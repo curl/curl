@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -387,7 +387,7 @@ static const br_x509_class x509_vtable = {
     x509_get_pkey};
 
 static FETCHcode
-bearssl_set_ssl_version_min_max(struct Curl_easy *data,
+bearssl_set_ssl_version_min_max(struct Fetch_easy *data,
                                 br_ssl_engine_context *ssl_eng,
                                 struct ssl_primary_config *conn_config)
 {
@@ -512,7 +512,7 @@ static const uint16_t ciphertable[] = {
 
 #define NUM_OF_CIPHERS (sizeof(ciphertable) / sizeof(ciphertable[0]))
 
-static FETCHcode bearssl_set_selected_ciphers(struct Curl_easy *data,
+static FETCHcode bearssl_set_selected_ciphers(struct Fetch_easy *data,
                                               br_ssl_engine_context *ssl_eng,
                                               const char *ciphers)
 {
@@ -522,7 +522,7 @@ static FETCHcode bearssl_set_selected_ciphers(struct Curl_easy *data,
 
   for (ptr = ciphers; ptr[0] != '\0' && count < NUM_OF_CIPHERS; ptr = end)
   {
-    uint16_t id = Curl_cipher_suite_walk_str(&ptr, &end);
+    uint16_t id = Fetch_cipher_suite_walk_str(&ptr, &end);
 
     /* Check if cipher is supported */
     if (id)
@@ -563,14 +563,14 @@ static FETCHcode bearssl_set_selected_ciphers(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode bearssl_connect_step1(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+static FETCHcode bearssl_connect_step1(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct bearssl_ssl_backend_data *backend =
       (struct bearssl_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
   const struct fetch_blob *ca_info_blob = conn_config->ca_info_blob;
   const char *const ssl_cafile =
       /* FETCHOPT_CAINFO_BLOB overrides FETCHOPT_CAINFO */
@@ -651,10 +651,10 @@ static FETCHcode bearssl_connect_step1(struct Curl_cfilter *cf,
 
   if (ssl_config->primary.cache_session)
   {
-    struct Curl_ssl_session *sc_session = NULL;
+    struct Fetch_ssl_session *sc_session = NULL;
     const br_ssl_session_parameters *session;
 
-    ret = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
+    ret = Fetch_ssl_scache_take(cf, data, connssl->peer.scache_key,
                                &sc_session);
     if (!ret && sc_session && sc_session->sdata && sc_session->sdata_len)
     {
@@ -663,7 +663,7 @@ static FETCHcode bearssl_connect_step1(struct Curl_cfilter *cf,
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
       /* single use of sessions */
-      Curl_ssl_scache_return(cf, data, connssl->peer.scache_key, sc_session);
+      Fetch_ssl_scache_return(cf, data, connssl->peer.scache_key, sc_session);
     }
   }
 
@@ -678,7 +678,7 @@ static FETCHcode bearssl_connect_step1(struct Curl_cfilter *cf,
     }
     br_ssl_engine_set_protocol_names(&backend->ctx.eng, backend->protocols,
                                      connssl->alpn->count);
-    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    Fetch_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
@@ -706,10 +706,10 @@ static FETCHcode bearssl_connect_step1(struct Curl_cfilter *cf,
   /* give application a chance to interfere with SSL set up. */
   if (data->set.ssl.fsslctx)
   {
-    Curl_set_in_callback(data, TRUE);
+    Fetch_set_in_callback(data, TRUE);
     ret = (*data->set.ssl.fsslctx)(data, &backend->ctx,
                                    data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, FALSE);
+    Fetch_set_in_callback(data, FALSE);
     if (ret)
     {
       failf(data, "BearSSL: error signaled by ssl ctx callback");
@@ -726,8 +726,8 @@ static FETCHcode bearssl_connect_step1(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static FETCHcode bearssl_run_until(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static FETCHcode bearssl_run_until(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    unsigned target)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -784,7 +784,7 @@ static FETCHcode bearssl_run_until(struct Curl_cfilter *cf,
     if (state & BR_SSL_SENDREC)
     {
       buf = br_ssl_engine_sendrec_buf(&backend->ctx.eng, &len);
-      ret = Curl_conn_cf_send(cf->next, data, (char *)buf, len, FALSE,
+      ret = Fetch_conn_cf_send(cf->next, data, (char *)buf, len, FALSE,
                               &result);
       FETCH_TRC_CF(data, cf, "ssl_send(len=%zu) -> %zd, %d", len, ret, result);
       if (ret <= 0)
@@ -798,7 +798,7 @@ static FETCHcode bearssl_run_until(struct Curl_cfilter *cf,
     else if (state & BR_SSL_RECVREC)
     {
       buf = br_ssl_engine_recvrec_buf(&backend->ctx.eng, &len);
-      ret = Curl_conn_cf_recv(cf->next, data, (char *)buf, len, &result);
+      ret = Fetch_conn_cf_recv(cf->next, data, (char *)buf, len, &result);
       FETCH_TRC_CF(data, cf, "ssl_recv(len=%zu) -> %zd, %d", len, ret, result);
       if (ret == 0)
       {
@@ -816,8 +816,8 @@ static FETCHcode bearssl_run_until(struct Curl_cfilter *cf,
   }
 }
 
-static FETCHcode bearssl_connect_step2(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+static FETCHcode bearssl_connect_step2(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct bearssl_ssl_backend_data *backend =
@@ -858,7 +858,7 @@ static FETCHcode bearssl_connect_step2(struct Curl_cfilter *cf,
       break;
     }
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, &session);
-    Curl_cipher_suite_get_str(session.cipher_suite, cipher_str,
+    Fetch_cipher_suite_get_str(session.cipher_suite, cipher_str,
                               sizeof(cipher_str), TRUE);
     infof(data, "BearSSL: TLS v1.%d connection using %s", subver,
           cipher_str);
@@ -866,13 +866,13 @@ static FETCHcode bearssl_connect_step2(struct Curl_cfilter *cf,
   return ret;
 }
 
-static FETCHcode bearssl_connect_step3(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+static FETCHcode bearssl_connect_step3(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct bearssl_ssl_backend_data *backend =
       (struct bearssl_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
   FETCHcode ret;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
@@ -884,26 +884,26 @@ static FETCHcode bearssl_connect_step3(struct Curl_cfilter *cf,
     const char *proto;
 
     proto = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);
-    Curl_alpn_set_negotiated(cf, data, connssl, (const unsigned char *)proto,
+    Fetch_alpn_set_negotiated(cf, data, connssl, (const unsigned char *)proto,
                              proto ? strlen(proto) : 0);
   }
 
   if (ssl_config->primary.cache_session)
   {
-    struct Curl_ssl_session *sc_session;
+    struct Fetch_ssl_session *sc_session;
     br_ssl_session_parameters *session;
 
     session = malloc(sizeof(*session));
     if (!session)
       return FETCHE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
-    ret = Curl_ssl_session_create((unsigned char *)session, sizeof(*session),
+    ret = Fetch_ssl_session_create((unsigned char *)session, sizeof(*session),
                                   (int)session->version,
                                   connssl->negotiated.alpn,
                                   0, 0, &sc_session);
     if (!ret)
     {
-      ret = Curl_ssl_scache_put(cf, data, connssl->peer.scache_key,
+      ret = Fetch_ssl_scache_put(cf, data, connssl->peer.scache_key,
                                 sc_session);
       /* took ownership of `sc_session` */
     }
@@ -916,7 +916,7 @@ static FETCHcode bearssl_connect_step3(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static ssize_t bearssl_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+static ssize_t bearssl_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                             const void *buf, size_t len, FETCHcode *err)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -954,7 +954,7 @@ static ssize_t bearssl_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 }
 
-static ssize_t bearssl_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+static ssize_t bearssl_recv(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                             char *buf, size_t len, FETCHcode *err)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -979,14 +979,14 @@ static ssize_t bearssl_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return applen;
 }
 
-static FETCHcode bearssl_connect_common(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
+static FETCHcode bearssl_connect_common(struct Fetch_cfilter *cf,
+                                        struct Fetch_easy *data,
                                         bool nonblocking,
                                         bool *done)
 {
   FETCHcode ret;
   struct ssl_connect_data *connssl = cf->ctx;
-  fetch_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+  fetch_socket_t sockfd = Fetch_conn_cf_get_socket(cf, data);
   timediff_t timeout_ms;
   int what;
 
@@ -1009,7 +1009,7 @@ static FETCHcode bearssl_connect_common(struct Curl_cfilter *cf,
   while (ssl_connect_2 == connssl->connecting_state)
   {
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Fetch_timeleft(data, NULL, TRUE);
 
     if (timeout_ms < 0)
     {
@@ -1025,7 +1025,7 @@ static FETCHcode bearssl_connect_common(struct Curl_cfilter *cf,
       fetch_socket_t readfd = (connssl->io_need & FETCH_SSL_IO_NEED_RECV) ? sockfd : FETCH_SOCKET_BAD;
 
       FETCH_TRC_CF(data, cf, "connect_common, check socket");
-      what = Curl_socket_check(readfd, FETCH_SOCKET_BAD, writefd,
+      what = Fetch_socket_check(readfd, FETCH_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);
       FETCH_TRC_CF(data, cf, "connect_common, check socket -> %d", what);
       if (what < 0)
@@ -1089,8 +1089,8 @@ static size_t bearssl_version(char *buffer, size_t size)
   return msnprintf(buffer, size, "BearSSL");
 }
 
-static bool bearssl_data_pending(struct Curl_cfilter *cf,
-                                 const struct Curl_easy *data)
+static bool bearssl_data_pending(struct Fetch_cfilter *cf,
+                                 const struct Fetch_easy *data)
 {
   struct ssl_connect_data *ctx = cf->ctx;
   struct bearssl_ssl_backend_data *backend;
@@ -1101,7 +1101,7 @@ static bool bearssl_data_pending(struct Curl_cfilter *cf,
   return br_ssl_engine_current_state(&backend->ctx.eng) & BR_SSL_RECVAPP;
 }
 
-static FETCHcode bearssl_random(struct Curl_easy *data UNUSED_PARAM,
+static FETCHcode bearssl_random(struct Fetch_easy *data UNUSED_PARAM,
                                 unsigned char *entropy, size_t length)
 {
   static br_hmac_drbg_context ctx;
@@ -1122,8 +1122,8 @@ static FETCHcode bearssl_random(struct Curl_easy *data UNUSED_PARAM,
   return FETCHE_OK;
 }
 
-static FETCHcode bearssl_connect(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static FETCHcode bearssl_connect(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data)
 {
   FETCHcode ret;
   bool done = FALSE;
@@ -1137,8 +1137,8 @@ static FETCHcode bearssl_connect(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static FETCHcode bearssl_connect_nonblocking(struct Curl_cfilter *cf,
-                                             struct Curl_easy *data,
+static FETCHcode bearssl_connect_nonblocking(struct Fetch_cfilter *cf,
+                                             struct Fetch_easy *data,
                                              bool *done)
 {
   return bearssl_connect_common(cf, data, TRUE, done);
@@ -1153,8 +1153,8 @@ static void *bearssl_get_internals(struct ssl_connect_data *connssl,
   return &backend->ctx;
 }
 
-static FETCHcode bearssl_shutdown(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static FETCHcode bearssl_shutdown(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   bool send_shutdown, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1194,7 +1194,7 @@ static FETCHcode bearssl_shutdown(struct Curl_cfilter *cf,
   return result;
 }
 
-static void bearssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void bearssl_close(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct bearssl_ssl_backend_data *backend =
@@ -1209,7 +1209,7 @@ static void bearssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   {
     for (i = 0; i < backend->anchors_len; ++i)
       free(backend->anchors[i].dn.data);
-    Curl_safefree(backend->anchors);
+    Fetch_safefree(backend->anchors);
   }
 }
 
@@ -1226,7 +1226,7 @@ static FETCHcode bearssl_sha256sum(const unsigned char *input,
   return FETCHE_OK;
 }
 
-const struct Curl_ssl Curl_ssl_bearssl = {
+const struct Fetch_ssl Fetch_ssl_bearssl = {
     {FETCHSSLBACKEND_BEARSSL, "bearssl"}, /* info */
 
     SSLSUPP_CAINFO_BLOB |
@@ -1245,7 +1245,7 @@ const struct Curl_ssl Curl_ssl_bearssl = {
     NULL,                        /* cert_status_request */
     bearssl_connect,             /* connect */
     bearssl_connect_nonblocking, /* connect_nonblocking */
-    Curl_ssl_adjust_pollset,     /* adjust_pollset */
+    Fetch_ssl_adjust_pollset,     /* adjust_pollset */
     bearssl_get_internals,       /* get_internals */
     bearssl_close,               /* close_one */
     NULL,                        /* close_all */

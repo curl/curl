@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -160,29 +160,29 @@ struct clearurlcase
 };
 
 static const struct testcase get_parts_list[] = {
-    {"curl.se",
-     "[10] | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+    {"fetch.se",
+     "[10] | [11] | [12] | [13] | fetch.se | [15] | / | [16] | [17]",
      FETCHU_GUESS_SCHEME, FETCHU_NO_GUESS_SCHEME, FETCHUE_OK},
-    {"https://curl.se:0/#",
-     "https | [11] | [12] | [13] | curl.se | 0 | / | [16] | ",
+    {"https://fetch.se:0/#",
+     "https | [11] | [12] | [13] | fetch.se | 0 | / | [16] | ",
      0, FETCHU_GET_EMPTY, FETCHUE_OK},
-    {"https://curl.se/#",
-     "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | ",
+    {"https://fetch.se/#",
+     "https | [11] | [12] | [13] | fetch.se | [15] | / | [16] | ",
      0, FETCHU_GET_EMPTY, FETCHUE_OK},
-    {"https://curl.se/?#",
-     "https | [11] | [12] | [13] | curl.se | [15] | / |  | ",
+    {"https://fetch.se/?#",
+     "https | [11] | [12] | [13] | fetch.se | [15] | / |  | ",
      0, FETCHU_GET_EMPTY, FETCHUE_OK},
-    {"https://curl.se/?",
-     "https | [11] | [12] | [13] | curl.se | [15] | / |  | [17]",
+    {"https://fetch.se/?",
+     "https | [11] | [12] | [13] | fetch.se | [15] | / |  | [17]",
      0, FETCHU_GET_EMPTY, FETCHUE_OK},
-    {"https://curl.se/?",
-     "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+    {"https://fetch.se/?",
+     "https | [11] | [12] | [13] | fetch.se | [15] | / | [16] | [17]",
      0, 0, FETCHUE_OK},
-    {"https://curl.se/?#",
-     "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+    {"https://fetch.se/?#",
+     "https | [11] | [12] | [13] | fetch.se | [15] | / | [16] | [17]",
      0, 0, FETCHUE_OK},
-    {"https://curl.se/#  ",
-     "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | %20%20",
+    {"https://fetch.se/#  ",
+     "https | [11] | [12] | [13] | fetch.se | [15] | / | [16] | %20%20",
      FETCHU_URLENCODE | FETCHU_ALLOW_SPACE, 0, FETCHUE_OK},
     {"", "", 0, 0, FETCHUE_MALFORMED_INPUT},
     {" ", "", 0, 0, FETCHUE_MALFORMED_INPUT},

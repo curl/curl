@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -68,7 +68,7 @@ int main(void)
 
     if (FETCHE_OK == res)
     {
-      /* https://curl.se/libfetch/c/fetch_easy_getinfo.html */
+      /* https://fetch.se/libfetch/c/fetch_easy_getinfo.html */
       res = fetch_easy_getinfo(fetch, FETCHINFO_FILETIME, &filetime);
       if ((FETCHE_OK == res) && (filetime >= 0))
       {

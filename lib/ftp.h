@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,13 +29,13 @@
 #include "pingpong.h"
 
 #ifndef FETCH_DISABLE_FTP
-extern const struct Curl_handler Curl_handler_ftp;
+extern const struct Fetch_handler Fetch_handler_ftp;
 
 #ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_ftps;
+extern const struct Fetch_handler Fetch_handler_ftps;
 #endif
 
-FETCHcode Curl_GetFTPResponse(struct Curl_easy *data, ssize_t *nread,
+FETCHcode Fetch_GetFTPResponse(struct Fetch_easy *data, ssize_t *nread,
                               int *ftpcode);
 #endif /* FETCH_DISABLE_FTP */
 
@@ -105,9 +105,9 @@ typedef enum
                            file */
 } fetch_ftpfile;
 
-/* This FTP struct is used in the Curl_easy. All FTP data that is
+/* This FTP struct is used in the Fetch_easy. All FTP data that is
    connection-oriented must be in FTP_conn to properly deal with the fact that
-   perhaps the Curl_easy is changed between the times the connection is
+   perhaps the Fetch_easy is changed between the times the connection is
    used. */
 struct FTP
 {
@@ -132,7 +132,7 @@ struct ftp_conn
   char **dirs;     /* realloc()ed array for path components */
   char *newhost;
   char *prevpath;              /* url-decoded conn->path from the previous transfer */
-  char transfertype;           /* set by ftp_transfertype for use by Curl_client_write()a
+  char transfertype;           /* set by ftp_transfertype for use by Fetch_client_write()a
                                   and others (A/I or zero) */
   fetch_off_t retr_size_saved; /* Size of retrieved file saved */
   char *server_os;             /* The target server operating system. */
@@ -157,9 +157,9 @@ struct ftp_conn
   BIT(dont_check);     /* Set to TRUE to prevent the final (post-transfer)
                           file size and 226/250 status check. It should still
                           read the line, just ignore the result. */
-  BIT(ctl_valid);      /* Tells Curl_ftp_quit() whether or not to do anything. If
+  BIT(ctl_valid);      /* Tells Fetch_ftp_quit() whether or not to do anything. If
                           the connection has timed out or been closed, this
-                          should be FALSE when it gets to Curl_ftp_quit() */
+                          should be FALSE when it gets to Fetch_ftp_quit() */
   BIT(cwddone);        /* if it has been determined that the proper CWD combo
                           already has been done */
   BIT(cwdfail);        /* set TRUE if a CWD command fails, as then we must prevent

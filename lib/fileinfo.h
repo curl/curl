@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,11 +31,11 @@
 struct fileinfo
 {
   struct fetch_fileinfo info;
-  struct Curl_llist_node list;
+  struct Fetch_llist_node list;
   struct dynbuf buf;
 };
 
-struct fileinfo *Curl_fileinfo_alloc(void);
-void Curl_fileinfo_cleanup(struct fileinfo *finfo);
+struct fileinfo *Fetch_fileinfo_alloc(void);
+void Fetch_fileinfo_cleanup(struct fileinfo *finfo);
 
 #endif /* HEADER_FETCH_FILEINFO_H */

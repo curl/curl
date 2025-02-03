@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -81,7 +81,7 @@ typedef enum
 /* Deflate and gzip writer. */
 struct zlib_writer
 {
-  struct Curl_cwriter super;
+  struct Fetch_cwriter super;
   zlibInitState zlib_init;             /* zlib init state */
   char buffer[DECOMPRESS_BUFFER_SIZE]; /* Put the decompressed data here. */
   uInt trailerlen;                     /* Remaining trailer byte count. */
@@ -104,7 +104,7 @@ zfree_cb(voidpf opaque, voidpf ptr)
 }
 
 static FETCHcode
-process_zlib_error(struct Curl_easy *data, z_stream *z)
+process_zlib_error(struct Fetch_easy *data, z_stream *z)
 {
   if (z->msg)
     failf(data, "Error while processing content unencoding: %s",
@@ -117,7 +117,7 @@ process_zlib_error(struct Curl_easy *data, z_stream *z)
 }
 
 static FETCHcode
-exit_zlib(struct Curl_easy *data,
+exit_zlib(struct Fetch_easy *data,
           z_stream *z, zlibInitState *zlib_init, FETCHcode result)
 {
   if (*zlib_init != ZLIB_UNINIT)
@@ -130,7 +130,7 @@ exit_zlib(struct Curl_easy *data,
   return result;
 }
 
-static FETCHcode process_trailer(struct Curl_easy *data,
+static FETCHcode process_trailer(struct Fetch_easy *data,
                                  struct zlib_writer *zp)
 {
   z_stream *z = &zp->z;
@@ -155,8 +155,8 @@ static FETCHcode process_trailer(struct Curl_easy *data,
   return result;
 }
 
-static FETCHcode inflate_stream(struct Curl_easy *data,
-                                struct Curl_cwriter *writer, int type,
+static FETCHcode inflate_stream(struct Fetch_easy *data,
+                                struct Fetch_cwriter *writer, int type,
                                 zlibInitState started)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
@@ -164,7 +164,7 @@ static FETCHcode inflate_stream(struct Curl_easy *data,
   uInt nread = z->avail_in;
   Bytef *orig_in = z->next_in;
   bool done = FALSE;
-  FETCHcode result = FETCHE_OK; /* Curl_client_write status */
+  FETCHcode result = FETCHE_OK; /* Fetch_client_write status */
 
   /* Check state. */
   if (zp->zlib_init != ZLIB_INIT &&
@@ -197,7 +197,7 @@ static FETCHcode inflate_stream(struct Curl_easy *data,
       if (status == Z_OK || status == Z_STREAM_END)
       {
         zp->zlib_init = started; /* Data started. */
-        result = Curl_cwriter_write(data, writer->next, type, zp->buffer,
+        result = Fetch_cwriter_write(data, writer->next, type, zp->buffer,
                                     DECOMPRESS_BUFFER_SIZE - z->avail_out);
         if (result)
         {
@@ -256,8 +256,8 @@ static FETCHcode inflate_stream(struct Curl_easy *data,
 }
 
 /* Deflate handler. */
-static FETCHcode deflate_do_init(struct Curl_easy *data,
-                                 struct Curl_cwriter *writer)
+static FETCHcode deflate_do_init(struct Fetch_easy *data,
+                                 struct Fetch_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
   z_stream *z = &zp->z; /* zlib state structure */
@@ -272,15 +272,15 @@ static FETCHcode deflate_do_init(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode deflate_do_write(struct Curl_easy *data,
-                                  struct Curl_cwriter *writer, int type,
+static FETCHcode deflate_do_write(struct Fetch_easy *data,
+                                  struct Fetch_cwriter *writer, int type,
                                   const char *buf, size_t nbytes)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
   z_stream *z = &zp->z; /* zlib state structure */
 
   if (!(type & CLIENTWRITE_BODY) || !nbytes)
-    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+    return Fetch_cwriter_write(data, writer->next, type, buf, nbytes);
 
   /* Set the compressed input when this function is called */
   z->next_in = (Bytef *)buf;
@@ -293,8 +293,8 @@ static FETCHcode deflate_do_write(struct Curl_easy *data,
   return inflate_stream(data, writer, type, ZLIB_INFLATING);
 }
 
-static void deflate_do_close(struct Curl_easy *data,
-                             struct Curl_cwriter *writer)
+static void deflate_do_close(struct Fetch_easy *data,
+                             struct Fetch_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
   z_stream *z = &zp->z; /* zlib state structure */
@@ -302,7 +302,7 @@ static void deflate_do_close(struct Curl_easy *data,
   exit_zlib(data, z, &zp->zlib_init, FETCHE_OK);
 }
 
-static const struct Curl_cwtype deflate_encoding = {
+static const struct Fetch_cwtype deflate_encoding = {
     "deflate",
     NULL,
     deflate_do_init,
@@ -311,8 +311,8 @@ static const struct Curl_cwtype deflate_encoding = {
     sizeof(struct zlib_writer)};
 
 /* Gzip handler. */
-static FETCHcode gzip_do_init(struct Curl_easy *data,
-                              struct Curl_cwriter *writer)
+static FETCHcode gzip_do_init(struct Fetch_easy *data,
+                              struct Fetch_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
   z_stream *z = &zp->z; /* zlib state structure */
@@ -340,15 +340,15 @@ static FETCHcode gzip_do_init(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode gzip_do_write(struct Curl_easy *data,
-                               struct Curl_cwriter *writer, int type,
+static FETCHcode gzip_do_write(struct Fetch_easy *data,
+                               struct Fetch_cwriter *writer, int type,
                                const char *buf, size_t nbytes)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
   z_stream *z = &zp->z; /* zlib state structure */
 
   if (!(type & CLIENTWRITE_BODY) || !nbytes)
-    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+    return Fetch_cwriter_write(data, writer->next, type, buf, nbytes);
 
   if (zp->zlib_init == ZLIB_INIT_GZIP)
   {
@@ -363,8 +363,8 @@ static FETCHcode gzip_do_write(struct Curl_easy *data,
   return exit_zlib(data, z, &zp->zlib_init, FETCHE_WRITE_ERROR);
 }
 
-static void gzip_do_close(struct Curl_easy *data,
-                          struct Curl_cwriter *writer)
+static void gzip_do_close(struct Fetch_easy *data,
+                          struct Fetch_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
   z_stream *z = &zp->z; /* zlib state structure */
@@ -372,7 +372,7 @@ static void gzip_do_close(struct Curl_easy *data,
   exit_zlib(data, z, &zp->zlib_init, FETCHE_OK);
 }
 
-static const struct Curl_cwtype gzip_encoding = {
+static const struct Fetch_cwtype gzip_encoding = {
     "gzip",
     "x-gzip",
     gzip_do_init,
@@ -386,7 +386,7 @@ static const struct Curl_cwtype gzip_encoding = {
 /* Brotli writer. */
 struct brotli_writer
 {
-  struct Curl_cwriter super;
+  struct Fetch_cwriter super;
   char buffer[DECOMPRESS_BUFFER_SIZE];
   BrotliDecoderState *br; /* State structure for brotli. */
 };
@@ -430,8 +430,8 @@ static FETCHcode brotli_map_error(BrotliDecoderErrorCode be)
   return FETCHE_WRITE_ERROR;
 }
 
-static FETCHcode brotli_do_init(struct Curl_easy *data,
-                                struct Curl_cwriter *writer)
+static FETCHcode brotli_do_init(struct Fetch_easy *data,
+                                struct Fetch_cwriter *writer)
 {
   struct brotli_writer *bp = (struct brotli_writer *)writer;
   (void)data;
@@ -440,8 +440,8 @@ static FETCHcode brotli_do_init(struct Curl_easy *data,
   return bp->br ? FETCHE_OK : FETCHE_OUT_OF_MEMORY;
 }
 
-static FETCHcode brotli_do_write(struct Curl_easy *data,
-                                 struct Curl_cwriter *writer, int type,
+static FETCHcode brotli_do_write(struct Fetch_easy *data,
+                                 struct Fetch_cwriter *writer, int type,
                                  const char *buf, size_t nbytes)
 {
   struct brotli_writer *bp = (struct brotli_writer *)writer;
@@ -452,7 +452,7 @@ static FETCHcode brotli_do_write(struct Curl_easy *data,
   BrotliDecoderResult r = BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT;
 
   if (!(type & CLIENTWRITE_BODY) || !nbytes)
-    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+    return Fetch_cwriter_write(data, writer->next, type, buf, nbytes);
 
   if (!bp->br)
     return FETCHE_WRITE_ERROR; /* Stream already ended. */
@@ -464,7 +464,7 @@ static FETCHcode brotli_do_write(struct Curl_easy *data,
     dstleft = DECOMPRESS_BUFFER_SIZE;
     r = BrotliDecoderDecompressStream(bp->br,
                                       &nbytes, &src, &dstleft, &dst, NULL);
-    result = Curl_cwriter_write(data, writer->next, type,
+    result = Fetch_cwriter_write(data, writer->next, type,
                                 bp->buffer, DECOMPRESS_BUFFER_SIZE - dstleft);
     if (result)
       break;
@@ -487,8 +487,8 @@ static FETCHcode brotli_do_write(struct Curl_easy *data,
   return result;
 }
 
-static void brotli_do_close(struct Curl_easy *data,
-                            struct Curl_cwriter *writer)
+static void brotli_do_close(struct Fetch_easy *data,
+                            struct Fetch_cwriter *writer)
 {
   struct brotli_writer *bp = (struct brotli_writer *)writer;
   (void)data;
@@ -500,7 +500,7 @@ static void brotli_do_close(struct Curl_easy *data,
   }
 }
 
-static const struct Curl_cwtype brotli_encoding = {
+static const struct Fetch_cwtype brotli_encoding = {
     "br",
     NULL,
     brotli_do_init,
@@ -513,27 +513,27 @@ static const struct Curl_cwtype brotli_encoding = {
 /* Zstd writer. */
 struct zstd_writer
 {
-  struct Curl_cwriter super;
+  struct Fetch_cwriter super;
   ZSTD_DStream *zds; /* State structure for zstd. */
   char buffer[DECOMPRESS_BUFFER_SIZE];
 };
 
 #ifdef ZSTD_STATIC_LINKING_ONLY
-static void *Curl_zstd_alloc(void *opaque, size_t size)
+static void *Fetch_zstd_alloc(void *opaque, size_t size)
 {
   (void)opaque;
-  return Curl_cmalloc(size);
+  return Fetch_cmalloc(size);
 }
 
-static void Curl_zstd_free(void *opaque, void *address)
+static void Fetch_zstd_free(void *opaque, void *address)
 {
   (void)opaque;
-  Curl_cfree(address);
+  Fetch_cfree(address);
 }
 #endif
 
-static FETCHcode zstd_do_init(struct Curl_easy *data,
-                              struct Curl_cwriter *writer)
+static FETCHcode zstd_do_init(struct Fetch_easy *data,
+                              struct Fetch_cwriter *writer)
 {
   struct zstd_writer *zp = (struct zstd_writer *)writer;
 
@@ -541,8 +541,8 @@ static FETCHcode zstd_do_init(struct Curl_easy *data,
 
 #ifdef ZSTD_STATIC_LINKING_ONLY
   zp->zds = ZSTD_createDStream_advanced((ZSTD_customMem){
-      .customAlloc = Curl_zstd_alloc,
-      .customFree = Curl_zstd_free,
+      .customAlloc = Fetch_zstd_alloc,
+      .customFree = Fetch_zstd_free,
       .opaque = NULL});
 #else
   zp->zds = ZSTD_createDStream();
@@ -551,8 +551,8 @@ static FETCHcode zstd_do_init(struct Curl_easy *data,
   return zp->zds ? FETCHE_OK : FETCHE_OUT_OF_MEMORY;
 }
 
-static FETCHcode zstd_do_write(struct Curl_easy *data,
-                               struct Curl_cwriter *writer, int type,
+static FETCHcode zstd_do_write(struct Fetch_easy *data,
+                               struct Fetch_cwriter *writer, int type,
                                const char *buf, size_t nbytes)
 {
   FETCHcode result = FETCHE_OK;
@@ -562,7 +562,7 @@ static FETCHcode zstd_do_write(struct Curl_easy *data,
   size_t errorCode;
 
   if (!(type & CLIENTWRITE_BODY) || !nbytes)
-    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+    return Fetch_cwriter_write(data, writer->next, type, buf, nbytes);
 
   in.pos = 0;
   in.src = buf;
@@ -581,7 +581,7 @@ static FETCHcode zstd_do_write(struct Curl_easy *data,
     }
     if (out.pos > 0)
     {
-      result = Curl_cwriter_write(data, writer->next, type,
+      result = Fetch_cwriter_write(data, writer->next, type,
                                   zp->buffer, out.pos);
       if (result)
         break;
@@ -593,8 +593,8 @@ static FETCHcode zstd_do_write(struct Curl_easy *data,
   return result;
 }
 
-static void zstd_do_close(struct Curl_easy *data,
-                          struct Curl_cwriter *writer)
+static void zstd_do_close(struct Fetch_easy *data,
+                          struct Fetch_cwriter *writer)
 {
   struct zstd_writer *zp = (struct zstd_writer *)writer;
   (void)data;
@@ -606,7 +606,7 @@ static void zstd_do_close(struct Curl_easy *data,
   }
 }
 
-static const struct Curl_cwtype zstd_encoding = {
+static const struct Fetch_cwtype zstd_encoding = {
     "zstd",
     NULL,
     zstd_do_init,
@@ -616,16 +616,16 @@ static const struct Curl_cwtype zstd_encoding = {
 #endif
 
 /* Identity handler. */
-static const struct Curl_cwtype identity_encoding = {
+static const struct Fetch_cwtype identity_encoding = {
     "identity",
     "none",
-    Curl_cwriter_def_init,
-    Curl_cwriter_def_write,
-    Curl_cwriter_def_close,
-    sizeof(struct Curl_cwriter)};
+    Fetch_cwriter_def_init,
+    Fetch_cwriter_def_write,
+    Fetch_cwriter_def_close,
+    sizeof(struct Fetch_cwriter)};
 
 /* supported general content decoders. */
-static const struct Curl_cwtype *const general_unencoders[] = {
+static const struct Fetch_cwtype *const general_unencoders[] = {
     &identity_encoding,
 #ifdef HAVE_LIBZ
     &deflate_encoding,
@@ -640,19 +640,19 @@ static const struct Curl_cwtype *const general_unencoders[] = {
     NULL};
 
 /* supported content decoders only for transfer encodings */
-static const struct Curl_cwtype *const transfer_unencoders[] = {
+static const struct Fetch_cwtype *const transfer_unencoders[] = {
 #ifndef FETCH_DISABLE_HTTP
-    &Curl_httpchunk_unencoder,
+    &Fetch_httpchunk_unencoder,
 #endif
     NULL};
 
 /* Provide a list of comma-separated names of supported encodings.
  */
-void Curl_all_content_encodings(char *buf, size_t blen)
+void Fetch_all_content_encodings(char *buf, size_t blen)
 {
   size_t len = 0;
-  const struct Curl_cwtype *const *cep;
-  const struct Curl_cwtype *ce;
+  const struct Fetch_cwtype *const *cep;
+  const struct Fetch_cwtype *ce;
 
   DEBUGASSERT(buf);
   DEBUGASSERT(blen);
@@ -689,16 +689,16 @@ void Curl_all_content_encodings(char *buf, size_t blen)
 }
 
 /* Deferred error dummy writer. */
-static FETCHcode error_do_init(struct Curl_easy *data,
-                               struct Curl_cwriter *writer)
+static FETCHcode error_do_init(struct Fetch_easy *data,
+                               struct Fetch_cwriter *writer)
 {
   (void)data;
   (void)writer;
   return FETCHE_OK;
 }
 
-static FETCHcode error_do_write(struct Curl_easy *data,
-                                struct Curl_cwriter *writer, int type,
+static FETCHcode error_do_write(struct Fetch_easy *data,
+                                struct Fetch_cwriter *writer, int type,
                                 const char *buf, size_t nbytes)
 {
   (void)writer;
@@ -706,11 +706,11 @@ static FETCHcode error_do_write(struct Curl_easy *data,
   (void)nbytes;
 
   if (!(type & CLIENTWRITE_BODY) || !nbytes)
-    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+    return Fetch_cwriter_write(data, writer->next, type, buf, nbytes);
   else
   {
     char all[256];
-    (void)Curl_all_content_encodings(all, sizeof(all));
+    (void)Fetch_all_content_encodings(all, sizeof(all));
     failf(data, "Unrecognized content encoding type. "
                 "libfetch understands %s content encodings.",
           all);
@@ -718,33 +718,33 @@ static FETCHcode error_do_write(struct Curl_easy *data,
   return FETCHE_BAD_CONTENT_ENCODING;
 }
 
-static void error_do_close(struct Curl_easy *data,
-                           struct Curl_cwriter *writer)
+static void error_do_close(struct Fetch_easy *data,
+                           struct Fetch_cwriter *writer)
 {
   (void)data;
   (void)writer;
 }
 
-static const struct Curl_cwtype error_writer = {
+static const struct Fetch_cwtype error_writer = {
     "ce-error",
     NULL,
     error_do_init,
     error_do_write,
     error_do_close,
-    sizeof(struct Curl_cwriter)};
+    sizeof(struct Fetch_cwriter)};
 
 /* Find the content encoding by name. */
-static const struct Curl_cwtype *find_unencode_writer(const char *name,
+static const struct Fetch_cwtype *find_unencode_writer(const char *name,
                                                       size_t len,
-                                                      Curl_cwriter_phase phase)
+                                                      Fetch_cwriter_phase phase)
 {
-  const struct Curl_cwtype *const *cep;
+  const struct Fetch_cwtype *const *cep;
 
   if (phase == FETCH_CW_TRANSFER_DECODE)
   {
     for (cep = transfer_unencoders; *cep; cep++)
     {
-      const struct Curl_cwtype *ce = *cep;
+      const struct Fetch_cwtype *ce = *cep;
       if ((strncasecompare(name, ce->name, len) && !ce->name[len]) ||
           (ce->alias && strncasecompare(name, ce->alias, len) && !ce->alias[len]))
         return ce;
@@ -753,7 +753,7 @@ static const struct Curl_cwtype *find_unencode_writer(const char *name,
   /* look among the general decoders */
   for (cep = general_unencoders; *cep; cep++)
   {
-    const struct Curl_cwtype *ce = *cep;
+    const struct Fetch_cwtype *ce = *cep;
     if ((strncasecompare(name, ce->name, len) && !ce->name[len]) ||
         (ce->alias && strncasecompare(name, ce->alias, len) && !ce->alias[len]))
       return ce;
@@ -763,10 +763,10 @@ static const struct Curl_cwtype *find_unencode_writer(const char *name,
 
 /* Setup the unencoding stack from the Content-Encoding header value.
  * See RFC 7231 section 3.1.2.2. */
-FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
+FETCHcode Fetch_build_unencoding_stack(struct Fetch_easy *data,
                                       const char *enclist, int is_transfer)
 {
-  Curl_cwriter_phase phase = is_transfer ? FETCH_CW_TRANSFER_DECODE : FETCH_CW_CONTENT_DECODE;
+  Fetch_cwriter_phase phase = is_transfer ? FETCH_CW_TRANSFER_DECODE : FETCH_CW_CONTENT_DECODE;
   FETCHcode result;
 
   do
@@ -787,8 +787,8 @@ FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
 
     if (namelen)
     {
-      const struct Curl_cwtype *cwt;
-      struct Curl_cwriter *writer;
+      const struct Fetch_cwtype *cwt;
+      struct Fetch_cwriter *writer;
 
       FETCH_TRC_WRITE(data, "looking for %s decoder: %.*s",
                       is_transfer ? "transfer" : "content", (int)namelen, name);
@@ -805,7 +805,7 @@ FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
         return FETCHE_OK;
       }
 
-      if (Curl_cwriter_count(data, phase) + 1 >= MAX_ENCODE_STACK)
+      if (Fetch_cwriter_count(data, phase) + 1 >= MAX_ENCODE_STACK)
       {
         failf(data, "Reject response due to more than %u content encodings",
               MAX_ENCODE_STACK);
@@ -813,7 +813,7 @@ FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
       }
 
       cwt = find_unencode_writer(name, namelen, phase);
-      if (cwt && is_chunked && Curl_cwriter_get_by_type(data, cwt))
+      if (cwt && is_chunked && Fetch_cwriter_get_by_type(data, cwt))
       {
         /* A 'chunked' transfer encoding has already been added.
          * Ignore duplicates. See #13451.
@@ -826,7 +826,7 @@ FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
       }
 
       if (is_transfer && !is_chunked &&
-          Curl_cwriter_get_by_name(data, "chunked"))
+          Fetch_cwriter_get_by_name(data, "chunked"))
       {
         /* RFC 9112, ch. 6.1:
          * "If any transfer coding other than chunked is applied to a
@@ -844,16 +844,16 @@ FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
       if (!cwt)
         cwt = &error_writer; /* Defer error at use. */
 
-      result = Curl_cwriter_create(&writer, data, cwt, phase);
+      result = Fetch_cwriter_create(&writer, data, cwt, phase);
       FETCH_TRC_WRITE(data, "added %s decoder %s -> %d",
                       is_transfer ? "transfer" : "content", cwt->name, result);
       if (result)
         return result;
 
-      result = Curl_cwriter_add(data, writer);
+      result = Fetch_cwriter_add(data, writer);
       if (result)
       {
-        Curl_cwriter_free(data, writer);
+        Fetch_cwriter_free(data, writer);
         return result;
       }
     }
@@ -864,7 +864,7 @@ FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
 
 #else
 /* Stubs for builds without HTTP. */
-FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
+FETCHcode Fetch_build_unencoding_stack(struct Fetch_easy *data,
                                       const char *enclist, int is_transfer)
 {
   (void)data;
@@ -873,7 +873,7 @@ FETCHcode Curl_build_unencoding_stack(struct Curl_easy *data,
   return FETCHE_NOT_BUILT_IN;
 }
 
-void Curl_all_content_encodings(char *buf, size_t blen)
+void Fetch_all_content_encodings(char *buf, size_t blen)
 {
   DEBUGASSERT(buf);
   DEBUGASSERT(blen);

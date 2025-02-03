@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -37,13 +37,13 @@ if(SH_EXECUTABLE)
 
   add_custom_target(build-certs
     DEPENDS ${CERTCONFIGS} ${SRPFILES}
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genroot.sh" EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost.nn EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost0h EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost-firstSAN EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost-lastSAN EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" stunnel EdelCurlRoot
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genroot.sh" EdelFetchRoot
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost EdelFetchRoot
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost.nn EdelFetchRoot
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost0h EdelFetchRoot
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost-firstSAN EdelFetchRoot
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost-lastSAN EdelFetchRoot
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" stunnel EdelFetchRoot
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/stunnel-sv.pem" "${CMAKE_CURRENT_SOURCE_DIR}/../stunnel.pem"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )

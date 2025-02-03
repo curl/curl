@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -99,7 +99,7 @@ static bool hostmatch(const char *hostname,
     return pmatch(hostname, hostlen, pattern, patternlen);
 
   /* detect IP address as hostname and fail the match if so */
-  else if (Curl_host_is_ipnum(hostname))
+  else if (Fetch_host_is_ipnum(hostname))
     return FALSE;
 
   /* We require at least 2 dots in the pattern to avoid too wide wildcard
@@ -123,9 +123,9 @@ static bool hostmatch(const char *hostname,
 }
 
 /*
- * Curl_cert_hostcheck() returns TRUE if a match and FALSE if not.
+ * Fetch_cert_hostcheck() returns TRUE if a match and FALSE if not.
  */
-bool Curl_cert_hostcheck(const char *match, size_t matchlen,
+bool Fetch_cert_hostcheck(const char *match, size_t matchlen,
                          const char *hostname, size_t hostlen)
 {
   if (match && *match && hostname && *hostname)

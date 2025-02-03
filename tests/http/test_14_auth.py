@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@ import logging
 import os
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, FetchClient
 
 
 log = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class TestAuth:
     def test_14_01_digest_get_noauth(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = fetch.http_download(urls=[url], alpn_proto=proto)
         r.check_response(http_status=401)
@@ -61,7 +61,7 @@ class TestAuth:
     def test_14_02_digest_get_auth(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = fetch.http_download(urls=[url], alpn_proto=proto, extra_args=[
             '--digest', '--user', 'test:test'
@@ -74,7 +74,7 @@ class TestAuth:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         data='0123456789'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
             '--digest', '--user', 'test:test'
@@ -88,7 +88,7 @@ class TestAuth:
             pytest.skip("h3 not supported")
         data='0123456789'
         password = 'x' * 65535
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
             '--digest', '--user', f'test:{password}',
@@ -109,7 +109,7 @@ class TestAuth:
         # just large enough that nghttp2 will submit
         password = 'x' * (47 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
             '--basic', '--user', f'test:{password}',
@@ -128,7 +128,7 @@ class TestAuth:
             pytest.skip("quiche has problems with large requests")
         password = 'x' * (64 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
             '--basic', '--user', f'test:{password}'

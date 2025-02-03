@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@ FETCHcode test(char *URL)
    static const char *const bl_servers[] =
        {"Microsoft-IIS/6.0", "nginx/0.8.54", NULL};
    static const char *const bl_sites[] =
-       {"curl.se:443", "example.com:80", NULL};
+       {"fetch.se:443", "example.com:80", NULL};
 
    global_init(FETCH_GLOBAL_ALL);
    handle = fetch_multi_init();

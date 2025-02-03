@@ -47,7 +47,7 @@ Informational: Single Character
 <data6>
 RTSP/1.0 200 OK
 Server: RTSPD/libfetch-test
-Curl-Private: swsclose
+Fetch-Private: swsclose
 CSeq: 6
 
 </data6>

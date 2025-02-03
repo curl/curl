@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,13 +29,13 @@
     defined(USE_MBEDTLS)
 
 #if defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
-#define WANT_PARSEX509 /* uses Curl_parseX509() */
+#define WANT_PARSEX509 /* uses Fetch_parseX509() */
 #endif
 
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
     defined(USE_MBEDTLS)
-#define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
-#define WANT_PARSEX509        /* ... uses Curl_parseX509() */
+#define WANT_EXTRACT_CERTINFO /* uses Fetch_extract_certinfo() */
+#define WANT_PARSEX509        /* ... uses Fetch_parseX509() */
 #endif
 
 #include <fetch/fetch.h>
@@ -101,14 +101,14 @@
 
 #ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
-struct Curl_OID
+struct Fetch_OID
 {
   const char *numoid;  /* Dotted-numeric OID. */
   const char *textoid; /* OID name. */
 };
 
 /* ASN.1 OIDs. */
-static const struct Curl_OID OIDtable[] = {
+static const struct Fetch_OID OIDtable[] = {
     {"1.2.840.10040.4.1", "dsa"},
     {"1.2.840.10040.4.3", "dsa-with-sha1"},
     {"1.2.840.10045.2.1", "ecPublicKey"},
@@ -173,16 +173,16 @@ static const struct Curl_OID OIDtable[] = {
  * Please note there is no pretension here to rewrite a full SSL library.
  */
 
-static const char *getASN1Element(struct Curl_asn1Element *elem,
+static const char *getASN1Element(struct Fetch_asn1Element *elem,
                                   const char *beg, const char *end)
     WARN_UNUSED_RESULT;
 
-static const char *getASN1Element(struct Curl_asn1Element *elem,
+static const char *getASN1Element(struct Fetch_asn1Element *elem,
                                   const char *beg, const char *end)
 {
   unsigned char b;
   size_t len;
-  struct Curl_asn1Element lelem;
+  struct Fetch_asn1Element lelem;
 
   /* Get a single ASN.1 element into `elem', parse ASN.1 string at `beg'
      ending at `end'.
@@ -252,9 +252,9 @@ static const char *getASN1Element(struct Curl_asn1Element *elem,
  * Search the null terminated OID or OID identifier in local table.
  * Return the table entry pointer or NULL if not found.
  */
-static const struct Curl_OID *searchOID(const char *oid)
+static const struct Fetch_OID *searchOID(const char *oid)
 {
-  const struct Curl_OID *op;
+  const struct Fetch_OID *op;
   for (op = OIDtable; op->numoid; op++)
     if (!strcmp(op->numoid, oid) || strcasecompare(op->textoid, oid))
       return op;
@@ -273,7 +273,7 @@ static FETCHcode bool2str(struct dynbuf *store,
 {
   if (end - beg != 1)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
-  return Curl_dyn_add(store, *beg ? "TRUE" : "FALSE");
+  return Fetch_dyn_add(store, *beg ? "TRUE" : "FALSE");
 }
 
 /*
@@ -287,7 +287,7 @@ static FETCHcode octet2str(struct dynbuf *store,
   FETCHcode result = FETCHE_OK;
 
   while (!result && beg < end)
-    result = Curl_dyn_addf(store, "%02x:", (unsigned char)*beg++);
+    result = Fetch_dyn_addf(store, "%02x:", (unsigned char)*beg++);
 
   return result;
 }
@@ -326,7 +326,7 @@ static FETCHcode int2str(struct dynbuf *store,
   do
     val = (val << 8) | *(const unsigned char *)beg++;
   while (beg < end);
-  return Curl_dyn_addf(store, "%s%x", val >= 10 ? "0x" : "", val);
+  return Fetch_dyn_addf(store, "%s%x", val >= 10 ? "0x" : "", val);
 }
 
 /*
@@ -371,7 +371,7 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
   {
     /* Just copy. */
     if (inlength)
-      result = Curl_dyn_addn(to, from, inlength);
+      result = Fetch_dyn_addn(to, from, inlength);
   }
   else
   {
@@ -417,7 +417,7 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
         charsize++;
       }
       buf[0] = (char)wc;
-      result = Curl_dyn_addn(to, buf, charsize);
+      result = Fetch_dyn_addn(to, buf, charsize);
     }
   }
   return result;
@@ -440,7 +440,7 @@ static FETCHcode encodeOID(struct dynbuf *store,
   x = y / 40;
   y -= x * 40;
 
-  result = Curl_dyn_addf(store, "%u.%u", x, y);
+  result = Fetch_dyn_addf(store, "%u.%u", x, y);
   if (result)
     return result;
 
@@ -455,7 +455,7 @@ static FETCHcode encodeOID(struct dynbuf *store,
       y = *(const unsigned char *)beg++;
       x = (x << 7) | (y & 0x7F);
     } while (y & 0x80);
-    result = Curl_dyn_addf(store, ".%u", x);
+    result = Fetch_dyn_addf(store, ".%u", x);
   }
   return result;
 }
@@ -475,17 +475,17 @@ static FETCHcode OID2str(struct dynbuf *store,
     if (symbolic)
     {
       struct dynbuf buf;
-      Curl_dyn_init(&buf, FETCH_X509_STR_MAX);
+      Fetch_dyn_init(&buf, FETCH_X509_STR_MAX);
       result = encodeOID(&buf, beg, end);
 
       if (!result)
       {
-        const struct Curl_OID *op = searchOID(Curl_dyn_ptr(&buf));
+        const struct Fetch_OID *op = searchOID(Fetch_dyn_ptr(&buf));
         if (op)
-          result = Curl_dyn_add(store, op->textoid);
+          result = Fetch_dyn_add(store, op->textoid);
         else
-          result = Curl_dyn_add(store, Curl_dyn_ptr(&buf));
-        Curl_dyn_free(&buf);
+          result = Fetch_dyn_add(store, Fetch_dyn_ptr(&buf));
+        Fetch_dyn_free(&buf);
       }
     }
     else
@@ -570,7 +570,7 @@ static FETCHcode GTime2str(struct dynbuf *store,
     tzl = end - tzp;
   }
 
-  return Curl_dyn_addf(store,
+  return Fetch_dyn_addf(store,
                        "%.4s-%.2s-%.2s %.2s:%.2s:%c%c%s%.*s%s%.*s",
                        beg, beg + 4, beg + 6,
                        beg + 8, beg + 10, sec1, sec2,
@@ -580,7 +580,7 @@ static FETCHcode GTime2str(struct dynbuf *store,
 
 #ifdef UNITTESTS
 /* used by unit1656.c */
-FETCHcode Curl_x509_GTime2str(struct dynbuf *store,
+FETCHcode Fetch_x509_GTime2str(struct dynbuf *store,
                               const char *beg, const char *end)
 {
   return GTime2str(store, beg, end);
@@ -626,7 +626,7 @@ static FETCHcode UTime2str(struct dynbuf *store,
     tzp++;
 
   tzl = end - tzp;
-  return Curl_dyn_addf(store, "%u%.2s-%.2s-%.2s %.2s:%.2s:%.2s %.*s",
+  return Fetch_dyn_addf(store, "%u%.2s-%.2s-%.2s %.2s:%.2s:%.2s %.*s",
                        20 - (*beg >= '5'), beg, beg + 2, beg + 4,
                        beg + 6, beg + 8, sec,
                        (int)tzl, tzp);
@@ -638,7 +638,7 @@ static FETCHcode UTime2str(struct dynbuf *store,
  * Return error
  */
 static FETCHcode ASN1tostr(struct dynbuf *store,
-                           struct Curl_asn1Element *elem, int type)
+                           struct Fetch_asn1Element *elem, int type)
 {
   FETCHcode result = FETCHE_BAD_FUNCTION_ARGUMENT;
   if (elem->constructed)
@@ -663,7 +663,7 @@ static FETCHcode ASN1tostr(struct dynbuf *store,
     result = octet2str(store, elem->beg, elem->end);
     break;
   case FETCH_ASN1_NULL:
-    result = Curl_dyn_addn(store, "", 1);
+    result = Fetch_dyn_addn(store, "", 1);
     break;
   case FETCH_ASN1_OBJECT_IDENTIFIER:
     result = OID2str(store, elem->beg, elem->end, TRUE);
@@ -694,12 +694,12 @@ static FETCHcode ASN1tostr(struct dynbuf *store,
  *
  * Returns error.
  */
-static FETCHcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
+static FETCHcode encodeDN(struct dynbuf *store, struct Fetch_asn1Element *dn)
 {
-  struct Curl_asn1Element rdn;
-  struct Curl_asn1Element atv;
-  struct Curl_asn1Element oid;
-  struct Curl_asn1Element value;
+  struct Fetch_asn1Element rdn;
+  struct Fetch_asn1Element atv;
+  struct Fetch_asn1Element oid;
+  struct Fetch_asn1Element value;
   const char *p1;
   const char *p2;
   const char *p3;
@@ -707,7 +707,7 @@ static FETCHcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
   FETCHcode result = FETCHE_OK;
   bool added = FALSE;
   struct dynbuf temp;
-  Curl_dyn_init(&temp, FETCH_X509_STR_MAX);
+  Fetch_dyn_init(&temp, FETCH_X509_STR_MAX);
 
   for (p1 = dn->beg; p1 < dn->end;)
   {
@@ -736,12 +736,12 @@ static FETCHcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
         result = FETCHE_BAD_FUNCTION_ARGUMENT;
         goto error;
       }
-      Curl_dyn_reset(&temp);
+      Fetch_dyn_reset(&temp);
       result = ASN1tostr(&temp, &oid, 0);
       if (result)
         goto error;
 
-      str = Curl_dyn_ptr(&temp);
+      str = Fetch_dyn_ptr(&temp);
 
       if (!str)
       {
@@ -756,20 +756,20 @@ static FETCHcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
       if (added)
       {
         if (p3 - str > 2)
-          result = Curl_dyn_addn(store, "/", 1);
+          result = Fetch_dyn_addn(store, "/", 1);
         else
-          result = Curl_dyn_addn(store, ", ", 2);
+          result = Fetch_dyn_addn(store, ", ", 2);
         if (result)
           goto error;
       }
 
       /* Encode attribute name. */
-      result = Curl_dyn_add(store, str);
+      result = Fetch_dyn_add(store, str);
       if (result)
         goto error;
 
       /* Generate equal sign. */
-      result = Curl_dyn_addn(store, "=", 1);
+      result = Fetch_dyn_addn(store, "=", 1);
       if (result)
         goto error;
 
@@ -777,12 +777,12 @@ static FETCHcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
       result = ASN1tostr(store, &value, 0);
       if (result)
         goto error;
-      Curl_dyn_reset(&temp);
+      Fetch_dyn_reset(&temp);
       added = TRUE; /* use separator for next */
     }
   }
 error:
-  Curl_dyn_free(&temp);
+  Fetch_dyn_free(&temp);
 
   return result;
 }
@@ -795,11 +795,11 @@ error:
  * Syntax is assumed to have already been checked by the SSL backend.
  * See RFC 5280.
  */
-int Curl_parseX509(struct Curl_X509certificate *cert,
+int Fetch_parseX509(struct Fetch_X509certificate *cert,
                    const char *beg, const char *end)
 {
-  struct Curl_asn1Element elem;
-  struct Curl_asn1Element tbsCertificate;
+  struct Fetch_asn1Element elem;
+  struct Fetch_asn1Element tbsCertificate;
   const char *ccp;
   static const char defaultVersion = 0; /* v1. */
 
@@ -920,10 +920,10 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
 #ifdef WANT_EXTRACT_CERTINFO
 
 static FETCHcode dumpAlgo(struct dynbuf *store,
-                          struct Curl_asn1Element *param,
+                          struct Fetch_asn1Element *param,
                           const char *beg, const char *end)
 {
-  struct Curl_asn1Element oid;
+  struct Fetch_asn1Element oid;
 
   /* Get algorithm parameters and return algorithm name. */
 
@@ -946,14 +946,14 @@ static FETCHcode dumpAlgo(struct dynbuf *store,
  * This is a convenience function for push_certinfo_len that takes a zero
  * terminated value.
  */
-static FETCHcode ssl_push_certinfo(struct Curl_easy *data,
+static FETCHcode ssl_push_certinfo(struct Fetch_easy *data,
                                    int certnum,
                                    const char *label,
                                    const char *value)
 {
   size_t valuelen = strlen(value);
 
-  return Curl_ssl_push_certinfo_len(data, certnum, label, value, valuelen);
+  return Fetch_ssl_push_certinfo_len(data, certnum, label, value, valuelen);
 }
 
 /*
@@ -962,15 +962,15 @@ static FETCHcode ssl_push_certinfo(struct Curl_easy *data,
  *
  * It also does the verbose output if !certnum.
  */
-static FETCHcode ssl_push_certinfo_dyn(struct Curl_easy *data,
+static FETCHcode ssl_push_certinfo_dyn(struct Fetch_easy *data,
                                        int certnum,
                                        const char *label,
                                        struct dynbuf *ptr)
 {
-  size_t valuelen = Curl_dyn_len(ptr);
-  char *value = Curl_dyn_ptr(ptr);
+  size_t valuelen = Fetch_dyn_len(ptr);
+  char *value = Fetch_dyn_ptr(ptr);
 
-  FETCHcode result = Curl_ssl_push_certinfo_len(data, certnum, label,
+  FETCHcode result = Fetch_ssl_push_certinfo_len(data, certnum, label,
                                                 value, valuelen);
 
   if (!certnum && !result)
@@ -979,14 +979,14 @@ static FETCHcode ssl_push_certinfo_dyn(struct Curl_easy *data,
   return result;
 }
 
-static FETCHcode do_pubkey_field(struct Curl_easy *data, int certnum,
+static FETCHcode do_pubkey_field(struct Fetch_easy *data, int certnum,
                                  const char *label,
-                                 struct Curl_asn1Element *elem)
+                                 struct Fetch_asn1Element *elem)
 {
   FETCHcode result;
   struct dynbuf out;
 
-  Curl_dyn_init(&out, FETCH_X509_STR_MAX);
+  Fetch_dyn_init(&out, FETCH_X509_STR_MAX);
 
   /* Generate a certificate information record for the public key. */
 
@@ -995,18 +995,18 @@ static FETCHcode do_pubkey_field(struct Curl_easy *data, int certnum,
   {
     if (data->set.ssl.certinfo)
       result = ssl_push_certinfo_dyn(data, certnum, label, &out);
-    Curl_dyn_free(&out);
+    Fetch_dyn_free(&out);
   }
   return result;
 }
 
 /* return 0 on success, 1 on error */
-static int do_pubkey(struct Curl_easy *data, int certnum,
-                     const char *algo, struct Curl_asn1Element *param,
-                     struct Curl_asn1Element *pubkey)
+static int do_pubkey(struct Fetch_easy *data, int certnum,
+                     const char *algo, struct Fetch_asn1Element *param,
+                     struct Fetch_asn1Element *pubkey)
 {
-  struct Curl_asn1Element elem;
-  struct Curl_asn1Element pk;
+  struct Fetch_asn1Element elem;
+  struct Fetch_asn1Element pk;
   const char *p;
 
   /* Generate all information records for the public key. */
@@ -1120,18 +1120,18 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
  * Return error.
  */
 static FETCHcode DNtostr(struct dynbuf *store,
-                         struct Curl_asn1Element *dn)
+                         struct Fetch_asn1Element *dn)
 {
   return encodeDN(store, dn);
 }
 
-FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
+FETCHcode Fetch_extract_certinfo(struct Fetch_easy *data,
                                 int certnum,
                                 const char *beg,
                                 const char *end)
 {
-  struct Curl_X509certificate cert;
-  struct Curl_asn1Element param;
+  struct Fetch_X509certificate cert;
+  struct Fetch_asn1Element param;
   char *certptr;
   size_t clen;
   struct dynbuf out;
@@ -1144,11 +1144,11 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     if (certnum)
       return FETCHE_OK;
 
-  Curl_dyn_init(&out, FETCH_X509_STR_MAX);
+  Fetch_dyn_init(&out, FETCH_X509_STR_MAX);
   /* Prepare the certificate information for fetch_easy_getinfo(). */
 
   /* Extract the certificate ASN.1 elements. */
-  if (Curl_parseX509(&cert, beg, end))
+  if (Fetch_parseX509(&cert, beg, end))
     return FETCHE_PEER_FAILED_VERIFICATION;
 
   /* Subject. */
@@ -1161,7 +1161,7 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     if (result)
       goto done;
   }
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Issuer. */
   result = DNtostr(&out, &cert.issuer);
@@ -1173,7 +1173,7 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     if (result)
       goto done;
   }
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Version (always fits in less than 32 bits). */
   version = 0;
@@ -1181,13 +1181,13 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     version = (version << 8) | *(const unsigned char *)ptr;
   if (data->set.ssl.certinfo)
   {
-    result = Curl_dyn_addf(&out, "%x", version);
+    result = Fetch_dyn_addf(&out, "%x", version);
     if (result)
       goto done;
     result = ssl_push_certinfo_dyn(data, certnum, "Version", &out);
     if (result)
       goto done;
-    Curl_dyn_reset(&out);
+    Fetch_dyn_reset(&out);
   }
 
   /* Serial number. */
@@ -1200,7 +1200,7 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     if (result)
       goto done;
   }
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Signature algorithm .*/
   result = dumpAlgo(&out, &param, cert.signatureAlgorithm.beg,
@@ -1214,7 +1214,7 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     if (result)
       goto done;
   }
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Start Date. */
   result = ASN1tostr(&out, &cert.notBefore, 0);
@@ -1226,7 +1226,7 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     if (result)
       goto done;
   }
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Expire Date. */
   result = ASN1tostr(&out, &cert.notAfter, 0);
@@ -1238,7 +1238,7 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     if (result)
       goto done;
   }
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Public Key Algorithm. */
   result = dumpAlgo(&out, &param, cert.subjectPublicKeyAlgorithm.beg,
@@ -1253,14 +1253,14 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
       goto done;
   }
 
-  rc = do_pubkey(data, certnum, Curl_dyn_ptr(&out),
+  rc = do_pubkey(data, certnum, Fetch_dyn_ptr(&out),
                  &param, &cert.subjectPublicKey);
   if (rc)
   {
     result = FETCHE_OUT_OF_MEMORY; /* the most likely error */
     goto done;
   }
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Signature. */
   result = ASN1tostr(&out, &cert.signature, 0);
@@ -1272,10 +1272,10 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     if (result)
       goto done;
   }
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Generate PEM certificate. */
-  result = Curl_base64_encode(cert.certificate.beg,
+  result = Fetch_base64_encode(cert.certificate.beg,
                               cert.certificate.end - cert.certificate.beg,
                               &certptr, &clen);
   if (result)
@@ -1290,10 +1290,10 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
      -----END CERTIFICATE-----\n
    */
 
-  Curl_dyn_reset(&out);
+  Fetch_dyn_reset(&out);
 
   /* Build the certificate string. */
-  result = Curl_dyn_add(&out, "-----BEGIN CERTIFICATE-----\n");
+  result = Fetch_dyn_add(&out, "-----BEGIN CERTIFICATE-----\n");
   if (!result)
   {
     size_t j = 0;
@@ -1301,13 +1301,13 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
     while (!result && (j < clen))
     {
       size_t chunksize = (clen - j) > 64 ? 64 : (clen - j);
-      result = Curl_dyn_addn(&out, &certptr[j], chunksize);
+      result = Fetch_dyn_addn(&out, &certptr[j], chunksize);
       if (!result)
-        result = Curl_dyn_addn(&out, "\n", 1);
+        result = Fetch_dyn_addn(&out, "\n", 1);
       j += chunksize;
     }
     if (!result)
-      result = Curl_dyn_add(&out, "-----END CERTIFICATE-----\n");
+      result = Fetch_dyn_add(&out, "-----END CERTIFICATE-----\n");
   }
   free(certptr);
   if (!result)
@@ -1317,7 +1317,7 @@ FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
 done:
   if (result)
     failf(data, "Failed extracting certificate chain");
-  Curl_dyn_free(&out);
+  Fetch_dyn_free(&out);
   return result;
 }
 

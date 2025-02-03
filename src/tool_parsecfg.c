@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -73,9 +73,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     {
       char *fullp;
       /* check for .fetchrc then _fetchrc in the dir of the executable */
-      file = Curl_execpath(".fetchrc", &fullp);
+      file = Fetch_execpath(".fetchrc", &fullp);
       if (!file)
-        file = Curl_execpath("_fetchrc", &fullp);
+        file = Fetch_execpath("_fetchrc", &fullp);
       if (file)
         /* this is the filename we read from */
         filename = fullp;
@@ -260,7 +260,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       }
 
       if (alloced_param)
-        Curl_safefree(param);
+        Fetch_safefree(param);
 
       fetchx_dyn_reset(&buf);
     }

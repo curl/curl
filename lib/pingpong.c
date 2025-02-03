@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,7 +47,7 @@
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
-timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
+timediff_t Fetch_pp_state_timeout(struct Fetch_easy *data,
                                  struct pingpong *pp, bool disconnecting)
 {
   struct connectdata *conn = data->conn;
@@ -62,13 +62,13 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
   timeout_ms = response_time -
-               Curl_timediff(Curl_now(), pp->response); /* spent time */
+               Fetch_timediff(Fetch_now(), pp->response); /* spent time */
 
   if (data->set.timeout && !disconnecting)
   {
     /* if timeout is requested, find out how much remaining time we have */
     timediff_t timeout2_ms = data->set.timeout -                   /* timeout time */
-                             Curl_timediff(Curl_now(), conn->now); /* spent time */
+                             Fetch_timediff(Fetch_now(), conn->now); /* spent time */
 
     /* pick the lowest number */
     timeout_ms = FETCHMIN(timeout_ms, timeout2_ms);
@@ -78,9 +78,9 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
 }
 
 /*
- * Curl_pp_statemach()
+ * Fetch_pp_statemach()
  */
-FETCHcode Curl_pp_statemach(struct Curl_easy *data,
+FETCHcode Fetch_pp_statemach(struct Fetch_easy *data,
                             struct pingpong *pp, bool block,
                             bool disconnecting)
 {
@@ -88,7 +88,7 @@ FETCHcode Curl_pp_statemach(struct Curl_easy *data,
   fetch_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
   timediff_t interval_ms;
-  timediff_t timeout_ms = Curl_pp_state_timeout(data, pp, disconnecting);
+  timediff_t timeout_ms = Fetch_pp_state_timeout(data, pp, disconnecting);
   FETCHcode result = FETCHE_OK;
 
   if (timeout_ms <= 0)
@@ -106,16 +106,16 @@ FETCHcode Curl_pp_statemach(struct Curl_easy *data,
   else
     interval_ms = 0; /* immediate */
 
-  if (Curl_conn_data_pending(data, FIRSTSOCKET))
+  if (Fetch_conn_data_pending(data, FIRSTSOCKET))
     rc = 1;
   else if (pp->overflow)
     /* We are receiving and there is data in the cache so just read it */
     rc = 1;
-  else if (!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
+  else if (!pp->sendleft && Fetch_conn_data_pending(data, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else
-    rc = Curl_socket_check(pp->sendleft ? FETCH_SOCKET_BAD : sock, /* reading */
+    rc = Fetch_socket_check(pp->sendleft ? FETCH_SOCKET_BAD : sock, /* reading */
                            FETCH_SOCKET_BAD,
                            pp->sendleft ? sock : FETCH_SOCKET_BAD, /* writing */
                            interval_ms);
@@ -123,10 +123,10 @@ FETCHcode Curl_pp_statemach(struct Curl_easy *data,
   if (block)
   {
     /* if we did not wait, we do not have to spend time on this now */
-    if (Curl_pgrsUpdate(data))
+    if (Fetch_pgrsUpdate(data))
       result = FETCHE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, Curl_now());
+      result = Fetch_speedcheck(data, Fetch_now());
 
     if (result)
       return result;
@@ -144,18 +144,18 @@ FETCHcode Curl_pp_statemach(struct Curl_easy *data,
 }
 
 /* initialize stuff to prepare for reading a fresh new response */
-void Curl_pp_init(struct pingpong *pp)
+void Fetch_pp_init(struct pingpong *pp)
 {
   pp->nread_resp = 0;
-  pp->response = Curl_now(); /* start response time-out now! */
+  pp->response = Fetch_now(); /* start response time-out now! */
   pp->pending_resp = TRUE;
-  Curl_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
-  Curl_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
+  Fetch_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
+  Fetch_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
 }
 
 /***********************************************************************
  *
- * Curl_pp_vsendf()
+ * Fetch_pp_vsendf()
  *
  * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
@@ -163,7 +163,7 @@ void Curl_pp_init(struct pingpong *pp)
  *
  * made to never block
  */
-FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
+FETCHcode Fetch_pp_vsendf(struct Fetch_easy *data,
                          struct pingpong *pp,
                          const char *fmt,
                          va_list args)
@@ -186,24 +186,24 @@ FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
     /* cannot send without a connection! */
     return FETCHE_SEND_ERROR;
 
-  Curl_dyn_reset(&pp->sendbuf);
-  result = Curl_dyn_vaddf(&pp->sendbuf, fmt, args);
+  Fetch_dyn_reset(&pp->sendbuf);
+  result = Fetch_dyn_vaddf(&pp->sendbuf, fmt, args);
   if (result)
     return result;
 
   /* append CRLF */
-  result = Curl_dyn_addn(&pp->sendbuf, "\r\n", 2);
+  result = Fetch_dyn_addn(&pp->sendbuf, "\r\n", 2);
   if (result)
     return result;
 
   pp->pending_resp = TRUE;
-  write_len = Curl_dyn_len(&pp->sendbuf);
-  s = Curl_dyn_ptr(&pp->sendbuf);
+  write_len = Fetch_dyn_len(&pp->sendbuf);
+  s = Fetch_dyn_ptr(&pp->sendbuf);
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
 #endif
-  result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, FALSE,
+  result = Fetch_conn_send(data, FIRSTSOCKET, s, write_len, FALSE,
                           &bytes_written);
   if (result == FETCHE_AGAIN)
   {
@@ -217,7 +217,7 @@ FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
   conn->data_prot = (unsigned char)data_sec;
 #endif
 
-  Curl_debug(data, FETCHINFO_HEADER_OUT, s, bytes_written);
+  Fetch_debug(data, FETCHINFO_HEADER_OUT, s, bytes_written);
 
   if (bytes_written != write_len)
   {
@@ -230,7 +230,7 @@ FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
   {
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = Curl_now();
+    pp->response = Fetch_now();
   }
 
   return FETCHE_OK;
@@ -238,7 +238,7 @@ FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
 
 /***********************************************************************
  *
- * Curl_pp_sendf()
+ * Fetch_pp_sendf()
  *
  * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
@@ -246,21 +246,21 @@ FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
  *
  * made to never block
  */
-FETCHcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
+FETCHcode Fetch_pp_sendf(struct Fetch_easy *data, struct pingpong *pp,
                         const char *fmt, ...)
 {
   FETCHcode result;
   va_list ap;
   va_start(ap, fmt);
 
-  result = Curl_pp_vsendf(data, pp, fmt, ap);
+  result = Fetch_pp_vsendf(data, pp, fmt, ap);
 
   va_end(ap);
 
   return result;
 }
 
-static FETCHcode pingpong_read(struct Curl_easy *data,
+static FETCHcode pingpong_read(struct Fetch_easy *data,
                                int sockindex,
                                char *buffer,
                                size_t buflen,
@@ -271,7 +271,7 @@ static FETCHcode pingpong_read(struct Curl_easy *data,
   enum protection_level prot = data->conn->data_prot;
   data->conn->data_prot = PROT_CLEAR;
 #endif
-  result = Curl_conn_recv(data, sockindex, buffer, buflen, nread);
+  result = Fetch_conn_recv(data, sockindex, buffer, buflen, nread);
 #ifdef HAVE_GSSAPI
   DEBUGASSERT(prot > PROT_NONE && prot < PROT_LAST);
   data->conn->data_prot = (unsigned char)prot;
@@ -280,11 +280,11 @@ static FETCHcode pingpong_read(struct Curl_easy *data,
 }
 
 /*
- * Curl_pp_readresp()
+ * Fetch_pp_readresp()
  *
  * Reads a piece of a server response.
  */
-FETCHcode Curl_pp_readresp(struct Curl_easy *data,
+FETCHcode Fetch_pp_readresp(struct Fetch_easy *data,
                            int sockindex,
                            struct pingpong *pp,
                            int *code,    /* return the server code if done */
@@ -305,10 +305,10 @@ FETCHcode Curl_pp_readresp(struct Curl_easy *data,
     {
       /* a previous call left this many bytes in the beginning of the buffer as
          that was the final line; now ditch that */
-      size_t full = Curl_dyn_len(&pp->recvbuf);
+      size_t full = Fetch_dyn_len(&pp->recvbuf);
 
       /* trim off the "final" leading part */
-      Curl_dyn_tail(&pp->recvbuf, full - pp->nfinal);
+      Fetch_dyn_tail(&pp->recvbuf, full - pp->nfinal);
 
       pp->nfinal = 0; /* now gone */
     }
@@ -328,7 +328,7 @@ FETCHcode Curl_pp_readresp(struct Curl_easy *data,
         return FETCHE_RECV_ERROR;
       }
 
-      result = Curl_dyn_addn(&pp->recvbuf, buffer, gotbytes);
+      result = Fetch_dyn_addn(&pp->recvbuf, buffer, gotbytes);
       if (result)
         return result;
 
@@ -339,8 +339,8 @@ FETCHcode Curl_pp_readresp(struct Curl_easy *data,
 
     do
     {
-      char *line = Curl_dyn_ptr(&pp->recvbuf);
-      char *nl = memchr(line, '\n', Curl_dyn_len(&pp->recvbuf));
+      char *line = Fetch_dyn_ptr(&pp->recvbuf);
+      char *nl = memchr(line, '\n', Fetch_dyn_len(&pp->recvbuf));
       if (nl)
       {
         /* a newline is CRLF in pp-talk, so the CR is ignored as
@@ -351,13 +351,13 @@ FETCHcode Curl_pp_readresp(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
         if (!conn->sec_complete)
 #endif
-          Curl_debug(data, FETCHINFO_HEADER_IN, line, length);
+          Fetch_debug(data, FETCHINFO_HEADER_IN, line, length);
 
         /*
          * Pass all response-lines to the callback function registered for
          * "headers". The response lines can be seen as a kind of headers.
          */
-        result = Curl_client_write(data, CLIENTWRITE_INFO, line, length);
+        result = Fetch_client_write(data, CLIENTWRITE_INFO, line, length);
         if (result)
           return result;
 
@@ -368,8 +368,8 @@ FETCHcode Curl_pp_readresp(struct Curl_easy *data,
              parsers). Store the overflow counter to inform about additional
              data in this buffer after the endofresp line. */
           pp->nfinal = length;
-          if (Curl_dyn_len(&pp->recvbuf) > length)
-            pp->overflow = Curl_dyn_len(&pp->recvbuf) - length;
+          if (Fetch_dyn_len(&pp->recvbuf) > length)
+            pp->overflow = Fetch_dyn_len(&pp->recvbuf) - length;
           else
             pp->overflow = 0;
           *size = pp->nread_resp; /* size of the response */
@@ -377,11 +377,11 @@ FETCHcode Curl_pp_readresp(struct Curl_easy *data,
           gotbytes = 0;           /* force break out of outer loop */
           break;
         }
-        if (Curl_dyn_len(&pp->recvbuf) > length)
+        if (Fetch_dyn_len(&pp->recvbuf) > length)
           /* keep the remaining piece */
-          Curl_dyn_tail((&pp->recvbuf), Curl_dyn_len(&pp->recvbuf) - length);
+          Fetch_dyn_tail((&pp->recvbuf), Fetch_dyn_len(&pp->recvbuf) - length);
         else
-          Curl_dyn_reset(&pp->recvbuf);
+          Fetch_dyn_reset(&pp->recvbuf);
       }
       else
       {
@@ -399,7 +399,7 @@ FETCHcode Curl_pp_readresp(struct Curl_easy *data,
   return result;
 }
 
-int Curl_pp_getsock(struct Curl_easy *data,
+int Fetch_pp_getsock(struct Fetch_easy *data,
                     struct pingpong *pp, fetch_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
@@ -415,24 +415,24 @@ int Curl_pp_getsock(struct Curl_easy *data,
   return GETSOCK_READSOCK(0);
 }
 
-bool Curl_pp_needs_flush(struct Curl_easy *data,
+bool Fetch_pp_needs_flush(struct Fetch_easy *data,
                          struct pingpong *pp)
 {
   (void)data;
   return pp->sendleft > 0;
 }
 
-FETCHcode Curl_pp_flushsend(struct Curl_easy *data,
+FETCHcode Fetch_pp_flushsend(struct Fetch_easy *data,
                             struct pingpong *pp)
 {
   /* we have a piece of a command still left to send */
   size_t written;
   FETCHcode result;
 
-  if (!Curl_pp_needs_flush(data, pp))
+  if (!Fetch_pp_needs_flush(data, pp))
     return FETCHE_OK;
 
-  result = Curl_conn_send(data, FIRSTSOCKET,
+  result = Fetch_conn_send(data, FIRSTSOCKET,
                           pp->sendthis + pp->sendsize - pp->sendleft,
                           pp->sendleft, FALSE, &written);
   if (result == FETCHE_AGAIN)
@@ -452,21 +452,21 @@ FETCHcode Curl_pp_flushsend(struct Curl_easy *data,
   {
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = Curl_now();
+    pp->response = Fetch_now();
   }
   return FETCHE_OK;
 }
 
-FETCHcode Curl_pp_disconnect(struct pingpong *pp)
+FETCHcode Fetch_pp_disconnect(struct pingpong *pp)
 {
-  Curl_dyn_free(&pp->sendbuf);
-  Curl_dyn_free(&pp->recvbuf);
+  Fetch_dyn_free(&pp->sendbuf);
+  Fetch_dyn_free(&pp->recvbuf);
   return FETCHE_OK;
 }
 
-bool Curl_pp_moredata(struct pingpong *pp)
+bool Fetch_pp_moredata(struct pingpong *pp)
 {
-  return !pp->sendleft && Curl_dyn_len(&pp->recvbuf) > pp->nfinal;
+  return !pp->sendleft && Fetch_dyn_len(&pp->recvbuf) > pp->nfinal;
 }
 
 #endif

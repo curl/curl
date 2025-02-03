@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -89,8 +89,8 @@ UNITTEST_START
   {
     char *path;
     const char *cp = list[i].cp;
-    FETCHcode result = Curl_get_pathname(&cp, &path, list[i].home);
-    printf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
+    FETCHcode result = Fetch_get_pathname(&cp, &path, list[i].home);
+    printf("%u - Fetch_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
            list[i].cp, list[i].home, list[i].result);
     if (result != list[i].result)
     {

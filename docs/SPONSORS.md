@@ -25,7 +25,7 @@ named sponsor level: **Silver**, **Gold**, **Platinum** or **Top**.
 
 Sponsors on a named level can provide their logo image and preferred URL and
 get recognition on the fetch website's [sponsor
-page](https://curl.se/sponsors.html).
+page](https://fetch.se/sponsors.html).
 
 - **Silver Sponsor** at least 100 USD/month
 - **Gold Sponsor** at least 500 USD/month

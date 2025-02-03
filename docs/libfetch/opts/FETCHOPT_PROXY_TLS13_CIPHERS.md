@@ -50,7 +50,7 @@ A valid example of a cipher list is:
 
 Find more details about cipher lists on this URL:
 
-https://curl.se/docs/ssl-ciphers.html
+https://fetch.se/docs/ssl-ciphers.html
 
 The application does not have to keep the string around after setting this
 option.

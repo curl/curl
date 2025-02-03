@@ -91,7 +91,7 @@ int main(void)
 # Cookie file format
 
 The cookie file format and general cookie concepts in fetch are described
-online here: https://curl.se/docs/http-cookies.html
+online here: https://fetch.se/docs/http-cookies.html
 
 # %AVAILABILITY%
 

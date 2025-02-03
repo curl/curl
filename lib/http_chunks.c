@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -78,43 +78,43 @@
 
  */
 
-void Curl_httpchunk_init(struct Curl_easy *data, struct Curl_chunker *ch,
+void Fetch_httpchunk_init(struct Fetch_easy *data, struct Fetch_chunker *ch,
                          bool ignore_body)
 {
   (void)data;
   ch->hexindex = 0;      /* start at 0 */
   ch->state = CHUNK_HEX; /* we get hex first! */
   ch->last_code = CHUNKE_OK;
-  Curl_dyn_init(&ch->trailer, DYN_H1_TRAILER);
+  Fetch_dyn_init(&ch->trailer, DYN_H1_TRAILER);
   ch->ignore_body = ignore_body;
 }
 
-void Curl_httpchunk_reset(struct Curl_easy *data, struct Curl_chunker *ch,
+void Fetch_httpchunk_reset(struct Fetch_easy *data, struct Fetch_chunker *ch,
                           bool ignore_body)
 {
   (void)data;
   ch->hexindex = 0;      /* start at 0 */
   ch->state = CHUNK_HEX; /* we get hex first! */
   ch->last_code = CHUNKE_OK;
-  Curl_dyn_reset(&ch->trailer);
+  Fetch_dyn_reset(&ch->trailer);
   ch->ignore_body = ignore_body;
 }
 
-void Curl_httpchunk_free(struct Curl_easy *data, struct Curl_chunker *ch)
+void Fetch_httpchunk_free(struct Fetch_easy *data, struct Fetch_chunker *ch)
 {
   (void)data;
-  Curl_dyn_free(&ch->trailer);
+  Fetch_dyn_free(&ch->trailer);
 }
 
-bool Curl_httpchunk_is_done(struct Curl_easy *data, struct Curl_chunker *ch)
+bool Fetch_httpchunk_is_done(struct Fetch_easy *data, struct Fetch_chunker *ch)
 {
   (void)data;
   return ch->state == CHUNK_DONE;
 }
 
-static FETCHcode httpchunk_readwrite(struct Curl_easy *data,
-                                     struct Curl_chunker *ch,
-                                     struct Curl_cwriter *cw_next,
+static FETCHcode httpchunk_readwrite(struct Fetch_easy *data,
+                                     struct Fetch_chunker *ch,
+                                     struct Fetch_cwriter *cw_next,
                                      const char *buf, size_t blen,
                                      size_t *pconsumed)
 {
@@ -133,9 +133,9 @@ static FETCHcode httpchunk_readwrite(struct Curl_easy *data,
   if (data->set.http_te_skip && !ch->ignore_body)
   {
     if (cw_next)
-      result = Curl_cwriter_write(data, cw_next, CLIENTWRITE_BODY, buf, blen);
+      result = Fetch_cwriter_write(data, cw_next, CLIENTWRITE_BODY, buf, blen);
     else
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)buf, blen);
+      result = Fetch_client_write(data, CLIENTWRITE_BODY, (char *)buf, blen);
     if (result)
     {
       ch->state = CHUNK_FAILED;
@@ -221,10 +221,10 @@ static FETCHcode httpchunk_readwrite(struct Curl_easy *data,
       if (!data->set.http_te_skip && !ch->ignore_body)
       {
         if (cw_next)
-          result = Curl_cwriter_write(data, cw_next, CLIENTWRITE_BODY,
+          result = Fetch_cwriter_write(data, cw_next, CLIENTWRITE_BODY,
                                       buf, piece);
         else
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
+          result = Fetch_client_write(data, CLIENTWRITE_BODY,
                                      (char *)buf, piece);
         if (result)
         {
@@ -250,7 +250,7 @@ static FETCHcode httpchunk_readwrite(struct Curl_easy *data,
       if (*buf == 0x0a)
       {
         /* The last one before we go back to hex state and start all over. */
-        Curl_httpchunk_reset(data, ch, ch->ignore_body);
+        Fetch_httpchunk_reset(data, ch, ch->ignore_body);
       }
       else if (*buf != 0x0d)
       {
@@ -266,31 +266,31 @@ static FETCHcode httpchunk_readwrite(struct Curl_easy *data,
     case CHUNK_TRAILER:
       if ((*buf == 0x0d) || (*buf == 0x0a))
       {
-        char *tr = Curl_dyn_ptr(&ch->trailer);
+        char *tr = Fetch_dyn_ptr(&ch->trailer);
         /* this is the end of a trailer, but if the trailer was zero bytes
            there was no trailer and we move on */
 
         if (tr)
         {
           size_t trlen;
-          result = Curl_dyn_addn(&ch->trailer, (char *)STRCONST("\x0d\x0a"));
+          result = Fetch_dyn_addn(&ch->trailer, (char *)STRCONST("\x0d\x0a"));
           if (result)
           {
             ch->state = CHUNK_FAILED;
             ch->last_code = CHUNKE_OUT_OF_MEMORY;
             return result;
           }
-          tr = Curl_dyn_ptr(&ch->trailer);
-          trlen = Curl_dyn_len(&ch->trailer);
+          tr = Fetch_dyn_ptr(&ch->trailer);
+          trlen = Fetch_dyn_len(&ch->trailer);
           if (!data->set.http_te_skip)
           {
             if (cw_next)
-              result = Curl_cwriter_write(data, cw_next,
+              result = Fetch_cwriter_write(data, cw_next,
                                           CLIENTWRITE_HEADER |
                                               CLIENTWRITE_TRAILER,
                                           tr, trlen);
             else
-              result = Curl_client_write(data,
+              result = Fetch_client_write(data,
                                          CLIENTWRITE_HEADER |
                                              CLIENTWRITE_TRAILER,
                                          tr, trlen);
@@ -301,7 +301,7 @@ static FETCHcode httpchunk_readwrite(struct Curl_easy *data,
               return result;
             }
           }
-          Curl_dyn_reset(&ch->trailer);
+          Fetch_dyn_reset(&ch->trailer);
           ch->state = CHUNK_TRAILER_CR;
           if (*buf == 0x0a)
             /* already on the LF */
@@ -316,7 +316,7 @@ static FETCHcode httpchunk_readwrite(struct Curl_easy *data,
       }
       else
       {
-        result = Curl_dyn_addn(&ch->trailer, buf, 1);
+        result = Fetch_dyn_addn(&ch->trailer, buf, 1);
         if (result)
         {
           ch->state = CHUNK_FAILED;
@@ -395,7 +395,7 @@ static FETCHcode httpchunk_readwrite(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static const char *Curl_chunked_strerror(CHUNKcode code)
+static const char *Fetch_chunked_strerror(CHUNKcode code)
 {
   switch (code)
   {
@@ -416,8 +416,8 @@ static const char *Curl_chunked_strerror(CHUNKcode code)
   }
 }
 
-FETCHcode Curl_httpchunk_read(struct Curl_easy *data,
-                              struct Curl_chunker *ch,
+FETCHcode Fetch_httpchunk_read(struct Fetch_easy *data,
+                              struct Fetch_chunker *ch,
                               char *buf, size_t blen,
                               size_t *pconsumed)
 {
@@ -426,29 +426,29 @@ FETCHcode Curl_httpchunk_read(struct Curl_easy *data,
 
 struct chunked_writer
 {
-  struct Curl_cwriter super;
-  struct Curl_chunker ch;
+  struct Fetch_cwriter super;
+  struct Fetch_chunker ch;
 };
 
-static FETCHcode cw_chunked_init(struct Curl_easy *data,
-                                 struct Curl_cwriter *writer)
+static FETCHcode cw_chunked_init(struct Fetch_easy *data,
+                                 struct Fetch_cwriter *writer)
 {
   struct chunked_writer *ctx = writer->ctx;
 
   data->req.chunk = TRUE; /* chunks coming our way. */
-  Curl_httpchunk_init(data, &ctx->ch, FALSE);
+  Fetch_httpchunk_init(data, &ctx->ch, FALSE);
   return FETCHE_OK;
 }
 
-static void cw_chunked_close(struct Curl_easy *data,
-                             struct Curl_cwriter *writer)
+static void cw_chunked_close(struct Fetch_easy *data,
+                             struct Fetch_cwriter *writer)
 {
   struct chunked_writer *ctx = writer->ctx;
-  Curl_httpchunk_free(data, &ctx->ch);
+  Fetch_httpchunk_free(data, &ctx->ch);
 }
 
-static FETCHcode cw_chunked_write(struct Curl_easy *data,
-                                  struct Curl_cwriter *writer, int type,
+static FETCHcode cw_chunked_write(struct Fetch_easy *data,
+                                  struct Fetch_cwriter *writer, int type,
                                   const char *buf, size_t blen)
 {
   struct chunked_writer *ctx = writer->ctx;
@@ -456,7 +456,7 @@ static FETCHcode cw_chunked_write(struct Curl_easy *data,
   size_t consumed;
 
   if (!(type & CLIENTWRITE_BODY))
-    return Curl_cwriter_write(data, writer->next, type, buf, blen);
+    return Fetch_cwriter_write(data, writer->next, type, buf, blen);
 
   consumed = 0;
   result = httpchunk_readwrite(data, &ctx->ch, writer->next, buf, blen,
@@ -471,7 +471,7 @@ static FETCHcode cw_chunked_write(struct Curl_easy *data,
     else
     {
       failf(data, "%s in chunked-encoding",
-            Curl_chunked_strerror(ctx->ch.last_code));
+            Fetch_chunked_strerror(ctx->ch.last_code));
     }
     return result;
   }
@@ -496,7 +496,7 @@ static FETCHcode cw_chunked_write(struct Curl_easy *data,
 }
 
 /* HTTP chunked Transfer-Encoding decoder */
-const struct Curl_cwtype Curl_httpchunk_unencoder = {
+const struct Fetch_cwtype Fetch_httpchunk_unencoder = {
     "chunked",
     NULL,
     cw_chunked_init,
@@ -510,31 +510,31 @@ const struct Curl_cwtype Curl_httpchunk_unencoder = {
 
 struct chunked_reader
 {
-  struct Curl_creader super;
+  struct Fetch_creader super;
   struct bufq chunkbuf;
   BIT(read_eos); /* we read an EOS from the next reader */
   BIT(eos);      /* we have returned an EOS */
 };
 
-static FETCHcode cr_chunked_init(struct Curl_easy *data,
-                                 struct Curl_creader *reader)
+static FETCHcode cr_chunked_init(struct Fetch_easy *data,
+                                 struct Fetch_creader *reader)
 {
   struct chunked_reader *ctx = reader->ctx;
   (void)data;
-  Curl_bufq_init2(&ctx->chunkbuf, FETCH_CHUNKED_MAXLEN, 2, BUFQ_OPT_SOFT_LIMIT);
+  Fetch_bufq_init2(&ctx->chunkbuf, FETCH_CHUNKED_MAXLEN, 2, BUFQ_OPT_SOFT_LIMIT);
   return FETCHE_OK;
 }
 
-static void cr_chunked_close(struct Curl_easy *data,
-                             struct Curl_creader *reader)
+static void cr_chunked_close(struct Fetch_easy *data,
+                             struct Fetch_creader *reader)
 {
   struct chunked_reader *ctx = reader->ctx;
   (void)data;
-  Curl_bufq_free(&ctx->chunkbuf);
+  Fetch_bufq_free(&ctx->chunkbuf);
 }
 
-static FETCHcode add_last_chunk(struct Curl_easy *data,
-                                struct Curl_creader *reader)
+static FETCHcode add_last_chunk(struct Fetch_easy *data,
+                                struct Fetch_creader *reader)
 {
   struct chunked_reader *ctx = reader->ctx;
   struct fetch_slist *trailers = NULL, *tr;
@@ -545,16 +545,16 @@ static FETCHcode add_last_chunk(struct Curl_easy *data,
   if (!data->set.trailer_callback)
   {
     FETCH_TRC_READ(data, "http_chunk, added last, empty chunk");
-    return Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("0\r\n\r\n"), &n);
+    return Fetch_bufq_cwrite(&ctx->chunkbuf, STRCONST("0\r\n\r\n"), &n);
   }
 
-  result = Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("0\r\n"), &n);
+  result = Fetch_bufq_cwrite(&ctx->chunkbuf, STRCONST("0\r\n"), &n);
   if (result)
     goto out;
 
-  Curl_set_in_callback(data, TRUE);
+  Fetch_set_in_callback(data, TRUE);
   rc = data->set.trailer_callback(&trailers, data->set.trailer_data);
-  Curl_set_in_callback(data, FALSE);
+  Fetch_set_in_callback(data, FALSE);
 
   if (rc != FETCH_TRAILERFUNC_OK)
   {
@@ -573,15 +573,15 @@ static FETCHcode add_last_chunk(struct Curl_easy *data,
       continue;
     }
 
-    result = Curl_bufq_cwrite(&ctx->chunkbuf, tr->data,
+    result = Fetch_bufq_cwrite(&ctx->chunkbuf, tr->data,
                               strlen(tr->data), &n);
     if (!result)
-      result = Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("\r\n"), &n);
+      result = Fetch_bufq_cwrite(&ctx->chunkbuf, STRCONST("\r\n"), &n);
     if (result)
       goto out;
   }
 
-  result = Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("\r\n"), &n);
+  result = Fetch_bufq_cwrite(&ctx->chunkbuf, STRCONST("\r\n"), &n);
 
 out:
   fetch_slist_free_all(trailers);
@@ -591,8 +591,8 @@ out:
   return result;
 }
 
-static FETCHcode add_chunk(struct Curl_easy *data,
-                           struct Curl_creader *reader,
+static FETCHcode add_chunk(struct Fetch_easy *data,
+                           struct Fetch_creader *reader,
                            char *buf, size_t blen)
 {
   struct chunked_reader *ctx = reader->ctx;
@@ -615,7 +615,7 @@ static FETCHcode add_chunk(struct Curl_easy *data,
     blen -= (8 + 2 + 2); /* deduct max overhead, 8 hex + 2*crlf */
   }
 
-  result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
+  result = Fetch_creader_read(data, reader->next, buf, blen, &nread, &eos);
   if (result)
     return result;
   if (eos)
@@ -632,11 +632,11 @@ static FETCHcode add_chunk(struct Curl_easy *data,
     if (hdlen <= 0)
       return FETCHE_READ_ERROR;
     /* On a soft-limited bufq, we do not need to check that all was written */
-    result = Curl_bufq_cwrite(&ctx->chunkbuf, hd, hdlen, &n);
+    result = Fetch_bufq_cwrite(&ctx->chunkbuf, hd, hdlen, &n);
     if (!result)
-      result = Curl_bufq_cwrite(&ctx->chunkbuf, buf, nread, &n);
+      result = Fetch_bufq_cwrite(&ctx->chunkbuf, buf, nread, &n);
     if (!result)
-      result = Curl_bufq_cwrite(&ctx->chunkbuf, "\r\n", 2, &n);
+      result = Fetch_bufq_cwrite(&ctx->chunkbuf, "\r\n", 2, &n);
     FETCH_TRC_READ(data, "http_chunk, made chunk of %zu bytes -> %d",
                    nread, result);
     if (result)
@@ -648,8 +648,8 @@ static FETCHcode add_chunk(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode cr_chunked_read(struct Curl_easy *data,
-                                 struct Curl_creader *reader,
+static FETCHcode cr_chunked_read(struct Fetch_easy *data,
+                                 struct Fetch_creader *reader,
                                  char *buf, size_t blen,
                                  size_t *pnread, bool *peos)
 {
@@ -661,7 +661,7 @@ static FETCHcode cr_chunked_read(struct Curl_easy *data,
 
   if (!ctx->eos)
   {
-    if (!ctx->read_eos && Curl_bufq_is_empty(&ctx->chunkbuf))
+    if (!ctx->read_eos && Fetch_bufq_is_empty(&ctx->chunkbuf))
     {
       /* Still getting data form the next reader, buffer is empty */
       result = add_chunk(data, reader, buf, blen);
@@ -669,10 +669,10 @@ static FETCHcode cr_chunked_read(struct Curl_easy *data,
         return result;
     }
 
-    if (!Curl_bufq_is_empty(&ctx->chunkbuf))
+    if (!Fetch_bufq_is_empty(&ctx->chunkbuf))
     {
-      result = Curl_bufq_cread(&ctx->chunkbuf, buf, blen, pnread);
-      if (!result && ctx->read_eos && Curl_bufq_is_empty(&ctx->chunkbuf))
+      result = Fetch_bufq_cread(&ctx->chunkbuf, buf, blen, pnread);
+      if (!result && ctx->read_eos && Fetch_bufq_is_empty(&ctx->chunkbuf))
       {
         /* no more data, read all, done. */
         ctx->eos = TRUE;
@@ -686,8 +686,8 @@ static FETCHcode cr_chunked_read(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static fetch_off_t cr_chunked_total_length(struct Curl_easy *data,
-                                           struct Curl_creader *reader)
+static fetch_off_t cr_chunked_total_length(struct Fetch_easy *data,
+                                           struct Fetch_creader *reader)
 {
   /* this reader changes length depending on input */
   (void)data;
@@ -696,32 +696,32 @@ static fetch_off_t cr_chunked_total_length(struct Curl_easy *data,
 }
 
 /* HTTP chunked Transfer-Encoding encoder */
-const struct Curl_crtype Curl_httpchunk_encoder = {
+const struct Fetch_crtype Fetch_httpchunk_encoder = {
     "chunked",
     cr_chunked_init,
     cr_chunked_read,
     cr_chunked_close,
-    Curl_creader_def_needs_rewind,
+    Fetch_creader_def_needs_rewind,
     cr_chunked_total_length,
-    Curl_creader_def_resume_from,
-    Curl_creader_def_rewind,
-    Curl_creader_def_unpause,
-    Curl_creader_def_is_paused,
-    Curl_creader_def_done,
+    Fetch_creader_def_resume_from,
+    Fetch_creader_def_rewind,
+    Fetch_creader_def_unpause,
+    Fetch_creader_def_is_paused,
+    Fetch_creader_def_done,
     sizeof(struct chunked_reader)};
 
-FETCHcode Curl_httpchunk_add_reader(struct Curl_easy *data)
+FETCHcode Fetch_httpchunk_add_reader(struct Fetch_easy *data)
 {
-  struct Curl_creader *reader = NULL;
+  struct Fetch_creader *reader = NULL;
   FETCHcode result;
 
-  result = Curl_creader_create(&reader, data, &Curl_httpchunk_encoder,
+  result = Fetch_creader_create(&reader, data, &Fetch_httpchunk_encoder,
                                FETCH_CR_TRANSFER_ENCODE);
   if (!result)
-    result = Curl_creader_add(data, reader);
+    result = Fetch_creader_add(data, reader);
 
   if (result && reader)
-    Curl_creader_free(data, reader);
+    Fetch_creader_free(data, reader);
   return result;
 }
 

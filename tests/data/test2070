@@ -39,7 +39,7 @@ Ignore certificate revocation "best effort" strategy
 FETCH_SSL_BACKEND=schannel
  </setenv>
 <command>
--4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelFetchRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -73,7 +73,7 @@ static const char *doh_strerror(DOHcode code)
   return "bad error code";
 }
 
-struct fetch_trc_feat Curl_doh_trc = {
+struct fetch_trc_feat Fetch_doh_trc = {
     "DoH",
     FETCH_LOG_LVL_NONE,
 };
@@ -186,14 +186,14 @@ doh_write_cb(char *contents, size_t size, size_t nmemb, void *userp)
   size_t realsize = size * nmemb;
   struct dynbuf *mem = (struct dynbuf *)userp;
 
-  if (Curl_dyn_addn(mem, contents, realsize))
+  if (Fetch_dyn_addn(mem, contents, realsize))
     return 0;
 
   return realsize;
 }
 
 #if defined(USE_HTTPSRR) && defined(DEBUGBUILD)
-static void doh_print_buf(struct Curl_easy *data,
+static void doh_print_buf(struct Fetch_easy *data,
                           const char *prefix,
                           unsigned char *buf, size_t len)
 {
@@ -203,7 +203,7 @@ static void doh_print_buf(struct Curl_easy *data,
 
   if (len > (LOCAL_PB_HEXMAX / 2))
     truncated = TRUE;
-  Curl_hexencode(buf, len, hexstr, hlen);
+  Fetch_hexencode(buf, len, hexstr, hlen);
   if (!truncated)
     infof(data, "%s: len=%d, val=%s", prefix, (int)len, hexstr);
   else
@@ -213,11 +213,11 @@ static void doh_print_buf(struct Curl_easy *data,
 #endif
 
 /* called from multi.c when this DoH transfer is complete */
-static int doh_done(struct Curl_easy *doh, FETCHcode result)
+static int doh_done(struct Fetch_easy *doh, FETCHcode result)
 {
-  struct Curl_easy *data; /* the transfer that asked for the DoH probe */
+  struct Fetch_easy *data; /* the transfer that asked for the DoH probe */
 
-  data = Curl_multi_get_handle(doh->multi, doh->set.dohfor_mid);
+  data = Fetch_multi_get_handle(doh->multi, doh->set.dohfor_mid);
   if (!data)
   {
     DEBUGF(infof(doh, "doh_done: xfer for mid=%" FMT_OFF_T " not found", doh->set.dohfor_mid));
@@ -235,7 +235,7 @@ static int doh_done(struct Curl_easy *doh, FETCHcode result)
     if (!dohp->pending)
     {
       /* DoH completed, run the transfer picking up the results */
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+      Fetch_expire(data, 0, EXPIRE_RUN_NOW);
     }
   }
   return 0;
@@ -251,13 +251,13 @@ static int doh_done(struct Curl_easy *doh, FETCHcode result)
       goto error;                                   \
   } while (0)
 
-static FETCHcode doh_run_probe(struct Curl_easy *data,
+static FETCHcode doh_run_probe(struct Fetch_easy *data,
                                struct doh_probe *p, DNStype dnstype,
                                const char *host,
                                const char *url, FETCHM *multi,
                                struct fetch_slist *headers)
 {
-  struct Curl_easy *doh = NULL;
+  struct Fetch_easy *doh = NULL;
   FETCHcode result = FETCHE_OK;
   timediff_t timeout_ms;
   DOHcode d = doh_req_encode(host, dnstype, p->req_body, sizeof(p->req_body),
@@ -269,16 +269,16 @@ static FETCHcode doh_run_probe(struct Curl_easy *data,
   }
 
   p->dnstype = dnstype;
-  Curl_dyn_init(&p->resp_body, DYN_DOH_RESPONSE);
+  Fetch_dyn_init(&p->resp_body, DYN_DOH_RESPONSE);
 
-  timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  timeout_ms = Fetch_timeleft(data, NULL, TRUE);
   if (timeout_ms <= 0)
   {
     result = FETCHE_OPERATION_TIMEDOUT;
     goto error;
   }
-  /* Curl_open() is the internal version of fetch_easy_init() */
-  result = Curl_open(&doh);
+  /* Fetch_open() is the internal version of fetch_easy_init() */
+  result = Fetch_open(&doh);
   if (result)
     goto error;
 
@@ -286,7 +286,7 @@ static FETCHcode doh_run_probe(struct Curl_easy *data,
      the gcc typecheck helpers */
   doh->state.internal = TRUE;
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-  doh->state.feat = &Curl_doh_trc;
+  doh->state.feat = &Fetch_doh_trc;
 #endif
   ERROR_CHECK_SETOPT(FETCHOPT_URL, url);
   ERROR_CHECK_SETOPT(FETCHOPT_DEFAULT_PROTOCOL, "https");
@@ -310,7 +310,7 @@ static FETCHcode doh_run_probe(struct Curl_easy *data,
   ERROR_CHECK_SETOPT(FETCHOPT_SHARE, (FETCHSH *)data->share);
   if (data->set.err && data->set.err != stderr)
     ERROR_CHECK_SETOPT(FETCHOPT_STDERR, data->set.err);
-  if (Curl_trc_ft_is_verbose(data, &Curl_doh_trc))
+  if (Fetch_trc_ft_is_verbose(data, &Fetch_doh_trc))
     ERROR_CHECK_SETOPT(FETCHOPT_VERBOSE, 1L);
   if (data->set.no_signal)
     ERROR_CHECK_SETOPT(FETCHOPT_NOSIGNAL, 1L);
@@ -396,17 +396,17 @@ static FETCHcode doh_run_probe(struct Curl_easy *data,
   return FETCHE_OK;
 
 error:
-  Curl_close(&doh);
+  Fetch_close(&doh);
   p->easy_mid = -1;
   return result;
 }
 
 /*
- * Curl_doh() resolves a name using DoH. It resolves a name and returns a
- * 'Curl_addrinfo *' with the address information.
+ * Fetch_doh() resolves a name using DoH. It resolves a name and returns a
+ * 'Fetch_addrinfo *' with the address information.
  */
 
-struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
+struct Fetch_addrinfo *Fetch_doh(struct Fetch_easy *data,
                                const char *hostname,
                                int port,
                                int *waitp)
@@ -450,7 +450,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   dohp->pending++;
 
 #ifdef USE_IPV6
-  if ((conn->ip_version != FETCH_IPRESOLVE_V4) && Curl_ipv6works(data))
+  if ((conn->ip_version != FETCH_IPRESOLVE_V4) && Fetch_ipv6works(data))
   {
     /* create IPv6 DoH request */
     result = doh_run_probe(data, &dohp->probe[DOH_SLOT_IPV6],
@@ -487,7 +487,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   return NULL;
 
 error:
-  Curl_doh_cleanup(data);
+  Fetch_doh_cleanup(data);
   return NULL;
 }
 
@@ -570,7 +570,7 @@ static DOHcode doh_store_https(const unsigned char *doh, int index,
   if (d->numhttps_rrs < DOH_MAX_HTTPS)
   {
     struct dohhttps_rr *h = &d->https_rrs[d->numhttps_rrs];
-    h->val = Curl_memdup(&doh[index], len);
+    h->val = Fetch_memdup(&doh[index], len);
     if (!h->val)
       return DOH_OUT_OF_MEM;
     h->len = len;
@@ -615,15 +615,15 @@ static DOHcode doh_store_cname(const unsigned char *doh, size_t dohlen,
 
     if (length)
     {
-      if (Curl_dyn_len(c))
+      if (Fetch_dyn_len(c))
       {
-        if (Curl_dyn_addn(c, STRCONST(".")))
+        if (Fetch_dyn_addn(c, STRCONST(".")))
           return DOH_OUT_OF_MEM;
       }
       if ((index + length) > dohlen)
         return DOH_DNS_BAD_LABEL;
 
-      if (Curl_dyn_addn(c, &doh[index], length))
+      if (Fetch_dyn_addn(c, &doh[index], length))
         return DOH_OUT_OF_MEM;
       index += length;
     }
@@ -688,7 +688,7 @@ UNITTEST void de_init(struct dohentry *de)
   memset(de, 0, sizeof(*de));
   de->ttl = INT_MAX;
   for (i = 0; i < DOH_MAX_CNAME; i++)
-    Curl_dyn_init(&de->cname[i], DYN_DOH_CNAME);
+    Fetch_dyn_init(&de->cname[i], DYN_DOH_CNAME);
 }
 
 UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
@@ -838,7 +838,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
 }
 
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-static void doh_show(struct Curl_easy *data,
+static void doh_show(struct Fetch_easy *data,
                      const struct dohentry *d)
 {
   int i;
@@ -884,7 +884,7 @@ static void doh_show(struct Curl_easy *data,
 #endif
   for (i = 0; i < d->numcname; i++)
   {
-    infof(data, "CNAME: %s", Curl_dyn_ptr(&d->cname[i]));
+    infof(data, "CNAME: %s", Fetch_dyn_ptr(&d->cname[i]));
   }
 }
 #else
@@ -895,21 +895,21 @@ static void doh_show(struct Curl_easy *data,
  * doh2ai()
  *
  * This function returns a pointer to the first element of a newly allocated
- * Curl_addrinfo struct linked list filled with the data from a set of DoH
- * lookups. Curl_addrinfo is meant to work like the addrinfo struct does for
+ * Fetch_addrinfo struct linked list filled with the data from a set of DoH
+ * lookups. Fetch_addrinfo is meant to work like the addrinfo struct does for
  * a IPv6 stack, but usable also for IPv4, all hosts and environments.
  *
  * The memory allocated by this function *MUST* be free'd later on calling
- * Curl_freeaddrinfo(). For each successful call to this function there
- * must be an associated call later to Curl_freeaddrinfo().
+ * Fetch_freeaddrinfo(). For each successful call to this function there
+ * must be an associated call later to Fetch_freeaddrinfo().
  */
 
 static FETCHcode doh2ai(const struct dohentry *de, const char *hostname,
-                        int port, struct Curl_addrinfo **aip)
+                        int port, struct Fetch_addrinfo **aip)
 {
-  struct Curl_addrinfo *ai;
-  struct Curl_addrinfo *prevai = NULL;
-  struct Curl_addrinfo *firstai = NULL;
+  struct Fetch_addrinfo *ai;
+  struct Fetch_addrinfo *prevai = NULL;
+  struct Fetch_addrinfo *firstai = NULL;
   struct sockaddr_in *addr;
 #ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
@@ -943,13 +943,13 @@ static FETCHcode doh2ai(const struct dohentry *de, const char *hostname,
       addrtype = AF_INET;
     }
 
-    ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen);
+    ai = calloc(1, sizeof(struct Fetch_addrinfo) + ss_size + hostlen);
     if (!ai)
     {
       result = FETCHE_OUT_OF_MEMORY;
       break;
     }
-    ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+    ai->ai_addr = (void *)((char *)ai + sizeof(struct Fetch_addrinfo));
     ai->ai_canonname = (void *)((char *)ai->ai_addr + ss_size);
     memcpy(ai->ai_canonname, hostname, hostlen);
 
@@ -997,7 +997,7 @@ static FETCHcode doh2ai(const struct dohentry *de, const char *hostname,
 
   if (result)
   {
-    Curl_freeaddrinfo(firstai);
+    Fetch_freeaddrinfo(firstai);
     firstai = NULL;
   }
   *aip = firstai;
@@ -1029,11 +1029,11 @@ UNITTEST void de_cleanup(struct dohentry *d)
   int i = 0;
   for (i = 0; i < d->numcname; i++)
   {
-    Curl_dyn_free(&d->cname[i]);
+    Fetch_dyn_free(&d->cname[i]);
   }
 #ifdef USE_HTTPSRR
   for (i = 0; i < d->numhttps_rrs; i++)
-    Curl_safefree(d->https_rrs[i].val);
+    Fetch_safefree(d->https_rrs[i].val);
 #endif
 }
 
@@ -1067,41 +1067,41 @@ static FETCHcode doh_decode_rdata_name(unsigned char **buf, size_t *remaining,
   rem = (int)*remaining;
   if (rem <= 0)
   {
-    Curl_dyn_free(&thename);
+    Fetch_dyn_free(&thename);
     return FETCHE_OUT_OF_MEMORY;
   }
-  Curl_dyn_init(&thename, FETCH_MAXLEN_host_name);
+  Fetch_dyn_init(&thename, FETCH_MAXLEN_host_name);
   cp = *buf;
   clen = *cp++;
   if (clen == 0)
   {
     /* special case - return "." as name */
-    if (Curl_dyn_addn(&thename, ".", 1))
+    if (Fetch_dyn_addn(&thename, ".", 1))
       return FETCHE_OUT_OF_MEMORY;
   }
   while (clen)
   {
     if (clen >= rem)
     {
-      Curl_dyn_free(&thename);
+      Fetch_dyn_free(&thename);
       return FETCHE_OUT_OF_MEMORY;
     }
-    if (Curl_dyn_addn(&thename, cp, clen) ||
-        Curl_dyn_addn(&thename, ".", 1))
+    if (Fetch_dyn_addn(&thename, cp, clen) ||
+        Fetch_dyn_addn(&thename, ".", 1))
       return FETCHE_TOO_LARGE;
 
     cp += clen;
     rem -= (clen + 1);
     if (rem <= 0)
     {
-      Curl_dyn_free(&thename);
+      Fetch_dyn_free(&thename);
       return FETCHE_OUT_OF_MEMORY;
     }
     clen = *cp++;
   }
   *buf = cp;
   *remaining = rem - 1;
-  *dnsname = Curl_dyn_ptr(&thename);
+  *dnsname = Fetch_dyn_ptr(&thename);
   return FETCHE_OK;
 }
 
@@ -1119,7 +1119,7 @@ static FETCHcode doh_test_alpn_escapes(void)
   unsigned char aval[MAX_HTTPSRR_ALPNS] = {0};
   static const char expected[2] = {ALPN_h2, ALPN_none};
 
-  if (Curl_httpsrr_decode_alpn(example, example_len, aval) != FETCHE_OK)
+  if (Fetch_httpsrr_decode_alpn(example, example_len, aval) != FETCHE_OK)
     return FETCHE_BAD_CONTENT_ENCODING;
   if (memcmp(aval, expected, sizeof(expected)))
     return FETCHE_BAD_CONTENT_ENCODING;
@@ -1128,10 +1128,10 @@ static FETCHcode doh_test_alpn_escapes(void)
 #endif
 
 static FETCHcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
-                                         struct Curl_https_rrinfo **hrr)
+                                         struct Fetch_https_rrinfo **hrr)
 {
   uint16_t pcode = 0, plen = 0;
-  struct Curl_https_rrinfo *lhrr = NULL;
+  struct Fetch_https_rrinfo *lhrr = NULL;
   char *dnsname = NULL;
 
 #ifdef DEBUGBUILD
@@ -1141,7 +1141,7 @@ static FETCHcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
 #endif
   if (len <= 2)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
-  lhrr = calloc(1, sizeof(struct Curl_https_rrinfo));
+  lhrr = calloc(1, sizeof(struct Fetch_https_rrinfo));
   if (!lhrr)
     return FETCHE_OUT_OF_MEMORY;
   lhrr->priority = doh_get16bit(cp, 0);
@@ -1160,7 +1160,7 @@ static FETCHcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
     switch (pcode)
     {
     case HTTPS_RR_CODE_ALPN:
-      if (Curl_httpsrr_decode_alpn(cp, plen, lhrr->alpns) != FETCHE_OK)
+      if (Fetch_httpsrr_decode_alpn(cp, plen, lhrr->alpns) != FETCHE_OK)
         goto err;
       break;
     case HTTPS_RR_CODE_NO_DEF_ALPN:
@@ -1169,7 +1169,7 @@ static FETCHcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
     case HTTPS_RR_CODE_IPV4:
       if (!plen)
         goto err;
-      lhrr->ipv4hints = Curl_memdup(cp, plen);
+      lhrr->ipv4hints = Fetch_memdup(cp, plen);
       if (!lhrr->ipv4hints)
         goto err;
       lhrr->ipv4hints_len = (size_t)plen;
@@ -1177,7 +1177,7 @@ static FETCHcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
     case HTTPS_RR_CODE_ECH:
       if (!plen)
         goto err;
-      lhrr->echconfiglist = Curl_memdup(cp, plen);
+      lhrr->echconfiglist = Fetch_memdup(cp, plen);
       if (!lhrr->echconfiglist)
         goto err;
       lhrr->echconfiglist_len = (size_t)plen;
@@ -1185,7 +1185,7 @@ static FETCHcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
     case HTTPS_RR_CODE_IPV6:
       if (!plen)
         goto err;
-      lhrr->ipv6hints = Curl_memdup(cp, plen);
+      lhrr->ipv6hints = Fetch_memdup(cp, plen);
       if (!lhrr->ipv6hints)
         goto err;
       lhrr->ipv6hints_len = (size_t)plen;
@@ -1206,15 +1206,15 @@ static FETCHcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
   *hrr = lhrr;
   return FETCHE_OK;
 err:
-  Curl_safefree(lhrr->target);
-  Curl_safefree(lhrr->echconfiglist);
-  Curl_safefree(lhrr);
+  Fetch_safefree(lhrr->target);
+  Fetch_safefree(lhrr->echconfiglist);
+  Fetch_safefree(lhrr);
   return FETCHE_OUT_OF_MEMORY;
 }
 
 #ifdef DEBUGBUILD
-static void doh_print_httpsrr(struct Curl_easy *data,
-                              struct Curl_https_rrinfo *hrr)
+static void doh_print_httpsrr(struct Fetch_easy *data,
+                              struct Fetch_https_rrinfo *hrr)
 {
   DEBUGASSERT(hrr);
   infof(data, "HTTPS RR: priority %d, target: %s",
@@ -1254,8 +1254,8 @@ static void doh_print_httpsrr(struct Curl_easy *data,
 #endif
 #endif
 
-FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
-                               struct Curl_dns_entry **dnsp)
+FETCHcode Fetch_doh_is_resolved(struct Fetch_easy *data,
+                               struct Fetch_dns_entry **dnsp)
 {
   FETCHcode result;
   struct doh_probes *dohp = data->req.doh;
@@ -1277,7 +1277,7 @@ FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
 
     memset(rc, 0, sizeof(rc));
     /* remove DoH handles from multi handle and close them */
-    Curl_doh_close(data);
+    Fetch_doh_close(data);
     /* parse the responses, create the struct and return it! */
     de_init(&de);
     for (slot = 0; slot < DOH_SLOT_COUNT; slot++)
@@ -1285,10 +1285,10 @@ FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct doh_probe *p = &dohp->probe[slot];
       if (!p->dnstype)
         continue;
-      rc[slot] = doh_resp_decode(Curl_dyn_uptr(&p->resp_body),
-                                 Curl_dyn_len(&p->resp_body),
+      rc[slot] = doh_resp_decode(Fetch_dyn_uptr(&p->resp_body),
+                                 Fetch_dyn_len(&p->resp_body),
                                  p->dnstype, &de);
-      Curl_dyn_free(&p->resp_body);
+      Fetch_dyn_free(&p->resp_body);
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
       if (rc[slot])
       {
@@ -1302,10 +1302,10 @@ FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
     if (!rc[DOH_SLOT_IPV4] || !rc[DOH_SLOT_IPV6])
     {
       /* we have an address, of one kind or other */
-      struct Curl_dns_entry *dns;
-      struct Curl_addrinfo *ai;
+      struct Fetch_dns_entry *dns;
+      struct Fetch_addrinfo *ai;
 
-      if (Curl_trc_ft_is_verbose(data, &Curl_doh_trc))
+      if (Fetch_trc_ft_is_verbose(data, &Fetch_doh_trc))
       {
         infof(data, "[DoH] hostname: %s", dohp->host);
         doh_show(data, &de);
@@ -1319,18 +1319,18 @@ FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
       }
 
       if (data->share)
-        Curl_share_lock(data, FETCH_LOCK_DATA_DNS, FETCH_LOCK_ACCESS_SINGLE);
+        Fetch_share_lock(data, FETCH_LOCK_DATA_DNS, FETCH_LOCK_ACCESS_SINGLE);
 
       /* we got a response, store it in the cache */
-      dns = Curl_cache_addr(data, ai, dohp->host, 0, dohp->port, FALSE);
+      dns = Fetch_cache_addr(data, ai, dohp->host, 0, dohp->port, FALSE);
 
       if (data->share)
-        Curl_share_unlock(data, FETCH_LOCK_DATA_DNS);
+        Fetch_share_unlock(data, FETCH_LOCK_DATA_DNS);
 
       if (!dns)
       {
         /* returned failure, bail out nicely */
-        Curl_freeaddrinfo(ai);
+        Fetch_freeaddrinfo(ai);
       }
       else
       {
@@ -1344,7 +1344,7 @@ FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
 #ifdef USE_HTTPSRR
     if (de.numhttps_rrs > 0 && result == FETCHE_OK && *dnsp)
     {
-      struct Curl_https_rrinfo *hrr = NULL;
+      struct Fetch_https_rrinfo *hrr = NULL;
       result = doh_resp_decode_httpsrr(de.https_rrs->val, de.https_rrs->len,
                                        &hrr);
       if (result)
@@ -1362,7 +1362,7 @@ FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
 
     /* All done */
     de_cleanup(&de);
-    Curl_doh_cleanup(data);
+    Fetch_doh_cleanup(data);
     return result;
 
   } /* !dohp->pending */
@@ -1371,12 +1371,12 @@ FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-void Curl_doh_close(struct Curl_easy *data)
+void Fetch_doh_close(struct Fetch_easy *data)
 {
   struct doh_probes *doh = data->req.doh;
   if (doh && data->multi)
   {
-    struct Curl_easy *probe_data;
+    struct Fetch_easy *probe_data;
     fetch_off_t mid;
     size_t slot;
     for (slot = 0; slot < DOH_SLOT_COUNT; slot++)
@@ -1387,29 +1387,29 @@ void Curl_doh_close(struct Curl_easy *data)
       doh->probe[slot].easy_mid = -1;
       /* should have been called before data is removed from multi handle */
       DEBUGASSERT(data->multi);
-      probe_data = data->multi ? Curl_multi_get_handle(data->multi, mid) : NULL;
+      probe_data = data->multi ? Fetch_multi_get_handle(data->multi, mid) : NULL;
       if (!probe_data)
       {
-        DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%" FMT_OFF_T " not found!",
+        DEBUGF(infof(data, "Fetch_doh_close: xfer for mid=%" FMT_OFF_T " not found!",
                      doh->probe[slot].easy_mid));
         continue;
       }
       /* data->multi might already be reset at this time */
       fetch_multi_remove_handle(data->multi, probe_data);
-      Curl_close(&probe_data);
+      Fetch_close(&probe_data);
     }
   }
 }
 
-void Curl_doh_cleanup(struct Curl_easy *data)
+void Fetch_doh_cleanup(struct Fetch_easy *data)
 {
   struct doh_probes *doh = data->req.doh;
   if (doh)
   {
-    Curl_doh_close(data);
+    Fetch_doh_close(data);
     fetch_slist_free_all(doh->req_hds);
     data->req.doh->req_hds = NULL;
-    Curl_safefree(data->req.doh);
+    Fetch_safefree(data->req.doh);
   }
 }
 

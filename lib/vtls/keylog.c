@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -50,7 +50,7 @@
 /* The fp for the open SSLKEYLOGFILE, or NULL if not open */
 static FILE *keylog_file_fp;
 
-void Curl_tls_keylog_open(void)
+void Fetch_tls_keylog_open(void)
 {
   char *keylog_file_name;
 
@@ -72,12 +72,12 @@ void Curl_tls_keylog_open(void)
           keylog_file_fp = NULL;
         }
       }
-      Curl_safefree(keylog_file_name);
+      Fetch_safefree(keylog_file_name);
     }
   }
 }
 
-void Curl_tls_keylog_close(void)
+void Fetch_tls_keylog_close(void)
 {
   if (keylog_file_fp)
   {
@@ -86,12 +86,12 @@ void Curl_tls_keylog_close(void)
   }
 }
 
-bool Curl_tls_keylog_enabled(void)
+bool Fetch_tls_keylog_enabled(void)
 {
   return keylog_file_fp != NULL;
 }
 
-bool Curl_tls_keylog_write_line(const char *line)
+bool Fetch_tls_keylog_write_line(const char *line)
 {
   /* The current maximum valid keylog line length LF and NUL is 195. */
   size_t linelen;
@@ -122,7 +122,7 @@ bool Curl_tls_keylog_write_line(const char *line)
   return TRUE;
 }
 
-bool Curl_tls_keylog_write(const char *label,
+bool Fetch_tls_keylog_write(const char *label,
                            const unsigned char client_random[CLIENT_RANDOM_SIZE],
                            const unsigned char *secret, size_t secretlen)
 {

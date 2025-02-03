@@ -45,7 +45,7 @@ Note that to be able to specify a URL in the config file, you need to specify
 it using the --url option, and not by simply writing the URL on its own
 line. So, it could look similar to this:
 
-    url = "https://curl.se/docs/"
+    url = "https://fetch.se/docs/"
 
     # --- Example file ---
     # this is a comment

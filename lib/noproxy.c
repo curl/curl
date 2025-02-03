@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,10 +39,10 @@
 #endif
 
 /*
- * Curl_cidr4_match() returns TRUE if the given IPv4 address is within the
+ * Fetch_cidr4_match() returns TRUE if the given IPv4 address is within the
  * specified CIDR address range.
  */
-UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
+UNITTEST bool Fetch_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
                                const char *network, /* 1.2.3.4 address */
                                unsigned int bits)
 {
@@ -53,9 +53,9 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
     /* strange input */
     return FALSE;
 
-  if (1 != Curl_inet_pton(AF_INET, ipv4, &address))
+  if (1 != Fetch_inet_pton(AF_INET, ipv4, &address))
     return FALSE;
-  if (1 != Curl_inet_pton(AF_INET, network, &check))
+  if (1 != Fetch_inet_pton(AF_INET, network, &check))
     return FALSE;
 
   if (bits && (bits != 32))
@@ -75,7 +75,7 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
   return address == check;
 }
 
-UNITTEST bool Curl_cidr6_match(const char *ipv6,
+UNITTEST bool Fetch_cidr6_match(const char *ipv6,
                                const char *network,
                                unsigned int bits)
 {
@@ -92,9 +92,9 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
   rest = bits & 0x07;
   if ((bytes > 16) || ((bytes == 16) && rest))
     return FALSE;
-  if (1 != Curl_inet_pton(AF_INET6, ipv6, address))
+  if (1 != Fetch_inet_pton(AF_INET6, ipv6, address))
     return FALSE;
-  if (1 != Curl_inet_pton(AF_INET6, network, check))
+  if (1 != Fetch_inet_pton(AF_INET6, network, check))
     return FALSE;
   if (bytes && memcmp(address, check, bytes))
     return FALSE;
@@ -121,7 +121,7 @@ enum nametype
  * Checks if the host is in the noproxy list. returns TRUE if it matches and
  * therefore the proxy should NOT be used.
  ****************************************************************/
-bool Curl_check_noproxy(const char *name, const char *no_proxy)
+bool Fetch_check_noproxy(const char *name, const char *no_proxy)
 {
   char hostip[128];
 
@@ -167,7 +167,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
     {
       unsigned int address;
       namelen = strlen(name);
-      if (1 == Curl_inet_pton(AF_INET, name, &address))
+      if (1 == Fetch_inet_pton(AF_INET, name, &address))
         type = TYPE_IPV4;
       else
       {
@@ -251,9 +251,9 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
             *slash = 0; /* null terminate there */
           }
           if (type == TYPE_IPV6)
-            match = Curl_cidr6_match(name, check, bits);
+            match = Fetch_cidr6_match(name, check, bits);
           else
-            match = Curl_cidr4_match(name, check, bits);
+            match = Fetch_cidr4_match(name, check, bits);
           break;
         }
         }

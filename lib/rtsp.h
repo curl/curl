@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,13 +26,13 @@
 
 #ifndef FETCH_DISABLE_RTSP
 
-extern const struct Curl_handler Curl_handler_rtsp;
+extern const struct Fetch_handler Fetch_handler_rtsp;
 
-FETCHcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header);
+FETCHcode Fetch_rtsp_parseheader(struct Fetch_easy *data, const char *header);
 
 #else
 /* disabled */
-#define Curl_rtsp_parseheader(x, y) FETCHE_NOT_BUILT_IN
+#define Fetch_rtsp_parseheader(x, y) FETCHE_NOT_BUILT_IN
 
 #endif /* FETCH_DISABLE_RTSP */
 

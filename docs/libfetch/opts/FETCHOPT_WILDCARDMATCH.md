@@ -98,7 +98,7 @@ int main(void)
     /* callback is called after data from the file have been transferred */
     fetch_easy_setopt(fetch, FETCHOPT_CHUNK_END_FUNCTION, end_cb);
 
-    /* See more on https://curl.se/libfetch/c/ftp-wildcard.html */
+    /* See more on https://fetch.se/libfetch/c/ftp-wildcard.html */
   }
 }
 ```

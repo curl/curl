@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -88,21 +88,21 @@
  * Forward declarations.
  */
 
-static FETCHcode file_do(struct Curl_easy *data, bool *done);
-static FETCHcode file_done(struct Curl_easy *data,
+static FETCHcode file_do(struct Fetch_easy *data, bool *done);
+static FETCHcode file_done(struct Fetch_easy *data,
                            FETCHcode status, bool premature);
-static FETCHcode file_connect(struct Curl_easy *data, bool *done);
-static FETCHcode file_disconnect(struct Curl_easy *data,
+static FETCHcode file_connect(struct Fetch_easy *data, bool *done);
+static FETCHcode file_disconnect(struct Fetch_easy *data,
                                  struct connectdata *conn,
                                  bool dead_connection);
-static FETCHcode file_setup_connection(struct Curl_easy *data,
+static FETCHcode file_setup_connection(struct Fetch_easy *data,
                                        struct connectdata *conn);
 
 /*
  * FILE scheme handler.
  */
 
-const struct Curl_handler Curl_handler_file = {
+const struct Fetch_handler Fetch_handler_file = {
     "file",                                /* scheme */
     file_setup_connection,                 /* setup_connection */
     file_do,                               /* do_it */
@@ -127,7 +127,7 @@ const struct Curl_handler Curl_handler_file = {
     PROTOPT_NONETWORK | PROTOPT_NOURLQUERY /* flags */
 };
 
-static FETCHcode file_setup_connection(struct Curl_easy *data,
+static FETCHcode file_setup_connection(struct Fetch_easy *data,
                                        struct connectdata *conn)
 {
   (void)conn;
@@ -140,11 +140,11 @@ static FETCHcode file_setup_connection(struct Curl_easy *data,
 }
 
 /*
- * file_connect() gets called from Curl_protocol_connect() to allow us to
+ * file_connect() gets called from Fetch_protocol_connect() to allow us to
  * do protocol-specific actions at connect-time. We emulate a
  * connect-then-transfer protocol and "connect" to the file here
  */
-static FETCHcode file_connect(struct Curl_easy *data, bool *done)
+static FETCHcode file_connect(struct Fetch_easy *data, bool *done)
 {
   char *real_path;
   struct FILEPROTO *file = data->req.p.file;
@@ -166,7 +166,7 @@ static FETCHcode file_connect(struct Curl_easy *data, bool *done)
     return FETCHE_OK;
   }
 
-  result = Curl_urldecode(data->state.up.path, 0, &real_path,
+  result = Fetch_urldecode(data->state.up.path, 0, &real_path,
                           &real_path_len, REJECT_ZERO);
   if (result)
     return result;
@@ -202,7 +202,7 @@ static FETCHcode file_connect(struct Curl_easy *data, bool *done)
       actual_path[i] = '\\';
     else if (!actual_path[i])
     { /* binary zero */
-      Curl_safefree(real_path);
+      Fetch_safefree(real_path);
       return FETCHE_URL_MALFORMAT;
     }
 
@@ -212,7 +212,7 @@ static FETCHcode file_connect(struct Curl_easy *data, bool *done)
   if (memchr(real_path, 0, real_path_len))
   {
     /* binary zeroes indicate foul play */
-    Curl_safefree(real_path);
+    Fetch_safefree(real_path);
     return FETCHE_URL_MALFORMAT;
   }
 
@@ -247,7 +247,7 @@ static FETCHcode file_connect(struct Curl_easy *data, bool *done)
   file->path = real_path;
 #endif
 #endif
-  Curl_safefree(file->freepath);
+  Fetch_safefree(file->freepath);
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
@@ -262,7 +262,7 @@ static FETCHcode file_connect(struct Curl_easy *data, bool *done)
   return FETCHE_OK;
 }
 
-static FETCHcode file_done(struct Curl_easy *data,
+static FETCHcode file_done(struct Fetch_easy *data,
                            FETCHcode status, bool premature)
 {
   struct FILEPROTO *file = data->req.p.file;
@@ -271,7 +271,7 @@ static FETCHcode file_done(struct Curl_easy *data,
 
   if (file)
   {
-    Curl_safefree(file->freepath);
+    Fetch_safefree(file->freepath);
     file->path = NULL;
     if (file->fd != -1)
       close(file->fd);
@@ -281,7 +281,7 @@ static FETCHcode file_done(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode file_disconnect(struct Curl_easy *data,
+static FETCHcode file_disconnect(struct Fetch_easy *data,
                                  struct connectdata *conn,
                                  bool dead_connection)
 {
@@ -296,7 +296,7 @@ static FETCHcode file_disconnect(struct Curl_easy *data,
 #define DIRSEP '/'
 #endif
 
-static FETCHcode file_upload(struct Curl_easy *data)
+static FETCHcode file_upload(struct Fetch_easy *data)
 {
   struct FILEPROTO *file = data->req.p.file;
   const char *dir = strchr(file->path, DIRSEP);
@@ -341,7 +341,7 @@ static FETCHcode file_upload(struct Curl_easy *data)
 
   if (-1 != data->state.infilesize)
     /* known size of data to "upload" */
-    Curl_pgrsSetUploadSize(data, data->state.infilesize);
+    Fetch_pgrsSetUploadSize(data, data->state.infilesize);
 
   /* treat the negative resume offset value as the case of "-" */
   if (data->state.resume_from < 0)
@@ -355,7 +355,7 @@ static FETCHcode file_upload(struct Curl_easy *data)
     data->state.resume_from = (fetch_off_t)file_stat.st_size;
   }
 
-  result = Curl_multi_xfer_ulbuf_borrow(data, &xfer_ulbuf, &xfer_ulblen);
+  result = Fetch_multi_xfer_ulbuf_borrow(data, &xfer_ulbuf, &xfer_ulblen);
   if (result)
     goto out;
 
@@ -365,7 +365,7 @@ static FETCHcode file_upload(struct Curl_easy *data)
     ssize_t nwrite;
     size_t readcount;
 
-    result = Curl_client_read(data, xfer_ulbuf, xfer_ulblen, &readcount, &eos);
+    result = Fetch_client_read(data, xfer_ulbuf, xfer_ulblen, &readcount, &eos);
     if (result)
       break;
 
@@ -403,19 +403,19 @@ static FETCHcode file_upload(struct Curl_easy *data)
 
     bytecount += nread;
 
-    Curl_pgrsSetUploadCounter(data, bytecount);
+    Fetch_pgrsSetUploadCounter(data, bytecount);
 
-    if (Curl_pgrsUpdate(data))
+    if (Fetch_pgrsUpdate(data))
       result = FETCHE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, Curl_now());
+      result = Fetch_speedcheck(data, Fetch_now());
   }
-  if (!result && Curl_pgrsUpdate(data))
+  if (!result && Fetch_pgrsUpdate(data))
     result = FETCHE_ABORTED_BY_CALLBACK;
 
 out:
   close(fd);
-  Curl_multi_xfer_ulbuf_release(data, xfer_ulbuf);
+  Fetch_multi_xfer_ulbuf_release(data, xfer_ulbuf);
 
   return result;
 }
@@ -428,7 +428,7 @@ out:
  * opposed to sockets) we instead perform the whole do-operation in this
  * function.
  */
-static FETCHcode file_do(struct Curl_easy *data, bool *done)
+static FETCHcode file_do(struct Fetch_easy *data, bool *done)
 {
   /* This implementation ignores the hostname in conformance with
      RFC 1738. Only local files (reachable via the standard file system)
@@ -468,7 +468,7 @@ static FETCHcode file_do(struct Curl_easy *data, bool *done)
   }
 
   if (fstated && !data->state.range && data->set.timecondition &&
-      !Curl_meets_timecondition(data, data->info.filetime))
+      !Fetch_meets_timecondition(data, data->info.filetime))
     return FETCHE_OK;
 
   if (fstated)
@@ -484,18 +484,18 @@ static FETCHcode file_do(struct Curl_easy *data, bool *done)
       headerlen =
           msnprintf(header, sizeof(header), "Content-Length: %" FMT_OFF_T "\r\n",
                     expected_size);
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+      result = Fetch_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if (result)
         return result;
 
-      result = Curl_client_write(data, CLIENTWRITE_HEADER,
+      result = Fetch_client_write(data, CLIENTWRITE_HEADER,
                                  accept_ranges, sizeof(accept_ranges) - 1);
       if (result != FETCHE_OK)
         return result;
     }
 
     filetime = (time_t)statbuf.st_mtime;
-    result = Curl_gmtime(filetime, &buffer);
+    result = Fetch_gmtime(filetime, &buffer);
     if (result)
       return result;
 
@@ -503,27 +503,27 @@ static FETCHcode file_do(struct Curl_easy *data, bool *done)
     headerlen =
         msnprintf(header, sizeof(header),
                   "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-                  Curl_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
+                  Fetch_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
                   tm->tm_mday,
-                  Curl_month[tm->tm_mon],
+                  Fetch_month[tm->tm_mon],
                   tm->tm_year + 1900,
                   tm->tm_hour,
                   tm->tm_min,
                   tm->tm_sec);
-    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+    result = Fetch_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
     if (!result)
       /* end of headers */
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
+      result = Fetch_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
     if (result)
       return result;
     /* set the file size to make it available post transfer */
-    Curl_pgrsSetDownloadSize(data, expected_size);
+    Fetch_pgrsSetDownloadSize(data, expected_size);
     if (data->req.no_body)
       return FETCHE_OK;
   }
 
   /* Check whether file range has been specified */
-  result = Curl_range(data);
+  result = Fetch_range(data);
   if (result)
     return result;
 
@@ -567,7 +567,7 @@ static FETCHcode file_do(struct Curl_easy *data, bool *done)
      it avoids problems with select() and recv() on file descriptors
      in Winsock */
   if (size_known)
-    Curl_pgrsSetDownloadSize(data, expected_size);
+    Fetch_pgrsSetDownloadSize(data, expected_size);
 
   if (data->state.resume_from)
   {
@@ -588,7 +588,7 @@ static FETCHcode file_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
+  result = Fetch_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if (result)
     goto out;
 
@@ -618,14 +618,14 @@ static FETCHcode file_do(struct Curl_easy *data, bool *done)
       if (size_known)
         expected_size -= nread;
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, xfer_buf, nread);
+      result = Fetch_client_write(data, CLIENTWRITE_BODY, xfer_buf, nread);
       if (result)
         goto out;
 
-      if (Curl_pgrsUpdate(data))
+      if (Fetch_pgrsUpdate(data))
         result = FETCHE_ABORTED_BY_CALLBACK;
       else
-        result = Curl_speedcheck(data, Curl_now());
+        result = Fetch_speedcheck(data, Fetch_now());
       if (result)
         goto out;
     }
@@ -647,11 +647,11 @@ static FETCHcode file_do(struct Curl_easy *data, bool *done)
       {
         if (entry->d_name[0] != '.')
         {
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
+          result = Fetch_client_write(data, CLIENTWRITE_BODY,
                                      entry->d_name, strlen(entry->d_name));
           if (result)
             break;
-          result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
+          result = Fetch_client_write(data, CLIENTWRITE_BODY, "\n", 1);
           if (result)
             break;
         }
@@ -664,11 +664,11 @@ static FETCHcode file_do(struct Curl_easy *data, bool *done)
 #endif
   }
 
-  if (Curl_pgrsUpdate(data))
+  if (Fetch_pgrsUpdate(data))
     result = FETCHE_ABORTED_BY_CALLBACK;
 
 out:
-  Curl_multi_xfer_buf_release(data, xfer_buf);
+  Fetch_multi_xfer_buf_release(data, xfer_buf);
   return result;
 }
 

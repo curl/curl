@@ -16,12 +16,12 @@ handling as many internal fetch read and write ones.
 
 
 ```
-ssize_t Curl_bufq_write(struct bufq *q, const unsigned char *buf, size_t len, FETCHcode *err);
+ssize_t Fetch_bufq_write(struct bufq *q, const unsigned char *buf, size_t len, FETCHcode *err);
 
 - returns the length written into `q` or -1 on error.
 - writing to a full `q` returns -1 and set *err to FETCHE_AGAIN
 
-ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len, FETCHcode *err);
+ssize_t Fetch_bufq_read(struct bufq *q, unsigned char *buf, size_t len, FETCHcode *err);
 
 - returns the length read from `q` or -1 on error.
 - reading from an empty `q` returns -1 and set *err to FETCHE_AGAIN
@@ -31,14 +31,14 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len, FETCHcode
 To pass data into a `bufq` without an extra copy, read callbacks can be used.
 
 ```
-typedef ssize_t Curl_bufq_reader(void *reader_ctx, unsigned char *buf, size_t len,
+typedef ssize_t Fetch_bufq_reader(void *reader_ctx, unsigned char *buf, size_t len,
                                  FETCHcode *err);
 
-ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader, void *reader_ctx,
+ssize_t Fetch_bufq_slurp(struct bufq *q, Fetch_bufq_reader *reader, void *reader_ctx,
                         FETCHcode *err);
 ```
 
-`Curl_bufq_slurp()` invokes the given `reader` callback, passing it its own
+`Fetch_bufq_slurp()` invokes the given `reader` callback, passing it its own
 internal buffer memory to write to. It may invoke the `reader` several times,
 as long as it has space and while the `reader` always returns the length that
 was requested. There are variations of `slurp` that call the `reader` at most
@@ -47,14 +47,14 @@ once or only read in a maximum amount of bytes.
 The analog mechanism for write out buffer data is:
 
 ```
-typedef ssize_t Curl_bufq_writer(void *writer_ctx, const unsigned char *buf, size_t len,
+typedef ssize_t Fetch_bufq_writer(void *writer_ctx, const unsigned char *buf, size_t len,
                                  FETCHcode *err);
 
-ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer, void *writer_ctx,
+ssize_t Fetch_bufq_pass(struct bufq *q, Fetch_bufq_writer *writer, void *writer_ctx,
                        FETCHcode *err);
 ```
 
-`Curl_bufq_pass()` invokes the `writer`, passing its internal memory and
+`Fetch_bufq_pass()` invokes the `writer`, passing its internal memory and
 remove the amount that `writer` reports.
 
 ## peek and skip
@@ -62,7 +62,7 @@ remove the amount that `writer` reports.
 It is possible to get access to the memory of data stored in a `bufq` with:
 
 ```
-bool Curl_bufq_peek(const struct bufq *q, const unsigned char **pbuf, size_t *plen);
+bool Fetch_bufq_peek(const struct bufq *q, const unsigned char **pbuf, size_t *plen);
 ```
 
 On returning TRUE, `pbuf` points to internal memory with `plen` bytes that one
@@ -71,7 +71,7 @@ may read. This is only valid until another operation on `bufq` is performed.
 Instead of reading `bufq` data, one may simply skip it:
 
 ```
-void Curl_bufq_skip(struct bufq *q, size_t amount);
+void Fetch_bufq_skip(struct bufq *q, size_t amount);
 ```
 
 This removes `amount` number of bytes from the `bufq`.
@@ -81,7 +81,7 @@ This removes `amount` number of bytes from the `bufq`.
 It is possible to undo writes by calling:
 
 ```
-FETCHcode Curl_bufq_unwrite(struct bufq *q, size_t len);
+FETCHcode Fetch_bufq_unwrite(struct bufq *q, size_t len);
 ```
 
 This removes `len` bytes from the end of the bufq again. When removing more
@@ -93,7 +93,7 @@ bytes than are present, FETCHE_AGAIN is returned and bufq is cleared.
 `bufq` holds a `struct bufq` somewhere. Before it uses it, it invokes:
 
 ```
-void Curl_bufq_init(struct bufq *q, size_t chunk_size, size_t max_chunks);
+void Fetch_bufq_init(struct bufq *q, size_t chunk_size, size_t max_chunks);
 ```
 
 The `bufq` is told how many "chunks" of data it shall hold at maximum and how
@@ -104,12 +104,12 @@ about memory management.
 The user of the `bufq` has the responsibility to call:
 
 ```
-void Curl_bufq_free(struct bufq *q);
+void Fetch_bufq_free(struct bufq *q);
 ```
 to free all resources held by `q`. It is possible to reset a `bufq` to empty via:
 
 ```
-void Curl_bufq_reset(struct bufq *q);
+void Fetch_bufq_reset(struct bufq *q);
 ```
 
 ## memory management
@@ -136,9 +136,9 @@ More in section "pools".
 ## empty, full and overflow
 
 One can ask about the state of a `bufq` with methods such as
-`Curl_bufq_is_empty(q)`, `Curl_bufq_is_full(q)`, etc. The amount of data held
+`Fetch_bufq_is_empty(q)`, `Fetch_bufq_is_full(q)`, etc. The amount of data held
 by a `bufq` is the sum of the data in all its chunks. This is what is reported
-by `Curl_bufq_len(q)`.
+by `Fetch_bufq_len(q)`.
 
 Note that a `bufq` length and it being "full" are only loosely related. A
 simple example:
@@ -168,9 +168,9 @@ A `struct bufc_pool` may be used to create chunks for a `bufq` and keep spare
 ones around. It is initialized and used via:
 
 ```
-void Curl_bufcp_init(struct bufc_pool *pool, size_t chunk_size, size_t spare_max);
+void Fetch_bufcp_init(struct bufc_pool *pool, size_t chunk_size, size_t spare_max);
 
-void Curl_bufq_initp(struct bufq *q, struct bufc_pool *pool, size_t max_chunks, int opts);
+void Fetch_bufq_initp(struct bufq *q, struct bufc_pool *pool, size_t max_chunks, int opts);
 ```
 
 The pool gets the size and the mount of spares to keep. The `bufq` gets the

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,9 +29,9 @@
 #include <fetch/fetch.h>
 
 /* generated table with all easy options */
-extern struct fetch_easyoption Curl_easyopts[];
+extern struct fetch_easyoption Fetch_easyopts[];
 
 #ifdef DEBUGBUILD
-int Curl_easyopts_check(void);
+int Fetch_easyopts_check(void);
 #endif
 #endif

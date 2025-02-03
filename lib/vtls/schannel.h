@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -74,13 +74,13 @@
 #undef X509_EXTENSIONS
 #endif
 
-extern const struct Curl_ssl Curl_ssl_schannel;
+extern const struct Fetch_ssl Fetch_ssl_schannel;
 
-FETCHcode Curl_verify_host(struct Curl_cfilter *cf,
-                           struct Curl_easy *data);
+FETCHcode Fetch_verify_host(struct Fetch_cfilter *cf,
+                           struct Fetch_easy *data);
 
-FETCHcode Curl_verify_certificate(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data);
+FETCHcode Fetch_verify_certificate(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data);
 
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_FETCH_SCHANNEL_H */

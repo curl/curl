@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,12 +24,12 @@
  *
  ***************************************************************************/
 
-struct Curl_sec_client_mech
+struct Fetch_sec_client_mech
 {
   const char *name;
   size_t size;
   int (*init)(void *);
-  int (*auth)(void *, struct Curl_easy *data, struct connectdata *);
+  int (*auth)(void *, struct Fetch_easy *data, struct connectdata *);
   void (*end)(void *);
   int (*check_prot)(void *, int);
   int (*encode)(void *, const void *, int, int, void **);
@@ -41,13 +41,13 @@ struct Curl_sec_client_mech
 #define AUTH_ERROR 2
 
 #ifdef HAVE_GSSAPI
-int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn, char *,
+int Fetch_sec_read_msg(struct Fetch_easy *data, struct connectdata *conn, char *,
                       enum protection_level);
-void Curl_sec_end(struct connectdata *);
-FETCHcode Curl_sec_login(struct Curl_easy *, struct connectdata *);
-int Curl_sec_request_prot(struct connectdata *conn, const char *level);
+void Fetch_sec_end(struct connectdata *);
+FETCHcode Fetch_sec_login(struct Fetch_easy *, struct connectdata *);
+int Fetch_sec_request_prot(struct connectdata *conn, const char *level);
 #else
-#define Curl_sec_end(x)
+#define Fetch_sec_end(x)
 #endif
 
 #endif /* HEADER_FETCH_KRB5_H */

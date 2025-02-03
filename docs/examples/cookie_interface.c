@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,7 +46,7 @@ print_cookies(FETCH *fetch)
   res = fetch_easy_getinfo(fetch, FETCHINFO_COOKIELIST, &cookies);
   if (res != FETCHE_OK)
   {
-    fprintf(stderr, "Curl fetch_easy_getinfo failed: %s\n",
+    fprintf(stderr, "Fetch fetch_easy_getinfo failed: %s\n",
             fetch_easy_strerror(res));
     exit(1);
   }
@@ -82,7 +82,7 @@ int main(void)
     res = fetch_easy_perform(fetch);
     if (res != FETCHE_OK)
     {
-      fprintf(stderr, "Curl perform failed: %s\n", fetch_easy_strerror(res));
+      fprintf(stderr, "Fetch perform failed: %s\n", fetch_easy_strerror(res));
       return 1;
     }
 
@@ -103,7 +103,7 @@ int main(void)
     res = fetch_easy_setopt(fetch, FETCHOPT_COOKIELIST, nline);
     if (res != FETCHE_OK)
     {
-      fprintf(stderr, "Curl fetch_easy_setopt failed: %s\n",
+      fprintf(stderr, "Fetch fetch_easy_setopt failed: %s\n",
               fetch_easy_strerror(res));
       return 1;
     }
@@ -119,7 +119,7 @@ int main(void)
     res = fetch_easy_setopt(fetch, FETCHOPT_COOKIELIST, nline);
     if (res != FETCHE_OK)
     {
-      fprintf(stderr, "Curl fetch_easy_setopt failed: %s\n",
+      fprintf(stderr, "Fetch fetch_easy_setopt failed: %s\n",
               fetch_easy_strerror(res));
       return 1;
     }
@@ -129,7 +129,7 @@ int main(void)
     res = fetch_easy_perform(fetch);
     if (res != FETCHE_OK)
     {
-      fprintf(stderr, "Curl perform failed: %s\n", fetch_easy_strerror(res));
+      fprintf(stderr, "Fetch perform failed: %s\n", fetch_easy_strerror(res));
       return 1;
     }
 
@@ -137,7 +137,7 @@ int main(void)
   }
   else
   {
-    fprintf(stderr, "Curl init failed!\n");
+    fprintf(stderr, "Fetch init failed!\n");
     return 1;
   }
 

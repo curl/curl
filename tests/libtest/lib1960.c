@@ -90,7 +90,7 @@ FETCHcode test(char *URL)
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(port);
 
-  if(Curl_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
+  if(Fetch_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
     fprintf(stderr, "inet_pton failed\n");
     goto test_cleanup;
   }

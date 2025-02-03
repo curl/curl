@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -501,7 +501,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     struct dynbuf fname;
     line++;
 
-    Curl_dyn_init(&fname, MAX_FILENAME);
+    Fetch_dyn_init(&fname, MAX_FILENAME);
 
     use_stdin = !strcmp(line, "-");
     if (use_stdin)
@@ -523,7 +523,7 @@ ParameterError setvariable(struct GlobalConfig *global,
       if (clen)
         contalloc = TRUE;
     }
-    Curl_dyn_free(&fname);
+    Fetch_dyn_free(&fname);
     if (!use_stdin && file)
       fclose(file);
     if (err)

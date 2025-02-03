@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,14 +54,14 @@ UNITTEST_START
                           defined(USE_WIN32_CRYPTO))
 unsigned char output[21];
 unsigned char *testp = output;
-Curl_ntlm_core_mk_nt_hash("1", output);
+Fetch_ntlm_core_mk_nt_hash("1", output);
 
 verify_memory(testp,
               "\x69\x94\x3c\x5e\x63\xb4\xd2\xc1\x04\xdb"
               "\xbc\xc1\x51\x38\xb7\x2b\x00\x00\x00\x00\x00",
               21);
 
-Curl_ntlm_core_mk_nt_hash("hello-you-fool", output);
+Fetch_ntlm_core_mk_nt_hash("hello-you-fool", output);
 
 verify_memory(testp,
               "\x39\xaf\x87\xa6\x75\x0a\x7a\x00\xba\xa0"
@@ -69,7 +69,7 @@ verify_memory(testp,
               21);
 
 /* !checksrc! disable LONGLINE 2 */
-Curl_ntlm_core_mk_nt_hash("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", output);
+Fetch_ntlm_core_mk_nt_hash("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", output);
 
 verify_memory(testp,
               "\x36\x9d\xae\x06\x84\x7e\xe1\xc1\x4a\x94\x39\xea\x6f\x44\x8c\x65\x00\x00\x00\x00\x00", 21);

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -80,14 +80,14 @@ static void parse_success(struct tcase *t)
   FETCHcode err;
   ssize_t nread;
 
-  Curl_h1_req_parse_init(&p, 1024);
+  Fetch_h1_req_parse_init(&p, 1024);
   in_len = in_consumed = 0;
   for (i = 0; t->input[i]; ++i)
   {
     buf = t->input[i];
     buflen = strlen(buf);
     in_len += buflen;
-    nread = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
+    nread = Fetch_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
                                    0, &err);
     if (nread < 0)
     {
@@ -120,19 +120,19 @@ static void parse_success(struct tcase *t)
     check_eq(p.req->scheme, t->scheme, "scheme");
     check_eq(p.req->authority, t->authority, "authority");
     check_eq(p.req->path, t->path, "path");
-    if (Curl_dynhds_count(&p.req->headers) != t->header_count)
+    if (Fetch_dynhds_count(&p.req->headers) != t->header_count)
     {
       fprintf(stderr, "expected %zu headers but got %zu\n", t->header_count,
-              Curl_dynhds_count(&p.req->headers));
+              Fetch_dynhds_count(&p.req->headers));
       fail("unexpected req header count");
     }
   }
 
-  Curl_h1_req_parse_free(&p);
+  Fetch_h1_req_parse_free(&p);
 }
 
 static const char *T1_INPUT[] = {
-    "GET /path HTTP/1.1\r\nHost: test.curl.se\r\n\r\n",
+    "GET /path HTTP/1.1\r\nHost: test.fetch.se\r\n\r\n",
     NULL,
 };
 static struct tcase TEST1a = {
@@ -143,7 +143,7 @@ static struct tcase TEST1b = {
 static const char *T2_INPUT[] = {
     "GET /path HTT",
     "P/1.1\r\nHost: te",
-    "st.curl.se\r\n\r",
+    "st.fetch.se\r\n\r",
     "\n12345678",
     NULL,
 };
@@ -151,21 +151,21 @@ static struct tcase TEST2 = {
     T2_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 8};
 
 static const char *T3_INPUT[] = {
-    "GET ftp://ftp.curl.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
+    "GET ftp://ftp.fetch.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
     "\nUser-Agent: xxx\r\n\r\n",
     NULL,
 };
 static struct tcase TEST3a = {
-    T3_INPUT, NULL, "GET", "ftp", "ftp.curl.se", "/xxx?a=2", 2, 0};
+    T3_INPUT, NULL, "GET", "ftp", "ftp.fetch.se", "/xxx?a=2", 2, 0};
 
 static const char *T4_INPUT[] = {
-    "CONNECT ftp.curl.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
+    "CONNECT ftp.fetch.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
     "User-Agent: xxx\r\n",
     "nothing:  \r\n\r\n\n\n",
     NULL,
 };
 static struct tcase TEST4a = {
-    T4_INPUT, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2};
+    T4_INPUT, NULL, "CONNECT", NULL, "ftp.fetch.se:123", NULL, 3, 2};
 
 static const char *T5_INPUT[] = {
     "OPTIONS * HTTP/1.1\r\nContent-Length: 0\r\nBlabla: xxx.yyy\r",
@@ -177,7 +177,7 @@ static struct tcase TEST5a = {
     T5_INPUT, NULL, "OPTIONS", NULL, NULL, "*", 2, 3};
 
 static const char *T6_INPUT[] = {
-    "PUT /path HTTP/1.1\nHost: test.curl.se\n\n123",
+    "PUT /path HTTP/1.1\nHost: test.fetch.se\n\n123",
     NULL,
 };
 static struct tcase TEST6a = {

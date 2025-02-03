@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,10 +45,10 @@ void clean_getout(struct OperationConfig *config)
     while (node)
     {
       next = node->next;
-      Curl_safefree(node->url);
-      Curl_safefree(node->outfile);
-      Curl_safefree(node->infile);
-      Curl_safefree(node);
+      Fetch_safefree(node->url);
+      Fetch_safefree(node->outfile);
+      Fetch_safefree(node->infile);
+      Fetch_safefree(node);
       node = next;
     }
     config->url_list = NULL;
@@ -243,7 +243,7 @@ FETCHcode get_url_file_name(struct GlobalConfig *global,
       {
         char *sanitized;
         SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
-        Curl_safefree(*filename);
+        Fetch_safefree(*filename);
         if (sc)
         {
           if (sc == SANITIZE_ERR_OUT_OF_MEMORY)

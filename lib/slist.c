@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,15 +51,15 @@ static struct fetch_slist *slist_get_last(struct fetch_slist *list)
 }
 
 /*
- * Curl_slist_append_nodup() appends a string to the linked list. Rather than
+ * Fetch_slist_append_nodup() appends a string to the linked list. Rather than
  * copying the string in dynamic storage, it takes its ownership. The string
- * should have been malloc()ated. Curl_slist_append_nodup always returns
+ * should have been malloc()ated. Fetch_slist_append_nodup always returns
  * the address of the first record, so that you can use this function as an
  * initialization function as well as an append function.
  * If an error occurs, NULL is returned and the string argument is NOT
  * released.
  */
-struct fetch_slist *Curl_slist_append_nodup(struct fetch_slist *list, char *data)
+struct fetch_slist *Fetch_slist_append_nodup(struct fetch_slist *list, char *data)
 {
   struct fetch_slist *last;
   struct fetch_slist *new_item;
@@ -97,7 +97,7 @@ struct fetch_slist *fetch_slist_append(struct fetch_slist *list,
   if (!dupdata)
     return NULL;
 
-  list = Curl_slist_append_nodup(list, dupdata);
+  list = Fetch_slist_append_nodup(list, dupdata);
   if (!list)
     free(dupdata);
 
@@ -105,11 +105,11 @@ struct fetch_slist *fetch_slist_append(struct fetch_slist *list,
 }
 
 /*
- * Curl_slist_duplicate() duplicates a linked list. It always returns the
+ * Fetch_slist_duplicate() duplicates a linked list. It always returns the
  * address of the first record of the cloned list or NULL in case of an
  * error (or if the input list was NULL).
  */
-struct fetch_slist *Curl_slist_duplicate(struct fetch_slist *inlist)
+struct fetch_slist *Fetch_slist_duplicate(struct fetch_slist *inlist)
 {
   struct fetch_slist *outlist = NULL;
   struct fetch_slist *tmp;
@@ -143,7 +143,7 @@ void fetch_slist_free_all(struct fetch_slist *list)
   do
   {
     next = item->next;
-    Curl_safefree(item->data);
+    Fetch_safefree(item->data);
     free(item);
     item = next;
   } while (next);

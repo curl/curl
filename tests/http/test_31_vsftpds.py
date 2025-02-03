@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@ import os
 import shutil
 import pytest
 
-from testenv import Env, CurlClient, VsFTPD
+from testenv import Env, FetchClient, VsFTPD
 
 
 log = logging.getLogger(__name__)
@@ -81,7 +81,7 @@ class TestVsFTPD:
         env.make_data_file(indir=env.gen_dir, fname="upload-1m", fsize=1024*1024)
 
     def test_31_01_list_dir(self, env: Env, vsftpds: VsFTPD):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/'
         r = fetch.ftp_ssl_get(urls=[url], with_stats=True)
         r.check_stats(count=1, http_status=226)
@@ -93,7 +93,7 @@ class TestVsFTPD:
         'data-1k', 'data-1m', 'data-10m'
     ])
     def test_31_02_download_1(self, env: Env, vsftpds: VsFTPD, docname):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         srcfile = os.path.join(vsftpds.docs_dir, f'{docname}')
         count = 1
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}?[0-{count-1}]'
@@ -105,7 +105,7 @@ class TestVsFTPD:
         'data-1k', 'data-1m', 'data-10m'
     ])
     def test_31_03_download_10_serial(self, env: Env, vsftpds: VsFTPD, docname):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         srcfile = os.path.join(vsftpds.docs_dir, f'{docname}')
         count = 10
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}?[0-{count-1}]'
@@ -117,7 +117,7 @@ class TestVsFTPD:
         'data-1k', 'data-1m', 'data-10m'
     ])
     def test_31_04_download_10_parallel(self, env: Env, vsftpds: VsFTPD, docname):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         srcfile = os.path.join(vsftpds.docs_dir, f'{docname}')
         count = 10
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}?[0-{count-1}]'
@@ -131,7 +131,7 @@ class TestVsFTPD:
         'upload-1k', 'upload-100k', 'upload-1m'
     ])
     def test_31_05_upload_1(self, env: Env, vsftpds: VsFTPD, docname):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         srcfile = os.path.join(env.gen_dir, docname)
         dstfile = os.path.join(vsftpds.docs_dir, docname)
         self._rmf(dstfile)
@@ -149,7 +149,7 @@ class TestVsFTPD:
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     def test_31_06_shutdownh_download(self, env: Env, vsftpds: VsFTPD):
         docname = 'data-1k'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         count = 1
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}?[0-{count-1}]'
         r = fetch.ftp_ssl_get(urls=[url], with_stats=True, with_tcpdump=True)
@@ -162,7 +162,7 @@ class TestVsFTPD:
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     def test_31_07_shutdownh_upload(self, env: Env, vsftpds: VsFTPD):
         docname = 'upload-1k'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         srcfile = os.path.join(env.gen_dir, docname)
         dstfile = os.path.join(vsftpds.docs_dir, docname)
         self._rmf(dstfile)
@@ -184,7 +184,7 @@ class TestVsFTPD:
         srcsize = os.path.getsize(srcfile)
         self._rmf(dstfile)
         count = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/'
         r = fetch.ftp_ssl_upload(urls=[url], fupload=f'{srcfile}', with_stats=True,
                                 extra_args=['--use-ascii'])
@@ -198,7 +198,7 @@ class TestVsFTPD:
 
     def test_31_08_active_download(self, env: Env, vsftpds: VsFTPD):
         docname = 'data-10k'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         srcfile = os.path.join(vsftpds.docs_dir, f'{docname}')
         count = 1
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}?[0-{count-1}]'
@@ -210,7 +210,7 @@ class TestVsFTPD:
 
     def test_31_09_active_upload(self, env: Env, vsftpds: VsFTPD):
         docname = 'upload-1k'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         srcfile = os.path.join(env.gen_dir, docname)
         dstfile = os.path.join(vsftpds.docs_dir, docname)
         self._rmf(dstfile)
@@ -226,7 +226,7 @@ class TestVsFTPD:
         '1234567890', ''
     ])
     def test_31_10_upload_stdin(self, env: Env, vsftpds: VsFTPD, indata):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         docname = "upload_31_10"
         dstfile = os.path.join(vsftpds.docs_dir, docname)
         self._rmf(dstfile)

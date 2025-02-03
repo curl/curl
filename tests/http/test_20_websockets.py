@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@ import time
 from datetime import datetime, timedelta
 import pytest
 
-from testenv import Env, CurlClient, LocalClient
+from testenv import Env, FetchClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ log = logging.getLogger(__name__)
 class TestWebsockets:
 
     def check_alive(self, env, timeout=5):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.ws_port}/'
         end = datetime.now() + timedelta(seconds=timeout)
         while datetime.now() < end:
@@ -81,7 +81,7 @@ class TestWebsockets:
             p.terminate()
 
     def test_20_01_basic(self, env: Env, ws_echo):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.ws_port}/'
         r = fetch.http_download(urls=[url])
         r.check_response(http_status=426)

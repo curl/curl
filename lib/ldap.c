@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -129,7 +129,7 @@ struct ldap_urldesc
 #undef LDAPURLDesc
 #define LDAPURLDesc struct ldap_urldesc
 
-static int _ldap_url_parse(struct Curl_easy *data,
+static int _ldap_url_parse(struct Fetch_easy *data,
                            const struct connectdata *conn,
                            LDAPURLDesc **ludp);
 static void _ldap_free_urldesc(LDAPURLDesc *ludp);
@@ -148,7 +148,7 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp);
 
 static void _ldap_trace(const char *fmt, ...) FETCH_PRINTF(1, 2);
 #else
-#define LDAP_TRACE(x) Curl_nop_stmt
+#define LDAP_TRACE(x) Fetch_nop_stmt
 #endif
 
 #if defined(USE_WIN32_LDAP) && defined(ldap_err2string)
@@ -166,13 +166,13 @@ static void _ldap_trace(const char *fmt, ...) FETCH_PRINTF(1, 2);
 #define LDAP_OPT_OFF ((void *)(size_t)0)
 #endif
 
-static FETCHcode ldap_do(struct Curl_easy *data, bool *done);
+static FETCHcode ldap_do(struct Fetch_easy *data, bool *done);
 
 /*
  * LDAP protocol handler.
  */
 
-const struct Curl_handler Curl_handler_ldap = {
+const struct Fetch_handler Fetch_handler_ldap = {
     "ldap",          /* scheme */
     ZERO_NULL,       /* setup_connection */
     ldap_do,         /* do_it */
@@ -202,7 +202,7 @@ const struct Curl_handler Curl_handler_ldap = {
  * LDAPS protocol handler.
  */
 
-const struct Curl_handler Curl_handler_ldaps = {
+const struct Fetch_handler Fetch_handler_ldaps = {
     "ldaps",          /* scheme */
     ZERO_NULL,        /* setup_connection */
     ldap_do,          /* do_it */
@@ -267,12 +267,12 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
 
   if (method && user && passwd)
   {
-    FETCHcode res = Curl_create_sspi_identity(user, passwd, &cred);
+    FETCHcode res = Fetch_create_sspi_identity(user, passwd, &cred);
     rc = (int)res;
     if (!rc)
     {
       rc = (int)ldap_bind_s(server, NULL, (TCHAR *)&cred, method);
-      Curl_sspi_free_identity(&cred);
+      Fetch_sspi_free_identity(&cred);
     }
   }
   else
@@ -285,7 +285,7 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
 }
 #endif /* #if defined(USE_WINDOWS_SSPI) */
 
-static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
+static int ldap_win_bind(struct Fetch_easy *data, LDAP *server,
                          const char *user, const char *passwd)
 {
   int rc = LDAP_INVALID_CREDENTIALS;
@@ -322,7 +322,7 @@ static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
 #define fetch_ldap_num_t int
 #endif
 
-static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
+static FETCHcode ldap_do(struct Fetch_easy *data, bool *done)
 {
   FETCHcode result = FETCHE_OK;
   int rc = 0;
@@ -365,7 +365,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
   }
 
   /* Get the URL scheme (either ldap or ldaps) */
-  if (Curl_conn_is_ssl(conn, FIRSTSOCKET))
+  if (Fetch_conn_is_ssl(conn, FIRSTSOCKET))
     ldap_ssl = 1;
   infof(data, "LDAP local: trying to establish %s connection",
         ldap_ssl ? "encrypted" : "cleartext");
@@ -581,7 +581,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
     goto quit;
   }
 
-  Curl_pgrsSetDownloadCounter(data, 0);
+  Fetch_pgrsSetDownloadCounter(data, 0);
   rc = (int)ldap_search_s(server, ludp->lud_dn,
                           (fetch_ldap_num_t)ludp->lud_scope,
                           ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
@@ -626,7 +626,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
 #endif
       name_len = strlen(name);
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+      result = Fetch_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
       if (result)
       {
         FREE_ON_WINLDAP(name);
@@ -634,7 +634,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
         goto quit;
       }
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
+      result = Fetch_client_write(data, CLIENTWRITE_BODY, name, name_len);
       if (result)
       {
         FREE_ON_WINLDAP(name);
@@ -642,7 +642,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
         goto quit;
       }
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+      result = Fetch_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
       if (result)
       {
         FREE_ON_WINLDAP(name);
@@ -683,7 +683,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
       {
         for (i = 0; (vals[i] != NULL); i++)
         {
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
+          result = Fetch_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
           if (result)
           {
             ldap_value_free_len(vals);
@@ -695,7 +695,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
             goto quit;
           }
 
-          result = Curl_client_write(data, CLIENTWRITE_BODY, attr, attr_len);
+          result = Fetch_client_write(data, CLIENTWRITE_BODY, attr, attr_len);
           if (result)
           {
             ldap_value_free_len(vals);
@@ -707,7 +707,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
             goto quit;
           }
 
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)": ", 2);
+          result = Fetch_client_write(data, CLIENTWRITE_BODY, (char *)": ", 2);
           if (result)
           {
             ldap_value_free_len(vals);
@@ -723,7 +723,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
               (strcmp(";binary", attr + (attr_len - 7)) == 0))
           {
             /* Binary attribute, encode to base64. */
-            result = Curl_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
+            result = Fetch_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
                                         &val_b64, &val_b64_sz);
             if (result)
             {
@@ -738,7 +738,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
 
             if (val_b64_sz > 0)
             {
-              result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
+              result = Fetch_client_write(data, CLIENTWRITE_BODY, val_b64,
                                          val_b64_sz);
               free(val_b64);
               if (result)
@@ -755,7 +755,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
           }
           else
           {
-            result = Curl_client_write(data, CLIENTWRITE_BODY, vals[i]->bv_val,
+            result = Fetch_client_write(data, CLIENTWRITE_BODY, vals[i]->bv_val,
                                        vals[i]->bv_len);
             if (result)
             {
@@ -769,7 +769,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
             }
           }
 
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+          result = Fetch_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
           if (result)
           {
             ldap_value_free_len(vals);
@@ -790,7 +790,7 @@ static FETCHcode ldap_do(struct Curl_easy *data, bool *done)
       FREE_ON_WINLDAP(attr);
       ldap_memfree(attribute);
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+      result = Fetch_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
       if (result)
         goto quit;
     }
@@ -819,7 +819,7 @@ quit:
   FREE_ON_WINLDAP(host);
 
   /* no data to transfer */
-  Curl_xfer_setup_nop(data);
+  Fetch_xfer_setup_nop(data);
   connclose(conn, "LDAP connection always disable reuse");
 
   return result;
@@ -888,8 +888,8 @@ static bool split_str(char *str, char ***out, size_t *count)
   if (!res)
     return FALSE;
 
-  for (i = 0, s = Curl_strtok_r(str, ",", &lasts); s && i < items;
-       s = Curl_strtok_r(NULL, ",", &lasts), i++)
+  for (i = 0, s = Fetch_strtok_r(str, ",", &lasts); s && i < items;
+       s = Fetch_strtok_r(NULL, ",", &lasts), i++)
     res[i] = s;
 
   *out = res;
@@ -912,7 +912,7 @@ static bool split_str(char *str, char ***out, size_t *count)
  *
  * Defined in RFC4516 section 2.
  */
-static int _ldap_url_parse2(struct Curl_easy *data,
+static int _ldap_url_parse2(struct Fetch_easy *data,
                             const struct connectdata *conn, LDAPURLDesc *ludp)
 {
   int rc = LDAP_SUCCESS;
@@ -958,7 +958,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     LDAP_TRACE(("DN '%s'\n", dn));
 
     /* Unescape the DN */
-    result = Curl_urldecode(dn, 0, &unescaped, NULL, REJECT_ZERO);
+    result = Fetch_urldecode(dn, 0, &unescaped, NULL, REJECT_ZERO);
     if (result)
     {
       rc = LDAP_NO_MEMORY;
@@ -1029,7 +1029,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
       LDAP_TRACE(("attr[%zu] '%s'\n", i, attributes[i]));
 
       /* Unescape the attribute */
-      result = Curl_urldecode(attributes[i], 0, &unescaped, NULL,
+      result = Fetch_urldecode(attributes[i], 0, &unescaped, NULL,
                               REJECT_ZERO);
       if (result)
       {
@@ -1104,7 +1104,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     LDAP_TRACE(("filter '%s'\n", filter));
 
     /* Unescape the filter */
-    result = Curl_urldecode(filter, 0, &unescaped, NULL, REJECT_ZERO);
+    result = Fetch_urldecode(filter, 0, &unescaped, NULL, REJECT_ZERO);
     if (result)
     {
       rc = LDAP_NO_MEMORY;
@@ -1145,7 +1145,7 @@ quit:
   return rc;
 }
 
-static int _ldap_url_parse(struct Curl_easy *data,
+static int _ldap_url_parse(struct Fetch_easy *data,
                            const struct connectdata *conn,
                            LDAPURLDesc **ludpp)
 {

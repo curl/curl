@@ -10,7 +10,7 @@ version that introduced changes.
 
 You can always learn which the latest fetch version is by running
 
-    fetch https://curl.se/info
+    fetch https://fetch.se/info
 
 The online version of this man page is always showing the latest incarnation:
-https://curl.se/docs/manpage.html
+https://fetch.se/docs/manpage.html

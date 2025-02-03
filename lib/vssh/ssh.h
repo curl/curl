@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -115,7 +115,7 @@ typedef enum
 #define FETCH_PATH_MAX 1024
 
 /* this struct is used in the HandleData struct which is part of the
-   Curl_easy, which means this is used on a per-easy handle basis.
+   Fetch_easy, which means this is used on a per-easy handle basis.
    Everything that is strictly related to a connection is banned from this
    struct. */
 struct SSHPROTO
@@ -200,8 +200,8 @@ struct ssh_conn
 
 #ifndef FETCH_DISABLE_PROXY
   /* for HTTPS proxy storage */
-  Curl_recv *tls_recv;
-  Curl_send *tls_send;
+  Fetch_recv *tls_recv;
+  Fetch_send *tls_send;
 #endif
 
 #ifdef HAVE_LIBSSH2_AGENT_API
@@ -267,20 +267,20 @@ struct ssh_conn
 
 #ifdef USE_SSH
 
-extern const struct Curl_handler Curl_handler_scp;
-extern const struct Curl_handler Curl_handler_sftp;
+extern const struct Fetch_handler Fetch_handler_scp;
+extern const struct Fetch_handler Fetch_handler_sftp;
 
 /* generic SSH backend functions */
-FETCHcode Curl_ssh_init(void);
-void Curl_ssh_cleanup(void);
-void Curl_ssh_version(char *buffer, size_t buflen);
-void Curl_ssh_attach(struct Curl_easy *data,
+FETCHcode Fetch_ssh_init(void);
+void Fetch_ssh_cleanup(void);
+void Fetch_ssh_version(char *buffer, size_t buflen);
+void Fetch_ssh_attach(struct Fetch_easy *data,
                      struct connectdata *conn);
 #else
 /* for non-SSH builds */
-#define Curl_ssh_cleanup()
-#define Curl_ssh_attach(x, y)
-#define Curl_ssh_init() 0
+#define Fetch_ssh_cleanup()
+#define Fetch_ssh_attach(x, y)
+#define Fetch_ssh_init() 0
 #endif
 
 #endif /* HEADER_FETCH_SSH_H */

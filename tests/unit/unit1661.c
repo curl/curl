@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,13 +38,13 @@ static void test_free(void *p)
 
 static FETCHcode unit_setup(void)
 {
-  Curl_bufref_init(&bufref);
+  Fetch_bufref_init(&bufref);
   return FETCHE_OK;
 }
 
 static void unit_stop(void)
 {
-  Curl_bufref_free(&bufref);
+  Fetch_bufref_free(&bufref);
 }
 
 UNITTEST_START
@@ -53,7 +53,7 @@ UNITTEST_START
   FETCHcode result = FETCHE_OK;
 
   /**
-   * testing Curl_bufref_init.
+   * testing Fetch_bufref_init.
    * @assumptions:
    * 1: data size will be 0
    * 2: reference will be NULL
@@ -65,49 +65,49 @@ UNITTEST_START
   fail_unless(!bufref.dtor, "Destructor must be NULL");
 
   /**
-   * testing Curl_bufref_set
+   * testing Fetch_bufref_set
    */
 
   buffer = malloc(13);
   abort_unless(buffer, "Out of memory");
-  Curl_bufref_set(&bufref, buffer, 13, test_free);
+  Fetch_bufref_set(&bufref, buffer, 13, test_free);
 
   fail_unless((char *)bufref.ptr == buffer, "Referenced data badly set");
   fail_unless(bufref.len == 13, "Data size badly set");
   fail_unless(bufref.dtor == test_free, "Destructor badly set");
 
   /**
-   * testing Curl_bufref_ptr
+   * testing Fetch_bufref_ptr
    */
 
-  fail_unless((char *)Curl_bufref_ptr(&bufref) == buffer,
+  fail_unless((char *)Fetch_bufref_ptr(&bufref) == buffer,
               "Wrong pointer value returned");
 
   /**
-   * testing Curl_bufref_len
+   * testing Fetch_bufref_len
    */
 
-  fail_unless(Curl_bufref_len(&bufref) == 13, "Wrong data size returned");
+  fail_unless(Fetch_bufref_len(&bufref) == 13, "Wrong data size returned");
 
   /**
-   * testing Curl_bufref_memdup
+   * testing Fetch_bufref_memdup
    */
 
-  result = Curl_bufref_memdup(&bufref, "1661", 3);
+  result = Fetch_bufref_memdup(&bufref, "1661", 3);
   abort_unless(result == FETCHE_OK, fetch_easy_strerror(result));
   fail_unless(freecount == 1, "Destructor not called");
   fail_unless((char *)bufref.ptr != buffer, "Returned pointer not set");
-  buffer = (char *)Curl_bufref_ptr(&bufref);
+  buffer = (char *)Fetch_bufref_ptr(&bufref);
   fail_unless(buffer, "Allocated pointer is NULL");
   fail_unless(bufref.len == 3, "Wrong data size stored");
   fail_unless(!buffer[3], "Duplicated data should have been truncated");
   fail_unless(!strcmp(buffer, "166"), "Bad duplicated data");
 
   /**
-   * testing Curl_bufref_free
+   * testing Fetch_bufref_free
    */
 
-  Curl_bufref_free(&bufref);
+  Fetch_bufref_free(&bufref);
   fail_unless(freecount == 1, "Wrong destructor called");
   fail_unless(!bufref.ptr, "Initial reference must be NULL");
   fail_unless(!bufref.len, "Initial length must be NULL");

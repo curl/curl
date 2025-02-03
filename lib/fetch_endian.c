@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,7 @@
 #include "fetch_endian.h"
 
 /*
- * Curl_read16_le()
+ * Fetch_read16_le()
  *
  * This function converts a 16-bit integer from the little endian format, as
  * used in the incoming package to whatever endian format we are using
@@ -39,14 +39,14 @@
  *
  * Returns the integer.
  */
-unsigned short Curl_read16_le(const unsigned char *buf)
+unsigned short Fetch_read16_le(const unsigned char *buf)
 {
   return (unsigned short)(((unsigned short)buf[0]) |
                           ((unsigned short)buf[1] << 8));
 }
 
 /*
- * Curl_read32_le()
+ * Fetch_read32_le()
  *
  * This function converts a 32-bit integer from the little endian format, as
  * used in the incoming package to whatever endian format we are using
@@ -58,14 +58,14 @@ unsigned short Curl_read16_le(const unsigned char *buf)
  *
  * Returns the integer.
  */
-unsigned int Curl_read32_le(const unsigned char *buf)
+unsigned int Fetch_read32_le(const unsigned char *buf)
 {
   return ((unsigned int)buf[0]) | ((unsigned int)buf[1] << 8) |
          ((unsigned int)buf[2] << 16) | ((unsigned int)buf[3] << 24);
 }
 
 /*
- * Curl_read16_be()
+ * Fetch_read16_be()
  *
  * This function converts a 16-bit integer from the big endian format, as
  * used in the incoming package to whatever endian format we are using
@@ -77,7 +77,7 @@ unsigned int Curl_read32_le(const unsigned char *buf)
  *
  * Returns the integer.
  */
-unsigned short Curl_read16_be(const unsigned char *buf)
+unsigned short Fetch_read16_be(const unsigned char *buf)
 {
   return (unsigned short)(((unsigned short)buf[0] << 8) |
                           ((unsigned short)buf[1]));

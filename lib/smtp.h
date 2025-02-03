@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -50,9 +50,9 @@ typedef enum
   SMTP_LAST /* never used */
 } smtpstate;
 
-/* This SMTP struct is used in the Curl_easy. All SMTP data that is
+/* This SMTP struct is used in the Fetch_easy. All SMTP data that is
    connection-oriented must be in smtp_conn to properly deal with the fact that
-   perhaps the Curl_easy is changed between the times the connection is
+   perhaps the Fetch_easy is changed between the times the connection is
    used. */
 struct SMTP
 {
@@ -84,7 +84,7 @@ struct smtp_conn
   BIT(auth_supported); /* AUTH capability supported by server */
 };
 
-extern const struct Curl_handler Curl_handler_smtp;
-extern const struct Curl_handler Curl_handler_smtps;
+extern const struct Fetch_handler Fetch_handler_smtp;
+extern const struct Fetch_handler Fetch_handler_smtps;
 
 #endif /* HEADER_FETCH_SMTP_H */

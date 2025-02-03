@@ -54,7 +54,7 @@ versions of libs and build tools.
 Library Symbols
 ===============
 
- All symbols used internally in libfetch must use a `Curl_` prefix if they are
+ All symbols used internally in libfetch must use a `Fetch_` prefix if they are
  used in more than a single file. Single-file symbols must be made static.
  Public ("exported") symbols must use a `fetch_` prefix. Public API functions
  are marked with `FETCH_EXTERN` in the public header files so that all others

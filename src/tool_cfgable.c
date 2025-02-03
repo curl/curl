@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,58 +52,58 @@ static void free_config_fields(struct OperationConfig *config)
 {
   struct getout *urlnode;
 
-  Curl_safefree(config->useragent);
-  Curl_safefree(config->altsvc);
-  Curl_safefree(config->hsts);
-  Curl_safefree(config->haproxy_clientip);
+  Fetch_safefree(config->useragent);
+  Fetch_safefree(config->altsvc);
+  Fetch_safefree(config->hsts);
+  Fetch_safefree(config->haproxy_clientip);
   fetch_slist_free_all(config->cookies);
-  Curl_safefree(config->cookiejar);
+  Fetch_safefree(config->cookiejar);
   fetch_slist_free_all(config->cookiefiles);
 
-  Curl_dyn_free(&config->postdata);
-  Curl_safefree(config->query);
-  Curl_safefree(config->referer);
+  Fetch_dyn_free(&config->postdata);
+  Fetch_safefree(config->query);
+  Fetch_safefree(config->referer);
 
-  Curl_safefree(config->headerfile);
-  Curl_safefree(config->ftpport);
-  Curl_safefree(config->iface);
+  Fetch_safefree(config->headerfile);
+  Fetch_safefree(config->ftpport);
+  Fetch_safefree(config->iface);
 
-  Curl_safefree(config->range);
+  Fetch_safefree(config->range);
 
-  Curl_safefree(config->userpwd);
-  Curl_safefree(config->tls_username);
-  Curl_safefree(config->tls_password);
-  Curl_safefree(config->tls_authtype);
-  Curl_safefree(config->proxy_tls_username);
-  Curl_safefree(config->proxy_tls_password);
-  Curl_safefree(config->proxy_tls_authtype);
-  Curl_safefree(config->proxyuserpwd);
-  Curl_safefree(config->proxy);
+  Fetch_safefree(config->userpwd);
+  Fetch_safefree(config->tls_username);
+  Fetch_safefree(config->tls_password);
+  Fetch_safefree(config->tls_authtype);
+  Fetch_safefree(config->proxy_tls_username);
+  Fetch_safefree(config->proxy_tls_password);
+  Fetch_safefree(config->proxy_tls_authtype);
+  Fetch_safefree(config->proxyuserpwd);
+  Fetch_safefree(config->proxy);
 
-  Curl_safefree(config->dns_ipv6_addr);
-  Curl_safefree(config->dns_ipv4_addr);
-  Curl_safefree(config->dns_interface);
-  Curl_safefree(config->dns_servers);
+  Fetch_safefree(config->dns_ipv6_addr);
+  Fetch_safefree(config->dns_ipv4_addr);
+  Fetch_safefree(config->dns_interface);
+  Fetch_safefree(config->dns_servers);
 
-  Curl_safefree(config->noproxy);
+  Fetch_safefree(config->noproxy);
 
-  Curl_safefree(config->mail_from);
+  Fetch_safefree(config->mail_from);
   fetch_slist_free_all(config->mail_rcpt);
-  Curl_safefree(config->mail_auth);
+  Fetch_safefree(config->mail_auth);
 
-  Curl_safefree(config->netrc_file);
-  Curl_safefree(config->output_dir);
-  Curl_safefree(config->proto_str);
-  Curl_safefree(config->proto_redir_str);
+  Fetch_safefree(config->netrc_file);
+  Fetch_safefree(config->output_dir);
+  Fetch_safefree(config->proto_str);
+  Fetch_safefree(config->proto_redir_str);
 
   urlnode = config->url_list;
   while (urlnode)
   {
     struct getout *next = urlnode->next;
-    Curl_safefree(urlnode->url);
-    Curl_safefree(urlnode->outfile);
-    Curl_safefree(urlnode->infile);
-    Curl_safefree(urlnode);
+    Fetch_safefree(urlnode->url);
+    Fetch_safefree(urlnode->outfile);
+    Fetch_safefree(urlnode->infile);
+    Fetch_safefree(urlnode);
     urlnode = next;
   }
   config->url_list = NULL;
@@ -112,47 +112,47 @@ static void free_config_fields(struct OperationConfig *config)
   config->url_out = NULL;
 
 #ifndef FETCH_DISABLE_IPFS
-  Curl_safefree(config->ipfs_gateway);
+  Fetch_safefree(config->ipfs_gateway);
 #endif /* !FETCH_DISABLE_IPFS */
-  Curl_safefree(config->doh_url);
-  Curl_safefree(config->cipher_list);
-  Curl_safefree(config->proxy_cipher_list);
-  Curl_safefree(config->cipher13_list);
-  Curl_safefree(config->proxy_cipher13_list);
-  Curl_safefree(config->cert);
-  Curl_safefree(config->proxy_cert);
-  Curl_safefree(config->cert_type);
-  Curl_safefree(config->proxy_cert_type);
-  Curl_safefree(config->cacert);
-  Curl_safefree(config->login_options);
-  Curl_safefree(config->proxy_cacert);
-  Curl_safefree(config->capath);
-  Curl_safefree(config->proxy_capath);
-  Curl_safefree(config->crlfile);
-  Curl_safefree(config->pinnedpubkey);
-  Curl_safefree(config->proxy_pinnedpubkey);
-  Curl_safefree(config->proxy_crlfile);
-  Curl_safefree(config->key);
-  Curl_safefree(config->proxy_key);
-  Curl_safefree(config->key_type);
-  Curl_safefree(config->proxy_key_type);
-  Curl_safefree(config->key_passwd);
-  Curl_safefree(config->proxy_key_passwd);
-  Curl_safefree(config->pubkey);
-  Curl_safefree(config->hostpubmd5);
-  Curl_safefree(config->hostpubsha256);
-  Curl_safefree(config->engine);
-  Curl_safefree(config->etag_save_file);
-  Curl_safefree(config->etag_compare_file);
-  Curl_safefree(config->ssl_ec_curves);
-  Curl_safefree(config->request_target);
-  Curl_safefree(config->customrequest);
-  Curl_safefree(config->krblevel);
-  Curl_safefree(config->oauth_bearer);
-  Curl_safefree(config->sasl_authzid);
-  Curl_safefree(config->unix_socket_path);
-  Curl_safefree(config->writeout);
-  Curl_safefree(config->proto_default);
+  Fetch_safefree(config->doh_url);
+  Fetch_safefree(config->cipher_list);
+  Fetch_safefree(config->proxy_cipher_list);
+  Fetch_safefree(config->cipher13_list);
+  Fetch_safefree(config->proxy_cipher13_list);
+  Fetch_safefree(config->cert);
+  Fetch_safefree(config->proxy_cert);
+  Fetch_safefree(config->cert_type);
+  Fetch_safefree(config->proxy_cert_type);
+  Fetch_safefree(config->cacert);
+  Fetch_safefree(config->login_options);
+  Fetch_safefree(config->proxy_cacert);
+  Fetch_safefree(config->capath);
+  Fetch_safefree(config->proxy_capath);
+  Fetch_safefree(config->crlfile);
+  Fetch_safefree(config->pinnedpubkey);
+  Fetch_safefree(config->proxy_pinnedpubkey);
+  Fetch_safefree(config->proxy_crlfile);
+  Fetch_safefree(config->key);
+  Fetch_safefree(config->proxy_key);
+  Fetch_safefree(config->key_type);
+  Fetch_safefree(config->proxy_key_type);
+  Fetch_safefree(config->key_passwd);
+  Fetch_safefree(config->proxy_key_passwd);
+  Fetch_safefree(config->pubkey);
+  Fetch_safefree(config->hostpubmd5);
+  Fetch_safefree(config->hostpubsha256);
+  Fetch_safefree(config->engine);
+  Fetch_safefree(config->etag_save_file);
+  Fetch_safefree(config->etag_compare_file);
+  Fetch_safefree(config->ssl_ec_curves);
+  Fetch_safefree(config->request_target);
+  Fetch_safefree(config->customrequest);
+  Fetch_safefree(config->krblevel);
+  Fetch_safefree(config->oauth_bearer);
+  Fetch_safefree(config->sasl_authzid);
+  Fetch_safefree(config->unix_socket_path);
+  Fetch_safefree(config->writeout);
+  Fetch_safefree(config->proto_default);
 
   fetch_slist_free_all(config->quote);
   fetch_slist_free_all(config->postquote);
@@ -171,17 +171,17 @@ static void free_config_fields(struct OperationConfig *config)
   fetch_slist_free_all(config->resolve);
   fetch_slist_free_all(config->connect_to);
 
-  Curl_safefree(config->preproxy);
-  Curl_safefree(config->proxy_service_name);
-  Curl_safefree(config->service_name);
-  Curl_safefree(config->ftp_account);
-  Curl_safefree(config->ftp_alternative_to_user);
-  Curl_safefree(config->aws_sigv4);
-  Curl_safefree(config->proto_str);
-  Curl_safefree(config->proto_redir_str);
-  Curl_safefree(config->ech);
-  Curl_safefree(config->ech_config);
-  Curl_safefree(config->ech_public);
+  Fetch_safefree(config->preproxy);
+  Fetch_safefree(config->proxy_service_name);
+  Fetch_safefree(config->service_name);
+  Fetch_safefree(config->ftp_account);
+  Fetch_safefree(config->ftp_alternative_to_user);
+  Fetch_safefree(config->aws_sigv4);
+  Fetch_safefree(config->proto_str);
+  Fetch_safefree(config->proto_redir_str);
+  Fetch_safefree(config->ech);
+  Fetch_safefree(config->ech_config);
+  Fetch_safefree(config->ech_public);
 }
 
 void config_free(struct OperationConfig *config)

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,10 +60,10 @@ struct bufc_pool
   size_t spare_max;        /* max number of spares to keep */
 };
 
-void Curl_bufcp_init(struct bufc_pool *pool,
+void Fetch_bufcp_init(struct bufc_pool *pool,
                      size_t chunk_size, size_t spare_max);
 
-void Curl_bufcp_free(struct bufc_pool *pool);
+void Fetch_bufcp_free(struct bufc_pool *pool);
 
 /**
  * A queue of byte chunks for reading and writing.
@@ -126,43 +126,43 @@ struct bufq
  * each of size `chunk_size`. The bufq will not allow writing of
  * more bytes than can be held in `max_chunks`.
  */
-void Curl_bufq_init(struct bufq *q, size_t chunk_size, size_t max_chunks);
+void Fetch_bufq_init(struct bufq *q, size_t chunk_size, size_t max_chunks);
 
 /**
  * Initialize a buffer queue that can hold up to `max_chunks` buffers
  * each of size `chunk_size` with the given options. See `BUFQ_OPT_*`.
  */
-void Curl_bufq_init2(struct bufq *q, size_t chunk_size,
+void Fetch_bufq_init2(struct bufq *q, size_t chunk_size,
                      size_t max_chunks, int opts);
 
-void Curl_bufq_initp(struct bufq *q, struct bufc_pool *pool,
+void Fetch_bufq_initp(struct bufq *q, struct bufc_pool *pool,
                      size_t max_chunks, int opts);
 
 /**
  * Reset the buffer queue to be empty. Will keep any allocated buffer
  * chunks around.
  */
-void Curl_bufq_reset(struct bufq *q);
+void Fetch_bufq_reset(struct bufq *q);
 
 /**
  * Free all resources held by the buffer queue.
  */
-void Curl_bufq_free(struct bufq *q);
+void Fetch_bufq_free(struct bufq *q);
 
 /**
  * Return the total amount of data in the queue.
  */
-size_t Curl_bufq_len(const struct bufq *q);
+size_t Fetch_bufq_len(const struct bufq *q);
 
 /**
  * Returns TRUE iff there is no data in the buffer queue.
  */
-bool Curl_bufq_is_empty(const struct bufq *q);
+bool Fetch_bufq_is_empty(const struct bufq *q);
 
 /**
  * Returns TRUE iff there is no space left in the buffer queue.
  */
-bool Curl_bufq_is_full(const struct bufq *q);
+bool Fetch_bufq_is_full(const struct bufq *q);
 
 /**
  * Write buf to the end of the buffer queue. The buf is copied
@@ -170,11 +170,11 @@ bool Curl_bufq_is_full(const struct bufq *q);
  * A return code of -1 indicates an error, setting `err` to the
  * cause. An err of FETCHE_AGAIN is returned if the buffer queue is full.
  */
-ssize_t Curl_bufq_write(struct bufq *q,
+ssize_t Fetch_bufq_write(struct bufq *q,
                         const unsigned char *buf, size_t len,
                         FETCHcode *err);
 
-FETCHcode Curl_bufq_cwrite(struct bufq *q,
+FETCHcode Fetch_bufq_cwrite(struct bufq *q,
                            const char *buf, size_t len,
                            size_t *pnwritten);
 
@@ -182,7 +182,7 @@ FETCHcode Curl_bufq_cwrite(struct bufq *q,
  * Remove `len` bytes from the end of the buffer queue again.
  * Returns FETCHE_AGAIN if less than `len` bytes were in the queue.
  */
-FETCHcode Curl_bufq_unwrite(struct bufq *q, size_t len);
+FETCHcode Fetch_bufq_unwrite(struct bufq *q, size_t len);
 
 /**
  * Read buf from the start of the buffer queue. The buf is copied
@@ -190,10 +190,10 @@ FETCHcode Curl_bufq_unwrite(struct bufq *q, size_t len);
  * A return code of -1 indicates an error, setting `err` to the
  * cause. An err of FETCHE_AGAIN is returned if the buffer queue is empty.
  */
-ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
+ssize_t Fetch_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
                        FETCHcode *err);
 
-FETCHcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
+FETCHcode Fetch_bufq_cread(struct bufq *q, char *buf, size_t len,
                           size_t *pnread);
 
 /**
@@ -203,12 +203,12 @@ FETCHcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
  * Returns TRUE iff bytes are available. Sets `pbuf` to NULL and `plen`
  * to 0 when no bytes are available.
  * Repeated calls return the same information until the buffer queue
- * is modified, see `Curl_bufq_skip()``
+ * is modified, see `Fetch_bufq_skip()``
  */
-bool Curl_bufq_peek(struct bufq *q,
+bool Fetch_bufq_peek(struct bufq *q,
                     const unsigned char **pbuf, size_t *plen);
 
-bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
+bool Fetch_bufq_peek_at(struct bufq *q, size_t offset,
                        const unsigned char **pbuf, size_t *plen);
 
 /**
@@ -216,9 +216,9 @@ bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
  * of the queue. Skipping more buf than is currently buffered will
  * just empty the queue.
  */
-void Curl_bufq_skip(struct bufq *q, size_t amount);
+void Fetch_bufq_skip(struct bufq *q, size_t amount);
 
-typedef ssize_t Curl_bufq_writer(void *writer_ctx,
+typedef ssize_t Fetch_bufq_writer(void *writer_ctx,
                                  const unsigned char *buf, size_t len,
                                  FETCHcode *err);
 /**
@@ -230,10 +230,10 @@ typedef ssize_t Curl_bufq_writer(void *writer_ctx,
  * Note that in case of a -1 chunks may have been written and
  * the buffer queue will have different length than before.
  */
-ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
+ssize_t Fetch_bufq_pass(struct bufq *q, Fetch_bufq_writer *writer,
                        void *writer_ctx, FETCHcode *err);
 
-typedef ssize_t Curl_bufq_reader(void *reader_ctx,
+typedef ssize_t Fetch_bufq_reader(void *reader_ctx,
                                  unsigned char *buf, size_t len,
                                  FETCHcode *err);
 
@@ -246,7 +246,7 @@ typedef ssize_t Curl_bufq_reader(void *reader_ctx,
  * Note that in case of a -1 chunks may have been read and
  * the buffer queue will have different length than before.
  */
-ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
+ssize_t Fetch_bufq_slurp(struct bufq *q, Fetch_bufq_reader *reader,
                         void *reader_ctx, FETCHcode *err);
 
 /**
@@ -255,8 +255,8 @@ ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
  * Returns the total amount of buf read (may be 0) or -1 on other
  * reader errors.
  */
-ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
-                       Curl_bufq_reader *reader, void *reader_ctx,
+ssize_t Fetch_bufq_sipn(struct bufq *q, size_t max_len,
+                       Fetch_bufq_reader *reader, void *reader_ctx,
                        FETCHcode *err);
 
 /**
@@ -266,9 +266,9 @@ ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
  * on or is placed into the buffer, depending on `len` and current
  * amount buffered, chunk size, etc.
  */
-ssize_t Curl_bufq_write_pass(struct bufq *q,
+ssize_t Fetch_bufq_write_pass(struct bufq *q,
                              const unsigned char *buf, size_t len,
-                             Curl_bufq_writer *writer, void *writer_ctx,
+                             Fetch_bufq_writer *writer, void *writer_ctx,
                              FETCHcode *err);
 
 #endif /* HEADER_FETCH_BUFQ_H */

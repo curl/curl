@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -100,7 +100,7 @@ UNITTEST_START
   int i;
   for (i = 0; tests[i].host; i++)
   {
-    if (tests[i].match != Curl_cert_hostcheck(tests[i].pattern,
+    if (tests[i].match != Fetch_cert_hostcheck(tests[i].pattern,
                                               strlen(tests[i].pattern),
                                               tests[i].host,
                                               strlen(tests[i].host)))

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,7 @@ typedef struct WOLFSSL_CTX WOLFSSL_CTX;
 struct WOLFSSL_SESSION;
 typedef struct WOLFSSL_SESSION WOLFSSL_SESSION;
 
-extern const struct Curl_ssl Curl_ssl_wolfssl;
+extern const struct Fetch_ssl Fetch_ssl_wolfssl;
 
 struct wolfssl_ctx
 {
@@ -48,19 +48,19 @@ struct wolfssl_ctx
   BIT(shutting_down);      /* TLS is being shut down */
 };
 
-size_t Curl_wssl_version(char *buffer, size_t size);
+size_t Fetch_wssl_version(char *buffer, size_t size);
 
-FETCHcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
+FETCHcode Fetch_wssl_setup_x509_store(struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data,
                                      struct wolfssl_ctx *wssl);
 
-FETCHcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+FETCHcode Fetch_wssl_setup_session(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct wolfssl_ctx *wss,
                                   const char *ssl_peer_key);
 
-FETCHcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+FETCHcode Fetch_wssl_cache_session(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   const char *ssl_peer_key,
                                   WOLFSSL_SESSION *session,
                                   int ietf_tls_id,

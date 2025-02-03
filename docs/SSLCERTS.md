@@ -97,7 +97,7 @@ The certificate has `BEGIN CERTIFICATE` and `END CERTIFICATE` markers.
 ### Get the Mozilla CA store
 
 Download a version of the Firefox CA store converted to PEM format on the [CA
-Extract](https://curl.se/docs/caextract.html) page. It always features the
+Extract](https://fetch.se/docs/caextract.html) page. It always features the
 latest Firefox bundle.
 
 ## Native CA store

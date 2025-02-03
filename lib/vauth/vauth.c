@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,7 +37,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_auth_build_spn()
+ * Fetch_auth_build_spn()
  *
  * This is used to build a SPN string in the following formats:
  *
@@ -54,7 +54,7 @@
  * Returns a pointer to the newly allocated SPN.
  */
 #if !defined(USE_WINDOWS_SSPI)
-char *Curl_auth_build_spn(const char *service, const char *host,
+char *Fetch_auth_build_spn(const char *service, const char *host,
                           const char *realm)
 {
   char *spn = NULL;
@@ -71,7 +71,7 @@ char *Curl_auth_build_spn(const char *service, const char *host,
   return spn;
 }
 #else
-TCHAR *Curl_auth_build_spn(const char *service, const char *host,
+TCHAR *Fetch_auth_build_spn(const char *service, const char *host,
                            const char *realm)
 {
   char *utf8_spn = NULL;
@@ -106,7 +106,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
 #endif /* USE_WINDOWS_SSPI */
 
 /*
- * Curl_auth_user_contains_domain()
+ * Fetch_auth_user_contains_domain()
  *
  * This is used to test if the specified user contains a Windows domain name as
  * follows:
@@ -126,7 +126,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
  *
  * Returns TRUE on success; otherwise FALSE.
  */
-bool Curl_auth_user_contains_domain(const char *user)
+bool Fetch_auth_user_contains_domain(const char *user)
 {
   bool valid = FALSE;
 
@@ -148,10 +148,10 @@ bool Curl_auth_user_contains_domain(const char *user)
 }
 
 /*
- * Curl_auth_ollowed_to_host() tells if authentication, cookies or other
+ * Fetch_auth_ollowed_to_host() tells if authentication, cookies or other
  * "sensitive data" can (still) be sent to this host.
  */
-bool Curl_auth_allowed_to_host(struct Curl_easy *data)
+bool Fetch_auth_allowed_to_host(struct Fetch_easy *data)
 {
   struct connectdata *conn = data->conn;
   return !data->state.this_is_a_follow ||

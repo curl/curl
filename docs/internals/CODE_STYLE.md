@@ -35,7 +35,7 @@ other places of the code, just that the names should be logical,
 understandable and be named according to what they are used for. File-local
 functions should be made static. We like lower case names.
 
-See the [INTERNALS](https://curl.se/dev/internals.html#symbols) document on
+See the [INTERNALS](https://fetch.se/dev/internals.html#symbols) document on
 how we name non-exported library-global symbols.
 
 ## Indenting
@@ -233,7 +233,7 @@ cases follow the 2-space indent guideline. Here are some examples from
 libfetch:
 
 ```c
-if(Curl_pipeline_wanted(handle->multi, FETCHPIPE_HTTP1) &&
+if(Fetch_pipeline_wanted(handle->multi, FETCHPIPE_HTTP1) &&
    (handle->set.httpversion != FETCH_HTTP_VERSION_1_0) &&
    (handle->set.httpreq == HTTPREQ_GET ||
     handle->set.httpreq == HTTPREQ_HEAD))
@@ -262,7 +262,7 @@ if(option) {
 Align with the "current open" parenthesis:
 
 ```c
-DEBUGF(infof(data, "Curl_pp_readresp_ %d bytes of trailing "
+DEBUGF(infof(data, "Fetch_pp_readresp_ %d bytes of trailing "
              "server response left\n",
              (int)clipamount));
 ```

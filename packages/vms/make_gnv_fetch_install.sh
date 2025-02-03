@@ -1,6 +1,6 @@
 # File: make_gnv_fetch_install.sh
 #
-# Set up and run the make script for Curl.
+# Set up and run the make script for Fetch.
 #
 # This makes the library, the fetch binary and attempts an install.
 # A search list should be set up for GNU (GNV$GNU).

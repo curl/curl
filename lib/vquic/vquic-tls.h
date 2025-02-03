@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@
 #include "vtls/wolfssl.h"
 
 struct ssl_peer;
-struct Curl_ssl_session;
+struct Fetch_ssl_session;
 
 struct fetch_tls_ctx
 {
@@ -49,19 +49,19 @@ struct fetch_tls_ctx
 };
 
 /**
- * Callback passed to `Curl_vquic_tls_init()` that can
+ * Callback passed to `Fetch_vquic_tls_init()` that can
  * do early initializations on the not otherwise configured TLS
  * instances created. This varies by TLS backend:
  * - openssl/wolfssl: SSL_CTX* has just been created
  * - gnutls: gtls_client_init() has run
  */
-typedef FETCHcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,
-                                           struct Curl_easy *data,
+typedef FETCHcode Fetch_vquic_tls_ctx_setup(struct Fetch_cfilter *cf,
+                                           struct Fetch_easy *data,
                                            void *cb_user_data);
 
-typedef FETCHcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
-                                              struct Curl_easy *data,
-                                              struct Curl_ssl_session *scs,
+typedef FETCHcode Fetch_vquic_session_reuse_cb(struct Fetch_cfilter *cf,
+                                              struct Fetch_easy *data,
+                                              struct Fetch_ssl_session *scs,
                                               bool *do_early_data);
 
 /**
@@ -79,32 +79,32 @@ typedef FETCHcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
  * @param ssl_user_data  optional pointer to set in TLS application context
  * @param session_reuse_cb callback to handle session reuse, signal early data
  */
-FETCHcode Curl_vquic_tls_init(struct fetch_tls_ctx *ctx,
-                              struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+FETCHcode Fetch_vquic_tls_init(struct fetch_tls_ctx *ctx,
+                              struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               struct ssl_peer *peer,
                               const char *alpn, size_t alpn_len,
-                              Curl_vquic_tls_ctx_setup *cb_setup,
+                              Fetch_vquic_tls_ctx_setup *cb_setup,
                               void *cb_user_data,
                               void *ssl_user_data,
-                              Curl_vquic_session_reuse_cb *session_reuse_cb);
+                              Fetch_vquic_session_reuse_cb *session_reuse_cb);
 
 /**
  * Cleanup all data that has been initialized.
  */
-void Curl_vquic_tls_cleanup(struct fetch_tls_ctx *ctx);
+void Fetch_vquic_tls_cleanup(struct fetch_tls_ctx *ctx);
 
-FETCHcode Curl_vquic_tls_before_recv(struct fetch_tls_ctx *ctx,
-                                     struct Curl_cfilter *cf,
-                                     struct Curl_easy *data);
+FETCHcode Fetch_vquic_tls_before_recv(struct fetch_tls_ctx *ctx,
+                                     struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data);
 
 /**
  * After the QUIC basic handshake has been, verify that the peer
  * (and its certificate) fulfill our requirements.
  */
-FETCHcode Curl_vquic_tls_verify_peer(struct fetch_tls_ctx *ctx,
-                                     struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
+FETCHcode Fetch_vquic_tls_verify_peer(struct fetch_tls_ctx *ctx,
+                                     struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data,
                                      struct ssl_peer *peer);
 
 #endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */

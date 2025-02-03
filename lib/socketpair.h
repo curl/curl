@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,20 +48,20 @@
 #define wakeup_write write
 #define wakeup_read read
 #define wakeup_close close
-#define wakeup_create(p, nb) Curl_eventfd(p, nb)
+#define wakeup_create(p, nb) Fetch_eventfd(p, nb)
 
 #include <fetch/fetch.h>
-int Curl_eventfd(fetch_socket_t socks[2], bool nonblocking);
+int Fetch_eventfd(fetch_socket_t socks[2], bool nonblocking);
 
 #elif defined(HAVE_PIPE)
 
 #define wakeup_write write
 #define wakeup_read read
 #define wakeup_close close
-#define wakeup_create(p, nb) Curl_pipe(p, nb)
+#define wakeup_create(p, nb) Fetch_pipe(p, nb)
 
 #include <fetch/fetch.h>
-int Curl_pipe(fetch_socket_t socks[2], bool nonblocking);
+int Fetch_pipe(fetch_socket_t socks[2], bool nonblocking);
 
 #else /* !USE_EVENTFD && !HAVE_PIPE */
 
@@ -84,14 +84,14 @@ int Curl_pipe(fetch_socket_t socks[2], bool nonblocking);
 #endif
 
 #define wakeup_create(p, nb) \
-    Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
+    Fetch_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
 
 #endif /* USE_EVENTFD */
 
 #ifndef FETCH_DISABLE_SOCKETPAIR
 #include <fetch/fetch.h>
 
-int Curl_socketpair(int domain, int type, int protocol,
+int Fetch_socketpair(int domain, int type, int protocol,
                     fetch_socket_t socks[2], bool nonblocking);
 #endif
 

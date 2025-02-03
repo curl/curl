@@ -4,4 +4,4 @@
 # BUGS
 
 If you experience any problems with fetch, submit an issue in the project's bug
-tracker on GitHub: https://github.com/curl/curl/issues
+tracker on GitHub: https://github.com/fetch/fetch/issues

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,7 +64,7 @@ typedef unsigned __int64 uint64_t;
 
 static FETCHcode spack_enc8(struct dynbuf *buf, uint8_t b)
 {
-  return Curl_dyn_addn(buf, &b, 1);
+  return Fetch_dyn_addn(buf, &b, 1);
 }
 
 static FETCHcode
@@ -82,7 +82,7 @@ static FETCHcode spack_enc16(struct dynbuf *buf, uint16_t val)
   uint8_t nval[2];
   nval[0] = (uint8_t)(val >> 8);
   nval[1] = (uint8_t)val;
-  return Curl_dyn_addn(buf, nval, sizeof(nval));
+  return Fetch_dyn_addn(buf, nval, sizeof(nval));
 }
 
 static FETCHcode
@@ -102,7 +102,7 @@ static FETCHcode spack_enc32(struct dynbuf *buf, uint32_t val)
   nval[1] = (uint8_t)(val >> 16);
   nval[2] = (uint8_t)(val >> 8);
   nval[3] = (uint8_t)val;
-  return Curl_dyn_addn(buf, nval, sizeof(nval));
+  return Fetch_dyn_addn(buf, nval, sizeof(nval));
 }
 
 static FETCHcode
@@ -127,7 +127,7 @@ static FETCHcode spack_enc64(struct dynbuf *buf, uint64_t val)
   nval[5] = (uint8_t)(val >> 16);
   nval[6] = (uint8_t)(val >> 8);
   nval[7] = (uint8_t)val;
-  return Curl_dyn_addn(buf, nval, sizeof(nval));
+  return Fetch_dyn_addn(buf, nval, sizeof(nval));
 }
 
 static FETCHcode
@@ -152,7 +152,7 @@ static FETCHcode spack_encstr16(struct dynbuf *buf, const char *s)
   r = spack_enc16(buf, (uint16_t)slen);
   if (!r)
   {
-    r = Curl_dyn_addn(buf, s, slen);
+    r = Fetch_dyn_addn(buf, s, slen);
   }
   return r;
 }
@@ -169,7 +169,7 @@ spack_decstr16(char **val, const uint8_t **src, const uint8_t *end)
     return r;
   if (end - *src < slen)
     return FETCHE_READ_ERROR;
-  *val = Curl_memdup0((const char *)(*src), slen);
+  *val = Fetch_memdup0((const char *)(*src), slen);
   *src += slen;
   return *val ? FETCHE_OK : FETCHE_OUT_OF_MEMORY;
 }
@@ -183,7 +183,7 @@ static FETCHcode spack_encdata16(struct dynbuf *buf,
   r = spack_enc16(buf, (uint16_t)data_len);
   if (!r)
   {
-    r = Curl_dyn_addn(buf, data, data_len);
+    r = Fetch_dyn_addn(buf, data, data_len);
   }
   return r;
 }
@@ -201,14 +201,14 @@ spack_decdata16(uint8_t **val, size_t *val_len,
     return r;
   if (end - *src < data_len)
     return FETCHE_READ_ERROR;
-  *val = Curl_memdup0((const char *)(*src), data_len);
+  *val = Fetch_memdup0((const char *)(*src), data_len);
   *val_len = data_len;
   *src += data_len;
   return *val ? FETCHE_OK : FETCHE_OUT_OF_MEMORY;
 }
 
-FETCHcode Curl_ssl_session_pack(struct Curl_easy *data,
-                                struct Curl_ssl_session *s,
+FETCHcode Fetch_ssl_session_pack(struct Fetch_easy *data,
+                                struct Fetch_ssl_session *s,
                                 struct dynbuf *buf)
 {
   FETCHcode r;
@@ -258,11 +258,11 @@ FETCHcode Curl_ssl_session_pack(struct Curl_easy *data,
   return r;
 }
 
-FETCHcode Curl_ssl_session_unpack(struct Curl_easy *data,
+FETCHcode Fetch_ssl_session_unpack(struct Fetch_easy *data,
                                   const unsigned char *buf, size_t buflen,
-                                  struct Curl_ssl_session **ps)
+                                  struct Fetch_ssl_session **ps)
 {
-  struct Curl_ssl_session *s = NULL;
+  struct Fetch_ssl_session *s = NULL;
   const unsigned char *end = buf + buflen;
   uint8_t val8, *pval8;
   uint16_t val16;
@@ -347,7 +347,7 @@ out:
   if (r)
   {
     FETCH_TRC_SSLS(data, "error unpacking data: %d", r);
-    Curl_ssl_session_destroy(s);
+    Fetch_ssl_session_destroy(s);
   }
   else
     *ps = s;

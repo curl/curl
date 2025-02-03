@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /*
- * See https://github.com/curl/curl/issues/3371
+ * See https://github.com/fetch/fetch/issues/3371
  *
  * This test case checks whether fetch_multi_remove_handle() cancels
  * asynchronous DNS resolvers without blocking where possible.  Obviously, it

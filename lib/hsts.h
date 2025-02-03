@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@ extern time_t deltatime;
 
 struct stsentry
 {
-  struct Curl_llist_node node;
+  struct Fetch_llist_node node;
   const char *host;
   bool includeSubDomains;
   fetch_off_t expires; /* the timestamp of this entry's expiry */
@@ -44,28 +44,28 @@ struct stsentry
 /* The HSTS cache. Needs to be able to tailmatch hostnames. */
 struct hsts
 {
-  struct Curl_llist list;
+  struct Fetch_llist list;
   char *filename;
   unsigned int flags;
 };
 
-struct hsts *Curl_hsts_init(void);
-void Curl_hsts_cleanup(struct hsts **hp);
-FETCHcode Curl_hsts_parse(struct hsts *h, const char *hostname,
+struct hsts *Fetch_hsts_init(void);
+void Fetch_hsts_cleanup(struct hsts **hp);
+FETCHcode Fetch_hsts_parse(struct hsts *h, const char *hostname,
                           const char *sts);
-struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
+struct stsentry *Fetch_hsts(struct hsts *h, const char *hostname,
                            size_t hlen, bool subdomain);
-FETCHcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
+FETCHcode Fetch_hsts_save(struct Fetch_easy *data, struct hsts *h,
                          const char *file);
-FETCHcode Curl_hsts_loadfile(struct Curl_easy *data,
+FETCHcode Fetch_hsts_loadfile(struct Fetch_easy *data,
                              struct hsts *h, const char *file);
-FETCHcode Curl_hsts_loadcb(struct Curl_easy *data,
+FETCHcode Fetch_hsts_loadcb(struct Fetch_easy *data,
                            struct hsts *h);
-void Curl_hsts_loadfiles(struct Curl_easy *data);
+void Fetch_hsts_loadfiles(struct Fetch_easy *data);
 #else
-#define Curl_hsts_cleanup(x)
-#define Curl_hsts_loadcb(x, y) FETCHE_OK
-#define Curl_hsts_save(x, y, z)
-#define Curl_hsts_loadfiles(x)
+#define Fetch_hsts_cleanup(x)
+#define Fetch_hsts_loadcb(x, y) FETCHE_OK
+#define Fetch_hsts_save(x, y, z)
+#define Fetch_hsts_loadfiles(x)
 #endif /* FETCH_DISABLE_HTTP || FETCH_DISABLE_HSTS */
 #endif /* HEADER_FETCH_HSTS_H */

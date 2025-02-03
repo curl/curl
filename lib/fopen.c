@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -66,7 +66,7 @@ static char *dirslash(const char *path)
   size_t n;
   struct dynbuf out;
   DEBUGASSERT(path);
-  Curl_dyn_init(&out, FETCH_MAX_INPUT_LENGTH);
+  Fetch_dyn_init(&out, FETCH_MAX_INPUT_LENGTH);
   n = strlen(path);
   if (n)
   {
@@ -77,22 +77,22 @@ static char *dirslash(const char *path)
     while (n && IS_SEP(path[n - 1]))
       --n;
   }
-  if (Curl_dyn_addn(&out, path, n))
+  if (Fetch_dyn_addn(&out, path, n))
     return NULL;
   /* if there was a directory, append a single trailing slash */
-  if (n && Curl_dyn_addn(&out, PATHSEP, 1))
+  if (n && Fetch_dyn_addn(&out, PATHSEP, 1))
     return NULL;
-  return Curl_dyn_ptr(&out);
+  return Fetch_dyn_ptr(&out);
 }
 
 /*
- * Curl_fopen() opens a file for writing with a temp name, to be renamed
+ * Fetch_fopen() opens a file for writing with a temp name, to be renamed
  * to the final name when completed. If there is an existing file using this
  * name at the time of the open, this function will clone the mode from that
  * file. if 'tempname' is non-NULL, it needs a rename after the file is
  * written.
  */
-FETCHcode Curl_fopen(struct Curl_easy *data, const char *filename,
+FETCHcode Fetch_fopen(struct Fetch_easy *data, const char *filename,
                      FILE **fh, char **tempname)
 {
   FETCHcode result = FETCHE_WRITE_ERROR;
@@ -113,7 +113,7 @@ FETCHcode Curl_fopen(struct Curl_easy *data, const char *filename,
   fclose(*fh);
   *fh = NULL;
 
-  result = Curl_rand_alnum(data, randbuf, sizeof(randbuf));
+  result = Fetch_rand_alnum(data, randbuf, sizeof(randbuf));
   if (result)
     goto fail;
 

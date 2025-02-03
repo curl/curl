@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,7 +64,7 @@
 
 #ifdef USE_IPV6
 /* Return the scope of the given address. */
-unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
+unsigned int Fetch_ipv6_scope(const struct sockaddr *sa)
 {
   if (sa->sa_family == AF_INET6)
   {
@@ -98,7 +98,7 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 
 #if defined(HAVE_GETIFADDRS)
 
-if2ip_result_t Curl_if2ip(int af,
+if2ip_result_t Fetch_if2ip(int af,
 #ifdef USE_IPV6
                           unsigned int remote_scope,
                           unsigned int local_scope_id,
@@ -134,7 +134,7 @@ if2ip_result_t Curl_if2ip(int af,
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
               unsigned int scopeid = 0;
 #endif
-              unsigned int ifscope = Curl_ipv6_scope(iface->ifa_addr);
+              unsigned int ifscope = Fetch_ipv6_scope(iface->ifa_addr);
 
               if (ifscope != remote_scope)
               {
@@ -171,7 +171,7 @@ if2ip_result_t Curl_if2ip(int af,
               addr =
                   &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
             res = IF2IP_FOUND;
-            ip = Curl_inet_ntop(af, addr, ipstr, sizeof(ipstr));
+            ip = Fetch_inet_ntop(af, addr, ipstr, sizeof(ipstr));
             msnprintf(buf, buf_size, "%s%s", ip, scope);
             break;
           }
@@ -192,7 +192,7 @@ if2ip_result_t Curl_if2ip(int af,
 
 #elif defined(HAVE_IOCTL_SIOCGIFADDR)
 
-if2ip_result_t Curl_if2ip(int af,
+if2ip_result_t Fetch_if2ip(int af,
 #ifdef USE_IPV6
                           unsigned int remote_scope,
                           unsigned int local_scope_id,
@@ -246,7 +246,7 @@ if2ip_result_t Curl_if2ip(int af,
 
   s = (struct sockaddr_in *)(void *)&req.ifr_addr;
   memcpy(&in, &s->sin_addr, sizeof(in));
-  r = Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
+  r = Fetch_inet_ntop(s->sin_family, &in, buf, buf_size);
 
   sclose(dummy);
   if (!r)
@@ -256,7 +256,7 @@ if2ip_result_t Curl_if2ip(int af,
 
 #else
 
-if2ip_result_t Curl_if2ip(int af,
+if2ip_result_t Fetch_if2ip(int af,
 #ifdef USE_IPV6
                           unsigned int remote_scope,
                           unsigned int local_scope_id,

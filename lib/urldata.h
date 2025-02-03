@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -165,7 +165,7 @@ typedef unsigned int fetch_prot_t;
 #include "netrc.h"
 
 /* return the count of bytes sent, or -1 on error */
-typedef ssize_t(Curl_send)(struct Curl_easy *data, /* transfer */
+typedef ssize_t(Fetch_send)(struct Fetch_easy *data, /* transfer */
                            int sockindex,          /* socketindex */
                            const void *buf,        /* data to write */
                            size_t len,             /* max amount to write */
@@ -173,7 +173,7 @@ typedef ssize_t(Curl_send)(struct Curl_easy *data, /* transfer */
                            FETCHcode *err);        /* error to return */
 
 /* return the count of bytes read, or -1 on error */
-typedef ssize_t(Curl_recv)(struct Curl_easy *data, /* transfer */
+typedef ssize_t(Fetch_recv)(struct Fetch_easy *data, /* transfer */
                            int sockindex,          /* socketindex */
                            char *buf,              /* store data here */
                            size_t len,             /* max amount to read */
@@ -263,7 +263,7 @@ enum protection_level
 
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
-struct Curl_ssl_scache_entry;
+struct Fetch_ssl_scache_entry;
 
 struct ssl_primary_config
 {
@@ -544,7 +544,7 @@ struct hostname
 };
 
 /*
- * Flags on the keepon member of the Curl_transfer_keeper
+ * Flags on the keepon member of the Fetch_transfer_keeper
  */
 
 #define KEEP_NONE 0
@@ -577,10 +577,10 @@ struct hostname
 
 #if defined(FETCHRES_ASYNCH) || !defined(FETCH_DISABLE_DOH)
 #define USE_FETCH_ASYNC
-struct Curl_async
+struct Fetch_async
 {
   char *hostname;
-  struct Curl_dns_entry *dns;
+  struct Fetch_dns_entry *dns;
   struct thread_data *tdata;
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel e.g. */
@@ -608,24 +608,24 @@ struct easy_pollset
  * Specific protocol handler.
  */
 
-struct Curl_handler
+struct Fetch_handler
 {
   const char *scheme; /* URL scheme name in lowercase */
 
   /* Complement to setup_connection_internals(). This is done before the
      transfer "owns" the connection. */
-  FETCHcode (*setup_connection)(struct Curl_easy *data,
+  FETCHcode (*setup_connection)(struct Fetch_easy *data,
                                 struct connectdata *conn);
 
   /* These two functions MUST be set to be protocol dependent */
-  FETCHcode (*do_it)(struct Curl_easy *data, bool *done);
-  FETCHcode (*done)(struct Curl_easy *, FETCHcode, bool);
+  FETCHcode (*do_it)(struct Fetch_easy *data, bool *done);
+  FETCHcode (*done)(struct Fetch_easy *, FETCHcode, bool);
 
   /* If the fetch_do() function is better made in two halves, this
    * fetch_do_more() function will be called afterwards, if set. For example
    * for doing the FTP stuff after the PASV/PORT command.
    */
-  FETCHcode (*do_more)(struct Curl_easy *, int *);
+  FETCHcode (*do_more)(struct Fetch_easy *, int *);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * after the connect() and everything is done, as a step in the connection.
@@ -633,31 +633,31 @@ struct Curl_handler
    * function completes before return. If it does not complete, the caller
    * should call the ->connecting() function until it is.
    */
-  FETCHcode (*connect_it)(struct Curl_easy *data, bool *done);
+  FETCHcode (*connect_it)(struct Fetch_easy *data, bool *done);
 
   /* See above. */
-  FETCHcode (*connecting)(struct Curl_easy *data, bool *done);
-  FETCHcode (*doing)(struct Curl_easy *data, bool *done);
+  FETCHcode (*connecting)(struct Fetch_easy *data, bool *done);
+  FETCHcode (*doing)(struct Fetch_easy *data, bool *done);
 
   /* Called from the multi interface during the PROTOCONNECT phase, and it
      should then return a proper fd set */
-  int (*proto_getsock)(struct Curl_easy *data,
+  int (*proto_getsock)(struct Fetch_easy *data,
                        struct connectdata *conn, fetch_socket_t *socks);
 
   /* Called from the multi interface during the DOING phase, and it should
      then return a proper fd set */
-  int (*doing_getsock)(struct Curl_easy *data,
+  int (*doing_getsock)(struct Fetch_easy *data,
                        struct connectdata *conn, fetch_socket_t *socks);
 
   /* Called from the multi interface during the DO_MORE phase, and it should
      then return a proper fd set */
-  int (*domore_getsock)(struct Curl_easy *data,
+  int (*domore_getsock)(struct Fetch_easy *data,
                         struct connectdata *conn, fetch_socket_t *socks);
 
   /* Called from the multi interface during the DO_DONE, PERFORM and
      WAITPERFORM phases, and it should then return a proper fd set. Not setting
      this will make libfetch use the generic default one. */
-  int (*perform_getsock)(struct Curl_easy *data,
+  int (*perform_getsock)(struct Fetch_easy *data,
                          struct connectdata *conn, fetch_socket_t *socks);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
@@ -666,35 +666,35 @@ struct Curl_handler
    * dead_connection is set to TRUE. The connection is (again) associated with
    * the transfer here.
    */
-  FETCHcode (*disconnect)(struct Curl_easy *, struct connectdata *,
+  FETCHcode (*disconnect)(struct Fetch_easy *, struct connectdata *,
                           bool dead_connection);
 
   /* If used, this function gets called from transfer.c to
      allow the protocol to do extra handling in writing response to
      the client. */
-  FETCHcode (*write_resp)(struct Curl_easy *data, const char *buf, size_t blen,
+  FETCHcode (*write_resp)(struct Fetch_easy *data, const char *buf, size_t blen,
                           bool is_eos);
 
   /* If used, this function gets called from transfer.c to
      allow the protocol to do extra handling in writing a single response
      header line to the client. */
-  FETCHcode (*write_resp_hd)(struct Curl_easy *data,
+  FETCHcode (*write_resp_hd)(struct Fetch_easy *data,
                              const char *hd, size_t hdlen, bool is_eos);
 
   /* This function can perform various checks on the connection. See
      CONNCHECK_* for more information about the checks that can be performed,
      and CONNRESULT_* for the results that can be returned. */
-  unsigned int (*connection_check)(struct Curl_easy *data,
+  unsigned int (*connection_check)(struct Fetch_easy *data,
                                    struct connectdata *conn,
                                    unsigned int checks_to_perform);
 
   /* attach() attaches this transfer to this connection */
-  void (*attach)(struct Curl_easy *data, struct connectdata *conn);
+  void (*attach)(struct Fetch_easy *data, struct connectdata *conn);
 
   /* return FETCHE_OK if a redirect to `newurl` should be followed,
      FETCHE_TOO_MANY_REDIRECTS otherwise. May alter `data` to change
      the way the follow request is performed. */
-  FETCHcode (*follow)(struct Curl_easy *data, const char *newurl,
+  FETCHcode (*follow)(struct Fetch_easy *data, const char *newurl,
                       followtype type);
 
   int defport;           /* Default port. */
@@ -771,7 +771,7 @@ struct ldapconninfo;
  */
 struct connectdata
 {
-  struct Curl_llist_node cpool_node; /* conncache lists */
+  struct Fetch_llist_node cpool_node; /* conncache lists */
 
   fetch_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
@@ -780,7 +780,7 @@ struct connectdata
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) Curl_llist_count(&(c)->easyq)
+#define CONN_INUSE(c) Fetch_llist_count(&(c)->easyq)
 
   /**** Fields set when inited and not modified again */
   fetch_off_t connection_id; /* Contains a unique number to make it easier to
@@ -792,11 +792,11 @@ struct connectdata
      DNS cache and it will not get pruned while locked. It gets unlocked in
      multi_done(). This entry will be NULL if the connection is reused as then
      there is no name resolve done. */
-  struct Curl_dns_entry *dns_entry;
+  struct Fetch_dns_entry *dns_entry;
 
   /* 'remote_addr' is the particular IP we connected to. it is owned, set
    * and NULLed by the connected socket filter (if there is one). */
-  const struct Curl_sockaddr_ex *remote_addr;
+  const struct Fetch_sockaddr_ex *remote_addr;
 
   struct hostname host;
   char *hostname_resolve;       /* hostname to resolve to address, allocated */
@@ -825,9 +825,9 @@ struct connectdata
   struct fetchtime lastused; /* when returned to the connection poolas idle */
   fetch_socket_t sock[2];    /* two sockets, the second is used for the data
                                transfer when doing FTP */
-  Curl_recv *recv[2];
-  Curl_send *send[2];
-  struct Curl_cfilter *cfilter[2]; /* connection filters */
+  Fetch_recv *recv[2];
+  Fetch_send *send[2];
+  struct Fetch_cfilter *cfilter[2]; /* connection filters */
   struct
   {
     struct fetchtime start[2]; /* when filter shutdown started */
@@ -843,8 +843,8 @@ struct connectdata
 #endif
   struct ConnectBits bits; /* various state-flags for this connection */
 
-  const struct Curl_handler *handler; /* Connection's protocol handler */
-  const struct Curl_handler *given;   /* The protocol first given */
+  const struct Fetch_handler *handler; /* Connection's protocol handler */
+  const struct Fetch_handler *given;   /* The protocol first given */
 
   /* Protocols can use a custom keepalive mechanism to keep connections alive.
      This allows those protocols to track the last time the keepalive mechanism
@@ -865,7 +865,7 @@ struct connectdata
   size_t buffer_size;
   struct krb5buffer in_buffer;
   void *app_data;
-  const struct Curl_sec_client_mech *mech;
+  const struct Fetch_sec_client_mech *mech;
   struct sockaddr_in local_addr;
 #endif
 
@@ -873,7 +873,7 @@ struct connectdata
   struct kerberos5data krb5; /* variables into the structure definition, */
 #endif                       /* however, some of them are ftp specific. */
 
-  struct Curl_llist easyq; /* List of easy handles using this connection */
+  struct Fetch_llist easyq; /* List of easy handles using this connection */
 
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
@@ -974,7 +974,7 @@ struct connectdata
   unsigned char proxy_alpn; /* APLN of proxy tunnel, FETCH_HTTP_VERSION* */
 #endif
   unsigned char transport;  /* one of the TRNSPRT_* defines */
-  unsigned char ip_version; /* copied from the Curl_easy at creation time */
+  unsigned char ip_version; /* copied from the Fetch_easy at creation time */
   /* HTTP version last responded with by the server.
    * 0 at start, then one of 09, 10, 11, etc. */
   unsigned char httpversion_seen;
@@ -996,7 +996,7 @@ struct connectdata
 
 /*
  * Struct to keep statistical and informational data.
- * All variables in this struct must be initialized/reset in Curl_initinfo().
+ * All variables in this struct must be initialized/reset in Fetch_initinfo().
  */
 struct PureInfo
 {
@@ -1104,7 +1104,7 @@ typedef enum
   RTSPREQ_RECORD,
   RTSPREQ_RECEIVE,
   RTSPREQ_LAST /* last in list */
-} Curl_RtspReq;
+} Fetch_RtspReq;
 
 struct auth
 {
@@ -1122,10 +1122,10 @@ struct auth
 };
 
 #ifdef USE_NGHTTP2
-struct Curl_data_prio_node
+struct Fetch_data_prio_node
 {
-  struct Curl_data_prio_node *next;
-  struct Curl_easy *data;
+  struct Fetch_data_prio_node *next;
+  struct Fetch_easy *data;
 };
 #endif
 
@@ -1134,12 +1134,12 @@ struct Curl_data_prio_node
  * on the same connection.
  * TODO: we need to adapt it to the new priority scheme as defined in RFC 9218
  */
-struct Curl_data_priority
+struct Fetch_data_priority
 {
 #ifdef USE_NGHTTP2
   /* tree like dependencies only implemented in nghttp2 */
-  struct Curl_easy *parent;
-  struct Curl_data_prio_node *children;
+  struct Fetch_easy *parent;
+  struct Fetch_data_prio_node *children;
 #endif
   int weight;
 #ifdef USE_NGHTTP2
@@ -1181,7 +1181,7 @@ typedef enum
  */
 struct time_node
 {
-  struct Curl_llist_node list;
+  struct Fetch_llist_node list;
   struct fetchtime time;
   expire_id eid;
 };
@@ -1227,7 +1227,7 @@ struct UrlState
   fetch_prot_t first_remote_protocol;
 
   int retrycount;                     /* number of retries on a new connection */
-  struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
+  struct Fetch_ssl_scache *ssl_scache; /* TLS session pool */
   int os_errno;                       /* filled in with errno whenever an error occurs */
   long followlocation;                /* redirect counter */
   int requests;                       /* request counter: redirects + authentication retakes */
@@ -1242,7 +1242,7 @@ struct UrlState
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
 #ifdef USE_FETCH_ASYNC
-  struct Curl_async async; /* asynchronous name resolver data */
+  struct Fetch_async async; /* asynchronous name resolver data */
 #endif
 
 #if defined(USE_OPENSSL)
@@ -1253,9 +1253,9 @@ struct UrlState
   BIT(provider);
   BIT(provider_failed);
 #endif                                   /* USE_OPENSSL */
-  struct fetchtime expiretime;           /* set this with Curl_expire() only */
-  struct Curl_tree timenode;             /* for the splay stuff */
-  struct Curl_llist timeoutlist;         /* list of pending timeouts */
+  struct fetchtime expiretime;           /* set this with Fetch_expire() only */
+  struct Fetch_tree timenode;             /* for the splay stuff */
+  struct Fetch_llist timeoutlist;         /* list of pending timeouts */
   struct time_node expires[EXPIRE_LAST]; /* nodes for each expire type */
 
   /* a place to store the most recently set (S)FTP entrypath */
@@ -1277,7 +1277,7 @@ struct UrlState
   fetch_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-  struct Curl_data_priority priority; /* shallow copy of data->set */
+  struct Fetch_data_priority priority; /* shallow copy of data->set */
 #endif
 
   fetch_read_callback fread_func; /* read callback/function */
@@ -1297,9 +1297,9 @@ struct UrlState
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf;         /* a buffer containing the compiled trailing
                                          headers */
-  struct Curl_llist httphdrs;         /* received headers */
+  struct Fetch_llist httphdrs;         /* received headers */
   struct fetch_header headerout[2];   /* for external purposes */
-  struct Curl_header_store *prevhead; /* the latest added header */
+  struct Fetch_header_store *prevhead; /* the latest added header */
   trailers_state trailers_state;      /* whether we are sending trailers
                                          and what stage are we at */
 #endif
@@ -1347,7 +1347,7 @@ struct UrlState
                                   to be used in the library's request(s) */
   unsigned char httpversion;   /* the lowest HTTP version*10 reported by any
                                   server involved in this request */
-  unsigned char httpreq;       /* Curl_HttpReq; what kind of HTTP request (if any)
+  unsigned char httpreq;       /* Fetch_HttpReq; what kind of HTTP request (if any)
                                   is this */
   unsigned char select_bits;   /* != 0 -> bitmask of socket events for this
                                    transfer overriding anything the socket may
@@ -1374,7 +1374,7 @@ struct UrlState
                          417 response */
   BIT(use_range);
   BIT(rangestringalloc); /* the range string is malloc()'ed */
-  BIT(done);             /* set to FALSE when Curl_init_do() is called and set to TRUE
+  BIT(done);             /* set to FALSE when Fetch_init_do() is called and set to TRUE
                             when multi_done() is called, to prevent multi_done() to get
                             invoked twice when the multi interface is used. */
 #ifndef FETCH_DISABLE_COOKIES
@@ -1402,7 +1402,7 @@ struct UrlState
  * Character pointer fields point to dynamic storage, unless otherwise stated.
  */
 
-struct Curl_multi; /* declared in multihandle.c */
+struct Fetch_multi; /* declared in multihandle.c */
 
 enum dupstring
 {
@@ -1558,7 +1558,7 @@ enum dupblob
 /* callback that gets called when this easy handle is completed within a multi
    handle. Only used for internally created transfers, like for example
    DoH. */
-typedef int (*multidone_func)(struct Curl_easy *easy, FETCHcode result);
+typedef int (*multidone_func)(struct Fetch_easy *easy, FETCHcode result);
 
 struct UserDefined
 {
@@ -1685,7 +1685,7 @@ struct UserDefined
 #ifndef FETCH_DISABLE_RTSP
   void *rtp_out; /* write RTP to this if non-NULL */
   /* Common RTSP header options */
-  Curl_RtspReq rtspreq; /* RTSP request type */
+  Fetch_RtspReq rtspreq; /* RTSP request type */
 #endif
 #ifndef FETCH_DISABLE_FTP
   fetch_chunk_bgn_callback chunk_bgn; /* called before part of transfer
@@ -1709,7 +1709,7 @@ struct UserDefined
 
   long expect_100_timeout; /* in milliseconds */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-  struct Curl_data_priority priority;
+  struct Fetch_data_priority priority;
 #endif
   fetch_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
@@ -1750,7 +1750,7 @@ struct UserDefined
   char keep_post;              /* keep POSTs as POSTs after a 30x request; each
                                   bit represents a request, from 301 to 303 */
   unsigned char timecondition; /* kind of time comparison: fetch_TimeCond */
-  unsigned char method;        /* what kind of HTTP request: Curl_HttpReq */
+  unsigned char method;        /* what kind of HTTP request: Fetch_HttpReq */
   unsigned char httpwant;      /* when non-zero, a specific HTTP version requested
                                   to be used in the library's request(s) */
   unsigned char ipver;         /* the FETCH_IPRESOLVE_* defines in the public header
@@ -1878,7 +1878,7 @@ struct UserDefined
 
 struct Names
 {
-  struct Curl_hash *hostcache;
+  struct Fetch_hash *hostcache;
   enum
   {
     HCACHE_NONE,  /* not pointing to anything */
@@ -1897,7 +1897,7 @@ struct Names
  * 'struct UrlState' instead.
  */
 
-struct Curl_easy
+struct Fetch_easy
 {
   /* First a simple identifier to easier detect if a user mix up this easy
      handle with a multi handle. Set this to FETCHEASY_MAGIC_NUMBER */
@@ -1915,13 +1915,13 @@ struct Curl_easy
   fetch_off_t mid;
 
   struct connectdata *conn;
-  struct Curl_llist_node multi_queue; /* for multihandle list management */
-  struct Curl_llist_node conn_queue;  /* list per connectdata */
+  struct Fetch_llist_node multi_queue; /* for multihandle list management */
+  struct Fetch_llist_node conn_queue;  /* list per connectdata */
 
   FETCHMstate mstate; /* the handle's state */
   FETCHcode result;   /* previous result */
 
-  struct Curl_message msg; /* A single posted message. */
+  struct Fetch_message msg; /* A single posted message. */
 
   /* Array with the plain socket numbers this handle takes care of, in no
      particular order. Note that all sockets are added to the sockhash, where
@@ -1930,13 +1930,13 @@ struct Curl_easy
   struct easy_pollset last_poll;
 
   struct Names dns;
-  struct Curl_multi *multi;      /* if non-NULL, points to the multi handle
+  struct Fetch_multi *multi;      /* if non-NULL, points to the multi handle
                                     struct to which this "belongs" when used by
                                     the multi interface */
-  struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
+  struct Fetch_multi *multi_easy; /* if non-NULL, points to the multi handle
                                     struct to which this "belongs" when used
                                     by the easy interface */
-  struct Curl_share *share;      /* Share, handles global variable mutexing */
+  struct Fetch_share *share;      /* Share, handles global variable mutexing */
 #ifdef USE_LIBPSL
   struct PslCache *psl; /* The associated PSL cache. */
 #endif

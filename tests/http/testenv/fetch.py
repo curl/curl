@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -449,7 +449,7 @@ class ExecResult:
             return [line for line in self._stderr if pat.match(line)]
 
 
-class CurlClient:
+class FetchClient:
 
     ALPN_ARG = {
         'http/0.9': '--http0.9',

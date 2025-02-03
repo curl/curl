@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -214,14 +214,14 @@ static void updateFdSet(struct Sockets *sockets, fd_set *fdset,
   }
 }
 
-static void notifyCurl(FETCHM *fetch, fetch_socket_t s, int evBitmask,
+static void notifyFetch(FETCHM *fetch, fetch_socket_t s, int evBitmask,
                        const char *info)
 {
   int numhandles = 0;
   FETCHMcode result = fetch_multi_socket_action(fetch, s, evBitmask, &numhandles);
   if (result != FETCHM_OK)
   {
-    fprintf(stderr, "Curl error on %s: %i (%s)\n",
+    fprintf(stderr, "Fetch error on %s: %i (%s)\n",
             info, result, fetch_multi_strerror(result));
   }
 }
@@ -237,7 +237,7 @@ static void checkFdSet(FETCHM *fetch, struct Sockets *sockets, fd_set *fdset,
   {
     if (FD_ISSET(sockets->sockets[i], fdset))
     {
-      notifyCurl(fetch, sockets->sockets[i], evBitmask, name);
+      notifyFetch(fetch, sockets->sockets[i], evBitmask, name);
     }
   }
 }
@@ -357,8 +357,8 @@ FETCHcode test(char *URL)
 
     if (timeout.tv_sec != (time_t)-1 && getMicroSecondTimeout(&timeout) == 0)
     {
-      /* Curl's timer has elapsed. */
-      notifyCurl(m, FETCH_SOCKET_TIMEOUT, 0, "timeout");
+      /* Fetch's timer has elapsed. */
+      notifyFetch(m, FETCH_SOCKET_TIMEOUT, 0, "timeout");
     }
 
     abort_on_test_timeout();

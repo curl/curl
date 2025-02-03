@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -105,9 +105,9 @@ static int parsedate(const char *date, time_t *output);
 #if !defined(FETCH_DISABLE_PARSEDATE) || !defined(FETCH_DISABLE_FTP) || \
     !defined(FETCH_DISABLE_FILE)
 /* These names are also used by FTP and FILE code */
-const char *const Curl_wkday[] =
+const char *const Fetch_wkday[] =
     {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-const char *const Curl_month[] =
+const char *const Fetch_month[] =
     {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 #endif
@@ -216,7 +216,7 @@ static int checkday(const char *check, size_t len)
   if (len > 3)
     what = &weekday[0];
   else if (len == 3)
-    what = &Curl_wkday[0];
+    what = &Fetch_wkday[0];
   else
     return -1; /* too short */
   for (i = 0; i < 7; i++)
@@ -233,7 +233,7 @@ static int checkday(const char *check, size_t len)
 static int checkmonth(const char *check, size_t len)
 {
   int i;
-  const char *const *what = &Curl_month[0];
+  const char *const *what = &Fetch_month[0];
   if (len != 3)
     return -1; /* not a month */
 
@@ -624,11 +624,11 @@ time_t fetch_getdate(const char *p, const time_t *now)
   return -1;
 }
 
-/* Curl_getdate_capped() differs from fetch_getdate() in that this will return
+/* Fetch_getdate_capped() differs from fetch_getdate() in that this will return
    TIME_T_MAX in case the parsed time value was too big, instead of an
    error. */
 
-time_t Curl_getdate_capped(const char *p)
+time_t Fetch_getdate_capped(const char *p)
 {
   time_t parsed = -1;
   int rc = parsedate(p, &parsed);
@@ -650,12 +650,12 @@ time_t Curl_getdate_capped(const char *p)
 }
 
 /*
- * Curl_gmtime() is a gmtime() replacement for portability. Do not use the
+ * Fetch_gmtime() is a gmtime() replacement for portability. Do not use the
  * gmtime_r() or gmtime() functions anywhere else but here.
  *
  */
 
-FETCHcode Curl_gmtime(time_t intime, struct tm *store)
+FETCHcode Fetch_gmtime(time_t intime, struct tm *store)
 {
   const struct tm *tm;
 #ifdef HAVE_GMTIME_R

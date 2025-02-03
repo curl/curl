@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -49,16 +49,16 @@ macro(fetch_internal_test _fetch_test)
     message(STATUS "Performing Test ${_fetch_test}")
     try_compile(${_fetch_test}
       ${PROJECT_BINARY_DIR}
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FetchTests.c"
       CMAKE_FLAGS
         "-DCOMPILE_DEFINITIONS:STRING=-D${_fetch_test} ${FETCH_TEST_DEFINES} ${_cmake_required_definitions}"
         "${_fetch_test_add_libraries}"
       OUTPUT_VARIABLE FETCH_TEST_OUTPUT)
     if(${_fetch_test})
-      set(${_fetch_test} 1 CACHE INTERNAL "Curl test")
+      set(${_fetch_test} 1 CACHE INTERNAL "Fetch test")
       message(STATUS "Performing Test ${_fetch_test} - Success")
     else()
-      set(${_fetch_test} "" CACHE INTERNAL "Curl test")
+      set(${_fetch_test} "" CACHE INTERNAL "Fetch test")
       message(STATUS "Performing Test ${_fetch_test} - Failed")
     endif()
   endif()

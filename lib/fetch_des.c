@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@
 #include "fetch_des.h"
 
 /*
- * Curl_des_set_odd_parity()
+ * Fetch_des_set_odd_parity()
  *
  * This is used to apply odd parity to the given byte array. It is typically
  * used by when a cryptography engine does not have its own version.
@@ -48,7 +48,7 @@
  *                        odd parity.
  * len         [out]    - The length of the data.
  */
-void Curl_des_set_odd_parity(unsigned char *bytes, size_t len)
+void Fetch_des_set_odd_parity(unsigned char *bytes, size_t len)
 {
   size_t i;
 

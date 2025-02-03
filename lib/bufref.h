@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,12 +37,12 @@ struct bufref
 #endif
 };
 
-void Curl_bufref_init(struct bufref *br);
-void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
+void Fetch_bufref_init(struct bufref *br);
+void Fetch_bufref_set(struct bufref *br, const void *ptr, size_t len,
                      void (*dtor)(void *));
-const unsigned char *Curl_bufref_ptr(const struct bufref *br);
-size_t Curl_bufref_len(const struct bufref *br);
-FETCHcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len);
-void Curl_bufref_free(struct bufref *br);
+const unsigned char *Fetch_bufref_ptr(const struct bufref *br);
+size_t Fetch_bufref_len(const struct bufref *br);
+FETCHcode Fetch_bufref_memdup(struct bufref *br, const void *ptr, size_t len);
+void Fetch_bufref_free(struct bufref *br);
 
 #endif

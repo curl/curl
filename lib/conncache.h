@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,11 +29,11 @@
 #include "timeval.h"
 
 struct connectdata;
-struct Curl_easy;
+struct Fetch_easy;
 struct fetch_pollfds;
-struct Curl_waitfds;
-struct Curl_multi;
-struct Curl_share;
+struct Fetch_waitfds;
+struct Fetch_multi;
+struct Fetch_share;
 
 /**
  * Callback invoked when disconnecting connections.
@@ -43,49 +43,49 @@ struct Curl_share;
  * @return if the connection is being aborted, e.g. should NOT perform
  *         a shutdown and just close.
  **/
-typedef bool Curl_cpool_disconnect_cb(struct Curl_easy *data,
+typedef bool Fetch_cpool_disconnect_cb(struct Fetch_easy *data,
                                       struct connectdata *conn,
                                       bool aborted);
 
 struct cpool
 {
   /* the pooled connections, bundled per destination */
-  struct Curl_hash dest2bundle;
+  struct Fetch_hash dest2bundle;
   size_t num_conn;
   fetch_off_t next_connection_id;
   fetch_off_t next_easy_id;
   struct fetchtime last_cleanup;
-  struct Curl_llist shutdowns; /* The connections being shut down */
-  struct Curl_easy *idata;     /* internal handle used for discard */
-  struct Curl_multi *multi;    /* != NULL iff pool belongs to multi */
-  struct Curl_share *share;    /* != NULL iff pool belongs to share */
-  Curl_cpool_disconnect_cb *disconnect_cb;
+  struct Fetch_llist shutdowns; /* The connections being shut down */
+  struct Fetch_easy *idata;     /* internal handle used for discard */
+  struct Fetch_multi *multi;    /* != NULL iff pool belongs to multi */
+  struct Fetch_share *share;    /* != NULL iff pool belongs to share */
+  Fetch_cpool_disconnect_cb *disconnect_cb;
   BIT(locked);
 };
 
 /* Init the pool, pass multi only if pool is owned by it.
  * returns 1 on error, 0 is fine.
  */
-int Curl_cpool_init(struct cpool *cpool,
-                    Curl_cpool_disconnect_cb *disconnect_cb,
-                    struct Curl_multi *multi,
-                    struct Curl_share *share,
+int Fetch_cpool_init(struct cpool *cpool,
+                    Fetch_cpool_disconnect_cb *disconnect_cb,
+                    struct Fetch_multi *multi,
+                    struct Fetch_share *share,
                     size_t size);
 
 /* Destroy all connections and free all members */
-void Curl_cpool_destroy(struct cpool *connc);
+void Fetch_cpool_destroy(struct cpool *connc);
 
 /* Init the transfer to be used within its connection pool.
  * Assigns `data->id`. */
-void Curl_cpool_xfer_init(struct Curl_easy *data);
+void Fetch_cpool_xfer_init(struct Fetch_easy *data);
 
 /**
  * Get the connection with the given id from the transfer's pool.
  */
-struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
+struct connectdata *Fetch_cpool_get_conn(struct Fetch_easy *data,
                                         fetch_off_t conn_id);
 
-FETCHcode Curl_cpool_add_conn(struct Curl_easy *data,
+FETCHcode Fetch_cpool_add_conn(struct Fetch_easy *data,
                               struct connectdata *conn) WARN_UNUSED_RESULT;
 
 /**
@@ -96,15 +96,15 @@ FETCHcode Curl_cpool_add_conn(struct Curl_easy *data,
 #define CPOOL_LIMIT_OK 0
 #define CPOOL_LIMIT_DEST 1
 #define CPOOL_LIMIT_TOTAL 2
-int Curl_cpool_check_limits(struct Curl_easy *data,
+int Fetch_cpool_check_limits(struct Fetch_easy *data,
                             struct connectdata *conn);
 
 /* Return of conn is suitable. If so, stops iteration. */
-typedef bool Curl_cpool_conn_match_cb(struct connectdata *conn,
+typedef bool Fetch_cpool_conn_match_cb(struct connectdata *conn,
                                       void *userdata);
 
 /* Act on the result of the find, may override it. */
-typedef bool Curl_cpool_done_match_cb(bool result, void *userdata);
+typedef bool Fetch_cpool_done_match_cb(bool result, void *userdata);
 
 /**
  * Find a connection in the pool matching `destination`.
@@ -117,10 +117,10 @@ typedef bool Curl_cpool_done_match_cb(bool result, void *userdata);
  * @return combined result of last conn_db and result_cb or FALSE if no
                       connections were present.
  */
-bool Curl_cpool_find(struct Curl_easy *data,
+bool Fetch_cpool_find(struct Fetch_easy *data,
                      const char *destination, size_t dest_len,
-                     Curl_cpool_conn_match_cb *conn_cb,
-                     Curl_cpool_done_match_cb *done_cb,
+                     Fetch_cpool_conn_match_cb *conn_cb,
+                     Fetch_cpool_done_match_cb *done_cb,
                      void *userdata);
 
 /*
@@ -129,7 +129,7 @@ bool Curl_cpool_find(struct Curl_easy *data,
  *
  * Return TRUE if idle connection kept in pool, FALSE if closed.
  */
-bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
+bool Fetch_cpool_conn_now_idle(struct Fetch_easy *data,
                               struct connectdata *conn);
 
 /**
@@ -139,7 +139,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
  * If the shutdown is not immediately complete, the connection
  * will be placed into the pool's shutdown queue.
  */
-void Curl_cpool_disconnect(struct Curl_easy *data,
+void Fetch_cpool_disconnect(struct Fetch_easy *data,
                            struct connectdata *conn,
                            bool aborted);
 
@@ -150,24 +150,24 @@ void Curl_cpool_disconnect(struct Curl_easy *data,
  *
  * When called, this transfer has no connection attached.
  */
-void Curl_cpool_prune_dead(struct Curl_easy *data);
+void Fetch_cpool_prune_dead(struct Fetch_easy *data);
 
 /**
  * Perform upkeep actions on connections in the transfer's pool.
  */
-FETCHcode Curl_cpool_upkeep(void *data);
+FETCHcode Fetch_cpool_upkeep(void *data);
 
-typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
-                                   struct Curl_easy *data,
+typedef void Fetch_cpool_conn_do_cb(struct connectdata *conn,
+                                   struct Fetch_easy *data,
                                    void *cbdata);
 
 /**
  * Invoke the callback on the pool's connection with the
  * given connection id (if it exists).
  */
-void Curl_cpool_do_by_id(struct Curl_easy *data,
+void Fetch_cpool_do_by_id(struct Fetch_easy *data,
                          fetch_off_t conn_id,
-                         Curl_cpool_conn_do_cb *cb, void *cbdata);
+                         Fetch_cpool_conn_do_cb *cb, void *cbdata);
 
 /**
  * Invoked the callback for the given data + connection under the
@@ -175,19 +175,19 @@ void Curl_cpool_do_by_id(struct Curl_easy *data,
  * The callback is always invoked, even if the transfer has no connection
  * pool associated.
  */
-void Curl_cpool_do_locked(struct Curl_easy *data,
+void Fetch_cpool_do_locked(struct Fetch_easy *data,
                           struct connectdata *conn,
-                          Curl_cpool_conn_do_cb *cb, void *cbdata);
+                          Fetch_cpool_conn_do_cb *cb, void *cbdata);
 
 /**
  * Add sockets and POLLIN/OUT flags for connections handled by the pool.
  */
-FETCHcode Curl_cpool_add_pollfds(struct cpool *connc,
+FETCHcode Fetch_cpool_add_pollfds(struct cpool *connc,
                                  struct fetch_pollfds *cpfds);
-unsigned int Curl_cpool_add_waitfds(struct cpool *connc,
-                                    struct Curl_waitfds *cwfds);
+unsigned int Fetch_cpool_add_waitfds(struct cpool *connc,
+                                    struct Fetch_waitfds *cwfds);
 
-void Curl_cpool_setfds(struct cpool *cpool,
+void Fetch_cpool_setfds(struct cpool *cpool,
                        fd_set *read_fd_set, fd_set *write_fd_set,
                        int *maxfd);
 
@@ -195,9 +195,9 @@ void Curl_cpool_setfds(struct cpool *cpool,
  * Perform maintenance on connections in the pool. Specifically,
  * progress the shutdown of connections in the queue.
  */
-void Curl_cpool_multi_perform(struct Curl_multi *multi);
+void Fetch_cpool_multi_perform(struct Fetch_multi *multi);
 
-void Curl_cpool_multi_socket(struct Curl_multi *multi,
+void Fetch_cpool_multi_socket(struct Fetch_multi *multi,
                              fetch_socket_t s, int ev_bitmask);
 
 #endif /* HEADER_FETCH_CONNCACHE_H */

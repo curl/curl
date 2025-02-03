@@ -12,7 +12,7 @@ print <<HEAD
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,7 @@ print <<HEAD
 #include "easyoptions.h"
 
 /* all easy setopt options listed in alphabetical order */
-struct fetch_easyoption Curl_easyopts[] = {
+struct fetch_easyoption Fetch_easyopts[] = {
 HEAD
     ;
 
@@ -140,10 +140,10 @@ print <<FOOT
 
 #ifdef DEBUGBUILD
 /*
- * Curl_easyopts_check() is a debug-only function that returns non-zero
+ * Fetch_easyopts_check() is a debug-only function that returns non-zero
  * if this source file is not in sync with the options listed in fetch/fetch.h
  */
-int Curl_easyopts_check(void)
+int Fetch_easyopts_check(void)
 {
   return (FETCHOPT_LASTENTRY % 10000) != ($lastnum + 1);
 }

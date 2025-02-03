@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,7 +39,7 @@
  */
 
 /* ASN.1 parsed element. */
-struct Curl_asn1Element
+struct Fetch_asn1Element
 {
   const char *header;  /* Pointer to header byte. */
   const char *beg;     /* Pointer to element data. */
@@ -50,34 +50,34 @@ struct Curl_asn1Element
 };
 
 /* X509 certificate: RFC 5280. */
-struct Curl_X509certificate
+struct Fetch_X509certificate
 {
-  struct Curl_asn1Element certificate;
-  struct Curl_asn1Element version;
-  struct Curl_asn1Element serialNumber;
-  struct Curl_asn1Element signatureAlgorithm;
-  struct Curl_asn1Element signature;
-  struct Curl_asn1Element issuer;
-  struct Curl_asn1Element notBefore;
-  struct Curl_asn1Element notAfter;
-  struct Curl_asn1Element subject;
-  struct Curl_asn1Element subjectPublicKeyInfo;
-  struct Curl_asn1Element subjectPublicKeyAlgorithm;
-  struct Curl_asn1Element subjectPublicKey;
-  struct Curl_asn1Element issuerUniqueID;
-  struct Curl_asn1Element subjectUniqueID;
-  struct Curl_asn1Element extensions;
+  struct Fetch_asn1Element certificate;
+  struct Fetch_asn1Element version;
+  struct Fetch_asn1Element serialNumber;
+  struct Fetch_asn1Element signatureAlgorithm;
+  struct Fetch_asn1Element signature;
+  struct Fetch_asn1Element issuer;
+  struct Fetch_asn1Element notBefore;
+  struct Fetch_asn1Element notAfter;
+  struct Fetch_asn1Element subject;
+  struct Fetch_asn1Element subjectPublicKeyInfo;
+  struct Fetch_asn1Element subjectPublicKeyAlgorithm;
+  struct Fetch_asn1Element subjectPublicKey;
+  struct Fetch_asn1Element issuerUniqueID;
+  struct Fetch_asn1Element subjectUniqueID;
+  struct Fetch_asn1Element extensions;
 };
 
 /*
  * Prototypes.
  */
 
-int Curl_parseX509(struct Curl_X509certificate *cert,
+int Fetch_parseX509(struct Fetch_X509certificate *cert,
                    const char *beg, const char *end);
-FETCHcode Curl_extract_certinfo(struct Curl_easy *data, int certnum,
+FETCHcode Fetch_extract_certinfo(struct Fetch_easy *data, int certnum,
                                 const char *beg, const char *end);
-FETCHcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
+FETCHcode Fetch_verifyhost(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                           const char *beg, const char *end);
 
 #ifdef UNITTESTS
@@ -85,7 +85,7 @@ FETCHcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
     defined(USE_MBEDTLS)
 
 /* used by unit1656.c */
-FETCHcode Curl_x509_GTime2str(struct dynbuf *store,
+FETCHcode Fetch_x509_GTime2str(struct dynbuf *store,
                               const char *beg, const char *end);
 #endif
 #endif

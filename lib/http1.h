@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,18 +46,18 @@ struct h1_req_parser
   bool done;
 };
 
-void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len);
-void Curl_h1_req_parse_free(struct h1_req_parser *parser);
+void Fetch_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len);
+void Fetch_h1_req_parse_free(struct h1_req_parser *parser);
 
-ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
+ssize_t Fetch_h1_req_parse_read(struct h1_req_parser *parser,
                                const char *buf, size_t buflen,
                                const char *scheme_default, int options,
                                FETCHcode *err);
 
-FETCHcode Curl_h1_req_dprint(const struct httpreq *req,
+FETCHcode Fetch_h1_req_dprint(const struct httpreq *req,
                              struct dynbuf *dbuf);
 
-FETCHcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,
+FETCHcode Fetch_h1_req_write_head(struct httpreq *req, int http_minor,
                                  struct dynbuf *dbuf);
 
 #endif /* !FETCH_DISABLE_HTTP */

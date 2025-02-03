@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@
 
 #include "bufref.h"
 
-struct Curl_easy;
+struct Fetch_easy;
 struct connectdata;
 
 /* Authentication mechanism flags */
@@ -100,15 +100,15 @@ typedef enum
 struct SASLproto
 {
   const char *service; /* The service name */
-  FETCHcode (*sendauth)(struct Curl_easy *data, const char *mech,
+  FETCHcode (*sendauth)(struct Fetch_easy *data, const char *mech,
                         const struct bufref *ir);
   /* Send authentication command */
-  FETCHcode (*contauth)(struct Curl_easy *data, const char *mech,
+  FETCHcode (*contauth)(struct Fetch_easy *data, const char *mech,
                         const struct bufref *contauth);
   /* Send authentication continuation */
-  FETCHcode (*cancelauth)(struct Curl_easy *data, const char *mech);
+  FETCHcode (*cancelauth)(struct Fetch_easy *data, const char *mech);
   /* Cancel authentication. */
-  FETCHcode (*getmessage)(struct Curl_easy *data, struct bufref *out);
+  FETCHcode (*getmessage)(struct Fetch_easy *data, struct bufref *out);
   /* Get SASL response message */
   size_t maxirlen;         /* Maximum initial response + mechanism length,
                               or zero if no max. This is normally the max
@@ -141,29 +141,29 @@ struct SASL
 
 /* This is used to cleanup any libraries or fetch modules used by the sasl
    functions */
-void Curl_sasl_cleanup(struct connectdata *conn, unsigned short authused);
+void Fetch_sasl_cleanup(struct connectdata *conn, unsigned short authused);
 
 /* Convert a mechanism name to a token */
-unsigned short Curl_sasl_decode_mech(const char *ptr,
+unsigned short Fetch_sasl_decode_mech(const char *ptr,
                                      size_t maxlen, size_t *len);
 
 /* Parse the URL login options */
-FETCHcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
+FETCHcode Fetch_sasl_parse_url_auth_option(struct SASL *sasl,
                                           const char *value, size_t len);
 
 /* Initializes an SASL structure */
-void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
+void Fetch_sasl_init(struct SASL *sasl, struct Fetch_easy *data,
                     const struct SASLproto *params);
 
 /* Check if we have enough auth data and capabilities to authenticate */
-bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data);
+bool Fetch_sasl_can_authenticate(struct SASL *sasl, struct Fetch_easy *data);
 
 /* Calculate the required login details for SASL authentication  */
-FETCHcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
+FETCHcode Fetch_sasl_start(struct SASL *sasl, struct Fetch_easy *data,
                           bool force_ir, saslprogress *progress);
 
 /* Continue an SASL authentication  */
-FETCHcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
+FETCHcode Fetch_sasl_continue(struct SASL *sasl, struct Fetch_easy *data,
                              int code, saslprogress *progress);
 
 #endif /* HEADER_FETCH_SASL_H */

@@ -48,7 +48,7 @@ Examples with specified ports:
 
     eth0:0
     192.168.1.2:32000-33000
-    curl.se:32123
+    fetch.se:32123
     [::1]:1234-4567
 
 We strongly advise against specifying the address with a name, as it causes

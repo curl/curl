@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,7 @@
 #include <sys/eventfd.h>
 #endif
 
-int Curl_eventfd(fetch_socket_t socks[2], bool nonblocking)
+int Fetch_eventfd(fetch_socket_t socks[2], bool nonblocking)
 {
   int efd = eventfd(0, nonblocking ? EFD_CLOEXEC | EFD_NONBLOCK : EFD_CLOEXEC);
   if (efd == -1)
@@ -48,7 +48,7 @@ int Curl_eventfd(fetch_socket_t socks[2], bool nonblocking)
 #include <fcntl.h>
 #endif
 
-int Curl_pipe(fetch_socket_t socks[2], bool nonblocking)
+int Fetch_pipe(fetch_socket_t socks[2], bool nonblocking)
 {
   if (pipe(socks))
     return -1;
@@ -80,7 +80,7 @@ int Curl_pipe(fetch_socket_t socks[2], bool nonblocking)
 
 #ifndef FETCH_DISABLE_SOCKETPAIR
 #ifdef HAVE_SOCKETPAIR
-int Curl_socketpair(int domain, int type, int protocol,
+int Fetch_socketpair(int domain, int type, int protocol,
                     fetch_socket_t socks[2], bool nonblocking)
 {
 #ifdef SOCK_NONBLOCK
@@ -126,14 +126,14 @@ int Curl_socketpair(int domain, int type, int protocol,
 
 #include "nonblock.h" /* for fetchx_nonblock */
 #include "timeval.h"  /* needed before select.h */
-#include "select.h"   /* for Curl_poll */
+#include "select.h"   /* for Fetch_poll */
 
 /* The last 3 #include files should be in this order */
 #include "fetch_printf.h"
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-int Curl_socketpair(int domain, int type, int protocol,
+int Fetch_socketpair(int domain, int type, int protocol,
                     fetch_socket_t socks[2], bool nonblocking)
 {
   union
@@ -195,19 +195,19 @@ int Curl_socketpair(int domain, int type, int protocol,
   pfd[0].fd = listener;
   pfd[0].events = POLLIN;
   pfd[0].revents = 0;
-  (void)Curl_poll(pfd, 1, 1000); /* one second */
+  (void)Fetch_poll(pfd, 1, 1000); /* one second */
   socks[1] = accept(listener, NULL, NULL);
   if (socks[1] == FETCH_SOCKET_BAD)
     goto error;
   else
   {
-    struct fetchtime start = Curl_now();
+    struct fetchtime start = Fetch_now();
     char rnd[9];
     char check[sizeof(rnd)];
     char *p = &check[0];
     size_t s = sizeof(check);
 
-    if (Curl_rand(NULL, (unsigned char *)rnd, sizeof(rnd)))
+    if (Fetch_rand(NULL, (unsigned char *)rnd, sizeof(rnd)))
       goto error;
 
     /* write data to the socket */
@@ -220,14 +220,14 @@ int Curl_socketpair(int domain, int type, int protocol,
       pfd[0].fd = socks[1];
       pfd[0].events = POLLIN;
       pfd[0].revents = 0;
-      (void)Curl_poll(pfd, 1, 1000); /* one second */
+      (void)Fetch_poll(pfd, 1, 1000); /* one second */
 
       nread = sread(socks[1], p, s);
       if (nread == -1)
       {
         int sockerr = SOCKERRNO;
         /* Do not block forever */
-        if (Curl_timediff(Curl_now(), start) > (60 * 1000))
+        if (Fetch_timediff(Fetch_now(), start) > (60 * 1000))
           goto error;
         if (
 #ifdef WSAEWOULDBLOCK

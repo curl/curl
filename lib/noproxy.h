@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,15 +29,15 @@
 
 #ifdef UNITTESTS
 
-UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
+UNITTEST bool Fetch_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
                                const char *network, /* 1.2.3.4 address */
                                unsigned int bits);
-UNITTEST bool Curl_cidr6_match(const char *ipv6,
+UNITTEST bool Fetch_cidr6_match(const char *ipv6,
                                const char *network,
                                unsigned int bits);
 #endif
 
-bool Curl_check_noproxy(const char *name, const char *no_proxy);
+bool Fetch_check_noproxy(const char *name, const char *no_proxy);
 #endif
 
 #endif /* HEADER_FETCH_NOPROXY_H */

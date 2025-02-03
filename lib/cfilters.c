@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,9 +28,9 @@
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "url.h" /* for Curl_safefree() */
+#include "url.h" /* for Fetch_safefree() */
 #include "sendf.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "sockaddr.h" /* required for Fetch_sockaddr_storage */
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
@@ -45,12 +45,12 @@
 #define ARRAYSIZE(A) (sizeof(A) / sizeof((A)[0]))
 #endif
 
-static void cf_cntrl_update_info(struct Curl_easy *data,
+static void cf_cntrl_update_info(struct Fetch_easy *data,
                                  struct connectdata *conn);
 
 #ifdef UNITTESTS
 /* used by unit2600.c */
-void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+void Fetch_cf_def_close(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   cf->connected = FALSE;
   if (cf->next)
@@ -58,8 +58,8 @@ void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 #endif
 
-FETCHcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
-                               struct Curl_easy *data, bool *done)
+FETCHcode Fetch_cf_def_shutdown(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data, bool *done)
 {
   (void)cf;
   (void)data;
@@ -67,10 +67,10 @@ FETCHcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static void conn_report_connect_stats(struct Curl_easy *data,
+static void conn_report_connect_stats(struct Fetch_easy *data,
                                       struct connectdata *conn);
 
-void Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
+void Fetch_cf_def_get_host(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                           const char **phost, const char **pdisplay_host,
                           int *pport)
 {
@@ -84,8 +84,8 @@ void Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 }
 
-void Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+void Fetch_cf_def_adjust_pollset(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data,
                                 struct easy_pollset *ps)
 {
   /* NOP */
@@ -94,49 +94,49 @@ void Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
   (void)ps;
 }
 
-bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
-                              const struct Curl_easy *data)
+bool Fetch_cf_def_data_pending(struct Fetch_cfilter *cf,
+                              const struct Fetch_easy *data)
 {
   return cf->next ? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
-ssize_t Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+ssize_t Fetch_cf_def_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                          const void *buf, size_t len, bool eos,
                          FETCHcode *err)
 {
   return cf->next ? cf->next->cft->do_send(cf->next, data, buf, len, eos, err) : FETCHE_RECV_ERROR;
 }
 
-ssize_t Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+ssize_t Fetch_cf_def_recv(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                          char *buf, size_t len, FETCHcode *err)
 {
   return cf->next ? cf->next->cft->do_recv(cf->next, data, buf, len, err) : FETCHE_SEND_ERROR;
 }
 
-bool Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
+bool Fetch_cf_def_conn_is_alive(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
                                bool *input_pending)
 {
   return cf->next ? cf->next->cft->is_alive(cf->next, data, input_pending) : FALSE; /* pessimistic in absence of data */
 }
 
-FETCHcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
+FETCHcode Fetch_cf_def_conn_keep_alive(struct Fetch_cfilter *cf,
+                                      struct Fetch_easy *data)
 {
   return cf->next ? cf->next->cft->keep_alive(cf->next, data) : FETCHE_OK;
 }
 
-FETCHcode Curl_cf_def_query(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
+FETCHcode Fetch_cf_def_query(struct Fetch_cfilter *cf,
+                            struct Fetch_easy *data,
                             int query, int *pres1, void *pres2)
 {
   return cf->next ? cf->next->cft->query(cf->next, data, query, pres1, pres2) : FETCHE_UNKNOWN_OPTION;
 }
 
-void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
-                                struct Curl_easy *data)
+void Fetch_conn_cf_discard_chain(struct Fetch_cfilter **pcf,
+                                struct Fetch_easy *data)
 {
-  struct Curl_cfilter *cfn, *cf = *pcf;
+  struct Fetch_cfilter *cfn, *cf = *pcf;
 
   if (cf)
   {
@@ -155,15 +155,15 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
   }
 }
 
-void Curl_conn_cf_discard_all(struct Curl_easy *data,
+void Fetch_conn_cf_discard_all(struct Fetch_easy *data,
                               struct connectdata *conn, int index)
 {
-  Curl_conn_cf_discard_chain(&conn->cfilter[index], data);
+  Fetch_conn_cf_discard_chain(&conn->cfilter[index], data);
 }
 
-void Curl_conn_close(struct Curl_easy *data, int index)
+void Fetch_conn_close(struct Fetch_easy *data, int index)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
 
   DEBUGASSERT(data->conn);
   /* it is valid to call that without filters being present */
@@ -172,12 +172,12 @@ void Curl_conn_close(struct Curl_easy *data, int index)
   {
     cf->cft->do_close(cf, data);
   }
-  Curl_shutdown_clear(data, index);
+  Fetch_shutdown_clear(data, index);
 }
 
-FETCHcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
+FETCHcode Fetch_conn_shutdown(struct Fetch_easy *data, int sockindex, bool *done)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result = FETCHE_OK;
   timediff_t timeout_ms;
   struct fetchtime now;
@@ -195,16 +195,16 @@ FETCHcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   }
 
   *done = FALSE;
-  now = Curl_now();
-  if (!Curl_shutdown_started(data, sockindex))
+  now = Fetch_now();
+  if (!Fetch_shutdown_started(data, sockindex))
   {
     DEBUGF(infof(data, "shutdown start on%s connection",
                  sockindex ? " secondary" : ""));
-    Curl_shutdown_start(data, sockindex, &now);
+    Fetch_shutdown_start(data, sockindex, &now);
   }
   else
   {
-    timeout_ms = Curl_shutdown_timeleft(data->conn, sockindex, &now);
+    timeout_ms = Fetch_shutdown_timeleft(data->conn, sockindex, &now);
     if (timeout_ms < 0)
     {
       /* info message, since this might be regarded as acceptable */
@@ -238,10 +238,10 @@ FETCHcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   return result;
 }
 
-ssize_t Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
+ssize_t Fetch_cf_recv(struct Fetch_easy *data, int num, char *buf,
                      size_t len, FETCHcode *code)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
@@ -263,11 +263,11 @@ ssize_t Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
   return -1;
 }
 
-ssize_t Curl_cf_send(struct Curl_easy *data, int num,
+ssize_t Fetch_cf_send(struct Fetch_easy *data, int num,
                      const void *mem, size_t len, bool eos,
                      FETCHcode *code)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
@@ -290,11 +290,11 @@ ssize_t Curl_cf_send(struct Curl_easy *data, int num,
   return -1;
 }
 
-FETCHcode Curl_cf_create(struct Curl_cfilter **pcf,
-                         const struct Curl_cftype *cft,
+FETCHcode Fetch_cf_create(struct Fetch_cfilter **pcf,
+                         const struct Fetch_cftype *cft,
                          void *ctx)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result = FETCHE_OUT_OF_MEMORY;
 
   DEBUGASSERT(cft);
@@ -310,10 +310,10 @@ out:
   return result;
 }
 
-void Curl_conn_cf_add(struct Curl_easy *data,
+void Fetch_conn_cf_add(struct Fetch_easy *data,
                       struct connectdata *conn,
                       int index,
-                      struct Curl_cfilter *cf)
+                      struct Fetch_cfilter *cf)
 {
   (void)data;
   DEBUGASSERT(conn);
@@ -327,10 +327,10 @@ void Curl_conn_cf_add(struct Curl_easy *data,
   FETCH_TRC_CF(data, cf, "added");
 }
 
-void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
-                               struct Curl_cfilter *cf_new)
+void Fetch_conn_cf_insert_after(struct Fetch_cfilter *cf_at,
+                               struct Fetch_cfilter *cf_new)
 {
-  struct Curl_cfilter *tail, **pnext;
+  struct Fetch_cfilter *tail, **pnext;
 
   DEBUGASSERT(cf_at);
   DEBUGASSERT(cf_new);
@@ -348,12 +348,12 @@ void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
   *pnext = tail;
 }
 
-bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
-                              struct Curl_cfilter *discard,
-                              struct Curl_easy *data,
+bool Fetch_conn_cf_discard_sub(struct Fetch_cfilter *cf,
+                              struct Fetch_cfilter *discard,
+                              struct Fetch_easy *data,
                               bool destroy_always)
 {
-  struct Curl_cfilter **pprev = &cf->next;
+  struct Fetch_cfilter **pprev = &cf->next;
   bool found = FALSE;
 
   /* remove from sub-chain and destroy */
@@ -378,8 +378,8 @@ bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
   return found;
 }
 
-FETCHcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
+FETCHcode Fetch_conn_cf_connect(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
                                bool blocking, bool *done)
 {
   if (cf)
@@ -387,13 +387,13 @@ FETCHcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
   return FETCHE_FAILED_INIT;
 }
 
-void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+void Fetch_conn_cf_close(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   if (cf)
     cf->cft->do_close(cf, data);
 }
 
-ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+ssize_t Fetch_conn_cf_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                           const void *buf, size_t len, bool eos,
                           FETCHcode *err)
 {
@@ -403,7 +403,7 @@ ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   return -1;
 }
 
-ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+ssize_t Fetch_conn_cf_recv(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                           char *buf, size_t len, FETCHcode *err)
 {
   if (cf)
@@ -412,12 +412,12 @@ ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return -1;
 }
 
-FETCHcode Curl_conn_connect(struct Curl_easy *data,
+FETCHcode Fetch_conn_connect(struct Fetch_easy *data,
                             int sockindex,
                             bool blocking,
                             bool *done)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result = FETCHE_OK;
 
   DEBUGASSERT(data);
@@ -434,10 +434,10 @@ FETCHcode Curl_conn_connect(struct Curl_easy *data,
   *done = cf->connected;
   if (!*done)
   {
-    if (Curl_conn_needs_flush(data, sockindex))
+    if (Fetch_conn_needs_flush(data, sockindex))
     {
-      DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
-      result = Curl_conn_flush(data, sockindex);
+      DEBUGF(infof(data, "Fetch_conn_connect(index=%d), flush", sockindex));
+      result = Fetch_conn_flush(data, sockindex);
       if (result && (result != FETCHE_AGAIN))
         return result;
     }
@@ -450,8 +450,8 @@ FETCHcode Curl_conn_connect(struct Curl_easy *data,
        * socket and ip related information. */
       cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(data, data->conn);
-      data->conn->keepalive = Curl_now();
-      Curl_verboseconnect(data, data->conn, sockindex);
+      data->conn->keepalive = Fetch_now();
+      Fetch_verboseconnect(data, data->conn, sockindex);
     }
     else if (result)
     {
@@ -462,17 +462,17 @@ FETCHcode Curl_conn_connect(struct Curl_easy *data,
   return result;
 }
 
-bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
+bool Fetch_conn_is_connected(struct connectdata *conn, int sockindex)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
 
   cf = conn->cfilter[sockindex];
   return cf && cf->connected;
 }
 
-bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
+bool Fetch_conn_is_ip_connected(struct Fetch_easy *data, int sockindex)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
 
   cf = data->conn->cfilter[sockindex];
   while (cf)
@@ -486,7 +486,7 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-bool Curl_conn_cf_is_ssl(struct Curl_cfilter *cf)
+bool Fetch_conn_cf_is_ssl(struct Fetch_cfilter *cf)
 {
   for (; cf; cf = cf->next)
   {
@@ -498,14 +498,14 @@ bool Curl_conn_cf_is_ssl(struct Curl_cfilter *cf)
   return FALSE;
 }
 
-bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
+bool Fetch_conn_is_ssl(struct connectdata *conn, int sockindex)
 {
-  return conn ? Curl_conn_cf_is_ssl(conn->cfilter[sockindex]) : FALSE;
+  return conn ? Fetch_conn_cf_is_ssl(conn->cfilter[sockindex]) : FALSE;
 }
 
-bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
+bool Fetch_conn_is_multiplex(struct connectdata *conn, int sockindex)
 {
-  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
+  struct Fetch_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
 
   for (; cf; cf = cf->next)
   {
@@ -517,9 +517,9 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
   return FALSE;
 }
 
-unsigned char Curl_conn_http_version(struct Curl_easy *data)
+unsigned char Fetch_conn_http_version(struct Fetch_easy *data)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result = FETCHE_UNKNOWN_OPTION;
   unsigned char v = 0;
 
@@ -542,9 +542,9 @@ unsigned char Curl_conn_http_version(struct Curl_easy *data)
   return result ? 0 : v;
 }
 
-bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
+bool Fetch_conn_data_pending(struct Fetch_easy *data, int sockindex)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
 
   (void)data;
   DEBUGASSERT(data);
@@ -562,8 +562,8 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+bool Fetch_conn_cf_needs_flush(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data)
 {
   FETCHcode result;
   int pending = 0;
@@ -573,13 +573,13 @@ bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
   return (result || !pending) ? FALSE : TRUE;
 }
 
-bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
+bool Fetch_conn_needs_flush(struct Fetch_easy *data, int sockindex)
 {
-  return Curl_conn_cf_needs_flush(data->conn->cfilter[sockindex], data);
+  return Fetch_conn_cf_needs_flush(data->conn->cfilter[sockindex], data);
 }
 
-void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
+void Fetch_conn_cf_adjust_pollset(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data,
                                  struct easy_pollset *ps)
 {
   /* Get the lowest not-connected filter, if there are any */
@@ -597,7 +597,7 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
   }
 }
 
-void Curl_conn_adjust_pollset(struct Curl_easy *data,
+void Fetch_conn_adjust_pollset(struct Fetch_easy *data,
                               struct easy_pollset *ps)
 {
   int i;
@@ -606,12 +606,12 @@ void Curl_conn_adjust_pollset(struct Curl_easy *data,
   DEBUGASSERT(data->conn);
   for (i = 0; i < 2; ++i)
   {
-    Curl_conn_cf_adjust_pollset(data->conn->cfilter[i], data, ps);
+    Fetch_conn_cf_adjust_pollset(data->conn->cfilter[i], data, ps);
   }
 }
 
-int Curl_conn_cf_poll(struct Curl_cfilter *cf,
-                      struct Curl_easy *data,
+int Fetch_conn_cf_poll(struct Fetch_cfilter *cf,
+                      struct Fetch_easy *data,
                       timediff_t timeout_ms)
 {
   struct easy_pollset ps;
@@ -624,7 +624,7 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
   memset(&ps, 0, sizeof(ps));
   memset(pfds, 0, sizeof(pfds));
 
-  Curl_conn_cf_adjust_pollset(cf, data, &ps);
+  Fetch_conn_cf_adjust_pollset(cf, data, &ps);
   DEBUGASSERT(ps.num <= MAX_SOCKSPEREASYHANDLE);
   for (i = 0; i < ps.num; ++i)
   {
@@ -647,14 +647,14 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
 
   if (!npfds)
     DEBUGF(infof(data, "no sockets to poll!"));
-  return Curl_poll(pfds, npfds, timeout_ms);
+  return Fetch_poll(pfds, npfds, timeout_ms);
 }
 
-void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
+void Fetch_conn_get_host(struct Fetch_easy *data, int sockindex,
                         const char **phost, const char **pdisplay_host,
                         int *pport)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
 
   DEBUGASSERT(data->conn);
   cf = data->conn->cfilter[sockindex];
@@ -674,8 +674,8 @@ void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
   }
 }
 
-FETCHcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
+FETCHcode Fetch_cf_def_cntrl(struct Fetch_cfilter *cf,
+                            struct Fetch_easy *data,
                             int event, int arg1, void *arg2)
 {
   (void)cf;
@@ -686,8 +686,8 @@ FETCHcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
+FETCHcode Fetch_conn_cf_cntrl(struct Fetch_cfilter *cf,
+                             struct Fetch_easy *data,
                              bool ignore_result,
                              int event, int arg1, void *arg2)
 {
@@ -695,7 +695,7 @@ FETCHcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
 
   for (; cf; cf = cf->next)
   {
-    if (Curl_cf_def_cntrl == cf->cft->cntrl)
+    if (Fetch_cf_def_cntrl == cf->cft->cntrl)
       continue;
     result = cf->cft->cntrl(cf, data, event, arg1, arg2);
     if (!ignore_result && result)
@@ -704,8 +704,8 @@ FETCHcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
   return result;
 }
 
-fetch_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+fetch_socket_t Fetch_conn_cf_get_socket(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data)
 {
   fetch_socket_t sock;
   if (cf && !cf->cft->query(cf, data, CF_QUERY_SOCKET, NULL, &sock))
@@ -713,8 +713,8 @@ fetch_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
   return FETCH_SOCKET_BAD;
 }
 
-FETCHcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+FETCHcode Fetch_conn_cf_get_ip_info(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    int *is_ipv6, struct ip_quadruple *ipquad)
 {
   if (cf)
@@ -722,26 +722,26 @@ FETCHcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
   return FETCHE_UNKNOWN_OPTION;
 }
 
-fetch_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)
+fetch_socket_t Fetch_conn_get_socket(struct Fetch_easy *data, int sockindex)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
 
   cf = data->conn ? data->conn->cfilter[sockindex] : NULL;
   /* if the top filter has not connected, ask it (and its sub-filters)
    * for the socket. Otherwise conn->sock[sockindex] should have it.
    */
   if (cf && !cf->connected)
-    return Curl_conn_cf_get_socket(cf, data);
+    return Fetch_conn_cf_get_socket(cf, data);
   return data->conn ? data->conn->sock[sockindex] : FETCH_SOCKET_BAD;
 }
 
-void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)
+void Fetch_conn_forget_socket(struct Fetch_easy *data, int sockindex)
 {
   if (data->conn)
   {
-    struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+    struct Fetch_cfilter *cf = data->conn->cfilter[sockindex];
     if (cf)
-      (void)Curl_conn_cf_cntrl(cf, data, TRUE,
+      (void)Fetch_conn_cf_cntrl(cf, data, TRUE,
                                CF_CTRL_FORGET_SOCKET, 0, NULL);
     fake_sclose(data->conn->sock[sockindex]);
     data->conn->sock[sockindex] = FETCH_SOCKET_BAD;
@@ -749,7 +749,7 @@ void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)
 }
 
 static FETCHcode cf_cntrl_all(struct connectdata *conn,
-                              struct Curl_easy *data,
+                              struct Fetch_easy *data,
                               bool ignore_result,
                               int event, int arg1, void *arg2)
 {
@@ -758,7 +758,7 @@ static FETCHcode cf_cntrl_all(struct connectdata *conn,
 
   for (i = 0; i < ARRAYSIZE(conn->cfilter); ++i)
   {
-    result = Curl_conn_cf_cntrl(conn->cfilter[i], data, ignore_result,
+    result = Fetch_conn_cf_cntrl(conn->cfilter[i], data, ignore_result,
                                 event, arg1, arg2);
     if (!ignore_result && result)
       break;
@@ -766,21 +766,21 @@ static FETCHcode cf_cntrl_all(struct connectdata *conn,
   return result;
 }
 
-FETCHcode Curl_conn_ev_data_setup(struct Curl_easy *data)
+FETCHcode Fetch_conn_ev_data_setup(struct Fetch_easy *data)
 {
   return cf_cntrl_all(data->conn, data, FALSE,
                       CF_CTRL_DATA_SETUP, 0, NULL);
 }
 
-FETCHcode Curl_conn_ev_data_idle(struct Curl_easy *data)
+FETCHcode Fetch_conn_ev_data_idle(struct Fetch_easy *data)
 {
   return cf_cntrl_all(data->conn, data, FALSE,
                       CF_CTRL_DATA_IDLE, 0, NULL);
 }
 
-FETCHcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
+FETCHcode Fetch_conn_flush(struct Fetch_easy *data, int sockindex)
 {
-  return Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
+  return Fetch_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
                             CF_CTRL_FLUSH, 0, NULL);
 }
 
@@ -788,7 +788,7 @@ FETCHcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
  * Notify connection filters that the transfer represented by `data`
  * is done with sending data (e.g. has uploaded everything).
  */
-void Curl_conn_ev_data_done_send(struct Curl_easy *data)
+void Fetch_conn_ev_data_done_send(struct Fetch_easy *data)
 {
   cf_cntrl_all(data->conn, data, TRUE, CF_CTRL_DATA_DONE_SEND, 0, NULL);
 }
@@ -797,18 +797,18 @@ void Curl_conn_ev_data_done_send(struct Curl_easy *data)
  * Notify connection filters that the transfer represented by `data`
  * is finished - eventually premature, e.g. before being complete.
  */
-void Curl_conn_ev_data_done(struct Curl_easy *data, bool premature)
+void Fetch_conn_ev_data_done(struct Fetch_easy *data, bool premature)
 {
   cf_cntrl_all(data->conn, data, TRUE, CF_CTRL_DATA_DONE, premature, NULL);
 }
 
-FETCHcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause)
+FETCHcode Fetch_conn_ev_data_pause(struct Fetch_easy *data, bool do_pause)
 {
   return cf_cntrl_all(data->conn, data, FALSE,
                       CF_CTRL_DATA_PAUSE, do_pause, NULL);
 }
 
-static void cf_cntrl_update_info(struct Curl_easy *data,
+static void cf_cntrl_update_info(struct Fetch_easy *data,
                                  struct connectdata *conn)
 {
   cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
@@ -817,10 +817,10 @@ static void cf_cntrl_update_info(struct Curl_easy *data,
 /**
  * Update connection statistics
  */
-static void conn_report_connect_stats(struct Curl_easy *data,
+static void conn_report_connect_stats(struct Fetch_easy *data,
                                       struct connectdata *conn)
 {
-  struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
+  struct Fetch_cfilter *cf = conn->cfilter[FIRSTSOCKET];
   if (cf)
   {
     struct fetchtime connected;
@@ -829,60 +829,60 @@ static void conn_report_connect_stats(struct Curl_easy *data,
     memset(&connected, 0, sizeof(connected));
     cf->cft->query(cf, data, CF_QUERY_TIMER_CONNECT, NULL, &connected);
     if (connected.tv_sec || connected.tv_usec)
-      Curl_pgrsTimeWas(data, TIMER_CONNECT, connected);
+      Fetch_pgrsTimeWas(data, TIMER_CONNECT, connected);
 
     memset(&appconnected, 0, sizeof(appconnected));
     cf->cft->query(cf, data, CF_QUERY_TIMER_APPCONNECT, NULL, &appconnected);
     if (appconnected.tv_sec || appconnected.tv_usec)
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, appconnected);
+      Fetch_pgrsTimeWas(data, TIMER_APPCONNECT, appconnected);
   }
 }
 
-bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
+bool Fetch_conn_is_alive(struct Fetch_easy *data, struct connectdata *conn,
                         bool *input_pending)
 {
-  struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
+  struct Fetch_cfilter *cf = conn->cfilter[FIRSTSOCKET];
   return cf && !cf->conn->bits.close &&
          cf->cft->is_alive(cf, data, input_pending);
 }
 
-FETCHcode Curl_conn_keep_alive(struct Curl_easy *data,
+FETCHcode Fetch_conn_keep_alive(struct Fetch_easy *data,
                                struct connectdata *conn,
                                int sockindex)
 {
-  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  struct Fetch_cfilter *cf = conn->cfilter[sockindex];
   return cf ? cf->cft->keep_alive(cf, data) : FETCHE_OK;
 }
 
-size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
+size_t Fetch_conn_get_max_concurrent(struct Fetch_easy *data,
                                     struct connectdata *conn,
                                     int sockindex)
 {
   FETCHcode result;
   int n = 0;
 
-  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  struct Fetch_cfilter *cf = conn->cfilter[sockindex];
   result = cf ? cf->cft->query(cf, data, CF_QUERY_MAX_CONCURRENT,
                                &n, NULL)
               : FETCHE_UNKNOWN_OPTION;
   return (result || n <= 0) ? 1 : (size_t)n;
 }
 
-int Curl_conn_get_stream_error(struct Curl_easy *data,
+int Fetch_conn_get_stream_error(struct Fetch_easy *data,
                                struct connectdata *conn,
                                int sockindex)
 {
   FETCHcode result;
   int n = 0;
 
-  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  struct Fetch_cfilter *cf = conn->cfilter[sockindex];
   result = cf ? cf->cft->query(cf, data, CF_QUERY_STREAM_ERROR,
                                &n, NULL)
               : FETCHE_UNKNOWN_OPTION;
   return (result || n < 0) ? 0 : n;
 }
 
-int Curl_conn_sockindex(struct Curl_easy *data, fetch_socket_t sockfd)
+int Fetch_conn_sockindex(struct Fetch_easy *data, fetch_socket_t sockfd)
 {
   if (data && data->conn &&
       sockfd != FETCH_SOCKET_BAD && sockfd == data->conn->sock[SECONDARYSOCKET])
@@ -890,7 +890,7 @@ int Curl_conn_sockindex(struct Curl_easy *data, fetch_socket_t sockfd)
   return FIRSTSOCKET;
 }
 
-FETCHcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
+FETCHcode Fetch_conn_recv(struct Fetch_easy *data, int sockindex,
                          char *buf, size_t blen, ssize_t *n)
 {
   FETCHcode result = FETCHE_OK;
@@ -904,7 +904,7 @@ FETCHcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
   return result;
 }
 
-FETCHcode Curl_conn_send(struct Curl_easy *data, int sockindex,
+FETCHcode Fetch_conn_send(struct Fetch_easy *data, int sockindex,
                          const void *buf, size_t blen, bool eos,
                          size_t *pnwritten)
 {
@@ -940,7 +940,7 @@ FETCHcode Curl_conn_send(struct Curl_easy *data, int sockindex,
   return result;
 }
 
-void Curl_pollset_reset(struct Curl_easy *data,
+void Fetch_pollset_reset(struct Fetch_easy *data,
                         struct easy_pollset *ps)
 {
   size_t i;
@@ -953,7 +953,7 @@ void Curl_pollset_reset(struct Curl_easy *data,
 /**
  *
  */
-void Curl_pollset_change(struct Curl_easy *data,
+void Fetch_pollset_change(struct Fetch_easy *data,
                          struct easy_pollset *ps, fetch_socket_t sock,
                          int add_flags, int remove_flags)
 {
@@ -1009,18 +1009,18 @@ void Curl_pollset_change(struct Curl_easy *data,
   }
 }
 
-void Curl_pollset_set(struct Curl_easy *data,
+void Fetch_pollset_set(struct Fetch_easy *data,
                       struct easy_pollset *ps, fetch_socket_t sock,
                       bool do_in, bool do_out)
 {
-  Curl_pollset_change(data, ps, sock,
+  Fetch_pollset_change(data, ps, sock,
                       (do_in ? FETCH_POLL_IN : 0) |
                           (do_out ? FETCH_POLL_OUT : 0),
                       (!do_in ? FETCH_POLL_IN : 0) |
                           (!do_out ? FETCH_POLL_OUT : 0));
 }
 
-static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
+static void ps_add(struct Fetch_easy *data, struct easy_pollset *ps,
                    int bitmap, fetch_socket_t *socks)
 {
   if (bitmap)
@@ -1035,20 +1035,20 @@ static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
       if (bitmap & GETSOCK_READSOCK(i))
       {
         if (bitmap & GETSOCK_WRITESOCK(i))
-          Curl_pollset_add_inout(data, ps, socks[i]);
+          Fetch_pollset_add_inout(data, ps, socks[i]);
         else
           /* is READ, since we checked MASK_RW above */
-          Curl_pollset_add_in(data, ps, socks[i]);
+          Fetch_pollset_add_in(data, ps, socks[i]);
       }
       else
-        Curl_pollset_add_out(data, ps, socks[i]);
+        Fetch_pollset_add_out(data, ps, socks[i]);
     }
   }
 }
 
-void Curl_pollset_add_socks(struct Curl_easy *data,
+void Fetch_pollset_add_socks(struct Fetch_easy *data,
                             struct easy_pollset *ps,
-                            int (*get_socks_cb)(struct Curl_easy *data,
+                            int (*get_socks_cb)(struct Fetch_easy *data,
                                                 fetch_socket_t *socks))
 {
   fetch_socket_t socks[MAX_SOCKSPEREASYHANDLE];
@@ -1058,7 +1058,7 @@ void Curl_pollset_add_socks(struct Curl_easy *data,
   ps_add(data, ps, bitmap, socks);
 }
 
-void Curl_pollset_check(struct Curl_easy *data,
+void Fetch_pollset_check(struct Fetch_easy *data,
                         struct easy_pollset *ps, fetch_socket_t sock,
                         bool *pwant_read, bool *pwant_write)
 {

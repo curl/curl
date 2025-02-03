@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,12 +25,12 @@
  ***************************************************************************/
 
 /* Converts a 16-bit integer from little endian */
-unsigned short Curl_read16_le(const unsigned char *buf);
+unsigned short Fetch_read16_le(const unsigned char *buf);
 
 /* Converts a 32-bit integer from little endian */
-unsigned int Curl_read32_le(const unsigned char *buf);
+unsigned int Fetch_read32_le(const unsigned char *buf);
 
 /* Converts a 16-bit integer from big endian */
-unsigned short Curl_read16_be(const unsigned char *buf);
+unsigned short Fetch_read16_be(const unsigned char *buf);
 
 #endif /* HEADER_FETCH_ENDIAN_H */

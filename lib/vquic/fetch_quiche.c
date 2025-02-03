@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -80,7 +80,7 @@
 /*
  * Store quiche version info in this buffer.
  */
-void Curl_quiche_ver(char *p, size_t len)
+void Fetch_quiche_ver(char *p, size_t len)
 {
   (void)msnprintf(p, len, "quiche/%s", quiche_version());
 }
@@ -98,7 +98,7 @@ struct cf_quiche_ctx
   struct fetchtime started_at;   /* time the current attempt started */
   struct fetchtime handshake_at; /* time connect handshake finished */
   struct bufc_pool stream_bufcp; /* chunk pool for streams */
-  struct Curl_hash streams;      /* hash `data->mid` to `stream_ctx` */
+  struct Fetch_hash streams;      /* hash `data->mid` to `stream_ctx` */
   fetch_off_t data_recvd;
   BIT(initialized);
   BIT(goaway);           /* got GOAWAY from server */
@@ -128,9 +128,9 @@ static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
     debug_log_init = 1;
   }
 #endif
-  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
+  Fetch_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Fetch_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->data_recvd = 0;
   ctx->initialized = TRUE;
 }
@@ -141,12 +141,12 @@ static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
   {
     /* quiche just freed it */
     ctx->tls.ossl.ssl = NULL;
-    Curl_vquic_tls_cleanup(&ctx->tls);
-    Curl_ssl_peer_cleanup(&ctx->peer);
+    Fetch_vquic_tls_cleanup(&ctx->tls);
+    Fetch_ssl_peer_cleanup(&ctx->peer);
     vquic_ctx_free(&ctx->q);
-    Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_hash_clean(&ctx->streams);
-    Curl_hash_destroy(&ctx->streams);
+    Fetch_bufcp_free(&ctx->stream_bufcp);
+    Fetch_hash_clean(&ctx->streams);
+    Fetch_hash_destroy(&ctx->streams);
   }
   free(ctx);
 }
@@ -163,8 +163,8 @@ static void cf_quiche_ctx_close(struct cf_quiche_ctx *ctx)
     quiche_config_free(ctx->cfg);
 }
 
-static FETCHcode cf_flush_egress(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data);
+static FETCHcode cf_flush_egress(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data);
 
 /**
  * All about the H3 internals of a stream
@@ -184,12 +184,12 @@ struct stream_ctx
   BIT(quic_flow_blocked);  /* stream is blocked by QUIC flow control */
 };
 
-#define H3_STREAM_CTX(ctx, data) ((struct stream_ctx *)(data ? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
+#define H3_STREAM_CTX(ctx, data) ((struct stream_ctx *)(data ? Fetch_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct stream_ctx *stream)
 {
-  Curl_bufq_free(&stream->recvbuf);
-  Curl_h1_req_parse_free(&stream->h1);
+  Fetch_bufq_free(&stream->recvbuf);
+  Fetch_h1_req_parse_free(&stream->h1);
   free(stream);
 }
 
@@ -199,31 +199,31 @@ static void h3_stream_hash_free(void *stream)
   h3_stream_ctx_free((struct stream_ctx *)stream);
 }
 
-static void check_resumes(struct Curl_cfilter *cf,
-                          struct Curl_easy *data)
+static void check_resumes(struct Fetch_cfilter *cf,
+                          struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct Curl_llist_node *e;
+  struct Fetch_llist_node *e;
 
   DEBUGASSERT(data->multi);
-  for (e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e))
+  for (e = Fetch_llist_head(&data->multi->process); e; e = Fetch_node_next(e))
   {
-    struct Curl_easy *sdata = Curl_node_elem(e);
+    struct Fetch_easy *sdata = Fetch_node_elem(e);
     if (sdata->conn == data->conn)
     {
       struct stream_ctx *stream = H3_STREAM_CTX(ctx, sdata);
       if (stream && stream->quic_flow_blocked)
       {
         stream->quic_flow_blocked = FALSE;
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        Fetch_expire(data, 0, EXPIRE_RUN_NOW);
         FETCH_TRC_CF(data, cf, "[%" FMT_PRIu64 "] unblock", stream->id);
       }
     }
   }
 }
 
-static FETCHcode h3_data_setup(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
+static FETCHcode h3_data_setup(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -236,11 +236,11 @@ static FETCHcode h3_data_setup(struct Curl_cfilter *cf,
     return FETCHE_OUT_OF_MEMORY;
 
   stream->id = -1;
-  Curl_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
+  Fetch_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
-  Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
+  Fetch_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if (!Curl_hash_offt_set(&ctx->streams, data->mid, stream))
+  if (!Fetch_hash_offt_set(&ctx->streams, data->mid, stream))
   {
     h3_stream_ctx_free(stream);
     return FETCHE_OUT_OF_MEMORY;
@@ -249,7 +249,7 @@ static FETCHcode h3_data_setup(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void h3_data_done(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -274,12 +274,12 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       if (result)
         FETCH_TRC_CF(data, cf, "data_done, flush egress -> %d", result);
     }
-    Curl_hash_offt_remove(&ctx->streams, data->mid);
+    Fetch_hash_offt_remove(&ctx->streams, data->mid);
   }
 }
 
-static void h3_drain_stream(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
+static void h3_drain_stream(struct Fetch_cfilter *cf,
+                            struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -292,12 +292,12 @@ static void h3_drain_stream(struct Curl_cfilter *cf,
   if (data->state.select_bits != bits)
   {
     data->state.select_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    Fetch_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
 
-static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
-                                         struct Curl_easy *data,
+static struct Fetch_easy *get_stream_easy(struct Fetch_cfilter *cf,
+                                         struct Fetch_easy *data,
                                          fetch_uint64_t stream_id,
                                          struct stream_ctx **pstream)
 {
@@ -313,11 +313,11 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
   }
   else
   {
-    struct Curl_llist_node *e;
+    struct Fetch_llist_node *e;
     DEBUGASSERT(data->multi);
-    for (e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e))
+    for (e = Fetch_llist_head(&data->multi->process); e; e = Fetch_node_next(e))
     {
-      struct Curl_easy *sdata = Curl_node_elem(e);
+      struct Fetch_easy *sdata = Fetch_node_elem(e);
       if (sdata->conn != data->conn)
         continue;
       stream = H3_STREAM_CTX(ctx, sdata);
@@ -332,20 +332,20 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
   return NULL;
 }
 
-static void cf_quiche_expire_conn_closed(struct Curl_cfilter *cf,
-                                         struct Curl_easy *data)
+static void cf_quiche_expire_conn_closed(struct Fetch_cfilter *cf,
+                                         struct Fetch_easy *data)
 {
-  struct Curl_llist_node *e;
+  struct Fetch_llist_node *e;
 
   DEBUGASSERT(data->multi);
   FETCH_TRC_CF(data, cf, "conn closed, expire all transfers");
-  for (e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e))
+  for (e = Fetch_llist_head(&data->multi->process); e; e = Fetch_node_next(e))
   {
-    struct Curl_easy *sdata = Curl_node_elem(e);
+    struct Fetch_easy *sdata = Fetch_node_elem(e);
     if (sdata == data || sdata->conn != data->conn)
       continue;
     FETCH_TRC_CF(sdata, cf, "conn closed, expire transfer");
-    Curl_expire(sdata, 0, EXPIRE_RUN_NOW);
+    Fetch_expire(sdata, 0, EXPIRE_RUN_NOW);
   }
 }
 
@@ -354,8 +354,8 @@ static void cf_quiche_expire_conn_closed(struct Curl_cfilter *cf,
  * receive buffer. If not enough space is available, it appends to the
  * `data`'s overflow buffer.
  */
-static FETCHcode write_resp_raw(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+static FETCHcode write_resp_raw(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data,
                                 const void *mem, size_t memlen)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -366,7 +366,7 @@ static FETCHcode write_resp_raw(struct Curl_cfilter *cf,
   (void)cf;
   if (!stream)
     return FETCHE_RECV_ERROR;
-  nwritten = Curl_bufq_write(&stream->recvbuf, mem, memlen, &result);
+  nwritten = Fetch_bufq_write(&stream->recvbuf, mem, memlen, &result);
   if (nwritten < 0)
     return result;
 
@@ -382,8 +382,8 @@ static FETCHcode write_resp_raw(struct Curl_cfilter *cf,
 
 struct cb_ctx
 {
-  struct Curl_cfilter *cf;
-  struct Curl_easy *data;
+  struct Fetch_cfilter *cf;
+  struct Fetch_easy *data;
 };
 
 static int cb_each_header(uint8_t *name, size_t name_len,
@@ -458,8 +458,8 @@ static ssize_t stream_resp_read(void *reader_ctx,
   }
 }
 
-static FETCHcode cf_recv_body(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+static FETCHcode cf_recv_body(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -480,7 +480,7 @@ static FETCHcode cf_recv_body(struct Curl_cfilter *cf,
 
   cb_ctx.cf = cf;
   cb_ctx.data = data;
-  nwritten = Curl_bufq_slurp(&stream->recvbuf,
+  nwritten = Fetch_bufq_slurp(&stream->recvbuf,
                              stream_resp_read, &cb_ctx, &result);
 
   if (nwritten < 0 && result != FETCHE_AGAIN)
@@ -521,8 +521,8 @@ static const char *cf_ev_name(quiche_h3_event *ev)
 #define cf_ev_name(x) ""
 #endif
 
-static FETCHcode h3_process_event(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static FETCHcode h3_process_event(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct stream_ctx *stream,
                                   quiche_h3_event *ev)
 {
@@ -587,12 +587,12 @@ static FETCHcode h3_process_event(struct Curl_cfilter *cf,
   return result;
 }
 
-static FETCHcode cf_poll_events(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
+static FETCHcode cf_poll_events(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = NULL;
-  struct Curl_easy *sdata;
+  struct Fetch_easy *sdata;
   quiche_h3_event *ev;
   FETCHcode result;
 
@@ -643,8 +643,8 @@ static FETCHcode cf_poll_events(struct Curl_cfilter *cf,
 
 struct recv_ctx
 {
-  struct Curl_cfilter *cf;
-  struct Curl_easy *data;
+  struct Fetch_cfilter *cf;
+  struct Fetch_easy *data;
   int pkts;
 };
 
@@ -710,15 +710,15 @@ static FETCHcode recv_pkt(const unsigned char *pkt, size_t pktlen,
   return FETCHE_OK;
 }
 
-static FETCHcode cf_process_ingress(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data)
+static FETCHcode cf_process_ingress(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct recv_ctx rctx;
   FETCHcode result;
 
   DEBUGASSERT(ctx->qconn);
-  result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
+  result = Fetch_vquic_tls_before_recv(&ctx->tls, cf, data);
   if (result)
     return result;
 
@@ -741,8 +741,8 @@ static FETCHcode cf_process_ingress(struct Curl_cfilter *cf,
 
 struct read_ctx
 {
-  struct Curl_cfilter *cf;
-  struct Curl_easy *data;
+  struct Fetch_cfilter *cf;
+  struct Fetch_easy *data;
   quiche_send_info send_info;
 };
 
@@ -775,8 +775,8 @@ static ssize_t read_pkt_to_send(void *userp,
  * flush_egress drains the buffers and sends off data.
  * Calls failf() on errors.
  */
-static FETCHcode cf_flush_egress(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static FETCHcode cf_flush_egress(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   ssize_t nread;
@@ -808,7 +808,7 @@ static FETCHcode cf_flush_egress(struct Curl_cfilter *cf,
   {
     if (result == FETCHE_AGAIN)
     {
-      Curl_expire(data, 1, EXPIRE_QUIC);
+      Fetch_expire(data, 1, EXPIRE_QUIC);
       return FETCHE_OK;
     }
     return result;
@@ -822,7 +822,7 @@ static FETCHcode cf_flush_egress(struct Curl_cfilter *cf,
   for (;;)
   {
     /* add the next packet to send, if any, to our buffer */
-    nread = Curl_bufq_sipn(&ctx->q.sendbuf, 0,
+    nread = Fetch_bufq_sipn(&ctx->q.sendbuf, 0,
                            read_pkt_to_send, &readx, &result);
     if (nread < 0)
     {
@@ -834,7 +834,7 @@ static FETCHcode cf_flush_egress(struct Curl_cfilter *cf,
       {
         if (result == FETCHE_AGAIN)
         {
-          Curl_expire(data, 1, EXPIRE_QUIC);
+          Fetch_expire(data, 1, EXPIRE_QUIC);
           return FETCHE_OK;
         }
         return result;
@@ -850,7 +850,7 @@ static FETCHcode cf_flush_egress(struct Curl_cfilter *cf,
       {
         if (result == FETCHE_AGAIN)
         {
-          Curl_expire(data, 1, EXPIRE_QUIC);
+          Fetch_expire(data, 1, EXPIRE_QUIC);
           return FETCHE_OK;
         }
         goto out;
@@ -864,12 +864,12 @@ out:
   if (timeout_ns % 1000000)
     timeout_ns += 1000000;
   /* expire resolution is milliseconds */
-  Curl_expire(data, (timeout_ns / 1000000), EXPIRE_QUIC);
+  Fetch_expire(data, (timeout_ns / 1000000), EXPIRE_QUIC);
   return result;
 }
 
-static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static ssize_t recv_closed_stream(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   FETCHcode *err)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -905,7 +905,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   return nread;
 }
 
-static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+static ssize_t cf_quiche_recv(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                               char *buf, size_t len, FETCHcode *err)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -921,9 +921,9 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     return -1;
   }
 
-  if (!Curl_bufq_is_empty(&stream->recvbuf))
+  if (!Fetch_bufq_is_empty(&stream->recvbuf))
   {
-    nread = Curl_bufq_read(&stream->recvbuf,
+    nread = Fetch_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
     FETCH_TRC_CF(data, cf, "[%" FMT_PRIu64 "] read recvbuf(len=%zu) "
                            "-> %zd, %d",
@@ -941,9 +941,9 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   /* recvbuf had nothing before, maybe after progressing ingress? */
-  if (nread < 0 && !Curl_bufq_is_empty(&stream->recvbuf))
+  if (nread < 0 && !Fetch_bufq_is_empty(&stream->recvbuf))
   {
-    nread = Curl_bufq_read(&stream->recvbuf,
+    nread = Fetch_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
     FETCH_TRC_CF(data, cf, "[%" FMT_PRIu64 "] read recvbuf(len=%zu) "
                            "-> %zd, %d",
@@ -990,8 +990,8 @@ out:
   return nread;
 }
 
-static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static ssize_t cf_quiche_send_body(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    struct stream_ctx *stream,
                                    const void *buf, size_t len, bool eos,
                                    FETCHcode *err)
@@ -1055,8 +1055,8 @@ static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
    field list. */
 #define AUTHORITY_DST_IDX 3
 
-static ssize_t h3_open_stream(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+static ssize_t h3_open_stream(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               const char *buf, size_t len, bool eos,
                               FETCHcode *err)
 {
@@ -1079,10 +1079,10 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
     DEBUGASSERT(stream);
   }
 
-  Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
+  Fetch_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   DEBUGASSERT(stream);
-  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
+  nwritten = Fetch_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if (nwritten < 0)
     goto out;
   if (!stream->h1.done)
@@ -1092,16 +1092,16 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
   }
   DEBUGASSERT(stream->h1.req);
 
-  *err = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
+  *err = Fetch_http_req_to_h2(&h2_headers, stream->h1.req, data);
   if (*err)
   {
     nwritten = -1;
     goto out;
   }
   /* no longer needed */
-  Curl_h1_req_parse_free(&stream->h1);
+  Fetch_h1_req_parse_free(&stream->h1);
 
-  nheader = Curl_dynhds_count(&h2_headers);
+  nheader = Fetch_dynhds_count(&h2_headers);
   nva = malloc(sizeof(quiche_h3_header) * nheader);
   if (!nva)
   {
@@ -1112,7 +1112,7 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
 
   for (i = 0; i < nheader; ++i)
   {
-    struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
+    struct dynhds_entry *e = Fetch_dynhds_getn(&h2_headers, i);
     nva[i].name = (unsigned char *)e->name;
     nva[i].name_len = e->namelen;
     nva[i].value = (unsigned char *)e->value;
@@ -1153,7 +1153,7 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
   stream->closed = FALSE;
   stream->reset = FALSE;
 
-  if (Curl_trc_is_verbose(data))
+  if (Fetch_trc_is_verbose(data))
   {
     infof(data, "[HTTP/3] [%" FMT_PRIu64 "] OPENED stream for %s",
           stream->id, data->state.url);
@@ -1186,11 +1186,11 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
 
 out:
   free(nva);
-  Curl_dynhds_free(&h2_headers);
+  Fetch_dynhds_free(&h2_headers);
   return nwritten;
 }
 
-static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+static ssize_t cf_quiche_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                               const void *buf, size_t len, bool eos,
                               FETCHcode *err)
 {
@@ -1258,8 +1258,8 @@ out:
   return nwritten;
 }
 
-static bool stream_is_writeable(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
+static bool stream_is_writeable(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1268,8 +1268,8 @@ static bool stream_is_writeable(struct Curl_cfilter *cf,
                         ctx->qconn, (fetch_uint64_t)stream->id, 1) > 0);
 }
 
-static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
+static void cf_quiche_adjust_pollset(struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data,
                                      struct easy_pollset *ps)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -1278,7 +1278,7 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
   if (!ctx->qconn)
     return;
 
-  Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
+  Fetch_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
   if (want_recv || want_send)
   {
     struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1290,9 +1290,9 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
                 (stream->quic_flow_blocked || !stream_is_writeable(cf, data));
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||
-                !Curl_bufq_is_empty(&ctx->q.sendbuf);
+                !Fetch_bufq_is_empty(&ctx->q.sendbuf);
 
-    Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
+    Fetch_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
   }
 }
 
@@ -1300,17 +1300,17 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
  * Called from transfer.c:data_pending to know if we should keep looping
  * to receive more data from the connection.
  */
-static bool cf_quiche_data_pending(struct Curl_cfilter *cf,
-                                   const struct Curl_easy *data)
+static bool cf_quiche_data_pending(struct Fetch_cfilter *cf,
+                                   const struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   const struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)cf;
-  return stream && !Curl_bufq_is_empty(&stream->recvbuf);
+  return stream && !Fetch_bufq_is_empty(&stream->recvbuf);
 }
 
-static FETCHcode h3_data_pause(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
+static FETCHcode h3_data_pause(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
                                bool pause)
 {
   /* TODO: there seems right now no API in quiche to shrink/enlarge
@@ -1318,13 +1318,13 @@ static FETCHcode h3_data_pause(struct Curl_cfilter *cf,
   if (!pause)
   {
     h3_drain_stream(cf, data);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    Fetch_expire(data, 0, EXPIRE_RUN_NOW);
   }
   return FETCHE_OK;
 }
 
-static FETCHcode cf_quiche_data_event(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data,
+static FETCHcode cf_quiche_data_event(struct Fetch_cfilter *cf,
+                                      struct Fetch_easy *data,
                                       int event, int arg1, void *arg2)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -1375,13 +1375,13 @@ static FETCHcode cf_quiche_data_event(struct Curl_cfilter *cf,
   return result;
 }
 
-static FETCHcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data)
+static FETCHcode cf_quiche_ctx_open(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   int rv;
   FETCHcode result;
-  const struct Curl_sockaddr_ex *sockaddr;
+  const struct Fetch_sockaddr_ex *sockaddr;
 
   DEBUGASSERT(ctx->q.sockfd != FETCH_SOCKET_BAD);
   DEBUGASSERT(ctx->initialized);
@@ -1418,18 +1418,18 @@ static FETCHcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
                                            QUICHE_H3_APPLICATION_PROTOCOL,
                                        sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1);
 
-  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
+  result = Fetch_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                QUICHE_H3_APPLICATION_PROTOCOL,
                                sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1,
                                NULL, NULL, cf, NULL);
   if (result)
     return result;
 
-  result = Curl_rand(data, ctx->scid, sizeof(ctx->scid));
+  result = Fetch_rand(data, ctx->scid, sizeof(ctx->scid));
   if (result)
     return result;
 
-  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &sockaddr, NULL);
+  Fetch_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &sockaddr, NULL);
   ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
   rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
                    &ctx->q.local_addrlen);
@@ -1453,7 +1453,7 @@ static FETCHcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
 #if !defined(_WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
   {
     int qfd;
-    (void)Curl_qlogdir(data, ctx->scid, sizeof(ctx->scid), &qfd);
+    (void)Fetch_qlogdir(data, ctx->scid, sizeof(ctx->scid), &qfd);
     if (qfd != -1)
       quiche_conn_set_qlog_fd(ctx->qconn, qfd,
                               "qlog title", "fetch qlog");
@@ -1483,18 +1483,18 @@ static FETCHcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static FETCHcode cf_quiche_verify_peer(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+static FETCHcode cf_quiche_verify_peer(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
 
   cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
 
-  return Curl_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
+  return Fetch_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
 }
 
-static FETCHcode cf_quiche_connect(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static FETCHcode cf_quiche_connect(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    bool blocking, bool *done)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -1509,7 +1509,7 @@ static FETCHcode cf_quiche_connect(struct Curl_cfilter *cf,
   /* Connect the UDP filter first */
   if (!cf->next->connected)
   {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Fetch_conn_cf_connect(cf->next, data, blocking, done);
     if (result || !*done)
       return result;
   }
@@ -1540,7 +1540,7 @@ static FETCHcode cf_quiche_connect(struct Curl_cfilter *cf,
   {
     ctx->handshake_at = ctx->q.last_op;
     FETCH_TRC_CF(data, cf, "handshake complete after %dms",
-                 (int)Curl_timediff(ctx->handshake_at, ctx->started_at));
+                 (int)Fetch_timediff(ctx->handshake_at, ctx->started_at));
     result = cf_quiche_verify_peer(cf, data);
     if (!result)
     {
@@ -1580,7 +1580,7 @@ out:
   {
     struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+    Fetch_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     infof(data, "connect to %s port %u failed: %s",
           ip.remote_ip, ip.remote_port, fetch_easy_strerror(result));
   }
@@ -1588,8 +1588,8 @@ out:
   return result;
 }
 
-static FETCHcode cf_quiche_shutdown(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data, bool *done)
+static FETCHcode cf_quiche_shutdown(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data, bool *done)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   FETCHcode result = FETCHE_OK;
@@ -1618,7 +1618,7 @@ static FETCHcode cf_quiche_shutdown(struct Curl_cfilter *cf,
     }
   }
 
-  if (!Curl_bufq_is_empty(&ctx->q.sendbuf))
+  if (!Fetch_bufq_is_empty(&ctx->q.sendbuf))
   {
     FETCH_TRC_CF(data, cf, "shutdown, flushing sendbuf");
     result = cf_flush_egress(cf, data);
@@ -1626,7 +1626,7 @@ static FETCHcode cf_quiche_shutdown(struct Curl_cfilter *cf,
       goto out;
   }
 
-  if (Curl_bufq_is_empty(&ctx->q.sendbuf))
+  if (Fetch_bufq_is_empty(&ctx->q.sendbuf))
   {
     /* sent everything, quiche does not seem to support a graceful
      * shutdown waiting for a reply, so ware done. */
@@ -1642,7 +1642,7 @@ out:
   return result;
 }
 
-static void cf_quiche_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_quiche_close(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   if (cf->ctx)
   {
@@ -1652,7 +1652,7 @@ static void cf_quiche_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static void cf_quiche_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_quiche_destroy(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   (void)data;
   if (cf->ctx)
@@ -1662,8 +1662,8 @@ static void cf_quiche_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static FETCHcode cf_quiche_query(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
+static FETCHcode cf_quiche_query(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data,
                                  int query, int *pres1, void *pres2)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -1686,7 +1686,7 @@ static FETCHcode cf_quiche_query(struct Curl_cfilter *cf,
   case CF_QUERY_CONNECT_REPLY_MS:
     if (ctx->q.got_first_byte)
     {
-      timediff_t ms = Curl_timediff(ctx->q.first_byte_at, ctx->started_at);
+      timediff_t ms = Fetch_timediff(ctx->q.first_byte_at, ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -1715,8 +1715,8 @@ static FETCHcode cf_quiche_query(struct Curl_cfilter *cf,
   return cf->next ? cf->next->cft->query(cf->next, data, query, pres1, pres2) : FETCHE_UNKNOWN_OPTION;
 }
 
-static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+static bool cf_quiche_conn_is_alive(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     bool *input_pending)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -1755,7 +1755,7 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
   return alive;
 }
 
-struct Curl_cftype Curl_cft_http3 = {
+struct Fetch_cftype Fetch_cft_http3 = {
     "HTTP/3",
     CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
     0,
@@ -1763,24 +1763,24 @@ struct Curl_cftype Curl_cft_http3 = {
     cf_quiche_connect,
     cf_quiche_close,
     cf_quiche_shutdown,
-    Curl_cf_def_get_host,
+    Fetch_cf_def_get_host,
     cf_quiche_adjust_pollset,
     cf_quiche_data_pending,
     cf_quiche_send,
     cf_quiche_recv,
     cf_quiche_data_event,
     cf_quiche_conn_is_alive,
-    Curl_cf_def_conn_keep_alive,
+    Fetch_cf_def_conn_keep_alive,
     cf_quiche_query,
 };
 
-FETCHcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
-                                struct Curl_easy *data,
+FETCHcode Fetch_cf_quiche_create(struct Fetch_cfilter **pcf,
+                                struct Fetch_easy *data,
                                 struct connectdata *conn,
-                                const struct Curl_addrinfo *ai)
+                                const struct Fetch_addrinfo *ai)
 {
   struct cf_quiche_ctx *ctx = NULL;
-  struct Curl_cfilter *cf = NULL, *udp_cf = NULL;
+  struct Fetch_cfilter *cf = NULL, *udp_cf = NULL;
   FETCHcode result;
 
   (void)data;
@@ -1793,11 +1793,11 @@ FETCHcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
   }
   cf_quiche_ctx_init(ctx);
 
-  result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
+  result = Fetch_cf_create(&cf, &Fetch_cft_http3, ctx);
   if (result)
     goto out;
 
-  result = Curl_cf_udp_create(&udp_cf, data, conn, ai, TRNSPRT_QUIC);
+  result = Fetch_cf_udp_create(&udp_cf, data, conn, ai, TRNSPRT_QUIC);
   if (result)
     goto out;
 
@@ -1810,24 +1810,24 @@ out:
   if (result)
   {
     if (udp_cf)
-      Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
-    Curl_safefree(cf);
+      Fetch_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
+    Fetch_safefree(cf);
     cf_quiche_ctx_free(ctx);
   }
 
   return result;
 }
 
-bool Curl_conn_is_quiche(const struct Curl_easy *data,
+bool Fetch_conn_is_quiche(const struct Fetch_easy *data,
                          const struct connectdata *conn,
                          int sockindex)
 {
-  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
+  struct Fetch_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
 
   (void)data;
   for (; cf; cf = cf->next)
   {
-    if (cf->cft == &Curl_cft_http3)
+    if (cf->cft == &Fetch_cft_http3)
       return TRUE;
     if (cf->cft->flags & CF_TYPE_IP_CONNECT)
       return FALSE;

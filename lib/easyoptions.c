@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@
 #include "easyoptions.h"
 
 /* all easy setopt options listed in alphabetical order */
-struct fetch_easyoption Curl_easyopts[] = {
+struct fetch_easyoption Fetch_easyopts[] = {
     {"ABSTRACT_UNIX_SOCKET", FETCHOPT_ABSTRACT_UNIX_SOCKET, FETCHOT_STRING, 0},
     {"ACCEPTTIMEOUT_MS", FETCHOPT_ACCEPTTIMEOUT_MS, FETCHOT_LONG, 0},
     {"ACCEPT_ENCODING", FETCHOPT_ACCEPT_ENCODING, FETCHOT_STRING, 0},
@@ -372,10 +372,10 @@ struct fetch_easyoption Curl_easyopts[] = {
 
 #ifdef DEBUGBUILD
 /*
- * Curl_easyopts_check() is a debug-only function that returns non-zero
+ * Fetch_easyopts_check() is a debug-only function that returns non-zero
  * if this source file is not in sync with the options listed in fetch/fetch.h
  */
-int Curl_easyopts_check(void)
+int Fetch_easyopts_check(void)
 {
   return (FETCHOPT_LASTENTRY % 10000) != (326 + 1);
 }

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -59,22 +59,22 @@ void vquic_ctx_free(struct cf_quic_ctx *qctx);
 
 void vquic_ctx_update_time(struct cf_quic_ctx *qctx);
 
-void vquic_push_blocked_pkt(struct Curl_cfilter *cf,
+void vquic_push_blocked_pkt(struct Fetch_cfilter *cf,
                             struct cf_quic_ctx *qctx,
                             const uint8_t *pkt, size_t pktlen, size_t gsolen);
 
-FETCHcode vquic_send_blocked_pkts(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+FETCHcode vquic_send_blocked_pkts(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct cf_quic_ctx *qctx);
 
-FETCHcode vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+FETCHcode vquic_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                      struct cf_quic_ctx *qctx, size_t gsolen);
 
-FETCHcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
+FETCHcode vquic_send_tail_split(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                                 struct cf_quic_ctx *qctx, size_t gsolen,
                                 size_t tail_len, size_t tail_gsolen);
 
-FETCHcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
+FETCHcode vquic_flush(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                       struct cf_quic_ctx *qctx);
 
 typedef FETCHcode vquic_recv_pkt_cb(const unsigned char *pkt, size_t pktlen,
@@ -82,8 +82,8 @@ typedef FETCHcode vquic_recv_pkt_cb(const unsigned char *pkt, size_t pktlen,
                                     socklen_t remote_addrlen, int ecn,
                                     void *userp);
 
-FETCHcode vquic_recv_packets(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
+FETCHcode vquic_recv_packets(struct Fetch_cfilter *cf,
+                             struct Fetch_easy *data,
                              struct cf_quic_ctx *qctx,
                              size_t max_pkts,
                              vquic_recv_pkt_cb *recv_cb, void *userp);

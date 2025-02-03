@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,7 +54,7 @@
 
 /*
  * Internal function used for waiting a specific amount of ms in
- * Curl_socket_check() and Curl_poll() when no file descriptor is provided to
+ * Fetch_socket_check() and Fetch_poll() when no file descriptor is provided to
  * wait on, just being used to delay execution. Winsock select() and poll()
  * timeout mechanisms need a valid socket descriptor in a not null file
  * descriptor set to work. Waiting indefinitely with this function is not
@@ -67,7 +67,7 @@
  *   -1 = system call error, or invalid timeout value
  *    0 = specified timeout has elapsed, or interrupted
  */
-int Curl_wait_ms(timediff_t timeout_ms)
+int Fetch_wait_ms(timediff_t timeout_ms)
 {
   int r = 0;
 
@@ -135,7 +135,7 @@ static int our_select(fetch_socket_t maxfd,  /* highest socket number */
       (!fds_err || fds_err->fd_count == 0))
   {
     /* no sockets, just wait */
-    return Curl_wait_ms(timeout_ms);
+    return Fetch_wait_ms(timeout_ms);
   }
 #endif
 
@@ -185,7 +185,7 @@ static int our_select(fetch_socket_t maxfd,  /* highest socket number */
  * FETCH_CSELECT_OUT - write socket is writable
  * FETCH_CSELECT_ERR - an error condition occurred
  */
-int Curl_socket_check(fetch_socket_t readfd0, /* two sockets to read from */
+int Fetch_socket_check(fetch_socket_t readfd0, /* two sockets to read from */
                       fetch_socket_t readfd1,
                       fetch_socket_t writefd, /* socket to write to */
                       timediff_t timeout_ms)  /* milliseconds to wait */
@@ -198,10 +198,10 @@ int Curl_socket_check(fetch_socket_t readfd0, /* two sockets to read from */
       (writefd == FETCH_SOCKET_BAD))
   {
     /* no sockets, just wait */
-    return Curl_wait_ms(timeout_ms);
+    return Fetch_wait_ms(timeout_ms);
   }
 
-  /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
+  /* Avoid initial timestamp, avoid Fetch_now() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
@@ -229,7 +229,7 @@ int Curl_socket_check(fetch_socket_t readfd0, /* two sockets to read from */
     num++;
   }
 
-  r = Curl_poll(pfd, (unsigned int)num, timeout_ms);
+  r = Fetch_poll(pfd, (unsigned int)num, timeout_ms);
   if (r <= 0)
     return r;
 
@@ -275,7 +275,7 @@ int Curl_socket_check(fetch_socket_t readfd0, /* two sockets to read from */
  *    0 = timeout
  *    N = number of structures with non zero revent fields
  */
-int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
+int Fetch_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
 {
 #ifdef HAVE_POLL
   int pending_ms;
@@ -303,10 +303,10 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   if (fds_none)
   {
     /* no sockets, just wait */
-    return Curl_wait_ms(timeout_ms);
+    return Fetch_wait_ms(timeout_ms);
   }
 
-  /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
+  /* Avoid initial timestamp, avoid Fetch_now() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
@@ -421,7 +421,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   return r;
 }
 
-void Curl_pollfds_init(struct fetch_pollfds *cpfds,
+void Fetch_pollfds_init(struct fetch_pollfds *cpfds,
                        struct pollfd *static_pfds,
                        unsigned int static_count)
 {
@@ -434,7 +434,7 @@ void Curl_pollfds_init(struct fetch_pollfds *cpfds,
   }
 }
 
-void Curl_pollfds_cleanup(struct fetch_pollfds *cpfds)
+void Fetch_pollfds_cleanup(struct fetch_pollfds *cpfds)
 {
   DEBUGASSERT(cpfds);
   if (cpfds->allocated_pfds)
@@ -490,13 +490,13 @@ static FETCHcode cpfds_add_sock(struct fetch_pollfds *cpfds,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_pollfds_add_sock(struct fetch_pollfds *cpfds,
+FETCHcode Fetch_pollfds_add_sock(struct fetch_pollfds *cpfds,
                                 fetch_socket_t sock, short events)
 {
   return cpfds_add_sock(cpfds, sock, events, FALSE);
 }
 
-FETCHcode Curl_pollfds_add_ps(struct fetch_pollfds *cpfds,
+FETCHcode Fetch_pollfds_add_ps(struct fetch_pollfds *cpfds,
                               struct easy_pollset *ps)
 {
   size_t i;
@@ -519,7 +519,7 @@ FETCHcode Curl_pollfds_add_ps(struct fetch_pollfds *cpfds,
   return FETCHE_OK;
 }
 
-void Curl_waitfds_init(struct Curl_waitfds *cwfds,
+void Fetch_waitfds_init(struct Fetch_waitfds *cwfds,
                        struct fetch_waitfd *static_wfds,
                        unsigned int static_count)
 {
@@ -530,7 +530,7 @@ void Curl_waitfds_init(struct Curl_waitfds *cwfds,
   cwfds->count = static_count;
 }
 
-static unsigned int cwfds_add_sock(struct Curl_waitfds *cwfds,
+static unsigned int cwfds_add_sock(struct Fetch_waitfds *cwfds,
                                    fetch_socket_t sock, short events)
 {
   int i;
@@ -560,7 +560,7 @@ static unsigned int cwfds_add_sock(struct Curl_waitfds *cwfds,
   return 1;
 }
 
-unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
+unsigned int Fetch_waitfds_add_ps(struct Fetch_waitfds *cwfds,
                                  struct easy_pollset *ps)
 {
   size_t i;

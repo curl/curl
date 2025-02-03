@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,7 +25,7 @@
 #include <fetch/fetch.h>
 
 /*
- * Use this tool to generate an updated table for the Curl_getn_scheme_handler
+ * Use this tool to generate an updated table for the Fetch_getn_scheme_handler
  * function in url.c.
  */
 
@@ -105,14 +105,14 @@ static void showtable(int try, int init, int shift)
          "   unsigned int c = %d\n"
          "   while(l) {\n"
          "     c <<= %d;\n"
-         "     c += Curl_raw_tolower(*s);\n"
+         "     c += Fetch_raw_tolower(*s);\n"
          "     s++;\n"
          "     l--;\n"
          "   }\n"
          "*/\n",
          init, shift);
 
-  printf("  static const struct Curl_handler * const protocols[%d] = {", try);
+  printf("  static const struct Fetch_handler * const protocols[%d] = {", try);
 
   /* generate table */
   for (i = 0; i < try; i++)
@@ -125,7 +125,7 @@ static void showtable(int try, int init, int shift)
       {
         printf("\n");
         printf("%s\n", scheme[j].ifdef);
-        printf("    &Curl_handler_%s,\n", scheme[j].n);
+        printf("    &Fetch_handler_%s,\n", scheme[j].n);
         printf("#else\n    NULL,\n");
         printf("#endif");
         match = 1;

@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@ import logging
 import os
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, FetchClient
 
 
 log = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class TestInfo:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True)
         r.check_stats(count=count, http_status=200, exitcode=0,
@@ -73,7 +73,7 @@ class TestInfo:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json.302?[0-{count-1}]'
         r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True, extra_args=[
             '--location'
@@ -91,7 +91,7 @@ class TestInfo:
         count = 2
         fdata = os.path.join(env.gen_dir, 'data-100k')
         fsize = 100 * 1024
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              with_headers=True, extra_args=[
@@ -108,7 +108,7 @@ class TestInfo:
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_16_04_info_http_download(self, env: Env, httpd, nghttpx, proto):
         count = 2
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
         r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True)
         r.check_stats(count=count, http_status=200, exitcode=0,

@@ -16,7 +16,7 @@ From File: fetch_gnv_build_steps.txt
 
  SPDX-License-Identifier: ISC
 
-Currently building Curl using GNV takes longer than building Curl via DCL.
+Currently building Fetch using GNV takes longer than building Fetch via DCL.
 The GNV procedure actually uses the same configure and makefiles that
 Unix builds use.
 
@@ -38,7 +38,7 @@ time that this document was written.
 [gnv.common_src]fetch_*_original_src.bck is the original source of the fetch kit
 as provided by the fetch project.  [gnv.vms_src]fetch-*_vms_src.bck, if present,
 has the OpenVMS specific files that are used for building that are not yet in
-the fetch source kits for that release distributed https://curl.se
+the fetch source kits for that release distributed https://fetch.se
 
 These backup savesets should be restored to different directory trees on
 an ODS-5 volume(s) which are referenced by concealed rooted logical names.

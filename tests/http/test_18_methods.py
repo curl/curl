@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@
 import logging
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, FetchClient
 
 
 log = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class TestMethods:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/tweak?id=[0-{count-1}]'
         r = fetch.http_delete(urls=[url], alpn_proto=proto)
         r.check_stats(count=count, http_status=204, exitcode=0)
@@ -66,7 +66,7 @@ class TestMethods:
     def test_18_02_delete_h2_special(self, env: Env, httpd, nghttpx):
         proto = 'h2'
         count = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/tweak?id=[0-{count-1}]'\
                 '&chunks=1&chunk_size=0&chunk_delay=10ms'
         r = fetch.http_delete(urls=[url], alpn_proto=proto)

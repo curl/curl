@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,7 +41,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_auth_is_gssapi_supported()
+ * Fetch_auth_is_gssapi_supported()
  *
  * This is used to evaluate if GSSAPI (Kerberos V5) is supported.
  *
@@ -49,27 +49,27 @@
  *
  * Returns TRUE if Kerberos V5 is supported by Windows SSPI.
  */
-bool Curl_auth_is_gssapi_supported(void)
+bool Fetch_auth_is_gssapi_supported(void)
 {
   PSecPkgInfo SecurityPackage;
   SECURITY_STATUS status;
 
   /* Query the security package for Kerberos */
-  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
+  status = Fetch_pSecFn->QuerySecurityPackageInfo((TCHAR *)
                                                      TEXT(SP_NAME_KERBEROS),
                                                  &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
   if (status == SEC_E_OK)
   {
-    Curl_pSecFn->FreeContextBuffer(SecurityPackage);
+    Fetch_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
   return status == SEC_E_OK;
 }
 
 /*
- * Curl_auth_create_gssapi_user_message()
+ * Fetch_auth_create_gssapi_user_message()
  *
  * This is used to generate an already encoded GSSAPI (Kerberos V5) user token
  * message ready for sending to the recipient.
@@ -89,7 +89,7 @@ bool Curl_auth_is_gssapi_supported(void)
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
+FETCHcode Fetch_auth_create_gssapi_user_message(struct Fetch_easy *data,
                                                const char *userp,
                                                const char *passwdp,
                                                const char *service,
@@ -113,7 +113,7 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   if (!krb5->spn)
   {
     /* Generate our SPN */
-    krb5->spn = Curl_auth_build_spn(service, host, NULL);
+    krb5->spn = Fetch_auth_build_spn(service, host, NULL);
     if (!krb5->spn)
       return FETCHE_OUT_OF_MEMORY;
   }
@@ -121,7 +121,7 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   if (!krb5->output_token)
   {
     /* Query the security package for Kerberos */
-    status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
+    status = Fetch_pSecFn->QuerySecurityPackageInfo((TCHAR *)
                                                        TEXT(SP_NAME_KERBEROS),
                                                    &SecurityPackage);
     if (status != SEC_E_OK)
@@ -133,7 +133,7 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     krb5->token_max = SecurityPackage->cbMaxToken;
 
     /* Release the package buffer as it is not required anymore */
-    Curl_pSecFn->FreeContextBuffer(SecurityPackage);
+    Fetch_pSecFn->FreeContextBuffer(SecurityPackage);
 
     /* Allocate our response buffer */
     krb5->output_token = malloc(krb5->token_max);
@@ -147,7 +147,7 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     if (userp && *userp)
     {
       /* Populate our identity structure */
-      result = Curl_create_sspi_identity(userp, passwdp, &krb5->identity);
+      result = Fetch_create_sspi_identity(userp, passwdp, &krb5->identity);
       if (result)
         return result;
 
@@ -164,7 +164,7 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       return FETCHE_OUT_OF_MEMORY;
 
     /* Acquire our credentials handle */
-    status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
+    status = Fetch_pSecFn->AcquireCredentialsHandle(NULL,
                                                    (TCHAR *)
                                                        TEXT(SP_NAME_KERBEROS),
                                                    SECPKG_CRED_OUTBOUND, NULL,
@@ -181,7 +181,7 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
   if (chlg)
   {
-    if (!Curl_bufref_len(chlg))
+    if (!Fetch_bufref_len(chlg))
     {
       infof(data, "GSSAPI handshake failure (empty challenge message)");
       return FETCHE_BAD_CONTENT_ENCODING;
@@ -192,8 +192,8 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     chlg_desc.cBuffers = 1;
     chlg_desc.pBuffers = &chlg_buf;
     chlg_buf.BufferType = SECBUFFER_TOKEN;
-    chlg_buf.pvBuffer = (void *)Curl_bufref_ptr(chlg);
-    chlg_buf.cbBuffer = fetchx_uztoul(Curl_bufref_len(chlg));
+    chlg_buf.pvBuffer = (void *)Fetch_bufref_ptr(chlg);
+    chlg_buf.cbBuffer = fetchx_uztoul(Fetch_bufref_len(chlg));
   }
 
   /* Setup the response "output" security buffer */
@@ -205,7 +205,7 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   resp_buf.cbBuffer = fetchx_uztoul(krb5->token_max);
 
   /* Generate our challenge-response message */
-  status = Curl_pSecFn->InitializeSecurityContext(krb5->credentials,
+  status = Fetch_pSecFn->InitializeSecurityContext(krb5->credentials,
                                                   chlg ? krb5->context : NULL,
                                                   krb5->spn,
                                                   (mutual_auth ? ISC_REQ_MUTUAL_AUTH : 0),
@@ -223,25 +223,25 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
   if (memcmp(&context, krb5->context, sizeof(context)))
   {
-    Curl_pSecFn->DeleteSecurityContext(krb5->context);
+    Fetch_pSecFn->DeleteSecurityContext(krb5->context);
 
     memcpy(krb5->context, &context, sizeof(context));
   }
 
   if (resp_buf.cbBuffer)
   {
-    result = Curl_bufref_memdup(out, resp_buf.pvBuffer, resp_buf.cbBuffer);
+    result = Fetch_bufref_memdup(out, resp_buf.pvBuffer, resp_buf.cbBuffer);
   }
   else if (mutual_auth)
-    Curl_bufref_set(out, "", 0, NULL);
+    Fetch_bufref_set(out, "", 0, NULL);
   else
-    Curl_bufref_set(out, NULL, 0, NULL);
+    Fetch_bufref_set(out, NULL, 0, NULL);
 
   return result;
 }
 
 /*
- * Curl_auth_create_gssapi_security_message()
+ * Fetch_auth_create_gssapi_security_message()
  *
  * This is used to generate an already encoded GSSAPI (Kerberos V5) security
  * token message ready for sending to the recipient.
@@ -256,7 +256,7 @@ FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
+FETCHcode Fetch_auth_create_gssapi_security_message(struct Fetch_easy *data,
                                                    const char *authzid,
                                                    const struct bufref *chlg,
                                                    struct kerberos5data *krb5,
@@ -285,14 +285,14 @@ FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 #endif
 
   /* Ensure we have a valid challenge message */
-  if (!Curl_bufref_len(chlg))
+  if (!Fetch_bufref_len(chlg))
   {
     infof(data, "GSSAPI handshake failure (empty security message)");
     return FETCHE_BAD_CONTENT_ENCODING;
   }
 
   /* Get our response size information */
-  status = Curl_pSecFn->QueryContextAttributes(krb5->context,
+  status = Fetch_pSecFn->QueryContextAttributes(krb5->context,
                                                SECPKG_ATTR_SIZES,
                                                &sizes);
 
@@ -307,14 +307,14 @@ FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   input_desc.cBuffers = 2;
   input_desc.pBuffers = input_buf;
   input_buf[0].BufferType = SECBUFFER_STREAM;
-  input_buf[0].pvBuffer = (void *)Curl_bufref_ptr(chlg);
-  input_buf[0].cbBuffer = fetchx_uztoul(Curl_bufref_len(chlg));
+  input_buf[0].pvBuffer = (void *)Fetch_bufref_ptr(chlg);
+  input_buf[0].cbBuffer = fetchx_uztoul(Fetch_bufref_len(chlg));
   input_buf[1].BufferType = SECBUFFER_DATA;
   input_buf[1].pvBuffer = NULL;
   input_buf[1].cbBuffer = 0;
 
   /* Decrypt the inbound challenge and obtain the qop */
-  status = Curl_pSecFn->DecryptMessage(krb5->context, &input_desc, 0, &qop);
+  status = Fetch_pSecFn->DecryptMessage(krb5->context, &input_desc, 0, &qop);
   if (status != SEC_E_OK)
   {
     infof(data, "GSSAPI handshake failure (empty security message)");
@@ -335,7 +335,7 @@ FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
              ((unsigned long)indata[2] << 8) | indata[3];
 
   /* Free the challenge as it is not required anymore */
-  Curl_pSecFn->FreeContextBuffer(input_buf[1].pvBuffer);
+  Fetch_pSecFn->FreeContextBuffer(input_buf[1].pvBuffer);
 
   /* Process the security layer */
   if (!(sec_layer & KERB_WRAP_NO_ENCRYPT))
@@ -408,7 +408,7 @@ FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   wrap_buf[2].cbBuffer = sizes.cbBlockSize;
 
   /* Encrypt the data */
-  status = Curl_pSecFn->EncryptMessage(krb5->context, KERB_WRAP_NO_ENCRYPT,
+  status = Fetch_pSecFn->EncryptMessage(krb5->context, KERB_WRAP_NO_ENCRYPT,
                                        &wrap_desc, 0);
   if (status != SEC_E_OK)
   {
@@ -448,12 +448,12 @@ FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   free(trailer);
 
   /* Return the response. */
-  Curl_bufref_set(out, appdata, appdatalen, fetch_free);
+  Fetch_bufref_set(out, appdata, appdatalen, fetch_free);
   return FETCHE_OK;
 }
 
 /*
- * Curl_auth_cleanup_gssapi()
+ * Fetch_auth_cleanup_gssapi()
  *
  * This is used to clean up the GSSAPI (Kerberos V5) specific data.
  *
@@ -462,12 +462,12 @@ FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
  * krb5     [in/out] - The Kerberos 5 data struct being cleaned up.
  *
  */
-void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
+void Fetch_auth_cleanup_gssapi(struct kerberos5data *krb5)
 {
   /* Free our security context */
   if (krb5->context)
   {
-    Curl_pSecFn->DeleteSecurityContext(krb5->context);
+    Fetch_pSecFn->DeleteSecurityContext(krb5->context);
     free(krb5->context);
     krb5->context = NULL;
   }
@@ -475,18 +475,18 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
   /* Free our credentials handle */
   if (krb5->credentials)
   {
-    Curl_pSecFn->FreeCredentialsHandle(krb5->credentials);
+    Fetch_pSecFn->FreeCredentialsHandle(krb5->credentials);
     free(krb5->credentials);
     krb5->credentials = NULL;
   }
 
   /* Free our identity */
-  Curl_sspi_free_identity(krb5->p_identity);
+  Fetch_sspi_free_identity(krb5->p_identity);
   krb5->p_identity = NULL;
 
   /* Free the SPN and output token */
-  Curl_safefree(krb5->spn);
-  Curl_safefree(krb5->output_token);
+  Fetch_safefree(krb5->spn);
+  Fetch_safefree(krb5->output_token);
 
   /* Reset any variables */
   krb5->token_max = 0;

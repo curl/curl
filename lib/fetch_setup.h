@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -412,9 +412,9 @@
 #define _SYS_MBUF_H /* m_len define clashes with fetch */
 #include <proto/bsdsocket.h>
 #ifdef __amigaos4__
-int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
+int Fetch_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
                       fd_set *errorfds, struct timeval *timeout);
-#define select(a, b, c, d, e) Curl_amiga_select(a, b, c, d, e)
+#define select(a, b, c, d, e) Fetch_amiga_select(a, b, c, d, e)
 #else
 #define select(a, b, c, d, e) WaitSelect(a, b, c, d, e, 0)
 #endif
@@ -447,9 +447,9 @@ int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
 #endif
 
 #ifdef _WIN32
-#define Curl_getpid() GetCurrentProcessId()
+#define Fetch_getpid() GetCurrentProcessId()
 #else
-#define Curl_getpid() getpid()
+#define Fetch_getpid() getpid()
 #endif
 
 /*
@@ -839,8 +839,8 @@ extern struct tm *gmtime_r(const time_t *const timep, struct tm *tmp);
  * Definition of our NOP statement Object-like macro
  */
 
-#ifndef Curl_nop_stmt
-#define Curl_nop_stmt \
+#ifndef Fetch_nop_stmt
+#define Fetch_nop_stmt \
   do                  \
   {                   \
   } while (0)
@@ -891,7 +891,7 @@ extern struct tm *gmtime_r(const time_t *const timep, struct tm *tmp);
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
-Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
+Therefore we specify it explicitly. https://github.com/fetch/fetch/pull/258
 */
 #if defined(_WIN32) || defined(MSDOS)
 #define FOPEN_READTEXT "rt"

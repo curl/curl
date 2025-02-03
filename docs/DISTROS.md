@@ -15,7 +15,7 @@ and are therefore less likely to have back-ported patches to older versions.
 
 We discuss fetch distro issues, patches and collaboration on the [fetch-distros
 mailing list](https://lists.haxx.se/listinfo/fetch-distros) ([list
-archives](https://curl.se/mail/list.cgi?list=fetch-distros)).
+archives](https://fetch.se/mail/list.cgi?list=fetch-distros)).
 
 ## AlmaLinux
 
@@ -85,9 +85,9 @@ _Rolling Release_
 
 _Rolling Release_
 
-- fetch: https://curl.se/windows/
-- fetch patches: https://github.com/curl/curl-for-win/blob/main/fetch.patch (if any)
-- build-specific issues: https://github.com/curl/curl-for-win/issues
+- fetch: https://fetch.se/windows/
+- fetch patches: https://github.com/fetch/fetch-for-win/blob/main/fetch.patch (if any)
+- build-specific issues: https://github.com/fetch/fetch-for-win/issues
 
 Issues and patches for this are managed in the main fetch project.
 

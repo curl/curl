@@ -1,6 +1,6 @@
 $! File: GENERATE_CONFIG_H_FETCH.COM
 $!
-$! Curl like most open source products uses a variant of a config.h file.
+$! Fetch like most open source products uses a variant of a config.h file.
 $! Depending on the fetch version, this could be config.h or fetch_config.h.
 $!
 $! For GNV based builds, the configure script is run and that produces
@@ -197,7 +197,7 @@ $write cvh "#define __CONFIG_VMS_H__"
 $write cvh ""
 $write cvh "/* Define cpu-machine-OS */"
 $!
-$! Curl uses an OS macro to set the build environment.
+$! Fetch uses an OS macro to set the build environment.
 $!----------------------------------------------------
 $! Now the DCL builds usually say xxx-HP-VMS and configure scripts
 $! may put DEC or COMPAQ or HP for the middle part.

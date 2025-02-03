@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@ import logging
 import os
 import pytest
 
-from testenv import Env, CurlClient, LocalClient
+from testenv import Env, FetchClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ class TestPush:
 
     # download a file that triggers a "103 Early Hints" response
     def test_09_01_h2_early_hints(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/push/data1'
         r = fetch.http_download(urls=[url], alpn_proto='h2', with_stats=False,
                                with_headers=True)

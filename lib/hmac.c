@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,7 +51,7 @@ static const unsigned char hmac_ipad = 0x36;
 static const unsigned char hmac_opad = 0x5C;
 
 struct HMAC_context *
-Curl_HMAC_init(const struct HMAC_params *hashparams,
+Fetch_HMAC_init(const struct HMAC_params *hashparams,
                const unsigned char *key,
                unsigned int keylen)
 {
@@ -104,7 +104,7 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
   return ctxt;
 }
 
-int Curl_HMAC_update(struct HMAC_context *ctxt,
+int Fetch_HMAC_update(struct HMAC_context *ctxt,
                      const unsigned char *ptr,
                      unsigned int len)
 {
@@ -113,7 +113,7 @@ int Curl_HMAC_update(struct HMAC_context *ctxt,
   return 0;
 }
 
-int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
+int Fetch_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
 {
   const struct HMAC_params *hashparams = ctxt->hash;
 
@@ -131,14 +131,14 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
 }
 
 /*
- * Curl_hmacit()
+ * Fetch_hmacit()
  *
  * This is used to generate a HMAC hash, for the specified input data, given
  * the specified hash function and key.
  *
  * Parameters:
  *
- * hashparams [in]     - The hash function (Curl_HMAC_MD5).
+ * hashparams [in]     - The hash function (Fetch_HMAC_MD5).
  * key        [in]     - The key to use.
  * keylen     [in]     - The length of the key.
  * buf        [in]     - The data to encrypt.
@@ -147,22 +147,22 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_hmacit(const struct HMAC_params *hashparams,
+FETCHcode Fetch_hmacit(const struct HMAC_params *hashparams,
                       const unsigned char *key, const size_t keylen,
                       const unsigned char *buf, const size_t buflen,
                       unsigned char *output)
 {
   struct HMAC_context *ctxt =
-      Curl_HMAC_init(hashparams, key, fetchx_uztoui(keylen));
+      Fetch_HMAC_init(hashparams, key, fetchx_uztoui(keylen));
 
   if (!ctxt)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
-  Curl_HMAC_update(ctxt, buf, fetchx_uztoui(buflen));
+  Fetch_HMAC_update(ctxt, buf, fetchx_uztoui(buflen));
 
   /* Finalise the digest */
-  Curl_HMAC_final(ctxt, output);
+  Fetch_HMAC_final(ctxt, output);
 
   return FETCHE_OK;
 }

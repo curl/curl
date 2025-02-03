@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,15 +24,15 @@
  *
  ***************************************************************************/
 
-extern const char *const Curl_wkday[7];
-extern const char *const Curl_month[12];
+extern const char *const Fetch_wkday[7];
+extern const char *const Fetch_month[12];
 
-FETCHcode Curl_gmtime(time_t intime, struct tm *store);
+FETCHcode Fetch_gmtime(time_t intime, struct tm *store);
 
-/* Curl_getdate_capped() differs from fetch_getdate() in that this will return
+/* Fetch_getdate_capped() differs from fetch_getdate() in that this will return
    TIME_T_MAX in case the parsed time value was too big, instead of an
    error. */
 
-time_t Curl_getdate_capped(const char *p);
+time_t Fetch_getdate_capped(const char *p);
 
 #endif /* HEADER_FETCH_PARSEDATE_H */

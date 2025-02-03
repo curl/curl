@@ -269,10 +269,10 @@ download URLs provided and put in CPQ-VAXVMS-SSL-V0101-B-1.PCSI-DCX_VAXEXE
 If your system can not be upgraded to a compatible version of OpenSSL, then
 you can extract the two shared images from the kit and place them in the
 [vms$common.gnv.lib]directory of the volume that you are installing GNV and
-or GNV compatible components like Curl.
+or GNV compatible components like Fetch.
 
 If GNV is installed, you must run the GNV startup procedure before these steps
-and before installing Curl.
+and before installing Fetch.
 
 
   1.  make sure that [vms$common.gnv.lib] exists by using the following

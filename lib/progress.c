@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -129,11 +129,11 @@ static char *max5data(fetch_off_t bytes, char *max5)
 
 */
 
-int Curl_pgrsDone(struct Curl_easy *data)
+int Fetch_pgrsDone(struct Fetch_easy *data)
 {
   int rc;
   data->progress.lastshow = 0;
-  rc = Curl_pgrsUpdate(data); /* the final (forced) update */
+  rc = Fetch_pgrsUpdate(data); /* the final (forced) update */
   if (rc)
     return rc;
 
@@ -148,17 +148,17 @@ int Curl_pgrsDone(struct Curl_easy *data)
 }
 
 /* reset the known transfer sizes */
-void Curl_pgrsResetTransferSizes(struct Curl_easy *data)
+void Fetch_pgrsResetTransferSizes(struct Fetch_easy *data)
 {
-  Curl_pgrsSetDownloadSize(data, -1);
-  Curl_pgrsSetUploadSize(data, -1);
+  Fetch_pgrsSetDownloadSize(data, -1);
+  Fetch_pgrsSetUploadSize(data, -1);
 }
 
 /*
  *
- * Curl_pgrsTimeWas(). Store the timestamp time at the given label.
+ * Fetch_pgrsTimeWas(). Store the timestamp time at the given label.
  */
-void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
+void Fetch_pgrsTimeWas(struct Fetch_easy *data, timerid timer,
                       struct fetchtime timestamp)
 {
   timediff_t *delta = NULL;
@@ -183,7 +183,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_POSTQUEUE:
     /* Queue time is accumulative from all involved redirects */
     data->progress.t_postqueue +=
-        Curl_timediff_us(timestamp, data->progress.t_startqueue);
+        Fetch_timediff_us(timestamp, data->progress.t_startqueue);
     break;
   case TIMER_STARTACCEPT:
     data->progress.t_acceptdata = timestamp;
@@ -221,14 +221,14 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
     delta = &data->progress.t_posttransfer;
     break;
   case TIMER_REDIRECT:
-    data->progress.t_redirect = Curl_timediff_us(timestamp,
+    data->progress.t_redirect = Fetch_timediff_us(timestamp,
                                                  data->progress.start);
     data->progress.t_startqueue = timestamp;
     break;
   }
   if (delta)
   {
-    timediff_t us = Curl_timediff_us(timestamp, data->progress.t_startsingle);
+    timediff_t us = Fetch_timediff_us(timestamp, data->progress.t_startsingle);
     if (us < 1)
       us = 1; /* make sure at least one microsecond passed */
     *delta += us;
@@ -237,23 +237,23 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
 
 /*
  *
- * Curl_pgrsTime(). Store the current time at the given label. This fetches a
+ * Fetch_pgrsTime(). Store the current time at the given label. This fetches a
  * fresh "now" and returns it.
  *
  * @unittest: 1399
  */
-struct fetchtime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
+struct fetchtime Fetch_pgrsTime(struct Fetch_easy *data, timerid timer)
 {
-  struct fetchtime now = Curl_now();
+  struct fetchtime now = Fetch_now();
 
-  Curl_pgrsTimeWas(data, timer, now);
+  Fetch_pgrsTimeWas(data, timer, now);
   return now;
 }
 
-void Curl_pgrsStartNow(struct Curl_easy *data)
+void Fetch_pgrsStartNow(struct Fetch_easy *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
-  data->progress.start = Curl_now();
+  data->progress.start = Fetch_now();
   data->progress.is_t_startransfer_set = FALSE;
   data->progress.ul.limit.start = data->progress.start;
   data->progress.dl.limit.start = data->progress.start;
@@ -263,7 +263,7 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.ul.cur_size = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
   data->progress.flags &= PGRS_HIDE | PGRS_HEADERS_OUT;
-  Curl_ratelimit(data, data->progress.start);
+  Fetch_ratelimit(data, data->progress.start);
 }
 
 /*
@@ -284,7 +284,7 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
  * starting point should be reset (to current); or the number of milliseconds
  * to wait to get back under the speed limit.
  */
-timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
+timediff_t Fetch_pgrsLimitWaitTime(struct pgrs_dir *d,
                                   fetch_off_t speed_limit,
                                   struct fetchtime now)
 {
@@ -314,7 +314,7 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
    * 'actual' is the time in milliseconds it took to actually download the
    * last 'size' bytes.
    */
-  actual = Curl_timediff_ceil(now, d->limit.start);
+  actual = Fetch_timediff_ceil(now, d->limit.start);
   if (actual < minimum)
   {
     /* if it downloaded the data faster than the limit, make it wait the
@@ -328,7 +328,7 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
 /*
  * Set the number of downloaded bytes so far.
  */
-FETCHcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, fetch_off_t size)
+FETCHcode Fetch_pgrsSetDownloadCounter(struct Fetch_easy *data, fetch_off_t size)
 {
   data->progress.dl.cur_size = size;
   return FETCHE_OK;
@@ -337,12 +337,12 @@ FETCHcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, fetch_off_t size)
 /*
  * Update the timestamp and sizestamp to use for rate limit calculations.
  */
-void Curl_ratelimit(struct Curl_easy *data, struct fetchtime now)
+void Fetch_ratelimit(struct Fetch_easy *data, struct fetchtime now)
 {
   /* do not set a new stamp unless the time since last update is long enough */
   if (data->set.max_recv_speed)
   {
-    if (Curl_timediff(now, data->progress.dl.limit.start) >=
+    if (Fetch_timediff(now, data->progress.dl.limit.start) >=
         MIN_RATE_LIMIT_PERIOD)
     {
       data->progress.dl.limit.start = now;
@@ -351,7 +351,7 @@ void Curl_ratelimit(struct Curl_easy *data, struct fetchtime now)
   }
   if (data->set.max_send_speed)
   {
-    if (Curl_timediff(now, data->progress.ul.limit.start) >=
+    if (Fetch_timediff(now, data->progress.ul.limit.start) >=
         MIN_RATE_LIMIT_PERIOD)
     {
       data->progress.ul.limit.start = now;
@@ -363,12 +363,12 @@ void Curl_ratelimit(struct Curl_easy *data, struct fetchtime now)
 /*
  * Set the number of uploaded bytes so far.
  */
-void Curl_pgrsSetUploadCounter(struct Curl_easy *data, fetch_off_t size)
+void Fetch_pgrsSetUploadCounter(struct Fetch_easy *data, fetch_off_t size)
 {
   data->progress.ul.cur_size = size;
 }
 
-void Curl_pgrsSetDownloadSize(struct Curl_easy *data, fetch_off_t size)
+void Fetch_pgrsSetDownloadSize(struct Fetch_easy *data, fetch_off_t size)
 {
   if (size >= 0)
   {
@@ -382,7 +382,7 @@ void Curl_pgrsSetDownloadSize(struct Curl_easy *data, fetch_off_t size)
   }
 }
 
-void Curl_pgrsSetUploadSize(struct Curl_easy *data, fetch_off_t size)
+void Fetch_pgrsSetUploadSize(struct Fetch_easy *data, fetch_off_t size)
 {
   if (size >= 0)
   {
@@ -396,7 +396,7 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, fetch_off_t size)
   }
 }
 
-void Curl_pgrsEarlyData(struct Curl_easy *data, fetch_off_t sent)
+void Fetch_pgrsEarlyData(struct Fetch_easy *data, fetch_off_t sent)
 {
   data->progress.earlydata_sent = sent;
 }
@@ -416,13 +416,13 @@ static fetch_off_t trspeed(fetch_off_t size, /* number of bytes */
 }
 
 /* returns TRUE if it is time to show the progress meter */
-static bool progress_calc(struct Curl_easy *data, struct fetchtime now)
+static bool progress_calc(struct Fetch_easy *data, struct fetchtime now)
 {
   bool timetoshow = FALSE;
   struct Progress *const p = &data->progress;
 
   /* The time spent so far (from the start) in microseconds */
-  p->timespent = Curl_timediff_us(now, p->start);
+  p->timespent = Fetch_timediff_us(now, p->start);
   p->dl.speed = trspeed(p->dl.cur_size, p->timespent);
   p->ul.speed = trspeed(p->ul.cur_size, p->timespent);
 
@@ -464,7 +464,7 @@ static bool progress_calc(struct Curl_easy *data, struct fetchtime now)
       checkindex = (p->speeder_c >= CURR_TIME) ? p->speeder_c % CURR_TIME : 0;
 
       /* Figure out the exact time for the time span */
-      span_ms = Curl_timediff(now, p->speeder_time[checkindex]);
+      span_ms = Fetch_timediff(now, p->speeder_time[checkindex]);
       if (0 == span_ms)
         span_ms = 1; /* at least one millisecond MUST have passed */
 
@@ -518,7 +518,7 @@ static void pgrs_estimates(struct pgrs_dir *d,
   }
 }
 
-static void progress_meter(struct Curl_easy *data)
+static void progress_meter(struct Fetch_easy *data)
 {
   struct Progress *p = &data->progress;
   char max5[6][10];
@@ -593,14 +593,14 @@ static void progress_meter(struct Curl_easy *data)
 }
 #else
 /* progress bar disabled */
-#define progress_meter(x) Curl_nop_stmt
+#define progress_meter(x) Fetch_nop_stmt
 #endif
 
 /*
- * Curl_pgrsUpdate() returns 0 for success or the value returned by the
+ * Fetch_pgrsUpdate() returns 0 for success or the value returned by the
  * progress callback!
  */
-static int pgrsupdate(struct Curl_easy *data, bool showprogress)
+static int pgrsupdate(struct Fetch_easy *data, bool showprogress)
 {
   if (!(data->progress.flags & PGRS_HIDE))
   {
@@ -608,13 +608,13 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
     {
       int result;
       /* There is a callback set, call that */
-      Curl_set_in_callback(data, TRUE);
+      Fetch_set_in_callback(data, TRUE);
       result = data->set.fxferinfo(data->set.progress_client,
                                    data->progress.dl.total_size,
                                    data->progress.dl.cur_size,
                                    data->progress.ul.total_size,
                                    data->progress.ul.cur_size);
-      Curl_set_in_callback(data, FALSE);
+      Fetch_set_in_callback(data, FALSE);
       if (result != FETCH_PROGRESSFUNC_CONTINUE)
       {
         if (result)
@@ -626,13 +626,13 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
     {
       int result;
       /* The older deprecated callback is set, call that */
-      Curl_set_in_callback(data, TRUE);
+      Fetch_set_in_callback(data, TRUE);
       result = data->set.fprogress(data->set.progress_client,
                                    (double)data->progress.dl.total_size,
                                    (double)data->progress.dl.cur_size,
                                    (double)data->progress.ul.total_size,
                                    (double)data->progress.ul.cur_size);
-      Curl_set_in_callback(data, FALSE);
+      Fetch_set_in_callback(data, FALSE);
       if (result != FETCH_PROGRESSFUNC_CONTINUE)
       {
         if (result)
@@ -648,9 +648,9 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
   return 0;
 }
 
-int Curl_pgrsUpdate(struct Curl_easy *data)
+int Fetch_pgrsUpdate(struct Fetch_easy *data)
 {
-  struct fetchtime now = Curl_now(); /* what time is it */
+  struct fetchtime now = Fetch_now(); /* what time is it */
   bool showprogress = progress_calc(data, now);
   return pgrsupdate(data, showprogress);
 }
@@ -658,8 +658,8 @@ int Curl_pgrsUpdate(struct Curl_easy *data)
 /*
  * Update all progress, do not do progress meter/callbacks.
  */
-void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
+void Fetch_pgrsUpdate_nometer(struct Fetch_easy *data)
 {
-  struct fetchtime now = Curl_now(); /* what time is it */
+  struct fetchtime now = Fetch_now(); /* what time is it */
   (void)progress_calc(data, now);
 }

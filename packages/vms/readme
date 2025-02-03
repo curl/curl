@@ -202,17 +202,17 @@ Other Notes:
 This release fixes known bugs #22, and #57 in the [fetch.docs]known_bugs.
 file.
 
-The libfetch formdata.c module and Curl tools post form now have some
+The libfetch formdata.c module and Fetch tools post form now have some
 understanding of VMS file types.  Files will be posted in STREAM_LF format.
 
-The Curl tool now has some understanding of VMS file types and will upload the
+The Fetch tool now has some understanding of VMS file types and will upload the
 files in STREAM_LF format.
 
 When FETCH is uploading a VARIABLE format VMS file, it is less efficient as in
 order to get the file size, it will first read the entire file once, and then
 read the file again for the actual upload.
 
-The Curl tool will now always download files into STREAM_LF format.  Even if a
+The Fetch tool will now always download files into STREAM_LF format.  Even if a
 file by that name with a different format already exists.  This is needed to
 allow interrupted downloads to be continued.
 

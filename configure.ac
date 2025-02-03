@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 
 dnl We don't know the version number "statically" so we use a dash here
-AC_INIT([fetch], [-], [a suitable fetch mailing list: https://curl.se/mail/])
+AC_INIT([fetch], [-], [a suitable fetch mailing list: https://fetch.se/mail/])
 
 XC_OVR_ZZ50
 XC_OVR_ZZ60

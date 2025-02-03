@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -177,7 +177,7 @@ static const struct testcase tests[] = {
     {"[[:foo:]]", "bar", NOMATCH | MAC_FAIL},
     {"[[:foo:]]", "f]", MATCH | LINUX_NOMATCH | MAC_FAIL},
 
-    {"Curl[[:blank:]];-)", "Curl ;-)", MATCH},
+    {"Fetch[[:blank:]];-)", "Fetch ;-)", MATCH},
     {"*[[:blank:]]*", " ", MATCH},
     {"*[[:blank:]]*", "", NOMATCH},
     {"*[[:blank:]]*", "hi, im_Pavel", MATCH},
@@ -297,7 +297,7 @@ UNITTEST_START
   for (i = 0; i < testnum; i++)
   {
     int result = tests[i].result;
-    int rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
+    int rc = Fetch_fnmatch(NULL, tests[i].pattern, tests[i].string);
     if (result & (LINUX_DIFFER | MAC_DIFFER))
     {
       if ((result & LINUX_DIFFER) && (machine == SYSTEM_LINUX))
@@ -308,7 +308,7 @@ UNITTEST_START
     }
     if (rc != result)
     {
-      printf("Curl_fnmatch(\"%s\", \"%s\") should return %s (returns %s)"
+      printf("Fetch_fnmatch(\"%s\", \"%s\") should return %s (returns %s)"
              " [%d]\n",
              tests[i].pattern, tests[i].string, ret2name(result),
              ret2name(rc), i);

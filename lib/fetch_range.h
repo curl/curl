@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,5 +27,5 @@
 #include "fetch_setup.h"
 #include "urldata.h"
 
-FETCHcode Curl_range(struct Curl_easy *data);
+FETCHcode Fetch_range(struct Fetch_easy *data);
 #endif /* HEADER_FETCH_RANGE_H */

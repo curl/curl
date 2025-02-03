@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,11 +38,11 @@
   If you intend to use a SSL-based protocol here you might need to setup TLS
   library mutex callbacks as described here:
 
-  https://curl.se/libfetch/c/threadsafe.html
+  https://fetch.se/libfetch/c/threadsafe.html
 
 */
 static const char *const urls[NUMT] = {
-    "https://curl.se/",
+    "https://fetch.se/",
     "ftp://example.com/",
     "https://example.net/",
     "www.example"};

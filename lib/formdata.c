@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@
 
 #include <fetch/fetch.h>
 
-struct Curl_easy;
+struct Fetch_easy;
 
 #include "formdata.h"
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_FORM_API)
@@ -35,7 +35,7 @@ struct Curl_easy;
 #include <libgen.h>
 #endif
 
-#include "urldata.h" /* for struct Curl_easy */
+#include "urldata.h" /* for struct Fetch_easy */
 #include "mime.h"
 #include "vtls/vtls.h"
 #include "strcase.h"
@@ -558,22 +558,22 @@ static FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
     {
       if (ptr->name_alloc)
       {
-        Curl_safefree(ptr->name);
+        Fetch_safefree(ptr->name);
         ptr->name_alloc = FALSE;
       }
       if (ptr->value_alloc)
       {
-        Curl_safefree(ptr->value);
+        Fetch_safefree(ptr->value);
         ptr->value_alloc = FALSE;
       }
       if (ptr->contenttype_alloc)
       {
-        Curl_safefree(ptr->contenttype);
+        Fetch_safefree(ptr->contenttype);
         ptr->contenttype_alloc = FALSE;
       }
       if (ptr->showfilename_alloc)
       {
-        Curl_safefree(ptr->showfilename);
+        Fetch_safefree(ptr->showfilename);
         ptr->showfilename_alloc = FALSE;
       }
     }
@@ -611,7 +611,7 @@ static FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
       {
         char *f = (form->flags & HTTPPOST_BUFFER) ? form->showfilename : form->value;
         char const *type;
-        type = Curl_mime_contenttype(f);
+        type = Fetch_mime_contenttype(f);
         if (!type)
           type = prevtype;
         if (!type)
@@ -647,7 +647,7 @@ static FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
         if (form->name)
         {
           /* copy name (without strdup; possibly not null-terminated) */
-          form->name = Curl_memdup0(form->name, form->namelength ? form->namelength : strlen(form->name));
+          form->name = Fetch_memdup0(form->name, form->namelength ? form->namelength : strlen(form->name));
         }
         if (!form->name)
         {
@@ -666,7 +666,7 @@ static FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
         if (!clen)
           clen = strlen(form->value) + 1;
 
-        form->value = Curl_memdup(form->value, clen);
+        form->value = Fetch_memdup(form->value, clen);
 
         if (!form->value)
         {
@@ -703,22 +703,22 @@ static FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
       {
         if (ptr->name_alloc)
         {
-          Curl_safefree(ptr->name);
+          Fetch_safefree(ptr->name);
           ptr->name_alloc = FALSE;
         }
         if (ptr->value_alloc)
         {
-          Curl_safefree(ptr->value);
+          Fetch_safefree(ptr->value);
           ptr->value_alloc = FALSE;
         }
         if (ptr->contenttype_alloc)
         {
-          Curl_safefree(ptr->contenttype);
+          Fetch_safefree(ptr->contenttype);
           ptr->contenttype_alloc = FALSE;
         }
         if (ptr->showfilename_alloc)
         {
-          Curl_safefree(ptr->showfilename);
+          Fetch_safefree(ptr->showfilename);
           ptr->showfilename_alloc = FALSE;
         }
       }
@@ -769,16 +769,16 @@ int fetch_formget(struct fetch_httppost *form, void *arg,
   FETCHcode result;
   fetch_mimepart toppart;
 
-  Curl_mime_initpart(&toppart); /* default form is empty */
-  result = Curl_getformdata(NULL, &toppart, form, NULL);
+  Fetch_mime_initpart(&toppart); /* default form is empty */
+  result = Fetch_getformdata(NULL, &toppart, form, NULL);
   if (!result)
-    result = Curl_mime_prepare_headers(NULL, &toppart, "multipart/form-data",
+    result = Fetch_mime_prepare_headers(NULL, &toppart, "multipart/form-data",
                                        NULL, MIMESTRATEGY_FORM);
 
   while (!result)
   {
     char buffer[8192];
-    size_t nread = Curl_mime_read(buffer, 1, sizeof(buffer), &toppart);
+    size_t nread = Fetch_mime_read(buffer, 1, sizeof(buffer), &toppart);
 
     if (!nread)
       break;
@@ -791,7 +791,7 @@ int fetch_formget(struct fetch_httppost *form, void *arg,
     }
   }
 
-  Curl_mime_cleanpart(&toppart);
+  Fetch_mime_cleanpart(&toppart);
   return (int)result;
 }
 
@@ -834,7 +834,7 @@ static FETCHcode setname(fetch_mimepart *part, const char *name, size_t len)
 
   if (!name || !len)
     return fetch_mime_name(part, name);
-  zname = Curl_memdup0(name, len);
+  zname = Fetch_memdup0(name, len);
   if (!zname)
     return FETCHE_OUT_OF_MEMORY;
   res = fetch_mime_name(part, zname);
@@ -857,7 +857,7 @@ static int fseeko_wrapper(void *stream, fetch_off_t offset, int whence)
 }
 
 /*
- * Curl_getformdata() converts a linked list of "meta data" into a mime
+ * Fetch_getformdata() converts a linked list of "meta data" into a mime
  * structure. The input list is in 'post', while the output is stored in
  * mime part at '*finalform'.
  *
@@ -866,7 +866,7 @@ static int fseeko_wrapper(void *stream, fetch_off_t offset, int whence)
  * a NULL pointer in the 'data' argument.
  */
 
-FETCHcode Curl_getformdata(FETCH *data,
+FETCHcode Fetch_getformdata(FETCH *data,
                            fetch_mimepart *finalform,
                            struct fetch_httppost *post,
                            fetch_read_callback fread_func)
@@ -876,7 +876,7 @@ FETCHcode Curl_getformdata(FETCH *data,
   fetch_mimepart *part;
   struct fetch_httppost *file;
 
-  Curl_mime_cleanpart(finalform); /* default form is empty */
+  Fetch_mime_cleanpart(finalform); /* default form is empty */
 
   if (!post)
     return result; /* no input => no output! */
@@ -988,7 +988,7 @@ FETCHcode Curl_getformdata(FETCH *data,
   }
 
   if (result)
-    Curl_mime_cleanpart(finalform);
+    Fetch_mime_cleanpart(finalform);
 
   return result;
 }

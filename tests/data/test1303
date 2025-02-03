@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-Curl_timeleft
+Fetch_timeleft
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
 <name>
-Curl_timeleft unit tests
+Fetch_timeleft unit tests
 </name>
 </client>
 </testcase>

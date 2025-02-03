@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -357,7 +357,7 @@ if(ENABLE_ARES)
   add_definitions("-DCARES_NO_DEPRECATED")  # Ignore c-ares deprecation warnings
 endif()
 
-include(CurlSymbolHiding)
+include(FetchSymbolHiding)
 
 option(FETCH_ENABLE_EXPORT_TARGET "Enable CMake export target" ON)
 mark_as_advanced(FETCH_ENABLE_EXPORT_TARGET)
@@ -1641,8 +1641,8 @@ if(AMIGA)
   check_include_file_concat_fetch("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
 endif()
 
-# Pass these detection results to fetch_internal_test() for use in CurlTests.c
-# Add here all feature flags referenced from CurlTests.c
+# Pass these detection results to fetch_internal_test() for use in FetchTests.c
+# Add here all feature flags referenced from FetchTests.c
 foreach(_variable IN ITEMS
     HAVE_STDATOMIC_H
     HAVE_STDBOOL_H

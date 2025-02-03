@@ -28,7 +28,7 @@ want you do reorganize them like:
 
     `fetch-config --cc` -o example-my example.c `fetch-config --cflags --libs`
 
-**Please** do not use the `curl.se` site as a test target for your libfetch
+**Please** do not use the `fetch.se` site as a test target for your libfetch
 applications/experiments. Even if some of the examples use that site as a URL
 at some places, it does not mean that the URLs work or that we expect you to
 actually torture our website with your tests. Thanks.

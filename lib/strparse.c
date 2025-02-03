@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@
 
 /* Get a word until the first DELIM or end of string. At least one byte long.
    return non-zero on error */
-int Curl_str_until(char **linep, struct Curl_str *out,
+int Fetch_str_until(char **linep, struct Fetch_str *out,
                    const size_t max, char delim)
 {
   char *s = *linep;
@@ -53,15 +53,15 @@ int Curl_str_until(char **linep, struct Curl_str *out,
 
 /* Get a word until the first space or end of string. At least one byte long.
    return non-zero on error */
-int Curl_str_word(char **linep, struct Curl_str *out,
+int Fetch_str_word(char **linep, struct Fetch_str *out,
                   const size_t max)
 {
-  return Curl_str_until(linep, out, max, ' ');
+  return Fetch_str_until(linep, out, max, ' ');
 }
 
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
-int Curl_str_quotedword(char **linep, struct Curl_str *out,
+int Fetch_str_quotedword(char **linep, struct Fetch_str *out,
                         const size_t max)
 {
   char *s = *linep;
@@ -89,7 +89,7 @@ int Curl_str_quotedword(char **linep, struct Curl_str *out,
 
 /* Advance over a single character.
    return non-zero on error */
-int Curl_str_single(char **linep, char byte)
+int Fetch_str_single(char **linep, char byte)
 {
   DEBUGASSERT(linep && *linep);
   if (**linep != byte)
@@ -100,14 +100,14 @@ int Curl_str_single(char **linep, char byte)
 
 /* Advance over a single space.
    return non-zero on error */
-int Curl_str_singlespace(char **linep)
+int Fetch_str_singlespace(char **linep)
 {
-  return Curl_str_single(linep, ' ');
+  return Fetch_str_single(linep, ' ');
 }
 
 /* Get an unsigned number. Leading zeroes are accepted.
    return non-zero on error */
-int Curl_str_number(char **linep, size_t *nump, size_t max)
+int Fetch_str_number(char **linep, size_t *nump, size_t max)
 {
   size_t num = 0;
   DEBUGASSERT(linep && *linep && nump);
@@ -128,7 +128,7 @@ int Curl_str_number(char **linep, size_t *nump, size_t max)
 
 /* CR or LF
    return non-zero on error */
-int Curl_str_newline(char **linep)
+int Fetch_str_newline(char **linep)
 {
   DEBUGASSERT(linep && *linep);
   if (ISNEWLINE(**linep))

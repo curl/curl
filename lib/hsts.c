@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -75,12 +75,12 @@ static time_t hsts_debugtime(void *unused)
 #define time(x) hsts_debugtime(x)
 #endif
 
-struct hsts *Curl_hsts_init(void)
+struct hsts *Fetch_hsts_init(void)
 {
   struct hsts *h = calloc(1, sizeof(struct hsts));
   if (h)
   {
-    Curl_llist_init(&h->list, NULL);
+    Fetch_llist_init(&h->list, NULL);
   }
   return h;
 }
@@ -91,17 +91,17 @@ static void hsts_free(struct stsentry *e)
   free(e);
 }
 
-void Curl_hsts_cleanup(struct hsts **hp)
+void Fetch_hsts_cleanup(struct hsts **hp)
 {
   struct hsts *h = *hp;
   if (h)
   {
-    struct Curl_llist_node *e;
-    struct Curl_llist_node *n;
-    for (e = Curl_llist_head(&h->list); e; e = n)
+    struct Fetch_llist_node *e;
+    struct Fetch_llist_node *n;
+    for (e = Fetch_llist_head(&h->list); e; e = n)
     {
-      struct stsentry *sts = Curl_node_elem(e);
-      n = Curl_node_next(e);
+      struct stsentry *sts = Fetch_node_elem(e);
+      n = Fetch_node_next(e);
       hsts_free(sts);
     }
     free(h->filename);
@@ -129,7 +129,7 @@ static FETCHcode hsts_create(struct hsts *h,
     if (!sts)
       return FETCHE_OUT_OF_MEMORY;
 
-    duphost = Curl_memdup0(hostname, hlen);
+    duphost = Fetch_memdup0(hostname, hlen);
     if (!duphost)
     {
       free(sts);
@@ -139,12 +139,12 @@ static FETCHcode hsts_create(struct hsts *h,
     sts->host = duphost;
     sts->expires = expires;
     sts->includeSubDomains = subdomains;
-    Curl_llist_append(&h->list, sts, &sts->node);
+    Fetch_llist_append(&h->list, sts, &sts->node);
   }
   return FETCHE_OK;
 }
 
-FETCHcode Curl_hsts_parse(struct hsts *h, const char *hostname,
+FETCHcode Fetch_hsts_parse(struct hsts *h, const char *hostname,
                           const char *header)
 {
   const char *p = header;
@@ -156,7 +156,7 @@ FETCHcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   time_t now = time(NULL);
   size_t hlen = strlen(hostname);
 
-  if (Curl_host_is_ipnum(hostname))
+  if (Fetch_host_is_ipnum(hostname))
     /* "explicit IP address identification of all forms is excluded."
        / RFC 6797 */
     return FETCHE_OK;
@@ -230,10 +230,10 @@ FETCHcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   if (!expires)
   {
     /* remove the entry if present verbatim (without subdomain match) */
-    sts = Curl_hsts(h, hostname, hlen, FALSE);
+    sts = Fetch_hsts(h, hostname, hlen, FALSE);
     if (sts)
     {
-      Curl_node_remove(&sts->node);
+      Fetch_node_remove(&sts->node);
       hsts_free(sts);
     }
     return FETCHE_OK;
@@ -246,7 +246,7 @@ FETCHcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     expires += now;
 
   /* check if it already exists */
-  sts = Curl_hsts(h, hostname, hlen, FALSE);
+  sts = Fetch_hsts(h, hostname, hlen, FALSE);
   if (sts)
   {
     /* just update these fields */
@@ -265,15 +265,15 @@ FETCHcode Curl_hsts_parse(struct hsts *h, const char *hostname,
  * The 'subdomain' argument tells the function if subdomain matching should be
  * attempted.
  */
-struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
+struct stsentry *Fetch_hsts(struct hsts *h, const char *hostname,
                            size_t hlen, bool subdomain)
 {
   struct stsentry *bestsub = NULL;
   if (h)
   {
     time_t now = time(NULL);
-    struct Curl_llist_node *e;
-    struct Curl_llist_node *n;
+    struct Fetch_llist_node *e;
+    struct Fetch_llist_node *n;
     size_t blen = 0;
 
     if ((hlen > MAX_HSTS_HOSTLEN) || !hlen)
@@ -282,15 +282,15 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
       /* remove the trailing dot */
       --hlen;
 
-    for (e = Curl_llist_head(&h->list); e; e = n)
+    for (e = Fetch_llist_head(&h->list); e; e = n)
     {
-      struct stsentry *sts = Curl_node_elem(e);
+      struct stsentry *sts = Fetch_node_elem(e);
       size_t ntail;
-      n = Curl_node_next(e);
+      n = Fetch_node_next(e);
       if (sts->expires <= now)
       {
         /* remove expired entries */
-        Curl_node_remove(&sts->node);
+        Fetch_node_remove(&sts->node);
         hsts_free(sts);
         continue;
       }
@@ -318,7 +318,7 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
 /*
  * Send this HSTS entry to the write callback.
  */
-static FETCHcode hsts_push(struct Curl_easy *data,
+static FETCHcode hsts_push(struct Fetch_easy *data,
                            struct fetch_index *i,
                            struct stsentry *sts,
                            bool *stop)
@@ -334,7 +334,7 @@ static FETCHcode hsts_push(struct Curl_easy *data,
 
   if (sts->expires != TIME_T_MAX)
   {
-    result = Curl_gmtime((time_t)sts->expires, &stamp);
+    result = Fetch_gmtime((time_t)sts->expires, &stamp);
     if (result)
       return result;
 
@@ -359,7 +359,7 @@ static FETCHcode hsts_out(struct stsentry *sts, FILE *fp)
   struct tm stamp;
   if (sts->expires != TIME_T_MAX)
   {
-    FETCHcode result = Curl_gmtime((time_t)sts->expires, &stamp);
+    FETCHcode result = Fetch_gmtime((time_t)sts->expires, &stamp);
     if (result)
       return result;
     fprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
@@ -374,13 +374,13 @@ static FETCHcode hsts_out(struct stsentry *sts, FILE *fp)
 }
 
 /*
- * Curl_https_save() writes the HSTS cache to file and callback.
+ * Fetch_https_save() writes the HSTS cache to file and callback.
  */
-FETCHcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
+FETCHcode Fetch_hsts_save(struct Fetch_easy *data, struct hsts *h,
                          const char *file)
 {
-  struct Curl_llist_node *e;
-  struct Curl_llist_node *n;
+  struct Fetch_llist_node *e;
+  struct Fetch_llist_node *n;
   FETCHcode result = FETCHE_OK;
   FILE *out;
   char *tempstore = NULL;
@@ -397,22 +397,22 @@ FETCHcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
     /* marked as read-only, no file or zero length filename */
     goto skipsave;
 
-  result = Curl_fopen(data, file, &out, &tempstore);
+  result = Fetch_fopen(data, file, &out, &tempstore);
   if (!result)
   {
-    fputs("# Your HSTS cache. https://curl.se/docs/hsts.html\n"
+    fputs("# Your HSTS cache. https://fetch.se/docs/hsts.html\n"
           "# This file was generated by libfetch! Edit at your own risk.\n",
           out);
-    for (e = Curl_llist_head(&h->list); e; e = n)
+    for (e = Fetch_llist_head(&h->list); e; e = n)
     {
-      struct stsentry *sts = Curl_node_elem(e);
-      n = Curl_node_next(e);
+      struct stsentry *sts = Fetch_node_elem(e);
+      n = Fetch_node_next(e);
       result = hsts_out(sts, out);
       if (result)
         break;
     }
     fclose(out);
-    if (!result && tempstore && Curl_rename(tempstore, file))
+    if (!result && tempstore && Fetch_rename(tempstore, file))
       result = FETCHE_WRITE_ERROR;
 
     if (result && tempstore)
@@ -424,13 +424,13 @@ skipsave:
   {
     /* if there is a write callback */
     struct fetch_index i; /* count */
-    i.total = Curl_llist_count(&h->list);
+    i.total = Fetch_llist_count(&h->list);
     i.index = 0;
-    for (e = Curl_llist_head(&h->list); e; e = n)
+    for (e = Fetch_llist_head(&h->list); e; e = n)
     {
-      struct stsentry *sts = Curl_node_elem(e);
+      struct stsentry *sts = Fetch_node_elem(e);
       bool stop;
-      n = Curl_node_next(e);
+      n = Fetch_node_next(e);
       result = hsts_push(data, &i, sts, &stop);
       if (result || stop)
         break;
@@ -447,13 +447,13 @@ static FETCHcode hsts_add(struct hsts *h, char *line)
      example.com "20191231 10:00:00"
      .example.net "20191231 10:00:00"
    */
-  struct Curl_str host;
-  struct Curl_str date;
+  struct Fetch_str host;
+  struct Fetch_str date;
 
-  if (Curl_str_word(&line, &host, MAX_HSTS_HOSTLEN) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_quotedword(&line, &date, MAX_HSTS_DATELEN) ||
-      Curl_str_newline(&line))
+  if (Fetch_str_word(&line, &host, MAX_HSTS_HOSTLEN) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_quotedword(&line, &date, MAX_HSTS_DATELEN) ||
+      Fetch_str_newline(&line))
     ;
   else
   {
@@ -464,11 +464,11 @@ static FETCHcode hsts_add(struct hsts *h, char *line)
     time_t expires;
 
     /* The date parser works on a null terminated string. The maximum length
-       is upheld by Curl_str_quotedword(). */
+       is upheld by Fetch_str_quotedword(). */
     memcpy(dbuf, date.str, date.len);
     dbuf[date.len] = 0;
 
-    expires = strcmp(dbuf, UNLIMITED) ? Curl_getdate_capped(dbuf) : TIME_T_MAX;
+    expires = strcmp(dbuf, UNLIMITED) ? Fetch_getdate_capped(dbuf) : TIME_T_MAX;
 
     if (host.str[0] == '.')
     {
@@ -477,7 +477,7 @@ static FETCHcode hsts_add(struct hsts *h, char *line)
       subdomain = TRUE;
     }
     /* only add it if not already present */
-    e = Curl_hsts(h, host.str, host.len, subdomain);
+    e = Fetch_hsts(h, host.str, host.len, subdomain);
     if (!e)
       result = hsts_create(h, host.str, host.len, subdomain, expires);
     else if ((strlen(e->host) == host.len) &&
@@ -498,7 +498,7 @@ static FETCHcode hsts_add(struct hsts *h, char *line)
  * Load HSTS data from callback.
  *
  */
-static FETCHcode hsts_pull(struct Curl_easy *data, struct hsts *h)
+static FETCHcode hsts_pull(struct Fetch_easy *data, struct hsts *h)
 {
   /* if the HSTS read callback is set, use it */
   if (data->set.hsts_read)
@@ -524,7 +524,7 @@ static FETCHcode hsts_pull(struct Curl_easy *data, struct hsts *h)
           /* bail out if no name was stored */
           return FETCHE_BAD_FUNCTION_ARGUMENT;
         if (e.expire[0])
-          expires = Curl_getdate_capped(e.expire);
+          expires = Fetch_getdate_capped(e.expire);
         else
           expires = TIME_T_MAX; /* the end of time */
         result = hsts_create(h, e.name, strlen(e.name),
@@ -543,7 +543,7 @@ static FETCHcode hsts_pull(struct Curl_easy *data, struct hsts *h)
 
 /*
  * Load the HSTS cache from the given file. The text based line-oriented file
- * format is documented here: https://curl.se/docs/hsts.html
+ * format is documented here: https://fetch.se/docs/hsts.html
  *
  * This function only returns error on major problems that prevent hsts
  * handling to work completely. It will ignore individual syntactical errors
@@ -565,31 +565,31 @@ static FETCHcode hsts_load(struct hsts *h, const char *file)
   if (fp)
   {
     struct dynbuf buf;
-    Curl_dyn_init(&buf, MAX_HSTS_LINE);
-    while (Curl_get_line(&buf, fp))
+    Fetch_dyn_init(&buf, MAX_HSTS_LINE);
+    while (Fetch_get_line(&buf, fp))
     {
-      char *lineptr = Curl_dyn_ptr(&buf);
+      char *lineptr = Fetch_dyn_ptr(&buf);
       while (*lineptr && ISBLANK(*lineptr))
         lineptr++;
       /*
        * Skip empty or commented lines, since we know the line will have a
-       * trailing newline from Curl_get_line we can treat length 1 as empty.
+       * trailing newline from Fetch_get_line we can treat length 1 as empty.
        */
       if ((*lineptr == '#') || strlen(lineptr) <= 1)
         continue;
 
       hsts_add(h, lineptr);
     }
-    Curl_dyn_free(&buf); /* free the line buffer */
+    Fetch_dyn_free(&buf); /* free the line buffer */
     fclose(fp);
   }
   return result;
 }
 
 /*
- * Curl_hsts_loadfile() loads HSTS from file
+ * Fetch_hsts_loadfile() loads HSTS from file
  */
-FETCHcode Curl_hsts_loadfile(struct Curl_easy *data,
+FETCHcode Fetch_hsts_loadfile(struct Fetch_easy *data,
                              struct hsts *h, const char *file)
 {
   DEBUGASSERT(h);
@@ -598,28 +598,28 @@ FETCHcode Curl_hsts_loadfile(struct Curl_easy *data,
 }
 
 /*
- * Curl_hsts_loadcb() loads HSTS from callback
+ * Fetch_hsts_loadcb() loads HSTS from callback
  */
-FETCHcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
+FETCHcode Fetch_hsts_loadcb(struct Fetch_easy *data, struct hsts *h)
 {
   if (h)
     return hsts_pull(data, h);
   return FETCHE_OK;
 }
 
-void Curl_hsts_loadfiles(struct Curl_easy *data)
+void Fetch_hsts_loadfiles(struct Fetch_easy *data)
 {
   struct fetch_slist *l = data->state.hstslist;
   if (l)
   {
-    Curl_share_lock(data, FETCH_LOCK_DATA_HSTS, FETCH_LOCK_ACCESS_SINGLE);
+    Fetch_share_lock(data, FETCH_LOCK_DATA_HSTS, FETCH_LOCK_ACCESS_SINGLE);
 
     while (l)
     {
-      (void)Curl_hsts_loadfile(data, data->hsts, l->data);
+      (void)Fetch_hsts_loadfile(data, data->hsts, l->data);
       l = l->next;
     }
-    Curl_share_unlock(data, FETCH_LOCK_DATA_HSTS);
+    Fetch_share_unlock(data, FETCH_LOCK_DATA_HSTS);
   }
 }
 

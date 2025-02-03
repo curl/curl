@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,7 +43,7 @@ int main(void)
   /* get a fetch handle */
   fetch = fetch_easy_init();
 
-  /* init Curl URL */
+  /* init Fetch URL */
   urlp = fetch_url();
   uc = fetch_url_set(urlp, FETCHUPART_URL,
                      "http://example.com/path/index.html", 0);

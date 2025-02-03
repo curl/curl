@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@
 #include "fetch_rtmp.h"
 #include "urldata.h"
 #include "nonblock.h" /* for fetchx_nonblock */
-#include "progress.h" /* for Curl_pgrsSetUploadSize */
+#include "progress.h" /* for Fetch_pgrsSetUploadSize */
 #include "transfer.h"
 #include "warnless.h"
 #include <fetch/fetch.h>
@@ -52,22 +52,22 @@
 
 #define DEF_BUFTIME (2 * 60 * 60 * 1000) /* 2 hours */
 
-static FETCHcode rtmp_setup_connection(struct Curl_easy *data,
+static FETCHcode rtmp_setup_connection(struct Fetch_easy *data,
                                        struct connectdata *conn);
-static FETCHcode rtmp_do(struct Curl_easy *data, bool *done);
-static FETCHcode rtmp_done(struct Curl_easy *data, FETCHcode, bool premature);
-static FETCHcode rtmp_connect(struct Curl_easy *data, bool *done);
-static FETCHcode rtmp_disconnect(struct Curl_easy *data,
+static FETCHcode rtmp_do(struct Fetch_easy *data, bool *done);
+static FETCHcode rtmp_done(struct Fetch_easy *data, FETCHcode, bool premature);
+static FETCHcode rtmp_connect(struct Fetch_easy *data, bool *done);
+static FETCHcode rtmp_disconnect(struct Fetch_easy *data,
                                  struct connectdata *conn, bool dead);
 
-static Curl_recv rtmp_recv;
-static Curl_send rtmp_send;
+static Fetch_recv rtmp_recv;
+static Fetch_send rtmp_send;
 
 /*
  * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu
  */
 
-const struct Curl_handler Curl_handler_rtmp = {
+const struct Fetch_handler Fetch_handler_rtmp = {
     "rtmp",                /* scheme */
     rtmp_setup_connection, /* setup_connection */
     rtmp_do,               /* do_it */
@@ -92,7 +92,7 @@ const struct Curl_handler Curl_handler_rtmp = {
     PROTOPT_NONE           /* flags */
 };
 
-const struct Curl_handler Curl_handler_rtmpt = {
+const struct Fetch_handler Fetch_handler_rtmpt = {
     "rtmpt",               /* scheme */
     rtmp_setup_connection, /* setup_connection */
     rtmp_do,               /* do_it */
@@ -117,7 +117,7 @@ const struct Curl_handler Curl_handler_rtmpt = {
     PROTOPT_NONE           /* flags */
 };
 
-const struct Curl_handler Curl_handler_rtmpe = {
+const struct Fetch_handler Fetch_handler_rtmpe = {
     "rtmpe",               /* scheme */
     rtmp_setup_connection, /* setup_connection */
     rtmp_do,               /* do_it */
@@ -142,7 +142,7 @@ const struct Curl_handler Curl_handler_rtmpe = {
     PROTOPT_NONE           /* flags */
 };
 
-const struct Curl_handler Curl_handler_rtmpte = {
+const struct Fetch_handler Fetch_handler_rtmpte = {
     "rtmpte",              /* scheme */
     rtmp_setup_connection, /* setup_connection */
     rtmp_do,               /* do_it */
@@ -167,7 +167,7 @@ const struct Curl_handler Curl_handler_rtmpte = {
     PROTOPT_NONE           /* flags */
 };
 
-const struct Curl_handler Curl_handler_rtmps = {
+const struct Fetch_handler Fetch_handler_rtmps = {
     "rtmps",               /* scheme */
     rtmp_setup_connection, /* setup_connection */
     rtmp_do,               /* do_it */
@@ -192,7 +192,7 @@ const struct Curl_handler Curl_handler_rtmps = {
     PROTOPT_NONE           /* flags */
 };
 
-const struct Curl_handler Curl_handler_rtmpts = {
+const struct Fetch_handler Fetch_handler_rtmpts = {
     "rtmpts",              /* scheme */
     rtmp_setup_connection, /* setup_connection */
     rtmp_do,               /* do_it */
@@ -217,7 +217,7 @@ const struct Curl_handler Curl_handler_rtmpts = {
     PROTOPT_NONE           /* flags */
 };
 
-static FETCHcode rtmp_setup_connection(struct Curl_easy *data,
+static FETCHcode rtmp_setup_connection(struct Fetch_easy *data,
                                        struct connectdata *conn)
 {
   RTMP *r = RTMP_Alloc();
@@ -235,7 +235,7 @@ static FETCHcode rtmp_setup_connection(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode rtmp_connect(struct Curl_easy *data, bool *done)
+static FETCHcode rtmp_connect(struct Fetch_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   RTMP *r = conn->proto.rtmp;
@@ -270,7 +270,7 @@ static FETCHcode rtmp_connect(struct Curl_easy *data, bool *done)
   return FETCHE_OK;
 }
 
-static FETCHcode rtmp_do(struct Curl_easy *data, bool *done)
+static FETCHcode rtmp_do(struct Fetch_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   RTMP *r = conn->proto.rtmp;
@@ -280,16 +280,16 @@ static FETCHcode rtmp_do(struct Curl_easy *data, bool *done)
 
   if (data->state.upload)
   {
-    Curl_pgrsSetUploadSize(data, data->state.infilesize);
-    Curl_xfer_setup1(data, FETCH_XFER_SEND, -1, FALSE);
+    Fetch_pgrsSetUploadSize(data, data->state.infilesize);
+    Fetch_xfer_setup1(data, FETCH_XFER_SEND, -1, FALSE);
   }
   else
-    Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
+    Fetch_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
   *done = TRUE;
   return FETCHE_OK;
 }
 
-static FETCHcode rtmp_done(struct Curl_easy *data, FETCHcode status,
+static FETCHcode rtmp_done(struct Fetch_easy *data, FETCHcode status,
                            bool premature)
 {
   (void)data;      /* unused */
@@ -299,7 +299,7 @@ static FETCHcode rtmp_done(struct Curl_easy *data, FETCHcode status,
   return FETCHE_OK;
 }
 
-static FETCHcode rtmp_disconnect(struct Curl_easy *data,
+static FETCHcode rtmp_disconnect(struct Fetch_easy *data,
                                  struct connectdata *conn,
                                  bool dead_connection)
 {
@@ -315,7 +315,7 @@ static FETCHcode rtmp_disconnect(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static ssize_t rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
+static ssize_t rtmp_recv(struct Fetch_easy *data, int sockindex, char *buf,
                          size_t len, FETCHcode *err)
 {
   struct connectdata *conn = data->conn;
@@ -339,7 +339,7 @@ static ssize_t rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
   return nread;
 }
 
-static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
+static ssize_t rtmp_send(struct Fetch_easy *data, int sockindex,
                          const void *buf, size_t len, bool eos, FETCHcode *err)
 {
   struct connectdata *conn = data->conn;
@@ -356,7 +356,7 @@ static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
   return num;
 }
 
-void Curl_rtmp_version(char *version, size_t len)
+void Fetch_rtmp_version(char *version, size_t len)
 {
   char suff[2];
   if (RTMP_LIB_VERSION & 0xff)

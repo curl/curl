@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -141,7 +141,7 @@ static void memory_tracking_init(void)
   }
 }
 #else
-#define memory_tracking_init() Curl_nop_stmt
+#define memory_tracking_init() Fetch_nop_stmt
 #endif
 
 /*
@@ -203,13 +203,13 @@ static FETCHcode main_init(struct GlobalConfig *config)
 
 static void free_globalconfig(struct GlobalConfig *config)
 {
-  Curl_safefree(config->trace_dump);
+  Fetch_safefree(config->trace_dump);
 
   if (config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
   config->trace_stream = NULL;
 
-  Curl_safefree(config->libfetch);
+  Fetch_safefree(config->libfetch);
 }
 
 /*

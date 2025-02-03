@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -112,35 +112,35 @@ unsigned char *computed_hash; /* Just to mute compiler warning */
 /* Mute compiler warnings in 'verify_memory' macros below */
 computed_hash = output_buf;
 
-Curl_sha512_256it(output_buf, (const unsigned char *)test_str1,
+Fetch_sha512_256it(output_buf, (const unsigned char *)test_str1,
                   (sizeof(test_str1) / sizeof(char)) - 1);
 verify_memory(computed_hash, precomp_hash1, FETCH_SHA512_256_DIGEST_LENGTH);
 
-Curl_sha512_256it(output_buf, (const unsigned char *)test_str2,
+Fetch_sha512_256it(output_buf, (const unsigned char *)test_str2,
                   (sizeof(test_str2) / sizeof(char)) - 1);
 verify_memory(computed_hash, precomp_hash2, FETCH_SHA512_256_DIGEST_LENGTH);
 
-Curl_sha512_256it(output_buf, (const unsigned char *)test_str3,
+Fetch_sha512_256it(output_buf, (const unsigned char *)test_str3,
                   (sizeof(test_str3) / sizeof(char)) - 1);
 verify_memory(computed_hash, precomp_hash3, FETCH_SHA512_256_DIGEST_LENGTH);
 
-Curl_sha512_256it(output_buf, (const unsigned char *)test_str4,
+Fetch_sha512_256it(output_buf, (const unsigned char *)test_str4,
                   (sizeof(test_str4) / sizeof(char)) - 1);
 verify_memory(computed_hash, precomp_hash4, FETCH_SHA512_256_DIGEST_LENGTH);
 
-Curl_sha512_256it(output_buf, (const unsigned char *)test_str5,
+Fetch_sha512_256it(output_buf, (const unsigned char *)test_str5,
                   (sizeof(test_str5) / sizeof(char)) - 1);
 verify_memory(computed_hash, precomp_hash5, FETCH_SHA512_256_DIGEST_LENGTH);
 
-Curl_sha512_256it(output_buf, (const unsigned char *)test_str6,
+Fetch_sha512_256it(output_buf, (const unsigned char *)test_str6,
                   (sizeof(test_str6) / sizeof(char)) - 1);
 verify_memory(computed_hash, precomp_hash6, FETCH_SHA512_256_DIGEST_LENGTH);
 
-Curl_sha512_256it(output_buf, (const unsigned char *)test_str7,
+Fetch_sha512_256it(output_buf, (const unsigned char *)test_str7,
                   (sizeof(test_str7) / sizeof(char)) - 1);
 verify_memory(computed_hash, precomp_hash7, FETCH_SHA512_256_DIGEST_LENGTH);
 
-Curl_sha512_256it(output_buf, test_seq8,
+Fetch_sha512_256it(output_buf, test_seq8,
                   sizeof(test_seq8) / sizeof(unsigned char));
 verify_memory(computed_hash, precomp_hash8, FETCH_SHA512_256_DIGEST_LENGTH);
 

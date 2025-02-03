@@ -17,41 +17,41 @@ With this naming established, client readers are concerned with providing data f
 
 ## Invoking
 
-The transfer loop that sends and receives, is using `Curl_client_read()` to get more data to send for a transfer. If no specific reader has been installed yet, the default one that uses `FETCHOPT_READFUNCTION` is added. The prototype is
+The transfer loop that sends and receives, is using `Fetch_client_read()` to get more data to send for a transfer. If no specific reader has been installed yet, the default one that uses `FETCHOPT_READFUNCTION` is added. The prototype is
 
 ```
-FETCHcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
+FETCHcode Fetch_client_read(struct Fetch_easy *data, char *buf, size_t blen,
                           size_t *nread, bool *eos);
 ```
 The arguments are the transfer to read for, a buffer to hold the read data, its length, the actual number of bytes placed into the buffer and the `eos` (*end of stream*) flag indicating that no more data is available. The `eos` flag may be set for a read amount, if that amount was the last. That way fetch can avoid to read an additional time.
 
-The implementation of `Curl_client_read()` uses a chain of *client reader* instances to get the data. This is similar to the design of *client writers*. The chain of readers allows processing of the data to send.
+The implementation of `Fetch_client_read()` uses a chain of *client reader* instances to get the data. This is similar to the design of *client writers*. The chain of readers allows processing of the data to send.
 
 The definition of a reader is:
 
 ```
-struct Curl_crtype {
+struct Fetch_crtype {
   const char *name;        /* writer name. */
-  FETCHcode (*do_init)(struct Curl_easy *data, struct Curl_creader *writer);
-  FETCHcode (*do_read)(struct Curl_easy *data, struct Curl_creader *reader,
+  FETCHcode (*do_init)(struct Fetch_easy *data, struct Fetch_creader *writer);
+  FETCHcode (*do_read)(struct Fetch_easy *data, struct Fetch_creader *reader,
                       char *buf, size_t blen, size_t *nread, bool *eos);
-  void (*do_close)(struct Curl_easy *data, struct Curl_creader *reader);
-  bool (*needs_rewind)(struct Curl_easy *data, struct Curl_creader *reader);
-  fetch_off_t (*total_length)(struct Curl_easy *data,
-                             struct Curl_creader *reader);
-  FETCHcode (*resume_from)(struct Curl_easy *data,
-                          struct Curl_creader *reader, fetch_off_t offset);
-  FETCHcode (*rewind)(struct Curl_easy *data, struct Curl_creader *reader);
+  void (*do_close)(struct Fetch_easy *data, struct Fetch_creader *reader);
+  bool (*needs_rewind)(struct Fetch_easy *data, struct Fetch_creader *reader);
+  fetch_off_t (*total_length)(struct Fetch_easy *data,
+                             struct Fetch_creader *reader);
+  FETCHcode (*resume_from)(struct Fetch_easy *data,
+                          struct Fetch_creader *reader, fetch_off_t offset);
+  FETCHcode (*rewind)(struct Fetch_easy *data, struct Fetch_creader *reader);
 };
 
-struct Curl_creader {
-  const struct Curl_crtype *crt;  /* type implementation */
-  struct Curl_creader *next;  /* Downstream reader. */
-  Curl_creader_phase phase; /* phase at which it operates */
+struct Fetch_creader {
+  const struct Fetch_crtype *crt;  /* type implementation */
+  struct Fetch_creader *next;  /* Downstream reader. */
+  Fetch_creader_phase phase; /* phase at which it operates */
 };
 ```
 
-`Curl_creader` is a reader instance with a `next` pointer to form the chain. It as a type `crt` which provides the implementation. The main callback is `do_read()` which provides the data to the caller. The others are for setup and tear down. `needs_rewind()` is explained further below.
+`Fetch_creader` is a reader instance with a `next` pointer to form the chain. It as a type `crt` which provides the implementation. The main callback is `do_read()` which provides the data to the caller. The others are for setup and tear down. `needs_rewind()` is explained further below.
 
 ## Phases and Ordering
 
@@ -64,7 +64,7 @@ typedef enum {
   FETCH_CR_PROTOCOL, /* before transfer, but after content decoding */
   FETCH_CR_CONTENT_ENCODE, /* add content-encodings */
   FETCH_CR_CLIENT  /* data read from client */
-} Curl_creader_phase;
+} Fetch_creader_phase;
 ```
 
 If a reader for phase `PROTOCOL` is added to the chain, it is always added *after* any `NET` or `TRANSFER_ENCODE` readers and *before* and `CONTENT_ENCODE` and `CLIENT` readers. If there is already a reader for the same phase, the new reader is added before the existing one(s).
@@ -89,17 +89,17 @@ Implemented in `sendf.c` for phase `FETCH_CR_CLIENT`, this reader get a buffer p
 
 ## Request retries
 
-Sometimes it is necessary to send a request with client data again. Transfer handling can inquire via `Curl_client_read_needs_rewind()` if a rewind (e.g. a reset of the client data) is necessary. This asks all installed readers if they need it and give `FALSE` of none does.
+Sometimes it is necessary to send a request with client data again. Transfer handling can inquire via `Fetch_client_read_needs_rewind()` if a rewind (e.g. a reset of the client data) is necessary. This asks all installed readers if they need it and give `FALSE` of none does.
 
 ## Upload Size
 
-Many protocols need to know the amount of bytes delivered by the client readers in advance. They may invoke `Curl_creader_total_length(data)` to retrieve that. However, not all reader chains know the exact value beforehand. In that case, the call returns `-1` for "unknown".
+Many protocols need to know the amount of bytes delivered by the client readers in advance. They may invoke `Fetch_creader_total_length(data)` to retrieve that. However, not all reader chains know the exact value beforehand. In that case, the call returns `-1` for "unknown".
 
 Even if the length of the "raw" data is known, the length that is send may not. Example: with option `--crlf` the uploaded content undergoes line-end conversion. The line converting reader does not know in advance how many newlines it may encounter. Therefore it must return `-1` for any positive raw content length.
 
 In HTTP, once the correct client readers are installed, the protocol asks the readers for the total length. If that is known, it can set `Content-Length:` accordingly. If not, it may choose to add an HTTP "chunked" reader.
 
-In addition, there is `Curl_creader_client_length(data)` which gives the total length as reported by the reader in phase `FETCH_CR_CLIENT` without asking other readers that may transform the raw data. This is useful in estimating the size of an upload. The HTTP protocol uses this to determine if `Expect: 100-continue` shall be done.
+In addition, there is `Fetch_creader_client_length(data)` which gives the total length as reported by the reader in phase `FETCH_CR_CLIENT` without asking other readers that may transform the raw data. This is useful in estimating the size of an upload. The HTTP protocol uses this to determine if `Expect: 100-continue` shall be done.
 
 ## Resuming
 
@@ -115,10 +115,10 @@ When a request is retried, installed client readers are discarded and replaced b
 
 Readers operating on callbacks to the application need to "rewind" the underlying content. For example, when reading from a `FILE*`, the reader needs to `fseek()` to the beginning. The following methods are used:
 
-1. `Curl_creader_needs_rewind(data)`: tells if a rewind is necessary, given the current state of the reader chain. If nothing really has been read so far, this returns `FALSE`.
-2. `Curl_creader_will_rewind(data)`: tells if the reader chain rewinds at the start of the next request.
-3. `Curl_creader_set_rewind(data, TRUE)`: marks the reader chain for rewinding at the start of the next request.
-4. `Curl_client_start(data)`: tells the readers that a new request starts and they need to rewind if requested.
+1. `Fetch_creader_needs_rewind(data)`: tells if a rewind is necessary, given the current state of the reader chain. If nothing really has been read so far, this returns `FALSE`.
+2. `Fetch_creader_will_rewind(data)`: tells if the reader chain rewinds at the start of the next request.
+3. `Fetch_creader_set_rewind(data, TRUE)`: marks the reader chain for rewinding at the start of the next request.
+4. `Fetch_client_start(data)`: tells the readers that a new request starts and they need to rewind if requested.
 
 
 ## Summary and Outlook

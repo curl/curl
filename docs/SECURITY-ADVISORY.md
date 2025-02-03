@@ -6,7 +6,7 @@ SPDX-License-Identifier: fetch
 
 # Anatomy of a fetch security advisory
 
-As described in the [Security Process](https://curl.se/dev/secprocess.html)
+As described in the [Security Process](https://fetch.se/dev/secprocess.html)
 document, when a security vulnerability has been reported to the project and
 confirmed, we author an advisory document for the issue. It should ideally
 be written in cooperation with the reporter to make sure all the angles and
@@ -15,7 +15,7 @@ details of the problem are gathered and described correctly and succinctly.
 ## New document
 
 A security advisory for fetch is created in the `docs/` folder in the
-[fetch-www](https://github.com/curl/curl-www) repository. It should be named
+[fetch-www](https://github.com/fetch/fetch-www) repository. It should be named
 `$CVEID.md` where `$CVEID` is the full CVE Id that has been registered for the
 flaw. Like `CVE-2016-0755`. The `.md` extension of course means that the
 document is written using markdown.
@@ -90,7 +90,7 @@ An example using the correct syntax:
 ```
 - Affected versions: fetch 7.16.1 to and including 7.88.1
 - Not affected versions: fetch < 7.16.1 and fetch >= 8.0.0
-- Introduced-in: https://github.com/curl/curl/commit/2147284cad
+- Introduced-in: https://github.com/fetch/fetch/commit/2147284cad
 ```
 
 ### THE SOLUTION
@@ -104,7 +104,7 @@ out.
 
 Example:
 
-`- Fixed-in: https://github.com/curl/curl/commit/af369db4d3833272b8ed`
+`- Fixed-in: https://github.com/fetch/fetch/commit/af369db4d3833272b8ed`
 
 ### RECOMMENDATIONS
 

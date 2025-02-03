@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,9 +55,9 @@ enum upgrade101
 };
 
 /*
- * Request specific data in the easy handle (Curl_easy). Previously,
+ * Request specific data in the easy handle (Fetch_easy). Previously,
  * these members were on the connectdata struct but since a conn struct may
- * now be shared between different Curl_easys, we store connection-specific
+ * now be shared between different Fetch_easys, we store connection-specific
  * data here. This struct only keeps stuff that is interesting for *this*
  * request, as it will be cleared between multiple ones
  */
@@ -92,10 +92,10 @@ struct SingleRequest
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol
    * checks, pausing by client callbacks. */
-  struct Curl_cwriter *writer_stack;
+  struct Fetch_cwriter *writer_stack;
   /* Client Reader stack, handles transfer- and content-encodings, protocol
    * checks, pausing by client callbacks. */
-  struct Curl_creader *reader_stack;
+  struct Fetch_creader *reader_stack;
   struct bufq sendbuf;    /* data which needs to be send to the server */
   size_t sendbuf_hds_len; /* amount of header bytes in sendbuf */
   time_t timeofdoc;
@@ -161,20 +161,20 @@ struct SingleRequest
 /**
  * Initialize the state of the request for first use.
  */
-void Curl_req_init(struct SingleRequest *req);
+void Fetch_req_init(struct SingleRequest *req);
 
 /**
  * The request is about to start. Record time and do a soft reset.
  */
-FETCHcode Curl_req_start(struct SingleRequest *req,
-                         struct Curl_easy *data);
+FETCHcode Fetch_req_start(struct SingleRequest *req,
+                         struct Fetch_easy *data);
 
 /**
  * The request may continue with a follow up. Reset
  * members, but keep start time for overall duration calc.
  */
-FETCHcode Curl_req_soft_reset(struct SingleRequest *req,
-                              struct Curl_easy *data);
+FETCHcode Fetch_req_soft_reset(struct SingleRequest *req,
+                              struct Fetch_easy *data);
 
 /**
  * The request is done. If not aborted, make sure that buffers are
@@ -183,69 +183,69 @@ FETCHcode Curl_req_soft_reset(struct SingleRequest *req,
  * @param data       the transfer
  * @param aborted    TRUE iff the request was aborted/errored
  */
-FETCHcode Curl_req_done(struct SingleRequest *req,
-                        struct Curl_easy *data, bool aborted);
+FETCHcode Fetch_req_done(struct SingleRequest *req,
+                        struct Fetch_easy *data, bool aborted);
 
 /**
  * Free the state of the request, not usable afterwards.
  */
-void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data);
+void Fetch_req_free(struct SingleRequest *req, struct Fetch_easy *data);
 
 /**
  * Hard reset the state of the request to virgin state base on
  * transfer settings.
  */
-void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
+void Fetch_req_hard_reset(struct SingleRequest *req, struct Fetch_easy *data);
 
 /**
  * Send request headers. If not all could be sent
- * they will be buffered. Use `Curl_req_flush()` to make sure
+ * they will be buffered. Use `Fetch_req_flush()` to make sure
  * bytes are really send.
  * @param data      the transfer making the request
  * @param buf       the complete header bytes, no body
  * @param httpversion version used in request (09, 10, 11, etc.)
  * @return FETCHE_OK (on blocking with *pnwritten == 0) or error.
  */
-FETCHcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf,
+FETCHcode Fetch_req_send(struct Fetch_easy *data, struct dynbuf *buf,
                         unsigned char httpversion);
 
 /**
  * TRUE iff the request has sent all request headers and data.
  */
-bool Curl_req_done_sending(struct Curl_easy *data);
+bool Fetch_req_done_sending(struct Fetch_easy *data);
 
 /*
  * Read more from client and flush all buffered request bytes.
  * @return FETCHE_OK on success or the error on the sending.
  *         Never returns FETCHE_AGAIN.
  */
-FETCHcode Curl_req_send_more(struct Curl_easy *data);
+FETCHcode Fetch_req_send_more(struct Fetch_easy *data);
 
 /**
  * TRUE iff the request wants to send, e.g. has buffered bytes.
  */
-bool Curl_req_want_send(struct Curl_easy *data);
+bool Fetch_req_want_send(struct Fetch_easy *data);
 
 /**
  * TRUE iff the request has no buffered bytes yet to send.
  */
-bool Curl_req_sendbuf_empty(struct Curl_easy *data);
+bool Fetch_req_sendbuf_empty(struct Fetch_easy *data);
 
 /**
  * Stop sending any more request data to the server.
  * Will clear the send buffer and mark request sending as done.
  */
-FETCHcode Curl_req_abort_sending(struct Curl_easy *data);
+FETCHcode Fetch_req_abort_sending(struct Fetch_easy *data);
 
 /**
  * Stop sending and receiving any more request data.
  * Will abort sending if not done.
  */
-FETCHcode Curl_req_stop_send_recv(struct Curl_easy *data);
+FETCHcode Fetch_req_stop_send_recv(struct Fetch_easy *data);
 
 /**
  * Invoked when all request data has been uploaded.
  */
-FETCHcode Curl_req_set_upload_done(struct Curl_easy *data);
+FETCHcode Fetch_req_set_upload_done(struct Fetch_easy *data);
 
 #endif /* HEADER_FETCH_REQUEST_H */

@@ -1,11 +1,11 @@
 [ ca ]
-default_ca = EdelCurlRoot
+default_ca = EdelFetchRoot
 
-[ EdelCurlRoot ]
-database = EdelCurlRoot-ca.db
-certificate = EdelCurlRoot-ca.crt
-private_key = EdelCurlRoot-ca.key
-crlnumber = EdelCurlRoot-ca.cnt
+[ EdelFetchRoot ]
+database = EdelFetchRoot-ca.db
+certificate = EdelFetchRoot-ca.crt
+private_key = EdelFetchRoot-ca.key
+crlnumber = EdelFetchRoot-ca.cnt
 default_md = sha256
 default_days = 365
 default_crl_days = 30

@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,7 @@ import os
 import re
 import pytest
 
-from testenv import Env, CurlClient, LocalClient
+from testenv import Env, FetchClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class TestSSLUse:
 
     def test_17_01_sslinfo_plain(self, env: Env, nghttpx):
         proto = 'http/1.1'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/sslinfo'
         r = fetch.http_get(url=url, alpn_proto=proto)
         assert r.json['HTTPS'] == 'on', f'{r.json}'
@@ -81,7 +81,7 @@ class TestSSLUse:
 
         run_env = os.environ.copy()
         run_env['FETCH_DEBUG'] = 'ssl'
-        fetch = CurlClient(env=env, run_env=run_env)
+        fetch = FetchClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
         urln = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/sslinfo?'\
                f'id=[0-{count-1}]&close'
@@ -107,7 +107,7 @@ class TestSSLUse:
     def test_17_03_trailing_dot(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         domain = f'{env.domain1}.'
         url = f'https://{env.authority_for(domain, proto)}/fetchtest/sslinfo'
         r = fetch.http_get(url=url, alpn_proto=proto)
@@ -122,7 +122,7 @@ class TestSSLUse:
     def test_17_04_double_dot(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         domain = f'{env.domain1}..'
         url = f'https://{env.authority_for(domain, proto)}/fetchtest/sslinfo'
         r = fetch.http_get(url=url, alpn_proto=proto, extra_args=[
@@ -148,7 +148,7 @@ class TestSSLUse:
             pytest.skip("mbedTLS does use IP addresses in SNI")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         domain = '127.0.0.1'
         url = f'https://{env.authority_for(domain, proto)}/fetchtest/sslinfo'
         r = fetch.http_get(url=url, alpn_proto=proto)
@@ -163,7 +163,7 @@ class TestSSLUse:
     def test_17_06_localhost(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         domain = 'localhost'
         url = f'https://{env.authority_for(domain, proto)}/fetchtest/sslinfo'
         r = fetch.http_get(url=url, alpn_proto=proto)
@@ -210,7 +210,7 @@ class TestSSLUse:
         ])
         httpd.reload_if_config_changed()
         proto = 'http/1.1'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/sslinfo'
         # SSL backend specifics
         if env.fetch_uses_lib('gnutls'):
@@ -257,7 +257,7 @@ class TestSSLUse:
             not env.fetch_uses_lib('gnutls') and \
             not env.fetch_uses_lib('quictls'):
             pytest.skip("TLS library does not support --cert-status")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         domain = 'localhost'
         url = f'https://{env.authority_for(domain, proto)}/'
         r = fetch.http_get(url=url, alpn_proto=proto, extra_args=[
@@ -291,7 +291,7 @@ class TestSSLUse:
                 with open(our_config, 'w') as fd:
                     fd.write('# empty\n')
             run_env['GNUTLS_SYSTEM_PRIORITY_FILE'] = our_config
-        fetch = CurlClient(env=env, run_env=run_env)
+        fetch = FetchClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/sslinfo'
         # SSL backend specifics
         if env.fetch_uses_lib('bearssl'):
@@ -349,7 +349,7 @@ class TestSSLUse:
     def test_17_11_wrong_host(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         domain = f'insecure.{env.tld}'
         url = f'https://{domain}:{env.port_for(proto)}/fetchtest/sslinfo'
         r = fetch.http_get(url=url, alpn_proto=proto)
@@ -360,7 +360,7 @@ class TestSSLUse:
     def test_17_12_insecure(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         domain = f'insecure.{env.tld}'
         url = f'https://{domain}:{env.port_for(proto)}/fetchtest/sslinfo'
         r = fetch.http_get(url=url, alpn_proto=proto, extra_args=[
@@ -374,7 +374,7 @@ class TestSSLUse:
     def test_17_14_expired_cert(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.expired_domain}:{env.port_for(proto)}/'
         r = fetch.http_get(url=url, alpn_proto=proto)
         assert r.exit_code == 60, f'{r}'  # peer failed verification
@@ -413,7 +413,7 @@ class TestSSLUse:
         if os.path.exists(session_file):
             return os.remove(session_file)
         xargs = ['--tls-max', '1.3', '--tlsv1.3', '--ssl-sessions', session_file]
-        fetch = CurlClient(env=env, run_env=run_env)
+        fetch = FetchClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/sslinfo'
         r = fetch.http_get(url=url, alpn_proto=proto, extra_args=xargs)
@@ -422,7 +422,7 @@ class TestSSLUse:
         assert r.json['SSL_SESSION_RESUMED'] == 'Initial', f'{r.json}\n{r.dump_logs()}'
         # ok, run again, sessions should be imported
         run_dir2 = os.path.join(env.gen_dir, 'fetch2')
-        fetch = CurlClient(env=env, run_env=run_env, run_dir=run_dir2)
+        fetch = FetchClient(env=env, run_env=run_env, run_dir=run_dir2)
         r = fetch.http_get(url=url, alpn_proto=proto, extra_args=xargs)
         assert r.exit_code == 0, f'{r}'
         assert r.json['SSL_SESSION_RESUMED'] == 'Resumed', f'{r.json}\n{r.dump_logs()}'

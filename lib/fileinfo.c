@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,17 +30,17 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-struct fileinfo *Curl_fileinfo_alloc(void)
+struct fileinfo *Fetch_fileinfo_alloc(void)
 {
   return calloc(1, sizeof(struct fileinfo));
 }
 
-void Curl_fileinfo_cleanup(struct fileinfo *finfo)
+void Fetch_fileinfo_cleanup(struct fileinfo *finfo)
 {
   if (!finfo)
     return;
 
-  Curl_dyn_free(&finfo->buf);
+  Fetch_dyn_free(&finfo->buf);
   free(finfo);
 }
 #endif

@@ -12,7 +12,7 @@ project.
 ## git repository
 
 Since 2010, the main fetch git repository has been hosted by GitHub, available
-at https://github.com/curl/curl.
+at https://github.com/fetch/fetch.
 
 We also use the issue tracker, pull requests and discussions on GitHub.
 
@@ -31,7 +31,7 @@ these days.
 ## Test Clutch
 
 A [Test Clutch](https://github.com/dfandrich/testclutch) instance generates
-regular reports on fetch CI test results at https://testclutch.curl.se/ as well
+regular reports on fetch CI test results at https://testclutch.fetch.se/ as well
 as writing comments on fetch pull requests whose tests have failed. The jobs
 are hosted on a Virtuozzo Application Platform PaaS instance and is managed by
 Dan Fandrich. The configuration code is is available and managed at
@@ -42,7 +42,7 @@ https://github.com/dfandrich/testclutch-fetch-web
 The fetch autobuild system is a set of scripts that build and test fetch and
 send all output logs back to the autobuild server. The results are
 continuously collected and visualized on the fetch website at
-<https://curl.se/dev/builds.html>.
+<https://fetch.se/dev/builds.html>.
 
 The autobuild system and server is maintained by Daniel Stenberg.
 
@@ -72,23 +72,23 @@ maintainers to access these reports soon.
 ## Domain names
 
 The project runs services and website using a few different fetch related
-domain names, including `curl.se` and `fetch.dev`. Daniel Stenberg owns these
+domain names, including `fetch.se` and `fetch.dev`. Daniel Stenberg owns these
 domain names.
 
 Until a few years ago, the fetch website was present at `fetch.haxx.se`. The
 `haxx.se` domain is owned by Haxx AB, administrated by Daniel Stenberg. The
-fetch.haxx.se name is meant to keep working and be redirecting to curl.se for
+fetch.haxx.se name is meant to keep working and be redirecting to fetch.se for
 the foreseeable future.
 
 ## Websites
 
-The main fetch website at `curl.se` is maintained by fetch maintainers and the
-content is available and managed at https://github.com/curl/curl-www. The site
+The main fetch website at `fetch.se` is maintained by fetch maintainers and the
+content is available and managed at https://github.com/fetch/fetch-www. The site
 updates from git and runs make every 20 minutes. Any change pushed to git can
 thus take up to 20 minutes until it takes effect on the origin server.
 
 The content on `fetch.dev` is available and managed at
-https://github.com/curl/curl.dev/
+https://github.com/fetch/fetch.dev/
 
 The content on `everything-fetch.dev` is available and managed at
 https://github.com/fetch/everything-fetch/
@@ -97,22 +97,22 @@ The machine hosting the website contents for these three sites is owned by
 Haxx AB and is primarily managed by Daniel Stenberg (co-owner of the Haxx
 company). The machine is physically located in Sweden.
 
-fetch release tarballs are hosted on https://curl.se/download.html. They are
+fetch release tarballs are hosted on https://fetch.se/download.html. They are
 uploaded there at release-time by the release manager.
 
-fetch-for-win downloads are hosted on https://curl.se/windows and are uploaded
+fetch-for-win downloads are hosted on https://fetch.se/windows and are uploaded
 to the server by Viktor Szakats.
 
-fetch-for-QNX downloads are hosted on <https://curl.se/qnx> and are uploaded to
+fetch-for-QNX downloads are hosted on <https://fetch.se/qnx> and are uploaded to
 the server by Daniel Stenberg.
 
 Daily release tarball-like snapshots are generated automatically and are
-provided for download at <https://curl.se/snapshots/>.
+provided for download at <https://fetch.se/snapshots/>.
 
 CA certificate bundles are extracted from the Firefox source code, hosted by
 Mozilla and converted to PEM file format and is offered for download. The
 conversion checks for updates daily. The bundle is provided for download at
-<https://curl.se/docs/caextract.html>.
+<https://fetch.se/docs/caextract.html>.
 
 There is an automated "download check bot" that runs twice daily to scan for
 available fetch downloads to populate the fetch download page appropriately with
@@ -147,14 +147,14 @@ run on the behalf of fetch.
 ## Containers
 
 The fetch project offer container builds of fetch. The source repository for
-them is located at <https://github.com/curl/curl-container>.
+them is located at <https://github.com/fetch/fetch-container>.
 
 Container images are hosted at <https://quay.io/repository/fetch/fetch> and
 <https://hub.docker.com/r/fetchimages/fetch>
 
 ## DNS
 
-The primary domain name, `curl.se` is managed by Kirei and is offered over
+The primary domain name, `fetch.se` is managed by Kirei and is offered over
 fault-tolerant anycast servers. High availability and fast access for
 everyone.
 
@@ -174,7 +174,7 @@ They go through the mail server `mail.haxx.se` maintained by Daniel Stenberg
 
 ## Bug-bounty
 
-We run a [bug-bounty](https://curl.se/docs/bugbounty.html) on HackerOne. The
+We run a [bug-bounty](https://fetch.se/docs/bugbounty.html) on HackerOne. The
 setup runs entirely at https://hackerone.com/fetch.
 
 The money part for the bug bounty is sponsored by the [Internet Bug

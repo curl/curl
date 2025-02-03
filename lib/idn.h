@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,16 +24,16 @@
  *
  ***************************************************************************/
 
-bool Curl_is_ASCII_name(const char *hostname);
-FETCHcode Curl_idnconvert_hostname(struct hostname *host);
+bool Fetch_is_ASCII_name(const char *hostname);
+FETCHcode Fetch_idnconvert_hostname(struct hostname *host);
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 #define USE_IDN
-void Curl_free_idnconverted_hostname(struct hostname *host);
-FETCHcode Curl_idn_decode(const char *input, char **output);
-FETCHcode Curl_idn_encode(const char *input, char **output);
+void Fetch_free_idnconverted_hostname(struct hostname *host);
+FETCHcode Fetch_idn_decode(const char *input, char **output);
+FETCHcode Fetch_idn_encode(const char *input, char **output);
 
 #else
-#define Curl_free_idnconverted_hostname(x)
-#define Curl_idn_decode(x) NULL
+#define Fetch_free_idnconverted_hostname(x)
+#define Fetch_idn_decode(x) NULL
 #endif
 #endif /* HEADER_FETCH_IDN_H */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,7 +41,7 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
+bool Fetch_auth_gsasl_is_supported(struct Fetch_easy *data,
                                   const char *mech,
                                   struct gsasldata *gsasl)
 {
@@ -64,7 +64,7 @@ bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
   return TRUE;
 }
 
-FETCHcode Curl_auth_gsasl_start(struct Curl_easy *data,
+FETCHcode Fetch_auth_gsasl_start(struct Fetch_easy *data,
                                 const char *userp,
                                 const char *passwdp,
                                 struct gsasldata *gsasl)
@@ -99,7 +99,7 @@ FETCHcode Curl_auth_gsasl_start(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_auth_gsasl_token(struct Curl_easy *data,
+FETCHcode Fetch_auth_gsasl_token(struct Fetch_easy *data,
                                 const struct bufref *chlg,
                                 struct gsasldata *gsasl,
                                 struct bufref *out)
@@ -109,7 +109,7 @@ FETCHcode Curl_auth_gsasl_token(struct Curl_easy *data,
   size_t outlen;
 
   res = gsasl_step(gsasl->client,
-                   (const char *)Curl_bufref_ptr(chlg), Curl_bufref_len(chlg),
+                   (const char *)Fetch_bufref_ptr(chlg), Fetch_bufref_len(chlg),
                    &response, &outlen);
   if (res != GSASL_OK && res != GSASL_NEEDS_MORE)
   {
@@ -117,11 +117,11 @@ FETCHcode Curl_auth_gsasl_token(struct Curl_easy *data,
     return FETCHE_BAD_CONTENT_ENCODING;
   }
 
-  Curl_bufref_set(out, response, outlen, gsasl_free);
+  Fetch_bufref_set(out, response, outlen, gsasl_free);
   return FETCHE_OK;
 }
 
-void Curl_auth_gsasl_cleanup(struct gsasldata *gsasl)
+void Fetch_auth_gsasl_cleanup(struct gsasldata *gsasl)
 {
   gsasl_finish(gsasl->client);
   gsasl->client = NULL;

@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -81,7 +81,7 @@ fi
 if [ -n "${LINK}" ]
 then    rm -rf "${LIBIFSNAME}/${STATBNDDIR}.BNDDIR"
         CMD="CRTBNDDIR BNDDIR(${TARGETLIB}/${STATBNDDIR})"
-        CMD="${CMD} TEXT('LibCurl API static binding directory')"
+        CMD="${CMD} TEXT('LibFetch API static binding directory')"
         CLcommand "${CMD}"
 
         for MODULE in ${MODULES}
@@ -175,7 +175,7 @@ fi
 if [ -n "${LINK}" ]
 then    rm -rf "${LIBIFSNAME}/${DYNBNDDIR}.BNDDIR"
         CMD="CRTBNDDIR BNDDIR(${TARGETLIB}/${DYNBNDDIR})"
-        CMD="${CMD} TEXT('LibCurl API dynamic binding directory')"
+        CMD="${CMD} TEXT('LibFetch API dynamic binding directory')"
         CLcommand "${CMD}"
         CMD="ADDBNDDIRE BNDDIR(${TARGETLIB}/${DYNBNDDIR})"
         CMD="${CMD} OBJ((*LIBL/${SRVPGM} *SRVPGM))"

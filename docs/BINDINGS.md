@@ -87,10 +87,10 @@ Lua: [luafetch](https://web.archive.org/web/20201205052437/luafetch.luaforge.net
 
 [Pascal](https://web.archive.org/web/20030804091414/houston.quik.com/jkp/fetchpas/) Free Pascal, Delphi and Kylix binding written by Jeffrey Pohlmeyer.
 
-Perl: [WWW::Curl](https://github.com/szbalint/WWW--Curl) Maintained by Cris
+Perl: [WWW::Fetch](https://github.com/szbalint/WWW--Fetch) Maintained by Cris
 Bailiff and Bálint Szilakszi,
 [perl6-net-fetch](https://github.com/azawawi/perl6-net-fetch) by Ahmad M. Zawawi
-[NET::Curl](https://metacpan.org/pod/Net::Curl) by Przemyslaw Iskra
+[NET::Fetch](https://metacpan.org/pod/Net::Fetch) by Przemyslaw Iskra
 
 [PHP](https://php.net/fetch) Originally written by Sterling Hughes
 
@@ -110,7 +110,7 @@ Bailiff and Bálint Szilakszi,
 
 [Rexx](https://rexxfetch.sourceforge.net/) Written Mark Hessling
 
-[Ring](https://ring-lang.sourceforge.io/doc1.3/libfetch.html) RingLibCurl by Mahmoud Fayed
+[Ring](https://ring-lang.sourceforge.io/doc1.3/libfetch.html) RingLibFetch by Mahmoud Fayed
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
@@ -125,7 +125,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [S-Lang](https://www.jedsoft.org/slang/modules/fetch.html) by John E Davis
 
-[Smalltalk](https://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
+[Smalltalk](https://www.squeaksource.com/FetchPlugin/) Written by Danil Osipchuk
 
 [SP-Forth](https://sourceforge.net/p/spf/spf/ci/master/tree/devel/~ac/lib/lin/fetch/) Written by Andrey Cherezov
 

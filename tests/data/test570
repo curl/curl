@@ -30,7 +30,7 @@ RTSP/1.0 200 OK
 Server: RTSPD/libfetch-test
 Session: asdfWRONG
 Informational: Session ID mismatch
-Curl-Private: swsclose
+Fetch-Private: swsclose
 CSeq: 1000
 
 </data3>

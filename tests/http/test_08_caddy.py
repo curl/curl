@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@ import os
 import re
 import pytest
 
-from testenv import Env, CurlClient, Caddy, LocalClient
+from testenv import Env, FetchClient, Caddy, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class TestCaddy:
             pytest.skip("h3 not supported in fetch")
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.domain1}:{caddy.port}/data.json'
         r = fetch.http_download(urls=[url], alpn_proto=proto)
         r.check_response(count=1, http_status=200)
@@ -89,7 +89,7 @@ class TestCaddy:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
         count = 50
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
         r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=count, http_status=200, connect_count=1)
@@ -102,7 +102,7 @@ class TestCaddy:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
         count = 20
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
         r = fetch.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
@@ -124,7 +124,7 @@ class TestCaddy:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
         count = 40
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data5.data?[0-{count-1}]'
         r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=count, http_status=200, connect_count=1)
@@ -139,7 +139,7 @@ class TestCaddy:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
         count = 20
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
         r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=count, http_status=200, connect_count=1)
@@ -157,7 +157,7 @@ class TestCaddy:
             pytest.skip("mbedtls 3.6.0 fails on 50 connections with: "\
                 "ssl_handshake returned: (-0x7F00) SSL - Memory allocation failed")
         count = 50
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
         r = fetch.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
@@ -179,7 +179,7 @@ class TestCaddy:
         # limit since we use a separate connection in h1
         count = 20
         data = '0123456789'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.domain2}:{caddy.port}/fetchtest/echo?id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
@@ -198,7 +198,7 @@ class TestCaddy:
         # limit since we use a separate connection in h1<
         count = 1
         fdata = os.path.join(env.gen_dir, 'data-10m')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.domain2}:{caddy.port}/fetchtest/put?id=[0-{count-1}]'
         r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
         exp_data = [f'{os.path.getsize(fdata)}']

@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@ import logging
 import re
 import pytest
 
-from testenv import Env, CurlClient, LocalClient
+from testenv import Env, FetchClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class TestShutdown:
     def test_19_01_check_tcp_rst(self, env: Env, httpd, proto):
         if env.ci_run:
             pytest.skip("seems not to work in CI")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
         r = fetch.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
             '--parallel'
@@ -73,7 +73,7 @@ class TestShutdown:
     def test_19_02_check_shutdown(self, env: Env, httpd, proto):
         if not env.fetch_is_debug():
             pytest.skip('only works for fetch debug builds')
-        fetch = CurlClient(env=env, run_env={
+        fetch = FetchClient(env=env, run_env={
             'FETCH_GRACEFUL_SHUTDOWN': '2000',
             'FETCH_DEBUG': 'ssl,tcp'
         })
@@ -91,7 +91,7 @@ class TestShutdown:
         if not env.fetch_is_debug():
             pytest.skip('only works for fetch debug builds')
         count = 10
-        fetch = CurlClient(env=env, run_env={
+        fetch = FetchClient(env=env, run_env={
             'FETCH_GRACEFUL_SHUTDOWN': '2000',
             'FETCH_DEBUG': 'ssl'
         })
@@ -133,7 +133,7 @@ class TestShutdown:
         if not env.fetch_is_debug():
             pytest.skip('only works for fetch debug builds')
         count = 10
-        fetch = CurlClient(env=env, run_env={
+        fetch = FetchClient(env=env, run_env={
             # forbid connection reuse to trigger shutdowns after transfer
             'FETCH_FORBID_REUSE': '1',
             # make socket receives block 50% of the time to delay shutdown
@@ -162,7 +162,7 @@ class TestShutdown:
             pytest.skip("h3 not supported")
         if not env.fetch_is_debug():
             pytest.skip('only works for fetch debug builds')
-        fetch = CurlClient(env=env, run_env={
+        fetch = FetchClient(env=env, run_env={
             'FETCH_GRACEFUL_SHUTDOWN': '2000',
             'FETCH_DEBUG': 'all'
         })

@@ -83,7 +83,7 @@ Build ngtcp2:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone https://github.com/fetch/fetch
      % cd fetch
      % autoreconf -fi
      % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
@@ -127,7 +127,7 @@ Build ngtcp2:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone https://github.com/fetch/fetch
      % cd fetch
      % autoreconf -fi
      % ./configure --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
@@ -169,7 +169,7 @@ Build ngtcp2:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone https://github.com/fetch/fetch
      % cd fetch
      % autoreconf -fi
      % ./configure --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
@@ -196,7 +196,7 @@ Build quiche and BoringSSL:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone https://github.com/fetch/fetch
      % cd fetch
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
@@ -233,7 +233,7 @@ Build nghttp3:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone https://github.com/fetch/fetch
      % cd fetch
      % autoreconf -fi
      % LDFLAGS="-Wl,-rpath,<somewhere>/lib" ./configure --with-openssl=<somewhere> --with-openssl-quic --with-nghttp3=<somewhere2>
@@ -243,7 +243,7 @@ Build fetch:
 You can build fetch with cmake:
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone https://github.com/fetch/fetch
      % cd fetch
      % cmake . -B bld -DFETCH_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
      % cmake --build bld
@@ -272,7 +272,7 @@ Build msh3:
 
 Build fetch:
 
-     % git clone https://github.com/curl/curl
+     % git clone https://github.com/fetch/fetch
      % cd fetch
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-msh3=/usr/local --with-openssl
@@ -299,7 +299,7 @@ additional set of build dependencies not specified here.
 Build fetch (in [Visual Studio Command
 prompt](../winbuild/README.md#open-a-command-prompt)):
 
-     % git clone https://github.com/curl/curl
+     % git clone https://github.com/fetch/fetch
      % cd fetch/winbuild
      % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
 
@@ -307,7 +307,7 @@ Run in the `C:/Program Files/msh3/lib` directory, copy `fetch.exe` to that
 directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 `fetch.exe` directory. For example:
 
-     % C:\Program Files\msh3\lib> F:\fetch\builds\libfetch-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\fetch.exe --http3 https://curl.se/
+     % C:\Program Files\msh3\lib> F:\fetch\builds\libfetch-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\fetch.exe --http3 https://fetch.se/
 
 # `--http3`
 
@@ -321,7 +321,7 @@ Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
 
 Upgrade via Alt-Svc:
 
-     % fetch --alt-svc altsvc.cache https://curl.se/
+     % fetch --alt-svc altsvc.cache https://fetch.se/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 
@@ -365,7 +365,7 @@ parallel (the actual eyeballing).
 
 ## Known Bugs
 
-Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTTP3).
+Check out the [list of known HTTP3 bugs](https://fetch.se/docs/knownbugs.html#HTTP3).
 
 # HTTP/3 Test server
 

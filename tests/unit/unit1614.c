@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -135,7 +135,7 @@ UNITTEST_START
       {NULL, NULL, FALSE}};
   for (i = 0; list4[i].a; i++)
   {
-    bool match = Curl_cidr4_match(list4[i].a, list4[i].n, list4[i].bits);
+    bool match = Fetch_cidr4_match(list4[i].a, list4[i].n, list4[i].bits);
     if (match != list4[i].match)
     {
       fprintf(stderr, "%s in %s/%u should %smatch\n",
@@ -147,7 +147,7 @@ UNITTEST_START
 #ifdef USE_IPV6
   for (i = 0; list6[i].a; i++)
   {
-    bool match = Curl_cidr6_match(list6[i].a, list6[i].n, list6[i].bits);
+    bool match = Fetch_cidr6_match(list6[i].a, list6[i].n, list6[i].bits);
     if (match != list6[i].match)
     {
       fprintf(stderr, "%s in %s/%u should %smatch\n",
@@ -159,7 +159,7 @@ UNITTEST_START
 #endif
   for (i = 0; list[i].a; i++)
   {
-    bool match = Curl_check_noproxy(list[i].a, list[i].n);
+    bool match = Fetch_check_noproxy(list[i].a, list[i].n);
     if (match != list[i].match)
     {
       fprintf(stderr, "%s in %s should %smatch\n",

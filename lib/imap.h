@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,9 +52,9 @@ typedef enum
   IMAP_LAST /* never used */
 } imapstate;
 
-/* This IMAP struct is used in the Curl_easy. All IMAP data that is
+/* This IMAP struct is used in the Fetch_easy. All IMAP data that is
    connection-oriented must be in imap_conn to properly deal with the fact that
-   perhaps the Curl_easy is changed between the times the connection is
+   perhaps the Fetch_easy is changed between the times the connection is
    used. */
 struct IMAP
 {
@@ -90,8 +90,8 @@ struct imap_conn
   BIT(ir_supported);         /* Initial response supported by server */
 };
 
-extern const struct Curl_handler Curl_handler_imap;
-extern const struct Curl_handler Curl_handler_imaps;
+extern const struct Fetch_handler Fetch_handler_imap;
+extern const struct Fetch_handler Fetch_handler_imaps;
 
 /* Authentication type flags */
 #define IMAP_TYPE_CLEARTEXT (1 << 0)

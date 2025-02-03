@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@
 
 #ifdef USE_SSL
 
-struct Curl_ssl;
+struct Fetch_ssl;
 struct ssl_connect_data;
 
 /* see https://www.iana.org/assignments/tls-extensiontype-values/ */
@@ -60,18 +60,18 @@ struct alpn_proto_buf
   int len;
 };
 
-FETCHcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
+FETCHcode Fetch_alpn_to_proto_buf(struct alpn_proto_buf *buf,
                                  const struct alpn_spec *spec);
-FETCHcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
+FETCHcode Fetch_alpn_to_proto_str(struct alpn_proto_buf *buf,
                                  const struct alpn_spec *spec);
 
-FETCHcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+FETCHcode Fetch_alpn_set_negotiated(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    struct ssl_connect_data *connssl,
                                    const unsigned char *proto,
                                    size_t proto_len);
 
-bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
+bool Fetch_alpn_contains_proto(const struct alpn_spec *spec,
                               const char *proto);
 
 /* enum for the nonblocking SSL connection state machine */
@@ -111,7 +111,7 @@ typedef enum
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data
 {
-  const struct Curl_ssl *ssl_impl; /* TLS backend for this filter */
+  const struct Fetch_ssl *ssl_impl; /* TLS backend for this filter */
   struct ssl_peer peer;            /* peer the filter talks to */
   const struct alpn_spec *alpn;    /* ALPN to use or NULL for none */
   void *backend;                   /* vtls backend specific props */
@@ -139,7 +139,7 @@ struct ssl_connect_data
 
 /* Definitions for SSL Implementations */
 
-struct Curl_ssl
+struct Fetch_ssl
 {
   /*
    * This *must* be the first entry to allow returning the list of available
@@ -153,55 +153,55 @@ struct Curl_ssl
   void (*cleanup)(void);
 
   size_t (*version)(char *buffer, size_t size);
-  FETCHcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
+  FETCHcode (*shut_down)(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                          bool send_shutdown, bool *done);
-  bool (*data_pending)(struct Curl_cfilter *cf,
-                       const struct Curl_easy *data);
+  bool (*data_pending)(struct Fetch_cfilter *cf,
+                       const struct Fetch_easy *data);
 
   /* return 0 if a find random is filled in */
-  FETCHcode (*random)(struct Curl_easy *data, unsigned char *entropy,
+  FETCHcode (*random)(struct Fetch_easy *data, unsigned char *entropy,
                       size_t length);
   bool (*cert_status_request)(void);
 
-  FETCHcode (*connect_blocking)(struct Curl_cfilter *cf,
-                                struct Curl_easy *data);
-  FETCHcode (*connect_nonblocking)(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+  FETCHcode (*connect_blocking)(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data);
+  FETCHcode (*connect_nonblocking)(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    bool *done);
 
   /* During handshake/shutdown, adjust the pollset to include the socket
    * for POLLOUT or POLLIN as needed. Mandatory. */
-  void (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
+  void (*adjust_pollset)(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                          struct easy_pollset *ps);
   void *(*get_internals)(struct ssl_connect_data *connssl, FETCHINFO info);
-  void (*close)(struct Curl_cfilter *cf, struct Curl_easy *data);
-  void (*close_all)(struct Curl_easy *data);
+  void (*close)(struct Fetch_cfilter *cf, struct Fetch_easy *data);
+  void (*close_all)(struct Fetch_easy *data);
 
-  FETCHcode (*set_engine)(struct Curl_easy *data, const char *engine);
-  FETCHcode (*set_engine_default)(struct Curl_easy *data);
-  struct fetch_slist *(*engines_list)(struct Curl_easy *data);
+  FETCHcode (*set_engine)(struct Fetch_easy *data, const char *engine);
+  FETCHcode (*set_engine_default)(struct Fetch_easy *data);
+  struct fetch_slist *(*engines_list)(struct Fetch_easy *data);
 
   bool (*false_start)(void);
   FETCHcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                          unsigned char *sha256sum, size_t sha256sumlen);
-  ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+  ssize_t (*recv_plain)(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                         char *buf, size_t len, FETCHcode *code);
-  ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+  ssize_t (*send_plain)(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                         const void *mem, size_t len, FETCHcode *code);
 
-  FETCHcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
+  FETCHcode (*get_channel_binding)(struct Fetch_easy *data, int sockindex,
                                    struct dynbuf *binding);
 };
 
-extern const struct Curl_ssl *Curl_ssl;
+extern const struct Fetch_ssl *Fetch_ssl;
 
-void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
+void Fetch_ssl_adjust_pollset(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                              struct easy_pollset *ps);
 
 /**
  * Get the SSL filter below the given one or NULL if there is none.
  */
-bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
+bool Fetch_ssl_cf_is_proxy(struct Fetch_cfilter *cf);
 
 #endif /* USE_SSL */
 

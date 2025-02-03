@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -73,20 +73,20 @@
 static void keylog_callback(const WOLFSSL *ssl, const char *line)
 {
   (void)ssl;
-  Curl_tls_keylog_write_line(line);
+  Fetch_tls_keylog_write_line(line);
 }
 #endif
 
 static FETCHcode wssl_init_ctx(struct fetch_tls_ctx *ctx,
-                               struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               Curl_vquic_tls_ctx_setup *cb_setup,
+                               struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
+                               Fetch_vquic_tls_ctx_setup *cb_setup,
                                void *cb_user_data)
 {
   struct ssl_primary_config *conn_config;
   FETCHcode result = FETCHE_FAILED_INIT;
 
-  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  conn_config = Fetch_ssl_cf_get_primary_config(cf);
   if (!conn_config)
   {
     result = FETCHE_FAILED_INIT;
@@ -126,8 +126,8 @@ static FETCHcode wssl_init_ctx(struct fetch_tls_ctx *ctx,
   }
 
   /* Open the file if a TLS or QUIC backend has not done this before. */
-  Curl_tls_keylog_open();
-  if (Curl_tls_keylog_enabled())
+  Fetch_tls_keylog_open();
+  if (Fetch_tls_keylog_enabled())
   {
 #if defined(HAVE_SECRET_CALLBACK)
     wolfSSL_CTX_set_keylog_callback(ctx->wssl.ctx, keylog_callback);
@@ -182,10 +182,10 @@ static FETCHcode wssl_init_ctx(struct fetch_tls_ctx *ctx,
   /* give application a chance to interfere with SSL set up. */
   if (data->set.ssl.fsslctx)
   {
-    Curl_set_in_callback(data, TRUE);
+    Fetch_set_in_callback(data, TRUE);
     result = (*data->set.ssl.fsslctx)(data, ctx->wssl.ctx,
                                       data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, FALSE);
+    Fetch_set_in_callback(data, FALSE);
     if (result)
     {
       failf(data, "error signaled by ssl ctx callback");
@@ -206,13 +206,13 @@ out:
 /** SSL callbacks ***/
 
 static FETCHcode wssl_init_ssl(struct fetch_tls_ctx *ctx,
-                               struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
+                               struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
                                struct ssl_peer *peer,
                                const char *alpn, size_t alpn_len,
                                void *user_data)
 {
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
 
   DEBUGASSERT(!ctx->wssl.handle);
   DEBUGASSERT(ctx->wssl.ctx);
@@ -234,47 +234,47 @@ static FETCHcode wssl_init_ssl(struct fetch_tls_ctx *ctx,
 
   if (ssl_config->primary.cache_session)
   {
-    (void)Curl_wssl_setup_session(cf, data, &ctx->wssl, peer->scache_key);
+    (void)Fetch_wssl_setup_session(cf, data, &ctx->wssl, peer->scache_key);
   }
 
   return FETCHE_OK;
 }
 #endif /* defined(USE_WOLFSSL) */
 
-FETCHcode Curl_vquic_tls_init(struct fetch_tls_ctx *ctx,
-                              struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+FETCHcode Fetch_vquic_tls_init(struct fetch_tls_ctx *ctx,
+                              struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               struct ssl_peer *peer,
                               const char *alpn, size_t alpn_len,
-                              Curl_vquic_tls_ctx_setup *cb_setup,
+                              Fetch_vquic_tls_ctx_setup *cb_setup,
                               void *cb_user_data, void *ssl_user_data,
-                              Curl_vquic_session_reuse_cb *session_reuse_cb)
+                              Fetch_vquic_session_reuse_cb *session_reuse_cb)
 {
   char tls_id[80];
   FETCHcode result;
 
 #ifdef USE_OPENSSL
-  Curl_ossl_version(tls_id, sizeof(tls_id));
+  Fetch_ossl_version(tls_id, sizeof(tls_id));
 #elif defined(USE_GNUTLS)
-  Curl_gtls_version(tls_id, sizeof(tls_id));
+  Fetch_gtls_version(tls_id, sizeof(tls_id));
 #elif defined(USE_WOLFSSL)
-  Curl_wssl_version(tls_id, sizeof(tls_id));
+  Fetch_wssl_version(tls_id, sizeof(tls_id));
 #else
 #error "no TLS lib in used, should not happen"
   return FETCHE_FAILED_INIT;
 #endif
   (void)session_reuse_cb;
-  result = Curl_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
+  result = Fetch_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
   if (result)
     return result;
 
 #ifdef USE_OPENSSL
   (void)result;
-  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer,
+  return Fetch_ossl_ctx_init(&ctx->ossl, cf, data, peer,
                             (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, NULL, ssl_user_data);
 #elif defined(USE_GNUTLS)
-  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer,
+  return Fetch_gtls_ctx_init(&ctx->gtls, cf, data, peer,
                             (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, ssl_user_data,
                             session_reuse_cb);
@@ -291,7 +291,7 @@ FETCHcode Curl_vquic_tls_init(struct fetch_tls_ctx *ctx,
 #endif
 }
 
-void Curl_vquic_tls_cleanup(struct fetch_tls_ctx *ctx)
+void Fetch_vquic_tls_cleanup(struct fetch_tls_ctx *ctx)
 {
 #ifdef USE_OPENSSL
   if (ctx->ossl.ssl)
@@ -301,7 +301,7 @@ void Curl_vquic_tls_cleanup(struct fetch_tls_ctx *ctx)
 #elif defined(USE_GNUTLS)
   if (ctx->gtls.session)
     gnutls_deinit(ctx->gtls.session);
-  Curl_gtls_shared_creds_free(&ctx->gtls.shared_creds);
+  Fetch_gtls_shared_creds_free(&ctx->gtls.shared_creds);
 #elif defined(USE_WOLFSSL)
   if (ctx->wssl.handle)
     wolfSSL_free(ctx->wssl.handle);
@@ -311,14 +311,14 @@ void Curl_vquic_tls_cleanup(struct fetch_tls_ctx *ctx)
   memset(ctx, 0, sizeof(*ctx));
 }
 
-FETCHcode Curl_vquic_tls_before_recv(struct fetch_tls_ctx *ctx,
-                                     struct Curl_cfilter *cf,
-                                     struct Curl_easy *data)
+FETCHcode Fetch_vquic_tls_before_recv(struct fetch_tls_ctx *ctx,
+                                     struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data)
 {
 #ifdef USE_OPENSSL
   if (!ctx->ossl.x509_store_setup)
   {
-    FETCHcode result = Curl_ssl_setup_x509_store(cf, data, ctx->ossl.ssl_ctx);
+    FETCHcode result = Fetch_ssl_setup_x509_store(cf, data, ctx->ossl.ssl_ctx);
     if (result)
       return result;
     ctx->ossl.x509_store_setup = TRUE;
@@ -326,14 +326,14 @@ FETCHcode Curl_vquic_tls_before_recv(struct fetch_tls_ctx *ctx,
 #elif defined(USE_WOLFSSL)
   if (!ctx->wssl.x509_store_setup)
   {
-    FETCHcode result = Curl_wssl_setup_x509_store(cf, data, &ctx->wssl);
+    FETCHcode result = Fetch_wssl_setup_x509_store(cf, data, &ctx->wssl);
     if (result)
       return result;
   }
 #elif defined(USE_GNUTLS)
   if (!ctx->gtls.shared_creds->trust_setup)
   {
-    FETCHcode result = Curl_gtls_client_trust_setup(cf, data, &ctx->gtls);
+    FETCHcode result = Fetch_gtls_client_trust_setup(cf, data, &ctx->gtls);
     if (result)
       return result;
   }
@@ -345,25 +345,25 @@ FETCHcode Curl_vquic_tls_before_recv(struct fetch_tls_ctx *ctx,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_vquic_tls_verify_peer(struct fetch_tls_ctx *ctx,
-                                     struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
+FETCHcode Fetch_vquic_tls_verify_peer(struct fetch_tls_ctx *ctx,
+                                     struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data,
                                      struct ssl_peer *peer)
 {
   struct ssl_primary_config *conn_config;
   FETCHcode result = FETCHE_OK;
 
-  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  conn_config = Fetch_ssl_cf_get_primary_config(cf);
   if (!conn_config)
     return FETCHE_FAILED_INIT;
 
 #ifdef USE_OPENSSL
   (void)conn_config;
-  result = Curl_oss_check_peer_cert(cf, data, &ctx->ossl, peer);
+  result = Fetch_oss_check_peer_cert(cf, data, &ctx->ossl, peer);
 #elif defined(USE_GNUTLS)
   if (conn_config->verifyhost)
   {
-    result = Curl_gtls_verifyserver(data, ctx->gtls.session,
+    result = Fetch_gtls_verifyserver(data, ctx->gtls.session,
                                     conn_config, &data->set.ssl, peer,
                                     data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
     if (result)
@@ -386,7 +386,7 @@ FETCHcode Curl_vquic_tls_verify_peer(struct fetch_tls_ctx *ctx,
 #endif
   /* on error, remove any session we might have in the pool */
   if (result)
-    Curl_ssl_scache_remove_all(cf, data, peer->scache_key);
+    Fetch_ssl_scache_remove_all(cf, data, peer->scache_key);
   return result;
 }
 

@@ -21,7 +21,7 @@ Cookies are set to the client with the Set-Cookie: header and are sent to
 servers with the Cookie: header.
 
 For a long time, the only spec explaining how to use cookies was the
-original [Netscape spec from 1994](https://curl.se/rfc/cookie_spec.html).
+original [Netscape spec from 1994](https://fetch.se/rfc/cookie_spec.html).
 
 In 2011, [RFC 6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
 published and details how cookies work within HTTP. In 2016, an update which
@@ -103,18 +103,18 @@ have fetch receive and send cookies exactly as mandated in the specs.
 
 Command line options:
 
-[`-b, --cookie`](https://curl.se/docs/manpage.html#-b)
+[`-b, --cookie`](https://fetch.se/docs/manpage.html#-b)
 
 tell fetch a file to read cookies from and start the cookie engine, or if it
 is not a file it passes on the given string. `-b name=var` works and so does
 `-b cookiefile`.
 
-[`-j, --junk-session-cookies`](https://curl.se/docs/manpage.html#-j)
+[`-j, --junk-session-cookies`](https://fetch.se/docs/manpage.html#-j)
 
 when used in combination with -b, it skips all "session cookies" on load so
 as to appear to start a new cookie session.
 
-[`-c, --cookie-jar`](https://curl.se/docs/manpage.html#-c)
+[`-c, --cookie-jar`](https://fetch.se/docs/manpage.html#-c)
 
 tell fetch to start the cookie engine and write cookies to the given file
 after the request(s)
@@ -125,34 +125,34 @@ libfetch offers several ways to enable and interface the cookie engine. These
 options are the ones provided by the native API. libfetch bindings may offer
 access to them using other means.
 
-[`FETCHOPT_COOKIE`](https://curl.se/libfetch/c/FETCHOPT_COOKIE.html)
+[`FETCHOPT_COOKIE`](https://fetch.se/libfetch/c/FETCHOPT_COOKIE.html)
 
 Is used when you want to specify the exact contents of a cookie header to
 send to the server.
 
-[`FETCHOPT_COOKIEFILE`](https://curl.se/libfetch/c/FETCHOPT_COOKIEFILE.html)
+[`FETCHOPT_COOKIEFILE`](https://fetch.se/libfetch/c/FETCHOPT_COOKIEFILE.html)
 
 Tell libfetch to activate the cookie engine, and to read the initial set of
 cookies from the given file. Read-only.
 
-[`FETCHOPT_COOKIEJAR`](https://curl.se/libfetch/c/FETCHOPT_COOKIEJAR.html)
+[`FETCHOPT_COOKIEJAR`](https://fetch.se/libfetch/c/FETCHOPT_COOKIEJAR.html)
 
 Tell libfetch to activate the cookie engine, and when the easy handle is
 closed save all known cookies to the given cookie jar file. Write-only.
 
-[`FETCHOPT_COOKIELIST`](https://curl.se/libfetch/c/FETCHOPT_COOKIELIST.html)
+[`FETCHOPT_COOKIELIST`](https://fetch.se/libfetch/c/FETCHOPT_COOKIELIST.html)
 
 Provide detailed information about a single cookie to add to the internal
 storage of cookies. Pass in the cookie as an HTTP header with all the
 details set, or pass in a line from a Netscape cookie file. This option can
 also be used to flush the cookies etc.
 
-[`FETCHOPT_COOKIESESSION`](https://curl.se/libfetch/c/FETCHOPT_COOKIESESSION.html)
+[`FETCHOPT_COOKIESESSION`](https://fetch.se/libfetch/c/FETCHOPT_COOKIESESSION.html)
 
 Tell libfetch to ignore all cookies it is about to load that are session
 cookies.
 
-[`FETCHINFO_COOKIELIST`](https://curl.se/libfetch/c/FETCHINFO_COOKIELIST.html)
+[`FETCHINFO_COOKIELIST`](https://fetch.se/libfetch/c/FETCHINFO_COOKIELIST.html)
 
 Extract cookie information from the internal cookie storage as a linked
 list.

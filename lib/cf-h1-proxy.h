@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,10 +28,10 @@
 
 #if !defined(FETCH_DISABLE_PROXY) && !defined(FETCH_DISABLE_HTTP)
 
-FETCHcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data);
+FETCHcode Fetch_cf_h1_proxy_insert_after(struct Fetch_cfilter *cf,
+                                        struct Fetch_easy *data);
 
-extern struct Curl_cftype Curl_cft_h1_proxy;
+extern struct Fetch_cftype Fetch_cft_h1_proxy;
 
 #endif /* !FETCH_DISABLE_PROXY && !FETCH_DISABLE_HTTP */
 

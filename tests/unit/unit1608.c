@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,11 +27,11 @@
 
 #ifndef FETCH_DISABLE_SHUFFLE_DNS
 
-FETCHcode Curl_shuffle_addr(struct Curl_easy *data,
-                            struct Curl_addrinfo **addr);
+FETCHcode Fetch_shuffle_addr(struct Fetch_easy *data,
+                            struct Fetch_addrinfo **addr);
 
 #define NUM_ADDRS 8
-static struct Curl_addrinfo addrs[NUM_ADDRS];
+static struct Fetch_addrinfo addrs[NUM_ADDRS];
 
 static FETCHcode unit_setup(void)
 {
@@ -53,9 +53,9 @@ UNITTEST_START
 
 int i;
 FETCHcode code;
-struct Curl_addrinfo *addrhead = addrs;
+struct Fetch_addrinfo *addrhead = addrs;
 
-struct Curl_easy *easy = fetch_easy_init();
+struct Fetch_easy *easy = fetch_easy_init();
 abort_unless(easy, "out of memory");
 
 code = fetch_easy_setopt(easy, FETCHOPT_DNS_SHUFFLE_ADDRESSES, 1L);
@@ -64,7 +64,7 @@ abort_unless(code == FETCHE_OK, "fetch_easy_setopt failed");
 /* Shuffle repeatedly and make sure that the list changes */
 for (i = 0; i < 10; i++)
 {
-  if (FETCHE_OK != Curl_shuffle_addr(easy, &addrhead))
+  if (FETCHE_OK != Fetch_shuffle_addr(easy, &addrhead))
     break;
   if (addrhead != addrs)
     break;

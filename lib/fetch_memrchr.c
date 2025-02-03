@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,7 +38,7 @@
     defined(USE_SCHANNEL)
 
 /*
- * Curl_memrchr()
+ * Fetch_memrchr()
  *
  * Our memrchr() function clone for systems which lack this function. The
  * memrchr() function is like the memchr() function, except that it searches
@@ -47,7 +47,7 @@
  */
 
 void *
-Curl_memrchr(const void *s, int c, size_t n)
+Fetch_memrchr(const void *s, int c, size_t n)
 {
   if (n > 0)
   {

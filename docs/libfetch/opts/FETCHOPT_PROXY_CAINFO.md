@@ -90,7 +90,7 @@ int main(void)
 
 For TLS backends that do not support certificate files, the
 FETCHOPT_PROXY_CAINFO(3) option is ignored. Refer to
-https://curl.se/docs/ssl-compared.html
+https://fetch.se/docs/ssl-compared.html
 
 # %AVAILABILITY%
 

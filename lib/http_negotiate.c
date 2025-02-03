@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,7 +38,7 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-FETCHcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
+FETCHcode Fetch_input_negotiate(struct Fetch_easy *data, struct connectdata *conn,
                                bool proxy, const char *header)
 {
   FETCHcode result;
@@ -96,13 +96,13 @@ FETCHcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
     if (state == GSS_AUTHSUCC)
     {
       infof(data, "Negotiate auth restarted");
-      Curl_http_auth_cleanup_negotiate(conn);
+      Fetch_http_auth_cleanup_negotiate(conn);
     }
     else if (state != GSS_AUTHNONE)
     {
       /* The server rejected our authentication and has not supplied any more
       negotiation mechanisms */
-      Curl_http_auth_cleanup_negotiate(conn);
+      Fetch_http_auth_cleanup_negotiate(conn);
       return FETCHE_LOGIN_DENIED;
     }
   }
@@ -113,34 +113,34 @@ FETCHcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #endif
   /* Check if the connection is using SSL and get the channel binding data */
 #if defined(USE_SSL) && defined(HAVE_GSSAPI)
-  if (Curl_conn_is_ssl(conn, FIRSTSOCKET))
+  if (Fetch_conn_is_ssl(conn, FIRSTSOCKET))
   {
-    Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
-    result = Curl_ssl_get_channel_binding(
+    Fetch_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
+    result = Fetch_ssl_get_channel_binding(
         data, FIRSTSOCKET, &neg_ctx->channel_binding_data);
     if (result)
     {
-      Curl_http_auth_cleanup_negotiate(conn);
+      Fetch_http_auth_cleanup_negotiate(conn);
       return result;
     }
   }
 #endif
 
   /* Initialize the security context and decode our challenge */
-  result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
+  result = Fetch_auth_decode_spnego_message(data, userp, passwdp, service,
                                            host, header, neg_ctx);
 
 #if defined(USE_SSL) && defined(HAVE_GSSAPI)
-  Curl_dyn_free(&neg_ctx->channel_binding_data);
+  Fetch_dyn_free(&neg_ctx->channel_binding_data);
 #endif
 
   if (result)
-    Curl_http_auth_cleanup_negotiate(conn);
+    Fetch_http_auth_cleanup_negotiate(conn);
 
   return result;
 }
 
-FETCHcode Curl_output_negotiate(struct Curl_easy *data,
+FETCHcode Fetch_output_negotiate(struct Fetch_easy *data,
                                 struct connectdata *conn, bool proxy)
 {
   struct negotiatedata *neg_ctx;
@@ -191,13 +191,13 @@ FETCHcode Curl_output_negotiate(struct Curl_easy *data,
 
     if (neg_ctx->noauthpersist && *state == GSS_AUTHSUCC)
     {
-      infof(data, "Curl_output_negotiate, "
+      infof(data, "Fetch_output_negotiate, "
                   "no persistent authentication: cleanup existing context");
-      Curl_http_auth_cleanup_negotiate(conn);
+      Fetch_http_auth_cleanup_negotiate(conn);
     }
     if (!neg_ctx->context)
     {
-      result = Curl_input_negotiate(data, conn, proxy, "Negotiate");
+      result = Fetch_input_negotiate(data, conn, proxy, "Negotiate");
       if (result == FETCHE_AUTH_ERROR)
       {
         /* negotiate auth failed, let's continue unauthenticated to stay
@@ -209,7 +209,7 @@ FETCHcode Curl_output_negotiate(struct Curl_easy *data,
         return result;
     }
 
-    result = Curl_auth_create_spnego_message(neg_ctx, &base64, &len);
+    result = Fetch_auth_create_spnego_message(neg_ctx, &base64, &len);
     if (result)
       return result;
 
@@ -219,13 +219,13 @@ FETCHcode Curl_output_negotiate(struct Curl_easy *data,
     if (proxy)
     {
 #ifndef FETCH_DISABLE_PROXY
-      Curl_safefree(data->state.aptr.proxyuserpwd);
+      Fetch_safefree(data->state.aptr.proxyuserpwd);
       data->state.aptr.proxyuserpwd = userp;
 #endif
     }
     else
     {
-      Curl_safefree(data->state.aptr.userpwd);
+      Fetch_safefree(data->state.aptr.userpwd);
       data->state.aptr.userpwd = userp;
     }
 
@@ -266,13 +266,13 @@ FETCHcode Curl_output_negotiate(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-void Curl_http_auth_cleanup_negotiate(struct connectdata *conn)
+void Fetch_http_auth_cleanup_negotiate(struct connectdata *conn)
 {
   conn->http_negotiate_state = GSS_AUTHNONE;
   conn->proxy_negotiate_state = GSS_AUTHNONE;
 
-  Curl_auth_cleanup_spnego(&conn->negotiate);
-  Curl_auth_cleanup_spnego(&conn->proxyneg);
+  Fetch_auth_cleanup_spnego(&conn->negotiate);
+  Fetch_auth_cleanup_spnego(&conn->proxyneg);
 }
 
 #endif /* !FETCH_DISABLE_HTTP && USE_SPNEGO */

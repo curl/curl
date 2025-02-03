@@ -17,10 +17,10 @@ With this naming established, client writers are concerned with writing response
 
 ## Invoking
 
-All code in `libfetch` that handles response data is ultimately expected to forward this data via `Curl_client_write()` to the application. The exact prototype of this function is:
+All code in `libfetch` that handles response data is ultimately expected to forward this data via `Fetch_client_write()` to the application. The exact prototype of this function is:
 
 ```
-FETCHcode Curl_client_write(struct Curl_easy *data, int type, const char *buf, size_t blen);
+FETCHcode Fetch_client_write(struct Fetch_easy *data, int type, const char *buf, size_t blen);
 ```
 The `type` argument specifies what the bytes in `buf` actually are. The following bits are defined:
 
@@ -39,28 +39,28 @@ mutually exclusive. The other bits are enhancements to `CLIENTWRITE_HEADER` to
 specify what the header is about. They are only used in HTTP and related
 protocols (RTSP and WebSocket).
 
-The implementation of `Curl_client_write()` uses a chain of *client writer* instances to process the call and make sure that the bytes reach the proper application callbacks. This is similar to the design of connection filters: client writers can be chained to process the bytes written through them. The definition is:
+The implementation of `Fetch_client_write()` uses a chain of *client writer* instances to process the call and make sure that the bytes reach the proper application callbacks. This is similar to the design of connection filters: client writers can be chained to process the bytes written through them. The definition is:
 
 ```
-struct Curl_cwtype {
+struct Fetch_cwtype {
   const char *name;
-  FETCHcode (*do_init)(struct Curl_easy *data,
-                      struct Curl_cwriter *writer);
-  FETCHcode (*do_write)(struct Curl_easy *data,
-                       struct Curl_cwriter *writer, int type,
+  FETCHcode (*do_init)(struct Fetch_easy *data,
+                      struct Fetch_cwriter *writer);
+  FETCHcode (*do_write)(struct Fetch_easy *data,
+                       struct Fetch_cwriter *writer, int type,
                        const char *buf, size_t nbytes);
-  void (*do_close)(struct Curl_easy *data,
-                   struct Curl_cwriter *writer);
+  void (*do_close)(struct Fetch_easy *data,
+                   struct Fetch_cwriter *writer);
 };
 
-struct Curl_cwriter {
-  const struct Curl_cwtype *cwt;  /* type implementation */
-  struct Curl_cwriter *next;  /* Downstream writer. */
-  Curl_cwriter_phase phase; /* phase at which it operates */
+struct Fetch_cwriter {
+  const struct Fetch_cwtype *cwt;  /* type implementation */
+  struct Fetch_cwriter *next;  /* Downstream writer. */
+  Fetch_cwriter_phase phase; /* phase at which it operates */
 };
 ```
 
-`Curl_cwriter` is a writer instance with a `next` pointer to form the chain. It has a type `cwt` which provides the implementation. The main callback is `do_write()` that processes the data and calls then the `next` writer. The others are for setup and tear down.
+`Fetch_cwriter` is a writer instance with a `next` pointer to form the chain. It has a type `cwt` which provides the implementation. The main callback is `do_write()` that processes the data and calls then the `next` writer. The others are for setup and tear down.
 
 ## Phases and Ordering
 
@@ -73,7 +73,7 @@ typedef enum {
   FETCH_CW_PROTOCOL, /* after transfer, but before content decoding */
   FETCH_CW_CONTENT_DECODE, /* remove content-encodings */
   FETCH_CW_CLIENT  /* data written to client */
-} Curl_cwriter_phase;
+} Fetch_cwriter_phase;
 ```
 
 If a writer for phase `PROTOCOL` is added to the chain, it is always added *after* any `RAW` or `TRANSFER_DECODE` and *before* any `CONTENT_DECODE` and `CLIENT` phase writer. If there is already a writer for the same phase present, the new writer is inserted just before that one.
@@ -102,7 +102,7 @@ before writing it out to the client. How does it do that?
 The HTTP protocol adds client writers in phase `FETCH_CW_CONTENT_DECODE` on
 seeing such a header. For each encoding listed, it adds the corresponding
 writer. The response from the server is then passed through
-`Curl_client_write()` to the writers that decode it. If several encodings had
+`Fetch_client_write()` to the writers that decode it. If several encodings had
 been applied the writer chain decodes them in the proper order.
 
 When the server provides a `Content-Length` header, that value applies to the
@@ -118,6 +118,6 @@ That is why transfer decoding writers are added for phase `FETCH_CW_TRANSFER_DEC
 
 ## Summary
 
-By adding the common behavior of all protocols into `Curl_client_write()` we make sure that they do apply everywhere. Protocol handler have less to worry about. Changes to default behavior can be done without affecting handler implementations.
+By adding the common behavior of all protocols into `Fetch_client_write()` we make sure that they do apply everywhere. Protocol handler have less to worry about. Changes to default behavior can be done without affecting handler implementations.
 
 Having a writer chain as implementation allows protocol handlers with extra needs, like HTTP, to add to this for special behavior. The common way of writing the actual response data stays the same.

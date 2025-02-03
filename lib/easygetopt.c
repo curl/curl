@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,10 +32,10 @@
 static struct fetch_easyoption *lookup(const char *name, FETCHoption id)
 {
   DEBUGASSERT(name || id);
-  DEBUGASSERT(!Curl_easyopts_check());
+  DEBUGASSERT(!Fetch_easyopts_check());
   if (name || id)
   {
-    struct fetch_easyoption *o = &Curl_easyopts[0];
+    struct fetch_easyoption *o = &Fetch_easyopts[0];
     do
     {
       if (name)
@@ -77,7 +77,7 @@ fetch_easy_option_next(const struct fetch_easyoption *prev)
       return prev;
   }
   else if (!prev)
-    return &Curl_easyopts[0];
+    return &Fetch_easyopts[0];
   return NULL;
 }
 

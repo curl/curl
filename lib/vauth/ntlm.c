@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -138,7 +138,7 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
     fprintf(stderr, "%02.2x", (unsigned int)*p++);
 }
 #else
-#define DEBUG_OUT(x) Curl_nop_stmt
+#define DEBUG_OUT(x) Fetch_nop_stmt
 #endif
 
 /*
@@ -155,14 +155,14 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
  *
  * Returns FETCHE_OK on success.
  */
-static FETCHcode ntlm_decode_type2_target(struct Curl_easy *data,
+static FETCHcode ntlm_decode_type2_target(struct Fetch_easy *data,
                                           const struct bufref *type2ref,
                                           struct ntlmdata *ntlm)
 {
   unsigned short target_info_len = 0;
   unsigned int target_info_offset = 0;
-  const unsigned char *type2 = Curl_bufref_ptr(type2ref);
-  size_t type2len = Curl_bufref_len(type2ref);
+  const unsigned char *type2 = Fetch_bufref_ptr(type2ref);
+  size_t type2len = Fetch_bufref_len(type2ref);
 
 #if defined(FETCH_DISABLE_VERBOSE_STRINGS)
   (void)data;
@@ -170,8 +170,8 @@ static FETCHcode ntlm_decode_type2_target(struct Curl_easy *data,
 
   if (type2len >= 48)
   {
-    target_info_len = Curl_read16_le(&type2[40]);
-    target_info_offset = Curl_read32_le(&type2[44]);
+    target_info_len = Fetch_read16_le(&type2[40]);
+    target_info_offset = Fetch_read32_le(&type2[44]);
     if (target_info_len > 0)
     {
       if ((target_info_offset > type2len) ||
@@ -184,7 +184,7 @@ static FETCHcode ntlm_decode_type2_target(struct Curl_easy *data,
       }
 
       free(ntlm->target_info); /* replace any previous data */
-      ntlm->target_info = Curl_memdup(&type2[target_info_offset],
+      ntlm->target_info = Fetch_memdup(&type2[target_info_offset],
                                       target_info_len);
       if (!ntlm->target_info)
         return FETCHE_OUT_OF_MEMORY;
@@ -213,7 +213,7 @@ static FETCHcode ntlm_decode_type2_target(struct Curl_easy *data,
 */
 
 /*
- * Curl_auth_is_ntlm_supported()
+ * Fetch_auth_is_ntlm_supported()
  *
  * This is used to evaluate if NTLM is supported.
  *
@@ -221,13 +221,13 @@ static FETCHcode ntlm_decode_type2_target(struct Curl_easy *data,
  *
  * Returns TRUE as NTLM as handled by libfetch.
  */
-bool Curl_auth_is_ntlm_supported(void)
+bool Fetch_auth_is_ntlm_supported(void)
 {
   return TRUE;
 }
 
 /*
- * Curl_auth_decode_ntlm_type2_message()
+ * Fetch_auth_decode_ntlm_type2_message()
  *
  * This is used to decode an NTLM type-2 message. The raw NTLM message is
  * checked * for validity before the appropriate data for creating a type-3
@@ -241,7 +241,7 @@ bool Curl_auth_is_ntlm_supported(void)
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
+FETCHcode Fetch_auth_decode_ntlm_type2_message(struct Fetch_easy *data,
                                               const struct bufref *type2ref,
                                               struct ntlmdata *ntlm)
 {
@@ -264,8 +264,8 @@ FETCHcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   */
 
   FETCHcode result = FETCHE_OK;
-  const unsigned char *type2 = Curl_bufref_ptr(type2ref);
-  size_t type2len = Curl_bufref_len(type2ref);
+  const unsigned char *type2 = Fetch_bufref_ptr(type2ref);
+  size_t type2len = Fetch_bufref_len(type2ref);
 
 #if defined(FETCH_DISABLE_VERBOSE_STRINGS)
   (void)data;
@@ -282,7 +282,7 @@ FETCHcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
     return FETCHE_BAD_CONTENT_ENCODING;
   }
 
-  ntlm->flags = Curl_read32_le(&type2[20]);
+  ntlm->flags = Fetch_read32_le(&type2[20]);
   memcpy(ntlm->nonce, &type2[24], 8);
 
   if (ntlm->flags & NTLMFLAG_NEGOTIATE_TARGET_INFO)
@@ -320,7 +320,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
 }
 
 /*
- * Curl_auth_create_ntlm_type1_message()
+ * Fetch_auth_create_ntlm_type1_message()
  *
  * This is used to generate an NTLM type-1 message ready for sending to the
  * recipient using the appropriate compile time crypto API.
@@ -337,7 +337,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
+FETCHcode Fetch_auth_create_ntlm_type1_message(struct Fetch_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
@@ -376,7 +376,7 @@ FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   (void)hostname;
 
   /* Clean up any former leftovers and initialise to defaults */
-  Curl_auth_cleanup_ntlm(ntlm);
+  Fetch_auth_cleanup_ntlm(ntlm);
 
   ntlmbuf = aprintf(NTLMSSP_SIGNATURE "%c"
                                       "\x01%c%c%c" /* 32-bit type = 1 */
@@ -438,12 +438,12 @@ FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
     fprintf(stderr, "\n****\n");
   });
 
-  Curl_bufref_set(out, ntlmbuf, size, fetch_free);
+  Fetch_bufref_set(out, ntlmbuf, size, fetch_free);
   return FETCHE_OK;
 }
 
 /*
- * Curl_auth_create_ntlm_type3_message()
+ * Fetch_auth_create_ntlm_type3_message()
  *
  * This is used to generate an already encoded NTLM type-3 message ready for
  * sending to the recipient using the appropriate compile time crypto API.
@@ -458,7 +458,7 @@ FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
+FETCHcode Fetch_auth_create_ntlm_type3_message(struct Fetch_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               struct ntlmdata *ntlm,
@@ -533,27 +533,27 @@ FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
        Although this cannot be negotiated, it is used here if available, as
        servers featuring extended security are likely supporting also
        NTLMv2. */
-    result = Curl_rand(data, entropy, 8);
+    result = Fetch_rand(data, entropy, 8);
     if (result)
       return result;
 
-    result = Curl_ntlm_core_mk_nt_hash(passwdp, ntbuffer);
+    result = Fetch_ntlm_core_mk_nt_hash(passwdp, ntbuffer);
     if (result)
       return result;
 
-    result = Curl_ntlm_core_mk_ntlmv2_hash(user, userlen, domain, domlen,
+    result = Fetch_ntlm_core_mk_ntlmv2_hash(user, userlen, domain, domlen,
                                            ntbuffer, ntlmv2hash);
     if (result)
       return result;
 
     /* LMv2 response */
-    result = Curl_ntlm_core_mk_lmv2_resp(ntlmv2hash, entropy,
+    result = Fetch_ntlm_core_mk_lmv2_resp(ntlmv2hash, entropy,
                                          &ntlm->nonce[0], lmresp);
     if (result)
       return result;
 
     /* NTLMv2 response */
-    result = Curl_ntlm_core_mk_ntlmv2_resp(ntlmv2hash, entropy,
+    result = Fetch_ntlm_core_mk_ntlmv2_resp(ntlmv2hash, entropy,
                                            ntlm, &ntlmv2resp, &ntresplen);
     if (result)
       return result;
@@ -568,21 +568,21 @@ FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
     /* NTLM version 1 */
 
-    result = Curl_ntlm_core_mk_nt_hash(passwdp, ntbuffer);
+    result = Fetch_ntlm_core_mk_nt_hash(passwdp, ntbuffer);
     if (result)
       return result;
 
-    Curl_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], ntresp);
+    Fetch_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], ntresp);
 
-    result = Curl_ntlm_core_mk_lm_hash(passwdp, lmbuffer);
+    result = Fetch_ntlm_core_mk_lm_hash(passwdp, lmbuffer);
     if (result)
       return result;
 
-    Curl_ntlm_core_lm_resp(lmbuffer, &ntlm->nonce[0], lmresp);
+    Fetch_ntlm_core_lm_resp(lmbuffer, &ntlm->nonce[0], lmresp);
     ntlm->flags &= ~(unsigned int)NTLMFLAG_NEGOTIATE_NTLM2_KEY;
 
     /* A safer but less compatible alternative is:
-     *   Curl_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], lmresp);
+     *   Fetch_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], lmresp);
      * See https://davenport.sourceforge.net/ntlm.html#ntlmVersion2 */
   }
 
@@ -749,15 +749,15 @@ FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size += hostlen;
 
   /* Return the binary blob. */
-  result = Curl_bufref_memdup(out, ntlmbuf, size);
+  result = Fetch_bufref_memdup(out, ntlmbuf, size);
 
-  Curl_auth_cleanup_ntlm(ntlm);
+  Fetch_auth_cleanup_ntlm(ntlm);
 
   return result;
 }
 
 /*
- * Curl_auth_cleanup_ntlm()
+ * Fetch_auth_cleanup_ntlm()
  *
  * This is used to clean up the NTLM specific data.
  *
@@ -766,10 +766,10 @@ FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
  * ntlm    [in/out] - The NTLM data struct being cleaned up.
  *
  */
-void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
+void Fetch_auth_cleanup_ntlm(struct ntlmdata *ntlm)
 {
   /* Free the target info */
-  Curl_safefree(ntlm->target_info);
+  Fetch_safefree(ntlm->target_info);
 
   /* Reset any variables */
   ntlm->target_info_len = 0;

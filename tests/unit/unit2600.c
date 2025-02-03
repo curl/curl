@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -124,12 +124,12 @@ struct cf_test_ctx
   struct ai_family_stats *stats;
 };
 
-static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_test_destroy(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_test_ctx *ctx = cf->ctx;
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
   infof(data, "%04dms: cf[%s] destroyed",
-        (int)Curl_timediff(Curl_now(), current_tr->started), ctx->id);
+        (int)Fetch_timediff(Fetch_now(), current_tr->started), ctx->id);
 #else
   (void)data;
 #endif
@@ -137,8 +137,8 @@ static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->ctx = NULL;
 }
 
-static FETCHcode cf_test_connect(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
+static FETCHcode cf_test_connect(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data,
                                  bool blocking, bool *done)
 {
   struct cf_test_ctx *ctx = cf->ctx;
@@ -147,7 +147,7 @@ static FETCHcode cf_test_connect(struct Curl_cfilter *cf,
   (void)data;
   (void)blocking;
   *done = FALSE;
-  duration_ms = Curl_timediff(Curl_now(), ctx->started);
+  duration_ms = Fetch_timediff(Fetch_now(), ctx->started);
   if (duration_ms >= ctx->fail_delay_ms)
   {
     infof(data, "%04dms: cf[%s] fail delay reached",
@@ -157,48 +157,48 @@ static FETCHcode cf_test_connect(struct Curl_cfilter *cf,
   if (duration_ms)
   {
     infof(data, "%04dms: cf[%s] continuing", (int)duration_ms, ctx->id);
-    Curl_wait_ms(10);
+    Fetch_wait_ms(10);
   }
-  Curl_expire(data, ctx->fail_delay_ms - duration_ms, EXPIRE_RUN_NOW);
+  Fetch_expire(data, ctx->fail_delay_ms - duration_ms, EXPIRE_RUN_NOW);
   return FETCHE_OK;
 }
 
-static void cf_test_adjust_pollset(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static void cf_test_adjust_pollset(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    struct easy_pollset *ps)
 {
   /* just for testing, give one socket with events back */
   (void)cf;
-  Curl_pollset_set(data, ps, 1, TRUE, TRUE);
+  Fetch_pollset_set(data, ps, 1, TRUE, TRUE);
 }
 
-static struct Curl_cftype cft_test = {
+static struct Fetch_cftype cft_test = {
     "TEST",
     CF_TYPE_IP_CONNECT,
     FETCH_LOG_LVL_NONE,
     cf_test_destroy,
     cf_test_connect,
-    Curl_cf_def_close,
-    Curl_cf_def_shutdown,
-    Curl_cf_def_get_host,
+    Fetch_cf_def_close,
+    Fetch_cf_def_shutdown,
+    Fetch_cf_def_get_host,
     cf_test_adjust_pollset,
-    Curl_cf_def_data_pending,
-    Curl_cf_def_send,
-    Curl_cf_def_recv,
-    Curl_cf_def_cntrl,
-    Curl_cf_def_conn_is_alive,
-    Curl_cf_def_conn_keep_alive,
-    Curl_cf_def_query,
+    Fetch_cf_def_data_pending,
+    Fetch_cf_def_send,
+    Fetch_cf_def_recv,
+    Fetch_cf_def_cntrl,
+    Fetch_cf_def_conn_is_alive,
+    Fetch_cf_def_conn_keep_alive,
+    Fetch_cf_def_query,
 };
 
-static FETCHcode cf_test_create(struct Curl_cfilter **pcf,
-                                struct Curl_easy *data,
+static FETCHcode cf_test_create(struct Fetch_cfilter **pcf,
+                                struct Fetch_easy *data,
                                 struct connectdata *conn,
-                                const struct Curl_addrinfo *ai,
+                                const struct Fetch_addrinfo *ai,
                                 int transport)
 {
   struct cf_test_ctx *ctx = NULL;
-  struct Curl_cfilter *cf = NULL;
+  struct Fetch_cfilter *cf = NULL;
   timediff_t created_at;
   FETCHcode result;
 
@@ -212,7 +212,7 @@ static FETCHcode cf_test_create(struct Curl_cfilter **pcf,
   }
   ctx->ai_family = ai->ai_family;
   ctx->transport = transport;
-  ctx->started = Curl_now();
+  ctx->started = Fetch_now();
 #ifdef USE_IPV6
   if (ctx->ai_family == AF_INET6)
   {
@@ -230,17 +230,17 @@ static FETCHcode cf_test_create(struct Curl_cfilter **pcf,
     ctx->stats->creations++;
   }
 
-  created_at = Curl_timediff(ctx->started, current_tr->started);
+  created_at = Fetch_timediff(ctx->started, current_tr->started);
   if (ctx->stats->creations == 1)
     ctx->stats->first_created = created_at;
   ctx->stats->last_created = created_at;
   infof(data, "%04dms: cf[%s] created", (int)created_at, ctx->id);
 
-  result = Curl_cf_create(&cf, &cft_test, ctx);
+  result = Fetch_cf_create(&cf, &cft_test, ctx);
   if (result)
     goto out;
 
-  Curl_expire(data, ctx->fail_delay_ms, EXPIRE_RUN_NOW);
+  Fetch_expire(data, ctx->fail_delay_ms, EXPIRE_RUN_NOW);
 
 out:
   *pcf = (!result) ? cf : NULL;
@@ -258,7 +258,7 @@ static void check_result(struct test_case *tc,
   char msg[256];
   timediff_t duration_ms;
 
-  duration_ms = Curl_timediff(tr->ended, tr->started);
+  duration_ms = Fetch_timediff(tr->ended, tr->started);
   fprintf(stderr, "%d: test case took %dms\n", tc->id, (int)duration_ms);
 
   if (tr->result != tc->exp_result && FETCHE_OPERATION_TIMEDOUT != tr->result)
@@ -282,7 +282,7 @@ static void check_result(struct test_case *tc,
     fail(msg);
   }
 
-  duration_ms = Curl_timediff(tr->ended, tr->started);
+  duration_ms = Fetch_timediff(tr->ended, tr->started);
   if (duration_ms < tc->min_duration_ms)
   {
     fetch_msprintf(msg, "%d: expected min duration of %dms, but took %dms",
@@ -325,7 +325,7 @@ static void test_connect(struct test_case *tc)
   struct test_result tr;
   struct fetch_slist *list = NULL;
 
-  Curl_debug_set_transport_provider(TRNSPRT_TCP, cf_test_create);
+  Fetch_debug_set_transport_provider(TRNSPRT_TCP, cf_test_create);
   current_tc = tc;
   current_tr = &tr;
 
@@ -343,9 +343,9 @@ static void test_connect(struct test_case *tc)
   tr.cf6.family = "v6";
   tr.cf4.family = "v4";
 
-  tr.started = Curl_now();
+  tr.started = Fetch_now();
   tr.result = fetch_easy_perform(easy);
-  tr.ended = Curl_now();
+  tr.ended = Fetch_now();
 
   fetch_easy_setopt(easy, FETCHOPT_RESOLVE, NULL);
   fetch_slist_free_all(list);

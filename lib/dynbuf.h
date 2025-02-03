@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,19 +29,19 @@
 #ifndef BUILDING_LIBFETCH
 /* this renames the functions so that the tool code can use the same code
    without getting symbol collisions */
-#define Curl_dyn_init(a, b) fetchx_dyn_init(a, b)
-#define Curl_dyn_add(a, b) fetchx_dyn_add(a, b)
-#define Curl_dyn_addn(a, b, c) fetchx_dyn_addn(a, b, c)
-#define Curl_dyn_addf fetchx_dyn_addf
-#define Curl_dyn_vaddf fetchx_dyn_vaddf
-#define Curl_dyn_free(a) fetchx_dyn_free(a)
-#define Curl_dyn_ptr(a) fetchx_dyn_ptr(a)
-#define Curl_dyn_uptr(a) fetchx_dyn_uptr(a)
-#define Curl_dyn_len(a) fetchx_dyn_len(a)
-#define Curl_dyn_reset(a) fetchx_dyn_reset(a)
-#define Curl_dyn_take(a, b) fetchx_dyn_take(a, b)
-#define Curl_dyn_tail(a, b) fetchx_dyn_tail(a, b)
-#define Curl_dyn_setlen(a, b) fetchx_dyn_setlen(a, b)
+#define Fetch_dyn_init(a, b) fetchx_dyn_init(a, b)
+#define Fetch_dyn_add(a, b) fetchx_dyn_add(a, b)
+#define Fetch_dyn_addn(a, b, c) fetchx_dyn_addn(a, b, c)
+#define Fetch_dyn_addf fetchx_dyn_addf
+#define Fetch_dyn_vaddf fetchx_dyn_vaddf
+#define Fetch_dyn_free(a) fetchx_dyn_free(a)
+#define Fetch_dyn_ptr(a) fetchx_dyn_ptr(a)
+#define Fetch_dyn_uptr(a) fetchx_dyn_uptr(a)
+#define Fetch_dyn_len(a) fetchx_dyn_len(a)
+#define Fetch_dyn_reset(a) fetchx_dyn_reset(a)
+#define Fetch_dyn_take(a, b) fetchx_dyn_take(a, b)
+#define Fetch_dyn_tail(a, b) fetchx_dyn_tail(a, b)
+#define Fetch_dyn_setlen(a, b) fetchx_dyn_setlen(a, b)
 #define fetchx_dynbuf dynbuf /* for the struct name */
 #endif
 
@@ -56,30 +56,30 @@ struct dynbuf
 #endif
 };
 
-void Curl_dyn_init(struct dynbuf *s, size_t toobig);
-void Curl_dyn_free(struct dynbuf *s);
-FETCHcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
+void Fetch_dyn_init(struct dynbuf *s, size_t toobig);
+void Fetch_dyn_free(struct dynbuf *s);
+FETCHcode Fetch_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
     WARN_UNUSED_RESULT;
-FETCHcode Curl_dyn_add(struct dynbuf *s, const char *str)
+FETCHcode Fetch_dyn_add(struct dynbuf *s, const char *str)
     WARN_UNUSED_RESULT;
-FETCHcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
+FETCHcode Fetch_dyn_addf(struct dynbuf *s, const char *fmt, ...)
     WARN_UNUSED_RESULT FETCH_PRINTF(2, 3);
-FETCHcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
+FETCHcode Fetch_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
     WARN_UNUSED_RESULT FETCH_PRINTF(2, 0);
-void Curl_dyn_reset(struct dynbuf *s);
-FETCHcode Curl_dyn_tail(struct dynbuf *s, size_t trail);
-FETCHcode Curl_dyn_setlen(struct dynbuf *s, size_t set);
-char *Curl_dyn_ptr(const struct dynbuf *s);
-unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
-size_t Curl_dyn_len(const struct dynbuf *s);
+void Fetch_dyn_reset(struct dynbuf *s);
+FETCHcode Fetch_dyn_tail(struct dynbuf *s, size_t trail);
+FETCHcode Fetch_dyn_setlen(struct dynbuf *s, size_t set);
+char *Fetch_dyn_ptr(const struct dynbuf *s);
+unsigned char *Fetch_dyn_uptr(const struct dynbuf *s);
+size_t Fetch_dyn_len(const struct dynbuf *s);
 
 /* returns 0 on success, -1 on error */
 /* The implementation of this function exists in mprintf.c */
-int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
+int Fetch_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
 
 /* Take the buffer out of the dynbuf. Caller has ownership and
  * dynbuf resets to initial state. */
-char *Curl_dyn_take(struct dynbuf *s, size_t *plen);
+char *Fetch_dyn_take(struct dynbuf *s, size_t *plen);
 
 /* Dynamic buffer max sizes */
 #define DYN_DOH_RESPONSE 3000

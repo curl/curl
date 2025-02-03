@@ -21,12 +21,12 @@ bug reports and bug fixes.
 If you cannot fix a bug yourself and submit a fix for it, try to report an as
 detailed report as possible to a fetch mailing list to allow one of us to have
 a go at a solution. You can optionally also submit your problem in [fetch's
-bug tracking system](https://github.com/curl/curl/issues).
+bug tracking system](https://github.com/fetch/fetch/issues).
 
 Please read the rest of this document below first before doing that.
 
 If you feel you need to ask around first, find a suitable [mailing
-list](https://curl.se/mail/) and post your questions there.
+list](https://fetch.se/mail/) and post your questions there.
 
 ## Security bugs
 
@@ -45,7 +45,7 @@ impact it has on existing users out there who might be using the vulnerable
 versions.
 
 The fetch project's process for handling security related issues is
-[documented separately](https://curl.se/dev/secprocess.html).
+[documented separately](https://fetch.se/dev/secprocess.html).
 
 ## What to report
 
@@ -150,7 +150,7 @@ convert your program over to plain C and follow the steps outlined above.
 
 The fetch project typically releases new versions every other month, and we
 fix several hundred bugs per year. For a huge table of releases, number of
-bug fixes and more, see: https://curl.se/docs/releases.html
+bug fixes and more, see: https://fetch.se/docs/releases.html
 
 The developers in the fetch project do not have bandwidth or energy enough to
 maintain several branches or to spend much time on hunting down problems in
@@ -176,7 +176,7 @@ experiencing.
 Security wise, it is almost always a bad idea to lag behind the current fetch
 versions by a lot. We keep discovering and reporting security problems
 over time see you can see in [this
-table](https://curl.se/docs/vulnerabilities.html)
+table](https://fetch.se/docs/vulnerabilities.html)
 
 # Bug fixing procedure
 
@@ -260,7 +260,7 @@ listed in `KNOWN_BUGS` instead.
 
 ## Closing off stalled bugs
 
-The [issue and pull request trackers](https://github.com/curl/curl) only hold
+The [issue and pull request trackers](https://github.com/fetch/fetch) only hold
 "active" entries open (using a non-precise definition of what active actually
 is, but they are at least not completely dead). Those that are abandoned or
 in other ways dormant are closed and sometimes added to `TODO` and

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -138,7 +138,7 @@ struct fetch_mimepart
   size_t lastreadstatus;              /* Last read callback returned status. */
 };
 
-FETCHcode Curl_mime_add_header(struct fetch_slist **slp, const char *fmt, ...)
+FETCHcode Fetch_mime_add_header(struct fetch_slist **slp, const char *fmt, ...)
     FETCH_PRINTF(2, 3);
 
 #if !defined(FETCH_DISABLE_MIME) && (!defined(FETCH_DISABLE_HTTP) || \
@@ -146,38 +146,38 @@ FETCHcode Curl_mime_add_header(struct fetch_slist **slp, const char *fmt, ...)
                                      !defined(FETCH_DISABLE_IMAP))
 
 /* Prototypes. */
-void Curl_mime_initpart(struct fetch_mimepart *part);
-void Curl_mime_cleanpart(struct fetch_mimepart *part);
-FETCHcode Curl_mime_duppart(struct Curl_easy *data,
+void Fetch_mime_initpart(struct fetch_mimepart *part);
+void Fetch_mime_cleanpart(struct fetch_mimepart *part);
+FETCHcode Fetch_mime_duppart(struct Fetch_easy *data,
                             struct fetch_mimepart *dst,
                             const fetch_mimepart *src);
-FETCHcode Curl_mime_set_subparts(struct fetch_mimepart *part,
+FETCHcode Fetch_mime_set_subparts(struct fetch_mimepart *part,
                                  struct fetch_mime *subparts,
                                  int take_ownership);
-FETCHcode Curl_mime_prepare_headers(struct Curl_easy *data,
+FETCHcode Fetch_mime_prepare_headers(struct Fetch_easy *data,
                                     struct fetch_mimepart *part,
                                     const char *contenttype,
                                     const char *disposition,
                                     enum mimestrategy strategy);
-size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
+size_t Fetch_mime_read(char *buffer, size_t size, size_t nitems,
                       void *instream);
-const char *Curl_mime_contenttype(const char *filename);
+const char *Fetch_mime_contenttype(const char *filename);
 
 /**
  * Install a client reader as upload source that reads the given
  * mime part.
  */
-FETCHcode Curl_creader_set_mime(struct Curl_easy *data, fetch_mimepart *part);
+FETCHcode Fetch_creader_set_mime(struct Fetch_easy *data, fetch_mimepart *part);
 
 #else
 /* if disabled */
-#define Curl_mime_initpart(x)
-#define Curl_mime_cleanpart(x)
-#define Curl_mime_duppart(x, y, z) FETCHE_OK /* Nothing to duplicate. Succeed */
-#define Curl_mime_set_subparts(a, b, c) FETCHE_NOT_BUILT_IN
-#define Curl_mime_prepare_headers(a, b, c, d, e) FETCHE_NOT_BUILT_IN
-#define Curl_mime_read NULL
-#define Curl_creader_set_mime(x, y) ((void)x, FETCHE_NOT_BUILT_IN)
+#define Fetch_mime_initpart(x)
+#define Fetch_mime_cleanpart(x)
+#define Fetch_mime_duppart(x, y, z) FETCHE_OK /* Nothing to duplicate. Succeed */
+#define Fetch_mime_set_subparts(a, b, c) FETCHE_NOT_BUILT_IN
+#define Fetch_mime_prepare_headers(a, b, c, d, e) FETCHE_NOT_BUILT_IN
+#define Fetch_mime_read NULL
+#define Fetch_creader_set_mime(x, y) ((void)x, FETCHE_NOT_BUILT_IN)
 #endif
 
 #endif /* HEADER_FETCH_MIME_H */

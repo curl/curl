@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,7 +54,7 @@ static gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
 /*
  * Helper GSS-API error functions.
  */
-static int check_gss_err(struct Curl_easy *data,
+static int check_gss_err(struct Fetch_easy *data,
                          OM_uint32 major_status,
                          OM_uint32 minor_status,
                          const char *function)
@@ -66,7 +66,7 @@ static int check_gss_err(struct Curl_easy *data,
     gss_buffer_desc status_string = GSS_C_EMPTY_BUFFER;
     struct dynbuf dbuf;
 
-    Curl_dyn_init(&dbuf, MAX_GSS_LEN);
+    Fetch_dyn_init(&dbuf, MAX_GSS_LEN);
     msg_ctx = 0;
     while (!msg_ctx)
     {
@@ -77,7 +77,7 @@ static int check_gss_err(struct Curl_easy *data,
                                     &msg_ctx, &status_string);
       if (maj_stat == GSS_S_COMPLETE)
       {
-        if (Curl_dyn_addn(&dbuf, status_string.value,
+        if (Fetch_dyn_addn(&dbuf, status_string.value,
                           status_string.length))
           return 1; /* error */
         gss_release_buffer(&min_stat, &status_string);
@@ -85,7 +85,7 @@ static int check_gss_err(struct Curl_easy *data,
       }
       gss_release_buffer(&min_stat, &status_string);
     }
-    if (Curl_dyn_addn(&dbuf, ".\n", 2))
+    if (Fetch_dyn_addn(&dbuf, ".\n", 2))
       return 1; /* error */
     msg_ctx = 0;
     while (!msg_ctx)
@@ -97,7 +97,7 @@ static int check_gss_err(struct Curl_easy *data,
                                     &msg_ctx, &status_string);
       if (maj_stat == GSS_S_COMPLETE)
       {
-        if (Curl_dyn_addn(&dbuf, status_string.value,
+        if (Fetch_dyn_addn(&dbuf, status_string.value,
                           status_string.length))
           return 1; /* error */
         gss_release_buffer(&min_stat, &status_string);
@@ -105,16 +105,16 @@ static int check_gss_err(struct Curl_easy *data,
       }
       gss_release_buffer(&min_stat, &status_string);
     }
-    failf(data, "GSS-API error: %s failed: %s", function, Curl_dyn_ptr(&dbuf));
-    Curl_dyn_free(&dbuf);
+    failf(data, "GSS-API error: %s failed: %s", function, Fetch_dyn_ptr(&dbuf));
+    Fetch_dyn_free(&dbuf);
     return 1;
   }
 
   return 0;
 }
 
-FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+FETCHcode Fetch_SOCKS5_gssapi_negotiate(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data)
 {
   struct connectdata *conn = cf->conn;
   fetch_socket_t sock = conn->sock[cf->sockindex];
@@ -150,7 +150,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   if (strchr(serviceptr, '/'))
   {
     service.length = serviceptr_length;
-    service.value = Curl_memdup(serviceptr, service.length);
+    service.value = Fetch_memdup(serviceptr, service.length);
     if (!service.value)
       return FETCHE_OUT_OF_MEMORY;
 
@@ -188,11 +188,11 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   /* errors, keep sending it...                                            */
   for (;;)
   {
-    gss_major_status = Curl_gss_init_sec_context(data,
+    gss_major_status = Fetch_gss_init_sec_context(data,
                                                  &gss_minor_status,
                                                  &gss_context,
                                                  server,
-                                                 &Curl_krb5_mech_oid,
+                                                 &Fetch_krb5_mech_oid,
                                                  NULL,
                                                  gss_token,
                                                  &gss_send_token,
@@ -219,7 +219,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       us_length = htons((unsigned short)gss_send_token.length);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
-      nwritten = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4,
+      nwritten = Fetch_conn_cf_send(cf->next, data, (char *)socksreq, 4,
                                    FALSE, &code);
       if (code || (4 != nwritten))
       {
@@ -231,7 +231,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
         return FETCHE_COULDNT_CONNECT;
       }
 
-      nwritten = Curl_conn_cf_send(cf->next, data,
+      nwritten = Fetch_conn_cf_send(cf->next, data,
                                    (char *)gss_send_token.value,
                                    gss_send_token.length, FALSE, &code);
       if (code || ((ssize_t)gss_send_token.length != nwritten))
@@ -260,7 +260,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
      * +----+------+-----+----------------+
      */
 
-    result = Curl_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
+    result = Fetch_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
     if (result || (actualread != 4))
     {
       failf(data, "Failed to receive GSS-API authentication response.");
@@ -303,7 +303,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       return FETCHE_OUT_OF_MEMORY;
     }
 
-    result = Curl_blockread_all(cf, data, (char *)gss_recv_token.value,
+    result = Fetch_blockread_all(cf, data, (char *)gss_recv_token.value,
                                 gss_recv_token.length, &actualread);
 
     if (result || (actualread != us_length))
@@ -414,7 +414,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   else
   {
     gss_send_token.length = 1;
-    gss_send_token.value = Curl_memdup(&gss_enc, 1);
+    gss_send_token.value = Fetch_memdup(&gss_enc, 1);
     if (!gss_send_token.value)
     {
       gss_delete_sec_context(&gss_status, &gss_context, NULL);
@@ -439,7 +439,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
+  nwritten = Fetch_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
                                &code);
   if (code || (4 != nwritten))
   {
@@ -452,7 +452,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   if (data->set.socks5_gssapi_nec)
   {
     memcpy(socksreq, &gss_enc, 1);
-    nwritten = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 1, FALSE,
+    nwritten = Fetch_conn_cf_send(cf->next, data, (char *)socksreq, 1, FALSE,
                                  &code);
     if (code || (1 != nwritten))
     {
@@ -463,7 +463,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
   else
   {
-    nwritten = Curl_conn_cf_send(cf->next, data,
+    nwritten = Fetch_conn_cf_send(cf->next, data,
                                  (char *)gss_w_token.value,
                                  gss_w_token.length, FALSE, &code);
     if (code || ((ssize_t)gss_w_token.length != nwritten))
@@ -476,7 +476,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     gss_release_buffer(&gss_status, &gss_w_token);
   }
 
-  result = Curl_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
+  result = Fetch_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
   if (result || (actualread != 4))
   {
     failf(data, "Failed to receive GSS-API encryption response.");
@@ -511,7 +511,7 @@ FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     gss_delete_sec_context(&gss_status, &gss_context, NULL);
     return FETCHE_OUT_OF_MEMORY;
   }
-  result = Curl_blockread_all(cf, data, (char *)gss_recv_token.value,
+  result = Fetch_blockread_all(cf, data, (char *)gss_recv_token.value,
                               gss_recv_token.length, &actualread);
 
   if (result || (actualread != us_length))

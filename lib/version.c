@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -231,7 +231,7 @@ char *fetch_version(void)
 
   src[i++] = LIBFETCH_NAME "/" LIBFETCH_VERSION;
 #ifdef USE_SSL
-  Curl_ssl_version(ssl_version, sizeof(ssl_version));
+  Fetch_ssl_version(ssl_version, sizeof(ssl_version));
   src[i++] = ssl_version;
 #endif
 #ifdef HAVE_LIBZ
@@ -260,19 +260,19 @@ char *fetch_version(void)
   src[i++] = psl_ver;
 #endif
 #ifdef USE_SSH
-  Curl_ssh_version(ssh_version, sizeof(ssh_version));
+  Fetch_ssh_version(ssh_version, sizeof(ssh_version));
   src[i++] = ssh_version;
 #endif
 #ifdef USE_NGHTTP2
-  Curl_http2_ver(h2_version, sizeof(h2_version));
+  Fetch_http2_ver(h2_version, sizeof(h2_version));
   src[i++] = h2_version;
 #endif
 #ifdef USE_HTTP3
-  Curl_quic_ver(h3_version, sizeof(h3_version));
+  Fetch_quic_ver(h3_version, sizeof(h3_version));
   src[i++] = h3_version;
 #endif
 #ifdef USE_LIBRTMP
-  Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
+  Fetch_rtmp_version(rtmp_version, sizeof(rtmp_version));
   src[i++] = rtmp_version;
 #endif
 #ifdef USE_GSASL
@@ -437,7 +437,7 @@ static int idn_present(fetch_version_info_data *info)
 static int https_proxy_present(fetch_version_info_data *info)
 {
   (void)info;
-  return Curl_ssl_supports(NULL, SSLSUPP_HTTPS_PROXY);
+  return Fetch_ssl_supports(NULL, SSLSUPP_HTTPS_PROXY);
 }
 #endif
 
@@ -445,7 +445,7 @@ static int https_proxy_present(fetch_version_info_data *info)
 static int ech_present(fetch_version_info_data *info)
 {
   (void)info;
-  return Curl_ssl_supports(NULL, SSLSUPP_ECH);
+  return Fetch_ssl_supports(NULL, SSLSUPP_ECH);
 }
 #endif
 
@@ -634,7 +634,7 @@ fetch_version_info_data *fetch_version_info(FETCHversion stamp)
   (void)stamp; /* avoid compiler warnings, we do not use this */
 
 #ifdef USE_SSL
-  Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
+  Fetch_ssl_version(ssl_buffer, sizeof(ssl_buffer));
   version_info.ssl_version = ssl_buffer;
 #endif
 
@@ -656,7 +656,7 @@ fetch_version_info_data *fetch_version_info(FETCHversion stamp)
 #endif
 
 #if defined(USE_SSH)
-  Curl_ssh_version(ssh_buf, sizeof(ssh_buf));
+  Fetch_ssh_version(ssh_buf, sizeof(ssh_buf));
   version_info.libssh_version = ssh_buf;
 #endif
 
@@ -683,7 +683,7 @@ fetch_version_info_data *fetch_version_info(FETCHversion stamp)
 #ifdef USE_HTTP3
   {
     static char quicbuffer[80];
-    Curl_quic_ver(quicbuffer, sizeof(quicbuffer));
+    Fetch_quic_ver(quicbuffer, sizeof(quicbuffer));
     version_info.quic_version = quicbuffer;
   }
 #endif
@@ -709,7 +709,7 @@ fetch_version_info_data *fetch_version_info(FETCHversion stamp)
 #ifdef USE_LIBRTMP
   {
     static char rtmp_version[30];
-    Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
+    Fetch_rtmp_version(rtmp_version, sizeof(rtmp_version));
     version_info.rtmp_version = rtmp_version;
   }
 #endif

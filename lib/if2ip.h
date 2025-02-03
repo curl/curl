@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,9 +33,9 @@
 #define IPV6_SCOPE_NODELOCAL 4   /* Loopback. */
 
 #ifdef USE_IPV6
-unsigned int Curl_ipv6_scope(const struct sockaddr *sa);
+unsigned int Fetch_ipv6_scope(const struct sockaddr *sa);
 #else
-#define Curl_ipv6_scope(x) 0
+#define Fetch_ipv6_scope(x) 0
 #endif
 
 typedef enum
@@ -45,7 +45,7 @@ typedef enum
   IF2IP_FOUND = 2             /* The address has been stored in "buf" */
 } if2ip_result_t;
 
-if2ip_result_t Curl_if2ip(int af,
+if2ip_result_t Fetch_if2ip(int af,
 #ifdef USE_IPV6
                           unsigned int remote_scope,
                           unsigned int local_scope_id,

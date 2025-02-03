@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -698,51 +698,51 @@ UNITTEST_START
     char alt[64] = "";
     uint16_t id;
 
-    /* test Curl_cipher_suite_lookup_id() for rfc name */
+    /* test Fetch_cipher_suite_lookup_id() for rfc name */
     if (test->rfc)
     {
-      id = Curl_cipher_suite_lookup_id(test->rfc, strlen(test->rfc));
+      id = Fetch_cipher_suite_lookup_id(test->rfc, strlen(test->rfc));
       if (id != test->id)
       {
-        fprintf(stderr, "Curl_cipher_suite_lookup_id FAILED for \"%s\", "
+        fprintf(stderr, "Fetch_cipher_suite_lookup_id FAILED for \"%s\", "
                         "result = 0x%04x, expected = 0x%04x\n",
                 test->rfc, id, test->id);
         unitfail++;
       }
     }
 
-    /* test Curl_cipher_suite_lookup_id() for OpenSSL name */
+    /* test Fetch_cipher_suite_lookup_id() for OpenSSL name */
     if (test->openssl)
     {
-      id = Curl_cipher_suite_lookup_id(test->openssl, strlen(test->openssl));
+      id = Fetch_cipher_suite_lookup_id(test->openssl, strlen(test->openssl));
       if (id != test->id)
       {
-        fprintf(stderr, "Curl_cipher_suite_lookup_id FAILED for \"%s\", "
+        fprintf(stderr, "Fetch_cipher_suite_lookup_id FAILED for \"%s\", "
                         "result = 0x%04x, expected = 0x%04x\n",
                 test->openssl, id, test->id);
         unitfail++;
       }
     }
 
-    /* test Curl_cipher_suite_get_str() prefer rfc name */
+    /* test Fetch_cipher_suite_get_str() prefer rfc name */
     buf[0] = '\0';
     expect = test->rfc ? test->rfc : test->openssl;
 
-    Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), true);
+    Fetch_cipher_suite_get_str(test->id, buf, sizeof(buf), true);
 
     if (strcmp(buf, expect) != 0)
     {
-      fprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
+      fprintf(stderr, "Fetch_cipher_suite_get_str FAILED for 0x%04x, "
                       "result = \"%s\", expected = \"%s\"\n",
               test->id, buf, expect);
       unitfail++;
     }
 
-    /* test Curl_cipher_suite_get_str() prefer OpenSSL name */
+    /* test Fetch_cipher_suite_get_str() prefer OpenSSL name */
     buf[0] = '\0';
     expect = test->openssl ? test->openssl : test->rfc;
 
-    Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), false);
+    Fetch_cipher_suite_get_str(test->id, buf, sizeof(buf), false);
 
     /* suites matched by EDH alias will return the DHE name */
     if (test->id >= 0x0011 && test->id < 0x0017)
@@ -755,14 +755,14 @@ UNITTEST_START
 
     if (strcmp(buf, expect) != 0)
     {
-      fprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
+      fprintf(stderr, "Fetch_cipher_suite_get_str FAILED for 0x%04x, "
                       "result = \"%s\", expected = \"%s\"\n",
               test->id, buf, expect);
       unitfail++;
     }
   }
 
-  /* test Curl_cipher_suite_walk_str() */
+  /* test Fetch_cipher_suite_walk_str() */
   {
     const char *ptr, *end = cs_test_string;
     int i = 0;
@@ -774,12 +774,12 @@ UNITTEST_START
       const struct test_str_entry *test = &test_str_list[i];
       abort_if(i == TEST_STR_LIST_LEN, "should have been done");
 
-      id = Curl_cipher_suite_walk_str(&ptr, &end);
+      id = Fetch_cipher_suite_walk_str(&ptr, &end);
       len = end - ptr;
 
       if (id != test->id)
       {
-        fprintf(stderr, "Curl_cipher_suite_walk_str FAILED for \"%s\" "
+        fprintf(stderr, "Fetch_cipher_suite_walk_str FAILED for \"%s\" "
                         "unexpected cipher, "
                         "result = 0x%04x, expected = 0x%04x\n",
                 test->str, id, test->id);
@@ -787,7 +787,7 @@ UNITTEST_START
       }
       if (len > 64 || strncmp(ptr, test->str, len) != 0)
       {
-        fprintf(stderr, "Curl_cipher_suite_walk_str ABORT for \"%s\" "
+        fprintf(stderr, "Fetch_cipher_suite_walk_str ABORT for \"%s\" "
                         "unexpected pointers\n",
                 test->str);
         unitfail++;

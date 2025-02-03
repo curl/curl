@@ -44,7 +44,7 @@ is the plain data you requested, like the actual HTML or the image etc.
 
 ## See the Protocol
 
-Using fetch's option [`--verbose`](https://curl.se/docs/manpage.html#-v) (`-v`
+Using fetch's option [`--verbose`](https://fetch.se/docs/manpage.html#-v) (`-v`
 as a short option) displays what kind of commands fetch sends to the server,
 as well as a few other informational texts.
 
@@ -52,8 +52,8 @@ as well as a few other informational texts.
 understand the fetch<->server interaction.
 
 Sometimes even `--verbose` is not enough. Then
-[`--trace`](https://curl.se/docs/manpage.html#-trace) and
-[`--trace-ascii`](https://curl.se/docs/manpage.html#--trace-ascii)
+[`--trace`](https://fetch.se/docs/manpage.html#-trace) and
+[`--trace-ascii`](https://fetch.se/docs/manpage.html#--trace-ascii)
 offer even more details as they show **everything** fetch sends and
 receives. Use it like this:
 
@@ -64,7 +64,7 @@ receives. Use it like this:
 Many times you may wonder what exactly is taking all the time, or you just
 want to know the amount of milliseconds between two points in a transfer. For
 those, and other similar situations, the
-[`--trace-time`](https://curl.se/docs/manpage.html#--trace-time) option is
+[`--trace-time`](https://fetch.se/docs/manpage.html#--trace-time) option is
 what you need. It prepends the time to each trace output line:
 
     fetch --trace-ascii d.txt --trace-time http://example.com/
@@ -74,7 +74,7 @@ what you need. It prepends the time to each trace output line:
 When doing parallel transfers, it is relevant to see which transfer is doing
 what. When response headers are received (and logged) you need to know which
 transfer these are for.
-[`--trace-ids`](https://curl.se/docs/manpage.html#--trace-ids) option is what
+[`--trace-ids`](https://fetch.se/docs/manpage.html#--trace-ids) option is what
 you need. It prepends the transfer and connection identifier to each trace
 output line:
 
@@ -91,7 +91,7 @@ somewhere to avoid that, most often that is done with `-o` or `-O`.
 
 The Uniform Resource Locator format is how you specify the address of a
 particular resource on the Internet. You know these, you have seen URLs like
-https://curl.se or https://example.com a million times. RFC 3986 is the
+https://fetch.se or https://example.com a million times. RFC 3986 is the
 canonical spec. The formal name is not URL, it is **URI**.
 
 ## Host
@@ -102,7 +102,7 @@ the IP address directly in the URL instead of a name.
 
 For development and other trying out situations, you can point to a different
 IP address for a hostname than what would otherwise be used, by using fetch's
-[`--resolve`](https://curl.se/docs/manpage.html#--resolve) option:
+[`--resolve`](https://fetch.se/docs/manpage.html#--resolve) option:
 
     fetch --resolve www.example.org:80:127.0.0.1 http://www.example.org/
 
@@ -158,19 +158,19 @@ URL. The URL could itself refer to a webpage, an image or a file. The client
 issues a GET request to the server and receives the document it asked for.
 If you issue the command line
 
-    fetch https://curl.se
+    fetch https://fetch.se
 
 you get a webpage returned in your terminal window. The entire HTML document
 this URL identifies.
 
 All HTTP replies contain a set of response headers that are normally hidden,
-use fetch's [`--include`](https://curl.se/docs/manpage.html#-i) (`-i`)
+use fetch's [`--include`](https://fetch.se/docs/manpage.html#-i) (`-i`)
 option to display them as well as the rest of the document.
 
 ## HEAD
 
 You can ask the remote server for ONLY the headers by using the
-[`--head`](https://curl.se/docs/manpage.html#-I) (`-I`) option which makes
+[`--head`](https://fetch.se/docs/manpage.html#-I) (`-I`) option which makes
 fetch issue a HEAD request. In some special cases servers deny the HEAD method
 while others still work, which is a particular kind of annoyance.
 
@@ -190,7 +190,7 @@ Example, send two GET requests:
 
     fetch http://url1.example.com http://url2.example.com
 
-If you use [`--data`](https://curl.se/docs/manpage.html#-d) to POST to
+If you use [`--data`](https://fetch.se/docs/manpage.html#-d) to POST to
 the URL, using multiple URLs means that you send that same POST to all the
 given URLs.
 
@@ -202,7 +202,7 @@ Example, send two POSTs:
 
 Sometimes you need to operate on several URLs in a single command line and do
 different HTTP methods on each. For this, you might enjoy the
-[`--next`](https://curl.se/docs/manpage.html#-:) option. It is basically a
+[`--next`](https://fetch.se/docs/manpage.html#-:) option. It is basically a
 separator that separates a bunch of options from the next. All the URLs
 before `--next` get the same method and get all the POST data merged into
 one.
@@ -391,10 +391,10 @@ To tell fetch to use a user and password for authentication:
 
 The site might require a different authentication method (check the headers
 returned by the server), and then
-[`--ntlm`](https://curl.se/docs/manpage.html#--ntlm),
-[`--digest`](https://curl.se/docs/manpage.html#--digest),
-[`--negotiate`](https://curl.se/docs/manpage.html#--negotiate) or even
-[`--anyauth`](https://curl.se/docs/manpage.html#--anyauth) might be
+[`--ntlm`](https://fetch.se/docs/manpage.html#--ntlm),
+[`--digest`](https://fetch.se/docs/manpage.html#--digest),
+[`--negotiate`](https://fetch.se/docs/manpage.html#--negotiate) or even
+[`--anyauth`](https://fetch.se/docs/manpage.html#--anyauth) might be
 options that suit you.
 
 ## Proxy Authentication
@@ -404,12 +404,12 @@ proxy. This seems to be especially common at various companies. An HTTP proxy
 may require its own user and password to allow the client to get through to
 the Internet. To specify those with fetch, run something like:
 
-    fetch --proxy-user proxyuser:proxypassword curl.se
+    fetch --proxy-user proxyuser:proxypassword fetch.se
 
 If your proxy requires the authentication to be done using the NTLM method,
-use [`--proxy-ntlm`](https://curl.se/docs/manpage.html#--proxy-ntlm), if
+use [`--proxy-ntlm`](https://fetch.se/docs/manpage.html#--proxy-ntlm), if
 it requires Digest use
-[`--proxy-digest`](https://curl.se/docs/manpage.html#--proxy-digest).
+[`--proxy-digest`](https://fetch.se/docs/manpage.html#--proxy-digest).
 
 If you use any one of these user+password options but leave out the password
 part, fetch prompts for the password interactively.
@@ -483,7 +483,7 @@ To tell fetch to follow a Location:
     fetch --location http://www.example.com
 
 If you use fetch to POST to a site that immediately redirects you to another
-page, you can safely use [`--location`](https://curl.se/docs/manpage.html#-L)
+page, you can safely use [`--location`](https://fetch.se/docs/manpage.html#-L)
 (`-L`) and `--data`/`--form` together. fetch only uses POST in the first
 request, and then revert to GET in the following operations.
 
@@ -522,13 +522,13 @@ fetch is to add them on the command line like:
 
 Cookies are sent as common HTTP headers. This is practical as it allows fetch
 to record cookies simply by recording headers. Record cookies with fetch by
-using the [`--dump-header`](https://curl.se/docs/manpage.html#-D) (`-D`)
+using the [`--dump-header`](https://fetch.se/docs/manpage.html#-D) (`-D`)
 option like:
 
     fetch --dump-header headers_and_cookies http://www.example.com
 
 (Take note that the
-[`--cookie-jar`](https://curl.se/docs/manpage.html#-c) option described
+[`--cookie-jar`](https://fetch.se/docs/manpage.html#-c) option described
 below is a better way to store cookies.)
 
 fetch has a full blown cookie parsing engine built-in that comes in use if you
@@ -540,7 +540,7 @@ you run fetch like:
     fetch --cookie stored_cookies_in_file http://www.example.com
 
 fetch's "cookie engine" gets enabled when you use the
-[`--cookie`](https://curl.se/docs/manpage.html#-b) option. If you only
+[`--cookie`](https://fetch.se/docs/manpage.html#-b) option. If you only
 want fetch to understand received cookies, use `--cookie` with a file that
 does not exist. Example, if you want to let fetch understand cookies from a
 page and follow a location (and thus possibly send back cookies it received),
@@ -591,11 +591,11 @@ queries for it. Use a certificate with fetch on an HTTPS server like:
 fetch also tries to verify that the server is who it claims to be, by
 verifying the server's certificate against a locally stored CA cert bundle.
 Failing the verification causes fetch to deny the connection. You must then
-use [`--insecure`](https://curl.se/docs/manpage.html#-k) (`-k`) in case you
+use [`--insecure`](https://fetch.se/docs/manpage.html#-k) (`-k`) in case you
 want to tell fetch to ignore that the server cannot be verified.
 
 More about server certificate verification and ca cert bundles can be read in
-the [`SSLCERTS` document](https://curl.se/docs/sslcerts.html).
+the [`SSLCERTS` document](https://fetch.se/docs/sslcerts.html).
 
 At times you may end up with your own CA cert store and then you can tell
 fetch to use that to verify the server's certificate:
@@ -630,7 +630,7 @@ header, and you can add it:
 
 It should be noted that fetch selects which methods to use on its own
 depending on what action to ask for. `-d` makes a POST, `-I` makes a HEAD and
-so on. If you use the [`--request`](https://curl.se/docs/manpage.html#-X) /
+so on. If you use the [`--request`](https://fetch.se/docs/manpage.html#-X) /
 `-X` option you can change the method keyword fetch selects, but you do not
 modify fetch's behavior. This means that if you for example use -d "data" to
 do a POST, you can modify the method to a `PROPFIND` with `-X` and fetch still
@@ -690,10 +690,10 @@ browser's requests:
 - Make sure you check for and use cookies when needed (both reading with
   `--cookie` and writing with `--cookie-jar`)
 
-- Set user-agent (with [`-A`](https://curl.se/docs/manpage.html#-A)) to
+- Set user-agent (with [`-A`](https://fetch.se/docs/manpage.html#-A)) to
   one like a recent popular browser does
 
-- Set referer (with [`-E`](https://curl.se/docs/manpage.html#-E)) like
+- Set referer (with [`-E`](https://fetch.se/docs/manpage.html#-E)) like
   it is set by the browser
 
 - If you use POST, make sure you send all the fields and in the same order as

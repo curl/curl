@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@
 
 #ifdef USE_RUSTLS
 
-extern const struct Curl_ssl Curl_ssl_rustls;
+extern const struct Fetch_ssl Fetch_ssl_rustls;
 
 #endif /* USE_RUSTLS */
 #endif /* HEADER_FETCH_RUSTLS_H */

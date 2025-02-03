@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,7 +37,7 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-FETCHcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
+FETCHcode Fetch_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
                                    unsigned char *alpns)
 {
   /*
@@ -54,7 +54,7 @@ FETCHcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
   struct dynbuf dval;
   int idnum = 0;
 
-  Curl_dyn_init(&dval, DYN_DOH_RESPONSE);
+  Fetch_dyn_init(&dval, DYN_DOH_RESPONSE);
   while (len > 0)
   {
     size_t tlen = (size_t)*cp++;
@@ -68,36 +68,36 @@ FETCHcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
     {
       if ('\\' == *cp || ',' == *cp)
       {
-        if (Curl_dyn_addn(&dval, "\\", 1))
+        if (Fetch_dyn_addn(&dval, "\\", 1))
           goto err;
       }
-      if (Curl_dyn_addn(&dval, cp++, 1))
+      if (Fetch_dyn_addn(&dval, cp++, 1))
         goto err;
     }
     len -= tlen;
 
     /* we only store ALPN ids we know about */
-    id = Curl_alpn2alpnid(Curl_dyn_ptr(&dval), Curl_dyn_len(&dval));
+    id = Fetch_alpn2alpnid(Fetch_dyn_ptr(&dval), Fetch_dyn_len(&dval));
     if (id != ALPN_none)
     {
       if (idnum == MAX_HTTPSRR_ALPNS)
         break;
       alpns[idnum++] = (unsigned char)id;
     }
-    Curl_dyn_reset(&dval);
+    Fetch_dyn_reset(&dval);
   }
-  Curl_dyn_free(&dval);
+  Fetch_dyn_free(&dval);
   if (idnum < MAX_HTTPSRR_ALPNS)
     alpns[idnum] = ALPN_none; /* terminate the list */
   return FETCHE_OK;
 err:
-  Curl_dyn_free(&dval);
+  Fetch_dyn_free(&dval);
   return FETCHE_BAD_CONTENT_ENCODING;
 }
 
 #ifdef USE_ARES
 
-static void httpsrr_opt(struct Curl_easy *data,
+static void httpsrr_opt(struct Fetch_easy *data,
                         const ares_dns_rr_t *rr,
                         ares_dns_rr_key_t key, size_t idx)
 {
@@ -105,13 +105,13 @@ static void httpsrr_opt(struct Curl_easy *data,
   const unsigned char *val = NULL;
   unsigned short code;
   struct thread_data *res = data->state.async.tdata;
-  struct Curl_https_rrinfo *hi = &res->hinfo;
+  struct Fetch_https_rrinfo *hi = &res->hinfo;
   code = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
 
   switch (code)
   {
   case HTTPS_RR_CODE_ALPN: /* str_list */
-    Curl_httpsrr_decode_alpn(val, len, hi->alpns);
+    Fetch_httpsrr_decode_alpn(val, len, hi->alpns);
     infof(data, "HTTPS RR ALPN: %u %u %u %u",
           hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
     break;
@@ -136,11 +136,11 @@ static void httpsrr_opt(struct Curl_easy *data,
   }
 }
 
-void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
+void Fetch_dnsrec_done_cb(void *arg, ares_status_t status,
                          size_t timeouts,
                          const ares_dns_record_t *dnsrec)
 {
-  struct Curl_easy *data = arg;
+  struct Fetch_easy *data = arg;
   size_t i;
 #ifdef FETCHRES_ARES
   struct thread_data *res = data->state.async.tdata;

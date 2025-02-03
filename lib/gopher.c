@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,10 +49,10 @@
  * Forward declarations.
  */
 
-static FETCHcode gopher_do(struct Curl_easy *data, bool *done);
+static FETCHcode gopher_do(struct Fetch_easy *data, bool *done);
 #ifdef USE_SSL
-static FETCHcode gopher_connect(struct Curl_easy *data, bool *done);
-static FETCHcode gopher_connecting(struct Curl_easy *data, bool *done);
+static FETCHcode gopher_connect(struct Fetch_easy *data, bool *done);
+static FETCHcode gopher_connecting(struct Fetch_easy *data, bool *done);
 #endif
 
 /*
@@ -61,7 +61,7 @@ static FETCHcode gopher_connecting(struct Curl_easy *data, bool *done);
  * connect-command-download protocols.
  */
 
-const struct Curl_handler Curl_handler_gopher = {
+const struct Fetch_handler Fetch_handler_gopher = {
     "gopher",          /* scheme */
     ZERO_NULL,         /* setup_connection */
     gopher_do,         /* do_it */
@@ -87,7 +87,7 @@ const struct Curl_handler Curl_handler_gopher = {
 };
 
 #ifdef USE_SSL
-const struct Curl_handler Curl_handler_gophers = {
+const struct Fetch_handler Fetch_handler_gophers = {
     "gophers",          /* scheme */
     ZERO_NULL,          /* setup_connection */
     gopher_do,          /* do_it */
@@ -112,19 +112,19 @@ const struct Curl_handler Curl_handler_gophers = {
     PROTOPT_SSL         /* flags */
 };
 
-static FETCHcode gopher_connect(struct Curl_easy *data, bool *done)
+static FETCHcode gopher_connect(struct Fetch_easy *data, bool *done)
 {
   (void)data;
   (void)done;
   return FETCHE_OK;
 }
 
-static FETCHcode gopher_connecting(struct Curl_easy *data, bool *done)
+static FETCHcode gopher_connecting(struct Fetch_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   FETCHcode result;
 
-  result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
+  result = Fetch_conn_connect(data, FIRSTSOCKET, TRUE, done);
   if (result)
     connclose(conn, "Failed TLS connection");
   *done = TRUE;
@@ -132,7 +132,7 @@ static FETCHcode gopher_connecting(struct Curl_easy *data, bool *done)
 }
 #endif
 
-static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
+static FETCHcode gopher_do(struct Fetch_easy *data, bool *done)
 {
   FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
@@ -176,7 +176,7 @@ static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
     newp += 2;
 
     /* ... and finally unescape */
-    result = Curl_urldecode(newp, 0, &sel, &len, REJECT_ZERO);
+    result = Fetch_urldecode(newp, 0, &sel, &len, REJECT_ZERO);
     free(gopherpath);
     if (result)
       return result;
@@ -192,10 +192,10 @@ static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
     if (strlen(sel) < 1)
       break;
 
-    result = Curl_xfer_send(data, sel, k, FALSE, &amount);
+    result = Fetch_xfer_send(data, sel, k, FALSE, &amount);
     if (!result)
     { /* Which may not have written it all! */
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
+      result = Fetch_client_write(data, CLIENTWRITE_HEADER, sel, amount);
       if (result)
         break;
 
@@ -207,7 +207,7 @@ static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
     else
       break;
 
-    timeout_ms = Curl_timeleft(data, NULL, FALSE);
+    timeout_ms = Fetch_timeleft(data, NULL, FALSE);
     if (timeout_ms < 0)
     {
       result = FETCHE_OPERATION_TIMEDOUT;
@@ -238,17 +238,17 @@ static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
   free(sel_org);
 
   if (!result)
-    result = Curl_xfer_send(data, "\r\n", 2, FALSE, &amount);
+    result = Fetch_xfer_send(data, "\r\n", 2, FALSE, &amount);
   if (result)
   {
     failf(data, "Failed sending Gopher request");
     return result;
   }
-  result = Curl_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
+  result = Fetch_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
   if (result)
     return result;
 
-  Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
+  Fetch_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
   return FETCHE_OK;
 }
 #endif /* FETCH_DISABLE_GOPHER */

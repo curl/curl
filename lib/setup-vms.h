@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -412,7 +412,7 @@ static int CONF_modules_load_file(const char *filename,
 void OPENSSL_ADD_ALL_ALGORITHMS(void);
 #endif
 
-/* Curl defines these to lower case and VAX needs them in upper case */
+/* Fetch defines these to lower case and VAX needs them in upper case */
 /* So we need static routines */
 #if (OPENSSL_VERSION_NUMBER < 0x00907001L)
 
@@ -445,7 +445,7 @@ static void des_ecb_encrypt(const_des_cblock *input,
 #if OPENSSL_VERSION_NUMBER < 0x00907000L
 #ifdef X509_STORE_set_flags
 #undef X509_STORE_set_flags
-#define X509_STORE_set_flags(x, y) Curl_nop_stmt
+#define X509_STORE_set_flags(x, y) Fetch_nop_stmt
 #endif
 #endif
 #endif

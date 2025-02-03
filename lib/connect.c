@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -63,9 +63,9 @@
 #include "cf-https-connect.h"
 #include "cf-socket.h"
 #include "select.h"
-#include "url.h" /* for Curl_safefree() */
+#include "url.h" /* for Fetch_safefree() */
 #include "multiif.h"
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "sockaddr.h" /* required for Fetch_sockaddr_storage */
 #include "inet_ntop.h"
 #include "inet_pton.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */
@@ -91,7 +91,7 @@
 
 #if !defined(FETCH_DISABLE_ALTSVC) || defined(USE_HTTPSRR)
 
-enum alpnid Curl_alpn2alpnid(char *name, size_t len)
+enum alpnid Fetch_alpn2alpnid(char *name, size_t len)
 {
   if (len == 2)
   {
@@ -113,16 +113,16 @@ enum alpnid Curl_alpn2alpnid(char *name, size_t len)
 #endif
 
 /*
- * Curl_timeleft() returns the amount of milliseconds left allowed for the
+ * Fetch_timeleft() returns the amount of milliseconds left allowed for the
  * transfer/connection. If the value is 0, there is no timeout (ie there is
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
  * @param data the transfer to check on
- * @param nowp timestamp to use for calculation, NULL to use Curl_now()
+ * @param nowp timestamp to use for calculation, NULL to use Fetch_now()
  * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
-timediff_t Curl_timeleft(struct Curl_easy *data,
+timediff_t Fetch_timeleft(struct Fetch_easy *data,
                          struct fetchtime *nowp,
                          bool duringconnect)
 {
@@ -140,14 +140,14 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 
   if (!nowp)
   {
-    now = Curl_now();
+    now = Fetch_now();
     nowp = &now;
   }
 
   if (data->set.timeout > 0)
   {
     timeleft_ms = data->set.timeout -
-                  Curl_timediff(*nowp, data->progress.t_startop);
+                  Fetch_timediff(*nowp, data->progress.t_startop);
     if (!timeleft_ms)
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
     if (!duringconnect)
@@ -158,7 +158,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
   {
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ? data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
     ctimeleft_ms = ctimeout_ms -
-                   Curl_timediff(*nowp, data->progress.t_startsingle);
+                   Fetch_timediff(*nowp, data->progress.t_startsingle);
     if (!ctimeleft_ms)
       ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
     if (!timeleft_ms)
@@ -168,7 +168,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
   return (ctimeleft_ms < timeleft_ms) ? ctimeleft_ms : timeleft_ms;
 }
 
-void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
+void Fetch_shutdown_start(struct Fetch_easy *data, int sockindex,
                          struct fetchtime *nowp)
 {
   struct fetchtime now;
@@ -176,14 +176,14 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
   DEBUGASSERT(data->conn);
   if (!nowp)
   {
-    now = Curl_now();
+    now = Fetch_now();
     nowp = &now;
   }
   data->conn->shutdown.start[sockindex] = *nowp;
   data->conn->shutdown.timeout_ms = (data->set.shutdowntimeout > 0) ? data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS;
 }
 
-timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
+timediff_t Fetch_shutdown_timeleft(struct connectdata *conn, int sockindex,
                                   struct fetchtime *nowp)
 {
   struct fetchtime now;
@@ -194,15 +194,15 @@ timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
 
   if (!nowp)
   {
-    now = Curl_now();
+    now = Fetch_now();
     nowp = &now;
   }
   left_ms = conn->shutdown.timeout_ms -
-            Curl_timediff(*nowp, conn->shutdown.start[sockindex]);
+            Fetch_timediff(*nowp, conn->shutdown.start[sockindex]);
   return left_ms ? left_ms : -1;
 }
 
-timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
+timediff_t Fetch_conn_shutdown_timeleft(struct connectdata *conn,
                                        struct fetchtime *nowp)
 {
   timediff_t left_ms = 0, ms;
@@ -215,30 +215,30 @@ timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
       continue;
     if (!nowp)
     {
-      now = Curl_now();
+      now = Fetch_now();
       nowp = &now;
     }
-    ms = Curl_shutdown_timeleft(conn, i, nowp);
+    ms = Fetch_shutdown_timeleft(conn, i, nowp);
     if (ms && (!left_ms || ms < left_ms))
       left_ms = ms;
   }
   return left_ms;
 }
 
-void Curl_shutdown_clear(struct Curl_easy *data, int sockindex)
+void Fetch_shutdown_clear(struct Fetch_easy *data, int sockindex)
 {
   struct fetchtime *pt = &data->conn->shutdown.start[sockindex];
   memset(pt, 0, sizeof(*pt));
 }
 
-bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
+bool Fetch_shutdown_started(struct Fetch_easy *data, int sockindex)
 {
   struct fetchtime *pt = &data->conn->shutdown.start[sockindex];
   return (pt->tv_sec > 0) || (pt->tv_usec > 0);
 }
 
-static const struct Curl_addrinfo *
-addr_first_match(const struct Curl_addrinfo *addr, int family)
+static const struct Fetch_addrinfo *
+addr_first_match(const struct Fetch_addrinfo *addr, int family)
 {
   while (addr)
   {
@@ -249,8 +249,8 @@ addr_first_match(const struct Curl_addrinfo *addr, int family)
   return NULL;
 }
 
-static const struct Curl_addrinfo *
-addr_next_match(const struct Curl_addrinfo *addr, int family)
+static const struct Fetch_addrinfo *
+addr_next_match(const struct Fetch_addrinfo *addr, int family)
 {
   while (addr && addr->ai_next)
   {
@@ -262,8 +262,8 @@ addr_next_match(const struct Curl_addrinfo *addr, int family)
 }
 
 /* retrieves ip address and port from a sockaddr structure.
-   note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool Curl_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
+   note it calls Fetch_inet_ntop which sets errno on fail, not SOCKERRNO. */
+bool Fetch_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
                       char *addr, int *port)
 {
   struct sockaddr_in *si = NULL;
@@ -280,7 +280,7 @@ bool Curl_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
   {
   case AF_INET:
     si = (struct sockaddr_in *)(void *)sa;
-    if (Curl_inet_ntop(sa->sa_family, &si->sin_addr,
+    if (Fetch_inet_ntop(sa->sa_family, &si->sin_addr,
                        addr, MAX_IPADR_LEN))
     {
       unsigned short us_port = ntohs(si->sin_port);
@@ -291,7 +291,7 @@ bool Curl_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
 #ifdef USE_IPV6
   case AF_INET6:
     si6 = (struct sockaddr_in6 *)(void *)sa;
-    if (Curl_inet_ntop(sa->sa_family, &si6->sin6_addr,
+    if (Fetch_inet_ntop(sa->sa_family, &si6->sin6_addr,
                        addr, MAX_IPADR_LEN))
     {
       unsigned short us_port = ntohs(si6->sin6_port);
@@ -324,11 +324,11 @@ bool Curl_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
 
 /*
  * Used to extract socket and connectdata struct for the most recent
- * transfer on the given Curl_easy.
+ * transfer on the given Fetch_easy.
  *
  * The returned socket will be FETCH_SOCKET_BAD in case of failure!
  */
-fetch_socket_t Curl_getconnectinfo(struct Curl_easy *data,
+fetch_socket_t Fetch_getconnectinfo(struct Fetch_easy *data,
                                    struct connectdata **connp)
 {
   DEBUGASSERT(data);
@@ -342,7 +342,7 @@ fetch_socket_t Curl_getconnectinfo(struct Curl_easy *data,
   {
     struct connectdata *conn;
 
-    conn = Curl_cpool_get_conn(data, data->state.lastconnect_id);
+    conn = Fetch_cpool_get_conn(data, data->state.lastconnect_id);
     if (!conn)
     {
       data->state.lastconnect_id = -1;
@@ -358,9 +358,9 @@ fetch_socket_t Curl_getconnectinfo(struct Curl_easy *data,
 }
 
 /*
- * Curl_conncontrol() marks streams or connection for closure.
+ * Fetch_conncontrol() marks streams or connection for closure.
  */
-void Curl_conncontrol(struct connectdata *conn,
+void Fetch_conncontrol(struct connectdata *conn,
                       int ctrl /* see defines in header */
 #if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
                       ,
@@ -376,7 +376,7 @@ void Curl_conncontrol(struct connectdata *conn,
 #if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
   (void)reason; /* useful for debugging */
 #endif
-  is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);
+  is_multiplex = Fetch_conn_is_multiplex(conn, FIRSTSOCKET);
   closeit = (ctrl == CONNCTRL_CONNECTION) ||
             ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
   if ((ctrl == CONNCTRL_STREAM) && is_multiplex)
@@ -395,16 +395,16 @@ void Curl_conncontrol(struct connectdata *conn,
 struct eyeballer
 {
   const char *name;
-  const struct Curl_addrinfo *first; /* complete address list, not owned */
-  const struct Curl_addrinfo *addr;  /* List of addresses to try, not owned */
+  const struct Fetch_addrinfo *first; /* complete address list, not owned */
+  const struct Fetch_addrinfo *addr;  /* List of addresses to try, not owned */
   int ai_family;                     /* matching address family only */
   cf_ip_connect_create *cf_create;   /* for creating cf */
-  struct Curl_cfilter *cf;           /* current sub-cfilter connecting */
+  struct Fetch_cfilter *cf;           /* current sub-cfilter connecting */
   struct eyeballer *primary;         /* eyeballer this one is backup for */
   timediff_t delay_ms;               /* delay until start */
   struct fetchtime started;          /* start of current attempt */
   timediff_t timeoutms;              /* timeout for current attempt */
-  expire_id timeout_id;              /* ID for Curl_expire() */
+  expire_id timeout_id;              /* ID for Fetch_expire() */
   FETCHcode result;
   int error;
   BIT(rewinded);     /* if we rewinded the addr list */
@@ -427,7 +427,7 @@ struct cf_he_ctx
 {
   int transport;
   cf_ip_connect_create *cf_create;
-  const struct Curl_dns_entry *remotehost;
+  const struct Fetch_dns_entry *remotehost;
   cf_connect_state state;
   struct eyeballer *baller[2];
   struct eyeballer *winner;
@@ -441,7 +441,7 @@ struct cf_he_ctx
 
 static FETCHcode eyeballer_new(struct eyeballer **pballer,
                                cf_ip_connect_create *cf_create,
-                               const struct Curl_addrinfo *addr,
+                               const struct Fetch_addrinfo *addr,
                                int ai_family,
                                struct eyeballer *primary,
                                timediff_t delay_ms,
@@ -474,16 +474,16 @@ static FETCHcode eyeballer_new(struct eyeballer **pballer,
 }
 
 static void baller_close(struct eyeballer *baller,
-                         struct Curl_easy *data)
+                         struct Fetch_easy *data)
 {
   if (baller && baller->cf)
   {
-    Curl_conn_cf_discard_chain(&baller->cf, data);
+    Fetch_conn_cf_discard_chain(&baller->cf, data);
   }
 }
 
 static void baller_free(struct eyeballer *baller,
-                        struct Curl_easy *data)
+                        struct Fetch_easy *data)
 {
   if (baller)
   {
@@ -510,13 +510,13 @@ static void baller_next_addr(struct eyeballer *baller)
  * Note that even on connect fail it returns FETCHE_OK, but with 'sock' set to
  * FETCH_SOCKET_BAD. Other errors will however return proper errors.
  */
-static void baller_initiate(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
+static void baller_initiate(struct Fetch_cfilter *cf,
+                            struct Fetch_easy *data,
                             struct eyeballer *baller)
 {
   struct cf_he_ctx *ctx = cf->ctx;
-  struct Curl_cfilter *cf_prev = baller->cf;
-  struct Curl_cfilter *wcf;
+  struct Fetch_cfilter *cf_prev = baller->cf;
+  struct Fetch_cfilter *wcf;
   FETCHcode result;
 
   /* Do not close a previous cfilter yet to ensure that the next IP's
@@ -537,7 +537,7 @@ static void baller_initiate(struct Curl_cfilter *cf,
 
   if (addr_next_match(baller->addr, baller->ai_family))
   {
-    Curl_expire(data, baller->timeoutms, baller->timeout_id);
+    Fetch_expire(data, baller->timeoutms, baller->timeout_id);
   }
 
 out:
@@ -547,7 +547,7 @@ out:
     baller_close(baller, data);
   }
   if (cf_prev)
-    Curl_conn_cf_discard_chain(&cf_prev, data);
+    Fetch_conn_cf_discard_chain(&cf_prev, data);
   baller->result = result;
 }
 
@@ -557,8 +557,8 @@ out:
  * could be created and the non-blocking connect started.
  * Returns error when all remaining addresses have been tried.
  */
-static FETCHcode baller_start(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+static FETCHcode baller_start(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               struct eyeballer *baller,
                               timediff_t timeoutms)
 {
@@ -568,7 +568,7 @@ static FETCHcode baller_start(struct Curl_cfilter *cf,
 
   while (baller->addr)
   {
-    baller->started = Curl_now();
+    baller->started = Fetch_now();
     baller->timeoutms = addr_next_match(baller->addr, baller->ai_family) ? USETIME(timeoutms) : timeoutms;
     baller_initiate(cf, data, baller);
     if (!baller->result)
@@ -584,8 +584,8 @@ static FETCHcode baller_start(struct Curl_cfilter *cf,
 
 /* Used within the multi interface. Try next IP address, returns error if no
    more address exists or error */
-static FETCHcode baller_start_next(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static FETCHcode baller_start_next(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    struct eyeballer *baller,
                                    timediff_t timeoutms)
 {
@@ -611,8 +611,8 @@ static FETCHcode baller_start_next(struct Curl_cfilter *cf,
   return baller->result;
 }
 
-static FETCHcode baller_connect(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+static FETCHcode baller_connect(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data,
                                 struct eyeballer *baller,
                                 struct fetchtime *now,
                                 bool *connected)
@@ -622,7 +622,7 @@ static FETCHcode baller_connect(struct Curl_cfilter *cf,
   if (!baller->result && !*connected)
   {
     /* evaluate again */
-    baller->result = Curl_conn_cf_connect(baller->cf, data, 0, connected);
+    baller->result = Fetch_conn_cf_connect(baller->cf, data, 0, connected);
 
     if (!baller->result)
     {
@@ -631,7 +631,7 @@ static FETCHcode baller_connect(struct Curl_cfilter *cf,
         baller->connected = TRUE;
         baller->is_done = TRUE;
       }
-      else if (Curl_timediff(*now, baller->started) >= baller->timeoutms)
+      else if (Fetch_timediff(*now, baller->started) >= baller->timeoutms)
       {
         infof(data, "%s connect timeout after %" FMT_TIMEDIFF_T "ms, move on!", baller->name, baller->timeoutms);
 #if defined(ETIMEDOUT)
@@ -649,8 +649,8 @@ static FETCHcode baller_connect(struct Curl_cfilter *cf,
 /*
  * is_connected() checks if the socket has connected.
  */
-static FETCHcode is_connected(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+static FETCHcode is_connected(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               bool *connected)
 {
   struct cf_he_ctx *ctx = cf->ctx;
@@ -669,7 +669,7 @@ static FETCHcode is_connected(struct Curl_cfilter *cf,
    * cot ballers in a QUIC appropriate way. */
 evaluate:
   *connected = FALSE; /* a negative world view is best */
-  now = Curl_now();
+  now = Fetch_now();
   ongoing = not_started = 0;
   for (i = 0; i < ARRAYSIZE(ctx->baller); i++)
   {
@@ -709,7 +709,7 @@ evaluate:
         data->state.os_errno = baller->error;
         SET_SOCKERRNO(baller->error);
       }
-      baller_start_next(cf, data, baller, Curl_timeleft(data, &now, TRUE));
+      baller_start_next(cf, data, baller, Fetch_timeleft(data, &now, TRUE));
       if (baller->is_done)
       {
         FETCH_TRC_CF(data, cf, "%s done", baller->name);
@@ -719,7 +719,7 @@ evaluate:
         /* next attempt was started */
         FETCH_TRC_CF(data, cf, "%s trying next", baller->name);
         ++ongoing;
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        Fetch_expire(data, 0, EXPIRE_RUN_NOW);
       }
     }
   }
@@ -732,10 +732,10 @@ evaluate:
 
   /* Nothing connected, check the time before we might
    * start new ballers or return ok. */
-  if ((ongoing || not_started) && Curl_timeleft(data, &now, TRUE) < 0)
+  if ((ongoing || not_started) && Fetch_timeleft(data, &now, TRUE) < 0)
   {
     failf(data, "Connection timeout after %" FMT_OFF_T " ms",
-          Curl_timediff(now, data->progress.t_startsingle));
+          Fetch_timediff(now, data->progress.t_startsingle));
     return FETCHE_OPERATION_TIMEDOUT;
   }
 
@@ -753,9 +753,9 @@ evaluate:
       /* We start its primary baller has failed to connect or if
        * its start delay_ms have expired */
       if ((baller->primary && baller->primary->is_done) ||
-          Curl_timediff(now, ctx->started) >= baller->delay_ms)
+          Fetch_timediff(now, ctx->started) >= baller->delay_ms)
       {
-        baller_start(cf, data, baller, Curl_timeleft(data, &now, TRUE));
+        baller_start(cf, data, baller, Fetch_timeleft(data, &now, TRUE));
         if (baller->is_done)
         {
           FETCH_TRC_CF(data, cf, "%s done", baller->name);
@@ -812,7 +812,7 @@ evaluate:
   failf(data, "Failed to connect to %s port %u after "
               "%" FMT_TIMEDIFF_T " ms: %s",
         hostname, conn->primary.remote_port,
-        Curl_timediff(now, data->progress.t_startsingle),
+        Fetch_timediff(now, data->progress.t_startsingle),
         fetch_easy_strerror(result));
 
 #ifdef WSAETIMEDOUT
@@ -830,16 +830,16 @@ evaluate:
  * Connect to the given host with timeout, proxy or remote does not matter.
  * There might be more than one IP address to try out.
  */
-static FETCHcode start_connect(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               const struct Curl_dns_entry *remotehost)
+static FETCHcode start_connect(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
+                               const struct Fetch_dns_entry *remotehost)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   struct connectdata *conn = cf->conn;
   FETCHcode result = FETCHE_COULDNT_CONNECT;
   int ai_family0 = 0, ai_family1 = 0;
-  timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
-  const struct Curl_addrinfo *addr0 = NULL, *addr1 = NULL;
+  timediff_t timeout_ms = Fetch_timeleft(data, NULL, TRUE);
+  const struct Fetch_addrinfo *addr0 = NULL, *addr1 = NULL;
 
   if (timeout_ms < 0)
   {
@@ -848,7 +848,7 @@ static FETCHcode start_connect(struct Curl_cfilter *cf,
     return FETCHE_OPERATION_TIMEDOUT;
   }
 
-  ctx->started = Curl_now();
+  ctx->started = Fetch_now();
 
   /* remotehost->addr is the list of addresses from the resolver, each
    * with an address family. The list has at least one entry, possibly
@@ -924,14 +924,14 @@ static FETCHcode start_connect(struct Curl_cfilter *cf,
       return result;
     FETCH_TRC_CF(data, cf, "created %s (timeout %" FMT_TIMEDIFF_T "ms)",
                  ctx->baller[1]->name, ctx->baller[1]->timeoutms);
-    Curl_expire(data, data->set.happy_eyeballs_timeout,
+    Fetch_expire(data, data->set.happy_eyeballs_timeout,
                 EXPIRE_HAPPY_EYEBALLS);
   }
 
   return FETCHE_OK;
 }
 
-static void cf_he_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_he_ctx_clear(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   size_t i;
@@ -947,8 +947,8 @@ static void cf_he_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
   ctx->winner = NULL;
 }
 
-static FETCHcode cf_he_shutdown(struct Curl_cfilter *cf,
-                                struct Curl_easy *data, bool *done)
+static FETCHcode cf_he_shutdown(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data, bool *done)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   size_t i;
@@ -992,8 +992,8 @@ static FETCHcode cf_he_shutdown(struct Curl_cfilter *cf,
   return result;
 }
 
-static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
+static void cf_he_adjust_pollset(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data,
                                  struct easy_pollset *ps)
 {
   struct cf_he_ctx *ctx = cf->ctx;
@@ -1006,14 +1006,14 @@ static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
       struct eyeballer *baller = ctx->baller[i];
       if (!baller || !baller->cf)
         continue;
-      Curl_conn_cf_adjust_pollset(baller->cf, data, ps);
+      Fetch_conn_cf_adjust_pollset(baller->cf, data, ps);
     }
     FETCH_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
   }
 }
 
-static FETCHcode cf_he_connect(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
+static FETCHcode cf_he_connect(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
                                bool blocking, bool *done)
 {
   struct cf_he_ctx *ctx = cf->ctx;
@@ -1032,7 +1032,7 @@ static FETCHcode cf_he_connect(struct Curl_cfilter *cf,
   switch (ctx->state)
   {
   case SCFST_INIT:
-    DEBUGASSERT(FETCH_SOCKET_BAD == Curl_conn_cf_get_socket(cf, data));
+    DEBUGASSERT(FETCH_SOCKET_BAD == Fetch_conn_cf_get_socket(cf, data));
     DEBUGASSERT(!cf->connected);
     result = start_connect(cf, data, ctx->remotehost);
     if (result)
@@ -1055,12 +1055,12 @@ static FETCHcode cf_he_connect(struct Curl_cfilter *cf,
       cf_he_ctx_clear(cf, data);
 
       if (cf->conn->handler->protocol & PROTO_FAMILY_SSH)
-        Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
-      if (Curl_trc_cf_is_verbose(cf, data))
+        Fetch_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
+      if (Fetch_trc_cf_is_verbose(cf, data))
       {
         struct ip_quadruple ipquad;
         int is_ipv6;
-        if (!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad))
+        if (!Fetch_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad))
         {
           const char *host, *disphost;
           int port;
@@ -1079,8 +1079,8 @@ static FETCHcode cf_he_connect(struct Curl_cfilter *cf,
   return result;
 }
 
-static void cf_he_close(struct Curl_cfilter *cf,
-                        struct Curl_easy *data)
+static void cf_he_close(struct Fetch_cfilter *cf,
+                        struct Fetch_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
 
@@ -1092,12 +1092,12 @@ static void cf_he_close(struct Curl_cfilter *cf,
   if (cf->next)
   {
     cf->next->cft->do_close(cf->next, data);
-    Curl_conn_cf_discard_chain(&cf->next, data);
+    Fetch_conn_cf_discard_chain(&cf->next, data);
   }
 }
 
-static bool cf_he_data_pending(struct Curl_cfilter *cf,
-                               const struct Curl_easy *data)
+static bool cf_he_data_pending(struct Fetch_cfilter *cf,
+                               const struct Fetch_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   size_t i;
@@ -1116,8 +1116,8 @@ static bool cf_he_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
-static struct fetchtime get_max_baller_time(struct Curl_cfilter *cf,
-                                            struct Curl_easy *data,
+static struct fetchtime get_max_baller_time(struct Fetch_cfilter *cf,
+                                            struct Fetch_easy *data,
                                             int query)
 {
   struct cf_he_ctx *ctx = cf->ctx;
@@ -1133,15 +1133,15 @@ static struct fetchtime get_max_baller_time(struct Curl_cfilter *cf,
     if (baller && baller->cf &&
         !baller->cf->cft->query(baller->cf, data, query, NULL, &t))
     {
-      if ((t.tv_sec || t.tv_usec) && Curl_timediff_us(t, tmax) > 0)
+      if ((t.tv_sec || t.tv_usec) && Fetch_timediff_us(t, tmax) > 0)
         tmax = t;
     }
   }
   return tmax;
 }
 
-static FETCHcode cf_he_query(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
+static FETCHcode cf_he_query(struct Fetch_cfilter *cf,
+                             struct Fetch_easy *data,
                              int query, int *pres1, void *pres2)
 {
   struct cf_he_ctx *ctx = cf->ctx;
@@ -1192,7 +1192,7 @@ static FETCHcode cf_he_query(struct Curl_cfilter *cf,
   return cf->next ? cf->next->cft->query(cf->next, data, query, pres1, pres2) : FETCHE_UNKNOWN_OPTION;
 }
 
-static void cf_he_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_he_destroy(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
 
@@ -1202,10 +1202,10 @@ static void cf_he_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf_he_ctx_clear(cf, data);
   }
   /* release any resources held in state */
-  Curl_safefree(ctx);
+  Fetch_safefree(ctx);
 }
 
-struct Curl_cftype Curl_cft_happy_eyeballs = {
+struct Fetch_cftype Fetch_cft_happy_eyeballs = {
     "HAPPY-EYEBALLS",
     0,
     FETCH_LOG_LVL_NONE,
@@ -1213,14 +1213,14 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
     cf_he_connect,
     cf_he_close,
     cf_he_shutdown,
-    Curl_cf_def_get_host,
+    Fetch_cf_def_get_host,
     cf_he_adjust_pollset,
     cf_he_data_pending,
-    Curl_cf_def_send,
-    Curl_cf_def_recv,
-    Curl_cf_def_cntrl,
-    Curl_cf_def_conn_is_alive,
-    Curl_cf_def_conn_keep_alive,
+    Fetch_cf_def_send,
+    Fetch_cf_def_recv,
+    Fetch_cf_def_cntrl,
+    Fetch_cf_def_conn_is_alive,
+    Fetch_cf_def_conn_keep_alive,
     cf_he_query,
 };
 
@@ -1235,11 +1235,11 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
  *                   actual connects.
  */
 static FETCHcode
-cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
-                         struct Curl_easy *data,
+cf_happy_eyeballs_create(struct Fetch_cfilter **pcf,
+                         struct Fetch_easy *data,
                          struct connectdata *conn,
                          cf_ip_connect_create *cf_create,
-                         const struct Curl_dns_entry *remotehost,
+                         const struct Fetch_dns_entry *remotehost,
                          int transport)
 {
   struct cf_he_ctx *ctx = NULL;
@@ -1258,13 +1258,13 @@ cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
   ctx->cf_create = cf_create;
   ctx->remotehost = remotehost;
 
-  result = Curl_cf_create(pcf, &Curl_cft_happy_eyeballs, ctx);
+  result = Fetch_cf_create(pcf, &Fetch_cft_happy_eyeballs, ctx);
 
 out:
   if (result)
   {
-    Curl_safefree(*pcf);
-    Curl_safefree(ctx);
+    Fetch_safefree(*pcf);
+    Fetch_safefree(ctx);
   }
   return result;
 }
@@ -1280,15 +1280,15 @@ static
     const
 #endif
     struct transport_provider transport_providers[] = {
-        {TRNSPRT_TCP, Curl_cf_tcp_create},
+        {TRNSPRT_TCP, Fetch_cf_tcp_create},
 #ifdef USE_HTTP3
-        {TRNSPRT_QUIC, Curl_cf_quic_create},
+        {TRNSPRT_QUIC, Fetch_cf_quic_create},
 #endif
 #ifndef FETCH_DISABLE_TFTP
-        {TRNSPRT_UDP, Curl_cf_udp_create},
+        {TRNSPRT_UDP, Fetch_cf_udp_create},
 #endif
 #ifdef USE_UNIX_SOCKETS
-        {TRNSPRT_UNIX, Curl_cf_unix_create},
+        {TRNSPRT_UNIX, Fetch_cf_unix_create},
 #endif
 };
 
@@ -1303,13 +1303,13 @@ static cf_ip_connect_create *get_cf_create(int transport)
   return NULL;
 }
 
-static FETCHcode cf_he_insert_after(struct Curl_cfilter *cf_at,
-                                    struct Curl_easy *data,
-                                    const struct Curl_dns_entry *remotehost,
+static FETCHcode cf_he_insert_after(struct Fetch_cfilter *cf_at,
+                                    struct Fetch_easy *data,
+                                    const struct Fetch_dns_entry *remotehost,
                                     int transport)
 {
   cf_ip_connect_create *cf_create;
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result;
 
   /* Need to be first */
@@ -1326,7 +1326,7 @@ static FETCHcode cf_he_insert_after(struct Curl_cfilter *cf_at,
   if (result)
     return result;
 
-  Curl_conn_cf_insert_after(cf_at, cf);
+  Fetch_conn_cf_insert_after(cf_at, cf);
   return FETCHE_OK;
 }
 
@@ -1344,13 +1344,13 @@ typedef enum
 struct cf_setup_ctx
 {
   cf_setup_state state;
-  const struct Curl_dns_entry *remotehost;
+  const struct Fetch_dns_entry *remotehost;
   int ssl_mode;
   int transport;
 };
 
-static FETCHcode cf_setup_connect(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static FETCHcode cf_setup_connect(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   bool blocking, bool *done)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
@@ -1366,7 +1366,7 @@ static FETCHcode cf_setup_connect(struct Curl_cfilter *cf,
 connect_sub_chain:
   if (cf->next && !cf->next->connected)
   {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Fetch_conn_cf_connect(cf->next, data, blocking, done);
     if (result || !*done)
       return result;
   }
@@ -1385,7 +1385,7 @@ connect_sub_chain:
 #ifndef FETCH_DISABLE_PROXY
   if (ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy)
   {
-    result = Curl_cf_socks_proxy_insert_after(cf, data);
+    result = Fetch_cf_socks_proxy_insert_after(cf, data);
     if (result)
       return result;
     ctx->state = CF_SETUP_CNNCT_SOCKS;
@@ -1396,9 +1396,9 @@ connect_sub_chain:
   if (ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy)
   {
 #ifdef USE_SSL
-    if (IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) && !Curl_conn_is_ssl(cf->conn, cf->sockindex))
+    if (IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) && !Fetch_conn_is_ssl(cf->conn, cf->sockindex))
     {
-      result = Curl_cf_ssl_proxy_insert_after(cf, data);
+      result = Fetch_cf_ssl_proxy_insert_after(cf, data);
       if (result)
         return result;
     }
@@ -1407,7 +1407,7 @@ connect_sub_chain:
 #if !defined(FETCH_DISABLE_HTTP)
     if (cf->conn->bits.tunnel_proxy)
     {
-      result = Curl_cf_http_proxy_insert_after(cf, data);
+      result = Fetch_cf_http_proxy_insert_after(cf, data);
       if (result)
         return result;
     }
@@ -1423,13 +1423,13 @@ connect_sub_chain:
 #if !defined(FETCH_DISABLE_PROXY)
     if (data->set.haproxyprotocol)
     {
-      if (Curl_conn_is_ssl(cf->conn, cf->sockindex))
+      if (Fetch_conn_is_ssl(cf->conn, cf->sockindex))
       {
         failf(data, "haproxy protocol not support with SSL "
                     "encryption in place (QUIC?)");
         return FETCHE_UNSUPPORTED_PROTOCOL;
       }
-      result = Curl_cf_haproxy_insert_after(cf, data);
+      result = Fetch_cf_haproxy_insert_after(cf, data);
       if (result)
         return result;
     }
@@ -1443,9 +1443,9 @@ connect_sub_chain:
   {
 #ifdef USE_SSL
     if ((ctx->ssl_mode == FETCH_CF_SSL_ENABLE || (ctx->ssl_mode != FETCH_CF_SSL_DISABLE && cf->conn->handler->flags & PROTOPT_SSL)) /* we want SSL */
-        && !Curl_conn_is_ssl(cf->conn, cf->sockindex))
+        && !Fetch_conn_is_ssl(cf->conn, cf->sockindex))
     { /* it is missing */
-      result = Curl_cf_ssl_insert_after(cf, data);
+      result = Fetch_cf_ssl_insert_after(cf, data);
       if (result)
         return result;
     }
@@ -1461,8 +1461,8 @@ connect_sub_chain:
   return FETCHE_OK;
 }
 
-static void cf_setup_close(struct Curl_cfilter *cf,
-                           struct Curl_easy *data)
+static void cf_setup_close(struct Fetch_cfilter *cf,
+                           struct Fetch_easy *data)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
 
@@ -1473,45 +1473,45 @@ static void cf_setup_close(struct Curl_cfilter *cf,
   if (cf->next)
   {
     cf->next->cft->do_close(cf->next, data);
-    Curl_conn_cf_discard_chain(&cf->next, data);
+    Fetch_conn_cf_discard_chain(&cf->next, data);
   }
 }
 
-static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_setup_destroy(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
 
   (void)data;
   FETCH_TRC_CF(data, cf, "destroy");
-  Curl_safefree(ctx);
+  Fetch_safefree(ctx);
 }
 
-struct Curl_cftype Curl_cft_setup = {
+struct Fetch_cftype Fetch_cft_setup = {
     "SETUP",
     0,
     FETCH_LOG_LVL_NONE,
     cf_setup_destroy,
     cf_setup_connect,
     cf_setup_close,
-    Curl_cf_def_shutdown,
-    Curl_cf_def_get_host,
-    Curl_cf_def_adjust_pollset,
-    Curl_cf_def_data_pending,
-    Curl_cf_def_send,
-    Curl_cf_def_recv,
-    Curl_cf_def_cntrl,
-    Curl_cf_def_conn_is_alive,
-    Curl_cf_def_conn_keep_alive,
-    Curl_cf_def_query,
+    Fetch_cf_def_shutdown,
+    Fetch_cf_def_get_host,
+    Fetch_cf_def_adjust_pollset,
+    Fetch_cf_def_data_pending,
+    Fetch_cf_def_send,
+    Fetch_cf_def_recv,
+    Fetch_cf_def_cntrl,
+    Fetch_cf_def_conn_is_alive,
+    Fetch_cf_def_conn_keep_alive,
+    Fetch_cf_def_query,
 };
 
-static FETCHcode cf_setup_create(struct Curl_cfilter **pcf,
-                                 struct Curl_easy *data,
-                                 const struct Curl_dns_entry *remotehost,
+static FETCHcode cf_setup_create(struct Fetch_cfilter **pcf,
+                                 struct Fetch_easy *data,
+                                 const struct Fetch_dns_entry *remotehost,
                                  int transport,
                                  int ssl_mode)
 {
-  struct Curl_cfilter *cf = NULL;
+  struct Fetch_cfilter *cf = NULL;
   struct cf_setup_ctx *ctx;
   FETCHcode result = FETCHE_OK;
 
@@ -1527,7 +1527,7 @@ static FETCHcode cf_setup_create(struct Curl_cfilter **pcf,
   ctx->ssl_mode = ssl_mode;
   ctx->transport = transport;
 
-  result = Curl_cf_create(&cf, &Curl_cft_setup, ctx);
+  result = Fetch_cf_create(&cf, &Fetch_cft_setup, ctx);
   if (result)
     goto out;
   ctx = NULL;
@@ -1538,28 +1538,28 @@ out:
   return result;
 }
 
-static FETCHcode cf_setup_add(struct Curl_easy *data,
+static FETCHcode cf_setup_add(struct Fetch_easy *data,
                               struct connectdata *conn,
                               int sockindex,
-                              const struct Curl_dns_entry *remotehost,
+                              const struct Fetch_dns_entry *remotehost,
                               int transport,
                               int ssl_mode)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result = FETCHE_OK;
 
   DEBUGASSERT(data);
   result = cf_setup_create(&cf, data, remotehost, transport, ssl_mode);
   if (result)
     goto out;
-  Curl_conn_cf_add(data, conn, sockindex, cf);
+  Fetch_conn_cf_add(data, conn, sockindex, cf);
 out:
   return result;
 }
 
 #ifdef UNITTESTS
 /* used by unit2600.c */
-void Curl_debug_set_transport_provider(int transport,
+void Fetch_debug_set_transport_provider(int transport,
                                        cf_ip_connect_create *cf_create)
 {
   size_t i;
@@ -1574,28 +1574,28 @@ void Curl_debug_set_transport_provider(int transport,
 }
 #endif /* UNITTESTS */
 
-FETCHcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
-                                     struct Curl_easy *data,
-                                     const struct Curl_dns_entry *remotehost,
+FETCHcode Fetch_cf_setup_insert_after(struct Fetch_cfilter *cf_at,
+                                     struct Fetch_easy *data,
+                                     const struct Fetch_dns_entry *remotehost,
                                      int transport,
                                      int ssl_mode)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result;
 
   DEBUGASSERT(data);
   result = cf_setup_create(&cf, data, remotehost, transport, ssl_mode);
   if (result)
     goto out;
-  Curl_conn_cf_insert_after(cf_at, cf);
+  Fetch_conn_cf_insert_after(cf_at, cf);
 out:
   return result;
 }
 
-FETCHcode Curl_conn_setup(struct Curl_easy *data,
+FETCHcode Fetch_conn_setup(struct Fetch_easy *data,
                           struct connectdata *conn,
                           int sockindex,
-                          const struct Curl_dns_entry *remotehost,
+                          const struct Fetch_dns_entry *remotehost,
                           int ssl_mode)
 {
   FETCHcode result = FETCHE_OK;
@@ -1608,7 +1608,7 @@ FETCHcode Curl_conn_setup(struct Curl_easy *data,
       conn->handler->protocol == FETCHPROTO_HTTPS)
   {
     DEBUGASSERT(ssl_mode != FETCH_CF_SSL_DISABLE);
-    result = Curl_cf_https_setup(data, conn, sockindex, remotehost);
+    result = Fetch_cf_https_setup(data, conn, sockindex, remotehost);
     if (result)
       goto out;
   }

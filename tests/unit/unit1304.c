@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,8 +39,8 @@ static FETCHcode unit_setup(void)
 
 static void unit_stop(void)
 {
-  Curl_safefree(s_password);
-  Curl_safefree(s_login);
+  Fetch_safefree(s_password);
+  Fetch_safefree(s_login);
 }
 
 UNITTEST_START
@@ -51,67 +51,67 @@ UNITTEST_START
   /*
    * Test a non existent host in our netrc file.
    */
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "test.example.com", &s_login, &s_password, arg);
   fail_unless(result == 1, "Host not found should return 1");
   abort_unless(s_password == NULL, "password did not return NULL!");
   abort_unless(s_login == NULL, "user did not return NULL!");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 
   /*
    * Test a non existent login in our netrc file.
    */
   s_login = (char *)"me";
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password == NULL, "password is not NULL!");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 
   /*
    * Test a non existent login and host in our netrc file.
    */
   s_login = (char *)"me";
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "test.example.com", &s_login, &s_password, arg);
   fail_unless(result == 1, "Host not found should return 1");
   abort_unless(s_password == NULL, "password is not NULL!");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 
   /*
    * Test a non existent login (substring of an existing one) in our
    * netrc file.
    */
   s_login = (char *)"admi";
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password == NULL, "password is not NULL!");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 
   /*
    * Test a non existent login (superstring of an existing one)
    * in our netrc file.
    */
   s_login = (char *)"adminn";
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password == NULL, "password is not NULL!");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 
   /*
    * Test for the first existing host in our netrc file
    * with s_login[0] = 0.
    */
   s_login = NULL;
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password != NULL, "returned NULL!");
@@ -119,7 +119,7 @@ UNITTEST_START
               "password should be 'passwd'");
   abort_unless(s_login != NULL, "returned NULL!");
   fail_unless(strncmp(s_login, "admin", 5) == 0, "login should be 'admin'");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 
   /*
    * Test for the first existing host in our netrc file
@@ -129,8 +129,8 @@ UNITTEST_START
   free(s_login);
   s_password = NULL;
   s_login = NULL;
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password != NULL, "returned NULL!");
@@ -138,7 +138,7 @@ UNITTEST_START
               "password should be 'passwd'");
   abort_unless(s_login != NULL, "returned NULL!");
   fail_unless(strncmp(s_login, "admin", 5) == 0, "login should be 'admin'");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 
   /*
    * Test for the second existing host in our netrc file
@@ -148,8 +148,8 @@ UNITTEST_START
   s_password = NULL;
   free(s_login);
   s_login = NULL;
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "fetch.example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password != NULL, "returned NULL!");
@@ -157,7 +157,7 @@ UNITTEST_START
               "password should be 'none'");
   abort_unless(s_login != NULL, "returned NULL!");
   fail_unless(strncmp(s_login, "none", 4) == 0, "login should be 'none'");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 
   /*
    * Test for the second existing host in our netrc file
@@ -167,8 +167,8 @@ UNITTEST_START
   free(s_login);
   s_password = NULL;
   s_login = NULL;
-  Curl_netrc_init(&store);
-  result = Curl_parsenetrc(&store,
+  Fetch_netrc_init(&store);
+  result = Fetch_parsenetrc(&store,
                            "fetch.example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password != NULL, "returned NULL!");
@@ -176,7 +176,7 @@ UNITTEST_START
               "password should be 'none'");
   abort_unless(s_login != NULL, "returned NULL!");
   fail_unless(strncmp(s_login, "none", 4) == 0, "login should be 'none'");
-  Curl_netrc_cleanup(&store);
+  Fetch_netrc_cleanup(&store);
 }
 UNITTEST_STOP
 

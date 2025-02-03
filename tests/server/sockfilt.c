@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -1681,7 +1681,7 @@ int main(int argc, char *argv[])
       me.sa4.sin_addr.s_addr = INADDR_ANY;
       if (!addr)
         addr = "127.0.0.1";
-      Curl_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
+      Fetch_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
 
       rc = connect(sock, &me.sa, sizeof(me.sa4));
 #ifdef USE_IPV6
@@ -1693,7 +1693,7 @@ int main(int argc, char *argv[])
       me.sa6.sin6_port = htons(connectport);
       if (!addr)
         addr = "::1";
-      Curl_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
+      Fetch_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
 
       rc = connect(sock, &me.sa, sizeof(me.sa6));
     }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -294,7 +294,7 @@ fetch_off_t our_getpid(void)
 {
   fetch_off_t pid;
 
-  pid = (fetch_off_t)Curl_getpid();
+  pid = (fetch_off_t)Fetch_getpid();
 #if defined(_WIN32)
   /* store pid + 65536 to avoid conflict with Cygwin/msys PIDs, see also:
    * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵

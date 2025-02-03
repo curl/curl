@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,7 +60,7 @@ static const unsigned char decodetable[] =
      29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
      48, 49, 50, 51};
 /*
- * Curl_base64_decode()
+ * Fetch_base64_decode()
  *
  * Given a base64 NUL-terminated string at src, decode it and return a
  * pointer in *outptr to a newly allocated memory area holding decoded
@@ -73,7 +73,7 @@ static const unsigned char decodetable[] =
  *
  * @unittest: 1302
  */
-FETCHcode Curl_base64_decode(const char *src,
+FETCHcode Fetch_base64_decode(const char *src,
                              unsigned char **outptr, size_t *outlen)
 {
   size_t srclen = 0;
@@ -261,7 +261,7 @@ static FETCHcode base64_encode(const char *table64,
 }
 
 /*
- * Curl_base64_encode()
+ * Fetch_base64_encode()
  *
  * Given a pointer to an input buffer and an input size, encode it and
  * return a pointer in *outptr to a newly allocated memory area holding
@@ -275,14 +275,14 @@ static FETCHcode base64_encode(const char *table64,
  *
  * @unittest: 1302
  */
-FETCHcode Curl_base64_encode(const char *inputbuff, size_t insize,
+FETCHcode Fetch_base64_encode(const char *inputbuff, size_t insize,
                              char **outptr, size_t *outlen)
 {
   return base64_encode(base64encdec, inputbuff, insize, outptr, outlen);
 }
 
 /*
- * Curl_base64url_encode()
+ * Fetch_base64url_encode()
  *
  * Given a pointer to an input buffer and an input size, encode it and
  * return a pointer in *outptr to a newly allocated memory area holding
@@ -296,7 +296,7 @@ FETCHcode Curl_base64_encode(const char *inputbuff, size_t insize,
  *
  * @unittest: 1302
  */
-FETCHcode Curl_base64url_encode(const char *inputbuff, size_t insize,
+FETCHcode Fetch_base64url_encode(const char *inputbuff, size_t insize,
                                 char **outptr, size_t *outlen)
 {
   return base64_encode(base64url, inputbuff, insize, outptr, outlen);

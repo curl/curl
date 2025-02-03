@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,9 +32,9 @@
 
 struct connectdata;
 
-struct Curl_message
+struct Fetch_message
 {
-  struct Curl_llist_node list;
+  struct Fetch_llist_node list;
   /* the 'FETCHMsg' is the part that is visible to the external user */
   struct FETCHMsg extmsg;
 };
@@ -83,7 +83,7 @@ typedef enum
 #define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
 /* This is the struct known as FETCHM on the outside */
-struct Curl_multi
+struct Fetch_multi
 {
   /* First a simple identifier to easier detect if a user mix up
      this multi handle with an easy handle. Set this to FETCH_MULTI_HANDLE. */
@@ -93,12 +93,12 @@ struct Curl_multi
   unsigned int num_alive; /* amount of easy handles that are added but have
                              not yet reached COMPLETE state */
 
-  struct Curl_llist msglist; /* a list of messages from completed transfers */
+  struct Fetch_llist msglist; /* a list of messages from completed transfers */
 
   /* Each added easy handle is added to ONE of these three lists */
-  struct Curl_llist process; /* not in PENDING or MSGSENT */
-  struct Curl_llist pending; /* in PENDING */
-  struct Curl_llist msgsent; /* in MSGSENT */
+  struct Fetch_llist process; /* not in PENDING or MSGSENT */
+  struct Fetch_llist pending; /* in PENDING */
+  struct Fetch_llist msgsent; /* in MSGSENT */
   fetch_off_t next_easy_mid; /* next multi-id for easy handle added */
 
   /* callback function and user data pointer for the *socket() API */
@@ -109,8 +109,8 @@ struct Curl_multi
   fetch_push_callback push_cb;
   void *push_userp;
 
-  struct Curl_hash hostcache;         /* Hostname cache */
-  struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
+  struct Fetch_hash hostcache;         /* Hostname cache */
+  struct Fetch_ssl_scache *ssl_scache; /* TLS session pool */
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
@@ -119,7 +119,7 @@ struct Curl_multi
 
   /* timetree points to the splay-tree of time nodes to figure out expire
      times of all currently set timers */
-  struct Curl_tree *timetree;
+  struct Fetch_tree *timetree;
 
   /* buffer used for transfer data, lazy initialized */
   char *xfer_buf;      /* the actual buffer */
@@ -134,14 +134,14 @@ struct Curl_multi
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
      the pluralis form, there can be more than one easy handle waiting on the
      same actual socket) */
-  struct Curl_hash sockhash;
+  struct Fetch_hash sockhash;
   /* `proto_hash` is a general key-value store for protocol implementations
    * with the lifetime of the multi handle. The number of elements kept here
    * should be in the order of supported protocols (and sub-protocols like
    * TLS), *not* in the order of connections or current transfers!
    * Elements need to be added with their own destructor to be invoked when
-   * the multi handle is cleaned up (see Curl_hash_add2()).*/
-  struct Curl_hash proto_hash;
+   * the multi handle is cleaned up (see Fetch_hash_add2()).*/
+  struct Fetch_hash proto_hash;
 
   /* Shared connection cache (bundles)*/
   struct cpool cpool;
@@ -176,7 +176,7 @@ struct Curl_multi
 #define IPV6_WORKS 2
   unsigned char ipv6_up; /* IPV6_* defined */
   BIT(multiplexing);     /* multiplexing wanted */
-  BIT(recheckstate);     /* see Curl_multi_connchanged */
+  BIT(recheckstate);     /* see Fetch_multi_connchanged */
   BIT(in_callback);      /* true while executing a callback */
 #ifdef USE_OPENSSL
   BIT(ssl_seeded);

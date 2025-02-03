@@ -16,7 +16,7 @@ unittest
 sftp
 </features>
 <name>
-Curl_get_pathname unit test
+Fetch_get_pathname unit test
 </name>
 </client>
 </testcase>

@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -523,7 +523,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
 #endif /* CRYPTO LIBS */
 
 /*
- * Curl_sha256it()
+ * Fetch_sha256it()
  *
  * Generates a SHA256 hash for the given input data.
  *
@@ -535,7 +535,7 @@ static void my_sha256_final(unsigned char *out, void *ctx)
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_sha256it(unsigned char *output, const unsigned char *input,
+FETCHcode Fetch_sha256it(unsigned char *output, const unsigned char *input,
                         const size_t length)
 {
   FETCHcode result;
@@ -550,7 +550,7 @@ FETCHcode Curl_sha256it(unsigned char *output, const unsigned char *input,
   return result;
 }
 
-const struct HMAC_params Curl_HMAC_SHA256 = {
+const struct HMAC_params Fetch_HMAC_SHA256 = {
     my_sha256_init,        /* Hash initialization function. */
     my_sha256_update,      /* Hash update function. */
     my_sha256_final,       /* Hash computation end function. */

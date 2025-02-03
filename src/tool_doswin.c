@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -635,7 +635,7 @@ FETCHcode FindWin32CACert(struct OperationConfig *config,
   if (res_len > 0)
   {
     char *mstr = fetchx_convert_tchar_to_UTF8(buf);
-    Curl_safefree(config->cacert);
+    Fetch_safefree(config->cacert);
     if (mstr)
       config->cacert = strdup(mstr);
     fetchx_unicodefree(mstr);

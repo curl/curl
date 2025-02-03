@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,7 +45,7 @@ const char string2[] = "hello-you-fool";
 unsigned char output[HMAC_MD5_LENGTH];
 unsigned char *testp = output;
 
-Curl_hmacit(&Curl_HMAC_MD5,
+Fetch_hmacit(&Fetch_HMAC_MD5,
             (const unsigned char *)password, strlen(password),
             (const unsigned char *)string1, strlen(string1),
             output);
@@ -55,7 +55,7 @@ verify_memory(testp,
               "\x37",
               HMAC_MD5_LENGTH);
 
-Curl_hmacit(&Curl_HMAC_MD5,
+Fetch_hmacit(&Fetch_HMAC_MD5,
             (const unsigned char *)password, strlen(password),
             (const unsigned char *)string2, strlen(string2),
             output);

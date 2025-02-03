@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,7 +25,7 @@
  ***************************************************************************/
 
 #ifndef FETCH_DISABLE_DICT
-extern const struct Curl_handler Curl_handler_dict;
+extern const struct Fetch_handler Fetch_handler_dict;
 #endif
 
 #endif /* HEADER_FETCH_DICT_H */

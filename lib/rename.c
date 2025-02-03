@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,14 +38,14 @@
 #include "memdebug.h"
 
 /* return 0 on success, 1 on error */
-int Curl_rename(const char *oldpath, const char *newpath)
+int Fetch_rename(const char *oldpath, const char *newpath)
 {
 #ifdef _WIN32
   /* rename() on Windows does not overwrite, so we cannot use it here.
      MoveFileEx() will overwrite and is usually atomic, however it fails
      when there are open handles to the file. */
   const int max_wait_ms = 1000;
-  struct fetchtime start = Curl_now();
+  struct fetchtime start = Fetch_now();
   TCHAR *tchar_oldpath = fetchx_convert_UTF8_to_tchar((char *)oldpath);
   TCHAR *tchar_newpath = fetchx_convert_UTF8_to_tchar((char *)newpath);
   for (;;)
@@ -57,7 +57,7 @@ int Curl_rename(const char *oldpath, const char *newpath)
       fetchx_unicodefree(tchar_newpath);
       break;
     }
-    diff = Curl_timediff(Curl_now(), start);
+    diff = Fetch_timediff(Fetch_now(), start);
     if (diff < 0 || diff > max_wait_ms)
     {
       fetchx_unicodefree(tchar_oldpath);

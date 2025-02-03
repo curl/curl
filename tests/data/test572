@@ -54,7 +54,7 @@ RTSP/1.0 200 OK
 Server: RTSPD/libfetch-test
 Session: getparams-test
 CSeq: 5
-Curl-private: swsclose
+Fetch-private: swsclose
 Informational: Empty Options Response
 
 </data5>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -94,13 +94,13 @@ struct socks_state
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
 /*
- * Helper read-from-socket functions. Does the same as Curl_read() but it
+ * Helper read-from-socket functions. Does the same as Fetch_read() but it
  * blocks until all bytes amount of buffersize will be read. No more, no less.
  *
  * This is STUPID BLOCKING behavior. Only used by the SOCKS GSSAPI functions.
  */
-int Curl_blockread_all(struct Curl_cfilter *cf,
-                       struct Curl_easy *data, /* transfer */
+int Fetch_blockread_all(struct Fetch_cfilter *cf,
+                       struct Fetch_easy *data, /* transfer */
                        char *buf,              /* store read data here */
                        ssize_t buffersize,     /* max amount to read */
                        ssize_t *n)             /* amount bytes read */
@@ -113,7 +113,7 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
   *n = 0;
   for (;;)
   {
-    timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timediff_t timeout_ms = Fetch_timeleft(data, NULL, TRUE);
     if (timeout_ms < 0)
     {
       /* we already got the timeout */
@@ -127,7 +127,7 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
       result = ~FETCHE_OK;
       break;
     }
-    nread = Curl_conn_cf_recv(cf->next, data, buf, buffersize, &err);
+    nread = Fetch_conn_cf_recv(cf->next, data, buf, buffersize, &err);
     if (nread <= 0)
     {
       result = (int)err;
@@ -168,7 +168,7 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
 #endif
 
 /* always use this function to change state, to make debugging easier */
-static void socksstate(struct socks_state *sx, struct Curl_easy *data,
+static void socksstate(struct socks_state *sx, struct Fetch_easy *data,
                        enum connect_t state
 #ifdef DEBUG_AND_VERBOSE
                        ,
@@ -215,16 +215,16 @@ static void socksstate(struct socks_state *sx, struct Curl_easy *data,
 #endif
 }
 
-static FETCHproxycode socks_state_send(struct Curl_cfilter *cf,
+static FETCHproxycode socks_state_send(struct Fetch_cfilter *cf,
                                        struct socks_state *sx,
-                                       struct Curl_easy *data,
+                                       struct Fetch_easy *data,
                                        FETCHproxycode failcode,
                                        const char *description)
 {
   ssize_t nwritten;
   FETCHcode result;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (char *)sx->outp,
+  nwritten = Fetch_conn_cf_send(cf->next, data, (char *)sx->outp,
                                sx->outstanding, FALSE, &result);
   if (nwritten <= 0)
   {
@@ -249,16 +249,16 @@ static FETCHproxycode socks_state_send(struct Curl_cfilter *cf,
   return FETCHPX_OK;
 }
 
-static FETCHproxycode socks_state_recv(struct Curl_cfilter *cf,
+static FETCHproxycode socks_state_recv(struct Fetch_cfilter *cf,
                                        struct socks_state *sx,
-                                       struct Curl_easy *data,
+                                       struct Fetch_easy *data,
                                        FETCHproxycode failcode,
                                        const char *description)
 {
   ssize_t nread;
   FETCHcode result;
 
-  nread = Curl_conn_cf_recv(cf->next, data, (char *)sx->outp,
+  nread = Fetch_conn_cf_recv(cf->next, data, (char *)sx->outp,
                             sx->outstanding, &result);
   if (nread <= 0)
   {
@@ -294,9 +294,9 @@ static FETCHproxycode socks_state_recv(struct Curl_cfilter *cf,
  *   Set protocol4a=true for  "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
  *   Nonsupport "Identification Protocol (RFC1413)"
  */
-static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
+static FETCHproxycode do_SOCKS4(struct Fetch_cfilter *cf,
                                 struct socks_state *sx,
-                                struct Curl_easy *data)
+                                struct Fetch_easy *data)
 {
   struct connectdata *conn = cf->conn;
   const bool protocol4a =
@@ -304,7 +304,7 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
   unsigned char *socksreq = sx->buffer;
   FETCHcode result;
   FETCHproxycode presult;
-  struct Curl_dns_entry *dns = NULL;
+  struct Fetch_dns_entry *dns = NULL;
 
   switch (sx->state)
   {
@@ -338,7 +338,7 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
     if (!protocol4a)
     {
       enum resolve_t rc =
-          Curl_resolv(data, sx->hostname, sx->remote_port, TRUE, &dns);
+          Fetch_resolv(data, sx->hostname, sx->remote_port, TRUE, &dns);
 
       if (rc == FETCHRESOLV_ERROR)
         return FETCHPX_RESOLVE_HOST;
@@ -358,7 +358,7 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
 
   case CONNECT_RESOLVING:
     /* check if we have the name resolved by now */
-    dns = Curl_fetch_addr(data, sx->hostname, conn->primary.remote_port);
+    dns = Fetch_fetch_addr(data, sx->hostname, conn->primary.remote_port);
 
     if (dns)
     {
@@ -371,7 +371,7 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
     }
     else
     {
-      result = Curl_resolv_check(data, &dns);
+      result = Fetch_resolv_check(data, &dns);
       if (!dns)
       {
         if (result)
@@ -383,10 +383,10 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
   case CONNECT_RESOLVED:
   CONNECT_RESOLVED:
   {
-    struct Curl_addrinfo *hp = NULL;
+    struct Fetch_addrinfo *hp = NULL;
     /*
-     * We cannot use 'hostent' as a struct that Curl_resolv() returns. It
-     * returns a Curl_addrinfo pointer that may not always look the same.
+     * We cannot use 'hostent' as a struct that Fetch_resolv() returns. It
+     * returns a Fetch_addrinfo pointer that may not always look the same.
      */
     if (dns)
     {
@@ -400,7 +400,7 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
       {
         struct sockaddr_in *saddr_in;
         char buf[64];
-        Curl_printable_address(hp, buf, sizeof(buf));
+        Fetch_printable_address(hp, buf, sizeof(buf));
 
         saddr_in = (struct sockaddr_in *)(void *)hp->ai_addr;
         socksreq[4] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[0];
@@ -410,7 +410,7 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
 
         infof(data, "SOCKS4 connect to IPv4 %s (locally resolved)", buf);
 
-        Curl_resolv_unlink(data, &dns); /* not used anymore from now on */
+        Fetch_resolv_unlink(data, &dns); /* not used anymore from now on */
       }
       else
         failf(data, "SOCKS4 connection to %s not supported", sx->hostname);
@@ -587,9 +587,9 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
  * This function logs in to a SOCKS5 proxy and sends the specifics to the final
  * destination server.
  */
-static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
+static FETCHproxycode do_SOCKS5(struct Fetch_cfilter *cf,
                                 struct socks_state *sx,
-                                struct Curl_easy *data)
+                                struct Fetch_easy *data)
 {
   /*
     According to the RFC1928, section "6. Replies". This is what a SOCK5
@@ -618,7 +618,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
   size_t len = 0;
   const unsigned char auth = data->set.socks5auth;
   bool allow_gssapi = FALSE;
-  struct Curl_dns_entry *dns = NULL;
+  struct Fetch_dns_entry *dns = NULL;
 
   DEBUGASSERT(auth & (FETCHAUTH_BASIC | FETCHAUTH_GSSAPI));
   switch (sx->state)
@@ -720,7 +720,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
     else if (allow_gssapi && (socksreq[1] == 1))
     {
       sxstate(sx, data, CONNECT_GSSAPI_INIT);
-      result = Curl_SOCKS5_gssapi_negotiate(cf, data);
+      result = Fetch_SOCKS5_gssapi_negotiate(cf, data);
       if (result)
       {
         failf(data, "Unable to negotiate SOCKS5 GSS-API context.");
@@ -849,7 +849,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
   CONNECT_REQ_INIT:
     if (socks5_resolve_local)
     {
-      enum resolve_t rc = Curl_resolv(data, sx->hostname, sx->remote_port,
+      enum resolve_t rc = Fetch_resolv(data, sx->hostname, sx->remote_port,
                                       TRUE, &dns);
 
       if (rc == FETCHRESOLV_ERROR)
@@ -867,7 +867,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
 
   case CONNECT_RESOLVING:
     /* check if we have the name resolved by now */
-    dns = Curl_fetch_addr(data, sx->hostname, sx->remote_port);
+    dns = Fetch_fetch_addr(data, sx->hostname, sx->remote_port);
 
     if (dns)
     {
@@ -880,7 +880,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
 
     if (!dns)
     {
-      result = Curl_resolv_check(data, &dns);
+      result = Fetch_resolv_check(data, &dns);
       if (!dns)
       {
         if (result)
@@ -893,7 +893,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
   CONNECT_RESOLVED:
   {
     char dest[MAX_IPADR_LEN]; /* printable address */
-    struct Curl_addrinfo *hp = NULL;
+    struct Fetch_addrinfo *hp = NULL;
     if (dns)
       hp = dns->addr;
 #ifdef USE_IPV6
@@ -912,7 +912,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
       return FETCHPX_RESOLVE_HOST;
     }
 
-    Curl_printable_address(hp, dest, sizeof(dest));
+    Fetch_printable_address(hp, dest, sizeof(dest));
 
     len = 0;
     socksreq[len++] = 5; /* version (SOCKS5) */
@@ -957,7 +957,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
       failf(data, "SOCKS5 connection to %s not supported", dest);
     }
 
-    Curl_resolv_unlink(data, &dns); /* not used anymore from now on */
+    Fetch_resolv_unlink(data, &dns); /* not used anymore from now on */
     goto CONNECT_REQ_SEND;
   }
   CONNECT_RESOLVE_REMOTE:
@@ -978,7 +978,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
       if (conn->bits.ipv6_ip)
       {
         char ip6[16];
-        if (1 != Curl_inet_pton(AF_INET6, sx->hostname, ip6))
+        if (1 != Fetch_inet_pton(AF_INET6, sx->hostname, ip6))
           return FETCHPX_BAD_ADDRESS_TYPE;
         socksreq[len++] = 4;
         memcpy(&socksreq[len], ip6, sizeof(ip6));
@@ -986,7 +986,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
       }
       else
 #endif
-          if (1 == Curl_inet_pton(AF_INET, sx->hostname, ip4))
+          if (1 == Fetch_inet_pton(AF_INET, sx->hostname, ip4))
       {
         socksreq[len++] = 1;
         memcpy(&socksreq[len], ip4, sizeof(ip4));
@@ -1162,9 +1162,9 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
   return FETCHPX_OK; /* Proxy was successful! */
 }
 
-static FETCHcode connect_SOCKS(struct Curl_cfilter *cf,
+static FETCHcode connect_SOCKS(struct Fetch_cfilter *cf,
                                struct socks_state *sxstate,
-                               struct Curl_easy *data)
+                               struct Fetch_easy *data)
 {
   FETCHcode result = FETCHE_OK;
   FETCHproxycode pxresult = FETCHPX_OK;
@@ -1195,7 +1195,7 @@ static FETCHcode connect_SOCKS(struct Curl_cfilter *cf,
   return result;
 }
 
-static void socks_proxy_cf_free(struct Curl_cfilter *cf)
+static void socks_proxy_cf_free(struct Fetch_cfilter *cf)
 {
   struct socks_state *sxstate = cf->ctx;
   if (sxstate)
@@ -1212,8 +1212,8 @@ static void socks_proxy_cf_free(struct Curl_cfilter *cf)
    Note: this function's sub-functions call failf()
 
 */
-static FETCHcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
+static FETCHcode socks_proxy_cf_connect(struct Fetch_cfilter *cf,
+                                        struct Fetch_easy *data,
                                         bool blocking, bool *done)
 {
   FETCHcode result;
@@ -1261,7 +1261,7 @@ static FETCHcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   if (!result && sx->state == CONNECT_DONE)
   {
     cf->connected = TRUE;
-    Curl_verboseconnect(data, conn, cf->sockindex);
+    Fetch_verboseconnect(data, conn, cf->sockindex);
     socks_proxy_cf_free(cf);
   }
 
@@ -1269,8 +1269,8 @@ static FETCHcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   return result;
 }
 
-static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+static void socks_cf_adjust_pollset(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     struct easy_pollset *ps)
 {
   struct socks_state *sx = cf->ctx;
@@ -1279,7 +1279,7 @@ static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
   {
     /* If we are not connected, the filter below is and has nothing
      * to wait on, we determine what to wait for. */
-    fetch_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    fetch_socket_t sock = Fetch_conn_cf_get_socket(cf, data);
     switch (sx->state)
     {
     case CONNECT_RESOLVING:
@@ -1287,17 +1287,17 @@ static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
     case CONNECT_AUTH_READ:
     case CONNECT_REQ_READ:
     case CONNECT_REQ_READ_MORE:
-      Curl_pollset_set_in_only(data, ps, sock);
+      Fetch_pollset_set_in_only(data, ps, sock);
       break;
     default:
-      Curl_pollset_set_out_only(data, ps, sock);
+      Fetch_pollset_set_out_only(data, ps, sock);
       break;
     }
   }
 }
 
-static void socks_proxy_cf_close(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static void socks_proxy_cf_close(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data)
 {
 
   DEBUGASSERT(cf->next);
@@ -1306,15 +1306,15 @@ static void socks_proxy_cf_close(struct Curl_cfilter *cf,
   cf->next->cft->do_close(cf->next, data);
 }
 
-static void socks_proxy_cf_destroy(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data)
+static void socks_proxy_cf_destroy(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data)
 {
   (void)data;
   socks_proxy_cf_free(cf);
 }
 
-static void socks_cf_get_host(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+static void socks_cf_get_host(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               const char **phost,
                               const char **pdisplay_host,
                               int *pport)
@@ -1332,35 +1332,35 @@ static void socks_cf_get_host(struct Curl_cfilter *cf,
   }
 }
 
-struct Curl_cftype Curl_cft_socks_proxy = {
+struct Fetch_cftype Fetch_cft_socks_proxy = {
     "SOCKS-PROXYY",
     CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
     0,
     socks_proxy_cf_destroy,
     socks_proxy_cf_connect,
     socks_proxy_cf_close,
-    Curl_cf_def_shutdown,
+    Fetch_cf_def_shutdown,
     socks_cf_get_host,
     socks_cf_adjust_pollset,
-    Curl_cf_def_data_pending,
-    Curl_cf_def_send,
-    Curl_cf_def_recv,
-    Curl_cf_def_cntrl,
-    Curl_cf_def_conn_is_alive,
-    Curl_cf_def_conn_keep_alive,
-    Curl_cf_def_query,
+    Fetch_cf_def_data_pending,
+    Fetch_cf_def_send,
+    Fetch_cf_def_recv,
+    Fetch_cf_def_cntrl,
+    Fetch_cf_def_conn_is_alive,
+    Fetch_cf_def_conn_keep_alive,
+    Fetch_cf_def_query,
 };
 
-FETCHcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                           struct Curl_easy *data)
+FETCHcode Fetch_cf_socks_proxy_insert_after(struct Fetch_cfilter *cf_at,
+                                           struct Fetch_easy *data)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result;
 
   (void)data;
-  result = Curl_cf_create(&cf, &Curl_cft_socks_proxy, NULL);
+  result = Fetch_cf_create(&cf, &Fetch_cft_socks_proxy, NULL);
   if (!result)
-    Curl_conn_cf_insert_after(cf_at, cf);
+    Fetch_conn_cf_insert_after(cf_at, cf);
   return result;
 }
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -148,7 +148,7 @@ ALLOC_FUNC void *fetch_dbg_malloc(size_t wantedsize,
   /* alloc at least 64 bytes */
   size = sizeof(struct memdebug) + wantedsize;
 
-  mem = (Curl_cmalloc)(size);
+  mem = (Fetch_cmalloc)(size);
   if (mem)
   {
     mem->size = wantedsize;
@@ -178,7 +178,7 @@ ALLOC_FUNC void *fetch_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   user_size = wanted_size * wanted_elements;
   size = sizeof(struct memdebug) + user_size;
 
-  mem = (Curl_ccalloc)(1, size);
+  mem = (Fetch_ccalloc)(1, size);
   if (mem)
     mem->size = user_size;
 
@@ -268,7 +268,7 @@ void *fetch_dbg_realloc(void *ptr, size_t wantedsize,
 #pragma warning(pop)
 #endif
 
-  mem = (Curl_crealloc)(mem, size);
+  mem = (Fetch_crealloc)(mem, size);
   if (source)
     fetch_dbg_log("MEM %s:%d realloc(%p, %zu) = %p\n",
                   source, line, (void *)ptr, wantedsize,
@@ -302,7 +302,7 @@ void fetch_dbg_free(void *ptr, int line, const char *source)
 #endif
 
     /* free for real */
-    (Curl_cfree)(mem);
+    (Fetch_cfree)(mem);
   }
 
   if (source && ptr)
@@ -451,7 +451,7 @@ void fetch_dbg_log(const char *format, ...)
   if (!fetch_dbg_logfile)
     return;
 
-  buf = (Curl_cmalloc)(LOGLINE_BUFSIZE);
+  buf = (Fetch_cmalloc)(LOGLINE_BUFSIZE);
   if (!buf)
     return;
 
@@ -465,7 +465,7 @@ void fetch_dbg_log(const char *format, ...)
   if (nchars > 0)
     fwrite(buf, 1, (size_t)nchars, fetch_dbg_logfile);
 
-  (Curl_cfree)(buf);
+  (Fetch_cfree)(buf);
 }
 
 #endif /* FETCHDEBUG */

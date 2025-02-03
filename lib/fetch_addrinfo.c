@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -58,12 +58,12 @@
 #include "memdebug.h"
 
 /*
- * Curl_freeaddrinfo()
+ * Fetch_freeaddrinfo()
  *
- * This is used to free a linked list of Curl_addrinfo structs along
+ * This is used to free a linked list of Fetch_addrinfo structs along
  * with all its associated allocated storage. This function should be
- * called once for each successful call to Curl_getaddrinfo_ex() or to
- * any function call which actually allocates a Curl_addrinfo struct.
+ * called once for each successful call to Fetch_getaddrinfo_ex() or to
+ * any function call which actually allocates a Fetch_addrinfo struct.
  */
 
 #if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
@@ -74,10 +74,10 @@
 #define vqualifier
 #endif
 
-void Curl_freeaddrinfo(struct Curl_addrinfo *cahead)
+void Fetch_freeaddrinfo(struct Fetch_addrinfo *cahead)
 {
-  struct Curl_addrinfo *vqualifier canext;
-  struct Curl_addrinfo *ca;
+  struct Fetch_addrinfo *vqualifier canext;
+  struct Fetch_addrinfo *ca;
 
   for (ca = cahead; ca; ca = canext)
   {
@@ -88,29 +88,29 @@ void Curl_freeaddrinfo(struct Curl_addrinfo *cahead)
 
 #ifdef HAVE_GETADDRINFO
 /*
- * Curl_getaddrinfo_ex()
+ * Fetch_getaddrinfo_ex()
  *
  * This is a wrapper function around system's getaddrinfo(), with
  * the only difference that instead of returning a linked list of
- * addrinfo structs this one returns a linked list of Curl_addrinfo
+ * addrinfo structs this one returns a linked list of Fetch_addrinfo
  * ones. The memory allocated by this function *MUST* be free'd with
- * Curl_freeaddrinfo(). For each successful call to this function
- * there must be an associated call later to Curl_freeaddrinfo().
+ * Fetch_freeaddrinfo(). For each successful call to this function
+ * there must be an associated call later to Fetch_freeaddrinfo().
  *
  * There should be no single call to system's getaddrinfo() in the
  * whole library, any such call should be 'routed' through this one.
  */
 
-int Curl_getaddrinfo_ex(const char *nodename,
+int Fetch_getaddrinfo_ex(const char *nodename,
                         const char *servname,
                         const struct addrinfo *hints,
-                        struct Curl_addrinfo **result)
+                        struct Fetch_addrinfo **result)
 {
   const struct addrinfo *ai;
   struct addrinfo *aihead;
-  struct Curl_addrinfo *cafirst = NULL;
-  struct Curl_addrinfo *calast = NULL;
-  struct Curl_addrinfo *ca;
+  struct Fetch_addrinfo *cafirst = NULL;
+  struct Fetch_addrinfo *calast = NULL;
+  struct Fetch_addrinfo *ca;
   size_t ss_size;
   int error;
 
@@ -144,7 +144,7 @@ int Curl_getaddrinfo_ex(const char *nodename,
     if ((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(struct Curl_addrinfo) + ss_size + namelen);
+    ca = malloc(sizeof(struct Fetch_addrinfo) + ss_size + namelen);
     if (!ca)
     {
       error = EAI_MEMORY;
@@ -163,7 +163,7 @@ int Curl_getaddrinfo_ex(const char *nodename,
     ca->ai_canonname = NULL;
     ca->ai_next = NULL;
 
-    ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
+    ca->ai_addr = (void *)((char *)ca + sizeof(struct Fetch_addrinfo));
     memcpy(ca->ai_addr, ai->ai_addr, ss_size);
 
     if (namelen)
@@ -186,10 +186,10 @@ int Curl_getaddrinfo_ex(const char *nodename,
   if (aihead)
     freeaddrinfo(aihead);
 
-  /* if we failed, also destroy the Curl_addrinfo list */
+  /* if we failed, also destroy the Fetch_addrinfo list */
   if (error)
   {
-    Curl_freeaddrinfo(cafirst);
+    Fetch_freeaddrinfo(cafirst);
     cafirst = NULL;
   }
   else if (!cafirst)
@@ -214,20 +214,20 @@ int Curl_getaddrinfo_ex(const char *nodename,
 #endif /* HAVE_GETADDRINFO */
 
 /*
- * Curl_he2ai()
+ * Fetch_he2ai()
  *
  * This function returns a pointer to the first element of a newly allocated
- * Curl_addrinfo struct linked list filled with the data of a given hostent.
- * Curl_addrinfo is meant to work like the addrinfo struct does for a IPv6
+ * Fetch_addrinfo struct linked list filled with the data of a given hostent.
+ * Fetch_addrinfo is meant to work like the addrinfo struct does for a IPv6
  * stack, but usable also for IPv4, all hosts and environments.
  *
  * The memory allocated by this function *MUST* be free'd later on calling
- * Curl_freeaddrinfo(). For each successful call to this function there
- * must be an associated call later to Curl_freeaddrinfo().
+ * Fetch_freeaddrinfo(). For each successful call to this function there
+ * must be an associated call later to Fetch_freeaddrinfo().
  *
- *   Curl_addrinfo defined in "lib/fetch_addrinfo.h"
+ *   Fetch_addrinfo defined in "lib/fetch_addrinfo.h"
  *
- *     struct Curl_addrinfo {
+ *     struct Fetch_addrinfo {
  *       int                   ai_flags;
  *       int                   ai_family;
  *       int                   ai_socktype;
@@ -235,7 +235,7 @@ int Curl_getaddrinfo_ex(const char *nodename,
  *       fetch_socklen_t        ai_addrlen;   * Follow rfc3493 struct addrinfo *
  *       char                 *ai_canonname;
  *       struct sockaddr      *ai_addr;
- *       struct Curl_addrinfo *ai_next;
+ *       struct Fetch_addrinfo *ai_next;
  *     };
  *
  *   hostent defined in <netdb.h>
@@ -254,12 +254,12 @@ int Curl_getaddrinfo_ex(const char *nodename,
  */
 
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
-struct Curl_addrinfo *
-Curl_he2ai(const struct hostent *he, int port)
+struct Fetch_addrinfo *
+Fetch_he2ai(const struct hostent *he, int port)
 {
-  struct Curl_addrinfo *ai;
-  struct Curl_addrinfo *prevai = NULL;
-  struct Curl_addrinfo *firstai = NULL;
+  struct Fetch_addrinfo *ai;
+  struct Fetch_addrinfo *prevai = NULL;
+  struct Fetch_addrinfo *firstai = NULL;
   struct sockaddr_in *addr;
 #ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
@@ -286,14 +286,14 @@ Curl_he2ai(const struct hostent *he, int port)
       ss_size = sizeof(struct sockaddr_in);
 
     /* allocate memory to hold the struct, the address and the name */
-    ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + namelen);
+    ai = calloc(1, sizeof(struct Fetch_addrinfo) + ss_size + namelen);
     if (!ai)
     {
       result = FETCHE_OUT_OF_MEMORY;
       break;
     }
     /* put the address after the struct */
-    ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+    ai->ai_addr = (void *)((char *)ai + sizeof(struct Fetch_addrinfo));
     /* then put the name after the address */
     ai->ai_canonname = (char *)ai->ai_addr + ss_size;
     memcpy(ai->ai_canonname, he->h_name, namelen);
@@ -342,7 +342,7 @@ Curl_he2ai(const struct hostent *he, int port)
 
   if (result)
   {
-    Curl_freeaddrinfo(firstai);
+    Fetch_freeaddrinfo(firstai);
     firstai = NULL;
   }
 
@@ -351,18 +351,18 @@ Curl_he2ai(const struct hostent *he, int port)
 #endif
 
 /*
- * Curl_ip2addr()
+ * Fetch_ip2addr()
  *
  * This function takes an Internet address, in binary form, as input parameter
  * along with its address family and the string version of the address, and it
- * returns a Curl_addrinfo chain filled in correctly with information for the
+ * returns a Fetch_addrinfo chain filled in correctly with information for the
  * given address/host
  */
 
-struct Curl_addrinfo *
-Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
+struct Fetch_addrinfo *
+Fetch_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 {
-  struct Curl_addrinfo *ai;
+  struct Fetch_addrinfo *ai;
   size_t addrsize;
   size_t namelen;
   struct sockaddr_in *addr;
@@ -384,11 +384,11 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     return NULL;
 
   /* allocate memory to hold the struct, the address and the name */
-  ai = calloc(1, sizeof(struct Curl_addrinfo) + addrsize + namelen);
+  ai = calloc(1, sizeof(struct Fetch_addrinfo) + addrsize + namelen);
   if (!ai)
     return NULL;
   /* put the address after the struct */
-  ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+  ai->ai_addr = (void *)((char *)ai + sizeof(struct Fetch_addrinfo));
   /* then put the name after the address */
   ai->ai_canonname = (char *)ai->ai_addr + addrsize;
   memcpy(ai->ai_canonname, hostname, namelen);
@@ -431,20 +431,20 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 
 /*
  * Given an IPv4 or IPv6 dotted string address, this converts it to a proper
- * allocated Curl_addrinfo struct and returns it.
+ * allocated Fetch_addrinfo struct and returns it.
  */
-struct Curl_addrinfo *Curl_str2addr(char *address, int port)
+struct Fetch_addrinfo *Fetch_str2addr(char *address, int port)
 {
   struct in_addr in;
-  if (Curl_inet_pton(AF_INET, address, &in) > 0)
+  if (Fetch_inet_pton(AF_INET, address, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(AF_INET, &in, address, port);
+    return Fetch_ip2addr(AF_INET, &in, address, port);
 #ifdef USE_IPV6
   {
     struct in6_addr in6;
-    if (Curl_inet_pton(AF_INET6, address, &in6) > 0)
+    if (Fetch_inet_pton(AF_INET6, address, &in6) > 0)
       /* This is a dotted IPv6 address ::1-style */
-      return Curl_ip2addr(AF_INET6, &in6, address, port);
+      return Fetch_ip2addr(AF_INET6, &in6, address, port);
   }
 #endif
   return NULL; /* bad input format */
@@ -452,23 +452,23 @@ struct Curl_addrinfo *Curl_str2addr(char *address, int port)
 
 #ifdef USE_UNIX_SOCKETS
 /**
- * Given a path to a Unix domain socket, return a newly allocated Curl_addrinfo
+ * Given a path to a Unix domain socket, return a newly allocated Fetch_addrinfo
  * struct initialized with this path.
  * Set '*longpath' to TRUE if the error is a too long path.
  */
-struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
+struct Fetch_addrinfo *Fetch_unix2addr(const char *path, bool *longpath,
                                      bool abstract)
 {
-  struct Curl_addrinfo *ai;
+  struct Fetch_addrinfo *ai;
   struct sockaddr_un *sa_un;
   size_t path_len;
 
   *longpath = FALSE;
 
-  ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_un));
+  ai = calloc(1, sizeof(struct Fetch_addrinfo) + sizeof(struct sockaddr_un));
   if (!ai)
     return NULL;
-  ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
+  ai->ai_addr = (void *)((char *)ai + sizeof(struct Fetch_addrinfo));
 
   sa_un = (void *)ai->ai_addr;
   sa_un->sun_family = AF_UNIX;
@@ -555,9 +555,9 @@ int fetch_dbg_getaddrinfo(const char *hostname,
  * Work-arounds the sin6_port is always zero bug on iOS 9.3.2 and macOS
  * 10.11.5.
  */
-void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port)
+void Fetch_addrinfo_set_port(struct Fetch_addrinfo *addrinfo, int port)
 {
-  struct Curl_addrinfo *ca;
+  struct Fetch_addrinfo *ca;
   struct sockaddr_in *addr;
 #ifdef USE_IPV6
   struct sockaddr_in6 *addr6;

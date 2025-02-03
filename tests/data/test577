@@ -15,7 +15,7 @@ RTSP/1.1234567 200 OK
 Server: RTSPD/libfetch-test
 CSeq: 1
 Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
-Curl-Private: swsclose
+Fetch-Private: swsclose
 </data>
 <datacheck>
 </datacheck>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -1514,7 +1514,7 @@ server_cleanup:
   if (got_exit_signal)
   {
     logmsg("========> %s rtspd (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, (long)Curl_getpid(), exit_signal);
+           ipv_inuse, (int)port, (long)Fetch_getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we

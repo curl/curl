@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,7 +45,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_auth_create_plain_message()
+ * Fetch_auth_create_plain_message()
  *
  * This is used to generate an already encoded PLAIN message ready
  * for sending to the recipient.
@@ -59,7 +59,7 @@
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_plain_message(const char *authzid,
+FETCHcode Fetch_auth_create_plain_message(const char *authzid,
                                          const char *authcid,
                                          const char *passwd,
                                          struct bufref *out)
@@ -92,12 +92,12 @@ FETCHcode Curl_auth_create_plain_message(const char *authzid,
   plainauth[zlen + clen + 1] = '\0';
   memcpy(plainauth + zlen + clen + 2, passwd, plen);
   plainauth[plainlen] = '\0';
-  Curl_bufref_set(out, plainauth, plainlen, fetch_free);
+  Fetch_bufref_set(out, plainauth, plainlen, fetch_free);
   return FETCHE_OK;
 }
 
 /*
- * Curl_auth_create_login_message()
+ * Fetch_auth_create_login_message()
  *
  * This is used to generate an already encoded LOGIN message containing the
  * username or password ready for sending to the recipient.
@@ -109,13 +109,13 @@ FETCHcode Curl_auth_create_plain_message(const char *authzid,
  *
  * Returns void.
  */
-void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
+void Fetch_auth_create_login_message(const char *valuep, struct bufref *out)
 {
-  Curl_bufref_set(out, valuep, strlen(valuep), NULL);
+  Fetch_bufref_set(out, valuep, strlen(valuep), NULL);
 }
 
 /*
- * Curl_auth_create_external_message()
+ * Fetch_auth_create_external_message()
  *
  * This is used to generate an already encoded EXTERNAL message containing
  * the username ready for sending to the recipient.
@@ -127,11 +127,11 @@ void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
  *
  * Returns void.
  */
-void Curl_auth_create_external_message(const char *user,
+void Fetch_auth_create_external_message(const char *user,
                                        struct bufref *out)
 {
   /* This is the same formatting as the login message */
-  Curl_auth_create_login_message(user, out);
+  Fetch_auth_create_login_message(user, out);
 }
 
 #endif /* if no users */

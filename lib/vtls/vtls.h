@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,8 +28,8 @@
 struct connectdata;
 struct ssl_config_data;
 struct ssl_primary_config;
-struct Curl_cfilter;
-struct Curl_easy;
+struct Fetch_cfilter;
+struct Fetch_easy;
 struct dynbuf;
 
 #define SSLSUPP_CA_PATH (1 << 0)            /* supports CAPATH */
@@ -92,7 +92,7 @@ struct ssl_peer
   int transport;      /* one of TRNSPRT_* defines */
 };
 
-FETCHsslset Curl_init_sslset_nolock(fetch_sslbackend id, const char *name,
+FETCHsslset Fetch_init_sslset_nolock(fetch_sslbackend id, const char *name,
                                     const fetch_ssl_backend ***avail);
 
 #ifndef MAX_PINNED_PUBKEY_SIZE
@@ -103,94 +103,94 @@ FETCHsslset Curl_init_sslset_nolock(fetch_sslbackend id, const char *name,
 #define FETCH_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
 
-fetch_sslbackend Curl_ssl_backend(void);
+fetch_sslbackend Fetch_ssl_backend(void);
 
 /**
  * Init ssl config for a new easy handle.
  */
-void Curl_ssl_easy_config_init(struct Curl_easy *data);
+void Fetch_ssl_easy_config_init(struct Fetch_easy *data);
 
 /**
  * Init the `data->set.ssl` and `data->set.proxy_ssl` for
  * connection matching use.
  */
-FETCHcode Curl_ssl_easy_config_complete(struct Curl_easy *data);
+FETCHcode Fetch_ssl_easy_config_complete(struct Fetch_easy *data);
 
 /**
  * Init SSL configs (main + proxy) for a new connection from the easy handle.
  */
-FETCHcode Curl_ssl_conn_config_init(struct Curl_easy *data,
+FETCHcode Fetch_ssl_conn_config_init(struct Fetch_easy *data,
                                     struct connectdata *conn);
 
 /**
  * Free allocated resources in SSL configs (main + proxy) for
  * the given connection.
  */
-void Curl_ssl_conn_config_cleanup(struct connectdata *conn);
+void Fetch_ssl_conn_config_cleanup(struct connectdata *conn);
 
 /**
  * Return TRUE iff SSL configuration from `data` is functionally the
  * same as the one on `candidate`.
  * @param proxy   match the proxy SSL config or the main one
  */
-bool Curl_ssl_conn_config_match(struct Curl_easy *data,
+bool Fetch_ssl_conn_config_match(struct Fetch_easy *data,
                                 struct connectdata *candidate,
                                 bool proxy);
 
 /* Update certain connection SSL config flags after they have
  * been changed on the easy handle. Will work for `verifypeer`,
  * `verifyhost` and `verifystatus`. */
-void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
+void Fetch_ssl_conn_config_update(struct Fetch_easy *data, bool for_proxy);
 
 /**
  * Init SSL peer information for filter. Can be called repeatedly.
  */
-FETCHcode Curl_ssl_peer_init(struct ssl_peer *peer,
-                             struct Curl_cfilter *cf,
+FETCHcode Fetch_ssl_peer_init(struct ssl_peer *peer,
+                             struct Fetch_cfilter *cf,
                              const char *tls_id,
                              int transport);
 /**
  * Free all allocated data and reset peer information.
  */
-void Curl_ssl_peer_cleanup(struct ssl_peer *peer);
+void Fetch_ssl_peer_cleanup(struct ssl_peer *peer);
 
 #ifdef USE_SSL
-int Curl_ssl_init(void);
-void Curl_ssl_cleanup(void);
+int Fetch_ssl_init(void);
+void Fetch_ssl_cleanup(void);
 /* tell the SSL stuff to close down all open information regarding
    connections (and thus session ID caching etc) */
-void Curl_ssl_close_all(struct Curl_easy *data);
-FETCHcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine);
+void Fetch_ssl_close_all(struct Fetch_easy *data);
+FETCHcode Fetch_ssl_set_engine(struct Fetch_easy *data, const char *engine);
 /* Sets engine as default for all SSL operations */
-FETCHcode Curl_ssl_set_engine_default(struct Curl_easy *data);
-struct fetch_slist *Curl_ssl_engines_list(struct Curl_easy *data);
+FETCHcode Fetch_ssl_set_engine_default(struct Fetch_easy *data);
+struct fetch_slist *Fetch_ssl_engines_list(struct Fetch_easy *data);
 
-void Curl_ssl_version(char *buffer, size_t size);
+void Fetch_ssl_version(char *buffer, size_t size);
 
 /* Certificate information list handling. */
 #define FETCH_X509_STR_MAX 100000
 
-void Curl_ssl_free_certinfo(struct Curl_easy *data);
-FETCHcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num);
-FETCHcode Curl_ssl_push_certinfo_len(struct Curl_easy *data, int certnum,
+void Fetch_ssl_free_certinfo(struct Fetch_easy *data);
+FETCHcode Fetch_ssl_init_certinfo(struct Fetch_easy *data, int num);
+FETCHcode Fetch_ssl_push_certinfo_len(struct Fetch_easy *data, int certnum,
                                      const char *label, const char *value,
                                      size_t valuelen);
-FETCHcode Curl_ssl_push_certinfo(struct Curl_easy *data, int certnum,
+FETCHcode Fetch_ssl_push_certinfo(struct Fetch_easy *data, int certnum,
                                  const char *label, const char *value);
 
 /* Functions to be used by SSL library adaptation functions */
 
 /* get N random bytes into the buffer */
-FETCHcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
+FETCHcode Fetch_ssl_random(struct Fetch_easy *data, unsigned char *buffer,
                           size_t length);
 /* Check pinned public key. */
-FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
+FETCHcode Fetch_pin_peer_pubkey(struct Fetch_easy *data,
                                const char *pinnedpubkey,
                                const unsigned char *pubkey, size_t pubkeylen);
 
-bool Curl_ssl_cert_status_request(void);
+bool Fetch_ssl_cert_status_request(void);
 
-bool Curl_ssl_false_start(void);
+bool Fetch_ssl_false_start(void);
 
 /* The maximum size of the SSL channel binding is 85 bytes, as defined in
  * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes long,
@@ -208,24 +208,24 @@ bool Curl_ssl_false_start(void);
  * If channel binding is not supported, binding stays empty and FETCHE_OK is
  * returned.
  */
-FETCHcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+FETCHcode Fetch_ssl_get_channel_binding(struct Fetch_easy *data, int sockindex,
                                        struct dynbuf *binding);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
-FETCHcode Curl_ssl_cfilter_add(struct Curl_easy *data,
+FETCHcode Fetch_ssl_cfilter_add(struct Fetch_easy *data,
                                struct connectdata *conn,
                                int sockindex);
 
-FETCHcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
-                                   struct Curl_easy *data);
+FETCHcode Fetch_cf_ssl_insert_after(struct Fetch_cfilter *cf_at,
+                                   struct Fetch_easy *data);
 
-FETCHcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
+FETCHcode Fetch_ssl_cfilter_remove(struct Fetch_easy *data,
                                   int sockindex, bool send_shutdown);
 
 #ifndef FETCH_DISABLE_PROXY
-FETCHcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                         struct Curl_easy *data);
+FETCHcode Fetch_cf_ssl_proxy_insert_after(struct Fetch_cfilter *cf_at,
+                                         struct Fetch_easy *data);
 #endif /* !FETCH_DISABLE_PROXY */
 
 /**
@@ -233,7 +233,7 @@ FETCHcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
  * Option is one of the defined SSLSUPP_* values.
  * `data` maybe NULL for the features of the default implementation.
  */
-bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
+bool Fetch_ssl_supports(struct Fetch_easy *data, unsigned int ssl_option);
 
 /**
  * Get the internal ssl instance (like OpenSSL's SSL*) from the filter
@@ -242,45 +242,45 @@ bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
  * 1 gives the second active, etc.
  * NULL is returned when no active SSL filter is present.
  */
-void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
+void *Fetch_ssl_get_internals(struct Fetch_easy *data, int sockindex,
                              FETCHINFO info, int n);
 
 /**
  * Get the ssl_config_data in `data` that is relevant for cfilter `cf`.
  */
-struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
-                                               struct Curl_easy *data);
+struct ssl_config_data *Fetch_ssl_cf_get_config(struct Fetch_cfilter *cf,
+                                               struct Fetch_easy *data);
 
 /**
  * Get the primary config relevant for the filter from its connection.
  */
 struct ssl_primary_config *
-Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
+Fetch_ssl_cf_get_primary_config(struct Fetch_cfilter *cf);
 
-extern struct Curl_cftype Curl_cft_ssl;
+extern struct Fetch_cftype Fetch_cft_ssl;
 #ifndef FETCH_DISABLE_PROXY
-extern struct Curl_cftype Curl_cft_ssl_proxy;
+extern struct Fetch_cftype Fetch_cft_ssl_proxy;
 #endif
 
 #else /* if not USE_SSL */
 
 /* When SSL support is not present, just define away these function calls */
-#define Curl_ssl_init() 1
-#define Curl_ssl_cleanup() Curl_nop_stmt
-#define Curl_ssl_close_all(x) Curl_nop_stmt
-#define Curl_ssl_set_engine(x, y) FETCHE_NOT_BUILT_IN
-#define Curl_ssl_set_engine_default(x) FETCHE_NOT_BUILT_IN
-#define Curl_ssl_engines_list(x) NULL
-#define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_random(x, y, z) ((void)x, FETCHE_NOT_BUILT_IN)
-#define Curl_ssl_cert_status_request() FALSE
-#define Curl_ssl_false_start() FALSE
-#define Curl_ssl_get_internals(a, b, c, d) NULL
-#define Curl_ssl_supports(a, b) FALSE
-#define Curl_ssl_cfilter_add(a, b, c) FETCHE_NOT_BUILT_IN
-#define Curl_ssl_cfilter_remove(a, b, c) FETCHE_OK
-#define Curl_ssl_cf_get_config(a, b) NULL
-#define Curl_ssl_cf_get_primary_config(a) NULL
+#define Fetch_ssl_init() 1
+#define Fetch_ssl_cleanup() Fetch_nop_stmt
+#define Fetch_ssl_close_all(x) Fetch_nop_stmt
+#define Fetch_ssl_set_engine(x, y) FETCHE_NOT_BUILT_IN
+#define Fetch_ssl_set_engine_default(x) FETCHE_NOT_BUILT_IN
+#define Fetch_ssl_engines_list(x) NULL
+#define Fetch_ssl_free_certinfo(x) Fetch_nop_stmt
+#define Fetch_ssl_random(x, y, z) ((void)x, FETCHE_NOT_BUILT_IN)
+#define Fetch_ssl_cert_status_request() FALSE
+#define Fetch_ssl_false_start() FALSE
+#define Fetch_ssl_get_internals(a, b, c, d) NULL
+#define Fetch_ssl_supports(a, b) FALSE
+#define Fetch_ssl_cfilter_add(a, b, c) FETCHE_NOT_BUILT_IN
+#define Fetch_ssl_cfilter_remove(a, b, c) FETCHE_OK
+#define Fetch_ssl_cf_get_config(a, b) NULL
+#define Fetch_ssl_cf_get_primary_config(a) NULL
 #endif
 
 #endif /* HEADER_FETCH_VTLS_H */

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,8 +31,8 @@
 
 struct Cookie
 {
-   struct Curl_llist_node node;    /* for the main cookie list */
-   struct Curl_llist_node getnode; /* for getlist */
+   struct Fetch_llist_node node;    /* for the main cookie list */
+   struct Fetch_llist_node getnode; /* for getlist */
    char *name;                     /* <this> = value */
    char *value;                    /* name = <this> */
    char *path;                     /* path = <this> which is in Set-Cookie: */
@@ -60,7 +60,7 @@ struct Cookie
 struct CookieInfo
 {
    /* linked lists of cookies we know of */
-   struct Curl_llist cookielist[COOKIE_HASH_SIZE];
+   struct Fetch_llist cookielist[COOKIE_HASH_SIZE];
    fetch_off_t next_expiration; /* the next time at which expiration happens */
    unsigned int numcookies;     /* number of cookies in the "jar" */
    unsigned int lastct;         /* last creation-time used in the jar */
@@ -106,39 +106,39 @@ struct CookieInfo
    keep the maximum HTTP request within the maximum allowed size. */
 #define MAX_COOKIE_SEND_AMOUNT 150
 
-struct Curl_easy;
+struct Fetch_easy;
 /*
  * Add a cookie to the internal list of cookies. The domain and path arguments
  * are only used if the header boolean is TRUE.
  */
 
-struct Cookie *Curl_cookie_add(struct Curl_easy *data,
+struct Cookie *Fetch_cookie_add(struct Fetch_easy *data,
                                struct CookieInfo *c, bool header,
                                bool noexpiry, const char *lineptr,
                                const char *domain, const char *path,
                                bool secure);
 
-int Curl_cookie_getlist(struct Curl_easy *data,
+int Fetch_cookie_getlist(struct Fetch_easy *data,
                         struct CookieInfo *c, const char *host,
                         const char *path, bool secure,
-                        struct Curl_llist *list);
-void Curl_cookie_clearall(struct CookieInfo *cookies);
-void Curl_cookie_clearsess(struct CookieInfo *cookies);
+                        struct Fetch_llist *list);
+void Fetch_cookie_clearall(struct CookieInfo *cookies);
+void Fetch_cookie_clearsess(struct CookieInfo *cookies);
 
 #if defined(FETCH_DISABLE_HTTP) || defined(FETCH_DISABLE_COOKIES)
-#define Curl_cookie_list(x) NULL
-#define Curl_cookie_loadfiles(x) Curl_nop_stmt
-#define Curl_cookie_init(x, y, z, w) NULL
-#define Curl_cookie_cleanup(x) Curl_nop_stmt
-#define Curl_flush_cookies(x, y) Curl_nop_stmt
+#define Fetch_cookie_list(x) NULL
+#define Fetch_cookie_loadfiles(x) Fetch_nop_stmt
+#define Fetch_cookie_init(x, y, z, w) NULL
+#define Fetch_cookie_cleanup(x) Fetch_nop_stmt
+#define Fetch_flush_cookies(x, y) Fetch_nop_stmt
 #else
-void Curl_flush_cookies(struct Curl_easy *data, bool cleanup);
-void Curl_cookie_cleanup(struct CookieInfo *c);
-struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
+void Fetch_flush_cookies(struct Fetch_easy *data, bool cleanup);
+void Fetch_cookie_cleanup(struct CookieInfo *c);
+struct CookieInfo *Fetch_cookie_init(struct Fetch_easy *data,
                                     const char *file, struct CookieInfo *inc,
                                     bool newsession);
-struct fetch_slist *Curl_cookie_list(struct Curl_easy *data);
-void Curl_cookie_loadfiles(struct Curl_easy *data);
+struct fetch_slist *Fetch_cookie_list(struct Fetch_easy *data);
+void Fetch_cookie_loadfiles(struct Fetch_easy *data);
 #endif
 
 #endif /* HEADER_FETCH_COOKIE_H */

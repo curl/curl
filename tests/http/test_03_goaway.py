@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,7 @@ from datetime import timedelta
 from threading import Thread
 import pytest
 
-from testenv import Env, CurlClient, ExecResult
+from testenv import Env, FetchClient, ExecResult
 
 
 log = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ class TestGoAway:
         count = 3
         self.r = None
         def long_run():
-            fetch = CurlClient(env=env)
+            fetch = FetchClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
                    f'/fetchtest/tweak?id=[0-{count - 1}]'\
@@ -89,7 +89,7 @@ class TestGoAway:
         count = 3
         self.r = None
         def long_run():
-            fetch = CurlClient(env=env)
+            fetch = FetchClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
                    f'/fetchtest/tweak?id=[0-{count - 1}]'\
@@ -119,7 +119,7 @@ class TestGoAway:
         count = 3
         self.r = None
         def long_run():
-            fetch = CurlClient(env=env)
+            fetch = FetchClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             # pause 2 seconds between requests
             urln = f'https://{env.authority_for(env.domain1, proto)}' \

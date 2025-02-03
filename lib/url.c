@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -130,7 +130,7 @@
 #endif
 
 #ifdef USE_NGHTTP2
-static void data_priority_cleanup(struct Curl_easy *data);
+static void data_priority_cleanup(struct Fetch_easy *data);
 #else
 #define data_priority_cleanup(x)
 #endif
@@ -157,18 +157,18 @@ static void data_priority_cleanup(struct Curl_easy *data);
  *
  * Parameters:
  *
- * 'h'  [in]  - struct Curl_handler pointer.
+ * 'h'  [in]  - struct Fetch_handler pointer.
  *
  * Returns the family as a single bit protocol identifier.
  */
-static fetch_prot_t get_protocol_family(const struct Curl_handler *h)
+static fetch_prot_t get_protocol_family(const struct Fetch_handler *h)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(h->family);
   return h->family;
 }
 
-void Curl_freeset(struct Curl_easy *data)
+void Fetch_freeset(struct Fetch_easy *data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
   enum dupstring i;
@@ -176,28 +176,28 @@ void Curl_freeset(struct Curl_easy *data)
 
   for (i = (enum dupstring)0; i < STRING_LAST; i++)
   {
-    Curl_safefree(data->set.str[i]);
+    Fetch_safefree(data->set.str[i]);
   }
 
   for (j = (enum dupblob)0; j < BLOB_LAST; j++)
   {
-    Curl_safefree(data->set.blobs[j]);
+    Fetch_safefree(data->set.blobs[j]);
   }
 
   if (data->state.referer_alloc)
   {
-    Curl_safefree(data->state.referer);
+    Fetch_safefree(data->state.referer);
     data->state.referer_alloc = FALSE;
   }
   data->state.referer = NULL;
   if (data->state.url_alloc)
   {
-    Curl_safefree(data->state.url);
+    Fetch_safefree(data->state.url);
     data->state.url_alloc = FALSE;
   }
   data->state.url = NULL;
 
-  Curl_mime_cleanpart(&data->set.mimepost);
+  Fetch_mime_cleanpart(&data->set.mimepost);
 
 #ifndef FETCH_DISABLE_COOKIES
   fetch_slist_free_all(data->state.cookielist);
@@ -206,17 +206,17 @@ void Curl_freeset(struct Curl_easy *data)
 }
 
 /* free the URL pieces */
-static void up_free(struct Curl_easy *data)
+static void up_free(struct Fetch_easy *data)
 {
   struct urlpieces *up = &data->state.up;
-  Curl_safefree(up->scheme);
-  Curl_safefree(up->hostname);
-  Curl_safefree(up->port);
-  Curl_safefree(up->user);
-  Curl_safefree(up->password);
-  Curl_safefree(up->options);
-  Curl_safefree(up->path);
-  Curl_safefree(up->query);
+  Fetch_safefree(up->scheme);
+  Fetch_safefree(up->hostname);
+  Fetch_safefree(up->port);
+  Fetch_safefree(up->user);
+  Fetch_safefree(up->password);
+  Fetch_safefree(up->options);
+  Fetch_safefree(up->path);
+  Fetch_safefree(up->query);
   fetch_url_cleanup(data->state.uh);
   data->state.uh = NULL;
 }
@@ -228,9 +228,9 @@ static void up_free(struct Curl_easy *data)
  * We ignore SIGPIPE when this is called from fetch_easy_cleanup.
  */
 
-FETCHcode Curl_close(struct Curl_easy **datap)
+FETCHcode Fetch_close(struct Fetch_easy **datap)
 {
-  struct Curl_easy *data;
+  struct Fetch_easy *data;
 
   if (!datap || !*datap)
     return FETCHE_OK;
@@ -240,7 +240,7 @@ FETCHcode Curl_close(struct Curl_easy **datap)
 
   /* Detach connection if any is left. This should not be normal, but can be
      the case for example with CONNECT_ONLY + recv/send (test 556) */
-  Curl_detach_connection(data);
+  Fetch_detach_connection(data);
   if (!data->state.internal)
   {
     if (data->multi)
@@ -257,7 +257,7 @@ FETCHcode Curl_close(struct Curl_easy **datap)
     }
   }
 
-  Curl_expire_clear(data); /* shut off any timers left */
+  Fetch_expire_clear(data); /* shut off any timers left */
 
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
                       the multi handle, since that function uses the magic
@@ -267,95 +267,95 @@ FETCHcode Curl_close(struct Curl_easy **datap)
     free(data->state.range);
 
   /* freed here just in case DONE was not called */
-  Curl_req_free(&data->req, data);
+  Fetch_req_free(&data->req, data);
 
   /* Close down all open SSL info and sessions */
-  Curl_ssl_close_all(data);
-  Curl_safefree(data->state.first_host);
-  Curl_ssl_free_certinfo(data);
+  Fetch_ssl_close_all(data);
+  Fetch_safefree(data->state.first_host);
+  Fetch_ssl_free_certinfo(data);
 
   if (data->state.referer_alloc)
   {
-    Curl_safefree(data->state.referer);
+    Fetch_safefree(data->state.referer);
     data->state.referer_alloc = FALSE;
   }
   data->state.referer = NULL;
 
   up_free(data);
-  Curl_dyn_free(&data->state.headerb);
-  Curl_flush_cookies(data, TRUE);
+  Fetch_dyn_free(&data->state.headerb);
+  Fetch_flush_cookies(data, TRUE);
 #ifndef FETCH_DISABLE_ALTSVC
-  Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
-  Curl_altsvc_cleanup(&data->asi);
+  Fetch_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
+  Fetch_altsvc_cleanup(&data->asi);
 #endif
 #ifndef FETCH_DISABLE_HSTS
-  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
+  Fetch_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
   if (!data->share || !data->share->hsts)
-    Curl_hsts_cleanup(&data->hsts);
+    Fetch_hsts_cleanup(&data->hsts);
   fetch_slist_free_all(data->state.hstslist); /* clean up list */
 #endif
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_DIGEST_AUTH)
-  Curl_http_auth_cleanup_digest(data);
+  Fetch_http_auth_cleanup_digest(data);
 #endif
-  Curl_safefree(data->info.contenttype);
-  Curl_safefree(data->info.wouldredirect);
+  Fetch_safefree(data->info.contenttype);
+  Fetch_safefree(data->info.wouldredirect);
 
   /* this destroys the channel and we cannot use it anymore after this */
-  Curl_resolver_cancel(data);
-  Curl_resolver_cleanup(data->state.async.resolver);
+  Fetch_resolver_cancel(data);
+  Fetch_resolver_cleanup(data->state.async.resolver);
 
   data_priority_cleanup(data);
 
   /* No longer a dirty share, if it exists */
   if (data->share)
   {
-    Curl_share_lock(data, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE);
+    Fetch_share_lock(data, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE);
     data->share->dirty--;
-    Curl_share_unlock(data, FETCH_LOCK_DATA_SHARE);
+    Fetch_share_unlock(data, FETCH_LOCK_DATA_SHARE);
   }
 
 #ifndef FETCH_DISABLE_PROXY
-  Curl_safefree(data->state.aptr.proxyuserpwd);
+  Fetch_safefree(data->state.aptr.proxyuserpwd);
 #endif
-  Curl_safefree(data->state.aptr.uagent);
-  Curl_safefree(data->state.aptr.userpwd);
-  Curl_safefree(data->state.aptr.accept_encoding);
-  Curl_safefree(data->state.aptr.te);
-  Curl_safefree(data->state.aptr.rangeline);
-  Curl_safefree(data->state.aptr.ref);
-  Curl_safefree(data->state.aptr.host);
+  Fetch_safefree(data->state.aptr.uagent);
+  Fetch_safefree(data->state.aptr.userpwd);
+  Fetch_safefree(data->state.aptr.accept_encoding);
+  Fetch_safefree(data->state.aptr.te);
+  Fetch_safefree(data->state.aptr.rangeline);
+  Fetch_safefree(data->state.aptr.ref);
+  Fetch_safefree(data->state.aptr.host);
 #ifndef FETCH_DISABLE_COOKIES
-  Curl_safefree(data->state.aptr.cookiehost);
+  Fetch_safefree(data->state.aptr.cookiehost);
 #endif
 #ifndef FETCH_DISABLE_RTSP
-  Curl_safefree(data->state.aptr.rtsp_transport);
+  Fetch_safefree(data->state.aptr.rtsp_transport);
 #endif
-  Curl_safefree(data->state.aptr.user);
-  Curl_safefree(data->state.aptr.passwd);
+  Fetch_safefree(data->state.aptr.user);
+  Fetch_safefree(data->state.aptr.passwd);
 #ifndef FETCH_DISABLE_PROXY
-  Curl_safefree(data->state.aptr.proxyuser);
-  Curl_safefree(data->state.aptr.proxypasswd);
+  Fetch_safefree(data->state.aptr.proxyuser);
+  Fetch_safefree(data->state.aptr.proxypasswd);
 #endif
 
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_FORM_API)
-  Curl_mime_cleanpart(data->state.formp);
-  Curl_safefree(data->state.formp);
+  Fetch_mime_cleanpart(data->state.formp);
+  Fetch_safefree(data->state.formp);
 #endif
 
   /* destruct wildcard structures if it is needed */
-  Curl_wildcard_dtor(&data->wildcard);
-  Curl_freeset(data);
-  Curl_headers_cleanup(data);
-  Curl_netrc_cleanup(&data->state.netrc);
+  Fetch_wildcard_dtor(&data->wildcard);
+  Fetch_freeset(data);
+  Fetch_headers_cleanup(data);
+  Fetch_netrc_cleanup(&data->state.netrc);
   free(data);
   return FETCHE_OK;
 }
 
 /*
- * Initialize the UserDefined fields within a Curl_easy.
- * This may be safely called on a new or existing Curl_easy.
+ * Initialize the UserDefined fields within a Fetch_easy.
+ * This may be safely called on a new or existing Fetch_easy.
  */
-FETCHcode Curl_init_userdefined(struct Curl_easy *data)
+FETCHcode Fetch_init_userdefined(struct Fetch_easy *data)
 {
   struct UserDefined *set = &data->set;
   FETCHcode result = FETCHE_OK;
@@ -406,9 +406,9 @@ FETCHcode Curl_init_userdefined(struct Curl_easy *data)
   /* make libfetch quiet by default: */
   set->hide_progress = TRUE; /* FETCHOPT_NOPROGRESS changes these */
 
-  Curl_mime_initpart(&set->mimepost);
+  Fetch_mime_initpart(&set->mimepost);
 
-  Curl_ssl_easy_config_init(data);
+  Fetch_ssl_easy_config_init(data);
 #ifndef FETCH_DISABLE_DOH
   set->doh_verifyhost = TRUE;
   set->doh_verifypeer = TRUE;
@@ -438,26 +438,26 @@ FETCHcode Curl_init_userdefined(struct Curl_easy *data)
    * Secure Transport when explicitly specified by the user via
    *  FETCHOPT_CAINFO / --cacert.
    */
-  if (Curl_ssl_backend() != FETCHSSLBACKEND_SCHANNEL &&
-      Curl_ssl_backend() != FETCHSSLBACKEND_SECURETRANSPORT)
+  if (Fetch_ssl_backend() != FETCHSSLBACKEND_SCHANNEL &&
+      Fetch_ssl_backend() != FETCHSSLBACKEND_SECURETRANSPORT)
   {
 #if defined(FETCH_CA_BUNDLE)
-    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], FETCH_CA_BUNDLE);
+    result = Fetch_setstropt(&set->str[STRING_SSL_CAFILE], FETCH_CA_BUNDLE);
     if (result)
       return result;
 #ifndef FETCH_DISABLE_PROXY
-    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
+    result = Fetch_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
                             FETCH_CA_BUNDLE);
     if (result)
       return result;
 #endif
 #endif
 #if defined(FETCH_CA_PATH)
-    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], FETCH_CA_PATH);
+    result = Fetch_setstropt(&set->str[STRING_SSL_CAPATH], FETCH_CA_PATH);
     if (result)
       return result;
 #ifndef FETCH_DISABLE_PROXY
-    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], FETCH_CA_PATH);
+    result = Fetch_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], FETCH_CA_PATH);
     if (result)
       return result;
 #endif
@@ -501,45 +501,45 @@ FETCHcode Curl_init_userdefined(struct Curl_easy *data)
 }
 
 /**
- * Curl_open()
+ * Fetch_open()
  *
  * @param fetch is a pointer to a sessionhandle pointer that gets set by this
  * function.
  * @return FETCHcode
  */
 
-FETCHcode Curl_open(struct Curl_easy **fetch)
+FETCHcode Fetch_open(struct Fetch_easy **fetch)
 {
   FETCHcode result;
-  struct Curl_easy *data;
+  struct Fetch_easy *data;
 
   /* simple start-up: alloc the struct, init it with zeroes and return */
-  data = calloc(1, sizeof(struct Curl_easy));
+  data = calloc(1, sizeof(struct Fetch_easy));
   if (!data)
   {
     /* this is a serious error */
-    DEBUGF(fprintf(stderr, "Error: calloc of Curl_easy failed\n"));
+    DEBUGF(fprintf(stderr, "Error: calloc of Fetch_easy failed\n"));
     return FETCHE_OUT_OF_MEMORY;
   }
 
   data->magic = FETCHEASY_MAGIC_NUMBER;
 
-  Curl_req_init(&data->req);
+  Fetch_req_init(&data->req);
 
-  result = Curl_resolver_init(data, &data->state.async.resolver);
+  result = Fetch_resolver_init(data, &data->state.async.resolver);
   if (result)
   {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-    Curl_req_free(&data->req, data);
+    Fetch_req_free(&data->req, data);
     free(data);
     return result;
   }
 
-  result = Curl_init_userdefined(data);
+  result = Fetch_init_userdefined(data);
   if (!result)
   {
-    Curl_dyn_init(&data->state.headerb, FETCH_MAX_HTTP_HEADER);
-    Curl_initinfo(data);
+    Fetch_dyn_init(&data->state.headerb, FETCH_MAX_HTTP_HEADER);
+    Fetch_initinfo(data);
 
     /* most recent connection is not yet defined */
     data->state.lastconnect_id = -1;
@@ -554,17 +554,17 @@ FETCHcode Curl_open(struct Curl_easy **fetch)
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
 #ifndef FETCH_DISABLE_HTTP
-    Curl_llist_init(&data->state.httphdrs, NULL);
+    Fetch_llist_init(&data->state.httphdrs, NULL);
 #endif
-    Curl_netrc_init(&data->state.netrc);
+    Fetch_netrc_init(&data->state.netrc);
   }
 
   if (result)
   {
-    Curl_resolver_cleanup(data->state.async.resolver);
-    Curl_dyn_free(&data->state.headerb);
-    Curl_freeset(data);
-    Curl_req_free(&data->req, data);
+    Fetch_resolver_cleanup(data->state.async.resolver);
+    Fetch_dyn_free(&data->state.headerb);
+    Fetch_freeset(data);
+    Fetch_req_free(&data->req, data);
     free(data);
     data = NULL;
   }
@@ -573,7 +573,7 @@ FETCHcode Curl_open(struct Curl_easy **fetch)
   return result;
 }
 
-void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
+void Fetch_conn_free(struct Fetch_easy *data, struct connectdata *conn)
 {
   size_t i;
 
@@ -581,37 +581,37 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 
   for (i = 0; i < ARRAYSIZE(conn->cfilter); ++i)
   {
-    Curl_conn_cf_discard_all(data, conn, (int)i);
+    Fetch_conn_cf_discard_all(data, conn, (int)i);
   }
 
-  Curl_free_idnconverted_hostname(&conn->host);
-  Curl_free_idnconverted_hostname(&conn->conn_to_host);
+  Fetch_free_idnconverted_hostname(&conn->host);
+  Fetch_free_idnconverted_hostname(&conn->conn_to_host);
 #ifndef FETCH_DISABLE_PROXY
-  Curl_free_idnconverted_hostname(&conn->http_proxy.host);
-  Curl_free_idnconverted_hostname(&conn->socks_proxy.host);
-  Curl_safefree(conn->http_proxy.user);
-  Curl_safefree(conn->socks_proxy.user);
-  Curl_safefree(conn->http_proxy.passwd);
-  Curl_safefree(conn->socks_proxy.passwd);
-  Curl_safefree(conn->http_proxy.host.rawalloc);  /* http proxy name buffer */
-  Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
+  Fetch_free_idnconverted_hostname(&conn->http_proxy.host);
+  Fetch_free_idnconverted_hostname(&conn->socks_proxy.host);
+  Fetch_safefree(conn->http_proxy.user);
+  Fetch_safefree(conn->socks_proxy.user);
+  Fetch_safefree(conn->http_proxy.passwd);
+  Fetch_safefree(conn->socks_proxy.passwd);
+  Fetch_safefree(conn->http_proxy.host.rawalloc);  /* http proxy name buffer */
+  Fetch_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
 #endif
-  Curl_safefree(conn->user);
-  Curl_safefree(conn->passwd);
-  Curl_safefree(conn->sasl_authzid);
-  Curl_safefree(conn->options);
-  Curl_safefree(conn->oauth_bearer);
-  Curl_safefree(conn->host.rawalloc);         /* hostname buffer */
-  Curl_safefree(conn->conn_to_host.rawalloc); /* hostname buffer */
-  Curl_safefree(conn->hostname_resolve);
-  Curl_safefree(conn->secondaryhostname);
-  Curl_safefree(conn->localdev);
-  Curl_ssl_conn_config_cleanup(conn);
+  Fetch_safefree(conn->user);
+  Fetch_safefree(conn->passwd);
+  Fetch_safefree(conn->sasl_authzid);
+  Fetch_safefree(conn->options);
+  Fetch_safefree(conn->oauth_bearer);
+  Fetch_safefree(conn->host.rawalloc);         /* hostname buffer */
+  Fetch_safefree(conn->conn_to_host.rawalloc); /* hostname buffer */
+  Fetch_safefree(conn->hostname_resolve);
+  Fetch_safefree(conn->secondaryhostname);
+  Fetch_safefree(conn->localdev);
+  Fetch_ssl_conn_config_cleanup(conn);
 
 #ifdef USE_UNIX_SOCKETS
-  Curl_safefree(conn->unix_domain_socket);
+  Fetch_safefree(conn->unix_domain_socket);
 #endif
-  Curl_safefree(conn->destination);
+  Fetch_safefree(conn->destination);
 
   free(conn); /* free all the connection oriented data */
 }
@@ -625,10 +625,10 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
  * in separately since the connection to get closed here is often already
  * disassociated from an easy handle.
  *
- * This function MUST NOT reset state in the Curl_easy struct if that
+ * This function MUST NOT reset state in the Fetch_easy struct if that
  * is not strictly bound to the life-time of *this* particular connection.
  */
-bool Curl_on_disconnect(struct Curl_easy *data,
+bool Fetch_on_disconnect(struct Fetch_easy *data,
                         struct connectdata *conn, bool aborted)
 {
   /* there must be a connection to close */
@@ -643,17 +643,17 @@ bool Curl_on_disconnect(struct Curl_easy *data,
   /* the transfer must be detached from the connection */
   DEBUGASSERT(!data->conn);
 
-  DEBUGF(infof(data, "Curl_disconnect(conn #%" FMT_OFF_T ", aborted=%d)",
+  DEBUGF(infof(data, "Fetch_disconnect(conn #%" FMT_OFF_T ", aborted=%d)",
                conn->connection_id, aborted));
 
   if (conn->dns_entry)
-    Curl_resolv_unlink(data, &conn->dns_entry);
+    Fetch_resolv_unlink(data, &conn->dns_entry);
 
   /* Cleanup NTLM connection-related data */
-  Curl_http_auth_cleanup_ntlm(conn);
+  Fetch_http_auth_cleanup_ntlm(conn);
 
   /* Cleanup NEGOTIATE connection-related data */
-  Curl_http_auth_cleanup_negotiate(conn);
+  Fetch_http_auth_cleanup_negotiate(conn);
 
   if (conn->connect_only)
     /* treat the connection as aborted in CONNECT_ONLY situations */
@@ -668,7 +668,7 @@ bool Curl_on_disconnect(struct Curl_easy *data,
  * Return a TRUE, iff the transfer can be done over an (appropriate)
  * multiplexed connection.
  */
-static bool xfer_may_multiplex(const struct Curl_easy *data,
+static bool xfer_may_multiplex(const struct Fetch_easy *data,
                                const struct connectdata *conn)
 {
   /* If an HTTP protocol and multiplexing is enabled */
@@ -676,7 +676,7 @@ static bool xfer_may_multiplex(const struct Curl_easy *data,
       (!conn->bits.protoconnstart || !conn->bits.close))
   {
 
-    if (Curl_multiplex_wanted(data->multi) &&
+    if (Fetch_multiplex_wanted(data->multi) &&
         (data->state.httpwant >= FETCH_HTTP_VERSION_2))
       /* allows HTTP/2 or newer */
       return TRUE;
@@ -710,8 +710,8 @@ socks_proxy_info_matches(const struct proxy_info *data,
 
   /* fetch_strequal does a case insensitive comparison,
      so do not use it here! */
-  if (Curl_timestrcmp(data->user, needle->user) ||
-      Curl_timestrcmp(data->passwd, needle->passwd))
+  if (Fetch_timestrcmp(data->user, needle->user) ||
+      Fetch_timestrcmp(data->passwd, needle->passwd))
     return FALSE;
   return TRUE;
 }
@@ -725,13 +725,13 @@ socks_proxy_info_matches(const struct proxy_info *data,
    (the success rate is just too low after this), or created less than
    'maxlifetime_conn' ago, to be subject for reuse. */
 
-static bool conn_maxage(struct Curl_easy *data,
+static bool conn_maxage(struct Fetch_easy *data,
                         struct connectdata *conn,
                         struct fetchtime now)
 {
   timediff_t idletime, lifetime;
 
-  idletime = Curl_timediff(now, conn->lastused);
+  idletime = Fetch_timediff(now, conn->lastused);
   idletime /= 1000; /* integer seconds is fine */
 
   if (idletime > data->set.maxage_conn)
@@ -740,7 +740,7 @@ static bool conn_maxage(struct Curl_easy *data,
     return TRUE;
   }
 
-  lifetime = Curl_timediff(now, conn->created);
+  lifetime = Fetch_timediff(now, conn->created);
   lifetime /= 1000; /* integer seconds is fine */
 
   if (data->set.maxlifetime_conn && lifetime > data->set.maxlifetime_conn)
@@ -758,8 +758,8 @@ static bool conn_maxage(struct Curl_easy *data,
 /*
  * Return TRUE iff the given connection is considered dead.
  */
-bool Curl_conn_seems_dead(struct connectdata *conn,
-                          struct Curl_easy *data,
+bool Fetch_conn_seems_dead(struct connectdata *conn,
+                          struct Fetch_easy *data,
                           struct fetchtime *pnow)
 {
   DEBUGASSERT(!data->conn);
@@ -771,7 +771,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
     struct fetchtime now;
     if (!pnow)
     {
-      now = Curl_now();
+      now = Fetch_now();
       pnow = &now;
     }
 
@@ -788,19 +788,19 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
 
       /* briefly attach the connection to this transfer for the purpose of
          checking it */
-      Curl_attach_connection(data, conn);
+      Fetch_attach_connection(data, conn);
 
       state = conn->handler->connection_check(data, conn, CONNCHECK_ISDEAD);
       dead = (state & CONNRESULT_DEAD);
       /* detach the connection again */
-      Curl_detach_connection(data);
+      Fetch_detach_connection(data);
     }
     else
     {
       bool input_pending = FALSE;
 
-      Curl_attach_connection(data, conn);
-      dead = !Curl_conn_is_alive(data, conn, &input_pending);
+      Fetch_attach_connection(data, conn);
+      dead = !Fetch_conn_is_alive(data, conn, &input_pending);
       if (input_pending)
       {
         /* For reuse, we want a "clean" connection state. The includes
@@ -814,7 +814,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
         DEBUGF(infof(data, "connection has input pending, not reusable"));
         dead = TRUE;
       }
-      Curl_detach_connection(data);
+      Fetch_detach_connection(data);
     }
 
     if (dead)
@@ -828,16 +828,16 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
   return FALSE;
 }
 
-FETCHcode Curl_conn_upkeep(struct Curl_easy *data,
+FETCHcode Fetch_conn_upkeep(struct Fetch_easy *data,
                            struct connectdata *conn,
                            struct fetchtime *now)
 {
   FETCHcode result = FETCHE_OK;
-  if (Curl_timediff(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
+  if (Fetch_timediff(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
     return result;
 
   /* briefly attach for action */
-  Curl_attach_connection(data, conn);
+  Fetch_attach_connection(data, conn);
   if (conn->handler->connection_check)
   {
     /* Do a protocol-specific keepalive check on the connection. */
@@ -849,9 +849,9 @@ FETCHcode Curl_conn_upkeep(struct Curl_easy *data,
   else
   {
     /* Do the generic action on the FIRSTSOCKET filter chain */
-    result = Curl_conn_keep_alive(data, conn, FIRSTSOCKET);
+    result = Fetch_conn_keep_alive(data, conn, FIRSTSOCKET);
   }
-  Curl_detach_connection(data);
+  Fetch_detach_connection(data);
 
   conn->keepalive = *now;
   return result;
@@ -861,8 +861,8 @@ FETCHcode Curl_conn_upkeep(struct Curl_easy *data,
 static bool ssh_config_matches(struct connectdata *one,
                                struct connectdata *two)
 {
-  return Curl_safecmp(one->proto.sshc.rsa, two->proto.sshc.rsa) &&
-         Curl_safecmp(one->proto.sshc.rsa_pub, two->proto.sshc.rsa_pub);
+  return Fetch_safecmp(one->proto.sshc.rsa, two->proto.sshc.rsa) &&
+         Fetch_safecmp(one->proto.sshc.rsa_pub, two->proto.sshc.rsa_pub);
 }
 #else
 #define ssh_config_matches(x, y) FALSE
@@ -871,7 +871,7 @@ static bool ssh_config_matches(struct connectdata *one,
 struct url_conn_match
 {
   struct connectdata *found;
-  struct Curl_easy *data;
+  struct Fetch_easy *data;
   struct connectdata *needle;
   BIT(may_multiplex);
   BIT(want_ntlm_http);
@@ -887,7 +887,7 @@ struct url_conn_match
 static bool url_match_conn(struct connectdata *conn, void *userdata)
 {
   struct url_conn_match *match = userdata;
-  struct Curl_easy *data = match->data;
+  struct Fetch_easy *data = match->data;
   struct connectdata *needle = match->needle;
 
   /* Check if `conn` can be used for transfer `data` */
@@ -932,7 +932,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
      * connections that do not use this feature */
     return FALSE;
 
-  if (!Curl_conn_is_connected(conn, FIRSTSOCKET) ||
+  if (!Fetch_conn_is_connected(conn, FIRSTSOCKET) ||
       conn->bits.asks_multiplex)
   {
     /* Not yet connected, or not yet decided if it multiplexes. The later
@@ -963,8 +963,8 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     else
     {
       /* transfer and conn multiplex. Are they on the same multi? */
-      struct Curl_llist_node *e = Curl_llist_head(&conn->easyq);
-      struct Curl_easy *entry = Curl_node_elem(e);
+      struct Fetch_llist_node *e = Fetch_llist_head(&conn->easyq);
+      struct Fetch_easy *entry = Fetch_node_elem(e);
       if (entry->multi != data->multi)
         return FALSE;
     }
@@ -988,7 +988,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 #endif
 
   if ((!(needle->handler->flags & PROTOPT_SSL) !=
-       !Curl_conn_is_ssl(conn, FIRSTSOCKET)) &&
+       !Fetch_conn_is_ssl(conn, FIRSTSOCKET)) &&
       !(get_protocol_family(conn->handler) == needle->handler->protocol &&
         conn->bits.tls_upgraded))
     /* Deny `conn` if it is not fit for `needle`'s SSL needs,
@@ -1019,7 +1019,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
       if (needle->http_proxy.proxytype != conn->http_proxy.proxytype)
         return FALSE;
       /* match SSL config to proxy */
-      if (!Curl_ssl_conn_config_match(data, conn, TRUE))
+      if (!Fetch_ssl_conn_config_match(data, conn, TRUE))
       {
         DEBUGF(infof(data,
                      "Connection #%" FMT_OFF_T
@@ -1053,10 +1053,10 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   {
     /* This protocol requires credentials per connection,
        so verify that we are using the same name and password as well */
-    if (Curl_timestrcmp(needle->user, conn->user) ||
-        Curl_timestrcmp(needle->passwd, conn->passwd) ||
-        Curl_timestrcmp(needle->sasl_authzid, conn->sasl_authzid) ||
-        Curl_timestrcmp(needle->oauth_bearer, conn->oauth_bearer))
+    if (Fetch_timestrcmp(needle->user, conn->user) ||
+        Fetch_timestrcmp(needle->passwd, conn->passwd) ||
+        Fetch_timestrcmp(needle->sasl_authzid, conn->sasl_authzid) ||
+        Fetch_timestrcmp(needle->oauth_bearer, conn->oauth_bearer))
     {
       /* one of them was different */
       return FALSE;
@@ -1077,7 +1077,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if ((needle->handler->protocol & PROTO_FAMILY_HTTP) &&
       (data->state.httpwant != FETCH_HTTP_VERSION_2TLS))
   {
-    unsigned char httpversion = Curl_conn_http_version(data);
+    unsigned char httpversion = Fetch_conn_http_version(data);
     if ((httpversion >= 20) &&
         (data->state.httpwant < FETCH_HTTP_VERSION_2_0))
     {
@@ -1103,9 +1103,9 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   else if (get_protocol_family(needle->handler) & PROTO_FAMILY_FTP)
   {
     /* Also match ACCOUNT, ALTERNATIVE-TO-USER, USE_SSL and CCC options */
-    if (Curl_timestrcmp(needle->proto.ftpc.account,
+    if (Fetch_timestrcmp(needle->proto.ftpc.account,
                         conn->proto.ftpc.account) ||
-        Curl_timestrcmp(needle->proto.ftpc.alternative_to_user,
+        Fetch_timestrcmp(needle->proto.ftpc.alternative_to_user,
                         conn->proto.ftpc.alternative_to_user) ||
         (needle->proto.ftpc.use_ssl != conn->proto.ftpc.use_ssl) ||
         (needle->proto.ftpc.ccc != conn->proto.ftpc.ccc))
@@ -1143,7 +1143,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 
     /* If talking TLS, conn needs to use the same SSL options. */
     if ((needle->handler->flags & PROTOPT_SSL) &&
-        !Curl_ssl_conn_config_match(data, conn, FALSE))
+        !Fetch_ssl_conn_config_match(data, conn, FALSE))
     {
       DEBUGF(infof(data,
                    "Connection #%" FMT_OFF_T
@@ -1161,8 +1161,8 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
      partway through a handshake!) */
   if (match->want_ntlm_http)
   {
-    if (Curl_timestrcmp(needle->user, conn->user) ||
-        Curl_timestrcmp(needle->passwd, conn->passwd))
+    if (Fetch_timestrcmp(needle->user, conn->user) ||
+        Fetch_timestrcmp(needle->passwd, conn->passwd))
     {
 
       /* we prefer a credential match, but this is at least a connection
@@ -1187,9 +1187,9 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     if (!conn->http_proxy.user || !conn->http_proxy.passwd)
       return FALSE;
 
-    if (Curl_timestrcmp(needle->http_proxy.user,
+    if (Fetch_timestrcmp(needle->http_proxy.user,
                         conn->http_proxy.user) ||
-        Curl_timestrcmp(needle->http_proxy.passwd,
+        Fetch_timestrcmp(needle->http_proxy.passwd,
                         conn->http_proxy.passwd))
       return FALSE;
   }
@@ -1227,7 +1227,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     DEBUGASSERT(conn->bits.multiplex);
     /* If multiplexed, make sure we do not go over concurrency limit */
     if (CONN_INUSE(conn) >=
-        Curl_multi_max_concurrent_streams(data->multi))
+        Fetch_multi_max_concurrent_streams(data->multi))
     {
       infof(data, "client side MAX_CONCURRENT_STREAMS reached"
                   ", skip (%zu)",
@@ -1235,7 +1235,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
       return FALSE;
     }
     if (CONN_INUSE(conn) >=
-        Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET))
+        Fetch_conn_get_max_concurrent(data, conn, FIRSTSOCKET))
     {
       infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%zu)",
             CONN_INUSE(conn));
@@ -1244,10 +1244,10 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     /* When not multiplexed, we have a match here! */
     infof(data, "Multiplexed connection found");
   }
-  else if (Curl_conn_seems_dead(conn, data, NULL))
+  else if (Fetch_conn_seems_dead(conn, data, NULL))
   {
     /* removed and disconnect. Do not treat as aborted. */
-    Curl_cpool_disconnect(data, conn, FALSE);
+    Fetch_cpool_disconnect(data, conn, FALSE);
     return FALSE;
   }
 
@@ -1264,7 +1264,7 @@ static bool url_match_result(bool result, void *userdata)
   {
     /* Attach it now while still under lock, so the connection does
      * no longer appear idle and can be reaped. */
-    Curl_attach_connection(match->data, match->found);
+    Fetch_attach_connection(match->data, match->found);
     return TRUE;
   }
   else if (match->seen_single_use_conn && !match->seen_multiplex_conn)
@@ -1296,7 +1296,7 @@ static bool url_match_result(bool result, void *userdata)
  * The force_reuse flag is set if the connection must be used.
  */
 static bool
-ConnectionExists(struct Curl_easy *data,
+ConnectionExists(struct Fetch_easy *data,
                  struct connectdata *needle,
                  struct connectdata **usethis,
                  bool *force_reuse,
@@ -1323,7 +1323,7 @@ ConnectionExists(struct Curl_easy *data,
 
   /* Find a connection in the pool that matches what "data + needle"
    * requires. If a suitable candidate is found, it is attached to "data". */
-  result = Curl_cpool_find(data, needle->destination, needle->destination_len,
+  result = Fetch_cpool_find(data, needle->destination, needle->destination_len,
                            url_match_conn, url_match_result, &match);
 
   /* wait_pipe is TRUE if we encounter a bundle that is undecided. There
@@ -1338,7 +1338,7 @@ ConnectionExists(struct Curl_easy *data,
  * verboseconnect() displays verbose information after a connect
  */
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-void Curl_verboseconnect(struct Curl_easy *data,
+void Fetch_verboseconnect(struct Fetch_easy *data,
                          struct connectdata *conn, int sockindex)
 {
   if (data->set.verbose && sockindex == SECONDARYSOCKET)
@@ -1371,7 +1371,7 @@ void Curl_verboseconnect(struct Curl_easy *data,
 /*
  * Allocate and initialize a new connectdata object.
  */
-static struct connectdata *allocate_conn(struct Curl_easy *data)
+static struct connectdata *allocate_conn(struct Fetch_easy *data)
 {
   struct connectdata *conn = calloc(1, sizeof(struct connectdata));
   if (!conn)
@@ -1393,7 +1393,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   connclose(conn, "Default to force-close");
 
   /* Store creation time to help future close decision making */
-  conn->created = Curl_now();
+  conn->created = Fetch_now();
 
   /* Store current time to give a baseline to keepalive connection times. */
   conn->keepalive = conn->created;
@@ -1431,7 +1431,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Initialize the easy handle list */
-  Curl_llist_init(&conn->easyq, NULL);
+  Fetch_llist_init(&conn->easyq, NULL);
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CLEAR;
@@ -1450,7 +1450,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #endif
 
   /* the close socket stuff needs to be copied to the connection struct as
-     it may live on without (this specific) Curl_easy */
+     it may live on without (this specific) Fetch_easy */
   conn->fclosesocket = data->set.fclosesocket;
   conn->closesocket_client = data->set.closesocket_client;
   conn->lastused = conn->created;
@@ -1465,13 +1465,13 @@ error:
   return NULL;
 }
 
-const struct Curl_handler *Curl_get_scheme_handler(const char *scheme)
+const struct Fetch_handler *Fetch_get_scheme_handler(const char *scheme)
 {
-  return Curl_getn_scheme_handler(scheme, strlen(scheme));
+  return Fetch_getn_scheme_handler(scheme, strlen(scheme));
 }
 
 /* returns the handler if the given scheme is built-in */
-const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
+const struct Fetch_handler *Fetch_getn_scheme_handler(const char *scheme,
                                                     size_t len)
 {
   /* table generated by schemetable.c:
@@ -1484,58 +1484,58 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
      schemetable.c
      7. if needed, adjust the #ifdefs in schemetable.c and rerun
      */
-  static const struct Curl_handler *const protocols[67] = {
+  static const struct Fetch_handler *const protocols[67] = {
 #ifndef FETCH_DISABLE_FILE
-      &Curl_handler_file,
+      &Fetch_handler_file,
 #else
       NULL,
 #endif
       NULL,
       NULL,
 #if defined(USE_SSL) && !defined(FETCH_DISABLE_GOPHER)
-      &Curl_handler_gophers,
+      &Fetch_handler_gophers,
 #else
       NULL,
 #endif
       NULL,
 #ifdef USE_LIBRTMP
-      &Curl_handler_rtmpe,
+      &Fetch_handler_rtmpe,
 #else
       NULL,
 #endif
 #ifndef FETCH_DISABLE_SMTP
-      &Curl_handler_smtp,
+      &Fetch_handler_smtp,
 #else
       NULL,
 #endif
 #if defined(USE_SSH)
-      &Curl_handler_sftp,
+      &Fetch_handler_sftp,
 #else
       NULL,
 #endif
 #if !defined(FETCH_DISABLE_SMB) && defined(USE_FETCH_NTLM_CORE) && \
     (SIZEOF_FETCH_OFF_T > 4)
-      &Curl_handler_smb,
+      &Fetch_handler_smb,
 #else
       NULL,
 #endif
 #if defined(USE_SSL) && !defined(FETCH_DISABLE_SMTP)
-      &Curl_handler_smtps,
+      &Fetch_handler_smtps,
 #else
       NULL,
 #endif
 #ifndef FETCH_DISABLE_TELNET
-      &Curl_handler_telnet,
+      &Fetch_handler_telnet,
 #else
       NULL,
 #endif
 #ifndef FETCH_DISABLE_GOPHER
-      &Curl_handler_gopher,
+      &Fetch_handler_gopher,
 #else
       NULL,
 #endif
 #ifndef FETCH_DISABLE_TFTP
-      &Curl_handler_tftp,
+      &Fetch_handler_tftp,
 #else
       NULL,
 #endif
@@ -1543,27 +1543,27 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
       NULL,
       NULL,
 #if defined(USE_SSL) && !defined(FETCH_DISABLE_FTP)
-      &Curl_handler_ftps,
+      &Fetch_handler_ftps,
 #else
       NULL,
 #endif
 #ifndef FETCH_DISABLE_HTTP
-      &Curl_handler_http,
+      &Fetch_handler_http,
 #else
       NULL,
 #endif
 #ifndef FETCH_DISABLE_IMAP
-      &Curl_handler_imap,
+      &Fetch_handler_imap,
 #else
       NULL,
 #endif
 #ifdef USE_LIBRTMP
-      &Curl_handler_rtmps,
+      &Fetch_handler_rtmps,
 #else
       NULL,
 #endif
 #ifdef USE_LIBRTMP
-      &Curl_handler_rtmpt,
+      &Fetch_handler_rtmpt,
 #else
       NULL,
 #endif
@@ -1574,18 +1574,18 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
     !defined(FETCH_DISABLE_LDAPS) &&                \
     ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
      (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
-      &Curl_handler_ldaps,
+      &Fetch_handler_ldaps,
 #else
       NULL,
 #endif
 #if !defined(FETCH_DISABLE_WEBSOCKETS) && \
     defined(USE_SSL) && !defined(FETCH_DISABLE_HTTP)
-      &Curl_handler_wss,
+      &Fetch_handler_wss,
 #else
       NULL,
 #endif
 #if defined(USE_SSL) && !defined(FETCH_DISABLE_HTTP)
-      &Curl_handler_https,
+      &Fetch_handler_https,
 #else
       NULL,
 #endif
@@ -1598,18 +1598,18 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
       NULL,
       NULL,
 #ifndef FETCH_DISABLE_RTSP
-      &Curl_handler_rtsp,
+      &Fetch_handler_rtsp,
 #else
       NULL,
 #endif
 #if defined(USE_SSL) && !defined(FETCH_DISABLE_SMB) && \
     defined(USE_FETCH_NTLM_CORE) && (SIZEOF_FETCH_OFF_T > 4)
-      &Curl_handler_smbs,
+      &Fetch_handler_smbs,
 #else
       NULL,
 #endif
 #if defined(USE_SSH) && !defined(USE_WOLFSSH)
-      &Curl_handler_scp,
+      &Fetch_handler_scp,
 #else
       NULL,
 #endif
@@ -1617,14 +1617,14 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
       NULL,
       NULL,
 #ifndef FETCH_DISABLE_POP3
-      &Curl_handler_pop3,
+      &Fetch_handler_pop3,
 #else
       NULL,
 #endif
       NULL,
       NULL,
 #ifdef USE_LIBRTMP
-      &Curl_handler_rtmp,
+      &Fetch_handler_rtmp,
 #else
       NULL,
 #endif
@@ -1632,7 +1632,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
       NULL,
       NULL,
 #ifdef USE_LIBRTMP
-      &Curl_handler_rtmpte,
+      &Fetch_handler_rtmpte,
 #else
       NULL,
 #endif
@@ -1640,7 +1640,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
       NULL,
       NULL,
 #ifndef FETCH_DISABLE_DICT
-      &Curl_handler_dict,
+      &Fetch_handler_dict,
 #else
       NULL,
 #endif
@@ -1648,41 +1648,41 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
       NULL,
       NULL,
 #ifndef FETCH_DISABLE_MQTT
-      &Curl_handler_mqtt,
+      &Fetch_handler_mqtt,
 #else
       NULL,
 #endif
 #if defined(USE_SSL) && !defined(FETCH_DISABLE_POP3)
-      &Curl_handler_pop3s,
+      &Fetch_handler_pop3s,
 #else
       NULL,
 #endif
 #if defined(USE_SSL) && !defined(FETCH_DISABLE_IMAP)
-      &Curl_handler_imaps,
+      &Fetch_handler_imaps,
 #else
       NULL,
 #endif
       NULL,
 #if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
-      &Curl_handler_ws,
+      &Fetch_handler_ws,
 #else
       NULL,
 #endif
       NULL,
 #ifdef USE_LIBRTMP
-      &Curl_handler_rtmpts,
+      &Fetch_handler_rtmpts,
 #else
       NULL,
 #endif
 #ifndef FETCH_DISABLE_LDAP
-      &Curl_handler_ldap,
+      &Fetch_handler_ldap,
 #else
       NULL,
 #endif
       NULL,
       NULL,
 #ifndef FETCH_DISABLE_FTP
-      &Curl_handler_ftp,
+      &Fetch_handler_ftp,
 #else
       NULL,
 #endif
@@ -1692,12 +1692,12 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
   {
     const char *s = scheme;
     size_t l = len;
-    const struct Curl_handler *h;
+    const struct Fetch_handler *h;
     unsigned int c = 978;
     while (l)
     {
       c <<= 5;
-      c += (unsigned int)Curl_raw_tolower(*s);
+      c += (unsigned int)Fetch_raw_tolower(*s);
       s++;
       l--;
     }
@@ -1709,11 +1709,11 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
   return NULL;
 }
 
-static FETCHcode findprotocol(struct Curl_easy *data,
+static FETCHcode findprotocol(struct Fetch_easy *data,
                               struct connectdata *conn,
                               const char *protostr)
 {
-  const struct Curl_handler *p = Curl_get_scheme_handler(protostr);
+  const struct Fetch_handler *p = Fetch_get_scheme_handler(protostr);
 
   if (p && /* Protocol found in table. Check if allowed */
       (data->set.allowed_protocols & p->protocol))
@@ -1744,7 +1744,7 @@ static FETCHcode findprotocol(struct Curl_easy *data,
   return FETCHE_UNSUPPORTED_PROTOCOL;
 }
 
-FETCHcode Curl_uc_to_fetchcode(FETCHUcode uc)
+FETCHcode Fetch_uc_to_fetchcode(FETCHUcode uc)
 {
   switch (uc)
   {
@@ -1765,7 +1765,7 @@ FETCHcode Curl_uc_to_fetchcode(FETCHUcode uc)
  * the scope_id based on that!
  */
 
-static void zonefrom_url(FETCHU *uh, struct Curl_easy *data,
+static void zonefrom_url(FETCHU *uh, struct Fetch_easy *data,
                          struct connectdata *conn)
 {
   char *zoneid;
@@ -1785,7 +1785,7 @@ static void zonefrom_url(FETCHU *uh, struct Curl_easy *data,
     else
     {
 #elif defined(_WIN32)
-    else if (Curl_if_nametoindex)
+    else if (Fetch_if_nametoindex)
     {
 #endif
 
@@ -1793,7 +1793,7 @@ static void zonefrom_url(FETCHU *uh, struct Curl_easy *data,
       /* Zone identifier is not numeric */
       unsigned int scopeidx = 0;
 #if defined(_WIN32)
-      scopeidx = Curl_if_nametoindex(zoneid);
+      scopeidx = Fetch_if_nametoindex(zoneid);
 #else
       scopeidx = if_nametoindex(zoneid);
 #endif
@@ -1802,7 +1802,7 @@ static void zonefrom_url(FETCHU *uh, struct Curl_easy *data,
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
         char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
-              Curl_strerror(errno, buffer, sizeof(buffer)));
+              Fetch_strerror(errno, buffer, sizeof(buffer)));
 #endif
       }
       else
@@ -1814,13 +1814,13 @@ static void zonefrom_url(FETCHU *uh, struct Curl_easy *data,
   }
 }
 #else
-#define zonefrom_url(a, b, c) Curl_nop_stmt
+#define zonefrom_url(a, b, c) Fetch_nop_stmt
 #endif
 
 /*
  * Parse URL and fill in the relevant members of the connection struct.
  */
-static FETCHcode parseurlandfillconn(struct Curl_easy *data,
+static FETCHcode parseurlandfillconn(struct Fetch_easy *data,
                                      struct connectdata *conn)
 {
   FETCHcode result;
@@ -1845,7 +1845,7 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
     return FETCHE_OUT_OF_MEMORY;
 
   if (data->set.str[STRING_DEFAULT_PROTOCOL] &&
-      !Curl_is_absolute_url(data->state.url, NULL, 0, TRUE))
+      !Fetch_is_absolute_url(data->state.url, NULL, 0, TRUE))
   {
     char *url = aprintf("%s://%s", data->set.str[STRING_DEFAULT_PROTOCOL],
                         data->state.url);
@@ -1864,13 +1864,13 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
     if (uc)
     {
       failf(data, "URL rejected: %s", fetch_url_strerror(uc));
-      return Curl_uc_to_fetchcode(uc);
+      return Fetch_uc_to_fetchcode(uc);
     }
 
     /* after it was parsed, get the generated normalized version */
     uc = fetch_url_get(uh, FETCHUPART_URL, &newurl, 0);
     if (uc)
-      return Curl_uc_to_fetchcode(uc);
+      return Fetch_uc_to_fetchcode(uc);
     if (data->state.url_alloc)
       free(data->state.url);
     data->state.url = newurl;
@@ -1879,7 +1879,7 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
 
   uc = fetch_url_get(uh, FETCHUPART_SCHEME, &data->state.up.scheme, 0);
   if (uc)
-    return Curl_uc_to_fetchcode(uc);
+    return Fetch_uc_to_fetchcode(uc);
 
   uc = fetch_url_get(uh, FETCHUPART_HOST, &data->state.up.hostname, 0);
   if (uc)
@@ -1917,7 +1917,7 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
   /*************************************************************
    * IDN-convert the hostnames
    *************************************************************/
-  result = Curl_idnconvert_hostname(&conn->host);
+  result = Fetch_idnconvert_hostname(&conn->host);
   if (result)
     return result;
 
@@ -1926,24 +1926,24 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
   if (data->hsts && strcasecompare("http", data->state.up.scheme))
   {
     /* This MUST use the IDN decoded name */
-    if (Curl_hsts(data->hsts, conn->host.name, strlen(conn->host.name), TRUE))
+    if (Fetch_hsts(data->hsts, conn->host.name, strlen(conn->host.name), TRUE))
     {
       char *url;
-      Curl_safefree(data->state.up.scheme);
+      Fetch_safefree(data->state.up.scheme);
       uc = fetch_url_set(uh, FETCHUPART_SCHEME, "https", 0);
       if (uc)
-        return Curl_uc_to_fetchcode(uc);
+        return Fetch_uc_to_fetchcode(uc);
       if (data->state.url_alloc)
-        Curl_safefree(data->state.url);
+        Fetch_safefree(data->state.url);
       /* after update, get the updated version */
       uc = fetch_url_get(uh, FETCHUPART_URL, &url, 0);
       if (uc)
-        return Curl_uc_to_fetchcode(uc);
+        return Fetch_uc_to_fetchcode(uc);
       uc = fetch_url_get(uh, FETCHUPART_SCHEME, &data->state.up.scheme, 0);
       if (uc)
       {
         free(url);
-        return Curl_uc_to_fetchcode(uc);
+        return Fetch_uc_to_fetchcode(uc);
       }
       data->state.url = url;
       data->state.url_alloc = TRUE;
@@ -1967,18 +1967,18 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
     if (!uc)
     {
       char *decoded;
-      result = Curl_urldecode(data->state.up.password, 0, &decoded, NULL,
+      result = Fetch_urldecode(data->state.up.password, 0, &decoded, NULL,
                               conn->handler->flags & PROTOPT_USERPWDCTRL ? REJECT_ZERO : REJECT_CTRL);
       if (result)
         return result;
       conn->passwd = decoded;
-      result = Curl_setstropt(&data->state.aptr.passwd, decoded);
+      result = Fetch_setstropt(&data->state.aptr.passwd, decoded);
       if (result)
         return result;
       data->state.creds_from = CREDS_URL;
     }
     else if (uc != FETCHUE_NO_PASSWORD)
-      return Curl_uc_to_fetchcode(uc);
+      return Fetch_uc_to_fetchcode(uc);
   }
 
   if (!data->state.aptr.user || (data->state.creds_from != CREDS_OPTION))
@@ -1990,16 +1990,16 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
     if (!uc)
     {
       char *decoded;
-      result = Curl_urldecode(data->state.up.user, 0, &decoded, NULL,
+      result = Fetch_urldecode(data->state.up.user, 0, &decoded, NULL,
                               conn->handler->flags & PROTOPT_USERPWDCTRL ? REJECT_ZERO : REJECT_CTRL);
       if (result)
         return result;
       conn->user = decoded;
-      result = Curl_setstropt(&data->state.aptr.user, decoded);
+      result = Fetch_setstropt(&data->state.aptr.user, decoded);
       data->state.creds_from = CREDS_URL;
     }
     else if (uc != FETCHUE_NO_USER)
-      return Curl_uc_to_fetchcode(uc);
+      return Fetch_uc_to_fetchcode(uc);
     if (result)
       return result;
   }
@@ -2013,12 +2013,12 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
       return FETCHE_OUT_OF_MEMORY;
   }
   else if (uc != FETCHUE_NO_OPTIONS)
-    return Curl_uc_to_fetchcode(uc);
+    return Fetch_uc_to_fetchcode(uc);
 
   uc = fetch_url_get(uh, FETCHUPART_PATH, &data->state.up.path,
                      FETCHU_URLENCODE);
   if (uc)
-    return Curl_uc_to_fetchcode(uc);
+    return Fetch_uc_to_fetchcode(uc);
 
   uc = fetch_url_get(uh, FETCHUPART_PORT, &data->state.up.port,
                      FETCHU_DEFAULT_PORT);
@@ -2049,7 +2049,7 @@ static FETCHcode parseurlandfillconn(struct Curl_easy *data,
  * If we are doing a resumed transfer, we need to setup our stuff
  * properly.
  */
-static FETCHcode setup_range(struct Curl_easy *data)
+static FETCHcode setup_range(struct Fetch_easy *data)
 {
   struct UrlState *s = &data->state;
   s->resume_from = data->set.set_resume_from;
@@ -2081,15 +2081,15 @@ static FETCHcode setup_range(struct Curl_easy *data)
  * setup_connection_internals() -
  *
  * Setup connection internals specific to the requested protocol in the
- * Curl_easy. This is inited and setup before the connection is made but
+ * Fetch_easy. This is inited and setup before the connection is made but
  * is about the particular protocol that is to be used.
  *
  * This MUST get called after proxy magic has been figured out.
  */
-static FETCHcode setup_connection_internals(struct Curl_easy *data,
+static FETCHcode setup_connection_internals(struct Fetch_easy *data,
                                             struct connectdata *conn)
 {
-  const struct Curl_handler *p;
+  const struct Fetch_handler *p;
   const char *hostname;
   int port;
   FETCHcode result;
@@ -2138,7 +2138,7 @@ static FETCHcode setup_connection_internals(struct Curl_easy *data,
     return FETCHE_OUT_OF_MEMORY;
 
   conn->destination_len = strlen(conn->destination) + 1;
-  Curl_strntolower(conn->destination, conn->destination,
+  Fetch_strntolower(conn->destination, conn->destination,
                    conn->destination_len - 1);
 
   return FETCHE_OK;
@@ -2152,7 +2152,7 @@ static FETCHcode setup_connection_internals(struct Curl_easy *data,
  * name and is not limited to HTTP proxies only.
  * The returned pointer must be freed by the caller (unless NULL)
  ****************************************************************/
-static char *detect_proxy(struct Curl_easy *data,
+static char *detect_proxy(struct Fetch_easy *data,
                           struct connectdata *conn)
 {
   char *proxy = NULL;
@@ -2200,7 +2200,7 @@ static char *detect_proxy(struct Curl_easy *data,
   if (!proxy && !strcasecompare("http_proxy", proxy_env))
   {
     /* There was no lowercase variable, try the uppercase version: */
-    Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
+    Fetch_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
     proxy = fetch_getenv(proxy_env);
   }
 
@@ -2244,7 +2244,7 @@ static char *detect_proxy(struct Curl_easy *data,
  * hostname, so that we can reuse an existing connection
  * that may exist registered to the same proxy host.
  */
-static FETCHcode parse_proxy(struct Curl_easy *data,
+static FETCHcode parse_proxy(struct Fetch_easy *data,
                              struct connectdata *conn, char *proxy,
                              fetch_proxytype proxytype)
 {
@@ -2319,7 +2319,7 @@ static FETCHcode parse_proxy(struct Curl_easy *data,
   }
 
 #ifdef USE_SSL
-  if (!Curl_ssl_supports(data, SSLSUPP_HTTPS_PROXY))
+  if (!Fetch_ssl_supports(data, SSLSUPP_HTTPS_PROXY))
 #endif
     if (IS_HTTPS_PROXY(proxytype))
     {
@@ -2349,13 +2349,13 @@ static FETCHcode parse_proxy(struct Curl_easy *data,
 
   if (proxyuser || proxypasswd)
   {
-    Curl_safefree(proxyinfo->user);
+    Fetch_safefree(proxyinfo->user);
     proxyinfo->user = proxyuser;
-    result = Curl_setstropt(&data->state.aptr.proxyuser, proxyuser);
+    result = Fetch_setstropt(&data->state.aptr.proxyuser, proxyuser);
     proxyuser = NULL;
     if (result)
       goto error;
-    Curl_safefree(proxyinfo->passwd);
+    Fetch_safefree(proxyinfo->passwd);
     if (!proxypasswd)
     {
       proxypasswd = strdup("");
@@ -2366,7 +2366,7 @@ static FETCHcode parse_proxy(struct Curl_easy *data,
       }
     }
     proxyinfo->passwd = proxypasswd;
-    result = Curl_setstropt(&data->state.aptr.proxypasswd, proxypasswd);
+    result = Fetch_setstropt(&data->state.aptr.proxypasswd, proxypasswd);
     proxypasswd = NULL;
     if (result)
       goto error;
@@ -2429,7 +2429,7 @@ static FETCHcode parse_proxy(struct Curl_easy *data,
         result = FETCHE_OUT_OF_MEMORY;
         goto error;
       }
-      Curl_safefree(proxyinfo->host.rawalloc);
+      Fetch_safefree(proxyinfo->host.rawalloc);
       proxyinfo->host.rawalloc = host;
       proxyinfo->host.name = host;
       host = NULL;
@@ -2439,7 +2439,7 @@ static FETCHcode parse_proxy(struct Curl_easy *data,
   if (!is_unix_proxy)
   {
 #endif
-    Curl_safefree(proxyinfo->host.rawalloc);
+    Fetch_safefree(proxyinfo->host.rawalloc);
     proxyinfo->host.rawalloc = host;
     if (host[0] == '[')
     {
@@ -2470,7 +2470,7 @@ error:
 /*
  * Extract the user and password from the authentication string
  */
-static FETCHcode parse_proxy_auth(struct Curl_easy *data,
+static FETCHcode parse_proxy_auth(struct Fetch_easy *data,
                                   struct connectdata *conn)
 {
   const char *proxyuser = data->state.aptr.proxyuser ? data->state.aptr.proxyuser : "";
@@ -2484,14 +2484,14 @@ static FETCHcode parse_proxy_auth(struct Curl_easy *data,
     if (conn->http_proxy.passwd)
       result = FETCHE_OK;
     else
-      Curl_safefree(conn->http_proxy.user);
+      Fetch_safefree(conn->http_proxy.user);
   }
   return result;
 }
 
 /* create_conn helper to parse and init proxy values. to be called after Unix
    socket init but before any proxy vars are evaluated. */
-static FETCHcode create_conn_helper_init_proxy(struct Curl_easy *data,
+static FETCHcode create_conn_helper_init_proxy(struct Fetch_easy *data,
                                                struct connectdata *conn)
 {
   char *proxy = NULL;
@@ -2551,17 +2551,17 @@ static FETCHcode create_conn_helper_init_proxy(struct Curl_easy *data,
     }
   }
 
-  if (Curl_check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY] ? data->set.str[STRING_NOPROXY] : no_proxy))
+  if (Fetch_check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY] ? data->set.str[STRING_NOPROXY] : no_proxy))
   {
-    Curl_safefree(proxy);
-    Curl_safefree(socksproxy);
+    Fetch_safefree(proxy);
+    Fetch_safefree(socksproxy);
   }
 #ifndef FETCH_DISABLE_HTTP
   else if (!proxy && !socksproxy)
     /* if the host is not in the noproxy list, detect proxy. */
     proxy = detect_proxy(data, conn);
 #endif /* FETCH_DISABLE_HTTP */
-  Curl_safefree(no_proxy);
+  Fetch_safefree(no_proxy);
 
 #ifdef USE_UNIX_SOCKETS
   /* For the time being do not mix proxy and Unix domain sockets. See #1274 */
@@ -2597,7 +2597,7 @@ static FETCHcode create_conn_helper_init_proxy(struct Curl_easy *data,
     if (proxy)
     {
       result = parse_proxy(data, conn, proxy, ptype);
-      Curl_safefree(proxy); /* parse_proxy copies the proxy string */
+      Fetch_safefree(proxy); /* parse_proxy copies the proxy string */
       if (result)
         goto out;
     }
@@ -2606,7 +2606,7 @@ static FETCHcode create_conn_helper_init_proxy(struct Curl_easy *data,
     {
       result = parse_proxy(data, conn, socksproxy, ptype);
       /* parse_proxy copies the socks proxy string */
-      Curl_safefree(socksproxy);
+      Fetch_safefree(socksproxy);
       if (result)
         goto out;
     }
@@ -2623,7 +2623,7 @@ static FETCHcode create_conn_helper_init_proxy(struct Curl_easy *data,
         {
           if ((conn->handler->flags & PROTOPT_PROXY_AS_HTTP) &&
               !conn->bits.tunnel_proxy)
-            conn->handler = &Curl_handler_http;
+            conn->handler = &Fetch_handler_http;
           else
             /* if not converting to HTTP over the proxy, enforce tunneling */
             conn->bits.tunnel_proxy = TRUE;
@@ -2646,7 +2646,7 @@ static FETCHcode create_conn_helper_init_proxy(struct Curl_easy *data,
         {
           conn->socks_proxy.user = conn->http_proxy.user;
           conn->http_proxy.user = NULL;
-          Curl_safefree(conn->socks_proxy.passwd);
+          Fetch_safefree(conn->socks_proxy.passwd);
           conn->socks_proxy.passwd = conn->http_proxy.passwd;
           conn->http_proxy.passwd = NULL;
         }
@@ -2685,7 +2685,7 @@ out:
 #endif /* FETCH_DISABLE_PROXY */
 
 /*
- * Curl_parse_login_details()
+ * Fetch_parse_login_details()
  *
  * This is used to parse a login string for username, password and options in
  * the following formats:
@@ -2714,7 +2714,7 @@ out:
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_parse_login_details(const char *login, const size_t len,
+FETCHcode Fetch_parse_login_details(const char *login, const size_t len,
                                    char **userp, char **passwdp,
                                    char **optionsp)
 {
@@ -2742,14 +2742,14 @@ FETCHcode Curl_parse_login_details(const char *login, const size_t len,
   olen = (osep ? (psep && psep > osep ? (size_t)(psep - osep) : (size_t)(login + len - osep)) - 1 : 0);
 
   /* Clone the user portion buffer, which can be zero length */
-  ubuf = Curl_memdup0(login, ulen);
+  ubuf = Fetch_memdup0(login, ulen);
   if (!ubuf)
     goto error;
 
   /* Clone the password portion buffer */
   if (psep)
   {
-    pbuf = Curl_memdup0(&psep[1], plen);
+    pbuf = Fetch_memdup0(&psep[1], plen);
     if (!pbuf)
       goto error;
   }
@@ -2760,7 +2760,7 @@ FETCHcode Curl_parse_login_details(const char *login, const size_t len,
     char *obuf = NULL;
     if (olen)
     {
-      obuf = Curl_memdup0(&osep[1], olen);
+      obuf = Fetch_memdup0(&osep[1], olen);
       if (!obuf)
         goto error;
     }
@@ -2783,7 +2783,7 @@ error:
  *
  * The port number embedded in the URL is replaced, if necessary.
  *************************************************************/
-static FETCHcode parse_remote_port(struct Curl_easy *data,
+static FETCHcode parse_remote_port(struct Fetch_easy *data,
                                    struct connectdata *conn)
 {
 
@@ -2818,7 +2818,7 @@ static bool str_has_ctrl(const char *input)
  * Override the login details from the URL with that in the FETCHOPT_USERPWD
  * option or a .netrc file, if applicable.
  */
-static FETCHcode override_login(struct Curl_easy *data,
+static FETCHcode override_login(struct Fetch_easy *data,
                                 struct connectdata *conn)
 {
   FETCHUcode uc;
@@ -2837,8 +2837,8 @@ static FETCHcode override_login(struct Curl_easy *data,
 #ifndef FETCH_DISABLE_NETRC
   if (data->set.use_netrc == FETCH_NETRC_REQUIRED)
   {
-    Curl_safefree(*userp);
-    Curl_safefree(*passwdp);
+    Fetch_safefree(*userp);
+    Fetch_safefree(*passwdp);
   }
   conn->bits.netrc = FALSE;
   if (data->set.use_netrc && !data->set.str[STRING_USERNAME])
@@ -2857,7 +2857,7 @@ static FETCHcode override_login(struct Curl_easy *data,
 
     if (!*passwdp)
     {
-      ret = Curl_parsenetrc(&data->state.netrc, conn->host.name,
+      ret = Fetch_parsenetrc(&data->state.netrc, conn->host.name,
                             userp, passwdp,
                             data->set.str[STRING_NETRC_FILE]);
       if (ret > 0)
@@ -2891,7 +2891,7 @@ static FETCHcode override_login(struct Curl_easy *data,
     }
     if (url_provided)
     {
-      Curl_safefree(conn->user);
+      Fetch_safefree(conn->user);
       conn->user = strdup(*userp);
       if (!conn->user)
         return FETCHE_OUT_OF_MEMORY;
@@ -2913,7 +2913,7 @@ static FETCHcode override_login(struct Curl_easy *data,
     if (data->state.aptr.user != *userp)
     {
       /* nothing to do then */
-      result = Curl_setstropt(&data->state.aptr.user, *userp);
+      result = Fetch_setstropt(&data->state.aptr.user, *userp);
       if (result)
         return result;
       data->state.creds_from = CREDS_NETRC;
@@ -2924,7 +2924,7 @@ static FETCHcode override_login(struct Curl_easy *data,
     uc = fetch_url_set(data->state.uh, FETCHUPART_USER, data->state.aptr.user,
                        FETCHU_URLENCODE);
     if (uc)
-      return Curl_uc_to_fetchcode(uc);
+      return Fetch_uc_to_fetchcode(uc);
     if (!*userp)
     {
       *userp = strdup(data->state.aptr.user);
@@ -2934,7 +2934,7 @@ static FETCHcode override_login(struct Curl_easy *data,
   }
   if (*passwdp)
   {
-    FETCHcode result = Curl_setstropt(&data->state.aptr.passwd, *passwdp);
+    FETCHcode result = Fetch_setstropt(&data->state.aptr.passwd, *passwdp);
     if (result)
       return result;
     data->state.creds_from = CREDS_NETRC;
@@ -2944,7 +2944,7 @@ static FETCHcode override_login(struct Curl_easy *data,
     uc = fetch_url_set(data->state.uh, FETCHUPART_PASSWORD,
                        data->state.aptr.passwd, FETCHU_URLENCODE);
     if (uc)
-      return Curl_uc_to_fetchcode(uc);
+      return Fetch_uc_to_fetchcode(uc);
     if (!*passwdp)
     {
       *passwdp = strdup(data->state.aptr.passwd);
@@ -2959,7 +2959,7 @@ static FETCHcode override_login(struct Curl_easy *data,
 /*
  * Set the login details so they are available in the connection
  */
-static FETCHcode set_login(struct Curl_easy *data,
+static FETCHcode set_login(struct Fetch_easy *data,
                            struct connectdata *conn)
 {
   FETCHcode result = FETCHE_OK;
@@ -2998,7 +2998,7 @@ static FETCHcode set_login(struct Curl_easy *data,
  * The hostname and the port may be empty; in this case, NULL is returned for
  * the hostname and -1 for the port.
  */
-static FETCHcode parse_connect_to_host_port(struct Curl_easy *data,
+static FETCHcode parse_connect_to_host_port(struct Fetch_easy *data,
                                             const char *host,
                                             char **hostname_result,
                                             int *port_result)
@@ -3106,7 +3106,7 @@ error:
  * Parses one "connect to" string in the form:
  * "HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT".
  */
-static FETCHcode parse_connect_to_string(struct Curl_easy *data,
+static FETCHcode parse_connect_to_string(struct Fetch_easy *data,
                                          struct connectdata *conn,
                                          const char *conn_to_host,
                                          char **host_result,
@@ -3184,7 +3184,7 @@ static FETCHcode parse_connect_to_string(struct Curl_easy *data,
  * Processes all strings in the "connect to" slist, and uses the "connect
  * to host" and "connect to port" of the first string that matches.
  */
-static FETCHcode parse_connect_to_slist(struct Curl_easy *data,
+static FETCHcode parse_connect_to_slist(struct Fetch_easy *data,
                                         struct connectdata *conn,
                                         struct fetch_slist *conn_to_host)
 {
@@ -3211,7 +3211,7 @@ static FETCHcode parse_connect_to_slist(struct Curl_easy *data,
     {
       /* no "connect to host" */
       conn->bits.conn_to_host = FALSE;
-      Curl_safefree(host);
+      Fetch_safefree(host);
     }
 
     if (port >= 0)
@@ -3302,7 +3302,7 @@ static FETCHcode parse_connect_to_slist(struct Curl_easy *data,
       for (i = 0; !hit && (i < ARRAYSIZE(alpn_ids)); ++i)
       {
         srcalpnid = alpn_ids[i];
-        hit = Curl_altsvc_lookup(data->asi,
+        hit = Fetch_altsvc_lookup(data->asi,
                                  srcalpnid, host, conn->remote_port, /* from */
                                  &as /* to */,
                                  allowed_versions);
@@ -3311,7 +3311,7 @@ static FETCHcode parse_connect_to_slist(struct Curl_easy *data,
     else
     {
       /* look for a specific alt-svc protocol id */
-      hit = Curl_altsvc_lookup(data->asi,
+      hit = Fetch_altsvc_lookup(data->asi,
                                srcalpnid, host, conn->remote_port, /* from */
                                &as /* to */,
                                allowed_versions);
@@ -3329,8 +3329,8 @@ static FETCHcode parse_connect_to_slist(struct Curl_easy *data,
       conn->bits.conn_to_port = TRUE;
       conn->bits.altused = TRUE;
       infof(data, "Alt-svc connecting from [%s]%s:%d to [%s]%s:%d",
-            Curl_alpnid2str(srcalpnid), host, conn->remote_port,
-            Curl_alpnid2str(as->dst.alpnid), hostd, as->dst.port);
+            Fetch_alpnid2str(srcalpnid), host, conn->remote_port,
+            Fetch_alpnid2str(as->dst.alpnid), hostd, as->dst.port);
       if (srcalpnid != as->dst.alpnid)
       {
         /* protocol version switch */
@@ -3358,11 +3358,11 @@ static FETCHcode parse_connect_to_slist(struct Curl_easy *data,
 }
 
 #ifdef USE_UNIX_SOCKETS
-static FETCHcode resolve_unix(struct Curl_easy *data,
+static FETCHcode resolve_unix(struct Fetch_easy *data,
                               struct connectdata *conn,
                               char *unix_path)
 {
-  struct Curl_dns_entry *hostaddr = NULL;
+  struct Fetch_dns_entry *hostaddr = NULL;
   bool longpath = FALSE;
 
   DEBUGASSERT(unix_path);
@@ -3371,11 +3371,11 @@ static FETCHcode resolve_unix(struct Curl_easy *data,
   /* Unix domain sockets are local. The host gets ignored, just use the
    * specified domain socket address. Do not cache "DNS entries". There is
    * no DNS involved and we already have the filesystem path available. */
-  hostaddr = calloc(1, sizeof(struct Curl_dns_entry));
+  hostaddr = calloc(1, sizeof(struct Fetch_dns_entry));
   if (!hostaddr)
     return FETCHE_OUT_OF_MEMORY;
 
-  hostaddr->addr = Curl_unix2addr(unix_path, &longpath,
+  hostaddr->addr = Fetch_unix2addr(unix_path, &longpath,
                                   conn->bits.abstract_unix_socket);
   if (!hostaddr->addr)
   {
@@ -3395,12 +3395,12 @@ static FETCHcode resolve_unix(struct Curl_easy *data,
 /*************************************************************
  * Resolve the address of the server or proxy
  *************************************************************/
-static FETCHcode resolve_server(struct Curl_easy *data,
+static FETCHcode resolve_server(struct Fetch_easy *data,
                                 struct connectdata *conn,
                                 bool *async)
 {
   struct hostname *ehost;
-  timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  timediff_t timeout_ms = Fetch_timeleft(data, NULL, TRUE);
   const char *peertype = "host";
   int rc;
 #ifdef USE_UNIX_SOCKETS
@@ -3443,7 +3443,7 @@ static FETCHcode resolve_server(struct Curl_easy *data,
   if (!conn->hostname_resolve)
     return FETCHE_OUT_OF_MEMORY;
 
-  rc = Curl_resolv_timeout(data, conn->hostname_resolve,
+  rc = Fetch_resolv_timeout(data, conn->hostname_resolve,
                            conn->primary.remote_port,
                            &conn->dns_entry, timeout_ms);
   if (rc == FETCHRESOLV_PENDING)
@@ -3451,7 +3451,7 @@ static FETCHcode resolve_server(struct Curl_easy *data,
   else if (rc == FETCHRESOLV_TIMEDOUT)
   {
     failf(data, "Failed to resolve %s '%s' with timeout after %" FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
-          Curl_timediff(Curl_now(), data->progress.t_startsingle));
+          Fetch_timediff(Fetch_now(), data->progress.t_startsingle));
     return FETCHE_OPERATION_TIMEDOUT;
   }
   else if (!conn->dns_entry)
@@ -3468,7 +3468,7 @@ static FETCHcode resolve_server(struct Curl_easy *data,
  * previously `existing` one for `data`. All relevant info is copied over
  * and `temp` is freed.
  */
-static void reuse_conn(struct Curl_easy *data,
+static void reuse_conn(struct Fetch_easy *data,
                        struct connectdata *temp,
                        struct connectdata *existing)
 {
@@ -3477,8 +3477,8 @@ static void reuse_conn(struct Curl_easy *data,
   if (temp->user)
   {
     /* use the new username and password though */
-    Curl_safefree(existing->user);
-    Curl_safefree(existing->passwd);
+    Fetch_safefree(existing->user);
+    Fetch_safefree(existing->passwd);
     existing->user = temp->user;
     existing->passwd = temp->passwd;
     temp->user = NULL;
@@ -3490,10 +3490,10 @@ static void reuse_conn(struct Curl_easy *data,
   if (existing->bits.proxy_user_passwd)
   {
     /* use the new proxy username and proxy password though */
-    Curl_safefree(existing->http_proxy.user);
-    Curl_safefree(existing->socks_proxy.user);
-    Curl_safefree(existing->http_proxy.passwd);
-    Curl_safefree(existing->socks_proxy.passwd);
+    Fetch_safefree(existing->http_proxy.user);
+    Fetch_safefree(existing->socks_proxy.user);
+    Fetch_safefree(existing->http_proxy.passwd);
+    Fetch_safefree(existing->socks_proxy.passwd);
     existing->http_proxy.user = temp->http_proxy.user;
     existing->socks_proxy.user = temp->socks_proxy.user;
     existing->http_proxy.passwd = temp->http_proxy.passwd;
@@ -3519,10 +3519,10 @@ static void reuse_conn(struct Curl_easy *data,
    *       used the original hostname in SNI to negotiate? Do we send
    *       requests for another host through the different SNI?
    */
-  Curl_free_idnconverted_hostname(&existing->host);
-  Curl_free_idnconverted_hostname(&existing->conn_to_host);
-  Curl_safefree(existing->host.rawalloc);
-  Curl_safefree(existing->conn_to_host.rawalloc);
+  Fetch_free_idnconverted_hostname(&existing->host);
+  Fetch_free_idnconverted_hostname(&existing->conn_to_host);
+  Fetch_safefree(existing->host.rawalloc);
+  Fetch_safefree(existing->conn_to_host.rawalloc);
   existing->host = temp->host;
   temp->host.rawalloc = NULL;
   temp->host.encalloc = NULL;
@@ -3530,7 +3530,7 @@ static void reuse_conn(struct Curl_easy *data,
   temp->conn_to_host.rawalloc = NULL;
   existing->conn_to_port = temp->conn_to_port;
   existing->remote_port = temp->remote_port;
-  Curl_safefree(existing->hostname_resolve);
+  Fetch_safefree(existing->hostname_resolve);
 
   existing->hostname_resolve = temp->hostname_resolve;
   temp->hostname_resolve = NULL;
@@ -3538,7 +3538,7 @@ static void reuse_conn(struct Curl_easy *data,
   /* reuse init */
   existing->bits.reuse = TRUE; /* yes, we are reusing here */
 
-  Curl_conn_free(data, temp);
+  Fetch_conn_free(data, temp);
 }
 
 /**
@@ -3552,11 +3552,11 @@ static void reuse_conn(struct Curl_easy *data,
  * @param data The sessionhandle pointer
  * @param in_connect is set to the next connection data pointer
  * @param async is set TRUE when an async DNS resolution is pending
- * @see Curl_setup_conn()
+ * @see Fetch_setup_conn()
  *
  */
 
-static FETCHcode create_conn(struct Curl_easy *data,
+static FETCHcode create_conn(struct Fetch_easy *data,
                              struct connectdata **in_connect,
                              bool *async)
 {
@@ -3680,20 +3680,20 @@ static FETCHcode create_conn(struct Curl_easy *data,
 #ifndef FETCH_DISABLE_PROXY
   if (conn->bits.httpproxy)
   {
-    result = Curl_idnconvert_hostname(&conn->http_proxy.host);
+    result = Fetch_idnconvert_hostname(&conn->http_proxy.host);
     if (result)
       return result;
   }
   if (conn->bits.socksproxy)
   {
-    result = Curl_idnconvert_hostname(&conn->socks_proxy.host);
+    result = Fetch_idnconvert_hostname(&conn->socks_proxy.host);
     if (result)
       return result;
   }
 #endif
   if (conn->bits.conn_to_host)
   {
-    result = Curl_idnconvert_hostname(&conn->conn_to_host);
+    result = Fetch_idnconvert_hostname(&conn->conn_to_host);
     if (result)
       return result;
   }
@@ -3753,8 +3753,8 @@ static FETCHcode create_conn(struct Curl_easy *data,
     /* Setup a "faked" transfer that will do nothing */
     if (!result)
     {
-      Curl_attach_connection(data, conn);
-      result = Curl_cpool_add_conn(data, conn);
+      Fetch_attach_connection(data, conn);
+      result = Fetch_cpool_add_conn(data, conn);
       if (result)
         goto out;
 
@@ -3769,30 +3769,30 @@ static FETCHcode create_conn(struct Curl_easy *data,
         (void)conn->handler->done(data, result, FALSE);
         goto out;
       }
-      Curl_xfer_setup_nop(data);
+      Fetch_xfer_setup_nop(data);
     }
 
     /* since we skip do_init() */
-    Curl_init_do(data, conn);
+    Fetch_init_do(data, conn);
 
     goto out;
   }
 #endif
 
   /* Setup filter for network connections */
-  conn->recv[FIRSTSOCKET] = Curl_cf_recv;
-  conn->send[FIRSTSOCKET] = Curl_cf_send;
-  conn->recv[SECONDARYSOCKET] = Curl_cf_recv;
-  conn->send[SECONDARYSOCKET] = Curl_cf_send;
+  conn->recv[FIRSTSOCKET] = Fetch_cf_recv;
+  conn->send[FIRSTSOCKET] = Fetch_cf_send;
+  conn->recv[SECONDARYSOCKET] = Fetch_cf_recv;
+  conn->send[SECONDARYSOCKET] = Fetch_cf_send;
   conn->bits.tcp_fastopen = data->set.tcp_fastopen;
 
   /* Complete the easy's SSL configuration for connection cache matching */
-  result = Curl_ssl_easy_config_complete(data);
+  result = Fetch_ssl_easy_config_complete(data);
   if (result)
     goto out;
 
   /* FIXME: do we really want to run this every time we add a transfer? */
-  Curl_cpool_prune_dead(data);
+  Fetch_cpool_prune_dead(data);
 
   /*************************************************************
    * Check the current list of connections to see if we can
@@ -3854,7 +3854,7 @@ static FETCHcode create_conn(struct Curl_easy *data,
       connections_available = FALSE;
     else
     {
-      switch (Curl_cpool_check_limits(data, conn))
+      switch (Fetch_cpool_check_limits(data, conn))
       {
       case CPOOL_LIMIT_DEST:
         infof(data, "No more connections allowed to host");
@@ -3880,7 +3880,7 @@ static FETCHcode create_conn(struct Curl_easy *data,
     {
       infof(data, "No connections available.");
 
-      Curl_conn_free(data, conn);
+      Fetch_conn_free(data, conn);
       *in_connect = NULL;
 
       result = FETCHE_NO_CONNECTION_AVAILABLE;
@@ -3892,15 +3892,15 @@ static FETCHcode create_conn(struct Curl_easy *data,
        * This is a brand new connection, so let's store it in the connection
        * cache of ours!
        */
-      result = Curl_ssl_conn_config_init(data, conn);
+      result = Fetch_ssl_conn_config_init(data, conn);
       if (result)
       {
         DEBUGF(fprintf(stderr, "Error: init connection ssl config\n"));
         goto out;
       }
 
-      Curl_attach_connection(data, conn);
-      result = Curl_cpool_add_conn(data, conn);
+      Fetch_attach_connection(data, conn);
+      result = Fetch_cpool_add_conn(data, conn);
       if (result)
         goto out;
     }
@@ -3928,7 +3928,7 @@ static FETCHcode create_conn(struct Curl_easy *data,
   }
 
   /* Setup and init stuff before DO starts, in preparing for the transfer. */
-  Curl_init_do(data, conn);
+  Fetch_init_do(data, conn);
 
   /*
    * Setup whatever necessary for a resumed transfer
@@ -3970,24 +3970,24 @@ static FETCHcode create_conn(struct Curl_easy *data,
 
   /* Everything general done, inform filters that they need
    * to prepare for a data transfer. */
-  result = Curl_conn_ev_data_setup(data);
+  result = Fetch_conn_ev_data_setup(data);
 
 out:
   return result;
 }
 
-/* Curl_setup_conn() is called after the name resolve initiated in
+/* Fetch_setup_conn() is called after the name resolve initiated in
  * create_conn() is all done.
  *
- * Curl_setup_conn() also handles reused connections
+ * Fetch_setup_conn() also handles reused connections
  */
-FETCHcode Curl_setup_conn(struct Curl_easy *data,
+FETCHcode Fetch_setup_conn(struct Fetch_easy *data,
                           bool *protocol_done)
 {
   FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
 
-  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
+  Fetch_pgrsTime(data, TIMER_NAMELOOKUP);
 
   if (conn->handler->flags & PROTOPT_NONETWORK)
   {
@@ -3998,19 +3998,19 @@ FETCHcode Curl_setup_conn(struct Curl_easy *data,
 
   /* set start time here for timeout purposes in the connect procedure, it
      is later set again for the progress meter purpose */
-  conn->now = Curl_now();
+  conn->now = Fetch_now();
   if (!conn->bits.reuse)
-    result = Curl_conn_setup(data, conn, FIRSTSOCKET, conn->dns_entry,
+    result = Fetch_conn_setup(data, conn, FIRSTSOCKET, conn->dns_entry,
                              FETCH_CF_SSL_DEFAULT);
   if (!result)
-    result = Curl_headers_init(data);
+    result = Fetch_headers_init(data);
 
   /* not sure we need this flag to be passed around any more */
   *protocol_done = FALSE;
   return result;
 }
 
-FETCHcode Curl_connect(struct Curl_easy *data,
+FETCHcode Fetch_connect(struct Fetch_easy *data,
                        bool *asyncp,
                        bool *protocol_done)
 {
@@ -4020,7 +4020,7 @@ FETCHcode Curl_connect(struct Curl_easy *data,
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
   /* Set the request to virgin state based on transfer settings */
-  Curl_req_hard_reset(&data->req, data);
+  Fetch_req_hard_reset(&data->req, data);
 
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
@@ -4035,7 +4035,7 @@ FETCHcode Curl_connect(struct Curl_easy *data,
       /* DNS resolution is done: that is either because this is a reused
          connection, in which case DNS was unnecessary, or because DNS
          really did finish already (synch resolver/fast async resolve) */
-      result = Curl_setup_conn(data, protocol_done);
+      result = Fetch_setup_conn(data, protocol_done);
     }
   }
 
@@ -4047,24 +4047,24 @@ FETCHcode Curl_connect(struct Curl_easy *data,
   {
     /* We are not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
-    Curl_detach_connection(data);
-    Curl_cpool_disconnect(data, conn, TRUE);
+    Fetch_detach_connection(data);
+    Fetch_cpool_disconnect(data, conn, TRUE);
   }
 
   return result;
 }
 
 /*
- * Curl_init_do() inits the readwrite session. This is inited each time (in
+ * Fetch_init_do() inits the readwrite session. This is inited each time (in
  * the DO function before the protocol-specific DO functions are invoked) for
- * a transfer, sometimes multiple times on the same Curl_easy. Make sure
+ * a transfer, sometimes multiple times on the same Fetch_easy. Make sure
  * nothing in here depends on stuff that are setup dynamically for the
  * transfer.
  *
  * Allow this function to get called with 'conn' set to NULL.
  */
 
-FETCHcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
+FETCHcode Fetch_init_do(struct Fetch_easy *data, struct connectdata *conn)
 {
   /* if this is a pushed stream, we need this: */
   FETCHcode result;
@@ -4085,12 +4085,12 @@ FETCHcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
     /* in HTTP lingo, no body means using the HEAD request... */
     data->state.httpreq = HTTPREQ_HEAD;
 
-  result = Curl_req_start(&data->req, data);
+  result = Fetch_req_start(&data->req, data);
   if (!result)
   {
-    Curl_speedinit(data);
-    Curl_pgrsSetUploadCounter(data, 0);
-    Curl_pgrsSetDownloadCounter(data, 0);
+    Fetch_speedinit(data);
+    Fetch_pgrsSetUploadCounter(data, 0);
+    Fetch_pgrsSetDownloadCounter(data, 0);
   }
   return result;
 }
@@ -4099,11 +4099,11 @@ FETCHcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 
 #ifdef USE_NGHTTP2
 
-static void priority_remove_child(struct Curl_easy *parent,
-                                  struct Curl_easy *child)
+static void priority_remove_child(struct Fetch_easy *parent,
+                                  struct Fetch_easy *child)
 {
-  struct Curl_data_prio_node **pnext = &parent->set.priority.children;
-  struct Curl_data_prio_node *pnode = parent->set.priority.children;
+  struct Fetch_data_prio_node **pnext = &parent->set.priority.children;
+  struct Fetch_data_prio_node *pnode = parent->set.priority.children;
 
   DEBUGASSERT(child->set.priority.parent == parent);
   while (pnode && pnode->data != child)
@@ -4123,8 +4123,8 @@ static void priority_remove_child(struct Curl_easy *parent,
   child->set.priority.exclusive = FALSE;
 }
 
-FETCHcode Curl_data_priority_add_child(struct Curl_easy *parent,
-                                       struct Curl_easy *child,
+FETCHcode Fetch_data_priority_add_child(struct Fetch_easy *parent,
+                                       struct Fetch_easy *child,
                                        bool exclusive)
 {
   if (child->set.priority.parent)
@@ -4134,8 +4134,8 @@ FETCHcode Curl_data_priority_add_child(struct Curl_easy *parent,
 
   if (parent)
   {
-    struct Curl_data_prio_node **tail;
-    struct Curl_data_prio_node *pnode;
+    struct Fetch_data_prio_node **tail;
+    struct Fetch_data_prio_node *pnode;
 
     pnode = calloc(1, sizeof(*pnode));
     if (!pnode)
@@ -4145,7 +4145,7 @@ FETCHcode Curl_data_priority_add_child(struct Curl_easy *parent,
     if (parent->set.priority.children && exclusive)
     {
       /* exclusive: move all existing children underneath the new child */
-      struct Curl_data_prio_node *node = parent->set.priority.children;
+      struct Fetch_data_prio_node *node = parent->set.priority.children;
       while (node)
       {
         node->data->set.priority.parent = child;
@@ -4180,14 +4180,14 @@ FETCHcode Curl_data_priority_add_child(struct Curl_easy *parent,
 #endif /* USE_NGHTTP2 */
 
 #ifdef USE_NGHTTP2
-static void data_priority_cleanup(struct Curl_easy *data)
+static void data_priority_cleanup(struct Fetch_easy *data)
 {
   while (data->set.priority.children)
   {
-    struct Curl_easy *tmp = data->set.priority.children->data;
+    struct Fetch_easy *tmp = data->set.priority.children->data;
     priority_remove_child(data, tmp);
     if (data->set.priority.parent)
-      Curl_data_priority_add_child(data->set.priority.parent, tmp, FALSE);
+      Fetch_data_priority_add_child(data->set.priority.parent, tmp, FALSE);
   }
 
   if (data->set.priority.parent)
@@ -4195,7 +4195,7 @@ static void data_priority_cleanup(struct Curl_easy *data)
 }
 #endif
 
-void Curl_data_priority_clear_state(struct Curl_easy *data)
+void Fetch_data_priority_clear_state(struct Fetch_easy *data)
 {
   memset(&data->state.priority, 0, sizeof(data->state.priority));
 }

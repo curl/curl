@@ -28,7 +28,7 @@ The splay tree is used to:
 
 This splay tree rebalances itself based on the time value.
 
-Each node in the splay tree points to a `struct Curl_easy`. Each `Curl_easy`
+Each node in the splay tree points to a `struct Fetch_easy`. Each `Fetch_easy`
 struct is represented only once in the tree. To still allow each easy handle
 to have a large number of timeouts per handle, each handle has a sorted linked
 list of pending timeouts. Only the handle's timeout that is closest to expire
@@ -39,25 +39,25 @@ splay tree and from the handle's linked list of timeouts. The next timeout for
 that handle is then first in line and becomes the new timeout value as the
 node is re-added to the splay.
 
-## `Curl_splay`
+## `Fetch_splay`
 
 ~~~c
-struct Curl_tree *Curl_splay(struct fetchtime i, struct Curl_tree *t);
+struct Fetch_tree *Fetch_splay(struct fetchtime i, struct Fetch_tree *t);
 ~~~
 
 Rearranges the tree `t` after the provide time `i`.
 
-## `Curl_splayinsert`
+## `Fetch_splayinsert`
 
 ~~~c
-struct Curl_tree *Curl_splayinsert(struct fetchtime key,
-                                   struct Curl_tree *t,
-                                   struct Curl_tree *node);
+struct Fetch_tree *Fetch_splayinsert(struct fetchtime key,
+                                   struct Fetch_tree *t,
+                                   struct Fetch_tree *node);
 ~~~
 
 This function inserts a new `node` in the tree, using the given `key`
 timestamp. The `node` struct has a field called `->payload` that can be set to
-point to anything. libfetch sets this to the `struct Curl_easy` handle that is
+point to anything. libfetch sets this to the `struct Fetch_easy` handle that is
 associated with the timeout value set in `key`.
 
 The splay insert function does not allocate any memory, it assumes the caller
@@ -65,12 +65,12 @@ has that arranged.
 
 It returns a pointer to the new tree root.
 
-## `Curl_splaygetbest`
+## `Fetch_splaygetbest`
 
 ~~~c
-struct Curl_tree *Curl_splaygetbest(struct fetchtime key,
-                                    struct Curl_tree *tree,
-                                    struct Curl_tree **removed);
+struct Fetch_tree *Fetch_splaygetbest(struct fetchtime key,
+                                    struct Fetch_tree *tree,
+                                    struct Fetch_tree **removed);
 ~~~
 
 If there is a node in the `tree` that has a time value that is less than the
@@ -79,12 +79,12 @@ in the `*removed` pointer (or NULL if there was no match).
 
 It returns a pointer to the new tree root.
 
-## `Curl_splayremove`
+## `Fetch_splayremove`
 
 ~~~c
-int Curl_splayremove(struct Curl_tree *tree,
-                     struct Curl_tree *node,
-                     struct Curl_tree **newroot);
+int Fetch_splayremove(struct Fetch_tree *tree,
+                     struct Fetch_tree *node,
+                     struct Fetch_tree **newroot);
 ~~~
 
 Removes a given `node` from a splay `tree`, and returns the `newroot`
@@ -92,20 +92,20 @@ identifying the new tree root.
 
 Note that a clean tree without any nodes present implies a NULL pointer.
 
-## `Curl_splayset`
+## `Fetch_splayset`
 
 ~~~c
-void Curl_splayset(struct Curl_tree *node, void *payload);
+void Fetch_splayset(struct Fetch_tree *node, void *payload);
 ~~~
 
 Set a custom pointer to be stored in the splay node. This pointer is not used
-by the splay code itself and can be retrieved again with `Curl_splayget`.
+by the splay code itself and can be retrieved again with `Fetch_splayget`.
 
-## `Curl_splayget`
+## `Fetch_splayget`
 
 ~~~c
-void *Curl_splayget(struct Curl_tree *node);
+void *Fetch_splayget(struct Fetch_tree *node);
 ~~~
 
 Get the custom pointer from the splay node that was previously set with
-`Curl_splayset`. If no pointer was set before, it returns NULL.
+`Fetch_splayset`. If no pointer was set before, it returns NULL.

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -378,10 +378,10 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
 /*
  * @unittest: 1307
  */
-int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
+int Fetch_fnmatch(void *ptr, const char *pattern, const char *string)
 {
   (void)ptr; /* the argument is specified by the fetch_fnmatch_callback
-                prototype, but not used by Curl_fnmatch() */
+                prototype, but not used by Fetch_fnmatch() */
   if (!pattern || !string)
   {
     return FETCH_FNMATCH_FAIL;
@@ -393,10 +393,10 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
 /*
  * @unittest: 1307
  */
-int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
+int Fetch_fnmatch(void *ptr, const char *pattern, const char *string)
 {
   (void)ptr; /* the argument is specified by the fetch_fnmatch_callback
-                prototype, but not used by Curl_fnmatch() */
+                prototype, but not used by Fetch_fnmatch() */
   if (!pattern || !string)
   {
     return FETCH_FNMATCH_FAIL;

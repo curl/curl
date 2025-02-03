@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
 void setfiletime(fetch_off_t filetime, const char *filename,
                  struct GlobalConfig *global);
 #else
-#define setfiletime(a, b, c) Curl_nop_stmt
+#define setfiletime(a, b, c) Fetch_nop_stmt
 #endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) || \
           (defined(_WIN32) && (SIZEOF_FETCH_OFF_T >= 8)) */
 

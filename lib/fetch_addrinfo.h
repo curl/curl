@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,13 +43,13 @@
 #endif
 
 /*
- * Curl_addrinfo is our internal struct definition that we use to allow
+ * Fetch_addrinfo is our internal struct definition that we use to allow
  * consistent internal handling of this data. We use this even when the system
  * provides an addrinfo structure definition. We use this for all sorts of
  * IPv4 and IPV6 builds.
  */
 
-struct Curl_addrinfo
+struct Fetch_addrinfo
 {
   int ai_flags;
   int ai_family;
@@ -58,30 +58,30 @@ struct Curl_addrinfo
   fetch_socklen_t ai_addrlen; /* Follow rfc3493 struct addrinfo */
   char *ai_canonname;
   struct sockaddr *ai_addr;
-  struct Curl_addrinfo *ai_next;
+  struct Fetch_addrinfo *ai_next;
 };
 
-void Curl_freeaddrinfo(struct Curl_addrinfo *cahead);
+void Fetch_freeaddrinfo(struct Fetch_addrinfo *cahead);
 
 #ifdef HAVE_GETADDRINFO
-int Curl_getaddrinfo_ex(const char *nodename,
+int Fetch_getaddrinfo_ex(const char *nodename,
                         const char *servname,
                         const struct addrinfo *hints,
-                        struct Curl_addrinfo **result);
+                        struct Fetch_addrinfo **result);
 #endif
 
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
-struct Curl_addrinfo *
-Curl_he2ai(const struct hostent *he, int port);
+struct Fetch_addrinfo *
+Fetch_he2ai(const struct hostent *he, int port);
 #endif
 
-struct Curl_addrinfo *
-Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port);
+struct Fetch_addrinfo *
+Fetch_ip2addr(int af, const void *inaddr, const char *hostname, int port);
 
-struct Curl_addrinfo *Curl_str2addr(char *dotted, int port);
+struct Fetch_addrinfo *Fetch_str2addr(char *dotted, int port);
 
 #ifdef USE_UNIX_SOCKETS
-struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
+struct Fetch_addrinfo *Fetch_unix2addr(const char *path, bool *longpath,
                                      bool abstract);
 #endif
 
@@ -98,9 +98,9 @@ int fetch_dbg_getaddrinfo(const char *hostname, const char *service,
 
 #ifdef HAVE_GETADDRINFO
 #ifdef USE_RESOLVE_ON_IPS
-void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port);
+void Fetch_addrinfo_set_port(struct Fetch_addrinfo *addrinfo, int port);
 #else
-#define Curl_addrinfo_set_port(x, y)
+#define Fetch_addrinfo_set_port(x, y)
 #endif
 #endif
 

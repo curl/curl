@@ -3,9 +3,9 @@
    Memcheck:Cond
    fun:ZSTD_decompressStream
    fun:zstd_unencode_write
-   fun:Curl_unencode_write
+   fun:Fetch_unencode_write
    fun:readwrite_data
-   fun:Curl_sendrecv
+   fun:Fetch_sendrecv
    fun:multi_runsingle
    fun:fetch_multi_perform
    fun:easy_transfer
@@ -22,7 +22,7 @@
    Memcheck:Cond
    fun:ZSTD_decompressStream
    fun:zstd_unencode_write
-   fun:Curl_sendrecv
+   fun:Fetch_sendrecv
    fun:multi_runsingle
    fun:fetch_multi_perform
    fun:fetch_easy_perform
@@ -39,7 +39,7 @@
    fun:fix_hostname
    fun:resolve_server
    fun:create_conn
-   fun:Curl_connect
+   fun:Fetch_connect
    fun:multi_runsingle
    fun:fetch_multi_perform
    fun:easy_transfer
@@ -59,7 +59,7 @@
    fun:fix_hostname
    fun:resolve_server
    fun:create_conn
-   fun:Curl_connect
+   fun:Fetch_connect
    fun:multi_runsingle
    fun:multi_socket
    fun:fetch_multi_socket_action
@@ -79,7 +79,7 @@
    fun:idna_to_ascii_8z
    fun:idna_to_ascii_lz
    fun:fix_hostname
-   fun:Curl_connect
+   fun:Fetch_connect
    fun:multi_runsingle
    fun:fetch_multi_perform
    fun:easy_perform.part.4
@@ -95,7 +95,7 @@
    fun:idna_to_ascii_8z
    fun:idna_to_ascii_lz
    fun:fix_hostname
-   fun:Curl_connect
+   fun:Fetch_connect
    fun:multi_runsingle
    fun:fetch_multi_perform
    fun:easy_perform
@@ -111,7 +111,7 @@
    fun:idna_to_ascii_8z
    fun:idna_to_ascii_lz
    fun:fix_hostname
-   fun:Curl_connect
+   fun:Fetch_connect
    fun:multi_runsingle
    fun:fetch_multi_perform
    fun:easy_perform

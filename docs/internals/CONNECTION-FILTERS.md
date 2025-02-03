@@ -29,13 +29,13 @@ With connection filters, fetch's internal setup looks something like this (cf
 for connection filter):
 
 ```
-Curl_easy *data         connectdata *conn        cf-ssl        cf-socket
+Fetch_easy *data         connectdata *conn        cf-ssl        cf-socket
 +----------------+      +-----------------+      +-------+     +--------+
-|https://curl.se/|----> | properties      |----> | keys  |---> | socket |--> OS --> network
+|https://fetch.se/|----> | properties      |----> | keys  |---> | socket |--> OS --> network
 +----------------+      +-----------------+      +-------+     +--------+
 
- Curl_write(data, buffer)
-  --> Curl_cfilter_write(data, data->conn, buffer)
+ Fetch_write(data, buffer)
+  --> Fetch_cfilter_write(data, data->conn, buffer)
        ---> conn->filter->write(conn->filter, data, buffer)
 ```
 
@@ -54,20 +54,20 @@ This allows stacking, as in:
 ```
 Direct:
   http://localhost/      conn -> cf-socket
-  https://curl.se/       conn -> cf-ssl -> cf-socket
+  https://fetch.se/       conn -> cf-ssl -> cf-socket
 Via http proxy tunnel:
   http://localhost/      conn -> cf-http-proxy -> cf-socket
-  https://curl.se/       conn -> cf-ssl -> cf-http-proxy -> cf-socket
+  https://fetch.se/       conn -> cf-ssl -> cf-http-proxy -> cf-socket
 Via https proxy tunnel:
   http://localhost/      conn -> cf-http-proxy -> cf-ssl -> cf-socket
-  https://curl.se/       conn -> cf-ssl -> cf-http-proxy -> cf-ssl -> cf-socket
+  https://fetch.se/       conn -> cf-ssl -> cf-http-proxy -> cf-ssl -> cf-socket
 Via http proxy tunnel via SOCKS proxy:
   http://localhost/      conn -> cf-http-proxy -> cf-socks -> cf-socket
 ```
 
 ### Connecting/Closing
 
-Before `Curl_easy` can send the request, the connection needs to be
+Before `Fetch_easy` can send the request, the connection needs to be
 established. This means that all connection filters have done, whatever they
 need to do: waiting for the socket to be connected, doing the TLS handshake,
 performing the HTTP tunnel request, etc. This has to be done in reverse order:
@@ -78,8 +78,8 @@ Each filter does in principle the following:
 
 ```
 static FETCHcode
-myfilter_cf_connect(struct Curl_cfilter *cf,
-                    struct Curl_easy *data,
+myfilter_cf_connect(struct Fetch_cfilter *cf,
+                    struct Fetch_easy *data,
                     bool *done)
 {
   FETCHcode result;
@@ -111,9 +111,9 @@ transfers.
 The memory footprint of a filter is relatively small:
 
 ```
-struct Curl_cfilter {
-  const struct Curl_cftype *cft; /* the type providing implementation */
-  struct Curl_cfilter *next;     /* next filter in chain */
+struct Fetch_cfilter {
+  const struct Fetch_cftype *cft; /* the type providing implementation */
+  struct Fetch_cfilter *next;     /* next filter in chain */
   void *ctx;                     /* filter type specific settings */
   struct connectdata *conn;      /* the connection this filter belongs to */
   int sockindex;                 /* TODO: like to get rid off this */
@@ -140,7 +140,7 @@ filter, once it is connected, just passes the calls through. Those filters
 implementations look like this:
 
 ```
-ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+ssize_t  Fetch_cf_def_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                           const void *buf, size_t len, FETCHcode *err)
 {
   return cf->next->cft->do_send(cf->next, data, buf, len, err);
@@ -234,7 +234,7 @@ Users of `fetch` may activate them by adding the name of the filter type to the
 of an HTTP/2 request, invoke fetch with:
 
 ```
-> fetch -v --trace-config ids,time,http/2  https://curl.se
+> fetch -v --trace-config ids,time,http/2  https://fetch.se
 ```
 
 Which gives you trace output with time information, transfer+connection ids
@@ -261,14 +261,14 @@ into IPv4 and IPv6 and makes parallel attempts. The connection filter chain
 looks like this:
 
 ```
-* create connection for http://curl.se
-conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> NULL
+* create connection for http://fetch.se
+conn[fetch.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> NULL
 * start connect
-conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> NULL
+conn[fetch.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> NULL
                                  - ballerv4 --> TCP[151.101.1.91]:443
                                  - ballerv6 --> TCP[2a04:4e42:c00::347]:443
 * v6 answers, connected
-conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> TCP[2a04:4e42:c00::347]:443
+conn[fetch.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> TCP[2a04:4e42:c00::347]:443
 * transfer
 ```
 
@@ -277,14 +277,14 @@ The modular design of connection filters and that we can plug them into each oth
 The `HAPPY-EYEBALLS` on the other hand stays focused on its side of the problem. We can use it also to make other type of connection by just giving it another filter type to try to have happy eyeballing for QUIC:
 
 ```
-* create connection for --http3-only https://curl.se
-conn[curl.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
+* create connection for --http3-only https://fetch.se
+conn[fetch.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
 * start connect
-conn[curl.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
+conn[fetch.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
                                   - ballerv4 --> HTTP/3[151.101.1.91]:443
                                   - ballerv6 --> HTTP/3[2a04:4e42:c00::347]:443
 * v6 answers, connected
-conn[curl.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> HTTP/3[2a04:4e42:c00::347]:443
+conn[fetch.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> HTTP/3[2a04:4e42:c00::347]:443
 * transfer
 ```
 
@@ -293,10 +293,10 @@ type that is used for `--http3` when **both** HTTP/3 and HTTP/2 or HTTP/1.1
 shall be attempted:
 
 ```
-* create connection for --http3 https://curl.se
-conn[curl.se] --> HTTPS-CONNECT --> NULL
+* create connection for --http3 https://fetch.se
+conn[fetch.se] --> HTTPS-CONNECT --> NULL
 * start connect
-conn[curl.se] --> HTTPS-CONNECT --> NULL
+conn[fetch.se] --> HTTPS-CONNECT --> NULL
                   - SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
                                     - ballerv4 --> HTTP/3[151.101.1.91]:443
                                     - ballerv6 --> HTTP/3[2a04:4e42:c00::347]:443
@@ -304,6 +304,6 @@ conn[curl.se] --> HTTPS-CONNECT --> NULL
                                     - ballerv4 --> TCP[151.101.1.91]:443
                                     - ballerv6 --> TCP[2a04:4e42:c00::347]:443
 * v4 QUIC answers, connected
-conn[curl.se] --> HTTPS-CONNECT --> SETUP[QUIC] --> HAPPY-EYEBALLS --> HTTP/3[151.101.1.91]:443
+conn[fetch.se] --> HTTPS-CONNECT --> SETUP[QUIC] --> HAPPY-EYEBALLS --> HTTP/3[151.101.1.91]:443
 * transfer
 ```

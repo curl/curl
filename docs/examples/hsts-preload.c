@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,7 +37,7 @@ struct entry
 
 static const struct entry preload_hosts[] = {
     {"example.com", "20370320 01:02:03"},
-    {"curl.se", "20370320 03:02:01"},
+    {"fetch.se", "20370320 03:02:01"},
     {NULL, NULL} /* end of list marker */
 };
 
@@ -104,7 +104,7 @@ int main(void)
 
     /* use the domain with HTTP but due to the preload, it should do the
        transfer using HTTPS */
-    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://curl.se");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://fetch.se");
 
     fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 

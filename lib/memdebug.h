@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -196,16 +196,16 @@ FETCH_EXTERN int fetch_dbg_fclose(FILE *file, int line, const char *source);
 */
 
 #ifndef fake_sclose
-#define fake_sclose(x) Curl_nop_stmt
+#define fake_sclose(x) Fetch_nop_stmt
 #endif
 
 /*
- * Curl_safefree defined as a macro to allow MemoryTracking feature
- * to log free() calls at same location where Curl_safefree is used.
+ * Fetch_safefree defined as a macro to allow MemoryTracking feature
+ * to log free() calls at same location where Fetch_safefree is used.
  * This macro also assigns NULL to given pointer when free'd.
  */
 
-#define Curl_safefree(ptr) \
+#define Fetch_safefree(ptr) \
   do                       \
   {                        \
     free((ptr));           \

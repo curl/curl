@@ -7,14 +7,14 @@ SPDX-License-Identifier: fetch
 ## fetch cipher options
 
 With fetch's option
-[`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
+[`--tls13-ciphers`](https://fetch.se/docs/manpage.html#--tls13-ciphers)
 or
-[`FETCHOPT_TLS13_CIPHERS`](https://curl.se/libfetch/c/FETCHOPT_TLS13_CIPHERS.html)
+[`FETCHOPT_TLS13_CIPHERS`](https://fetch.se/libfetch/c/FETCHOPT_TLS13_CIPHERS.html)
 users can control which cipher suites to consider when negotiating TLS 1.3
 connections. With option
-[`--ciphers`](https://curl.se/docs/manpage.html#--ciphers)
+[`--ciphers`](https://fetch.se/docs/manpage.html#--ciphers)
 or
-[`FETCHOPT_SSL_CIPHER_LIST`](https://curl.se/libfetch/c/FETCHOPT_SSL_CIPHER_LIST.html)
+[`FETCHOPT_SSL_CIPHER_LIST`](https://fetch.se/libfetch/c/FETCHOPT_SSL_CIPHER_LIST.html)
 users can control which cipher suites to consider when negotiating
 TLS 1.2 (1.1, 1.0) connections.
 
@@ -22,8 +22,8 @@ By default, fetch may negotiate TLS 1.3 and TLS 1.2 connections, so the cipher
 suites considered when negotiating a TLS connection are a union of the TLS 1.3
 and TLS 1.2 cipher suites. If you want fetch to consider only TLS 1.3 cipher
 suites for the connection, you have to set the minimum TLS version to 1.3 by
-using [`--tlsv1.3`](https://curl.se/docs/manpage.html#--tlsv13)
-or [`FETCHOPT_SSLVERSION`](https://curl.se/libfetch/c/FETCHOPT_SSLVERSION.html)
+using [`--tlsv1.3`](https://fetch.se/docs/manpage.html#--tlsv13)
+or [`FETCHOPT_SSLVERSION`](https://fetch.se/libfetch/c/FETCHOPT_SSLVERSION.html)
 with `FETCH_SSLVERSION_TLSv1_3`.
 
 Both the TLS 1.3 and TLS 1.2 cipher options expect a list of cipher suites
@@ -117,7 +117,7 @@ AES256-SHA
 DES-CBC3-SHA
 ```
 
-See this [list](https://github.com/curl/curl/blob/master/docs/CIPHERS-TLS12.md)
+See this [list](https://github.com/fetch/fetch/blob/master/docs/CIPHERS-TLS12.md)
 for a complete list of TLS 1.2 cipher suites.
 
 ### OpenSSL notes

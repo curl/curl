@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -97,16 +97,16 @@ struct gtls_ssl_backend_data
 
 static ssize_t gtls_push(void *s, const void *buf, size_t blen)
 {
-  struct Curl_cfilter *cf = s;
+  struct Fetch_cfilter *cf = s;
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
       (struct gtls_ssl_backend_data *)connssl->backend;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
+  struct Fetch_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   FETCHcode result;
 
   DEBUGASSERT(data);
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &result);
+  nwritten = Fetch_conn_cf_send(cf->next, data, buf, blen, FALSE, &result);
   FETCH_TRC_CF(data, cf, "gtls_push(len=%zu) -> %zd, err=%d",
                blen, nwritten, result);
   backend->gtls.io_result = result;
@@ -121,18 +121,18 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
 
 static ssize_t gtls_pull(void *s, void *buf, size_t blen)
 {
-  struct Curl_cfilter *cf = s;
+  struct Fetch_cfilter *cf = s;
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
       (struct gtls_ssl_backend_data *)connssl->backend;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
+  struct Fetch_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   FETCHcode result;
 
   DEBUGASSERT(data);
   if (!backend->gtls.shared_creds->trust_setup)
   {
-    result = Curl_gtls_client_trust_setup(cf, data, &backend->gtls);
+    result = Fetch_gtls_client_trust_setup(cf, data, &backend->gtls);
     if (result)
     {
       gnutls_transport_set_errno(backend->gtls.session, EINVAL);
@@ -141,7 +141,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
     }
   }
 
-  nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+  nread = Fetch_conn_cf_recv(cf->next, data, buf, blen, &result);
   FETCH_TRC_CF(data, cf, "glts_pull(len=%zu) -> %zd, err=%d",
                blen, nread, result);
   backend->gtls.io_result = result;
@@ -158,7 +158,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
 
 /* gtls_init()
  *
- * Global GnuTLS init, called from Curl_ssl_init(). This calls functions that
+ * Global GnuTLS init, called from Fetch_ssl_init(). This calls functions that
  * are not thread-safe and thus this function itself is not thread-safe and
  * must only be called from within fetch_global_init() to keep the thread
  * situation under control!
@@ -188,14 +188,14 @@ static void gtls_cleanup(void)
 }
 
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-static void showtime(struct Curl_easy *data,
+static void showtime(struct Fetch_easy *data,
                      const char *text,
                      time_t stamp)
 {
   struct tm buffer;
   const struct tm *tm = &buffer;
   char str[96];
-  FETCHcode result = Curl_gmtime(stamp, &buffer);
+  FETCHcode result = Fetch_gmtime(stamp, &buffer);
   if (result)
     return;
 
@@ -203,9 +203,9 @@ static void showtime(struct Curl_easy *data,
             sizeof(str),
             "  %s: %s, %02d %s %4d %02d:%02d:%02d GMT",
             text,
-            Curl_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
+            Fetch_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
             tm->tm_mday,
-            Curl_month[tm->tm_mon],
+            Fetch_month[tm->tm_mon],
             tm->tm_year + 1900,
             tm->tm_hour,
             tm->tm_min,
@@ -245,8 +245,8 @@ static void unload_file(gnutls_datum_t data)
 }
 
 /* this function does a SSL/TLS (re-)handshake */
-static FETCHcode handshake(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
+static FETCHcode handshake(struct Fetch_cfilter *cf,
+                           struct Fetch_easy *data,
                            bool duringconnect,
                            bool nonblocking)
 {
@@ -254,7 +254,7 @@ static FETCHcode handshake(struct Curl_cfilter *cf,
   struct gtls_ssl_backend_data *backend =
       (struct gtls_ssl_backend_data *)connssl->backend;
   gnutls_session_t session;
-  fetch_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+  fetch_socket_t sockfd = Fetch_conn_cf_get_socket(cf, data);
 
   DEBUGASSERT(backend);
   session = backend->gtls.session;
@@ -266,7 +266,7 @@ static FETCHcode handshake(struct Curl_cfilter *cf,
     int rc;
 
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(data, NULL, duringconnect);
+    timeout_ms = Fetch_timeleft(data, NULL, duringconnect);
 
     if (timeout_ms < 0)
     {
@@ -282,7 +282,7 @@ static FETCHcode handshake(struct Curl_cfilter *cf,
       fetch_socket_t writefd = (connssl->io_need & FETCH_SSL_IO_NEED_SEND) ? sockfd : FETCH_SOCKET_BAD;
       fetch_socket_t readfd = (connssl->io_need & FETCH_SSL_IO_NEED_RECV) ? sockfd : FETCH_SOCKET_BAD;
 
-      what = Curl_socket_check(readfd, FETCH_SOCKET_BAD, writefd,
+      what = Fetch_socket_check(readfd, FETCH_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms ? timeout_ms
                                                             : 1000);
       if (what < 0)
@@ -313,7 +313,7 @@ static FETCHcode handshake(struct Curl_cfilter *cf,
     {
       /* After having send off the ClientHello, we prepare the trust
        * store to verify the coming certificate from the server */
-      FETCHcode result = Curl_gtls_client_trust_setup(cf, data, &backend->gtls);
+      FETCHcode result = Fetch_gtls_client_trust_setup(cf, data, &backend->gtls);
       if (result)
         return result;
     }
@@ -385,7 +385,7 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
 #define GNUTLS_SRP "+SRP"
 
 static FETCHcode
-gnutls_set_ssl_version_min_max(struct Curl_easy *data,
+gnutls_set_ssl_version_min_max(struct Fetch_easy *data,
                                struct ssl_peer *peer,
                                struct ssl_primary_config *conn_config,
                                const char **prioritylist,
@@ -475,7 +475,7 @@ gnutls_set_ssl_version_min_max(struct Curl_easy *data,
   return FETCHE_SSL_CONNECT_ERROR;
 }
 
-FETCHcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
+FETCHcode Fetch_gtls_shared_creds_create(struct Fetch_easy *data,
                                         struct gtls_shared_creds **pcreds)
 {
   struct gtls_shared_creds *shared;
@@ -495,12 +495,12 @@ FETCHcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
   }
 
   shared->refcount = 1;
-  shared->time = Curl_now();
+  shared->time = Fetch_now();
   *pcreds = shared;
   return FETCHE_OK;
 }
 
-FETCHcode Curl_gtls_shared_creds_up_ref(struct gtls_shared_creds *creds)
+FETCHcode Fetch_gtls_shared_creds_up_ref(struct gtls_shared_creds *creds)
 {
   DEBUGASSERT(creds);
   if (creds->refcount < SIZE_T_MAX)
@@ -511,7 +511,7 @@ FETCHcode Curl_gtls_shared_creds_up_ref(struct gtls_shared_creds *creds)
   return FETCHE_BAD_FUNCTION_ARGUMENT;
 }
 
-void Curl_gtls_shared_creds_free(struct gtls_shared_creds **pcreds)
+void Fetch_gtls_shared_creds_free(struct gtls_shared_creds **pcreds)
 {
   struct gtls_shared_creds *shared = *pcreds;
   *pcreds = NULL;
@@ -527,12 +527,12 @@ void Curl_gtls_shared_creds_free(struct gtls_shared_creds **pcreds)
   }
 }
 
-static FETCHcode gtls_populate_creds(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
+static FETCHcode gtls_populate_creds(struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data,
                                      gnutls_certificate_credentials_t creds)
 {
-  struct ssl_primary_config *config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_primary_config *config = Fetch_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
   int rc;
 
   if (config->verifypeer)
@@ -619,12 +619,12 @@ static FETCHcode gtls_populate_creds(struct Curl_cfilter *cf,
 /* key to use at `multi->proto_hash` */
 #define MPROTO_GTLS_X509_KEY "tls:gtls:x509:share"
 
-static bool gtls_shared_creds_expired(const struct Curl_easy *data,
+static bool gtls_shared_creds_expired(const struct Fetch_easy *data,
                                       const struct gtls_shared_creds *sc)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  struct fetchtime now = Curl_now();
-  timediff_t elapsed_ms = Curl_timediff(now, sc->time);
+  struct fetchtime now = Fetch_now();
+  timediff_t elapsed_ms = Fetch_timediff(now, sc->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if (timeout_ms < 0)
@@ -633,10 +633,10 @@ static bool gtls_shared_creds_expired(const struct Curl_easy *data,
   return elapsed_ms >= timeout_ms;
 }
 
-static bool gtls_shared_creds_different(struct Curl_cfilter *cf,
+static bool gtls_shared_creds_different(struct Fetch_cfilter *cf,
                                         const struct gtls_shared_creds *sc)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
   if (!sc->CAfile || !conn_config->CAfile)
     return sc->CAfile != conn_config->CAfile;
 
@@ -644,13 +644,13 @@ static bool gtls_shared_creds_different(struct Curl_cfilter *cf,
 }
 
 static struct gtls_shared_creds *
-gtls_get_cached_creds(struct Curl_cfilter *cf, struct Curl_easy *data)
+gtls_get_cached_creds(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct gtls_shared_creds *shared_creds;
 
   if (data->multi)
   {
-    shared_creds = Curl_hash_pick(&data->multi->proto_hash,
+    shared_creds = Fetch_hash_pick(&data->multi->proto_hash,
                                   (void *)MPROTO_GTLS_X509_KEY,
                                   sizeof(MPROTO_GTLS_X509_KEY) - 1);
     if (shared_creds && shared_creds->creds &&
@@ -670,14 +670,14 @@ static void gtls_shared_creds_hash_free(void *key, size_t key_len, void *p)
   DEBUGASSERT(!memcmp(MPROTO_GTLS_X509_KEY, key, key_len));
   (void)key;
   (void)key_len;
-  Curl_gtls_shared_creds_free(&sc); /* down reference */
+  Fetch_gtls_shared_creds_free(&sc); /* down reference */
 }
 
-static void gtls_set_cached_creds(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static void gtls_set_cached_creds(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct gtls_shared_creds *sc)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
 
   DEBUGASSERT(sc);
   DEBUGASSERT(sc->creds);
@@ -693,25 +693,25 @@ static void gtls_set_cached_creds(struct Curl_cfilter *cf,
       return;
   }
 
-  if (Curl_gtls_shared_creds_up_ref(sc))
+  if (Fetch_gtls_shared_creds_up_ref(sc))
     return;
 
-  if (!Curl_hash_add2(&data->multi->proto_hash,
+  if (!Fetch_hash_add2(&data->multi->proto_hash,
                       (void *)MPROTO_GTLS_X509_KEY,
                       sizeof(MPROTO_GTLS_X509_KEY) - 1,
                       sc, gtls_shared_creds_hash_free))
   {
-    Curl_gtls_shared_creds_free(&sc); /* down reference again */
+    Fetch_gtls_shared_creds_free(&sc); /* down reference again */
     return;
   }
 }
 
-FETCHcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
+FETCHcode Fetch_gtls_client_trust_setup(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data,
                                        struct gtls_ctx *gtls)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
   struct gtls_shared_creds *cached_creds = NULL;
   bool cache_criteria_met;
   FETCHcode result;
@@ -731,10 +731,10 @@ FETCHcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
   if (cache_criteria_met)
     cached_creds = gtls_get_cached_creds(cf, data);
 
-  if (cached_creds && !Curl_gtls_shared_creds_up_ref(cached_creds))
+  if (cached_creds && !Fetch_gtls_shared_creds_up_ref(cached_creds))
   {
     FETCH_TRC_CF(data, cf, "using shared trust anchors and CRLs");
-    Curl_gtls_shared_creds_free(&gtls->shared_creds);
+    Fetch_gtls_shared_creds_free(&gtls->shared_creds);
     gtls->shared_creds = cached_creds;
     rc = gnutls_credentials_set(gtls->session, GNUTLS_CRD_CERTIFICATE,
                                 gtls->shared_creds->creds);
@@ -757,8 +757,8 @@ FETCHcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+FETCHcode Fetch_gtls_cache_session(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   const char *ssl_peer_key,
                                   gnutls_session_t session,
                                   fetch_off_t valid_until,
@@ -766,8 +766,8 @@ FETCHcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                   unsigned char *quic_tp,
                                   size_t quic_tp_len)
 {
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct Curl_ssl_session *sc_session;
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
+  struct Fetch_ssl_session *sc_session;
   unsigned char *sdata, *qtp_clone = NULL;
   size_t sdata_len = 0;
   size_t earlydata_max = 0;
@@ -800,7 +800,7 @@ FETCHcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                earlydata_max);
   if (quic_tp && quic_tp_len)
   {
-    qtp_clone = Curl_memdup0((char *)quic_tp, quic_tp_len);
+    qtp_clone = Fetch_memdup0((char *)quic_tp, quic_tp_len);
     if (!qtp_clone)
     {
       free(sdata);
@@ -808,21 +808,21 @@ FETCHcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
     }
   }
 
-  result = Curl_ssl_session_create2(sdata, sdata_len,
-                                    Curl_glts_get_ietf_proto(session),
+  result = Fetch_ssl_session_create2(sdata, sdata_len,
+                                    Fetch_glts_get_ietf_proto(session),
                                     alpn, valid_until, earlydata_max,
                                     qtp_clone, quic_tp_len,
                                     &sc_session);
   /* call took ownership of `sdata` and `qtp_clone` */
   if (!result)
   {
-    result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
+    result = Fetch_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
     /* took ownership of `sc_session` */
   }
   return result;
 }
 
-int Curl_glts_get_ietf_proto(gnutls_session_t session)
+int Fetch_glts_get_ietf_proto(gnutls_session_t session)
 {
   switch (gnutls_protocol_get_version(session))
   {
@@ -841,12 +841,12 @@ int Curl_glts_get_ietf_proto(gnutls_session_t session)
   }
 }
 
-static FETCHcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
-                                           struct Curl_easy *data,
+static FETCHcode cf_gtls_update_session_id(struct Fetch_cfilter *cf,
+                                           struct Fetch_easy *data,
                                            gnutls_session_t session)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  return Curl_gtls_cache_session(cf, data, connssl->peer.scache_key,
+  return Fetch_gtls_cache_session(cf, data, connssl->peer.scache_key,
                                  session, 0, connssl->negotiated.alpn,
                                  NULL, 0);
 }
@@ -855,13 +855,13 @@ static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
                              unsigned when, unsigned int incoming,
                              const gnutls_datum_t *msg)
 {
-  struct Curl_cfilter *cf = gnutls_session_get_ptr(session);
+  struct Fetch_cfilter *cf = gnutls_session_get_ptr(session);
 
   (void)msg;
   (void)incoming;
   if (when)
   { /* after message has been processed */
-    struct Curl_easy *data = CF_DATA_CURRENT(cf);
+    struct Fetch_easy *data = CF_DATA_CURRENT(cf);
     if (data)
     {
       FETCH_TRC_CF(data, cf, "handshake: %s message type %d",
@@ -881,14 +881,14 @@ static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
   return 0;
 }
 
-static FETCHcode gtls_client_init(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static FETCHcode gtls_client_init(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct ssl_peer *peer,
                                   size_t earlydata_max,
                                   struct gtls_ctx *gtls)
 {
-  struct ssl_primary_config *config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_primary_config *config = Fetch_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
   unsigned int init_flags;
   int rc;
   bool sni = TRUE; /* default is SNI enabled */
@@ -909,12 +909,12 @@ static FETCHcode gtls_client_init(struct Curl_cfilter *cf,
     sni = FALSE; /* SSLv3 has no SNI */
 
   /* allocate a shared creds struct */
-  result = Curl_gtls_shared_creds_create(data, &gtls->shared_creds);
+  result = Fetch_gtls_shared_creds_create(data, &gtls->shared_creds);
   if (result)
     return result;
 
 #ifdef USE_GNUTLS_SRP
-  if (config->username && Curl_auth_allowed_to_host(data))
+  if (config->username && Fetch_auth_allowed_to_host(data))
   {
     infof(data, "Using TLS-SRP username: %s", config->username);
 
@@ -1060,7 +1060,7 @@ static FETCHcode gtls_client_init(struct Curl_cfilter *cf,
   {
     if (!gtls->shared_creds->trust_setup)
     {
-      result = Curl_gtls_client_trust_setup(cf, data, gtls);
+      result = Fetch_gtls_client_trust_setup(cf, data, gtls);
       if (result)
         return result;
     }
@@ -1165,13 +1165,13 @@ static int keylog_callback(gnutls_session_t session, const char *label,
     return -1;
   }
 
-  Curl_tls_keylog_write(label, crandom.data, secret->data, secret->size);
+  Fetch_tls_keylog_write(label, crandom.data, secret->data, secret->size);
   return 0;
 }
 
-static FETCHcode gtls_on_session_reuse(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       struct Curl_ssl_session *scs,
+static FETCHcode gtls_on_session_reuse(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data,
+                                       struct Fetch_ssl_session *scs,
                                        bool *do_early_data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1187,7 +1187,7 @@ static FETCHcode gtls_on_session_reuse(struct Curl_cfilter *cf,
     /* Seems to be GnuTLS way to signal no EarlyData in session */
     FETCH_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }
-  else if (!Curl_alpn_contains_proto(connssl->alpn, scs->alpn))
+  else if (!Fetch_alpn_contains_proto(connssl->alpn, scs->alpn))
   {
     FETCH_TRC_CF(data, cf, "SSL session has different ALPN, no early data");
   }
@@ -1198,7 +1198,7 @@ static FETCHcode gtls_on_session_reuse(struct Curl_cfilter *cf,
           connssl->earlydata_max, scs->alpn);
     connssl->earlydata_state = ssl_earlydata_use;
     connssl->state = ssl_connection_deferred;
-    result = Curl_alpn_set_negotiated(cf, data, connssl,
+    result = Fetch_alpn_set_negotiated(cf, data, connssl,
                                       (const unsigned char *)scs->alpn,
                                       scs->alpn ? strlen(scs->alpn) : 0);
     *do_early_data = !result;
@@ -1206,19 +1206,19 @@ static FETCHcode gtls_on_session_reuse(struct Curl_cfilter *cf,
   return result;
 }
 
-FETCHcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
-                             struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
+FETCHcode Fetch_gtls_ctx_init(struct gtls_ctx *gctx,
+                             struct Fetch_cfilter *cf,
+                             struct Fetch_easy *data,
                              struct ssl_peer *peer,
                              const unsigned char *alpn, size_t alpn_len,
-                             Curl_gtls_ctx_setup_cb *cb_setup,
+                             Fetch_gtls_ctx_setup_cb *cb_setup,
                              void *cb_user_data,
                              void *ssl_user_data,
-                             Curl_gtls_init_session_reuse_cb *sess_reuse_cb)
+                             Fetch_gtls_init_session_reuse_cb *sess_reuse_cb)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct Curl_ssl_session *scs = NULL;
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
+  struct Fetch_ssl_session *scs = NULL;
   gnutls_datum_t gtls_alpns[5];
   size_t gtls_alpns_count = 0;
   bool gtls_session_setup = FALSE;
@@ -1231,7 +1231,7 @@ FETCHcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
      session since we need to set flags depending on the kind of reuse. */
   if (conn_config->cache_session)
   {
-    result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
+    result = Fetch_ssl_scache_take(cf, data, peer->scache_key, &scs);
     if (result)
       goto out;
 
@@ -1302,8 +1302,8 @@ FETCHcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   }
 
   /* Open the file if a TLS or QUIC backend has not done this before. */
-  Curl_tls_keylog_open();
-  if (Curl_tls_keylog_enabled())
+  Fetch_tls_keylog_open();
+  if (Fetch_tls_keylog_enabled())
   {
     gnutls_session_set_keylog_function(gctx->session, keylog_callback);
   }
@@ -1344,12 +1344,12 @@ FETCHcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   }
 
 out:
-  Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
+  Fetch_ssl_scache_return(cf, data, peer->scache_key, scs);
   return result;
 }
 
 static FETCHcode
-gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
+gtls_connect_step1(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
@@ -1368,7 +1368,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   memset(&proto, 0, sizeof(proto));
   if (connssl->alpn)
   {
-    result = Curl_alpn_to_proto_buf(&proto, connssl->alpn);
+    result = Fetch_alpn_to_proto_buf(&proto, connssl->alpn);
     if (result)
     {
       failf(data, "Error determining ALPN");
@@ -1376,7 +1376,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 
-  result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
+  result = Fetch_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
                               proto.data, proto.len,
                               NULL, NULL, cf, gtls_on_session_reuse);
   if (result)
@@ -1384,7 +1384,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if (connssl->alpn && (connssl->state != ssl_connection_deferred))
   {
-    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    Fetch_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
@@ -1400,7 +1400,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   return FETCHE_OK;
 }
 
-static FETCHcode pkp_pin_peer_pubkey(struct Curl_easy *data,
+static FETCHcode pkp_pin_peer_pubkey(struct Fetch_easy *data,
                                      gnutls_x509_crt_t cert,
                                      const char *pinnedpubkey)
 {
@@ -1448,19 +1448,19 @@ static FETCHcode pkp_pin_peer_pubkey(struct Curl_easy *data,
     /* End Gyrations */
 
     /* The one good exit point */
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey, buff1, len1);
+    result = Fetch_pin_peer_pubkey(data, pinnedpubkey, buff1, len1);
   } while (0);
 
   if (key)
     gnutls_pubkey_deinit(key);
 
-  Curl_safefree(buff1);
+  Fetch_safefree(buff1);
 
   return result;
 }
 
 FETCHcode
-Curl_gtls_verifyserver(struct Curl_easy *data,
+Fetch_gtls_verifyserver(struct Fetch_easy *data,
                        gnutls_session_t session,
                        struct ssl_primary_config *config,
                        struct ssl_config_data *ssl_config,
@@ -1533,7 +1533,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   {
     unsigned int i;
 
-    result = Curl_ssl_init_certinfo(data, (int)cert_list_size);
+    result = Fetch_ssl_init_certinfo(data, (int)cert_list_size);
     if (result)
       return result;
 
@@ -1542,7 +1542,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
       const char *beg = (const char *)chainp[i].data;
       const char *end = beg + chainp[i].size;
 
-      result = Curl_extract_certinfo(data, (int)i, beg, end);
+      result = Fetch_extract_certinfo(data, (int)i, beg, end);
       if (result)
         return result;
     }
@@ -1763,10 +1763,10 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     unsigned char addrbuf[sizeof(struct use_addr)];
     size_t addrlen = 0;
 
-    if (Curl_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
+    if (Fetch_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
       addrlen = 4;
 #ifdef USE_IPV6
-    else if (Curl_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
+    else if (Fetch_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
       addrlen = 16;
 #endif
 
@@ -1941,21 +1941,21 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   return result;
 }
 
-static FETCHcode gtls_verifyserver(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static FETCHcode gtls_verifyserver(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    gnutls_session_t session)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
 #ifndef FETCH_DISABLE_PROXY
-  const char *pinned_key = Curl_ssl_cf_is_proxy(cf) ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] : data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  const char *pinned_key = Fetch_ssl_cf_is_proxy(cf) ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] : data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   const char *pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #endif
   FETCHcode result;
 
-  result = Curl_gtls_verifyserver(data, session, conn_config, ssl_config,
+  result = Fetch_gtls_verifyserver(data, session, conn_config, ssl_config,
                                   &connssl->peer, pinned_key);
   if (result)
     goto out;
@@ -1969,8 +1969,8 @@ out:
   return result;
 }
 
-static FETCHcode gtls_set_earlydata(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+static FETCHcode gtls_set_earlydata(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     const void *buf, size_t blen)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1978,24 +1978,24 @@ static FETCHcode gtls_set_earlydata(struct Curl_cfilter *cf,
   FETCHcode result = FETCHE_OK;
 
   DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_use);
-  DEBUGASSERT(Curl_bufq_is_empty(&connssl->earlydata));
+  DEBUGASSERT(Fetch_bufq_is_empty(&connssl->earlydata));
   if (blen)
   {
     if (blen > connssl->earlydata_max)
       blen = connssl->earlydata_max;
-    nwritten = Curl_bufq_write(&connssl->earlydata, buf, blen, &result);
+    nwritten = Fetch_bufq_write(&connssl->earlydata, buf, blen, &result);
     FETCH_TRC_CF(data, cf, "gtls_set_earlydata(len=%zu) -> %zd",
                  blen, nwritten);
     if (nwritten < 0)
       return result;
   }
   connssl->earlydata_state = ssl_earlydata_sending;
-  connssl->earlydata_skip = Curl_bufq_len(&connssl->earlydata);
+  connssl->earlydata_skip = Fetch_bufq_len(&connssl->earlydata);
   return FETCHE_OK;
 }
 
-static FETCHcode gtls_send_earlydata(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data)
+static FETCHcode gtls_send_earlydata(struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
@@ -2007,7 +2007,7 @@ static FETCHcode gtls_send_earlydata(struct Curl_cfilter *cf,
 
   DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_sending);
   backend->gtls.io_result = FETCHE_OK;
-  while (Curl_bufq_peek(&connssl->earlydata, &buf, &blen))
+  while (Fetch_bufq_peek(&connssl->earlydata, &buf, &blen))
   {
     n = gnutls_record_send_early_data(backend->gtls.session, buf, blen);
     FETCH_TRC_CF(data, cf, "gtls_send_earlydata(len=%zu) -> %zd",
@@ -2027,7 +2027,7 @@ static FETCHcode gtls_send_earlydata(struct Curl_cfilter *cf,
       n = (ssize_t)blen;
     }
 
-    Curl_bufq_skip(&connssl->earlydata, (size_t)n);
+    Fetch_bufq_skip(&connssl->earlydata, (size_t)n);
   }
   /* sent everything there was */
   infof(data, "SSL sending %" FMT_OFF_T " bytes of early data",
@@ -2046,8 +2046,8 @@ out:
    'ssl_connect_3' (verifying and getting stats).
  */
 static FETCHcode
-gtls_connect_common(struct Curl_cfilter *cf,
-                    struct Curl_easy *data,
+gtls_connect_common(struct Fetch_cfilter *cf,
+                    struct Fetch_easy *data,
                     bool nonblocking,
                     bool *done)
 {
@@ -2079,8 +2079,8 @@ gtls_connect_common(struct Curl_cfilter *cf,
       if (result)
         goto out;
       connssl->earlydata_state = ssl_earlydata_sent;
-      if (!Curl_ssl_cf_is_proxy(cf))
-        Curl_pgrsEarlyData(data, (fetch_off_t)connssl->earlydata_skip);
+      if (!Fetch_ssl_cf_is_proxy(cf))
+        Fetch_pgrsEarlyData(data, (fetch_off_t)connssl->earlydata_skip);
     }
     DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
                 (connssl->earlydata_state == ssl_earlydata_sent));
@@ -2110,7 +2110,7 @@ gtls_connect_common(struct Curl_cfilter *cf,
       proto.size = 0;
     }
 
-    result = Curl_alpn_set_negotiated(cf, data, connssl,
+    result = Fetch_alpn_set_negotiated(cf, data, connssl,
                                       proto.data, proto.size);
     if (result)
       goto out;
@@ -2118,8 +2118,8 @@ gtls_connect_common(struct Curl_cfilter *cf,
     if (connssl->earlydata_state == ssl_earlydata_sent)
     {
       /* report the true time the handshake was done */
-      connssl->handshake_done = Curl_now();
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
+      connssl->handshake_done = Fetch_now();
+      Fetch_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
       if (gnutls_session_get_flags(backend->gtls.session) &
           GNUTLS_SFLAGS_EARLY_DATA)
       {
@@ -2130,8 +2130,8 @@ gtls_connect_common(struct Curl_cfilter *cf,
       else
       {
         connssl->earlydata_state = ssl_earlydata_rejected;
-        if (!Curl_ssl_cf_is_proxy(cf))
-          Curl_pgrsEarlyData(data, -(fetch_off_t)connssl->earlydata_skip);
+        if (!Fetch_ssl_cf_is_proxy(cf))
+          Fetch_pgrsEarlyData(data, -(fetch_off_t)connssl->earlydata_skip);
         infof(data, "Server rejected TLS early data.");
         connssl->earlydata_skip = 0;
       }
@@ -2149,8 +2149,8 @@ out:
   return result;
 }
 
-static FETCHcode gtls_connect_nonblocking(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
+static FETCHcode gtls_connect_nonblocking(struct Fetch_cfilter *cf,
+                                          struct Fetch_easy *data,
                                           bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -2163,8 +2163,8 @@ static FETCHcode gtls_connect_nonblocking(struct Curl_cfilter *cf,
   return gtls_connect_common(cf, data, TRUE, done);
 }
 
-static FETCHcode gtls_connect(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+static FETCHcode gtls_connect(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data)
 {
   FETCHcode result;
   bool done = FALSE;
@@ -2178,8 +2178,8 @@ static FETCHcode gtls_connect(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static FETCHcode gtls_connect_deferred(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
+static FETCHcode gtls_connect_deferred(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data,
                                        const void *buf,
                                        size_t blen,
                                        bool *done)
@@ -2199,8 +2199,8 @@ static FETCHcode gtls_connect_deferred(struct Curl_cfilter *cf,
   return gtls_connect_common(cf, data, TRUE, done);
 }
 
-static bool gtls_data_pending(struct Curl_cfilter *cf,
-                              const struct Curl_easy *data)
+static bool gtls_data_pending(struct Fetch_cfilter *cf,
+                              const struct Fetch_easy *data)
 {
   struct ssl_connect_data *ctx = cf->ctx;
   struct gtls_ssl_backend_data *backend;
@@ -2214,8 +2214,8 @@ static bool gtls_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
-static ssize_t gtls_send(struct Curl_cfilter *cf,
-                         struct Curl_easy *data,
+static ssize_t gtls_send(struct Fetch_cfilter *cf,
+                         struct Fetch_easy *data,
                          const void *buf,
                          size_t blen,
                          FETCHcode *fetchcode)
@@ -2298,8 +2298,8 @@ out:
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-static FETCHcode gtls_shutdown(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
+static FETCHcode gtls_shutdown(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
                                bool send_shutdown, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -2380,8 +2380,8 @@ out:
   return result;
 }
 
-static void gtls_close(struct Curl_cfilter *cf,
-                       struct Curl_easy *data)
+static void gtls_close(struct Fetch_cfilter *cf,
+                       struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
@@ -2397,7 +2397,7 @@ static void gtls_close(struct Curl_cfilter *cf,
   }
   if (backend->gtls.shared_creds)
   {
-    Curl_gtls_shared_creds_free(&backend->gtls.shared_creds);
+    Fetch_gtls_shared_creds_free(&backend->gtls.shared_creds);
   }
 #ifdef USE_GNUTLS_SRP
   if (backend->gtls.srp_client_cred)
@@ -2408,8 +2408,8 @@ static void gtls_close(struct Curl_cfilter *cf,
 #endif
 }
 
-static ssize_t gtls_recv(struct Curl_cfilter *cf,
-                         struct Curl_easy *data,
+static ssize_t gtls_recv(struct Fetch_cfilter *cf,
+                         struct Fetch_easy *data,
                          char *buf,
                          size_t buffersize,
                          FETCHcode *fetchcode)
@@ -2475,13 +2475,13 @@ out:
   return ret;
 }
 
-size_t Curl_gtls_version(char *buffer, size_t size)
+size_t Fetch_gtls_version(char *buffer, size_t size)
 {
   return msnprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
 
 /* data might be NULL! */
-static FETCHcode gtls_random(struct Curl_easy *data,
+static FETCHcode gtls_random(struct Fetch_easy *data,
                              unsigned char *entropy, size_t length)
 {
   int rc;
@@ -2517,7 +2517,7 @@ static void *gtls_get_internals(struct ssl_connect_data *connssl,
   return backend->gtls.session;
 }
 
-const struct Curl_ssl Curl_ssl_gnutls = {
+const struct Fetch_ssl Fetch_ssl_gnutls = {
     {FETCHSSLBACKEND_GNUTLS, "gnutls"}, /* info */
 
     SSLSUPP_CA_PATH |
@@ -2530,14 +2530,14 @@ const struct Curl_ssl Curl_ssl_gnutls = {
 
     gtls_init,                /* init */
     gtls_cleanup,             /* cleanup */
-    Curl_gtls_version,        /* version */
+    Fetch_gtls_version,        /* version */
     gtls_shutdown,            /* shutdown */
     gtls_data_pending,        /* data_pending */
     gtls_random,              /* random */
     gtls_cert_status_request, /* cert_status_request */
     gtls_connect,             /* connect */
     gtls_connect_nonblocking, /* connect_nonblocking */
-    Curl_ssl_adjust_pollset,  /* adjust_pollset */
+    Fetch_ssl_adjust_pollset,  /* adjust_pollset */
     gtls_get_internals,       /* get_internals */
     gtls_close,               /* close_one */
     NULL,                     /* close_all */

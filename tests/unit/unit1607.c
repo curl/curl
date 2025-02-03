@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -158,16 +158,16 @@ UNITTEST_START
 {
   int i;
   int testnum = sizeof(tests) / sizeof(struct testcase);
-  struct Curl_multi *multi = NULL;
-  struct Curl_easy *easy = NULL;
+  struct Fetch_multi *multi = NULL;
+  struct Fetch_easy *easy = NULL;
   struct fetch_slist *list = NULL;
 
   for (i = 0; i < testnum; ++i)
   {
     int j;
     int addressnum = sizeof(tests[i].address) / sizeof(*tests[i].address);
-    struct Curl_addrinfo *addr;
-    struct Curl_dns_entry *dns;
+    struct Fetch_addrinfo *addr;
+    struct Fetch_dns_entry *dns;
     void *entry_id;
     bool problem = false;
     easy = fetch_easy_init();
@@ -184,12 +184,12 @@ UNITTEST_START
       goto error;
     fetch_easy_setopt(easy, FETCHOPT_RESOLVE, list);
 
-    Curl_loadhostpairs(easy);
+    Fetch_loadhostpairs(easy);
 
     entry_id = (void *)aprintf("%s:%d", tests[i].host, tests[i].port);
     if (!entry_id)
       goto error;
-    dns = Curl_hash_pick(easy->dns.hostcache, entry_id, strlen(entry_id) + 1);
+    dns = Fetch_hash_pick(easy->dns.hostcache, entry_id, strlen(entry_id) + 1);
     free(entry_id);
     entry_id = NULL;
 
@@ -206,7 +206,7 @@ UNITTEST_START
       if (tests[i].address[j] == &skip)
         continue;
 
-      if (addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
+      if (addr && !Fetch_addr2string(addr->ai_addr, addr->ai_addrlen,
                                     ipaddress, &port))
       {
         fprintf(stderr, "%s:%d tests[%d] failed. getaddressinfo failed.\n",

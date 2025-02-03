@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -209,7 +209,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
   if (!ctx->data)
   {
-    ctx->data = Curl_memdup(data, size);
+    ctx->data = Fetch_memdup(data, size);
     if (ctx->data)
       ctx->size = size;
   }
@@ -225,7 +225,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
     (void)mbedtls_md4_ret(ctx->data, ctx->size, result);
 #endif
 
-    Curl_safefree(ctx->data);
+    Fetch_safefree(ctx->data);
     ctx->size = 0;
   }
 }
@@ -527,7 +527,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #endif /* CRYPTO LIBS */
 
-FETCHcode Curl_md4it(unsigned char *output, const unsigned char *input,
+FETCHcode Fetch_md4it(unsigned char *output, const unsigned char *input,
                      const size_t len)
 {
   MD4_CTX ctx;

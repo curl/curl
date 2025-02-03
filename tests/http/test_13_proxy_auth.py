@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@ import logging
 import re
 import pytest
 
-from testenv import Env, CurlClient, ExecResult
+from testenv import Env, FetchClient, ExecResult
 
 
 log = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class TestProxyAuth:
 
     # download via http: proxy (no tunnel), no auth
     def test_13_01_proxy_no_auth(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         r = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=fetch.get_proxy_args(proxys=False))
@@ -69,7 +69,7 @@ class TestProxyAuth:
 
     # download via http: proxy (no tunnel), auth
     def test_13_02_proxy_auth(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=False)
         xargs.extend(['--proxy-user', 'proxy:proxy'])
@@ -81,7 +81,7 @@ class TestProxyAuth:
                         reason='fetch lacks HTTPS-proxy support')
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
     def test_13_03_proxys_no_auth(self, env: Env, httpd, nghttpx_fwd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=True)
         r = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -92,7 +92,7 @@ class TestProxyAuth:
                         reason='fetch lacks HTTPS-proxy support')
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
     def test_13_04_proxys_auth(self, env: Env, httpd, nghttpx_fwd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=True)
         xargs.extend(['--proxy-user', 'proxy:proxy'])
@@ -101,7 +101,7 @@ class TestProxyAuth:
         r.check_response(count=1, http_status=200)
 
     def test_13_05_tunnel_http_no_auth(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=False, tunnel=True)
         r = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -110,7 +110,7 @@ class TestProxyAuth:
         r.check_response(exitcode=56, http_status=None)
 
     def test_13_06_tunnel_http_auth(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=False, tunnel=True)
         xargs.extend(['--proxy-user', 'proxy:proxy'])
@@ -126,7 +126,7 @@ class TestProxyAuth:
     def test_13_07_tunnels_no_auth(self, env: Env, httpd, proto, tunnel):
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=True, tunnel=True, proto=tunnel)
         r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True,
@@ -144,7 +144,7 @@ class TestProxyAuth:
     def test_13_08_tunnels_auth(self, env: Env, httpd, proto, tunnel):
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=True, tunnel=True, proto=tunnel)
         xargs.extend(['--proxy-user', 'proxy:proxy'])

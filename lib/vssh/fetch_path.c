@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@
 #define MAX_SSHPATH_LEN 100000 /* arbitrary */
 
 /* figure out the path to work with in this particular request */
-FETCHcode Curl_getworkingpath(struct Curl_easy *data,
+FETCHcode Fetch_getworkingpath(struct Fetch_easy *data,
                               char *homedir, /* when SFTP is used */
                               char **path)   /* returns the  allocated
                                                 real path to work with */
@@ -44,20 +44,20 @@ FETCHcode Curl_getworkingpath(struct Curl_easy *data,
   size_t working_path_len;
   struct dynbuf npath;
   FETCHcode result =
-      Curl_urldecode(data->state.up.path, 0, &working_path,
+      Fetch_urldecode(data->state.up.path, 0, &working_path,
                      &working_path_len, REJECT_ZERO);
   if (result)
     return result;
 
   /* new path to switch to in case we need to */
-  Curl_dyn_init(&npath, MAX_SSHPATH_LEN);
+  Fetch_dyn_init(&npath, MAX_SSHPATH_LEN);
 
   /* Check for /~/, indicating relative to the user's home directory */
   if ((data->conn->handler->protocol & FETCHPROTO_SCP) &&
       (working_path_len > 3) && (!memcmp(working_path, "/~/", 3)))
   {
     /* It is referenced to the home directory, so strip the leading '/~/' */
-    if (Curl_dyn_addn(&npath, &working_path[3], working_path_len - 3))
+    if (Fetch_dyn_addn(&npath, &working_path[3], working_path_len - 3))
     {
       free(working_path);
       return FETCHE_OUT_OF_MEMORY;
@@ -67,7 +67,7 @@ FETCHcode Curl_getworkingpath(struct Curl_easy *data,
            (!strcmp("/~", working_path) ||
             ((working_path_len > 2) && !memcmp(working_path, "/~/", 3))))
   {
-    if (Curl_dyn_add(&npath, homedir))
+    if (Fetch_dyn_add(&npath, homedir))
     {
       free(working_path);
       return FETCHE_OUT_OF_MEMORY;
@@ -78,12 +78,12 @@ FETCHcode Curl_getworkingpath(struct Curl_easy *data,
       const char *p;
       int copyfrom = 3;
       /* Copy a separating '/' if homedir does not end with one */
-      len = Curl_dyn_len(&npath);
-      p = Curl_dyn_ptr(&npath);
+      len = Fetch_dyn_len(&npath);
+      p = Fetch_dyn_ptr(&npath);
       if (len && (p[len - 1] != '/'))
         copyfrom = 2;
 
-      if (Curl_dyn_addn(&npath,
+      if (Fetch_dyn_addn(&npath,
                         &working_path[copyfrom], working_path_len - copyfrom))
       {
         free(working_path);
@@ -92,12 +92,12 @@ FETCHcode Curl_getworkingpath(struct Curl_easy *data,
     }
   }
 
-  if (Curl_dyn_len(&npath))
+  if (Fetch_dyn_len(&npath))
   {
     free(working_path);
 
     /* store the pointer for the caller to receive */
-    *path = Curl_dyn_ptr(&npath);
+    *path = Fetch_dyn_ptr(&npath);
   }
   else
     *path = working_path;
@@ -125,7 +125,7 @@ FETCHcode Curl_getworkingpath(struct Curl_easy *data,
 
 #define MAX_PATHLENGTH 65535 /* arbitrary long */
 
-FETCHcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
+FETCHcode Fetch_get_pathname(const char **cpp, char **path, const char *homedir)
 {
   const char *cp = *cpp, *end;
   char quot;
@@ -140,7 +140,7 @@ FETCHcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
   if (!*cp || !homedir)
     return FETCHE_QUOTE_ERROR;
 
-  Curl_dyn_init(&out, MAX_PATHLENGTH);
+  Fetch_dyn_init(&out, MAX_PATHLENGTH);
 
   /* Ignore leading whitespace */
   cp += strspn(cp, WHITESPACE);
@@ -171,12 +171,12 @@ FETCHcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
           goto fail;
         }
       }
-      result = Curl_dyn_addn(&out, &cp[i], 1);
+      result = Fetch_dyn_addn(&out, &cp[i], 1);
       if (result)
         return result;
     }
 
-    if (!Curl_dyn_len(&out))
+    if (!Fetch_dyn_len(&out))
       goto fail;
 
     /* return pointer to second parameter if it exists */
@@ -195,23 +195,23 @@ FETCHcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
     /* Handling for relative path - prepend home directory */
     if (cp[0] == '/' && cp[1] == '~' && cp[2] == '/')
     {
-      result = Curl_dyn_add(&out, homedir);
+      result = Fetch_dyn_add(&out, homedir);
       if (!result)
-        result = Curl_dyn_addn(&out, "/", 1);
+        result = Fetch_dyn_addn(&out, "/", 1);
       if (result)
         return result;
       cp += 3;
     }
     /* Copy path name up until first "whitespace" */
-    result = Curl_dyn_addn(&out, cp, (end - cp));
+    result = Fetch_dyn_addn(&out, cp, (end - cp));
     if (result)
       return result;
   }
-  *path = Curl_dyn_ptr(&out);
+  *path = Fetch_dyn_ptr(&out);
   return FETCHE_OK;
 
 fail:
-  Curl_dyn_free(&out);
+  Fetch_dyn_free(&out);
   return FETCHE_QUOTE_ERROR;
 }
 

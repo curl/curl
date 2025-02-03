@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -139,7 +139,7 @@ class EnvConfig:
             'cert': 'xxx',
         }
         self.htdocs_dir = os.path.join(self.gen_dir, 'htdocs')
-        self.tld = 'http.curl.se'
+        self.tld = 'http.fetch.se'
         self.domain1 = f"one.{self.tld}"
         self.domain1brotli = f"brotli.one.{self.tld}"
         self.domain2 = f"two.{self.tld}"

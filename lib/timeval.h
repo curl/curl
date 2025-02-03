@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@ struct fetchtime
   int tv_usec;   /* microseconds */
 };
 
-struct fetchtime Curl_now(void);
+struct fetchtime Fetch_now(void);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -42,7 +42,7 @@ struct fetchtime Curl_now(void);
  *
  * Returns: the time difference in number of milliseconds.
  */
-timediff_t Curl_timediff(struct fetchtime newer, struct fetchtime older);
+timediff_t Fetch_timediff(struct fetchtime newer, struct fetchtime older);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -50,7 +50,7 @@ timediff_t Curl_timediff(struct fetchtime newer, struct fetchtime older);
  *
  * Returns: the time difference in number of milliseconds, rounded up.
  */
-timediff_t Curl_timediff_ceil(struct fetchtime newer, struct fetchtime older);
+timediff_t Fetch_timediff_ceil(struct fetchtime newer, struct fetchtime older);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -58,6 +58,6 @@ timediff_t Curl_timediff_ceil(struct fetchtime newer, struct fetchtime older);
  *
  * Returns: the time difference in number of microseconds.
  */
-timediff_t Curl_timediff_us(struct fetchtime newer, struct fetchtime older);
+timediff_t Fetch_timediff_us(struct fetchtime newer, struct fetchtime older);
 
 #endif /* HEADER_FETCH_TIMEVAL_H */

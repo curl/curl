@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@
 #include "getinfo.h"
 
 #include "vtls/vtls.h"
-#include "connect.h" /* Curl_getconnectinfo() */
+#include "connect.h" /* Fetch_getconnectinfo() */
 #include "progress.h"
 
 /* The last #include files should be: */
@@ -44,7 +44,7 @@
  * beginning of a perform session. It must reset the session-info variables,
  * in particular all variables in struct PureInfo.
  */
-FETCHcode Curl_initinfo(struct Curl_easy *data)
+FETCHcode Fetch_initinfo(struct Fetch_easy *data)
 {
   struct Progress *pro = &data->progress;
   struct PureInfo *info = &data->info;
@@ -88,12 +88,12 @@ FETCHcode Curl_initinfo(struct Curl_easy *data)
   info->conn_protocol = 0;
 
 #ifdef USE_SSL
-  Curl_ssl_free_certinfo(data);
+  Fetch_ssl_free_certinfo(data);
 #endif
   return FETCHE_OK;
 }
 
-static FETCHcode getinfo_char(struct Curl_easy *data, FETCHINFO info,
+static FETCHcode getinfo_char(struct Fetch_easy *data, FETCHINFO info,
                               const char **param_charp)
 {
   switch (info)
@@ -198,7 +198,7 @@ static FETCHcode getinfo_char(struct Curl_easy *data, FETCHINFO info,
   return FETCHE_OK;
 }
 
-static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
+static FETCHcode getinfo_long(struct Fetch_easy *data, FETCHINFO info,
                               long *param_longp)
 {
   fetch_socket_t sockfd;
@@ -300,7 +300,7 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
     *param_longp = data->info.numconnects;
     break;
   case FETCHINFO_LASTSOCKET:
-    sockfd = Curl_getconnectinfo(data, NULL);
+    sockfd = Fetch_getconnectinfo(data, NULL);
 
     /* note: this is not a good conversion for systems with 64-bit sockets and
        32-bit longs */
@@ -387,7 +387,7 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
 
 #define DOUBLE_SECS(x) (double)(x) / 1000000
 
-static FETCHcode getinfo_offt(struct Curl_easy *data, FETCHINFO info,
+static FETCHcode getinfo_offt(struct Fetch_easy *data, FETCHINFO info,
                               fetch_off_t *param_offt)
 {
 #ifdef DEBUGBUILD
@@ -484,7 +484,7 @@ static FETCHcode getinfo_offt(struct Curl_easy *data, FETCHINFO info,
   return FETCHE_OK;
 }
 
-static FETCHcode getinfo_double(struct Curl_easy *data, FETCHINFO info,
+static FETCHcode getinfo_double(struct Fetch_easy *data, FETCHINFO info,
                                 double *param_doublep)
 {
 #ifdef DEBUGBUILD
@@ -559,7 +559,7 @@ static FETCHcode getinfo_double(struct Curl_easy *data, FETCHINFO info,
   return FETCHE_OK;
 }
 
-static FETCHcode getinfo_slist(struct Curl_easy *data, FETCHINFO info,
+static FETCHcode getinfo_slist(struct Fetch_easy *data, FETCHINFO info,
                                struct fetch_slist **param_slistp)
 {
   union
@@ -571,10 +571,10 @@ static FETCHcode getinfo_slist(struct Curl_easy *data, FETCHINFO info,
   switch (info)
   {
   case FETCHINFO_SSL_ENGINES:
-    *param_slistp = Curl_ssl_engines_list(data);
+    *param_slistp = Fetch_ssl_engines_list(data);
     break;
   case FETCHINFO_COOKIELIST:
-    *param_slistp = Curl_cookie_list(data);
+    *param_slistp = Fetch_cookie_list(data);
     break;
   case FETCHINFO_CERTINFO:
     /* Return the a pointer to the certinfo struct. Not really an slist
@@ -593,13 +593,13 @@ static FETCHcode getinfo_slist(struct Curl_easy *data, FETCHINFO info,
 #endif
 
     *tsip = tsi;
-    tsi->backend = Curl_ssl_backend();
+    tsi->backend = Fetch_ssl_backend();
     tsi->internals = NULL;
 
 #ifdef USE_SSL
     if (conn && tsi->backend != FETCHSSLBACKEND_NONE)
     {
-      tsi->internals = Curl_ssl_get_internals(data, FIRSTSOCKET, info, 0);
+      tsi->internals = Fetch_ssl_get_internals(data, FIRSTSOCKET, info, 0);
     }
 #endif
   }
@@ -611,13 +611,13 @@ static FETCHcode getinfo_slist(struct Curl_easy *data, FETCHINFO info,
   return FETCHE_OK;
 }
 
-static FETCHcode getinfo_socket(struct Curl_easy *data, FETCHINFO info,
+static FETCHcode getinfo_socket(struct Fetch_easy *data, FETCHINFO info,
                                 fetch_socket_t *param_socketp)
 {
   switch (info)
   {
   case FETCHINFO_ACTIVESOCKET:
-    *param_socketp = Curl_getconnectinfo(data, NULL);
+    *param_socketp = Fetch_getconnectinfo(data, NULL);
     break;
   default:
     return FETCHE_UNKNOWN_OPTION;
@@ -626,7 +626,7 @@ static FETCHcode getinfo_socket(struct Curl_easy *data, FETCHINFO info,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_getinfo(struct Curl_easy *data, FETCHINFO info, ...)
+FETCHcode Fetch_getinfo(struct Fetch_easy *data, FETCHINFO info, ...)
 {
   va_list arg;
   long *param_longp = NULL;

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -58,8 +58,8 @@ static void test_parse(
   char *dev = NULL;
   char *iface = NULL;
   char *host = NULL;
-  FETCHcode rc = Curl_parse_interface(input_data, &dev, &iface, &host);
-  fail_unless(rc == exp_rc, "Curl_parse_interface() failed");
+  FETCHcode rc = Fetch_parse_interface(input_data, &dev, &iface, &host);
+  fail_unless(rc == exp_rc, "Fetch_parse_interface() failed");
 
   fail_unless(!!exp_dev == !!dev, "dev expectation failed.");
   fail_unless(!!exp_iface == !!iface, "iface expectation failed");

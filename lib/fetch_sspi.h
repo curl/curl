@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,23 +42,23 @@
 #include <sspi.h>
 #include <rpc.h>
 
-FETCHcode Curl_sspi_global_init(void);
-void Curl_sspi_global_cleanup(void);
+FETCHcode Fetch_sspi_global_init(void);
+void Fetch_sspi_global_cleanup(void);
 
 /* This is used to populate the domain in a SSPI identity structure */
-FETCHcode Curl_override_sspi_http_realm(const char *chlg,
+FETCHcode Fetch_override_sspi_http_realm(const char *chlg,
                                         SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* This is used to generate an SSPI identity structure */
-FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
+FETCHcode Fetch_create_sspi_identity(const char *userp, const char *passwdp,
                                     SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* This is used to free an SSPI identity structure */
-void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
+void Fetch_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* Forward-declaration of global variables defined in fetch_sspi.c */
-extern HMODULE Curl_hSecDll;
-extern PSecurityFunctionTable Curl_pSecFn;
+extern HMODULE Fetch_hSecDll;
+extern PSecurityFunctionTable Fetch_pSecFn;
 
 /* Provide some definitions missing in old headers */
 #define SP_NAME_DIGEST "WDigest"

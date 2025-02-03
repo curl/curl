@@ -80,7 +80,7 @@ the remote document (if no filename part is specified in the URL, this fails):
 
 Fetch two files and store them with their remote names:
 
-    fetch -O www.haxx.se/index.html -O curl.se/download.html
+    fetch -O www.haxx.se/index.html -O fetch.se/download.html
 
 ## Using Passwords
 
@@ -291,7 +291,7 @@ then stores the headers in the specified file.
 
 Store the HTTP headers in a separate file (headers.txt in the example):
 
-      fetch --dump-header headers.txt curl.se
+      fetch --dump-header headers.txt fetch.se
 
 Note that headers stored in a separate file can be useful at a later time if
 you want fetch to use cookies sent by the server. More about that in the
@@ -798,7 +798,7 @@ a fallback mechanism in case version 3 fails to connect.
 LDAP is a complex thing and writing an LDAP query is not an easy
 task. Familiarize yourself with the exact syntax description elsewhere. One
 such place might be: [RFC 2255, The LDAP URL
-Format](https://curl.se/rfc/rfc2255.txt)
+Format](https://fetch.se/rfc/rfc2255.txt)
 
 To show you an example, this is how to get all people from an LDAP server that
 has a certain subdomain in their email address:
@@ -860,7 +860,7 @@ use it for all protocols where authentication is used.
 
 A simple `.netrc` file could look something like:
 
-    machine curl.se login iamdaniel password mysecret
+    machine fetch.se login iamdaniel password mysecret
 
 ## Custom Output
 
@@ -974,7 +974,7 @@ IPv6 addresses provided other than in URLs (e.g. to the `--proxy`,
 
 For your convenience, we have several open mailing lists to discuss fetch, its
 development and things relevant to this. Get all info at
-https://curl.se/mail/.
+https://fetch.se/mail/.
 
 Please direct fetch questions, feature requests and trouble reports to one of
 these mailing lists instead of mailing any individual.

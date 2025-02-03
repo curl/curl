@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@
 import logging
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, FetchClient
 
 
 log = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class TestErrors:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         count = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
                f'/fetchtest/tweak?id=[0-{count - 1}]'\
                '&chunks=3&chunk_size=16000&body_error=reset'
@@ -76,7 +76,7 @@ class TestErrors:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         count = 20
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
                f'/fetchtest/tweak?id=[0-{count - 1}]'\
                '&chunks=5&chunk_size=16000&body_error=reset'
@@ -93,7 +93,7 @@ class TestErrors:
 
     # access a resource that, on h2, RST the stream with HTTP_1_1_REQUIRED
     def test_05_03_required(self, env: Env, httpd, nghttpx):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         proto = 'http/1.1'
         urln = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/1_1'
         r = fetch.http_download(urls=[urln], alpn_proto=proto)
@@ -121,7 +121,7 @@ class TestErrors:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 10 if proto == 'h2' else 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}'\
                 f'/fetchtest/shutdown_unclean?id=[0-{count-1}]&chunks=4'
         r = fetch.http_download(urls=[url], alpn_proto=proto, extra_args=[

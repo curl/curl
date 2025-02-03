@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -68,7 +68,7 @@
 #endif
 #endif
 
-FETCHcode Curl_win32_random(unsigned char *entropy, size_t length)
+FETCHcode Fetch_win32_random(unsigned char *entropy, size_t length)
 {
   memset(entropy, 0, length);
 
@@ -103,7 +103,7 @@ FETCHcode Curl_win32_random(unsigned char *entropy, size_t length)
 
 #if !defined(USE_SSL)
 /* ---- possibly non-cryptographic version following ---- */
-static FETCHcode weak_random(struct Curl_easy *data,
+static FETCHcode weak_random(struct Fetch_easy *data,
                              unsigned char *entropy,
                              size_t length) /* always 4, size of int */
 {
@@ -114,7 +114,7 @@ static FETCHcode weak_random(struct Curl_easy *data,
 #ifdef _WIN32
   (void)data;
   {
-    FETCHcode result = Curl_win32_random(entropy, length);
+    FETCHcode result = Fetch_win32_random(entropy, length);
     if (result != FETCHE_NOT_BUILT_IN)
       return result;
   }
@@ -132,7 +132,7 @@ static FETCHcode weak_random(struct Curl_easy *data,
     unsigned int rnd;
     if (!seeded)
     {
-      struct fetchtime now = Curl_now();
+      struct fetchtime now = Fetch_now();
       randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
       randseed = randseed * 1103515245 + 12345;
       randseed = randseed * 1103515245 + 12345;
@@ -151,12 +151,12 @@ static FETCHcode weak_random(struct Curl_easy *data,
 #endif
 
 #ifdef USE_SSL
-#define _random(x, y, z) Curl_ssl_random(x, y, z)
+#define _random(x, y, z) Fetch_ssl_random(x, y, z)
 #else
 #define _random(x, y, z) weak_random(x, y, z)
 #endif
 
-static FETCHcode randit(struct Curl_easy *data, unsigned int *rnd,
+static FETCHcode randit(struct Fetch_easy *data, unsigned int *rnd,
                         bool env_override)
 {
 #ifdef DEBUGBUILD
@@ -193,7 +193,7 @@ static FETCHcode randit(struct Curl_easy *data, unsigned int *rnd,
 }
 
 /*
- * Curl_rand() stores 'num' number of random unsigned characters in the buffer
+ * Fetch_rand() stores 'num' number of random unsigned characters in the buffer
  * 'rnd' points to.
  *
  * If libfetch is built without TLS support or with a TLS backend that lacks a
@@ -208,7 +208,7 @@ static FETCHcode randit(struct Curl_easy *data, unsigned int *rnd,
  *
  */
 
-FETCHcode Curl_rand_bytes(struct Curl_easy *data,
+FETCHcode Fetch_rand_bytes(struct Fetch_easy *data,
 #ifdef DEBUGBUILD
                           bool env_override,
 #endif
@@ -243,12 +243,12 @@ FETCHcode Curl_rand_bytes(struct Curl_easy *data,
 }
 
 /*
- * Curl_rand_hex() fills the 'rnd' buffer with a given 'num' size with random
+ * Fetch_rand_hex() fills the 'rnd' buffer with a given 'num' size with random
  * hexadecimal digits PLUS a null-terminating byte. It must be an odd number
  * size.
  */
 
-FETCHcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
+FETCHcode Fetch_rand_hex(struct Fetch_easy *data, unsigned char *rnd,
                         size_t num)
 {
   FETCHcode result = FETCHE_BAD_FUNCTION_ARGUMENT;
@@ -264,29 +264,29 @@ FETCHcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   if ((num / 2 >= sizeof(buffer)) || !(num & 1))
   {
     /* make sure it fits in the local buffer and that it is an odd number! */
-    DEBUGF(infof(data, "invalid buffer size with Curl_rand_hex"));
+    DEBUGF(infof(data, "invalid buffer size with Fetch_rand_hex"));
     return FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
   num--; /* save one for null-termination */
 
-  result = Curl_rand(data, buffer, num / 2);
+  result = Fetch_rand(data, buffer, num / 2);
   if (result)
     return result;
 
-  Curl_hexencode(buffer, num / 2, rnd, num + 1);
+  Fetch_hexencode(buffer, num / 2, rnd, num + 1);
   return result;
 }
 
 /*
- * Curl_rand_alnum() fills the 'rnd' buffer with a given 'num' size with random
+ * Fetch_rand_alnum() fills the 'rnd' buffer with a given 'num' size with random
  * alphanumerical chars PLUS a null-terminating byte.
  */
 
 static const char alnum[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-FETCHcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
+FETCHcode Fetch_rand_alnum(struct Fetch_easy *data, unsigned char *rnd,
                           size_t num)
 {
   FETCHcode result = FETCHE_OK;

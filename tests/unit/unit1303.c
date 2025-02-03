@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,7 @@
 #include "connect.h"
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_easy *testdata;
+static struct Fetch_easy *testdata;
 
 static FETCHcode unit_setup(void)
 {
@@ -152,7 +152,7 @@ UNITTEST_START
     timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-    timeout = Curl_timeleft(testdata, &now, run[i].connecting);
+    timeout = Fetch_timeleft(testdata, &now, run[i].connecting);
     if (timeout != run[i].result)
       fail(run[i].comment);
   }

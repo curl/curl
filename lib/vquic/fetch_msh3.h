@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,14 +30,14 @@
 
 #include <msh3.h>
 
-void Curl_msh3_ver(char *p, size_t len);
+void Fetch_msh3_ver(char *p, size_t len);
 
-FETCHcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
-                              struct Curl_easy *data,
+FETCHcode Fetch_cf_msh3_create(struct Fetch_cfilter **pcf,
+                              struct Fetch_easy *data,
                               struct connectdata *conn,
-                              const struct Curl_addrinfo *ai);
+                              const struct Fetch_addrinfo *ai);
 
-bool Curl_conn_is_msh3(const struct Curl_easy *data,
+bool Fetch_conn_is_msh3(const struct Fetch_easy *data,
                        const struct connectdata *conn,
                        int sockindex);
 

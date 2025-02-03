@@ -39,7 +39,7 @@ Cseq: 3
 RTSP/1.0 200 OK
 Server: RTSPD/libfetch-test
 CSeq: 4
-Curl-private: swsclose
+Fetch-private: swsclose
 Informational: Empty Options Response
 
 </data4>

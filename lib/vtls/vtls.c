@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,10 +29,10 @@
    SSL-functions in libfetch should call functions in this source file, and not
    to any specific SSL-layer.
 
-   Curl_ssl_ - prefix for generic ones
+   Fetch_ssl_ - prefix for generic ones
 
    Note that this source code uses the functions of the configured SSL
-   backend via the global Curl_ssl instance.
+   backend via the global Fetch_ssl instance.
 
    "SSL/TLS Strong Encryption: An Introduction"
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
@@ -172,7 +172,7 @@ static const struct alpn_spec *alpn_get_spec(int httpwant, bool use_alpn)
 }
 #endif /* USE_SSL */
 
-void Curl_ssl_easy_config_init(struct Curl_easy *data)
+void Fetch_ssl_easy_config_init(struct Fetch_easy *data)
 {
   /*
    * libfetch 7.10 introduced SSL verification *by default*! This needs to be
@@ -187,7 +187,7 @@ void Curl_ssl_easy_config_init(struct Curl_easy *data)
 }
 
 static bool
-match_ssl_primary_config(struct Curl_easy *data,
+match_ssl_primary_config(struct Fetch_easy *data,
                          struct ssl_primary_config *c1,
                          struct ssl_primary_config *c2)
 {
@@ -201,13 +201,13 @@ match_ssl_primary_config(struct Curl_easy *data,
       blobcmp(c1->cert_blob, c2->cert_blob) &&
       blobcmp(c1->ca_info_blob, c2->ca_info_blob) &&
       blobcmp(c1->issuercert_blob, c2->issuercert_blob) &&
-      Curl_safecmp(c1->CApath, c2->CApath) &&
-      Curl_safecmp(c1->CAfile, c2->CAfile) &&
-      Curl_safecmp(c1->issuercert, c2->issuercert) &&
-      Curl_safecmp(c1->clientcert, c2->clientcert) &&
+      Fetch_safecmp(c1->CApath, c2->CApath) &&
+      Fetch_safecmp(c1->CAfile, c2->CAfile) &&
+      Fetch_safecmp(c1->issuercert, c2->issuercert) &&
+      Fetch_safecmp(c1->clientcert, c2->clientcert) &&
 #ifdef USE_TLS_SRP
-      !Curl_timestrcmp(c1->username, c2->username) &&
-      !Curl_timestrcmp(c1->password, c2->password) &&
+      !Fetch_timestrcmp(c1->username, c2->username) &&
+      !Fetch_timestrcmp(c1->password, c2->password) &&
 #endif
       strcasecompare(c1->cipher_list, c2->cipher_list) &&
       strcasecompare(c1->cipher_list13, c2->cipher_list13) &&
@@ -219,7 +219,7 @@ match_ssl_primary_config(struct Curl_easy *data,
   return FALSE;
 }
 
-bool Curl_ssl_conn_config_match(struct Curl_easy *data,
+bool Fetch_ssl_conn_config_match(struct Fetch_easy *data,
                                 struct connectdata *candidate,
                                 bool proxy)
 {
@@ -267,25 +267,25 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
 
 static void free_primary_ssl_config(struct ssl_primary_config *sslc)
 {
-  Curl_safefree(sslc->CApath);
-  Curl_safefree(sslc->CAfile);
-  Curl_safefree(sslc->issuercert);
-  Curl_safefree(sslc->clientcert);
-  Curl_safefree(sslc->cipher_list);
-  Curl_safefree(sslc->cipher_list13);
-  Curl_safefree(sslc->pinned_key);
-  Curl_safefree(sslc->cert_blob);
-  Curl_safefree(sslc->ca_info_blob);
-  Curl_safefree(sslc->issuercert_blob);
-  Curl_safefree(sslc->curves);
-  Curl_safefree(sslc->CRLfile);
+  Fetch_safefree(sslc->CApath);
+  Fetch_safefree(sslc->CAfile);
+  Fetch_safefree(sslc->issuercert);
+  Fetch_safefree(sslc->clientcert);
+  Fetch_safefree(sslc->cipher_list);
+  Fetch_safefree(sslc->cipher_list13);
+  Fetch_safefree(sslc->pinned_key);
+  Fetch_safefree(sslc->cert_blob);
+  Fetch_safefree(sslc->ca_info_blob);
+  Fetch_safefree(sslc->issuercert_blob);
+  Fetch_safefree(sslc->curves);
+  Fetch_safefree(sslc->CRLfile);
 #ifdef USE_TLS_SRP
-  Curl_safefree(sslc->username);
-  Curl_safefree(sslc->password);
+  Fetch_safefree(sslc->username);
+  Fetch_safefree(sslc->password);
 #endif
 }
 
-FETCHcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
+FETCHcode Fetch_ssl_easy_config_complete(struct Fetch_easy *data)
 {
   data->set.ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH];
   data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE];
@@ -347,7 +347,7 @@ FETCHcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   return FETCHE_OK;
 }
 
-FETCHcode Curl_ssl_conn_config_init(struct Curl_easy *data,
+FETCHcode Fetch_ssl_conn_config_init(struct Fetch_easy *data,
                                     struct connectdata *conn)
 {
   /* Clone "primary" SSL configurations from the esay handle to
@@ -363,7 +363,7 @@ FETCHcode Curl_ssl_conn_config_init(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-void Curl_ssl_conn_config_cleanup(struct connectdata *conn)
+void Fetch_ssl_conn_config_cleanup(struct connectdata *conn)
 {
   free_primary_ssl_config(&conn->ssl_config);
 #ifndef FETCH_DISABLE_PROXY
@@ -371,7 +371,7 @@ void Curl_ssl_conn_config_cleanup(struct connectdata *conn)
 #endif
 }
 
-void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy)
+void Fetch_ssl_conn_config_update(struct Fetch_easy *data, bool for_proxy)
 {
   /* May be called on an easy that has no connection yet */
   if (data->conn)
@@ -392,14 +392,14 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy)
 }
 
 #ifdef USE_SSL
-static int multissl_setup(const struct Curl_ssl *backend);
+static int multissl_setup(const struct Fetch_ssl *backend);
 #endif
 
-fetch_sslbackend Curl_ssl_backend(void)
+fetch_sslbackend Fetch_ssl_backend(void)
 {
 #ifdef USE_SSL
   multissl_setup(NULL);
-  return Curl_ssl->info.id;
+  return Fetch_ssl->info.id;
 #else
   return FETCHSSLBACKEND_NONE;
 #endif
@@ -416,19 +416,19 @@ static bool init_ssl = FALSE;
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-int Curl_ssl_init(void)
+int Fetch_ssl_init(void)
 {
   /* make sure this is only done once */
   if (init_ssl)
     return 1;
   init_ssl = TRUE; /* never again */
 
-  if (Curl_ssl->init)
-    return Curl_ssl->init();
+  if (Fetch_ssl->init)
+    return Fetch_ssl->init();
   return 1;
 }
 
-static bool ssl_prefs_check(struct Curl_easy *data)
+static bool ssl_prefs_check(struct Fetch_easy *data)
 {
   /* check for FETCHOPT_SSLVERSION invalid parameter value */
   const unsigned char sslver = data->set.ssl.primary.version;
@@ -455,7 +455,7 @@ static bool ssl_prefs_check(struct Curl_easy *data)
   return TRUE;
 }
 
-static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
+static struct ssl_connect_data *cf_ctx_new(struct Fetch_easy *data,
                                            const struct alpn_spec *alpn)
 {
   struct ssl_connect_data *ctx;
@@ -465,9 +465,9 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
   if (!ctx)
     return NULL;
 
-  ctx->ssl_impl = Curl_ssl;
+  ctx->ssl_impl = Fetch_ssl;
   ctx->alpn = alpn;
-  Curl_bufq_init2(&ctx->earlydata, FETCH_SSL_EARLY_MAX, 1, BUFQ_OPT_NO_SPARES);
+  Fetch_bufq_init2(&ctx->earlydata, FETCH_SSL_EARLY_MAX, 1, BUFQ_OPT_NO_SPARES);
   ctx->backend = calloc(1, ctx->ssl_impl->sizeof_ssl_backend_data);
   if (!ctx->backend)
   {
@@ -481,14 +481,14 @@ static void cf_ctx_free(struct ssl_connect_data *ctx)
 {
   if (ctx)
   {
-    Curl_safefree(ctx->negotiated.alpn);
-    Curl_bufq_free(&ctx->earlydata);
+    Fetch_safefree(ctx->negotiated.alpn);
+    Fetch_bufq_free(&ctx->earlydata);
     free(ctx->backend);
     free(ctx);
   }
 }
 
-static FETCHcode ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
+static FETCHcode ssl_connect(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   FETCHcode result;
@@ -510,7 +510,7 @@ static FETCHcode ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 static FETCHcode
-ssl_connect_nonblocking(struct Curl_cfilter *cf, struct Curl_easy *data,
+ssl_connect_nonblocking(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                         bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -522,39 +522,39 @@ ssl_connect_nonblocking(struct Curl_cfilter *cf, struct Curl_easy *data,
   return connssl->ssl_impl->connect_nonblocking(cf, data, done);
 }
 
-FETCHcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+FETCHcode Fetch_ssl_get_channel_binding(struct Fetch_easy *data, int sockindex,
                                        struct dynbuf *binding)
 {
-  if (Curl_ssl->get_channel_binding)
-    return Curl_ssl->get_channel_binding(data, sockindex, binding);
+  if (Fetch_ssl->get_channel_binding)
+    return Fetch_ssl->get_channel_binding(data, sockindex, binding);
   return FETCHE_OK;
 }
 
-void Curl_ssl_close_all(struct Curl_easy *data)
+void Fetch_ssl_close_all(struct Fetch_easy *data)
 {
-  if (Curl_ssl->close_all)
-    Curl_ssl->close_all(data);
+  if (Fetch_ssl->close_all)
+    Fetch_ssl->close_all(data);
 }
 
-void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
+void Fetch_ssl_adjust_pollset(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                              struct easy_pollset *ps)
 {
   struct ssl_connect_data *connssl = cf->ctx;
 
   if (connssl->io_need)
   {
-    fetch_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+    fetch_socket_t sock = Fetch_conn_cf_get_socket(cf->next, data);
     if (sock != FETCH_SOCKET_BAD)
     {
       if (connssl->io_need & FETCH_SSL_IO_NEED_SEND)
       {
-        Curl_pollset_set_out_only(data, ps, sock);
+        Fetch_pollset_set_out_only(data, ps, sock);
         FETCH_TRC_CF(data, cf, "adjust_pollset, POLLOUT fd=%" FMT_SOCKET_T,
                      sock);
       }
       else
       {
-        Curl_pollset_set_in_only(data, ps, sock);
+        Fetch_pollset_set_in_only(data, ps, sock);
         FETCH_TRC_CF(data, cf, "adjust_pollset, POLLIN fd=%" FMT_SOCKET_T,
                      sock);
       }
@@ -564,42 +564,42 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 /* Selects an SSL crypto engine
  */
-FETCHcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine)
+FETCHcode Fetch_ssl_set_engine(struct Fetch_easy *data, const char *engine)
 {
-  if (Curl_ssl->set_engine)
-    return Curl_ssl->set_engine(data, engine);
+  if (Fetch_ssl->set_engine)
+    return Fetch_ssl->set_engine(data, engine);
   return FETCHE_NOT_BUILT_IN;
 }
 
 /* Selects the default SSL crypto engine
  */
-FETCHcode Curl_ssl_set_engine_default(struct Curl_easy *data)
+FETCHcode Fetch_ssl_set_engine_default(struct Fetch_easy *data)
 {
-  if (Curl_ssl->set_engine_default)
-    return Curl_ssl->set_engine_default(data);
+  if (Fetch_ssl->set_engine_default)
+    return Fetch_ssl->set_engine_default(data);
   return FETCHE_NOT_BUILT_IN;
 }
 
 /* Return list of OpenSSL crypto engine names. */
-struct fetch_slist *Curl_ssl_engines_list(struct Curl_easy *data)
+struct fetch_slist *Fetch_ssl_engines_list(struct Fetch_easy *data)
 {
-  if (Curl_ssl->engines_list)
-    return Curl_ssl->engines_list(data);
+  if (Fetch_ssl->engines_list)
+    return Fetch_ssl->engines_list(data);
   return NULL;
 }
 
 static size_t multissl_version(char *buffer, size_t size);
 
-void Curl_ssl_version(char *buffer, size_t size)
+void Fetch_ssl_version(char *buffer, size_t size)
 {
 #ifdef FETCH_WITH_MULTI_SSL
   (void)multissl_version(buffer, size);
 #else
-  (void)Curl_ssl->version(buffer, size);
+  (void)Fetch_ssl->version(buffer, size);
 #endif
 }
 
-void Curl_ssl_free_certinfo(struct Curl_easy *data)
+void Fetch_ssl_free_certinfo(struct Fetch_easy *data)
 {
   struct fetch_certinfo *ci = &data->info.certs;
 
@@ -619,13 +619,13 @@ void Curl_ssl_free_certinfo(struct Curl_easy *data)
   }
 }
 
-FETCHcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
+FETCHcode Fetch_ssl_init_certinfo(struct Fetch_easy *data, int num)
 {
   struct fetch_certinfo *ci = &data->info.certs;
   struct fetch_slist **table;
 
   /* Free any previous certificate information structures */
-  Curl_ssl_free_certinfo(data);
+  Fetch_ssl_free_certinfo(data);
 
   /* Allocate the required certificate information structures */
   table = calloc((size_t)num, sizeof(struct fetch_slist *));
@@ -641,7 +641,7 @@ FETCHcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
 /*
  * 'value' is NOT a null-terminated string
  */
-FETCHcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
+FETCHcode Fetch_ssl_push_certinfo_len(struct Fetch_easy *data,
                                      int certnum,
                                      const char *label,
                                      const char *value,
@@ -654,18 +654,18 @@ FETCHcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
 
   DEBUGASSERT(certnum < ci->num_of_certs);
 
-  Curl_dyn_init(&build, FETCH_X509_STR_MAX);
+  Fetch_dyn_init(&build, FETCH_X509_STR_MAX);
 
-  if (Curl_dyn_add(&build, label) ||
-      Curl_dyn_addn(&build, ":", 1) ||
-      Curl_dyn_addn(&build, value, valuelen))
+  if (Fetch_dyn_add(&build, label) ||
+      Fetch_dyn_addn(&build, ":", 1) ||
+      Fetch_dyn_addn(&build, value, valuelen))
     return FETCHE_OUT_OF_MEMORY;
 
-  nl = Curl_slist_append_nodup(ci->certinfo[certnum],
-                               Curl_dyn_ptr(&build));
+  nl = Fetch_slist_append_nodup(ci->certinfo[certnum],
+                               Fetch_dyn_ptr(&build));
   if (!nl)
   {
-    Curl_dyn_free(&build);
+    Fetch_dyn_free(&build);
     fetch_slist_free_all(ci->certinfo[certnum]);
     result = FETCHE_OUT_OF_MEMORY;
   }
@@ -675,13 +675,13 @@ FETCHcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
 }
 
 /* get length bytes of randomness */
-FETCHcode Curl_ssl_random(struct Curl_easy *data,
+FETCHcode Fetch_ssl_random(struct Fetch_easy *data,
                           unsigned char *entropy,
                           size_t length)
 {
   DEBUGASSERT(length == sizeof(int));
-  if (Curl_ssl->random)
-    return Curl_ssl->random(data, entropy, length);
+  if (Fetch_ssl->random)
+    return Fetch_ssl->random(data, entropy, length);
   else
     return FETCHE_NOT_BUILT_IN;
 }
@@ -702,7 +702,7 @@ static FETCHcode pubkey_pem_to_der(const char *pem,
   if (!pem)
     return FETCHE_BAD_CONTENT_ENCODING;
 
-  Curl_dyn_init(&pbuf, MAX_PINNED_PUBKEY_SIZE);
+  Fetch_dyn_init(&pbuf, MAX_PINNED_PUBKEY_SIZE);
 
   begin_pos = strstr(pem, "-----BEGIN PUBLIC KEY-----");
   if (!begin_pos)
@@ -732,16 +732,16 @@ static FETCHcode pubkey_pem_to_der(const char *pem,
   {
     if ('\n' != pem[pem_count] && '\r' != pem[pem_count])
     {
-      result = Curl_dyn_addn(&pbuf, &pem[pem_count], 1);
+      result = Fetch_dyn_addn(&pbuf, &pem[pem_count], 1);
       if (result)
         return result;
     }
     ++pem_count;
   }
 
-  result = Curl_base64_decode(Curl_dyn_ptr(&pbuf), der, der_len);
+  result = Fetch_base64_decode(Fetch_dyn_ptr(&pbuf), der, der_len);
 
-  Curl_dyn_free(&pbuf);
+  Fetch_dyn_free(&pbuf);
 
   return result;
 }
@@ -750,7 +750,7 @@ static FETCHcode pubkey_pem_to_der(const char *pem,
  * Generic pinned public key check.
  */
 
-FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
+FETCHcode Fetch_pin_peer_pubkey(struct Fetch_easy *data,
                                const char *pinnedpubkey,
                                const unsigned char *pubkey, size_t pubkeylen)
 {
@@ -773,7 +773,7 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     char *encoded = NULL, *pinkeycopy, *begin_pos, *end_pos;
     unsigned char *sha256sumdigest;
 
-    if (!Curl_ssl->sha256sum)
+    if (!Fetch_ssl->sha256sum)
     {
       /* without sha256 support, this cannot match */
       return result;
@@ -783,14 +783,14 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     sha256sumdigest = malloc(FETCH_SHA256_DIGEST_LENGTH);
     if (!sha256sumdigest)
       return FETCHE_OUT_OF_MEMORY;
-    encode = Curl_ssl->sha256sum(pubkey, pubkeylen,
+    encode = Fetch_ssl->sha256sum(pubkey, pubkeylen,
                                  sha256sumdigest, FETCH_SHA256_DIGEST_LENGTH);
 
     if (!encode)
-      encode = Curl_base64_encode((char *)sha256sumdigest,
+      encode = Fetch_base64_encode((char *)sha256sumdigest,
                                   FETCH_SHA256_DIGEST_LENGTH, &encoded,
                                   &encodedlen);
-    Curl_safefree(sha256sumdigest);
+    Fetch_safefree(sha256sumdigest);
 
     if (encode)
       return encode;
@@ -801,7 +801,7 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     pinkeycopy = strdup(pinnedpubkey);
     if (!pinkeycopy)
     {
-      Curl_safefree(encoded);
+      Fetch_safefree(encoded);
       return FETCHE_OUT_OF_MEMORY;
     }
     /* point begin_pos to the copy, and start extracting keys */
@@ -834,8 +834,8 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
         begin_pos = strstr(end_pos, "sha256//");
       }
     } while (end_pos && begin_pos);
-    Curl_safefree(encoded);
-    Curl_safefree(pinkeycopy);
+    Fetch_safefree(encoded);
+    Fetch_safefree(pinkeycopy);
   }
   else
   {
@@ -849,7 +849,7 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if (!fp)
       return result;
 
-    Curl_dyn_init(&buf, MAX_PINNED_PUBKEY_SIZE);
+    Fetch_dyn_init(&buf, MAX_PINNED_PUBKEY_SIZE);
 
     /* Determine the file's size */
     if (fseek(fp, 0, SEEK_END))
@@ -878,7 +878,7 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
       size_t want = left > sizeof(buffer) ? sizeof(buffer) : left;
       if (want != fread(buffer, 1, want, fp))
         goto end;
-      if (Curl_dyn_addn(&buf, buffer, want))
+      if (Fetch_dyn_addn(&buf, buffer, want))
         goto end;
       left -= want;
     } while (left);
@@ -886,7 +886,7 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     /* If the sizes are the same, it cannot be base64 encoded, must be der */
     if (pubkeylen == size)
     {
-      if (!memcmp(pubkey, Curl_dyn_ptr(&buf), pubkeylen))
+      if (!memcmp(pubkey, Fetch_dyn_ptr(&buf), pubkeylen))
         result = FETCHE_OK;
       goto end;
     }
@@ -895,7 +895,7 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
      * Otherwise we will assume it is PEM and try to decode it
      * after placing null terminator
      */
-    pem_read = pubkey_pem_to_der(Curl_dyn_ptr(&buf), &pem_ptr, &pem_len);
+    pem_read = pubkey_pem_to_der(Fetch_dyn_ptr(&buf), &pem_ptr, &pem_len);
     /* if it was not read successfully, exit */
     if (pem_read)
       goto end;
@@ -907,8 +907,8 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if (pubkeylen == pem_len && !memcmp(pubkey, pem_ptr, pubkeylen))
       result = FETCHE_OK;
   end:
-    Curl_dyn_free(&buf);
-    Curl_safefree(pem_ptr);
+    Fetch_dyn_free(&buf);
+    Fetch_safefree(pem_ptr);
     fclose(fp);
   }
 
@@ -918,20 +918,20 @@ FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 /*
  * Check whether the SSL backend supports the status_request extension.
  */
-bool Curl_ssl_cert_status_request(void)
+bool Fetch_ssl_cert_status_request(void)
 {
-  if (Curl_ssl->cert_status_request)
-    return Curl_ssl->cert_status_request();
+  if (Fetch_ssl->cert_status_request)
+    return Fetch_ssl->cert_status_request();
   return FALSE;
 }
 
 /*
  * Check whether the SSL backend supports false start.
  */
-bool Curl_ssl_false_start(void)
+bool Fetch_ssl_false_start(void)
 {
-  if (Curl_ssl->false_start)
-    return Curl_ssl->false_start();
+  if (Fetch_ssl->false_start)
+    return Fetch_ssl->false_start();
   return FALSE;
 }
 
@@ -939,33 +939,33 @@ static int multissl_init(void)
 {
   if (multissl_setup(NULL))
     return 1;
-  return Curl_ssl->init();
+  return Fetch_ssl->init();
 }
 
-static FETCHcode multissl_connect(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data)
+static FETCHcode multissl_connect(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data)
 {
   if (multissl_setup(NULL))
     return FETCHE_FAILED_INIT;
-  return Curl_ssl->connect_blocking(cf, data);
+  return Fetch_ssl->connect_blocking(cf, data);
 }
 
-static FETCHcode multissl_connect_nonblocking(struct Curl_cfilter *cf,
-                                              struct Curl_easy *data,
+static FETCHcode multissl_connect_nonblocking(struct Fetch_cfilter *cf,
+                                              struct Fetch_easy *data,
                                               bool *done)
 {
   if (multissl_setup(NULL))
     return FETCHE_FAILED_INIT;
-  return Curl_ssl->connect_nonblocking(cf, data, done);
+  return Fetch_ssl->connect_nonblocking(cf, data, done);
 }
 
-static void multissl_adjust_pollset(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+static void multissl_adjust_pollset(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     struct easy_pollset *ps)
 {
   if (multissl_setup(NULL))
     return;
-  Curl_ssl->adjust_pollset(cf, data, ps);
+  Fetch_ssl->adjust_pollset(cf, data, ps);
 }
 
 static void *multissl_get_internals(struct ssl_connect_data *connssl,
@@ -973,36 +973,36 @@ static void *multissl_get_internals(struct ssl_connect_data *connssl,
 {
   if (multissl_setup(NULL))
     return NULL;
-  return Curl_ssl->get_internals(connssl, info);
+  return Fetch_ssl->get_internals(connssl, info);
 }
 
-static void multissl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void multissl_close(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   if (multissl_setup(NULL))
     return;
-  Curl_ssl->close(cf, data);
+  Fetch_ssl->close(cf, data);
 }
 
-static ssize_t multissl_recv_plain(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static ssize_t multissl_recv_plain(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    char *buf, size_t len, FETCHcode *code)
 {
   if (multissl_setup(NULL))
     return FETCHE_FAILED_INIT;
-  return Curl_ssl->recv_plain(cf, data, buf, len, code);
+  return Fetch_ssl->recv_plain(cf, data, buf, len, code);
 }
 
-static ssize_t multissl_send_plain(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static ssize_t multissl_send_plain(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    const void *mem, size_t len,
                                    FETCHcode *code)
 {
   if (multissl_setup(NULL))
     return FETCHE_FAILED_INIT;
-  return Curl_ssl->send_plain(cf, data, mem, len, code);
+  return Fetch_ssl->send_plain(cf, data, mem, len, code);
 }
 
-static const struct Curl_ssl Curl_ssl_multi = {
+static const struct Fetch_ssl Fetch_ssl_multi = {
     {FETCHSSLBACKEND_NONE, "multi"}, /* info */
     0,                               /* supports nothing */
     (size_t)-1,                      /* something insanely large to be on the safe side */
@@ -1030,66 +1030,66 @@ static const struct Curl_ssl Curl_ssl_multi = {
     NULL,                         /* get_channel_binding */
 };
 
-const struct Curl_ssl *Curl_ssl =
+const struct Fetch_ssl *Fetch_ssl =
 #if defined(FETCH_WITH_MULTI_SSL)
-    &Curl_ssl_multi;
+    &Fetch_ssl_multi;
 #elif defined(USE_WOLFSSL)
-    &Curl_ssl_wolfssl;
+    &Fetch_ssl_wolfssl;
 #elif defined(USE_GNUTLS)
-    &Curl_ssl_gnutls;
+    &Fetch_ssl_gnutls;
 #elif defined(USE_MBEDTLS)
-    &Curl_ssl_mbedtls;
+    &Fetch_ssl_mbedtls;
 #elif defined(USE_RUSTLS)
-    &Curl_ssl_rustls;
+    &Fetch_ssl_rustls;
 #elif defined(USE_OPENSSL)
-    &Curl_ssl_openssl;
+    &Fetch_ssl_openssl;
 #elif defined(USE_SECTRANSP)
-    &Curl_ssl_sectransp;
+    &Fetch_ssl_sectransp;
 #elif defined(USE_SCHANNEL)
-    &Curl_ssl_schannel;
+    &Fetch_ssl_schannel;
 #elif defined(USE_BEARSSL)
-    &Curl_ssl_bearssl;
+    &Fetch_ssl_bearssl;
 #else
-#error "Missing struct Curl_ssl for selected SSL backend"
+#error "Missing struct Fetch_ssl for selected SSL backend"
 #endif
 
-static const struct Curl_ssl *available_backends[] = {
+static const struct Fetch_ssl *available_backends[] = {
 #if defined(USE_WOLFSSL)
-    &Curl_ssl_wolfssl,
+    &Fetch_ssl_wolfssl,
 #endif
 #if defined(USE_GNUTLS)
-    &Curl_ssl_gnutls,
+    &Fetch_ssl_gnutls,
 #endif
 #if defined(USE_MBEDTLS)
-    &Curl_ssl_mbedtls,
+    &Fetch_ssl_mbedtls,
 #endif
 #if defined(USE_OPENSSL)
-    &Curl_ssl_openssl,
+    &Fetch_ssl_openssl,
 #endif
 #if defined(USE_SECTRANSP)
-    &Curl_ssl_sectransp,
+    &Fetch_ssl_sectransp,
 #endif
 #if defined(USE_SCHANNEL)
-    &Curl_ssl_schannel,
+    &Fetch_ssl_schannel,
 #endif
 #if defined(USE_BEARSSL)
-    &Curl_ssl_bearssl,
+    &Fetch_ssl_bearssl,
 #endif
 #if defined(USE_RUSTLS)
-    &Curl_ssl_rustls,
+    &Fetch_ssl_rustls,
 #endif
     NULL};
 
 /* Global cleanup */
-void Curl_ssl_cleanup(void)
+void Fetch_ssl_cleanup(void)
 {
   if (init_ssl)
   {
     /* only cleanup if we did a previous init */
-    if (Curl_ssl->cleanup)
-      Curl_ssl->cleanup();
+    if (Fetch_ssl->cleanup)
+      Fetch_ssl->cleanup();
 #if defined(FETCH_WITH_MULTI_SSL)
-    Curl_ssl = &Curl_ssl_multi;
+    Fetch_ssl = &Fetch_ssl_multi;
 #endif
     init_ssl = FALSE;
   }
@@ -1097,12 +1097,12 @@ void Curl_ssl_cleanup(void)
 
 static size_t multissl_version(char *buffer, size_t size)
 {
-  static const struct Curl_ssl *selected;
+  static const struct Fetch_ssl *selected;
   static char backends[200];
   static size_t backends_len;
-  const struct Curl_ssl *current;
+  const struct Fetch_ssl *current;
 
-  current = Curl_ssl == &Curl_ssl_multi ? available_backends[0] : Curl_ssl;
+  current = Fetch_ssl == &Fetch_ssl_multi ? available_backends[0] : Fetch_ssl;
 
   if (current != selected)
   {
@@ -1139,17 +1139,17 @@ static size_t multissl_version(char *buffer, size_t size)
   return 0;
 }
 
-static int multissl_setup(const struct Curl_ssl *backend)
+static int multissl_setup(const struct Fetch_ssl *backend)
 {
   int i;
   char *env;
 
-  if (Curl_ssl != &Curl_ssl_multi)
+  if (Fetch_ssl != &Fetch_ssl_multi)
     return 1;
 
   if (backend)
   {
-    Curl_ssl = backend;
+    Fetch_ssl = backend;
     return 0;
   }
 
@@ -1163,7 +1163,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
     {
       if (strcasecompare(env, available_backends[i]->info.name))
       {
-        Curl_ssl = available_backends[i];
+        Fetch_ssl = available_backends[i];
         free(env);
         return 0;
       }
@@ -1176,7 +1176,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
     if (strcasecompare(FETCH_DEFAULT_SSL_BACKEND,
                        available_backends[i]->info.name))
     {
-      Curl_ssl = available_backends[i];
+      Fetch_ssl = available_backends[i];
       free(env);
       return 0;
     }
@@ -1184,14 +1184,14 @@ static int multissl_setup(const struct Curl_ssl *backend)
 #endif
 
   /* Fall back to first available backend */
-  Curl_ssl = available_backends[0];
+  Fetch_ssl = available_backends[0];
   free(env);
   return 0;
 }
 
 /* This function is used to select the SSL backend to use. It is called by
    fetch_global_sslset (easy.c) which uses the global init lock. */
-FETCHsslset Curl_init_sslset_nolock(fetch_sslbackend id, const char *name,
+FETCHsslset Fetch_init_sslset_nolock(fetch_sslbackend id, const char *name,
                                     const fetch_ssl_backend ***avail)
 {
   int i;
@@ -1199,9 +1199,9 @@ FETCHsslset Curl_init_sslset_nolock(fetch_sslbackend id, const char *name,
   if (avail)
     *avail = (const fetch_ssl_backend **)&available_backends;
 
-  if (Curl_ssl != &Curl_ssl_multi)
-    return id == Curl_ssl->info.id ||
-                   (name && strcasecompare(name, Curl_ssl->info.name))
+  if (Fetch_ssl != &Fetch_ssl_multi)
+    return id == Fetch_ssl->info.id ||
+                   (name && strcasecompare(name, Fetch_ssl->info.name))
                ? FETCHSSLSET_OK
                :
 #if defined(FETCH_WITH_MULTI_SSL)
@@ -1224,7 +1224,7 @@ FETCHsslset Curl_init_sslset_nolock(fetch_sslbackend id, const char *name,
 }
 
 #else /* USE_SSL */
-FETCHsslset Curl_init_sslset_nolock(fetch_sslbackend id, const char *name,
+FETCHsslset Fetch_init_sslset_nolock(fetch_sslbackend id, const char *name,
                                     const fetch_ssl_backend ***avail)
 {
   (void)id;
@@ -1237,25 +1237,25 @@ FETCHsslset Curl_init_sslset_nolock(fetch_sslbackend id, const char *name,
 
 #ifdef USE_SSL
 
-void Curl_ssl_peer_cleanup(struct ssl_peer *peer)
+void Fetch_ssl_peer_cleanup(struct ssl_peer *peer)
 {
-  Curl_safefree(peer->sni);
+  Fetch_safefree(peer->sni);
   if (peer->dispname != peer->hostname)
     free(peer->dispname);
   peer->dispname = NULL;
-  Curl_safefree(peer->hostname);
-  Curl_safefree(peer->scache_key);
+  Fetch_safefree(peer->hostname);
+  Fetch_safefree(peer->scache_key);
   peer->type = FETCH_SSL_PEER_DNS;
 }
 
-static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_close(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   if (connssl)
   {
     connssl->ssl_impl->close(cf, data);
     connssl->state = ssl_connection_none;
-    Curl_ssl_peer_cleanup(&connssl->peer);
+    Fetch_ssl_peer_cleanup(&connssl->peer);
   }
   cf->connected = FALSE;
 }
@@ -1269,10 +1269,10 @@ static ssl_peer_type get_peer_type(const char *hostname)
 #else
     struct in_addr addr;
 #endif
-    if (Curl_inet_pton(AF_INET, hostname, &addr))
+    if (Fetch_inet_pton(AF_INET, hostname, &addr))
       return FETCH_SSL_PEER_IPV4;
 #ifdef USE_IPV6
-    else if (Curl_inet_pton(AF_INET6, hostname, &addr))
+    else if (Fetch_inet_pton(AF_INET6, hostname, &addr))
     {
       return FETCH_SSL_PEER_IPV6;
     }
@@ -1281,8 +1281,8 @@ static ssl_peer_type get_peer_type(const char *hostname)
   return FETCH_SSL_PEER_DNS;
 }
 
-FETCHcode Curl_ssl_peer_init(struct ssl_peer *peer,
-                             struct Curl_cfilter *cf,
+FETCHcode Fetch_ssl_peer_init(struct ssl_peer *peer,
+                             struct Fetch_cfilter *cf,
                              const char *tls_id,
                              int transport)
 {
@@ -1301,7 +1301,7 @@ FETCHcode Curl_ssl_peer_init(struct ssl_peer *peer,
    */
   peer->transport = transport;
 #ifndef FETCH_DISABLE_PROXY
-  if (Curl_ssl_cf_is_proxy(cf))
+  if (Fetch_ssl_cf_is_proxy(cf))
   {
     ehostname = cf->conn->http_proxy.host.name;
     edispname = cf->conn->http_proxy.host.dispname;
@@ -1346,20 +1346,20 @@ FETCHcode Curl_ssl_peer_init(struct ssl_peer *peer,
       peer->sni = calloc(1, len + 1);
       if (!peer->sni)
         goto out;
-      Curl_strntolower(peer->sni, peer->hostname, len);
+      Fetch_strntolower(peer->sni, peer->hostname, len);
       peer->sni[len] = 0;
     }
   }
 
-  result = Curl_ssl_peer_key_make(cf, peer, tls_id, &peer->scache_key);
+  result = Fetch_ssl_peer_key_make(cf, peer, tls_id, &peer->scache_key);
 
 out:
   if (result)
-    Curl_ssl_peer_cleanup(peer);
+    Fetch_ssl_peer_cleanup(peer);
   return result;
 }
 
-static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void ssl_cf_destroy(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_call_data save;
 
@@ -1370,8 +1370,8 @@ static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->ctx = NULL;
 }
 
-static void ssl_cf_close(struct Curl_cfilter *cf,
-                         struct Curl_easy *data)
+static void ssl_cf_close(struct Fetch_cfilter *cf,
+                         struct Fetch_easy *data)
 {
   struct cf_call_data save;
 
@@ -1382,8 +1382,8 @@ static void ssl_cf_close(struct Curl_cfilter *cf,
   CF_DATA_RESTORE(cf, save);
 }
 
-static FETCHcode ssl_cf_connect(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+static FETCHcode ssl_cf_connect(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data,
                                 bool blocking, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1420,7 +1420,7 @@ static FETCHcode ssl_cf_connect(struct Curl_cfilter *cf,
   {
     char tls_id[80];
     connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
-    result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
+    result = Fetch_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
     if (result)
       goto out;
   }
@@ -1439,7 +1439,7 @@ static FETCHcode ssl_cf_connect(struct Curl_cfilter *cf,
   {
     cf->connected = TRUE;
     if (connssl->state == ssl_connection_complete)
-      connssl->handshake_done = Curl_now();
+      connssl->handshake_done = Fetch_now();
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||
                 connssl->state == ssl_connection_deferred);
@@ -1450,8 +1450,8 @@ out:
   return result;
 }
 
-static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
-                                const struct Curl_easy *data)
+static bool ssl_cf_data_pending(struct Fetch_cfilter *cf,
+                                const struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
@@ -1467,8 +1467,8 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
   return result;
 }
 
-static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
-                           struct Curl_easy *data, const void *buf, size_t len,
+static ssize_t ssl_cf_send(struct Fetch_cfilter *cf,
+                           struct Fetch_easy *data, const void *buf, size_t len,
                            bool eos, FETCHcode *err)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1487,8 +1487,8 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
   return nwritten;
 }
 
-static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
-                           struct Curl_easy *data, char *buf, size_t len,
+static ssize_t ssl_cf_recv(struct Fetch_cfilter *cf,
+                           struct Fetch_easy *data, char *buf, size_t len,
                            FETCHcode *err)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1513,15 +1513,15 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
   return nread;
 }
 
-static FETCHcode ssl_cf_shutdown(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
+static FETCHcode ssl_cf_shutdown(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data,
                                  bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   FETCHcode result = FETCHE_OK;
 
   *done = TRUE;
-  if (!cf->shutdown && Curl_ssl->shut_down)
+  if (!cf->shutdown && Fetch_ssl->shut_down)
   {
     struct cf_call_data save;
 
@@ -1534,8 +1534,8 @@ static FETCHcode ssl_cf_shutdown(struct Curl_cfilter *cf,
   return result;
 }
 
-static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static void ssl_cf_adjust_pollset(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct easy_pollset *ps)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1546,8 +1546,8 @@ static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
   CF_DATA_RESTORE(cf, save);
 }
 
-static FETCHcode ssl_cf_query(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+static FETCHcode ssl_cf_query(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               int query, int *pres1, void *pres2)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1557,7 +1557,7 @@ static FETCHcode ssl_cf_query(struct Curl_cfilter *cf,
   case CF_QUERY_TIMER_APPCONNECT:
   {
     struct fetchtime *when = pres2;
-    if (cf->connected && !Curl_ssl_cf_is_proxy(cf))
+    if (cf->connected && !Fetch_ssl_cf_is_proxy(cf))
       *when = connssl->handshake_done;
     return FETCHE_OK;
   }
@@ -1567,7 +1567,7 @@ static FETCHcode ssl_cf_query(struct Curl_cfilter *cf,
   return cf->next ? cf->next->cft->query(cf->next, data, query, pres1, pres2) : FETCHE_UNKNOWN_OPTION;
 }
 
-static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
+static bool cf_ssl_is_alive(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                             bool *input_pending)
 {
   /*
@@ -1576,7 +1576,7 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
   return cf->next ? cf->next->cft->is_alive(cf->next, data, input_pending) : FALSE; /* pessimistic in absence of data */
 }
 
-struct Curl_cftype Curl_cft_ssl = {
+struct Fetch_cftype Fetch_cft_ssl = {
     "SSL",
     CF_TYPE_SSL,
     FETCH_LOG_LVL_NONE,
@@ -1584,20 +1584,20 @@ struct Curl_cftype Curl_cft_ssl = {
     ssl_cf_connect,
     ssl_cf_close,
     ssl_cf_shutdown,
-    Curl_cf_def_get_host,
+    Fetch_cf_def_get_host,
     ssl_cf_adjust_pollset,
     ssl_cf_data_pending,
     ssl_cf_send,
     ssl_cf_recv,
-    Curl_cf_def_cntrl,
+    Fetch_cf_def_cntrl,
     cf_ssl_is_alive,
-    Curl_cf_def_conn_keep_alive,
+    Fetch_cf_def_conn_keep_alive,
     ssl_cf_query,
 };
 
 #ifndef FETCH_DISABLE_PROXY
 
-struct Curl_cftype Curl_cft_ssl_proxy = {
+struct Fetch_cftype Fetch_cft_ssl_proxy = {
     "SSL-PROXY",
     CF_TYPE_SSL | CF_TYPE_PROXY,
     FETCH_LOG_LVL_NONE,
@@ -1605,24 +1605,24 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
     ssl_cf_connect,
     ssl_cf_close,
     ssl_cf_shutdown,
-    Curl_cf_def_get_host,
+    Fetch_cf_def_get_host,
     ssl_cf_adjust_pollset,
     ssl_cf_data_pending,
     ssl_cf_send,
     ssl_cf_recv,
-    Curl_cf_def_cntrl,
+    Fetch_cf_def_cntrl,
     cf_ssl_is_alive,
-    Curl_cf_def_conn_keep_alive,
-    Curl_cf_def_query,
+    Fetch_cf_def_conn_keep_alive,
+    Fetch_cf_def_query,
 };
 
 #endif /* !FETCH_DISABLE_PROXY */
 
-static FETCHcode cf_ssl_create(struct Curl_cfilter **pcf,
-                               struct Curl_easy *data,
+static FETCHcode cf_ssl_create(struct Fetch_cfilter **pcf,
+                               struct Fetch_easy *data,
                                struct connectdata *conn)
 {
-  struct Curl_cfilter *cf = NULL;
+  struct Fetch_cfilter *cf = NULL;
   struct ssl_connect_data *ctx;
   FETCHcode result;
 
@@ -1636,7 +1636,7 @@ static FETCHcode cf_ssl_create(struct Curl_cfilter **pcf,
     goto out;
   }
 
-  result = Curl_cf_create(&cf, &Curl_cft_ssl, ctx);
+  result = Fetch_cf_create(&cf, &Fetch_cft_ssl, ctx);
 
 out:
   if (result)
@@ -1645,38 +1645,38 @@ out:
   return result;
 }
 
-FETCHcode Curl_ssl_cfilter_add(struct Curl_easy *data,
+FETCHcode Fetch_ssl_cfilter_add(struct Fetch_easy *data,
                                struct connectdata *conn,
                                int sockindex)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result;
 
   result = cf_ssl_create(&cf, data, conn);
   if (!result)
-    Curl_conn_cf_add(data, conn, sockindex, cf);
+    Fetch_conn_cf_add(data, conn, sockindex, cf);
   return result;
 }
 
-FETCHcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
-                                   struct Curl_easy *data)
+FETCHcode Fetch_cf_ssl_insert_after(struct Fetch_cfilter *cf_at,
+                                   struct Fetch_easy *data)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result;
 
   result = cf_ssl_create(&cf, data, cf_at->conn);
   if (!result)
-    Curl_conn_cf_insert_after(cf_at, cf);
+    Fetch_conn_cf_insert_after(cf_at, cf);
   return result;
 }
 
 #ifndef FETCH_DISABLE_PROXY
 
-static FETCHcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
-                                     struct Curl_easy *data,
+static FETCHcode cf_ssl_proxy_create(struct Fetch_cfilter **pcf,
+                                     struct Fetch_easy *data,
                                      struct connectdata *conn)
 {
-  struct Curl_cfilter *cf = NULL;
+  struct Fetch_cfilter *cf = NULL;
   struct ssl_connect_data *ctx;
   FETCHcode result;
   bool use_alpn = conn->bits.tls_enable_alpn;
@@ -1696,7 +1696,7 @@ static FETCHcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
     result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
-  result = Curl_cf_create(&cf, &Curl_cft_ssl_proxy, ctx);
+  result = Fetch_cf_create(&cf, &Fetch_cft_ssl_proxy, ctx);
 
 out:
   if (result)
@@ -1705,48 +1705,48 @@ out:
   return result;
 }
 
-FETCHcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                         struct Curl_easy *data)
+FETCHcode Fetch_cf_ssl_proxy_insert_after(struct Fetch_cfilter *cf_at,
+                                         struct Fetch_easy *data)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   FETCHcode result;
 
   result = cf_ssl_proxy_create(&cf, data, cf_at->conn);
   if (!result)
-    Curl_conn_cf_insert_after(cf_at, cf);
+    Fetch_conn_cf_insert_after(cf_at, cf);
   return result;
 }
 
 #endif /* !FETCH_DISABLE_PROXY */
 
-bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
+bool Fetch_ssl_supports(struct Fetch_easy *data, unsigned int ssl_option)
 {
   (void)data;
-  return (Curl_ssl->supports & ssl_option);
+  return (Fetch_ssl->supports & ssl_option);
 }
 
-static struct Curl_cfilter *get_ssl_filter(struct Curl_cfilter *cf)
+static struct Fetch_cfilter *get_ssl_filter(struct Fetch_cfilter *cf)
 {
   for (; cf; cf = cf->next)
   {
-    if (cf->cft == &Curl_cft_ssl)
+    if (cf->cft == &Fetch_cft_ssl)
       return cf;
 #ifndef FETCH_DISABLE_PROXY
-    if (cf->cft == &Curl_cft_ssl_proxy)
+    if (cf->cft == &Fetch_cft_ssl_proxy)
       return cf;
 #endif
   }
   return NULL;
 }
 
-void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
+void *Fetch_ssl_get_internals(struct Fetch_easy *data, int sockindex,
                              FETCHINFO info, int n)
 {
   void *result = NULL;
   (void)n;
   if (data->conn)
   {
-    struct Curl_cfilter *cf;
+    struct Fetch_cfilter *cf;
     /* get first SSL filter in chain, if any is present */
     cf = get_ssl_filter(data->conn->cfilter[sockindex]);
     if (cf)
@@ -1761,8 +1761,8 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
   return result;
 }
 
-static FETCHcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
+static FETCHcode vtls_shutdown_blocking(struct Fetch_cfilter *cf,
+                                        struct Fetch_easy *data,
                                         bool send_shutdown, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1781,7 +1781,7 @@ static FETCHcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
   *done = FALSE;
   while (!result && !*done && loop--)
   {
-    timeout_ms = Curl_shutdown_timeleft(cf->conn, cf->sockindex, NULL);
+    timeout_ms = Fetch_shutdown_timeleft(cf->conn, cf->sockindex, NULL);
 
     if (timeout_ms < 0)
     {
@@ -1796,7 +1796,7 @@ static FETCHcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
 
     if (connssl->io_need)
     {
-      what = Curl_conn_cf_poll(cf, data, timeout_ms);
+      what = Fetch_conn_cf_poll(cf, data, timeout_ms);
       if (what < 0)
       {
         /* fatal error */
@@ -1820,25 +1820,25 @@ out:
   return result;
 }
 
-FETCHcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
+FETCHcode Fetch_ssl_cfilter_remove(struct Fetch_easy *data,
                                   int sockindex, bool send_shutdown)
 {
-  struct Curl_cfilter *cf, *head;
+  struct Fetch_cfilter *cf, *head;
   FETCHcode result = FETCHE_OK;
 
   head = data->conn ? data->conn->cfilter[sockindex] : NULL;
   for (cf = head; cf; cf = cf->next)
   {
-    if (cf->cft == &Curl_cft_ssl)
+    if (cf->cft == &Fetch_cft_ssl)
     {
       bool done;
       FETCH_TRC_CF(data, cf, "shutdown and remove SSL, start");
-      Curl_shutdown_start(data, sockindex, NULL);
+      Fetch_shutdown_start(data, sockindex, NULL);
       result = vtls_shutdown_blocking(cf, data, send_shutdown, &done);
-      Curl_shutdown_clear(data, sockindex);
+      Fetch_shutdown_clear(data, sockindex);
       if (!result && !done) /* blocking failed? */
         result = FETCHE_SSL_SHUTDOWN_FAILED;
-      Curl_conn_cf_discard_sub(head, cf, data, FALSE);
+      Fetch_conn_cf_discard_sub(head, cf, data, FALSE);
       FETCH_TRC_CF(data, cf, "shutdown and remove SSL, done -> %d", result);
       break;
     }
@@ -1846,33 +1846,33 @@ FETCHcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
   return result;
 }
 
-bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
+bool Fetch_ssl_cf_is_proxy(struct Fetch_cfilter *cf)
 {
   return (cf->cft->flags & CF_TYPE_SSL) && (cf->cft->flags & CF_TYPE_PROXY);
 }
 
 struct ssl_config_data *
-Curl_ssl_cf_get_config(struct Curl_cfilter *cf, struct Curl_easy *data)
+Fetch_ssl_cf_get_config(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
 #ifdef FETCH_DISABLE_PROXY
   (void)cf;
   return &data->set.ssl;
 #else
-  return Curl_ssl_cf_is_proxy(cf) ? &data->set.proxy_ssl : &data->set.ssl;
+  return Fetch_ssl_cf_is_proxy(cf) ? &data->set.proxy_ssl : &data->set.ssl;
 #endif
 }
 
 struct ssl_primary_config *
-Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf)
+Fetch_ssl_cf_get_primary_config(struct Fetch_cfilter *cf)
 {
 #ifdef FETCH_DISABLE_PROXY
   return &cf->conn->ssl_config;
 #else
-  return Curl_ssl_cf_is_proxy(cf) ? &cf->conn->proxy_ssl_config : &cf->conn->ssl_config;
+  return Fetch_ssl_cf_is_proxy(cf) ? &cf->conn->proxy_ssl_config : &cf->conn->ssl_config;
 #endif
 }
 
-FETCHcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
+FETCHcode Fetch_alpn_to_proto_buf(struct alpn_proto_buf *buf,
                                  const struct alpn_spec *spec)
 {
   size_t i, len;
@@ -1896,7 +1896,7 @@ FETCHcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
+FETCHcode Fetch_alpn_to_proto_str(struct alpn_proto_buf *buf,
                                  const struct alpn_spec *spec)
 {
   size_t i, len;
@@ -1920,7 +1920,7 @@ FETCHcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
   return FETCHE_OK;
 }
 
-bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
+bool Fetch_alpn_contains_proto(const struct alpn_spec *spec,
                               const char *proto)
 {
   size_t i, plen = proto ? strlen(proto) : 0;
@@ -1933,8 +1933,8 @@ bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
   return FALSE;
 }
 
-FETCHcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+FETCHcode Fetch_alpn_set_negotiated(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    struct ssl_connect_data *connssl,
                                    const unsigned char *proto,
                                    size_t proto_len)
@@ -1942,7 +1942,7 @@ FETCHcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   FETCHcode result = FETCHE_OK;
   unsigned char *palpn =
 #ifndef FETCH_DISABLE_PROXY
-      (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf)) ? &cf->conn->proxy_alpn : &cf->conn->alpn
+      (cf->conn->bits.tunnel_proxy && Fetch_ssl_cf_is_proxy(cf)) ? &cf->conn->proxy_alpn : &cf->conn->alpn
 #else
       &cf->conn->alpn
 #endif

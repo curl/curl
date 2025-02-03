@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,22 +43,22 @@ typedef enum
   TIMER_LAST /* must be last */
 } timerid;
 
-int Curl_pgrsDone(struct Curl_easy *data);
-void Curl_pgrsStartNow(struct Curl_easy *data);
-void Curl_pgrsSetDownloadSize(struct Curl_easy *data, fetch_off_t size);
-void Curl_pgrsSetUploadSize(struct Curl_easy *data, fetch_off_t size);
+int Fetch_pgrsDone(struct Fetch_easy *data);
+void Fetch_pgrsStartNow(struct Fetch_easy *data);
+void Fetch_pgrsSetDownloadSize(struct Fetch_easy *data, fetch_off_t size);
+void Fetch_pgrsSetUploadSize(struct Fetch_easy *data, fetch_off_t size);
 
 /* It is fine to not check the return code if 'size' is set to 0 */
-FETCHcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, fetch_off_t size);
+FETCHcode Fetch_pgrsSetDownloadCounter(struct Fetch_easy *data, fetch_off_t size);
 
-void Curl_pgrsSetUploadCounter(struct Curl_easy *data, fetch_off_t size);
-void Curl_ratelimit(struct Curl_easy *data, struct fetchtime now);
-int Curl_pgrsUpdate(struct Curl_easy *data);
-void Curl_pgrsUpdate_nometer(struct Curl_easy *data);
+void Fetch_pgrsSetUploadCounter(struct Fetch_easy *data, fetch_off_t size);
+void Fetch_ratelimit(struct Fetch_easy *data, struct fetchtime now);
+int Fetch_pgrsUpdate(struct Fetch_easy *data);
+void Fetch_pgrsUpdate_nometer(struct Fetch_easy *data);
 
-void Curl_pgrsResetTransferSizes(struct Curl_easy *data);
-struct fetchtime Curl_pgrsTime(struct Curl_easy *data, timerid timer);
-timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
+void Fetch_pgrsResetTransferSizes(struct Fetch_easy *data);
+struct fetchtime Fetch_pgrsTime(struct Fetch_easy *data, timerid timer);
+timediff_t Fetch_pgrsLimitWaitTime(struct pgrs_dir *d,
                                   fetch_off_t speed_limit,
                                   struct fetchtime now);
 /**
@@ -66,10 +66,10 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
  * This allows updating timers later and is used by happy eyeballing, where
  * we only want to record the winner's times.
  */
-void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
+void Fetch_pgrsTimeWas(struct Fetch_easy *data, timerid timer,
                       struct fetchtime timestamp);
 
-void Curl_pgrsEarlyData(struct Curl_easy *data, fetch_off_t sent);
+void Fetch_pgrsEarlyData(struct Fetch_easy *data, fetch_off_t sent);
 
 #define PGRS_HIDE (1 << 4)
 #define PGRS_UL_SIZE_KNOWN (1 << 5)

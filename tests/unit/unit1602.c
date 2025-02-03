@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_hash hash_static;
+static struct Fetch_hash hash_static;
 
 static void mydtor(void *p)
 {
@@ -39,14 +39,14 @@ static void mydtor(void *p)
 
 static FETCHcode unit_setup(void)
 {
-  Curl_hash_init(&hash_static, 7, Curl_hash_str,
-                 Curl_str_key_compare, mydtor);
+  Fetch_hash_init(&hash_static, 7, Fetch_hash_str,
+                 Fetch_str_key_compare, mydtor);
   return FETCHE_OK;
 }
 
 static void unit_stop(void)
 {
-  Curl_hash_destroy(&hash_static);
+  Fetch_hash_destroy(&hash_static);
 }
 
 UNITTEST_START
@@ -61,17 +61,17 @@ int key2 = 25;
 value = malloc(sizeof(int));
 abort_unless(value != NULL, "Out of memory");
 *value = 199;
-nodep = Curl_hash_add(&hash_static, &key, klen, value);
+nodep = Fetch_hash_add(&hash_static, &key, klen, value);
 if (!nodep)
   free(value);
 abort_unless(nodep, "insertion into hash failed");
-Curl_hash_clean(&hash_static);
+Fetch_hash_clean(&hash_static);
 
 /* Attempt to add another key/value pair */
 value2 = malloc(sizeof(int));
 abort_unless(value2 != NULL, "Out of memory");
 *value2 = 204;
-nodep = Curl_hash_add(&hash_static, &key2, klen, value2);
+nodep = Fetch_hash_add(&hash_static, &key2, klen, value2);
 if (!nodep)
   free(value2);
 abort_unless(nodep, "insertion into hash failed");

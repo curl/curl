@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,18 +25,18 @@
  ***************************************************************************/
 #include "fetch_setup.h"
 
-#include "nonblock.h" /* for fetchx_nonblock(), formerly Curl_nonblock() */
+#include "nonblock.h" /* for fetchx_nonblock(), formerly Fetch_nonblock() */
 #include "sockaddr.h"
 #include "timeval.h"
 
-struct Curl_dns_entry;
+struct Fetch_dns_entry;
 struct ip_quadruple;
 
-enum alpnid Curl_alpn2alpnid(char *name, size_t len);
+enum alpnid Fetch_alpn2alpnid(char *name, size_t len);
 
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */
-timediff_t Curl_timeleft(struct Curl_easy *data,
+timediff_t Fetch_timeleft(struct Fetch_easy *data,
                          struct fetchtime *nowp,
                          bool duringconnect);
 
@@ -44,38 +44,38 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 
 #define DEFAULT_SHUTDOWN_TIMEOUT_MS (2 * 1000)
 
-void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
+void Fetch_shutdown_start(struct Fetch_easy *data, int sockindex,
                          struct fetchtime *nowp);
 
 /* return how much time there is left to shutdown the connection at
  * sockindex. Returns 0 if there is no limit or shutdown has not started. */
-timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
+timediff_t Fetch_shutdown_timeleft(struct connectdata *conn, int sockindex,
                                   struct fetchtime *nowp);
 
 /* return how much time there is left to shutdown the connection.
  * Returns 0 if there is no limit or shutdown has not started. */
-timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
+timediff_t Fetch_conn_shutdown_timeleft(struct connectdata *conn,
                                        struct fetchtime *nowp);
 
-void Curl_shutdown_clear(struct Curl_easy *data, int sockindex);
+void Fetch_shutdown_clear(struct Fetch_easy *data, int sockindex);
 
 /* TRUE iff shutdown has been started */
-bool Curl_shutdown_started(struct Curl_easy *data, int sockindex);
+bool Fetch_shutdown_started(struct Fetch_easy *data, int sockindex);
 
 /*
  * Used to extract socket and connectdata struct for the most recent
- * transfer on the given Curl_easy.
+ * transfer on the given Fetch_easy.
  *
  * The returned socket will be FETCH_SOCKET_BAD in case of failure!
  */
-fetch_socket_t Curl_getconnectinfo(struct Curl_easy *data,
+fetch_socket_t Fetch_getconnectinfo(struct Fetch_easy *data,
                                    struct connectdata **connp);
 
-bool Curl_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
+bool Fetch_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
                       char *addr, int *port);
 
 /*
- * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'
+ * Fetch_conncontrol() marks the end of a connection/stream. The 'closeit'
  * argument specifies if it is the end of a connection or a stream.
  *
  * For stream-based protocols (such as HTTP/2), a stream close will not cause
@@ -90,7 +90,7 @@ bool Curl_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
 #define CONNCTRL_CONNECTION 1
 #define CONNCTRL_STREAM 2
 
-void Curl_conncontrol(struct connectdata *conn,
+void Fetch_conncontrol(struct connectdata *conn,
                       int closeit
 #if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
                       ,
@@ -99,13 +99,13 @@ void Curl_conncontrol(struct connectdata *conn,
 );
 
 #if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
-#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
-#define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
-#define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
+#define streamclose(x, y) Fetch_conncontrol(x, CONNCTRL_STREAM, y)
+#define connclose(x, y) Fetch_conncontrol(x, CONNCTRL_CONNECTION, y)
+#define connkeep(x, y) Fetch_conncontrol(x, CONNCTRL_KEEP, y)
 #else /* if !DEBUGBUILD || FETCH_DISABLE_VERBOSE_STRINGS */
-#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM)
-#define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
-#define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP)
+#define streamclose(x, y) Fetch_conncontrol(x, CONNCTRL_STREAM)
+#define connclose(x, y) Fetch_conncontrol(x, CONNCTRL_CONNECTION)
+#define connkeep(x, y) Fetch_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
 /**
@@ -119,15 +119,15 @@ void Curl_conncontrol(struct connectdata *conn,
  * `connect` implementation needs to support non-blocking. Once connected,
  * it MAY be installed in the connection filter chain to serve transfers.
  */
-typedef FETCHcode cf_ip_connect_create(struct Curl_cfilter **pcf,
-                                       struct Curl_easy *data,
+typedef FETCHcode cf_ip_connect_create(struct Fetch_cfilter **pcf,
+                                       struct Fetch_easy *data,
                                        struct connectdata *conn,
-                                       const struct Curl_addrinfo *ai,
+                                       const struct Fetch_addrinfo *ai,
                                        int transport);
 
-FETCHcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
-                                     struct Curl_easy *data,
-                                     const struct Curl_dns_entry *remotehost,
+FETCHcode Fetch_cf_setup_insert_after(struct Fetch_cfilter *cf_at,
+                                     struct Fetch_easy *data,
+                                     const struct Fetch_dns_entry *remotehost,
                                      int transport,
                                      int ssl_mode);
 
@@ -136,17 +136,17 @@ FETCHcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
  * If no filter chain is installed yet, inspects the configuration
  * in `data` and `conn? to install a suitable filter chain.
  */
-FETCHcode Curl_conn_setup(struct Curl_easy *data,
+FETCHcode Fetch_conn_setup(struct Fetch_easy *data,
                           struct connectdata *conn,
                           int sockindex,
-                          const struct Curl_dns_entry *remotehost,
+                          const struct Fetch_dns_entry *remotehost,
                           int ssl_mode);
 
-extern struct Curl_cftype Curl_cft_happy_eyeballs;
-extern struct Curl_cftype Curl_cft_setup;
+extern struct Fetch_cftype Fetch_cft_happy_eyeballs;
+extern struct Fetch_cftype Fetch_cft_setup;
 
 #ifdef UNITTESTS
-void Curl_debug_set_transport_provider(int transport,
+void Fetch_debug_set_transport_provider(int transport,
                                        cf_ip_connect_create *cf_create);
 #endif
 

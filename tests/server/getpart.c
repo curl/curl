@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,7 +44,7 @@
 #ifdef DEBUG_GETPART
 #define show(x) printf x
 #else
-#define show(x) Curl_nop_stmt
+#define show(x) Fetch_nop_stmt
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -52,13 +52,13 @@
 #pragma warning(disable : 4232) /* MSVC extension, dllimport identity */
 #endif
 
-fetch_malloc_callback Curl_cmalloc = (fetch_malloc_callback)malloc;
-fetch_free_callback Curl_cfree = (fetch_free_callback)free;
-fetch_realloc_callback Curl_crealloc = (fetch_realloc_callback)realloc;
-fetch_strdup_callback Curl_cstrdup = (fetch_strdup_callback)strdup;
-fetch_calloc_callback Curl_ccalloc = (fetch_calloc_callback)calloc;
+fetch_malloc_callback Fetch_cmalloc = (fetch_malloc_callback)malloc;
+fetch_free_callback Fetch_cfree = (fetch_free_callback)free;
+fetch_realloc_callback Fetch_crealloc = (fetch_realloc_callback)realloc;
+fetch_strdup_callback Fetch_cstrdup = (fetch_strdup_callback)strdup;
+fetch_calloc_callback Fetch_ccalloc = (fetch_calloc_callback)calloc;
 #if defined(_WIN32) && defined(UNICODE)
-fetch_wcsdup_callback Curl_cwcsdup = (fetch_wcsdup_callback)_wcsdup;
+fetch_wcsdup_callback Fetch_cwcsdup = (fetch_wcsdup_callback)_wcsdup;
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -232,7 +232,7 @@ static int decodedata(char **buf,  /* dest buffer */
     return GPE_OK;
 
   /* base64 decode the given buffer */
-  error = Curl_base64_decode(*buf, &buf64, &src_len);
+  error = Fetch_base64_decode(*buf, &buf64, &src_len);
   if (error)
     return GPE_OUT_OF_MEMORY;
 
@@ -240,7 +240,7 @@ static int decodedata(char **buf,  /* dest buffer */
   {
     /*
     ** currently there is no way to tell apart an OOM condition in
-    ** Curl_base64_decode() from zero length decoded data. For now,
+    ** Fetch_base64_decode() from zero length decoded data. For now,
     ** let's just assume it is an OOM condition, currently we have
     ** no input for this function that decodes to zero length data.
     */

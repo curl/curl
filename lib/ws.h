@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -63,7 +63,7 @@ struct ws_encoder
  * and keep track of boundaries. */
 struct websocket
 {
-  struct Curl_easy *data;      /* used for write callback handling */
+  struct Fetch_easy *data;      /* used for write callback handling */
   struct ws_decoder dec;       /* decode of we frames */
   struct ws_encoder enc;       /* decode of we frames */
   struct bufq recvbuf;         /* raw data from the server */
@@ -72,17 +72,17 @@ struct websocket
   size_t sendbuf_payload;      /* number of payload bytes in sendbuf */
 };
 
-FETCHcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
-FETCHcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
+FETCHcode Fetch_ws_request(struct Fetch_easy *data, struct dynbuf *req);
+FETCHcode Fetch_ws_accept(struct Fetch_easy *data, const char *mem, size_t len);
 
-extern const struct Curl_handler Curl_handler_ws;
+extern const struct Fetch_handler Fetch_handler_ws;
 #ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_wss;
+extern const struct Fetch_handler Fetch_handler_wss;
 #endif
 
 #else
-#define Curl_ws_request(x, y) FETCHE_OK
-#define Curl_ws_free(x) Curl_nop_stmt
+#define Fetch_ws_request(x, y) FETCHE_OK
+#define Fetch_ws_free(x) Fetch_nop_stmt
 #endif
 
 #endif /* HEADER_FETCH_WS_H */

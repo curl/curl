@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@
 /*
  * Init a bufref struct.
  */
-void Curl_bufref_init(struct bufref *br)
+void Fetch_bufref_init(struct bufref *br)
 {
   DEBUGASSERT(br);
   br->dtor = NULL;
@@ -52,7 +52,7 @@ void Curl_bufref_init(struct bufref *br)
  * 'signature' field and thus this buffer reference can be reused.
  */
 
-void Curl_bufref_free(struct bufref *br)
+void Fetch_bufref_free(struct bufref *br)
 {
   DEBUGASSERT(br);
   DEBUGASSERT(br->signature == SIGNATURE);
@@ -70,13 +70,13 @@ void Curl_bufref_free(struct bufref *br)
  * Set the buffer reference to new values. The previously referenced buffer
  * is released before assignment.
  */
-void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
+void Fetch_bufref_set(struct bufref *br, const void *ptr, size_t len,
                      void (*dtor)(void *))
 {
   DEBUGASSERT(ptr || !len);
   DEBUGASSERT(len <= FETCH_MAX_INPUT_LENGTH);
 
-  Curl_bufref_free(br);
+  Fetch_bufref_free(br);
   br->ptr = (const unsigned char *)ptr;
   br->len = len;
   br->dtor = dtor;
@@ -85,7 +85,7 @@ void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
 /*
  * Get a pointer to the referenced buffer.
  */
-const unsigned char *Curl_bufref_ptr(const struct bufref *br)
+const unsigned char *Fetch_bufref_ptr(const struct bufref *br)
 {
   DEBUGASSERT(br);
   DEBUGASSERT(br->signature == SIGNATURE);
@@ -97,7 +97,7 @@ const unsigned char *Curl_bufref_ptr(const struct bufref *br)
 /*
  * Get the length of the referenced buffer data.
  */
-size_t Curl_bufref_len(const struct bufref *br)
+size_t Fetch_bufref_len(const struct bufref *br)
 {
   DEBUGASSERT(br);
   DEBUGASSERT(br->signature == SIGNATURE);
@@ -106,7 +106,7 @@ size_t Curl_bufref_len(const struct bufref *br)
   return br->len;
 }
 
-FETCHcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len)
+FETCHcode Fetch_bufref_memdup(struct bufref *br, const void *ptr, size_t len)
 {
   unsigned char *cpy = NULL;
 
@@ -118,11 +118,11 @@ FETCHcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len)
 
   if (ptr)
   {
-    cpy = Curl_memdup0(ptr, len);
+    cpy = Fetch_memdup0(ptr, len);
     if (!cpy)
       return FETCHE_OUT_OF_MEMORY;
   }
 
-  Curl_bufref_set(br, cpy, len, fetch_free);
+  Fetch_bufref_set(br, cpy, len, fetch_free);
   return FETCHE_OK;
 }

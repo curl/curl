@@ -14,7 +14,7 @@ CUSTOMREQUEST
 <data>
 body
 
-+ Curl did not used to like this line
++ Fetch did not used to like this line
 --
   yours sincerely
 </data>

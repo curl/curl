@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,15 +60,15 @@
 #include "memdebug.h"
 
 /* a peer+tls-config we cache sessions for */
-struct Curl_ssl_scache_peer
+struct Fetch_ssl_scache_peer
 {
   char *ssl_peer_key; /* id for peer + relevant TLS configuration */
   char *clientcert;
   char *srp_username;
   char *srp_password;
-  struct Curl_llist sessions;
+  struct Fetch_llist sessions;
   void *sobj;                                         /* object instance or NULL */
-  Curl_ssl_scache_obj_dtor *sobj_free;                /* free `sobj` callback */
+  Fetch_ssl_scache_obj_dtor *sobj_free;                /* free `sobj` callback */
   unsigned char key_salt[FETCH_SHA256_DIGEST_LENGTH]; /* for entry export */
   unsigned char key_hmac[FETCH_SHA256_DIGEST_LENGTH]; /* for entry export */
   size_t max_sessions;
@@ -76,15 +76,15 @@ struct Curl_ssl_scache_peer
   BIT(hmac_set); /* if key_salt and key_hmac are present */
 };
 
-struct Curl_ssl_scache
+struct Fetch_ssl_scache
 {
-  struct Curl_ssl_scache_peer *peers;
+  struct Fetch_ssl_scache_peer *peers;
   size_t peer_count;
   int default_lifetime_secs;
   long age;
 };
 
-static void cf_ssl_scache_clear_session(struct Curl_ssl_session *s)
+static void cf_ssl_scache_clear_session(struct Fetch_ssl_session *s)
 {
   if (s->sdata)
   {
@@ -100,7 +100,7 @@ static void cf_ssl_scache_clear_session(struct Curl_ssl_session *s)
   s->quic_tp_len = 0;
   s->ietf_tls_id = 0;
   s->valid_until = 0;
-  Curl_safefree(s->alpn);
+  Fetch_safefree(s->alpn);
 }
 
 static void cf_ssl_scache_sesssion_ldestroy(void *udata, void *s)
@@ -111,24 +111,24 @@ static void cf_ssl_scache_sesssion_ldestroy(void *udata, void *s)
 }
 
 FETCHcode
-Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
+Fetch_ssl_session_create(unsigned char *sdata, size_t sdata_len,
                         int ietf_tls_id, const char *alpn,
                         fetch_off_t valid_until, size_t earlydata_max,
-                        struct Curl_ssl_session **psession)
+                        struct Fetch_ssl_session **psession)
 {
-  return Curl_ssl_session_create2(sdata, sdata_len, ietf_tls_id, alpn,
+  return Fetch_ssl_session_create2(sdata, sdata_len, ietf_tls_id, alpn,
                                   valid_until, earlydata_max,
                                   NULL, 0, psession);
 }
 
 FETCHcode
-Curl_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
+Fetch_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
                          int ietf_tls_id, const char *alpn,
                          fetch_off_t valid_until, size_t earlydata_max,
                          unsigned char *quic_tp, size_t quic_tp_len,
-                         struct Curl_ssl_session **psession)
+                         struct Fetch_ssl_session **psession)
 {
-  struct Curl_ssl_session *s;
+  struct Fetch_ssl_session *s;
 
   if (!sdata || !sdata_len)
   {
@@ -165,13 +165,13 @@ Curl_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
   return FETCHE_OK;
 }
 
-void Curl_ssl_session_destroy(struct Curl_ssl_session *s)
+void Fetch_ssl_session_destroy(struct Fetch_ssl_session *s)
 {
   if (s)
   {
     /* if in the list, the list destructor takes care of it */
-    if (Curl_node_llist(&s->list))
-      Curl_node_remove(&s->list);
+    if (Fetch_node_llist(&s->list))
+      Fetch_node_remove(&s->list);
     else
     {
       cf_ssl_scache_sesssion_ldestroy(NULL, s);
@@ -179,9 +179,9 @@ void Curl_ssl_session_destroy(struct Curl_ssl_session *s)
   }
 }
 
-static void cf_ssl_scache_clear_peer(struct Curl_ssl_scache_peer *peer)
+static void cf_ssl_scache_clear_peer(struct Fetch_ssl_scache_peer *peer)
 {
-  Curl_llist_destroy(&peer->sessions, NULL);
+  Fetch_llist_destroy(&peer->sessions, NULL);
   if (peer->sobj)
   {
     DEBUGASSERT(peer->sobj_free);
@@ -190,19 +190,19 @@ static void cf_ssl_scache_clear_peer(struct Curl_ssl_scache_peer *peer)
     peer->sobj = NULL;
   }
   peer->sobj_free = NULL;
-  Curl_safefree(peer->clientcert);
+  Fetch_safefree(peer->clientcert);
 #ifdef USE_TLS_SRP
-  Curl_safefree(peer->srp_username);
-  Curl_safefree(peer->srp_password);
+  Fetch_safefree(peer->srp_username);
+  Fetch_safefree(peer->srp_password);
 #endif
-  Curl_safefree(peer->ssl_peer_key);
+  Fetch_safefree(peer->ssl_peer_key);
   peer->age = 0;
   peer->hmac_set = FALSE;
 }
 
-static void cf_ssl_scache_peer_set_obj(struct Curl_ssl_scache_peer *peer,
+static void cf_ssl_scache_peer_set_obj(struct Fetch_ssl_scache_peer *peer,
                                        void *sobj,
-                                       Curl_ssl_scache_obj_dtor *sobj_free)
+                                       Fetch_ssl_scache_obj_dtor *sobj_free)
 {
   DEBUGASSERT(peer);
   if (peer->sobj_free)
@@ -214,7 +214,7 @@ static void cf_ssl_scache_peer_set_obj(struct Curl_ssl_scache_peer *peer,
 }
 
 static FETCHcode
-cf_ssl_scache_peer_init(struct Curl_ssl_scache_peer *peer,
+cf_ssl_scache_peer_init(struct Fetch_ssl_scache_peer *peer,
                         const char *ssl_peer_key,
                         const char *clientcert,
                         const char *srp_username,
@@ -268,51 +268,51 @@ out:
   return result;
 }
 
-static void cf_scache_session_remove(struct Curl_ssl_scache_peer *peer,
-                                     struct Curl_ssl_session *s)
+static void cf_scache_session_remove(struct Fetch_ssl_scache_peer *peer,
+                                     struct Fetch_ssl_session *s)
 {
   (void)peer;
-  DEBUGASSERT(Curl_node_llist(&s->list) == &peer->sessions);
-  Curl_ssl_session_destroy(s);
+  DEBUGASSERT(Fetch_node_llist(&s->list) == &peer->sessions);
+  Fetch_ssl_session_destroy(s);
 }
 
-static bool cf_scache_session_expired(struct Curl_ssl_session *s,
+static bool cf_scache_session_expired(struct Fetch_ssl_session *s,
                                       fetch_off_t now)
 {
   return (s->valid_until > 0) && (s->valid_until < now);
 }
 
-static void cf_scache_peer_remove_expired(struct Curl_ssl_scache_peer *peer,
+static void cf_scache_peer_remove_expired(struct Fetch_ssl_scache_peer *peer,
                                           fetch_off_t now)
 {
-  struct Curl_llist_node *n = Curl_llist_head(&peer->sessions);
+  struct Fetch_llist_node *n = Fetch_llist_head(&peer->sessions);
   while (n)
   {
-    struct Curl_ssl_session *s = Curl_node_elem(n);
-    n = Curl_node_next(n);
+    struct Fetch_ssl_session *s = Fetch_node_elem(n);
+    n = Fetch_node_next(n);
     if (cf_scache_session_expired(s, now))
       cf_scache_session_remove(peer, s);
   }
 }
 
-static void cf_scache_peer_remove_non13(struct Curl_ssl_scache_peer *peer)
+static void cf_scache_peer_remove_non13(struct Fetch_ssl_scache_peer *peer)
 {
-  struct Curl_llist_node *n = Curl_llist_head(&peer->sessions);
+  struct Fetch_llist_node *n = Fetch_llist_head(&peer->sessions);
   while (n)
   {
-    struct Curl_ssl_session *s = Curl_node_elem(n);
-    n = Curl_node_next(n);
+    struct Fetch_ssl_session *s = Fetch_node_elem(n);
+    n = Fetch_node_next(n);
     if (s->ietf_tls_id != FETCH_IETF_PROTO_TLS1_3)
       cf_scache_session_remove(peer, s);
   }
 }
 
-FETCHcode Curl_ssl_scache_create(size_t max_peers,
+FETCHcode Fetch_ssl_scache_create(size_t max_peers,
                                  size_t max_sessions_per_peer,
-                                 struct Curl_ssl_scache **pscache)
+                                 struct Fetch_ssl_scache **pscache)
 {
-  struct Curl_ssl_scache *scache;
-  struct Curl_ssl_scache_peer *peers;
+  struct Fetch_ssl_scache *scache;
+  struct Fetch_ssl_scache_peer *peers;
   size_t i;
 
   *pscache = NULL;
@@ -334,7 +334,7 @@ FETCHcode Curl_ssl_scache_create(size_t max_peers,
   for (i = 0; i < scache->peer_count; ++i)
   {
     scache->peers[i].max_sessions = max_sessions_per_peer;
-    Curl_llist_init(&scache->peers[i].sessions,
+    Fetch_llist_init(&scache->peers[i].sessions,
                     cf_ssl_scache_sesssion_ldestroy);
   }
 
@@ -342,7 +342,7 @@ FETCHcode Curl_ssl_scache_create(size_t max_peers,
   return FETCHE_OK;
 }
 
-void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
+void Fetch_ssl_scache_destroy(struct Fetch_ssl_scache *scache)
 {
   if (scache)
   {
@@ -357,17 +357,17 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
 }
 
 /* Lock shared SSL session data */
-void Curl_ssl_scache_lock(struct Curl_easy *data)
+void Fetch_ssl_scache_lock(struct Fetch_easy *data)
 {
   if (FETCH_SHARE_ssl_scache(data))
-    Curl_share_lock(data, FETCH_LOCK_DATA_SSL_SESSION, FETCH_LOCK_ACCESS_SINGLE);
+    Fetch_share_lock(data, FETCH_LOCK_DATA_SSL_SESSION, FETCH_LOCK_ACCESS_SINGLE);
 }
 
 /* Unlock shared SSL session data */
-void Curl_ssl_scache_unlock(struct Curl_easy *data)
+void Fetch_ssl_scache_unlock(struct Fetch_easy *data)
 {
   if (FETCH_SHARE_ssl_scache(data))
-    Curl_share_unlock(data, FETCH_LOCK_DATA_SSL_SESSION);
+    Fetch_share_unlock(data, FETCH_LOCK_DATA_SSL_SESSION);
 }
 
 static FETCHcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
@@ -383,20 +383,20 @@ static FETCHcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
 #ifdef _WIN32
     char abspath[_MAX_PATH];
     if (_fullpath(abspath, path, _MAX_PATH))
-      return Curl_dyn_addf(buf, ":%s-%s", name, abspath);
+      return Fetch_dyn_addf(buf, ":%s-%s", name, abspath);
 #else
     if (path[0] != '/')
     {
       char *abspath = realpath(path, NULL);
       if (abspath)
       {
-        FETCHcode r = Curl_dyn_addf(buf, ":%s-%s", name, abspath);
+        FETCHcode r = Fetch_dyn_addf(buf, ":%s-%s", name, abspath);
         (free)(abspath); /* allocated by libc, free without memdebug */
         return r;
       }
     }
 #endif
-    return Curl_dyn_addf(buf, ":%s-%s", name, path);
+    return Fetch_dyn_addf(buf, ":%s-%s", name, path);
   }
   return FETCHE_OK;
 }
@@ -411,15 +411,15 @@ static FETCHcode cf_ssl_peer_key_add_hash(struct dynbuf *buf,
     unsigned char hash[FETCH_SHA256_DIGEST_LENGTH];
     size_t i;
 
-    r = Curl_dyn_addf(buf, ":%s-", name);
+    r = Fetch_dyn_addf(buf, ":%s-", name);
     if (r)
       goto out;
-    r = Curl_sha256it(hash, blob->data, blob->len);
+    r = Fetch_sha256it(hash, blob->data, blob->len);
     if (r)
       goto out;
     for (i = 0; i < FETCH_SHA256_DIGEST_LENGTH; ++i)
     {
-      r = Curl_dyn_addf(buf, "%02x", hash[i]);
+      r = Fetch_dyn_addf(buf, "%02x", hash[i]);
       if (r)
         goto out;
     }
@@ -428,20 +428,20 @@ out:
   return r;
 }
 
-FETCHcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
+FETCHcode Fetch_ssl_peer_key_make(struct Fetch_cfilter *cf,
                                  const struct ssl_peer *peer,
                                  const char *tls_id,
                                  char **ppeer_key)
 {
-  struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_primary_config *ssl = Fetch_ssl_cf_get_primary_config(cf);
   struct dynbuf buf;
   size_t key_len;
   FETCHcode r;
 
   *ppeer_key = NULL;
-  Curl_dyn_init(&buf, 10 * 1024);
+  Fetch_dyn_init(&buf, 10 * 1024);
 
-  r = Curl_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
+  r = Fetch_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
   if (r)
     goto out;
 
@@ -450,16 +450,16 @@ FETCHcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   case TRNSPRT_TCP:
     break;
   case TRNSPRT_UDP:
-    r = Curl_dyn_add(&buf, ":UDP");
+    r = Fetch_dyn_add(&buf, ":UDP");
     break;
   case TRNSPRT_QUIC:
-    r = Curl_dyn_add(&buf, ":QUIC");
+    r = Fetch_dyn_add(&buf, ":QUIC");
     break;
   case TRNSPRT_UNIX:
-    r = Curl_dyn_add(&buf, ":UNIX");
+    r = Fetch_dyn_add(&buf, ":UNIX");
     break;
   default:
-    r = Curl_dyn_addf(&buf, ":TRNSPRT-%d", peer->transport);
+    r = Fetch_dyn_addf(&buf, ":TRNSPRT-%d", peer->transport);
     break;
   }
   if (r)
@@ -467,19 +467,19 @@ FETCHcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
 
   if (!ssl->verifypeer)
   {
-    r = Curl_dyn_add(&buf, ":NO-VRFY-PEER");
+    r = Fetch_dyn_add(&buf, ":NO-VRFY-PEER");
     if (r)
       goto out;
   }
   if (!ssl->verifyhost)
   {
-    r = Curl_dyn_add(&buf, ":NO-VRFY-HOST");
+    r = Fetch_dyn_add(&buf, ":NO-VRFY-HOST");
     if (r)
       goto out;
   }
   if (ssl->verifystatus)
   {
-    r = Curl_dyn_add(&buf, ":VRFY-STATUS");
+    r = Fetch_dyn_add(&buf, ":VRFY-STATUS");
     if (r)
       goto out;
   }
@@ -487,13 +487,13 @@ FETCHcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   {
     if (cf->conn->bits.conn_to_host)
     {
-      r = Curl_dyn_addf(&buf, ":CHOST-%s", cf->conn->conn_to_host.name);
+      r = Fetch_dyn_addf(&buf, ":CHOST-%s", cf->conn->conn_to_host.name);
       if (r)
         goto out;
     }
     if (cf->conn->bits.conn_to_port)
     {
-      r = Curl_dyn_addf(&buf, ":CPORT-%d", cf->conn->conn_to_port);
+      r = Fetch_dyn_addf(&buf, ":CPORT-%d", cf->conn->conn_to_port);
       if (r)
         goto out;
     }
@@ -501,32 +501,32 @@ FETCHcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
 
   if (ssl->version || ssl->version_max)
   {
-    r = Curl_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
+    r = Fetch_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
                       (ssl->version_max >> 16));
     if (r)
       goto out;
   }
   if (ssl->ssl_options)
   {
-    r = Curl_dyn_addf(&buf, ":TLSOPT-%x", ssl->ssl_options);
+    r = Fetch_dyn_addf(&buf, ":TLSOPT-%x", ssl->ssl_options);
     if (r)
       goto out;
   }
   if (ssl->cipher_list)
   {
-    r = Curl_dyn_addf(&buf, ":CIPHER-%s", ssl->cipher_list);
+    r = Fetch_dyn_addf(&buf, ":CIPHER-%s", ssl->cipher_list);
     if (r)
       goto out;
   }
   if (ssl->cipher_list13)
   {
-    r = Curl_dyn_addf(&buf, ":CIPHER13-%s", ssl->cipher_list13);
+    r = Fetch_dyn_addf(&buf, ":CIPHER13-%s", ssl->cipher_list13);
     if (r)
       goto out;
   }
   if (ssl->curves)
   {
-    r = Curl_dyn_addf(&buf, ":CURVES-%s", ssl->curves);
+    r = Fetch_dyn_addf(&buf, ":CURVES-%s", ssl->curves);
     if (r)
       goto out;
   }
@@ -565,21 +565,21 @@ FETCHcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   }
   if (ssl->pinned_key && ssl->pinned_key[0])
   {
-    r = Curl_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
+    r = Fetch_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
     if (r)
       goto out;
   }
 
   if (ssl->clientcert && ssl->clientcert[0])
   {
-    r = Curl_dyn_add(&buf, ":CCERT");
+    r = Fetch_dyn_add(&buf, ":CCERT");
     if (r)
       goto out;
   }
 #ifdef USE_TLS_SRP
   if (ssl->username || ssl->password)
   {
-    r = Curl_dyn_add(&buf, ":SRP-AUTH");
+    r = Fetch_dyn_add(&buf, ":SRP-AUTH");
     if (r)
       goto out;
   }
@@ -590,20 +590,20 @@ FETCHcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
     r = FETCHE_FAILED_INIT;
     goto out;
   }
-  r = Curl_dyn_addf(&buf, ":IMPL-%s", tls_id);
+  r = Fetch_dyn_addf(&buf, ":IMPL-%s", tls_id);
   if (r)
     goto out;
 
-  *ppeer_key = Curl_dyn_take(&buf, &key_len);
+  *ppeer_key = Fetch_dyn_take(&buf, &key_len);
   /* we just added printable char, and dynbuf always 0 terminates,
    * no need to track length */
 
 out:
-  Curl_dyn_free(&buf);
+  Fetch_dyn_free(&buf);
   return r;
 }
 
-static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,
+static bool cf_ssl_scache_match_auth(struct Fetch_ssl_scache_peer *peer,
                                      struct ssl_primary_config *conn_config)
 {
   if (!conn_config)
@@ -616,22 +616,22 @@ static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,
 #endif
     return TRUE;
   }
-  else if (!Curl_safecmp(peer->clientcert, conn_config->clientcert))
+  else if (!Fetch_safecmp(peer->clientcert, conn_config->clientcert))
     return FALSE;
 #ifdef USE_TLS_SRP
-  if (Curl_timestrcmp(peer->srp_username, conn_config->username) ||
-      Curl_timestrcmp(peer->srp_password, conn_config->password))
+  if (Fetch_timestrcmp(peer->srp_username, conn_config->username) ||
+      Fetch_timestrcmp(peer->srp_password, conn_config->password))
     return FALSE;
 #endif
   return TRUE;
 }
 
 static FETCHcode
-cf_ssl_find_peer_by_key(struct Curl_easy *data,
-                        struct Curl_ssl_scache *scache,
+cf_ssl_find_peer_by_key(struct Fetch_easy *data,
+                        struct Fetch_ssl_scache *scache,
                         const char *ssl_peer_key,
                         struct ssl_primary_config *conn_config,
-                        struct Curl_ssl_scache_peer **ppeer)
+                        struct Fetch_ssl_scache_peer **ppeer)
 {
   size_t i, peer_key_len = 0;
   FETCHcode result = FETCHE_OK;
@@ -660,7 +660,7 @@ cf_ssl_find_peer_by_key(struct Curl_easy *data,
       unsigned char my_hmac[FETCH_SHA256_DIGEST_LENGTH];
       if (!peer_key_len) /* we are lazy */
         peer_key_len = strlen(ssl_peer_key);
-      result = Curl_hmacit(&Curl_HMAC_SHA256,
+      result = Fetch_hmacit(&Fetch_HMAC_SHA256,
                            scache->peers[i].key_salt,
                            sizeof(scache->peers[i].key_salt),
                            (const unsigned char *)ssl_peer_key,
@@ -689,10 +689,10 @@ out:
   return result;
 }
 
-static struct Curl_ssl_scache_peer *
-cf_ssl_get_free_peer(struct Curl_ssl_scache *scache)
+static struct Fetch_ssl_scache_peer *
+cf_ssl_get_free_peer(struct Fetch_ssl_scache *scache)
 {
-  struct Curl_ssl_scache_peer *peer = NULL;
+  struct Fetch_ssl_scache_peer *peer = NULL;
   size_t i;
 
   /* find empty or oldest peer */
@@ -706,7 +706,7 @@ cf_ssl_get_free_peer(struct Curl_ssl_scache *scache)
     }
     /* peer without sessions and obj */
     if (!scache->peers[i].sobj &&
-        !Curl_llist_count(&scache->peers[i].sessions))
+        !Fetch_llist_count(&scache->peers[i].sessions))
     {
       peer = &scache->peers[i];
       break;
@@ -724,13 +724,13 @@ cf_ssl_get_free_peer(struct Curl_ssl_scache *scache)
 }
 
 static FETCHcode
-cf_ssl_add_peer(struct Curl_easy *data,
-                struct Curl_ssl_scache *scache,
+cf_ssl_add_peer(struct Fetch_easy *data,
+                struct Fetch_ssl_scache *scache,
                 const char *ssl_peer_key,
                 struct ssl_primary_config *conn_config,
-                struct Curl_ssl_scache_peer **ppeer)
+                struct Fetch_ssl_scache_peer **ppeer)
 {
-  struct Curl_ssl_scache_peer *peer = NULL;
+  struct Fetch_ssl_scache_peer *peer = NULL;
   FETCHcode result = FETCHE_OK;
 
   *ppeer = NULL;
@@ -774,44 +774,44 @@ out:
   return result;
 }
 
-static void cf_scache_peer_add_session(struct Curl_ssl_scache_peer *peer,
-                                       struct Curl_ssl_session *s,
+static void cf_scache_peer_add_session(struct Fetch_ssl_scache_peer *peer,
+                                       struct Fetch_ssl_session *s,
                                        fetch_off_t now)
 {
   /* A session not from TLSv1.3 replaces all other. */
   if (s->ietf_tls_id != FETCH_IETF_PROTO_TLS1_3)
   {
-    Curl_llist_destroy(&peer->sessions, NULL);
-    Curl_llist_append(&peer->sessions, s, &s->list);
+    Fetch_llist_destroy(&peer->sessions, NULL);
+    Fetch_llist_append(&peer->sessions, s, &s->list);
   }
   else
   {
     /* Expire existing, append, trim from head to obey max_sessions */
     cf_scache_peer_remove_expired(peer, now);
     cf_scache_peer_remove_non13(peer);
-    Curl_llist_append(&peer->sessions, s, &s->list);
-    while (Curl_llist_count(&peer->sessions) > peer->max_sessions)
+    Fetch_llist_append(&peer->sessions, s, &s->list);
+    while (Fetch_llist_count(&peer->sessions) > peer->max_sessions)
     {
-      Curl_node_remove(Curl_llist_head(&peer->sessions));
+      Fetch_node_remove(Fetch_llist_head(&peer->sessions));
     }
   }
 }
 
-static FETCHcode cf_scache_add_session(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       struct Curl_ssl_scache *scache,
+static FETCHcode cf_scache_add_session(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data,
+                                       struct Fetch_ssl_scache *scache,
                                        const char *ssl_peer_key,
-                                       struct Curl_ssl_session *s)
+                                       struct Fetch_ssl_session *s)
 {
-  struct Curl_ssl_scache_peer *peer = NULL;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct Fetch_ssl_scache_peer *peer = NULL;
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
   FETCHcode result = FETCHE_OUT_OF_MEMORY;
   fetch_off_t now = (fetch_off_t)time(NULL);
   fetch_off_t max_lifetime;
 
   if (!scache || !scache->peer_count)
   {
-    Curl_ssl_session_destroy(s);
+    Fetch_ssl_session_destroy(s);
     return FETCHE_OK;
   }
 
@@ -825,7 +825,7 @@ static FETCHcode cf_scache_add_session(struct Curl_cfilter *cf,
   if (cf_scache_session_expired(s, now))
   {
     FETCH_TRC_SSLS(data, "add, session already expired");
-    Curl_ssl_session_destroy(s);
+    Fetch_ssl_session_destroy(s);
     return FETCHE_OK;
   }
 
@@ -833,7 +833,7 @@ static FETCHcode cf_scache_add_session(struct Curl_cfilter *cf,
   if (result || !peer)
   {
     FETCH_TRC_SSLS(data, "unable to add scache peer: %d", result);
-    Curl_ssl_session_destroy(s);
+    Fetch_ssl_session_destroy(s);
     goto out;
   }
 
@@ -851,76 +851,76 @@ out:
                          "quic_tp=%s], peer has %zu sessions now",
                    ssl_peer_key, s->ietf_tls_id, s->valid_until - now,
                    s->alpn, s->earlydata_max, s->quic_tp ? "yes" : "no",
-                   peer ? Curl_llist_count(&peer->sessions) : 0);
+                   peer ? Fetch_llist_count(&peer->sessions) : 0);
   return result;
 }
 
-FETCHcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+FETCHcode Fetch_ssl_scache_put(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               const char *ssl_peer_key,
-                              struct Curl_ssl_session *s)
+                              struct Fetch_ssl_session *s)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct Fetch_ssl_scache *scache = data->state.ssl_scache;
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
   FETCHcode result;
   DEBUGASSERT(ssl_config);
 
   if (!scache || !ssl_config->primary.cache_session)
   {
-    Curl_ssl_session_destroy(s);
+    Fetch_ssl_session_destroy(s);
     return FETCHE_OK;
   }
 
-  Curl_ssl_scache_lock(data);
+  Fetch_ssl_scache_lock(data);
   result = cf_scache_add_session(cf, data, scache, ssl_peer_key, s);
-  Curl_ssl_scache_unlock(data);
+  Fetch_ssl_scache_unlock(data);
   return result;
 }
 
-void Curl_ssl_scache_return(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
+void Fetch_ssl_scache_return(struct Fetch_cfilter *cf,
+                            struct Fetch_easy *data,
                             const char *ssl_peer_key,
-                            struct Curl_ssl_session *s)
+                            struct Fetch_ssl_session *s)
 {
   /* See RFC 8446 C.4:
    * "Clients SHOULD NOT reuse a ticket for multiple connections." */
   if (s && s->ietf_tls_id < 0x304)
-    (void)Curl_ssl_scache_put(cf, data, ssl_peer_key, s);
+    (void)Fetch_ssl_scache_put(cf, data, ssl_peer_key, s);
   else
-    Curl_ssl_session_destroy(s);
+    Fetch_ssl_session_destroy(s);
 }
 
-FETCHcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
+FETCHcode Fetch_ssl_scache_take(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
                                const char *ssl_peer_key,
-                               struct Curl_ssl_session **ps)
+                               struct Fetch_ssl_session **ps)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_ssl_scache_peer *peer = NULL;
-  struct Curl_llist_node *n;
-  struct Curl_ssl_session *s = NULL;
+  struct Fetch_ssl_scache *scache = data->state.ssl_scache;
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
+  struct Fetch_ssl_scache_peer *peer = NULL;
+  struct Fetch_llist_node *n;
+  struct Fetch_ssl_session *s = NULL;
   FETCHcode result;
 
   *ps = NULL;
   if (!scache)
     return FETCHE_OK;
 
-  Curl_ssl_scache_lock(data);
+  Fetch_ssl_scache_lock(data);
   result = cf_ssl_find_peer_by_key(data, scache, ssl_peer_key, conn_config,
                                    &peer);
   if (!result && peer)
   {
     cf_scache_peer_remove_expired(peer, (fetch_off_t)time(NULL));
-    n = Curl_llist_head(&peer->sessions);
+    n = Fetch_llist_head(&peer->sessions);
     if (n)
     {
-      s = Curl_node_take_elem(n);
+      s = Fetch_node_take_elem(n);
       (scache->age)++;         /* increase general age */
       peer->age = scache->age; /* set this as used in this age */
     }
   }
-  Curl_ssl_scache_unlock(data);
+  Fetch_ssl_scache_unlock(data);
   if (s)
   {
     *ps = s;
@@ -928,7 +928,7 @@ FETCHcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                          "alpn=%s, earlydata=%zu, quic_tp=%s], %zu sessions remain",
                    ssl_peer_key, s->ietf_tls_id, s->alpn,
                    s->earlydata_max, s->quic_tp ? "yes" : "no",
-                   Curl_llist_count(&peer->sessions));
+                   Fetch_llist_count(&peer->sessions));
   }
   else
   {
@@ -937,15 +937,15 @@ FETCHcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
   return result;
 }
 
-FETCHcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+FETCHcode Fetch_ssl_scache_add_obj(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   const char *ssl_peer_key,
                                   void *sobj,
-                                  Curl_ssl_scache_obj_dtor *sobj_free)
+                                  Fetch_ssl_scache_obj_dtor *sobj_free)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_ssl_scache_peer *peer = NULL;
+  struct Fetch_ssl_scache *scache = data->state.ssl_scache;
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
+  struct Fetch_ssl_scache_peer *peer = NULL;
   FETCHcode result;
 
   DEBUGASSERT(sobj);
@@ -967,14 +967,14 @@ out:
   return result;
 }
 
-bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
+bool Fetch_ssl_scache_get_obj(struct Fetch_cfilter *cf,
+                             struct Fetch_easy *data,
                              const char *ssl_peer_key,
                              void **sobj)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_ssl_scache_peer *peer = NULL;
+  struct Fetch_ssl_scache *scache = data->state.ssl_scache;
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
+  struct Fetch_ssl_scache_peer *peer = NULL;
   FETCHcode result;
 
   *sobj = NULL;
@@ -994,32 +994,32 @@ bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
   return !!*sobj;
 }
 
-void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+void Fetch_ssl_scache_remove_all(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data,
                                 const char *ssl_peer_key)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_ssl_scache_peer *peer = NULL;
+  struct Fetch_ssl_scache *scache = data->state.ssl_scache;
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
+  struct Fetch_ssl_scache_peer *peer = NULL;
   FETCHcode result;
 
   (void)cf;
   if (!scache)
     return;
 
-  Curl_ssl_scache_lock(data);
+  Fetch_ssl_scache_lock(data);
   result = cf_ssl_find_peer_by_key(data, scache, ssl_peer_key, conn_config,
                                    &peer);
   if (!result && peer)
     cf_ssl_scache_clear_peer(peer);
-  Curl_ssl_scache_unlock(data);
+  Fetch_ssl_scache_unlock(data);
 }
 
 #ifdef USE_SSLS_EXPORT
 
 #define FETCH_SSL_TICKET_MAX (16 * 1024)
 
-static FETCHcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
+static FETCHcode cf_ssl_scache_peer_set_hmac(struct Fetch_ssl_scache_peer *peer)
 {
   FETCHcode result;
 
@@ -1027,11 +1027,11 @@ static FETCHcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
   if (!peer->ssl_peer_key)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-  result = Curl_rand(NULL, peer->key_salt, sizeof(peer->key_salt));
+  result = Fetch_rand(NULL, peer->key_salt, sizeof(peer->key_salt));
   if (result)
     return result;
 
-  result = Curl_hmacit(&Curl_HMAC_SHA256,
+  result = Fetch_hmacit(&Fetch_HMAC_SHA256,
                        peer->key_salt, sizeof(peer->key_salt),
                        (const unsigned char *)peer->ssl_peer_key,
                        strlen(peer->ssl_peer_key),
@@ -1042,10 +1042,10 @@ static FETCHcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
 }
 
 static FETCHcode
-cf_ssl_find_peer_by_hmac(struct Curl_ssl_scache *scache,
+cf_ssl_find_peer_by_hmac(struct Fetch_ssl_scache *scache,
                          const unsigned char *salt,
                          const unsigned char *hmac,
-                         struct Curl_ssl_scache_peer **ppeer)
+                         struct Fetch_ssl_scache_peer **ppeer)
 {
   size_t i;
   FETCHcode result = FETCHE_OK;
@@ -1055,7 +1055,7 @@ cf_ssl_find_peer_by_hmac(struct Curl_ssl_scache *scache,
    * ssl_peer_key which salt+hmac's to the same. */
   for (i = 0; scache && i < scache->peer_count; i++)
   {
-    struct Curl_ssl_scache_peer *peer = &scache->peers[i];
+    struct Fetch_ssl_scache_peer *peer = &scache->peers[i];
     if (!cf_ssl_scache_match_auth(peer, NULL))
       continue;
     if (scache->peers[i].hmac_set &&
@@ -1070,7 +1070,7 @@ cf_ssl_find_peer_by_hmac(struct Curl_ssl_scache *scache,
     {
       unsigned char my_hmac[FETCH_SHA256_DIGEST_LENGTH];
       /* compute hmac for the passed salt */
-      result = Curl_hmacit(&Curl_HMAC_SHA256,
+      result = Fetch_hmacit(&Fetch_HMAC_SHA256,
                            salt, sizeof(peer->key_salt),
                            (const unsigned char *)peer->ssl_peer_key,
                            strlen(peer->ssl_peer_key),
@@ -1095,14 +1095,14 @@ out:
   return result;
 }
 
-FETCHcode Curl_ssl_session_import(struct Curl_easy *data,
+FETCHcode Fetch_ssl_session_import(struct Fetch_easy *data,
                                   const char *ssl_peer_key,
                                   const unsigned char *shmac, size_t shmac_len,
                                   const unsigned char *sdata, size_t sdata_len)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
-  struct Curl_ssl_scache_peer *peer = NULL;
-  struct Curl_ssl_session *s = NULL;
+  struct Fetch_ssl_scache *scache = data->state.ssl_scache;
+  struct Fetch_ssl_scache_peer *peer = NULL;
+  struct Fetch_ssl_session *s = NULL;
   bool locked = FALSE;
   FETCHcode r;
 
@@ -1117,11 +1117,11 @@ FETCHcode Curl_ssl_session_import(struct Curl_easy *data,
     goto out;
   }
 
-  r = Curl_ssl_session_unpack(data, sdata, sdata_len, &s);
+  r = Fetch_ssl_session_unpack(data, sdata, sdata_len, &s);
   if (r)
     goto out;
 
-  Curl_ssl_scache_lock(data);
+  Fetch_ssl_scache_lock(data);
   locked = TRUE;
 
   if (ssl_peer_key)
@@ -1165,24 +1165,24 @@ FETCHcode Curl_ssl_session_import(struct Curl_easy *data,
     FETCH_TRC_SSLS(data, "successfully imported ticket for peer %s, now "
                          "with %zu tickets",
                    peer->ssl_peer_key ? peer->ssl_peer_key : "without key",
-                   Curl_llist_count(&peer->sessions));
+                   Fetch_llist_count(&peer->sessions));
   }
 
 out:
   if (locked)
-    Curl_ssl_scache_unlock(data);
-  Curl_ssl_session_destroy(s);
+    Fetch_ssl_scache_unlock(data);
+  Fetch_ssl_session_destroy(s);
   return r;
 }
 
-FETCHcode Curl_ssl_session_export(struct Curl_easy *data,
+FETCHcode Fetch_ssl_session_export(struct Fetch_easy *data,
                                   fetch_ssls_export_cb *export_fn,
                                   void *userptr)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
-  struct Curl_ssl_scache_peer *peer;
+  struct Fetch_ssl_scache *scache = data->state.ssl_scache;
+  struct Fetch_ssl_scache_peer *peer;
   struct dynbuf sbuf, hbuf;
-  struct Curl_llist_node *n;
+  struct Fetch_llist_node *n;
   size_t i, npeers = 0, ntickets = 0;
   fetch_off_t now = time(NULL);
   FETCHcode r = FETCHE_OK;
@@ -1192,10 +1192,10 @@ FETCHcode Curl_ssl_session_export(struct Curl_easy *data,
   if (!scache)
     return FETCHE_OK;
 
-  Curl_ssl_scache_lock(data);
+  Fetch_ssl_scache_lock(data);
 
-  Curl_dyn_init(&hbuf, (FETCH_SHA256_DIGEST_LENGTH * 2) + 1);
-  Curl_dyn_init(&sbuf, FETCH_SSL_TICKET_MAX);
+  Fetch_dyn_init(&hbuf, (FETCH_SHA256_DIGEST_LENGTH * 2) + 1);
+  Fetch_dyn_init(&sbuf, FETCH_SSL_TICKET_MAX);
 
   for (i = 0; scache && i < scache->peer_count; i++)
   {
@@ -1205,43 +1205,43 @@ FETCHcode Curl_ssl_session_export(struct Curl_easy *data,
     if (peer->clientcert || peer->srp_username || peer->srp_password)
       continue; /* not exporting those */
 
-    Curl_dyn_reset(&hbuf);
+    Fetch_dyn_reset(&hbuf);
     cf_scache_peer_remove_expired(peer, now);
-    n = Curl_llist_head(&peer->sessions);
+    n = Fetch_llist_head(&peer->sessions);
     if (n)
       ++npeers;
     while (n)
     {
-      struct Curl_ssl_session *s = Curl_node_elem(n);
+      struct Fetch_ssl_session *s = Fetch_node_elem(n);
       if (!peer->hmac_set)
       {
         r = cf_ssl_scache_peer_set_hmac(peer);
         if (r)
           goto out;
       }
-      if (!Curl_dyn_len(&hbuf))
+      if (!Fetch_dyn_len(&hbuf))
       {
-        r = Curl_dyn_addn(&hbuf, peer->key_salt, sizeof(peer->key_salt));
+        r = Fetch_dyn_addn(&hbuf, peer->key_salt, sizeof(peer->key_salt));
         if (r)
           goto out;
-        r = Curl_dyn_addn(&hbuf, peer->key_hmac, sizeof(peer->key_hmac));
+        r = Fetch_dyn_addn(&hbuf, peer->key_hmac, sizeof(peer->key_hmac));
         if (r)
           goto out;
       }
-      Curl_dyn_reset(&sbuf);
-      r = Curl_ssl_session_pack(data, s, &sbuf);
+      Fetch_dyn_reset(&sbuf);
+      r = Fetch_ssl_session_pack(data, s, &sbuf);
       if (r)
         goto out;
 
       r = export_fn(data, userptr, peer->ssl_peer_key,
-                    Curl_dyn_uptr(&hbuf), Curl_dyn_len(&hbuf),
-                    Curl_dyn_uptr(&sbuf), Curl_dyn_len(&sbuf),
+                    Fetch_dyn_uptr(&hbuf), Fetch_dyn_len(&hbuf),
+                    Fetch_dyn_uptr(&sbuf), Fetch_dyn_len(&sbuf),
                     s->valid_until, s->ietf_tls_id,
                     s->alpn, s->earlydata_max);
       if (r)
         goto out;
       ++ntickets;
-      n = Curl_node_next(n);
+      n = Fetch_node_next(n);
     }
   }
   r = FETCHE_OK;
@@ -1249,9 +1249,9 @@ FETCHcode Curl_ssl_session_export(struct Curl_easy *data,
                  ntickets, npeers);
 
 out:
-  Curl_ssl_scache_unlock(data);
-  Curl_dyn_free(&hbuf);
-  Curl_dyn_free(&sbuf);
+  Fetch_ssl_scache_unlock(data);
+  Fetch_dyn_free(&hbuf);
+  Fetch_dyn_free(&sbuf);
   return r;
 }
 

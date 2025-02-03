@@ -21,7 +21,7 @@ bufref API.
 ## `init`
 
 ```c
-void Curl_bufref_init(struct bufref *br);
+void Fetch_bufref_init(struct bufref *br);
 ```
 
 Initializes a `bufref` structure. This function **MUST** be called before any
@@ -35,7 +35,7 @@ invalidating the current reference.
 ## `free`
 
 ```c
-void Curl_bufref_free(struct bufref *br);
+void Fetch_bufref_free(struct bufref *br);
 ```
 
 Destroys the previously referenced buffer using its destructor and
@@ -44,7 +44,7 @@ reinitializes the structure for a possible subsequent reuse.
 ## `set`
 
 ```c
-void Curl_bufref_set(struct bufref *br, const void *buffer, size_t length,
+void Fetch_bufref_set(struct bufref *br, const void *buffer, size_t length,
                      void (*destructor)(void *));
 ```
 
@@ -57,7 +57,7 @@ if `buffer` is NULL, `length` must be zero.
 ## `memdup`
 
 ```c
-FETCHcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
+FETCHcode Fetch_bufref_memdup(struct bufref *br, const void *data, size_t length);
 ```
 
 Releases the previously referenced buffer, then duplicates the `length`-byte
@@ -72,7 +72,7 @@ Returns `FETCHE_OK` if successful, else `FETCHE_OUT_OF_MEMORY`.
 ## `ptr`
 
 ```c
-const unsigned char *Curl_bufref_ptr(const struct bufref *br);
+const unsigned char *Fetch_bufref_ptr(const struct bufref *br);
 ```
 
 Returns a `const unsigned char *` to the referenced buffer.
@@ -80,7 +80,7 @@ Returns a `const unsigned char *` to the referenced buffer.
 ## `len`
 
 ```c
-size_t Curl_bufref_len(const struct bufref *br);
+size_t Fetch_bufref_len(const struct bufref *br);
 ```
 
 Returns the stored length of the referenced buffer.

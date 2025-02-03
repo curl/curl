@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -61,20 +61,20 @@
  * Forward declarations.
  */
 
-static FETCHcode mqtt_do(struct Curl_easy *data, bool *done);
-static FETCHcode mqtt_done(struct Curl_easy *data,
+static FETCHcode mqtt_do(struct Fetch_easy *data, bool *done);
+static FETCHcode mqtt_done(struct Fetch_easy *data,
                            FETCHcode status, bool premature);
-static FETCHcode mqtt_doing(struct Curl_easy *data, bool *done);
-static int mqtt_getsock(struct Curl_easy *data, struct connectdata *conn,
+static FETCHcode mqtt_doing(struct Fetch_easy *data, bool *done);
+static int mqtt_getsock(struct Fetch_easy *data, struct connectdata *conn,
                         fetch_socket_t *sock);
-static FETCHcode mqtt_setup_conn(struct Curl_easy *data,
+static FETCHcode mqtt_setup_conn(struct Fetch_easy *data,
                                  struct connectdata *conn);
 
 /*
  * MQTT protocol handler.
  */
 
-const struct Curl_handler Curl_handler_mqtt = {
+const struct Fetch_handler Fetch_handler_mqtt = {
     "mqtt",          /* scheme */
     mqtt_setup_conn, /* setup_connection */
     mqtt_do,         /* do_it */
@@ -99,10 +99,10 @@ const struct Curl_handler Curl_handler_mqtt = {
     PROTOPT_NONE     /* flags */
 };
 
-static FETCHcode mqtt_setup_conn(struct Curl_easy *data,
+static FETCHcode mqtt_setup_conn(struct Fetch_easy *data,
                                  struct connectdata *conn)
 {
-  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
+  /* allocate the HTTP-specific struct for the Fetch_easy, only to survive
      during this request */
   struct MQTT *mq;
   (void)conn;
@@ -111,25 +111,25 @@ static FETCHcode mqtt_setup_conn(struct Curl_easy *data,
   mq = calloc(1, sizeof(struct MQTT));
   if (!mq)
     return FETCHE_OUT_OF_MEMORY;
-  Curl_dyn_init(&mq->recvbuf, DYN_MQTT_RECV);
+  Fetch_dyn_init(&mq->recvbuf, DYN_MQTT_RECV);
   data->req.p.mqtt = mq;
   return FETCHE_OK;
 }
 
-static FETCHcode mqtt_send(struct Curl_easy *data,
+static FETCHcode mqtt_send(struct Fetch_easy *data,
                            char *buf, size_t len)
 {
   FETCHcode result = FETCHE_OK;
   struct MQTT *mq = data->req.p.mqtt;
   size_t n;
-  result = Curl_xfer_send(data, buf, len, FALSE, &n);
+  result = Fetch_xfer_send(data, buf, len, FALSE, &n);
   if (result)
     return result;
-  Curl_debug(data, FETCHINFO_HEADER_OUT, buf, (size_t)n);
+  Fetch_debug(data, FETCHINFO_HEADER_OUT, buf, (size_t)n);
   if (len != n)
   {
     size_t nsend = len - n;
-    char *sendleftovers = Curl_memdup(&buf[n], nsend);
+    char *sendleftovers = Fetch_memdup(&buf[n], nsend);
     if (!sendleftovers)
       return FETCHE_OUT_OF_MEMORY;
     mq->sendleftovers = sendleftovers;
@@ -146,7 +146,7 @@ static FETCHcode mqtt_send(struct Curl_easy *data,
 /* Generic function called by the multi interface to figure out what socket(s)
    to wait for and for what actions during the DOING and PROTOCONNECT
    states */
-static int mqtt_getsock(struct Curl_easy *data,
+static int mqtt_getsock(struct Fetch_easy *data,
                         struct connectdata *conn,
                         fetch_socket_t *sock)
 {
@@ -251,7 +251,7 @@ static int init_connpack(char *packet, char *remain, int remain_pos)
   return remain_pos + 10;
 }
 
-static FETCHcode mqtt_connect(struct Curl_easy *data)
+static FETCHcode mqtt_connect(struct Fetch_easy *data)
 {
   FETCHcode result = FETCHE_OK;
   int pos = 0;
@@ -299,7 +299,7 @@ static FETCHcode mqtt_connect(struct Curl_easy *data)
   /* set initial values for the CONNECT packet */
   pos = init_connpack(packet, remain, remain_pos);
 
-  result = Curl_rand_alnum(data, (unsigned char *)&client_id[clen],
+  result = Fetch_rand_alnum(data, (unsigned char *)&client_id[clen],
                            MQTT_CLIENTID_LEN - clen + 1);
   /* add client id */
   rc = add_client_id(client_id, strlen(client_id), packet, pos + 1);
@@ -348,25 +348,25 @@ static FETCHcode mqtt_connect(struct Curl_easy *data)
 end:
   if (packet)
     free(packet);
-  Curl_safefree(data->state.aptr.user);
-  Curl_safefree(data->state.aptr.passwd);
+  Fetch_safefree(data->state.aptr.user);
+  Fetch_safefree(data->state.aptr.passwd);
   return result;
 }
 
-static FETCHcode mqtt_disconnect(struct Curl_easy *data)
+static FETCHcode mqtt_disconnect(struct Fetch_easy *data)
 {
   FETCHcode result = FETCHE_OK;
   struct MQTT *mq = data->req.p.mqtt;
   result = mqtt_send(data, (char *)"\xe0\x00", 2);
-  Curl_safefree(mq->sendleftovers);
-  Curl_dyn_free(&mq->recvbuf);
+  Fetch_safefree(mq->sendleftovers);
+  Fetch_dyn_free(&mq->recvbuf);
   return result;
 }
 
-static FETCHcode mqtt_recv_atleast(struct Curl_easy *data, size_t nbytes)
+static FETCHcode mqtt_recv_atleast(struct Fetch_easy *data, size_t nbytes)
 {
   struct MQTT *mq = data->req.p.mqtt;
-  size_t rlen = Curl_dyn_len(&mq->recvbuf);
+  size_t rlen = Fetch_dyn_len(&mq->recvbuf);
   FETCHcode result;
 
   if (rlen < nbytes)
@@ -375,28 +375,28 @@ static FETCHcode mqtt_recv_atleast(struct Curl_easy *data, size_t nbytes)
     ssize_t nread;
 
     DEBUGASSERT(nbytes - rlen < sizeof(readbuf));
-    result = Curl_xfer_recv(data, (char *)readbuf, nbytes - rlen, &nread);
+    result = Fetch_xfer_recv(data, (char *)readbuf, nbytes - rlen, &nread);
     if (result)
       return result;
     DEBUGASSERT(nread >= 0);
-    if (Curl_dyn_addn(&mq->recvbuf, readbuf, (size_t)nread))
+    if (Fetch_dyn_addn(&mq->recvbuf, readbuf, (size_t)nread))
       return FETCHE_OUT_OF_MEMORY;
-    rlen = Curl_dyn_len(&mq->recvbuf);
+    rlen = Fetch_dyn_len(&mq->recvbuf);
   }
   return (rlen >= nbytes) ? FETCHE_OK : FETCHE_AGAIN;
 }
 
-static void mqtt_recv_consume(struct Curl_easy *data, size_t nbytes)
+static void mqtt_recv_consume(struct Fetch_easy *data, size_t nbytes)
 {
   struct MQTT *mq = data->req.p.mqtt;
-  size_t rlen = Curl_dyn_len(&mq->recvbuf);
+  size_t rlen = Fetch_dyn_len(&mq->recvbuf);
   if (rlen <= nbytes)
-    Curl_dyn_reset(&mq->recvbuf);
+    Fetch_dyn_reset(&mq->recvbuf);
   else
-    Curl_dyn_tail(&mq->recvbuf, rlen - nbytes);
+    Fetch_dyn_tail(&mq->recvbuf, rlen - nbytes);
 }
 
-static FETCHcode mqtt_verify_connack(struct Curl_easy *data)
+static FETCHcode mqtt_verify_connack(struct Fetch_easy *data)
 {
   struct MQTT *mq = data->req.p.mqtt;
   FETCHcode result;
@@ -407,15 +407,15 @@ static FETCHcode mqtt_verify_connack(struct Curl_easy *data)
     goto fail;
 
   /* verify CONNACK */
-  DEBUGASSERT(Curl_dyn_len(&mq->recvbuf) >= MQTT_CONNACK_LEN);
-  ptr = Curl_dyn_ptr(&mq->recvbuf);
-  Curl_debug(data, FETCHINFO_HEADER_IN, ptr, MQTT_CONNACK_LEN);
+  DEBUGASSERT(Fetch_dyn_len(&mq->recvbuf) >= MQTT_CONNACK_LEN);
+  ptr = Fetch_dyn_ptr(&mq->recvbuf);
+  Fetch_debug(data, FETCHINFO_HEADER_IN, ptr, MQTT_CONNACK_LEN);
 
   if (ptr[0] != 0x00 || ptr[1] != 0x00)
   {
     failf(data, "Expected %02x%02x but got %02x%02x",
           0x00, 0x00, ptr[0], ptr[1]);
-    Curl_dyn_reset(&mq->recvbuf);
+    Fetch_dyn_reset(&mq->recvbuf);
     result = FETCHE_WEIRD_SERVER_REPLY;
     goto fail;
   }
@@ -424,14 +424,14 @@ fail:
   return result;
 }
 
-static FETCHcode mqtt_get_topic(struct Curl_easy *data,
+static FETCHcode mqtt_get_topic(struct Fetch_easy *data,
                                 char **topic, size_t *topiclen)
 {
   char *path = data->state.up.path;
   FETCHcode result = FETCHE_URL_MALFORMAT;
   if (strlen(path) > 1)
   {
-    result = Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
+    result = Fetch_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
     if (!result && (*topiclen > 0xffff))
     {
       failf(data, "Too long MQTT topic");
@@ -444,7 +444,7 @@ static FETCHcode mqtt_get_topic(struct Curl_easy *data,
   return result;
 }
 
-static FETCHcode mqtt_subscribe(struct Curl_easy *data)
+static FETCHcode mqtt_subscribe(struct Fetch_easy *data)
 {
   FETCHcode result = FETCHE_OK;
   char *topic = NULL;
@@ -493,7 +493,7 @@ fail:
 /*
  * Called when the first byte was already read.
  */
-static FETCHcode mqtt_verify_suback(struct Curl_easy *data)
+static FETCHcode mqtt_verify_suback(struct Fetch_easy *data)
 {
   struct MQTT *mq = data->req.p.mqtt;
   struct connectdata *conn = data->conn;
@@ -506,15 +506,15 @@ static FETCHcode mqtt_verify_suback(struct Curl_easy *data)
     goto fail;
 
   /* verify SUBACK */
-  DEBUGASSERT(Curl_dyn_len(&mq->recvbuf) >= MQTT_SUBACK_LEN);
-  ptr = Curl_dyn_ptr(&mq->recvbuf);
-  Curl_debug(data, FETCHINFO_HEADER_IN, ptr, MQTT_SUBACK_LEN);
+  DEBUGASSERT(Fetch_dyn_len(&mq->recvbuf) >= MQTT_SUBACK_LEN);
+  ptr = Fetch_dyn_ptr(&mq->recvbuf);
+  Fetch_debug(data, FETCHINFO_HEADER_IN, ptr, MQTT_SUBACK_LEN);
 
   if (((unsigned char)ptr[0]) != ((mqtt->packetid >> 8) & 0xff) ||
       ((unsigned char)ptr[1]) != (mqtt->packetid & 0xff) ||
       ptr[2] != 0x00)
   {
-    Curl_dyn_reset(&mq->recvbuf);
+    Fetch_dyn_reset(&mq->recvbuf);
     result = FETCHE_WEIRD_SERVER_REPLY;
     goto fail;
   }
@@ -523,7 +523,7 @@ fail:
   return result;
 }
 
-static FETCHcode mqtt_publish(struct Curl_easy *data)
+static FETCHcode mqtt_publish(struct Fetch_easy *data)
 {
   FETCHcode result;
   char *payload = data->set.postfields;
@@ -615,7 +615,7 @@ static const char *statenames[] = {
 #endif
 
 /* The only way to change state */
-static void mqstate(struct Curl_easy *data,
+static void mqstate(struct Fetch_easy *data,
                     enum mqttstate state,
                     enum mqttstate nextstate) /* used if state == FIRST */
 {
@@ -632,7 +632,7 @@ static void mqstate(struct Curl_easy *data,
     mqtt->nextstate = nextstate;
 }
 
-static FETCHcode mqtt_read_publish(struct Curl_easy *data, bool *done)
+static FETCHcode mqtt_read_publish(struct Fetch_easy *data, bool *done)
 {
   FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
@@ -686,7 +686,7 @@ static FETCHcode mqtt_read_publish(struct Curl_easy *data, bool *done)
       result = FETCHE_FILESIZE_EXCEEDED;
       goto end;
     }
-    Curl_pgrsSetDownloadSize(data, remlen);
+    Fetch_pgrsSetDownloadSize(data, remlen);
     data->req.bytecount = 0;
     data->req.size = remlen;
     mq->npacket = remlen; /* get this many bytes */
@@ -698,7 +698,7 @@ static FETCHcode mqtt_read_publish(struct Curl_easy *data, bool *done)
     size_t rest = mq->npacket;
     if (rest > sizeof(buffer))
       rest = sizeof(buffer);
-    result = Curl_xfer_recv(data, buffer, rest, &nread);
+    result = Fetch_xfer_recv(data, buffer, rest, &nread);
     if (result)
     {
       if (FETCHE_AGAIN == result)
@@ -715,7 +715,7 @@ static FETCHcode mqtt_read_publish(struct Curl_easy *data, bool *done)
     }
 
     /* if QoS is set, message contains packet id */
-    result = Curl_client_write(data, CLIENTWRITE_BODY, buffer, nread);
+    result = Fetch_client_write(data, CLIENTWRITE_BODY, buffer, nread);
     if (result)
       goto end;
 
@@ -734,7 +734,7 @@ end:
   return result;
 }
 
-static FETCHcode mqtt_do(struct Curl_easy *data, bool *done)
+static FETCHcode mqtt_do(struct Fetch_easy *data, bool *done)
 {
   FETCHcode result = FETCHE_OK;
   *done = FALSE; /* unconditionally */
@@ -749,18 +749,18 @@ static FETCHcode mqtt_do(struct Curl_easy *data, bool *done)
   return FETCHE_OK;
 }
 
-static FETCHcode mqtt_done(struct Curl_easy *data,
+static FETCHcode mqtt_done(struct Fetch_easy *data,
                            FETCHcode status, bool premature)
 {
   struct MQTT *mq = data->req.p.mqtt;
   (void)status;
   (void)premature;
-  Curl_safefree(mq->sendleftovers);
-  Curl_dyn_free(&mq->recvbuf);
+  Fetch_safefree(mq->sendleftovers);
+  Fetch_dyn_free(&mq->recvbuf);
   return FETCHE_OK;
 }
 
-static FETCHcode mqtt_doing(struct Curl_easy *data, bool *done)
+static FETCHcode mqtt_doing(struct Fetch_easy *data, bool *done)
 {
   FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
@@ -786,7 +786,7 @@ static FETCHcode mqtt_doing(struct Curl_easy *data, bool *done)
   {
   case MQTT_FIRST:
     /* Read the initial byte only */
-    result = Curl_xfer_recv(data, (char *)&mq->firstbyte, 1, &nread);
+    result = Fetch_xfer_recv(data, (char *)&mq->firstbyte, 1, &nread);
     if (result)
       break;
     else if (!nread)
@@ -796,7 +796,7 @@ static FETCHcode mqtt_doing(struct Curl_easy *data, bool *done)
       result = FETCHE_RECV_ERROR;
       break;
     }
-    Curl_debug(data, FETCHINFO_HEADER_IN, (char *)&mq->firstbyte, 1);
+    Fetch_debug(data, FETCHINFO_HEADER_IN, (char *)&mq->firstbyte, 1);
     /* remember the first byte */
     mq->npacket = 0;
     mqstate(data, MQTT_REMAINING_LENGTH, MQTT_NOSTATE);
@@ -804,10 +804,10 @@ static FETCHcode mqtt_doing(struct Curl_easy *data, bool *done)
   case MQTT_REMAINING_LENGTH:
     do
     {
-      result = Curl_xfer_recv(data, (char *)&recvbyte, 1, &nread);
+      result = Fetch_xfer_recv(data, (char *)&recvbyte, 1, &nread);
       if (result || !nread)
         break;
-      Curl_debug(data, FETCHINFO_HEADER_IN, (char *)&recvbyte, 1);
+      Fetch_debug(data, FETCHINFO_HEADER_IN, (char *)&recvbyte, 1);
       mq->pkt_hd[mq->npacket++] = recvbyte;
     } while ((recvbyte & 0x80) && (mq->npacket < 4));
     if (!result && nread && (recvbyte & 0x80))

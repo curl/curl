@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,13 +52,13 @@ typedef PSecurityFunctionTable(APIENTRY *INITSECURITYINTERFACE_FN)(VOID);
 #endif
 
 /* Handle of security.dll or secur32.dll, depending on Windows version */
-HMODULE Curl_hSecDll = NULL;
+HMODULE Fetch_hSecDll = NULL;
 
 /* Pointer to SSPI dispatch table */
-PSecurityFunctionTable Curl_pSecFn = NULL;
+PSecurityFunctionTable Fetch_pSecFn = NULL;
 
 /*
- * Curl_sspi_global_init()
+ * Fetch_sspi_global_init()
  *
  * This is used to load the Security Service Provider Interface (SSPI)
  * dynamic link library portably across all Windows versions, without
@@ -74,12 +74,12 @@ PSecurityFunctionTable Curl_pSecFn = NULL;
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_sspi_global_init(void)
+FETCHcode Fetch_sspi_global_init(void)
 {
   INITSECURITYINTERFACE_FN pInitSecurityInterface;
 
   /* If security interface is not yet initialized try to do this */
-  if (!Curl_hSecDll)
+  if (!Fetch_hSecDll)
   {
     /* Security Service Provider Interface (SSPI) functions are located in
      * security.dll on WinNT 4.0 and in secur32.dll on Win9x. Win2K and XP
@@ -87,22 +87,22 @@ FETCHcode Curl_sspi_global_init(void)
 
     /* Load SSPI dll into the address space of the calling process */
     if (fetchx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
-      Curl_hSecDll = Curl_load_library(TEXT("security.dll"));
+      Fetch_hSecDll = Fetch_load_library(TEXT("security.dll"));
     else
-      Curl_hSecDll = Curl_load_library(TEXT("secur32.dll"));
-    if (!Curl_hSecDll)
+      Fetch_hSecDll = Fetch_load_library(TEXT("secur32.dll"));
+    if (!Fetch_hSecDll)
       return FETCHE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
     pInitSecurityInterface =
         FETCHX_FUNCTION_CAST(INITSECURITYINTERFACE_FN,
-                             (GetProcAddress(Curl_hSecDll, SECURITYENTRYPOINT)));
+                             (GetProcAddress(Fetch_hSecDll, SECURITYENTRYPOINT)));
     if (!pInitSecurityInterface)
       return FETCHE_FAILED_INIT;
 
     /* Get pointer to Security Service Provider Interface dispatch table */
-    Curl_pSecFn = pInitSecurityInterface();
-    if (!Curl_pSecFn)
+    Fetch_pSecFn = pInitSecurityInterface();
+    if (!Fetch_pSecFn)
       return FETCHE_FAILED_INIT;
   }
 
@@ -110,7 +110,7 @@ FETCHcode Curl_sspi_global_init(void)
 }
 
 /*
- * Curl_sspi_global_cleanup()
+ * Fetch_sspi_global_cleanup()
  *
  * This deinitializes the Security Service Provider Interface from libfetch.
  *
@@ -118,18 +118,18 @@ FETCHcode Curl_sspi_global_init(void)
  *
  * None.
  */
-void Curl_sspi_global_cleanup(void)
+void Fetch_sspi_global_cleanup(void)
 {
-  if (Curl_hSecDll)
+  if (Fetch_hSecDll)
   {
-    FreeLibrary(Curl_hSecDll);
-    Curl_hSecDll = NULL;
-    Curl_pSecFn = NULL;
+    FreeLibrary(Fetch_hSecDll);
+    Fetch_hSecDll = NULL;
+    Fetch_pSecFn = NULL;
   }
 }
 
 /*
- * Curl_create_sspi_identity()
+ * Fetch_create_sspi_identity()
  *
  * This is used to populate a SSPI identity structure based on the supplied
  * username and password.
@@ -142,7 +142,7 @@ void Curl_sspi_global_cleanup(void)
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
+FETCHcode Fetch_create_sspi_identity(const char *userp, const char *passwdp,
                                     SEC_WINNT_AUTH_IDENTITY *identity)
 {
   xcharp_u useranddomain;
@@ -226,7 +226,7 @@ FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 }
 
 /*
- * Curl_sspi_free_identity()
+ * Fetch_sspi_free_identity()
  *
  * This is used to free the contents of a SSPI identifier structure.
  *
@@ -234,13 +234,13 @@ FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
  *
  * identity [in/out] - The identity structure.
  */
-void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity)
+void Fetch_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity)
 {
   if (identity)
   {
-    Curl_safefree(identity->User);
-    Curl_safefree(identity->Password);
-    Curl_safefree(identity->Domain);
+    Fetch_safefree(identity->User);
+    Fetch_safefree(identity->Password);
+    Fetch_safefree(identity->Domain);
   }
 }
 

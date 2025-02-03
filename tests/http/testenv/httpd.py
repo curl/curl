@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,7 @@ import time
 from typing import List, Union, Optional
 import copy
 
-from .fetch import CurlClient, ExecResult
+from .fetch import FetchClient, ExecResult
 from .env import Env
 
 
@@ -182,7 +182,7 @@ class Httpd:
         return self.reload()
 
     def wait_dead(self, timeout: timedelta):
-        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        fetch = FetchClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             r = fetch.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
@@ -193,7 +193,7 @@ class Httpd:
         return False
 
     def wait_live(self, timeout: timedelta):
-        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir,
+        fetch = FetchClient(env=self.env, run_dir=self._tmp_dir,
                           timeout=timeout.total_seconds())
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:

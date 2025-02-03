@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,9 +27,9 @@
 #include "fetch_setup.h"
 
 #include "timeval.h"
-struct Curl_easy;
-void Curl_speedinit(struct Curl_easy *data);
-FETCHcode Curl_speedcheck(struct Curl_easy *data,
+struct Fetch_easy;
+void Fetch_speedinit(struct Fetch_easy *data);
+FETCHcode Fetch_speedcheck(struct Fetch_easy *data,
                           struct fetchtime now);
 
 #endif /* HEADER_FETCH_SPEEDCHECK_H */

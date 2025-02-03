@@ -5,14 +5,14 @@ Certificate:
         Signature Algorithm: sha256WithRSAEncryption
         Issuer:
             countryName               = NN
-            organizationName          = Edel Curl Arctic Illudium Research Cloud
+            organizationName          = Edel Fetch Arctic Illudium Research Cloud
             commonName                = Northern Nowhere Trust Anchor
         Validity
             Not Before: Dec 23 12:21:36 2022 GMT
             Not After : May 28 12:21:36 2039 GMT
         Subject:
             countryName               = NN
-            organizationName          = Edel Curl Arctic Illudium Research Cloud
+            organizationName          = Edel Fetch Arctic Illudium Research Cloud
             commonName                = Northern Nowhere Trust Anchor
         Subject Public Key Info:
             Public Key Algorithm: rsaEncryption
@@ -47,10 +47,10 @@ Certificate:
             X509v3 Authority Key Identifier: 
                 87:CB:B1:33:2E:C1:67:7E:71:E3:E5:2B:4C:4D:A4:B3:6E:D2:5B:A9
             Authority Information Access: 
-                CA Issuers - URI:http://test.curl.se/ca/EdelCurlRoot.cer
+                CA Issuers - URI:http://test.fetch.se/ca/EdelFetchRoot.cer
             X509v3 CRL Distribution Points: 
                 Full Name:
-                  URI:http://test.curl.se/ca/EdelCurlRoot.crl
+                  URI:http://test.fetch.se/ca/EdelFetchRoot.crl
     Signature Algorithm: sha256WithRSAEncryption
     Signature Value:
         86:19:bd:3d:12:4f:6b:8c:8e:1b:72:db:8f:9b:67:68:96:f8:

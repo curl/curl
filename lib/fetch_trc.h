@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,13 +24,13 @@
  *
  ***************************************************************************/
 
-struct Curl_easy;
-struct Curl_cfilter;
+struct Fetch_easy;
+struct Fetch_cfilter;
 
 /**
  * Init logging, return != 0 on failure.
  */
-FETCHcode Curl_trc_init(void);
+FETCHcode Fetch_trc_init(void);
 
 /**
  * Configure tracing. May be called several times during global
@@ -48,19 +48,19 @@ FETCHcode Curl_trc_init(void);
  *
  * @param config configuration string
  */
-FETCHcode Curl_trc_opt(const char *config);
+FETCHcode Fetch_trc_opt(const char *config);
 
 /* the function used to output verbose information */
-void Curl_debug(struct Curl_easy *data, fetch_infotype type,
+void Fetch_debug(struct Fetch_easy *data, fetch_infotype type,
                 char *ptr, size_t size);
 
 /**
  * Output a failure message on registered callbacks for transfer.
  */
-void Curl_failf(struct Curl_easy *data,
+void Fetch_failf(struct Fetch_easy *data,
                 const char *fmt, ...) FETCH_PRINTF(2, 3);
 
-#define failf Curl_failf
+#define failf Fetch_failf
 
 #define FETCH_LOG_LVL_NONE 0
 #define FETCH_LOG_LVL_INFO 1
@@ -72,38 +72,38 @@ void Curl_failf(struct Curl_easy *data,
 /**
  * Output an informational message when transfer's verbose logging is enabled.
  */
-void Curl_infof(struct Curl_easy *data,
+void Fetch_infof(struct Fetch_easy *data,
                 const char *fmt, ...) FETCH_PRINTF(2, 3);
 
 /**
  * Output an informational message when both transfer's verbose logging
  * and connection filters verbose logging are enabled.
  */
-void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Fetch_trc_cf_infof(struct Fetch_easy *data, struct Fetch_cfilter *cf,
                        const char *fmt, ...) FETCH_PRINTF(3, 4);
-void Curl_trc_write(struct Curl_easy *data,
+void Fetch_trc_write(struct Fetch_easy *data,
                     const char *fmt, ...) FETCH_PRINTF(2, 3);
-void Curl_trc_read(struct Curl_easy *data,
+void Fetch_trc_read(struct Fetch_easy *data,
                    const char *fmt, ...) FETCH_PRINTF(2, 3);
 
 #ifndef FETCH_DISABLE_FTP
-extern struct fetch_trc_feat Curl_trc_feat_ftp;
-void Curl_trc_ftp(struct Curl_easy *data,
+extern struct fetch_trc_feat Fetch_trc_feat_ftp;
+void Fetch_trc_ftp(struct Fetch_easy *data,
                   const char *fmt, ...) FETCH_PRINTF(2, 3);
 #endif
 #ifndef FETCH_DISABLE_SMTP
-extern struct fetch_trc_feat Curl_trc_feat_smtp;
-void Curl_trc_smtp(struct Curl_easy *data,
+extern struct fetch_trc_feat Fetch_trc_feat_smtp;
+void Fetch_trc_smtp(struct Fetch_easy *data,
                    const char *fmt, ...) FETCH_PRINTF(2, 3);
 #endif
 #ifdef USE_SSL
-extern struct fetch_trc_feat Curl_trc_feat_ssls;
-void Curl_trc_ssls(struct Curl_easy *data,
+extern struct fetch_trc_feat Fetch_trc_feat_ssls;
+void Fetch_trc_ssls(struct Fetch_easy *data,
                    const char *fmt, ...) FETCH_PRINTF(2, 3);
 #endif
 #if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
-extern struct fetch_trc_feat Curl_trc_feat_ws;
-void Curl_trc_ws(struct Curl_easy *data,
+extern struct fetch_trc_feat Fetch_trc_feat_ws;
+void Fetch_trc_ws(struct Fetch_easy *data,
                  const char *fmt, ...) FETCH_PRINTF(2, 3);
 #endif
 
@@ -111,79 +111,79 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define infof(data, ...)             \
   do                                 \
   {                                  \
-    if (Curl_trc_is_verbose(data))   \
-      Curl_infof(data, __VA_ARGS__); \
+    if (Fetch_trc_is_verbose(data))   \
+      Fetch_infof(data, __VA_ARGS__); \
   } while (0)
 #define FETCH_TRC_CF(data, cf, ...)             \
   do                                            \
   {                                             \
-    if (Curl_trc_cf_is_verbose(cf, data))       \
-      Curl_trc_cf_infof(data, cf, __VA_ARGS__); \
+    if (Fetch_trc_cf_is_verbose(cf, data))       \
+      Fetch_trc_cf_infof(data, cf, __VA_ARGS__); \
   } while (0)
 #define FETCH_TRC_WRITE(data, ...)                          \
   do                                                        \
   {                                                         \
-    if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_write)) \
-      Curl_trc_write(data, __VA_ARGS__);                    \
+    if (Fetch_trc_ft_is_verbose(data, &Fetch_trc_feat_write)) \
+      Fetch_trc_write(data, __VA_ARGS__);                    \
   } while (0)
 #define FETCH_TRC_READ(data, ...)                          \
   do                                                       \
   {                                                        \
-    if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) \
-      Curl_trc_read(data, __VA_ARGS__);                    \
+    if (Fetch_trc_ft_is_verbose(data, &Fetch_trc_feat_read)) \
+      Fetch_trc_read(data, __VA_ARGS__);                    \
   } while (0)
 
 #ifndef FETCH_DISABLE_FTP
 #define FETCH_TRC_FTP(data, ...)                          \
   do                                                      \
   {                                                       \
-    if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ftp)) \
-      Curl_trc_ftp(data, __VA_ARGS__);                    \
+    if (Fetch_trc_ft_is_verbose(data, &Fetch_trc_feat_ftp)) \
+      Fetch_trc_ftp(data, __VA_ARGS__);                    \
   } while (0)
 #endif /* !FETCH_DISABLE_FTP */
 #ifndef FETCH_DISABLE_SMTP
 #define FETCH_TRC_SMTP(data, ...)                          \
   do                                                       \
   {                                                        \
-    if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp)) \
-      Curl_trc_smtp(data, __VA_ARGS__);                    \
+    if (Fetch_trc_ft_is_verbose(data, &Fetch_trc_feat_smtp)) \
+      Fetch_trc_smtp(data, __VA_ARGS__);                    \
   } while (0)
 #endif /* !FETCH_DISABLE_SMTP */
 #ifdef USE_SSL
 #define FETCH_TRC_SSLS(data, ...)                          \
   do                                                       \
   {                                                        \
-    if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) \
-      Curl_trc_ssls(data, __VA_ARGS__);                    \
+    if (Fetch_trc_ft_is_verbose(data, &Fetch_trc_feat_ssls)) \
+      Fetch_trc_ssls(data, __VA_ARGS__);                    \
   } while (0)
 #endif /* USE_SSL */
 #if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
 #define FETCH_TRC_WS(data, ...)                          \
   do                                                     \
   {                                                      \
-    if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) \
-      Curl_trc_ws(data, __VA_ARGS__);                    \
+    if (Fetch_trc_ft_is_verbose(data, &Fetch_trc_feat_ws)) \
+      Fetch_trc_ws(data, __VA_ARGS__);                    \
   } while (0)
 #endif /* !FETCH_DISABLE_WEBSOCKETS && !FETCH_DISABLE_HTTP */
 
 #else /* FETCH_HAVE_C99 */
 
-#define infof Curl_infof
-#define FETCH_TRC_CF Curl_trc_cf_infof
-#define FETCH_TRC_WRITE Curl_trc_write
-#define FETCH_TRC_READ Curl_trc_read
+#define infof Fetch_infof
+#define FETCH_TRC_CF Fetch_trc_cf_infof
+#define FETCH_TRC_WRITE Fetch_trc_write
+#define FETCH_TRC_READ Fetch_trc_read
 
 #ifndef FETCH_DISABLE_FTP
-#define FETCH_TRC_FTP Curl_trc_ftp
+#define FETCH_TRC_FTP Fetch_trc_ftp
 #endif
 #ifndef FETCH_DISABLE_SMTP
-#define FETCH_TRC_SMTP Curl_trc_smtp
+#define FETCH_TRC_SMTP Fetch_trc_smtp
 #endif
 #ifdef USE_SSL
-#define FETCH_TRC_SSLS Curl_trc_ssls
+#define FETCH_TRC_SSLS Fetch_trc_ssls
 #endif
 #if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
-#define FETCH_TRC_WS Curl_trc_ws
+#define FETCH_TRC_WS Fetch_trc_ws
 #endif
 
 #endif /* !FETCH_HAVE_C99 */
@@ -196,26 +196,26 @@ struct fetch_trc_feat
   const char *name;
   int log_level;
 };
-extern struct fetch_trc_feat Curl_trc_feat_read;
-extern struct fetch_trc_feat Curl_trc_feat_write;
+extern struct fetch_trc_feat Fetch_trc_feat_read;
+extern struct fetch_trc_feat Fetch_trc_feat_write;
 
-#define Curl_trc_is_verbose(data)   \
+#define Fetch_trc_is_verbose(data)   \
   ((data) && (data)->set.verbose && \
    (!(data)->state.feat ||          \
     ((data)->state.feat->log_level >= FETCH_LOG_LVL_INFO)))
-#define Curl_trc_cf_is_verbose(cf, data) \
-  (Curl_trc_is_verbose(data) &&          \
+#define Fetch_trc_cf_is_verbose(cf, data) \
+  (Fetch_trc_is_verbose(data) &&          \
    (cf) && (cf)->cft->log_level >= FETCH_LOG_LVL_INFO)
-#define Curl_trc_ft_is_verbose(data, ft) \
-  (Curl_trc_is_verbose(data) &&          \
+#define Fetch_trc_ft_is_verbose(data, ft) \
+  (Fetch_trc_is_verbose(data) &&          \
    (ft)->log_level >= FETCH_LOG_LVL_INFO)
 
 #else /* defined(FETCH_DISABLE_VERBOSE_STRINGS) */
 /* All informational messages are not compiled in for size savings */
 
-#define Curl_trc_is_verbose(d) (FALSE)
-#define Curl_trc_cf_is_verbose(x, y) (FALSE)
-#define Curl_trc_ft_is_verbose(x, y) (FALSE)
+#define Fetch_trc_is_verbose(d) (FALSE)
+#define Fetch_trc_cf_is_verbose(x, y) (FALSE)
+#define Fetch_trc_ft_is_verbose(x, y) (FALSE)
 
 #endif /* !defined(FETCH_DISABLE_VERBOSE_STRINGS) */
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,7 +46,7 @@ BEGIN
   BEGIN
     BLOCK "040904b0"
     BEGIN
-      VALUE "CompanyName",      "The fetch library, https://curl.se/\0"
+      VALUE "CompanyName",      "The fetch library, https://fetch.se/\0"
       VALUE "FileDescription",  "libfetch Shared Library\0"
       VALUE "FileVersion",      LIBFETCH_VERSION "\0"
       VALUE "InternalName",     "libfetch\0"
@@ -54,7 +54,7 @@ BEGIN
       VALUE "ProductName",      "The fetch library\0"
       VALUE "ProductVersion",   LIBFETCH_VERSION "\0"
       VALUE "LegalCopyright",   "Copyright (C) " LIBFETCH_COPYRIGHT "\0"
-      VALUE "License",          "https://curl.se/docs/copyright.html\0"
+      VALUE "License",          "https://fetch.se/docs/copyright.html\0"
     END
   END
 

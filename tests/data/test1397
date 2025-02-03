@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-Curl_cert_hostcheck
+Fetch_cert_hostcheck
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
 <name>
-Curl_cert_hostcheck unit tests
+Fetch_cert_hostcheck unit tests
 </name>
 </client>
 </testcase>

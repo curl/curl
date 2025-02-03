@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -131,13 +131,13 @@ typedef void *(*fetch_calloc_callback)(size_t nmemb, size_t size);
 #define FETCH_DID_MEMORY_FUNC_TYPEDEFS
 #endif
 
-extern fetch_malloc_callback Curl_cmalloc;
-extern fetch_free_callback Curl_cfree;
-extern fetch_realloc_callback Curl_crealloc;
-extern fetch_strdup_callback Curl_cstrdup;
-extern fetch_calloc_callback Curl_ccalloc;
+extern fetch_malloc_callback Fetch_cmalloc;
+extern fetch_free_callback Fetch_cfree;
+extern fetch_realloc_callback Fetch_crealloc;
+extern fetch_strdup_callback Fetch_cstrdup;
+extern fetch_calloc_callback Fetch_ccalloc;
 #if defined(_WIN32) && defined(UNICODE)
-extern fetch_wcsdup_callback Curl_cwcsdup;
+extern fetch_wcsdup_callback Fetch_cwcsdup;
 #endif
 
 #ifndef FETCHDEBUG
@@ -152,27 +152,27 @@ extern fetch_wcsdup_callback Curl_cwcsdup;
  */
 
 #undef strdup
-#define strdup(ptr) Curl_cstrdup(ptr)
+#define strdup(ptr) Fetch_cstrdup(ptr)
 #undef malloc
-#define malloc(size) Curl_cmalloc(size)
+#define malloc(size) Fetch_cmalloc(size)
 #undef calloc
-#define calloc(nbelem, size) Curl_ccalloc(nbelem, size)
+#define calloc(nbelem, size) Fetch_ccalloc(nbelem, size)
 #undef realloc
-#define realloc(ptr, size) Curl_crealloc(ptr, size)
+#define realloc(ptr, size) Fetch_crealloc(ptr, size)
 #undef free
-#define free(ptr) Curl_cfree(ptr)
+#define free(ptr) Fetch_cfree(ptr)
 
 #ifdef _WIN32
 #ifdef UNICODE
 #undef wcsdup
-#define wcsdup(ptr) Curl_cwcsdup(ptr)
+#define wcsdup(ptr) Fetch_cwcsdup(ptr)
 #undef _wcsdup
-#define _wcsdup(ptr) Curl_cwcsdup(ptr)
+#define _wcsdup(ptr) Fetch_cwcsdup(ptr)
 #undef _tcsdup
-#define _tcsdup(ptr) Curl_cwcsdup(ptr)
+#define _tcsdup(ptr) Fetch_cwcsdup(ptr)
 #else
 #undef _tcsdup
-#define _tcsdup(ptr) Curl_cstrdup(ptr)
+#define _tcsdup(ptr) Fetch_cstrdup(ptr)
 #endif
 #endif
 

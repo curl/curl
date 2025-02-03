@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -70,7 +70,7 @@ typedef enum
 
    /* A trailer LF must be found now, otherwise CHUNKE_BAD_CHUNK will be
       signalled If this is an empty trailer CHUNKE_STOP will be signalled.
-      Otherwise the trailer will be broadcasted via Curl_client_write() and the
+      Otherwise the trailer will be broadcasted via Fetch_client_write() and the
       next state will be CHUNK_TRAILER */
    CHUNK_TRAILER_POSTCR,
 
@@ -89,10 +89,10 @@ typedef enum
    CHUNKE_BAD_CHUNK,
    CHUNKE_BAD_ENCODING,
    CHUNKE_OUT_OF_MEMORY,
-   CHUNKE_PASSTHRU_ERROR /* Curl_httpchunk_read() returns a FETCHcode to use */
+   CHUNKE_PASSTHRU_ERROR /* Fetch_httpchunk_read() returns a FETCHcode to use */
 } CHUNKcode;
 
-struct Curl_chunker
+struct Fetch_chunker
 {
    fetch_off_t datasize;
    ChunkyState state;
@@ -104,10 +104,10 @@ struct Curl_chunker
 };
 
 /* The following functions are defined in http_chunks.c */
-void Curl_httpchunk_init(struct Curl_easy *data, struct Curl_chunker *ch,
+void Fetch_httpchunk_init(struct Fetch_easy *data, struct Fetch_chunker *ch,
                          bool ignore_body);
-void Curl_httpchunk_free(struct Curl_easy *data, struct Curl_chunker *ch);
-void Curl_httpchunk_reset(struct Curl_easy *data, struct Curl_chunker *ch,
+void Fetch_httpchunk_free(struct Fetch_easy *data, struct Fetch_chunker *ch);
+void Fetch_httpchunk_reset(struct Fetch_easy *data, struct Fetch_chunker *ch,
                           bool ignore_body);
 
 /*
@@ -126,22 +126,22 @@ void Curl_httpchunk_reset(struct Curl_easy *data, struct Curl_chunker *ch,
  * This function always uses ASCII hex values to accommodate non-ASCII hosts.
  * For example, 0x0d and 0x0a are used instead of '\r' and '\n'.
  */
-FETCHcode Curl_httpchunk_read(struct Curl_easy *data, struct Curl_chunker *ch,
+FETCHcode Fetch_httpchunk_read(struct Fetch_easy *data, struct Fetch_chunker *ch,
                               char *buf, size_t blen, size_t *pconsumed);
 
 /**
  * @return TRUE iff chunked decoded has finished successfully.
  */
-bool Curl_httpchunk_is_done(struct Curl_easy *data, struct Curl_chunker *ch);
+bool Fetch_httpchunk_is_done(struct Fetch_easy *data, struct Fetch_chunker *ch);
 
-extern const struct Curl_cwtype Curl_httpchunk_unencoder;
+extern const struct Fetch_cwtype Fetch_httpchunk_unencoder;
 
-extern const struct Curl_crtype Curl_httpchunk_encoder;
+extern const struct Fetch_crtype Fetch_httpchunk_encoder;
 
 /**
  * Add a transfer-encoding "chunked" reader to the transfers reader stack
  */
-FETCHcode Curl_httpchunk_add_reader(struct Curl_easy *data);
+FETCHcode Fetch_httpchunk_add_reader(struct Fetch_easy *data);
 
 #endif /* !FETCH_DISABLE_HTTP */
 

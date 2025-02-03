@@ -27,7 +27,7 @@ server's TLS certificate before it continues: that the certificate contains
 the right name which matches the hostname used in the URL and that the
 certificate has been signed by a CA certificate present in the cert store. See
 this online resource for further details:
-**https://curl.se/docs/sslcerts.html**
+**https://fetch.se/docs/sslcerts.html**
 
 For SFTP and SCP, this option makes fetch skip the _known_hosts_ verification.
 _known_hosts_ is a file normally stored in the user's home directory in the

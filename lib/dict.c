@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -69,13 +69,13 @@
  * Forward declarations.
  */
 
-static FETCHcode dict_do(struct Curl_easy *data, bool *done);
+static FETCHcode dict_do(struct Fetch_easy *data, bool *done);
 
 /*
  * DICT protocol handler.
  */
 
-const struct Curl_handler Curl_handler_dict = {
+const struct Fetch_handler Fetch_handler_dict = {
     "dict",                           /* scheme */
     ZERO_NULL,                        /* setup_connection */
     dict_do,                          /* do_it */
@@ -106,7 +106,7 @@ static char *unescape_word(const char *input)
   struct dynbuf out;
   const char *ptr;
   FETCHcode result = FETCHE_OK;
-  Curl_dyn_init(&out, DYN_DICT_WORD);
+  Fetch_dyn_init(&out, DYN_DICT_WORD);
 
   /* According to RFC2229 section 2.2, these letters need to be escaped with
      \[letter] */
@@ -115,20 +115,20 @@ static char *unescape_word(const char *input)
     char ch = *ptr;
     if ((ch <= 32) || (ch == 127) ||
         (ch == '\'') || (ch == '\"') || (ch == '\\'))
-      result = Curl_dyn_addn(&out, "\\", 1);
+      result = Fetch_dyn_addn(&out, "\\", 1);
     if (!result)
-      result = Curl_dyn_addn(&out, ptr, 1);
+      result = Fetch_dyn_addn(&out, ptr, 1);
     if (result)
       return NULL;
   }
-  return Curl_dyn_ptr(&out);
+  return Fetch_dyn_ptr(&out);
 }
 
 /* sendf() sends formatted data to the server */
-static FETCHcode sendf(struct Curl_easy *data,
+static FETCHcode sendf(struct Fetch_easy *data,
                        const char *fmt, ...) FETCH_PRINTF(2, 3);
 
-static FETCHcode sendf(struct Curl_easy *data, const char *fmt, ...)
+static FETCHcode sendf(struct Fetch_easy *data, const char *fmt, ...)
 {
   size_t bytes_written;
   size_t write_len;
@@ -149,12 +149,12 @@ static FETCHcode sendf(struct Curl_easy *data, const char *fmt, ...)
   for (;;)
   {
     /* Write the buffer to the socket */
-    result = Curl_xfer_send(data, sptr, write_len, FALSE, &bytes_written);
+    result = Fetch_xfer_send(data, sptr, write_len, FALSE, &bytes_written);
 
     if (result)
       break;
 
-    Curl_debug(data, FETCHINFO_DATA_OUT, sptr, (size_t)bytes_written);
+    Fetch_debug(data, FETCHINFO_DATA_OUT, sptr, (size_t)bytes_written);
 
     if ((size_t)bytes_written != write_len)
     {
@@ -172,7 +172,7 @@ static FETCHcode sendf(struct Curl_easy *data, const char *fmt, ...)
   return result;
 }
 
-static FETCHcode dict_do(struct Curl_easy *data, bool *done)
+static FETCHcode dict_do(struct Fetch_easy *data, bool *done)
 {
   char *word;
   char *eword = NULL;
@@ -188,7 +188,7 @@ static FETCHcode dict_do(struct Curl_easy *data, bool *done)
   *done = TRUE; /* unconditionally */
 
   /* url-decode path before further evaluation */
-  result = Curl_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
+  result = Fetch_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
   if (result)
     return result;
 
@@ -255,7 +255,7 @@ static FETCHcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE); /* no upload */
+    Fetch_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE); /* no upload */
   }
   else if (strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE) - 1) ||
            strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2) - 1) ||
@@ -309,7 +309,7 @@ static FETCHcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
+    Fetch_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
   }
   else
   {
@@ -336,7 +336,7 @@ static FETCHcode dict_do(struct Curl_easy *data, bool *done)
         goto error;
       }
 
-      Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
+      Fetch_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
     }
   }
 

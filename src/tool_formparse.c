@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -178,7 +178,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     }
     m = tool_mime_new(parent, TOOLMIME_STDIN);
     if (!m)
-      Curl_safefree(data);
+      Fetch_safefree(data);
     else
     {
       m->data = data;
@@ -201,11 +201,11 @@ void tool_mime_free(struct tool_mime *mime)
       tool_mime_free(mime->subparts);
     if (mime->prev)
       tool_mime_free(mime->prev);
-    Curl_safefree(mime->name);
-    Curl_safefree(mime->filename);
-    Curl_safefree(mime->type);
-    Curl_safefree(mime->encoder);
-    Curl_safefree(mime->data);
+    Fetch_safefree(mime->name);
+    Fetch_safefree(mime->filename);
+    Fetch_safefree(mime->type);
+    Fetch_safefree(mime->encoder);
+    Fetch_safefree(mime->data);
     fetch_slist_free_all(mime->headers);
     free(mime);
   }
@@ -906,7 +906,7 @@ int formparse(struct OperationConfig *config,
                   "error while reading standard input");
             goto fail;
           }
-          Curl_safefree(part->data);
+          Fetch_safefree(part->data);
           part->data = NULL;
           part->size = -1;
           res = FETCHE_OK;
@@ -947,7 +947,7 @@ int formparse(struct OperationConfig *config,
                   "error while reading standard input");
             goto fail;
           }
-          Curl_safefree(part->data);
+          Fetch_safefree(part->data);
           part->data = NULL;
           part->size = -1;
           res = FETCHE_OK;
@@ -994,7 +994,7 @@ int formparse(struct OperationConfig *config,
   }
   err = 0;
 fail:
-  Curl_safefree(contents);
+  Fetch_safefree(contents);
   fetch_slist_free_all(headers);
   return err;
 }

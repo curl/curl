@@ -228,7 +228,7 @@ FAQ
   considerable time already on maintaining and developing fetch. In order to
   get more out of us, you should consider trading in some of your time and
   effort in return. Simply go to the GitHub repository which resides at
-  https://github.com/curl/curl, fork the project, and create pull requests
+  https://github.com/fetch/fetch, fork the project, and create pull requests
   with your proposed changes.
 
   If you write the code, chances are better that it will get into fetch faster.
@@ -253,14 +253,14 @@ FAQ
 
   We get help from companies. Haxx provides website, bandwidth, mailing lists
   etc, GitHub hosts the primary git repository and other services like the bug
-  tracker at https://github.com/curl/curl. Also again, some companies have
+  tracker at https://github.com/fetch/fetch. Also again, some companies have
   sponsored certain parts of the development in the past and I hope some will
   continue to do so in the future.
 
   If you want to support our project, consider a donation or a banner-program
   or even better: by helping us with coding, documenting or testing etc.
 
-  See also: https://curl.se/sponsors.html
+  See also: https://fetch.se/sponsors.html
 
   1.7 What about FETCH from fetch.com?
 
@@ -282,7 +282,7 @@ FAQ
   Please do not mail any single individual unless you really need to. Keep
   fetch-related questions on a suitable mailing list. All available mailing
   lists are listed in the MANUAL document and online at
-  https://curl.se/mail/
+  https://fetch.se/mail/
 
   Keeping fetch-related questions and discussions on mailing lists allows
   others to join in and help, to share their ideas, to contribute their
@@ -299,7 +299,7 @@ FAQ
   the problem risks having on existing users.
 
   Security issues can also be taking to the fetch security team by emailing
-  security at curl.se (closed list of receivers, mails are not disclosed).
+  security at fetch.se (closed list of receivers, mails are not disclosed).
 
   1.9 Where do I buy commercial support for fetch?
 
@@ -307,7 +307,7 @@ FAQ
   your fetch-related problems.
 
   We list available alternatives on the fetch website:
-  https://curl.se/support.html
+  https://fetch.se/support.html
 
   1.10 How many are using fetch?
 
@@ -339,7 +339,7 @@ FAQ
   If you want the most recent collection of ca certs that Mozilla Firefox
   uses, we recommend that you extract the collection yourself from Mozilla
   Firefox (by running 'make ca-bundle), or by using our online service setup
-  for this purpose: https://curl.se/docs/caextract.html
+  for this purpose: https://fetch.se/docs/caextract.html
 
   1.12 I have a problem who, can I chat with?
 
@@ -372,7 +372,7 @@ FAQ
   1.14 How do I submit my patch?
 
   We strongly encourage you to submit changes and improvements directly as
-  "pull requests" on GitHub: https://github.com/curl/curl/pulls
+  "pull requests" on GitHub: https://github.com/fetch/fetch/pulls
 
   If you for any reason cannot or will not deal with GitHub, send your patch to
   the fetch-library mailing list. We are many subscribers there and there are
@@ -426,13 +426,13 @@ FAQ
   LibreSSL, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Secure Transport
   (native iOS/macOS), Schannel (native Windows), BearSSL or Rustls. They all
   have their pros and cons, and we try to maintain a comparison of them here:
-  https://curl.se/docs/ssl-compared.html
+  https://fetch.se/docs/ssl-compared.html
 
   2.3 How do I upgrade fetch.exe in Windows?
 
   The fetch tool that is shipped as an integrated component of Windows 10 and
   Windows 11 is managed by Microsoft. If you were to delete the file or
-  replace it with a newer version downloaded from https://curl.se/windows,
+  replace it with a newer version downloaded from https://fetch.se/windows,
   then Windows Update will cease to work on your system.
 
   There is no way to independently force an upgrade of the fetch.exe that is
@@ -442,7 +442,7 @@ FAQ
   system.
 
   You can always download and install the latest version of fetch for Windows
-  from https://curl.se/windows into a separate location.
+  from https://fetch.se/windows into a separate location.
 
   2.4 Does fetch support SOCKS (RFC 1928) ?
 
@@ -546,7 +546,7 @@ FAQ
 
   Find out more about which languages that support fetch directly, and how to
   install and use them, in the libfetch section of the fetch website:
-  https://curl.se/libfetch/
+  https://fetch.se/libfetch/
 
   All the various bindings to libfetch are made by other projects and people,
   outside of the cURL project. The cURL project itself only produces libfetch
@@ -687,7 +687,7 @@ FAQ
   certificate. Server certificate verification is enabled by default in fetch
   and libfetch and is often the reason for problems as explained in FAQ entry
   4.12 and the SSLCERTS document
-  (https://curl.se/docs/sslcerts.html). Server certificates that are
+  (https://fetch.se/docs/sslcerts.html). Server certificates that are
   "self-signed" or otherwise signed by a CA that you do not have a CA cert
   for, cannot be verified. If the verification during a connect fails, you are
   refused access. You then need to explicitly disable the verification to
@@ -964,7 +964,7 @@ FAQ
   test and check the certificate chain: https://www.ssllabs.com/ssltest/
 
   Details are also in the SSLCERTS.md document, found online here:
-  https://curl.se/docs/sslcerts.html
+  https://fetch.se/docs/sslcerts.html
 
   4.13 Why is fetch -R on Windows one hour off?
 
@@ -1129,7 +1129,7 @@ FAQ
 
   There may be some exceptions to thread safety depending on how libfetch was
   built. Please review the guidelines for thread safety to learn more:
-  https://curl.se/libfetch/c/threadsafe.html
+  https://fetch.se/libfetch/c/threadsafe.html
 
   5.2 How can I receive all data into a large memory chunk?
 
@@ -1485,7 +1485,7 @@ FAQ
   notice" somewhere. Most probably like in the documentation or in the section
   where other third party dependencies already are mentioned and acknowledged.
 
-  As can be seen here: https://curl.se/docs/companies.html and elsewhere,
+  As can be seen here: https://fetch.se/docs/companies.html and elsewhere,
   more and more companies are discovering the power of libfetch and take
   advantage of it even in commercial environments.
 

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -103,17 +103,17 @@ struct doh_probes
 };
 
 /*
- * Curl_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
- * and returns a 'Curl_addrinfo *' with the address information.
+ * Fetch_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
+ * and returns a 'Fetch_addrinfo *' with the address information.
  */
 
-struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
+struct Fetch_addrinfo *Fetch_doh(struct Fetch_easy *data,
                                const char *hostname,
                                int port,
                                int *waitp);
 
-FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
-                               struct Curl_dns_entry **dns);
+FETCHcode Fetch_doh_is_resolved(struct Fetch_easy *data,
+                               struct Fetch_dns_entry **dns);
 
 #define DOH_MAX_ADDR 24
 #define DOH_MAX_CNAME 4
@@ -158,8 +158,8 @@ struct dohentry
 #endif
 };
 
-void Curl_doh_close(struct Curl_easy *data);
-void Curl_doh_cleanup(struct Curl_easy *data);
+void Fetch_doh_close(struct Fetch_easy *data);
+void Fetch_doh_cleanup(struct Fetch_easy *data);
 
 #ifdef UNITTESTS
 UNITTEST DOHcode doh_req_encode(const char *host,
@@ -176,11 +176,11 @@ UNITTEST void de_init(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
-extern struct fetch_trc_feat Curl_doh_trc;
+extern struct fetch_trc_feat Fetch_doh_trc;
 
 #else /* if DoH is disabled */
-#define Curl_doh(a, b, c, d) NULL
-#define Curl_doh_is_resolved(x, y) FETCHE_COULDNT_RESOLVE_HOST
+#define Fetch_doh(a, b, c, d) NULL
+#define Fetch_doh_is_resolved(x, y) FETCHE_COULDNT_RESOLVE_HOST
 #endif
 
 #endif /* HEADER_FETCH_DOH_H */

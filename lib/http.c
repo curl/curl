@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -96,56 +96,56 @@
  * Forward declarations.
  */
 
-static bool http_should_fail(struct Curl_easy *data, int httpcode);
-static bool http_exp100_is_waiting(struct Curl_easy *data);
-static FETCHcode http_exp100_add_reader(struct Curl_easy *data);
-static void http_exp100_send_anyway(struct Curl_easy *data);
-static bool http_exp100_is_selected(struct Curl_easy *data);
-static void http_exp100_got100(struct Curl_easy *data);
-static FETCHcode http_firstwrite(struct Curl_easy *data);
-static FETCHcode http_header(struct Curl_easy *data,
+static bool http_should_fail(struct Fetch_easy *data, int httpcode);
+static bool http_exp100_is_waiting(struct Fetch_easy *data);
+static FETCHcode http_exp100_add_reader(struct Fetch_easy *data);
+static void http_exp100_send_anyway(struct Fetch_easy *data);
+static bool http_exp100_is_selected(struct Fetch_easy *data);
+static void http_exp100_got100(struct Fetch_easy *data);
+static FETCHcode http_firstwrite(struct Fetch_easy *data);
+static FETCHcode http_header(struct Fetch_easy *data,
                              const char *hd, size_t hdlen);
-static FETCHcode http_host(struct Curl_easy *data, struct connectdata *conn);
-static FETCHcode http_range(struct Curl_easy *data,
-                            Curl_HttpReq httpreq);
-static FETCHcode http_req_complete(struct Curl_easy *data,
+static FETCHcode http_host(struct Fetch_easy *data, struct connectdata *conn);
+static FETCHcode http_range(struct Fetch_easy *data,
+                            Fetch_HttpReq httpreq);
+static FETCHcode http_req_complete(struct Fetch_easy *data,
                                    struct dynbuf *r, int httpversion,
-                                   Curl_HttpReq httpreq);
-static FETCHcode http_req_set_reader(struct Curl_easy *data,
-                                     Curl_HttpReq httpreq, int httpversion,
+                                   Fetch_HttpReq httpreq);
+static FETCHcode http_req_set_reader(struct Fetch_easy *data,
+                                     Fetch_HttpReq httpreq, int httpversion,
                                      const char **tep);
-static FETCHcode http_size(struct Curl_easy *data);
-static FETCHcode http_statusline(struct Curl_easy *data,
+static FETCHcode http_size(struct Fetch_easy *data);
+static FETCHcode http_statusline(struct Fetch_easy *data,
                                  struct connectdata *conn);
-static FETCHcode http_target(struct Curl_easy *data, struct connectdata *conn,
+static FETCHcode http_target(struct Fetch_easy *data, struct connectdata *conn,
                              struct dynbuf *req);
-static FETCHcode http_useragent(struct Curl_easy *data);
+static FETCHcode http_useragent(struct Fetch_easy *data);
 #ifdef HAVE_LIBZ
-static FETCHcode http_transferencode(struct Curl_easy *data);
+static FETCHcode http_transferencode(struct Fetch_easy *data);
 #endif
 
 /*
  * HTTP handler interface.
  */
-const struct Curl_handler Curl_handler_http = {
+const struct Fetch_handler Fetch_handler_http = {
     "http",                   /* scheme */
-    Curl_http_setup_conn,     /* setup_connection */
-    Curl_http,                /* do_it */
-    Curl_http_done,           /* done */
+    Fetch_http_setup_conn,     /* setup_connection */
+    Fetch_http,                /* do_it */
+    Fetch_http_done,           /* done */
     ZERO_NULL,                /* do_more */
-    Curl_http_connect,        /* connect_it */
+    Fetch_http_connect,        /* connect_it */
     ZERO_NULL,                /* connecting */
     ZERO_NULL,                /* doing */
     ZERO_NULL,                /* proto_getsock */
-    Curl_http_getsock_do,     /* doing_getsock */
+    Fetch_http_getsock_do,     /* doing_getsock */
     ZERO_NULL,                /* domore_getsock */
     ZERO_NULL,                /* perform_getsock */
     ZERO_NULL,                /* disconnect */
-    Curl_http_write_resp,     /* write_resp */
-    Curl_http_write_resp_hd,  /* write_resp_hd */
+    Fetch_http_write_resp,     /* write_resp */
+    Fetch_http_write_resp_hd,  /* write_resp_hd */
     ZERO_NULL,                /* connection_check */
     ZERO_NULL,                /* attach connection */
-    Curl_http_follow,         /* follow */
+    Fetch_http_follow,         /* follow */
     PORT_HTTP,                /* defport */
     FETCHPROTO_HTTP,          /* protocol */
     FETCHPROTO_HTTP,          /* family */
@@ -156,25 +156,25 @@ const struct Curl_handler Curl_handler_http = {
 /*
  * HTTPS handler interface.
  */
-const struct Curl_handler Curl_handler_https = {
+const struct Fetch_handler Fetch_handler_https = {
     "https",                                               /* scheme */
-    Curl_http_setup_conn,                                  /* setup_connection */
-    Curl_http,                                             /* do_it */
-    Curl_http_done,                                        /* done */
+    Fetch_http_setup_conn,                                  /* setup_connection */
+    Fetch_http,                                             /* do_it */
+    Fetch_http_done,                                        /* done */
     ZERO_NULL,                                             /* do_more */
-    Curl_http_connect,                                     /* connect_it */
+    Fetch_http_connect,                                     /* connect_it */
     NULL,                                                  /* connecting */
     ZERO_NULL,                                             /* doing */
     NULL,                                                  /* proto_getsock */
-    Curl_http_getsock_do,                                  /* doing_getsock */
+    Fetch_http_getsock_do,                                  /* doing_getsock */
     ZERO_NULL,                                             /* domore_getsock */
     ZERO_NULL,                                             /* perform_getsock */
     ZERO_NULL,                                             /* disconnect */
-    Curl_http_write_resp,                                  /* write_resp */
-    Curl_http_write_resp_hd,                               /* write_resp_hd */
+    Fetch_http_write_resp,                                  /* write_resp */
+    Fetch_http_write_resp_hd,                               /* write_resp_hd */
     ZERO_NULL,                                             /* connection_check */
     ZERO_NULL,                                             /* attach connection */
-    Curl_http_follow,                                      /* follow */
+    Fetch_http_follow,                                      /* follow */
     PORT_HTTPS,                                            /* defport */
     FETCHPROTO_HTTPS,                                      /* protocol */
     FETCHPROTO_HTTP,                                       /* family */
@@ -183,16 +183,16 @@ const struct Curl_handler Curl_handler_https = {
 
 #endif
 
-FETCHcode Curl_http_setup_conn(struct Curl_easy *data,
+FETCHcode Fetch_http_setup_conn(struct Fetch_easy *data,
                                struct connectdata *conn)
 {
-  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
+  /* allocate the HTTP-specific struct for the Fetch_easy, only to survive
      during this request */
   connkeep(conn, "HTTP default");
 
   if (data->state.httpwant == FETCH_HTTP_VERSION_3ONLY)
   {
-    FETCHcode result = Curl_conn_may_http3(data, conn);
+    FETCHcode result = Fetch_conn_may_http3(data, conn);
     if (result)
       return result;
   }
@@ -210,7 +210,7 @@ FETCHcode Curl_http_setup_conn(struct Curl_easy *data,
  * not, as it then might check a different header list. Provide the header
  * prefix without colon!
  */
-char *Curl_checkProxyheaders(struct Curl_easy *data,
+char *Fetch_checkProxyheaders(struct Fetch_easy *data,
                              const struct connectdata *conn,
                              const char *thisheader,
                              const size_t thislen)
@@ -221,7 +221,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
        head; head = head->next)
   {
     if (strncasecompare(head->data, thisheader, thislen) &&
-        Curl_headersep(head->data[thislen]))
+        Fetch_headersep(head->data[thislen]))
       return head->data;
   }
 
@@ -229,7 +229,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 }
 #else
 /* disabled */
-#define Curl_checkProxyheaders(x, y, z, a) NULL
+#define Fetch_checkProxyheaders(x, y, z, a) NULL
 #endif
 
 /*
@@ -238,7 +238,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
  * case of allocation failure. Returns an empty string if the header value
  * consists entirely of whitespace.
  */
-char *Curl_copy_header_value(const char *header)
+char *Fetch_copy_header_value(const char *header)
 {
   const char *start;
   const char *end;
@@ -272,7 +272,7 @@ char *Curl_copy_header_value(const char *header)
   /* get length of the type */
   len = end - start + 1;
 
-  return Curl_memdup0(start, len);
+  return Fetch_memdup0(start, len);
 }
 
 #ifndef FETCH_DISABLE_HTTP_AUTH
@@ -284,7 +284,7 @@ char *Curl_copy_header_value(const char *header)
  *
  * Returns FETCHcode.
  */
-static FETCHcode http_output_basic(struct Curl_easy *data, bool proxy)
+static FETCHcode http_output_basic(struct Fetch_easy *data, bool proxy)
 {
   size_t size = 0;
   char *authorization = NULL;
@@ -317,7 +317,7 @@ static FETCHcode http_output_basic(struct Curl_easy *data, bool proxy)
   if (!out)
     return FETCHE_OUT_OF_MEMORY;
 
-  result = Curl_base64_encode(out, strlen(out), &authorization, &size);
+  result = Fetch_base64_encode(out, strlen(out), &authorization, &size);
   if (result)
     goto fail;
 
@@ -352,7 +352,7 @@ fail:
  *
  * Returns FETCHcode.
  */
-static FETCHcode http_output_bearer(struct Curl_easy *data)
+static FETCHcode http_output_bearer(struct Fetch_easy *data)
 {
   char **userp;
   FETCHcode result = FETCHE_OK;
@@ -428,14 +428,14 @@ static bool pickoneauth(struct auth *pick, unsigned long mask)
  * 1) a rewind of the data sent to the server is necessary
  * 2) the current transfer should continue or be stopped early
  */
-static FETCHcode http_perhapsrewind(struct Curl_easy *data,
+static FETCHcode http_perhapsrewind(struct Fetch_easy *data,
                                     struct connectdata *conn)
 {
   fetch_off_t bytessent = data->req.writebytecount;
-  fetch_off_t expectsend = Curl_creader_total_length(data);
+  fetch_off_t expectsend = Fetch_creader_total_length(data);
   fetch_off_t upload_remain = (expectsend >= 0) ? (expectsend - bytessent) : -1;
   bool little_upload_remains = (upload_remain >= 0 && upload_remain < 2000);
-  bool needs_rewind = Curl_creader_needs_rewind(data);
+  bool needs_rewind = Fetch_creader_needs_rewind(data);
   /* By default, we would like to abort the transfer when little or unknown
    * amount remains. This may be overridden by authentications further
    * below! */
@@ -451,7 +451,7 @@ static FETCHcode http_perhapsrewind(struct Curl_easy *data,
   if (needs_rewind)
   {
     infof(data, "Need to rewind upload for next request");
-    Curl_creader_set_rewind(data, TRUE);
+    Fetch_creader_set_rewind(data, TRUE);
   }
 
   if (conn->bits.close)
@@ -513,13 +513,13 @@ static FETCHcode http_perhapsrewind(struct Curl_easy *data,
 }
 
 /*
- * Curl_http_auth_act() gets called when all HTTP headers have been received
+ * Fetch_http_auth_act() gets called when all HTTP headers have been received
  * and it checks what authentication methods that are available and decides
  * which one (if any) to use. It will set 'newurl' if an auth method was
  * picked.
  */
 
-FETCHcode Curl_http_auth_act(struct Curl_easy *data)
+FETCHcode Fetch_http_auth_act(struct Fetch_easy *data)
 {
   struct connectdata *conn = data->conn;
   bool pickhost = FALSE;
@@ -577,7 +577,7 @@ FETCHcode Curl_http_auth_act(struct Curl_easy *data)
     /* In case this is GSS auth, the newurl field is already allocated so
        we must make sure to free it before allocating a new one. As figured
        out in bug #2284386 */
-    Curl_safefree(data->req.newurl);
+    Fetch_safefree(data->req.newurl);
     data->req.newurl = strdup(data->state.url); /* clone URL */
     if (!data->req.newurl)
       return FETCHE_OUT_OF_MEMORY;
@@ -615,7 +615,7 @@ FETCHcode Curl_http_auth_act(struct Curl_easy *data)
  * and whether or not it is to a proxy.
  */
 static FETCHcode
-output_auth_headers(struct Curl_easy *data,
+output_auth_headers(struct Fetch_easy *data,
                     struct connectdata *conn,
                     struct auth *authstatus,
                     const char *request,
@@ -634,7 +634,7 @@ output_auth_headers(struct Curl_easy *data,
   if (authstatus->picked == FETCHAUTH_AWS_SIGV4)
   {
     auth = "AWS_SIGV4";
-    result = Curl_output_aws_sigv4(data, proxy);
+    result = Fetch_output_aws_sigv4(data, proxy);
     if (result)
       return result;
   }
@@ -644,7 +644,7 @@ output_auth_headers(struct Curl_easy *data,
       if (authstatus->picked == FETCHAUTH_NEGOTIATE)
   {
     auth = "Negotiate";
-    result = Curl_output_negotiate(data, conn, proxy);
+    result = Fetch_output_negotiate(data, conn, proxy);
     if (result)
       return result;
   }
@@ -654,7 +654,7 @@ output_auth_headers(struct Curl_easy *data,
       if (authstatus->picked == FETCHAUTH_NTLM)
   {
     auth = "NTLM";
-    result = Curl_output_ntlm(data, proxy);
+    result = Fetch_output_ntlm(data, proxy);
     if (result)
       return result;
   }
@@ -664,7 +664,7 @@ output_auth_headers(struct Curl_easy *data,
       if (authstatus->picked == FETCHAUTH_DIGEST)
   {
     auth = "Digest";
-    result = Curl_output_digest(data,
+    result = Fetch_output_digest(data,
                                 proxy,
                                 (const unsigned char *)request,
                                 (const unsigned char *)path);
@@ -680,10 +680,10 @@ output_auth_headers(struct Curl_easy *data,
     if (
 #ifndef FETCH_DISABLE_PROXY
         (proxy && conn->bits.proxy_user_passwd &&
-         !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-authorization"))) ||
+         !Fetch_checkProxyheaders(data, conn, STRCONST("Proxy-authorization"))) ||
 #endif
         (!proxy && data->state.aptr.user &&
-         !Curl_checkheaders(data, STRCONST("Authorization"))))
+         !Fetch_checkheaders(data, STRCONST("Authorization"))))
     {
       auth = "Basic";
       result = http_output_basic(data, proxy);
@@ -701,7 +701,7 @@ output_auth_headers(struct Curl_easy *data,
   {
     /* Bearer */
     if ((!proxy && data->set.str[STRING_BEARER] &&
-         !Curl_checkheaders(data, STRCONST("Authorization"))))
+         !Fetch_checkheaders(data, STRCONST("Authorization"))))
     {
       auth = "Bearer";
       result = http_output_bearer(data);
@@ -735,7 +735,7 @@ output_auth_headers(struct Curl_easy *data,
 }
 
 /**
- * Curl_http_output_auth() setups the authentication headers for the
+ * Fetch_http_output_auth() setups the authentication headers for the
  * host/proxy and the correct authentication
  * method. data->state.authdone is set to TRUE when authentication is
  * done.
@@ -749,10 +749,10 @@ output_auth_headers(struct Curl_easy *data,
  * @returns FETCHcode
  */
 FETCHcode
-Curl_http_output_auth(struct Curl_easy *data,
+Fetch_http_output_auth(struct Fetch_easy *data,
                       struct connectdata *conn,
                       const char *request,
-                      Curl_HttpReq httpreq,
+                      Fetch_HttpReq httpreq,
                       const char *path,
                       bool proxytunnel) /* TRUE if this is the request setting
                                            up the proxy tunnel */
@@ -815,7 +815,7 @@ Curl_http_output_auth(struct Curl_easy *data,
 
   /* To prevent the user+password to get sent to other than the original host
      due to a location-follow */
-  if (Curl_auth_allowed_to_host(data)
+  if (Fetch_auth_allowed_to_host(data)
 #ifndef FETCH_DISABLE_NETRC
       || conn->bits.netrc
 #endif
@@ -842,10 +842,10 @@ Curl_http_output_auth(struct Curl_easy *data,
 #else
 /* when disabled */
 FETCHcode
-Curl_http_output_auth(struct Curl_easy *data,
+Fetch_http_output_auth(struct Fetch_easy *data,
                       struct connectdata *conn,
                       const char *request,
-                      Curl_HttpReq httpreq,
+                      Fetch_HttpReq httpreq,
                       const char *path,
                       bool proxytunnel)
 {
@@ -870,11 +870,11 @@ static int is_valid_auth_separator(char ch)
 #endif
 
 /*
- * Curl_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
+ * Fetch_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
  * headers. They are dealt with both in the transfer.c main loop and in the
  * proxy CONNECT loop.
  */
-FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
+FETCHcode Fetch_http_input_auth(struct Fetch_easy *data, bool proxy,
                                const char *auth) /* the first non-space */
 {
   /*
@@ -931,14 +931,14 @@ FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
     if (checkprefix("Negotiate", auth) && is_valid_auth_separator(auth[9]))
     {
       if ((authp->avail & FETCHAUTH_NEGOTIATE) ||
-          Curl_auth_is_spnego_supported())
+          Fetch_auth_is_spnego_supported())
       {
         *availp |= FETCHAUTH_NEGOTIATE;
         authp->avail |= FETCHAUTH_NEGOTIATE;
 
         if (authp->picked == FETCHAUTH_NEGOTIATE)
         {
-          FETCHcode result = Curl_input_negotiate(data, conn, proxy, auth);
+          FETCHcode result = Fetch_input_negotiate(data, conn, proxy, auth);
           if (!result)
           {
             free(data->req.newurl);
@@ -961,7 +961,7 @@ FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       if (checkprefix("NTLM", auth) && is_valid_auth_separator(auth[4]))
       {
         if ((authp->avail & FETCHAUTH_NTLM) ||
-            Curl_auth_is_ntlm_supported())
+            Fetch_auth_is_ntlm_supported())
         {
           *availp |= FETCHAUTH_NTLM;
           authp->avail |= FETCHAUTH_NTLM;
@@ -969,7 +969,7 @@ FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
           if (authp->picked == FETCHAUTH_NTLM)
           {
             /* NTLM authentication is picked and activated */
-            FETCHcode result = Curl_input_ntlm(data, proxy, auth);
+            FETCHcode result = Fetch_input_ntlm(data, proxy, auth);
             if (!result)
             {
               data->state.authproblem = FALSE;
@@ -989,7 +989,7 @@ FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       {
         if ((authp->avail & FETCHAUTH_DIGEST) != 0)
           infof(data, "Ignoring duplicate digest auth header.");
-        else if (Curl_auth_is_digest_supported())
+        else if (Fetch_auth_is_digest_supported())
         {
           FETCHcode result;
 
@@ -1000,7 +1000,7 @@ FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
            * authentication is not activated yet, as we need to store the
            * incoming data from this header in case we are going to use
            * Digest */
-          result = Curl_input_digest(data, proxy, auth);
+          result = Fetch_input_digest(data, proxy, auth);
           if (result)
           {
             infof(data, "Authentication problem. Ignoring this.");
@@ -1074,7 +1074,7 @@ FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
  *
  * @retval TRUE communications should not continue
  */
-static bool http_should_fail(struct Curl_easy *data, int httpcode)
+static bool http_should_fail(struct Fetch_easy *data, int httpcode)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
@@ -1137,7 +1137,7 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode)
   return data->state.authproblem;
 }
 
-FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
+FETCHcode Fetch_http_follow(struct Fetch_easy *data, const char *newurl,
                            followtype type)
 {
   bool disallowport = FALSE;
@@ -1174,7 +1174,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
 
         if (data->state.referer_alloc)
         {
-          Curl_safefree(data->state.referer);
+          Fetch_safefree(data->state.referer);
           data->state.referer_alloc = FALSE;
         }
 
@@ -1206,7 +1206,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
 
   if ((type != FOLLOW_RETRY) &&
       (data->req.httpcode != 401) && (data->req.httpcode != 407) &&
-      Curl_is_absolute_url(newurl, NULL, 0, FALSE))
+      Fetch_is_absolute_url(newurl, NULL, 0, FALSE))
   {
     /* If this is not redirect due to a 401 or 407 response and an absolute
        URL: do not allow a custom port number */
@@ -1221,7 +1221,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     {
       failf(data, "The redirect target URL could not be parsed: %s",
             fetch_url_strerror(uc));
-      return Curl_uc_to_fetchcode(uc);
+      return Fetch_uc_to_fetchcode(uc);
     }
 
     /* the URL could not be parsed for some reason, but since this is FAKE
@@ -1234,7 +1234,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
   {
     uc = fetch_url_get(data->state.uh, FETCHUPART_URL, &follow_url, 0);
     if (uc)
-      return Curl_uc_to_fetchcode(uc);
+      return Fetch_uc_to_fetchcode(uc);
 
     /* Clear auth if this redirects to a different port number or protocol,
        unless permitted */
@@ -1254,7 +1254,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         if (uc)
         {
           free(follow_url);
-          return Curl_uc_to_fetchcode(uc);
+          return Fetch_uc_to_fetchcode(uc);
         }
         port = atoi(portnum);
         free(portnum);
@@ -1268,15 +1268,15 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
       else
       {
         char *scheme;
-        const struct Curl_handler *p;
+        const struct Fetch_handler *p;
         uc = fetch_url_get(data->state.uh, FETCHUPART_SCHEME, &scheme, 0);
         if (uc)
         {
           free(follow_url);
-          return Curl_uc_to_fetchcode(uc);
+          return Fetch_uc_to_fetchcode(uc);
         }
 
-        p = Curl_get_scheme_handler(scheme);
+        p = Fetch_get_scheme_handler(scheme);
         if (p && (p->protocol != data->info.conn_protocol))
         {
           infof(data, "Clear auth, redirects scheme from %s to %s",
@@ -1287,8 +1287,8 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
       }
       if (clear)
       {
-        Curl_safefree(data->state.aptr.user);
-        Curl_safefree(data->state.aptr.passwd);
+        Fetch_safefree(data->state.aptr.user);
+        Fetch_safefree(data->state.aptr.passwd);
       }
     }
   }
@@ -1312,11 +1312,11 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     data->state.allow_port = FALSE;
 
   if (data->state.url_alloc)
-    Curl_safefree(data->state.url);
+    Fetch_safefree(data->state.url);
 
   data->state.url = follow_url;
   data->state.url_alloc = TRUE;
-  Curl_req_soft_reset(&data->req, data);
+  Fetch_req_soft_reset(&data->req, data);
   infof(data, "Issue another request to this URL: '%s'", data->state.url);
 
   /*
@@ -1361,7 +1361,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     {
       infof(data, "Switch from POST to GET");
       data->state.httpreq = HTTPREQ_GET;
-      Curl_creader_set_rewind(data, FALSE);
+      Fetch_creader_set_rewind(data, FALSE);
     }
     break;
   case 302: /* Found */
@@ -1385,7 +1385,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     {
       infof(data, "Switch from POST to GET");
       data->state.httpreq = HTTPREQ_GET;
-      Curl_creader_set_rewind(data, FALSE);
+      Fetch_creader_set_rewind(data, FALSE);
     }
     break;
 
@@ -1393,7 +1393,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     /* 'See Other' location is not the resource but a substitute for the
      * resource. In this case we switch the method to GET/HEAD, unless the
      * method is POST and the user specified to keep it as POST.
-     * https://github.com/curl/curl/issues/5237#issuecomment-614641049
+     * https://github.com/fetch/fetch/issues/5237#issuecomment-614641049
      */
     if (data->state.httpreq != HTTPREQ_GET &&
         ((data->state.httpreq != HTTPREQ_POST &&
@@ -1421,19 +1421,19 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
      */
     break;
   }
-  Curl_pgrsTime(data, TIMER_REDIRECT);
-  Curl_pgrsResetTransferSizes(data);
+  Fetch_pgrsTime(data, TIMER_REDIRECT);
+  Fetch_pgrsResetTransferSizes(data);
 
   return FETCHE_OK;
 }
 
 /*
- * Curl_compareheader()
+ * Fetch_compareheader()
  *
  * Returns TRUE if 'headerline' contains the 'header' with given 'content'.
  * Pass headers WITH the colon.
  */
-bool Curl_compareheader(const char *headerline, /* line to check */
+bool Fetch_compareheader(const char *headerline, /* line to check */
                         const char *header,     /* header keyword _with_ colon */
                         const size_t hlen,      /* len of the keyword in bytes */
                         const char *content,    /* content string to find */
@@ -1487,10 +1487,10 @@ bool Curl_compareheader(const char *headerline, /* line to check */
 }
 
 /*
- * Curl_http_connect() performs HTTP stuff to do at connect-time, called from
- * the generic Curl_connect().
+ * Fetch_http_connect() performs HTTP stuff to do at connect-time, called from
+ * the generic Fetch_connect().
  */
-FETCHcode Curl_http_connect(struct Curl_easy *data, bool *done)
+FETCHcode Fetch_http_connect(struct Fetch_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
 
@@ -1498,28 +1498,28 @@ FETCHcode Curl_http_connect(struct Curl_easy *data, bool *done)
      function to make the reuse checks properly be able to check this bit. */
   connkeep(conn, "HTTP default");
 
-  return Curl_conn_connect(data, FIRSTSOCKET, FALSE, done);
+  return Fetch_conn_connect(data, FIRSTSOCKET, FALSE, done);
 }
 
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
-int Curl_http_getsock_do(struct Curl_easy *data,
+int Fetch_http_getsock_do(struct Fetch_easy *data,
                          struct connectdata *conn,
                          fetch_socket_t *socks)
 {
   /* write mode */
   (void)conn;
-  socks[0] = Curl_conn_get_socket(data, FIRSTSOCKET);
+  socks[0] = Fetch_conn_get_socket(data, FIRSTSOCKET);
   return GETSOCK_WRITESOCK(0);
 }
 
 /*
- * Curl_http_done() gets called after a single HTTP request has been
+ * Fetch_http_done() gets called after a single HTTP request has been
  * performed.
  */
 
-FETCHcode Curl_http_done(struct Curl_easy *data,
+FETCHcode Fetch_http_done(struct Fetch_easy *data,
                          FETCHcode status, bool premature)
 {
   struct connectdata *conn = data->conn;
@@ -1529,7 +1529,7 @@ FETCHcode Curl_http_done(struct Curl_easy *data,
   data->state.authhost.multipass = FALSE;
   data->state.authproxy.multipass = FALSE;
 
-  Curl_dyn_reset(&data->state.headerb);
+  Fetch_dyn_reset(&data->state.headerb);
 
   if (status)
     return status;
@@ -1555,7 +1555,7 @@ FETCHcode Curl_http_done(struct Curl_easy *data,
 }
 
 /* Determine if we may use HTTP 1.1 for this request. */
-static bool http_may_use_1_1(const struct Curl_easy *data)
+static bool http_may_use_1_1(const struct Fetch_easy *data)
 {
   const struct connectdata *conn = data->conn;
   /* We have seen a previous response for *this* transfer with 1.0,
@@ -1575,9 +1575,9 @@ static bool http_may_use_1_1(const struct Curl_easy *data)
          (data->state.httpwant >= FETCH_HTTP_VERSION_1_1);
 }
 
-static unsigned char http_request_version(struct Curl_easy *data)
+static unsigned char http_request_version(struct Fetch_easy *data)
 {
-  unsigned char httpversion = Curl_conn_http_version(data);
+  unsigned char httpversion = Fetch_conn_http_version(data);
   if (!httpversion)
   {
     /* No specific HTTP connection filter installed. */
@@ -1601,7 +1601,7 @@ static const char *get_http_string(int httpversion)
   }
 }
 
-FETCHcode Curl_add_custom_headers(struct Curl_easy *data,
+FETCHcode Fetch_add_custom_headers(struct Fetch_easy *data,
                                   bool is_connect, int httpversion,
                                   struct dynbuf *req)
 {
@@ -1612,7 +1612,7 @@ FETCHcode Curl_add_custom_headers(struct Curl_easy *data,
   int i;
 
 #ifndef FETCH_DISABLE_PROXY
-  enum Curl_proxy_use proxy;
+  enum Fetch_proxy_use proxy;
 
   if (is_connect)
     proxy = HEADER_CONNECT;
@@ -1678,7 +1678,7 @@ FETCHcode Curl_add_custom_headers(struct Curl_easy *data,
               semicolonp = strdup(headers->data);
               if (!semicolonp)
               {
-                Curl_dyn_free(req);
+                Fetch_dyn_free(req);
                 return FETCHE_OUT_OF_MEMORY;
               }
               /* put a colon where the semicolon is */
@@ -1736,11 +1736,11 @@ FETCHcode Curl_add_custom_headers(struct Curl_easy *data,
                     checkprefix("Cookie:", compare)) &&
                    /* be careful of sending this potentially sensitive header to
                       other hosts */
-                   !Curl_auth_allowed_to_host(data))
+                   !Fetch_auth_allowed_to_host(data))
             ;
           else
           {
-            result = Curl_dyn_addf(req, "%s\r\n", compare);
+            result = Fetch_dyn_addf(req, "%s\r\n", compare);
           }
           if (semicolonp)
             free(semicolonp);
@@ -1756,7 +1756,7 @@ FETCHcode Curl_add_custom_headers(struct Curl_easy *data,
 }
 
 #ifndef FETCH_DISABLE_PARSEDATE
-FETCHcode Curl_add_timecondition(struct Curl_easy *data,
+FETCHcode Fetch_add_timecondition(struct Fetch_easy *data,
                                  struct dynbuf *req)
 {
   const struct tm *tm;
@@ -1770,7 +1770,7 @@ FETCHcode Curl_add_timecondition(struct Curl_easy *data,
     /* no condition was asked for */
     return FETCHE_OK;
 
-  result = Curl_gmtime(data->set.timevalue, &keeptime);
+  result = Fetch_gmtime(data->set.timevalue, &keeptime);
   if (result)
   {
     failf(data, "Invalid TIMEVALUE");
@@ -1798,7 +1798,7 @@ FETCHcode Curl_add_timecondition(struct Curl_easy *data,
     break;
   }
 
-  if (Curl_checkheaders(data, condp, len))
+  if (Fetch_checkheaders(data, condp, len))
   {
     /* A custom header was specified; it will be sent instead. */
     return FETCHE_OK;
@@ -1815,20 +1815,20 @@ FETCHcode Curl_add_timecondition(struct Curl_easy *data,
   msnprintf(datestr, sizeof(datestr),
             "%s: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
             condp,
-            Curl_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
+            Fetch_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
             tm->tm_mday,
-            Curl_month[tm->tm_mon],
+            Fetch_month[tm->tm_mon],
             tm->tm_year + 1900,
             tm->tm_hour,
             tm->tm_min,
             tm->tm_sec);
 
-  result = Curl_dyn_add(req, datestr);
+  result = Fetch_dyn_add(req, datestr);
   return result;
 }
 #else
 /* disabled */
-FETCHcode Curl_add_timecondition(struct Curl_easy *data,
+FETCHcode Fetch_add_timecondition(struct Fetch_easy *data,
                                  struct dynbuf *req)
 {
   (void)data;
@@ -1837,10 +1837,10 @@ FETCHcode Curl_add_timecondition(struct Curl_easy *data,
 }
 #endif
 
-void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
-                      const char **method, Curl_HttpReq *reqp)
+void Fetch_http_method(struct Fetch_easy *data, struct connectdata *conn,
+                      const char **method, Fetch_HttpReq *reqp)
 {
-  Curl_HttpReq httpreq = (Curl_HttpReq)data->state.httpreq;
+  Fetch_HttpReq httpreq = (Fetch_HttpReq)data->state.httpreq;
   const char *request;
   if ((conn->handler->protocol & (PROTO_FAMILY_HTTP | FETCHPROTO_FTP)) &&
       data->state.upload)
@@ -1880,13 +1880,13 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
   *reqp = httpreq;
 }
 
-static FETCHcode http_useragent(struct Curl_easy *data)
+static FETCHcode http_useragent(struct Fetch_easy *data)
 {
   /* The User-Agent string might have been allocated in url.c already, because
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */
-  if (Curl_checkheaders(data, STRCONST("User-Agent")))
+  if (Fetch_checkheaders(data, STRCONST("User-Agent")))
   {
     free(data->state.aptr.uagent);
     data->state.aptr.uagent = NULL;
@@ -1894,7 +1894,7 @@ static FETCHcode http_useragent(struct Curl_easy *data)
   return FETCHE_OK;
 }
 
-static FETCHcode http_host(struct Curl_easy *data, struct connectdata *conn)
+static FETCHcode http_host(struct Fetch_easy *data, struct connectdata *conn)
 {
   const char *ptr;
   struct dynamically_allocated_data *aptr = &data->state.aptr;
@@ -1910,9 +1910,9 @@ static FETCHcode http_host(struct Curl_easy *data, struct connectdata *conn)
     data->state.first_remote_port = conn->remote_port;
     data->state.first_remote_protocol = conn->handler->protocol;
   }
-  Curl_safefree(aptr->host);
+  Fetch_safefree(aptr->host);
 
-  ptr = Curl_checkheaders(data, STRCONST("Host"));
+  ptr = Fetch_checkheaders(data, STRCONST("Host"));
   if (ptr && (!data->state.this_is_a_follow ||
               strcasecompare(data->state.first_host, conn->host.name)))
   {
@@ -1922,7 +1922,7 @@ static FETCHcode http_host(struct Curl_easy *data, struct connectdata *conn)
        custom Host: header if this is NOT a redirect, as setting Host: in the
        redirected request is being out on thin ice. Except if the hostname
        is the same as the first one! */
-    char *cookiehost = Curl_copy_header_value(ptr);
+    char *cookiehost = Fetch_copy_header_value(ptr);
     if (!cookiehost)
       return FETCHE_OUT_OF_MEMORY;
     if (!*cookiehost)
@@ -1949,7 +1949,7 @@ static FETCHcode http_host(struct Curl_easy *data, struct connectdata *conn)
         if (colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      Curl_safefree(aptr->cookiehost);
+      Fetch_safefree(aptr->cookiehost);
       aptr->cookiehost = cookiehost;
     }
 #endif
@@ -1991,7 +1991,7 @@ static FETCHcode http_host(struct Curl_easy *data, struct connectdata *conn)
 /*
  * Append the request-target to the HTTP request
  */
-static FETCHcode http_target(struct Curl_easy *data,
+static FETCHcode http_target(struct Fetch_easy *data,
                              struct connectdata *conn,
                              struct dynbuf *r)
 {
@@ -2064,7 +2064,7 @@ static FETCHcode http_target(struct Curl_easy *data,
     fetch_url_cleanup(h);
 
     /* target or URL */
-    result = Curl_dyn_add(r, data->set.str[STRING_TARGET] ? data->set.str[STRING_TARGET] : url);
+    result = Fetch_dyn_add(r, data->set.str[STRING_TARGET] ? data->set.str[STRING_TARGET] : url);
     free(url);
     if (result)
       return result;
@@ -2077,7 +2077,7 @@ static FETCHcode http_target(struct Curl_easy *data,
         char *type = strstr(path, ";type=");
         if (type && type[6] && type[7] == 0)
         {
-          switch (Curl_raw_toupper(type[6]))
+          switch (Fetch_raw_toupper(type[6]))
           {
           case 'A':
           case 'D':
@@ -2089,7 +2089,7 @@ static FETCHcode http_target(struct Curl_easy *data,
         }
         if (!type)
         {
-          result = Curl_dyn_addf(r, ";type=%c",
+          result = Fetch_dyn_addf(r, ";type=%c",
                                  data->state.prefer_ascii ? 'a' : 'i');
           if (result)
             return result;
@@ -2103,18 +2103,18 @@ static FETCHcode http_target(struct Curl_easy *data,
   (void)conn; /* not used in disabled-proxy builds */
 #endif
   {
-    result = Curl_dyn_add(r, path);
+    result = Fetch_dyn_add(r, path);
     if (result)
       return result;
     if (query)
-      result = Curl_dyn_addf(r, "?%s", query);
+      result = Fetch_dyn_addf(r, "?%s", query);
   }
 
   return result;
 }
 
 #if !defined(FETCH_DISABLE_MIME) || !defined(FETCH_DISABLE_FORM_API)
-static FETCHcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
+static FETCHcode set_post_reader(struct Fetch_easy *data, Fetch_HttpReq httpreq)
 {
   FETCHcode result;
 
@@ -2134,12 +2134,12 @@ static FETCHcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
       data->state.formp = calloc(1, sizeof(fetch_mimepart));
       if (!data->state.formp)
         return FETCHE_OUT_OF_MEMORY;
-      Curl_mime_cleanpart(data->state.formp);
-      result = Curl_getformdata(data, data->state.formp, data->set.httppost,
+      Fetch_mime_cleanpart(data->state.formp);
+      result = Fetch_getformdata(data, data->state.formp, data->set.httppost,
                                 data->state.fread_func);
       if (result)
       {
-        Curl_safefree(data->state.formp);
+        Fetch_safefree(data->state.formp);
         return result;
       }
       data->state.mimepost = data->state.formp;
@@ -2159,7 +2159,7 @@ static FETCHcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
 #ifndef FETCH_DISABLE_MIME
     if (data->state.mimepost)
     {
-      const char *cthdr = Curl_checkheaders(data, STRCONST("Content-Type"));
+      const char *cthdr = Fetch_checkheaders(data, STRCONST("Content-Type"));
 
       /* Read and seek body only. */
       data->state.mimepost->flags |= MIME_BODY_ONLY;
@@ -2173,31 +2173,31 @@ static FETCHcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
         cthdr = "multipart/form-data";
 
       fetch_mime_headers(data->state.mimepost, data->set.headers, 0);
-      result = Curl_mime_prepare_headers(data, data->state.mimepost, cthdr,
+      result = Fetch_mime_prepare_headers(data, data->state.mimepost, cthdr,
                                          NULL, MIMESTRATEGY_FORM);
       if (result)
         return result;
       fetch_mime_headers(data->state.mimepost, NULL, 0);
-      result = Curl_creader_set_mime(data, data->state.mimepost);
+      result = Fetch_creader_set_mime(data, data->state.mimepost);
       if (result)
         return result;
     }
     else
 #endif
     {
-      result = Curl_creader_set_null(data);
+      result = Fetch_creader_set_null(data);
     }
-    data->state.infilesize = Curl_creader_total_length(data);
+    data->state.infilesize = Fetch_creader_total_length(data);
     return result;
 
   default:
-    return Curl_creader_set_null(data);
+    return Fetch_creader_set_null(data);
   }
   /* never reached */
 }
 #endif
 
-static FETCHcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
+static FETCHcode set_reader(struct Fetch_easy *data, Fetch_HttpReq httpreq)
 {
   FETCHcode result = FETCHE_OK;
   fetch_off_t postsize = data->state.infilesize;
@@ -2206,13 +2206,13 @@ static FETCHcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
 
   if (data->req.authneg)
   {
-    return Curl_creader_set_null(data);
+    return Fetch_creader_set_null(data);
   }
 
   switch (httpreq)
   {
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
-    return postsize ? Curl_creader_set_fread(data, postsize) : Curl_creader_set_null(data);
+    return postsize ? Fetch_creader_set_fread(data, postsize) : Fetch_creader_set_null(data);
 
 #if !defined(FETCH_DISABLE_MIME) || !defined(FETCH_DISABLE_FORM_API)
   case HTTPREQ_POST_FORM:
@@ -2225,15 +2225,15 @@ static FETCHcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
     /* the size of the post body */
     if (!postsize)
     {
-      result = Curl_creader_set_null(data);
+      result = Fetch_creader_set_null(data);
     }
     else if (data->set.postfields)
     {
       if (postsize > 0)
-        result = Curl_creader_set_buf(data, data->set.postfields,
+        result = Fetch_creader_set_buf(data, data->set.postfields,
                                       (size_t)postsize);
       else
-        result = Curl_creader_set_null(data);
+        result = Fetch_creader_set_null(data);
     }
     else
     {
@@ -2242,26 +2242,26 @@ static FETCHcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
        * a backward compatibility decision to earlier versions where
        * chunking disregarded this. See issue #13229. */
       bool chunked = FALSE;
-      char *ptr = Curl_checkheaders(data, STRCONST("Transfer-Encoding"));
+      char *ptr = Fetch_checkheaders(data, STRCONST("Transfer-Encoding"));
       if (ptr)
       {
         /* Some kind of TE is requested, check if 'chunked' is chosen */
-        chunked = Curl_compareheader(ptr, STRCONST("Transfer-Encoding:"),
+        chunked = Fetch_compareheader(ptr, STRCONST("Transfer-Encoding:"),
                                      STRCONST("chunked"));
       }
-      result = Curl_creader_set_fread(data, chunked ? -1 : postsize);
+      result = Fetch_creader_set_fread(data, chunked ? -1 : postsize);
     }
     return result;
 
   default:
     /* HTTP GET/HEAD download, has no body, needs no Content-Length */
     data->state.infilesize = 0;
-    return Curl_creader_set_null(data);
+    return Fetch_creader_set_null(data);
   }
   /* not reached */
 }
 
-static FETCHcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
+static FETCHcode http_resume(struct Fetch_easy *data, Fetch_HttpReq httpreq)
 {
   if ((HTTPREQ_POST == httpreq || HTTPREQ_PUT == httpreq) &&
       data->state.resume_from)
@@ -2288,7 +2288,7 @@ static FETCHcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
     {
       /* only act on the first request */
       FETCHcode result;
-      result = Curl_creader_resume_from(data, data->state.resume_from);
+      result = Fetch_creader_resume_from(data, data->state.resume_from);
       if (result)
       {
         failf(data, "Unable to resume from offset %" FMT_OFF_T,
@@ -2300,8 +2300,8 @@ static FETCHcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
   return FETCHE_OK;
 }
 
-static FETCHcode http_req_set_reader(struct Curl_easy *data,
-                                     Curl_HttpReq httpreq, int httpversion,
+static FETCHcode http_req_set_reader(struct Fetch_easy *data,
+                                     Fetch_HttpReq httpreq, int httpversion,
                                      const char **tep)
 {
   FETCHcode result = FETCHE_OK;
@@ -2315,12 +2315,12 @@ static FETCHcode http_req_set_reader(struct Curl_easy *data,
   if (result)
     return result;
 
-  ptr = Curl_checkheaders(data, STRCONST("Transfer-Encoding"));
+  ptr = Fetch_checkheaders(data, STRCONST("Transfer-Encoding"));
   if (ptr)
   {
     /* Some kind of TE is requested, check if 'chunked' is chosen */
     data->req.upload_chunky =
-        Curl_compareheader(ptr,
+        Fetch_compareheader(ptr,
                            STRCONST("Transfer-Encoding:"), STRCONST("chunked"));
     if (data->req.upload_chunky && (httpversion >= 20))
     {
@@ -2331,7 +2331,7 @@ static FETCHcode http_req_set_reader(struct Curl_easy *data,
   }
   else
   {
-    fetch_off_t req_clen = Curl_creader_total_length(data);
+    fetch_off_t req_clen = Fetch_creader_total_length(data);
 
     if (req_clen < 0)
     {
@@ -2360,7 +2360,7 @@ static FETCHcode http_req_set_reader(struct Curl_easy *data,
   return result;
 }
 
-static FETCHcode addexpect(struct Curl_easy *data, struct dynbuf *r,
+static FETCHcode addexpect(struct Fetch_easy *data, struct dynbuf *r,
                            int httpversion, bool *announced_exp100)
 {
   FETCHcode result;
@@ -2375,21 +2375,21 @@ static FETCHcode addexpect(struct Curl_easy *data, struct dynbuf *r,
      the somewhat bigger ones we allow the app to disable it. Just make
      sure that the expect100header is always set to the preferred value
      here. */
-  ptr = Curl_checkheaders(data, STRCONST("Expect"));
+  ptr = Fetch_checkheaders(data, STRCONST("Expect"));
   if (ptr)
   {
     *announced_exp100 =
-        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
+        Fetch_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
   }
   else if (!data->state.disableexpect && (httpversion == 11))
   {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
        Expect: 100-continue to the headers which actually speeds up post
        operations (as there is one packet coming back from the web server) */
-    fetch_off_t client_len = Curl_creader_client_length(data);
+    fetch_off_t client_len = Fetch_creader_client_length(data);
     if (client_len > EXPECT_100_THRESHOLD || client_len < 0)
     {
-      result = Curl_dyn_addn(r, STRCONST("Expect: 100-continue\r\n"));
+      result = Fetch_dyn_addn(r, STRCONST("Expect: 100-continue\r\n"));
       if (result)
         return result;
       *announced_exp100 = TRUE;
@@ -2398,9 +2398,9 @@ static FETCHcode addexpect(struct Curl_easy *data, struct dynbuf *r,
   return FETCHE_OK;
 }
 
-static FETCHcode http_req_complete(struct Curl_easy *data,
+static FETCHcode http_req_complete(struct Fetch_easy *data,
                                    struct dynbuf *r, int httpversion,
-                                   Curl_HttpReq httpreq)
+                                   Fetch_HttpReq httpreq)
 {
   FETCHcode result = FETCHE_OK;
   fetch_off_t req_clen;
@@ -2409,13 +2409,13 @@ static FETCHcode http_req_complete(struct Curl_easy *data,
   DEBUGASSERT(data->conn);
   if (data->req.upload_chunky)
   {
-    result = Curl_httpchunk_add_reader(data);
+    result = Fetch_httpchunk_add_reader(data);
     if (result)
       return result;
   }
 
   /* Get the request body length that has been set up */
-  req_clen = Curl_creader_total_length(data);
+  req_clen = Fetch_creader_total_length(data);
   switch (httpreq)
   {
   case HTTPREQ_PUT:
@@ -2432,11 +2432,11 @@ static FETCHcode http_req_complete(struct Curl_easy *data,
      */
     if (req_clen >= 0 && !data->req.upload_chunky &&
         (data->req.authneg ||
-         !Curl_checkheaders(data, STRCONST("Content-Length"))))
+         !Fetch_checkheaders(data, STRCONST("Content-Length"))))
     {
       /* we allow replacing this header if not during auth negotiation,
          although it is not very wise to actually set your own */
-      result = Curl_dyn_addf(r, "Content-Length: %" FMT_OFF_T "\r\n",
+      result = Fetch_dyn_addf(r, "Content-Length: %" FMT_OFF_T "\r\n",
                              req_clen);
     }
     if (result)
@@ -2451,7 +2451,7 @@ static FETCHcode http_req_complete(struct Curl_easy *data,
 
       for (hdr = data->state.mimepost->fetchheaders; hdr; hdr = hdr->next)
       {
-        result = Curl_dyn_addf(r, "%s\r\n", hdr->data);
+        result = Fetch_dyn_addf(r, "%s\r\n", hdr->data);
         if (result)
           goto out;
       }
@@ -2459,9 +2459,9 @@ static FETCHcode http_req_complete(struct Curl_easy *data,
 #endif
     if (httpreq == HTTPREQ_POST)
     {
-      if (!Curl_checkheaders(data, STRCONST("Content-Type")))
+      if (!Fetch_checkheaders(data, STRCONST("Content-Type")))
       {
-        result = Curl_dyn_addn(r, STRCONST("Content-Type: application/"
+        result = Fetch_dyn_addn(r, STRCONST("Content-Type: application/"
                                            "x-www-form-urlencoded\r\n"));
         if (result)
           goto out;
@@ -2476,10 +2476,10 @@ static FETCHcode http_req_complete(struct Curl_easy *data,
   }
 
   /* end of headers */
-  result = Curl_dyn_addn(r, STRCONST("\r\n"));
+  result = Fetch_dyn_addn(r, STRCONST("\r\n"));
   if (!result)
   {
-    Curl_pgrsSetUploadSize(data, req_clen);
+    Fetch_pgrsSetUploadSize(data, req_clen);
     if (announced_exp100)
       result = http_exp100_add_reader(data);
   }
@@ -2488,14 +2488,14 @@ out:
   if (!result)
   {
     /* setup variables for the upcoming transfer */
-    Curl_xfer_setup1(data, FETCH_XFER_SENDRECV, -1, TRUE);
+    Fetch_xfer_setup1(data, FETCH_XFER_SENDRECV, -1, TRUE);
   }
   return result;
 }
 
 #if !defined(FETCH_DISABLE_COOKIES)
 
-static FETCHcode http_cookies(struct Curl_easy *data,
+static FETCHcode http_cookies(struct Fetch_easy *data,
                               struct connectdata *conn,
                               struct dynbuf *r)
 {
@@ -2503,12 +2503,12 @@ static FETCHcode http_cookies(struct Curl_easy *data,
   char *addcookies = NULL;
   bool linecap = FALSE;
   if (data->set.str[STRING_COOKIE] &&
-      !Curl_checkheaders(data, STRCONST("Cookie")))
+      !Fetch_checkheaders(data, STRCONST("Cookie")))
     addcookies = data->set.str[STRING_COOKIE];
 
   if (data->cookies || addcookies)
   {
-    struct Curl_llist list;
+    struct Fetch_llist list;
     int count = 0;
     int rc = 1;
 
@@ -2520,26 +2520,26 @@ static FETCHcode http_cookies(struct Curl_easy *data,
           strcasecompare("localhost", host) ||
           !strcmp(host, "127.0.0.1") ||
           !strcmp(host, "::1");
-      Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
-      rc = Curl_cookie_getlist(data, data->cookies, host, data->state.up.path,
+      Fetch_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
+      rc = Fetch_cookie_getlist(data, data->cookies, host, data->state.up.path,
                                secure_context, &list);
-      Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
+      Fetch_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
     }
     if (!rc)
     {
-      struct Curl_llist_node *n;
+      struct Fetch_llist_node *n;
       size_t clen = 8; /* hold the size of the generated Cookie: header */
 
       /* loop through all cookies that matched */
-      for (n = Curl_llist_head(&list); n; n = Curl_node_next(n))
+      for (n = Fetch_llist_head(&list); n; n = Fetch_node_next(n))
       {
-        struct Cookie *co = Curl_node_elem(n);
+        struct Cookie *co = Fetch_node_elem(n);
         if (co->value)
         {
           size_t add;
           if (!count)
           {
-            result = Curl_dyn_addn(r, STRCONST("Cookie: "));
+            result = Fetch_dyn_addn(r, STRCONST("Cookie: "));
             if (result)
               break;
           }
@@ -2552,7 +2552,7 @@ static FETCHcode http_cookies(struct Curl_easy *data,
             linecap = TRUE;
             break;
           }
-          result = Curl_dyn_addf(r, "%s%s=%s", count ? "; " : "",
+          result = Fetch_dyn_addf(r, "%s%s=%s", count ? "; " : "",
                                  co->name, co->value);
           if (result)
             break;
@@ -2560,20 +2560,20 @@ static FETCHcode http_cookies(struct Curl_easy *data,
           count++;
         }
       }
-      Curl_llist_destroy(&list, NULL);
+      Fetch_llist_destroy(&list, NULL);
     }
     if (addcookies && !result && !linecap)
     {
       if (!count)
-        result = Curl_dyn_addn(r, STRCONST("Cookie: "));
+        result = Fetch_dyn_addn(r, STRCONST("Cookie: "));
       if (!result)
       {
-        result = Curl_dyn_addf(r, "%s%s", count ? "; " : "", addcookies);
+        result = Fetch_dyn_addf(r, "%s%s", count ? "; " : "", addcookies);
         count++;
       }
     }
     if (count && !result)
-      result = Curl_dyn_addn(r, STRCONST("\r\n"));
+      result = Fetch_dyn_addn(r, STRCONST("\r\n"));
 
     if (result)
       return result;
@@ -2584,8 +2584,8 @@ static FETCHcode http_cookies(struct Curl_easy *data,
 #define http_cookies(a, b, c) FETCHE_OK
 #endif
 
-static FETCHcode http_range(struct Curl_easy *data,
-                            Curl_HttpReq httpreq)
+static FETCHcode http_range(struct Fetch_easy *data,
+                            Fetch_HttpReq httpreq)
 {
   if (data->state.use_range)
   {
@@ -2595,7 +2595,7 @@ static FETCHcode http_range(struct Curl_easy *data,
      * ones if any such are specified.
      */
     if (((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) &&
-        !Curl_checkheaders(data, STRCONST("Range")))
+        !Fetch_checkheaders(data, STRCONST("Range")))
     {
       /* if a line like this was already allocated, free the previous one */
       free(data->state.aptr.rangeline);
@@ -2603,9 +2603,9 @@ static FETCHcode http_range(struct Curl_easy *data,
                                            data->state.range);
     }
     else if ((httpreq == HTTPREQ_POST || httpreq == HTTPREQ_PUT) &&
-             !Curl_checkheaders(data, STRCONST("Content-Range")))
+             !Fetch_checkheaders(data, STRCONST("Content-Range")))
     {
-      fetch_off_t req_clen = Curl_creader_total_length(data);
+      fetch_off_t req_clen = Fetch_creader_total_length(data);
       /* if a line like this was already allocated, free the previous one */
       free(data->state.aptr.rangeline);
 
@@ -2644,7 +2644,7 @@ static FETCHcode http_range(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode http_firstwrite(struct Curl_easy *data)
+static FETCHcode http_firstwrite(struct Fetch_easy *data)
 {
   struct connectdata *conn = data->conn;
   struct SingleRequest *k = &data->req;
@@ -2695,7 +2695,7 @@ static FETCHcode http_firstwrite(struct Curl_easy *data)
        seems to be what chapter 13.3.4 of RFC 2616 defines to be the correct
        action for an HTTP/1.1 client */
 
-    if (!Curl_meets_timecondition(data, k->timeofdoc))
+    if (!Fetch_meets_timecondition(data, k->timeofdoc))
     {
       k->done = TRUE;
       /* We are simulating an HTTP 304 from server so we return
@@ -2713,9 +2713,9 @@ static FETCHcode http_firstwrite(struct Curl_easy *data)
 }
 
 #ifdef HAVE_LIBZ
-static FETCHcode http_transferencode(struct Curl_easy *data)
+static FETCHcode http_transferencode(struct Fetch_easy *data)
 {
-  if (!Curl_checkheaders(data, STRCONST("TE")) &&
+  if (!Fetch_checkheaders(data, STRCONST("TE")) &&
       data->set.http_transfer_encoding)
   {
     /* When we are to insert a TE: header in the request, we must also insert
@@ -2723,14 +2723,14 @@ static FETCHcode http_transferencode(struct Curl_easy *data)
        Connection: header and prevent the original to get sent. Note that if
        the user has inserted his/her own TE: header we do not do this magic
        but then assume that the user will handle it all! */
-    char *cptr = Curl_checkheaders(data, STRCONST("Connection"));
+    char *cptr = Fetch_checkheaders(data, STRCONST("Connection"));
 #define TE_HEADER "TE: gzip\r\n"
 
-    Curl_safefree(data->state.aptr.te);
+    Fetch_safefree(data->state.aptr.te);
 
     if (cptr)
     {
-      cptr = Curl_copy_header_value(cptr);
+      cptr = Fetch_copy_header_value(cptr);
       if (!cptr)
         return FETCHE_OUT_OF_MEMORY;
     }
@@ -2748,15 +2748,15 @@ static FETCHcode http_transferencode(struct Curl_easy *data)
 #endif
 
 /*
- * Curl_http() gets called from the generic multi_do() function when an HTTP
+ * Fetch_http() gets called from the generic multi_do() function when an HTTP
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */
-FETCHcode Curl_http(struct Curl_easy *data, bool *done)
+FETCHcode Fetch_http(struct Fetch_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   FETCHcode result = FETCHE_OK;
-  Curl_HttpReq httpreq;
+  Fetch_HttpReq httpreq;
   const char *te = ""; /* transfer-encoding */
   const char *request;
   const char *httpstring;
@@ -2773,30 +2773,30 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
   switch (conn->alpn)
   {
   case FETCH_HTTP_VERSION_3:
-    DEBUGASSERT(Curl_conn_http_version(data) == 30);
+    DEBUGASSERT(Fetch_conn_http_version(data) == 30);
     break;
   case FETCH_HTTP_VERSION_2:
 #ifndef FETCH_DISABLE_PROXY
-    if ((Curl_conn_http_version(data) != 20) &&
+    if ((Fetch_conn_http_version(data) != 20) &&
         conn->bits.proxy && !conn->bits.tunnel_proxy)
     {
-      result = Curl_http2_switch(data);
+      result = Fetch_http2_switch(data);
       if (result)
         goto fail;
     }
     else
 #endif
-      DEBUGASSERT(Curl_conn_http_version(data) == 20);
+      DEBUGASSERT(Fetch_conn_http_version(data) == 20);
     break;
   case FETCH_HTTP_VERSION_1_1:
     /* continue with HTTP/1.x when explicitly requested */
     break;
   default:
     /* Check if user wants to use HTTP/2 with clear TCP */
-    if (Curl_http2_may_switch(data))
+    if (Fetch_http2_may_switch(data))
     {
       DEBUGF(infof(data, "HTTP/2 over clean TCP"));
-      result = Curl_http2_switch(data);
+      result = Fetch_http2_switch(data);
       if (result)
         goto fail;
     }
@@ -2806,7 +2806,7 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse
    * or multiplex needs it here as well. */
-  result = Curl_headers_init(data);
+  result = Fetch_headers_init(data);
   if (result)
     goto fail;
 
@@ -2818,7 +2818,7 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
   if (result)
     goto fail;
 
-  Curl_http_method(data, conn, &request, &httpreq);
+  Fetch_http_method(data, conn, &request, &httpreq);
 
   /* setup the authentication headers */
   {
@@ -2829,32 +2829,32 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
       if (!pq)
         return FETCHE_OUT_OF_MEMORY;
     }
-    result = Curl_http_output_auth(data, conn, request, httpreq,
+    result = Fetch_http_output_auth(data, conn, request, httpreq,
                                    (pq ? pq : data->state.up.path), FALSE);
     free(pq);
     if (result)
       goto fail;
   }
 
-  Curl_safefree(data->state.aptr.ref);
-  if (data->state.referer && !Curl_checkheaders(data, STRCONST("Referer")))
+  Fetch_safefree(data->state.aptr.ref);
+  if (data->state.referer && !Fetch_checkheaders(data, STRCONST("Referer")))
   {
     data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
     if (!data->state.aptr.ref)
       return FETCHE_OUT_OF_MEMORY;
   }
 
-  if (!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
+  if (!Fetch_checkheaders(data, STRCONST("Accept-Encoding")) &&
       data->set.str[STRING_ENCODING])
   {
-    Curl_safefree(data->state.aptr.accept_encoding);
+    Fetch_safefree(data->state.aptr.accept_encoding);
     data->state.aptr.accept_encoding =
         aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
     if (!data->state.aptr.accept_encoding)
       return FETCHE_OUT_OF_MEMORY;
   }
   else
-    Curl_safefree(data->state.aptr.accept_encoding);
+    Fetch_safefree(data->state.aptr.accept_encoding);
 
 #ifdef HAVE_LIBZ
   /* we only consider transfer-encoding magic if libz support is built-in */
@@ -2870,7 +2870,7 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
   if (result)
     goto fail;
 
-  p_accept = Curl_checkheaders(data,
+  p_accept = Fetch_checkheaders(data,
                                STRCONST("Accept"))
                  ? NULL
                  : "Accept: */*\r\n";
@@ -2880,37 +2880,37 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
     goto fail;
 
   /* initialize a dynamic send-buffer */
-  Curl_dyn_init(&req, DYN_HTTP_REQUEST);
+  Fetch_dyn_init(&req, DYN_HTTP_REQUEST);
 
   /* make sure the header buffer is reset - if there are leftovers from a
      previous transfer */
-  Curl_dyn_reset(&data->state.headerb);
+  Fetch_dyn_reset(&data->state.headerb);
 
   /* add the main request stuff */
   /* GET/HEAD/POST/PUT */
-  result = Curl_dyn_addf(&req, "%s ", request);
+  result = Fetch_dyn_addf(&req, "%s ", request);
   if (!result)
     result = http_target(data, conn, &req);
   if (result)
   {
-    Curl_dyn_free(&req);
+    Fetch_dyn_free(&req);
     goto fail;
   }
 
 #ifndef FETCH_DISABLE_ALTSVC
-  if (conn->bits.altused && !Curl_checkheaders(data, STRCONST("Alt-Used")))
+  if (conn->bits.altused && !Fetch_checkheaders(data, STRCONST("Alt-Used")))
   {
     altused = aprintf("Alt-Used: %s:%d\r\n",
                       conn->conn_to_host.name, conn->conn_to_port);
     if (!altused)
     {
-      Curl_dyn_free(&req);
+      Fetch_dyn_free(&req);
       return FETCHE_OUT_OF_MEMORY;
     }
   }
 #endif
   result =
-      Curl_dyn_addf(&req,
+      Fetch_dyn_addf(&req,
                     " HTTP/%s\r\n" /* HTTP version */
                     "%s"           /* host */
                     "%s"           /* proxyuserpwd */
@@ -2950,8 +2950,8 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
 #ifndef FETCH_DISABLE_PROXY
                     (conn->bits.httpproxy &&
                      !conn->bits.tunnel_proxy &&
-                     !Curl_checkheaders(data, STRCONST("Proxy-Connection")) &&
-                     !Curl_checkProxyheaders(data, conn,
+                     !Fetch_checkheaders(data, STRCONST("Proxy-Connection")) &&
+                     !Fetch_checkProxyheaders(data, conn,
                                              STRCONST("Proxy-Connection")))
                         ? "Proxy-Connection: Keep-Alive\r\n"
                         : "",
@@ -2963,27 +2963,27 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
 
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials
    * from reused connections */
-  Curl_safefree(data->state.aptr.userpwd);
+  Fetch_safefree(data->state.aptr.userpwd);
 #ifndef FETCH_DISABLE_PROXY
-  Curl_safefree(data->state.aptr.proxyuserpwd);
+  Fetch_safefree(data->state.aptr.proxyuserpwd);
 #endif
   free(altused);
 
   if (result)
   {
-    Curl_dyn_free(&req);
+    Fetch_dyn_free(&req);
     goto fail;
   }
 
-  if (!Curl_conn_is_ssl(conn, FIRSTSOCKET) && (httpversion < 20) &&
+  if (!Fetch_conn_is_ssl(conn, FIRSTSOCKET) && (httpversion < 20) &&
       (data->state.httpwant == FETCH_HTTP_VERSION_2))
   {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it is not done
        over SSL */
-    result = Curl_http2_request_upgrade(&req, data);
+    result = Fetch_http2_request_upgrade(&req, data);
     if (result)
     {
-      Curl_dyn_free(&req);
+      Fetch_dyn_free(&req);
       return result;
     }
   }
@@ -2991,21 +2991,21 @@ FETCHcode Curl_http(struct Curl_easy *data, bool *done)
   result = http_cookies(data, conn, &req);
 #ifndef FETCH_DISABLE_WEBSOCKETS
   if (!result && conn->handler->protocol & (FETCHPROTO_WS | FETCHPROTO_WSS))
-    result = Curl_ws_request(data, &req);
+    result = Fetch_ws_request(data, &req);
 #endif
   if (!result)
-    result = Curl_add_timecondition(data, &req);
+    result = Fetch_add_timecondition(data, &req);
   if (!result)
-    result = Curl_add_custom_headers(data, FALSE, httpversion, &req);
+    result = Fetch_add_custom_headers(data, FALSE, httpversion, &req);
 
   if (!result)
   {
     /* req_send takes ownership of the 'req' memory on success */
     result = http_req_complete(data, &req, httpversion, httpreq);
     if (!result)
-      result = Curl_req_send(data, &req, httpversion);
+      result = Fetch_req_send(data, &req, httpversion);
   }
-  Curl_dyn_free(&req);
+  Fetch_dyn_free(&req);
   if (result)
     goto fail;
 
@@ -3040,7 +3040,7 @@ static bool checkprefixmax(const char *prefix, const char *buffer, size_t len)
  * Returns TRUE if member of the list matches prefix of string
  */
 static statusline
-checkhttpprefix(struct Curl_easy *data,
+checkhttpprefix(struct Fetch_easy *data,
                 const char *s, size_t len)
 {
   struct fetch_slist *head = data->set.http200aliases;
@@ -3065,7 +3065,7 @@ checkhttpprefix(struct Curl_easy *data,
 
 #ifndef FETCH_DISABLE_RTSP
 static statusline
-checkrtspprefix(struct Curl_easy *data,
+checkrtspprefix(struct Fetch_easy *data,
                 const char *s, size_t len)
 {
   statusline result = STATUS_BAD;
@@ -3079,7 +3079,7 @@ checkrtspprefix(struct Curl_easy *data,
 #endif /* FETCH_DISABLE_RTSP */
 
 static statusline
-checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
+checkprotoprefix(struct Fetch_easy *data, struct connectdata *conn,
                  const char *s, size_t len)
 {
 #ifndef FETCH_DISABLE_RTSP
@@ -3107,12 +3107,12 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
 #define HD_IS_AND_SAYS(hd, hdlen, n, v)               \
   (HD_IS(hd, hdlen, n) &&                             \
    ((hdlen) > ((sizeof(n) - 1) + (sizeof(v) - 1))) && \
-   Curl_compareheader(hd, STRCONST(n), STRCONST(v)))
+   Fetch_compareheader(hd, STRCONST(n), STRCONST(v)))
 
 /*
  * http_header() parses a single response header.
  */
-static FETCHcode http_header(struct Curl_easy *data,
+static FETCHcode http_header(struct Fetch_easy *data,
                              const char *hd, size_t hdlen)
 {
   struct connectdata *conn = data->conn;
@@ -3126,7 +3126,7 @@ static FETCHcode http_header(struct Curl_easy *data,
   case 'A':
 #ifndef FETCH_DISABLE_ALTSVC
     v = (data->asi &&
-         (Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ||
+         (Fetch_conn_is_ssl(data->conn, FIRSTSOCKET) ||
 #ifdef DEBUGBUILD
           /* allow debug builds to circumvent the HTTPS restriction */
           getenv("FETCH_ALTSVC_HTTP")
@@ -3141,7 +3141,7 @@ static FETCHcode http_header(struct Curl_easy *data,
       /* the ALPN of the current request */
       enum alpnid id = (k->httpversion == 30) ? ALPN_h3 : (k->httpversion == 20) ? ALPN_h2
                                                                                  : ALPN_h1;
-      return Curl_altsvc_parse(data, data->asi, v, id, conn->host.name,
+      return Fetch_altsvc_parse(data, data->asi, v, id, conn->host.name,
                                fetchx_uitous((unsigned int)conn->remote_port));
     }
 #endif
@@ -3189,13 +3189,13 @@ static FETCHcode http_header(struct Curl_easy *data,
        * 2616). zlib cannot handle compress. However, errors are
        * handled further down when the response body is processed
        */
-      return Curl_build_unencoding_stack(data, v, FALSE);
+      return Fetch_build_unencoding_stack(data, v, FALSE);
     }
     /* check for Content-Type: header lines to get the MIME-type */
     v = HD_VAL(hd, hdlen, "Content-Type:");
     if (v)
     {
-      char *contenttype = Curl_copy_header_value(hd);
+      char *contenttype = Fetch_copy_header_value(hd);
       if (!contenttype)
         return FETCHE_OUT_OF_MEMORY;
       if (!*contenttype)
@@ -3203,7 +3203,7 @@ static FETCHcode http_header(struct Curl_easy *data,
         free(contenttype);
       else
       {
-        Curl_safefree(data->info.contenttype);
+        Fetch_safefree(data->info.contenttype);
         data->info.contenttype = contenttype;
       }
       return FETCHE_OK;
@@ -3274,7 +3274,7 @@ static FETCHcode http_header(struct Curl_easy *data,
             : NULL;
     if (v)
     {
-      k->timeofdoc = Curl_getdate_capped(v);
+      k->timeofdoc = Fetch_getdate_capped(v);
       if (data->set.get_filetime)
         data->info.filetime = k->timeofdoc;
       return FETCHE_OK;
@@ -3284,7 +3284,7 @@ static FETCHcode http_header(struct Curl_easy *data,
         !data->req.location)
     {
       /* this is the URL that the server advises us to use instead */
-      char *location = Curl_copy_header_value(hd);
+      char *location = Fetch_copy_header_value(hd);
       if (!location)
         return FETCHE_OUT_OF_MEMORY;
       if (!*location)
@@ -3346,10 +3346,10 @@ static FETCHcode http_header(struct Curl_easy *data,
 #endif
     if ((407 == k->httpcode) && HD_IS(hd, hdlen, "Proxy-authenticate:"))
     {
-      char *auth = Curl_copy_header_value(hd);
+      char *auth = Fetch_copy_header_value(hd);
       if (!auth)
         return FETCHE_OUT_OF_MEMORY;
-      result = Curl_http_input_auth(data, TRUE, auth);
+      result = Fetch_http_input_auth(data, TRUE, auth);
       free(auth);
       return result;
     }
@@ -3360,7 +3360,7 @@ static FETCHcode http_header(struct Curl_easy *data,
       struct auth *authp = &data->state.authhost;
       if (authp->picked == FETCHAUTH_NEGOTIATE)
       {
-        char *persistentauth = Curl_copy_header_value(hd);
+        char *persistentauth = Fetch_copy_header_value(hd);
         if (!persistentauth)
           return FETCHE_OUT_OF_MEMORY;
         negdata->noauthpersist = !!checkprefix("false", persistentauth);
@@ -3383,7 +3383,7 @@ static FETCHcode http_header(struct Curl_easy *data,
       (void)fetchx_strtoofft(v, NULL, 10, &retry_after);
       if (!retry_after)
       {
-        time_t date = Curl_getdate_capped(v);
+        time_t date = Fetch_getdate_capped(v);
         time_t current = time(NULL);
         if ((time_t)-1 != date && date > current)
         {
@@ -3416,18 +3416,18 @@ static FETCHcode http_header(struct Curl_easy *data,
           !strcmp(host, "127.0.0.1") ||
           !strcmp(host, "::1");
 
-      Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE,
+      Fetch_share_lock(data, FETCH_LOCK_DATA_COOKIE,
                       FETCH_LOCK_ACCESS_SINGLE);
-      Curl_cookie_add(data, data->cookies, TRUE, FALSE, v, host,
+      Fetch_cookie_add(data, data->cookies, TRUE, FALSE, v, host,
                       data->state.up.path, secure_context);
-      Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
+      Fetch_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
       return FETCHE_OK;
     }
 #endif
 #ifndef FETCH_DISABLE_HSTS
     /* If enabled, the header is incoming and this is over HTTPS */
     v = (data->hsts &&
-         (Curl_conn_is_ssl(conn, FIRSTSOCKET) ||
+         (Fetch_conn_is_ssl(conn, FIRSTSOCKET) ||
 #ifdef DEBUGBUILD
           /* allow debug builds to circumvent the HTTPS restriction */
           getenv("FETCH_HSTS_HTTP")
@@ -3440,13 +3440,13 @@ static FETCHcode http_header(struct Curl_easy *data,
     if (v)
     {
       FETCHcode check =
-          Curl_hsts_parse(data->hsts, conn->host.name, v);
+          Fetch_hsts_parse(data->hsts, conn->host.name, v);
       if (check)
         infof(data, "Illegal STS header skipped");
 #ifdef DEBUGBUILD
       else
         infof(data, "Parsed STS header fine (%zu entries)",
-              Curl_llist_count(&data->hsts->list));
+              Fetch_llist_count(&data->hsts->list));
 #endif
     }
 #endif
@@ -3472,7 +3472,7 @@ static FETCHcode http_header(struct Curl_easy *data,
     {
       /* One or more encodings. We check for chunked and/or a compression
          algorithm. */
-      result = Curl_build_unencoding_stack(data, v, TRUE);
+      result = Fetch_build_unencoding_stack(data, v, TRUE);
       if (result)
         return result;
       if (!k->chunk && data->set.http_transfer_encoding)
@@ -3496,10 +3496,10 @@ static FETCHcode http_header(struct Curl_easy *data,
   case 'W':
     if ((401 == k->httpcode) && HD_IS(hd, hdlen, "WWW-Authenticate:"))
     {
-      char *auth = Curl_copy_header_value(hd);
+      char *auth = Fetch_copy_header_value(hd);
       if (!auth)
         return FETCHE_OUT_OF_MEMORY;
-      result = Curl_http_input_auth(data, FALSE, auth);
+      result = Fetch_http_input_auth(data, FALSE, auth);
       free(auth);
       return result;
     }
@@ -3508,7 +3508,7 @@ static FETCHcode http_header(struct Curl_easy *data,
 
   if (conn->handler->protocol & FETCHPROTO_RTSP)
   {
-    result = Curl_rtsp_parseheader(data, hd);
+    result = Fetch_rtsp_parseheader(data, hd);
     if (result)
       return result;
   }
@@ -3519,7 +3519,7 @@ static FETCHcode http_header(struct Curl_easy *data,
  * Called after the first HTTP response line (the status line) has been
  * received and parsed.
  */
-static FETCHcode http_statusline(struct Curl_easy *data,
+static FETCHcode http_statusline(struct Fetch_easy *data,
                                  struct connectdata *conn)
 {
   struct SingleRequest *k = &data->req;
@@ -3619,7 +3619,7 @@ static FETCHcode http_statusline(struct Curl_easy *data,
    figured out here after all headers have been received but before the final
    call to the user's header callback, so that a valid content length can be
    retrieved by the user in the final call. */
-static FETCHcode http_size(struct Curl_easy *data)
+static FETCHcode http_size(struct Fetch_easy *data)
 {
   struct SingleRequest *k = &data->req;
   if (data->req.ignore_cl || k->chunk)
@@ -3637,13 +3637,13 @@ static FETCHcode http_size(struct Curl_easy *data)
     }
     if (k->ignorebody)
       infof(data, "setting size while ignoring");
-    Curl_pgrsSetDownloadSize(data, k->size);
+    Fetch_pgrsSetDownloadSize(data, k->size);
     k->maxdownload = k->size;
   }
   return FETCHE_OK;
 }
 
-static FETCHcode verify_header(struct Curl_easy *data,
+static FETCHcode verify_header(struct Fetch_easy *data,
                                const char *hd, size_t hdlen)
 {
   struct SingleRequest *k = &data->req;
@@ -3673,7 +3673,7 @@ static FETCHcode verify_header(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_bump_headersize(struct Curl_easy *data,
+FETCHcode Fetch_bump_headersize(struct Fetch_easy *data,
                                size_t delta,
                                bool connect_only)
 {
@@ -3703,7 +3703,7 @@ FETCHcode Curl_bump_headersize(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode http_write_header(struct Curl_easy *data,
+static FETCHcode http_write_header(struct Fetch_easy *data,
                                    const char *hd, size_t hdlen)
 {
   FETCHcode result;
@@ -3711,16 +3711,16 @@ static FETCHcode http_write_header(struct Curl_easy *data,
 
   /* now, only output this if the header AND body are requested:
    */
-  Curl_debug(data, FETCHINFO_HEADER_IN, (char *)hd, hdlen);
+  Fetch_debug(data, FETCHINFO_HEADER_IN, (char *)hd, hdlen);
 
   writetype = CLIENTWRITE_HEADER |
               ((data->req.httpcode / 100 == 1) ? CLIENTWRITE_1XX : 0);
 
-  result = Curl_client_write(data, writetype, hd, hdlen);
+  result = Fetch_client_write(data, writetype, hd, hdlen);
   if (result)
     return result;
 
-  result = Curl_bump_headersize(data, hdlen, FALSE);
+  result = Fetch_bump_headersize(data, hdlen, FALSE);
   if (result)
     return result;
 
@@ -3731,7 +3731,7 @@ static FETCHcode http_write_header(struct Curl_easy *data,
   return result;
 }
 
-static FETCHcode http_on_response(struct Curl_easy *data,
+static FETCHcode http_on_response(struct Fetch_easy *data,
                                   const char *last_hd, size_t last_hd_len,
                                   const char *buf, size_t blen,
                                   size_t *pconsumed)
@@ -3805,7 +3805,7 @@ static FETCHcode http_on_response(struct Curl_easy *data,
         k->httpversion_sent = 20; /* It's a HTTP/2 request now */
         /* Any remaining `buf` bytes are already HTTP/2 and passed to
          * be processed. */
-        result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+        result = Fetch_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
         if (result)
           goto out;
         *pconsumed += blen;
@@ -3815,7 +3815,7 @@ static FETCHcode http_on_response(struct Curl_easy *data,
       {
         /* verify the response. Any passed `buf` bytes are already in
          * WebSockets format and taken in by the protocol handler. */
-        result = Curl_ws_accept(data, buf, blen);
+        result = Fetch_ws_accept(data, buf, blen);
         if (result)
           goto out;
         *pconsumed += blen; /* ws accept handled the data */
@@ -3850,7 +3850,7 @@ static FETCHcode http_on_response(struct Curl_easy *data,
     /* A requested upgrade was denied, poke the multi handle to possibly
        allow a pending pipewait to continue */
     data->conn->bits.asks_multiplex = FALSE;
-    Curl_multi_connchanged(data->multi);
+    Fetch_multi_connchanged(data->multi);
   }
 
   if ((k->size == -1) && !k->chunk && !conn->bits.close &&
@@ -3922,17 +3922,17 @@ static FETCHcode http_on_response(struct Curl_easy *data,
     goto out;
   }
 
-  /* Curl_http_auth_act() checks what authentication methods
+  /* Fetch_http_auth_act() checks what authentication methods
    * that are available and decides which one (if any) to
    * use. It will set 'newurl' if an auth method was picked. */
-  result = Curl_http_auth_act(data);
+  result = Fetch_http_auth_act(data);
   if (result)
     goto out;
 
   if (k->httpcode >= 300)
   {
     if ((!data->req.authneg) && !conn->bits.close &&
-        !Curl_creader_will_rewind(data))
+        !Fetch_creader_will_rewind(data))
     {
       /*
        * General treatment of errors when about to send data. Including :
@@ -3955,7 +3955,7 @@ static FETCHcode http_on_response(struct Curl_easy *data,
          * request body has been sent we stop sending and mark the
          * connection for closure after we have read the entire response.
          */
-        if (!Curl_req_done_sending(data))
+        if (!Fetch_req_done_sending(data))
         {
           if ((k->httpcode == 417) && http_exp100_is_selected(data))
           {
@@ -3977,7 +3977,7 @@ static FETCHcode http_on_response(struct Curl_easy *data,
             data->state.disableexpect = TRUE;
             DEBUGASSERT(!data->req.newurl);
             data->req.newurl = strdup(data->state.url);
-            Curl_req_abort_sending(data);
+            Fetch_req_abort_sending(data);
           }
           else if (data->set.http_keep_sending_on_error)
           {
@@ -3988,7 +3988,7 @@ static FETCHcode http_on_response(struct Curl_easy *data,
           {
             infof(data, "HTTP error before end of send, stop sending");
             streamclose(conn, "Stop sending data before everything sent");
-            result = Curl_req_abort_sending(data);
+            result = Fetch_req_abort_sending(data);
             if (result)
               goto out;
           }
@@ -4000,7 +4000,7 @@ static FETCHcode http_on_response(struct Curl_easy *data,
       }
     }
 
-    if (Curl_creader_will_rewind(data) && !Curl_req_done_sending(data))
+    if (Fetch_creader_will_rewind(data) && !Fetch_req_done_sending(data))
     {
       /* We rewind before next send, continue sending now */
       infof(data, "Keep sending data to get tossed away");
@@ -4042,7 +4042,7 @@ out:
   return result;
 }
 
-static FETCHcode http_rw_hd(struct Curl_easy *data,
+static FETCHcode http_rw_hd(struct Fetch_easy *data,
                             const char *hd, size_t hdlen,
                             const char *buf_remain, size_t blen,
                             size_t *pconsumed)
@@ -4058,8 +4058,8 @@ static FETCHcode http_rw_hd(struct Curl_easy *data,
     struct dynbuf last_header;
     size_t consumed;
 
-    Curl_dyn_init(&last_header, hdlen + 1);
-    result = Curl_dyn_addn(&last_header, hd, hdlen);
+    Fetch_dyn_init(&last_header, hdlen + 1);
+    result = Fetch_dyn_addn(&last_header, hd, hdlen);
     if (result)
       return result;
 
@@ -4067,12 +4067,12 @@ static FETCHcode http_rw_hd(struct Curl_easy *data,
     /* Caveat: we clear anything in the header brigade, because a
      * response might switch HTTP version which may call use recursively.
      * Not nice, but that is currently the way of things. */
-    Curl_dyn_reset(&data->state.headerb);
-    result = http_on_response(data, Curl_dyn_ptr(&last_header),
-                              Curl_dyn_len(&last_header),
+    Fetch_dyn_reset(&data->state.headerb);
+    result = http_on_response(data, Fetch_dyn_ptr(&last_header),
+                              Fetch_dyn_len(&last_header),
                               buf_remain, blen, &consumed);
     *pconsumed += consumed;
-    Curl_dyn_free(&last_header);
+    Fetch_dyn_free(&last_header);
     return result;
   }
 
@@ -4226,15 +4226,15 @@ static FETCHcode http_rw_hd(struct Curl_easy *data,
   /*
    * Taken in one (more) header. Write it to the client.
    */
-  Curl_debug(data, FETCHINFO_HEADER_IN, (char *)hd, hdlen);
+  Fetch_debug(data, FETCHINFO_HEADER_IN, (char *)hd, hdlen);
 
   if (k->httpcode / 100 == 1)
     writetype |= CLIENTWRITE_1XX;
-  result = Curl_client_write(data, writetype, hd, hdlen);
+  result = Fetch_client_write(data, writetype, hd, hdlen);
   if (result)
     return result;
 
-  result = Curl_bump_headersize(data, hdlen, FALSE);
+  result = Fetch_bump_headersize(data, hdlen, FALSE);
   if (result)
     return result;
 
@@ -4244,7 +4244,7 @@ static FETCHcode http_rw_hd(struct Curl_easy *data,
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
-static FETCHcode http_parse_headers(struct Curl_easy *data,
+static FETCHcode http_parse_headers(struct Fetch_easy *data,
                                     const char *buf, size_t blen,
                                     size_t *pconsumed)
 {
@@ -4265,7 +4265,7 @@ static FETCHcode http_parse_headers(struct Curl_easy *data,
     {
       /* Not a complete header line within buffer, append the data to
          the end of the headerbuff. */
-      result = Curl_dyn_addn(&data->state.headerb, buf, blen);
+      result = Fetch_dyn_addn(&data->state.headerb, buf, blen);
       if (result)
         return result;
       *pconsumed += blen;
@@ -4275,8 +4275,8 @@ static FETCHcode http_parse_headers(struct Curl_easy *data,
         /* check if this looks like a protocol header */
         statusline st =
             checkprotoprefix(data, conn,
-                             Curl_dyn_ptr(&data->state.headerb),
-                             Curl_dyn_len(&data->state.headerb));
+                             Fetch_dyn_ptr(&data->state.headerb),
+                             Fetch_dyn_len(&data->state.headerb));
 
         if (st == STATUS_BAD)
         {
@@ -4303,7 +4303,7 @@ static FETCHcode http_parse_headers(struct Curl_easy *data,
 
     /* decrease the size of the remaining (supposed) header line */
     consumed = (end_ptr - buf) + 1;
-    result = Curl_dyn_addn(&data->state.headerb, buf, consumed);
+    result = Fetch_dyn_addn(&data->state.headerb, buf, consumed);
     if (result)
       return result;
     blen -= consumed;
@@ -4318,8 +4318,8 @@ static FETCHcode http_parse_headers(struct Curl_easy *data,
     {
       /* the first read header */
       statusline st = checkprotoprefix(data, conn,
-                                       Curl_dyn_ptr(&data->state.headerb),
-                                       Curl_dyn_len(&data->state.headerb));
+                                       Fetch_dyn_ptr(&data->state.headerb),
+                                       Fetch_dyn_len(&data->state.headerb));
       if (st == STATUS_BAD)
       {
         streamclose(conn, "bad HTTP: No end-of-message indicator");
@@ -4341,13 +4341,13 @@ static FETCHcode http_parse_headers(struct Curl_easy *data,
       }
     }
 
-    result = http_rw_hd(data, Curl_dyn_ptr(&data->state.headerb),
-                        Curl_dyn_len(&data->state.headerb),
+    result = http_rw_hd(data, Fetch_dyn_ptr(&data->state.headerb),
+                        Fetch_dyn_len(&data->state.headerb),
                         buf, blen, &consumed);
     /* We are done with this line. We reset because response
      * processing might switch to HTTP/2 and that might call us
      * directly again. */
-    Curl_dyn_reset(&data->state.headerb);
+    Fetch_dyn_reset(&data->state.headerb);
     if (consumed)
     {
       blen -= consumed;
@@ -4364,12 +4364,12 @@ static FETCHcode http_parse_headers(struct Curl_easy *data,
 out:
   if (!k->header && !leftover_body)
   {
-    Curl_dyn_free(&data->state.headerb);
+    Fetch_dyn_free(&data->state.headerb);
   }
   return FETCHE_OK;
 }
 
-FETCHcode Curl_http_write_resp_hd(struct Curl_easy *data,
+FETCHcode Fetch_http_write_resp_hd(struct Fetch_easy *data,
                                   const char *hd, size_t hdlen,
                                   bool is_eos)
 {
@@ -4380,7 +4380,7 @@ FETCHcode Curl_http_write_resp_hd(struct Curl_easy *data,
   result = http_rw_hd(data, hd, hdlen, &tmp, 0, &consumed);
   if (!result && is_eos)
   {
-    result = Curl_client_write(data, (CLIENTWRITE_BODY | CLIENTWRITE_EOS),
+    result = Fetch_client_write(data, (CLIENTWRITE_BODY | CLIENTWRITE_EOS),
                                &tmp, 0);
   }
   return result;
@@ -4390,7 +4390,7 @@ FETCHcode Curl_http_write_resp_hd(struct Curl_easy *data,
  * HTTP protocol `write_resp` implementation. Will parse headers
  * when not done yet and otherwise return without consuming data.
  */
-FETCHcode Curl_http_write_resp_hds(struct Curl_easy *data,
+FETCHcode Fetch_http_write_resp_hds(struct Fetch_easy *data,
                                    const char *buf, size_t blen,
                                    size_t *pconsumed)
 {
@@ -4406,22 +4406,22 @@ FETCHcode Curl_http_write_resp_hds(struct Curl_easy *data,
     result = http_parse_headers(data, buf, blen, pconsumed);
     if (!result && !data->req.header)
     {
-      if (!data->req.no_body && Curl_dyn_len(&data->state.headerb))
+      if (!data->req.no_body && Fetch_dyn_len(&data->state.headerb))
       {
         /* leftover from parsing something that turned out not
          * to be a header, only happens if we allow for
          * HTTP/0.9 like responses */
-        result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                   Curl_dyn_ptr(&data->state.headerb),
-                                   Curl_dyn_len(&data->state.headerb));
+        result = Fetch_client_write(data, CLIENTWRITE_BODY,
+                                   Fetch_dyn_ptr(&data->state.headerb),
+                                   Fetch_dyn_len(&data->state.headerb));
       }
-      Curl_dyn_free(&data->state.headerb);
+      Fetch_dyn_free(&data->state.headerb);
     }
     return result;
   }
 }
 
-FETCHcode Curl_http_write_resp(struct Curl_easy *data,
+FETCHcode Fetch_http_write_resp(struct Fetch_easy *data,
                                const char *buf, size_t blen,
                                bool is_eos)
 {
@@ -4429,7 +4429,7 @@ FETCHcode Curl_http_write_resp(struct Curl_easy *data,
   size_t consumed;
   int flags;
 
-  result = Curl_http_write_resp_hds(data, buf, blen, &consumed);
+  result = Fetch_http_write_resp_hds(data, buf, blen, &consumed);
   if (result || data->req.done)
     goto out;
 
@@ -4445,14 +4445,14 @@ FETCHcode Curl_http_write_resp(struct Curl_easy *data,
     flags = CLIENTWRITE_BODY;
     if (is_eos)
       flags |= CLIENTWRITE_EOS;
-    result = Curl_client_write(data, flags, (char *)buf, blen);
+    result = Fetch_client_write(data, flags, (char *)buf, blen);
   }
 out:
   return result;
 }
 
 /* Decode HTTP status code string. */
-FETCHcode Curl_http_decode_status(int *pstatus, const char *s, size_t len)
+FETCHcode Fetch_http_decode_status(int *pstatus, const char *s, size_t len)
 {
   FETCHcode result = FETCHE_BAD_FUNCTION_ARGUMENT;
   int status = 0;
@@ -4477,7 +4477,7 @@ out:
   return result;
 }
 
-FETCHcode Curl_http_req_make(struct httpreq **preq,
+FETCHcode Fetch_http_req_make(struct httpreq **preq,
                              const char *method, size_t m_len,
                              const char *scheme, size_t s_len,
                              const char *authority, size_t a_len,
@@ -4496,29 +4496,29 @@ FETCHcode Curl_http_req_make(struct httpreq **preq,
   memcpy(req->method, method, m_len);
   if (scheme)
   {
-    req->scheme = Curl_memdup0(scheme, s_len);
+    req->scheme = Fetch_memdup0(scheme, s_len);
     if (!req->scheme)
       goto out;
   }
   if (authority)
   {
-    req->authority = Curl_memdup0(authority, a_len);
+    req->authority = Fetch_memdup0(authority, a_len);
     if (!req->authority)
       goto out;
   }
   if (path)
   {
-    req->path = Curl_memdup0(path, p_len);
+    req->path = Fetch_memdup0(path, p_len);
     if (!req->path)
       goto out;
   }
-  Curl_dynhds_init(&req->headers, 0, DYN_HTTP_REQUEST);
-  Curl_dynhds_init(&req->trailers, 0, DYN_HTTP_REQUEST);
+  Fetch_dynhds_init(&req->headers, 0, DYN_HTTP_REQUEST);
+  Fetch_dynhds_init(&req->trailers, 0, DYN_HTTP_REQUEST);
   result = FETCHE_OK;
 
 out:
   if (result && req)
-    Curl_http_req_free(req);
+    Fetch_http_req_free(req);
   *preq = result ? NULL : req;
   return result;
 }
@@ -4531,7 +4531,7 @@ static FETCHcode req_assign_url_authority(struct httpreq *req, FETCHU *url)
   FETCHcode result = FETCHE_URL_MALFORMAT;
 
   user = pass = host = port = NULL;
-  Curl_dyn_init(&buf, DYN_HTTP_REQUEST);
+  Fetch_dyn_init(&buf, DYN_HTTP_REQUEST);
 
   uc = fetch_url_get(url, FETCHUPART_HOST, &host, 0);
   if (uc && uc != FETCHUE_NO_HOST)
@@ -4558,29 +4558,29 @@ static FETCHcode req_assign_url_authority(struct httpreq *req, FETCHU *url)
 
   if (user)
   {
-    result = Curl_dyn_add(&buf, user);
+    result = Fetch_dyn_add(&buf, user);
     if (result)
       goto out;
     if (pass)
     {
-      result = Curl_dyn_addf(&buf, ":%s", pass);
+      result = Fetch_dyn_addf(&buf, ":%s", pass);
       if (result)
         goto out;
     }
-    result = Curl_dyn_add(&buf, "@");
+    result = Fetch_dyn_add(&buf, "@");
     if (result)
       goto out;
   }
-  result = Curl_dyn_add(&buf, host);
+  result = Fetch_dyn_add(&buf, host);
   if (result)
     goto out;
   if (port)
   {
-    result = Curl_dyn_addf(&buf, ":%s", port);
+    result = Fetch_dyn_addf(&buf, ":%s", port);
     if (result)
       goto out;
   }
-  req->authority = strdup(Curl_dyn_ptr(&buf));
+  req->authority = strdup(Fetch_dyn_ptr(&buf));
   if (!req->authority)
     goto out;
   result = FETCHE_OK;
@@ -4590,7 +4590,7 @@ out:
   free(pass);
   free(host);
   free(port);
-  Curl_dyn_free(&buf);
+  Fetch_dyn_free(&buf);
   return result;
 }
 
@@ -4602,7 +4602,7 @@ static FETCHcode req_assign_url_path(struct httpreq *req, FETCHU *url)
   FETCHcode result = FETCHE_URL_MALFORMAT;
 
   path = query = NULL;
-  Curl_dyn_init(&buf, DYN_HTTP_REQUEST);
+  Fetch_dyn_init(&buf, DYN_HTTP_REQUEST);
 
   uc = fetch_url_get(url, FETCHUPART_PATH, &path, FETCHU_PATH_AS_IS);
   if (uc)
@@ -4624,17 +4624,17 @@ static FETCHcode req_assign_url_path(struct httpreq *req, FETCHU *url)
   {
     if (path)
     {
-      result = Curl_dyn_add(&buf, path);
+      result = Fetch_dyn_add(&buf, path);
       if (result)
         goto out;
     }
     if (query)
     {
-      result = Curl_dyn_addf(&buf, "?%s", query);
+      result = Fetch_dyn_addf(&buf, "?%s", query);
       if (result)
         goto out;
     }
-    req->path = strdup(Curl_dyn_ptr(&buf));
+    req->path = strdup(Fetch_dyn_ptr(&buf));
     if (!req->path)
       goto out;
   }
@@ -4643,11 +4643,11 @@ static FETCHcode req_assign_url_path(struct httpreq *req, FETCHU *url)
 out:
   free(path);
   free(query);
-  Curl_dyn_free(&buf);
+  Fetch_dyn_free(&buf);
   return result;
 }
 
-FETCHcode Curl_http_req_make2(struct httpreq **preq,
+FETCHcode Fetch_http_req_make2(struct httpreq **preq,
                               const char *method, size_t m_len,
                               FETCHU *url, const char *scheme_default)
 {
@@ -4681,26 +4681,26 @@ FETCHcode Curl_http_req_make2(struct httpreq **preq,
   if (result)
     goto out;
 
-  Curl_dynhds_init(&req->headers, 0, DYN_HTTP_REQUEST);
-  Curl_dynhds_init(&req->trailers, 0, DYN_HTTP_REQUEST);
+  Fetch_dynhds_init(&req->headers, 0, DYN_HTTP_REQUEST);
+  Fetch_dynhds_init(&req->trailers, 0, DYN_HTTP_REQUEST);
   result = FETCHE_OK;
 
 out:
   if (result && req)
-    Curl_http_req_free(req);
+    Fetch_http_req_free(req);
   *preq = result ? NULL : req;
   return result;
 }
 
-void Curl_http_req_free(struct httpreq *req)
+void Fetch_http_req_free(struct httpreq *req)
 {
   if (req)
   {
     free(req->scheme);
     free(req->authority);
     free(req->path);
-    Curl_dynhds_free(&req->headers);
-    Curl_dynhds_free(&req->trailers);
+    Fetch_dynhds_free(&req->headers);
+    Fetch_dynhds_free(&req->trailers);
     free(req);
   }
 }
@@ -4736,8 +4736,8 @@ static bool h2_non_field(const char *name, size_t namelen)
   return FALSE;
 }
 
-FETCHcode Curl_http_req_to_h2(struct dynhds *h2_headers,
-                              struct httpreq *req, struct Curl_easy *data)
+FETCHcode Fetch_http_req_to_h2(struct dynhds *h2_headers,
+                              struct httpreq *req, struct Fetch_easy *data)
 {
   const char *scheme = NULL, *authority = NULL;
   struct dynhds_entry *e;
@@ -4753,7 +4753,7 @@ FETCHcode Curl_http_req_to_h2(struct dynhds *h2_headers,
   }
   else if (strcmp("CONNECT", req->method))
   {
-    scheme = Curl_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
+    scheme = Fetch_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
     if (scheme)
     {
       scheme += sizeof(HTTP_PSEUDO_SCHEME);
@@ -4763,7 +4763,7 @@ FETCHcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     }
     else
     {
-      scheme = Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ? "https" : "http";
+      scheme = Fetch_conn_is_ssl(data->conn, FIRSTSOCKET) ? "https" : "http";
     }
   }
 
@@ -4773,36 +4773,36 @@ FETCHcode Curl_http_req_to_h2(struct dynhds *h2_headers,
   }
   else
   {
-    e = Curl_dynhds_get(&req->headers, STRCONST("Host"));
+    e = Fetch_dynhds_get(&req->headers, STRCONST("Host"));
     if (e)
       authority = e->value;
   }
 
-  Curl_dynhds_reset(h2_headers);
-  Curl_dynhds_set_opts(h2_headers, DYNHDS_OPT_LOWERCASE);
-  result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_METHOD),
+  Fetch_dynhds_reset(h2_headers);
+  Fetch_dynhds_set_opts(h2_headers, DYNHDS_OPT_LOWERCASE);
+  result = Fetch_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_METHOD),
                            req->method, strlen(req->method));
   if (!result && scheme)
   {
-    result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_SCHEME),
+    result = Fetch_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_SCHEME),
                              scheme, strlen(scheme));
   }
   if (!result && authority)
   {
-    result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_AUTHORITY),
+    result = Fetch_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_AUTHORITY),
                              authority, strlen(authority));
   }
   if (!result && req->path)
   {
-    result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_PATH),
+    result = Fetch_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_PATH),
                              req->path, strlen(req->path));
   }
-  for (i = 0; !result && i < Curl_dynhds_count(&req->headers); ++i)
+  for (i = 0; !result && i < Fetch_dynhds_count(&req->headers); ++i)
   {
-    e = Curl_dynhds_getn(&req->headers, i);
+    e = Fetch_dynhds_getn(&req->headers, i);
     if (!h2_non_field(e->name, e->namelen))
     {
-      result = Curl_dynhds_add(h2_headers, e->name, e->namelen,
+      result = Fetch_dynhds_add(h2_headers, e->name, e->namelen,
                                e->value, e->valuelen);
     }
   }
@@ -4810,7 +4810,7 @@ FETCHcode Curl_http_req_to_h2(struct dynhds *h2_headers,
   return result;
 }
 
-FETCHcode Curl_http_resp_make(struct http_resp **presp,
+FETCHcode Fetch_http_resp_make(struct http_resp **presp,
                               int status,
                               const char *description)
 {
@@ -4828,41 +4828,41 @@ FETCHcode Curl_http_resp_make(struct http_resp **presp,
     if (!resp->description)
       goto out;
   }
-  Curl_dynhds_init(&resp->headers, 0, DYN_HTTP_REQUEST);
-  Curl_dynhds_init(&resp->trailers, 0, DYN_HTTP_REQUEST);
+  Fetch_dynhds_init(&resp->headers, 0, DYN_HTTP_REQUEST);
+  Fetch_dynhds_init(&resp->trailers, 0, DYN_HTTP_REQUEST);
   result = FETCHE_OK;
 
 out:
   if (result && resp)
-    Curl_http_resp_free(resp);
+    Fetch_http_resp_free(resp);
   *presp = result ? NULL : resp;
   return result;
 }
 
-void Curl_http_resp_free(struct http_resp *resp)
+void Fetch_http_resp_free(struct http_resp *resp)
 {
   if (resp)
   {
     free(resp->description);
-    Curl_dynhds_free(&resp->headers);
-    Curl_dynhds_free(&resp->trailers);
+    Fetch_dynhds_free(&resp->headers);
+    Fetch_dynhds_free(&resp->trailers);
     if (resp->prev)
-      Curl_http_resp_free(resp->prev);
+      Fetch_http_resp_free(resp->prev);
     free(resp);
   }
 }
 
 struct cr_exp100_ctx
 {
-  struct Curl_creader super;
+  struct Fetch_creader super;
   struct fetchtime start; /* time started waiting */
   enum expect100 state;
 };
 
 /* Expect: 100-continue client reader, blocking uploads */
 
-static void http_exp100_continue(struct Curl_easy *data,
-                                 struct Curl_creader *reader)
+static void http_exp100_continue(struct Fetch_easy *data,
+                                 struct Fetch_creader *reader)
 {
   struct cr_exp100_ctx *ctx = reader->ctx;
   if (ctx->state > EXP100_SEND_DATA)
@@ -4870,12 +4870,12 @@ static void http_exp100_continue(struct Curl_easy *data,
     ctx->state = EXP100_SEND_DATA;
     data->req.keepon |= KEEP_SEND;
     data->req.keepon &= ~KEEP_SEND_TIMED;
-    Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+    Fetch_expire_done(data, EXPIRE_100_TIMEOUT);
   }
 }
 
-static FETCHcode cr_exp100_read(struct Curl_easy *data,
-                                struct Curl_creader *reader,
+static FETCHcode cr_exp100_read(struct Fetch_easy *data,
+                                struct Fetch_creader *reader,
                                 char *buf, size_t blen,
                                 size_t *nread, bool *eos)
 {
@@ -4885,7 +4885,7 @@ static FETCHcode cr_exp100_read(struct Curl_easy *data,
   switch (ctx->state)
   {
   case EXP100_SENDING_REQUEST:
-    if (!Curl_req_sendbuf_empty(data))
+    if (!Fetch_req_sendbuf_empty(data))
     {
       /* The initial request data has not been fully sent yet. Do
        * not start the timer yet. */
@@ -4900,8 +4900,8 @@ static FETCHcode cr_exp100_read(struct Curl_easy *data,
                        "timeout %ldms",
                  data->set.expect_100_timeout));
     ctx->state = EXP100_AWAITING_CONTINUE;
-    ctx->start = Curl_now();
-    Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
+    ctx->start = Fetch_now();
+    Fetch_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
     data->req.keepon &= ~KEEP_SEND;
     data->req.keepon |= KEEP_SEND_TIMED;
     *nread = 0;
@@ -4913,7 +4913,7 @@ static FETCHcode cr_exp100_read(struct Curl_easy *data,
     *eos = FALSE;
     return FETCHE_READ_ERROR;
   case EXP100_AWAITING_CONTINUE:
-    ms = Curl_timediff(Curl_now(), ctx->start);
+    ms = Fetch_timediff(Fetch_now(), ctx->start);
     if (ms < data->set.expect_100_timeout)
     {
       DEBUGF(infof(data, "cr_exp100_read, AWAITING_CONTINUE, not expired"));
@@ -4929,42 +4929,42 @@ static FETCHcode cr_exp100_read(struct Curl_easy *data,
     FALLTHROUGH();
   default:
     DEBUGF(infof(data, "cr_exp100_read, pass through"));
-    return Curl_creader_read(data, reader->next, buf, blen, nread, eos);
+    return Fetch_creader_read(data, reader->next, buf, blen, nread, eos);
   }
 }
 
-static void cr_exp100_done(struct Curl_easy *data,
-                           struct Curl_creader *reader, int premature)
+static void cr_exp100_done(struct Fetch_easy *data,
+                           struct Fetch_creader *reader, int premature)
 {
   struct cr_exp100_ctx *ctx = reader->ctx;
   ctx->state = premature ? EXP100_FAILED : EXP100_SEND_DATA;
   data->req.keepon &= ~KEEP_SEND_TIMED;
-  Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+  Fetch_expire_done(data, EXPIRE_100_TIMEOUT);
 }
 
-static const struct Curl_crtype cr_exp100 = {
+static const struct Fetch_crtype cr_exp100 = {
     "cr-exp100",
-    Curl_creader_def_init,
+    Fetch_creader_def_init,
     cr_exp100_read,
-    Curl_creader_def_close,
-    Curl_creader_def_needs_rewind,
-    Curl_creader_def_total_length,
-    Curl_creader_def_resume_from,
-    Curl_creader_def_rewind,
-    Curl_creader_def_unpause,
-    Curl_creader_def_is_paused,
+    Fetch_creader_def_close,
+    Fetch_creader_def_needs_rewind,
+    Fetch_creader_def_total_length,
+    Fetch_creader_def_resume_from,
+    Fetch_creader_def_rewind,
+    Fetch_creader_def_unpause,
+    Fetch_creader_def_is_paused,
     cr_exp100_done,
     sizeof(struct cr_exp100_ctx)};
 
-static FETCHcode http_exp100_add_reader(struct Curl_easy *data)
+static FETCHcode http_exp100_add_reader(struct Fetch_easy *data)
 {
-  struct Curl_creader *reader = NULL;
+  struct Fetch_creader *reader = NULL;
   FETCHcode result;
 
-  result = Curl_creader_create(&reader, data, &cr_exp100,
+  result = Fetch_creader_create(&reader, data, &cr_exp100,
                                FETCH_CR_PROTOCOL);
   if (!result)
-    result = Curl_creader_add(data, reader);
+    result = Fetch_creader_add(data, reader);
   if (!result)
   {
     struct cr_exp100_ctx *ctx = reader->ctx;
@@ -4972,20 +4972,20 @@ static FETCHcode http_exp100_add_reader(struct Curl_easy *data)
   }
 
   if (result && reader)
-    Curl_creader_free(data, reader);
+    Fetch_creader_free(data, reader);
   return result;
 }
 
-static void http_exp100_got100(struct Curl_easy *data)
+static void http_exp100_got100(struct Fetch_easy *data)
 {
-  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  struct Fetch_creader *r = Fetch_creader_get_by_type(data, &cr_exp100);
   if (r)
     http_exp100_continue(data, r);
 }
 
-static bool http_exp100_is_waiting(struct Curl_easy *data)
+static bool http_exp100_is_waiting(struct Fetch_easy *data)
 {
-  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  struct Fetch_creader *r = Fetch_creader_get_by_type(data, &cr_exp100);
   if (r)
   {
     struct cr_exp100_ctx *ctx = r->ctx;
@@ -4994,16 +4994,16 @@ static bool http_exp100_is_waiting(struct Curl_easy *data)
   return FALSE;
 }
 
-static void http_exp100_send_anyway(struct Curl_easy *data)
+static void http_exp100_send_anyway(struct Fetch_easy *data)
 {
-  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  struct Fetch_creader *r = Fetch_creader_get_by_type(data, &cr_exp100);
   if (r)
     http_exp100_continue(data, r);
 }
 
-static bool http_exp100_is_selected(struct Curl_easy *data)
+static bool http_exp100_is_selected(struct Fetch_easy *data)
 {
-  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  struct Fetch_creader *r = Fetch_creader_get_by_type(data, &cr_exp100);
   return !!r;
 }
 

@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-Curl_pgrsTime
+Fetch_pgrsTime
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
 <name>
-Curl_pgrsTime unit tests
+Fetch_pgrsTime unit tests
 </name>
 </client>
 </testcase>

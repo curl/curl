@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,16 +34,16 @@
  *  zero          : when i is equal   to   j
  *  positive when : when i is larger  than j
  */
-#define compare(i, j) Curl_timediff_us(i, j)
+#define compare(i, j) Fetch_timediff_us(i, j)
 
 /*
  * Splay using the key i (which may or may not be in the tree.) The starting
  * root is t.
  */
-struct Curl_tree *Curl_splay(struct fetchtime i,
-                             struct Curl_tree *t)
+struct Fetch_tree *Fetch_splay(struct fetchtime i,
+                             struct Fetch_tree *t)
 {
-  struct Curl_tree N, *l, *r, *y;
+  struct Fetch_tree N, *l, *r, *y;
 
   if (!t)
     return NULL;
@@ -104,9 +104,9 @@ struct Curl_tree *Curl_splay(struct fetchtime i,
  *
  * @unittest: 1309
  */
-struct Curl_tree *Curl_splayinsert(struct fetchtime i,
-                                   struct Curl_tree *t,
-                                   struct Curl_tree *node)
+struct Fetch_tree *Fetch_splayinsert(struct fetchtime i,
+                                   struct Fetch_tree *t,
+                                   struct Fetch_tree *node)
 {
   static const struct fetchtime KEY_NOTUSED = {
       ~0, -1}; /* will *NEVER* appear */
@@ -115,7 +115,7 @@ struct Curl_tree *Curl_splayinsert(struct fetchtime i,
 
   if (t)
   {
-    t = Curl_splay(i, t);
+    t = Fetch_splay(i, t);
     DEBUGASSERT(t);
     if (compare(i, t->key) == 0)
     {
@@ -161,12 +161,12 @@ struct Curl_tree *Curl_splayinsert(struct fetchtime i,
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
    resulting tree. best-fit means the smallest node if it is not larger than
    the key */
-struct Curl_tree *Curl_splaygetbest(struct fetchtime i,
-                                    struct Curl_tree *t,
-                                    struct Curl_tree **removed)
+struct Fetch_tree *Fetch_splaygetbest(struct fetchtime i,
+                                    struct Fetch_tree *t,
+                                    struct Fetch_tree **removed)
 {
   static const struct fetchtime tv_zero = {0, 0};
-  struct Curl_tree *x;
+  struct Fetch_tree *x;
 
   if (!t)
   {
@@ -175,7 +175,7 @@ struct Curl_tree *Curl_splaygetbest(struct fetchtime i,
   }
 
   /* find smallest */
-  t = Curl_splay(tv_zero, t);
+  t = Fetch_splay(tv_zero, t);
   DEBUGASSERT(t);
   if (compare(i, t->key) < 0)
   {
@@ -220,13 +220,13 @@ struct Curl_tree *Curl_splaygetbest(struct fetchtime i,
  *
  * @unittest: 1309
  */
-int Curl_splayremove(struct Curl_tree *t,
-                     struct Curl_tree *removenode,
-                     struct Curl_tree **newroot)
+int Fetch_splayremove(struct Fetch_tree *t,
+                     struct Fetch_tree *removenode,
+                     struct Fetch_tree **newroot)
 {
   static const struct fetchtime KEY_NOTUSED = {
       ~0, -1}; /* will *NEVER* appear */
-  struct Curl_tree *x;
+  struct Fetch_tree *x;
 
   if (!t)
     return 1;
@@ -251,7 +251,7 @@ int Curl_splayremove(struct Curl_tree *t,
     return 0;
   }
 
-  t = Curl_splay(removenode->key, t);
+  t = Fetch_splay(removenode->key, t);
   DEBUGASSERT(t);
 
   /* First make sure that we got the same root node as the one we want
@@ -285,7 +285,7 @@ int Curl_splayremove(struct Curl_tree *t,
       x = t->larger;
     else
     {
-      x = Curl_splay(removenode->key, t->smaller);
+      x = Fetch_splay(removenode->key, t->smaller);
       DEBUGASSERT(x);
       x->larger = t->larger;
     }
@@ -297,13 +297,13 @@ int Curl_splayremove(struct Curl_tree *t,
 }
 
 /* set and get the custom payload for this tree node */
-void Curl_splayset(struct Curl_tree *node, void *payload)
+void Fetch_splayset(struct Fetch_tree *node, void *payload)
 {
   DEBUGASSERT(node);
   node->ptr = payload;
 }
 
-void *Curl_splayget(struct Curl_tree *node)
+void *Fetch_splayget(struct Fetch_tree *node)
 {
   DEBUGASSERT(node);
   return node->ptr;

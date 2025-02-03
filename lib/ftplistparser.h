@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,16 +28,16 @@
 #ifndef FETCH_DISABLE_FTP
 
 /* WRITEFUNCTION callback for parsing LIST responses */
-size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
+size_t Fetch_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                           void *connptr);
 
 struct ftp_parselist_data; /* defined inside ftplibparser.c */
 
-FETCHcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data);
+FETCHcode Fetch_ftp_parselist_geterror(struct ftp_parselist_data *pl_data);
 
-struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void);
+struct ftp_parselist_data *Fetch_ftp_parselist_data_alloc(void);
 
-void Curl_ftp_parselist_data_free(struct ftp_parselist_data **pl_data);
+void Fetch_ftp_parselist_data_free(struct ftp_parselist_data **pl_data);
 
 /* list of wildcard process states */
 typedef enum
@@ -61,19 +61,19 @@ struct WildcardData
 {
   char *path;                 /* path to the directory, where we trying wildcard-match */
   char *pattern;              /* wildcard pattern */
-  struct Curl_llist filelist; /* llist with struct Curl_fileinfo */
+  struct Fetch_llist filelist; /* llist with struct Fetch_fileinfo */
   struct ftp_wc *ftpwc;       /* pointer to FTP wildcard data */
   wildcard_dtor dtor;
   unsigned char state; /* wildcard_states */
 };
 
-FETCHcode Curl_wildcard_init(struct WildcardData *wc);
-void Curl_wildcard_dtor(struct WildcardData **wcp);
+FETCHcode Fetch_wildcard_init(struct WildcardData *wc);
+void Fetch_wildcard_dtor(struct WildcardData **wcp);
 
-struct Curl_easy;
+struct Fetch_easy;
 
 #else
 /* FTP is disabled */
-#define Curl_wildcard_dtor(x)
+#define Fetch_wildcard_dtor(x)
 #endif /* FETCH_DISABLE_FTP */
 #endif /* HEADER_FETCH_FTPLISTPARSER_H */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,22 +55,22 @@
 #define NW_CHUNK_SIZE (64 * 1024)
 #define NW_SEND_CHUNKS 2
 
-void Curl_quic_ver(char *p, size_t len)
+void Fetch_quic_ver(char *p, size_t len)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  Curl_ngtcp2_ver(p, len);
+  Fetch_ngtcp2_ver(p, len);
 #elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
-  Curl_osslq_ver(p, len);
+  Fetch_osslq_ver(p, len);
 #elif defined(USE_QUICHE)
-  Curl_quiche_ver(p, len);
+  Fetch_quiche_ver(p, len);
 #elif defined(USE_MSH3)
-  Curl_msh3_ver(p, len);
+  Fetch_msh3_ver(p, len);
 #endif
 }
 
 FETCHcode vquic_ctx_init(struct cf_quic_ctx *qctx)
 {
-  Curl_bufq_init2(&qctx->sendbuf, NW_CHUNK_SIZE, NW_SEND_CHUNKS,
+  Fetch_bufq_init2(&qctx->sendbuf, NW_CHUNK_SIZE, NW_SEND_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
 #if defined(__linux__) && defined(UDP_SEGMENT) && defined(HAVE_SENDMSG)
   qctx->no_gso = FALSE;
@@ -95,22 +95,22 @@ FETCHcode vquic_ctx_init(struct cf_quic_ctx *qctx)
 
 void vquic_ctx_free(struct cf_quic_ctx *qctx)
 {
-  Curl_bufq_free(&qctx->sendbuf);
+  Fetch_bufq_free(&qctx->sendbuf);
 }
 
 void vquic_ctx_update_time(struct cf_quic_ctx *qctx)
 {
-  qctx->last_op = Curl_now();
+  qctx->last_op = Fetch_now();
 }
 
-static FETCHcode send_packet_no_gso(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+static FETCHcode send_packet_no_gso(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     struct cf_quic_ctx *qctx,
                                     const uint8_t *pkt, size_t pktlen,
                                     size_t gsolen, size_t *psent);
 
-static FETCHcode do_sendmsg(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
+static FETCHcode do_sendmsg(struct Fetch_cfilter *cf,
+                            struct Fetch_easy *data,
                             struct cf_quic_ctx *qctx,
                             const uint8_t *pkt, size_t pktlen, size_t gsolen,
                             size_t *psent)
@@ -215,8 +215,8 @@ static FETCHcode do_sendmsg(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static FETCHcode send_packet_no_gso(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+static FETCHcode send_packet_no_gso(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     struct cf_quic_ctx *qctx,
                                     const uint8_t *pkt, size_t pktlen,
                                     size_t gsolen, size_t *psent)
@@ -240,8 +240,8 @@ static FETCHcode send_packet_no_gso(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static FETCHcode vquic_send_packets(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+static FETCHcode vquic_send_packets(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     struct cf_quic_ctx *qctx,
                                     const uint8_t *pkt, size_t pktlen,
                                     size_t gsolen, size_t *psent)
@@ -253,7 +253,7 @@ static FETCHcode vquic_send_packets(struct Curl_cfilter *cf,
   {
     unsigned char c;
     *psent = 0;
-    Curl_rand(data, &c, 1);
+    Fetch_rand(data, &c, 1);
     if (c >= ((100 - qctx->wblock_percent) * 256 / 100))
     {
       FETCH_TRC_CF(data, cf, "vquic_flush() simulate EWOULDBLOCK");
@@ -274,7 +274,7 @@ static FETCHcode vquic_send_packets(struct Curl_cfilter *cf,
   return result;
 }
 
-FETCHcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
+FETCHcode vquic_flush(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                       struct cf_quic_ctx *qctx)
 {
   const unsigned char *buf;
@@ -282,7 +282,7 @@ FETCHcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
   FETCHcode result;
   size_t gsolen;
 
-  while (Curl_bufq_peek(&qctx->sendbuf, &buf, &blen))
+  while (Fetch_bufq_peek(&qctx->sendbuf, &buf, &blen))
   {
     gsolen = qctx->gsolen;
     if (qctx->split_len)
@@ -299,32 +299,32 @@ FETCHcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
     {
       if (result == FETCHE_AGAIN)
       {
-        Curl_bufq_skip(&qctx->sendbuf, sent);
+        Fetch_bufq_skip(&qctx->sendbuf, sent);
         if (qctx->split_len)
           qctx->split_len -= sent;
       }
       return result;
     }
-    Curl_bufq_skip(&qctx->sendbuf, sent);
+    Fetch_bufq_skip(&qctx->sendbuf, sent);
     if (qctx->split_len)
       qctx->split_len -= sent;
   }
   return FETCHE_OK;
 }
 
-FETCHcode vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+FETCHcode vquic_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                      struct cf_quic_ctx *qctx, size_t gsolen)
 {
   qctx->gsolen = gsolen;
   return vquic_flush(cf, data, qctx);
 }
 
-FETCHcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
+FETCHcode vquic_send_tail_split(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                                 struct cf_quic_ctx *qctx, size_t gsolen,
                                 size_t tail_len, size_t tail_gsolen)
 {
-  DEBUGASSERT(Curl_bufq_len(&qctx->sendbuf) > tail_len);
-  qctx->split_len = Curl_bufq_len(&qctx->sendbuf) - tail_len;
+  DEBUGASSERT(Fetch_bufq_len(&qctx->sendbuf) > tail_len);
+  qctx->split_len = Fetch_bufq_len(&qctx->sendbuf) - tail_len;
   qctx->split_gsolen = gsolen;
   qctx->gsolen = tail_gsolen;
   FETCH_TRC_CF(data, cf, "vquic_send_tail_split: [%zu gso=%zu][%zu gso=%zu]",
@@ -366,8 +366,8 @@ static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 #endif
 
 #ifdef HAVE_SENDMMSG
-static FETCHcode recvmmsg_packets(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static FETCHcode recvmmsg_packets(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct cf_quic_ctx *qctx,
                                   size_t max_pkts,
                                   vquic_recv_pkt_cb *recv_cb, void *userp)
@@ -388,7 +388,7 @@ static FETCHcode recvmmsg_packets(struct Curl_cfilter *cf,
   uint8_t(*bufs)[64 * 1024] = NULL;
 
   DEBUGASSERT(max_pkts > 0);
-  result = Curl_multi_xfer_sockbuf_borrow(data, MMSG_NUM * sizeof(bufs[0]),
+  result = Fetch_multi_xfer_sockbuf_borrow(data, MMSG_NUM * sizeof(bufs[0]),
                                           &sockbuf);
   if (result)
     goto out;
@@ -424,13 +424,13 @@ static FETCHcode recvmmsg_packets(struct Curl_cfilter *cf,
       if (!cf->connected && SOCKERRNO == ECONNREFUSED)
       {
         struct ip_quadruple ip;
-        Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+        Fetch_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",
               ip.remote_ip, ip.remote_port);
         result = FETCHE_COULDNT_CONNECT;
         goto out;
       }
-      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      Fetch_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmsg() unexpectedly returned %d (errno=%d; %s)",
             mcount, SOCKERRNO, errstr);
       result = FETCHE_RECV_ERROR;
@@ -474,13 +474,13 @@ out:
   if (total_nread || result)
     FETCH_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
                  pkts, total_nread, result);
-  Curl_multi_xfer_sockbuf_release(data, sockbuf);
+  Fetch_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
 }
 
 #elif defined(HAVE_SENDMSG)
-static FETCHcode recvmsg_packets(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
+static FETCHcode recvmsg_packets(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data,
                                  struct cf_quic_ctx *qctx,
                                  size_t max_pkts,
                                  vquic_recv_pkt_cb *recv_cb, void *userp)
@@ -524,13 +524,13 @@ static FETCHcode recvmsg_packets(struct Curl_cfilter *cf,
       if (!cf->connected && SOCKERRNO == ECONNREFUSED)
       {
         struct ip_quadruple ip;
-        Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+        Fetch_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",
               ip.remote_ip, ip.remote_port);
         result = FETCHE_COULDNT_CONNECT;
         goto out;
       }
-      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      Fetch_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
             nread, SOCKERRNO, errstr);
       result = FETCHE_RECV_ERROR;
@@ -574,8 +574,8 @@ out:
 }
 
 #else  /* HAVE_SENDMMSG || HAVE_SENDMSG */
-static FETCHcode recvfrom_packets(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static FETCHcode recvfrom_packets(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct cf_quic_ctx *qctx,
                                   size_t max_pkts,
                                   vquic_recv_pkt_cb *recv_cb, void *userp)
@@ -607,13 +607,13 @@ static FETCHcode recvfrom_packets(struct Curl_cfilter *cf,
       if (!cf->connected && SOCKERRNO == ECONNREFUSED)
       {
         struct ip_quadruple ip;
-        Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+        Fetch_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",
               ip.remote_ip, ip.remote_port);
         result = FETCHE_COULDNT_CONNECT;
         goto out;
       }
-      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      Fetch_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
             nread, SOCKERRNO, errstr);
       result = FETCHE_RECV_ERROR;
@@ -636,8 +636,8 @@ out:
 }
 #endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG */
 
-FETCHcode vquic_recv_packets(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
+FETCHcode vquic_recv_packets(struct Fetch_cfilter *cf,
+                             struct Fetch_easy *data,
                              struct cf_quic_ctx *qctx,
                              size_t max_pkts,
                              vquic_recv_pkt_cb *recv_cb, void *userp)
@@ -670,7 +670,7 @@ FETCHcode vquic_recv_packets(struct Curl_cfilter *cf,
  * create the file. Open file success is deemed by seeing if the returned fd
  * is != -1.
  */
-FETCHcode Curl_qlogdir(struct Curl_easy *data,
+FETCHcode Fetch_qlogdir(struct Fetch_easy *data,
                        unsigned char *scid,
                        size_t scidlen,
                        int *qlogfdp)
@@ -682,27 +682,27 @@ FETCHcode Curl_qlogdir(struct Curl_easy *data,
     struct dynbuf fname;
     FETCHcode result;
     unsigned int i;
-    Curl_dyn_init(&fname, DYN_QLOG_NAME);
-    result = Curl_dyn_add(&fname, qlog_dir);
+    Fetch_dyn_init(&fname, DYN_QLOG_NAME);
+    result = Fetch_dyn_add(&fname, qlog_dir);
     if (!result)
-      result = Curl_dyn_add(&fname, "/");
+      result = Fetch_dyn_add(&fname, "/");
     for (i = 0; (i < scidlen) && !result; i++)
     {
       char hex[3];
       msnprintf(hex, 3, "%02x", scid[i]);
-      result = Curl_dyn_add(&fname, hex);
+      result = Fetch_dyn_add(&fname, hex);
     }
     if (!result)
-      result = Curl_dyn_add(&fname, ".sqlog");
+      result = Fetch_dyn_add(&fname, ".sqlog");
 
     if (!result)
     {
-      int qlogfd = open(Curl_dyn_ptr(&fname), O_WRONLY | O_CREAT | FETCH_O_BINARY,
+      int qlogfd = open(Fetch_dyn_ptr(&fname), O_WRONLY | O_CREAT | FETCH_O_BINARY,
                         data->set.new_file_perms);
       if (qlogfd != -1)
         *qlogfdp = qlogfd;
     }
-    Curl_dyn_free(&fname);
+    Fetch_dyn_free(&fname);
     if (result)
       return result;
   }
@@ -710,22 +710,22 @@ FETCHcode Curl_qlogdir(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
-                              struct Curl_easy *data,
+FETCHcode Fetch_cf_quic_create(struct Fetch_cfilter **pcf,
+                              struct Fetch_easy *data,
                               struct connectdata *conn,
-                              const struct Curl_addrinfo *ai,
+                              const struct Fetch_addrinfo *ai,
                               int transport)
 {
   (void)transport;
   DEBUGASSERT(transport == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
+  return Fetch_cf_ngtcp2_create(pcf, data, conn, ai);
 #elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
-  return Curl_cf_osslq_create(pcf, data, conn, ai);
+  return Fetch_cf_osslq_create(pcf, data, conn, ai);
 #elif defined(USE_QUICHE)
-  return Curl_cf_quiche_create(pcf, data, conn, ai);
+  return Fetch_cf_quiche_create(pcf, data, conn, ai);
 #elif defined(USE_MSH3)
-  return Curl_cf_msh3_create(pcf, data, conn, ai);
+  return Fetch_cf_msh3_create(pcf, data, conn, ai);
 #else
   *pcf = NULL;
   (void)data;
@@ -735,7 +735,7 @@ FETCHcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
 #endif
 }
 
-FETCHcode Curl_conn_may_http3(struct Curl_easy *data,
+FETCHcode Fetch_conn_may_http3(struct Fetch_easy *data,
                               const struct connectdata *conn)
 {
   if (conn->transport == TRNSPRT_UNIX)
@@ -766,7 +766,7 @@ FETCHcode Curl_conn_may_http3(struct Curl_easy *data,
 
 #else /* USE_HTTP3 */
 
-FETCHcode Curl_conn_may_http3(struct Curl_easy *data,
+FETCHcode Fetch_conn_may_http3(struct Fetch_easy *data,
                               const struct connectdata *conn)
 {
   (void)conn;

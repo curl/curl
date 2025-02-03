@@ -52,7 +52,7 @@ The project slowly grew bigger. With upload capabilities, the name was once
 again misleading and a second name change was made. On March 20, 1998 fetch 4
 was released. (The version numbering from the previous names was kept.)
 
-(Unrelated to this project a company called Curl Corporation registered a US
+(Unrelated to this project a company called Fetch Corporation registered a US
 trademark on the name "FETCH" on May 18 1998. That company had then already
 registered the fetch.com domain back in November of the previous year. All this
 was revealed to us much later.)
@@ -125,7 +125,7 @@ also introduced libfetch's ability to do persistent connections. 24000 lines of
 code. The libfetch major SONAME number was bumped to 2 due to this overhaul.
 The first experimental ftps:// support was added.
 
-August: The fetch website gets 8000 visits weekly. Curl Corporation contacted
+August: The fetch website gets 8000 visits weekly. Fetch Corporation contacted
 Daniel to discuss "the name issue". After Daniel's reply, they have never
 since got back in touch again.
 
@@ -384,7 +384,7 @@ April: experimental MQTT support
 
 August: zstd support
 
-November: the website moves to curl.se. The website serves 10TB data monthly.
+November: the website moves to fetch.se. The website serves 10TB data monthly.
 
 December: alt-svc support
 
@@ -406,7 +406,7 @@ March: added --json, removed mesalink support
     Public functions in libfetch:  86
     Contributors:                 2601
 
-The curl.se website serves 16,500 GB/month over 462M requests, the
+The fetch.se website serves 16,500 GB/month over 462M requests, the
 official docker image has been pulled 4,098,015,431 times.
 
 October: initial WebSocket support

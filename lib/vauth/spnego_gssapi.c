@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,7 +48,7 @@
 #endif
 
 /*
- * Curl_auth_is_spnego_supported()
+ * Fetch_auth_is_spnego_supported()
  *
  * This is used to evaluate if SPNEGO (Negotiate) is supported.
  *
@@ -56,13 +56,13 @@
  *
  * Returns TRUE if Negotiate supported by the GSS-API library.
  */
-bool Curl_auth_is_spnego_supported(void)
+bool Fetch_auth_is_spnego_supported(void)
 {
   return TRUE;
 }
 
 /*
- * Curl_auth_decode_spnego_message()
+ * Fetch_auth_decode_spnego_message()
  *
  * This is used to decode an already encoded SPNEGO (Negotiate) challenge
  * message.
@@ -79,7 +79,7 @@ bool Curl_auth_is_spnego_supported(void)
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
+FETCHcode Fetch_auth_decode_spnego_message(struct Fetch_easy *data,
                                           const char *user,
                                           const char *password,
                                           const char *service,
@@ -107,14 +107,14 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     /* We finished successfully our part of authentication, but server
      * rejected it (since we are again here). Exit with an error since we
      * cannot invent anything better */
-    Curl_auth_cleanup_spnego(nego);
+    Fetch_auth_cleanup_spnego(nego);
     return FETCHE_LOGIN_DENIED;
   }
 
   if (!nego->spn)
   {
     /* Generate our SPN */
-    char *spn = Curl_auth_build_spn(service, NULL, host);
+    char *spn = Fetch_auth_build_spn(service, NULL, host);
     if (!spn)
       return FETCHE_OUT_OF_MEMORY;
 
@@ -128,7 +128,7 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                    &nego->spn);
     if (GSS_ERROR(major_status))
     {
-      Curl_gss_log_error(data, "gss_import_name() failed: ",
+      Fetch_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
 
       free(spn);
@@ -144,7 +144,7 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     /* Decode the base-64 encoded challenge message */
     if (*chlg64 != '=')
     {
-      result = Curl_base64_decode(chlg64, &chlg, &chlglen);
+      result = Fetch_base64_decode(chlg64, &chlg, &chlglen);
       if (result)
         return result;
     }
@@ -171,11 +171,11 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   /* Generate our challenge-response message */
-  major_status = Curl_gss_init_sec_context(data,
+  major_status = Fetch_gss_init_sec_context(data,
                                            &minor_status,
                                            &nego->context,
                                            nego->spn,
-                                           &Curl_spnego_mech_oid,
+                                           &Fetch_spnego_mech_oid,
                                            chan_bindings,
                                            &input_token,
                                            &output_token,
@@ -183,7 +183,7 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                            NULL);
 
   /* Free the decoded challenge as it is not required anymore */
-  Curl_safefree(input_token.value);
+  Fetch_safefree(input_token.value);
 
   nego->status = major_status;
   if (GSS_ERROR(major_status))
@@ -191,7 +191,7 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     if (output_token.value)
       gss_release_buffer(&unused_status, &output_token);
 
-    Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
+    Fetch_gss_log_error(data, "gss_init_sec_context() failed: ",
                        major_status, minor_status);
 
     return FETCHE_AUTH_ERROR;
@@ -215,7 +215,7 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 }
 
 /*
- * Curl_auth_create_spnego_message()
+ * Fetch_auth_create_spnego_message()
  *
  * This is used to generate an already encoded SPNEGO (Negotiate) response
  * message ready for sending to the recipient.
@@ -230,14 +230,14 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
+FETCHcode Fetch_auth_create_spnego_message(struct negotiatedata *nego,
                                           char **outptr, size_t *outlen)
 {
   FETCHcode result;
   OM_uint32 minor_status;
 
   /* Base64 encode the already generated response */
-  result = Curl_base64_encode(nego->output_token.value,
+  result = Fetch_base64_encode(nego->output_token.value,
                               nego->output_token.length,
                               outptr, outlen);
 
@@ -263,7 +263,7 @@ FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
 }
 
 /*
- * Curl_auth_cleanup_spnego()
+ * Fetch_auth_cleanup_spnego()
  *
  * This is used to clean up the SPNEGO (Negotiate) specific data.
  *
@@ -272,7 +272,7 @@ FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
  * nego     [in/out] - The Negotiate data struct being cleaned up.
  *
  */
-void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
+void Fetch_auth_cleanup_spnego(struct negotiatedata *nego)
 {
   OM_uint32 minor_status;
 

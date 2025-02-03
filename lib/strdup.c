@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,7 +37,7 @@
 #include "memdebug.h"
 
 #ifndef HAVE_STRDUP
-char *Curl_strdup(const char *str)
+char *Fetch_strdup(const char *str)
 {
   size_t len;
   char *newstr;
@@ -59,7 +59,7 @@ char *Curl_strdup(const char *str)
 #ifdef _WIN32
 /***************************************************************************
  *
- * Curl_wcsdup(source)
+ * Fetch_wcsdup(source)
  *
  * Copies the 'source' wchar string to a newly allocated buffer (that is
  * returned).
@@ -67,20 +67,20 @@ char *Curl_strdup(const char *str)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-wchar_t *Curl_wcsdup(const wchar_t *src)
+wchar_t *Fetch_wcsdup(const wchar_t *src)
 {
   size_t length = wcslen(src);
 
   if (length > (SIZE_T_MAX / sizeof(wchar_t)) - 1)
     return (wchar_t *)NULL; /* integer overflow */
 
-  return (wchar_t *)Curl_memdup(src, (length + 1) * sizeof(wchar_t));
+  return (wchar_t *)Fetch_memdup(src, (length + 1) * sizeof(wchar_t));
 }
 #endif
 
 /***************************************************************************
  *
- * Curl_memdup(source, length)
+ * Fetch_memdup(source, length)
  *
  * Copies the 'source' data to a newly allocated buffer (that is
  * returned). Copies 'length' bytes.
@@ -88,7 +88,7 @@ wchar_t *Curl_wcsdup(const wchar_t *src)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-void *Curl_memdup(const void *src, size_t length)
+void *Fetch_memdup(const void *src, size_t length)
 {
   void *buffer = malloc(length);
   if (!buffer)
@@ -101,7 +101,7 @@ void *Curl_memdup(const void *src, size_t length)
 
 /***************************************************************************
  *
- * Curl_memdup0(source, length)
+ * Fetch_memdup0(source, length)
  *
  * Copies the 'source' string to a newly allocated buffer (that is returned).
  * Copies 'length' bytes then adds a null terminator.
@@ -109,7 +109,7 @@ void *Curl_memdup(const void *src, size_t length)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-void *Curl_memdup0(const char *src, size_t length)
+void *Fetch_memdup0(const char *src, size_t length)
 {
   char *buf = malloc(length + 1);
   if (!buf)
@@ -121,7 +121,7 @@ void *Curl_memdup0(const char *src, size_t length)
 
 /***************************************************************************
  *
- * Curl_saferealloc(ptr, size)
+ * Fetch_saferealloc(ptr, size)
  *
  * Does a normal realloc(), but will free the data pointer if the realloc
  * fails. If 'size' is non-zero, it will free the data and return a failure.
@@ -133,7 +133,7 @@ void *Curl_memdup0(const char *src, size_t length)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-void *Curl_saferealloc(void *ptr, size_t size)
+void *Fetch_saferealloc(void *ptr, size_t size)
 {
   void *datap = realloc(ptr, size);
   if (size && !datap)

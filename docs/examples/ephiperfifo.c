@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -146,7 +146,7 @@ static void mcode_or_die(const char *where, FETCHMcode code)
 
 static void timer_cb(GlobalInfo *g, int revents);
 
-/* Update the timer after fetch_multi library does its thing. Curl informs the
+/* Update the timer after fetch_multi library does its thing. Fetch informs the
  * application through this callback what it wants the new timeout to be,
  * after it does some work. */
 static int multi_timer_cb(FETCHM *multi, long timeout_ms, GlobalInfo *g)

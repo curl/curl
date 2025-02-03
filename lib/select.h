@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -73,16 +73,16 @@ struct pollfd
    therefore defined here */
 #define FETCH_CSELECT_IN2 (FETCH_CSELECT_ERR << 1)
 
-int Curl_socket_check(fetch_socket_t readfd, fetch_socket_t readfd2,
+int Fetch_socket_check(fetch_socket_t readfd, fetch_socket_t readfd2,
                       fetch_socket_t writefd,
                       timediff_t timeout_ms);
 #define SOCKET_READABLE(x, z) \
-  Curl_socket_check(x, FETCH_SOCKET_BAD, FETCH_SOCKET_BAD, z)
+  Fetch_socket_check(x, FETCH_SOCKET_BAD, FETCH_SOCKET_BAD, z)
 #define SOCKET_WRITABLE(x, z) \
-  Curl_socket_check(FETCH_SOCKET_BAD, FETCH_SOCKET_BAD, x, z)
+  Fetch_socket_check(FETCH_SOCKET_BAD, FETCH_SOCKET_BAD, x, z)
 
-int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
-int Curl_wait_ms(timediff_t timeout_ms);
+int Fetch_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
+int Fetch_wait_ms(timediff_t timeout_ms);
 
 /*
    With Winsock the valid range is [0..INVALID_SOCKET-1] according to
@@ -125,30 +125,30 @@ struct fetch_pollfds
   BIT(allocated_pfds);
 };
 
-void Curl_pollfds_init(struct fetch_pollfds *cpfds,
+void Fetch_pollfds_init(struct fetch_pollfds *cpfds,
                        struct pollfd *static_pfds,
                        unsigned int static_count);
 
-void Curl_pollfds_cleanup(struct fetch_pollfds *cpfds);
+void Fetch_pollfds_cleanup(struct fetch_pollfds *cpfds);
 
-FETCHcode Curl_pollfds_add_ps(struct fetch_pollfds *cpfds,
+FETCHcode Fetch_pollfds_add_ps(struct fetch_pollfds *cpfds,
                               struct easy_pollset *ps);
 
-FETCHcode Curl_pollfds_add_sock(struct fetch_pollfds *cpfds,
+FETCHcode Fetch_pollfds_add_sock(struct fetch_pollfds *cpfds,
                                 fetch_socket_t sock, short events);
 
-struct Curl_waitfds
+struct Fetch_waitfds
 {
   struct fetch_waitfd *wfds;
   unsigned int n;
   unsigned int count;
 };
 
-void Curl_waitfds_init(struct Curl_waitfds *cwfds,
+void Fetch_waitfds_init(struct Fetch_waitfds *cwfds,
                        struct fetch_waitfd *static_wfds,
                        unsigned int static_count);
 
-unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
+unsigned int Fetch_waitfds_add_ps(struct Fetch_waitfds *cwfds,
                                  struct easy_pollset *ps);
 
 #endif /* HEADER_FETCH_SELECT_H */

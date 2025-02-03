@@ -132,7 +132,7 @@ That is safer and does not suffer from any of the problems above.
 
 How are you using this option? Are you affected by any of these limitations?
 Please let us know by making a comment at
-https://github.com/curl/curl/issues/685
+https://github.com/fetch/fetch/issues/685
 
 # %PROTOCOLS%
 

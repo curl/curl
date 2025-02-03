@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,18 +32,18 @@
 #include <netinet/udp.h>
 #endif
 
-struct Curl_cfilter;
+struct Fetch_cfilter;
 
 #include "urldata.h"
 
-void Curl_osslq_ver(char *p, size_t len);
+void Fetch_osslq_ver(char *p, size_t len);
 
-FETCHcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
-                               struct Curl_easy *data,
+FETCHcode Fetch_cf_osslq_create(struct Fetch_cfilter **pcf,
+                               struct Fetch_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai);
+                               const struct Fetch_addrinfo *ai);
 
-bool Curl_conn_is_osslq(const struct Curl_easy *data,
+bool Fetch_conn_is_osslq(const struct Fetch_easy *data,
                         const struct connectdata *conn,
                         int sockindex);
 #endif

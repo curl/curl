@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,7 @@ import os
 import re
 import pytest
 
-from testenv import Env, CurlClient, ExecResult
+from testenv import Env, FetchClient, ExecResult
 
 
 log = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class TestProxy:
 
     # download via http: proxy (no tunnel)
     def test_10_01_proxy_http(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         r = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=fetch.get_proxy_args(proxys=False))
@@ -75,7 +75,7 @@ class TestProxy:
     def test_10_02_proxys_down(self, env: Env, httpd, proto):
         if proto == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(proto=proto)
         r = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -99,7 +99,7 @@ class TestProxy:
             pytest.skip('only supported with nghttp2')
         count = fcount
         srcfile = os.path.join(httpd.docs_dir, fname)
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/fetchtest/echo?id=[0-{count-1}]'
         xargs = fetch.get_proxy_args(proto=proto)
         r = fetch.http_upload(urls=[url], data=f'@{srcfile}', alpn_proto=proto,
@@ -113,7 +113,7 @@ class TestProxy:
 
     # download http: via http: proxytunnel
     def test_10_03_proxytunnel_http(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=False, tunnel=True)
         r = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -125,7 +125,7 @@ class TestProxy:
                         reason='fetch lacks HTTPS-proxy support')
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
     def test_10_04_proxy_https(self, env: Env, httpd, nghttpx_fwd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(tunnel=True)
         r = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -136,7 +136,7 @@ class TestProxy:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.skipif(condition=not Env.have_ssl_fetch(), reason="fetch without SSL")
     def test_10_05_proxytunnel_http(self, env: Env, httpd, proto):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json'
         xargs = fetch.get_proxy_args(proxys=False, tunnel=True)
         r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True,
@@ -153,7 +153,7 @@ class TestProxy:
     def test_10_06_proxytunnel_https(self, env: Env, httpd, nghttpx_fwd, proto, tunnel):
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json?[0-0]'
         xargs = fetch.get_proxy_args(tunnel=True, proto=tunnel)
         r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True,
@@ -181,7 +181,7 @@ class TestProxy:
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
         count = fcount
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://localhost:{env.https_port}/{fname}?[0-{count-1}]'
         xargs = fetch.get_proxy_args(tunnel=True, proto=tunnel)
         r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True,
@@ -212,7 +212,7 @@ class TestProxy:
             pytest.skip('only supported with nghttp2')
         count = fcount
         srcfile = os.path.join(httpd.docs_dir, fname)
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://localhost:{env.https_port}/fetchtest/echo?id=[0-{count-1}]'
         xargs = fetch.get_proxy_args(tunnel=True, proto=tunnel)
         r = fetch.http_upload(urls=[url], data=f'@{srcfile}', alpn_proto=proto,
@@ -232,7 +232,7 @@ class TestProxy:
     def test_10_09_reuse_ser(self, env: Env, httpd, nghttpx_fwd, tunnel):
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url1 = f'https://localhost:{env.https_port}/data.json'
         url2 = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(tunnel=True, proto=tunnel)
@@ -256,7 +256,7 @@ class TestProxy:
         # url twice via https: proxy separated with '--next', will reuse
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json'
         proxy_args = fetch.get_proxy_args(tunnel=True, proto=tunnel)
         r1 = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -279,7 +279,7 @@ class TestProxy:
     @pytest.mark.skipif(condition=not Env.fetch_uses_lib('openssl'), reason="tls13-ciphers not supported")
     def test_10_11_noreuse_proxy_https(self, env: Env, httpd, nghttpx_fwd, tunnel):
         # different --proxy-tls13-ciphers, no reuse of connection for https:
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
         url = f'https://localhost:{env.https_port}/data.json'
@@ -307,7 +307,7 @@ class TestProxy:
         # different --proxy-tls13-ciphers, no reuse of connection for http:
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         proxy_args = fetch.get_proxy_args(tunnel=True, proto=tunnel)
         r1 = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -333,7 +333,7 @@ class TestProxy:
         # different --tls13-ciphers on https: same proxy config
         if tunnel == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json'
         proxy_args = fetch.get_proxy_args(tunnel=True, proto=tunnel)
         r1 = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -359,7 +359,7 @@ class TestProxy:
     def test_10_14_proxys_ip_addr(self, env: Env, httpd, proto):
         if proto == 'h2' and not env.fetch_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         xargs = fetch.get_proxy_args(proto=proto, use_ip=True)
         r = fetch.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,18 +43,18 @@ typedef size_t (*comp_function)(void *key1,
                                 void *key2,
                                 size_t key2_len);
 
-typedef void (*Curl_hash_dtor)(void *);
+typedef void (*Fetch_hash_dtor)(void *);
 
-struct Curl_hash
+struct Fetch_hash
 {
-  struct Curl_llist *table;
+  struct Fetch_llist *table;
 
   /* Hash function to be used for this hash table */
   hash_function hash_func;
 
   /* Comparator function to compare keys */
   comp_function comp_func;
-  Curl_hash_dtor dtor;
+  Fetch_hash_dtor dtor;
   size_t slots;
   size_t size;
 #ifdef DEBUGBUILD
@@ -62,13 +62,13 @@ struct Curl_hash
 #endif
 };
 
-typedef void (*Curl_hash_elem_dtor)(void *key, size_t key_len, void *p);
+typedef void (*Fetch_hash_elem_dtor)(void *key, size_t key_len, void *p);
 
-struct Curl_hash_element
+struct Fetch_hash_element
 {
-  struct Curl_llist_node list;
+  struct Fetch_llist_node list;
   void *ptr;
-  Curl_hash_elem_dtor dtor;
+  Fetch_hash_elem_dtor dtor;
   size_t key_len;
 #ifdef DEBUGBUILD
   int init;
@@ -76,50 +76,50 @@ struct Curl_hash_element
   char key[1]; /* allocated memory following the struct */
 };
 
-struct Curl_hash_iterator
+struct Fetch_hash_iterator
 {
-  struct Curl_hash *hash;
+  struct Fetch_hash *hash;
   size_t slot_index;
-  struct Curl_llist_node *current_element;
+  struct Fetch_llist_node *current_element;
 #ifdef DEBUGBUILD
   int init;
 #endif
 };
 
-void Curl_hash_init(struct Curl_hash *h,
+void Fetch_hash_init(struct Fetch_hash *h,
                     size_t slots,
                     hash_function hfunc,
                     comp_function comparator,
-                    Curl_hash_dtor dtor);
+                    Fetch_hash_dtor dtor);
 
-void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p);
-void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
-                     Curl_hash_elem_dtor dtor);
-int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len);
-void *Curl_hash_pick(struct Curl_hash *, void *key, size_t key_len);
+void *Fetch_hash_add(struct Fetch_hash *h, void *key, size_t key_len, void *p);
+void *Fetch_hash_add2(struct Fetch_hash *h, void *key, size_t key_len, void *p,
+                     Fetch_hash_elem_dtor dtor);
+int Fetch_hash_delete(struct Fetch_hash *h, void *key, size_t key_len);
+void *Fetch_hash_pick(struct Fetch_hash *, void *key, size_t key_len);
 
-void Curl_hash_destroy(struct Curl_hash *h);
-size_t Curl_hash_count(struct Curl_hash *h);
-void Curl_hash_clean(struct Curl_hash *h);
-void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
+void Fetch_hash_destroy(struct Fetch_hash *h);
+size_t Fetch_hash_count(struct Fetch_hash *h);
+void Fetch_hash_clean(struct Fetch_hash *h);
+void Fetch_hash_clean_with_criterium(struct Fetch_hash *h, void *user,
                                     int (*comp)(void *, void *));
-size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num);
-size_t Curl_str_key_compare(void *k1, size_t key1_len, void *k2,
+size_t Fetch_hash_str(void *key, size_t key_length, size_t slots_num);
+size_t Fetch_str_key_compare(void *k1, size_t key1_len, void *k2,
                             size_t key2_len);
-void Curl_hash_start_iterate(struct Curl_hash *hash,
-                             struct Curl_hash_iterator *iter);
-struct Curl_hash_element *
-Curl_hash_next_element(struct Curl_hash_iterator *iter);
+void Fetch_hash_start_iterate(struct Fetch_hash *hash,
+                             struct Fetch_hash_iterator *iter);
+struct Fetch_hash_element *
+Fetch_hash_next_element(struct Fetch_hash_iterator *iter);
 
-void Curl_hash_print(struct Curl_hash *h,
+void Fetch_hash_print(struct Fetch_hash *h,
                      void (*func)(void *));
 
 /* Hash for `fetch_off_t` as key */
-void Curl_hash_offt_init(struct Curl_hash *h, size_t slots,
-                         Curl_hash_dtor dtor);
+void Fetch_hash_offt_init(struct Fetch_hash *h, size_t slots,
+                         Fetch_hash_dtor dtor);
 
-void *Curl_hash_offt_set(struct Curl_hash *h, fetch_off_t id, void *elem);
-int Curl_hash_offt_remove(struct Curl_hash *h, fetch_off_t id);
-void *Curl_hash_offt_get(struct Curl_hash *h, fetch_off_t id);
+void *Fetch_hash_offt_set(struct Fetch_hash *h, fetch_off_t id, void *elem);
+int Fetch_hash_offt_remove(struct Fetch_hash *h, fetch_off_t id);
+void *Fetch_hash_offt_get(struct Fetch_hash *h, fetch_off_t id);
 
 #endif /* HEADER_FETCH_HASH_H */

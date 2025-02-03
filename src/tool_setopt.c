@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -427,7 +427,7 @@ static FETCHcode libfetch_generate_slist(struct fetch_slist *slist, int *slistno
   CLEAN1("slist%d = NULL;", *slistno);
   for (; slist; slist = slist->next)
   {
-    Curl_safefree(escaped);
+    Fetch_safefree(escaped);
     escaped = c_escape(slist->data, ZERO_TERMINATED);
     if (!escaped)
       return FETCHE_OUT_OF_MEMORY;
@@ -436,7 +436,7 @@ static FETCHcode libfetch_generate_slist(struct fetch_slist *slist, int *slistno
   }
 
 nomem:
-  Curl_safefree(escaped);
+  Fetch_safefree(escaped);
   return ret;
 }
 
@@ -483,7 +483,7 @@ static FETCHcode libfetch_generate_mime_part(FETCH *fetch,
     data = part->data;
     if (!ret)
     {
-      Curl_safefree(escaped);
+      Fetch_safefree(escaped);
       escaped = c_escape(data, ZERO_TERMINATED);
       NULL_CHECK(escaped);
       CODE2("fetch_mime_data(part%d, \"%s\", FETCH_ZERO_TERMINATED);",
@@ -519,7 +519,7 @@ static FETCHcode libfetch_generate_mime_part(FETCH *fetch,
 
   if (!ret && part->encoder)
   {
-    Curl_safefree(escaped);
+    Fetch_safefree(escaped);
     escaped = c_escape(part->encoder, ZERO_TERMINATED);
     NULL_CHECK(escaped);
     CODE2("fetch_mime_encoder(part%d, \"%s\");", mimeno, escaped);
@@ -527,7 +527,7 @@ static FETCHcode libfetch_generate_mime_part(FETCH *fetch,
 
   if (!ret && filename)
   {
-    Curl_safefree(escaped);
+    Fetch_safefree(escaped);
     escaped = c_escape(filename, ZERO_TERMINATED);
     NULL_CHECK(escaped);
     CODE2("fetch_mime_filename(part%d, \"%s\");", mimeno, escaped);
@@ -535,7 +535,7 @@ static FETCHcode libfetch_generate_mime_part(FETCH *fetch,
 
   if (!ret && part->name)
   {
-    Curl_safefree(escaped);
+    Fetch_safefree(escaped);
     escaped = c_escape(part->name, ZERO_TERMINATED);
     NULL_CHECK(escaped);
     CODE2("fetch_mime_name(part%d, \"%s\");", mimeno, escaped);
@@ -543,7 +543,7 @@ static FETCHcode libfetch_generate_mime_part(FETCH *fetch,
 
   if (!ret && part->type)
   {
-    Curl_safefree(escaped);
+    Fetch_safefree(escaped);
     escaped = c_escape(part->type, ZERO_TERMINATED);
     NULL_CHECK(escaped);
     CODE2("fetch_mime_type(part%d, \"%s\");", mimeno, escaped);
@@ -562,7 +562,7 @@ static FETCHcode libfetch_generate_mime_part(FETCH *fetch,
   }
 
 nomem:
-  Curl_safefree(escaped);
+  Fetch_safefree(escaped);
   return ret;
 }
 
@@ -760,7 +760,7 @@ FETCHcode tool_setopt(FETCH *fetch, bool str, struct GlobalConfig *global,
   }
 
 nomem:
-  Curl_safefree(escaped);
+  Fetch_safefree(escaped);
   return ret;
 }
 

@@ -23,7 +23,7 @@ Server: RTSPD/libfetch-test
 CSeq: 2
 Content-Base: rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 Content-Length: 80
-Curl-private: swsclose
+Fetch-private: swsclose
 
 v=0
 s=rtspd SDP
@@ -41,7 +41,7 @@ Server: RTSPD/libfetch-test
 CSeq: 2
 Content-Base: rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 Content-Length: 80
-Curl-private: swsclose
+Fetch-private: swsclose
 
 v=0
 s=rtspd SDP

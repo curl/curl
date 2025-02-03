@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -82,18 +82,18 @@ static bool do_test(struct test_spec *spec, size_t i, struct dynbuf *dbuf)
   FETCHcode result;
   const char *in = spec->input;
 
-  Curl_dyn_reset(dbuf);
-  result = Curl_x509_GTime2str(dbuf, in, in + strlen(in));
+  Fetch_dyn_reset(dbuf);
+  result = Fetch_x509_GTime2str(dbuf, in, in + strlen(in));
   if (result != spec->exp_result)
   {
     fprintf(stderr, "test %zu: expect result %d, got %d\n",
             i, spec->exp_result, result);
     return FALSE;
   }
-  else if (!result && strcmp(spec->exp_output, Curl_dyn_ptr(dbuf)))
+  else if (!result && strcmp(spec->exp_output, Fetch_dyn_ptr(dbuf)))
   {
     fprintf(stderr, "test %zu: input '%s', expected output '%s', got '%s'\n",
-            i, in, spec->exp_output, Curl_dyn_ptr(dbuf));
+            i, in, spec->exp_output, Fetch_dyn_ptr(dbuf));
     return FALSE;
   }
 
@@ -106,7 +106,7 @@ UNITTEST_START
   struct dynbuf dbuf;
   bool all_ok = TRUE;
 
-  Curl_dyn_init(&dbuf, 32 * 1024);
+  Fetch_dyn_init(&dbuf, 32 * 1024);
 
   if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
   {
@@ -119,9 +119,9 @@ UNITTEST_START
     if (!do_test(&test_specs[i], i, &dbuf))
       all_ok = FALSE;
   }
-  fail_unless(all_ok, "some tests of Curl_x509_GTime2str() fails");
+  fail_unless(all_ok, "some tests of Fetch_x509_GTime2str() fails");
 
-  Curl_dyn_free(&dbuf);
+  Fetch_dyn_free(&dbuf);
   fetch_global_cleanup();
 }
 UNITTEST_STOP
@@ -130,7 +130,7 @@ UNITTEST_STOP
 
 UNITTEST_START
 {
-  puts("not tested since Curl_x509_GTime2str() is not built-in");
+  puts("not tested since Fetch_x509_GTime2str() is not built-in");
 }
 UNITTEST_STOP
 

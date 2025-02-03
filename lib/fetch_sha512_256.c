@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -103,7 +103,7 @@
 /**
  * Context type used for SHA-512/256 calculations
  */
-typedef EVP_MD_CTX *Curl_sha512_256_ctx;
+typedef EVP_MD_CTX *Fetch_sha512_256_ctx;
 
 /**
  * Initialise structure for SHA-512/256 calculation.
@@ -113,9 +113,9 @@ typedef EVP_MD_CTX *Curl_sha512_256_ctx;
  *         error code otherwise
  */
 static FETCHcode
-Curl_sha512_256_init(void *context)
+Fetch_sha512_256_init(void *context)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Fetch_sha512_256_ctx *const ctx = (Fetch_sha512_256_ctx *)context;
 
   *ctx = EVP_MD_CTX_create();
   if (!*ctx)
@@ -145,11 +145,11 @@ Curl_sha512_256_init(void *context)
  *         error code otherwise
  */
 static FETCHcode
-Curl_sha512_256_update(void *context,
+Fetch_sha512_256_update(void *context,
                        const unsigned char *data,
                        size_t length)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Fetch_sha512_256_ctx *const ctx = (Fetch_sha512_256_ctx *)context;
 
   if (!EVP_DigestUpdate(*ctx, data, length))
     return FETCHE_SSL_CIPHER;
@@ -167,11 +167,11 @@ Curl_sha512_256_update(void *context,
  *         error code otherwise
  */
 static FETCHcode
-Curl_sha512_256_finish(unsigned char *digest,
+Fetch_sha512_256_finish(unsigned char *digest,
                        void *context)
 {
   FETCHcode ret;
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Fetch_sha512_256_ctx *const ctx = (Fetch_sha512_256_ctx *)context;
 
 #ifdef NEED_NETBSD_SHA512_256_WORKAROUND
   /* Use a larger buffer to work around a bug in NetBSD:
@@ -202,7 +202,7 @@ Curl_sha512_256_finish(unsigned char *digest,
 /**
  * Context type used for SHA-512/256 calculations
  */
-typedef struct sha512_256_ctx Curl_sha512_256_ctx;
+typedef struct sha512_256_ctx Fetch_sha512_256_ctx;
 
 /**
  * Initialise structure for SHA-512/256 calculation.
@@ -211,9 +211,9 @@ typedef struct sha512_256_ctx Curl_sha512_256_ctx;
  * @return always FETCHE_OK
  */
 static FETCHcode
-Curl_sha512_256_init(void *context)
+Fetch_sha512_256_init(void *context)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Fetch_sha512_256_ctx *const ctx = (Fetch_sha512_256_ctx *)context;
 
   /* Check whether the header and this file use the same numbers */
   DEBUGASSERT(FETCH_SHA512_256_DIGEST_LENGTH == FETCH_SHA512_256_DIGEST_SIZE);
@@ -232,11 +232,11 @@ Curl_sha512_256_init(void *context)
  * @return always FETCHE_OK
  */
 static FETCHcode
-Curl_sha512_256_update(void *context,
+Fetch_sha512_256_update(void *context,
                        const unsigned char *data,
                        size_t length)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Fetch_sha512_256_ctx *const ctx = (Fetch_sha512_256_ctx *)context;
 
   DEBUGASSERT((data != NULL) || (length == 0));
 
@@ -254,10 +254,10 @@ Curl_sha512_256_update(void *context,
  * @return always FETCHE_OK
  */
 static FETCHcode
-Curl_sha512_256_finish(unsigned char *digest,
+Fetch_sha512_256_finish(unsigned char *digest,
                        void *context)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Fetch_sha512_256_ctx *const ctx = (Fetch_sha512_256_ctx *)context;
 
   sha512_256_digest(ctx,
                     (size_t)FETCH_SHA512_256_DIGEST_SIZE, (uint8_t *)digest);
@@ -327,7 +327,7 @@ Curl_sha512_256_finish(unsigned char *digest,
  * size as each argument is used twice, so if any calculation is used
  * as an argument, the calculation could be done twice. */
 static FETCH_FORCEINLINE fetch_uint64_t
-Curl_rotr64(fetch_uint64_t value, unsigned int bits)
+Fetch_rotr64(fetch_uint64_t value, unsigned int bits)
 {
   bits %= 64;
   if (0 == bits)
@@ -386,7 +386,7 @@ Curl_rotr64(fetch_uint64_t value, unsigned int bits)
 /**
  * SHA-512/256 calculation context
  */
-struct Curl_sha512_256ctx
+struct Fetch_sha512_256ctx
 {
   /**
    * Intermediate hash value. The variable is properly aligned. Smart
@@ -414,7 +414,7 @@ struct Curl_sha512_256ctx
 /**
  * Context type used for SHA-512/256 calculations
  */
-typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
+typedef struct Fetch_sha512_256ctx Fetch_sha512_256_ctx;
 
 /**
  * Initialise structure for SHA-512/256 calculation.
@@ -423,9 +423,9 @@ typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
  * @return always FETCHE_OK
  */
 static FETCHcode
-Curl_sha512_256_init(void *context)
+Fetch_sha512_256_init(void *context)
 {
-  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
+  struct Fetch_sha512_256ctx *const ctx = (struct Fetch_sha512_256ctx *)context;
 
   /* Check whether the header and this file use the same numbers */
   DEBUGASSERT(FETCH_SHA512_256_DIGEST_LENGTH == FETCH_SHA512_256_DIGEST_SIZE);
@@ -458,7 +458,7 @@ Curl_sha512_256_init(void *context)
  * @param data  the data buffer with #FETCH_SHA512_256_BLOCK_SIZE bytes block
  */
 static void
-Curl_sha512_256_transform(fetch_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
+Fetch_sha512_256_transform(fetch_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
                           const void *data)
 {
   /* Working variables,
@@ -484,13 +484,13 @@ Curl_sha512_256_transform(fetch_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
   /* Four 'Sigma' macro functions.
      See FIPS PUB 180-4 formulae 4.10, 4.11, 4.12, 4.13. */
 #define SIG0(x) \
-  (Curl_rotr64((x), 28) ^ Curl_rotr64((x), 34) ^ Curl_rotr64((x), 39))
+  (Fetch_rotr64((x), 28) ^ Fetch_rotr64((x), 34) ^ Fetch_rotr64((x), 39))
 #define SIG1(x) \
-  (Curl_rotr64((x), 14) ^ Curl_rotr64((x), 18) ^ Curl_rotr64((x), 41))
+  (Fetch_rotr64((x), 14) ^ Fetch_rotr64((x), 18) ^ Fetch_rotr64((x), 41))
 #define sig0(x) \
-  (Curl_rotr64((x), 1) ^ Curl_rotr64((x), 8) ^ ((x) >> 7))
+  (Fetch_rotr64((x), 1) ^ Fetch_rotr64((x), 8) ^ ((x) >> 7))
 #define sig1(x) \
-  (Curl_rotr64((x), 19) ^ Curl_rotr64((x), 61) ^ ((x) >> 6))
+  (Fetch_rotr64((x), 19) ^ Fetch_rotr64((x), 61) ^ ((x) >> 6))
 
   if (1)
   {
@@ -630,12 +630,12 @@ Curl_sha512_256_transform(fetch_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
  * @return always FETCHE_OK
  */
 static FETCHcode
-Curl_sha512_256_update(void *context,
+Fetch_sha512_256_update(void *context,
                        const unsigned char *data,
                        size_t length)
 {
   unsigned int bytes_have; /**< Number of bytes in the context buffer */
-  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
+  struct Fetch_sha512_256ctx *const ctx = (struct Fetch_sha512_256ctx *)context;
   /* the void pointer here is required to mute Intel compiler warning */
   void *const ctx_buf = ctx->buffer;
 
@@ -665,7 +665,7 @@ Curl_sha512_256_update(void *context,
              bytes_left);
       data += bytes_left;
       length -= bytes_left;
-      Curl_sha512_256_transform(ctx->H, ctx->buffer);
+      Fetch_sha512_256_transform(ctx->H, ctx->buffer);
       bytes_have = 0;
     }
   }
@@ -674,7 +674,7 @@ Curl_sha512_256_update(void *context,
   {
     /* Process any full blocks of new data directly,
        without copying to the buffer. */
-    Curl_sha512_256_transform(ctx->H, data);
+    Fetch_sha512_256_transform(ctx->H, data);
     data += FETCH_SHA512_256_BLOCK_SIZE;
     length -= FETCH_SHA512_256_BLOCK_SIZE;
   }
@@ -709,10 +709,10 @@ Curl_sha512_256_update(void *context,
  * @return always FETCHE_OK
  */
 static FETCHcode
-Curl_sha512_256_finish(unsigned char *digest,
+Fetch_sha512_256_finish(unsigned char *digest,
                        void *context)
 {
-  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
+  struct Fetch_sha512_256ctx *const ctx = (struct Fetch_sha512_256ctx *)context;
   fetch_uint64_t num_bits; /**< Number of processed bits */
   unsigned int bytes_have; /**< Number of bytes in the context buffer */
   /* the void pointer here is required to mute Intel compiler warning */
@@ -747,7 +747,7 @@ Curl_sha512_256_finish(unsigned char *digest,
       memset(((unsigned char *)ctx_buf) + bytes_have, 0,
              FETCH_SHA512_256_BLOCK_SIZE - bytes_have);
     /* Process the full block. */
-    Curl_sha512_256_transform(ctx->H, ctx->buffer);
+    Fetch_sha512_256_transform(ctx->H, ctx->buffer);
     /* Start the new block. */
     bytes_have = 0;
   }
@@ -764,7 +764,7 @@ Curl_sha512_256_finish(unsigned char *digest,
   FETCH_PUT_64BIT_BE(((unsigned char *)ctx_buf) + FETCH_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD + SHA512_256_BYTES_IN_WORD,
                      num_bits);
   /* Process the full final block. */
-  Curl_sha512_256_transform(ctx->H, ctx->buffer);
+  Fetch_sha512_256_transform(ctx->H, ctx->buffer);
 
   /* Put in BE mode the leftmost part of the hash as the final digest.
      See FIPS PUB 180-4 section 6.7. */
@@ -775,7 +775,7 @@ Curl_sha512_256_finish(unsigned char *digest,
   FETCH_PUT_64BIT_BE((digest + 3 * SHA512_256_BYTES_IN_WORD), ctx->H[3]);
 
   /* Erase potentially sensitive data. */
-  memset(ctx, 0, sizeof(struct Curl_sha512_256ctx));
+  memset(ctx, 0, sizeof(struct Fetch_sha512_256ctx));
 
   return FETCHE_OK;
 }
@@ -790,57 +790,57 @@ Curl_sha512_256_finish(unsigned char *digest,
  * @return always #FETCHE_OK
  */
 FETCHcode
-Curl_sha512_256it(unsigned char *output, const unsigned char *input,
+Fetch_sha512_256it(unsigned char *output, const unsigned char *input,
                   size_t input_size)
 {
-  Curl_sha512_256_ctx ctx;
+  Fetch_sha512_256_ctx ctx;
   FETCHcode res;
 
-  res = Curl_sha512_256_init(&ctx);
+  res = Fetch_sha512_256_init(&ctx);
   if (res != FETCHE_OK)
     return res;
 
-  res = Curl_sha512_256_update(&ctx, (const void *)input, input_size);
+  res = Fetch_sha512_256_update(&ctx, (const void *)input, input_size);
 
   if (res != FETCHE_OK)
   {
-    (void)Curl_sha512_256_finish(output, &ctx);
+    (void)Fetch_sha512_256_finish(output, &ctx);
     return res;
   }
 
-  return Curl_sha512_256_finish(output, &ctx);
+  return Fetch_sha512_256_finish(output, &ctx);
 }
 
 /* Wrapper function, takes 'unsigned int' as length type, returns void */
 static void
-Curl_sha512_256_update_i(void *context,
+Fetch_sha512_256_update_i(void *context,
                          const unsigned char *data,
                          unsigned int length)
 {
   /* Hypothetically the function may fail, but assume it does not */
-  (void)Curl_sha512_256_update(context, data, length);
+  (void)Fetch_sha512_256_update(context, data, length);
 }
 
 /* Wrapper function, returns void */
 static void
-Curl_sha512_256_finish_v(unsigned char *result,
+Fetch_sha512_256_finish_v(unsigned char *result,
                          void *context)
 {
   /* Hypothetically the function may fail, but assume it does not */
-  (void)Curl_sha512_256_finish(result, context);
+  (void)Fetch_sha512_256_finish(result, context);
 }
 
 /* Wrapper function, takes 'unsigned int' as length type, returns void */
 
-const struct HMAC_params Curl_HMAC_SHA512_256[] = {
+const struct HMAC_params Fetch_HMAC_SHA512_256[] = {
     {/* Initialize context procedure. */
-     Curl_sha512_256_init,
+     Fetch_sha512_256_init,
      /* Update context with data. */
-     Curl_sha512_256_update_i,
+     Fetch_sha512_256_update_i,
      /* Get final result procedure. */
-     Curl_sha512_256_finish_v,
+     Fetch_sha512_256_finish_v,
      /* Context structure size. */
-     sizeof(Curl_sha512_256_ctx),
+     sizeof(Fetch_sha512_256_ctx),
      /* Maximum key length (bytes). */
      FETCH_SHA512_256_BLOCK_SIZE,
      /* Result length (bytes). */

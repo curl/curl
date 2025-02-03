@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -88,7 +88,7 @@ static struct cw_out_buf *cw_out_buf_create(cw_out_type otype)
   if (cwbuf)
   {
     cwbuf->type = otype;
-    Curl_dyn_init(&cwbuf->b, DYN_PAUSE_BUFFER);
+    Fetch_dyn_init(&cwbuf->b, DYN_PAUSE_BUFFER);
   }
   return cwbuf;
 }
@@ -97,27 +97,27 @@ static void cw_out_buf_free(struct cw_out_buf *cwbuf)
 {
   if (cwbuf)
   {
-    Curl_dyn_free(&cwbuf->b);
+    Fetch_dyn_free(&cwbuf->b);
     free(cwbuf);
   }
 }
 
 struct cw_out_ctx
 {
-  struct Curl_cwriter super;
+  struct Fetch_cwriter super;
   struct cw_out_buf *buf;
   BIT(paused);
   BIT(errored);
 };
 
-static FETCHcode cw_out_write(struct Curl_easy *data,
-                              struct Curl_cwriter *writer, int type,
+static FETCHcode cw_out_write(struct Fetch_easy *data,
+                              struct Fetch_cwriter *writer, int type,
                               const char *buf, size_t nbytes);
-static void cw_out_close(struct Curl_easy *data, struct Curl_cwriter *writer);
-static FETCHcode cw_out_init(struct Curl_easy *data,
-                             struct Curl_cwriter *writer);
+static void cw_out_close(struct Fetch_easy *data, struct Fetch_cwriter *writer);
+static FETCHcode cw_out_init(struct Fetch_easy *data,
+                             struct Fetch_cwriter *writer);
 
-struct Curl_cwtype Curl_cwt_out = {
+struct Fetch_cwtype Fetch_cwt_out = {
     "cw-out",
     NULL,
     cw_out_init,
@@ -125,8 +125,8 @@ struct Curl_cwtype Curl_cwt_out = {
     cw_out_close,
     sizeof(struct cw_out_ctx)};
 
-static FETCHcode cw_out_init(struct Curl_easy *data,
-                             struct Curl_cwriter *writer)
+static FETCHcode cw_out_init(struct Fetch_easy *data,
+                             struct Fetch_cwriter *writer)
 {
   struct cw_out_ctx *ctx = writer->ctx;
   (void)data;
@@ -150,13 +150,13 @@ static size_t cw_out_bufs_len(struct cw_out_ctx *ctx)
   size_t len = 0;
   while (cwbuf)
   {
-    len += Curl_dyn_len(&cwbuf->b);
+    len += Fetch_dyn_len(&cwbuf->b);
     cwbuf = cwbuf->next;
   }
   return len;
 }
 
-static void cw_out_close(struct Curl_easy *data, struct Curl_cwriter *writer)
+static void cw_out_close(struct Fetch_easy *data, struct Fetch_cwriter *writer)
 {
   struct cw_out_ctx *ctx = writer->ctx;
 
@@ -167,7 +167,7 @@ static void cw_out_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 /**
  * Return the current fetch_write_callback and user_data for the buf type
  */
-static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
+static void cw_get_writefunc(struct Fetch_easy *data, cw_out_type otype,
                              fetch_write_callback *pwcb, void **pwcb_data,
                              size_t *pmax_write, size_t *pmin_write)
 {
@@ -197,7 +197,7 @@ static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
 }
 
 static FETCHcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
-                                  struct Curl_easy *data,
+                                  struct Fetch_easy *data,
                                   cw_out_type otype,
                                   bool flush_all,
                                   const char *buf, size_t blen,
@@ -226,9 +226,9 @@ static FETCHcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
     if (!flush_all && blen < min_write)
       break;
     wlen = max_write ? FETCHMIN(blen, max_write) : blen;
-    Curl_set_in_callback(data, TRUE);
+    Fetch_set_in_callback(data, TRUE);
     nwritten = wcb((char *)buf, 1, wlen, wcb_data);
-    Curl_set_in_callback(data, FALSE);
+    Fetch_set_in_callback(data, FALSE);
     FETCH_TRC_WRITE(data, "cw_out, wrote %zu %s bytes -> %zu",
                     wlen, (otype == CW_OUT_BODY) ? "body" : "header",
                     nwritten);
@@ -268,33 +268,33 @@ static FETCHcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
 }
 
 static FETCHcode cw_out_buf_flush(struct cw_out_ctx *ctx,
-                                  struct Curl_easy *data,
+                                  struct Fetch_easy *data,
                                   struct cw_out_buf *cwbuf,
                                   bool flush_all)
 {
   FETCHcode result = FETCHE_OK;
 
-  if (Curl_dyn_len(&cwbuf->b))
+  if (Fetch_dyn_len(&cwbuf->b))
   {
     size_t consumed;
 
     result = cw_out_ptr_flush(ctx, data, cwbuf->type, flush_all,
-                              Curl_dyn_ptr(&cwbuf->b),
-                              Curl_dyn_len(&cwbuf->b),
+                              Fetch_dyn_ptr(&cwbuf->b),
+                              Fetch_dyn_len(&cwbuf->b),
                               &consumed);
     if (result)
       return result;
 
     if (consumed)
     {
-      if (consumed == Curl_dyn_len(&cwbuf->b))
+      if (consumed == Fetch_dyn_len(&cwbuf->b))
       {
-        Curl_dyn_free(&cwbuf->b);
+        Fetch_dyn_free(&cwbuf->b);
       }
       else
       {
-        DEBUGASSERT(consumed < Curl_dyn_len(&cwbuf->b));
-        result = Curl_dyn_tail(&cwbuf->b, Curl_dyn_len(&cwbuf->b) - consumed);
+        DEBUGASSERT(consumed < Fetch_dyn_len(&cwbuf->b));
+        result = Fetch_dyn_tail(&cwbuf->b, Fetch_dyn_len(&cwbuf->b) - consumed);
         if (result)
           return result;
       }
@@ -304,7 +304,7 @@ static FETCHcode cw_out_buf_flush(struct cw_out_ctx *ctx,
 }
 
 static FETCHcode cw_out_flush_chain(struct cw_out_ctx *ctx,
-                                    struct Curl_easy *data,
+                                    struct Fetch_easy *data,
                                     struct cw_out_buf **pcwbuf,
                                     bool flush_all)
 {
@@ -336,7 +336,7 @@ static FETCHcode cw_out_flush_chain(struct cw_out_ctx *ctx,
   result = cw_out_buf_flush(ctx, data, cwbuf, flush_all);
   if (result)
     return result;
-  if (!Curl_dyn_len(&cwbuf->b))
+  if (!Fetch_dyn_len(&cwbuf->b))
   {
     cw_out_buf_free(cwbuf);
     *pcwbuf = NULL;
@@ -363,11 +363,11 @@ static FETCHcode cw_out_append(struct cw_out_ctx *ctx,
     ctx->buf = cwbuf;
   }
   DEBUGASSERT(ctx->buf && (ctx->buf->type == otype));
-  return Curl_dyn_addn(&ctx->buf->b, buf, blen);
+  return Fetch_dyn_addn(&ctx->buf->b, buf, blen);
 }
 
 static FETCHcode cw_out_do_write(struct cw_out_ctx *ctx,
-                                 struct Curl_easy *data,
+                                 struct Fetch_easy *data,
                                  cw_out_type otype,
                                  bool flush_all,
                                  const char *buf, size_t blen)
@@ -421,8 +421,8 @@ out:
   return result;
 }
 
-static FETCHcode cw_out_write(struct Curl_easy *data,
-                              struct Curl_cwriter *writer, int type,
+static FETCHcode cw_out_write(struct Fetch_easy *data,
+                              struct Fetch_cwriter *writer, int type,
                               const char *buf, size_t blen)
 {
   struct cw_out_ctx *ctx = writer->ctx;
@@ -447,12 +447,12 @@ static FETCHcode cw_out_write(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-bool Curl_cw_out_is_paused(struct Curl_easy *data)
+bool Fetch_cw_out_is_paused(struct Fetch_easy *data)
 {
-  struct Curl_cwriter *cw_out;
+  struct Fetch_cwriter *cw_out;
   struct cw_out_ctx *ctx;
 
-  cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
+  cw_out = Fetch_cwriter_get_by_type(data, &Fetch_cwt_out);
   if (!cw_out)
     return FALSE;
 
@@ -461,13 +461,13 @@ bool Curl_cw_out_is_paused(struct Curl_easy *data)
   return ctx->paused;
 }
 
-static FETCHcode cw_out_flush(struct Curl_easy *data,
+static FETCHcode cw_out_flush(struct Fetch_easy *data,
                               bool unpause, bool flush_all)
 {
-  struct Curl_cwriter *cw_out;
+  struct Fetch_cwriter *cw_out;
   FETCHcode result = FETCHE_OK;
 
-  cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
+  cw_out = Fetch_cwriter_get_by_type(data, &Fetch_cwt_out);
   if (cw_out)
   {
     struct cw_out_ctx *ctx = (struct cw_out_ctx *)cw_out;
@@ -489,13 +489,13 @@ static FETCHcode cw_out_flush(struct Curl_easy *data,
   return result;
 }
 
-FETCHcode Curl_cw_out_unpause(struct Curl_easy *data)
+FETCHcode Fetch_cw_out_unpause(struct Fetch_easy *data)
 {
   FETCH_TRC_WRITE(data, "cw-out unpause");
   return cw_out_flush(data, TRUE, FALSE);
 }
 
-FETCHcode Curl_cw_out_done(struct Curl_easy *data)
+FETCHcode Fetch_cw_out_done(struct Fetch_easy *data)
 {
   FETCH_TRC_WRITE(data, "cw-out done");
   return cw_out_flush(data, FALSE, TRUE);

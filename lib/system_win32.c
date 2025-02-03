@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,17 +36,17 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
+LARGE_INTEGER Fetch_freq;
+bool Fetch_isVistaOrGreater;
 
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
 /* Pointer to the if_nametoindex function */
-IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
+IF_NAMETOINDEX_FN Fetch_if_nametoindex = NULL;
 
-/* Curl_win32_init() performs Win32 global initialization */
-FETCHcode Curl_win32_init(long flags)
+/* Fetch_win32_init() performs Win32 global initialization */
+FETCHcode Fetch_win32_init(long flags)
 {
   /* FETCH_GLOBAL_WIN32 controls the *optional* part of the initialization which
      is just for Winsock at the moment. Any required Win32 initialization
@@ -89,13 +89,13 @@ FETCHcode Curl_win32_init(long flags)
 
 #ifdef USE_WINDOWS_SSPI
   {
-    FETCHcode result = Curl_sspi_global_init();
+    FETCHcode result = Fetch_sspi_global_init();
     if (result)
       return result;
   }
 #endif
 
-  s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
+  s_hIpHlpApiDll = Fetch_load_library(TEXT("iphlpapi.dll"));
   if (s_hIpHlpApiDll)
   {
     /* Get the address of the if_nametoindex function */
@@ -104,7 +104,7 @@ FETCHcode Curl_win32_init(long flags)
                              (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
 
     if (pIfNameToIndex)
-      Curl_if_nametoindex = pIfNameToIndex;
+      Fetch_if_nametoindex = pIfNameToIndex;
   }
 
   /* fetchx_verify_windows_version must be called during init at least once
@@ -112,27 +112,27 @@ FETCHcode Curl_win32_init(long flags)
   if (fetchx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL))
   {
-    Curl_isVistaOrGreater = TRUE;
+    Fetch_isVistaOrGreater = TRUE;
   }
   else
-    Curl_isVistaOrGreater = FALSE;
+    Fetch_isVistaOrGreater = FALSE;
 
-  QueryPerformanceFrequency(&Curl_freq);
+  QueryPerformanceFrequency(&Fetch_freq);
   return FETCHE_OK;
 }
 
-/* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
-void Curl_win32_cleanup(long init_flags)
+/* Fetch_win32_cleanup() is the opposite of Fetch_win32_init() */
+void Fetch_win32_cleanup(long init_flags)
 {
   if (s_hIpHlpApiDll)
   {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;
-    Curl_if_nametoindex = NULL;
+    Fetch_if_nametoindex = NULL;
   }
 
 #ifdef USE_WINDOWS_SSPI
-  Curl_sspi_global_cleanup();
+  Fetch_sspi_global_cleanup();
 #endif
 
   if (init_flags & FETCH_GLOBAL_WIN32)
@@ -166,7 +166,7 @@ typedef HMODULE(APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 #endif
 
 /*
- * Curl_load_library()
+ * Fetch_load_library()
  *
  * This is used to dynamically load DLLs using the most secure method available
  * for the version of Windows that we are running on.
@@ -179,7 +179,7 @@ typedef HMODULE(APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  *
  * Returns the handle of the module on success; otherwise NULL.
  */
-HMODULE Curl_load_library(LPCTSTR filename)
+HMODULE Fetch_load_library(LPCTSTR filename)
 {
 #ifndef FETCH_WINDOWS_UWP
   HMODULE hModule = NULL;

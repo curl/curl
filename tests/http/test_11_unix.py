@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@ from typing import Generator
 
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, FetchClient
 
 
 log = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ class TestUnix:
 
     # download http: via Unix socket
     def test_11_01_unix_connect_http(self, env: Env, httpd, uds_faker):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
         r = fetch.http_download(urls=[url], with_stats=True,
                                extra_args=[
@@ -113,7 +113,7 @@ class TestUnix:
     # download https: via Unix socket
     @pytest.mark.skipif(condition=not Env.have_ssl_fetch(), reason="fetch without SSL")
     def test_11_02_unix_connect_http(self, env: Env, httpd, uds_faker):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'
         r = fetch.http_download(urls=[url], with_stats=True,
                                extra_args=[
@@ -124,7 +124,7 @@ class TestUnix:
     # download HTTP/3 via Unix socket
     @pytest.mark.skipif(condition=not Env.have_h3(), reason='h3 not supported')
     def test_11_03_unix_connect_quic(self, env: Env, httpd, uds_faker):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'
         r = fetch.http_download(urls=[url], with_stats=True,
                                alpn_proto='h3',

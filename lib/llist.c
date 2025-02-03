@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,7 +38,7 @@
 
 #ifdef DEBUGBUILD
 #define VERIFYNODE(x) verifynode(x)
-static struct Curl_llist_node *verifynode(struct Curl_llist_node *n)
+static struct Fetch_llist_node *verifynode(struct Fetch_llist_node *n)
 {
   DEBUGASSERT(!n || (n->_init == NODEINIT));
   return n;
@@ -49,7 +49,7 @@ static struct Curl_llist_node *verifynode(struct Curl_llist_node *n)
 /*
  * @unittest: 1300
  */
-void Curl_llist_init(struct Curl_llist *l, Curl_llist_dtor dtor)
+void Fetch_llist_init(struct Fetch_llist *l, Fetch_llist_dtor dtor)
 {
   l->_size = 0;
   l->_dtor = dtor;
@@ -61,7 +61,7 @@ void Curl_llist_init(struct Curl_llist *l, Curl_llist_dtor dtor)
 }
 
 /*
- * Curl_llist_insert_next()
+ * Fetch_llist_insert_next()
  *
  * Inserts a new list element after the given one 'e'. If the given existing
  * entry is NULL and the list already has elements, the new one will be
@@ -71,10 +71,10 @@ void Curl_llist_init(struct Curl_llist *l, Curl_llist_dtor dtor)
  *
  * @unittest: 1300
  */
-void Curl_llist_insert_next(struct Curl_llist *list,
-                            struct Curl_llist_node *e, /* may be NULL */
+void Fetch_llist_insert_next(struct Fetch_llist *list,
+                            struct Fetch_llist_node *e, /* may be NULL */
                             const void *p,
-                            struct Curl_llist_node *ne)
+                            struct Fetch_llist_node *ne)
 {
   DEBUGASSERT(list);
   DEBUGASSERT(list->_init == LLISTINIT);
@@ -118,7 +118,7 @@ void Curl_llist_insert_next(struct Curl_llist *list,
 }
 
 /*
- * Curl_llist_append()
+ * Fetch_llist_append()
  *
  * Adds a new list element to the end of the list.
  *
@@ -126,19 +126,19 @@ void Curl_llist_insert_next(struct Curl_llist *list,
  *
  * @unittest: 1300
  */
-void Curl_llist_append(struct Curl_llist *list, const void *p,
-                       struct Curl_llist_node *ne)
+void Fetch_llist_append(struct Fetch_llist *list, const void *p,
+                       struct Fetch_llist_node *ne)
 {
   DEBUGASSERT(list);
   DEBUGASSERT(list->_init == LLISTINIT);
   DEBUGASSERT(ne);
-  Curl_llist_insert_next(list, list->_tail, p, ne);
+  Fetch_llist_insert_next(list, list->_tail, p, ne);
 }
 
-void *Curl_node_take_elem(struct Curl_llist_node *e)
+void *Fetch_node_take_elem(struct Fetch_llist_node *e)
 {
   void *ptr;
-  struct Curl_llist *list;
+  struct Fetch_llist *list;
   if (!e)
     return NULL;
 
@@ -186,9 +186,9 @@ void *Curl_node_take_elem(struct Curl_llist_node *e)
 /*
  * @unittest: 1300
  */
-void Curl_node_uremove(struct Curl_llist_node *e, void *user)
+void Fetch_node_uremove(struct Fetch_llist_node *e, void *user)
 {
-  struct Curl_llist *list;
+  struct Fetch_llist *list;
   void *ptr;
   if (!e)
     return;
@@ -197,30 +197,30 @@ void Curl_node_uremove(struct Curl_llist_node *e, void *user)
   DEBUGASSERT(list);
   if (list)
   {
-    ptr = Curl_node_take_elem(e);
+    ptr = Fetch_node_take_elem(e);
     if (list->_dtor)
       list->_dtor(user, ptr);
   }
 }
 
-void Curl_node_remove(struct Curl_llist_node *e)
+void Fetch_node_remove(struct Fetch_llist_node *e)
 {
-  Curl_node_uremove(e, NULL);
+  Fetch_node_uremove(e, NULL);
 }
 
-void Curl_llist_destroy(struct Curl_llist *list, void *user)
+void Fetch_llist_destroy(struct Fetch_llist *list, void *user)
 {
   if (list)
   {
     DEBUGASSERT(list->_init == LLISTINIT);
     while (list->_size > 0)
-      Curl_node_uremove(list->_tail, user);
+      Fetch_node_uremove(list->_tail, user);
   }
 }
 
-/* Curl_llist_head() returns the first 'struct Curl_llist_node *', which
+/* Fetch_llist_head() returns the first 'struct Fetch_llist_node *', which
    might be NULL */
-struct Curl_llist_node *Curl_llist_head(struct Curl_llist *list)
+struct Fetch_llist_node *Fetch_llist_head(struct Fetch_llist *list)
 {
   DEBUGASSERT(list);
   DEBUGASSERT(list->_init == LLISTINIT);
@@ -228,9 +228,9 @@ struct Curl_llist_node *Curl_llist_head(struct Curl_llist *list)
 }
 
 #ifdef UNITTESTS
-/* Curl_llist_tail() returns the last 'struct Curl_llist_node *', which
+/* Fetch_llist_tail() returns the last 'struct Fetch_llist_node *', which
    might be NULL */
-struct Curl_llist_node *Curl_llist_tail(struct Curl_llist *list)
+struct Fetch_llist_node *Fetch_llist_tail(struct Fetch_llist *list)
 {
   DEBUGASSERT(list);
   DEBUGASSERT(list->_init == LLISTINIT);
@@ -238,25 +238,25 @@ struct Curl_llist_node *Curl_llist_tail(struct Curl_llist *list)
 }
 #endif
 
-/* Curl_llist_count() returns a size_t the number of nodes in the list */
-size_t Curl_llist_count(struct Curl_llist *list)
+/* Fetch_llist_count() returns a size_t the number of nodes in the list */
+size_t Fetch_llist_count(struct Fetch_llist *list)
 {
   DEBUGASSERT(list);
   DEBUGASSERT(list->_init == LLISTINIT);
   return list->_size;
 }
 
-/* Curl_node_elem() returns the custom data from a Curl_llist_node */
-void *Curl_node_elem(struct Curl_llist_node *n)
+/* Fetch_node_elem() returns the custom data from a Fetch_llist_node */
+void *Fetch_node_elem(struct Fetch_llist_node *n)
 {
   DEBUGASSERT(n);
   DEBUGASSERT(n->_init == NODEINIT);
   return n->_ptr;
 }
 
-/* Curl_node_next() returns the next element in a list from a given
-   Curl_llist_node */
-struct Curl_llist_node *Curl_node_next(struct Curl_llist_node *n)
+/* Fetch_node_next() returns the next element in a list from a given
+   Fetch_llist_node */
+struct Fetch_llist_node *Fetch_node_next(struct Fetch_llist_node *n)
 {
   DEBUGASSERT(n);
   DEBUGASSERT(n->_init == NODEINIT);
@@ -265,9 +265,9 @@ struct Curl_llist_node *Curl_node_next(struct Curl_llist_node *n)
 
 #ifdef UNITTESTS
 
-/* Curl_node_prev() returns the previous element in a list from a given
-   Curl_llist_node */
-struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n)
+/* Fetch_node_prev() returns the previous element in a list from a given
+   Fetch_llist_node */
+struct Fetch_llist_node *Fetch_node_prev(struct Fetch_llist_node *n)
 {
   DEBUGASSERT(n);
   DEBUGASSERT(n->_init == NODEINIT);
@@ -276,7 +276,7 @@ struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n)
 
 #endif
 
-struct Curl_llist *Curl_node_llist(struct Curl_llist_node *n)
+struct Fetch_llist *Fetch_node_llist(struct Fetch_llist_node *n)
 {
   DEBUGASSERT(n);
   DEBUGASSERT(!n->_list || n->_init == NODEINIT);

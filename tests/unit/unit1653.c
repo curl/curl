@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -50,11 +50,11 @@ static FETCHUcode parse_port(FETCHU *url,
 {
   struct dynbuf host;
   FETCHUcode ret;
-  Curl_dyn_init(&host, 10000);
-  if (Curl_dyn_add(&host, h))
+  Fetch_dyn_init(&host, 10000);
+  if (Fetch_dyn_add(&host, h))
     return FETCHUE_OUT_OF_MEMORY;
-  ret = Curl_parse_port(url, &host, has_scheme);
-  Curl_dyn_free(&host);
+  ret = Fetch_parse_port(url, &host, has_scheme);
+  Fetch_dyn_free(&host);
   return ret;
 }
 

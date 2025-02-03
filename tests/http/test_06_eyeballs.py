@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@
 import logging
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, FetchClient
 
 
 log = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class TestEyeballs:
     # download using only HTTP/3 on working server
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
     def test_06_01_h3_only(self, env: Env, httpd, nghttpx):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = fetch.http_download(urls=[urln], extra_args=['--http3-only'])
         r.check_response(count=1, http_status=200)
@@ -57,7 +57,7 @@ class TestEyeballs:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
     def test_06_02_h3_only(self, env: Env, httpd, nghttpx):
         nghttpx.stop_if_running()
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = fetch.http_download(urls=[urln], extra_args=['--http3-only'])
         r.check_response(exitcode=7, http_status=None)
@@ -66,7 +66,7 @@ class TestEyeballs:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
     def test_06_03_h3_fallback_h2(self, env: Env, httpd, nghttpx):
         nghttpx.stop_if_running()
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = fetch.http_download(urls=[urln], extra_args=['--http3'])
         r.check_response(count=1, http_status=200)
@@ -76,7 +76,7 @@ class TestEyeballs:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
     def test_06_04_h3_fallback_h1(self, env: Env, httpd, nghttpx):
         nghttpx.stop_if_running()
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.authority_for(env.domain2, "h3")}/data.json'
         r = fetch.http_download(urls=[urln], extra_args=['--http3'])
         r.check_response(count=1, http_status=200)
@@ -84,7 +84,7 @@ class TestEyeballs:
 
     # make a successful https: transfer and observer the timer stats
     def test_06_10_stats_success(self, env: Env, httpd, nghttpx):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json'
         r = fetch.http_download(urls=[urln])
         r.check_response(count=1, http_status=200)
@@ -93,7 +93,7 @@ class TestEyeballs:
 
     # make https: to a hostname that tcp connects, but will not verify
     def test_06_11_stats_fail_verify(self, env: Env, httpd, nghttpx):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = f'https://not-valid.com:{env.https_port}/data.json'
         r = fetch.http_download(urls=[urln], extra_args=[
             '--resolve', f'not-valid.com:{env.https_port}:127.0.0.1'
@@ -104,7 +104,7 @@ class TestEyeballs:
 
     # make https: to an invalid address
     def test_06_12_stats_fail_tcp(self, env: Env, httpd, nghttpx):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         urln = 'https://not-valid.com:1/data.json'
         r = fetch.http_download(urls=[urln], extra_args=[
             '--resolve', f'not-valid.com:{1}:127.0.0.1'

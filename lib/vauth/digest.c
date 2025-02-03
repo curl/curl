@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -69,7 +69,7 @@
 #define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
 #endif
 
-bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
+bool Fetch_auth_digest_get_pair(const char *str, char *value, char *content,
                                const char **endptr)
 {
   int c;
@@ -239,12 +239,12 @@ static FETCHcode auth_digest_get_qop_values(const char *options, int *value)
   *value = 0;
 
   /* Tokenise the list of qop values. Use a temporary clone of the buffer since
-     Curl_strtok_r() ruins it. */
+     Fetch_strtok_r() ruins it. */
   tmp = strdup(options);
   if (!tmp)
     return FETCHE_OUT_OF_MEMORY;
 
-  token = Curl_strtok_r(tmp, ",", &tok_buf);
+  token = Fetch_strtok_r(tmp, ",", &tok_buf);
   while (token)
   {
     if (strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH))
@@ -254,7 +254,7 @@ static FETCHcode auth_digest_get_qop_values(const char *options, int *value)
     else if (strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_CONF))
       *value |= DIGEST_QOP_VALUE_AUTH_CONF;
 
-    token = Curl_strtok_r(NULL, ",", &tok_buf);
+    token = Fetch_strtok_r(NULL, ",", &tok_buf);
   }
 
   free(tmp);
@@ -288,10 +288,10 @@ static FETCHcode auth_decode_digest_md5_message(const struct bufref *chlgref,
                                                 char *alg, size_t alen,
                                                 char *qop, size_t qlen)
 {
-  const char *chlg = (const char *)Curl_bufref_ptr(chlgref);
+  const char *chlg = (const char *)Fetch_bufref_ptr(chlgref);
 
   /* Ensure we have a valid challenge message */
-  if (!Curl_bufref_len(chlgref))
+  if (!Fetch_bufref_len(chlgref))
     return FETCHE_BAD_CONTENT_ENCODING;
 
   /* Retrieve nonce string from the challenge */
@@ -317,7 +317,7 @@ static FETCHcode auth_decode_digest_md5_message(const struct bufref *chlgref,
 }
 
 /*
- * Curl_auth_is_digest_supported()
+ * Fetch_auth_is_digest_supported()
  *
  * This is used to evaluate if DIGEST is supported.
  *
@@ -325,13 +325,13 @@ static FETCHcode auth_decode_digest_md5_message(const struct bufref *chlgref,
  *
  * Returns TRUE as DIGEST as handled by libfetch.
  */
-bool Curl_auth_is_digest_supported(void)
+bool Fetch_auth_is_digest_supported(void)
 {
   return TRUE;
 }
 
 /*
- * Curl_auth_create_digest_md5_message()
+ * Fetch_auth_create_digest_md5_message()
  *
  * This is used to generate an already encoded DIGEST-MD5 response message
  * ready for sending to the recipient.
@@ -347,7 +347,7 @@ bool Curl_auth_is_digest_supported(void)
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
+FETCHcode Fetch_auth_create_digest_md5_message(struct Fetch_easy *data,
                                               const struct bufref *chlg,
                                               const char *userp,
                                               const char *passwdp,
@@ -397,49 +397,49 @@ FETCHcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return FETCHE_BAD_CONTENT_ENCODING;
 
   /* Generate 32 random hex chars, 32 bytes + 1 null-termination */
-  result = Curl_rand_hex(data, (unsigned char *)cnonce, sizeof(cnonce));
+  result = Fetch_rand_hex(data, (unsigned char *)cnonce, sizeof(cnonce));
   if (result)
     return result;
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
-  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
+  ctxt = Fetch_MD5_init(&Fetch_DIGEST_MD5);
   if (!ctxt)
     return FETCHE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, (const unsigned char *)userp,
+  Fetch_MD5_update(ctxt, (const unsigned char *)userp,
                   fetchx_uztoui(strlen(userp)));
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *)realm,
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)realm,
                   fetchx_uztoui(strlen(realm)));
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *)passwdp,
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)passwdp,
                   fetchx_uztoui(strlen(passwdp)));
-  Curl_MD5_final(ctxt, digest);
+  Fetch_MD5_final(ctxt, digest);
 
-  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
+  ctxt = Fetch_MD5_init(&Fetch_DIGEST_MD5);
   if (!ctxt)
     return FETCHE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, (const unsigned char *)digest, MD5_DIGEST_LEN);
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *)nonce,
+  Fetch_MD5_update(ctxt, (const unsigned char *)digest, MD5_DIGEST_LEN);
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)nonce,
                   fetchx_uztoui(strlen(nonce)));
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *)cnonce,
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)cnonce,
                   fetchx_uztoui(strlen(cnonce)));
-  Curl_MD5_final(ctxt, digest);
+  Fetch_MD5_final(ctxt, digest);
 
   /* Convert calculated 16 octet hex into 32 bytes string */
   for (i = 0; i < MD5_DIGEST_LEN; i++)
     msnprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate our SPN */
-  spn = Curl_auth_build_spn(service, data->conn->host.name, NULL);
+  spn = Fetch_auth_build_spn(service, data->conn->host.name, NULL);
   if (!spn)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Calculate H(A2) */
-  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
+  ctxt = Fetch_MD5_init(&Fetch_DIGEST_MD5);
   if (!ctxt)
   {
     free(spn);
@@ -447,18 +447,18 @@ FETCHcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return FETCHE_OUT_OF_MEMORY;
   }
 
-  Curl_MD5_update(ctxt, (const unsigned char *)method,
+  Fetch_MD5_update(ctxt, (const unsigned char *)method,
                   fetchx_uztoui(strlen(method)));
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *)spn,
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)spn,
                   fetchx_uztoui(strlen(spn)));
-  Curl_MD5_final(ctxt, digest);
+  Fetch_MD5_final(ctxt, digest);
 
   for (i = 0; i < MD5_DIGEST_LEN; i++)
     msnprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Now calculate the response hash */
-  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
+  ctxt = Fetch_MD5_init(&Fetch_DIGEST_MD5);
   if (!ctxt)
   {
     free(spn);
@@ -466,24 +466,24 @@ FETCHcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return FETCHE_OUT_OF_MEMORY;
   }
 
-  Curl_MD5_update(ctxt, (const unsigned char *)HA1_hex, 2 * MD5_DIGEST_LEN);
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *)nonce,
+  Fetch_MD5_update(ctxt, (const unsigned char *)HA1_hex, 2 * MD5_DIGEST_LEN);
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)nonce,
                   fetchx_uztoui(strlen(nonce)));
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
 
-  Curl_MD5_update(ctxt, (const unsigned char *)nonceCount,
+  Fetch_MD5_update(ctxt, (const unsigned char *)nonceCount,
                   fetchx_uztoui(strlen(nonceCount)));
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *)cnonce,
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)cnonce,
                   fetchx_uztoui(strlen(cnonce)));
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *)qop,
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)qop,
                   fetchx_uztoui(strlen(qop)));
-  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Fetch_MD5_update(ctxt, (const unsigned char *)":", 1);
 
-  Curl_MD5_update(ctxt, (const unsigned char *)HA2_hex, 2 * MD5_DIGEST_LEN);
-  Curl_MD5_final(ctxt, digest);
+  Fetch_MD5_update(ctxt, (const unsigned char *)HA2_hex, 2 * MD5_DIGEST_LEN);
+  Fetch_MD5_final(ctxt, digest);
 
   for (i = 0; i < MD5_DIGEST_LEN; i++)
     msnprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
@@ -499,12 +499,12 @@ FETCHcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return FETCHE_OUT_OF_MEMORY;
 
   /* Return the response. */
-  Curl_bufref_set(out, response, strlen(response), fetch_free);
+  Fetch_bufref_set(out, response, strlen(response), fetch_free);
   return result;
 }
 
 /*
- * Curl_auth_decode_digest_http_message()
+ * Fetch_auth_decode_digest_http_message()
  *
  * This is used to decode an HTTP DIGEST challenge message into the separate
  * attributes.
@@ -516,7 +516,7 @@ FETCHcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_decode_digest_http_message(const char *chlg,
+FETCHcode Fetch_auth_decode_digest_http_message(const char *chlg,
                                                struct digestdata *digest)
 {
   bool before = FALSE; /* got a nonce before */
@@ -530,7 +530,7 @@ FETCHcode Curl_auth_decode_digest_http_message(const char *chlg,
     before = TRUE;
 
   /* Clean up any former leftovers and initialise to defaults */
-  Curl_auth_digest_cleanup(digest);
+  Fetch_auth_digest_cleanup(digest);
 
   for (;;)
   {
@@ -542,7 +542,7 @@ FETCHcode Curl_auth_decode_digest_http_message(const char *chlg,
       chlg++;
 
     /* Extract a value=content pair */
-    if (Curl_auth_digest_get_pair(chlg, value, content, &chlg))
+    if (Fetch_auth_digest_get_pair(chlg, value, content, &chlg))
     {
       if (strcasecompare(value, "nonce"))
       {
@@ -577,12 +577,12 @@ FETCHcode Curl_auth_decode_digest_http_message(const char *chlg,
       {
         char *tok_buf = NULL;
         /* Tokenize the list and choose auth if possible, use a temporary
-           clone of the buffer since Curl_strtok_r() ruins it */
+           clone of the buffer since Fetch_strtok_r() ruins it */
         tmp = strdup(content);
         if (!tmp)
           return FETCHE_OUT_OF_MEMORY;
 
-        token = Curl_strtok_r(tmp, ",", &tok_buf);
+        token = Fetch_strtok_r(tmp, ",", &tok_buf);
         while (token)
         {
           /* Pass additional spaces here */
@@ -596,7 +596,7 @@ FETCHcode Curl_auth_decode_digest_http_message(const char *chlg,
           {
             foundAuthInt = TRUE;
           }
-          token = Curl_strtok_r(NULL, ",", &tok_buf);
+          token = Fetch_strtok_r(NULL, ",", &tok_buf);
         }
 
         free(tmp);
@@ -713,7 +713,7 @@ FETCHcode Curl_auth_decode_digest_http_message(const char *chlg,
  * Returns FETCHE_OK on success.
  */
 static FETCHcode auth_create_digest_http_message(
-    struct Curl_easy *data,
+    struct Fetch_easy *data,
     const char *userp,
     const char *passwdp,
     const unsigned char *request,
@@ -746,7 +746,7 @@ static FETCHcode auth_create_digest_http_message(
   if (!digest->cnonce)
   {
     char cnoncebuf[12];
-    result = Curl_rand_bytes(data,
+    result = Fetch_rand_bytes(data,
 #ifdef DEBUGBUILD
                              TRUE,
 #endif
@@ -755,7 +755,7 @@ static FETCHcode auth_create_digest_http_message(
     if (result)
       return result;
 
-    result = Curl_base64_encode(cnoncebuf, sizeof(cnoncebuf),
+    result = Fetch_base64_encode(cnoncebuf, sizeof(cnoncebuf),
                                 &cnonce, &cnonce_sz);
     if (result)
       return result;
@@ -1004,7 +1004,7 @@ static FETCHcode auth_create_digest_http_message(
 }
 
 /*
- * Curl_auth_create_digest_http_message()
+ * Fetch_auth_create_digest_http_message()
  *
  * This is used to generate an HTTP DIGEST response message ready for sending
  * to the recipient.
@@ -1023,7 +1023,7 @@ static FETCHcode auth_create_digest_http_message(
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
+FETCHcode Fetch_auth_create_digest_http_message(struct Fetch_easy *data,
                                                const char *userp,
                                                const char *passwdp,
                                                const unsigned char *request,
@@ -1036,21 +1036,21 @@ FETCHcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_md5_to_ascii,
-                                           Curl_md5it);
+                                           Fetch_md5it);
 
   if (digest->algo <= ALGO_SHA256SESS)
     return auth_create_digest_http_message(data, userp, passwdp,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,
-                                           Curl_sha256it);
+                                           Fetch_sha256it);
 #ifdef FETCH_HAVE_SHA512_256
   if (digest->algo <= ALGO_SHA512_256SESS)
     return auth_create_digest_http_message(data, userp, passwdp,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,
-                                           Curl_sha512_256it);
+                                           Fetch_sha512_256it);
 #endif /* FETCH_HAVE_SHA512_256 */
 
   /* Should be unreachable */
@@ -1058,7 +1058,7 @@ FETCHcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 }
 
 /*
- * Curl_auth_digest_cleanup()
+ * Fetch_auth_digest_cleanup()
  *
  * This is used to clean up the digest specific data.
  *
@@ -1067,14 +1067,14 @@ FETCHcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
  * digest    [in/out] - The digest data struct being cleaned up.
  *
  */
-void Curl_auth_digest_cleanup(struct digestdata *digest)
+void Fetch_auth_digest_cleanup(struct digestdata *digest)
 {
-  Curl_safefree(digest->nonce);
-  Curl_safefree(digest->cnonce);
-  Curl_safefree(digest->realm);
-  Curl_safefree(digest->opaque);
-  Curl_safefree(digest->qop);
-  Curl_safefree(digest->algorithm);
+  Fetch_safefree(digest->nonce);
+  Fetch_safefree(digest->cnonce);
+  Fetch_safefree(digest->realm);
+  Fetch_safefree(digest->opaque);
+  Fetch_safefree(digest->qop);
+  Fetch_safefree(digest->algorithm);
 
   digest->nc = 0;
   digest->algo = ALGO_MD5; /* default algorithm */

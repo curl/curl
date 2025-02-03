@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,10 +29,10 @@
 #ifndef BUILDING_LIBFETCH
 /* this renames functions so that the tool code can use the same code
    without getting symbol collisions */
-#define Curl_get_line(a, b) fetchx_get_line(a, b)
+#define Fetch_get_line(a, b) fetchx_get_line(a, b)
 #endif
 
-/* Curl_get_line() returns complete lines that end with a newline. */
-int Curl_get_line(struct dynbuf *buf, FILE *input);
+/* Fetch_get_line() returns complete lines that end with a newline. */
+int Fetch_get_line(struct dynbuf *buf, FILE *input);
 
 #endif /* HEADER_FETCH_GET_LINE_H */

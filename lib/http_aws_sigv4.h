@@ -26,6 +26,6 @@
 #include "fetch_setup.h"
 
 /* this is for creating aws_sigv4 header output */
-FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy);
+FETCHcode Fetch_output_aws_sigv4(struct Fetch_easy *data, bool proxy);
 
 #endif /* HEADER_FETCH_HTTP_AWS_SIGV4_H */

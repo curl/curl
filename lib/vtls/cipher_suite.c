@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -873,7 +873,7 @@ static int cs_zip_to_str(const uint8_t zip[6],
   return 0;
 }
 
-uint16_t Curl_cipher_suite_lookup_id(const char *cs_str, size_t cs_len)
+uint16_t Fetch_cipher_suite_lookup_id(const char *cs_str, size_t cs_len)
 {
   size_t i;
   uint8_t zip[6];
@@ -905,7 +905,7 @@ static bool cs_is_separator(char c)
   return FALSE;
 }
 
-uint16_t Curl_cipher_suite_walk_str(const char **str, const char **end)
+uint16_t Fetch_cipher_suite_walk_str(const char **str, const char **end)
 {
   /* move string pointer to first non-separator or end of string */
   for (; cs_is_separator(*str[0]); (*str)++)
@@ -915,10 +915,10 @@ uint16_t Curl_cipher_suite_walk_str(const char **str, const char **end)
   for (*end = *str; *end[0] != '\0' && !cs_is_separator(*end[0]); (*end)++)
     ;
 
-  return Curl_cipher_suite_lookup_id(*str, *end - *str);
+  return Fetch_cipher_suite_lookup_id(*str, *end - *str);
 }
 
-int Curl_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
+int Fetch_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
                               bool prefer_rfc)
 {
   size_t i, j = CS_LIST_LEN;

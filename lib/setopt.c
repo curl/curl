@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -59,12 +59,12 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-FETCHcode Curl_setstropt(char **charp, const char *s)
+FETCHcode Fetch_setstropt(char **charp, const char *s)
 {
   /* Release the previous storage at `charp' and replace by a dynamic storage
      copy of `s'. Return FETCHE_OK or FETCHE_OUT_OF_MEMORY. */
 
-  Curl_safefree(*charp);
+  Fetch_safefree(*charp);
 
   if (s)
   {
@@ -79,13 +79,13 @@ FETCHcode Curl_setstropt(char **charp, const char *s)
   return FETCHE_OK;
 }
 
-FETCHcode Curl_setblobopt(struct fetch_blob **blobp,
+FETCHcode Fetch_setblobopt(struct fetch_blob **blobp,
                           const struct fetch_blob *blob)
 {
   /* free the previous storage at `blobp' and replace by a dynamic storage
      copy of blob. If FETCH_BLOB_COPY is set, the data is copied. */
 
-  Curl_safefree(*blobp);
+  Fetch_safefree(*blobp);
 
   if (blob)
   {
@@ -129,7 +129,7 @@ static FETCHcode setstropt_userpwd(char *option, char **userp, char **passwdp)
     if (len > FETCH_MAX_INPUT_LENGTH)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-    result = Curl_parse_login_details(option, len, &user, &passwd, NULL);
+    result = Fetch_parse_login_details(option, len, &user, &passwd, NULL);
     if (result)
       return result;
   }
@@ -158,7 +158,7 @@ static FETCHcode setstropt_interface(char *option, char **devp,
   if (option)
   {
     /* Parse the interface details if set, otherwise clear them all */
-    result = Curl_parse_interface(option, &dev, &iface, &host);
+    result = Fetch_parse_interface(option, &dev, &iface, &host);
     if (result)
       return result;
   }
@@ -203,7 +203,7 @@ static FETCHcode protocol2num(const char *str, fetch_prot_t *val)
     tlen = str ? (size_t)(str - token) : strlen(token);
     if (tlen)
     {
-      const struct Curl_handler *h = Curl_getn_scheme_handler(token, tlen);
+      const struct Fetch_handler *h = Fetch_getn_scheme_handler(token, tlen);
 
       if (!h)
         return FETCHE_UNSUPPORTED_PROTOCOL;
@@ -218,7 +218,7 @@ static FETCHcode protocol2num(const char *str, fetch_prot_t *val)
   return FETCHE_OK;
 }
 
-static FETCHcode httpauth(struct Curl_easy *data, bool proxy,
+static FETCHcode httpauth(struct Fetch_easy *data, bool proxy,
                           unsigned long auth)
 {
   if (auth != FETCHAUTH_NONE)
@@ -267,7 +267,7 @@ static FETCHcode httpauth(struct Curl_easy *data, bool proxy,
   return FETCHE_OK;
 }
 
-static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
+static FETCHcode setopt_long(struct Fetch_easy *data, FETCHoption option,
                              long arg)
 {
   bool enabled = (0 != arg);
@@ -283,7 +283,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.dns_cache_timeout = (int)arg;
     break;
   case FETCHOPT_CA_CACHE_TIMEOUT:
-    if (Curl_ssl_supports(data, SSLSUPP_CA_CACHE))
+    if (Fetch_ssl_supports(data, SSLSUPP_CA_CACHE))
     {
       if (arg < -1)
         return FETCHE_BAD_FUNCTION_ARGUMENT;
@@ -508,7 +508,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
         data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS])
     {
       /* Previous FETCHOPT_COPYPOSTFIELDS is no longer valid. */
-      Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
+      Fetch_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
       data->set.postfields = NULL;
     }
 
@@ -728,7 +728,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.proxy_ssl.primary.verifypeer = enabled;
 
     /* Update the current connection proxy_ssl_config. */
-    Curl_ssl_conn_config_update(data, TRUE);
+    Fetch_ssl_conn_config_update(data, TRUE);
     break;
   case FETCHOPT_PROXY_SSL_VERIFYHOST:
     /*
@@ -737,7 +737,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.proxy_ssl.primary.verifyhost = enabled;
 
     /* Update the current connection proxy_ssl_config. */
-    Curl_ssl_conn_config_update(data, TRUE);
+    Fetch_ssl_conn_config_update(data, TRUE);
     break;
 #endif /* ! FETCH_DISABLE_PROXY */
 
@@ -952,7 +952,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.ssl.primary.verifypeer = enabled;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_config_update(data, FALSE);
+    Fetch_ssl_conn_config_update(data, FALSE);
     break;
 #ifndef FETCH_DISABLE_DOH
   case FETCHOPT_DOH_SSL_VERIFYPEER:
@@ -971,7 +971,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Enable certificate status verifying for DoH.
      */
-    if (!Curl_ssl_cert_status_request())
+    if (!Fetch_ssl_cert_status_request())
       return FETCHE_NOT_BUILT_IN;
 
     data->set.doh_verifystatus = enabled;
@@ -988,32 +988,32 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.ssl.primary.verifyhost = enabled;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_config_update(data, FALSE);
+    Fetch_ssl_conn_config_update(data, FALSE);
     break;
   case FETCHOPT_SSL_VERIFYSTATUS:
     /*
      * Enable certificate status verifying.
      */
-    if (!Curl_ssl_cert_status_request())
+    if (!Fetch_ssl_cert_status_request())
       return FETCHE_NOT_BUILT_IN;
 
     data->set.ssl.primary.verifystatus = enabled;
 
     /* Update the current connection ssl_config. */
-    Curl_ssl_conn_config_update(data, FALSE);
+    Fetch_ssl_conn_config_update(data, FALSE);
     break;
   case FETCHOPT_SSL_FALSESTART:
     /*
      * Enable TLS false start.
      */
-    if (!Curl_ssl_false_start())
+    if (!Fetch_ssl_false_start())
       return FETCHE_NOT_BUILT_IN;
 
     data->set.ssl.falsestart = enabled;
     break;
   case FETCHOPT_CERTINFO:
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_CERTINFO))
+    if (Fetch_ssl_supports(data, SSLSUPP_CERTINFO))
       data->set.ssl.certinfo = enabled;
     else
 #endif
@@ -1231,7 +1231,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...)
      * Would this be better if the RTSPREQ_* were just moved into here?
      */
-    Curl_RtspReq rtspreq = RTSPREQ_NONE;
+    Fetch_RtspReq rtspreq = RTSPREQ_NONE;
     switch (arg)
     {
     case FETCH_RTSPREQ_OPTIONS:
@@ -1389,13 +1389,13 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     {
       if (!data->hsts)
       {
-        data->hsts = Curl_hsts_init();
+        data->hsts = Fetch_hsts_init();
         if (!data->hsts)
           return FETCHE_OUT_OF_MEMORY;
       }
     }
     else
-      Curl_hsts_cleanup(&data->hsts);
+      Fetch_hsts_cleanup(&data->hsts);
     break;
 #endif /* ! FETCH_DISABLE_HSTS */
 #ifndef FETCH_DISABLE_ALTSVC
@@ -1407,11 +1407,11 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     }
     if (!data->asi)
     {
-      data->asi = Curl_altsvc_init();
+      data->asi = Fetch_altsvc_init();
       if (!data->asi)
         return FETCHE_OUT_OF_MEMORY;
     }
-    return Curl_altsvc_ctrl(data->asi, arg);
+    return Fetch_altsvc_ctrl(data->asi, arg);
 #endif /* ! FETCH_DISABLE_ALTSVC */
 #ifndef FETCH_DISABLE_WEBSOCKETS
   case FETCHOPT_WS_OPTIONS:
@@ -1428,8 +1428,8 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * flag to set engine as default.
      */
-    Curl_safefree(data->set.str[STRING_SSL_ENGINE]);
-    return Curl_ssl_set_engine_default(data);
+    Fetch_safefree(data->set.str[STRING_SSL_ENGINE]);
+    return Fetch_ssl_set_engine_default(data);
 
   default:
     /* unknown option */
@@ -1438,7 +1438,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
   return FETCHE_OK;
 }
 
-static FETCHcode setopt_slist(struct Curl_easy *data, FETCHoption option,
+static FETCHcode setopt_slist(struct Fetch_easy *data, FETCHoption option,
                               struct fetch_slist *slist)
 {
   FETCHcode result = FETCHE_OK;
@@ -1536,7 +1536,7 @@ static FETCHcode setopt_slist(struct Curl_easy *data, FETCHoption option,
 }
 
 /* assorted pointer type arguments */
-static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
+static FETCHcode setopt_pointers(struct Fetch_easy *data, FETCHoption option,
                                  va_list param)
 {
   FETCHcode result = FETCHE_OK;
@@ -1551,8 +1551,8 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
     data->set.httppost = va_arg(param, struct fetch_httppost *);
     data->set.method = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
-    Curl_mime_cleanpart(data->state.formp);
-    Curl_safefree(data->state.formp);
+    Fetch_mime_cleanpart(data->state.formp);
+    Fetch_safefree(data->state.formp);
     data->state.mimepost = NULL;
     break;
 #endif /* ! FETCH_DISABLE_FORM_API */
@@ -1564,7 +1564,7 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
     /*
      * Set to make us do MIME POST
      */
-    result = Curl_mime_set_subparts(&data->set.mimepost,
+    result = Fetch_mime_set_subparts(&data->set.mimepost,
                                     va_arg(param, fetch_mime *),
                                     FALSE);
     if (!result)
@@ -1572,8 +1572,8 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
       data->set.method = HTTPREQ_POST_MIME;
       data->set.opt_no_body = FALSE; /* this is implied */
 #ifndef FETCH_DISABLE_FORM_API
-      Curl_mime_cleanpart(data->state.formp);
-      Curl_safefree(data->state.formp);
+      Fetch_mime_cleanpart(data->state.formp);
+      Fetch_safefree(data->state.formp);
       data->state.mimepost = NULL;
 #endif
     }
@@ -1591,12 +1591,12 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
     break;
   case FETCHOPT_SHARE:
   {
-    struct Curl_share *set = va_arg(param, struct Curl_share *);
+    struct Fetch_share *set = va_arg(param, struct Fetch_share *);
 
     /* disconnect from old share, if any */
     if (data->share)
     {
-      Curl_share_lock(data, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE);
+      Fetch_share_lock(data, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE);
 
       if (data->dns.hostcachetype == HCACHE_SHARED)
       {
@@ -1624,7 +1624,7 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
 
       data->share->dirty--;
 
-      Curl_share_unlock(data, FETCH_LOCK_DATA_SHARE);
+      Fetch_share_unlock(data, FETCH_LOCK_DATA_SHARE);
       data->share = NULL;
     }
 
@@ -1634,7 +1634,7 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
     if (data->share)
     {
 
-      Curl_share_lock(data, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE);
+      Fetch_share_lock(data, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE);
 
       data->share->dirty++;
 
@@ -1648,7 +1648,7 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
       if (data->share->cookies)
       {
         /* use shared cookie list, first free own one if any */
-        Curl_cookie_cleanup(data->cookies);
+        Fetch_cookie_cleanup(data->cookies);
         /* enable cookies since we now use a share that uses cookies! */
         data->cookies = data->share->cookies;
       }
@@ -1657,7 +1657,7 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
       if (data->share->hsts)
       {
         /* first free the private one if any */
-        Curl_hsts_cleanup(&data->hsts);
+        Fetch_hsts_cleanup(&data->hsts);
         data->hsts = data->share->hsts;
       }
 #endif
@@ -1670,7 +1670,7 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
         data->psl = &data->share->psl;
 #endif
 
-      Curl_share_unlock(data, FETCH_LOCK_DATA_SHARE);
+      Fetch_share_unlock(data, FETCH_LOCK_DATA_SHARE);
     }
     /* check for host cache not needed,
      * it will be done by fetch_easy_perform */
@@ -1681,9 +1681,9 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
   case FETCHOPT_STREAM_DEPENDS:
   case FETCHOPT_STREAM_DEPENDS_E:
   {
-    struct Curl_easy *dep = va_arg(param, struct Curl_easy *);
+    struct Fetch_easy *dep = va_arg(param, struct Fetch_easy *);
     if (!dep || GOOD_EASY_HANDLE(dep))
-      return Curl_data_priority_add_child(dep, data,
+      return Fetch_data_priority_add_child(dep, data,
                                           option == FETCHOPT_STREAM_DEPENDS_E);
     break;
   }
@@ -1695,24 +1695,24 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
   return result;
 }
 
-static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
+static FETCHcode setopt_cptr(struct Fetch_easy *data, FETCHoption option,
                              char *ptr)
 {
   FETCHcode result = FETCHE_OK;
   switch (option)
   {
   case FETCHOPT_SSL_CIPHER_LIST:
-    if (Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
+    if (Fetch_ssl_supports(data, SSLSUPP_CIPHER_LIST))
       /* set a list of cipher we want to use in the SSL connection */
-      return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST], ptr);
+      return Fetch_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST], ptr);
     return FETCHE_NOT_BUILT_IN;
     break;
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_SSL_CIPHER_LIST:
-    if (Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
+    if (Fetch_ssl_supports(data, SSLSUPP_CIPHER_LIST))
     {
       /* set a list of cipher we want to use in the SSL connection for proxy */
-      return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_PROXY],
+      return Fetch_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_PROXY],
                             ptr);
     }
     else
@@ -1720,19 +1720,19 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     break;
 #endif
   case FETCHOPT_TLS13_CIPHERS:
-    if (Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
+    if (Fetch_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
     {
       /* set preferred list of TLS 1.3 cipher suites */
-      return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST], ptr);
+      return Fetch_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST], ptr);
     }
     else
       return FETCHE_NOT_BUILT_IN;
     break;
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_TLS13_CIPHERS:
-    if (Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
+    if (Fetch_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
       /* set preferred list of TLS 1.3 cipher suites for proxy */
-      return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_PROXY],
+      return Fetch_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_PROXY],
                             ptr);
     else
       return FETCHE_NOT_BUILT_IN;
@@ -1743,13 +1743,13 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
   case FETCHOPT_EGDSOCKET:
     break;
   case FETCHOPT_REQUEST_TARGET:
-    return Curl_setstropt(&data->set.str[STRING_TARGET], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_TARGET], ptr);
 #ifndef FETCH_DISABLE_NETRC
   case FETCHOPT_NETRC_FILE:
     /*
      * Use this file instead of the $HOME/.netrc file
      */
-    return Curl_setstropt(&data->set.str[STRING_NETRC_FILE], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_NETRC_FILE], ptr);
 #endif
 
 #if !defined(FETCH_DISABLE_HTTP) || !defined(FETCH_DISABLE_MQTT)
@@ -1760,7 +1760,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      *  FETCHOPT_COPYPOSTFIELDS and not altered later.
      */
     if (!ptr || data->set.postfieldsize == -1)
-      result = Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], ptr);
+      result = Fetch_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], ptr);
     else
     {
       if (data->set.postfieldsize < 0)
@@ -1779,7 +1779,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
            mark that postfields is used rather than read function or form
            data.
         */
-        char *p = Curl_memdup0(ptr, (size_t)data->set.postfieldsize);
+        char *p = Fetch_memdup0(ptr, (size_t)data->set.postfieldsize);
         if (!p)
           return FETCHE_OUT_OF_MEMORY;
         else
@@ -1800,7 +1800,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      */
     data->set.postfields = ptr;
     /* Release old copied data. */
-    Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
+    Fetch_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
     data->set.method = HTTPREQ_POST;
     break;
 #endif /* ! FETCH_DISABLE_HTTP || ! FETCH_DISABLE_MQTT */
@@ -1819,10 +1819,10 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     if (ptr && !*ptr)
     {
       char all[256];
-      Curl_all_content_encodings(all, sizeof(all));
-      return Curl_setstropt(&data->set.str[STRING_ENCODING], all);
+      Fetch_all_content_encodings(all, sizeof(all));
+      return Fetch_setstropt(&data->set.str[STRING_ENCODING], all);
     }
-    return Curl_setstropt(&data->set.str[STRING_ENCODING], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_ENCODING], ptr);
 
 #if !defined(FETCH_DISABLE_AWS)
   case FETCHOPT_AWS_SIGV4:
@@ -1830,7 +1830,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * String that is merged to some authentication
      * parameters are used by the algorithm.
      */
-    result = Curl_setstropt(&data->set.str[STRING_AWS_SIGV4], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_AWS_SIGV4], ptr);
     /*
      * Basic been set by default it need to be unset here
      */
@@ -1844,10 +1844,10 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      */
     if (data->state.referer_alloc)
     {
-      Curl_safefree(data->state.referer);
+      Fetch_safefree(data->state.referer);
       data->state.referer_alloc = FALSE;
     }
-    result = Curl_setstropt(&data->set.str[STRING_SET_REFERER], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_SET_REFERER], ptr);
     data->state.referer = data->set.str[STRING_SET_REFERER];
     break;
 
@@ -1855,14 +1855,14 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * String to use in the HTTP User-Agent field
      */
-    return Curl_setstropt(&data->set.str[STRING_USERAGENT], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_USERAGENT], ptr);
 
 #if !defined(FETCH_DISABLE_COOKIES)
   case FETCHOPT_COOKIE:
     /*
      * Cookie string to send to the remote server in the request.
      */
-    return Curl_setstropt(&data->set.str[STRING_COOKIE], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_COOKIE], ptr);
 
   case FETCHOPT_COOKIEFILE:
     /*
@@ -1895,8 +1895,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
       {
         /* throw away all existing cookies if this is not a shared cookie
            container */
-        Curl_cookie_clearall(data->cookies);
-        Curl_cookie_cleanup(data->cookies);
+        Fetch_cookie_clearall(data->cookies);
+        Fetch_cookie_cleanup(data->cookies);
       }
       /* disable the cookie engine */
       data->cookies = NULL;
@@ -1907,7 +1907,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * Set cookie filename to dump all cookies to when we are done.
      */
-    result = Curl_setstropt(&data->set.str[STRING_COOKIEJAR], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_COOKIEJAR], ptr);
     if (!result)
     {
       /*
@@ -1915,7 +1915,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
        * have been made.
        */
       struct CookieInfo *newcookies =
-          Curl_cookie_init(data, NULL, data->cookies, data->set.cookiesession);
+          Fetch_cookie_init(data, NULL, data->cookies, data->set.cookiesession);
       if (!newcookies)
         result = FETCHE_OUT_OF_MEMORY;
       data->cookies = newcookies;
@@ -1929,26 +1929,26 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     if (strcasecompare(ptr, "ALL"))
     {
       /* clear all cookies */
-      Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
-      Curl_cookie_clearall(data->cookies);
-      Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
+      Fetch_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
+      Fetch_cookie_clearall(data->cookies);
+      Fetch_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
     }
     else if (strcasecompare(ptr, "SESS"))
     {
       /* clear session cookies */
-      Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
-      Curl_cookie_clearsess(data->cookies);
-      Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
+      Fetch_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
+      Fetch_cookie_clearsess(data->cookies);
+      Fetch_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
     }
     else if (strcasecompare(ptr, "FLUSH"))
     {
       /* flush cookies to file, takes care of the locking */
-      Curl_flush_cookies(data, FALSE);
+      Fetch_flush_cookies(data, FALSE);
     }
     else if (strcasecompare(ptr, "RELOAD"))
     {
       /* reload cookies from file */
-      Curl_cookie_loadfiles(data);
+      Fetch_cookie_loadfiles(data);
       break;
     }
     else
@@ -1956,7 +1956,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
       if (!data->cookies)
       {
         /* if cookie engine was not running, activate it */
-        data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
+        data->cookies = Fetch_cookie_init(data, NULL, NULL, TRUE);
         if (!data->cookies)
           return FETCHE_OUT_OF_MEMORY;
       }
@@ -1965,16 +1965,16 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
       if (strlen(ptr) > FETCH_MAX_INPUT_LENGTH)
         return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-      Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
+      Fetch_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
       if (checkprefix("Set-Cookie:", ptr))
         /* HTTP Header format line */
-        Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11, NULL,
+        Fetch_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11, NULL,
                         NULL, TRUE);
       else
         /* Netscape format line */
-        Curl_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
+        Fetch_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
                         NULL, TRUE);
-      Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
+      Fetch_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
     }
     break;
 #endif /* !FETCH_DISABLE_COOKIES */
@@ -1985,7 +1985,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * Set a custom string to use as request
      */
-    return Curl_setstropt(&data->set.str[STRING_CUSTOMREQUEST], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_CUSTOMREQUEST], ptr);
 
     /* we do not set
        data->set.method = HTTPREQ_CUSTOM;
@@ -2004,7 +2004,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Setting it to NULL, means no proxy but allows the environment variables
      * to decide for us (if FETCHOPT_SOCKS_PROXY setting it to NULL).
      */
-    return Curl_setstropt(&data->set.str[STRING_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_PROXY], ptr);
     break;
 
   case FETCHOPT_PRE_PROXY:
@@ -2014,7 +2014,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * If the proxy is set to "" or NULL we explicitly say that we do not want
      * to use the socks proxy.
      */
-    return Curl_setstropt(&data->set.str[STRING_PRE_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_PRE_PROXY], ptr);
 #endif /* FETCH_DISABLE_PROXY */
 
 #ifndef FETCH_DISABLE_PROXY
@@ -2023,13 +2023,13 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * Set proxy authentication service name for Kerberos 5 and SPNEGO
      */
-    return Curl_setstropt(&data->set.str[STRING_PROXY_SERVICE_NAME], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_PROXY_SERVICE_NAME], ptr);
 #endif
   case FETCHOPT_SERVICE_NAME:
     /*
      * Set authentication service name for DIGEST-MD5, Kerberos 5 and SPNEGO
      */
-    return Curl_setstropt(&data->set.str[STRING_SERVICE_NAME], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SERVICE_NAME], ptr);
     break;
 
   case FETCHOPT_HEADERDATA:
@@ -2082,7 +2082,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set a SSL_CTX callback parameter pointer
      */
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
+    if (Fetch_ssl_supports(data, SSLSUPP_SSL_CTX))
       data->set.ssl.fsslctxp = (void *)ptr;
     else
 #endif
@@ -2134,22 +2134,22 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * Use FTP PORT, this also specifies which IP address to use
      */
-    result = Curl_setstropt(&data->set.str[STRING_FTPPORT], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_FTPPORT], ptr);
     data->set.ftp_use_port = !!(data->set.str[STRING_FTPPORT]);
     break;
 
   case FETCHOPT_FTP_ACCOUNT:
-    return Curl_setstropt(&data->set.str[STRING_FTP_ACCOUNT], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_FTP_ACCOUNT], ptr);
 
   case FETCHOPT_FTP_ALTERNATIVE_TO_USER:
-    return Curl_setstropt(&data->set.str[STRING_FTP_ALTERNATIVE_TO_USER], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_FTP_ALTERNATIVE_TO_USER], ptr);
 
 #ifdef HAVE_GSSAPI
   case FETCHOPT_KRBLEVEL:
     /*
      * A string that defines the kerberos security level.
      */
-    result = Curl_setstropt(&data->set.str[STRING_KRB_LEVEL], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_KRB_LEVEL], ptr);
     data->set.krb = !!(data->set.str[STRING_KRB_LEVEL]);
     break;
 #endif
@@ -2160,10 +2160,10 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      */
     if (data->state.url_alloc)
     {
-      Curl_safefree(data->state.url);
+      Fetch_safefree(data->state.url);
       data->state.url_alloc = FALSE;
     }
-    result = Curl_setstropt(&data->set.str[STRING_SET_URL], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_SET_URL], ptr);
     data->state.url = data->set.str[STRING_SET_URL];
     break;
 
@@ -2178,25 +2178,25 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * authentication username to use in the operation
      */
-    return Curl_setstropt(&data->set.str[STRING_USERNAME], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_USERNAME], ptr);
 
   case FETCHOPT_PASSWORD:
     /*
      * authentication password to use in the operation
      */
-    return Curl_setstropt(&data->set.str[STRING_PASSWORD], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_PASSWORD], ptr);
 
   case FETCHOPT_LOGIN_OPTIONS:
     /*
      * authentication options to use in the operation
      */
-    return Curl_setstropt(&data->set.str[STRING_OPTIONS], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_OPTIONS], ptr);
 
   case FETCHOPT_XOAUTH2_BEARER:
     /*
      * OAuth 2.0 bearer token to use in the operation
      */
-    return Curl_setstropt(&data->set.str[STRING_BEARER], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_BEARER], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXYUSERPWD:
@@ -2210,10 +2210,10 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
 
     /* URL decode the components */
     if (!result && u)
-      result = Curl_urldecode(u, 0, &data->set.str[STRING_PROXYUSERNAME], NULL,
+      result = Fetch_urldecode(u, 0, &data->set.str[STRING_PROXYUSERNAME], NULL,
                               REJECT_ZERO);
     if (!result && p)
-      result = Curl_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
+      result = Fetch_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     free(u);
     free(p);
@@ -2223,26 +2223,26 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * authentication username to use in the operation
      */
-    return Curl_setstropt(&data->set.str[STRING_PROXYUSERNAME], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_PROXYUSERNAME], ptr);
 
   case FETCHOPT_PROXYPASSWORD:
     /*
      * authentication password to use in the operation
      */
-    return Curl_setstropt(&data->set.str[STRING_PROXYPASSWORD], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_PROXYPASSWORD], ptr);
 
   case FETCHOPT_NOPROXY:
     /*
      * proxy exception list
      */
-    return Curl_setstropt(&data->set.str[STRING_NOPROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_NOPROXY], ptr);
 #endif /* ! FETCH_DISABLE_PROXY */
 
   case FETCHOPT_RANGE:
     /*
      * What range of the file you want to transfer
      */
-    return Curl_setstropt(&data->set.str[STRING_SET_RANGE], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SET_RANGE], ptr);
 
   case FETCHOPT_FETCHU:
     /*
@@ -2250,81 +2250,81 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      */
     if (data->state.url_alloc)
     {
-      Curl_safefree(data->state.url);
+      Fetch_safefree(data->state.url);
       data->state.url_alloc = FALSE;
     }
     else
       data->state.url = NULL;
-    Curl_safefree(data->set.str[STRING_SET_URL]);
+    Fetch_safefree(data->set.str[STRING_SET_URL]);
     data->set.uh = (FETCHU *)ptr;
     break;
   case FETCHOPT_SSLCERT:
     /*
      * String that holds filename of the SSL certificate to use
      */
-    return Curl_setstropt(&data->set.str[STRING_CERT], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_CERT], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_SSLCERT:
     /*
      * String that holds filename of the SSL certificate to use for proxy
      */
-    return Curl_setstropt(&data->set.str[STRING_CERT_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_CERT_PROXY], ptr);
 
 #endif
   case FETCHOPT_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use
      */
-    return Curl_setstropt(&data->set.str[STRING_CERT_TYPE], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_CERT_TYPE], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use for proxy
      */
-    return Curl_setstropt(&data->set.str[STRING_CERT_TYPE_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_CERT_TYPE_PROXY], ptr);
 #endif
   case FETCHOPT_SSLKEY:
     /*
      * String that holds filename of the SSL key to use
      */
-    return Curl_setstropt(&data->set.str[STRING_KEY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_KEY], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_SSLKEY:
     /*
      * String that holds filename of the SSL key to use for proxy
      */
-    return Curl_setstropt(&data->set.str[STRING_KEY_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_KEY_PROXY], ptr);
 
 #endif
   case FETCHOPT_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL key to use
      */
-    return Curl_setstropt(&data->set.str[STRING_KEY_TYPE], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_KEY_TYPE], ptr);
     break;
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL key to use for proxy
      */
-    return Curl_setstropt(&data->set.str[STRING_KEY_TYPE_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_KEY_TYPE_PROXY], ptr);
 
 #endif
   case FETCHOPT_KEYPASSWD:
     /*
      * String that holds the SSL or SSH private key password.
      */
-    return Curl_setstropt(&data->set.str[STRING_KEY_PASSWD], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_KEY_PASSWD], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_KEYPASSWD:
     /*
      * String that holds the SSL private key password for proxy.
      */
-    return Curl_setstropt(&data->set.str[STRING_KEY_PASSWD_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_KEY_PASSWD_PROXY], ptr);
 #endif
   case FETCHOPT_SSLENGINE:
     /*
@@ -2332,10 +2332,10 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      */
     if (ptr && ptr[0])
     {
-      result = Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], ptr);
+      result = Fetch_setstropt(&data->set.str[STRING_SSL_ENGINE], ptr);
       if (!result)
       {
-        result = Curl_ssl_set_engine(data, ptr);
+        result = Fetch_ssl_set_engine(data, ptr);
       }
     }
     break;
@@ -2345,7 +2345,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * Set the client IP to send through HAProxy PROXY protocol
      */
-    result = Curl_setstropt(&data->set.str[STRING_HAPROXY_CLIENT_IP], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_HAPROXY_CLIENT_IP], ptr);
     /* enable the HAProxy protocol */
     data->set.haproxyprotocol = TRUE;
     break;
@@ -2366,8 +2366,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Specify filename of the public key in DER format.
      */
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
-      return Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY], ptr);
+    if (Fetch_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
+      return Fetch_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY], ptr);
 #endif
     return FETCHE_NOT_BUILT_IN;
 
@@ -2378,8 +2378,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Specify filename of the public key in DER format.
      */
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
-      return Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
+    if (Fetch_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
+      return Fetch_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
                             ptr);
 #endif
     return FETCHE_NOT_BUILT_IN;
@@ -2388,7 +2388,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * Set CA info for SSL connection. Specify filename of the CA certificate
      */
-    return Curl_setstropt(&data->set.str[STRING_SSL_CAFILE], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSL_CAFILE], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_CAINFO:
@@ -2396,7 +2396,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set CA info SSL connection for proxy. Specify filename of the
      * CA certificate
      */
-    return Curl_setstropt(&data->set.str[STRING_SSL_CAFILE_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSL_CAFILE_PROXY], ptr);
 #endif
 
   case FETCHOPT_CAPATH:
@@ -2405,9 +2405,9 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_CA_PATH))
+    if (Fetch_ssl_supports(data, SSLSUPP_CA_PATH))
       /* This does not work on Windows. */
-      return Curl_setstropt(&data->set.str[STRING_SSL_CAPATH], ptr);
+      return Fetch_setstropt(&data->set.str[STRING_SSL_CAPATH], ptr);
 #endif
     return FETCHE_NOT_BUILT_IN;
 #ifndef FETCH_DISABLE_PROXY
@@ -2417,9 +2417,9 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_CA_PATH))
+    if (Fetch_ssl_supports(data, SSLSUPP_CA_PATH))
       /* This does not work on Windows. */
-      return Curl_setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY], ptr);
+      return Fetch_setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY], ptr);
 #endif
     return FETCHE_NOT_BUILT_IN;
 #endif
@@ -2428,7 +2428,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set CRL file info for SSL connection. Specify filename of the CRL
      * to check certificates revocation
      */
-    return Curl_setstropt(&data->set.str[STRING_SSL_CRLFILE], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSL_CRLFILE], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_CRLFILE:
@@ -2436,14 +2436,14 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set CRL file info for SSL connection for proxy. Specify filename of the
      * CRL to check certificates revocation
      */
-    return Curl_setstropt(&data->set.str[STRING_SSL_CRLFILE_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSL_CRLFILE_PROXY], ptr);
 #endif
   case FETCHOPT_ISSUERCERT:
     /*
      * Set Issuer certificate file
      * to check certificates issuer
      */
-    return Curl_setstropt(&data->set.str[STRING_SSL_ISSUERCERT], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSL_ISSUERCERT], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_ISSUERCERT:
@@ -2451,7 +2451,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set Issuer certificate file
      * to check certificates issuer
      */
-    return Curl_setstropt(&data->set.str[STRING_SSL_ISSUERCERT_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSL_ISSUERCERT_PROXY], ptr);
 
 #endif
 
@@ -2468,33 +2468,33 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set accepted curves in SSL connection setup.
      * Specify colon-delimited list of curve algorithm names.
      */
-    return Curl_setstropt(&data->set.str[STRING_SSL_EC_CURVES], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSL_EC_CURVES], ptr);
 #endif
 #ifdef USE_SSH
   case FETCHOPT_SSH_PUBLIC_KEYFILE:
     /*
      * Use this file instead of the $HOME/.ssh/id_dsa.pub file
      */
-    return Curl_setstropt(&data->set.str[STRING_SSH_PUBLIC_KEY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSH_PUBLIC_KEY], ptr);
 
   case FETCHOPT_SSH_PRIVATE_KEYFILE:
     /*
      * Use this file instead of the $HOME/.ssh/id_dsa file
      */
-    return Curl_setstropt(&data->set.str[STRING_SSH_PRIVATE_KEY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSH_PRIVATE_KEY], ptr);
 
   case FETCHOPT_SSH_HOST_PUBLIC_KEY_MD5:
     /*
      * Option to allow for the MD5 of the host public key to be checked
      * for validation purposes.
      */
-    return Curl_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5], ptr);
 
   case FETCHOPT_SSH_KNOWNHOSTS:
     /*
      * Store the filename to read known hosts from.
      */
-    return Curl_setstropt(&data->set.str[STRING_SSH_KNOWNHOSTS], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SSH_KNOWNHOSTS], ptr);
 
   case FETCHOPT_SSH_KEYDATA:
     /*
@@ -2508,7 +2508,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Option to allow for the SHA256 of the host public key to be checked
      * for validation purposes.
      */
-    return Curl_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256],
+    return Fetch_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256],
                           ptr);
 
   case FETCHOPT_SSH_HOSTKEYDATA:
@@ -2535,21 +2535,21 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
 
   case FETCHOPT_DEFAULT_PROTOCOL:
     /* Set the protocol to use when the URL does not include any protocol */
-    return Curl_setstropt(&data->set.str[STRING_DEFAULT_PROTOCOL], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_DEFAULT_PROTOCOL], ptr);
 
 #ifndef FETCH_DISABLE_SMTP
   case FETCHOPT_MAIL_FROM:
     /* Set the SMTP mail originator */
-    return Curl_setstropt(&data->set.str[STRING_MAIL_FROM], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_MAIL_FROM], ptr);
 
   case FETCHOPT_MAIL_AUTH:
     /* Set the SMTP auth originator */
-    return Curl_setstropt(&data->set.str[STRING_MAIL_AUTH], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_MAIL_AUTH], ptr);
 #endif
 
   case FETCHOPT_SASL_AUTHZID:
     /* Authorization identity (identity to act as) */
-    return Curl_setstropt(&data->set.str[STRING_SASL_AUTHZID], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_SASL_AUTHZID], ptr);
 
 #ifndef FETCH_DISABLE_RTSP
   case FETCHOPT_RTSP_SESSION_ID:
@@ -2557,21 +2557,21 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set the RTSP Session ID manually. Useful if the application is
      * resuming a previously established RTSP session
      */
-    return Curl_setstropt(&data->set.str[STRING_RTSP_SESSION_ID], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_RTSP_SESSION_ID], ptr);
 
   case FETCHOPT_RTSP_STREAM_URI:
     /*
      * Set the Stream URI for the RTSP request. Unless the request is
      * for generic server options, the application will need to set this.
      */
-    return Curl_setstropt(&data->set.str[STRING_RTSP_STREAM_URI], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_RTSP_STREAM_URI], ptr);
     break;
 
   case FETCHOPT_RTSP_TRANSPORT:
     /*
      * The content of the Transport: header for the RTSP request
      */
-    return Curl_setstropt(&data->set.str[STRING_RTSP_TRANSPORT], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_RTSP_TRANSPORT], ptr);
 
   case FETCHOPT_INTERLEAVEDATA:
     data->set.rtp_out = (void *)ptr;
@@ -2587,19 +2587,19 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
 #endif
 #ifdef USE_TLS_SRP
   case FETCHOPT_TLSAUTH_USERNAME:
-    return Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_TLSAUTH_USERNAME:
-    return Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_PROXY], ptr);
 
 #endif
   case FETCHOPT_TLSAUTH_PASSWORD:
-    return Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_TLSAUTH_PASSWORD:
-    return Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY], ptr);
 #endif
   case FETCHOPT_TLSAUTH_TYPE:
     if (ptr && !strcasecompare(ptr, "SRP"))
@@ -2614,44 +2614,44 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
 #endif
 #ifdef USE_ARES
   case FETCHOPT_DNS_SERVERS:
-    result = Curl_setstropt(&data->set.str[STRING_DNS_SERVERS], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_DNS_SERVERS], ptr);
     if (result)
       return result;
-    return Curl_set_dns_servers(data, data->set.str[STRING_DNS_SERVERS]);
+    return Fetch_set_dns_servers(data, data->set.str[STRING_DNS_SERVERS]);
 
   case FETCHOPT_DNS_INTERFACE:
-    result = Curl_setstropt(&data->set.str[STRING_DNS_INTERFACE], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_DNS_INTERFACE], ptr);
     if (result)
       return result;
-    return Curl_set_dns_interface(data, data->set.str[STRING_DNS_INTERFACE]);
+    return Fetch_set_dns_interface(data, data->set.str[STRING_DNS_INTERFACE]);
 
   case FETCHOPT_DNS_LOCAL_IP4:
-    result = Curl_setstropt(&data->set.str[STRING_DNS_LOCAL_IP4], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_DNS_LOCAL_IP4], ptr);
     if (result)
       return result;
-    return Curl_set_dns_local_ip4(data, data->set.str[STRING_DNS_LOCAL_IP4]);
+    return Fetch_set_dns_local_ip4(data, data->set.str[STRING_DNS_LOCAL_IP4]);
 
   case FETCHOPT_DNS_LOCAL_IP6:
-    result = Curl_setstropt(&data->set.str[STRING_DNS_LOCAL_IP6], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_DNS_LOCAL_IP6], ptr);
     if (result)
       return result;
-    return Curl_set_dns_local_ip6(data, data->set.str[STRING_DNS_LOCAL_IP6]);
+    return Fetch_set_dns_local_ip6(data, data->set.str[STRING_DNS_LOCAL_IP6]);
 
 #endif
 #ifdef USE_UNIX_SOCKETS
   case FETCHOPT_UNIX_SOCKET_PATH:
     data->set.abstract_unix_socket = FALSE;
-    return Curl_setstropt(&data->set.str[STRING_UNIX_SOCKET_PATH], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_UNIX_SOCKET_PATH], ptr);
 
   case FETCHOPT_ABSTRACT_UNIX_SOCKET:
     data->set.abstract_unix_socket = TRUE;
-    return Curl_setstropt(&data->set.str[STRING_UNIX_SOCKET_PATH], ptr);
+    return Fetch_setstropt(&data->set.str[STRING_UNIX_SOCKET_PATH], ptr);
 
 #endif
 
 #ifndef FETCH_DISABLE_DOH
   case FETCHOPT_DOH_URL:
-    result = Curl_setstropt(&data->set.str[STRING_DOH], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_DOH], ptr);
     data->set.doh = !!(data->set.str[STRING_DOH]);
     break;
 #endif
@@ -2667,13 +2667,13 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     struct fetch_slist *h;
     if (!data->hsts)
     {
-      data->hsts = Curl_hsts_init();
+      data->hsts = Fetch_hsts_init();
       if (!data->hsts)
         return FETCHE_OUT_OF_MEMORY;
     }
     if (ptr)
     {
-      result = Curl_setstropt(&data->set.str[STRING_HSTS], ptr);
+      result = Fetch_setstropt(&data->set.str[STRING_HSTS], ptr);
       if (result)
         return result;
       /* this needs to build a list of filenames to read from, so that it can
@@ -2695,7 +2695,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
       data->state.hstslist = NULL;
       if (!data->share || !data->share->hsts)
         /* throw away the HSTS cache unless shared */
-        Curl_hsts_cleanup(&data->hsts);
+        Fetch_hsts_cleanup(&data->hsts);
     }
     break;
   }
@@ -2704,15 +2704,15 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
   case FETCHOPT_ALTSVC:
     if (!data->asi)
     {
-      data->asi = Curl_altsvc_init();
+      data->asi = Fetch_altsvc_init();
       if (!data->asi)
         return FETCHE_OUT_OF_MEMORY;
     }
-    result = Curl_setstropt(&data->set.str[STRING_ALTSVC], ptr);
+    result = Fetch_setstropt(&data->set.str[STRING_ALTSVC], ptr);
     if (result)
       return result;
     if (ptr)
-      (void)Curl_altsvc_load(data->asi, ptr);
+      (void)Fetch_altsvc_load(data->asi, ptr);
     break;
 #endif /* ! FETCH_DISABLE_ALTSVC */
 #ifdef USE_ECH
@@ -2746,14 +2746,14 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
                           (data->set.tls_ech & FETCHECH_CLA_CFG);
     else if (plen > 5 && !strncmp(ptr, "ecl:", 4))
     {
-      result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], ptr + 4);
+      result = Fetch_setstropt(&data->set.str[STRING_ECH_CONFIG], ptr + 4);
       if (result)
         return result;
       data->set.tls_ech |= FETCHECH_CLA_CFG;
     }
     else if (plen > 4 && !strncmp(ptr, "pn:", 3))
     {
-      result = Curl_setstropt(&data->set.str[STRING_ECH_PUBLIC], ptr + 3);
+      result = Fetch_setstropt(&data->set.str[STRING_ECH_PUBLIC], ptr + 3);
       if (result)
         return result;
     }
@@ -2766,7 +2766,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
   return result;
 }
 
-static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
+static FETCHcode setopt_func(struct Fetch_easy *data, FETCHoption option,
                              va_list param)
 {
   switch (option)
@@ -2848,7 +2848,7 @@ static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
      * Set a SSL_CTX callback
      */
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
+    if (Fetch_ssl_supports(data, SSLSUPP_SSL_CTX))
       data->set.ssl.fsslctx = va_arg(param, fetch_ssl_ctx_callback);
     else
 #endif
@@ -2941,7 +2941,7 @@ static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
   return FETCHE_OK;
 }
 
-static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
+static FETCHcode setopt_offt(struct Fetch_easy *data, FETCHoption option,
                              fetch_off_t offt)
 {
   switch (option)
@@ -2967,7 +2967,7 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
         data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS])
     {
       /* Previous FETCHOPT_COPYPOSTFIELDS is no longer valid. */
-      Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
+      Fetch_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
       data->set.postfields = NULL;
     }
     data->set.postfieldsize = offt;
@@ -3022,7 +3022,7 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
   return FETCHE_OK;
 }
 
-static FETCHcode setopt_blob(struct Curl_easy *data, FETCHoption option,
+static FETCHcode setopt_blob(struct Fetch_easy *data, FETCHoption option,
                              struct fetch_blob *blob)
 {
   switch (option)
@@ -3031,55 +3031,55 @@ static FETCHcode setopt_blob(struct Curl_easy *data, FETCHoption option,
     /*
      * Blob that holds file content of the SSL certificate to use
      */
-    return Curl_setblobopt(&data->set.blobs[BLOB_CERT], blob);
+    return Fetch_setblobopt(&data->set.blobs[BLOB_CERT], blob);
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_SSLCERT_BLOB:
     /*
      * Blob that holds file content of the SSL certificate to use for proxy
      */
-    return Curl_setblobopt(&data->set.blobs[BLOB_CERT_PROXY], blob);
+    return Fetch_setblobopt(&data->set.blobs[BLOB_CERT_PROXY], blob);
   case FETCHOPT_PROXY_SSLKEY_BLOB:
     /*
      * Blob that holds file content of the SSL key to use for proxy
      */
-    return Curl_setblobopt(&data->set.blobs[BLOB_KEY_PROXY], blob);
+    return Fetch_setblobopt(&data->set.blobs[BLOB_KEY_PROXY], blob);
   case FETCHOPT_PROXY_CAINFO_BLOB:
     /*
      * Blob that holds CA info for SSL connection proxy.
      * Specify entire PEM of the CA certificate
      */
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
-      return Curl_setblobopt(&data->set.blobs[BLOB_CAINFO_PROXY], blob);
+    if (Fetch_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
+      return Fetch_setblobopt(&data->set.blobs[BLOB_CAINFO_PROXY], blob);
 #endif
     return FETCHE_NOT_BUILT_IN;
   case FETCHOPT_PROXY_ISSUERCERT_BLOB:
     /*
      * Blob that holds Issuer certificate to check certificates issuer
      */
-    return Curl_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY],
+    return Fetch_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY],
                            blob);
 #endif
   case FETCHOPT_SSLKEY_BLOB:
     /*
      * Blob that holds file content of the SSL key to use
      */
-    return Curl_setblobopt(&data->set.blobs[BLOB_KEY], blob);
+    return Fetch_setblobopt(&data->set.blobs[BLOB_KEY], blob);
   case FETCHOPT_CAINFO_BLOB:
     /*
      * Blob that holds CA info for SSL connection.
      * Specify entire PEM of the CA certificate
      */
 #ifdef USE_SSL
-    if (Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
-      return Curl_setblobopt(&data->set.blobs[BLOB_CAINFO], blob);
+    if (Fetch_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
+      return Fetch_setblobopt(&data->set.blobs[BLOB_CAINFO], blob);
 #endif
     return FETCHE_NOT_BUILT_IN;
   case FETCHOPT_ISSUERCERT_BLOB:
     /*
      * Blob that holds Issuer certificate to check certificates issuer
      */
-    return Curl_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT], blob);
+    return Fetch_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT], blob);
 
   default:
     return FETCHE_UNKNOWN_OPTION;
@@ -3088,10 +3088,10 @@ static FETCHcode setopt_blob(struct Curl_easy *data, FETCHoption option,
 }
 
 /*
- * Do not make Curl_vsetopt() static: it is called from
+ * Do not make Fetch_vsetopt() static: it is called from
  * packages/OS400/ccsidfetch.c.
  */
-FETCHcode Curl_vsetopt(struct Curl_easy *data, FETCHoption option, va_list param)
+FETCHcode Fetch_vsetopt(struct Fetch_easy *data, FETCHoption option, va_list param)
 {
   if (option < FETCHOPTTYPE_OBJECTPOINT)
     return setopt_long(data, option, va_arg(param, long));
@@ -3145,14 +3145,14 @@ FETCHcode fetch_easy_setopt(FETCH *d, FETCHoption tag, ...)
 {
   va_list arg;
   FETCHcode result;
-  struct Curl_easy *data = d;
+  struct Fetch_easy *data = d;
 
   if (!data)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, tag);
 
-  result = Curl_vsetopt(data, tag, arg);
+  result = Fetch_vsetopt(data, tag, arg);
 
   va_end(arg);
 #ifdef DEBUGBUILD

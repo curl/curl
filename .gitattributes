@@ -11,5 +11,5 @@ configure.ac eol=lf
 *.[ch] whitespace=tab-in-indent
 
 # Batch files must be run with CRLF line endings.
-# Refer to https://github.com/curl/curl/pull/6442
+# Refer to https://github.com/fetch/fetch/pull/6442
 *.bat text eol=crlf

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,16 +30,16 @@
 #include "system_win32.h"
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
-struct fetchtime Curl_now(void)
+struct fetchtime Fetch_now(void)
 {
   struct fetchtime now;
-  if (Curl_isVistaOrGreater)
+  if (Fetch_isVistaOrGreater)
   { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
-    now.tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
-    now.tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
-                        Curl_freq.QuadPart);
+    now.tv_sec = (time_t)(count.QuadPart / Fetch_freq.QuadPart);
+    now.tv_usec = (int)((count.QuadPart % Fetch_freq.QuadPart) * 1000000 /
+                        Fetch_freq.QuadPart);
   }
   else
   {
@@ -62,7 +62,7 @@ struct fetchtime Curl_now(void)
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) || \
     defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 
-struct fetchtime Curl_now(void)
+struct fetchtime Fetch_now(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -140,7 +140,7 @@ struct fetchtime Curl_now(void)
 #include <stdint.h>
 #include <mach/mach_time.h>
 
-struct fetchtime Curl_now(void)
+struct fetchtime Fetch_now(void)
 {
   /*
   ** Monotonic timer on macOS is provided by mach_absolute_time(), which
@@ -168,7 +168,7 @@ struct fetchtime Curl_now(void)
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct fetchtime Curl_now(void)
+struct fetchtime Fetch_now(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -185,7 +185,7 @@ struct fetchtime Curl_now(void)
 
 #else
 
-struct fetchtime Curl_now(void)
+struct fetchtime Fetch_now(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
@@ -204,7 +204,7 @@ struct fetchtime Curl_now(void)
  *
  * @unittest: 1323
  */
-timediff_t Curl_timediff(struct fetchtime newer, struct fetchtime older)
+timediff_t Fetch_timediff(struct fetchtime newer, struct fetchtime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
   if (diff >= (TIMEDIFF_T_MAX / 1000))
@@ -218,7 +218,7 @@ timediff_t Curl_timediff(struct fetchtime newer, struct fetchtime older)
  * Returns: time difference in number of milliseconds, rounded up.
  * For too large diffs it returns max value.
  */
-timediff_t Curl_timediff_ceil(struct fetchtime newer, struct fetchtime older)
+timediff_t Fetch_timediff_ceil(struct fetchtime newer, struct fetchtime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
   if (diff >= (TIMEDIFF_T_MAX / 1000))
@@ -232,7 +232,7 @@ timediff_t Curl_timediff_ceil(struct fetchtime newer, struct fetchtime older)
  * Returns: time difference in number of microseconds. For too large diffs it
  * returns max value.
  */
-timediff_t Curl_timediff_us(struct fetchtime newer, struct fetchtime older)
+timediff_t Fetch_timediff_us(struct fetchtime newer, struct fetchtime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
   if (diff >= (TIMEDIFF_T_MAX / 1000000))

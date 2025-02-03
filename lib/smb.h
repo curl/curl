@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,8 +54,8 @@ struct smb_conn
 #if !defined(FETCH_DISABLE_SMB) && defined(USE_FETCH_NTLM_CORE) && \
     (SIZEOF_FETCH_OFF_T > 4)
 
-extern const struct Curl_handler Curl_handler_smb;
-extern const struct Curl_handler Curl_handler_smbs;
+extern const struct Fetch_handler Fetch_handler_smb;
+extern const struct Fetch_handler Fetch_handler_smbs;
 
 #endif /* FETCH_DISABLE_SMB && USE_FETCH_NTLM_CORE && \
           SIZEOF_FETCH_OFF_T > 4 */

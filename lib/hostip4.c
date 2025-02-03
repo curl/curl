@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,10 +55,10 @@
 #include "memdebug.h"
 
 /*
- * Curl_ipvalid() checks what FETCH_IPRESOLVE_* requirements that might've
+ * Fetch_ipvalid() checks what FETCH_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
-bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
+bool Fetch_ipvalid(struct Fetch_easy *data, struct connectdata *conn)
 {
   (void)data;
   if (conn->ip_version == FETCH_IPRESOLVE_V6)
@@ -71,7 +71,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 #ifdef FETCHRES_SYNCH
 
 /*
- * Curl_getaddrinfo() - the IPv4 synchronous version.
+ * Fetch_getaddrinfo() - the IPv4 synchronous version.
  *
  * The original code to this function was from the Dancer source code, written
  * by Bjorn Reese, it has since been patched and modified considerably.
@@ -86,12 +86,12 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
  * flavours have thread-safe versions of the plain gethostbyname() etc.
  *
  */
-struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
+struct Fetch_addrinfo *Fetch_getaddrinfo(struct Fetch_easy *data,
                                        const char *hostname,
                                        int port,
                                        int *waitp)
 {
-  struct Curl_addrinfo *ai = NULL;
+  struct Fetch_addrinfo *ai = NULL;
 
 #ifdef FETCH_DISABLE_VERBOSE_STRINGS
   (void)data;
@@ -99,9 +99,9 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   *waitp = 0; /* synchronous response only */
 
-  ai = Curl_ipv4_resolve_r(hostname, port);
+  ai = Fetch_ipv4_resolve_r(hostname, port);
   if (!ai)
-    infof(data, "Curl_ipv4_resolve_r failed for %s", hostname);
+    infof(data, "Fetch_ipv4_resolve_r failed for %s", hostname);
 
   return ai;
 }
@@ -112,20 +112,20 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
     !defined(FETCHRES_ARES) && !defined(FETCHRES_AMIGA)
 
 /*
- * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
+ * Fetch_ipv4_resolve_r() - ipv4 threadsafe resolver function.
  *
  * This is used for both synchronous and asynchronous resolver builds,
  * implying that only threadsafe code and function calls may be used.
  *
  */
-struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
+struct Fetch_addrinfo *Fetch_ipv4_resolve_r(const char *hostname,
                                           int port)
 {
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE)) && \
     defined(HAVE_GETHOSTBYNAME_R_3)
   int res;
 #endif
-  struct Curl_addrinfo *ai = NULL;
+  struct Fetch_addrinfo *ai = NULL;
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
   struct hostent *h = NULL;
   struct hostent *buf = NULL;
@@ -145,7 +145,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     sbufptr = sbuf;
   }
 
-  (void)Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &ai);
+  (void)Fetch_getaddrinfo_ex(hostname, sbufptr, &hints, &ai);
 
 #elif defined(HAVE_GETHOSTBYNAME_R)
   /*
@@ -273,7 +273,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
      * we cannot realloc down the huge alloc without doing closer analysis of
      * the returned data. Thus, we always use FETCH_HOSTENT_SIZE for every
      * name lookup. Fixing this would require an extra malloc() and then
-     * calling Curl_addrinfo_copy() that subsequent realloc()s down the new
+     * calling Fetch_addrinfo_copy() that subsequent realloc()s down the new
      * memory area to the actually used amount.
      */
   }
@@ -297,7 +297,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
   if (h)
   {
-    ai = Curl_he2ai(h, port);
+    ai = Fetch_he2ai(h, port);
 
     if (buf) /* used a *_r() function */
       free(buf);

@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@ import logging
 import re
 
 from testenv import Env
-from testenv import CurlClient
+from testenv import FetchClient
 
 
 log = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class TestTracing:
 
     # default verbose output
     def test_15_01_trace_defaults(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
         r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v'
@@ -51,7 +51,7 @@ class TestTracing:
 
     # trace ids
     def test_15_02_trace_ids(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
         r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v', '--trace-config', 'ids'
@@ -64,7 +64,7 @@ class TestTracing:
 
     # trace ids+time
     def test_15_03_trace_ids_time(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
         r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v', '--trace-config', 'ids,time'
@@ -77,7 +77,7 @@ class TestTracing:
 
     # trace all
     def test_15_04_trace_all(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
         r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v', '--trace-config', 'all'
@@ -96,7 +96,7 @@ class TestTracing:
 
     # trace all, no TCP, no time
     def test_15_05_trace_all(self, env: Env, httpd):
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
         r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v', '--trace-config', 'all,-tcp,-time'

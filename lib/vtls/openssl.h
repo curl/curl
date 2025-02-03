@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -69,48 +69,48 @@ struct ossl_ctx
   BIT(reused_session);   /* session-ID was reused for this */
 };
 
-size_t Curl_ossl_version(char *buffer, size_t size);
+size_t Fetch_ossl_version(char *buffer, size_t size);
 
-typedef FETCHcode Curl_ossl_ctx_setup_cb(struct Curl_cfilter *cf,
-                                         struct Curl_easy *data,
+typedef FETCHcode Fetch_ossl_ctx_setup_cb(struct Fetch_cfilter *cf,
+                                         struct Fetch_easy *data,
                                          void *user_data);
 
-typedef int Curl_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid);
+typedef int Fetch_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid);
 
-FETCHcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
-                             struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
+FETCHcode Fetch_ossl_ctx_init(struct ossl_ctx *octx,
+                             struct Fetch_cfilter *cf,
+                             struct Fetch_easy *data,
                              struct ssl_peer *peer,
                              const unsigned char *alpn, size_t alpn_len,
-                             Curl_ossl_ctx_setup_cb *cb_setup,
+                             Fetch_ossl_ctx_setup_cb *cb_setup,
                              void *cb_user_data,
-                             Curl_ossl_new_session_cb *cb_new_session,
+                             Fetch_ossl_new_session_cb *cb_new_session,
                              void *ssl_user_data);
 
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L)
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif
 
-extern const struct Curl_ssl Curl_ssl_openssl;
+extern const struct Fetch_ssl Fetch_ssl_openssl;
 
 /**
  * Setup the OpenSSL X509_STORE in `ssl_ctx` for the cfilter `cf` and
  * easy handle `data`. Will allow reuse of a shared cache if suitable
  * and configured.
  */
-FETCHcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+FETCHcode Fetch_ssl_setup_x509_store(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     SSL_CTX *ssl_ctx);
 
-FETCHcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+FETCHcode Fetch_ossl_ctx_configure(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   SSL_CTX *ssl_ctx);
 
 /*
  * Add a new session to the cache. Takes ownership of the session.
  */
-FETCHcode Curl_ossl_add_session(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+FETCHcode Fetch_ossl_add_session(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data,
                                 const char *ssl_peer_key,
                                 SSL_SESSION *ssl_sessionid,
                                 int ietf_tls_id,
@@ -121,8 +121,8 @@ FETCHcode Curl_ossl_add_session(struct Curl_cfilter *cf,
  * ssl config verifypeer or -host is set. Otherwise all this is for
  * informational purposes only!
  */
-FETCHcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+FETCHcode Fetch_oss_check_peer_cert(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    struct ossl_ctx *octx,
                                    struct ssl_peer *peer);
 

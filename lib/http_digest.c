@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,7 +43,7 @@ Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
 
 */
 
-FETCHcode Curl_input_digest(struct Curl_easy *data,
+FETCHcode Fetch_input_digest(struct Fetch_easy *data,
                             bool proxy,
                             const char *header) /* rest of the *-authenticate:
                                                    header */
@@ -67,10 +67,10 @@ FETCHcode Curl_input_digest(struct Curl_easy *data,
   while (*header && ISBLANK(*header))
     header++;
 
-  return Curl_auth_decode_digest_http_message(header, digest);
+  return Fetch_auth_decode_digest_http_message(header, digest);
 }
 
-FETCHcode Curl_output_digest(struct Curl_easy *data,
+FETCHcode Fetch_output_digest(struct Fetch_easy *data,
                              bool proxy,
                              const unsigned char *request,
                              const unsigned char *uripath)
@@ -115,7 +115,7 @@ FETCHcode Curl_output_digest(struct Curl_easy *data,
     authp = &data->state.authhost;
   }
 
-  Curl_safefree(*allocuserpwd);
+  Fetch_safefree(*allocuserpwd);
 
   /* not set means empty */
   if (!userp)
@@ -165,7 +165,7 @@ FETCHcode Curl_output_digest(struct Curl_easy *data,
   if (!path)
     return FETCHE_OUT_OF_MEMORY;
 
-  result = Curl_auth_create_digest_http_message(data, userp, passwdp, request,
+  result = Fetch_auth_create_digest_http_message(data, userp, passwdp, request,
                                                 path, digest, &response, &len);
   free(path);
   if (result)
@@ -183,10 +183,10 @@ FETCHcode Curl_output_digest(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-void Curl_http_auth_cleanup_digest(struct Curl_easy *data)
+void Fetch_http_auth_cleanup_digest(struct Fetch_easy *data)
 {
-  Curl_auth_digest_cleanup(&data->state.digest);
-  Curl_auth_digest_cleanup(&data->state.proxydigest);
+  Fetch_auth_digest_cleanup(&data->state.digest);
+  Fetch_auth_digest_cleanup(&data->state.proxydigest);
 }
 
 #endif

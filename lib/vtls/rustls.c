@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -73,7 +73,7 @@ static FETCHcode map_error(rustls_result r)
 }
 
 static bool
-cr_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
+cr_data_pending(struct Fetch_cfilter *cf, const struct Fetch_easy *data)
 {
   struct ssl_connect_data *ctx = cf->ctx;
   struct rustls_ssl_backend_data *backend;
@@ -86,8 +86,8 @@ cr_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
 
 struct io_ctx
 {
-  struct Curl_cfilter *cf;
-  struct Curl_easy *data;
+  struct Fetch_cfilter *cf;
+  struct Fetch_easy *data;
 };
 
 static int
@@ -97,7 +97,7 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   struct ssl_connect_data *const connssl = io_ctx->cf->ctx;
   FETCHcode result;
   int ret = 0;
-  ssize_t nread = Curl_conn_cf_recv(io_ctx->cf->next, io_ctx->data,
+  ssize_t nread = Fetch_conn_cf_recv(io_ctx->cf->next, io_ctx->data,
                                     (char *)buf, len, &result);
   if (nread < 0)
   {
@@ -121,7 +121,7 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   struct io_ctx *io_ctx = userdata;
   FETCHcode result;
   int ret = 0;
-  ssize_t nwritten = Curl_conn_cf_send(io_ctx->cf->next, io_ctx->data,
+  ssize_t nwritten = Fetch_conn_cf_send(io_ctx->cf->next, io_ctx->data,
                                        (const char *)buf, len, FALSE,
                                        &result);
   if (nwritten < 0)
@@ -138,8 +138,8 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   return ret;
 }
 
-static ssize_t tls_recv_more(struct Curl_cfilter *cf,
-                             struct Curl_easy *data, FETCHcode *err)
+static ssize_t tls_recv_more(struct Fetch_cfilter *cf,
+                             struct Fetch_easy *data, FETCHcode *err)
 {
   struct ssl_connect_data *const connssl = cf->ctx;
   struct rustls_ssl_backend_data *const backend =
@@ -162,7 +162,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
   {
     char buffer[STRERROR_LEN];
     failf(data, "reading from socket: %s",
-          Curl_strerror(io_error, buffer, sizeof(buffer)));
+          Fetch_strerror(io_error, buffer, sizeof(buffer)));
     *err = FETCHE_RECV_ERROR;
     return -1;
   }
@@ -197,7 +197,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
  * plaintext output buffer.
  */
 static ssize_t
-cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+cr_recv(struct Fetch_cfilter *cf, struct Fetch_easy *data,
         char *plainbuf, size_t plainlen, FETCHcode *err)
 {
   struct ssl_connect_data *const connssl = cf->ctx;
@@ -291,7 +291,7 @@ out:
   return nread;
 }
 
-static FETCHcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
+static FETCHcode cr_flush_out(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                               struct rustls_connection *rconn)
 {
   struct io_ctx io_ctx;
@@ -317,7 +317,7 @@ static FETCHcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
     {
       char buffer[STRERROR_LEN];
       failf(data, "writing to socket: %s",
-            Curl_strerror(io_error, buffer, sizeof(buffer)));
+            Fetch_strerror(io_error, buffer, sizeof(buffer)));
       return FETCHE_SEND_ERROR;
     }
     if (tlswritten == 0)
@@ -342,7 +342,7 @@ static FETCHcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
  * It will only drain Rustls' plaintext output buffer into the socket.
  */
 static ssize_t
-cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+cr_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
         const void *plainbuf, size_t plainlen, FETCHcode *err)
 {
   struct ssl_connect_data *const connssl = cf->ctx;
@@ -455,7 +455,7 @@ read_file_into(const char *filename,
     uint8_t buf[256];
     size_t rr = fread(buf, 1, sizeof(buf), f);
     if (rr == 0 ||
-        FETCHE_OK != Curl_dyn_addn(out, buf, rr))
+        FETCHE_OK != Fetch_dyn_addn(out, buf, rr))
     {
       fclose(f);
       return 0;
@@ -466,7 +466,7 @@ read_file_into(const char *filename,
 }
 
 static void
-cr_get_selected_ciphers(struct Curl_easy *data,
+cr_get_selected_ciphers(struct Fetch_easy *data,
                         const char *ciphers12,
                         const char *ciphers13,
                         const struct rustls_supported_ciphersuite **selected,
@@ -505,7 +505,7 @@ cr_get_selected_ciphers(struct Curl_easy *data,
 add_ciphers:
   for (ptr = ciphers; ptr[0] != '\0' && count < supported_len; ptr = end)
   {
-    uint16_t id = Curl_cipher_suite_walk_str(&ptr, &end);
+    uint16_t id = Fetch_cipher_suite_walk_str(&ptr, &end);
 
     /* Check if cipher is supported */
     if (id)
@@ -571,11 +571,11 @@ add_ciphers:
 }
 
 static FETCHcode
-cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
+cr_init_backend(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                 struct rustls_ssl_backend_data *const backend)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_primary_config *conn_config = Fetch_ssl_cf_get_primary_config(cf);
   struct rustls_crypto_provider_builder *custom_provider_builder = NULL;
   const struct rustls_crypto_provider *custom_provider = NULL;
   struct rustls_connection *rconn = NULL;
@@ -717,7 +717,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     rustls_client_config_builder_set_alpn_protocols(config_builder, alpn,
                                                     connssl->alpn->count);
-    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    Fetch_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
   if (!verifypeer)
@@ -773,20 +773,20 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     if (conn_config->CRLfile)
     {
       struct dynbuf crl_contents;
-      Curl_dyn_init(&crl_contents, SIZE_MAX);
+      Fetch_dyn_init(&crl_contents, SIZE_MAX);
       if (!read_file_into(conn_config->CRLfile, &crl_contents))
       {
         failf(data, "rustls: failed to read revocation list file");
-        Curl_dyn_free(&crl_contents);
+        Fetch_dyn_free(&crl_contents);
         rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
         return FETCHE_SSL_CRL_BADFILE;
       }
 
       result = rustls_web_pki_server_cert_verifier_builder_add_crl(
           verifier_builder,
-          Curl_dyn_uptr(&crl_contents),
-          Curl_dyn_len(&crl_contents));
-      Curl_dyn_free(&crl_contents);
+          Fetch_dyn_uptr(&crl_contents),
+          Fetch_dyn_len(&crl_contents));
+      Fetch_dyn_free(&crl_contents);
       if (result != RUSTLS_RESULT_OK)
       {
         failf(data, "rustls: failed to parse revocation list");
@@ -837,7 +837,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
 }
 
 static void
-cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
+cr_set_negotiated_alpn(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                        const struct rustls_connection *rconn)
 {
   struct ssl_connect_data *const connssl = cf->ctx;
@@ -845,7 +845,7 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t len = 0;
 
   rustls_connection_get_alpn_protocol(rconn, &protocol, &len);
-  Curl_alpn_set_negotiated(cf, data, connssl, protocol, len);
+  Fetch_alpn_set_negotiated(cf, data, connssl, protocol, len);
 }
 
 /* Given an established network connection, do a TLS handshake.
@@ -858,13 +858,13 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
  * `*done*`.
  */
 static FETCHcode
-cr_connect_common(struct Curl_cfilter *cf,
-                  struct Curl_easy *data,
+cr_connect_common(struct Fetch_cfilter *cf,
+                  struct Fetch_easy *data,
                   bool blocking,
                   bool *done)
 {
   struct ssl_connect_data *const connssl = cf->ctx;
-  fetch_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+  fetch_socket_t sockfd = Fetch_conn_cf_get_socket(cf, data);
   struct rustls_ssl_backend_data *const backend =
       (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
@@ -931,7 +931,7 @@ cr_connect_common(struct Curl_cfilter *cf,
           ver = "TLSv1.3";
         if (proto == RUSTLS_TLS_VERSION_TLSV1_2)
           ver = "TLSv1.2";
-        Curl_cipher_suite_get_str(cipher, buf, sizeof(buf), TRUE);
+        Fetch_cipher_suite_get_str(cipher, buf, sizeof(buf), TRUE);
         infof(data, "rustls: handshake complete, %s, cipher: %s",
               ver, buf);
       }
@@ -949,7 +949,7 @@ cr_connect_common(struct Curl_cfilter *cf,
     readfd = wants_read ? sockfd : FETCH_SOCKET_BAD;
 
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Fetch_timeleft(data, NULL, TRUE);
 
     if (timeout_ms < 0)
     {
@@ -960,7 +960,7 @@ cr_connect_common(struct Curl_cfilter *cf,
 
     socket_check_timeout = blocking ? timeout_ms : 0;
 
-    what = Curl_socket_check(readfd, FETCH_SOCKET_BAD, writefd,
+    what = Fetch_socket_check(readfd, FETCH_SOCKET_BAD, writefd,
                              socket_check_timeout);
     if (what < 0)
     {
@@ -976,7 +976,7 @@ cr_connect_common(struct Curl_cfilter *cf,
     }
     if (0 == what)
     {
-      FETCH_TRC_CF(data, cf, "Curl_socket_check: %s would block",
+      FETCH_TRC_CF(data, cf, "Fetch_socket_check: %s would block",
                    wants_read && wants_write ? "writing and reading" : wants_write ? "writing"
                                                                                    : "reading");
       if (wants_write)
@@ -1030,14 +1030,14 @@ cr_connect_common(struct Curl_cfilter *cf,
 }
 
 static FETCHcode
-cr_connect_nonblocking(struct Curl_cfilter *cf,
-                       struct Curl_easy *data, bool *done)
+cr_connect_nonblocking(struct Fetch_cfilter *cf,
+                       struct Fetch_easy *data, bool *done)
 {
   return cr_connect_common(cf, data, false, done);
 }
 
 static FETCHcode
-cr_connect_blocking(struct Curl_cfilter *cf, struct Curl_easy *data)
+cr_connect_blocking(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   bool done; /* unused */
   return cr_connect_common(cf, data, true, &done);
@@ -1054,8 +1054,8 @@ cr_get_internals(struct ssl_connect_data *connssl,
 }
 
 static FETCHcode
-cr_shutdown(struct Curl_cfilter *cf,
-            struct Curl_easy *data,
+cr_shutdown(struct Fetch_cfilter *cf,
+            struct Fetch_easy *data,
             bool send_shutdown, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1133,7 +1133,7 @@ out:
 }
 
 static void
-cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+cr_close(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct rustls_ssl_backend_data *backend =
@@ -1160,7 +1160,7 @@ static size_t cr_version(char *buffer, size_t size)
 }
 
 static FETCHcode
-cr_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
+cr_random(struct Fetch_easy *data, unsigned char *entropy, size_t length)
 {
   rustls_result rresult = 0;
   (void)data;
@@ -1169,7 +1169,7 @@ cr_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
   return map_error(rresult);
 }
 
-const struct Curl_ssl Curl_ssl_rustls = {
+const struct Fetch_ssl Fetch_ssl_rustls = {
     {FETCHSSLBACKEND_RUSTLS, "rustls"},
     SSLSUPP_CAINFO_BLOB | /* supports */
         SSLSUPP_HTTPS_PROXY |
@@ -1186,7 +1186,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
     NULL,                    /* cert_status_request */
     cr_connect_blocking,     /* connect */
     cr_connect_nonblocking,  /* connect_nonblocking */
-    Curl_ssl_adjust_pollset, /* adjust_pollset */
+    Fetch_ssl_adjust_pollset, /* adjust_pollset */
     cr_get_internals,        /* get_internals */
     cr_close,                /* close_one */
     NULL,                    /* close_all */

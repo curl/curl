@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -122,34 +122,34 @@ UNITTEST_START
 {
   FETCHcode result;
   struct stsentry *e;
-  struct hsts *h = Curl_hsts_init();
+  struct hsts *h = Fetch_hsts_init();
   int i;
   const char *chost;
   FETCH *easy;
   char savename[256];
 
-  abort_unless(h, "Curl_hsts_init()");
+  abort_unless(h, "Fetch_hsts_init()");
 
   fetch_global_init(FETCH_GLOBAL_ALL);
   easy = fetch_easy_init();
   if (!easy)
   {
-    Curl_hsts_cleanup(&h);
+    Fetch_hsts_cleanup(&h);
     fetch_global_cleanup();
     abort_unless(easy, "fetch_easy_init()");
   }
 
-  Curl_hsts_loadfile(easy, h, arg);
+  Fetch_hsts_loadfile(easy, h, arg);
 
   for (i = 0; headers[i].host; i++)
   {
     if (headers[i].hdr)
     {
-      result = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
+      result = Fetch_hsts_parse(h, headers[i].host, headers[i].hdr);
 
       if (result != headers[i].result)
       {
-        fprintf(stderr, "Curl_hsts_parse(%s) failed: %d\n",
+        fprintf(stderr, "Fetch_hsts_parse(%s) failed: %d\n",
                 headers[i].hdr, result);
         unitfail++;
         continue;
@@ -162,24 +162,24 @@ UNITTEST_START
     }
 
     chost = headers[i].chost ? headers[i].chost : headers[i].host;
-    e = Curl_hsts(h, chost, strlen(chost), TRUE);
+    e = Fetch_hsts(h, chost, strlen(chost), TRUE);
     showsts(e, chost);
   }
 
-  printf("Number of entries: %zu\n", Curl_llist_count(&h->list));
+  printf("Number of entries: %zu\n", Fetch_llist_count(&h->list));
 
   /* verify that it is exists for 7 seconds */
   chost = "expire.example";
   for (i = 100; i < 110; i++)
   {
-    e = Curl_hsts(h, chost, strlen(chost), TRUE);
+    e = Fetch_hsts(h, chost, strlen(chost), TRUE);
     showsts(e, chost);
     deltatime++; /* another second passed */
   }
 
   msnprintf(savename, sizeof(savename), "%s.save", arg);
-  (void)Curl_hsts_save(easy, h, savename);
-  Curl_hsts_cleanup(&h);
+  (void)Fetch_hsts_save(easy, h, savename);
+  Fetch_hsts_cleanup(&h);
   fetch_easy_cleanup(easy);
   fetch_global_cleanup();
 }

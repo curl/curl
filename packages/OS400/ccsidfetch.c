@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -226,7 +226,7 @@ slist_convert(int dccsid, struct fetch_slist *from, int sccsid)
       fetch_slist_free_all(to);
       return (struct fetch_slist *)NULL;
     }
-    nl = Curl_slist_append_nodup(to, cp);
+    nl = Fetch_slist_append_nodup(to, cp);
     if (!nl)
     {
       fetch_slist_free_all(to);
@@ -249,7 +249,7 @@ keyed_string(localkey_t key, const char *ascii, unsigned int ccsid)
 
   i = MAX_CONV_EXPANSION * (strlen(ascii) + 1);
 
-  ebcdic = Curl_thread_buffer(key, i);
+  ebcdic = Fetch_thread_buffer(key, i);
   if (!ebcdic)
     return ebcdic;
 
@@ -482,8 +482,8 @@ fetch_version_info_ccsid(FETCHversion stamp, unsigned int ccsid)
   if (nproto)
     n += nproto * sizeof(const char *);
 
-  cp = Curl_thread_buffer(LK_VERSION_INFO_DATA, n);
-  id = (fetch_version_info_data *)Curl_thread_buffer(LK_VERSION_INFO,
+  cp = Fetch_thread_buffer(LK_VERSION_INFO_DATA, n);
+  id = (fetch_version_info_data *)Fetch_thread_buffer(LK_VERSION_INFO,
                                                      sizeof(*id));
 
   if (!id || !cp)
@@ -565,15 +565,15 @@ fetch_easy_getinfo_ccsid(FETCH *fetch, FETCHINFO info, ...)
   va_list arg;
   void *paramp;
   FETCHcode ret;
-  struct Curl_easy *data;
+  struct Fetch_easy *data;
 
   /* WARNING: unlike fetch_easy_getinfo(), the strings returned by this
      procedure have to be free'ed. */
 
-  data = (struct Curl_easy *)fetch;
+  data = (struct Fetch_easy *)fetch;
   va_start(arg, info);
   paramp = va_arg(arg, void *);
-  ret = Curl_getinfo(data, info, paramp);
+  ret = Fetch_getinfo(data, info, paramp);
 
   if (ret == FETCHE_OK)
   {
@@ -670,7 +670,7 @@ fetch_easy_getinfo_ccsid(FETCH *fetch, FETCHINFO info, ...)
 }
 
 static int
-Curl_is_formadd_string(FETCHformoption option)
+Fetch_is_formadd_string(FETCHformoption option)
 {
   switch (option)
   {
@@ -689,11 +689,11 @@ Curl_is_formadd_string(FETCHformoption option)
 }
 
 static void
-Curl_formadd_release_local(struct fetch_forms *forms, int nargs, int skip)
+Fetch_formadd_release_local(struct fetch_forms *forms, int nargs, int skip)
 {
   while (nargs--)
     if (nargs != skip)
-      if (Curl_is_formadd_string(forms[nargs].option))
+      if (Fetch_is_formadd_string(forms[nargs].option))
         if (forms[nargs].value)
           free((char *)forms[nargs].value);
 
@@ -701,7 +701,7 @@ Curl_formadd_release_local(struct fetch_forms *forms, int nargs, int skip)
 }
 
 static int
-Curl_formadd_convert(struct fetch_forms *forms,
+Fetch_formadd_convert(struct fetch_forms *forms,
                      int formx, int lengthx, unsigned int ccsid)
 {
   int l;
@@ -949,7 +949,7 @@ fetch_formadd_ccsid(struct fetch_httppost **httppost,
     case FETCHFORM_CONTENTTYPE:
       /* If a previous content has been encountered, convert it now. */
 
-      if (Curl_formadd_convert(lforms, contentx, lengthx, contentccsid) < 0)
+      if (Fetch_formadd_convert(lforms, contentx, lengthx, contentccsid) < 0)
       {
         result = FETCH_FORMADD_MEMORY;
         break;
@@ -962,7 +962,7 @@ fetch_formadd_ccsid(struct fetch_httppost **httppost,
     default:
       /* Must be a convertible string. */
 
-      if (!Curl_is_formadd_string(option))
+      if (!Fetch_is_formadd_string(option))
       {
         result = FETCH_FORMADD_UNKNOWN_OPTION;
         break;
@@ -983,7 +983,7 @@ fetch_formadd_ccsid(struct fetch_httppost **httppost,
 
       lforms[nargs].value = value;
 
-      if (Curl_formadd_convert(lforms, nargs, -1, ccsid) < 0)
+      if (Fetch_formadd_convert(lforms, nargs, -1, ccsid) < 0)
       {
         result = FETCH_FORMADD_MEMORY;
         break;
@@ -1005,7 +1005,7 @@ fetch_formadd_ccsid(struct fetch_httppost **httppost,
 
   if (result == FETCH_FORMADD_OK && namex >= 0)
   {
-    if (Curl_formadd_convert(lforms, namex, namelengthx, nameccsid) < 0)
+    if (Fetch_formadd_convert(lforms, namex, namelengthx, nameccsid) < 0)
       result = FETCH_FORMADD_MEMORY;
     else
       lforms[namex].option = FETCHFORM_COPYNAME; /* Force copy. */
@@ -1013,7 +1013,7 @@ fetch_formadd_ccsid(struct fetch_httppost **httppost,
 
   if (result == FETCH_FORMADD_OK)
   {
-    if (Curl_formadd_convert(lforms, contentx, lengthx, contentccsid) < 0)
+    if (Fetch_formadd_convert(lforms, contentx, lengthx, contentccsid) < 0)
       result = FETCH_FORMADD_MEMORY;
     else
       contentx = -1;
@@ -1030,7 +1030,7 @@ fetch_formadd_ccsid(struct fetch_httppost **httppost,
 
   /* Terminate. */
 
-  Curl_formadd_release_local(lforms, nargs, contentx);
+  Fetch_formadd_release_local(lforms, nargs, contentx);
   return result;
 }
 
@@ -1042,7 +1042,7 @@ struct cfcdata
 };
 
 static size_t
-Curl_formget_callback_ccsid(void *arg, const char *buf, size_t len)
+Fetch_formget_callback_ccsid(void *arg, const char *buf, size_t len)
 {
   struct cfcdata *p;
   char *b;
@@ -1080,7 +1080,7 @@ int fetch_formget_ccsid(struct fetch_httppost *form, void *arg,
   lcfc.append = append;
   lcfc.arg = arg;
   lcfc.ccsid = ccsid;
-  return fetch_formget(form, (void *)&lcfc, Curl_formget_callback_ccsid);
+  return fetch_formget(form, (void *)&lcfc, Fetch_formget_callback_ccsid);
 }
 
 FETCHcode
@@ -1092,7 +1092,7 @@ fetch_easy_setopt_ccsid(FETCH *easy, FETCHoption tag, ...)
   char *cp = NULL;
   unsigned int ccsid;
   fetch_off_t pfsize;
-  struct Curl_easy *data = easy;
+  struct Fetch_easy *data = easy;
 
   va_start(arg, tag);
 
@@ -1321,7 +1321,7 @@ fetch_easy_setopt_ccsid(FETCH *easy, FETCHoption tag, ...)
     }
     FALLTHROUGH();
   case FETCHOPT_ERRORBUFFER: /* This is an output buffer. */
-    result = Curl_vsetopt(easy, tag, arg);
+    result = Fetch_vsetopt(easy, tag, arg);
     break;
   }
 

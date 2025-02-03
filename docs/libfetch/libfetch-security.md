@@ -500,4 +500,4 @@ cookies.
 
 Should you detect or just suspect a security problem in libfetch or fetch,
 contact the project fetch security team immediately. See
-https://curl.se/dev/secprocess.html for details.
+https://fetch.se/dev/secprocess.html for details.

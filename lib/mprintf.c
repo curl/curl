@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -1184,7 +1184,7 @@ int fetch_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 static int alloc_addbyter(unsigned char outc, void *f)
 {
   struct asprintf *infop = f;
-  FETCHcode result = Curl_dyn_addn(infop->b, &outc, 1);
+  FETCHcode result = Fetch_dyn_addn(infop->b, &outc, 1);
   if (result)
   {
     infop->merr = result == FETCHE_TOO_LARGE ? MERR_TOO_LARGE : MERR_MEM;
@@ -1194,7 +1194,7 @@ static int alloc_addbyter(unsigned char outc, void *f)
 }
 
 /* appends the formatted string, returns MERR error code */
-int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
+int Fetch_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 {
   struct asprintf info;
   info.b = dyn;
@@ -1203,7 +1203,7 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
   (void)formatf(&info, alloc_addbyter, format, ap_save);
   if (info.merr)
   {
-    Curl_dyn_free(info.b);
+    Fetch_dyn_free(info.b);
     return info.merr;
   }
   return 0;
@@ -1214,17 +1214,17 @@ char *fetch_mvaprintf(const char *format, va_list ap_save)
   struct asprintf info;
   struct dynbuf dyn;
   info.b = &dyn;
-  Curl_dyn_init(info.b, DYN_APRINTF);
+  Fetch_dyn_init(info.b, DYN_APRINTF);
   info.merr = MERR_OK;
 
   (void)formatf(&info, alloc_addbyter, format, ap_save);
   if (info.merr)
   {
-    Curl_dyn_free(info.b);
+    Fetch_dyn_free(info.b);
     return NULL;
   }
-  if (Curl_dyn_len(info.b))
-    return Curl_dyn_ptr(info.b);
+  if (Fetch_dyn_len(info.b))
+    return Fetch_dyn_ptr(info.b);
   return strdup("");
 }
 

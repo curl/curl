@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -57,13 +57,13 @@
 #include "memdebug.h"
 
 /*
- * Curl_ipvalid() checks what FETCH_IPRESOLVE_* requirements that might've
+ * Fetch_ipvalid() checks what FETCH_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
-bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
+bool Fetch_ipvalid(struct Fetch_easy *data, struct connectdata *conn)
 {
   if (conn->ip_version == FETCH_IPRESOLVE_V6)
-    return Curl_ipv6works(data);
+    return Fetch_ipv6works(data);
 
   return TRUE;
 }
@@ -71,7 +71,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 #if defined(FETCHRES_SYNCH)
 
 #ifdef DEBUG_ADDRINFO
-static void dump_addrinfo(const struct Curl_addrinfo *ai)
+static void dump_addrinfo(const struct Fetch_addrinfo *ai)
 {
   printf("dump_addrinfo:\n");
   for (; ai; ai = ai->ai_next)
@@ -79,30 +79,30 @@ static void dump_addrinfo(const struct Curl_addrinfo *ai)
     char buf[INET6_ADDRSTRLEN];
     printf("    fam %2d, CNAME %s, ",
            ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
-    Curl_printable_address(ai, buf, sizeof(buf));
+    Fetch_printable_address(ai, buf, sizeof(buf));
     printf("%s\n", buf);
   }
 }
 #else
-#define dump_addrinfo(x) Curl_nop_stmt
+#define dump_addrinfo(x) Fetch_nop_stmt
 #endif
 
 /*
- * Curl_getaddrinfo() when built IPv6-enabled (non-threading and
+ * Fetch_getaddrinfo() when built IPv6-enabled (non-threading and
  * non-ares version).
  *
  * Returns name information about the given hostname and port number. If
  * successful, the 'addrinfo' is returned and the fourth argument will point
  * to memory we need to free after use. That memory *MUST* be freed with
- * Curl_freeaddrinfo(), nothing else.
+ * Fetch_freeaddrinfo(), nothing else.
  */
-struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
+struct Fetch_addrinfo *Fetch_getaddrinfo(struct Fetch_easy *data,
                                        const char *hostname,
                                        int port,
                                        int *waitp)
 {
   struct addrinfo hints;
-  struct Curl_addrinfo *res;
+  struct Fetch_addrinfo *res;
   int error;
   char sbuf[12];
   char *sbufptr = NULL;
@@ -113,7 +113,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   *waitp = 0; /* synchronous response only */
 
-  if ((data->conn->ip_version != FETCH_IPRESOLVE_V4) && Curl_ipv6works(data))
+  if ((data->conn->ip_version != FETCH_IPRESOLVE_V4) && Fetch_ipv6works(data))
     /* The stack seems to be IPv6-enabled */
     pf = PF_UNSPEC;
 
@@ -126,8 +126,8 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
    * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
    * an IPv4 address on iOS and macOS.
    */
-  if ((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
-      (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf)))
+  if ((1 == Fetch_inet_pton(AF_INET, hostname, addrbuf)) ||
+      (1 == Fetch_inet_pton(AF_INET6, hostname, addrbuf)))
   {
     /* the given address is numerical only, prevent a reverse lookup */
     hints.ai_flags = AI_NUMERICHOST;
@@ -140,7 +140,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
     sbufptr = sbuf;
   }
 
-  error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
+  error = Fetch_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
   if (error)
   {
     infof(data, "getaddrinfo(3) failed for %s:%d", hostname, port);
@@ -149,7 +149,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   if (port)
   {
-    Curl_addrinfo_set_port(res, port);
+    Fetch_addrinfo_set_port(res, port);
   }
 
   dump_addrinfo(res);

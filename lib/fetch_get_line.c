@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,14 +35,14 @@
 #include "memdebug.h"
 
 /*
- * Curl_get_line() makes sure to only return complete whole lines that end
+ * Fetch_get_line() makes sure to only return complete whole lines that end
  * newlines.
  */
-int Curl_get_line(struct dynbuf *buf, FILE *input)
+int Fetch_get_line(struct dynbuf *buf, FILE *input)
 {
   FETCHcode result;
   char buffer[128];
-  Curl_dyn_reset(buf);
+  Fetch_dyn_reset(buf);
   while (1)
   {
     char *b = fgets(buffer, sizeof(buffer), input);
@@ -54,7 +54,7 @@ int Curl_get_line(struct dynbuf *buf, FILE *input)
       if (!rlen)
         break;
 
-      result = Curl_dyn_addn(buf, b, rlen);
+      result = Fetch_dyn_addn(buf, b, rlen);
       if (result)
         /* too long line or out of memory */
         return 0; /* error */
@@ -66,7 +66,7 @@ int Curl_get_line(struct dynbuf *buf, FILE *input)
       else if (feof(input))
       {
         /* append a newline */
-        result = Curl_dyn_addn(buf, "\n", 1);
+        result = Fetch_dyn_addn(buf, "\n", 1);
         if (result)
           /* too long line or out of memory */
           return 0; /* error */

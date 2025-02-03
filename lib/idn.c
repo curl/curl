@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -244,7 +244,7 @@ static FETCHcode win32_ascii_to_idn(const char *in, char **output)
 /*
  * Helpers for IDNA conversions.
  */
-bool Curl_is_ASCII_name(const char *hostname)
+bool Fetch_is_ASCII_name(const char *hostname)
 {
   /* get an UNSIGNED local version of the pointer */
   const unsigned char *ch = (const unsigned char *)hostname;
@@ -262,7 +262,7 @@ bool Curl_is_ASCII_name(const char *hostname)
 
 #ifdef USE_IDN
 /*
- * Curl_idn_decode() returns an allocated IDN decoded string if it was
+ * Fetch_idn_decode() returns an allocated IDN decoded string if it was
  * possible. NULL on error.
  *
  * FETCHE_URL_MALFORMAT - the hostname could not be converted
@@ -325,7 +325,7 @@ static FETCHcode idn_encode(const char *puny, char **output)
   return FETCHE_OK;
 }
 
-FETCHcode Curl_idn_decode(const char *input, char **output)
+FETCHcode Fetch_idn_decode(const char *input, char **output)
 {
   char *d = NULL;
   FETCHcode result = idn_decode(input, &d);
@@ -345,7 +345,7 @@ FETCHcode Curl_idn_decode(const char *input, char **output)
   return result;
 }
 
-FETCHcode Curl_idn_encode(const char *puny, char **output)
+FETCHcode Fetch_idn_encode(const char *puny, char **output)
 {
   char *d = NULL;
   FETCHcode result = idn_encode(puny, &d);
@@ -368,9 +368,9 @@ FETCHcode Curl_idn_encode(const char *puny, char **output)
 /*
  * Frees data allocated by idnconvert_hostname()
  */
-void Curl_free_idnconverted_hostname(struct hostname *host)
+void Fetch_free_idnconverted_hostname(struct hostname *host)
 {
-  Curl_safefree(host->encalloc);
+  Fetch_safefree(host->encalloc);
 }
 
 #endif /* USE_IDN */
@@ -378,17 +378,17 @@ void Curl_free_idnconverted_hostname(struct hostname *host)
 /*
  * Perform any necessary IDN conversion of hostname
  */
-FETCHcode Curl_idnconvert_hostname(struct hostname *host)
+FETCHcode Fetch_idnconvert_hostname(struct hostname *host)
 {
   /* set the name we use to display the hostname */
   host->dispname = host->name;
 
 #ifdef USE_IDN
   /* Check name for non-ASCII and convert hostname if we can */
-  if (!Curl_is_ASCII_name(host->name))
+  if (!Fetch_is_ASCII_name(host->name))
   {
     char *decoded;
-    FETCHcode result = Curl_idn_decode(host->name, &decoded);
+    FETCHcode result = Fetch_idn_decode(host->name, &decoded);
     if (result)
       return result;
     /* successful */

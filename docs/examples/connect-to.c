@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,17 +39,17 @@ int main(void)
      request, PORT is the port of the request, CONNECT-TO-HOST is the host name
      to connect to, and CONNECT-TO-PORT is the port to connect to.
     */
-   /* instead of curl.se:443, it resolves and uses example.com:443 but in other
-      aspects work as if it still is curl.se */
+   /* instead of fetch.se:443, it resolves and uses example.com:443 but in other
+      aspects work as if it still is fetch.se */
    struct fetch_slist *host = fetch_slist_append(NULL,
-                                                 "curl.se:443:example.com:443");
+                                                 "fetch.se:443:example.com:443");
 
    fetch = fetch_easy_init();
    if (fetch)
    {
       fetch_easy_setopt(fetch, FETCHOPT_CONNECT_TO, host);
       fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
-      fetch_easy_setopt(fetch, FETCHOPT_URL, "https://curl.se/");
+      fetch_easy_setopt(fetch, FETCHOPT_URL, "https://fetch.se/");
 
       /* since this connects to the wrong host, checking the host name in the
          server certificate fails, so unless we disable the check libfetch

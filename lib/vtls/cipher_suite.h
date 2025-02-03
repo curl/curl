@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,16 +31,16 @@
 #include <stdint.h>
 
 /* Lookup IANA id for cipher suite string, returns 0 if not recognized */
-uint16_t Curl_cipher_suite_lookup_id(const char *cs_str, size_t cs_len);
+uint16_t Fetch_cipher_suite_lookup_id(const char *cs_str, size_t cs_len);
 
 /* Walk over cipher suite string, update str and end pointers to next
    cipher suite in string, returns IANA id of that suite if recognized */
-uint16_t Curl_cipher_suite_walk_str(const char **str, const char **end);
+uint16_t Fetch_cipher_suite_walk_str(const char **str, const char **end);
 
 /* Copy openssl or RFC name for cipher suite in supplied buffer.
    Caller is responsible to supply sufficiently large buffer (size
    of 64 should suffice), excess bytes are silently truncated. */
-int Curl_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
+int Fetch_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
                               bool prefer_rfc);
 
 #endif /* defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \

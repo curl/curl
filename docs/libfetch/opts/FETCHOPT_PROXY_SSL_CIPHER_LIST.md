@@ -57,7 +57,7 @@ cipher suites. Refer to the ciphers lists document for algorithms.
 
 Find more details about cipher lists on this URL:
 
-https://curl.se/docs/ssl-ciphers.html
+https://fetch.se/docs/ssl-ciphers.html
 
 The application does not have to keep the string around after setting this
 option.

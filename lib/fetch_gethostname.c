@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,7 @@
 #include "fetch_gethostname.h"
 
 /*
- * Curl_gethostname() is a wrapper around gethostname() which allows
+ * Fetch_gethostname() is a wrapper around gethostname() which allows
  * overriding the hostname that the function would normally return.
  * This capability is used by the test suite to verify exact matching
  * of NTLM authentication, which exercises libfetch's MD4 and DES code
@@ -41,7 +41,7 @@
  * than being provider dependent.
  */
 
-int Curl_gethostname(char *const name, GETHOSTNAME_TYPE_ARG2 namelen)
+int Fetch_gethostname(char *const name, GETHOSTNAME_TYPE_ARG2 namelen)
 {
 #ifndef HAVE_GETHOSTNAME
 

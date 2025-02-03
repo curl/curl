@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,7 +54,7 @@
  */
 
 /*
- * hostip4.c - Curl_ipv4_resolve_r() replacement code
+ * hostip4.c - Fetch_ipv4_resolve_r() replacement code
  *
  * Logic that needs to be considered are the following build cases:
  * - newlib networking
@@ -69,13 +69,13 @@
 
 #include <proto/bsdsocket.h>
 
-static struct SocketIFace *__CurlISocket = NULL;
+static struct SocketIFace *__FetchISocket = NULL;
 static uint32 SocketFeatures = 0;
 
 #define HAVE_BSDSOCKET_GETHOSTBYNAME_R 0x01
 #define HAVE_BSDSOCKET_GETADDRINFO 0x02
 
-FETCHcode Curl_amiga_init(void)
+FETCHcode Fetch_amiga_init(void)
 {
   struct SocketIFace *ISocket;
   struct Library *base = OpenLibrary("bsdsocket.library", 4);
@@ -96,9 +96,9 @@ FETCHcode Curl_amiga_init(void)
         SocketFeatures |= HAVE_BSDSOCKET_GETHOSTBYNAME_R;
       }
 
-      __CurlISocket = ISocket;
+      __FetchISocket = ISocket;
 
-      atexit(Curl_amiga_cleanup);
+      atexit(Fetch_amiga_cleanup);
 
       return FETCHE_OK;
     }
@@ -108,32 +108,32 @@ FETCHcode Curl_amiga_init(void)
   return FETCHE_FAILED_INIT;
 }
 
-void Curl_amiga_cleanup(void)
+void Fetch_amiga_cleanup(void)
 {
-  if (__CurlISocket)
+  if (__FetchISocket)
   {
-    struct Library *base = __CurlISocket->Data.LibBase;
-    DropInterface((struct Interface *)__CurlISocket);
+    struct Library *base = __FetchISocket->Data.LibBase;
+    DropInterface((struct Interface *)__FetchISocket);
     CloseLibrary(base);
-    __CurlISocket = NULL;
+    __FetchISocket = NULL;
   }
 }
 
 #ifdef FETCHRES_AMIGA
 /*
  * Because we need to handle the different cases in hostip4.c at runtime,
- * not at compile-time, based on what was detected in Curl_amiga_init(),
+ * not at compile-time, based on what was detected in Fetch_amiga_init(),
  * we replace it completely with our own as to not complicate the baseline
- * code. Assumes malloc/calloc/free are thread safe because Curl_he2ai()
+ * code. Assumes malloc/calloc/free are thread safe because Fetch_he2ai()
  * allocates memory also.
  */
 
-struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
+struct Fetch_addrinfo *Fetch_ipv4_resolve_r(const char *hostname,
                                           int port)
 {
-  struct Curl_addrinfo *ai = NULL;
+  struct Fetch_addrinfo *ai = NULL;
   struct hostent *h;
-  struct SocketIFace *ISocket = __CurlISocket;
+  struct SocketIFace *ISocket = __FetchISocket;
 
   if (SocketFeatures & HAVE_BSDSOCKET_GETHOSTBYNAME_R)
   {
@@ -149,7 +149,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                           &h_errnop);
       if (h)
       {
-        ai = Curl_he2ai(h, port);
+        ai = Fetch_he2ai(h, port);
       }
       free(buf);
     }
@@ -169,7 +169,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
         h = gethostbyname((STRPTR)hostname);
         if (h)
         {
-          ai = Curl_he2ai(h, port);
+          ai = Fetch_he2ai(h, port);
         }
         DropInterface((struct Interface *)ISocket);
       }
@@ -180,7 +180,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     h = gethostbyname(hostname);
     if (h)
     {
-      ai = Curl_he2ai(h, port);
+      ai = Fetch_he2ai(h, port);
     }
 #endif
   }
@@ -191,7 +191,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 
 #ifdef USE_AMISSL
 #include <signal.h>
-int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
+int Fetch_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
                       fd_set *errorfds, struct timeval *timeout)
 {
   int r = WaitSelect(nfds, readfds, writefds, errorfds, timeout, 0);
@@ -215,7 +215,7 @@ void __request(const char *msg);
 #define __request(msg) Printf((const unsigned char *)(msg "\n\a"), 0)
 #endif
 
-void Curl_amiga_cleanup(void)
+void Fetch_amiga_cleanup(void)
 {
   if (SocketBase)
   {
@@ -224,7 +224,7 @@ void Curl_amiga_cleanup(void)
   }
 }
 
-FETCHcode Curl_amiga_init(void)
+FETCHcode Fetch_amiga_init(void)
 {
   if (!SocketBase)
     SocketBase = OpenLibrary((const unsigned char *)"bsdsocket.library", 4);
@@ -244,14 +244,14 @@ FETCHcode Curl_amiga_init(void)
   }
 
 #ifndef __libnix__
-  atexit(Curl_amiga_cleanup);
+  atexit(Fetch_amiga_cleanup);
 #endif
 
   return FETCHE_OK;
 }
 
 #ifdef __libnix__
-ADD2EXIT(Curl_amiga_cleanup, -50);
+ADD2EXIT(Fetch_amiga_cleanup, -50);
 #endif
 
 #endif /* !USE_AMISSL */

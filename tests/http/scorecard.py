@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@ import sys
 from statistics import mean
 from typing import Dict, Any, Optional, List
 
-from testenv import Env, Httpd, CurlClient, Caddy, ExecResult, NghttpxQuic, RunProfile
+from testenv import Env, Httpd, FetchClient, Caddy, ExecResult, NghttpxQuic, RunProfile
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class ScoreCard:
         sample_size = 5
         self.info('TLS Handshake\n')
         for authority in [
-            'curl.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
+            'fetch.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
         ]:
             self.info(f'  {authority}...')
             props[authority] = {}
@@ -83,7 +83,7 @@ class ScoreCard:
                 hs_samples = []
                 errors = []
                 for _ in range(sample_size):
-                    fetch = CurlClient(env=self.env, silent=self._silent_fetch,
+                    fetch = FetchClient(env=self.env, silent=self._silent_fetch,
                                       server_addr=self.server_addr)
                     args = [
                         '--http3-only' if self.protocol == 'h3' else '--http2',
@@ -142,7 +142,7 @@ class ScoreCard:
         profiles = []
         self.info('single...')
         for _ in range(sample_size):
-            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
+            fetch = FetchClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
             r = fetch.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True, with_headers=False,
@@ -171,7 +171,7 @@ class ScoreCard:
         url = f'{url}?[0-{count - 1}]'
         self.info('serial...')
         for _ in range(sample_size):
-            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
+            fetch = FetchClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
             r = fetch.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True,
@@ -201,7 +201,7 @@ class ScoreCard:
         url = f'{url}?[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(sample_size):
-            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
+            fetch = FetchClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
             r = fetch.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True,
@@ -268,7 +268,7 @@ class ScoreCard:
         profiles = []
         self.info('single...')
         for _ in range(sample_size):
-            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
+            fetch = FetchClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
             r = fetch.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True)
@@ -296,7 +296,7 @@ class ScoreCard:
         url = f'{url}?id=[0-{count - 1}]'
         self.info('serial...')
         for _ in range(sample_size):
-            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
+            fetch = FetchClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
             r = fetch.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True)
@@ -325,7 +325,7 @@ class ScoreCard:
         url = f'{url}?id=[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(sample_size):
-            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
+            fetch = FetchClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
             r = fetch.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True,
@@ -390,7 +390,7 @@ class ScoreCard:
             ])
         self.info(f'{max_parallel}...')
         for _ in range(sample_size):
-            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
+            fetch = FetchClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
             r = fetch.http_download(urls=[url], alpn_proto=self.protocol, no_save=True,
                                    with_headers=False, with_profile=True,

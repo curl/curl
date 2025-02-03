@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -113,7 +113,7 @@ FETCHcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
   dirbuildup = malloc(outlen + 1);
   if (!dirbuildup)
   {
-    Curl_safefree(outdup);
+    Fetch_safefree(outdup);
     return FETCHE_OUT_OF_MEMORY;
   }
   dirbuildup[0] = '\0';
@@ -166,8 +166,8 @@ FETCHcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
     tempdir = tempdir2;
   }
 
-  Curl_safefree(dirbuildup);
-  Curl_safefree(outdup);
+  Fetch_safefree(dirbuildup);
+  Fetch_safefree(outdup);
 
   return result;
 }

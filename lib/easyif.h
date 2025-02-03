@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,15 +27,15 @@
 /*
  * Prototypes for library-wide functions provided by easy.c
  */
-FETCHcode Curl_senddata(struct Curl_easy *data, const void *buffer,
+FETCHcode Fetch_senddata(struct Fetch_easy *data, const void *buffer,
                         size_t buflen, size_t *n);
 
 #ifndef FETCH_DISABLE_WEBSOCKETS
-FETCHcode Curl_connect_only_attach(struct Curl_easy *data);
+FETCHcode Fetch_connect_only_attach(struct Fetch_easy *data);
 #endif
 
 #ifdef DEBUGBUILD
-FETCH_EXTERN FETCHcode fetch_easy_perform_ev(struct Curl_easy *easy);
+FETCH_EXTERN FETCHcode fetch_easy_perform_ev(struct Fetch_easy *easy);
 #endif
 
 #endif /* HEADER_FETCH_EASYIF_H */

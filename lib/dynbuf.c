@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,7 +37,7 @@
 /*
  * Init a dynbuf struct.
  */
-void Curl_dyn_init(struct dynbuf *s, size_t toobig)
+void Fetch_dyn_init(struct dynbuf *s, size_t toobig)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(toobig);
@@ -54,10 +54,10 @@ void Curl_dyn_init(struct dynbuf *s, size_t toobig)
  * free the buffer and re-init the necessary fields. It does not touch the
  * 'init' field and thus this buffer can be reused to add data to again.
  */
-void Curl_dyn_free(struct dynbuf *s)
+void Fetch_dyn_free(struct dynbuf *s)
 {
   DEBUGASSERT(s);
-  Curl_safefree(s->bufr);
+  Fetch_safefree(s->bufr);
   s->leng = s->allc = 0;
 }
 
@@ -81,7 +81,7 @@ static FETCHcode dyn_nappend(struct dynbuf *s,
 
   if (fit > s->toobig)
   {
-    Curl_dyn_free(s);
+    Fetch_dyn_free(s);
     return FETCHE_TOO_LARGE;
   }
   else if (!a)
@@ -106,12 +106,12 @@ static FETCHcode dyn_nappend(struct dynbuf *s,
 
   if (a != s->allc)
   {
-    /* this logic is not using Curl_saferealloc() to make the tool not have to
+    /* this logic is not using Fetch_saferealloc() to make the tool not have to
        include that as well when it uses this code */
     void *p = realloc(s->bufr, a);
     if (!p)
     {
-      Curl_dyn_free(s);
+      Fetch_dyn_free(s);
       return FETCHE_OUT_OF_MEMORY;
     }
     s->bufr = p;
@@ -129,7 +129,7 @@ static FETCHcode dyn_nappend(struct dynbuf *s,
  * Clears the string, keeps the allocation. This can also be called on a
  * buffer that already was freed.
  */
-void Curl_dyn_reset(struct dynbuf *s)
+void Fetch_dyn_reset(struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -143,7 +143,7 @@ void Curl_dyn_reset(struct dynbuf *s)
  * Specify the size of the tail to keep (number of bytes from the end of the
  * buffer). The rest will be dropped.
  */
-FETCHcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
+FETCHcode Fetch_dyn_tail(struct dynbuf *s, size_t trail)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -154,7 +154,7 @@ FETCHcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
     return FETCHE_OK;
   else if (!trail)
   {
-    Curl_dyn_reset(s);
+    Fetch_dyn_reset(s);
   }
   else
   {
@@ -168,7 +168,7 @@ FETCHcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
 /*
  * Appends a buffer with length.
  */
-FETCHcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
+FETCHcode Fetch_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -179,7 +179,7 @@ FETCHcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
 /*
  * Append a null-terminated string at the end.
  */
-FETCHcode Curl_dyn_add(struct dynbuf *s, const char *str)
+FETCHcode Fetch_dyn_add(struct dynbuf *s, const char *str)
 {
   size_t n;
   DEBUGASSERT(str);
@@ -193,7 +193,7 @@ FETCHcode Curl_dyn_add(struct dynbuf *s, const char *str)
 /*
  * Append a string vprintf()-style
  */
-FETCHcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
+FETCHcode Fetch_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 {
 #ifdef BUILDING_LIBFETCH
   int rc;
@@ -201,7 +201,7 @@ FETCHcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
   DEBUGASSERT(fmt);
-  rc = Curl_dyn_vprintf(s, fmt, ap);
+  rc = Fetch_dyn_vprintf(s, fmt, ap);
 
   if (!rc)
     return FETCHE_OK;
@@ -219,7 +219,7 @@ FETCHcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
     return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */
-  Curl_dyn_free(s);
+  Fetch_dyn_free(s);
   return FETCHE_OUT_OF_MEMORY;
 #endif
 }
@@ -227,7 +227,7 @@ FETCHcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 /*
  * Append a string printf()-style
  */
-FETCHcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
+FETCHcode Fetch_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 {
   FETCHcode result;
   va_list ap;
@@ -235,7 +235,7 @@ FETCHcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
   va_start(ap, fmt);
-  result = Curl_dyn_vaddf(s, fmt, ap);
+  result = Fetch_dyn_vaddf(s, fmt, ap);
   va_end(ap);
   return result;
 }
@@ -243,7 +243,7 @@ FETCHcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 /*
  * Returns a pointer to the buffer.
  */
-char *Curl_dyn_ptr(const struct dynbuf *s)
+char *Fetch_dyn_ptr(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -251,7 +251,7 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
   return s->bufr;
 }
 
-char *Curl_dyn_take(struct dynbuf *s, size_t *plen)
+char *Fetch_dyn_take(struct dynbuf *s, size_t *plen)
 {
   char *ptr = s->bufr;
   DEBUGASSERT(s);
@@ -266,7 +266,7 @@ char *Curl_dyn_take(struct dynbuf *s, size_t *plen)
 /*
  * Returns an unsigned pointer to the buffer.
  */
-unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
+unsigned char *Fetch_dyn_uptr(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -277,7 +277,7 @@ unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
 /*
  * Returns the length of the buffer.
  */
-size_t Curl_dyn_len(const struct dynbuf *s)
+size_t Fetch_dyn_len(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -288,7 +288,7 @@ size_t Curl_dyn_len(const struct dynbuf *s)
 /*
  * Set a new (smaller) length.
  */
-FETCHcode Curl_dyn_setlen(struct dynbuf *s, size_t set)
+FETCHcode Fetch_dyn_setlen(struct dynbuf *s, size_t set)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);

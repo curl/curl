@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,7 +55,7 @@ static bool hd_name_eq(const char *n1, size_t n1len,
   return (n1len == n2len) ? strncasecompare(n1, n2, n1len) : FALSE;
 }
 
-static FETCHcode dynhds_add_custom(struct Curl_easy *data,
+static FETCHcode dynhds_add_custom(struct Fetch_easy *data,
                                    bool is_connect, int httpversion,
                                    struct dynhds *hds)
 {
@@ -66,7 +66,7 @@ static FETCHcode dynhds_add_custom(struct Curl_easy *data,
   int numlists = 1; /* by default */
   int i;
 
-  enum Curl_proxy_use proxy;
+  enum Fetch_proxy_use proxy;
 
   if (is_connect)
     proxy = HEADER_CONNECT;
@@ -187,13 +187,13 @@ static FETCHcode dynhds_add_custom(struct Curl_easy *data,
                 hd_name_eq(name, namelen, STRCONST("Cookie:"))) &&
                /* be careful of sending this potentially sensitive header to
                   other hosts */
-               !Curl_auth_allowed_to_host(data))
+               !Fetch_auth_allowed_to_host(data))
         ;
       else
       {
         FETCHcode result;
 
-        result = Curl_dynhds_add(hds, name, namelen, value, valuelen);
+        result = Fetch_dynhds_add(hds, name, namelen, value, valuelen);
         if (result)
           return result;
       }
@@ -203,7 +203,7 @@ static FETCHcode dynhds_add_custom(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
+FETCHcode Fetch_http_proxy_get_destination(struct Fetch_cfilter *cf,
                                           const char **phostname,
                                           int *pport, bool *pipv6_ip)
 {
@@ -235,13 +235,13 @@ FETCHcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
 struct cf_proxy_ctx
 {
   /* the protocol specific sub-filter we install during connect */
-  struct Curl_cfilter *cf_protocol;
+  struct Fetch_cfilter *cf_protocol;
   int httpversion; /* HTTP version used to CONNECT */
 };
 
-FETCHcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
-                                         struct Curl_cfilter *cf,
-                                         struct Curl_easy *data,
+FETCHcode Fetch_http_proxy_create_CONNECT(struct httpreq **preq,
+                                         struct Fetch_cfilter *cf,
+                                         struct Fetch_easy *data,
                                          int http_version_major)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
@@ -252,7 +252,7 @@ FETCHcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   FETCHcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
+  result = Fetch_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
   if (result)
     goto out;
 
@@ -264,48 +264,48 @@ FETCHcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
     goto out;
   }
 
-  result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT") - 1,
+  result = Fetch_http_req_make(&req, "CONNECT", sizeof("CONNECT") - 1,
                               NULL, 0, authority, strlen(authority),
                               NULL, 0);
   if (result)
     goto out;
 
   /* Setup the proxy-authorization header, if any */
-  result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
+  result = Fetch_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
                                  req->authority, TRUE);
   if (result)
     goto out;
 
   /* If user is not overriding Host: header, we add for HTTP/1.x */
   if (http_version_major == 1 &&
-      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host")))
+      !Fetch_checkProxyheaders(data, cf->conn, STRCONST("Host")))
   {
-    result = Curl_dynhds_cadd(&req->headers, "Host", authority);
+    result = Fetch_dynhds_cadd(&req->headers, "Host", authority);
     if (result)
       goto out;
   }
 
   if (data->state.aptr.proxyuserpwd)
   {
-    result = Curl_dynhds_h1_cadd_line(&req->headers,
+    result = Fetch_dynhds_h1_cadd_line(&req->headers,
                                       data->state.aptr.proxyuserpwd);
     if (result)
       goto out;
   }
 
-  if (!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+  if (!Fetch_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
       data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT])
   {
-    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
+    result = Fetch_dynhds_cadd(&req->headers, "User-Agent",
                               data->set.str[STRING_USERAGENT]);
     if (result)
       goto out;
   }
 
   if (http_version_major == 1 &&
-      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection")))
+      !Fetch_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection")))
   {
-    result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
+    result = Fetch_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
     if (result)
       goto out;
   }
@@ -315,7 +315,7 @@ FETCHcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
 out:
   if (result && req)
   {
-    Curl_http_req_free(req);
+    Fetch_http_req_free(req);
     req = NULL;
   }
   free(authority);
@@ -323,8 +323,8 @@ out:
   return result;
 }
 
-static FETCHcode http_proxy_cf_connect(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
+static FETCHcode http_proxy_cf_connect(struct Fetch_cfilter *cf,
+                                       struct Fetch_easy *data,
                                        bool blocking, bool *done)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
@@ -345,9 +345,9 @@ connect_sub:
   *done = FALSE;
   if (!ctx->cf_protocol)
   {
-    struct Curl_cfilter *cf_protocol = NULL;
+    struct Fetch_cfilter *cf_protocol = NULL;
     int httpversion = 0;
-    int alpn = Curl_conn_cf_is_ssl(cf->next) ? cf->conn->proxy_alpn : FETCH_HTTP_VERSION_1_1;
+    int alpn = Fetch_conn_cf_is_ssl(cf->next) ? cf->conn->proxy_alpn : FETCH_HTTP_VERSION_1_1;
 
     /* First time call after the subchain connected */
     switch (alpn)
@@ -358,7 +358,7 @@ connect_sub:
       FETCH_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
       infof(data, "CONNECT tunnel: HTTP/1.%d negotiated",
             (alpn == FETCH_HTTP_VERSION_1_0) ? 0 : 1);
-      result = Curl_cf_h1_proxy_insert_after(cf, data);
+      result = Fetch_cf_h1_proxy_insert_after(cf, data);
       if (result)
         goto out;
       cf_protocol = cf->next;
@@ -368,7 +368,7 @@ connect_sub:
     case FETCH_HTTP_VERSION_2:
       FETCH_TRC_CF(data, cf, "installing subfilter for HTTP/2");
       infof(data, "CONNECT tunnel: HTTP/2 negotiated");
-      result = Curl_cf_h2_proxy_insert_after(cf, data);
+      result = Fetch_cf_h2_proxy_insert_after(cf, data);
       if (result)
         goto out;
       cf_protocol = cf->next;
@@ -406,8 +406,8 @@ out:
   return result;
 }
 
-void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
+void Fetch_cf_http_proxy_get_host(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data,
                                  const char **phost,
                                  const char **pdisplay_host,
                                  int *pport)
@@ -425,8 +425,8 @@ void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
   }
 }
 
-static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data)
+static void http_proxy_cf_destroy(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
 
@@ -435,8 +435,8 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
   free(ctx);
 }
 
-static void http_proxy_cf_close(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
+static void http_proxy_cf_close(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
 
@@ -444,7 +444,7 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
   cf->connected = FALSE;
   if (ctx->cf_protocol)
   {
-    struct Curl_cfilter *f;
+    struct Fetch_cfilter *f;
     /* if someone already removed it, we assume he also
      * took care of destroying it. */
     for (f = cf->next; f; f = f->next)
@@ -452,7 +452,7 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
       if (f == ctx->cf_protocol)
       {
         /* still in our sub-chain */
-        Curl_conn_cf_discard_sub(cf, ctx->cf_protocol, data, FALSE);
+        Fetch_conn_cf_discard_sub(cf, ctx->cf_protocol, data, FALSE);
         break;
       }
     }
@@ -462,29 +462,29 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
     cf->next->cft->do_close(cf->next, data);
 }
 
-struct Curl_cftype Curl_cft_http_proxy = {
+struct Fetch_cftype Fetch_cft_http_proxy = {
     "HTTP-PROXY",
     CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
     0,
     http_proxy_cf_destroy,
     http_proxy_cf_connect,
     http_proxy_cf_close,
-    Curl_cf_def_shutdown,
-    Curl_cf_http_proxy_get_host,
-    Curl_cf_def_adjust_pollset,
-    Curl_cf_def_data_pending,
-    Curl_cf_def_send,
-    Curl_cf_def_recv,
-    Curl_cf_def_cntrl,
-    Curl_cf_def_conn_is_alive,
-    Curl_cf_def_conn_keep_alive,
-    Curl_cf_def_query,
+    Fetch_cf_def_shutdown,
+    Fetch_cf_http_proxy_get_host,
+    Fetch_cf_def_adjust_pollset,
+    Fetch_cf_def_data_pending,
+    Fetch_cf_def_send,
+    Fetch_cf_def_recv,
+    Fetch_cf_def_cntrl,
+    Fetch_cf_def_conn_is_alive,
+    Fetch_cf_def_conn_keep_alive,
+    Fetch_cf_def_query,
 };
 
-FETCHcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                          struct Curl_easy *data)
+FETCHcode Fetch_cf_http_proxy_insert_after(struct Fetch_cfilter *cf_at,
+                                          struct Fetch_easy *data)
 {
-  struct Curl_cfilter *cf;
+  struct Fetch_cfilter *cf;
   struct cf_proxy_ctx *ctx = NULL;
   FETCHcode result;
 
@@ -495,11 +495,11 @@ FETCHcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
     result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
-  result = Curl_cf_create(&cf, &Curl_cft_http_proxy, ctx);
+  result = Fetch_cf_create(&cf, &Fetch_cft_http_proxy, ctx);
   if (result)
     goto out;
   ctx = NULL;
-  Curl_conn_cf_insert_after(cf_at, cf);
+  Fetch_conn_cf_insert_after(cf_at, cf);
 
 out:
   free(ctx);

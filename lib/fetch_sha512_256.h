@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,12 +31,12 @@
 
 #define FETCH_HAVE_SHA512_256
 
-extern const struct HMAC_params Curl_HMAC_SHA512_256[1];
+extern const struct HMAC_params Fetch_HMAC_SHA512_256[1];
 
 #define FETCH_SHA512_256_DIGEST_LENGTH 32
 
 FETCHcode
-Curl_sha512_256it(unsigned char *output, const unsigned char *input,
+Fetch_sha512_256it(unsigned char *output, const unsigned char *input,
                   size_t input_size);
 
 #endif /* !FETCH_DISABLE_DIGEST_AUTH && !FETCH_DISABLE_SHA512_256 */

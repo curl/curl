@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,12 +42,12 @@
 FETCHSH *
 fetch_share_init(void)
 {
-  struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
+  struct Fetch_share *share = calloc(1, sizeof(struct Fetch_share));
   if (share)
   {
     share->magic = FETCH_GOOD_SHARE;
     share->specifier |= (1 << FETCH_LOCK_DATA_SHARE);
-    Curl_init_dnscache(&share->hostcache, 23);
+    Fetch_init_dnscache(&share->hostcache, 23);
   }
 
   return share;
@@ -63,7 +63,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
   fetch_unlock_function unlockfunc;
   void *ptr;
   FETCHSHcode res = FETCHSHE_OK;
-  struct Curl_share *share = sh;
+  struct Fetch_share *share = sh;
 
   if (!GOOD_SHARE_HANDLE(share))
     return FETCHSHE_INVALID;
@@ -90,7 +90,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
       if (!share->cookies)
       {
-        share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE);
+        share->cookies = Fetch_cookie_init(NULL, NULL, NULL, TRUE);
         if (!share->cookies)
           res = FETCHSHE_NOMEM;
       }
@@ -103,7 +103,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
 #ifndef FETCH_DISABLE_HSTS
       if (!share->hsts)
       {
-        share->hsts = Curl_hsts_init();
+        share->hsts = Fetch_hsts_init();
         if (!share->hsts)
           res = FETCHSHE_NOMEM;
       }
@@ -121,7 +121,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
          * itself, a high session count will impact startup time. Also, the
          * scache is not optimized for several hundreds of peers. So,
          * keep it at a reasonable level. */
-        if (Curl_ssl_scache_create(25, 2, &share->ssl_scache))
+        if (Fetch_ssl_scache_create(25, 2, &share->ssl_scache))
           res = FETCHSHE_NOMEM;
       }
 #else
@@ -133,7 +133,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
       /* It is safe to set this option several times on a share. */
       if (!share->cpool.idata)
       {
-        if (Curl_cpool_init(&share->cpool, Curl_on_disconnect,
+        if (Fetch_cpool_init(&share->cpool, Fetch_on_disconnect,
                             NULL, share, 103))
           res = FETCHSHE_NOMEM;
       }
@@ -165,7 +165,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
       if (share->cookies)
       {
-        Curl_cookie_cleanup(share->cookies);
+        Fetch_cookie_cleanup(share->cookies);
         share->cookies = NULL;
       }
 #else /* FETCH_DISABLE_HTTP */
@@ -177,7 +177,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
 #ifndef FETCH_DISABLE_HSTS
       if (share->hsts)
       {
-        Curl_hsts_cleanup(&share->hsts);
+        Fetch_hsts_cleanup(&share->hsts);
       }
 #else /* FETCH_DISABLE_HSTS */
       res = FETCHSHE_NOT_BUILT_IN;
@@ -188,7 +188,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
 #ifdef USE_SSL
       if (share->ssl_scache)
       {
-        Curl_ssl_scache_destroy(share->ssl_scache);
+        Fetch_ssl_scache_destroy(share->ssl_scache);
         share->ssl_scache = NULL;
       }
 #else
@@ -233,7 +233,7 @@ fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
 FETCHSHcode
 fetch_share_cleanup(FETCHSH *sh)
 {
-  struct Curl_share *share = sh;
+  struct Fetch_share *share = sh;
   if (!GOOD_SHARE_HANDLE(share))
     return FETCHSHE_INVALID;
 
@@ -250,27 +250,27 @@ fetch_share_cleanup(FETCHSH *sh)
 
   if (share->specifier & (1 << FETCH_LOCK_DATA_CONNECT))
   {
-    Curl_cpool_destroy(&share->cpool);
+    Fetch_cpool_destroy(&share->cpool);
   }
-  Curl_hash_destroy(&share->hostcache);
+  Fetch_hash_destroy(&share->hostcache);
 
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
-  Curl_cookie_cleanup(share->cookies);
+  Fetch_cookie_cleanup(share->cookies);
 #endif
 
 #ifndef FETCH_DISABLE_HSTS
-  Curl_hsts_cleanup(&share->hsts);
+  Fetch_hsts_cleanup(&share->hsts);
 #endif
 
 #ifdef USE_SSL
   if (share->ssl_scache)
   {
-    Curl_ssl_scache_destroy(share->ssl_scache);
+    Fetch_ssl_scache_destroy(share->ssl_scache);
     share->ssl_scache = NULL;
   }
 #endif
 
-  Curl_psl_destroy(&share->psl);
+  Fetch_psl_destroy(&share->psl);
 
   if (share->unlockfunc)
     share->unlockfunc(NULL, FETCH_LOCK_DATA_SHARE, share->clientdata);
@@ -281,10 +281,10 @@ fetch_share_cleanup(FETCHSH *sh)
 }
 
 FETCHSHcode
-Curl_share_lock(struct Curl_easy *data, fetch_lock_data type,
+Fetch_share_lock(struct Fetch_easy *data, fetch_lock_data type,
                 fetch_lock_access accesstype)
 {
-  struct Curl_share *share = data->share;
+  struct Fetch_share *share = data->share;
 
   if (!share)
     return FETCHSHE_INVALID;
@@ -300,9 +300,9 @@ Curl_share_lock(struct Curl_easy *data, fetch_lock_data type,
 }
 
 FETCHSHcode
-Curl_share_unlock(struct Curl_easy *data, fetch_lock_data type)
+Fetch_share_unlock(struct Fetch_easy *data, fetch_lock_data type)
 {
-  struct Curl_share *share = data->share;
+  struct Fetch_share *share = data->share;
 
   if (!share)
     return FETCHSHE_INVALID;

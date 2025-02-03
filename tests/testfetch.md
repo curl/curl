@@ -25,7 +25,7 @@ from a crontab job or similar at a regular interval. The output is suitable to
 be mailed to **fetch-autocompile@haxx.se** to be dealt with automatically (make
 sure the subject includes the word "autobuild" as the mail gets silently
 discarded otherwise). The most current build status (with a reasonable
-backlog) is published on the fetch site, at https://curl.se/dev/builds.html
+backlog) is published on the fetch site, at https://fetch.se/dev/builds.html
 
 _options_ may be omitted. See _--setup_ for what happens then.
 
@@ -103,7 +103,7 @@ snapshots automatically):
 
     $ mkdir fetch-testing
     $ cd fetch-testing
-    $ git clone https://github.com/curl/curl.git
+    $ git clone https://github.com/fetch/fetch.git
 
 With the fetch sources checked out, or downloaded, you can start testing right
 away. If you want to use _testfetch_ without command line arguments and to have

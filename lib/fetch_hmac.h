@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -58,15 +58,15 @@ struct HMAC_context
 };
 
 /* Prototypes. */
-struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
+struct HMAC_context *Fetch_HMAC_init(const struct HMAC_params *hashparams,
                                     const unsigned char *key,
                                     unsigned int keylen);
-int Curl_HMAC_update(struct HMAC_context *context,
+int Fetch_HMAC_update(struct HMAC_context *context,
                      const unsigned char *data,
                      unsigned int len);
-int Curl_HMAC_final(struct HMAC_context *context, unsigned char *result);
+int Fetch_HMAC_final(struct HMAC_context *context, unsigned char *result);
 
-FETCHcode Curl_hmacit(const struct HMAC_params *hashparams,
+FETCHcode Fetch_hmacit(const struct HMAC_params *hashparams,
                       const unsigned char *key, const size_t keylen,
                       const unsigned char *data, const size_t datalen,
                       unsigned char *output);

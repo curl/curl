@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,9 +49,9 @@ static void test_parse(
   char *userstr = NULL;
   char *passwdstr = NULL;
   char *options = NULL;
-  FETCHcode rc = Curl_parse_login_details(input, strlen(input),
+  FETCHcode rc = Fetch_parse_login_details(input, strlen(input),
                                           &userstr, &passwdstr, &options);
-  fail_unless(rc == FETCHE_OK, "Curl_parse_login_details() failed");
+  fail_unless(rc == FETCHE_OK, "Fetch_parse_login_details() failed");
 
   fail_unless(!!exp_username == !!userstr, "username expectation failed");
   fail_unless(!!exp_password == !!passwdstr, "password expectation failed");
@@ -75,34 +75,34 @@ static void test_parse(
 UNITTEST_START
 {
   FETCHcode rc;
-  struct Curl_easy *empty;
+  struct Fetch_easy *empty;
   enum dupstring i;
 
   bool async = FALSE;
   bool protocol_connect = FALSE;
 
-  rc = Curl_open(&empty);
+  rc = Fetch_open(&empty);
   if (rc)
     goto unit_test_abort;
-  fail_unless(rc == FETCHE_OK, "Curl_open() failed");
+  fail_unless(rc == FETCHE_OK, "Fetch_open() failed");
 
-  rc = Curl_connect(empty, &async, &protocol_connect);
+  rc = Fetch_connect(empty, &async, &protocol_connect);
   fail_unless(rc == FETCHE_URL_MALFORMAT,
-              "Curl_connect() failed to return FETCHE_URL_MALFORMAT");
+              "Fetch_connect() failed to return FETCHE_URL_MALFORMAT");
 
   fail_unless(empty->magic == FETCHEASY_MAGIC_NUMBER,
               "empty->magic should be equal to FETCHEASY_MAGIC_NUMBER");
 
   /* double invoke to ensure no dependency on internal state */
-  rc = Curl_connect(empty, &async, &protocol_connect);
+  rc = Fetch_connect(empty, &async, &protocol_connect);
   fail_unless(rc == FETCHE_URL_MALFORMAT,
-              "Curl_connect() failed to return FETCHE_URL_MALFORMAT");
+              "Fetch_connect() failed to return FETCHE_URL_MALFORMAT");
 
-  rc = Curl_init_userdefined(empty);
-  fail_unless(rc == FETCHE_OK, "Curl_userdefined() failed");
+  rc = Fetch_init_userdefined(empty);
+  fail_unless(rc == FETCHE_OK, "Fetch_userdefined() failed");
 
-  rc = Curl_init_do(empty, empty->conn);
-  fail_unless(rc == FETCHE_OK, "Curl_init_do() failed");
+  rc = Fetch_init_do(empty, empty->conn);
+  fail_unless(rc == FETCHE_OK, "Fetch_init_do() failed");
 
   test_parse("hostname", "hostname", NULL, NULL);
   test_parse("user:password", "user", "password", NULL);
@@ -119,14 +119,14 @@ UNITTEST_START
   test_parse("user;options:password", "user", "password", "options");
   test_parse("user;options:", "user", "", "options");
 
-  Curl_freeset(empty);
+  Fetch_freeset(empty);
   for (i = (enum dupstring)0; i < STRING_LAST; i++)
   {
     fail_unless(empty->set.str[i] == NULL,
-                "Curl_free() did not set to NULL");
+                "Fetch_free() did not set to NULL");
   }
 
-  rc = Curl_close(&empty);
-  fail_unless(rc == FETCHE_OK, "Curl_close() failed");
+  rc = Fetch_close(&empty);
+  fail_unless(rc == FETCHE_OK, "Fetch_close() failed");
 }
 UNITTEST_STOP

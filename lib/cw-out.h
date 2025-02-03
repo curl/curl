@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,21 +33,21 @@
  * the client callbacks. Intended to be the last installed in the
  * client writer stack of a transfer.
  */
-extern struct Curl_cwtype Curl_cwt_out;
+extern struct Fetch_cwtype Fetch_cwt_out;
 
 /**
  * Return TRUE iff 'cw-out' client write has paused data.
  */
-bool Curl_cw_out_is_paused(struct Curl_easy *data);
+bool Fetch_cw_out_is_paused(struct Fetch_easy *data);
 
 /**
  * Flush any buffered date to the client, chunk collation still applies.
  */
-FETCHcode Curl_cw_out_unpause(struct Curl_easy *data);
+FETCHcode Fetch_cw_out_unpause(struct Fetch_easy *data);
 
 /**
  * Mark EndOfStream reached and flush ALL data to the client.
  */
-FETCHcode Curl_cw_out_done(struct Curl_easy *data);
+FETCHcode Fetch_cw_out_done(struct Fetch_easy *data);
 
 #endif /* HEADER_FETCH_CW_OUT_H */

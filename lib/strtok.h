@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,9 +28,9 @@
 
 #ifdef HAVE_STRTOK_R
 #include <string.h>
-#define Curl_strtok_r strtok_r
+#define Fetch_strtok_r strtok_r
 #else
-char *Curl_strtok_r(char *s, const char *delim, char **last);
+char *Fetch_strtok_r(char *s, const char *delim, char **last);
 #endif
 
 #endif /* HEADER_FETCH_STRTOK_H */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -117,7 +117,7 @@ extern const unsigned char fetch_ca_embed[];
 #endif
 
 #define FETCH_CA_CERT_ERRORMSG                                             \
-  "More details here: https://curl.se/docs/sslcerts.html\n\n"              \
+  "More details here: https://fetch.se/docs/sslcerts.html\n\n"              \
   "fetch failed to verify the legitimacy of the server and therefore "     \
   "could not\nestablish a secure connection to it. To learn more about "   \
   "this situation and\nhow to fix it, please visit the webpage mentioned " \
@@ -452,8 +452,8 @@ void single_transfer_cleanup(struct OperationConfig *config)
     struct State *state = &config->state;
     /* Free list of remaining URLs */
     glob_cleanup(&state->urls);
-    Curl_safefree(state->outfiles);
-    Curl_safefree(state->uploadfile);
+    Fetch_safefree(state->outfiles);
+    Fetch_safefree(state->uploadfile);
     /* Free list of globbed upload files */
     glob_cleanup(&state->inglob);
   }
@@ -794,13 +794,13 @@ skip:
     fclose(per->heads.stream);
 
   if (per->heads.alloc_filename)
-    Curl_safefree(per->heads.filename);
+    Fetch_safefree(per->heads.filename);
 
   if (per->etag_save.fopened && per->etag_save.stream)
     fclose(per->etag_save.stream);
 
   if (per->etag_save.alloc_filename)
-    Curl_safefree(per->etag_save.filename);
+    Fetch_safefree(per->etag_save.filename);
 
   fetch_easy_cleanup(per->fetch);
   if (outs->alloc_filename)
@@ -972,7 +972,7 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   my_setopt(fetch, FETCHOPT_WRITEFUNCTION, tool_write_cb);
 
   /* Note that if FETCHOPT_READFUNCTION is fread (the default), then
-   * lib/telnet.c will Curl_poll() on the input file descriptor
+   * lib/telnet.c will Fetch_poll() on the input file descriptor
    * rather than calling the READFUNCTION at regular intervals.
    * The circumstances in which it is preferable to enable this
    * behavior, by omitting to set the READFUNCTION & READDATA options,
@@ -1885,7 +1885,7 @@ static FETCHcode append2query(struct GlobalConfig *global,
         result = urlerr_cvt(uerr);
       else
       {
-        Curl_safefree(per->url); /* free previous URL */
+        Fetch_safefree(per->url); /* free previous URL */
         per->url = updated;      /* use our new URL instead! */
       }
     }
@@ -2059,7 +2059,7 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
             etag_from_file)
         {
           header = aprintf("If-None-Match: %s", etag_from_file);
-          Curl_safefree(etag_from_file);
+          Fetch_safefree(etag_from_file);
         }
         else
           header = aprintf("If-None-Match: \"\"");
@@ -2076,7 +2076,7 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
 
         /* add Etag from file to list of custom headers */
         pe = add2list(&config->headers, header);
-        Curl_safefree(header);
+        Fetch_safefree(header);
 
         if (file)
           fclose(file);
@@ -2105,7 +2105,7 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
             warnf(global, "Failed creating file for saving etags: \"%s\". "
                           "Skip this transfer",
                   config->etag_save_file);
-            Curl_safefree(state->outfiles);
+            Fetch_safefree(state->outfiles);
             glob_cleanup(&state->urls);
             return FETCHE_OK;
           }
@@ -2148,7 +2148,7 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
         }
         if (SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq))
         {
-          Curl_safefree(per->uploadfile);
+          Fetch_safefree(per->uploadfile);
           fetch_easy_cleanup(fetch);
           result = FETCHE_FAILED_INIT;
           break;
@@ -2288,7 +2288,7 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
           /* fill '#1' ... '#9' terms from URL pattern */
           char *storefile = per->outfile;
           result = glob_match_url(&per->outfile, storefile, state->urls);
-          Curl_safefree(storefile);
+          Fetch_safefree(storefile);
           if (result)
           {
             /* bad globbing */
@@ -2506,7 +2506,7 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
         state->urlnum = 0; /* forced reglob of URLs */
         glob_cleanup(&state->urls);
         state->up++;
-        Curl_safefree(state->uploadfile); /* clear it to get the next */
+        Fetch_safefree(state->uploadfile); /* clear it to get the next */
       }
     }
     else
@@ -2517,8 +2517,8 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
       glob_cleanup(&state->urls);
       state->urlnum = 0;
 
-      Curl_safefree(state->outfiles);
-      Curl_safefree(state->uploadfile);
+      Fetch_safefree(state->outfiles);
+      Fetch_safefree(state->uploadfile);
       /* Free list of globbed upload files */
       glob_cleanup(&state->inglob);
       state->up = 0;
@@ -2526,7 +2526,7 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
     }
     break;
   }
-  Curl_safefree(state->outfiles);
+  Fetch_safefree(state->outfiles);
 fail:
   if (!*added || result)
   {
@@ -3242,7 +3242,7 @@ static FETCHcode cacertpaths(struct OperationConfig *config)
   {
 #if defined(FETCH_CA_SEARCH_SAFE)
     char *cacert = NULL;
-    FILE *cafile = Curl_execpath("fetch-ca-bundle.crt", &cacert);
+    FILE *cafile = Fetch_execpath("fetch-ca-bundle.crt", &cacert);
     if (cafile)
     {
       fclose(cafile);

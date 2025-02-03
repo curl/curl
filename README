@@ -6,9 +6,9 @@
 
 README
 
-  Curl is a command line tool for transferring data specified with URL
+  Fetch is a command line tool for transferring data specified with URL
   syntax. Find out how to use fetch by reading the fetch.1 man page or the
-  MANUAL document. Find out how to install Curl by reading the INSTALL
+  MANUAL document. Find out how to install Fetch by reading the INSTALL
   document.
 
   libfetch is the library fetch is using to do its job. It is readily
@@ -24,7 +24,7 @@ README
 CONTACT
 
   If you have problems, questions, ideas or suggestions, please contact us
-  by posting to a suitable mailing list. See https://curl.se/mail/
+  by posting to a suitable mailing list. See https://fetch.se/mail/
 
   All contributors to the project are listed in the THANKS document.
 
@@ -32,13 +32,13 @@ WEBSITE
 
   Visit the fetch website for the latest news and downloads:
 
-        https://curl.se/
+        https://fetch.se/
 
 GIT
 
   To download the latest source code off the GIT server, do this:
 
-    git clone https://github.com/curl/curl.git
+    git clone https://github.com/fetch/fetch.git
 
   (you will get a directory named fetch created, filled with the source code)
 
@@ -50,6 +50,6 @@ SECURITY PROBLEMS
 
 NOTICE
 
-  Curl contains pieces of source code that is Copyright (c) 1998, 1999
+  Fetch contains pieces of source code that is Copyright (c) 1998, 1999
   Kungliga Tekniska Högskolan. This notice is included here to comply with the
   distribution terms.

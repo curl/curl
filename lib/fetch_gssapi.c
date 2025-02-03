@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,13 +45,13 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-gss_OID_desc Curl_spnego_mech_oid FETCH_ALIGN8 = {
+gss_OID_desc Fetch_spnego_mech_oid FETCH_ALIGN8 = {
     6, (char *)"\x2b\x06\x01\x05\x05\x02"};
-gss_OID_desc Curl_krb5_mech_oid FETCH_ALIGN8 = {
+gss_OID_desc Fetch_krb5_mech_oid FETCH_ALIGN8 = {
     9, (char *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"};
 
-OM_uint32 Curl_gss_init_sec_context(
-    struct Curl_easy *data,
+OM_uint32 Fetch_gss_init_sec_context(
+    struct Fetch_easy *data,
     OM_uint32 *minor_status,
     gss_ctx_id_t *context,
     gss_name_t target_name,
@@ -128,7 +128,7 @@ static size_t display_gss_error(OM_uint32 status, int type,
 }
 
 /*
- * Curl_gss_log_error()
+ * Fetch_gss_log_error()
  *
  * This is used to log a GSS-API error status.
  *
@@ -139,7 +139,7 @@ static size_t display_gss_error(OM_uint32 status, int type,
  * major   [in] - The major status code.
  * minor   [in] - The minor status code.
  */
-void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
+void Fetch_gss_log_error(struct Fetch_easy *data, const char *prefix,
                         OM_uint32 major, OM_uint32 minor)
 {
   char buf[GSS_LOG_BUFFER_LEN];

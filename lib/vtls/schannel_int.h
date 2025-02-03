@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -122,7 +122,7 @@ typedef struct _SCH_CREDENTIALS
 
 #endif /* SCH_CREDENTIALS_VERSION */
 
-struct Curl_schannel_cred
+struct Fetch_schannel_cred
 {
   CredHandle cred_handle;
   TimeStamp time_stamp;
@@ -133,7 +133,7 @@ struct Curl_schannel_cred
   int refcount;
 };
 
-struct Curl_schannel_ctxt
+struct Fetch_schannel_ctxt
 {
   CtxtHandle ctxt_handle;
   TimeStamp time_stamp;
@@ -141,8 +141,8 @@ struct Curl_schannel_ctxt
 
 struct schannel_ssl_backend_data
 {
-  struct Curl_schannel_cred *cred;
-  struct Curl_schannel_ctxt *ctxt;
+  struct Fetch_schannel_cred *cred;
+  struct Fetch_schannel_ctxt *ctxt;
   SecPkgContext_StreamSizes stream_sizes;
   size_t encdata_length, decdata_length;
   size_t encdata_offset, decdata_offset;
@@ -191,11 +191,11 @@ struct num_ip_data
   } bData;
 };
 
-HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
-                                               const struct Curl_easy *data);
+HCERTSTORE Fetch_schannel_get_cached_cert_store(struct Fetch_cfilter *cf,
+                                               const struct Fetch_easy *data);
 
-bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
-                                         const struct Curl_easy *data,
+bool Fetch_schannel_set_cached_cert_store(struct Fetch_cfilter *cf,
+                                         const struct Fetch_easy *data,
                                          HCERTSTORE cert_store);
 
 #endif /* USE_SCHANNEL */

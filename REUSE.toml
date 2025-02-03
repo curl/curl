@@ -9,7 +9,7 @@
 
 version = 1
 SPDX-PackageName = "fetch"
-SPDX-PackageDownloadLocation = "https://curl.se/"
+SPDX-PackageDownloadLocation = "https://fetch.se/"
 
 [[annotations]]
 path = [

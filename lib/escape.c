@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@
 
 #include <fetch/fetch.h>
 
-struct Curl_easy;
+struct Fetch_easy;
 
 #include "urldata.h"
 #include "warnless.h"
@@ -69,7 +69,7 @@ char *fetch_easy_escape(FETCH *data, const char *string,
   if (!length)
     return strdup("");
 
-  Curl_dyn_init(&d, length * 3 + 1);
+  Fetch_dyn_init(&d, length * 3 + 1);
 
   while (length--)
   {
@@ -79,7 +79,7 @@ char *fetch_easy_escape(FETCH *data, const char *string,
     if (ISUNRESERVED(in))
     {
       /* append this */
-      if (Curl_dyn_addn(&d, &in, 1))
+      if (Fetch_dyn_addn(&d, &in, 1))
         return NULL;
     }
     else
@@ -89,12 +89,12 @@ char *fetch_easy_escape(FETCH *data, const char *string,
       char out[3] = {'%'};
       out[1] = hex[in >> 4];
       out[2] = hex[in & 0xf];
-      if (Curl_dyn_addn(&d, out, 3))
+      if (Fetch_dyn_addn(&d, out, 3))
         return NULL;
     }
   }
 
-  return Curl_dyn_ptr(&d);
+  return Fetch_dyn_ptr(&d);
 }
 
 static const unsigned char hextable[] = {
@@ -108,7 +108,7 @@ static const unsigned char hextable[] = {
 #define onehex2dec(x) hextable[x - '0']
 
 /*
- * Curl_urldecode() URL decodes the given string.
+ * Fetch_urldecode() URL decodes the given string.
  *
  * Returns a pointer to a malloced string in *ostring with length given in
  * *olen. If length == 0, the length is assumed to be strlen(string).
@@ -123,7 +123,7 @@ static const unsigned char hextable[] = {
  * invokes that used TRUE/FALSE (0 and 1).
  */
 
-FETCHcode Curl_urldecode(const char *string, size_t length,
+FETCHcode Fetch_urldecode(const char *string, size_t length,
                          char **ostring, size_t *olen,
                          enum urlreject ctrl)
 {
@@ -163,7 +163,7 @@ FETCHcode Curl_urldecode(const char *string, size_t length,
     if (((ctrl == REJECT_CTRL) && (in < 0x20)) ||
         ((ctrl == REJECT_ZERO) && (in == 0)))
     {
-      Curl_safefree(*ostring);
+      Fetch_safefree(*ostring);
       return FETCHE_URL_MALFORMAT;
     }
 
@@ -194,7 +194,7 @@ char *fetch_easy_unescape(FETCH *data, const char *string,
   {
     size_t inputlen = (size_t)length;
     size_t outputlen;
-    FETCHcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
+    FETCHcode res = Fetch_urldecode(string, inputlen, &str, &outputlen,
                                    REJECT_NADA);
     if (res)
       return NULL;
@@ -205,7 +205,7 @@ char *fetch_easy_unescape(FETCH *data, const char *string,
         *olen = fetchx_uztosi(outputlen);
       else
         /* too large to return in an int, fail! */
-        Curl_safefree(str);
+        Fetch_safefree(str);
     }
   }
   return str;
@@ -220,12 +220,12 @@ void fetch_free(void *p)
 }
 
 /*
- * Curl_hexencode()
+ * Fetch_hexencode()
  *
  * Converts binary input to lowercase hex-encoded ASCII output.
  * Null-terminated.
  */
-void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
+void Fetch_hexencode(const unsigned char *src, size_t len, /* input length */
                     unsigned char *out, size_t olen)      /* output buffer size */
 {
   const char *hex = "0123456789abcdef";

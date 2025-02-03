@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -79,7 +79,7 @@ FETCHcode test(char *URL)
     /* go http2 */
     easy_setopt(fetch[i], FETCHOPT_HTTP_VERSION, FETCH_HTTP_VERSION_3ONLY);
     easy_setopt(fetch[i], FETCHOPT_CONNECTTIMEOUT_MS, (long)5000);
-    easy_setopt(fetch[i], FETCHOPT_CAINFO, "./certs/EdelCurlRoot-ca.cacert");
+    easy_setopt(fetch[i], FETCHOPT_CAINFO, "./certs/EdelFetchRoot-ca.cacert");
     /* wait for first connection established to see if we can share it */
     easy_setopt(fetch[i], FETCHOPT_PIPEWAIT, 1L);
     /* go verbose */

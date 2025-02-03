@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -575,7 +575,7 @@ fetch_url_strerror(FETCHUcode error)
 }
 
 #ifdef USE_WINSOCK
-/* This is a helper function for Curl_strerror that converts Winsock error
+/* This is a helper function for Fetch_strerror that converts Winsock error
  * codes (WSAGetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
  */
@@ -774,7 +774,7 @@ get_winsock_error(int err, char *buf, size_t len)
 #endif /* USE_WINSOCK */
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
-/* This is a helper function for Curl_strerror that converts Windows API error
+/* This is a helper function for Fetch_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
  */
@@ -836,10 +836,10 @@ get_winapi_error(int err, char *buf, size_t buflen)
  * CRT (errno), Winsock (WSAGetLastError), Windows API (GetLastError).
  *
  * It may be more correct to call one of the variant functions instead:
- * Call Curl_sspi_strerror if the error code is definitely Windows SSPI.
- * Call Curl_winapi_strerror if the error code is definitely Windows API.
+ * Call Fetch_sspi_strerror if the error code is definitely Windows SSPI.
+ * Call Fetch_winapi_strerror if the error code is definitely Windows API.
  */
-const char *Curl_strerror(int err, char *buf, size_t buflen)
+const char *Fetch_strerror(int err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   DWORD old_win_err = GetLastError();
@@ -931,11 +931,11 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 }
 
 /*
- * Curl_winapi_strerror:
- * Variant of Curl_strerror if the error code is definitely Windows API.
+ * Fetch_winapi_strerror:
+ * Variant of Fetch_strerror if the error code is definitely Windows API.
  */
 #if defined(_WIN32) || defined(_WIN32_WCE)
-const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
+const char *Fetch_winapi_strerror(DWORD err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   DWORD old_win_err = GetLastError();
@@ -974,10 +974,10 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
 #ifdef USE_WINDOWS_SSPI
 /*
- * Curl_sspi_strerror:
- * Variant of Curl_strerror if the error code is definitely Windows SSPI.
+ * Fetch_sspi_strerror:
+ * Variant of Fetch_strerror if the error code is definitely Windows SSPI.
  */
-const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
+const char *Fetch_sspi_strerror(int err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   DWORD old_win_err = GetLastError();

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@
 #define STRE_NEWLINE 6
 #define STRE_OVERFLOW 7
 
-struct Curl_str
+struct Fetch_str
 {
    char *str;
    size_t len;
@@ -42,31 +42,31 @@ struct Curl_str
 
 /* Get a word until the first space
    return non-zero on error */
-int Curl_str_word(char **linep, struct Curl_str *out, const size_t max);
+int Fetch_str_word(char **linep, struct Fetch_str *out, const size_t max);
 
 /* Get a word until the first DELIM or end of string
    return non-zero on error */
-int Curl_str_until(char **linep, struct Curl_str *out, const size_t max,
+int Fetch_str_until(char **linep, struct Fetch_str *out, const size_t max,
                    char delim);
 
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
-int Curl_str_quotedword(char **linep, struct Curl_str *out, const size_t max);
+int Fetch_str_quotedword(char **linep, struct Fetch_str *out, const size_t max);
 
 /* Advance over a single character.
    return non-zero on error */
-int Curl_str_single(char **linep, char byte);
+int Fetch_str_single(char **linep, char byte);
 
 /* Advance over a single space.
    return non-zero on error */
-int Curl_str_singlespace(char **linep);
+int Fetch_str_singlespace(char **linep);
 
 /* Get an unsigned number
    return non-zero on error */
-int Curl_str_number(char **linep, size_t *nump, size_t max);
+int Fetch_str_number(char **linep, size_t *nump, size_t max);
 
 /* Check for CR or LF
    return non-zero on error */
-int Curl_str_newline(char **linep);
+int Fetch_str_newline(char **linep);
 
 #endif /* HEADER_FETCH_STRPARSE_H */

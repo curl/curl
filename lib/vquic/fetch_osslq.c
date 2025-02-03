@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -97,8 +97,8 @@ typedef unsigned long sslerr_t;
 #define CF_CTX_CALL_DATA(cf) \
   ((struct cf_osslq_ctx *)(cf)->ctx)->call_data
 
-static FETCHcode cf_progress_ingress(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data);
+static FETCHcode cf_progress_ingress(struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data);
 
 static const char *osslq_SSL_ERROR_to_str(int err)
 {
@@ -162,7 +162,7 @@ static char *osslq_strerror(unsigned long error, char *buf, size_t size)
 }
 
 static FETCHcode make_bio_addr(BIO_ADDR **pbio_addr,
-                               const struct Curl_sockaddr_ex *addr)
+                               const struct Fetch_sockaddr_ex *addr)
 {
   BIO_ADDR *ba;
   FETCHcode result = FETCHE_FAILED_INIT;
@@ -236,7 +236,7 @@ static FETCHcode cf_osslq_stream_open(struct cf_osslq_stream *s,
                                       void *user_data)
 {
   DEBUGASSERT(!s->ssl);
-  Curl_bufq_initp(&s->recvbuf, bufcp, 1, BUFQ_OPT_NONE);
+  Fetch_bufq_initp(&s->recvbuf, bufcp, 1, BUFQ_OPT_NONE);
   s->ssl = SSL_new_stream(conn, flags);
   if (!s->ssl)
   {
@@ -254,7 +254,7 @@ static void cf_osslq_stream_cleanup(struct cf_osslq_stream *s)
     SSL_set_app_data(s->ssl, NULL);
     SSL_free(s->ssl);
   }
-  Curl_bufq_free(&s->recvbuf);
+  Fetch_bufq_free(&s->recvbuf);
   memset(s, 0, sizeof(*s));
 }
 
@@ -304,11 +304,11 @@ struct cf_osslq_ctx
   struct fetchtime handshake_at;  /* time connect handshake finished */
   struct fetchtime first_byte_at; /* when first byte was recvd */
   struct bufc_pool stream_bufcp;  /* chunk pool for streams */
-  struct Curl_hash streams;       /* hash `data->mid` to `h3_stream_ctx` */
+  struct Fetch_hash streams;       /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;       /* max flow window for one stream */
   uint64_t max_idle_ms;           /* max idle time for QUIC connection */
   SSL_POLL_ITEM *poll_items;      /* Array for polling on writable state */
-  struct Curl_easy **fetch_items; /* Array of easy objs */
+  struct Fetch_easy **fetch_items; /* Array of easy objs */
   size_t item_count;              /* count of elements in poll/fetch_items */
   BIT(initialized);
   BIT(got_first_byte);    /* if first byte was received */
@@ -323,9 +323,9 @@ static void h3_stream_hash_free(void *stream);
 static void cf_osslq_ctx_init(struct cf_osslq_ctx *ctx)
 {
   DEBUGASSERT(!ctx->initialized);
-  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
+  Fetch_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Fetch_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->poll_items = NULL;
   ctx->fetch_items = NULL;
   ctx->item_count = 0;
@@ -336,10 +336,10 @@ static void cf_osslq_ctx_free(struct cf_osslq_ctx *ctx)
 {
   if (ctx && ctx->initialized)
   {
-    Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_hash_clean(&ctx->streams);
-    Curl_hash_destroy(&ctx->streams);
-    Curl_ssl_peer_cleanup(&ctx->peer);
+    Fetch_bufcp_free(&ctx->stream_bufcp);
+    Fetch_hash_clean(&ctx->streams);
+    Fetch_hash_destroy(&ctx->streams);
+    Fetch_ssl_peer_cleanup(&ctx->peer);
     free(ctx->poll_items);
     free(ctx->fetch_items);
   }
@@ -351,13 +351,13 @@ static void cf_osslq_ctx_close(struct cf_osslq_ctx *ctx)
   struct cf_call_data save = ctx->call_data;
 
   cf_osslq_h3conn_cleanup(&ctx->h3);
-  Curl_vquic_tls_cleanup(&ctx->tls);
+  Fetch_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
   ctx->call_data = save;
 }
 
-static FETCHcode cf_osslq_shutdown(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data, bool *done)
+static FETCHcode cf_osslq_shutdown(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data, bool *done)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct cf_call_data save;
@@ -430,7 +430,7 @@ out:
   return result;
 }
 
-static void cf_osslq_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_osslq_close(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct cf_call_data save;
@@ -453,7 +453,7 @@ static void cf_osslq_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   CF_DATA_RESTORE(cf, save);
 }
 
-static void cf_osslq_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_osslq_destroy(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct cf_call_data save;
@@ -474,8 +474,8 @@ static void cf_osslq_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static FETCHcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
                                             SSL *stream_ssl,
-                                            struct Curl_cfilter *cf,
-                                            struct Curl_easy *data)
+                                            struct Fetch_cfilter *cf,
+                                            struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   fetch_int64_t stream_id = (fetch_int64_t)SSL_get_stream_id(stream_ssl);
@@ -495,7 +495,7 @@ static FETCHcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
     struct cf_osslq_stream *nstream = &h3->remote_ctrl[h3->remote_ctrl_n++];
     nstream->id = stream_id;
     nstream->ssl = stream_ssl;
-    Curl_bufq_initp(&nstream->recvbuf, &ctx->stream_bufcp, 1, BUFQ_OPT_NONE);
+    Fetch_bufq_initp(&nstream->recvbuf, &ctx->stream_bufcp, 1, BUFQ_OPT_NONE);
     FETCH_TRC_CF(data, cf, "[%" FMT_PRId64 "] accepted remote uni stream",
                  stream_id);
     break;
@@ -510,8 +510,8 @@ static FETCHcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
   return FETCHE_OK;
 }
 
-static FETCHcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static FETCHcode cf_osslq_ssl_err(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   int detail, FETCHcode def_result)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -522,7 +522,7 @@ static FETCHcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
   long lerr;
   int lib;
   int reason;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_config_data *ssl_config = Fetch_ssl_cf_get_config(cf, data);
 
   errdetail = ERR_get_error();
   lib = ERR_GET_LIB(errdetail);
@@ -581,9 +581,9 @@ static FETCHcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
     int sockerr = SOCKERRNO;
     struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+    Fetch_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     if (sockerr && detail == SSL_ERROR_SYSCALL)
-      Curl_strerror(sockerr, extramsg, sizeof(extramsg));
+      Fetch_strerror(sockerr, extramsg, sizeof(extramsg));
     failf(data, "QUIC connect: %s in connection to %s:%d (%s)",
           extramsg[0] ? extramsg : osslq_SSL_ERROR_to_str(detail),
           ctx->peer.dispname, ip.remote_port, ip.remote_ip);
@@ -596,14 +596,14 @@ static FETCHcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
   return result;
 }
 
-static FETCHcode cf_osslq_verify_peer(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
+static FETCHcode cf_osslq_verify_peer(struct Fetch_cfilter *cf,
+                                      struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
 
   cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
 
-  return Curl_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
+  return Fetch_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
 }
 
 /**
@@ -628,14 +628,14 @@ struct h3_stream_ctx
   BIT(quic_flow_blocked);       /* stream is blocked by QUIC flow control */
 };
 
-#define H3_STREAM_CTX(ctx, data) ((struct h3_stream_ctx *)(data ? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
+#define H3_STREAM_CTX(ctx, data) ((struct h3_stream_ctx *)(data ? Fetch_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
   cf_osslq_stream_cleanup(&stream->s);
-  Curl_bufq_free(&stream->sendbuf);
-  Curl_bufq_free(&stream->recvbuf);
-  Curl_h1_req_parse_free(&stream->h1);
+  Fetch_bufq_free(&stream->sendbuf);
+  Fetch_bufq_free(&stream->recvbuf);
+  Fetch_h1_req_parse_free(&stream->h1);
   free(stream);
 }
 
@@ -645,8 +645,8 @@ static void h3_stream_hash_free(void *stream)
   h3_stream_ctx_free((struct h3_stream_ctx *)stream);
 }
 
-static FETCHcode h3_data_setup(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
+static FETCHcode h3_data_setup(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -663,17 +663,17 @@ static FETCHcode h3_data_setup(struct Curl_cfilter *cf,
 
   stream->s.id = -1;
   /* on send, we control how much we put into the buffer */
-  Curl_bufq_initp(&stream->sendbuf, &ctx->stream_bufcp,
+  Fetch_bufq_initp(&stream->sendbuf, &ctx->stream_bufcp,
                   H3_STREAM_SEND_CHUNKS, BUFQ_OPT_NONE);
   stream->sendbuf_len_in_flight = 0;
   /* on recv, we need a flexible buffer limit since we also write
    * headers to it that are not counted against the nghttp3 flow limits. */
-  Curl_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
+  Fetch_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   stream->recv_buf_nonflow = 0;
-  Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
+  Fetch_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if (!Curl_hash_offt_set(&ctx->streams, data->mid, stream))
+  if (!Fetch_hash_offt_set(&ctx->streams, data->mid, stream))
   {
     h3_stream_ctx_free(stream);
     return FETCHE_OUT_OF_MEMORY;
@@ -682,7 +682,7 @@ static FETCHcode h3_data_setup(struct Curl_cfilter *cf,
   return FETCHE_OK;
 }
 
-static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void h3_data_done(struct Fetch_cfilter *cf, struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -701,12 +701,12 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       stream->closed = TRUE;
     }
 
-    Curl_hash_offt_remove(&ctx->streams, data->mid);
+    Fetch_hash_offt_remove(&ctx->streams, data->mid);
   }
 }
 
-static struct cf_osslq_stream *cf_osslq_get_qstream(struct Curl_cfilter *cf,
-                                                    struct Curl_easy *data,
+static struct cf_osslq_stream *cf_osslq_get_qstream(struct Fetch_cfilter *cf,
+                                                    struct Fetch_easy *data,
                                                     int64_t stream_id)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -730,11 +730,11 @@ static struct cf_osslq_stream *cf_osslq_get_qstream(struct Curl_cfilter *cf,
   }
   else
   {
-    struct Curl_llist_node *e;
+    struct Fetch_llist_node *e;
     DEBUGASSERT(data->multi);
-    for (e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e))
+    for (e = Fetch_llist_head(&data->multi->process); e; e = Fetch_node_next(e))
     {
-      struct Curl_easy *sdata = Curl_node_elem(e);
+      struct Fetch_easy *sdata = Fetch_node_elem(e);
       if (sdata->conn != data->conn)
         continue;
       stream = H3_STREAM_CTX(ctx, sdata);
@@ -747,8 +747,8 @@ static struct cf_osslq_stream *cf_osslq_get_qstream(struct Curl_cfilter *cf,
   return NULL;
 }
 
-static void h3_drain_stream(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
+static void h3_drain_stream(struct Fetch_cfilter *cf,
+                            struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -761,19 +761,19 @@ static void h3_drain_stream(struct Curl_cfilter *cf,
   if (data->state.select_bits != bits)
   {
     data->state.select_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    Fetch_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
 
-static FETCHcode h3_data_pause(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
+static FETCHcode h3_data_pause(struct Fetch_cfilter *cf,
+                               struct Fetch_easy *data,
                                bool pause)
 {
   if (!pause)
   {
     /* unpaused. make it run again right away */
     h3_drain_stream(cf, data);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    Fetch_expire(data, 0, EXPIRE_RUN_NOW);
   }
   return FETCHE_OK;
 }
@@ -782,9 +782,9 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
                               uint64_t app_error_code, void *user_data,
                               void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)conn;
   (void)stream_id;
@@ -815,8 +815,8 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
  * receive buffer. If not enough space is available, it appends to the
  * `data`'s overflow buffer.
  */
-static FETCHcode write_resp_raw(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+static FETCHcode write_resp_raw(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data,
                                 const void *mem, size_t memlen,
                                 bool flow)
 {
@@ -830,7 +830,7 @@ static FETCHcode write_resp_raw(struct Curl_cfilter *cf,
   {
     return FETCHE_RECV_ERROR;
   }
-  nwritten = Curl_bufq_write(&stream->recvbuf, mem, memlen, &result);
+  nwritten = Fetch_bufq_write(&stream->recvbuf, mem, memlen, &result);
   if (nwritten < 0)
   {
     return result;
@@ -853,9 +853,9 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
                            const uint8_t *buf, size_t buflen,
                            void *user_data, void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   FETCHcode result;
 
@@ -883,9 +883,9 @@ static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
                                   size_t consumed, void *user_data,
                                   void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   (void)conn;
@@ -901,12 +901,12 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
                              nghttp3_rcbuf *value, uint8_t flags,
                              void *user_data, void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   fetch_int64_t stream_id = sid;
   struct cf_osslq_ctx *ctx = cf->ctx;
   nghttp3_vec h3name = nghttp3_rcbuf_get_buf(name);
   nghttp3_vec h3val = nghttp3_rcbuf_get_buf(value);
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   FETCHcode result = FETCHE_OK;
   (void)conn;
@@ -924,7 +924,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
 
-    result = Curl_http_decode_status(&stream->status_code,
+    result = Fetch_http_decode_status(&stream->status_code,
                                      (const char *)h3val.base, h3val.len);
     if (result)
       return -1;
@@ -970,9 +970,9 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
 static int cb_h3_end_headers(nghttp3_conn *conn, int64_t sid,
                              int fin, void *user_data, void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   fetch_int64_t stream_id = sid;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   FETCHcode result = FETCHE_OK;
@@ -1004,9 +1004,9 @@ static int cb_h3_stop_sending(nghttp3_conn *conn, int64_t sid,
                               uint64_t app_error_code, void *user_data,
                               void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   fetch_int64_t stream_id = sid;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)conn;
@@ -1024,9 +1024,9 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t sid,
                               uint64_t app_error_code, void *user_data,
                               void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   fetch_int64_t stream_id = sid;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   int rv;
@@ -1052,9 +1052,9 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
                     uint32_t *pflags, void *user_data,
                     void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t nwritten = 0;
   size_t nvecs = 0;
@@ -1073,11 +1073,11 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
    * ACKed yet.
    * Any amount beyond `sendbuf_len_in_flight` we need still to pass
    * to nghttp3. Do that now, if we can. */
-  if (stream->sendbuf_len_in_flight < Curl_bufq_len(&stream->sendbuf))
+  if (stream->sendbuf_len_in_flight < Fetch_bufq_len(&stream->sendbuf))
   {
     nvecs = 0;
     while (nvecs < veccnt &&
-           Curl_bufq_peek_at(&stream->sendbuf,
+           Fetch_bufq_peek_at(&stream->sendbuf,
                              stream->sendbuf_len_in_flight,
                              (const unsigned char **)&vec[nvecs].base,
                              &vec[nvecs].len))
@@ -1111,7 +1111,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
                          "%d vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
                stream->s.id, (int)nvecs,
                *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
-               nwritten, Curl_bufq_len(&stream->sendbuf),
+               nwritten, Fetch_bufq_len(&stream->sendbuf),
                stream->upload_left);
   return (nghttp3_ssize)nvecs;
 }
@@ -1120,9 +1120,9 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
                                    uint64_t datalen, void *user_data,
                                    void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
+  struct Fetch_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Fetch_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   size_t skiplen;
 
@@ -1136,11 +1136,11 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
     skiplen = stream->sendbuf_len_in_flight;
   else
     skiplen = (size_t)datalen;
-  Curl_bufq_skip(&stream->sendbuf, skiplen);
+  Fetch_bufq_skip(&stream->sendbuf, skiplen);
   stream->sendbuf_len_in_flight -= skiplen;
 
   /* Resume upload processing if we have more data to send */
-  if (stream->sendbuf_len_in_flight < Curl_bufq_len(&stream->sendbuf))
+  if (stream->sendbuf_len_in_flight < Fetch_bufq_len(&stream->sendbuf))
   {
     int rv = nghttp3_conn_resume_stream(conn, stream_id);
     if (rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND)
@@ -1232,20 +1232,20 @@ out:
   return result;
 }
 
-static FETCHcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data)
+static FETCHcode cf_osslq_ctx_start(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   FETCHcode result;
   int rv;
-  const struct Curl_sockaddr_ex *peer_addr = NULL;
+  const struct Fetch_sockaddr_ex *peer_addr = NULL;
   BIO *bio = NULL;
   BIO_ADDR *baddr = NULL;
 
   DEBUGASSERT(ctx->initialized);
 
 #define H3_ALPN "\x2h3"
-  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
+  result = Fetch_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                H3_ALPN, sizeof(H3_ALPN) - 1,
                                NULL, NULL, NULL, NULL);
   if (result)
@@ -1256,7 +1256,7 @@ static FETCHcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
     goto out;
 
   result = FETCHE_QUIC_CONNECT_ERROR;
-  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL);
+  Fetch_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL);
   if (!peer_addr)
     goto out;
 
@@ -1338,8 +1338,8 @@ out:
 
 struct h3_quic_recv_ctx
 {
-  struct Curl_cfilter *cf;
-  struct Curl_easy *data;
+  struct Fetch_cfilter *cf;
+  struct Fetch_easy *data;
   struct cf_osslq_stream *s;
 };
 
@@ -1393,8 +1393,8 @@ static ssize_t h3_quic_recv(void *reader_ctx,
 }
 
 static FETCHcode cf_osslq_stream_recv(struct cf_osslq_stream *s,
-                                      struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
+                                      struct Fetch_cfilter *cf,
+                                      struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   FETCHcode result = FETCHE_OK;
@@ -1413,11 +1413,11 @@ static FETCHcode cf_osslq_stream_recv(struct cf_osslq_stream *s,
   while (s->ssl && !s->closed && !eagain &&
          (total_recv_len < H3_STREAM_CHUNK_SIZE))
   {
-    if (Curl_bufq_is_empty(&s->recvbuf) && !s->recvd_eos)
+    if (Fetch_bufq_is_empty(&s->recvbuf) && !s->recvd_eos)
     {
-      while (!eagain && !s->recvd_eos && !Curl_bufq_is_full(&s->recvbuf))
+      while (!eagain && !s->recvd_eos && !Fetch_bufq_is_full(&s->recvbuf))
       {
-        nread = Curl_bufq_sipn(&s->recvbuf, 0, h3_quic_recv, &x, &result);
+        nread = Fetch_bufq_sipn(&s->recvbuf, 0, h3_quic_recv, &x, &result);
         if (nread < 0)
         {
           if (result != FETCHE_AGAIN)
@@ -1429,12 +1429,12 @@ static FETCHcode cf_osslq_stream_recv(struct cf_osslq_stream *s,
     }
 
     /* Forward what we have to nghttp3 */
-    if (!Curl_bufq_is_empty(&s->recvbuf))
+    if (!Fetch_bufq_is_empty(&s->recvbuf))
     {
       const unsigned char *buf;
       size_t blen;
 
-      while (Curl_bufq_peek(&s->recvbuf, &buf, &blen))
+      while (Fetch_bufq_peek(&s->recvbuf, &buf, &blen))
       {
         nread = nghttp3_conn_read_stream(ctx->h3.conn, s->id,
                                          buf, blen, 0);
@@ -1451,13 +1451,13 @@ static FETCHcode cf_osslq_stream_recv(struct cf_osslq_stream *s,
         /* success, `nread` is the flow for QUIC to count as "consumed",
          * not sure how that will work with OpenSSL. Anyways, without error,
          * all data that we passed is not owned by nghttp3. */
-        Curl_bufq_skip(&s->recvbuf, blen);
+        Fetch_bufq_skip(&s->recvbuf, blen);
         total_recv_len += blen;
       }
     }
 
     /* When we forwarded everything, handle RESET/EOS */
-    if (Curl_bufq_is_empty(&s->recvbuf) && !s->closed)
+    if (Fetch_bufq_is_empty(&s->recvbuf) && !s->closed)
     {
       int rv;
       result = FETCHE_OK;
@@ -1504,8 +1504,8 @@ out:
   return result;
 }
 
-static FETCHcode cf_progress_ingress(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data)
+static FETCHcode cf_progress_ingress(struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   FETCHcode result = FETCHE_OK;
@@ -1545,18 +1545,18 @@ static FETCHcode cf_progress_ingress(struct Curl_cfilter *cf,
 
   if (ctx->h3.conn)
   {
-    struct Curl_llist_node *e;
+    struct Fetch_llist_node *e;
     struct h3_stream_ctx *stream;
     /* PULL all open streams */
     DEBUGASSERT(data->multi);
-    for (e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e))
+    for (e = Fetch_llist_head(&data->multi->process); e; e = Fetch_node_next(e))
     {
-      struct Curl_easy *sdata = Curl_node_elem(e);
+      struct Fetch_easy *sdata = Fetch_node_elem(e);
       if (sdata->conn == data->conn && FETCH_WANT_RECV(sdata))
       {
         stream = H3_STREAM_CTX(ctx, sdata);
         if (stream && !stream->closed &&
-            !Curl_bufq_is_full(&stream->recvbuf))
+            !Fetch_bufq_is_full(&stream->recvbuf))
         {
           result = cf_osslq_stream_recv(&stream->s, cf, sdata);
           if (result)
@@ -1572,8 +1572,8 @@ out:
 }
 
 /* Iterate over all streams and check if blocked can be unblocked */
-static FETCHcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
-                                            struct Curl_easy *data)
+static FETCHcode cf_osslq_check_and_unblock(struct Fetch_cfilter *cf,
+                                            struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream;
@@ -1586,15 +1586,15 @@ static FETCHcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
 
   if (ctx->h3.conn)
   {
-    struct Curl_llist_node *e;
+    struct Fetch_llist_node *e;
 
     res = FETCHE_OUT_OF_MEMORY;
 
-    if (ctx->item_count < Curl_llist_count(&data->multi->process))
+    if (ctx->item_count < Fetch_llist_count(&data->multi->process))
     {
       ctx->item_count = 0;
       tmpptr = realloc(ctx->poll_items,
-                       Curl_llist_count(&data->multi->process) *
+                       Fetch_llist_count(&data->multi->process) *
                            sizeof(SSL_POLL_ITEM));
       if (!tmpptr)
       {
@@ -1605,8 +1605,8 @@ static FETCHcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
       ctx->poll_items = tmpptr;
 
       tmpptr = realloc(ctx->fetch_items,
-                       Curl_llist_count(&data->multi->process) *
-                           sizeof(struct Curl_easy *));
+                       Fetch_llist_count(&data->multi->process) *
+                           sizeof(struct Fetch_easy *));
       if (!tmpptr)
       {
         free(ctx->fetch_items);
@@ -1615,12 +1615,12 @@ static FETCHcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
       }
       ctx->fetch_items = tmpptr;
 
-      ctx->item_count = Curl_llist_count(&data->multi->process);
+      ctx->item_count = Fetch_llist_count(&data->multi->process);
     }
 
-    for (e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e))
+    for (e = Fetch_llist_head(&data->multi->process); e; e = Fetch_node_next(e))
     {
-      struct Curl_easy *sdata = Curl_node_elem(e);
+      struct Fetch_easy *sdata = Fetch_node_elem(e);
       if (sdata->conn == data->conn)
       {
         stream = H3_STREAM_CTX(ctx, sdata);
@@ -1662,8 +1662,8 @@ out:
   return res;
 }
 
-static FETCHcode h3_send_streams(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static FETCHcode h3_send_streams(struct Fetch_cfilter *cf,
+                                 struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   FETCHcode result = FETCHE_OK;
@@ -1757,7 +1757,7 @@ static FETCHcode h3_send_streams(struct Curl_cfilter *cf,
     {
       /* Since QUIC buffers the data written internally, we can tell
        * nghttp3 that it can move forward on it */
-      ctx->q.last_io = Curl_now();
+      ctx->q.last_io = Fetch_now();
       rv = nghttp3_conn_add_write_offset(ctx->h3.conn, s->id, acked_len);
       if (rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND)
       {
@@ -1792,8 +1792,8 @@ out:
   return result;
 }
 
-static FETCHcode cf_progress_egress(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data)
+static FETCHcode cf_progress_egress(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   FETCHcode result = FETCHE_OK;
@@ -1819,8 +1819,8 @@ out:
   return result;
 }
 
-static FETCHcode check_and_set_expiry(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
+static FETCHcode check_and_set_expiry(struct Fetch_cfilter *cf,
+                                      struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   FETCHcode result = FETCHE_OK;
@@ -1849,7 +1849,7 @@ static FETCHcode check_and_set_expiry(struct Curl_cfilter *cf,
     }
     if (!is_infinite)
     {
-      Curl_expire(data, timeoutms, EXPIRE_QUIC);
+      Fetch_expire(data, timeoutms, EXPIRE_QUIC);
       FETCH_TRC_CF(data, cf, "QUIC expiry in %ldms", (long)timeoutms);
     }
   }
@@ -1857,8 +1857,8 @@ out:
   return result;
 }
 
-static FETCHcode cf_osslq_connect(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static FETCHcode cf_osslq_connect(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   bool blocking, bool *done)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -1876,13 +1876,13 @@ static FETCHcode cf_osslq_connect(struct Curl_cfilter *cf,
   /* Connect the UDP filter first */
   if (!cf->next->connected)
   {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Fetch_conn_cf_connect(cf->next, data, blocking, done);
     if (result || !*done)
       return result;
   }
 
   *done = FALSE;
-  now = Curl_now();
+  now = Fetch_now();
   CF_DATA_SAVE(save, cf, data);
 
   if (!ctx->tls.ossl.ssl)
@@ -1899,7 +1899,7 @@ static FETCHcode cf_osslq_connect(struct Curl_cfilter *cf,
     if (readable > 0 && (readable & FETCH_CSELECT_IN))
     {
       ctx->got_first_byte = TRUE;
-      ctx->first_byte_at = Curl_now();
+      ctx->first_byte_at = Fetch_now();
     }
   }
 
@@ -1907,7 +1907,7 @@ static FETCHcode cf_osslq_connect(struct Curl_cfilter *cf,
    * moment to populate the x509 store right before the server response.
    * Do it instead before we start the handshake, at the loss of the
    * time to set this up. */
-  result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
+  result = Fetch_vquic_tls_before_recv(&ctx->tls, cf, data);
   if (result)
     goto out;
 
@@ -1920,7 +1920,7 @@ static FETCHcode cf_osslq_connect(struct Curl_cfilter *cf,
     ctx->handshake_at = now;
     ctx->q.last_io = now;
     FETCH_TRC_CF(data, cf, "handshake complete after %dms",
-                 (int)Curl_timediff(now, ctx->started_at));
+                 (int)Fetch_timediff(now, ctx->started_at));
     result = cf_osslq_verify_peer(cf, data);
     if (!result)
     {
@@ -1979,7 +1979,7 @@ out:
   {
     struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+    Fetch_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     infof(data, "QUIC connect to %s port %u failed: %s",
           ip.remote_ip, ip.remote_port, fetch_easy_strerror(result));
   }
@@ -1992,8 +1992,8 @@ out:
   return result;
 }
 
-static ssize_t h3_stream_open(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
+static ssize_t h3_stream_open(struct Fetch_cfilter *cf,
+                              struct Fetch_easy *data,
                               const void *buf, size_t len,
                               FETCHcode *err)
 {
@@ -2008,7 +2008,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
 
-  Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
+  Fetch_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   *err = h3_data_setup(cf, data);
   if (*err)
@@ -2021,7 +2021,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
-  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
+  nwritten = Fetch_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if (nwritten < 0)
     goto out;
   if (!stream->h1.done)
@@ -2031,16 +2031,16 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   }
   DEBUGASSERT(stream->h1.req);
 
-  *err = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
+  *err = Fetch_http_req_to_h2(&h2_headers, stream->h1.req, data);
   if (*err)
   {
     nwritten = -1;
     goto out;
   }
   /* no longer needed */
-  Curl_h1_req_parse_free(&stream->h1);
+  Fetch_h1_req_parse_free(&stream->h1);
 
-  nheader = Curl_dynhds_count(&h2_headers);
+  nheader = Fetch_dynhds_count(&h2_headers);
   nva = malloc(sizeof(nghttp3_nv) * nheader);
   if (!nva)
   {
@@ -2051,7 +2051,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
 
   for (i = 0; i < nheader; ++i)
   {
-    struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
+    struct dynhds_entry *e = Fetch_dynhds_getn(&h2_headers, i);
     nva[i].name = (unsigned char *)e->name;
     nva[i].namelen = e->namelen;
     nva[i].value = (unsigned char *)e->value;
@@ -2116,7 +2116,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
-  if (Curl_trc_is_verbose(data))
+  if (Fetch_trc_is_verbose(data))
   {
     infof(data, "[HTTP/3] [%" FMT_PRId64 "] OPENED stream for %s",
           stream->s.id, data->state.url);
@@ -2131,11 +2131,11 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
 
 out:
   free(nva);
-  Curl_dynhds_free(&h2_headers);
+  Fetch_dynhds_free(&h2_headers);
   return nwritten;
 }
 
-static ssize_t cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+static ssize_t cf_osslq_send(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                              const void *buf, size_t len, bool eos,
                              FETCHcode *err)
 {
@@ -2203,7 +2203,7 @@ static ssize_t cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else
   {
-    nwritten = Curl_bufq_write(&stream->sendbuf, buf, len, err);
+    nwritten = Fetch_bufq_write(&stream->sendbuf, buf, len, err);
     FETCH_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send, add to "
                            "sendbuf(len=%zu) -> %zd, %d",
                  stream->s.id, len, nwritten, *err);
@@ -2230,8 +2230,8 @@ out:
   return nwritten;
 }
 
-static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
+static ssize_t recv_closed_stream(struct Fetch_cfilter *cf,
+                                  struct Fetch_easy *data,
                                   struct h3_stream_ctx *stream,
                                   FETCHcode *err)
 {
@@ -2263,7 +2263,7 @@ out:
   return nread;
 }
 
-static ssize_t cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+static ssize_t cf_osslq_recv(struct Fetch_cfilter *cf, struct Fetch_easy *data,
                              char *buf, size_t len, FETCHcode *err)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -2286,9 +2286,9 @@ static ssize_t cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
-  if (!Curl_bufq_is_empty(&stream->recvbuf))
+  if (!Fetch_bufq_is_empty(&stream->recvbuf))
   {
-    nread = Curl_bufq_read(&stream->recvbuf,
+    nread = Fetch_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
     if (nread < 0)
     {
@@ -2308,9 +2308,9 @@ static ssize_t cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   /* recvbuf had nothing before, maybe after progressing ingress? */
-  if (nread < 0 && !Curl_bufq_is_empty(&stream->recvbuf))
+  if (nread < 0 && !Fetch_bufq_is_empty(&stream->recvbuf))
   {
-    nread = Curl_bufq_read(&stream->recvbuf,
+    nread = Fetch_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
     if (nread < 0)
     {
@@ -2361,17 +2361,17 @@ out:
  * Called from transfer.c:data_pending to know if we should keep looping
  * to receive more data from the connection.
  */
-static bool cf_osslq_data_pending(struct Curl_cfilter *cf,
-                                  const struct Curl_easy *data)
+static bool cf_osslq_data_pending(struct Fetch_cfilter *cf,
+                                  const struct Fetch_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   const struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)cf;
-  return stream && !Curl_bufq_is_empty(&stream->recvbuf);
+  return stream && !Fetch_bufq_is_empty(&stream->recvbuf);
 }
 
-static FETCHcode cf_osslq_data_event(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
+static FETCHcode cf_osslq_data_event(struct Fetch_cfilter *cf,
+                                     struct Fetch_easy *data,
                                      int event, int arg1, void *arg2)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -2397,7 +2397,7 @@ static FETCHcode cf_osslq_data_event(struct Curl_cfilter *cf,
     if (stream && !stream->send_closed)
     {
       stream->send_closed = TRUE;
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf) -
+      stream->upload_left = Fetch_bufq_len(&stream->sendbuf) -
                             stream->sendbuf_len_in_flight;
       (void)nghttp3_conn_resume_stream(ctx->h3.conn, stream->s.id);
     }
@@ -2420,8 +2420,8 @@ static FETCHcode cf_osslq_data_event(struct Curl_cfilter *cf,
   return result;
 }
 
-static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
+static bool cf_osslq_conn_is_alive(struct Fetch_cfilter *cf,
+                                   struct Fetch_easy *data,
                                    bool *input_pending)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -2447,7 +2447,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
       goto out;
     }
     FETCH_TRC_CF(data, cf, "negotiated idle timeout: %zums", (size_t)idle_ms);
-    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    idletime = Fetch_timediff(Fetch_now(), ctx->q.last_io);
     if (idletime > 0 && (uint64_t)idletime > idle_ms)
       goto out;
   }
@@ -2475,8 +2475,8 @@ out:
   return alive;
 }
 
-static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
+static void cf_osslq_adjust_pollset(struct Fetch_cfilter *cf,
+                                    struct Fetch_easy *data,
                                     struct easy_pollset *ps)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -2489,7 +2489,7 @@ static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
   {
     /* during handshake, transfer has not started yet. we always
      * add our socket for polling if SSL wants to send/recv */
-    Curl_pollset_set(data, ps, ctx->q.sockfd,
+    Fetch_pollset_set(data, ps, ctx->q.sockfd,
                      SSL_net_read_desired(ctx->tls.ossl.ssl),
                      SSL_net_write_desired(ctx->tls.ossl.ssl));
   }
@@ -2498,23 +2498,23 @@ static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
     /* once connected, we only modify the socket if it is present.
      * this avoids adding it for paused transfers. */
     bool want_recv, want_send;
-    Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
+    Fetch_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
     if (want_recv || want_send)
     {
-      Curl_pollset_set(data, ps, ctx->q.sockfd,
+      Fetch_pollset_set(data, ps, ctx->q.sockfd,
                        SSL_net_read_desired(ctx->tls.ossl.ssl),
                        SSL_net_write_desired(ctx->tls.ossl.ssl));
     }
     else if (ctx->need_recv || ctx->need_send)
     {
-      Curl_pollset_set(data, ps, ctx->q.sockfd,
+      Fetch_pollset_set(data, ps, ctx->q.sockfd,
                        ctx->need_recv, ctx->need_send);
     }
   }
 }
 
-static FETCHcode cf_osslq_query(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
+static FETCHcode cf_osslq_query(struct Fetch_cfilter *cf,
+                                struct Fetch_easy *data,
                                 int query, int *pres1, void *pres2)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -2544,7 +2544,7 @@ static FETCHcode cf_osslq_query(struct Curl_cfilter *cf,
   case CF_QUERY_CONNECT_REPLY_MS:
     if (ctx->got_first_byte)
     {
-      timediff_t ms = Curl_timediff(ctx->first_byte_at, ctx->started_at);
+      timediff_t ms = Fetch_timediff(ctx->first_byte_at, ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -2573,7 +2573,7 @@ static FETCHcode cf_osslq_query(struct Curl_cfilter *cf,
   return cf->next ? cf->next->cft->query(cf->next, data, query, pres1, pres2) : FETCHE_UNKNOWN_OPTION;
 }
 
-struct Curl_cftype Curl_cft_http3 = {
+struct Fetch_cftype Fetch_cft_http3 = {
     "HTTP/3",
     CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
     0,
@@ -2581,24 +2581,24 @@ struct Curl_cftype Curl_cft_http3 = {
     cf_osslq_connect,
     cf_osslq_close,
     cf_osslq_shutdown,
-    Curl_cf_def_get_host,
+    Fetch_cf_def_get_host,
     cf_osslq_adjust_pollset,
     cf_osslq_data_pending,
     cf_osslq_send,
     cf_osslq_recv,
     cf_osslq_data_event,
     cf_osslq_conn_is_alive,
-    Curl_cf_def_conn_keep_alive,
+    Fetch_cf_def_conn_keep_alive,
     cf_osslq_query,
 };
 
-FETCHcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
-                               struct Curl_easy *data,
+FETCHcode Fetch_cf_osslq_create(struct Fetch_cfilter **pcf,
+                               struct Fetch_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai)
+                               const struct Fetch_addrinfo *ai)
 {
   struct cf_osslq_ctx *ctx = NULL;
-  struct Curl_cfilter *cf = NULL, *udp_cf = NULL;
+  struct Fetch_cfilter *cf = NULL, *udp_cf = NULL;
   FETCHcode result;
 
   (void)data;
@@ -2610,11 +2610,11 @@ FETCHcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
   }
   cf_osslq_ctx_init(ctx);
 
-  result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
+  result = Fetch_cf_create(&cf, &Fetch_cft_http3, ctx);
   if (result)
     goto out;
 
-  result = Curl_cf_udp_create(&udp_cf, data, conn, ai, TRNSPRT_QUIC);
+  result = Fetch_cf_udp_create(&udp_cf, data, conn, ai, TRNSPRT_QUIC);
   if (result)
     goto out;
 
@@ -2628,23 +2628,23 @@ out:
   if (result)
   {
     if (udp_cf)
-      Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
-    Curl_safefree(cf);
+      Fetch_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
+    Fetch_safefree(cf);
     cf_osslq_ctx_free(ctx);
   }
   return result;
 }
 
-bool Curl_conn_is_osslq(const struct Curl_easy *data,
+bool Fetch_conn_is_osslq(const struct Fetch_easy *data,
                         const struct connectdata *conn,
                         int sockindex)
 {
-  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
+  struct Fetch_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
 
   (void)data;
   for (; cf; cf = cf->next)
   {
-    if (cf->cft == &Curl_cft_http3)
+    if (cf->cft == &Fetch_cft_http3)
       return TRUE;
     if (cf->cft->flags & CF_TYPE_IP_CONNECT)
       return FALSE;
@@ -2655,7 +2655,7 @@ bool Curl_conn_is_osslq(const struct Curl_easy *data,
 /*
  * Store ngtcp2 version info in this buffer.
  */
-void Curl_osslq_ver(char *p, size_t len)
+void Fetch_osslq_ver(char *p, size_t len)
 {
   const nghttp3_info *ht3 = nghttp3_version(0);
   (void)msnprintf(p, len, "nghttp3/%s", ht3->version_str);

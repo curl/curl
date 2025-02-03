@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -59,14 +59,14 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-static FETCHcode do_init_writer_stack(struct Curl_easy *data);
+static FETCHcode do_init_writer_stack(struct Fetch_easy *data);
 
-/* Curl_client_write() sends data to the write callback(s)
+/* Fetch_client_write() sends data to the write callback(s)
 
    The bit pattern defines to what "streams" to write to. Body and/or header.
    The defines are in sendf.h of course.
  */
-FETCHcode Curl_client_write(struct Curl_easy *data,
+FETCHcode Fetch_client_write(struct Fetch_easy *data,
                             int type, const char *buf, size_t blen)
 {
   FETCHcode result;
@@ -88,15 +88,15 @@ FETCHcode Curl_client_write(struct Curl_easy *data,
     DEBUGASSERT(data->req.writer_stack);
   }
 
-  result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
+  result = Fetch_cwriter_write(data, data->req.writer_stack, type, buf, blen);
   FETCH_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %d",
                   type, blen, result);
   return result;
 }
 
-static void cl_reset_writer(struct Curl_easy *data)
+static void cl_reset_writer(struct Fetch_easy *data)
 {
-  struct Curl_cwriter *writer = data->req.writer_stack;
+  struct Fetch_cwriter *writer = data->req.writer_stack;
   while (writer)
   {
     data->req.writer_stack = writer->next;
@@ -106,9 +106,9 @@ static void cl_reset_writer(struct Curl_easy *data)
   }
 }
 
-static void cl_reset_reader(struct Curl_easy *data)
+static void cl_reset_reader(struct Fetch_easy *data)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Fetch_creader *reader = data->req.reader_stack;
   while (reader)
   {
     data->req.reader_stack = reader->next;
@@ -118,7 +118,7 @@ static void cl_reset_reader(struct Curl_easy *data)
   }
 }
 
-void Curl_client_cleanup(struct Curl_easy *data)
+void Fetch_client_cleanup(struct Fetch_easy *data)
 {
   cl_reset_reader(data);
   cl_reset_writer(data);
@@ -127,7 +127,7 @@ void Curl_client_cleanup(struct Curl_easy *data)
   data->req.headerline = 0;
 }
 
-void Curl_client_reset(struct Curl_easy *data)
+void Fetch_client_reset(struct Fetch_easy *data)
 {
   if (data->req.rewind_read)
   {
@@ -145,11 +145,11 @@ void Curl_client_reset(struct Curl_easy *data)
   data->req.headerline = 0;
 }
 
-FETCHcode Curl_client_start(struct Curl_easy *data)
+FETCHcode Fetch_client_start(struct Fetch_easy *data)
 {
   if (data->req.rewind_read)
   {
-    struct Curl_creader *r = data->req.reader_stack;
+    struct Fetch_creader *r = data->req.reader_stack;
     FETCHcode result = FETCHE_OK;
 
     FETCH_TRC_READ(data, "client start, rewind readers");
@@ -170,19 +170,19 @@ FETCHcode Curl_client_start(struct Curl_easy *data)
   return FETCHE_OK;
 }
 
-bool Curl_creader_will_rewind(struct Curl_easy *data)
+bool Fetch_creader_will_rewind(struct Fetch_easy *data)
 {
   return data->req.rewind_read;
 }
 
-void Curl_creader_set_rewind(struct Curl_easy *data, bool enable)
+void Fetch_creader_set_rewind(struct Fetch_easy *data, bool enable)
 {
   data->req.rewind_read = !!enable;
 }
 
 /* Write data using an unencoding writer stack. */
-FETCHcode Curl_cwriter_write(struct Curl_easy *data,
-                             struct Curl_cwriter *writer, int type,
+FETCHcode Fetch_cwriter_write(struct Fetch_easy *data,
+                             struct Fetch_cwriter *writer, int type,
                              const char *buf, size_t nbytes)
 {
   if (!writer)
@@ -190,29 +190,29 @@ FETCHcode Curl_cwriter_write(struct Curl_easy *data,
   return writer->cwt->do_write(data, writer, type, buf, nbytes);
 }
 
-FETCHcode Curl_cwriter_def_init(struct Curl_easy *data,
-                                struct Curl_cwriter *writer)
+FETCHcode Fetch_cwriter_def_init(struct Fetch_easy *data,
+                                struct Fetch_cwriter *writer)
 {
   (void)data;
   (void)writer;
   return FETCHE_OK;
 }
 
-FETCHcode Curl_cwriter_def_write(struct Curl_easy *data,
-                                 struct Curl_cwriter *writer, int type,
+FETCHcode Fetch_cwriter_def_write(struct Fetch_easy *data,
+                                 struct Fetch_cwriter *writer, int type,
                                  const char *buf, size_t nbytes)
 {
-  return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+  return Fetch_cwriter_write(data, writer->next, type, buf, nbytes);
 }
 
-void Curl_cwriter_def_close(struct Curl_easy *data,
-                            struct Curl_cwriter *writer)
+void Fetch_cwriter_def_close(struct Fetch_easy *data,
+                            struct Fetch_cwriter *writer)
 {
   (void)data;
   (void)writer;
 }
 
-static size_t get_max_body_write_len(struct Curl_easy *data, fetch_off_t limit)
+static size_t get_max_body_write_len(struct Fetch_easy *data, fetch_off_t limit)
 {
   if (limit != -1)
   {
@@ -240,13 +240,13 @@ static size_t get_max_body_write_len(struct Curl_easy *data, fetch_off_t limit)
 
 struct cw_download_ctx
 {
-  struct Curl_cwriter super;
+  struct Fetch_cwriter super;
   BIT(started_response);
 };
 /* Download client writer in phase FETCH_CW_PROTOCOL that
  * sees the "real" download body data. */
-static FETCHcode cw_download_write(struct Curl_easy *data,
-                                   struct Curl_cwriter *writer, int type,
+static FETCHcode cw_download_write(struct Fetch_easy *data,
+                                   struct Fetch_cwriter *writer, int type,
                                    const char *buf, size_t nbytes)
 {
   struct cw_download_ctx *ctx = writer->ctx;
@@ -256,7 +256,7 @@ static FETCHcode cw_download_write(struct Curl_easy *data,
 
   if (!is_connect && !ctx->started_response)
   {
-    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+    Fetch_pgrsTime(data, TIMER_STARTTRANSFER);
     ctx->started_response = TRUE;
   }
 
@@ -264,7 +264,7 @@ static FETCHcode cw_download_write(struct Curl_easy *data,
   {
     if (is_connect && data->set.suppress_connect_headers)
       return FETCHE_OK;
-    result = Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+    result = Fetch_cwriter_write(data, writer->next, type, buf, nbytes);
     FETCH_TRC_WRITE(data, "download_write header(type=%x, blen=%zu) -> %d",
                     type, nbytes, result);
     return result;
@@ -331,7 +331,7 @@ static FETCHcode cw_download_write(struct Curl_easy *data,
 
   if (!data->req.ignorebody && (nwrite || (type & CLIENTWRITE_EOS)))
   {
-    result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
+    result = Fetch_cwriter_write(data, writer->next, type, buf, nwrite);
     FETCH_TRC_WRITE(data, "download_write body(type=%x, blen=%zu) -> %d",
                     type, nbytes, result);
     if (result)
@@ -339,7 +339,7 @@ static FETCHcode cw_download_write(struct Curl_easy *data,
   }
   /* Update stats, write and report progress */
   data->req.bytecount += nwrite;
-  result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
+  result = Fetch_pgrsSetDownloadCounter(data, data->req.bytecount);
   if (result)
     return result;
 
@@ -369,51 +369,51 @@ static FETCHcode cw_download_write(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static const struct Curl_cwtype cw_download = {
+static const struct Fetch_cwtype cw_download = {
     "protocol",
     NULL,
-    Curl_cwriter_def_init,
+    Fetch_cwriter_def_init,
     cw_download_write,
-    Curl_cwriter_def_close,
+    Fetch_cwriter_def_close,
     sizeof(struct cw_download_ctx)};
 
 /* RAW client writer in phase FETCH_CW_RAW that
  * enabled tracing of raw data. */
-static FETCHcode cw_raw_write(struct Curl_easy *data,
-                              struct Curl_cwriter *writer, int type,
+static FETCHcode cw_raw_write(struct Fetch_easy *data,
+                              struct Fetch_cwriter *writer, int type,
                               const char *buf, size_t nbytes)
 {
   if (type & CLIENTWRITE_BODY && data->set.verbose && !data->req.ignorebody)
   {
-    Curl_debug(data, FETCHINFO_DATA_IN, (char *)buf, nbytes);
+    Fetch_debug(data, FETCHINFO_DATA_IN, (char *)buf, nbytes);
   }
-  return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+  return Fetch_cwriter_write(data, writer->next, type, buf, nbytes);
 }
 
-static const struct Curl_cwtype cw_raw = {
+static const struct Fetch_cwtype cw_raw = {
     "raw",
     NULL,
-    Curl_cwriter_def_init,
+    Fetch_cwriter_def_init,
     cw_raw_write,
-    Curl_cwriter_def_close,
-    sizeof(struct Curl_cwriter)};
+    Fetch_cwriter_def_close,
+    sizeof(struct Fetch_cwriter)};
 
 /* Create an unencoding writer stage using the given handler. */
-FETCHcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
-                              struct Curl_easy *data,
-                              const struct Curl_cwtype *cwt,
-                              Curl_cwriter_phase phase)
+FETCHcode Fetch_cwriter_create(struct Fetch_cwriter **pwriter,
+                              struct Fetch_easy *data,
+                              const struct Fetch_cwtype *cwt,
+                              Fetch_cwriter_phase phase)
 {
-  struct Curl_cwriter *writer = NULL;
+  struct Fetch_cwriter *writer = NULL;
   FETCHcode result = FETCHE_OUT_OF_MEMORY;
   void *p;
 
-  DEBUGASSERT(cwt->cwriter_size >= sizeof(struct Curl_cwriter));
+  DEBUGASSERT(cwt->cwriter_size >= sizeof(struct Fetch_cwriter));
   p = calloc(1, cwt->cwriter_size);
   if (!p)
     goto out;
 
-  writer = (struct Curl_cwriter *)p;
+  writer = (struct Fetch_cwriter *)p;
   writer->cwt = cwt;
   writer->ctx = p;
   writer->phase = phase;
@@ -426,8 +426,8 @@ out:
   return result;
 }
 
-void Curl_cwriter_free(struct Curl_easy *data,
-                       struct Curl_cwriter *writer)
+void Fetch_cwriter_free(struct Fetch_easy *data,
+                       struct Fetch_cwriter *writer)
 {
   if (writer)
   {
@@ -436,9 +436,9 @@ void Curl_cwriter_free(struct Curl_easy *data,
   }
 }
 
-size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
+size_t Fetch_cwriter_count(struct Fetch_easy *data, Fetch_cwriter_phase phase)
 {
-  struct Curl_cwriter *w;
+  struct Fetch_cwriter *w;
   size_t n = 0;
 
   for (w = data->req.writer_stack; w; w = w->next)
@@ -449,42 +449,42 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
   return n;
 }
 
-static FETCHcode do_init_writer_stack(struct Curl_easy *data)
+static FETCHcode do_init_writer_stack(struct Fetch_easy *data)
 {
-  struct Curl_cwriter *writer;
+  struct Fetch_cwriter *writer;
   FETCHcode result;
 
   DEBUGASSERT(!data->req.writer_stack);
-  result = Curl_cwriter_create(&data->req.writer_stack,
-                               data, &Curl_cwt_out, FETCH_CW_CLIENT);
+  result = Fetch_cwriter_create(&data->req.writer_stack,
+                               data, &Fetch_cwt_out, FETCH_CW_CLIENT);
   if (result)
     return result;
 
-  result = Curl_cwriter_create(&writer, data, &cw_download, FETCH_CW_PROTOCOL);
+  result = Fetch_cwriter_create(&writer, data, &cw_download, FETCH_CW_PROTOCOL);
   if (result)
     return result;
-  result = Curl_cwriter_add(data, writer);
+  result = Fetch_cwriter_add(data, writer);
   if (result)
   {
-    Curl_cwriter_free(data, writer);
+    Fetch_cwriter_free(data, writer);
   }
 
-  result = Curl_cwriter_create(&writer, data, &cw_raw, FETCH_CW_RAW);
+  result = Fetch_cwriter_create(&writer, data, &cw_raw, FETCH_CW_RAW);
   if (result)
     return result;
-  result = Curl_cwriter_add(data, writer);
+  result = Fetch_cwriter_add(data, writer);
   if (result)
   {
-    Curl_cwriter_free(data, writer);
+    Fetch_cwriter_free(data, writer);
   }
   return result;
 }
 
-FETCHcode Curl_cwriter_add(struct Curl_easy *data,
-                           struct Curl_cwriter *writer)
+FETCHcode Fetch_cwriter_add(struct Fetch_easy *data,
+                           struct Fetch_cwriter *writer)
 {
   FETCHcode result;
-  struct Curl_cwriter **anchor = &data->req.writer_stack;
+  struct Fetch_cwriter **anchor = &data->req.writer_stack;
 
   if (!*anchor)
   {
@@ -502,10 +502,10 @@ FETCHcode Curl_cwriter_add(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
+struct Fetch_cwriter *Fetch_cwriter_get_by_name(struct Fetch_easy *data,
                                               const char *name)
 {
-  struct Curl_cwriter *writer;
+  struct Fetch_cwriter *writer;
   for (writer = data->req.writer_stack; writer; writer = writer->next)
   {
     if (!strcmp(name, writer->cwt->name))
@@ -514,10 +514,10 @@ struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
   return NULL;
 }
 
-struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
-                                              const struct Curl_cwtype *cwt)
+struct Fetch_cwriter *Fetch_cwriter_get_by_type(struct Fetch_easy *data,
+                                              const struct Fetch_cwtype *cwt)
 {
-  struct Curl_cwriter *writer;
+  struct Fetch_cwriter *writer;
   for (writer = data->req.writer_stack; writer; writer = writer->next)
   {
     if (writer->cwt == cwt)
@@ -526,18 +526,18 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
   return NULL;
 }
 
-bool Curl_cwriter_is_paused(struct Curl_easy *data)
+bool Fetch_cwriter_is_paused(struct Fetch_easy *data)
 {
-  return Curl_cw_out_is_paused(data);
+  return Fetch_cw_out_is_paused(data);
 }
 
-FETCHcode Curl_cwriter_unpause(struct Curl_easy *data)
+FETCHcode Fetch_cwriter_unpause(struct Fetch_easy *data)
 {
-  return Curl_cw_out_unpause(data);
+  return Fetch_cw_out_unpause(data);
 }
 
-FETCHcode Curl_creader_read(struct Curl_easy *data,
-                            struct Curl_creader *reader,
+FETCHcode Fetch_creader_read(struct Fetch_easy *data,
+                            struct Fetch_creader *reader,
                             char *buf, size_t blen, size_t *nread, bool *eos)
 {
   *nread = 0;
@@ -547,23 +547,23 @@ FETCHcode Curl_creader_read(struct Curl_easy *data,
   return reader->crt->do_read(data, reader, buf, blen, nread, eos);
 }
 
-FETCHcode Curl_creader_def_init(struct Curl_easy *data,
-                                struct Curl_creader *reader)
+FETCHcode Fetch_creader_def_init(struct Fetch_easy *data,
+                                struct Fetch_creader *reader)
 {
   (void)data;
   (void)reader;
   return FETCHE_OK;
 }
 
-void Curl_creader_def_close(struct Curl_easy *data,
-                            struct Curl_creader *reader)
+void Fetch_creader_def_close(struct Fetch_easy *data,
+                            struct Fetch_creader *reader)
 {
   (void)data;
   (void)reader;
 }
 
-FETCHcode Curl_creader_def_read(struct Curl_easy *data,
-                                struct Curl_creader *reader,
+FETCHcode Fetch_creader_def_read(struct Fetch_easy *data,
+                                struct Fetch_creader *reader,
                                 char *buf, size_t blen,
                                 size_t *nread, bool *eos)
 {
@@ -578,22 +578,22 @@ FETCHcode Curl_creader_def_read(struct Curl_easy *data,
   }
 }
 
-bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
-                                   struct Curl_creader *reader)
+bool Fetch_creader_def_needs_rewind(struct Fetch_easy *data,
+                                   struct Fetch_creader *reader)
 {
   (void)data;
   (void)reader;
   return FALSE;
 }
 
-fetch_off_t Curl_creader_def_total_length(struct Curl_easy *data,
-                                          struct Curl_creader *reader)
+fetch_off_t Fetch_creader_def_total_length(struct Fetch_easy *data,
+                                          struct Fetch_creader *reader)
 {
   return reader->next ? reader->next->crt->total_length(data, reader->next) : -1;
 }
 
-FETCHcode Curl_creader_def_resume_from(struct Curl_easy *data,
-                                       struct Curl_creader *reader,
+FETCHcode Fetch_creader_def_resume_from(struct Fetch_easy *data,
+                                       struct Fetch_creader *reader,
                                        fetch_off_t offset)
 {
   (void)data;
@@ -602,32 +602,32 @@ FETCHcode Curl_creader_def_resume_from(struct Curl_easy *data,
   return FETCHE_READ_ERROR;
 }
 
-FETCHcode Curl_creader_def_rewind(struct Curl_easy *data,
-                                  struct Curl_creader *reader)
+FETCHcode Fetch_creader_def_rewind(struct Fetch_easy *data,
+                                  struct Fetch_creader *reader)
 {
   (void)data;
   (void)reader;
   return FETCHE_OK;
 }
 
-FETCHcode Curl_creader_def_unpause(struct Curl_easy *data,
-                                   struct Curl_creader *reader)
+FETCHcode Fetch_creader_def_unpause(struct Fetch_easy *data,
+                                   struct Fetch_creader *reader)
 {
   (void)data;
   (void)reader;
   return FETCHE_OK;
 }
 
-bool Curl_creader_def_is_paused(struct Curl_easy *data,
-                                struct Curl_creader *reader)
+bool Fetch_creader_def_is_paused(struct Fetch_easy *data,
+                                struct Fetch_creader *reader)
 {
   (void)data;
   (void)reader;
   return FALSE;
 }
 
-void Curl_creader_def_done(struct Curl_easy *data,
-                           struct Curl_creader *reader, int premature)
+void Fetch_creader_def_done(struct Fetch_easy *data,
+                           struct Fetch_creader *reader, int premature)
 {
   (void)data;
   (void)reader;
@@ -636,7 +636,7 @@ void Curl_creader_def_done(struct Curl_easy *data,
 
 struct cr_in_ctx
 {
-  struct Curl_creader super;
+  struct Fetch_creader super;
   fetch_read_callback read_cb;
   void *cb_user_data;
   fetch_off_t total_len;
@@ -648,7 +648,7 @@ struct cr_in_ctx
   BIT(is_paused);
 };
 
-static FETCHcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
+static FETCHcode cr_in_init(struct Fetch_easy *data, struct Fetch_creader *reader)
 {
   struct cr_in_ctx *ctx = reader->ctx;
   (void)data;
@@ -660,8 +660,8 @@ static FETCHcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
 }
 
 /* Real client reader to installed client callbacks. */
-static FETCHcode cr_in_read(struct Curl_easy *data,
-                            struct Curl_creader *reader,
+static FETCHcode cr_in_read(struct Fetch_easy *data,
+                            struct Fetch_creader *reader,
                             char *buf, size_t blen,
                             size_t *pnread, bool *peos)
 {
@@ -695,9 +695,9 @@ static FETCHcode cr_in_read(struct Curl_easy *data,
   nread = 0;
   if (ctx->read_cb && blen)
   {
-    Curl_set_in_callback(data, TRUE);
+    Fetch_set_in_callback(data, TRUE);
     nread = ctx->read_cb(buf, 1, blen, ctx->cb_user_data);
-    Curl_set_in_callback(data, FALSE);
+    Fetch_set_in_callback(data, FALSE);
     ctx->has_used_cb = TRUE;
   }
 
@@ -765,24 +765,24 @@ static FETCHcode cr_in_read(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static bool cr_in_needs_rewind(struct Curl_easy *data,
-                               struct Curl_creader *reader)
+static bool cr_in_needs_rewind(struct Fetch_easy *data,
+                               struct Fetch_creader *reader)
 {
   struct cr_in_ctx *ctx = reader->ctx;
   (void)data;
   return ctx->has_used_cb;
 }
 
-static fetch_off_t cr_in_total_length(struct Curl_easy *data,
-                                      struct Curl_creader *reader)
+static fetch_off_t cr_in_total_length(struct Fetch_easy *data,
+                                      struct Fetch_creader *reader)
 {
   struct cr_in_ctx *ctx = reader->ctx;
   (void)data;
   return ctx->total_len;
 }
 
-static FETCHcode cr_in_resume_from(struct Curl_easy *data,
-                                   struct Curl_creader *reader,
+static FETCHcode cr_in_resume_from(struct Fetch_easy *data,
+                                   struct Fetch_creader *reader,
                                    fetch_off_t offset)
 {
   struct cr_in_ctx *ctx = reader->ctx;
@@ -795,9 +795,9 @@ static FETCHcode cr_in_resume_from(struct Curl_easy *data,
 
   if (data->set.seek_func)
   {
-    Curl_set_in_callback(data, TRUE);
+    Fetch_set_in_callback(data, TRUE);
     seekerr = data->set.seek_func(data->set.seek_client, offset, SEEK_SET);
-    Curl_set_in_callback(data, FALSE);
+    Fetch_set_in_callback(data, FALSE);
   }
 
   if (seekerr != FETCH_SEEKFUNC_OK)
@@ -817,10 +817,10 @@ static FETCHcode cr_in_resume_from(struct Curl_easy *data,
           (offset - passed > (fetch_off_t)sizeof(scratch)) ? sizeof(scratch) : fetchx_sotouz(offset - passed);
       size_t actuallyread;
 
-      Curl_set_in_callback(data, TRUE);
+      Fetch_set_in_callback(data, TRUE);
       actuallyread = ctx->read_cb(scratch, 1, readthisamountnow,
                                   ctx->cb_user_data);
-      Curl_set_in_callback(data, FALSE);
+      Fetch_set_in_callback(data, FALSE);
 
       passed += actuallyread;
       if ((actuallyread == 0) || (actuallyread > readthisamountnow))
@@ -849,8 +849,8 @@ static FETCHcode cr_in_resume_from(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode cr_in_rewind(struct Curl_easy *data,
-                              struct Curl_creader *reader)
+static FETCHcode cr_in_rewind(struct Fetch_easy *data,
+                              struct Fetch_creader *reader)
 {
   struct cr_in_ctx *ctx = reader->ctx;
 
@@ -862,9 +862,9 @@ static FETCHcode cr_in_rewind(struct Curl_easy *data,
   {
     int err;
 
-    Curl_set_in_callback(data, TRUE);
+    Fetch_set_in_callback(data, TRUE);
     err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
-    Curl_set_in_callback(data, FALSE);
+    Fetch_set_in_callback(data, FALSE);
     FETCH_TRC_READ(data, "cr_in, rewind via set.seek_func -> %d", err);
     if (err)
     {
@@ -876,10 +876,10 @@ static FETCHcode cr_in_rewind(struct Curl_easy *data,
   {
     fetchioerr err;
 
-    Curl_set_in_callback(data, TRUE);
+    Fetch_set_in_callback(data, TRUE);
     err = (data->set.ioctl_func)(data, FETCHIOCMD_RESTARTREAD,
                                  data->set.ioctl_client);
-    Curl_set_in_callback(data, FALSE);
+    Fetch_set_in_callback(data, FALSE);
     FETCH_TRC_READ(data, "cr_in, rewind via set.ioctl_func -> %d", (int)err);
     if (err)
     {
@@ -909,8 +909,8 @@ static FETCHcode cr_in_rewind(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static FETCHcode cr_in_unpause(struct Curl_easy *data,
-                               struct Curl_creader *reader)
+static FETCHcode cr_in_unpause(struct Fetch_easy *data,
+                               struct Fetch_creader *reader)
 {
   struct cr_in_ctx *ctx = reader->ctx;
   (void)data;
@@ -918,43 +918,43 @@ static FETCHcode cr_in_unpause(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static bool cr_in_is_paused(struct Curl_easy *data,
-                            struct Curl_creader *reader)
+static bool cr_in_is_paused(struct Fetch_easy *data,
+                            struct Fetch_creader *reader)
 {
   struct cr_in_ctx *ctx = reader->ctx;
   (void)data;
   return ctx->is_paused;
 }
 
-static const struct Curl_crtype cr_in = {
+static const struct Fetch_crtype cr_in = {
     "cr-in",
     cr_in_init,
     cr_in_read,
-    Curl_creader_def_close,
+    Fetch_creader_def_close,
     cr_in_needs_rewind,
     cr_in_total_length,
     cr_in_resume_from,
     cr_in_rewind,
     cr_in_unpause,
     cr_in_is_paused,
-    Curl_creader_def_done,
+    Fetch_creader_def_done,
     sizeof(struct cr_in_ctx)};
 
-FETCHcode Curl_creader_create(struct Curl_creader **preader,
-                              struct Curl_easy *data,
-                              const struct Curl_crtype *crt,
-                              Curl_creader_phase phase)
+FETCHcode Fetch_creader_create(struct Fetch_creader **preader,
+                              struct Fetch_easy *data,
+                              const struct Fetch_crtype *crt,
+                              Fetch_creader_phase phase)
 {
-  struct Curl_creader *reader = NULL;
+  struct Fetch_creader *reader = NULL;
   FETCHcode result = FETCHE_OUT_OF_MEMORY;
   void *p;
 
-  DEBUGASSERT(crt->creader_size >= sizeof(struct Curl_creader));
+  DEBUGASSERT(crt->creader_size >= sizeof(struct Fetch_creader));
   p = calloc(1, crt->creader_size);
   if (!p)
     goto out;
 
-  reader = (struct Curl_creader *)p;
+  reader = (struct Fetch_creader *)p;
   reader->crt = crt;
   reader->ctx = p;
   reader->phase = phase;
@@ -967,7 +967,7 @@ out:
   return result;
 }
 
-void Curl_creader_free(struct Curl_easy *data, struct Curl_creader *reader)
+void Fetch_creader_free(struct Fetch_easy *data, struct Fetch_creader *reader)
 {
   if (reader)
   {
@@ -978,31 +978,31 @@ void Curl_creader_free(struct Curl_easy *data, struct Curl_creader *reader)
 
 struct cr_lc_ctx
 {
-  struct Curl_creader super;
+  struct Fetch_creader super;
   struct bufq buf;
   BIT(read_eos); /* we read an EOS from the next reader */
   BIT(eos);      /* we have returned an EOS */
   BIT(prev_cr);  /* the last byte was a CR */
 };
 
-static FETCHcode cr_lc_init(struct Curl_easy *data, struct Curl_creader *reader)
+static FETCHcode cr_lc_init(struct Fetch_easy *data, struct Fetch_creader *reader)
 {
   struct cr_lc_ctx *ctx = reader->ctx;
   (void)data;
-  Curl_bufq_init2(&ctx->buf, (16 * 1024), 1, BUFQ_OPT_SOFT_LIMIT);
+  Fetch_bufq_init2(&ctx->buf, (16 * 1024), 1, BUFQ_OPT_SOFT_LIMIT);
   return FETCHE_OK;
 }
 
-static void cr_lc_close(struct Curl_easy *data, struct Curl_creader *reader)
+static void cr_lc_close(struct Fetch_easy *data, struct Fetch_creader *reader)
 {
   struct cr_lc_ctx *ctx = reader->ctx;
   (void)data;
-  Curl_bufq_free(&ctx->buf);
+  Fetch_bufq_free(&ctx->buf);
 }
 
 /* client reader doing line end conversions. */
-static FETCHcode cr_lc_read(struct Curl_easy *data,
-                            struct Curl_creader *reader,
+static FETCHcode cr_lc_read(struct Fetch_easy *data,
+                            struct Fetch_creader *reader,
                             char *buf, size_t blen,
                             size_t *pnread, bool *peos)
 {
@@ -1018,7 +1018,7 @@ static FETCHcode cr_lc_read(struct Curl_easy *data,
     return FETCHE_OK;
   }
 
-  if (Curl_bufq_is_empty(&ctx->buf))
+  if (Fetch_bufq_is_empty(&ctx->buf))
   {
     if (ctx->read_eos)
     {
@@ -1028,7 +1028,7 @@ static FETCHcode cr_lc_read(struct Curl_easy *data,
       return FETCHE_OK;
     }
     /* Still getting data form the next reader, ctx->buf is empty */
-    result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
+    result = Fetch_creader_read(data, reader->next, buf, blen, &nread, &eos);
     if (result)
       return result;
     ctx->read_eos = eos;
@@ -1055,9 +1055,9 @@ static FETCHcode cr_lc_read(struct Curl_easy *data,
       }
       ctx->prev_cr = FALSE;
       /* on a soft limit bufq, we do not need to check length */
-      result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
+      result = Fetch_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
       if (!result)
-        result = Curl_bufq_cwrite(&ctx->buf, STRCONST("\r\n"), &n);
+        result = Fetch_bufq_cwrite(&ctx->buf, STRCONST("\r\n"), &n);
       if (result)
         return result;
       start = i + 1;
@@ -1073,16 +1073,16 @@ static FETCHcode cr_lc_read(struct Curl_easy *data,
 
     if (start < i)
     { /* leftover */
-      result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
+      result = Fetch_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
       if (result)
         return result;
     }
   }
 
-  DEBUGASSERT(!Curl_bufq_is_empty(&ctx->buf));
+  DEBUGASSERT(!Fetch_bufq_is_empty(&ctx->buf));
   *peos = FALSE;
-  result = Curl_bufq_cread(&ctx->buf, buf, blen, pnread);
-  if (!result && ctx->read_eos && Curl_bufq_is_empty(&ctx->buf))
+  result = Fetch_bufq_cread(&ctx->buf, buf, blen, pnread);
+  if (!result && ctx->read_eos && Fetch_bufq_is_empty(&ctx->buf))
   {
     /* no more data, read all, done. */
     ctx->eos = TRUE;
@@ -1095,8 +1095,8 @@ out:
   return result;
 }
 
-static fetch_off_t cr_lc_total_length(struct Curl_easy *data,
-                                      struct Curl_creader *reader)
+static fetch_off_t cr_lc_total_length(struct Fetch_easy *data,
+                                      struct Fetch_creader *reader)
 {
   /* this reader changes length depending on input */
   (void)data;
@@ -1104,37 +1104,37 @@ static fetch_off_t cr_lc_total_length(struct Curl_easy *data,
   return -1;
 }
 
-static const struct Curl_crtype cr_lc = {
+static const struct Fetch_crtype cr_lc = {
     "cr-lineconv",
     cr_lc_init,
     cr_lc_read,
     cr_lc_close,
-    Curl_creader_def_needs_rewind,
+    Fetch_creader_def_needs_rewind,
     cr_lc_total_length,
-    Curl_creader_def_resume_from,
-    Curl_creader_def_rewind,
-    Curl_creader_def_unpause,
-    Curl_creader_def_is_paused,
-    Curl_creader_def_done,
+    Fetch_creader_def_resume_from,
+    Fetch_creader_def_rewind,
+    Fetch_creader_def_unpause,
+    Fetch_creader_def_is_paused,
+    Fetch_creader_def_done,
     sizeof(struct cr_lc_ctx)};
 
-static FETCHcode cr_lc_add(struct Curl_easy *data)
+static FETCHcode cr_lc_add(struct Fetch_easy *data)
 {
-  struct Curl_creader *reader = NULL;
+  struct Fetch_creader *reader = NULL;
   FETCHcode result;
 
-  result = Curl_creader_create(&reader, data, &cr_lc,
+  result = Fetch_creader_create(&reader, data, &cr_lc,
                                FETCH_CR_CONTENT_ENCODE);
   if (!result)
-    result = Curl_creader_add(data, reader);
+    result = Fetch_creader_add(data, reader);
 
   if (result && reader)
-    Curl_creader_free(data, reader);
+    Fetch_creader_free(data, reader);
   return result;
 }
 
-static FETCHcode do_init_reader_stack(struct Curl_easy *data,
-                                      struct Curl_creader *r)
+static FETCHcode do_init_reader_stack(struct Fetch_easy *data,
+                                      struct Fetch_creader *r)
 {
   FETCHcode result = FETCHE_OK;
   fetch_off_t clen;
@@ -1162,13 +1162,13 @@ static FETCHcode do_init_reader_stack(struct Curl_easy *data,
   return result;
 }
 
-FETCHcode Curl_creader_set_fread(struct Curl_easy *data, fetch_off_t len)
+FETCHcode Fetch_creader_set_fread(struct Fetch_easy *data, fetch_off_t len)
 {
   FETCHcode result;
-  struct Curl_creader *r;
+  struct Fetch_creader *r;
   struct cr_in_ctx *ctx;
 
-  result = Curl_creader_create(&r, data, &cr_in, FETCH_CR_CLIENT);
+  result = Fetch_creader_create(&r, data, &cr_in, FETCH_CR_CLIENT);
   if (result)
     goto out;
   ctx = r->ctx;
@@ -1182,15 +1182,15 @@ out:
   return result;
 }
 
-FETCHcode Curl_creader_add(struct Curl_easy *data,
-                           struct Curl_creader *reader)
+FETCHcode Fetch_creader_add(struct Fetch_easy *data,
+                           struct Fetch_creader *reader)
 {
   FETCHcode result;
-  struct Curl_creader **anchor = &data->req.reader_stack;
+  struct Fetch_creader **anchor = &data->req.reader_stack;
 
   if (!*anchor)
   {
-    result = Curl_creader_set_fread(data, data->state.infilesize);
+    result = Fetch_creader_set_fread(data, data->state.infilesize);
     if (result)
       return result;
   }
@@ -1204,7 +1204,7 @@ FETCHcode Curl_creader_add(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-FETCHcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r)
+FETCHcode Fetch_creader_set(struct Fetch_easy *data, struct Fetch_creader *r)
 {
   FETCHcode result;
 
@@ -1215,11 +1215,11 @@ FETCHcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r)
   cl_reset_reader(data);
   result = do_init_reader_stack(data, r);
   if (result)
-    Curl_creader_free(data, r);
+    Fetch_creader_free(data, r);
   return result;
 }
 
-FETCHcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
+FETCHcode Fetch_client_read(struct Fetch_easy *data, char *buf, size_t blen,
                            size_t *nread, bool *eos)
 {
   FETCHcode result;
@@ -1231,22 +1231,22 @@ FETCHcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
 
   if (!data->req.reader_stack)
   {
-    result = Curl_creader_set_fread(data, data->state.infilesize);
+    result = Fetch_creader_set_fread(data, data->state.infilesize);
     if (result)
       return result;
     DEBUGASSERT(data->req.reader_stack);
   }
 
-  result = Curl_creader_read(data, data->req.reader_stack, buf, blen,
+  result = Fetch_creader_read(data, data->req.reader_stack, buf, blen,
                              nread, eos);
   FETCH_TRC_READ(data, "client_read(len=%zu) -> %d, nread=%zu, eos=%d",
                  blen, result, *nread, *eos);
   return result;
 }
 
-bool Curl_creader_needs_rewind(struct Curl_easy *data)
+bool Fetch_creader_needs_rewind(struct Fetch_easy *data)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Fetch_creader *reader = data->req.reader_stack;
   while (reader)
   {
     if (reader->crt->needs_rewind(data, reader))
@@ -1259,8 +1259,8 @@ bool Curl_creader_needs_rewind(struct Curl_easy *data)
   return FALSE;
 }
 
-static FETCHcode cr_null_read(struct Curl_easy *data,
-                              struct Curl_creader *reader,
+static FETCHcode cr_null_read(struct Fetch_easy *data,
+                              struct Fetch_creader *reader,
                               char *buf, size_t blen,
                               size_t *pnread, bool *peos)
 {
@@ -1273,8 +1273,8 @@ static FETCHcode cr_null_read(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static fetch_off_t cr_null_total_length(struct Curl_easy *data,
-                                        struct Curl_creader *reader)
+static fetch_off_t cr_null_total_length(struct Fetch_easy *data,
+                                        struct Fetch_creader *reader)
 {
   /* this reader changes length depending on input */
   (void)data;
@@ -1282,26 +1282,26 @@ static fetch_off_t cr_null_total_length(struct Curl_easy *data,
   return 0;
 }
 
-static const struct Curl_crtype cr_null = {
+static const struct Fetch_crtype cr_null = {
     "cr-null",
-    Curl_creader_def_init,
+    Fetch_creader_def_init,
     cr_null_read,
-    Curl_creader_def_close,
-    Curl_creader_def_needs_rewind,
+    Fetch_creader_def_close,
+    Fetch_creader_def_needs_rewind,
     cr_null_total_length,
-    Curl_creader_def_resume_from,
-    Curl_creader_def_rewind,
-    Curl_creader_def_unpause,
-    Curl_creader_def_is_paused,
-    Curl_creader_def_done,
-    sizeof(struct Curl_creader)};
+    Fetch_creader_def_resume_from,
+    Fetch_creader_def_rewind,
+    Fetch_creader_def_unpause,
+    Fetch_creader_def_is_paused,
+    Fetch_creader_def_done,
+    sizeof(struct Fetch_creader)};
 
-FETCHcode Curl_creader_set_null(struct Curl_easy *data)
+FETCHcode Fetch_creader_set_null(struct Fetch_easy *data)
 {
-  struct Curl_creader *r;
+  struct Fetch_creader *r;
   FETCHcode result;
 
-  result = Curl_creader_create(&r, data, &cr_null, FETCH_CR_CLIENT);
+  result = Fetch_creader_create(&r, data, &cr_null, FETCH_CR_CLIENT);
   if (result)
     return result;
 
@@ -1311,14 +1311,14 @@ FETCHcode Curl_creader_set_null(struct Curl_easy *data)
 
 struct cr_buf_ctx
 {
-  struct Curl_creader super;
+  struct Fetch_creader super;
   const char *buf;
   size_t blen;
   size_t index;
 };
 
-static FETCHcode cr_buf_read(struct Curl_easy *data,
-                             struct Curl_creader *reader,
+static FETCHcode cr_buf_read(struct Fetch_easy *data,
+                             struct Fetch_creader *reader,
                              char *buf, size_t blen,
                              size_t *pnread, bool *peos)
 {
@@ -1345,24 +1345,24 @@ static FETCHcode cr_buf_read(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static bool cr_buf_needs_rewind(struct Curl_easy *data,
-                                struct Curl_creader *reader)
+static bool cr_buf_needs_rewind(struct Fetch_easy *data,
+                                struct Fetch_creader *reader)
 {
   struct cr_buf_ctx *ctx = reader->ctx;
   (void)data;
   return ctx->index > 0;
 }
 
-static fetch_off_t cr_buf_total_length(struct Curl_easy *data,
-                                       struct Curl_creader *reader)
+static fetch_off_t cr_buf_total_length(struct Fetch_easy *data,
+                                       struct Fetch_creader *reader)
 {
   struct cr_buf_ctx *ctx = reader->ctx;
   (void)data;
   return (fetch_off_t)ctx->blen;
 }
 
-static FETCHcode cr_buf_resume_from(struct Curl_easy *data,
-                                    struct Curl_creader *reader,
+static FETCHcode cr_buf_resume_from(struct Fetch_easy *data,
+                                    struct Fetch_creader *reader,
                                     fetch_off_t offset)
 {
   struct cr_buf_ctx *ctx = reader->ctx;
@@ -1384,28 +1384,28 @@ static FETCHcode cr_buf_resume_from(struct Curl_easy *data,
   return FETCHE_OK;
 }
 
-static const struct Curl_crtype cr_buf = {
+static const struct Fetch_crtype cr_buf = {
     "cr-buf",
-    Curl_creader_def_init,
+    Fetch_creader_def_init,
     cr_buf_read,
-    Curl_creader_def_close,
+    Fetch_creader_def_close,
     cr_buf_needs_rewind,
     cr_buf_total_length,
     cr_buf_resume_from,
-    Curl_creader_def_rewind,
-    Curl_creader_def_unpause,
-    Curl_creader_def_is_paused,
-    Curl_creader_def_done,
+    Fetch_creader_def_rewind,
+    Fetch_creader_def_unpause,
+    Fetch_creader_def_is_paused,
+    Fetch_creader_def_done,
     sizeof(struct cr_buf_ctx)};
 
-FETCHcode Curl_creader_set_buf(struct Curl_easy *data,
+FETCHcode Fetch_creader_set_buf(struct Fetch_easy *data,
                                const char *buf, size_t blen)
 {
   FETCHcode result;
-  struct Curl_creader *r;
+  struct Fetch_creader *r;
   struct cr_buf_ctx *ctx;
 
-  result = Curl_creader_create(&r, data, &cr_buf, FETCH_CR_CLIENT);
+  result = Fetch_creader_create(&r, data, &cr_buf, FETCH_CR_CLIENT);
   if (result)
     goto out;
   ctx = r->ctx;
@@ -1420,31 +1420,31 @@ out:
   return result;
 }
 
-fetch_off_t Curl_creader_total_length(struct Curl_easy *data)
+fetch_off_t Fetch_creader_total_length(struct Fetch_easy *data)
 {
-  struct Curl_creader *r = data->req.reader_stack;
+  struct Fetch_creader *r = data->req.reader_stack;
   return r ? r->crt->total_length(data, r) : -1;
 }
 
-fetch_off_t Curl_creader_client_length(struct Curl_easy *data)
+fetch_off_t Fetch_creader_client_length(struct Fetch_easy *data)
 {
-  struct Curl_creader *r = data->req.reader_stack;
+  struct Fetch_creader *r = data->req.reader_stack;
   while (r && r->phase != FETCH_CR_CLIENT)
     r = r->next;
   return r ? r->crt->total_length(data, r) : -1;
 }
 
-FETCHcode Curl_creader_resume_from(struct Curl_easy *data, fetch_off_t offset)
+FETCHcode Fetch_creader_resume_from(struct Fetch_easy *data, fetch_off_t offset)
 {
-  struct Curl_creader *r = data->req.reader_stack;
+  struct Fetch_creader *r = data->req.reader_stack;
   while (r && r->phase != FETCH_CR_CLIENT)
     r = r->next;
   return r ? r->crt->resume_from(data, r, offset) : FETCHE_READ_ERROR;
 }
 
-FETCHcode Curl_creader_unpause(struct Curl_easy *data)
+FETCHcode Fetch_creader_unpause(struct Fetch_easy *data)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Fetch_creader *reader = data->req.reader_stack;
   FETCHcode result = FETCHE_OK;
 
   while (reader)
@@ -1457,9 +1457,9 @@ FETCHcode Curl_creader_unpause(struct Curl_easy *data)
   return result;
 }
 
-bool Curl_creader_is_paused(struct Curl_easy *data)
+bool Fetch_creader_is_paused(struct Fetch_easy *data)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Fetch_creader *reader = data->req.reader_stack;
 
   while (reader)
   {
@@ -1470,9 +1470,9 @@ bool Curl_creader_is_paused(struct Curl_easy *data)
   return FALSE;
 }
 
-void Curl_creader_done(struct Curl_easy *data, int premature)
+void Fetch_creader_done(struct Fetch_easy *data, int premature)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Fetch_creader *reader = data->req.reader_stack;
   while (reader)
   {
     reader->crt->done(data, reader, premature);
@@ -1480,10 +1480,10 @@ void Curl_creader_done(struct Curl_easy *data, int premature)
   }
 }
 
-struct Curl_creader *Curl_creader_get_by_type(struct Curl_easy *data,
-                                              const struct Curl_crtype *crt)
+struct Fetch_creader *Fetch_creader_get_by_type(struct Fetch_easy *data,
+                                              const struct Fetch_crtype *crt)
 {
-  struct Curl_creader *r;
+  struct Fetch_creader *r;
   for (r = data->req.reader_stack; r; r = r->next)
   {
     if (r->crt == crt)

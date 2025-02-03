@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,29 +27,29 @@
 #include "fetch_setup.h"
 
 #ifdef USE_HTTP3
-struct Curl_cfilter;
-struct Curl_easy;
+struct Fetch_cfilter;
+struct Fetch_easy;
 struct connectdata;
-struct Curl_addrinfo;
+struct Fetch_addrinfo;
 
-void Curl_quic_ver(char *p, size_t len);
+void Fetch_quic_ver(char *p, size_t len);
 
-FETCHcode Curl_qlogdir(struct Curl_easy *data,
+FETCHcode Fetch_qlogdir(struct Fetch_easy *data,
                        unsigned char *scid,
                        size_t scidlen,
                        int *qlogfdp);
 
-FETCHcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
-                              struct Curl_easy *data,
+FETCHcode Fetch_cf_quic_create(struct Fetch_cfilter **pcf,
+                              struct Fetch_easy *data,
                               struct connectdata *conn,
-                              const struct Curl_addrinfo *ai,
+                              const struct Fetch_addrinfo *ai,
                               int transport);
 
-extern struct Curl_cftype Curl_cft_http3;
+extern struct Fetch_cftype Fetch_cft_http3;
 
 #endif /* !USE_HTTP3 */
 
-FETCHcode Curl_conn_may_http3(struct Curl_easy *data,
+FETCHcode Fetch_conn_may_http3(struct Fetch_easy *data,
                               const struct connectdata *conn);
 
 #endif /* HEADER_FETCH_VQUIC_QUIC_H */

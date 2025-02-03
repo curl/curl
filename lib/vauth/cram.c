@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,7 +42,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_auth_create_cram_md5_message()
+ * Fetch_auth_create_cram_md5_message()
  *
  * This is used to generate a CRAM-MD5 response message ready for sending to
  * the recipient.
@@ -56,7 +56,7 @@
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
+FETCHcode Fetch_auth_create_cram_md5_message(const struct bufref *chlg,
                                             const char *userp,
                                             const char *passwdp,
                                             struct bufref *out)
@@ -66,19 +66,19 @@ FETCHcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   char *response;
 
   /* Compute the digest using the password as the key */
-  ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
+  ctxt = Fetch_HMAC_init(&Fetch_HMAC_MD5,
                         (const unsigned char *)passwdp,
                         fetchx_uztoui(strlen(passwdp)));
   if (!ctxt)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
-  if (Curl_bufref_len(chlg))
-    Curl_HMAC_update(ctxt, Curl_bufref_ptr(chlg),
-                     fetchx_uztoui(Curl_bufref_len(chlg)));
+  if (Fetch_bufref_len(chlg))
+    Fetch_HMAC_update(ctxt, Fetch_bufref_ptr(chlg),
+                     fetchx_uztoui(Fetch_bufref_len(chlg)));
 
   /* Finalise the digest */
-  Curl_HMAC_final(ctxt, digest);
+  Fetch_HMAC_final(ctxt, digest);
 
   /* Generate the response */
   response = aprintf(
@@ -89,7 +89,7 @@ FETCHcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   if (!response)
     return FETCHE_OUT_OF_MEMORY;
 
-  Curl_bufref_set(out, response, strlen(response), fetch_free);
+  Fetch_bufref_set(out, response, strlen(response), fetch_free);
   return FETCHE_OK;
 }
 

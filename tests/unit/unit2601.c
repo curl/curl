@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -107,12 +107,12 @@ static void check_bufq(size_t pool_spares,
 
   if (pool_spares > 0)
   {
-    Curl_bufcp_init(&pool, chunk_size, pool_spares);
-    Curl_bufq_initp(&q, &pool, max_chunks, opts);
+    Fetch_bufcp_init(&pool, chunk_size, pool_spares);
+    Fetch_bufq_initp(&q, &pool, max_chunks, opts);
   }
   else
   {
-    Curl_bufq_init2(&q, chunk_size, max_chunks, opts);
+    Fetch_bufq_init2(&q, chunk_size, max_chunks, opts);
   }
 
   fail_unless(q.chunk_size == chunk_size, "chunk_size init wrong");
@@ -120,19 +120,19 @@ static void check_bufq(size_t pool_spares,
   fail_unless(q.head == NULL, "init: head not NULL");
   fail_unless(q.tail == NULL, "init: tail not NULL");
   fail_unless(q.spare == NULL, "init: spare not NULL");
-  fail_unless(Curl_bufq_len(&q) == 0, "init: bufq length != 0");
+  fail_unless(Fetch_bufq_len(&q) == 0, "init: bufq length != 0");
 
-  n = Curl_bufq_write(&q, test_data, wsize, &result);
+  n = Fetch_bufq_write(&q, test_data, wsize, &result);
   fail_unless(n >= 0, "write: negative size returned");
   fail_unless((size_t)n <= wsize, "write: wrong size returned");
   fail_unless(result == FETCHE_OK, "write: wrong result returned");
 
   /* write empty bufq full */
   nwritten = 0;
-  Curl_bufq_reset(&q);
-  while (!Curl_bufq_is_full(&q))
+  Fetch_bufq_reset(&q);
+  while (!Fetch_bufq_is_full(&q))
   {
-    n = Curl_bufq_write(&q, test_data, wsize, &result);
+    n = Fetch_bufq_write(&q, test_data, wsize, &result);
     if (n >= 0)
     {
       nwritten += (size_t)n;
@@ -153,9 +153,9 @@ static void check_bufq(size_t pool_spares,
 
   /* read full bufq empty */
   nread = 0;
-  while (!Curl_bufq_is_empty(&q))
+  while (!Fetch_bufq_is_empty(&q))
   {
-    n = Curl_bufq_read(&q, test_data, rsize, &result);
+    n = Fetch_bufq_read(&q, test_data, rsize, &result);
     if (n >= 0)
     {
       nread += (size_t)n;
@@ -181,13 +181,13 @@ static void check_bufq(size_t pool_spares,
 
   for (i = 0; i < 1000; ++i)
   {
-    n = Curl_bufq_write(&q, test_data, wsize, &result);
+    n = Fetch_bufq_write(&q, test_data, wsize, &result);
     if (n < 0 && result != FETCHE_AGAIN)
     {
       fail_unless(result == FETCHE_AGAIN, "rw-loop: unexpected write result");
       break;
     }
-    n = Curl_bufq_read(&q, test_data, rsize, &result);
+    n = Fetch_bufq_read(&q, test_data, rsize, &result);
     if (n < 0 && result != FETCHE_AGAIN)
     {
       fail_unless(result == FETCHE_AGAIN, "rw-loop: unexpected read result");
@@ -196,12 +196,12 @@ static void check_bufq(size_t pool_spares,
   }
 
   /* Test SOFT_LIMIT option */
-  Curl_bufq_free(&q);
-  Curl_bufq_init2(&q, chunk_size, max_chunks, (opts | BUFQ_OPT_SOFT_LIMIT));
+  Fetch_bufq_free(&q);
+  Fetch_bufq_init2(&q, chunk_size, max_chunks, (opts | BUFQ_OPT_SOFT_LIMIT));
   nwritten = 0;
-  while (!Curl_bufq_is_full(&q))
+  while (!Fetch_bufq_is_full(&q))
   {
-    n = Curl_bufq_write(&q, test_data, wsize, &result);
+    n = Fetch_bufq_write(&q, test_data, wsize, &result);
     if (n < 0 || (size_t)n != wsize)
     {
       fail_unless(n > 0 && (size_t)n == wsize, "write should be complete");
@@ -217,14 +217,14 @@ static void check_bufq(size_t pool_spares,
     fail_if(TRUE, "write: bufq full but nwritten wrong");
   }
   /* do one more write on a full bufq, should work */
-  n = Curl_bufq_write(&q, test_data, wsize, &result);
+  n = Fetch_bufq_write(&q, test_data, wsize, &result);
   fail_unless(n > 0 && (size_t)n == wsize, "write should be complete");
   nwritten += (size_t)n;
   /* see that we get all out again */
   nread = 0;
-  while (!Curl_bufq_is_empty(&q))
+  while (!Fetch_bufq_is_empty(&q))
   {
-    n = Curl_bufq_read(&q, test_data, rsize, &result);
+    n = Fetch_bufq_read(&q, test_data, rsize, &result);
     if (n <= 0)
     {
       fail_unless(n > 0, "read-loop: unexpected fail");
@@ -242,26 +242,26 @@ static void check_bufq(size_t pool_spares,
   {
     const unsigned char buf[] = "0123456789--";
     size_t roffset;
-    Curl_bufq_reset(&q);
-    while (Curl_bufq_len(&q) < chunk_size)
+    Fetch_bufq_reset(&q);
+    while (Fetch_bufq_len(&q) < chunk_size)
     {
-      n = Curl_bufq_write(&q, buf, sizeof(buf), &result);
+      n = Fetch_bufq_write(&q, buf, sizeof(buf), &result);
       fail_unless(n > 0 && (size_t)n == sizeof(buf), "write incomplete");
       if (result)
         break;
     }
-    result = Curl_bufq_unwrite(&q, 1);
+    result = Fetch_bufq_unwrite(&q, 1);
     roffset = 0;
-    while (!Curl_bufq_is_empty(&q))
+    while (!Fetch_bufq_is_empty(&q))
     {
       unsigned char rbuf[sizeof(buf)];
-      n = Curl_bufq_read(&q, rbuf, sizeof(rbuf), &result);
+      n = Fetch_bufq_read(&q, rbuf, sizeof(rbuf), &result);
       fail_unless(n > 0, "read should work");
       if (result)
         break;
       if (n != sizeof(rbuf))
       {
-        fail_unless(Curl_bufq_is_empty(&q), "should be last read");
+        fail_unless(Fetch_bufq_is_empty(&q), "should be last read");
       }
       if (memcmp(buf, rbuf, n))
       {
@@ -271,13 +271,13 @@ static void check_bufq(size_t pool_spares,
       }
       roffset += n;
     }
-    Curl_bufq_reset(&q);
+    Fetch_bufq_reset(&q);
   }
 
   dump_bufq(&q, "at end of test");
-  Curl_bufq_free(&q);
+  Fetch_bufq_free(&q);
   if (pool_spares > 0)
-    Curl_bufcp_free(&pool);
+    Fetch_bufcp_free(&pool);
 }
 
 UNITTEST_START
@@ -286,10 +286,10 @@ ssize_t n;
 FETCHcode result;
 unsigned char buf[16 * 1024];
 
-Curl_bufq_init(&q, 8 * 1024, 12);
-n = Curl_bufq_read(&q, buf, 128, &result);
+Fetch_bufq_init(&q, 8 * 1024, 12);
+n = Fetch_bufq_read(&q, buf, 128, &result);
 fail_unless(n < 0 && result == FETCHE_AGAIN, "read empty fail");
-Curl_bufq_free(&q);
+Fetch_bufq_free(&q);
 
 check_bufq(0, 1024, 4, 128, 128, BUFQ_OPT_NONE);
 check_bufq(0, 1024, 4, 129, 127, BUFQ_OPT_NONE);

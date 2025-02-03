@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -500,11 +500,11 @@ GetFileAndPassword(char *nextarg, char **file, char **password)
   if (nextarg)
   {
     parse_cert_parameter(nextarg, &certname, &passphrase);
-    Curl_safefree(*file);
+    Fetch_safefree(*file);
     *file = certname;
     if (passphrase)
     {
-      Curl_safefree(*password);
+      Fetch_safefree(*password);
       *password = passphrase;
     }
   }
@@ -662,7 +662,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
   else
   {
     char *enc = fetch_easy_escape(NULL, postdata, (int)size);
-    Curl_safefree(postdata); /* no matter if it worked or not */
+    Fetch_safefree(postdata); /* no matter if it worked or not */
     if (enc)
     {
       char *n;
@@ -972,7 +972,7 @@ static ParameterError set_data(cmdline_t cmd,
   if (!err && fetchx_dyn_addn(&config->postdata, postdata, size))
     err = PARAM_NO_MEM;
 
-  Curl_safefree(postdata);
+  Fetch_safefree(postdata);
 
   config->postfields = fetchx_dyn_ptr(&config->postdata);
   return err;
@@ -1441,7 +1441,7 @@ static ParameterError parse_range(struct GlobalConfig *global,
             "Appending one for you");
       msnprintf(buffer, sizeof(buffer), "%" FETCH_FORMAT_FETCH_OFF_T "-",
                 value);
-      Curl_safefree(config->range);
+      Fetch_safefree(config->range);
       config->range = strdup(buffer);
       if (!config->range)
         err = PARAM_NO_MEM;
@@ -1536,7 +1536,7 @@ static ParameterError parse_verbose(struct GlobalConfig *global,
   {
   case 0:
     global->verbosity = 1;
-    Curl_safefree(global->trace_dump);
+    Fetch_safefree(global->trace_dump);
     global->trace_dump = strdup("%");
     if (!global->trace_dump)
       err = PARAM_NO_MEM;
@@ -1600,7 +1600,7 @@ static ParameterError parse_writeout(struct GlobalConfig *global,
         return PARAM_READ_ERROR;
       }
     }
-    Curl_safefree(config->writeout);
+    Fetch_safefree(config->writeout);
     err = file2string(&config->writeout, file);
     if (file && (file != stdin))
       fclose(file);
@@ -1863,7 +1863,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->doh_url, nextarg, ALLOW_BLANK);
       if (!err && config->doh_url && !config->doh_url[0])
         /* if given a blank string, make it NULL again */
-        Curl_safefree(config->doh_url);
+        Fetch_safefree(config->doh_url);
       break;
     case C_CIPHERS: /* -- ciphers */
       err = getstr(&config->cipher_list, nextarg, DENY_BLANK);
@@ -2060,7 +2060,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case C_FTP_PASV: /* --ftp-pasv */
-      Curl_safefree(config->ftpport);
+      Fetch_safefree(config->ftpport);
       break;
     case C_SOCKS5: /* --socks5 */
       /*  socks5 proxy to use, and resolves the name locally and passes on the

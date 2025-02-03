@@ -3,4 +3,4 @@
 
 # WWW
 
-https://curl.se
+https://fetch.se

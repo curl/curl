@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,22 +30,22 @@
 
 #include <fetch/fetch.h>
 
-extern LARGE_INTEGER Curl_freq;
-extern bool Curl_isVistaOrGreater;
+extern LARGE_INTEGER Fetch_freq;
+extern bool Fetch_isVistaOrGreater;
 
-FETCHcode Curl_win32_init(long flags);
-void Curl_win32_cleanup(long init_flags);
+FETCHcode Fetch_win32_init(long flags);
+void Fetch_win32_cleanup(long init_flags);
 
 /* We use our own typedef here since some headers might lack this */
 typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 
 /* This is used instead of if_nametoindex if available on Windows */
-extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
+extern IF_NAMETOINDEX_FN Fetch_if_nametoindex;
 
 /* This is used to dynamically load DLLs */
-HMODULE Curl_load_library(LPCTSTR filename);
+HMODULE Fetch_load_library(LPCTSTR filename);
 #else /* _WIN32 */
-#define Curl_win32_init(x) FETCHE_OK
+#define Fetch_win32_init(x) FETCHE_OK
 #endif /* !_WIN32 */
 
 #endif /* HEADER_FETCH_SYSTEM_WIN32_H */

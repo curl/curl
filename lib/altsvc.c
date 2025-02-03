@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -56,7 +56,7 @@
 #define H3VERSION "h3"
 
 /* Given the ALPN ID, return the name */
-const char *Curl_alpnid2str(enum alpnid id)
+const char *Fetch_alpnid2str(enum alpnid id)
 {
   switch (id)
   {
@@ -115,11 +115,11 @@ static struct altsvc *altsvc_createid(const char *srchost,
     dlen -= 2;
   }
 
-  as->src.host = Curl_memdup0(srchost, hlen);
+  as->src.host = Fetch_memdup0(srchost, hlen);
   if (!as->src.host)
     goto error;
 
-  as->dst.host = Curl_memdup0(dsthost, dlen);
+  as->dst.host = Fetch_memdup0(dsthost, dlen);
   if (!as->dst.host)
     goto error;
 
@@ -134,15 +134,15 @@ error:
   return NULL;
 }
 
-static struct altsvc *altsvc_create(struct Curl_str *srchost,
-                                    struct Curl_str *dsthost,
-                                    struct Curl_str *srcalpn,
-                                    struct Curl_str *dstalpn,
+static struct altsvc *altsvc_create(struct Fetch_str *srchost,
+                                    struct Fetch_str *dsthost,
+                                    struct Fetch_str *srcalpn,
+                                    struct Fetch_str *dstalpn,
                                     size_t srcport,
                                     size_t dstport)
 {
-  enum alpnid dstalpnid = Curl_alpn2alpnid(dstalpn->str, dstalpn->len);
-  enum alpnid srcalpnid = Curl_alpn2alpnid(srcalpn->str, srcalpn->len);
+  enum alpnid dstalpnid = Fetch_alpn2alpnid(dstalpn->str, dstalpn->len);
+  enum alpnid srcalpnid = Fetch_alpn2alpnid(srcalpn->str, srcalpn->len);
   if (!srcalpnid || !dstalpnid)
     return NULL;
   return altsvc_createid(srchost->str, srchost->len,
@@ -157,34 +157,34 @@ static FETCHcode altsvc_add(struct altsvcinfo *asi, char *line)
   /* Example line:
      h2 example.com 443 h3 shiny.example.com 8443 "20191231 10:00:00" 1
    */
-  struct Curl_str srchost;
-  struct Curl_str dsthost;
-  struct Curl_str srcalpn;
-  struct Curl_str dstalpn;
-  struct Curl_str date;
+  struct Fetch_str srchost;
+  struct Fetch_str dsthost;
+  struct Fetch_str srcalpn;
+  struct Fetch_str dstalpn;
+  struct Fetch_str date;
   size_t srcport;
   size_t dstport;
   size_t persist;
   size_t prio;
 
-  if (Curl_str_word(&line, &srcalpn, MAX_ALTSVC_ALPNLEN) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_word(&line, &srchost, MAX_ALTSVC_HOSTLEN) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_number(&line, &srcport, 65535) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_word(&line, &dstalpn, MAX_ALTSVC_ALPNLEN) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_word(&line, &dsthost, MAX_ALTSVC_HOSTLEN) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_number(&line, &dstport, 65535) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_quotedword(&line, &date, MAX_ALTSVC_DATELEN) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_number(&line, &persist, 1) ||
-      Curl_str_singlespace(&line) ||
-      Curl_str_number(&line, &prio, 0) ||
-      Curl_str_newline(&line))
+  if (Fetch_str_word(&line, &srcalpn, MAX_ALTSVC_ALPNLEN) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_word(&line, &srchost, MAX_ALTSVC_HOSTLEN) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_number(&line, &srcport, 65535) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_word(&line, &dstalpn, MAX_ALTSVC_ALPNLEN) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_word(&line, &dsthost, MAX_ALTSVC_HOSTLEN) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_number(&line, &dstport, 65535) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_quotedword(&line, &date, MAX_ALTSVC_DATELEN) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_number(&line, &persist, 1) ||
+      Fetch_str_singlespace(&line) ||
+      Fetch_str_number(&line, &prio, 0) ||
+      Fetch_str_newline(&line))
     ;
   else
   {
@@ -193,10 +193,10 @@ static FETCHcode altsvc_add(struct altsvcinfo *asi, char *line)
     time_t expires;
 
     /* The date parser works on a null terminated string. The maximum length
-       is upheld by Curl_str_quotedword(). */
+       is upheld by Fetch_str_quotedword(). */
     memcpy(dbuf, date.str, date.len);
     dbuf[date.len] = 0;
-    expires = Curl_getdate_capped(dbuf);
+    expires = Fetch_getdate_capped(dbuf);
     as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn, srcport,
                        dstport);
     if (as)
@@ -204,7 +204,7 @@ static FETCHcode altsvc_add(struct altsvcinfo *asi, char *line)
       as->expires = expires;
       as->prio = 0; /* not supported to just set zero */
       as->persist = persist ? 1 : 0;
-      Curl_llist_append(&asi->list, as, &as->node);
+      Fetch_llist_append(&asi->list, as, &as->node);
     }
   }
 
@@ -213,7 +213,7 @@ static FETCHcode altsvc_add(struct altsvcinfo *asi, char *line)
 
 /*
  * Load alt-svc entries from the given file. The text based line-oriented file
- * format is documented here: https://curl.se/docs/alt-svc.html
+ * format is documented here: https://fetch.se/docs/alt-svc.html
  *
  * This function only returns error on major problems that prevent alt-svc
  * handling to work completely. It will ignore individual syntactical errors
@@ -235,10 +235,10 @@ static FETCHcode altsvc_load(struct altsvcinfo *asi, const char *file)
   if (fp)
   {
     struct dynbuf buf;
-    Curl_dyn_init(&buf, MAX_ALTSVC_LINE);
-    while (Curl_get_line(&buf, fp))
+    Fetch_dyn_init(&buf, MAX_ALTSVC_LINE);
+    while (Fetch_get_line(&buf, fp))
     {
-      char *lineptr = Curl_dyn_ptr(&buf);
+      char *lineptr = Fetch_dyn_ptr(&buf);
       while (*lineptr && ISBLANK(*lineptr))
         lineptr++;
       if (*lineptr == '#')
@@ -247,7 +247,7 @@ static FETCHcode altsvc_load(struct altsvcinfo *asi, const char *file)
 
       altsvc_add(asi, lineptr);
     }
-    Curl_dyn_free(&buf); /* free the line buffer */
+    Fetch_dyn_free(&buf); /* free the line buffer */
     fclose(fp);
   }
   return result;
@@ -264,19 +264,19 @@ static FETCHcode altsvc_out(struct altsvc *as, FILE *fp)
   const char *dst6_post = "";
   const char *src6_pre = "";
   const char *src6_post = "";
-  FETCHcode result = Curl_gmtime(as->expires, &stamp);
+  FETCHcode result = Fetch_gmtime(as->expires, &stamp);
   if (result)
     return result;
 #ifdef USE_IPV6
   else
   {
     char ipv6_unused[16];
-    if (1 == Curl_inet_pton(AF_INET6, as->dst.host, ipv6_unused))
+    if (1 == Fetch_inet_pton(AF_INET6, as->dst.host, ipv6_unused))
     {
       dst6_pre = "[";
       dst6_post = "]";
     }
-    if (1 == Curl_inet_pton(AF_INET6, as->src.host, ipv6_unused))
+    if (1 == Fetch_inet_pton(AF_INET6, as->src.host, ipv6_unused))
     {
       src6_pre = "[";
       src6_post = "]";
@@ -289,11 +289,11 @@ static FETCHcode altsvc_out(struct altsvc *as, FILE *fp)
           "\"%d%02d%02d "
           "%02d:%02d:%02d\" "
           "%u %u\n",
-          Curl_alpnid2str(as->src.alpnid),
+          Fetch_alpnid2str(as->src.alpnid),
           src6_pre, as->src.host, src6_post,
           as->src.port,
 
-          Curl_alpnid2str(as->dst.alpnid),
+          Fetch_alpnid2str(as->dst.alpnid),
           dst6_pre, as->dst.host, dst6_post,
           as->dst.port,
 
@@ -306,15 +306,15 @@ static FETCHcode altsvc_out(struct altsvc *as, FILE *fp)
 /* ---- library-wide functions below ---- */
 
 /*
- * Curl_altsvc_init() creates a new altsvc cache.
+ * Fetch_altsvc_init() creates a new altsvc cache.
  * It returns the new instance or NULL if something goes wrong.
  */
-struct altsvcinfo *Curl_altsvc_init(void)
+struct altsvcinfo *Fetch_altsvc_init(void)
 {
   struct altsvcinfo *asi = calloc(1, sizeof(struct altsvcinfo));
   if (!asi)
     return NULL;
-  Curl_llist_init(&asi->list, NULL);
+  Fetch_llist_init(&asi->list, NULL);
 
   /* set default behavior */
   asi->flags = FETCHALTSVC_H1
@@ -329,18 +329,18 @@ struct altsvcinfo *Curl_altsvc_init(void)
 }
 
 /*
- * Curl_altsvc_load() loads alt-svc from file.
+ * Fetch_altsvc_load() loads alt-svc from file.
  */
-FETCHcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
+FETCHcode Fetch_altsvc_load(struct altsvcinfo *asi, const char *file)
 {
   DEBUGASSERT(asi);
   return altsvc_load(asi, file);
 }
 
 /*
- * Curl_altsvc_ctrl() passes on the external bitmask.
+ * Fetch_altsvc_ctrl() passes on the external bitmask.
  */
-FETCHcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
+FETCHcode Fetch_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
 {
   DEBUGASSERT(asi);
   asi->flags = ctrl;
@@ -348,20 +348,20 @@ FETCHcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
 }
 
 /*
- * Curl_altsvc_cleanup() frees an altsvc cache instance and all associated
+ * Fetch_altsvc_cleanup() frees an altsvc cache instance and all associated
  * resources.
  */
-void Curl_altsvc_cleanup(struct altsvcinfo **altsvcp)
+void Fetch_altsvc_cleanup(struct altsvcinfo **altsvcp)
 {
   if (*altsvcp)
   {
-    struct Curl_llist_node *e;
-    struct Curl_llist_node *n;
+    struct Fetch_llist_node *e;
+    struct Fetch_llist_node *n;
     struct altsvcinfo *altsvc = *altsvcp;
-    for (e = Curl_llist_head(&altsvc->list); e; e = n)
+    for (e = Fetch_llist_head(&altsvc->list); e; e = n)
     {
-      struct altsvc *as = Curl_node_elem(e);
-      n = Curl_node_next(e);
+      struct altsvc *as = Fetch_node_elem(e);
+      n = Fetch_node_next(e);
       altsvc_free(as);
     }
     free(altsvc->filename);
@@ -371,9 +371,9 @@ void Curl_altsvc_cleanup(struct altsvcinfo **altsvcp)
 }
 
 /*
- * Curl_altsvc_save() writes the altsvc cache to a file.
+ * Fetch_altsvc_save() writes the altsvc cache to a file.
  */
-FETCHcode Curl_altsvc_save(struct Curl_easy *data,
+FETCHcode Fetch_altsvc_save(struct Fetch_easy *data,
                            struct altsvcinfo *altsvc, const char *file)
 {
   FETCHcode result = FETCHE_OK;
@@ -392,24 +392,24 @@ FETCHcode Curl_altsvc_save(struct Curl_easy *data,
     /* marked as read-only, no file or zero length filename */
     return FETCHE_OK;
 
-  result = Curl_fopen(data, file, &out, &tempstore);
+  result = Fetch_fopen(data, file, &out, &tempstore);
   if (!result)
   {
-    struct Curl_llist_node *e;
-    struct Curl_llist_node *n;
-    fputs("# Your alt-svc cache. https://curl.se/docs/alt-svc.html\n"
+    struct Fetch_llist_node *e;
+    struct Fetch_llist_node *n;
+    fputs("# Your alt-svc cache. https://fetch.se/docs/alt-svc.html\n"
           "# This file was generated by libfetch! Edit at your own risk.\n",
           out);
-    for (e = Curl_llist_head(&altsvc->list); e; e = n)
+    for (e = Fetch_llist_head(&altsvc->list); e; e = n)
     {
-      struct altsvc *as = Curl_node_elem(e);
-      n = Curl_node_next(e);
+      struct altsvc *as = Fetch_node_elem(e);
+      n = Fetch_node_next(e);
       result = altsvc_out(as, out);
       if (result)
         break;
     }
     fclose(out);
-    if (!result && tempstore && Curl_rename(tempstore, file))
+    if (!result && tempstore && Fetch_rename(tempstore, file))
       result = FETCHE_WRITE_ERROR;
 
     if (result && tempstore)
@@ -460,17 +460,17 @@ static bool hostcompare(const char *host, const char *check)
 static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
                          const char *srchost, unsigned short srcport)
 {
-  struct Curl_llist_node *e;
-  struct Curl_llist_node *n;
-  for (e = Curl_llist_head(&asi->list); e; e = n)
+  struct Fetch_llist_node *e;
+  struct Fetch_llist_node *n;
+  for (e = Fetch_llist_head(&asi->list); e; e = n)
   {
-    struct altsvc *as = Curl_node_elem(e);
-    n = Curl_node_next(e);
+    struct altsvc *as = Fetch_node_elem(e);
+    n = Fetch_node_next(e);
     if ((srcalpnid == as->src.alpnid) &&
         (srcport == as->src.port) &&
         hostcompare(srchost, as->src.host))
     {
-      Curl_node_remove(e);
+      Fetch_node_remove(e);
       altsvc_free(as);
     }
   }
@@ -495,7 +495,7 @@ static time_t altsvc_debugtime(void *unused)
 #endif
 
 /*
- * Curl_altsvc_parse() takes an incoming alt-svc response header and stores
+ * Fetch_altsvc_parse() takes an incoming alt-svc response header and stores
  * the data correctly in the cache.
  *
  * 'value' points to the header *value*. That is contents to the right of the
@@ -505,7 +505,7 @@ static time_t altsvc_debugtime(void *unused)
  * Invalid hostname, port number will result in the specific alternative
  * being rejected. Unknown protocols are skipped.
  */
-FETCHcode Curl_altsvc_parse(struct Curl_easy *data,
+FETCHcode Fetch_altsvc_parse(struct Fetch_easy *data,
                             struct altsvcinfo *asi, const char *value,
                             enum alpnid srcalpnid, const char *srchost,
                             unsigned short srcport)
@@ -542,7 +542,7 @@ FETCHcode Curl_altsvc_parse(struct Curl_easy *data,
     if (*p == '=')
     {
       /* [protocol]="[host][:port]" */
-      enum alpnid dstalpnid = Curl_alpn2alpnid(alpnbuf, alpnlen);
+      enum alpnid dstalpnid = Fetch_alpn2alpnid(alpnbuf, alpnlen);
       p++;
       if (*p == '\"')
       {
@@ -691,9 +691,9 @@ FETCHcode Curl_altsvc_parse(struct Curl_easy *data,
             else
               as->expires = maxage + secs;
             as->persist = persist;
-            Curl_llist_append(&asi->list, as, &as->node);
+            Fetch_llist_append(&asi->list, as, &as->node);
             infof(data, "Added alt-svc: %s:%d over %s", dsthost, dstport,
-                  Curl_alpnid2str(dstalpnid));
+                  Fetch_alpnid2str(dstalpnid));
           }
         }
       }
@@ -720,27 +720,27 @@ FETCHcode Curl_altsvc_parse(struct Curl_easy *data,
 /*
  * Return TRUE on a match
  */
-bool Curl_altsvc_lookup(struct altsvcinfo *asi,
+bool Fetch_altsvc_lookup(struct altsvcinfo *asi,
                         enum alpnid srcalpnid, const char *srchost,
                         int srcport,
                         struct altsvc **dstentry,
                         const int versions) /* one or more bits */
 {
-  struct Curl_llist_node *e;
-  struct Curl_llist_node *n;
+  struct Fetch_llist_node *e;
+  struct Fetch_llist_node *n;
   time_t now = time(NULL);
   DEBUGASSERT(asi);
   DEBUGASSERT(srchost);
   DEBUGASSERT(dstentry);
 
-  for (e = Curl_llist_head(&asi->list); e; e = n)
+  for (e = Fetch_llist_head(&asi->list); e; e = n)
   {
-    struct altsvc *as = Curl_node_elem(e);
-    n = Curl_node_next(e);
+    struct altsvc *as = Fetch_node_elem(e);
+    n = Fetch_node_next(e);
     if (as->expires < now)
     {
       /* an expired entry, remove */
-      Curl_node_remove(e);
+      Fetch_node_remove(e);
       altsvc_free(as);
       continue;
     }

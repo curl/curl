@@ -9,7 +9,7 @@
 /*                                                                           */
 /* This software is licensed as described in the file COPYING, which         */
 /* you should have received as part of this distribution. The terms          */
-/* are also available at https://curl.se/docs/copyright.html.                */
+/* are also available at https://fetch.se/docs/copyright.html.                */
 /*                                                                           */
 /* You may opt to use, copy, modify, merge, publish, distribute and/or sell  */
 /* copies of the Software, and permit persons to whom the Software is        */
@@ -29,4 +29,4 @@
 
              PARM       KWD(CMDARGS) TYPE(*CHAR) LEN(5000) VARY(*YES *INT2)   +
                           CASE(*MIXED) EXPR(*YES) MIN(1)                      +
-                          PROMPT('Curl command arguments')
+                          PROMPT('Fetch command arguments')

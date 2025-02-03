@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,17 +31,17 @@
 #include <quiche.h>
 #include <openssl/ssl.h>
 
-struct Curl_cfilter;
-struct Curl_easy;
+struct Fetch_cfilter;
+struct Fetch_easy;
 
-void Curl_quiche_ver(char *p, size_t len);
+void Fetch_quiche_ver(char *p, size_t len);
 
-FETCHcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
-                                struct Curl_easy *data,
+FETCHcode Fetch_cf_quiche_create(struct Fetch_cfilter **pcf,
+                                struct Fetch_easy *data,
                                 struct connectdata *conn,
-                                const struct Curl_addrinfo *ai);
+                                const struct Fetch_addrinfo *ai);
 
-bool Curl_conn_is_quiche(const struct Curl_easy *data,
+bool Fetch_conn_is_quiche(const struct Fetch_easy *data,
                          const struct connectdata *conn,
                          int sockindex);
 

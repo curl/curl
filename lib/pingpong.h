@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -56,7 +56,7 @@ struct pingpong
   char *sendthis;            /* pointer to a buffer that is to be sent to the server */
   size_t sendleft;           /* number of bytes left to send from the sendthis buffer */
   size_t sendsize;           /* total size of the sendthis buffer */
-  struct fetchtime response; /* set to Curl_now() when a command has been sent
+  struct fetchtime response; /* set to Fetch_now() when a command has been sent
                                off, used to time-out response reading */
   timediff_t response_time;  /* When no timeout is given, this is the amount of
                                 milliseconds we await for a server response. */
@@ -69,8 +69,8 @@ struct pingpong
   /* Function pointers the protocols MUST implement and provide for the
      pingpong layer to function */
 
-  FETCHcode (*statemachine)(struct Curl_easy *data, struct connectdata *conn);
-  bool (*endofresp)(struct Curl_easy *data, struct connectdata *conn,
+  FETCHcode (*statemachine)(struct Fetch_easy *data, struct connectdata *conn);
+  bool (*endofresp)(struct Fetch_easy *data, struct connectdata *conn,
                     char *ptr, size_t len, int *code);
 };
 
@@ -83,25 +83,25 @@ struct pingpong
   } while (0)
 
 /*
- * Curl_pp_statemach()
+ * Fetch_pp_statemach()
  *
  * called repeatedly until done. Set 'wait' to make it wait a while on the
  * socket if there is no traffic.
  */
-FETCHcode Curl_pp_statemach(struct Curl_easy *data, struct pingpong *pp,
+FETCHcode Fetch_pp_statemach(struct Fetch_easy *data, struct pingpong *pp,
                             bool block, bool disconnecting);
 
 /* initialize stuff to prepare for reading a fresh new response */
-void Curl_pp_init(struct pingpong *pp);
+void Fetch_pp_init(struct pingpong *pp);
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
-timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
+timediff_t Fetch_pp_state_timeout(struct Fetch_easy *data,
                                  struct pingpong *pp, bool disconnecting);
 
 /***********************************************************************
  *
- * Curl_pp_sendf()
+ * Fetch_pp_sendf()
  *
  * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
@@ -109,13 +109,13 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
  *
  * made to never block
  */
-FETCHcode Curl_pp_sendf(struct Curl_easy *data,
+FETCHcode Fetch_pp_sendf(struct Fetch_easy *data,
                         struct pingpong *pp,
                         const char *fmt, ...) FETCH_PRINTF(3, 4);
 
 /***********************************************************************
  *
- * Curl_pp_vsendf()
+ * Fetch_pp_vsendf()
  *
  * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
@@ -123,41 +123,41 @@ FETCHcode Curl_pp_sendf(struct Curl_easy *data,
  *
  * made to never block
  */
-FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
+FETCHcode Fetch_pp_vsendf(struct Fetch_easy *data,
                          struct pingpong *pp,
                          const char *fmt,
                          va_list args) FETCH_PRINTF(3, 0);
 
 /*
- * Curl_pp_readresp()
+ * Fetch_pp_readresp()
  *
  * Reads a piece of a server response.
  */
-FETCHcode Curl_pp_readresp(struct Curl_easy *data,
+FETCHcode Fetch_pp_readresp(struct Fetch_easy *data,
                            int sockindex,
                            struct pingpong *pp,
                            int *code,     /* return the server code if done */
                            size_t *size); /* size of the response */
 
-bool Curl_pp_needs_flush(struct Curl_easy *data,
+bool Fetch_pp_needs_flush(struct Fetch_easy *data,
                          struct pingpong *pp);
 
-FETCHcode Curl_pp_flushsend(struct Curl_easy *data,
+FETCHcode Fetch_pp_flushsend(struct Fetch_easy *data,
                             struct pingpong *pp);
 
 /* call this when a pingpong connection is disconnected */
-FETCHcode Curl_pp_disconnect(struct pingpong *pp);
+FETCHcode Fetch_pp_disconnect(struct pingpong *pp);
 
-int Curl_pp_getsock(struct Curl_easy *data, struct pingpong *pp,
+int Fetch_pp_getsock(struct Fetch_easy *data, struct pingpong *pp,
                     fetch_socket_t *socks);
 
 /***********************************************************************
  *
- * Curl_pp_moredata()
+ * Fetch_pp_moredata()
  *
  * Returns whether there are still more data in the cache and so a call
- * to Curl_pp_readresp() will not block.
+ * to Fetch_pp_readresp() will not block.
  */
-bool Curl_pp_moredata(struct pingpong *pp);
+bool Fetch_pp_moredata(struct pingpong *pp);
 
 #endif /* HEADER_FETCH_PINGPONG_H */

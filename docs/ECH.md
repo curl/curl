@@ -36,7 +36,7 @@ To build fetch ECH-enabled, making use of the above:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
+    git clone https://github.com/fetch/fetch
     cd fetch
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech
@@ -237,8 +237,8 @@ function in a new field in the `dohentry` structure.
 The qname for the DoH query is modified if the port number is not 443, as
 defined in the SVCB specification.
 
-When the DoH process has worked, `Curl_doh_is_resolved()` now also returns
-the relevant HTTPS RR value data in the `Curl_dns_entry` structure.
+When the DoH process has worked, `Fetch_doh_is_resolved()` now also returns
+the relevant HTTPS RR value data in the `Fetch_dns_entry` structure.
 That is later accessed when the TLS session is being established, if ECH is
 enabled (from `lib/vtls/openssl.c` as described above).
 
@@ -292,7 +292,7 @@ To build with cmake, assuming our ECH-enabled OpenSSL is as before:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
+    git clone https://github.com/fetch/fetch
     cd fetch
     mkdir build
     cd build
@@ -325,7 +325,7 @@ Then:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
+    git clone https://github.com/fetch/fetch
     cd fetch
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech
@@ -362,7 +362,7 @@ important or else we get build problems with fetch below.
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
+    git clone https://github.com/fetch/fetch
     cd fetch
     autoreconf -fi
     ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech

@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -36,31 +36,31 @@ EXTRA_DIST = $(CERTCONFIGS) $(GENERATEDCERTS) $(SRPFILES) CMakeLists.txt
 clean-certs:
 	cd $(srcdir); rm -f $(GENERATEDCERTS)
 
-build-certs: $(srcdir)/EdelCurlRoot-ca.cacert $(srcdir)/Server-localhost-sv.pem \
+build-certs: $(srcdir)/EdelFetchRoot-ca.cacert $(srcdir)/Server-localhost-sv.pem \
 	$(srcdir)/Server-localhost.nn-sv.pem $(srcdir)/Server-localhost0h-sv.pem \
 	$(srcdir)/Server-localhost-firstSAN-sv.pem $(srcdir)/Server-localhost-lastSAN-sv.pem \
 	$(srcdir)/stunnel-sv.pem $(srcdir)/../stunnel.pem
 
-$(srcdir)/EdelCurlRoot-ca.cacert:
-	cd $(srcdir); scripts/genroot.sh EdelCurlRoot
+$(srcdir)/EdelFetchRoot-ca.cacert:
+	cd $(srcdir); scripts/genroot.sh EdelFetchRoot
 
-$(srcdir)/Server-localhost-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost EdelCurlRoot
+$(srcdir)/Server-localhost-sv.pem: $(srcdir)/EdelFetchRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost EdelFetchRoot
 
-$(srcdir)/Server-localhost.nn-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost.nn EdelCurlRoot
+$(srcdir)/Server-localhost.nn-sv.pem: $(srcdir)/EdelFetchRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost.nn EdelFetchRoot
 
-$(srcdir)/Server-localhost0h-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost0h EdelCurlRoot
+$(srcdir)/Server-localhost0h-sv.pem: $(srcdir)/EdelFetchRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost0h EdelFetchRoot
 
-$(srcdir)/Server-localhost-firstSAN-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost-firstSAN EdelCurlRoot
+$(srcdir)/Server-localhost-firstSAN-sv.pem: $(srcdir)/EdelFetchRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost-firstSAN EdelFetchRoot
 
-$(srcdir)/Server-localhost-lastSAN-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost-lastSAN EdelCurlRoot
+$(srcdir)/Server-localhost-lastSAN-sv.pem: $(srcdir)/EdelFetchRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost-lastSAN EdelFetchRoot
 
-$(srcdir)/stunnel-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh stunnel EdelCurlRoot
+$(srcdir)/stunnel-sv.pem: $(srcdir)/EdelFetchRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh stunnel EdelFetchRoot
 
  $(srcdir)/../stunnel.pem: $(srcdir)/stunnel-sv.pem
 	cp $< $@

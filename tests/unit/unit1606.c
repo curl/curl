@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@
 #include "speedcheck.h"
 #include "urldata.h"
 
-static struct Curl_easy *easy;
+static struct Fetch_easy *easy;
 
 static FETCHcode unit_setup(void)
 {
@@ -60,13 +60,13 @@ static int runawhile(long time_limit,
 
   fetch_easy_setopt(easy, FETCHOPT_LOW_SPEED_LIMIT, speed_limit);
   fetch_easy_setopt(easy, FETCHOPT_LOW_SPEED_TIME, time_limit);
-  Curl_speedinit(easy);
+  Fetch_speedinit(easy);
 
   do
   {
     /* fake the current transfer speed */
     easy->progress.current_speed = speed;
-    result = Curl_speedcheck(easy, now);
+    result = Fetch_speedcheck(easy, now);
     if (result)
       break;
     /* step the time */

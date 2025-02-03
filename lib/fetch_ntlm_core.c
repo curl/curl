@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -196,7 +196,7 @@ static void setup_des_key(const unsigned char *key_56,
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *)key, sizeof(key));
+  Fetch_des_set_odd_parity((unsigned char *)key, sizeof(key));
 
   /* Set the key */
   des_set_key(des, (const uint8_t *)key);
@@ -235,7 +235,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *)key, sizeof(key));
+  Fetch_des_set_odd_parity((unsigned char *)key, sizeof(key));
 
   /* Perform the encryption */
   err = CCCrypt(kCCEncrypt, kCCAlgorithmDES, kCCOptionECBMode, key,
@@ -261,7 +261,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, ctl.Crypto_Key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *)ctl.Crypto_Key, ctl.Data_Len);
+  Fetch_des_set_odd_parity((unsigned char *)ctl.Crypto_Key, ctl.Data_Len);
 
   /* Perform the encryption */
   _CIPHER((_SPCPTR *)&out, &ctl, (_SPCPTR *)&in);
@@ -300,7 +300,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, blob.key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *)blob.key, sizeof(blob.key));
+  Fetch_des_set_odd_parity((unsigned char *)blob.key, sizeof(blob.key));
 
   /* Import the key */
   if (!CryptImportKey(hprov, (BYTE *)&blob, sizeof(blob), 0, 0, &hkey))
@@ -328,7 +328,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
  * 8 byte plaintext is encrypted with each key and the resulting 24
  * bytes are stored in the results array.
  */
-void Curl_ntlm_core_lm_resp(const unsigned char *keys,
+void Fetch_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
@@ -368,7 +368,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
 /*
  * Set up lanmanager hashed password
  */
-FETCHcode Curl_ntlm_core_mk_lm_hash(const char *password,
+FETCHcode Fetch_ntlm_core_mk_lm_hash(const char *password,
                                     unsigned char *lmbuffer /* 21 bytes */)
 {
   unsigned char pw[14];
@@ -379,7 +379,7 @@ FETCHcode Curl_ntlm_core_mk_lm_hash(const char *password,
 #endif
   size_t len = FETCHMIN(strlen(password), 14);
 
-  Curl_strntoupper((char *)pw, password, len);
+  Fetch_strntoupper((char *)pw, password, len);
   memset(&pw[len], 0, 14 - len);
 
   {
@@ -431,7 +431,7 @@ static void ascii_uppercase_to_unicode_le(unsigned char *dest,
   size_t i;
   for (i = 0; i < srclen; i++)
   {
-    dest[2 * i] = (unsigned char)(Curl_raw_toupper(src[i]));
+    dest[2 * i] = (unsigned char)(Fetch_raw_toupper(src[i]));
     dest[2 * i + 1] = '\0';
   }
 }
@@ -442,7 +442,7 @@ static void ascii_uppercase_to_unicode_le(unsigned char *dest,
  * Set up nt hashed passwords
  * @unittest: 1600
  */
-FETCHcode Curl_ntlm_core_mk_nt_hash(const char *password,
+FETCHcode Fetch_ntlm_core_mk_nt_hash(const char *password,
                                     unsigned char *ntbuffer /* 21 bytes */)
 {
   size_t len = strlen(password);
@@ -457,7 +457,7 @@ FETCHcode Curl_ntlm_core_mk_nt_hash(const char *password,
   ascii_to_unicode_le(pw, password, len);
 
   /* Create NT hashed password. */
-  result = Curl_md4it(ntbuffer, pw, 2 * len);
+  result = Fetch_md4it(ntbuffer, pw, 2 * len);
   if (!result)
     memset(ntbuffer + 16, 0, 21 - 16);
 
@@ -523,7 +523,7 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
  * (uppercase UserName + Domain) as the data
  */
-FETCHcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
+FETCHcode Fetch_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
                                         const char *domain, size_t domlen,
                                         unsigned char *ntlmhash,
                                         unsigned char *ntlmv2hash)
@@ -545,7 +545,7 @@ FETCHcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   ascii_uppercase_to_unicode_le(identity, user, userlen);
   ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
 
-  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmhash, 16, identity, identity_len,
+  result = Fetch_hmacit(&Fetch_HMAC_MD5, ntlmhash, 16, identity, identity_len,
                        ntlmv2hash);
   free(identity);
 
@@ -553,7 +553,7 @@ FETCHcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
 }
 
 /*
- * Curl_ntlm_core_mk_ntlmv2_resp()
+ * Fetch_ntlm_core_mk_ntlmv2_resp()
  *
  * This creates the NTLMv2 response as set in the NTLM type-3 message.
  *
@@ -569,7 +569,7 @@ FETCHcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
+FETCHcode Fetch_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
                                         unsigned char *challenge_client,
                                         struct ntlmdata *ntlm,
                                         unsigned char **ntresp,
@@ -630,7 +630,7 @@ FETCHcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
-  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
+  result = Fetch_hmacit(&Fetch_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
                        NTLMv2_BLOB_LEN + 8, hmac_output);
   if (result)
   {
@@ -649,7 +649,7 @@ FETCHcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 }
 
 /*
- * Curl_ntlm_core_mk_lmv2_resp()
+ * Fetch_ntlm_core_mk_lmv2_resp()
  *
  * This creates the LMv2 response as used in the NTLM type-3 message.
  *
@@ -662,7 +662,7 @@ FETCHcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
  *
  * Returns FETCHE_OK on success.
  */
-FETCHcode Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
+FETCHcode Fetch_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
                                       unsigned char *challenge_client,
                                       unsigned char *challenge_server,
                                       unsigned char *lmresp)
@@ -674,7 +674,7 @@ FETCHcode Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);
 
-  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, 16, &data[0], 16,
+  result = Fetch_hmacit(&Fetch_HMAC_MD5, ntlmv2hash, 16, &data[0], 16,
                        hmac_output);
   if (result)
     return result;

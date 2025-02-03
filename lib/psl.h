@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,7 @@
 #ifdef USE_LIBPSL
 #include <libpsl.h>
 
-struct Curl_easy;
+struct Fetch_easy;
 
 #define PSL_TTL (72 * 3600) /* PSL time to live before a refresh. */
 
@@ -38,15 +38,15 @@ struct PslCache
   bool dynamic;         /* PSL should be released when no longer needed. */
 };
 
-const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy);
-void Curl_psl_release(struct Curl_easy *easy);
-void Curl_psl_destroy(struct PslCache *pslcache);
+const psl_ctx_t *Fetch_psl_use(struct Fetch_easy *easy);
+void Fetch_psl_release(struct Fetch_easy *easy);
+void Fetch_psl_destroy(struct PslCache *pslcache);
 
 #else
 
-#define Curl_psl_use(easy) NULL
-#define Curl_psl_release(easy)
-#define Curl_psl_destroy(pslcache)
+#define Fetch_psl_use(easy) NULL
+#define Fetch_psl_release(easy)
+#define Fetch_psl_destroy(pslcache)
 
 #endif /* USE_LIBPSL */
 #endif /* HEADER_PSL_H */

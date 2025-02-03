@@ -15,7 +15,7 @@ none
 unittest
 </features>
 <name>
-Curl_dedotdotify
+Fetch_dedotdotify
 </name>
 </client>
 </testcase>

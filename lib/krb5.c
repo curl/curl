@@ -68,7 +68,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-static FETCHcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
+static FETCHcode ftpsend(struct Fetch_easy *data, struct connectdata *conn,
                         const char *cmd)
 {
   size_t bytes_written;
@@ -96,7 +96,7 @@ static FETCHcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
 #ifdef HAVE_GSSAPI
     conn->data_prot = PROT_CMD;
 #endif
-    result = Curl_xfer_send(data, sptr, write_len, FALSE, &bytes_written);
+    result = Fetch_xfer_send(data, sptr, write_len, FALSE, &bytes_written);
 #ifdef HAVE_GSSAPI
     DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
     conn->data_prot = data_sec;
@@ -105,7 +105,7 @@ static FETCHcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
     if(result)
       break;
 
-    Curl_debug(data, FETCHINFO_HEADER_OUT, sptr, bytes_written);
+    Fetch_debug(data, FETCHINFO_HEADER_OUT, sptr, bytes_written);
 
     if(bytes_written != write_len) {
       write_len -= bytes_written;
@@ -195,7 +195,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
 }
 
 static int
-krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
+krb5_auth(void *app_data, struct Fetch_easy *data, struct connectdata *conn)
 {
   int ret = AUTH_OK;
   char *p;
@@ -239,11 +239,11 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       if(result)
         return -2;
 
-      if(Curl_GetFTPResponse(data, &nread, NULL))
+      if(Fetch_GetFTPResponse(data, &nread, NULL))
         return -1;
       else {
         struct pingpong *pp = &conn->proto.ftpc.pp;
-        char *line = Curl_dyn_ptr(&pp->recvbuf);
+        char *line = Fetch_dyn_ptr(&pp->recvbuf);
         if(line[0] != '3')
           return -1;
       }
@@ -279,11 +279,11 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
          taken care by a final gss_release_buffer. */
       gss_release_buffer(&min, &output_buffer);
       ret = AUTH_OK;
-      maj = Curl_gss_init_sec_context(data,
+      maj = Fetch_gss_init_sec_context(data,
                                       &min,
                                       context,
                                       gssname,
-                                      &Curl_krb5_mech_oid,
+                                      &Fetch_krb5_mech_oid,
                                       &chan,
                                       gssresp,
                                       &output_buffer,
@@ -304,7 +304,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       if(output_buffer.length) {
         char *cmd;
 
-        result = Curl_base64_encode((char *)output_buffer.value,
+        result = Fetch_base64_encode((char *)output_buffer.value,
                                     output_buffer.length, &p, &base64_sz);
         if(result) {
           infof(data, "base64-encoding: %s", fetch_easy_strerror(result));
@@ -326,14 +326,14 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
           break;
         }
 
-        if(Curl_GetFTPResponse(data, &nread, NULL)) {
+        if(Fetch_GetFTPResponse(data, &nread, NULL)) {
           ret = -1;
           break;
         }
         else {
           struct pingpong *pp = &conn->proto.ftpc.pp;
-          size_t len = Curl_dyn_len(&pp->recvbuf);
-          p = Curl_dyn_ptr(&pp->recvbuf);
+          size_t len = Fetch_dyn_len(&pp->recvbuf);
+          p = Fetch_dyn_ptr(&pp->recvbuf);
           if((len < 4) || (p[0] != '2' && p[0] != '3')) {
             infof(data, "Server did not accept auth data");
             ret = AUTH_ERROR;
@@ -348,7 +348,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
         if(p) {
           unsigned char *outptr;
           size_t outlen;
-          result = Curl_base64_decode(p + 5, &outptr, &outlen);
+          result = Fetch_base64_decode(p + 5, &outptr, &outlen);
           if(result) {
             failf(data, "base64-decoding: %s", fetch_easy_strerror(result));
             ret = AUTH_CONTINUE;
@@ -387,7 +387,7 @@ static void krb5_end(void *app_data)
   }
 }
 
-static const struct Curl_sec_client_mech Curl_krb5_client_mech = {
+static const struct Fetch_sec_client_mech Fetch_krb5_client_mech = {
   "GSSAPI",
   sizeof(gss_ctx_id_t),
   krb5_init,
@@ -443,10 +443,10 @@ static char level_to_char(int level)
 
 /* Send an FTP command defined by |message| and the optional arguments. The
    function returns the ftp_code. If an error occurs, -1 is returned. */
-static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
+static int ftp_send_command(struct Fetch_easy *data, const char *message, ...)
   FETCH_PRINTF(2, 3);
 
-static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
+static int ftp_send_command(struct Fetch_easy *data, const char *message, ...)
 {
   int ftp_code;
   ssize_t nread = 0;
@@ -461,7 +461,7 @@ static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
     ftp_code = -1;
   }
   else {
-    if(Curl_GetFTPResponse(data, &nread, &ftp_code))
+    if(Fetch_GetFTPResponse(data, &nread, &ftp_code))
       ftp_code = -1;
   }
 
@@ -472,14 +472,14 @@ static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
 /* Read |len| from the socket |fd| and store it in |to|. Return a FETCHcode
    saying whether an error occurred or FETCHE_OK if |len| was read. */
 static FETCHcode
-socket_read(struct Curl_easy *data, int sockindex, void *to, size_t len)
+socket_read(struct Fetch_easy *data, int sockindex, void *to, size_t len)
 {
   char *to_p = to;
   FETCHcode result;
   ssize_t nread = 0;
 
   while(len > 0) {
-    result = Curl_conn_recv(data, sockindex, to_p, len, &nread);
+    result = Fetch_conn_recv(data, sockindex, to_p, len, &nread);
     if(nread > 0) {
       len -= nread;
       to_p += nread;
@@ -498,7 +498,7 @@ socket_read(struct Curl_easy *data, int sockindex, void *to, size_t len)
    FETCHcode saying whether an error occurred or FETCHE_OK if |len| was
    written. */
 static FETCHcode
-socket_write(struct Curl_easy *data, int sockindex, const void *to,
+socket_write(struct Fetch_easy *data, int sockindex, const void *to,
              size_t len)
 {
   const char *to_p = to;
@@ -506,7 +506,7 @@ socket_write(struct Curl_easy *data, int sockindex, const void *to,
   size_t written;
 
   while(len > 0) {
-    result = Curl_conn_send(data, sockindex, to_p, len, FALSE, &written);
+    result = Fetch_conn_send(data, sockindex, to_p, len, FALSE, &written);
     if(!result && written > 0) {
       len -= written;
       to_p += written;
@@ -520,7 +520,7 @@ socket_write(struct Curl_easy *data, int sockindex, const void *to,
   return FETCHE_OK;
 }
 
-static FETCHcode read_data(struct Curl_easy *data, int sockindex,
+static FETCHcode read_data(struct Fetch_easy *data, int sockindex,
                           struct krb5buffer *buf)
 {
   struct connectdata *conn = data->conn;
@@ -537,7 +537,7 @@ static FETCHcode read_data(struct Curl_easy *data, int sockindex,
     if(len > FETCH_MAX_INPUT_LENGTH)
       return FETCHE_TOO_LARGE;
 
-    Curl_dyn_reset(&buf->buf);
+    Fetch_dyn_reset(&buf->buf);
   }
   else
     return FETCHE_RECV_ERROR;
@@ -548,18 +548,18 @@ static FETCHcode read_data(struct Curl_easy *data, int sockindex,
     result = socket_read(data, sockindex, buffer, (size_t)nread);
     if(result)
       return result;
-    result = Curl_dyn_addn(&buf->buf, buffer, nread);
+    result = Fetch_dyn_addn(&buf->buf, buffer, nread);
     if(result)
       return result;
     len -= nread;
   } while(len);
   /* this decodes the dynbuf *in place* */
   nread = conn->mech->decode(conn->app_data,
-                             Curl_dyn_ptr(&buf->buf),
+                             Fetch_dyn_ptr(&buf->buf),
                              len, conn->data_prot, conn);
   if(nread < 0)
     return FETCHE_RECV_ERROR;
-  Curl_dyn_setlen(&buf->buf, nread);
+  Fetch_dyn_setlen(&buf->buf, nread);
   buf->index = 0;
   return FETCHE_OK;
 }
@@ -567,16 +567,16 @@ static FETCHcode read_data(struct Curl_easy *data, int sockindex,
 static size_t
 buffer_read(struct krb5buffer *buf, void *data, size_t len)
 {
-  size_t size = Curl_dyn_len(&buf->buf);
+  size_t size = Fetch_dyn_len(&buf->buf);
   if(size - buf->index < len)
     len = size - buf->index;
-  memcpy(data, Curl_dyn_ptr(&buf->buf) + buf->index, len);
+  memcpy(data, Fetch_dyn_ptr(&buf->buf) + buf->index, len);
   buf->index += len;
   return len;
 }
 
-/* Matches Curl_recv signature */
-static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
+/* Matches Fetch_recv signature */
+static ssize_t sec_recv(struct Fetch_easy *data, int sockindex,
                         char *buffer, size_t len, FETCHcode *err)
 {
   size_t bytes_read;
@@ -588,7 +588,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   /* Handle clear text response. */
   if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR) {
     ssize_t nread;
-    *err = Curl_conn_recv(data, sockindex, buffer, len, &nread);
+    *err = Fetch_conn_recv(data, sockindex, buffer, len, &nread);
     return nread;
   }
 
@@ -605,7 +605,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   while(len > 0) {
     if(read_data(data, sockindex, &conn->in_buffer))
       return -1;
-    if(Curl_dyn_len(&conn->in_buffer.buf) == 0) {
+    if(Fetch_dyn_len(&conn->in_buffer.buf) == 0) {
       if(bytes_read > 0)
         conn->in_buffer.eof_flag = 1;
       return bytes_read;
@@ -620,7 +620,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
 
 /* Send |length| bytes from |from| to the |sockindex| socket taking care of
    encoding and negotiating with the server. |from| can be NULL. */
-static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
+static void do_sec_send(struct Fetch_easy *data, struct connectdata *conn,
                         int sockindex, const char *from, int length)
 {
   int bytes, htonl_bytes; /* 32-bit integers for htonl */
@@ -645,7 +645,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
     return; /* error */
 
   if(iscmd) {
-    error = Curl_base64_encode(buffer, fetchx_sitouz(bytes),
+    error = Fetch_base64_encode(buffer, fetchx_sitouz(bytes),
                                &cmd_buffer, &cmd_size);
     if(error) {
       free(buffer);
@@ -674,7 +674,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
   free(buffer);
 }
 
-static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
+static ssize_t sec_write(struct Fetch_easy *data, struct connectdata *conn,
                          int sockindex, const char *buffer, size_t length)
 {
   ssize_t tx = 0, len = conn->buffer_size;
@@ -693,8 +693,8 @@ static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
   return tx;
 }
 
-/* Matches Curl_send signature */
-static ssize_t sec_send(struct Curl_easy *data, int sockindex,
+/* Matches Fetch_send signature */
+static ssize_t sec_send(struct Fetch_easy *data, int sockindex,
                         const void *buffer, size_t len, bool eos,
                         FETCHcode *err)
 {
@@ -704,7 +704,7 @@ static ssize_t sec_send(struct Curl_easy *data, int sockindex,
   return sec_write(data, conn, sockindex, buffer, len);
 }
 
-int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
+int Fetch_sec_read_msg(struct Fetch_easy *data, struct connectdata *conn,
                       char *buffer, enum protection_level level)
 {
   /* decoded_len should be size_t or ssize_t but conn->mech->decode returns an
@@ -723,7 +723,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
 
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
-  error = Curl_base64_decode(buffer + 4, (unsigned char **)&buf, &decoded_sz);
+  error = Fetch_base64_decode(buffer + 4, (unsigned char **)&buf, &decoded_sz);
   if(error || decoded_sz == 0)
     return -1;
 
@@ -742,7 +742,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
 
   {
     buf[decoded_len] = '\n';
-    Curl_debug(data, FETCHINFO_HEADER_IN, buf, decoded_len + 1);
+    Fetch_debug(data, FETCHINFO_HEADER_IN, buf, decoded_len + 1);
   }
 
   buf[decoded_len] = '\0';
@@ -760,7 +760,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   return ret_code;
 }
 
-static int sec_set_protection_level(struct Curl_easy *data)
+static int sec_set_protection_level(struct Fetch_easy *data)
 {
   int code;
   struct connectdata *conn = data->conn;
@@ -794,7 +794,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
     }
     conn->buffer_size = buffer_size;
 
-    line = Curl_dyn_ptr(&pp->recvbuf);
+    line = Fetch_dyn_ptr(&pp->recvbuf);
     pbsz = strstr(line, "PBSZ=");
     if(pbsz) {
       /* stick to default value if the check fails */
@@ -824,7 +824,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
 }
 
 int
-Curl_sec_request_prot(struct connectdata *conn, const char *level)
+Fetch_sec_request_prot(struct connectdata *conn, const char *level)
 {
   unsigned char l = name_to_level(level);
   if(l == PROT_NONE)
@@ -834,11 +834,11 @@ Curl_sec_request_prot(struct connectdata *conn, const char *level)
   return 0;
 }
 
-static FETCHcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
+static FETCHcode choose_mech(struct Fetch_easy *data, struct connectdata *conn)
 {
   int ret;
   void *tmp_allocation;
-  const struct Curl_sec_client_mech *mech = &Curl_krb5_client_mech;
+  const struct Fetch_sec_client_mech *mech = &Fetch_krb5_client_mech;
 
   tmp_allocation = realloc(conn->app_data, mech->size);
   if(!tmp_allocation) {
@@ -855,7 +855,7 @@ static FETCHcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
             mech->name);
       return FETCHE_FAILED_INIT;
     }
-    Curl_dyn_init(&conn->in_buffer.buf, FETCH_MAX_INPUT_LENGTH);
+    Fetch_dyn_init(&conn->in_buffer.buf, FETCH_MAX_INPUT_LENGTH);
   }
 
   infof(data, "Trying mechanism %s...", mech->name);
@@ -909,19 +909,19 @@ static FETCHcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
 }
 
 FETCHcode
-Curl_sec_login(struct Curl_easy *data, struct connectdata *conn)
+Fetch_sec_login(struct Fetch_easy *data, struct connectdata *conn)
 {
   return choose_mech(data, conn);
 }
 
 
 void
-Curl_sec_end(struct connectdata *conn)
+Fetch_sec_end(struct connectdata *conn)
 {
   if(conn->mech && conn->mech->end)
     conn->mech->end(conn->app_data);
-  Curl_safefree(conn->app_data);
-  Curl_dyn_free(&conn->in_buffer.buf);
+  Fetch_safefree(conn->app_data);
+  Fetch_dyn_free(&conn->in_buffer.buf);
   conn->in_buffer.index = 0;
   conn->in_buffer.eof_flag = 0;
   conn->sec_complete = 0;

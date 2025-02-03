@@ -94,4 +94,4 @@ backends in the future.
 
 References:
 
-https://curl.se/docs/ssl-compared.html
+https://fetch.se/docs/ssl-compared.html

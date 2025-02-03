@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -71,7 +71,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
   case DLL_THREAD_DETACH:
     /* Call OPENSSL_thread_stop to prevent a memory leak in case OpenSSL is
        linked statically.
-       https://github.com/curl/curl/issues/12327#issuecomment-1826405944 */
+       https://github.com/fetch/fetch/issues/12327#issuecomment-1826405944 */
     OPENSSL_thread_stop();
     break;
   }

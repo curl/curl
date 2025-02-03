@@ -10,7 +10,7 @@
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
-# * are also available at https://curl.se/docs/copyright.html.
+# * are also available at https://fetch.se/docs/copyright.html.
 # *
 # * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # * copies of the Software, and permit persons to whom the Software is
@@ -408,7 +408,7 @@ print CRT <<EOT;
 ##
 ## Certificate data from Mozilla ${datesrc}: ${currentdate} GMT
 ##
-## Find updated versions here: https://curl.se/docs/caextract.html
+## Find updated versions here: https://fetch.se/docs/caextract.html
 ##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates

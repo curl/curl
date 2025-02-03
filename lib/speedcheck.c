@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@
 #include "multiif.h"
 #include "speedcheck.h"
 
-void Curl_speedinit(struct Curl_easy *data)
+void Fetch_speedinit(struct Fetch_easy *data)
 {
   memset(&data->state.keeps_speed, 0, sizeof(struct fetchtime));
 }
@@ -38,7 +38,7 @@ void Curl_speedinit(struct Curl_easy *data)
 /*
  * @unittest: 1606
  */
-FETCHcode Curl_speedcheck(struct Curl_easy *data,
+FETCHcode Fetch_speedcheck(struct Fetch_easy *data,
                           struct fetchtime now)
 {
   if (data->req.keepon & KEEP_RECV_PAUSE)
@@ -55,7 +55,7 @@ FETCHcode Curl_speedcheck(struct Curl_easy *data,
       else
       {
         /* how long has it been under the limit */
-        timediff_t howlong = Curl_timediff(now, data->state.keeps_speed);
+        timediff_t howlong = Fetch_timediff(now, data->state.keeps_speed);
 
         if (howlong >= data->set.low_speed_time * 1000)
         {
@@ -77,7 +77,7 @@ FETCHcode Curl_speedcheck(struct Curl_easy *data,
   if (data->set.low_speed_limit)
     /* if low speed limit is enabled, set the expire timer to make this
        connection's speed get checked again in a second */
-    Curl_expire(data, 1000, EXPIRE_SPEEDCHECK);
+    Fetch_expire(data, 1000, EXPIRE_SPEEDCHECK);
 
   return FETCHE_OK;
 }

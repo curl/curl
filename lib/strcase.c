@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -66,14 +66,14 @@ static const unsigned char tolowermap[256] = {
 
 /* Portable, consistent toupper. Do not use toupper() because its behavior is
    altered by the current locale. */
-char Curl_raw_toupper(char in)
+char Fetch_raw_toupper(char in)
 {
   return (char)touppermap[(unsigned char)in];
 }
 
 /* Portable, consistent tolower. Do not use tolower() because its behavior is
    altered by the current locale. */
-char Curl_raw_tolower(char in)
+char Fetch_raw_tolower(char in)
 {
   return (char)tolowermap[(unsigned char)in];
 }
@@ -89,7 +89,7 @@ static int casecompare(const char *first, const char *second)
 {
   while (*first && *second)
   {
-    if (Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
+    if (Fetch_raw_toupper(*first) != Fetch_raw_toupper(*second))
       /* get out of the loop as soon as they do not match */
       return 0;
     first++;
@@ -117,7 +117,7 @@ static int ncasecompare(const char *first, const char *second, size_t max)
 {
   while (*first && *second && max)
   {
-    if (Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
+    if (Fetch_raw_toupper(*first) != Fetch_raw_toupper(*second))
       return 0;
     max--;
     first++;
@@ -126,7 +126,7 @@ static int ncasecompare(const char *first, const char *second, size_t max)
   if (0 == max)
     return 1; /* they are equal this far */
 
-  return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);
+  return Fetch_raw_toupper(*first) == Fetch_raw_toupper(*second);
 }
 
 /* --- public function --- */
@@ -144,14 +144,14 @@ int fetch_strnequal(const char *first, const char *second, size_t max)
  * (including any NUL) and the destination string will NOT be
  * NUL-terminated if that limit is reached.
  */
-void Curl_strntoupper(char *dest, const char *src, size_t n)
+void Fetch_strntoupper(char *dest, const char *src, size_t n)
 {
   if (n < 1)
     return;
 
   do
   {
-    *dest++ = Curl_raw_toupper(*src);
+    *dest++ = Fetch_raw_toupper(*src);
   } while (*src++ && --n);
 }
 
@@ -160,21 +160,21 @@ void Curl_strntoupper(char *dest, const char *src, size_t n)
  * (including any NUL) and the destination string will NOT be
  * NUL-terminated if that limit is reached.
  */
-void Curl_strntolower(char *dest, const char *src, size_t n)
+void Fetch_strntolower(char *dest, const char *src, size_t n)
 {
   if (n < 1)
     return;
 
   do
   {
-    *dest++ = Curl_raw_tolower(*src);
+    *dest++ = Fetch_raw_tolower(*src);
   } while (*src++ && --n);
 }
 
 /* Compare case-sensitive NUL-terminated strings, taking care of possible
  * null pointers. Return true if arguments match.
  */
-bool Curl_safecmp(char *a, char *b)
+bool Fetch_safecmp(char *a, char *b)
 {
   if (a && b)
     return !strcmp(a, b);
@@ -182,10 +182,10 @@ bool Curl_safecmp(char *a, char *b)
 }
 
 /*
- * Curl_timestrcmp() returns 0 if the two strings are identical. The time this
+ * Fetch_timestrcmp() returns 0 if the two strings are identical. The time this
  * function spends is a function of the shortest string, not of the contents.
  */
-int Curl_timestrcmp(const char *a, const char *b)
+int Fetch_timestrcmp(const char *a, const char *b)
 {
   int match = 0;
   int i = 0;

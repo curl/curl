@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,11 +46,11 @@ static FETCHcode ensure_trailing_slash(char **input)
 
       if (fetchx_dyn_addn(&dyn, *input, len))
       {
-        Curl_safefree(*input);
+        Fetch_safefree(*input);
         return FETCHE_OUT_OF_MEMORY;
       }
 
-      Curl_safefree(*input);
+      Fetch_safefree(*input);
 
       if (fetchx_dyn_addn(&dyn, "/", 1))
         return FETCHE_OUT_OF_MEMORY;
@@ -97,7 +97,7 @@ static char *ipfs_gateway(void)
     goto fail;
 
   gateway_file = fopen(gateway_composed_file_path, FOPEN_READTEXT);
-  Curl_safefree(gateway_composed_file_path);
+  Fetch_safefree(gateway_composed_file_path);
 
   if (gateway_file)
   {
@@ -125,15 +125,15 @@ static char *ipfs_gateway(void)
     if (!gateway)
       goto fail;
 
-    Curl_safefree(ipfs_path);
+    Fetch_safefree(ipfs_path);
 
     return gateway;
   }
 fail:
   if (gateway_file)
     fclose(gateway_file);
-  Curl_safefree(gateway);
-  Curl_safefree(ipfs_path);
+  Fetch_safefree(gateway);
+  Fetch_safefree(ipfs_path);
   return NULL;
 }
 
@@ -266,7 +266,7 @@ FETCHcode ipfs_url_rewrite(FETCHU *uh, const char *protocol, char **url,
   }
 
   /* Free whatever it has now, rewriting is next */
-  Curl_safefree(*url);
+  Fetch_safefree(*url);
 
   if (fetch_url_get(uh, FETCHUPART_URL, &cloneurl, FETCHU_URLENCODE))
   {

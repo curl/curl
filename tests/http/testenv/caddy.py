@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@ import time
 from datetime import timedelta, datetime
 from json import JSONEncoder
 
-from .fetch import CurlClient
+from .fetch import FetchClient
 from .env import Env
 
 
@@ -108,7 +108,7 @@ class Caddy:
         return self.start()
 
     def wait_dead(self, timeout: timedelta):
-        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        fetch = FetchClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             check_url = f'https://{self.env.domain1}:{self.port}/'
@@ -121,7 +121,7 @@ class Caddy:
         return False
 
     def wait_live(self, timeout: timedelta):
-        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        fetch = FetchClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             check_url = f'https://{self.env.domain1}:{self.port}/'

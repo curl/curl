@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,11 +28,11 @@
 
 /*
  * This test hardcodes the knowledge of the buffer size which is internal to
- * Curl_infof(). If that buffer is changed in size, this tests needs to be
+ * Fetch_infof(). If that buffer is changed in size, this tests needs to be
  * updated to still be valid.
  */
 
-static struct Curl_easy *testdata;
+static struct Fetch_easy *testdata;
 
 static char input[4096];
 static char output[4096];
@@ -103,24 +103,24 @@ UNITTEST_START
 
 /* Injecting a simple short string via a format */
 msnprintf(input, sizeof(input), "Simple Test");
-Curl_infof(testdata, "%s", input);
+Fetch_infof(testdata, "%s", input);
 fail_unless(verify(output, input) == 0, "Simple string test");
 
 /* Injecting a few different variables with a format */
-Curl_infof(testdata, "%s %u testing %lu", input, 42, 43L);
+Fetch_infof(testdata, "%s %u testing %lu", input, 42, 43L);
 fail_unless(verify(output, "Simple Test 42 testing 43\n") == 0,
             "Format string");
 
 /* Variations of empty strings */
-Curl_infof(testdata, "");
+Fetch_infof(testdata, "");
 fail_unless(strlen(output) == 1, "Empty string");
-Curl_infof(testdata, "%s", (char *)NULL);
+Fetch_infof(testdata, "%s", (char *)NULL);
 fail_unless(verify(output, "(nil)") == 0, "Passing NULL as string");
 
 /* A string just long enough to not be truncated */
 memset(input, '\0', sizeof(input));
 memset(input, 'A', 2047);
-Curl_infof(testdata, "%s", input);
+Fetch_infof(testdata, "%s", input);
 fail_unless(strlen(output) == 2048, "No truncation of infof input");
 fail_unless(verify(output, input) == 0, "No truncation of infof input");
 fail_unless(output[sizeof(output) - 1] == '\0',
@@ -128,21 +128,21 @@ fail_unless(output[sizeof(output) - 1] == '\0',
 
 /* Just over the limit without newline for truncation via '...' */
 memset(input + 2047, 'A', 4);
-Curl_infof(testdata, "%s", input);
+Fetch_infof(testdata, "%s", input);
 fail_unless(strlen(output) == 2051, "Truncation of infof input 1");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 1");
 
 /* Just over the limit with newline for truncation via '...' */
 memset(input + 2047, 'A', 4);
 memset(input + 2047 + 4, '\n', 1);
-Curl_infof(testdata, "%s", input);
+Fetch_infof(testdata, "%s", input);
 fail_unless(strlen(output) == 2051, "Truncation of infof input 2");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 2");
 
 /* Way over the limit for truncation via '...' */
 memset(input, '\0', sizeof(input));
 memset(input, 'A', sizeof(input) - 1);
-Curl_infof(testdata, "%s", input);
+Fetch_infof(testdata, "%s", input);
 fail_unless(strlen(output) == 2051, "Truncation of infof input 3");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 

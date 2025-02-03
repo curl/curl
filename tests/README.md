@@ -171,20 +171,20 @@ Sometimes, one needs detailed logging of operations, but does not want
 to drown in output. The newly introduced _connection filters_ allows one to
 dynamically increase log verbosity for a particular _filter type_. Example:
 
-    FETCH_DEBUG=ssl fetch -v https://curl.se
+    FETCH_DEBUG=ssl fetch -v https://fetch.se
 
 makes the `ssl` connection filter log more details. One may do that for
 every filter type and also use a combination of names, separated by `,` or
 space.
 
-    FETCH_DEBUG=ssl,http/2 fetch -v https://curl.se
+    FETCH_DEBUG=ssl,http/2 fetch -v https://fetch.se
 
 The order of filter type names is not relevant. Names used here are
 case insensitive. Note that these names are implementation internals and
 subject to change.
 
 Some, likely stable names are `tcp`, `ssl`, `http/2`. For a current list,
-one may search the sources for `struct Curl_cftype` definitions and find
+one may search the sources for `struct Fetch_cftype` definitions and find
 the names there. Also, some filters are only available with certain build
 options, of course.
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,9 +35,9 @@ static void unit_stop(void)
 {
 }
 
-static void splayprint(struct Curl_tree *t, int d, char output)
+static void splayprint(struct Fetch_tree *t, int d, char output)
 {
-  struct Curl_tree *node;
+  struct Fetch_tree *node;
   int i;
   int count;
   if (!t)
@@ -73,8 +73,8 @@ UNITTEST_START
 /* number of nodes to add to the splay tree */
 #define NUM_NODES 50
 
-struct Curl_tree *root, *removed;
-struct Curl_tree nodes[NUM_NODES * 3];
+struct Fetch_tree *root, *removed;
+struct Fetch_tree nodes[NUM_NODES * 3];
 size_t storage[NUM_NODES * 3];
 int rc;
 int i, j;
@@ -89,8 +89,8 @@ for (i = 0; i < NUM_NODES; i++)
   key.tv_sec = 0;
   key.tv_usec = (541 * i) % 1023;
   storage[i] = key.tv_usec;
-  Curl_splayset(&nodes[i], &storage[i]);
-  root = Curl_splayinsert(key, root, &nodes[i]);
+  Fetch_splayset(&nodes[i], &storage[i]);
+  root = Fetch_splayinsert(key, root, &nodes[i]);
 }
 
 puts("Result:");
@@ -102,8 +102,8 @@ for (i = 0; i < NUM_NODES; i++)
   printf("Tree look:\n");
   splayprint(root, 0, 1);
   printf("remove pointer %d, payload %zu\n", rem,
-         *(size_t *)Curl_splayget(&nodes[rem]));
-  rc = Curl_splayremove(root, &nodes[rem], &root);
+         *(size_t *)Fetch_splayget(&nodes[rem]));
+  rc = Fetch_splayremove(root, &nodes[rem], &root);
   if (rc)
   {
     /* failed! */
@@ -126,8 +126,8 @@ for (i = 0; i < NUM_NODES; i++)
   for (j = 0; j <= i % 3; j++)
   {
     storage[i * 3 + j] = key.tv_usec * 10 + j;
-    Curl_splayset(&nodes[i * 3 + j], &storage[i * 3 + j]);
-    root = Curl_splayinsert(key, root, &nodes[i * 3 + j]);
+    Fetch_splayset(&nodes[i * 3 + j], &storage[i * 3 + j]);
+    root = Fetch_splayinsert(key, root, &nodes[i * 3 + j]);
   }
 }
 
@@ -136,13 +136,13 @@ for (i = 0; i <= 1100; i += 100)
 {
   printf("Removing nodes not larger than %d\n", i);
   tv_now.tv_usec = i;
-  root = Curl_splaygetbest(tv_now, root, &removed);
+  root = Fetch_splaygetbest(tv_now, root, &removed);
   while (removed)
   {
     printf("removed payload %zu[%zu]\n",
-           *(size_t *)Curl_splayget(removed) / 10,
-           *(size_t *)Curl_splayget(removed) % 10);
-    root = Curl_splaygetbest(tv_now, root, &removed);
+           *(size_t *)Fetch_splayget(removed) / 10,
+           *(size_t *)Fetch_splayget(removed) % 10);
+    root = Fetch_splaygetbest(tv_now, root, &removed);
   }
 }
 

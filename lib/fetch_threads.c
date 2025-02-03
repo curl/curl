@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,7 +43,7 @@
 
 #if defined(USE_THREADS_POSIX)
 
-struct Curl_actual_call
+struct Fetch_actual_call
 {
   unsigned int (*func)(void *);
   void *arg;
@@ -51,7 +51,7 @@ struct Curl_actual_call
 
 static void *fetch_thread_create_thunk(void *arg)
 {
-  struct Curl_actual_call *ac = arg;
+  struct Fetch_actual_call *ac = arg;
   unsigned int (*func)(void *) = ac->func;
   void *real_arg = ac->arg;
 
@@ -62,10 +62,10 @@ static void *fetch_thread_create_thunk(void *arg)
   return 0;
 }
 
-fetch_thread_t Curl_thread_create(unsigned int (*func)(void *), void *arg)
+fetch_thread_t Fetch_thread_create(unsigned int (*func)(void *), void *arg)
 {
   fetch_thread_t t = malloc(sizeof(pthread_t));
-  struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
+  struct Fetch_actual_call *ac = malloc(sizeof(struct Fetch_actual_call));
   if (!(ac && t))
     goto err;
 
@@ -83,7 +83,7 @@ err:
   return fetch_thread_t_null;
 }
 
-void Curl_thread_destroy(fetch_thread_t hnd)
+void Fetch_thread_destroy(fetch_thread_t hnd)
 {
   if (hnd != fetch_thread_t_null)
   {
@@ -92,7 +92,7 @@ void Curl_thread_destroy(fetch_thread_t hnd)
   }
 }
 
-int Curl_thread_join(fetch_thread_t *hnd)
+int Fetch_thread_join(fetch_thread_t *hnd)
 {
   int ret = (pthread_join(**hnd, NULL) == 0);
 
@@ -104,7 +104,7 @@ int Curl_thread_join(fetch_thread_t *hnd)
 
 #elif defined(USE_THREADS_WIN32)
 
-fetch_thread_t Curl_thread_create(
+fetch_thread_t Fetch_thread_create(
 #if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP)
     DWORD
 #else
@@ -140,13 +140,13 @@ fetch_thread_t Curl_thread_create(
   return t;
 }
 
-void Curl_thread_destroy(fetch_thread_t hnd)
+void Fetch_thread_destroy(fetch_thread_t hnd)
 {
   if (hnd != fetch_thread_t_null)
     CloseHandle(hnd);
 }
 
-int Curl_thread_join(fetch_thread_t *hnd)
+int Fetch_thread_join(fetch_thread_t *hnd)
 {
 #if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
     (_WIN32_WINNT < _WIN32_WINNT_VISTA)
@@ -155,7 +155,7 @@ int Curl_thread_join(fetch_thread_t *hnd)
   int ret = (WaitForSingleObjectEx(*hnd, INFINITE, FALSE) == WAIT_OBJECT_0);
 #endif
 
-  Curl_thread_destroy(*hnd);
+  Fetch_thread_destroy(*hnd);
 
   *hnd = fetch_thread_t_null;
 

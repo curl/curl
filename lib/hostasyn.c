@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,20 +54,20 @@
 #include "memdebug.h"
 
 /*
- * Curl_addrinfo_callback() gets called by ares, gethostbyname_thread()
+ * Fetch_addrinfo_callback() gets called by ares, gethostbyname_thread()
  * or getaddrinfo_thread() when we got the name resolved (or not!).
  *
  * If the status argument is FETCH_ASYNC_SUCCESS, this function takes
- * ownership of the Curl_addrinfo passed, storing the resolved data
+ * ownership of the Fetch_addrinfo passed, storing the resolved data
  * in the DNS cache.
  *
  * The storage operation locks and unlocks the DNS cache.
  */
-FETCHcode Curl_addrinfo_callback(struct Curl_easy *data,
+FETCHcode Fetch_addrinfo_callback(struct Fetch_easy *data,
                                  int status,
-                                 struct Curl_addrinfo *ai)
+                                 struct Fetch_addrinfo *ai)
 {
-  struct Curl_dns_entry *dns = NULL;
+  struct Fetch_dns_entry *dns = NULL;
   FETCHcode result = FETCHE_OK;
 
   data->state.async.status = status;
@@ -77,18 +77,18 @@ FETCHcode Curl_addrinfo_callback(struct Curl_easy *data,
     if (ai)
     {
       if (data->share)
-        Curl_share_lock(data, FETCH_LOCK_DATA_DNS, FETCH_LOCK_ACCESS_SINGLE);
+        Fetch_share_lock(data, FETCH_LOCK_DATA_DNS, FETCH_LOCK_ACCESS_SINGLE);
 
-      dns = Curl_cache_addr(data, ai,
+      dns = Fetch_cache_addr(data, ai,
                             data->state.async.hostname, 0,
                             data->state.async.port, FALSE);
       if (data->share)
-        Curl_share_unlock(data, FETCH_LOCK_DATA_DNS);
+        Fetch_share_unlock(data, FETCH_LOCK_DATA_DNS);
 
       if (!dns)
       {
         /* failed to store, cleanup and return error */
-        Curl_freeaddrinfo(ai);
+        Fetch_freeaddrinfo(ai);
         result = FETCHE_OUT_OF_MEMORY;
       }
     }
@@ -111,17 +111,17 @@ FETCHcode Curl_addrinfo_callback(struct Curl_easy *data,
 }
 
 /*
- * Curl_getaddrinfo() is the generic low-level name resolve API within this
+ * Fetch_getaddrinfo() is the generic low-level name resolve API within this
  * source file. There are several versions of this function - for different
  * name resolve layers (selected at build-time). They all take this same set
  * of arguments
  */
-struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
+struct Fetch_addrinfo *Fetch_getaddrinfo(struct Fetch_easy *data,
                                        const char *hostname,
                                        int port,
                                        int *waitp)
 {
-  return Curl_resolver_getaddrinfo(data, hostname, port, waitp);
+  return Fetch_resolver_getaddrinfo(data, hostname, port, waitp);
 }
 
 #endif /* FETCHRES_ASYNCH */

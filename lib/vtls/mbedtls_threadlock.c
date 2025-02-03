@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,7 +47,7 @@
 /* This array will store all of the mutexes available to Mbedtls. */
 static MBEDTLS_MUTEX_T *mutex_buf = NULL;
 
-int Curl_mbedtlsthreadlock_thread_setup(void)
+int Fetch_mbedtlsthreadlock_thread_setup(void)
 {
   int i;
 
@@ -70,7 +70,7 @@ int Curl_mbedtlsthreadlock_thread_setup(void)
   return 1; /* OK */
 }
 
-int Curl_mbedtlsthreadlock_thread_cleanup(void)
+int Fetch_mbedtlsthreadlock_thread_cleanup(void)
 {
   int i;
 
@@ -93,7 +93,7 @@ int Curl_mbedtlsthreadlock_thread_cleanup(void)
   return 1; /* OK */
 }
 
-int Curl_mbedtlsthreadlock_lock_function(int n)
+int Fetch_mbedtlsthreadlock_lock_function(int n)
 {
   if (n < NUMT)
   {
@@ -116,7 +116,7 @@ int Curl_mbedtlsthreadlock_lock_function(int n)
   return 1; /* OK */
 }
 
-int Curl_mbedtlsthreadlock_unlock_function(int n)
+int Fetch_mbedtlsthreadlock_unlock_function(int n)
 {
   if (n < NUMT)
   {

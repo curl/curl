@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -44,11 +44,11 @@ if($ARGV[0] eq "--unit") {
 my $file = $ARGV[0];
 
 my %wl = (
-    'Curl_xfer_write_resp' => 'internal api',
-    'Curl_creader_def_init' => 'internal api',
-    'Curl_creader_def_close' => 'internal api',
-    'Curl_creader_def_read' => 'internal api',
-    'Curl_creader_def_total_length' => 'internal api',
+    'Fetch_xfer_write_resp' => 'internal api',
+    'Fetch_creader_def_init' => 'internal api',
+    'Fetch_creader_def_close' => 'internal api',
+    'Fetch_creader_def_read' => 'internal api',
+    'Fetch_creader_def_total_length' => 'internal api',
 );
 
 my %api = (

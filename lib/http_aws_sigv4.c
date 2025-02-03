@@ -48,7 +48,7 @@
 
 #define HMAC_SHA256(k, kl, d, dl, o)           \
   do {                                         \
-    result = Curl_hmacit(&Curl_HMAC_SHA256,    \
+    result = Fetch_hmacit(&Fetch_HMAC_SHA256,    \
                          (unsigned char *)k,   \
                          kl,                   \
                          (unsigned char *)d,   \
@@ -65,17 +65,17 @@
 
 static void sha256_to_hex(char *dst, unsigned char *sha)
 {
-  Curl_hexencode(sha, FETCH_SHA256_DIGEST_LENGTH,
+  Fetch_hexencode(sha, FETCH_SHA256_DIGEST_LENGTH,
                  (unsigned char *)dst, SHA256_HEX_LENGTH);
 }
 
-static char *find_date_hdr(struct Curl_easy *data, const char *sig_hdr)
+static char *find_date_hdr(struct Fetch_easy *data, const char *sig_hdr)
 {
-  char *tmp = Curl_checkheaders(data, sig_hdr, strlen(sig_hdr));
+  char *tmp = Fetch_checkheaders(data, sig_hdr, strlen(sig_hdr));
 
   if(tmp)
     return tmp;
-  return Curl_checkheaders(data, STRCONST("Date"));
+  return Fetch_checkheaders(data, STRCONST("Date"));
 }
 
 /* remove whitespace, and lowercase all headers */
@@ -86,7 +86,7 @@ static void trim_headers(struct fetch_slist *head)
     char *value; /* to read from */
     char *store;
     size_t colon = strcspn(l->data, ":");
-    Curl_strntolower(l->data, l->data, colon);
+    Fetch_strntolower(l->data, l->data, colon);
 
     value = &l->data[colon];
     if(!*value)
@@ -156,7 +156,7 @@ static int compare_header_names(const char *a, const char *b)
 }
 
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
-static FETCHcode make_headers(struct Curl_easy *data,
+static FETCHcode make_headers(struct Fetch_easy *data,
                              const char *hostname,
                              char *timestamp,
                              const char *provider1,
@@ -177,27 +177,27 @@ static FETCHcode make_headers(struct Curl_easy *data,
   msnprintf(date_hdr_key, DATE_HDR_KEY_LEN, "X-%.*s-Date",
             (int)plen, provider1);
   /* provider1 ucfirst */
-  Curl_strntolower(&date_hdr_key[2], provider1, plen);
-  date_hdr_key[2] = Curl_raw_toupper(provider1[0]);
+  Fetch_strntolower(&date_hdr_key[2], provider1, plen);
+  date_hdr_key[2] = Fetch_raw_toupper(provider1[0]);
 
   msnprintf(date_full_hdr, DATE_FULL_HDR_LEN,
             "x-%.*s-date:%s", (int)plen, provider1, timestamp);
   /* provider1 lowercase */
-  Curl_strntolower(&date_full_hdr[2], provider1, plen);
+  Fetch_strntolower(&date_full_hdr[2], provider1, plen);
 
-  if(!Curl_checkheaders(data, STRCONST("Host"))) {
+  if(!Fetch_checkheaders(data, STRCONST("Host"))) {
     char *fullhost;
 
     if(data->state.aptr.host) {
       /* remove /r/n as the separator for canonical request must be '\n' */
       size_t pos = strcspn(data->state.aptr.host, "\n\r");
-      fullhost = Curl_memdup0(data->state.aptr.host, pos);
+      fullhost = Fetch_memdup0(data->state.aptr.host, pos);
     }
     else
       fullhost = aprintf("host:%s", hostname);
 
     if(fullhost)
-      head = Curl_slist_append_nodup(NULL, fullhost);
+      head = Fetch_slist_append_nodup(NULL, fullhost);
     if(!head) {
       free(fullhost);
       goto fail;
@@ -242,7 +242,7 @@ static FETCHcode make_headers(struct Curl_easy *data,
     if(!dupdata)
       goto fail;
     dupdata[sep - l->data] = ':';
-    tmp_head = Curl_slist_append_nodup(head, dupdata);
+    tmp_head = Fetch_slist_append_nodup(head, dupdata);
     if(!tmp_head) {
       free(dupdata);
       goto fail;
@@ -304,9 +304,9 @@ static FETCHcode make_headers(struct Curl_easy *data,
   for(l = head; l; l = l->next) {
     char *tmp;
 
-    if(Curl_dyn_add(canonical_headers, l->data))
+    if(Fetch_dyn_add(canonical_headers, l->data))
       goto fail;
-    if(Curl_dyn_add(canonical_headers, "\n"))
+    if(Fetch_dyn_add(canonical_headers, "\n"))
       goto fail;
 
     tmp = strchr(l->data, ':');
@@ -314,10 +314,10 @@ static FETCHcode make_headers(struct Curl_easy *data,
       *tmp = 0;
 
     if(l != head) {
-      if(Curl_dyn_add(signed_headers, ";"))
+      if(Fetch_dyn_add(signed_headers, ";"))
         goto fail;
     }
-    if(Curl_dyn_add(signed_headers, l->data))
+    if(Fetch_dyn_add(signed_headers, l->data))
       goto fail;
   }
 
@@ -334,7 +334,7 @@ fail:
                                 SHA256_HEX_LENGTH)
 
 /* try to parse a payload hash from the content-sha256 header */
-static char *parse_content_sha_hdr(struct Curl_easy *data,
+static char *parse_content_sha_hdr(struct Fetch_easy *data,
                                    const char *provider1,
                                    size_t plen,
                                    size_t *value_len)
@@ -347,7 +347,7 @@ static char *parse_content_sha_hdr(struct Curl_easy *data,
   key_len = msnprintf(key, sizeof(key), "x-%.*s-content-sha256",
                       (int)plen, provider1);
 
-  value = Curl_checkheaders(data, key, key_len);
+  value = Fetch_checkheaders(data, key, key_len);
   if(!value)
     return NULL;
 
@@ -367,7 +367,7 @@ static char *parse_content_sha_hdr(struct Curl_easy *data,
   return value;
 }
 
-static FETCHcode calc_payload_hash(struct Curl_easy *data,
+static FETCHcode calc_payload_hash(struct Fetch_easy *data,
                                   unsigned char *sha_hash, char *sha_hex)
 {
   const char *post_data = data->set.postfields;
@@ -380,7 +380,7 @@ static FETCHcode calc_payload_hash(struct Curl_easy *data,
     else
       post_data_len = (size_t)data->set.postfieldsize;
   }
-  result = Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+  result = Fetch_sha256it(sha_hash, (const unsigned char *) post_data,
                          post_data_len);
   if(!result)
     sha256_to_hex(sha_hex, sha_hash);
@@ -389,8 +389,8 @@ static FETCHcode calc_payload_hash(struct Curl_easy *data,
 
 #define S3_UNSIGNED_PAYLOAD "UNSIGNED-PAYLOAD"
 
-static FETCHcode calc_s3_payload_hash(struct Curl_easy *data,
-                                     Curl_HttpReq httpreq, char *provider1,
+static FETCHcode calc_s3_payload_hash(struct Fetch_easy *data,
+                                     Fetch_HttpReq httpreq, char *provider1,
                                      size_t plen,
                                      unsigned char *sha_hash,
                                      char *sha_hex, char *header)
@@ -459,7 +459,7 @@ static FETCHcode canon_string(const char *q, size_t len,
 
   for(; len && !result; q++, len--) {
     if(ISALNUM(*q))
-      result = Curl_dyn_addn(dq, q, 1);
+      result = Fetch_dyn_addn(dq, q, 1);
     else {
       switch(*q) {
       case '-':
@@ -467,21 +467,21 @@ static FETCHcode canon_string(const char *q, size_t len,
       case '_':
       case '~':
         /* allowed as-is */
-        result = Curl_dyn_addn(dq, q, 1);
+        result = Fetch_dyn_addn(dq, q, 1);
         break;
       case '%':
         /* uppercase the following if hexadecimal */
         if(ISXDIGIT(q[1]) && ISXDIGIT(q[2])) {
           char tmp[3]="%";
-          tmp[1] = Curl_raw_toupper(q[1]);
-          tmp[2] = Curl_raw_toupper(q[2]);
-          result = Curl_dyn_addn(dq, tmp, 3);
+          tmp[1] = Fetch_raw_toupper(q[1]);
+          tmp[2] = Fetch_raw_toupper(q[2]);
+          result = Fetch_dyn_addn(dq, tmp, 3);
           q += 2;
           len -= 2;
         }
         else
           /* '%' without a following two-digit hex, encode it */
-          result = Curl_dyn_addn(dq, "%25", 3);
+          result = Fetch_dyn_addn(dq, "%25", 3);
         break;
       default: {
         const char hex[] = "0123456789ABCDEF";
@@ -491,14 +491,14 @@ static FETCHcode canon_string(const char *q, size_t len,
           /* if found_equals is NULL assuming, been in path */
           if(*q == '/') {
             /* allowed as if */
-            result = Curl_dyn_addn(dq, q, 1);
+            result = Fetch_dyn_addn(dq, q, 1);
             break;
           }
         }
         else {
           /* allowed as-is */
           if(*q == '=') {
-            result = Curl_dyn_addn(dq, q, 1);
+            result = Fetch_dyn_addn(dq, q, 1);
             *found_equals = TRUE;
             break;
           }
@@ -506,7 +506,7 @@ static FETCHcode canon_string(const char *q, size_t len,
         /* URL encode */
         out[1] = hex[((unsigned char)*q) >> 4];
         out[2] = hex[*q & 0xf];
-        result = Curl_dyn_addn(dq, out, 3);
+        result = Fetch_dyn_addn(dq, out, 3);
         break;
       }
       }
@@ -516,7 +516,7 @@ static FETCHcode canon_string(const char *q, size_t len,
 }
 
 
-static FETCHcode canon_query(struct Curl_easy *data,
+static FETCHcode canon_query(struct Fetch_easy *data,
                             const char *query, struct dynbuf *dq)
 {
   FETCHcode result = FETCHE_OK;
@@ -560,27 +560,27 @@ static FETCHcode canon_query(struct Curl_easy *data,
     result = canon_string(q, ap->len, dq, &found_equals);
     if(!result && !found_equals) {
       /* queries without value still need an equals */
-      result = Curl_dyn_addn(dq, "=", 1);
+      result = Fetch_dyn_addn(dq, "=", 1);
     }
     if(!result && i < entry - 1) {
       /* insert ampersands between query pairs */
-      result = Curl_dyn_addn(dq, "&", 1);
+      result = Fetch_dyn_addn(dq, "&", 1);
     }
   }
   return result;
 }
 
 
-FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
+FETCHcode Fetch_output_aws_sigv4(struct Fetch_easy *data, bool proxy)
 {
   FETCHcode result = FETCHE_OUT_OF_MEMORY;
   struct connectdata *conn = data->conn;
   size_t len;
   char *line;
-  struct Curl_str provider0;
-  struct Curl_str provider1;
-  struct Curl_str region = { NULL, 0};
-  struct Curl_str service = { NULL, 0};
+  struct Fetch_str provider0;
+  struct Fetch_str provider1;
+  struct Fetch_str region = { NULL, 0};
+  struct Fetch_str service = { NULL, 0};
   const char *hostname = conn->host.name;
   time_t clock;
   struct tm tm;
@@ -591,7 +591,7 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   struct dynbuf canonical_query;
   struct dynbuf canonical_path;
   char *date_header = NULL;
-  Curl_HttpReq httpreq;
+  Fetch_HttpReq httpreq;
   const char *method = NULL;
   char *payload_hash = NULL;
   size_t payload_hash_len = 0;
@@ -611,16 +611,16 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   DEBUGASSERT(!proxy);
   (void)proxy;
 
-  if(Curl_checkheaders(data, STRCONST("Authorization"))) {
+  if(Fetch_checkheaders(data, STRCONST("Authorization"))) {
     /* Authorization already present, Bailing out */
     return FETCHE_OK;
   }
 
   /* we init those buffers here, so goto fail will free initialized dynbuf */
-  Curl_dyn_init(&canonical_headers, FETCH_MAX_HTTP_HEADER);
-  Curl_dyn_init(&canonical_query, FETCH_MAX_HTTP_HEADER);
-  Curl_dyn_init(&signed_headers, FETCH_MAX_HTTP_HEADER);
-  Curl_dyn_init(&canonical_path, FETCH_MAX_HTTP_HEADER);
+  Fetch_dyn_init(&canonical_headers, FETCH_MAX_HTTP_HEADER);
+  Fetch_dyn_init(&canonical_query, FETCH_MAX_HTTP_HEADER);
+  Fetch_dyn_init(&signed_headers, FETCH_MAX_HTTP_HEADER);
+  Fetch_dyn_init(&canonical_path, FETCH_MAX_HTTP_HEADER);
 
   /*
    * Parameters parsing
@@ -636,20 +636,20 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
      No string can be longer than N bytes of non-whitespace
   */
-  if(Curl_str_until(&line, &provider0, MAX_SIGV4_LEN, ':')) {
+  if(Fetch_str_until(&line, &provider0, MAX_SIGV4_LEN, ':')) {
     failf(data, "first aws-sigv4 provider cannot be empty");
     result = FETCHE_BAD_FUNCTION_ARGUMENT;
     goto fail;
   }
-  if(Curl_str_single(&line, ':') ||
-     Curl_str_until(&line, &provider1, MAX_SIGV4_LEN, ':')) {
+  if(Fetch_str_single(&line, ':') ||
+     Fetch_str_until(&line, &provider1, MAX_SIGV4_LEN, ':')) {
     provider1.str = provider0.str;
     provider1.len = provider0.len;
   }
-  else if(Curl_str_single(&line, ':') ||
-          Curl_str_until(&line, &region, MAX_SIGV4_LEN, ':') ||
-          Curl_str_single(&line, ':') ||
-          Curl_str_until(&line, &service, MAX_SIGV4_LEN, ':')) {
+  else if(Fetch_str_single(&line, ':') ||
+          Fetch_str_until(&line, &region, MAX_SIGV4_LEN, ':') ||
+          Fetch_str_single(&line, ':') ||
+          Fetch_str_until(&line, &service, MAX_SIGV4_LEN, ':')) {
     /* nothing to do */
   }
 
@@ -693,7 +693,7 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     }
   }
 
-  Curl_http_method(data, conn, &method, &httpreq);
+  Fetch_http_method(data, conn, &method, &httpreq);
 
   payload_hash = parse_content_sha_hdr(data, provider1.str, provider1.len,
                                        &payload_hash_len);
@@ -730,7 +730,7 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 #else
   clock = time(NULL);
 #endif
-  result = Curl_gmtime(clock, &tm);
+  result = Fetch_gmtime(clock, &tm);
   if(result) {
     goto fail;
   }
@@ -774,11 +774,11 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
             "%s\n" /* SignedHeaders */
             "%.*s",  /* HashedRequestPayload in hex */
             method,
-            Curl_dyn_ptr(&canonical_path),
-            Curl_dyn_ptr(&canonical_query) ?
-            Curl_dyn_ptr(&canonical_query) : "",
-            Curl_dyn_ptr(&canonical_headers),
-            Curl_dyn_ptr(&signed_headers),
+            Fetch_dyn_ptr(&canonical_path),
+            Fetch_dyn_ptr(&canonical_query) ?
+            Fetch_dyn_ptr(&canonical_query) : "",
+            Fetch_dyn_ptr(&canonical_headers),
+            Fetch_dyn_ptr(&signed_headers),
             (int)payload_hash_len, payload_hash);
   if(!canonical_request)
     goto fail;
@@ -791,7 +791,7 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   /* provider0 is lowercased *after* aprintf() so that the buffer can be
      written to */
-  Curl_strntolower(request_type, request_type, provider0.len);
+  Fetch_strntolower(request_type, request_type, provider0.len);
 
   credential_scope = aprintf("%s/%.*s/%.*s/%s",
                              date, (int)region.len, region.str,
@@ -800,7 +800,7 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!credential_scope)
     goto fail;
 
-  if(Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
+  if(Fetch_sha256it(sha_hash, (unsigned char *) canonical_request,
                    strlen(canonical_request)))
     goto fail;
 
@@ -822,7 +822,7 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     goto fail;
 
   /* make provider0 part done uppercase */
-  Curl_strntoupper(str_to_sign, provider0.str, provider0.len);
+  Fetch_strntoupper(str_to_sign, provider0.str, provider0.len);
 
   secret = aprintf("%.*s4%s", (int)provider0.len, provider0.str,
                    data->state.aptr.passwd ?
@@ -830,7 +830,7 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!secret)
     goto fail;
   /* make provider0 part done uppercase */
-  Curl_strntoupper(secret, provider0.str, provider0.len);
+  Fetch_strntoupper(secret, provider0.str, provider0.len);
 
   HMAC_SHA256(secret, strlen(secret), date, strlen(date), sign0);
   HMAC_SHA256(sign0, sizeof(sign0), region.str, region.len, sign1);
@@ -854,7 +854,7 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                          (int)provider0.len, provider0.str,
                          user,
                          credential_scope,
-                         Curl_dyn_ptr(&signed_headers),
+                         Fetch_dyn_ptr(&signed_headers),
                          sha_hex,
                          date_header ? date_header : "",
                          content_sha256_hdr);
@@ -862,19 +862,19 @@ FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     goto fail;
   }
   /* provider 0 uppercase */
-  Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
+  Fetch_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
                    provider0.str, provider0.len);
 
-  Curl_safefree(data->state.aptr.userpwd);
+  Fetch_safefree(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
   result = FETCHE_OK;
 
 fail:
-  Curl_dyn_free(&canonical_query);
-  Curl_dyn_free(&canonical_path);
-  Curl_dyn_free(&canonical_headers);
-  Curl_dyn_free(&signed_headers);
+  Fetch_dyn_free(&canonical_query);
+  Fetch_dyn_free(&canonical_path);
+  Fetch_dyn_free(&canonical_headers);
+  Fetch_dyn_free(&signed_headers);
   free(canonical_request);
   free(request_type);
   free(credential_scope);

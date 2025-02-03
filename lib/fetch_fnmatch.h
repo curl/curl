@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@
 
 /* default pattern matching function
  * =================================
- * Implemented with recursive backtracking, if you want to use Curl_fnmatch,
+ * Implemented with recursive backtracking, if you want to use Fetch_fnmatch,
  * please note that there is not implemented UTF/Unicode support.
  *
  * Implemented features:
@@ -41,6 +41,6 @@
  * keywords: alnum, digit, xdigit, alpha, print, blank, lower, graph, space
  *           and upper (use as "[[:alnum:]]")
  */
-int Curl_fnmatch(void *ptr, const char *pattern, const char *string);
+int Fetch_fnmatch(void *ptr, const char *pattern, const char *string);
 
 #endif /* HEADER_FETCH_FNMATCH_H */

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,13 +25,13 @@
  ***************************************************************************/
 #include "fetch_setup.h"
 
-size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
+size_t Fetch_is_absolute_url(const char *url, char *buf, size_t buflen,
                             bool guess_scheme);
 
-FETCHUcode Curl_url_set_authority(FETCHU *u, const char *authority);
+FETCHUcode Fetch_url_set_authority(FETCHU *u, const char *authority);
 
 #ifdef UNITTESTS
-UNITTEST FETCHUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
+UNITTEST FETCHUcode Fetch_parse_port(struct Fetch_URL *u, struct dynbuf *host,
                                     bool has_scheme);
 #endif
 

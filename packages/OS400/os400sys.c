@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -81,7 +81,7 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t thdkey;
 static struct buffer_t *locbufs;
 
-char *(*Curl_thread_buffer)(localkey_t key, long size) = buffer_undef;
+char *(*Fetch_thread_buffer)(localkey_t key, long size) = buffer_undef;
 
 static void thdbufdestroy(void *private)
 {
@@ -103,20 +103,20 @@ static void thdbufdestroy(void *private)
 static void
 terminate(void)
 {
-  if (Curl_thread_buffer == buffer_threaded)
+  if (Fetch_thread_buffer == buffer_threaded)
   {
     locbufs = pthread_getspecific(thdkey);
     pthread_setspecific(thdkey, (void *)NULL);
     pthread_key_delete(thdkey);
   }
 
-  if (Curl_thread_buffer != buffer_undef)
+  if (Fetch_thread_buffer != buffer_undef)
   {
     thdbufdestroy((void *)locbufs);
     locbufs = (struct buffer_t *)NULL;
   }
 
-  Curl_thread_buffer = buffer_undef;
+  Fetch_thread_buffer = buffer_undef;
 }
 
 static char *
@@ -211,10 +211,10 @@ buffer_undef(localkey_t key, long size)
 
   /* Determine if we can use pthread-specific data. */
 
-  if (Curl_thread_buffer == buffer_undef)
+  if (Fetch_thread_buffer == buffer_undef)
   { /* If unchanged during lock. */
     if (!pthread_key_create(&thdkey, thdbufdestroy))
-      Curl_thread_buffer = buffer_threaded;
+      Fetch_thread_buffer = buffer_threaded;
     else
     {
       locbufs = calloc((size_t)LK_LAST, sizeof(*locbufs));
@@ -224,14 +224,14 @@ buffer_undef(localkey_t key, long size)
         return (char *)NULL;
       }
       else
-        Curl_thread_buffer = buffer_unthreaded;
+        Fetch_thread_buffer = buffer_unthreaded;
     }
 
     atexit(terminate);
   }
 
   pthread_mutex_unlock(&mutex);
-  return Curl_thread_buffer(key, size);
+  return Fetch_thread_buffer(key, size);
 }
 
 static char *
@@ -244,7 +244,7 @@ set_thread_string(localkey_t key, const char *s)
     return (char *)NULL;
 
   i = strlen(s) + 1;
-  cp = Curl_thread_buffer(key, MAX_CONV_EXPANSION * i + 1);
+  cp = Fetch_thread_buffer(key, MAX_CONV_EXPANSION * i + 1);
 
   if (cp)
   {
@@ -255,7 +255,7 @@ set_thread_string(localkey_t key, const char *s)
   return cp;
 }
 
-int Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
+int Fetch_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
                        char *nodename, socklen_t nodenamelen,
                        char *servname, socklen_t servnamelen,
                        int flags)
@@ -307,7 +307,7 @@ int Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
   return status;
 }
 
-int Curl_getaddrinfo_a(const char *nodename, const char *servname,
+int Fetch_getaddrinfo_a(const char *nodename, const char *servname,
                        const struct addrinfo *hints,
                        struct addrinfo **res)
 {
@@ -357,7 +357,7 @@ int Curl_getaddrinfo_a(const char *nodename, const char *servname,
 /* ASCII wrappers for the GSSAPI procedures. */
 
 static int
-Curl_gss_convert_in_place(OM_uint32 *minor_status, gss_buffer_t buf)
+Fetch_gss_convert_in_place(OM_uint32 *minor_status, gss_buffer_t buf)
 {
   unsigned int i = buf->length;
 
@@ -386,7 +386,7 @@ Curl_gss_convert_in_place(OM_uint32 *minor_status, gss_buffer_t buf)
 }
 
 OM_uint32
-Curl_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
+Fetch_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
                        gss_OID in_name_type, gss_name_t *out_name)
 {
   OM_uint32 rc;
@@ -416,7 +416,7 @@ Curl_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
 }
 
 OM_uint32
-Curl_gss_display_status_a(OM_uint32 *minor_status, OM_uint32 status_value,
+Fetch_gss_display_status_a(OM_uint32 *minor_status, OM_uint32 status_value,
                           int status_type, gss_OID mech_type,
                           gss_msg_ctx_t *message_context,
                           gss_buffer_t status_string)
@@ -434,14 +434,14 @@ Curl_gss_display_status_a(OM_uint32 *minor_status, OM_uint32 status_value,
      gss_release_buffer(). The solution is to overwrite the EBCDIC buffer
      with ASCII to return it. */
 
-  if (Curl_gss_convert_in_place(minor_status, status_string))
+  if (Fetch_gss_convert_in_place(minor_status, status_string))
     return GSS_S_FAILURE;
 
   return rc;
 }
 
 OM_uint32
-Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
+Fetch_gss_init_sec_context_a(OM_uint32 *minor_status,
                             gss_cred_id_t cred_handle,
                             gss_ctx_id_t *context_handle,
                             gss_name_t target_name, gss_OID mech_type,
@@ -495,14 +495,14 @@ Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
      gss_release_buffer(). The solution is to overwrite the EBCDIC buffer
      with ASCII to return it. */
 
-  if (Curl_gss_convert_in_place(minor_status, output_token))
+  if (Fetch_gss_convert_in_place(minor_status, output_token))
     return GSS_S_FAILURE;
 
   return rc;
 }
 
 OM_uint32
-Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
+Fetch_gss_delete_sec_context_a(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_buffer_t output_token)
 {
@@ -518,7 +518,7 @@ Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
      gss_release_buffer(). The solution is to overwrite the EBCDIC buffer
      with ASCII to return it. */
 
-  if (Curl_gss_convert_in_place(minor_status, output_token))
+  if (Fetch_gss_convert_in_place(minor_status, output_token))
     return GSS_S_FAILURE;
 
   return rc;
@@ -531,7 +531,7 @@ Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
 /* ASCII wrappers for the LDAP procedures. */
 
 void *
-Curl_ldap_init_a(char *host, int port)
+Fetch_ldap_init_a(char *host, int port)
 {
   size_t i;
   char *ehost;
@@ -553,7 +553,7 @@ Curl_ldap_init_a(char *host, int port)
   return result;
 }
 
-int Curl_ldap_simple_bind_s_a(void *ld, char *dn, char *passwd)
+int Fetch_ldap_simple_bind_s_a(void *ld, char *dn, char *passwd)
 {
   int i;
   char *edn;
@@ -595,7 +595,7 @@ int Curl_ldap_simple_bind_s_a(void *ld, char *dn, char *passwd)
   return i;
 }
 
-int Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
+int Fetch_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
                          char **attrs, int attrsonly, LDAPMessage **res)
 {
   int i;
@@ -684,7 +684,7 @@ int Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
 }
 
 struct berval **
-Curl_ldap_get_values_len_a(void *ld, LDAPMessage *entry, const char *attr)
+Fetch_ldap_get_values_len_a(void *ld, LDAPMessage *entry, const char *attr)
 {
   char *cp;
   struct berval **result;
@@ -717,13 +717,13 @@ Curl_ldap_get_values_len_a(void *ld, LDAPMessage *entry, const char *attr)
 }
 
 char *
-Curl_ldap_err2string_a(int error)
+Fetch_ldap_err2string_a(int error)
 {
   return set_thread_string(LK_LDAP_ERROR, ldap_err2string(error));
 }
 
 char *
-Curl_ldap_get_dn_a(void *ld, LDAPMessage *entry)
+Fetch_ldap_get_dn_a(void *ld, LDAPMessage *entry)
 {
   int i;
   char *cp;
@@ -753,7 +753,7 @@ Curl_ldap_get_dn_a(void *ld, LDAPMessage *entry)
 }
 
 char *
-Curl_ldap_first_attribute_a(void *ld,
+Fetch_ldap_first_attribute_a(void *ld,
                             LDAPMessage *entry, BerElement **berptr)
 {
   int i;
@@ -784,7 +784,7 @@ Curl_ldap_first_attribute_a(void *ld,
 }
 
 char *
-Curl_ldap_next_attribute_a(void *ld,
+Fetch_ldap_next_attribute_a(void *ld,
                            LDAPMessage *entry, BerElement *berptr)
 {
   int i;
@@ -897,7 +897,7 @@ sockaddr2ascii(struct sockaddr *dstaddr, int dstlen,
   return srclen;
 }
 
-int Curl_os400_connect(int sd, struct sockaddr *destaddr, int addrlen)
+int Fetch_os400_connect(int sd, struct sockaddr *destaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
@@ -910,7 +910,7 @@ int Curl_os400_connect(int sd, struct sockaddr *destaddr, int addrlen)
   return connect(sd, (struct sockaddr *)&laddr, i);
 }
 
-int Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen)
+int Fetch_os400_bind(int sd, struct sockaddr *localaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
@@ -923,7 +923,7 @@ int Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen)
   return bind(sd, (struct sockaddr *)&laddr, i);
 }
 
-int Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
+int Fetch_os400_sendto(int sd, char *buffer, int buflen, int flags,
                       const struct sockaddr *dstaddr, int addrlen)
 {
   int i;
@@ -937,7 +937,7 @@ int Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
   return sendto(sd, buffer, buflen, flags, (struct sockaddr *)&laddr, i);
 }
 
-int Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
+int Fetch_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
                         struct sockaddr *fromaddr, int *addrlen)
 {
   int rcvlen;
@@ -966,7 +966,7 @@ int Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
   return rcvlen;
 }
 
-int Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
+int Fetch_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
 {
   struct sockaddr_storage laddr;
   int laddrlen = sizeof(laddr);
@@ -983,7 +983,7 @@ int Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
   return retcode;
 }
 
-int Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen)
+int Fetch_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen)
 {
   struct sockaddr_storage laddr;
   int laddrlen = sizeof(laddr);
@@ -1002,12 +1002,12 @@ int Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen)
 
 #ifdef HAVE_LIBZ
 const char *
-Curl_os400_zlibVersion(void)
+Fetch_os400_zlibVersion(void)
 {
   return set_thread_string(LK_ZLIB_VERSION, zlibVersion());
 }
 
-int Curl_os400_inflateInit_(z_streamp strm, const char *version, int stream_size)
+int Fetch_os400_inflateInit_(z_streamp strm, const char *version, int stream_size)
 {
   z_const char *msgb4 = strm->msg;
   int ret;
@@ -1020,7 +1020,7 @@ int Curl_os400_inflateInit_(z_streamp strm, const char *version, int stream_size
   return ret;
 }
 
-int Curl_os400_inflateInit2_(z_streamp strm, int windowBits,
+int Fetch_os400_inflateInit2_(z_streamp strm, int windowBits,
                              const char *version, int stream_size)
 {
   z_const char *msgb4 = strm->msg;
@@ -1034,7 +1034,7 @@ int Curl_os400_inflateInit2_(z_streamp strm, int windowBits,
   return ret;
 }
 
-int Curl_os400_inflate(z_streamp strm, int flush)
+int Fetch_os400_inflate(z_streamp strm, int flush)
 {
   z_const char *msgb4 = strm->msg;
   int ret;
@@ -1047,7 +1047,7 @@ int Curl_os400_inflate(z_streamp strm, int flush)
   return ret;
 }
 
-int Curl_os400_inflateEnd(z_streamp strm)
+int Fetch_os400_inflateEnd(z_streamp strm)
 {
   z_const char *msgb4 = strm->msg;
   int ret;

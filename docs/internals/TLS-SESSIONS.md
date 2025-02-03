@@ -46,10 +46,10 @@ parameters involved in the connection.
 
 Examples:
 
-- `curl.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for
-  a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA
+- `fetch.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for
+  a connection to `fetch.se:443` using `/etc/ssl/cert.pem` as CA
   trust anchors and GnuTLS/3.8.7 as TLS backend.
-- `curl.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
+- `fetch.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
   same as the previous, except it is configured to use TLSv1.2 as
   min and max versions.
 

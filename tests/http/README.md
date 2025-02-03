@@ -115,7 +115,7 @@ All test cases start with `test_` in their name. We use a double number scheme t
 
 Tests are grouped thematically in a file with a single Python test class. This is convenient if you need a special "fixture" for several tests. "fixtures" can have "class" scope.
 
-There is a fetch helper class that knows how to invoke fetch and interpret its output. Among other things, it does add the local CA to the command line, so that SSL connections to the test servers are verified. Nothing prevents anyone from running fetch directly, for specific uses not covered by the `CurlClient` class.
+There is a fetch helper class that knows how to invoke fetch and interpret its output. Among other things, it does add the local CA to the command line, so that SSL connections to the test servers are verified. Nothing prevents anyone from running fetch directly, for specific uses not covered by the `FetchClient` class.
 
 ### mod_fetchtest
 

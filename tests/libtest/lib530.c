@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -255,7 +255,7 @@ static int socket_action(FETCHM *fetch, fetch_socket_t s, int evBitmask,
   FETCHMcode result = fetch_multi_socket_action(fetch, s, evBitmask, &numhandles);
   if (result != FETCHM_OK)
   {
-    fprintf(stderr, "Curl error on %s: %i (%s)\n",
+    fprintf(stderr, "Fetch error on %s: %i (%s)\n",
             info, result, fetch_multi_strerror(result));
   }
   return (int)result;
@@ -370,7 +370,7 @@ static FETCHcode testone(char *URL, int timercb, int socketcb)
 
     if (timeout.tv_sec != (time_t)-1 && getMicroSecondTimeout(&timeout) == 0)
     {
-      /* Curl's timer has elapsed. */
+      /* Fetch's timer has elapsed. */
       if (socket_action(m, FETCH_SOCKET_TIMEOUT, 0, "timeout"))
       {
         res = TEST_ERR_BAD_TIMEOUT;

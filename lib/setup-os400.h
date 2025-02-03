@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,36 +54,36 @@ typedef unsigned long u_int32_t;
 
 #ifdef BUILDING_LIBFETCH
 
-extern int Curl_getaddrinfo_a(const char *nodename,
+extern int Fetch_getaddrinfo_a(const char *nodename,
                               const char *servname,
                               const struct addrinfo *hints,
                               struct addrinfo **res);
-#define getaddrinfo Curl_getaddrinfo_a
+#define getaddrinfo Fetch_getaddrinfo_a
 
 /* Note socklen_t must be used as this is declared before fetch_socklen_t */
-extern int Curl_getnameinfo_a(const struct sockaddr *sa,
+extern int Fetch_getnameinfo_a(const struct sockaddr *sa,
                               socklen_t salen,
                               char *nodename, socklen_t nodenamelen,
                               char *servname, socklen_t servnamelen,
                               int flags);
-#define getnameinfo Curl_getnameinfo_a
+#define getnameinfo Fetch_getnameinfo_a
 
 /* GSSAPI wrappers. */
 
-extern OM_uint32 Curl_gss_import_name_a(OM_uint32 *minor_status,
+extern OM_uint32 Fetch_gss_import_name_a(OM_uint32 *minor_status,
                                         gss_buffer_t in_name,
                                         gss_OID in_name_type,
                                         gss_name_t *out_name);
-#define gss_import_name Curl_gss_import_name_a
+#define gss_import_name Fetch_gss_import_name_a
 
-extern OM_uint32 Curl_gss_display_status_a(OM_uint32 *minor_status,
+extern OM_uint32 Fetch_gss_display_status_a(OM_uint32 *minor_status,
                                            OM_uint32 status_value,
                                            int status_type, gss_OID mech_type,
                                            gss_msg_ctx_t *message_context,
                                            gss_buffer_t status_string);
-#define gss_display_status Curl_gss_display_status_a
+#define gss_display_status Fetch_gss_display_status_a
 
-extern OM_uint32 Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
+extern OM_uint32 Fetch_gss_init_sec_context_a(OM_uint32 *minor_status,
                                              gss_cred_id_t cred_handle,
                                              gss_ctx_id_t *context_handle,
                                              gss_name_t target_name,
@@ -97,52 +97,52 @@ extern OM_uint32 Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
                                              gss_buffer_t output_token,
                                              gss_flags_t *ret_flags,
                                              OM_uint32 *time_rec);
-#define gss_init_sec_context Curl_gss_init_sec_context_a
+#define gss_init_sec_context Fetch_gss_init_sec_context_a
 
-extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
+extern OM_uint32 Fetch_gss_delete_sec_context_a(OM_uint32 *minor_status,
                                                gss_ctx_id_t *context_handle,
                                                gss_buffer_t output_token);
-#define gss_delete_sec_context Curl_gss_delete_sec_context_a
+#define gss_delete_sec_context Fetch_gss_delete_sec_context_a
 
 /* LDAP wrappers. */
 
 #define BerValue struct berval
 
 #define ldap_url_parse ldap_url_parse_utf8
-#define ldap_init Curl_ldap_init_a
-#define ldap_simple_bind_s Curl_ldap_simple_bind_s_a
-#define ldap_search_s Curl_ldap_search_s_a
-#define ldap_get_values_len Curl_ldap_get_values_len_a
-#define ldap_err2string Curl_ldap_err2string_a
-#define ldap_get_dn Curl_ldap_get_dn_a
-#define ldap_first_attribute Curl_ldap_first_attribute_a
-#define ldap_next_attribute Curl_ldap_next_attribute_a
+#define ldap_init Fetch_ldap_init_a
+#define ldap_simple_bind_s Fetch_ldap_simple_bind_s_a
+#define ldap_search_s Fetch_ldap_search_s_a
+#define ldap_get_values_len Fetch_ldap_get_values_len_a
+#define ldap_err2string Fetch_ldap_err2string_a
+#define ldap_get_dn Fetch_ldap_get_dn_a
+#define ldap_first_attribute Fetch_ldap_first_attribute_a
+#define ldap_next_attribute Fetch_ldap_next_attribute_a
 
 /* Some socket functions must be wrapped to process textual addresses
    like AF_UNIX. */
 
-extern int Curl_os400_connect(int sd, struct sockaddr *destaddr, int addrlen);
-extern int Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen);
-extern int Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
+extern int Fetch_os400_connect(int sd, struct sockaddr *destaddr, int addrlen);
+extern int Fetch_os400_bind(int sd, struct sockaddr *localaddr, int addrlen);
+extern int Fetch_os400_sendto(int sd, char *buffer, int buflen, int flags,
                              const struct sockaddr *dstaddr, int addrlen);
-extern int Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
+extern int Fetch_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
                                struct sockaddr *fromaddr, int *addrlen);
-extern int Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen);
-extern int Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen);
+extern int Fetch_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen);
+extern int Fetch_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen);
 
-#define connect Curl_os400_connect
-#define bind Curl_os400_bind
-#define sendto Curl_os400_sendto
-#define recvfrom Curl_os400_recvfrom
-#define getpeername Curl_os400_getpeername
-#define getsockname Curl_os400_getsockname
+#define connect Fetch_os400_connect
+#define bind Fetch_os400_bind
+#define sendto Fetch_os400_sendto
+#define recvfrom Fetch_os400_recvfrom
+#define getpeername Fetch_os400_getpeername
+#define getsockname Fetch_os400_getsockname
 
 #ifdef HAVE_LIBZ
-#define zlibVersion Curl_os400_zlibVersion
-#define inflateInit_ Curl_os400_inflateInit_
-#define inflateInit2_ Curl_os400_inflateInit2_
-#define inflate Curl_os400_inflate
-#define inflateEnd Curl_os400_inflateEnd
+#define zlibVersion Fetch_os400_zlibVersion
+#define inflateInit_ Fetch_os400_inflateInit_
+#define inflateInit2_ Fetch_os400_inflateInit2_
+#define inflate Fetch_os400_inflate
+#define inflateEnd Fetch_os400_inflateEnd
 #endif
 
 #endif /* BUILDING_LIBFETCH */

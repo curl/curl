@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,10 +49,10 @@ static void sigpipe_init(struct sigpipe_ignore *ig)
  * internals, and then sigpipe_restore() will restore the situation when we
  * return from libfetch again.
  */
-static void sigpipe_ignore(struct Curl_easy *data,
+static void sigpipe_ignore(struct Fetch_easy *data,
                            struct sigpipe_ignore *ig)
 {
-  /* get a local copy of no_signal because the Curl_easy might not be
+  /* get a local copy of no_signal because the Fetch_easy might not be
      around when we restore */
   ig->no_signal = data->set.no_signal;
   if (!data->set.no_signal)
@@ -79,7 +79,7 @@ static void sigpipe_restore(struct sigpipe_ignore *ig)
     sigaction(SIGPIPE, &ig->old_pipe_act, NULL);
 }
 
-static void sigpipe_apply(struct Curl_easy *data,
+static void sigpipe_apply(struct Fetch_easy *data,
                           struct sigpipe_ignore *ig)
 {
   if (data->set.no_signal != ig->no_signal)
@@ -91,10 +91,10 @@ static void sigpipe_apply(struct Curl_easy *data,
 
 #else
 /* for systems without sigaction */
-#define sigpipe_ignore(x, y) Curl_nop_stmt
-#define sigpipe_apply(x, y) Curl_nop_stmt
-#define sigpipe_init(x) Curl_nop_stmt
-#define sigpipe_restore(x) Curl_nop_stmt
+#define sigpipe_ignore(x, y) Fetch_nop_stmt
+#define sigpipe_apply(x, y) Fetch_nop_stmt
+#define sigpipe_init(x) Fetch_nop_stmt
+#define sigpipe_restore(x) Fetch_nop_stmt
 #define SIGPIPE_VARIABLE(x)
 #define SIGPIPE_MEMBER(x) bool x
 #endif

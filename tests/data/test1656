@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-Curl_x509_GTime2str
+Fetch_x509_GTime2str
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
 <name>
-Curl_x509_GTime2str unit tests
+Fetch_x509_GTime2str unit tests
 </name>
 </client>
 </testcase>

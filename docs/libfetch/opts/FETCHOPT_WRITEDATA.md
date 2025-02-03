@@ -52,7 +52,7 @@ A common technique is to use the write callback to store the incoming data
 into a dynamically growing allocated buffer, and then this
 FETCHOPT_WRITEDATA(3) is used to point to a struct or the buffer to store data
 in. Like in the getinmemory example:
-https://curl.se/libfetch/c/getinmemory.html
+https://fetch.se/libfetch/c/getinmemory.html
 
 # HISTORY
 

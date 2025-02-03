@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -499,7 +499,7 @@ FETCHcode glob_url(struct URLGlob **glob, char *url, fetch_off_t *urlnum,
   glob_expand = calloc(1, sizeof(struct URLGlob));
   if (!glob_expand)
   {
-    Curl_safefree(glob_buffer);
+    Fetch_safefree(glob_buffer);
     return FETCHE_OUT_OF_MEMORY;
   }
   glob_expand->urllen = strlen(url);
@@ -555,13 +555,13 @@ void glob_cleanup(struct URLGlob **globp)
            elem >= 0;
            --elem)
       {
-        Curl_safefree(glob->pattern[i].content.Set.elements[elem]);
+        Fetch_safefree(glob->pattern[i].content.Set.elements[elem]);
       }
-      Curl_safefree(glob->pattern[i].content.Set.elements);
+      Fetch_safefree(glob->pattern[i].content.Set.elements);
     }
   }
-  Curl_safefree(glob->glob_buffer);
-  Curl_safefree(glob);
+  Fetch_safefree(glob->glob_buffer);
+  Fetch_safefree(glob);
   *globp = NULL;
 }
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -115,7 +115,7 @@ static void memory_tracking_init(void)
   }
 }
 #else
-#define memory_tracking_init() Curl_nop_stmt
+#define memory_tracking_init() Fetch_nop_stmt
 #endif
 
 /* returns a hexdump in a static memory area */

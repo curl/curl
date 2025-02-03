@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -139,14 +139,14 @@ static void test_lock(FETCH *handle, fetch_lock_data data,
   fetch_mutex_t *mutexes = (fetch_mutex_t *)useptr;
   (void)handle;
   (void)laccess;
-  Curl_mutex_acquire(&mutexes[data]);
+  Fetch_mutex_acquire(&mutexes[data]);
 }
 
 static void test_unlock(FETCH *handle, fetch_lock_data data, void *useptr)
 {
   fetch_mutex_t *mutexes = (fetch_mutex_t *)useptr;
   (void)handle;
-  Curl_mutex_release(&mutexes[data]);
+  Fetch_mutex_release(&mutexes[data]);
 }
 
 static void execute(FETCHSH *share, struct Ctx *ctx)
@@ -156,7 +156,7 @@ static void execute(FETCHSH *share, struct Ctx *ctx)
   fetch_thread_t thread[THREAD_SIZE];
   for (i = 0; i < FETCH_LOCK_DATA_LAST - 1; i++)
   {
-    Curl_mutex_init(&mutexes[i]);
+    Fetch_mutex_init(&mutexes[i]);
   }
   fetch_share_setopt(share, FETCHSHOPT_LOCKFUNC, test_lock);
   fetch_share_setopt(share, FETCHSHOPT_UNLOCKFUNC, test_unlock);
@@ -165,21 +165,21 @@ static void execute(FETCHSH *share, struct Ctx *ctx)
 
   for (i = 0; i < THREAD_SIZE; i++)
   {
-    thread[i] = Curl_thread_create(test_thread, (void *)&ctx[i]);
+    thread[i] = Fetch_thread_create(test_thread, (void *)&ctx[i]);
   }
   for (i = 0; i < THREAD_SIZE; i++)
   {
     if (thread[i])
     {
-      Curl_thread_join(&thread[i]);
-      Curl_thread_destroy(thread[i]);
+      Fetch_thread_join(&thread[i]);
+      Fetch_thread_destroy(thread[i]);
     }
   }
   fetch_share_setopt(share, FETCHSHOPT_LOCKFUNC, NULL);
   fetch_share_setopt(share, FETCHSHOPT_UNLOCKFUNC, NULL);
   for (i = 0; i < FETCH_LOCK_DATA_LAST - 1; i++)
   {
-    Curl_mutex_destroy(&mutexes[i]);
+    Fetch_mutex_destroy(&mutexes[i]);
   }
 }
 

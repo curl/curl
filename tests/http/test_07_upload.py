@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@ import re
 import pytest
 from typing import List
 
-from testenv import Env, CurlClient, LocalClient
+from testenv import Env, FetchClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class TestUpload:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
         data = '0123456789'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-0]'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto)
         r.check_stats(count=1, http_status=200, exitcode=0)
@@ -78,7 +78,7 @@ class TestUpload:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-0]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
         r.check_stats(count=1, http_status=200, exitcode=0)
@@ -95,7 +95,7 @@ class TestUpload:
             pytest.skip("msh3 stalls here")
         count = 20
         data = '0123456789'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
@@ -113,7 +113,7 @@ class TestUpload:
         # limit since we use a separate connection in h1
         count = 20
         data = '0123456789'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
@@ -131,7 +131,7 @@ class TestUpload:
             pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         count = 10
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
         r.check_response(count=count, http_status=200)
@@ -150,7 +150,7 @@ class TestUpload:
             pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 2
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
@@ -170,7 +170,7 @@ class TestUpload:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         count = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?id=[0-{count-1}]'
         r = fetch.http_put(urls=[url], data=indata, alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
@@ -236,7 +236,7 @@ class TestUpload:
         # limit since we use a separate connection in h1
         count = 10
         data = '0123456789'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
@@ -255,7 +255,7 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-100k')
         # limit since we use a separate connection in h1
         count = 10
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              extra_args=['--parallel'])
@@ -271,7 +271,7 @@ class TestUpload:
             pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 20
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}'\
             f'/fetchtest/tweak?status=400&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
@@ -288,7 +288,7 @@ class TestUpload:
             pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         count = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?id=[0-{count-1}]'
         r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
@@ -308,7 +308,7 @@ class TestUpload:
             pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?id=[0-{count-1}]&chunk_delay=2ms'
         r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
@@ -328,7 +328,7 @@ class TestUpload:
             pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?id=[0-{count-1}]'
         r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
@@ -340,7 +340,7 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-10m')
         # send a POST to our PUT handler which will send immediately a 404 back
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         r = fetch.run_direct(with_stats=True, args=[
             '--resolve', f'{env.authority_for(env.domain1, proto)}:127.0.0.1',
             '--cacert', env.ca.cert_file,
@@ -362,7 +362,7 @@ class TestUpload:
         # tell our test PUT handler to read the upload more slowly, so
         # that the send buffering and transfer loop needs to wait
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?chunk_delay=2ms'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         r = fetch.run_direct(with_stats=True, args=[
             '--verbose', '--trace-config', 'ids,time',
             '--resolve', f'{env.authority_for(env.domain1, proto)}:127.0.0.1',
@@ -384,7 +384,7 @@ class TestUpload:
         # that the send buffering and transfer loop needs to wait
         fdata = os.path.join(env.gen_dir, 'data-100k')
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put'
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         r = fetch.run_direct(with_stats=True, args=[
             '--verbose', '--trace-config', 'ids,time',
             '--resolve', f'{env.authority_for(env.domain1, proto)}:127.0.0.1',
@@ -400,7 +400,7 @@ class TestUpload:
     # upload large data on a h1 to h2 upgrade
     def test_07_35_h1_h2_upgrade_upload(self, env: Env, httpd, nghttpx):
         fdata = os.path.join(env.gen_dir, 'data-100k')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/fetchtest/echo?id=[0-0]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', extra_args=[
             '--http2'
@@ -421,7 +421,7 @@ class TestUpload:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
         data = '0123456789' * 10
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo{redir}?id=[0-0]'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
             '-L', '--trace-config', 'http/2,http/3'
@@ -438,7 +438,7 @@ class TestUpload:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
         data = '0123456789' * 10
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo307?id=[0-0]'
         r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
             '-L', '--trace-config', 'http/2,http/3'
@@ -454,7 +454,7 @@ class TestUpload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-0]'
         r = fetch.http_form(urls=[url], alpn_proto=proto, form={
             'name1': 'value1',
@@ -469,7 +469,7 @@ class TestUpload:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-63k')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-0]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
             '--trace-config', 'http/2,http/3'
@@ -487,7 +487,7 @@ class TestUpload:
         if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-64k')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-0]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
             '--trace-config', 'http/2,http/3'
@@ -511,7 +511,7 @@ class TestUpload:
         if proto == 'h3' and env.fetch_uses_lib('quiche'):
             pytest.skip("quiche has CWND issues with large requests")
         fdata = os.path.join(env.gen_dir, 'data-63k')
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         extra_args = ['--trace-config', 'http/2,http/3']
         # add enough headers so that the first send chunk is > 64KB
         for i in range(63):
@@ -600,7 +600,7 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
         max_upload = 128 * 1024
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?'\
             f'id=[0-{count-1}]&max_upload={max_upload}'
         r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
@@ -616,7 +616,7 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-100k')
         up_len = 100 * 1024
         speed_limit = 50 * 1024
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?id=[0-0]'
         r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                           with_headers=True, extra_args=[
@@ -635,7 +635,7 @@ class TestUpload:
         count = 1
         fdata = os.path.join(env.gen_dir, 'data-100k')
         speed_limit = 50 * 1024
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-0]'
         r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              with_headers=True, extra_args=[
@@ -650,7 +650,7 @@ class TestUpload:
     def test_07_60_upload_exp100(self, env: Env, httpd, nghttpx, proto):
         fdata = os.path.join(env.gen_dir, 'data-1m+')
         read_delay = 1
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?id=[0-0]'\
               f'&read_delay={read_delay}s'
         r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto, extra_args=[
@@ -663,7 +663,7 @@ class TestUpload:
     def test_07_61_upload_exp100_timeout(self, env: Env, httpd, nghttpx, proto):
         fdata = os.path.join(env.gen_dir, 'data-1m+')
         read_delay = 2
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/put?id=[0-0]'\
               f'&read_delay={read_delay}s'
         r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto, extra_args=[
@@ -681,7 +681,7 @@ class TestUpload:
         fname = f'data-{upload_len}'
         env.make_data_file(indir=env.gen_dir, fname=fname, fsize=upload_len)
         fdata = os.path.join(env.gen_dir, fname)
-        fetch = CurlClient(env=env)
+        fetch = FetchClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-0]'
         r = fetch.http_form(urls=[url], form={
             'file': f'@{fdata}',
