@@ -55,8 +55,10 @@
 /* #define HAVE_NETINET_IN_H 1 */
 
 /* Define to 1 if you have the <stdbool.h> header file. */
+#ifndef UNDER_CE
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_STDBOOL_H 1
+#define HAVE_STDBOOL_H 1  /* exists on __MINGW32CE__ */
+#endif
 #endif
 
 /* Define if you have the <sys/param.h> header file. */
@@ -111,8 +113,10 @@
 #define STDC_HEADERS 1
 
 /* Define to 1 if bool is an available type. */
+#ifndef UNDER_CE
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_BOOL_T 1
+#define HAVE_BOOL_T 1  /* exists on __MINGW32CE__ */
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
