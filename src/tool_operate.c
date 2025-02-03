@@ -126,7 +126,6 @@ extern const unsigned char curl_ca_embed[];
 static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
-                                bool capath_from_env,
                                 bool *added,
                                 bool *skipped);
 static CURLcode create_transfer(struct GlobalConfig *global,
@@ -875,7 +874,6 @@ static CURLcode set_cert_types(struct OperationConfig *config)
 static CURLcode config2setopts(struct GlobalConfig *global,
                                struct OperationConfig *config,
                                struct per_transfer *per,
-                               bool capath_from_env,
                                CURL *curl,
                                CURLSH *share)
 {
@@ -1188,13 +1186,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   if(config->capath) {
     result = res_setopt_str(curl, CURLOPT_CAPATH, config->capath);
-    if(result == CURLE_NOT_BUILT_IN) {
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
-            capath_from_env ?
-            "SSL_CERT_DIR environment variable" : "--capath",
-            ssl_backend());
-    }
-    else if(result)
+    if(result)
       return result;
   }
   /* For the time being if --proxy-capath is not set then we use the
@@ -1798,7 +1790,6 @@ static CURLcode append2query(struct GlobalConfig *global,
 static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
-                                bool capath_from_env,
                                 bool *added,
                                 bool *skipped)
 {
@@ -2319,8 +2310,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       hdrcbdata->global = global;
       hdrcbdata->config = config;
 
-      result = config2setopts(global, config, per, capath_from_env,
-                              curl, share);
+      result = config2setopts(global, config, per, curl, share);
       if(result)
         break;
 
@@ -3042,7 +3032,6 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
                                     bool *skipped)
 {
   CURLcode result = CURLE_OK;
-  bool capath_from_env;
   *added = FALSE;
 
   /* Check we have a url */
@@ -3060,7 +3049,6 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
    * We support the environment variable thing for non-Windows platforms
    * too. Just for the sake of it.
    */
-  capath_from_env = false;
   if(feature_ssl &&
      !config->cacert &&
      !config->capath &&
@@ -3078,8 +3066,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   }
 
   if(!result)
-    result = single_transfer(global, config, share, capath_from_env, added,
-                             skipped);
+    result = single_transfer(global, config, share, added, skipped);
 
   return result;
 }

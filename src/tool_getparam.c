@@ -68,20 +68,20 @@ static ParameterError getstr(char **str, const char *val, bool allowblank)
 /* this array MUST be alphasorted based on the 'lname' */
 static const struct LongShort aliases[]= {
   {"abstract-unix-socket",       ARG_FILE, ' ', C_ABSTRACT_UNIX_SOCKET},
-  {"alpn",                       ARG_BOOL|ARG_NO, ' ', C_ALPN},
+  {"alpn",                       ARG_BOOL|ARG_NO|ARG_TLS, ' ', C_ALPN},
   {"alt-svc",                    ARG_STRG, ' ', C_ALT_SVC},
   {"anyauth",                    ARG_BOOL, ' ', C_ANYAUTH},
   {"append",                     ARG_BOOL, 'a', C_APPEND},
   {"aws-sigv4",                  ARG_STRG, ' ', C_AWS_SIGV4},
   {"basic",                      ARG_BOOL, ' ', C_BASIC},
   {"buffer",                     ARG_BOOL|ARG_NO, 'N', C_BUFFER},
-  {"ca-native",                  ARG_BOOL, ' ', C_CA_NATIVE},
-  {"cacert",                     ARG_FILE, ' ', C_CACERT},
-  {"capath",                     ARG_FILE, ' ', C_CAPATH},
-  {"cert",                       ARG_FILE, 'E', C_CERT},
-  {"cert-status",                ARG_BOOL, ' ', C_CERT_STATUS},
-  {"cert-type",                  ARG_STRG, ' ', C_CERT_TYPE},
-  {"ciphers",                    ARG_STRG, ' ', C_CIPHERS},
+  {"ca-native",                  ARG_BOOL|ARG_TLS, ' ', C_CA_NATIVE},
+  {"cacert",                     ARG_FILE|ARG_TLS, ' ', C_CACERT},
+  {"capath",                     ARG_FILE|ARG_TLS, ' ', C_CAPATH},
+  {"cert",                       ARG_FILE|ARG_TLS, 'E', C_CERT},
+  {"cert-status",                ARG_BOOL|ARG_TLS, ' ', C_CERT_STATUS},
+  {"cert-type",                  ARG_STRG|ARG_TLS, ' ', C_CERT_TYPE},
+  {"ciphers",                    ARG_STRG|ARG_TLS, ' ', C_CIPHERS},
   {"clobber",                    ARG_BOOL|ARG_NO, ' ', C_CLOBBER},
   {"compressed",                 ARG_BOOL, ' ', C_COMPRESSED},
   {"compressed-ssh",             ARG_BOOL, ' ', C_COMPRESSED_SSH},
@@ -94,8 +94,8 @@ static const struct LongShort aliases[]= {
   {"create-dirs",                ARG_BOOL, ' ', C_CREATE_DIRS},
   {"create-file-mode",           ARG_STRG, ' ', C_CREATE_FILE_MODE},
   {"crlf",                       ARG_BOOL, ' ', C_CRLF},
-  {"crlfile",                    ARG_FILE, ' ', C_CRLFILE},
-  {"curves",                     ARG_STRG, ' ', C_CURVES},
+  {"crlfile",                    ARG_FILE|ARG_TLS, ' ', C_CRLFILE},
+  {"curves",                     ARG_STRG|ARG_TLS, ' ', C_CURVES},
   {"data",                       ARG_STRG, 'd', C_DATA},
   {"data-ascii",                 ARG_STRG, ' ', C_DATA_ASCII},
   {"data-binary",                ARG_STRG, ' ', C_DATA_BINARY},
@@ -111,14 +111,14 @@ static const struct LongShort aliases[]= {
   {"dns-ipv4-addr",              ARG_STRG, ' ', C_DNS_IPV4_ADDR},
   {"dns-ipv6-addr",              ARG_STRG, ' ', C_DNS_IPV6_ADDR},
   {"dns-servers",                ARG_STRG, ' ', C_DNS_SERVERS},
-  {"doh-cert-status",            ARG_BOOL, ' ', C_DOH_CERT_STATUS},
-  {"doh-insecure",               ARG_BOOL, ' ', C_DOH_INSECURE},
-  {"doh-url"        ,            ARG_STRG, ' ', C_DOH_URL},
-  {"dump-ca-embed",              ARG_NONE, ' ', C_DUMP_CA_EMBED},
+  {"doh-cert-status",            ARG_BOOL|ARG_TLS, ' ', C_DOH_CERT_STATUS},
+  {"doh-insecure",               ARG_BOOL|ARG_TLS, ' ', C_DOH_INSECURE},
+  {"doh-url"        ,            ARG_STRG|ARG_TLS, ' ', C_DOH_URL},
+  {"dump-ca-embed",              ARG_NONE|ARG_TLS, ' ', C_DUMP_CA_EMBED},
   {"dump-header",                ARG_FILE, 'D', C_DUMP_HEADER},
-  {"ech",                        ARG_STRG, ' ', C_ECH},
+  {"ech",                        ARG_STRG|ARG_TLS, ' ', C_ECH},
   {"egd-file",                   ARG_STRG, ' ', C_EGD_FILE},
-  {"engine",                     ARG_STRG, ' ', C_ENGINE},
+  {"engine",                     ARG_STRG|ARG_TLS, ' ', C_ENGINE},
   {"eprt",                       ARG_BOOL, ' ', C_EPRT},
   {"epsv",                       ARG_BOOL, ' ', C_EPSV},
   {"etag-compare",               ARG_FILE, ' ', C_ETAG_COMPARE},
@@ -139,11 +139,11 @@ static const struct LongShort aliases[]= {
   {"ftp-port",                   ARG_STRG, 'P', C_FTP_PORT},
   {"ftp-pret",                   ARG_BOOL, ' ', C_FTP_PRET},
   {"ftp-skip-pasv-ip",           ARG_BOOL, ' ', C_FTP_SKIP_PASV_IP},
-  {"ftp-ssl",                    ARG_BOOL, ' ', C_FTP_SSL},
-  {"ftp-ssl-ccc",                ARG_BOOL, ' ', C_FTP_SSL_CCC},
-  {"ftp-ssl-ccc-mode",           ARG_STRG, ' ', C_FTP_SSL_CCC_MODE},
-  {"ftp-ssl-control",            ARG_BOOL, ' ', C_FTP_SSL_CONTROL},
-  {"ftp-ssl-reqd",               ARG_BOOL, ' ', C_FTP_SSL_REQD},
+  {"ftp-ssl",                    ARG_BOOL|ARG_TLS, ' ', C_FTP_SSL},
+  {"ftp-ssl-ccc",                ARG_BOOL|ARG_TLS, ' ', C_FTP_SSL_CCC},
+  {"ftp-ssl-ccc-mode",           ARG_STRG|ARG_TLS, ' ', C_FTP_SSL_CCC_MODE},
+  {"ftp-ssl-control",            ARG_BOOL|ARG_TLS, ' ', C_FTP_SSL_CONTROL},
+  {"ftp-ssl-reqd",               ARG_BOOL|ARG_TLS, ' ', C_FTP_SSL_REQD},
   {"get",                        ARG_BOOL, 'G', C_GET},
   {"globoff",                    ARG_BOOL, 'g', C_GLOBOFF},
   {"happy-eyeballs-timeout-ms",  ARG_STRG, ' ', C_HAPPY_EYEBALLS_TIMEOUT_MS},
@@ -154,14 +154,14 @@ static const struct LongShort aliases[]= {
   {"help",                       ARG_BOOL, 'h', C_HELP},
   {"hostpubmd5",                 ARG_STRG, ' ', C_HOSTPUBMD5},
   {"hostpubsha256",              ARG_STRG, ' ', C_HOSTPUBSHA256},
-  {"hsts",                       ARG_STRG, ' ', C_HSTS},
+  {"hsts",                       ARG_STRG|ARG_TLS, ' ', C_HSTS},
   {"http0.9",                    ARG_BOOL, ' ', C_HTTP0_9},
   {"http1.0",                    ARG_NONE, '0', C_HTTP1_0},
   {"http1.1",                    ARG_NONE, ' ', C_HTTP1_1},
   {"http2",                      ARG_NONE, ' ', C_HTTP2},
   {"http2-prior-knowledge",      ARG_NONE, ' ', C_HTTP2_PRIOR_KNOWLEDGE},
-  {"http3",                      ARG_NONE, ' ', C_HTTP3},
-  {"http3-only",                 ARG_NONE, ' ', C_HTTP3_ONLY},
+  {"http3",                      ARG_NONE|ARG_TLS, ' ', C_HTTP3},
+  {"http3-only",                 ARG_NONE|ARG_TLS, ' ', C_HTTP3_ONLY},
   {"ignore-content-length",      ARG_BOOL, ' ', C_IGNORE_CONTENT_LENGTH},
   {"include",                    ARG_BOOL, ' ', C_INCLUDE},
   {"insecure",                   ARG_BOOL, 'k', C_INSECURE},
@@ -177,8 +177,8 @@ static const struct LongShort aliases[]= {
   {"keepalive",                  ARG_BOOL|ARG_NO, ' ', C_KEEPALIVE},
   {"keepalive-cnt",              ARG_STRG, ' ', C_KEEPALIVE_CNT},
   {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
-  {"key",                        ARG_FILE, ' ', C_KEY},
-  {"key-type",                   ARG_STRG, ' ', C_KEY_TYPE},
+  {"key",                        ARG_FILE|ARG_TLS, ' ', C_KEY},
+  {"key-type",                   ARG_STRG|ARG_TLS, ' ', C_KEY_TYPE},
   {"krb",                        ARG_STRG, ' ', C_KRB},
   {"krb4",                       ARG_STRG, ' ', C_KRB4},
   {"libcurl",                    ARG_STRG, ' ', C_LIBCURL},
@@ -215,7 +215,7 @@ static const struct LongShort aliases[]= {
   {"parallel-max",               ARG_STRG, ' ', C_PARALLEL_MAX},
   {"pass",                       ARG_STRG, ' ', C_PASS},
   {"path-as-is",                 ARG_BOOL, ' ', C_PATH_AS_IS},
-  {"pinnedpubkey",               ARG_STRG, ' ', C_PINNEDPUBKEY},
+  {"pinnedpubkey",               ARG_STRG|ARG_TLS, ' ', C_PINNEDPUBKEY},
   {"post301",                    ARG_BOOL, ' ', C_POST301},
   {"post302",                    ARG_BOOL, ' ', C_POST302},
   {"post303",                    ARG_BOOL, ' ', C_POST303},
@@ -228,31 +228,33 @@ static const struct LongShort aliases[]= {
   {"proxy",                      ARG_STRG, 'x', C_PROXY},
   {"proxy-anyauth",              ARG_BOOL, ' ', C_PROXY_ANYAUTH},
   {"proxy-basic",                ARG_BOOL, ' ', C_PROXY_BASIC},
-  {"proxy-ca-native",            ARG_BOOL, ' ', C_PROXY_CA_NATIVE},
-  {"proxy-cacert",               ARG_FILE, ' ', C_PROXY_CACERT},
-  {"proxy-capath",               ARG_FILE, ' ', C_PROXY_CAPATH},
-  {"proxy-cert",                 ARG_FILE, ' ', C_PROXY_CERT},
-  {"proxy-cert-type",            ARG_STRG, ' ', C_PROXY_CERT_TYPE},
-  {"proxy-ciphers",              ARG_STRG, ' ', C_PROXY_CIPHERS},
-  {"proxy-crlfile",              ARG_FILE, ' ', C_PROXY_CRLFILE},
+  {"proxy-ca-native",            ARG_BOOL|ARG_TLS, ' ', C_PROXY_CA_NATIVE},
+  {"proxy-cacert",               ARG_FILE|ARG_TLS, ' ', C_PROXY_CACERT},
+  {"proxy-capath",               ARG_FILE|ARG_TLS, ' ', C_PROXY_CAPATH},
+  {"proxy-cert",                 ARG_FILE|ARG_TLS, ' ', C_PROXY_CERT},
+  {"proxy-cert-type",            ARG_STRG|ARG_TLS, ' ', C_PROXY_CERT_TYPE},
+  {"proxy-ciphers",              ARG_STRG|ARG_TLS, ' ', C_PROXY_CIPHERS},
+  {"proxy-crlfile",              ARG_FILE|ARG_TLS, ' ', C_PROXY_CRLFILE},
   {"proxy-digest",               ARG_BOOL, ' ', C_PROXY_DIGEST},
   {"proxy-header",               ARG_STRG, ' ', C_PROXY_HEADER},
   {"proxy-http2",                ARG_BOOL, ' ', C_PROXY_HTTP2},
   {"proxy-insecure",             ARG_BOOL, ' ', C_PROXY_INSECURE},
-  {"proxy-key",                  ARG_FILE, ' ', C_PROXY_KEY},
-  {"proxy-key-type",             ARG_STRG, ' ', C_PROXY_KEY_TYPE},
+  {"proxy-key",                  ARG_FILE|ARG_TLS, ' ', C_PROXY_KEY},
+  {"proxy-key-type",             ARG_STRG|ARG_TLS, ' ', C_PROXY_KEY_TYPE},
   {"proxy-negotiate",            ARG_BOOL, ' ', C_PROXY_NEGOTIATE},
   {"proxy-ntlm",                 ARG_BOOL, ' ', C_PROXY_NTLM},
   {"proxy-pass",                 ARG_STRG, ' ', C_PROXY_PASS},
-  {"proxy-pinnedpubkey",         ARG_STRG, ' ', C_PROXY_PINNEDPUBKEY},
+  {"proxy-pinnedpubkey",         ARG_STRG|ARG_TLS, ' ', C_PROXY_PINNEDPUBKEY},
   {"proxy-service-name",         ARG_STRG, ' ', C_PROXY_SERVICE_NAME},
-  {"proxy-ssl-allow-beast",      ARG_BOOL, ' ', C_PROXY_SSL_ALLOW_BEAST},
-  {"proxy-ssl-auto-client-cert", ARG_BOOL, ' ', C_PROXY_SSL_AUTO_CLIENT_CERT},
-  {"proxy-tls13-ciphers",        ARG_STRG, ' ', C_PROXY_TLS13_CIPHERS},
-  {"proxy-tlsauthtype",          ARG_STRG, ' ', C_PROXY_TLSAUTHTYPE},
-  {"proxy-tlspassword",          ARG_STRG, ' ', C_PROXY_TLSPASSWORD},
-  {"proxy-tlsuser",              ARG_STRG, ' ', C_PROXY_TLSUSER},
-  {"proxy-tlsv1",                ARG_NONE, ' ', C_PROXY_TLSV1},
+  {"proxy-ssl-allow-beast",      ARG_BOOL|ARG_TLS, ' ',
+   C_PROXY_SSL_ALLOW_BEAST},
+  {"proxy-ssl-auto-client-cert", ARG_BOOL|ARG_TLS, ' ',
+   C_PROXY_SSL_AUTO_CLIENT_CERT},
+  {"proxy-tls13-ciphers",        ARG_STRG|ARG_TLS, ' ', C_PROXY_TLS13_CIPHERS},
+  {"proxy-tlsauthtype",          ARG_STRG|ARG_TLS, ' ', C_PROXY_TLSAUTHTYPE},
+  {"proxy-tlspassword",          ARG_STRG|ARG_TLS, ' ', C_PROXY_TLSPASSWORD},
+  {"proxy-tlsuser",              ARG_STRG|ARG_TLS, ' ', C_PROXY_TLSUSER},
+  {"proxy-tlsv1",                ARG_NONE|ARG_TLS, ' ', C_PROXY_TLSV1},
   {"proxy-user",                 ARG_STRG, 'U', C_PROXY_USER},
   {"proxy1.0",                   ARG_STRG, ' ', C_PROXY1_0},
   {"proxytunnel",                ARG_BOOL, 'p', C_PROXYTUNNEL},
@@ -294,15 +296,17 @@ static const struct LongShort aliases[]= {
   {"socks5-hostname",            ARG_STRG, ' ', C_SOCKS5_HOSTNAME},
   {"speed-limit",                ARG_STRG, 'Y', C_SPEED_LIMIT},
   {"speed-time",                 ARG_STRG, 'y', C_SPEED_TIME},
-  {"ssl",                        ARG_BOOL, ' ', C_SSL},
-  {"ssl-allow-beast",            ARG_BOOL, ' ', C_SSL_ALLOW_BEAST},
-  {"ssl-auto-client-cert",       ARG_BOOL, ' ', C_SSL_AUTO_CLIENT_CERT},
-  {"ssl-no-revoke",              ARG_BOOL, ' ', C_SSL_NO_REVOKE},
-  {"ssl-reqd",                   ARG_BOOL, ' ', C_SSL_REQD},
-  {"ssl-revoke-best-effort",     ARG_BOOL, ' ', C_SSL_REVOKE_BEST_EFFORT},
-  {"ssl-sessions",               ARG_FILE, ' ', C_SSL_SESSIONS},
-  {"sslv2",                      ARG_NONE, '2', C_SSLV2},
-  {"sslv3",                      ARG_NONE, '3', C_SSLV3},
+  {"ssl",                        ARG_BOOL|ARG_TLS, ' ', C_SSL},
+  {"ssl-allow-beast",            ARG_BOOL|ARG_TLS, ' ', C_SSL_ALLOW_BEAST},
+  {"ssl-auto-client-cert",       ARG_BOOL|ARG_TLS, ' ',
+   C_SSL_AUTO_CLIENT_CERT},
+  {"ssl-no-revoke",              ARG_BOOL|ARG_TLS, ' ', C_SSL_NO_REVOKE},
+  {"ssl-reqd",                   ARG_BOOL|ARG_TLS, ' ', C_SSL_REQD},
+  {"ssl-revoke-best-effort",     ARG_BOOL|ARG_TLS, ' ',
+   C_SSL_REVOKE_BEST_EFFORT},
+  {"ssl-sessions",               ARG_FILE|ARG_TLS, ' ', C_SSL_SESSIONS},
+  {"sslv2",                      ARG_NONE|ARG_TLS, '2', C_SSLV2},
+  {"sslv3",                      ARG_NONE|ARG_TLS, '3', C_SSLV3},
   {"stderr",                     ARG_FILE, ' ', C_STDERR},
   {"styled-output",              ARG_BOOL, ' ', C_STYLED_OUTPUT},
   {"suppress-connect-headers",   ARG_BOOL, ' ', C_SUPPRESS_CONNECT_HEADERS},
@@ -316,17 +320,17 @@ static const struct LongShort aliases[]= {
   {"tftp-blksize",               ARG_STRG, ' ', C_TFTP_BLKSIZE},
   {"tftp-no-options",            ARG_BOOL, ' ', C_TFTP_NO_OPTIONS},
   {"time-cond",                  ARG_STRG, 'z', C_TIME_COND},
-  {"tls-earlydata",              ARG_BOOL, ' ', C_TLS_EARLYDATA},
-  {"tls-max",                    ARG_STRG, ' ', C_TLS_MAX},
-  {"tls13-ciphers",              ARG_STRG, ' ', C_TLS13_CIPHERS},
-  {"tlsauthtype",                ARG_STRG, ' ', C_TLSAUTHTYPE},
-  {"tlspassword",                ARG_STRG, ' ', C_TLSPASSWORD},
-  {"tlsuser",                    ARG_STRG, ' ', C_TLSUSER},
-  {"tlsv1",                      ARG_NONE, '1', C_TLSV1},
-  {"tlsv1.0",                    ARG_NONE, ' ', C_TLSV1_0},
-  {"tlsv1.1",                    ARG_NONE, ' ', C_TLSV1_1},
-  {"tlsv1.2",                    ARG_NONE, ' ', C_TLSV1_2},
-  {"tlsv1.3",                    ARG_NONE, ' ', C_TLSV1_3},
+  {"tls-earlydata",              ARG_BOOL|ARG_TLS, ' ', C_TLS_EARLYDATA},
+  {"tls-max",                    ARG_STRG|ARG_TLS, ' ', C_TLS_MAX},
+  {"tls13-ciphers",              ARG_STRG|ARG_TLS, ' ', C_TLS13_CIPHERS},
+  {"tlsauthtype",                ARG_STRG|ARG_TLS, ' ', C_TLSAUTHTYPE},
+  {"tlspassword",                ARG_STRG|ARG_TLS, ' ', C_TLSPASSWORD},
+  {"tlsuser",                    ARG_STRG|ARG_TLS, ' ', C_TLSUSER},
+  {"tlsv1",                      ARG_NONE|ARG_TLS, '1', C_TLSV1},
+  {"tlsv1.0",                    ARG_NONE|ARG_TLS, ' ', C_TLSV1_0},
+  {"tlsv1.1",                    ARG_NONE|ARG_TLS, ' ', C_TLSV1_1},
+  {"tlsv1.2",                    ARG_NONE|ARG_TLS, ' ', C_TLSV1_2},
+  {"tlsv1.3",                    ARG_NONE|ARG_TLS, ' ', C_TLSV1_3},
   {"tr-encoding",                ARG_BOOL, ' ', C_TR_ENCODING},
   {"trace",                      ARG_FILE, ' ', C_TRACE},
   {"trace-ascii",                ARG_FILE, ' ', C_TRACE_ASCII},
@@ -1693,6 +1697,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = PARAM_NO_PREFIX;
       break;
     }
+    else if((a->desc & ARG_TLS) && !feature_ssl) {
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      break;
+    }
 
     if(!nextarg)
       /* this is a precaution mostly to please scan-build, as all arguments
@@ -1918,15 +1926,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_FTP_SSL: /* --ftp-ssl */
     case C_SSL: /* --ssl */
-      if(toggle && !feature_ssl)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
-      else {
-        config->ftp_ssl = toggle;
-        if(config->ftp_ssl)
-          warnf(global,
-                "--%s is an insecure option, consider --ssl-reqd instead",
-                a->lname);
-      }
+      config->ftp_ssl = toggle;
+      if(config->ftp_ssl)
+        warnf(global,
+              "--%s is an insecure option, consider --ssl-reqd instead",
+              a->lname);
       break;
     case C_FTP_PASV: /* --ftp-pasv */
       Curl_safefree(config->ftpport);
@@ -2026,20 +2030,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_FTP_SSL_REQD: /* --ftp-ssl-reqd */
     case C_SSL_REQD: /* --ssl-reqd */
-      if(toggle && !feature_ssl) {
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
-        break;
-      }
       config->ftp_ssl_reqd = toggle;
       break;
     case C_SESSIONID: /* --sessionid */
       config->disable_sessionid = !toggle;
       break;
     case C_FTP_SSL_CONTROL: /* --ftp-ssl-control */
-      if(toggle && !feature_ssl)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
-      else
-        config->ftp_ssl_control = toggle;
+      config->ftp_ssl_control = toggle;
       break;
     case C_FTP_SSL_CCC: /* --ftp-ssl-ccc */
       config->ftp_ssl_ccc = toggle;
@@ -2174,8 +2171,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
       break;
     case C_TLS_EARLYDATA: /* --tls-earlydata */
-      if(feature_ssl)
-        config->ssl_allow_earlydata = toggle;
+      config->ssl_allow_earlydata = toggle;
       break;
     case C_TLS_MAX: /* --tls-max */
       err = str2tls_max(&config->ssl_version_max, nextarg);
@@ -2438,16 +2434,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case C_SSL_ALLOW_BEAST: /* --ssl-allow-beast */
-      if(feature_ssl)
-        config->ssl_allow_beast = toggle;
+      config->ssl_allow_beast = toggle;
       break;
     case C_SSL_AUTO_CLIENT_CERT: /* --ssl-auto-client-cert */
-      if(feature_ssl)
-        config->ssl_auto_client_cert = toggle;
+      config->ssl_auto_client_cert = toggle;
       break;
     case C_PROXY_SSL_AUTO_CLIENT_CERT: /* --proxy-ssl-auto-client-cert */
-      if(feature_ssl)
-        config->proxy_ssl_auto_client_cert = toggle;
+      config->proxy_ssl_auto_client_cert = toggle;
       break;
     case C_PINNEDPUBKEY: /* --pinnedpubkey */
       err = getstr(&config->pinnedpubkey, nextarg, DENY_BLANK);
@@ -2465,12 +2458,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->falsestart = TRUE;
       break;
     case C_SSL_NO_REVOKE: /* --ssl-no-revoke */
-      if(feature_ssl)
-        config->ssl_no_revoke = TRUE;
+      config->ssl_no_revoke = TRUE;
       break;
     case C_SSL_REVOKE_BEST_EFFORT: /* --ssl-revoke-best-effort */
-      if(feature_ssl)
-        config->ssl_revoke_best_effort = TRUE;
+      config->ssl_revoke_best_effort = TRUE;
       break;
     case C_SSL_SESSIONS: /* --ssl-sessions */
       if(feature_ssls_export)
@@ -2529,8 +2520,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->proxy_crlfile, nextarg, DENY_BLANK);
       break;
     case C_PROXY_SSL_ALLOW_BEAST: /* --proxy-ssl-allow-beast */
-      if(feature_ssl)
-        config->proxy_ssl_allow_beast = toggle;
+      config->proxy_ssl_allow_beast = toggle;
       break;
     case C_LOGIN_OPTIONS: /* --login-options */
       err = getstr(&config->login_options, nextarg, ALLOW_BLANK);
