@@ -31,13 +31,6 @@
 /* Tell "curl/curl.h" not to include "curl/mprintf.h" */
 #define CURL_SKIP_INCLUDE_MPRINTF
 
-/* Make these warnings visible with an option. */
-#if !defined(CURL_WARN_SIGN_CONVERSION)
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#endif
-#endif
-
 /* Set default _WIN32_WINNT */
 #ifdef __MINGW32__
 #include <_mingw.h>
