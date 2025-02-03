@@ -1,10 +1,10 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: variable
 Arg: <[%]name=text/@file>
 Help: Set variable
-Category: curl
+Category: fetch
 Added: 8.3.0
 Multi: append
 See-also:
@@ -36,7 +36,7 @@ the environment variable is not set, use --variable %name=content or
 --variable %name@content. Note that on some systems - but not all -
 environment variables are case insensitive.
 
-Added in curl 8.12.0: you can get a byte range from the source by appending
+Added in fetch 8.12.0: you can get a byte range from the source by appending
 `[start-end]` to the variable name, where *start* and *end* are byte offsets
 to include from the contents. For example, asking for offset "2-10" means
 offset two to offset ten, inclusive, resulting in 9 bytes in total. `2-2`
@@ -45,19 +45,19 @@ end of data. The start offset cannot be larger than the end offset. Asking for
 a range that is outside of the file size makes the variable contents empty.
 For example, getting the first one hundred bytes from a given file:
 
-    curl --variable "fraction[0-99]@filename"
+    fetch --variable "fraction[0-99]@filename"
 
 Given a byte range that has no data results in an empty string. Asking for a
-range that is larger than the content makes curl use the piece of the data
+range that is larger than the content makes fetch use the piece of the data
 that exists.
 
 To assign a variable using contents from another variable, use
 --expand-variable. Like for example assigning a new variable using contents
 from two other:
 
-    curl --expand-variable "user={{firstname}} {{lastname}}"
+    fetch --expand-variable "user={{firstname}} {{lastname}}"
 
-When expanding variables, curl supports a set of functions that can make the
+When expanding variables, fetch supports a set of functions that can make the
 variable contents more convenient to use. You apply a function to a variable
 expansion by adding a colon and then list the desired functions in a
 comma-separated list that is evaluated in a left-to-right order. Variable
@@ -71,25 +71,25 @@ removes all leading and trailing white space.
 
 Example:
 
-    curl --expand-url https.//example.com/{{url:trim}}
+    fetch --expand-url https.//example.com/{{url:trim}}
 
 ## json
 outputs the content using JSON string quoting rules.
 
 Example:
 
-    curl --expand-data {{data:json}} https://example.com
+    fetch --expand-data {{data:json}} https://example.com
 
 ## url
 shows the content URL (percent) encoded.
 
 Example:
 
-    curl --expand-url https://example.com/{{path:url}}
+    fetch --expand-url https://example.com/{{path:url}}
 
 ## b64
 expands the variable base64 encoded
 
 Example:
 
-    curl --expand-url https://example.com/{{var:b64}}
+    fetch --expand-url https://example.com/{{var:b64}}

@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_init
+SPDX-License-Identifier: fetch
+Title: fetch_mime_init
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_MIMEPOST (3)
-  - curl_mime_addpart (3)
-  - curl_mime_free (3)
-  - curl_mime_subparts (3)
+  - FETCHOPT_MIMEPOST (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_free (3)
+  - fetch_mime_subparts (3)
 Protocol:
   - HTTP
   - IMAP
@@ -18,23 +18,23 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_init - create a mime handle
+fetch_mime_init - create a mime handle
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-curl_mime *curl_mime_init(CURL *easy_handle);
+fetch_mime *fetch_mime_init(FETCH *easy_handle);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_init(3) creates a handle to a new empty mime structure.
+fetch_mime_init(3) creates a handle to a new empty mime structure.
 This mime structure can be subsequently filled using the mime API, then
-attached to some easy handle using option CURLOPT_MIMEPOST(3) within
-a curl_easy_setopt(3) call or added as a multipart in another mime
-handle's part using curl_mime_subparts(3).
+attached to some easy handle using option FETCHOPT_MIMEPOST(3) within
+a fetch_easy_setopt(3) call or added as a multipart in another mime
+handle's part using fetch_mime_subparts(3).
 
 *easy_handle* is used for part separator randomization and error
 reporting. Since 7.87.0, it does not need to be the final target handle.
@@ -49,24 +49,24 @@ send a multi-part email with SMTP or upload such an email to an IMAP server.
 ~~~c
 int main(void)
 {
-  CURL *easy = curl_easy_init();
-  curl_mime *mime;
-  curl_mimepart *part;
+  FETCH *easy = fetch_easy_init();
+  fetch_mime *mime;
+  fetch_mimepart *part;
 
   /* Build an HTTP form with a single field named "data", */
-  mime = curl_mime_init(easy);
-  part = curl_mime_addpart(mime);
-  curl_mime_data(part, "This is the field data", CURL_ZERO_TERMINATED);
-  curl_mime_name(part, "data");
+  mime = fetch_mime_init(easy);
+  part = fetch_mime_addpart(mime);
+  fetch_mime_data(part, "This is the field data", FETCH_ZERO_TERMINATED);
+  fetch_mime_name(part, "data");
 
   /* Post and send it. */
-  curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);
-  curl_easy_setopt(easy, CURLOPT_URL, "https://example.com");
-  curl_easy_perform(easy);
+  fetch_easy_setopt(easy, FETCHOPT_MIMEPOST, mime);
+  fetch_easy_setopt(easy, FETCHOPT_URL, "https://example.com");
+  fetch_easy_perform(easy);
 
   /* Clean-up. */
-  curl_easy_cleanup(easy);
-  curl_mime_free(mime);
+  fetch_easy_cleanup(easy);
+  fetch_mime_free(mime);
 }
 ~~~
 

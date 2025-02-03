@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_HTTP_VERSION
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_HTTP_VERSION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_RESPONSE_CODE (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_RESPONSE_CODE (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.50.0
@@ -15,22 +15,22 @@ Added-in: 7.50.0
 
 # NAME
 
-CURLINFO_HTTP_VERSION - get the http version used in the connection
+FETCHINFO_HTTP_VERSION - get the http version used in the connection
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HTTP_VERSION, long *p);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_HTTP_VERSION, long *p);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a long to receive the version used in the last http
 connection done using this handle. The returned value is
-CURL_HTTP_VERSION_1_0, CURL_HTTP_VERSION_1_1, CURL_HTTP_VERSION_2_0,
-CURL_HTTP_VERSION_3 or 0 if the version cannot be determined.
+FETCH_HTTP_VERSION_1_0, FETCH_HTTP_VERSION_1_1, FETCH_HTTP_VERSION_2_0,
+FETCH_HTTP_VERSION_3 or 0 if the version cannot be determined.
 
 # %PROTOCOLS%
 
@@ -39,16 +39,16 @@ CURL_HTTP_VERSION_3 or 0 if the version cannot be determined.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       long http_version;
-      curl_easy_getinfo(curl, CURLINFO_HTTP_VERSION, &http_version);
+      fetch_easy_getinfo(fetch, FETCHINFO_HTTP_VERSION, &http_version);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -57,7 +57,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

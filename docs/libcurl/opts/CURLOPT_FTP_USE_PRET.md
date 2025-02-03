@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FTP_USE_PRET
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FTP_USE_PRET
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_FTP_USE_EPRT (3)
-  - CURLOPT_FTP_USE_EPSV (3)
+  - FETCHOPT_FTP_USE_EPRT (3)
+  - FETCHOPT_FTP_USE_EPSV (3)
 Protocol:
   - FTP
 Added-in: 7.20.0
@@ -14,19 +14,19 @@ Added-in: 7.20.0
 
 # NAME
 
-CURLOPT_FTP_USE_PRET - use PRET for FTP
+FETCHOPT_FTP_USE_PRET - use PRET for FTP
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_USE_PRET, long enable);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FTP_USE_PRET, long enable);
 ~~~
 
 # DESCRIPTION
 
-Pass a long. If the value is 1, it tells curl to send a PRET command before
+Pass a long. If the value is 1, it tells fetch to send a PRET command before
 PASV (and EPSV). Certain FTP servers, mainly drftpd, require this non-standard
 command for directory listings as well as up and downloads in PASV mode. Has
 no effect when using the active FTP transfers mode.
@@ -42,18 +42,18 @@ no effect when using the active FTP transfers mode.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL,
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL,
                      "ftp://example.com/old-server/file.txt");
 
     /* a drftpd server, do it */
-    curl_easy_setopt(curl, CURLOPT_FTP_USE_PRET, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_FTP_USE_PRET, 1L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -62,7 +62,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -26,7 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
@@ -40,10 +40,10 @@
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   struct stat file_info;
-  curl_off_t speed_upload, total_time;
+  fetch_off_t speed_upload, total_time;
   FILE *fd;
 
   fd = fopen("debugit", "rb"); /* open file to upload */
@@ -56,35 +56,35 @@ int main(void)
     return 1; /* cannot continue */
   }
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* upload to this place */
-    curl_easy_setopt(curl, CURLOPT_URL,
-                     "file:///home/dast/src/curl/debug/new");
+    fetch_easy_setopt(fetch, FETCHOPT_URL,
+                     "file:///home/dast/src/fetch/debug/new");
 
     /* tell it to "upload" to the URL */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
     /* set where to read from (on Windows you need to use READFUNCTION too) */
-    curl_easy_setopt(curl, CURLOPT_READDATA, fd);
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, fd);
 
     /* and give the size of the upload (optional) */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)file_info.st_size);
+    fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
+                     (fetch_off_t)file_info.st_size);
 
     /* enable verbose for easier tracing */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK) {
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK) {
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
     }
     else {
       /* now extract transfer info */
-      curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &speed_upload);
-      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &total_time);
+      fetch_easy_getinfo(fetch, FETCHINFO_SPEED_UPLOAD_T, &speed_upload);
+      fetch_easy_getinfo(fetch, FETCHINFO_TOTAL_TIME_T, &total_time);
 
       fprintf(stderr, "Speed: %lu bytes/sec during %lu.%06lu seconds\n",
               (unsigned long)speed_upload,
@@ -92,7 +92,7 @@ int main(void)
               (unsigned long)(total_time % 1000000));
     }
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   fclose(fd);
   return 0;

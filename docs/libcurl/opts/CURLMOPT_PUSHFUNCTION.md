@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLMOPT_PUSHFUNCTION
+SPDX-License-Identifier: fetch
+Title: FETCHMOPT_PUSHFUNCTION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_PIPELINING (3)
-  - CURLMOPT_PUSHDATA (3)
-  - CURLOPT_PIPEWAIT (3)
+  - FETCHMOPT_PIPELINING (3)
+  - FETCHMOPT_PUSHDATA (3)
+  - FETCHOPT_PIPEWAIT (3)
   - RFC 7540
 Protocol:
   - HTTP
@@ -16,21 +16,21 @@ Added-in: 7.44.0
 
 # NAME
 
-CURLMOPT_PUSHFUNCTION - callback that approves or denies server pushes
+FETCHMOPT_PUSHFUNCTION - callback that approves or denies server pushes
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-int curl_push_callback(CURL *parent,
-                       CURL *easy,
+int fetch_push_callback(FETCH *parent,
+                       FETCH *easy,
                        size_t num_headers,
-                       struct curl_pushheaders *headers,
+                       struct fetch_pushheaders *headers,
                        void *clientp);
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PUSHFUNCTION,
-                            curl_push_callback func);
+FETCHMcode fetch_multi_setopt(FETCHM *handle, FETCHMOPT_PUSHFUNCTION,
+                            fetch_push_callback func);
 ~~~
 
 # DESCRIPTION
@@ -58,33 +58,33 @@ functions described below. This only accesses and provides the PUSH_PROMISE
 headers, the normal response headers are provided in the header callback as
 usual.
 
-*clientp* is the pointer set with CURLMOPT_PUSHDATA(3)
+*clientp* is the pointer set with FETCHMOPT_PUSHDATA(3)
 
-If the callback returns CURL_PUSH_OK, the new easy handle is added to the
+If the callback returns FETCH_PUSH_OK, the new easy handle is added to the
 multi handle, the callback must not do that by itself.
 
 The callback can access PUSH_PROMISE headers with two accessor
 functions. These functions can only be used from within this callback and they
-can only access the PUSH_PROMISE headers: curl_pushheader_byname(3) and
-curl_pushheader_bynum(3). The normal response headers are passed to the
+can only access the PUSH_PROMISE headers: fetch_pushheader_byname(3) and
+fetch_pushheader_bynum(3). The normal response headers are passed to the
 header callback for pushed streams just as for normal streams.
 
-The header fields can also be accessed with curl_easy_header(3),
-introduced in later libcurl versions.
+The header fields can also be accessed with fetch_easy_header(3),
+introduced in later libfetch versions.
 
 # CALLBACK RETURN VALUE
 
-## CURL_PUSH_OK (0)
+## FETCH_PUSH_OK (0)
 
 The application has accepted the stream and it can now start receiving data,
-the ownership of the curl handle has been taken over by the application.
+the ownership of the fetch handle has been taken over by the application.
 
-## CURL_PUSH_DENY (1)
+## FETCH_PUSH_DENY (1)
 
 The callback denies the stream and no data reaches the application, the easy
-handle is destroyed by libcurl.
+handle is destroyed by libfetch.
 
-## CURL_PUSH_ERROROUT (2)
+## FETCH_PUSH_ERROROUT (2)
 
 Returning this code rejects the pushed stream and returns an error back on the
 parent stream making it get closed with an error. (Added in 7.72.0)
@@ -105,16 +105,16 @@ NULL, no callback
 #include <string.h>
 
 /* only allow pushes for filenames starting with "push-" */
-int push_callback(CURL *parent,
-                  CURL *easy,
+int push_callback(FETCH *parent,
+                  FETCH *easy,
                   size_t num_headers,
-                  struct curl_pushheaders *headers,
+                  struct fetch_pushheaders *headers,
                   void *clientp)
 {
   char *headp;
   int *transfers = (int *)clientp;
   FILE *out;
-  headp = curl_pushheader_byname(headers, ":path");
+  headp = fetch_pushheader_byname(headers, ":path");
   if(headp && !strncmp(headp, "/push-", 6)) {
     fprintf(stderr, "The PATH is %s\n", headp);
 
@@ -122,21 +122,21 @@ int push_callback(CURL *parent,
     out = fopen("pushed-stream", "wb");
 
     /* write to this file */
-    curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
+    fetch_easy_setopt(easy, FETCHOPT_WRITEDATA, out);
 
     (*transfers)++; /* one more */
 
-    return CURL_PUSH_OK;
+    return FETCH_PUSH_OK;
   }
-  return CURL_PUSH_DENY;
+  return FETCH_PUSH_DENY;
 }
 
 int main(void)
 {
   int counter;
-  CURLM *multi = curl_multi_init();
-  curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, push_callback);
-  curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
+  FETCHM *multi = fetch_multi_init();
+  fetch_multi_setopt(multi, FETCHMOPT_PUSHFUNCTION, push_callback);
+  fetch_multi_setopt(multi, FETCHMOPT_PUSHDATA, &counter);
 }
 ~~~
 
@@ -144,7 +144,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_multi_setopt(3) returns a CURLMcode indicating success or error.
+fetch_multi_setopt(3) returns a FETCHMcode indicating success or error.
 
-CURLM_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHM_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

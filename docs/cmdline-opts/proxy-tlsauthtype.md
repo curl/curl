@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proxy-tlsauthtype
 Arg: <type>
 Help: TLS authentication type for HTTPS proxy
@@ -19,6 +19,6 @@ Example:
 
 Set TLS authentication type with HTTPS proxy. The only supported option is
 `SRP`, for TLS-SRP (RFC 5054). This option works only if the underlying
-libcurl is built with TLS-SRP support.
+libfetch is built with TLS-SRP support.
 
 Equivalent to --tlsauthtype but used in HTTPS proxy context.

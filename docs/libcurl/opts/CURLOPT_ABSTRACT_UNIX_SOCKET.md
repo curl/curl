@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_ABSTRACT_UNIX_SOCKET
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_ABSTRACT_UNIX_SOCKET
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_UNIX_SOCKET_PATH (3)
+  - FETCHOPT_UNIX_SOCKET_PATH (3)
   - unix (7)
 Protocol:
   - All
@@ -14,14 +14,14 @@ Added-in: 7.53.0
 
 # NAME
 
-CURLOPT_ABSTRACT_UNIX_SOCKET - abstract Unix domain socket
+FETCHOPT_ABSTRACT_UNIX_SOCKET - abstract Unix domain socket
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ABSTRACT_UNIX_SOCKET,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_ABSTRACT_UNIX_SOCKET,
                           char *path);
 ~~~
 
@@ -37,7 +37,7 @@ should not contain a leading NULL byte.
 On non-supporting platforms, the abstract address is interpreted as an empty
 string and fails gracefully, generating a runtime error.
 
-This option shares the same semantics as CURLOPT_UNIX_SOCKET_PATH(3) in
+This option shares the same semantics as FETCHOPT_UNIX_SOCKET_PATH(3) in
 which documentation more details can be found. Internally, these two options
 share the same storage and therefore only one of them can be set per handle.
 
@@ -52,13 +52,13 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_ABSTRACT_UNIX_SOCKET, "/tmp/foo.sock");
-    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_ABSTRACT_UNIX_SOCKET, "/tmp/foo.sock");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://localhost/");
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -67,7 +67,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

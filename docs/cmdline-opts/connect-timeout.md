@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: connect-timeout
 Arg: <seconds>
 Help: Maximum time allowed to connect
@@ -16,8 +16,8 @@ Example:
 
 # `--connect-timeout`
 
-Maximum time in seconds that you allow curl's connection to take. This only
-limits the connection phase, so if curl connects within the given period it
+Maximum time in seconds that you allow fetch's connection to take. This only
+limits the connection phase, so if fetch connects within the given period it
 continues - if not it exits.
 
 This option accepts decimal values (added in 7.32.0). The decimal value needs

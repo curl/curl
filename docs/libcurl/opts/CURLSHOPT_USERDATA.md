@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLSHOPT_USERDATA
+SPDX-License-Identifier: fetch
+Title: FETCHSHOPT_USERDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLSHOPT_LOCKFUNC (3)
-  - curl_share_cleanup (3)
-  - curl_share_init (3)
-  - curl_share_setopt (3)
+  - FETCHSHOPT_LOCKFUNC (3)
+  - fetch_share_cleanup (3)
+  - fetch_share_init (3)
+  - fetch_share_setopt (3)
 Protocol:
   - All
 Added-in: 7.10.3
@@ -16,21 +16,21 @@ Added-in: 7.10.3
 
 # NAME
 
-CURLSHOPT_USERDATA - pointer passed to the lock and unlock mutex callbacks
+FETCHSHOPT_USERDATA - pointer passed to the lock and unlock mutex callbacks
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_USERDATA, void *clientp);
+FETCHSHcode fetch_share_setopt(FETCHSH *share, FETCHSHOPT_USERDATA, void *clientp);
 ~~~
 
 # DESCRIPTION
 
-The *clientp* parameter is held verbatim by libcurl and is passed on as
+The *clientp* parameter is held verbatim by libfetch and is passed on as
 the *clientp* argument to the callbacks set with
-CURLSHOPT_LOCKFUNC(3) and CURLSHOPT_UNLOCKFUNC(3).
+FETCHSHOPT_LOCKFUNC(3) and FETCHSHOPT_UNLOCKFUNC(3).
 
 # %PROTOCOLS%
 
@@ -43,12 +43,12 @@ struct secrets {
 
 int main(void)
 {
-  CURLSHcode sh;
+  FETCHSHcode sh;
   struct secrets private_stuff;
-  CURLSH *share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_USERDATA, &private_stuff);
+  FETCHSH *share = fetch_share_init();
+  sh = fetch_share_setopt(share, FETCHSHOPT_USERDATA, &private_stuff);
   if(sh)
-    printf("Error: %s\n", curl_share_strerror(sh));
+    printf("Error: %s\n", fetch_share_strerror(sh));
 }
 ~~~
 
@@ -56,6 +56,6 @@ int main(void)
 
 # RETURN VALUE
 
-CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred. See libcurl-errors(3) for the full list with
+FETCHSHE_OK (zero) means that the option was set properly, non-zero means an
+error occurred. See libfetch-errors(3) for the full list with
 descriptions.

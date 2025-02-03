@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: remote-name-all
 Help: Use the remote filename for all URLs
 Added: 7.19.0

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -45,75 +45,75 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int main(int argc, char *argv[])
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
 
-  struct curl_httppost *formpost = NULL;
-  struct curl_httppost *lastptr = NULL;
-  struct curl_slist *headerlist = NULL;
+  struct fetch_httppost *formpost = NULL;
+  struct fetch_httppost *lastptr = NULL;
+  struct fetch_slist *headerlist = NULL;
   static const char buf[] = "Expect:";
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Fill in the file upload field */
-    curl_formadd(&formpost,
+    fetch_formadd(&formpost,
                  &lastptr,
-                 CURLFORM_COPYNAME, "sendfile",
-                 CURLFORM_FILE, "postit2-formadd.c",
-                 CURLFORM_END);
+                 FETCHFORM_COPYNAME, "sendfile",
+                 FETCHFORM_FILE, "postit2-formadd.c",
+                 FETCHFORM_END);
 
     /* Fill in the filename field */
-    curl_formadd(&formpost,
+    fetch_formadd(&formpost,
                  &lastptr,
-                 CURLFORM_COPYNAME, "filename",
-                 CURLFORM_COPYCONTENTS, "postit2-formadd.c",
-                 CURLFORM_END);
+                 FETCHFORM_COPYNAME, "filename",
+                 FETCHFORM_COPYCONTENTS, "postit2-formadd.c",
+                 FETCHFORM_END);
 
 
     /* Fill in the submit field too, even if this is rarely needed */
-    curl_formadd(&formpost,
+    fetch_formadd(&formpost,
                  &lastptr,
-                 CURLFORM_COPYNAME, "submit",
-                 CURLFORM_COPYCONTENTS, "send",
-                 CURLFORM_END);
+                 FETCHFORM_COPYNAME, "submit",
+                 FETCHFORM_COPYCONTENTS, "send",
+                 FETCHFORM_END);
   )
 
-  curl = curl_easy_init();
+  fetch = fetch_easy_init();
   /* initialize custom header list (stating that Expect: 100-continue is not
      wanted */
-  headerlist = curl_slist_append(headerlist, buf);
-  if(curl) {
+  headerlist = fetch_slist_append(headerlist, buf);
+  if(fetch) {
     /* what URL that receives this POST */
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/examplepost.cgi");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/examplepost.cgi");
     if((argc == 2) && (!strcmp(argv[1], "noexpectheader")))
       /* only disable 100-continue header if explicitly requested */
-      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-    CURL_IGNORE_DEPRECATION(
-      curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+      fetch_easy_setopt(fetch, FETCHOPT_HTTPHEADER, headerlist);
+    FETCH_IGNORE_DEPRECATION(
+      fetch_easy_setopt(fetch, FETCHOPT_HTTPPOST, formpost);
     )
 
     /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
 
-    CURL_IGNORE_DEPRECATION(
+    FETCH_IGNORE_DEPRECATION(
       /* then cleanup the formpost chain */
-      curl_formfree(formpost);
+      fetch_formfree(formpost);
     )
 
     /* free slist */
-    curl_slist_free_all(headerlist);
+    fetch_slist_free_all(headerlist);
   }
   return 0;
 }

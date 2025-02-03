@@ -1,16 +1,16 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSL_CTX_FUNCTION
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSL_CTX_FUNCTION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CA_CACHE_TIMEOUT (3)
-  - CURLOPT_CAINFO (3)
-  - CURLOPT_CAINFO_BLOB (3)
-  - CURLOPT_SSL_CTX_DATA (3)
-  - CURLOPT_SSL_VERIFYHOST (3)
-  - CURLOPT_SSL_VERIFYPEER (3)
+  - FETCHOPT_CA_CACHE_TIMEOUT (3)
+  - FETCHOPT_CAINFO (3)
+  - FETCHOPT_CAINFO_BLOB (3)
+  - FETCHOPT_SSL_CTX_DATA (3)
+  - FETCHOPT_SSL_VERIFYHOST (3)
+  - FETCHOPT_SSL_VERIFYPEER (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -23,16 +23,16 @@ Added-in: 7.10.6
 
 # NAME
 
-CURLOPT_SSL_CTX_FUNCTION - SSL context callback
+FETCHOPT_SSL_CTX_FUNCTION - SSL context callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *clientp);
+FETCHcode ssl_ctx_callback(FETCH *fetch, void *ssl_ctx, void *clientp);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_FUNCTION,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSL_CTX_FUNCTION,
                           ssl_ctx_callback);
 ~~~
 
@@ -41,7 +41,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_FUNCTION,
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-This callback function gets called by libcurl just before the initialization
+This callback function gets called by libfetch just before the initialization
 of an SSL connection after having processed all other SSL related options to
 give a last chance to an application to modify the behavior of the SSL
 initialization. The *ssl_ctx* parameter is a pointer to the SSL library's
@@ -49,7 +49,7 @@ initialization. The *ssl_ctx* parameter is a pointer to the SSL library's
 mbedTLS or a pointer to *br_ssl_client_context* for BearSSL. If an error is
 returned from the callback no attempt to establish a connection is made and
 the perform operation returns the callback's error code. Set the *clientp*
-argument passed in to this callback with the CURLOPT_SSL_CTX_DATA(3) option.
+argument passed in to this callback with the FETCHOPT_SSL_CTX_DATA(3) option.
 
 This function gets called for all new connections made to a server, during the
 SSL negotiation. While *ssl_ctx* points to a newly initialized object each
@@ -63,27 +63,27 @@ change the actual URI of an HTTPS request.
 For OpenSSL, asynchronous certificate verification via *SSL_set_retry_verify*
 is supported. (Added in 8.3.0)
 
-The CURLOPT_SSL_CTX_FUNCTION(3) callback allows the application to reach in
-and modify SSL details in the connection without libcurl itself knowing
-anything about it, which then subsequently can lead to libcurl unknowingly
+The FETCHOPT_SSL_CTX_FUNCTION(3) callback allows the application to reach in
+and modify SSL details in the connection without libfetch itself knowing
+anything about it, which then subsequently can lead to libfetch unknowingly
 reusing SSL connections with different properties. To remedy this you may set
-CURLOPT_FORBID_REUSE(3) from the callback function.
+FETCHOPT_FORBID_REUSE(3) from the callback function.
 
-If you are using DNS-over-HTTPS (DoH) via CURLOPT_DOH_URL(3) then this
-callback is also called for those transfers and the curl handle is set to an
+If you are using DNS-over-HTTPS (DoH) via FETCHOPT_DOH_URL(3) then this
+callback is also called for those transfers and the fetch handle is set to an
 internal handle. **This behavior is subject to change.** We recommend setting
-CURLOPT_PRIVATE(3) on your curl handle so you can identify it correctly in the
+FETCHOPT_PRIVATE(3) on your fetch handle so you can identify it correctly in the
 context callback. If you have a reason to modify DoH SSL context please let us
-know on the curl-library mailing list because we are considering removing this
+know on the fetch-library mailing list because we are considering removing this
 capability.
 
-libcurl does not guarantee the lifetime of the passed in object once this
+libfetch does not guarantee the lifetime of the passed in object once this
 callback function has returned. Your application must not assume that it can
 keep using the SSL context or data derived from it once this function is
 completed.
 
-For libcurl builds using TLS backends that support CA caching and
-CURLOPT_CA_CACHE_TIMEOUT(3) is not set to zero, multiple calls to this
+For libfetch builds using TLS backends that support CA caching and
+FETCHOPT_CA_CACHE_TIMEOUT(3) is not set to zero, multiple calls to this
 callback may be done with the same CA store in memory.
 
 # DEFAULT
@@ -98,10 +98,10 @@ NULL
 /* OpenSSL specific */
 
 #include <openssl/ssl.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include <stdio.h>
 
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static FETCHcode sslctx_function(FETCH *fetch, void *sslctx, void *parm)
 {
   X509_STORE *store;
   X509 *cert = NULL;
@@ -128,13 +128,13 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   BIO_free(bio);
 
   /* all set to go */
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 int main(void)
 {
-  CURL *ch;
-  CURLcode rv;
+  FETCH *ch;
+  FETCHcode rv;
   char *mypem = /* example CA cert PEM - shortened */
     "-----BEGIN CERTIFICATE-----\n"
     "MIIHPTCCBSWgAwIBAgIBADANBgkqhkiG9w0BAQQFADB5MRAwDgYDVQQKEwdSb290\n"
@@ -146,23 +146,23 @@ int main(void)
     "omTxJBzcoTWcFbLUvFUufQb1nA5V9FrWk9p2rSVzTMVD\n"
     "-----END CERTIFICATE-----\n";
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  ch = curl_easy_init();
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  ch = fetch_easy_init();
 
-  curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
-  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
-  curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
+  fetch_easy_setopt(ch, FETCHOPT_SSLCERTTYPE, "PEM");
+  fetch_easy_setopt(ch, FETCHOPT_SSL_VERIFYPEER, 1L);
+  fetch_easy_setopt(ch, FETCHOPT_URL, "https://www.example.com/");
 
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_DATA, mypem);
-  rv = curl_easy_perform(ch);
+  fetch_easy_setopt(ch, FETCHOPT_SSL_CTX_FUNCTION, *sslctx_function);
+  fetch_easy_setopt(ch, FETCHOPT_SSL_CTX_DATA, mypem);
+  rv = fetch_easy_perform(ch);
   if(!rv)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
 
-  curl_easy_cleanup(ch);
-  curl_global_cleanup();
+  fetch_easy_cleanup(ch);
+  fetch_global_cleanup();
   return rv;
 }
 ~~~
@@ -171,6 +171,6 @@ int main(void)
 
 # RETURN VALUE
 
-CURLE_OK if supported; or an error such as:
+FETCHE_OK if supported; or an error such as:
 
-CURLE_NOT_BUILT_IN - Not supported by the SSL backend
+FETCHE_NOT_BUILT_IN - Not supported by the SSL backend

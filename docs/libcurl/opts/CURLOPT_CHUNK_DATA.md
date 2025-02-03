@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_CHUNK_DATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_CHUNK_DATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CHUNK_BGN_FUNCTION (3)
-  - CURLOPT_WILDCARDMATCH (3)
+  - FETCHOPT_CHUNK_BGN_FUNCTION (3)
+  - FETCHOPT_WILDCARDMATCH (3)
 Protocol:
   - FTP
 Added-in: 7.21.0
@@ -14,21 +14,21 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLOPT_CHUNK_DATA - pointer passed to the FTP chunk callbacks
+FETCHOPT_CHUNK_DATA - pointer passed to the FTP chunk callbacks
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CHUNK_DATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_CHUNK_DATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
-Pass a *pointer* that is untouched by libcurl and passed as the ptr
-argument to the CURLOPT_CHUNK_BGN_FUNCTION(3) and
-CURLOPT_CHUNK_END_FUNCTION(3).
+Pass a *pointer* that is untouched by libfetch and passed as the ptr
+argument to the FETCHOPT_CHUNK_BGN_FUNCTION(3) and
+FETCHOPT_CHUNK_END_FUNCTION(3).
 
 # DEFAULT
 
@@ -45,7 +45,7 @@ struct callback_data {
    FILE *output;
 };
 
-static long file_is_coming(struct curl_fileinfo *finfo,
+static long file_is_coming(struct fetch_fileinfo *finfo,
                            void *ptr,
                            int remains)
 {
@@ -54,10 +54,10 @@ static long file_is_coming(struct curl_fileinfo *finfo,
          (unsigned long)finfo->size);
 
   switch(finfo->filetype) {
-  case CURLFILETYPE_DIRECTORY:
+  case FETCHFILETYPE_DIRECTORY:
     printf(" DIR\n");
     break;
-  case CURLFILETYPE_FILE:
+  case FETCHFILETYPE_FILE:
     printf("FILE ");
     break;
   default:
@@ -65,20 +65,20 @@ static long file_is_coming(struct curl_fileinfo *finfo,
     break;
   }
 
-  if(finfo->filetype == CURLFILETYPE_FILE) {
+  if(finfo->filetype == FETCHFILETYPE_FILE) {
     /* do not transfer files >= 50B */
     if(finfo->size > 50) {
       printf("SKIPPED\n");
-      return CURL_CHUNK_BGN_FUNC_SKIP;
+      return FETCH_CHUNK_BGN_FUNC_SKIP;
     }
 
     data->output = fopen(finfo->filename, "wb");
     if(!data->output) {
-      return CURL_CHUNK_BGN_FUNC_FAIL;
+      return FETCH_CHUNK_BGN_FUNC_FAIL;
     }
   }
 
-  return CURL_CHUNK_BGN_FUNC_OK;
+  return FETCH_CHUNK_BGN_FUNC_OK;
 }
 
 int main()
@@ -86,11 +86,11 @@ int main()
   /* data for callback */
   struct callback_data callback_info;
 
-  CURL *curl = curl_easy_init();
+  FETCH *fetch = fetch_easy_init();
 
   /* callback is called before download of concrete file started */
-  curl_easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, file_is_coming);
-  curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &callback_info);
+  fetch_easy_setopt(fetch, FETCHOPT_CHUNK_BGN_FUNCTION, file_is_coming);
+  fetch_easy_setopt(fetch, FETCHOPT_CHUNK_DATA, &callback_info);
 }
 ~~~
 
@@ -98,7 +98,7 @@ int main()
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

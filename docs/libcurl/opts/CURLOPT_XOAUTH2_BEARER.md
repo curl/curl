@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_XOAUTH2_BEARER
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_XOAUTH2_BEARER
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_MAIL_AUTH (3)
-  - CURLOPT_USERNAME (3)
+  - FETCHOPT_MAIL_AUTH (3)
+  - FETCHOPT_USERNAME (3)
 Protocol:
   - HTTP
   - IMAP
@@ -18,14 +18,14 @@ Added-in: 7.33.0
 
 # NAME
 
-CURLOPT_XOAUTH2_BEARER - OAuth 2.0 access token
+FETCHOPT_XOAUTH2_BEARER - OAuth 2.0 access token
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XOAUTH2_BEARER, char *token);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_XOAUTH2_BEARER, char *token);
 ~~~
 
 # DESCRIPTION
@@ -35,7 +35,7 @@ OAuth 2.0 Bearer Access Token for use with HTTP, IMAP, LDAP, POP3 and SMTP
 servers that support the OAuth 2.0 Authorization Framework.
 
 Note: For IMAP, LDAP, POP3 and SMTP, the username used to generate the Bearer
-Token should be supplied via the CURLOPT_USERNAME(3) option.
+Token should be supplied via the FETCHOPT_USERNAME(3) option.
 
 The application does not have to keep the string around after setting this
 option.
@@ -54,13 +54,13 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "pop3://example.com/");
-    curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, "1ab9cb22ba269a7");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "pop3://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_XOAUTH2_BEARER, "1ab9cb22ba269a7");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -73,7 +73,7 @@ Support for OpenLDAP added in 7.82.0.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,5 +1,5 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # PROXY PROTOCOL PREFIXES
 The proxy string may be specified with a protocol:// prefix to specify
 alternative proxy protocols. (Added in 7.21.7)

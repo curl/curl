@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: http0.9
 Tags: Versions
 Protocols: HTTP
@@ -21,7 +21,7 @@ Example:
 Accept an HTTP version 0.9 response.
 
 HTTP/0.9 is a response without headers and therefore you can also connect with
-this to non-HTTP servers and still get a response since curl simply
+this to non-HTTP servers and still get a response since fetch simply
 transparently downgrades - if allowed.
 
 HTTP/0.9 is disabled by default (added in 7.66.0)

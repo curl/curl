@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROXY_TLSAUTH_PASSWORD
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROXY_TLSAUTH_PASSWORD
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PROXY_TLSAUTH_TYPE (3)
-  - CURLOPT_PROXY_TLSAUTH_USERNAME (3)
-  - CURLOPT_TLSAUTH_TYPE (3)
-  - CURLOPT_TLSAUTH_USERNAME (3)
+  - FETCHOPT_PROXY_TLSAUTH_TYPE (3)
+  - FETCHOPT_PROXY_TLSAUTH_USERNAME (3)
+  - FETCHOPT_TLSAUTH_TYPE (3)
+  - FETCHOPT_TLSAUTH_USERNAME (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -19,14 +19,14 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLOPT_PROXY_TLSAUTH_PASSWORD - password to use for proxy TLS authentication
+FETCHOPT_PROXY_TLSAUTH_PASSWORD - password to use for proxy TLS authentication
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_TLSAUTH_PASSWORD,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY_TLSAUTH_PASSWORD,
                           char *pwd);
 ~~~
 
@@ -34,8 +34,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_TLSAUTH_PASSWORD,
 
 Pass a char pointer as parameter, which should point to the null-terminated
 password to use for the TLS authentication method specified with the
-CURLOPT_PROXY_TLSAUTH_TYPE(3) option. Requires that the
-CURLOPT_PROXY_TLSAUTH_USERNAME(3) option also be set.
+FETCHOPT_PROXY_TLSAUTH_TYPE(3) option. Requires that the
+FETCHOPT_PROXY_TLSAUTH_USERNAME(3) option also be set.
 
 The application does not have to keep the string around after setting this
 option.
@@ -54,16 +54,16 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
-    curl_easy_setopt(curl, CURLOPT_PROXY_TLSAUTH_TYPE, "SRP");
-    curl_easy_setopt(curl, CURLOPT_PROXY_TLSAUTH_USERNAME, "user");
-    curl_easy_setopt(curl, CURLOPT_PROXY_TLSAUTH_PASSWORD, "secret");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "https://proxy");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_TLSAUTH_TYPE, "SRP");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_TLSAUTH_USERNAME, "user");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_TLSAUTH_PASSWORD, "secret");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -72,7 +72,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

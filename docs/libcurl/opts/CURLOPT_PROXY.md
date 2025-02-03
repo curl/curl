@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROXY
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROXY
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPPROXYTUNNEL (3)
-  - CURLOPT_PRE_PROXY (3)
-  - CURLOPT_PROXYPORT (3)
-  - CURLOPT_PROXYTYPE (3)
+  - FETCHOPT_HTTPPROXYTUNNEL (3)
+  - FETCHOPT_PRE_PROXY (3)
+  - FETCHOPT_PROXYPORT (3)
+  - FETCHOPT_PROXYTYPE (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -16,14 +16,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_PROXY - proxy to use
+FETCHOPT_PROXY - proxy to use
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY, char *proxy);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY, char *proxy);
 ~~~
 
 # DESCRIPTION
@@ -35,7 +35,7 @@ numerical IP address. A numerical IPv6 address must be written within
 
 To specify port number in this string, append :[port] to the end of the host
 name. The proxy's port number may optionally (but discouraged) be specified
-with the separate option CURLOPT_PROXYPORT(3). If not specified, libcurl
+with the separate option FETCHOPT_PROXYPORT(3). If not specified, libfetch
 defaults to using port 1080 for proxies.
 
 The proxy string may be prefixed with [scheme]:// to specify which kind of
@@ -57,8 +57,8 @@ HTTPS Proxy. (Added in 7.52.0 for OpenSSL and GnuTLS Since 7.87.0, it
 also works for BearSSL, mbedTLS, Rustls, Schannel, Secure Transport and
 wolfSSL.)
 
-This uses HTTP/1 by default. Setting CURLOPT_PROXYTYPE(3) to
-**CURLPROXY_HTTPS2** allows libcurl to negotiate using HTTP/2 with proxy.
+This uses HTTP/1 by default. Setting FETCHOPT_PROXYTYPE(3) to
+**FETCHPROXY_HTTPS2** allows libfetch to negotiate using HTTP/2 with proxy.
 
 ## socks4://
 
@@ -78,14 +78,14 @@ SOCKS5 Proxy. Proxy resolves URL hostname.
 
 ##
 
-Without a scheme prefix, CURLOPT_PROXYTYPE(3) can be used to specify which
+Without a scheme prefix, FETCHOPT_PROXYTYPE(3) can be used to specify which
 kind of proxy the string identifies.
 
-When you tell the library to use an HTTP proxy, libcurl transparently converts
+When you tell the library to use an HTTP proxy, libfetch transparently converts
 operations to HTTP even if you specify an FTP URL etc. This may have an impact
-on what other features of the library you can use, such as CURLOPT_QUOTE(3)
+on what other features of the library you can use, such as FETCHOPT_QUOTE(3)
 and similar FTP specifics that do not work unless you tunnel through the HTTP
-proxy. Such tunneling is activated with CURLOPT_HTTPPROXYTUNNEL(3).
+proxy. Such tunneling is activated with FETCHOPT_HTTPPROXYTUNNEL(3).
 
 Setting the proxy string to "" (an empty string) explicitly disables the use
 of a proxy, even if there is an environment variable set for it.
@@ -99,29 +99,29 @@ single port number used widely for proxies. Specify it.
 When a proxy is used, the active FTP mode as set with *CUROPT_FTPPORT(3)*,
 cannot be used.
 
-Doing FTP over an HTTP proxy without CURLOPT_HTTPPROXYTUNNEL(3) set makes
-libcurl do HTTP with an FTP URL over the proxy. For such transfers, common FTP
-specific options do not work, for example CURLOPT_USE_SSL(3).
+Doing FTP over an HTTP proxy without FETCHOPT_HTTPPROXYTUNNEL(3) set makes
+libfetch do HTTP with an FTP URL over the proxy. For such transfers, common FTP
+specific options do not work, for example FETCHOPT_USE_SSL(3).
 
 # Authentication
 
 The proxy can also be specified with its associated credentials like for
 ordinary URLs in the style: `scheme://username:password@hostname`
 
-Alternatively, set them using CURLOPT_PROXYUSERNAME(3) and
-CURLOPT_PROXYPASSWORD(3).
+Alternatively, set them using FETCHOPT_PROXYUSERNAME(3) and
+FETCHOPT_PROXYPASSWORD(3).
 
 # Environment variables
 
-libcurl respects the proxy environment variables named **http_proxy**,
-**ftp_proxy**, **sftp_proxy** etc. If set, libcurl uses the specified proxy
+libfetch respects the proxy environment variables named **http_proxy**,
+**ftp_proxy**, **sftp_proxy** etc. If set, libfetch uses the specified proxy
 for that URL scheme. For an "FTP://" URL, the **ftp_proxy** is
 considered. **all_proxy** is used if no protocol specific proxy was set.
 
 If **no_proxy** (or **NO_PROXY**) is set, it is the exact equivalent of
-setting the CURLOPT_NOPROXY(3) option.
+setting the FETCHOPT_NOPROXY(3) option.
 
-The CURLOPT_PROXY(3) and CURLOPT_NOPROXY(3) options override environment
+The FETCHOPT_PROXY(3) and FETCHOPT_NOPROXY(3) options override environment
 variables.
 
 # DEFAULT
@@ -135,11 +135,11 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/file.txt");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
-    curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/file.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "http://proxy:80");
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -151,14 +151,14 @@ scheme.
 
 Since 7.21.7 the proxy string supports the socks protocols as "schemes".
 
-Since 7.50.2, unsupported schemes in proxy strings cause libcurl to return
+Since 7.50.2, unsupported schemes in proxy strings cause libfetch to return
 error.
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_SSL_ENGINES
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_SSL_ENGINES
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSLENGINE (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHOPT_SSLENGINE (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -17,24 +17,24 @@ Added-in: 7.12.3
 
 # NAME
 
-CURLINFO_SSL_ENGINES - get an slist of OpenSSL crypto-engines
+FETCHINFO_SSL_ENGINES - get an slist of OpenSSL crypto-engines
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SSL_ENGINES,
-                           struct curl_slist **engine_list);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_SSL_ENGINES,
+                           struct fetch_slist **engine_list);
 ~~~
 
 # DESCRIPTION
 
-Pass the address of a 'struct curl_slist *' to receive a linked-list of
+Pass the address of a 'struct fetch_slist *' to receive a linked-list of
 OpenSSL crypto-engines supported. Note that engines are normally implemented
 in separate dynamic libraries. Hence not all the returned engines may be
-available at runtime. **NOTE:** you must call curl_slist_free_all(3)
-on the list pointer once you are done with it, as libcurl does not free this
+available at runtime. **NOTE:** you must call fetch_slist_free_all(3)
+on the list pointer once you are done with it, as libfetch does not free this
 data for you.
 
 # %PROTOCOLS%
@@ -44,17 +44,17 @@ data for you.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    struct curl_slist *engines;
-    res = curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
-    if((res == CURLE_OK) && engines) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    struct fetch_slist *engines;
+    res = fetch_easy_getinfo(fetch, FETCHINFO_SSL_ENGINES, &engines);
+    if((res == FETCHE_OK) && engines) {
       /* we have a list, free it when done using it */
-      curl_slist_free_all(engines);
+      fetch_slist_free_all(engines);
     }
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -63,7 +63,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

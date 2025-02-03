@@ -1,20 +1,20 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # Experimental
 
-Some features and functionality in curl and libcurl are considered
+Some features and functionality in fetch and libfetch are considered
 **EXPERIMENTAL**.
 
-Experimental support in curl means:
+Experimental support in fetch means:
 
 1. Experimental features are provided to allow users to try them out and
    provide feedback on functionality and API etc before they ship and get
    "carved in stone".
-2. You must enable the feature when invoking configure as otherwise curl is
+2. You must enable the feature when invoking configure as otherwise fetch is
    not built with the feature present.
 3. We strongly advise against using this feature in production.
 4. **We reserve the right to change behavior** of the feature without sticking
@@ -66,7 +66,7 @@ Graduation requirements:
 
 ## SSL session import/export
 
-Import/Export of SSL sessions tickets in libcurl and curl command line
+Import/Export of SSL sessions tickets in libfetch and fetch command line
 option '--ssl-session <filename>' for faster TLS handshakes and use
 of TLSv1.3/QUIC Early Data (0-RTT).
 

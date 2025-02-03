@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 ABI - Application Binary Interface
@@ -15,14 +15,14 @@ ABI - Application Binary Interface
 
 ## Upgrades
 
- A libcurl upgrade does not break the ABI or change established and documented
- behavior. Your application can remain using libcurl just as before, only with
+ A libfetch upgrade does not break the ABI or change established and documented
+ behavior. Your application can remain using libfetch just as before, only with
  fewer bugs and possibly with added new features.
 
 ## Version Numbers
 
- In libcurl land, you cannot tell by the libcurl version number if that
- libcurl is binary compatible or not with another libcurl version. As a rule,
+ In libfetch land, you cannot tell by the libfetch version number if that
+ libfetch is binary compatible or not with another libfetch version. As a rule,
  we do not break the ABI so you can *always* upgrade to a later version without
  any loss or change in functionality.
 
@@ -36,7 +36,7 @@ ABI - Application Binary Interface
  previous ABI version remains working and using the older lib, while newer
  applications build and use the newer one.
 
- During the first seven years of libcurl releases, there have only been four
+ During the first seven years of libfetch releases, there have only been four
  ABI breakages.
 
  We are determined to bump the SONAME as rarely as possible. Ideally, we never
@@ -44,10 +44,10 @@ ABI - Application Binary Interface
 
 ## Downgrades
 
- Going to an older libcurl version from one you are currently using can be a
- tricky thing. Mostly we add features and options to newer libcurls as that
+ Going to an older libfetch version from one you are currently using can be a
+ tricky thing. Mostly we add features and options to newer libfetchs as that
  does not break ABI or hamper existing applications. This has the implication
- that going backwards may get you in a situation where you pick a libcurl that
+ that going backwards may get you in a situation where you pick a libfetch that
  does not support the options your application needs. Or possibly you even
  downgrade so far so you cross an ABI break border and thus a different
  SONAME, and then your application may need to adapt to the modified ABI.
@@ -57,12 +57,12 @@ ABI - Application Binary Interface
  The previous major library SONAME number bumps (breaking backwards
  compatibility) happened the following times:
 
- 0 - libcurl 7.1,   August 2000
+ 0 - libfetch 7.1,   August 2000
 
- 1 - libcurl 7.5    December 2000
+ 1 - libfetch 7.5    December 2000
 
- 2 - libcurl 7.7    March 2001
+ 2 - libfetch 7.7    March 2001
 
- 3 - libcurl 7.12.0 June 2004
+ 3 - libfetch 7.12.0 June 2004
 
- 4 - libcurl 7.16.0 October 2006
+ 4 - libfetch 7.16.0 October 2006

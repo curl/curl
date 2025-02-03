@@ -5,12 +5,12 @@ Copyright (C) Daniel Stenberg,
 <daniel@haxx.se
   >, et al. # # This software is licensed as described in the file COPYING,
   which # you should have received as part of this distribution. The terms # are
-  also available at https://curl.se/docs/copyright.html. # # You may opt to use,
+  also available at https://fetch.se/docs/copyright.html. # # You may opt to use,
   copy, modify, merge, publish, distribute and/or sell # copies of the Software,
   and permit persons to whom the Software is # furnished to do so, under the
   terms of the COPYING file. # # This software is distributed on an "AS IS"
   basis, WITHOUT WARRANTY OF ANY # KIND, either express or implied. # #
-  SPDX-License-Identifier: curl #
+  SPDX-License-Identifier: fetch #
   ########################################################################### #
   Shared between Makefile.am and CMakeLists.txt SUPPORT = \ _AUTHORS.md \
   _BUGS.md \ _DESCRIPTION.md \ _ENVIRONMENT.md \ _EXITCODES.md \ _FILES.md \
@@ -39,7 +39,7 @@ Copyright (C) Daniel Stenberg,
   ignore-content-length.md \ insecure.md \ interface.md \ ip-tos.md \
   ipfs-gateway.md \ ipv4.md \ ipv6.md \ json.md \ junk-session-cookies.md \
   keepalive-cnt.md \ keepalive-time.md \ key-type.md \ key.md \ krb.md \
-  libcurl.md \ limit-rate.md \ list-only.md \ local-port.md \
+  libfetch.md \ limit-rate.md \ list-only.md \ local-port.md \
   location-trusted.md \ location.md \ login-options.md \ mail-auth.md \
   mail-from.md \ mail-rcpt-allowfails.md \ mail-rcpt.md \ manual.md \
   max-filesize.md \ max-redirs.md \ max-time.md \ metalink.md \ mptcp.md \

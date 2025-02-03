@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_REFERER
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_REFERER
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_REFERER (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_header (3)
-  - curl_easy_setopt (3)
+  - FETCHOPT_REFERER (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_header (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.76.0
@@ -16,14 +16,14 @@ Added-in: 7.76.0
 
 # NAME
 
-CURLINFO_REFERER - get the used referrer request header
+FETCHINFO_REFERER - get the used referrer request header
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REFERER, char **hdrp);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_REFERER, char **hdrp);
 ~~~
 
 # DESCRIPTION
@@ -32,7 +32,7 @@ Pass in a pointer to a char pointer and get the referrer header used in the
 most recent request.
 
 The **hdrp** pointer is NULL or points to private memory you MUST NOT free -
-it gets freed when you call curl_easy_cleanup(3) on the corresponding curl
+it gets freed when you call fetch_easy_cleanup(3) on the corresponding fetch
 handle.
 
 # %PROTOCOLS%
@@ -42,19 +42,19 @@ handle.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_REFERER, "https://example.org/referrer");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_REFERER, "https://example.org/referrer");
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       char *hdr = NULL;
-      curl_easy_getinfo(curl, CURLINFO_REFERER, &hdr);
+      fetch_easy_getinfo(fetch, FETCHINFO_REFERER, &hdr);
       if(hdr)
         printf("Referrer header: %s\n", hdr);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -63,7 +63,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

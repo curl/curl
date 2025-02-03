@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proxy1.0
 Arg: <host[:port]>
 Help: Use HTTP/1.0 proxy on given port

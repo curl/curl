@@ -1,5 +1,5 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # GLOBBING
 You can specify multiple URLs or parts of URLs by writing lists within braces
 or ranges within brackets. We call this "globbing".

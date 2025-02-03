@@ -1,50 +1,50 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# Contributing to the curl project
+# Contributing to the fetch project
 
 This document is intended to offer guidelines on how to best contribute to the
-curl project. This concerns new features as well as corrections to existing
+fetch project. This concerns new features as well as corrections to existing
 flaws or bugs.
 
 ## Join the Community
 
-Skip over to [https://curl.se/mail/](https://curl.se/mail/) and join
+Skip over to [https://fetch.se/mail/](https://fetch.se/mail/) and join
 the appropriate mailing list(s). Read up on details before you post
 questions. Read this file before you start sending patches. We prefer
 questions sent to and discussions being held on the mailing list(s), not sent
 to individuals.
 
-Before posting to one of the curl mailing lists, please read up on the
-[mailing list etiquette](https://curl.se/mail/etiquette.html).
+Before posting to one of the fetch mailing lists, please read up on the
+[mailing list etiquette](https://fetch.se/mail/etiquette.html).
 
-We also hang out on IRC in #curl on libera.chat
+We also hang out on IRC in #fetch on libera.chat
 
 If you are at all interested in the code side of things, consider clicking
-'watch' on the [curl repository on GitHub](https://github.com/curl/curl) to be
+'watch' on the [fetch repository on GitHub](https://github.com/fetch/fetch) to be
 notified of pull requests and new issues posted there.
 
 ## License and copyright
 
 When contributing with code, you agree to put your changes and new code under
-the same license curl and libcurl is already using unless stated and agreed
+the same license fetch and libfetch is already using unless stated and agreed
 otherwise.
 
 If you add a larger piece of code, you can opt to make that file or set of
 files to use a different license as long as they do not enforce any changes to
 the rest of the package and they make sense. Such "separate parts" can not be
-GPL licensed (as we do not want copyleft to affect users of libcurl) but they
-must use "GPL compatible" licenses (as we want to allow users to use libcurl
+GPL licensed (as we do not want copyleft to affect users of libfetch) but they
+must use "GPL compatible" licenses (as we want to allow users to use libfetch
 properly in GPL licensed environments).
 
 When changing existing source code, you do not alter the copyright of the
 original file(s). The copyright is still owned by the original creator(s) or
 those who have been assigned copyright by the original author(s).
 
-By submitting a patch to the curl project, you are assumed to have the right
+By submitting a patch to the fetch project, you are assumed to have the right
 to the code and to be allowed by your employer or whatever to hand over that
 patch/code to us. We credit you for your changes as far as possible, to give
 credit but also to keep a trace back to who made what changes. Please always
@@ -53,11 +53,11 @@ provide us with your full real name when contributing,
 ## What To Read
 
 Source code, the man pages, the [INTERNALS
-document](https://curl.se/dev/internals.html),
-[TODO](https://curl.se/docs/todo.html),
-[KNOWN_BUGS](https://curl.se/docs/knownbugs.html) and the [most recent
-changes](https://curl.se/dev/sourceactivity.html) in git. Just lurking on the
-[curl-library mailing list](https://curl.se/mail/list.cgi?list=curl-library)
+document](https://fetch.se/dev/internals.html),
+[TODO](https://fetch.se/docs/todo.html),
+[KNOWN_BUGS](https://fetch.se/docs/knownbugs.html) and the [most recent
+changes](https://fetch.se/dev/sourceactivity.html) in git. Just lurking on the
+[fetch-library mailing list](https://fetch.se/mail/list.cgi?list=fetch-library)
 gives you a lot of insights on what's going on right now. Asking there is a
 good idea too.
 
@@ -66,7 +66,7 @@ good idea too.
 ### Follow code style
 
 When writing C code, follow the
-[CODE_STYLE](https://curl.se/dev/code-style.html) already established in
+[CODE_STYLE](https://fetch.se/dev/code-style.html) already established in
 the project. Consistent style makes code easier to read and mistakes less
 likely to happen. Run `make checksrc` before you submit anything, to make sure
 you follow the basic style. That script does not verify everything, but if it
@@ -134,9 +134,9 @@ verified your changes.
 ## Get your changes merged
 
 Ideally you file a [pull request on
-GitHub](https://github.com/curl/curl/pulls), but you can also send your plain
-patch to [the curl-library mailing
-list](https://curl.se/mail/list.cgi?list=curl-library).
+GitHub](https://github.com/fetch/fetch/pulls), but you can also send your plain
+patch to [the fetch-library mailing
+list](https://fetch.se/mail/list.cgi?list=fetch-library).
 
 If you opt to post a patch on the mailing list, chances are someone converts
 it into a pull request for you, to have the CI jobs verify it proper before it
@@ -156,7 +156,7 @@ changes.
 ## About pull requests
 
 With GitHub it is easy to send a [pull
-request](https://github.com/curl/curl/pulls) to the curl project to have
+request](https://github.com/fetch/fetch/pulls) to the fetch project to have
 changes merged.
 
 We strongly prefer pull requests to mailed patches, as it makes it a proper
@@ -166,7 +166,7 @@ lists.
 
 Every pull request submitted is automatically tested in several different
 ways. [See the CI document for more
-information](https://github.com/curl/curl/blob/master/tests/CI.md).
+information](https://github.com/fetch/fetch/blob/master/tests/CI.md).
 
 Sometimes the tests fail due to a dependency service temporarily being offline
 or otherwise unavailable, e.g. package downloads. In this case you can just
@@ -211,7 +211,7 @@ to the list or better yet: change it to a pull request.
 
 ## Commit messages
 
-How to write git commit messages in the curl project.
+How to write git commit messages in the fetch project.
 
     ---- start ----
     [area]: [short line describing the main effect]
@@ -298,7 +298,7 @@ request and commit to verify that the *REUSE state* of all files are still
 fine.
 
 This means that all files need to have their license and copyright information
-clearly stated. Ideally by having the standard curl source code header, with
+clearly stated. Ideally by having the standard fetch source code header, with
 the `SPDX-License-Identifier` included. If the header does not work, you can
 use a smaller header or add the information for a specific file to the
 `REUSE.toml` file.

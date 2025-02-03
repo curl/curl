@@ -1,27 +1,27 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FTPPORT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FTPPORT
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - FTP
 See-also:
-  - CURLOPT_FTP_USE_EPRT (3)
-  - CURLOPT_FTP_USE_EPSV (3)
+  - FETCHOPT_FTP_USE_EPRT (3)
+  - FETCHOPT_FTP_USE_EPSV (3)
 Added-in: 7.1
 ---
 
 # NAME
 
-CURLOPT_FTPPORT - make FTP transfer active
+FETCHOPT_FTPPORT - make FTP transfer active
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPPORT, char *spec);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FTPPORT, char *spec);
 ~~~
 
 # DESCRIPTION
@@ -39,7 +39,7 @@ does not use the PORT command.
 The address can be followed by a ':' to specify a port, optionally followed by
 a '-' to specify a port range. If the port specified is 0, the operating
 system picks a free port. If a range is provided and all ports in the range
-are not available, libcurl reports CURLE_FTP_PORT_FAILED for the
+are not available, libfetch reports FETCHE_FTP_PORT_FAILED for the
 handle. Invalid port/range settings are ignored. IPv6 addresses followed by a
 port or port range have to be in brackets. IPv6 addresses without port/range
 specifier can be in brackets.
@@ -48,13 +48,13 @@ Examples with specified ports:
 
     eth0:0
     192.168.1.2:32000-33000
-    curl.se:32123
+    fetch.se:32123
     [::1]:1234-4567
 
 We strongly advise against specifying the address with a name, as it causes
-libcurl to do a blocking name resolve call to retrieve the IP address. That
+libfetch to do a blocking name resolve call to retrieve the IP address. That
 name resolve operation does **not** use DNS-over-HTTPS even if
-CURLOPT_DOH_URL(3) is set.
+FETCHOPT_DOH_URL(3) is set.
 
 Using anything else than "-" for this option should typically only be done if
 you have special knowledge and confirmation that it works.
@@ -77,14 +77,14 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL,
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL,
                      "ftp://example.com/old-server/file.txt");
-    curl_easy_setopt(curl, CURLOPT_FTPPORT, "-");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_FTPPORT, "-");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -93,7 +93,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

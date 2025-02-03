@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: b
 Long: cookie
 Arg: <data|filename>
@@ -26,19 +26,19 @@ This option has two slightly separate cookie sending functions.
 Either: pass the exact data to send to the HTTP server in the Cookie header.
 It is supposedly data previously received from the server in a `Set-Cookie:`
 line. The data should be in the format `NAME1=VALUE1; NAME2=VALUE2`. When
-given a set of specific cookies, curl populates its cookie header with this
+given a set of specific cookies, fetch populates its cookie header with this
 content explicitly in all outgoing request(s). If multiple requests are done
 due to authentication, followed redirects or similar, they all get this cookie
 header passed on.
 
 Or: If no `=` symbol is used in the argument, it is instead treated as a
 filename to read previously stored cookie from. This option also activates the
-cookie engine which makes curl record incoming cookies, which may be handy if
+cookie engine which makes fetch record incoming cookies, which may be handy if
 you are using this in combination with the --location option or do multiple
 URL transfers on the same invoke.
 
-If the filename is a single minus ("-"), curl reads the contents from stdin.
-If the filename is an empty string ("") and is the only cookie input, curl
+If the filename is a single minus ("-"), fetch reads the contents from stdin.
+If the filename is an empty string ("") and is the only cookie input, fetch
 activates the cookie engine without any cookies.
 
 The file format of the file to read cookies from should be plain HTTP headers
@@ -56,7 +56,7 @@ Users often want to both read cookies from a file and write updated cookies
 back to a file, so using both --cookie and --cookie-jar in the same command
 line is common.
 
-If curl is built with PSL (**Public Suffix List**) support, it detects and
+If fetch is built with PSL (**Public Suffix List**) support, it detects and
 discards cookies that are specified for such suffix domains that should not be
-allowed to have cookies. If curl is *not* built with PSL support, it has no
+allowed to have cookies. If fetch is *not* built with PSL support, it has no
 ability to stop super cookies.

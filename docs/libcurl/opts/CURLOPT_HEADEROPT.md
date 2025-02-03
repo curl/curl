@@ -1,27 +1,27 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_HEADEROPT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_HEADEROPT
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - HTTP
 See-also:
-  - CURLOPT_HTTPHEADER (3)
-  - CURLOPT_PROXYHEADER (3)
+  - FETCHOPT_HTTPHEADER (3)
+  - FETCHOPT_PROXYHEADER (3)
 Added-in: 7.37.0
 ---
 
 # NAME
 
-CURLOPT_HEADEROPT - send HTTP headers to both proxy and host or separately
+FETCHOPT_HEADEROPT - send HTTP headers to both proxy and host or separately
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADEROPT, long bitmask);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_HEADEROPT, long bitmask);
 ~~~
 
 # DESCRIPTION
@@ -29,21 +29,21 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADEROPT, long bitmask);
 Pass a long that is a bitmask of options of how to deal with headers. The two
 mutually exclusive options are:
 
-**CURLHEADER_UNIFIED** - the headers specified in
-CURLOPT_HTTPHEADER(3) are used in requests both to servers and
-proxies. With this option enabled, CURLOPT_PROXYHEADER(3) does not have
+**FETCHHEADER_UNIFIED** - the headers specified in
+FETCHOPT_HTTPHEADER(3) are used in requests both to servers and
+proxies. With this option enabled, FETCHOPT_PROXYHEADER(3) does not have
 any effect.
 
-**CURLHEADER_SEPARATE** - makes CURLOPT_HTTPHEADER(3) headers only get
+**FETCHHEADER_SEPARATE** - makes FETCHOPT_HTTPHEADER(3) headers only get
 sent to a server and not to a proxy. Proxy headers must be set with
-CURLOPT_PROXYHEADER(3) to get used. Note that if a non-CONNECT request
-is sent to a proxy, libcurl sends both server headers and proxy headers. When
-doing CONNECT, libcurl sends CURLOPT_PROXYHEADER(3) headers only to the
-proxy and then CURLOPT_HTTPHEADER(3) headers only to the server.
+FETCHOPT_PROXYHEADER(3) to get used. Note that if a non-CONNECT request
+is sent to a proxy, libfetch sends both server headers and proxy headers. When
+doing CONNECT, libfetch sends FETCHOPT_PROXYHEADER(3) headers only to the
+proxy and then FETCHOPT_HTTPHEADER(3) headers only to the server.
 
 # DEFAULT
 
-CURLHEADER_SEPARATE (changed in 7.42.1, used CURLHEADER_UNIFIED before then)
+FETCHHEADER_SEPARATE (changed in 7.42.1, used FETCHHEADER_UNIFIED before then)
 
 # %PROTOCOLS%
 
@@ -52,23 +52,23 @@ CURLHEADER_SEPARATE (changed in 7.42.1, used CURLHEADER_UNIFIED before then)
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    struct curl_slist *list;
-    list = curl_slist_append(NULL, "Shoesize: 10");
-    list = curl_slist_append(list, "Accept:");
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://localhost:8080");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    struct fetch_slist *list;
+    list = fetch_slist_append(NULL, "Shoesize: 10");
+    list = fetch_slist_append(list, "Accept:");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "http://localhost:8080");
+    fetch_easy_setopt(fetch, FETCHOPT_HTTPHEADER, list);
 
     /* HTTPS over a proxy makes a separate CONNECT to the proxy, so tell
-       libcurl to not send the custom headers to the proxy. Keep them
+       libfetch to not send the custom headers to the proxy. Keep them
        separate. */
-    curl_easy_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
-    ret = curl_easy_perform(curl);
-    curl_slist_free_all(list);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_HEADEROPT, FETCHHEADER_SEPARATE);
+    ret = fetch_easy_perform(fetch);
+    fetch_slist_free_all(list);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -77,7 +77,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

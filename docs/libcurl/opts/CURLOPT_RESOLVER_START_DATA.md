@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_RESOLVER_START_DATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_RESOLVER_START_DATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PREREQFUNCTION (3)
-  - CURLOPT_RESOLVER_START_FUNCTION (3)
+  - FETCHOPT_PREREQFUNCTION (3)
+  - FETCHOPT_RESOLVER_START_FUNCTION (3)
 Protocol:
   - All
 Added-in: 7.59.0
@@ -14,22 +14,22 @@ Added-in: 7.59.0
 
 # NAME
 
-CURLOPT_RESOLVER_START_DATA - pointer passed to the resolver start callback
+FETCHOPT_RESOLVER_START_DATA - pointer passed to the resolver start callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RESOLVER_START_DATA,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_RESOLVER_START_DATA,
                           void *pointer);
 ~~~
 
 # DESCRIPTION
 
-Pass a *pointer* is be untouched by libcurl and passed as the third
+Pass a *pointer* is be untouched by libfetch and passed as the third
 argument in the resolver start callback set with
-CURLOPT_RESOLVER_START_FUNCTION(3).
+FETCHOPT_RESOLVER_START_FUNCTION(3).
 
 # DEFAULT
 
@@ -51,13 +51,13 @@ static int resolver_start_cb(void *resolver_state, void *reserved,
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, resolver_start_cb);
-    curl_easy_setopt(curl, CURLOPT_RESOLVER_START_DATA, curl);
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_RESOLVER_START_FUNCTION, resolver_start_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_RESOLVER_START_DATA, fetch);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

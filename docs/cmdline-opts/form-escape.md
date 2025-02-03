@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: form-escape
 Help: Escape form fields using backslash
 Protocols: HTTP imap smtp
@@ -10,7 +10,7 @@ Multi: single
 See-also:
   - form
 Example:
-  - --form-escape -F 'field\name=curl' -F 'file=@load"this' $URL
+  - --form-escape -F 'field\name=fetch' -F 'file=@load"this' $URL
 ---
 
 # `--form-escape`

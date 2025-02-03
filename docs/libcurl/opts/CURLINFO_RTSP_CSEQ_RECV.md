@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_RTSP_CSEQ_RECV
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_RTSP_CSEQ_RECV
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_RTSP_SERVER_CSEQ (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_RTSP_SERVER_CSEQ (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - RTSP
 Added-in: 7.20.0
@@ -15,20 +15,20 @@ Added-in: 7.20.0
 
 # NAME
 
-CURLINFO_RTSP_CSEQ_RECV - get the recently received CSeq
+FETCHINFO_RTSP_CSEQ_RECV - get the recently received CSeq
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_RTSP_CSEQ_RECV, long *cseq);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_RTSP_CSEQ_RECV, long *cseq);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a long to receive the most recently received CSeq from the
-server. If your application encounters a *CURLE_RTSP_CSEQ_ERROR* then you
+server. If your application encounters a *FETCHE_RTSP_CSEQ_ERROR* then you
 may wish to troubleshoot and/or fix the CSeq mismatch by peeking at this
 value.
 
@@ -39,16 +39,16 @@ value.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "rtsp://rtsp.example.com");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "rtsp://rtsp.example.com");
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       long cseq;
-      curl_easy_getinfo(curl, CURLINFO_RTSP_CSEQ_RECV, &cseq);
+      fetch_easy_getinfo(fetch, FETCHINFO_RTSP_CSEQ_RECV, &cseq);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -57,7 +57,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proxy-tlsv1
 Help: TLSv1 for HTTPS proxy
 Added: 7.52.0

@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # `hash`
@@ -150,7 +150,7 @@ Called repeatedly, it iterates over all the entries in the hash table.
 Note: it only guarantees functionality if the hash table remains untouched
 during its iteration.
 
-# `curl_off_t` dedicated hash functions
+# `fetch_off_t` dedicated hash functions
 
 ## `Curl_hash_offt_init`
 
@@ -160,13 +160,13 @@ void Curl_hash_offt_init(struct Curl_hash *h,
                          Curl_hash_dtor dtor);
 ~~~
 
-Initializes a hash table for `curl_off_t` values. Pass in desired number of
+Initializes a hash table for `fetch_off_t` values. Pass in desired number of
 `slots` and `dtor` function.
 
 ## `Curl_hash_offt_set`
 
 ~~~c
-void *Curl_hash_offt_set(struct Curl_hash *h, curl_off_t id, void *elem);
+void *Curl_hash_offt_set(struct Curl_hash *h, fetch_off_t id, void *elem);
 ~~~
 
 Associate a custom `elem` pointer with the given `id`.
@@ -174,7 +174,7 @@ Associate a custom `elem` pointer with the given `id`.
 ## `Curl_hash_offt_remove`
 
 ~~~c
-int Curl_hash_offt_remove(struct Curl_hash *h, curl_off_t id);
+int Curl_hash_offt_remove(struct Curl_hash *h, fetch_off_t id);
 ~~~
 
 Remove the `id` from the hash.
@@ -182,7 +182,7 @@ Remove the `id` from the hash.
 ## `Curl_hash_offt_get`
 
 ~~~c
-void *Curl_hash_offt_get(struct Curl_hash *h, curl_off_t id);
+void *Curl_hash_offt_get(struct Curl_hash *h, fetch_off_t id);
 ~~~
 
 Get the pointer associated with the specified `id`.

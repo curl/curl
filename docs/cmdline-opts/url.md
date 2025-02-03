@@ -1,10 +1,10 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: url
 Arg: <url>
 Help: URL to work with
-Category: curl
+Category: fetch
 Added: 7.5
 Multi: append
 See-also:
@@ -18,7 +18,7 @@ Example:
 
 Specify a URL to fetch or send data to.
 
-If the given URL is missing a scheme (such as `http://` or `ftp://` etc) curl
+If the given URL is missing a scheme (such as `http://` or `ftp://` etc) fetch
 guesses which scheme to use based on the hostname. If the outermost subdomain
 name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP case insensitively, then that
 protocol is used, otherwise it assumes HTTP. Scheme guessing can be avoided by

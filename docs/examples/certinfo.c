@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -27,7 +27,7 @@
  */
 #include <stdio.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
 {
@@ -38,29 +38,29 @@ static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://www.example.com/");
 
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, wrfu);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, wrfu);
 
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYHOST, 0L);
 
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-    curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_CERTINFO, 1L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
-      struct curl_certinfo *certinfo;
+      struct fetch_certinfo *certinfo;
 
-      res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &certinfo);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_CERTINFO, &certinfo);
 
       if(!res && certinfo) {
         int i;
@@ -68,7 +68,7 @@ int main(void)
         printf("%d certs!\n", certinfo->num_of_certs);
 
         for(i = 0; i < certinfo->num_of_certs; i++) {
-          struct curl_slist *slist;
+          struct fetch_slist *slist;
 
           for(slist = certinfo->certinfo[i]; slist; slist = slist->next)
             printf("%s\n", slist->data);
@@ -78,10 +78,10 @@ int main(void)
 
     }
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return 0;
 }

@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_STREAM_DEPENDS_E
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_STREAM_DEPENDS_E
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_PIPELINING (3)
-  - CURLOPT_HTTP_VERSION (3)
-  - CURLOPT_STREAM_DEPENDS (3)
-  - CURLOPT_STREAM_WEIGHT (3)
+  - FETCHMOPT_PIPELINING (3)
+  - FETCHOPT_HTTP_VERSION (3)
+  - FETCHOPT_STREAM_DEPENDS (3)
+  - FETCHOPT_STREAM_WEIGHT (3)
 Protocol:
   - HTTP
 Added-in: 7.46.0
@@ -16,20 +16,20 @@ Added-in: 7.46.0
 
 # NAME
 
-CURLOPT_STREAM_DEPENDS_E - stream this transfer depends on exclusively
+FETCHOPT_STREAM_DEPENDS_E - stream this transfer depends on exclusively
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_DEPENDS_E,
-                          CURL *dephandle);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_STREAM_DEPENDS_E,
+                          FETCH *dephandle);
 ~~~
 
 # DESCRIPTION
 
-Pass a `CURL` pointer in *dephandle* to identify the stream within the same
+Pass a `FETCH` pointer in *dephandle* to identify the stream within the same
 connection that this stream is depending upon exclusively. That means it
 depends on it and sets the Exclusive bit.
 
@@ -58,14 +58,14 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  CURL *curl2 = curl_easy_init(); /* a second handle */
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/one");
+  FETCH *fetch = fetch_easy_init();
+  FETCH *fetch2 = fetch_easy_init(); /* a second handle */
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/one");
 
     /* the second depends on the first */
-    curl_easy_setopt(curl2, CURLOPT_URL, "https://example.com/two");
-    curl_easy_setopt(curl2, CURLOPT_STREAM_DEPENDS_E, curl);
+    fetch_easy_setopt(fetch2, FETCHOPT_URL, "https://example.com/two");
+    fetch_easy_setopt(fetch2, FETCHOPT_STREAM_DEPENDS_E, fetch);
 
     /* then add both to a multi handle and transfer them */
   }
@@ -76,7 +76,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

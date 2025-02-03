@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROXY_CAPATH
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROXY_CAPATH
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CAINFO (3)
-  - CURLOPT_DEBUGFUNCTION (3)
-  - CURLOPT_PROXY_CAINFO (3)
-  - CURLOPT_PROXY_SSL_VERIFYHOST (3)
-  - CURLOPT_STDERR (3)
+  - FETCHOPT_CAINFO (3)
+  - FETCHOPT_DEBUGFUNCTION (3)
+  - FETCHOPT_PROXY_CAINFO (3)
+  - FETCHOPT_PROXY_SSL_VERIFYHOST (3)
+  - FETCHOPT_STDERR (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -21,23 +21,23 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLOPT_PROXY_CAPATH - directory holding HTTPS proxy CA certificates
+FETCHOPT_PROXY_CAPATH - directory holding HTTPS proxy CA certificates
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAPATH, char *capath);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY_CAPATH, char *capath);
 ~~~
 
 # DESCRIPTION
 
 Pass a char pointer to a null-terminated string naming a directory holding
-multiple CA certificates to verify the HTTPS proxy with. If libcurl is built
+multiple CA certificates to verify the HTTPS proxy with. If libfetch is built
 against OpenSSL, the certificate directory must be prepared using the OpenSSL
 **c_rehash** utility. This makes sense only when
-CURLOPT_PROXY_SSL_VERIFYPEER(3) is enabled (which it is by default).
+FETCHOPT_PROXY_SSL_VERIFYPEER(3) is enabled (which it is by default).
 
 The application does not have to keep the string around after setting this
 option.
@@ -46,7 +46,7 @@ Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again and switch back to
 internal default.
 
-The default value for this can be figured out with CURLINFO_CAPATH(3).
+The default value for this can be figured out with FETCHINFO_CAPATH(3).
 
 # DEFAULT
 
@@ -59,15 +59,15 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
     /* using an HTTPS proxy */
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost:443");
-    curl_easy_setopt(curl, CURLOPT_PROXY_CAPATH, "/etc/cert-dir");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "https://localhost:443");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_CAPATH, "/etc/cert-dir");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -76,10 +76,10 @@ int main(void)
 
 # RETURN VALUE
 
-CURLE_OK if supported; or an error such as:
+FETCHE_OK if supported; or an error such as:
 
-CURLE_NOT_BUILT_IN - Not supported by the SSL backend
+FETCHE_NOT_BUILT_IN - Not supported by the SSL backend
 
-CURLE_UNKNOWN_OPTION
+FETCHE_UNKNOWN_OPTION
 
-CURLE_OUT_OF_MEMORY
+FETCHE_OUT_OF_MEMORY

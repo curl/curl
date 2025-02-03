@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: 3
 Long: sslv3
 Tags: Versions
@@ -20,5 +20,5 @@ Example:
 
 # `--sslv3`
 
-This option previously asked curl to use SSLv3, but is now ignored
+This option previously asked fetch to use SSLv3, but is now ignored
 (added in 7.77.0). SSLv3 is widely considered insecure (see RFC 7568).

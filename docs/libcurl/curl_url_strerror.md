@@ -1,16 +1,16 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_url_strerror
+SPDX-License-Identifier: fetch
+Title: fetch_url_strerror
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_strerror (3)
-  - curl_multi_strerror (3)
-  - curl_share_strerror (3)
-  - curl_url_get (3)
-  - curl_url_set (3)
-  - libcurl-errors (3)
+  - fetch_easy_strerror (3)
+  - fetch_multi_strerror (3)
+  - fetch_share_strerror (3)
+  - fetch_url_get (3)
+  - fetch_url_set (3)
+  - libfetch-errors (3)
 Protocol:
   - All
 Added-in: 7.80.0
@@ -18,19 +18,19 @@ Added-in: 7.80.0
 
 # NAME
 
-curl_url_strerror - return string describing error code
+fetch_url_strerror - return string describing error code
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-const char *curl_url_strerror(CURLUcode errornum);
+const char *fetch_url_strerror(FETCHUcode errornum);
 ~~~
 
 # DESCRIPTION
 
-This function returns a string describing the CURLUcode error code passed in
+This function returns a string describing the FETCHUcode error code passed in
 the argument *errornum*.
 
 # %PROTOCOLS%
@@ -40,12 +40,12 @@ the argument *errornum*.
 ~~~c
 int main(void)
 {
-  CURLUcode rc;
-  CURLU *url = curl_url();
-  rc = curl_url_set(url, CURLUPART_URL, "https://example.com", 0);
+  FETCHUcode rc;
+  FETCHU *url = fetch_url();
+  rc = fetch_url_set(url, FETCHUPART_URL, "https://example.com", 0);
   if(rc)
-    printf("URL error: %s\n", curl_url_strerror(rc));
-  curl_url_cleanup(url);
+    printf("URL error: %s\n", fetch_url_strerror(rc));
+  fetch_url_cleanup(url);
 }
 ~~~
 

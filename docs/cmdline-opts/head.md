@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: head
 Short: I
 Help: Show document info only
@@ -20,4 +20,4 @@ Example:
 
 Fetch the headers only. HTTP-servers feature the command HEAD which this uses
 to get nothing but the header of a document. When used on an FTP or FILE URL,
-curl displays the file size and last modification time only.
+fetch displays the file size and last modification time only.

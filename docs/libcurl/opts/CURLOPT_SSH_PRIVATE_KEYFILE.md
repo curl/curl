@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSH_PRIVATE_KEYFILE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSH_PRIVATE_KEYFILE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSH_AUTH_TYPES (3)
-  - CURLOPT_SSH_PUBLIC_KEYFILE (3)
+  - FETCHOPT_SSH_AUTH_TYPES (3)
+  - FETCHOPT_SSH_PUBLIC_KEYFILE (3)
 Protocol:
   - SFTP
   - SCP
@@ -15,30 +15,30 @@ Added-in: 7.16.1
 
 # NAME
 
-CURLOPT_SSH_PRIVATE_KEYFILE - private key file for SSH auth
+FETCHOPT_SSH_PRIVATE_KEYFILE - private key file for SSH auth
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_PRIVATE_KEYFILE,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSH_PRIVATE_KEYFILE,
                           char *filename);
 ~~~
 
 # DESCRIPTION
 
 Pass a char pointer pointing to a *filename* for your private key. If not
-used, libcurl defaults to **$HOME/.ssh/id_rsa** or **$HOME/.ssh/id_dsa** if
+used, libfetch defaults to **$HOME/.ssh/id_rsa** or **$HOME/.ssh/id_dsa** if
 the HOME environment variable is set, and in the current directory if HOME is
 not set.
 
 If the file is password-protected, set the password with
-CURLOPT_KEYPASSWD(3).
+FETCHOPT_KEYPASSWD(3).
 
 The SSH library derives the public key from this private key when possible. If
 the SSH library cannot derive the public key from the private one and no
-public one is provided with CURLOPT_SSH_PUBLIC_KEYFILE(3), the transfer
+public one is provided with FETCHOPT_SSH_PUBLIC_KEYFILE(3), the transfer
 fails.
 
 The application does not have to keep the string around after setting this
@@ -55,15 +55,15 @@ As explained above
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/file");
-    curl_easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE,
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "sftp://example.com/file");
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_PRIVATE_KEYFILE,
                      "/home/clarkkent/.ssh/id_rsa");
-    curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "password");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_KEYPASSWD, "password");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -72,7 +72,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

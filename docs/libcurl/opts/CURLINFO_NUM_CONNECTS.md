@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_NUM_CONNECTS
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_NUM_CONNECTS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.12.3
@@ -14,23 +14,23 @@ Added-in: 7.12.3
 
 # NAME
 
-CURLINFO_NUM_CONNECTS - get number of created connections
+FETCHINFO_NUM_CONNECTS - get number of created connections
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_NUM_CONNECTS, long *nump);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_NUM_CONNECTS, long *nump);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a long to receive how many new connections libcurl had to
+Pass a pointer to a long to receive how many new connections libfetch had to
 create to achieve the previous transfer (only the successful connects are
-counted). Combined with CURLINFO_REDIRECT_COUNT(3) you are able to know how
-many times libcurl successfully reused existing connection(s) or not. See the
-connection options of curl_easy_setopt(3) to see how libcurl tries to make
+counted). Combined with FETCHINFO_REDIRECT_COUNT(3) you are able to know how
+many times libfetch successfully reused existing connection(s) or not. See the
+connection options of fetch_easy_setopt(3) to see how libfetch tries to make
 persistent connections to save time.
 
 # %PROTOCOLS%
@@ -40,19 +40,19 @@ persistent connections to save time.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 1L);
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       long connects;
-      res = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &connects);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_NUM_CONNECTS, &connects);
       if(!res)
         printf("It needed %ld connects\n", connects);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -61,7 +61,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

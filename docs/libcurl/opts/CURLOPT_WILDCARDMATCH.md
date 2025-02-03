@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_WILDCARDMATCH
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_WILDCARDMATCH
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CHUNK_BGN_FUNCTION (3)
-  - CURLOPT_CHUNK_END_FUNCTION (3)
-  - CURLOPT_FNMATCH_FUNCTION (3)
-  - CURLOPT_URL (3)
+  - FETCHOPT_CHUNK_BGN_FUNCTION (3)
+  - FETCHOPT_CHUNK_END_FUNCTION (3)
+  - FETCHOPT_FNMATCH_FUNCTION (3)
+  - FETCHOPT_URL (3)
 Protocol:
   - FTP
 Added-in: 7.21.0
@@ -16,26 +16,26 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLOPT_WILDCARDMATCH - directory wildcard transfers
+FETCHOPT_WILDCARDMATCH - directory wildcard transfers
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_WILDCARDMATCH, long onoff);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_WILDCARDMATCH, long onoff);
 ~~~
 
 # DESCRIPTION
 
 Set *onoff* to 1 if you want to transfer multiple files according to a
-filename pattern. The pattern can be specified as part of the CURLOPT_URL(3)
+filename pattern. The pattern can be specified as part of the FETCHOPT_URL(3)
 option, using an **fnmatch**-like pattern (Shell Pattern Matching) in the last
 part of URL (filename).
 
-By default, libcurl uses its internal wildcard matching implementation. You
+By default, libfetch uses its internal wildcard matching implementation. You
 can provide your own matching function by the
-CURLOPT_FNMATCH_FUNCTION(3) option.
+FETCHOPT_FNMATCH_FUNCTION(3) option.
 
 A brief introduction of its syntax follows:
 
@@ -82,23 +82,23 @@ Using the rules above, a filename pattern can be constructed:
 # EXAMPLE
 
 ~~~c
-extern long begin_cb(struct curl_fileinfo *, void *, int);
+extern long begin_cb(struct fetch_fileinfo *, void *, int);
 extern long end_cb(void *ptr);
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     /* turn on wildcard matching */
-    curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_WILDCARDMATCH, 1L);
 
     /* callback is called before download of concrete file started */
-    curl_easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, begin_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_CHUNK_BGN_FUNCTION, begin_cb);
 
     /* callback is called after data from the file have been transferred */
-    curl_easy_setopt(curl, CURLOPT_CHUNK_END_FUNCTION, end_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_CHUNK_END_FUNCTION, end_cb);
 
-    /* See more on https://curl.se/libcurl/c/ftp-wildcard.html */
+    /* See more on https://fetch.se/libfetch/c/ftp-wildcard.html */
   }
 }
 ~~~
@@ -107,7 +107,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -36,17 +36,17 @@ CC = gcc
 # Compiler flags, -g for debug, -c to make an object file
 CFLAGS = -c -g
 
-# This should point to a directory that holds libcurl, if it is not
+# This should point to a directory that holds libfetch, if it is not
 # in the system's standard lib dir
 # We also set a -L to include the directory where we have the OpenSSL
 # libraries
 LDFLAGS = -L/home/dast/lib -L/usr/local/ssl/lib
 
-# We need -lcurl for the curl stuff
+# We need -lfetch for the fetch stuff
 # We need -lsocket and -lnsl when on Solaris
-# We need -lssl and -lcrypto when using libcurl with SSL support
+# We need -lssl and -lcrypto when using libfetch with SSL support
 # We need -lpthread for the pthread example
-LIBS = -lcurl -lsocket -lnsl -lssl -lcrypto
+LIBS = -lfetch -lsocket -lnsl -lssl -lcrypto
 
 # Link the target with all objects and libraries
 $(TARGET) : $(OBJS)

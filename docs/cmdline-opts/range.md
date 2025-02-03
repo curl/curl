@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: range
 Short: r
 Help: Retrieve only the bytes within RANGE
@@ -42,7 +42,7 @@ specifies two separate 100-byte ranges(*) (HTTP)
 ##
 
 (*) = NOTE that these make the server reply with a multipart response, which
-is returned as-is by curl. Parsing or otherwise transforming this response is
+is returned as-is by fetch. Parsing or otherwise transforming this response is
 the responsibility of the caller.
 
 Only digit characters (0-9) are valid in the 'start' and 'stop' fields of the
@@ -50,7 +50,7 @@ Only digit characters (0-9) are valid in the 'start' and 'stop' fields of the
 server's response is unspecified, depending on the server's configuration.
 
 Many HTTP/1.1 servers do not have this feature enabled, so that when you
-attempt to get a range, curl instead gets the whole document.
+attempt to get a range, fetch instead gets the whole document.
 
 FTP and SFTP range downloads only support the simple 'start-stop' syntax
 (optionally with one of the numbers omitted). FTP use depends on the extended

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: remove-on-error
 Help: Remove output file on errors
 Category: output
@@ -14,8 +14,8 @@ Example:
 
 # `--remove-on-error`
 
-Remove output file if an error occurs. If curl returns an error when told to
-save output in a local file. This prevents curl from leaving a partial file in
+Remove output file if an error occurs. If fetch returns an error when told to
+save output in a local file. This prevents fetch from leaving a partial file in
 the case of an error during transfer.
 
 If the output is not a regular file, this option has no effect.

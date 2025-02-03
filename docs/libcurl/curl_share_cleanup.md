@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_share_cleanup
+SPDX-License-Identifier: fetch
+Title: fetch_share_cleanup
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_share_init (3)
-  - curl_share_setopt (3)
+  - fetch_share_init (3)
+  - fetch_share_setopt (3)
 Protocol:
   - All
 Added-in: 7.10
@@ -14,14 +14,14 @@ Added-in: 7.10
 
 # NAME
 
-curl_share_cleanup - close a shared object
+fetch_share_cleanup - close a shared object
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLSHcode curl_share_cleanup(CURLSH *share_handle);
+FETCHSHcode fetch_share_cleanup(FETCHSH *share_handle);
 ~~~
 
 # DESCRIPTION
@@ -42,11 +42,11 @@ returned, is illegal.
 ~~~c
 int main(void)
 {
-  CURLSHcode sh;
-  CURLSH *share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  FETCHSHcode sh;
+  FETCHSH *share = fetch_share_init();
+  sh = fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_CONNECT);
   /* use the share, then ... */
-  curl_share_cleanup(share);
+  fetch_share_cleanup(share);
 }
 ~~~
 
@@ -54,7 +54,7 @@ int main(void)
 
 # RETURN VALUE
 
-CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as *\<curl/curl.h\>* defines. See the libcurl-errors(3) man
+FETCHSHE_OK (zero) means that the option was set properly, non-zero means an
+error occurred as *\<fetch/fetch.h\>* defines. See the libfetch-errors(3) man
 page for the full list with descriptions. If an error occurs, then the share
 object is not deleted.

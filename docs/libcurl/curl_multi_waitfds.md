@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_multi_waitfds
+SPDX-License-Identifier: fetch
+Title: fetch_multi_waitfds
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_multi_perform (3)
-  - curl_multi_poll (3)
-  - curl_multi_wait (3)
-  - curl_multi_fdset (3)
+  - fetch_multi_perform (3)
+  - fetch_multi_poll (3)
+  - fetch_multi_wait (3)
+  - fetch_multi_fdset (3)
 Protocol:
   - All
 Added-in: 8.8.0
@@ -16,33 +16,33 @@ Added-in: 8.8.0
 
 # NAME
 
-curl_multi_waitfds - extract file descriptor information from a multi handle
+fetch_multi_waitfds - extract file descriptor information from a multi handle
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include <stdlib.h>
 
-CURLMcode curl_multi_waitfds(CURLM *multi,
-                             struct curl_waitfd *ufds,
+FETCHMcode fetch_multi_waitfds(FETCHM *multi,
+                             struct fetch_waitfd *ufds,
                              unsigned int size,
                              unsigned int *fd_count);
 ~~~
 
 # DESCRIPTION
 
-This function extracts *curl_waitfd* structures which are similar to
+This function extracts *fetch_waitfd* structures which are similar to
 *poll(2)*'s *pollfd* structure from a given multi_handle.
 
 These structures can be used for polling on multi_handle file descriptors in a
-fashion similar to curl_multi_poll(3). The curl_multi_perform(3)
+fashion similar to fetch_multi_poll(3). The fetch_multi_perform(3)
 function should be called as soon as one of them is ready to be read from or
 written to.
 
-libcurl fills provided *ufds* array up to the *size*.
+libfetch fills provided *ufds* array up to the *size*.
 If a number of descriptors used by the multi_handle is greater than the
-*size* parameter then libcurl returns CURLM_OUT_OF_MEMORY error.
+*size* parameter then libfetch returns FETCHM_OUT_OF_MEMORY error.
 
 If the *fd_count* argument is not a null pointer, it points to a variable
 that on return specifies the number of descriptors used by the multi_handle to
@@ -62,21 +62,21 @@ than or equal to the number of descriptors.
 
 int main(void)
 {
-  CURLMcode mc;
-  struct curl_waitfd *ufds;
+  FETCHMcode mc;
+  struct fetch_waitfd *ufds;
 
-  CURLM *multi = curl_multi_init();
+  FETCHM *multi = fetch_multi_init();
 
   do {
-    /* call curl_multi_perform() */
+    /* call fetch_multi_perform() */
 
     /* get the count of file descriptors from the transfers */
     unsigned int fd_count = 0;
 
-    mc = curl_multi_waitfds(multi, NULL, 0, &fd_count);
+    mc = fetch_multi_waitfds(multi, NULL, 0, &fd_count);
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
+    if(mc != FETCHM_OK) {
+      fprintf(stderr, "fetch_multi_waitfds() failed, code %d.\n", mc);
       break;
     }
 
@@ -84,13 +84,13 @@ int main(void)
       continue; /* no descriptors yet */
 
     /* allocate storage for our descriptors */
-    ufds = malloc(fd_count * sizeof(struct curl_waitfd));
+    ufds = malloc(fd_count * sizeof(struct fetch_waitfd));
 
     /* get wait descriptors from the transfers and put them into array. */
-    mc = curl_multi_waitfds(multi, ufds, fd_count, &fd_count);
+    mc = fetch_multi_waitfds(multi, ufds, fd_count, &fd_count);
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
+    if(mc != FETCHM_OK) {
+      fprintf(stderr, "fetch_multi_waitfds() failed, code %d.\n", mc);
       free(ufds);
       break;
     }
@@ -106,7 +106,7 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLMcode indicating success or error.
+This function returns a FETCHMcode indicating success or error.
 
-CURLM_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHM_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

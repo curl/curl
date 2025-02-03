@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_AWS_SIGV4
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_AWS_SIGV4
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HEADEROPT (3)
-  - CURLOPT_HTTPAUTH (3)
-  - CURLOPT_HTTPHEADER (3)
-  - CURLOPT_PROXYAUTH (3)
+  - FETCHOPT_HEADEROPT (3)
+  - FETCHOPT_HTTPAUTH (3)
+  - FETCHOPT_HTTPHEADER (3)
+  - FETCHOPT_PROXYAUTH (3)
 Protocol:
   - HTTP
 Added-in: 7.75.0
@@ -16,14 +16,14 @@ Added-in: 7.75.0
 
 # NAME
 
-CURLOPT_AWS_SIGV4 - V4 signature
+FETCHOPT_AWS_SIGV4 - V4 signature
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4, char *param);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_AWS_SIGV4, char *param);
 ~~~
 
 # DESCRIPTION
@@ -53,11 +53,11 @@ hostname specified in the URL if omitted.
 
 ##
 
-NOTE: This call set CURLOPT_HTTPAUTH(3) to CURLAUTH_AWS_SIGV4. Calling
-CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same as calling this with
+NOTE: This call set FETCHOPT_HTTPAUTH(3) to FETCHAUTH_AWS_SIGV4. Calling
+FETCHOPT_HTTPAUTH(3) with FETCHAUTH_AWS_SIGV4 is the same as calling this with
 **"aws:amz"** in parameter.
 
-Example with "Test:Try", when curl uses the algorithm, it generates
+Example with "Test:Try", when fetch uses the algorithm, it generates
 **"TEST-HMAC-SHA256"** for "Algorithm", **"x-try-date"** and **"X-Try-Date"**
 for "date", **"test4_request"** for "request type",
 **"SignedHeaders=content-type;host;x-try-date"** for "signed headers"
@@ -65,7 +65,7 @@ for "date", **"test4_request"** for "request type",
 If you use just "test", instead of "test:try", test is used for every
 generated string.
 
-Setting CURLOPT_HTTPAUTH(3) with the CURLAUTH_AWS_SIGV4 bit set is the same as
+Setting FETCHOPT_HTTPAUTH(3) with the FETCHAUTH_AWS_SIGV4 bit set is the same as
 setting this option with a **"aws:amz"** parameter.
 
 The application does not have to keep the string around after setting this
@@ -85,20 +85,20 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
+  FETCH *fetch = fetch_easy_init();
 
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL,
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL,
                     "https://service.region.example.com/uri");
-    curl_easy_setopt(curl, CURLOPT_AWS_SIGV4, "provider1:provider2");
+    fetch_easy_setopt(fetch, FETCHOPT_AWS_SIGV4, "provider1:provider2");
 
-    /* service and region can also be set in CURLOPT_AWS_SIGV4 */
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/uri");
-    curl_easy_setopt(curl, CURLOPT_AWS_SIGV4,
+    /* service and region can also be set in FETCHOPT_AWS_SIGV4 */
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/uri");
+    fetch_easy_setopt(fetch, FETCHOPT_AWS_SIGV4,
                      "provider1:provider2:region:service");
 
-    curl_easy_setopt(curl, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
-    curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -106,12 +106,12 @@ int main(void)
 # NOTES
 
 This option overrides the other auth types you might have set in
-CURLOPT_HTTPAUTH(3) which should be highlighted as this makes this auth method
+FETCHOPT_HTTPAUTH(3) which should be highlighted as this makes this auth method
 special. This method cannot be combined with other auth types.
 
 A sha256 checksum of the request payload is used as input to the signature
 calculation. For POST requests, this is a checksum of the provided
-CURLOPT_POSTFIELDS(3). Otherwise, it is the checksum of an empty buffer. For
+FETCHOPT_POSTFIELDS(3). Otherwise, it is the checksum of an empty buffer. For
 requests like PUT, you can provide your own checksum in an HTTP header named
 **x-provider2-content-sha256**.
 
@@ -123,7 +123,7 @@ the special value "UNSIGNED-PAYLOAD".
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

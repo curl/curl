@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Dorian Craps, <dorian.craps@student.vinci.be>
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: mptcp
 Added: 8.9.0
 Help: Enable Multipath TCP
@@ -27,5 +27,5 @@ This option is currently only supported on Linux starting from kernel 5.6. Only
 TCP connections are modified, hence this option does not effect HTTP/3 (QUIC)
 or UDP connections.
 
-The server curl connects to must also support MPTCP. If not, the connection
+The server fetch connects to must also support MPTCP. If not, the connection
 seamlessly falls back to TCP.

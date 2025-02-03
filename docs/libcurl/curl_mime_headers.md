@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_headers
+SPDX-License-Identifier: fetch
+Title: fetch_mime_headers
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_mime_addpart (3)
-  - curl_mime_name (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_name (3)
 Protocol:
   - HTTP
   - IMAP
@@ -16,20 +16,20 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_headers - set a mime part's custom headers
+fetch_mime_headers - set a mime part's custom headers
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_mime_headers(curl_mimepart *part,
-                           struct curl_slist *headers, int take_ownership);
+FETCHcode fetch_mime_headers(fetch_mimepart *part,
+                           struct fetch_slist *headers, int take_ownership);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_headers(3) sets a mime part's custom headers.
+fetch_mime_headers(3) sets a mime part's custom headers.
 
 *part* is the part's handle to assign the custom headers list to.
 
@@ -50,29 +50,29 @@ set by the last call is retained.
 ~~~c
 int main(void)
 {
-  struct curl_slist *headers = NULL;
-  CURL *easy = curl_easy_init();
-  curl_mime *mime;
-  curl_mimepart *part;
+  struct fetch_slist *headers = NULL;
+  FETCH *easy = fetch_easy_init();
+  fetch_mime *mime;
+  fetch_mimepart *part;
 
-  headers = curl_slist_append(headers, "Custom-Header: mooo");
+  headers = fetch_slist_append(headers, "Custom-Header: mooo");
 
-  mime = curl_mime_init(easy);
-  part = curl_mime_addpart(mime);
+  mime = fetch_mime_init(easy);
+  part = fetch_mime_addpart(mime);
 
   /* use these headers in the part, takes ownership */
-  curl_mime_headers(part, headers, 1);
+  fetch_mime_headers(part, headers, 1);
 
   /* pass on this data */
-  curl_mime_data(part, "12345679", CURL_ZERO_TERMINATED);
+  fetch_mime_data(part, "12345679", FETCH_ZERO_TERMINATED);
 
   /* set name */
-  curl_mime_name(part, "numbers");
+  fetch_mime_name(part, "numbers");
 
   /* Post and send it. */
-  curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);
-  curl_easy_setopt(easy, CURLOPT_URL, "https://example.com");
-  curl_easy_perform(easy);
+  fetch_easy_setopt(easy, FETCHOPT_MIMEPOST, mime);
+  fetch_easy_setopt(easy, FETCHOPT_URL, "https://example.com");
+  fetch_easy_perform(easy);
 }
 ~~~
 
@@ -80,9 +80,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # HTTP3 (and QUIC)
@@ -27,11 +27,11 @@ QUIC libraries we are using:
 
 ## Experimental
 
-HTTP/3 support in curl is considered **EXPERIMENTAL** until further notice
+HTTP/3 support in fetch is considered **EXPERIMENTAL** until further notice
 when built to use *quiche* or *msh3*. Only the *ngtcp2* backend is not
 experimental.
 
-Further development and tweaking of the HTTP/3 support in curl happens in the
+Further development and tweaking of the HTTP/3 support in fetch happens in the
 master branch using pull-requests, just like ordinary changes.
 
 To fix before we remove the experimental label:
@@ -41,7 +41,7 @@ To fix before we remove the experimental label:
 
 # ngtcp2 version
 
-Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
+Building fetch with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
 
  * `ngtcp2`: v1.2.0
  * `nghttp3`: v1.1.0
@@ -80,11 +80,11 @@ Build ngtcp2:
      % make
      % make install
 
-Build curl:
+Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl
+     % git clone https://github.com/fetch/fetch
+     % cd fetch
      % autoreconf -fi
      % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
@@ -124,11 +124,11 @@ Build ngtcp2:
      % make
      % make install
 
-Build curl:
+Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl
+     % git clone https://github.com/fetch/fetch
+     % cd fetch
      % autoreconf -fi
      % ./configure --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
@@ -166,11 +166,11 @@ Build ngtcp2:
      % make
      % make install
 
-Build curl:
+Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl
+     % git clone https://github.com/fetch/fetch
+     % cd fetch
      % autoreconf -fi
      % ./configure --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
@@ -180,7 +180,7 @@ Build curl:
 
 quiche support is **EXPERIMENTAL**
 
-Since the quiche build manages its dependencies, curl can be built against the latest version. You are *probably* able to build against their main branch, but in case of problems, we recommend their latest release tag.
+Since the quiche build manages its dependencies, fetch can be built against the latest version. You are *probably* able to build against their main branch, but in case of problems, we recommend their latest release tag.
 
 ## Build
 
@@ -193,11 +193,11 @@ Build quiche and BoringSSL:
      % mkdir quiche/deps/boringssl/src/lib
      % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
-Build curl:
+Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl
+     % git clone https://github.com/fetch/fetch
+     % cd fetch
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
@@ -230,22 +230,22 @@ Build nghttp3:
      % make
      % make install
 
-Build curl:
+Build fetch:
 
      % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl
+     % git clone https://github.com/fetch/fetch
+     % cd fetch
      % autoreconf -fi
      % LDFLAGS="-Wl,-rpath,<somewhere>/lib" ./configure --with-openssl=<somewhere> --with-openssl-quic --with-nghttp3=<somewhere2>
      % make
      % make install
 
-You can build curl with cmake:
+You can build fetch with cmake:
 
      % cd ..
-     % git clone https://github.com/curl/curl
-     % cd curl
-     % cmake . -B bld -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+     % git clone https://github.com/fetch/fetch
+     % cd fetch
+     % cmake . -B bld -DFETCH_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
      % cmake --build bld
      % cmake --install bld
 
@@ -270,16 +270,16 @@ Build msh3:
      % cmake --build .
      % cmake --install .
 
-Build curl:
+Build fetch:
 
-     % git clone https://github.com/curl/curl
-     % cd curl
+     % git clone https://github.com/fetch/fetch
+     % cd fetch
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-msh3=/usr/local --with-openssl
      % make
      % make install
 
-Run from `/usr/local/bin/curl`.
+Run from `/usr/local/bin/fetch`.
 
 ## Build Windows
 
@@ -296,38 +296,38 @@ with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl`
 option to the generate command above. Also note that OpenSSL brings with it an
 additional set of build dependencies not specified here.
 
-Build curl (in [Visual Studio Command
+Build fetch (in [Visual Studio Command
 prompt](../winbuild/README.md#open-a-command-prompt)):
 
-     % git clone https://github.com/curl/curl
-     % cd curl/winbuild
+     % git clone https://github.com/fetch/fetch
+     % cd fetch/winbuild
      % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
 
-Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that
+Run in the `C:/Program Files/msh3/lib` directory, copy `fetch.exe` to that
 directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
-`curl.exe` directory. For example:
+`fetch.exe` directory. For example:
 
-     % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://curl.se/
+     % C:\Program Files\msh3\lib> F:\fetch\builds\libfetch-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\fetch.exe --http3 https://fetch.se/
 
 # `--http3`
 
 Use only HTTP/3:
 
-     % curl --http3-only https://example.org:4433/
+     % fetch --http3-only https://example.org:4433/
 
 Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
 
-     % curl --http3 https://example.org:4433/
+     % fetch --http3 https://example.org:4433/
 
 Upgrade via Alt-Svc:
 
-     % curl --alt-svc altsvc.cache https://curl.se/
+     % fetch --alt-svc altsvc.cache https://fetch.se/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 
 ### HTTPS eyeballing
 
-With option `--http3` curl attempts earlier HTTP versions as well should the
+With option `--http3` fetch attempts earlier HTTP versions as well should the
 connect attempt via HTTP/3 not succeed "fast enough". This strategy is similar
 to IPv4/6 happy eyeballing where the alternate address family is used in
 parallel after a short delay.
@@ -345,7 +345,7 @@ server on the HTTP/3 connection.
 
 So, without you specifying anything, the hard timeout is 200ms and the soft is 100ms:
 
- * Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection
+ * Ideally, the whole QUIC handshake happens and fetch has an HTTP/3 connection
    in less than 100ms.
  * When QUIC is not supported (or UDP does not work for this network path), no
    reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
@@ -358,14 +358,14 @@ The whole transfer only fails, when **both** QUIC and TLS+TCP fail to
 handshake or time out.
 
 Note that all this happens in addition to IP version happy eyeballing. If the
-name resolution for the server gives more than one IP address, curl tries all
+name resolution for the server gives more than one IP address, fetch tries all
 those until one succeeds - just as with all other protocols. If those IP
 addresses contain both IPv6 and IPv4, those attempts happen, delayed, in
 parallel (the actual eyeballing).
 
 ## Known Bugs
 
-Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTTP3).
+Check out the [list of known HTTP3 bugs](https://fetch.se/docs/knownbugs.html#HTTP3).
 
 # HTTP/3 Test server
 
@@ -380,7 +380,7 @@ are huge but do not occupy that much space on disk since they are just big
 holes.
 
 In a Debian setup you can install apache2. It runs on port 80 and has a
-document root in `/var/www/html`. Download the 8GB file from apache with `curl
+document root in `/var/www/html`. Download the 8GB file from apache with `fetch
 localhost/8GB -o dev/null`
 
 In this description we setup and run an HTTP/3 reverse-proxy in front of the
@@ -405,9 +405,9 @@ Get, build and install nghttp2:
 
 Run the local h3 server on port 9443, make it proxy all traffic through to
 HTTP/1 on localhost port 80. For local toying, we can just use the test cert
-that exists in curl's test dir.
+that exists in fetch's test dir.
 
-     % CERT=$CURLSRC/tests/stunnel.pem
+     % CERT=$FETCHSRC/tests/stunnel.pem
      % $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
       --frontend="localhost,9443;quic"
 

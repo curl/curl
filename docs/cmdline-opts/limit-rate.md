@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: limit-rate
 Arg: <speed>
 Help: Limit transfer speed to RATE
@@ -19,7 +19,7 @@ Example:
 
 # `--limit-rate`
 
-Specify the maximum transfer rate you want curl to use - for both downloads
+Specify the maximum transfer rate you want fetch to use - for both downloads
 and uploads. This feature is useful if you have a limited pipe and you would
 like your transfer not to use your entire bandwidth. To make it slower than it
 otherwise would be.

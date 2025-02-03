@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_DNS_LOCAL_IP4
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_DNS_LOCAL_IP4
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_DNS_INTERFACE (3)
-  - CURLOPT_DNS_LOCAL_IP6 (3)
-  - CURLOPT_DNS_SERVERS (3)
+  - FETCHOPT_DNS_INTERFACE (3)
+  - FETCHOPT_DNS_LOCAL_IP6 (3)
+  - FETCHOPT_DNS_SERVERS (3)
 Protocol:
   - All
 Added-in: 7.33.0
@@ -15,14 +15,14 @@ Added-in: 7.33.0
 
 # NAME
 
-CURLOPT_DNS_LOCAL_IP4 - IPv4 address to bind DNS resolves to
+FETCHOPT_DNS_LOCAL_IP4 - IPv4 address to bind DNS resolves to
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_LOCAL_IP4, char *address);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_DNS_LOCAL_IP4, char *address);
 ~~~
 
 # DESCRIPTION
@@ -49,27 +49,27 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
-    curl_easy_setopt(curl, CURLOPT_DNS_LOCAL_IP4, "192.168.0.14");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
+    fetch_easy_setopt(fetch, FETCHOPT_DNS_LOCAL_IP4, "192.168.0.14");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
 
 # NOTES
 
-This option requires that libcurl was built with a resolver backend that
+This option requires that libfetch was built with a resolver backend that
 supports this operation. The c-ares backend is the only such one.
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

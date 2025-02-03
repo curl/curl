@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLMOPT_PIPELINING_SERVER_BL
+SPDX-License-Identifier: fetch
+Title: FETCHMOPT_PIPELINING_SERVER_BL
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_PIPELINING (3)
-  - CURLMOPT_PIPELINING_SITE_BL (3)
+  - FETCHMOPT_PIPELINING (3)
+  - FETCHMOPT_PIPELINING_SITE_BL (3)
 Protocol:
   - HTTP
 Added-in: 7.30.0
@@ -14,14 +14,14 @@ Added-in: 7.30.0
 
 # NAME
 
-CURLMOPT_PIPELINING_SERVER_BL - pipelining server block list
+FETCHMOPT_PIPELINING_SERVER_BL - pipelining server block list
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING_SERVER_BL,
+FETCHMcode fetch_multi_setopt(FETCHM *handle, FETCHMOPT_PIPELINING_SERVER_BL,
                             char **servers);
 ~~~
 
@@ -32,7 +32,7 @@ No function since pipelining was removed in 7.62.0.
 Pass a **servers** array of char *, ending with a NULL entry. This is a list
 of server types prefixes (in the Server: HTTP header) that are blocked from
 pipelining, i.e server types that are known to not support HTTP
-pipelining. The array is copied by libcurl.
+pipelining. The array is copied by libfetch.
 
 Note that the comparison matches if the Server: header begins with the string
 in the block list, i.e "Server: Ninja 1.2.3" and "Server: Ninja 1.4.0" can
@@ -57,8 +57,8 @@ static char *server_block_list[] =
 };
 int main(void)
 {
-  CURLM *m = curl_multi_init();
-  curl_multi_setopt(m, CURLMOPT_PIPELINING_SERVER_BL, server_block_list);
+  FETCHM *m = fetch_multi_init();
+  fetch_multi_setopt(m, FETCHMOPT_PIPELINING_SERVER_BL, server_block_list);
 }
 ~~~
 
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_multi_setopt(3) returns a CURLMcode indicating success or error.
+fetch_multi_setopt(3) returns a FETCHMcode indicating success or error.
 
-CURLM_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHM_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

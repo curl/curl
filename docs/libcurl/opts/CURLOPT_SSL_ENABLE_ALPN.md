@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSL_ENABLE_ALPN
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSL_ENABLE_ALPN
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSL_ENABLE_NPN (3)
-  - CURLOPT_SSL_OPTIONS (3)
+  - FETCHOPT_SSL_ENABLE_NPN (3)
+  - FETCHOPT_SSL_OPTIONS (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -16,20 +16,20 @@ Added-in: 7.36.0
 
 # NAME
 
-CURLOPT_SSL_ENABLE_ALPN - Application Layer Protocol Negotiation
+FETCHOPT_SSL_ENABLE_ALPN - Application Layer Protocol Negotiation
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_ENABLE_ALPN, long npn);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSL_ENABLE_ALPN, long npn);
 ~~~
 
 # DESCRIPTION
 
 Pass a long as parameter, 0 or 1 where 1 is for enable and 0 for disable. This
-option enables/disables ALPN in the SSL handshake (if the SSL backend libcurl
+option enables/disables ALPN in the SSL handshake (if the SSL backend libfetch
 is built to use supports it), which can be used to negotiate http2.
 
 # DEFAULT
@@ -43,13 +43,13 @@ is built to use supports it), which can be used to negotiate http2.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_SSL_ENABLE_ALPN, 0L);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_ENABLE_ALPN, 0L);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -58,7 +58,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

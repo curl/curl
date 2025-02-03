@@ -1,28 +1,28 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_IGNORE_CONTENT_LENGTH
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_IGNORE_CONTENT_LENGTH
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - HTTP
   - FTP
 See-also:
-  - CURLOPT_HTTP_VERSION (3)
-  - CURLOPT_MAXFILESIZE_LARGE (3)
+  - FETCHOPT_HTTP_VERSION (3)
+  - FETCHOPT_MAXFILESIZE_LARGE (3)
 Added-in: 7.14.1
 ---
 
 # NAME
 
-CURLOPT_IGNORE_CONTENT_LENGTH - ignore content length
+FETCHOPT_IGNORE_CONTENT_LENGTH - ignore content length
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_IGNORE_CONTENT_LENGTH,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_IGNORE_CONTENT_LENGTH,
                           long ignore);
 ~~~
 
@@ -33,11 +33,11 @@ response and ignore asking for or relying on it for FTP transfers.
 
 This is useful for doing HTTP transfers with ancient web servers which report
 incorrect content length for files over 2 gigabytes. If this option is used,
-curl cannot accurately report progress, and it instead stops the download when
+fetch cannot accurately report progress, and it instead stops the download when
 the server ends the connection.
 
 It is also useful with FTP when for example the file is growing while the
-transfer is in progress which otherwise unconditionally causes libcurl to
+transfer is in progress which otherwise unconditionally causes libfetch to
 report error.
 
 Only use this option if strictly necessary.
@@ -53,14 +53,14 @@ Only use this option if strictly necessary.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* we know the server is silly, ignore content-length */
-    curl_easy_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_IGNORE_CONTENT_LENGTH, 1L);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -73,7 +73,7 @@ Support for FTP added in 7.46.0.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_HTTP_CONNECTCODE
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_HTTP_CONNECTCODE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_RESPONSE_CODE (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_RESPONSE_CODE (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.10.7
@@ -15,14 +15,14 @@ Added-in: 7.10.7
 
 # NAME
 
-CURLINFO_HTTP_CONNECTCODE - get the CONNECT response code
+FETCHINFO_HTTP_CONNECTCODE - get the CONNECT response code
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HTTP_CONNECTCODE, long *p);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_HTTP_CONNECTCODE, long *p);
 ~~~
 
 # DESCRIPTION
@@ -38,21 +38,21 @@ available.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* typically CONNECT is used to do HTTPS over HTTP proxies */
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://127.0.0.1");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "http://127.0.0.1");
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       long code;
-      res = curl_easy_getinfo(curl, CURLINFO_HTTP_CONNECTCODE, &code);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_HTTP_CONNECTCODE, &code);
       if(!res && code)
         printf("The CONNECT response code: %03ld\n", code);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -61,7 +61,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

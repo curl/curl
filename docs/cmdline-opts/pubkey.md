@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: pubkey
 Arg: <key>
 Protocols: SFTP SCP
@@ -19,7 +19,7 @@ Example:
 Public key filename. Allows you to provide your public key in this separate
 file.
 
-curl attempts to automatically extract the public key from the private key
+fetch attempts to automatically extract the public key from the private key
 file, so passing this option is generally not required. Note that this public
-key extraction requires libcurl to be linked against a copy of libssh2 1.2.8
+key extraction requires libfetch to be linked against a copy of libssh2 1.2.8
 or higher that is itself linked against OpenSSL. (Added in 7.39.0.)

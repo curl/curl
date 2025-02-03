@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_RESOLVER_START_FUNCTION
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_RESOLVER_START_FUNCTION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PREREQFUNCTION (3)
-  - CURLOPT_RESOLVER_START_DATA (3)
+  - FETCHOPT_PREREQFUNCTION (3)
+  - FETCHOPT_RESOLVER_START_DATA (3)
 Protocol:
   - All
 Added-in: 7.59.0
@@ -14,17 +14,17 @@ Added-in: 7.59.0
 
 # NAME
 
-CURLOPT_RESOLVER_START_FUNCTION - callback called before a new name resolve is started
+FETCHOPT_RESOLVER_START_FUNCTION - callback called before a new name resolve is started
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int resolver_start_cb(void *resolver_state, void *reserved, void *userdata);
 
-CURLcode curl_easy_setopt(CURL *handle,
-                          CURLOPT_RESOLVER_START_FUNCTION,
+FETCHcode fetch_easy_setopt(FETCH *handle,
+                          FETCHOPT_RESOLVER_START_FUNCTION,
                           resolver_start_cb);
 ~~~
 
@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle,
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-This callback function gets called by libcurl every time before a new resolve
+This callback function gets called by libfetch every time before a new resolve
 request is started.
 
 *resolver_state* points to a backend-specific resolver state. Currently only
@@ -44,7 +44,7 @@ socket callback options.
 *reserved* is reserved.
 
 *userdata* is the user pointer set with the
-CURLOPT_RESOLVER_START_DATA(3) option.
+FETCHOPT_RESOLVER_START_DATA(3) option.
 
 The callback must return 0 on success. Returning a non-zero value causes the
 resolve to fail.
@@ -69,13 +69,13 @@ static int start_cb(void *resolver_state, void *reserved,
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, start_cb);
-    curl_easy_setopt(curl, CURLOPT_RESOLVER_START_DATA, curl);
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_RESOLVER_START_FUNCTION, start_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_RESOLVER_START_DATA, fetch);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -84,7 +84,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

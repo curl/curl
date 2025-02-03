@@ -1,13 +1,13 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 Version Numbers and Releases
 ============================
 
- The command line tool curl and the library libcurl are individually
+ The command line tool fetch and the library libfetch are individually
  versioned, but they usually follow each other closely.
 
  The version numbering is always built up using the same system:
@@ -37,18 +37,18 @@ Version Numbers and Releases
  set to zero). 1 becomes 2, 3 becomes 4, 9 becomes 10, 88 becomes 89 and 99
  becomes 100. So, after 1.2.9 comes 1.2.10. After 3.99.3, 3.100.0 might come.
 
- All original curl source release archives are named according to the libcurl
- version (not according to the curl client version that, as said before, might
+ All original fetch source release archives are named according to the libfetch
+ version (not according to the fetch client version that, as said before, might
  differ).
 
- As a service to any application that might want to support new libcurl
+ As a service to any application that might want to support new libfetch
  features while still being able to build with older versions, all releases
- have the libcurl version stored in the `curl/curlver.h` file using a static
+ have the libfetch version stored in the `fetch/fetchver.h` file using a static
  numbering scheme that can be used for comparison. The version number is
  defined as:
 
 ```c
-#define LIBCURL_VERSION_NUM 0xXXYYZZ
+#define LIBFETCH_VERSION_NUM 0xXXYYZZ
 ```
 
  Where `XX`, `YY` and `ZZ` are the main version, release and patch numbers in
@@ -60,4 +60,4 @@ Version Numbers and Releases
  release. It makes comparisons with greater than and less than work.
 
  This number is also available as three separate defines:
- `LIBCURL_VERSION_MAJOR`, `LIBCURL_VERSION_MINOR` and `LIBCURL_VERSION_PATCH`.
+ `LIBFETCH_VERSION_MAJOR`, `LIBFETCH_VERSION_MINOR` and `LIBFETCH_VERSION_PATCH`.

@@ -1,14 +1,14 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# libcurl examples
+# libfetch examples
 
-This directory is for libcurl programming examples. They are meant to show
+This directory is for libfetch programming examples. They are meant to show
 some simple steps on how you can build your own application to take full
-advantage of libcurl.
+advantage of libfetch.
 
 If you end up with other small but still useful example sources, please mail
 them for submission in future packages and on the website.
@@ -21,14 +21,14 @@ first.
 
 Most examples should build fine using a command line like this:
 
-    `curl-config --cc --cflags --libs` -o example-my example.c
+    `fetch-config --cc --cflags --libs` -o example-my example.c
 
 Some compilers do not like having the arguments in this order but instead
 want you do reorganize them like:
 
-    `curl-config --cc` -o example-my example.c `curl-config --cflags --libs`
+    `fetch-config --cc` -o example-my example.c `fetch-config --cflags --libs`
 
-**Please** do not use the `curl.se` site as a test target for your libcurl
+**Please** do not use the `fetch.se` site as a test target for your libfetch
 applications/experiments. Even if some of the examples use that site as a URL
 at some places, it does not mean that the URLs work or that we expect you to
 actually torture our website with your tests. Thanks.

@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_FTP_ENTRY_PATH
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_FTP_ENTRY_PATH
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - FTP
 Added-in: 7.15.4
@@ -14,25 +14,25 @@ Added-in: 7.15.4
 
 # NAME
 
-CURLINFO_FTP_ENTRY_PATH - get entry path in FTP server
+FETCHINFO_FTP_ENTRY_PATH - get entry path in FTP server
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_FTP_ENTRY_PATH, char **path);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_FTP_ENTRY_PATH, char **path);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a char pointer to receive a pointer to a string holding the
-path of the entry path. That is the initial path libcurl ended up in when
+path of the entry path. That is the initial path libfetch ended up in when
 logging on to the remote FTP server. This stores a NULL as pointer if
 something is wrong.
 
 The **path** pointer is NULL or points to private memory. You MUST NOT free
-- it gets freed when you call curl_easy_cleanup(3) on the corresponding curl
+- it gets freed when you call fetch_easy_cleanup(3) on the corresponding fetch
 handle.
 
 # %PROTOCOLS%
@@ -42,22 +42,22 @@ handle.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
       /* extract the entry path */
       char *ep = NULL;
-      res = curl_easy_getinfo(curl, CURLINFO_FTP_ENTRY_PATH, &ep);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_FTP_ENTRY_PATH, &ep);
       if(!res && ep) {
         printf("Entry path was: %s\n", ep);
       }
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -70,7 +70,7 @@ Works for SFTP since 7.21.4
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

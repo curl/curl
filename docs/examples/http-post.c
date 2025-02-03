@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -26,36 +26,36 @@
  * </DESC>
  */
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(curl) {
+  /* get a fetch handle */
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* First set the URL that is about to receive our POST. This URL can
        just as well be an https:// URL if that is what should receive the
        data. */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://postit.example.com/moo.cgi");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://postit.example.com/moo.cgi");
     /* Now specify the POST data */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=daniel&project=curl");
+    fetch_easy_setopt(fetch, FETCHOPT_POSTFIELDS, "name=daniel&project=fetch");
 
     /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return 0;
 }

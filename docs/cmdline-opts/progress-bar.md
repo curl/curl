@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: #
 Long: progress-bar
 Help: Display transfer progress as a bar
@@ -16,7 +16,7 @@ Example:
 
 # `--progress-bar`
 
-Make curl display transfer progress as a simple progress bar instead of the
+Make fetch display transfer progress as a simple progress bar instead of the
 standard, more informational, meter.
 
 This progress bar draws a single line of '#' characters across the screen and

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_UPLOAD_BUFFERSIZE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_UPLOAD_BUFFERSIZE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_BUFFERSIZE (3)
-  - CURLOPT_READFUNCTION (3)
-  - CURLOPT_TCP_NODELAY (3)
+  - FETCHOPT_BUFFERSIZE (3)
+  - FETCHOPT_READFUNCTION (3)
+  - FETCHOPT_TCP_NODELAY (3)
 Protocol:
   - All
 Added-in: 7.62.0
@@ -15,20 +15,20 @@ Added-in: 7.62.0
 
 # NAME
 
-CURLOPT_UPLOAD_BUFFERSIZE - upload buffer size
+FETCHOPT_UPLOAD_BUFFERSIZE - upload buffer size
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPLOAD_BUFFERSIZE, long size);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_UPLOAD_BUFFERSIZE, long size);
 ~~~
 
 # DESCRIPTION
 
 Pass a long specifying your preferred *size* (in bytes) for the upload
-buffer in libcurl. It makes libcurl uses a larger buffer that gets passed to
+buffer in libfetch. It makes libfetch uses a larger buffer that gets passed to
 the next layer in the stack to get sent off. In some setups and for some
 protocols, there is a huge performance benefit of having a larger upload
 buffer.
@@ -57,17 +57,17 @@ transfer as that may lead to unintended consequences.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "sftp://example.com/foo.bin");
 
-    /* ask libcurl to allocate a larger upload buffer */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD_BUFFERSIZE, 120000L);
+    /* ask libfetch to allocate a larger upload buffer */
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD_BUFFERSIZE, 120000L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -76,7 +76,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

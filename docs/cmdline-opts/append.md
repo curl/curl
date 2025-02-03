@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: a
 Long: append
 Help: Append to target file when uploading
@@ -17,7 +17,7 @@ Example:
 
 # `--append`
 
-When used in an upload, this option makes curl append to the target file
+When used in an upload, this option makes fetch append to the target file
 instead of overwriting it. If the remote file does not exist, it is
 created. Note that this flag is ignored by some SFTP servers (including
 OpenSSH).

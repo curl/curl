@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_pushheader_bynum
+SPDX-License-Identifier: fetch
+Title: fetch_pushheader_bynum
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_PUSHFUNCTION (3)
-  - curl_pushheader_byname (3)
+  - FETCHMOPT_PUSHFUNCTION (3)
+  - fetch_pushheader_byname (3)
 Protocol:
   - HTTP
 Added-in: 7.44.0
@@ -14,25 +14,25 @@ Added-in: 7.44.0
 
 # NAME
 
-curl_pushheader_bynum - get a push header by index
+fetch_pushheader_bynum - get a push header by index
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num);
+char *fetch_pushheader_bynum(struct fetch_pushheaders *h, size_t num);
 ~~~
 
 # DESCRIPTION
 
 This is a function that is only functional within a
-CURLMOPT_PUSHFUNCTION(3) callback. It makes no sense to try to use it
+FETCHMOPT_PUSHFUNCTION(3) callback. It makes no sense to try to use it
 elsewhere and it has no function then.
 
 It returns the value for the header field at the given index **num**, for
 the incoming server push request or NULL. The data pointed to is freed by
-libcurl when this callback returns. The returned pointer points to a
+libfetch when this callback returns. The returned pointer points to a
 "name:value" string that gets freed when this callback returns.
 
 # %PROTOCOLS%
@@ -41,27 +41,27 @@ libcurl when this callback returns. The returned pointer points to a
 
 ~~~c
 /* output all the incoming push request headers */
-static int push_cb(CURL *parent,
-                   CURL *easy,
+static int push_cb(FETCH *parent,
+                   FETCH *easy,
                    size_t num_headers,
-                   struct curl_pushheaders *headers,
+                   struct fetch_pushheaders *headers,
                    void *clientp)
 {
   int i = 0;
   char *field;
   do {
-     field = curl_pushheader_bynum(headers, i);
+     field = fetch_pushheader_bynum(headers, i);
      if(field)
        fprintf(stderr, "Push header: %s\n", field);
      i++;
   } while(field);
-  return CURL_PUSH_OK; /* permission granted */
+  return FETCH_PUSH_OK; /* permission granted */
 }
 
 int main(void)
 {
-  CURLM *multi = curl_multi_init();
-  curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, push_cb);
+  FETCHM *multi = fetch_multi_init();
+  fetch_multi_setopt(multi, FETCHMOPT_PUSHFUNCTION, push_cb);
 }
 ~~~
 

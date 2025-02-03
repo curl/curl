@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -29,12 +29,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* curl stuff */
-#include <curl/curl.h>
-#include <curl/mprintf.h>
+/* fetch stuff */
+#include <fetch/fetch.h>
+#include <fetch/mprintf.h>
 
-#ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl, cannot do HTTP/2 server push!"
+#ifndef FETCHPIPE_MULTIPLEX
+#error "too old libfetch, cannot do HTTP/2 server push!"
 #endif
 
 static
@@ -87,7 +87,7 @@ void dump(const char *text, unsigned char *ptr, size_t size,
 }
 
 static
-int my_trace(CURL *handle, curl_infotype type,
+int my_trace(FETCH *handle, fetch_infotype type,
              char *data, size_t size,
              void *userp)
 {
@@ -95,25 +95,25 @@ int my_trace(CURL *handle, curl_infotype type,
   (void)handle; /* prevent compiler warning */
   (void)userp;
   switch(type) {
-  case CURLINFO_TEXT:
+  case FETCHINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
     return 0;
-  case CURLINFO_HEADER_OUT:
+  case FETCHINFO_HEADER_OUT:
     text = "=> Send header";
     break;
-  case CURLINFO_DATA_OUT:
+  case FETCHINFO_DATA_OUT:
     text = "=> Send data";
     break;
-  case CURLINFO_SSL_DATA_OUT:
+  case FETCHINFO_SSL_DATA_OUT:
     text = "=> Send SSL data";
     break;
-  case CURLINFO_HEADER_IN:
+  case FETCHINFO_HEADER_IN:
     text = "<= Recv header";
     break;
-  case CURLINFO_DATA_IN:
+  case FETCHINFO_DATA_IN:
     text = "<= Recv data";
     break;
-  case CURLINFO_SSL_DATA_IN:
+  case FETCHINFO_SSL_DATA_IN:
     text = "<= Recv SSL data";
     break;
   default: /* in case a new one is introduced to shock us */
@@ -126,7 +126,7 @@ int my_trace(CURL *handle, curl_infotype type,
 
 #define OUTPUTFILE "dl"
 
-static int setup(CURL *hnd, const char *url)
+static int setup(FETCH *hnd, const char *url)
 {
   FILE *out = fopen(OUTPUTFILE, "wb");
   if(!out)
@@ -134,34 +134,34 @@ static int setup(CURL *hnd, const char *url)
     return 1;
 
   /* write to this file */
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
+  fetch_easy_setopt(hnd, FETCHOPT_WRITEDATA, out);
 
   /* set the same URL */
-  curl_easy_setopt(hnd, CURLOPT_URL, url);
+  fetch_easy_setopt(hnd, FETCHOPT_URL, url);
 
   /* please be verbose */
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
+  fetch_easy_setopt(hnd, FETCHOPT_VERBOSE, 1L);
+  fetch_easy_setopt(hnd, FETCHOPT_DEBUGFUNCTION, my_trace);
 
   /* HTTP/2 please */
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+  fetch_easy_setopt(hnd, FETCHOPT_HTTP_VERSION, FETCH_HTTP_VERSION_2_0);
 
   /* we use a self-signed test server, skip verification during debugging */
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+  fetch_easy_setopt(hnd, FETCHOPT_SSL_VERIFYPEER, 0L);
+  fetch_easy_setopt(hnd, FETCHOPT_SSL_VERIFYHOST, 0L);
 
-#if (CURLPIPE_MULTIPLEX > 0)
+#if (FETCHPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+  fetch_easy_setopt(hnd, FETCHOPT_PIPEWAIT, 1L);
 #endif
   return 0; /* all is good */
 }
 
 /* called when there is an incoming push */
-static int server_push_callback(CURL *parent,
-                                CURL *easy,
+static int server_push_callback(FETCH *parent,
+                                FETCH *easy,
                                 size_t num_headers,
-                                struct curl_pushheaders *headers,
+                                struct fetch_pushheaders *headers,
                                 void *userp)
 {
   char *headp;
@@ -173,34 +173,34 @@ static int server_push_callback(CURL *parent,
 
   (void)parent; /* we have no use for this */
 
-  curl_msnprintf(filename, 128, "push%u", count++);
+  fetch_msnprintf(filename, 128, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
   if(!out) {
     /* if we cannot save it, deny it */
     fprintf(stderr, "Failed to create output file for push\n");
-    return CURL_PUSH_DENY;
+    return FETCH_PUSH_DENY;
   }
 
   /* write to this file */
-  curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
+  fetch_easy_setopt(easy, FETCHOPT_WRITEDATA, out);
 
   fprintf(stderr, "**** push callback approves stream %u, got %lu headers!\n",
           count, (unsigned long)num_headers);
 
   for(i = 0; i < num_headers; i++) {
-    headp = curl_pushheader_bynum(headers, i);
+    headp = fetch_pushheader_bynum(headers, i);
     fprintf(stderr, "**** header %lu: %s\n", (unsigned long)i, headp);
   }
 
-  headp = curl_pushheader_byname(headers, ":path");
+  headp = fetch_pushheader_byname(headers, ":path");
   if(headp) {
     fprintf(stderr, "**** The PATH is %s\n", headp /* skip :path + colon */);
   }
 
   (*transfers)++; /* one more */
-  return CURL_PUSH_OK;
+  return FETCH_PUSH_OK;
 }
 
 
@@ -209,19 +209,19 @@ static int server_push_callback(CURL *parent,
  */
 int main(int argc, char *argv[])
 {
-  CURL *easy;
-  CURLM *multi_handle;
+  FETCH *easy;
+  FETCHM *multi_handle;
   int transfers = 1; /* we start with one */
-  struct CURLMsg *m;
+  struct FETCHMsg *m;
   const char *url = "https://localhost:8443/index.html";
 
   if(argc == 2)
     url = argv[1];
 
   /* init a multi stack */
-  multi_handle = curl_multi_init();
+  multi_handle = fetch_multi_init();
 
-  easy = curl_easy_init();
+  easy = fetch_easy_init();
 
   /* set options */
   if(setup(easy, url)) {
@@ -230,43 +230,43 @@ int main(int argc, char *argv[])
   }
 
   /* add the easy transfer */
-  curl_multi_add_handle(multi_handle, easy);
+  fetch_multi_add_handle(multi_handle, easy);
 
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHFUNCTION, server_push_callback);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
+  fetch_multi_setopt(multi_handle, FETCHMOPT_PIPELINING, FETCHPIPE_MULTIPLEX);
+  fetch_multi_setopt(multi_handle, FETCHMOPT_PUSHFUNCTION, server_push_callback);
+  fetch_multi_setopt(multi_handle, FETCHMOPT_PUSHDATA, &transfers);
 
   do {
     int still_running; /* keep number of running handles */
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    FETCHMcode mc = fetch_multi_perform(multi_handle, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      mc = fetch_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
     if(mc)
       break;
 
     /*
-     * A little caution when doing server push is that libcurl itself has
+     * A little caution when doing server push is that libfetch itself has
      * created and added one or more easy handles but we need to clean them up
      * when we are done.
      */
 
     do {
       int msgq = 0;
-      m = curl_multi_info_read(multi_handle, &msgq);
-      if(m && (m->msg == CURLMSG_DONE)) {
-        CURL *e = m->easy_handle;
+      m = fetch_multi_info_read(multi_handle, &msgq);
+      if(m && (m->msg == FETCHMSG_DONE)) {
+        FETCH *e = m->easy_handle;
         transfers--;
-        curl_multi_remove_handle(multi_handle, e);
-        curl_easy_cleanup(e);
+        fetch_multi_remove_handle(multi_handle, e);
+        fetch_easy_cleanup(e);
       }
     } while(m);
 
   } while(transfers); /* as long as we have transfers going */
 
-  curl_multi_cleanup(multi_handle);
+  fetch_multi_cleanup(multi_handle);
 
 
   return 0;

@@ -1,10 +1,10 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: show-error
 Short: S
 Help: Show error even when -s is used
-Category: curl global
+Category: fetch global
 Added: 5.9
 Multi: boolean
 Scope: global
@@ -16,4 +16,4 @@ Example:
 
 # `--show-error`
 
-When used with --silent, it makes curl show an error message if it fails.
+When used with --silent, it makes fetch show an error message if it fails.

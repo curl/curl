@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ftp-pasv
 Help: Send PASV/EPSV instead of PORT
 Protocols: FTP
@@ -22,5 +22,5 @@ option.
 Reversing an enforced passive really is not doable but you must then instead
 enforce the correct --ftp-port again.
 
-Passive mode means that curl tries the EPSV command first and then PASV,
+Passive mode means that fetch tries the EPSV command first and then PASV,
 unless --disable-epsv is used.

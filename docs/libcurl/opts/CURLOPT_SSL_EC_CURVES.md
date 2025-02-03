@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSL_EC_CURVES
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSL_EC_CURVES
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSL_CIPHER_LIST (3)
-  - CURLOPT_SSL_OPTIONS (3)
-  - CURLOPT_TLS13_CIPHERS (3)
+  - FETCHOPT_SSL_CIPHER_LIST (3)
+  - FETCHOPT_SSL_OPTIONS (3)
+  - FETCHOPT_TLS13_CIPHERS (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -18,21 +18,21 @@ Added-in: 7.73.0
 
 # NAME
 
-CURLOPT_SSL_EC_CURVES - key exchange curves
+FETCHOPT_SSL_EC_CURVES - key exchange curves
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_EC_CURVES, char *list);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSL_EC_CURVES, char *list);
 ~~~
 
 # DESCRIPTION
 
 Pass a string as parameter with a colon delimited list of Elliptic curve (EC)
 algorithms. This option defines the client's key exchange algorithms in the
-SSL handshake (if the SSL backend libcurl is built to use supports it).
+SSL handshake (if the SSL backend libfetch is built to use supports it).
 
 The application does not have to keep the string around after setting this
 option.
@@ -51,13 +51,13 @@ previous ones. Set it to NULL to restore back to internal default.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, "X25519:P-521");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_EC_CURVES, "X25519:P-521");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

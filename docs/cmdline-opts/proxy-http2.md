@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proxy-http2
 Tags: Versions HTTP/2
 Protocols: HTTP
@@ -19,6 +19,6 @@ Example:
 # `--proxy-http2`
 
 Negotiate HTTP/2 with an HTTPS proxy. The proxy might still only offer HTTP/1
-and then curl sticks to using that version.
+and then fetch sticks to using that version.
 
 This has no effect for any other kinds of proxies.

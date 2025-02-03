@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLMOPT_SOCKETDATA
+SPDX-License-Identifier: fetch
+Title: FETCHMOPT_SOCKETDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_SOCKETFUNCTION (3)
-  - CURLMOPT_TIMERFUNCTION (3)
-  - curl_multi_socket_action (3)
+  - FETCHMOPT_SOCKETFUNCTION (3)
+  - FETCHMOPT_TIMERFUNCTION (3)
+  - fetch_multi_socket_action (3)
 Protocol:
   - All
 Added-in: 7.15.4
@@ -15,22 +15,22 @@ Added-in: 7.15.4
 
 # NAME
 
-CURLMOPT_SOCKETDATA - custom pointer passed to the socket callback
+FETCHMOPT_SOCKETDATA - custom pointer passed to the socket callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_SOCKETDATA, void *pointer);
+FETCHMcode fetch_multi_setopt(FETCHM *handle, FETCHMOPT_SOCKETDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
 A data *pointer* to pass to the socket callback set with the
-CURLMOPT_SOCKETFUNCTION(3) option.
+FETCHMOPT_SOCKETFUNCTION(3) option.
 
-This pointer is not touched by libcurl but is only passed in as the socket
+This pointer is not touched by libfetch but is only passed in as the socket
 callback's **clientp** argument.
 
 # DEFAULT
@@ -46,18 +46,18 @@ struct priv {
   void *ours;
 };
 
-static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
+static int sock_cb(FETCH *e, fetch_socket_t s, int what, void *cbp, void *sockp)
 {
   struct priv *p = sockp;
   printf("my ptr: %p\n", p->ours);
 
-  if(what == CURL_POLL_REMOVE) {
+  if(what == FETCH_POLL_REMOVE) {
     /* remove the socket from our collection */
   }
-  if(what & CURL_POLL_IN) {
+  if(what & FETCH_POLL_IN) {
     /* wait for read on this socket */
   }
-  if(what & CURL_POLL_OUT) {
+  if(what & FETCH_POLL_OUT) {
     /* wait for write on this socket */
   }
 
@@ -67,10 +67,10 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 int main(void)
 {
   struct priv setup;
-  CURLM *multi = curl_multi_init();
+  FETCHM *multi = fetch_multi_init();
   /* ... use socket callback and custom pointer */
-  curl_multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
-  curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, &setup);
+  fetch_multi_setopt(multi, FETCHMOPT_SOCKETFUNCTION, sock_cb);
+  fetch_multi_setopt(multi, FETCHMOPT_SOCKETDATA, &setup);
 }
 ~~~
 
@@ -78,4 +78,4 @@ int main(void)
 
 # RETURN VALUE
 
-Returns CURLM_OK.
+Returns FETCHM_OK.

@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # TLS Sessions and Tickets
@@ -24,17 +24,17 @@ be exploited by attackers) which TLSv1.3 then fixed. See
 [Session Tickets in the real world](https://words.filippo.io/we-need-to-talk-about-session-tickets/)
 for an insight into this topic.
 
-These difference between TLS protocol versions are reflected in curl's
+These difference between TLS protocol versions are reflected in fetch's
 handling of session tickets. More below.
 
-## curl's `ssl_peer_key`
+## fetch's `ssl_peer_key`
 
-In order to find a ticket from a previous TLS session, curl
+In order to find a ticket from a previous TLS session, fetch
 needs a name for TLS sessions that uniquely identifies the peer
 it talks to.
 
 This name has to reflect also the various TLS parameters that can
-be configured in curl for a connection. We do not want to use
+be configured in fetch for a connection. We do not want to use
 a ticket from an different configuration. Example: when setting
 the maximum TLS version to 1.2, we do not want to reuse a ticket
 we got from a TLSv1.3 session, although we are talking to the
@@ -45,27 +45,27 @@ string that carries hostname and port and any non-default TLS
 parameters involved in the connection.
 
 Examples:
-- `curl.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for
-   a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA
+- `fetch.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for
+   a connection to `fetch.se:443` using `/etc/ssl/cert.pem` as CA
    trust anchors and GnuTLS/3.8.7 as TLS backend.
-- `curl.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
+- `fetch.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
    same as the previous, except it is configured to use TLSv1.2 as
    min and max versions.
 
 Different configurations produce different keys which is just what
-curl needs when handling SSL session tickets.
+fetch needs when handling SSL session tickets.
 
 One important thing: peer keys do not contain confidential information. If you
 configure a client certificate or SRP authentication with username/password,
 these are not part of the peer key.
 
-However, peer keys carry the hostnames you use curl for. They *do*
+However, peer keys carry the hostnames you use fetch for. They *do*
 leak the privacy of your communication. We recommend to *not* persist
 peer keys for this reason.
 
 **Caveat**: The key may contain filenames or paths. It does not reflect the
 *contents* in the filesystem. If you change `/etc/ssl/cert.pem` and reuse a
-previous ticket, curl might trust a server which no longer has a root
+previous ticket, fetch might trust a server which no longer has a root
 certificate in the file.
 
 
@@ -147,7 +147,7 @@ have to brute force by guessing.
 
 #### Import
 
-When session tickets are imported from a file, curl only gets the salted
+When session tickets are imported from a file, fetch only gets the salted
 hashes. The imported tickets belong to an *unknown* peer key.
 
 When a connection filter tries to *take* a session ticket, it passes its peer

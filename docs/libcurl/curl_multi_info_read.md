@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_multi_info_read
+SPDX-License-Identifier: fetch
+Title: fetch_multi_info_read
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_multi_cleanup (3)
-  - curl_multi_init (3)
-  - curl_multi_perform (3)
+  - fetch_multi_cleanup (3)
+  - fetch_multi_init (3)
+  - fetch_multi_perform (3)
 Protocol:
   - All
 Added-in: 7.9.6
@@ -15,14 +15,14 @@ Added-in: 7.9.6
 
 # NAME
 
-curl_multi_info_read - read multi stack information
+fetch_multi_info_read - read multi stack information
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue);
+FETCHMsg *fetch_multi_info_read(FETCHM *multi_handle, int *msgs_in_queue);
 ~~~
 
 # DESCRIPTION
@@ -43,25 +43,25 @@ again. It instead returns new messages at each new invoke until the queue is
 emptied.
 
 **WARNING:** The data the returned pointer points to does not survive
-calling curl_multi_cleanup(3), curl_multi_remove_handle(3) or
-curl_easy_cleanup(3).
+calling fetch_multi_cleanup(3), fetch_multi_remove_handle(3) or
+fetch_easy_cleanup(3).
 
-The *CURLMsg* struct is simple and only contains basic information. If
+The *FETCHMsg* struct is simple and only contains basic information. If
 more involved information is wanted, the particular "easy handle" is present
 in that struct and can be used in subsequent regular
-curl_easy_getinfo(3) calls (or similar):
+fetch_easy_getinfo(3) calls (or similar):
 
 ~~~c
- struct CURLMsg {
-   CURLMSG msg;       /* what this message means */
-   CURL *easy_handle; /* the handle it concerns */
+ struct FETCHMsg {
+   FETCHMSG msg;       /* what this message means */
+   FETCH *easy_handle; /* the handle it concerns */
    union {
      void *whatever;    /* message-specific data */
-     CURLcode result;   /* return code for transfer */
+     FETCHcode result;   /* return code for transfer */
    } data;
  };
 ~~~
-When **msg** is *CURLMSG_DONE*, the message identifies a transfer that
+When **msg** is *FETCHMSG_DONE*, the message identifies a transfer that
 is done, and then **result** contains the return code for the easy handle
 that just completed.
 
@@ -74,22 +74,22 @@ At this point, there are no other **msg** types defined.
 ~~~c
 int main(void)
 {
-  CURLM *multi = curl_multi_init();
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    struct CURLMsg *m;
+  FETCHM *multi = fetch_multi_init();
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    struct FETCHMsg *m;
 
-    /* call curl_multi_perform or curl_multi_socket_action first, then loop
+    /* call fetch_multi_perform or fetch_multi_socket_action first, then loop
        through and check if there are any transfers that have completed */
 
     do {
       int msgq = 0;
-      m = curl_multi_info_read(multi, &msgq);
-      if(m && (m->msg == CURLMSG_DONE)) {
-        CURL *e = m->easy_handle;
+      m = fetch_multi_info_read(multi, &msgq);
+      if(m && (m->msg == FETCHMSG_DONE)) {
+        FETCH *e = m->easy_handle;
         /* m->data.result holds the error code for the transfer */
-        curl_multi_remove_handle(multi, e);
-        curl_easy_cleanup(e);
+        fetch_multi_remove_handle(multi, e);
+        fetch_easy_cleanup(e);
       }
     } while(m);
   }

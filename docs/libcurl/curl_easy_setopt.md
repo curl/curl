@@ -1,18 +1,18 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_easy_setopt
+SPDX-License-Identifier: fetch
+Title: fetch_easy_setopt
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_cleanup (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_init (3)
-  - curl_easy_option_by_id (3)
-  - curl_easy_option_by_name (3)
-  - curl_easy_option_next (3)
-  - curl_easy_reset (3)
-  - curl_multi_setopt (3)
+  - fetch_easy_cleanup (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_init (3)
+  - fetch_easy_option_by_id (3)
+  - fetch_easy_option_by_name (3)
+  - fetch_easy_option_next (3)
+  - fetch_easy_reset (3)
+  - fetch_multi_setopt (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -20,1312 +20,1312 @@ Added-in: 7.1
 
 # NAME
 
-curl_easy_setopt - set options for a curl easy handle
+fetch_easy_setopt - set options for a fetch easy handle
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLoption option, parameter);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHoption option, parameter);
 ~~~
 
 # DESCRIPTION
 
-curl_easy_setopt(3) is used to tell libcurl how to behave. By setting the
-appropriate options, the application can change libcurl's behavior. All
+fetch_easy_setopt(3) is used to tell libfetch how to behave. By setting the
+appropriate options, the application can change libfetch's behavior. All
 options are set with an *option* followed by a *parameter*. That parameter can
 be a **long**, a **function pointer**, an **object pointer** or a
-**curl_off_t**, depending on what the specific option expects. Read this
-manual carefully as bad input values may cause libcurl to behave badly. You
+**fetch_off_t**, depending on what the specific option expects. Read this
+manual carefully as bad input values may cause libfetch to behave badly. You
 can only set one option in each function call. A typical application uses many
-curl_easy_setopt(3) calls in the setup phase.
+fetch_easy_setopt(3) calls in the setup phase.
 
 Options set with this function call are valid for all forthcoming transfers
 performed using this *handle*. The options are not in any way reset between
 transfers, so if you want subsequent transfers with different options, you
 must change them between the transfers. You can optionally reset all options
-back to internal default with curl_easy_reset(3).
+back to internal default with fetch_easy_reset(3).
 
-Strings passed to libcurl as 'char *' arguments, are copied by the library;
+Strings passed to libfetch as 'char *' arguments, are copied by the library;
 the string storage associated to the pointer argument may be discarded or
-reused after curl_easy_setopt(3) returns. The only exception to this rule is
-really CURLOPT_POSTFIELDS(3), but the alternative that copies the string
-CURLOPT_COPYPOSTFIELDS(3) has some usage characteristics you need to read up
+reused after fetch_easy_setopt(3) returns. The only exception to this rule is
+really FETCHOPT_POSTFIELDS(3), but the alternative that copies the string
+FETCHOPT_COPYPOSTFIELDS(3) has some usage characteristics you need to read up
 on. This function does not accept input strings longer than
-**CURL_MAX_INPUT_LENGTH** (8 MB).
+**FETCH_MAX_INPUT_LENGTH** (8 MB).
 
 The order in which the options are set does not matter.
 
 Before version 7.17.0, strings were not copied. Instead the user was forced
-keep them available until libcurl no longer needed them.
+keep them available until libfetch no longer needed them.
 
-The *handle* is the return code from a curl_easy_init(3) or
-curl_easy_duphandle(3) call.
+The *handle* is the return code from a fetch_easy_init(3) or
+fetch_easy_duphandle(3) call.
 
 # OPTIONS
 
-## CURLOPT_ABSTRACT_UNIX_SOCKET
+## FETCHOPT_ABSTRACT_UNIX_SOCKET
 
-Path to an abstract Unix domain socket. See CURLOPT_ABSTRACT_UNIX_SOCKET(3)
+Path to an abstract Unix domain socket. See FETCHOPT_ABSTRACT_UNIX_SOCKET(3)
 
-## CURLOPT_ACCEPTTIMEOUT_MS
+## FETCHOPT_ACCEPTTIMEOUT_MS
 
 Timeout for waiting for the server's connect back to be accepted. See
-CURLOPT_ACCEPTTIMEOUT_MS(3)
+FETCHOPT_ACCEPTTIMEOUT_MS(3)
 
-## CURLOPT_ACCEPT_ENCODING
+## FETCHOPT_ACCEPT_ENCODING
 
 Accept-Encoding and automatic decompressing data. See
-CURLOPT_ACCEPT_ENCODING(3)
+FETCHOPT_ACCEPT_ENCODING(3)
 
-## CURLOPT_ADDRESS_SCOPE
+## FETCHOPT_ADDRESS_SCOPE
 
-IPv6 scope for local addresses. See CURLOPT_ADDRESS_SCOPE(3)
+IPv6 scope for local addresses. See FETCHOPT_ADDRESS_SCOPE(3)
 
-## CURLOPT_ALTSVC
+## FETCHOPT_ALTSVC
 
-Specify the Alt-Svc: cache filename. See CURLOPT_ALTSVC(3)
+Specify the Alt-Svc: cache filename. See FETCHOPT_ALTSVC(3)
 
-## CURLOPT_ALTSVC_CTRL
+## FETCHOPT_ALTSVC_CTRL
 
-Enable and configure Alt-Svc: treatment. See CURLOPT_ALTSVC_CTRL(3)
+Enable and configure Alt-Svc: treatment. See FETCHOPT_ALTSVC_CTRL(3)
 
-## CURLOPT_APPEND
+## FETCHOPT_APPEND
 
-Append to remote file. See CURLOPT_APPEND(3)
+Append to remote file. See FETCHOPT_APPEND(3)
 
-## CURLOPT_AUTOREFERER
+## FETCHOPT_AUTOREFERER
 
-Automatically set Referer: header. See CURLOPT_AUTOREFERER(3)
+Automatically set Referer: header. See FETCHOPT_AUTOREFERER(3)
 
-## CURLOPT_AWS_SIGV4
+## FETCHOPT_AWS_SIGV4
 
-AWS HTTP V4 Signature. See CURLOPT_AWS_SIGV4(3)
+AWS HTTP V4 Signature. See FETCHOPT_AWS_SIGV4(3)
 
-## CURLOPT_BUFFERSIZE
+## FETCHOPT_BUFFERSIZE
 
-Ask for alternate buffer size. See CURLOPT_BUFFERSIZE(3)
+Ask for alternate buffer size. See FETCHOPT_BUFFERSIZE(3)
 
-## CURLOPT_CAINFO
+## FETCHOPT_CAINFO
 
-CA cert bundle. See CURLOPT_CAINFO(3)
+CA cert bundle. See FETCHOPT_CAINFO(3)
 
-## CURLOPT_CAINFO_BLOB
+## FETCHOPT_CAINFO_BLOB
 
-CA cert bundle memory buffer. See CURLOPT_CAINFO_BLOB(3)
+CA cert bundle memory buffer. See FETCHOPT_CAINFO_BLOB(3)
 
-## CURLOPT_CAPATH
+## FETCHOPT_CAPATH
 
-Path to CA cert bundle. See CURLOPT_CAPATH(3)
+Path to CA cert bundle. See FETCHOPT_CAPATH(3)
 
-## CURLOPT_CA_CACHE_TIMEOUT
+## FETCHOPT_CA_CACHE_TIMEOUT
 
-Timeout for CA cache. See CURLOPT_CA_CACHE_TIMEOUT(3)
+Timeout for CA cache. See FETCHOPT_CA_CACHE_TIMEOUT(3)
 
-## CURLOPT_CERTINFO
+## FETCHOPT_CERTINFO
 
-Extract certificate info. See CURLOPT_CERTINFO(3)
+Extract certificate info. See FETCHOPT_CERTINFO(3)
 
-## CURLOPT_CHUNK_BGN_FUNCTION
+## FETCHOPT_CHUNK_BGN_FUNCTION
 
 Callback for wildcard download start of chunk. See
-CURLOPT_CHUNK_BGN_FUNCTION(3)
+FETCHOPT_CHUNK_BGN_FUNCTION(3)
 
-## CURLOPT_CHUNK_DATA
+## FETCHOPT_CHUNK_DATA
 
-Data pointer to pass to the chunk callbacks. See CURLOPT_CHUNK_DATA(3)
+Data pointer to pass to the chunk callbacks. See FETCHOPT_CHUNK_DATA(3)
 
-## CURLOPT_CHUNK_END_FUNCTION
+## FETCHOPT_CHUNK_END_FUNCTION
 
-Callback for wildcard download end of chunk. See CURLOPT_CHUNK_END_FUNCTION(3)
+Callback for wildcard download end of chunk. See FETCHOPT_CHUNK_END_FUNCTION(3)
 
-## CURLOPT_CLOSESOCKETDATA
+## FETCHOPT_CLOSESOCKETDATA
 
 Data pointer to pass to the close socket callback. See
-CURLOPT_CLOSESOCKETDATA(3)
+FETCHOPT_CLOSESOCKETDATA(3)
 
-## CURLOPT_CLOSESOCKETFUNCTION
+## FETCHOPT_CLOSESOCKETFUNCTION
 
-Callback for closing socket. See CURLOPT_CLOSESOCKETFUNCTION(3)
+Callback for closing socket. See FETCHOPT_CLOSESOCKETFUNCTION(3)
 
-## CURLOPT_CONNECTTIMEOUT
+## FETCHOPT_CONNECTTIMEOUT
 
-Timeout for the connection phase. See CURLOPT_CONNECTTIMEOUT(3)
+Timeout for the connection phase. See FETCHOPT_CONNECTTIMEOUT(3)
 
-## CURLOPT_CONNECTTIMEOUT_MS
+## FETCHOPT_CONNECTTIMEOUT_MS
 
-Millisecond timeout for the connection phase. See CURLOPT_CONNECTTIMEOUT_MS(3)
+Millisecond timeout for the connection phase. See FETCHOPT_CONNECTTIMEOUT_MS(3)
 
-## CURLOPT_CONNECT_ONLY
+## FETCHOPT_CONNECT_ONLY
 
-Only connect, nothing else. See CURLOPT_CONNECT_ONLY(3)
+Only connect, nothing else. See FETCHOPT_CONNECT_ONLY(3)
 
-## CURLOPT_CONNECT_TO
+## FETCHOPT_CONNECT_TO
 
-Connect to a specific host and port. See CURLOPT_CONNECT_TO(3)
+Connect to a specific host and port. See FETCHOPT_CONNECT_TO(3)
 
-## CURLOPT_CONV_FROM_NETWORK_FUNCTION
-
-**OBSOLETE** Callback for code base conversion.
-See CURLOPT_CONV_FROM_NETWORK_FUNCTION(3)
-
-## CURLOPT_CONV_FROM_UTF8_FUNCTION
+## FETCHOPT_CONV_FROM_NETWORK_FUNCTION
 
 **OBSOLETE** Callback for code base conversion.
-See CURLOPT_CONV_FROM_UTF8_FUNCTION(3)
+See FETCHOPT_CONV_FROM_NETWORK_FUNCTION(3)
 
-## CURLOPT_CONV_TO_NETWORK_FUNCTION
+## FETCHOPT_CONV_FROM_UTF8_FUNCTION
 
 **OBSOLETE** Callback for code base conversion.
-See CURLOPT_CONV_TO_NETWORK_FUNCTION(3)
+See FETCHOPT_CONV_FROM_UTF8_FUNCTION(3)
 
-## CURLOPT_COOKIE
+## FETCHOPT_CONV_TO_NETWORK_FUNCTION
 
-Cookie(s) to send. See CURLOPT_COOKIE(3)
+**OBSOLETE** Callback for code base conversion.
+See FETCHOPT_CONV_TO_NETWORK_FUNCTION(3)
 
-## CURLOPT_COOKIEFILE
+## FETCHOPT_COOKIE
 
-File to read cookies from. See CURLOPT_COOKIEFILE(3)
+Cookie(s) to send. See FETCHOPT_COOKIE(3)
 
-## CURLOPT_COOKIEJAR
+## FETCHOPT_COOKIEFILE
 
-File to write cookies to. See CURLOPT_COOKIEJAR(3)
+File to read cookies from. See FETCHOPT_COOKIEFILE(3)
 
-## CURLOPT_COOKIELIST
+## FETCHOPT_COOKIEJAR
 
-Add or control cookies. See CURLOPT_COOKIELIST(3)
+File to write cookies to. See FETCHOPT_COOKIEJAR(3)
 
-## CURLOPT_COOKIESESSION
+## FETCHOPT_COOKIELIST
 
-Start a new cookie session. See CURLOPT_COOKIESESSION(3)
+Add or control cookies. See FETCHOPT_COOKIELIST(3)
 
-## CURLOPT_COPYPOSTFIELDS
+## FETCHOPT_COOKIESESSION
 
-Send a POST with this data - and copy it. See CURLOPT_COPYPOSTFIELDS(3)
+Start a new cookie session. See FETCHOPT_COOKIESESSION(3)
 
-## CURLOPT_CRLF
+## FETCHOPT_COPYPOSTFIELDS
 
-Convert newlines. See CURLOPT_CRLF(3)
+Send a POST with this data - and copy it. See FETCHOPT_COPYPOSTFIELDS(3)
 
-## CURLOPT_CRLFILE
+## FETCHOPT_CRLF
 
-Certificate Revocation List. See CURLOPT_CRLFILE(3)
+Convert newlines. See FETCHOPT_CRLF(3)
 
-## CURLOPT_CURLU
+## FETCHOPT_CRLFILE
 
-Set URL to work on with a URL handle. See CURLOPT_CURLU(3)
+Certificate Revocation List. See FETCHOPT_CRLFILE(3)
 
-## CURLOPT_CUSTOMREQUEST
+## FETCHOPT_FETCHU
 
-Custom request/method. See CURLOPT_CUSTOMREQUEST(3)
+Set URL to work on with a URL handle. See FETCHOPT_FETCHU(3)
 
-## CURLOPT_DEBUGDATA
+## FETCHOPT_CUSTOMREQUEST
 
-Data pointer to pass to the debug callback. See CURLOPT_DEBUGDATA(3)
+Custom request/method. See FETCHOPT_CUSTOMREQUEST(3)
 
-## CURLOPT_DEBUGFUNCTION
+## FETCHOPT_DEBUGDATA
 
-Callback for debug information. See CURLOPT_DEBUGFUNCTION(3)
+Data pointer to pass to the debug callback. See FETCHOPT_DEBUGDATA(3)
 
-## CURLOPT_DEFAULT_PROTOCOL
+## FETCHOPT_DEBUGFUNCTION
 
-Default protocol. See CURLOPT_DEFAULT_PROTOCOL(3)
+Callback for debug information. See FETCHOPT_DEBUGFUNCTION(3)
 
-## CURLOPT_DIRLISTONLY
+## FETCHOPT_DEFAULT_PROTOCOL
 
-List only. See CURLOPT_DIRLISTONLY(3)
+Default protocol. See FETCHOPT_DEFAULT_PROTOCOL(3)
 
-## CURLOPT_DISALLOW_USERNAME_IN_URL
+## FETCHOPT_DIRLISTONLY
 
-Do not allow username in URL. See CURLOPT_DISALLOW_USERNAME_IN_URL(3)
+List only. See FETCHOPT_DIRLISTONLY(3)
 
-## CURLOPT_DNS_CACHE_TIMEOUT
+## FETCHOPT_DISALLOW_USERNAME_IN_URL
 
-Timeout for DNS cache. See CURLOPT_DNS_CACHE_TIMEOUT(3)
+Do not allow username in URL. See FETCHOPT_DISALLOW_USERNAME_IN_URL(3)
 
-## CURLOPT_DNS_INTERFACE
+## FETCHOPT_DNS_CACHE_TIMEOUT
 
-Bind name resolves to this interface. See CURLOPT_DNS_INTERFACE(3)
+Timeout for DNS cache. See FETCHOPT_DNS_CACHE_TIMEOUT(3)
 
-## CURLOPT_DNS_LOCAL_IP4
+## FETCHOPT_DNS_INTERFACE
 
-Bind name resolves to this IP4 address. See CURLOPT_DNS_LOCAL_IP4(3)
+Bind name resolves to this interface. See FETCHOPT_DNS_INTERFACE(3)
 
-## CURLOPT_DNS_LOCAL_IP6
+## FETCHOPT_DNS_LOCAL_IP4
 
-Bind name resolves to this IP6 address. See CURLOPT_DNS_LOCAL_IP6(3)
+Bind name resolves to this IP4 address. See FETCHOPT_DNS_LOCAL_IP4(3)
 
-## CURLOPT_DNS_SERVERS
+## FETCHOPT_DNS_LOCAL_IP6
 
-Preferred DNS servers. See CURLOPT_DNS_SERVERS(3)
+Bind name resolves to this IP6 address. See FETCHOPT_DNS_LOCAL_IP6(3)
 
-## CURLOPT_DNS_SHUFFLE_ADDRESSES
+## FETCHOPT_DNS_SERVERS
 
-Shuffle addresses before use. See CURLOPT_DNS_SHUFFLE_ADDRESSES(3)
+Preferred DNS servers. See FETCHOPT_DNS_SERVERS(3)
 
-## CURLOPT_DNS_USE_GLOBAL_CACHE
+## FETCHOPT_DNS_SHUFFLE_ADDRESSES
 
-**OBSOLETE** Enable global DNS cache. See CURLOPT_DNS_USE_GLOBAL_CACHE(3)
+Shuffle addresses before use. See FETCHOPT_DNS_SHUFFLE_ADDRESSES(3)
 
-## CURLOPT_DOH_SSL_VERIFYHOST
+## FETCHOPT_DNS_USE_GLOBAL_CACHE
+
+**OBSOLETE** Enable global DNS cache. See FETCHOPT_DNS_USE_GLOBAL_CACHE(3)
+
+## FETCHOPT_DOH_SSL_VERIFYHOST
 
 Verify the hostname in the DoH (DNS-over-HTTPS) SSL certificate. See
-CURLOPT_DOH_SSL_VERIFYHOST(3)
+FETCHOPT_DOH_SSL_VERIFYHOST(3)
 
-## CURLOPT_DOH_SSL_VERIFYPEER
+## FETCHOPT_DOH_SSL_VERIFYPEER
 
 Verify the DoH (DNS-over-HTTPS) SSL certificate. See
-CURLOPT_DOH_SSL_VERIFYPEER(3)
+FETCHOPT_DOH_SSL_VERIFYPEER(3)
 
-## CURLOPT_DOH_SSL_VERIFYSTATUS
+## FETCHOPT_DOH_SSL_VERIFYSTATUS
 
 Verify the DoH (DNS-over-HTTPS) SSL certificate's status. See
-CURLOPT_DOH_SSL_VERIFYSTATUS(3)
+FETCHOPT_DOH_SSL_VERIFYSTATUS(3)
 
-## CURLOPT_DOH_URL
+## FETCHOPT_DOH_URL
 
-Use this DoH server for name resolves. See CURLOPT_DOH_URL(3)
+Use this DoH server for name resolves. See FETCHOPT_DOH_URL(3)
 
-## CURLOPT_ECH
+## FETCHOPT_ECH
 
-Set the configuration for ECH. See CURLOPT_ECH(3)
+Set the configuration for ECH. See FETCHOPT_ECH(3)
 
-## CURLOPT_EGDSOCKET
+## FETCHOPT_EGDSOCKET
 
-**OBSOLETE** Identify EGD socket for entropy. See CURLOPT_EGDSOCKET(3)
+**OBSOLETE** Identify EGD socket for entropy. See FETCHOPT_EGDSOCKET(3)
 
-## CURLOPT_ERRORBUFFER
+## FETCHOPT_ERRORBUFFER
 
-Error message buffer. See CURLOPT_ERRORBUFFER(3)
+Error message buffer. See FETCHOPT_ERRORBUFFER(3)
 
-## CURLOPT_EXPECT_100_TIMEOUT_MS
+## FETCHOPT_EXPECT_100_TIMEOUT_MS
 
-100-continue timeout. See CURLOPT_EXPECT_100_TIMEOUT_MS(3)
+100-continue timeout. See FETCHOPT_EXPECT_100_TIMEOUT_MS(3)
 
-## CURLOPT_FAILONERROR
+## FETCHOPT_FAILONERROR
 
-Fail on HTTP 4xx errors. CURLOPT_FAILONERROR(3)
+Fail on HTTP 4xx errors. FETCHOPT_FAILONERROR(3)
 
-## CURLOPT_FILETIME
+## FETCHOPT_FILETIME
 
-Request file modification date and time. See CURLOPT_FILETIME(3)
+Request file modification date and time. See FETCHOPT_FILETIME(3)
 
-## CURLOPT_FNMATCH_DATA
+## FETCHOPT_FNMATCH_DATA
 
 Data pointer to pass to the wildcard matching callback. See
-CURLOPT_FNMATCH_DATA(3)
+FETCHOPT_FNMATCH_DATA(3)
 
-## CURLOPT_FNMATCH_FUNCTION
+## FETCHOPT_FNMATCH_FUNCTION
 
-Callback for wildcard matching. See CURLOPT_FNMATCH_FUNCTION(3)
+Callback for wildcard matching. See FETCHOPT_FNMATCH_FUNCTION(3)
 
-## CURLOPT_FOLLOWLOCATION
+## FETCHOPT_FOLLOWLOCATION
 
-Follow HTTP redirects. See CURLOPT_FOLLOWLOCATION(3)
+Follow HTTP redirects. See FETCHOPT_FOLLOWLOCATION(3)
 
-## CURLOPT_FORBID_REUSE
+## FETCHOPT_FORBID_REUSE
 
-Prevent subsequent connections from reusing this. See CURLOPT_FORBID_REUSE(3)
+Prevent subsequent connections from reusing this. See FETCHOPT_FORBID_REUSE(3)
 
-## CURLOPT_FRESH_CONNECT
+## FETCHOPT_FRESH_CONNECT
 
-Use a new connection. CURLOPT_FRESH_CONNECT(3)
+Use a new connection. FETCHOPT_FRESH_CONNECT(3)
 
-## CURLOPT_FTPPORT
+## FETCHOPT_FTPPORT
 
-Use active FTP. See CURLOPT_FTPPORT(3)
+Use active FTP. See FETCHOPT_FTPPORT(3)
 
-## CURLOPT_FTPSSLAUTH
+## FETCHOPT_FTPSSLAUTH
 
-Control how to do TLS. See CURLOPT_FTPSSLAUTH(3)
+Control how to do TLS. See FETCHOPT_FTPSSLAUTH(3)
 
-## CURLOPT_FTP_ACCOUNT
+## FETCHOPT_FTP_ACCOUNT
 
-Send ACCT command. See CURLOPT_FTP_ACCOUNT(3)
+Send ACCT command. See FETCHOPT_FTP_ACCOUNT(3)
 
-## CURLOPT_FTP_ALTERNATIVE_TO_USER
+## FETCHOPT_FTP_ALTERNATIVE_TO_USER
 
-Alternative to USER. See CURLOPT_FTP_ALTERNATIVE_TO_USER(3)
+Alternative to USER. See FETCHOPT_FTP_ALTERNATIVE_TO_USER(3)
 
-## CURLOPT_FTP_CREATE_MISSING_DIRS
+## FETCHOPT_FTP_CREATE_MISSING_DIRS
 
 Create missing directories on the remote server. See
-CURLOPT_FTP_CREATE_MISSING_DIRS(3)
+FETCHOPT_FTP_CREATE_MISSING_DIRS(3)
 
-## CURLOPT_FTP_FILEMETHOD
+## FETCHOPT_FTP_FILEMETHOD
 
-Specify how to reach files. See CURLOPT_FTP_FILEMETHOD(3)
+Specify how to reach files. See FETCHOPT_FTP_FILEMETHOD(3)
 
-## CURLOPT_FTP_SKIP_PASV_IP
+## FETCHOPT_FTP_SKIP_PASV_IP
 
-Ignore the IP address in the PASV response. See CURLOPT_FTP_SKIP_PASV_IP(3)
+Ignore the IP address in the PASV response. See FETCHOPT_FTP_SKIP_PASV_IP(3)
 
-## CURLOPT_FTP_SSL_CCC
+## FETCHOPT_FTP_SSL_CCC
 
-Back to non-TLS again after authentication. See CURLOPT_FTP_SSL_CCC(3)
+Back to non-TLS again after authentication. See FETCHOPT_FTP_SSL_CCC(3)
 
-## CURLOPT_FTP_USE_EPRT
+## FETCHOPT_FTP_USE_EPRT
 
-Use EPRT. See CURLOPT_FTP_USE_EPRT(3)
+Use EPRT. See FETCHOPT_FTP_USE_EPRT(3)
 
-## CURLOPT_FTP_USE_EPSV
+## FETCHOPT_FTP_USE_EPSV
 
-Use EPSV. See CURLOPT_FTP_USE_EPSV(3)
+Use EPSV. See FETCHOPT_FTP_USE_EPSV(3)
 
-## CURLOPT_FTP_USE_PRET
+## FETCHOPT_FTP_USE_PRET
 
-Use PRET. See CURLOPT_FTP_USE_PRET(3)
+Use PRET. See FETCHOPT_FTP_USE_PRET(3)
 
-## CURLOPT_GSSAPI_DELEGATION
+## FETCHOPT_GSSAPI_DELEGATION
 
-Disable GSS-API delegation. See CURLOPT_GSSAPI_DELEGATION(3)
+Disable GSS-API delegation. See FETCHOPT_GSSAPI_DELEGATION(3)
 
-## CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
+## FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS
 
-Timeout for happy eyeballs. See CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS(3)
+Timeout for happy eyeballs. See FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS(3)
 
-## CURLOPT_HAPROXYPROTOCOL
+## FETCHOPT_HAPROXYPROTOCOL
 
-Send an HAProxy PROXY protocol v1 header. See CURLOPT_HAPROXYPROTOCOL(3)
+Send an HAProxy PROXY protocol v1 header. See FETCHOPT_HAPROXYPROTOCOL(3)
 
-## CURLOPT_HAPROXY_CLIENT_IP
+## FETCHOPT_HAPROXY_CLIENT_IP
 
 Spoof the client IP in an HAProxy PROXY protocol v1 header. See
-CURLOPT_HAPROXY_CLIENT_IP(3)
+FETCHOPT_HAPROXY_CLIENT_IP(3)
 
-## CURLOPT_HEADER
+## FETCHOPT_HEADER
 
-Include the header in the body output. See CURLOPT_HEADER(3)
+Include the header in the body output. See FETCHOPT_HEADER(3)
 
-## CURLOPT_HEADERDATA
+## FETCHOPT_HEADERDATA
 
-Data pointer to pass to the header callback. See CURLOPT_HEADERDATA(3)
+Data pointer to pass to the header callback. See FETCHOPT_HEADERDATA(3)
 
-## CURLOPT_HEADERFUNCTION
+## FETCHOPT_HEADERFUNCTION
 
-Callback for writing received headers. See CURLOPT_HEADERFUNCTION(3)
+Callback for writing received headers. See FETCHOPT_HEADERFUNCTION(3)
 
-## CURLOPT_HEADEROPT
+## FETCHOPT_HEADEROPT
 
-Control custom headers. See CURLOPT_HEADEROPT(3)
+Control custom headers. See FETCHOPT_HEADEROPT(3)
 
-## CURLOPT_HSTS
+## FETCHOPT_HSTS
 
-Set HSTS cache file. See CURLOPT_HSTS(3)
+Set HSTS cache file. See FETCHOPT_HSTS(3)
 
-## CURLOPT_HSTSREADDATA
+## FETCHOPT_HSTSREADDATA
 
-Pass pointer to the HSTS read callback. See CURLOPT_HSTSREADDATA(3)
+Pass pointer to the HSTS read callback. See FETCHOPT_HSTSREADDATA(3)
 
-## CURLOPT_HSTSREADFUNCTION
+## FETCHOPT_HSTSREADFUNCTION
 
-Set HSTS read callback. See CURLOPT_HSTSREADFUNCTION(3)
+Set HSTS read callback. See FETCHOPT_HSTSREADFUNCTION(3)
 
-## CURLOPT_HSTSWRITEDATA
+## FETCHOPT_HSTSWRITEDATA
 
-Pass pointer to the HSTS write callback. See CURLOPT_HSTSWRITEDATA(3)
+Pass pointer to the HSTS write callback. See FETCHOPT_HSTSWRITEDATA(3)
 
-## CURLOPT_HSTSWRITEFUNCTION
+## FETCHOPT_HSTSWRITEFUNCTION
 
-Set HSTS write callback. See CURLOPT_HSTSWRITEFUNCTION(3)
+Set HSTS write callback. See FETCHOPT_HSTSWRITEFUNCTION(3)
 
-## CURLOPT_HSTS_CTRL
+## FETCHOPT_HSTS_CTRL
 
-Enable HSTS. See CURLOPT_HSTS_CTRL(3)
+Enable HSTS. See FETCHOPT_HSTS_CTRL(3)
 
-## CURLOPT_HTTP09_ALLOWED
+## FETCHOPT_HTTP09_ALLOWED
 
-Allow HTTP/0.9 responses. CURLOPT_HTTP09_ALLOWED(3)
+Allow HTTP/0.9 responses. FETCHOPT_HTTP09_ALLOWED(3)
 
-## CURLOPT_HTTP200ALIASES
+## FETCHOPT_HTTP200ALIASES
 
-Alternative versions of 200 OK. See CURLOPT_HTTP200ALIASES(3)
+Alternative versions of 200 OK. See FETCHOPT_HTTP200ALIASES(3)
 
-## CURLOPT_HTTPAUTH
+## FETCHOPT_HTTPAUTH
 
-HTTP server authentication methods. See CURLOPT_HTTPAUTH(3)
+HTTP server authentication methods. See FETCHOPT_HTTPAUTH(3)
 
-## CURLOPT_HTTPGET
+## FETCHOPT_HTTPGET
 
-Do an HTTP GET request. See CURLOPT_HTTPGET(3)
+Do an HTTP GET request. See FETCHOPT_HTTPGET(3)
 
-## CURLOPT_HTTPHEADER
+## FETCHOPT_HTTPHEADER
 
-Custom HTTP headers. See CURLOPT_HTTPHEADER(3)
+Custom HTTP headers. See FETCHOPT_HTTPHEADER(3)
 
-## CURLOPT_HTTPPOST
+## FETCHOPT_HTTPPOST
 
 **Deprecated option** Multipart formpost HTTP POST.
-See CURLOPT_HTTPPOST(3)
+See FETCHOPT_HTTPPOST(3)
 
-## CURLOPT_HTTPPROXYTUNNEL
+## FETCHOPT_HTTPPROXYTUNNEL
 
-Tunnel through the HTTP proxy. CURLOPT_HTTPPROXYTUNNEL(3)
+Tunnel through the HTTP proxy. FETCHOPT_HTTPPROXYTUNNEL(3)
 
-## CURLOPT_HTTP_CONTENT_DECODING
+## FETCHOPT_HTTP_CONTENT_DECODING
 
-Disable Content decoding. See CURLOPT_HTTP_CONTENT_DECODING(3)
+Disable Content decoding. See FETCHOPT_HTTP_CONTENT_DECODING(3)
 
-## CURLOPT_HTTP_TRANSFER_DECODING
+## FETCHOPT_HTTP_TRANSFER_DECODING
 
-Disable Transfer decoding. See CURLOPT_HTTP_TRANSFER_DECODING(3)
+Disable Transfer decoding. See FETCHOPT_HTTP_TRANSFER_DECODING(3)
 
-## CURLOPT_HTTP_VERSION
+## FETCHOPT_HTTP_VERSION
 
-HTTP version to use. CURLOPT_HTTP_VERSION(3)
+HTTP version to use. FETCHOPT_HTTP_VERSION(3)
 
-## CURLOPT_IGNORE_CONTENT_LENGTH
+## FETCHOPT_IGNORE_CONTENT_LENGTH
 
-Ignore Content-Length. See CURLOPT_IGNORE_CONTENT_LENGTH(3)
+Ignore Content-Length. See FETCHOPT_IGNORE_CONTENT_LENGTH(3)
 
-## CURLOPT_INFILESIZE
+## FETCHOPT_INFILESIZE
 
-Size of file to send. CURLOPT_INFILESIZE(3)
+Size of file to send. FETCHOPT_INFILESIZE(3)
 
-## CURLOPT_INFILESIZE_LARGE
+## FETCHOPT_INFILESIZE_LARGE
 
-Size of file to send. CURLOPT_INFILESIZE_LARGE(3)
+Size of file to send. FETCHOPT_INFILESIZE_LARGE(3)
 
-## CURLOPT_INTERFACE
+## FETCHOPT_INTERFACE
 
-Bind connection locally to this. See CURLOPT_INTERFACE(3)
+Bind connection locally to this. See FETCHOPT_INTERFACE(3)
 
-## CURLOPT_INTERLEAVEDATA
+## FETCHOPT_INTERLEAVEDATA
 
 Data pointer to pass to the RTSP interleave callback. See
-CURLOPT_INTERLEAVEDATA(3)
+FETCHOPT_INTERLEAVEDATA(3)
 
-## CURLOPT_INTERLEAVEFUNCTION
+## FETCHOPT_INTERLEAVEFUNCTION
 
-Callback for RTSP interleaved data. See CURLOPT_INTERLEAVEFUNCTION(3)
+Callback for RTSP interleaved data. See FETCHOPT_INTERLEAVEFUNCTION(3)
 
-## CURLOPT_IOCTLDATA
+## FETCHOPT_IOCTLDATA
 
 **Deprecated option** Data pointer to pass to the I/O callback.
-See CURLOPT_IOCTLDATA(3)
+See FETCHOPT_IOCTLDATA(3)
 
-## CURLOPT_IOCTLFUNCTION
+## FETCHOPT_IOCTLFUNCTION
 
 **Deprecated option** Callback for I/O operations.
-See CURLOPT_IOCTLFUNCTION(3)
+See FETCHOPT_IOCTLFUNCTION(3)
 
-## CURLOPT_IPRESOLVE
+## FETCHOPT_IPRESOLVE
 
-IP version to use. See CURLOPT_IPRESOLVE(3)
+IP version to use. See FETCHOPT_IPRESOLVE(3)
 
-## CURLOPT_ISSUERCERT
+## FETCHOPT_ISSUERCERT
 
-Issuer certificate. See CURLOPT_ISSUERCERT(3)
+Issuer certificate. See FETCHOPT_ISSUERCERT(3)
 
-## CURLOPT_ISSUERCERT_BLOB
+## FETCHOPT_ISSUERCERT_BLOB
 
-Issuer certificate memory buffer. See CURLOPT_ISSUERCERT_BLOB(3)
+Issuer certificate memory buffer. See FETCHOPT_ISSUERCERT_BLOB(3)
 
-## CURLOPT_KEEP_SENDING_ON_ERROR
+## FETCHOPT_KEEP_SENDING_ON_ERROR
 
-Keep sending on HTTP \>= 300 errors. CURLOPT_KEEP_SENDING_ON_ERROR(3)
+Keep sending on HTTP \>= 300 errors. FETCHOPT_KEEP_SENDING_ON_ERROR(3)
 
-## CURLOPT_KEYPASSWD
+## FETCHOPT_KEYPASSWD
 
-Client key password. See CURLOPT_KEYPASSWD(3)
+Client key password. See FETCHOPT_KEYPASSWD(3)
 
-## CURLOPT_KRBLEVEL
+## FETCHOPT_KRBLEVEL
 
-Kerberos security level. See CURLOPT_KRBLEVEL(3)
+Kerberos security level. See FETCHOPT_KRBLEVEL(3)
 
-## CURLOPT_LOCALPORT
+## FETCHOPT_LOCALPORT
 
-Bind connection locally to this port. See CURLOPT_LOCALPORT(3)
+Bind connection locally to this port. See FETCHOPT_LOCALPORT(3)
 
-## CURLOPT_LOCALPORTRANGE
+## FETCHOPT_LOCALPORTRANGE
 
-Bind connection locally to port range. See CURLOPT_LOCALPORTRANGE(3)
+Bind connection locally to port range. See FETCHOPT_LOCALPORTRANGE(3)
 
-## CURLOPT_LOGIN_OPTIONS
+## FETCHOPT_LOGIN_OPTIONS
 
-Login options. See CURLOPT_LOGIN_OPTIONS(3)
+Login options. See FETCHOPT_LOGIN_OPTIONS(3)
 
-## CURLOPT_LOW_SPEED_LIMIT
+## FETCHOPT_LOW_SPEED_LIMIT
 
-Low speed limit to abort transfer. See CURLOPT_LOW_SPEED_LIMIT(3)
+Low speed limit to abort transfer. See FETCHOPT_LOW_SPEED_LIMIT(3)
 
-## CURLOPT_LOW_SPEED_TIME
+## FETCHOPT_LOW_SPEED_TIME
 
 Time to be below the speed to trigger low speed abort. See
-CURLOPT_LOW_SPEED_TIME(3)
+FETCHOPT_LOW_SPEED_TIME(3)
 
-## CURLOPT_MAIL_AUTH
+## FETCHOPT_MAIL_AUTH
 
-Authentication address. See CURLOPT_MAIL_AUTH(3)
+Authentication address. See FETCHOPT_MAIL_AUTH(3)
 
-## CURLOPT_MAIL_FROM
+## FETCHOPT_MAIL_FROM
 
-Address of the sender. See CURLOPT_MAIL_FROM(3)
+Address of the sender. See FETCHOPT_MAIL_FROM(3)
 
-## CURLOPT_MAIL_RCPT
+## FETCHOPT_MAIL_RCPT
 
-Address of the recipients. See CURLOPT_MAIL_RCPT(3)
+Address of the recipients. See FETCHOPT_MAIL_RCPT(3)
 
-## CURLOPT_MAIL_RCPT_ALLOWFAILS
+## FETCHOPT_MAIL_RCPT_ALLOWFAILS
 
 Allow RCPT TO command to fail for some recipients. See
-CURLOPT_MAIL_RCPT_ALLOWFAILS(3)
+FETCHOPT_MAIL_RCPT_ALLOWFAILS(3)
 
-## CURLOPT_MAXAGE_CONN
+## FETCHOPT_MAXAGE_CONN
 
-Limit the age (idle time) of connections for reuse. See CURLOPT_MAXAGE_CONN(3)
+Limit the age (idle time) of connections for reuse. See FETCHOPT_MAXAGE_CONN(3)
 
-## CURLOPT_MAXCONNECTS
+## FETCHOPT_MAXCONNECTS
 
 Maximum number of connections in the connection pool. See
-CURLOPT_MAXCONNECTS(3)
+FETCHOPT_MAXCONNECTS(3)
 
-## CURLOPT_MAXFILESIZE
+## FETCHOPT_MAXFILESIZE
 
-Maximum file size to get. See CURLOPT_MAXFILESIZE(3)
+Maximum file size to get. See FETCHOPT_MAXFILESIZE(3)
 
-## CURLOPT_MAXFILESIZE_LARGE
+## FETCHOPT_MAXFILESIZE_LARGE
 
-Maximum file size to get. See CURLOPT_MAXFILESIZE_LARGE(3)
+Maximum file size to get. See FETCHOPT_MAXFILESIZE_LARGE(3)
 
-## CURLOPT_MAXLIFETIME_CONN
+## FETCHOPT_MAXLIFETIME_CONN
 
 Limit the age (since creation) of connections for reuse. See
-CURLOPT_MAXLIFETIME_CONN(3)
+FETCHOPT_MAXLIFETIME_CONN(3)
 
-## CURLOPT_MAXREDIRS
+## FETCHOPT_MAXREDIRS
 
-Maximum number of redirects to follow. See CURLOPT_MAXREDIRS(3)
+Maximum number of redirects to follow. See FETCHOPT_MAXREDIRS(3)
 
-## CURLOPT_MAX_RECV_SPEED_LARGE
+## FETCHOPT_MAX_RECV_SPEED_LARGE
 
-Cap the download speed to this. See CURLOPT_MAX_RECV_SPEED_LARGE(3)
+Cap the download speed to this. See FETCHOPT_MAX_RECV_SPEED_LARGE(3)
 
-## CURLOPT_MAX_SEND_SPEED_LARGE
+## FETCHOPT_MAX_SEND_SPEED_LARGE
 
-Cap the upload speed to this. See CURLOPT_MAX_SEND_SPEED_LARGE(3)
+Cap the upload speed to this. See FETCHOPT_MAX_SEND_SPEED_LARGE(3)
 
-## CURLOPT_MIMEPOST
+## FETCHOPT_MIMEPOST
 
-Post/send MIME data. See CURLOPT_MIMEPOST(3)
+Post/send MIME data. See FETCHOPT_MIMEPOST(3)
 
-## CURLOPT_MIME_OPTIONS
+## FETCHOPT_MIME_OPTIONS
 
-Set MIME option flags. See CURLOPT_MIME_OPTIONS(3)
+Set MIME option flags. See FETCHOPT_MIME_OPTIONS(3)
 
-## CURLOPT_NETRC
+## FETCHOPT_NETRC
 
-Enable .netrc parsing. See CURLOPT_NETRC(3)
+Enable .netrc parsing. See FETCHOPT_NETRC(3)
 
-## CURLOPT_NETRC_FILE
+## FETCHOPT_NETRC_FILE
 
-.netrc filename. See CURLOPT_NETRC_FILE(3)
+.netrc filename. See FETCHOPT_NETRC_FILE(3)
 
-## CURLOPT_NEW_DIRECTORY_PERMS
+## FETCHOPT_NEW_DIRECTORY_PERMS
 
-Mode for creating new remote directories. See CURLOPT_NEW_DIRECTORY_PERMS(3)
+Mode for creating new remote directories. See FETCHOPT_NEW_DIRECTORY_PERMS(3)
 
-## CURLOPT_NEW_FILE_PERMS
+## FETCHOPT_NEW_FILE_PERMS
 
-Mode for creating new remote files. See CURLOPT_NEW_FILE_PERMS(3)
+Mode for creating new remote files. See FETCHOPT_NEW_FILE_PERMS(3)
 
-## CURLOPT_NOBODY
+## FETCHOPT_NOBODY
 
-Do not get the body contents. See CURLOPT_NOBODY(3)
+Do not get the body contents. See FETCHOPT_NOBODY(3)
 
-## CURLOPT_NOPROGRESS
+## FETCHOPT_NOPROGRESS
 
-Shut off the progress meter. See CURLOPT_NOPROGRESS(3)
+Shut off the progress meter. See FETCHOPT_NOPROGRESS(3)
 
-## CURLOPT_NOPROXY
+## FETCHOPT_NOPROXY
 
-Filter out hosts from proxy use. CURLOPT_NOPROXY(3)
+Filter out hosts from proxy use. FETCHOPT_NOPROXY(3)
 
-## CURLOPT_NOSIGNAL
+## FETCHOPT_NOSIGNAL
 
-Do not install signal handlers. See CURLOPT_NOSIGNAL(3)
+Do not install signal handlers. See FETCHOPT_NOSIGNAL(3)
 
-## CURLOPT_OPENSOCKETDATA
+## FETCHOPT_OPENSOCKETDATA
 
-Data pointer to pass to the open socket callback. See CURLOPT_OPENSOCKETDATA(3)
+Data pointer to pass to the open socket callback. See FETCHOPT_OPENSOCKETDATA(3)
 
-## CURLOPT_OPENSOCKETFUNCTION
+## FETCHOPT_OPENSOCKETFUNCTION
 
-Callback for socket creation. See CURLOPT_OPENSOCKETFUNCTION(3)
+Callback for socket creation. See FETCHOPT_OPENSOCKETFUNCTION(3)
 
-## CURLOPT_PASSWORD
+## FETCHOPT_PASSWORD
 
-Password. See CURLOPT_PASSWORD(3)
+Password. See FETCHOPT_PASSWORD(3)
 
-## CURLOPT_PATH_AS_IS
+## FETCHOPT_PATH_AS_IS
 
-Disable squashing /../ and /./ sequences in the path. See CURLOPT_PATH_AS_IS(3)
+Disable squashing /../ and /./ sequences in the path. See FETCHOPT_PATH_AS_IS(3)
 
-## CURLOPT_PINNEDPUBLICKEY
+## FETCHOPT_PINNEDPUBLICKEY
 
-Set pinned SSL public key . See CURLOPT_PINNEDPUBLICKEY(3)
+Set pinned SSL public key . See FETCHOPT_PINNEDPUBLICKEY(3)
 
-## CURLOPT_PIPEWAIT
+## FETCHOPT_PIPEWAIT
 
-Wait on connection to pipeline on it. See CURLOPT_PIPEWAIT(3)
+Wait on connection to pipeline on it. See FETCHOPT_PIPEWAIT(3)
 
-## CURLOPT_PORT
+## FETCHOPT_PORT
 
-Port number to connect to. See CURLOPT_PORT(3)
+Port number to connect to. See FETCHOPT_PORT(3)
 
-## CURLOPT_POST
+## FETCHOPT_POST
 
-Make an HTTP POST. See CURLOPT_POST(3)
+Make an HTTP POST. See FETCHOPT_POST(3)
 
-## CURLOPT_POSTFIELDSIZE
+## FETCHOPT_POSTFIELDSIZE
 
-The POST data is this big. See CURLOPT_POSTFIELDSIZE(3)
+The POST data is this big. See FETCHOPT_POSTFIELDSIZE(3)
 
-## CURLOPT_POSTFIELDSIZE_LARGE
+## FETCHOPT_POSTFIELDSIZE_LARGE
 
-The POST data is this big. See CURLOPT_POSTFIELDSIZE_LARGE(3)
+The POST data is this big. See FETCHOPT_POSTFIELDSIZE_LARGE(3)
 
-## CURLOPT_POSTQUOTE
+## FETCHOPT_POSTQUOTE
 
-Commands to run after transfer. See CURLOPT_POSTQUOTE(3)
+Commands to run after transfer. See FETCHOPT_POSTQUOTE(3)
 
-## CURLOPT_POSTREDIR
+## FETCHOPT_POSTREDIR
 
-How to act on redirects after POST. See CURLOPT_POSTREDIR(3)
+How to act on redirects after POST. See FETCHOPT_POSTREDIR(3)
 
-## CURLOPT_PREQUOTE
+## FETCHOPT_PREQUOTE
 
-Commands to run just before transfer. See CURLOPT_PREQUOTE(3)
+Commands to run just before transfer. See FETCHOPT_PREQUOTE(3)
 
-## CURLOPT_PREREQDATA
+## FETCHOPT_PREREQDATA
 
-Data pointer to pass to the CURLOPT_PREREQFUNCTION callback. See
-CURLOPT_PREREQDATA(3)
+Data pointer to pass to the FETCHOPT_PREREQFUNCTION callback. See
+FETCHOPT_PREREQDATA(3)
 
-## CURLOPT_PREREQFUNCTION
+## FETCHOPT_PREREQFUNCTION
 
 Callback to be called after a connection is established but before a request
-is made on that connection. See CURLOPT_PREREQFUNCTION(3)
+is made on that connection. See FETCHOPT_PREREQFUNCTION(3)
 
-## CURLOPT_PRE_PROXY
+## FETCHOPT_PRE_PROXY
 
-Socks proxy to use. See CURLOPT_PRE_PROXY(3)
+Socks proxy to use. See FETCHOPT_PRE_PROXY(3)
 
-## CURLOPT_PRIVATE
+## FETCHOPT_PRIVATE
 
-Private pointer to store. See CURLOPT_PRIVATE(3)
+Private pointer to store. See FETCHOPT_PRIVATE(3)
 
-## CURLOPT_PROGRESSDATA
+## FETCHOPT_PROGRESSDATA
 
 Data pointer to pass to the progress meter callback. See
-CURLOPT_PROGRESSDATA(3)
+FETCHOPT_PROGRESSDATA(3)
 
-## CURLOPT_PROGRESSFUNCTION
+## FETCHOPT_PROGRESSFUNCTION
 
-**OBSOLETE** callback for progress meter. See CURLOPT_PROGRESSFUNCTION(3)
+**OBSOLETE** callback for progress meter. See FETCHOPT_PROGRESSFUNCTION(3)
 
-## CURLOPT_PROTOCOLS
+## FETCHOPT_PROTOCOLS
 
-**Deprecated option** Allowed protocols. See CURLOPT_PROTOCOLS(3)
+**Deprecated option** Allowed protocols. See FETCHOPT_PROTOCOLS(3)
 
-## CURLOPT_PROTOCOLS_STR
+## FETCHOPT_PROTOCOLS_STR
 
-Allowed protocols. See CURLOPT_PROTOCOLS_STR(3)
+Allowed protocols. See FETCHOPT_PROTOCOLS_STR(3)
 
-## CURLOPT_PROXY
+## FETCHOPT_PROXY
 
-Proxy to use. See CURLOPT_PROXY(3)
+Proxy to use. See FETCHOPT_PROXY(3)
 
-## CURLOPT_PROXYAUTH
+## FETCHOPT_PROXYAUTH
 
-HTTP proxy authentication methods. See CURLOPT_PROXYAUTH(3)
+HTTP proxy authentication methods. See FETCHOPT_PROXYAUTH(3)
 
-## CURLOPT_PROXYHEADER
+## FETCHOPT_PROXYHEADER
 
-Custom HTTP headers sent to proxy. See CURLOPT_PROXYHEADER(3)
+Custom HTTP headers sent to proxy. See FETCHOPT_PROXYHEADER(3)
 
-## CURLOPT_PROXYPASSWORD
+## FETCHOPT_PROXYPASSWORD
 
-Proxy password. See CURLOPT_PROXYPASSWORD(3)
+Proxy password. See FETCHOPT_PROXYPASSWORD(3)
 
-## CURLOPT_PROXYPORT
+## FETCHOPT_PROXYPORT
 
-Proxy port to use. See CURLOPT_PROXYPORT(3)
+Proxy port to use. See FETCHOPT_PROXYPORT(3)
 
-## CURLOPT_PROXYTYPE
+## FETCHOPT_PROXYTYPE
 
-Proxy type. See CURLOPT_PROXYTYPE(3)
+Proxy type. See FETCHOPT_PROXYTYPE(3)
 
-## CURLOPT_PROXYUSERNAME
-Proxy username. See CURLOPT_PROXYUSERNAME(3)
+## FETCHOPT_PROXYUSERNAME
+Proxy username. See FETCHOPT_PROXYUSERNAME(3)
 
-## CURLOPT_PROXYUSERPWD
+## FETCHOPT_PROXYUSERPWD
 
-Proxy username and password. See CURLOPT_PROXYUSERPWD(3)
+Proxy username and password. See FETCHOPT_PROXYUSERPWD(3)
 
-## CURLOPT_PROXY_CAINFO
+## FETCHOPT_PROXY_CAINFO
 
-Proxy CA cert bundle. See CURLOPT_PROXY_CAINFO(3)
+Proxy CA cert bundle. See FETCHOPT_PROXY_CAINFO(3)
 
-## CURLOPT_PROXY_CAINFO_BLOB
+## FETCHOPT_PROXY_CAINFO_BLOB
 
-Proxy CA cert bundle memory buffer. See CURLOPT_PROXY_CAINFO_BLOB(3)
+Proxy CA cert bundle memory buffer. See FETCHOPT_PROXY_CAINFO_BLOB(3)
 
-## CURLOPT_PROXY_CAPATH
+## FETCHOPT_PROXY_CAPATH
 
-Path to proxy CA cert bundle. See CURLOPT_PROXY_CAPATH(3)
+Path to proxy CA cert bundle. See FETCHOPT_PROXY_CAPATH(3)
 
-## CURLOPT_PROXY_CRLFILE
+## FETCHOPT_PROXY_CRLFILE
 
-Proxy Certificate Revocation List. See CURLOPT_PROXY_CRLFILE(3)
+Proxy Certificate Revocation List. See FETCHOPT_PROXY_CRLFILE(3)
 
-## CURLOPT_PROXY_ISSUERCERT
+## FETCHOPT_PROXY_ISSUERCERT
 
-Proxy issuer certificate. See CURLOPT_PROXY_ISSUERCERT(3)
+Proxy issuer certificate. See FETCHOPT_PROXY_ISSUERCERT(3)
 
-## CURLOPT_PROXY_ISSUERCERT_BLOB
+## FETCHOPT_PROXY_ISSUERCERT_BLOB
 
-Proxy issuer certificate memory buffer. See CURLOPT_PROXY_ISSUERCERT_BLOB(3)
+Proxy issuer certificate memory buffer. See FETCHOPT_PROXY_ISSUERCERT_BLOB(3)
 
-## CURLOPT_PROXY_KEYPASSWD
+## FETCHOPT_PROXY_KEYPASSWD
 
-Proxy client key password. See CURLOPT_PROXY_KEYPASSWD(3)
+Proxy client key password. See FETCHOPT_PROXY_KEYPASSWD(3)
 
-## CURLOPT_PROXY_PINNEDPUBLICKEY
+## FETCHOPT_PROXY_PINNEDPUBLICKEY
 
 Set the proxy's pinned SSL public key. See
-CURLOPT_PROXY_PINNEDPUBLICKEY(3)
+FETCHOPT_PROXY_PINNEDPUBLICKEY(3)
 
-## CURLOPT_PROXY_SERVICE_NAME
+## FETCHOPT_PROXY_SERVICE_NAME
 
-Proxy authentication service name. CURLOPT_PROXY_SERVICE_NAME(3)
+Proxy authentication service name. FETCHOPT_PROXY_SERVICE_NAME(3)
 
-## CURLOPT_PROXY_SSLCERT
+## FETCHOPT_PROXY_SSLCERT
 
-Proxy client cert. See CURLOPT_PROXY_SSLCERT(3)
+Proxy client cert. See FETCHOPT_PROXY_SSLCERT(3)
 
-## CURLOPT_PROXY_SSLCERTTYPE
+## FETCHOPT_PROXY_SSLCERTTYPE
 
-Proxy client cert type. See CURLOPT_PROXY_SSLCERTTYPE(3)
+Proxy client cert type. See FETCHOPT_PROXY_SSLCERTTYPE(3)
 
-## CURLOPT_PROXY_SSLCERT_BLOB
+## FETCHOPT_PROXY_SSLCERT_BLOB
 
-Proxy client cert memory buffer. See CURLOPT_PROXY_SSLCERT_BLOB(3)
+Proxy client cert memory buffer. See FETCHOPT_PROXY_SSLCERT_BLOB(3)
 
-## CURLOPT_PROXY_SSLKEY
+## FETCHOPT_PROXY_SSLKEY
 
-Proxy client key. See CURLOPT_PROXY_SSLKEY(3)
+Proxy client key. See FETCHOPT_PROXY_SSLKEY(3)
 
-## CURLOPT_PROXY_SSLKEYTYPE
+## FETCHOPT_PROXY_SSLKEYTYPE
 
-Proxy client key type. See CURLOPT_PROXY_SSLKEYTYPE(3)
+Proxy client key type. See FETCHOPT_PROXY_SSLKEYTYPE(3)
 
-## CURLOPT_PROXY_SSLKEY_BLOB
+## FETCHOPT_PROXY_SSLKEY_BLOB
 
-Proxy client key. See CURLOPT_PROXY_SSLKEY_BLOB(3)
+Proxy client key. See FETCHOPT_PROXY_SSLKEY_BLOB(3)
 
-## CURLOPT_PROXY_SSLVERSION
+## FETCHOPT_PROXY_SSLVERSION
 
-Proxy SSL version to use. See CURLOPT_PROXY_SSLVERSION(3)
+Proxy SSL version to use. See FETCHOPT_PROXY_SSLVERSION(3)
 
-## CURLOPT_PROXY_SSL_CIPHER_LIST
+## FETCHOPT_PROXY_SSL_CIPHER_LIST
 
-Proxy ciphers to use. See CURLOPT_PROXY_SSL_CIPHER_LIST(3)
+Proxy ciphers to use. See FETCHOPT_PROXY_SSL_CIPHER_LIST(3)
 
-## CURLOPT_PROXY_SSL_OPTIONS
+## FETCHOPT_PROXY_SSL_OPTIONS
 
-Control proxy SSL behavior. See CURLOPT_PROXY_SSL_OPTIONS(3)
+Control proxy SSL behavior. See FETCHOPT_PROXY_SSL_OPTIONS(3)
 
-## CURLOPT_PROXY_SSL_VERIFYHOST
+## FETCHOPT_PROXY_SSL_VERIFYHOST
 
 Verify the hostname in the proxy SSL certificate. See
-CURLOPT_PROXY_SSL_VERIFYHOST(3)
+FETCHOPT_PROXY_SSL_VERIFYHOST(3)
 
-## CURLOPT_PROXY_SSL_VERIFYPEER
+## FETCHOPT_PROXY_SSL_VERIFYPEER
 
-Verify the proxy SSL certificate. See CURLOPT_PROXY_SSL_VERIFYPEER(3)
+Verify the proxy SSL certificate. See FETCHOPT_PROXY_SSL_VERIFYPEER(3)
 
-## CURLOPT_PROXY_TLS13_CIPHERS
+## FETCHOPT_PROXY_TLS13_CIPHERS
 
-Proxy TLS 1.3 cipher suites to use. See CURLOPT_PROXY_TLS13_CIPHERS(3)
+Proxy TLS 1.3 cipher suites to use. See FETCHOPT_PROXY_TLS13_CIPHERS(3)
 
-## CURLOPT_PROXY_TLSAUTH_PASSWORD
+## FETCHOPT_PROXY_TLSAUTH_PASSWORD
 
-Proxy TLS authentication password. See CURLOPT_PROXY_TLSAUTH_PASSWORD(3)
+Proxy TLS authentication password. See FETCHOPT_PROXY_TLSAUTH_PASSWORD(3)
 
-## CURLOPT_PROXY_TLSAUTH_TYPE
+## FETCHOPT_PROXY_TLSAUTH_TYPE
 
-Proxy TLS authentication methods. See CURLOPT_PROXY_TLSAUTH_TYPE(3)
+Proxy TLS authentication methods. See FETCHOPT_PROXY_TLSAUTH_TYPE(3)
 
-## CURLOPT_PROXY_TLSAUTH_USERNAME
+## FETCHOPT_PROXY_TLSAUTH_USERNAME
 
-Proxy TLS authentication username. See CURLOPT_PROXY_TLSAUTH_USERNAME(3)
+Proxy TLS authentication username. See FETCHOPT_PROXY_TLSAUTH_USERNAME(3)
 
-## CURLOPT_PROXY_TRANSFER_MODE
+## FETCHOPT_PROXY_TRANSFER_MODE
 
-Add transfer mode to URL over proxy. See CURLOPT_PROXY_TRANSFER_MODE(3)
+Add transfer mode to URL over proxy. See FETCHOPT_PROXY_TRANSFER_MODE(3)
 
-## CURLOPT_PUT
+## FETCHOPT_PUT
 
-**Deprecated option** Issue an HTTP PUT request. See CURLOPT_PUT(3)
+**Deprecated option** Issue an HTTP PUT request. See FETCHOPT_PUT(3)
 
-## CURLOPT_QUICK_EXIT
+## FETCHOPT_QUICK_EXIT
 
-To be set by toplevel tools like "curl" to skip lengthy cleanups when they are
-about to call exit() anyway. See CURLOPT_QUICK_EXIT(3)
+To be set by toplevel tools like "fetch" to skip lengthy cleanups when they are
+about to call exit() anyway. See FETCHOPT_QUICK_EXIT(3)
 
-## CURLOPT_QUOTE
+## FETCHOPT_QUOTE
 
-Commands to run before transfer. See CURLOPT_QUOTE(3)
+Commands to run before transfer. See FETCHOPT_QUOTE(3)
 
-## CURLOPT_RANDOM_FILE
+## FETCHOPT_RANDOM_FILE
 
 **OBSOLETE** Provide source for entropy random data.
-See CURLOPT_RANDOM_FILE(3)
+See FETCHOPT_RANDOM_FILE(3)
 
-## CURLOPT_RANGE
+## FETCHOPT_RANGE
 
-Range requests. See CURLOPT_RANGE(3)
+Range requests. See FETCHOPT_RANGE(3)
 
-## CURLOPT_READDATA
+## FETCHOPT_READDATA
 
-Data pointer to pass to the read callback. See CURLOPT_READDATA(3)
+Data pointer to pass to the read callback. See FETCHOPT_READDATA(3)
 
-## CURLOPT_READFUNCTION
+## FETCHOPT_READFUNCTION
 
-Callback for reading data. See CURLOPT_READFUNCTION(3)
+Callback for reading data. See FETCHOPT_READFUNCTION(3)
 
-## CURLOPT_REDIR_PROTOCOLS
+## FETCHOPT_REDIR_PROTOCOLS
 
 **Deprecated option** Protocols to allow redirects to. See
-CURLOPT_REDIR_PROTOCOLS(3)
+FETCHOPT_REDIR_PROTOCOLS(3)
 
-## CURLOPT_REDIR_PROTOCOLS_STR
+## FETCHOPT_REDIR_PROTOCOLS_STR
 
-Protocols to allow redirects to. See CURLOPT_REDIR_PROTOCOLS_STR(3)
+Protocols to allow redirects to. See FETCHOPT_REDIR_PROTOCOLS_STR(3)
 
-## CURLOPT_REFERER
+## FETCHOPT_REFERER
 
-Referer: header. See CURLOPT_REFERER(3)
+Referer: header. See FETCHOPT_REFERER(3)
 
-## CURLOPT_REQUEST_TARGET
+## FETCHOPT_REQUEST_TARGET
 
-Set the request target. CURLOPT_REQUEST_TARGET(3)
+Set the request target. FETCHOPT_REQUEST_TARGET(3)
 
-## CURLOPT_RESOLVE
+## FETCHOPT_RESOLVE
 
-Provide fixed/fake name resolves. See CURLOPT_RESOLVE(3)
+Provide fixed/fake name resolves. See FETCHOPT_RESOLVE(3)
 
-## CURLOPT_RESOLVER_START_DATA
+## FETCHOPT_RESOLVER_START_DATA
 
 Data pointer to pass to resolver start callback. See
-CURLOPT_RESOLVER_START_DATA(3)
+FETCHOPT_RESOLVER_START_DATA(3)
 
-## CURLOPT_RESOLVER_START_FUNCTION
+## FETCHOPT_RESOLVER_START_FUNCTION
 
 Callback to be called before a new resolve request is started. See
-CURLOPT_RESOLVER_START_FUNCTION(3)
+FETCHOPT_RESOLVER_START_FUNCTION(3)
 
-## CURLOPT_RESUME_FROM
+## FETCHOPT_RESUME_FROM
 
-Resume a transfer. See CURLOPT_RESUME_FROM(3)
+Resume a transfer. See FETCHOPT_RESUME_FROM(3)
 
-## CURLOPT_RESUME_FROM_LARGE
+## FETCHOPT_RESUME_FROM_LARGE
 
-Resume a transfer. See CURLOPT_RESUME_FROM_LARGE(3)
+Resume a transfer. See FETCHOPT_RESUME_FROM_LARGE(3)
 
-## CURLOPT_RTSP_CLIENT_CSEQ
+## FETCHOPT_RTSP_CLIENT_CSEQ
 
-Client CSEQ number. See CURLOPT_RTSP_CLIENT_CSEQ(3)
+Client CSEQ number. See FETCHOPT_RTSP_CLIENT_CSEQ(3)
 
-## CURLOPT_RTSP_REQUEST
+## FETCHOPT_RTSP_REQUEST
 
-RTSP request. See CURLOPT_RTSP_REQUEST(3)
+RTSP request. See FETCHOPT_RTSP_REQUEST(3)
 
-## CURLOPT_RTSP_SERVER_CSEQ
+## FETCHOPT_RTSP_SERVER_CSEQ
 
-CSEQ number for RTSP Server-\>Client request. See CURLOPT_RTSP_SERVER_CSEQ(3)
+CSEQ number for RTSP Server-\>Client request. See FETCHOPT_RTSP_SERVER_CSEQ(3)
 
-## CURLOPT_RTSP_SESSION_ID
+## FETCHOPT_RTSP_SESSION_ID
 
-RTSP session-id. See CURLOPT_RTSP_SESSION_ID(3)
+RTSP session-id. See FETCHOPT_RTSP_SESSION_ID(3)
 
-## CURLOPT_RTSP_STREAM_URI
+## FETCHOPT_RTSP_STREAM_URI
 
-RTSP stream URI. See CURLOPT_RTSP_STREAM_URI(3)
+RTSP stream URI. See FETCHOPT_RTSP_STREAM_URI(3)
 
-## CURLOPT_RTSP_TRANSPORT
+## FETCHOPT_RTSP_TRANSPORT
 
-RTSP Transport: header. See CURLOPT_RTSP_TRANSPORT(3)
+RTSP Transport: header. See FETCHOPT_RTSP_TRANSPORT(3)
 
-## CURLOPT_SASL_AUTHZID
+## FETCHOPT_SASL_AUTHZID
 
-SASL authorization identity (identity to act as). See CURLOPT_SASL_AUTHZID(3)
+SASL authorization identity (identity to act as). See FETCHOPT_SASL_AUTHZID(3)
 
-## CURLOPT_SASL_IR
+## FETCHOPT_SASL_IR
 
-Enable SASL initial response. See CURLOPT_SASL_IR(3)
+Enable SASL initial response. See FETCHOPT_SASL_IR(3)
 
-## CURLOPT_SEEKDATA
+## FETCHOPT_SEEKDATA
 
-Data pointer to pass to the seek callback. See CURLOPT_SEEKDATA(3)
+Data pointer to pass to the seek callback. See FETCHOPT_SEEKDATA(3)
 
-## CURLOPT_SEEKFUNCTION
+## FETCHOPT_SEEKFUNCTION
 
-Callback for seek operations. See CURLOPT_SEEKFUNCTION(3)
+Callback for seek operations. See FETCHOPT_SEEKFUNCTION(3)
 
-## CURLOPT_SERVER_RESPONSE_TIMEOUT
+## FETCHOPT_SERVER_RESPONSE_TIMEOUT
 
-Timeout for server responses. See CURLOPT_SERVER_RESPONSE_TIMEOUT(3)
+Timeout for server responses. See FETCHOPT_SERVER_RESPONSE_TIMEOUT(3)
 
-## CURLOPT_SERVER_RESPONSE_TIMEOUT_MS
+## FETCHOPT_SERVER_RESPONSE_TIMEOUT_MS
 
-Timeout for server responses. See CURLOPT_SERVER_RESPONSE_TIMEOUT_MS(3)
+Timeout for server responses. See FETCHOPT_SERVER_RESPONSE_TIMEOUT_MS(3)
 
-## CURLOPT_SERVICE_NAME
+## FETCHOPT_SERVICE_NAME
 
-Authentication service name. CURLOPT_SERVICE_NAME(3)
+Authentication service name. FETCHOPT_SERVICE_NAME(3)
 
-## CURLOPT_SHARE
+## FETCHOPT_SHARE
 
-Share object to use. See CURLOPT_SHARE(3)
+Share object to use. See FETCHOPT_SHARE(3)
 
-## CURLOPT_SOCKOPTDATA
+## FETCHOPT_SOCKOPTDATA
 
-Data pointer to pass to the sockopt callback. See CURLOPT_SOCKOPTDATA(3)
+Data pointer to pass to the sockopt callback. See FETCHOPT_SOCKOPTDATA(3)
 
-## CURLOPT_SOCKOPTFUNCTION
+## FETCHOPT_SOCKOPTFUNCTION
 
-Callback for sockopt operations. See CURLOPT_SOCKOPTFUNCTION(3)
+Callback for sockopt operations. See FETCHOPT_SOCKOPTFUNCTION(3)
 
-## CURLOPT_SOCKS5_AUTH
+## FETCHOPT_SOCKS5_AUTH
 
-Socks5 authentication methods. See CURLOPT_SOCKS5_AUTH(3)
+Socks5 authentication methods. See FETCHOPT_SOCKS5_AUTH(3)
 
-## CURLOPT_SOCKS5_GSSAPI_NEC
+## FETCHOPT_SOCKS5_GSSAPI_NEC
 
-Socks5 GSSAPI NEC mode. See CURLOPT_SOCKS5_GSSAPI_NEC(3)
+Socks5 GSSAPI NEC mode. See FETCHOPT_SOCKS5_GSSAPI_NEC(3)
 
-## CURLOPT_SOCKS5_GSSAPI_SERVICE
+## FETCHOPT_SOCKS5_GSSAPI_SERVICE
 
 **Deprecated option** Socks5 GSSAPI service name.
-See CURLOPT_SOCKS5_GSSAPI_SERVICE(3)
+See FETCHOPT_SOCKS5_GSSAPI_SERVICE(3)
 
-## CURLOPT_SSH_AUTH_TYPES
+## FETCHOPT_SSH_AUTH_TYPES
 
-SSH authentication types. See CURLOPT_SSH_AUTH_TYPES(3)
+SSH authentication types. See FETCHOPT_SSH_AUTH_TYPES(3)
 
-## CURLOPT_SSH_COMPRESSION
+## FETCHOPT_SSH_COMPRESSION
 
-Enable SSH compression. See CURLOPT_SSH_COMPRESSION(3)
+Enable SSH compression. See FETCHOPT_SSH_COMPRESSION(3)
 
-## CURLOPT_SSH_HOSTKEYDATA
+## FETCHOPT_SSH_HOSTKEYDATA
 
-Custom pointer to pass to ssh host key callback. See CURLOPT_SSH_HOSTKEYDATA(3)
+Custom pointer to pass to ssh host key callback. See FETCHOPT_SSH_HOSTKEYDATA(3)
 
-## CURLOPT_SSH_HOSTKEYFUNCTION
+## FETCHOPT_SSH_HOSTKEYFUNCTION
 
-Callback for checking host key handling. See CURLOPT_SSH_HOSTKEYFUNCTION(3)
+Callback for checking host key handling. See FETCHOPT_SSH_HOSTKEYFUNCTION(3)
 
-## CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
+## FETCHOPT_SSH_HOST_PUBLIC_KEY_MD5
 
-MD5 of host's public key. See CURLOPT_SSH_HOST_PUBLIC_KEY_MD5(3)
+MD5 of host's public key. See FETCHOPT_SSH_HOST_PUBLIC_KEY_MD5(3)
 
-## CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256
+## FETCHOPT_SSH_HOST_PUBLIC_KEY_SHA256
 
-SHA256 of host's public key. See CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256(3)
+SHA256 of host's public key. See FETCHOPT_SSH_HOST_PUBLIC_KEY_SHA256(3)
 
-## CURLOPT_SSH_KEYDATA
+## FETCHOPT_SSH_KEYDATA
 
-Custom pointer to pass to ssh key callback. See CURLOPT_SSH_KEYDATA(3)
+Custom pointer to pass to ssh key callback. See FETCHOPT_SSH_KEYDATA(3)
 
-## CURLOPT_SSH_KEYFUNCTION
+## FETCHOPT_SSH_KEYFUNCTION
 
-Callback for known hosts handling. See CURLOPT_SSH_KEYFUNCTION(3)
+Callback for known hosts handling. See FETCHOPT_SSH_KEYFUNCTION(3)
 
-## CURLOPT_SSH_KNOWNHOSTS
+## FETCHOPT_SSH_KNOWNHOSTS
 
-Filename with known hosts. See CURLOPT_SSH_KNOWNHOSTS(3)
+Filename with known hosts. See FETCHOPT_SSH_KNOWNHOSTS(3)
 
-## CURLOPT_SSH_PRIVATE_KEYFILE
+## FETCHOPT_SSH_PRIVATE_KEYFILE
 
-Filename of the private key. See CURLOPT_SSH_PRIVATE_KEYFILE(3)
+Filename of the private key. See FETCHOPT_SSH_PRIVATE_KEYFILE(3)
 
-## CURLOPT_SSH_PUBLIC_KEYFILE
+## FETCHOPT_SSH_PUBLIC_KEYFILE
 
-Filename of the public key. See CURLOPT_SSH_PUBLIC_KEYFILE(3)
+Filename of the public key. See FETCHOPT_SSH_PUBLIC_KEYFILE(3)
 
-## CURLOPT_SSLCERT
+## FETCHOPT_SSLCERT
 
-Client cert. See CURLOPT_SSLCERT(3)
+Client cert. See FETCHOPT_SSLCERT(3)
 
-## CURLOPT_SSLCERTTYPE
+## FETCHOPT_SSLCERTTYPE
 
-Client cert type. See CURLOPT_SSLCERTTYPE(3)
+Client cert type. See FETCHOPT_SSLCERTTYPE(3)
 
-## CURLOPT_SSLCERT_BLOB
+## FETCHOPT_SSLCERT_BLOB
 
-Client cert memory buffer. See CURLOPT_SSLCERT_BLOB(3)
+Client cert memory buffer. See FETCHOPT_SSLCERT_BLOB(3)
 
-## CURLOPT_SSLENGINE
+## FETCHOPT_SSLENGINE
 
-Use identifier with SSL engine. See CURLOPT_SSLENGINE(3)
+Use identifier with SSL engine. See FETCHOPT_SSLENGINE(3)
 
-## CURLOPT_SSLENGINE_DEFAULT
+## FETCHOPT_SSLENGINE_DEFAULT
 
-Default SSL engine. See CURLOPT_SSLENGINE_DEFAULT(3)
+Default SSL engine. See FETCHOPT_SSLENGINE_DEFAULT(3)
 
-## CURLOPT_SSLKEY
+## FETCHOPT_SSLKEY
 
-Client key. See CURLOPT_SSLKEY(3)
+Client key. See FETCHOPT_SSLKEY(3)
 
-## CURLOPT_SSLKEYTYPE
+## FETCHOPT_SSLKEYTYPE
 
-Client key type. See CURLOPT_SSLKEYTYPE(3)
+Client key type. See FETCHOPT_SSLKEYTYPE(3)
 
-## CURLOPT_SSLKEY_BLOB
+## FETCHOPT_SSLKEY_BLOB
 
-Client key memory buffer. See CURLOPT_SSLKEY_BLOB(3)
+Client key memory buffer. See FETCHOPT_SSLKEY_BLOB(3)
 
-## CURLOPT_SSLVERSION
+## FETCHOPT_SSLVERSION
 
-SSL version to use. See CURLOPT_SSLVERSION(3)
+SSL version to use. See FETCHOPT_SSLVERSION(3)
 
-## CURLOPT_SSL_CIPHER_LIST
+## FETCHOPT_SSL_CIPHER_LIST
 
-Ciphers to use. See CURLOPT_SSL_CIPHER_LIST(3)
+Ciphers to use. See FETCHOPT_SSL_CIPHER_LIST(3)
 
-## CURLOPT_SSL_CTX_DATA
+## FETCHOPT_SSL_CTX_DATA
 
-Data pointer to pass to the SSL context callback. See CURLOPT_SSL_CTX_DATA(3)
+Data pointer to pass to the SSL context callback. See FETCHOPT_SSL_CTX_DATA(3)
 
-## CURLOPT_SSL_CTX_FUNCTION
+## FETCHOPT_SSL_CTX_FUNCTION
 
-Callback for SSL context logic. See CURLOPT_SSL_CTX_FUNCTION(3)
+Callback for SSL context logic. See FETCHOPT_SSL_CTX_FUNCTION(3)
 
-## CURLOPT_SSL_EC_CURVES
+## FETCHOPT_SSL_EC_CURVES
 
-Set key exchange curves. See CURLOPT_SSL_EC_CURVES(3)
+Set key exchange curves. See FETCHOPT_SSL_EC_CURVES(3)
 
-## CURLOPT_SSL_ENABLE_ALPN
+## FETCHOPT_SSL_ENABLE_ALPN
 
-Enable use of ALPN. See CURLOPT_SSL_ENABLE_ALPN(3)
+Enable use of ALPN. See FETCHOPT_SSL_ENABLE_ALPN(3)
 
-## CURLOPT_SSL_ENABLE_NPN
+## FETCHOPT_SSL_ENABLE_NPN
 
-**OBSOLETE** Enable use of NPN. See CURLOPT_SSL_ENABLE_NPN(3)
+**OBSOLETE** Enable use of NPN. See FETCHOPT_SSL_ENABLE_NPN(3)
 
-## CURLOPT_SSL_FALSESTART
+## FETCHOPT_SSL_FALSESTART
 
-Enable TLS False Start. See CURLOPT_SSL_FALSESTART(3)
+Enable TLS False Start. See FETCHOPT_SSL_FALSESTART(3)
 
-## CURLOPT_SSL_OPTIONS
+## FETCHOPT_SSL_OPTIONS
 
-Control SSL behavior. See CURLOPT_SSL_OPTIONS(3)
+Control SSL behavior. See FETCHOPT_SSL_OPTIONS(3)
 
-## CURLOPT_SSL_SESSIONID_CACHE
+## FETCHOPT_SSL_SESSIONID_CACHE
 
-Disable SSL session-id cache. See CURLOPT_SSL_SESSIONID_CACHE(3)
+Disable SSL session-id cache. See FETCHOPT_SSL_SESSIONID_CACHE(3)
 
-## CURLOPT_SSL_VERIFYHOST
+## FETCHOPT_SSL_VERIFYHOST
 
-Verify the hostname in the SSL certificate. See CURLOPT_SSL_VERIFYHOST(3)
+Verify the hostname in the SSL certificate. See FETCHOPT_SSL_VERIFYHOST(3)
 
-## CURLOPT_SSL_VERIFYPEER
+## FETCHOPT_SSL_VERIFYPEER
 
-Verify the SSL certificate. See CURLOPT_SSL_VERIFYPEER(3)
+Verify the SSL certificate. See FETCHOPT_SSL_VERIFYPEER(3)
 
-## CURLOPT_SSL_VERIFYSTATUS
+## FETCHOPT_SSL_VERIFYSTATUS
 
-Verify the SSL certificate's status. See CURLOPT_SSL_VERIFYSTATUS(3)
+Verify the SSL certificate's status. See FETCHOPT_SSL_VERIFYSTATUS(3)
 
-## CURLOPT_STDERR
+## FETCHOPT_STDERR
 
-Redirect stderr to another stream. See CURLOPT_STDERR(3)
+Redirect stderr to another stream. See FETCHOPT_STDERR(3)
 
-## CURLOPT_STREAM_DEPENDS
+## FETCHOPT_STREAM_DEPENDS
 
-This HTTP/2 stream depends on another. See CURLOPT_STREAM_DEPENDS(3)
+This HTTP/2 stream depends on another. See FETCHOPT_STREAM_DEPENDS(3)
 
-## CURLOPT_STREAM_DEPENDS_E
+## FETCHOPT_STREAM_DEPENDS_E
 
 This HTTP/2 stream depends on another exclusively. See
-CURLOPT_STREAM_DEPENDS_E(3)
+FETCHOPT_STREAM_DEPENDS_E(3)
 
-## CURLOPT_STREAM_WEIGHT
+## FETCHOPT_STREAM_WEIGHT
 
-Set this HTTP/2 stream's weight. See CURLOPT_STREAM_WEIGHT(3)
+Set this HTTP/2 stream's weight. See FETCHOPT_STREAM_WEIGHT(3)
 
-## CURLOPT_SUPPRESS_CONNECT_HEADERS
+## FETCHOPT_SUPPRESS_CONNECT_HEADERS
 
 Suppress proxy CONNECT response headers from user callbacks. See
-CURLOPT_SUPPRESS_CONNECT_HEADERS(3)
+FETCHOPT_SUPPRESS_CONNECT_HEADERS(3)
 
-## CURLOPT_TCP_FASTOPEN
+## FETCHOPT_TCP_FASTOPEN
 
-Enable TCP Fast Open. See CURLOPT_TCP_FASTOPEN(3)
+Enable TCP Fast Open. See FETCHOPT_TCP_FASTOPEN(3)
 
-## CURLOPT_TCP_KEEPALIVE
+## FETCHOPT_TCP_KEEPALIVE
 
-Enable TCP keep-alive. See CURLOPT_TCP_KEEPALIVE(3)
+Enable TCP keep-alive. See FETCHOPT_TCP_KEEPALIVE(3)
 
-## CURLOPT_TCP_KEEPCNT
+## FETCHOPT_TCP_KEEPCNT
 
-Maximum number of keep-alive probes. See CURLOPT_TCP_KEEPCNT(3)
+Maximum number of keep-alive probes. See FETCHOPT_TCP_KEEPCNT(3)
 
-## CURLOPT_TCP_KEEPIDLE
+## FETCHOPT_TCP_KEEPIDLE
 
-Idle time before sending keep-alive. See CURLOPT_TCP_KEEPIDLE(3)
+Idle time before sending keep-alive. See FETCHOPT_TCP_KEEPIDLE(3)
 
-## CURLOPT_TCP_KEEPINTVL
+## FETCHOPT_TCP_KEEPINTVL
 
-Interval between keep-alive probes. See CURLOPT_TCP_KEEPINTVL(3)
+Interval between keep-alive probes. See FETCHOPT_TCP_KEEPINTVL(3)
 
-## CURLOPT_TCP_NODELAY
+## FETCHOPT_TCP_NODELAY
 
-Disable the Nagle algorithm. See CURLOPT_TCP_NODELAY(3)
+Disable the Nagle algorithm. See FETCHOPT_TCP_NODELAY(3)
 
-## CURLOPT_TELNETOPTIONS
+## FETCHOPT_TELNETOPTIONS
 
-TELNET options. See CURLOPT_TELNETOPTIONS(3)
+TELNET options. See FETCHOPT_TELNETOPTIONS(3)
 
-## CURLOPT_TFTP_BLKSIZE
+## FETCHOPT_TFTP_BLKSIZE
 
-TFTP block size. See CURLOPT_TFTP_BLKSIZE(3)
+TFTP block size. See FETCHOPT_TFTP_BLKSIZE(3)
 
-## CURLOPT_TFTP_NO_OPTIONS
+## FETCHOPT_TFTP_NO_OPTIONS
 
-Do not send TFTP options requests. See CURLOPT_TFTP_NO_OPTIONS(3)
+Do not send TFTP options requests. See FETCHOPT_TFTP_NO_OPTIONS(3)
 
-## CURLOPT_TIMECONDITION
+## FETCHOPT_TIMECONDITION
 
-Make a time conditional request. See CURLOPT_TIMECONDITION(3)
+Make a time conditional request. See FETCHOPT_TIMECONDITION(3)
 
-## CURLOPT_TIMEOUT
+## FETCHOPT_TIMEOUT
 
-Timeout for the entire request. See CURLOPT_TIMEOUT(3)
+Timeout for the entire request. See FETCHOPT_TIMEOUT(3)
 
-## CURLOPT_TIMEOUT_MS
+## FETCHOPT_TIMEOUT_MS
 
-Millisecond timeout for the entire request. See CURLOPT_TIMEOUT_MS(3)
+Millisecond timeout for the entire request. See FETCHOPT_TIMEOUT_MS(3)
 
-## CURLOPT_TIMEVALUE
+## FETCHOPT_TIMEVALUE
 
-Time value for the time conditional request. See CURLOPT_TIMEVALUE(3)
+Time value for the time conditional request. See FETCHOPT_TIMEVALUE(3)
 
-## CURLOPT_TIMEVALUE_LARGE
+## FETCHOPT_TIMEVALUE_LARGE
 
-Time value for the time conditional request. See CURLOPT_TIMEVALUE_LARGE(3)
+Time value for the time conditional request. See FETCHOPT_TIMEVALUE_LARGE(3)
 
-## CURLOPT_TLS13_CIPHERS
+## FETCHOPT_TLS13_CIPHERS
 
-TLS 1.3 cipher suites to use. See CURLOPT_TLS13_CIPHERS(3)
+TLS 1.3 cipher suites to use. See FETCHOPT_TLS13_CIPHERS(3)
 
-## CURLOPT_TLSAUTH_PASSWORD
+## FETCHOPT_TLSAUTH_PASSWORD
 
-TLS authentication password. See CURLOPT_TLSAUTH_PASSWORD(3)
+TLS authentication password. See FETCHOPT_TLSAUTH_PASSWORD(3)
 
-## CURLOPT_TLSAUTH_TYPE
+## FETCHOPT_TLSAUTH_TYPE
 
-TLS authentication methods. See CURLOPT_TLSAUTH_TYPE(3)
+TLS authentication methods. See FETCHOPT_TLSAUTH_TYPE(3)
 
-## CURLOPT_TLSAUTH_USERNAME
+## FETCHOPT_TLSAUTH_USERNAME
 
-TLS authentication username. See CURLOPT_TLSAUTH_USERNAME(3)
+TLS authentication username. See FETCHOPT_TLSAUTH_USERNAME(3)
 
-## CURLOPT_TRAILERDATA
+## FETCHOPT_TRAILERDATA
 
 Custom pointer passed to the trailing headers callback. See
-CURLOPT_TRAILERDATA(3)
+FETCHOPT_TRAILERDATA(3)
 
-## CURLOPT_TRAILERFUNCTION
+## FETCHOPT_TRAILERFUNCTION
 
 Set callback for sending trailing headers. See
-CURLOPT_TRAILERFUNCTION(3)
+FETCHOPT_TRAILERFUNCTION(3)
 
-## CURLOPT_TRANSFERTEXT
+## FETCHOPT_TRANSFERTEXT
 
-Use text transfer. See CURLOPT_TRANSFERTEXT(3)
+Use text transfer. See FETCHOPT_TRANSFERTEXT(3)
 
-## CURLOPT_TRANSFER_ENCODING
+## FETCHOPT_TRANSFER_ENCODING
 
-Request Transfer-Encoding. See CURLOPT_TRANSFER_ENCODING(3)
+Request Transfer-Encoding. See FETCHOPT_TRANSFER_ENCODING(3)
 
-## CURLOPT_UNIX_SOCKET_PATH
+## FETCHOPT_UNIX_SOCKET_PATH
 
-Path to a Unix domain socket. See CURLOPT_UNIX_SOCKET_PATH(3)
+Path to a Unix domain socket. See FETCHOPT_UNIX_SOCKET_PATH(3)
 
-## CURLOPT_UNRESTRICTED_AUTH
+## FETCHOPT_UNRESTRICTED_AUTH
 
-Do not restrict authentication to original host. CURLOPT_UNRESTRICTED_AUTH(3)
+Do not restrict authentication to original host. FETCHOPT_UNRESTRICTED_AUTH(3)
 
-## CURLOPT_UPKEEP_INTERVAL_MS
+## FETCHOPT_UPKEEP_INTERVAL_MS
 
 Sets the interval at which connection upkeep are performed. See
-CURLOPT_UPKEEP_INTERVAL_MS(3)
+FETCHOPT_UPKEEP_INTERVAL_MS(3)
 
-## CURLOPT_UPLOAD
+## FETCHOPT_UPLOAD
 
-Upload data. See CURLOPT_UPLOAD(3)
+Upload data. See FETCHOPT_UPLOAD(3)
 
-## CURLOPT_UPLOAD_BUFFERSIZE
+## FETCHOPT_UPLOAD_BUFFERSIZE
 
-Set upload buffer size. See CURLOPT_UPLOAD_BUFFERSIZE(3)
+Set upload buffer size. See FETCHOPT_UPLOAD_BUFFERSIZE(3)
 
-## CURLOPT_URL
+## FETCHOPT_URL
 
-URL to work on. See CURLOPT_URL(3)
+URL to work on. See FETCHOPT_URL(3)
 
-## CURLOPT_USERAGENT
+## FETCHOPT_USERAGENT
 
-User-Agent: header. See CURLOPT_USERAGENT(3)
+User-Agent: header. See FETCHOPT_USERAGENT(3)
 
-## CURLOPT_USERNAME
+## FETCHOPT_USERNAME
 
-Username. See CURLOPT_USERNAME(3)
+Username. See FETCHOPT_USERNAME(3)
 
-## CURLOPT_USERPWD
+## FETCHOPT_USERPWD
 
-Username and password. See CURLOPT_USERPWD(3)
+Username and password. See FETCHOPT_USERPWD(3)
 
-## CURLOPT_USE_SSL
+## FETCHOPT_USE_SSL
 
-Use TLS/SSL. See CURLOPT_USE_SSL(3)
+Use TLS/SSL. See FETCHOPT_USE_SSL(3)
 
-## CURLOPT_VERBOSE
+## FETCHOPT_VERBOSE
 
-Display verbose information. See CURLOPT_VERBOSE(3)
+Display verbose information. See FETCHOPT_VERBOSE(3)
 
-## CURLOPT_WILDCARDMATCH
+## FETCHOPT_WILDCARDMATCH
 
 Transfer multiple files according to a filename pattern. See
-CURLOPT_WILDCARDMATCH(3)
+FETCHOPT_WILDCARDMATCH(3)
 
-## CURLOPT_WRITEDATA
+## FETCHOPT_WRITEDATA
 
-Data pointer to pass to the write callback. See CURLOPT_WRITEDATA(3)
+Data pointer to pass to the write callback. See FETCHOPT_WRITEDATA(3)
 
-## CURLOPT_WRITEFUNCTION
+## FETCHOPT_WRITEFUNCTION
 
-Callback for writing data. See CURLOPT_WRITEFUNCTION(3)
+Callback for writing data. See FETCHOPT_WRITEFUNCTION(3)
 
-## CURLOPT_WS_OPTIONS
+## FETCHOPT_WS_OPTIONS
 
-Set WebSocket options. See CURLOPT_WS_OPTIONS(3)
+Set WebSocket options. See FETCHOPT_WS_OPTIONS(3)
 
-## CURLOPT_XFERINFODATA
+## FETCHOPT_XFERINFODATA
 
 Data pointer to pass to the progress meter callback. See
-CURLOPT_XFERINFODATA(3)
+FETCHOPT_XFERINFODATA(3)
 
-## CURLOPT_XFERINFOFUNCTION
+## FETCHOPT_XFERINFOFUNCTION
 
-Callback for progress meter. See CURLOPT_XFERINFOFUNCTION(3)
+Callback for progress meter. See FETCHOPT_XFERINFOFUNCTION(3)
 
-## CURLOPT_XOAUTH2_BEARER
+## FETCHOPT_XOAUTH2_BEARER
 
-OAuth2 bearer token. See CURLOPT_XOAUTH2_BEARER(3)
+OAuth2 bearer token. See FETCHOPT_XOAUTH2_BEARER(3)
 
 # %PROTOCOLS%
 
@@ -1334,12 +1334,12 @@ OAuth2 bearer token. See CURLOPT_XOAUTH2_BEARER(3)
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -1348,20 +1348,20 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.
 
-Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
-curl_easy_setopt(3) returns **CURLE_BAD_FUNCTION_ARGUMENT** (added in 7.65.0).
+Strings passed on to libfetch must be shorter than 8000000 bytes, otherwise
+fetch_easy_setopt(3) returns **FETCHE_BAD_FUNCTION_ARGUMENT** (added in 7.65.0).
 
-**CURLE_BAD_FUNCTION_ARGUMENT** is returned when the argument to an option is
+**FETCHE_BAD_FUNCTION_ARGUMENT** is returned when the argument to an option is
 invalid, like perhaps out of range.
 
-If you try to set an option that libcurl does not know about, perhaps because
+If you try to set an option that libfetch does not know about, perhaps because
 the library is too old to support it or the option was removed in a recent
-version, this function returns *CURLE_UNKNOWN_OPTION*. If support for the
-option was disabled at compile-time, it returns *CURLE_NOT_BUILT_IN*.
+version, this function returns *FETCHE_UNKNOWN_OPTION*. If support for the
+option was disabled at compile-time, it returns *FETCHE_NOT_BUILT_IN*.

@@ -1,12 +1,12 @@
 <!--
   Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-  SPDX-License-Identifier: curl
+  SPDX-License-Identifier: fetch
 -->
 
-# curl man page generator
+# fetch man page generator
 
-`managen` is the curl man page generator. It generates a single nroff man page
+`managen` is the fetch man page generator. It generates a single nroff man page
 output from the set of sources files in this directory.
 
 The `mainpage.idx` file lists all files that are rendered in that order to
@@ -39,7 +39,7 @@ A line that starts with `<!--` is a comment. It should also end with `-->`.
     Arg: (the argument the option takes)
     c: (copyright line)
     Example:
-      - (an example command line, without "curl" and can use `$URL`)
+      - (an example command line, without "fetch" and can use `$URL`)
       - (another example)
     Experimental: yes (if so)
     Help: (short text for the --help output for this option)
@@ -54,7 +54,7 @@ A line that starts with `<!--` is a comment. It should also end with `-->`.
       - (a related option, no dashes)
       - (another related option, no dashes)
     Short: (single letter, without dash)
-    SPDX-License-Identifier: curl
+    SPDX-License-Identifier: fetch
     Tags: (space separated list)
     --- (end of meta-data)
 
@@ -105,14 +105,14 @@ getting spellchecked by CI jobs): `%DATE`, `%VERSION` and `%GLOBALS`.
 
 `managen mainpage [list of markdown option file names]`
 
-This command outputs a single huge nroff file, meant to become `curl.1`. The
-full curl man page.
+This command outputs a single huge nroff file, meant to become `fetch.1`. The
+full fetch man page.
 
 `managen ascii [list of markdown option file names]`
 
-This command outputs a single text file, meant to become `curl.txt`. The full
-curl man page in text format, used to build `tool_hugehelp.c`.
+This command outputs a single text file, meant to become `fetch.txt`. The full
+fetch man page in text format, used to build `tool_hugehelp.c`.
 
 `managen listhelp`
 
-Generates a full `curl --help` output for all known command line options.
+Generates a full `fetch --help` output for all known command line options.

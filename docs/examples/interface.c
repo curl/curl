@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,34 +18,34 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
- * Use CURLOPT_INTERFACE to bind the outgoing socket to an interface
+ * Use FETCHOPT_INTERFACE to bind the outgoing socket to an interface
  * </DESC>
  */
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* The interface needs to be a local existing interface over which you can
        connect to the host in the URL. It can also specify an IP address, but
        that address needs to be assigned one of the local network
        interfaces. */
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, "enp3s0");
-    curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
+    fetch_easy_setopt(fetch, FETCHOPT_INTERFACE, "enp3s0");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://fetch.se/");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
   return (int)res;

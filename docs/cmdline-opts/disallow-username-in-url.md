@@ -1,10 +1,10 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: disallow-username-in-url
 Help: Disallow username in URL
 Added: 7.61.0
-Category: curl
+Category: fetch
 Multi: boolean
 See-also:
   - proto

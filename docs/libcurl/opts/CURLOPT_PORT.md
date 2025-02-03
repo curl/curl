@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PORT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PORT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_PRIMARY_PORT (3)
-  - CURLOPT_STDERR (3)
-  - CURLOPT_URL (3)
+  - FETCHINFO_PRIMARY_PORT (3)
+  - FETCHOPT_STDERR (3)
+  - FETCHOPT_URL (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -15,14 +15,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_PORT - remote port number to connect to
+FETCHOPT_PORT - remote port number to connect to
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PORT, long number);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PORT, long number);
 ~~~
 
 # DESCRIPTION
@@ -39,7 +39,7 @@ application to override that.
 
 While this option accepts a 'long', a port number is an unsigned 16 bit number
 and therefore using a port number lower than zero or over 65535 causes a
-**CURLE_BAD_FUNCTION_ARGUMENT** error.
+**FETCHE_BAD_FUNCTION_ARGUMENT** error.
 
 # DEFAULT
 
@@ -53,13 +53,13 @@ with this API.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
-    curl_easy_setopt(curl, CURLOPT_PORT, 8080L);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
+    fetch_easy_setopt(fetch, FETCHOPT_PORT, 8080L);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -68,7 +68,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

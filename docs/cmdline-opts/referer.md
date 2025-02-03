@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: referer
 Short: e
 Arg: <URL>
@@ -22,6 +22,6 @@ Example:
 
 Set the referrer URL in the HTTP request. This can also be set with the
 --header flag of course. When used with --location you can append `;auto`" to
-the --referer URL to make curl automatically set the previous URL when it
+the --referer URL to make fetch automatically set the previous URL when it
 follows a Location: header. The `;auto` string can be used alone, even if you
 do not set an initial --referer.

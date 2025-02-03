@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SUPPRESS_CONNECT_HEADERS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SUPPRESS_CONNECT_HEADERS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HEADER (3)
-  - CURLOPT_HTTPPROXYTUNNEL (3)
-  - CURLOPT_PROXY (3)
+  - FETCHOPT_HEADER (3)
+  - FETCHOPT_HTTPPROXYTUNNEL (3)
+  - FETCHOPT_PROXY (3)
 Protocol:
   - All
 Added-in: 7.54.0
@@ -15,21 +15,21 @@ Added-in: 7.54.0
 
 # NAME
 
-CURLOPT_SUPPRESS_CONNECT_HEADERS - suppress proxy CONNECT response headers
+FETCHOPT_SUPPRESS_CONNECT_HEADERS - suppress proxy CONNECT response headers
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SUPPRESS_CONNECT_HEADERS, long onoff);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SUPPRESS_CONNECT_HEADERS, long onoff);
 ~~~
 
 # DESCRIPTION
 
-When CURLOPT_HTTPPROXYTUNNEL(3) is used and a CONNECT request is made,
+When FETCHOPT_HTTPPROXYTUNNEL(3) is used and a CONNECT request is made,
 suppress proxy CONNECT response headers from the user callback functions
-CURLOPT_HEADERFUNCTION(3) and CURLOPT_WRITEFUNCTION(3).
+FETCHOPT_HEADERFUNCTION(3) and FETCHOPT_WRITEFUNCTION(3).
 
 Proxy CONNECT response headers can complicate header processing since it is
 essentially a separate set of headers. You can enable this option to suppress
@@ -78,19 +78,19 @@ Content-Type: application/json
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
-    curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://foo:3128");
-    curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
-    curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_HEADER, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "http://foo:3128");
+    fetch_easy_setopt(fetch, FETCHOPT_HTTPPROXYTUNNEL, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_SUPPRESS_CONNECT_HEADERS, 1L);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -99,4 +99,4 @@ int main(void)
 
 # RETURN VALUE
 
-CURLE_OK or an error such as CURLE_UNKNOWN_OPTION.
+FETCHE_OK or an error such as FETCHE_UNKNOWN_OPTION.

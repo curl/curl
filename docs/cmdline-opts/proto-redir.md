@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proto-redir
 Arg: <protocols>
 Help: Enable/disable PROTOCOLS on redirect
 Added: 7.20.2
-Category: connection curl
+Category: connection fetch
 Multi: single
 See-also:
   - proto
@@ -20,8 +20,8 @@ not overridden by this option. See --proto for how protocols are represented.
 
 Example, allow only HTTP and HTTPS on redirect:
 
-    curl --proto-redir -all,http,https http://example.com
+    fetch --proto-redir -all,http,https http://example.com
 
-By default curl only allows HTTP, HTTPS, FTP and FTPS on redirects
+By default fetch only allows HTTP, HTTPS, FTP and FTPS on redirects
 (added in 7.65.2). Specifying *all* or *+all* enables all protocols on
 redirects, which is not good for security.

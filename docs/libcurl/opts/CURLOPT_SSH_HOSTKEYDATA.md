@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSH_HOSTKEYDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSH_HOSTKEYDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSH_HOSTKEYFUNCTION (3)
+  - FETCHOPT_SSH_HOSTKEYFUNCTION (3)
 Protocol:
   - SFTP
   - SCP
@@ -14,20 +14,20 @@ Added-in: 7.84.0
 
 # NAME
 
-CURLOPT_SSH_HOSTKEYDATA - pointer to pass to the SSH host key callback
+FETCHOPT_SSH_HOSTKEYDATA - pointer to pass to the SSH host key callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_HOSTKEYDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSH_HOSTKEYDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
 Pass a void * as parameter. This *pointer* is passed along untouched to
-the callback set with CURLOPT_SSH_HOSTKEYFUNCTION(3).
+the callback set with FETCHOPT_SSH_HOSTKEYFUNCTION(3).
 
 # DEFAULT
 
@@ -42,26 +42,26 @@ struct mine {
   void *custom;
 };
 
-static int hostkeycb(void *clientp,   /* CURLOPT_SSH_HOSTKEYDATA */
-                     int keytype,     /* CURLKHTYPE */
+static int hostkeycb(void *clientp,   /* FETCHOPT_SSH_HOSTKEYDATA */
+                     int keytype,     /* FETCHKHTYPE */
                      const char *key, /* host key to check */
                      size_t keylen)   /* length of the key */
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */
-  return CURLKHMATCH_OK;
+  return FETCHKHMATCH_OK;
 }
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     struct mine callback_data;
-    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
-    curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
-    curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYDATA, &callback_data);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "sftp://example.com/thisfile.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_HOSTKEYDATA, &callback_data);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -74,7 +74,7 @@ Works only with the libssh2 backend.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

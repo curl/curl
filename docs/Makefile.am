@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -29,17 +29,17 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 if BUILD_DOCS
 # if we disable man page building, ignore these
 MK_CA_DOCS = mk-ca-bundle.1
-CURLCONF_DOCS = curl-config.1
-man_MANS = curl-config.1
+FETCHCONF_DOCS = fetch-config.1
+man_MANS = fetch-config.1
 endif
 
-CURLPAGES = curl-config.md mk-ca-bundle.md
+FETCHPAGES = fetch-config.md mk-ca-bundle.md
 
-SUBDIRS = . cmdline-opts libcurl
+SUBDIRS = . cmdline-opts libfetch
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 if BUILD_DOCS
-CLEANFILES = mk-ca-bundle.1 curl-config.1
+CLEANFILES = mk-ca-bundle.1 fetch-config.1
 endif
 
 INTERNALDOCS =                                  \
@@ -62,7 +62,7 @@ INTERNALDOCS =                                  \
  internals/WEBSOCKET.md
 
 EXTRA_DIST =                                    \
- $(CURLPAGES)                                   \
+ $(FETCHPAGES)                                   \
  $(INTERNALDOCS)                                \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
@@ -74,8 +74,8 @@ EXTRA_DIST =                                    \
  CODE_OF_CONDUCT.md                             \
  CODE_REVIEW.md                                 \
  CONTRIBUTE.md                                  \
- CURL-DISABLE.md                                \
- CURLDOWN.md                                    \
+ FETCH-DISABLE.md                                \
+ FETCHDOWN.md                                    \
  DEPRECATE.md                                   \
  DISTROS.md                                     \
  EARLY-RELEASE.md                               \
@@ -123,12 +123,12 @@ CD2_ = $(CD2_0)
 
 SUFFIXES = .1 .md
 
-all: $(MK_CA_DOCS) $(CURLCONF_DOCS)
+all: $(MK_CA_DOCS) $(FETCHCONF_DOCS)
 
 .md.1:
 	$(CD2)$(CD2NROFF)
 
-curl-config.1: curl-config.md
+fetch-config.1: fetch-config.md
 
 mk-ca-bundle.1: mk-ca-bundle.md
 

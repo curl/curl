@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,20 +18,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
- * Use CURLOPT_CONNECT_TO to connect to "wrong" hostname
+ * Use FETCHOPT_CONNECT_TO to connect to "wrong" hostname
  * </DESC>
  */
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
   /*
     Each single string should be written using the format
@@ -39,32 +39,32 @@ int main(void)
     request, PORT is the port of the request, CONNECT-TO-HOST is the host name
     to connect to, and CONNECT-TO-PORT is the port to connect to.
    */
-  /* instead of curl.se:443, it resolves and uses example.com:443 but in other
-     aspects work as if it still is curl.se */
-  struct curl_slist *host = curl_slist_append(NULL,
-                                              "curl.se:443:example.com:443");
+  /* instead of fetch.se:443, it resolves and uses example.com:443 but in other
+     aspects work as if it still is fetch.se */
+  struct fetch_slist *host = fetch_slist_append(NULL,
+                                              "fetch.se:443:example.com:443");
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_CONNECT_TO, host);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_CONNECT_TO, host);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://fetch.se/");
 
     /* since this connects to the wrong host, checking the host name in the
-       server certificate fails, so unless we disable the check libcurl
-       returns CURLE_PEER_FAILED_VERIFICATION */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+       server certificate fails, so unless we disable the check libfetch
+       returns FETCHE_PEER_FAILED_VERIFICATION */
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYHOST, 0L);
 
     /* Letting the wrong host name in the certificate be okay, the transfer
        goes through but (most likely) causes a 404 or similar because it sends
        an unknown name in the Host: header field */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
-  curl_slist_free_all(host);
+  fetch_slist_free_all(host);
 
   return (int)res;
 }

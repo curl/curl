@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: interface
 Arg: <name>
 Help: Use network interface
@@ -24,7 +24,7 @@ following special syntax:
 ## if!<name>
 
 Interface name. If the provided name does not match an existing interface,
-curl returns with error 45.
+fetch returns with error 45.
 
 ## host!<name>
 
@@ -32,15 +32,15 @@ IP address or hostname.
 
 ## ifhost!<interface>!<host>
 
-Interface name and IP address or hostname. This syntax requires libcurl 8.9.0
+Interface name and IP address or hostname. This syntax requires libfetch 8.9.0
 or later.
 
-If the provided name does not match an existing interface, curl returns with
+If the provided name does not match an existing interface, fetch returns with
 error 45.
 
 ##
 
-curl does not support using network interface names for this option on
+fetch does not support using network interface names for this option on
 Windows.
 
 That name resolve operation if a hostname is provided does **not** use

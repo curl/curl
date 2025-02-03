@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_READDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_READDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HEADERDATA (3)
-  - CURLOPT_READFUNCTION (3)
-  - CURLOPT_WRITEDATA (3)
-  - CURLOPT_WRITEFUNCTION (3)
+  - FETCHOPT_HEADERDATA (3)
+  - FETCHOPT_READFUNCTION (3)
+  - FETCHOPT_WRITEDATA (3)
+  - FETCHOPT_WRITEFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.9.7
@@ -16,27 +16,27 @@ Added-in: 7.9.7
 
 # NAME
 
-CURLOPT_READDATA - pointer passed to the read callback
+FETCHOPT_READDATA - pointer passed to the read callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_READDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_READDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
 Data *pointer* to pass to the file read function. If you use the
-CURLOPT_READFUNCTION(3) option, this is the pointer you get as input in
+FETCHOPT_READFUNCTION(3) option, this is the pointer you get as input in
 the fourth argument to the callback.
 
 If you do not specify a read callback but instead rely on the default internal
 read function, this data must be a valid readable FILE * (cast to 'void *').
 
-If you are using libcurl as a DLL on Windows, you must use the
-CURLOPT_READFUNCTION(3) callback if you set this option, otherwise you
+If you are using libfetch as a DLL on Windows, you must use the
+FETCHOPT_READFUNCTION(3) callback if you set this option, otherwise you
 might experience crashes.
 
 # DEFAULT
@@ -54,27 +54,27 @@ struct MyData {
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
+  FETCH *fetch = fetch_easy_init();
   struct MyData this;
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* pass pointer that gets passed in to the
-       CURLOPT_READFUNCTION callback */
-    curl_easy_setopt(curl, CURLOPT_READDATA, &this);
+       FETCHOPT_READFUNCTION callback */
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, &this);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
 
 # HISTORY
 
-This option was once known by the older name CURLOPT_INFILE, the name
-CURLOPT_READDATA(3) was introduced in 7.9.7.
+This option was once known by the older name FETCHOPT_INFILE, the name
+FETCHOPT_READDATA(3) was introduced in 7.9.7.
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-This returns CURLE_OK.
+This returns FETCHE_OK.

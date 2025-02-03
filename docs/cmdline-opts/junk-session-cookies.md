@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: junk-session-cookies
 Short: j
 Help: Ignore session cookies read from file
@@ -17,6 +17,6 @@ Example:
 
 # `--junk-session-cookies`
 
-When curl is told to read cookies from a given file, this option makes it
+When fetch is told to read cookies from a given file, this option makes it
 discard all "session cookies". This has the same effect as if a new session is
 started. Typical browsers discard session cookies when they are closed down.

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TIMEVALUE_LARGE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TIMEVALUE_LARGE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_FILETIME (3)
-  - CURLOPT_TIMECONDITION (3)
-  - CURLOPT_TIMEVALUE (3)
+  - FETCHINFO_FILETIME (3)
+  - FETCHOPT_TIMECONDITION (3)
+  - FETCHOPT_TIMEVALUE (3)
 Protocol:
   - HTTP
 Added-in: 7.59.0
@@ -15,24 +15,24 @@ Added-in: 7.59.0
 
 # NAME
 
-CURLOPT_TIMEVALUE_LARGE - time value for conditional
+FETCHOPT_TIMEVALUE_LARGE - time value for conditional
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE_LARGE,
-                          curl_off_t val);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TIMEVALUE_LARGE,
+                          fetch_off_t val);
 ~~~
 
 # DESCRIPTION
 
-Pass a curl_off_t *val* as parameter. This should be the time counted as
+Pass a fetch_off_t *val* as parameter. This should be the time counted as
 seconds since 1 Jan 1970, and the time is used in a condition as specified
-with CURLOPT_TIMECONDITION(3).
+with FETCHOPT_TIMECONDITION(3).
 
-The difference between this option and CURLOPT_TIMEVALUE(3) is the type of the
+The difference between this option and FETCHOPT_TIMEVALUE(3) is the type of the
 argument. On systems where 'long' is only 32 bits wide, this option has to be
 used to set dates beyond the year 2038.
 
@@ -47,18 +47,18 @@ used to set dates beyond the year 2038.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* January 1, 2020 is 1577833200 */
-    curl_easy_setopt(curl, CURLOPT_TIMEVALUE_LARGE, (curl_off_t)1577833200);
+    fetch_easy_setopt(fetch, FETCHOPT_TIMEVALUE_LARGE, (fetch_off_t)1577833200);
 
     /* If-Modified-Since the above time stamp */
-    curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+    fetch_easy_setopt(fetch, FETCHOPT_TIMECONDITION, FETCH_TIMECOND_IFMODSINCE);
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -67,7 +67,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
  * A basic application source code using the multi interface doing two
- * transfers in parallel without curl_multi_wait/poll.
+ * transfers in parallel without fetch_multi_wait/poll.
  * </DESC>
  */
 
@@ -36,8 +36,8 @@
 #include <unistd.h>
 #endif
 
-/* curl stuff */
-#include <curl/curl.h>
+/* fetch stuff */
+#include <fetch/fetch.h>
 
 /*
  * Download an HTTP file and upload an FTP file simultaneously.
@@ -49,46 +49,46 @@
 
 int main(void)
 {
-  CURL *handles[HANDLECOUNT];
-  CURLM *multi_handle;
+  FETCH *handles[HANDLECOUNT];
+  FETCHM *multi_handle;
 
   int still_running = 0; /* keep number of running handles */
   int i;
 
-  CURLMsg *msg; /* for picking up messages with the transfer status */
+  FETCHMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
 
-  /* Allocate one curl handle per transfer */
+  /* Allocate one fetch handle per transfer */
   for(i = 0; i < HANDLECOUNT; i++)
-    handles[i] = curl_easy_init();
+    handles[i] = fetch_easy_init();
 
   /* set the options (I left out a few, you get the point anyway) */
-  curl_easy_setopt(handles[HTTP_HANDLE], CURLOPT_URL, "https://example.com");
+  fetch_easy_setopt(handles[HTTP_HANDLE], FETCHOPT_URL, "https://example.com");
 
-  curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_URL, "ftp://example.com");
-  curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_UPLOAD, 1L);
+  fetch_easy_setopt(handles[FTP_HANDLE], FETCHOPT_URL, "ftp://example.com");
+  fetch_easy_setopt(handles[FTP_HANDLE], FETCHOPT_UPLOAD, 1L);
 
   /* init a multi stack */
-  multi_handle = curl_multi_init();
+  multi_handle = fetch_multi_init();
 
   /* add the individual transfers */
   for(i = 0; i < HANDLECOUNT; i++)
-    curl_multi_add_handle(multi_handle, handles[i]);
+    fetch_multi_add_handle(multi_handle, handles[i]);
 
   /* we start some action by calling perform right away */
-  curl_multi_perform(multi_handle, &still_running);
+  fetch_multi_perform(multi_handle, &still_running);
 
   while(still_running) {
     struct timeval timeout;
     int rc; /* select() return code */
-    CURLMcode mc; /* curl_multi_fdset() return code */
+    FETCHMcode mc; /* fetch_multi_fdset() return code */
 
     fd_set fdread;
     fd_set fdwrite;
     fd_set fdexcep;
     int maxfd = -1;
 
-    long curl_timeo = -1;
+    long fetch_timeo = -1;
 
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
@@ -98,28 +98,28 @@ int main(void)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    curl_multi_timeout(multi_handle, &curl_timeo);
-    if(curl_timeo >= 0) {
+    fetch_multi_timeout(multi_handle, &fetch_timeo);
+    if(fetch_timeo >= 0) {
 #if defined(MSDOS) || defined(__AMIGA__)
-      timeout.tv_sec = (time_t)(curl_timeo / 1000);
+      timeout.tv_sec = (time_t)(fetch_timeo / 1000);
 #else
-      timeout.tv_sec = curl_timeo / 1000;
+      timeout.tv_sec = fetch_timeo / 1000;
 #endif
       if(timeout.tv_sec > 1)
         timeout.tv_sec = 1;
       else
 #if defined(MSDOS) || defined(__AMIGA__)
-        timeout.tv_usec = (time_t)(curl_timeo % 1000) * 1000;
+        timeout.tv_usec = (time_t)(fetch_timeo % 1000) * 1000;
 #else
-        timeout.tv_usec = (int)(curl_timeo % 1000) * 1000;
+        timeout.tv_usec = (int)(fetch_timeo % 1000) * 1000;
 #endif
     }
 
     /* get file descriptors from the transfers */
-    mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    mc = fetch_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+    if(mc != FETCHM_OK) {
+      fprintf(stderr, "fetch_multi_fdset() failed, code %d.\n", mc);
       break;
     }
 
@@ -127,7 +127,7 @@ int main(void)
        select(maxfd + 1, ...); specially in case of (maxfd == -1) there are
        no fds ready yet so we call select(0, ...) --or Sleep() on Windows--
        to sleep 100ms, which is the minimum suggested value in the
-       curl_multi_fdset() doc. */
+       fetch_multi_fdset() doc. */
 
     if(maxfd == -1) {
 #ifdef _WIN32
@@ -152,15 +152,15 @@ int main(void)
       break;
     case 0: /* timeout */
     default: /* action */
-      curl_multi_perform(multi_handle, &still_running);
+      fetch_multi_perform(multi_handle, &still_running);
       break;
     }
   }
 
   /* See how the transfers went */
   /* !checksrc! disable EQUALSNULL 1 */
-  while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
-    if(msg->msg == CURLMSG_DONE) {
+  while((msg = fetch_multi_info_read(multi_handle, &msgs_left)) != NULL) {
+    if(msg->msg == FETCHMSG_DONE) {
       int idx;
 
       /* Find out which handle this message is about */
@@ -181,11 +181,11 @@ int main(void)
     }
   }
 
-  curl_multi_cleanup(multi_handle);
+  fetch_multi_cleanup(multi_handle);
 
-  /* Free the curl handles */
+  /* Free the fetch handles */
   for(i = 0; i < HANDLECOUNT; i++)
-    curl_easy_cleanup(handles[i]);
+    fetch_easy_cleanup(handles[i]);
 
   return 0;
 }

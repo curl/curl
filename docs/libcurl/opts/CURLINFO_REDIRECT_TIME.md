@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_REDIRECT_TIME
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_REDIRECT_TIME
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_REDIRECT_COUNT (3)
-  - CURLINFO_REDIRECT_TIME_T (3)
-  - CURLINFO_REDIRECT_URL (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_REDIRECT_COUNT (3)
+  - FETCHINFO_REDIRECT_TIME_T (3)
+  - FETCHINFO_REDIRECT_URL (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.9.7
@@ -17,14 +17,14 @@ Added-in: 7.9.7
 
 # NAME
 
-CURLINFO_REDIRECT_TIME - get the time for all redirection steps
+FETCHINFO_REDIRECT_TIME - get the time for all redirection steps
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REDIRECT_TIME,
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_REDIRECT_TIME,
                            double *timep);
 ~~~
 
@@ -32,10 +32,10 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REDIRECT_TIME,
 
 Pass a pointer to a double to receive the total time, in seconds, it took for
 all redirection steps include name lookup, connect, pretransfer and transfer
-before final transaction was started. CURLINFO_REDIRECT_TIME(3) contains
+before final transaction was started. FETCHINFO_REDIRECT_TIME(3) contains
 the complete execution time for multiple redirections.
 
-See also the TIMES overview in the curl_easy_getinfo(3) man page.
+See also the TIMES overview in the fetch_easy_getinfo(3) man page.
 
 # %PROTOCOLS%
 
@@ -44,20 +44,20 @@ See also the TIMES overview in the curl_easy_getinfo(3) man page.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
     double redirect;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(CURLE_OK == res) {
-      res = curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME, &redirect);
-      if(CURLE_OK == res) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(FETCHE_OK == res) {
+      res = fetch_easy_getinfo(fetch, FETCHINFO_REDIRECT_TIME, &redirect);
+      if(FETCHE_OK == res) {
         printf("Time: %.1f", redirect);
       }
     }
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

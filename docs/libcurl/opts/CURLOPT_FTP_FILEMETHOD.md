@@ -1,33 +1,33 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FTP_FILEMETHOD
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FTP_FILEMETHOD
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - FTP
 See-also:
-  - CURLOPT_DIRLISTONLY (3)
-  - CURLOPT_FTP_SKIP_PASV_IP (3)
+  - FETCHOPT_DIRLISTONLY (3)
+  - FETCHOPT_FTP_SKIP_PASV_IP (3)
 Added-in: 7.15.1
 ---
 
 # NAME
 
-CURLOPT_FTP_FILEMETHOD - select directory traversing method for FTP
+FETCHOPT_FTP_FILEMETHOD - select directory traversing method for FTP
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_FILEMETHOD,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FTP_FILEMETHOD,
                           long method);
 ~~~
 
 # DESCRIPTION
 
-Pass a long telling libcurl which *method* to use to reach a file on a
+Pass a long telling libfetch which *method* to use to reach a file on a
 FTP(S) server.
 
 This option exists because some server implementations are not compliant to
@@ -35,27 +35,27 @@ what the standards say should work.
 
 The argument should be one of the following alternatives:
 
-## CURLFTPMETHOD_MULTICWD
+## FETCHFTPMETHOD_MULTICWD
 
-libcurl does a single CWD operation for each path part in the given URL. For
+libfetch does a single CWD operation for each path part in the given URL. For
 deep hierarchies this means many commands. This is how RFC 1738 says it should
 be done. This is the default but the slowest behavior.
 
-## CURLFTPMETHOD_NOCWD
+## FETCHFTPMETHOD_NOCWD
 
-libcurl makes no CWD at all. libcurl does SIZE, RETR, STOR etc and gives a
+libfetch makes no CWD at all. libfetch does SIZE, RETR, STOR etc and gives a
 full path to the server for all these commands. This is the fastest behavior
 since it skips having to change directories.
 
-## CURLFTPMETHOD_SINGLECWD
+## FETCHFTPMETHOD_SINGLECWD
 
-libcurl does one CWD with the full target directory and then operates on the
+libfetch does one CWD with the full target directory and then operates on the
 file &"normally" (like in the multicwd case). This is somewhat more standards
 compliant than 'nocwd' but without the full penalty of 'multicwd'.
 
 # DEFAULT
 
-CURLFTPMETHOD_MULTICWD
+FETCHFTPMETHOD_MULTICWD
 
 # %PROTOCOLS%
 
@@ -64,16 +64,16 @@ CURLFTPMETHOD_MULTICWD
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/1/2/3/4/new.txt");
-    curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD,
-                     (long)CURLFTPMETHOD_SINGLECWD);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/1/2/3/4/new.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_FTP_FILEMETHOD,
+                     (long)FETCHFTPMETHOD_SINGLECWD);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -82,7 +82,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

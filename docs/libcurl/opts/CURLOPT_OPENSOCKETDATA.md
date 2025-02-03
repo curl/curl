@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_OPENSOCKETDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_OPENSOCKETDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CLOSESOCKETFUNCTION (3)
-  - CURLOPT_OPENSOCKETFUNCTION (3)
-  - CURLOPT_SOCKOPTFUNCTION (3)
+  - FETCHOPT_CLOSESOCKETFUNCTION (3)
+  - FETCHOPT_OPENSOCKETFUNCTION (3)
+  - FETCHOPT_SOCKOPTFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.17.1
@@ -15,21 +15,21 @@ Added-in: 7.17.1
 
 # NAME
 
-CURLOPT_OPENSOCKETDATA - pointer passed to open socket callback
+FETCHOPT_OPENSOCKETDATA - pointer passed to open socket callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_OPENSOCKETDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_OPENSOCKETDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
-Pass a *pointer* that is untouched by libcurl and passed as the first
+Pass a *pointer* that is untouched by libfetch and passed as the first
 argument in the open socket callback set with
-CURLOPT_OPENSOCKETFUNCTION(3).
+FETCHOPT_OPENSOCKETFUNCTION(3).
 
 # DEFAULT
 
@@ -40,46 +40,46 @@ NULL
 # EXAMPLE
 
 ~~~c
-/* make libcurl use the already established socket 'sockfd' */
+/* make libfetch use the already established socket 'sockfd' */
 
-static curl_socket_t opensocket(void *clientp,
-                                curlsocktype purpose,
-                                struct curl_sockaddr *address)
+static fetch_socket_t opensocket(void *clientp,
+                                fetchsocktype purpose,
+                                struct fetch_sockaddr *address)
 {
-  curl_socket_t sockfd;
-  sockfd = *(curl_socket_t *)clientp;
+  fetch_socket_t sockfd;
+  sockfd = *(fetch_socket_t *)clientp;
   /* the actual externally set socket is passed in via the OPENSOCKETDATA
      option */
   return sockfd;
 }
 
-static int sockopt_callback(void *clientp, curl_socket_t curlfd,
-                            curlsocktype purpose)
+static int sockopt_callback(void *clientp, fetch_socket_t fetchfd,
+                            fetchsocktype purpose)
 {
-  /* This return code was added in libcurl 7.21.5 */
-  return CURL_SOCKOPT_ALREADY_CONNECTED;
+  /* This return code was added in libfetch 7.21.5 */
+  return FETCH_SOCKOPT_ALREADY_CONNECTED;
 }
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
     extern int sockfd; /* the already connected one */
 
-    /* libcurl thinks that you connect to the host
+    /* libfetch thinks that you connect to the host
      * and port that you specify in the URL option. */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://99.99.99.99:9999");
     /* call this function to get a socket */
-    curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
-    curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &sockfd);
+    fetch_easy_setopt(fetch, FETCHOPT_OPENSOCKETFUNCTION, opensocket);
+    fetch_easy_setopt(fetch, FETCHOPT_OPENSOCKETDATA, &sockfd);
 
     /* call this function to set options for the socket */
-    curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_SOCKOPTFUNCTION, sockopt_callback);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -88,7 +88,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

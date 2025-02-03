@@ -1,15 +1,15 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # Building with CMake
 
-This document describes how to configure, build and install curl and libcurl
+This document describes how to configure, build and install fetch and libfetch
 from source code using the CMake build tool. To build with CMake, you of
 course first have to install CMake. The minimum required version of CMake is
-specified in the file `CMakeLists.txt` found in the top of the curl source
+specified in the file `CMakeLists.txt` found in the top of the fetch source
 tree. Once the correct version of CMake is installed you can follow the
 instructions below for the platform you are building on.
 
@@ -18,7 +18,7 @@ CMake's GUIs.
 
 # Configuring
 
-A CMake configuration of curl is similar to the autotools build of curl.
+A CMake configuration of fetch is similar to the autotools build of fetch.
 It consists of the following steps after you have unpacked the source.
 
 ## Using `cmake`
@@ -30,10 +30,10 @@ that is apart from the source tree.
 
        $ cmake -B .
 
- - Build in a separate directory (parallel to the curl source tree in this
+ - Build in a separate directory (parallel to the fetch source tree in this
    example). The build directory is created for you.
 
-       $ cmake -B ../curl-build
+       $ cmake -B ../fetch-build
 
 ### Fallback for CMake before version 3.13
 
@@ -41,9 +41,9 @@ CMake before version 3.13 does not support the `-B` option. In that case,
 you must create the build directory yourself, `cd` to it and run `cmake`
 from there:
 
-    $ mkdir ../curl-build
-    $ cd ../curl-build
-    $ cmake ../curl
+    $ mkdir ../fetch-build
+    $ cd ../fetch-build
+    $ cmake ../fetch
 
 If you want to build in the source tree, it is enough to do this:
 
@@ -59,7 +59,7 @@ on Windows with multiple build systems if you have MinGW-w64 then you could use
 ## Using `ccmake`
 
 CMake comes with a curses based interface called `ccmake`. To run `ccmake`
-on a curl use the instructions for the command line cmake, but substitute
+on a fetch use the instructions for the command line cmake, but substitute
 `ccmake` for `cmake`.
 
 This brings up a curses interface with instructions on the bottom of the
@@ -72,10 +72,10 @@ CMake also comes with a Qt based GUI called `cmake-gui`. To configure with
 `cmake-gui`, you run `cmake-gui` and follow these steps:
 
  1. Fill in the "Where is the source code" combo box with the path to
-    the curl source tree.
+    the fetch source tree.
  2. Fill in the "Where to build the binaries" combo box with the path to
     the directory for your build tree, ideally this should not be the same
-    as the source tree, but a parallel directory called curl-build or
+    as the source tree, but a parallel directory called fetch-build or
     something similar.
  3. Once the source and binary directories are specified, press the
     "Configure" button.
@@ -88,7 +88,7 @@ CMake also comes with a Qt based GUI called `cmake-gui`. To configure with
 
 Build (you have to specify the build directory).
 
-    $ cmake --build ../curl-build
+    $ cmake --build ../fetch-build
 
 ## Static builds
 
@@ -116,7 +116,7 @@ case, you have to `cd` to the build directory and use the building tool that
 corresponds to the build files that CMake generated for you. This example
 assumes that CMake generates `Makefile`:
 
-    $ cd ../curl-build
+    $ cd ../fetch-build
     $ make
 
 # Testing
@@ -127,7 +127,7 @@ assumes that CMake generates `Makefile`:
 
 Install to default location (you have to specify the build directory).
 
-    $ cmake --install ../curl-build
+    $ cmake --install ../fetch-build
 
 ### Fallback for CMake before version 3.15
 
@@ -136,54 +136,54 @@ case, you have to `cd` to the build directory and use the building tool that
 corresponds to the build files that CMake generated for you. This example
 assumes that CMake generates `Makefile`:
 
-    $ cd ../curl-build
+    $ cd ../fetch-build
     $ make install
 
 # CMake build options
 
-- `BUILD_CURL_EXE`:                         Build curl executable. Default: `ON`
-- `BUILD_EXAMPLES`:                         Build libcurl examples. Default: `ON`
-- `BUILD_LIBCURL_DOCS`:                     Build libcurl man pages. Default: `ON`
-- `BUILD_MISC_DOCS`:                        Build misc man pages (e.g. `curl-config` and `mk-ca-bundle`). Default: `ON`
+- `BUILD_FETCH_EXE`:                         Build fetch executable. Default: `ON`
+- `BUILD_EXAMPLES`:                         Build libfetch examples. Default: `ON`
+- `BUILD_LIBFETCH_DOCS`:                     Build libfetch man pages. Default: `ON`
+- `BUILD_MISC_DOCS`:                        Build misc man pages (e.g. `fetch-config` and `mk-ca-bundle`). Default: `ON`
 - `BUILD_SHARED_LIBS`:                      Build shared libraries. Default: `ON`
-- `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF`
+- `BUILD_STATIC_FETCH`:                      Build fetch executable with static libfetch. Default: `OFF`
 - `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF`
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
-- `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
-- `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
-- `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
+- `FETCH_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
+- `FETCH_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
+- `FETCH_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`
-- `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
-- `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external). Default: `ON`
-- `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
-- `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
-- `CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX`:  Override default versioned symbol prefix. Default: `<TLS-BACKEND>_` or `MULTISSL_`
-- `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
-- `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`). Default: `OFF`
-- `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
-- `CURL_TEST_BUNDLES`:                      Bundle `libtest` and `unittest` tests into single binaries. Default: `OFF`
-- `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
-- `ENABLE_CURLDEBUG`:                       Enable TrackMemory debug feature. Default: =`ENABLE_DEBUG`
-- `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
-- `ENABLE_DEBUG`:                           Enable curl debug features (for developing curl itself). Default: `OFF`
+- `FETCH_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
+- `FETCH_HIDDEN_SYMBOLS`:                    Hide libfetch internal symbols (=hide all symbols that are not officially external). Default: `ON`
+- `FETCH_LIBFETCH_SOVERSION`:                 Enable libfetch SOVERSION. Default: `ON` for supported platforms
+- `FETCH_LIBFETCH_VERSIONED_SYMBOLS`:         Enable libfetch versioned symbols. Default: `OFF`
+- `FETCH_LIBFETCH_VERSIONED_SYMBOLS_PREFIX`:  Override default versioned symbol prefix. Default: `<TLS-BACKEND>_` or `MULTISSL_`
+- `FETCH_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
+- `FETCH_STATIC_CRT`:                        Build libfetch with static CRT with MSVC (`/MT`). Default: `OFF`
+- `FETCH_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
+- `FETCH_TEST_BUNDLES`:                      Bundle `libtest` and `unittest` tests into single binaries. Default: `OFF`
+- `FETCH_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
+- `ENABLE_FETCHDEBUG`:                       Enable TrackMemory debug feature. Default: =`ENABLE_DEBUG`
+- `ENABLE_FETCH_MANUAL`:                     Build the man page for fetch and enable its `-M`/`--manual` option. Default: `ON`
+- `ENABLE_DEBUG`:                           Enable fetch debug features (for developing fetch itself). Default: `OFF`
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp`
-- `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
+- `LIBFETCH_OUTPUT_NAME`:                    Basename of the fetch library. Default: `libfetch`
 - `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
 - `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
 
 ## CA bundle options
 
-- `CURL_CA_BUNDLE`:                         Path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
-- `CURL_CA_EMBED`:                          Path to the CA bundle to embed in the curl tool. Default: (disabled)
-- `CURL_CA_FALLBACK`:                       Use built-in CA store of TLS backend. Default: `OFF`
-- `CURL_CA_PATH`:                           Location of default CA path. Set `none` to disable or `auto` for auto-detection. Default: `auto`
-- `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
+- `FETCH_CA_BUNDLE`:                         Path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
+- `FETCH_CA_EMBED`:                          Path to the CA bundle to embed in the fetch tool. Default: (disabled)
+- `FETCH_CA_FALLBACK`:                       Use built-in CA store of TLS backend. Default: `OFF`
+- `FETCH_CA_PATH`:                           Location of default CA path. Set `none` to disable or `auto` for auto-detection. Default: `auto`
+- `FETCH_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the fetch tool directory) on Windows. Default: `OFF`
 
 ## Enabling features
 
-- `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
-- `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
+- `FETCH_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
+- `FETCH_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`FETCH_USE_SCHANNEL`
 - `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON` if target supports IPv6.
 - `ENABLE_THREADED_RESOLVER`:               Enable threaded DNS lookup. Default: `ON` if c-ares is not enabled and target supports threading.
 - `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
@@ -195,60 +195,60 @@ assumes that CMake generates `Makefile`:
 
 ## Disabling features
 
-- `CURL_DISABLE_ALTSVC`:                    Disable alt-svc support. Default: `OFF`
-- `CURL_DISABLE_AWS`:                       Disable **aws-sigv4**. Default: `OFF`
-- `CURL_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
-- `CURL_DISABLE_BEARER_AUTH`:               Disable Bearer authentication. Default: `OFF`
-- `CURL_DISABLE_BINDLOCAL`:                 Disable local binding support. Default: `OFF`
-- `CURL_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF`
-- `CURL_DISABLE_COOKIES`:                   Disable cookies support. Default: `OFF`
-- `CURL_DISABLE_DICT`:                      Disable DICT. Default: `OFF`
-- `CURL_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`
-- `CURL_DISABLE_DOH`:                       Disable DNS-over-HTTPS. Default: `OFF`
-- `CURL_DISABLE_FILE`:                      Disable FILE. Default: `OFF`
-- `CURL_DISABLE_FORM_API`:                  Disable **form-api**. Default: =`CURL_DISABLE_MIME`
-- `CURL_DISABLE_FTP`:                       Disable FTP. Default: `OFF`
-- `CURL_DISABLE_GETOPTIONS`:                Disable `curl_easy_options` API for existing options to `curl_easy_setopt`. Default: `OFF`
-- `CURL_DISABLE_GOPHER`:                    Disable Gopher. Default: `OFF`
-- `CURL_DISABLE_HEADERS_API`:               Disable **headers-api** support. Default: `OFF`
-- `CURL_DISABLE_HSTS`:                      Disable HSTS support. Default: `OFF`
-- `CURL_DISABLE_HTTP`:                      Disable HTTP. Default: `OFF`
-- `CURL_DISABLE_HTTP_AUTH`:                 Disable all HTTP authentication methods. Default: `OFF`
-- `CURL_DISABLE_IMAP`:                      Disable IMAP. Default: `OFF`
-- `CURL_DISABLE_INSTALL`:                   Disable installation targets. Default: `OFF`
-- `CURL_DISABLE_IPFS`:                      Disable IPFS. Default: `OFF`
-- `CURL_DISABLE_KERBEROS_AUTH`:             Disable Kerberos authentication. Default: `OFF`
-- `CURL_DISABLE_LDAP`:                      Disable LDAP. Default: `OFF`
-- `CURL_DISABLE_LDAPS`:                     Disable LDAPS. Default: =`CURL_DISABLE_LDAP`
-- `CURL_DISABLE_LIBCURL_OPTION`:            Disable `--libcurl` option from the curl tool. Default: `OFF`
-- `CURL_DISABLE_MIME`:                      Disable MIME support. Default: `OFF`
-- `CURL_DISABLE_MQTT`:                      Disable MQTT. Default: `OFF`
-- `CURL_DISABLE_NEGOTIATE_AUTH`:            Disable negotiate authentication. Default: `OFF`
-- `CURL_DISABLE_NETRC`:                     Disable netrc parser. Default: `OFF`
-- `CURL_DISABLE_NTLM`:                      Disable NTLM support. Default: `OFF`
-- `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG`:  Disable automatic loading of OpenSSL configuration. Default: `OFF`
-- `CURL_DISABLE_PARSEDATE`:                 Disable date parsing. Default: `OFF`
-- `CURL_DISABLE_POP3`:                      Disable POP3. Default: `OFF`
-- `CURL_DISABLE_PROGRESS_METER`:            Disable built-in progress meter. Default: `OFF`
-- `CURL_DISABLE_PROXY`:                     Disable proxy support. Default: `OFF`
-- `CURL_DISABLE_RTSP`:                      Disable RTSP. Default: `OFF`
-- `CURL_DISABLE_SHA512_256`:                Disable SHA-512/256 hash algorithm. Default: `OFF`
-- `CURL_DISABLE_SHUFFLE_DNS`:               Disable shuffle DNS feature. Default: `OFF`
-- `CURL_DISABLE_SMB`:                       Disable SMB. Default: `OFF`
-- `CURL_DISABLE_SMTP`:                      Disable SMTP. Default: `OFF`
-- `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll. Default: `OFF`
-- `CURL_DISABLE_SRP`:                       Disable TLS-SRP support. Default: `OFF`
-- `CURL_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
-- `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
-- `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
-- `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
-- `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `CURL_DISABLE_*` options). Default: `OFF`
+- `FETCH_DISABLE_ALTSVC`:                    Disable alt-svc support. Default: `OFF`
+- `FETCH_DISABLE_AWS`:                       Disable **aws-sigv4**. Default: `OFF`
+- `FETCH_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
+- `FETCH_DISABLE_BEARER_AUTH`:               Disable Bearer authentication. Default: `OFF`
+- `FETCH_DISABLE_BINDLOCAL`:                 Disable local binding support. Default: `OFF`
+- `FETCH_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF`
+- `FETCH_DISABLE_COOKIES`:                   Disable cookies support. Default: `OFF`
+- `FETCH_DISABLE_DICT`:                      Disable DICT. Default: `OFF`
+- `FETCH_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`
+- `FETCH_DISABLE_DOH`:                       Disable DNS-over-HTTPS. Default: `OFF`
+- `FETCH_DISABLE_FILE`:                      Disable FILE. Default: `OFF`
+- `FETCH_DISABLE_FORM_API`:                  Disable **form-api**. Default: =`FETCH_DISABLE_MIME`
+- `FETCH_DISABLE_FTP`:                       Disable FTP. Default: `OFF`
+- `FETCH_DISABLE_GETOPTIONS`:                Disable `fetch_easy_options` API for existing options to `fetch_easy_setopt`. Default: `OFF`
+- `FETCH_DISABLE_GOPHER`:                    Disable Gopher. Default: `OFF`
+- `FETCH_DISABLE_HEADERS_API`:               Disable **headers-api** support. Default: `OFF`
+- `FETCH_DISABLE_HSTS`:                      Disable HSTS support. Default: `OFF`
+- `FETCH_DISABLE_HTTP`:                      Disable HTTP. Default: `OFF`
+- `FETCH_DISABLE_HTTP_AUTH`:                 Disable all HTTP authentication methods. Default: `OFF`
+- `FETCH_DISABLE_IMAP`:                      Disable IMAP. Default: `OFF`
+- `FETCH_DISABLE_INSTALL`:                   Disable installation targets. Default: `OFF`
+- `FETCH_DISABLE_IPFS`:                      Disable IPFS. Default: `OFF`
+- `FETCH_DISABLE_KERBEROS_AUTH`:             Disable Kerberos authentication. Default: `OFF`
+- `FETCH_DISABLE_LDAP`:                      Disable LDAP. Default: `OFF`
+- `FETCH_DISABLE_LDAPS`:                     Disable LDAPS. Default: =`FETCH_DISABLE_LDAP`
+- `FETCH_DISABLE_LIBFETCH_OPTION`:            Disable `--libfetch` option from the fetch tool. Default: `OFF`
+- `FETCH_DISABLE_MIME`:                      Disable MIME support. Default: `OFF`
+- `FETCH_DISABLE_MQTT`:                      Disable MQTT. Default: `OFF`
+- `FETCH_DISABLE_NEGOTIATE_AUTH`:            Disable negotiate authentication. Default: `OFF`
+- `FETCH_DISABLE_NETRC`:                     Disable netrc parser. Default: `OFF`
+- `FETCH_DISABLE_NTLM`:                      Disable NTLM support. Default: `OFF`
+- `FETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG`:  Disable automatic loading of OpenSSL configuration. Default: `OFF`
+- `FETCH_DISABLE_PARSEDATE`:                 Disable date parsing. Default: `OFF`
+- `FETCH_DISABLE_POP3`:                      Disable POP3. Default: `OFF`
+- `FETCH_DISABLE_PROGRESS_METER`:            Disable built-in progress meter. Default: `OFF`
+- `FETCH_DISABLE_PROXY`:                     Disable proxy support. Default: `OFF`
+- `FETCH_DISABLE_RTSP`:                      Disable RTSP. Default: `OFF`
+- `FETCH_DISABLE_SHA512_256`:                Disable SHA-512/256 hash algorithm. Default: `OFF`
+- `FETCH_DISABLE_SHUFFLE_DNS`:               Disable shuffle DNS feature. Default: `OFF`
+- `FETCH_DISABLE_SMB`:                       Disable SMB. Default: `OFF`
+- `FETCH_DISABLE_SMTP`:                      Disable SMTP. Default: `OFF`
+- `FETCH_DISABLE_SOCKETPAIR`:                Disable use of socketpair for fetch_multi_poll. Default: `OFF`
+- `FETCH_DISABLE_SRP`:                       Disable TLS-SRP support. Default: `OFF`
+- `FETCH_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
+- `FETCH_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
+- `FETCH_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
+- `FETCH_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
+- `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `FETCH_DISABLE_*` options). Default: `OFF`
 
 ## Environment
 
 - `CI`:                                     Assume running under CI if set.
-- `CURL_BUILDINFO`:                         Print `buildinfo.txt` if set.
-- `CURL_CI`:                                Assume running under CI if set.
+- `FETCH_BUILDINFO`:                         Print `buildinfo.txt` if set.
+- `FETCH_CI`:                                Assume running under CI if set.
 
 ## CMake options
 
@@ -269,25 +269,25 @@ Details via CMake
 
 ## Dependencies
 
-- `CURL_BROTLI`:                            Use brotli (`ON`, `OFF` or `AUTO`). Default: `AUTO`
-- `CURL_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
-- `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
-- `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
-- `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
-- `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
-- `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
-- `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
-- `CURL_USE_LIBUV`:                         Use libuv for event-based tests. Default: `OFF`
-- `CURL_USE_MBEDTLS`:                       Enable mbedTLS for SSL/TLS. Default: `OFF`
-- `CURL_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if no other TLS backend was enabled.
-- `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
-- `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
-- `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
-- `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
-- `CURL_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
-- `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
-- `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
-- `CURL_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`
+- `FETCH_BROTLI`:                            Use brotli (`ON`, `OFF` or `AUTO`). Default: `AUTO`
+- `FETCH_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
+- `FETCH_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
+- `FETCH_USE_GSASL`:                         Use libgsasl. Default: `OFF`
+- `FETCH_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
+- `FETCH_USE_LIBPSL`:                        Use libpsl. Default: `ON`
+- `FETCH_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
+- `FETCH_USE_LIBSSH`:                        Use libssh. Default: `OFF`
+- `FETCH_USE_LIBUV`:                         Use libuv for event-based tests. Default: `OFF`
+- `FETCH_USE_MBEDTLS`:                       Enable mbedTLS for SSL/TLS. Default: `OFF`
+- `FETCH_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if no other TLS backend was enabled.
+- `FETCH_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
+- `FETCH_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
+- `FETCH_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
+- `FETCH_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
+- `FETCH_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
+- `FETCH_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
+- `FETCH_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
+- `FETCH_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
 - `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
 - `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
@@ -308,7 +308,7 @@ Details via CMake
 
 ## Dependency options
 
-- `CLANG_TIDY`:                             `clang-tidy` tool used with `CURL_CLANG_TIDY=ON`. Default: `clang-tidy`
+- `CLANG_TIDY`:                             `clang-tidy` tool used with `FETCH_CLANG_TIDY=ON`. Default: `clang-tidy`
 - `PERL_EXECUTABLE`                         Perl binary used throughout the build and tests.
 - `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
 - `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
@@ -378,7 +378,7 @@ Details via CMake
 
 # Migrating from Visual Studio IDE Project Files
 
-We recommend CMake to build curl with MSVC.
+We recommend CMake to build fetch with MSVC.
 
 The project build files reside in project/Windows/VC\* for VS2010, VS2010 and
 VS2013 respectively.
@@ -400,24 +400,24 @@ Configuration element             | Equivalent CMake options
 `LIB`                             | `BUILD_SHARED_LIBS=OFF`, `BUILD_STATIC_LIBS=ON`
 `Debug`                           | `CMAKE_BUILD_TYPE=Debug`
 `Release`                         | `CMAKE_BUILD_TYPE=Release`
-`DLL Windows SSPI`                | `CURL_USE_SCHANNEL=ON` (with SSPI enabled by default)
-`DLL OpenSSL`                     | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
-`DLL libssh2`                     | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
+`DLL Windows SSPI`                | `FETCH_USE_SCHANNEL=ON` (with SSPI enabled by default)
+`DLL OpenSSL`                     | `FETCH_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
+`DLL libssh2`                     | `FETCH_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
 `DLL WinIDN`                      | `USE_WIN32_IDN=ON`
 
 For example these commands:
 
     > cd projects
     > ./generate.bat VC12
-    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" Windows/VC12/curl-all.sln
+    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" Windows/VC12/fetch-all.sln
 
 translate to:
 
-    > cmake . -G "Visual Studio 12 2013" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DCURL_USE_LIBPSL=OFF
+    > cmake . -G "Visual Studio 12 2013" -A x64 -DCMAKE_BUILD_TYPE=Debug -DFETCH_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DFETCH_USE_LIBPSL=OFF
 
 # Migrating from winbuild builds
 
-We recommend CMake to build curl with MSVC. The winbuild build method is
+We recommend CMake to build fetch with MSVC. The winbuild build method is
 deprecated and may be dropped in a future release.
 
 In CMake you can customize the path of dependencies by passing the absolute
@@ -435,30 +435,30 @@ winbuild options                  | Equivalent CMake options
 :-------------------------------- | :--------------------------------
 `DEBUG`                           | `CMAKE_BUILD_TYPE=Debug`
 `GEN_PDB`                         | `CMAKE_EXE_LINKER_FLAGS=/Fd<path>`, `CMAKE_SHARED_LINKER_FLAGS=/Fd<path>`
-`LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBCURL_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
+`LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBFETCH_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
 `VC`                              | see CMake `-G` [options](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
 `MACHINE`: `x64`, `x86`           | `-A x64`, `-A Win32`
-`MODE`: `dll`, `static`           | `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF` (default: dll)
-`RTLIBCFG`: `static`              | `CURL_STATIC_CRT=ON`
+`MODE`: `dll`, `static`           | `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_STATIC_FETCH=ON/OFF` (default: dll)
+`RTLIBCFG`: `static`              | `FETCH_STATIC_CRT=ON`
 `ENABLE_IDN`                      | `USE_WIN32_IDN=ON`
 `ENABLE_IPV6`                     | `ENABLE_IPV6=ON`
 `ENABLE_MSH3`                     | `USE_MSH3=ON`
 `ENABLE_NGHTTP2`                  | `USE_NGHTTP2=ON`
-`ENABLE_OPENSSL_AUTO_LOAD_CONFIG` | `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG=OFF` (default)
-`ENABLE_SCHANNEL`                 | `CURL_USE_SCHANNEL=ON`
-`ENABLE_SSPI`                     | `CURL_WINDOWS_SSPI=ON` (default with Schannel)
+`ENABLE_OPENSSL_AUTO_LOAD_CONFIG` | `FETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG=OFF` (default)
+`ENABLE_SCHANNEL`                 | `FETCH_USE_SCHANNEL=ON`
+`ENABLE_SSPI`                     | `FETCH_WINDOWS_SSPI=ON` (default with Schannel)
 `ENABLE_UNICODE`                  | `ENABLE_UNICODE=ON`
 `WITH_PREFIX`                     | `CMAKE_INSTALL_PREFIX=<path>`
 `WITH_DEVEL`                      | see individual `*_INCLUDE_DIR` and `*_LIBRARY` options and `OPENSSL_ROOT_DIR`
 `WITH_CARES`, `CARES_PATH`        | `ENABLE_ARES=ON`, optional: `CARES_INCLUDE_DIR`, `CARES_LIBRARY`
-`WITH_MBEDTLS`, `MBEDTLS_PATH`    | `CURL_USE_MBEDTLS=ON`, optional: `MBEDTLS_INCLUDE_DIR`, `MBEDTLS_LIBRARY`, `MBEDX509_LIBRARY`, `MBEDCRYPTO_LIBRARY`
+`WITH_MBEDTLS`, `MBEDTLS_PATH`    | `FETCH_USE_MBEDTLS=ON`, optional: `MBEDTLS_INCLUDE_DIR`, `MBEDTLS_LIBRARY`, `MBEDX509_LIBRARY`, `MBEDCRYPTO_LIBRARY`
 `WITH_MSH3`, `MSH_PATH`           | `USE_MSH3=ON`, optional: `MSH3_INCLUDE_DIR`, `MSH3_LIBRARY`
 `WITH_NGHTTP2`, `NGHTTP2_PATH`    | `USE_NGHTTP2=ON`, optional: `NGHTTP2_INCLUDE_DIR`, `NGHTTP2_LIBRARY`
-`WITH_SSH`, `SSH_PATH`            | `CURL_USE_LIBSSH=ON`, optional: `LIBSSH_INCLUDE_DIR`, `LIBSSH_LIBRARY`
-`WITH_SSH2`, `SSH2_PATH`          | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
-`WITH_SSL`, `SSL_PATH`            | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
-`WITH_WOLFSSL`, `WOLFSSL_PATH`    | `CURL_USE_WOLFSSL=ON`, optional: `WOLFSSL_INCLUDE_DIR`, `WOLFSSL_LIBRARY`
-`WITH_ZLIB`, `ZLIB_PATH`          | `CURL_ZLIB=ON`, optional: `ZLIB_INCLUDE_DIR`, `ZLIB_LIBRARY`
+`WITH_SSH`, `SSH_PATH`            | `FETCH_USE_LIBSSH=ON`, optional: `LIBSSH_INCLUDE_DIR`, `LIBSSH_LIBRARY`
+`WITH_SSH2`, `SSH2_PATH`          | `FETCH_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
+`WITH_SSL`, `SSL_PATH`            | `FETCH_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
+`WITH_WOLFSSL`, `WOLFSSL_PATH`    | `FETCH_USE_WOLFSSL=ON`, optional: `WOLFSSL_INCLUDE_DIR`, `WOLFSSL_LIBRARY`
+`WITH_ZLIB`, `ZLIB_PATH`          | `FETCH_ZLIB=ON`, optional: `ZLIB_INCLUDE_DIR`, `ZLIB_LIBRARY`
 
 For example this command-line:
 
@@ -466,4 +466,4 @@ For example this command-line:
 
 translates to:
 
-    > cmake . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
+    > cmake . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DFETCH_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DFETCH_USE_LIBPSL=OFF

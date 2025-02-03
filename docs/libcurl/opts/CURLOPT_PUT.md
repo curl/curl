@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PUT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PUT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPGET (3)
-  - CURLOPT_MIMEPOST (3)
-  - CURLOPT_POSTFIELDS (3)
-  - CURLOPT_UPLOAD (3)
+  - FETCHOPT_HTTPGET (3)
+  - FETCHOPT_MIMEPOST (3)
+  - FETCHOPT_POSTFIELDS (3)
+  - FETCHOPT_UPLOAD (3)
 Protocol:
   - HTTP
 Added-in: 7.1
@@ -16,23 +16,23 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_PUT - make an HTTP PUT request
+FETCHOPT_PUT - make an HTTP PUT request
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PUT, long put);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PUT, long put);
 ~~~
 
 # DESCRIPTION
 
 A parameter set to 1 tells the library to use HTTP PUT to transfer data. The
-data should be set with CURLOPT_READDATA(3) and
-CURLOPT_INFILESIZE(3).
+data should be set with FETCHOPT_READDATA(3) and
+FETCHOPT_INFILESIZE(3).
 
-This option is **deprecated** since version 7.12.1. Use CURLOPT_UPLOAD(3).
+This option is **deprecated** since version 7.12.1. Use FETCHOPT_UPLOAD(3).
 
 # DEFAULT
 
@@ -55,28 +55,28 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     FILE *src = fopen("local-file", "r");
-    curl_off_t fsize; /* set this to the size of the input file */
+    fetch_off_t fsize; /* set this to the size of the input file */
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, read_cb);
 
     /* enable PUT */
-    curl_easy_setopt(curl, CURLOPT_PUT, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_PUT, 1L);
 
     /* specify target */
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/to/newfile");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/dir/to/newfile");
 
     /* now specify which pointer to pass to our callback */
-    curl_easy_setopt(curl, CURLOPT_READDATA, src);
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, src);
 
     /* Set the size of the file to upload */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
+    fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE, (fetch_off_t)fsize);
 
     /* Now run off and do what you have been told */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -89,7 +89,7 @@ Deprecated since 7.12.1.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

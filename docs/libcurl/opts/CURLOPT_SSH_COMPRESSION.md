@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSH_COMPRESSION
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSH_COMPRESSION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_ACCEPT_ENCODING (3)
-  - CURLOPT_TRANSFER_ENCODING (3)
+  - FETCHOPT_ACCEPT_ENCODING (3)
+  - FETCHOPT_TRANSFER_ENCODING (3)
 Protocol:
   - SFTP
   - SCP
@@ -15,14 +15,14 @@ Added-in: 7.56.0
 
 # NAME
 
-CURLOPT_SSH_COMPRESSION - enable SSH compression
+FETCHOPT_SSH_COMPRESSION - enable SSH compression
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_COMPRESSION, long enable);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSH_COMPRESSION, long enable);
 ~~~
 
 # DESCRIPTION
@@ -43,15 +43,15 @@ may or may not do it.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "sftp://example.com");
 
     /* enable built-in compression */
-    curl_easy_setopt(curl, CURLOPT_SSH_COMPRESSION, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_COMPRESSION, 1L);
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -60,7 +60,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

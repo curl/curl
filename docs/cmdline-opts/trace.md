@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: trace
 Arg: <file>
 Help: Write a debug trace to FILE
@@ -25,6 +25,6 @@ descriptive information, in the given output file. Use `-` as filename to have
 the output sent to stdout. Use `%` as filename to have the output sent to
 stderr.
 
-Note that verbose output of curl activities and network traffic might contain
+Note that verbose output of fetch activities and network traffic might contain
 sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.

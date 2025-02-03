@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_FILETIME_T
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_FILETIME_T
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_FILETIME (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHOPT_FILETIME (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
   - FTP
@@ -17,29 +17,29 @@ Added-in: 7.59.0
 
 # NAME
 
-CURLINFO_FILETIME_T - get the remote time of the retrieved document
+FETCHINFO_FILETIME_T - get the remote time of the retrieved document
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_FILETIME_T,
-                           curl_off_t *timep);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_FILETIME_T,
+                           fetch_off_t *timep);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a curl_off_t to receive the remote time of the retrieved
+Pass a pointer to a fetch_off_t to receive the remote time of the retrieved
 document in number of seconds since January 1 1970 in the GMT/UTC time zone.
 If you get -1, it can be because of many reasons (it might be unknown, the
 server might hide it or the server does not support the command that tells
 document time etc) and the time of the document is unknown.
 
-You must ask libcurl to collect this information before the transfer is made,
-by using the CURLOPT_FILETIME(3) option or you unconditionally get a -1 back.
+You must ask libfetch to collect this information before the transfer is made,
+by using the FETCHOPT_FILETIME(3) option or you unconditionally get a -1 back.
 
-This option is an alternative to CURLINFO_FILETIME(3) to allow systems with 32
+This option is an alternative to FETCHINFO_FILETIME(3) to allow systems with 32
 bit long variables to extract dates outside of the 32-bit timestamp range.
 
 # %PROTOCOLS%
@@ -49,23 +49,23 @@ bit long variables to extract dates outside of the 32-bit timestamp range.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
     /* Ask for filetime */
-    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
-    res = curl_easy_perform(curl);
-    if(CURLE_OK == res) {
-      curl_off_t filetime;
-      res = curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
-      if((CURLE_OK == res) && (filetime >= 0)) {
+    fetch_easy_setopt(fetch, FETCHOPT_FILETIME, 1L);
+    res = fetch_easy_perform(fetch);
+    if(FETCHE_OK == res) {
+      fetch_off_t filetime;
+      res = fetch_easy_getinfo(fetch, FETCHINFO_FILETIME_T, &filetime);
+      if((FETCHE_OK == res) && (filetime >= 0)) {
         time_t file_time = (time_t)filetime;
         printf("filetime: %s", ctime(&file_time));
       }
     }
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -74,7 +74,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

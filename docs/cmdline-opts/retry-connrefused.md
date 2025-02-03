@@ -1,10 +1,10 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: retry-connrefused
 Help: Retry on connection refused (with --retry)
 Added: 7.52.0
-Category: curl
+Category: fetch
 Multi: boolean
 See-also:
   - retry

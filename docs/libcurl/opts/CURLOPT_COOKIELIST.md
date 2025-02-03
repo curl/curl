@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_COOKIELIST
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_COOKIELIST
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_COOKIELIST (3)
-  - CURLOPT_COOKIE (3)
-  - CURLOPT_COOKIEFILE (3)
-  - CURLOPT_COOKIEJAR (3)
+  - FETCHINFO_COOKIELIST (3)
+  - FETCHOPT_COOKIE (3)
+  - FETCHOPT_COOKIEFILE (3)
+  - FETCHOPT_COOKIEJAR (3)
 Protocol:
   - HTTP
 Added-in: 7.14.1
@@ -16,14 +16,14 @@ Added-in: 7.14.1
 
 # NAME
 
-CURLOPT_COOKIELIST - add to or manipulate cookies held in memory
+FETCHOPT_COOKIELIST - add to or manipulate cookies held in memory
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIELIST,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_COOKIELIST,
                           char *cookie);
 ~~~
 
@@ -60,11 +60,11 @@ erases all session cookies held in memory
 
 ## `FLUSH`
 
-writes all known cookies to the file specified by CURLOPT_COOKIEJAR(3)
+writes all known cookies to the file specified by FETCHOPT_COOKIEJAR(3)
 
 ## `RELOAD`
 
-loads all cookies from the files specified by CURLOPT_COOKIEFILE(3)
+loads all cookies from the files specified by FETCHOPT_COOKIEFILE(3)
 
 # DEFAULT
 
@@ -90,36 +90,36 @@ int main(void)
     SEP "foo"        /* Name */
     SEP "bar";       /* Value */
 
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    /* my_cookie is imported immediately via CURLOPT_COOKIELIST. */
-    curl_easy_setopt(curl, CURLOPT_COOKIELIST, my_cookie);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    /* my_cookie is imported immediately via FETCHOPT_COOKIELIST. */
+    fetch_easy_setopt(fetch, FETCHOPT_COOKIELIST, my_cookie);
 
     /* The list of cookies in cookies.txt are not be imported until right
        before a transfer is performed. Cookies in the list that have the same
        hostname, path and name as in my_cookie are skipped. That is because
-       libcurl has already imported my_cookie and it's considered a "live"
+       libfetch has already imported my_cookie and it's considered a "live"
        cookie. A live cookie is not replaced by one read from a file.
     */
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */
+    fetch_easy_setopt(fetch, FETCHOPT_COOKIEFILE, "cookies.txt");  /* import */
 
-    /* Cookies are exported after curl_easy_cleanup is called. The server
+    /* Cookies are exported after fetch_easy_cleanup is called. The server
        may have added, deleted or modified cookies by then. The cookies that
        were skipped on import are not exported.
     */
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
+    fetch_easy_setopt(fetch, FETCHOPT_COOKIEJAR, "cookies.txt");  /* export */
 
-    curl_easy_perform(curl);  /* cookies imported from cookies.txt */
+    fetch_easy_perform(fetch);  /* cookies imported from cookies.txt */
 
-    curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
+    fetch_easy_cleanup(fetch);  /* cookies exported to cookies.txt */
   }
 }
 ~~~
 
 # Cookie file format
 
-The cookie file format and general cookie concepts in curl are described
-online here: https://curl.se/docs/http-cookies.html
+The cookie file format and general cookie concepts in fetch are described
+online here: https://fetch.se/docs/http-cookies.html
 
 # HISTORY
 
@@ -135,7 +135,7 @@ online here: https://curl.se/docs/http-cookies.html
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

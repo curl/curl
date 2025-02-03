@@ -1,10 +1,10 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: parallel-immediate
 Help: Do not wait for multiplexing
 Added: 7.68.0
-Category: connection curl global
+Category: connection fetch global
 Multi: boolean
 Scope: global
 See-also:
@@ -16,10 +16,10 @@ Example:
 
 # `--parallel-immediate`
 
-When doing parallel transfers, this option instructs curl to prefer opening up
+When doing parallel transfers, this option instructs fetch to prefer opening up
 more connections in parallel at once rather than waiting to see if new
 transfers can be added as multiplexed streams on another connection.
 
-By default, without this option set, curl prefers to wait a little and
+By default, without this option set, fetch prefers to wait a little and
 multiplex new transfers over existing connections. It keeps the number of
 connections low at the expense of risking a slightly slower transfer startup.

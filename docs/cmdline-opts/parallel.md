@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: Z
 Long: parallel
 Help: Perform transfers in parallel
 Added: 7.66.0
-Category: connection curl global
+Category: connection fetch global
 Multi: boolean
 Scope: global
 See-also:
@@ -19,8 +19,8 @@ Example:
 
 # `--parallel`
 
-Makes curl perform all transfers in parallel as compared to the regular serial
-manner. Parallel transfer means that curl runs up to N concurrent transfers
+Makes fetch perform all transfers in parallel as compared to the regular serial
+manner. Parallel transfer means that fetch runs up to N concurrent transfers
 simultaneously and if there are more than N transfers to handle, it starts new
 ones when earlier transfers finish.
 

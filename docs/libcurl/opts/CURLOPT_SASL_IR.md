@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SASL_IR
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SASL_IR
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_MAIL_AUTH (3)
-  - CURLOPT_MAIL_FROM (3)
-  - CURLOPT_SASL_AUTHZID (3)
+  - FETCHOPT_MAIL_AUTH (3)
+  - FETCHOPT_MAIL_FROM (3)
+  - FETCHOPT_SASL_AUTHZID (3)
 Protocol:
   - SMTP
   - IMAP
@@ -16,19 +16,19 @@ Added-in: 7.31.0
 
 # NAME
 
-CURLOPT_SASL_IR - send initial response in first packet
+FETCHOPT_SASL_IR - send initial response in first packet
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_IR, long enable);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SASL_IR, long enable);
 ~~~
 
 # DESCRIPTION
 
-Pass a long. If the value is 1, curl sends the initial response to the server
+Pass a long. If the value is 1, fetch sends the initial response to the server
 in the first authentication packet in order to reduce the number of ping pong
 requests. Only applicable to the following supporting SASL authentication
 mechanisms:
@@ -40,7 +40,7 @@ mechanisms:
 * OAuth 2.0
 
 Note: Whilst IMAP supports this option there is no need to explicitly set it,
-as libcurl can determine the feature itself when the server supports the
+as libfetch can determine the feature itself when the server supports the
 SASL-IR CAPABILITY.
 
 # DEFAULT
@@ -54,13 +54,13 @@ SASL-IR CAPABILITY.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
-    curl_easy_setopt(curl, CURLOPT_SASL_IR, 1L);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "smtp://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_SASL_IR, 1L);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -69,7 +69,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

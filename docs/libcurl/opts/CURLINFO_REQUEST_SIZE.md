@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_REQUEST_SIZE
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_REQUEST_SIZE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_HEADER_SIZE (3)
-  - CURLINFO_SIZE_DOWNLOAD_T (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_HEADER_SIZE (3)
+  - FETCHINFO_SIZE_DOWNLOAD_T (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.4.1
@@ -16,21 +16,21 @@ Added-in: 7.4.1
 
 # NAME
 
-CURLINFO_REQUEST_SIZE - get size of sent request
+FETCHINFO_REQUEST_SIZE - get size of sent request
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REQUEST_SIZE, long *sizep);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_REQUEST_SIZE, long *sizep);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a long to receive the total size of the issued
 requests. This is so far only for HTTP requests. Note that this may be more
-than one request if CURLOPT_FOLLOWLOCATION(3) is enabled.
+than one request if FETCHOPT_FOLLOWLOCATION(3) is enabled.
 
 # %PROTOCOLS%
 
@@ -39,18 +39,18 @@ than one request if CURLOPT_FOLLOWLOCATION(3) is enabled.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       long req;
-      res = curl_easy_getinfo(curl, CURLINFO_REQUEST_SIZE, &req);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_REQUEST_SIZE, &req);
       if(!res)
         printf("Request size: %ld bytes\n", req);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -59,7 +59,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

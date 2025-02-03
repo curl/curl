@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -29,14 +29,14 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /* This is a simple example showing how to verify an email address from an
  * SMTP server.
  *
  * Notes:
  *
- * 1) This example requires libcurl 7.34.0 or above.
+ * 1) This example requires libfetch 7.34.0 or above.
  * 2) Not all email servers support this command and even if your email server
  *    does support it, it may respond with a 252 response code even though the
  *    address does not exist.
@@ -44,37 +44,37 @@
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
-  struct curl_slist *recipients = NULL;
+  FETCH *fetch;
+  FETCHcode res;
+  struct fetch_slist *recipients = NULL;
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* This is the URL for your mailserver */
-    curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "smtp://mail.example.com");
 
-    /* Note that the CURLOPT_MAIL_RCPT takes a list, not a char array  */
-    recipients = curl_slist_append(recipients, "<recipient@example.com>");
-    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+    /* Note that the FETCHOPT_MAIL_RCPT takes a list, not a char array  */
+    recipients = fetch_slist_append(recipients, "<recipient@example.com>");
+    fetch_easy_setopt(fetch, FETCHOPT_MAIL_RCPT, recipients);
 
     /* Perform the VRFY */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* Free the list of recipients */
-    curl_slist_free_all(recipients);
+    fetch_slist_free_all(recipients);
 
-    /* curl does not send the QUIT command until you call cleanup, so you
+    /* fetch does not send the QUIT command until you call cleanup, so you
      * should be able to reuse this connection for additional requests. It may
      * not be a good idea to keep the connection open for a long time though
      * (more than a few minutes may result in the server timing out the
      * connection) and you do want to clean up in the end.
      */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
   return 0;

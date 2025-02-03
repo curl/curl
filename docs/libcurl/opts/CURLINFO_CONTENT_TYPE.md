@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_CONTENT_TYPE
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_CONTENT_TYPE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HEADERFUNCTION (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_header (3)
-  - curl_easy_setopt (3)
+  - FETCHOPT_HEADERFUNCTION (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_header (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.9.4
@@ -16,14 +16,14 @@ Added-in: 7.9.4
 
 # NAME
 
-CURLINFO_CONTENT_TYPE - get Content-Type
+FETCHINFO_CONTENT_TYPE - get Content-Type
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_TYPE, char **ct);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_CONTENT_TYPE, char **ct);
 ~~~
 
 # DESCRIPTION
@@ -34,11 +34,11 @@ it means that the server did not send a valid Content-Type header or that the
 protocol used does not support this.
 
 The **ct** pointer is set to NULL or pointing to private memory. You MUST
-NOT free it - it gets freed when you call curl_easy_cleanup(3) on the
-corresponding curl handle.
+NOT free it - it gets freed when you call fetch_easy_cleanup(3) on the
+corresponding fetch handle.
 
 The modern way to get this header from a response is to instead use the
-curl_easy_header(3) function.
+fetch_easy_header(3) function.
 
 # %PROTOCOLS%
 
@@ -47,22 +47,22 @@ curl_easy_header(3) function.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
       /* extract the content-type */
       char *ct = NULL;
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_CONTENT_TYPE, &ct);
       if(!res && ct) {
         printf("Content-Type: %s\n", ct);
       }
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -71,7 +71,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

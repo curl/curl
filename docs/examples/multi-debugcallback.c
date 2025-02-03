@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include <string.h>
 
-/* curl stuff */
-#include <curl/curl.h>
+/* fetch stuff */
+#include <fetch/fetch.h>
 
 #define TRUE 1
 
@@ -84,7 +84,7 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
 }
 
 static
-int my_trace(CURL *handle, curl_infotype type,
+int my_trace(FETCH *handle, fetch_infotype type,
              unsigned char *data, size_t size,
              void *userp)
 {
@@ -94,19 +94,19 @@ int my_trace(CURL *handle, curl_infotype type,
   (void)handle; /* prevent compiler warning */
 
   switch(type) {
-  case CURLINFO_TEXT:
+  case FETCHINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
     return 0;
-  case CURLINFO_HEADER_OUT:
+  case FETCHINFO_HEADER_OUT:
     text = "=> Send header";
     break;
-  case CURLINFO_DATA_OUT:
+  case FETCHINFO_DATA_OUT:
     text = "=> Send data";
     break;
-  case CURLINFO_HEADER_IN:
+  case FETCHINFO_HEADER_IN:
     text = "<= Recv header";
     break;
-  case CURLINFO_DATA_IN:
+  case FETCHINFO_DATA_IN:
     text = "<= Recv data";
     break;
   default: /* in case a new one is introduced to shock us */
@@ -122,40 +122,40 @@ int my_trace(CURL *handle, curl_infotype type,
  */
 int main(void)
 {
-  CURL *http_handle;
-  CURLM *multi_handle;
+  FETCH *http_handle;
+  FETCHM *multi_handle;
 
   int still_running = 0; /* keep number of running handles */
 
-  http_handle = curl_easy_init();
+  http_handle = fetch_easy_init();
 
   /* set the options (I left out a few, you get the point anyway) */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
+  fetch_easy_setopt(http_handle, FETCHOPT_URL, "https://www.example.com/");
 
-  curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);
-  curl_easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
+  fetch_easy_setopt(http_handle, FETCHOPT_DEBUGFUNCTION, my_trace);
+  fetch_easy_setopt(http_handle, FETCHOPT_VERBOSE, 1L);
 
   /* init a multi stack */
-  multi_handle = curl_multi_init();
+  multi_handle = fetch_multi_init();
 
   /* add the individual transfers */
-  curl_multi_add_handle(multi_handle, http_handle);
+  fetch_multi_add_handle(multi_handle, http_handle);
 
   do {
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    FETCHMcode mc = fetch_multi_perform(multi_handle, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      mc = fetch_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
     if(mc)
       break;
 
   } while(still_running);
 
-  curl_multi_cleanup(multi_handle);
+  fetch_multi_cleanup(multi_handle);
 
-  curl_easy_cleanup(http_handle);
+  fetch_easy_cleanup(http_handle);
 
   return 0;
 }

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: tls-earlydata
 Help: Allow use of TLSv1.3 early data (0RTT)
 Protocols: TLS
@@ -20,10 +20,10 @@ Example:
 Enable the use of TLSv1.3 early data, also known as '0RTT' where possible.
 This has security implications for the requests sent that way.
 
-This option is used when curl is built to use GnuTLS.
+This option is used when fetch is built to use GnuTLS.
 
 If a server supports this TLSv1.3 feature, and to what extent, is announced
-as part of the TLS "session" sent back to curl. Until curl has seen such
+as part of the TLS "session" sent back to fetch. Until fetch has seen such
 a session in a previous request, early data cannot be used.
 
 When a new connection is initiated with a known TLSv1.3 session, and that
@@ -34,7 +34,7 @@ your early data to the server again and the server would accept it.
 
 If your request contacts a public server and only retrieves a file, there
 may be no harm in that. If the first request orders a refrigerator
-for you, it is probably not a good idea to use early data for it. curl
+for you, it is probably not a good idea to use early data for it. fetch
 cannot deduce what the security implications of your requests actually
 are and make this decision for you.
 

@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # IPFS
@@ -49,16 +49,16 @@ The IPFS integration in cURL hides this gateway logic for you. Instead of
 providing a full URL to a file on IPFS like this:
 
 ```
-curl http://127.0.0.1:8080/ipfs/bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
+fetch http://127.0.0.1:8080/ipfs/bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
 ```
 
 You can provide it with the IPFS protocol instead:
 ```
-curl ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
+fetch ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
 ```
 
 With the IPFS protocol way of asking a file, cURL still needs to know the
-gateway. curl essentially just rewrites the IPFS based URL to a gateway URL.
+gateway. fetch essentially just rewrites the IPFS based URL to a gateway URL.
 
 ### IPFS_GATEWAY environment variable
 
@@ -81,7 +81,7 @@ to the option most applicable to solving the issue.
 ### `--ipfs-gateway` argument
 
 You can also provide a `--ipfs-gateway` argument to cURL. This overrules any
-other gateway setting. curl does not fallback to the other options if the
+other gateway setting. fetch does not fallback to the other options if the
 provided gateway did not work.
 
 ## Gateway redirects
@@ -92,7 +92,7 @@ requests to [subdomain
 based](https://docs.ipfs.tech/how-to/address-ipfs-on-web/#subdomain-gateway)
 ones. A request using:
 
-    curl ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi --ipfs-gateway https://dweb.link
+    fetch ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi --ipfs-gateway https://dweb.link
 
 Which would be translated to:
 

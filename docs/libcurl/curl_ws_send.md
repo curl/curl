@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_ws_send
+SPDX-License-Identifier: fetch
+Title: fetch_ws_send
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_getinfo (3)
-  - curl_easy_perform (3)
-  - curl_easy_setopt (3)
-  - curl_ws_recv (3)
-  - libcurl-ws (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_perform (3)
+  - fetch_easy_setopt (3)
+  - fetch_ws_recv (3)
+  - libfetch-ws (3)
 Protocol:
   - WS
 Added-in: 7.86.0
@@ -17,15 +17,15 @@ Added-in: 7.86.0
 
 # NAME
 
-curl_ws_send - send WebSocket data
+fetch_ws_send - send WebSocket data
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_ws_send(CURL *curl, const void *buffer, size_t buflen,
-                      size_t *sent, curl_off_t fragsize,
+FETCHcode fetch_ws_send(FETCH *fetch, const void *buffer, size_t buflen,
+                      size_t *sent, fetch_off_t fragsize,
                       unsigned int flags);
 ~~~
 
@@ -38,17 +38,17 @@ number of payload bytes in that memory area.
 *sent* is returned as the number of payload bytes actually sent.
 
 To send a (huge) fragment using multiple calls with partial content per
-invoke, set the *CURLWS_OFFSET* bit and the *fragsize* argument as the
-total expected size for the first part, then set the *CURLWS_OFFSET* with
+invoke, set the *FETCHWS_OFFSET* bit and the *fragsize* argument as the
+total expected size for the first part, then set the *FETCHWS_OFFSET* with
 a zero *fragsize* for the following parts.
 
 If not sending a partial fragment or if this is raw mode, *fragsize*
 should be set to zero.
 
-If **CURLWS_RAW_MODE** is enabled in CURLOPT_WS_OPTIONS(3), the
+If **FETCHWS_RAW_MODE** is enabled in FETCHOPT_WS_OPTIONS(3), the
 **flags** argument should be set to 0.
 
-To send a message consisting of multiple frames, set the *CURLWS_CONT* bit
+To send a message consisting of multiple frames, set the *FETCHWS_CONT* bit
 in all frames except the final one.
 
 Warning: while it is possible to invoke this function from a callback,
@@ -57,37 +57,37 @@ has been sent or an error is encountered.
 
 # FLAGS
 
-## CURLWS_TEXT
+## FETCHWS_TEXT
 
 The buffer contains text data. Note that this makes a difference to WebSocket
-but libcurl itself does not make any verification of the content or
+but libfetch itself does not make any verification of the content or
 precautions that you actually send valid UTF-8 content.
 
-## CURLWS_BINARY
+## FETCHWS_BINARY
 
 This is binary data.
 
-## CURLWS_CONT
+## FETCHWS_CONT
 
 This is not the final fragment of the message, which implies that there is
 another fragment coming as part of the same message where this bit is not set.
 
-## CURLWS_CLOSE
+## FETCHWS_CLOSE
 
 Close this transfer.
 
-## CURLWS_PING
+## FETCHWS_PING
 
 This is a ping.
 
-## CURLWS_PONG
+## FETCHWS_PONG
 
 This is a pong.
 
-## CURLWS_OFFSET
+## FETCHWS_OFFSET
 
 The provided data is only a partial fragment and there is more coming in a
-following call to *curl_ws_send()*. When sending only a piece of the
+following call to *fetch_ws_send()*. When sending only a piece of the
 fragment like this, the *fragsize* must be provided with the total
 expected fragment size in the first call and it needs to be zero in subsequent
 calls.
@@ -104,14 +104,14 @@ const char *send_payload = "magic";
 int main(void)
 {
   size_t sent;
-  CURLcode res;
-  CURL *curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com/");
-  curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L);
-  curl_easy_perform(curl);
-  res = curl_ws_send(curl, send_payload, strlen(send_payload), &sent, 0,
-                     CURLWS_PING);
-  curl_easy_cleanup(curl);
+  FETCHcode res;
+  FETCH *fetch = fetch_easy_init();
+  fetch_easy_setopt(fetch, FETCHOPT_URL, "wss://example.com/");
+  fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 2L);
+  fetch_easy_perform(fetch);
+  res = fetch_ws_send(fetch, send_payload, strlen(send_payload), &sent, 0,
+                     FETCHWS_PING);
+  fetch_easy_cleanup(fetch);
   return (int)res;
 }
 ~~~
@@ -120,9 +120,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

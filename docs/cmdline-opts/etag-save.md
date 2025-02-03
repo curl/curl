@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: etag-save
 Arg: <file>
 Help: Parse incoming ETag and save to a file
@@ -21,5 +21,5 @@ usually returned in a response. Use this option with a single URL only.
 
 If no ETag is sent by the server, an empty file is created.
 
-Starting in curl 8.12.0, using the --create-dirs option can also create
+Starting in fetch 8.12.0, using the --create-dirs option can also create
 missing directory components for the path provided in --etag-save.

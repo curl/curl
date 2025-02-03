@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: trace-time
 Help: Add time stamps to trace/verbose output
 Added: 7.14.0
@@ -16,4 +16,4 @@ Example:
 
 # `--trace-time`
 
-Prepends a time stamp to each trace or verbose line that curl displays.
+Prepends a time stamp to each trace or verbose line that fetch displays.

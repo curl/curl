@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: no-clobber
 Help: Do not overwrite files that already exist
 Category: output
@@ -16,7 +16,7 @@ Example:
 # `--no-clobber`
 
 When used in conjunction with the --output, --remote-header-name,
---remote-name, or --remote-name-all options, curl avoids overwriting files
+--remote-name, or --remote-name-all options, fetch avoids overwriting files
 that already exist. Instead, a dot and a number gets appended to the name of
 the file that would be created, up to filename.100 after which it does not
 create any file.

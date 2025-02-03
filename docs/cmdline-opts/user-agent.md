@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: A
 Long: user-agent
 Arg: <name>
@@ -26,4 +26,4 @@ If you give an empty argument to --user-agent (""), it removes the header
 completely from the request. If you prefer a blank header, you can set it to a
 single space (" ").
 
-By default, curl uses curl/VERSION, such as User-Agent: curl/`%VERSION`.
+By default, fetch uses fetch/VERSION, such as User-Agent: fetch/`%VERSION`.

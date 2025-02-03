@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include <stdio.h>
 #include <string.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -48,8 +48,8 @@
 #define REMOTE_URL      "ftp://example.com/"  UPLOAD_FILE_AS
 #define RENAME_FILE_TO  "renamed-and-fine.txt"
 
-/* NOTE: if you want this example to work on Windows with libcurl as a DLL,
-   you MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to
+/* NOTE: if you want this example to work on Windows with libfetch as a DLL,
+   you MUST also provide a read callback with FETCHOPT_READFUNCTION. Failing to
    do so might give you a crash since a DLL may not use the variable's memory
    when passed in to it from an app like this. */
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
@@ -70,13 +70,13 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   FILE *hd_src;
   struct stat file_info;
   unsigned long fsize;
 
-  struct curl_slist *headerlist = NULL;
+  struct fetch_slist *headerlist = NULL;
   static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
   static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
@@ -95,52 +95,52 @@ int main(void)
     return 2;
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(curl) {
-    /* build a list of commands to pass to libcurl */
-    headerlist = curl_slist_append(headerlist, buf_1);
-    headerlist = curl_slist_append(headerlist, buf_2);
+  /* get a fetch handle */
+  fetch = fetch_easy_init();
+  if(fetch) {
+    /* build a list of commands to pass to libfetch */
+    headerlist = fetch_slist_append(headerlist, buf_1);
+    headerlist = fetch_slist_append(headerlist, buf_2);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
     /* enable uploading */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
     /* specify target */
-    curl_easy_setopt(curl, CURLOPT_URL, REMOTE_URL);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, REMOTE_URL);
 
     /* pass in that last of FTP commands to run after the transfer */
-    curl_easy_setopt(curl, CURLOPT_POSTQUOTE, headerlist);
+    fetch_easy_setopt(fetch, FETCHOPT_POSTQUOTE, headerlist);
 
     /* now specify which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, hd_src);
 
     /* Set the size of the file to upload (optional).  If you give a *_LARGE
        option you MUST make sure that the type of the passed-in argument is a
-       curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
+       fetch_off_t. If you use FETCHOPT_INFILESIZE (without _LARGE) you must
        make sure that to pass in a type 'long' argument. */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)fsize);
+    fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
+                     (fetch_off_t)fsize);
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* clean up the FTP commands list */
-    curl_slist_free_all(headerlist);
+    fetch_slist_free_all(headerlist);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   fclose(hd_src); /* close the local file */
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return 0;
 }

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SASL_AUTHZID
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SASL_AUTHZID
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PASSWORD (3)
-  - CURLOPT_USERNAME (3)
-  - CURLOPT_USERPWD (3)
+  - FETCHOPT_PASSWORD (3)
+  - FETCHOPT_USERNAME (3)
+  - FETCHOPT_USERPWD (3)
 Protocol:
   - IMAP
 Added-in: 7.66.0
@@ -15,14 +15,14 @@ Added-in: 7.66.0
 
 # NAME
 
-CURLOPT_SASL_AUTHZID - authorization identity (identity to act as)
+FETCHOPT_SASL_AUTHZID - authorization identity (identity to act as)
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_AUTHZID, char *authzid);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SASL_AUTHZID, char *authzid);
 ~~~
 
 # DESCRIPTION
@@ -57,15 +57,15 @@ blank
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "imap://example.com/");
-    curl_easy_setopt(curl, CURLOPT_USERNAME, "Kurt");
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, "xipj3plmq");
-    curl_easy_setopt(curl, CURLOPT_SASL_AUTHZID, "Ursel");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "imap://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_USERNAME, "Kurt");
+    fetch_easy_setopt(fetch, FETCHOPT_PASSWORD, "xipj3plmq");
+    fetch_easy_setopt(fetch, FETCHOPT_SASL_AUTHZID, "Ursel");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -74,7 +74,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

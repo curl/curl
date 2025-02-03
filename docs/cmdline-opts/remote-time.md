@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: remote-time
 Short: R
 Help: Set remote file's time on local output
@@ -16,6 +16,6 @@ Example:
 
 # `--remote-time`
 
-Makes curl attempt to figure out the timestamp of the remote file that is
+Makes fetch attempt to figure out the timestamp of the remote file that is
 getting downloaded, and if that is available make the local file get that same
 timestamp.

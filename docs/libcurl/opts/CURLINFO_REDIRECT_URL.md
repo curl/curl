@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_REDIRECT_URL
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_REDIRECT_URL
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_REDIRECT_COUNT (3)
-  - CURLINFO_REDIRECT_TIME_T (3)
-  - CURLOPT_FOLLOWLOCATION (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_REDIRECT_COUNT (3)
+  - FETCHINFO_REDIRECT_TIME_T (3)
+  - FETCHOPT_FOLLOWLOCATION (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.18.2
@@ -17,25 +17,25 @@ Added-in: 7.18.2
 
 # NAME
 
-CURLINFO_REDIRECT_URL - get the URL a redirect would go to
+FETCHINFO_REDIRECT_URL - get the URL a redirect would go to
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REDIRECT_URL, char **urlp);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_REDIRECT_URL, char **urlp);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a char pointer to receive the URL a redirect *would* take
-you to if you would enable CURLOPT_FOLLOWLOCATION(3). This can come handy if
-you think using the built-in libcurl redirect logic is not good enough for you
+you to if you would enable FETCHOPT_FOLLOWLOCATION(3). This can come handy if
+you think using the built-in libfetch redirect logic is not good enough for you
 but you would still prefer to avoid implementing all the magic of figuring out
 the new URL.
 
-This URL is also set if the CURLOPT_MAXREDIRS(3) limit prevented a redirect to
+This URL is also set if the FETCHOPT_MAXREDIRS(3) limit prevented a redirect to
 happen (since 7.54.1).
 
 # %PROTOCOLS%
@@ -45,18 +45,18 @@ happen (since 7.54.1).
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       char *url = NULL;
-      curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &url);
+      fetch_easy_getinfo(fetch, FETCHINFO_REDIRECT_URL, &url);
       if(url)
         printf("Redirect to: %s\n", url);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -65,7 +65,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

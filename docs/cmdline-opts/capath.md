@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: capath
 Arg: <dir>
 Help: CA directory to verify peer against
@@ -20,9 +20,9 @@ Example:
 
 Use the specified certificate directory to verify the peer. Multiple paths can
 be provided by separated with colon (`:`) (e.g. `path1:path2:path3`). The
-certificates must be in PEM format, and if curl is built against OpenSSL, the
+certificates must be in PEM format, and if fetch is built against OpenSSL, the
 directory must have been processed using the c_rehash utility supplied with
-OpenSSL. Using --capath can allow OpenSSL-powered curl to make SSL-connections
+OpenSSL. Using --capath can allow OpenSSL-powered fetch to make SSL-connections
 much more efficiently than using --cacert if the --cacert file contains many
 CA certificates.
 

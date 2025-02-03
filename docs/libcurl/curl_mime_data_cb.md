@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_data_cb
+SPDX-License-Identifier: fetch
+Title: fetch_mime_data_cb
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_duphandle (3)
-  - curl_mime_addpart (3)
-  - curl_mime_data (3)
-  - curl_mime_name (3)
+  - fetch_easy_duphandle (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_data (3)
+  - fetch_mime_name (3)
 Protocol:
   - HTTP
   - IMAP
@@ -18,28 +18,28 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_data_cb - set a callback-based data source for a mime part's body
+fetch_mime_data_cb - set a callback-based data source for a mime part's body
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 size_t readfunc(char *buffer, size_t size, size_t nitems, void *arg);
 
-int seekfunc(void *arg, curl_off_t offset, int origin);
+int seekfunc(void *arg, fetch_off_t offset, int origin);
 
 void freefunc(void *arg);
 
-CURLcode curl_mime_data_cb(curl_mimepart *part, curl_off_t datasize,
-                           curl_read_callback readfunc,
-                           curl_seek_callback seekfunc,
-                           curl_free_callback freefunc, void *arg);
+FETCHcode fetch_mime_data_cb(fetch_mimepart *part, fetch_off_t datasize,
+                           fetch_read_callback readfunc,
+                           fetch_seek_callback seekfunc,
+                           fetch_free_callback freefunc, void *arg);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_data_cb(3) sets the data source of a mime part's body content
+fetch_mime_data_cb(3) sets the data source of a mime part's body content
 from a data read callback function.
 
 *part* is the part's to assign contents to.
@@ -59,7 +59,7 @@ freeing.
 
 *arg* is a user defined argument to callback functions.
 
-The read callback function gets called by libcurl as soon as it needs to
+The read callback function gets called by libfetch as soon as it needs to
 read data in order to send it to the peer - like if you ask it to upload or
 post data to the server. The data area pointed at by the pointer *buffer*
 should be filled up with at most *size* multiplied with *nitems* number
@@ -74,25 +74,25 @@ the server expected it, like when you have said you intend to upload N bytes
 and yet you upload less than N bytes), you may experience that the server
 "hangs" waiting for the rest of the data that does not come.
 
-The read callback may return *CURL_READFUNC_ABORT* to stop the current
-operation immediately, resulting in a *CURLE_ABORTED_BY_CALLBACK* error
+The read callback may return *FETCH_READFUNC_ABORT* to stop the current
+operation immediately, resulting in a *FETCHE_ABORTED_BY_CALLBACK* error
 code from the transfer.
 
-The callback can return *CURL_READFUNC_PAUSE* to cause reading from this
-connection to pause. See curl_easy_pause(3) for further details.
+The callback can return *FETCH_READFUNC_PAUSE* to cause reading from this
+connection to pause. See fetch_easy_pause(3) for further details.
 
-The seek function gets called by libcurl to rewind input stream data or to
+The seek function gets called by libfetch to rewind input stream data or to
 seek to a certain position. The function shall work like fseek(3) or lseek(3)
 and it gets SEEK_SET, SEEK_CUR or SEEK_END as argument for *origin*,
-although libcurl currently only passes SEEK_SET.
+although libfetch currently only passes SEEK_SET.
 
-The callback function must return *CURL_SEEKFUNC_OK* on success,
-*CURL_SEEKFUNC_FAIL* to cause the upload operation to fail or
-*CURL_SEEKFUNC_CANTSEEK* to indicate that while the seek failed, libcurl
+The callback function must return *FETCH_SEEKFUNC_OK* on success,
+*FETCH_SEEKFUNC_FAIL* to cause the upload operation to fail or
+*FETCH_SEEKFUNC_CANTSEEK* to indicate that while the seek failed, libfetch
 is free to work around the problem if possible. The latter can sometimes be
 done by instead reading from the input or similar.
 
-Care must be taken if the part is bound to a curl easy handle that is later
+Care must be taken if the part is bound to a fetch easy handle that is later
 duplicated: the *arg* pointer argument is also duplicated, resulting in
 the pointed item to be shared between the original and the copied handle. In
 particular, special attention should be given to the *freefunc* procedure
@@ -112,14 +112,14 @@ char hugedata[512000];
 
 struct ctl {
   char *buffer;
-  curl_off_t size;
-  curl_off_t position;
+  fetch_off_t size;
+  fetch_off_t position;
 };
 
 size_t read_callback(char *buffer, size_t size, size_t nitems, void *arg)
 {
   struct ctl *p = (struct ctl *) arg;
-  curl_off_t sz = p->size - p->position;
+  fetch_off_t sz = p->size - p->position;
 
   nitems *= size;
   if(sz > nitems)
@@ -130,7 +130,7 @@ size_t read_callback(char *buffer, size_t size, size_t nitems, void *arg)
   return sz;
 }
 
-int seek_callback(void *arg, curl_off_t offset, int origin)
+int seek_callback(void *arg, fetch_off_t offset, int origin)
 {
   struct ctl *p = (struct ctl *) arg;
 
@@ -144,23 +144,23 @@ int seek_callback(void *arg, curl_off_t offset, int origin)
   }
 
   if(offset < 0)
-    return CURL_SEEKFUNC_FAIL;
+    return FETCH_SEEKFUNC_FAIL;
   p->position = offset;
-  return CURL_SEEKFUNC_OK;
+  return FETCH_SEEKFUNC_OK;
 }
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_mime *mime = curl_mime_init(curl);
-    curl_mimepart *part = curl_mime_addpart(mime);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_mime *mime = fetch_mime_init(fetch);
+    fetch_mimepart *part = fetch_mime_addpart(mime);
     struct ctl hugectl;
 
     hugectl.buffer = hugedata;
     hugectl.size = sizeof(hugedata);
     hugectl.position = 0;
-    curl_mime_data_cb(part, hugectl.size, read_callback, seek_callback, NULL,
+    fetch_mime_data_cb(part, hugectl.size, read_callback, seek_callback, NULL,
                       &hugectl);
   }
 }
@@ -170,9 +170,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

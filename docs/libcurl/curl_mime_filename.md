@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_filename
+SPDX-License-Identifier: fetch
+Title: fetch_mime_filename
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_mime_addpart (3)
-  - curl_mime_data (3)
-  - curl_mime_filedata (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_data (3)
+  - fetch_mime_filedata (3)
 Protocol:
   - HTTP
   - IMAP
@@ -17,20 +17,20 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_filename - set a mime part's remote filename
+fetch_mime_filename - set a mime part's remote filename
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_mime_filename(curl_mimepart *part,
+FETCHcode fetch_mime_filename(fetch_mimepart *part,
                             const char *filename);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_filename(3) sets a mime part's remote filename. When remote
+fetch_mime_filename(3) sets a mime part's remote filename. When remote
 filename is set, content data is processed as a file, whatever is the part's
 content source. A part's remote filename is transmitted to the server in the
 associated Content-Disposition generated header.
@@ -54,25 +54,25 @@ static char imagebuf[]="imagedata";
 
 int main(void)
 {
-  curl_mime *mime;
-  curl_mimepart *part;
+  fetch_mime *mime;
+  fetch_mimepart *part;
 
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     /* create a mime handle */
-    mime = curl_mime_init(curl);
+    mime = fetch_mime_init(fetch);
 
     /* add a part */
-    part = curl_mime_addpart(mime);
+    part = fetch_mime_addpart(mime);
 
     /* send image data from memory */
-    curl_mime_data(part, imagebuf, sizeof(imagebuf));
+    fetch_mime_data(part, imagebuf, sizeof(imagebuf));
 
     /* set a file name to make it look like a file upload */
-    curl_mime_filename(part, "image.png");
+    fetch_mime_filename(part, "image.png");
 
     /* set name */
-    curl_mime_name(part, "data");
+    fetch_mime_name(part, "data");
   }
 }
 ~~~
@@ -81,9 +81,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

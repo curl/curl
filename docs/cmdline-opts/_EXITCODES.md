@@ -1,5 +1,5 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # EXIT CODES
 There are a bunch of different error codes and their corresponding error
 messages that may appear under error conditions. At the time of this writing,
@@ -7,15 +7,15 @@ the exit codes are:
 ## 0
 Success. The operation completed successfully according to the instructions.
 ## 1
-Unsupported protocol. This build of curl has no support for this protocol.
+Unsupported protocol. This build of fetch has no support for this protocol.
 ## 2
 Failed to initialize.
 ## 3
 URL malformed. The syntax was not correct.
 ## 4
 A feature or option that was needed to perform the desired request was not
-enabled or was explicitly disabled at build-time. To make curl able to do
-this, you probably need another build of libcurl.
+enabled or was explicitly disabled at build-time. To make fetch able to do
+this, you probably need another build of libfetch.
 ## 5
 Could not resolve proxy. The given proxy host could not be resolved.
 ## 6
@@ -23,7 +23,7 @@ Could not resolve host. The given remote host could not be resolved.
 ## 7
 Failed to connect to host.
 ## 8
-Weird server reply. The server sent data curl could not parse.
+Weird server reply. The server sent data fetch could not parse.
 ## 9
 FTP access denied. The server denied login or denied access to the particular
 resource or directory you wanted to reach. Most often you tried to change to a
@@ -33,14 +33,14 @@ FTP accept failed. While waiting for the server to connect back when an active
 FTP session is used, an error code was sent over the control connection or
 similar.
 ## 11
-FTP weird PASS reply. curl could not parse the reply sent to the PASS request.
+FTP weird PASS reply. fetch could not parse the reply sent to the PASS request.
 ## 12
 During an active FTP session while waiting for the server to connect back to
-curl, the timeout expired.
+fetch, the timeout expired.
 ## 13
-FTP weird PASV reply, curl could not parse the reply sent to the PASV request.
+FTP weird PASV reply, fetch could not parse the reply sent to the PASV request.
 ## 14
-FTP weird 227 format. curl could not parse the 227-line the server sent.
+FTP weird 227 format. fetch could not parse the 227-line the server sent.
 ## 15
 FTP cannot use host. Could not resolve the host IP we got in the 227-line.
 ## 16
@@ -61,7 +61,7 @@ HTTP page not retrieved. The requested URL was not found or returned another
 error with the HTTP error code being 400 or above. This return code only
 appears if --fail is used.
 ## 23
-Write error. curl could not write data to a local filesystem or similar.
+Write error. fetch could not write data to a local filesystem or similar.
 ## 25
 Failed starting the upload. For FTP, the server typically denied the STOR
 command.
@@ -95,16 +95,16 @@ LDAP search failed.
 ## 41
 Function not found. A required LDAP function was not found.
 ## 42
-Aborted by callback. An application told curl to abort the operation.
+Aborted by callback. An application told fetch to abort the operation.
 ## 43
 Internal error. A function was called with a bad parameter.
 ## 45
 Interface error. A specified outgoing interface could not be used.
 ## 47
-Too many redirects. When following redirects, curl hit the maximum amount.
+Too many redirects. When following redirects, fetch hit the maximum amount.
 ## 48
-Unknown option specified to libcurl. This indicates that you passed a weird
-option to curl that was passed on to libcurl and rejected. Read up in the
+Unknown option specified to libfetch. This indicates that you passed a weird
+option to fetch that was passed on to libfetch and rejected. Read up in the
 manual.
 ## 49
 Malformed telnet option.
@@ -135,7 +135,7 @@ Sending the data requires a rewind that failed.
 ## 66
 Failed to initialize SSL Engine.
 ## 67
-The username, password, or similar was not accepted and curl failed to log in.
+The username, password, or similar was not accepted and fetch failed to log in.
 ## 68
 File not found on TFTP server.
 ## 69

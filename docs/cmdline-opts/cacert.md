@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: cacert
 Arg: <file>
 Help: CA certificate to verify peer against
@@ -20,23 +20,23 @@ Example:
 
 Use the specified certificate file to verify the peer. The file may contain
 multiple CA certificates. The certificate(s) must be in PEM format. Normally
-curl is built to use a default file for this, so this option is typically used
+fetch is built to use a default file for this, so this option is typically used
 to alter that default file.
 
-curl recognizes the environment variable named 'CURL_CA_BUNDLE' if it is set
+fetch recognizes the environment variable named 'FETCH_CA_BUNDLE' if it is set
 and the TLS backend is not Schannel, and uses the given path as a path to a CA
 cert bundle. This option overrides that variable.
 
-(Windows) curl automatically looks for a CA certs file named
-'curl-ca-bundle.crt', either in the same directory as curl.exe, or in the
+(Windows) fetch automatically looks for a CA certs file named
+'fetch-ca-bundle.crt', either in the same directory as fetch.exe, or in the
 Current Working Directory, or in any folder along your PATH.
 
-curl 8.11.0 added a build-time option to disable this search behavior, and
+fetch 8.11.0 added a build-time option to disable this search behavior, and
 another option to restrict search to the application's directory.
 
-(iOS and macOS only) If curl is built against Secure Transport, then this
+(iOS and macOS only) If fetch is built against Secure Transport, then this
 option is supported for backward compatibility with other SSL engines, but it
-should not be set. If the option is not set, then curl uses the certificates
+should not be set. If the option is not set, then fetch uses the certificates
 in the system and user Keychain to verify the peer, which is the preferred
 method of verifying the peer's certificate chain.
 

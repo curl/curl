@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TRANSFERTEXT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TRANSFERTEXT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CRLF (3)
+  - FETCHOPT_CRLF (3)
 Protocol:
   - All
 Added-in: 7.1.1
@@ -13,14 +13,14 @@ Added-in: 7.1.1
 
 # NAME
 
-CURLOPT_TRANSFERTEXT - request a text based transfer for FTP
+FETCHOPT_TRANSFERTEXT - request a text based transfer for FTP
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRANSFERTEXT, long text);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TRANSFERTEXT, long text);
 ~~~
 
 # DESCRIPTION
@@ -31,8 +31,8 @@ stdout to binary mode. This option can be usable when transferring text data
 between systems with different views on certain characters, such as newlines
 or similar.
 
-libcurl does not do a complete ASCII conversion when doing ASCII transfers
-over FTP. This is a known limitation/flaw that nobody has rectified. libcurl
+libfetch does not do a complete ASCII conversion when doing ASCII transfers
+over FTP. This is a known limitation/flaw that nobody has rectified. libfetch
 simply sets the mode to ASCII and performs a standard transfer.
 
 # DEFAULT
@@ -46,13 +46,13 @@ simply sets the mode to ASCII and performs a standard transfer.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/textfile");
-    curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/textfile");
+    fetch_easy_setopt(fetch, FETCHOPT_TRANSFERTEXT, 1L);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -61,7 +61,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

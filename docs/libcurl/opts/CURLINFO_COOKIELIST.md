@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_COOKIELIST
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_COOKIELIST
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_COOKIELIST (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHOPT_COOKIELIST (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.14.1
@@ -15,24 +15,24 @@ Added-in: 7.14.1
 
 # NAME
 
-CURLINFO_COOKIELIST - get all known cookies
+FETCHINFO_COOKIELIST - get all known cookies
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_COOKIELIST,
-                           struct curl_slist **cookies);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_COOKIELIST,
+                           struct fetch_slist **cookies);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
-cookies curl knows (expired ones, too). Do not forget to call
-curl_slist_free_all(3) on the list after it has been used. If there are no
+Pass a pointer to a 'struct fetch_slist *' to receive a linked-list of all
+cookies fetch knows (expired ones, too). Do not forget to call
+fetch_slist_free_all(3) on the list after it has been used. If there are no
 cookies (cookies for the handle have not been enabled or simply none have been
-received) the 'struct curl_slist *' is made a NULL pointer.
+received) the 'struct fetch_slist *' is made a NULL pointer.
 
 Since 7.43.0 cookies that were imported in the Set-Cookie format without a
 domain name are not exported by this option.
@@ -44,32 +44,32 @@ domain name are not exported by this option.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* enable the cookie engine */
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+    fetch_easy_setopt(fetch, FETCHOPT_COOKIEFILE, "");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
       /* extract all known cookies */
-      struct curl_slist *cookies = NULL;
-      res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+      struct fetch_slist *cookies = NULL;
+      res = fetch_easy_getinfo(fetch, FETCHINFO_COOKIELIST, &cookies);
       if(!res && cookies) {
         /* a linked list of cookies in cookie file format */
-        struct curl_slist *each = cookies;
+        struct fetch_slist *each = cookies;
         while(each) {
           printf("%s\n", each->data);
           each = each->next;
         }
         /* we must free these cookies when we are done */
-        curl_slist_free_all(cookies);
+        fetch_slist_free_all(cookies);
       }
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -78,7 +78,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

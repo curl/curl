@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_name
+SPDX-License-Identifier: fetch
+Title: fetch_mime_name
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_mime_addpart (3)
-  - curl_mime_data (3)
-  - curl_mime_type (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_data (3)
+  - fetch_mime_type (3)
 Protocol:
   - HTTP
   - IMAP
@@ -17,19 +17,19 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_name - set a mime part's name
+fetch_mime_name - set a mime part's name
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_mime_name(curl_mimepart *part, const char *name);
+FETCHcode fetch_mime_name(fetch_mimepart *part, const char *name);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_name(3) sets a mime part's name. This is the way HTTP form
+fetch_mime_name(3) sets a mime part's name. This is the way HTTP form
 fields are named.
 
 *part* is the part's handle to assign a name to.
@@ -48,19 +48,19 @@ reset the name of a part by setting *name* to NULL.
 ~~~c
 int main(void)
 {
-  curl_mime *mime;
-  curl_mimepart *part;
+  fetch_mime *mime;
+  fetch_mimepart *part;
 
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     /* create a mime handle */
-    mime = curl_mime_init(curl);
+    mime = fetch_mime_init(fetch);
 
     /* add a part */
-    part = curl_mime_addpart(mime);
+    part = fetch_mime_addpart(mime);
 
     /* give the part a name */
-    curl_mime_name(part, "shoe_size");
+    fetch_mime_name(part, "shoe_size");
   }
 }
 ~~~
@@ -69,9 +69,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

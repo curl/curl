@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_url_cleanup
+SPDX-License-Identifier: fetch
+Title: fetch_url_cleanup
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CURLU (3)
-  - curl_url (3)
-  - curl_url_dup (3)
-  - curl_url_get (3)
-  - curl_url_set (3)
+  - FETCHOPT_FETCHU (3)
+  - fetch_url (3)
+  - fetch_url_dup (3)
+  - fetch_url_get (3)
+  - fetch_url_set (3)
 Protocol:
   - All
 Added-in: 7.62.0
@@ -17,19 +17,19 @@ Added-in: 7.62.0
 
 # NAME
 
-curl_url_cleanup - free the URL handle
+fetch_url_cleanup - free the URL handle
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-void curl_url_cleanup(CURLU *handle);
+void fetch_url_cleanup(FETCHU *handle);
 ~~~
 
 # DESCRIPTION
 
-Frees all the resources associated with the given *CURLU* handle.
+Frees all the resources associated with the given *FETCHU* handle.
 
 Passing in a NULL pointer in *handle* makes this function return
 immediately with no action.
@@ -44,9 +44,9 @@ returned, is illegal.
 ~~~c
 int main(void)
 {
-  CURLU *url = curl_url();
-  curl_url_set(url, CURLUPART_URL, "https://example.com", 0);
-  curl_url_cleanup(url);
+  FETCHU *url = fetch_url();
+  fetch_url_set(url, FETCHUPART_URL, "https://example.com", 0);
+  fetch_url_cleanup(url);
 }
 ~~~
 

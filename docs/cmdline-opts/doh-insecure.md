@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: doh-insecure
 Help: Allow insecure DoH server connections
 Added: 7.76.0
@@ -16,8 +16,8 @@ Example:
 
 # `--doh-insecure`
 
-By default, every connection curl makes to a DoH server is verified to be
-secure before the transfer takes place. This option tells curl to skip the
+By default, every connection fetch makes to a DoH server is verified to be
+secure before the transfer takes place. This option tells fetch to skip the
 verification step and proceed without checking.
 
 **WARNING**: using this option makes the DoH transfer and name resolution

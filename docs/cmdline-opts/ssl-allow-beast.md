@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ssl-allow-beast
 Help: Allow security flaw to improve interop
 Protocols: TLS
@@ -20,7 +20,7 @@ Do not work around a security flaw in the TLS1.0 protocol known as BEAST. If
 this option is not used, the TLS layer may use workarounds known to cause
 interoperability problems with some older server implementations.
 
-This option only changes how curl does TLS 1.0 and has no effect on later TLS
+This option only changes how fetch does TLS 1.0 and has no effect on later TLS
 versions.
 
 **WARNING**: this option loosens the TLS security, and by using this flag you

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: alt-svc
 Arg: <filename>
 Protocols: HTTPS
@@ -21,8 +21,8 @@ Enable the alt-svc parser. If the filename points to an existing alt-svc cache
 file, that gets used. After a completed transfer, the cache is saved to the
 filename again if it has been modified.
 
-Specify a "" filename (zero length) to avoid loading/saving and make curl just
+Specify a "" filename (zero length) to avoid loading/saving and make fetch just
 handle the cache in memory.
 
-If this option is used several times, curl loads contents from all the
+If this option is used several times, fetch loads contents from all the
 files but the last one is used for saving.

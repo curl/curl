@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: silent
 Short: s
 Help: Silent mode
@@ -17,7 +17,7 @@ Example:
 
 # `--silent`
 
-Silent or quiet mode. Do not show progress meter or error messages. Makes curl
+Silent or quiet mode. Do not show progress meter or error messages. Makes fetch
 mute. It still outputs the data you ask for, potentially even to the
 terminal/stdout unless you redirect it.
 

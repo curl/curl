@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_KEYPASSWD
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_KEYPASSWD
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSH_PRIVATE_KEYFILE (3)
-  - CURLOPT_SSLKEY (3)
+  - FETCHOPT_SSH_PRIVATE_KEYFILE (3)
+  - FETCHOPT_SSLKEY (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -19,21 +19,21 @@ Added-in: 7.17.0
 
 # NAME
 
-CURLOPT_KEYPASSWD - passphrase to private key
+FETCHOPT_KEYPASSWD - passphrase to private key
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_KEYPASSWD, char *pwd);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_KEYPASSWD, char *pwd);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. It is used as the
-password required to use the CURLOPT_SSLKEY(3) or
-CURLOPT_SSH_PRIVATE_KEYFILE(3) private key. You never need a passphrase to
+password required to use the FETCHOPT_SSLKEY(3) or
+FETCHOPT_SSH_PRIVATE_KEYFILE(3) private key. You never need a passphrase to
 load a certificate but you need one to load your private key.
 
 The application does not have to keep the string around after setting this
@@ -53,29 +53,29 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, "client.pem");
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, "key.pem");
-    curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "superman");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
+    fetch_easy_setopt(fetch, FETCHOPT_SSLCERT, "client.pem");
+    fetch_easy_setopt(fetch, FETCHOPT_SSLKEY, "key.pem");
+    fetch_easy_setopt(fetch, FETCHOPT_KEYPASSWD, "superman");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
 
 # HISTORY
 
-This option was known as CURLOPT_SSLKEYPASSWD up to 7.16.4 and
-CURLOPT_SSLCERTPASSWD up to 7.9.2.
+This option was known as FETCHOPT_SSLKEYPASSWD up to 7.16.4 and
+FETCHOPT_SSLCERTPASSWD up to 7.9.2.
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,12 +1,12 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # Alt-Svc
 
-curl features support for the Alt-Svc: HTTP header.
+fetch features support for the Alt-Svc: HTTP header.
 
 ## Enable Alt-Svc in build
 

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: negotiate
 Help: Use HTTP Negotiate (SPNEGO) authentication
 Protocols: HTTP
@@ -21,7 +21,7 @@ Example:
 Enable Negotiate (SPNEGO) authentication.
 
 This option requires a library built with GSS-API or SSPI support. Use
---version to see if your curl supports GSS-API/SSPI or SPNEGO.
+--version to see if your fetch supports GSS-API/SSPI or SPNEGO.
 
 When using this option, you must also provide a fake --user option to activate
 the authentication code properly. Sending a '-u :' is enough as the username

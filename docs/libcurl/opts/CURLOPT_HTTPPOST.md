@@ -1,50 +1,50 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_HTTPPOST
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_HTTPPOST
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - HTTP
 See-also:
-  - CURLOPT_MIMEPOST (3)
-  - CURLOPT_POST (3)
-  - CURLOPT_POSTFIELDS (3)
-  - curl_formadd (3)
-  - curl_formfree (3)
-  - curl_mime_init (3)
+  - FETCHOPT_MIMEPOST (3)
+  - FETCHOPT_POST (3)
+  - FETCHOPT_POSTFIELDS (3)
+  - fetch_formadd (3)
+  - fetch_formfree (3)
+  - fetch_mime_init (3)
 Added-in: 7.1
 ---
 
 # NAME
 
-CURLOPT_HTTPPOST - multipart formpost content
+FETCHOPT_HTTPPOST - multipart formpost content
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPPOST,
-                          struct curl_httppost *formpost);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_HTTPPOST,
+                          struct fetch_httppost *formpost);
 ~~~
 
 # DESCRIPTION
 
-**This option is deprecated.** Use CURLOPT_MIMEPOST(3) instead.
+**This option is deprecated.** Use FETCHOPT_MIMEPOST(3) instead.
 
-Tells libcurl you want a **multipart/formdata** HTTP POST to be made and you
+Tells libfetch you want a **multipart/formdata** HTTP POST to be made and you
 instruct what data to pass on to the server in the *formpost* argument.
-Pass a pointer to a linked list of *curl_httppost* structs as parameter.
-The easiest way to create such a list, is to use curl_formadd(3) as
-documented. The data in this list must remain intact as long as the curl
+Pass a pointer to a linked list of *fetch_httppost* structs as parameter.
+The easiest way to create such a list, is to use fetch_formadd(3) as
+documented. The data in this list must remain intact as long as the fetch
 transfer is alive and is using it.
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
-You can disable this header with CURLOPT_HTTPHEADER(3).
+You can disable this header with FETCHOPT_HTTPHEADER(3).
 
-When setting CURLOPT_HTTPPOST(3), libcurl automatically sets
-CURLOPT_NOBODY(3) to 0.
+When setting FETCHOPT_HTTPPOST(3), libfetch automatically sets
+FETCHOPT_NOBODY(3) to 0.
 
 # DEFAULT
 
@@ -57,38 +57,38 @@ NULL
 ~~~c
 int main(void)
 {
-  struct curl_httppost *formpost;
-  struct curl_httppost *lastptr;
+  struct fetch_httppost *formpost;
+  struct fetch_httppost *lastptr;
 
-  /* Fill in the file upload field. This makes libcurl load data from
-     the given file name when curl_easy_perform() is called. */
-  curl_formadd(&formpost,
+  /* Fill in the file upload field. This makes libfetch load data from
+     the given file name when fetch_easy_perform() is called. */
+  fetch_formadd(&formpost,
                &lastptr,
-               CURLFORM_COPYNAME, "sendfile",
-               CURLFORM_FILE, "postit2.c",
-               CURLFORM_END);
+               FETCHFORM_COPYNAME, "sendfile",
+               FETCHFORM_FILE, "postit2.c",
+               FETCHFORM_END);
 
   /* Fill in the filename field */
-  curl_formadd(&formpost,
+  fetch_formadd(&formpost,
                &lastptr,
-               CURLFORM_COPYNAME, "filename",
-               CURLFORM_COPYCONTENTS, "postit2.c",
-               CURLFORM_END);
+               FETCHFORM_COPYNAME, "filename",
+               FETCHFORM_COPYCONTENTS, "postit2.c",
+               FETCHFORM_END);
 
   /* Fill in the submit field too, even if this is rarely needed */
-  curl_formadd(&formpost,
+  fetch_formadd(&formpost,
                &lastptr,
-               CURLFORM_COPYNAME, "submit",
-               CURLFORM_COPYCONTENTS, "send",
-               CURLFORM_END);
+               FETCHFORM_COPYNAME, "submit",
+               FETCHFORM_COPYCONTENTS, "send",
+               FETCHFORM_END);
 
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-    curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_HTTPPOST, formpost);
+    fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
-  curl_formfree(formpost);
+  fetch_formfree(formpost);
 }
 ~~~
 
@@ -100,7 +100,7 @@ Deprecated in 7.56.0.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

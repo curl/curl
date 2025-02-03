@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -28,7 +28,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 static const char *urls[] = {
   "https://www.microsoft.com",
@@ -91,29 +91,29 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   return n*l;
 }
 
-static void add_transfer(CURLM *cm, unsigned int i, int *left)
+static void add_transfer(FETCHM *cm, unsigned int i, int *left)
 {
-  CURL *eh = curl_easy_init();
-  curl_easy_setopt(eh, CURLOPT_WRITEFUNCTION, write_cb);
-  curl_easy_setopt(eh, CURLOPT_URL, urls[i]);
-  curl_easy_setopt(eh, CURLOPT_PRIVATE, urls[i]);
-  curl_multi_add_handle(cm, eh);
+  FETCH *eh = fetch_easy_init();
+  fetch_easy_setopt(eh, FETCHOPT_WRITEFUNCTION, write_cb);
+  fetch_easy_setopt(eh, FETCHOPT_URL, urls[i]);
+  fetch_easy_setopt(eh, FETCHOPT_PRIVATE, urls[i]);
+  fetch_multi_add_handle(cm, eh);
   (*left)++;
 }
 
 int main(void)
 {
-  CURLM *cm;
-  CURLMsg *msg;
+  FETCHM *cm;
+  FETCHMsg *msg;
   unsigned int transfers = 0;
   int msgs_left = -1;
   int left = 0;
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  cm = curl_multi_init();
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  cm = fetch_multi_init();
 
-  /* Limit the amount of simultaneous connections curl should allow: */
-  curl_multi_setopt(cm, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
+  /* Limit the amount of simultaneous connections fetch should allow: */
+  fetch_multi_setopt(cm, FETCHMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
 
   for(transfers = 0; transfers < MAX_PARALLEL && transfers < NUM_URLS;
       transfers++)
@@ -121,33 +121,33 @@ int main(void)
 
   do {
     int still_alive = 1;
-    curl_multi_perform(cm, &still_alive);
+    fetch_multi_perform(cm, &still_alive);
 
     /* !checksrc! disable EQUALSNULL 1 */
-    while((msg = curl_multi_info_read(cm, &msgs_left)) != NULL) {
-      if(msg->msg == CURLMSG_DONE) {
+    while((msg = fetch_multi_info_read(cm, &msgs_left)) != NULL) {
+      if(msg->msg == FETCHMSG_DONE) {
         char *url;
-        CURL *e = msg->easy_handle;
-        curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &url);
+        FETCH *e = msg->easy_handle;
+        fetch_easy_getinfo(msg->easy_handle, FETCHINFO_PRIVATE, &url);
         fprintf(stderr, "R: %d - %s <%s>\n",
-                msg->data.result, curl_easy_strerror(msg->data.result), url);
-        curl_multi_remove_handle(cm, e);
-        curl_easy_cleanup(e);
+                msg->data.result, fetch_easy_strerror(msg->data.result), url);
+        fetch_multi_remove_handle(cm, e);
+        fetch_easy_cleanup(e);
         left--;
       }
       else {
-        fprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
+        fprintf(stderr, "E: FETCHMsg (%d)\n", msg->msg);
       }
       if(transfers < NUM_URLS)
         add_transfer(cm, transfers++, &left);
     }
     if(left)
-      curl_multi_wait(cm, NULL, 0, 1000, NULL);
+      fetch_multi_wait(cm, NULL, 0, 1000, NULL);
 
   } while(left);
 
-  curl_multi_cleanup(cm);
-  curl_global_cleanup();
+  fetch_multi_cleanup(cm);
+  fetch_global_cleanup();
 
   return EXIT_SUCCESS;
 }

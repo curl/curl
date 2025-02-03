@@ -1,191 +1,191 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # Code defines to disable features and protocols
 
-## `CURL_DISABLE_ALTSVC`
+## `FETCH_DISABLE_ALTSVC`
 
 Disable support for Alt-Svc: HTTP headers.
 
-## `CURL_DISABLE_BINDLOCAL`
+## `FETCH_DISABLE_BINDLOCAL`
 
 Disable support for binding the local end of connections.
 
-## `CURL_DISABLE_COOKIES`
+## `FETCH_DISABLE_COOKIES`
 
 Disable support for HTTP cookies.
 
-## `CURL_DISABLE_BASIC_AUTH`
+## `FETCH_DISABLE_BASIC_AUTH`
 
 Disable support for the Basic authentication methods.
 
-## `CURL_DISABLE_BEARER_AUTH`
+## `FETCH_DISABLE_BEARER_AUTH`
 
 Disable support for the Bearer authentication methods.
 
-## `CURL_DISABLE_DIGEST_AUTH`
+## `FETCH_DISABLE_DIGEST_AUTH`
 
 Disable support for the Digest authentication methods.
 
-## `CURL_DISABLE_KERBEROS_AUTH`
+## `FETCH_DISABLE_KERBEROS_AUTH`
 
 Disable support for the Kerberos authentication methods.
 
-## `CURL_DISABLE_NEGOTIATE_AUTH`
+## `FETCH_DISABLE_NEGOTIATE_AUTH`
 
 Disable support for the negotiate authentication methods.
 
-## `CURL_DISABLE_AWS`
+## `FETCH_DISABLE_AWS`
 
 Disable **aws-sigv4** support.
 
-## `CURL_DISABLE_CA_SEARCH`
+## `FETCH_DISABLE_CA_SEARCH`
 
 Disable unsafe CA bundle search in PATH on Windows.
 
-## `CURL_DISABLE_DICT`
+## `FETCH_DISABLE_DICT`
 
 Disable the DICT protocol
 
-## `CURL_DISABLE_DOH`
+## `FETCH_DISABLE_DOH`
 
 Disable DNS-over-HTTPS
 
-## `CURL_DISABLE_FILE`
+## `FETCH_DISABLE_FILE`
 
 Disable the FILE protocol
 
-## `CURL_DISABLE_FORM_API`
+## `FETCH_DISABLE_FORM_API`
 
 Disable the form API
 
-## `CURL_DISABLE_FTP`
+## `FETCH_DISABLE_FTP`
 
 Disable the FTP (and FTPS) protocol
 
-## `CURL_DISABLE_GETOPTIONS`
+## `FETCH_DISABLE_GETOPTIONS`
 
-Disable the `curl_easy_options` API calls that lets users get information
-about existing options to `curl_easy_setopt`.
+Disable the `fetch_easy_options` API calls that lets users get information
+about existing options to `fetch_easy_setopt`.
 
-## `CURL_DISABLE_GOPHER`
+## `FETCH_DISABLE_GOPHER`
 
 Disable the GOPHER protocol.
 
-## `CURL_DISABLE_HEADERS_API`
+## `FETCH_DISABLE_HEADERS_API`
 
 Disable the HTTP header API.
 
-## `CURL_DISABLE_HSTS`
+## `FETCH_DISABLE_HSTS`
 
 Disable the HTTP Strict Transport Security support.
 
-## `CURL_DISABLE_HTTP`
+## `FETCH_DISABLE_HTTP`
 
 Disable the HTTP(S) protocols. Note that this then also disable HTTP proxy
 support.
 
-## `CURL_DISABLE_HTTP_AUTH`
+## `FETCH_DISABLE_HTTP_AUTH`
 
 Disable support for all HTTP authentication methods.
 
-## `CURL_DISABLE_IMAP`
+## `FETCH_DISABLE_IMAP`
 
 Disable the IMAP(S) protocols.
 
-## `CURL_DISABLE_LDAP`
+## `FETCH_DISABLE_LDAP`
 
 Disable the LDAP(S) protocols.
 
-## `CURL_DISABLE_LDAPS`
+## `FETCH_DISABLE_LDAPS`
 
 Disable the LDAPS protocol.
 
-## `CURL_DISABLE_LIBCURL_OPTION`
+## `FETCH_DISABLE_LIBFETCH_OPTION`
 
-Disable the --libcurl option from the curl tool.
+Disable the --libfetch option from the fetch tool.
 
-## `CURL_DISABLE_MIME`
+## `FETCH_DISABLE_MIME`
 
 Disable MIME support.
 
-## `CURL_DISABLE_MQTT`
+## `FETCH_DISABLE_MQTT`
 
 Disable MQTT support.
 
-## `CURL_DISABLE_NETRC`
+## `FETCH_DISABLE_NETRC`
 
 Disable the netrc parser.
 
-## `CURL_DISABLE_NTLM`
+## `FETCH_DISABLE_NTLM`
 
 Disable support for NTLM.
 
-## `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG`
+## `FETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG`
 
 Disable the auto load config support in the OpenSSL backend.
 
-## `CURL_DISABLE_PARSEDATE`
+## `FETCH_DISABLE_PARSEDATE`
 
 Disable date parsing
 
-## `CURL_DISABLE_POP3`
+## `FETCH_DISABLE_POP3`
 
 Disable the POP3 protocol
 
-## `CURL_DISABLE_PROGRESS_METER`
+## `FETCH_DISABLE_PROGRESS_METER`
 
 Disable the built-in progress meter
 
-## `CURL_DISABLE_PROXY`
+## `FETCH_DISABLE_PROXY`
 
 Disable support for proxies
 
-## `CURL_DISABLE_IPFS`
+## `FETCH_DISABLE_IPFS`
 
-Disable the IPFS/IPNS protocols. This affects the curl tool only, where
+Disable the IPFS/IPNS protocols. This affects the fetch tool only, where
 IPFS/IPNS protocol support is implemented.
 
-## `CURL_DISABLE_RTSP`
+## `FETCH_DISABLE_RTSP`
 
 Disable the RTSP protocol.
 
-## `CURL_DISABLE_SHA512_256`
+## `FETCH_DISABLE_SHA512_256`
 
 Disable the SHA-512/256 hash algorithm.
 
-## `CURL_DISABLE_SHUFFLE_DNS`
+## `FETCH_DISABLE_SHUFFLE_DNS`
 
 Disable the shuffle DNS feature
 
-## `CURL_DISABLE_SMB`
+## `FETCH_DISABLE_SMB`
 
 Disable the SMB(S) protocols
 
-## `CURL_DISABLE_SMTP`
+## `FETCH_DISABLE_SMTP`
 
 Disable the SMTP(S) protocols
 
-## `CURL_DISABLE_SOCKETPAIR`
+## `FETCH_DISABLE_SOCKETPAIR`
 
 Disable the use of `socketpair()` internally to allow waking up and canceling
-`curl_multi_poll()`.
+`fetch_multi_poll()`.
 
-## `CURL_DISABLE_TELNET`
+## `FETCH_DISABLE_TELNET`
 
 Disable the TELNET protocol
 
-## `CURL_DISABLE_TFTP`
+## `FETCH_DISABLE_TFTP`
 
 Disable the TFTP protocol
 
-## `CURL_DISABLE_VERBOSE_STRINGS`
+## `FETCH_DISABLE_VERBOSE_STRINGS`
 
 Disable verbose strings and error messages.
 
-## `CURL_DISABLE_WEBSOCKETS`
+## `FETCH_DISABLE_WEBSOCKETS`
 
 Disable the WebSocket protocols.

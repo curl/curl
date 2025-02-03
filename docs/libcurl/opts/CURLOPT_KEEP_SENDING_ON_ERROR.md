@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_KEEP_SENDING_ON_ERROR
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_KEEP_SENDING_ON_ERROR
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_RESPONSE_CODE (3)
-  - CURLOPT_FAILONERROR (3)
-  - CURLOPT_HTTPHEADER (3)
+  - FETCHINFO_RESPONSE_CODE (3)
+  - FETCHOPT_FAILONERROR (3)
+  - FETCHOPT_HTTPHEADER (3)
 Protocol:
   - HTTP
 Added-in: 7.51.0
@@ -15,14 +15,14 @@ Added-in: 7.51.0
 
 # NAME
 
-CURLOPT_KEEP_SENDING_ON_ERROR - keep sending on early HTTP response \>= 300
+FETCHOPT_KEEP_SENDING_ON_ERROR - keep sending on early HTTP response \>= 300
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_KEEP_SENDING_ON_ERROR,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_KEEP_SENDING_ON_ERROR,
                           long keep_sending);
 ~~~
 
@@ -33,8 +33,8 @@ if the HTTP code returned is equal to or larger than 300. The default action
 would be to stop sending and close the stream or connection.
 
 This option is suitable for manual NTLM authentication, i.e. if an application
-does not use CURLOPT_HTTPAUTH(3), but instead sets "Authorization: NTLM ..."
-headers manually using CURLOPT_HTTPHEADER(3).
+does not use FETCHOPT_HTTPAUTH(3), but instead sets "Authorization: NTLM ..."
+headers manually using FETCHOPT_HTTPHEADER(3).
 
 Most applications do not need this option.
 
@@ -49,13 +49,13 @@ Most applications do not need this option.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "sending data");
-    curl_easy_setopt(curl, CURLOPT_KEEP_SENDING_ON_ERROR, 1L);
-    ret = curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_POSTFIELDS, "sending data");
+    fetch_easy_setopt(fetch, FETCHOPT_KEEP_SENDING_ON_ERROR, 1L);
+    ret = fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -64,7 +64,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

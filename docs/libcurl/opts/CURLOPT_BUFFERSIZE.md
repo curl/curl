@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_BUFFERSIZE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_BUFFERSIZE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_MAXFILESIZE (3)
-  - CURLOPT_MAX_RECV_SPEED_LARGE (3)
-  - CURLOPT_UPLOAD_BUFFERSIZE (3)
-  - CURLOPT_WRITEFUNCTION (3)
+  - FETCHOPT_MAXFILESIZE (3)
+  - FETCHOPT_MAX_RECV_SPEED_LARGE (3)
+  - FETCHOPT_UPLOAD_BUFFERSIZE (3)
+  - FETCHOPT_WRITEFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.10
@@ -16,28 +16,28 @@ Added-in: 7.10
 
 # NAME
 
-CURLOPT_BUFFERSIZE - receive buffer size
+FETCHOPT_BUFFERSIZE - receive buffer size
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_BUFFERSIZE, long size);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_BUFFERSIZE, long size);
 ~~~
 
 # DESCRIPTION
 
 Pass a long specifying your preferred *size* (in bytes) for the receive buffer
-in libcurl. The main point of this would be that the write callback gets
+in libfetch. The main point of this would be that the write callback gets
 called more often and with smaller chunks. Secondly, for some protocols, there
 is a benefit of having a larger buffer for performance.
 
 This is just treated as a request, not an order. You cannot be guaranteed to
 actually get the given size.
 
-This buffer size is by default *CURL_MAX_WRITE_SIZE* (16kB). The maximum
-buffer size allowed to be set is *CURL_MAX_READ_SIZE* (10MB). The minimum
+This buffer size is by default *FETCH_MAX_WRITE_SIZE* (16kB). The maximum
+buffer size allowed to be set is *FETCH_MAX_READ_SIZE* (10MB). The minimum
 buffer size allowed to be set is 1024.
 
 DO NOT set this option on a handle that is currently used for an active
@@ -45,14 +45,14 @@ transfer as that may lead to unintended consequences.
 
 The maximum size was 512kB until 7.88.0.
 
-Starting in libcurl 8.7.0, there is just a single transfer buffer allocated
+Starting in libfetch 8.7.0, there is just a single transfer buffer allocated
 per multi handle. This buffer is used by all easy handles added to a multi
 handle no matter how many parallel transfers there are. The buffer remains
 allocated as long as there are active transfers.
 
 # DEFAULT
 
-CURL_MAX_WRITE_SIZE (16kB)
+FETCH_MAX_WRITE_SIZE (16kB)
 
 # %PROTOCOLS%
 
@@ -61,17 +61,17 @@ CURL_MAX_WRITE_SIZE (16kB)
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "sftp://example.com/foo.bin");
 
-    /* ask libcurl to allocate a larger receive buffer */
-    curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 120000L);
+    /* ask libfetch to allocate a larger receive buffer */
+    fetch_easy_setopt(fetch, FETCHOPT_BUFFERSIZE, 120000L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -80,7 +80,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

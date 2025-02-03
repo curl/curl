@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_PRIMARY_PORT
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_PRIMARY_PORT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_LOCAL_PORT (3)
-  - CURLINFO_PRIMARY_IP (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_LOCAL_PORT (3)
+  - FETCHINFO_PRIMARY_IP (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.21.0
@@ -16,22 +16,22 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLINFO_PRIMARY_PORT - get the latest destination port number
+FETCHINFO_PRIMARY_PORT - get the latest destination port number
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRIMARY_PORT, long *portp);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_PRIMARY_PORT, long *portp);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a long to receive the destination port of the most recent
-connection done with this **curl** handle.
+connection done with this **fetch** handle.
 
-This is the destination port of the actual TCP or UDP connection libcurl used.
+This is the destination port of the actual TCP or UDP connection libfetch used.
 If a proxy was used for the most recent transfer, this is the port number of
 the proxy, if no proxy was used it is the port number of the most recently
 accessed URL.
@@ -43,18 +43,18 @@ accessed URL.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       long port;
-      res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT, &port);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_PRIMARY_PORT, &port);
       if(!res)
         printf("Connected to remote port: %ld\n", port);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -63,7 +63,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_APPEND
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_APPEND
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_DIRLISTONLY (3)
-  - CURLOPT_RESUME_FROM (3)
-  - CURLOPT_UPLOAD (3)
+  - FETCHOPT_DIRLISTONLY (3)
+  - FETCHOPT_RESUME_FROM (3)
+  - FETCHOPT_UPLOAD (3)
 Protocol:
   - FTP
   - SFTP
@@ -16,14 +16,14 @@ Added-in: 7.17.0
 
 # NAME
 
-CURLOPT_APPEND - append to the remote file
+FETCHOPT_APPEND - append to the remote file
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_APPEND, long append);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_APPEND, long append);
 ~~~
 
 # DESCRIPTION
@@ -42,27 +42,27 @@ instead of overwrite it. This is only useful when uploading to an FTP site.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
 
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/to/newfile");
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-    curl_easy_setopt(curl, CURLOPT_APPEND, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/dir/to/newfile");
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_APPEND, 1L);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
 
 # HISTORY
 
-This option was known as CURLOPT_FTPAPPEND up to 7.16.4
+This option was known as FETCHOPT_FTPAPPEND up to 7.16.4
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

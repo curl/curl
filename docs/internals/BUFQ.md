@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # bufq
@@ -12,19 +12,19 @@ to and read from. It manages read and write positions and has a maximum size.
 ## read/write
 
 Its basic read/write functions have a similar signature and return code
-handling as many internal curl read and write ones.
+handling as many internal fetch read and write ones.
 
 
 ```
-ssize_t Curl_bufq_write(struct bufq *q, const unsigned char *buf, size_t len, CURLcode *err);
+ssize_t Curl_bufq_write(struct bufq *q, const unsigned char *buf, size_t len, FETCHcode *err);
 
 - returns the length written into `q` or -1 on error.
-- writing to a full `q` returns -1 and set *err to CURLE_AGAIN
+- writing to a full `q` returns -1 and set *err to FETCHE_AGAIN
 
-ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len, CURLcode *err);
+ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len, FETCHcode *err);
 
 - returns the length read from `q` or -1 on error.
-- reading from an empty `q` returns -1 and set *err to CURLE_AGAIN
+- reading from an empty `q` returns -1 and set *err to FETCHE_AGAIN
 
 ```
 
@@ -32,10 +32,10 @@ To pass data into a `bufq` without an extra copy, read callbacks can be used.
 
 ```
 typedef ssize_t Curl_bufq_reader(void *reader_ctx, unsigned char *buf, size_t len,
-                                 CURLcode *err);
+                                 FETCHcode *err);
 
 ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader, void *reader_ctx,
-                        CURLcode *err);
+                        FETCHcode *err);
 ```
 
 `Curl_bufq_slurp()` invokes the given `reader` callback, passing it its own
@@ -48,10 +48,10 @@ The analog mechanism for write out buffer data is:
 
 ```
 typedef ssize_t Curl_bufq_writer(void *writer_ctx, const unsigned char *buf, size_t len,
-                                 CURLcode *err);
+                                 FETCHcode *err);
 
 ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer, void *writer_ctx,
-                       CURLcode *err);
+                       FETCHcode *err);
 ```
 
 `Curl_bufq_pass()` invokes the `writer`, passing its internal memory and
@@ -81,11 +81,11 @@ This removes `amount` number of bytes from the `bufq`.
 It is possible to undo writes by calling:
 
 ```
-CURLcode Curl_bufq_unwrite(struct bufq *q, size_t len);
+FETCHcode Curl_bufq_unwrite(struct bufq *q, size_t len);
 ```
 
 This removes `len` bytes from the end of the bufq again. When removing more
-bytes than are present, CURLE_AGAIN is returned and bufq is cleared.
+bytes than are present, FETCHE_AGAIN is returned and bufq is cleared.
 
 ## lifetime
 
@@ -116,7 +116,7 @@ void Curl_bufq_reset(struct bufq *q);
 
 Internally, a `bufq` uses allocation of fixed size, e.g. the "chunk_size", up
 to a maximum number, e.g. "max_chunks". These chunks are allocated on demand,
-therefore writing to a `bufq` may return `CURLE_OUT_OF_MEMORY`. Once the max
+therefore writing to a `bufq` may return `FETCHE_OUT_OF_MEMORY`. Once the max
 number of chunks are used, the `bufq` reports that it is "full".
 
 Each chunks has a `read` and `write` index. A `bufq` keeps its chunks in a
@@ -178,7 +178,7 @@ pool and the `max_chunks`. It no longer needs to know the chunk sizes, as
 those are managed by the pool.
 
 A pool can be shared between many `bufq`s, as long as all of them operate in
-the same thread. In curl that would be true for all transfers using the same
+the same thread. In fetch that would be true for all transfers using the same
 multi handle. The advantages of a pool are:
 
 * when all `bufq`s are empty, only memory for `max_spare` chunks in the pool

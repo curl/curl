@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROXY_KEYPASSWD
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROXY_KEYPASSWD
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_KEYPASSWD (3)
-  - CURLOPT_PROXY_SSLKEY (3)
-  - CURLOPT_SSH_PRIVATE_KEYFILE (3)
-  - CURLOPT_SSLKEY (3)
+  - FETCHOPT_KEYPASSWD (3)
+  - FETCHOPT_PROXY_SSLKEY (3)
+  - FETCHOPT_SSH_PRIVATE_KEYFILE (3)
+  - FETCHOPT_SSLKEY (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -21,14 +21,14 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLOPT_PROXY_KEYPASSWD - passphrase for the proxy private key
+FETCHOPT_PROXY_KEYPASSWD - passphrase for the proxy private key
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_KEYPASSWD, char *pwd);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY_KEYPASSWD, char *pwd);
 ~~~
 
 # DESCRIPTION
@@ -36,7 +36,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_KEYPASSWD, char *pwd);
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
 Pass a pointer to a null-terminated string as parameter. It is used as the
-password required to use the CURLOPT_PROXY_SSLKEY(3) private key. You never
+password required to use the FETCHOPT_PROXY_SSLKEY(3) private key. You never
 need a passphrase to load a certificate but you need one to load your private
 key.
 
@@ -57,14 +57,14 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
-    curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "superman");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "https://proxy:443");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_KEYPASSWD, "superman");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -73,7 +73,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

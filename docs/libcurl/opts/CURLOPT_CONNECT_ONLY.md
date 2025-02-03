@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_CONNECT_ONLY
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_CONNECT_ONLY
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPPROXYTUNNEL (3)
-  - CURLOPT_VERBOSE (3)
-  - curl_easy_recv (3)
-  - curl_easy_send (3)
+  - FETCHOPT_HTTPPROXYTUNNEL (3)
+  - FETCHOPT_VERBOSE (3)
+  - fetch_easy_recv (3)
+  - fetch_easy_send (3)
 Protocol:
   - All
 Added-in: 7.15.2
@@ -16,14 +16,14 @@ Added-in: 7.15.2
 
 # NAME
 
-CURLOPT_CONNECT_ONLY - stop when connected to target server
+FETCHOPT_CONNECT_ONLY - stop when connected to target server
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECT_ONLY, long only);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_CONNECT_ONLY, long only);
 ~~~
 
 # DESCRIPTION
@@ -33,13 +33,13 @@ the required proxy authentication and connection setup, but no data transfer,
 and then return.
 
 The option can be used to simply test a connection to a server, but is more
-useful when used with the CURLINFO_ACTIVESOCKET(3) option to
-curl_easy_getinfo(3) as the library can set up the connection and then
+useful when used with the FETCHINFO_ACTIVESOCKET(3) option to
+fetch_easy_getinfo(3) as the library can set up the connection and then
 the application can obtain the most recently used socket for special data
 transfers.
 
 Since 7.86.0, this option can be set to '2' and if HTTP or WebSocket are used,
-libcurl performs the request and reads all response headers before handing
+libfetch performs the request and reads all response headers before handing
 over control to the application.
 
 Transfers marked connect only do not reuse any existing connections and
@@ -48,8 +48,8 @@ connections marked connect only are not allowed to get reused.
 If the connect only transfer is done using the multi interface, the particular
 easy handle must remain added to the multi handle for as long as the
 application wants to use it. Once it has been removed with
-curl_multi_remove_handle(3), curl_easy_send(3) and
-curl_easy_recv(3) do not function.
+fetch_multi_remove_handle(3), fetch_easy_send(3) and
+fetch_easy_recv(3) do not function.
 
 # DEFAULT
 
@@ -62,13 +62,13 @@ curl_easy_recv(3) do not function.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-    ret = curl_easy_perform(curl);
-    if(ret == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 1L);
+    ret = fetch_easy_perform(fetch);
+    if(ret == FETCHE_OK) {
       /* only connected */
     }
   }
@@ -83,7 +83,7 @@ WS and WSS support added in 7.86.0.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

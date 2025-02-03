@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -29,7 +29,7 @@
  *
  * Expat => https://libexpat.github.io/
  *
- * gcc -Wall -I/usr/local/include xmlstream.c -lcurl -lexpat -o xmlstream
+ * gcc -Wall -I/usr/local/include xmlstream.c -lfetch -lexpat -o xmlstream
  *
  */
 
@@ -38,7 +38,7 @@
 #include <string.h>
 
 #include <expat.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 struct MemoryStruct {
   char *memory;
@@ -116,8 +116,8 @@ static size_t parseStreamCallback(void *contents, size_t length, size_t nmemb,
 
 int main(void)
 {
-  CURL *curl_handle;
-  CURLcode res;
+  FETCH *fetch_handle;
+  FETCHcode res;
   XML_Parser parser;
   struct ParserStruct state;
 
@@ -131,21 +131,21 @@ int main(void)
   XML_SetElementHandler(parser, startElement, endElement);
   XML_SetCharacterDataHandler(parser, characterDataHandler);
 
-  /* Initialize a libcurl handle. */
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl_handle = curl_easy_init();
-  curl_easy_setopt(curl_handle, CURLOPT_URL,
+  /* Initialize a libfetch handle. */
+  fetch_global_init(FETCH_GLOBAL_DEFAULT);
+  fetch_handle = fetch_easy_init();
+  fetch_easy_setopt(fetch_handle, FETCHOPT_URL,
                    "https://www.w3schools.com/xml/simple.xml");
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, parseStreamCallback);
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)parser);
+  fetch_easy_setopt(fetch_handle, FETCHOPT_WRITEFUNCTION, parseStreamCallback);
+  fetch_easy_setopt(fetch_handle, FETCHOPT_WRITEDATA, (void *)parser);
 
   printf("Depth   Characters   Closing Tag\n");
 
   /* Perform the request and any follow-up parsing. */
-  res = curl_easy_perform(curl_handle);
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+  res = fetch_easy_perform(fetch_handle);
+  if(res != FETCHE_OK) {
+    fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+            fetch_easy_strerror(res));
   }
   else if(state.ok) {
     /* Expat requires one final call to finalize parsing. */
@@ -163,8 +163,8 @@ int main(void)
   /* Clean up. */
   free(state.characters.memory);
   XML_ParserFree(parser);
-  curl_easy_cleanup(curl_handle);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch_handle);
+  fetch_global_cleanup();
 
   return 0;
 }

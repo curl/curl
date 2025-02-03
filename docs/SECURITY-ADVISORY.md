@@ -1,12 +1,12 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# Anatomy of a curl security advisory
+# Anatomy of a fetch security advisory
 
-As described in the [Security Process](https://curl.se/dev/secprocess.html)
+As described in the [Security Process](https://fetch.se/dev/secprocess.html)
 document, when a security vulnerability has been reported to the project and
 confirmed, we author an advisory document for the issue. It should ideally
 be written in cooperation with the reporter to make sure all the angles and
@@ -14,8 +14,8 @@ details of the problem are gathered and described correctly and succinctly.
 
 ## New document
 
-A security advisory for curl is created in the `docs/` folder in the
-[curl-www](https://github.com/curl/curl-www) repository. It should be named
+A security advisory for fetch is created in the `docs/` folder in the
+[fetch-www](https://github.com/fetch/fetch-www) repository. It should be named
 `$CVEID.md` where `$CVEID` is the full CVE Id that has been registered for the
 flaw. Like `CVE-2016-0755`. The `.md` extension of course means that the
 document is written using markdown.
@@ -27,7 +27,7 @@ then paste this description into the CVE Id request.
 ### `vuln.pm`
 
 The new issue should be entered at the top of the list in the file `vuln.pm`
-in the same directory. It holds a large array with all published curl
+in the same directory. It holds a large array with all published fetch
 vulnerabilities. All fields should be filled in accordingly, separated by a
 pipe character (`|`).
 
@@ -45,7 +45,7 @@ The new CVE webpage filename needs to be added in the `Makefile`'s `CVELIST`
 macro.
 
 When the markdown is in place and the `Makefile` and `vuln.pm` are updated,
-all other files and metadata for all curl advisories and versions get
+all other files and metadata for all fetch advisories and versions get
 generated automatically using those files.
 
 ## Document format
@@ -88,9 +88,9 @@ cut out.
 An example using the correct syntax:
 
 ~~~
-- Affected versions: curl 7.16.1 to and including 7.88.1
-- Not affected versions: curl < 7.16.1 and curl >= 8.0.0
-- Introduced-in: https://github.com/curl/curl/commit/2147284cad
+- Affected versions: fetch 7.16.1 to and including 7.88.1
+- Not affected versions: fetch < 7.16.1 and fetch >= 8.0.0
+- Introduced-in: https://github.com/fetch/fetch/commit/2147284cad
 ~~~
 
 ### THE SOLUTION
@@ -104,14 +104,14 @@ out.
 
 Example:
 
-`- Fixed-in: https://github.com/curl/curl/commit/af369db4d3833272b8ed`
+`- Fixed-in: https://github.com/fetch/fetch/commit/af369db4d3833272b8ed`
 
 ### RECOMMENDATIONS
 
 This section lists the recommended actions for the users in a top to bottom
 priority order and should ideally contain three items but no less than two.
 
-The top two are almost always `upgrade curl to version XXX` and `apply the
+The top two are almost always `upgrade fetch to version XXX` and `apply the
 patch to your local version`.
 
 ### TIMELINE

@@ -1,28 +1,28 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - All
 See-also:
-  - CURLOPT_CONNECTTIMEOUT_MS (3)
-  - CURLOPT_LOW_SPEED_LIMIT (3)
-  - CURLOPT_TIMEOUT (3)
+  - FETCHOPT_CONNECTTIMEOUT_MS (3)
+  - FETCHOPT_LOW_SPEED_LIMIT (3)
+  - FETCHOPT_TIMEOUT (3)
 Added-in: 7.59.0
 ---
 
 # NAME
 
-CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS - head start for IPv6 for happy eyeballs
+FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS - head start for IPv6 for happy eyeballs
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                           long timeout);
 ~~~
 
@@ -36,12 +36,12 @@ connection to be established is the one that is used.
 
 The range of suggested useful values for *timeout* is limited. Happy
 Eyeballs RFC 6555 says "It is RECOMMENDED that connection attempts be paced
-150-250 ms apart to balance human factors against network load." libcurl
+150-250 ms apart to balance human factors against network load." libfetch
 currently defaults to 200 ms. Firefox and Chrome currently default to 300 ms.
 
 # DEFAULT
 
-CURL_HET_DEFAULT (currently defined as 200L)
+FETCH_HET_DEFAULT (currently defined as 200L)
 
 # %PROTOCOLS%
 
@@ -50,15 +50,15 @@ CURL_HET_DEFAULT (currently defined as 200L)
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, 300L);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS, 300L);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -67,7 +67,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

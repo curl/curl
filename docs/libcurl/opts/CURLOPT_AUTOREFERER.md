@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_AUTOREFERER
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_AUTOREFERER
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_EFFECTIVE_URL (3)
-  - CURLINFO_REDIRECT_URL (3)
-  - CURLINFO_REFERER (3)
-  - CURLOPT_FOLLOWLOCATION (3)
-  - CURLOPT_REFERER (3)
+  - FETCHINFO_EFFECTIVE_URL (3)
+  - FETCHINFO_REDIRECT_URL (3)
+  - FETCHINFO_REFERER (3)
+  - FETCHOPT_FOLLOWLOCATION (3)
+  - FETCHOPT_REFERER (3)
 Protocol:
   - HTTP
 Added-in: 7.1
@@ -17,19 +17,19 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_AUTOREFERER - automatically update the referer header
+FETCHOPT_AUTOREFERER - automatically update the referer header
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AUTOREFERER, long autorefer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_AUTOREFERER, long autorefer);
 ~~~
 
 # DESCRIPTION
 
-Pass a long parameter set to 1 to enable this. When enabled, libcurl
+Pass a long parameter set to 1 to enable this. When enabled, libfetch
 automatically sets the Referer: header field in HTTP requests to the full URL
 when it follows a Location: redirect to a new destination.
 
@@ -37,7 +37,7 @@ The automatic referer is set to the full previous URL even when redirects are
 done cross-origin or following redirects to insecure protocols. This is
 considered a minor privacy leak by some.
 
-With CURLINFO_REFERER(3), applications can extract the actually used
+With FETCHINFO_REFERER(3), applications can extract the actually used
 referer header after the transfer.
 
 # DEFAULT
@@ -51,20 +51,20 @@ referer header after the transfer.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
 
     /* follow redirects */
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 1L);
 
     /* set Referer: automatically when following redirects */
-    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_AUTOREFERER, 1L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -73,7 +73,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

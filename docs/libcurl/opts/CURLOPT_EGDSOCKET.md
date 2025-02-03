@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_EGDSOCKET
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_EGDSOCKET
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_RANDOM_FILE (3)
+  - FETCHOPT_RANDOM_FILE (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -15,14 +15,14 @@ Added-in: 7.7
 
 # NAME
 
-CURLOPT_EGDSOCKET - EGD socket path
+FETCHOPT_EGDSOCKET - EGD socket path
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_EGDSOCKET, char *path);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_EGDSOCKET, char *path);
 ~~~
 
 # DESCRIPTION
@@ -41,7 +41,7 @@ This option was deprecated in 7.84.0.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -38,7 +38,7 @@
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include <stdio.h>
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -51,7 +51,7 @@ static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static FETCHcode sslctx_function(FETCH *fetch, void *sslctx, void *parm)
 {
   X509 *cert = NULL;
   BIO *bio = NULL;
@@ -123,7 +123,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"\
     "-----END RSA PRIVATE KEY-----\n";
 
-  (void)curl; /* avoid warnings */
+  (void)fetch; /* avoid warnings */
   (void)parm; /* avoid warnings */
 
   /* get a BIO */
@@ -179,37 +179,37 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
     X509_free(cert);
 
   /* all set to go */
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 int main(void)
 {
-  CURL *ch;
-  CURLcode rv;
+  FETCH *ch;
+  FETCHcode rv;
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  ch = curl_easy_init();
-  curl_easy_setopt(ch, CURLOPT_VERBOSE, 0L);
-  curl_easy_setopt(ch, CURLOPT_HEADER, 0L);
-  curl_easy_setopt(ch, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(ch, CURLOPT_NOSIGNAL, 1L);
-  curl_easy_setopt(ch, CURLOPT_WRITEFUNCTION, writefunction);
-  curl_easy_setopt(ch, CURLOPT_WRITEDATA, stdout);
-  curl_easy_setopt(ch, CURLOPT_HEADERFUNCTION, writefunction);
-  curl_easy_setopt(ch, CURLOPT_HEADERDATA, stderr);
-  curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  ch = fetch_easy_init();
+  fetch_easy_setopt(ch, FETCHOPT_VERBOSE, 0L);
+  fetch_easy_setopt(ch, FETCHOPT_HEADER, 0L);
+  fetch_easy_setopt(ch, FETCHOPT_NOPROGRESS, 1L);
+  fetch_easy_setopt(ch, FETCHOPT_NOSIGNAL, 1L);
+  fetch_easy_setopt(ch, FETCHOPT_WRITEFUNCTION, writefunction);
+  fetch_easy_setopt(ch, FETCHOPT_WRITEDATA, stdout);
+  fetch_easy_setopt(ch, FETCHOPT_HEADERFUNCTION, writefunction);
+  fetch_easy_setopt(ch, FETCHOPT_HEADERDATA, stderr);
+  fetch_easy_setopt(ch, FETCHOPT_SSLCERTTYPE, "PEM");
 
   /* both VERIFYPEER and VERIFYHOST are set to 0 in this case because there is
      no CA certificate */
 
-  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
-  curl_easy_setopt(ch, CURLOPT_SSLKEYTYPE, "PEM");
+  fetch_easy_setopt(ch, FETCHOPT_SSL_VERIFYPEER, 0L);
+  fetch_easy_setopt(ch, FETCHOPT_SSL_VERIFYHOST, 0L);
+  fetch_easy_setopt(ch, FETCHOPT_URL, "https://www.example.com/");
+  fetch_easy_setopt(ch, FETCHOPT_SSLKEYTYPE, "PEM");
 
   /* first try: retrieve page without user certificate and key -> fails */
-  rv = curl_easy_perform(ch);
-  if(rv == CURLE_OK) {
+  rv = fetch_easy_perform(ch);
+  if(rv == FETCHE_OK) {
     printf("*** transfer succeeded ***\n");
   }
   else {
@@ -220,16 +220,16 @@ int main(void)
    * load the certificate and key by installing a function doing the necessary
    * "modifications" to the SSL CONTEXT just before link init
    */
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
-  rv = curl_easy_perform(ch);
-  if(rv == CURLE_OK) {
+  fetch_easy_setopt(ch, FETCHOPT_SSL_CTX_FUNCTION, sslctx_function);
+  rv = fetch_easy_perform(ch);
+  if(rv == FETCHE_OK) {
     printf("*** transfer succeeded ***\n");
   }
   else {
     printf("*** transfer failed ***\n");
   }
 
-  curl_easy_cleanup(ch);
-  curl_global_cleanup();
+  fetch_easy_cleanup(ch);
+  fetch_global_cleanup();
   return (int)rv;
 }

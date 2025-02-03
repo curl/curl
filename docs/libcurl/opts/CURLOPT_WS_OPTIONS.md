@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_WS_OPTIONS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_WS_OPTIONS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CONNECT_ONLY (3)
-  - curl_ws_recv (3)
-  - curl_ws_send (3)
+  - FETCHOPT_CONNECT_ONLY (3)
+  - fetch_ws_recv (3)
+  - fetch_ws_send (3)
 Protocol:
   - WS
 Added-in: 7.86.0
@@ -15,33 +15,33 @@ Added-in: 7.86.0
 
 # NAME
 
-CURLOPT_WS_OPTIONS - WebSocket behavior options
+FETCHOPT_WS_OPTIONS - WebSocket behavior options
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_WS_OPTIONS, long bitmask);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_WS_OPTIONS, long bitmask);
 ~~~
 
 # DESCRIPTION
 
-Pass a long with a bitmask to tell libcurl about specific WebSocket
+Pass a long with a bitmask to tell libfetch about specific WebSocket
 behaviors.
 
-To detach a WebSocket connection and use the curl_ws_send(3) and
-curl_ws_recv(3) functions after the HTTP upgrade procedure, set the
-CURLOPT_CONNECT_ONLY(3) option to 2L.
+To detach a WebSocket connection and use the fetch_ws_send(3) and
+fetch_ws_recv(3) functions after the HTTP upgrade procedure, set the
+FETCHOPT_CONNECT_ONLY(3) option to 2L.
 
 Available bits in the bitmask
 
-## CURLWS_RAW_MODE (1)
+## FETCHWS_RAW_MODE (1)
 
-Deliver "raw" WebSocket traffic to the CURLOPT_WRITEFUNCTION(3)
+Deliver "raw" WebSocket traffic to the FETCHOPT_WRITEFUNCTION(3)
 callback.
 
-In raw mode, libcurl does not handle pings or any other frame for the
+In raw mode, libfetch does not handle pings or any other frame for the
 application.
 
 # DEFAULT
@@ -55,14 +55,14 @@ application.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ws://example.com/");
-    /* tell curl we deal with all the WebSocket magic ourselves */
-    curl_easy_setopt(curl, CURLOPT_WS_OPTIONS, (long)CURLWS_RAW_MODE);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ws://example.com/");
+    /* tell fetch we deal with all the WebSocket magic ourselves */
+    fetch_easy_setopt(fetch, FETCHOPT_WS_OPTIONS, (long)FETCHWS_RAW_MODE);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -71,7 +71,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

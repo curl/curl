@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLMOPT_MAX_TOTAL_CONNECTIONS
+SPDX-License-Identifier: fetch
+Title: FETCHMOPT_MAX_TOTAL_CONNECTIONS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_MAXCONNECTS (3)
-  - CURLMOPT_MAX_HOST_CONNECTIONS (3)
+  - FETCHMOPT_MAXCONNECTS (3)
+  - FETCHMOPT_MAX_HOST_CONNECTIONS (3)
 Protocol:
   - All
 Added-in: 7.30.0
@@ -14,14 +14,14 @@ Added-in: 7.30.0
 
 # NAME
 
-CURLMOPT_MAX_TOTAL_CONNECTIONS - max simultaneously open connections
+FETCHMOPT_MAX_TOTAL_CONNECTIONS - max simultaneously open connections
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_TOTAL_CONNECTIONS,
+FETCHMcode fetch_multi_setopt(FETCHM *handle, FETCHMOPT_MAX_TOTAL_CONNECTIONS,
                             long amount);
 ~~~
 
@@ -29,17 +29,17 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_TOTAL_CONNECTIONS,
 
 Pass a long for the **amount**. The set number is used as the maximum number
 of simultaneously open connections in total using this multi handle. For each
-new session, libcurl might open a new connection up to the limit set by
-CURLMOPT_MAX_TOTAL_CONNECTIONS(3). If CURLMOPT_PIPELINING(3) is enabled,
-libcurl can try multiplexing if the host is capable of it.
+new session, libfetch might open a new connection up to the limit set by
+FETCHMOPT_MAX_TOTAL_CONNECTIONS(3). If FETCHMOPT_PIPELINING(3) is enabled,
+libfetch can try multiplexing if the host is capable of it.
 
 When more transfers are added to the multi handle than what can be performed
 due to the set limit, they get queued up waiting for their chance.
 
 While a transfer is queued up internally waiting for a connection, the
-CURLOPT_TIMEOUT_MS(3) timeout is counted inclusive of the waiting time,
+FETCHOPT_TIMEOUT_MS(3) timeout is counted inclusive of the waiting time,
 meaning that if you set a too narrow timeout the transfer might never even
-start before it times out. The CURLOPT_CONNECTTIMEOUT_MS(3) time is also
+start before it times out. The FETCHOPT_CONNECTTIMEOUT_MS(3) time is also
 similarly still treated as a per-connect timeout and might expire even before
 making a new connection is permitted.
 
@@ -61,9 +61,9 @@ done.
 ~~~c
 int main(void)
 {
-  CURLM *m = curl_multi_init();
+  FETCHM *m = fetch_multi_init();
   /* never do more than 15 connections */
-  curl_multi_setopt(m, CURLMOPT_MAX_TOTAL_CONNECTIONS, 15L);
+  fetch_multi_setopt(m, FETCHMOPT_MAX_TOTAL_CONNECTIONS, 15L);
 }
 ~~~
 
@@ -71,7 +71,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_multi_setopt(3) returns a CURLMcode indicating success or error.
+fetch_multi_setopt(3) returns a FETCHMcode indicating success or error.
 
-CURLM_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHM_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

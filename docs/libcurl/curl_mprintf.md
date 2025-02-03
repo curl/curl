@@ -1,9 +1,9 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_printf
+SPDX-License-Identifier: fetch
+Title: fetch_printf
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
   - fprintf (3)
   - printf (3)
@@ -16,26 +16,26 @@ Added-in: 7.1
 
 # NAME
 
-curl_maprintf, curl_mfprintf, curl_mprintf, curl_msnprintf, curl_msprintf,
-curl_mvaprintf, curl_mvfprintf, curl_mvprintf, curl_mvsnprintf,
-curl_mvsprintf - formatted output conversion
+fetch_maprintf, fetch_mfprintf, fetch_mprintf, fetch_msnprintf, fetch_msprintf,
+fetch_mvaprintf, fetch_mvfprintf, fetch_mvprintf, fetch_mvsnprintf,
+fetch_mvsprintf - formatted output conversion
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/mprintf.h>
+#include <fetch/mprintf.h>
 
-int curl_mprintf(const char *format, ...);
-int curl_mfprintf(FILE *fd, const char *format, ...);
-int curl_msprintf(char *buffer, const char *format, ...);
-int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...);
-int curl_mvprintf(const char *format, va_list args);
-int curl_mvfprintf(FILE *fd, const char *format, va_list args);
-int curl_mvsprintf(char *buffer, const char *format, va_list args);
-int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
+int fetch_mprintf(const char *format, ...);
+int fetch_mfprintf(FILE *fd, const char *format, ...);
+int fetch_msprintf(char *buffer, const char *format, ...);
+int fetch_msnprintf(char *buffer, size_t maxlength, const char *format, ...);
+int fetch_mvprintf(const char *format, va_list args);
+int fetch_mvfprintf(FILE *fd, const char *format, va_list args);
+int fetch_mvsprintf(char *buffer, const char *format, va_list args);
+int fetch_mvsnprintf(char *buffer, size_t maxlength, const char *format,
                     va_list args);
-char *curl_maprintf(const char *format , ...);
-char *curl_mvaprintf(const char *format, va_list args);
+char *fetch_maprintf(const char *format , ...);
+char *fetch_mvaprintf(const char *format, va_list args);
 ~~~
 
 # DESCRIPTION
@@ -46,28 +46,28 @@ there are slight differences in behavior.
 
 We discourage users from using any of these functions in new applications.
 
-Functions in the curl_mprintf() family produce output according to a format as
-described below. The functions **curl_mprintf()** and **curl_mvprintf()**
-write output to stdout, the standard output stream; **curl_mfprintf()** and
-**curl_mvfprintf()** write output to the given output stream;
-**curl_msprintf()**, **curl_msnprintf()**, **curl_mvsprintf()**, and
-**curl_mvsnprintf()** write to the character string **buffer**.
+Functions in the fetch_mprintf() family produce output according to a format as
+described below. The functions **fetch_mprintf()** and **fetch_mvprintf()**
+write output to stdout, the standard output stream; **fetch_mfprintf()** and
+**fetch_mvfprintf()** write output to the given output stream;
+**fetch_msprintf()**, **fetch_msnprintf()**, **fetch_mvsprintf()**, and
+**fetch_mvsnprintf()** write to the character string **buffer**.
 
-The functions **curl_msnprintf()** and **curl_mvsnprintf()** write at most
+The functions **fetch_msnprintf()** and **fetch_mvsnprintf()** write at most
 *maxlength* bytes (including the terminating null byte ('0')) to
 *buffer*.
 
-The functions **curl_mvprintf()**, **curl_mvfprintf()**,
-**curl_mvsprintf()**, **curl_mvsnprintf()** are equivalent to the
-functions **curl_mprintf()**, **curl_mfprintf()**, **curl_msprintf()**,
-**curl_msnprintf()**, respectively, except that they are called with a
+The functions **fetch_mvprintf()**, **fetch_mvfprintf()**,
+**fetch_mvsprintf()**, **fetch_mvsnprintf()** are equivalent to the
+functions **fetch_mprintf()**, **fetch_mfprintf()**, **fetch_msprintf()**,
+**fetch_msnprintf()**, respectively, except that they are called with a
 *va_list* instead of a variable number of arguments. These functions do
 not call the *va_end* macro. Because they invoke the *va_arg* macro,
 the value of *ap* is undefined after the call.
 
-The functions **curl_maprintf()** and **curl_mvaprintf()** return the
+The functions **fetch_maprintf()** and **fetch_mvaprintf()** return the
 output string as pointer to a newly allocated memory area. The returned string
-must be curl_free(3)ed by the receiver.
+must be fetch_free(3)ed by the receiver.
 
 All of these functions write the output under the control of a format string
 that specifies how subsequent arguments are converted for output.
@@ -93,11 +93,11 @@ argument is required, by writing "%m$" instead of '%' and "*m$" instead
 of '*', where the decimal integer m denotes the position in the argument list
 of the desired argument, indexed starting from 1. Thus,
 ~~~c
-    curl_mprintf("%*d", width, num);
+    fetch_mprintf("%*d", width, num);
 ~~~
 and
 ~~~c
-    curl_mprintf("%2$*1$d", width, num);
+    fetch_mprintf("%2$*1$d", width, num);
 ~~~
 are equivalent. The second style allows repeated references to the same
 argument.
@@ -273,8 +273,8 @@ const char *name = "John";
 
 int main(void)
 {
-  curl_mprintf("My name is %s\n", name);
-  curl_mprintf("Pi is almost %f\n", (double)25.0/8);
+  fetch_mprintf("My name is %s\n", name);
+  fetch_mprintf("Pi is almost %f\n", (double)25.0/8);
 }
 ~~~
 
@@ -282,7 +282,7 @@ int main(void)
 
 # RETURN VALUE
 
-The **curl_maprintf** and **curl_mvaprintf** functions return a pointer to
+The **fetch_maprintf** and **fetch_mvaprintf** functions return a pointer to
 a newly allocated string, or NULL if it failed.
 
 All other functions return the number of characters actually printed

@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_REDIRECT_COUNT
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_REDIRECT_COUNT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_REDIRECT_URL (3)
-  - CURLOPT_FOLLOWLOCATION (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_REDIRECT_URL (3)
+  - FETCHOPT_FOLLOWLOCATION (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.9.7
@@ -16,14 +16,14 @@ Added-in: 7.9.7
 
 # NAME
 
-CURLINFO_REDIRECT_COUNT - get the number of redirects
+FETCHINFO_REDIRECT_COUNT - get the number of redirects
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REDIRECT_COUNT,
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_REDIRECT_COUNT,
                            long *countp);
 ~~~
 
@@ -39,17 +39,17 @@ actually followed.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 1L);
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       long redirects;
-      curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &redirects);
+      fetch_easy_getinfo(fetch, FETCHINFO_REDIRECT_COUNT, &redirects);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -58,7 +58,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

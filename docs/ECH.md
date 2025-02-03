@@ -1,20 +1,20 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# Building curl with HTTPS-RR and ECH support
+# Building fetch with HTTPS-RR and ECH support
 
-We have added support for ECH to curl. It can use HTTPS RRs published in the
-DNS if curl uses DoH, or else can accept the relevant ECHConfigList values
+We have added support for ECH to fetch. It can use HTTPS RRs published in the
+DNS if fetch uses DoH, or else can accept the relevant ECHConfigList values
 from the command line. This works with OpenSSL, wolfSSL, BoringSSL or AWS-LC as
 the TLS provider.
 
 This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
 
 This should however provide enough of a proof-of-concept to prompt an informed
-discussion about a good path forward for ECH support in curl.
+discussion about a good path forward for ECH support in fetch.
 
 ## OpenSSL Build
 
@@ -32,12 +32,12 @@ To build our ECH-enabled OpenSSL fork:
     ...a little bit of stuff...
 ```
 
-To build curl ECH-enabled, making use of the above:
+To build fetch ECH-enabled, making use of the above:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
-    cd curl
+    git clone https://github.com/fetch/fetch
+    cd fetch
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech
     ...lots of output...
@@ -48,7 +48,7 @@ To build curl ECH-enabled, making use of the above:
 
 If you do not get that WARNING at the end of the ``configure`` command, then
 ECH is not enabled, so go back some steps and re-do whatever needs re-doing:-)
-If you want to debug curl then you should add ``--enable-debug`` to the
+If you want to debug fetch then you should add ``--enable-debug`` to the
 ``configure`` command.
 
 In a recent (2024-05-20) build on one machine, configure failed to find the
@@ -59,12 +59,12 @@ not be the best solution.
 
 ## Using ECH and DoH
 
-curl supports using DoH for A/AAAA lookups so it was relatively easy to add
+fetch supports using DoH for A/AAAA lookups so it was relatively easy to add
 retrieval of HTTPS RRs in that situation. To use ECH and DoH together:
 
 ```bash
-    cd $HOME/code/curl
-    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl --ech true --doh-url https://one.one.one.one/dns-query https://defo.ie/ech-check.php
+    cd $HOME/code/fetch
+    LD_LIBRARY_PATH=$HOME/code/openssl ./src/fetch --ech true --doh-url https://one.one.one.one/dns-query https://defo.ie/ech-check.php
     ...
     SSL_ECH_STATUS: success <img src="greentick-small.png" alt="good" /> <br/>
     ...
@@ -86,7 +86,7 @@ The list above has 4 different server technologies, implemented by 3 different
 parties, and includes a case (the port 8414 server) where HelloRetryRequest
 (HRR) is forced.
 
-We currently support the following new curl command line arguments/options:
+We currently support the following new fetch command line arguments/options:
 
 - ``--ech <config>`` - the ``config`` value can be one of:
     - ``false`` says to not attempt ECH
@@ -111,10 +111,10 @@ cut-and-paste, e.g.:
     1 . ipv4hint=213.108.108.101 ech=AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA ipv6hint=2a00:c6c0:0:116:5::10
 ```
 
-Then paste the base64 encoded ECHConfigList onto the curl command line:
+Then paste the base64 encoded ECHConfigList onto the fetch command line:
 
 ```bash
-    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl --ech ecl:AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+    LD_LIBRARY_PATH=$HOME/code/openssl ./src/fetch --ech ecl:AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
     ...
     SSL_ECH_STATUS: success <img src="greentick-small.png" alt="good" /> <br/>
     ...
@@ -126,7 +126,7 @@ If you paste in the wrong ECHConfigList (it changes hourly for ``defo.ie``) you
 should get an error like this:
 
 ```bash
-    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+    LD_LIBRARY_PATH=$HOME/code/openssl ./src/fetch -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
     ...
     * OpenSSL/3.3.0: error:0A00054B:SSL routines::ech required
     ...
@@ -141,7 +141,7 @@ good value, via the ``retry_configs`` mechanism. You can see that value in
 the verbose output, e.g.:
 
 ```bash
-    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+    LD_LIBRARY_PATH=$HOME/code/openssl ./src/fetch -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
     ...
 * ECH: retry_configs AQD+DQA8DAAgACBvYqJy+Hgk33wh/ZLBzKSPgwxeop7gvojQzfASq7zeZQAEAAEAAQANY292ZXIuZGVmby5pZQAA/g0APEMAIAAgXkT5r4cYs8z19q5rdittyIX8gfQ3ENW4wj1fVoiJZBoABAABAAEADWNvdmVyLmRlZm8uaWUAAP4NADw2ACAAINXSE9EdXzEQIJZA7vpwCIQsWqsFohZARXChgPsnfI1kAAQAAQABAA1jb3Zlci5kZWZvLmllAAD+DQA8cQAgACASeiD5F+UoSnVoHvA2l1EifUVMFtbVZ76xwDqmMPraHQAEAAEAAQANY292ZXIuZGVmby5pZQAA
 * ECH: retry_configs for defo.ie from cover.defo.ie, 319
@@ -153,23 +153,23 @@ For now, this only works for the OpenSSL and BoringSSL/AWS-LC builds.
 
 ## Default settings
 
-curl has various ways to configure default settings, e.g. in ``$HOME/.curlrc``,
+fetch has various ways to configure default settings, e.g. in ``$HOME/.fetchrc``,
 so one can set the DoH URL and enable ECH that way:
 
 ```bash
-    cat ~/.curlrc
+    cat ~/.fetchrc
     doh-url=https://one.one.one.one/dns-query
     silent
     ech=true
 ```
 
-Note that when you use the system's curl command (rather than our ECH-enabled
+Note that when you use the system's fetch command (rather than our ECH-enabled
 build), it is liable to warn that ``ech`` is an unknown option. If that is an
 issue (e.g. if some script re-directs stdout and stderr somewhere) then adding
 the ``silent`` line above seems to be a good enough fix. (Though of
 course, yet another script could depend on non-silent behavior, so you may have
 to figure out what you prefer yourself.) That seems to have changed with the
-latest build, previously ``silent=TRUE`` was what I used in ``~/.curlrc`` but
+latest build, previously ``silent=TRUE`` was what I used in ``~/.fetchrc`` but
 now that seems to cause a problem, so that the following line(s) are ignored.
 
 If you want to always use our OpenSSL build you can set ``LD_LIBRARY_PATH``
@@ -192,7 +192,7 @@ should unset ``LD_LIBRARY_PATH`` before doing that or use a different shell.
 With all that setup as above the command line gets simpler:
 
 ```bash
-    ./src/curl https://defo.ie/ech-check.php
+    ./src/fetch https://defo.ie/ech-check.php
     ...
     SSL_ECH_STATUS: success <img src="greentick-small.png" alt="good" /> <br/>
     ...
@@ -202,7 +202,7 @@ The ``--ech true`` option is opportunistic, so tries to do ECH but does not fail
 the client for example cannot find any ECHConfig values. The ``--ech hard``
 option hard-fails if there is no ECHConfig found in DNS, so for now, that is not
 a good option to set as a default. Once ECH has really been attempted by
-the client, if decryption on the server side fails, then curl fails.
+the client, if decryption on the server side fails, then fetch fails.
 
 ## Code changes for ECH support when using DoH
 
@@ -219,7 +219,7 @@ arguments which are not described here, but should be fairly clear.
 
 As shown in the ``configure`` usage above, there are ``configure.ac`` changes
 that allow separately dis/enabling ``USE_HTTPSRR`` and ``USE_ECH``. If ``USE_ECH``
-is enabled, then ``USE_HTTPSRR`` is forced. In both cases ``CURL_DISABLE_DOH``
+is enabled, then ``USE_HTTPSRR`` is forced. In both cases ``FETCH_DISABLE_DOH``
 must not be enabled. (There may be some configuration conflicts available for the
 determined :-)
 
@@ -263,7 +263,7 @@ needs re-checking as it has been a while.
 - It is unclear how one should handle any IP address hints found in an HTTPS RR.
   It may be that a bit of consideration of how "multi-CDN" deployments might
 emerge would provide good answers there, but for now, it is not clear how best
-curl might handle those values when present in the DNS.
+fetch might handle those values when present in the DNS.
 
 - The SVCB/HTTPS RR specification supports a new "CNAME at apex" indirection
   ("aliasMode") - the current code takes no account of that at all. One could
@@ -273,17 +273,17 @@ to have any support for that "aliasMode" and we have not checked Firefox for tha
 recently.)
 
 - We have not investigated what related changes or additions might be needed
-  for applications using libcurl, as opposed to use of curl as a command line
+  for applications using libfetch, as opposed to use of fetch as a command line
 tool.
 
-- We have not yet implemented tests as part of the usual curl test harness as
+- We have not yet implemented tests as part of the usual fetch test harness as
 doing so would seem to require re-implementing an ECH-enabled server as part
-of the curl test harness. For now, we have a ``./tests/ech_test.sh`` script
+of the fetch test harness. For now, we have a ``./tests/ech_test.sh`` script
 that attempts ECH with various test servers and with many combinations of the
 allowed command line options. While that is a useful test and has find issues,
 it is not comprehensive and we are not (as yet) sure what would be the right
 level of coverage. When running that script you should not have a
-``$HOME/.curlrc`` file that affects ECH or some of the negative tests could
+``$HOME/.fetchrc`` file that affects ECH or some of the negative tests could
 produce spurious failures.
 
 ## Building with cmake
@@ -292,15 +292,15 @@ To build with cmake, assuming our ECH-enabled OpenSSL is as before:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
-    cd curl
+    git clone https://github.com/fetch/fetch
+    cd fetch
     mkdir build
     cd build
     cmake -DOPENSSL_ROOT_DIR=$HOME/code/openssl -DUSE_ECH=1 ..
     ...
     make
     ...
-    [100%] Built target curl
+    [100%] Built target fetch
 ```
 
 The binary produced by the cmake build does not need any ECH-specific
@@ -308,7 +308,7 @@ The binary produced by the cmake build does not need any ECH-specific
 
 ## BoringSSL build
 
-BoringSSL is also supported by curl and also supports ECH, so to build
+BoringSSL is also supported by fetch and also supports ECH, so to build
 with that, instead of our ECH-enabled OpenSSL:
 
 ```bash
@@ -325,8 +325,8 @@ Then:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
-    cd curl
+    git clone https://github.com/fetch/fetch
+    cd fetch
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech
     ...lots of output...
@@ -343,7 +343,7 @@ line variant as of now.
 
 ## wolfSSL build
 
-wolfSSL also supports ECH and can be used by curl, so here's how:
+wolfSSL also supports ECH and can be used by fetch, so here's how:
 
 ```bash
     cd $HOME/code
@@ -356,14 +356,14 @@ wolfSSL also supports ECH and can be used by curl, so here's how:
 ```
 
 The install prefix (``inst``) in the above causes wolfSSL to be installed there
-and we seem to need that for the curl configure command to work out. The
+and we seem to need that for the fetch configure command to work out. The
 ``--enable-opensslextra`` turns out (after much faffing about;-) to be
-important or else we get build problems with curl below.
+important or else we get build problems with fetch below.
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
-    cd curl
+    git clone https://github.com/fetch/fetch
+    cd fetch
     autoreconf -fi
     ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech
     make
@@ -383,7 +383,7 @@ There are some known issues with the ECH implementation in wolfSSL:
 
 There are what seem like oddball differences:
 
-- The DoH URL in``$HOME/.curlrc`` can use `1.1.1.1` for OpenSSL but has to be
+- The DoH URL in``$HOME/.fetchrc`` can use `1.1.1.1` for OpenSSL but has to be
   `one.one.one.one` for wolfSSL. The latter works for both, so OK, we us that.
 - There seems to be some difference in CA databases too - the wolfSSL version
   does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can
@@ -408,27 +408,27 @@ BoringSSL/AWS-LC. (Both are reasonable.)
 ### Supporting ECH without DoH
 
 All of the above only applies if DoH is being used. There should be a use-case
-for ECH when DoH is not used by curl - if a system stub resolver supports DoT
+for ECH when DoH is not used by fetch - if a system stub resolver supports DoT
 or DoH, then, considering only ECH and the network threat model, it would make
-sense for curl to support ECH without curl itself using DoH. The author for
+sense for fetch to support ECH without fetch itself using DoH. The author for
 example uses a combination of stubby+unbound as the system resolver listening
 on localhost:53, so would fit this use-case. That said, it is unclear if
 this is a niche that is worth trying to address. (The author is just as happy to
-let curl use DoH to talk to the same public recursive that stubby might use:-)
+let fetch use DoH to talk to the same public recursive that stubby might use:-)
 
 Assuming for the moment this is a use-case we would like to support, then if
-DoH is not being used by curl, it is not clear at this time how to provide
+DoH is not being used by fetch, it is not clear at this time how to provide
 support for ECH. One option would seem to be to extend the ``c-ares`` library
 to support HTTPS RRs, but in that case it is not now clear whether such
 changes would be attractive to the ``c-ares`` maintainers, nor whether the
 "tag=value" extensibility inherent in the HTTPS/SVCB specification is a good
 match for the ``c-ares`` approach of defining structures specific to decoded
 answers for each supported RRtype. We are also not sure how many downstream
-curl deployments actually make use of the ``c-ares`` library, which would
+fetch deployments actually make use of the ``c-ares`` library, which would
 affect the utility of such changes. Another option might be to consider using
 some other generic DNS library that does support HTTPS RRs, but it is unclear
-if such a library could or would be used by all or almost all curl builds and
-downstream releases of curl.
+if such a library could or would be used by all or almost all fetch builds and
+downstream releases of fetch.
 
 Our current conclusion is that doing the above is likely best left until we
 have some experience with the "using DoH" approach, so we are going to punt on
@@ -439,7 +439,7 @@ this for now.
 Just a note to self as remembering this is a nuisance:
 
 ```bash
-LD_LIBRARY_PATH=$HOME/code/openssl:./lib/.libs gdb ./src/.libs/curl
+LD_LIBRARY_PATH=$HOME/code/openssl:./lib/.libs gdb ./src/.libs/fetch
 ```
 
 ### Localhost testing
@@ -448,7 +448,7 @@ It can be useful to be able to run against a localhost OpenSSL ``s_server``
 for testing. We have published instructions for such
 [localhost tests](https://github.com/defo-project/ech-dev-utils/blob/main/howtos/localhost-tests.md)
 in another repository. Once you have that set up, you can start a server
-and then run curl against that:
+and then run fetch against that:
 
 ```bash
     cd $HOME/code/ech-dev-utils
@@ -462,8 +462,8 @@ for details.
 In another window:
 
 ```bash
-    cd $HOME/code/curl/
-    ./src/curl -vvv --insecure  --connect-to foo.example.com:8443:localhost:8443  --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
+    cd $HOME/code/fetch/
+    ./src/fetch -vvv --insecure  --connect-to foo.example.com:8443:localhost:8443  --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
 ```
 
 ### Automated use of ``retry_configs`` not supported so far...

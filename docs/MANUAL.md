@@ -1,86 +1,86 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# curl tutorial
+# fetch tutorial
 
 ## Simple Usage
 
 Get the main page from a web-server:
 
-    curl https://www.example.com/
+    fetch https://www.example.com/
 
 Get a README file from an FTP server:
 
-    curl ftp://ftp.example.com/README
+    fetch ftp://ftp.example.com/README
 
 Get a webpage from a server using port 8000:
 
-    curl http://www.example.com:8000/
+    fetch http://www.example.com:8000/
 
 Get a directory listing of an FTP site:
 
-    curl ftp://ftp.example.com/
+    fetch ftp://ftp.example.com/
 
-Get the all terms matching curl from a dictionary:
+Get the all terms matching fetch from a dictionary:
 
-    curl dict://dict.example.com/m:curl
+    fetch dict://dict.example.com/m:fetch
 
-Get the definition of curl from a dictionary:
+Get the definition of fetch from a dictionary:
 
-    curl dict://dict.example.com/d:curl
+    fetch dict://dict.example.com/d:fetch
 
 Fetch two documents at once:
 
-    curl ftp://ftp.example.com/ http://www.example.com:8000/
+    fetch ftp://ftp.example.com/ http://www.example.com:8000/
 
 Get a file off an FTPS server:
 
-    curl ftps://files.are.example.com/secrets.txt
+    fetch ftps://files.are.example.com/secrets.txt
 
 or use the more appropriate FTPS way to get the same file:
 
-    curl --ssl-reqd ftp://files.are.example.com/secrets.txt
+    fetch --ssl-reqd ftp://files.are.example.com/secrets.txt
 
 Get a file from an SSH server using SFTP:
 
-    curl -u username sftp://example.com/etc/issue
+    fetch -u username sftp://example.com/etc/issue
 
 Get a file from an SSH server using SCP using a private key (not
 password-protected) to authenticate:
 
-    curl -u username: --key ~/.ssh/id_rsa scp://example.com/~/file.txt
+    fetch -u username: --key ~/.ssh/id_rsa scp://example.com/~/file.txt
 
 Get a file from an SSH server using SCP using a private key
 (password-protected) to authenticate:
 
-    curl -u username: --key ~/.ssh/id_rsa --pass private_key_password
+    fetch -u username: --key ~/.ssh/id_rsa --pass private_key_password
     scp://example.com/~/file.txt
 
 Get the main page from an IPv6 web server:
 
-    curl "http://[2001:1890:1112:1::20]/"
+    fetch "http://[2001:1890:1112:1::20]/"
 
 Get a file from an SMB server:
 
-    curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
+    fetch -u "domain\username:passwd" smb://server.example.com/share/file.txt
 
 ## Download to a File
 
 Get a webpage and store in a local file with a specific name:
 
-    curl -o thatpage.html http://www.example.com/
+    fetch -o thatpage.html http://www.example.com/
 
 Get a webpage and store in a local file, make the local file get the name of
 the remote document (if no filename part is specified in the URL, this fails):
 
-    curl -O http://www.example.com/index.html
+    fetch -O http://www.example.com/index.html
 
 Fetch two files and store them with their remote names:
 
-    curl -O www.haxx.se/index.html -O curl.se/download.html
+    fetch -O www.haxx.se/index.html -O fetch.se/download.html
 
 ## Using Passwords
 
@@ -88,11 +88,11 @@ Fetch two files and store them with their remote names:
 
 To ftp files using name and password, include them in the URL like:
 
-    curl ftp://name:passwd@ftp.server.example:port/full/path/to/file
+    fetch ftp://name:passwd@ftp.server.example:port/full/path/to/file
 
 or specify them with the `-u` flag like
 
-    curl -u name:passwd ftp://ftp.server.example:port/full/path/to/file
+    fetch -u name:passwd ftp://ftp.server.example:port/full/path/to/file
 
 ### FTPS
 
@@ -109,30 +109,30 @@ This is similar to FTP, but you can use the `--key` option to specify a
 private key to use instead of a password. Note that the private key may itself
 be protected by a password that is unrelated to the login password of the
 remote system; this password is specified using the `--pass` option.
-Typically, curl automatically extracts the public key from the private key
-file, but in cases where curl does not have the proper library support, a
+Typically, fetch automatically extracts the public key from the private key
+file, but in cases where fetch does not have the proper library support, a
 matching public key file must be specified using the `--pubkey` option.
 
 ### HTTP
 
-curl also supports user and password in HTTP URLs, thus you can pick a file
+fetch also supports user and password in HTTP URLs, thus you can pick a file
 like:
 
-    curl http://name:passwd@http.server.example/full/path/to/file
+    fetch http://name:passwd@http.server.example/full/path/to/file
 
 or specify user and password separately like in
 
-    curl -u name:passwd http://http.server.example/full/path/to/file
+    fetch -u name:passwd http://http.server.example/full/path/to/file
 
-HTTP offers many different methods of authentication and curl supports
+HTTP offers many different methods of authentication and fetch supports
 several: Basic, Digest, NTLM and Negotiate (SPNEGO). Without telling which
-method to use, curl defaults to Basic. You can also ask curl to pick the most
+method to use, fetch defaults to Basic. You can also ask fetch to pick the most
 secure ones out of the ones that the server accepts for the given URL, by
 using `--anyauth`.
 
 **Note**! According to the URL specification, HTTP URLs can not contain a user
-and password, so that style does not work when using curl via a proxy, even
-though curl allows it at other times. When using a proxy, you _must_ use the
+and password, so that style does not work when using fetch via a proxy, even
+though fetch allows it at other times. When using a proxy, you _must_ use the
 `-u` style for user and password.
 
 ### HTTPS
@@ -141,7 +141,7 @@ Probably most commonly used with private certificates, as explained below.
 
 ## Proxy
 
-curl supports both HTTP and SOCKS proxy servers, with optional authentication.
+fetch supports both HTTP and SOCKS proxy servers, with optional authentication.
 It does not have special support for FTP proxy servers since there are no
 standards for those, but it can still be made to work with many of them. You
 can also use both HTTP and SOCKS proxies to transfer files to and from FTP
@@ -149,49 +149,49 @@ servers.
 
 Get an ftp file using an HTTP proxy named my-proxy that uses port 888:
 
-    curl -x my-proxy:888 ftp://ftp.example.com/README
+    fetch -x my-proxy:888 ftp://ftp.example.com/README
 
 Get a file from an HTTP server that requires user and password, using the
 same proxy as above:
 
-    curl -u user:passwd -x my-proxy:888 http://www.example.com/
+    fetch -u user:passwd -x my-proxy:888 http://www.example.com/
 
 Some proxies require special authentication. Specify by using -U as above:
 
-    curl -U user:passwd -x my-proxy:888 http://www.example.com/
+    fetch -U user:passwd -x my-proxy:888 http://www.example.com/
 
 A comma-separated list of hosts and domains which do not use the proxy can be
 specified as:
 
-    curl --noproxy example.com -x my-proxy:888 http://www.example.com/
+    fetch --noproxy example.com -x my-proxy:888 http://www.example.com/
 
 If the proxy is specified with `--proxy1.0` instead of `--proxy` or `-x`, then
-curl uses HTTP/1.0 instead of HTTP/1.1 for any `CONNECT` attempts.
+fetch uses HTTP/1.0 instead of HTTP/1.1 for any `CONNECT` attempts.
 
-curl also supports SOCKS4 and SOCKS5 proxies with `--socks4` and `--socks5`.
+fetch also supports SOCKS4 and SOCKS5 proxies with `--socks4` and `--socks5`.
 
-See also the environment variables curl supports that offer further proxy
+See also the environment variables fetch supports that offer further proxy
 control.
 
 Most FTP proxy servers are set up to appear as a normal FTP server from the
 client's perspective, with special commands to select the remote FTP server.
-curl supports the `-u`, `-Q` and `--ftp-account` options that can be used to
+fetch supports the `-u`, `-Q` and `--ftp-account` options that can be used to
 set up transfers through many FTP proxies. For example, a file can be uploaded
 to a remote FTP server using a Blue Coat FTP proxy with the options:
 
-    curl -u "username@ftp.server.example Proxy-Username:Remote-Pass"
+    fetch -u "username@ftp.server.example Proxy-Username:Remote-Pass"
       --ftp-account Proxy-Password --upload-file local-file
       ftp://my-ftp.proxy.example:21/remote/upload/path/
 
 See the manual for your FTP proxy to determine the form it expects to set up
-transfers, and curl's `-v` option to see exactly what curl is sending.
+transfers, and fetch's `-v` option to see exactly what fetch is sending.
 
 ## Piping
 
 Get a key file and add it with `apt-key` (when on a system that uses `apt` for
 package management):
 
-    curl -L https://apt.example.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    fetch -L https://apt.example.org/llvm-snapshot.gpg.key | sudo apt-key add -
 
 The '|' pipes the output to STDIN. `-` tells `apt-key` that the key file
 should be read from STDIN.
@@ -199,23 +199,23 @@ should be read from STDIN.
 ## Ranges
 
 HTTP 1.1 introduced byte-ranges. Using this, a client can request to get only
-one or more sub-parts of a specified document. curl supports this with the
+one or more sub-parts of a specified document. fetch supports this with the
 `-r` flag.
 
 Get the first 100 bytes of a document:
 
-    curl -r 0-99 http://www.example.com/
+    fetch -r 0-99 http://www.example.com/
 
 Get the last 500 bytes of a document:
 
-    curl -r -500 http://www.example.com/
+    fetch -r -500 http://www.example.com/
 
-curl also supports simple ranges for FTP files as well. Then you can only
+fetch also supports simple ranges for FTP files as well. Then you can only
 specify start and stop position.
 
 Get the first 100 bytes of a document using FTP:
 
-    curl -r 0-99 ftp://www.example.com/README
+    fetch -r 0-99 ftp://www.example.com/README
 
 ## Uploading
 
@@ -223,37 +223,37 @@ Get the first 100 bytes of a document using FTP:
 
 Upload all data on stdin to a specified server:
 
-    curl -T - ftp://ftp.example.com/myfile
+    fetch -T - ftp://ftp.example.com/myfile
 
 Upload data from a specified file, login with user and password:
 
-    curl -T uploadfile -u user:passwd ftp://ftp.example.com/myfile
+    fetch -T uploadfile -u user:passwd ftp://ftp.example.com/myfile
 
 Upload a local file to the remote site, and use the local filename at the
 remote site too:
 
-    curl -T uploadfile -u user:passwd ftp://ftp.example.com/
+    fetch -T uploadfile -u user:passwd ftp://ftp.example.com/
 
 Upload a local file to get appended to the remote file:
 
-    curl -T localfile -a ftp://ftp.example.com/remotefile
+    fetch -T localfile -a ftp://ftp.example.com/remotefile
 
-curl also supports ftp upload through a proxy, but only if the proxy is
-configured to allow that kind of tunneling. If it does, you can run curl in a
+fetch also supports ftp upload through a proxy, but only if the proxy is
+configured to allow that kind of tunneling. If it does, you can run fetch in a
 fashion similar to:
 
-    curl --proxytunnel -x proxy:port -T localfile ftp.example.com
+    fetch --proxytunnel -x proxy:port -T localfile ftp.example.com
 
 ### SMB / SMBS
 
-    curl -T file.txt -u "domain\username:passwd"
+    fetch -T file.txt -u "domain\username:passwd"
       smb://server.example.com/share/
 
 ### HTTP
 
 Upload all data on stdin to a specified HTTP site:
 
-    curl -T - http://www.example.com/myfile
+    fetch -T - http://www.example.com/myfile
 
 Note that the HTTP server must have been configured to accept PUT before this
 can be done successfully.
@@ -262,57 +262,57 @@ For other ways to do HTTP data upload, see the POST section below.
 
 ## Verbose / Debug
 
-If curl fails where it is not supposed to, if the servers do not let you in,
+If fetch fails where it is not supposed to, if the servers do not let you in,
 if you cannot understand the responses: use the `-v` flag to get verbose
-fetching. curl outputs lots of info and what it sends and receives in order to
+fetching. fetch outputs lots of info and what it sends and receives in order to
 let the user see all client-server interaction (but it does not show you the
 actual data).
 
-    curl -v ftp://ftp.example.com/
+    fetch -v ftp://ftp.example.com/
 
-To get even more details and information on what curl does, try using the
+To get even more details and information on what fetch does, try using the
 `--trace` or `--trace-ascii` options with a given filename to log to, like
 this:
 
-    curl --trace my-trace.txt www.haxx.se
+    fetch --trace my-trace.txt www.haxx.se
 
 
 ## Detailed Information
 
 Different protocols provide different ways of getting detailed information
-about specific files/documents. To get curl to show detailed information about
+about specific files/documents. To get fetch to show detailed information about
 a single file, you should use `-I`/`--head` option. It displays all available
 info on a single file for HTTP and FTP. The HTTP information is a lot more
 extensive.
 
 For HTTP, you can get the header information (the same as `-I` would show)
-shown before the data by using `-i`/`--include`. curl understands the
+shown before the data by using `-i`/`--include`. fetch understands the
 `-D`/`--dump-header` option when getting files from both FTP and HTTP, and it
 then stores the headers in the specified file.
 
 Store the HTTP headers in a separate file (headers.txt in the example):
 
-      curl --dump-header headers.txt curl.se
+      fetch --dump-header headers.txt fetch.se
 
 Note that headers stored in a separate file can be useful at a later time if
-you want curl to use cookies sent by the server. More about that in the
+you want fetch to use cookies sent by the server. More about that in the
 cookies section.
 
 ## POST (HTTP)
 
-It is easy to post data using curl. This is done using the `-d <data>` option.
+It is easy to post data using fetch. This is done using the `-d <data>` option.
 The post data must be urlencoded.
 
 Post a simple `name` and `phone` guestbook.
 
-    curl -d "name=Rafael%20Sagula&phone=3320780" http://www.example.com/guest.cgi
+    fetch -d "name=Rafael%20Sagula&phone=3320780" http://www.example.com/guest.cgi
 
-Or automatically [URL encode the data](https://everything.curl.dev/http/post/url-encode).
+Or automatically [URL encode the data](https://everything.fetch.dev/http/post/url-encode).
 
-    curl --data-urlencode "name=Rafael Sagula&phone=3320780"
+    fetch --data-urlencode "name=Rafael Sagula&phone=3320780"
       http://www.example.com/guest.cgi
 
-How to post a form with curl, lesson #1:
+How to post a form with fetch, lesson #1:
 
 Dig out all the `<input>` tags in the form that you want to fill in.
 
@@ -342,13 +342,13 @@ Example:
 
 We want to enter user `foobar` with password `12345`.
 
-To post to this, you would enter a curl command line like:
+To post to this, you would enter a fetch command line like:
 
-    curl -d "user=foobar&pass=12345&id=blablabla&ding=submit"
+    fetch -d "user=foobar&pass=12345&id=blablabla&ding=submit"
       http://example.com/post.cgi
 
 While `-d` uses the application/x-www-form-urlencoded mime-type, generally
-understood by CGI's and similar, curl also supports the more capable
+understood by CGI's and similar, fetch also supports the more capable
 multipart/form-data type. This latter type supports things like file upload.
 
 `-F` accepts parameters like `-F "name=contents"`. If you want the contents to
@@ -358,10 +358,10 @@ filename. You can also post the contents of several files in one field.  For
 example, the field name `coolfiles` is used to send three files, with
 different content types using the following syntax:
 
-    curl -F "coolfiles=@fil1.gif;type=image/gif,fil2.txt,fil3.html"
+    fetch -F "coolfiles=@fil1.gif;type=image/gif,fil2.txt,fil3.html"
       http://www.example.com/postit.cgi
 
-If the content-type is not specified, curl tries to guess from the file
+If the content-type is not specified, fetch tries to guess from the file
 extension (it only knows a few), or use the previously specified type (from an
 earlier file if several files are specified in a list) or else it uses the
 default type `application/octet-stream`.
@@ -369,12 +369,12 @@ default type `application/octet-stream`.
 Emulate a fill-in form with `-F`. Let's say you fill in three fields in a
 form. One field is a filename which to post, one field is your name and one
 field is a file description. We want to post the file we have written named
-`cooltext.txt`. To let curl do the posting of this data instead of your
+`cooltext.txt`. To let fetch do the posting of this data instead of your
 favorite browser, you have to read the HTML source of the form page and find
 the names of the input fields. In our example, the input field names are
 `file`, `yourname` and `filedescription`.
 
-    curl -F "file=@cooltext.txt" -F "yourname=Daniel"
+    fetch -F "file=@cooltext.txt" -F "yourname=Daniel"
       -F "filedescription=Cool text file with cool text inside"
       http://www.example.com/postit.cgi
 
@@ -382,38 +382,38 @@ To send two files in one post you can do it in two ways:
 
 Send multiple files in a single field with a single field name:
 
-    curl -F "pictures=@dog.gif,cat.gif" $URL
+    fetch -F "pictures=@dog.gif,cat.gif" $URL
 
 Send two fields with two field names
 
-    curl -F "docpicture=@dog.gif" -F "catpicture=@cat.gif" $URL
+    fetch -F "docpicture=@dog.gif" -F "catpicture=@cat.gif" $URL
 
 To send a field value literally without interpreting a leading `@` or `<`, or
 an embedded `;type=`, use `--form-string` instead of `-F`. This is recommended
 when the value is obtained from a user or some other unpredictable
 source. Under these circumstances, using `-F` instead of `--form-string` could
-allow a user to trick curl into uploading a file.
+allow a user to trick fetch into uploading a file.
 
 ## Referrer
 
 An HTTP request has the option to include information about which address
-referred it to the actual page. curl allows you to specify the referrer to be
+referred it to the actual page. fetch allows you to specify the referrer to be
 used on the command line. It is especially useful to fool or trick stupid
 servers or CGI scripts that rely on that information being available or
 contain certain data.
 
-    curl -e www.example.org http://www.example.com/
+    fetch -e www.example.org http://www.example.com/
 
 ## User Agent
 
 An HTTP request has the option to include information about the browser that
-generated the request. curl allows it to be specified on the command line. It
+generated the request. fetch allows it to be specified on the command line. It
 is especially useful to fool or trick stupid servers or CGI scripts that only
 accept certain browsers.
 
 Example:
 
-    curl -A 'Mozilla/3.0 (Win95; I)' http://www.bank.example.com/
+    fetch -A 'Mozilla/3.0 (Win95; I)' http://www.bank.example.com/
 
 Other common strings:
 
@@ -454,44 +454,44 @@ path beginning with `/foo`.
 
 Example, get a page that wants my name passed in a cookie:
 
-    curl -b "name=Daniel" www.example.com
+    fetch -b "name=Daniel" www.example.com
 
-curl also has the ability to use previously received cookies in following
+fetch also has the ability to use previously received cookies in following
 sessions. If you get cookies from a server and store them in a file in a
 manner similar to:
 
-    curl --dump-header headers www.example.com
+    fetch --dump-header headers www.example.com
 
 ... you can then in a second connect to that (or another) site, use the
 cookies from the `headers.txt` file like:
 
-    curl -b headers.txt www.example.com
+    fetch -b headers.txt www.example.com
 
 While saving headers to a file is a working way to store cookies, it is
-however error-prone and not the preferred way to do this. Instead, make curl
+however error-prone and not the preferred way to do this. Instead, make fetch
 save the incoming cookies using the well-known Netscape cookie format like
 this:
 
-    curl -c cookies.txt www.example.com
+    fetch -c cookies.txt www.example.com
 
 Note that by specifying `-b` you enable the cookie engine and with `-L` you
-can make curl follow a `location:` (which often is used in combination with
+can make fetch follow a `location:` (which often is used in combination with
 cookies). If a site sends cookies and a location field, you can use a
 non-existing file to trigger the cookie awareness like:
 
-    curl -L -b empty.txt www.example.com
+    fetch -L -b empty.txt www.example.com
 
 The file to read cookies from must be formatted using plain HTTP headers OR as
-Netscape's cookie file. curl determines what kind it is based on the file
-contents. In the above command, curl parses the header and store the cookies
-received from www.example.com. curl sends the stored cookies which match the
+Netscape's cookie file. fetch determines what kind it is based on the file
+contents. In the above command, fetch parses the header and store the cookies
+received from www.example.com. fetch sends the stored cookies which match the
 request to the server as it follows the location. The file `empty.txt` may be
 a nonexistent file.
 
 To read and write cookies from a Netscape cookie file, you can set both `-b`
 and `-c` to use the same file:
 
-    curl -b cookies.txt -c cookies.txt www.example.com
+    fetch -b cookies.txt -c cookies.txt www.example.com
 
 ## Progress Meter
 
@@ -523,37 +523,37 @@ much explanation!
 
 ## Speed Limit
 
-curl allows the user to set the transfer speed conditions that must be met to
+fetch allows the user to set the transfer speed conditions that must be met to
 let the transfer keep going. By using the switch `-y` and `-Y` you can make
-curl abort transfers if the transfer speed is below the specified lowest limit
+fetch abort transfers if the transfer speed is below the specified lowest limit
 for a specified time.
 
-To have curl abort the download if the speed is slower than 3000 bytes per
+To have fetch abort the download if the speed is slower than 3000 bytes per
 second for 1 minute, run:
 
-    curl -Y 3000 -y 60 www.far-away.example.com
+    fetch -Y 3000 -y 60 www.far-away.example.com
 
 This can be used in combination with the overall time limit, so that the above
 operation must be completed in whole within 30 minutes:
 
-    curl -m 1800 -Y 3000 -y 60 www.far-away.example.com
+    fetch -m 1800 -Y 3000 -y 60 www.far-away.example.com
 
-Forcing curl not to transfer data faster than a given rate is also possible,
+Forcing fetch not to transfer data faster than a given rate is also possible,
 which might be useful if you are using a limited bandwidth connection and you
 do not want your transfer to use all of it (sometimes referred to as
 *bandwidth throttle*).
 
-Make curl transfer data no faster than 10 kilobytes per second:
+Make fetch transfer data no faster than 10 kilobytes per second:
 
-    curl --limit-rate 10K www.far-away.example.com
+    fetch --limit-rate 10K www.far-away.example.com
 
 or
 
-    curl --limit-rate 10240 www.far-away.example.com
+    fetch --limit-rate 10240 www.far-away.example.com
 
-Or prevent curl from uploading data faster than 1 megabyte per second:
+Or prevent fetch from uploading data faster than 1 megabyte per second:
 
-    curl -T upload --limit-rate 1M ftp://uploads.example.com
+    fetch -T upload --limit-rate 1M ftp://uploads.example.com
 
 When using the `--limit-rate` option, the transfer rate is regulated on a
 per-second basis, which causes the total transfer speed to become lower than
@@ -562,7 +562,7 @@ stalls during periods.
 
 ## Config File
 
-curl automatically tries to read the `.curlrc` file (or `_curlrc` file on
+fetch automatically tries to read the `.fetchrc` file (or `_fetchrc` file on
 Microsoft Windows systems) from the user's home directory on startup.
 
 The config file could be made up with normal command line switches, but you
@@ -587,42 +587,42 @@ Example, set default time out and proxy in a config file:
 Whitespaces ARE significant at the end of lines, but all whitespace leading
 up to the first characters of each line are ignored.
 
-Prevent curl from reading the default file by using -q as the first command
+Prevent fetch from reading the default file by using -q as the first command
 line parameter, like:
 
-    curl -q www.example.org
+    fetch -q www.example.org
 
-Force curl to get and display a local help page in case it is invoked without
+Force fetch to get and display a local help page in case it is invoked without
 URL by making a config file similar to:
 
     # default url to get
-    url = "http://help.with.curl.example.com/curlhelp.html"
+    url = "http://help.with.fetch.example.com/fetchhelp.html"
 
 You can specify another config file to be read by using the `-K`/`--config`
 flag. If you set config filename to `-` it reads the config from stdin, which
 can be handy if you want to hide options from being visible in process tables
 etc:
 
-    echo "user = user:passwd" | curl -K - http://that.secret.example.com
+    echo "user = user:passwd" | fetch -K - http://that.secret.example.com
 
 ## Extra Headers
 
-When using curl in your own programs, you may end up needing to pass on your
+When using fetch in your own programs, you may end up needing to pass on your
 own custom headers when getting a webpage. You can do this by using the `-H`
 flag.
 
 Example, send the header `X-you-and-me: yes` to the server when getting a
 page:
 
-    curl -H "X-you-and-me: yes" love.example.com
+    fetch -H "X-you-and-me: yes" love.example.com
 
-This can also be useful in case you want curl to send a different text in a
+This can also be useful in case you want fetch to send a different text in a
 header than it normally does. The `-H` header you specify then replaces the
-header curl would normally send. If you replace an internal header with an
+header fetch would normally send. If you replace an internal header with an
 empty one, you prevent that header from being sent. To prevent the `Host:`
 header from being used:
 
-    curl -H "Host:" server.example.com
+    fetch -H "Host:" server.example.com
 
 ## FTP and Path Names
 
@@ -630,12 +630,12 @@ Do note that when getting files with a `ftp://` URL, the given path is
 relative to the directory you enter. To get the file `README` from your home
 directory at your ftp site, do:
 
-    curl ftp://user:passwd@my.example.com/README
+    fetch ftp://user:passwd@my.example.com/README
 
 If you want the README file from the root directory of that same site, you
 need to specify the absolute filename:
 
-    curl ftp://user:passwd@my.example.com//README
+    fetch ftp://user:passwd@my.example.com//README
 
 (I.e with an extra slash in front of the filename.)
 
@@ -645,7 +645,7 @@ With sftp: and scp: URLs, the path name given is the absolute name on the
 server. To access a file relative to the remote user's home directory, prefix
 the file with `/~/` , such as:
 
-    curl -u $USER sftp://home.example.com/~/.bashrc
+    fetch -u $USER sftp://home.example.com/~/.bashrc
 
 ## FTP and Firewalls
 
@@ -653,12 +653,12 @@ The FTP protocol requires one of the involved parties to open a second
 connection as soon as data is about to get transferred. There are two ways to
 do this.
 
-The default way for curl is to issue the PASV command which causes the server
+The default way for fetch is to issue the PASV command which causes the server
 to open another port and await another connection performed by the
 client. This is good if the client is behind a firewall that does not allow
 incoming connections.
 
-    curl ftp.example.com
+    fetch ftp.example.com
 
 If the server, for example, is behind a firewall that does not allow
 connections on ports other than 21 (or if it just does not support the `PASV`
@@ -666,163 +666,163 @@ command), the other way to do it is to use the `PORT` command and instruct the
 server to connect to the client on the given IP number and port (as parameters
 to the PORT command).
 
-The `-P` flag to curl supports a few different options. Your machine may have
-several IP-addresses and/or network interfaces and curl allows you to select
+The `-P` flag to fetch supports a few different options. Your machine may have
+several IP-addresses and/or network interfaces and fetch allows you to select
 which of them to use. Default address can also be used:
 
-    curl -P - ftp.example.com
+    fetch -P - ftp.example.com
 
 Download with `PORT` but use the IP address of our `le0` interface (this does
 not work on Windows):
 
-    curl -P le0 ftp.example.com
+    fetch -P le0 ftp.example.com
 
 Download with `PORT` but use 192.168.0.10 as our IP address to use:
 
-    curl -P 192.168.0.10 ftp.example.com
+    fetch -P 192.168.0.10 ftp.example.com
 
 ## Network Interface
 
 Get a webpage from a server using a specified port for the interface:
 
-    curl --interface eth0:1 http://www.example.com/
+    fetch --interface eth0:1 http://www.example.com/
 
 or
 
-    curl --interface 192.168.1.10 http://www.example.com/
+    fetch --interface 192.168.1.10 http://www.example.com/
 
 ## HTTPS
 
-Secure HTTP requires a TLS library to be installed and used when curl is
-built. If that is done, curl is capable of retrieving and posting documents
+Secure HTTP requires a TLS library to be installed and used when fetch is
+built. If that is done, fetch is capable of retrieving and posting documents
 using the HTTPS protocol.
 
 Example:
 
-    curl https://secure.example.com
+    fetch https://secure.example.com
 
-curl is also capable of using client certificates to get/post files from sites
+fetch is also capable of using client certificates to get/post files from sites
 that require valid certificates. The only drawback is that the certificate
 needs to be in PEM-format. PEM is a standard and open format to store
 certificates with, but it is not used by the most commonly used browsers. If
-you want curl to use the certificates you use with your favorite browser, you
+you want fetch to use the certificates you use with your favorite browser, you
 may need to download/compile a converter that can convert your browser's
 formatted certificates to PEM formatted ones.
 
 Example on how to automatically retrieve a document using a certificate with a
 personal password:
 
-    curl -E /path/to/cert.pem:password https://secure.example.com/
+    fetch -E /path/to/cert.pem:password https://secure.example.com/
 
 If you neglect to specify the password on the command line, you are prompted
 for the correct password before any data can be received.
 
 Many older HTTPS servers have problems with specific SSL or TLS versions,
 which newer versions of OpenSSL etc use, therefore it is sometimes useful to
-specify what TLS version curl should use.:
+specify what TLS version fetch should use.:
 
-    curl --tlv1.0 https://secure.example.com/
+    fetch --tlv1.0 https://secure.example.com/
 
-Otherwise, curl attempts to use a sensible TLS default version.
+Otherwise, fetch attempts to use a sensible TLS default version.
 
 ## Resuming File Transfers
 
-To continue a file transfer where it was previously aborted, curl supports
+To continue a file transfer where it was previously aborted, fetch supports
 resume on HTTP(S) downloads as well as FTP uploads and downloads.
 
 Continue downloading a document:
 
-    curl -C - -o file ftp://ftp.example.com/path/file
+    fetch -C - -o file ftp://ftp.example.com/path/file
 
 Continue uploading a document:
 
-    curl -C - -T file ftp://ftp.example.com/path/file
+    fetch -C - -T file ftp://ftp.example.com/path/file
 
 Continue downloading a document from a web server
 
-    curl -C - -o file http://www.example.com/
+    fetch -C - -o file http://www.example.com/
 
 ## Time Conditions
 
 HTTP allows a client to specify a time condition for the document it requests.
-It is `If-Modified-Since` or `If-Unmodified-Since`. curl allows you to specify
+It is `If-Modified-Since` or `If-Unmodified-Since`. fetch allows you to specify
 them with the `-z`/`--time-cond` flag.
 
 For example, you can easily make a download that only gets performed if the
 remote file is newer than a local copy. It would be made like:
 
-    curl -z local.html http://remote.example.com/remote.html
+    fetch -z local.html http://remote.example.com/remote.html
 
 Or you can download a file only if the local file is newer than the remote
 one. Do this by prepending the date string with a `-`, as in:
 
-    curl -z -local.html http://remote.example.com/remote.html
+    fetch -z -local.html http://remote.example.com/remote.html
 
-You can specify a plain text date as condition. Tell curl to only download the
+You can specify a plain text date as condition. Tell fetch to only download the
 file if it was updated since January 12, 2012:
 
-    curl -z "Jan 12 2012" http://remote.example.com/remote.html
+    fetch -z "Jan 12 2012" http://remote.example.com/remote.html
 
-curl accepts a wide range of date formats. You always make the date check the
+fetch accepts a wide range of date formats. You always make the date check the
 other way around by prepending it with a dash (`-`).
 
 ## DICT
 
 For fun try
 
-    curl dict://dict.org/m:curl
-    curl dict://dict.org/d:heisenbug:jargon
-    curl dict://dict.org/d:daniel:gcide
+    fetch dict://dict.org/m:fetch
+    fetch dict://dict.org/d:heisenbug:jargon
+    fetch dict://dict.org/d:daniel:gcide
 
 Aliases for `m` are `match` and `find`, and aliases for `d` are `define` and
 `lookup`. For example,
 
-    curl dict://dict.org/find:curl
+    fetch dict://dict.org/find:fetch
 
 Commands that break the URL description of the RFC (but not the DICT
 protocol) are
 
-    curl dict://dict.org/show:db
-    curl dict://dict.org/show:strat
+    fetch dict://dict.org/show:db
+    fetch dict://dict.org/show:strat
 
 Authentication support is still missing
 
 ## LDAP
 
-If you have installed the OpenLDAP library, curl can take advantage of it and
-offer `ldap://` support. On Windows, curl uses WinLDAP from Platform SDK by
+If you have installed the OpenLDAP library, fetch can take advantage of it and
+offer `ldap://` support. On Windows, fetch uses WinLDAP from Platform SDK by
 default.
 
-Default protocol version used by curl is LDAP version 3. Version 2 is used as
+Default protocol version used by fetch is LDAP version 3. Version 2 is used as
 a fallback mechanism in case version 3 fails to connect.
 
 LDAP is a complex thing and writing an LDAP query is not an easy
 task. Familiarize yourself with the exact syntax description elsewhere. One
 such place might be: [RFC 2255, The LDAP URL
-Format](https://curl.se/rfc/rfc2255.txt)
+Format](https://fetch.se/rfc/rfc2255.txt)
 
 To show you an example, this is how to get all people from an LDAP server that
 has a certain subdomain in their email address:
 
-    curl -B "ldap://ldap.example.com/o=frontec??sub?mail=*sth.example.com"
+    fetch -B "ldap://ldap.example.com/o=frontec??sub?mail=*sth.example.com"
 
 You also can use authentication when accessing LDAP catalog:
 
-    curl -u user:passwd "ldap://ldap.example.com/o=frontec??sub?mail=*"
-    curl "ldap://user:passwd@ldap.example.com/o=frontec??sub?mail=*"
+    fetch -u user:passwd "ldap://ldap.example.com/o=frontec??sub?mail=*"
+    fetch "ldap://user:passwd@ldap.example.com/o=frontec??sub?mail=*"
 
 By default, if user and password are provided, OpenLDAP/WinLDAP uses basic
 authentication. On Windows you can control this behavior by providing one of
-`--basic`, `--ntlm` or `--digest` option in curl command line
+`--basic`, `--ntlm` or `--digest` option in fetch command line
 
-    curl --ntlm "ldap://user:passwd@ldap.example.com/o=frontec??sub?mail=*"
+    fetch --ntlm "ldap://user:passwd@ldap.example.com/o=frontec??sub?mail=*"
 
 On Windows, if no user/password specified, auto-negotiation mechanism is used
 with current logon credentials (SSPI/SPNEGO).
 
 ## Environment Variables
 
-curl reads and understands the following proxy related environment variables:
+fetch reads and understands the following proxy related environment variables:
 
     http_proxy, HTTPS_PROXY, FTP_PROXY
 
@@ -853,47 +853,47 @@ to specify name and password for commonly visited FTP sites in a file so that
 you do not have to type them in each time you visit those sites. You realize
 this is a big security risk if someone else gets hold of your passwords,
 therefore most Unix programs do not read this file unless it is only readable
-by yourself (curl does not care though).
+by yourself (fetch does not care though).
 
-curl supports `.netrc` files if told to (using the `-n`/`--netrc` and
-`--netrc-optional` options). This is not restricted to just FTP, so curl can
+fetch supports `.netrc` files if told to (using the `-n`/`--netrc` and
+`--netrc-optional` options). This is not restricted to just FTP, so fetch can
 use it for all protocols where authentication is used.
 
 A simple `.netrc` file could look something like:
 
-    machine curl.se login iamdaniel password mysecret
+    machine fetch.se login iamdaniel password mysecret
 
 ## Custom Output
 
-To better allow script programmers to get to know about the progress of curl,
+To better allow script programmers to get to know about the progress of fetch,
 the `-w`/`--write-out` option was introduced. Using this, you can specify what
 information from the previous transfer you want to extract.
 
 To display the amount of bytes downloaded together with some text and an
 ending newline:
 
-    curl -w 'We downloaded %{size_download} bytes\n' www.example.com
+    fetch -w 'We downloaded %{size_download} bytes\n' www.example.com
 
 ## Kerberos FTP Transfer
 
-curl supports kerberos4 and kerberos5/GSSAPI for FTP transfers. You need the
-kerberos package installed and used at curl build time for it to be available.
+fetch supports kerberos4 and kerberos5/GSSAPI for FTP transfers. You need the
+kerberos package installed and used at fetch build time for it to be available.
 
 First, get the krb-ticket the normal way, like with the `kinit`/`kauth` tool.
-Then use curl in way similar to:
+Then use fetch in way similar to:
 
-    curl --krb private ftp://krb4site.example.com -u username:fakepwd
+    fetch --krb private ftp://krb4site.example.com -u username:fakepwd
 
-There is no use for a password on the `-u` switch, but a blank one makes curl
+There is no use for a password on the `-u` switch, but a blank one makes fetch
 ask for one and you already entered the real password to `kinit`/`kauth`.
 
 ## TELNET
 
-The curl telnet support is basic and easy to use. curl passes all data passed
+The fetch telnet support is basic and easy to use. fetch passes all data passed
 to it on stdin to the remote server. Connect to a remote telnet server using a
 command line similar to:
 
-    curl telnet://remote.example.com
+    fetch telnet://remote.example.com
 
 Enter the data to pass to the server on stdin. The result is sent to stdout or
 to the file you specify with `-o`.
@@ -904,7 +904,7 @@ for slow connections or similar.
 Pass options to the telnet protocol negotiation, by using the `-t` option. To
 tell the server we use a vt100 terminal, try something like:
 
-    curl -tTTYPE=vt100 telnet://remote.example.com
+    fetch -tTTYPE=vt100 telnet://remote.example.com
 
 Other interesting options for it `-t` include:
 
@@ -912,23 +912,23 @@ Other interesting options for it `-t` include:
  - `NEW_ENV=<var,val>` Sets an environment variable.
 
 NOTE: The telnet protocol does not specify any way to login with a specified
-user and password so curl cannot do that automatically. To do that, you need to
+user and password so fetch cannot do that automatically. To do that, you need to
 track when the login prompt is received and send the username and password
 accordingly.
 
 ## Persistent Connections
 
-Specifying multiple files on a single command line makes curl transfer all of
+Specifying multiple files on a single command line makes fetch transfer all of
 them, one after the other in the specified order.
 
-libcurl attempts to use persistent connections for the transfers so that the
+libfetch attempts to use persistent connections for the transfers so that the
 second transfer to the same host can use the same connection that was already
 initiated and was left open in the previous transfer. This greatly decreases
 connection time for all but the first transfer and it makes a far better use
 of the network.
 
-Note that curl cannot use persistent connections for transfers that are used
-in subsequent curl invokes. Try to stuff as many URLs as possible on the same
+Note that fetch cannot use persistent connections for transfers that are used
+in subsequent fetch invokes. Try to stuff as many URLs as possible on the same
 command line if they are using the same host, as that makes the transfers
 faster. If you use an HTTP proxy for file transfers, practically all transfers
 are persistent.
@@ -944,22 +944,22 @@ URL you specify. Note that this also goes for the `-O` option (but not
 For example: get two files and use `-O` for the first and a custom file
 name for the second:
 
-    curl -O http://example.com/file.txt ftp://example.com/moo.exe -o moo.jpg
+    fetch -O http://example.com/file.txt ftp://example.com/moo.exe -o moo.jpg
 
 You can also upload multiple files in a similar fashion:
 
-    curl -T local1 ftp://example.com/moo.exe -T local2 ftp://example.com/moo2.txt
+    fetch -T local1 ftp://example.com/moo.exe -T local2 ftp://example.com/moo2.txt
 
 ## IPv6
 
-curl connects to a server with IPv6 when a host lookup returns an IPv6 address
+fetch connects to a server with IPv6 when a host lookup returns an IPv6 address
 and fall back to IPv4 if the connection fails. The `--ipv4` and `--ipv6`
 options can specify which address to use when both are available. IPv6
 addresses can also be specified directly in URLs using the syntax:
 
     http://[2001:1890:1112:1::20]/overview.html
 
-When this style is used, the `-g` option must be given to stop curl from
+When this style is used, the `-g` option must be given to stop fetch from
 interpreting the square brackets as special globbing characters. Link local
 and site local addresses including a scope identifier, such as `fe80::1234%1`,
 may also be used, but the scope portion must be numeric or match an existing
@@ -973,36 +973,36 @@ IPv6 addresses provided other than in URLs (e.g. to the `--proxy`,
 
 ## Mailing Lists
 
-For your convenience, we have several open mailing lists to discuss curl, its
+For your convenience, we have several open mailing lists to discuss fetch, its
 development and things relevant to this. Get all info at
-https://curl.se/mail/.
+https://fetch.se/mail/.
 
-Please direct curl questions, feature requests and trouble reports to one of
+Please direct fetch questions, feature requests and trouble reports to one of
 these mailing lists instead of mailing any individual.
 
 Available lists include:
 
-### `curl-users`
+### `fetch-users`
 
 Users of the command line tool. How to use it, what does not work, new
 features, related tools, questions, news, installations, compilations,
 running, porting etc.
 
-### `curl-library`
+### `fetch-library`
 
-Developers using or developing libcurl. Bugs, extensions, improvements.
+Developers using or developing libfetch. Bugs, extensions, improvements.
 
-### `curl-announce`
+### `fetch-announce`
 
 Low-traffic. Only receives announcements of new public versions. At worst,
 that makes something like one or two mails per month, but usually only one
 mail every second month.
 
-### `curl-and-php`
+### `fetch-and-php`
 
-Using the curl functions in PHP. Everything curl with a PHP angle. Or PHP with
-a curl angle.
+Using the fetch functions in PHP. Everything fetch with a PHP angle. Or PHP with
+a fetch angle.
 
-### `curl-and-python`
+### `fetch-and-python`
 
-Python hackers using curl with or without the python binding pycurl.
+Python hackers using fetch with or without the python binding pyfetch.

@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSL_CIPHER_LIST
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSL_CIPHER_LIST
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PROXY_SSL_CIPHER_LIST (3)
-  - CURLOPT_PROXY_TLS13_CIPHERS (3)
-  - CURLOPT_SSLVERSION (3)
-  - CURLOPT_TLS13_CIPHERS (3)
-  - CURLOPT_USE_SSL (3)
+  - FETCHOPT_PROXY_SSL_CIPHER_LIST (3)
+  - FETCHOPT_PROXY_TLS13_CIPHERS (3)
+  - FETCHOPT_SSLVERSION (3)
+  - FETCHOPT_TLS13_CIPHERS (3)
+  - FETCHOPT_USE_SSL (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -25,14 +25,14 @@ Added-in: 7.9
 
 # NAME
 
-CURLOPT_SSL_CIPHER_LIST - ciphers to use for TLS
+FETCHOPT_SSL_CIPHER_LIST - ciphers to use for TLS
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CIPHER_LIST, char *list);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSL_CIPHER_LIST, char *list);
 ~~~
 
 # DESCRIPTION
@@ -42,7 +42,7 @@ cipher suites to use for the TLS 1.2 (1.1, 1.0) connection. The list must
 be syntactically correct, it consists of one or more cipher suite strings
 separated by colons.
 
-For setting TLS 1.3 ciphers see CURLOPT_TLS13_CIPHERS(3).
+For setting TLS 1.3 ciphers see FETCHOPT_TLS13_CIPHERS(3).
 
 A valid example of a cipher list is:
 ~~~
@@ -55,7 +55,7 @@ cipher suites. Refer to the ciphers lists document for algorithms.
 
 Find more details about cipher lists on this URL:
 
- https://curl.se/docs/ssl-ciphers.html
+ https://fetch.se/docs/ssl-ciphers.html
 
 The application does not have to keep the string around after setting this
 option.
@@ -74,15 +74,15 @@ NULL, use built-in list
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST,
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_CIPHER_LIST,
                      "ECDHE-ECDSA-CHACHA20-POLY1305:"
                      "ECDHE-RSA-CHACHA20-POLY1305");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -97,13 +97,13 @@ BearSSL support added in 7.83.0.
 mbedTLS support added in 8.8.0.
 Rustls support added in 8.10.0.
 
-Since curl 8.10.0 returns CURLE_NOT_BUILT_IN when not supported.
+Since fetch 8.10.0 returns FETCHE_NOT_BUILT_IN when not supported.
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

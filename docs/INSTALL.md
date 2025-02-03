@@ -1,29 +1,29 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# How to install curl and libcurl
+# How to install fetch and libfetch
 
 ## Installing Binary Packages
 
-Lots of people download binary distributions of curl and libcurl. This
-document does not describe how to install curl or libcurl using such a binary
-package. This document describes how to compile, build and install curl and
-libcurl from source code.
+Lots of people download binary distributions of fetch and libfetch. This
+document does not describe how to install fetch or libfetch using such a binary
+package. This document describes how to compile, build and install fetch and
+libfetch from source code.
 
 ## Building using vcpkg
 
-You can download and install curl and libcurl using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+You can download and install fetch and libfetch using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
 
     git clone https://github.com/Microsoft/vcpkg.git
     cd vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
-    vcpkg install curl[tool]
+    vcpkg install fetch[tool]
 
-The curl port in vcpkg is kept up to date by Microsoft team members and
+The fetch port in vcpkg is kept up to date by Microsoft team members and
 community contributors. If the version is out of date, please [create an issue
 or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
@@ -51,10 +51,10 @@ Get a full listing of all available configure options by invoking it like:
 
     ./configure --help
 
-If you want to install curl in a different file hierarchy than `/usr/local`,
+If you want to install fetch in a different file hierarchy than `/usr/local`,
 specify that when running configure:
 
-    ./configure --prefix=/path/to/curl/tree
+    ./configure --prefix=/path/to/fetch/tree
 
 If you have write permission in that directory, you can do 'make install'
 without being root. An example of this would be to make a local install in
@@ -125,10 +125,10 @@ Building statically is not for the faint of heart.
 
 ## Debug
 
-If you are a curl developer and use gcc, you might want to enable more debug
+If you are a fetch developer and use gcc, you might want to enable more debug
 options with the `--enable-debug` option.
 
-curl can be built to use a whole range of libraries to provide various useful
+fetch can be built to use a whole range of libraries to provide various useful
 services, and configure tries to auto-detect a decent default. If you want to
 alter it, you can select how to deal with each individual library.
 
@@ -146,22 +146,22 @@ These options are provided to select the TLS backend to use.
  - Secure Transport: `--with-secure-transport`
  - wolfSSL: `--with-wolfssl`
 
-You can build curl with *multiple* TLS backends at your choice, but some TLS
+You can build fetch with *multiple* TLS backends at your choice, but some TLS
 backends cannot be combined: if you build with an OpenSSL fork (or wolfSSL),
 you cannot add another OpenSSL fork (or wolfSSL) simply because they have
 conflicting identical symbol names.
 
 When you build with multiple TLS backends, you can select the active one at
-runtime when curl starts up.
+runtime when fetch starts up.
 
 ## MultiSSL and HTTP/3
 
-HTTP/3 needs QUIC and QUIC needs TLS. Building libcurl with HTTP/3 and QUIC
+HTTP/3 needs QUIC and QUIC needs TLS. Building libfetch with HTTP/3 and QUIC
 support is not compatible with the MultiSSL feature: they are mutually
 exclusive. If you need MultiSSL in your build, you cannot have HTTP/3 support
 and vice versa.
 
-libcurl can only use a single TLS library with QUIC and that *same* TLS
+libfetch can only use a single TLS library with QUIC and that *same* TLS
 library needs to be used for the other TLS using protocols.
 
 ## Configure finding libs in wrong directory
@@ -180,7 +180,7 @@ library check.
 
 Building for Windows XP is required as a minimum.
 
-You can build curl with:
+You can build fetch with:
 
 - Microsoft Visual Studio 2008 v9.0 or later (`_MSC_VER >= 1500`)
 - MinGW-w64
@@ -209,7 +209,7 @@ multi-threaded dynamic C runtime.
 ## Cygwin
 
 Almost identical to the Unix installation. Run the configure script in the
-curl source tree root with `sh configure`. Make sure you have the `sh`
+fetch source tree root with `sh configure`. Make sure you have the `sh`
 executable in `/bin/` or you see the configure fail toward the end.
 
 Run `make`
@@ -239,7 +239,7 @@ You can use either autotools or cmake:
       -DOPENSSL_CRYPTO_LIBRARY=/path/to/djgpp/lib/libcrypto.a \
       -DZLIB_INCLUDE_DIR=/path/to/djgpp/include \
       -DZLIB_LIBRARY=/path/to/djgpp/lib/libz.a \
-      -DCURL_USE_LIBPSL=OFF
+      -DFETCH_USE_LIBPSL=OFF
 
 Notes:
 
@@ -275,7 +275,7 @@ You can use either autotools or cmake:
       -DAMISSL_INCLUDE_DIR=/path/to/AmiSSL/Developer/include \
       -DAMISSL_STUBS_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
       -DAMISSL_AUTO_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a \
-      -DCURL_USE_LIBPSL=OFF
+      -DFETCH_USE_LIBPSL=OFF
 
 ## Disabling Specific Protocols in Windows builds
 
@@ -284,14 +284,14 @@ environment, therefore, you cannot use the various disable-protocol options of
 the configure utility on this platform.
 
 You can use specific defines to disable specific protocols and features. See
-[CURL-DISABLE](CURL-DISABLE.md) for the full list.
+[FETCH-DISABLE](FETCH-DISABLE.md) for the full list.
 
 If you want to set any of these defines you have the following options:
 
  - Modify `lib/config-win32.h`
- - Modify `lib/curl_setup.h`
+ - Modify `lib/fetch_setup.h`
  - Modify `winbuild/Makefile.vc`
- - Modify the "Preprocessor Definitions" in the libcurl project
+ - Modify the "Preprocessor Definitions" in the libfetch project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
 under "Project -> Properties -> Configuration Properties -> C/C++ ->
@@ -299,35 +299,35 @@ Preprocessor".
 
 ## Using BSD-style lwIP instead of Winsock TCP/IP stack in Windows builds
 
-In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
+In order to compile libfetch and fetch using BSD-style lwIP TCP/IP stack it is
 necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
-visible to libcurl and curl compilation processes. To set this definition you
+visible to libfetch and fetch compilation processes. To set this definition you
 have the following alternatives:
 
  - Modify `lib/config-win32.h`
  - Modify `winbuild/Makefile.vc`
- - Modify the "Preprocessor Definitions" in the libcurl project
+ - Modify the "Preprocessor Definitions" in the libfetch project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
 under "Project -> Properties -> Configuration Properties -> C/C++ ->
 Preprocessor".
 
-Once that libcurl has been built with BSD-style lwIP TCP/IP stack support, in
+Once that libfetch has been built with BSD-style lwIP TCP/IP stack support, in
 order to use it with your program it is mandatory that your program includes
 lwIP header file `<lwip/opt.h>` (or another lwIP header that includes this)
-before including any libcurl header. Your program does not need the
-`USE_LWIPSOCK` preprocessor definition which is for libcurl internals only.
+before including any libfetch header. Your program does not need the
+`USE_LWIPSOCK` preprocessor definition which is for libfetch internals only.
 
 Compilation has been verified with lwIP 1.4.0.
 
 This BSD-style lwIP TCP/IP stack support must be considered experimental given
-that it has been verified that lwIP 1.4.0 still needs some polish, and libcurl
+that it has been verified that lwIP 1.4.0 still needs some polish, and libfetch
 might yet need some additional adjustment.
 
-## Important static libcurl usage note
+## Important static libfetch usage note
 
-When building an application that uses the static libcurl library on Windows,
-you must add `-DCURL_STATICLIB` to your `CFLAGS`. Otherwise the linker looks
+When building an application that uses the static libfetch library on Windows,
+you must add `-DFETCH_STATICLIB` to your `CFLAGS`. Otherwise the linker looks
 for dynamic import symbols.
 
 ## Legacy Windows and SSL
@@ -335,23 +335,23 @@ for dynamic import symbols.
 Schannel (from Windows SSPI), is the native SSL library in Windows. However,
 Schannel in Windows <= XP is unable to connect to servers that no longer
 support the legacy handshakes and algorithms used by those versions. If you
-are using curl in one of those earlier versions of Windows you should choose
+are using fetch in one of those earlier versions of Windows you should choose
 another SSL backend such as OpenSSL.
 
 # Apple Platforms (macOS, iOS, tvOS, watchOS, and their simulator counterparts)
 
-On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
+On modern Apple operating systems, fetch can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
 Transport for SSL/TLS, use the configure option `--with-secure-transport`.
 
-When Secure Transport is in use, the curl options `--cacert` and `--capath`
-and their libcurl equivalents, are ignored, because Secure Transport uses the
+When Secure Transport is in use, the fetch options `--cacert` and `--capath`
+and their libfetch equivalents, are ignored, because Secure Transport uses the
 certificates stored in the Keychain to evaluate whether or not to trust the
 server. This, of course, includes the root certificates that ship with the OS.
-The `--cert` and `--engine` options, and their libcurl equivalents, are
-currently unimplemented in curl with Secure Transport.
+The `--cert` and `--engine` options, and their libfetch equivalents, are
+currently unimplemented in fetch with Secure Transport.
 
-In general, a curl build for an Apple `ARCH/SDK/DEPLOYMENT_TARGET` combination
+In general, a fetch build for an Apple `ARCH/SDK/DEPLOYMENT_TARGET` combination
 can be taken by providing appropriate values for `ARCH`, `SDK`, `DEPLOYMENT_TARGET`
 below and running the commands:
 
@@ -376,7 +376,7 @@ cmake . \
   -DCMAKE_OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
 ```
 
-The above command lines build curl for macOS platform with `x86_64`
+The above command lines build fetch for macOS platform with `x86_64`
 architecture and `10.8` as deployment target.
 
 Here is an example for iOS device:
@@ -419,9 +419,9 @@ In all above, the built libraries and executables can be found in the
 
 # Android
 
-When building curl for Android you can you CMake or curl's `configure` script.
+When building fetch for Android you can you CMake or fetch's `configure` script.
 
-Before you can build curl for Android, you need to install the Android NDK
+Before you can build fetch for Android, you need to install the Android NDK
 first. This can be done using the SDK Manager that is part of Android Studio.
 Once you have installed the Android NDK, you need to figure out where it has
 been installed and then set up some environment variables before launching
@@ -435,8 +435,8 @@ with CMake, where `ANDROID_NDK_HOME` points into your NDK:
       -DANDROID_ABI=arm64-v8a \
       -DANDROID_PLATFORM=android-29 \
       -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
-      -DCURL_ENABLE_SSL=OFF \
-      -DCURL_USE_LIBPSL=OFF
+      -DFETCH_ENABLE_SSL=OFF \
+      -DFETCH_USE_LIBPSL=OFF
 
 with `configure`, on macOS:
 
@@ -454,16 +454,16 @@ export STRIP=$TOOLCHAIN/bin/llvm-strip
 ```
 
 When building on Linux or targeting other API levels or architectures, you need
-to adjust those variables accordingly. After that you can build curl like this:
+to adjust those variables accordingly. After that you can build fetch like this:
 
     ./configure --host aarch64-linux-android --with-pic --disable-shared
 
 Note that this does not give you SSL/TLS support. If you need SSL/TLS, you
-have to build curl with a SSL/TLS library, e.g. OpenSSL, because it is
-impossible for curl to access Android's native SSL/TLS layer. To build curl
+have to build fetch with a SSL/TLS library, e.g. OpenSSL, because it is
+impossible for fetch to access Android's native SSL/TLS layer. To build fetch
 for Android using OpenSSL, follow the OpenSSL build instructions and then
 install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
-`include/openssl` to `$TOOLCHAIN/sysroot/usr/include`. Now you can build curl
+`include/openssl` to `$TOOLCHAIN/sysroot/usr/include`. Now you can build fetch
 for Android using OpenSSL like this:
 
 ```bash
@@ -473,32 +473,32 @@ LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you need to the
 
 # IBM i
 
-For IBM i (formerly OS/400), you can use curl in two different ways:
+For IBM i (formerly OS/400), you can use fetch in two different ways:
 
-- Natively, running in the **ILE**. The obvious use is being able to call curl
+- Natively, running in the **ILE**. The obvious use is being able to call fetch
   from ILE C or RPG applications.
 - You need to build this from source. See `packages/OS400/README` for the ILE
   specific build instructions.
-- In the **PASE** environment, which runs AIX programs. curl is built as it
+- In the **PASE** environment, which runs AIX programs. fetch is built as it
   would be on AIX.
-- IBM provides builds of curl in their Yum repository for PASE software.
+- IBM provides builds of fetch in their Yum repository for PASE software.
 - To build from source, follow the Unix instructions.
 
-There are some additional limitations and quirks with curl on this platform;
+There are some additional limitations and quirks with fetch on this platform;
 they affect both environments.
 
 ## Multi-threading notes
 
 By default, jobs in IBM i does not start with threading enabled. (Exceptions
 include interactive PASE sessions started by `QP2TERM` or SSH.) If you use
-curl in an environment without threading when options like asynchronous DNS
+fetch in an environment without threading when options like asynchronous DNS
 were enabled, you get messages like:
 
 ```
 getaddrinfo() thread failed to start
 ```
 
-Do not panic. curl and your program are not broken. You can fix this by:
+Do not panic. fetch and your program are not broken. You can fix this by:
 
 - Set the environment variable `QIBM_MULTI_THREADED` to `Y` before starting
   your program. This can be done at whatever scope you feel is appropriate.
@@ -506,9 +506,9 @@ Do not panic. curl and your program are not broken. You can fix this by:
 
 # Cross compile
 
-Download and unpack the curl package.
+Download and unpack the fetch package.
 
-`cd` to the new directory. (e.g. `cd curl-7.12.3`)
+`cd` to the new directory. (e.g. `cd fetch-7.12.3`)
 
 Set environment variables to point to the cross-compile toolchain and call
 configure with any options you need. Be sure and specify the `--host` and
@@ -537,7 +537,7 @@ export NM=ppc_405-nm
 
 You may also need to provide a parameter like `--with-random=/dev/urandom` to
 configure as it cannot detect the presence of a random number generating
-device for a target system. The `--prefix` parameter specifies where curl gets
+device for a target system. The `--prefix` parameter specifies where fetch gets
 installed. If `configure` completes successfully, do `make` and `make install`
 as usual.
 
@@ -548,7 +548,7 @@ In some cases, you may be able to simplify the above commands to as little as:
 # REDUCING SIZE
 
 There are a number of configure options that can be used to reduce the size of
-libcurl for embedded applications where binary size is an important factor.
+libfetch for embedded applications where binary size is an important factor.
 First, be sure to set the `CFLAGS` variable when configuring with any relevant
 compiler optimization flags to reduce the size of the binary. For gcc, this
 would mean at minimum the `-Os` option, and others like the following that
@@ -566,7 +566,7 @@ Note that newer compilers often produce smaller code than older versions
 due to improved optimization.
 
 Be sure to specify as many `--disable-` and `--without-` flags on the
-configure command-line as you can to disable all the libcurl features that you
+configure command-line as you can to disable all the libfetch features that you
 know your application is not going to need. Besides specifying the
 `--disable-PROTOCOL` flags for all the types of URLs your application do not
 use, here are some other flags that can reduce the size of the library by
@@ -590,7 +590,7 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--disable-hsts` (HTTP Strict Transport Security)
  - `--disable-http-auth` (all HTTP authentication)
  - `--disable-ipv6` (IPv6)
- - `--disable-libcurl-option` (--libcurl C code generation support)
+ - `--disable-libfetch-option` (--libfetch C code generation support)
  - `--disable-manual` (--manual built-in documentation)
  - `--disable-mime` (MIME API)
  - `--disable-netrc`  (.netrc file)
@@ -621,14 +621,14 @@ using 'strip' or an option like `-s`. If space is really tight, you may be able
 to gain a few bytes by removing some unneeded sections of the shared library
 using the -R option to objcopy (e.g. the .comment section).
 
-Using these techniques it is possible to create a basic HTTP-only libcurl
+Using these techniques it is possible to create a basic HTTP-only libfetch
 shared library for i386 Linux platforms that is only 130 KiB in size
-(as of libcurl version 8.6.0, using gcc 13.2.0).
+(as of libfetch version 8.6.0, using gcc 13.2.0).
 
-You may find that statically linking libcurl to your application results in a
+You may find that statically linking libfetch to your application results in a
 lower total size than dynamically linking.
 
-The curl test harness can detect the use of some, but not all, of the
+The fetch test harness can detect the use of some, but not all, of the
 `--disable` statements suggested above. Use of these can cause tests relying
 on those features to fail. The test harness can be manually forced to skip the
 relevant tests by specifying certain key words on the `runtests.pl` command
@@ -636,14 +636,14 @@ line. Following is a list of appropriate key words for those configure options
 that are not automatically detected:
 
  - `--disable-cookies`          !cookies
- - `--disable-dateparse`        !RETRY-AFTER !`CURLOPT_TIMECONDITION` !`CURLINFO_FILETIME` !`If-Modified-Since` !`curl_getdate` !`-z`
- - `--disable-libcurl-option`   !`--libcurl`
+ - `--disable-dateparse`        !RETRY-AFTER !`FETCHOPT_TIMECONDITION` !`FETCHINFO_FILETIME` !`If-Modified-Since` !`fetch_getdate` !`-z`
+ - `--disable-libfetch-option`   !`--libfetch`
  - `--disable-verbose`          !verbose\ logs
 
 # Ports
 
 This is a probably incomplete list of known CPU architectures and operating
-systems that curl has been compiled for. If you know a system curl compiles
+systems that fetch has been compiled for. If you know a system fetch compiles
 and runs on, that is not listed, please let us know.
 
 ## 104 Operating Systems

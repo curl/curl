@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: resolve
 Arg: <[+]host:port:addr[,addr]...>
 Help: Resolve host+port to address
@@ -17,24 +17,24 @@ Example:
 # `--resolve`
 
 Provide a custom address for a specific host and port pair. Using this, you
-can make the curl requests(s) use a specified address and prevent the
+can make the fetch requests(s) use a specified address and prevent the
 otherwise normally resolved address to be used. Consider it a sort of
 /etc/hosts alternative provided on the command line. The port number should be
 the number used for the specific protocol the host is used for. It means
 you need several entries if you want to provide address for the same host but
 different ports.
 
-By specifying `*` as host you can tell curl to resolve any host and specific
+By specifying `*` as host you can tell fetch to resolve any host and specific
 port pair to the specified address. Wildcard is resolved last so any --resolve
 with a specific host and port is used first.
 
 The provided address set by this option is used even if --ipv4 or --ipv6 is
-set to make curl use another IP version.
+set to make fetch use another IP version.
 
-By prefixing the host with a '+' you can make the entry time out after curl's
+By prefixing the host with a '+' you can make the entry time out after fetch's
 default timeout (1 minute). Note that this only makes sense for long running
 parallel transfers with a lot of files. In such cases, if this option is used
-curl tries to resolve the host as it normally would once the timeout has
+fetch tries to resolve the host as it normally would once the timeout has
 expired.
 
 To redirect connects from a specific hostname or any hostname, independently

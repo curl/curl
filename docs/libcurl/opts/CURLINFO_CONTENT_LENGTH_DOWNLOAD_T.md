@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_CONTENT_LENGTH_DOWNLOAD_T
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_CONTENT_LENGTH_UPLOAD_T (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_CONTENT_LENGTH_UPLOAD_T (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.55.0
@@ -15,20 +15,20 @@ Added-in: 7.55.0
 
 # NAME
 
-CURLINFO_CONTENT_LENGTH_DOWNLOAD_T - get content-length of download
+FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T - get content-length of download
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                           curl_off_t *content_length);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                           fetch_off_t *content_length);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a *curl_off_t* to receive the content-length of the
+Pass a pointer to a *fetch_off_t* to receive the content-length of the
 download. This is the value read from the Content-Length: field. Stores -1 if
 the size is not known.
 
@@ -39,20 +39,20 @@ the size is not known.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* Perform the request */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
       /* check the size */
-      curl_off_t cl;
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
+      fetch_off_t cl;
+      res = fetch_easy_getinfo(fetch, FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
       if(!res) {
-        printf("Download size: %" CURL_FORMAT_CURL_OFF_T "\n", cl);
+        printf("Download size: %" FETCH_FORMAT_FETCH_OFF_T "\n", cl);
       }
     }
   }
@@ -63,7 +63,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

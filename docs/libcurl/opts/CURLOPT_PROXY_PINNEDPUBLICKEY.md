@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROXY_PINNEDPUBLICKEY
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROXY_PINNEDPUBLICKEY
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PINNEDPUBLICKEY (3)
-  - CURLOPT_PROXY_CAINFO (3)
-  - CURLOPT_PROXY_CAPATH (3)
-  - CURLOPT_PROXY_SSL_VERIFYHOST (3)
-  - CURLOPT_PROXY_SSL_VERIFYPEER (3)
+  - FETCHOPT_PINNEDPUBLICKEY (3)
+  - FETCHOPT_PROXY_CAINFO (3)
+  - FETCHOPT_PROXY_CAPATH (3)
+  - FETCHOPT_PROXY_SSL_VERIFYHOST (3)
+  - FETCHOPT_PROXY_SSL_VERIFYPEER (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -22,14 +22,14 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLOPT_PROXY_PINNEDPUBLICKEY - pinned public key for https proxy
+FETCHOPT_PROXY_PINNEDPUBLICKEY - pinned public key for https proxy
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_PINNEDPUBLICKEY,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY_PINNEDPUBLICKEY,
                           char *pinnedpubkey);
 ~~~
 
@@ -42,10 +42,10 @@ preceded by "sha256//" and separated by ";"
 
 When negotiating a TLS or SSL connection, the https proxy sends a certificate
 indicating its identity. A public key is extracted from this certificate and
-if it does not exactly match the public key provided to this option, libcurl
+if it does not exactly match the public key provided to this option, libfetch
 aborts the connection before sending or receiving any data.
 
-On mismatch, *CURLE_SSL_PINNEDPUBKEYNOTMATCH* is returned.
+On mismatch, *FETCHE_SSL_PINNEDPUBKEYNOTMATCH* is returned.
 
 The application does not have to keep the string around after setting this
 option.
@@ -64,17 +64,17 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
-    curl_easy_setopt(curl, CURLOPT_PROXY_PINNEDPUBLICKEY,
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "https://proxy:443");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_PINNEDPUBLICKEY,
                      "sha256//YhKJKSzoTt2b5FP18fvpHo7fJYqQCjA"
                      "a3HWY3tvRMwE=;sha256//t62CeU2tQiqkexU74"
                      "Gxa2eg7fRbEgoChTociMee9wno=");
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -131,7 +131,7 @@ Other SSL backends not supported.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

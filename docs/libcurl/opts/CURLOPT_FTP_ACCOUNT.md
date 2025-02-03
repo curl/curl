@@ -1,27 +1,27 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FTP_ACCOUNT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FTP_ACCOUNT
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - FTP
 See-also:
-  - CURLOPT_PASSWORD (3)
-  - CURLOPT_USERNAME (3)
+  - FETCHOPT_PASSWORD (3)
+  - FETCHOPT_USERNAME (3)
 Added-in: 7.13.0
 ---
 
 # NAME
 
-CURLOPT_FTP_ACCOUNT - account info for FTP
+FETCHOPT_FTP_ACCOUNT - account info for FTP
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_ACCOUNT, char *account);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FTP_ACCOUNT, char *account);
 ~~~
 
 # DESCRIPTION
@@ -47,16 +47,16 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/foo.bin");
 
-    curl_easy_setopt(curl, CURLOPT_FTP_ACCOUNT, "human-resources");
+    fetch_easy_setopt(fetch, FETCHOPT_FTP_ACCOUNT, "human-resources");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -65,7 +65,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

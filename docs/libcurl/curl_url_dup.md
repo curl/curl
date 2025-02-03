@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_url_dup
+SPDX-License-Identifier: fetch
+Title: fetch_url_dup
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CURLU (3)
-  - curl_url (3)
-  - curl_url_cleanup (3)
-  - curl_url_get (3)
-  - curl_url_set (3)
+  - FETCHOPT_FETCHU (3)
+  - fetch_url (3)
+  - fetch_url_cleanup (3)
+  - fetch_url_get (3)
+  - fetch_url_set (3)
 Protocol:
   - All
 Added-in: 7.62.0
@@ -17,21 +17,21 @@ Added-in: 7.62.0
 
 # NAME
 
-curl_url_dup - duplicate a URL handle
+fetch_url_dup - duplicate a URL handle
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLU *curl_url_dup(const CURLU *inhandle);
+FETCHU *fetch_url_dup(const FETCHU *inhandle);
 ~~~
 
 # DESCRIPTION
 
-Duplicates the URL object the input *CURLU* *inhandle* identifies and
-returns a pointer to the copy as a new *CURLU* handle. The new handle also
-needs to be freed with curl_url_cleanup(3).
+Duplicates the URL object the input *FETCHU* *inhandle* identifies and
+returns a pointer to the copy as a new *FETCHU* handle. The new handle also
+needs to be freed with fetch_url_cleanup(3).
 
 # %PROTOCOLS%
 
@@ -40,15 +40,15 @@ needs to be freed with curl_url_cleanup(3).
 ~~~c
 int main(void)
 {
-  CURLUcode rc;
-  CURLU *url = curl_url();
-  CURLU *url2;
-  rc = curl_url_set(url, CURLUPART_URL, "https://example.com", 0);
+  FETCHUcode rc;
+  FETCHU *url = fetch_url();
+  FETCHU *url2;
+  rc = fetch_url_set(url, FETCHUPART_URL, "https://example.com", 0);
   if(!rc) {
-    url2 = curl_url_dup(url); /* clone it */
-    curl_url_cleanup(url2);
+    url2 = fetch_url_dup(url); /* clone it */
+    fetch_url_cleanup(url2);
   }
-  curl_url_cleanup(url);
+  fetch_url_cleanup(url);
 }
 ~~~
 
@@ -56,4 +56,4 @@ int main(void)
 
 # RETURN VALUE
 
-Returns a pointer to a new `CURLU` handle or NULL if out of memory.
+Returns a pointer to a new `FETCHU` handle or NULL if out of memory.

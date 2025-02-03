@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_DEBUGFUNCTION
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_DEBUGFUNCTION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_CONN_ID (3)
-  - CURLINFO_XFER_ID (3)
-  - CURLOPT_DEBUGDATA (3)
-  - CURLOPT_VERBOSE (3)
-  - curl_global_trace (3)
+  - FETCHINFO_CONN_ID (3)
+  - FETCHINFO_XFER_ID (3)
+  - FETCHOPT_DEBUGDATA (3)
+  - FETCHOPT_VERBOSE (3)
+  - fetch_global_trace (3)
 Protocol:
   - All
 Added-in: 7.9.6
@@ -17,31 +17,31 @@ Added-in: 7.9.6
 
 # NAME
 
-CURLOPT_DEBUGFUNCTION - debug callback
+FETCHOPT_DEBUGFUNCTION - debug callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 typedef enum {
-  CURLINFO_TEXT = 0,
-  CURLINFO_HEADER_IN,    /* 1 */
-  CURLINFO_HEADER_OUT,   /* 2 */
-  CURLINFO_DATA_IN,      /* 3 */
-  CURLINFO_DATA_OUT,     /* 4 */
-  CURLINFO_SSL_DATA_IN,  /* 5 */
-  CURLINFO_SSL_DATA_OUT, /* 6 */
-  CURLINFO_END
-} curl_infotype;
+  FETCHINFO_TEXT = 0,
+  FETCHINFO_HEADER_IN,    /* 1 */
+  FETCHINFO_HEADER_OUT,   /* 2 */
+  FETCHINFO_DATA_IN,      /* 3 */
+  FETCHINFO_DATA_OUT,     /* 4 */
+  FETCHINFO_SSL_DATA_IN,  /* 5 */
+  FETCHINFO_SSL_DATA_OUT, /* 6 */
+  FETCHINFO_END
+} fetch_infotype;
 
-int debug_callback(CURL *handle,
-                   curl_infotype type,
+int debug_callback(FETCH *handle,
+                   fetch_infotype type,
                    char *data,
                    size_t size,
                    void *clientp);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DEBUGFUNCTION,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_DEBUGFUNCTION,
                           debug_callback);
 ~~~
 
@@ -50,55 +50,55 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DEBUGFUNCTION,
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-CURLOPT_DEBUGFUNCTION(3) replaces the standard debug function used when
-CURLOPT_VERBOSE(3) is in effect. This callback receives debug
+FETCHOPT_DEBUGFUNCTION(3) replaces the standard debug function used when
+FETCHOPT_VERBOSE(3) is in effect. This callback receives debug
 information, as specified in the *type* argument. This function must
 return 0. The *data* pointed to by the char * passed to this function is
 not null-terminated, but is exactly of the *size* as told by the
 *size* argument.
 
-The *clientp* argument is the pointer set with CURLOPT_DEBUGDATA(3).
+The *clientp* argument is the pointer set with FETCHOPT_DEBUGDATA(3).
 
-Available **curl_infotype** values:
+Available **fetch_infotype** values:
 
-## CURLINFO_TEXT
+## FETCHINFO_TEXT
 
 The data is informational text.
 
-## CURLINFO_HEADER_IN
+## FETCHINFO_HEADER_IN
 
 The data is header (or header-like) data received from the peer.
 
-## CURLINFO_HEADER_OUT
+## FETCHINFO_HEADER_OUT
 
 The data is header (or header-like) data sent to the peer.
 
-## CURLINFO_DATA_IN
+## FETCHINFO_DATA_IN
 
 The data is the unprocessed protocol data received from the peer. Even if the
 data is encoded or compressed, it is not provided decoded nor decompressed
 to this callback. If you need the data in decoded and decompressed form, use
-CURLOPT_WRITEFUNCTION(3).
+FETCHOPT_WRITEFUNCTION(3).
 
-## CURLINFO_DATA_OUT
+## FETCHINFO_DATA_OUT
 
 The data is protocol data sent to the peer.
 
-## CURLINFO_SSL_DATA_OUT
+## FETCHINFO_SSL_DATA_OUT
 
 The data is SSL/TLS (binary) data sent to the peer.
 
-## CURLINFO_SSL_DATA_IN
+## FETCHINFO_SSL_DATA_IN
 
 The data is SSL/TLS (binary) data received from the peer.
 
 ##
 
-WARNING: This callback may be called with the curl *handle* set to an internal
+WARNING: This callback may be called with the fetch *handle* set to an internal
 handle. (Added in 8.4.0)
 
-If you need to distinguish your curl *handle* from internal handles then set
-CURLOPT_PRIVATE(3) on your handle.
+If you need to distinguish your fetch *handle* from internal handles then set
+FETCHOPT_PRIVATE(3) on your handle.
 
 # DEFAULT
 
@@ -142,7 +142,7 @@ void dump(const char *text,
 }
 
 static
-int my_trace(CURL *handle, curl_infotype type,
+int my_trace(FETCH *handle, fetch_infotype type,
              char *data, size_t size,
              void *clientp)
 {
@@ -151,28 +151,28 @@ int my_trace(CURL *handle, curl_infotype type,
   (void)clientp;
 
   switch(type) {
-  case CURLINFO_TEXT:
+  case FETCHINFO_TEXT:
     fputs("== Info: ", stderr);
     fwrite(data, size, 1, stderr);
   default: /* in case a new one is introduced to shock us */
     return 0;
 
-  case CURLINFO_HEADER_OUT:
+  case FETCHINFO_HEADER_OUT:
     text = "=> Send header";
     break;
-  case CURLINFO_DATA_OUT:
+  case FETCHINFO_DATA_OUT:
     text = "=> Send data";
     break;
-  case CURLINFO_SSL_DATA_OUT:
+  case FETCHINFO_SSL_DATA_OUT:
     text = "=> Send SSL data";
     break;
-  case CURLINFO_HEADER_IN:
+  case FETCHINFO_HEADER_IN:
     text = "<= Recv header";
     break;
-  case CURLINFO_DATA_IN:
+  case FETCHINFO_DATA_IN:
     text = "<= Recv data";
     break;
-  case CURLINFO_SSL_DATA_IN:
+  case FETCHINFO_SSL_DATA_IN:
     text = "<= Recv SSL data";
     break;
   }
@@ -183,28 +183,28 @@ int my_trace(CURL *handle, curl_infotype type,
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_DEBUGFUNCTION, my_trace);
 
     /* the DEBUGFUNCTION has no effect until we enable VERBOSE */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
-    /* example.com is redirected, so we tell libcurl to follow redirection */
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    /* example.com is redirected, so we tell libfetch to follow redirection */
+    fetch_easy_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 1L);
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    res = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   return 0;
 }
@@ -214,7 +214,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

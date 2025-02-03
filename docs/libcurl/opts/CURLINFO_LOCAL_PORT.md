@@ -1,36 +1,36 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_LOCAL_PORT
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_LOCAL_PORT
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - TCP
   - QUIC
 See-also:
-  - CURLINFO_LOCAL_IP (3)
-  - CURLINFO_PRIMARY_PORT (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_LOCAL_IP (3)
+  - FETCHINFO_PRIMARY_PORT (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Added-in: 7.21.0
 ---
 
 # NAME
 
-CURLINFO_LOCAL_PORT - get the latest local port number
+FETCHINFO_LOCAL_PORT - get the latest local port number
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LOCAL_PORT, long *portp);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_LOCAL_PORT, long *portp);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a long to receive the local port number of the most recent
-connection done with this **curl** handle.
+connection done with this **fetch** handle.
 
 If the connection was done using QUIC, the port number is a UDP port number,
 otherwise it is a TCP port number.
@@ -42,23 +42,23 @@ otherwise it is a TCP port number.
 ~~~c
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    res = curl_easy_perform(curl);
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    res = fetch_easy_perform(fetch);
 
-    if(CURLE_OK == res) {
+    if(FETCHE_OK == res) {
       long port;
-      res = curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT, &port);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_LOCAL_PORT, &port);
 
-      if(CURLE_OK == res) {
+      if(FETCHE_OK == res) {
         printf("We used local port: %ld\n", port);
       }
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   return 0;
 }
@@ -68,7 +68,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

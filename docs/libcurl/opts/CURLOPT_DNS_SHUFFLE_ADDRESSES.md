@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_DNS_SHUFFLE_ADDRESSES
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_DNS_SHUFFLE_ADDRESSES
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_DNS_CACHE_TIMEOUT (3)
-  - CURLOPT_IPRESOLVE (3)
+  - FETCHOPT_DNS_CACHE_TIMEOUT (3)
+  - FETCHOPT_IPRESOLVE (3)
 Protocol:
   - All
 Added-in: 7.60.0
@@ -14,14 +14,14 @@ Added-in: 7.60.0
 
 # NAME
 
-CURLOPT_DNS_SHUFFLE_ADDRESSES - shuffle IP addresses for hostname
+FETCHOPT_DNS_SHUFFLE_ADDRESSES - shuffle IP addresses for hostname
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_SHUFFLE_ADDRESSES, long onoff);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_DNS_SHUFFLE_ADDRESSES, long onoff);
 ~~~
 
 # DESCRIPTION
@@ -34,7 +34,7 @@ a random order. This is similar to the ordering behavior of the legacy
 gethostbyname function which is no longer used on most platforms.
 
 Addresses are not reshuffled if name resolution is completed using the DNS
-cache. CURLOPT_DNS_CACHE_TIMEOUT(3) can be used together with this
+cache. FETCHOPT_DNS_CACHE_TIMEOUT(3) can be used together with this
 option to reduce DNS cache timeout or disable caching entirely if frequent
 reshuffling is needed.
 
@@ -54,15 +54,15 @@ performance impacts and may cause IPv4 to be used before IPv6 or vice versa.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_DNS_SHUFFLE_ADDRESSES, 1L);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_DNS_SHUFFLE_ADDRESSES, 1L);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -71,4 +71,4 @@ int main(void)
 
 # RETURN VALUE
 
-CURLE_OK or an error such as CURLE_UNKNOWN_OPTION.
+FETCHE_OK or an error such as FETCHE_UNKNOWN_OPTION.

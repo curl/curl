@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_CUSTOMREQUEST
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_CUSTOMREQUEST
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_EFFECTIVE_METHOD (3)
-  - CURLOPT_HTTPHEADER (3)
-  - CURLOPT_NOBODY (3)
-  - CURLOPT_REQUEST_TARGET (3)
+  - FETCHINFO_EFFECTIVE_METHOD (3)
+  - FETCHOPT_HTTPHEADER (3)
+  - FETCHOPT_NOBODY (3)
+  - FETCHOPT_REQUEST_TARGET (3)
 Protocol:
   - HTTP
   - FTP
@@ -20,25 +20,25 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_CUSTOMREQUEST - custom request method
+FETCHOPT_CUSTOMREQUEST - custom request method
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CUSTOMREQUEST, char *method);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_CUSTOMREQUEST, char *method);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter.
 
-When changing the request *method* by setting CURLOPT_CUSTOMREQUEST(3), you do
-not actually change how libcurl behaves or acts: you only change the actual
+When changing the request *method* by setting FETCHOPT_CUSTOMREQUEST(3), you do
+not actually change how libfetch behaves or acts: you only change the actual
 string sent in the request.
 
-libcurl passes on the verbatim string in its request without any filter or
+libfetch passes on the verbatim string in its request without any filter or
 other safe guards. That includes white space and control characters.
 
 The application does not have to keep the string around after setting this
@@ -56,19 +56,19 @@ particularly useful, for example, for performing an HTTP DELETE request.
 
 For example:
 
-When you tell libcurl to do a HEAD request, but then specify a GET though a
-custom request libcurl still acts as if it sent a HEAD. To switch to a proper
-HEAD use CURLOPT_NOBODY(3), to switch to a proper POST use
-CURLOPT_POST(3) or CURLOPT_POSTFIELDS(3) and to switch to a proper
-GET use CURLOPT_HTTPGET(3).
+When you tell libfetch to do a HEAD request, but then specify a GET though a
+custom request libfetch still acts as if it sent a HEAD. To switch to a proper
+HEAD use FETCHOPT_NOBODY(3), to switch to a proper POST use
+FETCHOPT_POST(3) or FETCHOPT_POSTFIELDS(3) and to switch to a proper
+GET use FETCHOPT_HTTPGET(3).
 
 Many people have wrongly used this option to replace the entire request with
 their own, including multiple headers and POST contents. While that might work
-in many cases, it might cause libcurl to send invalid requests and it could
-possibly confuse the remote server badly. Use CURLOPT_POST(3) and
-CURLOPT_POSTFIELDS(3) to set POST data. Use CURLOPT_HTTPHEADER(3)
-to replace or extend the set of headers sent by libcurl. Use
-CURLOPT_HTTP_VERSION(3) to change HTTP version.
+in many cases, it might cause libfetch to send invalid requests and it could
+possibly confuse the remote server badly. Use FETCHOPT_POST(3) and
+FETCHOPT_POSTFIELDS(3) to set POST data. Use FETCHOPT_HTTPHEADER(3)
+to replace or extend the set of headers sent by libfetch. Use
+FETCHOPT_HTTP_VERSION(3) to change HTTP version.
 
 ## FTP
 
@@ -84,9 +84,9 @@ Instead of LIST and RETR when issuing POP3 based requests.
 
 For example:
 
-When you tell libcurl to use a custom request it behaves like a LIST or RETR
+When you tell libfetch to use a custom request it behaves like a LIST or RETR
 command was sent where it expects data to be returned by the server. As such
-CURLOPT_NOBODY(3) should be used when specifying commands such as
+FETCHOPT_NOBODY(3) should be used when specifying commands such as
 **DELE** and **NOOP** for example.
 
 ## SMTP
@@ -96,8 +96,8 @@ Instead of a **HELP** or **VRFY** when issuing SMTP based requests.
 For example:
 
 Normally a multi line response is returned which can be used, in conjunction
-with CURLOPT_MAIL_RCPT(3), to specify an EXPN request. If the
-CURLOPT_NOBODY(3) option is specified then the request can be used to
+with FETCHOPT_MAIL_RCPT(3), to specify an EXPN request. If the
+FETCHOPT_NOBODY(3) option is specified then the request can be used to
 issue **NOOP** and **RSET** commands.
 
 # DEFAULT
@@ -111,17 +111,17 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
 
     /* DELETE the given path */
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+    fetch_easy_setopt(fetch, FETCHOPT_CUSTOMREQUEST, "DELETE");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -130,7 +130,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,7 +1,7 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # VARIABLES
-curl supports command line variables (added in 8.3.0). Set variables with
+fetch supports command line variables (added in 8.3.0). Set variables with
 --variable name=content or --variable name@file (where `file` can be stdin if
 set to a single dash (-)).
 
@@ -24,7 +24,7 @@ set:
     --variable '%USER'
     --expand-url = "https://example.com/api/{{USER}}/method"
 
-When expanding variables, curl supports a set of functions that can make the
+When expanding variables, fetch supports a set of functions that can make the
 variable contents more convenient to use. It can trim leading and trailing
 white space with `trim`, it can output the contents as a JSON quoted string
 with `json`, URL encode the string with `url` or base64 encode it with `b64`.

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -29,13 +29,13 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-/* This is a simple example showing how to send mime mail using libcurl's SMTP
+/* This is a simple example showing how to send mime mail using libfetch's SMTP
  * capabilities. For an example of using the multi interface please see
  * smtp-multi.c.
  *
- * Note that this example requires libcurl 7.56.0 or above.
+ * Note that this example requires libfetch 7.56.0 or above.
  */
 
 #define FROM    "<sender@example.org>"
@@ -70,98 +70,98 @@ static const char inline_html[] =
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  curl = curl_easy_init();
-  if(curl) {
-    struct curl_slist *headers = NULL;
-    struct curl_slist *recipients = NULL;
-    struct curl_slist *slist = NULL;
-    curl_mime *mime;
-    curl_mime *alt;
-    curl_mimepart *part;
+  fetch = fetch_easy_init();
+  if(fetch) {
+    struct fetch_slist *headers = NULL;
+    struct fetch_slist *recipients = NULL;
+    struct fetch_slist *slist = NULL;
+    fetch_mime *mime;
+    fetch_mime *alt;
+    fetch_mimepart *part;
     const char **cpp;
 
     /* This is the URL for your mailserver */
-    curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "smtp://mail.example.com");
 
     /* Note that this option is not strictly required, omitting it results in
-     * libcurl sending the MAIL FROM command with empty sender data. All
+     * libfetch sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
      * to the address in the reverse-path which triggered them. Otherwise,
      * they could cause an endless loop. See RFC 5321 Section 4.5.5 for more
      * details.
      */
-    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
+    fetch_easy_setopt(fetch, FETCHOPT_MAIL_FROM, FROM);
 
     /* Add two recipients, in this particular case they correspond to the
      * To: and Cc: addressees in the header, but they could be any kind of
      * recipient. */
-    recipients = curl_slist_append(recipients, TO);
-    recipients = curl_slist_append(recipients, CC);
-    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+    recipients = fetch_slist_append(recipients, TO);
+    recipients = fetch_slist_append(recipients, CC);
+    fetch_easy_setopt(fetch, FETCHOPT_MAIL_RCPT, recipients);
 
     /* allow one of the recipients to fail and still consider it okay */
-    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_MAIL_RCPT_ALLOWFAILS, 1L);
 
     /* Build and set the message header list. */
     for(cpp = headers_text; *cpp; cpp++)
-      headers = curl_slist_append(headers, *cpp);
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+      headers = fetch_slist_append(headers, *cpp);
+    fetch_easy_setopt(fetch, FETCHOPT_HTTPHEADER, headers);
 
     /* Build the mime message. */
-    mime = curl_mime_init(curl);
+    mime = fetch_mime_init(fetch);
 
     /* The inline part is an alternative proposing the html and the text
        versions of the email. */
-    alt = curl_mime_init(curl);
+    alt = fetch_mime_init(fetch);
 
     /* HTML message. */
-    part = curl_mime_addpart(alt);
-    curl_mime_data(part, inline_html, CURL_ZERO_TERMINATED);
-    curl_mime_type(part, "text/html");
+    part = fetch_mime_addpart(alt);
+    fetch_mime_data(part, inline_html, FETCH_ZERO_TERMINATED);
+    fetch_mime_type(part, "text/html");
 
     /* Text message. */
-    part = curl_mime_addpart(alt);
-    curl_mime_data(part, inline_text, CURL_ZERO_TERMINATED);
+    part = fetch_mime_addpart(alt);
+    fetch_mime_data(part, inline_text, FETCH_ZERO_TERMINATED);
 
     /* Create the inline part. */
-    part = curl_mime_addpart(mime);
-    curl_mime_subparts(part, alt);
-    curl_mime_type(part, "multipart/alternative");
-    slist = curl_slist_append(NULL, "Content-Disposition: inline");
-    curl_mime_headers(part, slist, 1);
+    part = fetch_mime_addpart(mime);
+    fetch_mime_subparts(part, alt);
+    fetch_mime_type(part, "multipart/alternative");
+    slist = fetch_slist_append(NULL, "Content-Disposition: inline");
+    fetch_mime_headers(part, slist, 1);
 
     /* Add the current source program as an attachment. */
-    part = curl_mime_addpart(mime);
-    curl_mime_filedata(part, "smtp-mime.c");
-    curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+    part = fetch_mime_addpart(mime);
+    fetch_mime_filedata(part, "smtp-mime.c");
+    fetch_easy_setopt(fetch, FETCHOPT_MIMEPOST, mime);
 
     /* Send the message */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* Free lists. */
-    curl_slist_free_all(recipients);
-    curl_slist_free_all(headers);
+    fetch_slist_free_all(recipients);
+    fetch_slist_free_all(headers);
 
-    /* curl does not send the QUIT command until you call cleanup, so you
+    /* fetch does not send the QUIT command until you call cleanup, so you
      * should be able to reuse this connection for additional messages
-     * (setting CURLOPT_MAIL_FROM and CURLOPT_MAIL_RCPT as required, and
-     * calling curl_easy_perform() again. It may not be a good idea to keep
+     * (setting FETCHOPT_MAIL_FROM and FETCHOPT_MAIL_RCPT as required, and
+     * calling fetch_easy_perform() again. It may not be a good idea to keep
      * the connection open for a long time though (more than a few minutes may
      * result in the server timing out the connection), and you do want to
      * clean up in the end.
      */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
 
     /* Free multipart message. */
-    curl_mime_free(mime);
+    fetch_mime_free(mime);
   }
 
   return (int)res;

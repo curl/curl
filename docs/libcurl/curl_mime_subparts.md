@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_subparts
+SPDX-License-Identifier: fetch
+Title: fetch_mime_subparts
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_mime_addpart (3)
-  - curl_mime_init (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_init (3)
 Protocol:
   - HTTP
   - IMAP
@@ -16,25 +16,25 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_subparts - set sub-parts of a multipart mime part
+fetch_mime_subparts - set sub-parts of a multipart mime part
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_mime_subparts(curl_mimepart *part, curl_mime *subparts);
+FETCHcode fetch_mime_subparts(fetch_mimepart *part, fetch_mime *subparts);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_subparts(3) sets a multipart mime part's content from a mime
+fetch_mime_subparts(3) sets a multipart mime part's content from a mime
 structure.
 
 *part* is a handle to the multipart part.
 
 *subparts* is a mime structure handle holding the sub-parts. After
-curl_mime_subparts(3) succeeds, the mime structure handle belongs to the
+fetch_mime_subparts(3) succeeds, the mime structure handle belongs to the
 multipart part and must not be freed explicitly. It may however be updated by
 subsequent calls to mime API functions.
 
@@ -53,30 +53,30 @@ static char *inline_text = "once upon the time";
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    struct curl_slist *slist;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    struct fetch_slist *slist;
 
     /* The inline part is an alternative proposing the html and the text
        versions of the email. */
-    curl_mime *alt = curl_mime_init(curl);
-    curl_mimepart *part;
+    fetch_mime *alt = fetch_mime_init(fetch);
+    fetch_mimepart *part;
 
     /* HTML message. */
-    part = curl_mime_addpart(alt);
-    curl_mime_data(part, inline_html, CURL_ZERO_TERMINATED);
-    curl_mime_type(part, "text/html");
+    part = fetch_mime_addpart(alt);
+    fetch_mime_data(part, inline_html, FETCH_ZERO_TERMINATED);
+    fetch_mime_type(part, "text/html");
 
     /* Text message. */
-    part = curl_mime_addpart(alt);
-    curl_mime_data(part, inline_text, CURL_ZERO_TERMINATED);
+    part = fetch_mime_addpart(alt);
+    fetch_mime_data(part, inline_text, FETCH_ZERO_TERMINATED);
 
     /* Create the inline part. */
-    part = curl_mime_addpart(alt);
-    curl_mime_subparts(part, alt);
-    curl_mime_type(part, "multipart/alternative");
-    slist = curl_slist_append(NULL, "Content-Disposition: inline");
-    curl_mime_headers(part, slist, 1);
+    part = fetch_mime_addpart(alt);
+    fetch_mime_subparts(part, alt);
+    fetch_mime_type(part, "multipart/alternative");
+    slist = fetch_slist_append(NULL, "Content-Disposition: inline");
+    fetch_mime_headers(part, slist, 1);
   }
 }
 ~~~
@@ -85,9 +85,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

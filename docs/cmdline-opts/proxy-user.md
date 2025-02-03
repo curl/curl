@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proxy-user
 Short: U
 Arg: <user:password>
@@ -18,11 +18,11 @@ Example:
 
 Specify the username and password to use for proxy authentication.
 
-If you use a Windows SSPI-enabled curl binary and do either Negotiate or NTLM
-authentication then you can tell curl to select the username and password from
+If you use a Windows SSPI-enabled fetch binary and do either Negotiate or NTLM
+authentication then you can tell fetch to select the username and password from
 your environment by specifying a single colon with this option: "-U :".
 
-On systems where it works, curl hides the given option argument from process
+On systems where it works, fetch hides the given option argument from process
 listings. This is not enough to protect credentials from possibly getting seen
 by other users on the same system as they still are visible for a moment
 before cleared. Such sensitive data should be retrieved from a file instead or

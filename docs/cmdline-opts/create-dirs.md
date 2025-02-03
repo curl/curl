@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: create-dirs
 Help: Create necessary local directory hierarchy
 Category: output
@@ -15,7 +15,7 @@ Example:
 
 # `--create-dirs`
 
-When used in conjunction with the --output option, curl creates the necessary
+When used in conjunction with the --output option, fetch creates the necessary
 local directory hierarchy as needed. This option creates the directories
 mentioned with the --output option combined with the path possibly set with
 --output-dir. If the combined output filename uses no directory, or if the

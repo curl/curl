@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSH_KEYDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSH_KEYDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSH_KEYDATA (3)
-  - CURLOPT_SSH_KNOWNHOSTS (3)
+  - FETCHOPT_SSH_KEYDATA (3)
+  - FETCHOPT_SSH_KNOWNHOSTS (3)
 Protocol:
   - SFTP
   - SCP
@@ -15,20 +15,20 @@ Added-in: 7.19.6
 
 # NAME
 
-CURLOPT_SSH_KEYDATA - pointer passed to the SSH key callback
+FETCHOPT_SSH_KEYDATA - pointer passed to the SSH key callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_KEYDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSH_KEYDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
 Pass a void * as parameter. This *pointer* is passed along verbatim to the
-callback set with CURLOPT_SSH_KEYFUNCTION(3).
+callback set with FETCHOPT_SSH_KEYFUNCTION(3).
 
 # DEFAULT
 
@@ -42,28 +42,28 @@ NULL
 struct mine {
   void *custom;
 };
-static int keycb(CURL *easy,
-                 const struct curl_khkey *knownkey,
-                 const struct curl_khkey *foundkey,
-                 enum curl_khmatch match,
+static int keycb(FETCH *easy,
+                 const struct fetch_khkey *knownkey,
+                 const struct fetch_khkey *foundkey,
+                 enum fetch_khmatch match,
                  void *clientp)
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */
-  return CURLKHSTAT_FINE_ADD_TO_FILE;
+  return FETCHKHSTAT_FINE_ADD_TO_FILE;
 }
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     struct mine callback_data;
-    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
-    curl_easy_setopt(curl, CURLOPT_SSH_KEYFUNCTION, keycb);
-    curl_easy_setopt(curl, CURLOPT_SSH_KEYDATA, &callback_data);
-    curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS, "/home/user/known_hosts");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "sftp://example.com/thisfile.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_KEYFUNCTION, keycb);
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_KEYDATA, &callback_data);
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_KNOWNHOSTS, "/home/user/known_hosts");
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -72,7 +72,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

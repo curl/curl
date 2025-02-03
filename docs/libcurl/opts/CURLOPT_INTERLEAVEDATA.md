@@ -1,33 +1,33 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_INTERLEAVEDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_INTERLEAVEDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - RTSP
 See-also:
-  - CURLOPT_INTERLEAVEFUNCTION (3)
-  - CURLOPT_RTSP_REQUEST (3)
+  - FETCHOPT_INTERLEAVEFUNCTION (3)
+  - FETCHOPT_RTSP_REQUEST (3)
 Added-in: 7.20.0
 ---
 
 # NAME
 
-CURLOPT_INTERLEAVEDATA - pointer passed to RTSP interleave callback
+FETCHOPT_INTERLEAVEDATA - pointer passed to RTSP interleave callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INTERLEAVEDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_INTERLEAVEDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
 This is the userdata *pointer* that is passed to
-CURLOPT_INTERLEAVEFUNCTION(3) when interleaved RTP data is received. If
+FETCHOPT_INTERLEAVEFUNCTION(3) when interleaved RTP data is received. If
 the interleave function callback is not set, this pointer is not used
 anywhere.
 
@@ -54,12 +54,12 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   struct local rtp_data;
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_INTERLEAVEFUNCTION, rtp_write);
-    curl_easy_setopt(curl, CURLOPT_INTERLEAVEDATA, &rtp_data);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_INTERLEAVEFUNCTION, rtp_write);
+    fetch_easy_setopt(fetch, FETCHOPT_INTERLEAVEDATA, &rtp_data);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
  }
 }
 ~~~
@@ -68,7 +68,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: show-headers
 Short: i
 Help: Show response headers in output
@@ -26,7 +26,7 @@ the data. --dump-header exists to save headers in a separate stream.
 
 To view the request headers, consider the --verbose option.
 
-Prior to 7.75.0 curl did not print the headers if --fail was used in
+Prior to 7.75.0 fetch did not print the headers if --fail was used in
 combination with this option and there was error reported by server.
 
 This option was called --include before 8.10.0. The previous name remains

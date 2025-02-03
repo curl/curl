@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -41,64 +41,64 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int main(int argc, char *argv[])
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
 
-  curl_mime *form = NULL;
-  curl_mimepart *field = NULL;
-  struct curl_slist *headerlist = NULL;
+  fetch_mime *form = NULL;
+  fetch_mimepart *field = NULL;
+  struct fetch_slist *headerlist = NULL;
   static const char buf[] = "Expect:";
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* Create the form */
-    form = curl_mime_init(curl);
+    form = fetch_mime_init(fetch);
 
     /* Fill in the file upload field */
-    field = curl_mime_addpart(form);
-    curl_mime_name(field, "sendfile");
-    curl_mime_filedata(field, "postit2.c");
+    field = fetch_mime_addpart(form);
+    fetch_mime_name(field, "sendfile");
+    fetch_mime_filedata(field, "postit2.c");
 
     /* Fill in the filename field */
-    field = curl_mime_addpart(form);
-    curl_mime_name(field, "filename");
-    curl_mime_data(field, "postit2.c", CURL_ZERO_TERMINATED);
+    field = fetch_mime_addpart(form);
+    fetch_mime_name(field, "filename");
+    fetch_mime_data(field, "postit2.c", FETCH_ZERO_TERMINATED);
 
     /* Fill in the submit field too, even if this is rarely needed */
-    field = curl_mime_addpart(form);
-    curl_mime_name(field, "submit");
-    curl_mime_data(field, "send", CURL_ZERO_TERMINATED);
+    field = fetch_mime_addpart(form);
+    fetch_mime_name(field, "submit");
+    fetch_mime_data(field, "send", FETCH_ZERO_TERMINATED);
 
     /* initialize custom header list (stating that Expect: 100-continue is not
        wanted */
-    headerlist = curl_slist_append(headerlist, buf);
+    headerlist = fetch_slist_append(headerlist, buf);
     /* what URL that receives this POST */
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/examplepost.cgi");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/examplepost.cgi");
     if((argc == 2) && (!strcmp(argv[1], "noexpectheader")))
       /* only disable 100-continue header if explicitly requested */
-      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-    curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
+      fetch_easy_setopt(fetch, FETCHOPT_HTTPHEADER, headerlist);
+    fetch_easy_setopt(fetch, FETCHOPT_MIMEPOST, form);
 
     /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
 
     /* then cleanup the form */
-    curl_mime_free(form);
+    fetch_mime_free(form);
     /* free slist */
-    curl_slist_free_all(headerlist);
+    fetch_slist_free_all(headerlist);
   }
   return 0;
 }

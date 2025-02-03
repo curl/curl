@@ -1,9 +1,9 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_getenv
+SPDX-License-Identifier: fetch
+Title: fetch_getenv
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
   - getenv (3C)
 Protocol:
@@ -13,23 +13,23 @@ Added-in: 7.1
 
 # NAME
 
-curl_getenv - return value for environment name
+fetch_getenv - return value for environment name
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-char *curl_getenv(const char *name);
+char *fetch_getenv(const char *name);
 ~~~
 
 # DESCRIPTION
 
-curl_getenv() is a portable wrapper for the getenv() function, meant to
+fetch_getenv() is a portable wrapper for the getenv() function, meant to
 emulate its behavior and provide an identical interface for all operating
-systems libcurl builds on (including Windows).
+systems libfetch builds on (including Windows).
 
-You must curl_free(3) the returned string when you are done with it.
+You must fetch_free(3) the returned string when you are done with it.
 
 # %PROTOCOLS%
 
@@ -38,10 +38,10 @@ You must curl_free(3) the returned string when you are done with it.
 ~~~c
 int main(void)
 {
-  char *width = curl_getenv("COLUMNS");
+  char *width = fetch_getenv("COLUMNS");
   if(width) {
     /* it was set */
-    curl_free(width);
+    fetch_free(width);
   }
 }
 ~~~

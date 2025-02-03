@@ -1,10 +1,10 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# MQTT in curl
+# MQTT in fetch
 
 ## Usage
 
@@ -17,11 +17,11 @@ Doing a "POST" publishes the post data to the topic and exits.
 
 Command usage:
 
-    curl mqtt://host/topic
+    fetch mqtt://host/topic
 
 Example subscribe:
 
-    curl mqtt://host.home/bedroom/temp
+    fetch mqtt://host.home/bedroom/temp
 
 This sends an MQTT SUBSCRIBE packet for the topic `bedroom/temp` and listen in
 for incoming PUBLISH packets.
@@ -30,18 +30,18 @@ for incoming PUBLISH packets.
 
 Command usage:
 
-    curl -d payload mqtt://host/topic
+    fetch -d payload mqtt://host/topic
 
 Example publish:
 
-    curl -d 75 mqtt://host.home/bedroom/dimmer
+    fetch -d 75 mqtt://host.home/bedroom/dimmer
 
 This sends an MQTT PUBLISH packet to the topic `bedroom/dimmer` with the
 payload `75`.
 
-## What does curl deliver as a response to a subscribe
+## What does fetch deliver as a response to a subscribe
 
-Whenever a PUBLISH packet is received, curl outputs two bytes topic length (MSB | LSB), the topic followed by the
+Whenever a PUBLISH packet is received, fetch outputs two bytes topic length (MSB | LSB), the topic followed by the
 payload.
 
 ## Caveats

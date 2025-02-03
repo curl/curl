@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: http3
 Tags: Versions
 Protocols: HTTP
@@ -27,8 +27,8 @@ This option allows a user to avoid using the Alt-Svc method of upgrading to
 HTTP/3 when you know or suspect that the target speaks HTTP/3 on the given
 host and port.
 
-When asked to use HTTP/3, curl issues a separate attempt to use older HTTP
-versions with a slight delay, so if the HTTP/3 transfer fails or is slow, curl
+When asked to use HTTP/3, fetch issues a separate attempt to use older HTTP
+versions with a slight delay, so if the HTTP/3 transfer fails or is slow, fetch
 still tries to proceed with an older HTTP version. The fallback performs the
 regular negotiation between HTTP/1 and HTTP/2.
 

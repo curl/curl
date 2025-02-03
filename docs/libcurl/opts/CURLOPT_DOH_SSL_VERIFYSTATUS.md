@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_DOH_SSL_VERIFYSTATUS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_DOH_SSL_VERIFYSTATUS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_DOH_SSL_VERIFYHOST (3)
-  - CURLOPT_DOH_SSL_VERIFYPEER (3)
-  - CURLOPT_SSL_VERIFYSTATUS (3)
+  - FETCHOPT_DOH_SSL_VERIFYHOST (3)
+  - FETCHOPT_DOH_SSL_VERIFYPEER (3)
+  - FETCHOPT_SSL_VERIFYSTATUS (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -18,14 +18,14 @@ Added-in: 7.76.0
 
 # NAME
 
-CURLOPT_DOH_SSL_VERIFYSTATUS - verify the DoH SSL certificate's status
+FETCHOPT_DOH_SSL_VERIFYSTATUS - verify the DoH SSL certificate's status
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYSTATUS,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_DOH_SSL_VERIFYSTATUS,
                           long verify);
 ~~~
 
@@ -33,11 +33,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYSTATUS,
 
 Pass a long as parameter set to 1 to enable or 0 to disable.
 
-This option determines whether libcurl verifies the status of the DoH
+This option determines whether libfetch verifies the status of the DoH
 (DNS-over-HTTPS) server cert using the "Certificate Status Request" TLS
 extension (aka. OCSP stapling).
 
-This option is the DoH equivalent of CURLOPT_SSL_VERIFYSTATUS(3) and
+This option is the DoH equivalent of FETCHOPT_SSL_VERIFYSTATUS(3) and
 only affects requests to the DoH server.
 
 If this option is enabled and the server does not support the TLS extension,
@@ -54,17 +54,17 @@ the verification fails.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
-    curl_easy_setopt(curl, CURLOPT_DOH_URL,
+    fetch_easy_setopt(fetch, FETCHOPT_DOH_URL,
                      "https://cloudflare-dns.com/dns-query");
 
     /* Ask for OCSP stapling when verifying the DoH server */
-    curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYSTATUS, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_DOH_SSL_VERIFYSTATUS, 1L);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -73,7 +73,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

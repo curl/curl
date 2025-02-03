@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -26,55 +26,55 @@
  * </DESC>
  */
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-#if !CURL_AT_LEAST_VERSION(7, 62, 0)
-#error "this example requires curl 7.62.0 or later"
+#if !FETCH_AT_LEAST_VERSION(7, 62, 0)
+#error "this example requires fetch 7.62.0 or later"
 #endif
 
 int main(void)
 {
-  CURLU *h;
-  CURLUcode uc;
+  FETCHU *h;
+  FETCHUcode uc;
   char *host;
   char *path;
 
-  h = curl_url(); /* get a handle to work with */
+  h = fetch_url(); /* get a handle to work with */
   if(!h)
     return 1;
 
   /* parse a full URL */
-  uc = curl_url_set(h, CURLUPART_URL, "http://example.com/path/index.html", 0);
+  uc = fetch_url_set(h, FETCHUPART_URL, "http://example.com/path/index.html", 0);
   if(uc)
     goto fail;
 
   /* extract hostname from the parsed URL */
-  uc = curl_url_get(h, CURLUPART_HOST, &host, 0);
+  uc = fetch_url_get(h, FETCHUPART_HOST, &host, 0);
   if(!uc) {
     printf("Host name: %s\n", host);
-    curl_free(host);
+    fetch_free(host);
   }
 
   /* extract the path from the parsed URL */
-  uc = curl_url_get(h, CURLUPART_PATH, &path, 0);
+  uc = fetch_url_get(h, FETCHUPART_PATH, &path, 0);
   if(!uc) {
     printf("Path: %s\n", path);
-    curl_free(path);
+    fetch_free(path);
   }
 
   /* redirect with a relative URL */
-  uc = curl_url_set(h, CURLUPART_URL, "../another/second.html", 0);
+  uc = fetch_url_set(h, FETCHUPART_URL, "../another/second.html", 0);
   if(uc)
     goto fail;
 
   /* extract the new, updated path */
-  uc = curl_url_get(h, CURLUPART_PATH, &path, 0);
+  uc = fetch_url_get(h, FETCHUPART_PATH, &path, 0);
   if(!uc) {
     printf("Path: %s\n", path);
-    curl_free(path);
+    fetch_free(path);
   }
 
 fail:
-  curl_url_cleanup(h); /* free URL handle */
+  fetch_url_cleanup(h); /* free URL handle */
   return 0;
 }

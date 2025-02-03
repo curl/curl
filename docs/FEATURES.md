@@ -1,12 +1,12 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# Features -- what curl can do
+# Features -- what fetch can do
 
-## curl tool
+## fetch tool
 
  - config file support
  - multiple URLs in a single command line
@@ -15,7 +15,7 @@ SPDX-License-Identifier: curl
  - redirect stderr
  - parallel transfers
 
-## libcurl
+## libfetch
 
  - URL RFC 3986 syntax
  - custom maximum download time

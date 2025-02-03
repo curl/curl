@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_multi_strerror
+SPDX-License-Identifier: fetch
+Title: fetch_multi_strerror
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_strerror (3)
-  - curl_share_strerror (3)
-  - curl_url_strerror (3)
-  - libcurl-errors (3)
+  - fetch_easy_strerror (3)
+  - fetch_share_strerror (3)
+  - fetch_url_strerror (3)
+  - libfetch-errors (3)
 Protocol:
   - All
 Added-in: 7.12.0
@@ -16,19 +16,19 @@ Added-in: 7.12.0
 
 # NAME
 
-curl_multi_strerror - return string describing error code
+fetch_multi_strerror - return string describing error code
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-const char *curl_multi_strerror(CURLMcode errornum);
+const char *fetch_multi_strerror(FETCHMcode errornum);
 ~~~
 
 # DESCRIPTION
 
-This function returns a string describing the *CURLMcode* error code
+This function returns a string describing the *FETCHMcode* error code
 passed in the argument *errornum*.
 
 # %PROTOCOLS%
@@ -39,11 +39,11 @@ passed in the argument *errornum*.
 int main(void)
 {
   int still_running;
-  CURLM *multi = curl_multi_init();
+  FETCHM *multi = fetch_multi_init();
 
-  CURLMcode mc = curl_multi_perform(multi, &still_running);
+  FETCHMcode mc = fetch_multi_perform(multi, &still_running);
   if(mc)
-    printf("error: %s\n", curl_multi_strerror(mc));
+    printf("error: %s\n", fetch_multi_strerror(mc));
 }
 ~~~
 

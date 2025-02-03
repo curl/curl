@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -28,10 +28,10 @@
  */
 /*
  * Written by Jud Bishop after studying the other examples provided with
- * libcurl.
+ * libfetch.
  *
  * To compile (on a single line):
- * gcc -ggdb `pkg-config --cflags  --libs gtk+-2.0` -lcurl -lssl -lcrypto
+ * gcc -ggdb `pkg-config --cflags  --libs gtk+-2.0` -lfetch -lssl -lcrypto
  *   -lgthread-2.0 -dl  smooth-gtk-thread.c -o smooth-gtk-thread
  */
 
@@ -41,7 +41,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #define NUMT 4
 
@@ -68,22 +68,22 @@ size_t write_file(void *ptr, size_t size, size_t nmemb, FILE *stream)
 static void run_one(gchar *http, int j)
 {
   FILE *outfile = fopen(urls[j], "wb");
-  CURL *curl;
+  FETCH *fetch;
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     printf("j = %d\n", j);
 
     /* Set the URL and transfer type */
-    curl_easy_setopt(curl, CURLOPT_URL, http);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, http);
 
     /* Write to the file */
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
-    curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, outfile);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, write_file);
+    fetch_easy_perform(fetch);
 
     fclose(outfile);
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 
@@ -168,8 +168,8 @@ int main(int argc, char **argv)
 {
   GtkWidget *top_window, *outside_frame, *inside_frame, *progress_bar;
 
-  /* Must initialize libcurl before any threads are started */
-  curl_global_init(CURL_GLOBAL_ALL);
+  /* Must initialize libfetch before any threads are started */
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
   /* Init thread */
   g_thread_init(NULL);

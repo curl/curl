@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_NETRC_FILE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_NETRC_FILE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_NETRC (3)
-  - CURLOPT_PASSWORD (3)
-  - CURLOPT_USERNAME (3)
+  - FETCHOPT_NETRC (3)
+  - FETCHOPT_PASSWORD (3)
+  - FETCHOPT_USERNAME (3)
 Protocol:
   - All
 Added-in: 7.11.0
@@ -15,21 +15,21 @@ Added-in: 7.11.0
 
 # NAME
 
-CURLOPT_NETRC_FILE - filename to read .netrc info from
+FETCHOPT_NETRC_FILE - filename to read .netrc info from
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NETRC_FILE, char *file);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_NETRC_FILE, char *file);
 ~~~
 
 # DESCRIPTION
 
 Pass a char pointer as parameter, pointing to a null-terminated string
-containing the full path name to the *file* you want libcurl to use as .netrc
-file. If this option is omitted, and CURLOPT_NETRC(3) is set, libcurl checks
+containing the full path name to the *file* you want libfetch to use as .netrc
+file. If this option is omitted, and FETCHOPT_NETRC(3) is set, libfetch checks
 for a .netrc file in the current user's home directory.
 
 The application does not have to keep the string around after setting this
@@ -49,13 +49,13 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/");
-    curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
-    curl_easy_setopt(curl, CURLOPT_NETRC_FILE, "/tmp/magic-netrc");
-    ret = curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_NETRC, FETCH_NETRC_OPTIONAL);
+    fetch_easy_setopt(fetch, FETCHOPT_NETRC_FILE, "/tmp/magic-netrc");
+    ret = fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -64,7 +64,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

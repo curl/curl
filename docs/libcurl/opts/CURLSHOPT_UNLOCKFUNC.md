@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLSHOPT_UNLOCKFUNC
+SPDX-License-Identifier: fetch
+Title: FETCHSHOPT_UNLOCKFUNC
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLSHOPT_LOCKFUNC (3)
-  - curl_share_cleanup (3)
-  - curl_share_init (3)
-  - curl_share_setopt (3)
+  - FETCHSHOPT_LOCKFUNC (3)
+  - fetch_share_cleanup (3)
+  - fetch_share_init (3)
+  - fetch_share_setopt (3)
 Protocol:
   - All
 Added-in: 7.10.3
@@ -16,22 +16,22 @@ Added-in: 7.10.3
 
 # NAME
 
-CURLSHOPT_UNLOCKFUNC - mutex unlock callback
+FETCHSHOPT_UNLOCKFUNC - mutex unlock callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-void unlockcb(CURL *handle, curl_lock_data data, void *clientp);
+void unlockcb(FETCH *handle, fetch_lock_data data, void *clientp);
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_UNLOCKFUNC, unlockcb);
+FETCHSHcode fetch_share_setopt(FETCHSH *share, FETCHSHOPT_UNLOCKFUNC, unlockcb);
 ~~~
 
 # DESCRIPTION
 
 Set a mutex unlock callback for the share object. There is a corresponding
-CURLSHOPT_LOCKFUNC(3) callback called when the mutex is first locked.
+FETCHSHOPT_LOCKFUNC(3) callback called when the mutex is first locked.
 
 The *unlockcb* argument must be a pointer to a function matching the
 prototype shown above. The arguments to the callback are:
@@ -39,26 +39,26 @@ prototype shown above. The arguments to the callback are:
 *handle* is the currently active easy handle in use when the share object
 is released.
 
-The *data* argument tells what kind of data libcurl wants to unlock. Make
+The *data* argument tells what kind of data libfetch wants to unlock. Make
 sure that the callback uses a different lock for each kind of data.
 
-*clientp* is the private pointer you set with CURLSHOPT_USERDATA(3).
-This pointer is not used by libcurl itself.
+*clientp* is the private pointer you set with FETCHSHOPT_USERDATA(3).
+This pointer is not used by libfetch itself.
 
 # %PROTOCOLS%
 
 # EXAMPLE
 
 ~~~c
-extern void mutex_unlock(CURL *, curl_lock_data, void *);
+extern void mutex_unlock(FETCH *, fetch_lock_data, void *);
 
 int main(void)
 {
-  CURLSHcode sh;
-  CURLSH *share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, mutex_unlock);
+  FETCHSHcode sh;
+  FETCHSH *share = fetch_share_init();
+  sh = fetch_share_setopt(share, FETCHSHOPT_UNLOCKFUNC, mutex_unlock);
   if(sh)
-    printf("Error: %s\n", curl_share_strerror(sh));
+    printf("Error: %s\n", fetch_share_strerror(sh));
 }
 ~~~
 
@@ -66,6 +66,6 @@ int main(void)
 
 # RETURN VALUE
 
-CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred. See libcurl-errors(3) for the full list with
+FETCHSHE_OK (zero) means that the option was set properly, non-zero means an
+error occurred. See libfetch-errors(3) for the full list with
 descriptions.

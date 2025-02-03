@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_getdate
+SPDX-License-Identifier: fetch
+Title: fetch_getdate
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_TIMECONDITION (3)
-  - CURLOPT_TIMEVALUE (3)
-  - curl_easy_escape (3)
-  - curl_easy_unescape (3)
+  - FETCHOPT_TIMECONDITION (3)
+  - FETCHOPT_TIMEVALUE (3)
+  - fetch_easy_escape (3)
+  - fetch_easy_unescape (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -16,19 +16,19 @@ Added-in: 7.1
 
 # NAME
 
-curl_getdate - convert date string to number of seconds
+fetch_getdate - convert date string to number of seconds
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-time_t curl_getdate(const char *datestring, const time_t *now);
+time_t fetch_getdate(const char *datestring, const time_t *now);
 ~~~
 
 # DESCRIPTION
 
-curl_getdate(3) returns the number of seconds since the Epoch, January
+fetch_getdate(3) returns the number of seconds since the Epoch, January
 1st 1970 00:00:00 in the UTC time zone, for the date and time that the
 *datestring* parameter specifies. The *now* parameter is not used,
 pass a NULL there.
@@ -83,28 +83,28 @@ calendar date.
 int main(void)
 {
   time_t t;
-  t = curl_getdate("Sun, 06 Nov 1994 08:49:37 GMT", NULL);
-  t = curl_getdate("Sunday, 06-Nov-94 08:49:37 GMT", NULL);
-  t = curl_getdate("Sun Nov  6 08:49:37 1994", NULL);
-  t = curl_getdate("06 Nov 1994 08:49:37 GMT", NULL);
-  t = curl_getdate("06-Nov-94 08:49:37 GMT", NULL);
-  t = curl_getdate("Nov  6 08:49:37 1994", NULL);
-  t = curl_getdate("06 Nov 1994 08:49:37", NULL);
-  t = curl_getdate("06-Nov-94 08:49:37", NULL);
-  t = curl_getdate("1994 Nov 6 08:49:37", NULL);
-  t = curl_getdate("GMT 08:49:37 06-Nov-94 Sunday", NULL);
-  t = curl_getdate("94 6 Nov 08:49:37", NULL);
-  t = curl_getdate("1994 Nov 6", NULL);
-  t = curl_getdate("06-Nov-94", NULL);
-  t = curl_getdate("Sun Nov 6 94", NULL);
-  t = curl_getdate("1994.Nov.6", NULL);
-  t = curl_getdate("Sun/Nov/6/94/GMT", NULL);
-  t = curl_getdate("Sun, 06 Nov 1994 08:49:37 CET", NULL);
-  t = curl_getdate("06 Nov 1994 08:49:37 EST", NULL);
-  t = curl_getdate("Sun, 12 Sep 2004 15:05:58 -0700", NULL);
-  t = curl_getdate("Sat, 11 Sep 2004 21:32:11 +0200", NULL);
-  t = curl_getdate("20040912 15:05:58 -0700", NULL);
-  t = curl_getdate("20040911 +0200", NULL);
+  t = fetch_getdate("Sun, 06 Nov 1994 08:49:37 GMT", NULL);
+  t = fetch_getdate("Sunday, 06-Nov-94 08:49:37 GMT", NULL);
+  t = fetch_getdate("Sun Nov  6 08:49:37 1994", NULL);
+  t = fetch_getdate("06 Nov 1994 08:49:37 GMT", NULL);
+  t = fetch_getdate("06-Nov-94 08:49:37 GMT", NULL);
+  t = fetch_getdate("Nov  6 08:49:37 1994", NULL);
+  t = fetch_getdate("06 Nov 1994 08:49:37", NULL);
+  t = fetch_getdate("06-Nov-94 08:49:37", NULL);
+  t = fetch_getdate("1994 Nov 6 08:49:37", NULL);
+  t = fetch_getdate("GMT 08:49:37 06-Nov-94 Sunday", NULL);
+  t = fetch_getdate("94 6 Nov 08:49:37", NULL);
+  t = fetch_getdate("1994 Nov 6", NULL);
+  t = fetch_getdate("06-Nov-94", NULL);
+  t = fetch_getdate("Sun Nov 6 94", NULL);
+  t = fetch_getdate("1994.Nov.6", NULL);
+  t = fetch_getdate("Sun/Nov/6/94/GMT", NULL);
+  t = fetch_getdate("Sun, 06 Nov 1994 08:49:37 CET", NULL);
+  t = fetch_getdate("06 Nov 1994 08:49:37 EST", NULL);
+  t = fetch_getdate("Sun, 12 Sep 2004 15:05:58 -0700", NULL);
+  t = fetch_getdate("Sat, 11 Sep 2004 21:32:11 +0200", NULL);
+  t = fetch_getdate("20040912 15:05:58 -0700", NULL);
+  t = fetch_getdate("20040911 +0200", NULL);
 }
 ~~~
 

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: request
 Short: X
 Arg: <method>
@@ -19,7 +19,7 @@ Example:
 
 Change the method to use when starting the transfer.
 
-curl passes on the verbatim string you give it in the request without any
+fetch passes on the verbatim string you give it in the request without any
 filter or other safe guards. That includes white space and control characters.
 
 ## HTTP
@@ -34,11 +34,11 @@ Normally you do not need this option. All sorts of *GET*, *HEAD*, *POST* and
 *PUT* requests are rather invoked by using dedicated command line options.
 
 This option only changes the actual word used in the HTTP request, it does not
-alter the way curl behaves. For example if you want to make a proper HEAD
+alter the way fetch behaves. For example if you want to make a proper HEAD
 request, using -X HEAD does not suffice. You need to use the --head option.
 
 The method string you set with --request is used for all requests, which
-if you for example use --location may cause unintended side-effects when curl
+if you for example use --location may cause unintended side-effects when fetch
 does not change request method according to the HTTP 30x response codes - and
 similar.
 

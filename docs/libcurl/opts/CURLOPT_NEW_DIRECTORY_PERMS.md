@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_NEW_DIRECTORY_PERMS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_NEW_DIRECTORY_PERMS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_FTP_CREATE_MISSING_DIRS (3)
-  - CURLOPT_NEW_FILE_PERMS (3)
-  - CURLOPT_UPLOAD (3)
+  - FETCHOPT_FTP_CREATE_MISSING_DIRS (3)
+  - FETCHOPT_NEW_FILE_PERMS (3)
+  - FETCHOPT_UPLOAD (3)
 Protocol:
   - SFTP
   - SCP
@@ -17,14 +17,14 @@ Added-in: 7.16.4
 
 # NAME
 
-CURLOPT_NEW_DIRECTORY_PERMS - permissions for remotely created directories
+FETCHOPT_NEW_DIRECTORY_PERMS - permissions for remotely created directories
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NEW_DIRECTORY_PERMS,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_NEW_DIRECTORY_PERMS,
                           long mode);
 ~~~
 
@@ -46,14 +46,14 @@ this are *sftp://*, *scp://*, and *file://*.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL,
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL,
                      "sftp://upload.example.com/newdir/file.zip");
-    curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS, 1L);
-    curl_easy_setopt(curl, CURLOPT_NEW_DIRECTORY_PERMS, 0644L);
-    ret = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_FTP_CREATE_MISSING_DIRS, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_NEW_DIRECTORY_PERMS, 0644L);
+    ret = fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -62,7 +62,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

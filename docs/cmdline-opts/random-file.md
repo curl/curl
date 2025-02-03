@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: random-file
 Arg: <file>
 Help: File for reading random data from
@@ -16,7 +16,7 @@ Example:
 # `--random-file`
 
 Deprecated option. This option is ignored (added in 7.84.0). Prior to that it
-only had an effect on curl if built to use old versions of OpenSSL.
+only had an effect on fetch if built to use old versions of OpenSSL.
 
 Specify the path name to file containing random data. The data may be used to
 seed the random engine for SSL connections.

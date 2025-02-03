@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_ACCEPT_ENCODING
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_ACCEPT_ENCODING
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPHEADER (3)
-  - CURLOPT_HTTP_CONTENT_DECODING (3)
-  - CURLOPT_TRANSFER_ENCODING (3)
+  - FETCHOPT_HTTPHEADER (3)
+  - FETCHOPT_HTTP_CONTENT_DECODING (3)
+  - FETCHOPT_TRANSFER_ENCODING (3)
 Protocol:
   - HTTP
 Added-in: 7.21.6
@@ -15,14 +15,14 @@ Added-in: 7.21.6
 
 # NAME
 
-CURLOPT_ACCEPT_ENCODING - automatic decompression of HTTP downloads
+FETCHOPT_ACCEPT_ENCODING - automatic decompression of HTTP downloads
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ACCEPT_ENCODING, char *enc);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_ACCEPT_ENCODING, char *enc);
 ~~~
 
 # DESCRIPTION
@@ -32,11 +32,11 @@ Pass a char pointer argument specifying what encoding you would like.
 Sets the contents of the Accept-Encoding: header sent in an HTTP request, and
 enables decoding of a response when a Content-Encoding: header is received.
 
-libcurl potentially supports several different compressed encodings depending
+libfetch potentially supports several different compressed encodings depending
 on what support that has been built-in.
 
 To aid applications not having to bother about what specific algorithms this
-particular libcurl build supports, libcurl allows a zero-length string to be
+particular libfetch build supports, libfetch allows a zero-length string to be
 set ("") to ask for an Accept-Encoding: header to be used that contains all
 built-in supported encodings.
 
@@ -44,16 +44,16 @@ Alternatively, you can specify exactly the encoding or list of encodings you
 want in the response. The following encodings are supported: *identity*,
 meaning non-compressed, *deflate* which requests the server to compress its
 response using the zlib algorithm, *gzip* which requests the gzip algorithm,
-(since curl 7.57.0) *br* which is brotli and (since curl 7.72.0) *zstd* which
+(since fetch 7.57.0) *br* which is brotli and (since fetch 7.72.0) *zstd* which
 is zstd. Provide them in the string as a comma-separated list of accepted
 encodings, like: **"br, gzip, deflate"**.
 
-Set CURLOPT_ACCEPT_ENCODING(3) to NULL to explicitly disable it, which makes
-libcurl not send an Accept-Encoding: header and not decompress received
+Set FETCHOPT_ACCEPT_ENCODING(3) to NULL to explicitly disable it, which makes
+libfetch not send an Accept-Encoding: header and not decompress received
 contents automatically.
 
 You can also opt to just include the Accept-Encoding: header in your request
-with CURLOPT_HTTPHEADER(3) but then there is no automatic decompressing when
+with FETCHOPT_HTTPHEADER(3) but then there is no automatic decompressing when
 receiving data.
 
 This is a request, not an order; the server may or may not do it. This option
@@ -77,11 +77,11 @@ previous ones.
 
 # HISTORY
 
-This option was called CURLOPT_ENCODING before 7.21.6
+This option was called FETCHOPT_ENCODING before 7.21.6
 
 # NOTES
 
-The specific libcurl you are using must have been built with zlib to be able to
+The specific libfetch you are using must have been built with zlib to be able to
 decompress gzip and deflate responses, with the brotli library to
 decompress brotli responses and with the zstd library to decompress zstd
 responses.
@@ -97,15 +97,15 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* enable all supported built-in compressions */
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+    fetch_easy_setopt(fetch, FETCHOPT_ACCEPT_ENCODING, "");
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -114,7 +114,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

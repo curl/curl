@@ -1,52 +1,52 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FTPSSLAUTH
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FTPSSLAUTH
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - FTP
 See-also:
-  - CURLOPT_FTP_SSL_CCC (3)
-  - CURLOPT_USE_SSL (3)
+  - FETCHOPT_FTP_SSL_CCC (3)
+  - FETCHOPT_USE_SSL (3)
 Added-in: 7.12.2
 ---
 
 # NAME
 
-CURLOPT_FTPSSLAUTH - order in which to attempt TLS vs SSL
+FETCHOPT_FTPSSLAUTH - order in which to attempt TLS vs SSL
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPSSLAUTH, long order);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FTPSSLAUTH, long order);
 ~~~
 
 # DESCRIPTION
 
-Pass a long using one of the values from below, to alter how libcurl issues
+Pass a long using one of the values from below, to alter how libfetch issues
 "AUTH TLS" or "AUTH SSL" when FTP over SSL is activated. This is only
-interesting if CURLOPT_USE_SSL(3) is also set.
+interesting if FETCHOPT_USE_SSL(3) is also set.
 
 Possible *order* values:
 
-## CURLFTPAUTH_DEFAULT
+## FETCHFTPAUTH_DEFAULT
 
-Allow libcurl to decide.
+Allow libfetch to decide.
 
-## CURLFTPAUTH_SSL
+## FETCHFTPAUTH_SSL
 
 Try "AUTH SSL" first, and only if that fails try "AUTH TLS".
 
-## CURLFTPAUTH_TLS
+## FETCHFTPAUTH_TLS
 
 Try "AUTH TLS" first, and only if that fails try "AUTH SSL".
 
 # DEFAULT
 
-CURLFTPAUTH_DEFAULT
+FETCHFTPAUTH_DEFAULT
 
 # %PROTOCOLS%
 
@@ -55,15 +55,15 @@ CURLFTPAUTH_DEFAULT
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/file.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_USE_SSL, FETCHUSESSL_TRY);
     /* funny server, ask for SSL before TLS */
-    curl_easy_setopt(curl, CURLOPT_FTPSSLAUTH, (long)CURLFTPAUTH_SSL);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_FTPSSLAUTH, (long)FETCHFTPAUTH_SSL);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -72,7 +72,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

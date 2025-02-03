@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_NOSIGNAL
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_NOSIGNAL
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_TIMEOUT (3)
+  - FETCHOPT_TIMEOUT (3)
 Protocol:
   - All
 Added-in: 7.10
@@ -13,32 +13,32 @@ Added-in: 7.10
 
 # NAME
 
-CURLOPT_NOSIGNAL - skip all signal handling
+FETCHOPT_NOSIGNAL - skip all signal handling
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOSIGNAL, long onoff);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_NOSIGNAL, long onoff);
 ~~~
 
 # DESCRIPTION
 
-If *onoff* is 1, libcurl uses no functions that install signal handlers or
+If *onoff* is 1, libfetch uses no functions that install signal handlers or
 any functions that cause signals to be sent to the process. This option is
 here to allow multi-threaded Unix applications to still set/use all timeout
 options etc, without risking getting signals.
 
-If this option is set and libcurl has been built with the standard name
+If this option is set and libfetch has been built with the standard name
 resolver, timeouts cannot occur while the name resolve takes place. Consider
-building libcurl with the c-ares or threaded resolver backends to enable
+building libfetch with the c-ares or threaded resolver backends to enable
 asynchronous DNS lookups, to enable timeouts for name resolves without the use
 of signals.
 
-Setting CURLOPT_NOSIGNAL(3) to 1 makes libcurl NOT ask the system to
+Setting FETCHOPT_NOSIGNAL(3) to 1 makes libfetch NOT ask the system to
 ignore SIGPIPE signals, which otherwise are sent by the system when trying to
-send data to a socket which is closed in the other end. libcurl makes an
+send data to a socket which is closed in the other end. libfetch makes an
 effort to never cause such SIGPIPE signals to trigger, but some operating
 systems have no way to avoid them and even on those that have there are some
 corner cases when they may still happen, contrary to our desire.
@@ -54,16 +54,16 @@ corner cases when they may still happen, contrary to our desire.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
 
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_NOSIGNAL, 1L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -72,7 +72,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

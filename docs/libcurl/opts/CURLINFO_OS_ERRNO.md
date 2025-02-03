@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_OS_ERRNO
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_OS_ERRNO
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.12.2
@@ -14,14 +14,14 @@ Added-in: 7.12.2
 
 # NAME
 
-CURLINFO_OS_ERRNO - get errno number from last connect failure
+FETCHINFO_OS_ERRNO - get errno number from last connect failure
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_OS_ERRNO, long *errnop);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_OS_ERRNO, long *errnop);
 ~~~
 
 # DESCRIPTION
@@ -30,11 +30,11 @@ Pass a pointer to a long to receive the errno variable from a connect failure.
 Note that the value is only set on failure, it is not reset upon a successful
 operation. The number is OS and system specific.
 
-libcurl network-related errors that may have a saved errno are:
-CURLE_COULDNT_CONNECT, CURLE_FAILED_INIT, CURLE_INTERFACE_FAILED,
-CURLE_OPERATION_TIMEDOUT, CURLE_RECV_ERROR, CURLE_SEND_ERROR.
+libfetch network-related errors that may have a saved errno are:
+FETCHE_COULDNT_CONNECT, FETCHE_FAILED_INIT, FETCHE_INTERFACE_FAILED,
+FETCHE_OPERATION_TIMEDOUT, FETCHE_RECV_ERROR, FETCHE_SEND_ERROR.
 
-Since 8.8.0 libcurl clears the easy handle's saved errno before performing the
+Since 8.8.0 libfetch clears the easy handle's saved errno before performing the
 transfer. Prior versions did not clear the saved errno, which means if a saved
 errno is retrieved it could be from a previous transfer on the same handle.
 
@@ -45,19 +45,19 @@ errno is retrieved it could be from a previous transfer on the same handle.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res != CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(res != FETCHE_OK) {
       long error;
-      res = curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &error);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_OS_ERRNO, &error);
       if(!res && error) {
         printf("Errno: %ld\n", error);
       }
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

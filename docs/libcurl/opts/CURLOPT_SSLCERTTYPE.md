@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSLCERTTYPE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSLCERTTYPE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSLCERT (3)
-  - CURLOPT_SSLKEY (3)
+  - FETCHOPT_SSLCERT (3)
+  - FETCHOPT_SSLKEY (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -21,14 +21,14 @@ Added-in: 7.9.3
 
 # NAME
 
-CURLOPT_SSLCERTTYPE - type of client SSL certificate
+FETCHOPT_SSLCERTTYPE - type of client SSL certificate
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERTTYPE, char *type);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSLCERTTYPE, char *type);
 ~~~
 
 # DESCRIPTION
@@ -39,7 +39,7 @@ the format of your certificate.
 Supported formats are "PEM" and "DER", except with Secure Transport or
 Schannel. OpenSSL (versions 0.9.3 and later), Secure Transport (on iOS 5 or
 later, or macOS 10.7 or later) and Schannel support "P12" for PKCS#12-encoded
-files. GnuTLS supports P12 starting with curl 8.11.0.
+files. GnuTLS supports P12 starting with fetch 8.11.0.
 
 The application does not have to keep the string around after setting this
 option.
@@ -58,16 +58,16 @@ previous ones. Set it to NULL restores back to internal default.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, "client.pem");
-    curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, "key.pem");
-    curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "s3cret");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_SSLCERT, "client.pem");
+    fetch_easy_setopt(fetch, FETCHOPT_SSLCERTTYPE, "PEM");
+    fetch_easy_setopt(fetch, FETCHOPT_SSLKEY, "key.pem");
+    fetch_easy_setopt(fetch, FETCHOPT_KEYPASSWD, "s3cret");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -76,7 +76,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

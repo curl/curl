@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_RESPONSE_CODE
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_RESPONSE_CODE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_HTTP_CONNECTCODE (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_HTTP_CONNECTCODE (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
   - FTP
@@ -18,25 +18,25 @@ Added-in: 7.10.8
 
 # NAME
 
-CURLINFO_RESPONSE_CODE - get the last response code
+FETCHINFO_RESPONSE_CODE - get the last response code
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_RESPONSE_CODE, long *codep);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_RESPONSE_CODE, long *codep);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a long to receive the last received HTTP, FTP, SMTP or LDAP
 (OpenLDAP only) response code. This option was previously known as
-CURLINFO_HTTP_CODE in libcurl 7.10.7 and earlier. The stored value is zero if
+FETCHINFO_HTTP_CODE in libfetch 7.10.7 and earlier. The stored value is zero if
 no server response code has been received.
 
 Note that a proxy's CONNECT response should be read with
-CURLINFO_HTTP_CONNECTCODE(3) and not this.
+FETCHINFO_HTTP_CONNECTCODE(3) and not this.
 
 # %PROTOCOLS%
 
@@ -45,30 +45,30 @@ CURLINFO_HTTP_CONNECTCODE(3) and not this.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(res == FETCHE_OK) {
       long response_code;
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+      fetch_easy_getinfo(fetch, FETCHINFO_RESPONSE_CODE, &response_code);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
 
 # NOTES
 
-The former name, CURLINFO_HTTP_CODE, was added in 7.4.1. Support for SMTP
+The former name, FETCHINFO_HTTP_CODE, was added in 7.4.1. Support for SMTP
 responses added in 7.25.0, for OpenLDAP in 7.81.0.
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

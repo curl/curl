@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_RANGE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_RANGE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_LOW_SPEED_LIMIT (3)
-  - CURLOPT_MAXFILESIZE_LARGE (3)
-  - CURLOPT_MAX_RECV_SPEED_LARGE (3)
-  - CURLOPT_RESUME_FROM (3)
+  - FETCHOPT_LOW_SPEED_LIMIT (3)
+  - FETCHOPT_MAXFILESIZE_LARGE (3)
+  - FETCHOPT_MAX_RECV_SPEED_LARGE (3)
+  - FETCHOPT_RESUME_FROM (3)
 Protocol:
   - HTTP
   - FTP
@@ -20,14 +20,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_RANGE - byte range to request
+FETCHOPT_RANGE - byte range to request
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RANGE, char *range);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_RANGE, char *range);
 ~~~
 
 # DESCRIPTION
@@ -40,7 +40,7 @@ HTTP transfers also support several intervals, separated with commas as in
 *"X-Y,N-M"*. Using this kind of multiple intervals causes the HTTP server
 to send the response document in pieces (using standard MIME separation
 techniques). Unfortunately, the HTTP standard (RFC 7233 section 3.1) allows
-servers to ignore range requests so even when you set CURLOPT_RANGE(3)
+servers to ignore range requests so even when you set FETCHOPT_RANGE(3)
 for a request, you may end up getting the full response sent back.
 
 For RTSP, the formatting of a range should follow RFC 2326 Section 12.29. For
@@ -67,15 +67,15 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* get the first 200 bytes */
-    curl_easy_setopt(curl, CURLOPT_RANGE, "0-199");
+    fetch_easy_setopt(fetch, FETCHOPT_RANGE, "0-199");
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -88,7 +88,7 @@ FILE since 7.18.0, RTSP since 7.20.0
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: retry-max-time
 Arg: <seconds>
 Help: Retry only within this period
 Added: 7.12.3
-Category: curl timeout
+Category: fetch timeout
 Multi: single
 See-also:
   - retry

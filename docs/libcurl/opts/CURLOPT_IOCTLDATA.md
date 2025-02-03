@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_IOCTLDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_IOCTLDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_IOCTLFUNCTION (3)
-  - CURLOPT_SEEKFUNCTION (3)
+  - FETCHOPT_IOCTLFUNCTION (3)
+  - FETCHOPT_SEEKFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.12.3
@@ -14,20 +14,20 @@ Added-in: 7.12.3
 
 # NAME
 
-CURLOPT_IOCTLDATA - pointer passed to I/O callback
+FETCHOPT_IOCTLDATA - pointer passed to I/O callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_IOCTLDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_IOCTLDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
-Pass the *pointer* that is untouched by libcurl and passed as the 3rd
-argument in the ioctl callback set with CURLOPT_IOCTLFUNCTION(3).
+Pass the *pointer* that is untouched by libfetch and passed as the 3rd
+argument in the ioctl callback set with FETCHOPT_IOCTLFUNCTION(3).
 
 # DEFAULT
 
@@ -44,22 +44,22 @@ struct data {
   int fd; /* our file descriptor */
 };
 
-static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
+static fetchioerr ioctl_callback(FETCH *handle, int cmd, void *clientp)
 {
   struct data *io = (struct data *)clientp;
-  if(cmd == CURLIOCMD_RESTARTREAD) {
+  if(cmd == FETCHIOCMD_RESTARTREAD) {
     lseek(io->fd, 0, SEEK_SET);
-    return CURLIOE_OK;
+    return FETCHIOE_OK;
   }
-  return CURLIOE_UNKNOWNCMD;
+  return FETCHIOE_UNKNOWNCMD;
 }
 int main(void)
 {
   struct data ioctl_data;
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
-    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, &ioctl_data);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctl_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_IOCTLDATA, &ioctl_data);
   }
 }
 ~~~
@@ -72,7 +72,7 @@ Deprecated since 7.18.0.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

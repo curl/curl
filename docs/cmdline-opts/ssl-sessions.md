@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ssl-sessions
 Arg: <filename>
 Protocols: TLS
@@ -16,11 +16,11 @@ Example:
 
 # `--ssl-sessions`
 
-Use the given file to load SSL session tickets into curl's cache before
-starting any transfers. At the end of a successful curl run, the cached
+Use the given file to load SSL session tickets into fetch's cache before
+starting any transfers. At the end of a successful fetch run, the cached
 SSL sessions tickets are save to the file, replacing any previous content.
 
-The file does not have to exist, but curl reports an error if it is
+The file does not have to exist, but fetch reports an error if it is
 unable to create it. Unused loaded tickets are saved again, unless they
 get replaced or purged from the cache for space reasons.
 

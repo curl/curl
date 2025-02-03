@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: write-out
 Short: w
 Arg: <format>
@@ -17,14 +17,14 @@ Example:
 
 # `--write-out`
 
-Make curl display information on stdout after a completed transfer. The format
+Make fetch display information on stdout after a completed transfer. The format
 is a string that may contain plain text mixed with any number of variables.
-The format can be specified as a literal "string", or you can have curl read
-the format from a file with "@filename" and to tell curl to read the format
+The format can be specified as a literal "string", or you can have fetch read
+the format from a file with "@filename" and to tell fetch to read the format
 from stdin you write "@-".
 
 The variables present in the output format are substituted by the value or
-text that curl thinks fit, as described below. All variables are specified as
+text that fetch thinks fit, as described below. All variables are specified as
 %{variable_name} and to output a normal % you just write them as %%. You can
 output a newline by using \n, a carriage return with \r and a tab space with
 \t.
@@ -38,10 +38,10 @@ colon). The header contents are exactly as sent over the network, with leading
 and trailing whitespace trimmed (added in 7.84.0).
 
 Select a specific target destination file to write the output to, by using
-*%output{name}* (added in curl 8.3.0) where *name* is the full filename. The
+*%output{name}* (added in fetch 8.3.0) where *name* is the full filename. The
 output following that instruction is then written to that file. More than one
 *%output{}* instruction can be specified in the same write-out argument. If
-the filename cannot be created, curl leaves the output destination to the one
+the filename cannot be created, fetch leaves the output destination to the one
 used prior to the *%output{}* instruction. Use *%output{\>\>name}* to append
 data to an existing file.
 
@@ -49,7 +49,7 @@ This output is done independently of if the file transfer was successful or
 not.
 
 If the specified action or output specified with this option fails in any way,
-it does not make curl return a (different) error.
+it does not make fetch return a (different) error.
 
 **NOTE:** On Windows, the %-symbol is a special symbol used to expand
 environment variables. In batch files, all occurrences of % must be doubled
@@ -78,13 +78,13 @@ The error message. (Added in 7.75.0)
 The numerical exit code of the transfer. (Added in 7.75.0)
 
 ## `filename_effective`
-The ultimate filename that curl writes out to. This is only meaningful if curl
+The ultimate filename that fetch writes out to. This is only meaningful if fetch
 is told to write to a file with the --remote-name or --output option. It is
 most useful in combination with the --remote-header-name option.
 (Added in 7.26.0)
 
 ## `ftp_entry_path`
-The initial path curl ended up in when logging on to the remote FTP
+The initial path fetch ended up in when logging on to the remote FTP
 server. (Added in 7.15.4)
 
 ## `header_json`
@@ -102,7 +102,7 @@ FTP(s) transfer.
 
 ## `http_connect`
 The numerical code that was found in the last response (from a proxy) to a
-curl CONNECT request. (Added in 7.12.4)
+fetch CONNECT request. (Added in 7.12.4)
 
 ## `http_version`
 The http version that was effectively used. (Added in 7.50.0)
@@ -189,11 +189,11 @@ The total amount of bytes that were uploaded. This is the size of the
 body/data that was transferred, excluding headers.
 
 ## `speed_download`
-The average download speed that curl measured for the complete download. Bytes
+The average download speed that fetch measured for the complete download. Bytes
 per second.
 
 ## `speed_upload`
-The average upload speed that curl measured for the complete upload. Bytes per
+The average upload speed that fetch measured for the complete upload. Bytes per
 second.
 
 ## `ssl_verify_result`
@@ -222,7 +222,7 @@ The time, in seconds, it took from the start until the name resolving was
 completed.
 
 ## `time_posttransfer`
-The time it took from the start until the last byte is sent by libcurl.
+The time it took from the start until the last byte is sent by libfetch.
 In microseconds. (Added in 8.10.0)
 
 ## `time_pretransfer`
@@ -322,7 +322,7 @@ The URL index number of this transfer, 0-indexed. Unglobbed URLs share the
 same index number as the origin globbed URL. (Added in 7.75.0)
 
 ## `url_effective`
-The URL that was fetched last. This is most meaningful if you have told curl
+The URL that was fetched last. This is most meaningful if you have told fetch
 to follow location: headers.
 
 ## `xfer_id`

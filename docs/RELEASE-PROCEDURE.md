@@ -1,10 +1,10 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-curl release procedure - how to do a release
+fetch release procedure - how to do a release
 ============================================
 
 in the source code repo
@@ -16,7 +16,7 @@ in the source code repo
 
 - make sure all relevant changes are committed on the master branch
 
-- tag the git repo in this style: `git tag -a curl-7_34_0`. -a annotates the
+- tag the git repo in this style: `git tag -a fetch-7_34_0`. -a annotates the
   tag and we use underscores instead of dots in the version number. Make sure
   the tag is GPG signed (using -s).
 
@@ -28,7 +28,7 @@ in the source code repo
 
 - upload the 8 resulting files to the primary download directory
 
-in the curl-www repo
+in the fetch-www repo
 --------------------
 
 - edit `Makefile` (version number and date),
@@ -53,7 +53,7 @@ on GitHub
 inform
 ------
 
-- send an email to curl-users, curl-announce and curl-library. Insert the
+- send an email to fetch-users, fetch-announce and fetch-library. Insert the
   RELEASE-NOTES into the mail.
 
 - if there are any advisories associated with the release, send each markdown
@@ -65,7 +65,7 @@ celebrate
 
 - suitable beverage intake is encouraged for the festivities
 
-curl release scheduling
+fetch release scheduling
 =======================
 
 Release Cycle
@@ -82,7 +82,7 @@ Each 8 week (56 days) release cycle is divided into three distinct periods:
   might do a follow-up patch release.
 
 - During the following 3 weeks (21 days) there is a feature window: we allow
-  new features and changes to curl and libcurl. If we accept any such changes,
+  new features and changes to fetch and libfetch. If we accept any such changes,
   we bump the minor number used for the next release.
 
 - During the next 25 days we are in feature freeze. We do not merge any
@@ -103,7 +103,7 @@ assess such criticality, but if an issue is highly disturbing or has a
 security impact on a large enough share of the user population it might
 qualify.
 
-If you think an issue qualifies, bring it to the curl-library mailing list and
+If you think an issue qualifies, bring it to the fetch-library mailing list and
 push for it.
 
 Coming dates

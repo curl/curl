@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: data-binary
 Arg: <data>
 Help: HTTP POST binary data
@@ -19,7 +19,7 @@ Example:
 Post data exactly as specified with no extra processing whatsoever.
 
 If you start the data with the letter @, the rest should be a filename.
-`@-` makes curl read the data from stdin. Data is posted in a similar
+`@-` makes fetch read the data from stdin. Data is posted in a similar
 manner as --data does, except that newlines and carriage returns are
 preserved and conversions are never done.
 

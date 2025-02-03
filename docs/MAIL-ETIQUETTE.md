@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # Mail etiquette
@@ -10,8 +10,8 @@ SPDX-License-Identifier: curl
 
 ### Mailing Lists
 
-The mailing lists we have are all listed and described on the [curl
-website](https://curl.se/mail/).
+The mailing lists we have are all listed and described on the [fetch
+website](https://fetch.se/mail/).
 
 Each mailing list is targeted to a specific set of users and subjects, please
 use the one or the ones that suit you the most.
@@ -26,7 +26,7 @@ Netiquette is a common term for how to behave on the Internet. Of course, in
 each particular group and subculture there are differences in what is
 acceptable and what is considered good manners.
 
-This document outlines what we in the curl project consider to be good
+This document outlines what we in the fetch project consider to be good
 etiquette, and primarily this focus on how to behave on and how to use our
 mailing lists.
 
@@ -39,12 +39,12 @@ way to read the reply, but to ask the one person the question. The one person
 consequently gets overloaded with mail.
 
 If you really want to contact an individual and perhaps pay for his or her
-services, by all means go ahead, but if it is just another curl question, take
+services, by all means go ahead, but if it is just another fetch question, take
 it to a suitable list instead.
 
 ### Subscription Required
 
-All curl mailing lists require that you are subscribed to allow a mail to go
+All fetch mailing lists require that you are subscribed to allow a mail to go
 through to all the subscribers.
 
 If you post without being subscribed (or from a different mail address than
@@ -56,13 +56,13 @@ stop spam from pestering the lists.
 
 ### Moderation of new posters
 
-Several of the curl mailing lists automatically make all posts from new
+Several of the fetch mailing lists automatically make all posts from new
 subscribers be moderated. After you have subscribed and sent your first mail
 to a list, that mail is not let through to the list until a mailing list
 administrator has verified that it is OK and permits it to get posted.
 
 Once a first post has been made that proves the sender is actually talking
-about curl-related subjects, the moderation "flag" is switched off and future
+about fetch-related subjects, the moderation "flag" is switched off and future
 posts go through without being moderated.
 
 The reason for this moderation policy is that we do suffer from spammers who
@@ -95,7 +95,7 @@ the page for the particular mailing list you are subscribed to and you enter
 your email address and password and press the unsubscribe button.
 
 Also, the instructions to unsubscribe are included in the headers of every
-mail that is sent out to all curl related mailing lists and there is a footer
+mail that is sent out to all fetch related mailing lists and there is a footer
 in each mail that links to the "admin" page on which you can unsubscribe and
 change other options.
 
@@ -121,7 +121,7 @@ you get an answer within a couple of days.
 
 You do yourself and all of us a service when you include as many details as
 possible already in your first email. Mention your operating system and
-environment. Tell us which curl version you are using and tell us what you
+environment. Tell us which fetch version you are using and tell us what you
 did, what happened and what you expected would happen. Preferably, show us
 what you did with details enough to allow others to help point out the problem
 or repeat the steps in their locations.
@@ -143,17 +143,17 @@ Your email, its contents and all its headers and the details in those headers
 are received by every subscriber of the mailing list that you send your email
 to.
 
-Your email as sent to a curl mailing list ends up in mail archives, on the
-curl website and elsewhere, for others to see and read. Today and in the
+Your email as sent to a fetch mailing list ends up in mail archives, on the
+fetch website and elsewhere, for others to see and read. Today and in the
 future. In addition to the archives, the mail is sent out to thousands of
 individuals. There is no way to undo a sent email.
 
-When sending emails to a curl mailing list, do not include sensitive
+When sending emails to a fetch mailing list, do not include sensitive
 information such as usernames and passwords; use fake ones, temporary ones or
 just remove them completely from the mail. Note that this includes base64
 encoded HTTP Basic auth headers.
 
-This public nature of the curl mailing lists makes automatically inserted mail
+This public nature of the fetch mailing lists makes automatically inserted mail
 footers about mails being "private" or "only meant for the recipient" or
 similar even more silly than usual. Because they are absolutely not private
 when sent to a public mailing list.

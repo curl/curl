@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: disable-eprt
 Help: Inhibit using EPRT or LPRT
 Protocols: FTP
@@ -17,7 +17,7 @@ Example:
 # `--disable-eprt`
 
 Disable the use of the EPRT and LPRT commands when doing active FTP transfers.
-curl normally first attempts to use EPRT before using PORT, but with this
+fetch normally first attempts to use EPRT before using PORT, but with this
 option, it uses PORT right away. EPRT is an extension to the original FTP
 protocol, and does not work on all servers, but enables more functionality in
 a better way than the traditional PORT command.

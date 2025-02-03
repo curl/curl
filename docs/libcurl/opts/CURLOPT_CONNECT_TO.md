@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_CONNECT_TO
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_CONNECT_TO
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_FOLLOWLOCATION (3)
-  - CURLOPT_HTTPPROXYTUNNEL (3)
-  - CURLOPT_RESOLVE (3)
-  - CURLOPT_URL (3)
+  - FETCHOPT_FOLLOWLOCATION (3)
+  - FETCHOPT_HTTPPROXYTUNNEL (3)
+  - FETCHOPT_RESOLVE (3)
+  - FETCHOPT_URL (3)
 Protocol:
   - All
 Added-in: 7.49.0
@@ -16,23 +16,23 @@ Added-in: 7.49.0
 
 # NAME
 
-CURLOPT_CONNECT_TO - connect to another host and port instead
+FETCHOPT_CONNECT_TO - connect to another host and port instead
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECT_TO,
-                          struct curl_slist *connect_to);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_CONNECT_TO,
+                          struct fetch_slist *connect_to);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a linked list of strings with "connect to" information to
 use for establishing network connections with this handle. The linked list
-should be a fully valid list of **struct curl_slist** structs properly filled
-in. Use curl_slist_append(3) to create the list and curl_slist_free_all(3) to
+should be a fully valid list of **struct fetch_slist** structs properly filled
+in. Use fetch_slist_append(3) to create the list and fetch_slist_free_all(3) to
 clean up an entire list.
 
 Each single string should be written using the format
@@ -58,7 +58,7 @@ The "connect to" host and port are only used to establish the network
 connection. They do NOT affect the host and port that are used for TLS/SSL
 (e.g. SNI, certificate verification) or for the application protocols.
 
-In contrast to CURLOPT_RESOLVE(3), the option CURLOPT_CONNECT_TO(3) does not
+In contrast to FETCHOPT_RESOLVE(3), the option FETCHOPT_CONNECT_TO(3) does not
 pre-populate the DNS cache and therefore it does not affect future transfers
 of other easy handles that have been added to the same multi handle.
 
@@ -72,9 +72,9 @@ port, the HTTP proxy is automatically switched to tunnel mode for this
 specific request. This is necessary because it is not possible to connect to a
 specific host or port in normal (non-tunnel) mode.
 
-When this option is passed to curl_easy_setopt(3), libcurl does not copy the
+When this option is passed to fetch_easy_setopt(3), libfetch does not copy the
 list so you **must** keep it around until you no longer use this *handle* for
-a transfer before you call curl_slist_free_all(3) on the list.
+a transfer before you call fetch_slist_free_all(3) on the list.
 
 Using this option multiple times makes the last set list override the previous
 ones. Set it to NULL to disable its use again.
@@ -90,22 +90,22 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl;
-  struct curl_slist *connect_to = NULL;
-  connect_to = curl_slist_append(NULL, "example.com::server1.example.com:");
+  FETCH *fetch;
+  struct fetch_slist *connect_to = NULL;
+  connect_to = fetch_slist_append(NULL, "example.com::server1.example.com:");
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_CONNECT_TO, connect_to);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
-  curl_slist_free_all(connect_to);
+  fetch_slist_free_all(connect_to);
 }
 ~~~
 
@@ -113,7 +113,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,10 +1,10 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# Decision making in the curl project
+# Decision making in the fetch project
 
 A rough guide to how we make decisions and who does what.
 
@@ -21,7 +21,7 @@ what the project and the general user population wants and expects from us.
 
 ## Legal entity
 
-There is no legal entity. The curl project is just a bunch of people scattered
+There is no legal entity. The fetch project is just a bunch of people scattered
 around the globe with the common goal to produce source code that creates
 great products. We are not part of any umbrella organization and we are not
 located in any specific country. We are totally independent.
@@ -31,7 +31,7 @@ that wrote those parts of the code.
 
 ## Decisions
 
-The curl project is not a democracy, but everyone is entitled to state their
+The fetch project is not a democracy, but everyone is entitled to state their
 opinion and may argue for their sake within the community.
 
 All and any changes that have been done or are done are eligible to bring up
@@ -44,46 +44,46 @@ the project.
 
 ## Donations
 
-Donating plain money to curl is best done to curl's [Open Collective
-fund](https://opencollective.com/curl). Open Collective is a US based
+Donating plain money to fetch is best done to fetch's [Open Collective
+fund](https://opencollective.com/fetch). Open Collective is a US based
 non-profit organization that holds on to funds for us. This fund is then used
-for paying the curl security bug bounties, to reimburse project related
+for paying the fetch security bug bounties, to reimburse project related
 expenses etc.
 
 Donations to the project can also come in the form of server hosting, providing
-services and paying for people to work on curl related code etc. Usually, such
+services and paying for people to work on fetch related code etc. Usually, such
 donations are services paid for directly by the sponsors.
 
 We grade sponsors in a few different levels and if they meet the criteria,
-they can be mentioned on the Sponsors page on the curl website.
+they can be mentioned on the Sponsors page on the fetch website.
 
 ## Commercial Support
 
-The curl project does not do or offer commercial support. It only hosts
+The fetch project does not do or offer commercial support. It only hosts
 mailing lists, runs bug trackers etc to facilitate communication and work.
 
-However, Daniel works for wolfSSL and we offer commercial curl support there.
+However, Daniel works for wolfSSL and we offer commercial fetch support there.
 
 # Key roles
 
 ## User
 
-Someone who uses or has used curl or libcurl.
+Someone who uses or has used fetch or libfetch.
 
 ## Contributor
 
-Someone who has helped the curl project, who has contributed to bring it
+Someone who has helped the fetch project, who has contributed to bring it
 forward. Contributing could be to provide advice, debug a problem, file a bug
 report, run test infrastructure or writing code etc.
 
 ## Commit author
 
 Sometimes also called 'committer'. Someone who has authored a commit in the
-curl source code repository. Committers are recorded as `Author` in git.
+fetch source code repository. Committers are recorded as `Author` in git.
 
 ## Maintainers
 
-A maintainer in the curl project is an individual who has been given
+A maintainer in the fetch project is an individual who has been given
 permissions to push commits to one of the git repositories.
 
 Maintainers are free to push commits to the repositories at they see fit.
@@ -96,17 +96,17 @@ project as a Pull-Request (PR) to allow others to comment/object before merge.
 A maintainer who stops being active in the project gets their push permissions
 removed at some point. We do this for security reasons but also to make sure
 that we always have the list of maintainers as "the team that push stuff to
-curl".
+fetch".
 
 Getting push permissions removed is not a punishment. Everyone who ever worked
-on maintaining curl is considered a hero, for all time hereafter.
+on maintaining fetch is considered a hero, for all time hereafter.
 
 ## Security team members
 
 We have a security team. That is the team of people who are subscribed to the
-curl-security mailing list; the receivers of security reports from users and
+fetch-security mailing list; the receivers of security reports from users and
 developers. This list of people varies over time but they are all skilled
-developers familiar with the curl project.
+developers familiar with the fetch project.
 
 The security team works best when it consists of a small set of active
 persons. We invite new members when the team seems to need it, and we also
@@ -115,12 +115,12 @@ just find themselves unable to perform their duties there.
 
 ## Core team
 
-There is a curl core team. It currently has the same set of members as the
+There is a fetch core team. It currently has the same set of members as the
 security team. It can also be reached on the security email address.
 
 The core team nominates and invites new members to the team when it sees fit.
 There is no open member voting or formal ways to be a candidate. Active
-participants in the curl project who want to join the core team can ask to
+participants in the fetch project who want to join the core team can ask to
 join.
 
 The core team is a board of advisors. It deals with project management
@@ -131,16 +131,16 @@ lists.
 
 ## Server admins
 
-We run a web server, a mailing list and more on the curl project's primary
+We run a web server, a mailing list and more on the fetch project's primary
 server. That physical machine is owned and run by Haxx. Daniel is the primary
-admin of all things curl related server stuff, but Björn Stenberg and Linus
+admin of all things fetch related server stuff, but Björn Stenberg and Linus
 Feltzing serve as backup admins for when Daniel is gone or unable.
 
 The primary server is paid for by Haxx. The machine is physically located in a
 server bunker in Stockholm Sweden, operated by the company Glesys.
 
 The website contents are served to the web via Fastly and Daniel is the
-primary curl contact with Fastly.
+primary fetch contact with Fastly.
 
 ## BDFL
 
@@ -148,10 +148,10 @@ That is Daniel.
 
 # Maintainers
 
-A curl maintainer is a project volunteer who has the authority and rights to
-merge changes into a git repository in the curl project.
+A fetch maintainer is a project volunteer who has the authority and rights to
+merge changes into a git repository in the fetch project.
 
-Anyone can aspire to become a curl maintainer.
+Anyone can aspire to become a fetch maintainer.
 
 ### Duties
 
@@ -184,7 +184,7 @@ When you are merging patches/pull requests...
 
 ## Who are maintainers?
 
-The [list of maintainers](https://github.com/orgs/curl/people). Be aware that
+The [list of maintainers](https://github.com/orgs/fetch/people). Be aware that
 the level of presence and activity in the project vary greatly between
 different individuals and over time.
 
@@ -193,7 +193,7 @@ different individuals and over time.
 If you think you can help making the project better by shouldering some
 maintaining responsibilities, then please get in touch.
 
-You are expected to be familiar with the curl project and its ways of working.
+You are expected to be familiar with the fetch project and its ways of working.
 You need to have gotten a few quality patches merged as a proof of this.
 
 ### Stop being a maintainer

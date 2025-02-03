@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_USERNAME
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_USERNAME
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPAUTH (3)
-  - CURLOPT_PASSWORD (3)
-  - CURLOPT_PROXYAUTH (3)
-  - CURLOPT_USERPWD (3)
+  - FETCHOPT_HTTPAUTH (3)
+  - FETCHOPT_PASSWORD (3)
+  - FETCHOPT_PROXYAUTH (3)
+  - FETCHOPT_USERPWD (3)
 Protocol:
   - All
 Added-in: 7.19.1
@@ -16,14 +16,14 @@ Added-in: 7.19.1
 
 # NAME
 
-CURLOPT_USERNAME - username to use in authentication
+FETCHOPT_USERNAME - username to use in authentication
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERNAME,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_USERNAME,
                           char *username);
 ~~~
 
@@ -32,9 +32,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERNAME,
 Pass a char pointer as parameter, which should be pointing to the
 null-terminated username to use for the transfer.
 
-CURLOPT_USERNAME(3) sets the username to be used in protocol
+FETCHOPT_USERNAME(3) sets the username to be used in protocol
 authentication. You should not use this option together with the (older)
-CURLOPT_USERPWD(3) option.
+FETCHOPT_USERPWD(3) option.
 
 When using Kerberos V5 authentication with a Windows based server, you should
 include the domain name in order for the server to successfully obtain a
@@ -52,7 +52,7 @@ Some HTTP servers (on Windows) support inclusion of the domain for Basic
 authentication as well.
 
 To specify the password and login options, along with the username, use the
-CURLOPT_PASSWORD(3) and CURLOPT_LOGIN_OPTIONS(3) options.
+FETCHOPT_PASSWORD(3) and FETCHOPT_LOGIN_OPTIONS(3) options.
 
 The application does not have to keep the string around after setting this
 option.
@@ -68,16 +68,16 @@ blank
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
 
-    curl_easy_setopt(curl, CURLOPT_USERNAME, "clark");
+    fetch_easy_setopt(fetch, FETCHOPT_USERNAME, "clark");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -86,7 +86,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

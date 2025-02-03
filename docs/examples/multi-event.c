@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -30,33 +30,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <event2/event.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 static struct event_base *base;
-static CURLM *curl_handle;
+static FETCHM *fetch_handle;
 static struct event *timeout;
 
-typedef struct curl_context_s {
+typedef struct fetch_context_s {
   struct event *event;
-  curl_socket_t sockfd;
-} curl_context_t;
+  fetch_socket_t sockfd;
+} fetch_context_t;
 
-static void curl_perform(int fd, short event, void *arg);
+static void fetch_perform(int fd, short event, void *arg);
 
-static curl_context_t *create_curl_context(curl_socket_t sockfd)
+static fetch_context_t *create_fetch_context(fetch_socket_t sockfd)
 {
-  curl_context_t *context;
+  fetch_context_t *context;
 
-  context = (curl_context_t *) malloc(sizeof(*context));
+  context = (fetch_context_t *) malloc(sizeof(*context));
 
   context->sockfd = sockfd;
 
-  context->event = event_new(base, sockfd, 0, curl_perform, context);
+  context->event = event_new(base, sockfd, 0, fetch_perform, context);
 
   return context;
 }
 
-static void destroy_curl_context(curl_context_t *context)
+static void destroy_fetch_context(fetch_context_t *context)
 {
   event_del(context->event);
   event_free(context->event);
@@ -67,7 +67,7 @@ static void add_download(const char *url, int num)
 {
   char filename[50];
   FILE *file;
-  CURL *handle;
+  FETCH *handle;
 
   snprintf(filename, 50, "%d.download", num);
 
@@ -77,66 +77,66 @@ static void add_download(const char *url, int num)
     return;
   }
 
-  handle = curl_easy_init();
-  curl_easy_setopt(handle, CURLOPT_WRITEDATA, file);
-  curl_easy_setopt(handle, CURLOPT_PRIVATE, file);
-  curl_easy_setopt(handle, CURLOPT_URL, url);
-  curl_multi_add_handle(curl_handle, handle);
+  handle = fetch_easy_init();
+  fetch_easy_setopt(handle, FETCHOPT_WRITEDATA, file);
+  fetch_easy_setopt(handle, FETCHOPT_PRIVATE, file);
+  fetch_easy_setopt(handle, FETCHOPT_URL, url);
+  fetch_multi_add_handle(fetch_handle, handle);
   fprintf(stderr, "Added download %s -> %s\n", url, filename);
 }
 
 static void check_multi_info(void)
 {
   char *done_url;
-  CURLMsg *message;
+  FETCHMsg *message;
   int pending;
-  CURL *easy_handle;
+  FETCH *easy_handle;
   FILE *file;
 
-  while((message = curl_multi_info_read(curl_handle, &pending))) {
+  while((message = fetch_multi_info_read(fetch_handle, &pending))) {
     switch(message->msg) {
-    case CURLMSG_DONE:
-      /* Do not use message data after calling curl_multi_remove_handle() and
-         curl_easy_cleanup(). As per curl_multi_info_read() docs:
+    case FETCHMSG_DONE:
+      /* Do not use message data after calling fetch_multi_remove_handle() and
+         fetch_easy_cleanup(). As per fetch_multi_info_read() docs:
          "WARNING: The data the returned pointer points to does not survive
-         calling curl_multi_cleanup, curl_multi_remove_handle or
-         curl_easy_cleanup." */
+         calling fetch_multi_cleanup, fetch_multi_remove_handle or
+         fetch_easy_cleanup." */
       easy_handle = message->easy_handle;
 
-      curl_easy_getinfo(easy_handle, CURLINFO_EFFECTIVE_URL, &done_url);
-      curl_easy_getinfo(easy_handle, CURLINFO_PRIVATE, &file);
+      fetch_easy_getinfo(easy_handle, FETCHINFO_EFFECTIVE_URL, &done_url);
+      fetch_easy_getinfo(easy_handle, FETCHINFO_PRIVATE, &file);
       printf("%s DONE\n", done_url);
 
-      curl_multi_remove_handle(curl_handle, easy_handle);
-      curl_easy_cleanup(easy_handle);
+      fetch_multi_remove_handle(fetch_handle, easy_handle);
+      fetch_easy_cleanup(easy_handle);
       if(file) {
         fclose(file);
       }
       break;
 
     default:
-      fprintf(stderr, "CURLMSG default\n");
+      fprintf(stderr, "FETCHMSG default\n");
       break;
     }
   }
 }
 
-static void curl_perform(int fd, short event, void *arg)
+static void fetch_perform(int fd, short event, void *arg)
 {
   int running_handles;
   int flags = 0;
-  curl_context_t *context;
+  fetch_context_t *context;
 
   (void)fd;
 
   if(event & EV_READ)
-    flags |= CURL_CSELECT_IN;
+    flags |= FETCH_CSELECT_IN;
   if(event & EV_WRITE)
-    flags |= CURL_CSELECT_OUT;
+    flags |= FETCH_CSELECT_OUT;
 
-  context = (curl_context_t *) arg;
+  context = (fetch_context_t *) arg;
 
-  curl_multi_socket_action(curl_handle, context->sockfd, flags,
+  fetch_multi_socket_action(fetch_handle, context->sockfd, flags,
                            &running_handles);
 
   check_multi_info();
@@ -148,12 +148,12 @@ static void on_timeout(evutil_socket_t fd, short events, void *arg)
   (void)fd;
   (void)events;
   (void)arg;
-  curl_multi_socket_action(curl_handle, CURL_SOCKET_TIMEOUT, 0,
+  fetch_multi_socket_action(fetch_handle, FETCH_SOCKET_TIMEOUT, 0,
                            &running_handles);
   check_multi_info();
 }
 
-static int start_timeout(CURLM *multi, long timeout_ms, void *userp)
+static int start_timeout(FETCHM *multi, long timeout_ms, void *userp)
 {
   (void)multi;
   (void)userp;
@@ -172,42 +172,42 @@ static int start_timeout(CURLM *multi, long timeout_ms, void *userp)
   return 0;
 }
 
-static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
+static int handle_socket(FETCH *easy, fetch_socket_t s, int action, void *userp,
                          void *socketp)
 {
-  curl_context_t *curl_context;
+  fetch_context_t *fetch_context;
   int events = 0;
 
   (void)easy;
   (void)userp;
 
   switch(action) {
-  case CURL_POLL_IN:
-  case CURL_POLL_OUT:
-  case CURL_POLL_INOUT:
-    curl_context = socketp ?
-      (curl_context_t *) socketp : create_curl_context(s);
+  case FETCH_POLL_IN:
+  case FETCH_POLL_OUT:
+  case FETCH_POLL_INOUT:
+    fetch_context = socketp ?
+      (fetch_context_t *) socketp : create_fetch_context(s);
 
-    curl_multi_assign(curl_handle, s, (void *) curl_context);
+    fetch_multi_assign(fetch_handle, s, (void *) fetch_context);
 
-    if(action != CURL_POLL_IN)
+    if(action != FETCH_POLL_IN)
       events |= EV_WRITE;
-    if(action != CURL_POLL_OUT)
+    if(action != FETCH_POLL_OUT)
       events |= EV_READ;
 
     events |= EV_PERSIST;
 
-    event_del(curl_context->event);
-    event_assign(curl_context->event, base, curl_context->sockfd,
-      (short)events, curl_perform, curl_context);
-    event_add(curl_context->event, NULL);
+    event_del(fetch_context->event);
+    event_assign(fetch_context->event, base, fetch_context->sockfd,
+      (short)events, fetch_perform, fetch_context);
+    event_add(fetch_context->event, NULL);
 
     break;
-  case CURL_POLL_REMOVE:
+  case FETCH_POLL_REMOVE:
     if(socketp) {
-      event_del(((curl_context_t*) socketp)->event);
-      destroy_curl_context((curl_context_t*) socketp);
-      curl_multi_assign(curl_handle, s, NULL);
+      event_del(((fetch_context_t*) socketp)->event);
+      destroy_fetch_context((fetch_context_t*) socketp);
+      fetch_multi_assign(fetch_handle, s, NULL);
     }
     break;
   default:
@@ -222,17 +222,17 @@ int main(int argc, char **argv)
   if(argc <= 1)
     return 0;
 
-  if(curl_global_init(CURL_GLOBAL_ALL)) {
-    fprintf(stderr, "Could not init curl\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL)) {
+    fprintf(stderr, "Could not init fetch\n");
     return 1;
   }
 
   base = event_base_new();
   timeout = evtimer_new(base, on_timeout, NULL);
 
-  curl_handle = curl_multi_init();
-  curl_multi_setopt(curl_handle, CURLMOPT_SOCKETFUNCTION, handle_socket);
-  curl_multi_setopt(curl_handle, CURLMOPT_TIMERFUNCTION, start_timeout);
+  fetch_handle = fetch_multi_init();
+  fetch_multi_setopt(fetch_handle, FETCHMOPT_SOCKETFUNCTION, handle_socket);
+  fetch_multi_setopt(fetch_handle, FETCHMOPT_TIMERFUNCTION, start_timeout);
 
   while(argc-- > 1) {
     add_download(argv[argc], argc);
@@ -240,12 +240,12 @@ int main(int argc, char **argv)
 
   event_base_dispatch(base);
 
-  curl_multi_cleanup(curl_handle);
+  fetch_multi_cleanup(fetch_handle);
   event_free(timeout);
   event_base_free(base);
 
   libevent_global_shutdown();
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return 0;
 }

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: form
 Short: F
 Arg: <name=content>
@@ -15,13 +15,13 @@ See-also:
   - form-string
   - form-escape
 Example:
-  - --form "name=curl" --form "file=@loadthis" $URL
+  - --form "name=fetch" --form "file=@loadthis" $URL
 ---
 
 # `--form`
 
 For the HTTP protocol family, emulate a filled-in form in which a user has
-pressed the submit button. This makes curl POST data using the Content-Type
+pressed the submit button. This makes fetch POST data using the Content-Type
 multipart/form-data according to RFC 2388.
 
 For SMTP and IMAP protocols, this composes a multipart mail message to
@@ -36,7 +36,7 @@ from a file.
 
 Read content from stdin instead of a file by using a single "-" as filename.
 This goes for both @ and \< constructs. When stdin is used, the contents is
-buffered in memory first by curl to determine its size and allow a possible
+buffered in memory first by fetch to determine its size and allow a possible
 resend. Defining a part's data from a named non-regular file (such as a named
 pipe or similar) is not subject to buffering and is instead read at
 transmission time; since the full size is unknown before the transfer starts,
@@ -45,39 +45,39 @@ such data is sent as chunks by HTTP and rejected by IMAP.
 Example: send an image to an HTTP server, where 'profile' is the name of the
 form-field to which the file **portrait.jpg** is the input:
 
-    curl -F profile=@portrait.jpg https://example.com/upload.cgi
+    fetch -F profile=@portrait.jpg https://example.com/upload.cgi
 
 Example: send your name and shoe size in two text fields to the server:
 
-    curl -F name=John -F shoesize=11 https://example.com/
+    fetch -F name=John -F shoesize=11 https://example.com/
 
 Example: send your essay in a text field to the server. Send it as a plain
 text field, but get the contents for it from a local file:
 
-    curl -F "story=<hugefile.txt" https://example.com/
+    fetch -F "story=<hugefile.txt" https://example.com/
 
-You can also instruct curl what Content-Type to use by using `type=`, in a
+You can also instruct fetch what Content-Type to use by using `type=`, in a
 manner similar to:
 
-    curl -F "web=@index.html;type=text/html" example.com
+    fetch -F "web=@index.html;type=text/html" example.com
 
 or
 
-    curl -F "name=daniel;type=text/foo" example.com
+    fetch -F "name=daniel;type=text/foo" example.com
 
 You can also explicitly change the name field of a file upload part by setting
 filename=, like this:
 
-    curl -F "file=@localfile;filename=nameinpost" example.com
+    fetch -F "file=@localfile;filename=nameinpost" example.com
 
 If filename/path contains ',' or ';', it must be quoted by double-quotes like:
 
-    curl -F "file=@\"local,file\";filename=\"name;in;post\"" \
+    fetch -F "file=@\"local,file\";filename=\"name;in;post\"" \
         https://example.com
 
 or
 
-    curl -F 'file=@"local,file";filename="name;in;post"' \
+    fetch -F 'file=@"local,file";filename="name;in;post"' \
         https://example.com
 
 Note that if a filename/path is quoted by double-quotes, any double-quote
@@ -86,16 +86,16 @@ or backslash within the filename must be escaped by backslash.
 Quoting must also be applied to non-file data if it contains semicolons,
 leading/trailing spaces or leading double quotes:
 
-    curl -F 'colors="red; green; blue";type=text/x-myapp' \
+    fetch -F 'colors="red; green; blue";type=text/x-myapp' \
        https://example.com
 
 You can add custom headers to the field by setting headers=, like
 
-    curl -F "submit=OK;headers=\"X-submit-type: OK\"" example.com
+    fetch -F "submit=OK;headers=\"X-submit-type: OK\"" example.com
 
 or
 
-    curl -F "submit=OK;headers=@headerfile" example.com
+    fetch -F "submit=OK;headers=@headerfile" example.com
 
 The headers= keyword may appear more that once and above notes about quoting
 apply. When headers are read from a file, Empty lines and lines starting
@@ -124,7 +124,7 @@ Example: the following command sends an SMTP mime email consisting in an
 inline part in two alternative formats: plain text and HTML. It attaches a
 text file:
 
-    curl -F '=(;type=multipart/alternative' \
+    fetch -F '=(;type=multipart/alternative' \
          -F '=plain text message' \
          -F '= <body>HTML message</body>;type=text/html' \
          -F '=)' -F '=@textfile.txt' ...  smtp://example.com
@@ -139,7 +139,7 @@ characters.
 Example: send multipart mail with a quoted-printable text message and a
 base64 attached file:
 
-    curl -F '=text message;encoder=quoted-printable' \
+    fetch -F '=text message;encoder=quoted-printable' \
          -F '=@localfile;encoder=base64' ... smtp://example.com
 
 See further examples and details in the MANUAL.

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: tlsv1.3
 Help: TLSv1.3 or greater
 Protocols: TLS
@@ -16,7 +16,7 @@ Example:
 
 # `--tlsv1.3`
 
-Forces curl to use TLS version 1.3 or later when connecting to a remote TLS
+Forces fetch to use TLS version 1.3 or later when connecting to a remote TLS
 server.
 
 If the connection is done without TLS, this option has no effect. This

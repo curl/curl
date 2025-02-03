@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_DIRLISTONLY
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_DIRLISTONLY
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CUSTOMREQUEST (3)
-  - CURLOPT_WILDCARDMATCH (3)
+  - FETCHOPT_CUSTOMREQUEST (3)
+  - FETCHOPT_WILDCARDMATCH (3)
 Protocol:
   - FTP
   - SFTP
@@ -16,14 +16,14 @@ Added-in: 7.17.0
 
 # NAME
 
-CURLOPT_DIRLISTONLY - ask for names only in a directory listing
+FETCHOPT_DIRLISTONLY - ask for names only in a directory listing
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DIRLISTONLY, long listonly);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_DIRLISTONLY, long listonly);
 ~~~
 
 # DESCRIPTION
@@ -34,7 +34,7 @@ that would normally include file sizes, dates etc.
 
 For POP3 a parameter of 1 tells the library to list the email message or
 messages on the POP3 server. This can be used to change the default behavior
-of libcurl, when combined with a URL that contains a message ID, to perform a
+of libfetch, when combined with a URL that contains a message ID, to perform a
 "scan listing" which can then be used to determine the size of an email.
 
 For FILE, this option has no effect yet as directories are always listed in
@@ -47,7 +47,7 @@ not include subdirectories and symbolic links.
 Setting this option to 1 also implies a directory listing even if the URL
 does not end with a slash, which otherwise is necessary.
 
-Do not use this option if you also use CURLOPT_WILDCARDMATCH(3) as it
+Do not use this option if you also use FETCHOPT_WILDCARDMATCH(3) as it
 effectively breaks that feature.
 
 # DEFAULT
@@ -61,31 +61,31 @@ effectively breaks that feature.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/dir/");
 
     /* list only */
-    curl_easy_setopt(curl, CURLOPT_DIRLISTONLY, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_DIRLISTONLY, 1L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
 
 # HISTORY
 
-This option was known as CURLOPT_FTPLISTONLY up to 7.16.4. POP3 is supported
+This option was known as FETCHOPT_FTPLISTONLY up to 7.16.4. POP3 is supported
 since 7.21.5.
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

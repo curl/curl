@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ech
 Arg: <config>
 Help: Configure ECH
@@ -49,4 +49,4 @@ available with OpenSSL TLS support)
 
 ##
 
-Most ECH related errors cause error *CURLE_ECH_REQUIRED* (101).
+Most ECH related errors cause error *FETCHE_ECH_REQUIRED* (101).

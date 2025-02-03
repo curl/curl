@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_QUEUE_TIME_T
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_QUEUE_TIME_T
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_STARTTRANSFER_TIME_T (3)
-  - CURLOPT_TIMEOUT (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_STARTTRANSFER_TIME_T (3)
+  - FETCHOPT_TIMEOUT (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 8.6.0
@@ -16,25 +16,25 @@ Added-in: 8.6.0
 
 # NAME
 
-CURLINFO_QUEUE_TIME_T - time this transfer was queued
+FETCHINFO_QUEUE_TIME_T - time this transfer was queued
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_QUEUE_TIME_T,
-                           curl_off_t *timep);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_QUEUE_TIME_T,
+                           fetch_off_t *timep);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a curl_off_t to receive the time, in microseconds, this
+Pass a pointer to a fetch_off_t to receive the time, in microseconds, this
 transfer was held in a waiting queue before it started "for real". A transfer
 might be put in a queue if after getting started, it cannot create a new
 connection etc due to set conditions and limits imposed by the application.
 
-See also the TIMES overview in the curl_easy_getinfo(3) man page.
+See also the TIMES overview in the fetch_easy_getinfo(3) man page.
 
 # %PROTOCOLS%
 
@@ -43,21 +43,21 @@ See also the TIMES overview in the curl_easy_getinfo(3) man page.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_off_t queue;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(CURLE_OK == res) {
-      res = curl_easy_getinfo(curl, CURLINFO_QUEUE_TIME_T, &queue);
-      if(CURLE_OK == res) {
-        printf("Queued: %" CURL_FORMAT_CURL_OFF_T ".%06ld us", queue / 1000000,
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_off_t queue;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(FETCHE_OK == res) {
+      res = fetch_easy_getinfo(fetch, FETCHINFO_QUEUE_TIME_T, &queue);
+      if(FETCHE_OK == res) {
+        printf("Queued: %" FETCH_FORMAT_FETCH_OFF_T ".%06ld us", queue / 1000000,
                (long)(queue % 1000000));
       }
     }
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

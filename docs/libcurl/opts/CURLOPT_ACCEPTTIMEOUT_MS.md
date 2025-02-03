@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_ACCEPTTIMEOUT_MS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_ACCEPTTIMEOUT_MS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CONNECTTIMEOUT_MS (3)
-  - CURLOPT_DEBUGFUNCTION (3)
-  - CURLOPT_STDERR (3)
+  - FETCHOPT_CONNECTTIMEOUT_MS (3)
+  - FETCHOPT_DEBUGFUNCTION (3)
+  - FETCHOPT_STDERR (3)
 Protocol:
   - FTP
 Added-in: 7.24.0
@@ -15,20 +15,20 @@ Added-in: 7.24.0
 
 # NAME
 
-CURLOPT_ACCEPTTIMEOUT_MS - timeout waiting for FTP server to connect back
+FETCHOPT_ACCEPTTIMEOUT_MS - timeout waiting for FTP server to connect back
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ACCEPTTIMEOUT_MS, long ms);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_ACCEPTTIMEOUT_MS, long ms);
 ~~~
 
 # DESCRIPTION
 
-Pass a long telling libcurl the maximum number of milliseconds to wait for a
-server to connect back to libcurl when an active FTP connection is used.
+Pass a long telling libfetch the maximum number of milliseconds to wait for a
+server to connect back to libfetch when an active FTP connection is used.
 
 # DEFAULT
 
@@ -41,14 +41,14 @@ server to connect back to libcurl when an active FTP connection is used.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/path/file");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/path/file");
 
     /* wait no more than 5 seconds for FTP server responses */
-    curl_easy_setopt(curl, CURLOPT_ACCEPTTIMEOUT_MS, 5000L);
+    fetch_easy_setopt(fetch, FETCHOPT_ACCEPTTIMEOUT_MS, 5000L);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -57,7 +57,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

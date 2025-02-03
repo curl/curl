@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ftp-method
 Arg: <method>
 Help: Control CWD usage
@@ -18,7 +18,7 @@ Example:
 
 # `--ftp-method`
 
-Control what method curl should use to reach a file on an FTP(S)
+Control what method fetch should use to reach a file on an FTP(S)
 server. The method argument should be one of the following alternatives:
 
 ## multicwd
@@ -27,7 +27,7 @@ hierarchies this means many commands. This is how RFC 1738 says it should be
 done. This is the default but the slowest behavior.
 
 ## nocwd
-Do no CWD at all. curl does SIZE, RETR, STOR etc and gives the full path to
+Do no CWD at all. fetch does SIZE, RETR, STOR etc and gives the full path to
 the server for each of these commands. This is the fastest behavior.
 
 ## singlecwd

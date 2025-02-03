@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_USERAGENT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_USERAGENT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CUSTOMREQUEST (3)
-  - CURLOPT_HTTPHEADER (3)
-  - CURLOPT_REFERER (3)
-  - CURLOPT_REQUEST_TARGET (3)
+  - FETCHOPT_CUSTOMREQUEST (3)
+  - FETCHOPT_HTTPHEADER (3)
+  - FETCHOPT_REFERER (3)
+  - FETCHOPT_REQUEST_TARGET (3)
 Protocol:
   - HTTP
 Added-in: 7.1
@@ -16,21 +16,21 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_USERAGENT - HTTP user-agent header
+FETCHOPT_USERAGENT - HTTP user-agent header
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERAGENT, char *ua);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_USERAGENT, char *ua);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. It is used to set the
 User-Agent: header field in the HTTP request sent to the remote server. You
-can also set any custom header with CURLOPT_HTTPHEADER(3).
+can also set any custom header with FETCHOPT_HTTPHEADER(3).
 
 The application does not have to keep the string around after setting this
 option.
@@ -49,13 +49,13 @@ NULL, no User-Agent: header is used.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Dark Secret Ninja/1.0");
+    fetch_easy_setopt(fetch, FETCHOPT_USERAGENT, "Dark Secret Ninja/1.0");
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -64,7 +64,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

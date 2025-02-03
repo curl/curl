@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -28,7 +28,7 @@
 
 #include <stdio.h>
 #include <pthread.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #define NUMT 4
 
@@ -38,11 +38,11 @@
   If you intend to use a SSL-based protocol here you might need to setup TLS
   library mutex callbacks as described here:
 
-  https://curl.se/libcurl/c/threadsafe.html
+  https://fetch.se/libfetch/c/threadsafe.html
 
 */
 static const char * const urls[NUMT]= {
-  "https://curl.se/",
+  "https://fetch.se/",
   "ftp://example.com/",
   "https://example.net/",
   "www.example"
@@ -50,12 +50,12 @@ static const char * const urls[NUMT]= {
 
 static void *pull_one_url(void *url)
 {
-  CURL *curl;
+  FETCH *fetch;
 
-  curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, url);
-  curl_easy_perform(curl); /* ignores error */
-  curl_easy_cleanup(curl);
+  fetch = fetch_easy_init();
+  fetch_easy_setopt(fetch, FETCHOPT_URL, url);
+  fetch_easy_perform(fetch); /* ignores error */
+  fetch_easy_cleanup(fetch);
 
   return NULL;
 }
@@ -72,8 +72,8 @@ int main(void)
   pthread_t tid[NUMT];
   int i;
 
-  /* Must initialize libcurl before any threads are started */
-  curl_global_init(CURL_GLOBAL_ALL);
+  /* Must initialize libfetch before any threads are started */
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
   for(i = 0; i < NUMT; i++) {
     int error = pthread_create(&tid[i],
@@ -91,6 +91,6 @@ int main(void)
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return 0;
 }

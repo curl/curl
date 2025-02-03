@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_PRIVATE
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_PRIVATE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PRIVATE (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHOPT_PRIVATE (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.10.3
@@ -15,20 +15,20 @@ Added-in: 7.10.3
 
 # NAME
 
-CURLINFO_PRIVATE - get the private pointer
+FETCHINFO_PRIVATE - get the private pointer
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRIVATE, char **private);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_PRIVATE, char **private);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a char pointer to receive the pointer to the private data
-associated with the curl handle (set with the CURLOPT_PRIVATE(3)).
+associated with the fetch handle (set with the FETCHOPT_PRIVATE(3)).
 Please note that for internal reasons, the value is returned as a char
 pointer, although effectively being a 'void *'.
 
@@ -39,23 +39,23 @@ pointer, although effectively being a 'void *'.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
     void *pointer = (void *)0x2345454;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
 
     /* set the private pointer */
-    curl_easy_setopt(curl, CURLOPT_PRIVATE, pointer);
-    res = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_PRIVATE, pointer);
+    res = fetch_easy_perform(fetch);
 
     /* extract the private pointer again */
-    res = curl_easy_getinfo(curl, CURLINFO_PRIVATE, &pointer);
+    res = fetch_easy_getinfo(fetch, FETCHINFO_PRIVATE, &pointer);
 
     if(res)
-      printf("error: %s\n", curl_easy_strerror(res));
+      printf("error: %s\n", fetch_easy_strerror(res));
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -64,7 +64,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: no-keepalive
 Help: Disable TCP keepalive on the connection
 Category: connection
@@ -15,7 +15,7 @@ Example:
 
 # `--no-keepalive`
 
-Disables the use of keepalive messages on the TCP connection. curl otherwise
+Disables the use of keepalive messages on the TCP connection. fetch otherwise
 enables them by default.
 
 Note that this is the negated option name documented. You can thus use

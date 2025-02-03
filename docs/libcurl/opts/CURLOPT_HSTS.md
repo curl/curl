@@ -1,28 +1,28 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_HSTS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_HSTS
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - HTTP
 See-also:
-  - CURLOPT_ALTSVC (3)
-  - CURLOPT_HSTS_CTRL (3)
-  - CURLOPT_RESOLVE (3)
+  - FETCHOPT_ALTSVC (3)
+  - FETCHOPT_HSTS_CTRL (3)
+  - FETCHOPT_RESOLVE (3)
 Added-in: 7.74.0
 ---
 
 # NAME
 
-CURLOPT_HSTS - HSTS cache filename
+FETCHOPT_HSTS - HSTS cache filename
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTS, char *filename);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_HSTS, char *filename);
 ~~~
 
 # DESCRIPTION
@@ -30,14 +30,14 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTS, char *filename);
 Make the *filename* point to a filename to load an existing HSTS cache
 from, and to store the cache in when the easy handle is closed. Setting a file
 name with this option also enables HSTS for this handle (the equivalent of
-setting *CURLHSTS_ENABLE* with CURLOPT_HSTS_CTRL(3)).
+setting *FETCHHSTS_ENABLE* with FETCHOPT_HSTS_CTRL(3)).
 
 If the given file does not exist or contains no HSTS entries at startup, the
 HSTS cache simply starts empty. Setting the filename to NULL allows HSTS
-without reading from or writing to any file. NULL also makes libcurl clear the
+without reading from or writing to any file. NULL also makes libfetch clear the
 list of files to read HSTS data from, if any such were previously set.
 
-If this option is set multiple times, libcurl loads cache entries from each
+If this option is set multiple times, libfetch loads cache entries from each
 given file but only stores the last used name for later writing.
 
 # FILE FORMAT
@@ -63,7 +63,7 @@ NULL, no filename
 
 # SECURITY CONCERNS
 
-libcurl cannot fully protect against attacks where an attacker has write
+libfetch cannot fully protect against attacks where an attacker has write
 access to the same directory where it is directed to save files. This is
 particularly sensitive if you save files using elevated privileges.
 
@@ -74,10 +74,10 @@ particularly sensitive if you save files using elevated privileges.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_HSTS, "/home/user/.hsts-cache");
-    curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_HSTS, "/home/user/.hsts-cache");
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -86,7 +86,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

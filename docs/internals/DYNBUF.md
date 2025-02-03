@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # dynbuf
@@ -23,7 +23,7 @@ void Curl_dyn_init(struct dynbuf *s, size_t toobig);
 
 This initializes a struct to use for dynbuf and it cannot fail. The `toobig`
 value **must** be set to the maximum size we allow this buffer instance to
-grow to. The functions below return `CURLE_OUT_OF_MEMORY` when hitting this
+grow to. The functions below return `FETCHE_OUT_OF_MEMORY` when hitting this
 limit.
 
 ## `Curl_dyn_free`
@@ -38,7 +38,7 @@ be reused to start appending new data to.
 ## `Curl_dyn_addn`
 
 ```c
-CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len);
+FETCHcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len);
 ```
 
 Append arbitrary data of a given length to the end of the buffer.
@@ -48,7 +48,7 @@ If this function fails it calls `Curl_dyn_free` on `dynbuf`.
 ## `Curl_dyn_add`
 
 ```c
-CURLcode Curl_dyn_add(struct dynbuf *s, const char *str);
+FETCHcode Curl_dyn_add(struct dynbuf *s, const char *str);
 ```
 
 Append a C string to the end of the buffer.
@@ -58,7 +58,7 @@ If this function fails it calls `Curl_dyn_free` on `dynbuf`.
 ## `Curl_dyn_addf`
 
 ```c
-CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...);
+FETCHcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...);
 ```
 
 Append a `printf()`-style string to the end of the buffer.
@@ -68,7 +68,7 @@ If this function fails it calls `Curl_dyn_free` on `dynbuf`.
 ## `Curl_dyn_vaddf`
 
 ```c
-CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap);
+FETCHcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap);
 ```
 
 Append a `vprintf()`-style string to the end of the buffer.
@@ -86,7 +86,7 @@ Reset the buffer length, but leave the allocation.
 ## `Curl_dyn_tail`
 
 ```c
-CURLcode Curl_dyn_tail(struct dynbuf *s, size_t length);
+FETCHcode Curl_dyn_tail(struct dynbuf *s, size_t length);
 ```
 
 Keep `length` bytes of the buffer tail (the last `length` bytes of the
@@ -126,7 +126,7 @@ zero byte.
 ## `Curl_dyn_setlen`
 
 ```c
-CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t len);
+FETCHcode Curl_dyn_setlen(struct dynbuf *s, size_t len);
 ```
 
 Sets the new shorter length of the buffer in number of bytes. Keeps the

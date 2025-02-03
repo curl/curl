@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,14 +20,14 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 # Get 'man_MANS' variable
-curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+fetch_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-function(curl_add_manual_pages _listname)
+function(fetch_add_manual_pages _listname)
   # Maximum number of files per command to stay within shell/OS limits
   if(CMAKE_HOST_UNIX)
     set(_files_per_batch 10000)
@@ -53,7 +53,7 @@ function(curl_add_manual_pages _listname)
     endif()
 
     list(APPEND _rofffiles "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
-    if(_file STREQUAL "libcurl-symbols.3")
+    if(_file STREQUAL "libfetch-symbols.3")
       # Special case, an auto-generated file.
       string(REPLACE ".3" ".md" _mdfile "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
     else()
@@ -65,20 +65,20 @@ function(curl_add_manual_pages _listname)
   unset(_mdfiles)
 endfunction()
 
-add_custom_command(OUTPUT "libcurl-symbols.md"
+add_custom_command(OUTPUT "libfetch-symbols.md"
   COMMAND
     "${PERL_EXECUTABLE}"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl" <
-    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions" > "libcurl-symbols.md"
+    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions" > "libfetch-symbols.md"
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl"
   VERBATIM
 )
 
-curl_add_manual_pages(man_MANS)
-add_custom_target(curl-man ALL DEPENDS ${man_MANS})
-if(NOT CURL_DISABLE_INSTALL)
+fetch_add_manual_pages(man_MANS)
+add_custom_target(fetch-man ALL DEPENDS ${man_MANS})
+if(NOT FETCH_DISABLE_INSTALL)
   set(_src "")
   foreach(_f IN LISTS man_MANS)
     list(APPEND _src "${CMAKE_CURRENT_BINARY_DIR}/${_f}")

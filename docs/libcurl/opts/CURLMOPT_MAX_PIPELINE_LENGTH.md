@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLMOPT_MAX_PIPELINE_LENGTH
+SPDX-License-Identifier: fetch
+Title: FETCHMOPT_MAX_PIPELINE_LENGTH
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_MAX_HOST_CONNECTIONS (3)
-  - CURLMOPT_PIPELINING (3)
+  - FETCHMOPT_MAX_HOST_CONNECTIONS (3)
+  - FETCHMOPT_PIPELINING (3)
 Protocol:
   - All
 Added-in: 7.30.0
@@ -14,14 +14,14 @@ Added-in: 7.30.0
 
 # NAME
 
-CURLMOPT_MAX_PIPELINE_LENGTH - maximum number of requests in a pipeline
+FETCHMOPT_MAX_PIPELINE_LENGTH - maximum number of requests in a pipeline
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_PIPELINE_LENGTH,
+FETCHMcode fetch_multi_setopt(FETCHM *handle, FETCHMOPT_MAX_PIPELINE_LENGTH,
                             long max);
 ~~~
 
@@ -33,11 +33,11 @@ Pass a long. The set **max** number is used as the maximum amount of
 outstanding requests in an HTTP/1.1 pipeline. This option is only used for
 HTTP/1.1 pipelining, not for HTTP/2 multiplexing.
 
-When this limit is reached, libcurl creates another connection to the same
-host (see CURLMOPT_MAX_HOST_CONNECTIONS(3)), or queue the request until one
+When this limit is reached, libfetch creates another connection to the same
+host (see FETCHMOPT_MAX_HOST_CONNECTIONS(3)), or queue the request until one
     of the pipelines to the host is ready to accept a request. Thus, the total
-number of requests in-flight is CURLMOPT_MAX_HOST_CONNECTIONS(3) *
-CURLMOPT_MAX_PIPELINE_LENGTH(3).
+number of requests in-flight is FETCHMOPT_MAX_HOST_CONNECTIONS(3) *
+FETCHMOPT_MAX_PIPELINE_LENGTH(3).
 
 # DEFAULT
 
@@ -50,9 +50,9 @@ CURLMOPT_MAX_PIPELINE_LENGTH(3).
 ~~~c
 int main(void)
 {
-  CURLM *m = curl_multi_init();
+  FETCHM *m = fetch_multi_init();
   /* set a more conservative pipe length */
-  curl_multi_setopt(m, CURLMOPT_MAX_PIPELINE_LENGTH, 3L);
+  fetch_multi_setopt(m, FETCHMOPT_MAX_PIPELINE_LENGTH, 3L);
 }
 ~~~
 
@@ -60,7 +60,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_multi_setopt(3) returns a CURLMcode indicating success or error.
+fetch_multi_setopt(3) returns a FETCHMcode indicating success or error.
 
-CURLM_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHM_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

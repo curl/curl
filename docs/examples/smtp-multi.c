@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -28,11 +28,11 @@
  */
 
 #include <string.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-/* This is an example showing how to send mail using libcurl's SMTP
+/* This is an example showing how to send mail using libfetch's SMTP
  * capabilities. It builds on the smtp-mail.c example to demonstrate how to use
- * libcurl's multi interface.
+ * libfetch's multi interface.
  */
 
 #define FROM_MAIL     "<sender@example.com>"
@@ -84,56 +84,56 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 
 int main(void)
 {
-  CURL *curl;
-  CURLM *mcurl;
+  FETCH *fetch;
+  FETCHM *mfetch;
   int still_running = 1;
-  struct curl_slist *recipients = NULL;
+  struct fetch_slist *recipients = NULL;
   struct upload_status upload_ctx = { 0 };
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
-  curl = curl_easy_init();
-  if(!curl)
+  fetch = fetch_easy_init();
+  if(!fetch)
     return 1;
 
-  mcurl = curl_multi_init();
-  if(!mcurl)
+  mfetch = fetch_multi_init();
+  if(!mfetch)
     return 2;
 
   /* This is the URL for your mailserver */
-  curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
+  fetch_easy_setopt(fetch, FETCHOPT_URL, "smtp://mail.example.com");
 
   /* Note that this option is not strictly required, omitting it results in
-   * libcurl sending the MAIL FROM command with empty sender data. All
+   * libfetch sending the MAIL FROM command with empty sender data. All
    * autoresponses should have an empty reverse-path, and should be directed
    * to the address in the reverse-path which triggered them. Otherwise, they
    * could cause an endless loop. See RFC 5321 Section 4.5.5 for more details.
    */
-  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM_MAIL);
+  fetch_easy_setopt(fetch, FETCHOPT_MAIL_FROM, FROM_MAIL);
 
   /* Add two recipients, in this particular case they correspond to the
    * To: and Cc: addressees in the header, but they could be any kind of
    * recipient. */
-  recipients = curl_slist_append(recipients, TO_MAIL);
-  recipients = curl_slist_append(recipients, CC_MAIL);
-  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+  recipients = fetch_slist_append(recipients, TO_MAIL);
+  recipients = fetch_slist_append(recipients, CC_MAIL);
+  fetch_easy_setopt(fetch, FETCHOPT_MAIL_RCPT, recipients);
 
   /* We are using a callback function to specify the payload (the headers and
-   * body of the message). You could just use the CURLOPT_READDATA option to
+   * body of the message). You could just use the FETCHOPT_READDATA option to
    * specify a FILE pointer to read from. */
-  curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
-  curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, payload_source);
+  fetch_easy_setopt(fetch, FETCHOPT_READDATA, &upload_ctx);
+  fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
   /* Tell the multi stack about our easy handle */
-  curl_multi_add_handle(mcurl, curl);
+  fetch_multi_add_handle(mfetch, fetch);
 
   do {
-    CURLMcode mc = curl_multi_perform(mcurl, &still_running);
+    FETCHMcode mc = fetch_multi_perform(mfetch, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(mcurl, NULL, 0, 1000, NULL);
+      mc = fetch_multi_poll(mfetch, NULL, 0, 1000, NULL);
 
     if(mc)
       break;
@@ -141,13 +141,13 @@ int main(void)
   } while(still_running);
 
   /* Free the list of recipients */
-  curl_slist_free_all(recipients);
+  fetch_slist_free_all(recipients);
 
   /* Always cleanup */
-  curl_multi_remove_handle(mcurl, curl);
-  curl_multi_cleanup(mcurl);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(mfetch, fetch);
+  fetch_multi_cleanup(mfetch);
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return 0;
 }

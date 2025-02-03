@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TRAILERDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TRAILERDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_TRAILERFUNCTION (3)
-  - CURLOPT_WRITEFUNCTION (3)
+  - FETCHOPT_TRAILERFUNCTION (3)
+  - FETCHOPT_WRITEFUNCTION (3)
 Protocol:
   - HTTP
 Added-in: 7.64.0
@@ -14,14 +14,14 @@ Added-in: 7.64.0
 
 # NAME
 
-CURLOPT_TRAILERDATA - pointer passed to trailing headers callback
+FETCHOPT_TRAILERDATA - pointer passed to trailing headers callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl.h>
+#include <fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERDATA, void *userdata);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TRAILERDATA, void *userdata);
 ~~~
 
 # DESCRIPTION
@@ -43,10 +43,10 @@ struct MyData {
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     struct MyData data;
-    curl_easy_setopt(curl, CURLOPT_TRAILERDATA, &data);
+    fetch_easy_setopt(fetch, FETCHOPT_TRAILERDATA, &data);
   }
 }
 ~~~
@@ -55,7 +55,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

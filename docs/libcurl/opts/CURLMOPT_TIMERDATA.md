@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLMOPT_TIMERDATA
+SPDX-License-Identifier: fetch
+Title: FETCHMOPT_TIMERDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_SOCKETFUNCTION (3)
-  - CURLMOPT_TIMERFUNCTION (3)
+  - FETCHMOPT_SOCKETFUNCTION (3)
+  - FETCHMOPT_TIMERFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.16.0
@@ -14,22 +14,22 @@ Added-in: 7.16.0
 
 # NAME
 
-CURLMOPT_TIMERDATA - custom pointer to pass to timer callback
+FETCHMOPT_TIMERDATA - custom pointer to pass to timer callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_TIMERDATA, void *pointer);
+FETCHMcode fetch_multi_setopt(FETCHM *handle, FETCHMOPT_TIMERDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
 A data **pointer** to pass to the timer callback set with the
-CURLMOPT_TIMERFUNCTION(3) option.
+FETCHMOPT_TIMERFUNCTION(3) option.
 
-This pointer is not touched by libcurl but is only be passed in to the timer
+This pointer is not touched by libfetch but is only be passed in to the timer
 callback's **clientp** argument.
 
 # DEFAULT
@@ -45,7 +45,7 @@ struct priv {
   void *custom;
 };
 
-static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
+static int timerfunc(FETCHM *multi, long timeout_ms, void *clientp)
 {
  struct priv *mydata = clientp;
  printf("our ptr: %p\n", mydata->custom);
@@ -61,9 +61,9 @@ static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
 int main(void)
 {
   struct priv mydata;
-  CURLM *multi = curl_multi_init();
-  curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION, timerfunc);
-  curl_multi_setopt(multi, CURLMOPT_TIMERDATA, &mydata);
+  FETCHM *multi = fetch_multi_init();
+  fetch_multi_setopt(multi, FETCHMOPT_TIMERFUNCTION, timerfunc);
+  fetch_multi_setopt(multi, FETCHMOPT_TIMERDATA, &mydata);
 }
 ~~~
 
@@ -71,7 +71,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_multi_setopt(3) returns a CURLMcode indicating success or error.
+fetch_multi_setopt(3) returns a FETCHMcode indicating success or error.
 
-CURLM_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHM_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

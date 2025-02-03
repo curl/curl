@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROXY_SSLKEY
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROXY_SSLKEY
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PROXY_SSLCERT (3)
-  - CURLOPT_PROXY_SSLKEYTYPE (3)
-  - CURLOPT_SSLCERT (3)
-  - CURLOPT_SSLKEY (3)
-  - CURLOPT_SSLKEYTYPE (3)
+  - FETCHOPT_PROXY_SSLCERT (3)
+  - FETCHOPT_PROXY_SSLKEYTYPE (3)
+  - FETCHOPT_SSLCERT (3)
+  - FETCHOPT_SSLKEY (3)
+  - FETCHOPT_SSLKEYTYPE (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -22,14 +22,14 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLOPT_PROXY_SSLKEY - private key file for HTTPS proxy client cert
+FETCHOPT_PROXY_SSLKEY - private key file for HTTPS proxy client cert
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLKEY, char *keyfile);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY_SSLKEY, char *keyfile);
 ~~~
 
 # DESCRIPTION
@@ -37,7 +37,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLKEY, char *keyfile);
 Pass a pointer to a null-terminated string as parameter. The string should be
 the filename of your private key used for connecting to the HTTPS proxy. The
 default format is "PEM" and can be changed with
-CURLOPT_PROXY_SSLKEYTYPE(3).
+FETCHOPT_PROXY_SSLKEYTYPE(3).
 
 (Windows, iOS and macOS) This option is ignored by Secure Transport and
 Schannel SSL backends because they expect the private key to be already
@@ -60,16 +60,16 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
-    curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT, "client.pem");
-    curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
-    curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "s3cret");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "https://proxy");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_SSLCERT, "client.pem");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_SSLKEY, "key.pem");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_KEYPASSWD, "s3cret");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -78,7 +78,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,28 +1,28 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FRESH_CONNECT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FRESH_CONNECT
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - All
 See-also:
-  - CURLOPT_FORBID_REUSE (3)
-  - CURLOPT_MAXAGE_CONN (3)
-  - CURLOPT_MAXLIFETIME_CONN (3)
+  - FETCHOPT_FORBID_REUSE (3)
+  - FETCHOPT_MAXAGE_CONN (3)
+  - FETCHOPT_MAXLIFETIME_CONN (3)
 Added-in: 7.7
 ---
 
 # NAME
 
-CURLOPT_FRESH_CONNECT - force a new connection to be used
+FETCHOPT_FRESH_CONNECT - force a new connection to be used
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FRESH_CONNECT, long fresh);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FRESH_CONNECT, long fresh);
 ~~~
 
 # DESCRIPTION
@@ -32,10 +32,10 @@ by force instead of trying to reuse an existing one. This option should be
 used with caution and only if you understand what it does as it may impact
 performance negatively.
 
-Related functionality is CURLOPT_FORBID_REUSE(3) which makes sure the
+Related functionality is FETCHOPT_FORBID_REUSE(3) which makes sure the
 connection is closed after use so that it cannot be reused.
 
-Set *fresh* to 0 to have libcurl attempt reusing an existing connection
+Set *fresh* to 0 to have libfetch attempt reusing an existing connection
 (default behavior).
 
 # DEFAULT
@@ -49,13 +49,13 @@ Set *fresh* to 0 to have libcurl attempt reusing an existing connection
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_FRESH_CONNECT, 1L);
     /* this transfer must use a new connection, not reuse an existing */
-    curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -64,7 +64,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

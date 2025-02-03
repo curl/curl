@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_easy_nextheader
+SPDX-License-Identifier: fetch
+Title: fetch_easy_nextheader
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_header (3)
-  - curl_easy_perform (3)
+  - fetch_easy_header (3)
+  - fetch_easy_perform (3)
 Protocol:
   - HTTP
 Added-in: 7.83.0
@@ -14,17 +14,17 @@ Added-in: 7.83.0
 
 # NAME
 
-curl_easy_nextheader - get the next HTTP header
+fetch_easy_nextheader - get the next HTTP header
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-struct curl_header *curl_easy_nextheader(CURL *easy,
+struct fetch_header *fetch_easy_nextheader(FETCH *easy,
                                          unsigned int origin,
                                          int request,
-                                         struct curl_header *prev);
+                                         struct fetch_header *prev);
 ~~~
 
 # DESCRIPTION
@@ -36,9 +36,9 @@ The *origin* argument is for specifying which headers to receive, as a single
 HTTP transfer might provide headers from several different places and they may
 then have different importance to the user and headers using the same name
 might be used. The *origin* is a bitmask for what header sources you want. See
-the curl_easy_header(3) man page for the origin descriptions.
+the fetch_easy_header(3) man page for the origin descriptions.
 
-The *request* argument tells libcurl from which request you want headers
+The *request* argument tells libfetch from which request you want headers
 from. A single transfer might consist of a series of HTTP requests and this
 argument lets you specify which particular individual request you want the
 headers from. 0 being the first request and then the number increases for
@@ -54,10 +54,10 @@ If *prev* is NULL, this function returns a pointer to the first header stored
 within the given scope (origin + request).
 
 If *prev* is a pointer to a previously returned header struct,
-curl_easy_nextheader(3) returns a pointer the next header stored within the
+fetch_easy_nextheader(3) returns a pointer the next header stored within the
 given scope. This way, an application can iterate over all available headers.
 
-The memory for the struct this points to, is owned and managed by libcurl and
+The memory for the struct this points to, is owned and managed by libfetch and
 is associated with the easy handle. Applications must copy the data if they
 want it to survive subsequent API calls or the life-time of the easy handle.
 
@@ -68,23 +68,23 @@ want it to survive subsequent API calls or the life-time of the easy handle.
 ~~~c
 int main(void)
 {
-  struct curl_header *prev = NULL;
-  struct curl_header *h;
+  struct fetch_header *prev = NULL;
+  struct fetch_header *h;
 
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_perform(fetch);
 
     /* extract the normal headers from the first request */
-    while((h = curl_easy_nextheader(curl, CURLH_HEADER, 0, prev))) {
+    while((h = fetch_easy_nextheader(fetch, FETCHH_HEADER, 0, prev))) {
       printf("%s: %s\n", h->name, h->value);
       prev = h;
     }
 
     /* extract the normal headers + 1xx + trailers from the last request */
-    unsigned int origin = CURLH_HEADER| CURLH_1XX | CURLH_TRAILER;
-    while((h = curl_easy_nextheader(curl, origin, -1, prev))) {
+    unsigned int origin = FETCHH_HEADER| FETCHH_1XX | FETCHH_TRAILER;
+    while((h = fetch_easy_nextheader(fetch, origin, -1, prev))) {
       printf("%s: %s\n", h->name, h->value);
       prev = h;
     }

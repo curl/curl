@@ -1,6 +1,6 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # FILES
-*~/.curlrc*
+*~/.fetchrc*
 
 Default config file, see --config for details.

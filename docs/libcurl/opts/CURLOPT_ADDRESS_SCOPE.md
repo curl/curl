@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_ADDRESS_SCOPE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_ADDRESS_SCOPE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_DEBUGFUNCTION (3)
-  - CURLOPT_STDERR (3)
+  - FETCHOPT_DEBUGFUNCTION (3)
+  - FETCHOPT_STDERR (3)
 Protocol:
   - All
 Added-in: 7.19.0
@@ -14,14 +14,14 @@ Added-in: 7.19.0
 
 # NAME
 
-CURLOPT_ADDRESS_SCOPE - scope id for IPv6 addresses
+FETCHOPT_ADDRESS_SCOPE - scope id for IPv6 addresses
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ADDRESS_SCOPE, long scope);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_ADDRESS_SCOPE, long scope);
 ~~~
 
 # DESCRIPTION
@@ -41,15 +41,15 @@ Pass a long specifying the scope id value to use when connecting to IPv6 address
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
     long my_scope_id;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
     my_scope_id = if_nametoindex("eth0");
-    curl_easy_setopt(curl, CURLOPT_ADDRESS_SCOPE, my_scope_id);
-    ret = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_ADDRESS_SCOPE, my_scope_id);
+    ret = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -58,8 +58,8 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
-Returns CURLE_BAD_FUNCTION_ARGUMENT if set to a negative value.
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).
+Returns FETCHE_BAD_FUNCTION_ARGUMENT if set to a negative value.

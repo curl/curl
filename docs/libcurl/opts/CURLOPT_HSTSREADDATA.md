@@ -1,38 +1,38 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_HSTSREADDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_HSTSREADDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - HTTP
 See-also:
-  - CURLOPT_HSTS (3)
-  - CURLOPT_HSTSREADFUNCTION (3)
-  - CURLOPT_HSTSWRITEDATA (3)
-  - CURLOPT_HSTSWRITEFUNCTION (3)
+  - FETCHOPT_HSTS (3)
+  - FETCHOPT_HSTSREADFUNCTION (3)
+  - FETCHOPT_HSTSWRITEDATA (3)
+  - FETCHOPT_HSTSWRITEFUNCTION (3)
 Added-in: 7.74.0
 ---
 
 # NAME
 
-CURLOPT_HSTSREADDATA - pointer passed to the HSTS read callback
+FETCHOPT_HSTSREADDATA - pointer passed to the HSTS read callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSREADDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_HSTSREADDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
 Data *pointer* to pass to the HSTS read function. If you use the
-CURLOPT_HSTSREADFUNCTION(3) option, this is the pointer you get as input
+FETCHOPT_HSTSREADFUNCTION(3) option, this is the pointer you get as input
 in the 3rd argument to the callback.
 
-This option does not enable HSTS, you need to use CURLOPT_HSTS_CTRL(3) to
+This option does not enable HSTS, you need to use FETCHOPT_HSTS_CTRL(3) to
 do that.
 
 # DEFAULT
@@ -50,16 +50,16 @@ struct MyData {
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
+  FETCH *fetch = fetch_easy_init();
   struct MyData this;
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://example.com");
 
     /* pass pointer that gets passed in to the
-       CURLOPT_HSTSREADFUNCTION callback */
-    curl_easy_setopt(curl, CURLOPT_HSTSREADDATA, &this);
+       FETCHOPT_HSTSREADFUNCTION callback */
+    fetch_easy_setopt(fetch, FETCHOPT_HSTSREADDATA, &this);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -68,4 +68,4 @@ int main(void)
 
 # RETURN VALUE
 
-This returns CURLE_OK.
+This returns FETCHE_OK.

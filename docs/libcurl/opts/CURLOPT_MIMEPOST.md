@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_MIMEPOST
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_MIMEPOST
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPPOST (3)
-  - CURLOPT_POSTFIELDS (3)
-  - CURLOPT_PUT (3)
-  - curl_mime_init (3)
+  - FETCHOPT_HTTPPOST (3)
+  - FETCHOPT_POSTFIELDS (3)
+  - FETCHOPT_PUT (3)
+  - fetch_mime_init (3)
 Protocol:
   - HTTP
   - SMTP
@@ -18,29 +18,29 @@ Added-in: 7.56.0
 
 # NAME
 
-CURLOPT_MIMEPOST - send data from mime structure
+FETCHOPT_MIMEPOST - send data from mime structure
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-curl_mime *mime;
+fetch_mime *mime;
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MIMEPOST, mime);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_MIMEPOST, mime);
 ~~~
 
 # DESCRIPTION
 
-Pass a mime handle previously obtained from curl_mime_init(3).
+Pass a mime handle previously obtained from fetch_mime_init(3).
 
 This setting is supported by the HTTP protocol to post forms and by the
 SMTP and IMAP protocols to provide the email data to send/upload.
 
 This option is the preferred way of posting an HTTP form, replacing and
-extending the CURLOPT_HTTPPOST(3) option.
+extending the FETCHOPT_HTTPPOST(3) option.
 
-When setting CURLOPT_MIMEPOST(3) to NULL, libcurl resets the request
+When setting FETCHOPT_MIMEPOST(3) to NULL, libfetch resets the request
 type for HTTP to the default to disable the POST. Typically that would mean it
 is reset to GET. Instead you should set a desired request method explicitly.
 
@@ -51,25 +51,25 @@ is reset to GET. Instead you should set a desired request method explicitly.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_mime *multipart = curl_mime_init(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_mime *multipart = fetch_mime_init(fetch);
     if(multipart) {
-      curl_mimepart *part = curl_mime_addpart(multipart);
-      curl_mime_name(part, "name");
-      curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
-      part = curl_mime_addpart(multipart);
-      curl_mime_name(part, "project");
-      curl_mime_data(part, "curl", CURL_ZERO_TERMINATED);
-      part = curl_mime_addpart(multipart);
-      curl_mime_name(part, "logotype-image");
-      curl_mime_filedata(part, "curl.png");
+      fetch_mimepart *part = fetch_mime_addpart(multipart);
+      fetch_mime_name(part, "name");
+      fetch_mime_data(part, "daniel", FETCH_ZERO_TERMINATED);
+      part = fetch_mime_addpart(multipart);
+      fetch_mime_name(part, "project");
+      fetch_mime_data(part, "fetch", FETCH_ZERO_TERMINATED);
+      part = fetch_mime_addpart(multipart);
+      fetch_mime_name(part, "logotype-image");
+      fetch_mime_filedata(part, "fetch.png");
 
       /* Set the form info */
-      curl_easy_setopt(curl, CURLOPT_MIMEPOST, multipart);
+      fetch_easy_setopt(fetch, FETCHOPT_MIMEPOST, multipart);
 
-      curl_easy_perform(curl); /* post away */
-      curl_mime_free(multipart); /* free the post data */
+      fetch_easy_perform(fetch); /* post away */
+      fetch_mime_free(multipart); /* free the post data */
     }
   }
 }
@@ -79,4 +79,4 @@ int main(void)
 
 # RETURN VALUE
 
-This returns CURLE_OK.
+This returns FETCHE_OK.

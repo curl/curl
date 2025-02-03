@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: json
 Arg: <data>
 Help: HTTP POST JSON
@@ -32,7 +32,7 @@ There is **no verification** that the passed in data is actual JSON or that
 the syntax is correct.
 
 If you start the data with the letter @, the rest should be a filename to read
-the data from, or a single dash (-) if you want curl to read the data from
+the data from, or a single dash (-) if you want fetch to read the data from
 stdin. Posting data from a file named 'foobar' would thus be done with --json
 @foobar and to instead read the data from stdin, use --json @-.
 

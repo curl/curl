@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_CRLF
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_CRLF
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CONV_FROM_NETWORK_FUNCTION (3)
-  - CURLOPT_CONV_TO_NETWORK_FUNCTION (3)
+  - FETCHOPT_CONV_FROM_NETWORK_FUNCTION (3)
+  - FETCHOPT_CONV_TO_NETWORK_FUNCTION (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -14,19 +14,19 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_CRLF - CRLF conversion
+FETCHOPT_CRLF - CRLF conversion
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CRLF, long conv);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_CRLF, long conv);
 ~~~
 
 # DESCRIPTION
 
-Pass a long. If the value is set to 1 (one), libcurl converts Unix newlines to
+Pass a long. If the value is set to 1 (one), libfetch converts Unix newlines to
 CRLF newlines on transfers. Disable this option again by setting the value to
 0 (zero).
 
@@ -43,13 +43,13 @@ This is a legacy option of questionable use.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/");
-    curl_easy_setopt(curl, CURLOPT_CRLF, 1L);
-    ret = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_CRLF, 1L);
+    ret = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -58,7 +58,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: libcurl-env-dbg
+SPDX-License-Identifier: fetch
+Title: libfetch-env-dbg
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - libcurl-env (3)
+  - libfetch-env (3)
 Protocol:
   - All
 Added-in: n/a
@@ -13,135 +13,135 @@ Added-in: n/a
 
 # NAME
 
-libcurl-env-dbg - environment variables libcurl DEBUGBUILD understands
+libfetch-env-dbg - environment variables libfetch DEBUGBUILD understands
 
 # DESCRIPTION
 
-This is a set of variables only recognized and used if libcurl was built
+This is a set of variables only recognized and used if libfetch was built
 "debug enabled", which should never be true for a library used in production.
 These variables are intended for internal use only, subject to change and have
-many effects on the behavior of libcurl. Refer to the source code to determine
+many effects on the behavior of libfetch. Refer to the source code to determine
 how exactly they are being used.
 
-## CURL_ALTSVC_HTTP
+## FETCH_ALTSVC_HTTP
 
 Bypass the AltSvc HTTPS protocol restriction if this variable exists.
 
-## CURL_DBG_SOCK_RBLOCK
+## FETCH_DBG_SOCK_RBLOCK
 
 The percentage of recv() calls that should be answered with a EAGAIN at random.
 For TCP/UNIX sockets.
 
-## CURL_DBG_SOCK_RMAX
+## FETCH_DBG_SOCK_RMAX
 
 The maximum data that shall be received from the network in one recv() call.
 For TCP/UNIX sockets. This is applied to every recv.
 
-Example: **CURL_DBG_SOCK_RMAX=400** means recv buffer size is limited to a
+Example: **FETCH_DBG_SOCK_RMAX=400** means recv buffer size is limited to a
 maximum of 400 bytes.
 
-## CURL_DBG_SOCK_WBLOCK
+## FETCH_DBG_SOCK_WBLOCK
 
 The percentage of send() calls that should be answered with a EAGAIN at random.
 For TCP/UNIX sockets.
 
-## CURL_DBG_SOCK_WPARTIAL
+## FETCH_DBG_SOCK_WPARTIAL
 
 The percentage of data that shall be written to the network. For TCP/UNIX
 sockets. This is applied to every send.
 
-Example: **CURL_DBG_SOCK_WPARTIAL=80** means a send with 1000 bytes would
+Example: **FETCH_DBG_SOCK_WPARTIAL=80** means a send with 1000 bytes would
 only send 800.
 
-## CURL_DBG_QUIC_WBLOCK
+## FETCH_DBG_QUIC_WBLOCK
 
 The percentage of send() calls that should be answered with EAGAIN at random.
 QUIC only.
 
-## CURL_DEBUG
+## FETCH_DEBUG
 
-Trace logging behavior as an alternative to calling curl_global_trace(3).
+Trace logging behavior as an alternative to calling fetch_global_trace(3).
 
-Example: **CURL_DEBUG=http/2** means trace details about HTTP/2 handling.
+Example: **FETCH_DEBUG=http/2** means trace details about HTTP/2 handling.
 
-In the curl command line tool, built with `--enable-debug`, this environment
+In the fetch command line tool, built with `--enable-debug`, this environment
 variable adds to arguments like `--verbose`, `-vvv`. At least a single `-v`
 is needed to make the run emit trace output, but when it does, the contents
-of `CURL_DEBUG` are added and can override existing options.
+of `FETCH_DEBUG` are added and can override existing options.
 
-Example: **CURL_DEBUG=tcp,-http/2 curl -vv url** means trace protocol details,
+Example: **FETCH_DEBUG=tcp,-http/2 fetch -vv url** means trace protocol details,
 triggered by `-vv`, add tracing of TCP in addition and remove tracing of
 HTTP/2.
 
-## CURL_DEBUG_SIZE
+## FETCH_DEBUG_SIZE
 
-Fake the size returned by CURLINFO_HEADER_SIZE and CURLINFO_REQUEST_SIZE.
+Fake the size returned by FETCHINFO_HEADER_SIZE and FETCHINFO_REQUEST_SIZE.
 
-## CURL_GETHOSTNAME
+## FETCH_GETHOSTNAME
 
 Fake the local machine's unqualified hostname for NTLM and SMTP.
 
-## CURL_HSTS_HTTP
+## FETCH_HSTS_HTTP
 
 Bypass the HSTS HTTPS protocol restriction if this variable exists.
 
-## CURL_FORCETIME
+## FETCH_FORCETIME
 
 A time of 0 is used for AWS signatures and NTLM if this variable exists.
 
-## CURL_ENTROPY
+## FETCH_ENTROPY
 
 A fixed faked value to use instead of a proper random number so that functions
-in libcurl that are otherwise getting random outputs can be tested for what
+in libfetch that are otherwise getting random outputs can be tested for what
 they generate.
 
-## CURL_SMALLREQSEND
+## FETCH_SMALLREQSEND
 
 An alternative size of HTTP data to be sent at a time only if smaller than the
 current.
 
-## CURL_SMALLSENDS
+## FETCH_SMALLSENDS
 
 An alternative size of socket data to be sent at a time only if smaller than
 the current.
 
-## CURL_TIME
+## FETCH_TIME
 
-Fake Unix timestamp to use for AltSvc, HSTS and CURLINFO variables that are
+Fake Unix timestamp to use for AltSvc, HSTS and FETCHINFO variables that are
 time related.
 
-This variable can also be used to fake the data returned by some CURLINFO
-variables that are not time-related (such as CURLINFO_LOCAL_PORT), and in that
+This variable can also be used to fake the data returned by some FETCHINFO
+variables that are not time-related (such as FETCHINFO_LOCAL_PORT), and in that
 case the value is not a timestamp.
 
-## CURL_TRACE
+## FETCH_TRACE
 
 LDAP tracing is enabled if this variable exists and its value is 1 or greater.
 
-OpenLDAP tracing is separate. Refer to CURL_OPENLDAP_TRACE.
+OpenLDAP tracing is separate. Refer to FETCH_OPENLDAP_TRACE.
 
-## CURL_OPENLDAP_TRACE
+## FETCH_OPENLDAP_TRACE
 
 OpenLDAP tracing is enabled if this variable exists and its value is 1 or
 greater. There is a number of debug levels, refer to *openldap.c* comments.
 
-## CURL_WS_CHUNK_SIZE
+## FETCH_WS_CHUNK_SIZE
 
 Used to influence the buffer chunk size used for WebSocket encoding and
 decoding.
 
-## CURL_WS_CHUNK_EAGAIN
+## FETCH_WS_CHUNK_EAGAIN
 
 Used to simulate blocking sends after this chunk size for WebSocket
 connections.
 
-## CURL_FORBID_REUSE
+## FETCH_FORBID_REUSE
 
-Used to set the CURLOPT_FORBID_REUSE flag on each transfer initiated
-by the curl command line tool. The value of the environment variable
+Used to set the FETCHOPT_FORBID_REUSE flag on each transfer initiated
+by the fetch command line tool. The value of the environment variable
 does not matter.
 
-## CURL_GRACEFUL_SHUTDOWN
+## FETCH_GRACEFUL_SHUTDOWN
 
 Make a blocking, graceful shutdown of all remaining connections when
 a multi handle is destroyed. This implicitly triggers for easy handles

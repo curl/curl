@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_encoder
+SPDX-License-Identifier: fetch
+Title: fetch_mime_encoder
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_mime_addpart (3)
-  - curl_mime_headers (3)
-  - curl_mime_subparts (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_headers (3)
+  - fetch_mime_subparts (3)
 Protocol:
   - HTTP
   - IMAP
@@ -17,19 +17,19 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_encoder - set a mime part's encoder and content transfer encoding
+fetch_mime_encoder - set a mime part's encoder and content transfer encoding
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding);
+FETCHcode fetch_mime_encoder(fetch_mimepart *part, const char *encoding);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_encoder() requests a mime part's content to be encoded before being
+fetch_mime_encoder() requests a mime part's content to be encoded before being
 transmitted.
 
 *part* is the part's handle to assign an encoder.
@@ -65,10 +65,10 @@ not be used with other types of data.
 
 If the original data is already encoded in such a scheme, a custom
 *Content-Transfer-Encoding* header should be added with
-curl_mime_headers(3) instead of setting a part encoder.
+fetch_mime_headers(3) instead of setting a part encoder.
 
 Encoding should not be applied to multiparts, thus the use of this function on
-a part with content set with curl_mime_subparts(3) is strongly
+a part with content set with fetch_mime_subparts(3) is strongly
 discouraged.
 
 # %PROTOCOLS%
@@ -78,22 +78,22 @@ discouraged.
 ~~~c
 int main(void)
 {
-  curl_mime *mime;
-  curl_mimepart *part;
+  fetch_mime *mime;
+  fetch_mimepart *part;
 
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     /* create a mime handle */
-    mime = curl_mime_init(curl);
+    mime = fetch_mime_init(fetch);
 
     /* add a part */
-    part = curl_mime_addpart(mime);
+    part = fetch_mime_addpart(mime);
 
     /* send a file */
-    curl_mime_filedata(part, "image.png");
+    fetch_mime_filedata(part, "image.png");
 
     /* encode file data in base64 for transfer */
-    curl_mime_encoder(part, "base64");
+    fetch_mime_encoder(part, "base64");
   }
 }
 ~~~
@@ -102,9 +102,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

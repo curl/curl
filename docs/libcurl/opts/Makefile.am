@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -29,11 +29,11 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 if BUILD_DOCS
 include Makefile.inc
 
-CURLPAGES = $(man_MANS:.3=.md)
+FETCHPAGES = $(man_MANS:.3=.md)
 endif
 CLEANFILES = $(man_MANS)
 
-EXTRA_DIST = $(CURLPAGES) CMakeLists.txt
+EXTRA_DIST = $(FETCHPAGES) CMakeLists.txt
 
 if BUILD_DOCS
 

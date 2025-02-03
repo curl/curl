@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_multi_get_handles
+SPDX-License-Identifier: fetch
+Title: fetch_multi_get_handles
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_multi_add_handle (3)
-  - curl_multi_cleanup (3)
-  - curl_multi_init (3)
-  - curl_multi_remove_handle (3)
+  - fetch_multi_add_handle (3)
+  - fetch_multi_cleanup (3)
+  - fetch_multi_init (3)
+  - fetch_multi_remove_handle (3)
 Protocol:
   - All
 Added-in: 8.4.0
@@ -16,14 +16,14 @@ Added-in: 8.4.0
 
 # NAME
 
-curl_multi_get_handles - return all added easy handles
+fetch_multi_get_handles - return all added easy handles
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURL **curl_multi_get_handles(CURLM *multi_handle);
+FETCH **fetch_multi_get_handles(FETCHM *multi_handle);
 ~~~
 
 # DESCRIPTION
@@ -41,7 +41,7 @@ are out of sync.
 
 The order of the easy handles within the array is not guaranteed.
 
-The returned array must be freed with a call to curl_free(3) after use.
+The returned array must be freed with a call to fetch_free(3) after use.
 
 # %PROTOCOLS%
 
@@ -51,23 +51,23 @@ The returned array must be freed with a call to curl_free(3) after use.
 int main(void)
 {
   /* init a multi stack */
-  CURLM *multi = curl_multi_init();
-  CURL *curl = curl_easy_init();
+  FETCHM *multi = fetch_multi_init();
+  FETCH *fetch = fetch_easy_init();
 
-  if(curl) {
+  if(fetch) {
     /* add the transfer */
-    curl_multi_add_handle(multi, curl);
+    fetch_multi_add_handle(multi, fetch);
 
     /* extract all added handles */
-    CURL **list = curl_multi_get_handles(multi);
+    FETCH **list = fetch_multi_get_handles(multi);
 
     if(list) {
       int i;
       /* remove all added handles */
       for(i = 0; list[i]; i++) {
-        curl_multi_remove_handle(multi, list[i]);
+        fetch_multi_remove_handle(multi, list[i]);
       }
-      curl_free(list);
+      fetch_free(list);
     }
   }
 }

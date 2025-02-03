@@ -1,16 +1,16 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# curldown
+# fetchdown
 
-A markdown-like syntax for libcurl man pages.
+A markdown-like syntax for libfetch man pages.
 
 ## Purpose
 
-A text format for writing libcurl documentation in the shape of man pages.
+A text format for writing libfetch documentation in the shape of man pages.
 
 Make it easier for users to contribute and write documentation. A format that
 is easier on the eye in its source format.
@@ -36,21 +36,21 @@ see also information) and general awareness of what the file is about.
 
 ## File extension
 
-Since curldown looks similar to markdown, we use `.md` extensions on the
+Since fetchdown looks similar to markdown, we use `.md` extensions on the
 files.
 
 ## Conversion
 
-Convert **from curldown to nroff** with `cd2nroff`. Generates nroff man pages.
+Convert **from fetchdown to nroff** with `cd2nroff`. Generates nroff man pages.
 
-Convert **from nroff to curldown** with `nroff2cd`. This is only meant to be
-used for the initial conversion to curldown and should ideally never be needed
+Convert **from nroff to fetchdown** with `nroff2cd`. This is only meant to be
+used for the initial conversion to fetchdown and should ideally never be needed
 again.
 
-Convert, check or clean up an existing curldown to nicer, better, cleaner
-curldown with **cd2cd**.
+Convert, check or clean up an existing fetchdown to nicer, better, cleaner
+fetchdown with **cd2cd**.
 
-Mass-convert all curldown files to nroff in specified directories with
+Mass-convert all fetchdown files to nroff in specified directories with
 `cdall`:
 
     cdall [dir1] [dir2] [dir3] ..
@@ -65,25 +65,25 @@ the nroff format does not carry a distinction.
 
 # Format
 
-Each curldown starts with a header with meta-data:
+Each fetchdown starts with a header with meta-data:
 
     ---
     c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-    SPDX-License-Identifier: curl
-    Title: CURLOPT_AWS_SIGV4
+    SPDX-License-Identifier: fetch
+    Title: FETCHOPT_AWS_SIGV4
     Section: 3
-    Source: libcurl
+    Source: libfetch
     Protocol:
       - HTTP
     See-also:
-      - CURLOPT_HEADEROPT (3)
-      - CURLOPT_HTTPAUTH (3)
+      - FETCHOPT_HEADEROPT (3)
+      - FETCHOPT_HTTPAUTH (3)
     TLS-backend:
       - [name]
     Added-in: [version or "n/a"]
     ---
 
-All curldown files *must* have all the headers present and at least one
+All fetchdown files *must* have all the headers present and at least one
 `See-also:` entry specified.
 
 If the man page is for section 3 (library related). The `Protocol` list must
@@ -114,9 +114,9 @@ syntax:
 
     # SYNOPSIS
     ~~~c
-    #include <curl/curl.h>
+    #include <fetch/fetch.h>
 
-    CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4, char *param);
+    FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_AWS_SIGV4, char *param);
     ~~~
 ~~~
 
@@ -145,7 +145,7 @@ When generating the nroff output, the tooling removes superfluous newlines,
 meaning they can be used freely in the source file to make the text more
 readable.
 
-To make sure curldown documents render correctly as markdown, all literal
+To make sure fetchdown documents render correctly as markdown, all literal
 occurrences of `<` or `>` need to be escaped by a leading backslash.
 
 ## Generating contents
@@ -158,11 +158,11 @@ provided in the header.
 
 ## Symbols
 
-All mentioned curl symbols that have their own man pages, like
-`curl_easy_perform(3)` are automatically rendered using italics in the output
+All mentioned fetch symbols that have their own man pages, like
+`fetch_easy_perform(3)` are automatically rendered using italics in the output
 without having to enclose it with asterisks. This helps ensuring that they get
 converted to links properly later in the HTML version on the website, as
-converted with `roffit`. This makes the curldown text easier to read even when
-mentioning many curl symbols.
+converted with `roffit`. This makes the fetchdown text easier to read even when
+mentioning many fetch symbols.
 
-This auto-linking works for patterns matching `(lib|)curl[^ ]*(3)`.
+This auto-linking works for patterns matching `(lib|)fetch[^ ]*(3)`.

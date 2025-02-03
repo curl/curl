@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: metalink
 Help: Process given URLs as metalink XML file
 Added: 7.27.0
@@ -15,4 +15,4 @@ Example:
 # `--metalink`
 
 This option was previously used to specify a Metalink resource. Metalink
-support is disabled in curl for security reasons (added in 7.78.0).
+support is disabled in fetch for security reasons (added in 7.78.0).

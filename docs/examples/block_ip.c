@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
- * Show how CURLOPT_OPENSOCKETFUNCTION can be used to block IP addresses.
+ * Show how FETCHOPT_OPENSOCKETFUNCTION can be used to block IP addresses.
  * </DESC>
  */
 /* This is an advanced example that defines a whitelist or a blacklist to
@@ -58,7 +58,7 @@ int main(void) { printf("AmigaOS is not supported.\n"); return 1; }
 #include <stdlib.h>
 #include <string.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #ifndef TRUE
 #define TRUE 1
@@ -233,12 +233,12 @@ static int is_ipv4_mapped_ipv6_address(int family, void *netaddr)
 }
 #endif /* AF_INET6 */
 
-static curl_socket_t opensocket(void *clientp,
-                                curlsocktype purpose,
-                                struct curl_sockaddr *address)
+static fetch_socket_t opensocket(void *clientp,
+                                fetchsocktype purpose,
+                                struct fetch_sockaddr *address)
 {
   /* filter the address */
-  if(purpose == CURLSOCKTYPE_IPCXN) {
+  if(purpose == FETCHSOCKTYPE_IPCXN) {
     void *cinaddr = NULL;
 
     if(address->family == AF_INET)
@@ -273,7 +273,7 @@ static curl_socket_t opensocket(void *clientp,
           fprintf(stderr, "* Rejecting IP %s due to blacklist entry %s.\n",
                   buf, ip->str);
         }
-        return CURL_SOCKET_BAD;
+        return FETCH_SOCKET_BAD;
       }
       else if(!ip && filter->type == CONNECTION_FILTER_WHITELIST) {
         if(filter->verbose) {
@@ -282,7 +282,7 @@ static curl_socket_t opensocket(void *clientp,
           fprintf(stderr,
             "* Rejecting IP %s due to missing whitelist entry.\n", buf);
         }
-        return CURL_SOCKET_BAD;
+        return FETCH_SOCKET_BAD;
       }
     }
   }
@@ -292,23 +292,23 @@ static curl_socket_t opensocket(void *clientp,
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   struct connection_filter *filter;
 
   filter = (struct connection_filter *)calloc(1, sizeof(*filter));
   if(!filter)
     exit(1);
 
-  if(curl_global_init(CURL_GLOBAL_DEFAULT))
+  if(fetch_global_init(FETCH_GLOBAL_DEFAULT))
     exit(1);
 
-  curl = curl_easy_init();
-  if(!curl)
+  fetch = fetch_easy_init();
+  if(!fetch)
     exit(1);
 
   /* Set the target URL */
-  curl_easy_setopt(curl, CURLOPT_URL, "http://localhost");
+  fetch_easy_setopt(fetch, FETCHOPT_URL, "http://localhost");
 
   /* Define an IP connection filter.
    * If an address has CIDR notation then it matches the network.
@@ -322,28 +322,28 @@ int main(void)
 #endif
 
   /* Set the socket function which does the filtering */
-  curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
-  curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, filter);
+  fetch_easy_setopt(fetch, FETCHOPT_OPENSOCKETFUNCTION, opensocket);
+  fetch_easy_setopt(fetch, FETCHOPT_OPENSOCKETDATA, filter);
 
   /* Verbose mode */
   filter->verbose = TRUE;
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* Perform the request */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
   /* Check for errors */
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+  if(res != FETCHE_OK) {
+    fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+            fetch_easy_strerror(res));
   }
 
   /* Clean up */
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
   free_connection_filter(filter);
 
-  /* Clean up libcurl */
-  curl_global_cleanup();
+  /* Clean up libfetch */
+  fetch_global_cleanup();
 
   return 0;
 }

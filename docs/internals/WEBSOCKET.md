@@ -1,14 +1,14 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# WebSocket in curl
+# WebSocket in fetch
 
 ## URL
 
-WebSocket communication with libcurl is done by setting up a transfer to a URL
+WebSocket communication with libfetch is done by setting up a transfer to a URL
 using the `ws://` or `wss://` URL schemes. The latter one being the secure
 version done over HTTPS.
 
@@ -16,7 +16,7 @@ When using `wss://` to do WebSocket over HTTPS, the standard TLS and HTTPS
 options are acknowledged for the CA, verification of server certificate etc.
 
 WebSocket communication is done by upgrading a connection from either HTTP or
-HTTPS. When given a WebSocket URL to work with, libcurl considers it a
+HTTPS. When given a WebSocket URL to work with, libfetch considers it a
 transfer failure if the upgrade procedure fails. This means that a plain HTTP
 200 response code is considered an error for this work.
 
@@ -24,30 +24,30 @@ transfer failure if the upgrade procedure fails. This means that a plain HTTP
 
 The WebSocket API is described in the individual man pages for the new API.
 
-WebSocket with libcurl can be done two ways.
+WebSocket with libfetch can be done two ways.
 
 1. Get the WebSocket frames from the server sent to the write callback. You
-   can then respond with `curl_ws_send()` from within the callback (or outside
+   can then respond with `fetch_ws_send()` from within the callback (or outside
    of it).
 
-2. Set `CURLOPT_CONNECT_ONLY` to 2L (new for WebSocket), which makes libcurl
+2. Set `FETCHOPT_CONNECT_ONLY` to 2L (new for WebSocket), which makes libfetch
    do an HTTP GET + `Upgrade:` request plus response in the
-   `curl_easy_perform()` call before it returns and then you can use
-   `curl_ws_recv()` and `curl_ws_send()` to receive and send WebSocket frames
+   `fetch_easy_perform()` call before it returns and then you can use
+   `fetch_ws_recv()` and `fetch_ws_send()` to receive and send WebSocket frames
    from and to the server.
 
-The new options to `curl_easy_setopt()`:
+The new options to `fetch_easy_setopt()`:
 
- `CURLOPT_WS_OPTIONS` - to control specific behavior. `CURLWS_RAW_MODE` makes
- libcurl provide all WebSocket traffic raw in the callback.
+ `FETCHOPT_WS_OPTIONS` - to control specific behavior. `FETCHWS_RAW_MODE` makes
+ libfetch provide all WebSocket traffic raw in the callback.
 
 The new function calls:
 
- `curl_ws_recv()` - receive a WebSocket frame
+ `fetch_ws_recv()` - receive a WebSocket frame
 
- `curl_ws_send()` - send a WebSocket frame
+ `fetch_ws_send()` - send a WebSocket frame
 
- `curl_ws_meta()` - return WebSocket metadata within a write callback
+ `fetch_ws_meta()` - return WebSocket metadata within a write callback
 
 ## Max frame size
 
@@ -63,7 +63,7 @@ directions.
 
 If the given WebSocket URL (using `ws://` or `wss://`) fails to get upgraded
 via a 101 response code and instead gets another response code back from the
-HTTP server - the transfer returns `CURLE_HTTP_RETURNED_ERROR` for that
+HTTP server - the transfer returns `FETCHE_HTTP_RETURNED_ERROR` for that
 transfer. Note then that even 2xx response codes are then considered error
 since it failed to provide a WebSocket transfer.
 
@@ -82,7 +82,7 @@ might be the better way.
 
 ## Command line tool WebSocket
 
-The plan is to make curl do WebSocket similar to telnet/nc. That part of the
+The plan is to make fetch do WebSocket similar to telnet/nc. That part of the
 work has not been started.
 
 Ideas:
@@ -99,11 +99,11 @@ Ideas:
 
 - Verify the Sec-WebSocket-Accept response. It requires a sha-1 function.
 - Verify Sec-WebSocket-Extensions and Sec-WebSocket-Protocol in the response
-- Consider a `curl_ws_poll()`
+- Consider a `fetch_ws_poll()`
 - Make sure WebSocket code paths are fuzzed
 - Add client-side PING interval
 - Provide option to disable PING-PONG automation
-- Support compression (`CURLWS_COMPRESS`)
+- Support compression (`FETCHWS_COMPRESS`)
 
 ## Why not libWebSocket
 
@@ -112,13 +112,13 @@ a vast amount of users. My plan was originally to build upon it to skip having
 to implement the low level parts of WebSocket myself.
 
 Here are the reasons why I have decided to move forward with WebSocket in
-curl **without using libWebSocket**:
+fetch **without using libWebSocket**:
 
 - doxygen generated docs only makes them hard to navigate. No tutorial, no
   clearly written explanatory pages for specific functions.
 
 - seems (too) tightly integrated with a specific TLS library, while we want to
-  support WebSocket with whatever TLS library libcurl was already made to
+  support WebSocket with whatever TLS library libfetch was already made to
   work with.
 
 - seems (too) tightly integrated with event libraries
@@ -127,7 +127,7 @@ curl **without using libWebSocket**:
   much logic for our purposes
 
 - "bloated" - it is a *huge* library that is actually more lines of code than
-  libcurl itself
+  libfetch itself
 
 - WebSocket is a fairly simple protocol on the network/framing layer so
   making a homegrown handling of it should be fine

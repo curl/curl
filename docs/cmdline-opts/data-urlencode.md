@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: data-urlencode
 Arg: <data>
 Help: HTTP POST data URL encoded
@@ -25,7 +25,7 @@ performs URL-encoding.
 
 To be CGI-compliant, the \<data\> part should begin with a *name* followed by
 a separator and a content specification. The \<data\> part can be passed to
-curl using one of the following syntaxes:
+fetch using one of the following syntaxes:
 
 ## content
 URL-encode the content and pass that on. Just be careful so that the content
@@ -42,7 +42,7 @@ expected to be URL-encoded already.
 
 ## @filename
 load data from the given file (including any newlines), URL-encode that data
-and pass it on in the POST. Using `@-` makes curl read the data from stdin.
+and pass it on in the POST. Using `@-` makes fetch read the data from stdin.
 
 ## name@filename
 load data from the given file (including any newlines), URL-encode that data

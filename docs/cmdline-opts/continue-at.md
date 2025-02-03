@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: C
 Long: continue-at
 Arg: <offset>
@@ -20,9 +20,9 @@ Example:
 Resume a previous transfer from the given byte offset. The given offset is the
 exact number of bytes that are skipped, counting from the beginning of the
 source file before it is transferred to the destination. If used with uploads,
-the FTP server command SIZE is not used by curl.
+the FTP server command SIZE is not used by fetch.
 
-Use "-C -" to instruct curl to automatically find out where/how to resume the
+Use "-C -" to instruct fetch to automatically find out where/how to resume the
 transfer. It then uses the given output/input files to figure that out.
 
 This command line option is mutually exclusive with --range: you can only use

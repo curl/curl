@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_ISSUERCERT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_ISSUERCERT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CRLFILE (3)
-  - CURLOPT_SSL_VERIFYHOST (3)
-  - CURLOPT_SSL_VERIFYPEER (3)
+  - FETCHOPT_CRLFILE (3)
+  - FETCHOPT_SSL_VERIFYHOST (3)
+  - FETCHOPT_SSL_VERIFYPEER (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -18,14 +18,14 @@ Added-in: 7.19.0
 
 # NAME
 
-CURLOPT_ISSUERCERT - issuer SSL certificate filename
+FETCHOPT_ISSUERCERT - issuer SSL certificate filename
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ISSUERCERT, char *file);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_ISSUERCERT, char *file);
 ~~~
 
 # DESCRIPTION
@@ -38,12 +38,12 @@ is useful in multi-level PKI where one needs to enforce that the peer
 certificate is from a specific branch of the tree.
 
 This option makes sense only when used in combination with the
-CURLOPT_SSL_VERIFYPEER(3) option. Otherwise, the result of the check is
+FETCHOPT_SSL_VERIFYPEER(3) option. Otherwise, the result of the check is
 not considered as failure.
 
-A specific error code (CURLE_SSL_ISSUER_ERROR) is defined with the option,
+A specific error code (FETCHE_SSL_ISSUER_ERROR) is defined with the option,
 which is returned if the setup of the SSL/TLS session has failed due to a
-mismatch with the issuer of peer certificate (CURLOPT_SSL_VERIFYPEER(3)
+mismatch with the issuer of peer certificate (FETCHOPT_SSL_VERIFYPEER(3)
 has to be set too for the check to fail). (Added in 7.19.0)
 
 Using this option multiple times makes the last set string override the
@@ -63,13 +63,13 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_ISSUERCERT, "/etc/certs/cacert.pem");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_ISSUERCERT, "/etc/certs/cacert.pem");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -78,7 +78,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

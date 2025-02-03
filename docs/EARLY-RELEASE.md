@@ -1,12 +1,12 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # How to determine if an early patch release is warranted
 
-In the curl project we do releases every 8 weeks. Unless we break the cycle
+In the fetch project we do releases every 8 weeks. Unless we break the cycle
 and do an early patch release.
 
 We do frequent releases partly to always have the next release "not too far
@@ -26,7 +26,7 @@ in the git master branch.
 
 An early patch release means that we ship a new, complete and full release
 called `major.minor.patch` where the `patch` part is increased by one since
-the previous release. A curl release is a curl release. There is no small or
+the previous release. A fetch release is a fetch release. There is no small or
 big and we never release just a patch. There is only "release".
 
 ## Questions to ask
@@ -42,20 +42,20 @@ warranted.
 More questions to ask ourselves when doing the assessment if the answers to
 the three ones above are all 'no'.
 
- - Does the bug cause curl to prematurely terminate?
+ - Does the bug cause fetch to prematurely terminate?
  - How common is the affected buggy option/feature/protocol/platform to get
    used?
  - How large is the estimated impacted user base?
  - Does the bug block something crucial for applications or other adoption of
-   curl "out there" ?
- - Does the bug cause problems for curl developers or others on "the curl
+   fetch "out there" ?
+ - Does the bug cause problems for fetch developers or others on "the fetch
    team" ?
- - Is the bug limited to the curl tool only? That might have a smaller impact
-   than a bug also present in libcurl.
+ - Is the bug limited to the fetch tool only? That might have a smaller impact
+   than a bug also present in libfetch.
  - Is there a (decent) workaround?
  - Is it a regression? Is the bug introduced in this release?
  - Can the bug be fixed "easily" by applying a patch?
- - Does the bug break the build? Most users do not build curl themselves.
+ - Does the bug break the build? Most users do not build fetch themselves.
  - How long is it until the already scheduled next release?
  - Can affected users safely rather revert to a former release until the next
    scheduled release?

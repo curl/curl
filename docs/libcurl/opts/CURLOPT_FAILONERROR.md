@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FAILONERROR
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FAILONERROR
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_RESPONSE_CODE (3)
-  - CURLOPT_HTTP200ALIASES (3)
-  - CURLOPT_KEEP_SENDING_ON_ERROR (3)
+  - FETCHINFO_RESPONSE_CODE (3)
+  - FETCHOPT_HTTP200ALIASES (3)
+  - FETCHOPT_KEEP_SENDING_ON_ERROR (3)
 Protocol:
   - HTTP
 Added-in: 7.1
@@ -15,14 +15,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_FAILONERROR - request failure on HTTP response \>= 400
+FETCHOPT_FAILONERROR - request failure on HTTP response \>= 400
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FAILONERROR, long fail);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FAILONERROR, long fail);
 ~~~
 
 # DESCRIPTION
@@ -40,7 +40,7 @@ detected, like when a "100-continue" is received as a response to a POST/PUT
 and a 401 or 407 is received immediately afterwards.
 
 When this option is used and an error is detected, it causes the connection to
-get closed and *CURLE_HTTP_RETURNED_ERROR* is returned.
+get closed and *FETCHE_HTTP_RETURNED_ERROR* is returned.
 
 # DEFAULT
 
@@ -53,13 +53,13 @@ get closed and *CURLE_HTTP_RETURNED_ERROR* is returned.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
-    ret = curl_easy_perform(curl);
-    if(ret == CURLE_HTTP_RETURNED_ERROR) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_FAILONERROR, 1L);
+    ret = fetch_easy_perform(fetch);
+    if(ret == FETCHE_HTTP_RETURNED_ERROR) {
       /* an HTTP response error problem */
     }
   }
@@ -70,7 +70,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

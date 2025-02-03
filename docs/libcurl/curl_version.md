@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_version
+SPDX-License-Identifier: fetch
+Title: fetch_version
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_version_info (3)
+  - fetch_version_info (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -13,22 +13,22 @@ Added-in: 7.1
 
 # NAME
 
-curl_version - returns the libcurl version string
+fetch_version - returns the libfetch version string
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-char *curl_version();
+char *fetch_version();
 ~~~
 
 # DESCRIPTION
 
-Returns a human readable string with the version number of libcurl and some of
+Returns a human readable string with the version number of libfetch and some of
 its important components (like OpenSSL version).
 
-We recommend using curl_version_info(3) instead.
+We recommend using fetch_version_info(3) instead.
 
 # %PROTOCOLS%
 
@@ -37,7 +37,7 @@ We recommend using curl_version_info(3) instead.
 ~~~c
 int main(void)
 {
-  printf("libcurl version %s\n", curl_version());
+  printf("libfetch version %s\n", fetch_version());
 }
 ~~~
 

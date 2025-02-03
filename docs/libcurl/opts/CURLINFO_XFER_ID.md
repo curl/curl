@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_XFER_ID
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_XFER_ID
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_CONN_ID (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_CONN_ID (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 8.2.0
@@ -15,20 +15,20 @@ Added-in: 8.2.0
 
 # NAME
 
-CURLINFO_XFER_ID - get the ID of a transfer
+FETCHINFO_XFER_ID - get the ID of a transfer
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_XFER_ID,
-                           curl_off_t *xfer_id);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_XFER_ID,
+                           fetch_off_t *xfer_id);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a *curl_off_t* to receive the identifier of the
+Pass a pointer to a *fetch_off_t* to receive the identifier of the
 current/last transfer done with the handle. Stores -1 if no transfer
 has been started yet for the handle.
 
@@ -43,19 +43,19 @@ same multi handle.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* Perform the request */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
-      curl_off_t xfer_id;
-      res = curl_easy_getinfo(curl, CURLINFO_XFER_ID, &xfer_id);
+      fetch_off_t xfer_id;
+      res = fetch_easy_getinfo(fetch, FETCHINFO_XFER_ID, &xfer_id);
       if(!res) {
-        printf("Transfer ID: %" CURL_FORMAT_CURL_OFF_T "\n", xfer_id);
+        printf("Transfer ID: %" FETCH_FORMAT_FETCH_OFF_T "\n", xfer_id);
       }
     }
   }
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_POSTFIELDSIZE_LARGE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_POSTFIELDSIZE_LARGE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_COPYPOSTFIELDS (3)
-  - CURLOPT_POSTFIELDS (3)
-  - CURLOPT_POSTFIELDSIZE (3)
+  - FETCHOPT_COPYPOSTFIELDS (3)
+  - FETCHOPT_POSTFIELDS (3)
+  - FETCHOPT_POSTFIELDSIZE (3)
 Protocol:
   - HTTP
 Added-in: 7.11.1
@@ -15,24 +15,24 @@ Added-in: 7.11.1
 
 # NAME
 
-CURLOPT_POSTFIELDSIZE_LARGE - size of POST data pointed to
+FETCHOPT_POSTFIELDSIZE_LARGE - size of POST data pointed to
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTFIELDSIZE_LARGE,
-                          curl_off_t size);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_POSTFIELDSIZE_LARGE,
+                          fetch_off_t size);
 ~~~
 
 # DESCRIPTION
 
-If you want to post static data to the server without having libcurl do a
+If you want to post static data to the server without having libfetch do a
 strlen() to measure the data size, this option must be used. When this option
 is used you can post fully binary data, which otherwise is likely to fail. If
-this size is set to -1, libcurl uses strlen() to get the size or relies on the
-CURLOPT_READFUNCTION(3) (if used) to signal the end of data.
+this size is set to -1, libfetch uses strlen() to get the size or relies on the
+FETCHOPT_READFUNCTION(3) (if used) to signal the end of data.
 
 # DEFAULT
 
@@ -47,19 +47,19 @@ extern char *large_chunk; /* pointer to somewhere */
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     const char *data = large_chunk;
-    curl_off_t length_of_data; /* set somehow */
+    fetch_off_t length_of_data; /* set somehow */
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* size of the POST data */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, length_of_data);
+    fetch_easy_setopt(fetch, FETCHOPT_POSTFIELDSIZE_LARGE, length_of_data);
 
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+    fetch_easy_setopt(fetch, FETCHOPT_POSTFIELDS, data);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -68,7 +68,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

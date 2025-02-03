@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: user
 Short: u
 Arg: <user:password>
@@ -20,13 +20,13 @@ Example:
 Specify the username and password to use for server authentication. Overrides
 --netrc and --netrc-optional.
 
-If you simply specify the username, curl prompts for a password.
+If you simply specify the username, fetch prompts for a password.
 
 The username and passwords are split up on the first colon, which makes it
 impossible to use a colon in the username with this option. The password can,
 still.
 
-On systems where it works, curl hides the given option argument from process
+On systems where it works, fetch hides the given option argument from process
 listings. This is not enough to protect credentials from possibly getting seen
 by other users on the same system as they still are visible for a moment
 before cleared. Such sensitive data should be retrieved from a file instead or
@@ -44,7 +44,7 @@ To specify the domain name use either Down-Level Logon Name or UPN (User
 Principal Name) formats. For example, EXAMPLE\user and user@example.com
 respectively.
 
-If you use a Windows SSPI-enabled curl binary and perform Kerberos V5,
-Negotiate, NTLM or Digest authentication then you can tell curl to select the
+If you use a Windows SSPI-enabled fetch binary and perform Kerberos V5,
+Negotiate, NTLM or Digest authentication then you can tell fetch to select the
 username and password from your environment by specifying a single colon with
 this option: "-u :".

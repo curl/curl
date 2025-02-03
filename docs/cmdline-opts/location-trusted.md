@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: location-trusted
 Help: As --location, but send secrets to other hosts
 Protocols: HTTP
@@ -16,11 +16,11 @@ Example:
 
 # `--location-trusted`
 
-Instructs curl to like --location follow HTTP redirects, but permits it to
+Instructs fetch to like --location follow HTTP redirects, but permits it to
 send credentials and other secrets along to other hosts than the initial one.
 
 This may or may not introduce a security breach if the site redirects you to a
 site to which you send this sensitive data to. Another host means that one or
 more of hostname, protocol scheme or port number changed.
 
-This option also allows curl to pass long cookies set explicitly with --header.
+This option also allows fetch to pass long cookies set explicitly with --header.

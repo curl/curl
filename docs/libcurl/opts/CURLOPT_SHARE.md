@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SHARE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SHARE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_COOKIE (3)
-  - CURLSHOPT_SHARE (3)
+  - FETCHOPT_COOKIE (3)
+  - FETCHSHOPT_SHARE (3)
 Protocol:
   - All
 Added-in: 7.10
@@ -14,24 +14,24 @@ Added-in: 7.10
 
 # NAME
 
-CURLOPT_SHARE - share handle to use
+FETCHOPT_SHARE - share handle to use
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SHARE, CURLSH *share);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SHARE, FETCHSH *share);
 ~~~
 
 # DESCRIPTION
 
 Pass a *share* handle as a parameter. The share handle must have been
-created by a previous call to curl_share_init(3). Setting this option,
-makes this curl handle use the data from the shared handle instead of keeping
-the data to itself. This enables several curl handles to share data. If the
-curl handles are used simultaneously in multiple threads, you **MUST** use
-the locking methods in the share handle. See curl_share_setopt(3) for
+created by a previous call to fetch_share_init(3). Setting this option,
+makes this fetch handle use the data from the shared handle instead of keeping
+the data to itself. This enables several fetch handles to share data. If the
+fetch handles are used simultaneously in multiple threads, you **MUST** use
+the locking methods in the share handle. See fetch_share_setopt(3) for
 details.
 
 If you add a share that is set to share cookies, your easy handle uses that
@@ -55,27 +55,27 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  CURL *curl2 = curl_easy_init(); /* a second handle */
-  if(curl) {
-    CURLcode res;
-    CURLSH *shobject = curl_share_init();
-    curl_share_setopt(shobject, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  FETCH *fetch = fetch_easy_init();
+  FETCH *fetch2 = fetch_easy_init(); /* a second handle */
+  if(fetch) {
+    FETCHcode res;
+    FETCHSH *shobject = fetch_share_init();
+    fetch_share_setopt(shobject, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_COOKIE);
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
-    curl_easy_setopt(curl, CURLOPT_SHARE, shobject);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_COOKIEFILE, "");
+    fetch_easy_setopt(fetch, FETCHOPT_SHARE, shobject);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
 
     /* the second handle shares cookies from the first */
-    curl_easy_setopt(curl2, CURLOPT_URL, "https://example.com/second");
-    curl_easy_setopt(curl2, CURLOPT_COOKIEFILE, "");
-    curl_easy_setopt(curl2, CURLOPT_SHARE, shobject);
-    res = curl_easy_perform(curl2);
-    curl_easy_cleanup(curl2);
+    fetch_easy_setopt(fetch2, FETCHOPT_URL, "https://example.com/second");
+    fetch_easy_setopt(fetch2, FETCHOPT_COOKIEFILE, "");
+    fetch_easy_setopt(fetch2, FETCHOPT_SHARE, shobject);
+    res = fetch_easy_perform(fetch2);
+    fetch_easy_cleanup(fetch2);
 
-    curl_share_cleanup(shobject);
+    fetch_share_cleanup(shobject);
   }
 }
 ~~~
@@ -84,7 +84,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

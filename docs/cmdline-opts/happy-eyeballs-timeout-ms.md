@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: happy-eyeballs-timeout-ms
 Arg: <ms>
 Help: Time for IPv6 before IPv4
@@ -24,5 +24,5 @@ first connection to be established is the one that is used.
 
 The range of suggested useful values is limited. Happy Eyeballs RFC 6555 says
 "It is RECOMMENDED that connection attempts be paced 150-250 ms apart to
-balance human factors against network load." libcurl currently defaults to
+balance human factors against network load." libfetch currently defaults to
 200 ms. Firefox and Chrome currently default to 300 ms.

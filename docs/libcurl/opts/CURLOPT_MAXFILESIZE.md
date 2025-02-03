@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_MAXFILESIZE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_MAXFILESIZE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_MAXFILESIZE_LARGE (3)
-  - CURLOPT_MAX_RECV_SPEED_LARGE (3)
+  - FETCHOPT_MAXFILESIZE_LARGE (3)
+  - FETCHOPT_MAX_RECV_SPEED_LARGE (3)
 Protocol:
   - All
 Added-in: 7.10.8
@@ -14,29 +14,29 @@ Added-in: 7.10.8
 
 # NAME
 
-CURLOPT_MAXFILESIZE - maximum file size allowed to download
+FETCHOPT_MAXFILESIZE - maximum file size allowed to download
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXFILESIZE, long size);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_MAXFILESIZE, long size);
 ~~~
 
 # DESCRIPTION
 
 Pass a long as parameter. This specifies the maximum accepted *size* (in
 bytes) of a file to download. If the file requested is found larger than this
-value, the transfer is aborted and *CURLE_FILESIZE_EXCEEDED* is returned.
+value, the transfer is aborted and *FETCHE_FILESIZE_EXCEEDED* is returned.
 Passing a zero *size* disables this, and passing a negative *size* yields a
-*CURLE_BAD_FUNCTION_ARGUMENT*.
+*FETCHE_BAD_FUNCTION_ARGUMENT*.
 
 The file size is not always known prior to the download start, and for such
 transfers this option has no effect - even if the file transfer eventually
 ends up being larger than this given limit.
 
-If you want a limit above 2GB, use CURLOPT_MAXFILESIZE_LARGE(3).
+If you want a limit above 2GB, use FETCHOPT_MAXFILESIZE_LARGE(3).
 
 Since 8.4.0, this option also stops ongoing transfers if they reach this
 threshold.
@@ -52,13 +52,13 @@ threshold.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
     /* refuse to download if larger than 1000 bytes */
-    curl_easy_setopt(curl, CURLOPT_MAXFILESIZE, 1000L);
-    ret = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_MAXFILESIZE, 1000L);
+    ret = fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -67,7 +67,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

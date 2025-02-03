@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_slist_append
+SPDX-License-Identifier: fetch
+Title: fetch_slist_append
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_slist_free_all (3)
+  - fetch_slist_free_all (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -13,27 +13,27 @@ Added-in: 7.1
 
 # NAME
 
-curl_slist_append - add a string to an slist
+fetch_slist_append - add a string to an slist
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-struct curl_slist *curl_slist_append(struct curl_slist *list,
+struct fetch_slist *fetch_slist_append(struct fetch_slist *list,
                                      const char *string);
 ~~~
 
 # DESCRIPTION
 
-curl_slist_append(3) appends a string to a linked list of strings. The
+fetch_slist_append(3) appends a string to a linked list of strings. The
 existing **list** should be passed as the first argument and the new list is
 returned from this function. Pass in NULL in the **list** argument to create
 a new list. The specified **string** has been appended when this function
-returns. curl_slist_append(3) copies the string.
+returns. fetch_slist_append(3) copies the string.
 
 The list should be freed again (after usage) with
-curl_slist_free_all(3).
+fetch_slist_free_all(3).
 
 # %PROTOCOLS%
 
@@ -42,29 +42,29 @@ curl_slist_free_all(3).
 ~~~c
 int main(void)
 {
-  CURL *handle;
-  struct curl_slist *slist = NULL;
-  struct curl_slist *temp = NULL;
+  FETCH *handle;
+  struct fetch_slist *slist = NULL;
+  struct fetch_slist *temp = NULL;
 
-  slist = curl_slist_append(slist, "pragma:");
+  slist = fetch_slist_append(slist, "pragma:");
 
   if(!slist)
     return -1;
 
-  temp = curl_slist_append(slist, "Accept:");
+  temp = fetch_slist_append(slist, "Accept:");
 
   if(!temp) {
-    curl_slist_free_all(slist);
+    fetch_slist_free_all(slist);
     return -1;
   }
 
   slist = temp;
 
-  curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
+  fetch_easy_setopt(handle, FETCHOPT_HTTPHEADER, slist);
 
-  curl_easy_perform(handle);
+  fetch_easy_perform(handle);
 
-  curl_slist_free_all(slist); /* free the list again */
+  fetch_slist_free_all(slist); /* free the list again */
 }
 ~~~
 

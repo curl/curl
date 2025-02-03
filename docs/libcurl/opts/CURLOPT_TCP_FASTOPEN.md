@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TCP_FASTOPEN
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TCP_FASTOPEN
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSL_FALSESTART (3)
+  - FETCHOPT_SSL_FALSESTART (3)
 Protocol:
   - TCP
 Added-in: 7.49.0
@@ -13,14 +13,14 @@ Added-in: 7.49.0
 
 # NAME
 
-CURLOPT_TCP_FASTOPEN - TCP Fast Open
+FETCHOPT_TCP_FASTOPEN - TCP Fast Open
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_FASTOPEN, long enable);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TCP_FASTOPEN, long enable);
 ~~~
 
 # DESCRIPTION
@@ -45,11 +45,11 @@ Fast Open is also known to be problematic on or across certain networks.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
-    curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_TCP_FASTOPEN, 1L);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -62,7 +62,7 @@ This option is only supported on Linux and macOS 10.11 or later.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

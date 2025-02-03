@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: pinnedpubkey
 Arg: <hashes>
 Help: Public key to verify peer against
@@ -24,7 +24,7 @@ separated by ';'.
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. A public key is extracted from this certificate and
-if it does not exactly match the public key provided to this option, curl
+if it does not exactly match the public key provided to this option, fetch
 aborts the connection before sending or receiving any data.
 
 This option is independent of option --insecure. If you use both options

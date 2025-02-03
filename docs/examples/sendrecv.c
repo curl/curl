@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,20 +18,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
- * Demonstrate curl_easy_send() and curl_easy_recv() usage.
+ * Demonstrate fetch_easy_send() and fetch_easy_recv() usage.
  * </DESC>
  */
 
 #include <stdio.h>
 #include <string.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /* Avoid warning in FD_SET() with pre-2020 Cygwin/MSYS releases:
- * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
+ * warning: conversion to 'long unsigned int' from 'fetch_socket_t' {aka 'int'}
  * may change the sign of the result [-Wsign-conversion]
  */
 #ifdef __GNUC__
@@ -44,7 +44,7 @@
 #endif
 
 /* Auxiliary function that waits on the socket. */
-static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
+static int wait_on_socket(fetch_socket_t sockfd, int for_recv, long timeout_ms)
 {
   struct timeval tv;
   fd_set infd, outfd, errfd;
@@ -78,40 +78,40 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 
 int main(void)
 {
-  CURL *curl;
+  FETCH *fetch;
   /* Minimalistic http request */
   const char *request = "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n";
   size_t request_len = strlen(request);
 
-  /* A general note of caution here: if you are using curl_easy_recv() or
-     curl_easy_send() to implement HTTP or _any_ other protocol libcurl
+  /* A general note of caution here: if you are using fetch_easy_recv() or
+     fetch_easy_send() to implement HTTP or _any_ other protocol libfetch
      supports "natively", you are doing it wrong and you should stop.
 
      This example uses HTTP only to show how to use this API, it does not
      suggest that writing an application doing this is sensible.
   */
 
-  curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_socket_t sockfd;
+  fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_socket_t sockfd;
     size_t nsent_total = 0;
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
     /* Do not do the transfer - only connect to host */
-    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-    res = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 1L);
+    res = fetch_easy_perform(fetch);
 
-    if(res != CURLE_OK) {
-      printf("Error: %s\n", curl_easy_strerror(res));
+    if(res != FETCHE_OK) {
+      printf("Error: %s\n", fetch_easy_strerror(res));
       return 1;
     }
 
-    /* Extract the socket from the curl handle - we need it for waiting. */
-    res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
+    /* Extract the socket from the fetch handle - we need it for waiting. */
+    res = fetch_easy_getinfo(fetch, FETCHINFO_ACTIVESOCKET, &sockfd);
 
-    if(res != CURLE_OK) {
-      printf("Error: %s\n", curl_easy_strerror(res));
+    if(res != FETCHE_OK) {
+      printf("Error: %s\n", fetch_easy_strerror(res));
       return 1;
     }
 
@@ -124,18 +124,18 @@ int main(void)
       size_t nsent;
       do {
         nsent = 0;
-        res = curl_easy_send(curl, request + nsent_total,
+        res = fetch_easy_send(fetch, request + nsent_total,
             request_len - nsent_total, &nsent);
         nsent_total += nsent;
 
-        if(res == CURLE_AGAIN && !wait_on_socket(sockfd, 0, 60000L)) {
+        if(res == FETCHE_AGAIN && !wait_on_socket(sockfd, 0, 60000L)) {
           printf("Error: timeout.\n");
           return 1;
         }
-      } while(res == CURLE_AGAIN);
+      } while(res == FETCHE_AGAIN);
 
-      if(res != CURLE_OK) {
-        printf("Error: %s\n", curl_easy_strerror(res));
+      if(res != FETCHE_OK) {
+        printf("Error: %s\n", fetch_easy_strerror(res));
         return 1;
       }
 
@@ -151,16 +151,16 @@ int main(void)
       size_t nread;
       do {
         nread = 0;
-        res = curl_easy_recv(curl, buf, sizeof(buf), &nread);
+        res = fetch_easy_recv(fetch, buf, sizeof(buf), &nread);
 
-        if(res == CURLE_AGAIN && !wait_on_socket(sockfd, 1, 60000L)) {
+        if(res == FETCHE_AGAIN && !wait_on_socket(sockfd, 1, 60000L)) {
           printf("Error: timeout.\n");
           return 1;
         }
-      } while(res == CURLE_AGAIN);
+      } while(res == FETCHE_AGAIN);
 
-      if(res != CURLE_OK) {
-        printf("Error: %s\n", curl_easy_strerror(res));
+      if(res != FETCHE_OK) {
+        printf("Error: %s\n", fetch_easy_strerror(res));
         break;
       }
 
@@ -173,7 +173,7 @@ int main(void)
     }
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   return 0;
 }

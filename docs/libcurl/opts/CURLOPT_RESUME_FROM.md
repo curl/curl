@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_RESUME_FROM
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_RESUME_FROM
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_INFILESIZE (3)
-  - CURLOPT_RANGE (3)
-  - CURLOPT_RESUME_FROM_LARGE (3)
+  - FETCHOPT_INFILESIZE (3)
+  - FETCHOPT_RANGE (3)
+  - FETCHOPT_RESUME_FROM_LARGE (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -15,14 +15,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_RESUME_FROM - offset to resume transfer from
+FETCHOPT_RESUME_FROM - offset to resume transfer from
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RESUME_FROM, long from);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_RESUME_FROM, long from);
 ~~~
 
 # DESCRIPTION
@@ -34,11 +34,11 @@ option to -1 to make the transfer start from the end of the target file
 (useful to continue an interrupted upload).
 
 When doing uploads with FTP, the resume position is where in the local/source
-file libcurl should try to resume the upload from and it then appends the
+file libfetch should try to resume the upload from and it then appends the
 source file to the remote target file.
 
 If you need to resume a transfer beyond the 2GB limit, use
-CURLOPT_RESUME_FROM_LARGE(3) instead.
+FETCHOPT_RESUME_FROM_LARGE(3) instead.
 
 # DEFAULT
 
@@ -51,23 +51,23 @@ CURLOPT_RESUME_FROM_LARGE(3) instead.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     long size_of_file;
 
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com");
 
     /* resume upload at byte index 200 */
-    curl_easy_setopt(curl, CURLOPT_RESUME_FROM, 200L);
+    fetch_easy_setopt(fetch, FETCHOPT_RESUME_FROM, 200L);
 
     /* ask for upload */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
     /* set total data amount to expect */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE, size_of_file);
+    fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE, size_of_file);
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -76,7 +76,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

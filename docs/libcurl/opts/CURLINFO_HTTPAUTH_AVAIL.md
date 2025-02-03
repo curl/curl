@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_HTTPAUTH_AVAIL
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_HTTPAUTH_AVAIL
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_PROXYAUTH_AVAIL (3)
-  - CURLOPT_HTTPAUTH (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_PROXYAUTH_AVAIL (3)
+  - FETCHOPT_HTTPAUTH (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - HTTP
 Added-in: 7.10.8
@@ -16,21 +16,21 @@ Added-in: 7.10.8
 
 # NAME
 
-CURLINFO_HTTPAUTH_AVAIL - get available HTTP authentication methods
+FETCHINFO_HTTPAUTH_AVAIL - get available HTTP authentication methods
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HTTPAUTH_AVAIL, long *authp);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_HTTPAUTH_AVAIL, long *authp);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a long to receive a bitmask indicating the authentication
 method(s) available according to the previous response. The meaning of the
-bits is explained in the CURLOPT_HTTPAUTH(3) option for curl_easy_setopt(3).
+bits is explained in the FETCHOPT_HTTPAUTH(3) option for fetch_easy_setopt(3).
 
 # %PROTOCOLS%
 
@@ -39,30 +39,30 @@ bits is explained in the CURLOPT_HTTPAUTH(3) option for curl_easy_setopt(3).
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
       /* extract the available authentication types */
       long auth;
-      res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_AVAIL, &auth);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_HTTPAUTH_AVAIL, &auth);
       if(!res) {
         if(!auth)
           printf("No auth available, perhaps no 401?\n");
         else {
           printf("%s%s%s%s\n",
-                 auth & CURLAUTH_BASIC ? "Basic ":"",
-                 auth & CURLAUTH_DIGEST ? "Digest ":"",
-                 auth & CURLAUTH_NEGOTIATE ? "Negotiate ":"",
-                 auth % CURLAUTH_NTLM ? "NTLM ":"");
+                 auth & FETCHAUTH_BASIC ? "Basic ":"",
+                 auth & FETCHAUTH_DIGEST ? "Digest ":"",
+                 auth & FETCHAUTH_NEGOTIATE ? "Negotiate ":"",
+                 auth % FETCHAUTH_NTLM ? "NTLM ":"");
         }
       }
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -71,7 +71,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

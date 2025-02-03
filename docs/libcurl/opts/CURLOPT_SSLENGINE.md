@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSLENGINE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSLENGINE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_SSL_ENGINES (3)
-  - CURLOPT_SSLENGINE_DEFAULT (3)
-  - CURLOPT_SSLKEY (3)
+  - FETCHINFO_SSL_ENGINES (3)
+  - FETCHOPT_SSLENGINE_DEFAULT (3)
+  - FETCHOPT_SSLKEY (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -17,14 +17,14 @@ Added-in: 7.9.3
 
 # NAME
 
-CURLOPT_SSLENGINE - SSL engine identifier
+FETCHOPT_SSLENGINE - SSL engine identifier
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLENGINE, char *id);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSLENGINE, char *id);
 ~~~
 
 # DESCRIPTION
@@ -49,13 +49,13 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_SSLENGINE, "dynamic");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE, "dynamic");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -64,15 +64,15 @@ int main(void)
 
 # RETURN VALUE
 
-CURLE_OK - Engine found.
+FETCHE_OK - Engine found.
 
-CURLE_SSL_ENGINE_NOTFOUND - Engine not found, or OpenSSL was not built with
+FETCHE_SSL_ENGINE_NOTFOUND - Engine not found, or OpenSSL was not built with
 engine support.
 
-CURLE_SSL_ENGINE_INITFAILED - Engine found but initialization failed.
+FETCHE_SSL_ENGINE_INITFAILED - Engine found but initialization failed.
 
-CURLE_NOT_BUILT_IN - Option not built in, OpenSSL is not the SSL backend.
+FETCHE_NOT_BUILT_IN - Option not built in, OpenSSL is not the SSL backend.
 
-CURLE_UNKNOWN_OPTION - Option not recognized.
+FETCHE_UNKNOWN_OPTION - Option not recognized.
 
-CURLE_OUT_OF_MEMORY - Insufficient heap space.
+FETCHE_OUT_OF_MEMORY - Insufficient heap space.

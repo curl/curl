@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSL_VERIFYSTATUS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSL_VERIFYSTATUS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_CAINFO (3)
-  - CURLOPT_SSL_VERIFYHOST (3)
-  - CURLOPT_SSL_VERIFYPEER (3)
+  - FETCHOPT_CAINFO (3)
+  - FETCHOPT_SSL_VERIFYHOST (3)
+  - FETCHOPT_SSL_VERIFYPEER (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -18,21 +18,21 @@ Added-in: 7.41.0
 
 # NAME
 
-CURLOPT_SSL_VERIFYSTATUS - verify the certificate's status
+FETCHOPT_SSL_VERIFYSTATUS - verify the certificate's status
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_VERIFYSTATUS, long verify);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSL_VERIFYSTATUS, long verify);
 ~~~
 
 # DESCRIPTION
 
 Pass a long as parameter set to 1 to enable or 0 to disable.
 
-This option determines whether libcurl verifies the status of the server cert
+This option determines whether libfetch verifies the status of the server cert
 using the "Certificate Status Request" TLS extension (aka. OCSP stapling).
 
 Note that if this option is enabled but the server does not support the TLS
@@ -49,14 +49,14 @@ extension, the verification fails.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
     /* ask for OCSP stapling */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYSTATUS, 1L);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -65,7 +65,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

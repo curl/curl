@@ -1,18 +1,18 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# curl vulnerability disclosure policy
+# fetch vulnerability disclosure policy
 
-This document describes how security vulnerabilities are handled in the curl
+This document describes how security vulnerabilities are handled in the fetch
 project.
 
 ## Publishing Information
 
-All known and public curl or libcurl related vulnerabilities are listed on
-[the curl website security page](https://curl.se/docs/security.html).
+All known and public fetch or libfetch related vulnerabilities are listed on
+[the fetch website security page](https://fetch.se/docs/security.html).
 
 Security vulnerabilities **should not** be entered in the project's public bug
 tracker.
@@ -30,11 +30,11 @@ reference to the security nature of the commit if done prior to the public
 announcement.
 
 - The person discovering the issue, the reporter, reports the vulnerability on
-  [HackerOne](https://hackerone.com/curl). Issues filed there reach a handful
+  [HackerOne](https://hackerone.com/fetch). Issues filed there reach a handful
   of selected and trusted people.
 
 - Messages that do not relate to the reporting or managing of an undisclosed
-  security vulnerability in curl or libcurl are ignored and no further action
+  security vulnerability in fetch or libfetch are ignored and no further action
   is required.
 
 - A person in the security team responds to the original report to acknowledge
@@ -62,10 +62,10 @@ announcement.
   problem is, its impact, which versions it affects, solutions or workarounds,
   when the release is out and make sure to credit all contributors properly.
   Figure out the CWE (Common Weakness Enumeration) number for the flaw. See
-  [SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
+  [SECURITY-ADVISORY](https://fetch.se/dev/advisory.html) for help on creating
   the advisory.
 
-- Request a CVE Id for the issue. curl is a CNA (CVE Numbering Authority) and
+- Request a CVE Id for the issue. fetch is a CNA (CVE Numbering Authority) and
   can request its own numbers.
 
 - Update the "security advisory" with the CVE number.
@@ -78,7 +78,7 @@ announcement.
 
 - The monetary reward part of the bug-bounty is managed by the Internet Bug
   Bounty team and the reporter is asked to request the reward from them after
-  the issue has been completely handled and published by curl.
+  the issue has been completely handled and published by fetch.
 
 - No more than 10 days before release, inform
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
@@ -97,20 +97,20 @@ announcement.
 
 - The project team announces the release and the vulnerability to the world in
   the same manner we always announce releases. It gets sent to the
-  curl-announce, curl-library and curl-users mailing lists.
+  fetch-announce, fetch-library and fetch-users mailing lists.
 
 - The security webpage on the website should get the new vulnerability
   mentioned.
 
-## security (at curl dot se)
+## security (at fetch dot se)
 
-This is a private mailing list for discussions on and about curl security
+This is a private mailing list for discussions on and about fetch security
 issues.
 
 Who is on this list? There are a couple of criteria you must meet, and then we
 might ask you to join the list or you can ask to join it. It really is not a
 formal process. We basically only require that you have a long-term presence
-in the curl project and you have shown an understanding for the project and
+in the fetch project and you have shown an understanding for the project and
 its way of working. You must have been around for a good while and you should
 have no plans of vanishing in the near future.
 
@@ -124,14 +124,14 @@ somewhat over time and a list somewhere only risks getting outdated.
 
 2. Name the advisory file after the allocated CVE id.
 
-3. Add a line on the top of the array in `curl-www/docs/vuln.pm`.
+3. Add a line on the top of the array in `fetch-www/docs/vuln.pm`.
 
-4. Put the new advisory markdown file in the `curl-www/docs/` directory. Add it
+4. Put the new advisory markdown file in the `fetch-www/docs/` directory. Add it
    to the git repository.
 
 5. Run `make` in your local web checkout and verify that things look fine.
 
-6. On security advisory release day, push the changes on the curl-www
+6. On security advisory release day, push the changes on the fetch-www
    repository's remote master branch.
 
 ## HackerOne
@@ -143,21 +143,21 @@ has been published.
 
 ## Bug Bounty
 
-See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
+See [BUG-BOUNTY](https://fetch.se/docs/bugbounty.html) for details on the
 bug bounty program.
 
 # Severity levels
 
-The curl project's security team rates security problems using four severity
+The fetch project's security team rates security problems using four severity
 levels depending how serious we consider the problem to be. We use **Low**,
 **Medium**, **High** and **Critical**. We refrain from using numerical scoring
 of vulnerabilities.
 
 We do not support CVSS as a method to grade security vulnerabilities, so we do
-not set them for CVE records published by the curl project. We believe CVSS is
+not set them for CVE records published by the fetch project. We believe CVSS is
 a broken system that often does not properly evaluate to suitable severity
 levels that reflect all dimensions and factors involved. Other organizations
-however set and provide CVSS scores for curl vulnerabilities. You need to
+however set and provide CVSS scores for fetch vulnerabilities. You need to
 decide for yourself if you believe they know enough about the subjects
 involved to make reasonable assessments. Deciding between four different
 severity levels is hard enough for us.
@@ -173,7 +173,7 @@ confidentiality, integrity or availability problems.
 This is a security problem that is truly hard or unlikely to exploit or
 trigger. Due to timing, platform requirements or the fact that options or
 protocols involved are rare etc. [Past
-example](https://curl.se/docs/CVE-2022-43552.html)
+example](https://fetch.se/docs/CVE-2022-43552.html)
 
 ## Medium
 
@@ -181,22 +181,22 @@ This is a security problem that is less hard than **Low** to exploit or
 trigger. Less strict timing, wider platforms availability or involving more
 widely used options or protocols. A problem that usually needs something else
 to also happen to become serious. [Past
-example](https://curl.se/docs/CVE-2022-32206.html)
+example](https://fetch.se/docs/CVE-2022-32206.html)
 
 ## High
 
 This issue in itself a serious problem with real world impact. Flaws that can
 easily compromise the confidentiality, integrity or availability of resources.
 Exploiting or triggering this problem is not hard. [Past
-example](https://curl.se/docs/CVE-2019-3822.html)
+example](https://fetch.se/docs/CVE-2019-3822.html)
 
 ## Critical
 
 Easily exploitable by a remote unauthenticated attacker and lead to system
 compromise (arbitrary code execution) without requiring user interaction, with
 a common configuration on a popular platform. This issue has few restrictions
-and requirements and can be exploited easily using most curl configurations.
-[Past example](https://curl.se/docs/CVE-2000-0973.html)
+and requirements and can be exploited easily using most fetch configurations.
+[Past example](https://fetch.se/docs/CVE-2000-0973.html)
 
 # Not security issues
 
@@ -244,8 +244,8 @@ security problem.
 
 When an issue can only be attacked or misused by an attacker present on the
 local system or network, the bar is raised. If a local user wrongfully has
-elevated rights on your system enough to attack curl, they can probably
-already do much worse harm and the problem is not really in curl.
+elevated rights on your system enough to attack fetch, they can probably
+already do much worse harm and the problem is not really in fetch.
 
 ## Experiments
 
@@ -255,7 +255,7 @@ consider them security problems.
 
 ## URL inconsistencies
 
-URL parser inconsistencies between browsers and curl are expected and are not
+URL parser inconsistencies between browsers and fetch are expected and are not
 considered security vulnerabilities. The WHATWG URL Specification and RFC
 3986+ (the plus meaning that it is an extended version) [are not completely
 interoperable](https://github.com/bagder/docs/blob/master/URL-interop.md).
@@ -264,18 +264,18 @@ Obvious parser bugs can still be vulnerabilities of course.
 
 ## Visible command line arguments
 
-The curl command blanks the contents of a number of command line arguments to
+The fetch command blanks the contents of a number of command line arguments to
 prevent them from appearing in process listings. It does not blank all
 arguments even if some of them that are not blanked might contain sensitive
 data. We consider this functionality a best-effort and omissions are not
 security vulnerabilities.
 
  - not all systems allow the arguments to be blanked in the first place
- - since curl blanks the argument itself they are readable for a short moment
+ - since fetch blanks the argument itself they are readable for a short moment
    no matter what
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
-   curl command lines in process listings
+   fetch command lines in process listings
 
 ## Busy-loops
 
@@ -287,14 +287,14 @@ do not consider it a security problem.
 
 ## Saving files
 
-curl cannot protect against attacks where an attacker has write access to the
-same directory where curl is directed to save files.
+fetch cannot protect against attacks where an attacker has write access to the
+same directory where fetch is directed to save files.
 
 ## Tricking a user to run a command line
 
 A creative, misleading or funny looking command line is not a security
-problem. The curl command line tool takes options and URLs on the command line
-and if an attacker can trick the user to run a specifically crafted curl
+problem. The fetch command line tool takes options and URLs on the command line
+and if an attacker can trick the user to run a specifically crafted fetch
 command line, all bets are off. Such an attacker can just as well have the
 user run a much worse command that can do something fatal (like
 `sudo rm -rf /`).
@@ -302,16 +302,16 @@ user run a much worse command that can do something fatal (like
 ## Terminal output and escape sequences
 
 Content that is transferred from a server and gets displayed in a terminal by
-curl may contain escape sequences or use other tricks to fool the user. This
-is curl working as designed and is not a curl security problem. Escape
+fetch may contain escape sequences or use other tricks to fool the user. This
+is fetch working as designed and is not a fetch security problem. Escape
 sequences, moving cursor, changing color etc, is also frequently used for
 good. To reduce the risk of getting fooled, save files and browse them after
 download using a display method that minimizes risks.
 
 ## NULL dereferences and crashes
 
-If a malicious server can trigger a NULL dereference in curl or otherwise
-cause curl to crash (and nothing worse), chances are big that we do not
+If a malicious server can trigger a NULL dereference in fetch or otherwise
+cause fetch to crash (and nothing worse), chances are big that we do not
 consider that a security problem.
 
 Malicious servers can already cause considerable harm and denial of service

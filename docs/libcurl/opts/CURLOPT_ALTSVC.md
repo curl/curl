@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_ALTSVC
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_ALTSVC
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_ALTSVC_CTRL (3)
-  - CURLOPT_CONNECT_TO (3)
-  - CURLOPT_COOKIEFILE (3)
-  - CURLOPT_RESOLVE (3)
+  - FETCHOPT_ALTSVC_CTRL (3)
+  - FETCHOPT_CONNECT_TO (3)
+  - FETCHOPT_COOKIEFILE (3)
+  - FETCHOPT_RESOLVE (3)
 Protocol:
   - HTTP
 Added-in: 7.64.1
@@ -16,24 +16,24 @@ Added-in: 7.64.1
 <!-- markdown-link-check-disable -->
 # NAME
 
-CURLOPT_ALTSVC - alt-svc cache filename
+FETCHOPT_ALTSVC - alt-svc cache filename
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC, char *filename);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_ALTSVC, char *filename);
 ~~~
 
 # DESCRIPTION
 
-Pass in a pointer to a *filename* to instruct libcurl to use that file as
+Pass in a pointer to a *filename* to instruct libfetch to use that file as
 the Alt-Svc cache to read existing cache contents from and possibly also write
-it back to after a transfer, unless **CURLALTSVC_READONLYFILE** is set in
-CURLOPT_ALTSVC_CTRL(3).
+it back to after a transfer, unless **FETCHALTSVC_READONLYFILE** is set in
+FETCHOPT_ALTSVC_CTRL(3).
 
-Specify a blank filename ("") to make libcurl not load from a file at all.
+Specify a blank filename ("") to make libfetch not load from a file at all.
 
 The application does not have to keep the string around after setting this
 option.
@@ -43,7 +43,7 @@ previous ones. Set it to NULL to disable its use again.
 
 # SECURITY CONCERNS
 
-libcurl cannot fully protect against attacks where an attacker has write
+libfetch cannot fully protect against attacks where an attacker has write
 access to the same directory where it is directed to save files. This is
 particularly sensitive if you save files using elevated privileges.
 
@@ -58,11 +58,11 @@ NULL. The alt-svc cache is not read nor written to file.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, CURLALTSVC_H1);
-    curl_easy_setopt(curl, CURLOPT_ALTSVC, "altsvc-cache.txt");
-    curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_ALTSVC_CTRL, FETCHALTSVC_H1);
+    fetch_easy_setopt(fetch, FETCHOPT_ALTSVC, "altsvc-cache.txt");
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -119,7 +119,7 @@ Integer priority value (not currently used)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_RANDOM_FILE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_RANDOM_FILE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_EGDSOCKET (3)
+  - FETCHOPT_EGDSOCKET (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -15,14 +15,14 @@ Added-in: 7.7
 
 # NAME
 
-CURLOPT_RANDOM_FILE - file to read random data from
+FETCHOPT_RANDOM_FILE - file to read random data from
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RANDOM_FILE, char *path);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_RANDOM_FILE, char *path);
 ~~~
 
 # DESCRIPTION
@@ -41,7 +41,7 @@ Deprecated since 7.84.0.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

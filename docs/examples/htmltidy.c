@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -32,9 +32,9 @@
 #include <stdio.h>
 #include <tidy/tidy.h>
 #include <tidy/tidybuffio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-/* curl write callback, to fill tidy's input buffer...  */
+/* fetch write callback, to fill tidy's input buffer...  */
 uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
 {
   uint r;
@@ -77,19 +77,19 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
 int main(int argc, char **argv)
 {
   if(argc == 2) {
-    CURL *curl;
-    char curl_errbuf[CURL_ERROR_SIZE];
+    FETCH *fetch;
+    char fetch_errbuf[FETCH_ERROR_SIZE];
     TidyDoc tdoc;
     TidyBuffer docbuf = {0};
     TidyBuffer tidy_errbuf = {0};
     int err;
 
-    curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_errbuf);
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    fetch = fetch_easy_init();
+    fetch_easy_setopt(fetch, FETCHOPT_URL, argv[1]);
+    fetch_easy_setopt(fetch, FETCHOPT_ERRORBUFFER, fetch_errbuf);
+    fetch_easy_setopt(fetch, FETCHOPT_NOPROGRESS, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, write_cb);
 
     tdoc = tidyCreate();
     tidyOptSetBool(tdoc, TidyForceOutput, yes); /* try harder */
@@ -97,8 +97,8 @@ int main(int argc, char **argv)
     tidySetErrorBuffer(tdoc, &tidy_errbuf);
     tidyBufInit(&docbuf);
 
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
-    err = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, &docbuf);
+    err = fetch_easy_perform(fetch);
     if(!err) {
       err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
       if(err >= 0) {
@@ -113,10 +113,10 @@ int main(int argc, char **argv)
       }
     }
     else
-      fprintf(stderr, "%s\n", curl_errbuf);
+      fprintf(stderr, "%s\n", fetch_errbuf);
 
     /* clean-up */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
     tidyBufFree(&docbuf);
     tidyBufFree(&tidy_errbuf);
     tidyRelease(tdoc);

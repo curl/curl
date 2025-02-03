@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_SPEED_UPLOAD
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_SPEED_UPLOAD
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_SPEED_DOWNLOAD_T (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_SPEED_DOWNLOAD_T (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.4.1
@@ -15,22 +15,22 @@ Added-in: 7.4.1
 
 # NAME
 
-CURLINFO_SPEED_UPLOAD - get upload speed
+FETCHINFO_SPEED_UPLOAD - get upload speed
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SPEED_UPLOAD, double *speed);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_SPEED_UPLOAD, double *speed);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a double to receive the average upload speed that curl
+Pass a pointer to a double to receive the average upload speed that fetch
 measured for the complete upload. Measured in bytes/second.
 
-CURLINFO_SPEED_UPLOAD_T(3) is a newer replacement that returns a more
+FETCHINFO_SPEED_UPLOAD_T(3) is a newer replacement that returns a more
 sensible variable type.
 
 # %PROTOCOLS%
@@ -40,17 +40,17 @@ sensible variable type.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* Perform the request */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
       double speed;
-      res = curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_SPEED_UPLOAD, &speed);
       if(!res) {
         printf("Upload speed %.0f bytes/sec\n", speed);
       }
@@ -67,7 +67,7 @@ Deprecated since 7.55.0.
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

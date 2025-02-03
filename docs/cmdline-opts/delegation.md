@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: delegation
 Arg: <LEVEL>
 Help: GSS-API delegation permission
@@ -17,7 +17,7 @@ Example:
 
 # `--delegation`
 
-Set LEVEL what curl is allowed to delegate when it comes to user credentials.
+Set LEVEL what fetch is allowed to delegate when it comes to user credentials.
 
 ## none
 Do not allow any delegation.

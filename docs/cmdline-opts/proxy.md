@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proxy
 Short: x
 Arg: [protocol://]host[:port]
@@ -32,7 +32,7 @@ and GnuTLS (added in 7.52.0). It also works for BearSSL, mbedTLS, Rustls,
 Schannel, Secure Transport and wolfSSL (added in 7.87.0).
 
 Unrecognized and unsupported proxy protocols cause an error (added in 7.52.0).
-Ancient curl versions ignored unknown schemes and used http:// instead.
+Ancient fetch versions ignored unknown schemes and used http:// instead.
 
 If the port number is not specified in the proxy string, it is assumed to be
 1080.
@@ -47,7 +47,7 @@ not be available. This is not the case if you can tunnel through the proxy, as
 one with the --proxytunnel option.
 
 User and password that might be provided in the proxy string are URL decoded
-by curl. This allows you to pass in special characters such as @ by using %40
+by fetch. This allows you to pass in special characters such as @ by using %40
 or pass in a colon with %3a.
 
 The proxy host can be specified the same way as the proxy environment
@@ -57,6 +57,6 @@ password.
 When a proxy is used, the active FTP mode as set with --ftp-port, cannot be
 used.
 
-Doing FTP over an HTTP proxy without --proxytunnel makes curl do HTTP with an
+Doing FTP over an HTTP proxy without --proxytunnel makes fetch do HTTP with an
 FTP URL over the proxy. For such transfers, common FTP specific options do not
 work, including --ftp-ssl-reqd and --ftp-ssl-control.

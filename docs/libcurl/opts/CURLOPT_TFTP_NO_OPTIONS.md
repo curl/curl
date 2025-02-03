@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TFTP_NO_OPTIONS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TFTP_NO_OPTIONS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_TFTP_BLKSIZE (3)
+  - FETCHOPT_TFTP_BLKSIZE (3)
 Protocol:
   - TFTP
 Added-in: 7.48.0
@@ -13,14 +13,14 @@ Added-in: 7.48.0
 
 # NAME
 
-CURLOPT_TFTP_NO_OPTIONS - send no TFTP options requests
+FETCHOPT_TFTP_NO_OPTIONS - send no TFTP options requests
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TFTP_NO_OPTIONS, long onoff);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TFTP_NO_OPTIONS, long onoff);
 ~~~
 
 # DESCRIPTION
@@ -30,7 +30,7 @@ RFC 2348 and RFC 2349 from read and write requests.
 
 This option improves interoperability with legacy servers that do not
 acknowledge or properly implement TFTP options. When this option is used
-CURLOPT_TFTP_BLKSIZE(3) is ignored.
+FETCHOPT_TFTP_BLKSIZE(3) is ignored.
 
 # DEFAULT
 
@@ -48,24 +48,24 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *fp)
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     FILE *fp = fopen("foo.bin", "wb");
     if(fp) {
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)fp);
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+      fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, (void *)fp);
+      fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, write_callback);
 
-      curl_easy_setopt(curl, CURLOPT_URL, "tftp://example.com/foo.bin");
+      fetch_easy_setopt(fetch, FETCHOPT_URL, "tftp://example.com/foo.bin");
 
       /* do not send TFTP options requests */
-      curl_easy_setopt(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
+      fetch_easy_setopt(fetch, FETCHOPT_TFTP_NO_OPTIONS, 1L);
 
       /* Perform the request */
-      curl_easy_perform(curl);
+      fetch_easy_perform(fetch);
 
       fclose(fp);
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -74,7 +74,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

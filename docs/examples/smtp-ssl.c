@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -29,14 +29,14 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-/* This is a simple example showing how to send mail using libcurl's SMTP
+/* This is a simple example showing how to send mail using libfetch's SMTP
  * capabilities. It builds on the smtp-mail.c example to add authentication
  * and, more importantly, transport security to protect the authentication
  * details from being snooped.
  *
- * Note that this example requires libcurl 7.20.0 or above.
+ * Note that this example requires libfetch 7.20.0 or above.
  */
 
 #define FROM_MAIL     "<sender@example.com>"
@@ -88,20 +88,20 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct curl_slist *recipients = NULL;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
+  struct fetch_slist *recipients = NULL;
   struct upload_status upload_ctx = { 0 };
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* Set username and password */
-    curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+    fetch_easy_setopt(fetch, FETCHOPT_USERNAME, "user");
+    fetch_easy_setopt(fetch, FETCHOPT_PASSWORD, "secret");
 
     /* This is the URL for your mailserver. Note the use of smtps:// rather
      * than smtp:// to request a SSL based connection. */
-    curl_easy_setopt(curl, CURLOPT_URL, "smtps://mainserver.example.net");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "smtps://mainserver.example.net");
 
     /* If you want to connect to a site who is not using a certificate that is
      * signed by one of the certs in the CA bundle you have, you can skip the
@@ -109,61 +109,61 @@ int main(void)
      * A LOT LESS SECURE.
      *
      * If you have a CA cert for the server stored someplace else than in the
-     * default bundle, then the CURLOPT_CAPATH option might come handy for
+     * default bundle, then the FETCHOPT_CAPATH option might come handy for
      * you. */
 #ifdef SKIP_PEER_VERIFICATION
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 0L);
 #endif
 
     /* If the site you are connecting to uses a different host name that what
      * they have mentioned in their server certificate's commonName (or
-     * subjectAltName) fields, libcurl refuses to connect. You can skip this
+     * subjectAltName) fields, libfetch refuses to connect. You can skip this
      * check, but it makes the connection insecure. */
 #ifdef SKIP_HOSTNAME_VERIFICATION
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYHOST, 0L);
 #endif
 
     /* Note that this option is not strictly required, omitting it results in
-     * libcurl sending the MAIL FROM command with empty sender data. All
+     * libfetch sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
      * to the address in the reverse-path which triggered them. Otherwise,
      * they could cause an endless loop. See RFC 5321 Section 4.5.5 for more
      * details.
      */
-    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM_MAIL);
+    fetch_easy_setopt(fetch, FETCHOPT_MAIL_FROM, FROM_MAIL);
 
     /* Add two recipients, in this particular case they correspond to the
      * To: and Cc: addressees in the header, but they could be any kind of
      * recipient. */
-    recipients = curl_slist_append(recipients, TO_MAIL);
-    recipients = curl_slist_append(recipients, CC_MAIL);
-    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+    recipients = fetch_slist_append(recipients, TO_MAIL);
+    recipients = fetch_slist_append(recipients, CC_MAIL);
+    fetch_easy_setopt(fetch, FETCHOPT_MAIL_RCPT, recipients);
 
     /* We are using a callback function to specify the payload (the headers and
-     * body of the message). You could just use the CURLOPT_READDATA option to
+     * body of the message). You could just use the FETCHOPT_READDATA option to
      * specify a FILE pointer to read from. */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
-    curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, payload_source);
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, &upload_ctx);
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
     /* Since the traffic is encrypted, it is useful to turn on debug
-     * information within libcurl to see what is happening during the
+     * information within libfetch to see what is happening during the
      * transfer */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
     /* Send the message */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* Free the list of recipients */
-    curl_slist_free_all(recipients);
+    fetch_slist_free_all(recipients);
 
     /* Always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
   return (int)res;

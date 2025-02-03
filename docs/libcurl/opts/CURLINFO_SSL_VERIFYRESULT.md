@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_SSL_VERIFYRESULT
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_SSL_VERIFYRESULT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_PROXY_SSL_VERIFYRESULT (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_PROXY_SSL_VERIFYRESULT (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -18,21 +18,21 @@ Added-in: 7.5
 
 # NAME
 
-CURLINFO_SSL_VERIFYRESULT - get the result of the certificate verification
+FETCHINFO_SSL_VERIFYRESULT - get the result of the certificate verification
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SSL_VERIFYRESULT,
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_SSL_VERIFYRESULT,
                            long *result);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to a long to receive the result of the server SSL certificate
-verification that was requested (using the CURLOPT_SSL_VERIFYPEER(3)
+verification that was requested (using the FETCHOPT_SSL_VERIFYPEER(3)
 option).
 
 0 is a positive result. Non-zero is an error.
@@ -44,27 +44,27 @@ option).
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
     long verifyresult;
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     if(res) {
-      printf("error: %s\n", curl_easy_strerror(res));
-      curl_easy_cleanup(curl);
+      printf("error: %s\n", fetch_easy_strerror(res));
+      fetch_easy_cleanup(fetch);
       return 1;
     }
 
-    res = curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT,
+    res = fetch_easy_getinfo(fetch, FETCHINFO_SSL_VERIFYRESULT,
                             &verifyresult);
     if(!res) {
       printf("The peer verification said %s\n",
              (verifyresult ? "bad" : "fine"));
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -73,7 +73,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FILETIME
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FILETIME
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_FILETIME (3)
-  - curl_easy_getinfo (3)
+  - FETCHINFO_FILETIME (3)
+  - fetch_easy_getinfo (3)
 Protocol:
   - HTTP
   - FTP
@@ -18,22 +18,22 @@ Added-in: 7.5
 
 # NAME
 
-CURLOPT_FILETIME - get the modification time of the remote resource
+FETCHOPT_FILETIME - get the modification time of the remote resource
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FILETIME, long gettime);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FILETIME, long gettime);
 ~~~
 
 # DESCRIPTION
 
-Pass a long. If it is 1, libcurl attempts to get the modification time of the
+Pass a long. If it is 1, libfetch attempts to get the modification time of the
 remote document in this operation. This requires that the remote server sends
-the time or replies to a time querying command. The curl_easy_getinfo(3)
-function with the CURLINFO_FILETIME(3) argument can be used after a
+the time or replies to a time querying command. The fetch_easy_getinfo(3)
+function with the FETCHINFO_FILETIME(3) argument can be used after a
 transfer to extract the received time (if any).
 
 # DEFAULT
@@ -47,23 +47,23 @@ transfer to extract the received time (if any).
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/path.html");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/path.html");
     /* Ask for filetime */
-    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
-    res = curl_easy_perform(curl);
-    if(CURLE_OK == res) {
+    fetch_easy_setopt(fetch, FETCHOPT_FILETIME, 1L);
+    res = fetch_easy_perform(fetch);
+    if(FETCHE_OK == res) {
       long filetime;
-      res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
-      if((CURLE_OK == res) && (filetime >= 0)) {
+      res = fetch_easy_getinfo(fetch, FETCHINFO_FILETIME, &filetime);
+      if((FETCHE_OK == res) && (filetime >= 0)) {
         time_t file_time = (time_t)filetime;
         printf("filetime: %s", ctime(&file_time));
       }
     }
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -72,7 +72,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

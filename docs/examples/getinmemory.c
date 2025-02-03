@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 struct MemoryStruct {
   char *memory;
@@ -61,39 +61,39 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 
 int main(void)
 {
-  CURL *curl_handle;
-  CURLcode res;
+  FETCH *fetch_handle;
+  FETCHcode res;
 
   struct MemoryStruct chunk;
 
   chunk.memory = malloc(1);  /* grown as needed by the realloc above */
   chunk.size = 0;    /* no data at this point */
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  /* init the curl session */
-  curl_handle = curl_easy_init();
+  /* init the fetch session */
+  fetch_handle = fetch_easy_init();
 
   /* specify URL to get */
-  curl_easy_setopt(curl_handle, CURLOPT_URL, "https://www.example.com/");
+  fetch_easy_setopt(fetch_handle, FETCHOPT_URL, "https://www.example.com/");
 
   /* send all data to this function  */
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+  fetch_easy_setopt(fetch_handle, FETCHOPT_WRITEFUNCTION, WriteMemoryCallback);
 
   /* we pass our 'chunk' struct to the callback function */
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+  fetch_easy_setopt(fetch_handle, FETCHOPT_WRITEDATA, (void *)&chunk);
 
   /* some servers do not like requests that are made without a user-agent
      field, so we provide one */
-  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+  fetch_easy_setopt(fetch_handle, FETCHOPT_USERAGENT, "libfetch-agent/1.0");
 
   /* get it! */
-  res = curl_easy_perform(curl_handle);
+  res = fetch_easy_perform(fetch_handle);
 
   /* check for errors */
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+  if(res != FETCHE_OK) {
+    fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+            fetch_easy_strerror(res));
   }
   else {
     /*
@@ -106,13 +106,13 @@ int main(void)
     printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
   }
 
-  /* cleanup curl stuff */
-  curl_easy_cleanup(curl_handle);
+  /* cleanup fetch stuff */
+  fetch_easy_cleanup(fetch_handle);
 
   free(chunk.memory);
 
-  /* we are done with libcurl, so clean it up */
-  curl_global_cleanup();
+  /* we are done with libfetch, so clean it up */
+  fetch_global_cleanup();
 
   return 0;
 }

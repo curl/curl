@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -30,19 +30,19 @@
 #include <string.h>
 #include <errno.h>
 
-/* curl stuff */
-#include <curl/curl.h>
-#include <curl/mprintf.h>
+/* fetch stuff */
+#include <fetch/fetch.h>
+#include <fetch/mprintf.h>
 
-#ifndef CURLPIPE_MULTIPLEX
-/* This little trick makes sure that we do not enable pipelining for libcurls
+#ifndef FETCHPIPE_MULTIPLEX
+/* This little trick makes sure that we do not enable pipelining for libfetchs
    old enough to not have this symbol. It is _not_ defined to zero in a recent
-   libcurl header. */
-#define CURLPIPE_MULTIPLEX 0
+   libfetch header. */
+#define FETCHPIPE_MULTIPLEX 0
 #endif
 
 struct transfer {
-  CURL *easy;
+  FETCH *easy;
   unsigned int num;
   FILE *out;
 };
@@ -99,7 +99,7 @@ void dump(const char *text, unsigned int num, unsigned char *ptr, size_t size,
 }
 
 static
-int my_trace(CURL *handle, curl_infotype type,
+int my_trace(FETCH *handle, fetch_infotype type,
              char *data, size_t size,
              void *userp)
 {
@@ -109,25 +109,25 @@ int my_trace(CURL *handle, curl_infotype type,
   (void)handle; /* prevent compiler warning */
 
   switch(type) {
-  case CURLINFO_TEXT:
+  case FETCHINFO_TEXT:
     fprintf(stderr, "== %u Info: %s", num, data);
     return 0;
-  case CURLINFO_HEADER_OUT:
+  case FETCHINFO_HEADER_OUT:
     text = "=> Send header";
     break;
-  case CURLINFO_DATA_OUT:
+  case FETCHINFO_DATA_OUT:
     text = "=> Send data";
     break;
-  case CURLINFO_SSL_DATA_OUT:
+  case FETCHINFO_SSL_DATA_OUT:
     text = "=> Send SSL data";
     break;
-  case CURLINFO_HEADER_IN:
+  case FETCHINFO_HEADER_IN:
     text = "<= Recv header";
     break;
-  case CURLINFO_DATA_IN:
+  case FETCHINFO_DATA_IN:
     text = "<= Recv data";
     break;
-  case CURLINFO_SSL_DATA_IN:
+  case FETCHINFO_SSL_DATA_IN:
     text = "<= Recv SSL data";
     break;
   default: /* in case a new one is introduced to shock us */
@@ -141,11 +141,11 @@ int my_trace(CURL *handle, curl_infotype type,
 static void setup(struct transfer *t, int num)
 {
   char filename[128];
-  CURL *hnd;
+  FETCH *hnd;
 
-  hnd = t->easy = curl_easy_init();
+  hnd = t->easy = fetch_easy_init();
 
-  curl_msnprintf(filename, 128, "dl-%d", num);
+  fetch_msnprintf(filename, 128, "dl-%d", num);
 
   t->out = fopen(filename, "wb");
   if(!t->out) {
@@ -155,25 +155,25 @@ static void setup(struct transfer *t, int num)
   }
 
   /* write to this file */
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t->out);
+  fetch_easy_setopt(hnd, FETCHOPT_WRITEDATA, t->out);
 
   /* set the same URL */
-  curl_easy_setopt(hnd, CURLOPT_URL, "https://localhost:8443/index.html");
+  fetch_easy_setopt(hnd, FETCHOPT_URL, "https://localhost:8443/index.html");
 
   /* please be verbose */
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, t);
+  fetch_easy_setopt(hnd, FETCHOPT_VERBOSE, 1L);
+  fetch_easy_setopt(hnd, FETCHOPT_DEBUGFUNCTION, my_trace);
+  fetch_easy_setopt(hnd, FETCHOPT_DEBUGDATA, t);
 
   /* enlarge the receive buffer for potentially higher transfer speeds */
-  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 100000L);
+  fetch_easy_setopt(hnd, FETCHOPT_BUFFERSIZE, 100000L);
 
   /* HTTP/2 please */
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+  fetch_easy_setopt(hnd, FETCHOPT_HTTP_VERSION, FETCH_HTTP_VERSION_2_0);
 
-#if (CURLPIPE_MULTIPLEX > 0)
+#if (FETCHPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+  fetch_easy_setopt(hnd, FETCHOPT_PIPEWAIT, 1L);
 #endif
 }
 
@@ -183,7 +183,7 @@ static void setup(struct transfer *t, int num)
 int main(int argc, char **argv)
 {
   struct transfer trans[NUM_HANDLES];
-  CURLM *multi_handle;
+  FETCHM *multi_handle;
   int i;
   int still_running = 0; /* keep number of running handles */
   int num_transfers;
@@ -197,34 +197,34 @@ int main(int argc, char **argv)
     num_transfers = 3; /* suitable default */
 
   /* init a multi stack */
-  multi_handle = curl_multi_init();
+  multi_handle = fetch_multi_init();
 
   for(i = 0; i < num_transfers; i++) {
     setup(&trans[i], i);
 
     /* add the individual transfer */
-    curl_multi_add_handle(multi_handle, trans[i].easy);
+    fetch_multi_add_handle(multi_handle, trans[i].easy);
   }
 
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  fetch_multi_setopt(multi_handle, FETCHMOPT_PIPELINING, FETCHPIPE_MULTIPLEX);
 
   do {
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    FETCHMcode mc = fetch_multi_perform(multi_handle, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      mc = fetch_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
     if(mc)
       break;
   } while(still_running);
 
   for(i = 0; i < num_transfers; i++) {
-    curl_multi_remove_handle(multi_handle, trans[i].easy);
-    curl_easy_cleanup(trans[i].easy);
+    fetch_multi_remove_handle(multi_handle, trans[i].easy);
+    fetch_easy_cleanup(trans[i].easy);
   }
 
-  curl_multi_cleanup(multi_handle);
+  fetch_multi_cleanup(multi_handle);
 
   return 0;
 }

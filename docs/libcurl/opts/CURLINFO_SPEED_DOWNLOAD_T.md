@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_SPEED_DOWNLOAD_T
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_SPEED_DOWNLOAD_T
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_SIZE_UPLOAD_T (3)
-  - CURLINFO_SPEED_UPLOAD_T (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_SIZE_UPLOAD_T (3)
+  - FETCHINFO_SPEED_UPLOAD_T (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.55.0
@@ -16,21 +16,21 @@ Added-in: 7.55.0
 
 # NAME
 
-CURLINFO_SPEED_DOWNLOAD_T - get download speed
+FETCHINFO_SPEED_DOWNLOAD_T - get download speed
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SPEED_DOWNLOAD_T,
-                           curl_off_t *speed);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_SPEED_DOWNLOAD_T,
+                           fetch_off_t *speed);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a *curl_off_t* to receive the average download speed
-that curl measured for the complete download. Measured in bytes/second.
+Pass a pointer to a *fetch_off_t* to receive the average download speed
+that fetch measured for the complete download. Measured in bytes/second.
 
 # %PROTOCOLS%
 
@@ -39,19 +39,19 @@ that curl measured for the complete download. Measured in bytes/second.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* Perform the request */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
-      curl_off_t speed;
-      res = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &speed);
+      fetch_off_t speed;
+      res = fetch_easy_getinfo(fetch, FETCHINFO_SPEED_DOWNLOAD_T, &speed);
       if(!res) {
-        printf("Download speed %" CURL_FORMAT_CURL_OFF_T " bytes/sec\n",
+        printf("Download speed %" FETCH_FORMAT_FETCH_OFF_T " bytes/sec\n",
                speed);
       }
     }
@@ -63,7 +63,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

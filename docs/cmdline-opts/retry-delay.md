@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: retry-delay
 Arg: <seconds>
 Help: Wait time between retries
 Added: 7.12.3
-Category: curl timeout
+Category: fetch timeout
 Multi: single
 See-also:
   - retry
@@ -15,7 +15,7 @@ Example:
 
 # `--retry-delay`
 
-Make curl sleep this amount of time before each retry when a transfer has
+Make fetch sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
 between retries). This option is only interesting if --retry is also
-used. Setting this delay to zero makes curl use the default backoff time.
+used. Setting this delay to zero makes fetch use the default backoff time.

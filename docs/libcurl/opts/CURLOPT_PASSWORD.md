@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PASSWORD
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PASSWORD
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPAUTH (3)
-  - CURLOPT_PROXYAUTH (3)
-  - CURLOPT_USERNAME (3)
-  - CURLOPT_USERPWD (3)
+  - FETCHOPT_HTTPAUTH (3)
+  - FETCHOPT_PROXYAUTH (3)
+  - FETCHOPT_USERNAME (3)
+  - FETCHOPT_USERPWD (3)
 Protocol:
   - All
 Added-in: 7.19.1
@@ -16,14 +16,14 @@ Added-in: 7.19.1
 
 # NAME
 
-CURLOPT_PASSWORD - password to use in authentication
+FETCHOPT_PASSWORD - password to use in authentication
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PASSWORD, char *pwd);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PASSWORD, char *pwd);
 ~~~
 
 # DESCRIPTION
@@ -31,8 +31,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PASSWORD, char *pwd);
 Pass a char pointer as parameter, which should be pointing to the
 null-terminated password to use for the transfer.
 
-The CURLOPT_PASSWORD(3) option should be used in conjunction with the
-CURLOPT_USERNAME(3) option.
+The FETCHOPT_PASSWORD(3) option should be used in conjunction with the
+FETCHOPT_USERNAME(3) option.
 
 The application does not have to keep the string around after setting this
 option.
@@ -51,16 +51,16 @@ blank
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
 
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, "qwerty");
+    fetch_easy_setopt(fetch, FETCHOPT_PASSWORD, "qwerty");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -69,7 +69,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

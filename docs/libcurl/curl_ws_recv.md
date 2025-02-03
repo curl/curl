@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_ws_recv
+SPDX-License-Identifier: fetch
+Title: fetch_ws_recv
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_getinfo (3)
-  - curl_easy_perform (3)
-  - curl_easy_setopt (3)
-  - curl_ws_send (3)
-  - libcurl-ws (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_perform (3)
+  - fetch_easy_setopt (3)
+  - fetch_ws_send (3)
+  - libfetch-ws (3)
 Protocol:
   - WS
 Added-in: 7.86.0
@@ -17,15 +17,15 @@ Added-in: 7.86.0
 
 # NAME
 
-curl_ws_recv - receive WebSocket data
+fetch_ws_recv - receive WebSocket data
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                      size_t *recv, const struct curl_ws_frame **meta);
+FETCHcode fetch_ws_recv(FETCH *fetch, void *buffer, size_t buflen,
+                      size_t *recv, const struct fetch_ws_frame **meta);
 ~~~
 
 # DESCRIPTION
@@ -35,13 +35,13 @@ Retrieves as much as possible of a received WebSocket data fragment into the
 number of bytes actually stored.
 
 If there is more fragment data to deliver than what fits in the provided
-*buffer*, libcurl returns a full buffer and the application needs to call this
+*buffer*, libfetch returns a full buffer and the application needs to call this
 function again to continue draining the buffer.
 
 If the function call is successful, the *meta* pointer gets set to point to a
-*const struct curl_ws_frame* that contains information about the received
+*const struct fetch_ws_frame* that contains information about the received
 data. That struct must not be freed and its contents must not be relied upon
-anymore once another WebSocket function is called. See the curl_ws_meta(3) for
+anymore once another WebSocket function is called. See the fetch_ws_meta(3) for
 details on that struct.
 
 # %PROTOCOLS%
@@ -52,13 +52,13 @@ details on that struct.
 int main(void)
 {
   size_t rlen;
-  const struct curl_ws_frame *meta;
+  const struct fetch_ws_frame *meta;
   char buffer[256];
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res = fetch_ws_recv(fetch, buffer, sizeof(buffer), &rlen, &meta);
     if(res)
-      printf("error: %s\n", curl_easy_strerror(res));
+      printf("error: %s\n", fetch_easy_strerror(res));
   }
 }
 ~~~
@@ -67,15 +67,15 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.
 
-Returns **CURLE_GOT_NOTHING** if the associated connection is closed.
+Returns **FETCHE_GOT_NOTHING** if the associated connection is closed.
 
-Instead of blocking, the function returns **CURLE_AGAIN**. The correct
+Instead of blocking, the function returns **FETCHE_AGAIN**. The correct
 behavior is then to wait for the socket to signal readability before calling
 this function again.

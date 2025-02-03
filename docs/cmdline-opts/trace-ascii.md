@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: trace-ascii
 Arg: <file>
 Help: Like --trace, but without hex output
@@ -26,6 +26,6 @@ This is similar to --trace, but leaves out the hex part and only shows the
 ASCII part of the dump. It makes smaller output that might be easier to read
 for untrained humans.
 
-Note that verbose output of curl activities and network traffic might contain
+Note that verbose output of fetch activities and network traffic might contain
 sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.

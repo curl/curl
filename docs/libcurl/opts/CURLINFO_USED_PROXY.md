@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_USED_PROXY
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_USED_PROXY
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_NOPROXY (3)
-  - CURLOPT_PROXY (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHOPT_NOPROXY (3)
+  - FETCHOPT_PROXY (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 8.7.0
@@ -16,14 +16,14 @@ Added-in: 8.7.0
 
 # NAME
 
-CURLINFO_USED_PROXY - whether the transfer used a proxy
+FETCHINFO_USED_PROXY - whether the transfer used a proxy
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_USED_PROXY,
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_USED_PROXY,
                            long *authp);
 ~~~
 
@@ -39,24 +39,24 @@ previous transfer or a non-zero value if a proxy was used.
 ~~~c
 int main(int argc, char *argv[])
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://127.0.0.1:80");
-    curl_easy_setopt(curl, CURLOPT_NOPROXY, "example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, argv[1]);
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "http://127.0.0.1:80");
+    fetch_easy_setopt(fetch, FETCHOPT_NOPROXY, "example.com");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
       /* extract the available proxy authentication types */
       long used;
-      res = curl_easy_getinfo(curl, CURLINFO_USED_PROXY, &used);
+      res = fetch_easy_getinfo(fetch, FETCHINFO_USED_PROXY, &used);
       if(!res) {
         printf("The proxy was %sused\n", used ? "": "NOT ");
       }
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

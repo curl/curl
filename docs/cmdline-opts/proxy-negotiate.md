@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proxy-negotiate
 Help: HTTP Negotiate (SPNEGO) auth with the proxy
 Added: 7.17.1

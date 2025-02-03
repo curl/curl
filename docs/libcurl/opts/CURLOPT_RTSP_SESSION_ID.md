@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_RTSP_SESSION_ID
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_RTSP_SESSION_ID
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_RTSP_REQUEST (3)
-  - CURLOPT_RTSP_STREAM_URI (3)
+  - FETCHOPT_RTSP_REQUEST (3)
+  - FETCHOPT_RTSP_STREAM_URI (3)
 Protocol:
   - RTSP
 Added-in: 7.20.0
@@ -14,23 +14,23 @@ Added-in: 7.20.0
 
 # NAME
 
-CURLOPT_RTSP_SESSION_ID - RTSP session ID
+FETCHOPT_RTSP_SESSION_ID - RTSP session ID
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RTSP_SESSION_ID, char *id);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_RTSP_SESSION_ID, char *id);
 ~~~
 
 # DESCRIPTION
 
 Pass a char pointer as a parameter to set the value of the current RTSP
 Session ID for the handle. Useful for resuming an in-progress session. Once
-this value is set to any non-NULL value, libcurl returns
-*CURLE_RTSP_SESSION_ERROR* if ID received from the server does not match. If
-unset (or set to NULL), libcurl automatically sets the ID the first time the
+this value is set to any non-NULL value, libfetch returns
+*FETCHE_RTSP_SESSION_ERROR* if ID received from the server does not match. If
+unset (or set to NULL), libfetch automatically sets the ID the first time the
 server sets it in a response.
 
 The application does not have to keep the string around after setting this
@@ -50,14 +50,14 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
     char *prev_id; /* saved from before somehow */
-    curl_easy_setopt(curl, CURLOPT_URL, "rtsp://example.com/");
-    curl_easy_setopt(curl, CURLOPT_RTSP_SESSION_ID, prev_id);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "rtsp://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_RTSP_SESSION_ID, prev_id);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

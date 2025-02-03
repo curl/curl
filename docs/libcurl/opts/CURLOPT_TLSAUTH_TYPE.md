@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TLSAUTH_TYPE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TLSAUTH_TYPE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_TLSAUTH_PASSWORD (3)
-  - CURLOPT_TLSAUTH_USERNAME (3)
+  - FETCHOPT_TLSAUTH_PASSWORD (3)
+  - FETCHOPT_TLSAUTH_USERNAME (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -17,14 +17,14 @@ Added-in: 7.21.4
 
 # NAME
 
-CURLOPT_TLSAUTH_TYPE - TLS authentication methods
+FETCHOPT_TLSAUTH_TYPE - TLS authentication methods
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TLSAUTH_TYPE, char *type);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TLSAUTH_TYPE, char *type);
 ~~~
 
 # DESCRIPTION
@@ -43,7 +43,7 @@ option.
 TLS-SRP authentication. Secure Remote Password authentication for TLS is
 defined in RFC 5054 and provides mutual authentication if both sides have a
 shared secret. To use TLS-SRP, you must also set the
-CURLOPT_TLSAUTH_USERNAME(3) and CURLOPT_TLSAUTH_PASSWORD(3) options.
+FETCHOPT_TLSAUTH_USERNAME(3) and FETCHOPT_TLSAUTH_PASSWORD(3) options.
 
 TLS SRP does not work with TLS 1.3.
 
@@ -58,15 +58,15 @@ blank
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_TLSAUTH_TYPE, "SRP");
-    curl_easy_setopt(curl, CURLOPT_TLSAUTH_USERNAME, "user");
-    curl_easy_setopt(curl, CURLOPT_TLSAUTH_PASSWORD, "secret");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_TLSAUTH_TYPE, "SRP");
+    fetch_easy_setopt(fetch, FETCHOPT_TLSAUTH_USERNAME, "user");
+    fetch_easy_setopt(fetch, FETCHOPT_TLSAUTH_PASSWORD, "secret");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -75,7 +75,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_multi_setopt
+SPDX-License-Identifier: fetch
+Title: fetch_multi_setopt
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_multi_cleanup (3)
-  - curl_multi_info_read (3)
-  - curl_multi_init (3)
-  - curl_multi_socket (3)
+  - fetch_multi_cleanup (3)
+  - fetch_multi_info_read (3)
+  - fetch_multi_init (3)
+  - fetch_multi_socket (3)
 Protocol:
   - All
 Added-in: 7.15.4
@@ -16,93 +16,93 @@ Added-in: 7.15.4
 
 # NAME
 
-curl_multi_setopt - set options for a curl multi handle
+fetch_multi_setopt - set options for a fetch multi handle
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLMcode curl_multi_setopt(CURLM *multi, CURLMoption option, parameter);
+FETCHMcode fetch_multi_setopt(FETCHM *multi, FETCHMoption option, parameter);
 ~~~
 
 # DESCRIPTION
 
-curl_multi_setopt(3) is used to tell a libcurl multi handle how to behave. By
-using the appropriate options to curl_multi_setopt(3), you can change
-libcurl's behavior when using that multi handle. All options are set with the
+fetch_multi_setopt(3) is used to tell a libfetch multi handle how to behave. By
+using the appropriate options to fetch_multi_setopt(3), you can change
+libfetch's behavior when using that multi handle. All options are set with the
 *option* followed by the *parameter*. That parameter can be a **long**, a
-**function pointer**, an **object pointer** or a **curl_off_t** type,
+**function pointer**, an **object pointer** or a **fetch_off_t** type,
 depending on what the specific option expects. Read this manual carefully as
-bad input values may cause libcurl to behave badly. You can only set one
+bad input values may cause libfetch to behave badly. You can only set one
 option in each function call.
 
 # OPTIONS
 
-## CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE
+## FETCHMOPT_CHUNK_LENGTH_PENALTY_SIZE
 
-**deprecated** See CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE(3)
+**deprecated** See FETCHMOPT_CHUNK_LENGTH_PENALTY_SIZE(3)
 
-## CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE
+## FETCHMOPT_CONTENT_LENGTH_PENALTY_SIZE
 
-**deprecated** See CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)
+**deprecated** See FETCHMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)
 
-## CURLMOPT_MAXCONNECTS
+## FETCHMOPT_MAXCONNECTS
 
-Size of connection cache. See CURLMOPT_MAXCONNECTS(3)
+Size of connection cache. See FETCHMOPT_MAXCONNECTS(3)
 
-## CURLMOPT_MAX_CONCURRENT_STREAMS
+## FETCHMOPT_MAX_CONCURRENT_STREAMS
 
-Max concurrent streams for http2. See CURLMOPT_MAX_CONCURRENT_STREAMS(3)
+Max concurrent streams for http2. See FETCHMOPT_MAX_CONCURRENT_STREAMS(3)
 
-## CURLMOPT_MAX_HOST_CONNECTIONS
+## FETCHMOPT_MAX_HOST_CONNECTIONS
 
 Max number of connections to a single host. See
-CURLMOPT_MAX_HOST_CONNECTIONS(3)
+FETCHMOPT_MAX_HOST_CONNECTIONS(3)
 
-## CURLMOPT_MAX_PIPELINE_LENGTH
+## FETCHMOPT_MAX_PIPELINE_LENGTH
 
-**deprecated**. See CURLMOPT_MAX_PIPELINE_LENGTH(3)
+**deprecated**. See FETCHMOPT_MAX_PIPELINE_LENGTH(3)
 
-## CURLMOPT_MAX_TOTAL_CONNECTIONS
+## FETCHMOPT_MAX_TOTAL_CONNECTIONS
 
-Max simultaneously open connections. See CURLMOPT_MAX_TOTAL_CONNECTIONS(3)
+Max simultaneously open connections. See FETCHMOPT_MAX_TOTAL_CONNECTIONS(3)
 
-## CURLMOPT_PIPELINING
+## FETCHMOPT_PIPELINING
 
-Enable HTTP multiplexing. See CURLMOPT_PIPELINING(3)
+Enable HTTP multiplexing. See FETCHMOPT_PIPELINING(3)
 
-## CURLMOPT_PIPELINING_SERVER_BL
+## FETCHMOPT_PIPELINING_SERVER_BL
 
-**deprecated**. See CURLMOPT_PIPELINING_SERVER_BL(3)
+**deprecated**. See FETCHMOPT_PIPELINING_SERVER_BL(3)
 
-## CURLMOPT_PIPELINING_SITE_BL
+## FETCHMOPT_PIPELINING_SITE_BL
 
-**deprecated**. See CURLMOPT_PIPELINING_SITE_BL(3)
+**deprecated**. See FETCHMOPT_PIPELINING_SITE_BL(3)
 
-## CURLMOPT_PUSHDATA
+## FETCHMOPT_PUSHDATA
 
-Pointer to pass to push callback. See CURLMOPT_PUSHDATA(3)
+Pointer to pass to push callback. See FETCHMOPT_PUSHDATA(3)
 
-## CURLMOPT_PUSHFUNCTION
+## FETCHMOPT_PUSHFUNCTION
 
-Callback that approves or denies server pushes. See CURLMOPT_PUSHFUNCTION(3)
+Callback that approves or denies server pushes. See FETCHMOPT_PUSHFUNCTION(3)
 
-## CURLMOPT_SOCKETDATA
+## FETCHMOPT_SOCKETDATA
 
-Custom pointer passed to the socket callback. See CURLMOPT_SOCKETDATA(3)
+Custom pointer passed to the socket callback. See FETCHMOPT_SOCKETDATA(3)
 
-## CURLMOPT_SOCKETFUNCTION
+## FETCHMOPT_SOCKETFUNCTION
 
-Callback informed about what to wait for. See CURLMOPT_SOCKETFUNCTION(3)
+Callback informed about what to wait for. See FETCHMOPT_SOCKETFUNCTION(3)
 
-## CURLMOPT_TIMERDATA
+## FETCHMOPT_TIMERDATA
 
-Custom pointer to pass to timer callback. See CURLMOPT_TIMERDATA(3)
+Custom pointer to pass to timer callback. See FETCHMOPT_TIMERDATA(3)
 
-## CURLMOPT_TIMERFUNCTION
+## FETCHMOPT_TIMERFUNCTION
 
-Callback to receive timeout values. See CURLMOPT_TIMERFUNCTION(3)
+Callback to receive timeout values. See FETCHMOPT_TIMERFUNCTION(3)
 
 # %PROTOCOLS%
 
@@ -114,9 +114,9 @@ Callback to receive timeout values. See CURLMOPT_TIMERFUNCTION(3)
 
 int main(void)
 {
-  CURLM *multi;
-  /* Limit the amount of simultaneous connections curl should allow: */
-  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
+  FETCHM *multi;
+  /* Limit the amount of simultaneous connections fetch should allow: */
+  fetch_multi_setopt(multi, FETCHMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
 }
 ~~~
 
@@ -124,10 +124,10 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLMcode indicating success or error.
+This function returns a FETCHMcode indicating success or error.
 
-CURLM_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHM_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).
 
-Note that it returns a CURLM_UNKNOWN_OPTION if you try setting an option that
-this version of libcurl does not know of.
+Note that it returns a FETCHM_UNKNOWN_OPTION if you try setting an option that
+this version of libfetch does not know of.

@@ -1,27 +1,27 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_HAPROXY_CLIENT_IP
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_HAPROXY_CLIENT_IP
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - All
 See-also:
-  - CURLOPT_HAPROXYPROTOCOL (3)
-  - CURLOPT_PROXY (3)
+  - FETCHOPT_HAPROXYPROTOCOL (3)
+  - FETCHOPT_PROXY (3)
 Added-in: 8.2.0
 ---
 
 # NAME
 
-CURLOPT_HAPROXY_CLIENT_IP - set HAProxy PROXY protocol client IP
+FETCHOPT_HAPROXY_CLIENT_IP - set HAProxy PROXY protocol client IP
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPROXY_CLIENT_IP,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_HAPROXY_CLIENT_IP,
                           char *client_ip);
 ~~~
 
@@ -31,7 +31,7 @@ When this parameter is set to a valid IPv4 or IPv6 numerical address, the
 library sends this address as client address in the HAProxy PROXY protocol v1
 header at beginning of the connection.
 
-This option is an alternative to CURLOPT_HAPROXYPROTOCOL(3) as that one cannot
+This option is an alternative to FETCHOPT_HAPROXYPROTOCOL(3) as that one cannot
 use a specified address.
 
 Using this option multiple times makes the last set string override the
@@ -51,12 +51,12 @@ NULL, no HAProxy header is sent
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_HAPROXY_CLIENT_IP, "1.1.1.1");
-    ret = curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_HAPROXY_CLIENT_IP, "1.1.1.1");
+    ret = fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -65,7 +65,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

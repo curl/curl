@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: haproxy-protocol
 Help: Send HAProxy PROXY protocol v1 header
 Protocols: HTTP

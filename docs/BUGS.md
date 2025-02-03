@@ -1,51 +1,51 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # BUGS
 
 ## There are still bugs
 
- curl and libcurl keep being developed. Adding features and changing code
+ fetch and libfetch keep being developed. Adding features and changing code
  means that bugs sneak in, no matter how hard we try to keep them out.
 
  Of course there are lots of bugs left. Not to mention misfeatures.
 
- To help us make curl the stable and solid product we want it to be, we need
+ To help us make fetch the stable and solid product we want it to be, we need
  bug reports and bug fixes.
 
 ## Where to report
 
  If you cannot fix a bug yourself and submit a fix for it, try to report an as
- detailed report as possible to a curl mailing list to allow one of us to have
- a go at a solution. You can optionally also submit your problem in [curl's
- bug tracking system](https://github.com/curl/curl/issues).
+ detailed report as possible to a fetch mailing list to allow one of us to have
+ a go at a solution. You can optionally also submit your problem in [fetch's
+ bug tracking system](https://github.com/fetch/fetch/issues).
 
  Please read the rest of this document below first before doing that.
 
  If you feel you need to ask around first, find a suitable [mailing
- list](https://curl.se/mail/) and post your questions there.
+ list](https://fetch.se/mail/) and post your questions there.
 
 ## Security bugs
 
- If you find a bug or problem in curl or libcurl that you think has a security
+ If you find a bug or problem in fetch or libfetch that you think has a security
  impact, for example a bug that can put users in danger or make them
  vulnerable if the bug becomes public knowledge, then please report that bug
  using our security development process.
 
  Security related bugs or bugs that are suspected to have a security impact,
- should be reported on the [curl security tracker at
- HackerOne](https://hackerone.com/curl).
+ should be reported on the [fetch security tracker at
+ HackerOne](https://hackerone.com/fetch).
 
- This ensures that the report reaches the curl security team so that they
+ This ensures that the report reaches the fetch security team so that they
  first can deal with the report away from the public to minimize the harm and
  impact it has on existing users out there who might be using the vulnerable
  versions.
 
- The curl project's process for handling security related issues is
- [documented separately](https://curl.se/dev/secprocess.html).
+ The fetch project's process for handling security related issues is
+ [documented separately](https://fetch.se/dev/secprocess.html).
 
 ## What to report
 
@@ -55,9 +55,9 @@ SPDX-License-Identifier: curl
 
  - your operating system's name and version number
 
- - what version of curl you are using (`curl -V` is fine)
+ - what version of fetch you are using (`fetch -V` is fine)
 
- - versions of the used libraries that libcurl is built to use
+ - versions of the used libraries that libfetch is built to use
 
  - what URL you were working with (if possible), at least which protocol
 
@@ -67,11 +67,11 @@ SPDX-License-Identifier: curl
  pieces in your report. You benefit from this yourself, as it enables us to
  help you quicker and more accurately.
 
- Since curl deals with networks, it often helps us if you include a protocol
+ Since fetch deals with networks, it often helps us if you include a protocol
  debug dump with your bug report. The output you get by using the `-v` or
  `--trace` options.
 
- If curl crashed, causing a core dump (in Unix), there is hardly any use to
+ If fetch crashed, causing a core dump (in Unix), there is hardly any use to
  send that huge file to anyone of us. Unless we have the same system setup as
  you, we cannot do much with it. Instead, we ask you to get a stack trace and
  send that (much smaller) output to us instead.
@@ -79,22 +79,22 @@ SPDX-License-Identifier: curl
  The address and how to subscribe to the mailing lists are detailed in the
  `MANUAL.md` file.
 
-## libcurl problems
+## libfetch problems
 
- When you have written your own application with libcurl to perform transfers,
+ When you have written your own application with libfetch to perform transfers,
  it is even more important to be specific and detailed when reporting bugs.
 
- Tell us the libcurl version and your operating system. Tell us the name and
+ Tell us the libfetch version and your operating system. Tell us the name and
  version of all relevant sub-components like for example the SSL library
- you are using and what name resolving your libcurl uses. If you use SFTP or
+ you are using and what name resolving your libfetch uses. If you use SFTP or
  SCP, the libssh2 version is relevant etc.
 
  Showing us a real source code example repeating your problem is the best way
  to get our attention and it greatly increases our chances to understand your
  problem and to work on a fix (if we agree it truly is a problem).
 
- Lots of problems that appear to be libcurl problems are actually just abuses
- of the libcurl API or other malfunctions in your applications. It is advised
+ Lots of problems that appear to be libfetch problems are actually just abuses
+ of the libfetch API or other malfunctions in your applications. It is advised
  that you run your problematic program using a memory debug tool like valgrind
  or similar before you post memory-related or "crashing" problems to us.
 
@@ -103,9 +103,9 @@ SPDX-License-Identifier: curl
  If the problems or bugs you describe are considered to be bugs, we want to
  have the problems fixed.
 
- There are no developers in the curl project that are paid to work on bugs.
+ There are no developers in the fetch project that are paid to work on bugs.
  All developers that take on reported bugs do this on a voluntary basis. We do
- it out of an ambition to keep curl and libcurl excellent products and out of
+ it out of an ambition to keep fetch and libfetch excellent products and out of
  pride.
 
  Please do not assume that you can just lump over something to us and it then
@@ -125,7 +125,7 @@ SPDX-License-Identifier: curl
 
  Run the program until it cores.
 
- Run your debugger on the core file, like `<debugger> curl core`. `<debugger>`
+ Run your debugger on the core file, like `<debugger> fetch core`. `<debugger>`
  should be replaced with the name of your debugger, in most cases that is
  `gdb`, but `dbx` and others also occur.
 
@@ -133,50 +133,50 @@ SPDX-License-Identifier: curl
  prompt, enter `where` (without quotes) and press return.
 
  The list that is presented is the stack trace. If everything worked, it is
- supposed to contain the chain of functions that were called when curl
+ supposed to contain the chain of functions that were called when fetch
  crashed. Include the stack trace with your detailed bug report, it helps a
  lot.
 
-## Bugs in libcurl bindings
+## Bugs in libfetch bindings
 
- There are of course bugs in libcurl bindings. You should then primarily
+ There are of course bugs in libfetch bindings. You should then primarily
  approach the team that works on that particular binding and see what you can
  do to help them fix the problem.
 
- If you suspect that the problem exists in the underlying libcurl, then please
+ If you suspect that the problem exists in the underlying libfetch, then please
  convert your program over to plain C and follow the steps outlined above.
 
 ## Bugs in old versions
 
- The curl project typically releases new versions every other month, and we
+ The fetch project typically releases new versions every other month, and we
  fix several hundred bugs per year. For a huge table of releases, number of
- bug fixes and more, see: https://curl.se/docs/releases.html
+ bug fixes and more, see: https://fetch.se/docs/releases.html
 
- The developers in the curl project do not have bandwidth or energy enough to
+ The developers in the fetch project do not have bandwidth or energy enough to
  maintain several branches or to spend much time on hunting down problems in
  old versions when chances are we already fixed them or at least that they have
  changed nature and appearance in later versions.
 
  When you experience a problem and want to report it, you really SHOULD
- include the version number of the curl you are using when you experience the
- issue. If that version number shows us that you are using an out-of-date curl,
- you should also try out a modern curl version to see if the problem persists
+ include the version number of the fetch you are using when you experience the
+ issue. If that version number shows us that you are using an out-of-date fetch,
+ you should also try out a modern fetch version to see if the problem persists
  or how/if it has changed in appearance.
 
  Even if you cannot immediately upgrade your application/system to run the
- latest curl version, you can most often at least run a test version or
+ latest fetch version, you can most often at least run a test version or
  experimental build or similar, to get this confirmed or not.
 
- At times people insist that they cannot upgrade to a modern curl version, but
+ At times people insist that they cannot upgrade to a modern fetch version, but
  instead, they "just want the bug fixed". That is fine, just do not count on us
  spending many cycles on trying to identify which single commit, if that is
  even possible, that at some point in the past fixed the problem you are now
  experiencing.
 
- Security wise, it is almost always a bad idea to lag behind the current curl
+ Security wise, it is almost always a bad idea to lag behind the current fetch
  versions by a lot. We keep discovering and reporting security problems
  over time see you can see in [this
- table](https://curl.se/docs/vulnerabilities.html)
+ table](https://fetch.se/docs/vulnerabilities.html)
 
 # Bug fixing procedure
 
@@ -251,7 +251,7 @@ SPDX-License-Identifier: curl
 
  The `TODO` document is full of ideas and suggestions of what we can add or
  fix one day. You are always encouraged and free to grab one of those items and
- take up a discussion with the curl development team on how that could be
+ take up a discussion with the fetch development team on how that could be
  implemented or provided in the project so that you can work on ticking it odd
  that document.
 
@@ -260,7 +260,7 @@ SPDX-License-Identifier: curl
 
 ## Closing off stalled bugs
 
- The [issue and pull request trackers](https://github.com/curl/curl) only hold
+ The [issue and pull request trackers](https://github.com/fetch/fetch) only hold
  "active" entries open (using a non-precise definition of what active actually
  is, but they are at least not completely dead). Those that are abandoned or
  in other ways dormant are closed and sometimes added to `TODO` and

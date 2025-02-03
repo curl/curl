@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,27 +18,27 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
  * GET a range only of an HTTP resource
  * </DESC>
  */
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
-    curl_easy_setopt(curl, CURLOPT_RANGE, "200-999");
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://fetch.se/");
+    fetch_easy_setopt(fetch, FETCHOPT_RANGE, "200-999");
 
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 
   return (int)res;

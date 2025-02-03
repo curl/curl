@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_CERTINFO
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_CERTINFO
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_CAINFO (3)
-  - CURLINFO_CAPATH (3)
-  - CURLINFO_CERTINFO (3)
-  - CURLOPT_CAINFO (3)
-  - CURLOPT_SSL_VERIFYPEER (3)
+  - FETCHINFO_CAINFO (3)
+  - FETCHINFO_CAPATH (3)
+  - FETCHINFO_CERTINFO (3)
+  - FETCHOPT_CAINFO (3)
+  - FETCHOPT_SSL_VERIFYPEER (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -22,23 +22,23 @@ Added-in: 7.19.1
 
 # NAME
 
-CURLOPT_CERTINFO - request SSL certificate information
+FETCHOPT_CERTINFO - request SSL certificate information
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CERTINFO, long certinfo);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_CERTINFO, long certinfo);
 ~~~
 
 # DESCRIPTION
 
-Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
-this enabled, libcurl extracts lots of information and data about the
+Pass a long set to 1 to enable libfetch's certificate chain info gatherer. With
+this enabled, libfetch extracts lots of information and data about the
 certificates in the certificate chain used in the SSL connection. This data
-may then be retrieved after a transfer using curl_easy_getinfo(3) and
-its option CURLINFO_CERTINFO(3).
+may then be retrieved after a transfer using fetch_easy_getinfo(3) and
+its option FETCHINFO_CERTINFO(3).
 
 # DEFAULT
 
@@ -51,36 +51,36 @@ its option CURLINFO_CERTINFO(3).
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://www.example.com/");
 
     /* connect to any HTTPS site, trusted or not */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYHOST, 0L);
 
-    curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_CERTINFO, 1L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     if(!res) {
-      struct curl_certinfo *ci;
-      res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
+      struct fetch_certinfo *ci;
+      res = fetch_easy_getinfo(fetch, FETCHINFO_CERTINFO, &ci);
 
       if(!res) {
         int i;
         printf("%d certs!\n", ci->num_of_certs);
 
         for(i = 0; i < ci->num_of_certs; i++) {
-          struct curl_slist *slist;
+          struct fetch_slist *slist;
 
           for(slist = ci->certinfo[i]; slist; slist = slist->next)
             printf("%s\n", slist->data);
         }
       }
     }
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -94,7 +94,7 @@ mbedTLS support added in 8.9.0.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

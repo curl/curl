@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: remote-name
 Short: O
 Help: Write output to file named as remote file
@@ -23,7 +23,7 @@ part of the remote file is used, the path is cut off.)
 
 The file is saved in the current working directory. If you want the file saved
 in a different directory, make sure you change the current working directory
-before invoking curl with this option or use --output-dir.
+before invoking fetch with this option or use --output-dir.
 
 The remote filename to use for saving is extracted from the given URL, nothing
 else, and if it already exists it is overwritten. If you want the server to be
@@ -36,7 +36,7 @@ encoded parts of the name, they end up as-is as filename.
 
 You may use this option as many times as the number of URLs you have.
 
-Before curl 8.10.0, curl returned an error if the URL ended with a slash,
+Before fetch 8.10.0, fetch returned an error if the URL ended with a slash,
 which means that there is no filename part in the URL. Starting in 8.10.0,
-curl sets the filename to the last directory part of the URL or if that also
-is missing to `curl_response` (without extension) for this situation.
+fetch sets the filename to the last directory part of the URL or if that also
+is missing to `fetch_response` (without extension) for this situation.

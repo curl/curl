@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: dump-ca-embed
 Help: Write the embedded CA bundle to standard output
 Protocols: TLS
@@ -20,6 +20,6 @@ Example:
 
 # `--dump-ca-embed`
 
-Write the CA bundle embedded in curl to standard output, then quit.
+Write the CA bundle embedded in fetch to standard output, then quit.
 
-If curl was not built with a default CA bundle embedded, the output is empty.
+If fetch was not built with a default CA bundle embedded, the output is empty.

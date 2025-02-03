@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # bufref
@@ -57,17 +57,17 @@ if `buffer` is NULL, `length` must be zero.
 ## `memdup`
 
 ```c
-CURLcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
+FETCHcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
 ```
 
 Releases the previously referenced buffer, then duplicates the `length`-byte
 `data` into a buffer allocated via `malloc()` and references the latter
-associated with destructor `curl_free()`.
+associated with destructor `fetch_free()`.
 
 An additional trailing byte is allocated and set to zero as a possible string
 null-terminator; it is not counted in the stored length.
 
-Returns `CURLE_OK` if successful, else `CURLE_OUT_OF_MEMORY`.
+Returns `FETCHE_OK` if successful, else `FETCHE_OUT_OF_MEMORY`.
 
 ## `ptr`
 

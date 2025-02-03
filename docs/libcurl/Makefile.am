@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -31,15 +31,15 @@ SUBDIRS = opts
 if BUILD_DOCS
 include Makefile.inc
 
-CURLPAGES = $(man_MANS:.3=.md)
+FETCHPAGES = $(man_MANS:.3=.md)
 endif
 
 m4macrodir = $(datadir)/aclocal
-dist_m4macro_DATA = libcurl.m4
+dist_m4macro_DATA = libfetch.m4
 
-CLEANFILES = $(man_MANS) libcurl-symbols.md
+CLEANFILES = $(man_MANS) libfetch-symbols.md
 
-EXTRA_DIST = $(CURLPAGES) ABI.md symbols-in-versions symbols.pl  \
+EXTRA_DIST = $(FETCHPAGES) ABI.md symbols-in-versions symbols.pl  \
   mksymbolsmanpage.pl CMakeLists.txt
 
 if BUILD_DOCS
@@ -52,7 +52,7 @@ CD2_ = $(CD2_0)
 
 SUFFIXES = .3 .md
 
-libcurl-symbols.md: $(srcdir)/symbols-in-versions $(srcdir)/mksymbolsmanpage.pl
+libfetch-symbols.md: $(srcdir)/symbols-in-versions $(srcdir)/mksymbolsmanpage.pl
 	$(CD2)perl $(srcdir)/mksymbolsmanpage.pl < $(srcdir)/symbols-in-versions > $@
 
 .md.3:

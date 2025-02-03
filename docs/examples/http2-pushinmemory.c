@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -29,8 +29,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* curl stuff */
-#include <curl/curl.h>
+/* fetch stuff */
+#include <fetch/fetch.h>
 
 struct Memory {
   char *memory;
@@ -67,32 +67,32 @@ static void init_memory(struct Memory *chunk)
   chunk->size = 0;            /* no data at this point */
 }
 
-static void setup(CURL *hnd)
+static void setup(FETCH *hnd)
 {
   /* set the same URL */
-  curl_easy_setopt(hnd, CURLOPT_URL, "https://localhost:8443/index.html");
+  fetch_easy_setopt(hnd, FETCHOPT_URL, "https://localhost:8443/index.html");
 
   /* HTTP/2 please */
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+  fetch_easy_setopt(hnd, FETCHOPT_HTTP_VERSION, FETCH_HTTP_VERSION_2_0);
 
   /* we use a self-signed test server, skip verification during debugging */
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+  fetch_easy_setopt(hnd, FETCHOPT_SSL_VERIFYPEER, 0L);
+  fetch_easy_setopt(hnd, FETCHOPT_SSL_VERIFYHOST, 0L);
 
   /* write data to a struct  */
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_cb);
+  fetch_easy_setopt(hnd, FETCHOPT_WRITEFUNCTION, write_cb);
   init_memory(&files[0]);
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &files[0]);
+  fetch_easy_setopt(hnd, FETCHOPT_WRITEDATA, &files[0]);
 
   /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+  fetch_easy_setopt(hnd, FETCHOPT_PIPEWAIT, 1L);
 }
 
 /* called when there is an incoming push */
-static int server_push_callback(CURL *parent,
-                                CURL *easy,
+static int server_push_callback(FETCH *parent,
+                                FETCH *easy,
                                 size_t num_headers,
-                                struct curl_pushheaders *headers,
+                                struct fetch_pushheaders *headers,
                                 void *userp)
 {
   char *headp;
@@ -102,19 +102,19 @@ static int server_push_callback(CURL *parent,
 
   if(pushindex == MAX_FILES)
     /* cannot fit anymore */
-    return CURL_PUSH_DENY;
+    return FETCH_PUSH_DENY;
 
   /* write to this buffer */
   init_memory(&files[pushindex]);
-  curl_easy_setopt(easy, CURLOPT_WRITEDATA, &files[pushindex]);
+  fetch_easy_setopt(easy, FETCHOPT_WRITEDATA, &files[pushindex]);
   pushindex++;
 
-  headp = curl_pushheader_byname(headers, ":path");
+  headp = fetch_pushheader_byname(headers, ":path");
   if(headp)
     fprintf(stderr, "* Pushed :path '%s'\n", headp /* skip :path + colon */);
 
   (*transfers)++; /* one more */
-  return CURL_PUSH_OK;
+  return FETCH_PUSH_OK;
 }
 
 
@@ -123,58 +123,58 @@ static int server_push_callback(CURL *parent,
  */
 int main(void)
 {
-  CURL *easy;
-  CURLM *multi;
+  FETCH *easy;
+  FETCHM *multi;
   int still_running; /* keep number of running handles */
   int transfers = 1; /* we start with one */
   int i;
-  struct CURLMsg *m;
+  struct FETCHMsg *m;
 
   /* init a multi stack */
-  multi = curl_multi_init();
+  multi = fetch_multi_init();
 
-  easy = curl_easy_init();
+  easy = fetch_easy_init();
 
   /* set options */
   setup(easy);
 
   /* add the easy transfer */
-  curl_multi_add_handle(multi, easy);
+  fetch_multi_add_handle(multi, easy);
 
-  curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, server_push_callback);
-  curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &transfers);
+  fetch_multi_setopt(multi, FETCHMOPT_PIPELINING, FETCHPIPE_MULTIPLEX);
+  fetch_multi_setopt(multi, FETCHMOPT_PUSHFUNCTION, server_push_callback);
+  fetch_multi_setopt(multi, FETCHMOPT_PUSHDATA, &transfers);
 
   while(transfers) {
     int rc;
-    CURLMcode mcode = curl_multi_perform(multi, &still_running);
+    FETCHMcode mcode = fetch_multi_perform(multi, &still_running);
     if(mcode)
       break;
 
-    mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
+    mcode = fetch_multi_wait(multi, NULL, 0, 1000, &rc);
     if(mcode)
       break;
 
 
     /*
-     * When doing server push, libcurl itself created and added one or more
+     * When doing server push, libfetch itself created and added one or more
      * easy handles but *we* need to clean them up when they are done.
      */
     do {
       int msgq = 0;
-      m = curl_multi_info_read(multi, &msgq);
-      if(m && (m->msg == CURLMSG_DONE)) {
-        CURL *e = m->easy_handle;
+      m = fetch_multi_info_read(multi, &msgq);
+      if(m && (m->msg == FETCHMSG_DONE)) {
+        FETCH *e = m->easy_handle;
         transfers--;
-        curl_multi_remove_handle(multi, e);
-        curl_easy_cleanup(e);
+        fetch_multi_remove_handle(multi, e);
+        fetch_easy_cleanup(e);
       }
     } while(m);
 
   }
 
 
-  curl_multi_cleanup(multi);
+  fetch_multi_cleanup(multi);
 
   /* 'pushindex' is now the number of received transfers */
   for(i = 0; i < pushindex; i++) {

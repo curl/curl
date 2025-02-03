@@ -1,5 +1,5 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # OPTIONS
 
 Options start with one or two dashes. Many of the options require an

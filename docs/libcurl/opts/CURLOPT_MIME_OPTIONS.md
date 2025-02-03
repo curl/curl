@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_MIME_OPTIONS
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_MIME_OPTIONS
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPPOST (3)
-  - CURLOPT_MIMEPOST (3)
+  - FETCHOPT_HTTPPOST (3)
+  - FETCHOPT_MIMEPOST (3)
 Protocol:
   - HTTP
   - IMAP
@@ -16,26 +16,26 @@ Added-in: 7.81.0
 
 # NAME
 
-CURLOPT_MIME_OPTIONS - set MIME option flags
+FETCHOPT_MIME_OPTIONS - set MIME option flags
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MIME_OPTIONS, long options);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_MIME_OPTIONS, long options);
 ~~~
 
 # DESCRIPTION
 
-Pass a long that holds a bitmask of CURLMIMEOPT_* defines. Each bit is a
+Pass a long that holds a bitmask of FETCHMIMEOPT_* defines. Each bit is a
 Boolean flag used while encoding a MIME tree or multipart form data.
 
 Available bits are:
 
-## CURLMIMEOPT_FORMESCAPE
+## FETCHMIMEOPT_FORMESCAPE
 
-Tells libcurl to escape multipart form field and filenames using the
+Tells libfetch to escape multipart form field and filenames using the
 backslash-escaping algorithm rather than percent-encoding (HTTP only).
 
 Backslash-escaping consists in preceding backslashes and double quotes with
@@ -64,29 +64,29 @@ containing multipart form is sent, this is normally transmitted as
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  curl_mime *form = NULL;
+  FETCH *fetch = fetch_easy_init();
+  fetch_mime *form = NULL;
 
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_MIME_OPTIONS, CURLMIMEOPT_FORMESCAPE);
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    fetch_easy_setopt(fetch, FETCHOPT_MIME_OPTIONS, FETCHMIMEOPT_FORMESCAPE);
 
-    form = curl_mime_init(curl);
+    form = fetch_mime_init(fetch);
     if(form) {
-      curl_mimepart *part = curl_mime_addpart(form);
+      fetch_mimepart *part = fetch_mime_addpart(form);
 
       if(part) {
-        curl_mime_filedata(part, "strange\\file\\name");
-        curl_mime_name(part, "strange\"field\"name");
-        curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
+        fetch_mime_filedata(part, "strange\\file\\name");
+        fetch_mime_name(part, "strange\"field\"name");
+        fetch_easy_setopt(fetch, FETCHOPT_MIMEPOST, form);
 
         /* Perform the request */
-        curl_easy_perform(curl);
+        fetch_easy_perform(fetch);
       }
     }
 
-    curl_easy_cleanup(curl);
-    curl_mime_free(form);
+    fetch_easy_cleanup(fetch);
+    fetch_mime_free(form);
   }
 }
 ~~~
@@ -95,7 +95,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

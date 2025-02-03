@@ -1,7 +1,7 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # `splay`
@@ -15,9 +15,9 @@ quick to access again. A self-balancing tree.
 Nodes are added to the tree, they are accessed and removed from the tree and
 it automatically rebalances itself in each operation.
 
-## libcurl use
+## libfetch use
 
-libcurl adds fixed timeout expiry timestamps to the splay tree, and is meant
+libfetch adds fixed timeout expiry timestamps to the splay tree, and is meant
 to scale up to holding a huge amount of pending timeouts with decent
 performance.
 
@@ -42,7 +42,7 @@ node is re-added to the splay.
 ## `Curl_splay`
 
 ~~~c
-struct Curl_tree *Curl_splay(struct curltime i, struct Curl_tree *t);
+struct Curl_tree *Curl_splay(struct fetchtime i, struct Curl_tree *t);
 ~~~
 
 Rearranges the tree `t` after the provide time `i`.
@@ -50,14 +50,14 @@ Rearranges the tree `t` after the provide time `i`.
 ## `Curl_splayinsert`
 
 ~~~c
-struct Curl_tree *Curl_splayinsert(struct curltime key,
+struct Curl_tree *Curl_splayinsert(struct fetchtime key,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node);
 ~~~
 
 This function inserts a new `node` in the tree, using the given `key`
 timestamp. The `node` struct has a field called `->payload` that can be set to
-point to anything. libcurl sets this to the `struct Curl_easy` handle that is
+point to anything. libfetch sets this to the `struct Curl_easy` handle that is
 associated with the timeout value set in `key`.
 
 The splay insert function does not allocate any memory, it assumes the caller
@@ -68,7 +68,7 @@ It returns a pointer to the new tree root.
 ## `Curl_splaygetbest`
 
 ~~~c
-struct Curl_tree *Curl_splaygetbest(struct curltime key,
+struct Curl_tree *Curl_splaygetbest(struct fetchtime key,
                                     struct Curl_tree *tree,
                                     struct Curl_tree **removed);
 ~~~

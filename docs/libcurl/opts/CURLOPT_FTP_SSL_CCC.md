@@ -1,54 +1,54 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FTP_SSL_CCC
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FTP_SSL_CCC
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - FTP
 See-also:
-  - CURLOPT_FTPSSLAUTH (3)
-  - CURLOPT_PROTOCOLS_STR (3)
-  - CURLOPT_USE_SSL (3)
+  - FETCHOPT_FTPSSLAUTH (3)
+  - FETCHOPT_PROTOCOLS_STR (3)
+  - FETCHOPT_USE_SSL (3)
 Added-in: 7.16.1
 ---
 
 # NAME
 
-CURLOPT_FTP_SSL_CCC - switch off SSL again with FTP after auth
+FETCHOPT_FTP_SSL_CCC - switch off SSL again with FTP after auth
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_SSL_CCC,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FTP_SSL_CCC,
                           long how);
 ~~~
 
 # DESCRIPTION
 
-If enabled, this option makes libcurl use CCC (Clear Command Channel). It
+If enabled, this option makes libfetch use CCC (Clear Command Channel). It
 shuts down the SSL/TLS layer after authenticating. The rest of the control
 channel communication remains unencrypted. This allows NAT routers to follow
 the FTP transaction. Pass a long using one of the values below
 
-## CURLFTPSSL_CCC_NONE
+## FETCHFTPSSL_CCC_NONE
 
 do not attempt to use CCC.
 
-## CURLFTPSSL_CCC_PASSIVE
+## FETCHFTPSSL_CCC_PASSIVE
 
 Do not initiate the shutdown, but wait for the server to do it. Do not send a
 reply.
 
-## CURLFTPSSL_CCC_ACTIVE
+## FETCHFTPSSL_CCC_ACTIVE
 
 Initiate the shutdown and wait for a reply.
 
 # DEFAULT
 
-CURLFTPSSL_CCC_NONE
+FETCHFTPSSL_CCC_NONE
 
 # %PROTOCOLS%
 
@@ -57,15 +57,15 @@ CURLFTPSSL_CCC_NONE
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_CONTROL);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/file.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_USE_SSL, FETCHUSESSL_CONTROL);
     /* go back to clear-text FTP after authenticating */
-    curl_easy_setopt(curl, CURLOPT_FTP_SSL_CCC, (long)CURLFTPSSL_CCC_ACTIVE);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_FTP_SSL_CCC, (long)FETCHFTPSSL_CCC_ACTIVE);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -74,7 +74,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TCP_NODELAY
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TCP_NODELAY
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_BUFFERSIZE (3)
-  - CURLOPT_SOCKOPTFUNCTION (3)
-  - CURLOPT_TCP_KEEPALIVE (3)
+  - FETCHOPT_BUFFERSIZE (3)
+  - FETCHOPT_SOCKOPTFUNCTION (3)
+  - FETCHOPT_TCP_KEEPALIVE (3)
 Protocol:
   - TCP
 Added-in: 7.11.2
@@ -15,14 +15,14 @@ Added-in: 7.11.2
 
 # NAME
 
-CURLOPT_TCP_NODELAY - the TCP_NODELAY option
+FETCHOPT_TCP_NODELAY - the TCP_NODELAY option
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_NODELAY, long nodelay);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TCP_NODELAY, long nodelay);
 ~~~
 
 # DESCRIPTION
@@ -53,12 +53,12 @@ overdone.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
     /* leave Nagle enabled */
-    curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 0);
-    curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_TCP_NODELAY, 0);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -71,7 +71,7 @@ The default was changed to 1 from 0 in 7.50.2.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

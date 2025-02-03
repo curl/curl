@@ -1,29 +1,29 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FTP_ALTERNATIVE_TO_USER
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FTP_ALTERNATIVE_TO_USER
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - FTP
 See-also:
-  - CURLOPT_FTP_ACCOUNT (3)
-  - CURLOPT_FTP_SKIP_PASV_IP (3)
-  - CURLOPT_SERVER_RESPONSE_TIMEOUT (3)
-  - CURLOPT_USERNAME (3)
+  - FETCHOPT_FTP_ACCOUNT (3)
+  - FETCHOPT_FTP_SKIP_PASV_IP (3)
+  - FETCHOPT_SERVER_RESPONSE_TIMEOUT (3)
+  - FETCHOPT_USERNAME (3)
 Added-in: 7.15.5
 ---
 
 # NAME
 
-CURLOPT_FTP_ALTERNATIVE_TO_USER - command to use instead of USER with FTP
+FETCHOPT_FTP_ALTERNATIVE_TO_USER - command to use instead of USER with FTP
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_ALTERNATIVE_TO_USER,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FTP_ALTERNATIVE_TO_USER,
                           char *cmd);
 ~~~
 
@@ -49,14 +49,14 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
-    curl_easy_setopt(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER, "two users");
-    res = curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://example.com/foo.bin");
+    fetch_easy_setopt(fetch, FETCHOPT_FTP_ALTERNATIVE_TO_USER, "two users");
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -65,7 +65,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

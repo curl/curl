@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: tls13-ciphers
 Arg: <list>
 help: TLS 1.3 cipher suites to use
@@ -22,10 +22,10 @@ Specifies which cipher suites to use in the connection if it negotiates TLS
 1.3. The list of ciphers suites must specify valid ciphers. Read up on TLS 1.3
 cipher suite details on this URL:
 
-https://curl.se/docs/ssl-ciphers.html
+https://fetch.se/docs/ssl-ciphers.html
 
-This option is used when curl is built to use OpenSSL 1.1.1 or later,
+This option is used when fetch is built to use OpenSSL 1.1.1 or later,
 wolfSSL, or mbedTLS 3.6.0 or later.
 
-Before curl 8.10.0 with mbedTLS or wolfSSL, TLS 1.3 cipher suites were set
+Before fetch 8.10.0 with mbedTLS or wolfSSL, TLS 1.3 cipher suites were set
 by using the --ciphers option.

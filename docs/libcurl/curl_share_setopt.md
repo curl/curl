@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_share_setopt
+SPDX-License-Identifier: fetch
+Title: fetch_share_setopt
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_share_cleanup (3)
-  - curl_share_init (3)
+  - fetch_share_cleanup (3)
+  - fetch_share_init (3)
 Protocol:
   - All
 Added-in: 7.10
@@ -14,14 +14,14 @@ Added-in: 7.10
 
 # NAME
 
-curl_share_setopt - set options for a shared object
+fetch_share_setopt - set options for a shared object
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
+FETCHSHcode fetch_share_setopt(FETCHSH *share, FETCHSHoption option, parameter);
 ~~~
 
 # DESCRIPTION
@@ -30,25 +30,25 @@ Set the *option* to *parameter* for the given *share*.
 
 # OPTIONS
 
-## CURLSHOPT_LOCKFUNC
+## FETCHSHOPT_LOCKFUNC
 
-See CURLSHOPT_LOCKFUNC(3).
+See FETCHSHOPT_LOCKFUNC(3).
 
-## CURLSHOPT_UNLOCKFUNC
+## FETCHSHOPT_UNLOCKFUNC
 
-See CURLSHOPT_UNLOCKFUNC(3).
+See FETCHSHOPT_UNLOCKFUNC(3).
 
-## CURLSHOPT_SHARE
+## FETCHSHOPT_SHARE
 
-See CURLSHOPT_SHARE(3).
+See FETCHSHOPT_SHARE(3).
 
-## CURLSHOPT_UNSHARE
+## FETCHSHOPT_UNSHARE
 
-See CURLSHOPT_UNSHARE(3).
+See FETCHSHOPT_UNSHARE(3).
 
-## CURLSHOPT_USERDATA
+## FETCHSHOPT_USERDATA
 
-See CURLSHOPT_USERDATA(3).
+See FETCHSHOPT_USERDATA(3).
 
 # %PROTOCOLS%
 
@@ -57,11 +57,11 @@ See CURLSHOPT_USERDATA(3).
 ~~~c
 int main(void)
 {
-  CURLSHcode sh;
-  CURLSH *share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  FETCHSHcode sh;
+  FETCHSH *share = fetch_share_init();
+  sh = fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_CONNECT);
   if(sh)
-    printf("Error: %s\n", curl_share_strerror(sh));
+    printf("Error: %s\n", fetch_share_strerror(sh));
 }
 ~~~
 
@@ -69,6 +69,6 @@ int main(void)
 
 # RETURN VALUE
 
-CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as *\<curl/curl.h\>* defines. See the libcurl-errors(3) man
+FETCHSHE_OK (zero) means that the option was set properly, non-zero means an
+error occurred as *\<fetch/fetch.h\>* defines. See the libfetch-errors(3) man
 page for the full list with descriptions.

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: E
 Long: cert
 Arg: <certificate[:password]>
@@ -32,18 +32,18 @@ In the \<certificate\> portion of the argument, you must escape the character
 you must escape the double quote character as \" so that it is not recognized
 as an escape character.
 
-If curl is built against OpenSSL library, and the engine pkcs11 or pkcs11
+If fetch is built against OpenSSL library, and the engine pkcs11 or pkcs11
 provider is available, then a PKCS#11 URI (RFC 7512) can be used to specify a
 certificate located in a PKCS#11 device. A string beginning with `pkcs11:` is
 interpreted as a PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine
 option is set as `pkcs11` if none was provided and the --cert-type option is
 set as `ENG` or `PROV` if none was provided (depending on OpenSSL version).
 
-If curl is built against GnuTLS library, a PKCS#11 URI can be used to specify
+If fetch is built against GnuTLS library, a PKCS#11 URI can be used to specify
 a certificate located in a PKCS#11 device. A string beginning with `pkcs11:`
 is interpreted as a PKCS#11 URI.
 
-(iOS and macOS only) If curl is built against Secure Transport, then the
+(iOS and macOS only) If fetch is built against Secure Transport, then the
 certificate string can either be the name of a certificate/private key in the
 system or user keychain, or the path to a PKCS#12-encoded certificate and
 private key. If you want to use a file from the current directory, please

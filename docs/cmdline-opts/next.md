@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: :
 Long: next
 Tags:
@@ -8,7 +8,7 @@ Protocols:
 Added: 7.36.0
 Magic: divider
 Help: Make next URL use separate options
-Category: curl
+Category: fetch
 Multi: append
 See-also:
   - parallel
@@ -30,4 +30,4 @@ over to the operation following the --next instruction. Global options include
 
 For example, you can do both a GET and a POST in a single command line:
 
-    curl www1.example.com --next -d postthis www2.example.com
+    fetch www1.example.com --next -d postthis www2.example.com

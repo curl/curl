@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_global_init_mem
+SPDX-License-Identifier: fetch
+Title: fetch_global_init_mem
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_global_cleanup (3)
-  - curl_global_init (3)
+  - fetch_global_cleanup (3)
+  - fetch_global_init (3)
 Protocol:
   - All
 Added-in: 7.12.0
@@ -14,28 +14,28 @@ Added-in: 7.12.0
 
 # NAME
 
-curl_global_init_mem - global libcurl initialization with memory callbacks
+fetch_global_init_mem - global libfetch initialization with memory callbacks
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_global_init_mem(long flags,
-                              curl_malloc_callback m,
-                              curl_free_callback f,
-                              curl_realloc_callback r,
-                              curl_strdup_callback s,
-                              curl_calloc_callback c);
+FETCHcode fetch_global_init_mem(long flags,
+                              fetch_malloc_callback m,
+                              fetch_free_callback f,
+                              fetch_realloc_callback r,
+                              fetch_strdup_callback s,
+                              fetch_calloc_callback c);
 ~~~
 
 # DESCRIPTION
 
-This function works exactly as curl_global_init(3) with one addition: it
+This function works exactly as fetch_global_init(3) with one addition: it
 allows the application to set callbacks to replace the otherwise used internal
 memory functions.
 
-If you are using libcurl from multiple threads or libcurl was built with the
+If you are using libfetch from multiple threads or libfetch was built with the
 threaded resolver option then the callback functions must be thread safe. The
 threaded resolver is a common build option to enable (and in some cases the
 default) so we strongly urge you to make your callback functions thread safe.
@@ -63,13 +63,13 @@ To replace strdup()
 
 To replace calloc()
 
-This function is otherwise the same as curl_global_init(3), please refer
+This function is otherwise the same as fetch_global_init(3), please refer
 to that man page for documentation.
 
 # CAUTION
 
 Manipulating these gives considerable powers to the application to severely
-screw things up for libcurl. Take care.
+screw things up for libfetch. Take care.
 
 # %PROTOCOLS%
 
@@ -84,7 +84,7 @@ extern void *calloc_cb(size_t, size_t);
 
 int main(void)
 {
-  curl_global_init_mem(CURL_GLOBAL_DEFAULT, malloc_cb,
+  fetch_global_init_mem(FETCH_GLOBAL_DEFAULT, malloc_cb,
                        free_cb, realloc_cb,
                        strdup_cb, calloc_cb);
 }
@@ -94,9 +94,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

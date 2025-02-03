@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -35,25 +35,25 @@
 #include <unistd.h>
 #endif
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-static int ping(CURL *curl, const char *send_payload)
+static int ping(FETCH *fetch, const char *send_payload)
 {
   size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, send_payload, strlen(send_payload), &sent, 0,
-                 CURLWS_PING);
+  FETCHcode result =
+    fetch_ws_send(fetch, send_payload, strlen(send_payload), &sent, 0,
+                 FETCHWS_PING);
   return (int)result;
 }
 
-static int recv_pong(CURL *curl, const char *expected_payload)
+static int recv_pong(FETCH *fetch, const char *expected_payload)
 {
   size_t rlen;
-  const struct curl_ws_frame *meta;
+  const struct fetch_ws_frame *meta;
   char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  FETCHcode result = fetch_ws_recv(fetch, buffer, sizeof(buffer), &rlen, &meta);
   if(!result) {
-    if(meta->flags & CURLWS_PONG) {
+    if(meta->flags & FETCHWS_PONG) {
       int same = 0;
       fprintf(stderr, "ws: got PONG back\n");
       if(rlen == strlen(expected_payload)) {
@@ -70,66 +70,66 @@ static int recv_pong(CURL *curl, const char *expected_payload)
               meta->flags);
     }
   }
-  fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n",
+  fprintf(stderr, "ws: fetch_ws_recv returned %u, received %u\n",
           (unsigned int)result, (unsigned int)rlen);
   return (int)result;
 }
 
-static CURLcode recv_any(CURL *curl)
+static FETCHcode recv_any(FETCH *fetch)
 {
   size_t rlen;
-  const struct curl_ws_frame *meta;
+  const struct fetch_ws_frame *meta;
   char buffer[256];
 
-  return curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  return fetch_ws_recv(fetch, buffer, sizeof(buffer), &rlen, &meta);
 }
 
 /* close the connection */
-static void websocket_close(CURL *curl)
+static void websocket_close(FETCH *fetch)
 {
   size_t sent;
-  (void)curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
+  (void)fetch_ws_send(fetch, "", 0, &sent, 0, FETCHWS_CLOSE);
 }
 
-static void websocket(CURL *curl)
+static void websocket(FETCH *fetch)
 {
   int i = 0;
   do {
-    recv_any(curl);
-    if(ping(curl, "foobar"))
+    recv_any(fetch);
+    if(ping(fetch, "foobar"))
       return;
-    if(recv_pong(curl, "foobar")) {
+    if(recv_pong(fetch, "foobar")) {
       return;
     }
     sleep(2);
   } while(i++ < 10);
-  websocket_close(curl);
+  websocket_close(fetch);
 }
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com");
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "wss://example.com");
 
-    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
+    fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 2L); /* websocket style */
 
     /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
     else {
       /* connected and ready */
-      websocket(curl);
+      websocket(fetch);
     }
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   return 0;
 }

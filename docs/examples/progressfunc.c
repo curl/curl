@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,35 +18,35 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
  * Use the progress callbacks, old and/or new one depending on available
- * libcurl version.
+ * libfetch version.
  * </DESC>
  */
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3000000
 #define STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES         6000
 
 struct myprogress {
-  curl_off_t lastruntime; /* type depends on version, see above */
-  CURL *curl;
+  fetch_off_t lastruntime; /* type depends on version, see above */
+  FETCH *fetch;
 };
 
-/* this is how the CURLOPT_XFERINFOFUNCTION callback works */
+/* this is how the FETCHOPT_XFERINFOFUNCTION callback works */
 static int xferinfo(void *p,
-                    curl_off_t dltotal, curl_off_t dlnow,
-                    curl_off_t ultotal, curl_off_t ulnow)
+                    fetch_off_t dltotal, fetch_off_t dlnow,
+                    fetch_off_t ultotal, fetch_off_t ulnow)
 {
   struct myprogress *myp = (struct myprogress *)p;
-  CURL *curl = myp->curl;
-  curl_off_t curtime = 0;
+  FETCH *fetch = myp->fetch;
+  fetch_off_t curtime = 0;
 
-  curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &curtime);
+  fetch_easy_getinfo(fetch, FETCHINFO_TOTAL_TIME_T, &curtime);
 
   /* under certain circumstances it may be desirable for certain functionality
      to only run every N seconds, in order to do this the transaction time can
@@ -69,29 +69,29 @@ static int xferinfo(void *p,
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
   struct myprogress prog;
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     prog.lastruntime = 0;
-    prog.curl = curl;
+    prog.fetch = fetch;
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
 
-    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
+    fetch_easy_setopt(fetch, FETCHOPT_XFERINFOFUNCTION, xferinfo);
     /* pass the struct pointer into the xferinfo function */
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &prog);
+    fetch_easy_setopt(fetch, FETCHOPT_XFERINFODATA, &prog);
 
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    res = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_NOPROGRESS, 0L);
+    res = fetch_easy_perform(fetch);
 
-    if(res != CURLE_OK)
-      fprintf(stderr, "%s\n", curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "%s\n", fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   return (int)res;
 }

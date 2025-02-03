@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ftp-create-dirs
 Protocols: FTP SFTP
 Help: Create the remote dirs if not present
@@ -16,5 +16,5 @@ Example:
 # `--ftp-create-dirs`
 
 When an FTP or SFTP URL/operation uses a path that does not currently exist on
-the server, the standard behavior of curl is to fail. Using this option, curl
+the server, the standard behavior of fetch is to fail. Using this option, fetch
 instead attempts to create missing directories.

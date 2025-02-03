@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: trace-ids
 Help: Transfer + connection ids in verbose output
 Added: 8.2.0
@@ -16,4 +16,4 @@ Example:
 
 # `--trace-ids`
 
-Prepends the transfer and connection identifiers to each trace or verbose line that curl displays.
+Prepends the transfer and connection identifiers to each trace or verbose line that fetch displays.

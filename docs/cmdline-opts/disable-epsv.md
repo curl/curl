@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: disable-epsv
 Help: Inhibit using EPSV
 Protocols: FTP
@@ -16,7 +16,7 @@ Example:
 
 # `--disable-epsv`
 
-Disable the use of the EPSV command when doing passive FTP transfers. curl
+Disable the use of the EPSV command when doing passive FTP transfers. fetch
 normally first attempts to use EPSV before PASV, but with this option, it does
 not try EPSV.
 

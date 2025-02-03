@@ -1,15 +1,15 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # Rustls
 
-[Rustls is a TLS backend written in Rust](https://docs.rs/rustls/). curl can
+[Rustls is a TLS backend written in Rust](https://docs.rs/rustls/). fetch can
 be built to use it as an alternative to OpenSSL or other TLS backends. We use
 the [rustls-ffi C bindings](https://github.com/rustls/rustls-ffi/). This
-version of curl depends on version v0.14.0 of rustls-ffi.
+version of fetch depends on version v0.14.0 of rustls-ffi.
 
 # Building with Rustls
 
@@ -22,10 +22,10 @@ Next, check out, build, and install the appropriate version of rustls-ffi:
     % make
     % make DESTDIR=${HOME}/rustls-ffi-built/ install
 
-Now configure and build curl with Rustls:
+Now configure and build fetch with Rustls:
 
-    % git clone https://github.com/curl/curl
-    % cd curl
+    % git clone https://github.com/fetch/fetch
+    % cd fetch
     % autoreconf -fi
     % ./configure --with-rustls=${HOME}/rustls-ffi-built
     % make

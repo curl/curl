@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROXYUSERPWD
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROXYUSERPWD
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PROXY (3)
-  - CURLOPT_PROXYPASSWORD (3)
-  - CURLOPT_PROXYTYPE (3)
-  - CURLOPT_PROXYUSERNAME (3)
+  - FETCHOPT_PROXY (3)
+  - FETCHOPT_PROXYPASSWORD (3)
+  - FETCHOPT_PROXYTYPE (3)
+  - FETCHOPT_PROXYUSERNAME (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -16,14 +16,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_PROXYUSERPWD - username and password to use for proxy authentication
+FETCHOPT_PROXYUSERPWD - username and password to use for proxy authentication
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYUSERPWD, char *userpwd);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXYUSERPWD, char *userpwd);
 ~~~
 
 # DESCRIPTION
@@ -31,10 +31,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYUSERPWD, char *userpwd);
 Pass a char pointer as parameter, which should be [username]:[password] to use
 for the connection to the HTTP proxy. Both the name and the password are URL
 decoded before used, so to include for example a colon in the username you
-should encode it as %3A. (This is different to how CURLOPT_USERPWD(3) is
+should encode it as %3A. (This is different to how FETCHOPT_USERPWD(3) is
 used - beware.)
 
-Use CURLOPT_PROXYAUTH(3) to specify the authentication method.
+Use FETCHOPT_PROXYAUTH(3) to specify the authentication method.
 
 The application does not have to keep the string around after setting this
 option.
@@ -53,14 +53,14 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://localhost:8080");
-    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "clark%20kent:superman");
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "http://localhost:8080");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXYUSERPWD, "clark%20kent:superman");
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -69,7 +69,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

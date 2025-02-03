@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proxy-ssl-allow-beast
 Help: Allow this security flaw for HTTPS proxy
 Added: 7.52.0
@@ -20,7 +20,7 @@ communicating to an HTTPS proxy. If this option is not used, the TLS layer may
 use workarounds known to cause interoperability problems with some older
 server implementations.
 
-This option only changes how curl does TLS 1.0 with an HTTPS proxy and has no
+This option only changes how fetch does TLS 1.0 with an HTTPS proxy and has no
 effect on later TLS versions.
 
 **WARNING**: this option loosens the TLS security, and by using this flag you

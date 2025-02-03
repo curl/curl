@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSH_HOSTKEYFUNCTION
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSH_HOSTKEYFUNCTION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSH_HOSTKEYDATA (3)
-  - CURLOPT_SSH_KNOWNHOSTS (3)
+  - FETCHOPT_SSH_HOSTKEYDATA (3)
+  - FETCHOPT_SSH_KNOWNHOSTS (3)
 Protocol:
   - SFTP
   - SCP
@@ -15,43 +15,43 @@ Added-in: 7.84.0
 
 # NAME
 
-CURLOPT_SSH_HOSTKEYFUNCTION - callback to check host key
+FETCHOPT_SSH_HOSTKEYFUNCTION - callback to check host key
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int keycallback(void *clientp,
                 int keytype,
                 const char *key,
                 size_t keylen);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_HOSTKEYFUNCTION,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSH_HOSTKEYFUNCTION,
                           keycallback);
 ~~~
 
 # DESCRIPTION
 
 Pass a pointer to your callback function, which should match the prototype
-shown above. It overrides CURLOPT_SSH_KNOWNHOSTS(3).
+shown above. It overrides FETCHOPT_SSH_KNOWNHOSTS(3).
 
 This callback gets called when the verification of the SSH host key is needed.
 
 **key** is **keylen** bytes long and is the key to check. **keytype**
-says what type it is, from the **CURLKHTYPE_*** series in the
-**curl_khtype** enum.
+says what type it is, from the **FETCHKHTYPE_*** series in the
+**fetch_khtype** enum.
 
-**clientp** is a custom pointer set with CURLOPT_SSH_HOSTKEYDATA(3).
+**clientp** is a custom pointer set with FETCHOPT_SSH_HOSTKEYDATA(3).
 
-The callback MUST return one of the following return codes to tell libcurl how
+The callback MUST return one of the following return codes to tell libfetch how
 to act:
 
-## CURLKHMATCH_OK
+## FETCHKHMATCH_OK
 
 The host key is accepted, the connection should continue.
 
-## CURLKHMATCH_MISMATCH
+## FETCHKHMATCH_MISMATCH
 
 the host key is rejected, the connection is canceled.
 
@@ -68,25 +68,25 @@ struct mine {
   void *custom;
 };
 
-int hostkeycb(void *clientp,    /* passed with CURLOPT_SSH_HOSTKEYDATA */
-              int keytype,      /* CURLKHTYPE */
+int hostkeycb(void *clientp,    /* passed with FETCHOPT_SSH_HOSTKEYDATA */
+              int keytype,      /* FETCHKHTYPE */
               const char *key,  /* host key to check */
               size_t keylen)    /* length of the key */
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */
-  return CURLKHMATCH_OK;
+  return FETCHKHMATCH_OK;
 }
 int main(void)
 {
   struct mine callback_data;
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
-    curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
-    curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYDATA, &callback_data);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "sftp://example.com/thisfile.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_HOSTKEYDATA, &callback_data);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -99,7 +99,7 @@ Work only with the libssh2 backend.
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

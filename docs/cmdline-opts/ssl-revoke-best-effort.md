@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ssl-revoke-best-effort
 Help: Ignore missing cert CRL dist points
 Added: 7.70.0

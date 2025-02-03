@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_UNIX_SOCKET_PATH
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_UNIX_SOCKET_PATH
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_ABSTRACT_UNIX_SOCKET (3)
-  - CURLOPT_OPENSOCKETFUNCTION (3)
+  - FETCHOPT_ABSTRACT_UNIX_SOCKET (3)
+  - FETCHOPT_OPENSOCKETFUNCTION (3)
   - unix (7)
 Protocol:
   - All
@@ -15,14 +15,14 @@ Added-in: 7.40.0
 
 # NAME
 
-CURLOPT_UNIX_SOCKET_PATH - Unix domain socket
+FETCHOPT_UNIX_SOCKET_PATH - Unix domain socket
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UNIX_SOCKET_PATH, char *path);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_UNIX_SOCKET_PATH, char *path);
 ~~~
 
 # DESCRIPTION
@@ -31,15 +31,15 @@ Enables the use of Unix domain sockets as connection endpoint and sets the
 path to *path*. If *path* is NULL, then Unix domain sockets are
 disabled.
 
-When enabled, curl connects to the Unix domain socket instead of establishing
-a TCP connection to the host. Since no network connection is created, curl
+When enabled, fetch connects to the Unix domain socket instead of establishing
+a TCP connection to the host. Since no network connection is created, fetch
 does not resolve the DNS hostname in the URL.
 
 The maximum path length on Cygwin, Linux and Solaris is 107. On other platforms
 it might be even less.
 
-Proxy and TCP options such as CURLOPT_TCP_NODELAY(3) are not supported. Proxy
-options such as CURLOPT_PROXY(3) have no effect either as these are
+Proxy and TCP options such as FETCHOPT_TCP_NODELAY(3) are not supported. Proxy
+options such as FETCHOPT_PROXY(3) have no effect either as these are
 TCP-oriented, and asking a proxy server to connect to a certain Unix domain
 socket is not possible.
 
@@ -60,12 +60,12 @@ NULL - no Unix domain sockets are used.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, "/tmp/httpd.sock");
-    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_UNIX_SOCKET_PATH, "/tmp/httpd.sock");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://localhost/");
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -77,7 +77,7 @@ you can use the proc filesystem to bypass the limitation:
   int dirfd = open(long_directory_path_to_socket, O_DIRECTORY | O_RDONLY);
   char path[108];
   snprintf(path, sizeof(path), "/proc/self/fd/%d/httpd.sock", dirfd);
-  curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, path);
+  fetch_easy_setopt(fetch_handle, FETCHOPT_UNIX_SOCKET_PATH, path);
   /* Be sure to keep dirfd valid until you discard the handle */
 ~~~
 
@@ -85,7 +85,7 @@ you can use the proc filesystem to bypass the limitation:
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

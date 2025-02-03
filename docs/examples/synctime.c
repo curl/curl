@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -56,7 +56,7 @@
  * This software synchronises your computer clock only when you issue
  * it with --synctime. By default, it only display the webserver's clock.
  *
- * Written by: Frank (contributed to libcurl)
+ * Written by: Frank (contributed to libfetch)
  *
  * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
@@ -73,7 +73,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -115,14 +115,14 @@ static SYSTEMTIME LOCALTime;
 #define HTTP_COMMAND_GET        1
 
 
-static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
+static size_t SyncTime_FETCH_WriteOutput(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
   return nmemb * size;
 }
 
-static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
+static size_t SyncTime_FETCH_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
   char TmpStr1[26], TmpStr2[26];
@@ -174,39 +174,39 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   return nmemb * size;
 }
 
-static void SyncTime_CURL_Init(CURL *curl, const char *proxy_port,
+static void SyncTime_FETCH_Init(FETCH *fetch, const char *proxy_port,
                                const char *proxy_user_password)
 {
   if(strlen(proxy_port) > 0)
-    curl_easy_setopt(curl, CURLOPT_PROXY, proxy_port);
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, proxy_port);
 
   if(strlen(proxy_user_password) > 0)
-    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, proxy_user_password);
+    fetch_easy_setopt(fetch, FETCHOPT_PROXYUSERPWD, proxy_user_password);
 
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, SYNCTIME_UA);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, SyncTime_CURL_WriteOutput);
-  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, SyncTime_CURL_WriteHeader);
+  fetch_easy_setopt(fetch, FETCHOPT_USERAGENT, SYNCTIME_UA);
+  fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, SyncTime_FETCH_WriteOutput);
+  fetch_easy_setopt(fetch, FETCHOPT_HEADERFUNCTION, SyncTime_FETCH_WriteHeader);
 }
 
-static CURLcode SyncTime_CURL_Fetch(CURL *curl, const char *URL_Str,
+static FETCHcode SyncTime_FETCH_Fetch(FETCH *fetch, const char *URL_Str,
                                     const char *OutFileName, int HttpGetBody)
 {
   FILE *outfile;
-  CURLcode res;
+  FETCHcode res;
 
   outfile = NULL;
   if(HttpGetBody == HTTP_COMMAND_HEAD)
-    curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_NOBODY, 1L);
   else {
     outfile = fopen(OutFileName, "wb");
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, outfile);
   }
 
-  curl_easy_setopt(curl, CURLOPT_URL, URL_Str);
-  res = curl_easy_perform(curl);
+  fetch_easy_setopt(fetch, FETCHOPT_URL, URL_Str);
+  res = fetch_easy_perform(fetch);
   if(outfile)
     fclose(outfile);
-  return res;  /* (CURLE_OK) */
+  return res;  /* (FETCHE_OK) */
 }
 
 static void showUsage(void)
@@ -242,7 +242,7 @@ static int conf_init(conf_t *conf)
 
 int main(int argc, char *argv[])
 {
-  CURL    *curl;
+  FETCH    *fetch;
   conf_t  conf[1];
   int     RetValue;
 
@@ -281,10 +281,10 @@ int main(int argc, char *argv[])
   if(*conf->timeserver == 0)     /* Use default server for time information */
     snprintf(conf->timeserver, MAX_STRING, "%s", DefaultTimeServer[0]);
 
-  /* Init CURL before usage */
-  curl_global_init(CURL_GLOBAL_ALL);
-  curl = curl_easy_init();
-  if(curl) {
+  /* Init FETCH before usage */
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  fetch = fetch_easy_init();
+  if(fetch) {
     struct tm *lt;
     struct tm *gmt;
     time_t tt;
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
     char timeBuf[61];
     char tzoneBuf[16];
 
-    SyncTime_CURL_Init(curl, conf->http_proxy, conf->proxy_user);
+    SyncTime_FETCH_Init(fetch, conf->http_proxy, conf->proxy_user);
 
     /* Calculating time diff between GMT and localtime */
     tt       = time(0);
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Before HTTP. Date: %s%s\n\n", timeBuf, tzoneBuf);
 
     /* HTTP HEAD command to the Webserver */
-    SyncTime_CURL_Fetch(curl, conf->timeserver, "index.htm",
+    SyncTime_FETCH_Fetch(fetch, conf->timeserver, "index.htm",
                         HTTP_COMMAND_HEAD);
 
     GetLocalTime(&LOCALTime);
@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
 
     /* Cleanup before exit */
     conf_init(conf);
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   return RetValue;
 }

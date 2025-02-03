@@ -1,12 +1,12 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # checksrc
 
-This is the tool we use within the curl project to scan C source code and
+This is the tool we use within the fetch project to scan C source code and
 check that it adheres to our [Source Code Style guide](CODE_STYLE.md).
 
 ## Usage
@@ -51,7 +51,7 @@ warnings are:
    **Ignore certain warnings** section below for details.
 
 - `BANNEDFUNC`: A banned function was used. The functions sprintf, vsprintf,
-   strcat, strncat, gets are **never** allowed in curl source code.
+   strcat, strncat, gets are **never** allowed in fetch source code.
 
 - `BRACEELSE`: '} else' on the same line. The else is supposed to be on the
    following line.

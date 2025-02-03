@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,17 +20,17 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 # Get 'man_MANS' variable
-curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+fetch_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-curl_add_manual_pages(man_MANS)
-add_custom_target(curl-opts-man DEPENDS ${man_MANS})
-add_dependencies(curl-man curl-opts-man)
-if(NOT CURL_DISABLE_INSTALL)
+fetch_add_manual_pages(man_MANS)
+add_custom_target(fetch-opts-man DEPENDS ${man_MANS})
+add_dependencies(fetch-man fetch-opts-man)
+if(NOT FETCH_DISABLE_INSTALL)
   set(_src "")
   foreach(_f IN LISTS man_MANS)
     list(APPEND _src "${CMAKE_CURRENT_BINARY_DIR}/${_f}")

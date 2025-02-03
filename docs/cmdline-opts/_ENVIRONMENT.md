@@ -1,5 +1,5 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # ENVIRONMENT
 The environment variables can be specified in lower case or upper case. The
 lower case version has precedence. `http_proxy` is an exception as it is only
@@ -16,7 +16,7 @@ Sets the proxy server to use for HTTPS.
 
 ## `[url-protocol]_PROXY` [protocol://]<host>[:port]
 Sets the proxy server to use for [url-protocol], where the protocol is a
-protocol that curl supports and as specified in a URL. FTP, FTPS, POP3, IMAP,
+protocol that fetch supports and as specified in a URL. FTP, FTPS, POP3, IMAP,
 SMTP, LDAP, etc.
 
 ## `ALL_PROXY` [protocol://]<host>[:port]
@@ -30,12 +30,12 @@ domain name which contains the hostname, or the hostname itself.
 This environment variable disables use of the proxy even when specified with
 the --proxy option. That is
 
-    NO_PROXY=direct.example.com curl -x http://proxy.example.com
+    NO_PROXY=direct.example.com fetch -x http://proxy.example.com
     http://direct.example.com
 
 accesses the target URL directly, and
 
-    NO_PROXY=direct.example.com curl -x http://proxy.example.com
+    NO_PROXY=direct.example.com fetch -x http://proxy.example.com
     http://somewhere.example.com
 
 accesses the target URL through the proxy.
@@ -54,22 +54,22 @@ the primary home variables are all unset.
 
 ## `COLUMNS` <terminal width>
 If set, the specified number of characters is used as the terminal width when
-the alternative progress-bar is shown. If not set, curl tries to figure it out
+the alternative progress-bar is shown. If not set, fetch tries to figure it out
 using other ways.
 
-## `CURL_CA_BUNDLE` <file>
+## `FETCH_CA_BUNDLE` <file>
 If set, it is used as the --cacert value. This environment variable is ignored
 if Schannel is used as the TLS backend.
 
-## `CURL_HOME` <dir>
-If set, is the first variable curl checks when trying to find its home
+## `FETCH_HOME` <dir>
+If set, is the first variable fetch checks when trying to find its home
 directory. If not set, it continues to check *XDG_CONFIG_HOME*
 
-## `CURL_SSL_BACKEND` <TLS backend>
-If curl was built with support for "MultiSSL", meaning that it has built-in
+## `FETCH_SSL_BACKEND` <TLS backend>
+If fetch was built with support for "MultiSSL", meaning that it has built-in
 support for more than one TLS backend, this environment variable can be set to
-the case insensitive name of the particular backend to use when curl is
-invoked. Setting a name that is not a built-in alternative makes curl stay
+the case insensitive name of the particular backend to use when fetch is
+invoked. Setting a name that is not a built-in alternative makes fetch stay
 with the default.
 
 SSL backend names (case-insensitive): **bearssl**, **gnutls**, **mbedtls**,
@@ -77,12 +77,12 @@ SSL backend names (case-insensitive): **bearssl**, **gnutls**, **mbedtls**,
 
 ## `HOME` <dir>
 If set, this is used to find the home directory when that is needed. Like when
-looking for the default .curlrc. *CURL_HOME* and *XDG_CONFIG_HOME*
+looking for the default .fetchrc. *FETCH_HOME* and *XDG_CONFIG_HOME*
 have preference.
 
 ## `QLOGDIR` <directory name>
-If curl was built with HTTP/3 support, setting this environment variable to a
-local directory makes curl produce **qlogs** in that directory, using file
+If fetch was built with HTTP/3 support, setting this environment variable to a
+local directory makes fetch produce **qlogs** in that directory, using file
 names named after the destination connection id (in hex). Do note that these
 files can become rather large. Works with the ngtcp2 and quiche QUIC backends.
 
@@ -98,7 +98,7 @@ If set, it is used as the --cacert value. This environment variable is ignored
 if Schannel is used as the TLS backend.
 
 ## `SSLKEYLOGFILE` <filename>
-If you set this environment variable to a filename, curl stores TLS secrets
+If you set this environment variable to a filename, fetch stores TLS secrets
 from its connections in that file when invoked to enable you to analyze the
 TLS traffic in real time using network analyzing tools such as Wireshark. This
 works with the following TLS backends: OpenSSL, LibreSSL (TLS 1.2 max),
@@ -106,9 +106,9 @@ BoringSSL, GnuTLS and wolfSSL.
 
 ## `USERPROFILE` <dir>
 On Windows, this variable is used when trying to find the home directory. If
-the other, primary, variable are all unset. If set, curl uses the path
+the other, primary, variable are all unset. If set, fetch uses the path
 **"$USERPROFILE\Application Data"**.
 
 ## `XDG_CONFIG_HOME` <dir>
-If *CURL_HOME* is not set, this variable is checked when looking for a
-default .curlrc file.
+If *FETCH_HOME* is not set, this variable is checked when looking for a
+default .fetchrc file.

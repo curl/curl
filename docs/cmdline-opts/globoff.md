@@ -1,10 +1,10 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: globoff
 Short: g
 Help: Disable URL globbing with {} and []
-Category: curl
+Category: fetch
 Added: 7.6
 Multi: boolean
 See-also:
@@ -17,6 +17,6 @@ Example:
 # `--globoff`
 
 Switch off the URL globbing function. When you set this option, you can
-specify URLs that contain the letters {}[] without having curl itself
+specify URLs that contain the letters {}[] without having fetch itself
 interpret them. Note that these letters are not normal legal URL contents but
 they should be encoded according to the URI standard.

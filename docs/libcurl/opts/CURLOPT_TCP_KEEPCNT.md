@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TCP_KEEPCNT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TCP_KEEPCNT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_TCP_KEEPALIVE (3)
-  - CURLOPT_TCP_KEEPIDLE (3)
-  - CURLOPT_TCP_KEEPINTVL (3)
+  - FETCHOPT_TCP_KEEPALIVE (3)
+  - FETCHOPT_TCP_KEEPIDLE (3)
+  - FETCHOPT_TCP_KEEPINTVL (3)
 Protocol:
   - TCP
 Added-in: 8.9.0
@@ -15,14 +15,14 @@ Added-in: 8.9.0
 
 # NAME
 
-CURLOPT_TCP_KEEPCNT - Maximum number of TCP keep-alive probes
+FETCHOPT_TCP_KEEPCNT - Maximum number of TCP keep-alive probes
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_KEEPCNT, long cnt);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TCP_KEEPCNT, long cnt);
 ~~~
 
 # DESCRIPTION
@@ -46,23 +46,23 @@ Any larger value is capped to this amount.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* enable TCP keep-alive for this transfer */
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_TCP_KEEPALIVE, 1L);
 
     /* set keep-alive idle time to 120 seconds */
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 120L);
+    fetch_easy_setopt(fetch, FETCHOPT_TCP_KEEPIDLE, 120L);
 
     /* interval time between keep-alive probes: 60 seconds */
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
+    fetch_easy_setopt(fetch, FETCHOPT_TCP_KEEPINTVL, 60L);
 
     /* maximum number of keep-alive probes: 3 */
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPCNT, 3L);
+    fetch_easy_setopt(fetch, FETCHOPT_TCP_KEEPCNT, 3L);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -71,7 +71,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

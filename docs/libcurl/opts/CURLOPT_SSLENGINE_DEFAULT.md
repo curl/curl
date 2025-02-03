@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSLENGINE_DEFAULT
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSLENGINE_DEFAULT
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSLCERT (3)
-  - CURLOPT_SSLENGINE (3)
+  - FETCHOPT_SSLCERT (3)
+  - FETCHOPT_SSLENGINE (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -16,14 +16,14 @@ Added-in: 7.9.3
 
 # NAME
 
-CURLOPT_SSLENGINE_DEFAULT - make SSL engine default
+FETCHOPT_SSLENGINE_DEFAULT - make SSL engine default
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLENGINE_DEFAULT, long val);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSLENGINE_DEFAULT, long val);
 ~~~
 
 # DESCRIPTION
@@ -31,7 +31,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLENGINE_DEFAULT, long val);
 Pass a long set to 1 to make the already specified crypto engine the default
 for (asymmetric) crypto operations.
 
-This option has no effect unless set after CURLOPT_SSLENGINE(3).
+This option has no effect unless set after FETCHOPT_SSLENGINE(3).
 
 # DEFAULT
 
@@ -44,14 +44,14 @@ None
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_SSLENGINE, "dynamic");
-    curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE, "dynamic");
+    fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE_DEFAULT, 1L);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -60,12 +60,12 @@ int main(void)
 
 # RETURN VALUE
 
-CURLE_OK - Engine set as default.
+FETCHE_OK - Engine set as default.
 
-CURLE_SSL_ENGINE_SETFAILED - Engine could not be set as default.
+FETCHE_SSL_ENGINE_SETFAILED - Engine could not be set as default.
 
-CURLE_NOT_BUILT_IN - Option not built in, OpenSSL is not the SSL backend.
+FETCHE_NOT_BUILT_IN - Option not built in, OpenSSL is not the SSL backend.
 
-CURLE_UNKNOWN_OPTION - Option not recognized.
+FETCHE_UNKNOWN_OPTION - Option not recognized.
 
-CURLE_OUT_OF_MEMORY - Insufficient heap space.
+FETCHE_OUT_OF_MEMORY - Insufficient heap space.

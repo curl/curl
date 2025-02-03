@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: hsts
 Arg: <filename>
 Protocols: HTTPS
@@ -20,13 +20,13 @@ Enable HSTS for the transfer. If the filename points to an existing HSTS cache
 file, that is used. After a completed transfer, the cache is saved to the
 filename again if it has been modified.
 
-If curl is told to use HTTP:// for a transfer involving a hostname that exists
+If fetch is told to use HTTP:// for a transfer involving a hostname that exists
 in the HSTS cache, it upgrades the transfer to use HTTPS. Each HSTS cache
 entry has an individual life time after which the upgrade is no longer
 performed.
 
-Specify a "" filename (zero length) to avoid loading/saving and make curl just
+Specify a "" filename (zero length) to avoid loading/saving and make fetch just
 handle HSTS in memory.
 
-If this option is used several times, curl loads contents from all the
+If this option is used several times, fetch loads contents from all the
 files but the last one is used for saving.

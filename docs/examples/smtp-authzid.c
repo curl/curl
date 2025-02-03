@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -29,16 +29,16 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /*
- * This is a simple example show how to send an email using libcurl's SMTP
+ * This is a simple example show how to send an email using libfetch's SMTP
  * capabilities.
  *
- * Note that this example requires libcurl 7.66.0 or above.
+ * Note that this example requires libfetch 7.66.0 or above.
  */
 
-/* The libcurl options want plain addresses, the viewable headers in the mail
+/* The libfetch options want plain addresses, the viewable headers in the mail
  * can get a full name as well.
  */
 #define FROM_ADDR    "<ursel@example.org>"
@@ -94,68 +94,68 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct curl_slist *recipients = NULL;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
+  struct fetch_slist *recipients = NULL;
   struct upload_status upload_ctx = { 0 };
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* This is the URL for your mailserver. In this example we connect to the
        smtp-submission port as we require an authenticated connection. */
-    curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com:587");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "smtp://mail.example.com:587");
 
     /* Set the username and password */
-    curl_easy_setopt(curl, CURLOPT_USERNAME, "kurt");
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, "xipj3plmq");
+    fetch_easy_setopt(fetch, FETCHOPT_USERNAME, "kurt");
+    fetch_easy_setopt(fetch, FETCHOPT_PASSWORD, "xipj3plmq");
 
     /* Set the authorization identity (identity to act as) */
-    curl_easy_setopt(curl, CURLOPT_SASL_AUTHZID, "ursel");
+    fetch_easy_setopt(fetch, FETCHOPT_SASL_AUTHZID, "ursel");
 
     /* Force PLAIN authentication */
-    curl_easy_setopt(curl, CURLOPT_LOGIN_OPTIONS, "AUTH=PLAIN");
+    fetch_easy_setopt(fetch, FETCHOPT_LOGIN_OPTIONS, "AUTH=PLAIN");
 
     /* Note that this option is not strictly required, omitting it results in
-     * libcurl sending the MAIL FROM command with empty sender data. All
+     * libfetch sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
      * to the address in the reverse-path which triggered them. Otherwise,
      * they could cause an endless loop. See RFC 5321 Section 4.5.5 for more
      * details.
      */
-    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM_ADDR);
+    fetch_easy_setopt(fetch, FETCHOPT_MAIL_FROM, FROM_ADDR);
 
     /* Add a recipient, in this particular case it corresponds to the
      * To: addressee in the header. */
-    recipients = curl_slist_append(recipients, TO_ADDR);
-    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+    recipients = fetch_slist_append(recipients, TO_ADDR);
+    fetch_easy_setopt(fetch, FETCHOPT_MAIL_RCPT, recipients);
 
     /* We are using a callback function to specify the payload (the headers and
-     * body of the message). You could just use the CURLOPT_READDATA option to
+     * body of the message). You could just use the FETCHOPT_READDATA option to
      * specify a FILE pointer to read from. */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
-    curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, payload_source);
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, &upload_ctx);
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
     /* Send the message */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* Free the list of recipients */
-    curl_slist_free_all(recipients);
+    fetch_slist_free_all(recipients);
 
-    /* curl does not send the QUIT command until you call cleanup, so you
+    /* fetch does not send the QUIT command until you call cleanup, so you
      * should be able to reuse this connection for additional messages
-     * (setting CURLOPT_MAIL_FROM and CURLOPT_MAIL_RCPT as required, and
-     * calling curl_easy_perform() again. It may not be a good idea to keep
+     * (setting FETCHOPT_MAIL_FROM and FETCHOPT_MAIL_RCPT as required, and
+     * calling fetch_easy_perform() again. It may not be a good idea to keep
      * the connection open for a long time though (more than a few minutes may
      * result in the server timing out the connection), and you do want to
      * clean up in the end.
      */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
   return (int)res;

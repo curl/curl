@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,25 +21,25 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
 # Experience has shown that the symbols-in-versions file is useful to
-# applications that want to build with a wide range of libcurl versions.  It
+# applications that want to build with a wide range of libfetch versions.  It
 # is however easy to get it wrong and the source gets a bit messy with all the
 # fixed numerical comparisons.
 #
-# The point of this script is to provide an easy-to-use macro for libcurl-
-# using applications to do preprocessor checks for specific libcurl defines,
+# The point of this script is to provide an easy-to-use macro for libfetch-
+# using applications to do preprocessor checks for specific libfetch defines,
 # and yet make the code clearly show what the macro is used for.
 #
-# Run this script and generate libcurl-symbols.h and then use that header in
+# Run this script and generate libfetch-symbols.h and then use that header in
 # a fashion similar to:
 #
-# #include "libcurl-symbols.h"
+# #include "libfetch-symbols.h"
 #
-# #if LIBCURL_HAS(CURLOPT_MUTE)
+# #if LIBFETCH_HAS(FETCHOPT_MUTE)
 #   has mute
 # #else
 #   no mute
@@ -57,17 +57,17 @@ sub str2num {
 
 print <<EOS
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-#define LIBCURL_HAS(x) \\
-  (defined(x ## _FIRST) && (x ## _FIRST <= LIBCURL_VERSION_NUM) && \\
-   (!defined(x ## _LAST) || ( x ## _LAST >= LIBCURL_VERSION_NUM)))
+#define LIBFETCH_HAS(x) \\
+  (defined(x ## _FIRST) && (x ## _FIRST <= LIBFETCH_VERSION_NUM) && \\
+   (!defined(x ## _LAST) || ( x ## _LAST >= LIBFETCH_VERSION_NUM)))
 
 EOS
     ;
 
 while(<F>) {
-    if(/^(CURL[^ ]*)[ \t]*(.*)/) {
+    if(/^(FETCH[^ ]*)[ \t]*(.*)/) {
         my ($sym, $vers)=($1, $2);
 
         my $intr;

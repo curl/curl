@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: curves
 Arg: <list>
 Help: (EC) TLS key exchange algorithms to request
@@ -21,7 +21,7 @@ Set specific curves to use during SSL session establishment according to RFC
 (e.g. `X25519:P-521`). The parameter is available identically in the OpenSSL
 `s_client` and `s_server` utilities.
 
---curves allows a OpenSSL powered curl to make SSL-connections with exactly
+--curves allows a OpenSSL powered fetch to make SSL-connections with exactly
 the (EC) curve requested by the client, avoiding nontransparent client/server
 negotiations.
 

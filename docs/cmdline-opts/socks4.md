@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: socks4
 Arg: <host[:port]>
 Help: SOCKS4 proxy on given host + port
@@ -18,7 +18,7 @@ Example:
 # `--socks4`
 
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
-assumed at port 1080. Using this socket type make curl resolve the hostname
+assumed at port 1080. Using this socket type make fetch resolve the hostname
 and passing the address on to the proxy.
 
 To specify proxy on a Unix domain socket, use localhost for host, e.g.
@@ -31,6 +31,6 @@ This option is superfluous since you can specify a socks4 proxy with --proxy
 using a socks4:// protocol prefix. (Added in 7.21.7)
 
 --preproxy can be used to specify a SOCKS proxy at the same time proxy is used
-with an HTTP/HTTPS proxy (added in 7.52.0). In such a case, curl first
+with an HTTP/HTTPS proxy (added in 7.52.0). In such a case, fetch first
 connects to the SOCKS proxy and then connects (through SOCKS) to the HTTP or
 HTTPS proxy.

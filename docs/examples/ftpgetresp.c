@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include <stdio.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /* <DESC>
  * Similar to ftpget.c but also stores the received response-lines
@@ -42,8 +42,8 @@ write_response(void *ptr, size_t size, size_t nmemb, void *data)
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   FILE *ftpfile;
   FILE *respfile;
 
@@ -59,23 +59,23 @@ int main(void)
     return 1;
   }
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* Get a file listing from sunet */
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/");
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, ftpfile);
-    /* If you intend to use this on Windows with a libcurl DLL, you must use
-       CURLOPT_WRITEFUNCTION as well */
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_response);
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, respfile);
-    res = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://ftp.example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, ftpfile);
+    /* If you intend to use this on Windows with a libfetch DLL, you must use
+       FETCHOPT_WRITEFUNCTION as well */
+    fetch_easy_setopt(fetch, FETCHOPT_HEADERFUNCTION, write_response);
+    fetch_easy_setopt(fetch, FETCHOPT_HEADERDATA, respfile);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
   fclose(ftpfile); /* close the local file */

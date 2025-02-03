@@ -1,28 +1,28 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_NOPROXY
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_NOPROXY
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - All
 See-also:
-  - CURLOPT_PROXY (3)
-  - CURLOPT_PROXYAUTH (3)
-  - CURLOPT_PROXYTYPE (3)
+  - FETCHOPT_PROXY (3)
+  - FETCHOPT_PROXYAUTH (3)
+  - FETCHOPT_PROXYTYPE (3)
 Added-in: 7.19.4
 ---
 
 # NAME
 
-CURLOPT_NOPROXY - disable proxy use for specific hosts
+FETCHOPT_NOPROXY - disable proxy use for specific hosts
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOPROXY, char *noproxy);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_NOPROXY, char *noproxy);
 ~~~
 
 # DESCRIPTION
@@ -57,7 +57,7 @@ previous ones. Set it to NULL to disable its use again.
 # Environment variables
 
 If there is an environment variable called **no_proxy** (or **NO_PROXY**),
-it is used if the CURLOPT_NOPROXY(3) option is not set. It works exactly
+it is used if the FETCHOPT_NOPROXY(3) option is not set. It works exactly
 the same way.
 
 # DEFAULT
@@ -71,15 +71,15 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     /* accept various URLs */
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
     /* use this proxy */
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "http://proxy:80");
     /* ... but make sure this host name is not proxied */
-    curl_easy_setopt(curl, CURLOPT_NOPROXY, "www.example.com");
-    curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_NOPROXY, "www.example.com");
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -88,7 +88,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

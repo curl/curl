@@ -1,10 +1,10 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-![curl logo](https://curl.se/logo/curl-logo.svg)
+![fetch logo](https://fetch.se/logo/fetch-logo.svg)
 
 # Documentation
 
@@ -13,6 +13,6 @@ using several different formats. Some of them are not ideal for reading
 directly in your browser.
 
 If you would rather see the rendered version of the documentation, check out the
-curl website's [documentation section](https://curl.se/docs/) for
-general curl stuff or the [libcurl section](https://curl.se/libcurl/) for
-libcurl related documentation.
+fetch website's [documentation section](https://fetch.se/docs/) for
+general fetch stuff or the [libfetch section](https://fetch.se/libfetch/) for
+libfetch related documentation.

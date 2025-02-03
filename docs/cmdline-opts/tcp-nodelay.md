@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: tcp-nodelay
 Help: Set TCP_NODELAY
 Added: 7.11.2
@@ -14,8 +14,8 @@ Example:
 
 # `--tcp-nodelay`
 
-Turn on the TCP_NODELAY option. See the *curl_easy_setopt(3)* man page for
+Turn on the TCP_NODELAY option. See the *fetch_easy_setopt(3)* man page for
 details about this option.
 
-curl sets this option by default and you need to explicitly switch it off if
+fetch sets this option by default and you need to explicitly switch it off if
 you do not want it on (added in 7.50.2).

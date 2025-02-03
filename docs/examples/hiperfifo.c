@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -32,14 +32,14 @@ Written by Jeff Pohlmeyer
 
 Requires libevent version 2 and a (POSIX?) system that has mkfifo().
 
-This is an adaptation of libcurl's "hipev.c" and libevent's "event-test.c"
+This is an adaptation of libfetch's "hipev.c" and libevent's "event-test.c"
 sample programs.
 
 When running, the program creates the named pipe "hiper.fifo"
 
 Whenever there is input into the fifo, the program reads the input as a list
 of URL's and creates some new easy handles to fetch each URL via the
-curl_multi "hiper" API.
+fetch_multi "hiper" API.
 
 
 Thus, you can try a single URL:
@@ -66,7 +66,7 @@ callback.
 #include <time.h>
 #include <unistd.h>
 #include <sys/poll.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include <event2/event.h>
 #include <event2/event_struct.h>
 #include <fcntl.h>
@@ -83,7 +83,7 @@ typedef struct _GlobalInfo
   struct event_base *evbase;
   struct event fifo_event;
   struct event timer_event;
-  CURLM *multi;
+  FETCHM *multi;
   int still_running;
   FILE *input;
   int stopped;
@@ -93,18 +93,18 @@ typedef struct _GlobalInfo
 /* Information associated with a specific easy handle */
 typedef struct _ConnInfo
 {
-  CURL *easy;
+  FETCH *easy;
   char *url;
   GlobalInfo *global;
-  char error[CURL_ERROR_SIZE];
+  char error[FETCH_ERROR_SIZE];
 } ConnInfo;
 
 
 /* Information associated with a specific socket */
 typedef struct _SockInfo
 {
-  curl_socket_t sockfd;
-  CURL *easy;
+  fetch_socket_t sockfd;
+  FETCH *easy;
   int action;
   long timeout;
   struct event ev;
@@ -114,20 +114,20 @@ typedef struct _SockInfo
 #define mycase(code) \
   case code: s = __STRING(code)
 
-/* Die if we get a bad CURLMcode somewhere */
-static void mcode_or_die(const char *where, CURLMcode code)
+/* Die if we get a bad FETCHMcode somewhere */
+static void mcode_or_die(const char *where, FETCHMcode code)
 {
-  if(CURLM_OK != code) {
+  if(FETCHM_OK != code) {
     const char *s;
     switch(code) {
-      mycase(CURLM_BAD_HANDLE); break;
-      mycase(CURLM_BAD_EASY_HANDLE); break;
-      mycase(CURLM_OUT_OF_MEMORY); break;
-      mycase(CURLM_INTERNAL_ERROR); break;
-      mycase(CURLM_UNKNOWN_OPTION); break;
-      mycase(CURLM_LAST); break;
-      default: s = "CURLM_unknown"; break;
-      mycase(CURLM_BAD_SOCKET);
+      mycase(FETCHM_BAD_HANDLE); break;
+      mycase(FETCHM_BAD_EASY_HANDLE); break;
+      mycase(FETCHM_OUT_OF_MEMORY); break;
+      mycase(FETCHM_INTERNAL_ERROR); break;
+      mycase(FETCHM_UNKNOWN_OPTION); break;
+      mycase(FETCHM_LAST); break;
+      default: s = "FETCHM_unknown"; break;
+      mycase(FETCHM_BAD_SOCKET);
       fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
       /* ignore this error */
       return;
@@ -138,8 +138,8 @@ static void mcode_or_die(const char *where, CURLMcode code)
 }
 
 
-/* Update the event timer after curl_multi library calls */
-static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
+/* Update the event timer after fetch_multi library calls */
+static int multi_timer_cb(FETCHM *multi, long timeout_ms, GlobalInfo *g)
 {
   struct timeval timeout;
   (void)multi;
@@ -166,23 +166,23 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
 static void check_multi_info(GlobalInfo *g)
 {
   char *eff_url;
-  CURLMsg *msg;
+  FETCHMsg *msg;
   int msgs_left;
   ConnInfo *conn;
-  CURL *easy;
-  CURLcode res;
+  FETCH *easy;
+  FETCHcode res;
 
   fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
-  while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
-    if(msg->msg == CURLMSG_DONE) {
+  while((msg = fetch_multi_info_read(g->multi, &msgs_left))) {
+    if(msg->msg == FETCHMSG_DONE) {
       easy = msg->easy_handle;
       res = msg->data.result;
-      curl_easy_getinfo(easy, CURLINFO_PRIVATE, &conn);
-      curl_easy_getinfo(easy, CURLINFO_EFFECTIVE_URL, &eff_url);
+      fetch_easy_getinfo(easy, FETCHINFO_PRIVATE, &conn);
+      fetch_easy_getinfo(easy, FETCHINFO_EFFECTIVE_URL, &eff_url);
       fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, res, conn->error);
-      curl_multi_remove_handle(g->multi, easy);
+      fetch_multi_remove_handle(g->multi, easy);
       free(conn->url);
-      curl_easy_cleanup(easy);
+      fetch_easy_cleanup(easy);
       free(conn);
     }
   }
@@ -196,14 +196,14 @@ static void check_multi_info(GlobalInfo *g)
 static void event_cb(int fd, short kind, void *userp)
 {
   GlobalInfo *g = (GlobalInfo*) userp;
-  CURLMcode rc;
+  FETCHMcode rc;
 
   int action =
-    ((kind & EV_READ) ? CURL_CSELECT_IN : 0) |
-    ((kind & EV_WRITE) ? CURL_CSELECT_OUT : 0);
+    ((kind & EV_READ) ? FETCH_CSELECT_IN : 0) |
+    ((kind & EV_WRITE) ? FETCH_CSELECT_OUT : 0);
 
-  rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
-  mcode_or_die("event_cb: curl_multi_socket_action", rc);
+  rc = fetch_multi_socket_action(g->multi, fd, action, &g->still_running);
+  mcode_or_die("event_cb: fetch_multi_socket_action", rc);
 
   check_multi_info(g);
   if(g->still_running <= 0) {
@@ -220,13 +220,13 @@ static void event_cb(int fd, short kind, void *userp)
 static void timer_cb(int fd, short kind, void *userp)
 {
   GlobalInfo *g = (GlobalInfo *)userp;
-  CURLMcode rc;
+  FETCHMcode rc;
   (void)fd;
   (void)kind;
 
-  rc = curl_multi_socket_action(g->multi,
-                                  CURL_SOCKET_TIMEOUT, 0, &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", rc);
+  rc = fetch_multi_socket_action(g->multi,
+                                  FETCH_SOCKET_TIMEOUT, 0, &g->still_running);
+  mcode_or_die("timer_cb: fetch_multi_socket_action", rc);
   check_multi_info(g);
 }
 
@@ -246,12 +246,12 @@ static void remsock(SockInfo *f)
 
 
 /* Assign information to a SockInfo structure */
-static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
+static void setsock(SockInfo *f, fetch_socket_t s, FETCH *e, int act,
                     GlobalInfo *g)
 {
   int kind =
-     ((act & CURL_POLL_IN) ? EV_READ : 0) |
-     ((act & CURL_POLL_OUT) ? EV_WRITE : 0) | EV_PERSIST;
+     ((act & FETCH_POLL_IN) ? EV_READ : 0) |
+     ((act & FETCH_POLL_OUT) ? EV_WRITE : 0) | EV_PERSIST;
 
   f->sockfd = s;
   f->action = act;
@@ -266,17 +266,17 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
 
 
 /* Initialize a new SockInfo structure */
-static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
+static void addsock(fetch_socket_t s, FETCH *easy, int action, GlobalInfo *g)
 {
   SockInfo *fdp = calloc(1, sizeof(SockInfo));
 
   fdp->global = g;
   setsock(fdp, s, easy, action, g);
-  curl_multi_assign(g->multi, s, fdp);
+  fetch_multi_assign(g->multi, s, fdp);
 }
 
-/* CURLMOPT_SOCKETFUNCTION */
-static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
+/* FETCHMOPT_SOCKETFUNCTION */
+static int sock_cb(FETCH *e, fetch_socket_t s, int what, void *cbp, void *sockp)
 {
   GlobalInfo *g = (GlobalInfo*) cbp;
   SockInfo *fdp = (SockInfo*) sockp;
@@ -284,7 +284,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 
   fprintf(MSG_OUT,
           "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
-  if(what == CURL_POLL_REMOVE) {
+  if(what == FETCH_POLL_REMOVE) {
     fprintf(MSG_OUT, "\n");
     remsock(fdp);
   }
@@ -305,7 +305,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 
 
 
-/* CURLOPT_WRITEFUNCTION */
+/* FETCHOPT_WRITEFUNCTION */
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
   (void)ptr;
@@ -314,50 +314,50 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 }
 
 
-/* CURLOPT_PROGRESSFUNCTION */
-static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
-                       curl_off_t ult, curl_off_t uln)
+/* FETCHOPT_PROGRESSFUNCTION */
+static int xferinfo_cb(void *p, fetch_off_t dltotal, fetch_off_t dlnow,
+                       fetch_off_t ult, fetch_off_t uln)
 {
   ConnInfo *conn = (ConnInfo *)p;
   (void)ult;
   (void)uln;
 
-  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T
-          "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
+  fprintf(MSG_OUT, "Progress: %s (%" FETCH_FORMAT_FETCH_OFF_T
+          "/%" FETCH_FORMAT_FETCH_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
 
 
-/* Create a new easy handle, and add it to the global curl_multi */
+/* Create a new easy handle, and add it to the global fetch_multi */
 static void new_conn(const char *url, GlobalInfo *g)
 {
   ConnInfo *conn;
-  CURLMcode rc;
+  FETCHMcode rc;
 
   conn = calloc(1, sizeof(ConnInfo));
   conn->error[0] = '\0';
 
-  conn->easy = curl_easy_init();
+  conn->easy = fetch_easy_init();
   if(!conn->easy) {
-    fprintf(MSG_OUT, "curl_easy_init() failed, exiting!\n");
+    fprintf(MSG_OUT, "fetch_easy_init() failed, exiting!\n");
     exit(2);
   }
   conn->global = g;
   conn->url = strdup(url);
-  curl_easy_setopt(conn->easy, CURLOPT_URL, conn->url);
-  curl_easy_setopt(conn->easy, CURLOPT_WRITEFUNCTION, write_cb);
-  curl_easy_setopt(conn->easy, CURLOPT_WRITEDATA, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
-  curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(conn->easy, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
-  curl_easy_setopt(conn->easy, CURLOPT_PROGRESSDATA, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1L);
+  fetch_easy_setopt(conn->easy, FETCHOPT_URL, conn->url);
+  fetch_easy_setopt(conn->easy, FETCHOPT_WRITEFUNCTION, write_cb);
+  fetch_easy_setopt(conn->easy, FETCHOPT_WRITEDATA, conn);
+  fetch_easy_setopt(conn->easy, FETCHOPT_VERBOSE, 1L);
+  fetch_easy_setopt(conn->easy, FETCHOPT_ERRORBUFFER, conn->error);
+  fetch_easy_setopt(conn->easy, FETCHOPT_PRIVATE, conn);
+  fetch_easy_setopt(conn->easy, FETCHOPT_NOPROGRESS, 0L);
+  fetch_easy_setopt(conn->easy, FETCHOPT_XFERINFOFUNCTION, xferinfo_cb);
+  fetch_easy_setopt(conn->easy, FETCHOPT_PROGRESSDATA, conn);
+  fetch_easy_setopt(conn->easy, FETCHOPT_FOLLOWLOCATION, 1L);
   fprintf(MSG_OUT,
           "Adding easy %p to multi %p (%s)\n", conn->easy, g->multi, url);
-  rc = curl_multi_add_handle(g->multi, conn->easy);
-  mcode_or_die("new_conn: curl_multi_add_handle", rc);
+  rc = fetch_multi_add_handle(g->multi, conn->easy);
+  mcode_or_die("new_conn: fetch_multi_add_handle", rc);
 
   /* note that the add_handle() sets a time-out to trigger soon so that
      the necessary socket_action() gets called */
@@ -396,7 +396,7 @@ static const char *fifo = "hiper.fifo";
 static int init_fifo(GlobalInfo *g)
 {
   struct stat st;
-  curl_socket_t sockfd;
+  fetch_socket_t sockfd;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
   if(lstat (fifo, &st) == 0) {
@@ -441,16 +441,16 @@ int main(int argc, char **argv)
   memset(&g, 0, sizeof(GlobalInfo));
   g.evbase = event_base_new();
   init_fifo(&g);
-  g.multi = curl_multi_init();
+  g.multi = fetch_multi_init();
   evtimer_assign(&g.timer_event, g.evbase, timer_cb, &g);
 
   /* setup the generic multi interface options we want */
-  curl_multi_setopt(g.multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
-  curl_multi_setopt(g.multi, CURLMOPT_SOCKETDATA, &g);
-  curl_multi_setopt(g.multi, CURLMOPT_TIMERFUNCTION, multi_timer_cb);
-  curl_multi_setopt(g.multi, CURLMOPT_TIMERDATA, &g);
+  fetch_multi_setopt(g.multi, FETCHMOPT_SOCKETFUNCTION, sock_cb);
+  fetch_multi_setopt(g.multi, FETCHMOPT_SOCKETDATA, &g);
+  fetch_multi_setopt(g.multi, FETCHMOPT_TIMERFUNCTION, multi_timer_cb);
+  fetch_multi_setopt(g.multi, FETCHMOPT_TIMERDATA, &g);
 
-  /* we do not call any curl_multi_socket*() function yet as we have no handles
+  /* we do not call any fetch_multi_socket*() function yet as we have no handles
      added! */
 
   event_base_dispatch(g.evbase);
@@ -461,6 +461,6 @@ int main(int argc, char **argv)
   clean_fifo(&g);
   event_del(&g.timer_event);
   event_base_free(g.evbase);
-  curl_multi_cleanup(g.multi);
+  fetch_multi_cleanup(g.multi);
   return 0;
 }

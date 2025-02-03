@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include <stdio.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /* <DESC>
  * Get a single file from an FTP server.
@@ -50,45 +50,45 @@ static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   struct FtpFile ftpfile = {
-    "curl.tar.gz", /* name to store the file as if successful */
+    "fetch.tar.gz", /* name to store the file as if successful */
     NULL
   };
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /*
      * You better replace the URL with one that works!
      */
-    curl_easy_setopt(curl, CURLOPT_URL,
-                     "ftp://ftp.example.com/curl/curl-7.9.2.tar.gz");
+    fetch_easy_setopt(fetch, FETCHOPT_URL,
+                     "ftp://ftp.example.com/fetch/fetch-7.9.2.tar.gz");
     /* Define our callback to get called when there is data to be written */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, my_fwrite);
     /* Set a pointer to our struct to pass to the callback */
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ftpfile);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, &ftpfile);
 
     /* Switch on full protocol/debug output */
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
 
-    if(CURLE_OK != res) {
+    if(FETCHE_OK != res) {
       /* we failed */
-      fprintf(stderr, "curl told us %d\n", res);
+      fprintf(stderr, "fetch told us %d\n", res);
     }
   }
 
   if(ftpfile.stream)
     fclose(ftpfile.stream); /* close the local file */
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return 0;
 }

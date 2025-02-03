@@ -1,22 +1,22 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# curl internals
+# fetch internals
 
-The canonical libcurl internals documentation is now in the [everything
-curl](https://everything.curl.dev/internals) book. This file lists supported
+The canonical libfetch internals documentation is now in the [everything
+fetch](https://everything.fetch.dev/internals) book. This file lists supported
 versions of libs and build tools.
 
 ## Portability
 
- We write curl and libcurl to compile with C89 compilers on 32-bit and up
- machines. Most of libcurl assumes more or less POSIX compliance but that is
+ We write fetch and libfetch to compile with C89 compilers on 32-bit and up
+ machines. Most of libfetch assumes more or less POSIX compliance but that is
  not a requirement.
 
- We write libcurl to build and work with lots of third party tools, and we
+ We write libfetch to build and work with lots of third party tools, and we
  want it to remain functional and buildable with these and later versions
  (older versions may still work but is not what we work hard to maintain):
 
@@ -54,8 +54,8 @@ versions of libs and build tools.
 Library Symbols
 ===============
 
- All symbols used internally in libcurl must use a `Curl_` prefix if they are
+ All symbols used internally in libfetch must use a `Curl_` prefix if they are
  used in more than a single file. Single-file symbols must be made static.
- Public ("exported") symbols must use a `curl_` prefix. Public API functions
- are marked with `CURL_EXTERN` in the public header files so that all others
+ Public ("exported") symbols must use a `fetch_` prefix. Public API functions
+ are marked with `FETCH_EXTERN` in the public header files so that all others
  can be hidden on platforms where this is possible.

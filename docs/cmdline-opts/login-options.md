@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: login-options
 Arg: <options>
 Protocols: IMAP LDAP POP3 SMTP
@@ -25,7 +25,7 @@ RFC 5092 and the IETF draft
 https://datatracker.ietf.org/doc/html/draft-earhart-url-smtp-00
 
 Since 8.2.0, IMAP supports the login option `AUTH=+LOGIN`. With this option,
-curl uses the plain (not SASL) `LOGIN IMAP` command even if the server
+fetch uses the plain (not SASL) `LOGIN IMAP` command even if the server
 advertises SASL authentication. Care should be taken in using this option, as
 it sends your password over the network in plain text. This does not work if
 the IMAP server disables the plain `LOGIN` (e.g. to prevent password

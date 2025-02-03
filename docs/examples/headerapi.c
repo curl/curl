@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -26,7 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)
 {
@@ -38,36 +38,36 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
 
 int main(void)
 {
-  CURL *curl;
+  FETCH *fetch;
 
-  curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    struct curl_header *header;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    /* example.com is redirected, so we tell libcurl to follow redirection */
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    struct fetch_header *header;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    /* example.com is redirected, so we tell libfetch to follow redirection */
+    fetch_easy_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 1L);
 
     /* this example just ignores the content */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, write_cb);
 
     /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
-    if(CURLHE_OK == curl_easy_header(curl, "Content-Type", 0, CURLH_HEADER,
+    if(FETCHHE_OK == fetch_easy_header(fetch, "Content-Type", 0, FETCHH_HEADER,
                                      -1, &header))
       printf("Got content-type: %s\n", header->value);
 
     printf("All server headers:\n");
     {
-      struct curl_header *h;
-      struct curl_header *prev = NULL;
+      struct fetch_header *h;
+      struct fetch_header *prev = NULL;
       do {
-        h = curl_easy_nextheader(curl, CURLH_HEADER, -1, prev);
+        h = fetch_easy_nextheader(fetch, FETCHH_HEADER, -1, prev);
         if(h)
           printf(" %s: %s (%u)\n", h->name, h->value, (int)h->amount);
         prev = h;
@@ -75,7 +75,7 @@ int main(void)
 
     }
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   return 0;
 }

@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_COOKIEFILE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_COOKIEFILE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_COOKIE (3)
-  - CURLOPT_COOKIEJAR (3)
-  - CURLOPT_COOKIESESSION (3)
+  - FETCHOPT_COOKIE (3)
+  - FETCHOPT_COOKIEJAR (3)
+  - FETCHOPT_COOKIESESSION (3)
 Protocol:
   - HTTP
 Added-in: 7.1
@@ -15,14 +15,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_COOKIEFILE - filename to read cookies from
+FETCHOPT_COOKIEFILE - filename to read cookies from
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEFILE, char *filename);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_COOKIEFILE, char *filename);
 ~~~
 
 # DESCRIPTION
@@ -32,15 +32,15 @@ the filename of your file holding cookie data to read. The cookie data can be
 in either the old Netscape / Mozilla cookie data format or just regular HTTP
 headers (Set-Cookie style) dumped to a file.
 
-It also enables the cookie engine, making libcurl parse and send cookies on
+It also enables the cookie engine, making libfetch parse and send cookies on
 subsequent requests with this handle.
 
 By passing the empty string ("") to this option, you enable the cookie engine
-without reading any initial cookies. If you tell libcurl the filename is "-"
-(just a single minus sign), libcurl instead reads from stdin.
+without reading any initial cookies. If you tell libfetch the filename is "-"
+(just a single minus sign), libfetch instead reads from stdin.
 
-This option only **reads** cookies. To make libcurl write cookies to file,
-see CURLOPT_COOKIEJAR(3).
+This option only **reads** cookies. To make libfetch write cookies to file,
+see FETCHOPT_COOKIEJAR(3).
 
 If you read cookies from a plain HTTP headers file and it does not specify a
 domain in the Set-Cookie line, then the cookie is not sent since the cookie
@@ -73,31 +73,31 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
 
     /* get cookies from an existing file */
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "/tmp/cookies.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_COOKIEFILE, "/tmp/cookies.txt");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
 
 # Cookie file format
 
-The cookie file format and general cookie concepts in curl are described
-online here: https://curl.se/docs/http-cookies.html
+The cookie file format and general cookie concepts in fetch are described
+online here: https://fetch.se/docs/http-cookies.html
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

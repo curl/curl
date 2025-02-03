@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ssl
 Help: Try enabling TLS
 Protocols: FTP IMAP POP3 SMTP LDAP
@@ -18,7 +18,7 @@ Example:
 # `--ssl`
 
 Warning: this is considered an insecure option. Consider using --ssl-reqd
-instead to be sure curl upgrades to a secure connection.
+instead to be sure fetch upgrades to a secure connection.
 
 Try to use SSL/TLS for the connection - often referred to as STARTTLS or STLS
 because of the involved commands. Reverts to a non-secure connection if the

@@ -6,7 +6,7 @@
                                   \/          \/     \/ 
                 Things that could be nice to do in the future
 
- Things to do in project curl. Please tell us what you think, contribute and
+ Things to do in project fetch. Please tell us what you think, contribute and
  send us patches that improve things.
 
  Be aware that these are things that we could do, or have once been considered
@@ -16,19 +16,19 @@
 
  All bugs documented in the KNOWN_BUGS document are subject for fixing.
 
- 1. libcurl
+ 1. libfetch
  1.1 TFO support on Windows
  1.2 Consult %APPDATA% also for .netrc
  1.3 struct lifreq
  1.4 alt-svc sharing
  1.5 get rid of PATH_MAX
  1.6 thread-safe sharing
- 1.8 CURLOPT_RESOLVE for any port number
+ 1.8 FETCHOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
  1.10 auto-detect proxy
  1.11 minimize dependencies with dynamically loaded modules
  1.12 updated DNS server while running
- 1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
+ 1.13 c-ares and FETCHOPT_OPENSOCKETFUNCTION
  1.14 connect to multiple IPs in parallel
  1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
@@ -37,7 +37,7 @@
  1.19 provide timing info for each redirect
  1.20 SRV and URI DNS records
  1.21 netrc caching and sharing
- 1.22 CURLINFO_PAUSE_STATE
+ 1.22 FETCHINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
  1.25 Expose tried IP addresses that failed
  1.28 FD_CLOEXEC
@@ -47,10 +47,10 @@
  1.32 add asynch getaddrinfo support
  1.33 make DoH inherit more transfer properties
 
- 2. libcurl - multi interface
+ 2. libfetch - multi interface
  2.1 More non-blocking
  2.2 Better support for same name resolves
- 2.3 Non-blocking curl_multi_remove_handle()
+ 2.3 Non-blocking fetch_multi_remove_handle()
  2.4 Split connect and authentication process
  2.5 Edge-triggered sockets should work
  2.6 multi upkeep
@@ -62,7 +62,7 @@
 
  4. FTP
  4.1 HOST
- 4.4 Support CURLOPT_PREQUOTE for directories listings
+ 4.4 Support FETCHOPT_PREQUOTE for directories listings
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
  4.8 Passive transfer could try other IP addresses
@@ -83,9 +83,9 @@
  6.4 exit immediately upon connection if stdin is /dev/null
 
  7. SMTP
- 7.1 Passing NOTIFY option to CURLOPT_MAIL_RCPT
+ 7.1 Passing NOTIFY option to FETCHOPT_MAIL_RCPT
  7.2 Enhanced capability support
- 7.3 Add CURLOPT_MAIL_CLIENT option
+ 7.3 Add FETCHOPT_MAIL_CLIENT option
 
  8. POP3
  8.2 Enhanced capability support
@@ -96,7 +96,7 @@
 
  10. LDAP
  10.1 SASL based authentication mechanisms
- 10.2 CURLOPT_SSL_CTX_FUNCTION for LDAPS
+ 10.2 FETCHOPT_SSL_CTX_FUNCTION for LDAPS
  10.3 Paged searches on LDAP server
  10.4 Certificate-Based Authentication
 
@@ -140,7 +140,7 @@
  17.1 Multiplexing
  17.2 Handle growing SFTP files
  17.3 Read keys from ~/.ssh/id_ecdsa, id_ed25519
- 17.4 Support CURLOPT_PREQUOTE
+ 17.4 Support FETCHOPT_PREQUOTE
  17.5 SSH over HTTPS proxy with more backends
  17.6 SFTP with SCP://
 
@@ -152,7 +152,7 @@
  18.6 Option to make -Z merge lined based outputs on stdout
  18.7 specify which response codes that make -f/--fail return error
  18.9 Choose the name of file in braces for complex URLs
- 18.10 improve how curl works in a Windows console window
+ 18.10 improve how fetch works in a Windows console window
  18.11 Windows: set attribute 'archive' for completed downloads
  18.12 keep running, read instructions from pipe/socket
  18.13 Acknowledge Ratelimit headers
@@ -174,7 +174,7 @@
  19. Build
  19.2 Enable PIE and RELRO by default
  19.3 Do not use GNU libtool on OpenBSD
- 19.4 Package curl for Windows in a signed installer
+ 19.4 Package fetch for Windows in a signed installer
  19.5 make configure use --cache-file more and better
 
  20. Test suite
@@ -199,24 +199,24 @@
 
 ==============================================================================
 
-1. libcurl
+1. libfetch
 
 1.1 TFO support on Windows
 
- libcurl supports the CURLOPT_TCP_FASTOPEN option since 7.49.0 for Linux and
+ libfetch supports the FETCHOPT_TCP_FASTOPEN option since 7.49.0 for Linux and
  macOS. Windows supports TCP Fast Open starting with Windows 10, version 1607
  and we should add support for it.
 
  TCP Fast Open is supported on several platforms but not on Windows. Work on
  this was once started but never finished.
 
- See https://github.com/curl/curl/pull/3378
+ See https://github.com/fetch/fetch/pull/3378
 
 1.2 Consult %APPDATA% also for .netrc
 
  %APPDATA%\.netrc is not considered when running on Windows. should not it?
 
- See https://github.com/curl/curl/issues/4016
+ See https://github.com/fetch/fetch/issues/4016
 
 1.3 struct lifreq
 
@@ -229,15 +229,15 @@
  The share interface could benefit from allowing the alt-svc cache to be
  possible to share between easy handles.
 
- See https://github.com/curl/curl/issues/4476
+ See https://github.com/fetch/fetch/issues/4476
 
- The share interface offers CURL_LOCK_DATA_CONNECT to have multiple easy
+ The share interface offers FETCH_LOCK_DATA_CONNECT to have multiple easy
  handle share a connection cache, but due to how connections are used they are
  still not thread-safe when used shared.
 
- See https://github.com/curl/curl/issues/4915 and lib1541.c
+ See https://github.com/fetch/fetch/issues/4915 and lib1541.c
 
- The share interface offers CURL_LOCK_DATA_HSTS to have multiple easy handle
+ The share interface offers FETCH_LOCK_DATA_HSTS to have multiple easy handle
  share a HSTS cache, but this is not thread-safe.
 
 1.5 get rid of PATH_MAX
@@ -256,13 +256,13 @@
  share between multiple concurrent threads. Fixing this would enable more
  users to share data in more powerful ways.
 
-1.8 CURLOPT_RESOLVE for any port number
+1.8 FETCHOPT_RESOLVE for any port number
 
  This option allows applications to set a replacement IP address for a given
  host + port pair. Consider making support for providing a replacement address
  for the hostname on all port numbers.
 
- See https://github.com/curl/curl/issues/1264
+ See https://github.com/fetch/fetch/issues/1264
 
 1.9 Cache negative name resolves
 
@@ -271,12 +271,12 @@
 
 1.10 auto-detect proxy
 
- libcurl could be made to detect the system proxy setup automatically and use
+ libfetch could be made to detect the system proxy setup automatically and use
  that. On Windows, macOS and Linux desktops for example.
 
  The pull-request to use libproxy for this was deferred due to doubts on the
  reliability of the dependency and how to use it:
- https://github.com/curl/curl/pull/977
+ https://github.com/fetch/fetch/pull/977
 
  libdetectproxy is a (C++) library for detecting the proxy on Windows
  https://github.com/paulharris/libdetectproxy
@@ -287,32 +287,32 @@
  would be the ones that link to 3rd party libs. That would allow us to avoid
  having to load ALL dependencies since only the necessary ones for this
  app/invoke/used protocols would be necessary to load. See
- https://github.com/curl/curl/issues/349
+ https://github.com/fetch/fetch/issues/349
 
 1.12 updated DNS server while running
 
- If /etc/resolv.conf gets updated while a program using libcurl is running, it
+ If /etc/resolv.conf gets updated while a program using libfetch is running, it
  is may cause name resolves to fail unless res_init() is called. We should
  consider calling res_init() + retry once unconditionally on all name resolve
  failures to mitigate against this. Firefox works like that. Note that Windows
  does not have res_init() or an alternative.
 
- https://github.com/curl/curl/issues/2251
+ https://github.com/fetch/fetch/issues/2251
 
-1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
+1.13 c-ares and FETCHOPT_OPENSOCKETFUNCTION
 
- curl creates most sockets via the CURLOPT_OPENSOCKETFUNCTION callback and
- close them with the CURLOPT_CLOSESOCKETFUNCTION callback. However, c-ares
+ fetch creates most sockets via the FETCHOPT_OPENSOCKETFUNCTION callback and
+ close them with the FETCHOPT_CLOSESOCKETFUNCTION callback. However, c-ares
  does not use those functions and instead opens and closes the sockets itself.
- This means that when curl passes the c-ares socket to the
- CURLMOPT_SOCKETFUNCTION it is not owned by the application like other
+ This means that when fetch passes the c-ares socket to the
+ FETCHMOPT_SOCKETFUNCTION it is not owned by the application like other
  sockets.
 
- See https://github.com/curl/curl/issues/2734
+ See https://github.com/fetch/fetch/issues/2734
 
 1.14 connect to multiple IPs in parallel
 
- curl currently implements the happy eyeball algorithm for connecting to the
+ fetch currently implements the happy eyeball algorithm for connecting to the
  IPv4 and IPv6 alternatives for a host in parallel, sticking with the
  connection that "wins". We could implement a similar algorithm per individual
  IP family as well when there are multiple available addresses: start with the
@@ -323,35 +323,35 @@
 
 1.15 Monitor connections in the connection pool
 
- libcurl's connection cache or pool holds a number of open connections for the
+ libfetch's connection cache or pool holds a number of open connections for the
  purpose of possible subsequent connection reuse. It may contain a few up to a
- significant amount of connections. Currently, libcurl leaves all connections
+ significant amount of connections. Currently, libfetch leaves all connections
  as they are and first when a connection is iterated over for matching or
  reuse purpose it is verified that it is still alive.
 
  Those connections may get closed by the server side for idleness or they may
  get an HTTP/2 ping from the peer to verify that they are still alive. By
- adding monitoring of the connections while in the pool, libcurl can detect
+ adding monitoring of the connections while in the pool, libfetch can detect
  dead connections (and close them) better and earlier, and it can handle
  HTTP/2 pings to keep such ones alive even when not actively doing transfers
  on them.
 
 1.16 Try to URL encode given URL
 
- Given a URL that for example contains spaces, libcurl could have an option
+ Given a URL that for example contains spaces, libfetch could have an option
  that would try somewhat harder than it does now and convert spaces to %20 and
  perhaps URL encoded byte values over 128 etc (basically do what the redirect
  following code already does).
 
- https://github.com/curl/curl/issues/514
+ https://github.com/fetch/fetch/issues/514
 
 1.17 Add support for IRIs
 
  IRIs (RFC 3987) allow localized, non-ASCII, names in the URL. To properly
- support this, curl/libcurl would need to translate/encode the given input
+ support this, fetch/libfetch would need to translate/encode the given input
  from the input string encoding into percent encoded output "over the wire".
 
- To make that work smoothly for curl users even on Windows, curl would
+ To make that work smoothly for fetch users even on Windows, fetch would
  probably need to be able to convert from several input encodings.
 
 1.18 try next proxy if one does not work
@@ -361,20 +361,20 @@
  exhausted. Browsers support this feature at least when they specify proxies
  using PACs.
 
- https://github.com/curl/curl/issues/896
+ https://github.com/fetch/fetch/issues/896
 
 1.19 provide timing info for each redirect
 
- curl and libcurl provide timing information via a set of different
- time-stamps (CURLINFO_*_TIME). When curl is following redirects, those
+ fetch and libfetch provide timing information via a set of different
+ time-stamps (FETCHINFO_*_TIME). When fetch is following redirects, those
  returned time value are the accumulated sums. An improvement could be to
  offer separate timings for each redirect.
 
- https://github.com/curl/curl/issues/6743
+ https://github.com/fetch/fetch/issues/6743
 
 1.20 SRV and URI DNS records
 
- Offer support for resolving SRV and URI DNS records for libcurl to know which
+ Offer support for resolving SRV and URI DNS records for libfetch to know which
  server to connect to for various protocols (including HTTP).
 
 1.21 netrc caching and sharing
@@ -384,10 +384,10 @@
  redirects, the file might be reread (and parsed) multiple times. This makes
  it impossible to provide the file as a pipe.
 
-1.22 CURLINFO_PAUSE_STATE
+1.22 FETCHINFO_PAUSE_STATE
 
  Return information about the transfer's current pause state, in both
- directions. https://github.com/curl/curl/issues/2588
+ directions. https://github.com/fetch/fetch/issues/2588
 
 1.23 Offer API to flush the connection pool
 
@@ -397,12 +397,12 @@
 
 1.25 Expose tried IP addresses that failed
 
- When libcurl fails to connect to a host, it could offer the application the
+ When libfetch fails to connect to a host, it could offer the application the
  addresses that were used in the attempt. Source + dest IP, source + dest port
  and protocol (UDP or TCP) for each failure. Possibly as a callback. Perhaps
  also provide "reason".
 
- https://github.com/curl/curl/issues/2126
+ https://github.com/fetch/fetch/issues/2126
 
 1.28 FD_CLOEXEC
 
@@ -410,40 +410,40 @@
  descriptor to be automatically (and atomically) closed when any of the
  exec-family functions succeed. Should probably be set by default?
 
- https://github.com/curl/curl/issues/2252
+ https://github.com/fetch/fetch/issues/2252
 
 1.29 WebSocket read callback
 
  Call the read callback once the connection is established to allow sending
  the first message in the connection.
 
- https://github.com/curl/curl/issues/11402
+ https://github.com/fetch/fetch/issues/11402
 
 1.30 config file parsing
 
  Consider providing an API, possibly in a separate companion library, for
- parsing a config file like curl's -K/--config option to allow applications to
- get the same ability to read curl options from files.
+ parsing a config file like fetch's -K/--config option to allow applications to
+ get the same ability to read fetch options from files.
 
- See https://github.com/curl/curl/issues/3698
+ See https://github.com/fetch/fetch/issues/3698
 
 1.31 erase secrets from heap/stack after use
 
  Introducing a concept and system to erase secrets from memory after use, it
  could help mitigate and lessen the impact of (future) security problems etc.
- However: most secrets are passed to libcurl as clear text from the
+ However: most secrets are passed to libfetch as clear text from the
  application and then clearing them within the library adds nothing...
 
- https://github.com/curl/curl/issues/7268
+ https://github.com/fetch/fetch/issues/7268
 
 1.32 add asynch getaddrinfo support
 
- Use getaddrinfo_a() to provide an asynch name resolver backend to libcurl
+ Use getaddrinfo_a() to provide an asynch name resolver backend to libfetch
  that does not use threads and does not depend on c-ares. The getaddrinfo_a
  function is (probably?) glibc specific but that is a widely used libc among
  our users.
 
- https://github.com/curl/curl/pull/6746
+ https://github.com/fetch/fetch/pull/6746
 
 1.33 make DoH inherit more transfer properties
 
@@ -455,12 +455,12 @@
 
  If an option is not inherited then it is not possible to set it separately
  for DoH without a DoH-specific option. For example:
- CURLOPT_DOH_SSL_VERIFYHOST, CURLOPT_DOH_SSL_VERIFYPEER and
- CURLOPT_DOH_SSL_VERIFYSTATUS.
+ FETCHOPT_DOH_SSL_VERIFYHOST, FETCHOPT_DOH_SSL_VERIFYPEER and
+ FETCHOPT_DOH_SSL_VERIFYSTATUS.
 
- See https://github.com/curl/curl/issues/6605
+ See https://github.com/fetch/fetch/issues/6605
 
-2. libcurl - multi interface
+2. libfetch - multi interface
 
 2.1 More non-blocking
 
@@ -470,7 +470,7 @@
  - Name resolves on non-Windows unless c-ares or the threaded resolver is used.
 
  - The threaded resolver may block on cleanup:
- https://github.com/curl/curl/issues/4852
+ https://github.com/fetch/fetch/issues/4852
 
  - file:// transfers
 
@@ -481,9 +481,9 @@
  - The "DONE" operation (post transfer protocol-specific actions) for the
  protocols SFTP, SMTP, FTP. Fixing multi_done() for this is a worthy task.
 
- - curl_multi_remove_handle for any of the above. See section 2.3.
+ - fetch_multi_remove_handle for any of the above. See section 2.3.
 
- - Calling curl_ws_send() from a callback
+ - Calling fetch_ws_send() from a callback
 
 2.2 Better support for same name resolves
 
@@ -493,7 +493,7 @@
  especially needed when adding many simultaneous handles using the same host
  name when the DNS resolver can get flooded.
 
-2.3 Non-blocking curl_multi_remove_handle()
+2.3 Non-blocking fetch_multi_remove_handle()
 
  The multi interface has a few API calls that assume a blocking behavior, like
  add_handle() and remove_handle() which limits what we can do internally. The
@@ -516,35 +516,35 @@
 
 2.6 multi upkeep
 
- In libcurl 7.62.0 we introduced curl_easy_upkeep. It unfortunately only works
+ In libfetch 7.62.0 we introduced fetch_easy_upkeep. It unfortunately only works
  on easy handles. We should introduces a version of that for the multi handle,
  and also consider doing "upkeep" automatically on connections in the
  connection pool when the multi handle is in used.
 
- See https://github.com/curl/curl/issues/3199
+ See https://github.com/fetch/fetch/issues/3199
 
 2.7 Virtual external sockets
 
- libcurl performs operations on the given file descriptor that presumes it is
+ libfetch performs operations on the given file descriptor that presumes it is
  a socket and an application cannot replace them at the moment. Allowing an
  application to fully replace those would allow a larger degree of freedom and
  flexibility.
 
- See https://github.com/curl/curl/issues/5835
+ See https://github.com/fetch/fetch/issues/5835
 
 2.8 dynamically decide to use socketpair
 
- For users who do not use curl_multi_wait() or do not care for
- curl_multi_wakeup(), we could introduce a way to make libcurl NOT
+ For users who do not use fetch_multi_wait() or do not care for
+ fetch_multi_wakeup(), we could introduce a way to make libfetch NOT
  create a socketpair in the multi handle.
 
- See https://github.com/curl/curl/issues/4829
+ See https://github.com/fetch/fetch/issues/4829
 
 3. Documentation
 
 3.1 Improve documentation about fork safety
 
- See https://github.com/curl/curl/issues/6968
+ See https://github.com/fetch/fetch/issues/6968
 
 4. FTP
 
@@ -555,12 +555,12 @@
 
  https://datatracker.ietf.org/doc/html/rfc7151
 
-4.4 Support CURLOPT_PREQUOTE for directions listings
+4.4 Support FETCHOPT_PREQUOTE for directions listings
 
  The lack of support is mostly an oversight and requires the FTP state machine
  to get updated to get fixed.
 
- https://github.com/curl/curl/issues/8602
+ https://github.com/fetch/fetch/issues/8602
 
 4.6 GSSAPI via Windows SSPI
 
@@ -579,39 +579,39 @@
 4.8 Passive transfer could try other IP addresses
 
  When doing FTP operations through a proxy at localhost, the reported spotted
- that curl only tried to connect once to the proxy, while it had multiple
+ that fetch only tried to connect once to the proxy, while it had multiple
  addresses and a failed connect on one address should make it try the next.
 
- After switching to passive mode (EPSV), curl could try all IP addresses for
+ After switching to passive mode (EPSV), fetch could try all IP addresses for
  "localhost". Currently it tries ::1, but it should also try 127.0.0.1.
 
- See https://github.com/curl/curl/issues/1508
+ See https://github.com/fetch/fetch/issues/1508
 
 5. HTTP
 
 5.1 Provide the error body from a CONNECT response
 
- When curl receives a body response from a CONNECT request to a proxy, it
- always just reads and ignores it. It would make some users happy if curl
+ When fetch receives a body response from a CONNECT request to a proxy, it
+ always just reads and ignores it. It would make some users happy if fetch
  instead optionally would be able to make that responsible available. Via a
  new callback? Through some other means?
 
- See https://github.com/curl/curl/issues/9513
+ See https://github.com/fetch/fetch/issues/9513
 
 5.2 Obey Retry-After in redirects
 
  The Retry-After is said to dicate "the minimum time that the user agent is
- asked to wait before issuing the redirected request" and libcurl does not
+ asked to wait before issuing the redirected request" and libfetch does not
  obey this.
 
- See https://github.com/curl/curl/issues/11447
+ See https://github.com/fetch/fetch/issues/11447
 
 5.3 Rearrange request header order
 
  Server implementers often make an effort to detect browser and to reject
  clients it can detect to not match. One of the last details we cannot yet
- control in libcurl's HTTP requests, which also can be exploited to detect
- that libcurl is in fact used even when it tries to impersonate a browser, is
+ control in libfetch's HTTP requests, which also can be exploited to detect
+ that libfetch is in fact used even when it tries to impersonate a browser, is
  the order of the request headers. I propose that we introduce a new option in
  which you give headers a value, and then when the HTTP request is built it
  sorts the headers based on that number. We could then have internally created
@@ -620,12 +620,12 @@
 
 5.4 Allow SAN names in HTTP/2 server push
 
- curl only allows HTTP/2 push promise if the provided :authority header value
+ fetch only allows HTTP/2 push promise if the provided :authority header value
  exactly matches the hostname given in the URL. It could be extended to allow
  any name that would match the Subject Alternative Names in the server's TLS
  certificate.
 
- See https://github.com/curl/curl/pull/3581
+ See https://github.com/fetch/fetch/pull/3581
 
 5.5 auth= in URLs
 
@@ -641,19 +641,19 @@
 
 5.6 alt-svc should fallback if alt-svc does not work
 
- The alt-svc: header provides a set of alternative services for curl to use
+ The alt-svc: header provides a set of alternative services for fetch to use
  instead of the original. If the first attempted one fails, it should try the
  next etc and if all alternatives fail go back to the original.
 
- See https://github.com/curl/curl/issues/4908
+ See https://github.com/fetch/fetch/issues/4908
 
 5.7 Require HTTP version X or higher
 
- curl and libcurl provide options for trying higher HTTP versions (for example
+ fetch and libfetch provide options for trying higher HTTP versions (for example
  HTTP/2) but then still allows the server to pick version 1.1. We could
  consider adding a way to require a minimum version.
 
- See https://github.com/curl/curl/issues/7980
+ See https://github.com/fetch/fetch/issues/7980
 
 6. TELNET
 
@@ -675,50 +675,50 @@
 
 6.4 exit immediately upon connection if stdin is /dev/null
 
- If it did, curl could be used to probe if there is an server there listening
+ If it did, fetch could be used to probe if there is an server there listening
  on a specific port. That is, the following command would exit immediately
  after the connection is established with exit code 0:
 
-    curl -s --connect-timeout 2 telnet://example.com:80 </dev/null
+    fetch -s --connect-timeout 2 telnet://example.com:80 </dev/null
 
 7. SMTP
 
-7.1 Passing NOTIFY option to CURLOPT_MAIL_RCPT
+7.1 Passing NOTIFY option to FETCHOPT_MAIL_RCPT
 
- Is there a way to pass the NOTIFY option to the CURLOPT_MAIL_RCPT option ?  I
+ Is there a way to pass the NOTIFY option to the FETCHOPT_MAIL_RCPT option ?  I
  set a string that already contains a bracket. For instance something like
- that: curl_slist_append( recipients, "<foo@bar> NOTIFY=SUCCESS,FAILURE" );
+ that: fetch_slist_append( recipients, "<foo@bar> NOTIFY=SUCCESS,FAILURE" );
 
- https://github.com/curl/curl/issues/8232
+ https://github.com/fetch/fetch/issues/8232
 
 7.2 Enhanced capability support
 
- Add the ability, for an application that uses libcurl, to obtain the list of
+ Add the ability, for an application that uses libfetch, to obtain the list of
  capabilities returned from the EHLO command.
 
-7.3 Add CURLOPT_MAIL_CLIENT option
+7.3 Add FETCHOPT_MAIL_CLIENT option
 
  Rather than use the URL to specify the mail client string to present in the
- HELO and EHLO commands, libcurl should support a new CURLOPT specifically for
+ HELO and EHLO commands, libfetch should support a new FETCHOPT specifically for
  specifying this data as the URL is non-standard and to be honest a bit of a
  hack ;-)
 
  Please see the following thread for more information:
- https://curl.se/mail/lib-2012-05/0178.html
+ https://fetch.se/mail/lib-2012-05/0178.html
 
 
 8. POP3
 
 8.2 Enhanced capability support
 
- Add the ability, for an application that uses libcurl, to obtain the list of
+ Add the ability, for an application that uses libfetch, to obtain the list of
  capabilities returned from the CAPA command.
 
 9. IMAP
 
 9.1 Enhanced capability support
 
- Add the ability, for an application that uses libcurl, to obtain the list of
+ Add the ability, for an application that uses libfetch, to obtain the list of
  capabilities returned from the CAPABILITY command.
 
 9.2 upload unread
@@ -737,22 +737,22 @@
  be possible to use ldap_bind_s() instead specifying the security context
  information ourselves.
 
-10.2 CURLOPT_SSL_CTX_FUNCTION for LDAPS
+10.2 FETCHOPT_SSL_CTX_FUNCTION for LDAPS
 
- CURLOPT_SSL_CTX_FUNCTION works perfectly for HTTPS and email protocols, but
+ FETCHOPT_SSL_CTX_FUNCTION works perfectly for HTTPS and email protocols, but
  it has no effect for LDAPS connections.
 
- https://github.com/curl/curl/issues/4108
+ https://github.com/fetch/fetch/issues/4108
 
 10.3 Paged searches on LDAP server
 
- https://github.com/curl/curl/issues/4452
+ https://github.com/fetch/fetch/issues/4452
 
 10.4 Certificate-Based Authentication
 
  LDAPS not possible with macOS and Windows with Certificate-Based Authentication
 
- https://github.com/curl/curl/issues/9641
+ https://github.com/fetch/fetch/issues/9641
 
 11. SMB
 
@@ -793,7 +793,7 @@
  keys (PSKs). These pre-shared keys are symmetric keys shared in advance among
  the communicating parties.
 
- https://github.com/curl/curl/issues/5081
+ https://github.com/fetch/fetch/issues/5081
 
 13.2 TLS channel binding
 
@@ -810,7 +810,7 @@
 
  https://datatracker.ietf.org/doc/html/rfc5929
  https://datatracker.ietf.org/doc/html/rfc9266
- https://github.com/curl/curl/issues/9226
+ https://github.com/fetch/fetch/issues/9226
 
 13.3 Defeat TLS fingerprinting
 
@@ -824,11 +824,11 @@
  stapling is presumed to get used much less in the future when Let's Encrypt
  drops the OCSP support, the benefit of this might however be limited.
 
- https://github.com/curl/curl/issues/15483
+ https://github.com/fetch/fetch/issues/15483
 
 13.5 Export session ids
 
- Add an interface to libcurl that enables "session IDs" to get
+ Add an interface to libfetch that enables "session IDs" to get
  exported/imported. Cris Bailiff said: "OpenSSL has functions which can
  serialise the current SSL state to a buffer of your choice, and recover/reset
  the state from such a buffer at a later date - this is used by mod_ssl for
@@ -837,7 +837,7 @@
 13.6 Provide callback for cert verification
 
  OpenSSL supports a callback for customised verification of the peer
- certificate, but this does not seem to be exposed in the libcurl APIs. Could
+ certificate, but this does not seem to be exposed in the libfetch APIs. Could
  it be? There is so much that could be done if it were.
 
 13.7 Less memory massaging with Schannel
@@ -854,9 +854,9 @@
  https://www.rfc-editor.org/rfc/rfc6698.txt
 
  An initial patch was posted by Suresh Krishnaswamy on March 7th 2013
- (https://curl.se/mail/lib-2013-03/0075.html) but it was a too simple
+ (https://fetch.se/mail/lib-2013-03/0075.html) but it was a too simple
  approach. See Daniel's comments:
- https://curl.se/mail/lib-2013-03/0103.html . libunbound may be the
+ https://fetch.se/mail/lib-2013-03/0103.html . libunbound may be the
  correct library to base this development on.
 
  Björn Stenberg wrote a separate initial take on DANE that was never
@@ -865,10 +865,10 @@
 13.9 TLS record padding
 
  TLS (1.3) offers optional record padding and OpenSSL provides an API for it.
- I could make sense for libcurl to offer this ability to applications to make
+ I could make sense for libfetch to offer this ability to applications to make
  traffic patterns harder to figure out by network traffic observers.
 
- See https://github.com/curl/curl/issues/5398
+ See https://github.com/fetch/fetch/issues/5398
 
 13.10 Support Authority Information Access certificate extension (AIA)
 
@@ -879,24 +879,24 @@
  Since AIA is about downloading certs on demand to complete a TLS handshake,
  it is probably a bit tricky to get done right.
 
- See https://github.com/curl/curl/issues/2793
+ See https://github.com/fetch/fetch/issues/2793
 
 13.11 Some TLS options are not offered for HTTPS proxies
 
- Some TLS related options to the command line tool and libcurl are only
+ Some TLS related options to the command line tool and libfetch are only
  provided for the server and not for HTTPS proxies. --proxy-tls-max,
  --proxy-tlsv1.3, --proxy-curves and a few more.
  For more Documentation on this see:
- https://curl.se/libcurl/c/tls-options.html
+ https://fetch.se/libfetch/c/tls-options.html
 
- https://github.com/curl/curl/issues/12286
+ https://github.com/fetch/fetch/issues/12286
 
 13.13 Make sure we forbid TLS 1.3 post-handshake authentication
 
  RFC 8740 explains how using HTTP/2 must forbid the use of TLS 1.3
  post-handshake authentication. We should make sure to live up to that.
 
- See https://github.com/curl/curl/issues/5396
+ See https://github.com/fetch/fetch/issues/5396
 
 13.14 Support the clienthello extension
 
@@ -906,7 +906,7 @@
  extension adds padding to avoid that size range.
 
  https://datatracker.ietf.org/doc/html/rfc7685
- https://github.com/curl/curl/issues/2299
+ https://github.com/fetch/fetch/issues/2299
 
 13.15 Select signature algorithms
 
@@ -914,7 +914,7 @@
  algorithm. The signature algorithms set by a client are used directly in the
  supported signature algorithm in the client hello message.
 
- https://github.com/curl/curl/issues/12982
+ https://github.com/fetch/fetch/issues/12982
 
 13.16 Share the CA cache
 
@@ -925,7 +925,7 @@
 
 13.17 Add missing features to TLS backends
 
- The feature matrix at https://curl.se/libcurl/c/tls-options.html shows which
+ The feature matrix at https://fetch.se/libfetch/c/tls-options.html shows which
  features are supported by which TLS backends, and thus also where there are
  feature gaps.
 
@@ -947,12 +947,12 @@
 
 15.4 Add option to allow abrupt server closure
 
- libcurl with Schannel errors without a known termination point from the server
+ libfetch with Schannel errors without a known termination point from the server
  (such as length of transfer, or SSL "close notify" alert) to prevent against
  a truncation attack. Really old servers may neglect to send any termination
  point. An option could be added to ignore such abrupt closures.
 
- https://github.com/curl/curl/issues/4427
+ https://github.com/fetch/fetch/issues/4427
 
 16. SASL
 
@@ -973,34 +973,34 @@
 
 17.1 Multiplexing
 
- SSH is a perfectly fine multiplexed protocols which would allow libcurl to do
+ SSH is a perfectly fine multiplexed protocols which would allow libfetch to do
  multiple parallel transfers from the same host using the same connection,
- much in the same spirit as HTTP/2 does. libcurl however does not take
+ much in the same spirit as HTTP/2 does. libfetch however does not take
  advantage of that ability but does instead always create a new connection for
  new transfers even if an existing connection already exists to the host.
 
- To fix this, libcurl would have to detect an existing connection and "attach"
+ To fix this, libfetch would have to detect an existing connection and "attach"
  the new transfer to the existing one.
 
 17.2 Handle growing SFTP files
 
- The SFTP code in libcurl checks the file size *before* a transfer starts and
+ The SFTP code in libfetch checks the file size *before* a transfer starts and
  then proceeds to transfer exactly that amount of data. If the remote file
- grows while the transfer is in progress libcurl does not notice and does not
- adapt. The OpenSSH SFTP command line tool does and libcurl could also just
+ grows while the transfer is in progress libfetch does not notice and does not
+ adapt. The OpenSSH SFTP command line tool does and libfetch could also just
  attempt to download more to see if there is more to get...
 
- https://github.com/curl/curl/issues/4344
+ https://github.com/fetch/fetch/issues/4344
 
 17.3 Read keys from ~/.ssh/id_ecdsa, id_ed25519
 
- The libssh2 backend in curl is limited to only reading keys from id_rsa and
+ The libssh2 backend in fetch is limited to only reading keys from id_rsa and
  id_dsa, which makes it fail connecting to servers that use more modern key
  types.
 
- https://github.com/curl/curl/issues/8586
+ https://github.com/fetch/fetch/issues/8586
 
-17.4 Support CURLOPT_PREQUOTE
+17.4 Support FETCHOPT_PREQUOTE
 
  The two other QUOTE options are supported for SFTP, but this was left out for
  unknown reasons.
@@ -1008,22 +1008,22 @@
 17.5 SSH over HTTPS proxy with more backends
 
  The SSH based protocols SFTP and SCP did not work over HTTPS proxy at
- all until PR https://github.com/curl/curl/pull/6021 brought the
+ all until PR https://github.com/fetch/fetch/pull/6021 brought the
  functionality with the libssh2 backend. Presumably, this support
  can/could be added for the other backends as well.
 
 17.6 SFTP with SCP://
 
  OpenSSH 9 switched their 'scp' tool to speak SFTP under the hood. Going
- forward it might be worth having curl or libcurl attempt SFTP if SCP fails to
+ forward it might be worth having fetch or libfetch attempt SFTP if SCP fails to
  follow suite.
 
 18. Command line tool
 
 18.1 sync
 
- "curl --sync http://example.com/feed[1-100].rss" or
- "curl --sync http://example.net/{index,calendar,history}.html"
+ "fetch --sync http://example.com/feed[1-100].rss" or
+ "fetch --sync http://example.net/{index,calendar,history}.html"
 
  Downloads a range or set of URLs using the remote name, but only if the
  remote file is newer than the local file. A Last-Modified HTTP date header
@@ -1031,33 +1031,33 @@
 
 18.2 glob posts
 
- Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
+ Globbing support for -d and -F, as in 'fetch -d "name=foo[0-9]" URL'.
  This is easily scripted though.
 
 18.4 --proxycommand
 
- Allow the user to make curl run a command and use its stdio to make requests
+ Allow the user to make fetch run a command and use its stdio to make requests
  and not do any network connection by itself. Example:
 
-   curl --proxycommand 'ssh pi@raspberrypi.local -W 10.1.1.75 80' \
+   fetch --proxycommand 'ssh pi@raspberrypi.local -W 10.1.1.75 80' \
         http://some/otherwise/unavailable/service.php
 
- See https://github.com/curl/curl/issues/4941
+ See https://github.com/fetch/fetch/issues/4941
 
 18.5 UTF-8 filenames in Content-Disposition
 
  RFC 6266 documents how UTF-8 names can be passed to a client in the
- Content-Disposition header, and curl does not support this.
+ Content-Disposition header, and fetch does not support this.
 
- https://github.com/curl/curl/issues/1888
+ https://github.com/fetch/fetch/issues/1888
 
 18.6 Option to make -Z merge lined based outputs on stdout
 
  When a user requests multiple lined based files using -Z and sends them to
- stdout, curl does not "merge" and send complete lines fine but may send
+ stdout, fetch does not "merge" and send complete lines fine but may send
  partial lines from several sources.
 
- https://github.com/curl/curl/issues/5175
+ https://github.com/fetch/fetch/issues/5175
 
 18.7 specify which response codes that make -f/--fail return error
 
@@ -1067,20 +1067,20 @@
 18.9 Choose the name of file in braces for complex URLs
 
  When using braces to download a list of URLs and you use complicated names
- in the list of alternatives, it could be handy to allow curl to use other
+ in the list of alternatives, it could be handy to allow fetch to use other
  names when saving.
 
  Consider a way to offer that. Possibly like
  {partURL1:name1,partURL2:name2,partURL3:name3} where the name following the
  colon is the output name.
 
- See https://github.com/curl/curl/issues/221
+ See https://github.com/fetch/fetch/issues/221
 
-18.10 improve how curl works in a Windows console window
+18.10 improve how fetch works in a Windows console window
 
- If you pull the scrollbar when transferring with curl in a Windows console
+ If you pull the scrollbar when transferring with fetch in a Windows console
  window, the transfer is interrupted and can get disconnected. This can
- probably be improved. See https://github.com/curl/curl/issues/322
+ probably be improved. See https://github.com/fetch/fetch/issues/322
 
 18.11 Windows: set attribute 'archive' for completed downloads
 
@@ -1091,43 +1091,43 @@
  opened by a different process. Only after a download has been completed it is
  sensible to include it in any integer snapshot or backup of the system.
 
- See https://github.com/curl/curl/issues/3354
+ See https://github.com/fetch/fetch/issues/3354
 
 18.12 keep running, read instructions from pipe/socket
 
- Provide an option that makes curl not exit after the last URL (or even work
+ Provide an option that makes fetch not exit after the last URL (or even work
  without a given URL), and then make it read instructions passed on a pipe or
- over a socket to make further instructions so that a second subsequent curl
+ over a socket to make further instructions so that a second subsequent fetch
  invoke can talk to the still running instance and ask for transfers to get
  done, and thus maintain its connection pool, DNS cache and more.
 
 18.13 Acknowledge Ratelimit headers
 
- Consider a command line option that can make curl do multiple serial requests
+ Consider a command line option that can make fetch do multiple serial requests
  while acknowledging server specified rate limits:
  https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/
 
- See https://github.com/curl/curl/issues/5406
+ See https://github.com/fetch/fetch/issues/5406
 
 18.14 --dry-run
 
- A command line option that makes curl show exactly what it would do and send
+ A command line option that makes fetch show exactly what it would do and send
  if it would run for real.
 
- See https://github.com/curl/curl/issues/5426
+ See https://github.com/fetch/fetch/issues/5426
 
 18.15 --retry should resume
 
- When --retry is used and curl actually retries transfer, it should use the
+ When --retry is used and fetch actually retries transfer, it should use the
  already transferred data and do a resumed transfer for the rest (when
  possible) so that it does not have to transfer the same data again that was
  already transferred before the retry.
 
- See https://github.com/curl/curl/issues/1084
+ See https://github.com/fetch/fetch/issues/1084
 
 18.17 consider filename from the redirected URL with -O ?
 
- When a user gives a URL and uses -O, and curl follows a redirect to a new
+ When a user gives a URL and uses -O, and fetch follows a redirect to a new
  URL, the filename is not extracted and used from the newly redirected-to URL
  even if the new URL may have a much more sensible filename.
 
@@ -1139,10 +1139,10 @@
 
  This is extra tricky if the original URL has no filename part at all since
  then the current code path does error out with an error message, and we
- cannot *know* already at that point if curl is redirected to a URL that has a
+ cannot *know* already at that point if fetch is redirected to a URL that has a
  filename...
 
- See https://github.com/curl/curl/issues/1241
+ See https://github.com/fetch/fetch/issues/1241
 
 18.18 retry on network is unreachable
 
@@ -1154,39 +1154,39 @@
  this more configurable than to add a new option for every new error people
  want to retry for?
 
- https://github.com/curl/curl/issues/1603
+ https://github.com/fetch/fetch/issues/1603
 
 18.19 expand ~/ in config files
 
- For example .curlrc could benefit from being able to do this.
+ For example .fetchrc could benefit from being able to do this.
 
- See https://github.com/curl/curl/issues/2317
+ See https://github.com/fetch/fetch/issues/2317
 
 18.20 hostname sections in config files
 
  config files would be more powerful if they could set different
  configurations depending on used URLs, hostname or possibly origin. Then a
- default .curlrc could a specific user-agent only when doing requests against
+ default .fetchrc could a specific user-agent only when doing requests against
  a certain site.
 
 18.21 retry on the redirected-to URL
 
- When curl is told to --retry a failed transfer and follows redirects, it
+ When fetch is told to --retry a failed transfer and follows redirects, it
  might get an HTTP 429 response from the redirected-to URL and not the
- original one, which then could make curl decide to rather retry the transfer
+ original one, which then could make fetch decide to rather retry the transfer
  on that URL only instead of the original operation to the original URL.
 
  Perhaps extra emphasized if the original transfer is a large POST that
  redirects to a separate GET, and that GET is what gets the 529
 
- See https://github.com/curl/curl/issues/5462
+ See https://github.com/fetch/fetch/issues/5462
 
 18.23 Set the modification date on an uploaded file
 
- For SFTP and possibly FTP, curl could offer an option to set the
+ For SFTP and possibly FTP, fetch could offer an option to set the
  modification time for the uploaded file.
 
- See https://github.com/curl/curl/issues/5768
+ See https://github.com/fetch/fetch/issues/5768
 
 18.24 Use multiple parallel transfers for a single download
 
@@ -1195,7 +1195,7 @@
  result.
 
  An ideal implementation would not use a specified number of parallel
- transfers, but curl could:
+ transfers, but fetch could:
  - First start getting the full file as transfer A
  - If after N seconds have passed and the transfer is expected to continue for
    M seconds or more, add a new transfer (B) that asks for the second half of
@@ -1207,32 +1207,32 @@
  transfer A remain the single one. N and M could be set to some sensible
  defaults.
 
- See https://github.com/curl/curl/issues/5774
+ See https://github.com/fetch/fetch/issues/5774
 
 18.25 Prevent terminal injection when writing to terminal
 
- curl could offer an option to make escape sequence either non-functional or
+ fetch could offer an option to make escape sequence either non-functional or
  avoid cursor moves or similar to reduce the risk of a user getting tricked by
  clever tricks.
 
- See https://github.com/curl/curl/issues/6150
+ See https://github.com/fetch/fetch/issues/6150
 
 18.26 Custom progress meter update interval
 
  Users who are for example doing large downloads in CI or remote setups might
  want the occasional progress meter update to see that the transfer is
  progressing and has not stuck, but they may not appreciate the
- many-times-a-second frequency curl can end up doing it with now.
+ many-times-a-second frequency fetch can end up doing it with now.
 
 18.27 -J and -O with %-encoded filenames
 
  -J/--remote-header-name does not decode %-encoded filenames. RFC 6266 details
  how it should be done. The can of worm is basically that we have no charset
- handling in curl and ASCII >=128 is a challenge for us. Not to mention that
+ handling in fetch and ASCII >=128 is a challenge for us. Not to mention that
  decoding also means that we need to check for nastiness that is attempted,
  like "../" sequences and the like. Probably everything to the left of any
  embedded slashes should be cut off.
- https://curl.se/bug/view.cgi?id=1294
+ https://fetch.se/bug/view.cgi?id=1294
 
  -O also does not decode %-encoded names, and while it has even less
  information about the charset involved the process is similar to the -J case.
@@ -1248,7 +1248,7 @@
  resume logic is worked out before the target filename (and thus its
  pre-transfer size) has been figured out. This can be improved.
 
- https://curl.se/bug/view.cgi?id=1169
+ https://fetch.se/bug/view.cgi?id=1169
 
 18.29 --retry and transfer timeouts
 
@@ -1256,7 +1256,7 @@
  -y/-Y) the next attempt does not resume the transfer properly from what was
  downloaded in the previous attempt but truncates and restarts at the original
  position where it was at before the previous failed attempt. See
- https://curl.se/mail/lib-2008-01/0080.html and Mandriva bug report
+ https://fetch.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
 
 
@@ -1264,7 +1264,7 @@
 
 19.2 Enable PIE and RELRO by default
 
- Especially when having programs that execute curl via the command line, PIE
+ Especially when having programs that execute fetch via the command line, PIE
  renders the exploitation of memory corruption vulnerabilities a lot more
  difficult. This can be attributed to the additional information leaks being
  required to conduct a successful attack. RELRO, on the other hand, masks
@@ -1272,29 +1272,29 @@
  of techniques that come in handy when attackers are able to arbitrarily
  overwrite memory. A few tests showed that enabling these features had close
  to no impact, neither on the performance nor on the general functionality of
- curl.
+ fetch.
 
 19.3 Do not use GNU libtool on OpenBSD
 
- When compiling curl on OpenBSD with "--enable-debug" it gives linking errors
+ When compiling fetch on OpenBSD with "--enable-debug" it gives linking errors
  when you use GNU libtool. This can be fixed by using the libtool provided by
  OpenBSD itself. However for this the user always needs to invoke make with
  "LIBTOOL=/usr/bin/libtool". It would be nice if the script could have some
  magic to detect if this system is an OpenBSD host and then use the OpenBSD
  libtool instead.
 
- See https://github.com/curl/curl/issues/5862
+ See https://github.com/fetch/fetch/issues/5862
 
-19.4 Package curl for Windows in a signed installer
+19.4 Package fetch for Windows in a signed installer
 
- See https://github.com/curl/curl/issues/5424
+ See https://github.com/fetch/fetch/issues/5424
 
 19.5 make configure use --cache-file more and better
 
  The configure script can be improved to cache more values so that repeated
  invokes run much faster.
 
- See https://github.com/curl/curl/issues/7753
+ See https://github.com/fetch/fetch/issues/7753
 
 20. Test suite
 
@@ -1324,14 +1324,14 @@
  This would allow us to run SMB tests on more platforms and do better and more
  covering tests.
 
- See https://github.com/curl/curl/issues/15697
+ See https://github.com/fetch/fetch/issues/15697
 
 20.6 Use the RFC 6265 test suite
 
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
  https://github.com/abarth/http-state/tree/master/tests
 
- It would be good if someone would write a script/setup that would run curl
+ It would be good if someone would write a script/setup that would run fetch
  with that test suite and detect deviances. Ideally, that would even be
  incorporated into our regular test suite.
 
@@ -1342,7 +1342,7 @@
  It would help us find issues to fix and help us document where our parser
  differs from the WHATWG URL spec parsers.
 
- See https://github.com/curl/curl/issues/4477
+ See https://github.com/fetch/fetch/issues/4477
 
 21. MQTT
 
@@ -1356,7 +1356,7 @@
 21.3 Handle network blocks
 
   Running test suite with
-  `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a mqtt` makes several
+  `FETCH_DBG_SOCK_WBLOCK=90 ./runtests.pl -a mqtt` makes several
   MQTT test cases fail where they should not.
 
 22. TFTP
@@ -1364,16 +1364,16 @@
 22.1 TFTP does not convert LF to CRLF for mode=netascii
 
  RFC 3617 defines that an TFTP transfer can be done using "netascii"
- mode. curl does not support extracting that mode from the URL nor does it treat
+ mode. fetch does not support extracting that mode from the URL nor does it treat
  such transfers specifically. It should probably do LF to CRLF translations
  for them.
 
- See https://github.com/curl/curl/issues/12655
+ See https://github.com/fetch/fetch/issues/12655
 
 23. Gopher
 
 23.1 Handle network blocks
 
   Running test suite with
-  `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a 1200 to 1300` makes several
+  `FETCH_DBG_SOCK_WBLOCK=90 ./runtests.pl -a 1200 to 1300` makes several
   Gopher test cases fail where they should not.

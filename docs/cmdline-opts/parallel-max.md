@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: parallel-max
 Arg: <num>
 Help: Maximum concurrency for parallel transfers
 Added: 7.66.0
-Category: connection curl global
+Category: connection fetch global
 Multi: single
 Scope: global
 See-also:

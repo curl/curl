@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -28,7 +28,7 @@
 
 #include <openssl/err.h>
 #include <openssl/ssl.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include <stdio.h>
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -41,9 +41,9 @@ static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static FETCHcode sslctx_function(FETCH *fetch, void *sslctx, void *parm)
 {
-  CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
+  FETCHcode rv = FETCHE_ABORTED_BY_CALLBACK;
 
   /** This example uses two (fake) certificates **/
   static const char mypem[] =
@@ -93,7 +93,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   X509_STORE  *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
   int i;
   STACK_OF(X509_INFO) *inf;
-  (void)curl;
+  (void)fetch;
   (void)parm;
 
   if(!cts || !cbio) {
@@ -120,41 +120,41 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
   BIO_free(cbio);
 
-  rv = CURLE_OK;
+  rv = FETCHE_OK;
   return rv;
 }
 
 int main(void)
 {
-  CURL *ch;
-  CURLcode rv;
+  FETCH *ch;
+  FETCHcode rv;
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  ch = curl_easy_init();
-  curl_easy_setopt(ch, CURLOPT_VERBOSE, 0L);
-  curl_easy_setopt(ch, CURLOPT_HEADER, 0L);
-  curl_easy_setopt(ch, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(ch, CURLOPT_NOSIGNAL, 1L);
-  curl_easy_setopt(ch, CURLOPT_WRITEFUNCTION, writefunction);
-  curl_easy_setopt(ch, CURLOPT_WRITEDATA, stdout);
-  curl_easy_setopt(ch, CURLOPT_HEADERFUNCTION, writefunction);
-  curl_easy_setopt(ch, CURLOPT_HEADERDATA, stderr);
-  curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
-  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
-  curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  ch = fetch_easy_init();
+  fetch_easy_setopt(ch, FETCHOPT_VERBOSE, 0L);
+  fetch_easy_setopt(ch, FETCHOPT_HEADER, 0L);
+  fetch_easy_setopt(ch, FETCHOPT_NOPROGRESS, 1L);
+  fetch_easy_setopt(ch, FETCHOPT_NOSIGNAL, 1L);
+  fetch_easy_setopt(ch, FETCHOPT_WRITEFUNCTION, writefunction);
+  fetch_easy_setopt(ch, FETCHOPT_WRITEDATA, stdout);
+  fetch_easy_setopt(ch, FETCHOPT_HEADERFUNCTION, writefunction);
+  fetch_easy_setopt(ch, FETCHOPT_HEADERDATA, stderr);
+  fetch_easy_setopt(ch, FETCHOPT_SSLCERTTYPE, "PEM");
+  fetch_easy_setopt(ch, FETCHOPT_SSL_VERIFYPEER, 1L);
+  fetch_easy_setopt(ch, FETCHOPT_URL, "https://www.example.com/");
 
-  /* Turn off the default CA locations, otherwise libcurl loads CA
+  /* Turn off the default CA locations, otherwise libfetch loads CA
    * certificates from the locations that were detected/specified at
    * build-time
    */
-  curl_easy_setopt(ch, CURLOPT_CAINFO, NULL);
-  curl_easy_setopt(ch, CURLOPT_CAPATH, NULL);
+  fetch_easy_setopt(ch, FETCHOPT_CAINFO, NULL);
+  fetch_easy_setopt(ch, FETCHOPT_CAPATH, NULL);
 
   /* first try: retrieve page without ca certificates -> should fail
-   * unless libcurl was built --with-ca-fallback enabled at build-time
+   * unless libfetch was built --with-ca-fallback enabled at build-time
    */
-  rv = curl_easy_perform(ch);
-  if(rv == CURLE_OK)
+  rv = fetch_easy_perform(ch);
+  if(rv == FETCHE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
@@ -167,20 +167,20 @@ int main(void)
    * associated with this handle. normally you would set the ssl ctx function
    * before making any transfers, and not use this option.
    */
-  curl_easy_setopt(ch, CURLOPT_FRESH_CONNECT, 1L);
+  fetch_easy_setopt(ch, FETCHOPT_FRESH_CONNECT, 1L);
 
   /* second try: retrieve page using cacerts' certificate -> succeeds to load
    * the certificate by installing a function doing the necessary
    * "modifications" to the SSL CONTEXT just before link init
    */
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
-  rv = curl_easy_perform(ch);
-  if(rv == CURLE_OK)
+  fetch_easy_setopt(ch, FETCHOPT_SSL_CTX_FUNCTION, sslctx_function);
+  rv = fetch_easy_perform(ch);
+  if(rv == FETCHE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
 
-  curl_easy_cleanup(ch);
-  curl_global_cleanup();
+  fetch_easy_cleanup(ch);
+  fetch_global_cleanup();
   return (int)rv;
 }

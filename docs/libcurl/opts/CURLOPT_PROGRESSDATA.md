@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROGRESSDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROGRESSDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PROGRESSFUNCTION (3)
-  - CURLOPT_XFERINFOFUNCTION (3)
+  - FETCHOPT_PROGRESSFUNCTION (3)
+  - FETCHOPT_XFERINFOFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -14,20 +14,20 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_PROGRESSDATA - pointer passed to the progress callback
+FETCHOPT_PROGRESSDATA - pointer passed to the progress callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROGRESSDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROGRESSDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
-Pass a *pointer* that is untouched by libcurl and passed as the first
-argument in the progress callback set with CURLOPT_PROGRESSFUNCTION(3).
+Pass a *pointer* that is untouched by libfetch and passed as the first
+argument in the progress callback set with FETCHOPT_PROGRESSFUNCTION(3).
 
 # DEFAULT
 
@@ -59,15 +59,15 @@ static size_t progress_callback(void *clientp,
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     struct progress data;
 
     /* pass struct to callback  */
-    curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &data);
-    curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_PROGRESSDATA, &data);
+    fetch_easy_setopt(fetch, FETCHOPT_PROGRESSFUNCTION, progress_callback);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -76,7 +76,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

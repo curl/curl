@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_formfree
+SPDX-License-Identifier: fetch
+Title: fetch_formfree
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_formadd (3)
-  - curl_mime_free (3)
-  - curl_mime_init (3)
+  - fetch_formadd (3)
+  - fetch_mime_free (3)
+  - fetch_mime_init (3)
 Protocol:
   - HTTP
 Added-in: 7.1
@@ -15,30 +15,30 @@ Added-in: 7.1
 
 # NAME
 
-curl_formfree - free a previously build multipart form post chain
+fetch_formfree - free a previously build multipart form post chain
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-void curl_formfree(struct curl_httppost *form);
+void fetch_formfree(struct fetch_httppost *form);
 ~~~
 
 # DESCRIPTION
 
-This function is deprecated. Do not use. See curl_mime_init(3) instead.
+This function is deprecated. Do not use. See fetch_mime_init(3) instead.
 
-curl_formfree() is used to clean up data previously built/appended with
-curl_formadd(3). This must be called when the data has been used, which
-typically means after curl_easy_perform(3) has been called.
+fetch_formfree() is used to clean up data previously built/appended with
+fetch_formadd(3). This must be called when the data has been used, which
+typically means after fetch_easy_perform(3) has been called.
 
 The pointer to free is the same pointer you passed to the
-CURLOPT_HTTPPOST(3) option, which is the *firstitem* pointer from
-the curl_formadd(3) invoke(s).
+FETCHOPT_HTTPPOST(3) option, which is the *firstitem* pointer from
+the fetch_formadd(3) invoke(s).
 
 **form** is the pointer as returned from a previous call to
-curl_formadd(3) and may be NULL.
+fetch_formadd(3) and may be NULL.
 
 Passing in a NULL pointer in *form* makes this function return immediately
 with no action.
@@ -50,24 +50,24 @@ with no action.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    struct curl_httppost *formpost;
-    struct curl_httppost *lastptr;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    struct fetch_httppost *formpost;
+    struct fetch_httppost *lastptr;
 
     /* Fill in a file upload field */
-    curl_formadd(&formpost,
+    fetch_formadd(&formpost,
                  &lastptr,
-                 CURLFORM_COPYNAME, "file",
-                 CURLFORM_FILE, "nice-image.jpg",
-                 CURLFORM_END);
+                 FETCHFORM_COPYNAME, "file",
+                 FETCHFORM_FILE, "nice-image.jpg",
+                 FETCHFORM_END);
 
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    fetch_easy_setopt(fetch, FETCHOPT_HTTPPOST, formpost);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
 
     /* then cleanup the formpost chain */
-    curl_formfree(formpost);
+    fetch_formfree(formpost);
   }
 }
 ~~~

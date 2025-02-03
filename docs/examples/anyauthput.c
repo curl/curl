@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
- * HTTP PUT upload with authentication using "any" method. libcurl picks the
+ * HTTP PUT upload with authentication using "any" method. libfetch picks the
  * one the server supports/wants.
  * </DESC>
  */
@@ -31,7 +31,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #ifdef _WIN32
 #undef stat
@@ -41,8 +41,8 @@
 #define fileno _fileno
 #endif
 
-#if LIBCURL_VERSION_NUM < 0x070c03
-#error "upgrade your libcurl to no less than 7.12.3"
+#if LIBFETCH_VERSION_NUM < 0x070c03
+#error "upgrade your libfetch to no less than 7.12.3"
 #endif
 
 /*
@@ -50,22 +50,22 @@
  * type. It PUTs a file given as a command line argument to the URL also given
  * on the command line.
  *
- * Since libcurl 7.12.3, using "any" auth and POST/PUT requires a set seek
+ * Since libfetch 7.12.3, using "any" auth and POST/PUT requires a set seek
  * function.
  *
  * This example also uses its own read callback.
  */
 
 /* seek callback function */
-static int my_seek(void *userp, curl_off_t offset, int origin)
+static int my_seek(void *userp, fetch_off_t offset, int origin)
 {
   FILE *fp = (FILE *) userp;
 
   if(-1 == fseek(fp, (long) offset, origin))
     /* could not seek */
-    return CURL_SEEKFUNC_CANTSEEK;
+    return FETCH_SEEKFUNC_CANTSEEK;
 
-  return CURL_SEEKFUNC_OK; /* success! */
+  return FETCH_SEEKFUNC_OK; /* success! */
 }
 
 /* read callback function, fread() look alike */
@@ -84,8 +84,8 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(int argc, char **argv)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   FILE *fp;
   struct stat file_info;
 
@@ -106,55 +106,55 @@ int main(int argc, char **argv)
   fstat(fileno(fp), &file_info);
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(curl) {
+  /* get a fetch handle */
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
     /* which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, (void *) fp);
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, (void *) fp);
 
     /* set the seek function */
-    curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION, my_seek);
+    fetch_easy_setopt(fetch, FETCHOPT_SEEKFUNCTION, my_seek);
 
     /* pass the file descriptor to the seek callback as well */
-    curl_easy_setopt(curl, CURLOPT_SEEKDATA, (void *) fp);
+    fetch_easy_setopt(fetch, FETCHOPT_SEEKDATA, (void *) fp);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
     /* specify target URL, and note that this URL should also include a file
        name, not only a directory (as you can do with GTP uploads) */
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, url);
 
     /* and give the size of the upload, this supports large file sizes
        on systems that have general support for it */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)file_info.st_size);
+    fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
+                     (fetch_off_t)file_info.st_size);
 
-    /* tell libcurl we can use "any" auth, which lets the lib pick one, but it
+    /* tell libfetch we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT
        data twice!!! */
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
+    fetch_easy_setopt(fetch, FETCHOPT_HTTPAUTH, (long)FETCHAUTH_ANY);
 
     /* set user name and password for the authentication */
-    curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");
+    fetch_easy_setopt(fetch, FETCHOPT_USERPWD, "user:password");
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   fclose(fp); /* close the local file */
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return 0;
 }

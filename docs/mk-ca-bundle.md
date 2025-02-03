@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Title: mk-ca-bundle
 Section: 1
 Source: mk-ca-bundle
 See-also:
-  - curl (1)
+  - fetch (1)
 Added-in: n/a
 ---
 
@@ -29,7 +29,7 @@ The default *output* name is **ca-bundle.crt**. By setting it to '-' (a single
 dash) you get the output sent to STDOUT instead of a file.
 
 The PEM format this scripts uses for output makes the result readily available
-for use by just about all OpenSSL or GnuTLS powered applications, such as curl
+for use by just about all OpenSSL or GnuTLS powered applications, such as fetch
 and others.
 
 # OPTIONS

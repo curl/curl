@@ -1,23 +1,23 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# Items to be removed from future curl releases
+# Items to be removed from future fetch releases
 
 If any of these deprecated features is a cause for concern for you, please
 email the
-[curl-library mailing list](https://lists.haxx.se/listinfo/curl-library)
+[fetch-library mailing list](https://lists.haxx.se/listinfo/fetch-library)
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
 ## TLS libraries without 1.3 support
 
-curl drops support for TLS libraries without TLS 1.3 capability after May
+fetch drops support for TLS libraries without TLS 1.3 capability after May
 2025.
 
-It requires that a curl build using the library should be able to negotiate
+It requires that a fetch build using the library should be able to negotiate
 and use TLS 1.3, or else it is not good enough.
 
 As of May 2024, the libraries that need to get fixed to remain supported after
@@ -35,11 +35,11 @@ Meanwhile, we have a fully working backend in the ngtcp2 one and we have two
 fully working backends in OpenSSL-QUIC and quiche well on their way of ending
 their experimental status in a future.
 
-We remove msh3 support from the curl source tree in July 2025.
+We remove msh3 support from the fetch source tree in July 2025.
 
 ## winbuild build system
 
-curl drops support for the winbuild build method after September 2025.
+fetch drops support for the winbuild build method after September 2025.
 
 We recommend migrating to CMake. See the migration guide in
 `docs/INSTALL-CMAKE.md`.

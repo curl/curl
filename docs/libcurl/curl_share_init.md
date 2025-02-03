@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_share_init
+SPDX-License-Identifier: fetch
+Title: fetch_share_init
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_share_cleanup (3)
-  - curl_share_setopt (3)
+  - fetch_share_cleanup (3)
+  - fetch_share_setopt (3)
 Protocol:
   - All
 Added-in: 7.10
@@ -14,27 +14,27 @@ Added-in: 7.10
 
 # NAME
 
-curl_share_init - create a share object
+fetch_share_init - create a share object
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLSH *curl_share_init();
+FETCHSH *fetch_share_init();
 ~~~
 
 # DESCRIPTION
 
-This function returns a pointer to a *CURLSH* handle to be used as input
+This function returns a pointer to a *FETCHSH* handle to be used as input
 to all the other share-functions, sometimes referred to as a share handle in
 some places in the documentation. This init call MUST have a corresponding
-call to curl_share_cleanup(3) when all operations using the share are
+call to fetch_share_cleanup(3) when all operations using the share are
 complete.
 
-This *share handle* is what you pass to curl using the
-CURLOPT_SHARE(3) option with curl_easy_setopt(3), to make that
-specific curl handle use the data in this share.
+This *share handle* is what you pass to fetch using the
+FETCHOPT_SHARE(3) option with fetch_easy_setopt(3), to make that
+specific fetch handle use the data in this share.
 
 # %PROTOCOLS%
 
@@ -43,11 +43,11 @@ specific curl handle use the data in this share.
 ~~~c
 int main(void)
 {
-  CURLSHcode sh;
-  CURLSH *share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  FETCHSHcode sh;
+  FETCHSH *share = fetch_share_init();
+  sh = fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_CONNECT);
   if(sh)
-    printf("Error: %s\n", curl_share_strerror(sh));
+    printf("Error: %s\n", fetch_share_strerror(sh));
 }
 ~~~
 

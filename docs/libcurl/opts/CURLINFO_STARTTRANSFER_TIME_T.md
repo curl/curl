@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLINFO_STARTTRANSFER_TIME_T
+SPDX-License-Identifier: fetch
+Title: FETCHINFO_STARTTRANSFER_TIME_T
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_STARTTRANSFER_TIME (3)
-  - CURLOPT_TIMEOUT (3)
-  - curl_easy_getinfo (3)
-  - curl_easy_setopt (3)
+  - FETCHINFO_STARTTRANSFER_TIME (3)
+  - FETCHOPT_TIMEOUT (3)
+  - fetch_easy_getinfo (3)
+  - fetch_easy_setopt (3)
 Protocol:
   - All
 Added-in: 7.61.0
@@ -16,28 +16,28 @@ Added-in: 7.61.0
 
 # NAME
 
-CURLINFO_STARTTRANSFER_TIME_T - get the time until the first byte is received
+FETCHINFO_STARTTRANSFER_TIME_T - get the time until the first byte is received
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_STARTTRANSFER_TIME_T,
-                           curl_off_t *timep);
+FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_STARTTRANSFER_TIME_T,
+                           fetch_off_t *timep);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a curl_off_t to receive the time, in microseconds,
+Pass a pointer to a fetch_off_t to receive the time, in microseconds,
 it took from the
-start until the first byte is received by libcurl. This includes
-CURLINFO_PRETRANSFER_TIME_T(3) and also the time the server needs to
+start until the first byte is received by libfetch. This includes
+FETCHINFO_PRETRANSFER_TIME_T(3) and also the time the server needs to
 calculate the result.
 
 When a redirect is followed, the time from each request is added together.
 
-See also the TIMES overview in the curl_easy_getinfo(3) man page.
+See also the TIMES overview in the fetch_easy_getinfo(3) man page.
 
 # %PROTOCOLS%
 
@@ -46,21 +46,21 @@ See also the TIMES overview in the curl_easy_getinfo(3) man page.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_off_t start;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(CURLE_OK == res) {
-      res = curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME_T, &start);
-      if(CURLE_OK == res) {
-        printf("Time: %" CURL_FORMAT_CURL_OFF_T ".%06ld", start / 1000000,
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_off_t start;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
+    res = fetch_easy_perform(fetch);
+    if(FETCHE_OK == res) {
+      res = fetch_easy_getinfo(fetch, FETCHINFO_STARTTRANSFER_TIME_T, &start);
+      if(FETCHE_OK == res) {
+        printf("Time: %" FETCH_FORMAT_FETCH_OFF_T ".%06ld", start / 1000000,
                (long)(start % 1000000));
       }
     }
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -69,7 +69,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_getinfo(3) returns a CURLcode indicating success or error.
+fetch_easy_getinfo(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

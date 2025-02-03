@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_MAX_RECV_SPEED_LARGE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_MAX_RECV_SPEED_LARGE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_LOW_SPEED_LIMIT (3)
-  - CURLOPT_MAX_SEND_SPEED_LARGE (3)
-  - CURLOPT_TIMEOUT (3)
+  - FETCHOPT_LOW_SPEED_LIMIT (3)
+  - FETCHOPT_MAX_SEND_SPEED_LARGE (3)
+  - FETCHOPT_TIMEOUT (3)
 Protocol:
   - All
 Added-in: 7.15.5
@@ -15,28 +15,28 @@ Added-in: 7.15.5
 
 # NAME
 
-CURLOPT_MAX_RECV_SPEED_LARGE - rate limit data download speed
+FETCHOPT_MAX_RECV_SPEED_LARGE - rate limit data download speed
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAX_RECV_SPEED_LARGE,
-                          curl_off_t maxspeed);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_MAX_RECV_SPEED_LARGE,
+                          fetch_off_t maxspeed);
 ~~~
 
 # DESCRIPTION
 
-Pass a curl_off_t as parameter. If a download exceeds this *maxspeed*
+Pass a fetch_off_t as parameter. If a download exceeds this *maxspeed*
 (counted in bytes per second) the transfer pauses to keep the average speed
 less than or equal to the parameter value. Defaults to unlimited speed.
 
-This is not an exact science. libcurl attempts to keep the average speed below
+This is not an exact science. libfetch attempts to keep the average speed below
 the given threshold over a period time.
 
-If you set *maxspeed* to a value lower than CURLOPT_BUFFERSIZE(3),
-libcurl might download faster than the set limit initially.
+If you set *maxspeed* to a value lower than FETCHOPT_BUFFERSIZE(3),
+libfetch might download faster than the set limit initially.
 
 This option does not affect transfer speeds done with FILE:// URLs.
 
@@ -51,13 +51,13 @@ This option does not affect transfer speeds done with FILE:// URLs.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode ret;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode ret;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
     /* cap the download speed to 31415 bytes/sec */
-    curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, (curl_off_t)31415);
-    ret = curl_easy_perform(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_MAX_RECV_SPEED_LARGE, (fetch_off_t)31415);
+    ret = fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -66,7 +66,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

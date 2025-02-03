@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ftp-skip-pasv-ip
 Help: Skip the IP address for PASV
 Protocols: FTP
@@ -15,8 +15,8 @@ Example:
 
 # `--ftp-skip-pasv-ip`
 
-Do not use the IP address the server suggests in its response to curl's PASV
-command when curl connects the data connection. Instead curl reuses the same
+Do not use the IP address the server suggests in its response to fetch's PASV
+command when fetch connects the data connection. Instead fetch reuses the same
 IP address it already uses for the control connection.
 
 This option is enabled by default (added in 7.74.0).

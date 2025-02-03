@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #ifdef _WIN32
 #undef stat
@@ -65,8 +65,8 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(int argc, char **argv)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   FILE * hd_src;
   struct stat file_info;
 
@@ -90,41 +90,41 @@ int main(int argc, char **argv)
     return 2;
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(curl) {
+  /* get a fetch handle */
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
     /* enable uploading (implies PUT over HTTP) */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
     /* specify target URL, and note that this URL should include a file
        name, not only a directory */
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, url);
 
     /* now specify which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, hd_src);
 
-    /* provide the size of the upload, we typecast the value to curl_off_t
+    /* provide the size of the upload, we typecast the value to fetch_off_t
        since we must be sure to use the correct data size */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)file_info.st_size);
+    fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
+                     (fetch_off_t)file_info.st_size);
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   fclose(hd_src); /* close the local file */
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return 0;
 }

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: expect100-timeout
 Arg: <seconds>
 Help: How long to wait for 100-continue
@@ -16,9 +16,9 @@ Example:
 
 # `--expect100-timeout`
 
-Maximum time in seconds that you allow curl to wait for a 100-continue
-response when curl emits an Expects: 100-continue header in its request. By
-default curl waits one second. This option accepts decimal values. When curl
+Maximum time in seconds that you allow fetch to wait for a 100-continue
+response when fetch emits an Expects: 100-continue header in its request. By
+default fetch waits one second. This option accepts decimal values. When fetch
 stops waiting, it continues as if a response was received.
 
 The decimal value needs to be provided using a dot (`.`) as decimal separator -

@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: connect-to
 Arg: <HOST1:PORT1:HOST2:PORT2>
 Help: Connect to host2 instead of host1
@@ -32,9 +32,9 @@ match the name used in request URL. It can be either numerical such as
 Example: redirect connects from the example.com hostname to 127.0.0.1
 independently of port number:
 
-    curl --connect-to example.com::127.0.0.1: https://example.com/
+    fetch --connect-to example.com::127.0.0.1: https://example.com/
 
 Example: redirect connects from all hostnames to 127.0.0.1 independently of
 port number:
 
-    curl --connect-to ::127.0.0.1: http://example.com/
+    fetch --connect-to ::127.0.0.1: http://example.com/

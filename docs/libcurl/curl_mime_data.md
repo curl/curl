@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_data
+SPDX-License-Identifier: fetch
+Title: fetch_mime_data
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_mime_addpart (3)
-  - curl_mime_data_cb (3)
-  - curl_mime_name (3)
-  - curl_mime_type (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_data_cb (3)
+  - fetch_mime_name (3)
+  - fetch_mime_type (3)
 Protocol:
   - HTTP
   - IMAP
@@ -18,29 +18,29 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_data - set a mime part's body data from memory
+fetch_mime_data - set a mime part's body data from memory
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_mime_data(curl_mimepart *part, const char *data,
+FETCHcode fetch_mime_data(fetch_mimepart *part, const char *data,
                         size_t datasize);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_data(3) sets a mime part's body content from memory data.
+fetch_mime_data(3) sets a mime part's body content from memory data.
 
 *part* is the mime part to assign contents to, created with
-curl_mime_addpart(3).
+fetch_mime_addpart(3).
 
 *data* points to the data that gets copied by this function. The storage
 may safely be reused after the call.
 
 *datasize* is the number of bytes *data* points to. It can be set to
-*CURL_ZERO_TERMINATED* to indicate *data* is a null-terminated
+*FETCH_ZERO_TERMINATED* to indicate *data* is a null-terminated
 character string.
 
 Setting a part's contents multiple times is valid: only the value set by the
@@ -48,7 +48,7 @@ last call is retained. It is possible to unassign part's contents by setting
 *data* to NULL.
 
 Setting large data is memory consuming: one might consider using
-curl_mime_data_cb(3) in such a case.
+fetch_mime_data_cb(3) in such a case.
 
 # %PROTOCOLS%
 
@@ -57,19 +57,19 @@ curl_mime_data_cb(3) in such a case.
 ~~~c
 int main(void)
 {
-  curl_mime *mime;
-  curl_mimepart *part;
+  fetch_mime *mime;
+  fetch_mimepart *part;
 
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     /* create a mime handle */
-    mime = curl_mime_init(curl);
+    mime = fetch_mime_init(fetch);
 
     /* add a part */
-    part = curl_mime_addpart(mime);
+    part = fetch_mime_addpart(mime);
 
     /* add data to the part  */
-    curl_mime_data(part, "raw contents to send", CURL_ZERO_TERMINATED);
+    fetch_mime_data(part, "raw contents to send", FETCH_ZERO_TERMINATED);
   }
 }
 ~~~
@@ -78,9 +78,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

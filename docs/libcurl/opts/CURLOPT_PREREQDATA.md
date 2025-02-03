@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PREREQDATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PREREQDATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_PRIMARY_IP (3)
-  - CURLINFO_PRIMARY_PORT (3)
-  - CURLOPT_PREREQFUNCTION (3)
+  - FETCHINFO_PRIMARY_IP (3)
+  - FETCHINFO_PRIMARY_PORT (3)
+  - FETCHOPT_PREREQFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.80.0
@@ -15,20 +15,20 @@ Added-in: 7.80.0
 
 # NAME
 
-CURLOPT_PREREQDATA - pointer passed to the pre-request callback
+FETCHOPT_PREREQDATA - pointer passed to the pre-request callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PREREQDATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PREREQDATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
-Pass a *pointer* that is untouched by libcurl and passed as the first
-argument in the pre-request callback set with CURLOPT_PREREQFUNCTION(3).
+Pass a *pointer* that is untouched by libfetch and passed as the first
+argument in the pre-request callback set with FETCHOPT_PREREQFUNCTION(3).
 
 # DEFAULT
 
@@ -50,17 +50,17 @@ static int prereq_callback(void *clientp,
                            int conn_local_port)
 {
   printf("Connection made to %s:%d\n", conn_primary_ip, conn_primary_port);
-  return CURL_PREREQFUNC_OK;
+  return FETCH_PREREQFUNC_OK;
 }
 
 int main(void)
 {
   struct priv prereq_data;
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_PREREQFUNCTION, prereq_callback);
-    curl_easy_setopt(curl, CURLOPT_PREREQDATA, &prereq_data);
-    curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_PREREQFUNCTION, prereq_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_PREREQDATA, &prereq_data);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -69,7 +69,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -27,7 +27,7 @@
  */
 #include <stdio.h>
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /* some requirements for this to work:
    1.   set pCertFile to the file with the client certificate
@@ -43,14 +43,14 @@
 
    !! verify of the server certificate is not implemented here !!
 
-   **** This example only works with libcurl 7.9.3 and later! ****
+   **** This example only works with libfetch 7.9.3 and later! ****
 
 */
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   FILE *headerfile;
   const char *pPassphrase = NULL;
 
@@ -77,13 +77,13 @@ int main(void)
   if(!headerfile)
     return 1;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /* what call to write: */
-    curl_easy_setopt(curl, CURLOPT_URL, "HTTPS://your.favourite.ssl.site");
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, headerfile);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "HTTPS://your.favourite.ssl.site");
+    fetch_easy_setopt(fetch, FETCHOPT_HEADERDATA, headerfile);
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -92,50 +92,50 @@ int main(void)
     do { /* dummy loop, just to break out from */
       if(pEngine) {
         /* use crypto engine */
-        if(curl_easy_setopt(curl, CURLOPT_SSLENGINE, pEngine) != CURLE_OK) {
+        if(fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE, pEngine) != FETCHE_OK) {
           /* load the crypto engine */
           fprintf(stderr, "cannot set crypto engine\n");
           break;
         }
-        if(curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK) {
+        if(fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE_DEFAULT, 1L) != FETCHE_OK) {
           /* set the crypto engine as default */
           /* only needed for the first time you load
-             an engine in a curl object... */
+             an engine in a fetch object... */
           fprintf(stderr, "cannot set crypto engine as default\n");
           break;
         }
       }
       /* cert is stored PEM coded in file... */
       /* since PEM is default, we needn't set it for PEM */
-      curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+      fetch_easy_setopt(fetch, FETCHOPT_SSLCERTTYPE, "PEM");
 
       /* set the cert for client authentication */
-      curl_easy_setopt(curl, CURLOPT_SSLCERT, pCertFile);
+      fetch_easy_setopt(fetch, FETCHOPT_SSLCERT, pCertFile);
 
       /* sorry, for engine we must set the passphrase
          (if the key has one...) */
       if(pPassphrase)
-        curl_easy_setopt(curl, CURLOPT_KEYPASSWD, pPassphrase);
+        fetch_easy_setopt(fetch, FETCHOPT_KEYPASSWD, pPassphrase);
 
       /* if we use a key stored in a crypto engine,
          we must set the key type to "ENG" */
-      curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, pKeyType);
+      fetch_easy_setopt(fetch, FETCHOPT_SSLKEYTYPE, pKeyType);
 
       /* set the private key (file or ID in engine) */
-      curl_easy_setopt(curl, CURLOPT_SSLKEY, pKeyName);
+      fetch_easy_setopt(fetch, FETCHOPT_SSLKEY, pKeyName);
 
       /* set the file with the certs validating the server */
-      curl_easy_setopt(curl, CURLOPT_CAINFO, pCACertFile);
+      fetch_easy_setopt(fetch, FETCHOPT_CAINFO, pCACertFile);
 
       /* disconnect if we cannot validate server's cert */
-      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+      fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 1L);
 
       /* Perform the request, res gets the return code */
-      res = curl_easy_perform(curl);
+      res = fetch_easy_perform(fetch);
       /* Check for errors */
-      if(res != CURLE_OK)
-        fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
+      if(res != FETCHE_OK)
+        fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+                fetch_easy_strerror(res));
 
       /* we are done... */
     } while(0);
@@ -143,10 +143,10 @@ int main(void)
 #pragma warning(pop)
 #endif
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   fclose(headerfile);
 

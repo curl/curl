@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSH_AUTH_TYPES
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSH_AUTH_TYPES
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 (3)
-  - CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 (3)
-  - CURLOPT_SSH_PUBLIC_KEYFILE (3)
+  - FETCHOPT_SSH_HOST_PUBLIC_KEY_MD5 (3)
+  - FETCHOPT_SSH_HOST_PUBLIC_KEY_SHA256 (3)
+  - FETCHOPT_SSH_PUBLIC_KEYFILE (3)
 Protocol:
   - SFTP
   - SCP
@@ -16,30 +16,30 @@ Added-in: 7.16.1
 
 # NAME
 
-CURLOPT_SSH_AUTH_TYPES - auth types for SFTP and SCP
+FETCHOPT_SSH_AUTH_TYPES - auth types for SFTP and SCP
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_AUTH_TYPES, long bitmask);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSH_AUTH_TYPES, long bitmask);
 ~~~
 
 # DESCRIPTION
 
 Pass a long set to a bitmask consisting of one or more of
-CURLSSH_AUTH_PUBLICKEY, CURLSSH_AUTH_PASSWORD, CURLSSH_AUTH_HOST,
-CURLSSH_AUTH_KEYBOARD and CURLSSH_AUTH_AGENT.
+FETCHSSH_AUTH_PUBLICKEY, FETCHSSH_AUTH_PASSWORD, FETCHSSH_AUTH_HOST,
+FETCHSSH_AUTH_KEYBOARD and FETCHSSH_AUTH_AGENT.
 
-Set *CURLSSH_AUTH_ANY* to let libcurl pick a suitable one. Currently
-CURLSSH_AUTH_HOST has no effect. If CURLSSH_AUTH_AGENT is used, libcurl
+Set *FETCHSSH_AUTH_ANY* to let libfetch pick a suitable one. Currently
+FETCHSSH_AUTH_HOST has no effect. If FETCHSSH_AUTH_AGENT is used, libfetch
 attempts to connect to ssh-agent or pageant and let the agent attempt the
 authentication.
 
 # DEFAULT
 
-CURLSSH_AUTH_ANY (all available)
+FETCHSSH_AUTH_ANY (all available)
 
 # %PROTOCOLS%
 
@@ -48,14 +48,14 @@ CURLSSH_AUTH_ANY (all available)
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/file");
-    curl_easy_setopt(curl, CURLOPT_SSH_AUTH_TYPES,
-                     CURLSSH_AUTH_PUBLICKEY | CURLSSH_AUTH_KEYBOARD);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "sftp://example.com/file");
+    fetch_easy_setopt(fetch, FETCHOPT_SSH_AUTH_TYPES,
+                     FETCHSSH_AUTH_PUBLICKEY | FETCHSSH_AUTH_KEYBOARD);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -64,7 +64,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

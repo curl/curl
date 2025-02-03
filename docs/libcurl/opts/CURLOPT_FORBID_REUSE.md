@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FORBID_REUSE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FORBID_REUSE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_FRESH_CONNECT (3)
-  - CURLOPT_MAXCONNECTS (3)
-  - CURLOPT_MAXLIFETIME_CONN (3)
+  - FETCHOPT_FRESH_CONNECT (3)
+  - FETCHOPT_MAXCONNECTS (3)
+  - FETCHOPT_MAXLIFETIME_CONN (3)
 Protocol:
   - All
 Added-in: 7.7
@@ -15,25 +15,25 @@ Added-in: 7.7
 
 # NAME
 
-CURLOPT_FORBID_REUSE - make connection get closed at once after use
+FETCHOPT_FORBID_REUSE - make connection get closed at once after use
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FORBID_REUSE, long close);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FORBID_REUSE, long close);
 ~~~
 
 # DESCRIPTION
 
-Pass a long. Set *close* to 1 to make libcurl explicitly close the
-connection when done with the transfer. Normally, libcurl keeps all
+Pass a long. Set *close* to 1 to make libfetch explicitly close the
+connection when done with the transfer. Normally, libfetch keeps all
 connections alive when done with one transfer in case a succeeding one follows
 that can reuse them. This option should be used with caution and only if you
 understand what it does as it can seriously impact performance.
 
-Set to 0 to have libcurl keep the connection open for possible later reuse
+Set to 0 to have libfetch keep the connection open for possible later reuse
 (default behavior).
 
 # DEFAULT
@@ -47,16 +47,16 @@ Set to 0 to have libcurl keep the connection open for possible later reuse
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_FORBID_REUSE, 1L);
-    curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_FORBID_REUSE, 1L);
+    fetch_easy_perform(fetch);
 
     /* this second transfer may not reuse the same connection */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -65,7 +65,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

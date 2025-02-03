@@ -1,19 +1,19 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# curl sponsors
+# fetch sponsors
 
-A sponsor is someone who donates money or resources to the curl project for no
+A sponsor is someone who donates money or resources to the fetch project for no
 specific service in return.
 
-curl accepts donations via [GitHub sponsors](https://github.com/sponsors/curl)
-and [Open Collective](https://opencollective.com/curl).
+fetch accepts donations via [GitHub sponsors](https://github.com/sponsors/fetch)
+and [Open Collective](https://opencollective.com/fetch).
 
 An even better way to contribute to the project might be to pay an engineer or
-two to spend work hours on curl related tasks.
+two to spend work hours on fetch related tasks.
 
 We promise to use donated funds for things and activities that we believe are
 beneficial for the project and its development. That includes but is not
@@ -24,8 +24,8 @@ Recurring donations above a certain amount of money puts the sponsor at a
 named sponsor level: **Silver**, **Gold**, **Platinum** or **Top**.
 
 Sponsors on a named level can provide their logo image and preferred URL and
-get recognition on the curl website's [sponsor
-page](https://curl.se/sponsors.html).
+get recognition on the fetch website's [sponsor
+page](https://fetch.se/sponsors.html).
 
 - **Silver Sponsor** at least 100 USD/month
 - **Gold Sponsor** at least 500 USD/month
@@ -34,8 +34,8 @@ page](https://curl.se/sponsors.html).
 
 ## Sponsor requirements
 
-A named level sponsor is entitled a logo and link on the curl website assuming
-the company, brand and link are not deemed unsuitable. The curl team reserves
+A named level sponsor is entitled a logo and link on the fetch website assuming
+the company, brand and link are not deemed unsuitable. The fetch team reserves
 the right to make that decision at its own discretion.
 
 Sponsors may be denied a website presence for example if involved with drugs,

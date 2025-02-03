@@ -5,42 +5,42 @@ Copyright (C) Daniel Stenberg,
 <daniel@haxx.se
   >, et al. # # This software is licensed as described in the file COPYING,
   which # you should have received as part of this distribution. The terms # are
-  also available at https://curl.se/docs/copyright.html. # # You may opt to use,
+  also available at https://fetch.se/docs/copyright.html. # # You may opt to use,
   copy, modify, merge, publish, distribute and/or sell # copies of the Software,
   and permit persons to whom the Software is # furnished to do so, under the
   terms of the COPYING file. # # This software is distributed on an "AS IS"
   basis, WITHOUT WARRANTY OF ANY # KIND, either express or implied. # #
-  SPDX-License-Identifier: curl #
+  SPDX-License-Identifier: fetch #
   ########################################################################### #
-  Shared between Makefile.am and CMakeLists.txt man_MANS = \ curl_easy_cleanup.3
-  \ curl_easy_duphandle.3 \ curl_easy_escape.3 \ curl_easy_getinfo.3 \
-  curl_easy_header.3 \ curl_easy_init.3 \ curl_easy_nextheader.3 \
-  curl_easy_option_by_id.3 \ curl_easy_option_by_name.3 \
-  curl_easy_option_next.3 \ curl_easy_pause.3 \ curl_easy_perform.3 \
-  curl_easy_recv.3 \ curl_easy_reset.3 \ curl_easy_send.3 \ curl_easy_setopt.3 \
-  curl_easy_ssls_export.3 \ curl_easy_ssls_import.3 \ curl_easy_strerror.3 \
-  curl_easy_unescape.3 \ curl_easy_upkeep.3 \ curl_escape.3 \ curl_formadd.3 \
-  curl_formfree.3 \ curl_formget.3 \ curl_free.3 \ curl_getdate.3 \
-  curl_getenv.3 \ curl_global_cleanup.3 \ curl_global_init.3 \
-  curl_global_init_mem.3 \ curl_global_sslset.3 \ curl_global_trace.3 \
-  curl_mime_addpart.3 \ curl_mime_data.3 \ curl_mime_data_cb.3 \
-  curl_mime_encoder.3 \ curl_mime_filedata.3 \ curl_mime_filename.3 \
-  curl_mime_free.3 \ curl_mime_headers.3 \ curl_mime_init.3 \ curl_mime_name.3 \
-  curl_mime_subparts.3 \ curl_mime_type.3 \ curl_mprintf.3 \
-  curl_multi_add_handle.3 \ curl_multi_assign.3 \ curl_multi_cleanup.3 \
-  curl_multi_fdset.3 \ curl_multi_get_handles.3 \ curl_multi_info_read.3 \
-  curl_multi_init.3 \ curl_multi_perform.3 \ curl_multi_poll.3 \
-  curl_multi_remove_handle.3 \ curl_multi_setopt.3 \ curl_multi_socket.3 \
-  curl_multi_socket_action.3 \ curl_multi_socket_all.3 \ curl_multi_strerror.3 \
-  curl_multi_timeout.3 \ curl_multi_wait.3 \ curl_multi_waitfds.3 \
-  curl_multi_wakeup.3 \ curl_pushheader_byname.3 \ curl_pushheader_bynum.3 \
-  curl_share_cleanup.3 \ curl_share_init.3 \ curl_share_setopt.3 \
-  curl_share_strerror.3 \ curl_slist_append.3 \ curl_slist_free_all.3 \
-  curl_strequal.3 \ curl_strnequal.3 \ curl_unescape.3 \ curl_url.3 \
-  curl_url_cleanup.3 \ curl_url_dup.3 \ curl_url_get.3 \ curl_url_set.3 \
-  curl_url_strerror.3 \ curl_version.3 \ curl_version_info.3 \ curl_ws_meta.3 \
-  curl_ws_recv.3 \ curl_ws_send.3 \ libcurl-easy.3 \ libcurl-env-dbg.3 \
-  libcurl-env.3 \ libcurl-errors.3 \ libcurl-multi.3 \ libcurl-security.3 \
-  libcurl-share.3 \ libcurl-symbols.3 \ libcurl-thread.3 \ libcurl-tutorial.3 \
-  libcurl-url.3 \ libcurl-ws.3 \ libcurl.3
+  Shared between Makefile.am and CMakeLists.txt man_MANS = \ fetch_easy_cleanup.3
+  \ fetch_easy_duphandle.3 \ fetch_easy_escape.3 \ fetch_easy_getinfo.3 \
+  fetch_easy_header.3 \ fetch_easy_init.3 \ fetch_easy_nextheader.3 \
+  fetch_easy_option_by_id.3 \ fetch_easy_option_by_name.3 \
+  fetch_easy_option_next.3 \ fetch_easy_pause.3 \ fetch_easy_perform.3 \
+  fetch_easy_recv.3 \ fetch_easy_reset.3 \ fetch_easy_send.3 \ fetch_easy_setopt.3 \
+  fetch_easy_ssls_export.3 \ fetch_easy_ssls_import.3 \ fetch_easy_strerror.3 \
+  fetch_easy_unescape.3 \ fetch_easy_upkeep.3 \ fetch_escape.3 \ fetch_formadd.3 \
+  fetch_formfree.3 \ fetch_formget.3 \ fetch_free.3 \ fetch_getdate.3 \
+  fetch_getenv.3 \ fetch_global_cleanup.3 \ fetch_global_init.3 \
+  fetch_global_init_mem.3 \ fetch_global_sslset.3 \ fetch_global_trace.3 \
+  fetch_mime_addpart.3 \ fetch_mime_data.3 \ fetch_mime_data_cb.3 \
+  fetch_mime_encoder.3 \ fetch_mime_filedata.3 \ fetch_mime_filename.3 \
+  fetch_mime_free.3 \ fetch_mime_headers.3 \ fetch_mime_init.3 \ fetch_mime_name.3 \
+  fetch_mime_subparts.3 \ fetch_mime_type.3 \ fetch_mprintf.3 \
+  fetch_multi_add_handle.3 \ fetch_multi_assign.3 \ fetch_multi_cleanup.3 \
+  fetch_multi_fdset.3 \ fetch_multi_get_handles.3 \ fetch_multi_info_read.3 \
+  fetch_multi_init.3 \ fetch_multi_perform.3 \ fetch_multi_poll.3 \
+  fetch_multi_remove_handle.3 \ fetch_multi_setopt.3 \ fetch_multi_socket.3 \
+  fetch_multi_socket_action.3 \ fetch_multi_socket_all.3 \ fetch_multi_strerror.3 \
+  fetch_multi_timeout.3 \ fetch_multi_wait.3 \ fetch_multi_waitfds.3 \
+  fetch_multi_wakeup.3 \ fetch_pushheader_byname.3 \ fetch_pushheader_bynum.3 \
+  fetch_share_cleanup.3 \ fetch_share_init.3 \ fetch_share_setopt.3 \
+  fetch_share_strerror.3 \ fetch_slist_append.3 \ fetch_slist_free_all.3 \
+  fetch_strequal.3 \ fetch_strnequal.3 \ fetch_unescape.3 \ fetch_url.3 \
+  fetch_url_cleanup.3 \ fetch_url_dup.3 \ fetch_url_get.3 \ fetch_url_set.3 \
+  fetch_url_strerror.3 \ fetch_version.3 \ fetch_version_info.3 \ fetch_ws_meta.3 \
+  fetch_ws_recv.3 \ fetch_ws_send.3 \ libfetch-easy.3 \ libfetch-env-dbg.3 \
+  libfetch-env.3 \ libfetch-errors.3 \ libfetch-multi.3 \ libfetch-security.3 \
+  libfetch-share.3 \ libfetch-symbols.3 \ libfetch-thread.3 \ libfetch-tutorial.3 \
+  libfetch-url.3 \ libfetch-ws.3 \ libfetch.3
 </daniel@haxx.se>

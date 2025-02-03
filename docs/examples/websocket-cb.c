@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
@@ -26,14 +26,14 @@
  * </DESC>
  */
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 static size_t writecb(char *b, size_t size, size_t nitems, void *p)
 {
-  CURL *easy = p;
+  FETCH *easy = p;
   size_t i;
-  const struct curl_ws_frame *frame = curl_ws_meta(easy);
-  fprintf(stderr, "Type: %s\n", frame->flags & CURLWS_BINARY ?
+  const struct fetch_ws_frame *frame = fetch_ws_meta(easy);
+  fprintf(stderr, "Type: %s\n", frame->flags & FETCHWS_BINARY ?
           "binary" : "text");
   fprintf(stderr, "Bytes: %u", (unsigned int)(nitems * size));
   for(i = 0; i < nitems; i++)
@@ -43,26 +43,26 @@ static size_t writecb(char *b, size_t size, size_t nitems, void *p)
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com");
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "wss://example.com");
 
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, writecb);
     /* pass the easy handle to the callback */
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, curl);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, fetch);
 
     /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+              fetch_easy_strerror(res));
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
   return 0;
 }

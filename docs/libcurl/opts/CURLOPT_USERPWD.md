@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_USERPWD
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_USERPWD
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PASSWORD (3)
-  - CURLOPT_PROXYUSERPWD (3)
-  - CURLOPT_USERNAME (3)
+  - FETCHOPT_PASSWORD (3)
+  - FETCHOPT_PROXYUSERPWD (3)
+  - FETCHOPT_USERNAME (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -15,14 +15,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_USERPWD - username and password to use in authentication
+FETCHOPT_USERPWD - username and password to use in authentication
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERPWD, char *userpwd);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_USERPWD, char *userpwd);
 ~~~
 
 # DESCRIPTION
@@ -45,19 +45,19 @@ respectively.
 Some HTTP servers (on Windows) support inclusion of the domain for Basic
 authentication as well.
 
-When using HTTP and CURLOPT_FOLLOWLOCATION(3), libcurl might perform several
-requests to possibly different hosts. libcurl only sends this user and
+When using HTTP and FETCHOPT_FOLLOWLOCATION(3), libfetch might perform several
+requests to possibly different hosts. libfetch only sends this user and
 password information to hosts using the initial hostname (unless
-CURLOPT_UNRESTRICTED_AUTH(3) is set), so if libcurl follows redirects to other
+FETCHOPT_UNRESTRICTED_AUTH(3) is set), so if libfetch follows redirects to other
 hosts, it does not send the user and password to those. This is enforced to
 prevent accidental information leakage.
 
-Use CURLOPT_HTTPAUTH(3) to specify the authentication method for HTTP
-based connections or CURLOPT_LOGIN_OPTIONS(3) to control IMAP, POP3 and
+Use FETCHOPT_HTTPAUTH(3) to specify the authentication method for HTTP
+based connections or FETCHOPT_LOGIN_OPTIONS(3) to control IMAP, POP3 and
 SMTP options.
 
 The user and password strings are not URL decoded, so there is no way to send
-in a username containing a colon using this option. Use CURLOPT_USERNAME(3)
+in a username containing a colon using this option. Use FETCHOPT_USERNAME(3)
 for that, or include it in the URL.
 
 The application does not have to keep the string around after setting this
@@ -77,16 +77,16 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/foo.bin");
 
-    curl_easy_setopt(curl, CURLOPT_USERPWD, "clark:kent");
+    fetch_easy_setopt(fetch, FETCHOPT_USERPWD, "clark:kent");
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -95,7 +95,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

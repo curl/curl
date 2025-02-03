@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PROXY_SSLCERT_BLOB
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PROXY_SSLCERT_BLOB
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PROXY_SSLCERT (3)
-  - CURLOPT_PROXY_SSLCERTTYPE (3)
-  - CURLOPT_PROXY_SSLKEY (3)
-  - CURLOPT_SSLCERT_BLOB (3)
+  - FETCHOPT_PROXY_SSLCERT (3)
+  - FETCHOPT_PROXY_SSLCERTTYPE (3)
+  - FETCHOPT_PROXY_SSLKEY (3)
+  - FETCHOPT_SSLCERT_BLOB (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -20,30 +20,30 @@ Added-in: 7.71.0
 
 # NAME
 
-CURLOPT_PROXY_SSLCERT_BLOB - SSL proxy client certificate from memory blob
+FETCHOPT_PROXY_SSLCERT_BLOB - SSL proxy client certificate from memory blob
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLCERT_BLOB,
-                          struct curl_blob *blob);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY_SSLCERT_BLOB,
+                          struct fetch_blob *blob);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer to a curl_blob structure, which contains information (pointer
+Pass a pointer to a fetch_blob structure, which contains information (pointer
 and size) about a memory block with binary data of the certificate used to
 connect to the HTTPS proxy. The format must be "P12" on Secure Transport or
 Schannel. The format must be "P12" or "PEM" on OpenSSL. The string "P12" or
-"PEM" must be specified with CURLOPT_PROXY_SSLCERTTYPE(3).
+"PEM" must be specified with FETCHOPT_PROXY_SSLCERTTYPE(3).
 
-If the blob is initialized with the flags member of struct curl_blob set to
-CURL_BLOB_COPY, the application does not have to keep the buffer around after
+If the blob is initialized with the flags member of struct fetch_blob set to
+FETCH_BLOB_COPY, the application does not have to keep the buffer around after
 setting this.
 
-This option is an alternative to CURLOPT_PROXY_SSLCERT(3) which instead
+This option is an alternative to FETCHOPT_PROXY_SSLCERT(3) which instead
 expects a filename as input.
 
 # DEFAULT
@@ -61,20 +61,20 @@ extern size_t filesize; /* size of the data */
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
-    struct curl_blob blob;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
+    struct fetch_blob blob;
     blob.data = certificateData;
     blob.len = filesize;
-    blob.flags = CURL_BLOB_COPY;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
-    curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
-    curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "s3cret");
-    curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT_BLOB, &blob);
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    blob.flags = FETCH_BLOB_COPY;
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "https://proxy");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_SSLKEY, "key.pem");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_KEYPASSWD, "s3cret");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY_SSLCERT_BLOB, &blob);
+    res = fetch_easy_perform(fetch);
+    fetch_easy_cleanup(fetch);
   }
 }
 ~~~
@@ -83,7 +83,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

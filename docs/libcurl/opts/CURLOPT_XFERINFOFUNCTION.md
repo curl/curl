@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_XFERINFOFUNCTION
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_XFERINFOFUNCTION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_NOPROGRESS (3)
-  - CURLOPT_XFERINFODATA (3)
+  - FETCHOPT_NOPROGRESS (3)
+  - FETCHOPT_XFERINFODATA (3)
 Protocol:
   - All
 Added-in: 7.32.0
@@ -14,20 +14,20 @@ Added-in: 7.32.0
 
 # NAME
 
-CURLOPT_XFERINFOFUNCTION - progress meter callback
+FETCHOPT_XFERINFOFUNCTION - progress meter callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 int progress_callback(void *clientp,
-                      curl_off_t dltotal,
-                      curl_off_t dlnow,
-                      curl_off_t ultotal,
-                      curl_off_t ulnow);
+                      fetch_off_t dltotal,
+                      fetch_off_t dlnow,
+                      fetch_off_t ultotal,
+                      fetch_off_t ulnow);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XFERINFOFUNCTION,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_XFERINFOFUNCTION,
                           progress_callback);
 ~~~
 
@@ -36,18 +36,18 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XFERINFOFUNCTION,
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-This function gets called by libcurl instead of its internal equivalent with a
+This function gets called by libfetch instead of its internal equivalent with a
 frequent interval. While data is being transferred it gets called frequently,
 and during slow periods like when nothing is being transferred it can slow
 down to about one call per second.
 
-*clientp* is the pointer set with CURLOPT_XFERINFODATA(3), it is not
-used by libcurl but is only passed along from the application to the callback.
+*clientp* is the pointer set with FETCHOPT_XFERINFODATA(3), it is not
+used by libfetch but is only passed along from the application to the callback.
 
-The callback gets told how much data libcurl is about to transfer and has
+The callback gets told how much data libfetch is about to transfer and has
 already transferred, in number of bytes. *dltotal* is the total number of
-bytes libcurl expects to download in this transfer. *dlnow* is the number
-of bytes downloaded so far. *ultotal* is the total number of bytes libcurl
+bytes libfetch expects to download in this transfer. *dlnow* is the number
+of bytes downloaded so far. *ultotal* is the total number of bytes libfetch
 expects to upload in this transfer. *ulnow* is the number of bytes
 uploaded so far.
 
@@ -58,17 +58,17 @@ must be made to handle that.
 
 Return zero from the callback if everything is fine.
 
-Return 1 from this callback to make libcurl abort the transfer and return
-*CURLE_ABORTED_BY_CALLBACK*.
+Return 1 from this callback to make libfetch abort the transfer and return
+*FETCHE_ABORTED_BY_CALLBACK*.
 
-If your callback function returns CURL_PROGRESSFUNC_CONTINUE it makes libcurl
+If your callback function returns FETCH_PROGRESSFUNC_CONTINUE it makes libfetch
 to continue executing the default progress function.
 
 If you transfer data with the multi interface, this function is not called
-during periods of idleness unless you call the appropriate libcurl function
+during periods of idleness unless you call the appropriate libfetch function
 that performs transfers.
 
-CURLOPT_NOPROGRESS(3) must be set to 0 to make this function actually
+FETCHOPT_NOPROGRESS(3) must be set to 0 to make this function actually
 get called.
 
 # DEFAULT
@@ -86,10 +86,10 @@ struct progress {
 };
 
 static size_t progress_callback(void *clientp,
-                                curl_off_t dltotal,
-                                curl_off_t dlnow,
-                                curl_off_t ultotal,
-                                curl_off_t ulnow)
+                                fetch_off_t dltotal,
+                                fetch_off_t dlnow,
+                                fetch_off_t ultotal,
+                                fetch_off_t ulnow)
 {
   struct progress *memory = clientp;
   printf("my ptr: %p\n", memory->private);
@@ -101,17 +101,17 @@ static size_t progress_callback(void *clientp,
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     struct progress data;
 
     /* pass struct to callback  */
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &data);
+    fetch_easy_setopt(fetch, FETCHOPT_XFERINFODATA, &data);
 
     /* enable progress callback getting called */
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    fetch_easy_setopt(fetch, FETCHOPT_NOPROGRESS, 0L);
 
-    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_XFERINFOFUNCTION, progress_callback);
   }
 }
 ~~~
@@ -120,7 +120,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

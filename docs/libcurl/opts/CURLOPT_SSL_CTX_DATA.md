@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SSL_CTX_DATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SSL_CTX_DATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SSLVERSION (3)
-  - CURLOPT_SSL_CTX_FUNCTION (3)
+  - FETCHOPT_SSLVERSION (3)
+  - FETCHOPT_SSL_CTX_FUNCTION (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -19,20 +19,20 @@ Added-in: 7.10.6
 
 # NAME
 
-CURLOPT_SSL_CTX_DATA - pointer passed to SSL context callback
+FETCHOPT_SSL_CTX_DATA - pointer passed to SSL context callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_DATA, void *pointer);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SSL_CTX_DATA, void *pointer);
 ~~~
 
 # DESCRIPTION
 
 Data *pointer* to pass to the ssl context callback set by the option
-CURLOPT_SSL_CTX_FUNCTION(3), this is the pointer you get as third
+FETCHOPT_SSL_CTX_FUNCTION(3), this is the pointer you get as third
 parameter.
 
 # DEFAULT
@@ -47,10 +47,10 @@ NULL
 /* OpenSSL specific */
 
 #include <openssl/ssl.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include <stdio.h>
 
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static FETCHcode sslctx_function(FETCH *fetch, void *sslctx, void *parm)
 {
   X509_STORE *store;
   X509 *cert = NULL;
@@ -77,13 +77,13 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   BIO_free(bio);
 
   /* all set to go */
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 int main(void)
 {
-  CURL *ch;
-  CURLcode rv;
+  FETCH *ch;
+  FETCHcode rv;
   char *mypem = /* example CA cert PEM - shortened */
     "-----BEGIN CERTIFICATE-----\n"
     "MIIHPTCCBSWgAwIBAgIBADANBgkqhkiG9w0BAQQFADB5MRAwDgYDVQQKEwdSb290\n"
@@ -95,23 +95,23 @@ int main(void)
     "omTxJBzcoTWcFbLUvFUufQb1nA5V9FrWk9p2rSVzTMVD\n"
     "-----END CERTIFICATE-----\n";
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  ch = curl_easy_init();
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  ch = fetch_easy_init();
 
-  curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
-  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
-  curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
+  fetch_easy_setopt(ch, FETCHOPT_SSLCERTTYPE, "PEM");
+  fetch_easy_setopt(ch, FETCHOPT_SSL_VERIFYPEER, 1L);
+  fetch_easy_setopt(ch, FETCHOPT_URL, "https://www.example.com/");
 
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_DATA, mypem);
-  rv = curl_easy_perform(ch);
+  fetch_easy_setopt(ch, FETCHOPT_SSL_CTX_FUNCTION, *sslctx_function);
+  fetch_easy_setopt(ch, FETCHOPT_SSL_CTX_DATA, mypem);
+  rv = fetch_easy_perform(ch);
   if(!rv)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
 
-  curl_easy_cleanup(ch);
-  curl_global_cleanup();
+  fetch_easy_cleanup(ch);
+  fetch_global_cleanup();
   return rv;
 }
 ~~~
@@ -125,8 +125,8 @@ in 7.83.0 in BearSSL.
 
 # RETURN VALUE
 
-CURLE_OK if supported; or an error such as:
+FETCHE_OK if supported; or an error such as:
 
-CURLE_NOT_BUILT_IN - Not supported by the SSL backend
+FETCHE_NOT_BUILT_IN - Not supported by the SSL backend
 
-CURLE_UNKNOWN_OPTION
+FETCHE_UNKNOWN_OPTION

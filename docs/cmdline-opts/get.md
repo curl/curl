@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: get
 Short: G
 Help: Put the post data in the URL and use GET
@@ -13,15 +13,15 @@ See-also:
   - request
 Example:
   - --get $URL
-  - --get -d "tool=curl" -d "age=old" $URL
-  - --get -I -d "tool=curl" $URL
+  - --get -d "tool=fetch" -d "age=old" $URL
+  - --get -I -d "tool=fetch" $URL
 ---
 
 # `--get`
 
 When used, this option makes all data specified with --data, --data-binary or
 --data-urlencode to be used in an HTTP GET request instead of the POST request
-that otherwise would be used. curl appends the provided data to the URL as a
+that otherwise would be used. fetch appends the provided data to the URL as a
 query string.
 
 If used in combination with --head, the POST data is instead appended to the

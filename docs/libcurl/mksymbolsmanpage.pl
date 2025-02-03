@@ -10,7 +10,7 @@
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
-# * are also available at https://curl.se/docs/copyright.html.
+# * are also available at https://fetch.se/docs/copyright.html.
 # *
 # * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # * copies of the Software, and permit persons to whom the Software is
@@ -19,7 +19,7 @@
 # * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # * KIND, either express or implied.
 # *
-# * SPDX-License-Identifier: curl
+# * SPDX-License-Identifier: fetch
 # *
 # ***************************************************************************
 
@@ -36,24 +36,24 @@ my $year = strftime "%Y", @ts;
 print <<HEADER
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: libcurl-symbols
+SPDX-License-Identifier: fetch
+Title: libfetch-symbols
 Section: 3
-Source: libcurl
+Source: libfetch
 Protocol:
   - All
 See-also:
-  - libcurl (3)
-  - libcurl-easy (3)
-  - libcurl-multi (3)
-  - libcurl-security (3)
-  - libcurl-thread (3)
+  - libfetch (3)
+  - libfetch-easy (3)
+  - libfetch-multi (3)
+  - libfetch-security (3)
+  - libfetch-thread (3)
 Added-in: n/a
 ---
-# libcurl symbols
+# libfetch symbols
 
 This man page details version information for public symbols provided in the
-libcurl header files. This lists the first version in which the symbol was
+libfetch header files. This lists the first version in which the symbol was
 introduced and for some symbols two additional information pieces:
 
 The first version in which the symbol is marked "deprecated" - meaning that
@@ -69,224 +69,224 @@ HEADER
 
 sub nameref {
     my ($n)=@_;
-    if($n =~ /^CURLOPT_/) {
-        if($n eq "CURLOPT_RTSPHEADER") {
-            $n = "CURLOPT_HTTPHEADER";
+    if($n =~ /^FETCHOPT_/) {
+        if($n eq "FETCHOPT_RTSPHEADER") {
+            $n = "FETCHOPT_HTTPHEADER";
         }
-        elsif($n eq "CURLOPT_WRITEHEADER") {
-            $n = "CURLOPT_HEADERDATA";
+        elsif($n eq "FETCHOPT_WRITEHEADER") {
+            $n = "FETCHOPT_HEADERDATA";
         }
-        elsif($n eq "CURLOPT_WRITEINFO") {
+        elsif($n eq "FETCHOPT_WRITEINFO") {
             ; # now obsolete
         }
         else {
             return "$n(3)";
         }
     }
-    elsif($n =~ /^CURLMOPT_/) {
+    elsif($n =~ /^FETCHMOPT_/) {
         return "$n(3)";
     }
-    elsif($n =~ /^CURLINFO_/) {
+    elsif($n =~ /^FETCHINFO_/) {
         my %infotypes = (
-            'CURLINFO_TEXT' => 1,
-            'CURLINFO_HEADER_IN' => 1,
-            'CURLINFO_HEADER_OUT' => 1,
-            'CURLINFO_DATA_IN' => 1,
-            'CURLINFO_DATA_OUT' => 1,
-            'CURLINFO_SSL_DATA_IN' => 1,
-            'CURLINFO_SSL_DATA_OUT' => 1,
+            'FETCHINFO_TEXT' => 1,
+            'FETCHINFO_HEADER_IN' => 1,
+            'FETCHINFO_HEADER_OUT' => 1,
+            'FETCHINFO_DATA_IN' => 1,
+            'FETCHINFO_DATA_OUT' => 1,
+            'FETCHINFO_SSL_DATA_IN' => 1,
+            'FETCHINFO_SSL_DATA_OUT' => 1,
             );
         if($infotypes{$n}) {
-            return "CURLOPT_DEBUGFUNCTION(3)";
+            return "FETCHOPT_DEBUGFUNCTION(3)";
         }
     }
-    elsif($n =~ /^CURLALTSVC_/) {
-        return "CURLOPT_ALTSVC_CTRL(3)";
+    elsif($n =~ /^FETCHALTSVC_/) {
+        return "FETCHOPT_ALTSVC_CTRL(3)";
     }
-    elsif($n =~ /^CURLAUTH_/) {
-        return "CURLOPT_HTTPAUTH(3)";
+    elsif($n =~ /^FETCHAUTH_/) {
+        return "FETCHOPT_HTTPAUTH(3)";
     }
-    elsif($n =~ /^CURLFORM_/) {
-        return "curl_formadd(3)";
+    elsif($n =~ /^FETCHFORM_/) {
+        return "fetch_formadd(3)";
     }
-    elsif($n =~ /^CURLKH/) {
-        return "CURLOPT_SSH_KEYFUNCTION(3)";
+    elsif($n =~ /^FETCHKH/) {
+        return "FETCHOPT_SSH_KEYFUNCTION(3)";
     }
-    elsif($n =~ /^CURLE_/) {
-        return "libcurl-errors(3)";
+    elsif($n =~ /^FETCHE_/) {
+        return "libfetch-errors(3)";
     }
-    elsif($n =~ /^CURLM_/) {
-        return "libcurl-errors(3)";
+    elsif($n =~ /^FETCHM_/) {
+        return "libfetch-errors(3)";
     }
-    elsif($n =~ /^CURLUE_/) {
-        return "libcurl-errors(3)";
+    elsif($n =~ /^FETCHUE_/) {
+        return "libfetch-errors(3)";
     }
-    elsif($n =~ /^CURLHE_/) {
-        return "libcurl-errors(3)";
+    elsif($n =~ /^FETCHHE_/) {
+        return "libfetch-errors(3)";
     }
-    elsif($n =~ /^CURLSHE_/) {
-        return "libcurl-errors(3)";
+    elsif($n =~ /^FETCHSHE_/) {
+        return "libfetch-errors(3)";
     }
-    elsif($n =~ /^CURLPROTO_/) {
-        return "CURLINFO_PROTOCOL(3)";
+    elsif($n =~ /^FETCHPROTO_/) {
+        return "FETCHINFO_PROTOCOL(3)";
     }
-    elsif($n =~ /^CURLPX_/) {
-        return "CURLINFO_PROXY_ERROR(3)";
+    elsif($n =~ /^FETCHPX_/) {
+        return "FETCHINFO_PROXY_ERROR(3)";
     }
-    elsif($n =~ /^CURLPROXY_/) {
-        return "CURLOPT_PROXYTYPE(3)";
+    elsif($n =~ /^FETCHPROXY_/) {
+        return "FETCHOPT_PROXYTYPE(3)";
     }
-    elsif($n =~ /^CURLSSLBACKEND_/) {
-        return "curl_global_sslset(3)";
+    elsif($n =~ /^FETCHSSLBACKEND_/) {
+        return "fetch_global_sslset(3)";
     }
-    elsif($n =~ /^CURLSSLOPT_/) {
-        return "CURLOPT_SSL_OPTIONS(3)";
+    elsif($n =~ /^FETCHSSLOPT_/) {
+        return "FETCHOPT_SSL_OPTIONS(3)";
     }
-    elsif($n =~ /^CURLSSLSET_/) {
-        return "curl_global_sslset(3)";
+    elsif($n =~ /^FETCHSSLSET_/) {
+        return "fetch_global_sslset(3)";
     }
-    elsif($n =~ /^CURLUPART_/) {
-        return "curl_url_get(3)";
+    elsif($n =~ /^FETCHUPART_/) {
+        return "fetch_url_get(3)";
     }
-    elsif($n =~ /^CURLU_/) {
-        return "curl_url_get(3)";
+    elsif($n =~ /^FETCHU_/) {
+        return "fetch_url_get(3)";
     }
-    elsif($n =~ /^CURLVERSION_/) {
-        return "curl_version_info(3)";
+    elsif($n =~ /^FETCHVERSION_/) {
+        return "fetch_version_info(3)";
     }
-    elsif($n =~ /^CURLSHOPT_/) {
-        if($n eq "CURLSHOPT_NONE") {
-            $n = "curl_share_setopt";
+    elsif($n =~ /^FETCHSHOPT_/) {
+        if($n eq "FETCHSHOPT_NONE") {
+            $n = "fetch_share_setopt";
         }
         return "$n(3)";
     }
-    elsif($n =~ /^CURLWS_/) {
-        return "curl_ws_send(3)";
+    elsif($n =~ /^FETCHWS_/) {
+        return "fetch_ws_send(3)";
     }
-    elsif($n =~ /^CURL_FORMADD_/) {
-        return "curl_formadd(3)";
+    elsif($n =~ /^FETCH_FORMADD_/) {
+        return "fetch_formadd(3)";
     }
-    elsif($n =~ /^CURL_HTTPPOST_/) {
-        return "curl_formadd(3)";
+    elsif($n =~ /^FETCH_HTTPPOST_/) {
+        return "fetch_formadd(3)";
     }
-    elsif($n =~ /^CURL_GLOBAL_/) {
-        return "curl_global_init(3)";
+    elsif($n =~ /^FETCH_GLOBAL_/) {
+        return "fetch_global_init(3)";
     }
-    elsif($n =~ /^CURL_HTTP_VERSION_/) {
-        return "CURLOPT_HTTP_VERSION(3)";
+    elsif($n =~ /^FETCH_HTTP_VERSION_/) {
+        return "FETCHOPT_HTTP_VERSION(3)";
     }
-    elsif($n =~ /^CURL_LOCK_/) {
-        return "CURLSHOPT_SHARE(3)";
+    elsif($n =~ /^FETCH_LOCK_/) {
+        return "FETCHSHOPT_SHARE(3)";
     }
-    elsif($n =~ /^CURL_SSLVERSION_/) {
-        return "CURLOPT_SSLVERSION(3)";
+    elsif($n =~ /^FETCH_SSLVERSION_/) {
+        return "FETCHOPT_SSLVERSION(3)";
     }
-    elsif($n =~ /^CURL_VERSION_/) {
-        return "curl_version_info(3)";
+    elsif($n =~ /^FETCH_VERSION_/) {
+        return "fetch_version_info(3)";
     }
-    elsif($n =~ /^CURL_RTSPREQ_/) {
-        return "CURLOPT_RTSP_REQUEST(3)";
+    elsif($n =~ /^FETCH_RTSPREQ_/) {
+        return "FETCHOPT_RTSP_REQUEST(3)";
     }
-    elsif($n =~ /^CURLH_/) {
-        return "curl_easy_header(3)";
+    elsif($n =~ /^FETCHH_/) {
+        return "fetch_easy_header(3)";
     }
-    elsif($n =~ /^CURL_TRAILERFUNC_/) {
-        return "CURLOPT_TRAILERFUNCTION(3)";
+    elsif($n =~ /^FETCH_TRAILERFUNC_/) {
+        return "FETCHOPT_TRAILERFUNCTION(3)";
     }
-    elsif($n =~ /^CURLOT_/) {
-        return "curl_easy_option_next(3)";
+    elsif($n =~ /^FETCHOT_/) {
+        return "fetch_easy_option_next(3)";
     }
-    elsif($n =~ /^CURLFINFOFLAG_/) {
-        return "CURLOPT_CHUNK_BGN_FUNCTION(3)";
+    elsif($n =~ /^FETCHFINFOFLAG_/) {
+        return "FETCHOPT_CHUNK_BGN_FUNCTION(3)";
     }
-    elsif($n =~ /^CURLFILETYPE_/) {
-        return "CURLOPT_CHUNK_BGN_FUNCTION(3)";
+    elsif($n =~ /^FETCHFILETYPE_/) {
+        return "FETCHOPT_CHUNK_BGN_FUNCTION(3)";
     }
-    elsif($n =~ /^CURL_CHUNK_BGN_FUNC_/) {
-        return "CURLOPT_CHUNK_BGN_FUNCTION(3)";
+    elsif($n =~ /^FETCH_CHUNK_BGN_FUNC_/) {
+        return "FETCHOPT_CHUNK_BGN_FUNCTION(3)";
     }
-    elsif($n =~ /^CURL_CHUNK_END_FUNC_/) {
-        return "CURLOPT_CHUNK_END_FUNCTION(3)";
+    elsif($n =~ /^FETCH_CHUNK_END_FUNC_/) {
+        return "FETCHOPT_CHUNK_END_FUNCTION(3)";
     }
-    elsif($n =~ /^CURLSSH_AUTH_/) {
-        return "CURLOPT_SSH_AUTH_TYPES(3)";
+    elsif($n =~ /^FETCHSSH_AUTH_/) {
+        return "FETCHOPT_SSH_AUTH_TYPES(3)";
     }
-    elsif($n =~ /^CURL_POLL_/) {
-        return "CURLMOPT_SOCKETFUNCTION(3)";
+    elsif($n =~ /^FETCH_POLL_/) {
+        return "FETCHMOPT_SOCKETFUNCTION(3)";
     }
-    elsif($n =~ /^CURLMSG_/) {
-        return "curl_multi_info_read(3)";
+    elsif($n =~ /^FETCHMSG_/) {
+        return "fetch_multi_info_read(3)";
     }
-    elsif($n =~ /^CURLFTPAUTH_/) {
-        return "CURLOPT_FTPSSLAUTH(3)";
+    elsif($n =~ /^FETCHFTPAUTH_/) {
+        return "FETCHOPT_FTPSSLAUTH(3)";
     }
-    elsif($n =~ /^CURLFTPMETHOD_/) {
-        return "CURLOPT_FTP_FILEMETHOD(3)";
+    elsif($n =~ /^FETCHFTPMETHOD_/) {
+        return "FETCHOPT_FTP_FILEMETHOD(3)";
     }
-    elsif($n =~ /^CURLFTPSSL_/) {
-        return "CURLOPT_USE_SSL(3)";
+    elsif($n =~ /^FETCHFTPSSL_/) {
+        return "FETCHOPT_USE_SSL(3)";
     }
-    elsif($n =~ /^CURLFTP_CREATE_/) {
-        return "CURLOPT_FTP_CREATE_MISSING_DIRS(3)";
+    elsif($n =~ /^FETCHFTP_CREATE_/) {
+        return "FETCHOPT_FTP_CREATE_MISSING_DIRS(3)";
     }
-    elsif($n =~ /^CURLGSSAPI_DELEGATION_/) {
-        return "CURLOPT_GSSAPI_DELEGATION(3)";
+    elsif($n =~ /^FETCHGSSAPI_DELEGATION_/) {
+        return "FETCHOPT_GSSAPI_DELEGATION(3)";
     }
-    elsif($n =~ /^CURLHEADER_/) {
-        return "CURLOPT_HEADEROPT(3)";
+    elsif($n =~ /^FETCHHEADER_/) {
+        return "FETCHOPT_HEADEROPT(3)";
     }
-    elsif($n =~ /^CURLHSTS_/) {
-        return "CURLOPT_HSTS_CTRL(3)";
+    elsif($n =~ /^FETCHHSTS_/) {
+        return "FETCHOPT_HSTS_CTRL(3)";
     }
-    elsif($n =~ /^CURLIOCMD_/) {
-        return "CURLOPT_IOCTLFUNCTION(3)";
+    elsif($n =~ /^FETCHIOCMD_/) {
+        return "FETCHOPT_IOCTLFUNCTION(3)";
     }
-    elsif($n =~ /^CURLIOE_/) {
-        return "CURLOPT_IOCTLFUNCTION(3)";
+    elsif($n =~ /^FETCHIOE_/) {
+        return "FETCHOPT_IOCTLFUNCTION(3)";
     }
-    elsif($n =~ /^CURLMIMEOPT_/) {
-        return "CURLOPT_MIME_OPTIONS(3)";
+    elsif($n =~ /^FETCHMIMEOPT_/) {
+        return "FETCHOPT_MIME_OPTIONS(3)";
     }
-    elsif($n =~ /^CURLPAUSE_/) {
-        return "curl_easy_pause(3)";
+    elsif($n =~ /^FETCHPAUSE_/) {
+        return "fetch_easy_pause(3)";
     }
-    elsif($n =~ /^CURLPIPE_/) {
-        return "CURLMOPT_PIPELINING(3)";
+    elsif($n =~ /^FETCHPIPE_/) {
+        return "FETCHMOPT_PIPELINING(3)";
     }
-    elsif($n =~ /^CURLSOCKTYPE_/) {
-        return "CURLOPT_SOCKOPTFUNCTION(3)";
+    elsif($n =~ /^FETCHSOCKTYPE_/) {
+        return "FETCHOPT_SOCKOPTFUNCTION(3)";
     }
-    elsif($n =~ /^CURLSTS_/) {
-        return "CURLOPT_HSTSREADFUNCTION(3)";
+    elsif($n =~ /^FETCHSTS_/) {
+        return "FETCHOPT_HSTSREADFUNCTION(3)";
     }
-    elsif($n =~ /^CURLUSESSL_/) {
-        return "CURLOPT_USE_SSL(3)";
+    elsif($n =~ /^FETCHUSESSL_/) {
+        return "FETCHOPT_USE_SSL(3)";
     }
-    elsif($n =~ /^CURL_CSELECT_/) {
-        return "curl_multi_socket_action(3)";
+    elsif($n =~ /^FETCH_CSELECT_/) {
+        return "fetch_multi_socket_action(3)";
     }
-    elsif($n =~ /^CURL_FNMATCHFUNC_/) {
-        return "CURLOPT_FNMATCH_FUNCTION(3)";
+    elsif($n =~ /^FETCH_FNMATCHFUNC_/) {
+        return "FETCHOPT_FNMATCH_FUNCTION(3)";
     }
-    elsif($n =~ /^CURL_HET_/) {
-        return "CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS(3)";
+    elsif($n =~ /^FETCH_HET_/) {
+        return "FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS(3)";
     }
-    elsif($n =~ /^CURL_IPRESOLVE_/) {
-        return "CURLOPT_IPRESOLVE(3)";
+    elsif($n =~ /^FETCH_IPRESOLVE_/) {
+        return "FETCHOPT_IPRESOLVE(3)";
     }
-    elsif($n =~ /^CURL_SEEKFUNC_/) {
-        return "CURLOPT_SEEKFUNCTION(3)";
+    elsif($n =~ /^FETCH_SEEKFUNC_/) {
+        return "FETCHOPT_SEEKFUNCTION(3)";
     }
-    elsif($n =~ /^CURL_TIMECOND_/) {
-        return "CURLOPT_TIMECONDITION(3)";
+    elsif($n =~ /^FETCH_TIMECOND_/) {
+        return "FETCHOPT_TIMECONDITION(3)";
     }
-    elsif($n =~ /^CURL_REDIR_POST_/) {
-        return "CURLOPT_POSTREDIR(3)";
+    elsif($n =~ /^FETCH_REDIR_POST_/) {
+        return "FETCHOPT_POSTREDIR(3)";
     }
 }
 
 while(<STDIN>) {
-    if($_ =~ /^(CURL[A-Z0-9_.]*) *(.*)/i) {
+    if($_ =~ /^(FETCH[A-Z0-9_.]*) *(.*)/i) {
         my ($symbol, $rest)=($1,$2);
         my ($intro, $dep, $rem);
         if($rest =~ s/^([0-9.]*) *//) {

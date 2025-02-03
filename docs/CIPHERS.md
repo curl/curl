@@ -1,30 +1,30 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-## curl cipher options
+## fetch cipher options
 
-With curl's option
-[`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
+With fetch's option
+[`--tls13-ciphers`](https://fetch.se/docs/manpage.html#--tls13-ciphers)
 or
-[`CURLOPT_TLS13_CIPHERS`](https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
+[`FETCHOPT_TLS13_CIPHERS`](https://fetch.se/libfetch/c/FETCHOPT_TLS13_CIPHERS.html)
 users can control which cipher suites to consider when negotiating TLS 1.3
 connections. With option
-[`--ciphers`](https://curl.se/docs/manpage.html#--ciphers)
+[`--ciphers`](https://fetch.se/docs/manpage.html#--ciphers)
 or
-[`CURLOPT_SSL_CIPHER_LIST`](https://curl.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+[`FETCHOPT_SSL_CIPHER_LIST`](https://fetch.se/libfetch/c/FETCHOPT_SSL_CIPHER_LIST.html)
 users can control which cipher suites to consider when negotiating
 TLS 1.2 (1.1, 1.0) connections.
 
-By default, curl may negotiate TLS 1.3 and TLS 1.2 connections, so the cipher
+By default, fetch may negotiate TLS 1.3 and TLS 1.2 connections, so the cipher
 suites considered when negotiating a TLS connection are a union of the TLS 1.3
-and TLS 1.2 cipher suites. If you want curl to consider only TLS 1.3 cipher
+and TLS 1.2 cipher suites. If you want fetch to consider only TLS 1.3 cipher
 suites for the connection, you have to set the minimum TLS version to 1.3 by
-using [`--tlsv1.3`](https://curl.se/docs/manpage.html#--tlsv13)
-or [`CURLOPT_SSLVERSION`](https://curl.se/libcurl/c/CURLOPT_SSLVERSION.html)
-with `CURL_SSLVERSION_TLSv1_3`.
+using [`--tlsv1.3`](https://fetch.se/docs/manpage.html#--tlsv13)
+or [`FETCHOPT_SSLVERSION`](https://fetch.se/libfetch/c/FETCHOPT_SSLVERSION.html)
+with `FETCH_SSLVERSION_TLSv1_3`.
 
 Both the TLS 1.3 and TLS 1.2 cipher options expect a list of cipher suites
 separated by colons (`:`). This list is parsed opportunistically, cipher suites
@@ -34,15 +34,15 @@ least one recognized cipher suite in the list, the list is considered valid.
 For both the TLS 1.3 and TLS 1.2 cipher options, the order in which the
 cipher suites are specified determine the preference of them. When negotiating
 a TLS connection the server picks a cipher suite from the intersection of the
-cipher suites supported by the server and the cipher suites sent by curl. If
+cipher suites supported by the server and the cipher suites sent by fetch. If
 the server is configured to honor the client's cipher preference, the first
-common cipher suite in the list sent by curl is chosen.
+common cipher suite in the list sent by fetch is chosen.
 
 ## TLS 1.3 cipher suites
 
-Setting TLS 1.3 cipher suites is supported by curl with
-OpenSSL (1.1.1+, curl 7.61.0+), LibreSSL (3.4.1+, curl 8.3.0+),
-wolfSSL (curl 8.10.0+) and mbedTLS (3.6.0+, curl 8.10.0+).
+Setting TLS 1.3 cipher suites is supported by fetch with
+OpenSSL (1.1.1+, fetch 7.61.0+), LibreSSL (3.4.1+, fetch 8.3.0+),
+wolfSSL (fetch 8.10.0+) and mbedTLS (3.6.0+, fetch 8.10.0+).
 
 The list of cipher suites that can be used for the `--tls13-ciphers` option:
 ```
@@ -62,18 +62,18 @@ are NULL ciphers, offering no encryption whatsoever.)
 
 ## TLS 1.2 (1.1, 1.0) cipher suites
 
-Setting TLS 1.2 cipher suites is supported by curl with OpenSSL, LibreSSL,
-BoringSSL, mbedTLS (curl 8.8.0+), wolfSSL (curl 7.53.0+),
-Secure Transport (curl 7.77.0+) and BearSSL (curl 7.83.0+). Schannel does not
+Setting TLS 1.2 cipher suites is supported by fetch with OpenSSL, LibreSSL,
+BoringSSL, mbedTLS (fetch 8.8.0+), wolfSSL (fetch 7.53.0+),
+Secure Transport (fetch 7.77.0+) and BearSSL (fetch 7.83.0+). Schannel does not
 support setting cipher suites directly, but does support setting algorithms
-(curl 7.61.0+), see Schannel notes below.
+(fetch 7.61.0+), see Schannel notes below.
 
 For TLS 1.2 cipher suites there are multiple naming schemes, the two most used
 are with OpenSSL names (e.g. `ECDHE-RSA-AES128-GCM-SHA256`) and IANA names
 (e.g. `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`). IANA names of TLS 1.2 cipher
 suites look similar to TLS 1.3 cipher suite names, to distinguish them note
 that TLS 1.2 names contain `_WITH_`, while TLS 1.3 names do not. When setting
-TLS 1.2 cipher suites with curl it is recommended that you use OpenSSL names
+TLS 1.2 cipher suites with fetch it is recommended that you use OpenSSL names
 as these are most widely recognized by the supported SSL backends.
 
 The complete list of cipher suites that may be considered for the `--ciphers`
@@ -115,7 +115,7 @@ AES256-SHA
 DES-CBC3-SHA
 ```
 
-See this [list](https://github.com/curl/curl/blob/master/docs/CIPHERS-TLS12.md)
+See this [list](https://github.com/fetch/fetch/blob/master/docs/CIPHERS-TLS12.md)
 for a complete list of TLS 1.2 cipher suites.
 
 ### OpenSSL notes
@@ -132,17 +132,17 @@ Schannel does not support setting individual TLS 1.2 cipher suites directly.
 It only allows the enabling and disabling of encryption algorithms. These are
 in the form of `CALG_xxx`, see the [Schannel `ALG_ID`
 documentation](https://docs.microsoft.com/windows/desktop/SecCrypto/alg-id)
-for a list of these algorithms. Also, (since curl 7.77.0)
+for a list of these algorithms. Also, (since fetch 7.77.0)
 `SCH_USE_STRONG_CRYPTO` can be given to pass that flag to Schannel, lookup the
 [documentation for the Windows version in
 use](https://learn.microsoft.com/en-us/windows/win32/secauthn/cipher-suites-in-schannel)
 to see how that affects the cipher suite selection. When not specifying the
-`--chiphers` and `--tl13-ciphers` options curl passes this flag by default.
+`--chiphers` and `--tl13-ciphers` options fetch passes this flag by default.
 
 ## Examples
 
 ```sh
-curl \
+fetch \
   --tls13-ciphers TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256 \
   --ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:\
 ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305 \
@@ -152,7 +152,7 @@ Restrict ciphers to `aes128-gcm` and `chacha20`. Works with OpenSSL, LibreSSL,
 mbedTLS and wolfSSL.
 
 ```sh
-curl \
+fetch \
   --tlsv1.3 \
   --tls13-ciphers TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256 \
   https://example.com/
@@ -161,7 +161,7 @@ Restrict to only TLS 1.3 with `aes128-gcm` and `chacha20` ciphers. Works with
 OpenSSL, LibreSSL, mbedTLS, wolfSSL and Schannel.
 
 ```sh
-curl \
+fetch \
   --ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:\
 ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305 \
   https://example.com/

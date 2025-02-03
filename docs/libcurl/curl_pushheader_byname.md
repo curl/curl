@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_pushheader_byname
+SPDX-License-Identifier: fetch
+Title: fetch_pushheader_byname
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLMOPT_PUSHFUNCTION (3)
-  - curl_pushheader_bynum (3)
+  - FETCHMOPT_PUSHFUNCTION (3)
+  - fetch_pushheader_bynum (3)
 Protocol:
   - HTTP
 Added-in: 7.44.0
@@ -14,20 +14,20 @@ Added-in: 7.44.0
 
 # NAME
 
-curl_pushheader_byname - get a push header by name
+fetch_pushheader_byname - get a push header by name
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name);
+char *fetch_pushheader_byname(struct fetch_pushheaders *h, const char *name);
 ~~~
 
 # DESCRIPTION
 
 This is a function that is only functional within a
-CURLMOPT_PUSHFUNCTION(3) callback. It makes no sense to try to use it
+FETCHMOPT_PUSHFUNCTION(3) callback. It makes no sense to try to use it
 elsewhere and it has no function then.
 
 It returns the value for the given header field name (or NULL) for the
@@ -43,16 +43,16 @@ one header field use the same name, this returns only the first one.
 ~~~c
 #include <string.h> /* for strncmp */
 
-static int push_cb(CURL *parent,
-                   CURL *easy,
+static int push_cb(FETCH *parent,
+                   FETCH *easy,
                    size_t num_headers,
-                   struct curl_pushheaders *headers,
+                   struct fetch_pushheaders *headers,
                    void *clientp)
 {
   char *headp;
   int *transfers = (int *)clientp;
   FILE *out;
-  headp = curl_pushheader_byname(headers, ":path");
+  headp = fetch_pushheader_byname(headers, ":path");
   if(headp && !strncmp(headp, "/push-", 6)) {
     fprintf(stderr, "The PATH is %s\n", headp);
 
@@ -60,21 +60,21 @@ static int push_cb(CURL *parent,
     out = fopen("pushed-stream", "wb");
 
     /* write to this file */
-    curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
+    fetch_easy_setopt(easy, FETCHOPT_WRITEDATA, out);
 
     (*transfers)++; /* one more */
 
-    return CURL_PUSH_OK;
+    return FETCH_PUSH_OK;
   }
-  return CURL_PUSH_DENY;
+  return FETCH_PUSH_DENY;
 }
 
 int main(void)
 {
   int counter;
-  CURLM *multi = curl_multi_init();
-  curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, push_cb);
-  curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
+  FETCHM *multi = fetch_multi_init();
+  fetch_multi_setopt(multi, FETCHMOPT_PUSHFUNCTION, push_cb);
+  fetch_multi_setopt(multi, FETCHMOPT_PUSHDATA, &counter);
 }
 ~~~
 

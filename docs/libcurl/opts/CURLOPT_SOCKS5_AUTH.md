@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_SOCKS5_AUTH
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_SOCKS5_AUTH
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_PROXY (3)
-  - CURLOPT_PROXYTYPE (3)
+  - FETCHOPT_PROXY (3)
+  - FETCHOPT_PROXYTYPE (3)
 Protocol:
   - All
 Added-in: 7.55.0
@@ -14,28 +14,28 @@ Added-in: 7.55.0
 
 # NAME
 
-CURLOPT_SOCKS5_AUTH - methods for SOCKS5 proxy authentication
+FETCHOPT_SOCKS5_AUTH - methods for SOCKS5 proxy authentication
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SOCKS5_AUTH, long bitmask);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_SOCKS5_AUTH, long bitmask);
 ~~~
 
 # DESCRIPTION
 
-Pass a long as parameter, which is set to a bitmask, to tell libcurl which
+Pass a long as parameter, which is set to a bitmask, to tell libfetch which
 authentication method(s) are allowed for SOCKS5 proxy authentication. The only
-supported flags are *CURLAUTH_BASIC*, which allows username/password
-authentication, *CURLAUTH_GSSAPI*, which allows GSS-API authentication, and
-*CURLAUTH_NONE*, which allows no authentication. Set the actual username and
-password with the CURLOPT_PROXYUSERPWD(3) option.
+supported flags are *FETCHAUTH_BASIC*, which allows username/password
+authentication, *FETCHAUTH_GSSAPI*, which allows GSS-API authentication, and
+*FETCHAUTH_NONE*, which allows no authentication. Set the actual username and
+password with the FETCHOPT_PROXYUSERPWD(3) option.
 
 # DEFAULT
 
-CURLAUTH_BASIC|CURLAUTH_GSSAPI
+FETCHAUTH_BASIC|FETCHAUTH_GSSAPI
 
 # %PROTOCOLS%
 
@@ -44,18 +44,18 @@ CURLAUTH_BASIC|CURLAUTH_GSSAPI
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
     /* request to use a SOCKS5 proxy */
-    curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://user:pass@myproxy.com");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "socks5://user:pass@myproxy.com");
 
     /* enable username/password authentication only */
-    curl_easy_setopt(curl, CURLOPT_SOCKS5_AUTH, (long)CURLAUTH_BASIC);
+    fetch_easy_setopt(fetch, FETCHOPT_SOCKS5_AUTH, (long)FETCHAUTH_BASIC);
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -64,7 +64,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

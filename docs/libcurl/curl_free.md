@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_free
+SPDX-License-Identifier: fetch
+Title: fetch_free
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_easy_escape (3)
-  - curl_easy_unescape (3)
+  - fetch_easy_escape (3)
+  - fetch_easy_unescape (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -14,21 +14,21 @@ Added-in: 7.1
 
 # NAME
 
-curl_free - reclaim memory that has been obtained through a libcurl call
+fetch_free - reclaim memory that has been obtained through a libfetch call
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-void curl_free(void *ptr);
+void fetch_free(void *ptr);
 ~~~
 
 # DESCRIPTION
 
-curl_free reclaims memory that has been obtained through a libcurl call. Use
-curl_free(3) instead of free() to avoid anomalies that can result from
-differences in memory management between your application and libcurl.
+fetch_free reclaims memory that has been obtained through a libfetch call. Use
+fetch_free(3) instead of free() to avoid anomalies that can result from
+differences in memory management between your application and libfetch.
 
 Passing in a NULL pointer in *ptr* makes this function return immediately
 with no action.
@@ -40,10 +40,10 @@ with no action.
 ~~~c
 int main(void)
 {
-  char *width = curl_getenv("COLUMNS");
+  char *width = fetch_getenv("COLUMNS");
   if(width) {
     /* it was set */
-    curl_free(width);
+    fetch_free(width);
   }
 }
 ~~~

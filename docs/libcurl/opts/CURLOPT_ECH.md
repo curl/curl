@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_ECH
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_ECH
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_DOH_URL (3)
+  - FETCHOPT_DOH_URL (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -16,14 +16,14 @@ Added-in: 8.8.0
 
 # NAME
 
-CURLOPT_ECH - configuration for Encrypted Client Hello
+FETCHOPT_ECH - configuration for Encrypted Client Hello
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ECH, char *config);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_ECH, char *config);
 ~~~
 
 # DESCRIPTION
@@ -89,14 +89,14 @@ NULL, meaning ECH is disabled.
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
+  FETCH *fetch = fetch_easy_init();
 
   const char *config = \
     "ecl:AED+DQA87wAgACB/RuzUCsW3uBbSFI7mzD63TUXpI8sGDTnFTbFCDpa+" \
     "CAAEAAEAAQANY292ZXIuZGVmby5pZQAA";
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_ECH, config);
-    curl_easy_perform(curl);
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_ECH, config);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -104,7 +104,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

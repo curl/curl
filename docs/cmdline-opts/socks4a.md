@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: socks4a
 Arg: <host[:port]>
 Help: SOCKS4a proxy on given host + port
@@ -30,6 +30,6 @@ This option is superfluous since you can specify a socks4a proxy with --proxy
 using a socks4a:// protocol prefix. (Added in 7.21.7)
 
 --preproxy can be used to specify a SOCKS proxy at the same time --proxy is
-used with an HTTP/HTTPS proxy (added in 7.52.0). In such a case, curl first
+used with an HTTP/HTTPS proxy (added in 7.52.0). In such a case, fetch first
 connects to the SOCKS proxy and then connects (through SOCKS) to the HTTP or
 HTTPS proxy.

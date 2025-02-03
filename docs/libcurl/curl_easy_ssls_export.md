@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_easy_ssls_export
+SPDX-License-Identifier: fetch
+Title: fetch_easy_ssls_export
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_SHARE (3)
-  - curl_share_setopt (3)
-  - curl_easy_ssls_import (3)
+  - FETCHOPT_SHARE (3)
+  - fetch_share_setopt (3)
+  - fetch_easy_ssls_import (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -21,27 +21,27 @@ Added-in: 8.12.0
 
 # NAME
 
-curl_easy_ssls_export - export SSL sessions
+fetch_easy_ssls_export - export SSL sessions
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-typedef CURLcode curl_ssls_export_function(CURL *handle,
+typedef FETCHcode fetch_ssls_export_function(FETCH *handle,
                                            void *userptr,
                                            const char *session_key,
                                            const unsigned char *shmac,
                                            size_t shmac_len,
                                            const unsigned char *sdata,
                                            size_t sdata_len,
-                                           curl_off_t valid_until,
+                                           fetch_off_t valid_until,
                                            int ietf_tls_id,
                                            const char *alpn,
                                            size_t earlydata_max);
 
-CURLcode curl_easy_ssls_export(CURL *handle,
-                               curl_ssls_export_function *export_fn,
+FETCHcode fetch_easy_ssls_export(FETCH *handle,
+                               fetch_ssls_export_function *export_fn,
                                void *userptr);
 ~~~
 
@@ -49,10 +49,10 @@ CURLcode curl_easy_ssls_export(CURL *handle,
 
 This function iterates over all SSL session tickets that belong to the
 easy handle and invokes the **export_fn** callback on each of them, as
-long as the callback returns **CURLE_OK**.
+long as the callback returns **FETCHE_OK**.
 
-The callback may then store this information and use curl_easy_ssls_import(3)
-in another libcurl instance to add SSL session tickets again. Reuse of
+The callback may then store this information and use fetch_easy_ssls_import(3)
+in another libfetch instance to add SSL session tickets again. Reuse of
 SSL session tickets may result in faster handshakes and some connections
 might be able to send request data in the initial packets (0-RTT).
 
@@ -75,7 +75,7 @@ and version number of the TLS backend used.
 
 It is recommended to only persist **session_key** when it can be protected
 from outside access. Since the hostname appears in plain text, it would
-allow any third party to see how curl has been used for.
+allow any third party to see how fetch has been used for.
 
 ## Salted Hash
 
@@ -120,43 +120,43 @@ The maximum amount of bytes the server supports to receive in early data
 # EXAMPLE
 
 ~~~c
-CURLcode my_export_cb(CURL *handle,
+FETCHcode my_export_cb(FETCH *handle,
                       void *userptr,
                       const char *session_key,
                       const unsigned char *shmac,
                       size_t shmac_len,
                       const unsigned char *sdata,
                       size_t sdata_len,
-                      curl_off_t valid_until,
+                      fetch_off_t valid_until,
                       int ietf_tls_id,
                       const char *alpn,
                       size_t earlydata_max)
 {
   /* persist sdata */
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 int main(void)
 {
-  CURLSHcode sh;
-  CURLSH *share = curl_share_init();
-  CURLcode rc;
-  CURL *curl;
+  FETCHSHcode sh;
+  FETCHSH *share = fetch_share_init();
+  FETCHcode rc;
+  FETCH *fetch;
 
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+  sh = fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_SSL_SESSION);
   if(sh)
-    printf("Error: %s\n", curl_share_strerror(sh));
+    printf("Error: %s\n", fetch_share_strerror(sh));
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_SHARE, share);
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_SHARE, share);
 
-    rc = curl_easy_ssls_export(curl, my_export_cb, NULL);
+    rc = fetch_easy_ssls_export(fetch, my_export_cb, NULL);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
-  curl_share_cleanup(share);
+  fetch_share_cleanup(share);
 }
 ~~~
 
@@ -164,9 +164,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

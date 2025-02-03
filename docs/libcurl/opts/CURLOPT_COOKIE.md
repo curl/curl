@@ -1,15 +1,15 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_COOKIE
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_COOKIE
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLINFO_COOKIELIST (3)
-  - CURLOPT_COOKIEFILE (3)
-  - CURLOPT_COOKIEJAR (3)
-  - CURLOPT_COOKIELIST (3)
-  - CURLOPT_HTTPHEADER (3)
+  - FETCHINFO_COOKIELIST (3)
+  - FETCHOPT_COOKIEFILE (3)
+  - FETCHOPT_COOKIEJAR (3)
+  - FETCHOPT_COOKIELIST (3)
+  - FETCHOPT_HTTPHEADER (3)
 Protocol:
   - HTTP
 Added-in: 7.1
@@ -17,14 +17,14 @@ Added-in: 7.1
 
 # NAME
 
-CURLOPT_COOKIE - HTTP Cookie header
+FETCHOPT_COOKIE - HTTP Cookie header
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIE, char *cookie);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_COOKIE, char *cookie);
 ~~~
 
 # DESCRIPTION
@@ -35,7 +35,7 @@ NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
 should contain.
 
 To set multiple cookies, set them all using a single option concatenated like
-this: "name1=content1; name2=content2;" etc. libcurl does not syntax check the
+this: "name1=content1; name2=content2;" etc. libfetch does not syntax check the
 data but assumes the application gives it what it needs to send.
 
 This option sets the cookie header explicitly in the outgoing request(s). If
@@ -48,7 +48,7 @@ the cookie engine and either you have imported a cookie of the same name (e.g.
 'foo') or the server has set one, it has no effect on the cookies you set
 here. A request to the server sends both the 'foo' held by the cookie engine
 and the 'foo' held by this option. To set a cookie that is instead held by the
-cookie engine and can be modified by the server use CURLOPT_COOKIELIST(3).
+cookie engine and can be modified by the server use FETCHOPT_COOKIELIST(3).
 
 Since this custom cookie is appended to the Cookie: header in addition to any
 cookies set by the cookie engine, there is a risk that the header ends up too
@@ -60,8 +60,8 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
-This option does not enable the cookie engine. Use CURLOPT_COOKIEFILE(3) or
-CURLOPT_COOKIEJAR(3) to enable parsing and sending cookies automatically.
+This option does not enable the cookie engine. Use FETCHOPT_COOKIEFILE(3) or
+FETCHOPT_COOKIEJAR(3) to enable parsing and sending cookies automatically.
 
 # DEFAULT
 
@@ -74,13 +74,13 @@ NULL, no cookies
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
 
-    curl_easy_setopt(curl, CURLOPT_COOKIE, "tool=curl; fun=yes;");
+    fetch_easy_setopt(fetch, FETCHOPT_COOKIE, "tool=fetch; fun=yes;");
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -89,7 +89,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

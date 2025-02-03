@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
- * Pass in a custom socket for libcurl to use.
+ * Pass in a custom socket for libfetch to use.
  * </DESC>
  */
 #ifdef _WIN32
@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #ifdef _WIN32
 #define close closesocket
@@ -62,42 +62,42 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
   return written;
 }
 
-static int closecb(void *clientp, curl_socket_t item)
+static int closecb(void *clientp, fetch_socket_t item)
 {
   (void)clientp;
-  printf("libcurl wants to close %d now\n", (int)item);
+  printf("libfetch wants to close %d now\n", (int)item);
   return 0;
 }
 
-static curl_socket_t opensocket(void *clientp,
-                                curlsocktype purpose,
-                                struct curl_sockaddr *address)
+static fetch_socket_t opensocket(void *clientp,
+                                fetchsocktype purpose,
+                                struct fetch_sockaddr *address)
 {
-  curl_socket_t sockfd;
+  fetch_socket_t sockfd;
   (void)purpose;
   (void)address;
-  sockfd = *(curl_socket_t *)clientp;
+  sockfd = *(fetch_socket_t *)clientp;
   /* the actual externally set socket is passed in via the OPENSOCKETDATA
      option */
   return sockfd;
 }
 
-static int sockopt_callback(void *clientp, curl_socket_t curlfd,
-                            curlsocktype purpose)
+static int sockopt_callback(void *clientp, fetch_socket_t fetchfd,
+                            fetchsocktype purpose)
 {
   (void)clientp;
-  (void)curlfd;
+  (void)fetchfd;
   (void)purpose;
-  /* This return code was added in libcurl 7.21.5 */
-  return CURL_SOCKOPT_ALREADY_CONNECTED;
+  /* This return code was added in libfetch 7.21.5 */
+  return FETCH_SOCKOPT_ALREADY_CONNECTED;
 }
 
 int main(void)
 {
-  CURL *curl;
-  CURLcode res;
+  FETCH *fetch;
+  FETCHcode res;
   struct sockaddr_in servaddr;  /*  socket address structure  */
-  curl_socket_t sockfd;
+  fetch_socket_t sockfd;
 
 #ifdef _WIN32
   WSADATA wsaData;
@@ -108,17 +108,17 @@ int main(void)
   }
 #endif
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     /*
-     * Note that libcurl internally thinks that you connect to the host and
+     * Note that libfetch internally thinks that you connect to the host and
      * port that you specify in the URL option.
      */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://99.99.99.99:9999");
 
     /* Create the socket "manually" */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if(sockfd == CURL_SOCKET_BAD) {
+    if(sockfd == FETCH_SOCKET_BAD) {
       printf("Error creating listening socket.\n");
       return 3;
     }
@@ -141,32 +141,32 @@ int main(void)
     }
 
     /* no progress meter please */
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_NOPROGRESS, 1L);
 
     /* send all data to this function  */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, write_data);
 
     /* call this function to get a socket */
-    curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
-    curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &sockfd);
+    fetch_easy_setopt(fetch, FETCHOPT_OPENSOCKETFUNCTION, opensocket);
+    fetch_easy_setopt(fetch, FETCHOPT_OPENSOCKETDATA, &sockfd);
 
     /* call this function to close sockets */
-    curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closecb);
-    curl_easy_setopt(curl, CURLOPT_CLOSESOCKETDATA, &sockfd);
+    fetch_easy_setopt(fetch, FETCHOPT_CLOSESOCKETFUNCTION, closecb);
+    fetch_easy_setopt(fetch, FETCHOPT_CLOSESOCKETDATA, &sockfd);
 
     /* call this function to set options for the socket */
-    curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
+    fetch_easy_setopt(fetch, FETCHOPT_SOCKOPTFUNCTION, sockopt_callback);
 
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
 
     close(sockfd);
 
     if(res) {
-      printf("libcurl error: %d\n", res);
+      printf("libfetch error: %d\n", res);
       return 4;
     }
   }

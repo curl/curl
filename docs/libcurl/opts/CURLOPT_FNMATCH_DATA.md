@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_FNMATCH_DATA
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_FNMATCH_DATA
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_FNMATCH_FUNCTION (3)
-  - CURLOPT_WILDCARDMATCH (3)
+  - FETCHOPT_FNMATCH_FUNCTION (3)
+  - FETCHOPT_WILDCARDMATCH (3)
 Protocol:
   - FTP
 Added-in: 7.21.0
@@ -14,21 +14,21 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLOPT_FNMATCH_DATA - pointer passed to the fnmatch callback
+FETCHOPT_FNMATCH_DATA - pointer passed to the fnmatch callback
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FNMATCH_DATA,
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FNMATCH_DATA,
                           void *pointer);
 ~~~
 
 # DESCRIPTION
 
-Pass a pointer that is untouched by libcurl and passed as the ptr argument to
-the CURLOPT_FNMATCH_FUNCTION(3).
+Pass a pointer that is untouched by libfetch and passed as the ptr argument to
+the FETCHOPT_FNMATCH_FUNCTION(3).
 
 # DEFAULT
 
@@ -52,22 +52,22 @@ static int my_fnmatch(void *clientp,
   printf("my ptr: %p\n", my->custom);
 
   if(string_match(pattern, string))
-    return CURL_FNMATCHFUNC_MATCH;
+    return FETCH_FNMATCHFUNC_MATCH;
   else
-    return CURL_FNMATCHFUNC_NOMATCH;
+    return FETCH_FNMATCHFUNC_NOMATCH;
 }
 
 int main(void)
 {
   struct local_stuff local_data;
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/file*");
-    curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
-    curl_easy_setopt(curl, CURLOPT_FNMATCH_FUNCTION, my_fnmatch);
-    curl_easy_setopt(curl, CURLOPT_FNMATCH_DATA, &local_data);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "ftp://ftp.example.com/file*");
+    fetch_easy_setopt(fetch, FETCHOPT_WILDCARDMATCH, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_FNMATCH_FUNCTION, my_fnmatch);
+    fetch_easy_setopt(fetch, FETCHOPT_FNMATCH_DATA, &local_data);
 
-    curl_easy_perform(curl);
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -76,7 +76,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_TRAILERFUNCTION
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_TRAILERFUNCTION
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_TRAILERDATA (3)
-  - CURLOPT_WRITEFUNCTION (3)
+  - FETCHOPT_TRAILERDATA (3)
+  - FETCHOPT_WRITEFUNCTION (3)
 Protocol:
   - HTTP
 Added-in: 7.64.0
@@ -14,17 +14,17 @@ Added-in: 7.64.0
 
 # NAME
 
-CURLOPT_TRAILERFUNCTION - callback for sending trailing headers
+FETCHOPT_TRAILERFUNCTION - callback for sending trailing headers
 
 # SYNOPSIS
 
 ~~~c
-#include <curl.h>
+#include <fetch.h>
 
-int curl_trailer_callback(struct curl_slist ** list, void *userdata);
+int fetch_trailer_callback(struct fetch_slist ** list, void *userdata);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERFUNCTION,
-                          curl_trailer_callback *func);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TRAILERFUNCTION,
+                          fetch_trailer_callback *func);
 ~~~
 
 # DESCRIPTION
@@ -35,22 +35,22 @@ This callback function is called once right before sending the final CR LF in
 an HTTP chunked transfer to fill a list of trailing headers to be sent before
 finishing the HTTP transfer.
 
-You can set the userdata argument with the CURLOPT_TRAILERDATA(3)
+You can set the userdata argument with the FETCHOPT_TRAILERDATA(3)
 option.
 
 The trailing headers included in the linked list must not be CRLF-terminated,
-because libcurl adds the appropriate line termination characters after each
+because libfetch adds the appropriate line termination characters after each
 header item.
 
-If you use curl_slist_append(3) to add trailing headers to the *curl_slist*
-then libcurl duplicates the strings, and frees the *curl_slist* once the
+If you use fetch_slist_append(3) to add trailing headers to the *fetch_slist*
+then libfetch duplicates the strings, and frees the *fetch_slist* once the
 trailers have been sent.
 
 If one of the trailing header fields is not formatted correctly it is ignored
 and an info message is emitted.
 
-The return value can either be **CURL_TRAILERFUNC_OK** or
-**CURL_TRAILERFUNC_ABORT** which would respectively instruct libcurl to
+The return value can either be **FETCH_TRAILERFUNC_OK** or
+**FETCH_TRAILERFUNC_ABORT** which would respectively instruct libfetch to
 either continue with sending the trailers or to abort the request.
 
 If you set this option to NULL, then the transfer proceeds as usual
@@ -64,41 +64,41 @@ NULL
 
 # EXAMPLE
 ~~~c
-static int trailer_cb(struct curl_slist **tr, void *data)
+static int trailer_cb(struct fetch_slist **tr, void *data)
 {
-  /* libcurl frees the list */
-  *tr = curl_slist_append(*tr, "My-super-awesome-trailer: trailer-stuff");
-  return CURL_TRAILERFUNC_OK;
+  /* libfetch frees the list */
+  *tr = fetch_slist_append(*tr, "My-super-awesome-trailer: trailer-stuff");
+  return FETCH_TRAILERFUNC_OK;
 }
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    CURLcode res;
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    FETCHcode res;
 
     /* Set the URL of the request */
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/");
     /* Now set it as a put */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
     /* Assuming we have a function that returns the data to be pushed
        Let that function be read_cb */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, trailer_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, trailer_cb);
 
-    struct curl_slist *headers = NULL;
-    headers = curl_slist_append(headers, "Trailer: My-super-awesome-trailer");
-    res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    struct fetch_slist *headers = NULL;
+    headers = fetch_slist_append(headers, "Trailer: My-super-awesome-trailer");
+    res = fetch_easy_setopt(fetch, FETCHOPT_HTTPHEADER, headers);
 
     /* Set the trailers filling callback */
-    curl_easy_setopt(curl, CURLOPT_TRAILERFUNCTION, trailer_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_TRAILERFUNCTION, trailer_cb);
 
     /* Perform the transfer */
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
 
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
 
-    curl_slist_free_all(headers);
+    fetch_slist_free_all(headers);
   }
 }
 ~~~
@@ -107,7 +107,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

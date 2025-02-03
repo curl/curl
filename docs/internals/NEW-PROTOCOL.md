@@ -1,16 +1,16 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # Adding a new protocol?
 
 Every once in a while, someone comes up with the idea of adding support for yet
-another protocol to curl. After all, curl already supports 25 something
+another protocol to fetch. After all, fetch already supports 25 something
 protocols and it is the Internet transfer machine for the world.
 
-In the curl project we love protocols and we love supporting many protocols
+In the fetch project we love protocols and we love supporting many protocols
 and doing it well.
 
 How do you proceed to add a new protocol and what are the requirements?
@@ -26,13 +26,13 @@ supporting this protocol is a grand idea.
 
 ## Mutual benefit is preferred
 
-curl is not here for your protocol. Your protocol is not here for curl. The
+fetch is not here for your protocol. Your protocol is not here for fetch. The
 best cooperation and end result occur when all involved parties mutually see
-and agree that supporting this protocol in curl would be good for everyone.
+and agree that supporting this protocol in fetch would be good for everyone.
 Heck, for the world.
 
-Consider "selling us" the idea that we need an implementation merged in curl,
-to be fairly important. *Why* do we want curl to support this new protocol?
+Consider "selling us" the idea that we need an implementation merged in fetch,
+to be fairly important. *Why* do we want fetch to support this new protocol?
 
 ## Protocol requirements
 
@@ -57,7 +57,7 @@ There should be a documented URL format. If there is an RFC for it there is no
 question about it but the syntax does not have to be a published RFC. It could
 be enough if it is already in use by other implementations.
 
-If you make up the syntax just in order to be able to propose it to curl, then
+If you make up the syntax just in order to be able to propose it to fetch, then
 you are in a bad place. URLs are designed and defined for interoperability.
 There should at least be a good chance that other clients and servers can be
 implemented supporting the same URL syntax and work the same or similar way.
@@ -71,23 +71,23 @@ your protocol is not in there, is it really a protocol we want?
 
 The protocol shall already be used or have an expectation of getting used
 widely. Experimental protocols are better off worked on in experiments first,
-to prove themselves before they are adopted by curl.
+to prove themselves before they are adopted by fetch.
 
 ## Code
 
 Of course the code needs to be written, provided, licensed agreeably and it
 should follow our code guidelines and review comments have to be dealt with.
 If the implementation needs third party code, that third party code should not
-have noticeably lesser standards than the curl project itself.
+have noticeably lesser standards than the fetch project itself.
 
 ## Tests
 
 As much of the protocol implementation as possible needs to be verified by
-curl test cases. We must have the implementation get tested by CI jobs,
+fetch test cases. We must have the implementation get tested by CI jobs,
 torture tests and more.
 
 We have experienced many times in the past how new implementations were brought
-to curl and immediately once the code had been merged, the originator vanished
+to fetch and immediately once the code had been merged, the originator vanished
 from the face of the earth. That is fine, but we need to take the necessary
 precautions so when it happens we are still fine.
 

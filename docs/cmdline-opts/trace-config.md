@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: trace-config
 Arg: <string>
 Help: Details to log in trace/verbose output
@@ -24,4 +24,4 @@ Specify 'all' to enable all trace components.
 In addition to trace component names, specify `ids` and `time` to avoid extra
 --trace-ids or --trace-time parameters.
 
-See the *curl_global_trace(3)* man page for more details.
+See the *fetch_global_trace(3)* man page for more details.

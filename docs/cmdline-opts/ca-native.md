@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: ca-native
 Help: Load CA certs from the OS
 Protocols: TLS
@@ -19,11 +19,11 @@ Example:
 # `--ca-native`
 
 Use the CA store from the native operating system to verify the peer. By
-default, curl otherwise uses a CA store provided in a single file or
+default, fetch otherwise uses a CA store provided in a single file or
 directory, but when using this option it interfaces the operating system's own
 vault.
 
-This option works for curl on Windows when built to use OpenSSL, wolfSSL
-(added in 8.3.0) or GnuTLS (added in 8.5.0). When curl on Windows is built to
-use Schannel, this feature is implied and curl then only uses the native CA
+This option works for fetch on Windows when built to use OpenSSL, wolfSSL
+(added in 8.3.0) or GnuTLS (added in 8.5.0). When fetch on Windows is built to
+use Schannel, this feature is implied and fetch then only uses the native CA
 store.

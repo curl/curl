@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: no-buffer
 Short: N
 Help: Disable buffering of the output stream
@@ -15,7 +15,7 @@ Example:
 
 # `--no-buffer`
 
-Disables the buffering of the output stream. In normal work situations, curl
+Disables the buffering of the output stream. In normal work situations, fetch
 uses a standard buffered output stream that has the effect that it outputs the
 data in chunks, not necessarily exactly when the data arrives. Using this
 option disables that buffering.

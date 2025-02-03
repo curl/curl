@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_mime_type
+SPDX-License-Identifier: fetch
+Title: fetch_mime_type
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_mime_addpart (3)
-  - curl_mime_data (3)
-  - curl_mime_name (3)
+  - fetch_mime_addpart (3)
+  - fetch_mime_data (3)
+  - fetch_mime_name (3)
 Protocol:
   - HTTP
   - IMAP
@@ -17,19 +17,19 @@ Added-in: 7.56.0
 
 # NAME
 
-curl_mime_type - set a mime part's content type
+fetch_mime_type - set a mime part's content type
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype);
+FETCHcode fetch_mime_type(fetch_mimepart *part, const char *mimetype);
 ~~~
 
 # DESCRIPTION
 
-curl_mime_type(3) sets a mime part's content type.
+fetch_mime_type(3) sets a mime part's content type.
 
 *part* is the part's handle to assign the content type to.
 
@@ -61,25 +61,25 @@ extension, or application/octet-stream by default.
 ~~~c
 int main(void)
 {
-  curl_mime *mime;
-  curl_mimepart *part;
+  fetch_mime *mime;
+  fetch_mimepart *part;
 
-  CURL *curl = curl_easy_init();
-  if(curl) {
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
     /* create a mime handle */
-    mime = curl_mime_init(curl);
+    mime = fetch_mime_init(fetch);
 
     /* add a part */
-    part = curl_mime_addpart(mime);
+    part = fetch_mime_addpart(mime);
 
     /* get data from this file */
-    curl_mime_filedata(part, "image.png");
+    fetch_mime_filedata(part, "image.png");
 
     /* content-type for this part */
-    curl_mime_type(part, "image/png");
+    fetch_mime_type(part, "image/png");
 
     /* set name */
-    curl_mime_name(part, "image");
+    fetch_mime_name(part, "image");
 }
 }
 ~~~
@@ -88,9 +88,9 @@ int main(void)
 
 # RETURN VALUE
 
-This function returns a CURLcode indicating success or error.
+This function returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3). If FETCHOPT_ERRORBUFFER(3) was set with fetch_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.

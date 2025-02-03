@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,19 +20,19 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
-if(BUILD_LIBCURL_DOCS)
-  add_subdirectory(libcurl)
+if(BUILD_LIBFETCH_DOCS)
+  add_subdirectory(libfetch)
 endif()
-if(ENABLE_CURL_MANUAL AND BUILD_CURL_EXE)
+if(ENABLE_FETCH_MANUAL AND BUILD_FETCH_EXE)
   add_subdirectory(cmdline-opts)
 endif()
 
 if(BUILD_MISC_DOCS)
-  foreach(_man_misc IN ITEMS "curl-config" "mk-ca-bundle")
+  foreach(_man_misc IN ITEMS "fetch-config" "mk-ca-bundle")
     set(_man_target "${CMAKE_CURRENT_BINARY_DIR}/${_man_misc}.1")
     add_custom_command(OUTPUT "${_man_target}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -40,8 +40,8 @@ if(BUILD_MISC_DOCS)
       DEPENDS "${_man_misc}.md"
       VERBATIM
     )
-    add_custom_target("curl-generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
-    if(NOT CURL_DISABLE_INSTALL)
+    add_custom_target("fetch-generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
+    if(NOT FETCH_DISABLE_INSTALL)
       install(FILES "${_man_target}" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
     endif()
   endforeach()

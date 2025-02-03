@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: tftp-blksize
 Arg: <value>
 Help: Set TFTP BLKSIZE option
@@ -17,5 +17,5 @@ Example:
 # `--tftp-blksize`
 
 Set the TFTP **BLKSIZE** option (must be 512 or larger). This is the block
-size that curl tries to use when transferring data to or from a TFTP
+size that fetch tries to use when transferring data to or from a TFTP
 server. By default 512 bytes are used.

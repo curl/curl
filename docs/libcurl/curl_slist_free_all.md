@@ -1,11 +1,11 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: curl_slist_free_all
+SPDX-License-Identifier: fetch
+Title: fetch_slist_free_all
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - curl_slist_append (3)
+  - fetch_slist_append (3)
 Protocol:
   - All
 Added-in: 7.1
@@ -13,19 +13,19 @@ Added-in: 7.1
 
 # NAME
 
-curl_slist_free_all - free an entire curl_slist list
+fetch_slist_free_all - free an entire fetch_slist list
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-void curl_slist_free_all(struct curl_slist *list);
+void fetch_slist_free_all(struct fetch_slist *list);
 ~~~
 
 # DESCRIPTION
 
-curl_slist_free_all() removes all traces of a previously built curl_slist
+fetch_slist_free_all() removes all traces of a previously built fetch_slist
 linked list.
 
 Passing in a NULL pointer in *list* makes this function return immediately
@@ -41,19 +41,19 @@ is illegal.
 ~~~c
 int main(void)
 {
-  CURL *handle;
-  struct curl_slist *slist = NULL;
+  FETCH *handle;
+  struct fetch_slist *slist = NULL;
 
-  slist = curl_slist_append(slist, "X-libcurl: coolness");
+  slist = fetch_slist_append(slist, "X-libfetch: coolness");
 
   if(!slist)
     return -1;
 
-  curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
+  fetch_easy_setopt(handle, FETCHOPT_HTTPHEADER, slist);
 
-  curl_easy_perform(handle);
+  fetch_easy_perform(handle);
 
-  curl_slist_free_all(slist); /* free the list again */
+  fetch_slist_free_all(slist); /* free the list again */
 }
 ~~~
 

@@ -1,12 +1,12 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
-Title: CURLOPT_PRE_PROXY
+SPDX-License-Identifier: fetch
+Title: FETCHOPT_PRE_PROXY
 Section: 3
-Source: libcurl
+Source: libfetch
 See-also:
-  - CURLOPT_HTTPPROXYTUNNEL (3)
-  - CURLOPT_PROXY (3)
+  - FETCHOPT_HTTPPROXYTUNNEL (3)
+  - FETCHOPT_PROXY (3)
 Protocol:
   - All
 Added-in: 7.52.0
@@ -14,14 +14,14 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLOPT_PRE_PROXY - pre-proxy host to use
+FETCHOPT_PRE_PROXY - pre-proxy host to use
 
 # SYNOPSIS
 
 ~~~c
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PRE_PROXY, char *preproxy);
+FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PRE_PROXY, char *preproxy);
 ~~~
 
 # DESCRIPTION
@@ -32,17 +32,17 @@ address. A numerical IPv6 address must be written within [brackets].
 
 To specify port number in this string, append :[port] to the end of the host
 name. The proxy's port number may optionally be specified with the separate
-option CURLOPT_PROXYPORT(3). If not specified, libcurl defaults to using
+option FETCHOPT_PROXYPORT(3). If not specified, libfetch defaults to using
 port 1080 for proxies.
 
-A pre proxy is a SOCKS proxy that curl connects to before it connects to the
-HTTP(S) proxy specified in the CURLOPT_PROXY(3) option. The pre proxy
+A pre proxy is a SOCKS proxy that fetch connects to before it connects to the
+HTTP(S) proxy specified in the FETCHOPT_PROXY(3) option. The pre proxy
 can only be a SOCKS proxy.
 
 The pre proxy string should be prefixed with [scheme]:// to specify which kind
 of socks is used. Use socks4://, socks4a://, socks5:// or socks5h:// (the last
 one to enable socks5 and asking the proxy to do the resolving, also known as
-*CURLPROXY_SOCKS5_HOSTNAME* type) to request the specific SOCKS version to
+*FETCHPROXY_SOCKS5_HOSTNAME* type) to request the specific SOCKS version to
 be used. Otherwise SOCKS4 is used as default.
 
 Setting the pre proxy string to "" (an empty string) explicitly disables the
@@ -68,12 +68,12 @@ NULL
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/file.txt");
-    curl_easy_setopt(curl, CURLOPT_PRE_PROXY, "socks4://socks-proxy:1080");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
-    curl_easy_perform(curl);
+  FETCH *fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/file.txt");
+    fetch_easy_setopt(fetch, FETCHOPT_PRE_PROXY, "socks4://socks-proxy:1080");
+    fetch_easy_setopt(fetch, FETCHOPT_PROXY, "http://proxy:80");
+    fetch_easy_perform(fetch);
   }
 }
 ~~~
@@ -82,7 +82,7 @@ int main(void)
 
 # RETURN VALUE
 
-curl_easy_setopt(3) returns a CURLcode indicating success or error.
+fetch_easy_setopt(3) returns a FETCHcode indicating success or error.
 
-CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
-libcurl-errors(3).
+FETCHE_OK (0) means everything was OK, non-zero means an error occurred, see
+libfetch-errors(3).

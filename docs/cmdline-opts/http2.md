@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: http2
 Tags: Versions
 Protocols: HTTP
@@ -22,12 +22,12 @@ Example:
 
 Use HTTP/2.
 
-For HTTPS, this means curl negotiates HTTP/2 in the TLS handshake. curl does
+For HTTPS, this means fetch negotiates HTTP/2 in the TLS handshake. fetch does
 this by default.
 
-For HTTP, this means curl attempts to upgrade the request to HTTP/2 using the
+For HTTP, this means fetch attempts to upgrade the request to HTTP/2 using the
 Upgrade: request header.
 
-When curl uses HTTP/2 over HTTPS, it does not itself insist on TLS 1.2 or
+When fetch uses HTTP/2 over HTTPS, it does not itself insist on TLS 1.2 or
 higher even though that is required by the specification. A user can add this
 version requirement with --tlsv1.2.
