@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,16 +20,16 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
-AC_DEFUN([CURL_WITH_SCHANNEL], [
+AC_DEFUN([FETCH_WITH_SCHANNEL], [
 AC_MSG_CHECKING([whether to enable Windows native SSL/TLS])
 if test "x$OPT_SCHANNEL" != xno; then
   ssl_msg=
   if test "x$OPT_SCHANNEL" != "xno"  &&
-     test "x$curl_cv_native_windows" = "xyes"; then
+     test "x$fetch_cv_native_windows" = "xyes"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
     ssl_msg="Schannel"
@@ -38,7 +38,7 @@ if test "x$OPT_SCHANNEL" != xno; then
     # --with-schannel implies --enable-sspi
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
     USE_WINDOWS_SSPI=1
-    curl_sspi_msg="enabled"
+    fetch_sspi_msg="enabled"
   else
     AC_MSG_RESULT(no)
   fi

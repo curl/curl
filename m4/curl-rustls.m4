@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
-AC_DEFUN([CURL_WITH_RUSTLS], [
+AC_DEFUN([FETCH_WITH_RUSTLS], [
 dnl ----------------------------------------------------
 dnl check for Rustls
 dnl ----------------------------------------------------
@@ -117,16 +117,16 @@ if test "x$OPT_RUSTLS" != xno; then
 
   if test "$PKGTEST" = "yes"; then
 
-    CURL_CHECK_PKGCONFIG(rustls, [$RUSTLS_PCDIR])
+    FETCH_CHECK_PKGCONFIG(rustls, [$RUSTLS_PCDIR])
 
     if test "$PKGCONFIG" != "no" ; then
-      SSL_LIBS=`CURL_EXPORT_PCDIR([$RUSTLS_PCDIR]) dnl
+      SSL_LIBS=`FETCH_EXPORT_PCDIR([$RUSTLS_PCDIR]) dnl
         $PKGCONFIG --libs-only-l --libs-only-other rustls 2>/dev/null`
 
-      SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$RUSTLS_PCDIR]) dnl
+      SSL_LDFLAGS=`FETCH_EXPORT_PCDIR([$RUSTLS_PCDIR]) dnl
         $PKGCONFIG --libs-only-L rustls 2>/dev/null`
 
-      SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$RUSTLS_PCDIR]) dnl
+      SSL_CPPFLAGS=`FETCH_EXPORT_PCDIR([$RUSTLS_PCDIR]) dnl
         $PKGCONFIG --cflags-only-I rustls 2>/dev/null`
 
       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
@@ -170,16 +170,16 @@ if test "x$OPT_RUSTLS" != xno; then
     if test -n "$LIB_RUSTLS"; then
       dnl when shared libs were found in a path that the run-time
       dnl linker does not search through, we need to add it to
-      dnl CURL_LIBRARY_PATH so that further configure tests do not
+      dnl FETCH_LIBRARY_PATH so that further configure tests do not
       dnl fail due to this
       if test "x$cross_compiling" != "xyes"; then
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_RUSTLS"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $LIB_RUSTLS to CURL_LIBRARY_PATH])
+        FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$LIB_RUSTLS"
+        export FETCH_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $LIB_RUSTLS to FETCH_LIBRARY_PATH])
       fi
     fi
     if test -n "$link_pkgconfig"; then
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE rustls"
+      LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE rustls"
     fi
   fi
 

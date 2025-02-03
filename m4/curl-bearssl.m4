@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
-AC_DEFUN([CURL_WITH_BEARSSL], [
+AC_DEFUN([FETCH_WITH_BEARSSL], [
 dnl ----------------------------------------------------
 dnl check for BearSSL
 dnl ----------------------------------------------------
@@ -96,12 +96,12 @@ if test "x$OPT_BEARSSL" != xno; then
       if test -n "$bearssllib"; then
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
-        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
+        dnl FETCH_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$bearssllib"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $bearssllib to CURL_LIBRARY_PATH])
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$bearssllib"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $bearssllib to FETCH_LIBRARY_PATH])
         fi
       fi
     fi

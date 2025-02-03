@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
-AC_DEFUN([CURL_WITH_AMISSL], [
+AC_DEFUN([FETCH_WITH_AMISSL], [
 AC_MSG_CHECKING([whether to enable Amiga native SSL/TLS (AmiSSL v5)])
 if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
   if test "x$OPT_AMISSL" != xno; then
@@ -52,7 +52,7 @@ if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
       check_for_ca_bundle=1
       with_ca_fallback=yes
       LIBS="-lamisslstubs -lamisslauto $LIBS"
-      CURL_NETWORK_AND_TIME_LIBS="-lamisslstubs -lamisslauto $CURL_NETWORK_AND_TIME_LIBS"
+      FETCH_NETWORK_AND_TIME_LIBS="-lamisslstubs -lamisslauto $FETCH_NETWORK_AND_TIME_LIBS"
       AC_DEFINE(USE_AMISSL, 1, [if AmiSSL is in use])
       AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use])
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \

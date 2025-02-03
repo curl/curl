@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
@@ -29,17 +29,17 @@
 
 dnl Note 1
 dnl ------
-dnl None of the CURL_CHECK_NEED_REENTRANT_* macros shall use HAVE_FOO_H to
+dnl None of the FETCH_CHECK_NEED_REENTRANT_* macros shall use HAVE_FOO_H to
 dnl conditionally include header files. These macros are used early in the
 dnl configure process much before header file availability is known.
 
 
-dnl CURL_CHECK_NEED_REENTRANT_ERRNO
+dnl FETCH_CHECK_NEED_REENTRANT_ERRNO
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl makes errno available as a preprocessor macro.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_ERRNO], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
       #include <errno.h>
@@ -86,12 +86,12 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_GMTIME_R
+dnl FETCH_CHECK_NEED_REENTRANT_GMTIME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function gmtime_r compiler visible.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GMTIME_R], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_GMTIME_R], [
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([gmtime_r])
   ],[
@@ -119,12 +119,12 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GMTIME_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_LOCALTIME_R
+dnl FETCH_CHECK_NEED_REENTRANT_LOCALTIME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function localtime_r compiler visible.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_LOCALTIME_R], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_LOCALTIME_R], [
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([localtime_r])
   ],[
@@ -152,12 +152,12 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_LOCALTIME_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_STRERROR_R
+dnl FETCH_CHECK_NEED_REENTRANT_STRERROR_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function strerror_r compiler visible.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRERROR_R], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_STRERROR_R], [
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([strerror_r])
   ],[
@@ -185,12 +185,12 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRERROR_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_STRTOK_R
+dnl FETCH_CHECK_NEED_REENTRANT_STRTOK_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function strtok_r compiler visible.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRTOK_R], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_STRTOK_R], [
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([strtok_r])
   ],[
@@ -218,12 +218,12 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRTOK_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
+dnl FETCH_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function gethostbyname_r compiler visible.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R], [
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([gethostbyname_r])
   ],[
@@ -251,12 +251,12 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
+dnl FETCH_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl makes function getprotobyname_r compiler visible.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
   AC_LINK_IFELSE([
     AC_LANG_FUNC_LINK_TRY([getprotobyname_r])
   ],[
@@ -284,41 +284,41 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R
+dnl FETCH_CHECK_NEED_REENTRANT_FUNCTIONS_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl makes several _r functions compiler visible.
-dnl Internal macro for CURL_CONFIGURE_REENTRANT.
+dnl Internal macro for FETCH_CONFIGURE_REENTRANT.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_FUNCTIONS_R], [
   if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_GMTIME_R
+    FETCH_CHECK_NEED_REENTRANT_GMTIME_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_LOCALTIME_R
+    FETCH_CHECK_NEED_REENTRANT_LOCALTIME_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_STRERROR_R
+    FETCH_CHECK_NEED_REENTRANT_STRERROR_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_STRTOK_R
+    FETCH_CHECK_NEED_REENTRANT_STRTOK_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
+    FETCH_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
+    FETCH_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R
   fi
 ])
 
 
-dnl CURL_CHECK_NEED_REENTRANT_SYSTEM
+dnl FETCH_CHECK_NEED_REENTRANT_SYSTEM
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
 dnl must be unconditionally done for this platform.
-dnl Internal macro for CURL_CONFIGURE_REENTRANT.
+dnl Internal macro for FETCH_CONFIGURE_REENTRANT.
 
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_SYSTEM], [
+AC_DEFUN([FETCH_CHECK_NEED_REENTRANT_SYSTEM], [
   case $host_os in
     solaris*)
       tmp_need_reentrant="yes"
@@ -330,13 +330,13 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_SYSTEM], [
 ])
 
 
-dnl CURL_CHECK_NEED_THREAD_SAFE_SYSTEM
+dnl FETCH_CHECK_NEED_THREAD_SAFE_SYSTEM
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _THREAD_SAFE definition
 dnl must be unconditionally done for this platform.
-dnl Internal macro for CURL_CONFIGURE_THREAD_SAFE.
+dnl Internal macro for FETCH_CONFIGURE_THREAD_SAFE.
 
-AC_DEFUN([CURL_CHECK_NEED_THREAD_SAFE_SYSTEM], [
+AC_DEFUN([FETCH_CHECK_NEED_THREAD_SAFE_SYSTEM], [
   case $host_os in
     aix[[123]].* | aix4.[[012]].*)
       dnl aix 4.2 and older
@@ -353,16 +353,16 @@ AC_DEFUN([CURL_CHECK_NEED_THREAD_SAFE_SYSTEM], [
 ])
 
 
-dnl CURL_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT
+dnl FETCH_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT
 dnl -------------------------------------------------
 dnl This macro ensures that configuration tests done
 dnl after this will execute with preprocessor symbol
 dnl _REENTRANT defined. This macro also ensures that
 dnl the generated config file defines NEED_REENTRANT
-dnl and that in turn curl_setup.h will define _REENTRANT.
-dnl Internal macro for CURL_CONFIGURE_REENTRANT.
+dnl and that in turn fetch_setup.h will define _REENTRANT.
+dnl Internal macro for FETCH_CONFIGURE_REENTRANT.
 
-AC_DEFUN([CURL_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT], [
+AC_DEFUN([FETCH_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT], [
 AC_DEFINE(NEED_REENTRANT, 1,
   [Define to 1 if _REENTRANT preprocessor symbol must be defined.])
 cat >>confdefs.h <<_EOF
@@ -373,16 +373,16 @@ _EOF
 ])
 
 
-dnl CURL_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE
+dnl FETCH_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE
 dnl -------------------------------------------------
 dnl This macro ensures that configuration tests done
 dnl after this will execute with preprocessor symbol
 dnl _THREAD_SAFE defined. This macro also ensures that
 dnl the generated config file defines NEED_THREAD_SAFE
-dnl and that in turn curl_setup.h will define _THREAD_SAFE.
-dnl Internal macro for CURL_CONFIGURE_THREAD_SAFE.
+dnl and that in turn fetch_setup.h will define _THREAD_SAFE.
+dnl Internal macro for FETCH_CONFIGURE_THREAD_SAFE.
 
-AC_DEFUN([CURL_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE], [
+AC_DEFUN([FETCH_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE], [
 AC_DEFINE(NEED_THREAD_SAFE, 1,
   [Define to 1 if _THREAD_SAFE preprocessor symbol must be defined.])
 cat >>confdefs.h <<_EOF
@@ -393,7 +393,7 @@ _EOF
 ])
 
 
-dnl CURL_CONFIGURE_REENTRANT
+dnl FETCH_CONFIGURE_REENTRANT
 dnl -------------------------------------------------
 dnl This first checks if the preprocessor _REENTRANT
 dnl symbol is already defined. If it isn't currently
@@ -405,7 +405,7 @@ dnl care of making adjustments necessary to ensure
 dnl that it is defined equally for further configure
 dnl tests and generated config file.
 
-AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
+AC_DEFUN([FETCH_CONFIGURE_REENTRANT], [
   AC_PREREQ([2.50])dnl
   #
   AC_MSG_CHECKING([if _REENTRANT is already defined])
@@ -428,12 +428,12 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
   #
   if test "$tmp_reentrant_initially_defined" = "no"; then
     AC_MSG_CHECKING([if _REENTRANT is actually needed])
-    CURL_CHECK_NEED_REENTRANT_SYSTEM
+    FETCH_CHECK_NEED_REENTRANT_SYSTEM
     if test "$tmp_need_reentrant" = "no"; then
-      CURL_CHECK_NEED_REENTRANT_ERRNO
+      FETCH_CHECK_NEED_REENTRANT_ERRNO
     fi
     if test "$tmp_need_reentrant" = "no"; then
-      CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R
+      FETCH_CHECK_NEED_REENTRANT_FUNCTIONS_R
     fi
     if test "$tmp_need_reentrant" = "yes"; then
       AC_MSG_RESULT([yes])
@@ -445,7 +445,7 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
   AC_MSG_CHECKING([if _REENTRANT is onwards defined])
   if test "$tmp_reentrant_initially_defined" = "yes" ||
     test "$tmp_need_reentrant" = "yes"; then
-    CURL_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT
+    FETCH_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT
     AC_MSG_RESULT([yes])
   else
     AC_MSG_RESULT([no])
@@ -454,7 +454,7 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
 ])
 
 
-dnl CURL_CONFIGURE_THREAD_SAFE
+dnl FETCH_CONFIGURE_THREAD_SAFE
 dnl -------------------------------------------------
 dnl This first checks if the preprocessor _THREAD_SAFE
 dnl symbol is already defined. If it isn't currently
@@ -465,7 +465,7 @@ dnl care of making adjustments necessary to ensure
 dnl that it is defined equally for further configure
 dnl tests and generated config file.
 
-AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
+AC_DEFUN([FETCH_CONFIGURE_THREAD_SAFE], [
   AC_PREREQ([2.50])dnl
   #
   AC_MSG_CHECKING([if _THREAD_SAFE is already defined])
@@ -488,7 +488,7 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
   #
   if test "$tmp_thread_safe_initially_defined" = "no"; then
     AC_MSG_CHECKING([if _THREAD_SAFE is actually needed])
-    CURL_CHECK_NEED_THREAD_SAFE_SYSTEM
+    FETCH_CHECK_NEED_THREAD_SAFE_SYSTEM
     if test "$tmp_need_thread_safe" = "yes"; then
       AC_MSG_RESULT([yes])
     else
@@ -499,7 +499,7 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
   AC_MSG_CHECKING([if _THREAD_SAFE is onwards defined])
   if test "$tmp_thread_safe_initially_defined" = "yes" ||
     test "$tmp_need_thread_safe" = "yes"; then
-    CURL_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE
+    FETCH_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE
     AC_MSG_RESULT([yes])
   else
     AC_MSG_RESULT([no])

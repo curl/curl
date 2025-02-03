@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
@@ -31,7 +31,7 @@ dnl **********************************************************************
 dnl Check for OpenSSL libraries and headers
 dnl **********************************************************************
 
-AC_DEFUN([CURL_WITH_OPENSSL], [
+AC_DEFUN([FETCH_WITH_OPENSSL], [
 if test "x$OPT_OPENSSL" != xno; then
   ssl_msg=
 
@@ -110,16 +110,16 @@ if test "x$OPT_OPENSSL" != xno; then
 
   if test "$PKGTEST" = "yes"; then
 
-    CURL_CHECK_PKGCONFIG(openssl, [$OPENSSL_PCDIR])
+    FETCH_CHECK_PKGCONFIG(openssl, [$OPENSSL_PCDIR])
 
     if test "$PKGCONFIG" != "no" ; then
-      SSL_LIBS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_LIBS=`FETCH_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
         $PKGCONFIG --libs-only-l --libs-only-other openssl 2>/dev/null`
 
-      SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_LDFLAGS=`FETCH_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
         $PKGCONFIG --libs-only-L openssl 2>/dev/null`
 
-      SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
+      SSL_CPPFLAGS=`FETCH_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
         $PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
@@ -325,16 +325,16 @@ if test "x$OPT_OPENSSL" != xno; then
   if test "$OPENSSL_ENABLED" = "1"; then
     if test -n "$LIB_OPENSSL"; then
       dnl when the ssl shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl linker doesn't search through, we need to add it to FETCH_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
       if test "x$cross_compiling" != "xyes"; then
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_OPENSSL"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $LIB_OPENSSL to CURL_LIBRARY_PATH])
+        FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$LIB_OPENSSL"
+        export FETCH_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $LIB_OPENSSL to FETCH_LIBRARY_PATH])
       fi
     fi
     check_for_ca_bundle=1
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
+    LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE openssl"
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
@@ -377,7 +377,7 @@ AS_HELP_STRING([--enable-openssl-auto-load-config],[Enable automatic loading of 
 AS_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading of OpenSSL configuration]),
   [ if test X"$enableval" = X"no"; then
       AC_MSG_NOTICE([automatic loading of OpenSSL configuration disabled])
-      AC_DEFINE(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration won't be loaded automatically])
+      AC_DEFINE(FETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration won't be loaded automatically])
     fi
   ])
 fi

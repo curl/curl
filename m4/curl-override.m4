@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #***************************************************************************
@@ -29,16 +29,16 @@
 # File version for 'aclocal' use. Keep it a single number.
 # serial 7
 
-dnl CURL_OVERRIDE_AUTOCONF
+dnl FETCH_OVERRIDE_AUTOCONF
 dnl -------------------------------------------------
 dnl Placing a call to this macro in configure.ac after
 dnl the one to AC_INIT will make macros in this file
 dnl visible to the rest of the compilation overriding
 dnl those from Autoconf.
 
-AC_DEFUN([CURL_OVERRIDE_AUTOCONF], [
+AC_DEFUN([FETCH_OVERRIDE_AUTOCONF], [
 AC_BEFORE([$0],[AC_PROG_LIBTOOL])
-# using curl-override.m4
+# using fetch-override.m4
 ])
 
 dnl Override Autoconf's AC_LANG_PROGRAM (C)

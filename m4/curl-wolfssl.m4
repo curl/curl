@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
-AC_DEFUN([CURL_WITH_WOLFSSL], [
+AC_DEFUN([FETCH_WITH_WOLFSSL], [
 dnl ----------------------------------------------------
 dnl check for wolfSSL
 dnl ----------------------------------------------------
@@ -52,20 +52,20 @@ if test "x$OPT_WOLFSSL" != xno; then
     fi
 
     dnl try pkg-config magic
-    CURL_CHECK_PKGCONFIG(wolfssl, [$wolfpkg])
+    FETCH_CHECK_PKGCONFIG(wolfssl, [$wolfpkg])
     AC_MSG_NOTICE([Check dir $wolfpkg])
 
     addld=""
     addlib=""
     addcflags=""
     if test "$PKGCONFIG" != "no" ; then
-      addlib=`CURL_EXPORT_PCDIR([$wolfpkg])
+      addlib=`FETCH_EXPORT_PCDIR([$wolfpkg])
         $PKGCONFIG --libs-only-l wolfssl`
-      addld=`CURL_EXPORT_PCDIR([$wolfpkg])
+      addld=`FETCH_EXPORT_PCDIR([$wolfpkg])
         $PKGCONFIG --libs-only-L wolfssl`
-      addcflags=`CURL_EXPORT_PCDIR([$wolfpkg])
+      addcflags=`FETCH_EXPORT_PCDIR([$wolfpkg])
         $PKGCONFIG --cflags-only-I wolfssl`
-      version=`CURL_EXPORT_PCDIR([$wolfpkg])
+      version=`FETCH_EXPORT_PCDIR([$wolfpkg])
         $PKGCONFIG --modversion wolfssl`
       wolfssllibpath=`echo $addld | $SED -e 's/^-L//'`
     else
@@ -128,7 +128,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       check_for_ca_bundle=1
 
       dnl wolfssl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
-      CURL_SIZEOF(long long)
+      FETCH_SIZEOF(long long)
 
       LIBS="$addlib -lm $LIBS"
 
@@ -168,15 +168,15 @@ if test "x$OPT_WOLFSSL" != xno; then
       if test -n "$wolfssllibpath"; then
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
-        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
+        dnl FETCH_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$wolfssllibpath"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $wolfssllibpath to CURL_LIBRARY_PATH])
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$wolfssllibpath"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $wolfssllibpath to FETCH_LIBRARY_PATH])
         fi
       fi
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE wolfssl"
+      LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE wolfssl"
     else
       AC_MSG_ERROR([--with-wolfssl but wolfSSL was not found or doesn't work])
     fi
