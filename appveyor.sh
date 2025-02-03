@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -42,40 +42,40 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
   [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
   [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
-  [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
+  [ -n "${FETCHDEBUG:-}" ] && options+=" -DENABLE_FETCHDEBUG=${FETCHDEBUG}"
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
   # shellcheck disable=SC2086
   cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
-    "-DCURL_USE_OPENSSL=${OPENSSL}" \
-    "-DCURL_USE_SCHANNEL=${SCHANNEL}" \
+    "-DFETCH_USE_OPENSSL=${OPENSSL}" \
+    "-DFETCH_USE_SCHANNEL=${SCHANNEL}" \
     "-DHTTP_ONLY=${HTTP_ONLY}" \
     "-DBUILD_SHARED_LIBS=${SHARED}" \
     "-DCMAKE_UNITY_BUILD=${UNITY}" \
-    '-DCURL_TEST_BUNDLES=ON' \
-    '-DCURL_WERROR=ON' \
+    '-DFETCH_TEST_BUNDLES=ON' \
+    '-DFETCH_WERROR=ON' \
     "-DENABLE_DEBUG=${DEBUG}" \
     "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
-    '-DCMAKE_INSTALL_PREFIX=C:/curl' \
+    '-DCMAKE_INSTALL_PREFIX=C:/fetch' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}" \
-    '-DCURL_USE_LIBPSL=OFF'
+    '-DFETCH_USE_LIBPSL=OFF'
   if false; then
     cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
   fi
-  echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
+  echo 'fetch_config.h'; grep -F '#define' _bld/lib/fetch_config.h | sort || true
   # shellcheck disable=SC2086
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
   [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
-  curl='_bld/src/curl.exe'
+  fetch='_bld/src/fetch.exe'
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
     ./generate.bat "${VC_VERSION}"
-    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "Windows/${VC_VERSION}/curl-all.sln"
+    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "Windows/${VC_VERSION}/fetch-all.sln"
   )
-  curl="build/Win32/${VC_VERSION}/${PRJ_CFG}/curld.exe"
+  fetch="build/Win32/${VC_VERSION}/${PRJ_CFG}/fetchd.exe"
 elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2015' ]; then
   (
     cd winbuild
@@ -87,7 +87,7 @@ EOF
     ./_make.bat
     rm _make.bat
   )
-  curl="builds/libcurl-vc14-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
+  fetch="builds/libfetch-vc14-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/fetch.exe"
 elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2017' ]; then
   (
     cd winbuild
@@ -98,14 +98,14 @@ EOF
     ./_make.bat
     rm _make.bat
   )
-  curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
+  fetch="builds/libfetch-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/fetch.exe"
 fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
 if [ -z "${SKIP_RUN:-}" ]; then
-  "${curl}" --disable --version
+  "${fetch}" --disable --version
 else
-  echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
+  echo "Skip running fetch.exe. Reason: ${SKIP_RUN}"
 fi
 
 # build tests
@@ -119,10 +119,10 @@ fi
 
 if [ "${TFLAGS}" != 'skipall' ] && \
    [ "${TFLAGS}" != 'skiprun' ]; then
-  if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
-    TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
-  elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
-    TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
+  if [ -x "$(cygpath "${SYSTEMROOT}/System32/fetch.exe")" ]; then
+    TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/fetch.exe")"
+  elif [ -x "$(cygpath 'C:/msys64/usr/bin/fetch.exe')" ]; then
+    TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/fetch.exe')"
   fi
   TFLAGS+=' -j0'
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
@@ -140,5 +140,5 @@ fi
 
 if [ "${EXAMPLES}" = 'ON' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target fetch-examples
 fi

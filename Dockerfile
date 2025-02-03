@@ -1,23 +1,23 @@
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 
 # Self-contained build environment to match the release environment.
 #
 # Build and set the timestamp for the date corresponding to the release
 #
-#   docker build --build-arg SOURCE_DATE_EPOCH=1711526400 --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t curl/curl .
+#   docker build --build-arg SOURCE_DATE_EPOCH=1711526400 --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t fetch/fetch .
 #
 # Then run commands from within the build environment, for example
 #
-#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl autoreconf -fi
-#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl ./configure --without-ssl --without-libpsl
-#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl make
-#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl ./scripts/maketgz 8.7.1
+#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src fetch/fetch autoreconf -fi
+#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src fetch/fetch ./configure --without-ssl --without-libpsl
+#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src fetch/fetch make
+#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src fetch/fetch ./scripts/maketgz 8.7.1
 #
 # or get into a shell in the build environment, for example
 #
-#   docker run --rm -it -u $(id -u):$(id -g) -v (pwd):/usr/src -w /usr/src curl/curl bash
+#   docker run --rm -it -u $(id -u):$(id -g) -v (pwd):/usr/src -w /usr/src fetch/fetch bash
 #   $ autoreconf -fi
 #   $ ./configure --without-ssl --without-libpsl
 #   $ make

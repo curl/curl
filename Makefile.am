@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -32,7 +32,7 @@ ACLOCAL_AMFLAGS = -I m4
 CMAKE_DIST =                                    \
  CMake/cmake_uninstall.cmake.in                 \
  CMake/CMakeConfigurableFile.in                 \
- CMake/curl-config.cmake.in                     \
+ CMake/fetch-config.cmake.in                     \
  CMake/CurlSymbolHiding.cmake                   \
  CMake/CurlTests.c                              \
  CMake/FindBearSSL.cmake                        \
@@ -89,13 +89,13 @@ EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile \
 
 DISTCLEANFILES = buildinfo.txt
 
-bin_SCRIPTS = curl-config
+bin_SCRIPTS = fetch-config
 
 SUBDIRS = lib docs src scripts
 DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libcurl.pc
+pkgconfig_DATA = libfetch.pc
 
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
@@ -156,7 +156,7 @@ examples:
 	@(cd docs/examples; $(MAKE) check)
 
 check-docs:
-	@(cd docs/libcurl; $(MAKE) check)
+	@(cd docs/libfetch; $(MAKE) check)
 
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
 # must contain the following line:
@@ -173,8 +173,8 @@ check-docs:
 #
 
 rpms:
-	$(MAKE) RPMDIST=curl rpm
-	$(MAKE) RPMDIST=curl-ssl rpm
+	$(MAKE) RPMDIST=fetch rpm
+	$(MAKE) RPMDIST=fetch-ssl rpm
 
 rpm:
 	RPM_TOPDIR=`rpm --showrc | $(PERL) -n -e 'print if(s/.*_topdir\s+(.*)/$$1/)'` ; \
@@ -189,7 +189,7 @@ if BUILD_DOCS
 install-data-hook:
 	(cd include && $(MAKE) install)
 	(cd docs && $(MAKE) install)
-	(cd docs/libcurl && $(MAKE) install)
+	(cd docs/libfetch && $(MAKE) install)
 else
 install-data-hook:
 	(cd include && $(MAKE) install)
@@ -200,7 +200,7 @@ endif
 uninstall-hook:
 	(cd include && $(MAKE) uninstall)
 	(cd docs && $(MAKE) uninstall)
-	(cd docs/libcurl && $(MAKE) uninstall)
+	(cd docs/libfetch && $(MAKE) uninstall)
 
 ca-bundle: $(srcdir)/scripts/mk-ca-bundle.pl
 	@echo "generating a fresh ca-bundle.crt"
@@ -214,7 +214,7 @@ checksrc:
 	(cd lib && $(MAKE) checksrc)
 	(cd src && $(MAKE) checksrc)
 	(cd tests && $(MAKE) checksrc)
-	(cd include/curl && $(MAKE) checksrc)
+	(cd include/fetch && $(MAKE) checksrc)
 	(cd docs/examples && $(MAKE) checksrc)
 	(cd packages && $(MAKE) checksrc)
 

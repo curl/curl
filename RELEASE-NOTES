@@ -1,28 +1,28 @@
-curl and libcurl 8.12.0
+fetch and libfetch 8.12.0
 
- Public curl releases:         264
+ Public fetch releases:         264
  Command line options:         267
- curl_easy_setopt() options:   306
- Public functions in libcurl:  96
+ fetch_easy_setopt() options:   306
+ Public functions in libfetch:  96
  Contributors:                 3327
 
 This release includes the following changes:
 
- o curl: add byte range support to --variable reading from file [56]
- o curl: make --etag-save acknowledge --create-dirs [31]
- o getinfo: fix CURLINFO_QUEUE_TIME_T and add 'time_queue' var [55]
+ o fetch: add byte range support to --variable reading from file [56]
+ o fetch: make --etag-save acknowledge --create-dirs [31]
+ o getinfo: fix FETCHINFO_QUEUE_TIME_T and add 'time_queue' var [55]
  o getinfo: provide info which auth was used for HTTP and proxy [40]
  o hyper: drop support [57]
  o openssl: add support to use keys and certificates from PKCS#11 provider [77]
- o QUIC: 0RTT for gnutls via CURLSSLOPT_EARLYDATA [61]
+ o QUIC: 0RTT for gnutls via FETCHSSLOPT_EARLYDATA [61]
  o vtls: feature ssls-export for SSL session im-/export [141]
 
 This release includes the following bugfixes:
 
  o altsvc: avoid integer overflow in expire calculation [16]
  o altsvc: return error on dot-only name [178]
- o android: add CI jobs, buildinfo, cmake docs, disable `CURL_USE_PKGCONFIG` by default [185]
- o asyn-ares: acknowledge CURLOPT_DNS_SERVERS set to NULL [190]
+ o android: add CI jobs, buildinfo, cmake docs, disable `FETCH_USE_PKGCONFIG` by default [185]
+ o asyn-ares: acknowledge FETCHOPT_DNS_SERVERS set to NULL [190]
  o asyn-ares: initial HTTPS resolve support [166]
  o asyn-thread: use c-ares to resolve HTTPS RR [205]
  o async-thread: avoid closing eventfd twice [9]
@@ -57,13 +57,13 @@ This release includes the following bugfixes:
  o cmake: add `librtmp` Find module [86]
  o cmake: add LDAP Find module [46]
  o cmake: add native `pkg-config` detection for remaining Find modules [37]
- o cmake: allow `CURL_LTO` regardless of `CURL_BUILD_TYPE`, enable in CI [88]
+ o cmake: allow `FETCH_LTO` regardless of `FETCH_BUILD_TYPE`, enable in CI [88]
  o cmake: clang-cl improvements [42]
  o cmake: delete accidental debug message
  o cmake: deprecate winbuild, add migration guide from legacy build methods [157]
  o cmake: detect mingw-w64 version, pre-fill `HAVE_STRTOK_R` [179]
  o cmake: do not store `MINGW64_VERSION` in cache [175]
- o cmake: drop `CURL_USE_PKGCONFIG` from `curl-config.cmake.in` [208]
+ o cmake: drop `FETCH_USE_PKGCONFIG` from `fetch-config.cmake.in` [208]
  o cmake: drop `fseeko()` pre-fill and check for Windows [201]
  o cmake: drop duplicate Windows cache value [81]
  o cmake: drop redundant FOUND checks (libgsasl, libssh, libuv) [49]
@@ -72,7 +72,7 @@ This release includes the following bugfixes:
  o cmake: drop VS2010 "Dialog Hell" workaround added in 2013 [136]
  o cmake: extend zlib's `AUTO` option to brotli, zstd and enable if found [36]
  o cmake: fix `net/in.h` detection for MS-DOS [103]
- o cmake: improve `curl_dumpvars()` and move to `Utilities.cmake` [50]
+ o cmake: improve `fetch_dumpvars()` and move to `Utilities.cmake` [50]
  o cmake: make libpsl required by default [45]
  o cmake: make system libraries `dl`, `m`, `pthread` customizable [123]
  o cmake: move `pkg-config` names to Find modules [87]
@@ -84,7 +84,7 @@ This release includes the following bugfixes:
  o cmake: pre-fill `HAVE_STDATOMIC_H`, `HAVE_ATOMIC` for mingw-w64 [180]
  o cmake: pre-fill `HAVE_STDINT_H` on Windows [149]
  o cmake: prefer dash-style MSVC options [216]
- o cmake: publish/check supported protocols/features via `CURLConfig.cmake` [100]
+ o cmake: publish/check supported protocols/features via `FETCHConfig.cmake` [100]
  o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
  o cmake: sync OpenSSL QUIC fork detection with autotools [102]
  o cmake: use `CMAKE_REQUIRED_LINK_DIRECTORIES` [48]
@@ -106,31 +106,31 @@ This release includes the following bugfixes:
  o cookie: cap expire times to 400 days [111]
  o cookie: fix crash in netscape cookie parsing [84]
  o cookie: parse only the exact expire date [3]
- o curl-functions.m4: fix indentation in `CURL_SIZEOF()` [131]
- o curl: return error if etag options are used with multiple URLs [5]
- o curl_multi_fdset: include the shutdown connections in the set [168]
- o curl_multi_waitfds.md: tidy up the example [162]
- o curl_multibyte: support Windows paths longer than MAX_PATH [76]
- o curl_setup: fix missing `ADDRESS_FAMILY` type in rare build cases [144]
- o curl_sha512_256: rename symbols to the curl namespace [124]
- o curl_url_set.md: adjust the added-in to 7.62.0 [94]
- o curl_ws_recv.md: fix typo
- o CURLOPT_CONNECT_ONLY.md: an easy handle with this option set cannot be reused [164]
- o CURLOPT_PROXY.md: clarify the crendential support in proxy URLs [66]
- o CURLOPT_RESOLVE.md: fix wording [30]
- o CURLOPT_SEEKFUNCTION.md: used for FTP, HTTP and SFTP (only) [109]
+ o fetch-functions.m4: fix indentation in `FETCH_SIZEOF()` [131]
+ o fetch: return error if etag options are used with multiple URLs [5]
+ o fetch_multi_fdset: include the shutdown connections in the set [168]
+ o fetch_multi_waitfds.md: tidy up the example [162]
+ o fetch_multibyte: support Windows paths longer than MAX_PATH [76]
+ o fetch_setup: fix missing `ADDRESS_FAMILY` type in rare build cases [144]
+ o fetch_sha512_256: rename symbols to the fetch namespace [124]
+ o fetch_url_set.md: adjust the added-in to 7.62.0 [94]
+ o fetch_ws_recv.md: fix typo
+ o FETCHOPT_CONNECT_ONLY.md: an easy handle with this option set cannot be reused [164]
+ o FETCHOPT_PROXY.md: clarify the crendential support in proxy URLs [66]
+ o FETCHOPT_RESOLVE.md: fix wording [30]
+ o FETCHOPT_SEEKFUNCTION.md: used for FTP, HTTP and SFTP (only) [109]
  o docs/BUGS.md: remove leading space from a link
  o docs/cmdline-opts/_ENVIRONMENT.md: minor language fix [119]
  o docs/HTTP-COOKIES.md: link to more information [125]
  o docs/HTTPSRR.md: initial HTTPS RR documentation [204]
- o docs/libcurl/opts: clarify the return values [114]
- o docs/libcurl: return value overhall [120]
+ o docs/libfetch/opts: clarify the return values [114]
+ o docs/libfetch: return value overhall [120]
  o docs/TLS-SESSIONS: fix typo, the->they [189]
- o docs: document the behavior of -- in the curl command line [198]
- o docs: use lowercase curl and libcurl [113]
+ o docs: document the behavior of -- in the fetch command line [198]
+ o docs: use lowercase fetch and libfetch [113]
  o doh: cleanups and extended HTTPS RR code [161]
  o doh: send HTTPS RR requests for all HTTP(S) transfers [160]
- o easy: make curl_easy_perform() return error if connection still there [163]
+ o easy: make fetch_easy_perform() return error if connection still there [163]
  o easy_lock: use Sleep(1) for thread yield on old Windows [191]
  o ECH: update APIs to those agreed with OpenSSL maintainers [101]
  o examples/block-ip: drop redundant `memory.h` include
@@ -145,7 +145,7 @@ This release includes the following bugfixes:
  o hash: add asserts in hash_element_dtor() [126]
  o HTTP/2: strip TE request header [140]
  o http2: fix value stored to 'result' is never read [71]
- o http: fix build with `CURL_DISABLE_COOKIES` [95]
+ o http: fix build with `FETCH_DISABLE_COOKIES` [95]
  o http: ignore invalid Retry-After times [107]
  o http_aws_sigv4: Fix invalid compare function handling zero-length pairs [24]
  o INFRASTRUCTURE.md: project infra [99]
@@ -154,10 +154,10 @@ This release includes the following bugfixes:
  o lib: clarify 'conn->httpversion' [213]
  o lib: redirect handling by protocol handler [212]
  o lib: remove `__EMX__` guards [83]
- o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
+ o lib: replace `inline` redefine with `FETCH_INLINE` macro [47]
  o lib: supress deprecation warnings in apple builds [32]
  o lib: TLS session ticket caching reworked [60]
- o libcurl/opts: do not save files in dirs where attackers have access [199]
+ o libfetch/opts: do not save files in dirs where attackers have access [199]
  o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
  o mbedtls: fix handling of blocked sends [116]
  o mime: explicitly rewind subparts at attachment time. [80]
@@ -168,7 +168,7 @@ This release includes the following bugfixes:
  o msvc: fix building with `HAVE_INET_NTOP` and MSVC <=1900 [151]
  o msvc: require VS2005 for large file support [143]
  o msvc: tidy up `_CRT_*_NO_DEPRECATE` definitions [148]
- o multi: fix curl_multi_waitfds reporting of fd_count [73]
+ o multi: fix fetch_multi_waitfds reporting of fd_count [73]
  o multi: fix return code for an already-removed easy handle [106]
  o multihandle: add an ssl_scache here [129]
  o multissl: auto-enable `OPENSSL_COEXIST` for wolfSSL + OpenSSL [92]
@@ -188,12 +188,12 @@ This release includes the following bugfixes:
  o sectransp: free certificate on error [12]
  o select: avoid a NULL deref in cwfds_add_sock [128]
  o smb: fix compiler warning [112]
- o src: add `CURL_STRICMP()` macro, use `_stricmp()` on Windows [54]
- o src: drop support for `CURL_TESTDIR` debug env [121]
- o src: omit hugehelp and ca-embed from libcurltool [215]
+ o src: add `FETCH_STRICMP()` macro, use `_stricmp()` on Windows [54]
+ o src: drop support for `FETCH_TESTDIR` debug env [121]
+ o src: omit hugehelp and ca-embed from libfetchtool [215]
  o ssl session cache: change cache dimensions [159]
  o strparse: string parsing helper functions [8]
- o system.h: add 64-bit curl_off_t definitions for NonStop [11]
+ o system.h: add 64-bit fetch_off_t definitions for NonStop [11]
  o system.h: drop compilers lacking 64-bit integer type (Windows/MS-DOS) [155]
  o system.h: drop duplicate and no-op code [153]
  o system.h: fix indentation [142]
@@ -202,19 +202,19 @@ This release includes the following bugfixes:
  o tests/http/clients: use proper sleep() call on NonStop [10]
  o tests: change the behavior of swsbounce [202]
  o TheArtOfHttpScripting.md: rewrite double 'that' [115]
- o tidy-up: `curl_setup.h`, `curl_setup_once.h`, `config-win32ce.h` [146]
+ o tidy-up: `fetch_setup.h`, `fetch_setup_once.h`, `config-win32ce.h` [146]
  o tidy-up: drop parenthesis around `return` expression [167]
  o tidy-up: drop parenthesis around `return` values [134]
- o tidy-up: extend `CURL_O_BINARY` to lib and tests [195]
+ o tidy-up: extend `FETCH_O_BINARY` to lib and tests [195]
  o TLS: check connection for SSL use, not handler [181]
- o tool_formparse.c: make curlx_uztoso a static in here [39]
+ o tool_formparse.c: make fetchx_uztoso a static in here [39]
  o tool_formparse: accept digits in --form type= strings [33]
  o tool_getparam: ECH param parsing refix [150]
  o tool_getparam: fix "Ignored Return Value" [21]
  o tool_getparam: fix memory leak on error in parse_ech [14]
  o tool_getparam: fix the ECH parser [20]
  o tool_operate: make --etag-compare always accept a non-existing file [22]
- o transfer: fix CURLOPT_CURLU override logic [171]
+ o transfer: fix FETCHOPT_FETCHU override logic [171]
  o urlapi: fix redirect to a new fragment or query (only) [118]
  o variable.md: mention --expand-variable for variables to variables [13]
  o variable.md: show function use with examples [18]
@@ -227,7 +227,7 @@ This release includes the following bugfixes:
  o vtls: replace "none"-functions with NULL pointers [27]
  o VULN-DISCLOSURE-POLICY.md: mention the not setting CVSS [23]
  o websocket: fix message send corruption [188]
- o windows: drop dupe macros, detect `CURL_OS` for WinCE ARM, indentation [183]
+ o windows: drop dupe macros, detect `FETCH_OS` for WinCE ARM, indentation [183]
  o windows: drop redundant `USE_WIN32_SMALL_FILES` macro [145]
  o windows: drop two missed `buildconf.bat` references
  o windows: merge `config-win32ce.h` into `config-win32.h` [196]
@@ -235,18 +235,18 @@ This release includes the following bugfixes:
 
 This release includes the following known bugs:
 
- See docs/KNOWN_BUGS (https://curl.se/docs/knownbugs.html)
+ See docs/KNOWN_BUGS (https://fetch.se/docs/knownbugs.html)
 
-For all changes ever done in curl:
+For all changes ever done in fetch:
 
- See https://curl.se/changes.html
+ See https://fetch.se/changes.html
 
 Planned upcoming removals include:
 
  o Support for the msh3 HTTP/3 backend
  o TLS libraries not supporting TLS 1.3
 
- See https://curl.se/dev/deprecate.html for details
+ See https://fetch.se/dev/deprecate.html for details
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
@@ -267,215 +267,215 @@ advice from friends like these:
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=15720
- [2] = https://curl.se/bug/?i=15714
- [3] = https://curl.se/bug/?i=15709
- [4] = https://curl.se/bug/?i=15708
- [5] = https://curl.se/bug/?i=15729
- [6] = https://curl.se/bug/?i=15734
- [7] = https://curl.se/bug/?i=15687
- [8] = https://curl.se/bug/?i=15692
- [9] = https://curl.se/bug/?i=15725
- [10] = https://curl.se/bug/?i=15711
- [11] = https://curl.se/bug/?i=15723
- [12] = https://curl.se/bug/?i=15721
- [13] = https://curl.se/bug/?i=15752
- [14] = https://curl.se/bug/?i=15753
- [15] = https://curl.se/bug/?i=15749
+ [1] = https://fetch.se/bug/?i=15720
+ [2] = https://fetch.se/bug/?i=15714
+ [3] = https://fetch.se/bug/?i=15709
+ [4] = https://fetch.se/bug/?i=15708
+ [5] = https://fetch.se/bug/?i=15729
+ [6] = https://fetch.se/bug/?i=15734
+ [7] = https://fetch.se/bug/?i=15687
+ [8] = https://fetch.se/bug/?i=15692
+ [9] = https://fetch.se/bug/?i=15725
+ [10] = https://fetch.se/bug/?i=15711
+ [11] = https://fetch.se/bug/?i=15723
+ [12] = https://fetch.se/bug/?i=15721
+ [13] = https://fetch.se/bug/?i=15752
+ [14] = https://fetch.se/bug/?i=15753
+ [15] = https://fetch.se/bug/?i=15749
  [16] = https://issues.oss-fuzz.com/issues/383911309
- [17] = https://curl.se/bug/?i=15495
- [18] = https://curl.se/bug/?i=15743
- [19] = https://curl.se/bug/?i=15742
- [20] = https://curl.se/bug/?i=15741
- [21] = https://curl.se/bug/?i=15740
- [22] = https://curl.se/bug/?i=15737
- [23] = https://curl.se/bug/?i=15779
- [24] = https://curl.se/bug/?i=15778
- [25] = https://curl.se/bug/?i=15776
- [26] = https://curl.se/bug/?i=15775
- [27] = https://curl.se/bug/?i=15772
- [28] = https://curl.se/bug/?i=15767
- [29] = https://curl.se/bug/?i=15769
- [30] = https://curl.se/bug/?i=15770
- [31] = https://curl.se/bug/?i=15730
- [32] = https://curl.se/bug/?i=15763
- [33] = https://curl.se/bug/?i=15761
- [34] = https://curl.se/bug/?i=15596
- [35] = https://curl.se/bug/?i=15764
- [36] = https://curl.se/bug/?i=15431
- [37] = https://curl.se/bug/?i=15408
- [38] = https://curl.se/bug/?i=15543
- [39] = https://curl.se/bug/?i=15796
- [40] = https://curl.se/bug/?i=15450
- [41] = https://curl.se/bug/?i=15498
- [42] = https://curl.se/bug/?i=15478
- [43] = https://curl.se/bug/?i=15255
- [44] = https://curl.se/bug/?i=15787
- [45] = https://curl.se/bug/?i=15464
- [46] = https://curl.se/bug/?i=15273
- [47] = https://curl.se/bug/?i=15523
- [48] = https://curl.se/bug/?i=15280
- [49] = https://curl.se/bug/?i=15465
- [50] = https://curl.se/bug/?i=15562
- [51] = https://curl.se/bug/?i=15577
- [52] = https://curl.se/bug/?i=15813
- [53] = https://curl.se/bug/?i=15815
- [54] = https://curl.se/bug/?i=15788
- [55] = https://curl.se/bug/?i=15512
- [56] = https://curl.se/bug/?i=15739
- [57] = https://curl.se/bug/?i=15120
- [58] = https://curl.se/bug/?i=15789
- [59] = https://curl.se/bug/?i=15785
- [60] = https://curl.se/bug/?i=15774
- [61] = https://curl.se/bug/?i=15667
- [62] = https://curl.se/bug/?i=15786
- [63] = https://curl.se/bug/?i=15777
- [64] = https://curl.se/bug/?i=15773
- [65] = https://curl.se/bug/?i=15812
- [66] = https://curl.se/bug/?i=15805
- [67] = https://curl.se/bug/?i=15814
- [68] = https://curl.se/bug/?i=15855
- [69] = https://curl.se/bug/?i=15807
- [70] = https://curl.se/bug/?i=15808
- [71] = https://curl.se/bug/?i=15806
- [72] = https://curl.se/bug/?i=15784
- [73] = https://curl.se/bug/?i=15146
- [74] = https://curl.se/bug/?i=15748
- [75] = https://curl.se/bug/?i=15468
- [76] = https://curl.se/bug/?i=13522
- [77] = https://curl.se/bug/?i=15587
- [78] = https://curl.se/bug/?i=15850
- [79] = https://curl.se/bug/?i=15845
- [80] = https://curl.se/bug/?i=15842
- [81] = https://curl.se/bug/?i=15840
- [82] = https://curl.se/bug/?i=15928
- [83] = https://curl.se/bug/?i=15884
- [84] = https://curl.se/bug/?i=15826
- [85] = https://curl.se/bug/?i=15883
- [86] = https://curl.se/bug/?i=15832
- [87] = https://curl.se/bug/?i=15800
- [88] = https://curl.se/bug/?i=15829
- [89] = https://curl.se/bug/?i=15827
- [90] = https://curl.se/bug/?i=15828
- [91] = https://curl.se/bug/?i=15882
- [92] = https://curl.se/bug/?i=15765
- [93] = https://curl.se/bug/?i=15809
- [94] = https://curl.se/bug/?i=15822
- [95] = https://curl.se/bug/?i=15820
- [96] = https://curl.se/bug/?i=15915
- [97] = https://curl.se/bug/?i=15871
- [98] = https://curl.se/bug/?i=15876
- [99] = https://curl.se/bug/?i=15906
- [100] = https://curl.se/bug/?i=15854
- [101] = https://curl.se/bug/?i=15945
- [102] = https://curl.se/bug/?i=15873
- [103] = https://curl.se/bug/?i=15869
- [104] = https://curl.se/bug/?i=15868
- [105] = https://curl.se/bug/?i=15867
- [106] = https://curl.se/bug/?i=15844
- [107] = https://curl.se/bug/?i=15833
- [108] = https://curl.se/bug/?i=15908
- [109] = https://curl.se/bug/?i=15903
- [110] = https://curl.se/bug/?i=15861
- [111] = https://curl.se/bug/?i=15937
- [112] = https://curl.se/bug/?i=15902
- [113] = https://curl.se/bug/?i=15898
- [114] = https://curl.se/bug/?i=15900
- [115] = https://curl.se/bug/?i=15863
- [116] = https://curl.se/bug/?i=15801
- [117] = https://curl.se/bug/?i=15835
- [118] = https://curl.se/bug/?i=15836
- [119] = https://curl.se/bug/?i=15897
- [120] = https://curl.se/bug/?i=15899
- [121] = https://curl.se/bug/?i=15893
- [122] = https://curl.se/bug/?i=15895
- [123] = https://curl.se/bug/?i=15892
- [124] = https://curl.se/bug/?i=15894
- [125] = https://curl.se/bug/?i=15891
- [126] = https://curl.se/bug/?i=15889
- [127] = https://curl.se/bug/?i=15954
- [128] = https://curl.se/bug/?i=15881
- [129] = https://curl.se/bug/?i=15982
- [130] = https://curl.se/bug/?i=15983
- [131] = https://curl.se/bug/?i=15981
- [132] = https://curl.se/bug/?i=15980
- [133] = https://curl.se/bug/?i=15946
- [134] = https://curl.se/bug/?i=15979
- [135] = https://curl.se/bug/?i=15978
- [136] = https://curl.se/bug/?i=15973
- [137] = https://curl.se/bug/?i=15939
- [138] = https://curl.se/bug/?i=15971
- [139] = https://curl.se/bug/?i=15909
- [140] = https://curl.se/bug/?i=15941
- [141] = https://curl.se/bug/?i=15924
- [142] = https://curl.se/bug/?i=15974
- [143] = https://curl.se/bug/?i=15958
- [144] = https://curl.se/bug/?i=15969
- [145] = https://curl.se/bug/?i=15968
- [146] = https://curl.se/bug/?i=15967
- [147] = https://curl.se/bug/?i=15929
- [148] = https://curl.se/bug/?i=15960
- [149] = https://curl.se/bug/?i=15925
- [150] = https://curl.se/bug/?i=16006
- [151] = https://curl.se/bug/?i=15923
- [152] = https://curl.se/bug/?i=16012
- [153] = https://curl.se/bug/?i=15966
- [154] = https://curl.se/bug/?i=15857
- [155] = https://curl.se/bug/?i=15957
- [156] = https://curl.se/bug/?i=15962
- [157] = https://curl.se/bug/?i=15920
- [158] = https://curl.se/bug/?i=15955
- [159] = https://curl.se/bug/?i=15953
- [160] = https://curl.se/bug/?i=16007
- [161] = https://curl.se/bug/?i=16007
- [162] = https://curl.se/bug/?i=16050
- [163] = https://curl.se/bug/?i=16003
- [164] = https://curl.se/bug/?i=16002
- [165] = https://curl.se/bug/?i=15992
- [166] = https://curl.se/bug/?i=16039
- [167] = https://curl.se/bug/?i=15990
- [168] = https://curl.se/bug/?i=15156
- [169] = https://curl.se/bug/?i=16000
- [170] = https://curl.se/bug/?i=15996
- [171] = https://curl.se/bug/?i=15984
- [172] = https://curl.se/bug/?i=15997
- [173] = https://curl.se/bug/?i=15988
- [174] = https://curl.se/bug/?i=16032
- [175] = https://curl.se/bug/?i=16040
- [176] = https://curl.se/bug/?i=16037
- [177] = https://curl.se/bug/?i=15987
- [178] = https://curl.se/bug/?i=15986
- [179] = https://curl.se/bug/?i=16022
- [180] = https://curl.se/bug/?i=16036
- [181] = https://curl.se/bug/?i=16034
- [182] = https://curl.se/bug/?i=16033
- [183] = https://curl.se/bug/?i=16029
- [184] = https://curl.se/bug/?i=16027
- [185] = https://curl.se/bug/?i=16014
- [186] = https://curl.se/bug/?i=16028
- [187] = https://curl.se/bug/?i=16091
- [188] = https://curl.se/bug/?i=15865
- [189] = https://curl.se/bug/?i=16057
- [190] = https://curl.se/bug/?i=16015
- [191] = https://curl.se/bug/?i=16048
- [192] = https://curl.se/bug/?i=16020
- [194] = https://curl.se/bug/?i=16019
- [195] = https://curl.se/bug/?i=16009
- [196] = https://curl.se/bug/?i=16038
- [198] = https://curl.se/bug/?i=16053
- [199] = https://curl.se/bug/?i=16051
- [200] = https://curl.se/bug/?i=16081
- [201] = https://curl.se/bug/?i=16041
- [202] = https://curl.se/bug/?i=16074
- [203] = https://curl.se/bug/?i=16089
- [204] = https://curl.se/bug/?i=16052
- [205] = https://curl.se/bug/?i=16054
- [208] = https://curl.se/bug/?i=16087
- [210] = https://curl.se/bug/?i=16079
- [211] = https://curl.se/bug/?i=16079
- [212] = https://curl.se/bug/?i=16075
- [213] = https://curl.se/bug/?i=16073
- [214] = https://curl.se/bug/?i=16062
- [215] = https://curl.se/bug/?i=16068
- [216] = https://curl.se/bug/?i=16063
- [217] = https://curl.se/bug/?i=16067
+ [17] = https://fetch.se/bug/?i=15495
+ [18] = https://fetch.se/bug/?i=15743
+ [19] = https://fetch.se/bug/?i=15742
+ [20] = https://fetch.se/bug/?i=15741
+ [21] = https://fetch.se/bug/?i=15740
+ [22] = https://fetch.se/bug/?i=15737
+ [23] = https://fetch.se/bug/?i=15779
+ [24] = https://fetch.se/bug/?i=15778
+ [25] = https://fetch.se/bug/?i=15776
+ [26] = https://fetch.se/bug/?i=15775
+ [27] = https://fetch.se/bug/?i=15772
+ [28] = https://fetch.se/bug/?i=15767
+ [29] = https://fetch.se/bug/?i=15769
+ [30] = https://fetch.se/bug/?i=15770
+ [31] = https://fetch.se/bug/?i=15730
+ [32] = https://fetch.se/bug/?i=15763
+ [33] = https://fetch.se/bug/?i=15761
+ [34] = https://fetch.se/bug/?i=15596
+ [35] = https://fetch.se/bug/?i=15764
+ [36] = https://fetch.se/bug/?i=15431
+ [37] = https://fetch.se/bug/?i=15408
+ [38] = https://fetch.se/bug/?i=15543
+ [39] = https://fetch.se/bug/?i=15796
+ [40] = https://fetch.se/bug/?i=15450
+ [41] = https://fetch.se/bug/?i=15498
+ [42] = https://fetch.se/bug/?i=15478
+ [43] = https://fetch.se/bug/?i=15255
+ [44] = https://fetch.se/bug/?i=15787
+ [45] = https://fetch.se/bug/?i=15464
+ [46] = https://fetch.se/bug/?i=15273
+ [47] = https://fetch.se/bug/?i=15523
+ [48] = https://fetch.se/bug/?i=15280
+ [49] = https://fetch.se/bug/?i=15465
+ [50] = https://fetch.se/bug/?i=15562
+ [51] = https://fetch.se/bug/?i=15577
+ [52] = https://fetch.se/bug/?i=15813
+ [53] = https://fetch.se/bug/?i=15815
+ [54] = https://fetch.se/bug/?i=15788
+ [55] = https://fetch.se/bug/?i=15512
+ [56] = https://fetch.se/bug/?i=15739
+ [57] = https://fetch.se/bug/?i=15120
+ [58] = https://fetch.se/bug/?i=15789
+ [59] = https://fetch.se/bug/?i=15785
+ [60] = https://fetch.se/bug/?i=15774
+ [61] = https://fetch.se/bug/?i=15667
+ [62] = https://fetch.se/bug/?i=15786
+ [63] = https://fetch.se/bug/?i=15777
+ [64] = https://fetch.se/bug/?i=15773
+ [65] = https://fetch.se/bug/?i=15812
+ [66] = https://fetch.se/bug/?i=15805
+ [67] = https://fetch.se/bug/?i=15814
+ [68] = https://fetch.se/bug/?i=15855
+ [69] = https://fetch.se/bug/?i=15807
+ [70] = https://fetch.se/bug/?i=15808
+ [71] = https://fetch.se/bug/?i=15806
+ [72] = https://fetch.se/bug/?i=15784
+ [73] = https://fetch.se/bug/?i=15146
+ [74] = https://fetch.se/bug/?i=15748
+ [75] = https://fetch.se/bug/?i=15468
+ [76] = https://fetch.se/bug/?i=13522
+ [77] = https://fetch.se/bug/?i=15587
+ [78] = https://fetch.se/bug/?i=15850
+ [79] = https://fetch.se/bug/?i=15845
+ [80] = https://fetch.se/bug/?i=15842
+ [81] = https://fetch.se/bug/?i=15840
+ [82] = https://fetch.se/bug/?i=15928
+ [83] = https://fetch.se/bug/?i=15884
+ [84] = https://fetch.se/bug/?i=15826
+ [85] = https://fetch.se/bug/?i=15883
+ [86] = https://fetch.se/bug/?i=15832
+ [87] = https://fetch.se/bug/?i=15800
+ [88] = https://fetch.se/bug/?i=15829
+ [89] = https://fetch.se/bug/?i=15827
+ [90] = https://fetch.se/bug/?i=15828
+ [91] = https://fetch.se/bug/?i=15882
+ [92] = https://fetch.se/bug/?i=15765
+ [93] = https://fetch.se/bug/?i=15809
+ [94] = https://fetch.se/bug/?i=15822
+ [95] = https://fetch.se/bug/?i=15820
+ [96] = https://fetch.se/bug/?i=15915
+ [97] = https://fetch.se/bug/?i=15871
+ [98] = https://fetch.se/bug/?i=15876
+ [99] = https://fetch.se/bug/?i=15906
+ [100] = https://fetch.se/bug/?i=15854
+ [101] = https://fetch.se/bug/?i=15945
+ [102] = https://fetch.se/bug/?i=15873
+ [103] = https://fetch.se/bug/?i=15869
+ [104] = https://fetch.se/bug/?i=15868
+ [105] = https://fetch.se/bug/?i=15867
+ [106] = https://fetch.se/bug/?i=15844
+ [107] = https://fetch.se/bug/?i=15833
+ [108] = https://fetch.se/bug/?i=15908
+ [109] = https://fetch.se/bug/?i=15903
+ [110] = https://fetch.se/bug/?i=15861
+ [111] = https://fetch.se/bug/?i=15937
+ [112] = https://fetch.se/bug/?i=15902
+ [113] = https://fetch.se/bug/?i=15898
+ [114] = https://fetch.se/bug/?i=15900
+ [115] = https://fetch.se/bug/?i=15863
+ [116] = https://fetch.se/bug/?i=15801
+ [117] = https://fetch.se/bug/?i=15835
+ [118] = https://fetch.se/bug/?i=15836
+ [119] = https://fetch.se/bug/?i=15897
+ [120] = https://fetch.se/bug/?i=15899
+ [121] = https://fetch.se/bug/?i=15893
+ [122] = https://fetch.se/bug/?i=15895
+ [123] = https://fetch.se/bug/?i=15892
+ [124] = https://fetch.se/bug/?i=15894
+ [125] = https://fetch.se/bug/?i=15891
+ [126] = https://fetch.se/bug/?i=15889
+ [127] = https://fetch.se/bug/?i=15954
+ [128] = https://fetch.se/bug/?i=15881
+ [129] = https://fetch.se/bug/?i=15982
+ [130] = https://fetch.se/bug/?i=15983
+ [131] = https://fetch.se/bug/?i=15981
+ [132] = https://fetch.se/bug/?i=15980
+ [133] = https://fetch.se/bug/?i=15946
+ [134] = https://fetch.se/bug/?i=15979
+ [135] = https://fetch.se/bug/?i=15978
+ [136] = https://fetch.se/bug/?i=15973
+ [137] = https://fetch.se/bug/?i=15939
+ [138] = https://fetch.se/bug/?i=15971
+ [139] = https://fetch.se/bug/?i=15909
+ [140] = https://fetch.se/bug/?i=15941
+ [141] = https://fetch.se/bug/?i=15924
+ [142] = https://fetch.se/bug/?i=15974
+ [143] = https://fetch.se/bug/?i=15958
+ [144] = https://fetch.se/bug/?i=15969
+ [145] = https://fetch.se/bug/?i=15968
+ [146] = https://fetch.se/bug/?i=15967
+ [147] = https://fetch.se/bug/?i=15929
+ [148] = https://fetch.se/bug/?i=15960
+ [149] = https://fetch.se/bug/?i=15925
+ [150] = https://fetch.se/bug/?i=16006
+ [151] = https://fetch.se/bug/?i=15923
+ [152] = https://fetch.se/bug/?i=16012
+ [153] = https://fetch.se/bug/?i=15966
+ [154] = https://fetch.se/bug/?i=15857
+ [155] = https://fetch.se/bug/?i=15957
+ [156] = https://fetch.se/bug/?i=15962
+ [157] = https://fetch.se/bug/?i=15920
+ [158] = https://fetch.se/bug/?i=15955
+ [159] = https://fetch.se/bug/?i=15953
+ [160] = https://fetch.se/bug/?i=16007
+ [161] = https://fetch.se/bug/?i=16007
+ [162] = https://fetch.se/bug/?i=16050
+ [163] = https://fetch.se/bug/?i=16003
+ [164] = https://fetch.se/bug/?i=16002
+ [165] = https://fetch.se/bug/?i=15992
+ [166] = https://fetch.se/bug/?i=16039
+ [167] = https://fetch.se/bug/?i=15990
+ [168] = https://fetch.se/bug/?i=15156
+ [169] = https://fetch.se/bug/?i=16000
+ [170] = https://fetch.se/bug/?i=15996
+ [171] = https://fetch.se/bug/?i=15984
+ [172] = https://fetch.se/bug/?i=15997
+ [173] = https://fetch.se/bug/?i=15988
+ [174] = https://fetch.se/bug/?i=16032
+ [175] = https://fetch.se/bug/?i=16040
+ [176] = https://fetch.se/bug/?i=16037
+ [177] = https://fetch.se/bug/?i=15987
+ [178] = https://fetch.se/bug/?i=15986
+ [179] = https://fetch.se/bug/?i=16022
+ [180] = https://fetch.se/bug/?i=16036
+ [181] = https://fetch.se/bug/?i=16034
+ [182] = https://fetch.se/bug/?i=16033
+ [183] = https://fetch.se/bug/?i=16029
+ [184] = https://fetch.se/bug/?i=16027
+ [185] = https://fetch.se/bug/?i=16014
+ [186] = https://fetch.se/bug/?i=16028
+ [187] = https://fetch.se/bug/?i=16091
+ [188] = https://fetch.se/bug/?i=15865
+ [189] = https://fetch.se/bug/?i=16057
+ [190] = https://fetch.se/bug/?i=16015
+ [191] = https://fetch.se/bug/?i=16048
+ [192] = https://fetch.se/bug/?i=16020
+ [194] = https://fetch.se/bug/?i=16019
+ [195] = https://fetch.se/bug/?i=16009
+ [196] = https://fetch.se/bug/?i=16038
+ [198] = https://fetch.se/bug/?i=16053
+ [199] = https://fetch.se/bug/?i=16051
+ [200] = https://fetch.se/bug/?i=16081
+ [201] = https://fetch.se/bug/?i=16041
+ [202] = https://fetch.se/bug/?i=16074
+ [203] = https://fetch.se/bug/?i=16089
+ [204] = https://fetch.se/bug/?i=16052
+ [205] = https://fetch.se/bug/?i=16054
+ [208] = https://fetch.se/bug/?i=16087
+ [210] = https://fetch.se/bug/?i=16079
+ [211] = https://fetch.se/bug/?i=16079
+ [212] = https://fetch.se/bug/?i=16075
+ [213] = https://fetch.se/bug/?i=16073
+ [214] = https://fetch.se/bug/?i=16062
+ [215] = https://fetch.se/bug/?i=16068
+ [216] = https://fetch.se/bug/?i=16063
+ [217] = https://fetch.se/bug/?i=16067

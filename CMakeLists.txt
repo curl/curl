@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,14 +20,14 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 # by Tetetest and Sukender (Benoit Neil)
 
 # Note: By default this CMake build script detects the version of some
 # dependencies using `check_symbol_exists`. Those checks do not work in
-# the case that both CURL and its dependency are included as sub-projects
+# the case that both FETCH and its dependency are included as sub-projects
 # in a larger build using `FetchContent`. To support that case, additional
 # variables may be defined by the parent project, ideally in the "extra"
 # find package redirect file:
@@ -51,7 +51,7 @@ message(STATUS "Using CMake version ${CMAKE_VERSION}")
 # Collect command-line arguments for buildinfo.txt.
 # Must reside at the top of the script to work as expected.
 set(_cmake_args "")
-if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
+if(NOT "$ENV{FETCH_BUILDINFO}$ENV{FETCH_CI}$ENV{CI}" STREQUAL "")
   get_cmake_property(_cache_vars CACHE_VARIABLES)
   foreach(_cache_var IN ITEMS ${_cache_vars})
     get_property(_cache_var_helpstring CACHE ${_cache_var} PROPERTY HELPSTRING)
@@ -74,18 +74,18 @@ include(Macros)
 include(CMakeDependentOption)
 include(CheckCCompilerFlag)
 
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
-string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" _curl_version ${_curl_version_h_contents})
-string(REGEX REPLACE "[^\"]+\"" "" _curl_version ${_curl_version})
-string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_num ${_curl_version_h_contents})
-string(REGEX REPLACE "[^0]+0x" "" _curl_version_num ${_curl_version_num})
-unset(_curl_version_h_contents)
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/fetch/fetchver.h" _fetch_version_h_contents REGEX "#define LIBFETCH_VERSION( |_NUM )")
+string(REGEX MATCH "#define LIBFETCH_VERSION \"[^\"]*" _fetch_version ${_fetch_version_h_contents})
+string(REGEX REPLACE "[^\"]+\"" "" _fetch_version ${_fetch_version})
+string(REGEX MATCH "#define LIBFETCH_VERSION_NUM 0x[0-9a-fA-F]+" _fetch_version_num ${_fetch_version_h_contents})
+string(REGEX REPLACE "[^0]+0x" "" _fetch_version_num ${_fetch_version_num})
+unset(_fetch_version_h_contents)
 
-message(STATUS "curl version=[${_curl_version}]")
+message(STATUS "fetch version=[${_fetch_version}]")
 
-string(REGEX REPLACE "([0-9]+\.[0-9]+\.[0-9]+).+" "\\1" _curl_version_sem "${_curl_version}")
-project(CURL
-  VERSION "${_curl_version_sem}"
+string(REGEX REPLACE "([0-9]+\.[0-9]+\.[0-9]+).+" "\\1" _fetch_version_sem "${_fetch_version}")
+project(FETCH
+  VERSION "${_fetch_version_sem}"
   LANGUAGES C)
 
 # CMake does not recognize some targets accurately. Touch up configuration manually as a workaround.
@@ -160,9 +160,9 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 
 if(CMAKE_C_COMPILER_TARGET)
-  set(CURL_OS "\"${CMAKE_C_COMPILER_TARGET}\"")
+  set(FETCH_OS "\"${CMAKE_C_COMPILER_TARGET}\"")
 else()
-  set(CURL_OS "\"${CMAKE_SYSTEM_NAME}\"")
+  set(FETCH_OS "\"${CMAKE_SYSTEM_NAME}\"")
 endif()
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
@@ -182,18 +182,18 @@ if(CMAKE_TRY_COMPILE_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
   set(CMAKE_TRY_COMPILE_TARGET_TYPE "EXECUTABLE")
 endif()
 
-option(CURL_WERROR "Turn compiler warnings into errors" OFF)
+option(FETCH_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
-option(BUILD_CURL_EXE "Build curl executable" ON)
+option(BUILD_FETCH_EXE "Build fetch executable" ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_STATIC_LIBS "Build static libraries" OFF)
-option(BUILD_STATIC_CURL "Build curl executable with static libcurl" OFF)
+option(BUILD_STATIC_FETCH "Build fetch executable with static libfetch" OFF)
 option(ENABLE_ARES "Enable c-ares support" OFF)
-option(CURL_DISABLE_INSTALL "Disable installation targets" OFF)
+option(FETCH_DISABLE_INSTALL "Disable installation targets" OFF)
 
 if(WIN32)
-  option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
-  if(CURL_STATIC_CRT AND MSVC)
+  option(FETCH_STATIC_CRT "Build libfetch with static CRT with MSVC (/MT)" OFF)
+  if(FETCH_STATIC_CRT AND MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MT")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -MTd")
@@ -212,29 +212,29 @@ if(WIN32)
 
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")  # Apply to all feature checks
 
-  set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
-  if(CURL_TARGET_WINDOWS_VERSION)
-    add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to all feature checks
+  set(FETCH_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
+  if(FETCH_TARGET_WINDOWS_VERSION)
+    add_definitions("-D_WIN32_WINNT=${FETCH_TARGET_WINDOWS_VERSION}")
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${FETCH_TARGET_WINDOWS_VERSION}")  # Apply to all feature checks
   endif()
 
   # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
-  curl_internal_test(HAVE_WIN32_WINNT)
+  fetch_internal_test(HAVE_WIN32_WINNT)
   if(HAVE_WIN32_WINNT)
-    string(REGEX MATCH "_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE "_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4 digits
-    string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
+    string(REGEX MATCH "_WIN32_WINNT=0x[0-9a-fA-F]+" FETCH_TEST_OUTPUT "${FETCH_TEST_OUTPUT}")
+    string(REGEX REPLACE "_WIN32_WINNT=" "" FETCH_TEST_OUTPUT "${FETCH_TEST_OUTPUT}")
+    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" FETCH_TEST_OUTPUT "${FETCH_TEST_OUTPUT}")  # pad to 4 digits
+    string(TOLOWER "${FETCH_TEST_OUTPUT}" HAVE_WIN32_WINNT)
     message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
   endif()
   unset(HAVE_WIN32_WINNT CACHE)  # Avoid storing in CMake cache
 
   if(MINGW)
     # Detect __MINGW64_VERSION_MAJOR, __MINGW64_VERSION_MINOR and store as MINGW64_VERSION
-    curl_internal_test(MINGW64_VERSION)
+    fetch_internal_test(MINGW64_VERSION)
     if(MINGW64_VERSION)
-      string(REGEX MATCH "MINGW64_VERSION=[0-9]+\.[0-9]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-      string(REGEX REPLACE "MINGW64_VERSION=" "" MINGW64_VERSION "${CURL_TEST_OUTPUT}")
+      string(REGEX MATCH "MINGW64_VERSION=[0-9]+\.[0-9]+" FETCH_TEST_OUTPUT "${FETCH_TEST_OUTPUT}")
+      string(REGEX REPLACE "MINGW64_VERSION=" "" MINGW64_VERSION "${FETCH_TEST_OUTPUT}")
       message(STATUS "Found MINGW64_VERSION=${MINGW64_VERSION}")
     endif()
     unset(MINGW64_VERSION CACHE)  # Avoid storing in CMake cache
@@ -243,7 +243,7 @@ elseif(DOS OR AMIGA)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_STATIC_LIBS ON)
 endif()
-option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
+option(FETCH_LTO "Enable compiler Link Time Optimizations" OFF)
 
 if(NOT DOS AND NOT AMIGA)
   # if c-ares is used, default the threaded resolver to OFF
@@ -261,26 +261,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")  # Required for sendmmsg()
 endif()
 
-option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
+option(ENABLE_DEBUG "Enable fetch debug features (for developing fetch itself)" OFF)
 if(ENABLE_DEBUG)
-  message(WARNING "This curl build is Debug-enabled, do not use in production.")
+  message(WARNING "This fetch build is Debug-enabled, do not use in production.")
 endif()
-option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
+option(ENABLE_FETCHDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
 
 if(MSVC)
-  set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory + MSVC fails test 558 and 1330. Tested with static build, Debug mode.
+  set(ENABLE_FETCHDEBUG OFF)  # FIXME: TrackMemory + MSVC fails test 558 and 1330. Tested with static build, Debug mode.
 endif()
 
 if(ENABLE_DEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DEBUGBUILD")
 endif()
 
-if(ENABLE_CURLDEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURLDEBUG")
+if(ENABLE_FETCHDEBUG)
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "FETCHDEBUG")
 endif()
 
-option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
-if(CURL_CLANG_TIDY)
+option(FETCH_CLANG_TIDY "Run the build through clang-tidy" OFF)
+if(FETCH_CLANG_TIDY)
   set(CMAKE_UNITY_BUILD OFF)
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
@@ -290,11 +290,11 @@ if(CURL_CLANG_TIDY)
   find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
   set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "-checks=${_tidy_checks}" "-quiet")
   unset(_tidy_checks)
-  if(CURL_WERROR)
+  if(FETCH_WERROR)
     list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
   endif()
-  if(CURL_CLANG_TIDYFLAGS)
-    list(APPEND CMAKE_C_CLANG_TIDY ${CURL_CLANG_TIDYFLAGS})
+  if(FETCH_CLANG_TIDYFLAGS)
+    list(APPEND CMAKE_C_CLANG_TIDY ${FETCH_CLANG_TIDYFLAGS})
   endif()
 endif()
 
@@ -303,20 +303,20 @@ if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "-d")
 endif()
 
-set(LIB_STATIC "libcurl_static")
-set(LIB_SHARED "libcurl_shared")
+set(LIB_STATIC "libfetch_static")
+set(LIB_SHARED "libfetch_shared")
 
 if(NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
   set(BUILD_STATIC_LIBS ON)
 endif()
-if(NOT BUILD_STATIC_CURL AND NOT BUILD_SHARED_LIBS)
-  set(BUILD_STATIC_CURL ON)
-elseif(BUILD_STATIC_CURL AND NOT BUILD_STATIC_LIBS)
-  set(BUILD_STATIC_CURL OFF)
+if(NOT BUILD_STATIC_FETCH AND NOT BUILD_SHARED_LIBS)
+  set(BUILD_STATIC_FETCH ON)
+elseif(BUILD_STATIC_FETCH AND NOT BUILD_STATIC_LIBS)
+  set(BUILD_STATIC_FETCH OFF)
 endif()
 
-# Lib flavour selected for curl tool
-if(BUILD_STATIC_CURL)
+# Lib flavour selected for fetch tool
+if(BUILD_STATIC_FETCH)
   set(LIB_SELECTED_FOR_EXE ${LIB_STATIC})
 else()
   set(LIB_SELECTED_FOR_EXE ${LIB_SHARED})
@@ -333,23 +333,23 @@ endif()
 if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME MATCHES "Darwin")) OR
    VCPKG_TOOLCHAIN OR
    (MINGW AND NOT CMAKE_CROSSCOMPILING))
-  set(_curl_use_pkgconfig_default ON)
+  set(_fetch_use_pkgconfig_default ON)
 else()
-  set(_curl_use_pkgconfig_default OFF)
+  set(_fetch_use_pkgconfig_default OFF)
 endif()
-option(CURL_USE_PKGCONFIG "Enable pkg-config to detect dependencies" ${_curl_use_pkgconfig_default})
+option(FETCH_USE_PKGCONFIG "Enable pkg-config to detect dependencies" ${_fetch_use_pkgconfig_default})
 
 # Initialize variables collecting dependency libs, paths, pkg-config names.
-set(CURL_LIBS "")
-set(CURL_LIBDIRS "")
-set(LIBCURL_PC_REQUIRES_PRIVATE "")
+set(FETCH_LIBS "")
+set(FETCH_LIBDIRS "")
+set(LIBFETCH_PC_REQUIRES_PRIVATE "")
 
 if(ENABLE_ARES)
   set(USE_ARES 1)
   find_package(Cares REQUIRED)
-  list(APPEND CURL_LIBS ${CARES_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${CARES_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${CARES_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${CARES_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${CARES_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${CARES_PC_REQUIRES})
   link_directories(${CARES_LIBRARY_DIRS})
   if(CARES_CFLAGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CARES_CFLAGS}")
@@ -359,131 +359,131 @@ endif()
 
 include(CurlSymbolHiding)
 
-option(CURL_ENABLE_EXPORT_TARGET "Enable CMake export target" ON)
-mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
+option(FETCH_ENABLE_EXPORT_TARGET "Enable CMake export target" ON)
+mark_as_advanced(FETCH_ENABLE_EXPORT_TARGET)
 
-option(CURL_DISABLE_ALTSVC "Disable alt-svc support" OFF)
-mark_as_advanced(CURL_DISABLE_ALTSVC)
-option(CURL_DISABLE_SRP "Disable TLS-SRP support" OFF)
-mark_as_advanced(CURL_DISABLE_SRP)
-option(CURL_DISABLE_COOKIES "Disable cookies support" OFF)
-mark_as_advanced(CURL_DISABLE_COOKIES)
-option(CURL_DISABLE_BASIC_AUTH "Disable Basic authentication" OFF)
-mark_as_advanced(CURL_DISABLE_BASIC_AUTH)
-option(CURL_DISABLE_BEARER_AUTH "Disable Bearer authentication" OFF)
-mark_as_advanced(CURL_DISABLE_BEARER_AUTH)
-option(CURL_DISABLE_DIGEST_AUTH "Disable Digest authentication" OFF)
-mark_as_advanced(CURL_DISABLE_DIGEST_AUTH)
-option(CURL_DISABLE_KERBEROS_AUTH "Disable Kerberos authentication" OFF)
-mark_as_advanced(CURL_DISABLE_KERBEROS_AUTH)
-option(CURL_DISABLE_NEGOTIATE_AUTH "Disable negotiate authentication" OFF)
-mark_as_advanced(CURL_DISABLE_NEGOTIATE_AUTH)
-option(CURL_DISABLE_AWS "Disable aws-sigv4" OFF)
-mark_as_advanced(CURL_DISABLE_AWS)
-option(CURL_DISABLE_DICT "Disable DICT" OFF)
-mark_as_advanced(CURL_DISABLE_DICT)
-option(CURL_DISABLE_DOH "Disable DNS-over-HTTPS" OFF)
-mark_as_advanced(CURL_DISABLE_DOH)
-option(CURL_DISABLE_FILE "Disable FILE" OFF)
-mark_as_advanced(CURL_DISABLE_FILE)
-option(CURL_DISABLE_FTP "Disable FTP" OFF)
-mark_as_advanced(CURL_DISABLE_FTP)
-option(CURL_DISABLE_GETOPTIONS "Disable curl_easy_options API for existing options to curl_easy_setopt" OFF)
-mark_as_advanced(CURL_DISABLE_GETOPTIONS)
-option(CURL_DISABLE_GOPHER "Disable Gopher" OFF)
-mark_as_advanced(CURL_DISABLE_GOPHER)
-option(CURL_DISABLE_HEADERS_API "Disable headers-api support" OFF)
-mark_as_advanced(CURL_DISABLE_HEADERS_API)
-option(CURL_DISABLE_HSTS "Disable HSTS support" OFF)
-mark_as_advanced(CURL_DISABLE_HSTS)
-option(CURL_DISABLE_HTTP "Disable HTTP" OFF)
-mark_as_advanced(CURL_DISABLE_HTTP)
-option(CURL_DISABLE_HTTP_AUTH "Disable all HTTP authentication methods" OFF)
-mark_as_advanced(CURL_DISABLE_HTTP_AUTH)
-option(CURL_DISABLE_IMAP "Disable IMAP" OFF)
-mark_as_advanced(CURL_DISABLE_IMAP)
-option(CURL_DISABLE_LDAP "Disable LDAP" OFF)
-mark_as_advanced(CURL_DISABLE_LDAP)
-option(CURL_DISABLE_LDAPS "Disable LDAPS" ${CURL_DISABLE_LDAP})
-mark_as_advanced(CURL_DISABLE_LDAPS)
-option(CURL_DISABLE_LIBCURL_OPTION "Disable --libcurl option from the curl tool" OFF)
-mark_as_advanced(CURL_DISABLE_LIBCURL_OPTION)
-option(CURL_DISABLE_MIME "Disable MIME support" OFF)
-mark_as_advanced(CURL_DISABLE_MIME)
-cmake_dependent_option(CURL_DISABLE_FORM_API "Disable form-api"
-  OFF "NOT CURL_DISABLE_MIME"
+option(FETCH_DISABLE_ALTSVC "Disable alt-svc support" OFF)
+mark_as_advanced(FETCH_DISABLE_ALTSVC)
+option(FETCH_DISABLE_SRP "Disable TLS-SRP support" OFF)
+mark_as_advanced(FETCH_DISABLE_SRP)
+option(FETCH_DISABLE_COOKIES "Disable cookies support" OFF)
+mark_as_advanced(FETCH_DISABLE_COOKIES)
+option(FETCH_DISABLE_BASIC_AUTH "Disable Basic authentication" OFF)
+mark_as_advanced(FETCH_DISABLE_BASIC_AUTH)
+option(FETCH_DISABLE_BEARER_AUTH "Disable Bearer authentication" OFF)
+mark_as_advanced(FETCH_DISABLE_BEARER_AUTH)
+option(FETCH_DISABLE_DIGEST_AUTH "Disable Digest authentication" OFF)
+mark_as_advanced(FETCH_DISABLE_DIGEST_AUTH)
+option(FETCH_DISABLE_KERBEROS_AUTH "Disable Kerberos authentication" OFF)
+mark_as_advanced(FETCH_DISABLE_KERBEROS_AUTH)
+option(FETCH_DISABLE_NEGOTIATE_AUTH "Disable negotiate authentication" OFF)
+mark_as_advanced(FETCH_DISABLE_NEGOTIATE_AUTH)
+option(FETCH_DISABLE_AWS "Disable aws-sigv4" OFF)
+mark_as_advanced(FETCH_DISABLE_AWS)
+option(FETCH_DISABLE_DICT "Disable DICT" OFF)
+mark_as_advanced(FETCH_DISABLE_DICT)
+option(FETCH_DISABLE_DOH "Disable DNS-over-HTTPS" OFF)
+mark_as_advanced(FETCH_DISABLE_DOH)
+option(FETCH_DISABLE_FILE "Disable FILE" OFF)
+mark_as_advanced(FETCH_DISABLE_FILE)
+option(FETCH_DISABLE_FTP "Disable FTP" OFF)
+mark_as_advanced(FETCH_DISABLE_FTP)
+option(FETCH_DISABLE_GETOPTIONS "Disable fetch_easy_options API for existing options to fetch_easy_setopt" OFF)
+mark_as_advanced(FETCH_DISABLE_GETOPTIONS)
+option(FETCH_DISABLE_GOPHER "Disable Gopher" OFF)
+mark_as_advanced(FETCH_DISABLE_GOPHER)
+option(FETCH_DISABLE_HEADERS_API "Disable headers-api support" OFF)
+mark_as_advanced(FETCH_DISABLE_HEADERS_API)
+option(FETCH_DISABLE_HSTS "Disable HSTS support" OFF)
+mark_as_advanced(FETCH_DISABLE_HSTS)
+option(FETCH_DISABLE_HTTP "Disable HTTP" OFF)
+mark_as_advanced(FETCH_DISABLE_HTTP)
+option(FETCH_DISABLE_HTTP_AUTH "Disable all HTTP authentication methods" OFF)
+mark_as_advanced(FETCH_DISABLE_HTTP_AUTH)
+option(FETCH_DISABLE_IMAP "Disable IMAP" OFF)
+mark_as_advanced(FETCH_DISABLE_IMAP)
+option(FETCH_DISABLE_LDAP "Disable LDAP" OFF)
+mark_as_advanced(FETCH_DISABLE_LDAP)
+option(FETCH_DISABLE_LDAPS "Disable LDAPS" ${FETCH_DISABLE_LDAP})
+mark_as_advanced(FETCH_DISABLE_LDAPS)
+option(FETCH_DISABLE_LIBFETCH_OPTION "Disable --libfetch option from the fetch tool" OFF)
+mark_as_advanced(FETCH_DISABLE_LIBFETCH_OPTION)
+option(FETCH_DISABLE_MIME "Disable MIME support" OFF)
+mark_as_advanced(FETCH_DISABLE_MIME)
+cmake_dependent_option(FETCH_DISABLE_FORM_API "Disable form-api"
+  OFF "NOT FETCH_DISABLE_MIME"
   ON)
-mark_as_advanced(CURL_DISABLE_FORM_API)
-option(CURL_DISABLE_MQTT "Disable MQTT" OFF)
-mark_as_advanced(CURL_DISABLE_MQTT)
-option(CURL_DISABLE_BINDLOCAL "Disable local binding support" OFF)
-mark_as_advanced(CURL_DISABLE_BINDLOCAL)
-option(CURL_DISABLE_NETRC "Disable netrc parser" OFF)
-mark_as_advanced(CURL_DISABLE_NETRC)
-option(CURL_DISABLE_NTLM "Disable NTLM support" OFF)
-mark_as_advanced(CURL_DISABLE_NTLM)
-option(CURL_DISABLE_PARSEDATE "Disable date parsing" OFF)
-mark_as_advanced(CURL_DISABLE_PARSEDATE)
-option(CURL_DISABLE_POP3 "Disable POP3" OFF)
-mark_as_advanced(CURL_DISABLE_POP3)
-option(CURL_DISABLE_PROGRESS_METER "Disable built-in progress meter" OFF)
-mark_as_advanced(CURL_DISABLE_PROGRESS_METER)
-option(CURL_DISABLE_PROXY "Disable proxy support" OFF)
-mark_as_advanced(CURL_DISABLE_PROXY)
-option(CURL_DISABLE_IPFS "Disable IPFS" OFF)
-mark_as_advanced(CURL_DISABLE_IPFS)
-option(CURL_DISABLE_RTSP "Disable RTSP" OFF)
-mark_as_advanced(CURL_DISABLE_SHA512_256)
-option(CURL_DISABLE_SHA512_256 "Disable SHA-512/256 hash algorithm" OFF)
-mark_as_advanced(CURL_DISABLE_RTSP)
-option(CURL_DISABLE_SHUFFLE_DNS "Disable shuffle DNS feature" OFF)
-mark_as_advanced(CURL_DISABLE_SHUFFLE_DNS)
-option(CURL_DISABLE_SMB "Disable SMB" OFF)
-mark_as_advanced(CURL_DISABLE_SMB)
-option(CURL_DISABLE_SMTP "Disable SMTP" OFF)
-mark_as_advanced(CURL_DISABLE_SMTP)
-option(CURL_DISABLE_SOCKETPAIR "Disable use of socketpair for curl_multi_poll" OFF)
-mark_as_advanced(CURL_DISABLE_SOCKETPAIR)
-option(CURL_DISABLE_WEBSOCKETS "Disable WebSocket" OFF)
-mark_as_advanced(CURL_DISABLE_WEBSOCKETS)
-option(CURL_DISABLE_TELNET "Disable Telnet" OFF)
-mark_as_advanced(CURL_DISABLE_TELNET)
-option(CURL_DISABLE_TFTP "Disable TFTP" OFF)
-mark_as_advanced(CURL_DISABLE_TFTP)
-option(CURL_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
-mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
+mark_as_advanced(FETCH_DISABLE_FORM_API)
+option(FETCH_DISABLE_MQTT "Disable MQTT" OFF)
+mark_as_advanced(FETCH_DISABLE_MQTT)
+option(FETCH_DISABLE_BINDLOCAL "Disable local binding support" OFF)
+mark_as_advanced(FETCH_DISABLE_BINDLOCAL)
+option(FETCH_DISABLE_NETRC "Disable netrc parser" OFF)
+mark_as_advanced(FETCH_DISABLE_NETRC)
+option(FETCH_DISABLE_NTLM "Disable NTLM support" OFF)
+mark_as_advanced(FETCH_DISABLE_NTLM)
+option(FETCH_DISABLE_PARSEDATE "Disable date parsing" OFF)
+mark_as_advanced(FETCH_DISABLE_PARSEDATE)
+option(FETCH_DISABLE_POP3 "Disable POP3" OFF)
+mark_as_advanced(FETCH_DISABLE_POP3)
+option(FETCH_DISABLE_PROGRESS_METER "Disable built-in progress meter" OFF)
+mark_as_advanced(FETCH_DISABLE_PROGRESS_METER)
+option(FETCH_DISABLE_PROXY "Disable proxy support" OFF)
+mark_as_advanced(FETCH_DISABLE_PROXY)
+option(FETCH_DISABLE_IPFS "Disable IPFS" OFF)
+mark_as_advanced(FETCH_DISABLE_IPFS)
+option(FETCH_DISABLE_RTSP "Disable RTSP" OFF)
+mark_as_advanced(FETCH_DISABLE_SHA512_256)
+option(FETCH_DISABLE_SHA512_256 "Disable SHA-512/256 hash algorithm" OFF)
+mark_as_advanced(FETCH_DISABLE_RTSP)
+option(FETCH_DISABLE_SHUFFLE_DNS "Disable shuffle DNS feature" OFF)
+mark_as_advanced(FETCH_DISABLE_SHUFFLE_DNS)
+option(FETCH_DISABLE_SMB "Disable SMB" OFF)
+mark_as_advanced(FETCH_DISABLE_SMB)
+option(FETCH_DISABLE_SMTP "Disable SMTP" OFF)
+mark_as_advanced(FETCH_DISABLE_SMTP)
+option(FETCH_DISABLE_SOCKETPAIR "Disable use of socketpair for fetch_multi_poll" OFF)
+mark_as_advanced(FETCH_DISABLE_SOCKETPAIR)
+option(FETCH_DISABLE_WEBSOCKETS "Disable WebSocket" OFF)
+mark_as_advanced(FETCH_DISABLE_WEBSOCKETS)
+option(FETCH_DISABLE_TELNET "Disable Telnet" OFF)
+mark_as_advanced(FETCH_DISABLE_TELNET)
+option(FETCH_DISABLE_TFTP "Disable TFTP" OFF)
+mark_as_advanced(FETCH_DISABLE_TFTP)
+option(FETCH_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
+mark_as_advanced(FETCH_DISABLE_VERBOSE_STRINGS)
 
-if(CURL_DISABLE_HTTP)
-  set(CURL_DISABLE_IPFS ON)
-  set(CURL_DISABLE_RTSP ON)
-  set(CURL_DISABLE_ALTSVC ON)
-  set(CURL_DISABLE_HSTS ON)
+if(FETCH_DISABLE_HTTP)
+  set(FETCH_DISABLE_IPFS ON)
+  set(FETCH_DISABLE_RTSP ON)
+  set(FETCH_DISABLE_ALTSVC ON)
+  set(FETCH_DISABLE_HSTS ON)
 endif()
 
-# Corresponds to HTTP_ONLY in lib/curl_setup.h
-option(HTTP_ONLY "Disable all protocols except HTTP (This overrides all CURL_DISABLE_* options)" OFF)
+# Corresponds to HTTP_ONLY in lib/fetch_setup.h
+option(HTTP_ONLY "Disable all protocols except HTTP (This overrides all FETCH_DISABLE_* options)" OFF)
 mark_as_advanced(HTTP_ONLY)
 
 if(HTTP_ONLY)
-  set(CURL_DISABLE_DICT ON)
-  set(CURL_DISABLE_FILE ON)
-  set(CURL_DISABLE_FTP ON)
-  set(CURL_DISABLE_GOPHER ON)
-  set(CURL_DISABLE_IMAP ON)
-  set(CURL_DISABLE_LDAP ON)
-  set(CURL_DISABLE_LDAPS ON)
-  set(CURL_DISABLE_MQTT ON)
-  set(CURL_DISABLE_POP3 ON)
-  set(CURL_DISABLE_IPFS ON)
-  set(CURL_DISABLE_RTSP ON)
-  set(CURL_DISABLE_SMB ON)
-  set(CURL_DISABLE_SMTP ON)
-  set(CURL_DISABLE_TELNET ON)
-  set(CURL_DISABLE_TFTP ON)
+  set(FETCH_DISABLE_DICT ON)
+  set(FETCH_DISABLE_FILE ON)
+  set(FETCH_DISABLE_FTP ON)
+  set(FETCH_DISABLE_GOPHER ON)
+  set(FETCH_DISABLE_IMAP ON)
+  set(FETCH_DISABLE_LDAP ON)
+  set(FETCH_DISABLE_LDAPS ON)
+  set(FETCH_DISABLE_MQTT ON)
+  set(FETCH_DISABLE_POP3 ON)
+  set(FETCH_DISABLE_IPFS ON)
+  set(FETCH_DISABLE_RTSP ON)
+  set(FETCH_DISABLE_SMB ON)
+  set(FETCH_DISABLE_SMTP ON)
+  set(FETCH_DISABLE_TELNET ON)
+  set(FETCH_DISABLE_TFTP ON)
 endif()
 
 if(WINDOWS_STORE)
-  set(CURL_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
+  set(FETCH_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
 endif()
 
 option(ENABLE_IPV6 "Enable IPv6 support" ON)
@@ -508,7 +508,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
     if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
       message(FATAL_ERROR "SystemConfiguration framework not found")
     endif()
-    list(APPEND CURL_LIBS "-framework SystemConfiguration")
+    list(APPEND FETCH_LIBS "-framework SystemConfiguration")
   endif()
 endif()
 if(ENABLE_IPV6)
@@ -518,23 +518,23 @@ endif()
 find_package(Perl)
 
 if(PERL_EXECUTABLE)
-  add_custom_target(curl-ca-bundle
+  add_custom_target(fetch-ca-bundle
     COMMENT "Generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl" -b -l -u "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
   )
-  add_custom_target(curl-ca-firefox
+  add_custom_target(fetch-ca-firefox
     COMMENT "generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
   )
 endif()
 
-option(BUILD_LIBCURL_DOCS "Build libcurl man pages" ON)
-option(BUILD_MISC_DOCS "Build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
-option(ENABLE_CURL_MANUAL "Build the man page for curl and enable its -M/--manual option" ON)
+option(BUILD_LIBFETCH_DOCS "Build libfetch man pages" ON)
+option(BUILD_MISC_DOCS "Build misc man pages (e.g. fetch-config and mk-ca-bundle)" ON)
+option(ENABLE_FETCH_MANUAL "Build the man page for fetch and enable its -M/--manual option" ON)
 
-if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
+if(ENABLE_FETCH_MANUAL OR BUILD_LIBFETCH_DOCS)
   if(PERL_FOUND)
     set(HAVE_MANUAL_TOOLS ON)
   endif()
@@ -555,9 +555,9 @@ endif()
 
 # If we are on Haiku, make sure that the network library is brought in.
 if(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
-  list(APPEND CURL_LIBS "network")
+  list(APPEND FETCH_LIBS "network")
 elseif(AMIGA)
-  list(APPEND CURL_LIBS "net" "m" "atomic")
+  list(APPEND FETCH_LIBS "net" "m" "atomic")
   list(APPEND CMAKE_REQUIRED_LIBRARIES "net" "m" "atomic")
 endif()
 
@@ -593,7 +593,7 @@ if(ENABLE_THREADED_RESOLVER)
     find_package(Threads REQUIRED)
     set(USE_THREADS_POSIX ${CMAKE_USE_PTHREADS_INIT})
     set(HAVE_PTHREAD_H ${CMAKE_USE_PTHREADS_INIT})
-    list(APPEND CURL_LIBS ${CMAKE_THREAD_LIBS_INIT})
+    list(APPEND FETCH_LIBS ${CMAKE_THREAD_LIBS_INIT})
   endif()
 endif()
 
@@ -602,7 +602,7 @@ if(DOS)
   if(WATT_ROOT)
     set(USE_WATT32 ON)
     # FIXME upstream: must specify the full path to avoid CMake converting "watt" to "watt.lib"
-    list(APPEND CURL_LIBS "${WATT_ROOT}/lib/libwatt.a")
+    list(APPEND FETCH_LIBS "${WATT_ROOT}/lib/libwatt.a")
     include_directories(SYSTEM "${WATT_ROOT}/inc")
     list(APPEND CMAKE_REQUIRED_INCLUDES "${WATT_ROOT}/inc")
   else()
@@ -616,90 +616,90 @@ elseif(AMIGA)
     set(OPENSSL_INCLUDE_DIR "${AMISSL_INCLUDE_DIR}")
     set(OPENSSL_SSL_LIBRARY "${AMISSL_STUBS_LIBRARY}")
     set(OPENSSL_CRYPTO_LIBRARY "${AMISSL_AUTO_LIBRARY}")
-    set(CURL_USE_OPENSSL ON)
-    set(CURL_CA_FALLBACK ON CACHE BOOL "")
+    set(FETCH_USE_OPENSSL ON)
+    set(FETCH_CA_FALLBACK ON CACHE BOOL "")
   endif()
 elseif(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
-    set(CURL_LIBS "socket;${CURL_LIBS}")
+    set(FETCH_LIBS "socket;${FETCH_LIBS}")
   endif()
 endif()
 
 if(WIN32)
-  list(APPEND CURL_LIBS "ws2_32" "bcrypt")
+  list(APPEND FETCH_LIBS "ws2_32" "bcrypt")
 endif()
 
 # Check SSL libraries
-option(CURL_ENABLE_SSL "Enable SSL support" ON)
+option(FETCH_ENABLE_SSL "Enable SSL support" ON)
 
-if(CURL_DEFAULT_SSL_BACKEND)
+if(FETCH_DEFAULT_SSL_BACKEND)
   set(_valid_default_ssl_backend FALSE)
 endif()
 
 if(APPLE)
-  cmake_dependent_option(CURL_USE_SECTRANSP "Enable Apple OS native SSL/TLS (Secure Transport)" OFF CURL_ENABLE_SSL OFF)
+  cmake_dependent_option(FETCH_USE_SECTRANSP "Enable Apple OS native SSL/TLS (Secure Transport)" OFF FETCH_ENABLE_SSL OFF)
 endif()
 if(WIN32)
-  cmake_dependent_option(CURL_USE_SCHANNEL "Enable Windows native SSL/TLS (Schannel)" OFF CURL_ENABLE_SSL OFF)
-  option(CURL_WINDOWS_SSPI "Enable SSPI on Windows" ${CURL_USE_SCHANNEL})
+  cmake_dependent_option(FETCH_USE_SCHANNEL "Enable Windows native SSL/TLS (Schannel)" OFF FETCH_ENABLE_SSL OFF)
+  option(FETCH_WINDOWS_SSPI "Enable SSPI on Windows" ${FETCH_USE_SCHANNEL})
 endif()
-cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_RUSTLS "Enable Rustls for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(FETCH_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF FETCH_ENABLE_SSL OFF)
+cmake_dependent_option(FETCH_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF FETCH_ENABLE_SSL OFF)
+cmake_dependent_option(FETCH_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF FETCH_ENABLE_SSL OFF)
+cmake_dependent_option(FETCH_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF FETCH_ENABLE_SSL OFF)
+cmake_dependent_option(FETCH_USE_RUSTLS "Enable Rustls for SSL/TLS" OFF FETCH_ENABLE_SSL OFF)
 
 if(WIN32 OR
-   CURL_USE_SECTRANSP OR
-   CURL_USE_SCHANNEL OR
-   CURL_USE_MBEDTLS OR
-   CURL_USE_BEARSSL OR
-   CURL_USE_WOLFSSL OR
-   CURL_USE_GNUTLS OR
-   CURL_USE_RUSTLS)
+   FETCH_USE_SECTRANSP OR
+   FETCH_USE_SCHANNEL OR
+   FETCH_USE_MBEDTLS OR
+   FETCH_USE_BEARSSL OR
+   FETCH_USE_WOLFSSL OR
+   FETCH_USE_GNUTLS OR
+   FETCH_USE_RUSTLS)
   set(_openssl_default OFF)
 else()
   set(_openssl_default ON)
 endif()
-cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${_openssl_default} CURL_ENABLE_SSL OFF)
+cmake_dependent_option(FETCH_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${_openssl_default} FETCH_ENABLE_SSL OFF)
 option(USE_OPENSSL_QUIC "Use OpenSSL and nghttp3 libraries for HTTP/3 support" OFF)
-if(USE_OPENSSL_QUIC AND NOT CURL_USE_OPENSSL)
+if(USE_OPENSSL_QUIC AND NOT FETCH_USE_OPENSSL)
   message(WARNING "OpenSSL QUIC has been requested, but without enabling OpenSSL. Will not enable QUIC.")
   set(USE_OPENSSL_QUIC OFF)
 endif()
-option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
+option(FETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
-curl_count_true(_enabled_ssl_options_count
-  CURL_USE_SCHANNEL
-  CURL_USE_SECTRANSP
-  CURL_USE_OPENSSL
-  CURL_USE_MBEDTLS
-  CURL_USE_BEARSSL
-  CURL_USE_WOLFSSL
-  CURL_USE_GNUTLS
-  CURL_USE_RUSTLS
+fetch_count_true(_enabled_ssl_options_count
+  FETCH_USE_SCHANNEL
+  FETCH_USE_SECTRANSP
+  FETCH_USE_OPENSSL
+  FETCH_USE_MBEDTLS
+  FETCH_USE_BEARSSL
+  FETCH_USE_WOLFSSL
+  FETCH_USE_GNUTLS
+  FETCH_USE_RUSTLS
 )
 if(_enabled_ssl_options_count GREATER 1)
-  set(CURL_WITH_MULTI_SSL ON)
+  set(FETCH_WITH_MULTI_SSL ON)
 elseif(_enabled_ssl_options_count EQUAL 0)
-  set(CURL_DISABLE_HSTS ON)
+  set(FETCH_DISABLE_HSTS ON)
 endif()
 
-if(CURL_USE_SCHANNEL)
+if(FETCH_USE_SCHANNEL)
   set(_ssl_enabled ON)
   set(USE_SCHANNEL ON)  # Windows native SSL/TLS support
-  set(USE_WINDOWS_SSPI ON)  # CURL_USE_SCHANNEL implies CURL_WINDOWS_SSPI
+  set(USE_WINDOWS_SSPI ON)  # FETCH_USE_SCHANNEL implies FETCH_WINDOWS_SSPI
 
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "schannel")
+  if(FETCH_DEFAULT_SSL_BACKEND AND FETCH_DEFAULT_SSL_BACKEND STREQUAL "schannel")
     set(_valid_default_ssl_backend TRUE)
   endif()
 endif()
-if(CURL_WINDOWS_SSPI)
+if(FETCH_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
 endif()
 
-if(CURL_USE_SECTRANSP)
+if(FETCH_USE_SECTRANSP)
   set(_use_core_foundation_and_core_services ON)
 
   find_library(SECURITY_FRAMEWORK NAMES "Security")
@@ -707,12 +707,12 @@ if(CURL_USE_SECTRANSP)
   if(NOT SECURITY_FRAMEWORK)
     message(FATAL_ERROR "Security framework not found")
   endif()
-  list(APPEND CURL_LIBS "-framework Security")
+  list(APPEND FETCH_LIBS "-framework Security")
 
   set(_ssl_enabled ON)
   set(USE_SECTRANSP ON)
 
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "secure-transport")
+  if(FETCH_DEFAULT_SSL_BACKEND AND FETCH_DEFAULT_SSL_BACKEND STREQUAL "secure-transport")
     set(_valid_default_ssl_backend TRUE)
   endif()
 
@@ -725,30 +725,30 @@ if(_use_core_foundation_and_core_services)
   if(NOT COREFOUNDATION_FRAMEWORK)
     message(FATAL_ERROR "CoreFoundation framework not found")
   endif()
-  list(APPEND CURL_LIBS "-framework CoreFoundation")
+  list(APPEND FETCH_LIBS "-framework CoreFoundation")
 
   find_library(CORESERVICES_FRAMEWORK NAMES "CoreServices")
   mark_as_advanced(CORESERVICES_FRAMEWORK)
   if(NOT CORESERVICES_FRAMEWORK)
     message(FATAL_ERROR "CoreServices framework not found")
   endif()
-  list(APPEND CURL_LIBS "-framework CoreServices")
+  list(APPEND FETCH_LIBS "-framework CoreServices")
 endif()
 
-if(CURL_USE_OPENSSL)
+if(FETCH_USE_OPENSSL)
   find_package(OpenSSL REQUIRED)
   set(_ssl_enabled ON)
   set(USE_OPENSSL ON)
 
   # Depend on OpenSSL via imported targets. This allows our dependents to
   # get our dependencies transitively.
-  list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl")
+  list(APPEND FETCH_LIBS OpenSSL::SSL OpenSSL::Crypto)
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE "openssl")
 
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
+  if(FETCH_DEFAULT_SSL_BACKEND AND FETCH_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
   endif()
-  set(_curl_ca_bundle_supported TRUE)
+  set(_fetch_ca_bundle_supported TRUE)
 
   cmake_push_check_state()
   list(APPEND CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
@@ -765,7 +765,7 @@ if(CURL_USE_OPENSSL)
 
   if(HAVE_BORINGSSL OR HAVE_AWSLC)
     if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang")
-      list(APPEND CURL_LIBS "stdc++")
+      list(APPEND FETCH_LIBS "stdc++")
       list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
     endif()
   endif()
@@ -786,61 +786,61 @@ if(CURL_USE_OPENSSL)
   endif()
 endif()
 
-if(CURL_USE_MBEDTLS)
+if(FETCH_USE_MBEDTLS)
   find_package(MbedTLS REQUIRED)
   set(_ssl_enabled ON)
   set(USE_MBEDTLS ON)
-  list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${MBEDTLS_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${MBEDTLS_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${MBEDTLS_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${MBEDTLS_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${MBEDTLS_PC_REQUIRES})
   include_directories(SYSTEM ${MBEDTLS_INCLUDE_DIRS})
   link_directories(${MBEDTLS_LIBRARY_DIRS})
   if(MBEDTLS_CFLAGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MBEDTLS_CFLAGS}")
   endif()
 
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
+  if(FETCH_DEFAULT_SSL_BACKEND AND FETCH_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
     set(_valid_default_ssl_backend TRUE)
   endif()
-  set(_curl_ca_bundle_supported TRUE)
+  set(_fetch_ca_bundle_supported TRUE)
 endif()
 
-if(CURL_USE_BEARSSL)
+if(FETCH_USE_BEARSSL)
   find_package(BearSSL REQUIRED)
   set(_ssl_enabled ON)
   set(USE_BEARSSL ON)
-  list(APPEND CURL_LIBS ${BEARSSL_LIBRARIES})
+  list(APPEND FETCH_LIBS ${BEARSSL_LIBRARIES})
   include_directories(SYSTEM ${BEARSSL_INCLUDE_DIRS})
 
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "bearssl")
+  if(FETCH_DEFAULT_SSL_BACKEND AND FETCH_DEFAULT_SSL_BACKEND STREQUAL "bearssl")
     set(_valid_default_ssl_backend TRUE)
   endif()
-  set(_curl_ca_bundle_supported TRUE)
+  set(_fetch_ca_bundle_supported TRUE)
 
   message(WARNING "BearSSL does not support TLS 1.3.")
 endif()
 
-if(CURL_USE_WOLFSSL)
+if(FETCH_USE_WOLFSSL)
   find_package(WolfSSL REQUIRED)
   set(_ssl_enabled ON)
   set(USE_WOLFSSL ON)
-  list(APPEND CURL_LIBS ${WOLFSSL_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${WOLFSSL_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${WOLFSSL_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${WOLFSSL_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${WOLFSSL_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${WOLFSSL_PC_REQUIRES})
   include_directories(SYSTEM ${WOLFSSL_INCLUDE_DIRS})
   link_directories(${WOLFSSL_LIBRARY_DIRS})
   if(WOLFSSL_CFLAGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WOLFSSL_CFLAGS}")
   endif()
 
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "wolfssl")
+  if(FETCH_DEFAULT_SSL_BACKEND AND FETCH_DEFAULT_SSL_BACKEND STREQUAL "wolfssl")
     set(_valid_default_ssl_backend TRUE)
   endif()
-  set(_curl_ca_bundle_supported TRUE)
+  set(_fetch_ca_bundle_supported TRUE)
 endif()
 
-if(CURL_USE_GNUTLS)
-  if(CURL_USE_PKGCONFIG)
+if(FETCH_USE_GNUTLS)
+  if(FETCH_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_check_modules(GNUTLS "gnutls")
     if(GNUTLS_FOUND)
@@ -853,21 +853,21 @@ if(CURL_USE_GNUTLS)
   find_package(Nettle REQUIRED)
   set(_ssl_enabled ON)
   set(USE_GNUTLS ON)
-  list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} ${NETTLE_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${NETTLE_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "gnutls" ${NETTLE_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${GNUTLS_LIBRARIES} ${NETTLE_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${NETTLE_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE "gnutls" ${NETTLE_PC_REQUIRES})
   include_directories(SYSTEM ${GNUTLS_INCLUDE_DIRS} ${NETTLE_INCLUDE_DIRS})
   link_directories(${NETTLE_LIBRARY_DIRS})
   if(NETTLE_CFLAGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${NETTLE_CFLAGS}")
   endif()
 
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
+  if(FETCH_DEFAULT_SSL_BACKEND AND FETCH_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
     set(_valid_default_ssl_backend TRUE)
   endif()
-  set(_curl_ca_bundle_supported TRUE)
+  set(_fetch_ca_bundle_supported TRUE)
 
-  if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
+  if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT FETCH_DISABLE_SRP)
     cmake_push_check_state()
     list(APPEND CMAKE_REQUIRED_INCLUDES ${GNUTLS_INCLUDE_DIRS})
     list(APPEND CMAKE_REQUIRED_LIBRARIES ${GNUTLS_LIBRARIES})
@@ -876,49 +876,49 @@ if(CURL_USE_GNUTLS)
   endif()
 endif()
 
-if(CURL_USE_RUSTLS)
+if(FETCH_USE_RUSTLS)
   find_package(Rustls REQUIRED)
   set(_ssl_enabled ON)
   set(USE_RUSTLS ON)
-  list(APPEND CURL_LIBS ${RUSTLS_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${RUSTLS_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${RUSTLS_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${RUSTLS_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${RUSTLS_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${RUSTLS_PC_REQUIRES})
   include_directories(SYSTEM ${RUSTLS_INCLUDE_DIRS})
   link_directories(${RUSTLS_LIBRARY_DIRS})
   if(RUSTLS_CFLAGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${RUSTLS_CFLAGS}")
   endif()
 
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "rustls")
+  if(FETCH_DEFAULT_SSL_BACKEND AND FETCH_DEFAULT_SSL_BACKEND STREQUAL "rustls")
     set(_valid_default_ssl_backend TRUE)
   endif()
-  set(_curl_ca_bundle_supported TRUE)
+  set(_fetch_ca_bundle_supported TRUE)
 endif()
 
-if(CURL_DEFAULT_SSL_BACKEND AND NOT _valid_default_ssl_backend)
-  message(FATAL_ERROR "CURL_DEFAULT_SSL_BACKEND '${CURL_DEFAULT_SSL_BACKEND}' not enabled.")
+if(FETCH_DEFAULT_SSL_BACKEND AND NOT _valid_default_ssl_backend)
+  message(FATAL_ERROR "FETCH_DEFAULT_SSL_BACKEND '${FETCH_DEFAULT_SSL_BACKEND}' not enabled.")
 endif()
 
 # Keep ZLIB detection after TLS detection,
-# and before calling curl_openssl_check_symbol_exists().
+# and before calling fetch_openssl_check_symbol_exists().
 
 set(HAVE_LIBZ OFF)
-curl_dependency_option(CURL_ZLIB ZLIB "ZLIB")
+fetch_dependency_option(FETCH_ZLIB ZLIB "ZLIB")
 if(ZLIB_FOUND)
   set(HAVE_LIBZ ON)
   # Depend on ZLIB via imported targets. This allows our dependents to
   # get our dependencies transitively.
-  list(APPEND CURL_LIBS ZLIB::ZLIB)
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "zlib")
+  list(APPEND FETCH_LIBS ZLIB::ZLIB)
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE "zlib")
 endif()
 
 set(HAVE_BROTLI OFF)
-curl_dependency_option(CURL_BROTLI Brotli "brotli")
+fetch_dependency_option(FETCH_BROTLI Brotli "brotli")
 if(BROTLI_FOUND)
   set(HAVE_BROTLI ON)
-  list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${BROTLI_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${BROTLI_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${BROTLI_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${BROTLI_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${BROTLI_PC_REQUIRES})
   include_directories(SYSTEM ${BROTLI_INCLUDE_DIRS})
   link_directories(${BROTLI_LIBRARY_DIRS})
   if(BROTLI_CFLAGS)
@@ -927,13 +927,13 @@ if(BROTLI_FOUND)
 endif()
 
 set(HAVE_ZSTD OFF)
-curl_dependency_option(CURL_ZSTD Zstd "zstd")
+fetch_dependency_option(FETCH_ZSTD Zstd "zstd")
 if(ZSTD_FOUND)
   if(NOT ZSTD_VERSION VERSION_LESS 1.0.0)
     set(HAVE_ZSTD ON)
-    list(APPEND CURL_LIBS ${ZSTD_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${ZSTD_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${ZSTD_PC_REQUIRES})
+    list(APPEND FETCH_LIBS ${ZSTD_LIBRARIES})
+    list(APPEND FETCH_LIBDIRS ${ZSTD_LIBRARY_DIRS})
+    list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${ZSTD_PC_REQUIRES})
     include_directories(SYSTEM ${ZSTD_INCLUDE_DIRS})
     link_directories(${ZSTD_LIBRARY_DIRS})
     if(ZSTD_CFLAGS)
@@ -945,7 +945,7 @@ if(ZSTD_FOUND)
 endif()
 
 # Check symbol in an OpenSSL-like TLS backend.
-macro(curl_openssl_check_symbol_exists _symbol _files _variable)
+macro(fetch_openssl_check_symbol_exists _symbol _files _variable)
   cmake_push_check_state()
   if(USE_OPENSSL)
     list(APPEND CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
@@ -961,7 +961,7 @@ macro(curl_openssl_check_symbol_exists _symbol _files _variable)
   if(USE_WOLFSSL)
     list(APPEND CMAKE_REQUIRED_INCLUDES   "${WOLFSSL_INCLUDE_DIRS}")
     list(APPEND CMAKE_REQUIRED_LIBRARIES  "${WOLFSSL_LIBRARIES}")
-    curl_required_libpaths("${WOLFSSL_LIBRARY_DIRS}")
+    fetch_required_libpaths("${WOLFSSL_LIBRARY_DIRS}")
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
       list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
@@ -976,13 +976,13 @@ macro(curl_openssl_check_symbol_exists _symbol _files _variable)
 endmacro()
 
 # Ensure that the OpenSSL fork actually supports QUIC.
-macro(curl_openssl_check_quic)
+macro(fetch_openssl_check_quic)
   if(NOT DEFINED HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     if(USE_OPENSSL)
-      curl_openssl_check_symbol_exists("SSL_set_quic_use_legacy_codepoint" "openssl/ssl.h" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
+      fetch_openssl_check_symbol_exists("SSL_set_quic_use_legacy_codepoint" "openssl/ssl.h" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     endif()
     if(USE_WOLFSSL)
-      curl_openssl_check_symbol_exists("wolfSSL_set_quic_use_legacy_codepoint" "wolfssl/options.h;wolfssl/openssl/ssl.h"
+      fetch_openssl_check_symbol_exists("wolfSSL_set_quic_use_legacy_codepoint" "wolfssl/options.h;wolfssl/openssl/ssl.h"
         HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     endif()
   endif()
@@ -992,17 +992,17 @@ macro(curl_openssl_check_quic)
 endmacro()
 
 if(USE_WOLFSSL)
-  curl_openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT)
-  curl_openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO)
-  curl_openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO)
+  fetch_openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+  fetch_openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO)
+  fetch_openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO)
 endif()
 
 if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
-    curl_openssl_check_symbol_exists("SSL_set0_wbio" "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
+    fetch_openssl_check_symbol_exists("SSL_set0_wbio" "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
   endif()
-  if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
-    curl_openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP)
+  if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT FETCH_DISABLE_SRP)
+    fetch_openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP)
   endif()
 endif()
 
@@ -1012,13 +1012,13 @@ if(USE_ECH)
   if(USE_OPENSSL OR USE_WOLFSSL)
     # Be sure that the TLS library actually supports ECH.
     if(USE_WOLFSSL)
-      curl_openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h"
+      fetch_openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h"
         HAVE_WOLFSSL_CTX_GENERATEECHCONFIG)
     endif()
     if(HAVE_BORINGSSL OR HAVE_AWSLC)
-      curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
+      fetch_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
     elseif(HAVE_OPENSSL)
-      curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ech.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
+      fetch_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ech.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
     endif()
     if(HAVE_WOLFSSL_CTX_GENERATEECHCONFIG OR
        HAVE_SSL_SET1_ECH_CONFIG_LIST)
@@ -1050,9 +1050,9 @@ option(USE_NGHTTP2 "Use nghttp2 library" ON)
 if(USE_NGHTTP2)
   find_package(NGHTTP2)
   if(NGHTTP2_FOUND)
-    list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${NGHTTP2_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP2_PC_REQUIRES})
+    list(APPEND FETCH_LIBS ${NGHTTP2_LIBRARIES})
+    list(APPEND FETCH_LIBDIRS ${NGHTTP2_LIBRARY_DIRS})
+    list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${NGHTTP2_PC_REQUIRES})
     include_directories(SYSTEM ${NGHTTP2_INCLUDE_DIRS})
     link_directories(${NGHTTP2_LIBRARY_DIRS})
     if(NGHTTP2_CFLAGS)
@@ -1076,15 +1076,15 @@ if(USE_NGTCP2)
         set(_openssl "quictls")
       endif()
     endif()
-    curl_openssl_check_quic()
+    fetch_openssl_check_quic()
   elseif(USE_GNUTLS)
     find_package(NGTCP2 REQUIRED "GnuTLS")
   else()
     message(FATAL_ERROR "ngtcp2 requires OpenSSL, wolfSSL or GnuTLS")
   endif()
-  list(APPEND CURL_LIBS ${NGTCP2_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${NGTCP2_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGTCP2_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${NGTCP2_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${NGTCP2_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${NGTCP2_PC_REQUIRES})
   include_directories(SYSTEM ${NGTCP2_INCLUDE_DIRS})
   link_directories(${NGTCP2_LIBRARY_DIRS})
   if(NGTCP2_CFLAGS)
@@ -1093,9 +1093,9 @@ if(USE_NGTCP2)
 
   find_package(NGHTTP3 REQUIRED)
   set(USE_NGHTTP3 ON)
-  list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${NGHTTP3_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP3_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${NGHTTP3_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${NGHTTP3_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${NGHTTP3_PC_REQUIRES})
   include_directories(SYSTEM ${NGHTTP3_INCLUDE_DIRS})
   link_directories(${NGHTTP3_LIBRARY_DIRS})
   if(NGHTTP3_CFLAGS)
@@ -1112,10 +1112,10 @@ if(USE_QUICHE)
   if(NOT HAVE_BORINGSSL)
     message(FATAL_ERROR "quiche requires BoringSSL")
   endif()
-  curl_openssl_check_quic()
-  list(APPEND CURL_LIBS ${QUICHE_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${QUICHE_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${QUICHE_PC_REQUIRES})
+  fetch_openssl_check_quic()
+  list(APPEND FETCH_LIBS ${QUICHE_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${QUICHE_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${QUICHE_PC_REQUIRES})
   include_directories(SYSTEM ${QUICHE_INCLUDE_DIRS})
   link_directories(${QUICHE_LIBRARY_DIRS})
   if(QUICHE_CFLAGS)
@@ -1139,12 +1139,12 @@ if(USE_MSH3)
     if(NOT USE_OPENSSL)
       message(FATAL_ERROR "msh3/msquic requires OpenSSL fork with QUIC API")
     endif()
-    curl_openssl_check_quic()
+    fetch_openssl_check_quic()
   endif()
   find_package(MSH3 REQUIRED)
-  list(APPEND CURL_LIBS ${MSH3_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${MSH3_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${MSH3_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${MSH3_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${MSH3_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${MSH3_PC_REQUIRES})
   include_directories(SYSTEM ${MSH3_INCLUDE_DIRS})
   link_directories(${MSH3_LIBRARY_DIRS})
   if(MSH3_CFLAGS)
@@ -1161,24 +1161,24 @@ if(USE_OPENSSL_QUIC)
   find_package(NGHTTP3 REQUIRED)
   set(USE_NGHTTP3 ON)
   include_directories(SYSTEM ${NGHTTP3_INCLUDE_DIRS})
-  list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP3_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${NGHTTP3_LIBRARIES})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${NGHTTP3_PC_REQUIRES})
 endif()
 
-if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
+if(FETCH_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
   message(FATAL_ERROR "MultiSSL cannot be enabled with HTTP/3 and vice versa.")
 endif()
 
-if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
+if(NOT FETCH_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
   set(USE_TLS_SRP 1)
 endif()
 
-if(NOT CURL_DISABLE_LDAP)
+if(NOT FETCH_DISABLE_LDAP)
   if(WIN32 AND NOT WINDOWS_STORE)
     option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
     if(USE_WIN32_LDAP)
-      list(APPEND CURL_LIBS "wldap32")
-      if(NOT CURL_DISABLE_LDAPS)
+      list(APPEND FETCH_LIBS "wldap32")
+      if(NOT FETCH_DISABLE_LDAPS)
         set(HAVE_LDAP_SSL ON)
       endif()
     endif()
@@ -1194,10 +1194,10 @@ if(NOT CURL_DISABLE_LDAP)
     find_package(LDAP)
     if(LDAP_FOUND)
       set(HAVE_LBER_H 1)
-      set(CURL_LIBS "${LDAP_LIBRARIES};${CURL_LIBS}")
-      list(APPEND CURL_LIBDIRS ${LDAP_LIBRARY_DIRS})
+      set(FETCH_LIBS "${LDAP_LIBRARIES};${FETCH_LIBS}")
+      list(APPEND FETCH_LIBDIRS ${LDAP_LIBRARY_DIRS})
       if(LDAP_PC_REQUIRES)
-        set(LIBCURL_PC_REQUIRES_PRIVATE "${LDAP_PC_REQUIRES};${LIBCURL_PC_REQUIRES_PRIVATE}")
+        set(LIBFETCH_PC_REQUIRES_PRIVATE "${LDAP_PC_REQUIRES};${LIBFETCH_PC_REQUIRES_PRIVATE}")
       endif()
       include_directories(SYSTEM ${LDAP_INCLUDE_DIRS})
       link_directories(${LDAP_LIBRARY_DIRS})
@@ -1209,7 +1209,7 @@ if(NOT CURL_DISABLE_LDAP)
 
       list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1")
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${LDAP_LIBRARIES})
-      curl_required_libpaths("${LDAP_LIBRARY_DIRS}")
+      fetch_required_libpaths("${LDAP_LIBRARY_DIRS}")
 
       check_function_exists("ldap_url_parse" HAVE_LDAP_URL_PARSE)
       check_function_exists("ldap_init_fd" HAVE_LDAP_INIT_FD)
@@ -1220,29 +1220,29 @@ if(NOT CURL_DISABLE_LDAP)
         set(USE_OPENLDAP ON)
         add_definitions("-DLDAP_DEPRECATED=1")
       endif()
-      if(NOT CURL_DISABLE_LDAPS)
+      if(NOT FETCH_DISABLE_LDAPS)
         set(HAVE_LDAP_SSL ON)
       endif()
     else()
-      message(STATUS "LDAP not found. CURL_DISABLE_LDAP set ON")
-      set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
+      message(STATUS "LDAP not found. FETCH_DISABLE_LDAP set ON")
+      set(FETCH_DISABLE_LDAP ON CACHE BOOL "" FORCE)
     endif()
     cmake_pop_check_state()
   endif()
 endif()
 
 # No ldap, no ldaps.
-if(CURL_DISABLE_LDAP)
-  if(NOT CURL_DISABLE_LDAPS)
+if(FETCH_DISABLE_LDAP)
+  if(NOT FETCH_DISABLE_LDAPS)
     message(STATUS "LDAP needs to be enabled to support LDAPS")
-    set(CURL_DISABLE_LDAPS ON CACHE BOOL "" FORCE)
+    set(FETCH_DISABLE_LDAPS ON CACHE BOOL "" FORCE)
   endif()
 endif()
 
 if(WIN32)
   option(USE_WIN32_IDN "Use WinIDN for IDN support" OFF)
   if(USE_WIN32_IDN)
-    list(APPEND CURL_LIBS "normaliz")
+    list(APPEND FETCH_LIBS "normaliz")
   endif()
 else()
   set(USE_WIN32_IDN OFF)
@@ -1256,7 +1256,7 @@ if(APPLE)
     check_symbol_exists("uidna_openUTS46" "unicode/uidna.h" HAVE_APPLE_IDN)
     cmake_pop_check_state()
     if(HAVE_APPLE_IDN)
-      list(APPEND CURL_LIBS "icucore" "iconv")
+      list(APPEND FETCH_LIBS "icucore" "iconv")
     else()
       set(USE_APPLE_IDN OFF)
     endif()
@@ -1272,9 +1272,9 @@ set(HAVE_LIBIDN2 OFF)
 if(USE_LIBIDN2 AND NOT USE_APPLE_IDN AND NOT USE_WIN32_IDN)
   find_package(Libidn2)
   if(LIBIDN2_FOUND)
-    set(CURL_LIBS "${LIBIDN2_LIBRARIES};${CURL_LIBS}")
-    list(APPEND CURL_LIBDIRS ${LIBIDN2_LIBRARY_DIRS})
-    set(LIBCURL_PC_REQUIRES_PRIVATE "${LIBIDN2_PC_REQUIRES};${LIBCURL_PC_REQUIRES_PRIVATE}")
+    set(FETCH_LIBS "${LIBIDN2_LIBRARIES};${FETCH_LIBS}")
+    list(APPEND FETCH_LIBDIRS ${LIBIDN2_LIBRARY_DIRS})
+    set(LIBFETCH_PC_REQUIRES_PRIVATE "${LIBIDN2_PC_REQUIRES};${LIBFETCH_PC_REQUIRES_PRIVATE}")
     include_directories(SYSTEM ${LIBIDN2_INCLUDE_DIRS})
     link_directories(${LIBIDN2_LIBRARY_DIRS})
     if(LIBIDN2_CFLAGS)
@@ -1286,15 +1286,15 @@ if(USE_LIBIDN2 AND NOT USE_APPLE_IDN AND NOT USE_WIN32_IDN)
 endif()
 
 # libpsl
-option(CURL_USE_LIBPSL "Use libpsl" ON)
-mark_as_advanced(CURL_USE_LIBPSL)
+option(FETCH_USE_LIBPSL "Use libpsl" ON)
+mark_as_advanced(FETCH_USE_LIBPSL)
 set(USE_LIBPSL OFF)
 
-if(CURL_USE_LIBPSL)
+if(FETCH_USE_LIBPSL)
   find_package(Libpsl REQUIRED)
-  list(APPEND CURL_LIBS ${LIBPSL_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBPSL_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBPSL_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${LIBPSL_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${LIBPSL_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${LIBPSL_PC_REQUIRES})
   include_directories(SYSTEM ${LIBPSL_INCLUDE_DIRS})
   link_directories(${LIBPSL_LIBRARY_DIRS})
   if(LIBPSL_CFLAGS)
@@ -1304,16 +1304,16 @@ if(CURL_USE_LIBPSL)
 endif()
 
 # libssh2
-option(CURL_USE_LIBSSH2 "Use libssh2" ON)
-mark_as_advanced(CURL_USE_LIBSSH2)
+option(FETCH_USE_LIBSSH2 "Use libssh2" ON)
+mark_as_advanced(FETCH_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
 
-if(CURL_USE_LIBSSH2)
+if(FETCH_USE_LIBSSH2)
   find_package(Libssh2)
   if(LIBSSH2_FOUND)
-    list(APPEND CURL_LIBS ${LIBSSH2_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${LIBSSH2_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH2_PC_REQUIRES})
+    list(APPEND FETCH_LIBS ${LIBSSH2_LIBRARIES})
+    list(APPEND FETCH_LIBDIRS ${LIBSSH2_LIBRARY_DIRS})
+    list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${LIBSSH2_PC_REQUIRES})
     include_directories(SYSTEM ${LIBSSH2_INCLUDE_DIRS})
     link_directories(${LIBSSH2_LIBRARY_DIRS})
     if(LIBSSH2_CFLAGS)
@@ -1324,13 +1324,13 @@ if(CURL_USE_LIBSSH2)
 endif()
 
 # libssh
-option(CURL_USE_LIBSSH "Use libssh" OFF)
-mark_as_advanced(CURL_USE_LIBSSH)
-if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
+option(FETCH_USE_LIBSSH "Use libssh" OFF)
+mark_as_advanced(FETCH_USE_LIBSSH)
+if(NOT USE_LIBSSH2 AND FETCH_USE_LIBSSH)
   find_package(Libssh REQUIRED)
-  list(APPEND CURL_LIBS ${LIBSSH_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBSSH_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${LIBSSH_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${LIBSSH_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${LIBSSH_PC_REQUIRES})
   include_directories(SYSTEM ${LIBSSH_INCLUDE_DIRS})
   link_directories(${LIBSSH_LIBRARY_DIRS})
   if(LIBSSH_CFLAGS)
@@ -1340,14 +1340,14 @@ if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
 endif()
 
 # wolfSSH
-option(CURL_USE_WOLFSSH "Use wolfSSH" OFF)
-mark_as_advanced(CURL_USE_WOLFSSH)
+option(FETCH_USE_WOLFSSH "Use wolfSSH" OFF)
+mark_as_advanced(FETCH_USE_WOLFSSH)
 set(USE_WOLFSSH OFF)
-if(NOT USE_LIBSSH2 AND NOT USE_LIBSSH AND CURL_USE_WOLFSSH)
+if(NOT USE_LIBSSH2 AND NOT USE_LIBSSH AND FETCH_USE_WOLFSSH)
   if(USE_WOLFSSL)
     find_package(WolfSSH)
     if(WOLFSSH_FOUND)
-      list(APPEND CURL_LIBS ${WOLFSSH_LIBRARIES})
+      list(APPEND FETCH_LIBS ${WOLFSSH_LIBRARIES})
       include_directories(SYSTEM ${WOLFSSH_INCLUDE_DIRS})
       set(USE_WOLFSSH ON)
     endif()
@@ -1356,13 +1356,13 @@ if(NOT USE_LIBSSH2 AND NOT USE_LIBSSH AND CURL_USE_WOLFSSH)
   endif()
 endif()
 
-option(CURL_USE_GSASL "Use libgsasl" OFF)
-mark_as_advanced(CURL_USE_GSASL)
-if(CURL_USE_GSASL)
+option(FETCH_USE_GSASL "Use libgsasl" OFF)
+mark_as_advanced(FETCH_USE_GSASL)
+if(FETCH_USE_GSASL)
   find_package(Libgsasl REQUIRED)
-  list(APPEND CURL_LIBS ${LIBGSASL_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBGSASL_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBGSASL_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${LIBGSASL_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${LIBGSASL_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${LIBGSASL_PC_REQUIRES})
   include_directories(SYSTEM ${LIBGSASL_INCLUDE_DIRS})
   link_directories(${LIBGSASL_LIBRARY_DIRS})
   if(LIBGSASL_CFLAGS)
@@ -1371,17 +1371,17 @@ if(CURL_USE_GSASL)
   set(USE_GSASL ON)
 endif()
 
-option(CURL_USE_GSSAPI "Use GSSAPI implementation" OFF)
-mark_as_advanced(CURL_USE_GSSAPI)
+option(FETCH_USE_GSSAPI "Use GSSAPI implementation" OFF)
+mark_as_advanced(FETCH_USE_GSSAPI)
 
-if(CURL_USE_GSSAPI)
+if(FETCH_USE_GSSAPI)
   find_package(GSS)
 
   set(HAVE_GSSAPI ${GSS_FOUND})
   if(GSS_FOUND)
-    list(APPEND CURL_LIBS ${GSS_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${GSS_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${GSS_PC_REQUIRES})
+    list(APPEND FETCH_LIBS ${GSS_LIBRARIES})
+    list(APPEND FETCH_LIBDIRS ${GSS_LIBRARY_DIRS})
+    list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${GSS_PC_REQUIRES})
     include_directories(SYSTEM ${GSS_INCLUDE_DIRS})
     link_directories(${GSS_LIBRARY_DIRS})
     if(GSS_CFLAGS)
@@ -1413,7 +1413,7 @@ if(CURL_USE_GSSAPI)
         if(NOT DEFINED HAVE_GSS_C_NT_HOSTBASED_SERVICE)
           set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${GSS_CFLAGS}")
           list(APPEND CMAKE_REQUIRED_LIBRARIES ${GSS_LIBRARIES})
-          curl_required_libpaths("${GSS_LIBRARY_DIRS}")
+          fetch_required_libpaths("${GSS_LIBRARY_DIRS}")
           check_symbol_exists("GSS_C_NT_HOSTBASED_SERVICE" "${_include_list}" HAVE_GSS_C_NT_HOSTBASED_SERVICE)
         endif()
         if(NOT HAVE_GSS_C_NT_HOSTBASED_SERVICE)
@@ -1429,15 +1429,15 @@ if(CURL_USE_GSSAPI)
 endif()
 
 # libuv
-option(CURL_USE_LIBUV "Use libuv for event-based tests" OFF)
-if(CURL_USE_LIBUV)
+option(FETCH_USE_LIBUV "Use libuv for event-based tests" OFF)
+if(FETCH_USE_LIBUV)
   if(NOT ENABLE_DEBUG)
     message(FATAL_ERROR "Using libuv without debug support enabled is useless")
   endif()
   find_package(Libuv REQUIRED)
-  list(APPEND CURL_LIBS ${LIBUV_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBUV_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBUV_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${LIBUV_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${LIBUV_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${LIBUV_PC_REQUIRES})
   include_directories(SYSTEM ${LIBUV_INCLUDE_DIRS})
   link_directories(${LIBUV_LIBRARY_DIRS})
   if(LIBUV_CFLAGS)
@@ -1450,9 +1450,9 @@ endif()
 option(USE_LIBRTMP "Enable librtmp from rtmpdump" OFF)
 if(USE_LIBRTMP)
   find_package(Librtmp REQUIRED)
-  list(APPEND CURL_LIBS ${LIBRTMP_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBRTMP_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBRTMP_PC_REQUIRES})
+  list(APPEND FETCH_LIBS ${LIBRTMP_LIBRARIES})
+  list(APPEND FETCH_LIBDIRS ${LIBRTMP_LIBRARY_DIRS})
+  list(APPEND LIBFETCH_PC_REQUIRES_PRIVATE ${LIBRTMP_PC_REQUIRES})
   include_directories(SYSTEM ${LIBRTMP_INCLUDE_DIRS})
   link_directories(${LIBRTMP_LIBRARY_DIRS})
   if(LIBRTMP_CFLAGS)
@@ -1475,52 +1475,52 @@ endif()
 #
 # CA handling
 #
-if(_curl_ca_bundle_supported)
-  set(CURL_CA_BUNDLE "auto" CACHE
+if(_fetch_ca_bundle_supported)
+  set(FETCH_CA_BUNDLE "auto" CACHE
     STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-  set(CURL_CA_FALLBACK OFF CACHE
+  set(FETCH_CA_FALLBACK OFF CACHE
     BOOL "Use built-in CA store of TLS backend. Defaults to OFF")
-  set(CURL_CA_PATH "auto" CACHE
+  set(FETCH_CA_PATH "auto" CACHE
     STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-  set(CURL_CA_EMBED "" CACHE
-    STRING "Path to the CA bundle to embed in the curl tool.")
+  set(FETCH_CA_EMBED "" CACHE
+    STRING "Path to the CA bundle to embed in the fetch tool.")
 
-  if(CURL_CA_BUNDLE STREQUAL "")
-    message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
-  elseif(CURL_CA_BUNDLE STREQUAL "none")
-    unset(CURL_CA_BUNDLE CACHE)
-  elseif(CURL_CA_BUNDLE STREQUAL "auto")
-    unset(CURL_CA_BUNDLE CACHE)
+  if(FETCH_CA_BUNDLE STREQUAL "")
+    message(FATAL_ERROR "Invalid value of FETCH_CA_BUNDLE. Use 'none', 'auto' or file path.")
+  elseif(FETCH_CA_BUNDLE STREQUAL "none")
+    unset(FETCH_CA_BUNDLE CACHE)
+  elseif(FETCH_CA_BUNDLE STREQUAL "auto")
+    unset(FETCH_CA_BUNDLE CACHE)
     if(NOT CMAKE_CROSSCOMPILING AND NOT WIN32)
-      set(_curl_ca_bundle_autodetect TRUE)
+      set(_fetch_ca_bundle_autodetect TRUE)
     endif()
   else()
-    set(CURL_CA_BUNDLE_SET TRUE)
+    set(FETCH_CA_BUNDLE_SET TRUE)
   endif()
-  mark_as_advanced(CURL_CA_BUNDLE_SET)
+  mark_as_advanced(FETCH_CA_BUNDLE_SET)
 
-  if(CURL_CA_PATH STREQUAL "")
-    message(FATAL_ERROR "Invalid value of CURL_CA_PATH. Use 'none', 'auto' or directory path.")
-  elseif(CURL_CA_PATH STREQUAL "none")
-    unset(CURL_CA_PATH CACHE)
-  elseif(CURL_CA_PATH STREQUAL "auto")
-    unset(CURL_CA_PATH CACHE)
+  if(FETCH_CA_PATH STREQUAL "")
+    message(FATAL_ERROR "Invalid value of FETCH_CA_PATH. Use 'none', 'auto' or directory path.")
+  elseif(FETCH_CA_PATH STREQUAL "none")
+    unset(FETCH_CA_PATH CACHE)
+  elseif(FETCH_CA_PATH STREQUAL "auto")
+    unset(FETCH_CA_PATH CACHE)
     if(NOT CMAKE_CROSSCOMPILING AND NOT WIN32)
-      set(_curl_ca_path_autodetect TRUE)
+      set(_fetch_ca_path_autodetect TRUE)
     endif()
   else()
-    set(CURL_CA_PATH_SET TRUE)
+    set(FETCH_CA_PATH_SET TRUE)
   endif()
-  mark_as_advanced(CURL_CA_PATH_SET)
+  mark_as_advanced(FETCH_CA_PATH_SET)
 
-  if(CURL_CA_BUNDLE_SET AND _curl_ca_path_autodetect)
+  if(FETCH_CA_BUNDLE_SET AND _fetch_ca_path_autodetect)
     # Skip auto-detection of unset CA path because CA bundle is set explicitly
-  elseif(CURL_CA_PATH_SET AND _curl_ca_bundle_autodetect)
+  elseif(FETCH_CA_PATH_SET AND _fetch_ca_bundle_autodetect)
     # Skip auto-detection of unset CA bundle because CA path is set explicitly
-  elseif(_curl_ca_bundle_autodetect OR _curl_ca_path_autodetect)
+  elseif(_fetch_ca_bundle_autodetect OR _fetch_ca_path_autodetect)
     # First try auto-detecting a CA bundle, then a CA path
 
-    if(_curl_ca_bundle_autodetect)
+    if(_fetch_ca_bundle_autodetect)
       foreach(_search_ca_bundle_path IN ITEMS
           "/etc/ssl/certs/ca-certificates.crt"
           "/etc/pki/tls/certs/ca-bundle.crt"
@@ -1529,47 +1529,47 @@ if(_curl_ca_bundle_supported)
           "/etc/ssl/cert.pem")
         if(EXISTS "${_search_ca_bundle_path}")
           message(STATUS "Found CA bundle: ${_search_ca_bundle_path}")
-          set(CURL_CA_BUNDLE "${_search_ca_bundle_path}" CACHE
+          set(FETCH_CA_BUNDLE "${_search_ca_bundle_path}" CACHE
             STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-          set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+          set(FETCH_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
           break()
         endif()
       endforeach()
     endif()
 
-    if(_curl_ca_path_autodetect AND NOT CURL_CA_PATH_SET)
+    if(_fetch_ca_path_autodetect AND NOT FETCH_CA_PATH_SET)
       set(_search_ca_path "/etc/ssl/certs")
-      file(GLOB _curl_ca_files_found "${_search_ca_path}/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0")
-      if(_curl_ca_files_found)
-        unset(_curl_ca_files_found)
+      file(GLOB _fetch_ca_files_found "${_search_ca_path}/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0")
+      if(_fetch_ca_files_found)
+        unset(_fetch_ca_files_found)
         message(STATUS "Found CA path: ${_search_ca_path}")
-        set(CURL_CA_PATH "${_search_ca_path}" CACHE
+        set(FETCH_CA_PATH "${_search_ca_path}" CACHE
           STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-        set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+        set(FETCH_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
       endif()
     endif()
   endif()
 
-  set(CURL_CA_EMBED_SET FALSE)
-  if(BUILD_CURL_EXE AND NOT CURL_CA_EMBED STREQUAL "")
-    if(EXISTS "${CURL_CA_EMBED}")
-      set(CURL_CA_EMBED_SET TRUE)
-      message(STATUS "Found CA bundle to embed: ${CURL_CA_EMBED}")
+  set(FETCH_CA_EMBED_SET FALSE)
+  if(BUILD_FETCH_EXE AND NOT FETCH_CA_EMBED STREQUAL "")
+    if(EXISTS "${FETCH_CA_EMBED}")
+      set(FETCH_CA_EMBED_SET TRUE)
+      message(STATUS "Found CA bundle to embed: ${FETCH_CA_EMBED}")
     else()
-      message(FATAL_ERROR "CA bundle to embed is missing: '${CURL_CA_EMBED}'")
+      message(FATAL_ERROR "CA bundle to embed is missing: '${FETCH_CA_EMBED}'")
     endif()
   endif()
 endif()
 
 if(WIN32)
-  option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" OFF)
-  option(CURL_CA_SEARCH_SAFE "Enable safe CA bundle search (within the curl tool directory) on Windows" OFF)
+  option(FETCH_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" OFF)
+  option(FETCH_CA_SEARCH_SAFE "Enable safe CA bundle search (within the fetch tool directory) on Windows" OFF)
 endif()
 
 # Check for header files
 if(WIN32)
-  list(APPEND CURL_INCLUDES "winsock2.h")
-  list(APPEND CURL_INCLUDES "ws2tcpip.h")
+  list(APPEND FETCH_INCLUDES "winsock2.h")
+  list(APPEND FETCH_INCLUDES "ws2tcpip.h")
 
   if(HAVE_WIN32_WINNT)
     if(HAVE_WIN32_WINNT LESS 0x0501)
@@ -1594,8 +1594,8 @@ endif()
 
 # Detect headers
 
-# Use check_include_file_concat_curl() for headers required by subsequent
-# check_include_file_concat_curl() or check_symbol_exists() detections.
+# Use check_include_file_concat_fetch() for headers required by subsequent
+# check_include_file_concat_fetch() or check_symbol_exists() detections.
 # Order for these is significant.
 check_include_file("sys/eventfd.h"    HAVE_SYS_EVENTFD_H)
 check_include_file("sys/filio.h"      HAVE_SYS_FILIO_H)
@@ -1603,29 +1603,29 @@ check_include_file("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
 check_include_file("sys/param.h"      HAVE_SYS_PARAM_H)
 check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
 check_include_file("sys/resource.h"   HAVE_SYS_RESOURCE_H)
-check_include_file_concat_curl("sys/select.h"     HAVE_SYS_SELECT_H)
-check_include_file_concat_curl("sys/socket.h"     HAVE_SYS_SOCKET_H)
+check_include_file_concat_fetch("sys/select.h"     HAVE_SYS_SELECT_H)
+check_include_file_concat_fetch("sys/socket.h"     HAVE_SYS_SOCKET_H)
 check_include_file("sys/sockio.h"     HAVE_SYS_SOCKIO_H)
 check_include_file("sys/stat.h"       HAVE_SYS_STAT_H)
-check_include_file_concat_curl("sys/time.h"       HAVE_SYS_TIME_H)
-check_include_file_concat_curl("sys/types.h"      HAVE_SYS_TYPES_H)
+check_include_file_concat_fetch("sys/time.h"       HAVE_SYS_TIME_H)
+check_include_file_concat_fetch("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
-check_include_file_concat_curl("sys/utime.h"      HAVE_SYS_UTIME_H)  # sys/types.h (AmigaOS)
+check_include_file_concat_fetch("sys/utime.h"      HAVE_SYS_UTIME_H)  # sys/types.h (AmigaOS)
 
-check_include_file_concat_curl("arpa/inet.h"      HAVE_ARPA_INET_H)
+check_include_file_concat_fetch("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file("dirent.h"         HAVE_DIRENT_H)
 check_include_file("fcntl.h"          HAVE_FCNTL_H)
-check_include_file_concat_curl("ifaddrs.h"        HAVE_IFADDRS_H)
+check_include_file_concat_fetch("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file("io.h"             HAVE_IO_H)
-check_include_file_concat_curl("libgen.h"         HAVE_LIBGEN_H)
+check_include_file_concat_fetch("libgen.h"         HAVE_LIBGEN_H)
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 check_include_file("locale.h"         HAVE_LOCALE_H)
-check_include_file_concat_curl("net/if.h"         HAVE_NET_IF_H)  # sys/select.h (e.g. MS-DOS/Watt-32)
-check_include_file_concat_curl("netdb.h"          HAVE_NETDB_H)
-check_include_file_concat_curl("netinet/in.h"     HAVE_NETINET_IN_H)
+check_include_file_concat_fetch("net/if.h"         HAVE_NET_IF_H)  # sys/select.h (e.g. MS-DOS/Watt-32)
+check_include_file_concat_fetch("netdb.h"          HAVE_NETDB_H)
+check_include_file_concat_fetch("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file("netinet/in6.h"    HAVE_NETINET_IN6_H)
-check_include_file_concat_curl("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
-check_include_file_concat_curl("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
+check_include_file_concat_fetch("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
+check_include_file_concat_fetch("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
 check_include_file("poll.h"           HAVE_POLL_H)
 check_include_file("pwd.h"            HAVE_PWD_H)
 check_include_file("stdatomic.h"      HAVE_STDATOMIC_H)
@@ -1634,14 +1634,14 @@ check_include_file("strings.h"        HAVE_STRINGS_H)
 check_include_file("stropts.h"        HAVE_STROPTS_H)
 check_include_file("termio.h"         HAVE_TERMIO_H)
 check_include_file("termios.h"        HAVE_TERMIOS_H)
-check_include_file_concat_curl("unistd.h"         HAVE_UNISTD_H)
+check_include_file_concat_fetch("unistd.h"         HAVE_UNISTD_H)
 check_include_file("utime.h"          HAVE_UTIME_H)
 
 if(AMIGA)
-  check_include_file_concat_curl("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
+  check_include_file_concat_fetch("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
 endif()
 
-# Pass these detection results to curl_internal_test() for use in CurlTests.c
+# Pass these detection results to fetch_internal_test() for use in CurlTests.c
 # Add here all feature flags referenced from CurlTests.c
 foreach(_variable IN ITEMS
     HAVE_STDATOMIC_H
@@ -1653,7 +1653,7 @@ foreach(_variable IN ITEMS
     HAVE_UNISTD_H
     )
   if(${_variable})
-    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${_variable}")
+    set(FETCH_TEST_DEFINES "${FETCH_TEST_DEFINES} -D${_variable}")
   endif()
 endforeach()
 
@@ -1694,16 +1694,16 @@ elseif(DOS)
 endif()
 
 check_function_exists("fnmatch"       HAVE_FNMATCH)
-check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)  # libgen.h unistd.h
+check_symbol_exists("basename"        "${FETCH_INCLUDES};string.h" HAVE_BASENAME)  # libgen.h unistd.h
 check_symbol_exists("opendir"         "dirent.h" HAVE_OPENDIR)
 check_function_exists("poll"          HAVE_POLL)  # poll.h
-check_symbol_exists("socket"          "${CURL_INCLUDES}" HAVE_SOCKET)  # winsock2.h sys/socket.h
-check_symbol_exists("socketpair"      "${CURL_INCLUDES}" HAVE_SOCKETPAIR)  # sys/socket.h
-check_symbol_exists("recv"            "${CURL_INCLUDES}" HAVE_RECV)  # proto/bsdsocket.h sys/types.h sys/socket.h
-check_symbol_exists("send"            "${CURL_INCLUDES}" HAVE_SEND)  # proto/bsdsocket.h sys/types.h sys/socket.h
+check_symbol_exists("socket"          "${FETCH_INCLUDES}" HAVE_SOCKET)  # winsock2.h sys/socket.h
+check_symbol_exists("socketpair"      "${FETCH_INCLUDES}" HAVE_SOCKETPAIR)  # sys/socket.h
+check_symbol_exists("recv"            "${FETCH_INCLUDES}" HAVE_RECV)  # proto/bsdsocket.h sys/types.h sys/socket.h
+check_symbol_exists("send"            "${FETCH_INCLUDES}" HAVE_SEND)  # proto/bsdsocket.h sys/types.h sys/socket.h
 check_function_exists("sendmsg"       HAVE_SENDMSG)
 check_function_exists("sendmmsg"      HAVE_SENDMMSG)
-check_symbol_exists("select"          "${CURL_INCLUDES}" HAVE_SELECT)  # proto/bsdsocket.h sys/select.h sys/socket.h
+check_symbol_exists("select"          "${FETCH_INCLUDES}" HAVE_SELECT)  # proto/bsdsocket.h sys/select.h sys/socket.h
 check_symbol_exists("strdup"          "string.h" HAVE_STRDUP)
 check_symbol_exists("strtok_r"        "string.h" HAVE_STRTOK_R)
 check_symbol_exists("memrchr"         "string.h" HAVE_MEMRCHR)
@@ -1713,7 +1713,7 @@ check_function_exists("getppid"       HAVE_GETPPID)
 check_function_exists("utimes"        HAVE_UTIMES)
 
 check_function_exists("gettimeofday"  HAVE_GETTIMEOFDAY)  # sys/time.h
-check_symbol_exists("closesocket"     "${CURL_INCLUDES}" HAVE_CLOSESOCKET)  # winsock2.h
+check_symbol_exists("closesocket"     "${FETCH_INCLUDES}" HAVE_CLOSESOCKET)  # winsock2.h
 check_symbol_exists("sigsetjmp"       "setjmp.h" HAVE_SIGSETJMP)
 check_function_exists("getpass_r"     HAVE_GETPASS_R)
 check_function_exists("getpwuid"      HAVE_GETPWUID)
@@ -1723,21 +1723,21 @@ check_function_exists("utime"         HAVE_UTIME)
 check_symbol_exists("gmtime_r"        "stdlib.h;time.h" HAVE_GMTIME_R)
 
 check_symbol_exists("gethostbyname_r" "netdb.h" HAVE_GETHOSTBYNAME_R)
-check_symbol_exists("gethostname"     "${CURL_INCLUDES}" HAVE_GETHOSTNAME)  # winsock2.h unistd.h proto/bsdsocket.h
+check_symbol_exists("gethostname"     "${FETCH_INCLUDES}" HAVE_GETHOSTNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 
 check_symbol_exists("signal"          "signal.h" HAVE_SIGNAL)
 check_symbol_exists("strtoll"         "stdlib.h" HAVE_STRTOLL)
 check_symbol_exists("strerror_r"      "stdlib.h;string.h" HAVE_STRERROR_R)
 check_symbol_exists("sigaction"       "signal.h" HAVE_SIGACTION)
 check_symbol_exists("siginterrupt"    "signal.h" HAVE_SIGINTERRUPT)
-check_symbol_exists("getaddrinfo"     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)  # ws2tcpip.h sys/socket.h netdb.h
-check_symbol_exists("getifaddrs"      "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)  # ifaddrs.h
-check_symbol_exists("freeaddrinfo"    "${CURL_INCLUDES}" HAVE_FREEADDRINFO)  # ws2tcpip.h sys/socket.h netdb.h
+check_symbol_exists("getaddrinfo"     "${FETCH_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)  # ws2tcpip.h sys/socket.h netdb.h
+check_symbol_exists("getifaddrs"      "${FETCH_INCLUDES};stdlib.h" HAVE_GETIFADDRS)  # ifaddrs.h
+check_symbol_exists("freeaddrinfo"    "${FETCH_INCLUDES}" HAVE_FREEADDRINFO)  # ws2tcpip.h sys/socket.h netdb.h
 check_function_exists("pipe"          HAVE_PIPE)
 check_function_exists("eventfd"       HAVE_EVENTFD)
 check_symbol_exists("ftruncate"       "unistd.h" HAVE_FTRUNCATE)
-check_symbol_exists("getpeername"     "${CURL_INCLUDES}" HAVE_GETPEERNAME)  # winsock2.h unistd.h proto/bsdsocket.h
-check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # winsock2.h unistd.h proto/bsdsocket.h
+check_symbol_exists("getpeername"     "${FETCH_INCLUDES}" HAVE_GETPEERNAME)  # winsock2.h unistd.h proto/bsdsocket.h
+check_symbol_exists("getsockname"     "${FETCH_INCLUDES}" HAVE_GETSOCKNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # winsock2.h net/if.h
 check_function_exists("getrlimit"       HAVE_GETRLIMIT)
 check_function_exists("setlocale"       HAVE_SETLOCALE)
@@ -1756,11 +1756,11 @@ if(WIN32 OR CYGWIN)
 endif()
 
 if(AMIGA)
-  check_symbol_exists("CloseSocket" "${CURL_INCLUDES}" HAVE_CLOSESOCKET_CAMEL)  # sys/socket.h proto/bsdsocket.h
+  check_symbol_exists("CloseSocket" "${FETCH_INCLUDES}" HAVE_CLOSESOCKET_CAMEL)  # sys/socket.h proto/bsdsocket.h
 endif()
 
 if(NOT _ssl_enabled)
-  check_symbol_exists("arc4random" "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
+  check_symbol_exists("arc4random" "${FETCH_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
 endif()
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
@@ -1770,13 +1770,13 @@ endif()
 if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 endif()
-check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h
-check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h
+check_symbol_exists("inet_ntop" "${FETCH_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h
+check_symbol_exists("inet_pton" "${FETCH_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h
 
 check_symbol_exists("fsetxattr" "sys/xattr.h" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
-  curl_internal_test(HAVE_FSETXATTR_5)
-  curl_internal_test(HAVE_FSETXATTR_6)
+  fetch_internal_test(HAVE_FSETXATTR_5)
+  fetch_internal_test(HAVE_FSETXATTR_6)
 endif()
 
 cmake_push_check_state()
@@ -1791,8 +1791,8 @@ elseif(HAVE_SYS_SOCKET_H)
 endif()
 cmake_pop_check_state()
 
-# Do curl specific tests
-foreach(_curl_test IN ITEMS
+# Do fetch specific tests
+foreach(_fetch_test IN ITEMS
     HAVE_FCNTL_O_NONBLOCK
     HAVE_IOCTLSOCKET
     HAVE_IOCTLSOCKET_CAMEL
@@ -1813,7 +1813,7 @@ foreach(_curl_test IN ITEMS
     HAVE_FILE_OFFSET_BITS
     HAVE_ATOMIC
     )
-  curl_internal_test(${_curl_test})
+  fetch_internal_test(${_fetch_test})
 endforeach()
 
 cmake_push_check_state()
@@ -1827,7 +1827,7 @@ if(NOT WIN32)
   # fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with
   # _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
   # so we need to test fseeko after testing for _FILE_OFFSET_BITS
-  check_symbol_exists("fseeko" "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
+  check_symbol_exists("fseeko" "${FETCH_INCLUDES};stdio.h" HAVE_FSEEKO)
 
   if(HAVE_FSEEKO)
     set(HAVE_DECL_FSEEKO 1)
@@ -1837,11 +1837,11 @@ endif()
 # Include this header to get the type
 cmake_push_check_state()
 list(APPEND CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/include")
-list(APPEND CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
-check_type_size("curl_off_t" SIZEOF_CURL_OFF_T)
-list(APPEND CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
-check_type_size("curl_socket_t" SIZEOF_CURL_SOCKET_T)
-cmake_pop_check_state()  # pop curl system headers
+list(APPEND CMAKE_EXTRA_INCLUDE_FILES "fetch/system.h")
+check_type_size("fetch_off_t" SIZEOF_FETCH_OFF_T)
+list(APPEND CMAKE_EXTRA_INCLUDE_FILES "fetch/fetch.h")
+check_type_size("fetch_socket_t" SIZEOF_FETCH_SOCKET_T)
+cmake_pop_check_state()  # pop fetch system headers
 cmake_pop_check_state()  # pop -D_FILE_OFFSET_BITS=64
 
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
@@ -1866,39 +1866,39 @@ if(NOT CMAKE_CROSSCOMPILING)
     }" HAVE_TIME_T_UNSIGNED)
 endif()
 
-curl_internal_test(HAVE_GLIBC_STRERROR_R)
-curl_internal_test(HAVE_POSIX_STRERROR_R)
+fetch_internal_test(HAVE_GLIBC_STRERROR_R)
+fetch_internal_test(HAVE_POSIX_STRERROR_R)
 
 # Check for reentrant
-foreach(_curl_test IN ITEMS
+foreach(_fetch_test IN ITEMS
     HAVE_GETHOSTBYNAME_R_3
     HAVE_GETHOSTBYNAME_R_5
     HAVE_GETHOSTBYNAME_R_6)
-  if(NOT ${_curl_test})
-    if(${_curl_test}_REENTRANT)
+  if(NOT ${_fetch_test})
+    if(${_fetch_test}_REENTRANT)
       set(NEED_REENTRANT 1)
     endif()
   endif()
 endforeach()
 
 if(NEED_REENTRANT)
-  foreach(_curl_test IN ITEMS
+  foreach(_fetch_test IN ITEMS
       HAVE_GETHOSTBYNAME_R_3
       HAVE_GETHOSTBYNAME_R_5
       HAVE_GETHOSTBYNAME_R_6)
-    set(${_curl_test} 0)
-    if(${_curl_test}_REENTRANT)
-      set(${_curl_test} 1)
+    set(${_fetch_test} 0)
+    if(${_fetch_test}_REENTRANT)
+      set(${_fetch_test} 1)
     endif()
   endforeach()
 endif()
 
 if(NOT WIN32)
-  curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)  # Check clock_gettime(CLOCK_MONOTONIC, x) support
+  fetch_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)  # Check clock_gettime(CLOCK_MONOTONIC, x) support
 endif()
 
 if(APPLE)
-  curl_internal_test(HAVE_BUILTIN_AVAILABLE)  # Check compiler support of __builtin_available()
+  fetch_internal_test(HAVE_BUILTIN_AVAILABLE)  # Check compiler support of __builtin_available()
 endif()
 
 # Some other minor tests
@@ -1939,7 +1939,7 @@ if(WIN32)
   endif()
 
   # Use the manifest embedded in the Windows Resource
-  set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
+  set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DFETCH_EMBED_MANIFEST")
 
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
@@ -1948,7 +1948,7 @@ if(WIN32)
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    list(APPEND CURL_LIBS "advapi32" "crypt32")
+    list(APPEND FETCH_LIBS "advapi32" "crypt32")
   endif()
 endif()
 
@@ -1968,7 +1968,7 @@ if(MSVC)
   endif()
 endif()
 
-if(CURL_WERROR)
+if(FETCH_WERROR)
   if(MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -WX")
   else()
@@ -1977,7 +1977,7 @@ if(CURL_WERROR)
   endif()
 endif()
 
-if(CURL_LTO)
+if(FETCH_LTO)
   if(CMAKE_VERSION VERSION_LESS 3.9)
     message(FATAL_ERROR "LTO has been requested, but your cmake version ${CMAKE_VERSION} is to old. You need at least 3.9")
   endif()
@@ -1985,8 +1985,8 @@ if(CURL_LTO)
   cmake_policy(SET CMP0069 NEW)
 
   include(CheckIPOSupported)
-  check_ipo_supported(RESULT CURL_HAS_LTO OUTPUT _lto_error LANGUAGES C)
-  if(CURL_HAS_LTO)
+  check_ipo_supported(RESULT FETCH_HAS_LTO OUTPUT _lto_error LANGUAGES C)
+  if(FETCH_HAS_LTO)
     message(STATUS "LTO supported and enabled")
   else()
     message(FATAL_ERROR "LTO has been requested, but the compiler does not support it\n${_lto_error}")
@@ -1996,7 +1996,7 @@ endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it
 # (= regenerate it).
-function(curl_transform_makefile_inc _input_file _output_file)
+function(fetch_transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
   string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
@@ -2023,36 +2023,36 @@ set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
 set(_version_config "${_generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
 option(BUILD_TESTING "Build tests" ON)
-if(BUILD_TESTING AND PERL_FOUND AND NOT CURL_DISABLE_TESTS)
-  set(CURL_BUILD_TESTING ON)
+if(BUILD_TESTING AND PERL_FOUND AND NOT FETCH_DISABLE_TESTS)
+  set(FETCH_BUILD_TESTING ON)
 else()
-  set(CURL_BUILD_TESTING OFF)
+  set(FETCH_BUILD_TESTING OFF)
 endif()
 
 if(HAVE_MANUAL_TOOLS)
-  set(CURL_MANPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.1")
-  set(CURL_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
+  set(FETCH_MANPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/fetch.1")
+  set(FETCH_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/fetch.txt")
   add_subdirectory(docs)
 endif()
 
 add_subdirectory(lib)
 
-if(BUILD_CURL_EXE)
+if(BUILD_FETCH_EXE)
   add_subdirectory(src)
 endif()
 
-option(BUILD_EXAMPLES "Build libcurl examples" ON)
+option(BUILD_EXAMPLES "Build libfetch examples" ON)
 if(BUILD_EXAMPLES)
   add_subdirectory(docs/examples)
 endif()
 
-if(CURL_BUILD_TESTING)
+if(FETCH_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
 # Helper to populate a list (_items) with a label when conditions
 # (the remaining args) are satisfied
-macro(curl_add_if _label)
+macro(fetch_add_if _label)
   # Needs to be a macro to allow this indirection
   if(${ARGN})
     set(_items ${_items} "${_label}")
@@ -2060,106 +2060,106 @@ macro(curl_add_if _label)
 endmacro()
 
 # NTLM support requires crypto functions from various SSL libs.
-# These conditions must match those in lib/curl_setup.h.
-if(NOT CURL_DISABLE_NTLM AND
+# These conditions must match those in lib/fetch_setup.h.
+if(NOT FETCH_DISABLE_NTLM AND
    (USE_OPENSSL OR
     USE_MBEDTLS OR
     USE_GNUTLS OR
     USE_SECTRANSP OR
     USE_WIN32_CRYPTO OR
     (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))
-  set(_use_curl_ntlm_core ON)
+  set(_use_fetch_ntlm_core ON)
 endif()
 
 # Clear list and try to detect available protocols
 set(_items "")
-curl_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
-curl_add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
-curl_add_if("FTP"           NOT CURL_DISABLE_FTP)
-curl_add_if("FTPS"          NOT CURL_DISABLE_FTP AND _ssl_enabled)
-curl_add_if("FILE"          NOT CURL_DISABLE_FILE)
-curl_add_if("TELNET"        NOT CURL_DISABLE_TELNET)
-curl_add_if("LDAP"          NOT CURL_DISABLE_LDAP)
-# CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
-curl_add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
+fetch_add_if("HTTP"          NOT FETCH_DISABLE_HTTP)
+fetch_add_if("HTTPS"         NOT FETCH_DISABLE_HTTP AND _ssl_enabled)
+fetch_add_if("FTP"           NOT FETCH_DISABLE_FTP)
+fetch_add_if("FTPS"          NOT FETCH_DISABLE_FTP AND _ssl_enabled)
+fetch_add_if("FILE"          NOT FETCH_DISABLE_FILE)
+fetch_add_if("TELNET"        NOT FETCH_DISABLE_TELNET)
+fetch_add_if("LDAP"          NOT FETCH_DISABLE_LDAP)
+# FETCH_DISABLE_LDAP implies FETCH_DISABLE_LDAPS
+fetch_add_if("LDAPS"         NOT FETCH_DISABLE_LDAPS AND
                             ((USE_OPENLDAP AND _ssl_enabled) OR
                             (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
-curl_add_if("DICT"          NOT CURL_DISABLE_DICT)
-curl_add_if("TFTP"          NOT CURL_DISABLE_TFTP)
-curl_add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
-curl_add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND _ssl_enabled)
-curl_add_if("POP3"          NOT CURL_DISABLE_POP3)
-curl_add_if("POP3S"         NOT CURL_DISABLE_POP3 AND _ssl_enabled)
-curl_add_if("IMAP"          NOT CURL_DISABLE_IMAP)
-curl_add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND _ssl_enabled)
-curl_add_if("SMB"           NOT CURL_DISABLE_SMB AND
-                            _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-curl_add_if("SMBS"          NOT CURL_DISABLE_SMB AND _ssl_enabled AND
-                            _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-curl_add_if("SMTP"          NOT CURL_DISABLE_SMTP)
-curl_add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND _ssl_enabled)
-curl_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
-curl_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
-curl_add_if("IPFS"          NOT CURL_DISABLE_IPFS)
-curl_add_if("IPNS"          NOT CURL_DISABLE_IPFS)
-curl_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
-curl_add_if("RTMP"          USE_LIBRTMP)
-curl_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
-curl_add_if("WS"            NOT CURL_DISABLE_WEBSOCKETS)
-curl_add_if("WSS"           NOT CURL_DISABLE_WEBSOCKETS AND _ssl_enabled)
+fetch_add_if("DICT"          NOT FETCH_DISABLE_DICT)
+fetch_add_if("TFTP"          NOT FETCH_DISABLE_TFTP)
+fetch_add_if("GOPHER"        NOT FETCH_DISABLE_GOPHER)
+fetch_add_if("GOPHERS"       NOT FETCH_DISABLE_GOPHER AND _ssl_enabled)
+fetch_add_if("POP3"          NOT FETCH_DISABLE_POP3)
+fetch_add_if("POP3S"         NOT FETCH_DISABLE_POP3 AND _ssl_enabled)
+fetch_add_if("IMAP"          NOT FETCH_DISABLE_IMAP)
+fetch_add_if("IMAPS"         NOT FETCH_DISABLE_IMAP AND _ssl_enabled)
+fetch_add_if("SMB"           NOT FETCH_DISABLE_SMB AND
+                            _use_fetch_ntlm_core AND (SIZEOF_FETCH_OFF_T GREATER 4))
+fetch_add_if("SMBS"          NOT FETCH_DISABLE_SMB AND _ssl_enabled AND
+                            _use_fetch_ntlm_core AND (SIZEOF_FETCH_OFF_T GREATER 4))
+fetch_add_if("SMTP"          NOT FETCH_DISABLE_SMTP)
+fetch_add_if("SMTPS"         NOT FETCH_DISABLE_SMTP AND _ssl_enabled)
+fetch_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
+fetch_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
+fetch_add_if("IPFS"          NOT FETCH_DISABLE_IPFS)
+fetch_add_if("IPNS"          NOT FETCH_DISABLE_IPFS)
+fetch_add_if("RTSP"          NOT FETCH_DISABLE_RTSP)
+fetch_add_if("RTMP"          USE_LIBRTMP)
+fetch_add_if("MQTT"          NOT FETCH_DISABLE_MQTT)
+fetch_add_if("WS"            NOT FETCH_DISABLE_WEBSOCKETS)
+fetch_add_if("WSS"           NOT FETCH_DISABLE_WEBSOCKETS AND _ssl_enabled)
 if(_items)
   list(SORT _items)
 endif()
-set(CURL_SUPPORTED_PROTOCOLS_LIST "${_items}")
+set(FETCH_SUPPORTED_PROTOCOLS_LIST "${_items}")
 string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
 string(TOLOWER "${SUPPORT_PROTOCOLS}" _support_protocols_lower)
 message(STATUS "Protocols: ${_support_protocols_lower}")
 
 # Clear list and try to detect available features
 set(_items "")
-curl_add_if("SSL"           _ssl_enabled)
-curl_add_if("IPv6"          USE_IPV6)
-curl_add_if("UnixSockets"   USE_UNIX_SOCKETS)
-curl_add_if("libz"          HAVE_LIBZ)
-curl_add_if("brotli"        HAVE_BROTLI)
-curl_add_if("gsasl"         USE_GSASL)
-curl_add_if("zstd"          HAVE_ZSTD)
-curl_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-curl_add_if("asyn-rr"       USE_ARES AND ENABLE_THREADED_RESOLVER)
-curl_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
+fetch_add_if("SSL"           _ssl_enabled)
+fetch_add_if("IPv6"          USE_IPV6)
+fetch_add_if("UnixSockets"   USE_UNIX_SOCKETS)
+fetch_add_if("libz"          HAVE_LIBZ)
+fetch_add_if("brotli"        HAVE_BROTLI)
+fetch_add_if("gsasl"         USE_GSASL)
+fetch_add_if("zstd"          HAVE_ZSTD)
+fetch_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
+fetch_add_if("asyn-rr"       USE_ARES AND ENABLE_THREADED_RESOLVER)
+fetch_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
                             USE_WIN32_IDN OR
                             USE_APPLE_IDN)
-curl_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
+fetch_add_if("Largefile"     (SIZEOF_FETCH_OFF_T GREATER 4) AND
                             ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-curl_add_if("SSPI"          USE_WINDOWS_SSPI)
-curl_add_if("GSS-API"       HAVE_GSSAPI)
-curl_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
-curl_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
-curl_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
+fetch_add_if("SSPI"          USE_WINDOWS_SSPI)
+fetch_add_if("GSS-API"       HAVE_GSSAPI)
+fetch_add_if("alt-svc"       NOT FETCH_DISABLE_ALTSVC)
+fetch_add_if("HSTS"          NOT FETCH_DISABLE_HSTS)
+fetch_add_if("SPNEGO"        NOT FETCH_DISABLE_NEGOTIATE_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-curl_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
+fetch_add_if("Kerberos"      NOT FETCH_DISABLE_KERBEROS_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-curl_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
-                            (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-curl_add_if("TLS-SRP"       USE_TLS_SRP)
-curl_add_if("HTTP2"         USE_NGHTTP2)
-curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
-curl_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-curl_add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
+fetch_add_if("NTLM"          NOT (FETCH_DISABLE_NTLM) AND
+                            (_use_fetch_ntlm_core OR USE_WINDOWS_SSPI))
+fetch_add_if("TLS-SRP"       USE_TLS_SRP)
+fetch_add_if("HTTP2"         USE_NGHTTP2)
+fetch_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
+fetch_add_if("MultiSSL"      FETCH_WITH_MULTI_SSL)
+fetch_add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                             OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                             USE_MBEDTLS OR USE_SECTRANSP OR
                             (USE_WOLFSSL AND HAVE_WOLFSSL_BIO)))
-curl_add_if("Unicode"       ENABLE_UNICODE)
-curl_add_if("threadsafe"    HAVE_ATOMIC OR
+fetch_add_if("Unicode"       ENABLE_UNICODE)
+fetch_add_if("threadsafe"    HAVE_ATOMIC OR
                             (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
                             (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
-curl_add_if("Debug"         ENABLE_DEBUG)
-curl_add_if("TrackMemory"   ENABLE_CURLDEBUG)
-curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
-curl_add_if("HTTPSRR"       _ssl_enabled AND USE_HTTPSRR)
-curl_add_if("PSL"           USE_LIBPSL)
-curl_add_if("CAcert"        CURL_CA_EMBED_SET)
-curl_add_if("SSLS-EXPORT"   _ssl_enabled AND USE_SSLS_EXPORT)
+fetch_add_if("Debug"         ENABLE_DEBUG)
+fetch_add_if("TrackMemory"   ENABLE_FETCHDEBUG)
+fetch_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
+fetch_add_if("HTTPSRR"       _ssl_enabled AND USE_HTTPSRR)
+fetch_add_if("PSL"           USE_LIBPSL)
+fetch_add_if("CAcert"        FETCH_CA_EMBED_SET)
+fetch_add_if("SSLS-EXPORT"   _ssl_enabled AND USE_SSLS_EXPORT)
 if(_items)
   if(NOT CMAKE_VERSION VERSION_LESS 3.13)
     list(SORT _items CASE INSENSITIVE)
@@ -2167,21 +2167,21 @@ if(_items)
     list(SORT _items)
   endif()
 endif()
-set(CURL_SUPPORTED_FEATURES_LIST "${_items}")
+set(FETCH_SUPPORTED_FEATURES_LIST "${_items}")
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Features: ${SUPPORT_FEATURES}")
 
 # Clear list and collect SSL backends
 set(_items "")
-curl_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
-curl_add_if("${_openssl}"      _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
-curl_add_if("${_openssl} v3+"  _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
-curl_add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
-curl_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
-curl_add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
-curl_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
-curl_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
-curl_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
+fetch_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
+fetch_add_if("${_openssl}"      _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
+fetch_add_if("${_openssl} v3+"  _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
+fetch_add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
+fetch_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
+fetch_add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
+fetch_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
+fetch_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
+fetch_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
 
 if(_items)
   if(NOT CMAKE_VERSION VERSION_LESS 3.13)
@@ -2192,18 +2192,18 @@ if(_items)
 endif()
 string(REPLACE ";" " " SSL_BACKENDS "${_items}")
 message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
-if(CURL_DEFAULT_SSL_BACKEND)
-  message(STATUS "Default SSL backend: ${CURL_DEFAULT_SSL_BACKEND}")
+if(FETCH_DEFAULT_SSL_BACKEND)
+  message(STATUS "Default SSL backend: ${FETCH_DEFAULT_SSL_BACKEND}")
 endif()
 
-if(NOT CURL_DISABLE_INSTALL)
+if(NOT FETCH_DISABLE_INSTALL)
 
-  # curl-config needs the following options to be set.
+  # fetch-config needs the following options to be set.
   set(CC                      "${CMAKE_C_COMPILER}")
   # TODO: probably put a -D... options here?
   set(CONFIGURE_OPTIONS       "")
-  set(CURLVERSION             "${_curl_version}")
-  set(VERSIONNUM              "${_curl_version_num}")
+  set(FETCHVERSION             "${_fetch_version}")
+  set(VERSIONNUM              "${_fetch_version_num}")
   set(prefix                  "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix             "\${prefix}")
   if(IS_ABSOLUTE ${CMAKE_INSTALL_INCLUDEDIR})
@@ -2220,7 +2220,7 @@ if(NOT CURL_DISABLE_INSTALL)
   string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
   set(_ldflags "")
-  set(LIBCURL_PC_LIBS_PRIVATE "")
+  set(LIBFETCH_PC_LIBS_PRIVATE "")
 
   # Filter CMAKE_SHARED_LINKER_FLAGS for libs and libpaths
   string(STRIP "${CMAKE_SHARED_LINKER_FLAGS}" _custom_ldflags)
@@ -2262,7 +2262,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  foreach(_libdir IN LISTS _custom_libdirs CURL_LIBDIRS)
+  foreach(_libdir IN LISTS _custom_libdirs FETCH_LIBDIRS)
     list(FIND _sys_libdirs "${_libdir}" _libdir_index)
     if(_libdir_index LESS 0)
       list(APPEND _ldflags "-L${_libdir}")
@@ -2274,7 +2274,7 @@ if(NOT CURL_DISABLE_INSTALL)
     set(_implicit_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})
   endif()
 
-  foreach(_lib IN LISTS _implicit_libs _custom_libs CURL_LIBS)
+  foreach(_lib IN LISTS _implicit_libs _custom_libs FETCH_LIBS)
     if(TARGET "${_lib}")
       set(_libname "${_lib}")
       get_target_property(_imported "${_libname}" IMPORTED)
@@ -2302,42 +2302,42 @@ if(NOT CURL_DISABLE_INSTALL)
           list(APPEND _ldflags "-L${_libdir}")
         endif()
         string(REGEX REPLACE "^lib" "" _libname "${_libname}")
-        list(APPEND LIBCURL_PC_LIBS_PRIVATE "-l${_libname}")
+        list(APPEND LIBFETCH_PC_LIBS_PRIVATE "-l${_libname}")
       else()
-        list(APPEND LIBCURL_PC_LIBS_PRIVATE "${_lib}")
+        list(APPEND LIBFETCH_PC_LIBS_PRIVATE "${_lib}")
       endif()
     else()
-      list(APPEND LIBCURL_PC_LIBS_PRIVATE "-l${_lib}")
+      list(APPEND LIBFETCH_PC_LIBS_PRIVATE "-l${_lib}")
     endif()
   endforeach()
 
-  if(LIBCURL_PC_REQUIRES_PRIVATE)
-    string(REPLACE ";" "," LIBCURL_PC_REQUIRES_PRIVATE "${LIBCURL_PC_REQUIRES_PRIVATE}")
+  if(LIBFETCH_PC_REQUIRES_PRIVATE)
+    string(REPLACE ";" "," LIBFETCH_PC_REQUIRES_PRIVATE "${LIBFETCH_PC_REQUIRES_PRIVATE}")
   endif()
-  if(LIBCURL_PC_LIBS_PRIVATE)
-    string(REPLACE ";" " " LIBCURL_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE}")
+  if(LIBFETCH_PC_LIBS_PRIVATE)
+    string(REPLACE ";" " " LIBFETCH_PC_LIBS_PRIVATE "${LIBFETCH_PC_LIBS_PRIVATE}")
   endif()
   if(_ldflags)
     list(REMOVE_DUPLICATES _ldflags)
     string(REPLACE ";" " " _ldflags "${_ldflags}")
-    set(LIBCURL_PC_LDFLAGS_PRIVATE "${_ldflags}")
-    string(STRIP "${LIBCURL_PC_LDFLAGS_PRIVATE}" LIBCURL_PC_LDFLAGS_PRIVATE)
+    set(LIBFETCH_PC_LDFLAGS_PRIVATE "${_ldflags}")
+    string(STRIP "${LIBFETCH_PC_LDFLAGS_PRIVATE}" LIBFETCH_PC_LDFLAGS_PRIVATE)
   else()
-    set(LIBCURL_PC_LDFLAGS_PRIVATE "")
+    set(LIBFETCH_PC_LDFLAGS_PRIVATE "")
   endif()
-  set(LIBCURL_PC_CFLAGS_PRIVATE "-DCURL_STATICLIB")
+  set(LIBFETCH_PC_CFLAGS_PRIVATE "-DFETCH_STATICLIB")
 
   # Merge pkg-config private fields into public ones when static-only
   if(BUILD_SHARED_LIBS)
     set(ENABLE_SHARED       "yes")
-    set(LIBCURL_PC_REQUIRES "")
-    set(LIBCURL_PC_LIBS     "")
-    set(LIBCURL_PC_CFLAGS   "")
+    set(LIBFETCH_PC_REQUIRES "")
+    set(LIBFETCH_PC_LIBS     "")
+    set(LIBFETCH_PC_CFLAGS   "")
   else()
     set(ENABLE_SHARED       "no")
-    set(LIBCURL_PC_REQUIRES "${LIBCURL_PC_REQUIRES_PRIVATE}")
-    set(LIBCURL_PC_LIBS     "${LIBCURL_PC_LIBS_PRIVATE}")
-    set(LIBCURL_PC_CFLAGS   "${LIBCURL_PC_CFLAGS_PRIVATE}")
+    set(LIBFETCH_PC_REQUIRES "${LIBFETCH_PC_REQUIRES_PRIVATE}")
+    set(LIBFETCH_PC_LIBS     "${LIBFETCH_PC_LIBS_PRIVATE}")
+    set(LIBFETCH_PC_CFLAGS   "${LIBFETCH_PC_CFLAGS_PRIVATE}")
   endif()
   if(BUILD_STATIC_LIBS)
     set(ENABLE_STATIC       "yes")
@@ -2345,19 +2345,19 @@ if(NOT CURL_DISABLE_INSTALL)
     set(ENABLE_STATIC       "no")
   endif()
 
-  # Generate a "curl-config" matching this config.
+  # Generate a "fetch-config" matching this config.
   # Consumed variables:
   #   CC
   #   CONFIGURE_OPTIONS
-  #   CURLVERSION
-  #   CURL_CA_BUNDLE
+  #   FETCHVERSION
+  #   FETCH_CA_BUNDLE
   #   ENABLE_SHARED
   #   ENABLE_STATIC
   #   exec_prefix
   #   includedir
-  #   LIBCURL_PC_CFLAGS
-  #   LIBCURL_PC_LDFLAGS_PRIVATE
-  #   LIBCURL_PC_LIBS_PRIVATE
+  #   LIBFETCH_PC_CFLAGS
+  #   LIBFETCH_PC_LDFLAGS_PRIVATE
+  #   LIBFETCH_PC_LIBS_PRIVATE
   #   libdir
   #   libext
   #   prefix
@@ -2366,9 +2366,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   SUPPORT_PROTOCOLS
   #   VERSIONNUM
   configure_file(
-    "${PROJECT_SOURCE_DIR}/curl-config.in"
-    "${PROJECT_BINARY_DIR}/curl-config" @ONLY)
-  install(FILES "${PROJECT_BINARY_DIR}/curl-config"
+    "${PROJECT_SOURCE_DIR}/fetch-config.in"
+    "${PROJECT_BINARY_DIR}/fetch-config" @ONLY)
+  install(FILES "${PROJECT_BINARY_DIR}/fetch-config"
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     PERMISSIONS
       OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -2377,16 +2377,16 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Generate a pkg-config file matching this config.
   # Consumed variables:
-  #   CURLVERSION
+  #   FETCHVERSION
   #   exec_prefix
   #   includedir
-  #   LIBCURL_PC_CFLAGS
-  #   LIBCURL_PC_CFLAGS_PRIVATE
-  #   LIBCURL_PC_LDFLAGS_PRIVATE
-  #   LIBCURL_PC_LIBS
-  #   LIBCURL_PC_LIBS_PRIVATE
-  #   LIBCURL_PC_REQUIRES
-  #   LIBCURL_PC_REQUIRES_PRIVATE
+  #   LIBFETCH_PC_CFLAGS
+  #   LIBFETCH_PC_CFLAGS_PRIVATE
+  #   LIBFETCH_PC_LDFLAGS_PRIVATE
+  #   LIBFETCH_PC_LIBS
+  #   LIBFETCH_PC_LIBS_PRIVATE
+  #   LIBFETCH_PC_REQUIRES
+  #   LIBFETCH_PC_REQUIRES_PRIVATE
   #   libdir
   #   prefix
   #   SUPPORT_FEATURES
@@ -2397,20 +2397,20 @@ if(NOT CURL_DISABLE_INSTALL)
   #   https://manpages.debian.org/unstable/pkg-config/pkg-config.1.en.html
   #   https://www.msys2.org/docs/pkgconfig/
   configure_file(
-    "${PROJECT_SOURCE_DIR}/libcurl.pc.in"
-    "${PROJECT_BINARY_DIR}/libcurl.pc" @ONLY)
-  install(FILES "${PROJECT_BINARY_DIR}/libcurl.pc"
+    "${PROJECT_SOURCE_DIR}/libfetch.pc.in"
+    "${PROJECT_BINARY_DIR}/libfetch.pc" @ONLY)
+  install(FILES "${PROJECT_BINARY_DIR}/libfetch.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
   # Install headers
-  install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/curl"
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/fetch"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
 
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
     "${_version_config}"
-    VERSION ${_curl_version}
+    VERSION ${_fetch_version}
     COMPATIBILITY SameMajorVersion)
   file(READ "${_version_config}" _generated_version_config)
   file(WRITE "${_version_config}" "
@@ -2422,19 +2422,19 @@ if(NOT CURL_DISABLE_INSTALL)
     ${_generated_version_config}")
 
   # Consumed custom variables:
-  #   CURLVERSION
+  #   FETCHVERSION
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
   #   USE_OPENSSL OPENSSL_VERSION_MAJOR
   #   HAVE_LIBZ ZLIB_VERSION_MAJOR
-  #   CURL_SUPPORTED_FEATURES_LIST
-  #   CURL_SUPPORTED_PROTOCOLS_LIST
-  configure_package_config_file("CMake/curl-config.cmake.in"
+  #   FETCH_SUPPORTED_FEATURES_LIST
+  #   FETCH_SUPPORTED_PROTOCOLS_LIST
+  configure_package_config_file("CMake/fetch-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
 
-  if(CURL_ENABLE_EXPORT_TARGET)
+  if(FETCH_ENABLE_EXPORT_TARGET)
     install(EXPORT "${TARGETS_EXPORT_NAME}"
       NAMESPACE "${PROJECT_NAME}::"
       DESTINATION ${_install_cmake_dir})
@@ -2443,13 +2443,13 @@ if(NOT CURL_DISABLE_INSTALL)
   install(FILES ${_version_config} ${_project_config}
     DESTINATION ${_install_cmake_dir})
 
-  if(NOT TARGET curl_uninstall)
+  if(NOT TARGET fetch_uninstall)
     configure_file(
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in"
       "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake"
       @ONLY)
 
-    add_custom_target(curl_uninstall
+    add_custom_target(fetch_uninstall
       COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
   endif()
 
@@ -2461,7 +2461,7 @@ if(NOT CURL_DISABLE_INSTALL)
       WORLD_READ WORLD_EXECUTE)
 
   # The `-DEV` part is important
-  string(REGEX REPLACE "([0-9]+\.[0-9]+)\.([0-9]+.*)" "\\2" CPACK_PACKAGE_VERSION_PATCH "${_curl_version}")
+  string(REGEX REPLACE "([0-9]+\.[0-9]+)\.([0-9]+.*)" "\\2" CPACK_PACKAGE_VERSION_PATCH "${_fetch_version}")
   set(CPACK_GENERATOR "TGZ")
   include(CPack)
 endif()
@@ -2489,6 +2489,6 @@ buildinfo.compiler.version: ${CMAKE_C_COMPILER_VERSION}
 buildinfo.sysroot: ${_cmake_sysroot}
 ")
 file(WRITE "${PROJECT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.\n${_buildinfo}")
-if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
+if(NOT "$ENV{FETCH_BUILDINFO}$ENV{FETCH_CI}$ENV{CI}" STREQUAL "")
   message(STATUS "\n${_buildinfo}")
 endif()

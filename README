@@ -7,12 +7,12 @@
 README
 
   Curl is a command line tool for transferring data specified with URL
-  syntax. Find out how to use curl by reading the curl.1 man page or the
+  syntax. Find out how to use fetch by reading the fetch.1 man page or the
   MANUAL document. Find out how to install Curl by reading the INSTALL
   document.
 
-  libcurl is the library curl is using to do its job. It is readily
-  available to be used by your software. Read the libcurl.3 man page to
+  libfetch is the library fetch is using to do its job. It is readily
+  available to be used by your software. Read the libfetch.3 man page to
   learn how.
 
   You find answers to the most frequent questions we get in the FAQ document.
@@ -24,29 +24,29 @@ README
 CONTACT
 
   If you have problems, questions, ideas or suggestions, please contact us
-  by posting to a suitable mailing list. See https://curl.se/mail/
+  by posting to a suitable mailing list. See https://fetch.se/mail/
 
   All contributors to the project are listed in the THANKS document.
 
 WEBSITE
 
-  Visit the curl website for the latest news and downloads:
+  Visit the fetch website for the latest news and downloads:
 
-        https://curl.se/
+        https://fetch.se/
 
 GIT
 
   To download the latest source code off the GIT server, do this:
 
-    git clone https://github.com/curl/curl.git
+    git clone https://github.com/fetch/fetch.git
 
-  (you will get a directory named curl created, filled with the source code)
+  (you will get a directory named fetch created, filled with the source code)
 
 SECURITY PROBLEMS
 
   Report suspected security problems via our HackerOne page and not in public.
 
-    https://hackerone.com/curl
+    https://hackerone.com/fetch
 
 NOTICE
 

@@ -1,6 +1,6 @@
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 
 *.asc
 *.dll
@@ -50,14 +50,14 @@ config.log
 config.status
 config.sub
 configure
-curl-*.tar.bz2
-curl-*.tar.gz
-curl-*.tar.xz
-curl-*.zip
-curl-config
+fetch-*.tar.bz2
+fetch-*.tar.gz
+fetch-*.tar.xz
+fetch-*.zip
+fetch-config
 depcomp
 install-sh
-libcurl.pc
+libfetch.pc
 libtool
 ltmain.sh
 missing
@@ -65,10 +65,10 @@ mkinstalldirs
 tags
 test-driver
 stamp-h*
-scripts/_curl
-scripts/curl.fish
-curl_fuzzer
-curl_fuzzer_seed_corpus.zip
+scripts/_fetch
+scripts/fetch.fish
+fetch_fuzzer
+fetch_fuzzer_seed_corpus.zip
 libstandaloneengine.a
 tests/string
 tests/config

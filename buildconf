@@ -2,7 +2,7 @@
 #
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 
 echo "*** Do not use buildconf. Instead, just use: autoreconf -fi" >&2
 exec ${AUTORECONF:-autoreconf} -fi "${@}"

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 # SPDX-FileCopyrightText: Daniel Stenberg, <daniel@haxx.se>, et al.
 
 # This file describes the licensing and copyright situation for files that
@@ -8,8 +8,8 @@
 # This follows the REUSE specification: https://reuse.software/spec-3.2/#reusetoml
 
 version = 1
-SPDX-PackageName = "curl"
-SPDX-PackageDownloadLocation = "https://curl.se/"
+SPDX-PackageName = "fetch"
+SPDX-PackageDownloadLocation = "https://fetch.se/"
 
 [[annotations]]
 path = [
@@ -17,18 +17,18 @@ path = [
   "docs/FAQ",
   "docs/INSTALL",
   "docs/KNOWN_BUGS",
-  "docs/libcurl/symbols-in-versions",
+  "docs/libfetch/symbols-in-versions",
   "docs/MAIL-ETIQUETTE",
   "docs/options-in-versions",
   "docs/THANKS",
   "docs/TODO",
   "GIT-INFO.md",
-  "lib/libcurl.vers.in",
-  "lib/libcurl.def",
+  "lib/libfetch.vers.in",
+  "lib/libfetch.def",
   "packages/OS400/README.OS400",
   "packages/vms/build_vms.com",
-  "packages/vms/curl_release_note_start.txt",
-  "packages/vms/curlmsg.sdl",
+  "packages/vms/fetch_release_note_start.txt",
+  "packages/vms/fetchmsg.sdl",
   "packages/vms/macro32_exactcase.patch",
   "packages/vms/readme",
   "plan9/README",
@@ -52,6 +52,6 @@ path = [
   "tests/server/.checksrc",
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
+SPDX-License-Identifier = "fetch"
 # If there is licensing/copyright information in or next to these files, prefer that
 precedence = "closest"

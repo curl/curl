@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -37,23 +37,23 @@ includedir="@includedir@"
 usage()
 {
   cat <<EOF
-Usage: curl-config [OPTION]
+Usage: fetch-config [OPTION]
 
 Available values for OPTION include:
 
-  --built-shared says 'yes' if libcurl was built shared
+  --built-shared says 'yes' if libfetch was built shared
   --ca                  CA bundle install path
   --cc                  compiler
   --cflags              preprocessor and compiler flags
-  --checkfor [version]  check for (lib)curl of the specified version
-  --configure           the arguments given to configure when building curl
+  --checkfor [version]  check for (lib)fetch of the specified version
+  --configure           the arguments given to configure when building fetch
   --features            newline separated list of enabled features
   --help                display this help and exit
   --libs                library linking information
-  --prefix              curl install prefix
+  --prefix              fetch install prefix
   --protocols           newline separated list of enabled protocols
-  --ssl-backends        output the SSL backends libcurl was built to support
-  --static-libs         static libcurl library linking information
+  --ssl-backends        output the SSL backends libfetch was built to support
+  --static-libs         static libfetch library linking information
   --version             output version information
   --vernum              output version as a hexadecimal number
 EOF
@@ -72,7 +72,7 @@ while test "$#" -gt 0; do
     ;;
 
   --ca)
-    echo '@CURL_CA_BUNDLE@'
+    echo '@FETCH_CA_BUNDLE@'
     ;;
 
   --cc)
@@ -97,7 +97,7 @@ while test "$#" -gt 0; do
     ;;
 
   --version)
-    echo 'libcurl @CURLVERSION@'
+    echo 'libfetch @FETCHVERSION@'
     exit 0
     ;;
 
@@ -109,11 +109,11 @@ while test "$#" -gt 0; do
     # dash as that's used for things like version 1.2.3-pre1
     cpatch=`echo "$checkfor" | cut -d. -f3 | cut -d- -f1`
 
-    vmajor=`echo '@CURLVERSION@' | cut -d. -f1`
-    vminor=`echo '@CURLVERSION@' | cut -d. -f2`
+    vmajor=`echo '@FETCHVERSION@' | cut -d. -f1`
+    vminor=`echo '@FETCHVERSION@' | cut -d. -f2`
     # when extracting the patch part we strip off everything after a
     # dash as that's used for things like version 1.2.3-pre1
-    vpatch=`echo '@CURLVERSION@' | cut -d. -f3 | cut -d- -f1`
+    vpatch=`echo '@FETCHVERSION@' | cut -d. -f3 | cut -d- -f1`
 
     if test "$vmajor" -gt "$cmajor"; then
       exit 0
@@ -129,7 +129,7 @@ while test "$#" -gt 0; do
       fi
     fi
 
-    echo "requested version $checkfor is newer than existing @CURLVERSION@"
+    echo "requested version $checkfor is newer than existing @FETCHVERSION@"
     exit 1
     ;;
 
@@ -144,22 +144,22 @@ while test "$#" -gt 0; do
 
   --cflags)
     if test "X@includedir@" = 'X/usr/include'; then
-      echo '@LIBCURL_PC_CFLAGS@'
+      echo '@LIBFETCH_PC_CFLAGS@'
     else
-      echo "@LIBCURL_PC_CFLAGS@ -I@includedir@"
+      echo "@LIBFETCH_PC_CFLAGS@ -I@includedir@"
     fi
     ;;
 
   --libs)
     if test "X@libdir@" != 'X/usr/lib' -a "X@libdir@" != 'X/usr/lib64'; then
-      curllibdir="-L@libdir@ "
+      fetchlibdir="-L@libdir@ "
     else
-      curllibdir=''
+      fetchlibdir=''
     fi
     if test 'X@ENABLE_SHARED@' = 'Xno'; then
-      echo "${curllibdir}-lcurl @LIBCURL_PC_LIBS_PRIVATE@"
+      echo "${fetchlibdir}-lfetch @LIBFETCH_PC_LIBS_PRIVATE@"
     else
-      echo "${curllibdir}-lcurl"
+      echo "${fetchlibdir}-lfetch"
     fi
     ;;
 
@@ -169,9 +169,9 @@ while test "$#" -gt 0; do
 
   --static-libs)
     if test 'X@ENABLE_STATIC@' != 'Xno'; then
-      echo "@libdir@/libcurl.@libext@ @LIBCURL_PC_LDFLAGS_PRIVATE@ @LIBCURL_PC_LIBS_PRIVATE@"
+      echo "@libdir@/libfetch.@libext@ @LIBFETCH_PC_LDFLAGS_PRIVATE@ @LIBFETCH_PC_LIBS_PRIVATE@"
     else
-      echo 'curl was built with static libraries disabled' >&2
+      echo 'fetch was built with static libraries disabled' >&2
       exit 1
     fi
     ;;

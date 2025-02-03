@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 dnl Process this file with autoconf to produce a configure script.
@@ -28,35 +28,35 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 
 dnl We don't know the version number "statically" so we use a dash here
-AC_INIT([curl], [-], [a suitable curl mailing list: https://curl.se/mail/])
+AC_INIT([fetch], [-], [a suitable fetch mailing list: https://fetch.se/mail/])
 
 XC_OVR_ZZ50
 XC_OVR_ZZ60
-CURL_OVERRIDE_AUTOCONF
+FETCH_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
 AC_COPYRIGHT([Copyright (C) Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
-terms of the curl license; see COPYING for more details])
+terms of the fetch license; see COPYING for more details])
 
 AC_CONFIG_SRCDIR([lib/urldata.h])
-AC_CONFIG_HEADERS(lib/curl_config.h)
+AC_CONFIG_HEADERS(lib/fetch_config.h)
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-CURL_CHECK_OPTION_DEBUG
+FETCH_CHECK_OPTION_DEBUG
 AM_CONDITIONAL(DEBUGBUILD, test x$want_debug = xyes)
-CURL_CHECK_OPTION_OPTIMIZE
-CURL_CHECK_OPTION_WARNINGS
-CURL_CHECK_OPTION_WERROR
-CURL_CHECK_OPTION_CURLDEBUG
-CURL_CHECK_OPTION_SYMBOL_HIDING
-CURL_CHECK_OPTION_ARES
-CURL_CHECK_OPTION_RT
-CURL_CHECK_OPTION_HTTPSRR
-CURL_CHECK_OPTION_ECH
-CURL_CHECK_OPTION_SSLS_EXPORT
+FETCH_CHECK_OPTION_OPTIMIZE
+FETCH_CHECK_OPTION_WARNINGS
+FETCH_CHECK_OPTION_WERROR
+FETCH_CHECK_OPTION_FETCHDEBUG
+FETCH_CHECK_OPTION_SYMBOL_HIDING
+FETCH_CHECK_OPTION_ARES
+FETCH_CHECK_OPTION_RT
+FETCH_CHECK_OPTION_HTTPSRR
+FETCH_CHECK_OPTION_ECH
+FETCH_CHECK_OPTION_SSLS_EXPORT
 
 XC_CHECK_PATH_SEPARATOR
 
@@ -123,57 +123,57 @@ AC_SUBST([AR])
 
 AC_SUBST(libext)
 
-dnl figure out the libcurl version
-CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/curl/curlver.h`
+dnl figure out the libfetch version
+FETCHVERSION=`$SED -ne 's/^#define LIBFETCH_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/fetch/fetchver.h`
 XC_CHECK_PROG_CC
-CURL_ATOMIC
+FETCH_ATOMIC
 
 dnl for --enable-code-coverage
-CURL_COVERAGE
+FETCH_COVERAGE
 
 XC_AUTOMAKE
-AC_MSG_CHECKING([curl version])
-AC_MSG_RESULT($CURLVERSION)
+AC_MSG_CHECKING([fetch version])
+AC_MSG_RESULT($FETCHVERSION)
 
-AC_SUBST(CURLVERSION)
+AC_SUBST(FETCHVERSION)
 
 dnl
-dnl we extract the numerical version for curl-config only
-VERSIONNUM=`$SED -ne 's/^#define LIBCURL_VERSION_NUM 0x\([0-9A-Fa-f]*\).*/\1/p' ${srcdir}/include/curl/curlver.h`
+dnl we extract the numerical version for fetch-config only
+VERSIONNUM=`$SED -ne 's/^#define LIBFETCH_VERSION_NUM 0x\([0-9A-Fa-f]*\).*/\1/p' ${srcdir}/include/fetch/fetchver.h`
 AC_SUBST(VERSIONNUM)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,secure-transport,amissl,bearssl,rustls} )"
-    curl_ssh_msg="no      (--with-{libssh,libssh2})"
-   curl_zlib_msg="no      (--with-zlib)"
- curl_brotli_msg="no      (--with-brotli)"
-   curl_zstd_msg="no      (--with-zstd)"
-    curl_gss_msg="no      (--with-gssapi)"
-  curl_gsasl_msg="no      (--with-gsasl)"
-curl_tls_srp_msg="no      (--enable-tls-srp)"
-    curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
-   curl_ipv6_msg="no      (--enable-ipv6)"
-curl_unix_sockets_msg="no      (--enable-unix-sockets)"
-    curl_idn_msg="no      (--with-{libidn2,winidn})"
-   curl_docs_msg="enabled (--disable-docs)"
- curl_manual_msg="no      (--enable-manual)"
-curl_libcurl_msg="enabled (--disable-libcurl-option)"
-curl_verbose_msg="enabled (--disable-verbose)"
-   curl_sspi_msg="no      (--enable-sspi)"
-   curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
-  curl_ldaps_msg="no      (--enable-ldaps)"
-   curl_ipfs_msg="no      (--enable-ipfs)"
-   curl_rtsp_msg="no      (--enable-rtsp)"
-   curl_rtmp_msg="no      (--with-librtmp)"
-    curl_psl_msg="no      (--with-libpsl)"
- curl_altsvc_msg="enabled (--disable-alt-svc)"
-curl_headers_msg="enabled (--disable-headers-api)"
-   curl_hsts_msg="enabled (--disable-hsts)"
+    fetch_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,secure-transport,amissl,bearssl,rustls} )"
+    fetch_ssh_msg="no      (--with-{libssh,libssh2})"
+   fetch_zlib_msg="no      (--with-zlib)"
+ fetch_brotli_msg="no      (--with-brotli)"
+   fetch_zstd_msg="no      (--with-zstd)"
+    fetch_gss_msg="no      (--with-gssapi)"
+  fetch_gsasl_msg="no      (--with-gsasl)"
+fetch_tls_srp_msg="no      (--enable-tls-srp)"
+    fetch_res_msg="default (--enable-ares / --enable-threaded-resolver)"
+   fetch_ipv6_msg="no      (--enable-ipv6)"
+fetch_unix_sockets_msg="no      (--enable-unix-sockets)"
+    fetch_idn_msg="no      (--with-{libidn2,winidn})"
+   fetch_docs_msg="enabled (--disable-docs)"
+ fetch_manual_msg="no      (--enable-manual)"
+fetch_libfetch_msg="enabled (--disable-libfetch-option)"
+fetch_verbose_msg="enabled (--disable-verbose)"
+   fetch_sspi_msg="no      (--enable-sspi)"
+   fetch_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
+  fetch_ldaps_msg="no      (--enable-ldaps)"
+   fetch_ipfs_msg="no      (--enable-ipfs)"
+   fetch_rtsp_msg="no      (--enable-rtsp)"
+   fetch_rtmp_msg="no      (--with-librtmp)"
+    fetch_psl_msg="no      (--with-libpsl)"
+ fetch_altsvc_msg="enabled (--disable-alt-svc)"
+fetch_headers_msg="enabled (--disable-headers-api)"
+   fetch_hsts_msg="enabled (--disable-hsts)"
     ssl_backends=
-     curl_h1_msg="enabled (internal)"
-     curl_h2_msg="no      (--with-nghttp2)"
-     curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic, --with-msh3)"
+     fetch_h1_msg="enabled (internal)"
+     fetch_h2_msg="no      (--with-nghttp2)"
+     fetch_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic, --with-msh3)"
 
 enable_altsvc="yes"
 hsts="yes"
@@ -186,19 +186,19 @@ INITIAL_LIBS=$LIBS
 
 dnl
 dnl Generates a shell script to run the compiler with LD_LIBRARY_PATH set to
-dnl the value used right now. This lets CURL_RUN_IFELSE set LD_LIBRARY_PATH to
+dnl the value used right now. This lets FETCH_RUN_IFELSE set LD_LIBRARY_PATH to
 dnl something different but only have that affect the execution of the results
 dnl of the compile, not change the libraries for the compiler itself.
 dnl
 compilersh="run-compiler"
-CURL_SAVED_CC="$CC"
-export CURL_SAVED_CC
-CURL_SAVED_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
-export CURL_SAVED_LD_LIBRARY_PATH
+FETCH_SAVED_CC="$CC"
+export FETCH_SAVED_CC
+FETCH_SAVED_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+export FETCH_SAVED_LD_LIBRARY_PATH
 cat <<\EOF > "$compilersh"
-CC="$CURL_SAVED_CC"
+CC="$FETCH_SAVED_CC"
 export CC
-LD_LIBRARY_PATH="$CURL_SAVED_LD_LIBRARY_PATH"
+LD_LIBRARY_PATH="$FETCH_SAVED_LD_LIBRARY_PATH"
 export LD_LIBRARY_PATH
 exec $CC "$@"
 EOF
@@ -423,17 +423,17 @@ dnl
 
 AC_CANONICAL_HOST
 dnl Get system canonical name
-AC_DEFINE_UNQUOTED(CURL_OS, "${host}", [cpu-machine-OS])
+AC_DEFINE_UNQUOTED(FETCH_OS, "${host}", [cpu-machine-OS])
 
 # Silence warning: ar: 'u' modifier ignored since 'D' is the default
 AC_SUBST(AR_FLAGS, [cr])
 
 dnl This defines _ALL_SOURCE for AIX
-CURL_CHECK_AIX_ALL_SOURCE
+FETCH_CHECK_AIX_ALL_SOURCE
 
 dnl Our configure and build reentrant settings
-CURL_CONFIGURE_THREAD_SAFE
-CURL_CONFIGURE_REENTRANT
+FETCH_CONFIGURE_THREAD_SAFE
+FETCH_CONFIGURE_REENTRANT
 
 dnl check for how to do large files
 AC_SYS_LARGEFILE
@@ -446,11 +446,11 @@ LT_LANG([Windows Resource])
 # Automake conditionals based on libtool related checks
 #
 
-AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSION_INFO],
+AM_CONDITIONAL([FETCH_LT_SHLIB_USE_VERSION_INFO],
   [test "x$xc_lt_shlib_use_version_info" = 'xyes'])
-AM_CONDITIONAL([CURL_LT_SHLIB_USE_NO_UNDEFINED],
+AM_CONDITIONAL([FETCH_LT_SHLIB_USE_NO_UNDEFINED],
   [test "x$xc_lt_shlib_use_no_undefined" = 'xyes'])
-AM_CONDITIONAL([CURL_LT_SHLIB_USE_MIMPURE_TEXT],
+AM_CONDITIONAL([FETCH_LT_SHLIB_USE_MIMPURE_TEXT],
   [test "x$xc_lt_shlib_use_mimpure_text" = 'xyes'])
 
 #
@@ -469,7 +469,7 @@ AM_CONDITIONAL([CURL_LT_SHLIB_USE_MIMPURE_TEXT],
 # targeting a static library and not building its shared counterpart.
 #
 
-AM_CONDITIONAL([USE_CPPFLAG_CURL_STATICLIB],
+AM_CONDITIONAL([USE_CPPFLAG_FETCH_STATICLIB],
   [test "x$xc_lt_build_static_only" = 'xyes'])
 
 #
@@ -478,34 +478,34 @@ AM_CONDITIONAL([USE_CPPFLAG_CURL_STATICLIB],
 # targeting a static library and not building its shared counterpart.
 #
 
-LIBCURL_PC_CFLAGS_PRIVATE='-DCURL_STATICLIB'
-AC_SUBST(LIBCURL_PC_CFLAGS_PRIVATE)
+LIBFETCH_PC_CFLAGS_PRIVATE='-DFETCH_STATICLIB'
+AC_SUBST(LIBFETCH_PC_CFLAGS_PRIVATE)
 
-LIBCURL_PC_CFLAGS=
+LIBFETCH_PC_CFLAGS=
 if test "x$xc_lt_build_static_only" = 'xyes'; then
-  LIBCURL_PC_CFLAGS="${LIBCURL_PC_CFLAGS_PRIVATE}"
+  LIBFETCH_PC_CFLAGS="${LIBFETCH_PC_CFLAGS_PRIVATE}"
 fi
-AC_SUBST([LIBCURL_PC_CFLAGS])
+AC_SUBST([LIBFETCH_PC_CFLAGS])
 
 
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
-CURL_CHECK_COMPILER
-CURL_CHECK_NATIVE_WINDOWS
+FETCH_CHECK_COMPILER
+FETCH_CHECK_NATIVE_WINDOWS
 
-curl_cv_winuwp='no'
-if test "$curl_cv_native_windows" = "yes"; then
+fetch_cv_winuwp='no'
+if test "$fetch_cv_native_windows" = "yes"; then
   case "$CPPFLAGS" in
-    *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
+    *-DWINSTORECOMPAT*) fetch_cv_winuwp='yes';;
   esac
 fi
 
-CURL_SET_COMPILER_BASIC_OPTS
-CURL_SET_COMPILER_DEBUG_OPTS
-CURL_SET_COMPILER_OPTIMIZE_OPTS
-CURL_SET_COMPILER_WARNING_OPTS
+FETCH_SET_COMPILER_BASIC_OPTS
+FETCH_SET_COMPILER_DEBUG_OPTS
+FETCH_SET_COMPILER_OPTIMIZE_OPTS
+FETCH_SET_COMPILER_WARNING_OPTS
 
 if test "$compiler_id" = "INTEL_UNIX_C"; then
   #
@@ -519,30 +519,30 @@ if test "$compiler_id" = "INTEL_UNIX_C"; then
   #
 fi
 
-CURL_CFLAG_EXTRAS=""
+FETCH_CFLAG_EXTRAS=""
 if test X"$want_werror" = Xyes; then
-  CURL_CFLAG_EXTRAS="-Werror"
+  FETCH_CFLAG_EXTRAS="-Werror"
   if test "$compiler_id" = "GNU_C"; then
     dnl enable -pedantic-errors for GCC 5 and later,
     dnl as before that it was the same as -Werror=pedantic
     if test "$compiler_num" -ge "500"; then
-      CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
+      FETCH_CFLAG_EXTRAS="$FETCH_CFLAG_EXTRAS -pedantic-errors"
     fi
   elif test "$compiler_id" = "CLANG" -o "$compiler_id" = "APPLECLANG"; then
-    CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
+    FETCH_CFLAG_EXTRAS="$FETCH_CFLAG_EXTRAS -pedantic-errors"
   fi
 fi
-AC_SUBST(CURL_CFLAG_EXTRAS)
-AM_CONDITIONAL(CURL_WERROR, test X"$want_werror" = Xyes)
+AC_SUBST(FETCH_CFLAG_EXTRAS)
+AM_CONDITIONAL(FETCH_WERROR, test X"$want_werror" = Xyes)
 
-CURL_CHECK_COMPILER_HALT_ON_ERROR
-CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
-CURL_CHECK_COMPILER_PROTOTYPE_MISMATCH
-CURL_CHECK_COMPILER_SYMBOL_HIDING
+FETCH_CHECK_COMPILER_HALT_ON_ERROR
+FETCH_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
+FETCH_CHECK_COMPILER_PROTOTYPE_MISMATCH
+FETCH_CHECK_COMPILER_SYMBOL_HIDING
 
 supports_unittests=yes
 # cross-compilation of unit tests static library/programs fails when
-# libcurl shared library is built. This might be due to a libtool or
+# libfetch shared library is built. This might be due to a libtool or
 # automake issue. In this case we disable unit tests.
 if test "x$cross_compiling" != "xno" &&
    test "x$enable_shared" != "xno"; then
@@ -590,26 +590,26 @@ dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
 
-CURL_CHECK_WIN32_LARGEFILE
-CURL_CHECK_WIN32_CRYPTO
+FETCH_CHECK_WIN32_LARGEFILE
+FETCH_CHECK_WIN32_CRYPTO
 
-CURL_DARWIN_CFLAGS
+FETCH_DARWIN_CFLAGS
 
 case $host in
   *-apple-*)
-    CURL_SUPPORTS_BUILTIN_AVAILABLE
+    FETCH_SUPPORTS_BUILTIN_AVAILABLE
     ;;
 esac
 
-curl_cv_cygwin='no'
+fetch_cv_cygwin='no'
 case $host_os in
-  cygwin*|msys*) curl_cv_cygwin='yes';;
+  cygwin*|msys*) fetch_cv_cygwin='yes';;
 esac
 
 AM_CONDITIONAL([HAVE_WINDRES],
-  [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
+  [test "$fetch_cv_native_windows" = "yes" && test -n "${RC}"])
 
-if test "$curl_cv_native_windows" = "yes"; then
+if test "$fetch_cv_native_windows" = "yes"; then
   AM_COND_IF([HAVE_WINDRES],,
     [AC_MSG_ERROR([windres not found in PATH. Windows builds require windres. Cannot continue.])])
 fi
@@ -619,7 +619,7 @@ dnl whether use "unity" mode for lib and src
 dnl ----------------------------------------
 
 want_unity='no'
-AC_MSG_CHECKING([whether to build libcurl and curl in "unity" mode])
+AC_MSG_CHECKING([whether to build libfetch and fetch in "unity" mode])
 AC_ARG_ENABLE(unity,
 AS_HELP_STRING([--enable-unity],[Enable unity mode])
 AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
@@ -670,20 +670,20 @@ AS_HELP_STRING([--disable-http],[Disable HTTP support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_HTTP, 1, [to disable HTTP])
+    AC_DEFINE(FETCH_DISABLE_HTTP, 1, [to disable HTTP])
     disable_http="yes"
     AC_MSG_WARN([disable HTTP disables FTP over proxy, IPFS and RTSP])
-    CURL_DISABLE_HTTP=1
-    AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
-    CURL_DISABLE_IPFS=1
-    AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
-    CURL_DISABLE_RTSP=1
+    FETCH_DISABLE_HTTP=1
+    AC_DEFINE(FETCH_DISABLE_IPFS, 1, [to disable IPFS])
+    FETCH_DISABLE_IPFS=1
+    AC_DEFINE(FETCH_DISABLE_RTSP, 1, [to disable RTSP])
+    FETCH_DISABLE_RTSP=1
     dnl toggle off alt-svc too when HTTP is disabled
-    AC_DEFINE(CURL_DISABLE_ALTSVC, 1, [disable alt-svc])
-    AC_DEFINE(CURL_DISABLE_HSTS, 1, [disable HSTS])
-    curl_h1_msg="no      (--enable-http)"
-    curl_altsvc_msg="no";
-    curl_hsts_msg="no      (--enable-hsts)";
+    AC_DEFINE(FETCH_DISABLE_ALTSVC, 1, [disable alt-svc])
+    AC_DEFINE(FETCH_DISABLE_HSTS, 1, [disable HSTS])
+    fetch_h1_msg="no      (--enable-http)"
+    fetch_altsvc_msg="no";
+    fetch_hsts_msg="no      (--enable-hsts)";
     enable_altsvc="no"
     hsts="no"
     ;;
@@ -700,8 +700,8 @@ AS_HELP_STRING([--disable-ftp],[Disable FTP support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_FTP, 1, [to disable FTP])
-    CURL_DISABLE_FTP=1
+    AC_DEFINE(FETCH_DISABLE_FTP, 1, [to disable FTP])
+    FETCH_DISABLE_FTP=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -716,8 +716,8 @@ AS_HELP_STRING([--disable-file],[Disable FILE support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_FILE, 1, [to disable FILE])
-    CURL_DISABLE_FILE=1
+    AC_DEFINE(FETCH_DISABLE_FILE, 1, [to disable FILE])
+    FETCH_DISABLE_FILE=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -732,21 +732,21 @@ AS_HELP_STRING([--disable-ipfs],[Disable IPFS support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
-    CURL_DISABLE_IPFS=1
+    AC_DEFINE(FETCH_DISABLE_IPFS, 1, [to disable IPFS])
+    FETCH_DISABLE_IPFS=1
     ;;
   *)
-    if test x$CURL_DISABLE_HTTP = x1; then
+    if test x$FETCH_DISABLE_HTTP = x1; then
       AC_MSG_ERROR(HTTP support needs to be enabled in order to enable IPFS support!)
     else
       AC_MSG_RESULT(yes)
-      curl_ipfs_msg="enabled"
+      fetch_ipfs_msg="enabled"
     fi
     ;;
   esac ],
-    if test "x$CURL_DISABLE_HTTP" != "x1"; then
+    if test "x$FETCH_DISABLE_HTTP" != "x1"; then
       AC_MSG_RESULT(yes)
-      curl_ipfs_msg="enabled"
+      fetch_ipfs_msg="enabled"
     else
       AC_MSG_RESULT(no)
     fi
@@ -758,8 +758,8 @@ AS_HELP_STRING([--disable-ldap],[Disable LDAP support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-    CURL_DISABLE_LDAP=1
+    AC_DEFINE(FETCH_DISABLE_LDAP, 1, [to disable LDAP])
+    FETCH_DISABLE_LDAP=1
     ;;
   yes)
     ldap_askedfor="yes"
@@ -778,14 +778,14 @@ AS_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-    CURL_DISABLE_LDAPS=1
+    AC_DEFINE(FETCH_DISABLE_LDAPS, 1, [to disable LDAPS])
+    FETCH_DISABLE_LDAPS=1
     ;;
   *)
-    if test "x$CURL_DISABLE_LDAP" = "x1"; then
+    if test "x$FETCH_DISABLE_LDAP" = "x1"; then
       AC_MSG_RESULT(LDAP needs to be enabled to support LDAPS)
-      AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-      CURL_DISABLE_LDAPS=1
+      AC_DEFINE(FETCH_DISABLE_LDAPS, 1, [to disable LDAPS])
+      FETCH_DISABLE_LDAPS=1
     else
       AC_MSG_RESULT(yes)
       AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
@@ -793,10 +793,10 @@ AS_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
     fi
     ;;
   esac ],[
-    if test "x$CURL_DISABLE_LDAP" = "x1"; then
+    if test "x$FETCH_DISABLE_LDAP" = "x1"; then
       AC_MSG_RESULT(no)
-      AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-      CURL_DISABLE_LDAPS=1
+      AC_DEFINE(FETCH_DISABLE_LDAPS, 1, [to disable LDAPS])
+      FETCH_DISABLE_LDAPS=1
     else
       AC_MSG_RESULT(yes)
       AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
@@ -811,21 +811,21 @@ AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
   [ case "$enableval" in
       no)
       AC_MSG_RESULT(no)
-      AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
-      CURL_DISABLE_RTSP=1
+      AC_DEFINE(FETCH_DISABLE_RTSP, 1, [to disable RTSP])
+      FETCH_DISABLE_RTSP=1
       ;;
     *)
-      if test x$CURL_DISABLE_HTTP = x1; then
+      if test x$FETCH_DISABLE_HTTP = x1; then
         AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
       else
         AC_MSG_RESULT(yes)
-        curl_rtsp_msg="enabled"
+        fetch_rtsp_msg="enabled"
       fi
       ;;
     esac ],
-      if test "x$CURL_DISABLE_HTTP" != "x1"; then
+      if test "x$FETCH_DISABLE_HTTP" != "x1"; then
         AC_MSG_RESULT(yes)
-        curl_rtsp_msg="enabled"
+        fetch_rtsp_msg="enabled"
       else
         AC_MSG_RESULT(no)
       fi
@@ -838,8 +838,8 @@ AS_HELP_STRING([--disable-proxy],[Disable proxy support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_PROXY, 1, [to disable proxies])
-    CURL_DISABLE_PROXY=1
+    AC_DEFINE(FETCH_DISABLE_PROXY, 1, [to disable proxies])
+    FETCH_DISABLE_PROXY=1
     https_proxy="no"
     ;;
   *)
@@ -856,8 +856,8 @@ AS_HELP_STRING([--disable-dict],[Disable DICT support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_DICT, 1, [to disable DICT])
-    CURL_DISABLE_DICT=1
+    AC_DEFINE(FETCH_DISABLE_DICT, 1, [to disable DICT])
+    FETCH_DISABLE_DICT=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -873,8 +873,8 @@ AS_HELP_STRING([--disable-telnet],[Disable TELNET support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
-    CURL_DISABLE_TELNET=1
+    AC_DEFINE(FETCH_DISABLE_TELNET, 1, [to disable TELNET])
+    FETCH_DISABLE_TELNET=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -883,9 +883,9 @@ AS_HELP_STRING([--disable-telnet],[Disable TELNET support]),
     AC_MSG_RESULT(yes)
 )
 
-if test "$curl_cv_winuwp" = 'yes'; then
-  AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
-  CURL_DISABLE_TELNET=1
+if test "$fetch_cv_winuwp" = 'yes'; then
+  AC_DEFINE(FETCH_DISABLE_TELNET, 1, [to disable TELNET])
+  FETCH_DISABLE_TELNET=1
 fi
 
 AC_MSG_CHECKING([whether to support tftp])
@@ -895,8 +895,8 @@ AS_HELP_STRING([--disable-tftp],[Disable TFTP support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_TFTP, 1, [to disable TFTP])
-    CURL_DISABLE_TFTP=1
+    AC_DEFINE(FETCH_DISABLE_TFTP, 1, [to disable TFTP])
+    FETCH_DISABLE_TFTP=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -912,8 +912,8 @@ AS_HELP_STRING([--disable-pop3],[Disable POP3 support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_POP3, 1, [to disable POP3])
-    CURL_DISABLE_POP3=1
+    AC_DEFINE(FETCH_DISABLE_POP3, 1, [to disable POP3])
+    FETCH_DISABLE_POP3=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -929,8 +929,8 @@ AS_HELP_STRING([--disable-imap],[Disable IMAP support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_IMAP, 1, [to disable IMAP])
-    CURL_DISABLE_IMAP=1
+    AC_DEFINE(FETCH_DISABLE_IMAP, 1, [to disable IMAP])
+    FETCH_DISABLE_IMAP=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -946,8 +946,8 @@ AS_HELP_STRING([--disable-smb],[Disable SMB/CIFS support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_SMB, 1, [to disable SMB/CIFS])
-    CURL_DISABLE_SMB=1
+    AC_DEFINE(FETCH_DISABLE_SMB, 1, [to disable SMB/CIFS])
+    FETCH_DISABLE_SMB=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -963,8 +963,8 @@ AS_HELP_STRING([--disable-smtp],[Disable SMTP support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_SMTP, 1, [to disable SMTP])
-    CURL_DISABLE_SMTP=1
+    AC_DEFINE(FETCH_DISABLE_SMTP, 1, [to disable SMTP])
+    FETCH_DISABLE_SMTP=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -980,8 +980,8 @@ AS_HELP_STRING([--disable-gopher],[Disable Gopher support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable Gopher])
-    CURL_DISABLE_GOPHER=1
+    AC_DEFINE(FETCH_DISABLE_GOPHER, 1, [to disable Gopher])
+    FETCH_DISABLE_GOPHER=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -997,8 +997,8 @@ AS_HELP_STRING([--disable-mqtt],[Disable MQTT support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_MQTT, 1, [to disable MQTT])
-    CURL_DISABLE_MQTT=1
+    AC_DEFINE(FETCH_DISABLE_MQTT, 1, [to disable MQTT])
+    FETCH_DISABLE_MQTT=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1044,7 +1044,7 @@ AS_HELP_STRING([--disable-docs],[Disable documentation]),
     BUILD_DOCS=0
     dnl disable manual too because it needs built documentation
     USE_MANUAL=0
-    curl_docs_msg="no"
+    fetch_docs_msg="no"
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1060,14 +1060,14 @@ dnl ************************************************************
 dnl disable C code generation support
 dnl
 AC_MSG_CHECKING([whether to enable generation of C code])
-AC_ARG_ENABLE(libcurl_option,
-AS_HELP_STRING([--enable-libcurl-option],[Enable --libcurl C code generation support])
-AS_HELP_STRING([--disable-libcurl-option],[Disable --libcurl C code generation support]),
+AC_ARG_ENABLE(libfetch_option,
+AS_HELP_STRING([--enable-libfetch-option],[Enable --libfetch C code generation support])
+AS_HELP_STRING([--disable-libfetch-option],[Disable --libfetch C code generation support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_LIBCURL_OPTION, 1, [to disable --libcurl C code generation option])
-    curl_libcurl_msg="no"
+    AC_DEFINE(FETCH_DISABLE_LIBFETCH_OPTION, 1, [to disable --libfetch C code generation option])
+    fetch_libfetch_msg="no"
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1095,7 +1095,7 @@ AS_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
     AC_MSG_RESULT(no)
 )
 
-CURL_CHECK_LIB_XNET
+FETCH_CHECK_LIB_XNET
 
 dnl gethostbyname without lib or in the nsl lib?
 AC_CHECK_FUNC(gethostbyname,
@@ -1163,9 +1163,9 @@ fi
 
 # In UWP mode gethostbyname gets detected via the core libs, but some
 # code (in6addr_any) still need ws2_32, so let us detect and add it.
-if test "$HAVE_GETHOSTBYNAME" != "1" -o "$curl_cv_winuwp" = "yes"; then
+if test "$HAVE_GETHOSTBYNAME" != "1" -o "$fetch_cv_winuwp" = "yes"; then
   dnl This is for Winsock systems
-  if test "$curl_cv_native_windows" = "yes"; then
+  if test "$fetch_cv_native_windows" = "yes"; then
     winsock_LIB="-lws2_32"
     if test ! -z "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
@@ -1265,16 +1265,16 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   )
 fi
 
-CURL_CHECK_LIBS_CONNECT
+FETCH_CHECK_LIBS_CONNECT
 
 dnl **********************************************************************
 dnl In case that function clock_gettime with monotonic timer is available,
 dnl check for additional required libraries.
 dnl **********************************************************************
-CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
+FETCH_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
 
 dnl Check for even better option
-CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
+FETCH_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
 
 dnl **********************************************************************
 dnl The preceding library checks are all potentially useful for test
@@ -1282,7 +1282,7 @@ dnl servers and libtest cases which require networking and clock_gettime
 dnl support.  Save the list of required libraries at this point for use
 dnl while linking those test servers and programs.
 dnl **********************************************************************
-CURL_NETWORK_AND_TIME_LIBS=$LIBS
+FETCH_NETWORK_AND_TIME_LIBS=$LIBS
 
 dnl **********************************************************************
 dnl Check for the presence of ZLIB libraries and headers
@@ -1307,7 +1307,7 @@ else
   fi
 
   if test -z "$OPT_ZLIB"; then
-    CURL_CHECK_PKGCONFIG(zlib)
+    FETCH_CHECK_PKGCONFIG(zlib)
 
     if test "$PKGCONFIG" != "no"; then
       ZLIB_LIBS="`$PKGCONFIG --libs-only-l zlib`"
@@ -1396,8 +1396,8 @@ else
     dnl replace 'HAVE_LIBZ' in the automake makefile.ams
     AMFIXLIB="1"
     AC_MSG_NOTICE([found both libz and libz.h header])
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE zlib"
-    curl_zlib_msg="enabled"
+    LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE zlib"
+    fetch_zlib_msg="enabled"
   fi
 fi
 
@@ -1428,7 +1428,7 @@ if test X"$OPT_BROTLI" != Xno; then
   case "$OPT_BROTLI" in
     yes)
       dnl --with-brotli (without path) used
-      CURL_CHECK_PKGCONFIG(libbrotlidec)
+      FETCH_CHECK_PKGCONFIG(libbrotlidec)
 
       if test "$PKGCONFIG" != "no"; then
         LIB_BROTLI=`$PKGCONFIG --libs-only-l libbrotlidec`
@@ -1464,7 +1464,7 @@ if test X"$OPT_BROTLI" != Xno; then
   AC_CHECK_LIB(brotlidec, BrotliDecoderDecompress)
 
   AC_CHECK_HEADERS(brotli/decode.h,
-    curl_brotli_msg="enabled (libbrotlidec)"
+    fetch_brotli_msg="enabled (libbrotlidec)"
     HAVE_BROTLI=1
     AC_DEFINE(HAVE_BROTLI, 1, [if BROTLI is in use])
   )
@@ -1477,16 +1477,16 @@ if test X"$OPT_BROTLI" != Xno; then
   if test "$HAVE_BROTLI" = "1"; then
     if test -n "$DIR_BROTLI"; then
       dnl when the brotli shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl linker doesn't search through, we need to add it to FETCH_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_BROTLI"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $DIR_BROTLI to CURL_LIBRARY_PATH])
+        FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_BROTLI"
+        export FETCH_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_BROTLI to FETCH_LIBRARY_PATH])
       fi
     fi
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libbrotlidec"
+    LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libbrotlidec"
   else
     dnl no brotli, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -1517,7 +1517,7 @@ if test X"$OPT_ZSTD" != Xno; then
   case "$OPT_ZSTD" in
     yes)
       dnl --with-zstd (without path) used
-      CURL_CHECK_PKGCONFIG(libzstd)
+      FETCH_CHECK_PKGCONFIG(libzstd)
 
       if test "$PKGCONFIG" != "no"; then
         LIB_ZSTD=`$PKGCONFIG --libs-only-l libzstd`
@@ -1553,7 +1553,7 @@ if test X"$OPT_ZSTD" != Xno; then
   AC_CHECK_LIB(zstd, ZSTD_createDStream)
 
   AC_CHECK_HEADERS(zstd.h,
-    curl_zstd_msg="enabled (libzstd)"
+    fetch_zstd_msg="enabled (libzstd)"
     HAVE_ZSTD=1
     AC_DEFINE(HAVE_ZSTD, 1, [if libzstd is in use])
   )
@@ -1567,16 +1567,16 @@ if test X"$OPT_ZSTD" != Xno; then
     if test -n "$DIR_ZSTD"; then
       dnl when the zstd shared lib were found in a path that the run-time
       dnl linker doesn't search through, we need to add it to
-      dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
+      dnl FETCH_LIBRARY_PATH to prevent further configure tests to fail due to
       dnl this
 
       if test "x$cross_compiling" != "xyes"; then
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_ZSTD"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $DIR_ZSTD to CURL_LIBRARY_PATH])
+        FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_ZSTD"
+        export FETCH_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_ZSTD to FETCH_LIBRARY_PATH])
       fi
     fi
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libzstd"
+    LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libzstd"
   else
     dnl no zstd, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -1600,14 +1600,14 @@ AC_ARG_WITH(lber-lib,
 AS_HELP_STRING([--with-lber-lib=libname],[Specify name of lber lib file]),
   [LBERLIBNAME="$withval"])
 
-if test x$CURL_DISABLE_LDAP != x1; then
+if test x$FETCH_DISABLE_LDAP != x1; then
 
-  CURL_CHECK_HEADER_LBER
-  CURL_CHECK_HEADER_LDAP
-  CURL_CHECK_HEADER_LDAP_SSL
+  FETCH_CHECK_HEADER_LBER
+  FETCH_CHECK_HEADER_LDAP
+  FETCH_CHECK_HEADER_LDAP_SSL
 
   if test -z "$LDAPLIBNAME"; then
-    if test "$curl_cv_native_windows" = "yes" -a "$curl_cv_winuwp" != "yes"; then
+    if test "$fetch_cv_native_windows" = "yes" -a "$fetch_cv_winuwp" != "yes"; then
       dnl Windows uses a single and unique LDAP library name
       LDAPLIBNAME="wldap32"
       LBERLIBNAME="no"
@@ -1620,31 +1620,31 @@ if test x$CURL_DISABLE_LDAP != x1; then
         AC_MSG_ERROR([couldn't detect the LDAP libraries])
       fi
       AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
-      AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-      CURL_DISABLE_LDAP=1
-      AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-      CURL_DISABLE_LDAPS=1
+      AC_DEFINE(FETCH_DISABLE_LDAP, 1, [to disable LDAP])
+      FETCH_DISABLE_LDAP=1
+      AC_DEFINE(FETCH_DISABLE_LDAPS, 1, [to disable LDAPS])
+      FETCH_DISABLE_LDAPS=1
       ]
     )
   else
     dnl Try to find the right ldap libraries for this system
-    CURL_CHECK_LIBS_LDAP
-    case X-"$curl_cv_ldap_LIBS" in
+    FETCH_CHECK_LIBS_LDAP
+    case X-"$fetch_cv_ldap_LIBS" in
       X-unknown)
         if test -n "$ldap_askedfor"; then
           AC_MSG_ERROR([couldn't detect the LDAP libraries])
         fi
         AC_MSG_WARN([Cannot find libraries for LDAP support: LDAP disabled])
-        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-        CURL_DISABLE_LDAP=1
-        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-        CURL_DISABLE_LDAPS=1
+        AC_DEFINE(FETCH_DISABLE_LDAP, 1, [to disable LDAP])
+        FETCH_DISABLE_LDAP=1
+        AC_DEFINE(FETCH_DISABLE_LDAPS, 1, [to disable LDAPS])
+        FETCH_DISABLE_LDAPS=1
         ;;
     esac
   fi
 fi
 
-if test x$CURL_DISABLE_LDAP != x1; then
+if test x$FETCH_DISABLE_LDAP != x1; then
 
   if test "$LBERLIBNAME"; then
     dnl If name is "no" then don't define this library at all
@@ -1652,36 +1652,36 @@ if test x$CURL_DISABLE_LDAP != x1; then
     if test "$LBERLIBNAME" != "no"; then
       AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
         AC_MSG_WARN(["$LBERLIBNAME" is not an LBER library: LDAP disabled])
-        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-        CURL_DISABLE_LDAP=1
-        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-        CURL_DISABLE_LDAPS=1
+        AC_DEFINE(FETCH_DISABLE_LDAP, 1, [to disable LDAP])
+        FETCH_DISABLE_LDAP=1
+        AC_DEFINE(FETCH_DISABLE_LDAPS, 1, [to disable LDAPS])
+        FETCH_DISABLE_LDAPS=1
         ]
       )
     fi
   fi
 fi
 
-if test x$CURL_DISABLE_LDAP != x1; then
+if test x$FETCH_DISABLE_LDAP != x1; then
   AC_CHECK_FUNCS([ldap_url_parse \
                   ldap_init_fd])
 
   if test "$LDAPLIBNAME" = "wldap32"; then
-    curl_ldap_msg="enabled (winldap)"
+    fetch_ldap_msg="enabled (winldap)"
     AC_DEFINE(USE_WIN32_LDAP, 1, [Use Windows LDAP implementation])
   else
     if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
-      curl_ldap_msg="enabled (OpenLDAP)"
+      fetch_ldap_msg="enabled (OpenLDAP)"
       AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
       USE_OPENLDAP=1
     else
-      curl_ldap_msg="enabled (ancient OpenLDAP)"
+      fetch_ldap_msg="enabled (ancient OpenLDAP)"
     fi
   fi
 fi
 
-if test x$CURL_DISABLE_LDAPS != x1; then
-  curl_ldaps_msg="enabled"
+if test x$FETCH_DISABLE_LDAPS != x1; then
+  fetch_ldaps_msg="enabled"
 fi
 
 dnl **********************************************************************
@@ -1734,7 +1734,7 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
 )
 
 if test "$ipv6" = yes; then
-  curl_ipv6_msg="enabled"
+  fetch_ipv6_msg="enabled"
   AC_DEFINE(USE_IPV6, 1, [Define if you want to enable IPv6 support])
   IPV6_ENABLED=1
 
@@ -1768,7 +1768,7 @@ dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
 
 AC_MSG_CHECKING([if argv can be written to])
-CURL_RUN_IFELSE([[
+FETCH_RUN_IFELSE([[
 int main(int argc, char **argv)
 {
 #ifdef _WIN32
@@ -1784,13 +1784,13 @@ int main(int argc, char **argv)
 #endif
 }
 ]],[
-  curl_cv_writable_argv=yes
+  fetch_cv_writable_argv=yes
 ],[
-  curl_cv_writable_argv=no
+  fetch_cv_writable_argv=no
 ],[
-  curl_cv_writable_argv=cross
+  fetch_cv_writable_argv=cross
 ])
-case $curl_cv_writable_argv in
+case $fetch_cv_writable_argv in
   yes)
     AC_DEFINE(HAVE_WRITABLE_ARGV, 1, [Define this symbol if your OS supports changing the contents of argv])
     AC_MSG_RESULT(yes)
@@ -1846,9 +1846,9 @@ if test x"$want_gss" = xyes; then
   AC_MSG_RESULT(yes)
 
   if test $GSSAPI_ROOT != "/usr"; then
-    CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+    FETCH_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
   else
-    CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+    FETCH_CHECK_PKGCONFIG(mit-krb5-gssapi)
   fi
   if test -z "$GSSAPI_INCS"; then
     if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
@@ -1925,11 +1925,11 @@ fi
 if test x"$want_gss" = xyes; then
   AC_DEFINE(HAVE_GSSAPI, 1, [if you have GSS-API libraries])
   HAVE_GSSAPI=1
-  curl_gss_msg="enabled (MIT Kerberos/Heimdal)"
+  fetch_gss_msg="enabled (MIT Kerberos/Heimdal)"
   link_pkgconfig=''
 
   if test -n "$gnu_gss"; then
-    curl_gss_msg="enabled (GNU GSS)"
+    fetch_gss_msg="enabled (GNU GSS)"
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
     LIBS="-lgss $LIBS"
@@ -1941,9 +1941,9 @@ if test x"$want_gss" = xyes; then
         ;;
       *)
         if test $GSSAPI_ROOT != "/usr"; then
-          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+          FETCH_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
         else
-          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+          FETCH_CHECK_PKGCONFIG(mit-krb5-gssapi)
         fi
         if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
           dnl krb5-config doesn't have --libs-only-L or similar, put everything
@@ -1994,11 +1994,11 @@ if test x"$want_gss" = xyes; then
   fi
   if test -n "$link_pkgconfig"; then
     if test -n "$gnu_gss"; then
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gss"
+      LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE gss"
     elif test "x$not_mit" = "x1"; then
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE heimdal-gssapi"
+      LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE heimdal-gssapi"
     else
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
+      LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
     fi
   fi
 else
@@ -2049,15 +2049,15 @@ case "$DEFAULT_SSL_BACKEND" in
     ;;
 esac
 
-CURL_WITH_SCHANNEL
-CURL_WITH_SECURETRANSPORT
-CURL_WITH_AMISSL
-CURL_WITH_OPENSSL
-CURL_WITH_GNUTLS
-CURL_WITH_MBEDTLS
-CURL_WITH_WOLFSSL
-CURL_WITH_BEARSSL
-CURL_WITH_RUSTLS
+FETCH_WITH_SCHANNEL
+FETCH_WITH_SECURETRANSPORT
+FETCH_WITH_AMISSL
+FETCH_WITH_OPENSSL
+FETCH_WITH_GNUTLS
+FETCH_WITH_MBEDTLS
+FETCH_WITH_WOLFSSL
+FETCH_WITH_BEARSSL
+FETCH_WITH_RUSTLS
 
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
@@ -2065,7 +2065,7 @@ if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
 fi
 
 dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
-if test "x$curl_cv_native_windows" = "xyes"; then
+if test "x$fetch_cv_native_windows" = "xyes"; then
   LIBS="-lbcrypt $LIBS"
 fi
 
@@ -2090,14 +2090,14 @@ Since these are conflicting parameters, verify which is the desired one and drop
   *)
     # more than one SSL backend is enabled
     SSL_ENABLED="1"
-    CURL_WITH_MULTI_SSL="1"
-    AC_DEFINE(CURL_WITH_MULTI_SSL, 1, [built with multiple SSL backends])
+    FETCH_WITH_MULTI_SSL="1"
+    AC_DEFINE(FETCH_WITH_MULTI_SSL, 1, [built with multiple SSL backends])
     AC_MSG_NOTICE([built with multiple SSL backends])
     ;;
 esac
 
 if test -n "$ssl_backends"; then
-  curl_ssl_msg="enabled ($ssl_backends)"
+  fetch_ssl_msg="enabled ($ssl_backends)"
 fi
 
 if test no = "$VALID_DEFAULT_SSL_BACKEND"; then
@@ -2107,7 +2107,7 @@ if test no = "$VALID_DEFAULT_SSL_BACKEND"; then
     AC_MSG_ERROR([Default SSL backend requires SSL!])
   fi
 elif test yes = "$VALID_DEFAULT_SSL_BACKEND"; then
-  AC_DEFINE_UNQUOTED([CURL_DEFAULT_SSL_BACKEND], ["$DEFAULT_SSL_BACKEND"], [Default SSL backend])
+  AC_DEFINE_UNQUOTED([FETCH_DEFAULT_SSL_BACKEND], ["$DEFAULT_SSL_BACKEND"], [Default SSL backend])
 fi
 
 dnl **********************************************************************
@@ -2115,17 +2115,17 @@ dnl Check for the CA bundle
 dnl **********************************************************************
 
 if test -n "$check_for_ca_bundle"; then
-  CURL_CHECK_CA_BUNDLE
-  CURL_CHECK_CA_EMBED
+  FETCH_CHECK_CA_BUNDLE
+  FETCH_CHECK_CA_EMBED
 fi
 
-AM_CONDITIONAL(CURL_CA_EMBED_SET, test "x$CURL_CA_EMBED" != "x")
+AM_CONDITIONAL(FETCH_CA_EMBED_SET, test "x$FETCH_CA_EMBED" != "x")
 
 dnl ----------------------
 dnl check unsafe CA search
 dnl ----------------------
 
-if test "$curl_cv_native_windows" = "yes"; then
+if test "$fetch_cv_native_windows" = "yes"; then
   AC_MSG_CHECKING([whether to enable unsafe CA bundle search in PATH on Windows])
   AC_ARG_ENABLE(ca-search,
 AS_HELP_STRING([--enable-ca-search],[Enable unsafe CA bundle search in PATH on Windows (default)])
@@ -2133,7 +2133,7 @@ AS_HELP_STRING([--disable-ca-search],[Disable unsafe CA bundle search in PATH on
   [ case "$enableval" in
     no)
       AC_MSG_RESULT([no])
-      AC_DEFINE(CURL_DISABLE_CA_SEARCH, 1, [If unsafe CA bundle search in PATH on Windows is disabled])
+      AC_DEFINE(FETCH_DISABLE_CA_SEARCH, 1, [If unsafe CA bundle search in PATH on Windows is disabled])
       ;;
     *)
       AC_MSG_RESULT([yes])
@@ -2147,15 +2147,15 @@ dnl --------------------
 dnl check safe CA search
 dnl --------------------
 
-if test "$curl_cv_native_windows" = "yes"; then
-  AC_MSG_CHECKING([whether to enable safe CA bundle search (within the curl tool directory) on Windows])
+if test "$fetch_cv_native_windows" = "yes"; then
+  AC_MSG_CHECKING([whether to enable safe CA bundle search (within the fetch tool directory) on Windows])
   AC_ARG_ENABLE(ca-search-safe,
 AS_HELP_STRING([--enable-ca-search-safe],[Enable safe CA bundle search])
 AS_HELP_STRING([--disable-ca-search-safe],[Disable safe CA bundle search (default)]),
   [ case "$enableval" in
     yes)
       AC_MSG_RESULT([yes])
-      AC_DEFINE(CURL_CA_SEARCH_SAFE, 1, [If safe CA bundle search is enabled])
+      AC_DEFINE(FETCH_CA_SEARCH_SAFE, 1, [If safe CA bundle search is enabled])
       ;;
     *)
       AC_MSG_RESULT([no])
@@ -2186,7 +2186,7 @@ if test X"$OPT_LIBPSL" != Xno; then
   case "$OPT_LIBPSL" in
     yes|off)
       dnl --with-libpsl (without path) used
-      CURL_CHECK_PKGCONFIG(libpsl)
+      FETCH_CHECK_PKGCONFIG(libpsl)
 
       if test "$PKGCONFIG" != "no"; then
         LIB_PSL=`$PKGCONFIG --libs-only-l libpsl`
@@ -2219,10 +2219,10 @@ if test X"$OPT_LIBPSL" != Xno; then
   AC_CHECK_LIB(psl, psl_builtin,
     [
       AC_CHECK_HEADERS(libpsl.h,
-        curl_psl_msg="enabled"
+        fetch_psl_msg="enabled"
         AC_DEFINE(USE_LIBPSL, 1, [if libpsl is in use])
         USE_LIBPSL=1
-        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libpsl"
+        LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libpsl"
       )
     ],
       dnl not found, revert back to clean variables
@@ -2236,7 +2236,7 @@ if test X"$OPT_LIBPSL" != Xno; then
     AC_MSG_ERROR([libpsl libs and/or directories were not found where specified!])
   fi
 fi
-AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])
+AM_CONDITIONAL([USE_LIBPSL], [test "$fetch_psl_msg" = "enabled"])
 
 
 dnl **********************************************************************
@@ -2250,16 +2250,16 @@ AC_ARG_WITH(libgsasl,
   with_libgsasl=yes)
 if test $with_libgsasl != "no"; then
   AC_SEARCH_LIBS(gsasl_init, gsasl,
-    [curl_gsasl_msg="enabled";
+    [fetch_gsasl_msg="enabled";
       AC_DEFINE([USE_GSASL], [1], [GSASL support enabled])
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libgsasl"
+      LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libgsasl"
     ],
-    [curl_gsasl_msg="no      (libgsasl not found)";
+    [fetch_gsasl_msg="no      (libgsasl not found)";
       AC_MSG_WARN([libgsasl was not found])
     ]
   )
 fi
-AM_CONDITIONAL([USE_GSASL], [test "$curl_gsasl_msg" = "enabled"])
+AM_CONDITIONAL([USE_GSASL], [test "$fetch_gsasl_msg" = "enabled"])
 
 AC_ARG_WITH(libmetalink,,
   AC_MSG_ERROR([--with-libmetalink and --without-libmetalink no longer work!]))
@@ -2298,7 +2298,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
   case "$OPT_LIBSSH2" in
     yes)
       dnl --with-libssh2 (without path) used
-      CURL_CHECK_PKGCONFIG(libssh2)
+      FETCH_CHECK_PKGCONFIG(libssh2)
 
       if test "$PKGCONFIG" != "no"; then
         LIB_SSH2=`$PKGCONFIG --libs-only-l libssh2`
@@ -2335,7 +2335,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
   AC_CHECK_LIB(ssh2, libssh2_session_block_directions)
 
   AC_CHECK_HEADER(libssh2.h,
-    curl_ssh_msg="enabled (libssh2)"
+    fetch_ssh_msg="enabled (libssh2)"
     AC_DEFINE(USE_LIBSSH2, 1, [if libssh2 is in use])
     USE_LIBSSH2=1
   )
@@ -2348,16 +2348,16 @@ if test X"$OPT_LIBSSH2" != Xno; then
   if test "$USE_LIBSSH2" = "1"; then
     if test -n "$DIR_SSH2"; then
       dnl when the libssh2 shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl linker doesn't search through, we need to add it to FETCH_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_SSH2"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $DIR_SSH2 to CURL_LIBRARY_PATH])
+        FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_SSH2"
+        export FETCH_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_SSH2 to FETCH_LIBRARY_PATH])
       fi
     fi
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libssh2"
+    LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libssh2"
   else
     dnl no libssh2, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -2375,7 +2375,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
   case "$OPT_LIBSSH" in
     yes)
       dnl --with-libssh (without path) used
-      CURL_CHECK_PKGCONFIG(libssh)
+      FETCH_CHECK_PKGCONFIG(libssh)
 
       if test "$PKGCONFIG" != "no"; then
         LIB_SSH=`$PKGCONFIG --libs-only-l libssh`
@@ -2411,7 +2411,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
   AC_CHECK_LIB(ssh, ssh_new)
 
   AC_CHECK_HEADER(libssh/libssh.h,
-    curl_ssh_msg="enabled (libssh)"
+    fetch_ssh_msg="enabled (libssh)"
     AC_DEFINE(USE_LIBSSH, 1, [if libssh is in use])
     USE_LIBSSH=1
   )
@@ -2422,22 +2422,22 @@ elif test X"$OPT_LIBSSH" != Xno; then
   fi
 
   if test "$USE_LIBSSH" = "1"; then
-    if test "$curl_cv_native_windows" = "yes"; then
+    if test "$fetch_cv_native_windows" = "yes"; then
       dnl for if_nametoindex
       LIBS="-liphlpapi $LIBS"
     fi
     if test -n "$DIR_SSH"; then
       dnl when the libssh shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl linker doesn't search through, we need to add it to FETCH_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_SSH"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $DIR_SSH to CURL_LIBRARY_PATH])
+        FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_SSH"
+        export FETCH_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_SSH to FETCH_LIBRARY_PATH])
       fi
     fi
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libssh"
+    LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libssh"
   else
     dnl no libssh, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -2463,7 +2463,7 @@ elif test X"$OPT_WOLFSSH" != Xno; then
   AC_CHECK_LIB(wolfssh, wolfSSH_Init)
 
   AC_CHECK_HEADERS(wolfssh/ssh.h,
-    curl_ssh_msg="enabled (wolfSSH)"
+    fetch_ssh_msg="enabled (wolfSSH)"
     AC_DEFINE(USE_WOLFSSH, 1, [if wolfSSH is in use])
     USE_WOLFSSH=1
   )
@@ -2490,7 +2490,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
   case "$OPT_LIBRTMP" in
     yes)
       dnl --with-librtmp (without path) used
-      CURL_CHECK_PKGCONFIG(librtmp)
+      FETCH_CHECK_PKGCONFIG(librtmp)
 
       if test "$PKGCONFIG" != "no"; then
         LIB_RTMP=`$PKGCONFIG --libs-only-l librtmp`
@@ -2531,10 +2531,10 @@ if test X"$OPT_LIBRTMP" != Xno; then
   AC_CHECK_LIB(rtmp, RTMP_Init,
     [
       AC_CHECK_HEADERS(librtmp/rtmp.h,
-        curl_rtmp_msg="enabled (librtmp)"
+        fetch_rtmp_msg="enabled (librtmp)"
         AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
         USE_LIBRTMP=1
-        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE librtmp"
+        LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE librtmp"
       )
     ],
       dnl not found, revert back to clean variables
@@ -2574,7 +2574,7 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
       AC_MSG_RESULT(yes)
       if test "x$enableval" != "xyes"; then
         versioned_symbols_flavour="$enableval"
-      elif test "x$CURL_WITH_MULTI_SSL" = "x1"; then
+      elif test "x$FETCH_WITH_MULTI_SSL" = "x1"; then
         versioned_symbols_flavour="MULTISSL_"
       elif test "x$OPENSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="OPENSSL_"
@@ -2601,9 +2601,9 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
 ]
 )
 
-AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX], ["$versioned_symbols_flavour"])
-AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME], ["4"])  dnl Keep in sync with VERSIONCHANGE - VERSIONDEL in lib/Makefile.soname
-AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS],
+AC_SUBST([FETCH_LIBFETCH_VERSIONED_SYMBOLS_PREFIX], ["$versioned_symbols_flavour"])
+AC_SUBST([FETCH_LIBFETCH_VERSIONED_SYMBOLS_SONAME], ["4"])  dnl Keep in sync with VERSIONCHANGE - VERSIONDEL in lib/Makefile.soname
+AM_CONDITIONAL([FETCH_LT_SHLIB_USE_VERSIONED_SYMBOLS],
   [test "x$versioned_symbols" = 'xyes'])
 
 dnl ----------------------------
@@ -2611,8 +2611,8 @@ dnl check Windows Unicode option
 dnl ----------------------------
 
 want_winuni="no"
-if test "$curl_cv_native_windows" = "yes"; then
-  if test "$curl_cv_winuwp" = 'yes'; then
+if test "$fetch_cv_native_windows" = "yes"; then
+  if test "$fetch_cv_winuwp" = 'yes'; then
     want_winuni="yes"
   else
     AC_MSG_CHECKING([whether to enable Windows Unicode (Windows native builds only)])
@@ -2644,7 +2644,7 @@ dnl check WinIDN option before other IDN libraries
 dnl -------------------------------------------------
 
 tst_links_winidn='no'
-if test "$curl_cv_native_windows" = 'yes'; then
+if test "$fetch_cv_native_windows" = 'yes'; then
   AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
   OPT_WINIDN="default"
   AC_ARG_WITH(winidn,
@@ -2718,7 +2718,7 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     if test "$tst_links_winidn" = "yes"; then
       AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
       IDN_ENABLED=1
-      curl_idn_msg="enabled (Windows-native)"
+      fetch_idn_msg="enabled (Windows-native)"
     else
       AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
       CPPFLAGS="$clean_CPPFLAGS"
@@ -2749,7 +2749,7 @@ AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
         AC_CHECK_LIB(icucore, uidna_openUTS46,
         [
           AC_CHECK_HEADERS(unicode/uidna.h,
-            curl_idn_msg="enabled (AppleIDN)"
+            fetch_idn_msg="enabled (AppleIDN)"
             AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
             USE_APPLE_IDN=1
             IDN_ENABLED=1
@@ -2820,13 +2820,13 @@ if test "$want_idn" = "yes"; then
   if test "$want_idn_path" != "default"; then
     dnl path has been specified
     IDN_PCDIR="$want_idn_path/lib$libsuff/pkgconfig"
-    CURL_CHECK_PKGCONFIG(libidn2, [$IDN_PCDIR])
+    FETCH_CHECK_PKGCONFIG(libidn2, [$IDN_PCDIR])
     if test "$PKGCONFIG" != "no"; then
-      IDN_LIBS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+      IDN_LIBS=`FETCH_EXPORT_PCDIR([$IDN_PCDIR]) dnl
         $PKGCONFIG --libs-only-l libidn2 2>/dev/null`
-      IDN_LDFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+      IDN_LDFLAGS=`FETCH_EXPORT_PCDIR([$IDN_PCDIR]) dnl
         $PKGCONFIG --libs-only-L libidn2 2>/dev/null`
-      IDN_CPPFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+      IDN_CPPFLAGS=`FETCH_EXPORT_PCDIR([$IDN_PCDIR]) dnl
         $PKGCONFIG --cflags-only-I libidn2 2>/dev/null`
       IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/^-L//'`
     else
@@ -2838,7 +2838,7 @@ if test "$want_idn" = "yes"; then
     fi
   else
     dnl path not specified
-    CURL_CHECK_PKGCONFIG(libidn2)
+    FETCH_CHECK_PKGCONFIG(libidn2)
     if test "$PKGCONFIG" != "no"; then
       IDN_LIBS=`$PKGCONFIG --libs-only-l libidn2 2>/dev/null`
       IDN_LDFLAGS=`$PKGCONFIG --libs-only-L libidn2 2>/dev/null`
@@ -2885,13 +2885,13 @@ if test "$want_idn" = "yes"; then
     dnl different versions of libidn have different setups of these:
 
     IDN_ENABLED=1
-    curl_idn_msg="enabled (libidn2)"
+    fetch_idn_msg="enabled (libidn2)"
     if test -n "$IDN_DIR" -a "x$cross_compiling" != "xyes"; then
-      CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$IDN_DIR"
-      export CURL_LIBRARY_PATH
-      AC_MSG_NOTICE([Added $IDN_DIR to CURL_LIBRARY_PATH])
+      FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$IDN_DIR"
+      export FETCH_LIBRARY_PATH
+      AC_MSG_NOTICE([Added $IDN_DIR to FETCH_LIBRARY_PATH])
     fi
-    LIBCURL_PC_REQUIRES_PRIVATE="libidn2 $LIBCURL_PC_REQUIRES_PRIVATE"
+    LIBFETCH_PC_REQUIRES_PRIVATE="libidn2 $LIBFETCH_PC_REQUIRES_PRIVATE"
   else
     AC_MSG_WARN([Cannot find libidn2])
     CPPFLAGS="$clean_CPPFLAGS"
@@ -2943,18 +2943,18 @@ if test X"$want_nghttp2" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libnghttp2, $want_nghttp2_pkg_config_path)
+  FETCH_CHECK_PKGCONFIG(libnghttp2, $want_nghttp2_pkg_config_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path])
+    LIB_H2=`FETCH_EXPORT_PCDIR([$want_nghttp2_pkg_config_path])
       $PKGCONFIG --libs-only-l libnghttp2`
     AC_MSG_NOTICE([-l is $LIB_H2])
 
-    CPP_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path]) dnl
+    CPP_H2=`FETCH_EXPORT_PCDIR([$want_nghttp2_pkg_config_path]) dnl
       $PKGCONFIG --cflags-only-I libnghttp2`
     AC_MSG_NOTICE([-I is $CPP_H2])
 
-    LD_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path])
+    LD_H2=`FETCH_EXPORT_PCDIR([$want_nghttp2_pkg_config_path])
       $PKGCONFIG --libs-only-L libnghttp2`
     AC_MSG_NOTICE([-L is $LD_H2])
 
@@ -2982,15 +2982,15 @@ if test X"$want_nghttp2" != Xno; then
   AC_CHECK_LIB(nghttp2, nghttp2_session_get_stream_local_window_size,
     [
       AC_CHECK_HEADERS(nghttp2/nghttp2.h,
-        curl_h2_msg="enabled (nghttp2)"
+        fetch_h2_msg="enabled (nghttp2)"
         AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
         USE_NGHTTP2=1
-        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libnghttp2"
+        LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libnghttp2"
       )
 
-      CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_H2"
-      export CURL_LIBRARY_PATH
-      AC_MSG_NOTICE([Added $DIR_H2 to CURL_LIBRARY_PATH])
+      FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_H2"
+      export FETCH_LIBRARY_PATH
+      AC_MSG_NOTICE([Added $DIR_H2 to FETCH_LIBRARY_PATH])
     ],
       dnl not found, revert back to clean variables
       LDFLAGS=$CLEANLDFLAGS
@@ -3032,7 +3032,7 @@ case "$OPT_TCP2" in
     ;;
 esac
 
-curl_tcp2_msg="no      (--with-ngtcp2)"
+fetch_tcp2_msg="no      (--with-ngtcp2)"
 if test X"$want_tcp2" != Xno; then
 
   if test "$QUIC_ENABLED" != "yes"; then
@@ -3045,18 +3045,18 @@ if test X"$want_tcp2" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libngtcp2, $want_tcp2_path)
+  FETCH_CHECK_PKGCONFIG(libngtcp2, $want_tcp2_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LIB_TCP2=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2`
     AC_MSG_NOTICE([-l is $LIB_TCP2])
 
-    CPP_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+    CPP_TCP2=`FETCH_EXPORT_PCDIR([$want_tcp2_path]) dnl
       $PKGCONFIG --cflags-only-I libngtcp2`
     AC_MSG_NOTICE([-I is $CPP_TCP2])
 
-    LD_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LD_TCP2=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-L libngtcp2`
     AC_MSG_NOTICE([-L is $LD_TCP2])
 
@@ -3073,10 +3073,10 @@ if test X"$want_tcp2" != Xno; then
         AC_CHECK_HEADERS(ngtcp2/ngtcp2.h,
           AC_DEFINE(USE_NGTCP2, 1, [if ngtcp2 is in use])
           USE_NGTCP2=1
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_TCP2"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_TCP2 to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libngtcp2"
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_TCP2"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_TCP2 to FETCH_LIBRARY_PATH])
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libngtcp2"
         )
       ],
         dnl not found, revert back to clean variables
@@ -3103,18 +3103,18 @@ if test "x$USE_NGTCP2" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BOR
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libngtcp2_crypto_quictls, $want_tcp2_path)
+  FETCH_CHECK_PKGCONFIG(libngtcp2_crypto_quictls, $want_tcp2_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LIB_NGTCP2_CRYPTO_QUICTLS=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_quictls`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_QUICTLS])
 
-    CPP_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+    CPP_NGTCP2_CRYPTO_QUICTLS=`FETCH_EXPORT_PCDIR([$want_tcp2_path]) dnl
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_quictls`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_QUICTLS])
 
-    LD_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LD_NGTCP2_CRYPTO_QUICTLS=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-L libngtcp2_crypto_quictls`
     AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_QUICTLS])
 
@@ -3130,10 +3130,10 @@ if test "x$USE_NGTCP2" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BOR
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           USE_NGTCP2=1
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_QUICTLS"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_QUICTLS to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libngtcp2_crypto_quictls"
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_QUICTLS"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_QUICTLS to FETCH_LIBRARY_PATH])
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libngtcp2_crypto_quictls"
         )
       ],
         dnl not found, revert back to clean variables
@@ -3160,18 +3160,18 @@ if test "x$USE_NGTCP2" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BOR
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libngtcp2_crypto_boringssl, $want_tcp2_path)
+  FETCH_CHECK_PKGCONFIG(libngtcp2_crypto_boringssl, $want_tcp2_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_NGTCP2_CRYPTO_BORINGSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LIB_NGTCP2_CRYPTO_BORINGSSL=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_boringssl`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_BORINGSSL])
 
-    CPP_NGTCP2_CRYPTO_BORINGSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+    CPP_NGTCP2_CRYPTO_BORINGSSL=`FETCH_EXPORT_PCDIR([$want_tcp2_path]) dnl
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_boringssl`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_BORINGSSL])
 
-    LD_NGTCP2_CRYPTO_BORINGSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LD_NGTCP2_CRYPTO_BORINGSSL=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-L libngtcp2_crypto_boringssl`
     AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_BORINGSSL])
 
@@ -3187,10 +3187,10 @@ if test "x$USE_NGTCP2" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BOR
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           USE_NGTCP2=1
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_BORINGSSL"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_BORINGSSL to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libngtcp2_crypto_boringssl"
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_BORINGSSL"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_BORINGSSL to FETCH_LIBRARY_PATH])
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libngtcp2_crypto_boringssl"
         )
       ],
         dnl not found, revert back to clean variables
@@ -3217,18 +3217,18 @@ if test "x$USE_NGTCP2" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libngtcp2_crypto_gnutls, $want_tcp2_path)
+  FETCH_CHECK_PKGCONFIG(libngtcp2_crypto_gnutls, $want_tcp2_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_NGTCP2_CRYPTO_GNUTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LIB_NGTCP2_CRYPTO_GNUTLS=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_gnutls`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_GNUTLS])
 
-    CPP_NGTCP2_CRYPTO_GNUTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+    CPP_NGTCP2_CRYPTO_GNUTLS=`FETCH_EXPORT_PCDIR([$want_tcp2_path]) dnl
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_gnutls`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_GNUTLS])
 
-    LD_NGTCP2_CRYPTO_GNUTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LD_NGTCP2_CRYPTO_GNUTLS=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-L libngtcp2_crypto_gnutls`
     AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_GNUTLS])
 
@@ -3244,10 +3244,10 @@ if test "x$USE_NGTCP2" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           USE_NGTCP2=1
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_GNUTLS"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_GNUTLS to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libngtcp2_crypto_gnutls"
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_GNUTLS"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_GNUTLS to FETCH_LIBRARY_PATH])
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libngtcp2_crypto_gnutls"
         )
       ],
         dnl not found, revert back to clean variables
@@ -3274,18 +3274,18 @@ if test "x$USE_NGTCP2" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libngtcp2_crypto_wolfssl, $want_tcp2_path)
+  FETCH_CHECK_PKGCONFIG(libngtcp2_crypto_wolfssl, $want_tcp2_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_NGTCP2_CRYPTO_WOLFSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LIB_NGTCP2_CRYPTO_WOLFSSL=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_wolfssl`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_WOLFSSL])
 
-    CPP_NGTCP2_CRYPTO_WOLFSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+    CPP_NGTCP2_CRYPTO_WOLFSSL=`FETCH_EXPORT_PCDIR([$want_tcp2_path]) dnl
       $PKGCONFIG --cflags-only-I libngtcp2_crypto_wolfssl`
     AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_WOLFSSL])
 
-    LD_NGTCP2_CRYPTO_WOLFSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+    LD_NGTCP2_CRYPTO_WOLFSSL=`FETCH_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-L libngtcp2_crypto_wolfssl`
     AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_WOLFSSL])
 
@@ -3301,10 +3301,10 @@ if test "x$USE_NGTCP2" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           USE_NGTCP2=1
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_WOLFSSL"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_WOLFSSL to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libngtcp2_crypto_wolfssl"
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_WOLFSSL"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_WOLFSSL to FETCH_LIBRARY_PATH])
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libngtcp2_crypto_wolfssl"
         )
       ],
         dnl not found, revert back to clean variables
@@ -3350,7 +3350,7 @@ case "$OPT_OPENSSL_QUIC" in
     ;;
 esac
 
-curl_openssl_quic_msg="no      (--with-openssl-quic)"
+fetch_openssl_quic_msg="no      (--with-openssl-quic)"
 if test "x$want_openssl_quic" = "xyes"; then
 
   if test "$USE_NGTCP2" = 1; then
@@ -3396,7 +3396,7 @@ case "$OPT_NGHTTP3" in
     ;;
 esac
 
-curl_http3_msg="no      (--with-nghttp3)"
+fetch_http3_msg="no      (--with-nghttp3)"
 if test X"$want_nghttp3" != Xno; then
 
   if test "x$USE_NGTCP2" != "x1" -a "x$USE_OPENSSL_QUIC" != "x1"; then
@@ -3410,18 +3410,18 @@ if test X"$want_nghttp3" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libnghttp3, $want_nghttp3_path)
+  FETCH_CHECK_PKGCONFIG(libnghttp3, $want_nghttp3_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_NGHTTP3=`CURL_EXPORT_PCDIR([$want_nghttp3_path])
+    LIB_NGHTTP3=`FETCH_EXPORT_PCDIR([$want_nghttp3_path])
       $PKGCONFIG --libs-only-l libnghttp3`
     AC_MSG_NOTICE([-l is $LIB_NGHTTP3])
 
-    CPP_NGHTTP3=`CURL_EXPORT_PCDIR([$want_nghttp3_path]) dnl
+    CPP_NGHTTP3=`FETCH_EXPORT_PCDIR([$want_nghttp3_path]) dnl
       $PKGCONFIG --cflags-only-I libnghttp3`
     AC_MSG_NOTICE([-I is $CPP_NGHTTP3])
 
-    LD_NGHTTP3=`CURL_EXPORT_PCDIR([$want_nghttp3_path])
+    LD_NGHTTP3=`FETCH_EXPORT_PCDIR([$want_nghttp3_path])
       $PKGCONFIG --libs-only-L libnghttp3`
     AC_MSG_NOTICE([-L is $LD_NGHTTP3])
 
@@ -3438,10 +3438,10 @@ if test X"$want_nghttp3" != Xno; then
         AC_CHECK_HEADERS(nghttp3/nghttp3.h,
           AC_DEFINE(USE_NGHTTP3, 1, [if nghttp3 is in use])
           USE_NGHTTP3=1
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGHTTP3"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_NGHTTP3 to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libnghttp3"
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_NGHTTP3"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_NGHTTP3 to FETCH_LIBRARY_PATH])
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libnghttp3"
         )
       ],
         dnl not found, revert back to clean variables
@@ -3468,7 +3468,7 @@ dnl **********************************************************************
 if test "x$USE_NGTCP2" = "x1" -a "x$USE_NGHTTP3" = "x1"; then
   USE_NGTCP2_H3=1
   AC_MSG_NOTICE([HTTP3 support is experimental])
-  curl_h3_msg="enabled (ngtcp2 + nghttp3)"
+  fetch_h3_msg="enabled (ngtcp2 + nghttp3)"
 fi
 
 dnl **********************************************************************
@@ -3479,7 +3479,7 @@ if test "x$USE_OPENSSL_QUIC" = "x1" -a "x$USE_NGHTTP3" = "x1"; then
   experimental="$experimental HTTP3"
   USE_OPENSSL_H3=1
   AC_MSG_NOTICE([HTTP3 support is experimental])
-  curl_h3_msg="enabled (openssl + nghttp3)"
+  fetch_h3_msg="enabled (openssl + nghttp3)"
 fi
 
 dnl **********************************************************************
@@ -3530,18 +3530,18 @@ if test X"$want_quiche" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(quiche, $want_quiche_path)
+  FETCH_CHECK_PKGCONFIG(quiche, $want_quiche_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path])
+    LIB_QUICHE=`FETCH_EXPORT_PCDIR([$want_quiche_path])
       $PKGCONFIG --libs-only-l quiche`
     AC_MSG_NOTICE([-l is $LIB_QUICHE])
 
-    CPP_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path]) dnl
+    CPP_QUICHE=`FETCH_EXPORT_PCDIR([$want_quiche_path]) dnl
       $PKGCONFIG --cflags-only-I quiche`
     AC_MSG_NOTICE([-I is $CPP_QUICHE])
 
-    LD_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path])
+    LD_QUICHE=`FETCH_EXPORT_PCDIR([$want_quiche_path])
       $PKGCONFIG --libs-only-L quiche`
     AC_MSG_NOTICE([-L is $LD_QUICHE])
 
@@ -3558,14 +3558,14 @@ if test X"$want_quiche" != Xno; then
         AC_CHECK_HEADERS(quiche.h,
           experimental="$experimental HTTP3"
           AC_MSG_NOTICE([HTTP3 support is experimental])
-          curl_h3_msg="enabled (quiche)"
+          fetch_h3_msg="enabled (quiche)"
           AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
           USE_QUICHE=1
           AC_CHECK_FUNCS([quiche_conn_set_qlog_fd])
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE quiche",
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_QUICHE"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_QUICHE to FETCH_LIBRARY_PATH])
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE quiche",
           [],
           [
             AC_INCLUDES_DEFAULT
@@ -3621,7 +3621,7 @@ esac
 if test X"$want_msh3" != Xno; then
 
   dnl msh3 on non-Windows needs an OpenSSL with the QUIC API
-  if test "$curl_cv_native_windows" != "yes"; then
+  if test "$fetch_cv_native_windows" != "yes"; then
     if test "$QUIC_ENABLED" != "yes"; then
       AC_MSG_ERROR([the detected TLS library does not support QUIC, making --with-msh3 a no-no])
     fi
@@ -3656,15 +3656,15 @@ if test X"$want_msh3" != Xno; then
   AC_CHECK_LIB(msh3, MsH3ApiOpen,
     [
       AC_CHECK_HEADERS(msh3.h,
-        curl_h3_msg="enabled (msh3)"
+        fetch_h3_msg="enabled (msh3)"
         AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
         USE_MSH3=1
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH])
+        FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_MSH3"
+        export FETCH_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_MSH3 to FETCH_LIBRARY_PATH])
         dnl FIXME: Enable when msh3 was detected via pkg-config
         if false; then
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libmsh3"
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libmsh3"
         fi
         experimental="$experimental HTTP3"
       )
@@ -3714,18 +3714,18 @@ if test X"$want_libuv" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libuv, $want_libuv_path)
+  FETCH_CHECK_PKGCONFIG(libuv, $want_libuv_path)
 
   if test "$PKGCONFIG" != "no"; then
-    LIB_LIBUV=`CURL_EXPORT_PCDIR([$want_libuv_path])
+    LIB_LIBUV=`FETCH_EXPORT_PCDIR([$want_libuv_path])
       $PKGCONFIG --libs-only-l libuv`
     AC_MSG_NOTICE([-l is $LIB_LIBUV])
 
-    CPP_LIBUV=`CURL_EXPORT_PCDIR([$want_libuv_path]) dnl
+    CPP_LIBUV=`FETCH_EXPORT_PCDIR([$want_libuv_path]) dnl
       $PKGCONFIG --cflags-only-I libuv`
     AC_MSG_NOTICE([-I is $CPP_LIBUV])
 
-    LD_LIBUV=`CURL_EXPORT_PCDIR([$want_libuv_path])
+    LD_LIBUV=`FETCH_EXPORT_PCDIR([$want_libuv_path])
       $PKGCONFIG --libs-only-L libuv`
     AC_MSG_NOTICE([-L is $LD_LIBUV])
 
@@ -3742,10 +3742,10 @@ if test X"$want_libuv" != Xno; then
         AC_CHECK_HEADERS(uv.h,
           AC_DEFINE(USE_LIBUV, 1, [if libuv is in use])
           USE_LIBUV=1
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_LIBUV"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_LIBUV to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libuv"
+          FETCH_LIBRARY_PATH="$FETCH_LIBRARY_PATH:$DIR_LIBUV"
+          export FETCH_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_LIBUV to FETCH_LIBRARY_PATH])
+          LIBFETCH_PC_REQUIRES_PRIVATE="$LIBFETCH_PC_REQUIRES_PRIVATE libuv"
         )
       ],
         dnl not found, revert back to clean variables
@@ -3807,7 +3807,7 @@ case "$OPT_FISH_FPATH" in
     ;;
   yes)
     dnl --with-fish-functions-dir option used without path
-    CURL_CHECK_PKGCONFIG(fish)
+    FETCH_CHECK_PKGCONFIG(fish)
     if test "$PKGCONFIG" != "no"; then
       FISH_FUNCTIONS_DIR=`$PKGCONFIG --variable completionsdir fish`
     else
@@ -3897,22 +3897,22 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIZE_T
 
-CURL_CHECK_STRUCT_TIMEVAL
-CURL_VERIFY_RUNTIMELIBS
+FETCH_CHECK_STRUCT_TIMEVAL
+FETCH_VERIFY_RUNTIMELIBS
 
-CURL_SIZEOF(size_t)
-CURL_SIZEOF(long)
-CURL_SIZEOF(int)
-CURL_SIZEOF(time_t)
-CURL_SIZEOF(off_t)
+FETCH_SIZEOF(size_t)
+FETCH_SIZEOF(long)
+FETCH_SIZEOF(int)
+FETCH_SIZEOF(time_t)
+FETCH_SIZEOF(off_t)
 
 o=$CPPFLAGS
 CPPFLAGS="-I$srcdir/include $CPPFLAGS"
-CURL_SIZEOF(curl_off_t, [
-#include <curl/system.h>
+FETCH_SIZEOF(fetch_off_t, [
+#include <fetch/system.h>
 ])
-CURL_SIZEOF(curl_socket_t, [
-#include <curl/curl.h>
+FETCH_SIZEOF(fetch_socket_t, [
+#include <fetch/fetch.h>
 ])
 CPPFLAGS=$o
 
@@ -3922,8 +3922,8 @@ AC_CHECK_TYPE(long long,
   longlong="yes"
 )
 
-if test ${ac_cv_sizeof_curl_off_t} -lt 8; then
-  AC_MSG_ERROR([64 bit curl_off_t is required])
+if test ${ac_cv_sizeof_fetch_off_t} -lt 8; then
+  AC_MSG_ERROR([64 bit fetch_off_t is required])
 fi
 
 # check for ssize_t
@@ -3988,7 +3988,7 @@ case $host_os in
     ;;
   *)
     AC_MSG_CHECKING([if time_t is unsigned])
-    CURL_RUN_IFELSE(
+    FETCH_RUN_IFELSE(
       [
       #include <time.h>
       int main(void) {
@@ -4011,43 +4011,43 @@ TYPE_IN_ADDR_T
 
 TYPE_SOCKADDR_STORAGE
 
-CURL_CHECK_FUNC_SELECT
+FETCH_CHECK_FUNC_SELECT
 
-CURL_CHECK_FUNC_RECV
-CURL_CHECK_FUNC_SEND
-CURL_CHECK_MSG_NOSIGNAL
+FETCH_CHECK_FUNC_RECV
+FETCH_CHECK_FUNC_SEND
+FETCH_CHECK_MSG_NOSIGNAL
 
-CURL_CHECK_FUNC_ALARM
-CURL_CHECK_FUNC_BASENAME
-CURL_CHECK_FUNC_CLOSESOCKET
-CURL_CHECK_FUNC_CLOSESOCKET_CAMEL
-CURL_CHECK_FUNC_FCNTL
-CURL_CHECK_FUNC_FREEADDRINFO
-CURL_CHECK_FUNC_FSETXATTR
-CURL_CHECK_FUNC_FTRUNCATE
-CURL_CHECK_FUNC_GETADDRINFO
-CURL_CHECK_FUNC_GETHOSTBYNAME_R
-CURL_CHECK_FUNC_GETHOSTNAME
-CURL_CHECK_FUNC_GETPEERNAME
-CURL_CHECK_FUNC_GETSOCKNAME
-CURL_CHECK_FUNC_GETIFADDRS
-CURL_CHECK_FUNC_GMTIME_R
-CURL_CHECK_FUNC_INET_NTOP
-CURL_CHECK_FUNC_INET_PTON
-CURL_CHECK_FUNC_IOCTL
-CURL_CHECK_FUNC_IOCTLSOCKET
-CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL
-CURL_CHECK_FUNC_MEMRCHR
-CURL_CHECK_FUNC_SIGACTION
-CURL_CHECK_FUNC_SIGINTERRUPT
-CURL_CHECK_FUNC_SIGNAL
-CURL_CHECK_FUNC_SIGSETJMP
-CURL_CHECK_FUNC_SOCKET
-CURL_CHECK_FUNC_SOCKETPAIR
-CURL_CHECK_FUNC_STRDUP
-CURL_CHECK_FUNC_STRERROR_R
-CURL_CHECK_FUNC_STRTOK_R
-CURL_CHECK_FUNC_STRTOLL
+FETCH_CHECK_FUNC_ALARM
+FETCH_CHECK_FUNC_BASENAME
+FETCH_CHECK_FUNC_CLOSESOCKET
+FETCH_CHECK_FUNC_CLOSESOCKET_CAMEL
+FETCH_CHECK_FUNC_FCNTL
+FETCH_CHECK_FUNC_FREEADDRINFO
+FETCH_CHECK_FUNC_FSETXATTR
+FETCH_CHECK_FUNC_FTRUNCATE
+FETCH_CHECK_FUNC_GETADDRINFO
+FETCH_CHECK_FUNC_GETHOSTBYNAME_R
+FETCH_CHECK_FUNC_GETHOSTNAME
+FETCH_CHECK_FUNC_GETPEERNAME
+FETCH_CHECK_FUNC_GETSOCKNAME
+FETCH_CHECK_FUNC_GETIFADDRS
+FETCH_CHECK_FUNC_GMTIME_R
+FETCH_CHECK_FUNC_INET_NTOP
+FETCH_CHECK_FUNC_INET_PTON
+FETCH_CHECK_FUNC_IOCTL
+FETCH_CHECK_FUNC_IOCTLSOCKET
+FETCH_CHECK_FUNC_IOCTLSOCKET_CAMEL
+FETCH_CHECK_FUNC_MEMRCHR
+FETCH_CHECK_FUNC_SIGACTION
+FETCH_CHECK_FUNC_SIGINTERRUPT
+FETCH_CHECK_FUNC_SIGNAL
+FETCH_CHECK_FUNC_SIGSETJMP
+FETCH_CHECK_FUNC_SOCKET
+FETCH_CHECK_FUNC_SOCKETPAIR
+FETCH_CHECK_FUNC_STRDUP
+FETCH_CHECK_FUNC_STRERROR_R
+FETCH_CHECK_FUNC_STRTOK_R
+FETCH_CHECK_FUNC_STRTOLL
 
 case $host in
   *msdosdjgpp)
@@ -4081,14 +4081,14 @@ AC_CHECK_FUNCS([\
   utimes \
 ])
 
-if test "$curl_cv_native_windows" != 'yes'; then
+if test "$fetch_cv_native_windows" != 'yes'; then
   AC_CHECK_FUNCS([sched_yield])
-  CURL_CHECK_FUNC_STRCASECMP
-  CURL_CHECK_FUNC_STRCMPI
-  CURL_CHECK_FUNC_STRICMP
+  FETCH_CHECK_FUNC_STRCASECMP
+  FETCH_CHECK_FUNC_STRCMPI
+  FETCH_CHECK_FUNC_STRICMP
 fi
 
-if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
+if test "$fetch_cv_native_windows" = 'yes' -o "$fetch_cv_cygwin" = 'yes'; then
   AC_CHECK_FUNCS([_setmode])
 fi
 
@@ -4096,7 +4096,7 @@ if test -z "$ssl_backends"; then
   AC_CHECK_FUNCS([arc4random])
 fi
 
-if test "$curl_cv_native_windows" != 'yes'; then
+if test "$fetch_cv_native_windows" != 'yes'; then
   AC_CHECK_FUNCS([fseeko])
 
   dnl On Android, the only way to know if fseeko can be used is to see if it is
@@ -4109,13 +4109,13 @@ if test "$curl_cv_native_windows" != 'yes'; then
     [[#include <stdio.h>]])
 fi
 
-CURL_CHECK_NONBLOCKING_SOCKET
+FETCH_CHECK_NONBLOCKING_SOCKET
 
 AC_PATH_PROG(PERL, perl,,
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
 AC_SUBST(PERL)
 
-if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0" -o "x$CURL_CA_EMBED" != "x"; then
+if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0" -o "x$FETCH_CA_EMBED" != "x"; then
   if test -z "$PERL"; then
     AC_MSG_ERROR([perl was not found, needed for docs, manual and CA embed])
   fi
@@ -4129,17 +4129,17 @@ dnl If the manual variable still is set, then we go with providing a built-in
 dnl manual
 
 if test "$USE_MANUAL" = "1"; then
-  curl_manual_msg="enabled"
+  fetch_manual_msg="enabled"
 fi
 
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
-CURL_CHECK_LIB_ARES
-CURL_CHECK_OPTION_THREADED_RESOLVER
+FETCH_CHECK_LIB_ARES
+FETCH_CHECK_OPTION_THREADED_RESOLVER
 
 if test "$ipv6" = yes; then
-  CURL_DARWIN_SYSTEMCONFIGURATION
+  FETCH_DARWIN_SYSTEMCONFIGURATION
 fi
 
 dnl turn off pthreads if rt is disabled
@@ -4148,10 +4148,10 @@ if test "$want_threaded_resolver" = "yes" && test "$dontwant_rt" = "yes"; then
 fi
 
 dnl Windows threaded resolver check
-if test "$want_threaded_resolver" = "yes" && test "$curl_cv_native_windows" = "yes"; then
+if test "$want_threaded_resolver" = "yes" && test "$fetch_cv_native_windows" = "yes"; then
   USE_THREADS_WIN32=1
   AC_DEFINE(USE_THREADS_WIN32, 1, [if you want Win32 threaded DNS lookup])
-  curl_res_msg="Win32 threaded"
+  fetch_res_msg="Win32 threaded"
 fi
 
 dnl detect pthreads
@@ -4211,7 +4211,7 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
 
       if test "x$USE_THREADS_POSIX" = "x1"; then
         AC_DEFINE(USE_THREADS_POSIX, 1, [if you want POSIX threaded DNS lookup])
-        curl_res_msg="POSIX threaded"
+        fetch_res_msg="POSIX threaded"
       fi
   ])
 fi
@@ -4227,7 +4227,7 @@ AC_CHECK_HEADER(dirent.h,
   ]
 )
 
-CURL_CONVERT_INCLUDE_TO_ISYSTEM
+FETCH_CONVERT_INCLUDE_TO_ISYSTEM
 
 dnl ************************************************************
 dnl disable verbose text strings
@@ -4239,8 +4239,8 @@ AS_HELP_STRING([--disable-verbose],[Disable verbose strings]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_VERBOSE_STRINGS, 1, [to disable verbose strings])
-    curl_verbose_msg="no"
+    AC_DEFINE(FETCH_DISABLE_VERBOSE_STRINGS, 1, [to disable verbose strings])
+    fetch_verbose_msg="no"
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4258,11 +4258,11 @@ AS_HELP_STRING([--enable-sspi],[Enable SSPI])
 AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
 [ case "$enableval" in
   yes)
-    if test "$curl_cv_native_windows" = "yes"; then
+    if test "$fetch_cv_native_windows" = "yes"; then
       AC_MSG_RESULT(yes)
       AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
       USE_WINDOWS_SSPI=1
-      curl_sspi_msg="enabled"
+      fetch_sspi_msg="enabled"
     else
       AC_MSG_RESULT(no)
       AC_MSG_WARN([--enable-sspi Ignored. Only supported on native Windows builds.])
@@ -4295,7 +4295,7 @@ AS_HELP_STRING([--disable-basic-auth],[Disable basic authentication]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_BASIC_AUTH, 1, [to disable basic authentication])
+    AC_DEFINE(FETCH_DISABLE_BASIC_AUTH, 1, [to disable basic authentication])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4314,7 +4314,7 @@ AS_HELP_STRING([--disable-bearer-auth],[Disable bearer authentication]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_BEARER_AUTH, 1, [to disable bearer authentication])
+    AC_DEFINE(FETCH_DISABLE_BEARER_AUTH, 1, [to disable bearer authentication])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4333,7 +4333,7 @@ AS_HELP_STRING([--disable-digest-auth],[Disable digest authentication]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_DIGEST_AUTH, 1, [to disable digest authentication])
+    AC_DEFINE(FETCH_DISABLE_DIGEST_AUTH, 1, [to disable digest authentication])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4352,8 +4352,8 @@ AS_HELP_STRING([--disable-kerberos-auth],[Disable kerberos authentication]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_KERBEROS_AUTH, 1, [to disable kerberos authentication])
-    CURL_DISABLE_KERBEROS_AUTH=1
+    AC_DEFINE(FETCH_DISABLE_KERBEROS_AUTH, 1, [to disable kerberos authentication])
+    FETCH_DISABLE_KERBEROS_AUTH=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4372,8 +4372,8 @@ AS_HELP_STRING([--disable-negotiate-auth],[Disable negotiate authentication]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_NEGOTIATE_AUTH, 1, [to disable negotiate authentication])
-    CURL_DISABLE_NEGOTIATE_AUTH=1
+    AC_DEFINE(FETCH_DISABLE_NEGOTIATE_AUTH, 1, [to disable negotiate authentication])
+    FETCH_DISABLE_NEGOTIATE_AUTH=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4392,7 +4392,7 @@ AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable AWS sig support])
+    AC_DEFINE(FETCH_DISABLE_AWS, 1, [to disable AWS sig support])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4411,8 +4411,8 @@ AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_NTLM, 1, [to disable NTLM support])
-    CURL_DISABLE_NTLM=1
+    AC_DEFINE(FETCH_DISABLE_NTLM, 1, [to disable NTLM support])
+    FETCH_DISABLE_NTLM=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4445,7 +4445,7 @@ AS_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
 if test "$want_tls_srp" = "yes" && ( test "x$HAVE_GNUTLS_SRP" = "x1" || test "x$HAVE_OPENSSL_SRP" = "x1"); then
   AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
   USE_TLS_SRP=1
-  curl_tls_srp_msg="enabled"
+  fetch_tls_srp_msg="enabled"
 fi
 
 dnl ************************************************************
@@ -4470,15 +4470,15 @@ AS_HELP_STRING([--disable-unix-sockets],[Disable Unix domain sockets]),
     ]
 )
 if test "x$want_unix_sockets" != "xno"; then
-  if test "x$curl_cv_native_windows" = "xyes"; then
+  if test "x$fetch_cv_native_windows" = "xyes"; then
     USE_UNIX_SOCKETS=1
     AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
-    curl_unix_sockets_msg="enabled"
+    fetch_unix_sockets_msg="enabled"
   else
     AC_CHECK_MEMBER([struct sockaddr_un.sun_path], [
       AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
       USE_UNIX_SOCKETS=1
-      curl_unix_sockets_msg="enabled"
+      fetch_unix_sockets_msg="enabled"
     ], [
       if test "x$want_unix_sockets" = "xyes"; then
         AC_MSG_ERROR([--enable-unix-sockets is not available on this platform!])
@@ -4499,7 +4499,7 @@ AS_HELP_STRING([--disable-cookies],[Disable cookies support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_COOKIES, 1, [to disable cookies support])
+    AC_DEFINE(FETCH_DISABLE_COOKIES, 1, [to disable cookies support])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4518,7 +4518,7 @@ AS_HELP_STRING([--disable-socketpair],[Disable socketpair support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_SOCKETPAIR, 1, [to disable socketpair support])
+    AC_DEFINE(FETCH_DISABLE_SOCKETPAIR, 1, [to disable socketpair support])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4537,7 +4537,7 @@ AS_HELP_STRING([--disable-http-auth],[Disable HTTP authentication support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_HTTP_AUTH, 1, [disable HTTP authentication])
+    AC_DEFINE(FETCH_DISABLE_HTTP_AUTH, 1, [disable HTTP authentication])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4556,7 +4556,7 @@ AS_HELP_STRING([--disable-doh],[Disable DoH support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_DOH, 1, [disable DoH])
+    AC_DEFINE(FETCH_DISABLE_DOH, 1, [disable DoH])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4575,7 +4575,7 @@ AS_HELP_STRING([--disable-mime],[Disable mime API support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_MIME, 1, [disable mime API])
+    AC_DEFINE(FETCH_DISABLE_MIME, 1, [disable mime API])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4594,7 +4594,7 @@ AS_HELP_STRING([--disable-bindlocal],[Disable local binding support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_BINDLOCAL, 1, [disable local binding support])
+    AC_DEFINE(FETCH_DISABLE_BINDLOCAL, 1, [disable local binding support])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4613,7 +4613,7 @@ AS_HELP_STRING([--disable-form-api],[Disable form API support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_FORM_API, 1, [disable form API])
+    AC_DEFINE(FETCH_DISABLE_FORM_API, 1, [disable form API])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4625,7 +4625,7 @@ AS_HELP_STRING([--disable-form-api],[Disable form API support]),
   if test "$enable_mime" = no; then
     enable_form_api=no
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_FORM_API, 1, [disable form API])
+    AC_DEFINE(FETCH_DISABLE_FORM_API, 1, [disable form API])
   else
     AC_MSG_RESULT(yes)
   fi ]
@@ -4641,7 +4641,7 @@ AS_HELP_STRING([--disable-dateparse],[Disable date parsing]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_PARSEDATE, 1, [disable date parsing])
+    AC_DEFINE(FETCH_DISABLE_PARSEDATE, 1, [disable date parsing])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4660,7 +4660,7 @@ AS_HELP_STRING([--disable-netrc],[Disable netrc parsing]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_NETRC, 1, [disable netrc parsing])
+    AC_DEFINE(FETCH_DISABLE_NETRC, 1, [disable netrc parsing])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4679,7 +4679,7 @@ AS_HELP_STRING([--disable-progress-meter],[Disable progress-meter]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_PROGRESS_METER, 1, [disable progress-meter])
+    AC_DEFINE(FETCH_DISABLE_PROGRESS_METER, 1, [disable progress-meter])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4698,7 +4698,7 @@ AS_HELP_STRING([--disable-sha512-256],[Disable SHA-512/256 hash algorithm]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_SHA512_256, 1, [disable SHA-512/256 hash algorithm])
+    AC_DEFINE(FETCH_DISABLE_SHA512_256, 1, [disable SHA-512/256 hash algorithm])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4717,7 +4717,7 @@ AS_HELP_STRING([--disable-dnsshuffle],[Disable DNS shuffling]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_SHUFFLE_DNS, 1, [disable DNS shuffling])
+    AC_DEFINE(FETCH_DISABLE_SHUFFLE_DNS, 1, [disable DNS shuffling])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4727,16 +4727,16 @@ AS_HELP_STRING([--disable-dnsshuffle],[Disable DNS shuffling]),
 )
 
 dnl ************************************************************
-dnl disable the curl_easy_options API
+dnl disable the fetch_easy_options API
 dnl
-AC_MSG_CHECKING([whether to support curl_easy_option*])
+AC_MSG_CHECKING([whether to support fetch_easy_option*])
 AC_ARG_ENABLE(get-easy-options,
-AS_HELP_STRING([--enable-get-easy-options],[Enable curl_easy_options])
-AS_HELP_STRING([--disable-get-easy-options],[Disable curl_easy_options]),
+AS_HELP_STRING([--enable-get-easy-options],[Enable fetch_easy_options])
+AS_HELP_STRING([--disable-get-easy-options],[Disable fetch_easy_options]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_GETOPTIONS, 1, [to disable curl_easy_options])
+    AC_DEFINE(FETCH_DISABLE_GETOPTIONS, 1, [to disable fetch_easy_options])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4755,8 +4755,8 @@ AS_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_ALTSVC, 1, [disable alt-svc])
-    curl_altsvc_msg="no";
+    AC_DEFINE(FETCH_DISABLE_ALTSVC, 1, [disable alt-svc])
+    fetch_altsvc_msg="no";
     enable_altsvc="no"
     ;;
   *)
@@ -4776,8 +4776,8 @@ AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    curl_headers_msg="no      (--enable-headers-api)"
-    AC_DEFINE(CURL_DISABLE_HEADERS_API, 1, [disable headers-api])
+    fetch_headers_msg="no      (--enable-headers-api)"
+    AC_DEFINE(FETCH_DISABLE_HEADERS_API, 1, [disable headers-api])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4812,8 +4812,8 @@ else
 fi
 
 if test "x$hsts" != "xyes"; then
-  curl_hsts_msg="no      (--enable-hsts)";
-  AC_DEFINE(CURL_DISABLE_HSTS, 1, [disable alt-svc])
+  fetch_hsts_msg="no      (--enable-hsts)";
+  AC_DEFINE(FETCH_DISABLE_HSTS, 1, [disable alt-svc])
 fi
 
 
@@ -4858,7 +4858,7 @@ if test "x$want_httpsrr" != "xno"; then
   AC_MSG_RESULT([HTTPSRR support is enabled])
   AC_DEFINE(USE_HTTPSRR, 1, [enable HTTPS RR support])
   experimental="$experimental HTTPSRR"
-  curl_httpsrr_msg="enabled (--disable-httpsrr)"
+  fetch_httpsrr_msg="enabled (--disable-httpsrr)"
 fi
 
 
@@ -4869,7 +4869,7 @@ if test "x$OPENSSL_ENABLED" = "x1"; then
   AC_CHECK_FUNCS([SSL_set0_wbio])
 fi
 
-if test "x$CURL_DISABLE_HTTP" != "x1"; then
+if test "x$FETCH_DISABLE_HTTP" != "x1"; then
   dnl *************************************************************
   dnl WebSockets
   dnl
@@ -4880,18 +4880,18 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
   [ case "$enableval" in
     no)
       AC_MSG_RESULT(no)
-      AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
-      CURL_DISABLE_WEBSOCKETS=1
+      AC_DEFINE(FETCH_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+      FETCH_DISABLE_WEBSOCKETS=1
       ;;
     *)
-      if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
+      if test ${ac_cv_sizeof_fetch_off_t} -gt 4; then
         AC_MSG_RESULT(yes)
       else
-        dnl WebSockets requires >32 bit curl_off_t
+        dnl WebSockets requires >32 bit fetch_off_t
         AC_MSG_RESULT(no)
-        AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
-        AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
-        CURL_DISABLE_WEBSOCKETS=1
+        AC_MSG_WARN([WebSockets disabled due to lack of >32 bit fetch_off_t])
+        AC_DEFINE(FETCH_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+        FETCH_DISABLE_WEBSOCKETS=1
       fi
       ;;
     esac ],
@@ -4899,8 +4899,8 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
   )
 else
   AC_MSG_WARN([WebSockets disabled because HTTP is disabled])
-  AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
-  CURL_DISABLE_WEBSOCKETS=1
+  AC_DEFINE(FETCH_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+  FETCH_DISABLE_WEBSOCKETS=1
 fi
 
 dnl *************************************************************
@@ -4926,34 +4926,34 @@ fi
 dnl ************************************************************
 dnl hiding of library internal symbols
 dnl
-CURL_CONFIGURE_SYMBOL_HIDING
+FETCH_CONFIGURE_SYMBOL_HIDING
 
 dnl
-dnl All the library dependencies put into $LIB apply to libcurl only.
+dnl All the library dependencies put into $LIB apply to libfetch only.
 dnl
-LIBCURL_PC_LDFLAGS_PRIVATE=''
+LIBFETCH_PC_LDFLAGS_PRIVATE=''
 dnl Do not quote $INITIAL_LDFLAGS
 set -- $INITIAL_LDFLAGS
 while test -n "$1"; do
   case "$1" in
     -L* | --library-path=* | -F*)
-      LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $1"
+      LIBFETCH_PC_LDFLAGS_PRIVATE="$LIBFETCH_PC_LDFLAGS_PRIVATE $1"
       ;;
     -framework)
       if test -n "$2"; then
-        LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $1 $2"
+        LIBFETCH_PC_LDFLAGS_PRIVATE="$LIBFETCH_PC_LDFLAGS_PRIVATE $1 $2"
         shift
       fi
       ;;
   esac
   shift
 done
-LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $LDFLAGSPC"
-LIBCURL_PC_LIBS_PRIVATE="$LIBS$PTHREAD"
+LIBFETCH_PC_LDFLAGS_PRIVATE="$LIBFETCH_PC_LDFLAGS_PRIVATE $LDFLAGSPC"
+LIBFETCH_PC_LIBS_PRIVATE="$LIBS$PTHREAD"
 
-AC_SUBST(LIBCURL_PC_LDFLAGS_PRIVATE)
-AC_SUBST(LIBCURL_PC_LIBS_PRIVATE)
-AC_SUBST(CURL_NETWORK_AND_TIME_LIBS)
+AC_SUBST(LIBFETCH_PC_LDFLAGS_PRIVATE)
+AC_SUBST(LIBFETCH_PC_LIBS_PRIVATE)
+AC_SUBST(FETCH_NETWORK_AND_TIME_LIBS)
 
 dnl BLANK_AT_MAKETIME may be used in our Makefile.am files to blank
 dnl LIBS variable used in generated makefile at makefile processing
@@ -4968,31 +4968,31 @@ dnl yes or no
 ENABLE_SHARED="$enable_shared"
 AC_SUBST(ENABLE_SHARED)
 
-dnl to let curl-config output the static libraries correctly
+dnl to let fetch-config output the static libraries correctly
 ENABLE_STATIC="$enable_static"
 AC_SUBST(ENABLE_STATIC)
 
-squeeze LIBCURL_PC_REQUIRES_PRIVATE
-LIBCURL_PC_REQUIRES_PRIVATE=`echo $LIBCURL_PC_REQUIRES_PRIVATE | tr ' ' ','`
+squeeze LIBFETCH_PC_REQUIRES_PRIVATE
+LIBFETCH_PC_REQUIRES_PRIVATE=`echo $LIBFETCH_PC_REQUIRES_PRIVATE | tr ' ' ','`
 
-AC_SUBST(LIBCURL_PC_REQUIRES_PRIVATE)
+AC_SUBST(LIBFETCH_PC_REQUIRES_PRIVATE)
 
 dnl Merge pkg-config private fields into public ones when static-only
 if test "x$enable_shared" = "xno"; then
-  LIBCURL_PC_REQUIRES=$LIBCURL_PC_REQUIRES_PRIVATE
-  LIBCURL_PC_LIBS=$LIBCURL_PC_LIBS_PRIVATE
+  LIBFETCH_PC_REQUIRES=$LIBFETCH_PC_REQUIRES_PRIVATE
+  LIBFETCH_PC_LIBS=$LIBFETCH_PC_LIBS_PRIVATE
 else
-  LIBCURL_PC_REQUIRES=
-  LIBCURL_PC_LIBS=
+  LIBFETCH_PC_REQUIRES=
+  LIBFETCH_PC_LIBS=
 fi
-AC_SUBST(LIBCURL_PC_REQUIRES)
-AC_SUBST(LIBCURL_PC_LIBS)
+AC_SUBST(LIBFETCH_PC_REQUIRES)
+AC_SUBST(LIBFETCH_PC_LIBS)
 
 rm $compilersh
 
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
-dnl since it is more cross-compile friendly than curl-config
+dnl since it is more cross-compile friendly than fetch-config
 dnl
 
 if test "x$OPENSSL_ENABLED" = "x1"; then
@@ -5033,11 +5033,11 @@ if test "x$HAVE_GSSAPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
 
-if test "x$curl_psl_msg" = "xenabled"; then
+if test "x$fetch_psl_msg" = "xenabled"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES PSL"
 fi
 
-if test "x$curl_gsasl_msg" = "xenabled"; then
+if test "x$fetch_gsasl_msg" = "xenabled"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES gsasl"
 fi
 
@@ -5048,28 +5048,28 @@ if test "x$hsts" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HSTS"
 fi
 
-if test "x$CURL_DISABLE_NEGOTIATE_AUTH" != "x1" -a \
+if test "x$FETCH_DISABLE_NEGOTIATE_AUTH" != "x1" -a \
     \( "x$HAVE_GSSAPI" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
 fi
 
-if test "x$CURL_DISABLE_KERBEROS_AUTH" != "x1" -a \
+if test "x$FETCH_DISABLE_KERBEROS_AUTH" != "x1" -a \
     \( "x$HAVE_GSSAPI" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Kerberos"
 fi
 
-use_curl_ntlm_core=no
+use_fetch_ntlm_core=no
 
-if test "x$CURL_DISABLE_NTLM" != "x1"; then
+if test "x$FETCH_DISABLE_NTLM" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
       -o "x$WOLFSSL_NTLM" = "x1"; then
-    use_curl_ntlm_core=yes
+    use_fetch_ntlm_core=yes
   fi
 
-  if test "x$use_curl_ntlm_core" = "xyes" \
+  if test "x$use_fetch_ntlm_core" = "xyes" \
       -o "x$USE_WINDOWS_SSPI" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
   fi
@@ -5085,19 +5085,19 @@ fi
 
 if test "x$USE_NGTCP2_H3" = "x1" -o "x$USE_QUICHE" = "x1" \
     -o "x$USE_OPENSSL_H3" = "x1" -o "x$USE_MSH3" = "x1"; then
-  if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
+  if test "x$FETCH_WITH_MULTI_SSL" = "x1"; then
     AC_MSG_ERROR([MultiSSL cannot be enabled with HTTP/3 and vice versa])
   fi
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP3"
 fi
 
-if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
+if test "x$FETCH_WITH_MULTI_SSL" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES MultiSSL"
 fi
 
 AC_MSG_CHECKING([if this build supports HTTPS-proxy])
 dnl if not explicitly turned off, HTTPS-proxy comes with some TLS backends
-if test "x$CURL_DISABLE_HTTP" != "x1"; then
+if test "x$FETCH_DISABLE_HTTP" != "x1"; then
   if test "x$https_proxy" != "xno"; then
     if test "x$OPENSSL_ENABLED" = "x1" \
         -o "x$GNUTLS_ENABLED" = "x1" \
@@ -5136,9 +5136,9 @@ if test "x$SSLS_EXPORT_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSLS-EXPORT"
 fi
 
-if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
+if test ${ac_cv_sizeof_fetch_off_t} -gt 4; then
   if test ${ac_cv_sizeof_off_t} -gt 4 -o \
-     "$curl_win32_file_api" = "win32_large_files"; then
+     "$fetch_win32_file_api" = "win32_large_files"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES Largefile"
   fi
 fi
@@ -5169,14 +5169,14 @@ fi
 if test "x$want_debug" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Debug"
 fi
-if test "x$want_curldebug" = "xyes"; then
+if test "x$want_fetchdebug" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES TrackMemory"
 fi
-if test "x$CURL_CA_EMBED" != "x"; then
+if test "x$FETCH_CA_EMBED" != "x"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES CAcert"
-  CURL_CA_EMBED_msg="$CURL_CA_EMBED"
+  FETCH_CA_EMBED_msg="$FETCH_CA_EMBED"
 else
-  CURL_CA_EMBED_msg='no'
+  FETCH_CA_EMBED_msg='no'
 fi
 
 dnl replace spaces with newlines
@@ -5190,68 +5190,68 @@ fi
 AC_SUBST(SUPPORT_FEATURES)
 
 dnl For supported protocols in pkg-config file
-if test "x$CURL_DISABLE_HTTP" != "x1"; then
+if test "x$FETCH_DISABLE_HTTP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTP"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTPS"
   fi
 fi
-if test "x$CURL_DISABLE_FTP" != "x1"; then
+if test "x$FETCH_DISABLE_FTP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS FTP"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS FTPS"
   fi
 fi
-if test "x$CURL_DISABLE_FILE" != "x1"; then
+if test "x$FETCH_DISABLE_FILE" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS FILE"
 fi
-if test "x$CURL_DISABLE_TELNET" != "x1"; then
+if test "x$FETCH_DISABLE_TELNET" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TELNET"
 fi
-if test "x$CURL_DISABLE_LDAP" != "x1"; then
+if test "x$FETCH_DISABLE_LDAP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAP"
-  if test "x$CURL_DISABLE_LDAPS" != "x1"; then
+  if test "x$FETCH_DISABLE_LDAPS" != "x1"; then
     if (test "x$USE_OPENLDAP" = "x1" && test "x$SSL_ENABLED" = "x1") ||
       (test "x$USE_OPENLDAP" != "x1"  && test "x$HAVE_LDAP_SSL" = "x1"); then
       SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
     fi
   fi
 fi
-if test "x$CURL_DISABLE_DICT" != "x1"; then
+if test "x$FETCH_DISABLE_DICT" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS DICT"
 fi
-if test "x$CURL_DISABLE_TFTP" != "x1"; then
+if test "x$FETCH_DISABLE_TFTP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TFTP"
 fi
-if test "x$CURL_DISABLE_GOPHER" != "x1"; then
+if test "x$FETCH_DISABLE_GOPHER" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GOPHER"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GOPHERS"
   fi
 fi
-if test "x$CURL_DISABLE_MQTT" != "x1"; then
+if test "x$FETCH_DISABLE_MQTT" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS MQTT"
 fi
-if test "x$CURL_DISABLE_POP3" != "x1"; then
+if test "x$FETCH_DISABLE_POP3" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS POP3"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS POP3S"
   fi
 fi
-if test "x$CURL_DISABLE_IMAP" != "x1"; then
+if test "x$FETCH_DISABLE_IMAP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAP"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAPS"
   fi
 fi
-if test "x$CURL_DISABLE_SMB" != "x1" \
-    -a "x$use_curl_ntlm_core" = "xyes"; then
+if test "x$FETCH_DISABLE_SMB" != "x1" \
+    -a "x$use_fetch_ntlm_core" = "xyes"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMBS"
   fi
 fi
-if test "x$CURL_DISABLE_SMTP" != "x1"; then
+if test "x$FETCH_DISABLE_SMTP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMTP"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMTPS"
@@ -5268,16 +5268,16 @@ fi
 if test "x$USE_WOLFSSH" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
 fi
-if test "x$CURL_DISABLE_IPFS" != "x1"; then
+if test "x$FETCH_DISABLE_IPFS" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IPFS IPNS"
 fi
-if test "x$CURL_DISABLE_RTSP" != "x1"; then
+if test "x$FETCH_DISABLE_RTSP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
 fi
 if test "x$USE_LIBRTMP" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTMP"
 fi
-if test "x$CURL_DISABLE_WEBSOCKETS" != "x1"; then
+if test "x$FETCH_DISABLE_WEBSOCKETS" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WS"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WSS"
@@ -5299,9 +5299,9 @@ squeeze DEFS
 squeeze LDFLAGS
 squeeze LIBS
 
-squeeze LIBCURL_PC_LDFLAGS_PRIVATE
-squeeze LIBCURL_PC_LIBS_PRIVATE
-squeeze CURL_NETWORK_AND_TIME_LIBS
+squeeze LIBFETCH_PC_LDFLAGS_PRIVATE
+squeeze LIBFETCH_PC_LIBS_PRIVATE
+squeeze FETCH_NETWORK_AND_TIME_LIBS
 
 squeeze SUPPORT_FEATURES
 squeeze SUPPORT_PROTOCOLS
@@ -5311,26 +5311,26 @@ XC_CHECK_BUILD_FLAGS
 SSL_BACKENDS=${ssl_backends}
 AC_SUBST(SSL_BACKENDS)
 
-if test "x$want_curldebug_assumed" = "xyes" &&
-  test "x$want_curldebug" = "xyes" && test "x$USE_ARES" = "x1"; then
-  ac_configure_args="$ac_configure_args --enable-curldebug"
+if test "x$want_fetchdebug_assumed" = "xyes" &&
+  test "x$want_fetchdebug" = "xyes" && test "x$USE_ARES" = "x1"; then
+  ac_configure_args="$ac_configure_args --enable-fetchdebug"
 fi
 
-CURL_PREPARE_CONFIGUREHELP_PM
+FETCH_PREPARE_CONFIGUREHELP_PM
 
 AC_CONFIG_FILES([\
   Makefile \
   docs/Makefile \
   docs/examples/Makefile \
-  docs/libcurl/Makefile \
-  docs/libcurl/opts/Makefile \
+  docs/libfetch/Makefile \
+  docs/libfetch/opts/Makefile \
   docs/cmdline-opts/Makefile \
   include/Makefile \
-  include/curl/Makefile \
+  include/fetch/Makefile \
   src/Makefile \
   lib/Makefile \
   scripts/Makefile \
-  lib/libcurl.vers \
+  lib/libfetch.vers \
   tests/Makefile \
   tests/config \
   tests/configurehelp.pm \
@@ -5345,64 +5345,64 @@ AC_CONFIG_FILES([\
   tests/http/clients/Makefile \
   packages/Makefile \
   packages/vms/Makefile \
-  curl-config \
-  libcurl.pc
+  fetch-config \
+  libfetch.pc
 ])
 AC_OUTPUT
 
 SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
 
-AC_MSG_NOTICE([Configured to build curl/libcurl:
+AC_MSG_NOTICE([Configured to build fetch/libfetch:
 
   Host setup:       ${host}
   Install prefix:   ${prefix}
   Compiler:         ${CC}
    CFLAGS:          ${CFLAGS}
-   CFLAGS extras:   ${CURL_CFLAG_EXTRAS}
+   CFLAGS extras:   ${FETCH_CFLAG_EXTRAS}
    CPPFLAGS:        ${CPPFLAGS}
    LDFLAGS:         ${LDFLAGS}
-     curl-config:   ${LIBCURL_PC_LDFLAGS_PRIVATE}
+     fetch-config:   ${LIBFETCH_PC_LDFLAGS_PRIVATE}
    LIBS:            ${LIBS}
 
-  curl version:     ${CURLVERSION}
-  SSL:              ${curl_ssl_msg}
-  SSH:              ${curl_ssh_msg}
-  zlib:             ${curl_zlib_msg}
-  brotli:           ${curl_brotli_msg}
-  zstd:             ${curl_zstd_msg}
-  GSS-API:          ${curl_gss_msg}
-  GSASL:            ${curl_gsasl_msg}
-  TLS-SRP:          ${curl_tls_srp_msg}
-  resolver:         ${curl_res_msg}
-  IPv6:             ${curl_ipv6_msg}
-  Unix sockets:     ${curl_unix_sockets_msg}
-  IDN:              ${curl_idn_msg}
-  Build docs:       ${curl_docs_msg}
-  Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
-  Built-in manual:  ${curl_manual_msg}
-  --libcurl option: ${curl_libcurl_msg}
-  Verbose errors:   ${curl_verbose_msg}
-  Code coverage:    ${curl_coverage_msg}
-  SSPI:             ${curl_sspi_msg}
+  fetch version:     ${FETCHVERSION}
+  SSL:              ${fetch_ssl_msg}
+  SSH:              ${fetch_ssh_msg}
+  zlib:             ${fetch_zlib_msg}
+  brotli:           ${fetch_brotli_msg}
+  zstd:             ${fetch_zstd_msg}
+  GSS-API:          ${fetch_gss_msg}
+  GSASL:            ${fetch_gsasl_msg}
+  TLS-SRP:          ${fetch_tls_srp_msg}
+  resolver:         ${fetch_res_msg}
+  IPv6:             ${fetch_ipv6_msg}
+  Unix sockets:     ${fetch_unix_sockets_msg}
+  IDN:              ${fetch_idn_msg}
+  Build docs:       ${fetch_docs_msg}
+  Build libfetch:    Shared=${enable_shared}, Static=${enable_static}
+  Built-in manual:  ${fetch_manual_msg}
+  --libfetch option: ${fetch_libfetch_msg}
+  Verbose errors:   ${fetch_verbose_msg}
+  Code coverage:    ${fetch_coverage_msg}
+  SSPI:             ${fetch_sspi_msg}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}
-  ca cert embed:    ${CURL_CA_EMBED_msg}
+  ca cert embed:    ${FETCH_CA_EMBED_msg}
   ca fallback:      ${with_ca_fallback}
-  LDAP:             ${curl_ldap_msg}
-  LDAPS:            ${curl_ldaps_msg}
-  IPFS/IPNS:        ${curl_ipfs_msg}
-  RTSP:             ${curl_rtsp_msg}
-  RTMP:             ${curl_rtmp_msg}
-  PSL:              ${curl_psl_msg}
-  Alt-svc:          ${curl_altsvc_msg}
-  Headers API:      ${curl_headers_msg}
-  HSTS:             ${curl_hsts_msg}
-  HTTP1:            ${curl_h1_msg}
-  HTTP2:            ${curl_h2_msg}
-  HTTP3:            ${curl_h3_msg}
-  ECH:              ${curl_ech_msg}
-  HTTPS RR:         ${curl_httpsrr_msg}
-  SSLS-EXPORT:      ${curl_ssls_export_msg}
+  LDAP:             ${fetch_ldap_msg}
+  LDAPS:            ${fetch_ldaps_msg}
+  IPFS/IPNS:        ${fetch_ipfs_msg}
+  RTSP:             ${fetch_rtsp_msg}
+  RTMP:             ${fetch_rtmp_msg}
+  PSL:              ${fetch_psl_msg}
+  Alt-svc:          ${fetch_altsvc_msg}
+  Headers API:      ${fetch_headers_msg}
+  HSTS:             ${fetch_hsts_msg}
+  HTTP1:            ${fetch_h1_msg}
+  HTTP2:            ${fetch_h2_msg}
+  HTTP3:            ${fetch_h3_msg}
+  ECH:              ${fetch_ech_msg}
+  HTTPS RR:         ${fetch_httpsrr_msg}
+  SSLS-EXPORT:      ${fetch_ssls_export_msg}
   Protocols:        ${SUPPORT_PROTOCOLS_LOWER}
   Features:         ${SUPPORT_FEATURES}
 ])
@@ -5421,8 +5421,8 @@ if test -n "$experimental"; then
   done
 fi
 
-CURL_PREPARE_BUILDINFO
-echo "[@%:@] This is a generated file.  Do not edit.${curl_buildinfo}" > ./buildinfo.txt
-if test -n "$CURL_BUILDINFO$CURL_CI$CI"; then
-  AC_MSG_NOTICE([${curl_buildinfo}])
+FETCH_PREPARE_BUILDINFO
+echo "[@%:@] This is a generated file.  Do not edit.${fetch_buildinfo}" > ./buildinfo.txt
+if test -n "$FETCH_BUILDINFO$FETCH_CI$CI"; then
+  AC_MSG_NOTICE([${fetch_buildinfo}])
 fi
