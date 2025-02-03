@@ -465,7 +465,9 @@
  */
 
 #ifdef USE_WIN32_LARGE_FILES
+#  ifdef HAVE_IO_H
 #  include <io.h>
+#  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  undef  lseek
@@ -496,7 +498,9 @@
  */
 
 #if defined(_WIN32) && !defined(USE_WIN32_LARGE_FILES)
+#  ifdef HAVE_IO_H
 #  include <io.h>
+#  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  ifndef UNDER_CE
