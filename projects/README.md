@@ -1,13 +1,13 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 Building via IDE Project Files
 ==============================
 
-This document describes how to compile, build and install curl and libcurl
+This document describes how to compile, build and install fetch and libfetch
 from sources using legacy versions of Visual Studio 2010 - 2013.
 
 You need to generate the project files before using them. Please run "generate
@@ -16,7 +16,7 @@ You need to generate the project files before using them. Please run "generate
 To generate project files for recent versions of Visual Studio instead, use
 cmake. Refer to INSTALL-CMAKE.md in the docs directory.
 
-Another way to build curl using Visual Studio is without project files. Refer
+Another way to build fetch using Visual Studio is without project files. Refer
 to README in the winbuild directory.
 
 ## Directory Structure
@@ -24,17 +24,17 @@ to README in the winbuild directory.
 The following directory structure is used for the legacy project files:
 
     somedirectory\
-     |_curl
+     |_fetch
        |_projects
          |_<platform>
            |_<ide>
              |_lib
              |_src
 
-This structure allows for side-by-side compilation of curl on the same machine
+This structure allows for side-by-side compilation of fetch on the same machine
 using different versions of a given compiler (for example VC10 and VC12) and
 allows for your own application or product to be compiled against those
-variants of libcurl for example.
+variants of libfetch for example.
 
 Note: Typically this side-by-side compilation is generally only required when
 a library is being compiled against dynamic runtime libraries.
@@ -47,10 +47,10 @@ also need to download and compile those libraries as well.
 
 To support compilation of these libraries using different versions of
 compilers, the following directory structure has been used for both the output
-of curl and libcurl as well as these dependencies.
+of fetch and libfetch as well as these dependencies.
 
     somedirectory\
-     |_curl
+     |_fetch
      | |_ build
      |    |_<architecture>
      |      |_<ide>
@@ -88,23 +88,23 @@ default version of Visual C++. We offer these versions:
  - VC11      (Visual Studio 2012 Version 11.0)
  - VC12      (Visual Studio 2013 Version 12.0)
 
-Separate solutions are provided for both libcurl and the curl command line
-tool as well as a solution that includes both projects. libcurl.sln, curl.sln
-and curl-all.sln, respectively. We recommend using curl-all.sln to build both
+Separate solutions are provided for both libfetch and the fetch command line
+tool as well as a solution that includes both projects. libfetch.sln, fetch.sln
+and fetch-all.sln, respectively. We recommend using fetch-all.sln to build both
 projects.
 
 For example, if you are using Visual Studio 2010 then you should be able to
-use `VC10\curl-all.sln` to build curl and libcurl.
+use `VC10\fetch-all.sln` to build fetch and libfetch.
 
 ## Running DLL based configurations
 
-If you are a developer and plan to run the curl tool from Visual Studio with
+If you are a developer and plan to run the fetch tool from Visual Studio with
 any third-party libraries (such as OpenSSL or libssh2) then you need to add
 the search path of these DLLs to the configuration's PATH environment. To do
 that:
 
- 1. Open the 'curl-all.sln' or 'curl.sln' solutions
- 2. Right-click on the 'curl' project and select Properties
+ 1. Open the 'fetch-all.sln' or 'fetch.sln' solutions
+ 2. Right-click on the 'fetch' project and select Properties
  3. Navigate to 'Configuration Properties > Debugging > Environment'
  4. Add `PATH='Path to DLL';C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem`
 
@@ -147,6 +147,6 @@ that Visual Studio uses.
 Some of the project configurations use Schannel (Windows SSPI), the native SSL
 library that comes with the Windows OS. Schannel in Windows 8 and earlier is
 not able to connect to servers that no longer support the legacy handshakes
-and algorithms used by those versions. If you are using curl in one of those
+and algorithms used by those versions. If you are using fetch in one of those
 earlier versions of Windows you should choose another SSL backend like
 OpenSSL.

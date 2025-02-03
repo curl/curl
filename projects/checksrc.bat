@@ -10,7 +10,7 @@ rem * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
-rem * are also available at https://curl.se/docs/copyright.html.
+rem * are also available at https://fetch.se/docs/copyright.html.
 rem *
 rem * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 rem * copies of the Software, and permit persons to whom the Software is
@@ -19,7 +19,7 @@ rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
 rem *
-rem * SPDX-License-Identifier: curl
+rem * SPDX-License-Identifier: fetch
 rem *
 rem ***************************************************************************
 
@@ -124,7 +124,7 @@ rem ***************************************************************************
     rem Check the lib directory
     if exist %SRC_DIR%\lib (
       for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib" -Wcurl_config.h.cmake -Wcurl_config.h.in -Wcurl_config.h "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib" -Wfetch_config.h.cmake -Wfetch_config.h.in -Wfetch_config.h "%%i"
     )
 
     rem Check the lib\vauth directory
@@ -188,12 +188,12 @@ rem ***************************************************************************
   echo.
   echo What to scan:
   echo.
-  echo lib       - Scan the libcurl source
+  echo lib       - Scan the libfetch source
   echo src       - Scan the command-line tool source
   echo tests     - Scan the library tests and unit tests
   echo examples  - Scan the examples
   echo.
-  echo directory - Specifies the curl source directory
+  echo directory - Specifies the fetch source directory
   goto success
 
 :unknown

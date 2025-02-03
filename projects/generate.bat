@@ -10,7 +10,7 @@ rem * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
-rem * are also available at https://curl.se/docs/copyright.html.
+rem * are also available at https://fetch.se/docs/copyright.html.
 rem *
 rem * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 rem * copies of the Software, and permit persons to whom the Software is
@@ -19,7 +19,7 @@ rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
 rem *
-rem * SPDX-License-Identifier: curl
+rem * SPDX-License-Identifier: fetch
 rem *
 rem ***************************************************************************
 
@@ -38,7 +38,7 @@ rem ***************************************************************************
   rem Switch to this batch file's directory
   cd /d "%~0\.." 1>NUL 2>&1
 
-  rem Check we are running from a curl git repository
+  rem Check we are running from a fetch git repository
   if not exist ..\GIT-INFO.md goto norepo
 
 :parseArgs
@@ -81,12 +81,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC10 project files
-    call :generate vcxproj Windows\VC10\src\curl.tmpl Windows\VC10\src\curl.vcxproj
-    call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
+    call :generate vcxproj Windows\VC10\src\fetch.tmpl Windows\VC10\src\fetch.vcxproj
+    call :generate vcxproj Windows\VC10\lib\libfetch.tmpl Windows\VC10\lib\libfetch.vcxproj
   ) else (
     echo Removing VC10 project files
-    call :clean Windows\VC10\src\curl.vcxproj
-    call :clean Windows\VC10\lib\libcurl.vcxproj
+    call :clean Windows\VC10\src\fetch.vcxproj
+    call :clean Windows\VC10\lib\libfetch.vcxproj
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -96,12 +96,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC11 project files
-    call :generate vcxproj Windows\VC11\src\curl.tmpl Windows\VC11\src\curl.vcxproj
-    call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
+    call :generate vcxproj Windows\VC11\src\fetch.tmpl Windows\VC11\src\fetch.vcxproj
+    call :generate vcxproj Windows\VC11\lib\libfetch.tmpl Windows\VC11\lib\libfetch.vcxproj
   ) else (
     echo Removing VC11 project files
-    call :clean Windows\VC11\src\curl.vcxproj
-    call :clean Windows\VC11\lib\libcurl.vcxproj
+    call :clean Windows\VC11\src\fetch.vcxproj
+    call :clean Windows\VC11\lib\libfetch.vcxproj
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -111,12 +111,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC12 project files
-    call :generate vcxproj Windows\VC12\src\curl.tmpl Windows\VC12\src\curl.vcxproj
-    call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
+    call :generate vcxproj Windows\VC12\src\fetch.tmpl Windows\VC12\src\fetch.vcxproj
+    call :generate vcxproj Windows\VC12\lib\libfetch.tmpl Windows\VC12\lib\libfetch.vcxproj
   ) else (
     echo Removing VC12 project files
-    call :clean Windows\VC12\src\curl.vcxproj
-    call :clean Windows\VC12\lib\libcurl.vcxproj
+    call :clean Windows\VC12\src\fetch.vcxproj
+    call :clean Windows\VC12\lib\libfetch.vcxproj
   )
 
   goto success
@@ -144,57 +144,57 @@ rem
     setlocal enabledelayedexpansion
     set "var=!var:*:=!"
 
-    if "!var!" == "CURL_SRC_C_FILES" (
+    if "!var!" == "FETCH_SRC_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\src\*.c') do call :element %1 src "%%c" %3
-    ) else if "!var!" == "CURL_SRC_H_FILES" (
+    ) else if "!var!" == "FETCH_SRC_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\src\*.h') do call :element %1 src "%%h" %3
-    ) else if "!var!" == "CURL_SRC_RC_FILES" (
+    ) else if "!var!" == "FETCH_SRC_RC_FILES" (
       for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element %1 src "%%r" %3
-    ) else if "!var!" == "CURL_SRC_X_C_FILES" (
+    ) else if "!var!" == "FETCH_SRC_X_C_FILES" (
       call :element %1 lib "strtoofft.c" %3
       call :element %1 lib "timediff.c" %3
       call :element %1 lib "nonblock.c" %3
       call :element %1 lib "warnless.c" %3
-      call :element %1 lib "curl_get_line.c" %3
-      call :element %1 lib "curl_multibyte.c" %3
+      call :element %1 lib "fetch_get_line.c" %3
+      call :element %1 lib "fetch_multibyte.c" %3
       call :element %1 lib "version_win32.c" %3
       call :element %1 lib "dynbuf.c" %3
       call :element %1 lib "base64.c" %3
-    ) else if "!var!" == "CURL_SRC_X_H_FILES" (
+    ) else if "!var!" == "FETCH_SRC_X_H_FILES" (
       call :element %1 lib "config-win32.h" %3
-      call :element %1 lib "curl_setup.h" %3
+      call :element %1 lib "fetch_setup.h" %3
       call :element %1 lib "strtoofft.h" %3
       call :element %1 lib "timediff.h" %3
       call :element %1 lib "nonblock.h" %3
       call :element %1 lib "warnless.h" %3
-      call :element %1 lib "curl_ctype.h" %3
-      call :element %1 lib "curl_get_line.h" %3
-      call :element %1 lib "curl_multibyte.h" %3
+      call :element %1 lib "fetch_ctype.h" %3
+      call :element %1 lib "fetch_get_line.h" %3
+      call :element %1 lib "fetch_multibyte.h" %3
       call :element %1 lib "version_win32.h" %3
       call :element %1 lib "dynbuf.h" %3
-      call :element %1 lib "curl_base64.h" %3
-    ) else if "!var!" == "CURL_LIB_C_FILES" (
+      call :element %1 lib "fetch_base64.h" %3
+    ) else if "!var!" == "FETCH_LIB_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element %1 lib "%%c" %3
-    ) else if "!var!" == "CURL_LIB_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\include\curl\*.h') do call :element %1 include\curl "%%h" %3
+    ) else if "!var!" == "FETCH_LIB_H_FILES" (
+      for /f "delims=" %%h in ('dir /b ..\include\fetch\*.h') do call :element %1 include\fetch "%%h" %3
       for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element %1 lib "%%h" %3
-    ) else if "!var!" == "CURL_LIB_RC_FILES" (
+    ) else if "!var!" == "FETCH_LIB_RC_FILES" (
       for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib "%%r" %3
-    ) else if "!var!" == "CURL_LIB_VAUTH_C_FILES" (
+    ) else if "!var!" == "FETCH_LIB_VAUTH_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\vauth\*.c') do call :element %1 lib\vauth "%%c" %3
-    ) else if "!var!" == "CURL_LIB_VAUTH_H_FILES" (
+    ) else if "!var!" == "FETCH_LIB_VAUTH_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\lib\vauth\*.h') do call :element %1 lib\vauth "%%h" %3
-    ) else if "!var!" == "CURL_LIB_VQUIC_C_FILES" (
+    ) else if "!var!" == "FETCH_LIB_VQUIC_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\vquic\*.c') do call :element %1 lib\vquic "%%c" %3
-    ) else if "!var!" == "CURL_LIB_VQUIC_H_FILES" (
+    ) else if "!var!" == "FETCH_LIB_VQUIC_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\lib\vquic\*.h') do call :element %1 lib\vquic "%%h" %3
-    ) else if "!var!" == "CURL_LIB_VSSH_C_FILES" (
+    ) else if "!var!" == "FETCH_LIB_VSSH_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\vssh\*.c') do call :element %1 lib\vssh "%%c" %3
-    ) else if "!var!" == "CURL_LIB_VSSH_H_FILES" (
+    ) else if "!var!" == "FETCH_LIB_VSSH_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\lib\vssh\*.h') do call :element %1 lib\vssh "%%h" %3
-    ) else if "!var!" == "CURL_LIB_VTLS_C_FILES" (
+    ) else if "!var!" == "FETCH_LIB_VTLS_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element %1 lib\vtls "%%c" %3
-    ) else if "!var!" == "CURL_LIB_VTLS_H_FILES" (
+    ) else if "!var!" == "FETCH_LIB_VTLS_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\lib\vtls\*.h') do call :element %1 lib\vtls "%%h" %3
     ) else (
       echo.!var!>> %3
@@ -326,7 +326,7 @@ rem
 
 :norepo
   echo.
-  echo Error: This batch file should only be used from a curl git repository
+  echo Error: This batch file should only be used from a fetch git repository
   goto error
 
 :seterr
