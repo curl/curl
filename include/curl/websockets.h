@@ -1,5 +1,5 @@
-#ifndef CURLINC_WEBSOCKETS_H
-#define CURLINC_WEBSOCKETS_H
+#ifndef FETCHINC_WEBSOCKETS_H
+#define FETCHINC_WEBSOCKETS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -28,57 +28,57 @@
 extern "C" {
 #endif
 
-struct curl_ws_frame {
+struct fetch_ws_frame {
   int age;              /* zero */
-  int flags;            /* See the CURLWS_* defines */
-  curl_off_t offset;    /* the offset of this data into the frame */
-  curl_off_t bytesleft; /* number of pending bytes left of the payload */
+  int flags;            /* See the FETCHWS_* defines */
+  fetch_off_t offset;    /* the offset of this data into the frame */
+  fetch_off_t bytesleft; /* number of pending bytes left of the payload */
   size_t len;           /* size of the current data chunk */
 };
 
 /* flag bits */
-#define CURLWS_TEXT       (1<<0)
-#define CURLWS_BINARY     (1<<1)
-#define CURLWS_CONT       (1<<2)
-#define CURLWS_CLOSE      (1<<3)
-#define CURLWS_PING       (1<<4)
-#define CURLWS_OFFSET     (1<<5)
+#define FETCHWS_TEXT       (1<<0)
+#define FETCHWS_BINARY     (1<<1)
+#define FETCHWS_CONT       (1<<2)
+#define FETCHWS_CLOSE      (1<<3)
+#define FETCHWS_PING       (1<<4)
+#define FETCHWS_OFFSET     (1<<5)
 
 /*
- * NAME curl_ws_recv()
+ * NAME fetch_ws_recv()
  *
  * DESCRIPTION
  *
  * Receives data from the websocket connection. Use after successful
- * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ * fetch_easy_perform() with FETCHOPT_CONNECT_ONLY option.
  */
-CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
+FETCH_EXTERN FETCHcode fetch_ws_recv(FETCH *fetch, void *buffer, size_t buflen,
                                   size_t *recv,
-                                  const struct curl_ws_frame **metap);
+                                  const struct fetch_ws_frame **metap);
 
-/* flags for curl_ws_send() */
-#define CURLWS_PONG       (1<<6)
+/* flags for fetch_ws_send() */
+#define FETCHWS_PONG       (1<<6)
 
 /*
- * NAME curl_ws_send()
+ * NAME fetch_ws_send()
  *
  * DESCRIPTION
  *
  * Sends data over the websocket connection. Use after successful
- * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ * fetch_easy_perform() with FETCHOPT_CONNECT_ONLY option.
  */
-CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
+FETCH_EXTERN FETCHcode fetch_ws_send(FETCH *fetch, const void *buffer,
                                   size_t buflen, size_t *sent,
-                                  curl_off_t fragsize,
+                                  fetch_off_t fragsize,
                                   unsigned int flags);
 
-/* bits for the CURLOPT_WS_OPTIONS bitmask: */
-#define CURLWS_RAW_MODE (1<<0)
+/* bits for the FETCHOPT_WS_OPTIONS bitmask: */
+#define FETCHWS_RAW_MODE (1<<0)
 
-CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *curl);
+FETCH_EXTERN const struct fetch_ws_frame *fetch_ws_meta(FETCH *fetch);
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif /* CURLINC_WEBSOCKETS_H */
+#endif /* FETCHINC_WEBSOCKETS_H */

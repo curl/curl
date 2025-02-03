@@ -1,5 +1,5 @@
-#ifndef CURLINC_MPRINTF_H
-#define CURLINC_MPRINTF_H
+#ifndef FETCHINC_MPRINTF_H
+#define FETCHINC_MPRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,66 +20,66 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 #include <stdarg.h>
 #include <stdio.h> /* needed for FILE */
-#include "curl.h"  /* for CURL_EXTERN */
+#include "fetch.h"  /* for FETCH_EXTERN */
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-#ifndef CURL_TEMP_PRINTF
+#ifndef FETCH_TEMP_PRINTF
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
   defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(CURL_NO_FMT_CHECKS)
+  !defined(FETCH_NO_FMT_CHECKS)
 #if defined(__MINGW32__) && !defined(__clang__)
 #if defined(__MINGW_PRINTF_FORMAT)  /* mingw-w64 3.0.0+. Needs stdio.h. */
-#define CURL_TEMP_PRINTF(fmt, arg) \
+#define FETCH_TEMP_PRINTF(fmt, arg) \
   __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
 #else
-#define CURL_TEMP_PRINTF(fmt, arg)
+#define FETCH_TEMP_PRINTF(fmt, arg)
 #endif
 #else
-#define CURL_TEMP_PRINTF(fmt, arg) \
+#define FETCH_TEMP_PRINTF(fmt, arg) \
   __attribute__((format(printf, fmt, arg)))
 #endif
 #else
-#define CURL_TEMP_PRINTF(fmt, arg)
+#define FETCH_TEMP_PRINTF(fmt, arg)
 #endif
 #endif
 
-CURL_EXTERN int curl_mprintf(const char *format, ...)
-  CURL_TEMP_PRINTF(1, 2);
-CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...)
-  CURL_TEMP_PRINTF(2, 3);
-CURL_EXTERN int curl_msprintf(char *buffer, const char *format, ...)
-  CURL_TEMP_PRINTF(2, 3);
-CURL_EXTERN int curl_msnprintf(char *buffer, size_t maxlength,
+FETCH_EXTERN int fetch_mprintf(const char *format, ...)
+  FETCH_TEMP_PRINTF(1, 2);
+FETCH_EXTERN int fetch_mfprintf(FILE *fd, const char *format, ...)
+  FETCH_TEMP_PRINTF(2, 3);
+FETCH_EXTERN int fetch_msprintf(char *buffer, const char *format, ...)
+  FETCH_TEMP_PRINTF(2, 3);
+FETCH_EXTERN int fetch_msnprintf(char *buffer, size_t maxlength,
                                const char *format, ...)
-  CURL_TEMP_PRINTF(3, 4);
-CURL_EXTERN int curl_mvprintf(const char *format, va_list args)
-  CURL_TEMP_PRINTF(1, 0);
-CURL_EXTERN int curl_mvfprintf(FILE *fd, const char *format, va_list args)
-  CURL_TEMP_PRINTF(2, 0);
-CURL_EXTERN int curl_mvsprintf(char *buffer, const char *format, va_list args)
-  CURL_TEMP_PRINTF(2, 0);
-CURL_EXTERN int curl_mvsnprintf(char *buffer, size_t maxlength,
+  FETCH_TEMP_PRINTF(3, 4);
+FETCH_EXTERN int fetch_mvprintf(const char *format, va_list args)
+  FETCH_TEMP_PRINTF(1, 0);
+FETCH_EXTERN int fetch_mvfprintf(FILE *fd, const char *format, va_list args)
+  FETCH_TEMP_PRINTF(2, 0);
+FETCH_EXTERN int fetch_mvsprintf(char *buffer, const char *format, va_list args)
+  FETCH_TEMP_PRINTF(2, 0);
+FETCH_EXTERN int fetch_mvsnprintf(char *buffer, size_t maxlength,
                                 const char *format, va_list args)
-  CURL_TEMP_PRINTF(3, 0);
-CURL_EXTERN char *curl_maprintf(const char *format, ...)
-  CURL_TEMP_PRINTF(1, 2);
-CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args)
-  CURL_TEMP_PRINTF(1, 0);
+  FETCH_TEMP_PRINTF(3, 0);
+FETCH_EXTERN char *fetch_maprintf(const char *format, ...)
+  FETCH_TEMP_PRINTF(1, 2);
+FETCH_EXTERN char *fetch_mvaprintf(const char *format, va_list args)
+  FETCH_TEMP_PRINTF(1, 0);
 
-#undef CURL_TEMP_PRINTF
+#undef FETCH_TEMP_PRINTF
 
 #ifdef  __cplusplus
 } /* end of extern "C" */
 #endif
 
-#endif /* CURLINC_MPRINTF_H */
+#endif /* FETCHINC_MPRINTF_H */

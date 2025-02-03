@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,14 +20,14 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 pkginclude_HEADERS = \
-  curl.h curlver.h easy.h mprintf.h stdcheaders.h multi.h \
+  fetch.h fetchver.h easy.h mprintf.h stdcheaders.h multi.h \
   typecheck-gcc.h system.h urlapi.h options.h header.h websockets.h
 
-pkgincludedir= $(includedir)/curl
+pkgincludedir= $(includedir)/fetch
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -35,7 +35,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(top_srcdir)/include/curl $(pkginclude_HEADERS)
+	$(CHECKSRC)@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(top_srcdir)/include/fetch $(pkginclude_HEADERS)
 
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes

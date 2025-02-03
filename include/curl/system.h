@@ -1,5 +1,5 @@
-#ifndef CURLINC_SYSTEM_H
-#define CURLINC_SYSTEM_H
+#ifndef FETCHINC_SYSTEM_H
+#define FETCHINC_SYSTEM_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -33,17 +33,17 @@
  * In order to differentiate between platforms/compilers/architectures use
  * only compiler built-in predefined preprocessor symbols.
  *
- * curl_off_t
+ * fetch_off_t
  * ----------
  *
- * For any given platform/compiler curl_off_t must be typedef'ed to a 64-bit
+ * For any given platform/compiler fetch_off_t must be typedef'ed to a 64-bit
  * wide signed integral data type. The width of this data type must remain
  * constant and independent of any possible large file support settings.
  *
- * As an exception to the above, curl_off_t shall be typedef'ed to a 32-bit
+ * As an exception to the above, fetch_off_t shall be typedef'ed to a 32-bit
  * wide signed integral data type if there is no 64-bit type.
  *
- * As a general rule, curl_off_t shall not be mapped to off_t. This rule shall
+ * As a general rule, fetch_off_t shall not be mapped to off_t. This rule shall
  * only be violated if off_t is the only 64-bit data type available and the
  * size of off_t is independent of large file support settings. Keep your
  * build on the safe side avoiding an off_t gating. If you have a 64-bit
@@ -53,247 +53,247 @@
  */
 
 #if defined(__DJGPP__)
-#  define CURL_TYPEOF_CURL_OFF_T     long long
-#  define CURL_FORMAT_CURL_OFF_T     "lld"
-#  define CURL_FORMAT_CURL_OFF_TU    "llu"
-#  define CURL_SUFFIX_CURL_OFF_T     LL
-#  define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define FETCH_TYPEOF_FETCH_OFF_T     long long
+#  define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#  define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#  define FETCH_SUFFIX_FETCH_OFF_T     LL
+#  define FETCH_SUFFIX_FETCH_OFF_TU    ULL
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 
 #elif defined(__BORLANDC__)
-#  define CURL_TYPEOF_CURL_OFF_T     __int64
-#  define CURL_FORMAT_CURL_OFF_T     "I64d"
-#  define CURL_FORMAT_CURL_OFF_TU    "I64u"
-#  define CURL_SUFFIX_CURL_OFF_T     i64
-#  define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define FETCH_TYPEOF_FETCH_OFF_T     __int64
+#  define FETCH_FORMAT_FETCH_OFF_T     "I64d"
+#  define FETCH_FORMAT_FETCH_OFF_TU    "I64u"
+#  define FETCH_SUFFIX_FETCH_OFF_T     i64
+#  define FETCH_SUFFIX_FETCH_OFF_TU    ui64
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 
 #elif defined(__POCC__)
 #  if defined(_MSC_VER)
-#    define CURL_TYPEOF_CURL_OFF_T     __int64
-#    define CURL_FORMAT_CURL_OFF_T     "I64d"
-#    define CURL_FORMAT_CURL_OFF_TU    "I64u"
-#    define CURL_SUFFIX_CURL_OFF_T     i64
-#    define CURL_SUFFIX_CURL_OFF_TU    ui64
+#    define FETCH_TYPEOF_FETCH_OFF_T     __int64
+#    define FETCH_FORMAT_FETCH_OFF_T     "I64d"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "I64u"
+#    define FETCH_SUFFIX_FETCH_OFF_T     i64
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ui64
 #  else
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 
 #elif defined(__LCC__)
 #  if defined(__MCST__) /* MCST eLbrus Compiler Collection */
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
-#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#    define CURL_PULL_SYS_TYPES_H      1
-#    define CURL_PULL_SYS_SOCKET_H     1
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#    define FETCH_PULL_SYS_TYPES_H      1
+#    define FETCH_PULL_SYS_SOCKET_H     1
 #  else                /* Local (or Little) C Compiler */
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
-#    define CURL_TYPEOF_CURL_SOCKLEN_T int
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 #  endif
 
 #elif defined(macintosh)
 #  include <ConditionalMacros.h>
 #  if TYPE_LONGLONG
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #  else
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T unsigned int
 
 #elif defined(__TANDEM)
 #  if !defined(__LP64)
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    define CURL_TYPEOF_CURL_SOCKLEN_T int
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 #  else
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
-#    define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_SOCKLEN_T unsigned int
 #  endif
 
 #elif defined(_WIN32_WCE)
-#  define CURL_TYPEOF_CURL_OFF_T     __int64
-#  define CURL_FORMAT_CURL_OFF_T     "I64d"
-#  define CURL_FORMAT_CURL_OFF_TU    "I64u"
-#  define CURL_SUFFIX_CURL_OFF_T     i64
-#  define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define FETCH_TYPEOF_FETCH_OFF_T     __int64
+#  define FETCH_FORMAT_FETCH_OFF_T     "I64d"
+#  define FETCH_FORMAT_FETCH_OFF_TU    "I64u"
+#  define FETCH_SUFFIX_FETCH_OFF_T     i64
+#  define FETCH_SUFFIX_FETCH_OFF_TU    ui64
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 
 #elif defined(__MINGW32__)
 #  include <inttypes.h>
-#  define CURL_TYPEOF_CURL_OFF_T     long long
-#  define CURL_FORMAT_CURL_OFF_T     PRId64
-#  define CURL_FORMAT_CURL_OFF_TU    PRIu64
-#  define CURL_SUFFIX_CURL_OFF_T     LL
-#  define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
-#  define CURL_PULL_SYS_TYPES_H      1
+#  define FETCH_TYPEOF_FETCH_OFF_T     long long
+#  define FETCH_FORMAT_FETCH_OFF_T     PRId64
+#  define FETCH_FORMAT_FETCH_OFF_TU    PRIu64
+#  define FETCH_SUFFIX_FETCH_OFF_T     LL
+#  define FETCH_SUFFIX_FETCH_OFF_TU    ULL
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T int
+#  define FETCH_PULL_SYS_TYPES_H      1
 
 #elif defined(__VMS)
 #  if defined(__VAX)
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
 #  else
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T unsigned int
 
 #elif defined(__OS400__)
-#  define CURL_TYPEOF_CURL_OFF_T     long long
-#  define CURL_FORMAT_CURL_OFF_T     "lld"
-#  define CURL_FORMAT_CURL_OFF_TU    "llu"
-#  define CURL_SUFFIX_CURL_OFF_T     LL
-#  define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#  define CURL_PULL_SYS_TYPES_H      1
-#  define CURL_PULL_SYS_SOCKET_H     1
+#  define FETCH_TYPEOF_FETCH_OFF_T     long long
+#  define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#  define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#  define FETCH_SUFFIX_FETCH_OFF_T     LL
+#  define FETCH_SUFFIX_FETCH_OFF_TU    ULL
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#  define FETCH_PULL_SYS_TYPES_H      1
+#  define FETCH_PULL_SYS_SOCKET_H     1
 
 #elif defined(__MVS__)
 #  if defined(_LONG_LONG)
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #  else /* _LP64 and default */
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#  define CURL_PULL_SYS_TYPES_H      1
-#  define CURL_PULL_SYS_SOCKET_H     1
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#  define FETCH_PULL_SYS_TYPES_H      1
+#  define FETCH_PULL_SYS_SOCKET_H     1
 
 #elif defined(__370__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)
 #    if defined(_LONG_LONG)
-#      define CURL_TYPEOF_CURL_OFF_T     long long
-#      define CURL_FORMAT_CURL_OFF_T     "lld"
-#      define CURL_FORMAT_CURL_OFF_TU    "llu"
-#      define CURL_SUFFIX_CURL_OFF_T     LL
-#      define CURL_SUFFIX_CURL_OFF_TU    ULL
+#      define FETCH_TYPEOF_FETCH_OFF_T     long long
+#      define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#      define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#      define FETCH_SUFFIX_FETCH_OFF_T     LL
+#      define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #    else /* _LP64 and default */
-#      define CURL_TYPEOF_CURL_OFF_T     long
-#      define CURL_FORMAT_CURL_OFF_T     "ld"
-#      define CURL_FORMAT_CURL_OFF_TU    "lu"
-#      define CURL_SUFFIX_CURL_OFF_T     L
-#      define CURL_SUFFIX_CURL_OFF_TU    UL
+#      define FETCH_TYPEOF_FETCH_OFF_T     long
+#      define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#      define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#      define FETCH_SUFFIX_FETCH_OFF_T     L
+#      define FETCH_SUFFIX_FETCH_OFF_TU    UL
 #    endif
-#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#    define CURL_PULL_SYS_TYPES_H      1
-#    define CURL_PULL_SYS_SOCKET_H     1
+#    define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#    define FETCH_PULL_SYS_TYPES_H      1
+#    define FETCH_PULL_SYS_SOCKET_H     1
 #  endif
 
 #elif defined(TPF)
-#  define CURL_TYPEOF_CURL_OFF_T     long
-#  define CURL_FORMAT_CURL_OFF_T     "ld"
-#  define CURL_FORMAT_CURL_OFF_TU    "lu"
-#  define CURL_SUFFIX_CURL_OFF_T     L
-#  define CURL_SUFFIX_CURL_OFF_TU    UL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define FETCH_TYPEOF_FETCH_OFF_T     long
+#  define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#  define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#  define FETCH_SUFFIX_FETCH_OFF_T     L
+#  define FETCH_SUFFIX_FETCH_OFF_TU    UL
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 
 #elif defined(__TINYC__) /* also known as tcc */
-#  define CURL_TYPEOF_CURL_OFF_T     long long
-#  define CURL_FORMAT_CURL_OFF_T     "lld"
-#  define CURL_FORMAT_CURL_OFF_TU    "llu"
-#  define CURL_SUFFIX_CURL_OFF_T     LL
-#  define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#  define CURL_PULL_SYS_TYPES_H      1
-#  define CURL_PULL_SYS_SOCKET_H     1
+#  define FETCH_TYPEOF_FETCH_OFF_T     long long
+#  define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#  define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#  define FETCH_SUFFIX_FETCH_OFF_T     LL
+#  define FETCH_SUFFIX_FETCH_OFF_TU    ULL
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#  define FETCH_PULL_SYS_TYPES_H      1
+#  define FETCH_PULL_SYS_SOCKET_H     1
 
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC) /* Oracle Solaris Studio */
 #  if !defined(__LP64) && (defined(__ILP32) ||                          \
                            defined(__i386) ||                           \
                            defined(__sparcv8) ||                        \
                            defined(__sparcv8plus))
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #  elif defined(__LP64) || \
         defined(__amd64) || defined(__sparcv9)
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#  define CURL_PULL_SYS_TYPES_H      1
-#  define CURL_PULL_SYS_SOCKET_H     1
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#  define FETCH_PULL_SYS_TYPES_H      1
+#  define FETCH_PULL_SYS_SOCKET_H     1
 
 #elif defined(__xlc__) /* IBM xlc compiler */
 #  if !defined(_LP64)
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #  else
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#  define CURL_PULL_SYS_TYPES_H      1
-#  define CURL_PULL_SYS_SOCKET_H     1
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#  define FETCH_PULL_SYS_TYPES_H      1
+#  define FETCH_PULL_SYS_SOCKET_H     1
 
 #elif defined(__hpux) /* HP aCC compiler */
 #  if !defined(_LP64)
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #  else
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#  define CURL_PULL_SYS_TYPES_H      1
-#  define CURL_PULL_SYS_SOCKET_H     1
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#  define FETCH_PULL_SYS_TYPES_H      1
+#  define FETCH_PULL_SYS_SOCKET_H     1
 
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */
@@ -302,16 +302,16 @@
 #elif defined(_MSC_VER)
 #  if (_MSC_VER >= 1800)
 #    include <inttypes.h>
-#    define CURL_FORMAT_CURL_OFF_T     PRId64
-#    define CURL_FORMAT_CURL_OFF_TU    PRIu64
+#    define FETCH_FORMAT_FETCH_OFF_T     PRId64
+#    define FETCH_FORMAT_FETCH_OFF_TU    PRIu64
 #  else
-#    define CURL_FORMAT_CURL_OFF_T     "I64d"
-#    define CURL_FORMAT_CURL_OFF_TU    "I64u"
+#    define FETCH_FORMAT_FETCH_OFF_T     "I64d"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "I64u"
 #  endif
-#  define CURL_TYPEOF_CURL_OFF_T     __int64
-#  define CURL_SUFFIX_CURL_OFF_T     i64
-#  define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define FETCH_TYPEOF_FETCH_OFF_T     __int64
+#  define FETCH_SUFFIX_FETCH_OFF_T     i64
+#  define FETCH_SUFFIX_FETCH_OFF_TU    ui64
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 
 /* ===================================== */
 /*    KEEP GENERIC GCC THE LAST ENTRY    */
@@ -325,75 +325,75 @@
    defined(__XTENSA__) ||                                               \
    (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4)  ||               \
    (defined(__LONG_MAX__) && __LONG_MAX__ == 2147483647L))
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long long
+#    define FETCH_FORMAT_FETCH_OFF_T     "lld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "llu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     LL
+#    define FETCH_SUFFIX_FETCH_OFF_TU    ULL
 #  elif defined(__LP64__) || \
         defined(__x86_64__) || defined(__ppc64__) || defined(__sparc64__) || \
         defined(__e2k__) || \
         (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 8) || \
         (defined(__LONG_MAX__) && __LONG_MAX__ == 9223372036854775807L)
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define FETCH_TYPEOF_FETCH_OFF_T     long
+#    define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#    define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#    define FETCH_SUFFIX_FETCH_OFF_T     L
+#    define FETCH_SUFFIX_FETCH_OFF_TU    UL
 #  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#  define CURL_PULL_SYS_TYPES_H      1
-#  define CURL_PULL_SYS_SOCKET_H     1
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T socklen_t
+#  define FETCH_PULL_SYS_TYPES_H      1
+#  define FETCH_PULL_SYS_SOCKET_H     1
 
 #else
 /* generic "safe guess" on old 32-bit style */
-#  define CURL_TYPEOF_CURL_OFF_T     long
-#  define CURL_FORMAT_CURL_OFF_T     "ld"
-#  define CURL_FORMAT_CURL_OFF_TU    "lu"
-#  define CURL_SUFFIX_CURL_OFF_T     L
-#  define CURL_SUFFIX_CURL_OFF_TU    UL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define FETCH_TYPEOF_FETCH_OFF_T     long
+#  define FETCH_FORMAT_FETCH_OFF_T     "ld"
+#  define FETCH_FORMAT_FETCH_OFF_TU    "lu"
+#  define FETCH_SUFFIX_FETCH_OFF_T     L
+#  define FETCH_SUFFIX_FETCH_OFF_TU    UL
+#  define FETCH_TYPEOF_FETCH_SOCKLEN_T int
 #endif
 
 #ifdef _AIX
 /* AIX needs <sys/poll.h> */
-#define CURL_PULL_SYS_POLL_H
+#define FETCH_PULL_SYS_POLL_H
 #endif
 
-/* CURL_PULL_SYS_TYPES_H is defined above when inclusion of header file  */
+/* FETCH_PULL_SYS_TYPES_H is defined above when inclusion of header file  */
 /* sys/types.h is required here to properly make type definitions below. */
-#ifdef CURL_PULL_SYS_TYPES_H
+#ifdef FETCH_PULL_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
 
-/* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
+/* FETCH_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
 /* sys/socket.h is required here to properly make type definitions below. */
-#ifdef CURL_PULL_SYS_SOCKET_H
+#ifdef FETCH_PULL_SYS_SOCKET_H
 #  include <sys/socket.h>
 #endif
 
-/* CURL_PULL_SYS_POLL_H is defined above when inclusion of header file    */
+/* FETCH_PULL_SYS_POLL_H is defined above when inclusion of header file    */
 /* sys/poll.h is required here to properly make type definitions below.   */
-#ifdef CURL_PULL_SYS_POLL_H
+#ifdef FETCH_PULL_SYS_POLL_H
 #  include <sys/poll.h>
 #endif
 
-/* Data type definition of curl_socklen_t. */
-#ifdef CURL_TYPEOF_CURL_SOCKLEN_T
-  typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
+/* Data type definition of fetch_socklen_t. */
+#ifdef FETCH_TYPEOF_FETCH_SOCKLEN_T
+  typedef FETCH_TYPEOF_FETCH_SOCKLEN_T fetch_socklen_t;
 #endif
 
-/* Data type definition of curl_off_t. */
+/* Data type definition of fetch_off_t. */
 
-#ifdef CURL_TYPEOF_CURL_OFF_T
-  typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
+#ifdef FETCH_TYPEOF_FETCH_OFF_T
+  typedef FETCH_TYPEOF_FETCH_OFF_T fetch_off_t;
 #endif
 
 /*
- * CURL_ISOCPP and CURL_OFF_T_C definitions are done here in order to allow
- * these to be visible and exported by the external libcurl interface API,
+ * FETCH_ISOCPP and FETCH_OFF_T_C definitions are done here in order to allow
+ * these to be visible and exported by the external libfetch interface API,
  * while also making them visible to the library internals, simply including
- * curl_setup.h, without actually needing to include curl.h internally.
+ * fetch_setup.h, without actually needing to include fetch.h internally.
  * If some day this section would grow big enough, all this should be moved
  * to its own header file.
  */
@@ -409,32 +409,32 @@
   defined(__POCC__) || defined(__HIGHC__) || \
   defined(__ILEC400__)
   /* This compiler is believed to have an ISO compatible preprocessor */
-#define CURL_ISOCPP
+#define FETCH_ISOCPP
 #else
   /* This compiler is believed NOT to have an ISO compatible preprocessor */
-#undef CURL_ISOCPP
+#undef FETCH_ISOCPP
 #endif
 
 /*
- * Macros for minimum-width signed and unsigned curl_off_t integer constants.
+ * Macros for minimum-width signed and unsigned fetch_off_t integer constants.
  */
 
 #if defined(__BORLANDC__) && (__BORLANDC__ == 0x0551)
-#  define CURLINC_OFF_T_C_HLPR2(x) x
-#  define CURLINC_OFF_T_C_HLPR1(x) CURLINC_OFF_T_C_HLPR2(x)
-#  define CURL_OFF_T_C(Val)  CURLINC_OFF_T_C_HLPR1(Val) ## \
-                             CURLINC_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_T)
-#  define CURL_OFF_TU_C(Val) CURLINC_OFF_T_C_HLPR1(Val) ## \
-                             CURLINC_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_TU)
+#  define FETCHINC_OFF_T_C_HLPR2(x) x
+#  define FETCHINC_OFF_T_C_HLPR1(x) FETCHINC_OFF_T_C_HLPR2(x)
+#  define FETCH_OFF_T_C(Val)  FETCHINC_OFF_T_C_HLPR1(Val) ## \
+                             FETCHINC_OFF_T_C_HLPR1(FETCH_SUFFIX_FETCH_OFF_T)
+#  define FETCH_OFF_TU_C(Val) FETCHINC_OFF_T_C_HLPR1(Val) ## \
+                             FETCHINC_OFF_T_C_HLPR1(FETCH_SUFFIX_FETCH_OFF_TU)
 #else
-#  ifdef CURL_ISOCPP
-#    define CURLINC_OFF_T_C_HLPR2(Val,Suffix) Val ## Suffix
+#  ifdef FETCH_ISOCPP
+#    define FETCHINC_OFF_T_C_HLPR2(Val,Suffix) Val ## Suffix
 #  else
-#    define CURLINC_OFF_T_C_HLPR2(Val,Suffix) Val/**/Suffix
+#    define FETCHINC_OFF_T_C_HLPR2(Val,Suffix) Val/**/Suffix
 #  endif
-#  define CURLINC_OFF_T_C_HLPR1(Val,Suffix) CURLINC_OFF_T_C_HLPR2(Val,Suffix)
-#  define CURL_OFF_T_C(Val)  CURLINC_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_T)
-#  define CURL_OFF_TU_C(Val) CURLINC_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_TU)
+#  define FETCHINC_OFF_T_C_HLPR1(Val,Suffix) FETCHINC_OFF_T_C_HLPR2(Val,Suffix)
+#  define FETCH_OFF_T_C(Val)  FETCHINC_OFF_T_C_HLPR1(Val,FETCH_SUFFIX_FETCH_OFF_T)
+#  define FETCH_OFF_TU_C(Val) FETCHINC_OFF_T_C_HLPR1(Val,FETCH_SUFFIX_FETCH_OFF_TU)
 #endif
 
-#endif /* CURLINC_SYSTEM_H */
+#endif /* FETCHINC_SYSTEM_H */

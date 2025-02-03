@@ -1,5 +1,5 @@
-#ifndef CURLINC_HEADER_H
-#define CURLINC_HEADER_H
+#ifndef FETCHINC_HEADER_H
+#define FETCHINC_HEADER_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -28,47 +28,47 @@
 extern "C" {
 #endif
 
-struct curl_header {
+struct fetch_header {
   char *name;    /* this might not use the same case */
   char *value;
   size_t amount; /* number of headers using this name  */
   size_t index;  /* ... of this instance, 0 or higher */
   unsigned int origin; /* see bits below */
-  void *anchor; /* handle privately used by libcurl */
+  void *anchor; /* handle privately used by libfetch */
 };
 
 /* 'origin' bits */
-#define CURLH_HEADER    (1<<0) /* plain server header */
-#define CURLH_TRAILER   (1<<1) /* trailers */
-#define CURLH_CONNECT   (1<<2) /* CONNECT headers */
-#define CURLH_1XX       (1<<3) /* 1xx headers */
-#define CURLH_PSEUDO    (1<<4) /* pseudo headers */
+#define FETCHH_HEADER    (1<<0) /* plain server header */
+#define FETCHH_TRAILER   (1<<1) /* trailers */
+#define FETCHH_CONNECT   (1<<2) /* CONNECT headers */
+#define FETCHH_1XX       (1<<3) /* 1xx headers */
+#define FETCHH_PSEUDO    (1<<4) /* pseudo headers */
 
 typedef enum {
-  CURLHE_OK,
-  CURLHE_BADINDEX,      /* header exists but not with this index */
-  CURLHE_MISSING,       /* no such header exists */
-  CURLHE_NOHEADERS,     /* no headers at all exist (yet) */
-  CURLHE_NOREQUEST,     /* no request with this number was used */
-  CURLHE_OUT_OF_MEMORY, /* out of memory while processing */
-  CURLHE_BAD_ARGUMENT,  /* a function argument was not okay */
-  CURLHE_NOT_BUILT_IN   /* if API was disabled in the build */
-} CURLHcode;
+  FETCHHE_OK,
+  FETCHHE_BADINDEX,      /* header exists but not with this index */
+  FETCHHE_MISSING,       /* no such header exists */
+  FETCHHE_NOHEADERS,     /* no headers at all exist (yet) */
+  FETCHHE_NOREQUEST,     /* no request with this number was used */
+  FETCHHE_OUT_OF_MEMORY, /* out of memory while processing */
+  FETCHHE_BAD_ARGUMENT,  /* a function argument was not okay */
+  FETCHHE_NOT_BUILT_IN   /* if API was disabled in the build */
+} FETCHHcode;
 
-CURL_EXTERN CURLHcode curl_easy_header(CURL *easy,
+FETCH_EXTERN FETCHHcode fetch_easy_header(FETCH *easy,
                                        const char *name,
                                        size_t index,
                                        unsigned int origin,
                                        int request,
-                                       struct curl_header **hout);
+                                       struct fetch_header **hout);
 
-CURL_EXTERN struct curl_header *curl_easy_nextheader(CURL *easy,
+FETCH_EXTERN struct fetch_header *fetch_easy_nextheader(FETCH *easy,
                                                      unsigned int origin,
                                                      int request,
-                                                     struct curl_header *prev);
+                                                     struct fetch_header *prev);
 
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif
 
-#endif /* CURLINC_HEADER_H */
+#endif /* FETCHINC_HEADER_H */
