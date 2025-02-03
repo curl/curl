@@ -33,7 +33,7 @@
 
 /* Make these warnings visible with an option. */
 #if !defined(CURL_WARN_SIGN_CONVERSION)
-#if (defined(__GNUC__) && (__GNUC__ > 4)) || defined(__clang__)
+#if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC__MINOR__ > 2))) || defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 #endif
