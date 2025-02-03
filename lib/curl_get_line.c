@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,18 +18,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
-  !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
+#if !defined(FETCH_DISABLE_COOKIES) || !defined(FETCH_DISABLE_ALTSVC) ||  \
+  !defined(FETCH_DISABLE_HSTS) || !defined(FETCH_DISABLE_NETRC)
 
-#include "curl_get_line.h"
-#ifdef BUILDING_LIBCURL
-#include "curl_memory.h"
+#include "fetch_get_line.h"
+#ifdef BUILDING_LIBFETCH
+#include "fetch_memory.h"
 #endif
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -40,7 +40,7 @@
  */
 int Curl_get_line(struct dynbuf *buf, FILE *input)
 {
-  CURLcode result;
+  FETCHcode result;
   char buffer[128];
   Curl_dyn_reset(buf);
   while(1) {

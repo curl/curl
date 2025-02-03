@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,24 +18,24 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl AND ISC
+ * SPDX-License-Identifier: fetch AND ISC
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_SSH)
 
-#include "curl_path.h"
-#include <curl/curl.h>
-#include "curl_memory.h"
+#include "fetch_path.h"
+#include <fetch/fetch.h>
+#include "fetch_memory.h"
 #include "escape.h"
 #include "memdebug.h"
 
 #define MAX_SSHPATH_LEN 100000 /* arbitrary */
 
 /* figure out the path to work with in this particular request */
-CURLcode Curl_getworkingpath(struct Curl_easy *data,
+FETCHcode Curl_getworkingpath(struct Curl_easy *data,
                              char *homedir,  /* when SFTP is used */
                              char **path) /* returns the  allocated
                                              real path to work with */
@@ -43,7 +43,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
   char *working_path;
   size_t working_path_len;
   struct dynbuf npath;
-  CURLcode result =
+  FETCHcode result =
     Curl_urldecode(data->state.up.path, 0, &working_path,
                    &working_path_len, REJECT_ZERO);
   if(result)
@@ -53,20 +53,20 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
   Curl_dyn_init(&npath, MAX_SSHPATH_LEN);
 
   /* Check for /~/, indicating relative to the user's home directory */
-  if((data->conn->handler->protocol & CURLPROTO_SCP) &&
+  if((data->conn->handler->protocol & FETCHPROTO_SCP) &&
      (working_path_len > 3) && (!memcmp(working_path, "/~/", 3))) {
     /* It is referenced to the home directory, so strip the leading '/~/' */
     if(Curl_dyn_addn(&npath, &working_path[3], working_path_len - 3)) {
       free(working_path);
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
     }
   }
-  else if((data->conn->handler->protocol & CURLPROTO_SFTP) &&
+  else if((data->conn->handler->protocol & FETCHPROTO_SFTP) &&
           (!strcmp("/~", working_path) ||
            ((working_path_len > 2) && !memcmp(working_path, "/~/", 3)))) {
     if(Curl_dyn_add(&npath, homedir)) {
       free(working_path);
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
     }
     if(working_path_len > 2) {
       size_t len;
@@ -81,7 +81,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
       if(Curl_dyn_addn(&npath,
                        &working_path[copyfrom], working_path_len - copyfrom)) {
         free(working_path);
-        return CURLE_OUT_OF_MEMORY;
+        return FETCHE_OUT_OF_MEMORY;
       }
     }
   }
@@ -95,7 +95,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
   else
     *path = working_path;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /* The original get_pathname() function came from OpenSSH sftp.c version
@@ -118,20 +118,20 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
 
 #define MAX_PATHLENGTH 65535 /* arbitrary long */
 
-CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
+FETCHcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 {
   const char *cp = *cpp, *end;
   char quot;
   unsigned int i;
   static const char WHITESPACE[] = " \t\r\n";
   struct dynbuf out;
-  CURLcode result;
+  FETCHcode result;
 
   DEBUGASSERT(homedir);
   *path = NULL;
   *cpp = NULL;
   if(!*cp || !homedir)
-    return CURLE_QUOTE_ERROR;
+    return FETCHE_QUOTE_ERROR;
 
   Curl_dyn_init(&out, MAX_PATHLENGTH);
 
@@ -193,11 +193,11 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
       return result;
   }
   *path = Curl_dyn_ptr(&out);
-  return CURLE_OK;
+  return FETCHE_OK;
 
 fail:
   Curl_dyn_free(&out);
-  return CURLE_QUOTE_ERROR;
+  return FETCHE_QUOTE_ERROR;
 }
 
 #endif /* if SSH is used */

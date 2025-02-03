@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SASL_H
-#define HEADER_CURL_SASL_H
+#ifndef HEADER_FETCH_SASL_H
+#define HEADER_FETCH_SASL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "bufref.h"
 
@@ -97,15 +97,15 @@ typedef enum {
 /* Protocol dependent SASL parameters */
 struct SASLproto {
   const char *service;     /* The service name */
-  CURLcode (*sendauth)(struct Curl_easy *data, const char *mech,
+  FETCHcode (*sendauth)(struct Curl_easy *data, const char *mech,
                        const struct bufref *ir);
                            /* Send authentication command */
-  CURLcode (*contauth)(struct Curl_easy *data, const char *mech,
+  FETCHcode (*contauth)(struct Curl_easy *data, const char *mech,
                        const struct bufref *contauth);
                            /* Send authentication continuation */
-  CURLcode (*cancelauth)(struct Curl_easy *data, const char *mech);
+  FETCHcode (*cancelauth)(struct Curl_easy *data, const char *mech);
                            /* Cancel authentication. */
-  CURLcode (*getmessage)(struct Curl_easy *data, struct bufref *out);
+  FETCHcode (*getmessage)(struct Curl_easy *data, struct bufref *out);
                            /* Get SASL response message */
   size_t maxirlen;         /* Maximum initial response + mechanism length,
                               or zero if no max. This is normally the max
@@ -135,7 +135,7 @@ struct SASL {
   (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
    !memcmp(line, mech, wordlen))
 
-/* This is used to cleanup any libraries or curl modules used by the sasl
+/* This is used to cleanup any libraries or fetch modules used by the sasl
    functions */
 void Curl_sasl_cleanup(struct connectdata *conn, unsigned short authused);
 
@@ -144,7 +144,7 @@ unsigned short Curl_sasl_decode_mech(const char *ptr,
                                      size_t maxlen, size_t *len);
 
 /* Parse the URL login options */
-CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
+FETCHcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
                                          const char *value, size_t len);
 
 /* Initializes an SASL structure */
@@ -155,11 +155,11 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
 bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data);
 
 /* Calculate the required login details for SASL authentication  */
-CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
+FETCHcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
                          bool force_ir, saslprogress *progress);
 
 /* Continue an SASL authentication  */
-CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
+FETCHcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
                             int code, saslprogress *progress);
 
-#endif /* HEADER_CURL_SASL_H */
+#endif /* HEADER_FETCH_SASL_H */

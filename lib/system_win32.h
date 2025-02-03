@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SYSTEM_WIN32_H
-#define HEADER_CURL_SYSTEM_WIN32_H
+#ifndef HEADER_FETCH_SYSTEM_WIN32_H
+#define HEADER_FETCH_SYSTEM_WIN32_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,20 +20,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(_WIN32)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 extern LARGE_INTEGER Curl_freq;
 extern bool Curl_isVistaOrGreater;
 
-CURLcode Curl_win32_init(long flags);
+FETCHcode Curl_win32_init(long flags);
 void Curl_win32_cleanup(long init_flags);
 
 /* We use our own typedef here since some headers might lack this */
@@ -45,7 +45,7 @@ extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);
 #else  /* _WIN32 */
-#define Curl_win32_init(x) CURLE_OK
+#define Curl_win32_init(x) FETCHE_OK
 #endif /* !_WIN32 */
 
-#endif /* HEADER_CURL_SYSTEM_WIN32_H */
+#endif /* HEADER_FETCH_SYSTEM_WIN32_H */

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_CURL_QUICHE_H
-#define HEADER_CURL_VQUIC_CURL_QUICHE_H
+#ifndef HEADER_FETCH_VQUIC_FETCH_QUICHE_H
+#define HEADER_FETCH_VQUIC_FETCH_QUICHE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_QUICHE
 
@@ -36,7 +36,7 @@ struct Curl_easy;
 
 void Curl_quiche_ver(char *p, size_t len);
 
-CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
+FETCHcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
                                const struct Curl_addrinfo *ai);
@@ -47,4 +47,4 @@ bool Curl_conn_is_quiche(const struct Curl_easy *data,
 
 #endif
 
-#endif /* HEADER_CURL_VQUIC_CURL_QUICHE_H */
+#endif /* HEADER_FETCH_VQUIC_FETCH_QUICHE_H */

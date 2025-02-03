@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SELECT_H
-#define HEADER_CURL_SELECT_H
+#ifndef HEADER_FETCH_SELECT_H
+#define HEADER_FETCH_SELECT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef HAVE_POLL_H
 #include <poll.h>
@@ -49,7 +49,7 @@
 
 struct pollfd
 {
-    curl_socket_t fd;
+    fetch_socket_t fd;
     short   events;
     short   revents;
 };
@@ -71,15 +71,15 @@ struct pollfd
 /* there are three CSELECT defines that are defined in the public header that
    are exposed to users, but this *IN2 bit is only ever used internally and
    therefore defined here */
-#define CURL_CSELECT_IN2 (CURL_CSELECT_ERR << 1)
+#define FETCH_CSELECT_IN2 (FETCH_CSELECT_ERR << 1)
 
-int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
-                      curl_socket_t writefd,
+int Curl_socket_check(fetch_socket_t readfd, fetch_socket_t readfd2,
+                      fetch_socket_t writefd,
                       timediff_t timeout_ms);
 #define SOCKET_READABLE(x,z) \
-  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
+  Curl_socket_check(x, FETCH_SOCKET_BAD, FETCH_SOCKET_BAD, z)
 #define SOCKET_WRITABLE(x,z) \
-  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
+  Curl_socket_check(FETCH_SOCKET_BAD, FETCH_SOCKET_BAD, x, z)
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
 int Curl_wait_ms(timediff_t timeout_ms);
@@ -111,36 +111,36 @@ int Curl_wait_ms(timediff_t timeout_ms);
   } while(0)
 #endif
 
-struct curl_pollfds {
+struct fetch_pollfds {
   struct pollfd *pfds;
   unsigned int n;
   unsigned int count;
   BIT(allocated_pfds);
 };
 
-void Curl_pollfds_init(struct curl_pollfds *cpfds,
+void Curl_pollfds_init(struct fetch_pollfds *cpfds,
                        struct pollfd *static_pfds,
                        unsigned int static_count);
 
-void Curl_pollfds_cleanup(struct curl_pollfds *cpfds);
+void Curl_pollfds_cleanup(struct fetch_pollfds *cpfds);
 
-CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,
+FETCHcode Curl_pollfds_add_ps(struct fetch_pollfds *cpfds,
                              struct easy_pollset *ps);
 
-CURLcode Curl_pollfds_add_sock(struct curl_pollfds *cpfds,
-                               curl_socket_t sock, short events);
+FETCHcode Curl_pollfds_add_sock(struct fetch_pollfds *cpfds,
+                               fetch_socket_t sock, short events);
 
 struct Curl_waitfds {
-  struct curl_waitfd *wfds;
+  struct fetch_waitfd *wfds;
   unsigned int n;
   unsigned int count;
 };
 
 void Curl_waitfds_init(struct Curl_waitfds *cwfds,
-                       struct curl_waitfd *static_wfds,
+                       struct fetch_waitfd *static_wfds,
                        unsigned int static_count);
 
 unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
                                  struct easy_pollset *ps);
 
-#endif /* HEADER_CURL_SELECT_H */
+#endif /* HEADER_FETCH_SELECT_H */

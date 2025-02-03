@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  * RFC2195 CRAM-MD5 authentication
  * RFC2617 Basic and Digest Access Authentication
@@ -33,28 +33,28 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3) || \
-  (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
+#if !defined(FETCH_DISABLE_IMAP) || !defined(FETCH_DISABLE_SMTP) || \
+  !defined(FETCH_DISABLE_POP3) || \
+  (!defined(FETCH_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 
-#include "curl_base64.h"
-#include "curl_md5.h"
+#include "fetch_base64.h"
+#include "fetch_md5.h"
 #include "vauth/vauth.h"
 #include "cfilters.h"
 #include "vtls/vtls.h"
-#include "curl_hmac.h"
-#include "curl_sasl.h"
+#include "fetch_hmac.h"
+#include "fetch_sasl.h"
 #include "warnless.h"
 #include "strtok.h"
 #include "sendf.h"
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /* Supported mechanisms */
@@ -80,7 +80,7 @@ static const struct {
 /*
  * Curl_sasl_cleanup()
  *
- * This is used to cleanup any libraries or curl modules used by the sasl
+ * This is used to cleanup any libraries or fetch modules used by the sasl
  * functions.
  *
  * Parameters:
@@ -157,14 +157,14 @@ unsigned short Curl_sasl_decode_mech(const char *ptr, size_t maxlen,
  *
  * Parse the URL login options.
  */
-CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
+FETCHcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
                                          const char *value, size_t len)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   size_t mechlen;
 
   if(!len)
-    return CURLE_URL_MALFORMAT;
+    return FETCHE_URL_MALFORMAT;
 
   if(sasl->resetprefs) {
     sasl->resetprefs = FALSE;
@@ -178,7 +178,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
     if(mechbit && mechlen == len)
       sasl->prefmech |= mechbit;
     else
-      result = CURLE_URL_MALFORMAT;
+      result = FETCHE_URL_MALFORMAT;
   }
 
   return result;
@@ -204,20 +204,20 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
   sasl->mutual_auth = FALSE;       /* No mutual authentication (GSSAPI only) */
   sasl->force_ir = FALSE;          /* Respect external option */
 
-  if(auth != CURLAUTH_BASIC) {
+  if(auth != FETCHAUTH_BASIC) {
     unsigned short mechs = SASL_AUTH_NONE;
 
     /* If some usable http authentication options have been set, determine
        new defaults from them. */
-    if(auth & CURLAUTH_BASIC)
+    if(auth & FETCHAUTH_BASIC)
       mechs |= SASL_MECH_PLAIN | SASL_MECH_LOGIN;
-    if(auth & CURLAUTH_DIGEST)
+    if(auth & FETCHAUTH_DIGEST)
       mechs |= SASL_MECH_DIGEST_MD5;
-    if(auth & CURLAUTH_NTLM)
+    if(auth & FETCHAUTH_NTLM)
       mechs |= SASL_MECH_NTLM;
-    if(auth & CURLAUTH_BEARER)
+    if(auth & FETCHAUTH_BEARER)
       mechs |= SASL_MECH_OAUTHBEARER | SASL_MECH_XOAUTH2;
-    if(auth & CURLAUTH_GSSAPI)
+    if(auth & FETCHAUTH_GSSAPI)
       mechs |= SASL_MECH_GSSAPI;
 
     if(mechs != SASL_AUTH_NONE)
@@ -233,7 +233,7 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
 static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
                        saslstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[]={
     "STOP",
@@ -268,12 +268,12 @@ static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
 }
 
 #if defined(USE_NTLM) || defined(USE_GSASL) || defined(USE_KERBEROS5) || \
-  !defined(CURL_DISABLE_DIGEST_AUTH)
+  !defined(FETCH_DISABLE_DIGEST_AUTH)
 /* Get the SASL server message and convert it to binary. */
-static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
+static FETCHcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
                                    struct bufref *out)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   result = sasl->params->getmessage(data, out);
   if(!result && (sasl->params->flags & SASL_FLAG_BASE64)) {
@@ -286,7 +286,7 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
     else {
       result = Curl_base64_decode(serverdata, &msg, &msglen);
       if(!result)
-        Curl_bufref_set(out, msg, msglen, curl_free);
+        Curl_bufref_set(out, msg, msglen, fetch_free);
     }
   }
   return result;
@@ -294,9 +294,9 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
 #endif
 
 /* Encode the outgoing SASL message. */
-static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
+static FETCHcode build_message(struct SASL *sasl, struct bufref *msg)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   if(sasl->params->flags & SASL_FLAG_BASE64) {
     if(!Curl_bufref_ptr(msg))                   /* Empty message. */
@@ -310,7 +310,7 @@ static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
       result = Curl_base64_encode((const char *) Curl_bufref_ptr(msg),
                                   Curl_bufref_len(msg), &base64, &base64len);
       if(!result)
-        Curl_bufref_set(msg, base64, base64len, curl_free);
+        Curl_bufref_set(msg, base64, base64len, fetch_free);
     }
   }
 
@@ -340,10 +340,10 @@ bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data)
  *
  * Calculate the required login details for SASL authentication.
  */
-CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
+FETCHcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
                          bool force_ir, saslprogress *progress)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
   unsigned short enabledmechs;
   const char *mech = NULL;
@@ -410,7 +410,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
 
       result = Curl_auth_gsasl_start(data, conn->user,
                                      conn->passwd, &conn->gsasl);
-      if(result == CURLE_OK && (force_ir || data->set.sasl_ir))
+      if(result == FETCHE_OK && (force_ir || data->set.sasl_ir))
         result = Curl_auth_gsasl_token(data, &nullmsg, &conn->gsasl, &resp);
     }
     else if((enabledmechs & SASL_MECH_SCRAM_SHA_1) &&
@@ -423,12 +423,12 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
 
       result = Curl_auth_gsasl_start(data, conn->user,
                                      conn->passwd, &conn->gsasl);
-      if(result == CURLE_OK && (force_ir || data->set.sasl_ir))
+      if(result == FETCHE_OK && (force_ir || data->set.sasl_ir))
         result = Curl_auth_gsasl_token(data, &nullmsg, &conn->gsasl, &resp);
     }
     else
 #endif
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#ifndef FETCH_DISABLE_DIGEST_AUTH
     if((enabledmechs & SASL_MECH_DIGEST_MD5) &&
        Curl_auth_is_digest_supported()) {
       mech = SASL_MECH_STRING_DIGEST_MD5;
@@ -529,17 +529,17 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
  *
  * Continue the authentication.
  */
-CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
+FETCHcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
                             int code, saslprogress *progress)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
   saslstate newstate = SASL_FINAL;
   struct bufref resp;
   const char *hostname, *disp_hostname;
   int port;
 #if defined(USE_KERBEROS5) || defined(USE_NTLM) \
-    || !defined(CURL_DISABLE_DIGEST_AUTH)
+    || !defined(FETCH_DISABLE_DIGEST_AUTH)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
@@ -554,7 +554,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
 
   if(sasl->state == SASL_FINAL) {
     if(code != sasl->params->finalcode)
-      result = CURLE_LOGIN_DENIED;
+      result = FETCHE_LOGIN_DENIED;
     *progress = SASL_DONE;
     sasl_state(sasl, data, SASL_STOP);
     return result;
@@ -564,7 +564,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
      code != sasl->params->contcode) {
     *progress = SASL_DONE;
     sasl_state(sasl, data, SASL_STOP);
-    return CURLE_LOGIN_DENIED;
+    return FETCHE_LOGIN_DENIED;
   }
 
   switch(sasl->state) {
@@ -594,7 +594,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
       newstate = SASL_GSASL;
     break;
 #endif
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#ifndef FETCH_DISABLE_DIGEST_AUTH
   case SASL_CRAMMD5:
     result = get_server_message(sasl, data, &serverdata);
     if(!result)
@@ -717,7 +717,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     else {
       *progress = SASL_DONE;
       sasl_state(sasl, data, SASL_STOP);
-      return CURLE_LOGIN_DENIED;
+      return FETCHE_LOGIN_DENIED;
     }
 
   case SASL_CANCEL:
@@ -728,19 +728,19 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     return Curl_sasl_start(sasl, data, sasl->force_ir, progress);
   default:
     failf(data, "Unsupported SASL authentication mechanism");
-    result = CURLE_UNSUPPORTED_PROTOCOL;  /* Should not happen */
+    result = FETCHE_UNSUPPORTED_PROTOCOL;  /* Should not happen */
     break;
   }
 
   Curl_bufref_free(&serverdata);
 
   switch(result) {
-  case CURLE_BAD_CONTENT_ENCODING:
+  case FETCHE_BAD_CONTENT_ENCODING:
     /* Cancel dialog */
     result = sasl->params->cancelauth(data, sasl->curmech);
     newstate = SASL_CANCEL;
     break;
-  case CURLE_OK:
+  case FETCHE_OK:
     result = build_message(sasl, &resp);
     if(!result)
       result = sasl->params->contauth(data, sasl->curmech, &resp);

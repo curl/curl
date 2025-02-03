@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE)
+#if defined(USE_FETCH_NTLM_CORE)
 
 /*
  * NTLM details:
@@ -127,27 +127,27 @@
 #  include <wincrypt.h>
 #else
 #  error "cannot compile NTLM support without a crypto library with DES."
-#  define CURL_NTLM_NOT_SUPPORTED
+#  define FETCH_NTLM_NOT_SUPPORTED
 #endif
 
 #include "urldata.h"
 #include "strcase.h"
-#include "curl_ntlm_core.h"
-#include "curl_md5.h"
-#include "curl_hmac.h"
+#include "fetch_ntlm_core.h"
+#include "fetch_md5.h"
+#include "fetch_hmac.h"
 #include "warnless.h"
-#include "curl_endian.h"
-#include "curl_des.h"
-#include "curl_md4.h"
+#include "fetch_endian.h"
+#include "fetch_des.h"
+#include "fetch_md4.h"
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
 #define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
 
-#if !defined(CURL_NTLM_NOT_SUPPORTED)
+#if !defined(FETCH_NTLM_NOT_SUPPORTED)
 /*
 * Turns a 56-bit key into being 64-bit wide.
 */
@@ -366,16 +366,16 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
 /*
  * Set up lanmanager hashed password
  */
-CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
+FETCHcode Curl_ntlm_core_mk_lm_hash(const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */)
 {
   unsigned char pw[14];
-#if !defined(CURL_NTLM_NOT_SUPPORTED)
+#if !defined(FETCH_NTLM_NOT_SUPPORTED)
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
   };
 #endif
-  size_t len = CURLMIN(strlen(password), 14);
+  size_t len = FETCHMIN(strlen(password), 14);
 
   Curl_strntoupper((char *)pw, password, len);
   memset(&pw[len], 0, 14 - len);
@@ -408,7 +408,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     memset(lmbuffer + 16, 0, 21 - 16);
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void ascii_to_unicode_le(unsigned char *dest, const char *src,
@@ -439,17 +439,17 @@ static void ascii_uppercase_to_unicode_le(unsigned char *dest,
  * Set up nt hashed passwords
  * @unittest: 1600
  */
-CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
+FETCHcode Curl_ntlm_core_mk_nt_hash(const char *password,
                                    unsigned char *ntbuffer /* 21 bytes */)
 {
   size_t len = strlen(password);
   unsigned char *pw;
-  CURLcode result;
+  FETCHcode result;
   if(len > SIZE_T_MAX/2) /* avoid integer overflow */
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   pw = len ? malloc(len * 2) : (unsigned char *)strdup("");
   if(!pw)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   ascii_to_unicode_le(pw, password, len);
 
@@ -475,7 +475,7 @@ struct ms_filetime {
 static void time2filetime(struct ms_filetime *ft, time_t t)
 {
 #if SIZEOF_TIME_T > 4
-  t = (t + CURL_OFF_T_C(11644473600)) * 10000000;
+  t = (t + FETCH_OFF_T_C(11644473600)) * 10000000;
   ft->dwLowDateTime = (unsigned int) (t & 0xFFFFFFFF);
   ft->dwHighDateTime = (unsigned int) (t >> 32);
 #else
@@ -518,7 +518,7 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
  * (uppercase UserName + Domain) as the data
  */
-CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
+FETCHcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
                                        const char *domain, size_t domlen,
                                        unsigned char *ntlmhash,
                                        unsigned char *ntlmv2hash)
@@ -526,16 +526,16 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   /* Unicode representation */
   size_t identity_len;
   unsigned char *identity;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
-  if((userlen > CURL_MAX_INPUT_LENGTH) || (domlen > CURL_MAX_INPUT_LENGTH))
-    return CURLE_OUT_OF_MEMORY;
+  if((userlen > FETCH_MAX_INPUT_LENGTH) || (domlen > FETCH_MAX_INPUT_LENGTH))
+    return FETCHE_OUT_OF_MEMORY;
 
   identity_len = (userlen + domlen) * 2;
   identity = malloc(identity_len + 1);
 
   if(!identity)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   ascii_uppercase_to_unicode_le(identity, user, userlen);
   ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
@@ -562,9 +562,9 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
  *                         memory holding the NTLMv2 response.
  * ntresp_len      [out] - The length of the output message.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
+FETCHcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
                                        unsigned char *challenge_client,
                                        struct ntlmdata *ntlm,
                                        unsigned char **ntresp,
@@ -590,11 +590,11 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   unsigned char hmac_output[HMAC_MD5_LENGTH];
   struct ms_filetime tw;
 
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   /* Calculate the timestamp */
 #ifdef DEBUGBUILD
-  char *force_timestamp = getenv("CURL_FORCETIME");
+  char *force_timestamp = getenv("FETCH_FORCETIME");
   if(force_timestamp)
     time2filetime(&tw, (time_t) 0);
   else
@@ -607,7 +607,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   /* Allocate the response */
   ptr = calloc(1, len);
   if(!ptr)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Create the BLOB structure */
   msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
@@ -654,16 +654,16 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
  * challenge_client  [in] - The server challenge (8 bytes)
  * lmresp           [out] - The LMv2 response (24 bytes)
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
+FETCHcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
                                       unsigned char *challenge_client,
                                       unsigned char *challenge_server,
                                       unsigned char *lmresp)
 {
   unsigned char data[16];
   unsigned char hmac_output[16];
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);
@@ -682,4 +682,4 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
 
 #endif /* !USE_WINDOWS_SSPI */
 
-#endif /* USE_CURL_NTLM_CORE */
+#endif /* USE_FETCH_NTLM_CORE */

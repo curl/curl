@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred.  */
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 struct Curl_easy;
 
@@ -36,26 +36,26 @@ struct Curl_easy;
 #include "escape.h"
 #include "strdup.h"
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /* for ABI-compatibility with previous versions */
-char *curl_escape(const char *string, int inlength)
+char *fetch_escape(const char *string, int inlength)
 {
-  return curl_easy_escape(NULL, string, inlength);
+  return fetch_easy_escape(NULL, string, inlength);
 }
 
 /* for ABI-compatibility with previous versions */
-char *curl_unescape(const char *string, int length)
+char *fetch_unescape(const char *string, int length)
 {
-  return curl_easy_unescape(NULL, string, length, NULL);
+  return fetch_easy_unescape(NULL, string, length, NULL);
 }
 
 /* Escapes for URL the given unescaped string of given length.
  * 'data' is ignored since 7.82.0.
  */
-char *curl_easy_escape(CURL *data, const char *string,
+char *fetch_easy_escape(FETCH *data, const char *string,
                        int inlength)
 {
   size_t length;
@@ -120,7 +120,7 @@ static const unsigned char hextable[] = {
  * invokes that used TRUE/FALSE (0 and 1).
  */
 
-CURLcode Curl_urldecode(const char *string, size_t length,
+FETCHcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
                         enum urlreject ctrl)
 {
@@ -134,7 +134,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
   ns = malloc(alloc + 1);
 
   if(!ns)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* store output string */
   *ostring = ns;
@@ -157,7 +157,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     if(((ctrl == REJECT_CTRL) && (in < 0x20)) ||
        ((ctrl == REJECT_ZERO) && (in == 0))) {
       Curl_safefree(*ostring);
-      return CURLE_URL_MALFORMAT;
+      return FETCHE_URL_MALFORMAT;
     }
 
     *ns++ = (char)in;
@@ -168,7 +168,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     /* store output size */
     *olen = ns - *ostring;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -178,7 +178,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
  * If olen == NULL, no output length is stored.
  * 'data' is ignored since 7.82.0.
  */
-char *curl_easy_unescape(CURL *data, const char *string,
+char *fetch_easy_unescape(FETCH *data, const char *string,
                          int length, int *olen)
 {
   char *str = NULL;
@@ -186,14 +186,14 @@ char *curl_easy_unescape(CURL *data, const char *string,
   if(string && (length >= 0)) {
     size_t inputlen = (size_t)length;
     size_t outputlen;
-    CURLcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
+    FETCHcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
                                   REJECT_NADA);
     if(res)
       return NULL;
 
     if(olen) {
       if(outputlen <= (size_t) INT_MAX)
-        *olen = curlx_uztosi(outputlen);
+        *olen = fetchx_uztosi(outputlen);
       else
         /* too large to return in an int, fail! */
         Curl_safefree(str);
@@ -205,7 +205,7 @@ char *curl_easy_unescape(CURL *data, const char *string,
 /* For operating systems/environments that use different malloc/free
    systems for the app and for this library, we provide a free that uses
    the library's memory system */
-void curl_free(void *p)
+void fetch_free(void *p)
 {
   free(p);
 }

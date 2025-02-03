@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_IMAP_H
-#define HEADER_CURL_IMAP_H
+#ifndef HEADER_FETCH_IMAP_H
+#define HEADER_FETCH_IMAP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 #include "pingpong.h"
-#include "curl_sasl.h"
+#include "fetch_sasl.h"
 
 /****************************************************************************
  * IMAP unique setup
@@ -56,7 +56,7 @@ typedef enum {
    perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct IMAP {
-  curl_pp_transfer transfer;
+  fetch_pp_transfer transfer;
   char *mailbox;          /* Mailbox to select */
   char *uidvalidity;      /* UIDVALIDITY to check in select */
   char *uid;              /* Message UID to fetch */
@@ -98,4 +98,4 @@ extern const struct Curl_handler Curl_handler_imaps;
 #define IMAP_TYPE_NONE      0
 #define IMAP_TYPE_ANY       (IMAP_TYPE_CLEARTEXT|IMAP_TYPE_SASL)
 
-#endif /* HEADER_CURL_IMAP_H */
+#endif /* HEADER_FETCH_IMAP_H */

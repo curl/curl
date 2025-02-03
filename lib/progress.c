@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,44 +18,44 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #include "urldata.h"
 #include "sendf.h"
 #include "multiif.h"
 #include "progress.h"
 #include "timeval.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000
 
-#ifndef CURL_DISABLE_PROGRESS_METER
+#ifndef FETCH_DISABLE_PROGRESS_METER
 /* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
    byte) */
-static void time2str(char *r, curl_off_t seconds)
+static void time2str(char *r, fetch_off_t seconds)
 {
-  curl_off_t h;
+  fetch_off_t h;
   if(seconds <= 0) {
     strcpy(r, "--:--:--");
     return;
   }
-  h = seconds / CURL_OFF_T_C(3600);
-  if(h <= CURL_OFF_T_C(99)) {
-    curl_off_t m = (seconds - (h*CURL_OFF_T_C(3600))) / CURL_OFF_T_C(60);
-    curl_off_t s = (seconds - (h*CURL_OFF_T_C(3600))) - (m*CURL_OFF_T_C(60));
+  h = seconds / FETCH_OFF_T_C(3600);
+  if(h <= FETCH_OFF_T_C(99)) {
+    fetch_off_t m = (seconds - (h*FETCH_OFF_T_C(3600))) / FETCH_OFF_T_C(60);
+    fetch_off_t s = (seconds - (h*FETCH_OFF_T_C(3600))) - (m*FETCH_OFF_T_C(60));
     msnprintf(r, 9, "%2" FMT_OFF_T ":%02" FMT_OFF_T ":%02" FMT_OFF_T, h, m, s);
   }
   else {
     /* this equals to more than 99 hours, switch to a more suitable output
        format to fit within the limits. */
-    curl_off_t d = seconds / CURL_OFF_T_C(86400);
-    h = (seconds - (d*CURL_OFF_T_C(86400))) / CURL_OFF_T_C(3600);
-    if(d <= CURL_OFF_T_C(999))
+    fetch_off_t d = seconds / FETCH_OFF_T_C(86400);
+    h = (seconds - (d*FETCH_OFF_T_C(86400))) / FETCH_OFF_T_C(3600);
+    if(d <= FETCH_OFF_T_C(999))
       msnprintf(r, 9, "%3" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
     else
       msnprintf(r, 9, "%7" FMT_OFF_T "d", d);
@@ -65,41 +65,41 @@ static void time2str(char *r, curl_off_t seconds)
 /* The point of this function would be to return a string of the input data,
    but never longer than 5 columns (+ one zero byte).
    Add suffix k, M, G when suitable... */
-static char *max5data(curl_off_t bytes, char *max5)
+static char *max5data(fetch_off_t bytes, char *max5)
 {
-#define ONE_KILOBYTE  CURL_OFF_T_C(1024)
-#define ONE_MEGABYTE (CURL_OFF_T_C(1024) * ONE_KILOBYTE)
-#define ONE_GIGABYTE (CURL_OFF_T_C(1024) * ONE_MEGABYTE)
-#define ONE_TERABYTE (CURL_OFF_T_C(1024) * ONE_GIGABYTE)
-#define ONE_PETABYTE (CURL_OFF_T_C(1024) * ONE_TERABYTE)
+#define ONE_KILOBYTE  FETCH_OFF_T_C(1024)
+#define ONE_MEGABYTE (FETCH_OFF_T_C(1024) * ONE_KILOBYTE)
+#define ONE_GIGABYTE (FETCH_OFF_T_C(1024) * ONE_MEGABYTE)
+#define ONE_TERABYTE (FETCH_OFF_T_C(1024) * ONE_GIGABYTE)
+#define ONE_PETABYTE (FETCH_OFF_T_C(1024) * ONE_TERABYTE)
 
-  if(bytes < CURL_OFF_T_C(100000))
+  if(bytes < FETCH_OFF_T_C(100000))
     msnprintf(max5, 6, "%5" FMT_OFF_T, bytes);
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_KILOBYTE)
+  else if(bytes < FETCH_OFF_T_C(10000) * ONE_KILOBYTE)
     msnprintf(max5, 6, "%4" FMT_OFF_T "k", bytes/ONE_KILOBYTE);
 
-  else if(bytes < CURL_OFF_T_C(100) * ONE_MEGABYTE)
+  else if(bytes < FETCH_OFF_T_C(100) * ONE_MEGABYTE)
     /* 'XX.XM' is good as long as we are less than 100 megs */
     msnprintf(max5, 6, "%2" FMT_OFF_T ".%0"
               FMT_OFF_T "M", bytes/ONE_MEGABYTE,
-              (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
+              (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/FETCH_OFF_T_C(10)) );
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
+  else if(bytes < FETCH_OFF_T_C(10000) * ONE_MEGABYTE)
     /* 'XXXXM' is good until we are at 10000MB or above */
     msnprintf(max5, 6, "%4" FMT_OFF_T "M", bytes/ONE_MEGABYTE);
 
-  else if(bytes < CURL_OFF_T_C(100) * ONE_GIGABYTE)
+  else if(bytes < FETCH_OFF_T_C(100) * ONE_GIGABYTE)
     /* 10000 MB - 100 GB, we show it as XX.XG */
     msnprintf(max5, 6, "%2" FMT_OFF_T ".%0"
               FMT_OFF_T "G", bytes/ONE_GIGABYTE,
-              (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/CURL_OFF_T_C(10)) );
+              (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/FETCH_OFF_T_C(10)) );
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_GIGABYTE)
+  else if(bytes < FETCH_OFF_T_C(10000) * ONE_GIGABYTE)
     /* up to 10000GB, display without decimal: XXXXG */
     msnprintf(max5, 6, "%4" FMT_OFF_T "G", bytes/ONE_GIGABYTE);
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_TERABYTE)
+  else if(bytes < FETCH_OFF_T_C(10000) * ONE_TERABYTE)
     /* up to 10000TB, display without decimal: XXXXT */
     msnprintf(max5, 6, "%4" FMT_OFF_T "T", bytes/ONE_TERABYTE);
 
@@ -158,7 +158,7 @@ void Curl_pgrsResetTransferSizes(struct Curl_easy *data)
  * Curl_pgrsTimeWas(). Store the timestamp time at the given label.
  */
 void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
-                      struct curltime timestamp)
+                      struct fetchtime timestamp)
 {
   timediff_t *delta = NULL;
 
@@ -237,9 +237,9 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
  *
  * @unittest: 1399
  */
-struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
+struct fetchtime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
-  struct curltime now = Curl_now();
+  struct fetchtime now = Curl_now();
 
   Curl_pgrsTimeWas(data, timer, now);
   return now;
@@ -280,10 +280,10 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
  * to wait to get back under the speed limit.
  */
 timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
-                                  curl_off_t speed_limit,
-                                  struct curltime now)
+                                  fetch_off_t speed_limit,
+                                  struct fetchtime now)
 {
-  curl_off_t size = d->cur_size - d->limit.start_size;
+  fetch_off_t size = d->cur_size - d->limit.start_size;
   timediff_t minimum;
   timediff_t actual;
 
@@ -294,8 +294,8 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
    * 'minimum' is the number of milliseconds 'size' should take to download to
    * stay below 'limit'.
    */
-  if(size < CURL_OFF_T_MAX/1000)
-    minimum = (timediff_t) (CURL_OFF_T_C(1000) * size / speed_limit);
+  if(size < FETCH_OFF_T_MAX/1000)
+    minimum = (timediff_t) (FETCH_OFF_T_C(1000) * size / speed_limit);
   else {
     minimum = (timediff_t) (size / speed_limit);
     if(minimum < TIMEDIFF_T_MAX/1000)
@@ -321,16 +321,16 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
 /*
  * Set the number of downloaded bytes so far.
  */
-CURLcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
+FETCHcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, fetch_off_t size)
 {
   data->progress.dl.cur_size = size;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
  * Update the timestamp and sizestamp to use for rate limit calculations.
  */
-void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
+void Curl_ratelimit(struct Curl_easy *data, struct fetchtime now)
 {
   /* do not set a new stamp unless the time since last update is long enough */
   if(data->set.max_recv_speed) {
@@ -352,12 +352,12 @@ void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
 /*
  * Set the number of uploaded bytes so far.
  */
-void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
+void Curl_pgrsSetUploadCounter(struct Curl_easy *data, fetch_off_t size)
 {
   data->progress.ul.cur_size = size;
 }
 
-void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size)
+void Curl_pgrsSetDownloadSize(struct Curl_easy *data, fetch_off_t size)
 {
   if(size >= 0) {
     data->progress.dl.total_size = size;
@@ -369,7 +369,7 @@ void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
-void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
+void Curl_pgrsSetUploadSize(struct Curl_easy *data, fetch_off_t size)
 {
   if(size >= 0) {
     data->progress.ul.total_size = size;
@@ -381,27 +381,27 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
-void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent)
+void Curl_pgrsEarlyData(struct Curl_easy *data, fetch_off_t sent)
 {
     data->progress.earlydata_sent = sent;
 }
 
 /* returns the average speed in bytes / second */
-static curl_off_t trspeed(curl_off_t size, /* number of bytes */
-                          curl_off_t us)   /* microseconds */
+static fetch_off_t trspeed(fetch_off_t size, /* number of bytes */
+                          fetch_off_t us)   /* microseconds */
 {
   if(us < 1)
     return size * 1000000;
-  else if(size < CURL_OFF_T_MAX/1000000)
+  else if(size < FETCH_OFF_T_MAX/1000000)
     return (size * 1000000) / us;
   else if(us >= 1000000)
     return size / (us / 1000000);
   else
-    return CURL_OFF_T_MAX;
+    return FETCH_OFF_T_MAX;
 }
 
 /* returns TRUE if it is time to show the progress meter */
-static bool progress_calc(struct Curl_easy *data, struct curltime now)
+static bool progress_calc(struct Curl_easy *data, struct fetchtime now)
 {
   bool timetoshow = FALSE;
   struct Progress * const p = &data->progress;
@@ -439,7 +439,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
     if(countindex) {
       int checkindex;
       timediff_t span_ms;
-      curl_off_t amount;
+      fetch_off_t amount;
 
       /* Get the index position to compare with the 'nowindex' position.
          Get the oldest entry possible. While we have less than CURR_TIME
@@ -454,15 +454,15 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
       /* Calculate the average speed the last 'span_ms' milliseconds */
       amount = p->speeder[nowindex]- p->speeder[checkindex];
 
-      if(amount > CURL_OFF_T_C(4294967) /* 0xffffffff/1000 */)
+      if(amount > FETCH_OFF_T_C(4294967) /* 0xffffffff/1000 */)
         /* the 'amount' value is bigger than would fit in 32 bits if
            multiplied with 1000, so we use the double math for this */
-        p->current_speed = (curl_off_t)
+        p->current_speed = (fetch_off_t)
           ((double)amount/((double)span_ms/1000.0));
       else
         /* the 'amount' value is small enough to fit within 32 bits even
            when multiplied with 1000 */
-        p->current_speed = amount*CURL_OFF_T_C(1000)/span_ms;
+        p->current_speed = amount*FETCH_OFF_T_C(1000)/span_ms;
     }
     else
       /* the first second we use the average */
@@ -472,18 +472,18 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
   return timetoshow;
 }
 
-#ifndef CURL_DISABLE_PROGRESS_METER
+#ifndef FETCH_DISABLE_PROGRESS_METER
 
 struct pgrs_estimate {
-  curl_off_t secs;
-  curl_off_t percent;
+  fetch_off_t secs;
+  fetch_off_t percent;
 };
 
-static curl_off_t pgrs_est_percent(curl_off_t total, curl_off_t cur)
+static fetch_off_t pgrs_est_percent(fetch_off_t total, fetch_off_t cur)
 {
-  if(total > CURL_OFF_T_C(10000))
-    return cur / (total/CURL_OFF_T_C(100));
-  else if(total > CURL_OFF_T_C(0))
+  if(total > FETCH_OFF_T_C(10000))
+    return cur / (total/FETCH_OFF_T_C(100));
+  else if(total > FETCH_OFF_T_C(0))
     return (cur*100) / total;
   return 0;
 }
@@ -494,7 +494,7 @@ static void pgrs_estimates(struct pgrs_dir *d,
 {
   est->secs = 0;
   est->percent = 0;
-  if(total_known && (d->speed > CURL_OFF_T_C(0))) {
+  if(total_known && (d->speed > FETCH_OFF_T_C(0))) {
     est->secs = d->total_size / d->speed;
     est->percent = pgrs_est_percent(d->total_size, d->cur_size);
   }
@@ -507,12 +507,12 @@ static void progress_meter(struct Curl_easy *data)
   struct pgrs_estimate dl_estm;
   struct pgrs_estimate ul_estm;
   struct pgrs_estimate total_estm;
-  curl_off_t total_cur_size;
-  curl_off_t total_expected_size;
+  fetch_off_t total_cur_size;
+  fetch_off_t total_expected_size;
   char time_left[10];
   char time_total[10];
   char time_spent[10];
-  curl_off_t cur_secs = (curl_off_t)p->timespent/1000000; /* seconds */
+  fetch_off_t cur_secs = (fetch_off_t)p->timespent/1000000; /* seconds */
 
   if(!(p->flags & PGRS_HEADERS_OUT)) {
     if(data->state.resume_from) {
@@ -533,7 +533,7 @@ static void progress_meter(struct Curl_easy *data)
   pgrs_estimates(&p->dl, (p->flags & PGRS_DL_SIZE_KNOWN), &dl_estm);
 
   /* Since both happen at the same time, total expected duration is max. */
-  total_estm.secs = CURLMAX(ul_estm.secs, dl_estm.secs);
+  total_estm.secs = FETCHMAX(ul_estm.secs, dl_estm.secs);
   /* create the three time strings */
   time2str(time_left, total_estm.secs > 0 ? (total_estm.secs - cur_secs) : 0);
   time2str(time_total, total_estm.secs);
@@ -595,7 +595,7 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
                                    data->progress.ul.total_size,
                                    data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
-      if(result != CURL_PROGRESSFUNC_CONTINUE) {
+      if(result != FETCH_PROGRESSFUNC_CONTINUE) {
         if(result)
           failf(data, "Callback aborted");
         return result;
@@ -611,7 +611,7 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
                                    (double)data->progress.ul.total_size,
                                    (double)data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
-      if(result != CURL_PROGRESSFUNC_CONTINUE) {
+      if(result != FETCH_PROGRESSFUNC_CONTINUE) {
         if(result)
           failf(data, "Callback aborted");
         return result;
@@ -627,7 +627,7 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
 
 int Curl_pgrsUpdate(struct Curl_easy *data)
 {
-  struct curltime now = Curl_now(); /* what time is it */
+  struct fetchtime now = Curl_now(); /* what time is it */
   bool showprogress = progress_calc(data, now);
   return pgrsupdate(data, showprogress);
 }
@@ -637,6 +637,6 @@ int Curl_pgrsUpdate(struct Curl_easy *data)
  */
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
 {
-  struct curltime now = Curl_now(); /* what time is it */
+  struct fetchtime now = Curl_now(); /* what time is it */
   (void)progress_calc(data, now);
 }

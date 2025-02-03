@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_WOLFSSL_H
-#define HEADER_CURL_WOLFSSL_H
+#ifndef HEADER_FETCH_WOLFSSL_H
+#define HEADER_FETCH_WOLFSSL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_WOLFSSL
 
@@ -41,7 +41,7 @@ extern const struct Curl_ssl Curl_ssl_wolfssl;
 struct wolfssl_ctx {
   WOLFSSL_CTX *ctx;
   WOLFSSL     *handle;
-  CURLcode    io_result;   /* result of last BIO cfilter operation */
+  FETCHcode    io_result;   /* result of last BIO cfilter operation */
   int io_send_blocked_len; /* length of last BIO write that EAGAINed */
   BIT(x509_store_setup);   /* x509 store has been set up */
   BIT(shutting_down);      /* TLS is being shut down */
@@ -49,16 +49,16 @@ struct wolfssl_ctx {
 
 size_t Curl_wssl_version(char *buffer, size_t size);
 
-CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
+FETCHcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct wolfssl_ctx *wssl);
 
-CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
+FETCHcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct wolfssl_ctx *wss,
                                  const char *ssl_peer_key);
 
-CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
+FETCHcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  WOLFSSL_SESSION *session,
@@ -67,4 +67,4 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
 
 
 #endif /* USE_WOLFSSL */
-#endif /* HEADER_CURL_WOLFSSL_H */
+#endif /* HEADER_FETCH_WOLFSSL_H */

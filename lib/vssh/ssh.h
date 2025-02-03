@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SSH_H
-#define HEADER_CURL_SSH_H
+#ifndef HEADER_FETCH_SSH_H
+#define HEADER_FETCH_SSH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_LIBSSH2)
 #include <libssh2.h>
@@ -39,7 +39,7 @@
 #include <wolfssh/wolfsftp.h>
 #endif
 
-#include "curl_path.h"
+#include "fetch_path.h"
 
 /****************************************************************************
  * SSH unique setup
@@ -111,7 +111,7 @@ typedef enum {
   SSH_LAST  /* never used */
 } sshstate;
 
-#define CURL_PATH_MAX 1024
+#define FETCH_PATH_MAX 1024
 
 /* this struct is used in the HandleData struct which is part of the
    Curl_easy, which means this is used on a per-easy handle basis.
@@ -122,8 +122,8 @@ struct SSHPROTO {
 #ifdef USE_LIBSSH2
   struct dynbuf readdir_link;
   struct dynbuf readdir;
-  char readdir_filename[CURL_PATH_MAX + 1];
-  char readdir_longentry[CURL_PATH_MAX + 1];
+  char readdir_filename[FETCH_PATH_MAX + 1];
+  char readdir_longentry[FETCH_PATH_MAX + 1];
 
   LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
 
@@ -146,8 +146,8 @@ struct ssh_conn {
                                  quote command fails) */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
-  CURLcode actualcode;        /* the actual error code */
-  struct curl_slist *quote_item; /* for the quote option */
+  FETCHcode actualcode;        /* the actual error code */
+  struct fetch_slist *quote_item; /* for the quote option */
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
 
@@ -195,7 +195,7 @@ struct ssh_conn {
   LIBSSH2_SFTP *sftp_session;   /* SFTP handle */
   LIBSSH2_SFTP_HANDLE *sftp_handle;
 
-#ifndef CURL_DISABLE_PROXY
+#ifndef FETCH_DISABLE_PROXY
   /* for HTTPS proxy storage */
   Curl_recv *tls_recv;
   Curl_send *tls_send;
@@ -217,7 +217,7 @@ struct ssh_conn {
   WOLFSSH_CTX *ctx;
   word32 handleSz;
   byte handle[WOLFSSH_MAX_HANDLE];
-  curl_off_t offset;
+  fetch_off_t offset;
 #endif /* USE_LIBSSH */
 };
 
@@ -254,10 +254,10 @@ struct ssh_conn {
 
 #ifdef HAVE_LIBSSH2_VERSION
 /* get it runtime if possible */
-#define CURL_LIBSSH2_VERSION libssh2_version(0)
+#define FETCH_LIBSSH2_VERSION libssh2_version(0)
 #else
 /* use build-time if runtime not possible */
-#define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
+#define FETCH_LIBSSH2_VERSION LIBSSH2_VERSION
 #endif
 
 #endif /* USE_LIBSSH2 */
@@ -268,7 +268,7 @@ extern const struct Curl_handler Curl_handler_scp;
 extern const struct Curl_handler Curl_handler_sftp;
 
 /* generic SSH backend functions */
-CURLcode Curl_ssh_init(void);
+FETCHcode Curl_ssh_init(void);
 void Curl_ssh_cleanup(void);
 void Curl_ssh_version(char *buffer, size_t buflen);
 void Curl_ssh_attach(struct Curl_easy *data,
@@ -280,4 +280,4 @@ void Curl_ssh_attach(struct Curl_easy *data,
 #define Curl_ssh_init() 0
 #endif
 
-#endif /* HEADER_CURL_SSH_H */
+#endif /* HEADER_FETCH_SSH_H */

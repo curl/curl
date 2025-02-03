@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_HTTP3) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
@@ -45,7 +45,7 @@
 #endif
 
 #include "urldata.h"
-#include "curl_trc.h"
+#include "fetch_trc.h"
 #include "cfilters.h"
 #include "multiif.h"
 #include "vtls/keylog.h"
@@ -54,8 +54,8 @@
 #include "vquic-tls.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #ifndef ARRAYSIZE
@@ -77,24 +77,24 @@ static void keylog_callback(const WOLFSSL *ssl, const char *line)
 }
 #endif
 
-static CURLcode wssl_init_ctx(struct curl_tls_ctx *ctx,
+static FETCHcode wssl_init_ctx(struct fetch_tls_ctx *ctx,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               Curl_vquic_tls_ctx_setup *cb_setup,
                               void *cb_user_data)
 {
   struct ssl_primary_config *conn_config;
-  CURLcode result = CURLE_FAILED_INIT;
+  FETCHcode result = FETCHE_FAILED_INIT;
 
   conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!conn_config) {
-    result = CURLE_FAILED_INIT;
+    result = FETCHE_FAILED_INIT;
     goto out;
   }
 
   ctx->wssl.ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
   if(!ctx->wssl.ctx) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
 
@@ -112,7 +112,7 @@ static CURLcode wssl_init_ctx(struct curl_tls_ctx *ctx,
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
     failf(data, "wolfSSL failed to set ciphers: %s", error_buffer);
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    result = FETCHE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
 
@@ -120,7 +120,7 @@ static CURLcode wssl_init_ctx(struct curl_tls_ctx *ctx,
                                   conn_config->curves :
                                   (char *)QUIC_GROUPS) != 1) {
     failf(data, "wolfSSL failed to set curves");
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    result = FETCHE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
 
@@ -131,7 +131,7 @@ static CURLcode wssl_init_ctx(struct curl_tls_ctx *ctx,
     wolfSSL_CTX_set_keylog_callback(ctx->wssl.ctx, keylog_callback);
 #else
     failf(data, "wolfSSL was built without keylog callback");
-    result = CURLE_NOT_BUILT_IN;
+    result = FETCHE_NOT_BUILT_IN;
     goto out;
 #endif
   }
@@ -154,13 +154,13 @@ static CURLcode wssl_init_ctx(struct curl_tls_ctx *ctx,
               "  CAfile: %s CApath: %s",
               ssl_cafile ? ssl_cafile : "none",
               ssl_capath ? ssl_capath : "none");
-        result = CURLE_SSL_CACERT_BADFILE;
+        result = FETCHE_SSL_CACERT_BADFILE;
         goto out;
       }
       infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
       infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
     }
-#ifdef CURL_CA_FALLBACK
+#ifdef FETCH_CA_FALLBACK
     else {
       /* verifying the peer without any CA certificates will not work so
          use wolfSSL's built-in default as fallback */
@@ -183,7 +183,7 @@ static CURLcode wssl_init_ctx(struct curl_tls_ctx *ctx,
       goto out;
     }
   }
-  result = CURLE_OK;
+  result = FETCHE_OK;
 
 out:
   if(result && ctx->wssl.ctx) {
@@ -195,7 +195,7 @@ out:
 
 /** SSL callbacks ***/
 
-static CURLcode wssl_init_ssl(struct curl_tls_ctx *ctx,
+static FETCHcode wssl_init_ssl(struct fetch_tls_ctx *ctx,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               struct ssl_peer *peer,
@@ -225,11 +225,11 @@ static CURLcode wssl_init_ssl(struct curl_tls_ctx *ctx,
     (void)Curl_wssl_setup_session(cf, data, &ctx->wssl, peer->scache_key);
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 #endif /* defined(USE_WOLFSSL) */
 
-CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
+FETCHcode Curl_vquic_tls_init(struct fetch_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ssl_peer *peer,
@@ -239,7 +239,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              Curl_vquic_session_reuse_cb *session_reuse_cb)
 {
   char tls_id[80];
-  CURLcode result;
+  FETCHcode result;
 
 #ifdef USE_OPENSSL
   Curl_ossl_version(tls_id, sizeof(tls_id));
@@ -249,7 +249,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   Curl_wssl_version(tls_id, sizeof(tls_id));
 #else
 #error "no TLS lib in used, should not happen"
-  return CURLE_FAILED_INIT;
+  return FETCHE_FAILED_INIT;
 #endif
   (void)session_reuse_cb;
   result = Curl_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
@@ -275,11 +275,11 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   return wssl_init_ssl(ctx, cf, data, peer, alpn, alpn_len, ssl_user_data);
 #else
 #error "no TLS lib in used, should not happen"
-  return CURLE_FAILED_INIT;
+  return FETCHE_FAILED_INIT;
 #endif
 }
 
-void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx)
+void Curl_vquic_tls_cleanup(struct fetch_tls_ctx *ctx)
 {
 #ifdef USE_OPENSSL
   if(ctx->ossl.ssl)
@@ -299,46 +299,46 @@ void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx)
   memset(ctx, 0, sizeof(*ctx));
 }
 
-CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
+FETCHcode Curl_vquic_tls_before_recv(struct fetch_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
 {
 #ifdef USE_OPENSSL
   if(!ctx->ossl.x509_store_setup) {
-    CURLcode result = Curl_ssl_setup_x509_store(cf, data, ctx->ossl.ssl_ctx);
+    FETCHcode result = Curl_ssl_setup_x509_store(cf, data, ctx->ossl.ssl_ctx);
     if(result)
       return result;
     ctx->ossl.x509_store_setup = TRUE;
   }
 #elif defined(USE_WOLFSSL)
   if(!ctx->wssl.x509_store_setup) {
-    CURLcode result = Curl_wssl_setup_x509_store(cf, data, &ctx->wssl);
+    FETCHcode result = Curl_wssl_setup_x509_store(cf, data, &ctx->wssl);
     if(result)
       return result;
   }
 #elif defined(USE_GNUTLS)
   if(!ctx->gtls.shared_creds->trust_setup) {
-    CURLcode result = Curl_gtls_client_trust_setup(cf, data, &ctx->gtls);
+    FETCHcode result = Curl_gtls_client_trust_setup(cf, data, &ctx->gtls);
     if(result)
       return result;
   }
 #else
   (void)ctx; (void)cf; (void)data;
 #endif
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
+FETCHcode Curl_vquic_tls_verify_peer(struct fetch_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer)
 {
   struct ssl_primary_config *conn_config;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!conn_config)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
 
 #ifdef USE_OPENSSL
   (void)conn_config;
@@ -358,7 +358,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
       WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->wssl.handle);
       if(wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0, NULL)
             == WOLFSSL_FAILURE) {
-        result = CURLE_PEER_FAILED_VERIFICATION;
+        result = FETCHE_PEER_FAILED_VERIFICATION;
       }
       wolfSSL_X509_free(cert);
     }

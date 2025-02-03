@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VTLS_INT_H
-#define HEADER_CURL_VTLS_INT_H
+#ifndef HEADER_FETCH_VTLS_INT_H
+#define HEADER_FETCH_VTLS_INT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "cfilters.h"
 #include "urldata.h"
 #include "vtls.h"
@@ -58,12 +58,12 @@ struct alpn_proto_buf {
   int len;
 };
 
-CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
+FETCHcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
                                 const struct alpn_spec *spec);
-CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
+FETCHcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
                                 const struct alpn_spec *spec);
 
-CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
+FETCHcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct ssl_connect_data *connssl,
                                   const unsigned char *proto,
@@ -96,12 +96,12 @@ typedef enum {
   ssl_earlydata_rejected
 } ssl_earlydata_state;
 
-#define CURL_SSL_IO_NEED_NONE   (0)
-#define CURL_SSL_IO_NEED_RECV   (1<<0)
-#define CURL_SSL_IO_NEED_SEND   (1<<1)
+#define FETCH_SSL_IO_NEED_NONE   (0)
+#define FETCH_SSL_IO_NEED_RECV   (1<<0)
+#define FETCH_SSL_IO_NEED_SEND   (1<<1)
 
 /* Max earlydata payload we want to send */
-#define CURL_SSL_EARLY_MAX       (64*1024)
+#define FETCH_SSL_EARLY_MAX       (64*1024)
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
@@ -110,7 +110,7 @@ struct ssl_connect_data {
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
-  struct curltime handshake_done;   /* time when handshake finished */
+  struct fetchtime handshake_done;   /* time when handshake finished */
   struct {
     char *alpn;                     /* ALPN value or NULL */
   } negotiated;
@@ -137,9 +137,9 @@ struct ssl_connect_data {
 struct Curl_ssl {
   /*
    * This *must* be the first entry to allow returning the list of available
-   * backends in curl_global_sslset().
+   * backends in fetch_global_sslset().
    */
-  curl_ssl_backend info;
+  fetch_ssl_backend info;
   unsigned int supports; /* bitfield, see above */
   size_t sizeof_ssl_backend_data;
 
@@ -147,19 +147,19 @@ struct Curl_ssl {
   void (*cleanup)(void);
 
   size_t (*version)(char *buffer, size_t size);
-  CURLcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
+  FETCHcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         bool send_shutdown, bool *done);
   bool (*data_pending)(struct Curl_cfilter *cf,
                        const struct Curl_easy *data);
 
   /* return 0 if a find random is filled in */
-  CURLcode (*random)(struct Curl_easy *data, unsigned char *entropy,
+  FETCHcode (*random)(struct Curl_easy *data, unsigned char *entropy,
                      size_t length);
   bool (*cert_status_request)(void);
 
-  CURLcode (*connect_blocking)(struct Curl_cfilter *cf,
+  FETCHcode (*connect_blocking)(struct Curl_cfilter *cf,
                                struct Curl_easy *data);
-  CURLcode (*connect_nonblocking)(struct Curl_cfilter *cf,
+  FETCHcode (*connect_nonblocking)(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   bool *done);
 
@@ -167,23 +167,23 @@ struct Curl_ssl {
    * for POLLOUT or POLLIN as needed. Mandatory. */
   void (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
                           struct easy_pollset *ps);
-  void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
+  void *(*get_internals)(struct ssl_connect_data *connssl, FETCHINFO info);
   void (*close)(struct Curl_cfilter *cf, struct Curl_easy *data);
   void (*close_all)(struct Curl_easy *data);
 
-  CURLcode (*set_engine)(struct Curl_easy *data, const char *engine);
-  CURLcode (*set_engine_default)(struct Curl_easy *data);
-  struct curl_slist *(*engines_list)(struct Curl_easy *data);
+  FETCHcode (*set_engine)(struct Curl_easy *data, const char *engine);
+  FETCHcode (*set_engine_default)(struct Curl_easy *data);
+  struct fetch_slist *(*engines_list)(struct Curl_easy *data);
 
   bool (*false_start)(void);
-  CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
+  FETCHcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
   ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        char *buf, size_t len, CURLcode *code);
+                        char *buf, size_t len, FETCHcode *code);
   ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        const void *mem, size_t len, CURLcode *code);
+                        const void *mem, size_t len, FETCHcode *code);
 
-  CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
+  FETCHcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
                                   struct dynbuf *binding);
 
 };
@@ -200,4 +200,4 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
 
 #endif /* USE_SSL */
 
-#endif /* HEADER_CURL_VTLS_INT_H */
+#endif /* HEADER_FETCH_VTLS_INT_H */

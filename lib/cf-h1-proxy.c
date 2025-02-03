@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,15 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if !defined(FETCH_DISABLE_PROXY) && !defined(FETCH_DISABLE_HTTP)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 #include "dynbuf.h"
 #include "sendf.h"
@@ -39,15 +39,15 @@
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "connect.h"
-#include "curl_trc.h"
-#include "curlx.h"
+#include "fetch_trc.h"
+#include "fetchx.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 
@@ -72,7 +72,7 @@ struct h1_tunnel_state {
     KEEPON_CONNECT,
     KEEPON_IGNORE
   } keepon;
-  curl_off_t cl; /* size of content to read and ignore */
+  fetch_off_t cl; /* size of content to read and ignore */
   h1_tunnel_state tunnel_state;
   BIT(chunked_encoding);
   BIT(close_connection);
@@ -89,7 +89,7 @@ static bool tunnel_is_failed(struct h1_tunnel_state *ts)
   return ts && (ts->tunnel_state == H1_TUNNEL_FAILED);
 }
 
-static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
+static FETCHcode tunnel_reinit(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               struct h1_tunnel_state *ts)
 {
@@ -102,10 +102,10 @@ static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
   ts->keepon = KEEPON_CONNECT;
   ts->cl = 0;
   ts->close_connection = FALSE;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-static CURLcode tunnel_init(struct Curl_cfilter *cf,
+static FETCHcode tunnel_init(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct h1_tunnel_state **pts)
 {
@@ -113,12 +113,12 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 
   if(cf->conn->handler->flags & PROTOPT_NOTCPPROXY) {
     failf(data, "%s cannot be done over CONNECT", cf->conn->handler->scheme);
-    return CURLE_UNSUPPORTED_PROTOCOL;
+    return FETCHE_UNSUPPORTED_PROTOCOL;
   }
 
   ts = calloc(1, sizeof(*ts));
   if(!ts)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   infof(data, "allocate connect buffer");
 
@@ -141,36 +141,36 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
   /* entering this one */
   switch(new_state) {
   case H1_TUNNEL_INIT:
-    CURL_TRC_CF(data, cf, "new tunnel state 'init'");
+    FETCH_TRC_CF(data, cf, "new tunnel state 'init'");
     tunnel_reinit(cf, data, ts);
     break;
 
   case H1_TUNNEL_CONNECT:
-    CURL_TRC_CF(data, cf, "new tunnel state 'connect'");
+    FETCH_TRC_CF(data, cf, "new tunnel state 'connect'");
     ts->tunnel_state = H1_TUNNEL_CONNECT;
     ts->keepon = KEEPON_CONNECT;
     Curl_dyn_reset(&ts->rcvbuf);
     break;
 
   case H1_TUNNEL_RECEIVE:
-    CURL_TRC_CF(data, cf, "new tunnel state 'receive'");
+    FETCH_TRC_CF(data, cf, "new tunnel state 'receive'");
     ts->tunnel_state = H1_TUNNEL_RECEIVE;
     break;
 
   case H1_TUNNEL_RESPONSE:
-    CURL_TRC_CF(data, cf, "new tunnel state 'response'");
+    FETCH_TRC_CF(data, cf, "new tunnel state 'response'");
     ts->tunnel_state = H1_TUNNEL_RESPONSE;
     break;
 
   case H1_TUNNEL_ESTABLISHED:
-    CURL_TRC_CF(data, cf, "new tunnel state 'established'");
+    FETCH_TRC_CF(data, cf, "new tunnel state 'established'");
     infof(data, "CONNECT phase completed");
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     FALLTHROUGH();
   case H1_TUNNEL_FAILED:
     if(new_state == H1_TUNNEL_FAILED)
-      CURL_TRC_CF(data, cf, "new tunnel state 'failed'");
+      FETCH_TRC_CF(data, cf, "new tunnel state 'failed'");
     ts->tunnel_state = new_state;
     Curl_dyn_reset(&ts->rcvbuf);
     Curl_dyn_reset(&ts->request_data);
@@ -206,13 +206,13 @@ static bool tunnel_want_send(struct h1_tunnel_state *ts)
   return ts->tunnel_state == H1_TUNNEL_CONNECT;
 }
 
-static CURLcode start_CONNECT(struct Curl_cfilter *cf,
+static FETCHcode start_CONNECT(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               struct h1_tunnel_state *ts)
 {
   struct httpreq *req = NULL;
   int http_minor;
-  CURLcode result;
+  FETCHcode result;
 
     /* This only happens if we have looped here due to authentication
        reasons, and we do not really use the newly cloned URL here
@@ -228,7 +228,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   Curl_dyn_reset(&ts->request_data);
   ts->nsent = 0;
   ts->headerlines = 0;
-  http_minor = (cf->conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? 0 : 1;
+  http_minor = (cf->conn->http_proxy.proxytype == FETCHPROXY_HTTP_1_0) ? 0 : 1;
 
   result = Curl_h1_req_write_head(req, http_minor, &ts->request_data);
   if(!result)
@@ -242,7 +242,7 @@ out:
   return result;
 }
 
-static CURLcode send_CONNECT(struct Curl_cfilter *cf,
+static FETCHcode send_CONNECT(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct h1_tunnel_state *ts,
                              bool *done)
@@ -250,7 +250,7 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   char *buf = Curl_dyn_ptr(&ts->request_data);
   size_t request_len = Curl_dyn_len(&ts->request_data);
   size_t blen = request_len;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   ssize_t nwritten;
 
   if(blen <= ts->nsent)
@@ -261,15 +261,15 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
 
   nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &result);
   if(nwritten < 0) {
-    if(result == CURLE_AGAIN) {
-      result = CURLE_OK;
+    if(result == FETCHE_AGAIN) {
+      result = FETCHE_OK;
     }
     goto out;
   }
 
   DEBUGASSERT(blen >= (size_t)nwritten);
   ts->nsent += (size_t)nwritten;
-  Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)nwritten);
+  Curl_debug(data, FETCHINFO_HEADER_OUT, buf, (size_t)nwritten);
 
 out:
   if(result)
@@ -278,12 +278,12 @@ out:
   return result;
 }
 
-static CURLcode on_resp_header(struct Curl_cfilter *cf,
+static FETCHcode on_resp_header(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                struct h1_tunnel_state *ts,
                                const char *header)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct SingleRequest *k = &data->req;
   (void)cf;
 
@@ -295,9 +295,9 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
     bool proxy = (k->httpcode == 407);
     char *auth = Curl_copy_header_value(header);
     if(!auth)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
 
-    CURL_TRC_CF(data, cf, "CONNECT: fwd auth header '%s'", header);
+    FETCH_TRC_CF(data, cf, "CONNECT: fwd auth header '%s'", header);
     result = Curl_http_input_auth(data, proxy, auth);
 
     free(auth);
@@ -314,7 +314,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
             k->httpcode);
     }
     else {
-      (void)curlx_strtoofft(header + strlen("Content-Length:"),
+      (void)fetchx_strtoofft(header + strlen("Content-Length:"),
                             NULL, 10, &ts->cl);
     }
   }
@@ -354,12 +354,12 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
+static FETCHcode recv_CONNECT_resp(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct h1_tunnel_state *ts,
                                   bool *done)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct SingleRequest *k = &data->req;
   char *linep;
   size_t line_len;
@@ -372,7 +372,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(!Curl_conn_data_pending(data, cf->sockindex))
-    return CURLE_OK;
+    return FETCHE_OK;
 
   while(ts->keepon) {
     ssize_t nread;
@@ -381,12 +381,12 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
     result = Curl_conn_recv(data, cf->sockindex, &byte, 1, &nread);
-    if(result == CURLE_AGAIN)
+    if(result == FETCHE_AGAIN)
       /* socket buffer drained, return */
-      return CURLE_OK;
+      return FETCHE_OK;
 
     if(Curl_pgrsUpdate(data))
-      return CURLE_ABORTED_BY_CALLBACK;
+      return FETCHE_ABORTED_BY_CALLBACK;
 
     if(result) {
       ts->keepon = KEEPON_DONE;
@@ -442,7 +442,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     if(Curl_dyn_addn(&ts->rcvbuf, &byte, 1)) {
       failf(data, "CONNECT response too large");
-      return CURLE_RECV_ERROR;
+      return FETCHE_RECV_ERROR;
     }
 
     /* if this is not the end of a header line then continue */
@@ -454,7 +454,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     line_len = Curl_dyn_len(&ts->rcvbuf); /* amount of bytes in this line */
 
     /* output debug if that is requested */
-    Curl_debug(data, CURLINFO_HEADER_IN, linep, line_len);
+    Curl_debug(data, FETCHINFO_HEADER_IN, linep, line_len);
 
     /* send the header to the callback */
     writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
@@ -491,7 +491,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
           /* without content-length or chunked encoding, we
              cannot keep the connection alive since the close is
              the end signal so we bail out at once instead */
-          CURL_TRC_CF(data, cf, "CONNECT: no content-length or chunked");
+          FETCH_TRC_CF(data, cf, "CONNECT: no content-length or chunked");
           ts->keepon = KEEPON_DONE;
         }
       }
@@ -512,7 +512,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   } /* while there is buffer left and loop is requested */
 
   if(error)
-    result = CURLE_RECV_ERROR;
+    result = FETCHE_RECV_ERROR;
   *done = (ts->keepon == KEEPON_DONE);
   if(!result && *done && data->info.httpproxycode/100 != 2) {
     /* Deal with the possibly already received authenticate
@@ -522,18 +522,18 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
+static FETCHcode H1_CONNECT(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            struct h1_tunnel_state *ts)
 {
   struct connectdata *conn = cf->conn;
-  CURLcode result;
+  FETCHcode result;
   bool done;
 
   if(tunnel_is_established(ts))
-    return CURLE_OK;
+    return FETCHE_OK;
   if(tunnel_is_failed(ts))
-    return CURLE_RECV_ERROR; /* Need a cfilter close and new bootstrap */
+    return FETCHE_RECV_ERROR; /* Need a cfilter close and new bootstrap */
 
   do {
     timediff_t check;
@@ -541,14 +541,14 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
     check = Curl_timeleft(data, NULL, TRUE);
     if(check <= 0) {
       failf(data, "Proxy CONNECT aborted due to timeout");
-      result = CURLE_OPERATION_TIMEDOUT;
+      result = FETCHE_OPERATION_TIMEDOUT;
       goto out;
     }
 
     switch(ts->tunnel_state) {
     case H1_TUNNEL_INIT:
       /* Prepare the CONNECT request and make a first attempt to send. */
-      CURL_TRC_CF(data, cf, "CONNECT start");
+      FETCH_TRC_CF(data, cf, "CONNECT start");
       result = start_CONNECT(cf, data, ts);
       if(result)
         goto out;
@@ -557,7 +557,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
 
     case H1_TUNNEL_CONNECT:
       /* see that the request is completely sent */
-      CURL_TRC_CF(data, cf, "CONNECT send");
+      FETCH_TRC_CF(data, cf, "CONNECT send");
       result = send_CONNECT(cf, data, ts, &done);
       if(result || !done)
         goto out;
@@ -566,10 +566,10 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
 
     case H1_TUNNEL_RECEIVE:
       /* read what is there */
-      CURL_TRC_CF(data, cf, "CONNECT receive");
+      FETCH_TRC_CF(data, cf, "CONNECT receive");
       result = recv_CONNECT_resp(cf, data, ts, &done);
       if(Curl_pgrsUpdate(data)) {
-        result = CURLE_ABORTED_BY_CALLBACK;
+        result = FETCHE_ABORTED_BY_CALLBACK;
         goto out;
       }
       /* error or not complete yet. return for more multi-multi */
@@ -580,7 +580,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
       FALLTHROUGH();
 
     case H1_TUNNEL_RESPONSE:
-      CURL_TRC_CF(data, cf, "CONNECT response");
+      FETCH_TRC_CF(data, cf, "CONNECT response");
       if(data->req.newurl) {
         /* not the "final" response, we need to do a follow up request.
          * If the other side indicated a connection close, or if someone
@@ -593,7 +593,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
            * reset our tunnel state. To avoid recursion, we return
            * and expect to be called again.
            */
-          CURL_TRC_CF(data, cf, "CONNECT need to close+open");
+          FETCH_TRC_CF(data, cf, "CONNECT need to close+open");
           infof(data, "Connect me again please");
           Curl_conn_cf_close(cf, data);
           connkeep(conn, "HTTP proxy CONNECT");
@@ -621,13 +621,13 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
     streamclose(conn, "proxy CONNECT failure");
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
     failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
-    return CURLE_RECV_ERROR;
+    return FETCHE_RECV_ERROR;
   }
   /* 2xx response, SUCCESS! */
   h1_tunnel_go_state(cf, ts, H1_TUNNEL_ESTABLISHED, data);
   infof(data, "CONNECT tunnel established, response %d",
         data->info.httpproxycode);
-  result = CURLE_OK;
+  result = FETCHE_OK;
 
 out:
   if(result)
@@ -635,19 +635,19 @@ out:
   return result;
 }
 
-static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
+static FETCHcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     bool blocking, bool *done)
 {
-  CURLcode result;
+  FETCHcode result;
   struct h1_tunnel_state *ts = cf->ctx;
 
   if(cf->connected) {
     *done = TRUE;
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
-  CURL_TRC_CF(data, cf, "connect");
+  FETCH_TRC_CF(data, cf, "connect");
   result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
@@ -669,7 +669,7 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
   Curl_safefree(data->state.aptr.proxyuserpwd);
 
 out:
-  *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);
+  *done = (result == FETCHE_OK) && tunnel_is_established(cf->ctx);
   if(*done) {
     cf->connected = TRUE;
     /* The real request will follow the CONNECT, reset request partially */
@@ -692,7 +692,7 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
   if(!cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are tunneling. */
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    fetch_socket_t sock = Curl_conn_cf_get_socket(cf, data);
     if(ts) {
       /* when we have sent a CONNECT to a proxy, we should rather either
          wait for the socket to become readable to be able to get the
@@ -711,14 +711,14 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
-  CURL_TRC_CF(data, cf, "destroy");
+  FETCH_TRC_CF(data, cf, "destroy");
   tunnel_free(cf, data);
 }
 
 static void cf_h1_proxy_close(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
-  CURL_TRC_CF(data, cf, "close");
+  FETCH_TRC_CF(data, cf, "close");
   if(cf) {
     cf->connected = FALSE;
     if(cf->ctx) {
@@ -749,11 +749,11 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   Curl_cf_def_query,
 };
 
-CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
+FETCHcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
                                        struct Curl_easy *data)
 {
   struct Curl_cfilter *cf;
-  CURLcode result;
+  FETCHcode result;
 
   (void)data;
   result = Curl_cf_create(&cf, &Curl_cft_h1_proxy, NULL);
@@ -762,4 +762,4 @@ CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
   return result;
 }
 
-#endif /* !CURL_DISABLE_PROXY && ! CURL_DISABLE_HTTP */
+#endif /* !FETCH_DISABLE_PROXY && ! FETCH_DISABLE_HTTP */

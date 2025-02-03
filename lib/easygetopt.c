@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,30 +18,30 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "strcase.h"
 #include "easyoptions.h"
 
-#ifndef CURL_DISABLE_GETOPTIONS
+#ifndef FETCH_DISABLE_GETOPTIONS
 
 /* Lookups easy options at runtime */
-static struct curl_easyoption *lookup(const char *name, CURLoption id)
+static struct fetch_easyoption *lookup(const char *name, FETCHoption id)
 {
   DEBUGASSERT(name || id);
   DEBUGASSERT(!Curl_easyopts_check());
   if(name || id) {
-    struct curl_easyoption *o = &Curl_easyopts[0];
+    struct fetch_easyoption *o = &Curl_easyopts[0];
     do {
       if(name) {
         if(strcasecompare(o->name, name))
           return o;
       }
       else {
-        if((o->id == id) && !(o->flags & CURLOT_FLAG_ALIAS))
+        if((o->id == id) && !(o->flags & FETCHOT_FLAG_ALIAS))
           /* do not match alias options */
           return o;
       }
@@ -51,20 +51,20 @@ static struct curl_easyoption *lookup(const char *name, CURLoption id)
   return NULL;
 }
 
-const struct curl_easyoption *curl_easy_option_by_name(const char *name)
+const struct fetch_easyoption *fetch_easy_option_by_name(const char *name)
 {
   /* when name is used, the id argument is ignored */
-  return lookup(name, CURLOPT_LASTENTRY);
+  return lookup(name, FETCHOPT_LASTENTRY);
 }
 
-const struct curl_easyoption *curl_easy_option_by_id(CURLoption id)
+const struct fetch_easyoption *fetch_easy_option_by_id(FETCHoption id)
 {
   return lookup(NULL, id);
 }
 
 /* Iterates over available options */
-const struct curl_easyoption *
-curl_easy_option_next(const struct curl_easyoption *prev)
+const struct fetch_easyoption *
+fetch_easy_option_next(const struct fetch_easyoption *prev)
 {
   if(prev && prev->name) {
     prev++;
@@ -77,20 +77,20 @@ curl_easy_option_next(const struct curl_easyoption *prev)
 }
 
 #else
-const struct curl_easyoption *curl_easy_option_by_name(const char *name)
+const struct fetch_easyoption *fetch_easy_option_by_name(const char *name)
 {
   (void)name;
   return NULL;
 }
 
-const struct curl_easyoption *curl_easy_option_by_id (CURLoption id)
+const struct fetch_easyoption *fetch_easy_option_by_id (FETCHoption id)
 {
   (void)id;
   return NULL;
 }
 
-const struct curl_easyoption *
-curl_easy_option_next(const struct curl_easyoption *prev)
+const struct fetch_easyoption *
+fetch_easy_option_next(const struct fetch_easyoption *prev)
 {
   (void)prev;
   return NULL;

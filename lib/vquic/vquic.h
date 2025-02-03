@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_QUIC_H
-#define HEADER_CURL_VQUIC_QUIC_H
+#ifndef HEADER_FETCH_VQUIC_QUIC_H
+#define HEADER_FETCH_VQUIC_QUIC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_HTTP3
 struct Curl_cfilter;
@@ -34,13 +34,13 @@ struct Curl_addrinfo;
 
 void Curl_quic_ver(char *p, size_t len);
 
-CURLcode Curl_qlogdir(struct Curl_easy *data,
+FETCHcode Curl_qlogdir(struct Curl_easy *data,
                       unsigned char *scid,
                       size_t scidlen,
                       int *qlogfdp);
 
 
-CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
+FETCHcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
                              const struct Curl_addrinfo *ai,
@@ -50,7 +50,7 @@ extern struct Curl_cftype Curl_cft_http3;
 
 #endif /* !USE_HTTP3 */
 
-CURLcode Curl_conn_may_http3(struct Curl_easy *data,
+FETCHcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn);
 
-#endif /* HEADER_CURL_VQUIC_QUIC_H */
+#endif /* HEADER_FETCH_VQUIC_QUIC_H */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,36 +18,36 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  * RFC2831 DIGEST-MD5 authentication
  * RFC7616 DIGEST-SHA256, DIGEST-SHA512-256 authentication
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#ifndef FETCH_DISABLE_DIGEST_AUTH
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "vauth/vauth.h"
 #include "vauth/digest.h"
 #include "urldata.h"
-#include "curl_base64.h"
-#include "curl_hmac.h"
-#include "curl_md5.h"
-#include "curl_sha256.h"
-#include "curl_sha512_256.h"
+#include "fetch_base64.h"
+#include "fetch_hmac.h"
+#include "fetch_md5.h"
+#include "fetch_sha256.h"
+#include "fetch_sha512_256.h"
 #include "vtls/vtls.h"
 #include "warnless.h"
 #include "strtok.h"
 #include "strcase.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 #include "rand.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #define SESSION_ALGO 1 /* for algos with this bit set */
@@ -217,7 +217,7 @@ static bool auth_digest_get_key_value(const char *chlg,
   return TRUE;
 }
 
-static CURLcode auth_digest_get_qop_values(const char *options, int *value)
+static FETCHcode auth_digest_get_qop_values(const char *options, int *value)
 {
   char *tmp;
   char *token;
@@ -230,7 +230,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
      Curl_strtok_r() ruins it. */
   tmp = strdup(options);
   if(!tmp)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   token = Curl_strtok_r(tmp, ",", &tok_buf);
   while(token) {
@@ -246,7 +246,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
 
   free(tmp);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -267,9 +267,9 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
  * qop     [in/out] - The buffer where the qop-options will be stored.
  * qlen    [in]     - The length of the qop buffer.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
+static FETCHcode auth_decode_digest_md5_message(const struct bufref *chlgref,
                                                char *nonce, size_t nlen,
                                                char *realm, size_t rlen,
                                                char *alg, size_t alen,
@@ -279,11 +279,11 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
 
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlgref))
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
   /* Retrieve nonce string from the challenge */
   if(!auth_digest_get_key_value(chlg, "nonce=\"", nonce, nlen, '\"'))
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
   /* Retrieve realm string from the challenge */
   if(!auth_digest_get_key_value(chlg, "realm=\"", realm, rlen, '\"')) {
@@ -293,13 +293,13 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
 
   /* Retrieve algorithm string from the challenge */
   if(!auth_digest_get_key_value(chlg, "algorithm=", alg, alen, ','))
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
   /* Retrieve qop-options string from the challenge */
   if(!auth_digest_get_key_value(chlg, "qop=\"", qop, qlen, '\"'))
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -309,7 +309,7 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
  *
  * Parameters: None
  *
- * Returns TRUE as DIGEST as handled by libcurl.
+ * Returns TRUE as DIGEST as handled by libfetch.
  */
 bool Curl_auth_is_digest_supported(void)
 {
@@ -331,9 +331,9 @@ bool Curl_auth_is_digest_supported(void)
  * service [in]     - The service type such as http, smtp, pop or imap.
  * out     [out]    - The result storage.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const struct bufref *chlg,
                                              const char *userp,
                                              const char *passwdp,
@@ -359,7 +359,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char *spn         = NULL;
 
   /* Decode the challenge message */
-  CURLcode result = auth_decode_digest_md5_message(chlg,
+  FETCHcode result = auth_decode_digest_md5_message(chlg,
                                                    nonce, sizeof(nonce),
                                                    realm, sizeof(realm),
                                                    algorithm,
@@ -371,7 +371,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* We only support md5 sessions */
   if(strcmp(algorithm, "md5-sess") != 0)
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
   /* Get the qop-values from the qop-options */
   result = auth_digest_get_qop_values(qop_options, &qop_values);
@@ -380,7 +380,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* We only support auth quality-of-protection */
   if(!(qop_values & DIGEST_QOP_VALUE_AUTH))
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
   /* Generate 32 random hex chars, 32 bytes + 1 null-termination */
   result = Curl_rand_hex(data, (unsigned char *)cnonce, sizeof(cnonce));
@@ -390,29 +390,29 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   Curl_MD5_update(ctxt, (const unsigned char *) userp,
-                  curlx_uztoui(strlen(userp)));
+                  fetchx_uztoui(strlen(userp)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) realm,
-                  curlx_uztoui(strlen(realm)));
+                  fetchx_uztoui(strlen(realm)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) passwdp,
-                  curlx_uztoui(strlen(passwdp)));
+                  fetchx_uztoui(strlen(passwdp)));
   Curl_MD5_final(ctxt, digest);
 
   ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   Curl_MD5_update(ctxt, (const unsigned char *) digest, MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) nonce,
-                  curlx_uztoui(strlen(nonce)));
+                  fetchx_uztoui(strlen(nonce)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) cnonce,
-                  curlx_uztoui(strlen(cnonce)));
+                  fetchx_uztoui(strlen(cnonce)));
   Curl_MD5_final(ctxt, digest);
 
   /* Convert calculated 16 octet hex into 32 bytes string */
@@ -422,21 +422,21 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   /* Generate our SPN */
   spn = Curl_auth_build_spn(service, data->conn->host.name, NULL);
   if(!spn)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt) {
     free(spn);
 
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   Curl_MD5_update(ctxt, (const unsigned char *) method,
-                  curlx_uztoui(strlen(method)));
+                  fetchx_uztoui(strlen(method)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) spn,
-                  curlx_uztoui(strlen(spn)));
+                  fetchx_uztoui(strlen(spn)));
   Curl_MD5_final(ctxt, digest);
 
   for(i = 0; i < MD5_DIGEST_LEN; i++)
@@ -447,23 +447,23 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(!ctxt) {
     free(spn);
 
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   Curl_MD5_update(ctxt, (const unsigned char *) HA1_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) nonce,
-                  curlx_uztoui(strlen(nonce)));
+                  fetchx_uztoui(strlen(nonce)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
 
   Curl_MD5_update(ctxt, (const unsigned char *) nonceCount,
-                  curlx_uztoui(strlen(nonceCount)));
+                  fetchx_uztoui(strlen(nonceCount)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) cnonce,
-                  curlx_uztoui(strlen(cnonce)));
+                  fetchx_uztoui(strlen(cnonce)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) qop,
-                  curlx_uztoui(strlen(qop)));
+                  fetchx_uztoui(strlen(qop)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
 
   Curl_MD5_update(ctxt, (const unsigned char *) HA2_hex, 2 * MD5_DIGEST_LEN);
@@ -480,10 +480,10 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                      cnonce, nonceCount, spn, resp_hash_hex, qop);
   free(spn);
   if(!response)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Return the response. */
-  Curl_bufref_set(out, response, strlen(response), curl_free);
+  Curl_bufref_set(out, response, strlen(response), fetch_free);
   return result;
 }
 
@@ -498,9 +498,9 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
  * chlg    [in]     - The challenge message.
  * digest  [in/out] - The digest data struct being used and modified.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
+FETCHcode Curl_auth_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest)
 {
   bool before = FALSE; /* got a nonce before */
@@ -530,7 +530,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         free(digest->nonce);
         digest->nonce = strdup(content);
         if(!digest->nonce)
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "stale")) {
         if(strcasecompare(content, "true")) {
@@ -542,13 +542,13 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         free(digest->realm);
         digest->realm = strdup(content);
         if(!digest->realm)
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "opaque")) {
         free(digest->opaque);
         digest->opaque = strdup(content);
         if(!digest->opaque)
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "qop")) {
         char *tok_buf = NULL;
@@ -556,7 +556,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
            clone of the buffer since Curl_strtok_r() ruins it */
         tmp = strdup(content);
         if(!tmp)
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
 
         token = Curl_strtok_r(tmp, ",", &tok_buf);
         while(token) {
@@ -579,20 +579,20 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           free(digest->qop);
           digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH);
           if(!digest->qop)
-            return CURLE_OUT_OF_MEMORY;
+            return FETCHE_OUT_OF_MEMORY;
         }
         else if(foundAuthInt) {
           free(digest->qop);
           digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH_INT);
           if(!digest->qop)
-            return CURLE_OUT_OF_MEMORY;
+            return FETCHE_OUT_OF_MEMORY;
         }
       }
       else if(strcasecompare(value, "algorithm")) {
         free(digest->algorithm);
         digest->algorithm = strdup(content);
         if(!digest->algorithm)
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
 
         if(strcasecompare(content, "MD5-sess"))
           digest->algo = ALGO_MD5SESS;
@@ -603,21 +603,21 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         else if(strcasecompare(content, "SHA-256-SESS"))
           digest->algo = ALGO_SHA256SESS;
         else if(strcasecompare(content, "SHA-512-256")) {
-#ifdef CURL_HAVE_SHA512_256
+#ifdef FETCH_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256;
-#else  /* ! CURL_HAVE_SHA512_256 */
-          return CURLE_NOT_BUILT_IN;
-#endif /* ! CURL_HAVE_SHA512_256 */
+#else  /* ! FETCH_HAVE_SHA512_256 */
+          return FETCHE_NOT_BUILT_IN;
+#endif /* ! FETCH_HAVE_SHA512_256 */
         }
         else if(strcasecompare(content, "SHA-512-256-SESS")) {
-#ifdef CURL_HAVE_SHA512_256
+#ifdef FETCH_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256SESS;
-#else  /* ! CURL_HAVE_SHA512_256 */
-          return CURLE_NOT_BUILT_IN;
-#endif /* ! CURL_HAVE_SHA512_256 */
+#else  /* ! FETCH_HAVE_SHA512_256 */
+          return FETCHE_NOT_BUILT_IN;
+#endif /* ! FETCH_HAVE_SHA512_256 */
         }
         else
-          return CURLE_BAD_CONTENT_ENCODING;
+          return FETCHE_BAD_CONTENT_ENCODING;
       }
       else if(strcasecompare(value, "userhash")) {
         if(strcasecompare(content, "true")) {
@@ -644,17 +644,17 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
      'stale=true'. This means we provided bad credentials in the previous
      request */
   if(before && !digest->stale)
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
   /* We got this header without a nonce, that is a bad Digest line! */
   if(!digest->nonce)
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
   /* "<algo>-sess" protocol versions require "auth" or "auth-int" qop */
   if(!digest->qop && (digest->algo & SESSION_ALGO))
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -675,9 +675,9 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-static CURLcode auth_create_digest_http_message(
+static FETCHcode auth_create_digest_http_message(
                   struct Curl_easy *data,
                   const char *userp,
                   const char *passwdp,
@@ -686,10 +686,10 @@ static CURLcode auth_create_digest_http_message(
                   struct digestdata *digest,
                   char **outptr, size_t *outlen,
                   void (*convert_to_ascii)(unsigned char *, unsigned char *),
-                  CURLcode (*hash)(unsigned char *, const unsigned char *,
+                  FETCHcode (*hash)(unsigned char *, const unsigned char *,
                                    const size_t))
 {
-  CURLcode result;
+  FETCHcode result;
   unsigned char hashbuf[32]; /* 32 bytes/256 bits */
   unsigned char request_digest[65];
   unsigned char ha1[65];    /* 64 digits and 1 zero byte */
@@ -730,7 +730,7 @@ static CURLcode auth_create_digest_http_message(
   if(digest->userhash) {
     hashthis = aprintf("%s:%s", userp, digest->realm ? digest->realm : "");
     if(!hashthis)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
 
     result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
     free(hashthis);
@@ -753,7 +753,7 @@ static CURLcode auth_create_digest_http_message(
   hashthis = aprintf("%s:%s:%s", userp, digest->realm ? digest->realm : "",
                      passwdp);
   if(!hashthis)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
@@ -765,7 +765,7 @@ static CURLcode auth_create_digest_http_message(
     /* nonce and cnonce are OUTSIDE the hash */
     tmp = aprintf("%s:%s:%s", ha1, digest->nonce, digest->cnonce);
     if(!tmp)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
 
     result = hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
     free(tmp);
@@ -789,7 +789,7 @@ static CURLcode auth_create_digest_http_message(
 
   hashthis = aprintf("%s:%s", request, uripath);
   if(!hashthis)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   if(digest->qop && strcasecompare(digest->qop, "auth-int")) {
     /* We do not support auth-int for PUT or POST */
@@ -809,7 +809,7 @@ static CURLcode auth_create_digest_http_message(
   }
 
   if(!hashthis)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
@@ -826,7 +826,7 @@ static CURLcode auth_create_digest_http_message(
   }
 
   if(!hashthis)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
@@ -849,7 +849,7 @@ static CURLcode auth_create_digest_http_message(
   */
   userp_quoted = auth_digest_string_quoted(digest->userhash ? userh : userp);
   if(!userp_quoted)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   if(digest->realm)
     realm_quoted = auth_digest_string_quoted(digest->realm);
   else {
@@ -859,13 +859,13 @@ static CURLcode auth_create_digest_http_message(
   }
   if(!realm_quoted) {
     free(userp_quoted);
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
   nonce_quoted = auth_digest_string_quoted(digest->nonce);
   if(!nonce_quoted) {
     free(realm_quoted);
     free(userp_quoted);
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   if(digest->qop) {
@@ -905,7 +905,7 @@ static CURLcode auth_create_digest_http_message(
   free(realm_quoted);
   free(userp_quoted);
   if(!response)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Add the optional fields */
   if(digest->opaque) {
@@ -914,13 +914,13 @@ static CURLcode auth_create_digest_http_message(
     opaque_quoted = auth_digest_string_quoted(digest->opaque);
     if(!opaque_quoted) {
       free(response);
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
     }
     tmp = aprintf("%s, opaque=\"%s\"", response, opaque_quoted);
     free(response);
     free(opaque_quoted);
     if(!tmp)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
 
     response = tmp;
   }
@@ -930,7 +930,7 @@ static CURLcode auth_create_digest_http_message(
     tmp = aprintf("%s, algorithm=%s", response, digest->algorithm);
     free(response);
     if(!tmp)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
 
     response = tmp;
   }
@@ -940,7 +940,7 @@ static CURLcode auth_create_digest_http_message(
     tmp = aprintf("%s, userhash=true", response);
     free(response);
     if(!tmp)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
 
     response = tmp;
   }
@@ -949,7 +949,7 @@ static CURLcode auth_create_digest_http_message(
   *outptr = response;
   *outlen = strlen(response);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -970,9 +970,9 @@ static CURLcode auth_create_digest_http_message(
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const unsigned char *request,
@@ -993,17 +993,17 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,
                                            Curl_sha256it);
-#ifdef CURL_HAVE_SHA512_256
+#ifdef FETCH_HAVE_SHA512_256
   if(digest->algo <= ALGO_SHA512_256SESS)
     return auth_create_digest_http_message(data, userp, passwdp,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,
                                            Curl_sha512_256it);
-#endif /* CURL_HAVE_SHA512_256 */
+#endif /* FETCH_HAVE_SHA512_256 */
 
   /* Should be unreachable */
-  return CURLE_BAD_CONTENT_ENCODING;
+  return FETCHE_BAD_CONTENT_ENCODING;
 }
 
 /*
@@ -1032,4 +1032,4 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
 }
 #endif  /* !USE_WINDOWS_SSPI */
 
-#endif  /* !CURL_DISABLE_DIGEST_AUTH */
+#endif  /* !FETCH_DISABLE_DIGEST_AUTH */

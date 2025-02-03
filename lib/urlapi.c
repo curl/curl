@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,26 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #include "urldata.h"
 #include "urlapi-int.h"
 #include "strcase.h"
 #include "url.h"
 #include "escape.h"
-#include "curl_ctype.h"
+#include "fetch_ctype.h"
 #include "inet_pton.h"
 #include "inet_ntop.h"
 #include "strdup.h"
 #include "idn.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
   /* MS-DOS/Windows style drive prefix, eg c: in c:foo */
@@ -54,7 +54,7 @@
    ((str)[1] == ':' || (str)[1] == '|') && \
    ((str)[2] == '/' || (str)[2] == '\\' || (str)[2] == 0))
 
-/* scheme is not URL encoded, the longest libcurl supported ones are... */
+/* scheme is not URL encoded, the longest libfetch supported ones are... */
 #define MAX_SCHEME_LEN 40
 
 /*
@@ -66,7 +66,7 @@
 #define AF_INET6 (AF_INET + 1)
 #endif
 
-/* Internal representation of CURLU. Point to URL-encoded strings. */
+/* Internal representation of FETCHU. Point to URL-encoded strings. */
 struct Curl_URL {
   char *scheme;
   char *user;
@@ -86,7 +86,7 @@ struct Curl_URL {
 
 #define DEFAULT_SCHEME "https"
 
-static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
+static FETCHUcode parseurl_and_replace(const char *url, FETCHU *u,
                                       unsigned int flags);
 
 static void free_urlhandle(struct Curl_URL *u)
@@ -131,9 +131,9 @@ static const char *find_host_sep(const char *url)
   return sep < query ? sep : query;
 }
 
-/* convert CURLcode to CURLUcode */
-#define cc2cu(x) ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE :   \
-                  CURLUE_OUT_OF_MEMORY)
+/* convert FETCHcode to FETCHUcode */
+#define cc2cu(x) ((x) == FETCHE_TOO_LARGE ? FETCHUE_TOO_LARGE :   \
+                  FETCHUE_OUT_OF_MEMORY)
 /*
  * Decide whether a character in a URL must be escaped.
  */
@@ -146,7 +146,7 @@ static const char hexdigits[] = "0123456789abcdef";
  * URL encoding should be skipped for hostnames, otherwise IDN resolution
  * will fail.
  */
-static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
+static FETCHUcode urlencode_str(struct dynbuf *o, const char *url,
                                size_t len, bool relative,
                                bool query)
 {
@@ -154,7 +154,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
   bool left = !query;
   const unsigned char *iptr;
   const unsigned char *host_sep = (const unsigned char *) url;
-  CURLcode result;
+  FETCHcode result;
 
   if(!relative)
     host_sep = (const unsigned char *) find_host_sep(url);
@@ -194,7 +194,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
       return cc2cu(result);
   }
 
-  return CURLUE_OK;
+  return FETCHUE_OK;
 }
 
 /*
@@ -250,14 +250,14 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
  *
  * Note that this function destroys the 'base' string.
  */
-static CURLUcode redirect_url(char *base, const char *relurl,
-                              CURLU *u, unsigned int flags)
+static FETCHUcode redirect_url(char *base, const char *relurl,
+                              FETCHU *u, unsigned int flags)
 {
   struct dynbuf urlbuf;
   bool host_changed = FALSE;
   const char *useurl = relurl;
-  CURLcode result = CURLE_OK;
-  CURLUcode uc;
+  FETCHcode result = FETCHE_OK;
+  FETCHUcode uc;
   /* protsep points to the start of the hostname */
   char *protsep = strstr(base, "//");
   DEBUGASSERT(protsep);
@@ -314,7 +314,7 @@ static CURLUcode redirect_url(char *base, const char *relurl,
       *pathsep = 0;
   }
 
-  Curl_dyn_init(&urlbuf, CURL_MAX_INPUT_LENGTH);
+  Curl_dyn_init(&urlbuf, FETCH_MAX_INPUT_LENGTH);
 
   /* copy over the root URL part */
   result = Curl_dyn_add(&urlbuf, base);
@@ -326,13 +326,13 @@ static CURLUcode redirect_url(char *base, const char *relurl,
                      FALSE);
   if(!uc)
     uc = parseurl_and_replace(Curl_dyn_ptr(&urlbuf), u,
-                              flags&~CURLU_PATH_AS_IS);
+                              flags&~FETCHU_PATH_AS_IS);
   Curl_dyn_free(&urlbuf);
   return uc;
 }
 
 /* scan for byte values <= 31, 127 and sometimes space */
-static CURLUcode junkscan(const char *url, size_t *urllen, unsigned int flags)
+static FETCHUcode junkscan(const char *url, size_t *urllen, unsigned int flags)
 {
   static const char badbytes[]={
     /* */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -344,17 +344,17 @@ static CURLUcode junkscan(const char *url, size_t *urllen, unsigned int flags)
   size_t n = strlen(url);
   size_t nfine;
 
-  if(n > CURL_MAX_INPUT_LENGTH)
+  if(n > FETCH_MAX_INPUT_LENGTH)
     /* excessive input length */
-    return CURLUE_MALFORMED_INPUT;
+    return FETCHUE_MALFORMED_INPUT;
 
   nfine = strcspn(url, badbytes);
   if((nfine != n) ||
-     (!(flags & CURLU_ALLOW_SPACE) && strchr(url, ' ')))
-    return CURLUE_MALFORMED_INPUT;
+     (!(flags & FETCHU_ALLOW_SPACE) && strchr(url, ' ')))
+    return FETCHUE_MALFORMED_INPUT;
 
   *urllen = n;
-  return CURLUE_OK;
+  return FETCHUE_OK;
 }
 
 /*
@@ -364,14 +364,14 @@ static CURLUcode junkscan(const char *url, size_t *urllen, unsigned int flags)
  * strip them out of the hostname
  *
  */
-static CURLUcode parse_hostname_login(struct Curl_URL *u,
+static FETCHUcode parse_hostname_login(struct Curl_URL *u,
                                       const char *login,
                                       size_t len,
                                       unsigned int flags,
                                       size_t *offset) /* to the hostname */
 {
-  CURLUcode result = CURLUE_OK;
-  CURLcode ccode;
+  FETCHUcode result = FETCHUE_OK;
+  FETCHcode ccode;
   char *userp = NULL;
   char *passwdp = NULL;
   char *optionsp = NULL;
@@ -409,14 +409,14 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
                                    (h && (h->flags & PROTOPT_URLOPTIONS)) ?
                                    &optionsp : NULL);
   if(ccode) {
-    result = CURLUE_BAD_LOGIN;
+    result = FETCHUE_BAD_LOGIN;
     goto out;
   }
 
   if(userp) {
-    if(flags & CURLU_DISALLOW_USER) {
+    if(flags & FETCHU_DISALLOW_USER) {
       /* Option DISALLOW_USER is set and URL contains username. */
-      result = CURLUE_USER_NOT_ALLOWED;
+      result = FETCHUE_USER_NOT_ALLOWED;
       goto out;
     }
     free(u->user);
@@ -435,7 +435,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   /* the hostname starts at this offset */
   *offset = ptr - login;
-  return CURLUE_OK;
+  return FETCHUE_OK;
 
 out:
 
@@ -449,7 +449,7 @@ out:
   return result;
 }
 
-UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
+UNITTEST FETCHUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
                                    bool has_scheme)
 {
   char *portptr;
@@ -460,12 +460,12 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
   if(hostname[0] == '[') {
     portptr = strchr(hostname, ']');
     if(!portptr)
-      return CURLUE_BAD_IPV6;
+      return FETCHUE_BAD_IPV6;
     portptr++;
     /* this is a RFC2732-style specified IP-address */
     if(*portptr) {
       if(*portptr != ':')
-        return CURLUE_BAD_PORT_NUMBER;
+        return FETCHUE_BAD_PORT_NUMBER;
     }
     else
       portptr = NULL;
@@ -488,36 +488,36 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     Curl_dyn_setlen(host, keep);
     portptr++;
     if(!*portptr)
-      return has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
+      return has_scheme ? FETCHUE_OK : FETCHUE_BAD_PORT_NUMBER;
 
     if(!ISDIGIT(*portptr))
-      return CURLUE_BAD_PORT_NUMBER;
+      return FETCHUE_BAD_PORT_NUMBER;
 
     errno = 0;
     port = strtoul(portptr, &rest, 10);  /* Port number must be decimal */
 
     if(errno || (port > 0xffff) || *rest)
-      return CURLUE_BAD_PORT_NUMBER;
+      return FETCHUE_BAD_PORT_NUMBER;
 
     u->portnum = (unsigned short) port;
     /* generate a new port number string to get rid of leading zeroes etc */
     free(u->port);
     u->port = aprintf("%ld", port);
     if(!u->port)
-      return CURLUE_OUT_OF_MEMORY;
+      return FETCHUE_OUT_OF_MEMORY;
   }
 
-  return CURLUE_OK;
+  return FETCHUE_OK;
 }
 
 /* this assumes 'hostname' now starts with [ */
-static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
+static FETCHUcode ipv6_parse(struct Curl_URL *u, char *hostname,
                             size_t hlen) /* length of hostname */
 {
   size_t len;
   DEBUGASSERT(*hostname == '[');
   if(hlen < 4) /* '[::]' is the shortest possible valid string */
-    return CURLUE_BAD_IPV6;
+    return FETCHUE_BAD_IPV6;
   hostname++;
   hlen -= 2;
 
@@ -537,16 +537,16 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
       while(*h && (*h != ']') && (i < 15))
         zoneid[i++] = *h++;
       if(!i || (']' != *h))
-        return CURLUE_BAD_IPV6;
+        return FETCHUE_BAD_IPV6;
       zoneid[i] = 0;
       u->zoneid = strdup(zoneid);
       if(!u->zoneid)
-        return CURLUE_OUT_OF_MEMORY;
+        return FETCHUE_OUT_OF_MEMORY;
       hostname[len] = ']'; /* insert end bracket */
       hostname[len + 1] = 0; /* terminate the hostname */
     }
     else
-      return CURLUE_BAD_IPV6;
+      return FETCHUE_BAD_IPV6;
     /* hostname is fine */
   }
 
@@ -555,24 +555,24 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
     char dest[16]; /* fits a binary IPv6 address */
     hostname[hlen] = 0; /* end the address there */
     if(1 != Curl_inet_pton(AF_INET6, hostname, dest))
-      return CURLUE_BAD_IPV6;
+      return FETCHUE_BAD_IPV6;
     if(Curl_inet_ntop(AF_INET6, dest, hostname, hlen)) {
       hlen = strlen(hostname); /* might be shorter now */
       hostname[hlen + 1] = 0;
     }
     hostname[hlen] = ']'; /* restore ending bracket */
   }
-  return CURLUE_OK;
+  return FETCHUE_OK;
 }
 
-static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
+static FETCHUcode hostname_check(struct Curl_URL *u, char *hostname,
                                 size_t hlen) /* length of hostname */
 {
   size_t len;
   DEBUGASSERT(hostname);
 
   if(!hlen)
-    return CURLUE_NO_HOST;
+    return FETCHUE_NO_HOST;
   else if(hostname[0] == '[')
     return ipv6_parse(u, hostname, hlen);
   else {
@@ -580,9 +580,9 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
     len = strcspn(hostname, " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%");
     if(hlen != len)
       /* hostname with bad content */
-      return CURLUE_BAD_HOSTNAME;
+      return FETCHUE_BAD_HOSTNAME;
   }
-  return CURLUE_OK;
+  return FETCHUE_OK;
 }
 
 /*
@@ -610,7 +610,7 @@ static int ipv4_normalize(struct dynbuf *host)
   int n = 0;
   const char *c = Curl_dyn_ptr(host);
   unsigned long parts[4] = {0, 0, 0, 0};
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   if(*c == '[')
     return HOST_IPV6;
@@ -699,22 +699,22 @@ static int ipv4_normalize(struct dynbuf *host)
 }
 
 /* if necessary, replace the host content with a URL decoded version */
-static CURLUcode urldecode_host(struct dynbuf *host)
+static FETCHUcode urldecode_host(struct dynbuf *host)
 {
   char *per = NULL;
   const char *hostname = Curl_dyn_ptr(host);
   per = strchr(hostname, '%');
   if(!per)
     /* nothing to decode */
-    return CURLUE_OK;
+    return FETCHUE_OK;
   else {
     /* encoded */
     size_t dlen;
     char *decoded;
-    CURLcode result = Curl_urldecode(hostname, 0, &decoded, &dlen,
+    FETCHcode result = Curl_urldecode(hostname, 0, &decoded, &dlen,
                                      REJECT_CTRL);
     if(result)
-      return CURLUE_BAD_HOSTNAME;
+      return FETCHUE_BAD_HOSTNAME;
     Curl_dyn_reset(host);
     result = Curl_dyn_addn(host, decoded, dlen);
     free(decoded);
@@ -722,18 +722,18 @@ static CURLUcode urldecode_host(struct dynbuf *host)
       return cc2cu(result);
   }
 
-  return CURLUE_OK;
+  return FETCHUE_OK;
 }
 
-static CURLUcode parse_authority(struct Curl_URL *u,
+static FETCHUcode parse_authority(struct Curl_URL *u,
                                  const char *auth, size_t authlen,
                                  unsigned int flags,
                                  struct dynbuf *host,
                                  bool has_scheme)
 {
   size_t offset;
-  CURLUcode uc;
-  CURLcode result;
+  FETCHUcode uc;
+  FETCHcode result;
 
   /*
    * Parse the login details and strip them out of the hostname.
@@ -753,7 +753,7 @@ static CURLUcode parse_authority(struct Curl_URL *u,
     goto out;
 
   if(!Curl_dyn_len(host))
-    return CURLUE_NO_HOST;
+    return FETCHUE_NO_HOST;
 
   switch(ipv4_normalize(host)) {
   case HOST_IPV4:
@@ -767,10 +767,10 @@ static CURLUcode parse_authority(struct Curl_URL *u,
       uc = hostname_check(u, Curl_dyn_ptr(host), Curl_dyn_len(host));
     break;
   case HOST_ERROR:
-    uc = CURLUE_OUT_OF_MEMORY;
+    uc = FETCHUE_OUT_OF_MEMORY;
     break;
   default:
-    uc = CURLUE_BAD_HOSTNAME; /* Bad IPv4 address even */
+    uc = FETCHUE_BAD_HOSTNAME; /* Bad IPv4 address even */
     break;
   }
 
@@ -779,16 +779,16 @@ out:
 }
 
 /* used for HTTP/2 server push */
-CURLUcode Curl_url_set_authority(CURLU *u, const char *authority)
+FETCHUcode Curl_url_set_authority(FETCHU *u, const char *authority)
 {
-  CURLUcode result;
+  FETCHUcode result;
   struct dynbuf host;
 
   DEBUGASSERT(authority);
-  Curl_dyn_init(&host, CURL_MAX_INPUT_LENGTH);
+  Curl_dyn_init(&host, FETCH_MAX_INPUT_LENGTH);
 
   result = parse_authority(u, authority, strlen(authority),
-                           CURLU_DISALLOW_USER, &host, !!u->scheme);
+                           FETCHU_DISALLOW_USER, &host, !!u->scheme);
   if(result)
     Curl_dyn_free(&host);
   else {
@@ -929,7 +929,7 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
   return 0; /* success */
 }
 
-static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
+static FETCHUcode parseurl(const char *url, FETCHU *u, unsigned int flags)
 {
   const char *path;
   size_t pathlen;
@@ -938,28 +938,28 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   char schemebuf[MAX_SCHEME_LEN + 1];
   size_t schemelen = 0;
   size_t urllen;
-  CURLUcode result = CURLUE_OK;
+  FETCHUcode result = FETCHUE_OK;
   size_t fraglen = 0;
   struct dynbuf host;
 
   DEBUGASSERT(url);
 
-  Curl_dyn_init(&host, CURL_MAX_INPUT_LENGTH);
+  Curl_dyn_init(&host, FETCH_MAX_INPUT_LENGTH);
 
   result = junkscan(url, &urllen, flags);
   if(result)
     goto fail;
 
   schemelen = Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf),
-                                   flags & (CURLU_GUESS_SCHEME|
-                                            CURLU_DEFAULT_SCHEME));
+                                   flags & (FETCHU_GUESS_SCHEME|
+                                            FETCHU_DEFAULT_SCHEME));
 
   /* handle the file: scheme */
   if(schemelen && !strcmp(schemebuf, "file")) {
     bool uncpath = FALSE;
     if(urllen <= 6) {
       /* file:/ is not enough to actually be a complete file: URL */
-      result = CURLUE_BAD_FILE_URL;
+      result = FETCHUE_BAD_FILE_URL;
       goto fail;
     }
 
@@ -969,7 +969,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 
     u->scheme = strdup("file");
     if(!u->scheme) {
-      result = CURLUE_OUT_OF_MEMORY;
+      result = FETCHUE_OUT_OF_MEMORY;
       goto fail;
     }
 
@@ -1018,13 +1018,13 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
              hostname */
           path = strpbrk(ptr, "/\\:*?\"<>|");
           if(!path || *path != '/') {
-            result = CURLUE_BAD_FILE_URL;
+            result = FETCHUE_BAD_FILE_URL;
             goto fail;
           }
 
           len = path - ptr;
           if(len) {
-            CURLcode code = Curl_dyn_addn(&host, ptr, len);
+            FETCHcode code = Curl_dyn_addn(&host, ptr, len);
             if(code) {
               result = cc2cu(code);
               goto fail;
@@ -1036,7 +1036,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 #else
           /* Invalid file://hostname/, expected localhost or 127.0.0.1 or
              none */
-          result = CURLUE_BAD_FILE_URL;
+          result = FETCHUE_BAD_FILE_URL;
           goto fail;
 #endif
         }
@@ -1056,7 +1056,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     if(('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) ||
        STARTS_WITH_URL_DRIVE_PREFIX(path)) {
       /* File drive letters are only accepted in MS-DOS/Windows */
-      result = CURLUE_BAD_FILE_URL;
+      result = FETCHUE_BAD_FILE_URL;
       goto fail;
     }
 #else
@@ -1085,14 +1085,14 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 
       schemep = schemebuf;
       if(!Curl_get_scheme_handler(schemep) &&
-         !(flags & CURLU_NON_SUPPORT_SCHEME)) {
-        result = CURLUE_UNSUPPORTED_SCHEME;
+         !(flags & FETCHU_NON_SUPPORT_SCHEME)) {
+        result = FETCHUE_UNSUPPORTED_SCHEME;
         goto fail;
       }
 
       if((i < 1) || (i > 3)) {
         /* less than one or more than three slashes */
-        result = CURLUE_BAD_SLASHES;
+        result = FETCHUE_BAD_SLASHES;
         goto fail;
       }
       hostp = p; /* hostname starts here */
@@ -1100,11 +1100,11 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     else {
       /* no scheme! */
 
-      if(!(flags & (CURLU_DEFAULT_SCHEME|CURLU_GUESS_SCHEME))) {
-        result = CURLUE_BAD_SCHEME;
+      if(!(flags & (FETCHU_DEFAULT_SCHEME|FETCHU_GUESS_SCHEME))) {
+        result = FETCHUE_BAD_SCHEME;
         goto fail;
       }
-      if(flags & CURLU_DEFAULT_SCHEME)
+      if(flags & FETCHU_DEFAULT_SCHEME)
         schemep = DEFAULT_SCHEME;
 
       /*
@@ -1116,7 +1116,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     if(schemep) {
       u->scheme = strdup(schemep);
       if(!u->scheme) {
-        result = CURLUE_OUT_OF_MEMORY;
+        result = FETCHUE_OUT_OF_MEMORY;
         goto fail;
       }
     }
@@ -1133,9 +1133,9 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       if(result)
         goto fail;
 
-      if((flags & CURLU_GUESS_SCHEME) && !schemep) {
+      if((flags & FETCHU_GUESS_SCHEME) && !schemep) {
         const char *hostname = Curl_dyn_ptr(&host);
-        /* legacy curl-style guess based on hostname */
+        /* legacy fetch-style guess based on hostname */
         if(checkprefix("ftp.", hostname))
           schemep = "ftp";
         else if(checkprefix("dict.", hostname))
@@ -1153,21 +1153,21 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 
         u->scheme = strdup(schemep);
         if(!u->scheme) {
-          result = CURLUE_OUT_OF_MEMORY;
+          result = FETCHUE_OUT_OF_MEMORY;
           goto fail;
         }
         u->guessed_scheme = TRUE;
       }
     }
-    else if(flags & CURLU_NO_AUTHORITY) {
+    else if(flags & FETCHU_NO_AUTHORITY) {
       /* allowed to be empty. */
       if(Curl_dyn_add(&host, "")) {
-        result = CURLUE_OUT_OF_MEMORY;
+        result = FETCHUE_OUT_OF_MEMORY;
         goto fail;
       }
     }
     else {
-      result = CURLUE_NO_HOST;
+      result = FETCHUE_NO_HOST;
       goto fail;
     }
   }
@@ -1178,9 +1178,9 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     u->fragment_present = TRUE;
     if(fraglen > 1) {
       /* skip the leading '#' in the copy but include the terminating null */
-      if(flags & CURLU_URLENCODE) {
+      if(flags & FETCHU_URLENCODE) {
         struct dynbuf enc;
-        Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+        Curl_dyn_init(&enc, FETCH_MAX_INPUT_LENGTH);
         result = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, FALSE);
         if(result)
           goto fail;
@@ -1189,7 +1189,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       else {
         u->fragment = Curl_memdup0(fragment + 1, fraglen - 1);
         if(!u->fragment) {
-          result = CURLUE_OUT_OF_MEMORY;
+          result = FETCHUE_OUT_OF_MEMORY;
           goto fail;
         }
       }
@@ -1205,9 +1205,9 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     pathlen -= qlen;
     u->query_present = TRUE;
     if(qlen > 1) {
-      if(flags & CURLU_URLENCODE) {
+      if(flags & FETCHU_URLENCODE) {
         struct dynbuf enc;
-        Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+        Curl_dyn_init(&enc, FETCH_MAX_INPUT_LENGTH);
         /* skip the leading question mark */
         result = urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE);
         if(result)
@@ -1217,7 +1217,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       else {
         u->query = Curl_memdup0(query + 1, qlen - 1);
         if(!u->query) {
-          result = CURLUE_OUT_OF_MEMORY;
+          result = FETCHUE_OUT_OF_MEMORY;
           goto fail;
         }
       }
@@ -1226,15 +1226,15 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       /* single byte query */
       u->query = strdup("");
       if(!u->query) {
-        result = CURLUE_OUT_OF_MEMORY;
+        result = FETCHUE_OUT_OF_MEMORY;
         goto fail;
       }
     }
   }
 
-  if(pathlen && (flags & CURLU_URLENCODE)) {
+  if(pathlen && (flags & FETCHU_URLENCODE)) {
     struct dynbuf enc;
-    Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+    Curl_dyn_init(&enc, FETCH_MAX_INPUT_LENGTH);
     result = urlencode_str(&enc, path, pathlen, TRUE, FALSE);
     if(result)
       goto fail;
@@ -1250,21 +1250,21 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     if(!u->path) {
       u->path = Curl_memdup0(path, pathlen);
       if(!u->path) {
-        result = CURLUE_OUT_OF_MEMORY;
+        result = FETCHUE_OUT_OF_MEMORY;
         goto fail;
       }
       path = u->path;
     }
-    else if(flags & CURLU_URLENCODE)
+    else if(flags & FETCHU_URLENCODE)
       /* it might have encoded more than just the path so cut it */
       u->path[pathlen] = 0;
 
-    if(!(flags & CURLU_PATH_AS_IS)) {
+    if(!(flags & FETCHU_PATH_AS_IS)) {
       /* remove ../ and ./ sequences according to RFC3986 */
       char *dedot;
       int err = dedotdotify((char *)path, pathlen, &dedot);
       if(err) {
-        result = CURLUE_OUT_OF_MEMORY;
+        result = FETCHUE_OUT_OF_MEMORY;
         goto fail;
       }
       if(dedot) {
@@ -1286,11 +1286,11 @@ fail:
 /*
  * Parse the URL and, if successful, replace everything in the Curl_URL struct.
  */
-static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
+static FETCHUcode parseurl_and_replace(const char *url, FETCHU *u,
                                       unsigned int flags)
 {
-  CURLUcode result;
-  CURLU tmpurl;
+  FETCHUcode result;
+  FETCHU tmpurl;
   memset(&tmpurl, 0, sizeof(tmpurl));
   result = parseurl(url, &tmpurl, flags);
   if(!result) {
@@ -1302,12 +1302,12 @@ static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
 
 /*
  */
-CURLU *curl_url(void)
+FETCHU *fetch_url(void)
 {
   return calloc(1, sizeof(struct Curl_URL));
 }
 
-void curl_url_cleanup(CURLU *u)
+void fetch_url_cleanup(FETCHU *u)
 {
   if(u) {
     free_urlhandle(u);
@@ -1324,7 +1324,7 @@ void curl_url_cleanup(CURLU *u)
     }                                           \
   } while(0)
 
-CURLU *curl_url_dup(const CURLU *in)
+FETCHU *fetch_url_dup(const FETCHU *in)
 {
   struct Curl_URL *u = calloc(1, sizeof(struct Curl_URL));
   if(u) {
@@ -1344,63 +1344,63 @@ CURLU *curl_url_dup(const CURLU *in)
   }
   return u;
 fail:
-  curl_url_cleanup(u);
+  fetch_url_cleanup(u);
   return NULL;
 }
 
-CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
+FETCHUcode fetch_url_get(const FETCHU *u, FETCHUPart what,
                        char **part, unsigned int flags)
 {
   const char *ptr;
-  CURLUcode ifmissing = CURLUE_UNKNOWN_PART;
+  FETCHUcode ifmissing = FETCHUE_UNKNOWN_PART;
   char portbuf[7];
-  bool urldecode = (flags & CURLU_URLDECODE) ? 1 : 0;
-  bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
+  bool urldecode = (flags & FETCHU_URLDECODE) ? 1 : 0;
+  bool urlencode = (flags & FETCHU_URLENCODE) ? 1 : 0;
   bool punycode = FALSE;
   bool depunyfy = FALSE;
   bool plusdecode = FALSE;
   (void)flags;
   if(!u)
-    return CURLUE_BAD_HANDLE;
+    return FETCHUE_BAD_HANDLE;
   if(!part)
-    return CURLUE_BAD_PARTPOINTER;
+    return FETCHUE_BAD_PARTPOINTER;
   *part = NULL;
 
   switch(what) {
-  case CURLUPART_SCHEME:
+  case FETCHUPART_SCHEME:
     ptr = u->scheme;
-    ifmissing = CURLUE_NO_SCHEME;
+    ifmissing = FETCHUE_NO_SCHEME;
     urldecode = FALSE; /* never for schemes */
-    if((flags & CURLU_NO_GUESS_SCHEME) && u->guessed_scheme)
-      return CURLUE_NO_SCHEME;
+    if((flags & FETCHU_NO_GUESS_SCHEME) && u->guessed_scheme)
+      return FETCHUE_NO_SCHEME;
     break;
-  case CURLUPART_USER:
+  case FETCHUPART_USER:
     ptr = u->user;
-    ifmissing = CURLUE_NO_USER;
+    ifmissing = FETCHUE_NO_USER;
     break;
-  case CURLUPART_PASSWORD:
+  case FETCHUPART_PASSWORD:
     ptr = u->password;
-    ifmissing = CURLUE_NO_PASSWORD;
+    ifmissing = FETCHUE_NO_PASSWORD;
     break;
-  case CURLUPART_OPTIONS:
+  case FETCHUPART_OPTIONS:
     ptr = u->options;
-    ifmissing = CURLUE_NO_OPTIONS;
+    ifmissing = FETCHUE_NO_OPTIONS;
     break;
-  case CURLUPART_HOST:
+  case FETCHUPART_HOST:
     ptr = u->host;
-    ifmissing = CURLUE_NO_HOST;
-    punycode = (flags & CURLU_PUNYCODE) ? 1 : 0;
-    depunyfy = (flags & CURLU_PUNY2IDN) ? 1 : 0;
+    ifmissing = FETCHUE_NO_HOST;
+    punycode = (flags & FETCHU_PUNYCODE) ? 1 : 0;
+    depunyfy = (flags & FETCHU_PUNY2IDN) ? 1 : 0;
     break;
-  case CURLUPART_ZONEID:
+  case FETCHUPART_ZONEID:
     ptr = u->zoneid;
-    ifmissing = CURLUE_NO_ZONEID;
+    ifmissing = FETCHUE_NO_ZONEID;
     break;
-  case CURLUPART_PORT:
+  case FETCHUPART_PORT:
     ptr = u->port;
-    ifmissing = CURLUE_NO_PORT;
+    ifmissing = FETCHUE_NO_PORT;
     urldecode = FALSE; /* never for port */
-    if(!ptr && (flags & CURLU_DEFAULT_PORT) && u->scheme) {
+    if(!ptr && (flags & FETCHU_DEFAULT_PORT) && u->scheme) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */
       const struct Curl_handler *h = Curl_get_scheme_handler(u->scheme);
@@ -1414,43 +1414,43 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
          it matches the default one for the scheme */
       const struct Curl_handler *h = Curl_get_scheme_handler(u->scheme);
       if(h && (h->defport == u->portnum) &&
-         (flags & CURLU_NO_DEFAULT_PORT))
+         (flags & FETCHU_NO_DEFAULT_PORT))
         ptr = NULL;
     }
     break;
-  case CURLUPART_PATH:
+  case FETCHUPART_PATH:
     ptr = u->path;
     if(!ptr)
       ptr = "/";
     break;
-  case CURLUPART_QUERY:
+  case FETCHUPART_QUERY:
     ptr = u->query;
-    ifmissing = CURLUE_NO_QUERY;
+    ifmissing = FETCHUE_NO_QUERY;
     plusdecode = urldecode;
-    if(ptr && !ptr[0] && !(flags & CURLU_GET_EMPTY))
+    if(ptr && !ptr[0] && !(flags & FETCHU_GET_EMPTY))
       /* there was a blank query and the user do not ask for it */
       ptr = NULL;
     break;
-  case CURLUPART_FRAGMENT:
+  case FETCHUPART_FRAGMENT:
     ptr = u->fragment;
-    ifmissing = CURLUE_NO_FRAGMENT;
-    if(!ptr && u->fragment_present && flags & CURLU_GET_EMPTY)
+    ifmissing = FETCHUE_NO_FRAGMENT;
+    if(!ptr && u->fragment_present && flags & FETCHU_GET_EMPTY)
       /* there was a blank fragment and the user asks for it */
       ptr = "";
     break;
-  case CURLUPART_URL: {
+  case FETCHUPART_URL: {
     char *url;
     char *scheme;
     char *options = u->options;
     char *port = u->port;
     char *allochost = NULL;
     bool show_fragment =
-      u->fragment || (u->fragment_present && flags & CURLU_GET_EMPTY);
+      u->fragment || (u->fragment_present && flags & FETCHU_GET_EMPTY);
     bool show_query =
       (u->query && u->query[0]) ||
-      (u->query_present && flags & CURLU_GET_EMPTY);
-    punycode = (flags & CURLU_PUNYCODE) ? 1 : 0;
-    depunyfy = (flags & CURLU_PUNY2IDN) ? 1 : 0;
+      (u->query_present && flags & FETCHU_GET_EMPTY);
+    punycode = (flags & FETCHU_PUNYCODE) ? 1 : 0;
+    depunyfy = (flags & FETCHU_PUNY2IDN) ? 1 : 0;
     if(u->scheme && strcasecompare("file", u->scheme)) {
       url = aprintf("file://%s%s%s",
                     u->path,
@@ -1458,19 +1458,19 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
                     u->fragment ? u->fragment : "");
     }
     else if(!u->host)
-      return CURLUE_NO_HOST;
+      return FETCHUE_NO_HOST;
     else {
       const struct Curl_handler *h = NULL;
       char schemebuf[MAX_SCHEME_LEN + 5];
       if(u->scheme)
         scheme = u->scheme;
-      else if(flags & CURLU_DEFAULT_SCHEME)
+      else if(flags & FETCHU_DEFAULT_SCHEME)
         scheme = (char *) DEFAULT_SCHEME;
       else
-        return CURLUE_NO_SCHEME;
+        return FETCHUE_NO_SCHEME;
 
       h = Curl_get_scheme_handler(scheme);
-      if(!port && (flags & CURLU_DEFAULT_PORT)) {
+      if(!port && (flags & FETCHU_DEFAULT_PORT)) {
         /* there is no stored port number, but asked to deliver
            a default one for the scheme */
         if(h) {
@@ -1482,7 +1482,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
         /* there is a stored port number, but asked to inhibit if it matches
            the default one for the scheme */
         if(h && (h->defport == u->portnum) &&
-           (flags & CURLU_NO_DEFAULT_PORT))
+           (flags & FETCHU_NO_DEFAULT_PORT))
           port = NULL;
       }
 
@@ -1494,45 +1494,45 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
           /* make it '[ host %25 zoneid ]' */
           struct dynbuf enc;
           size_t hostlen = strlen(u->host);
-          Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+          Curl_dyn_init(&enc, FETCH_MAX_INPUT_LENGTH);
           if(Curl_dyn_addf(&enc, "%.*s%%25%s]", (int)hostlen - 1, u->host,
                            u->zoneid))
-            return CURLUE_OUT_OF_MEMORY;
+            return FETCHUE_OUT_OF_MEMORY;
           allochost = Curl_dyn_ptr(&enc);
         }
       }
       else if(urlencode) {
-        allochost = curl_easy_escape(NULL, u->host, 0);
+        allochost = fetch_easy_escape(NULL, u->host, 0);
         if(!allochost)
-          return CURLUE_OUT_OF_MEMORY;
+          return FETCHUE_OUT_OF_MEMORY;
       }
       else if(punycode) {
         if(!Curl_is_ASCII_name(u->host)) {
 #ifndef USE_IDN
-          return CURLUE_LACKS_IDN;
+          return FETCHUE_LACKS_IDN;
 #else
-          CURLcode result = Curl_idn_decode(u->host, &allochost);
+          FETCHcode result = Curl_idn_decode(u->host, &allochost);
           if(result)
-            return (result == CURLE_OUT_OF_MEMORY) ?
-              CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
+            return (result == FETCHE_OUT_OF_MEMORY) ?
+              FETCHUE_OUT_OF_MEMORY : FETCHUE_BAD_HOSTNAME;
 #endif
         }
       }
       else if(depunyfy) {
         if(Curl_is_ASCII_name(u->host) && !strncmp("xn--", u->host, 4)) {
 #ifndef USE_IDN
-          return CURLUE_LACKS_IDN;
+          return FETCHUE_LACKS_IDN;
 #else
-          CURLcode result = Curl_idn_encode(u->host, &allochost);
+          FETCHcode result = Curl_idn_encode(u->host, &allochost);
           if(result)
             /* this is the most likely error */
-            return (result == CURLE_OUT_OF_MEMORY) ?
-              CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
+            return (result == FETCHE_OUT_OF_MEMORY) ?
+              FETCHUE_OUT_OF_MEMORY : FETCHUE_BAD_HOSTNAME;
 #endif
         }
       }
 
-      if(!(flags & CURLU_NO_GUESS_SCHEME) || !u->guessed_scheme)
+      if(!(flags & FETCHU_NO_GUESS_SCHEME) || !u->guessed_scheme)
         msnprintf(schemebuf, sizeof(schemebuf), "%s://", scheme);
       else
         schemebuf[0] = 0;
@@ -1556,9 +1556,9 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
       free(allochost);
     }
     if(!url)
-      return CURLUE_OUT_OF_MEMORY;
+      return FETCHUE_OUT_OF_MEMORY;
     *part = url;
-    return CURLUE_OK;
+    return FETCHUE_OK;
   }
   default:
     ptr = NULL;
@@ -1569,7 +1569,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     size_t i = 0;
     *part = Curl_memdup0(ptr, partlen);
     if(!*part)
-      return CURLUE_OUT_OF_MEMORY;
+      return FETCHUE_OUT_OF_MEMORY;
     if(plusdecode) {
       /* convert + to space */
       char *plus = *part;
@@ -1583,20 +1583,20 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
       size_t dlen;
       /* this unconditional rejection of control bytes is documented
          API behavior */
-      CURLcode res = Curl_urldecode(*part, 0, &decoded, &dlen, REJECT_CTRL);
+      FETCHcode res = Curl_urldecode(*part, 0, &decoded, &dlen, REJECT_CTRL);
       free(*part);
       if(res) {
         *part = NULL;
-        return CURLUE_URLDECODE;
+        return FETCHUE_URLDECODE;
       }
       *part = decoded;
       partlen = dlen;
     }
     if(urlencode) {
       struct dynbuf enc;
-      CURLUcode uc;
-      Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-      uc = urlencode_str(&enc, *part, partlen, TRUE, what == CURLUPART_QUERY);
+      FETCHUcode uc;
+      Curl_dyn_init(&enc, FETCH_MAX_INPUT_LENGTH);
+      uc = urlencode_str(&enc, *part, partlen, TRUE, what == FETCHUPART_QUERY);
       if(uc)
         return uc;
       free(*part);
@@ -1605,13 +1605,13 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     else if(punycode) {
       if(!Curl_is_ASCII_name(u->host)) {
 #ifndef USE_IDN
-        return CURLUE_LACKS_IDN;
+        return FETCHUE_LACKS_IDN;
 #else
         char *allochost;
-        CURLcode result = Curl_idn_decode(*part, &allochost);
+        FETCHcode result = Curl_idn_decode(*part, &allochost);
         if(result)
-          return (result == CURLE_OUT_OF_MEMORY) ?
-            CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
+          return (result == FETCHE_OUT_OF_MEMORY) ?
+            FETCHUE_OUT_OF_MEMORY : FETCHUE_BAD_HOSTNAME;
         free(*part);
         *part = allochost;
 #endif
@@ -1620,30 +1620,30 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     else if(depunyfy) {
       if(Curl_is_ASCII_name(u->host)  && !strncmp("xn--", u->host, 4)) {
 #ifndef USE_IDN
-        return CURLUE_LACKS_IDN;
+        return FETCHUE_LACKS_IDN;
 #else
         char *allochost;
-        CURLcode result = Curl_idn_encode(*part, &allochost);
+        FETCHcode result = Curl_idn_encode(*part, &allochost);
         if(result)
-          return (result == CURLE_OUT_OF_MEMORY) ?
-            CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
+          return (result == FETCHE_OUT_OF_MEMORY) ?
+            FETCHUE_OUT_OF_MEMORY : FETCHUE_BAD_HOSTNAME;
         free(*part);
         *part = allochost;
 #endif
       }
     }
 
-    return CURLUE_OK;
+    return FETCHUE_OK;
   }
   else
     return ifmissing;
 }
 
-CURLUcode curl_url_set(CURLU *u, CURLUPart what,
+FETCHUcode fetch_url_set(FETCHU *u, FETCHUPart what,
                        const char *part, unsigned int flags)
 {
   char **storep = NULL;
-  bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
+  bool urlencode = (flags & FETCHU_URLENCODE) ? 1 : 0;
   bool plusencode = FALSE;
   bool urlskipslash = FALSE;
   bool leadingslash = FALSE;
@@ -1652,48 +1652,48 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   size_t nalloc;
 
   if(!u)
-    return CURLUE_BAD_HANDLE;
+    return FETCHUE_BAD_HANDLE;
   if(!part) {
     /* setting a part to NULL clears it */
     switch(what) {
-    case CURLUPART_URL:
+    case FETCHUPART_URL:
       break;
-    case CURLUPART_SCHEME:
+    case FETCHUPART_SCHEME:
       storep = &u->scheme;
       u->guessed_scheme = FALSE;
       break;
-    case CURLUPART_USER:
+    case FETCHUPART_USER:
       storep = &u->user;
       break;
-    case CURLUPART_PASSWORD:
+    case FETCHUPART_PASSWORD:
       storep = &u->password;
       break;
-    case CURLUPART_OPTIONS:
+    case FETCHUPART_OPTIONS:
       storep = &u->options;
       break;
-    case CURLUPART_HOST:
+    case FETCHUPART_HOST:
       storep = &u->host;
       break;
-    case CURLUPART_ZONEID:
+    case FETCHUPART_ZONEID:
       storep = &u->zoneid;
       break;
-    case CURLUPART_PORT:
+    case FETCHUPART_PORT:
       u->portnum = 0;
       storep = &u->port;
       break;
-    case CURLUPART_PATH:
+    case FETCHUPART_PATH:
       storep = &u->path;
       break;
-    case CURLUPART_QUERY:
+    case FETCHUPART_QUERY:
       storep = &u->query;
       u->query_present = FALSE;
       break;
-    case CURLUPART_FRAGMENT:
+    case FETCHUPART_FRAGMENT:
       storep = &u->fragment;
       u->fragment_present = FALSE;
       break;
     default:
-      return CURLUE_UNKNOWN_PART;
+      return FETCHUE_UNKNOWN_PART;
     }
     if(storep && *storep) {
       Curl_safefree(*storep);
@@ -1702,24 +1702,24 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       free_urlhandle(u);
       memset(u, 0, sizeof(struct Curl_URL));
     }
-    return CURLUE_OK;
+    return FETCHUE_OK;
   }
 
   nalloc = strlen(part);
-  if(nalloc > CURL_MAX_INPUT_LENGTH)
+  if(nalloc > FETCH_MAX_INPUT_LENGTH)
     /* excessive input length */
-    return CURLUE_MALFORMED_INPUT;
+    return FETCHUE_MALFORMED_INPUT;
 
   switch(what) {
-  case CURLUPART_SCHEME: {
+  case FETCHUPART_SCHEME: {
     size_t plen = strlen(part);
     const char *s = part;
     if((plen > MAX_SCHEME_LEN) || (plen < 1))
       /* too long or too short */
-      return CURLUE_BAD_SCHEME;
+      return FETCHUE_BAD_SCHEME;
    /* verify that it is a fine scheme */
-    if(!(flags & CURLU_NON_SUPPORT_SCHEME) && !Curl_get_scheme_handler(part))
-      return CURLUE_UNSUPPORTED_SCHEME;
+    if(!(flags & FETCHU_NON_SUPPORT_SCHEME) && !Curl_get_scheme_handler(part))
+      return FETCHUE_UNSUPPORTED_SCHEME;
     storep = &u->scheme;
     urlencode = FALSE; /* never */
     if(ISALPHA(*s)) {
@@ -1728,34 +1728,34 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         if(ISALNUM(*s) || (*s == '+') || (*s == '-') || (*s == '.'))
           s++; /* fine */
         else
-          return CURLUE_BAD_SCHEME;
+          return FETCHUE_BAD_SCHEME;
       }
     }
     else
-      return CURLUE_BAD_SCHEME;
+      return FETCHUE_BAD_SCHEME;
     u->guessed_scheme = FALSE;
     break;
   }
-  case CURLUPART_USER:
+  case FETCHUPART_USER:
     storep = &u->user;
     break;
-  case CURLUPART_PASSWORD:
+  case FETCHUPART_PASSWORD:
     storep = &u->password;
     break;
-  case CURLUPART_OPTIONS:
+  case FETCHUPART_OPTIONS:
     storep = &u->options;
     break;
-  case CURLUPART_HOST:
+  case FETCHUPART_HOST:
     storep = &u->host;
     Curl_safefree(u->zoneid);
     break;
-  case CURLUPART_ZONEID:
+  case FETCHUPART_ZONEID:
     storep = &u->zoneid;
     break;
-  case CURLUPART_PORT:
+  case FETCHUPART_PORT:
     if(!ISDIGIT(part[0]))
       /* not a number */
-      return CURLUE_BAD_PORT_NUMBER;
+      return FETCHUE_BAD_PORT_NUMBER;
     else {
       char *tmp;
       char *endp;
@@ -1764,50 +1764,50 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       port = strtoul(part, &endp, 10);  /* must be decimal */
       if(errno || (port > 0xffff) || *endp)
         /* weirdly provided number, not good! */
-        return CURLUE_BAD_PORT_NUMBER;
+        return FETCHUE_BAD_PORT_NUMBER;
       tmp = strdup(part);
       if(!tmp)
-        return CURLUE_OUT_OF_MEMORY;
+        return FETCHUE_OUT_OF_MEMORY;
       free(u->port);
       u->port = tmp;
       u->portnum = (unsigned short)port;
-      return CURLUE_OK;
+      return FETCHUE_OK;
     }
-  case CURLUPART_PATH:
+  case FETCHUPART_PATH:
     urlskipslash = TRUE;
     leadingslash = TRUE; /* enforce */
     storep = &u->path;
     break;
-  case CURLUPART_QUERY:
+  case FETCHUPART_QUERY:
     plusencode = urlencode;
-    appendquery = (flags & CURLU_APPENDQUERY) ? 1 : 0;
+    appendquery = (flags & FETCHU_APPENDQUERY) ? 1 : 0;
     equalsencode = appendquery;
     storep = &u->query;
     u->query_present = TRUE;
     break;
-  case CURLUPART_FRAGMENT:
+  case FETCHUPART_FRAGMENT:
     storep = &u->fragment;
     u->fragment_present = TRUE;
     break;
-  case CURLUPART_URL: {
+  case FETCHUPART_URL: {
     /*
      * Allow a new URL to replace the existing (if any) contents.
      *
      * If the existing contents is enough for a URL, allow a relative URL to
      * replace it.
      */
-    CURLUcode uc;
+    FETCHUcode uc;
     char *oldurl;
 
     if(!nalloc)
       /* a blank URL is not a valid URL */
-      return CURLUE_MALFORMED_INPUT;
+      return FETCHUE_MALFORMED_INPUT;
 
     /* if the new thing is absolute or the old one is not (we could not get an
      * absolute URL in 'oldurl'), then replace the existing with the new. */
     if(Curl_is_absolute_url(part, NULL, 0,
-                            flags & (CURLU_GUESS_SCHEME|CURLU_DEFAULT_SCHEME))
-       || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
+                            flags & (FETCHU_GUESS_SCHEME|FETCHU_DEFAULT_SCHEME))
+       || fetch_url_get(u, FETCHUPART_URL, &oldurl, flags)) {
       return parseurl_and_replace(part, u, flags);
     }
 
@@ -1817,7 +1817,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     return uc;
   }
   default:
-    return CURLUE_UNKNOWN_PART;
+    return FETCHUE_UNKNOWN_PART;
   }
   DEBUGASSERT(storep);
   {
@@ -1826,7 +1826,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     Curl_dyn_init(&enc, nalloc * 3 + 1 + leadingslash);
 
     if(leadingslash && (part[0] != '/')) {
-      CURLcode result = Curl_dyn_addn(&enc, "/", 1);
+      FETCHcode result = Curl_dyn_addn(&enc, "/", 1);
       if(result)
         return cc2cu(result);
     }
@@ -1834,11 +1834,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       const unsigned char *i;
 
       for(i = (const unsigned char *)part; *i; i++) {
-        CURLcode result;
+        FETCHcode result;
         if((*i == ' ') && plusencode) {
           result = Curl_dyn_addn(&enc, "+", 1);
           if(result)
-            return CURLUE_OUT_OF_MEMORY;
+            return FETCHUE_OUT_OF_MEMORY;
         }
         else if(ISUNRESERVED(*i) ||
                 ((*i == '/') && urlskipslash) ||
@@ -1862,7 +1862,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     }
     else {
       char *p;
-      CURLcode result = Curl_dyn_add(&enc, part);
+      FETCHcode result = Curl_dyn_add(&enc, part);
       if(result)
         return cc2cu(result);
       p = Curl_dyn_ptr(&enc);
@@ -1888,7 +1888,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       bool addamperand = querylen && (u->query[querylen -1] != '&');
       if(querylen) {
         struct dynbuf qbuf;
-        Curl_dyn_init(&qbuf, CURL_MAX_INPUT_LENGTH);
+        Curl_dyn_init(&qbuf, FETCH_MAX_INPUT_LENGTH);
 
         if(Curl_dyn_addn(&qbuf, u->query, querylen)) /* add original query */
           goto nomem;
@@ -1902,16 +1902,16 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         Curl_dyn_free(&enc);
         free(*storep);
         *storep = Curl_dyn_ptr(&qbuf);
-        return CURLUE_OK;
+        return FETCHUE_OK;
 nomem:
         Curl_dyn_free(&enc);
-        return CURLUE_OUT_OF_MEMORY;
+        return FETCHUE_OUT_OF_MEMORY;
       }
     }
 
-    else if(what == CURLUPART_HOST) {
+    else if(what == FETCHUPART_HOST) {
       size_t n = Curl_dyn_len(&enc);
-      if(!n && (flags & CURLU_NO_AUTHORITY)) {
+      if(!n && (flags & FETCHU_NO_AUTHORITY)) {
         /* Skip hostname check, it is allowed to be empty. */
       }
       else {
@@ -1923,7 +1923,7 @@ nomem:
              URL encoded so we need to decode it to check */
           size_t dlen;
           char *decoded = NULL;
-          CURLcode result =
+          FETCHcode result =
             Curl_urldecode(newp, n, &decoded, &dlen, REJECT_CTRL);
           if(result || hostname_check(u, decoded, dlen))
             bad = TRUE;
@@ -1933,7 +1933,7 @@ nomem:
           bad = TRUE;
         if(bad) {
           Curl_dyn_free(&enc);
-          return CURLUE_BAD_HOSTNAME;
+          return FETCHUE_BAD_HOSTNAME;
         }
       }
     }
@@ -1941,5 +1941,5 @@ nomem:
     free(*storep);
     *storep = (char *)newp;
   }
-  return CURLUE_OK;
+  return FETCHUE_OK;
 }

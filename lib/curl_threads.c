@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #if defined(USE_THREADS_POSIX)
 #  ifdef HAVE_PTHREAD_H
@@ -34,9 +34,9 @@
 #  include <process.h>
 #endif
 
-#include "curl_threads.h"
-#ifdef BUILDING_LIBCURL
-#include "curl_memory.h"
+#include "fetch_threads.h"
+#ifdef BUILDING_LIBFETCH
+#include "fetch_memory.h"
 #endif
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -48,7 +48,7 @@ struct Curl_actual_call {
   void *arg;
 };
 
-static void *curl_thread_create_thunk(void *arg)
+static void *fetch_thread_create_thunk(void *arg)
 {
   struct Curl_actual_call *ac = arg;
   unsigned int (*func)(void *) = ac->func;
@@ -61,9 +61,9 @@ static void *curl_thread_create_thunk(void *arg)
   return 0;
 }
 
-curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
+fetch_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
 {
-  curl_thread_t t = malloc(sizeof(pthread_t));
+  fetch_thread_t t = malloc(sizeof(pthread_t));
   struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
   if(!(ac && t))
     goto err;
@@ -71,7 +71,7 @@ curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
   ac->func = func;
   ac->arg = arg;
 
-  if(pthread_create(t, NULL, curl_thread_create_thunk, ac) != 0)
+  if(pthread_create(t, NULL, fetch_thread_create_thunk, ac) != 0)
     goto err;
 
   return t;
@@ -79,51 +79,51 @@ curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
 err:
   free(t);
   free(ac);
-  return curl_thread_t_null;
+  return fetch_thread_t_null;
 }
 
-void Curl_thread_destroy(curl_thread_t hnd)
+void Curl_thread_destroy(fetch_thread_t hnd)
 {
-  if(hnd != curl_thread_t_null) {
+  if(hnd != fetch_thread_t_null) {
     pthread_detach(*hnd);
     free(hnd);
   }
 }
 
-int Curl_thread_join(curl_thread_t *hnd)
+int Curl_thread_join(fetch_thread_t *hnd)
 {
   int ret = (pthread_join(**hnd, NULL) == 0);
 
   free(*hnd);
-  *hnd = curl_thread_t_null;
+  *hnd = fetch_thread_t_null;
 
   return ret;
 }
 
 #elif defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+fetch_thread_t Curl_thread_create(
+#if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP)
                                  DWORD
 #else
                                  unsigned int
 #endif
-                                 (CURL_STDCALL *func) (void *),
+                                 (FETCH_STDCALL *func) (void *),
                                  void *arg)
 {
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
-  typedef HANDLE curl_win_thread_handle_t;
+#if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP)
+  typedef HANDLE fetch_win_thread_handle_t;
 #else
-  typedef uintptr_t curl_win_thread_handle_t;
+  typedef uintptr_t fetch_win_thread_handle_t;
 #endif
-  curl_thread_t t;
-  curl_win_thread_handle_t thread_handle;
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+  fetch_thread_t t;
+  fetch_win_thread_handle_t thread_handle;
+#if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP)
   thread_handle = CreateThread(NULL, 0, func, arg, 0, NULL);
 #else
   thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
 #endif
-  t = (curl_thread_t)thread_handle;
+  t = (fetch_thread_t)thread_handle;
   if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef _WIN32_WCE
     DWORD gle = GetLastError();
@@ -131,18 +131,18 @@ curl_thread_t Curl_thread_create(
               gle == ERROR_NOT_ENOUGH_MEMORY) ?
              EACCES : EINVAL);
 #endif
-    return curl_thread_t_null;
+    return fetch_thread_t_null;
   }
   return t;
 }
 
-void Curl_thread_destroy(curl_thread_t hnd)
+void Curl_thread_destroy(fetch_thread_t hnd)
 {
-  if(hnd != curl_thread_t_null)
+  if(hnd != fetch_thread_t_null)
     CloseHandle(hnd);
 }
 
-int Curl_thread_join(curl_thread_t *hnd)
+int Curl_thread_join(fetch_thread_t *hnd)
 {
 #if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
     (_WIN32_WINNT < _WIN32_WINNT_VISTA)
@@ -153,7 +153,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 
   Curl_thread_destroy(*hnd);
 
-  *hnd = curl_thread_t_null;
+  *hnd = fetch_thread_t_null;
 
   return ret;
 }

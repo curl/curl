@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,22 +18,22 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(_WIN32)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "system_win32.h"
 #include "version_win32.h"
-#include "curl_sspi.h"
+#include "fetch_sspi.h"
 #include "warnless.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 LARGE_INTEGER Curl_freq;
@@ -46,12 +46,12 @@ static HMODULE s_hIpHlpApiDll = NULL;
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
 
 /* Curl_win32_init() performs Win32 global initialization */
-CURLcode Curl_win32_init(long flags)
+FETCHcode Curl_win32_init(long flags)
 {
-  /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
+  /* FETCH_GLOBAL_WIN32 controls the *optional* part of the initialization which
      is just for Winsock at the moment. Any required Win32 initialization
      should take place after this block. */
-  if(flags & CURL_GLOBAL_WIN32) {
+  if(flags & FETCH_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
     WORD wVersionRequested;
     WSADATA wsaData;
@@ -63,7 +63,7 @@ CURLcode Curl_win32_init(long flags)
     if(res)
       /* Tell the user that we could not find a usable */
       /* winsock.dll.     */
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
 
     /* Confirm that the Windows Sockets DLL supports what we need.*/
     /* Note that if the DLL supports versions greater */
@@ -77,17 +77,17 @@ CURLcode Curl_win32_init(long flags)
 
       /* winsock.dll. */
       WSACleanup();
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
     }
     /* The Windows Sockets DLL is acceptable. Proceed. */
 #elif defined(USE_LWIPSOCK)
     lwip_init();
 #endif
-  } /* CURL_GLOBAL_WIN32 */
+  } /* FETCH_GLOBAL_WIN32 */
 
 #ifdef USE_WINDOWS_SSPI
   {
-    CURLcode result = Curl_sspi_global_init();
+    FETCHcode result = Curl_sspi_global_init();
     if(result)
       return result;
   }
@@ -97,16 +97,16 @@ CURLcode Curl_win32_init(long flags)
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
     IF_NAMETOINDEX_FN pIfNameToIndex =
-      CURLX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
+      FETCHX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
                           (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
 
     if(pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
   }
 
-  /* curlx_verify_windows_version must be called during init at least once
+  /* fetchx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
-  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+  if(fetchx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL)) {
     Curl_isVistaOrGreater = TRUE;
   }
@@ -114,7 +114,7 @@ CURLcode Curl_win32_init(long flags)
     Curl_isVistaOrGreater = FALSE;
 
   QueryPerformanceFrequency(&Curl_freq);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
@@ -130,7 +130,7 @@ void Curl_win32_cleanup(long init_flags)
   Curl_sspi_global_cleanup();
 #endif
 
-  if(init_flags & CURL_GLOBAL_WIN32) {
+  if(init_flags & FETCH_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
     WSACleanup();
 #endif
@@ -175,7 +175,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  */
 HMODULE Curl_load_library(LPCTSTR filename)
 {
-#ifndef CURL_WINDOWS_UWP
+#ifndef FETCH_WINDOWS_UWP
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 
@@ -187,7 +187,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
   /* Attempt to find LoadLibraryEx() which is only available on Windows 2000
      and above */
   pLoadLibraryEx =
-    CURLX_FUNCTION_CAST(LOADLIBRARYEX_FN,
+    FETCHX_FUNCTION_CAST(LOADLIBRARYEX_FN,
                         (GetProcAddress(hKernel32, LOADLIBARYEX)));
 
   /* Detect if there is already a path in the filename and load the library if

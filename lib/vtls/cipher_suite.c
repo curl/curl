@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,20 +18,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
     defined(USE_BEARSSL) || defined(USE_RUSTLS)
 #include "cipher_suite.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 #include "strcase.h"
 #include <string.h>
 
 /*
- * To support the CURLOPT_SSL_CIPHER_LIST option on SSL backends
+ * To support the FETCHOPT_SSL_CIPHER_LIST option on SSL backends
  * that do not support it natively, but do support setting a list of
  * IANA ids, we need a list of all supported cipher suite names
  * (OpenSSL and IANA) to be able to look up the IANA ids.

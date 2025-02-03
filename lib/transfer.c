@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "strtoofft.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -57,7 +57,7 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "netrc.h"
 
 #include "content_encoding.h"
@@ -84,12 +84,12 @@
 #include "headers.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
-    !defined(CURL_DISABLE_IMAP)
+#if !defined(FETCH_DISABLE_HTTP) || !defined(FETCH_DISABLE_SMTP) || \
+    !defined(FETCH_DISABLE_IMAP)
 /*
  * checkheaders() checks the linked list of custom headers for a
  * particular header (prefix). Provide the prefix without colon!
@@ -100,7 +100,7 @@ char *Curl_checkheaders(const struct Curl_easy *data,
                         const char *thisheader,
                         const size_t thislen)
 {
-  struct curl_slist *head;
+  struct fetch_slist *head;
   DEBUGASSERT(thislen);
   DEBUGASSERT(thisheader[thislen-1] != ':');
 
@@ -123,13 +123,13 @@ static int data_pending(struct Curl_easy *data)
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
-  return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
+  return conn->handler->protocol&(FETCHPROTO_SCP|FETCHPROTO_SFTP) ||
     Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
 /*
- * Check to see if CURLOPT_TIMECONDITION was met by comparing the time of the
- * remote document with the time provided by CURLOPT_TIMEVAL
+ * Check to see if FETCHOPT_TIMECONDITION was met by comparing the time of the
+ * remote document with the time provided by FETCHOPT_TIMEVAL
  */
 bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
 {
@@ -137,7 +137,7 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
     return TRUE;
 
   switch(data->set.timecondition) {
-  case CURL_TIMECOND_IFMODSINCE:
+  case FETCH_TIMECOND_IFMODSINCE:
   default:
     if(timeofdoc <= data->set.timevalue) {
       infof(data,
@@ -146,7 +146,7 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
       return FALSE;
     }
     break;
-  case CURL_TIMECOND_IFUNMODSINCE:
+  case FETCH_TIMECOND_IFUNMODSINCE:
     if(timeofdoc >= data->set.timevalue) {
       infof(data,
             "The requested document is not old enough");
@@ -159,14 +159,14 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   return TRUE;
 }
 
-static CURLcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
+static FETCHcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
 {
   int sockindex;
 
   if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
-  if(data->conn->sockfd == CURL_SOCKET_BAD)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
+  if(data->conn->sockfd == FETCH_SOCKET_BAD)
+    return FETCHE_FAILED_INIT;
   sockindex = (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]);
   return Curl_conn_shutdown(data, sockindex, done);
 }
@@ -176,21 +176,21 @@ static bool xfer_recv_shutdown_started(struct Curl_easy *data)
   int sockindex;
 
   if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
-  if(data->conn->sockfd == CURL_SOCKET_BAD)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
+  if(data->conn->sockfd == FETCH_SOCKET_BAD)
+    return FETCHE_FAILED_INIT;
   sockindex = (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]);
   return Curl_shutdown_started(data, sockindex);
 }
 
-CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
+FETCHcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
 {
   int sockindex;
 
   if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
-  if(data->conn->writesockfd == CURL_SOCKET_BAD)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
+  if(data->conn->writesockfd == FETCH_SOCKET_BAD)
+    return FETCHE_FAILED_INIT;
   sockindex = (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]);
   return Curl_conn_shutdown(data, sockindex, done);
 }
@@ -207,7 +207,7 @@ CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
 static ssize_t xfer_recv_resp(struct Curl_easy *data,
                               char *buf, size_t blen,
                               bool eos_reliable,
-                              CURLcode *err)
+                              FETCHcode *err)
 {
   ssize_t nread;
 
@@ -215,10 +215,10 @@ static ssize_t xfer_recv_resp(struct Curl_easy *data,
   /* If we are reading BODY data and the connection does NOT handle EOF
    * and we know the size of the BODY data, limit the read amount */
   if(!eos_reliable && !data->req.header && data->req.size != -1) {
-    curl_off_t totalleft = data->req.size - data->req.bytecount;
+    fetch_off_t totalleft = data->req.size - data->req.bytecount;
     if(totalleft <= 0)
       blen = 0;
-    else if(totalleft < (curl_off_t)blen)
+    else if(totalleft < (fetch_off_t)blen)
       blen = (size_t)totalleft;
   }
   else if(xfer_recv_shutdown_started(data)) {
@@ -228,7 +228,7 @@ static ssize_t xfer_recv_resp(struct Curl_easy *data,
 
   if(!blen) {
     /* want nothing more */
-    *err = CURLE_OK;
+    *err = FETCHE_OK;
     nread = 0;
   }
   else {
@@ -244,7 +244,7 @@ static ssize_t xfer_recv_resp(struct Curl_easy *data,
       if(*err)
         return -1;
       if(!done) {
-        *err = CURLE_AGAIN;
+        *err = FETCHE_AGAIN;
         return -1;
       }
     }
@@ -259,16 +259,16 @@ static ssize_t xfer_recv_resp(struct Curl_easy *data,
  * the stream was rewound (in which case we have data in a
  * buffer)
  */
-static CURLcode sendrecv_dl(struct Curl_easy *data,
+static FETCHcode sendrecv_dl(struct Curl_easy *data,
                             struct SingleRequest *k,
                             int *didwhat)
 {
   struct connectdata *conn = data->conn;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   char *buf, *xfer_buf;
   size_t blen, xfer_blen;
   int maxloops = 10;
-  curl_off_t total_received = 0;
+  fetch_off_t total_received = 0;
   bool is_multiplex = FALSE;
 
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
@@ -276,7 +276,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     goto out;
 
   /* This is where we loop until we have read everything there is to
-     read or we get a CURLE_AGAIN */
+     read or we get a FETCHE_AGAIN */
   do {
     bool is_eos = FALSE;
     size_t bytestoread;
@@ -298,15 +298,15 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
        * The overall, timed, speed limiting is done in multi.c */
       if(total_received)
         break;
-      if(data->set.max_recv_speed < (curl_off_t)bytestoread)
+      if(data->set.max_recv_speed < (fetch_off_t)bytestoread)
         bytestoread = (size_t)data->set.max_recv_speed;
     }
 
     nread = xfer_recv_resp(data, buf, bytestoread, is_multiplex, &result);
     if(nread < 0) {
-      if(CURLE_AGAIN != result)
+      if(FETCHE_AGAIN != result)
         goto out; /* real error */
-      result = CURLE_OK;
+      result = FETCHE_OK;
       if(data->req.download_done && data->req.no_body &&
          !data->req.resp_trailer) {
         DEBUGF(infof(data, "EAGAIN, download done, no trailer announced, "
@@ -357,9 +357,9 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   if((maxloops <= 0) || data_pending(data)) {
     /* did not read until EAGAIN or there is still pending data, mark as
        read-again-please */
-    data->state.select_bits = CURL_CSELECT_IN;
+    data->state.select_bits = FETCH_CSELECT_IN;
     if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
-      data->state.select_bits |= CURL_CSELECT_OUT;
+      data->state.select_bits |= FETCH_CSELECT_OUT;
   }
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
@@ -381,7 +381,7 @@ out:
 /*
  * Send data to upload to the server, when the socket is writable.
  */
-static CURLcode sendrecv_ul(struct Curl_easy *data, int *didwhat)
+static FETCHcode sendrecv_ul(struct Curl_easy *data, int *didwhat)
 {
   /* We should not get here when the sending is already done. It
    * probably means that someone set `data-req.keepon |= KEEP_SEND`
@@ -392,7 +392,7 @@ static CURLcode sendrecv_ul(struct Curl_easy *data, int *didwhat)
     *didwhat |= KEEP_SEND;
     return Curl_req_send_more(data);
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static int select_bits_paused(struct Curl_easy *data, int select_bits)
@@ -404,9 +404,9 @@ static int select_bits_paused(struct Curl_easy *data, int select_bits)
    * NOTE: we are only interested in PAUSE, not HOLD. */
 
   /* if there is data in a direction not paused, return false */
-  if(((select_bits & CURL_CSELECT_IN) &&
+  if(((select_bits & FETCH_CSELECT_IN) &&
       !(data->req.keepon & KEEP_RECV_PAUSE)) ||
-     ((select_bits & CURL_CSELECT_OUT) &&
+     ((select_bits & FETCH_CSELECT_OUT) &&
       !(data->req.keepon & KEEP_SEND_PAUSE)))
     return FALSE;
 
@@ -417,10 +417,10 @@ static int select_bits_paused(struct Curl_easy *data, int select_bits)
  * Curl_sendrecv() is the low-level function to be called when data is to
  * be read and written to/from the connection.
  */
-CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
+FETCHcode Curl_sendrecv(struct Curl_easy *data, struct fetchtime *nowp)
 {
   struct SingleRequest *k = &data->req;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   int didwhat = 0;
 
   DEBUGASSERT(nowp);
@@ -428,7 +428,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
     if(select_bits_paused(data, data->state.select_bits)) {
       /* leave the bits unchanged, so they'll tell us what to do when
        * this transfer gets unpaused. */
-      result = CURLE_OK;
+      result = FETCHE_OK;
       goto out;
     }
     data->state.select_bits = 0;
@@ -457,7 +457,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 
   if(Curl_pgrsUpdate(data))
-    result = CURLE_ABORTED_BY_CALLBACK;
+    result = FETCHE_ABORTED_BY_CALLBACK;
   else
     result = Curl_speedcheck(data, *nowp);
   if(result)
@@ -478,7 +478,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
               Curl_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount);
       }
-      result = CURLE_OPERATION_TIMEDOUT;
+      result = FETCHE_OPERATION_TIMEDOUT;
       goto out;
     }
   }
@@ -491,11 +491,11 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
        (k->bytecount != k->size) && !k->newurl) {
       failf(data, "transfer closed with %" FMT_OFF_T
             " bytes remaining to read", k->size - k->bytecount);
-      result = CURLE_PARTIAL_FILE;
+      result = FETCHE_PARTIAL_FILE;
       goto out;
     }
     if(Curl_pgrsUpdate(data)) {
-      result = CURLE_ABORTED_BY_CALLBACK;
+      result = FETCHE_ABORTED_BY_CALLBACK;
       goto out;
     }
   }
@@ -524,26 +524,26 @@ void Curl_init_CONNECT(struct Curl_easy *data)
  * once for one transfer no matter if it has redirects or do multi-pass
  * authentication etc.
  */
-CURLcode Curl_pretransfer(struct Curl_easy *data)
+FETCHcode Curl_pretransfer(struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   if(!data->set.str[STRING_SET_URL] && !data->set.uh) {
     /* we cannot do anything without URL */
     failf(data, "No URL set");
-    return CURLE_URL_MALFORMAT;
+    return FETCHE_URL_MALFORMAT;
   }
 
-  /* CURLOPT_CURLU overrides CURLOPT_URL and the contents of the CURLU handle
+  /* FETCHOPT_FETCHU overrides FETCHOPT_URL and the contents of the FETCHU handle
      is allowed to be changed by the user between transfers */
   if(data->set.uh) {
-    CURLUcode uc;
+    FETCHUcode uc;
     free(data->set.str[STRING_SET_URL]);
-    uc = curl_url_get(data->set.uh,
-                      CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
+    uc = fetch_url_get(data->set.uh,
+                      FETCHUPART_URL, &data->set.str[STRING_SET_URL], 0);
     if(uc) {
       failf(data, "No URL set");
-      return CURLE_URL_MALFORMAT;
+      return FETCHE_URL_MALFORMAT;
     }
   }
 
@@ -558,11 +558,11 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(data->set.postfields && data->set.set_resume_from) {
     /* we cannot */
     failf(data, "cannot mix POSTFIELDS with RESUME_FROM");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
   data->state.prefer_ascii = data->set.prefer_ascii;
-#ifdef CURL_LIST_ONLY_PROTOCOL
+#ifdef FETCH_LIST_ONLY_PROTOCOL
   data->state.list_only = data->set.list_only;
 #endif
   data->state.httpreq = data->set.method;
@@ -591,7 +591,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
           (data->state.httpreq != HTTPREQ_HEAD)) {
     data->state.infilesize = data->set.postfieldsize;
     if(data->set.postfields && (data->state.infilesize == -1))
-      data->state.infilesize = (curl_off_t)strlen(data->set.postfields);
+      data->state.infilesize = (fetch_off_t)strlen(data->set.postfields);
   }
   else
     data->state.infilesize = 0;
@@ -630,24 +630,24 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     data->state.authhost.picked &= data->state.authhost.want;
     data->state.authproxy.picked &= data->state.authproxy.want;
 
-#ifndef CURL_DISABLE_FTP
+#ifndef FETCH_DISABLE_FTP
     data->state.wildcardmatch = data->set.wildcard_enabled;
     if(data->state.wildcardmatch) {
       struct WildcardData *wc;
       if(!data->wildcard) {
         data->wildcard = calloc(1, sizeof(struct WildcardData));
         if(!data->wildcard)
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
       }
       wc = data->wildcard;
-      if(wc->state < CURLWC_INIT) {
+      if(wc->state < FETCHWC_INIT) {
         if(wc->ftpwc)
           wc->dtor(wc->ftpwc);
         Curl_safefree(wc->pattern);
         Curl_safefree(wc->path);
         result = Curl_wildcard_init(wc); /* init wildcard structures */
         if(result)
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
       }
     }
 #endif
@@ -664,7 +664,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     data->state.aptr.uagent =
       aprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
     if(!data->state.aptr.uagent)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
   }
 
   if(data->set.str[STRING_USERNAME] ||
@@ -676,7 +676,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(!result)
     result = Curl_setstropt(&data->state.aptr.passwd,
                             data->set.str[STRING_PASSWORD]);
-#ifndef CURL_DISABLE_PROXY
+#ifndef FETCH_DISABLE_PROXY
   if(!result)
     result = Curl_setstropt(&data->state.aptr.proxyuser,
                             data->set.str[STRING_PROXYUSERNAME]);
@@ -690,10 +690,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   return result;
 }
 
-/* Returns CURLE_OK *and* sets '*url' if a request retry is wanted.
+/* Returns FETCHE_OK *and* sets '*url' if a request retry is wanted.
 
    NOTE: that the *url is malloc()ed. */
-CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
+FETCHcode Curl_retry_request(struct Curl_easy *data, char **url)
 {
   struct connectdata *conn = data->conn;
   bool retry = FALSE;
@@ -703,13 +703,13 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
      protocol is HTTP as when uploading over HTTP we will still get a
      response */
   if(data->state.upload &&
-     !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
-    return CURLE_OK;
+     !(conn->handler->protocol&(PROTO_FAMILY_HTTP|FETCHPROTO_RTSP)))
+    return FETCHE_OK;
 
   if((data->req.bytecount + data->req.headerbytecount == 0) &&
      conn->bits.reuse &&
      (!data->req.no_body || (conn->handler->protocol & PROTO_FAMILY_HTTP))
-#ifndef CURL_DISABLE_RTSP
+#ifndef FETCH_DISABLE_RTSP
      && (data->set.rtspreq != RTSPREQ_RECEIVE)
 #endif
     )
@@ -738,13 +738,13 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
       failf(data, "Connection died, tried %d times before giving up",
             CONN_MAX_RETRIES);
       data->state.retrycount = 0;
-      return CURLE_SEND_ERROR;
+      return FETCHE_SEND_ERROR;
     }
     infof(data, "Connection died, retrying a fresh connect (retry count: %d)",
           data->state.retrycount);
     *url = strdup(data->state.url);
     if(!*url)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
 
     connclose(conn, "retry"); /* close this connection */
     conn->bits.retry = TRUE; /* mark this as a connection we are about
@@ -754,7 +754,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
                                 transferred! */
     Curl_creader_set_rewind(data, TRUE);
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -763,7 +763,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 static void xfer_setup(
   struct Curl_easy *data,   /* transfer */
   int sockindex,            /* socket index to read from or -1 */
-  curl_off_t size,          /* -1 if unknown at this point */
+  fetch_off_t size,          /* -1 if unknown at this point */
   bool getheader,           /* TRUE if header parsing is wanted */
   int writesockindex,       /* socket index to write to, it may be the same we
                                read from. -1 disables */
@@ -785,7 +785,7 @@ static void xfer_setup(
   if(Curl_conn_is_multiplex(conn, FIRSTSOCKET) || want_send) {
     /* when multiplexing, the read/write sockets need to be the same! */
     conn->sockfd = sockindex == -1 ?
-      ((writesockindex == -1 ? CURL_SOCKET_BAD : conn->sock[writesockindex])) :
+      ((writesockindex == -1 ? FETCH_SOCKET_BAD : conn->sock[writesockindex])) :
       conn->sock[sockindex];
     conn->writesockfd = conn->sockfd;
     if(want_send)
@@ -794,9 +794,9 @@ static void xfer_setup(
   }
   else {
     conn->sockfd = sockindex == -1 ?
-      CURL_SOCKET_BAD : conn->sock[sockindex];
+      FETCH_SOCKET_BAD : conn->sock[sockindex];
     conn->writesockfd = writesockindex == -1 ?
-      CURL_SOCKET_BAD : conn->sock[writesockindex];
+      FETCH_SOCKET_BAD : conn->sock[writesockindex];
   }
 
   k->getheader = getheader;
@@ -832,33 +832,33 @@ void Curl_xfer_setup_nop(struct Curl_easy *data)
 
 void Curl_xfer_setup1(struct Curl_easy *data,
                       int send_recv,
-                      curl_off_t recv_size,
+                      fetch_off_t recv_size,
                       bool getheader)
 {
-  int recv_index = (send_recv & CURL_XFER_RECV) ? FIRSTSOCKET : -1;
-  int send_index = (send_recv & CURL_XFER_SEND) ? FIRSTSOCKET : -1;
+  int recv_index = (send_recv & FETCH_XFER_RECV) ? FIRSTSOCKET : -1;
+  int send_index = (send_recv & FETCH_XFER_SEND) ? FIRSTSOCKET : -1;
   DEBUGASSERT((recv_index >= 0) || (recv_size == -1));
   xfer_setup(data, recv_index, recv_size, getheader, send_index, FALSE, FALSE);
 }
 
 void Curl_xfer_setup2(struct Curl_easy *data,
                       int send_recv,
-                      curl_off_t recv_size,
+                      fetch_off_t recv_size,
                       bool shutdown,
                       bool shutdown_err_ignore)
 {
-  int recv_index = (send_recv & CURL_XFER_RECV) ? SECONDARYSOCKET : -1;
-  int send_index = (send_recv & CURL_XFER_SEND) ? SECONDARYSOCKET : -1;
+  int recv_index = (send_recv & FETCH_XFER_RECV) ? SECONDARYSOCKET : -1;
+  int send_index = (send_recv & FETCH_XFER_SEND) ? SECONDARYSOCKET : -1;
   DEBUGASSERT((recv_index >= 0) || (recv_size == -1));
   xfer_setup(data, recv_index, recv_size, FALSE, send_index,
              shutdown, shutdown_err_ignore);
 }
 
-CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
+FETCHcode Curl_xfer_write_resp(struct Curl_easy *data,
                               const char *buf, size_t blen,
                               bool is_eos)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   if(data->conn->handler->write_resp) {
     /* protocol handlers offering this function take full responsibility
@@ -881,12 +881,12 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
     data->req.eos_written = TRUE;
     data->req.download_done = TRUE;
   }
-  CURL_TRC_WRITE(data, "xfer_write_resp(len=%zu, eos=%d) -> %d",
+  FETCH_TRC_WRITE(data, "xfer_write_resp(len=%zu, eos=%d) -> %d",
                  blen, is_eos, result);
   return result;
 }
 
-CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
+FETCHcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
                                  const char *hd0, size_t hdlen, bool is_eos)
 {
   if(data->conn->handler->write_resp_hd) {
@@ -898,7 +898,7 @@ CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
   return Curl_xfer_write_resp(data, hd0, hdlen, is_eos);
 }
 
-CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
+FETCHcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
 {
   (void)premature;
   return Curl_cw_out_done(data);
@@ -907,34 +907,34 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
 bool Curl_xfer_needs_flush(struct Curl_easy *data)
 {
   int sockindex;
-  sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
+  sockindex = ((data->conn->writesockfd != FETCH_SOCKET_BAD) &&
                (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
   return Curl_conn_needs_flush(data, sockindex);
 }
 
-CURLcode Curl_xfer_flush(struct Curl_easy *data)
+FETCHcode Curl_xfer_flush(struct Curl_easy *data)
 {
   int sockindex;
-  sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
+  sockindex = ((data->conn->writesockfd != FETCH_SOCKET_BAD) &&
                (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
   return Curl_conn_flush(data, sockindex);
 }
 
-CURLcode Curl_xfer_send(struct Curl_easy *data,
+FETCHcode Curl_xfer_send(struct Curl_easy *data,
                         const void *buf, size_t blen, bool eos,
                         size_t *pnwritten)
 {
-  CURLcode result;
+  FETCHcode result;
   int sockindex;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
 
-  sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
+  sockindex = ((data->conn->writesockfd != FETCH_SOCKET_BAD) &&
                (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
   result = Curl_conn_send(data, sockindex, buf, blen, eos, pnwritten);
-  if(result == CURLE_AGAIN) {
-    result = CURLE_OK;
+  if(result == FETCHE_AGAIN) {
+    result = FETCHE_OK;
     *pnwritten = 0;
   }
   else if(!result && *pnwritten)
@@ -945,7 +945,7 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
   return result;
 }
 
-CURLcode Curl_xfer_recv(struct Curl_easy *data,
+FETCHcode Curl_xfer_recv(struct Curl_easy *data,
                         char *buf, size_t blen,
                         ssize_t *pnrcvd)
 {
@@ -955,17 +955,17 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
   DEBUGASSERT(data->conn);
   DEBUGASSERT(data->set.buffer_size > 0);
 
-  sockindex = ((data->conn->sockfd != CURL_SOCKET_BAD) &&
+  sockindex = ((data->conn->sockfd != FETCH_SOCKET_BAD) &&
                (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]));
   if((size_t)data->set.buffer_size < blen)
     blen = (size_t)data->set.buffer_size;
   return Curl_conn_recv(data, sockindex, buf, blen, pnrcvd);
 }
 
-CURLcode Curl_xfer_send_close(struct Curl_easy *data)
+FETCHcode Curl_xfer_send_close(struct Curl_easy *data)
 {
   Curl_conn_ev_data_done_send(data);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 bool Curl_xfer_is_blocked(struct Curl_easy *data)

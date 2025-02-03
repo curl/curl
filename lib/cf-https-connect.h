@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CF_HTTP_H
-#define HEADER_CURL_CF_HTTP_H
+#ifndef HEADER_FETCH_CF_HTTP_H
+#define HEADER_FETCH_CF_HTTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP)
+#if !defined(FETCH_DISABLE_HTTP)
 
 struct Curl_cfilter;
 struct Curl_easy;
@@ -35,24 +35,24 @@ struct Curl_dns_entry;
 
 extern struct Curl_cftype Curl_cft_http_connect;
 
-CURLcode Curl_cf_http_connect_add(struct Curl_easy *data,
+FETCHcode Curl_cf_http_connect_add(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   int sockindex,
                                   const struct Curl_dns_entry *remotehost,
                                   bool try_h3, bool try_h21);
 
-CURLcode
+FETCHcode
 Curl_cf_http_connect_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
                                   const struct Curl_dns_entry *remotehost,
                                   bool try_h3, bool try_h21);
 
 
-CURLcode Curl_cf_https_setup(struct Curl_easy *data,
+FETCHcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
                              int sockindex,
                              const struct Curl_dns_entry *remotehost);
 
 
-#endif /* !defined(CURL_DISABLE_HTTP) */
-#endif /* HEADER_CURL_CF_HTTP_H */
+#endif /* !defined(FETCH_DISABLE_HTTP) */
+#endif /* HEADER_FETCH_CF_HTTP_H */

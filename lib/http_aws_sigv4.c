@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://fetch.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,19 +18,19 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS)
+#if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_AWS)
 
 #include "urldata.h"
 #include "strcase.h"
 #include "strdup.h"
 #include "http_aws_sigv4.h"
-#include "curl_sha256.h"
+#include "fetch_sha256.h"
 #include "transfer.h"
 #include "parsedate.h"
 #include "sendf.h"
@@ -40,8 +40,8 @@
 #include <time.h>
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #include "slist.h"
@@ -61,11 +61,11 @@
 #define TIMESTAMP_SIZE 17
 
 /* hex-encoded with trailing null */
-#define SHA256_HEX_LENGTH (2 * CURL_SHA256_DIGEST_LENGTH + 1)
+#define SHA256_HEX_LENGTH (2 * FETCH_SHA256_DIGEST_LENGTH + 1)
 
 static void sha256_to_hex(char *dst, unsigned char *sha)
 {
-  Curl_hexencode(sha, CURL_SHA256_DIGEST_LENGTH,
+  Curl_hexencode(sha, FETCH_SHA256_DIGEST_LENGTH,
                  (unsigned char *)dst, SHA256_HEX_LENGTH);
 }
 
@@ -79,9 +79,9 @@ static char *find_date_hdr(struct Curl_easy *data, const char *sig_hdr)
 }
 
 /* remove whitespace, and lowercase all headers */
-static void trim_headers(struct curl_slist *head)
+static void trim_headers(struct fetch_slist *head)
 {
-  struct curl_slist *l;
+  struct fetch_slist *l;
   for(l = head; l; l = l->next) {
     char *value; /* to read from */
     char *store;
@@ -156,7 +156,7 @@ static int compare_header_names(const char *a, const char *b)
 }
 
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
-static CURLcode make_headers(struct Curl_easy *data,
+static FETCHcode make_headers(struct Curl_easy *data,
                              const char *hostname,
                              char *timestamp,
                              const char *provider1,
@@ -168,10 +168,10 @@ static CURLcode make_headers(struct Curl_easy *data,
 {
   char date_hdr_key[DATE_HDR_KEY_LEN];
   char date_full_hdr[DATE_FULL_HDR_LEN];
-  struct curl_slist *head = NULL;
-  struct curl_slist *tmp_head = NULL;
-  CURLcode ret = CURLE_OUT_OF_MEMORY;
-  struct curl_slist *l;
+  struct fetch_slist *head = NULL;
+  struct fetch_slist *tmp_head = NULL;
+  FETCHcode ret = FETCHE_OUT_OF_MEMORY;
+  struct fetch_slist *l;
   bool again = TRUE;
 
   msnprintf(date_hdr_key, DATE_HDR_KEY_LEN, "X-%.*s-Date",
@@ -206,7 +206,7 @@ static CURLcode make_headers(struct Curl_easy *data,
 
 
   if(*content_sha256_header) {
-    tmp_head = curl_slist_append(head, content_sha256_header);
+    tmp_head = fetch_slist_append(head, content_sha256_header);
     if(!tmp_head)
       goto fail;
     head = tmp_head;
@@ -254,7 +254,7 @@ static CURLcode make_headers(struct Curl_easy *data,
 
   *date_header = find_date_hdr(data, date_hdr_key);
   if(!*date_header) {
-    tmp_head = curl_slist_append(head, date_full_hdr);
+    tmp_head = fetch_slist_append(head, date_full_hdr);
     if(!tmp_head)
       goto fail;
     head = tmp_head;
@@ -289,7 +289,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   do {
     again = FALSE;
     for(l = head; l; l = l->next) {
-      struct curl_slist *next = l->next;
+      struct fetch_slist *next = l->next;
 
       if(next && compare_header_names(l->data, next->data) > 0) {
         char *tmp = l->data;
@@ -321,9 +321,9 @@ static CURLcode make_headers(struct Curl_easy *data,
       goto fail;
   }
 
-  ret = CURLE_OK;
+  ret = FETCHE_OK;
 fail:
-  curl_slist_free_all(head);
+  fetch_slist_free_all(head);
 
   return ret;
 }
@@ -367,12 +367,12 @@ static char *parse_content_sha_hdr(struct Curl_easy *data,
   return value;
 }
 
-static CURLcode calc_payload_hash(struct Curl_easy *data,
+static FETCHcode calc_payload_hash(struct Curl_easy *data,
                                   unsigned char *sha_hash, char *sha_hex)
 {
   const char *post_data = data->set.postfields;
   size_t post_data_len = 0;
-  CURLcode result;
+  FETCHcode result;
 
   if(post_data) {
     if(data->set.postfieldsize < 0)
@@ -389,7 +389,7 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
 
 #define S3_UNSIGNED_PAYLOAD "UNSIGNED-PAYLOAD"
 
-static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
+static FETCHcode calc_s3_payload_hash(struct Curl_easy *data,
                                      Curl_HttpReq httpreq, char *provider1,
                                      size_t plen,
                                      unsigned char *sha_hash,
@@ -400,7 +400,7 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
   bool empty_payload = (empty_method || data->set.filesize == 0);
   /* The POST payload is in memory */
   bool post_payload = (httpreq == HTTPREQ_POST && data->set.postfields);
-  CURLcode ret = CURLE_OUT_OF_MEMORY;
+  FETCHcode ret = FETCHE_OUT_OF_MEMORY;
 
   if(empty_payload || post_payload) {
     /* Calculate a real hash when we know the request payload */
@@ -420,7 +420,7 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
   msnprintf(header, CONTENT_SHA256_HDR_LEN,
             "x-%.*s-content-sha256: %s", (int)plen, provider1, sha_hex);
 
-  ret = CURLE_OK;
+  ret = FETCHE_OK;
 fail:
   return ret;
 }
@@ -452,10 +452,10 @@ static int compare_func(const void *a, const void *b)
  * and mark that this function is called to compute the path,
  * if found_equals is NULL.
  */
-static CURLcode canon_string(const char *q, size_t len,
+static FETCHcode canon_string(const char *q, size_t len,
                              struct dynbuf *dq, bool *found_equals)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   for(; len && !result; q++, len--) {
     if(ISALNUM(*q))
@@ -516,10 +516,10 @@ static CURLcode canon_string(const char *q, size_t len,
 }
 
 
-static CURLcode canon_query(struct Curl_easy *data,
+static FETCHcode canon_query(struct Curl_easy *data,
                             const char *query, struct dynbuf *dq)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   int entry = 0;
   int i;
   const char *p = query;
@@ -546,7 +546,7 @@ static CURLcode canon_query(struct Curl_easy *data,
   if(entry == MAX_QUERYPAIRS) {
     /* too many query pairs for us */
     failf(data, "aws-sigv4: too many query pairs in URL");
-    return CURLE_URL_MALFORMAT;
+    return FETCHE_URL_MALFORMAT;
   }
 
   qsort(&array[0], entry, sizeof(struct pair), compare_func);
@@ -571,9 +571,9 @@ static CURLcode canon_query(struct Curl_easy *data,
 }
 
 
-CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
+FETCHcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
-  CURLcode result = CURLE_OUT_OF_MEMORY;
+  FETCHcode result = FETCHE_OUT_OF_MEMORY;
   struct connectdata *conn = data->conn;
   size_t len;
   char *line;
@@ -595,7 +595,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   const char *method = NULL;
   char *payload_hash = NULL;
   size_t payload_hash_len = 0;
-  unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  unsigned char sha_hash[FETCH_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
   char content_sha256_hdr[CONTENT_SHA256_HDR_LEN + 2] = ""; /* add \r\n */
   char *canonical_request = NULL;
@@ -604,8 +604,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *str_to_sign = NULL;
   const char *user = data->state.aptr.user ? data->state.aptr.user : "";
   char *secret = NULL;
-  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = {0};
-  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = {0};
+  unsigned char sign0[FETCH_SHA256_DIGEST_LENGTH] = {0};
+  unsigned char sign1[FETCH_SHA256_DIGEST_LENGTH] = {0};
   char *auth_headers = NULL;
 
   DEBUGASSERT(!proxy);
@@ -613,14 +613,14 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   if(Curl_checkheaders(data, STRCONST("Authorization"))) {
     /* Authorization already present, Bailing out */
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
   /* we init those buffers here, so goto fail will free initialized dynbuf */
-  Curl_dyn_init(&canonical_headers, CURL_MAX_HTTP_HEADER);
-  Curl_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
-  Curl_dyn_init(&signed_headers, CURL_MAX_HTTP_HEADER);
-  Curl_dyn_init(&canonical_path, CURL_MAX_HTTP_HEADER);
+  Curl_dyn_init(&canonical_headers, FETCH_MAX_HTTP_HEADER);
+  Curl_dyn_init(&canonical_query, FETCH_MAX_HTTP_HEADER);
+  Curl_dyn_init(&signed_headers, FETCH_MAX_HTTP_HEADER);
+  Curl_dyn_init(&canonical_path, FETCH_MAX_HTTP_HEADER);
 
   /*
    * Parameters parsing
@@ -638,7 +638,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   */
   if(Curl_str_until(&line, &provider0, MAX_SIGV4_LEN, ':')) {
     failf(data, "first aws-sigv4 provider cannot be empty");
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    result = FETCHE_BAD_FUNCTION_ARGUMENT;
     goto fail;
   }
   if(Curl_str_single(&line, ':') ||
@@ -657,13 +657,13 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     char *hostdot = strchr(hostname, '.');
     if(!hostdot) {
       failf(data, "aws-sigv4: service missing in parameters and hostname");
-      result = CURLE_URL_MALFORMAT;
+      result = FETCHE_URL_MALFORMAT;
       goto fail;
     }
     len = hostdot - hostname;
     if(len > MAX_SIGV4_LEN) {
       failf(data, "aws-sigv4: service too long in hostname");
-      result = CURLE_URL_MALFORMAT;
+      result = FETCHE_URL_MALFORMAT;
       goto fail;
     }
     service.str = (char *)hostname;
@@ -677,13 +677,13 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       const char *hostreg = strchr(reg, '.');
       if(!hostreg) {
         failf(data, "aws-sigv4: region missing in parameters and hostname");
-        result = CURLE_URL_MALFORMAT;
+        result = FETCHE_URL_MALFORMAT;
         goto fail;
       }
       len = hostreg - reg;
       if(len > MAX_SIGV4_LEN) {
         failf(data, "aws-sigv4: region too long in hostname");
-        result = CURLE_URL_MALFORMAT;
+        result = FETCHE_URL_MALFORMAT;
         goto fail;
       }
       region.str = (char *)reg;
@@ -721,7 +721,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
 #ifdef DEBUGBUILD
   {
-    char *force_timestamp = getenv("CURL_FORCETIME");
+    char *force_timestamp = getenv("FETCH_FORCETIME");
     if(force_timestamp)
       clock = 0;
     else
@@ -735,7 +735,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     goto fail;
   }
   if(!strftime(timestamp, sizeof(timestamp), "%Y%m%dT%H%M%SZ", &tm)) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = FETCHE_OUT_OF_MEMORY;
     goto fail;
   }
 
@@ -764,7 +764,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                         &canonical_path, NULL);
   if(result)
     goto fail;
-  result = CURLE_OUT_OF_MEMORY;
+  result = FETCHE_OUT_OF_MEMORY;
 
   canonical_request =
     aprintf("%s\n" /* HTTPRequestMethod */
@@ -846,7 +846,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                          "Signature=%s\r\n"
                          /*
                           * date_header is added here, only if it was not
-                          * user-specified (using CURLOPT_HTTPHEADER).
+                          * user-specified (using FETCHOPT_HTTPHEADER).
                           * date_header includes \r\n
                           */
                          "%s"
@@ -868,7 +868,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   Curl_safefree(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
-  result = CURLE_OK;
+  result = FETCHE_OK;
 
 fail:
   Curl_dyn_free(&canonical_query);
@@ -884,4 +884,4 @@ fail:
   return result;
 }
 
-#endif /* !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS) */
+#endif /* !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_AWS) */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 
@@ -44,37 +44,37 @@
 
 #include <limits.h>
 
-#define CURL_MASK_UCHAR   ((unsigned char)~0)
-#define CURL_MASK_SCHAR   (CURL_MASK_UCHAR >> 1)
+#define FETCH_MASK_UCHAR   ((unsigned char)~0)
+#define FETCH_MASK_SCHAR   (FETCH_MASK_UCHAR >> 1)
 
-#define CURL_MASK_USHORT  ((unsigned short)~0)
-#define CURL_MASK_SSHORT  (CURL_MASK_USHORT >> 1)
+#define FETCH_MASK_USHORT  ((unsigned short)~0)
+#define FETCH_MASK_SSHORT  (FETCH_MASK_USHORT >> 1)
 
-#define CURL_MASK_UINT    ((unsigned int)~0)
-#define CURL_MASK_SINT    (CURL_MASK_UINT >> 1)
+#define FETCH_MASK_UINT    ((unsigned int)~0)
+#define FETCH_MASK_SINT    (FETCH_MASK_UINT >> 1)
 
-#define CURL_MASK_ULONG   ((unsigned long)~0)
-#define CURL_MASK_SLONG   (CURL_MASK_ULONG >> 1)
+#define FETCH_MASK_ULONG   ((unsigned long)~0)
+#define FETCH_MASK_SLONG   (FETCH_MASK_ULONG >> 1)
 
-#define CURL_MASK_UCOFFT  ((unsigned CURL_TYPEOF_CURL_OFF_T)~0)
-#define CURL_MASK_SCOFFT  (CURL_MASK_UCOFFT >> 1)
+#define FETCH_MASK_UCOFFT  ((unsigned FETCH_TYPEOF_FETCH_OFF_T)~0)
+#define FETCH_MASK_SCOFFT  (FETCH_MASK_UCOFFT >> 1)
 
-#define CURL_MASK_USIZE_T ((size_t)~0)
-#define CURL_MASK_SSIZE_T (CURL_MASK_USIZE_T >> 1)
+#define FETCH_MASK_USIZE_T ((size_t)~0)
+#define FETCH_MASK_SSIZE_T (FETCH_MASK_USIZE_T >> 1)
 
 /*
 ** unsigned long to unsigned short
 */
 
-unsigned short curlx_ultous(unsigned long ulnum)
+unsigned short fetchx_ultous(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-  DEBUGASSERT(ulnum <= (unsigned long) CURL_MASK_USHORT);
-  return (unsigned short)(ulnum & (unsigned long) CURL_MASK_USHORT);
+  DEBUGASSERT(ulnum <= (unsigned long) FETCH_MASK_USHORT);
+  return (unsigned short)(ulnum & (unsigned long) FETCH_MASK_USHORT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -85,15 +85,15 @@ unsigned short curlx_ultous(unsigned long ulnum)
 ** unsigned long to unsigned char
 */
 
-unsigned char curlx_ultouc(unsigned long ulnum)
+unsigned char fetchx_ultouc(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-  DEBUGASSERT(ulnum <= (unsigned long) CURL_MASK_UCHAR);
-  return (unsigned char)(ulnum & (unsigned long) CURL_MASK_UCHAR);
+  DEBUGASSERT(ulnum <= (unsigned long) FETCH_MASK_UCHAR);
+  return (unsigned char)(ulnum & (unsigned long) FETCH_MASK_UCHAR);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -104,15 +104,15 @@ unsigned char curlx_ultouc(unsigned long ulnum)
 ** unsigned size_t to signed int
 */
 
-int curlx_uztosi(size_t uznum)
+int fetchx_uztosi(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-  DEBUGASSERT(uznum <= (size_t) CURL_MASK_SINT);
-  return (int)(uznum & (size_t) CURL_MASK_SINT);
+  DEBUGASSERT(uznum <= (size_t) FETCH_MASK_SINT);
+  return (int)(uznum & (size_t) FETCH_MASK_SINT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -123,7 +123,7 @@ int curlx_uztosi(size_t uznum)
 ** unsigned size_t to unsigned long
 */
 
-unsigned long curlx_uztoul(size_t uznum)
+unsigned long fetchx_uztoul(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -131,9 +131,9 @@ unsigned long curlx_uztoul(size_t uznum)
 #endif
 
 #if ULONG_MAX < SIZE_T_MAX
-  DEBUGASSERT(uznum <= (size_t) CURL_MASK_ULONG);
+  DEBUGASSERT(uznum <= (size_t) FETCH_MASK_ULONG);
 #endif
-  return (unsigned long)(uznum & (size_t) CURL_MASK_ULONG);
+  return (unsigned long)(uznum & (size_t) FETCH_MASK_ULONG);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -144,7 +144,7 @@ unsigned long curlx_uztoul(size_t uznum)
 ** unsigned size_t to unsigned int
 */
 
-unsigned int curlx_uztoui(size_t uznum)
+unsigned int fetchx_uztoui(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -152,9 +152,9 @@ unsigned int curlx_uztoui(size_t uznum)
 #endif
 
 #if UINT_MAX < SIZE_T_MAX
-  DEBUGASSERT(uznum <= (size_t) CURL_MASK_UINT);
+  DEBUGASSERT(uznum <= (size_t) FETCH_MASK_UINT);
 #endif
-  return (unsigned int)(uznum & (size_t) CURL_MASK_UINT);
+  return (unsigned int)(uznum & (size_t) FETCH_MASK_UINT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -165,7 +165,7 @@ unsigned int curlx_uztoui(size_t uznum)
 ** signed long to signed int
 */
 
-int curlx_sltosi(long slnum)
+int fetchx_sltosi(long slnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -174,9 +174,9 @@ int curlx_sltosi(long slnum)
 
   DEBUGASSERT(slnum >= 0);
 #if INT_MAX < LONG_MAX
-  DEBUGASSERT((unsigned long) slnum <= (unsigned long) CURL_MASK_SINT);
+  DEBUGASSERT((unsigned long) slnum <= (unsigned long) FETCH_MASK_SINT);
 #endif
-  return (int)(slnum & (long) CURL_MASK_SINT);
+  return (int)(slnum & (long) FETCH_MASK_SINT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -187,7 +187,7 @@ int curlx_sltosi(long slnum)
 ** signed long to unsigned int
 */
 
-unsigned int curlx_sltoui(long slnum)
+unsigned int fetchx_sltoui(long slnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -196,9 +196,9 @@ unsigned int curlx_sltoui(long slnum)
 
   DEBUGASSERT(slnum >= 0);
 #if UINT_MAX < LONG_MAX
-  DEBUGASSERT((unsigned long) slnum <= (unsigned long) CURL_MASK_UINT);
+  DEBUGASSERT((unsigned long) slnum <= (unsigned long) FETCH_MASK_UINT);
 #endif
-  return (unsigned int)(slnum & (long) CURL_MASK_UINT);
+  return (unsigned int)(slnum & (long) FETCH_MASK_UINT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -209,7 +209,7 @@ unsigned int curlx_sltoui(long slnum)
 ** signed long to unsigned short
 */
 
-unsigned short curlx_sltous(long slnum)
+unsigned short fetchx_sltous(long slnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -217,8 +217,8 @@ unsigned short curlx_sltous(long slnum)
 #endif
 
   DEBUGASSERT(slnum >= 0);
-  DEBUGASSERT((unsigned long) slnum <= (unsigned long) CURL_MASK_USHORT);
-  return (unsigned short)(slnum & (long) CURL_MASK_USHORT);
+  DEBUGASSERT((unsigned long) slnum <= (unsigned long) FETCH_MASK_USHORT);
+  return (unsigned short)(slnum & (long) FETCH_MASK_USHORT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -229,15 +229,15 @@ unsigned short curlx_sltous(long slnum)
 ** unsigned size_t to signed ssize_t
 */
 
-ssize_t curlx_uztosz(size_t uznum)
+ssize_t fetchx_uztosz(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-  DEBUGASSERT(uznum <= (size_t) CURL_MASK_SSIZE_T);
-  return (ssize_t)(uznum & (size_t) CURL_MASK_SSIZE_T);
+  DEBUGASSERT(uznum <= (size_t) FETCH_MASK_SSIZE_T);
+  return (ssize_t)(uznum & (size_t) FETCH_MASK_SSIZE_T);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -245,10 +245,10 @@ ssize_t curlx_uztosz(size_t uznum)
 }
 
 /*
-** signed curl_off_t to unsigned size_t
+** signed fetch_off_t to unsigned size_t
 */
 
-size_t curlx_sotouz(curl_off_t sonum)
+size_t fetchx_sotouz(fetch_off_t sonum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -256,7 +256,7 @@ size_t curlx_sotouz(curl_off_t sonum)
 #endif
 
   DEBUGASSERT(sonum >= 0);
-  return (size_t)(sonum & (curl_off_t) CURL_MASK_USIZE_T);
+  return (size_t)(sonum & (fetch_off_t) FETCH_MASK_USIZE_T);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -267,7 +267,7 @@ size_t curlx_sotouz(curl_off_t sonum)
 ** signed ssize_t to signed int
 */
 
-int curlx_sztosi(ssize_t sznum)
+int fetchx_sztosi(ssize_t sznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -276,9 +276,9 @@ int curlx_sztosi(ssize_t sznum)
 
   DEBUGASSERT(sznum >= 0);
 #if INT_MAX < SSIZE_T_MAX
-  DEBUGASSERT((size_t) sznum <= (size_t) CURL_MASK_SINT);
+  DEBUGASSERT((size_t) sznum <= (size_t) FETCH_MASK_SINT);
 #endif
-  return (int)(sznum & (ssize_t) CURL_MASK_SINT);
+  return (int)(sznum & (ssize_t) FETCH_MASK_SINT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -289,15 +289,15 @@ int curlx_sztosi(ssize_t sznum)
 ** unsigned int to unsigned short
 */
 
-unsigned short curlx_uitous(unsigned int uinum)
+unsigned short fetchx_uitous(unsigned int uinum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-  DEBUGASSERT(uinum <= (unsigned int) CURL_MASK_USHORT);
-  return (unsigned short) (uinum & (unsigned int) CURL_MASK_USHORT);
+  DEBUGASSERT(uinum <= (unsigned int) FETCH_MASK_USHORT);
+  return (unsigned short) (uinum & (unsigned int) FETCH_MASK_USHORT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)
@@ -308,7 +308,7 @@ unsigned short curlx_uitous(unsigned int uinum)
 ** signed int to unsigned size_t
 */
 
-size_t curlx_sitouz(int sinum)
+size_t fetchx_sitouz(int sinum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -325,18 +325,18 @@ size_t curlx_sitouz(int sinum)
 
 #if defined(_WIN32)
 
-ssize_t curlx_read(int fd, void *buf, size_t count)
+ssize_t fetchx_read(int fd, void *buf, size_t count)
 {
-  return (ssize_t)read(fd, buf, curlx_uztoui(count));
+  return (ssize_t)read(fd, buf, fetchx_uztoui(count));
 }
 
-ssize_t curlx_write(int fd, const void *buf, size_t count)
+ssize_t fetchx_write(int fd, const void *buf, size_t count)
 {
-  return (ssize_t)write(fd, buf, curlx_uztoui(count));
+  return (ssize_t)write(fd, buf, fetchx_uztoui(count));
 }
 
 #endif /* _WIN32 */
 
 /* Ensure that warnless.h redefinitions continue to have an effect
    in "unity" builds. */
-#undef HEADER_CURL_WARNLESS_H_REDEFS
+#undef HEADER_FETCH_WARNLESS_H_REDEFS

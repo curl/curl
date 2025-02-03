@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,15 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "dynbuf.h"
-#include "curl_printf.h"
-#ifdef BUILDING_LIBCURL
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#ifdef BUILDING_LIBFETCH
+#include "fetch_memory.h"
 #endif
 #include "memdebug.h"
 
@@ -64,7 +64,7 @@ void Curl_dyn_free(struct dynbuf *s)
 /*
  * Store/append an chunk of memory to the dynbuf.
  */
-static CURLcode dyn_nappend(struct dynbuf *s,
+static FETCHcode dyn_nappend(struct dynbuf *s,
                             const unsigned char *mem, size_t len)
 {
   size_t indx = s->leng;
@@ -81,7 +81,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
 
   if(fit > s->toobig) {
     Curl_dyn_free(s);
-    return CURLE_TOO_LARGE;
+    return FETCHE_TOO_LARGE;
   }
   else if(!a) {
     DEBUGASSERT(!indx);
@@ -107,7 +107,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
     void *p = realloc(s->bufr, a);
     if(!p) {
       Curl_dyn_free(s);
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
     }
     s->bufr = p;
     s->allc = a;
@@ -117,7 +117,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
     memcpy(&s->bufr[indx], mem, len);
   s->leng = indx + len;
   s->bufr[s->leng] = 0;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -138,15 +138,15 @@ void Curl_dyn_reset(struct dynbuf *s)
  * Specify the size of the tail to keep (number of bytes from the end of the
  * buffer). The rest will be dropped.
  */
-CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
+FETCHcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
   if(trail > s->leng)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   else if(trail == s->leng)
-    return CURLE_OK;
+    return FETCHE_OK;
   else if(!trail) {
     Curl_dyn_reset(s);
   }
@@ -155,14 +155,14 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
     s->leng = trail;
     s->bufr[s->leng] = 0;
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 
 }
 
 /*
  * Appends a buffer with length.
  */
-CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
+FETCHcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -173,7 +173,7 @@ CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
 /*
  * Append a null-terminated string at the end.
  */
-CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
+FETCHcode Curl_dyn_add(struct dynbuf *s, const char *str)
 {
   size_t n;
   DEBUGASSERT(str);
@@ -187,9 +187,9 @@ CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
 /*
  * Append a string vprintf()-style
  */
-CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
+FETCHcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 {
-#ifdef BUILDING_LIBCURL
+#ifdef BUILDING_LIBFETCH
   int rc;
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -198,31 +198,31 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   rc = Curl_dyn_vprintf(s, fmt, ap);
 
   if(!rc)
-    return CURLE_OK;
+    return FETCHE_OK;
   else if(rc == MERR_TOO_LARGE)
-    return CURLE_TOO_LARGE;
-  return CURLE_OUT_OF_MEMORY;
+    return FETCHE_TOO_LARGE;
+  return FETCHE_OUT_OF_MEMORY;
 #else
   char *str;
   str = vaprintf(fmt, ap); /* this allocs a new string to append */
 
   if(str) {
-    CURLcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
+    FETCHcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
     free(str);
     return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */
   Curl_dyn_free(s);
-  return CURLE_OUT_OF_MEMORY;
+  return FETCHE_OUT_OF_MEMORY;
 #endif
 }
 
 /*
  * Append a string printf()-style
  */
-CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
+FETCHcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 {
-  CURLcode result;
+  FETCHcode result;
   va_list ap;
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -281,14 +281,14 @@ size_t Curl_dyn_len(const struct dynbuf *s)
 /*
  * Set a new (smaller) length.
  */
-CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t set)
+FETCHcode Curl_dyn_setlen(struct dynbuf *s, size_t set)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
   if(set > s->leng)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   s->leng = set;
   s->bufr[s->leng] = 0;
-  return CURLE_OK;
+  return FETCHE_OK;
 }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,29 +18,29 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /*
  * This file is 'mem-include-scan' clean, which means memdebug.h and
- * curl_memory.h are purposely not included in this file. See test 1132.
+ * fetch_memory.h are purposely not included in this file. See test 1132.
  *
- * The functions in this file are curlx functions which are not tracked by the
- * curl memory tracker memdebug.
+ * The functions in this file are fetchx functions which are not tracked by the
+ * fetch memory tracker memdebug.
  */
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef _WIN32
 
-#include "curl_multibyte.h"
+#include "fetch_multibyte.h"
 
 /*
  * MultiByte conversions using Windows kernel32 library.
  */
 
-wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8)
+wchar_t *fetchx_convert_UTF8_to_wchar(const char *str_utf8)
 {
   wchar_t *str_w = NULL;
 
@@ -62,7 +62,7 @@ wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8)
   return str_w;
 }
 
-char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
+char *fetchx_convert_wchar_to_UTF8(const wchar_t *str_w)
 {
   char *str_utf8 = NULL;
 
@@ -85,7 +85,7 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
 }
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
-#if defined(CURL_WINDOWS_UWP) && defined(__MINGW32__) && \
+#if defined(FETCH_WINDOWS_UWP) && defined(__MINGW32__) && \
   (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR, DWORD, LPWSTR, LPWSTR *);
 #endif
@@ -240,7 +240,7 @@ cleanup:
   return *out ? true : false;
 }
 
-int curlx_win32_open(const char *filename, int oflag, ...)
+int fetchx_win32_open(const char *filename, int oflag, ...)
 {
   int pmode = 0;
   int result = -1;
@@ -248,7 +248,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   const TCHAR *target = NULL;
 
 #ifdef _UNICODE
-  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
+  wchar_t *filename_w = fetchx_convert_UTF8_to_wchar(filename);
 #endif
 
   va_list param;
@@ -264,7 +264,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     else
       target = filename_w;
     result = _wopen(target, oflag, pmode);
-    curlx_unicodefree(filename_w);
+    fetchx_unicodefree(filename_w);
   }
   else
     errno = EINVAL;
@@ -280,15 +280,15 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   return result;
 }
 
-FILE *curlx_win32_fopen(const char *filename, const char *mode)
+FILE *fetchx_win32_fopen(const char *filename, const char *mode)
 {
   FILE *result = NULL;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
 #ifdef _UNICODE
-  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
-  wchar_t *mode_w = curlx_convert_UTF8_to_wchar(mode);
+  wchar_t *filename_w = fetchx_convert_UTF8_to_wchar(filename);
+  wchar_t *mode_w = fetchx_convert_UTF8_to_wchar(mode);
   if(filename_w && mode_w) {
     if(fix_excessive_path(filename_w, &fixed))
       target = fixed;
@@ -298,8 +298,8 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   }
   else
     errno = EINVAL;
-  curlx_unicodefree(filename_w);
-  curlx_unicodefree(mode_w);
+  fetchx_unicodefree(filename_w);
+  fetchx_unicodefree(mode_w);
 #else
   if(fix_excessive_path(filename, &fixed))
     target = fixed;
@@ -312,14 +312,14 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   return result;
 }
 
-int curlx_win32_stat(const char *path, struct_stat *buffer)
+int fetchx_win32_stat(const char *path, struct_stat *buffer)
 {
   int result = -1;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
 #ifdef _UNICODE
-  wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
+  wchar_t *path_w = fetchx_convert_UTF8_to_wchar(path);
   if(path_w) {
     if(fix_excessive_path(path_w, &fixed))
       target = fixed;
@@ -330,7 +330,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
 #else
     result = _wstati64(target, buffer);
 #endif
-    curlx_unicodefree(path_w);
+    fetchx_unicodefree(path_w);
   }
   else
     errno = EINVAL;

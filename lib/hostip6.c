@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 /***********************************************************************
  * Only for IPv6-enabled builds
  **********************************************************************/
-#ifdef CURLRES_IPV6
+#ifdef FETCHRES_IPV6
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -52,23 +52,23 @@
 #include "inet_pton.h"
 #include "connect.h"
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /*
- * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
+ * Curl_ipvalid() checks what FETCH_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
 bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 {
-  if(conn->ip_version == CURL_IPRESOLVE_V6)
+  if(conn->ip_version == FETCH_IPRESOLVE_V6)
     return Curl_ipv6works(data);
 
   return TRUE;
 }
 
-#if defined(CURLRES_SYNCH)
+#if defined(FETCHRES_SYNCH)
 
 #ifdef DEBUG_ADDRINFO
 static void dump_addrinfo(const struct Curl_addrinfo *ai)
@@ -112,7 +112,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   *waitp = 0; /* synchronous response only */
 
-  if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
+  if((data->conn->ip_version != FETCH_IPRESOLVE_V4) && Curl_ipv6works(data))
     /* The stack seems to be IPv6-enabled */
     pf = PF_UNSPEC;
 
@@ -152,6 +152,6 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   return res;
 }
-#endif /* CURLRES_SYNCH */
+#endif /* FETCHRES_SYNCH */
 
-#endif /* CURLRES_IPV6 */
+#endif /* FETCHRES_IPV6 */

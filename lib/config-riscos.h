@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CONFIG_RISCOS_H
-#define HEADER_CURL_CONFIG_RISCOS_H
+#ifndef HEADER_FETCH_CONFIG_RISCOS_H
+#define HEADER_FETCH_CONFIG_RISCOS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -29,8 +29,8 @@
 /* ================================================================ */
 
 /* Define cpu-machine-OS */
-#ifndef CURL_OS
-#define CURL_OS "ARM-RISC OS"
+#ifndef FETCH_OS
+#define FETCH_OS "ARM-RISC OS"
 #endif
 
 /* Define if you want the built-in manual */
@@ -208,7 +208,7 @@
 #define HAVE_IOCTL_FIONBIO
 
 /* to disable LDAP */
-#define CURL_DISABLE_LDAP
+#define FETCH_DISABLE_LDAP
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
@@ -249,4 +249,4 @@
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV ssize_t
 
-#endif /* HEADER_CURL_CONFIG_RISCOS_H */
+#endif /* HEADER_FETCH_CONFIG_RISCOS_H */

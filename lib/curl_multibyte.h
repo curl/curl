@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_MULTIBYTE_H
-#define HEADER_CURL_MULTIBYTE_H
+#ifndef HEADER_FETCH_MULTIBYTE_H
+#define HEADER_FETCH_MULTIBYTE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(_WIN32)
 
@@ -31,13 +31,13 @@
   * MultiByte conversions using Windows kernel32 library.
   */
 
-wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
-char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
+wchar_t *fetchx_convert_UTF8_to_wchar(const char *str_utf8);
+char *fetchx_convert_wchar_to_UTF8(const wchar_t *str_w);
 #endif /* _WIN32 */
 
 /*
- * Macros curlx_convert_UTF8_to_tchar(), curlx_convert_tchar_to_UTF8()
- * and curlx_unicodefree() main purpose is to minimize the number of
+ * Macros fetchx_convert_UTF8_to_tchar(), fetchx_convert_tchar_to_UTF8()
+ * and fetchx_unicodefree() main purpose is to minimize the number of
  * preprocessor conditional directives needed by code using these
  * to differentiate Unicode from non-Unicode builds.
  *
@@ -46,19 +46,19 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
  * which is assumed to be UTF-8 but may be other encoding. Therefore the
  * significance of the conversion functions is primarily for Unicode builds.
  *
- * Allocated memory should be free'd with curlx_unicodefree().
+ * Allocated memory should be free'd with fetchx_unicodefree().
  *
- * Note: Because these are curlx functions their memory usage is not tracked
- * by the curl memory tracker memdebug. you will notice that curlx
+ * Note: Because these are fetchx functions their memory usage is not tracked
+ * by the fetch memory tracker memdebug. you will notice that fetchx
  * function-like macros call free and strdup in parentheses, eg (strdup)(ptr),
- * and that is to ensure that the curl memdebug override macros do not replace
+ * and that is to ensure that the fetch memdebug override macros do not replace
  * them.
  */
 
 #if defined(UNICODE) && defined(_WIN32)
 
-#define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
-#define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
+#define fetchx_convert_UTF8_to_tchar(ptr) fetchx_convert_UTF8_to_wchar((ptr))
+#define fetchx_convert_tchar_to_UTF8(ptr) fetchx_convert_wchar_to_UTF8((ptr))
 
 typedef union {
   unsigned short       *tchar_ptr;
@@ -69,8 +69,8 @@ typedef union {
 
 #else
 
-#define curlx_convert_UTF8_to_tchar(ptr) (strdup)(ptr)
-#define curlx_convert_tchar_to_UTF8(ptr) (strdup)(ptr)
+#define fetchx_convert_UTF8_to_tchar(ptr) (strdup)(ptr)
+#define fetchx_convert_tchar_to_UTF8(ptr) (strdup)(ptr)
 
 typedef union {
   char                *tchar_ptr;
@@ -81,7 +81,7 @@ typedef union {
 
 #endif /* UNICODE && _WIN32 */
 
-#define curlx_unicodefree(ptr)                          \
+#define fetchx_unicodefree(ptr)                          \
   do {                                                  \
     if(ptr) {                                           \
       (free)(ptr);                                      \
@@ -89,4 +89,4 @@ typedef union {
     }                                                   \
   } while(0)
 
-#endif /* HEADER_CURL_MULTIBYTE_H */
+#endif /* HEADER_FETCH_MULTIBYTE_H */

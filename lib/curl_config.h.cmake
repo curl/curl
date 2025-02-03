@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,162 +18,162 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /* Location of default ca bundle */
-#cmakedefine CURL_CA_BUNDLE "${CURL_CA_BUNDLE}"
+#cmakedefine FETCH_CA_BUNDLE "${FETCH_CA_BUNDLE}"
 
 /* define "1" to use built-in ca store of TLS backend */
-#cmakedefine CURL_CA_FALLBACK 1
+#cmakedefine FETCH_CA_FALLBACK 1
 
 /* Location of default ca path */
-#cmakedefine CURL_CA_PATH "${CURL_CA_PATH}"
+#cmakedefine FETCH_CA_PATH "${FETCH_CA_PATH}"
 
 /* Default SSL backend */
-#cmakedefine CURL_DEFAULT_SSL_BACKEND "${CURL_DEFAULT_SSL_BACKEND}"
+#cmakedefine FETCH_DEFAULT_SSL_BACKEND "${FETCH_DEFAULT_SSL_BACKEND}"
 
 /* disables alt-svc */
-#cmakedefine CURL_DISABLE_ALTSVC 1
+#cmakedefine FETCH_DISABLE_ALTSVC 1
 
 /* disables cookies support */
-#cmakedefine CURL_DISABLE_COOKIES 1
+#cmakedefine FETCH_DISABLE_COOKIES 1
 
 /* disables Basic authentication */
-#cmakedefine CURL_DISABLE_BASIC_AUTH 1
+#cmakedefine FETCH_DISABLE_BASIC_AUTH 1
 
 /* disables Bearer authentication */
-#cmakedefine CURL_DISABLE_BEARER_AUTH 1
+#cmakedefine FETCH_DISABLE_BEARER_AUTH 1
 
 /* disables Digest authentication */
-#cmakedefine CURL_DISABLE_DIGEST_AUTH 1
+#cmakedefine FETCH_DISABLE_DIGEST_AUTH 1
 
 /* disables Kerberos authentication */
-#cmakedefine CURL_DISABLE_KERBEROS_AUTH 1
+#cmakedefine FETCH_DISABLE_KERBEROS_AUTH 1
 
 /* disables negotiate authentication */
-#cmakedefine CURL_DISABLE_NEGOTIATE_AUTH 1
+#cmakedefine FETCH_DISABLE_NEGOTIATE_AUTH 1
 
 /* disables aws-sigv4 */
-#cmakedefine CURL_DISABLE_AWS 1
+#cmakedefine FETCH_DISABLE_AWS 1
 
 /* disables DICT */
-#cmakedefine CURL_DISABLE_DICT 1
+#cmakedefine FETCH_DISABLE_DICT 1
 
 /* disables DNS-over-HTTPS */
-#cmakedefine CURL_DISABLE_DOH 1
+#cmakedefine FETCH_DISABLE_DOH 1
 
 /* disables FILE */
-#cmakedefine CURL_DISABLE_FILE 1
+#cmakedefine FETCH_DISABLE_FILE 1
 
 /* disables form api */
-#cmakedefine CURL_DISABLE_FORM_API 1
+#cmakedefine FETCH_DISABLE_FORM_API 1
 
 /* disables FTP */
-#cmakedefine CURL_DISABLE_FTP 1
+#cmakedefine FETCH_DISABLE_FTP 1
 
-/* disables curl_easy_options API for existing options to curl_easy_setopt */
-#cmakedefine CURL_DISABLE_GETOPTIONS 1
+/* disables fetch_easy_options API for existing options to fetch_easy_setopt */
+#cmakedefine FETCH_DISABLE_GETOPTIONS 1
 
 /* disables GOPHER */
-#cmakedefine CURL_DISABLE_GOPHER 1
+#cmakedefine FETCH_DISABLE_GOPHER 1
 
 /* disables headers-api support */
-#cmakedefine CURL_DISABLE_HEADERS_API 1
+#cmakedefine FETCH_DISABLE_HEADERS_API 1
 
 /* disables HSTS support */
-#cmakedefine CURL_DISABLE_HSTS 1
+#cmakedefine FETCH_DISABLE_HSTS 1
 
 /* disables HTTP */
-#cmakedefine CURL_DISABLE_HTTP 1
+#cmakedefine FETCH_DISABLE_HTTP 1
 
 /* disabled all HTTP authentication methods */
-#cmakedefine CURL_DISABLE_HTTP_AUTH 1
+#cmakedefine FETCH_DISABLE_HTTP_AUTH 1
 
 /* disables IMAP */
-#cmakedefine CURL_DISABLE_IMAP 1
+#cmakedefine FETCH_DISABLE_IMAP 1
 
 /* disables LDAP */
-#cmakedefine CURL_DISABLE_LDAP 1
+#cmakedefine FETCH_DISABLE_LDAP 1
 
 /* disables LDAPS */
-#cmakedefine CURL_DISABLE_LDAPS 1
+#cmakedefine FETCH_DISABLE_LDAPS 1
 
-/* disables --libcurl option from the curl tool */
-#cmakedefine CURL_DISABLE_LIBCURL_OPTION 1
+/* disables --libfetch option from the fetch tool */
+#cmakedefine FETCH_DISABLE_LIBFETCH_OPTION 1
 
 /* disables MIME support */
-#cmakedefine CURL_DISABLE_MIME 1
+#cmakedefine FETCH_DISABLE_MIME 1
 
 /* disables local binding support */
-#cmakedefine CURL_DISABLE_BINDLOCAL 1
+#cmakedefine FETCH_DISABLE_BINDLOCAL 1
 
 /* disables MQTT */
-#cmakedefine CURL_DISABLE_MQTT 1
+#cmakedefine FETCH_DISABLE_MQTT 1
 
 /* disables netrc parser */
-#cmakedefine CURL_DISABLE_NETRC 1
+#cmakedefine FETCH_DISABLE_NETRC 1
 
 /* disables NTLM support */
-#cmakedefine CURL_DISABLE_NTLM 1
+#cmakedefine FETCH_DISABLE_NTLM 1
 
 /* disables date parsing */
-#cmakedefine CURL_DISABLE_PARSEDATE 1
+#cmakedefine FETCH_DISABLE_PARSEDATE 1
 
 /* disables POP3 */
-#cmakedefine CURL_DISABLE_POP3 1
+#cmakedefine FETCH_DISABLE_POP3 1
 
 /* disables built-in progress meter */
-#cmakedefine CURL_DISABLE_PROGRESS_METER 1
+#cmakedefine FETCH_DISABLE_PROGRESS_METER 1
 
 /* disables proxies */
-#cmakedefine CURL_DISABLE_PROXY 1
+#cmakedefine FETCH_DISABLE_PROXY 1
 
-/* disables IPFS from the curl tool */
-#cmakedefine CURL_DISABLE_IPFS 1
+/* disables IPFS from the fetch tool */
+#cmakedefine FETCH_DISABLE_IPFS 1
 
 /* disables RTSP */
-#cmakedefine CURL_DISABLE_RTSP 1
+#cmakedefine FETCH_DISABLE_RTSP 1
 
 /* disables SHA-512/256 hash algorithm */
-#cmakedefine CURL_DISABLE_SHA512_256 1
+#cmakedefine FETCH_DISABLE_SHA512_256 1
 
 /* disabled shuffle DNS feature */
-#cmakedefine CURL_DISABLE_SHUFFLE_DNS 1
+#cmakedefine FETCH_DISABLE_SHUFFLE_DNS 1
 
 /* disables SMB */
-#cmakedefine CURL_DISABLE_SMB 1
+#cmakedefine FETCH_DISABLE_SMB 1
 
 /* disables SMTP */
-#cmakedefine CURL_DISABLE_SMTP 1
+#cmakedefine FETCH_DISABLE_SMTP 1
 
 /* disabled WebSockets */
-#cmakedefine CURL_DISABLE_WEBSOCKETS 1
+#cmakedefine FETCH_DISABLE_WEBSOCKETS 1
 
-/* disables use of socketpair for curl_multi_poll */
-#cmakedefine CURL_DISABLE_SOCKETPAIR 1
+/* disables use of socketpair for fetch_multi_poll */
+#cmakedefine FETCH_DISABLE_SOCKETPAIR 1
 
 /* disables TELNET */
-#cmakedefine CURL_DISABLE_TELNET 1
+#cmakedefine FETCH_DISABLE_TELNET 1
 
 /* disables TFTP */
-#cmakedefine CURL_DISABLE_TFTP 1
+#cmakedefine FETCH_DISABLE_TFTP 1
 
 /* disables verbose strings */
-#cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
+#cmakedefine FETCH_DISABLE_VERBOSE_STRINGS 1
 
-/* disables unsafe CA bundle search on Windows from the curl tool */
-#cmakedefine CURL_DISABLE_CA_SEARCH 1
+/* disables unsafe CA bundle search on Windows from the fetch tool */
+#cmakedefine FETCH_DISABLE_CA_SEARCH 1
 
-/* safe CA bundle search (within the curl tool directory) on Windows */
-#cmakedefine CURL_CA_SEARCH_SAFE 1
+/* safe CA bundle search (within the fetch tool directory) on Windows */
+#cmakedefine FETCH_CA_SEARCH_SAFE 1
 
 /* to make a symbol visible */
-#cmakedefine CURL_EXTERN_SYMBOL ${CURL_EXTERN_SYMBOL}
-/* Ensure using CURL_EXTERN_SYMBOL is possible */
-#ifndef CURL_EXTERN_SYMBOL
-#define CURL_EXTERN_SYMBOL
+#cmakedefine FETCH_EXTERN_SYMBOL ${FETCH_EXTERN_SYMBOL}
+/* Ensure using FETCH_EXTERN_SYMBOL is possible */
+#ifndef FETCH_EXTERN_SYMBOL
+#define FETCH_EXTERN_SYMBOL
 #endif
 
 /* Allow SMB to work on Windows */
@@ -629,7 +629,7 @@
 #cmakedefine NEED_REENTRANT 1
 
 /* cpu-machine-OS */
-#cmakedefine CURL_OS ${CURL_OS}
+#cmakedefine FETCH_OS ${FETCH_OS}
 
 /*
  Note: SIZEOF_* variables are fetched with CMake through check_type_size().
@@ -652,11 +652,11 @@ ${SIZEOF_LONG_LONG_CODE}
 /* The size of `off_t', as computed by sizeof. */
 ${SIZEOF_OFF_T_CODE}
 
-/* The size of `curl_off_t', as computed by sizeof. */
-${SIZEOF_CURL_OFF_T_CODE}
+/* The size of `fetch_off_t', as computed by sizeof. */
+${SIZEOF_FETCH_OFF_T_CODE}
 
-/* The size of `curl_socket_t', as computed by sizeof. */
-${SIZEOF_CURL_SOCKET_T_CODE}
+/* The size of `fetch_socket_t', as computed by sizeof. */
+${SIZEOF_FETCH_SOCKET_T_CODE}
 
 /* The size of `size_t', as computed by sizeof. */
 ${SIZEOF_SIZE_T_CODE}
@@ -741,7 +741,7 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Define to 1 if you do not want the OpenSSL configuration to be loaded
    automatically */
-#cmakedefine CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
+#cmakedefine FETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
 
 /* to enable NGHTTP2  */
 #cmakedefine USE_NGHTTP2 1
@@ -780,7 +780,7 @@ ${SIZEOF_TIME_T_CODE}
 #cmakedefine USE_WATT32 1
 
 /* enable multiple SSL backends */
-#cmakedefine CURL_WITH_MULTI_SSL 1
+#cmakedefine FETCH_WITH_MULTI_SSL 1
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS ${_FILE_OFFSET_BITS}

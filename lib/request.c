@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #include "urldata.h"
 #include "cfilters.h"
@@ -36,8 +36,8 @@
 #include "url.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 void Curl_req_init(struct SingleRequest *req)
@@ -45,10 +45,10 @@ void Curl_req_init(struct SingleRequest *req)
   memset(req, 0, sizeof(*req));
 }
 
-CURLcode Curl_req_soft_reset(struct SingleRequest *req,
+FETCHcode Curl_req_soft_reset(struct SingleRequest *req,
                              struct Curl_easy *data)
 {
-  CURLcode result;
+  FETCHcode result;
 
   req->done = FALSE;
   req->upload_done = FALSE;
@@ -86,34 +86,34 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
     }
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode Curl_req_start(struct SingleRequest *req,
+FETCHcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data)
 {
   req->start = Curl_now();
   return Curl_req_soft_reset(req, data);
 }
 
-static CURLcode req_flush(struct Curl_easy *data);
+static FETCHcode req_flush(struct Curl_easy *data);
 
-CURLcode Curl_req_done(struct SingleRequest *req,
+FETCHcode Curl_req_done(struct SingleRequest *req,
                        struct Curl_easy *data, bool aborted)
 {
   (void)req;
   if(!aborted)
     (void)req_flush(data);
   Curl_client_reset(data);
-#ifndef CURL_DISABLE_DOH
+#ifndef FETCH_DISABLE_DOH
   Curl_doh_close(data);
 #endif
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
-  struct curltime t0 = {0, 0};
+  struct fetchtime t0 = {0, 0};
 
   /* This is a bit ugly. `req->p` is a union and we assume we can
    * free this safely without leaks. */
@@ -123,7 +123,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   if(req->sendbuf_init)
     Curl_bufq_reset(&req->sendbuf);
 
-#ifndef CURL_DISABLE_DOH
+#ifndef FETCH_DISABLE_DOH
   Curl_doh_close(data);
 #endif
   /* Can no longer memset() this struct as we need to keep some state */
@@ -143,7 +143,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->timeofdoc = 0;
   req->location = NULL;
   req->newurl = NULL;
-#ifndef CURL_DISABLE_COOKIES
+#ifndef FETCH_DISABLE_COOKIES
   req->setcookies = 0;
 #endif
   req->header = FALSE;
@@ -175,16 +175,16 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
     Curl_bufq_free(&req->sendbuf);
   Curl_client_cleanup(data);
 
-#ifndef CURL_DISABLE_DOH
+#ifndef FETCH_DISABLE_DOH
   Curl_doh_cleanup(data);
 #endif
 }
 
-static CURLcode xfer_send(struct Curl_easy *data,
+static FETCHcode xfer_send(struct Curl_easy *data,
                           const char *buf, size_t blen,
                           size_t hds_len, size_t *pnwritten)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   bool eos = FALSE;
 
   *pnwritten = 0;
@@ -194,7 +194,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
     /* Allow debug builds to override this logic to force short initial
        sends */
     size_t body_len = blen - hds_len;
-    char *p = getenv("CURL_SMALLREQSEND");
+    char *p = getenv("FETCH_SMALLREQSEND");
     if(p) {
       size_t body_small = (size_t)strtoul(p, NULL, 10);
       if(body_small && body_small < body_len)
@@ -206,7 +206,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
      speed says. The headers do not count to the max speed. */
   if(data->set.max_send_speed) {
     size_t body_bytes = blen - hds_len;
-    if((curl_off_t)body_bytes > data->set.max_send_speed)
+    if((fetch_off_t)body_bytes > data->set.max_send_speed)
       blen = hds_len + (size_t)data->set.max_send_speed;
   }
 
@@ -222,11 +222,11 @@ static CURLcode xfer_send(struct Curl_easy *data,
       data->req.eos_sent = TRUE;
     if(*pnwritten) {
       if(hds_len)
-        Curl_debug(data, CURLINFO_HEADER_OUT, (char *)buf,
-                   CURLMIN(hds_len, *pnwritten));
+        Curl_debug(data, FETCHINFO_HEADER_OUT, (char *)buf,
+                   FETCHMIN(hds_len, *pnwritten));
       if(*pnwritten > hds_len) {
         size_t body_len = *pnwritten - hds_len;
-        Curl_debug(data, CURLINFO_DATA_OUT, (char *)buf + hds_len, body_len);
+        Curl_debug(data, FETCHINFO_DATA_OUT, (char *)buf + hds_len, body_len);
         data->req.writebytecount += body_len;
         Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
       }
@@ -235,21 +235,21 @@ static CURLcode xfer_send(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode req_send_buffer_flush(struct Curl_easy *data)
+static FETCHcode req_send_buffer_flush(struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   const unsigned char *buf;
   size_t blen;
 
   while(Curl_bufq_peek(&data->req.sendbuf, &buf, &blen)) {
-    size_t nwritten, hds_len = CURLMIN(data->req.sendbuf_hds_len, blen);
+    size_t nwritten, hds_len = FETCHMIN(data->req.sendbuf_hds_len, blen);
     result = xfer_send(data, (const char *)buf, blen, hds_len, &nwritten);
     if(result)
       break;
 
     Curl_bufq_skip(&data->req.sendbuf, nwritten);
     if(hds_len) {
-      data->req.sendbuf_hds_len -= CURLMIN(hds_len, nwritten);
+      data->req.sendbuf_hds_len -= FETCHMIN(hds_len, nwritten);
     }
     /* leave if we could not send all. Maybe network blocking or
      * speed limits on transfer */
@@ -259,7 +259,7 @@ static CURLcode req_send_buffer_flush(struct Curl_easy *data)
   return result;
 }
 
-static CURLcode req_set_upload_done(struct Curl_easy *data)
+static FETCHcode req_set_upload_done(struct Curl_easy *data)
 {
   DEBUGASSERT(!data->req.upload_done);
   data->req.upload_done = TRUE;
@@ -289,12 +289,12 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
   return Curl_xfer_send_close(data);
 }
 
-static CURLcode req_flush(struct Curl_easy *data)
+static FETCHcode req_flush(struct Curl_easy *data)
 {
-  CURLcode result;
+  FETCHcode result;
 
   if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
 
   if(!Curl_bufq_is_empty(&data->req.sendbuf)) {
     result = req_send_buffer_flush(data);
@@ -303,7 +303,7 @@ static CURLcode req_flush(struct Curl_easy *data)
     if(!Curl_bufq_is_empty(&data->req.sendbuf)) {
       DEBUGF(infof(data, "Curl_req_flush(len=%zu) -> EAGAIN",
              Curl_bufq_len(&data->req.sendbuf)));
-      return CURLE_AGAIN;
+      return FETCHE_AGAIN;
     }
   }
   else if(Curl_xfer_needs_flush(data)) {
@@ -328,23 +328,23 @@ static CURLcode req_flush(struct Curl_easy *data)
       if(result && data->req.shutdown_err_ignore) {
         infof(data, "Shutdown send direction error: %d. Broken server? "
               "Proceeding as if everything is ok.", result);
-        result = CURLE_OK;
+        result = FETCHE_OK;
         done = TRUE;
       }
 
       if(result)
         return result;
       if(!done)
-        return CURLE_AGAIN;
+        return FETCHE_AGAIN;
     }
     return req_set_upload_done(data);
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static ssize_t add_from_client(void *reader_ctx,
                                unsigned char *buf, size_t buflen,
-                               CURLcode *err)
+                               FETCHcode *err)
 {
   struct Curl_easy *data = reader_ctx;
   size_t nread;
@@ -358,11 +358,11 @@ static ssize_t add_from_client(void *reader_ctx,
   return (ssize_t)nread;
 }
 
-static CURLcode req_send_buffer_add(struct Curl_easy *data,
+static FETCHcode req_send_buffer_add(struct Curl_easy *data,
                                     const char *buf, size_t blen,
                                     size_t hds_len)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   ssize_t n;
   n = Curl_bufq_write(&data->req.sendbuf,
                       (const unsigned char *)buf, blen, &result);
@@ -371,18 +371,18 @@ static CURLcode req_send_buffer_add(struct Curl_easy *data,
   /* We rely on a SOFTLIMIT on sendbuf, so it can take all data in */
   DEBUGASSERT((size_t)n == blen);
   data->req.sendbuf_hds_len += hds_len;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
+FETCHcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
                        unsigned char httpversion)
 {
-  CURLcode result;
+  FETCHcode result;
   const char *buf;
   size_t blen, nwritten;
 
   if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
 
   data->req.httpversion_sent = httpversion;
   buf = Curl_dyn_ptr(req);
@@ -407,7 +407,7 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
 
     return Curl_req_send_more(data);
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 bool Curl_req_sendbuf_empty(struct Curl_easy *data)
@@ -432,9 +432,9 @@ bool Curl_req_done_sending(struct Curl_easy *data)
   return data->req.upload_done && !Curl_req_want_send(data);
 }
 
-CURLcode Curl_req_send_more(struct Curl_easy *data)
+FETCHcode Curl_req_send_more(struct Curl_easy *data)
 {
-  CURLcode result;
+  FETCHcode result;
 
   /* Fill our send buffer if more from client can be read. */
   if(!data->req.upload_aborted &&
@@ -443,18 +443,18 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
      !Curl_bufq_is_full(&data->req.sendbuf)) {
     ssize_t nread = Curl_bufq_sipn(&data->req.sendbuf, 0,
                                    add_from_client, data, &result);
-    if(nread < 0 && result != CURLE_AGAIN)
+    if(nread < 0 && result != FETCHE_AGAIN)
       return result;
   }
 
   result = req_flush(data);
-  if(result == CURLE_AGAIN)
-    result = CURLE_OK;
+  if(result == FETCHE_AGAIN)
+    result = FETCHE_OK;
 
   return result;
 }
 
-CURLcode Curl_req_abort_sending(struct Curl_easy *data)
+FETCHcode Curl_req_abort_sending(struct Curl_easy *data)
 {
   if(!data->req.upload_done) {
     Curl_bufq_reset(&data->req.sendbuf);
@@ -463,10 +463,10 @@ CURLcode Curl_req_abort_sending(struct Curl_easy *data)
     data->req.keepon &= ~KEEP_SENDBITS;
     return req_set_upload_done(data);
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode Curl_req_stop_send_recv(struct Curl_easy *data)
+FETCHcode Curl_req_stop_send_recv(struct Curl_easy *data)
 {
   /* stop receiving and ALL sending as well, including PAUSE and HOLD.
    * We might still be paused on receive client writes though, so

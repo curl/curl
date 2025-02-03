@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SETUP_H
-#define HEADER_CURL_SETUP_H
+#ifndef HEADER_FETCH_SETUP_H
+#define HEADER_FETCH_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,19 +20,19 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#if defined(BUILDING_LIBCURL) && !defined(CURL_NO_OLDIES)
-#define CURL_NO_OLDIES
+#if defined(BUILDING_LIBFETCH) && !defined(FETCH_NO_OLDIES)
+#define FETCH_NO_OLDIES
 #endif
 
-/* Tell "curl/curl.h" not to include "curl/mprintf.h" */
-#define CURL_SKIP_INCLUDE_MPRINTF
+/* Tell "fetch/fetch.h" not to include "fetch/mprintf.h" */
+#define FETCH_SKIP_INCLUDE_MPRINTF
 
 /* Make these warnings visible with an option. */
-#if !defined(CURL_WARN_SIGN_CONVERSION)
+#if !defined(FETCH_WARN_SIGN_CONVERSION)
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
@@ -57,9 +57,9 @@
 #if defined(__APPLE__) && !defined(__clang__) && defined(__GNUC__) && \
   defined(__has_attribute)
 #  if !defined(__has_feature)
-#    define availability curl_pp_attribute_disabled
+#    define availability fetch_pp_attribute_disabled
 #  elif !__has_feature(attribute_availability)
-#    define availability curl_pp_attribute_disabled
+#    define availability fetch_pp_attribute_disabled
 #  endif
 #endif
 
@@ -116,7 +116,7 @@
 #    include <winapifamily.h>
 #    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
        !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#      define CURL_WINDOWS_UWP
+#      define FETCH_WINDOWS_UWP
 #    endif
 #  endif
 #endif
@@ -133,7 +133,7 @@
 
 #ifdef HAVE_CONFIG_H
 
-#include "curl_config.h"
+#include "fetch_config.h"
 
 #else /* HAVE_CONFIG_H */
 
@@ -213,47 +213,47 @@
  */
 
 #ifdef HTTP_ONLY
-#  ifndef CURL_DISABLE_DICT
-#    define CURL_DISABLE_DICT
+#  ifndef FETCH_DISABLE_DICT
+#    define FETCH_DISABLE_DICT
 #  endif
-#  ifndef CURL_DISABLE_FILE
-#    define CURL_DISABLE_FILE
+#  ifndef FETCH_DISABLE_FILE
+#    define FETCH_DISABLE_FILE
 #  endif
-#  ifndef CURL_DISABLE_FTP
-#    define CURL_DISABLE_FTP
+#  ifndef FETCH_DISABLE_FTP
+#    define FETCH_DISABLE_FTP
 #  endif
-#  ifndef CURL_DISABLE_GOPHER
-#    define CURL_DISABLE_GOPHER
+#  ifndef FETCH_DISABLE_GOPHER
+#    define FETCH_DISABLE_GOPHER
 #  endif
-#  ifndef CURL_DISABLE_IMAP
-#    define CURL_DISABLE_IMAP
+#  ifndef FETCH_DISABLE_IMAP
+#    define FETCH_DISABLE_IMAP
 #  endif
-#  ifndef CURL_DISABLE_LDAP
-#    define CURL_DISABLE_LDAP
+#  ifndef FETCH_DISABLE_LDAP
+#    define FETCH_DISABLE_LDAP
 #  endif
-#  ifndef CURL_DISABLE_LDAPS
-#    define CURL_DISABLE_LDAPS
+#  ifndef FETCH_DISABLE_LDAPS
+#    define FETCH_DISABLE_LDAPS
 #  endif
-#  ifndef CURL_DISABLE_MQTT
-#    define CURL_DISABLE_MQTT
+#  ifndef FETCH_DISABLE_MQTT
+#    define FETCH_DISABLE_MQTT
 #  endif
-#  ifndef CURL_DISABLE_POP3
-#    define CURL_DISABLE_POP3
+#  ifndef FETCH_DISABLE_POP3
+#    define FETCH_DISABLE_POP3
 #  endif
-#  ifndef CURL_DISABLE_RTSP
-#    define CURL_DISABLE_RTSP
+#  ifndef FETCH_DISABLE_RTSP
+#    define FETCH_DISABLE_RTSP
 #  endif
-#  ifndef CURL_DISABLE_SMB
-#    define CURL_DISABLE_SMB
+#  ifndef FETCH_DISABLE_SMB
+#    define FETCH_DISABLE_SMB
 #  endif
-#  ifndef CURL_DISABLE_SMTP
-#    define CURL_DISABLE_SMTP
+#  ifndef FETCH_DISABLE_SMTP
+#    define FETCH_DISABLE_SMTP
 #  endif
-#  ifndef CURL_DISABLE_TELNET
-#    define CURL_DISABLE_TELNET
+#  ifndef FETCH_DISABLE_TELNET
+#    define FETCH_DISABLE_TELNET
 #  endif
-#  ifndef CURL_DISABLE_TFTP
-#    define CURL_DISABLE_TFTP
+#  ifndef FETCH_DISABLE_TFTP
+#    define FETCH_DISABLE_TFTP
 #  endif
 #endif
 
@@ -261,25 +261,25 @@
  * When http is disabled rtsp is not supported.
  */
 
-#if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_RTSP)
-#  define CURL_DISABLE_RTSP
+#if defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_RTSP)
+#  define FETCH_DISABLE_RTSP
 #endif
 
 /*
  * When HTTP is disabled, disable HTTP-only features
  */
 
-#if defined(CURL_DISABLE_HTTP)
-#  define CURL_DISABLE_ALTSVC 1
-#  define CURL_DISABLE_COOKIES 1
-#  define CURL_DISABLE_BASIC_AUTH 1
-#  define CURL_DISABLE_BEARER_AUTH 1
-#  define CURL_DISABLE_AWS 1
-#  define CURL_DISABLE_DOH 1
-#  define CURL_DISABLE_FORM_API 1
-#  define CURL_DISABLE_HEADERS_API 1
-#  define CURL_DISABLE_HSTS 1
-#  define CURL_DISABLE_HTTP_AUTH 1
+#if defined(FETCH_DISABLE_HTTP)
+#  define FETCH_DISABLE_ALTSVC 1
+#  define FETCH_DISABLE_COOKIES 1
+#  define FETCH_DISABLE_BASIC_AUTH 1
+#  define FETCH_DISABLE_BEARER_AUTH 1
+#  define FETCH_DISABLE_AWS 1
+#  define FETCH_DISABLE_DOH 1
+#  define FETCH_DISABLE_FORM_API 1
+#  define FETCH_DISABLE_HEADERS_API 1
+#  define FETCH_DISABLE_HSTS 1
+#  define FETCH_DISABLE_HTTP_AUTH 1
 #endif
 
 /* ================================================================ */
@@ -311,45 +311,45 @@
 #  include "setup-win32.h"
 #endif
 
-#include <curl/system.h>
+#include <fetch/system.h>
 
 /* Helper macro to expand and concatenate two macros.
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
  */
-#define CURL_CONC_MACROS_(A,B) A ## B
-#define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
+#define FETCH_CONC_MACROS_(A,B) A ## B
+#define FETCH_CONC_MACROS(A,B) FETCH_CONC_MACROS_(A,B)
 
-/* curl uses its own printf() function internally. It understands the GNU
+/* fetch uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that is matches the GNU format attribute we
  * use with the MinGW compiler, allowing it to verify them at compile-time.
  */
 #ifdef  __MINGW32__
-#  undef CURL_FORMAT_CURL_OFF_T
-#  undef CURL_FORMAT_CURL_OFF_TU
-#  define CURL_FORMAT_CURL_OFF_T   "lld"
-#  define CURL_FORMAT_CURL_OFF_TU  "llu"
+#  undef FETCH_FORMAT_FETCH_OFF_T
+#  undef FETCH_FORMAT_FETCH_OFF_TU
+#  define FETCH_FORMAT_FETCH_OFF_T   "lld"
+#  define FETCH_FORMAT_FETCH_OFF_TU  "llu"
 #endif
 
-/* based on logic in "curl/mprintf.h" */
+/* based on logic in "fetch/mprintf.h" */
 
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
   defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(CURL_NO_FMT_CHECKS)
+  !defined(FETCH_NO_FMT_CHECKS)
 #if defined(__MINGW32__) && !defined(__clang__)
-#define CURL_PRINTF(fmt, arg) \
+#define FETCH_PRINTF(fmt, arg) \
   __attribute__((format(gnu_printf, fmt, arg)))
 #else
-#define CURL_PRINTF(fmt, arg) \
+#define FETCH_PRINTF(fmt, arg) \
   __attribute__((format(__printf__, fmt, arg)))
 #endif
 #else
-#define CURL_PRINTF(fmt, arg)
+#define FETCH_PRINTF(fmt, arg)
 #endif
 
-/* Override default printf mask check rules in "curl/mprintf.h" */
-#define CURL_TEMP_PRINTF CURL_PRINTF
+/* Override default printf mask check rules in "fetch/mprintf.h" */
+#define FETCH_TEMP_PRINTF FETCH_PRINTF
 
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
@@ -373,7 +373,7 @@
 #define USE_RESOLVE_ON_IPS 1
 #  if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
      defined(USE_IPV6)
-#    define CURL_MACOS_CALL_COPYPROXIES 1
+#    define FETCH_MACOS_CALL_COPYPROXIES 1
 #  endif
 #endif
 
@@ -392,7 +392,7 @@
 #  ifdef __amigaos4__
 #    define __USE_INLINE__
      /* use our own resolver which uses runtime feature detection */
-#    define CURLRES_AMIGA
+#    define FETCHRES_AMIGA
      /* getaddrinfo() currently crashes bsdsocket.library, so disable */
 #    undef HAVE_GETADDRINFO
 #    if !(defined(__NEWLIB__) || \
@@ -409,7 +409,7 @@
 #  if defined(HAVE_PROTO_BSDSOCKET_H) && \
     (!defined(__amigaos4__) || defined(USE_AMISSL))
      /* use bsdsocket.library directly, instead of libc networking functions */
-#    define _SYS_MBUF_H /* m_len define clashes with curl */
+#    define _SYS_MBUF_H /* m_len define clashes with fetch */
 #    include <proto/bsdsocket.h>
 #    ifdef __amigaos4__
        int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
@@ -443,7 +443,7 @@
 #endif
 
 #ifndef STDC_HEADERS /* no standard C headers! */
-#include <curl/stdcheaders.h>
+#include <fetch/stdcheaders.h>
 #endif
 
 #ifdef _WIN32
@@ -465,14 +465,14 @@
 #  undef  fstat
 #  define fstat(fdes,stp)            _fstati64(fdes, stp)
 #  undef  stat
-#  define stat(fname,stp)            curlx_win32_stat(fname, stp)
+#  define stat(fname,stp)            fetchx_win32_stat(fname, stp)
 #  define struct_stat                struct _stati64
 #  define LSEEK_ERROR                (__int64)-1
-#  define open                       curlx_win32_open
-#  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-   int curlx_win32_open(const char *filename, int oflag, ...);
-   int curlx_win32_stat(const char *path, struct_stat *buffer);
-   FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#  define open                       fetchx_win32_open
+#  define fopen(fname,mode)          fetchx_win32_fopen(fname, mode)
+   int fetchx_win32_open(const char *filename, int oflag, ...);
+   int fetchx_win32_stat(const char *path, struct_stat *buffer);
+   FILE *fetchx_win32_fopen(const char *filename, const char *mode);
 #endif
 
 #ifdef __DJGPP__
@@ -495,13 +495,13 @@
 #    undef  lseek
 #    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #    define fstat(fdes,stp)            _fstat(fdes, stp)
-#    define stat(fname,stp)            curlx_win32_stat(fname, stp)
+#    define stat(fname,stp)            fetchx_win32_stat(fname, stp)
 #    define struct_stat                struct _stat
-#    define open                       curlx_win32_open
-#    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-     int curlx_win32_stat(const char *path, struct_stat *buffer);
-     int curlx_win32_open(const char *filename, int oflag, ...);
-     FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#    define open                       fetchx_win32_open
+#    define fopen(fname,mode)          fetchx_win32_fopen(fname, mode)
+     int fetchx_win32_stat(const char *path, struct_stat *buffer);
+     int fetchx_win32_open(const char *filename, int oflag, ...);
+     FILE *fetchx_win32_fopen(const char *filename, const char *mode);
 #  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
@@ -519,17 +519,17 @@
 #define SIZEOF_TIME_T 4
 #endif
 
-#ifndef SIZEOF_CURL_SOCKET_T
+#ifndef SIZEOF_FETCH_SOCKET_T
 /* configure and cmake check and set the define */
 #  ifdef _WIN64
-#    define SIZEOF_CURL_SOCKET_T 8
+#    define SIZEOF_FETCH_SOCKET_T 8
 #  else
 /* default guess */
-#    define SIZEOF_CURL_SOCKET_T 4
+#    define SIZEOF_FETCH_SOCKET_T 4
 #  endif
 #endif
 
-#if SIZEOF_CURL_SOCKET_T < 8
+#if SIZEOF_FETCH_SOCKET_T < 8
 #  define FMT_SOCKET_T "d"
 #elif defined(__MINGW32__)
 #  define FMT_SOCKET_T "zd"
@@ -564,30 +564,30 @@
 #  endif
 #endif
 
-#if (SIZEOF_CURL_OFF_T < 8)
-#error "too small curl_off_t"
+#if (SIZEOF_FETCH_OFF_T < 8)
+#error "too small fetch_off_t"
 #else
-   /* assume SIZEOF_CURL_OFF_T == 8 */
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+   /* assume SIZEOF_FETCH_OFF_T == 8 */
+#  define FETCH_OFF_T_MAX FETCH_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
-#define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
+#define FETCH_OFF_T_MIN (-FETCH_OFF_T_MAX - FETCH_OFF_T_C(1))
 
-#if (SIZEOF_CURL_OFF_T != 8)
-#  error "curl_off_t must be exactly 64 bits"
+#if (SIZEOF_FETCH_OFF_T != 8)
+#  error "fetch_off_t must be exactly 64 bits"
 #else
-  typedef unsigned CURL_TYPEOF_CURL_OFF_T curl_uint64_t;
-  typedef CURL_TYPEOF_CURL_OFF_T  curl_int64_t;
-#  ifndef CURL_SUFFIX_CURL_OFF_TU
-#    error "CURL_SUFFIX_CURL_OFF_TU must be defined"
+  typedef unsigned FETCH_TYPEOF_FETCH_OFF_T fetch_uint64_t;
+  typedef FETCH_TYPEOF_FETCH_OFF_T  fetch_int64_t;
+#  ifndef FETCH_SUFFIX_FETCH_OFF_TU
+#    error "FETCH_SUFFIX_FETCH_OFF_TU must be defined"
 #  endif
-#  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
-#  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-#  define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
-#  define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
+#  define FETCH_UINT64_SUFFIX  FETCH_SUFFIX_FETCH_OFF_TU
+#  define FETCH_UINT64_C(val)  FETCH_CONC_MACROS(val,FETCH_UINT64_SUFFIX)
+#  define FMT_PRId64  FETCH_FORMAT_FETCH_OFF_T
+#  define FMT_PRIu64  FETCH_FORMAT_FETCH_OFF_TU
 #endif
 
-#define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
-#define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
+#define FMT_OFF_T FETCH_FORMAT_FETCH_OFF_T
+#define FMT_OFF_TU FETCH_FORMAT_FETCH_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
 #  ifdef HAVE_TIME_T_UNSIGNED
@@ -676,7 +676,7 @@
 
 /* ---------------------------------------------------------------- */
 /*             resolver specialty compile-time defines              */
-/*         CURLRES_* defines to use in the host*.c sources          */
+/*         FETCHRES_* defines to use in the host*.c sources          */
 /* ---------------------------------------------------------------- */
 
 /*
@@ -690,29 +690,29 @@
 #endif
 
 /*
- * Mutually exclusive CURLRES_* definitions.
+ * Mutually exclusive FETCHRES_* definitions.
  */
 
 #if defined(USE_IPV6) && defined(HAVE_GETADDRINFO)
-#  define CURLRES_IPV6
+#  define FETCHRES_IPV6
 #elif defined(USE_IPV6) && (defined(_WIN32) || defined(__CYGWIN__))
 /* assume on Windows that IPv6 without getaddrinfo is a broken build */
 #  error "Unexpected build: IPv6 is enabled but getaddrinfo was not found."
 #else
-#  define CURLRES_IPV4
+#  define FETCHRES_IPV4
 #endif
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-#  define CURLRES_ASYNCH
-#  define CURLRES_THREADED
+#  define FETCHRES_ASYNCH
+#  define FETCHRES_THREADED
 #elif defined(USE_ARES)
-#  define CURLRES_ASYNCH
-#  define CURLRES_ARES
+#  define FETCHRES_ASYNCH
+#  define FETCHRES_ARES
 /* now undef the stock libc functions just to avoid them being used */
 #  undef HAVE_GETADDRINFO
 #  undef HAVE_FREEADDRINFO
 #else
-#  define CURLRES_SYNCH
+#  define FETCHRES_SYNCH
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -750,26 +750,26 @@
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */
-#if !defined(CURL_DISABLE_NEGOTIATE_AUTH) && \
+#if !defined(FETCH_DISABLE_NEGOTIATE_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_SPNEGO
 #endif
 
 /* Single point where USE_KERBEROS5 definition might be defined */
-#if !defined(CURL_DISABLE_KERBEROS_AUTH) && \
+#if !defined(FETCH_DISABLE_KERBEROS_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_KERBEROS5
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#if !defined(CURL_DISABLE_NTLM)
+#if !defined(FETCH_DISABLE_NTLM)
 #  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                   \
   defined(USE_GNUTLS) || defined(USE_SECTRANSP) ||                      \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
   (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
-#    define USE_CURL_NTLM_CORE
+#    define USE_FETCH_NTLM_CORE
 #  endif
-#  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
+#  if defined(USE_FETCH_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
 #    define USE_NTLM
 #  endif
 #endif
@@ -802,14 +802,14 @@
 
 /* noreturn attribute */
 
-#if !defined(CURL_NORETURN)
+#if !defined(FETCH_NORETURN)
 #if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__) || \
   defined(__IAR_SYSTEMS_ICC__)
-#  define CURL_NORETURN  __attribute__((__noreturn__))
+#  define FETCH_NORETURN  __attribute__((__noreturn__))
 #elif defined(_MSC_VER)
-#  define CURL_NORETURN  __declspec(noreturn)
+#  define FETCH_NORETURN  __declspec(noreturn)
 #else
-#  define CURL_NORETURN
+#  define FETCH_NORETURN
 #endif
 #endif
 
@@ -828,8 +828,8 @@
  * Include macros and defines that should only be processed once.
  */
 
-#ifndef HEADER_CURL_SETUP_ONCE_H
-#include "curl_setup_once.h"
+#ifndef HEADER_FETCH_SETUP_ONCE_H
+#include "fetch_setup_once.h"
 #endif
 
 /*
@@ -879,13 +879,13 @@
 /* Since O_BINARY is used in bitmasks, setting it to zero makes it usable in
    source code but yet it does not ruin anything */
 #ifdef O_BINARY
-#define CURL_O_BINARY O_BINARY
+#define FETCH_O_BINARY O_BINARY
 #else
-#define CURL_O_BINARY 0
+#define FETCH_O_BINARY 0
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
-Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
+Therefore we specify it explicitly. https://github.com/fetch/fetch/pull/258
 */
 #if defined(_WIN32) || defined(MSDOS)
 #define FOPEN_READTEXT "rt"
@@ -908,23 +908,23 @@ endings either CRLF or LF so 't' is appropriate.
 #endif
 
 /* for systems that do not detect this in configure */
-#ifndef CURL_SA_FAMILY_T
+#ifndef FETCH_SA_FAMILY_T
 #  if defined(HAVE_SA_FAMILY_T)
-#    define CURL_SA_FAMILY_T sa_family_t
+#    define FETCH_SA_FAMILY_T sa_family_t
 #  elif defined(HAVE_ADDRESS_FAMILY)
-#    define CURL_SA_FAMILY_T ADDRESS_FAMILY
+#    define FETCH_SA_FAMILY_T ADDRESS_FAMILY
 #  elif defined(__AMIGA__)
-#    define CURL_SA_FAMILY_T unsigned char
+#    define FETCH_SA_FAMILY_T unsigned char
 #  else
 /* use a sensible default */
-#    define CURL_SA_FAMILY_T unsigned short
+#    define FETCH_SA_FAMILY_T unsigned short
 #  endif
 #endif
 
 /* Some convenience macros to get the larger/smaller value out of two given.
-   We prefix with CURL to prevent name collisions. */
-#define CURLMAX(x,y) ((x)>(y)?(x):(y))
-#define CURLMIN(x,y) ((x)<(y)?(x):(y))
+   We prefix with FETCH to prevent name collisions. */
+#define FETCHMAX(x,y) ((x)>(y)?(x):(y))
+#define FETCHMIN(x,y) ((x)<(y)?(x):(y))
 
 /* A convenience macro to provide both the string literal and the length of
    the string literal in one go, useful for functions that take "string,len"
@@ -953,14 +953,14 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
     (defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)) || \
     defined(USE_QUICHE) || defined(USE_MSH3)
 
-#ifdef CURL_WITH_MULTI_SSL
+#ifdef FETCH_WITH_MULTI_SSL
 #error "MultiSSL combined with QUIC is not supported"
 #endif
 
 #define USE_HTTP3
 #endif
 
-/* Certain Windows implementations are not aligned with what curl expects,
+/* Certain Windows implementations are not aligned with what fetch expects,
    so always use the local one on this platform. E.g. the mingw-w64
    implementation can return wrong results for non-ASCII inputs. */
 #if defined(HAVE_BASENAME) && defined(_WIN32)
@@ -974,7 +974,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #    define UNIX_PATH_MAX 108
      /* !checksrc! disable TYPEDEFSTRUCT 1 */
      typedef struct sockaddr_un {
-       CURL_SA_FAMILY_T sun_family;
+       FETCH_SA_FAMILY_T sun_family;
        char sun_path[UNIX_PATH_MAX];
      } SOCKADDR_UN, *PSOCKADDR_UN;
 #    define WIN32_SOCKADDR_UN
@@ -987,26 +987,26 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define OPENSSL_SUPPRESS_DEPRECATED
 #endif
 
-#if defined(CURL_INLINE)
-/* 'CURL_INLINE' defined, use as-is */
+#if defined(FETCH_INLINE)
+/* 'FETCH_INLINE' defined, use as-is */
 #elif defined(inline)
-#  define CURL_INLINE inline /* 'inline' defined, assumed correct */
+#  define FETCH_INLINE inline /* 'inline' defined, assumed correct */
 #elif defined(__cplusplus)
 /* The code is compiled with C++ compiler.
    C++ always supports 'inline'. */
-#  define CURL_INLINE inline /* 'inline' keyword supported */
+#  define FETCH_INLINE inline /* 'inline' keyword supported */
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901
 /* C99 (and later) supports 'inline' keyword */
-#  define CURL_INLINE inline /* 'inline' keyword supported */
+#  define FETCH_INLINE inline /* 'inline' keyword supported */
 #elif defined(__GNUC__) && __GNUC__ >= 3
 /* GCC supports '__inline__' as an extension */
-#  define CURL_INLINE __inline__
+#  define FETCH_INLINE __inline__
 #elif defined(_MSC_VER)
-#  define CURL_INLINE __inline
+#  define FETCH_INLINE __inline
 #else
 /* Probably 'inline' is not supported by compiler.
    Define to the empty string to be on the safe side. */
-#  define CURL_INLINE /* empty */
+#  define FETCH_INLINE /* empty */
 #endif
 
-#endif /* HEADER_CURL_SETUP_H */
+#endif /* HEADER_FETCH_SETUP_H */

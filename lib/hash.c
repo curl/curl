@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,17 +18,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "hash.h"
 #include "llist.h"
-#include "curl_memory.h"
+#include "fetch_memory.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -389,17 +389,17 @@ void Curl_hash_offt_init(struct Curl_hash *h,
   Curl_hash_init(h, slots, Curl_hash_str, Curl_str_key_compare, dtor);
 }
 
-void *Curl_hash_offt_set(struct Curl_hash *h, curl_off_t id, void *elem)
+void *Curl_hash_offt_set(struct Curl_hash *h, fetch_off_t id, void *elem)
 {
   return Curl_hash_add(h, &id, sizeof(id), elem);
 }
 
-int Curl_hash_offt_remove(struct Curl_hash *h, curl_off_t id)
+int Curl_hash_offt_remove(struct Curl_hash *h, fetch_off_t id)
 {
   return Curl_hash_delete(h, &id, sizeof(id));
 }
 
-void *Curl_hash_offt_get(struct Curl_hash *h, curl_off_t id)
+void *Curl_hash_offt_get(struct Curl_hash *h, fetch_off_t id)
 {
   return Curl_hash_pick(h, &id, sizeof(id));
 }

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_BUFQ_H
-#define HEADER_CURL_BUFQ_H
+#ifndef HEADER_FETCH_BUFQ_H
+#define HEADER_FETCH_BUFQ_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /**
  * A chunk of bytes for reading and writing.
@@ -77,7 +77,7 @@ void Curl_bufcp_free(struct bufc_pool *pool);
  * e.g. when the head chunk is partially read. `len` may also become
  * larger than the max when option `BUFQ_OPT_SOFT_LIMIT` is used.
  *
- * By default, writing to a full bufq will return (-1, CURLE_AGAIN). Same
+ * By default, writing to a full bufq will return (-1, FETCHE_AGAIN). Same
  * as reading from an empty bufq.
  * With `BUFQ_OPT_SOFT_LIMIT` set, a bufq will allow writing becond this
  * limit and use more than `max_chunks`. However it will report that it
@@ -105,7 +105,7 @@ struct bufq {
 /**
  * Default behaviour: chunk limit is "hard", meaning attempts to write
  * more bytes than can be hold in `max_chunks` is refused and will return
- * -1, CURLE_AGAIN. */
+ * -1, FETCHE_AGAIN. */
 #define BUFQ_OPT_NONE        (0)
 /**
  * Make `max_chunks` a "soft" limit. A bufq will report that it is "full"
@@ -164,32 +164,32 @@ bool Curl_bufq_is_full(const struct bufq *q);
  * Write buf to the end of the buffer queue. The buf is copied
  * and the amount of copied bytes is returned.
  * A return code of -1 indicates an error, setting `err` to the
- * cause. An err of CURLE_AGAIN is returned if the buffer queue is full.
+ * cause. An err of FETCHE_AGAIN is returned if the buffer queue is full.
  */
 ssize_t Curl_bufq_write(struct bufq *q,
                         const unsigned char *buf, size_t len,
-                        CURLcode *err);
+                        FETCHcode *err);
 
-CURLcode Curl_bufq_cwrite(struct bufq *q,
+FETCHcode Curl_bufq_cwrite(struct bufq *q,
                          const char *buf, size_t len,
                          size_t *pnwritten);
 
 /**
  * Remove `len` bytes from the end of the buffer queue again.
- * Returns CURLE_AGAIN if less than `len` bytes were in the queue.
+ * Returns FETCHE_AGAIN if less than `len` bytes were in the queue.
  */
-CURLcode Curl_bufq_unwrite(struct bufq *q, size_t len);
+FETCHcode Curl_bufq_unwrite(struct bufq *q, size_t len);
 
 /**
  * Read buf from the start of the buffer queue. The buf is copied
  * and the amount of copied bytes is returned.
  * A return code of -1 indicates an error, setting `err` to the
- * cause. An err of CURLE_AGAIN is returned if the buffer queue is empty.
+ * cause. An err of FETCHE_AGAIN is returned if the buffer queue is empty.
  */
 ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
-                        CURLcode *err);
+                        FETCHcode *err);
 
-CURLcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
+FETCHcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
                          size_t *pnread);
 
 /**
@@ -216,10 +216,10 @@ void Curl_bufq_skip(struct bufq *q, size_t amount);
 
 typedef ssize_t Curl_bufq_writer(void *writer_ctx,
                                  const unsigned char *buf, size_t len,
-                                 CURLcode *err);
+                                 FETCHcode *err);
 /**
  * Passes the chunks in the buffer queue to the writer and returns
- * the amount of buf written. A writer may return -1 and CURLE_AGAIN
+ * the amount of buf written. A writer may return -1 and FETCHE_AGAIN
  * to indicate blocking at which point the queue will stop and return
  * the amount of buf passed so far.
  * -1 is returned on any other errors reported by the writer.
@@ -227,23 +227,23 @@ typedef ssize_t Curl_bufq_writer(void *writer_ctx,
  * the buffer queue will have different length than before.
  */
 ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
-                       void *writer_ctx, CURLcode *err);
+                       void *writer_ctx, FETCHcode *err);
 
 typedef ssize_t Curl_bufq_reader(void *reader_ctx,
                                  unsigned char *buf, size_t len,
-                                 CURLcode *err);
+                                 FETCHcode *err);
 
 /**
  * Read date and append it to the end of the buffer queue until the
  * reader returns blocking or the queue is full. A reader returns
- * -1 and CURLE_AGAIN to indicate blocking.
+ * -1 and FETCHE_AGAIN to indicate blocking.
  * Returns the total amount of buf read (may be 0) or -1 on other
  * reader errors.
  * Note that in case of a -1 chunks may have been read and
  * the buffer queue will have different length than before.
  */
 ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
-                        void *reader_ctx, CURLcode *err);
+                        void *reader_ctx, FETCHcode *err);
 
 /**
  * Read *once* up to `max_len` bytes and append it to the buffer.
@@ -253,7 +253,7 @@ ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
  */
 ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
                        Curl_bufq_reader *reader, void *reader_ctx,
-                       CURLcode *err);
+                       FETCHcode *err);
 
 /**
  * Write buf to the end of the buffer queue.
@@ -265,6 +265,6 @@ ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
 ssize_t Curl_bufq_write_pass(struct bufq *q,
                              const unsigned char *buf, size_t len,
                              Curl_bufq_writer *writer, void *writer_ctx,
-                             CURLcode *err);
+                             FETCHcode *err);
 
-#endif /* HEADER_CURL_BUFQ_H */
+#endif /* HEADER_FETCH_BUFQ_H */

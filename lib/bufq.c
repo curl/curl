@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "bufq.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 static bool chunk_is_empty(const struct buf_chunk *chunk)
@@ -58,7 +58,7 @@ static size_t chunk_append(struct buf_chunk *chunk,
   size_t n = chunk->dlen - chunk->w_offset;
   DEBUGASSERT(chunk->dlen >= chunk->w_offset);
   if(n) {
-    n = CURLMIN(n, len);
+    n = FETCHMIN(n, len);
     memcpy(p, buf, n);
     chunk->w_offset += n;
   }
@@ -105,7 +105,7 @@ static size_t chunk_unwrite(struct buf_chunk *chunk, size_t len)
 
 static ssize_t chunk_slurpn(struct buf_chunk *chunk, size_t max_len,
                             Curl_bufq_reader *reader,
-                            void *reader_ctx, CURLcode *err)
+                            void *reader_ctx, FETCHcode *err)
 {
   unsigned char *p = &chunk->x.data[chunk->w_offset];
   size_t n = chunk->dlen - chunk->w_offset; /* free amount */
@@ -113,7 +113,7 @@ static ssize_t chunk_slurpn(struct buf_chunk *chunk, size_t max_len,
 
   DEBUGASSERT(chunk->dlen >= chunk->w_offset);
   if(!n) {
-    *err = CURLE_AGAIN;
+    *err = FETCHE_AGAIN;
     return -1;
   }
   if(max_len && n > max_len)
@@ -148,7 +148,7 @@ static size_t chunk_skip(struct buf_chunk *chunk, size_t amount)
   size_t n = chunk->w_offset - chunk->r_offset;
   DEBUGASSERT(chunk->w_offset >= chunk->r_offset);
   if(n) {
-    n = CURLMIN(n, amount);
+    n = FETCHMIN(n, amount);
     chunk->r_offset += n;
     if(chunk->r_offset == chunk->w_offset)
       chunk->r_offset = chunk->w_offset = 0;
@@ -178,7 +178,7 @@ void Curl_bufcp_init(struct bufc_pool *pool,
   pool->spare_max = spare_max;
 }
 
-static CURLcode bufcp_take(struct bufc_pool *pool,
+static FETCHcode bufcp_take(struct bufc_pool *pool,
                            struct buf_chunk **pchunk)
 {
   struct buf_chunk *chunk = NULL;
@@ -189,17 +189,17 @@ static CURLcode bufcp_take(struct bufc_pool *pool,
     --pool->spare_count;
     chunk_reset(chunk);
     *pchunk = chunk;
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
   chunk = calloc(1, sizeof(*chunk) + pool->chunk_size);
   if(!chunk) {
     *pchunk = NULL;
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
   chunk->dlen = pool->chunk_size;
   *pchunk = chunk;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void bufcp_put(struct bufc_pool *pool,
@@ -423,7 +423,7 @@ static struct buf_chunk *get_non_full_tail(struct bufq *q)
 
 ssize_t Curl_bufq_write(struct bufq *q,
                         const unsigned char *buf, size_t len,
-                        CURLcode *err)
+                        FETCHcode *err)
 {
   struct buf_chunk *tail;
   ssize_t nwritten = 0;
@@ -434,7 +434,7 @@ ssize_t Curl_bufq_write(struct bufq *q,
     tail = get_non_full_tail(q);
     if(!tail) {
       if((q->chunk_count < q->max_chunks) || (q->opts & BUFQ_OPT_SOFT_LIMIT)) {
-        *err = CURLE_OUT_OF_MEMORY;
+        *err = FETCHE_OUT_OF_MEMORY;
         return -1;
       }
       break;
@@ -447,40 +447,40 @@ ssize_t Curl_bufq_write(struct bufq *q,
     len -= n;
   }
   if(nwritten == 0 && len) {
-    *err = CURLE_AGAIN;
+    *err = FETCHE_AGAIN;
     return -1;
   }
-  *err = CURLE_OK;
+  *err = FETCHE_OK;
   return nwritten;
 }
 
-CURLcode Curl_bufq_cwrite(struct bufq *q,
+FETCHcode Curl_bufq_cwrite(struct bufq *q,
                           const char *buf, size_t len,
                           size_t *pnwritten)
 {
   ssize_t n;
-  CURLcode result;
+  FETCHcode result;
   n = Curl_bufq_write(q, (const unsigned char *)buf, len, &result);
   *pnwritten = (n < 0) ? 0 : (size_t)n;
   return result;
 }
 
-CURLcode Curl_bufq_unwrite(struct bufq *q, size_t len)
+FETCHcode Curl_bufq_unwrite(struct bufq *q, size_t len)
 {
   while(len && q->tail) {
     len -= chunk_unwrite(q->tail, len);
     prune_tail(q);
   }
-  return len ? CURLE_AGAIN : CURLE_OK;
+  return len ? FETCHE_AGAIN : FETCHE_OK;
 }
 
 ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
-                       CURLcode *err)
+                       FETCHcode *err)
 {
   ssize_t nread = 0;
   size_t n;
 
-  *err = CURLE_OK;
+  *err = FETCHE_OK;
   while(len && q->head) {
     n = chunk_read(q->head, buf, len);
     if(n) {
@@ -491,17 +491,17 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
     prune_head(q);
   }
   if(nread == 0) {
-    *err = CURLE_AGAIN;
+    *err = FETCHE_AGAIN;
     return -1;
   }
   return nread;
 }
 
-CURLcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
+FETCHcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
                          size_t *pnread)
 {
   ssize_t n;
-  CURLcode result;
+  FETCHcode result;
   n = Curl_bufq_read(q, (unsigned char *)buf, len, &result);
   *pnread = (n < 0) ? 0 : (size_t)n;
   return result;
@@ -557,7 +557,7 @@ void Curl_bufq_skip(struct bufq *q, size_t amount)
 }
 
 ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
-                       void *writer_ctx, CURLcode *err)
+                       void *writer_ctx, FETCHcode *err)
 {
   const unsigned char *buf;
   size_t blen;
@@ -568,7 +568,7 @@ ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
 
     chunk_written = writer(writer_ctx, buf, blen, err);
     if(chunk_written < 0) {
-      if(!nwritten || *err != CURLE_AGAIN) {
+      if(!nwritten || *err != FETCHE_AGAIN) {
         /* blocked on first write or real error, fail */
         nwritten = -1;
       }
@@ -577,7 +577,7 @@ ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
     if(!chunk_written) {
       if(!nwritten) {
         /* treat as blocked */
-        *err = CURLE_AGAIN;
+        *err = FETCHE_AGAIN;
         nwritten = -1;
       }
       break;
@@ -591,17 +591,17 @@ ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
 ssize_t Curl_bufq_write_pass(struct bufq *q,
                              const unsigned char *buf, size_t len,
                              Curl_bufq_writer *writer, void *writer_ctx,
-                             CURLcode *err)
+                             FETCHcode *err)
 {
   ssize_t nwritten = 0, n;
 
-  *err = CURLE_OK;
+  *err = FETCHE_OK;
   while(len) {
     if(Curl_bufq_is_full(q)) {
       /* try to make room in case we are full */
       n = Curl_bufq_pass(q, writer, writer_ctx, err);
       if(n < 0) {
-        if(*err != CURLE_AGAIN) {
+        if(*err != FETCHE_AGAIN) {
           /* real error, fail */
           return -1;
         }
@@ -613,7 +613,7 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
     /* Add whatever is remaining now to bufq */
     n = Curl_bufq_write(q, buf, len, err);
     if(n < 0) {
-      if(*err != CURLE_AGAIN) {
+      if(*err != FETCHE_AGAIN) {
         /* real error, fail */
         return -1;
       }
@@ -632,29 +632,29 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
   }
 
   if(!nwritten && len) {
-    *err = CURLE_AGAIN;
+    *err = FETCHE_AGAIN;
     return -1;
   }
-  *err = CURLE_OK;
+  *err = FETCHE_OK;
   return nwritten;
 }
 
 ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
                        Curl_bufq_reader *reader, void *reader_ctx,
-                       CURLcode *err)
+                       FETCHcode *err)
 {
   struct buf_chunk *tail = NULL;
   ssize_t nread;
 
-  *err = CURLE_AGAIN;
+  *err = FETCHE_AGAIN;
   tail = get_non_full_tail(q);
   if(!tail) {
     if(q->chunk_count < q->max_chunks) {
-      *err = CURLE_OUT_OF_MEMORY;
+      *err = FETCHE_OUT_OF_MEMORY;
       return -1;
     }
     /* full, blocked */
-    *err = CURLE_AGAIN;
+    *err = FETCHE_AGAIN;
     return -1;
   }
 
@@ -664,7 +664,7 @@ ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
   }
   else if(nread == 0) {
     /* eof */
-    *err = CURLE_OK;
+    *err = FETCHE_OK;
   }
   return nread;
 }
@@ -680,26 +680,26 @@ ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
  */
 static ssize_t bufq_slurpn(struct bufq *q, size_t max_len,
                            Curl_bufq_reader *reader, void *reader_ctx,
-                           CURLcode *err)
+                           FETCHcode *err)
 {
   ssize_t nread = 0, n;
 
-  *err = CURLE_AGAIN;
+  *err = FETCHE_AGAIN;
   while(1) {
 
     n = Curl_bufq_sipn(q, max_len, reader, reader_ctx, err);
     if(n < 0) {
-      if(!nread || *err != CURLE_AGAIN) {
+      if(!nread || *err != FETCHE_AGAIN) {
         /* blocked on first read or real error, fail */
         nread = -1;
       }
       else
-        *err = CURLE_OK;
+        *err = FETCHE_OK;
       break;
     }
     else if(n == 0) {
       /* eof */
-      *err = CURLE_OK;
+      *err = FETCHE_OK;
       break;
     }
     nread += (size_t)n;
@@ -717,7 +717,7 @@ static ssize_t bufq_slurpn(struct bufq *q, size_t max_len,
 }
 
 ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
-                        void *reader_ctx, CURLcode *err)
+                        void *reader_ctx, FETCHcode *err)
 {
   return bufq_slurpn(q, 0, reader, reader_ctx, err);
 }

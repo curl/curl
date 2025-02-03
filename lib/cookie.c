@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -69,9 +69,9 @@ Example set of cookies:
 ****/
 
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
 
 #include "urldata.h"
 #include "cookie.h"
@@ -82,8 +82,8 @@ Example set of cookies:
 #include "share.h"
 #include "strtoofft.h"
 #include "strcase.h"
-#include "curl_get_line.h"
-#include "curl_memrchr.h"
+#include "fetch_get_line.h"
+#include "fetch_memrchr.h"
 #include "parsedate.h"
 #include "rename.h"
 #include "fopen.h"
@@ -91,8 +91,8 @@ Example set of cookies:
 #include "llist.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 static void strstore(char **str, const char *newstr, size_t len);
@@ -332,15 +332,15 @@ static char *sanitize_cookie_path(const char *cookie_path)
 }
 
 /*
- * Load cookies from all given cookie files (CURLOPT_COOKIEFILE).
+ * Load cookies from all given cookie files (FETCHOPT_COOKIEFILE).
  *
  * NOTE: OOM or cookie parsing failures are ignored.
  */
 void Curl_cookie_loadfiles(struct Curl_easy *data)
 {
-  struct curl_slist *list = data->state.cookielist;
+  struct fetch_slist *list = data->state.cookielist;
   if(list) {
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+    Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
     while(list) {
       struct CookieInfo *ci =
         Curl_cookie_init(data, list->data, data->cookies,
@@ -355,7 +355,7 @@ void Curl_cookie_loadfiles(struct Curl_easy *data)
         data->cookies = ci;
       list = list->next;
     }
-    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+    Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
   }
 }
 
@@ -388,7 +388,7 @@ static void strstore(char **str, const char *newstr, size_t len)
 static void remove_expired(struct CookieInfo *ci)
 {
   struct Cookie *co;
-  curl_off_t now = (curl_off_t)time(NULL);
+  fetch_off_t now = (fetch_off_t)time(NULL);
   unsigned int i;
 
   /*
@@ -400,10 +400,10 @@ static void remove_expired(struct CookieInfo *ci)
    * fallback of checking all cookies.
    */
   if(now < ci->next_expiration &&
-     ci->next_expiration != CURL_OFF_T_MAX)
+     ci->next_expiration != FETCH_OFF_T_MAX)
     return;
   else
-    ci->next_expiration = CURL_OFF_T_MAX;
+    ci->next_expiration = FETCH_OFF_T_MAX;
 
   for(i = 0; i < COOKIE_HASH_SIZE; i++) {
     struct Curl_llist_node *n;
@@ -709,27 +709,27 @@ parse_cookie_header(struct Curl_easy *data,
          * client should discard the cookie. A value of zero means the
          * cookie should be discarded immediately.
          */
-        CURLofft offt;
+        FETCHofft offt;
         const char *maxage = valuep;
-        offt = curlx_strtoofft((*maxage == '\"') ?
+        offt = fetchx_strtoofft((*maxage == '\"') ?
                                &maxage[1] : &maxage[0], NULL, 10,
                                &co->expires);
         switch(offt) {
-        case CURL_OFFT_FLOW:
+        case FETCH_OFFT_FLOW:
           /* overflow, used max value */
-          co->expires = CURL_OFF_T_MAX;
+          co->expires = FETCH_OFF_T_MAX;
           break;
-        case CURL_OFFT_INVAL:
+        case FETCH_OFFT_INVAL:
           /* negative or otherwise bad, expire */
           co->expires = 1;
           break;
-        case CURL_OFFT_OK:
+        case FETCH_OFFT_OK:
           if(!co->expires)
             /* already expired */
             co->expires = 1;
-          else if(CURL_OFF_T_MAX - now < co->expires)
+          else if(FETCH_OFF_T_MAX - now < co->expires)
             /* would overflow */
-            co->expires = CURL_OFF_T_MAX;
+            co->expires = FETCH_OFF_T_MAX;
           else
             co->expires += now;
           break;
@@ -919,11 +919,11 @@ parse_netscape(struct Cookie *co,
       {
         char *endp;
         const char *p;
-        /* make sure curlx_strtoofft won't read past the current field */
+        /* make sure fetchx_strtoofft won't read past the current field */
         for(p = ptr; p < &ptr[len] && ISDIGIT(*p); ++p)
           ;
         if(p == ptr || p != &ptr[len] ||
-           curlx_strtoofft(ptr, &endp, 10, &co->expires) || endp != &ptr[len])
+           fetchx_strtoofft(ptr, &endp, 10, &co->expires) || endp != &ptr[len])
           return CERR_RANGE;
       }
       break;
@@ -1263,7 +1263,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
      * Initialize the next_expiration time to signal that we do not have enough
      * information yet.
      */
-    ci->next_expiration = CURL_OFF_T_MAX;
+    ci->next_expiration = FETCH_OFF_T_MAX;
   }
   ci->newsession = newsession; /* new session? */
 
@@ -1583,18 +1583,18 @@ static char *get_netscape_format(const struct Cookie *co)
  *
  * The function returns non-zero on write failure.
  */
-static CURLcode cookie_output(struct Curl_easy *data,
+static FETCHcode cookie_output(struct Curl_easy *data,
                               struct CookieInfo *ci,
                               const char *filename)
 {
   FILE *out = NULL;
   bool use_stdout = FALSE;
   char *tempstore = NULL;
-  CURLcode error = CURLE_OK;
+  FETCHcode error = FETCHE_OK;
 
   if(!ci)
     /* no cookie engine alive */
-    return CURLE_OK;
+    return FETCHE_OK;
 
   /* at first, remove expired cookies */
   remove_expired(ci);
@@ -1611,8 +1611,8 @@ static CURLcode cookie_output(struct Curl_easy *data,
   }
 
   fputs("# Netscape HTTP Cookie File\n"
-        "# https://curl.se/docs/http-cookies.html\n"
-        "# This file was generated by libcurl! Edit at your own risk.\n\n",
+        "# https://fetch.se/docs/http-cookies.html\n"
+        "# This file was generated by libfetch! Edit at your own risk.\n\n",
         out);
 
   if(ci->numcookies) {
@@ -1623,7 +1623,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
 
     array = calloc(1, sizeof(struct Cookie *) * ci->numcookies);
     if(!array) {
-      error = CURLE_OUT_OF_MEMORY;
+      error = FETCHE_OUT_OF_MEMORY;
       goto error;
     }
 
@@ -1644,7 +1644,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
       char *format_ptr = get_netscape_format(array[i]);
       if(!format_ptr) {
         free(array);
-        error = CURLE_OUT_OF_MEMORY;
+        error = FETCHE_OUT_OF_MEMORY;
         goto error;
       }
       fprintf(out, "%s\n", format_ptr);
@@ -1659,7 +1659,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
     out = NULL;
     if(tempstore && Curl_rename(tempstore, filename)) {
       unlink(tempstore);
-      error = CURLE_WRITE_ERROR;
+      error = FETCHE_WRITE_ERROR;
       goto error;
     }
   }
@@ -1670,7 +1670,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
    * error block below.
    */
   free(tempstore);
-  return CURLE_OK;
+  return FETCHE_OK;
 
 error:
   if(out && !use_stdout)
@@ -1679,10 +1679,10 @@ error:
   return error;
 }
 
-static struct curl_slist *cookie_list(struct Curl_easy *data)
+static struct fetch_slist *cookie_list(struct Curl_easy *data)
 {
-  struct curl_slist *list = NULL;
-  struct curl_slist *beg;
+  struct fetch_slist *list = NULL;
+  struct fetch_slist *beg;
   unsigned int i;
   struct Curl_llist_node *n;
 
@@ -1698,13 +1698,13 @@ static struct curl_slist *cookie_list(struct Curl_easy *data)
         continue;
       line = get_netscape_format(c);
       if(!line) {
-        curl_slist_free_all(list);
+        fetch_slist_free_all(list);
         return NULL;
       }
       beg = Curl_slist_append_nodup(list, line);
       if(!beg) {
         free(line);
-        curl_slist_free_all(list);
+        fetch_slist_free_all(list);
         return NULL;
       }
       list = beg;
@@ -1714,37 +1714,37 @@ static struct curl_slist *cookie_list(struct Curl_easy *data)
   return list;
 }
 
-struct curl_slist *Curl_cookie_list(struct Curl_easy *data)
+struct fetch_slist *Curl_cookie_list(struct Curl_easy *data)
 {
-  struct curl_slist *list;
-  Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+  struct fetch_slist *list;
+  Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
   list = cookie_list(data);
-  Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+  Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
   return list;
 }
 
 void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
 {
-  CURLcode res;
+  FETCHcode res;
 
   if(data->set.str[STRING_COOKIEJAR]) {
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+    Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
 
     /* if we have a destination file for all the cookies to get dumped to */
     res = cookie_output(data, data->cookies, data->set.str[STRING_COOKIEJAR]);
     if(res)
       infof(data, "WARNING: failed to save cookies in %s: %s",
-            data->set.str[STRING_COOKIEJAR], curl_easy_strerror(res));
+            data->set.str[STRING_COOKIEJAR], fetch_easy_strerror(res));
   }
   else {
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+    Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
   }
 
   if(cleanup && (!data->share || (data->cookies != data->share->cookies))) {
     Curl_cookie_cleanup(data->cookies);
     data->cookies = NULL;
   }
-  Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+  Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
 }
 
-#endif /* CURL_DISABLE_HTTP || CURL_DISABLE_COOKIES */
+#endif /* FETCH_DISABLE_HTTP || FETCH_DISABLE_COOKIES */

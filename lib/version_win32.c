@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,21 +18,21 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(_WIN32)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "version_win32.h"
 #include "warnless.h"
 
 /* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
-#include "curl_memory.h"
+#ifdef BUILDING_LIBFETCH
+#include "fetch_memory.h"
 #endif
 #include "memdebug.h"
 
@@ -53,7 +53,7 @@ struct OUR_OSVERSIONINFOEXW {
 };
 
 /*
- * curlx_verify_windows_version()
+ * fetchx_verify_windows_version()
  *
  * This is used to verify if we are running on a specific Windows version.
  *
@@ -71,7 +71,7 @@ struct OUR_OSVERSIONINFOEXW {
  *
  * Returns TRUE if matched; otherwise FALSE.
  */
-bool curlx_verify_windows_version(const unsigned int majorVersion,
+bool fetchx_verify_windows_version(const unsigned int majorVersion,
                                   const unsigned int minorVersion,
                                   const unsigned int buildVersion,
                                   const PlatformIdentifier platform,
@@ -79,7 +79,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 {
   bool matched = FALSE;
 
-#if defined(CURL_WINDOWS_UWP)
+#if defined(FETCH_WINDOWS_UWP)
   /* We have no way to determine the Windows version from Windows apps,
      so let's assume we are running on the target Windows version. */
   const WORD fullVersion = MAKEWORD(minorVersion, majorVersion);
@@ -212,7 +212,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   static bool onetime = TRUE; /* safe because first call is during init */
 
   if(onetime) {
-    pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
+    pRtlVerifyVersionInfo = FETCHX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
       (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
     onetime = FALSE;
   }
@@ -301,7 +301,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
      (condition == VERSION_EQUAL ||
       ((condition == VERSION_GREATER_THAN_EQUAL ||
         condition == VERSION_LESS_THAN_EQUAL) &&
-        curlx_verify_windows_version(majorVersion, minorVersion, 0,
+        fetchx_verify_windows_version(majorVersion, minorVersion, 0,
                                      platform, VERSION_EQUAL)))) {
 
     cm = VerSetConditionMask(0, VER_BUILDNUMBER, buildCondition);

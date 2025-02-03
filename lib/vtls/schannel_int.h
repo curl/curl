@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SCHANNEL_INT_H
-#define HEADER_CURL_SCHANNEL_INT_H
+#ifndef HEADER_FETCH_SCHANNEL_INT_H
+#define HEADER_FETCH_SCHANNEL_INT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,17 +21,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_SCHANNEL
 
 #include "vtls.h"
 
 #if (defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)) \
-  && !defined(CURL_WINDOWS_UWP)
+  && !defined(FETCH_WINDOWS_UWP)
 #define HAS_MANUAL_VERIFY_API
 #endif
 
@@ -152,7 +152,7 @@ struct schannel_ssl_backend_data {
      more bytes into encdata then set this back to false. */
   bool encdata_is_incomplete;
   unsigned long req_flags, ret_flags;
-  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
+  FETCHcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
   bool recv_sspi_close_notify; /* true if connection closed by close_notify */
   bool recv_connection_closed; /* true if connection closed, regardless how */
   bool recv_renegotiating;     /* true if recv is doing renegotiation */
@@ -167,13 +167,13 @@ struct schannel_ssl_backend_data {
 #define MPROTO_SCHANNEL_CERT_SHARE_KEY   "tls:schannel:cert:share"
 
 struct schannel_cert_share {
-  unsigned char CAinfo_blob_digest[CURL_SHA256_DIGEST_LENGTH];
+  unsigned char CAinfo_blob_digest[FETCH_SHA256_DIGEST_LENGTH];
   size_t CAinfo_blob_size;           /* CA info blob size */
   char *CAfile;                      /* CAfile path used to generate
                                         certificate store */
   HCERTSTORE cert_store;             /* cached certificate store or
                                         NULL if none */
-  struct curltime time;              /* when the cached store was created */
+  struct fetchtime time;              /* when the cached store was created */
 };
 
 /*
@@ -195,4 +195,4 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                                          HCERTSTORE cert_store);
 
 #endif /* USE_SCHANNEL */
-#endif /* HEADER_CURL_SCHANNEL_INT_H */
+#endif /* HEADER_FETCH_SCHANNEL_INT_H */

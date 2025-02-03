@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SIGPIPE_H
-#define HEADER_CURL_SIGPIPE_H
+#ifndef HEADER_FETCH_SIGPIPE_H
+#define HEADER_FETCH_SIGPIPE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(HAVE_SIGACTION) &&        \
   (defined(USE_OPENSSL) || defined(USE_MBEDTLS) || defined(USE_WOLFSSL))
@@ -44,9 +44,9 @@ static void sigpipe_init(struct sigpipe_ignore *ig)
 }
 
 /*
- * sigpipe_ignore() makes sure we ignore SIGPIPE while running libcurl
+ * sigpipe_ignore() makes sure we ignore SIGPIPE while running libfetch
  * internals, and then sigpipe_restore() will restore the situation when we
- * return from libcurl again.
+ * return from libfetch again.
  */
 static void sigpipe_ignore(struct Curl_easy *data,
                            struct sigpipe_ignore *ig)
@@ -96,4 +96,4 @@ static void sigpipe_apply(struct Curl_easy *data,
 #define SIGPIPE_MEMBER(x)   bool x
 #endif
 
-#endif /* HEADER_CURL_SIGPIPE_H */
+#endif /* HEADER_FETCH_SIGPIPE_H */

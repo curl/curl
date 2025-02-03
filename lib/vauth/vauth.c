@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,22 +18,22 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "vauth.h"
 #include "urldata.h"
 #include "strcase.h"
-#include "curl_multibyte.h"
-#include "curl_printf.h"
+#include "fetch_multibyte.h"
+#include "fetch_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /*
@@ -92,15 +92,15 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
   if(!utf8_spn)
     return NULL;
 
-  /* Allocate and return a TCHAR based SPN. Since curlx_convert_UTF8_to_tchar
-     must be freed by curlx_unicodefree we will dupe the result so that the
+  /* Allocate and return a TCHAR based SPN. Since fetchx_convert_UTF8_to_tchar
+     must be freed by fetchx_unicodefree we will dupe the result so that the
      pointer this function returns can be normally free'd. */
-  tchar_spn = curlx_convert_UTF8_to_tchar(utf8_spn);
+  tchar_spn = fetchx_convert_UTF8_to_tchar(utf8_spn);
   free(utf8_spn);
   if(!tchar_spn)
     return NULL;
   dupe_tchar_spn = _tcsdup(tchar_spn);
-  curlx_unicodefree(tchar_spn);
+  fetchx_unicodefree(tchar_spn);
   return dupe_tchar_spn;
 }
 #endif /* USE_WINDOWS_SSPI */
@@ -112,7 +112,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
  * follows:
  *
  * Domain\User (Down-level Logon Name)
- * Domain/User (curl Down-level format - for compatibility with existing code)
+ * Domain/User (fetch Down-level format - for compatibility with existing code)
  * User@Domain (User Principal Name)
  *
  * Note: The username may be empty when using a GSS-API library or Windows

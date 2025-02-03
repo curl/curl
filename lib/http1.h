@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HTTP1_H
-#define HEADER_CURL_HTTP1_H
+#ifndef HEADER_FETCH_HTTP1_H
+#define HEADER_FETCH_HTTP1_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifndef CURL_DISABLE_HTTP
+#ifndef FETCH_DISABLE_HTTP
 #include "bufq.h"
 #include "http.h"
 
@@ -51,13 +51,13 @@ void Curl_h1_req_parse_free(struct h1_req_parser *parser);
 ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
                                const char *buf, size_t buflen,
                                const char *scheme_default, int options,
-                               CURLcode *err);
+                               FETCHcode *err);
 
-CURLcode Curl_h1_req_dprint(const struct httpreq *req,
+FETCHcode Curl_h1_req_dprint(const struct httpreq *req,
                             struct dynbuf *dbuf);
 
-CURLcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,
+FETCHcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,
                                 struct dynbuf *dbuf);
 
-#endif /* !CURL_DISABLE_HTTP */
-#endif /* HEADER_CURL_HTTP1_H */
+#endif /* !FETCH_DISABLE_HTTP */
+#endif /* HEADER_FETCH_HTTP1_H */

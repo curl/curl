@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SSPI_H
-#define HEADER_CURL_SSPI_H
+#ifndef HEADER_FETCH_SSPI_H
+#define HEADER_FETCH_SSPI_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,15 +20,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_WINDOWS_SSPI
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /*
  * When including the following three headers, it is mandatory to define either
@@ -42,21 +42,21 @@
 #include <sspi.h>
 #include <rpc.h>
 
-CURLcode Curl_sspi_global_init(void);
+FETCHcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
 
 /* This is used to populate the domain in a SSPI identity structure */
-CURLcode Curl_override_sspi_http_realm(const char *chlg,
+FETCHcode Curl_override_sspi_http_realm(const char *chlg,
                                        SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* This is used to generate an SSPI identity structure */
-CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
+FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
                                    SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* This is used to free an SSPI identity structure */
 void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
 
-/* Forward-declaration of global variables defined in curl_sspi.c */
+/* Forward-declaration of global variables defined in fetch_sspi.c */
 extern HMODULE Curl_hSecDll;
 extern PSecurityFunctionTable Curl_pSecFn;
 
@@ -120,4 +120,4 @@ extern PSecurityFunctionTable Curl_pSecFn;
 
 #endif /* USE_WINDOWS_SSPI */
 
-#endif /* HEADER_CURL_SSPI_H */
+#endif /* HEADER_FETCH_SSPI_H */

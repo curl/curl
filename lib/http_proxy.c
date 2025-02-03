@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,17 +18,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #include "http_proxy.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
+#if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_PROXY)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "sendf.h"
 #include "http.h"
 #include "url.h"
@@ -38,15 +38,15 @@
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
 #include "connect.h"
-#include "curlx.h"
+#include "fetchx.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
 #include "vauth/vauth.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 static bool hd_name_eq(const char *n1, size_t n1len,
@@ -55,14 +55,14 @@ static bool hd_name_eq(const char *n1, size_t n1len,
   return (n1len == n2len) ? strncasecompare(n1, n2, n1len) : FALSE;
 }
 
-static CURLcode dynhds_add_custom(struct Curl_easy *data,
+static FETCHcode dynhds_add_custom(struct Curl_easy *data,
                                   bool is_connect, int httpversion,
                                   struct dynhds *hds)
 {
   struct connectdata *conn = data->conn;
   char *ptr;
-  struct curl_slist *h[2];
-  struct curl_slist *headers;
+  struct fetch_slist *h[2];
+  struct fetch_slist *headers;
   int numlists = 1; /* by default */
   int i;
 
@@ -180,7 +180,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
               !Curl_auth_allowed_to_host(data))
         ;
       else {
-        CURLcode result;
+        FETCHcode result;
 
         result = Curl_dynhds_add(hds, name, namelen, value, valuelen);
         if(result)
@@ -189,10 +189,10 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
     }
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
+FETCHcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
                                          const char **phostname,
                                          int *pport, bool *pipv6_ip)
 {
@@ -218,7 +218,7 @@ CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
   else
     *pipv6_ip = cf->conn->bits.ipv6_ip;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 struct cf_proxy_ctx {
@@ -227,7 +227,7 @@ struct cf_proxy_ctx {
   int httpversion; /* HTTP version used to CONNECT */
 };
 
-CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
+FETCHcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         int http_version_major)
@@ -237,7 +237,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   char *authority = NULL;
   int port;
   bool ipv6_ip;
-  CURLcode result;
+  FETCHcode result;
   struct httpreq *req = NULL;
 
   result = Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
@@ -247,7 +247,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   authority = aprintf("%s%s%s:%d", ipv6_ip ? "[" : "", hostname,
                       ipv6_ip ?"]" : "", port);
   if(!authority) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
 
@@ -305,19 +305,19 @@ out:
   return result;
 }
 
-static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
+static FETCHcode http_proxy_cf_connect(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       bool blocking, bool *done)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
-  CURLcode result;
+  FETCHcode result;
 
   if(cf->connected) {
     *done = TRUE;
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
-  CURL_TRC_CF(data, cf, "connect");
+  FETCH_TRC_CF(data, cf, "connect");
 connect_sub:
   result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
@@ -328,25 +328,25 @@ connect_sub:
     struct Curl_cfilter *cf_protocol = NULL;
     int httpversion = 0;
     int alpn = Curl_conn_cf_is_ssl(cf->next) ?
-      cf->conn->proxy_alpn : CURL_HTTP_VERSION_1_1;
+      cf->conn->proxy_alpn : FETCH_HTTP_VERSION_1_1;
 
     /* First time call after the subchain connected */
     switch(alpn) {
-    case CURL_HTTP_VERSION_NONE:
-    case CURL_HTTP_VERSION_1_0:
-    case CURL_HTTP_VERSION_1_1:
-      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
+    case FETCH_HTTP_VERSION_NONE:
+    case FETCH_HTTP_VERSION_1_0:
+    case FETCH_HTTP_VERSION_1_1:
+      FETCH_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
       infof(data, "CONNECT tunnel: HTTP/1.%d negotiated",
-            (alpn == CURL_HTTP_VERSION_1_0) ? 0 : 1);
+            (alpn == FETCH_HTTP_VERSION_1_0) ? 0 : 1);
       result = Curl_cf_h1_proxy_insert_after(cf, data);
       if(result)
         goto out;
       cf_protocol = cf->next;
-      httpversion = (alpn == CURL_HTTP_VERSION_1_0) ? 10 : 11;
+      httpversion = (alpn == FETCH_HTTP_VERSION_1_0) ? 10 : 11;
       break;
 #ifdef USE_NGHTTP2
-    case CURL_HTTP_VERSION_2:
-      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
+    case FETCH_HTTP_VERSION_2:
+      FETCH_TRC_CF(data, cf, "installing subfilter for HTTP/2");
       infof(data, "CONNECT tunnel: HTTP/2 negotiated");
       result = Curl_cf_h2_proxy_insert_after(cf, data);
       if(result)
@@ -357,7 +357,7 @@ connect_sub:
 #endif
     default:
       infof(data, "CONNECT tunnel: unsupported ALPN(%d) negotiated", alpn);
-      result = CURLE_COULDNT_CONNECT;
+      result = FETCHE_COULDNT_CONNECT;
       goto out;
     }
 
@@ -373,7 +373,7 @@ connect_sub:
      * This means the protocol tunnel is established, we are done.
      */
     DEBUGASSERT(ctx->cf_protocol);
-    result = CURLE_OK;
+    result = FETCHE_OK;
   }
 
 out:
@@ -407,7 +407,7 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
   struct cf_proxy_ctx *ctx = cf->ctx;
 
   (void)data;
-  CURL_TRC_CF(data, cf, "destroy");
+  FETCH_TRC_CF(data, cf, "destroy");
   free(ctx);
 }
 
@@ -416,7 +416,7 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
 
-  CURL_TRC_CF(data, cf, "close");
+  FETCH_TRC_CF(data, cf, "close");
   cf->connected = FALSE;
   if(ctx->cf_protocol) {
     struct Curl_cfilter *f;
@@ -455,17 +455,17 @@ struct Curl_cftype Curl_cft_http_proxy = {
   Curl_cf_def_query,
 };
 
-CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
+FETCHcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
                                          struct Curl_easy *data)
 {
   struct Curl_cfilter *cf;
   struct cf_proxy_ctx *ctx = NULL;
-  CURLcode result;
+  FETCHcode result;
 
   (void)data;
   ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
   result = Curl_cf_create(&cf, &Curl_cft_http_proxy, ctx);
@@ -479,4 +479,4 @@ out:
   return result;
 }
 
-#endif /* ! CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
+#endif /* ! FETCH_DISABLE_HTTP && !FETCH_DISABLE_PROXY */

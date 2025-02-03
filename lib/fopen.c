@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,14 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
-  !defined(CURL_DISABLE_HSTS)
+#if !defined(FETCH_DISABLE_COOKIES) || !defined(FETCH_DISABLE_ALTSVC) ||  \
+  !defined(FETCH_DISABLE_HSTS)
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -35,8 +35,8 @@
 #include "rand.h"
 #include "fopen.h"
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /*
@@ -66,7 +66,7 @@ static char *dirslash(const char *path)
   size_t n;
   struct dynbuf out;
   DEBUGASSERT(path);
-  Curl_dyn_init(&out, CURL_MAX_INPUT_LENGTH);
+  Curl_dyn_init(&out, FETCH_MAX_INPUT_LENGTH);
   n = strlen(path);
   if(n) {
     /* find the rightmost path separator, if any */
@@ -91,10 +91,10 @@ static char *dirslash(const char *path)
  * file. if 'tempname' is non-NULL, it needs a rename after the file is
  * written.
  */
-CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
+FETCHcode Curl_fopen(struct Curl_easy *data, const char *filename,
                     FILE **fh, char **tempname)
 {
-  CURLcode result = CURLE_WRITE_ERROR;
+  FETCHcode result = FETCHE_WRITE_ERROR;
   unsigned char randbuf[41];
   char *tempstore = NULL;
   struct_stat sb;
@@ -106,7 +106,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   if(!*fh)
     goto fail;
   if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
-    return CURLE_OK;
+    return FETCHE_OK;
   }
   fclose(*fh);
   *fh = NULL;
@@ -124,11 +124,11 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   }
 
   if(!tempstore) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = FETCHE_OUT_OF_MEMORY;
     goto fail;
   }
 
-  result = CURLE_WRITE_ERROR;
+  result = FETCHE_WRITE_ERROR;
 #if (defined(ANDROID) || defined(__ANDROID__)) && \
     (defined(__i386__) || defined(__arm__))
   fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, (mode_t)(0600|sb.st_mode));
@@ -143,7 +143,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     goto fail;
 
   *tempname = tempstore;
-  return CURLE_OK;
+  return FETCHE_OK;
 
 fail:
   if(fd != -1) {

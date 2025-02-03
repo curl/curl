@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_FORMDATA_H
-#define HEADER_CURL_FORMDATA_H
+#ifndef HEADER_FETCH_FORMDATA_H
+#define HEADER_FETCH_FORMDATA_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,20 +20,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifndef CURL_DISABLE_FORM_API
+#ifndef FETCH_DISABLE_FORM_API
 
 /* used by FormAdd for temporary storage */
 struct FormInfo {
   char *name;
   size_t namelength;
   char *value;
-  curl_off_t contentslength;
+  fetch_off_t contentslength;
   char *contenttype;
   long flags;
   char *buffer;      /* pointer to existing buffer used for file upload */
@@ -41,7 +41,7 @@ struct FormInfo {
   char *showfilename; /* The filename to show. If not set, the actual
                          filename will be used */
   char *userp;        /* pointer for the read callback */
-  struct curl_slist *contentheader;
+  struct fetch_slist *contentheader;
   struct FormInfo *more;
   bool name_alloc;
   bool value_alloc;
@@ -49,11 +49,11 @@ struct FormInfo {
   bool showfilename_alloc;
 };
 
-CURLcode Curl_getformdata(CURL *data,
-                          curl_mimepart *,
-                          struct curl_httppost *post,
-                          curl_read_callback fread_func);
-#endif /* CURL_DISABLE_FORM_API */
+FETCHcode Curl_getformdata(FETCH *data,
+                          fetch_mimepart *,
+                          struct fetch_httppost *post,
+                          fetch_read_callback fread_func);
+#endif /* FETCH_DISABLE_FORM_API */
 
 
-#endif /* HEADER_CURL_FORMDATA_H */
+#endif /* HEADER_FETCH_FORMDATA_H */

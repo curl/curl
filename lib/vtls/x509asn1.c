@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) ||      \
   defined(USE_SCHANNEL) || defined(USE_SECTRANSP) ||    \
@@ -38,22 +38,22 @@
 #define WANT_PARSEX509 /* ... uses Curl_parseX509() */
 #endif
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 #include "strcase.h"
-#include "curl_ctype.h"
+#include "fetch_ctype.h"
 #include "hostcheck.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
 #include "sendf.h"
 #include "inet_pton.h"
-#include "curl_base64.h"
+#include "fetch_base64.h"
 #include "x509asn1.h"
 #include "dynbuf.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /*
@@ -61,43 +61,43 @@
  */
 
 /* Largest supported ASN.1 structure. */
-#define CURL_ASN1_MAX                   ((size_t) 0x40000)      /* 256K */
+#define FETCH_ASN1_MAX                   ((size_t) 0x40000)      /* 256K */
 
 /* ASN.1 classes. */
-#define CURL_ASN1_UNIVERSAL             0
-#define CURL_ASN1_APPLICATION           1
-#define CURL_ASN1_CONTEXT_SPECIFIC      2
-#define CURL_ASN1_PRIVATE               3
+#define FETCH_ASN1_UNIVERSAL             0
+#define FETCH_ASN1_APPLICATION           1
+#define FETCH_ASN1_CONTEXT_SPECIFIC      2
+#define FETCH_ASN1_PRIVATE               3
 
 /* ASN.1 types. */
-#define CURL_ASN1_BOOLEAN               1
-#define CURL_ASN1_INTEGER               2
-#define CURL_ASN1_BIT_STRING            3
-#define CURL_ASN1_OCTET_STRING          4
-#define CURL_ASN1_NULL                  5
-#define CURL_ASN1_OBJECT_IDENTIFIER     6
-#define CURL_ASN1_OBJECT_DESCRIPTOR     7
-#define CURL_ASN1_INSTANCE_OF           8
-#define CURL_ASN1_REAL                  9
-#define CURL_ASN1_ENUMERATED            10
-#define CURL_ASN1_EMBEDDED              11
-#define CURL_ASN1_UTF8_STRING           12
-#define CURL_ASN1_RELATIVE_OID          13
-#define CURL_ASN1_SEQUENCE              16
-#define CURL_ASN1_SET                   17
-#define CURL_ASN1_NUMERIC_STRING        18
-#define CURL_ASN1_PRINTABLE_STRING      19
-#define CURL_ASN1_TELETEX_STRING        20
-#define CURL_ASN1_VIDEOTEX_STRING       21
-#define CURL_ASN1_IA5_STRING            22
-#define CURL_ASN1_UTC_TIME              23
-#define CURL_ASN1_GENERALIZED_TIME      24
-#define CURL_ASN1_GRAPHIC_STRING        25
-#define CURL_ASN1_VISIBLE_STRING        26
-#define CURL_ASN1_GENERAL_STRING        27
-#define CURL_ASN1_UNIVERSAL_STRING      28
-#define CURL_ASN1_CHARACTER_STRING      29
-#define CURL_ASN1_BMP_STRING            30
+#define FETCH_ASN1_BOOLEAN               1
+#define FETCH_ASN1_INTEGER               2
+#define FETCH_ASN1_BIT_STRING            3
+#define FETCH_ASN1_OCTET_STRING          4
+#define FETCH_ASN1_NULL                  5
+#define FETCH_ASN1_OBJECT_IDENTIFIER     6
+#define FETCH_ASN1_OBJECT_DESCRIPTOR     7
+#define FETCH_ASN1_INSTANCE_OF           8
+#define FETCH_ASN1_REAL                  9
+#define FETCH_ASN1_ENUMERATED            10
+#define FETCH_ASN1_EMBEDDED              11
+#define FETCH_ASN1_UTF8_STRING           12
+#define FETCH_ASN1_RELATIVE_OID          13
+#define FETCH_ASN1_SEQUENCE              16
+#define FETCH_ASN1_SET                   17
+#define FETCH_ASN1_NUMERIC_STRING        18
+#define FETCH_ASN1_PRINTABLE_STRING      19
+#define FETCH_ASN1_TELETEX_STRING        20
+#define FETCH_ASN1_VIDEOTEX_STRING       21
+#define FETCH_ASN1_IA5_STRING            22
+#define FETCH_ASN1_UTC_TIME              23
+#define FETCH_ASN1_GENERALIZED_TIME      24
+#define FETCH_ASN1_GRAPHIC_STRING        25
+#define FETCH_ASN1_VISIBLE_STRING        26
+#define FETCH_ASN1_GENERAL_STRING        27
+#define FETCH_ASN1_UNIVERSAL_STRING      28
+#define FETCH_ASN1_CHARACTER_STRING      29
+#define FETCH_ASN1_BMP_STRING            30
 
 
 #ifdef WANT_EXTRACT_CERTINFO
@@ -190,7 +190,7 @@ static const char *getASN1Element(struct Curl_asn1Element *elem,
      Returns a pointer in source string after the parsed element, or NULL
      if an error occurs. */
   if(!beg || !end || beg >= end || !*beg ||
-     (size_t)(end - beg) > CURL_ASN1_MAX)
+     (size_t)(end - beg) > FETCH_ASN1_MAX)
     return NULL;
 
   /* Process header byte. */
@@ -265,11 +265,11 @@ static const struct Curl_OID *searchOID(const char *oid)
  * Return error code.
  */
 
-static CURLcode bool2str(struct dynbuf *store,
+static FETCHcode bool2str(struct dynbuf *store,
                          const char *beg, const char *end)
 {
   if(end - beg != 1)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   return Curl_dyn_add(store, *beg ? "TRUE": "FALSE");
 }
 
@@ -278,10 +278,10 @@ static CURLcode bool2str(struct dynbuf *store,
  *
  * Return error code.
  */
-static CURLcode octet2str(struct dynbuf *store,
+static FETCHcode octet2str(struct dynbuf *store,
                           const char *beg, const char *end)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   while(!result && beg < end)
     result = Curl_dyn_addf(store, "%02x:", (unsigned char) *beg++);
@@ -289,13 +289,13 @@ static CURLcode octet2str(struct dynbuf *store,
   return result;
 }
 
-static CURLcode bit2str(struct dynbuf *store,
+static FETCHcode bit2str(struct dynbuf *store,
                         const char *beg, const char *end)
 {
   /* Convert an ASN.1 bit string to a printable string. */
 
   if(++beg > end)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   return octet2str(store, beg, end);
 }
 
@@ -304,14 +304,14 @@ static CURLcode bit2str(struct dynbuf *store,
  *
  * Returns error.
  */
-static CURLcode int2str(struct dynbuf *store,
+static FETCHcode int2str(struct dynbuf *store,
                         const char *beg, const char *end)
 {
   unsigned int val = 0;
   size_t n = end - beg;
 
   if(!n)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   if(n > 4)
     return octet2str(store, beg, end);
@@ -334,36 +334,36 @@ static CURLcode int2str(struct dynbuf *store,
  *
  * Returns error.
  */
-static CURLcode
+static FETCHcode
 utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
 {
   size_t inlength = end - from;
   int size = 1;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   switch(type) {
-  case CURL_ASN1_BMP_STRING:
+  case FETCH_ASN1_BMP_STRING:
     size = 2;
     break;
-  case CURL_ASN1_UNIVERSAL_STRING:
+  case FETCH_ASN1_UNIVERSAL_STRING:
     size = 4;
     break;
-  case CURL_ASN1_NUMERIC_STRING:
-  case CURL_ASN1_PRINTABLE_STRING:
-  case CURL_ASN1_TELETEX_STRING:
-  case CURL_ASN1_IA5_STRING:
-  case CURL_ASN1_VISIBLE_STRING:
-  case CURL_ASN1_UTF8_STRING:
+  case FETCH_ASN1_NUMERIC_STRING:
+  case FETCH_ASN1_PRINTABLE_STRING:
+  case FETCH_ASN1_TELETEX_STRING:
+  case FETCH_ASN1_IA5_STRING:
+  case FETCH_ASN1_VISIBLE_STRING:
+  case FETCH_ASN1_UTF8_STRING:
     break;
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;  /* Conversion not supported. */
+    return FETCHE_BAD_FUNCTION_ARGUMENT;  /* Conversion not supported. */
   }
 
   if(inlength % size)
     /* Length inconsistent with character size. */
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-  if(type == CURL_ASN1_UTF8_STRING) {
+  if(type == FETCH_ASN1_UTF8_STRING) {
     /* Just copy. */
     if(inlength)
       result = Curl_dyn_addn(to, from, inlength);
@@ -390,7 +390,7 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
           if(wc >= 0x00010000) {
             if(wc >= 0x00200000) {
               /* Invalid char. size for target encoding. */
-              return CURLE_WEIRD_SERVER_REPLY;
+              return FETCHE_WEIRD_SERVER_REPLY;
             }
             buf[3] = (char) (0x80 | (wc & 0x3F));
             wc = (wc >> 6) | 0x00010000;
@@ -416,12 +416,12 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
  *
  * Return error code.
  */
-static CURLcode encodeOID(struct dynbuf *store,
+static FETCHcode encodeOID(struct dynbuf *store,
                           const char *beg, const char *end)
 {
   unsigned int x;
   unsigned int y;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   /* Process the first two numbers. */
   y = *(const unsigned char *) beg++;
@@ -452,14 +452,14 @@ static CURLcode encodeOID(struct dynbuf *store,
  * Return error code.
  */
 
-static CURLcode OID2str(struct dynbuf *store,
+static FETCHcode OID2str(struct dynbuf *store,
                         const char *beg, const char *end, bool symbolic)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   if(beg < end) {
     if(symbolic) {
       struct dynbuf buf;
-      Curl_dyn_init(&buf, CURL_X509_STR_MAX);
+      Curl_dyn_init(&buf, FETCH_X509_STR_MAX);
       result = encodeOID(&buf, beg, end);
 
       if(!result) {
@@ -477,7 +477,7 @@ static CURLcode OID2str(struct dynbuf *store,
   return result;
 }
 
-static CURLcode GTime2str(struct dynbuf *store,
+static FETCHcode GTime2str(struct dynbuf *store,
                           const char *beg, const char *end)
 {
   const char *tzp;
@@ -506,7 +506,7 @@ static CURLcode GTime2str(struct dynbuf *store,
     sec2 = fracp[-1];
     break;
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
   /* timezone follows optional fractional seconds. */
@@ -519,7 +519,7 @@ static CURLcode GTime2str(struct dynbuf *store,
     while(tzp < end && ISDIGIT(*tzp))
       tzp++;
     if(tzp == fracp) /* never looped, no digit after [.,] */
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      return FETCHE_BAD_FUNCTION_ARGUMENT;
     fracl = tzp - fracp; /* number of fractional sec digits */
     DEBUGASSERT(fracl > 0);
     /* Strip trailing zeroes in fractional seconds.
@@ -557,7 +557,7 @@ static CURLcode GTime2str(struct dynbuf *store,
 
 #ifdef UNITTESTS
 /* used by unit1656.c */
-CURLcode Curl_x509_GTime2str(struct dynbuf *store,
+FETCHcode Curl_x509_GTime2str(struct dynbuf *store,
                              const char *beg, const char *end)
 {
   return GTime2str(store, beg, end);
@@ -569,7 +569,7 @@ CURLcode Curl_x509_GTime2str(struct dynbuf *store,
  *
  * Return error code.
  */
-static CURLcode UTime2str(struct dynbuf *store,
+static FETCHcode UTime2str(struct dynbuf *store,
                              const char *beg, const char *end)
 {
   const char *tzp;
@@ -587,12 +587,12 @@ static CURLcode UTime2str(struct dynbuf *store,
   case 2:
     break;
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
   /* Process timezone. */
   if(tzp >= end)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   if(*tzp == 'Z') {
     tzp = "GMT";
     end = tzp + 3;
@@ -612,10 +612,10 @@ static CURLcode UTime2str(struct dynbuf *store,
  *
  * Return error
  */
-static CURLcode ASN1tostr(struct dynbuf *store,
+static FETCHcode ASN1tostr(struct dynbuf *store,
                           struct Curl_asn1Element *elem, int type)
 {
-  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  FETCHcode result = FETCHE_BAD_FUNCTION_ARGUMENT;
   if(elem->constructed)
     return result; /* No conversion of structured elements. */
 
@@ -623,39 +623,39 @@ static CURLcode ASN1tostr(struct dynbuf *store,
     type = elem->tag;   /* Type not forced: use element tag as type. */
 
   switch(type) {
-  case CURL_ASN1_BOOLEAN:
+  case FETCH_ASN1_BOOLEAN:
     result = bool2str(store, elem->beg, elem->end);
     break;
-  case CURL_ASN1_INTEGER:
-  case CURL_ASN1_ENUMERATED:
+  case FETCH_ASN1_INTEGER:
+  case FETCH_ASN1_ENUMERATED:
     result = int2str(store, elem->beg, elem->end);
     break;
-  case CURL_ASN1_BIT_STRING:
+  case FETCH_ASN1_BIT_STRING:
     result = bit2str(store, elem->beg, elem->end);
     break;
-  case CURL_ASN1_OCTET_STRING:
+  case FETCH_ASN1_OCTET_STRING:
     result = octet2str(store, elem->beg, elem->end);
     break;
-  case CURL_ASN1_NULL:
+  case FETCH_ASN1_NULL:
     result = Curl_dyn_addn(store, "", 1);
     break;
-  case CURL_ASN1_OBJECT_IDENTIFIER:
+  case FETCH_ASN1_OBJECT_IDENTIFIER:
     result = OID2str(store, elem->beg, elem->end, TRUE);
     break;
-  case CURL_ASN1_UTC_TIME:
+  case FETCH_ASN1_UTC_TIME:
     result = UTime2str(store, elem->beg, elem->end);
     break;
-  case CURL_ASN1_GENERALIZED_TIME:
+  case FETCH_ASN1_GENERALIZED_TIME:
     result = GTime2str(store, elem->beg, elem->end);
     break;
-  case CURL_ASN1_UTF8_STRING:
-  case CURL_ASN1_NUMERIC_STRING:
-  case CURL_ASN1_PRINTABLE_STRING:
-  case CURL_ASN1_TELETEX_STRING:
-  case CURL_ASN1_IA5_STRING:
-  case CURL_ASN1_VISIBLE_STRING:
-  case CURL_ASN1_UNIVERSAL_STRING:
-  case CURL_ASN1_BMP_STRING:
+  case FETCH_ASN1_UTF8_STRING:
+  case FETCH_ASN1_NUMERIC_STRING:
+  case FETCH_ASN1_PRINTABLE_STRING:
+  case FETCH_ASN1_TELETEX_STRING:
+  case FETCH_ASN1_IA5_STRING:
+  case FETCH_ASN1_VISIBLE_STRING:
+  case FETCH_ASN1_UNIVERSAL_STRING:
+  case FETCH_ASN1_BMP_STRING:
     result = utf8asn1str(store, type, elem->beg, elem->end);
     break;
   }
@@ -668,7 +668,7 @@ static CURLcode ASN1tostr(struct dynbuf *store,
  *
  * Returns error.
  */
-static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
+static FETCHcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
 {
   struct Curl_asn1Element rdn;
   struct Curl_asn1Element atv;
@@ -678,30 +678,30 @@ static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
   const char *p2;
   const char *p3;
   const char *str;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   bool added = FALSE;
   struct dynbuf temp;
-  Curl_dyn_init(&temp, CURL_X509_STR_MAX);
+  Curl_dyn_init(&temp, FETCH_X509_STR_MAX);
 
   for(p1 = dn->beg; p1 < dn->end;) {
     p1 = getASN1Element(&rdn, p1, dn->end);
     if(!p1) {
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      result = FETCHE_BAD_FUNCTION_ARGUMENT;
       goto error;
     }
     for(p2 = rdn.beg; p2 < rdn.end;) {
       p2 = getASN1Element(&atv, p2, rdn.end);
       if(!p2) {
-        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        result = FETCHE_BAD_FUNCTION_ARGUMENT;
         goto error;
       }
       p3 = getASN1Element(&oid, atv.beg, atv.end);
       if(!p3) {
-        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        result = FETCHE_BAD_FUNCTION_ARGUMENT;
         goto error;
       }
       if(!getASN1Element(&value, p3, atv.end)) {
-        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        result = FETCHE_BAD_FUNCTION_ARGUMENT;
         goto error;
       }
       Curl_dyn_reset(&temp);
@@ -712,7 +712,7 @@ static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
       str = Curl_dyn_ptr(&temp);
 
       if(!str) {
-        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        result = FETCHE_BAD_FUNCTION_ARGUMENT;
         goto error;
       }
 
@@ -879,7 +879,7 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
 
 #ifdef WANT_EXTRACT_CERTINFO
 
-static CURLcode dumpAlgo(struct dynbuf *store,
+static FETCHcode dumpAlgo(struct dynbuf *store,
                          struct Curl_asn1Element *param,
                          const char *beg, const char *end)
 {
@@ -889,14 +889,14 @@ static CURLcode dumpAlgo(struct dynbuf *store,
 
   beg = getASN1Element(&oid, beg, end);
   if(!beg)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   param->header = NULL;
   param->tag = 0;
   param->beg = param->end = end;
   if(beg < end) {
     const char *p = getASN1Element(param, beg, end);
     if(!p)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      return FETCHE_BAD_FUNCTION_ARGUMENT;
   }
   return OID2str(store, oid.beg, oid.end, TRUE);
 }
@@ -905,7 +905,7 @@ static CURLcode dumpAlgo(struct dynbuf *store,
  * This is a convenience function for push_certinfo_len that takes a zero
  * terminated value.
  */
-static CURLcode ssl_push_certinfo(struct Curl_easy *data,
+static FETCHcode ssl_push_certinfo(struct Curl_easy *data,
                                   int certnum,
                                   const char *label,
                                   const char *value)
@@ -921,7 +921,7 @@ static CURLcode ssl_push_certinfo(struct Curl_easy *data,
  *
  * It also does the verbose output if !certnum.
  */
-static CURLcode ssl_push_certinfo_dyn(struct Curl_easy *data,
+static FETCHcode ssl_push_certinfo_dyn(struct Curl_easy *data,
                                       int certnum,
                                       const char *label,
                                       struct dynbuf *ptr)
@@ -929,7 +929,7 @@ static CURLcode ssl_push_certinfo_dyn(struct Curl_easy *data,
   size_t valuelen = Curl_dyn_len(ptr);
   char *value = Curl_dyn_ptr(ptr);
 
-  CURLcode result = Curl_ssl_push_certinfo_len(data, certnum, label,
+  FETCHcode result = Curl_ssl_push_certinfo_len(data, certnum, label,
                                                value, valuelen);
 
   if(!certnum && !result)
@@ -938,14 +938,14 @@ static CURLcode ssl_push_certinfo_dyn(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode do_pubkey_field(struct Curl_easy *data, int certnum,
+static FETCHcode do_pubkey_field(struct Curl_easy *data, int certnum,
                                 const char *label,
                                 struct Curl_asn1Element *elem)
 {
-  CURLcode result;
+  FETCHcode result;
   struct dynbuf out;
 
-  Curl_dyn_init(&out, CURL_X509_STR_MAX);
+  Curl_dyn_init(&out, FETCH_X509_STR_MAX);
 
   /* Generate a certificate information record for the public key. */
 
@@ -983,7 +983,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
       if(ssl_push_certinfo(data, certnum, "ECC Public Key", q))
         return 1;
     }
-    return do_pubkey_field(data, certnum, "ecPublicKey", pubkey) == CURLE_OK
+    return do_pubkey_field(data, certnum, "ecPublicKey", pubkey) == FETCHE_OK
       ? 0 : 1;
   }
 
@@ -1064,13 +1064,13 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
  * Convert an ASN.1 distinguished name into a printable string.
  * Return error.
  */
-static CURLcode DNtostr(struct dynbuf *store,
+static FETCHcode DNtostr(struct dynbuf *store,
                         struct Curl_asn1Element *dn)
 {
   return encodeDN(store, dn);
 }
 
-CURLcode Curl_extract_certinfo(struct Curl_easy *data,
+FETCHcode Curl_extract_certinfo(struct Curl_easy *data,
                                int certnum,
                                const char *beg,
                                const char *end)
@@ -1080,21 +1080,21 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   char *certptr;
   size_t clen;
   struct dynbuf out;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   unsigned int version;
   const char *ptr;
   int rc;
 
   if(!data->set.ssl.certinfo)
     if(certnum)
-      return CURLE_OK;
+      return FETCHE_OK;
 
-  Curl_dyn_init(&out, CURL_X509_STR_MAX);
-  /* Prepare the certificate information for curl_easy_getinfo(). */
+  Curl_dyn_init(&out, FETCH_X509_STR_MAX);
+  /* Prepare the certificate information for fetch_easy_getinfo(). */
 
   /* Extract the certificate ASN.1 elements. */
   if(Curl_parseX509(&cert, beg, end))
-    return CURLE_PEER_FAILED_VERIFICATION;
+    return FETCHE_PEER_FAILED_VERIFICATION;
 
   /* Subject. */
   result = DNtostr(&out, &cert.subject);
@@ -1193,7 +1193,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   rc = do_pubkey(data, certnum, Curl_dyn_ptr(&out),
                  &param, &cert.subjectPublicKey);
   if(rc) {
-    result = CURLE_OUT_OF_MEMORY; /* the most likely error */
+    result = FETCHE_OUT_OF_MEMORY; /* the most likely error */
     goto done;
   }
   Curl_dyn_reset(&out);

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_OPENSSL) || \
   defined(USE_GNUTLS) || \
@@ -30,10 +30,10 @@
   defined(USE_QUICHE)
 
 #include "keylog.h"
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #define KEYLOG_LABEL_MAXLEN (sizeof("CLIENT_HANDSHAKE_TRAFFIC_SECRET") - 1)
@@ -57,7 +57,7 @@ Curl_tls_keylog_open(void)
   char *keylog_file_name;
 
   if(!keylog_file_fp) {
-    keylog_file_name = curl_getenv("SSLKEYLOGFILE");
+    keylog_file_name = fetch_getenv("SSLKEYLOGFILE");
     if(keylog_file_name) {
       keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
       if(keylog_file_fp) {
@@ -114,7 +114,7 @@ Curl_tls_keylog_write_line(const char *line)
   }
   buf[linelen] = '\0';
 
-  /* Using fputs here instead of fprintf since libcurl's fprintf replacement
+  /* Using fputs here instead of fprintf since libfetch's fprintf replacement
      may not be thread-safe. */
   fputs(buf, keylog_file_fp);
   return TRUE;
@@ -158,7 +158,7 @@ Curl_tls_keylog_write(const char *label,
   line[pos++] = '\n';
   line[pos] = '\0';
 
-  /* Using fputs here instead of fprintf since libcurl's fprintf replacement
+  /* Using fputs here instead of fprintf since libfetch's fprintf replacement
      may not be thread-safe. */
   fputs(line, keylog_file_fp);
   return TRUE;

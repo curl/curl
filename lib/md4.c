@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,18 +18,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE)
+#if defined(USE_FETCH_NTLM_CORE)
 
 #include <string.h>
 
 #include "strdup.h"
-#include "curl_md4.h"
+#include "fetch_md4.h"
 #include "warnless.h"
 
 #ifdef USE_OPENSSL
@@ -88,8 +88,8 @@
 #endif
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 
@@ -484,40 +484,40 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   memset(&ctx->buffer[used], 0, available - 8);
 
   ctx->lo <<= 3;
-  ctx->buffer[56] = curlx_ultouc((ctx->lo)&0xff);
-  ctx->buffer[57] = curlx_ultouc((ctx->lo >> 8)&0xff);
-  ctx->buffer[58] = curlx_ultouc((ctx->lo >> 16)&0xff);
-  ctx->buffer[59] = curlx_ultouc((ctx->lo >> 24)&0xff);
-  ctx->buffer[60] = curlx_ultouc((ctx->hi)&0xff);
-  ctx->buffer[61] = curlx_ultouc((ctx->hi >> 8)&0xff);
-  ctx->buffer[62] = curlx_ultouc((ctx->hi >> 16)&0xff);
-  ctx->buffer[63] = curlx_ultouc(ctx->hi >> 24);
+  ctx->buffer[56] = fetchx_ultouc((ctx->lo)&0xff);
+  ctx->buffer[57] = fetchx_ultouc((ctx->lo >> 8)&0xff);
+  ctx->buffer[58] = fetchx_ultouc((ctx->lo >> 16)&0xff);
+  ctx->buffer[59] = fetchx_ultouc((ctx->lo >> 24)&0xff);
+  ctx->buffer[60] = fetchx_ultouc((ctx->hi)&0xff);
+  ctx->buffer[61] = fetchx_ultouc((ctx->hi >> 8)&0xff);
+  ctx->buffer[62] = fetchx_ultouc((ctx->hi >> 16)&0xff);
+  ctx->buffer[63] = fetchx_ultouc(ctx->hi >> 24);
 
   my_md4_body(ctx, ctx->buffer, 64);
 
-  result[0] = curlx_ultouc((ctx->a)&0xff);
-  result[1] = curlx_ultouc((ctx->a >> 8)&0xff);
-  result[2] = curlx_ultouc((ctx->a >> 16)&0xff);
-  result[3] = curlx_ultouc(ctx->a >> 24);
-  result[4] = curlx_ultouc((ctx->b)&0xff);
-  result[5] = curlx_ultouc((ctx->b >> 8)&0xff);
-  result[6] = curlx_ultouc((ctx->b >> 16)&0xff);
-  result[7] = curlx_ultouc(ctx->b >> 24);
-  result[8] = curlx_ultouc((ctx->c)&0xff);
-  result[9] = curlx_ultouc((ctx->c >> 8)&0xff);
-  result[10] = curlx_ultouc((ctx->c >> 16)&0xff);
-  result[11] = curlx_ultouc(ctx->c >> 24);
-  result[12] = curlx_ultouc((ctx->d)&0xff);
-  result[13] = curlx_ultouc((ctx->d >> 8)&0xff);
-  result[14] = curlx_ultouc((ctx->d >> 16)&0xff);
-  result[15] = curlx_ultouc(ctx->d >> 24);
+  result[0] = fetchx_ultouc((ctx->a)&0xff);
+  result[1] = fetchx_ultouc((ctx->a >> 8)&0xff);
+  result[2] = fetchx_ultouc((ctx->a >> 16)&0xff);
+  result[3] = fetchx_ultouc(ctx->a >> 24);
+  result[4] = fetchx_ultouc((ctx->b)&0xff);
+  result[5] = fetchx_ultouc((ctx->b >> 8)&0xff);
+  result[6] = fetchx_ultouc((ctx->b >> 16)&0xff);
+  result[7] = fetchx_ultouc(ctx->b >> 24);
+  result[8] = fetchx_ultouc((ctx->c)&0xff);
+  result[9] = fetchx_ultouc((ctx->c >> 8)&0xff);
+  result[10] = fetchx_ultouc((ctx->c >> 16)&0xff);
+  result[11] = fetchx_ultouc(ctx->c >> 24);
+  result[12] = fetchx_ultouc((ctx->d)&0xff);
+  result[13] = fetchx_ultouc((ctx->d >> 8)&0xff);
+  result[14] = fetchx_ultouc((ctx->d >> 16)&0xff);
+  result[15] = fetchx_ultouc(ctx->d >> 24);
 
   memset(ctx, 0, sizeof(*ctx));
 }
 
 #endif /* CRYPTO LIBS */
 
-CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
+FETCHcode Curl_md4it(unsigned char *output, const unsigned char *input,
                     const size_t len)
 {
   MD4_CTX ctx;
@@ -526,12 +526,12 @@ CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
   MD4_Init(&ctx);
 #else
   if(!MD4_Init(&ctx))
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
 #endif
 
-  MD4_Update(&ctx, input, curlx_uztoui(len));
+  MD4_Update(&ctx, input, fetchx_uztoui(len));
   MD4_Final(output, &ctx);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-#endif /* USE_CURL_NTLM_CORE */
+#endif /* USE_FETCH_NTLM_CORE */

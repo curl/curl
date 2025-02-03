@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,22 +18,22 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-#include "curl_memrchr.h"
-#include "curl_memory.h"
+#include "fetch_memrchr.h"
+#include "fetch_memory.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
 
 #ifndef HAVE_MEMRCHR
-#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)) || \
+#if (!defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)) || \
   defined(USE_OPENSSL) || \
   defined(USE_SCHANNEL)
 

@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,27 +19,27 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(HAVE_GSSAPI) && defined(USE_KERBEROS5)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "vauth/vauth.h"
-#include "curl_sasl.h"
+#include "fetch_sasl.h"
 #include "urldata.h"
-#include "curl_gssapi.h"
+#include "fetch_gssapi.h"
 #include "sendf.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)
@@ -80,9 +80,9 @@ bool Curl_auth_is_gssapi_supported(void)
  * krb5        [in/out] - The Kerberos 5 data struct being used and modified.
  * out         [out]    - The result storage.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
@@ -92,7 +92,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               struct kerberos5data *krb5,
                                               struct bufref *out)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   OM_uint32 major_status;
   OM_uint32 minor_status;
   OM_uint32 unused_status;
@@ -107,7 +107,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     /* Generate our SPN */
     char *spn = Curl_auth_build_spn(service, NULL, host);
     if(!spn)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
 
     /* Populate the SPN structure */
     spn_token.value = spn;
@@ -122,7 +122,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
       free(spn);
 
-      return CURLE_AUTH_ERROR;
+      return FETCHE_AUTH_ERROR;
     }
 
     free(spn);
@@ -131,7 +131,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   if(chlg) {
     if(!Curl_bufref_len(chlg)) {
       infof(data, "GSSAPI handshake failure (empty challenge message)");
-      return CURLE_BAD_CONTENT_ENCODING;
+      return FETCHE_BAD_CONTENT_ENCODING;
     }
     input_token.value = (void *) Curl_bufref_ptr(chlg);
     input_token.length = Curl_bufref_len(chlg);
@@ -155,7 +155,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
                        major_status, minor_status);
 
-    return CURLE_AUTH_ERROR;
+    return FETCHE_AUTH_ERROR;
   }
 
   if(output_token.value && output_token.length) {
@@ -182,15 +182,15 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
  * krb5    [in/out] - The Kerberos 5 data struct being used and modified.
  * out     [out]    - The result storage.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
                                                   const char *authzid,
                                                   const struct bufref *chlg,
                                                   struct kerberos5data *krb5,
                                                   struct bufref *out)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   size_t messagelen = 0;
   unsigned char *message = NULL;
   OM_uint32 major_status;
@@ -206,7 +206,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlg)) {
     infof(data, "GSSAPI handshake failure (empty security message)");
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
   }
 
   /* Setup the challenge "input" security buffer */
@@ -219,13 +219,13 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(GSS_ERROR(major_status)) {
     Curl_gss_log_error(data, "gss_unwrap() failed: ",
                        major_status, minor_status);
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
   }
 
   /* Not 4 octets long so fail as per RFC4752 Section 3.1 */
   if(output_token.length != 4) {
     infof(data, "GSSAPI handshake failure (invalid security data)");
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
   }
 
   /* Extract the security layer and the maximum message size */
@@ -241,7 +241,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(!(sec_layer & GSSAUTH_P_NONE)) {
     infof(data, "GSSAPI handshake failure (invalid security layer)");
 
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
   }
   sec_layer &= GSSAUTH_P_NONE;  /* We do not support a security layer */
 
@@ -259,7 +259,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     messagelen += strlen(authzid);
   message = malloc(messagelen);
   if(!message)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Populate the message with the security layer and client supported receive
      message size. */
@@ -285,7 +285,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     Curl_gss_log_error(data, "gss_wrap() failed: ",
                        major_status, minor_status);
     free(message);
-    return CURLE_AUTH_ERROR;
+    return FETCHE_AUTH_ERROR;
   }
 
   /* Return the response. */

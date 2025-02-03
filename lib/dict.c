@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifndef CURL_DISABLE_DICT
+#ifndef FETCH_DISABLE_DICT
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -53,15 +53,15 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "transfer.h"
 #include "sendf.h"
 #include "escape.h"
 #include "progress.h"
 #include "dict.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 #include "strcase.h"
-#include "curl_memory.h"
+#include "fetch_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -69,7 +69,7 @@
  * Forward declarations.
  */
 
-static CURLcode dict_do(struct Curl_easy *data, bool *done);
+static FETCHcode dict_do(struct Curl_easy *data, bool *done);
 
 /*
  * DICT protocol handler.
@@ -95,8 +95,8 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
   PORT_DICT,                            /* defport */
-  CURLPROTO_DICT,                       /* protocol */
-  CURLPROTO_DICT,                       /* family */
+  FETCHPROTO_DICT,                       /* protocol */
+  FETCHPROTO_DICT,                       /* family */
   PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
@@ -105,7 +105,7 @@ static char *unescape_word(const char *input)
 {
   struct dynbuf out;
   const char *ptr;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   Curl_dyn_init(&out, DYN_DICT_WORD);
 
   /* According to RFC2229 section 2.2, these letters need to be escaped with
@@ -124,14 +124,14 @@ static char *unescape_word(const char *input)
 }
 
 /* sendf() sends formatted data to the server */
-static CURLcode sendf(struct Curl_easy *data,
-                      const char *fmt, ...) CURL_PRINTF(2, 3);
+static FETCHcode sendf(struct Curl_easy *data,
+                      const char *fmt, ...) FETCH_PRINTF(2, 3);
 
-static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
+static FETCHcode sendf(struct Curl_easy *data, const char *fmt, ...)
 {
   size_t bytes_written;
   size_t write_len;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   char *s;
   char *sptr;
   va_list ap;
@@ -139,7 +139,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
   s = vaprintf(fmt, ap); /* returns an allocated string */
   va_end(ap);
   if(!s)
-    return CURLE_OUT_OF_MEMORY; /* failure */
+    return FETCHE_OUT_OF_MEMORY; /* failure */
 
   bytes_written = 0;
   write_len = strlen(s);
@@ -152,7 +152,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
     if(result)
       break;
 
-    Curl_debug(data, CURLINFO_DATA_OUT, sptr, (size_t)bytes_written);
+    Curl_debug(data, FETCHINFO_DATA_OUT, sptr, (size_t)bytes_written);
 
     if((size_t)bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
@@ -169,7 +169,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
   return result;
 }
 
-static CURLcode dict_do(struct Curl_easy *data, bool *done)
+static FETCHcode dict_do(struct Curl_easy *data, bool *done)
 {
   char *word;
   char *eword = NULL;
@@ -178,7 +178,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   char *strategy = NULL;
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
-  CURLcode result;
+  FETCHcode result;
 
   char *path;
 
@@ -223,12 +223,12 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
     eword = unescape_word(word);
     if(!eword) {
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
       goto error;
     }
 
     result = sendf(data,
-                   "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
+                   "CLIENT " LIBFETCH_NAME " " LIBFETCH_VERSION "\r\n"
                    "MATCH "
                    "%s "    /* database */
                    "%s "    /* strategy */
@@ -242,7 +242,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE); /* no upload */
+    Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE); /* no upload */
   }
   else if(strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
           strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
@@ -271,12 +271,12 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
     eword = unescape_word(word);
     if(!eword) {
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
       goto error;
     }
 
     result = sendf(data,
-                   "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
+                   "CLIENT " LIBFETCH_NAME " " LIBFETCH_VERSION "\r\n"
                    "DEFINE "
                    "%s "     /* database */
                    "%s\r\n"  /* word */
@@ -288,7 +288,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
+    Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
   }
   else {
 
@@ -302,7 +302,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
           ppath[i] = ' ';
       }
       result = sendf(data,
-                     "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
+                     "CLIENT " LIBFETCH_NAME " " LIBFETCH_VERSION "\r\n"
                      "%s\r\n"
                      "QUIT\r\n", ppath);
       if(result) {
@@ -310,7 +310,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
         goto error;
       }
 
-      Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
+      Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
     }
   }
 
@@ -319,4 +319,4 @@ error:
   free(path);
   return result;
 }
-#endif /* CURL_DISABLE_DICT */
+#endif /* FETCH_DISABLE_DICT */

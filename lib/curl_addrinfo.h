@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_ADDRINFO_H
-#define HEADER_CURL_ADDRINFO_H
+#ifndef HEADER_FETCH_ADDRINFO_H
+#define HEADER_FETCH_ADDRINFO_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
@@ -54,7 +54,7 @@ struct Curl_addrinfo {
   int                   ai_family;
   int                   ai_socktype;
   int                   ai_protocol;
-  curl_socklen_t        ai_addrlen;   /* Follow rfc3493 struct addrinfo */
+  fetch_socklen_t        ai_addrlen;   /* Follow rfc3493 struct addrinfo */
   char                 *ai_canonname;
   struct sockaddr      *ai_addr;
   struct Curl_addrinfo *ai_next;
@@ -86,15 +86,15 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
                                      bool abstract);
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) && \
+#if defined(FETCHDEBUG) && defined(HAVE_GETADDRINFO) && \
     defined(HAVE_FREEADDRINFO)
 void
-curl_dbg_freeaddrinfo(struct addrinfo *freethis, int line, const char *source);
+fetch_dbg_freeaddrinfo(struct addrinfo *freethis, int line, const char *source);
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
+#if defined(FETCHDEBUG) && defined(HAVE_GETADDRINFO)
 int
-curl_dbg_getaddrinfo(const char *hostname, const char *service,
+fetch_dbg_getaddrinfo(const char *hostname, const char *service,
                      const struct addrinfo *hints, struct addrinfo **result,
                      int line, const char *source);
 #endif
@@ -107,4 +107,4 @@ void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port);
 #endif
 #endif
 
-#endif /* HEADER_CURL_ADDRINFO_H */
+#endif /* HEADER_FETCH_ADDRINFO_H */

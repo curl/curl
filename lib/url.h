@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_URL_H
-#define HEADER_CURL_URL_H
+#ifndef HEADER_FETCH_URL_H
+#define HEADER_FETCH_URL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,29 +20,29 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 /*
  * Prototypes for library-wide functions provided by url.c
  */
 
-CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn);
-CURLcode Curl_open(struct Curl_easy **curl);
-CURLcode Curl_init_userdefined(struct Curl_easy *data);
+FETCHcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn);
+FETCHcode Curl_open(struct Curl_easy **fetch);
+FETCHcode Curl_init_userdefined(struct Curl_easy *data);
 
 void Curl_freeset(struct Curl_easy *data);
-CURLcode Curl_uc_to_curlcode(CURLUcode uc);
-CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
-CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
+FETCHcode Curl_uc_to_fetchcode(FETCHUcode uc);
+FETCHcode Curl_close(struct Curl_easy **datap); /* opposite of fetch_open() */
+FETCHcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
 bool Curl_on_disconnect(struct Curl_easy *data,
                         struct connectdata *, bool aborted);
-CURLcode Curl_setup_conn(struct Curl_easy *data,
+FETCHcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done);
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);
-CURLcode Curl_parse_login_details(const char *login, const size_t len,
+FETCHcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
 
@@ -54,11 +54,11 @@ const struct Curl_handler *Curl_get_scheme_handler(const char *scheme);
 const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
                                                     size_t len);
 
-#define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
-#define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
+#define FETCH_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
+#define FETCH_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
                                              specified */
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FETCH_DISABLE_VERBOSE_STRINGS
 #define Curl_verboseconnect(x,y,z)  Curl_nop_stmt
 #else
 void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn,
@@ -71,14 +71,14 @@ void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn,
  */
 bool Curl_conn_seems_dead(struct connectdata *conn,
                           struct Curl_easy *data,
-                          struct curltime *nowp);
+                          struct fetchtime *nowp);
 
 /**
  * Perform upkeep operations on the connection.
  */
-CURLcode Curl_conn_upkeep(struct Curl_easy *data,
+FETCHcode Curl_conn_upkeep(struct Curl_easy *data,
                           struct connectdata *conn,
-                          struct curltime *now);
+                          struct fetchtime *now);
 
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
 void Curl_data_priority_clear_state(struct Curl_easy *data);
@@ -87,11 +87,11 @@ void Curl_data_priority_clear_state(struct Curl_easy *data);
 #endif /* !(defined(USE_HTTP2) || defined(USE_HTTP3)) */
 
 #ifdef USE_NGHTTP2
-CURLcode Curl_data_priority_add_child(struct Curl_easy *parent,
+FETCHcode Curl_data_priority_add_child(struct Curl_easy *parent,
                                       struct Curl_easy *child,
                                       bool exclusive);
 #else
-#define Curl_data_priority_add_child(x, y, z) CURLE_NOT_BUILT_IN
+#define Curl_data_priority_add_child(x, y, z) FETCHE_NOT_BUILT_IN
 #endif
 
-#endif /* HEADER_CURL_URL_H */
+#endif /* HEADER_FETCH_URL_H */

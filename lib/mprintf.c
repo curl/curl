@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,15 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  */
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "dynbuf.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 
-#include "curl_memory.h"
+#include "fetch_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -349,7 +349,7 @@ static int parsefmt(const char *format,
             fmt += 2;
           }
           else {
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if (SIZEOF_FETCH_OFF_T > SIZEOF_LONG)
             flags |= FLAGS_LONGLONG;
 #else
             flags |= FLAGS_LONG;
@@ -379,7 +379,7 @@ static int parsefmt(const char *format,
 #endif
           break;
         case 'O':
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if (SIZEOF_FETCH_OFF_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
@@ -969,7 +969,7 @@ number:
         if(width >= BUFFSIZE)
           width = BUFFSIZE - 1;
         /* RECURSIVE USAGE */
-        dlen = (size_t)curl_msnprintf(fptr, left, "%d", width);
+        dlen = (size_t)fetch_msnprintf(fptr, left, "%d", width);
         fptr += dlen;
         left -= dlen;
       }
@@ -992,7 +992,7 @@ number:
         if(prec < 0)
           prec = 0;
         /* RECURSIVE USAGE */
-        len = curl_msnprintf(fptr, left, ".%d", prec);
+        len = fetch_msnprintf(fptr, left, ".%d", prec);
         fptr += len;
       }
       if(flags & FLAGS_LONG)
@@ -1067,7 +1067,7 @@ static int addbyter(unsigned char outc, void *f)
   return 1;
 }
 
-int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
+int fetch_mvsnprintf(char *buffer, size_t maxlength, const char *format,
                     va_list ap_save)
 {
   int retcode;
@@ -1092,12 +1092,12 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
   return retcode;
 }
 
-int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
+int fetch_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 {
   int retcode;
   va_list ap_save; /* argument pointer */
   va_start(ap_save, format);
-  retcode = curl_mvsnprintf(buffer, maxlength, format, ap_save);
+  retcode = fetch_mvsnprintf(buffer, maxlength, format, ap_save);
   va_end(ap_save);
   return retcode;
 }
@@ -1106,9 +1106,9 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 static int alloc_addbyter(unsigned char outc, void *f)
 {
   struct asprintf *infop = f;
-  CURLcode result = Curl_dyn_addn(infop->b, &outc, 1);
+  FETCHcode result = Curl_dyn_addn(infop->b, &outc, 1);
   if(result) {
-    infop->merr = result == CURLE_TOO_LARGE ? MERR_TOO_LARGE : MERR_MEM;
+    infop->merr = result == FETCHE_TOO_LARGE ? MERR_TOO_LARGE : MERR_MEM;
     return 1 ; /* fail */
   }
   return 0;
@@ -1129,7 +1129,7 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
   return 0;
 }
 
-char *curl_mvaprintf(const char *format, va_list ap_save)
+char *fetch_mvaprintf(const char *format, va_list ap_save)
 {
   struct asprintf info;
   struct dynbuf dyn;
@@ -1147,12 +1147,12 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   return strdup("");
 }
 
-char *curl_maprintf(const char *format, ...)
+char *fetch_maprintf(const char *format, ...)
 {
   va_list ap_save;
   char *s;
   va_start(ap_save, format);
-  s = curl_mvaprintf(format, ap_save);
+  s = fetch_mvaprintf(format, ap_save);
   va_end(ap_save);
   return s;
 }
@@ -1165,7 +1165,7 @@ static int storebuffer(unsigned char outc, void *f)
   return 0;
 }
 
-int curl_msprintf(char *buffer, const char *format, ...)
+int fetch_msprintf(char *buffer, const char *format, ...)
 {
   va_list ap_save; /* argument pointer */
   int retcode;
@@ -1184,7 +1184,7 @@ static int fputc_wrapper(unsigned char outc, void *f)
   return rc == EOF;
 }
 
-int curl_mprintf(const char *format, ...)
+int fetch_mprintf(const char *format, ...)
 {
   int retcode;
   va_list ap_save; /* argument pointer */
@@ -1195,7 +1195,7 @@ int curl_mprintf(const char *format, ...)
   return retcode;
 }
 
-int curl_mfprintf(FILE *whereto, const char *format, ...)
+int fetch_mfprintf(FILE *whereto, const char *format, ...)
 {
   int retcode;
   va_list ap_save; /* argument pointer */
@@ -1205,19 +1205,19 @@ int curl_mfprintf(FILE *whereto, const char *format, ...)
   return retcode;
 }
 
-int curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
+int fetch_mvsprintf(char *buffer, const char *format, va_list ap_save)
 {
   int retcode = formatf(&buffer, storebuffer, format, ap_save);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 
-int curl_mvprintf(const char *format, va_list ap_save)
+int fetch_mvprintf(const char *format, va_list ap_save)
 {
   return formatf(stdout, fputc_wrapper, format, ap_save);
 }
 
-int curl_mvfprintf(FILE *whereto, const char *format, va_list ap_save)
+int fetch_mvfprintf(FILE *whereto, const char *format, va_list ap_save)
 {
   return formatf(whereto, fputc_wrapper, format, ap_save);
 }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,15 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-#include "curl_trc.h"
+#include "fetch_trc.h"
 #include "urldata.h"
 #include "easyif.h"
 #include "cfilters.h"
@@ -49,19 +49,19 @@
 #include "vquic/vquic.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
-void Curl_debug(struct Curl_easy *data, curl_infotype type,
+void Curl_debug(struct Curl_easy *data, fetch_infotype type,
                 char *ptr, size_t size)
 {
   if(data->set.verbose) {
-    static const char s_infotype[CURLINFO_END][3] = {
+    static const char s_infotype[FETCHINFO_END][3] = {
       "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
@@ -71,9 +71,9 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
     }
     else {
       switch(type) {
-      case CURLINFO_TEXT:
-      case CURLINFO_HEADER_OUT:
-      case CURLINFO_HEADER_IN:
+      case FETCHINFO_TEXT:
+      case FETCHINFO_HEADER_OUT:
+      case FETCHINFO_HEADER_IN:
         fwrite(s_infotype[type], 2, 1, data->set.err);
         fwrite(ptr, size, 1, data->set.err);
         break;
@@ -94,9 +94,9 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   if(data->set.verbose || data->set.errorbuffer) {
     va_list ap;
     int len;
-    char error[CURL_ERROR_SIZE + 2];
+    char error[FETCH_ERROR_SIZE + 2];
     va_start(ap, fmt);
-    len = mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
+    len = mvsnprintf(error, FETCH_ERROR_SIZE, fmt, ap);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {
       strcpy(data->set.errorbuffer, error);
@@ -104,20 +104,20 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     }
     error[len++] = '\n';
     error[len] = '\0';
-    Curl_debug(data, CURLINFO_TEXT, error, len);
+    Curl_debug(data, FETCHINFO_TEXT, error, len);
     va_end(ap);
   }
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if !defined(FETCH_DISABLE_VERBOSE_STRINGS)
 
 /* Curl_infof() is for info message along the way */
 #define MAXINFO 2048
 
-static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
-                      const char * const fmt, va_list ap)  CURL_PRINTF(3, 0);
+static void trc_infof(struct Curl_easy *data, struct fetch_trc_feat *feat,
+                      const char * const fmt, va_list ap)  FETCH_PRINTF(3, 0);
 
-static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
+static void trc_infof(struct Curl_easy *data, struct fetch_trc_feat *feat,
                       const char * const fmt, va_list ap)
 {
   int len = 0;
@@ -133,7 +133,7 @@ static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
   }
   buffer[len++] = '\n';
   buffer[len] = '\0';
-  Curl_debug(data, CURLINFO_TEXT, buffer, len);
+  Curl_debug(data, FETCHINFO_TEXT, buffer, len);
 }
 
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
@@ -168,17 +168,17 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
     va_end(ap);
     buffer[len++] = '\n';
     buffer[len] = '\0';
-    Curl_debug(data, CURLINFO_TEXT, buffer, len);
+    Curl_debug(data, FETCHINFO_TEXT, buffer, len);
   }
 }
 
-struct curl_trc_feat Curl_trc_feat_read = {
+struct fetch_trc_feat Curl_trc_feat_read = {
   "READ",
-  CURL_LOG_LVL_NONE,
+  FETCH_LOG_LVL_NONE,
 };
-struct curl_trc_feat Curl_trc_feat_write = {
+struct fetch_trc_feat Curl_trc_feat_write = {
   "WRITE",
-  CURL_LOG_LVL_NONE,
+  FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
@@ -203,10 +203,10 @@ void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-#ifndef CURL_DISABLE_FTP
-struct curl_trc_feat Curl_trc_feat_ftp = {
+#ifndef FETCH_DISABLE_FTP
+struct fetch_trc_feat Curl_trc_feat_ftp = {
   "FTP",
-  CURL_LOG_LVL_NONE,
+  FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
@@ -219,12 +219,12 @@ void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
     va_end(ap);
   }
 }
-#endif /* !CURL_DISABLE_FTP */
+#endif /* !FETCH_DISABLE_FTP */
 
-#ifndef CURL_DISABLE_SMTP
-struct curl_trc_feat Curl_trc_feat_smtp = {
+#ifndef FETCH_DISABLE_SMTP
+struct fetch_trc_feat Curl_trc_feat_smtp = {
   "SMTP",
-  CURL_LOG_LVL_NONE,
+  FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
@@ -237,12 +237,12 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
     va_end(ap);
   }
 }
-#endif /* !CURL_DISABLE_SMTP */
+#endif /* !FETCH_DISABLE_SMTP */
 
 #ifdef USE_SSL
-struct curl_trc_feat Curl_trc_feat_ssls = {
+struct fetch_trc_feat Curl_trc_feat_ssls = {
   "SSLS",
-  CURL_LOG_LVL_NONE,
+  FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
@@ -257,10 +257,10 @@ void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif /* USE_SSL */
 
-#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
-struct curl_trc_feat Curl_trc_feat_ws = {
+#if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
+struct fetch_trc_feat Curl_trc_feat_ws = {
   "WS",
-  CURL_LOG_LVL_NONE,
+  FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
@@ -273,7 +273,7 @@ void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
     va_end(ap);
   }
 }
-#endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
+#endif /* !FETCH_DISABLE_WEBSOCKETS && !FETCH_DISABLE_HTTP */
 
 #define TRC_CT_NONE        (0)
 #define TRC_CT_PROTOCOL    (1<<(0))
@@ -281,26 +281,26 @@ void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 #define TRC_CT_PROXY       (1<<(2))
 
 struct trc_feat_def {
-  struct curl_trc_feat *feat;
+  struct fetch_trc_feat *feat;
   unsigned int category;
 };
 
 static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_read,      TRC_CT_NONE },
   { &Curl_trc_feat_write,     TRC_CT_NONE },
-#ifndef CURL_DISABLE_FTP
+#ifndef FETCH_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
 #endif
-#ifndef CURL_DISABLE_DOH
+#ifndef FETCH_DISABLE_DOH
   { &Curl_doh_trc,            TRC_CT_NETWORK },
 #endif
-#ifndef CURL_DISABLE_SMTP
+#ifndef FETCH_DISABLE_SMTP
   { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },
 #endif
 #ifdef USE_SSL
   { &Curl_trc_feat_ssls,      TRC_CT_NETWORK },
 #endif
-#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
   { &Curl_trc_feat_ws,        TRC_CT_PROTOCOL },
 #endif
 };
@@ -322,25 +322,25 @@ static struct trc_cft_def trc_cfts[] = {
 #endif
 #ifdef USE_SSL
   { &Curl_cft_ssl,            TRC_CT_NETWORK },
-#ifndef CURL_DISABLE_PROXY
+#ifndef FETCH_DISABLE_PROXY
   { &Curl_cft_ssl_proxy,      TRC_CT_PROXY },
 #endif
 #endif
-#if !defined(CURL_DISABLE_PROXY)
-#if !defined(CURL_DISABLE_HTTP)
+#if !defined(FETCH_DISABLE_PROXY)
+#if !defined(FETCH_DISABLE_HTTP)
   { &Curl_cft_h1_proxy,       TRC_CT_PROXY },
 #ifdef USE_NGHTTP2
   { &Curl_cft_h2_proxy,       TRC_CT_PROXY },
 #endif
   { &Curl_cft_http_proxy,     TRC_CT_PROXY },
-#endif /* !CURL_DISABLE_HTTP */
+#endif /* !FETCH_DISABLE_HTTP */
   { &Curl_cft_haproxy,        TRC_CT_PROXY },
   { &Curl_cft_socks_proxy,    TRC_CT_PROXY },
-#endif /* !CURL_DISABLE_PROXY */
+#endif /* !FETCH_DISABLE_PROXY */
 #ifdef USE_HTTP3
   { &Curl_cft_http3,          TRC_CT_PROTOCOL },
 #endif
-#if !defined(CURL_DISABLE_HTTP)
+#if !defined(FETCH_DISABLE_HTTP)
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
 #endif
 };
@@ -377,28 +377,28 @@ static void trc_apply_level_by_category(int category, int lvl)
   }
 }
 
-static CURLcode trc_opt(const char *config)
+static FETCHcode trc_opt(const char *config)
 {
   char *token, *tok_buf, *tmp;
   int lvl;
 
   tmp = strdup(config);
   if(!tmp)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   token = Curl_strtok_r(tmp, ", ", &tok_buf);
   while(token) {
     switch(*token) {
       case '-':
-        lvl = CURL_LOG_LVL_NONE;
+        lvl = FETCH_LOG_LVL_NONE;
         ++token;
         break;
       case '+':
-        lvl = CURL_LOG_LVL_INFO;
+        lvl = FETCH_LOG_LVL_INFO;
         ++token;
         break;
       default:
-        lvl = CURL_LOG_LVL_INFO;
+        lvl = FETCH_LOG_LVL_INFO;
         break;
     }
     if(strcasecompare(token, "all"))
@@ -415,16 +415,16 @@ static CURLcode trc_opt(const char *config)
     token = Curl_strtok_r(NULL, ", ", &tok_buf);
   }
   free(tmp);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode Curl_trc_opt(const char *config)
+FETCHcode Curl_trc_opt(const char *config)
 {
-  CURLcode result = config ? trc_opt(config) : CURLE_OK;
+  FETCHcode result = config ? trc_opt(config) : FETCHE_OK;
 #ifdef DEBUGBUILD
-  /* CURL_DEBUG can override anything */
+  /* FETCH_DEBUG can override anything */
   if(!result) {
-    const char *dbg_config = getenv("CURL_DEBUG");
+    const char *dbg_config = getenv("FETCH_DEBUG");
     if(dbg_config)
       result = trc_opt(dbg_config);
   }
@@ -432,20 +432,20 @@ CURLcode Curl_trc_opt(const char *config)
   return result;
 }
 
-CURLcode Curl_trc_init(void)
+FETCHcode Curl_trc_init(void)
 {
 #ifdef DEBUGBUILD
   return Curl_trc_opt(NULL);
 #else
-  return CURLE_OK;
+  return FETCHE_OK;
 #endif
 }
 
-#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* defined(FETCH_DISABLE_VERBOSE_STRINGS) */
 
-CURLcode Curl_trc_init(void)
+FETCHcode Curl_trc_init(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
@@ -460,7 +460,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data,
   (void)data; (void)cf; (void)fmt;
 }
 
-struct curl_trc_feat;
+struct fetch_trc_feat;
 
 void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
 {
@@ -472,19 +472,19 @@ void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 
-#ifndef CURL_DISABLE_FTP
+#ifndef FETCH_DISABLE_FTP
 void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
 }
 #endif
-#ifndef CURL_DISABLE_SMTP
+#ifndef FETCH_DISABLE_SMTP
 void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
 }
 #endif
-#if !defined(CURL_DISABLE_WEBSOCKETS) || !defined(CURL_DISABLE_HTTP)
+#if !defined(FETCH_DISABLE_WEBSOCKETS) || !defined(FETCH_DISABLE_HTTP)
 void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
@@ -497,4 +497,4 @@ void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
   (void)fmt;
 }
 
-#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#endif /* !defined(FETCH_DISABLE_VERBOSE_STRINGS) */

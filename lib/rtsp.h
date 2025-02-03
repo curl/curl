@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_RTSP_H
-#define HEADER_CURL_RTSP_H
+#ifndef HEADER_FETCH_RTSP_H
+#define HEADER_FETCH_RTSP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,21 +20,21 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#ifndef CURL_DISABLE_RTSP
+#ifndef FETCH_DISABLE_RTSP
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
-CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header);
+FETCHcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header);
 
 #else
 /* disabled */
-#define Curl_rtsp_parseheader(x,y) CURLE_NOT_BUILT_IN
+#define Curl_rtsp_parseheader(x,y) FETCHE_NOT_BUILT_IN
 
-#endif /* CURL_DISABLE_RTSP */
+#endif /* FETCH_DISABLE_RTSP */
 
 typedef enum {
   RTP_PARSE_SKIP,
@@ -64,4 +64,4 @@ struct RTSP {
 };
 
 
-#endif /* HEADER_CURL_RTSP_H */
+#endif /* HEADER_FETCH_RTSP_H */

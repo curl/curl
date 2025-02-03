@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,26 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef HAVE_GSSAPI
 
-#include "curl_gssapi.h"
+#include "fetch_gssapi.h"
 #include "sendf.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #if defined(__GNUC__)
-#define CURL_ALIGN8  __attribute__((aligned(8)))
+#define FETCH_ALIGN8  __attribute__((aligned(8)))
 #else
-#define CURL_ALIGN8
+#define FETCH_ALIGN8
 #endif
 
 #if defined(__GNUC__) && defined(__APPLE__)
@@ -45,10 +45,10 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-gss_OID_desc Curl_spnego_mech_oid CURL_ALIGN8 = {
+gss_OID_desc Curl_spnego_mech_oid FETCH_ALIGN8 = {
   6, (char *)"\x2b\x06\x01\x05\x05\x02"
 };
-gss_OID_desc Curl_krb5_mech_oid CURL_ALIGN8 = {
+gss_OID_desc Curl_krb5_mech_oid FETCH_ALIGN8 = {
   9, (char *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"
 };
 
@@ -69,16 +69,16 @@ OM_uint32 Curl_gss_init_sec_context(
   if(mutual_auth)
     req_flags |= GSS_C_MUTUAL_FLAG;
 
-  if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_POLICY_FLAG) {
+  if(data->set.gssapi_delegation & FETCHGSSAPI_DELEGATION_POLICY_FLAG) {
 #ifdef GSS_C_DELEG_POLICY_FLAG
     req_flags |= GSS_C_DELEG_POLICY_FLAG;
 #else
-    infof(data, "WARNING: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
+    infof(data, "WARNING: support for FETCHGSSAPI_DELEGATION_POLICY_FLAG not "
         "compiled in");
 #endif
   }
 
-  if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
+  if(data->set.gssapi_delegation & FETCHGSSAPI_DELEGATION_FLAG)
     req_flags |= GSS_C_DELEG_FLAG;
 
   return gss_init_sec_context(minor_status,
@@ -148,7 +148,7 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
   display_gss_error(minor, GSS_C_MECH_CODE, buf, len);
 
   infof(data, "%s%s", prefix, buf);
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FETCH_DISABLE_VERBOSE_STRINGS
   (void)data;
   (void)prefix;
 #endif

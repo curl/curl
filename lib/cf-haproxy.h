@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CF_HAPROXY_H
-#define HEADER_CURL_CF_HAPROXY_H
+#ifndef HEADER_FETCH_CF_HAPROXY_H
+#define HEADER_FETCH_CF_HAPROXY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,20 +20,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "urldata.h"
 
-#if !defined(CURL_DISABLE_PROXY)
+#if !defined(FETCH_DISABLE_PROXY)
 
-CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
+FETCHcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
                                       struct Curl_easy *data);
 
 extern struct Curl_cftype Curl_cft_haproxy;
 
-#endif /* !CURL_DISABLE_PROXY */
+#endif /* !FETCH_DISABLE_PROXY */
 
-#endif /* HEADER_CURL_CF_HAPROXY_H */
+#endif /* HEADER_FETCH_CF_HAPROXY_H */

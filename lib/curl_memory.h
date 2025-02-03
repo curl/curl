@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_MEMORY_H
-#define HEADER_CURL_MEMORY_H
+#ifndef HEADER_FETCH_MEMORY_H
+#define HEADER_FETCH_MEMORY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,45 +20,45 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /*
  * Nasty internal details ahead...
  *
- * File curl_memory.h must be included by _all_ *.c source files
+ * File fetch_memory.h must be included by _all_ *.c source files
  * that use memory related functions strdup, malloc, calloc, realloc
- * or free, and given source file is used to build libcurl library.
+ * or free, and given source file is used to build libfetch library.
  * It should be included immediately before memdebug.h as the last files
  * included to avoid undesired interaction with other memory function
  * headers in dependent libraries.
  *
- * There is nearly no exception to above rule. All libcurl source
+ * There is nearly no exception to above rule. All libfetch source
  * files in 'lib' subdirectory as well as those living deep inside
  * 'packages' subdirectories and linked together in order to build
- * libcurl library shall follow it.
+ * libfetch library shall follow it.
  *
  * File lib/strdup.c is an exception, given that it provides a strdup
  * clone implementation while using malloc. Extra care needed inside
  * this one.
  *
- * The need for curl_memory.h inclusion is due to libcurl's feature
+ * The need for fetch_memory.h inclusion is due to libfetch's feature
  * of allowing library user to provide memory replacement functions,
- * memory callbacks, at runtime with curl_global_init_mem()
+ * memory callbacks, at runtime with fetch_global_init_mem()
  *
- * Any *.c source file used to build libcurl library that does not
- * include curl_memory.h and uses any memory function of the five
+ * Any *.c source file used to build libfetch library that does not
+ * include fetch_memory.h and uses any memory function of the five
  * mentioned above will compile without any indication, but it will
  * trigger weird memory related issues at runtime.
  *
  */
 
-#ifdef HEADER_CURL_MEMDEBUG_H
+#ifdef HEADER_FETCH_MEMDEBUG_H
 /* cleanup after memdebug.h */
 
 #ifdef MEMDEBUG_NODEFINES
-#ifdef CURLDEBUG
+#ifdef FETCHDEBUG
 
 #undef strdup
 #undef malloc
@@ -84,7 +84,7 @@
 #undef socketpair
 #endif
 
-#ifndef CURL_NO_GETADDRINFO_OVERRIDE
+#ifndef FETCH_NO_GETADDRINFO_OVERRIDE
 #ifdef HAVE_GETADDRINFO
 #if defined(getaddrinfo) && defined(__osf__)
 #undef ogetaddrinfo
@@ -96,7 +96,7 @@
 #ifdef HAVE_FREEADDRINFO
 #undef freeaddrinfo
 #endif /* HAVE_FREEADDRINFO */
-#endif /* !CURL_NO_GETADDRINFO_OVERRIDE */
+#endif /* !FETCH_NO_GETADDRINFO_OVERRIDE */
 
 /* sclose is probably already defined, redefine it! */
 #undef sclose
@@ -105,48 +105,48 @@
 #undef fclose
 
 #endif /* MEMDEBUG_NODEFINES */
-#endif /* CURLDEBUG */
+#endif /* FETCHDEBUG */
 
-#undef HEADER_CURL_MEMDEBUG_H
-#endif /* HEADER_CURL_MEMDEBUG_H */
+#undef HEADER_FETCH_MEMDEBUG_H
+#endif /* HEADER_FETCH_MEMDEBUG_H */
 
 /*
-** Following section applies even when CURLDEBUG is not defined.
+** Following section applies even when FETCHDEBUG is not defined.
 */
 
 #undef fake_sclose
 
-#ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
+#ifndef FETCH_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
 /*
  * The following memory function replacement typedef's are COPIED from
- * curl/curl.h and MUST match the originals. We copy them to avoid having to
- * include curl/curl.h here. We avoid that include since it includes stdio.h
+ * fetch/fetch.h and MUST match the originals. We copy them to avoid having to
+ * include fetch/fetch.h here. We avoid that include since it includes stdio.h
  * and other headers that may get messed up with defines done here.
  */
-typedef void *(*curl_malloc_callback)(size_t size);
-typedef void (*curl_free_callback)(void *ptr);
-typedef void *(*curl_realloc_callback)(void *ptr, size_t size);
-typedef char *(*curl_strdup_callback)(const char *str);
-typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
-#define CURL_DID_MEMORY_FUNC_TYPEDEFS
+typedef void *(*fetch_malloc_callback)(size_t size);
+typedef void (*fetch_free_callback)(void *ptr);
+typedef void *(*fetch_realloc_callback)(void *ptr, size_t size);
+typedef char *(*fetch_strdup_callback)(const char *str);
+typedef void *(*fetch_calloc_callback)(size_t nmemb, size_t size);
+#define FETCH_DID_MEMORY_FUNC_TYPEDEFS
 #endif
 
-extern curl_malloc_callback Curl_cmalloc;
-extern curl_free_callback Curl_cfree;
-extern curl_realloc_callback Curl_crealloc;
-extern curl_strdup_callback Curl_cstrdup;
-extern curl_calloc_callback Curl_ccalloc;
+extern fetch_malloc_callback Curl_cmalloc;
+extern fetch_free_callback Curl_cfree;
+extern fetch_realloc_callback Curl_crealloc;
+extern fetch_strdup_callback Curl_cstrdup;
+extern fetch_calloc_callback Curl_ccalloc;
 #if defined(_WIN32) && defined(UNICODE)
-extern curl_wcsdup_callback Curl_cwcsdup;
+extern fetch_wcsdup_callback Curl_cwcsdup;
 #endif
 
-#ifndef CURLDEBUG
+#ifndef FETCHDEBUG
 
 /*
- * libcurl's 'memory tracking' system defines strdup, malloc, calloc,
+ * libfetch's 'memory tracking' system defines strdup, malloc, calloc,
  * realloc and free, along with others, in memdebug.h in a different
  * way although still using memory callbacks forward declared above.
- * When using the 'memory tracking' system (CURLDEBUG defined) we do
+ * When using the 'memory tracking' system (FETCHDEBUG defined) we do
  * not define here the five memory functions given that definitions
  * from memdebug.h are the ones that shall be used.
  */
@@ -176,5 +176,5 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 #  endif
 #endif
 
-#endif /* CURLDEBUG */
-#endif /* HEADER_CURL_MEMORY_H */
+#endif /* FETCHDEBUG */
+#endif /* HEADER_FETCH_MEMORY_H */

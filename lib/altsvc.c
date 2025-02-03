@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,20 +18,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /*
  * The Alt-Svc: header is defined in RFC 7838:
  * https://datatracker.ietf.org/doc/html/rfc7838
  */
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
-#include <curl/curl.h>
+#if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_ALTSVC)
+#include <fetch/fetch.h>
 #include "urldata.h"
 #include "altsvc.h"
-#include "curl_get_line.h"
+#include "fetch_get_line.h"
 #include "strcase.h"
 #include "parsedate.h"
 #include "sendf.h"
@@ -44,8 +44,8 @@
 #include "connect.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #define MAX_ALTSVC_LINE 4095
@@ -149,7 +149,7 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
 }
 
 /* only returns SERIOUS errors */
-static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
+static FETCHcode altsvc_add(struct altsvcinfo *asi, char *line)
 {
   /* Example line:
      h2 example.com 443 h3 shiny.example.com 8443 "20191231 10:00:00" 1
@@ -203,20 +203,20 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
     }
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
  * Load alt-svc entries from the given file. The text based line-oriented file
- * format is documented here: https://curl.se/docs/alt-svc.html
+ * format is documented here: https://fetch.se/docs/alt-svc.html
  *
  * This function only returns error on major problems that prevent alt-svc
  * handling to work completely. It will ignore individual syntactical errors
  * etc.
  */
-static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
+static FETCHcode altsvc_load(struct altsvcinfo *asi, const char *file)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   FILE *fp;
 
   /* we need a private copy of the filename so that the altsvc cache file
@@ -224,7 +224,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   free(asi->filename);
   asi->filename = strdup(file);
   if(!asi->filename)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   fp = fopen(file, FOPEN_READTEXT);
   if(fp) {
@@ -250,14 +250,14 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
  * Write this single altsvc entry to a single output line
  */
 
-static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
+static FETCHcode altsvc_out(struct altsvc *as, FILE *fp)
 {
   struct tm stamp;
   const char *dst6_pre = "";
   const char *dst6_post = "";
   const char *src6_pre = "";
   const char *src6_post = "";
-  CURLcode result = Curl_gmtime(as->expires, &stamp);
+  FETCHcode result = Curl_gmtime(as->expires, &stamp);
   if(result)
     return result;
 #ifdef USE_IPV6
@@ -290,7 +290,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
           stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
           stamp.tm_hour, stamp.tm_min, stamp.tm_sec,
           as->persist, as->prio);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /* ---- library-wide functions below ---- */
@@ -307,12 +307,12 @@ struct altsvcinfo *Curl_altsvc_init(void)
   Curl_llist_init(&asi->list, NULL);
 
   /* set default behavior */
-  asi->flags = CURLALTSVC_H1
+  asi->flags = FETCHALTSVC_H1
 #ifdef USE_HTTP2
-    | CURLALTSVC_H2
+    | FETCHALTSVC_H2
 #endif
 #ifdef USE_HTTP3
-    | CURLALTSVC_H3
+    | FETCHALTSVC_H3
 #endif
     ;
   return asi;
@@ -321,7 +321,7 @@ struct altsvcinfo *Curl_altsvc_init(void)
 /*
  * Curl_altsvc_load() loads alt-svc from file.
  */
-CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
+FETCHcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
 {
   DEBUGASSERT(asi);
   return altsvc_load(asi, file);
@@ -330,11 +330,11 @@ CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
 /*
  * Curl_altsvc_ctrl() passes on the external bitmask.
  */
-CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
+FETCHcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
 {
   DEBUGASSERT(asi);
   asi->flags = ctrl;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -361,31 +361,31 @@ void Curl_altsvc_cleanup(struct altsvcinfo **altsvcp)
 /*
  * Curl_altsvc_save() writes the altsvc cache to a file.
  */
-CURLcode Curl_altsvc_save(struct Curl_easy *data,
+FETCHcode Curl_altsvc_save(struct Curl_easy *data,
                           struct altsvcinfo *altsvc, const char *file)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   FILE *out;
   char *tempstore = NULL;
 
   if(!altsvc)
     /* no cache activated */
-    return CURLE_OK;
+    return FETCHE_OK;
 
   /* if not new name is given, use the one we stored from the load */
   if(!file && altsvc->filename)
     file = altsvc->filename;
 
-  if((altsvc->flags & CURLALTSVC_READONLYFILE) || !file || !file[0])
+  if((altsvc->flags & FETCHALTSVC_READONLYFILE) || !file || !file[0])
     /* marked as read-only, no file or zero length filename */
-    return CURLE_OK;
+    return FETCHE_OK;
 
   result = Curl_fopen(data, file, &out, &tempstore);
   if(!result) {
     struct Curl_llist_node *e;
     struct Curl_llist_node *n;
-    fputs("# Your alt-svc cache. https://curl.se/docs/alt-svc.html\n"
-          "# This file was generated by libcurl! Edit at your own risk.\n",
+    fputs("# Your alt-svc cache. https://fetch.se/docs/alt-svc.html\n"
+          "# This file was generated by libfetch! Edit at your own risk.\n",
           out);
     for(e = Curl_llist_head(&altsvc->list); e; e = n) {
       struct altsvc *as = Curl_node_elem(e);
@@ -396,7 +396,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
     }
     fclose(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
-      result = CURLE_WRITE_ERROR;
+      result = FETCHE_WRITE_ERROR;
 
     if(result && tempstore)
       unlink(tempstore);
@@ -405,7 +405,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
+static FETCHcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
 {
   size_t len;
   const char *protop;
@@ -419,10 +419,10 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   *ptr = p;
 
   if(!len || (len >= buflen))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   memcpy(alpnbuf, protop, len);
   alpnbuf[len] = 0;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /* hostcompare() returns true if 'host' matches 'check'. The first host
@@ -465,7 +465,7 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
    return */
 static time_t altsvc_debugtime(void *unused)
 {
-  char *timestr = getenv("CURL_TIME");
+  char *timestr = getenv("FETCH_TIME");
   (void)unused;
   if(timestr) {
     long val = strtol(timestr, NULL, 10);
@@ -488,7 +488,7 @@ static time_t altsvc_debugtime(void *unused)
  * Invalid hostname, port number will result in the specific alternative
  * being rejected. Unknown protocols are skipped.
  */
-CURLcode Curl_altsvc_parse(struct Curl_easy *data,
+FETCHcode Curl_altsvc_parse(struct Curl_easy *data,
                            struct altsvcinfo *asi, const char *value,
                            enum alpnid srcalpnid, const char *srchost,
                            unsigned short srcport)
@@ -497,16 +497,16 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   char alpnbuf[MAX_ALTSVC_ALPNLEN] = "";
   struct altsvc *as;
   unsigned short dstport = srcport; /* the same by default */
-  CURLcode result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
+  FETCHcode result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
   size_t entries = 0;
   size_t alpnlen = strlen(alpnbuf);
   size_t srchostlen = strlen(srchost);
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FETCH_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
   if(result) {
     infof(data, "Excessive alt-svc header, ignoring.");
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
   DEBUGASSERT(asi);
@@ -515,7 +515,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   if(strcasecompare(alpnbuf, "clear")) {
     /* Flush cached alternatives for this source origin */
     altsvc_flush(asi, srcalpnid, srchost, srcport);
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
   do {
@@ -579,7 +579,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             valid = FALSE;
           }
           else {
-            dstport = curlx_ultous(port);
+            dstport = fetchx_ultous(port);
             p = end_ptr;
           }
         }
@@ -603,12 +603,12 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           while(*p && ISBLANK(*p))
             p++;
           if(*p != '=')
-            return CURLE_OK;
+            return FETCHE_OK;
           p++;
           while(*p && ISBLANK(*p))
             p++;
           if(!*p)
-            return CURLE_OK;
+            return FETCHE_OK;
           if(*p == '\"') {
             /* quoted value */
             p++;
@@ -619,7 +619,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             while(*p && *p != '\"')
               p++;
             if(!*p++)
-              return CURLE_OK;
+              return FETCHE_OK;
           }
           else {
             while(*p && !ISBLANK(*p) && *p!= ';' && *p != ',')
@@ -674,7 +674,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
       break;
   } while(*p && (*p != ';') && (*p != '\n') && (*p != '\r'));
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -714,4 +714,4 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
   return FALSE;
 }
 
-#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */
+#endif /* !FETCH_DISABLE_HTTP && !FETCH_DISABLE_ALTSVC */

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HMAC_H
-#define HEADER_CURL_HMAC_H
+#ifndef HEADER_FETCH_HMAC_H
+#define HEADER_FETCH_HMAC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,19 +20,19 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||      \
-  !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) ||   \
+#if (defined(USE_FETCH_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||      \
+  !defined(FETCH_DISABLE_AWS) || !defined(FETCH_DISABLE_DIGEST_AUTH) ||   \
   defined(USE_SSL)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #define HMAC_MD5_LENGTH 16
 
-typedef CURLcode (*HMAC_hinit)(void *context);
+typedef FETCHcode (*HMAC_hinit)(void *context);
 typedef void    (*HMAC_hupdate)(void *context,
                                 const unsigned char *data,
                                 unsigned int len);
@@ -66,11 +66,11 @@ int Curl_HMAC_update(struct HMAC_context *context,
                      unsigned int len);
 int Curl_HMAC_final(struct HMAC_context *context, unsigned char *result);
 
-CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
+FETCHcode Curl_hmacit(const struct HMAC_params *hashparams,
                      const unsigned char *key, const size_t keylen,
                      const unsigned char *data, const size_t datalen,
                      unsigned char *output);
 
 #endif
 
-#endif /* HEADER_CURL_HMAC_H */
+#endif /* HEADER_FETCH_HMAC_H */

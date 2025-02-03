@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_MULTIIF_H
-#define HEADER_CURL_MULTIIF_H
+#ifndef HEADER_FETCH_MULTIIF_H
+#define HEADER_FETCH_MULTIIF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -28,22 +28,22 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 
-CURLcode Curl_updatesocket(struct Curl_easy *data);
+FETCHcode Curl_updatesocket(struct Curl_easy *data);
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 bool Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
-CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
+FETCHMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
 void Curl_attach_connection(struct Curl_easy *data,
                              struct connectdata *conn);
 void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *data);
-CURLcode Curl_preconnect(struct Curl_easy *data);
+FETCHcode Curl_preconnect(struct Curl_easy *data);
 
 void Curl_multi_connchanged(struct Curl_multi *multi);
 
-/* Internal version of curl_multi_init() accepts size parameters for the
+/* Internal version of fetch_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
 struct Curl_multi *Curl_multi_handle(size_t hashsize,
                                      size_t chashsize,
@@ -70,17 +70,17 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize,
  * Used by the connect code to tell the multi_socket code that one of the
  * sockets we were using is about to be closed. This function will then
  * remove it from the sockethash for this handle to make the multi_socket API
- * behave properly, especially for the case when libcurl will create another
+ * behave properly, especially for the case when libfetch will create another
  * socket again and it gets the same file descriptor number.
  */
 
-void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
+void Curl_multi_closed(struct Curl_easy *data, fetch_socket_t s);
 
 /* Compare the two pollsets to notify the multi_socket API of changes
  * in socket polling, e.g calling multi->socket_cb() with the changes if
  * differences are seen.
  */
-CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
+FETCHMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
                                 struct Curl_easy *data,
                                 struct easy_pollset *ps,
                                 struct easy_pollset *last_ps);
@@ -88,12 +88,12 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
 /*
  * Add a handle and move it into PERFORM state at once. For pushed streams.
  */
-CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
+FETCHMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
 
 
-/* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
+/* Return the value of the FETCHMOPT_MAX_CONCURRENT_STREAMS option */
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
 
 /**
@@ -106,12 +106,12 @@ unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
  * @param data    the easy handle
  * @param pbuf    on return, the buffer to use or NULL on error
  * @param pbuflen on return, the size of *pbuf or 0 on error
- * @return CURLE_OK when buffer is available and is returned.
- *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
- *         CURLE_FAILED_INIT if the easy handle is without multi.
- *         CURLE_AGAIN if the buffer is borrowed already.
+ * @return FETCHE_OK when buffer is available and is returned.
+ *         FETCHE_OUT_OF_MEMORy on failure to allocate the buffer,
+ *         FETCHE_FAILED_INIT if the easy handle is without multi.
+ *         FETCHE_AGAIN if the buffer is borrowed already.
  */
-CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
+FETCHcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
                                    char **pbuf, size_t *pbuflen);
 /**
  * Release the borrowed buffer. All references into the buffer become
@@ -130,12 +130,12 @@ void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf);
  * @param data    the easy handle
  * @param pbuf    on return, the buffer to use or NULL on error
  * @param pbuflen on return, the size of *pbuf or 0 on error
- * @return CURLE_OK when buffer is available and is returned.
- *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
- *         CURLE_FAILED_INIT if the easy handle is without multi.
- *         CURLE_AGAIN if the buffer is borrowed already.
+ * @return FETCHE_OK when buffer is available and is returned.
+ *         FETCHE_OUT_OF_MEMORy on failure to allocate the buffer,
+ *         FETCHE_FAILED_INIT if the easy handle is without multi.
+ *         FETCHE_AGAIN if the buffer is borrowed already.
  */
-CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
+FETCHcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
                                       char **pbuf, size_t *pbuflen);
 
 /**
@@ -155,12 +155,12 @@ void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf);
  * @param data    the easy handle
  * @param blen    requested length of the buffer
  * @param pbuf    on return, the buffer to use or NULL on error
- * @return CURLE_OK when buffer is available and is returned.
- *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
- *         CURLE_FAILED_INIT if the easy handle is without multi.
- *         CURLE_AGAIN if the buffer is borrowed already.
+ * @return FETCHE_OK when buffer is available and is returned.
+ *         FETCHE_OUT_OF_MEMORy on failure to allocate the buffer,
+ *         FETCHE_FAILED_INIT if the easy handle is without multi.
+ *         FETCHE_AGAIN if the buffer is borrowed already.
  */
-CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
+FETCHcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
                                         size_t blen, char **pbuf);
 /**
  * Release the borrowed buffer. All references into the buffer become
@@ -173,6 +173,6 @@ void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf);
  * Get the transfer handle for the given id. Returns NULL if not found.
  */
 struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
-                                        curl_off_t id);
+                                        fetch_off_t id);
 
-#endif /* HEADER_CURL_MULTIIF_H */
+#endif /* HEADER_FETCH_MULTIIF_H */

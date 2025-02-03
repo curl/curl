@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 #include <errno.h>
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #include "strtoofft.h"
 
@@ -35,7 +35,7 @@
  * https://www.opengroup.org/onlinepubs/009695399/functions/strtoimax.html
  */
 
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if (SIZEOF_FETCH_OFF_T > SIZEOF_LONG)
 #  ifdef HAVE_STRTOLL
 #    define strtooff strtoll
 #  else
@@ -73,16 +73,16 @@ static const char valchars[] =
 static int get_char(char c, int base);
 
 /**
- * Custom version of the strtooff function. This extracts a curl_off_t
+ * Custom version of the strtooff function. This extracts a fetch_off_t
  * value from the given input string and returns it.
  */
-static curl_off_t strtooff(const char *nptr, char **endptr, int base)
+static fetch_off_t strtooff(const char *nptr, char **endptr, int base)
 {
   char *end;
   bool is_negative = FALSE;
   bool overflow = FALSE;
   int i;
-  curl_off_t value = 0;
+  fetch_off_t value = 0;
 
   /* Skip leading whitespace. */
   end = (char *)nptr;
@@ -132,7 +132,7 @@ static curl_off_t strtooff(const char *nptr, char **endptr, int base)
       i != -1;
       end++, i = get_char(end[0], base)) {
 
-    if(value > (CURL_OFF_T_MAX - i) / base) {
+    if(value > (FETCH_OFF_T_MAX - i) / base) {
       overflow = TRUE;
       break;
     }
@@ -147,9 +147,9 @@ static curl_off_t strtooff(const char *nptr, char **endptr, int base)
   }
   else {
     if(is_negative)
-      value = CURL_OFF_T_MIN;
+      value = FETCH_OFF_T_MIN;
     else
-      value = CURL_OFF_T_MAX;
+      value = FETCH_OFF_T_MAX;
 
     errno = ERANGE;
   }
@@ -209,11 +209,11 @@ static int get_char(char c, int base)
 /*
  * Parse a *positive* up to 64-bit number written in ASCII.
  */
-CURLofft curlx_strtoofft(const char *str, char **endp, int base,
-                         curl_off_t *num)
+FETCHofft fetchx_strtoofft(const char *str, char **endp, int base,
+                         fetch_off_t *num)
 {
   char *end = NULL;
-  curl_off_t number;
+  fetch_off_t number;
   errno = 0;
   *num = 0; /* clear by default */
   DEBUGASSERT(base); /* starting now, avoid base zero */
@@ -223,18 +223,18 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   if(('-' == *str) || (ISSPACE(*str))) {
     if(endp)
       *endp = (char *)str; /* did not actually move */
-    return CURL_OFFT_INVAL; /* nothing parsed */
+    return FETCH_OFFT_INVAL; /* nothing parsed */
   }
   number = strtooff(str, &end, base);
   if(endp)
     *endp = end;
   if(errno == ERANGE)
     /* overflow/underflow */
-    return CURL_OFFT_FLOW;
+    return FETCH_OFFT_FLOW;
   else if(str == end)
     /* nothing parsed */
-    return CURL_OFFT_INVAL;
+    return FETCH_OFFT_INVAL;
 
   *num = number;
-  return CURL_OFFT_OK;
+  return FETCH_OFFT_OK;
 }

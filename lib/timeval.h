@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TIMEVAL_H
-#define HEADER_CURL_TIMEVAL_H
+#ifndef HEADER_FETCH_TIMEVAL_H
+#define HEADER_FETCH_TIMEVAL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,20 +20,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #include "timediff.h"
 
-struct curltime {
+struct fetchtime {
   time_t tv_sec; /* seconds */
   int tv_usec;   /* microseconds */
 };
 
-struct curltime Curl_now(void);
+struct fetchtime Curl_now(void);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -41,7 +41,7 @@ struct curltime Curl_now(void);
  *
  * Returns: the time difference in number of milliseconds.
  */
-timediff_t Curl_timediff(struct curltime newer, struct curltime older);
+timediff_t Curl_timediff(struct fetchtime newer, struct fetchtime older);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -49,7 +49,7 @@ timediff_t Curl_timediff(struct curltime newer, struct curltime older);
  *
  * Returns: the time difference in number of milliseconds, rounded up.
  */
-timediff_t Curl_timediff_ceil(struct curltime newer, struct curltime older);
+timediff_t Curl_timediff_ceil(struct fetchtime newer, struct fetchtime older);
 
 /*
  * Make sure that the first argument (newer) is the more recent time and older
@@ -57,6 +57,6 @@ timediff_t Curl_timediff_ceil(struct curltime newer, struct curltime older);
  *
  * Returns: the time difference in number of microseconds.
  */
-timediff_t Curl_timediff_us(struct curltime newer, struct curltime older);
+timediff_t Curl_timediff_us(struct fetchtime newer, struct fetchtime older);
 
-#endif /* HEADER_CURL_TIMEVAL_H */
+#endif /* HEADER_FETCH_TIMEVAL_H */

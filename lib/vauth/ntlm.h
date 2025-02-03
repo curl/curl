@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,19 +20,19 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_NTLM
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024
 
-/* Stuff only required for curl_ntlm_msgs.c */
-#ifdef BUILDING_CURL_NTLM_MSGS_C
+/* Stuff only required for fetch_ntlm_msgs.c */
+#ifdef BUILDING_FETCH_NTLM_MSGS_C
 
 /* Flag bits definitions based on
    https://davenport.sourceforge.net/ntlm.html */
@@ -136,7 +136,7 @@
 #define NTLMFLAG_NEGOTIATE_56                    (1<<31)
 /* Indicates that 56-bit encryption is supported. */
 
-#endif /* BUILDING_CURL_NTLM_MSGS_C */
+#endif /* BUILDING_FETCH_NTLM_MSGS_C */
 
 #endif /* USE_NTLM */
 

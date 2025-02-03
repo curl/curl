@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,26 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_HTTPSRR
 
 #include "urldata.h"
-#include "curl_addrinfo.h"
+#include "fetch_addrinfo.h"
 #include "httpsrr.h"
 #include "connect.h"
 #include "sendf.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
-CURLcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
+FETCHcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
                                   unsigned char *alpns)
 {
   /*
@@ -85,10 +85,10 @@ CURLcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
   Curl_dyn_free(&dval);
   if(idnum < MAX_HTTPSRR_ALPNS)
     alpns[idnum] = ALPN_none; /* terminate the list */
-  return CURLE_OK;
+  return FETCHE_OK;
 err:
   Curl_dyn_free(&dval);
-  return CURLE_BAD_CONTENT_ENCODING;
+  return FETCHE_BAD_CONTENT_ENCODING;
 }
 
 #ifdef USE_ARES
@@ -137,7 +137,7 @@ void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
 {
   struct Curl_easy *data = arg;
   size_t i;
-#ifdef CURLRES_ARES
+#ifdef FETCHRES_ARES
   struct thread_data *res = data->state.async.tdata;
 
   res->num_pending--;

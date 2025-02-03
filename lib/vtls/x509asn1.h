@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_X509ASN1_H
-#define HEADER_CURL_X509ASN1_H
+#ifndef HEADER_FETCH_X509ASN1_H
+#define HEADER_FETCH_X509ASN1_H
 
 /***************************************************************************
  *                                  _   _ ____  _
@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,11 +21,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
   defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
@@ -73,9 +73,9 @@ struct Curl_X509certificate {
 
 int Curl_parseX509(struct Curl_X509certificate *cert,
                    const char *beg, const char *end);
-CURLcode Curl_extract_certinfo(struct Curl_easy *data, int certnum,
+FETCHcode Curl_extract_certinfo(struct Curl_easy *data, int certnum,
                                const char *beg, const char *end);
-CURLcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
+FETCHcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
                          const char *beg, const char *end);
 
 #ifdef UNITTESTS
@@ -83,10 +83,10 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
   defined(USE_MBEDTLS)
 
 /* used by unit1656.c */
-CURLcode Curl_x509_GTime2str(struct dynbuf *store,
+FETCHcode Curl_x509_GTime2str(struct dynbuf *store,
                              const char *beg, const char *end);
 #endif
 #endif
 
 #endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_SECTRANSP */
-#endif /* HEADER_CURL_X509ASN1_H */
+#endif /* HEADER_FETCH_X509ASN1_H */

@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,39 +20,39 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
+CMAKE_DIST = CMakeLists.txt fetch_config.h.cmake
 
 CHECKSRC_DIST = .checksrc vauth/.checksrc vquic/.checksrc vssh/.checksrc \
  vtls/.checksrc
 
 EXTRA_DIST = config-mac.h config-os400.h config-plan9.h config-riscos.h \
- config-win32.h curl_config.h.in libcurl.rc libcurl.def                 \
+ config-win32.h fetch_config.h.in libfetch.rc libfetch.def                 \
  $(CMAKE_DIST) Makefile.soname optiontable.pl $(CHECKSRC_DIST)
 
-lib_LTLIBRARIES = libcurl.la
+lib_LTLIBRARIES = libfetch.la
 
 if BUILD_UNITTESTS
-noinst_LTLIBRARIES = libcurlu.la
+noinst_LTLIBRARIES = libfetchu.la
 else
 noinst_LTLIBRARIES =
 endif
 
 # This might hold -Werror
-CFLAGS += @CURL_CFLAG_EXTRAS@
+CFLAGS += @FETCH_CFLAG_EXTRAS@
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
 # being currently built and tested are searched before the library which
 # might possibly already be installed in the system.
 #
-# $(top_srcdir)/include is for libcurl's external include files
-# $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
-# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "private" files
+# $(top_srcdir)/include is for libfetch's external include files
+# $(top_builddir)/lib is for libfetch's generated lib/fetch_config.h file
+# $(top_srcdir)/lib for libfetch's lib/fetch_setup.h and other "private" files
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
@@ -63,7 +63,7 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 include Makefile.soname
 
-AM_CPPFLAGS += -DBUILDING_LIBCURL
+AM_CPPFLAGS += -DBUILDING_LIBFETCH
 AM_LDFLAGS =
 AM_CFLAGS =
 
@@ -73,71 +73,71 @@ include Makefile.inc
 if USE_UNITY
 # Keep these separate to avoid duplicate definitions when linking libtests
 # in static mode.
-curl_EXCLUDE = curl_threads.c timediff.c warnless.c
+fetch_EXCLUDE = fetch_threads.c timediff.c warnless.c
 if DEBUGBUILD
 # We must compile these sources separately to avoid memdebug.h redefinitions
 # applying to them.
-curl_EXCLUDE += memdebug.c curl_multibyte.c
+fetch_EXCLUDE += memdebug.c fetch_multibyte.c
 endif
-libcurl_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CSOURCES) --exclude $(curl_EXCLUDE) > libcurl_unity.c
+libfetch_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CSOURCES) --exclude $(fetch_EXCLUDE) > libfetch_unity.c
 
-nodist_libcurl_la_SOURCES = libcurl_unity.c
-libcurl_la_SOURCES = $(curl_EXCLUDE)
-nodist_libcurlu_la_SOURCES = libcurl_unity.c
-libcurlu_la_SOURCES = $(curl_EXCLUDE)
-CLEANFILES = libcurl_unity.c
+nodist_libfetch_la_SOURCES = libfetch_unity.c
+libfetch_la_SOURCES = $(fetch_EXCLUDE)
+nodist_libfetchu_la_SOURCES = libfetch_unity.c
+libfetchu_la_SOURCES = $(fetch_EXCLUDE)
+CLEANFILES = libfetch_unity.c
 else
-libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
-libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
+libfetch_la_SOURCES = $(CSOURCES) $(HHEADERS)
+libfetchu_la_SOURCES = $(CSOURCES) $(HHEADERS)
 endif
 
-libcurl_la_CPPFLAGS_EXTRA =
-libcurl_la_LDFLAGS_EXTRA =
-libcurl_la_CFLAGS_EXTRA =
+libfetch_la_CPPFLAGS_EXTRA =
+libfetch_la_LDFLAGS_EXTRA =
+libfetch_la_CFLAGS_EXTRA =
 
-if CURL_LT_SHLIB_USE_VERSION_INFO
-libcurl_la_LDFLAGS_EXTRA += $(VERSIONINFO)
+if FETCH_LT_SHLIB_USE_VERSION_INFO
+libfetch_la_LDFLAGS_EXTRA += $(VERSIONINFO)
 endif
 
-if CURL_LT_SHLIB_USE_NO_UNDEFINED
-libcurl_la_LDFLAGS_EXTRA += -no-undefined
+if FETCH_LT_SHLIB_USE_NO_UNDEFINED
+libfetch_la_LDFLAGS_EXTRA += -no-undefined
 endif
 
-if CURL_LT_SHLIB_USE_MIMPURE_TEXT
-libcurl_la_LDFLAGS_EXTRA += -mimpure-text
+if FETCH_LT_SHLIB_USE_MIMPURE_TEXT
+libfetch_la_LDFLAGS_EXTRA += -mimpure-text
 endif
 
-if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
-libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
+if FETCH_LT_SHLIB_USE_VERSIONED_SYMBOLS
+libfetch_la_LDFLAGS_EXTRA += -Wl,--version-script=libfetch.vers
 else
 # if symbol-hiding is enabled, hide them!
-if DOING_CURL_SYMBOL_HIDING
-libcurl_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
+if DOING_FETCH_SYMBOL_HIDING
+libfetch_la_LDFLAGS_EXTRA += -export-symbols-regex '^fetch_.*'
 endif
 endif
 
-if USE_CPPFLAG_CURL_STATICLIB
-libcurl_la_CPPFLAGS_EXTRA += -DCURL_STATICLIB
+if USE_CPPFLAG_FETCH_STATICLIB
+libfetch_la_CPPFLAGS_EXTRA += -DFETCH_STATICLIB
 else
 if HAVE_WINDRES
-libcurl_la_SOURCES += $(LIB_RCFILES)
-$(LIB_RCFILES): $(top_srcdir)/include/curl/curlver.h
+libfetch_la_SOURCES += $(LIB_RCFILES)
+$(LIB_RCFILES): $(top_srcdir)/include/fetch/fetchver.h
 endif
 endif
 
-if DOING_CURL_SYMBOL_HIDING
-libcurl_la_CPPFLAGS_EXTRA += -DCURL_HIDDEN_SYMBOLS
-libcurl_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
+if DOING_FETCH_SYMBOL_HIDING
+libfetch_la_CPPFLAGS_EXTRA += -DFETCH_HIDDEN_SYMBOLS
+libfetch_la_CFLAGS_EXTRA += $(CFLAG_FETCH_SYMBOL_HIDING)
 endif
 
-libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) $(libcurl_la_CPPFLAGS_EXTRA)
-libcurl_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_la_LDFLAGS_EXTRA) $(CURL_LDFLAGS_LIB) $(LIBCURL_PC_LIBS_PRIVATE)
-libcurl_la_CFLAGS = $(AM_CFLAGS) $(libcurl_la_CFLAGS_EXTRA)
+libfetch_la_CPPFLAGS = $(AM_CPPFLAGS) $(libfetch_la_CPPFLAGS_EXTRA)
+libfetch_la_LDFLAGS = $(AM_LDFLAGS) $(libfetch_la_LDFLAGS_EXTRA) $(FETCH_LDFLAGS_LIB) $(LIBFETCH_PC_LIBS_PRIVATE)
+libfetch_la_CFLAGS = $(AM_CFLAGS) $(libfetch_la_CFLAGS_EXTRA)
 
-libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
-libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_PC_LIBS_PRIVATE)
-libcurlu_la_CFLAGS = $(AM_CFLAGS)
+libfetchu_la_CPPFLAGS = $(AM_CPPFLAGS) -DFETCH_STATICLIB -DUNITTESTS
+libfetchu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBFETCH_PC_LIBS_PRIVATE)
+libfetchu_la_CFLAGS = $(AM_CFLAGS)
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -146,7 +146,7 @@ CS_ = $(CS_0)
 
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir)         \
-	  -W$(srcdir)/libcurl_unity.c -W$(srcdir)/curl_config.h $(srcdir)/*.[ch] \
+	  -W$(srcdir)/libfetch_unity.c -W$(srcdir)/fetch_config.h $(srcdir)/*.[ch] \
 	  $(srcdir)/vauth/*.[ch] $(srcdir)/vtls/*.[ch] $(srcdir)/vquic/*.[ch]    \
 	  $(srcdir)/vssh/*.[ch])
 
@@ -157,17 +157,17 @@ endif
 
 # disable the tests that are mostly causing false positives
 TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
-if CURL_WERROR
+if FETCH_WERROR
 TIDYFLAGS += --warnings-as-errors=*
 endif
 
 TIDY := clang-tidy
 
 tidy:
-	$(TIDY) $(CSOURCES) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
+	$(TIDY) $(CSOURCES) $(TIDYFLAGS) $(FETCH_CLANG_TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
 
 optiontable:
-	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c
+	perl optiontable.pl < $(top_srcdir)/include/fetch/fetch.h > easyoptions.c
 
 if HAVE_WINDRES
 .rc.lo:

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef HAVE_STRERROR_R
 #  if (!defined(HAVE_POSIX_STRERROR_R) && \
@@ -32,20 +32,20 @@
 #  endif
 #endif
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #ifdef USE_LIBIDN2
 #include <idn2.h>
 #endif
 
 #ifdef USE_WINDOWS_SSPI
-#include "curl_sspi.h"
+#include "fetch_sspi.h"
 #endif
 
 #include "strerror.h"
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
@@ -53,289 +53,289 @@
 #endif
 
 const char *
-curl_easy_strerror(CURLcode error)
+fetch_easy_strerror(FETCHcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
   switch(error) {
-  case CURLE_OK:
+  case FETCHE_OK:
     return "No error";
 
-  case CURLE_UNSUPPORTED_PROTOCOL:
+  case FETCHE_UNSUPPORTED_PROTOCOL:
     return "Unsupported protocol";
 
-  case CURLE_FAILED_INIT:
+  case FETCHE_FAILED_INIT:
     return "Failed initialization";
 
-  case CURLE_URL_MALFORMAT:
+  case FETCHE_URL_MALFORMAT:
     return "URL using bad/illegal format or missing URL";
 
-  case CURLE_NOT_BUILT_IN:
+  case FETCHE_NOT_BUILT_IN:
     return "A requested feature, protocol or option was not found built-in in"
-      " this libcurl due to a build-time decision.";
+      " this libfetch due to a build-time decision.";
 
-  case CURLE_COULDNT_RESOLVE_PROXY:
+  case FETCHE_COULDNT_RESOLVE_PROXY:
     return "Could not resolve proxy name";
 
-  case CURLE_COULDNT_RESOLVE_HOST:
+  case FETCHE_COULDNT_RESOLVE_HOST:
     return "Could not resolve hostname";
 
-  case CURLE_COULDNT_CONNECT:
+  case FETCHE_COULDNT_CONNECT:
     return "Could not connect to server";
 
-  case CURLE_WEIRD_SERVER_REPLY:
+  case FETCHE_WEIRD_SERVER_REPLY:
     return "Weird server reply";
 
-  case CURLE_REMOTE_ACCESS_DENIED:
+  case FETCHE_REMOTE_ACCESS_DENIED:
     return "Access denied to remote resource";
 
-  case CURLE_FTP_ACCEPT_FAILED:
+  case FETCHE_FTP_ACCEPT_FAILED:
     return "FTP: The server failed to connect to data port";
 
-  case CURLE_FTP_ACCEPT_TIMEOUT:
+  case FETCHE_FTP_ACCEPT_TIMEOUT:
     return "FTP: Accepting server connect has timed out";
 
-  case CURLE_FTP_PRET_FAILED:
+  case FETCHE_FTP_PRET_FAILED:
     return "FTP: The server did not accept the PRET command.";
 
-  case CURLE_FTP_WEIRD_PASS_REPLY:
+  case FETCHE_FTP_WEIRD_PASS_REPLY:
     return "FTP: unknown PASS reply";
 
-  case CURLE_FTP_WEIRD_PASV_REPLY:
+  case FETCHE_FTP_WEIRD_PASV_REPLY:
     return "FTP: unknown PASV reply";
 
-  case CURLE_FTP_WEIRD_227_FORMAT:
+  case FETCHE_FTP_WEIRD_227_FORMAT:
     return "FTP: unknown 227 response format";
 
-  case CURLE_FTP_CANT_GET_HOST:
+  case FETCHE_FTP_CANT_GET_HOST:
     return "FTP: cannot figure out the host in the PASV response";
 
-  case CURLE_HTTP2:
+  case FETCHE_HTTP2:
     return "Error in the HTTP2 framing layer";
 
-  case CURLE_FTP_COULDNT_SET_TYPE:
+  case FETCHE_FTP_COULDNT_SET_TYPE:
     return "FTP: could not set file type";
 
-  case CURLE_PARTIAL_FILE:
+  case FETCHE_PARTIAL_FILE:
     return "Transferred a partial file";
 
-  case CURLE_FTP_COULDNT_RETR_FILE:
+  case FETCHE_FTP_COULDNT_RETR_FILE:
     return "FTP: could not retrieve (RETR failed) the specified file";
 
-  case CURLE_QUOTE_ERROR:
+  case FETCHE_QUOTE_ERROR:
     return "Quote command returned error";
 
-  case CURLE_HTTP_RETURNED_ERROR:
+  case FETCHE_HTTP_RETURNED_ERROR:
     return "HTTP response code said error";
 
-  case CURLE_WRITE_ERROR:
+  case FETCHE_WRITE_ERROR:
     return "Failed writing received data to disk/application";
 
-  case CURLE_UPLOAD_FAILED:
+  case FETCHE_UPLOAD_FAILED:
     return "Upload failed (at start/before it took off)";
 
-  case CURLE_READ_ERROR:
+  case FETCHE_READ_ERROR:
     return "Failed to open/read local data from file/application";
 
-  case CURLE_OUT_OF_MEMORY:
+  case FETCHE_OUT_OF_MEMORY:
     return "Out of memory";
 
-  case CURLE_OPERATION_TIMEDOUT:
+  case FETCHE_OPERATION_TIMEDOUT:
     return "Timeout was reached";
 
-  case CURLE_FTP_PORT_FAILED:
+  case FETCHE_FTP_PORT_FAILED:
     return "FTP: command PORT failed";
 
-  case CURLE_FTP_COULDNT_USE_REST:
+  case FETCHE_FTP_COULDNT_USE_REST:
     return "FTP: command REST failed";
 
-  case CURLE_RANGE_ERROR:
+  case FETCHE_RANGE_ERROR:
     return "Requested range was not delivered by the server";
 
-  case CURLE_SSL_CONNECT_ERROR:
+  case FETCHE_SSL_CONNECT_ERROR:
     return "SSL connect error";
 
-  case CURLE_BAD_DOWNLOAD_RESUME:
+  case FETCHE_BAD_DOWNLOAD_RESUME:
     return "Could not resume download";
 
-  case CURLE_FILE_COULDNT_READ_FILE:
+  case FETCHE_FILE_COULDNT_READ_FILE:
     return "Could not read a file:// file";
 
-  case CURLE_LDAP_CANNOT_BIND:
+  case FETCHE_LDAP_CANNOT_BIND:
     return "LDAP: cannot bind";
 
-  case CURLE_LDAP_SEARCH_FAILED:
+  case FETCHE_LDAP_SEARCH_FAILED:
     return "LDAP: search failed";
 
-  case CURLE_ABORTED_BY_CALLBACK:
+  case FETCHE_ABORTED_BY_CALLBACK:
     return "Operation was aborted by an application callback";
 
-  case CURLE_BAD_FUNCTION_ARGUMENT:
-    return "A libcurl function was given a bad argument";
+  case FETCHE_BAD_FUNCTION_ARGUMENT:
+    return "A libfetch function was given a bad argument";
 
-  case CURLE_INTERFACE_FAILED:
+  case FETCHE_INTERFACE_FAILED:
     return "Failed binding local connection end";
 
-  case CURLE_TOO_MANY_REDIRECTS:
+  case FETCHE_TOO_MANY_REDIRECTS:
     return "Number of redirects hit maximum amount";
 
-  case CURLE_UNKNOWN_OPTION:
-    return "An unknown option was passed in to libcurl";
+  case FETCHE_UNKNOWN_OPTION:
+    return "An unknown option was passed in to libfetch";
 
-  case CURLE_SETOPT_OPTION_SYNTAX:
+  case FETCHE_SETOPT_OPTION_SYNTAX:
     return "Malformed option provided in a setopt";
 
-  case CURLE_GOT_NOTHING:
+  case FETCHE_GOT_NOTHING:
     return "Server returned nothing (no headers, no data)";
 
-  case CURLE_SSL_ENGINE_NOTFOUND:
+  case FETCHE_SSL_ENGINE_NOTFOUND:
     return "SSL crypto engine not found";
 
-  case CURLE_SSL_ENGINE_SETFAILED:
+  case FETCHE_SSL_ENGINE_SETFAILED:
     return "Can not set SSL crypto engine as default";
 
-  case CURLE_SSL_ENGINE_INITFAILED:
+  case FETCHE_SSL_ENGINE_INITFAILED:
     return "Failed to initialise SSL crypto engine";
 
-  case CURLE_SEND_ERROR:
+  case FETCHE_SEND_ERROR:
     return "Failed sending data to the peer";
 
-  case CURLE_RECV_ERROR:
+  case FETCHE_RECV_ERROR:
     return "Failure when receiving data from the peer";
 
-  case CURLE_SSL_CERTPROBLEM:
+  case FETCHE_SSL_CERTPROBLEM:
     return "Problem with the local SSL certificate";
 
-  case CURLE_SSL_CIPHER:
+  case FETCHE_SSL_CIPHER:
     return "Could not use specified SSL cipher";
 
-  case CURLE_PEER_FAILED_VERIFICATION:
+  case FETCHE_PEER_FAILED_VERIFICATION:
     return "SSL peer certificate or SSH remote key was not OK";
 
-  case CURLE_SSL_CACERT_BADFILE:
+  case FETCHE_SSL_CACERT_BADFILE:
     return "Problem with the SSL CA cert (path? access rights?)";
 
-  case CURLE_BAD_CONTENT_ENCODING:
+  case FETCHE_BAD_CONTENT_ENCODING:
     return "Unrecognized or bad HTTP Content or Transfer-Encoding";
 
-  case CURLE_FILESIZE_EXCEEDED:
+  case FETCHE_FILESIZE_EXCEEDED:
     return "Maximum file size exceeded";
 
-  case CURLE_USE_SSL_FAILED:
+  case FETCHE_USE_SSL_FAILED:
     return "Requested SSL level failed";
 
-  case CURLE_SSL_SHUTDOWN_FAILED:
+  case FETCHE_SSL_SHUTDOWN_FAILED:
     return "Failed to shut down the SSL connection";
 
-  case CURLE_SSL_CRL_BADFILE:
+  case FETCHE_SSL_CRL_BADFILE:
     return "Failed to load CRL file (path? access rights?, format?)";
 
-  case CURLE_SSL_ISSUER_ERROR:
+  case FETCHE_SSL_ISSUER_ERROR:
     return "Issuer check against peer certificate failed";
 
-  case CURLE_SEND_FAIL_REWIND:
+  case FETCHE_SEND_FAIL_REWIND:
     return "Send failed since rewinding of the data stream failed";
 
-  case CURLE_LOGIN_DENIED:
+  case FETCHE_LOGIN_DENIED:
     return "Login denied";
 
-  case CURLE_TFTP_NOTFOUND:
+  case FETCHE_TFTP_NOTFOUND:
     return "TFTP: File Not Found";
 
-  case CURLE_TFTP_PERM:
+  case FETCHE_TFTP_PERM:
     return "TFTP: Access Violation";
 
-  case CURLE_REMOTE_DISK_FULL:
+  case FETCHE_REMOTE_DISK_FULL:
     return "Disk full or allocation exceeded";
 
-  case CURLE_TFTP_ILLEGAL:
+  case FETCHE_TFTP_ILLEGAL:
     return "TFTP: Illegal operation";
 
-  case CURLE_TFTP_UNKNOWNID:
+  case FETCHE_TFTP_UNKNOWNID:
     return "TFTP: Unknown transfer ID";
 
-  case CURLE_REMOTE_FILE_EXISTS:
+  case FETCHE_REMOTE_FILE_EXISTS:
     return "Remote file already exists";
 
-  case CURLE_TFTP_NOSUCHUSER:
+  case FETCHE_TFTP_NOSUCHUSER:
     return "TFTP: No such user";
 
-  case CURLE_REMOTE_FILE_NOT_FOUND:
+  case FETCHE_REMOTE_FILE_NOT_FOUND:
     return "Remote file not found";
 
-  case CURLE_SSH:
+  case FETCHE_SSH:
     return "Error in the SSH layer";
 
-  case CURLE_AGAIN:
+  case FETCHE_AGAIN:
     return "Socket not ready for send/recv";
 
-  case CURLE_RTSP_CSEQ_ERROR:
+  case FETCHE_RTSP_CSEQ_ERROR:
     return "RTSP CSeq mismatch or invalid CSeq";
 
-  case CURLE_RTSP_SESSION_ERROR:
+  case FETCHE_RTSP_SESSION_ERROR:
     return "RTSP session error";
 
-  case CURLE_FTP_BAD_FILE_LIST:
+  case FETCHE_FTP_BAD_FILE_LIST:
     return "Unable to parse FTP file list";
 
-  case CURLE_CHUNK_FAILED:
+  case FETCHE_CHUNK_FAILED:
     return "Chunk callback failed";
 
-  case CURLE_NO_CONNECTION_AVAILABLE:
+  case FETCHE_NO_CONNECTION_AVAILABLE:
     return "The max connection limit is reached";
 
-  case CURLE_SSL_PINNEDPUBKEYNOTMATCH:
+  case FETCHE_SSL_PINNEDPUBKEYNOTMATCH:
     return "SSL public key does not match pinned public key";
 
-  case CURLE_SSL_INVALIDCERTSTATUS:
+  case FETCHE_SSL_INVALIDCERTSTATUS:
     return "SSL server certificate status verification FAILED";
 
-  case CURLE_HTTP2_STREAM:
+  case FETCHE_HTTP2_STREAM:
     return "Stream error in the HTTP/2 framing layer";
 
-  case CURLE_RECURSIVE_API_CALL:
+  case FETCHE_RECURSIVE_API_CALL:
     return "API function called from within callback";
 
-  case CURLE_AUTH_ERROR:
+  case FETCHE_AUTH_ERROR:
     return "An authentication function returned an error";
 
-  case CURLE_HTTP3:
+  case FETCHE_HTTP3:
     return "HTTP/3 error";
 
-  case CURLE_QUIC_CONNECT_ERROR:
+  case FETCHE_QUIC_CONNECT_ERROR:
     return "QUIC connection error";
 
-  case CURLE_PROXY:
+  case FETCHE_PROXY:
     return "proxy handshake error";
 
-  case CURLE_SSL_CLIENTCERT:
+  case FETCHE_SSL_CLIENTCERT:
     return "SSL Client Certificate required";
 
-  case CURLE_UNRECOVERABLE_POLL:
+  case FETCHE_UNRECOVERABLE_POLL:
     return "Unrecoverable error in select/poll";
 
-  case CURLE_TOO_LARGE:
+  case FETCHE_TOO_LARGE:
     return "A value or data field grew larger than allowed";
 
-  case CURLE_ECH_REQUIRED:
+  case FETCHE_ECH_REQUIRED:
     return "ECH attempted but failed";
 
-    /* error codes not used by current libcurl */
-  case CURLE_OBSOLETE20:
-  case CURLE_OBSOLETE24:
-  case CURLE_OBSOLETE29:
-  case CURLE_OBSOLETE32:
-  case CURLE_OBSOLETE34:
-  case CURLE_OBSOLETE40:
-  case CURLE_OBSOLETE41:
-  case CURLE_OBSOLETE44:
-  case CURLE_OBSOLETE46:
-  case CURLE_OBSOLETE50:
-  case CURLE_OBSOLETE51:
-  case CURLE_OBSOLETE57:
-  case CURLE_OBSOLETE62:
-  case CURLE_OBSOLETE75:
-  case CURLE_OBSOLETE76:
-  case CURL_LAST:
+    /* error codes not used by current libfetch */
+  case FETCHE_OBSOLETE20:
+  case FETCHE_OBSOLETE24:
+  case FETCHE_OBSOLETE29:
+  case FETCHE_OBSOLETE32:
+  case FETCHE_OBSOLETE34:
+  case FETCHE_OBSOLETE40:
+  case FETCHE_OBSOLETE41:
+  case FETCHE_OBSOLETE44:
+  case FETCHE_OBSOLETE46:
+  case FETCHE_OBSOLETE50:
+  case FETCHE_OBSOLETE51:
+  case FETCHE_OBSOLETE57:
+  case FETCHE_OBSOLETE62:
+  case FETCHE_OBSOLETE75:
+  case FETCHE_OBSOLETE76:
+  case FETCH_LAST:
     break;
   }
   /*
@@ -361,59 +361,59 @@ curl_easy_strerror(CURLcode error)
 }
 
 const char *
-curl_multi_strerror(CURLMcode error)
+fetch_multi_strerror(FETCHMcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
   switch(error) {
-  case CURLM_CALL_MULTI_PERFORM:
-    return "Please call curl_multi_perform() soon";
+  case FETCHM_CALL_MULTI_PERFORM:
+    return "Please call fetch_multi_perform() soon";
 
-  case CURLM_OK:
+  case FETCHM_OK:
     return "No error";
 
-  case CURLM_BAD_HANDLE:
+  case FETCHM_BAD_HANDLE:
     return "Invalid multi handle";
 
-  case CURLM_BAD_EASY_HANDLE:
+  case FETCHM_BAD_EASY_HANDLE:
     return "Invalid easy handle";
 
-  case CURLM_OUT_OF_MEMORY:
+  case FETCHM_OUT_OF_MEMORY:
     return "Out of memory";
 
-  case CURLM_INTERNAL_ERROR:
+  case FETCHM_INTERNAL_ERROR:
     return "Internal error";
 
-  case CURLM_BAD_SOCKET:
+  case FETCHM_BAD_SOCKET:
     return "Invalid socket argument";
 
-  case CURLM_UNKNOWN_OPTION:
+  case FETCHM_UNKNOWN_OPTION:
     return "Unknown option";
 
-  case CURLM_ADDED_ALREADY:
+  case FETCHM_ADDED_ALREADY:
     return "The easy handle is already added to a multi handle";
 
-  case CURLM_RECURSIVE_API_CALL:
+  case FETCHM_RECURSIVE_API_CALL:
     return "API function called from within callback";
 
-  case CURLM_WAKEUP_FAILURE:
+  case FETCHM_WAKEUP_FAILURE:
     return "Wakeup is unavailable or failed";
 
-  case CURLM_BAD_FUNCTION_ARGUMENT:
-    return "A libcurl function was given a bad argument";
+  case FETCHM_BAD_FUNCTION_ARGUMENT:
+    return "A libfetch function was given a bad argument";
 
-  case CURLM_ABORTED_BY_CALLBACK:
+  case FETCHM_ABORTED_BY_CALLBACK:
     return "Operation was aborted by an application callback";
 
-  case CURLM_UNRECOVERABLE_POLL:
+  case FETCHM_UNRECOVERABLE_POLL:
     return "Unrecoverable error in select/poll";
 
-  case CURLM_LAST:
+  case FETCHM_LAST:
     break;
   }
 
   return "Unknown error";
 #else
-  if(error == CURLM_OK)
+  if(error == FETCHM_OK)
     return "No error";
   else
     return "Error";
@@ -421,35 +421,35 @@ curl_multi_strerror(CURLMcode error)
 }
 
 const char *
-curl_share_strerror(CURLSHcode error)
+fetch_share_strerror(FETCHSHcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
   switch(error) {
-  case CURLSHE_OK:
+  case FETCHSHE_OK:
     return "No error";
 
-  case CURLSHE_BAD_OPTION:
+  case FETCHSHE_BAD_OPTION:
     return "Unknown share option";
 
-  case CURLSHE_IN_USE:
+  case FETCHSHE_IN_USE:
     return "Share currently in use";
 
-  case CURLSHE_INVALID:
+  case FETCHSHE_INVALID:
     return "Invalid share handle";
 
-  case CURLSHE_NOMEM:
+  case FETCHSHE_NOMEM:
     return "Out of memory";
 
-  case CURLSHE_NOT_BUILT_IN:
+  case FETCHSHE_NOT_BUILT_IN:
     return "Feature not enabled in this library";
 
-  case CURLSHE_LAST:
+  case FETCHSHE_LAST:
     break;
   }
 
-  return "CURLSHcode unknown";
+  return "FETCHSHcode unknown";
 #else
-  if(error == CURLSHE_OK)
+  if(error == FETCHSHE_OK)
     return "No error";
   else
     return "Error";
@@ -457,113 +457,113 @@ curl_share_strerror(CURLSHcode error)
 }
 
 const char *
-curl_url_strerror(CURLUcode error)
+fetch_url_strerror(FETCHUcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
   switch(error) {
-  case CURLUE_OK:
+  case FETCHUE_OK:
     return "No error";
 
-  case CURLUE_BAD_HANDLE:
-    return "An invalid CURLU pointer was passed as argument";
+  case FETCHUE_BAD_HANDLE:
+    return "An invalid FETCHU pointer was passed as argument";
 
-  case CURLUE_BAD_PARTPOINTER:
+  case FETCHUE_BAD_PARTPOINTER:
     return "An invalid 'part' argument was passed as argument";
 
-  case CURLUE_MALFORMED_INPUT:
+  case FETCHUE_MALFORMED_INPUT:
     return "Malformed input to a URL function";
 
-  case CURLUE_BAD_PORT_NUMBER:
+  case FETCHUE_BAD_PORT_NUMBER:
     return "Port number was not a decimal number between 0 and 65535";
 
-  case CURLUE_UNSUPPORTED_SCHEME:
+  case FETCHUE_UNSUPPORTED_SCHEME:
     return "Unsupported URL scheme";
 
-  case CURLUE_URLDECODE:
+  case FETCHUE_URLDECODE:
     return "URL decode error, most likely because of rubbish in the input";
 
-  case CURLUE_OUT_OF_MEMORY:
+  case FETCHUE_OUT_OF_MEMORY:
     return "A memory function failed";
 
-  case CURLUE_USER_NOT_ALLOWED:
+  case FETCHUE_USER_NOT_ALLOWED:
     return "Credentials was passed in the URL when prohibited";
 
-  case CURLUE_UNKNOWN_PART:
+  case FETCHUE_UNKNOWN_PART:
     return "An unknown part ID was passed to a URL API function";
 
-  case CURLUE_NO_SCHEME:
+  case FETCHUE_NO_SCHEME:
     return "No scheme part in the URL";
 
-  case CURLUE_NO_USER:
+  case FETCHUE_NO_USER:
     return "No user part in the URL";
 
-  case CURLUE_NO_PASSWORD:
+  case FETCHUE_NO_PASSWORD:
     return "No password part in the URL";
 
-  case CURLUE_NO_OPTIONS:
+  case FETCHUE_NO_OPTIONS:
     return "No options part in the URL";
 
-  case CURLUE_NO_HOST:
+  case FETCHUE_NO_HOST:
     return "No host part in the URL";
 
-  case CURLUE_NO_PORT:
+  case FETCHUE_NO_PORT:
     return "No port part in the URL";
 
-  case CURLUE_NO_QUERY:
+  case FETCHUE_NO_QUERY:
     return "No query part in the URL";
 
-  case CURLUE_NO_FRAGMENT:
+  case FETCHUE_NO_FRAGMENT:
     return "No fragment part in the URL";
 
-  case CURLUE_NO_ZONEID:
+  case FETCHUE_NO_ZONEID:
     return "No zoneid part in the URL";
 
-  case CURLUE_BAD_LOGIN:
+  case FETCHUE_BAD_LOGIN:
     return "Bad login part";
 
-  case CURLUE_BAD_IPV6:
+  case FETCHUE_BAD_IPV6:
     return "Bad IPv6 address";
 
-  case CURLUE_BAD_HOSTNAME:
+  case FETCHUE_BAD_HOSTNAME:
     return "Bad hostname";
 
-  case CURLUE_BAD_FILE_URL:
+  case FETCHUE_BAD_FILE_URL:
     return "Bad file:// URL";
 
-  case CURLUE_BAD_SLASHES:
+  case FETCHUE_BAD_SLASHES:
     return "Unsupported number of slashes following scheme";
 
-  case CURLUE_BAD_SCHEME:
+  case FETCHUE_BAD_SCHEME:
     return "Bad scheme";
 
-  case CURLUE_BAD_PATH:
+  case FETCHUE_BAD_PATH:
     return "Bad path";
 
-  case CURLUE_BAD_FRAGMENT:
+  case FETCHUE_BAD_FRAGMENT:
     return "Bad fragment";
 
-  case CURLUE_BAD_QUERY:
+  case FETCHUE_BAD_QUERY:
     return "Bad query";
 
-  case CURLUE_BAD_PASSWORD:
+  case FETCHUE_BAD_PASSWORD:
     return "Bad password";
 
-  case CURLUE_BAD_USER:
+  case FETCHUE_BAD_USER:
     return "Bad user";
 
-  case CURLUE_LACKS_IDN:
-    return "libcurl lacks IDN support";
+  case FETCHUE_LACKS_IDN:
+    return "libfetch lacks IDN support";
 
-  case CURLUE_TOO_LARGE:
+  case FETCHUE_TOO_LARGE:
     return "A value or data field is larger than allowed";
 
-  case CURLUE_LAST:
+  case FETCHUE_LAST:
     break;
   }
 
-  return "CURLUcode unknown";
+  return "FETCHUcode unknown";
 #else
-  if(error == CURLUE_OK)
+  if(error == FETCHUE_OK)
     return "No error";
   else
     return "Error";
@@ -578,7 +578,7 @@ curl_url_strerror(CURLUcode error)
 static const char *
 get_winsock_error(int err, char *buf, size_t len)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
   const char *p;
   size_t alen;
 #endif
@@ -588,7 +588,7 @@ get_winsock_error(int err, char *buf, size_t len)
 
   *buf = '\0';
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FETCH_DISABLE_VERBOSE_STRINGS
   (void)err;
   return NULL;
 #else
@@ -938,7 +938,7 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
   if(!get_winapi_error((int)err, buf, buflen)) {
     msnprintf(buf, buflen, "Unknown error %lu (0x%08lX)", err, err);
   }
@@ -980,7 +980,7 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
 
   switch(err) {
     case SEC_E_OK:

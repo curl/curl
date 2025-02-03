@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "urldata.h"
 #include "bufref.h"
 #include "strdup.h"
 
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #define SIGNATURE 0x5c48e9b2    /* Random pattern. */
@@ -74,7 +74,7 @@ void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
                      void (*dtor)(void *))
 {
   DEBUGASSERT(ptr || !len);
-  DEBUGASSERT(len <= CURL_MAX_INPUT_LENGTH);
+  DEBUGASSERT(len <= FETCH_MAX_INPUT_LENGTH);
 
   Curl_bufref_free(br);
   br->ptr = (const unsigned char *) ptr;
@@ -106,7 +106,7 @@ size_t Curl_bufref_len(const struct bufref *br)
   return br->len;
 }
 
-CURLcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len)
+FETCHcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len)
 {
   unsigned char *cpy = NULL;
 
@@ -114,14 +114,14 @@ CURLcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len)
   DEBUGASSERT(br->signature == SIGNATURE);
   DEBUGASSERT(br->ptr || !br->len);
   DEBUGASSERT(ptr || !len);
-  DEBUGASSERT(len <= CURL_MAX_INPUT_LENGTH);
+  DEBUGASSERT(len <= FETCH_MAX_INPUT_LENGTH);
 
   if(ptr) {
     cpy = Curl_memdup0(ptr, len);
     if(!cpy)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
   }
 
-  Curl_bufref_set(br, cpy, len, curl_free);
-  return CURLE_OK;
+  Curl_bufref_set(br, cpy, len, fetch_free);
+  return FETCHE_OK;
 }

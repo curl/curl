@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SMTP_H
-#define HEADER_CURL_SMTP_H
+#ifndef HEADER_FETCH_SMTP_H
+#define HEADER_FETCH_SMTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 #include "pingpong.h"
-#include "curl_sasl.h"
+#include "fetch_sasl.h"
 
 /****************************************************************************
  * SMTP unique setup
@@ -54,9 +54,9 @@ typedef enum {
    perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct SMTP {
-  curl_pp_transfer transfer;
+  fetch_pp_transfer transfer;
   char *custom;            /* Custom Request */
-  struct curl_slist *rcpt; /* Recipient list */
+  struct fetch_slist *rcpt; /* Recipient list */
   int rcpt_last_error;     /* The last error received for RCPT TO command */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
@@ -84,4 +84,4 @@ struct smtp_conn {
 extern const struct Curl_handler Curl_handler_smtp;
 extern const struct Curl_handler Curl_handler_smtps;
 
-#endif /* HEADER_CURL_SMTP_H */
+#endif /* HEADER_FETCH_SMTP_H */

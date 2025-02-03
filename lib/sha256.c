@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,18 +19,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
+#if !defined(FETCH_DISABLE_AWS) || !defined(FETCH_DISABLE_DIGEST_AUTH) \
   || defined(USE_LIBSSH2) || defined(USE_SSL)
 
 #include "warnless.h"
-#include "curl_sha256.h"
-#include "curl_hmac.h"
+#include "fetch_sha256.h"
+#include "fetch_hmac.h"
 
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
@@ -79,8 +79,8 @@
 #endif
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /* Please keep the SSL backend-specific #if branches in this order:
@@ -102,18 +102,18 @@ struct ossl_sha256_ctx {
 };
 typedef struct ossl_sha256_ctx my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *in)
+static FETCHcode my_sha256_init(void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   ctx->openssl_ctx = EVP_MD_CTX_create();
   if(!ctx->openssl_ctx)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   if(!EVP_DigestInit_ex(ctx->openssl_ctx, EVP_sha256(), NULL)) {
     EVP_MD_CTX_destroy(ctx->openssl_ctx);
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_sha256_update(void *in,
@@ -135,10 +135,10 @@ static void my_sha256_final(unsigned char *digest, void *in)
 
 typedef struct sha256_ctx my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *ctx)
+static FETCHcode my_sha256_init(void *ctx)
 {
   sha256_init(ctx);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_sha256_update(void *ctx,
@@ -157,14 +157,14 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
 
 typedef mbedtls_sha256_context my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *ctx)
+static FETCHcode my_sha256_init(void *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
   (void) mbedtls_sha256_starts(ctx, 0);
 #else
   (void) mbedtls_sha256_starts_ret(ctx, 0);
 #endif
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_sha256_update(void *ctx,
@@ -190,10 +190,10 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
 #elif defined(AN_APPLE_OS)
 typedef CC_SHA256_CTX my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *ctx)
+static FETCHcode my_sha256_init(void *ctx)
 {
   (void) CC_SHA256_Init(ctx);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_sha256_update(void *ctx,
@@ -220,20 +220,20 @@ typedef struct sha256_ctx my_sha256_ctx;
 #define CALG_SHA_256 0x0000800c
 #endif
 
-static CURLcode my_sha256_init(void *in)
+static FETCHcode my_sha256_init(void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   if(!CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash)) {
     CryptReleaseContext(ctx->hCryptProv, 0);
     ctx->hCryptProv = 0;
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_sha256_update(void *in,
@@ -250,7 +250,7 @@ static void my_sha256_final(unsigned char *digest, void *in)
   unsigned long length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == CURL_SHA256_DIGEST_LENGTH)
+  if(length == FETCH_SHA256_DIGEST_LENGTH)
     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
 
   if(ctx->hHash)
@@ -311,7 +311,7 @@ struct sha256_state {
 #else
   unsigned __int64 length;
 #endif
-  unsigned long state[8], curlen;
+  unsigned long state[8], fetchen;
   unsigned char buf[64];
 };
 typedef struct sha256_state my_sha256_ctx;
@@ -391,10 +391,10 @@ static int sha256_compress(struct sha256_state *md,
 }
 
 /* Initialize the hash state */
-static CURLcode my_sha256_init(void *in)
+static FETCHcode my_sha256_init(void *in)
 {
   struct sha256_state *md = (struct sha256_state *)in;
-  md->curlen = 0;
+  md->fetchen = 0;
   md->length = 0;
   md->state[0] = 0x6A09E667UL;
   md->state[1] = 0xBB67AE85UL;
@@ -405,7 +405,7 @@ static CURLcode my_sha256_init(void *in)
   md->state[6] = 0x1F83D9ABUL;
   md->state[7] = 0x5BE0CD19UL;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -421,28 +421,28 @@ static void my_sha256_update(void *ctx,
   unsigned long inlen = len;
   unsigned long n;
   struct sha256_state *md = (struct sha256_state *)ctx;
-#define CURL_SHA256_BLOCK_SIZE 64
-  if(md->curlen > sizeof(md->buf))
+#define FETCH_SHA256_BLOCK_SIZE 64
+  if(md->fetchen > sizeof(md->buf))
     return;
   while(inlen > 0) {
-    if(md->curlen == 0 && inlen >= CURL_SHA256_BLOCK_SIZE) {
+    if(md->fetchen == 0 && inlen >= FETCH_SHA256_BLOCK_SIZE) {
       if(sha256_compress(md, (unsigned char *)in) < 0)
         return;
-      md->length += CURL_SHA256_BLOCK_SIZE * 8;
-      in += CURL_SHA256_BLOCK_SIZE;
-      inlen -= CURL_SHA256_BLOCK_SIZE;
+      md->length += FETCH_SHA256_BLOCK_SIZE * 8;
+      in += FETCH_SHA256_BLOCK_SIZE;
+      inlen -= FETCH_SHA256_BLOCK_SIZE;
     }
     else {
-      n = CURLMIN(inlen, (CURL_SHA256_BLOCK_SIZE - md->curlen));
-      memcpy(md->buf + md->curlen, in, n);
-      md->curlen += n;
+      n = FETCHMIN(inlen, (FETCH_SHA256_BLOCK_SIZE - md->fetchen));
+      memcpy(md->buf + md->fetchen, in, n);
+      md->fetchen += n;
       in += n;
       inlen -= n;
-      if(md->curlen == CURL_SHA256_BLOCK_SIZE) {
+      if(md->fetchen == FETCH_SHA256_BLOCK_SIZE) {
         if(sha256_compress(md, md->buf) < 0)
           return;
-        md->length += 8 * CURL_SHA256_BLOCK_SIZE;
-        md->curlen = 0;
+        md->length += 8 * FETCH_SHA256_BLOCK_SIZE;
+        md->fetchen = 0;
       }
     }
   }
@@ -459,30 +459,30 @@ static void my_sha256_final(unsigned char *out, void *ctx)
   struct sha256_state *md = ctx;
   int i;
 
-  if(md->curlen >= sizeof(md->buf))
+  if(md->fetchen >= sizeof(md->buf))
     return;
 
   /* Increase the length of the message */
-  md->length += md->curlen * 8;
+  md->length += md->fetchen * 8;
 
   /* Append the '1' bit */
-  md->buf[md->curlen++] = (unsigned char)0x80;
+  md->buf[md->fetchen++] = (unsigned char)0x80;
 
   /* If the length is currently above 56 bytes we append zeros
    * then compress. Then we can fall back to padding zeros and length
    * encoding like normal.
    */
-  if(md->curlen > 56) {
-    while(md->curlen < 64) {
-      md->buf[md->curlen++] = (unsigned char)0;
+  if(md->fetchen > 56) {
+    while(md->fetchen < 64) {
+      md->buf[md->fetchen++] = (unsigned char)0;
     }
     sha256_compress(md, md->buf);
-    md->curlen = 0;
+    md->fetchen = 0;
   }
 
   /* Pad up to 56 bytes of zeroes */
-  while(md->curlen < 56) {
-    md->buf[md->curlen++] = (unsigned char)0;
+  while(md->fetchen < 56) {
+    md->buf[md->fetchen++] = (unsigned char)0;
   }
 
   /* Store length */
@@ -507,17 +507,17 @@ static void my_sha256_final(unsigned char *out, void *ctx)
  * input  [in]     - The input data.
  * length [in]     - The input length.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
+FETCHcode Curl_sha256it(unsigned char *output, const unsigned char *input,
                        const size_t length)
 {
-  CURLcode result;
+  FETCHcode result;
   my_sha256_ctx ctx;
 
   result = my_sha256_init(&ctx);
   if(!result) {
-    my_sha256_update(&ctx, input, curlx_uztoui(length));
+    my_sha256_update(&ctx, input, fetchx_uztoui(length));
     my_sha256_final(output, &ctx);
   }
   return result;

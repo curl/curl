@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,27 +18,27 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  * RFC6749 OAuth 2.0 Authorization Framework
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3) || \
-  (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
+#if !defined(FETCH_DISABLE_IMAP) || !defined(FETCH_DISABLE_SMTP) || \
+  !defined(FETCH_DISABLE_POP3) || \
+  (!defined(FETCH_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 
 #include "vauth/vauth.h"
 #include "warnless.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /*
@@ -55,9 +55,9 @@
  * bearer[in]       - The bearer token.
  * out[out]         - The result storage.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
+FETCHcode Curl_auth_create_oauth_bearer_message(const char *user,
                                                const char *host,
                                                const long port,
                                                const char *bearer,
@@ -73,10 +73,10 @@ CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
     oauth = aprintf("n,a=%s,\1host=%s\1port=%ld\1auth=Bearer %s\1\1", user,
                     host, port, bearer);
   if(!oauth)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
-  Curl_bufref_set(out, oauth, strlen(oauth), curl_free);
-  return CURLE_OK;
+  Curl_bufref_set(out, oauth, strlen(oauth), fetch_free);
+  return FETCHE_OK;
 }
 
 /*
@@ -91,18 +91,18 @@ CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
  * bearer[in]       - The bearer token.
  * out[out]         - The result storage.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
+FETCHcode Curl_auth_create_xoauth_bearer_message(const char *user,
                                                const char *bearer,
                                                struct bufref *out)
 {
   /* Generate the message */
   char *xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
   if(!xoauth)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
-  Curl_bufref_set(out, xoauth, strlen(xoauth), curl_free);
-  return CURLE_OK;
+  Curl_bufref_set(out, xoauth, strlen(xoauth), fetch_free);
+  return FETCHE_OK;
 }
 #endif /* disabled, no users */

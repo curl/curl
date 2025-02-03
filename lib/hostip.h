@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HOSTIP_H
-#define HEADER_CURL_HOSTIP_H
+#ifndef HEADER_FETCH_HOSTIP_H
+#define HEADER_FETCH_HOSTIP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "hash.h"
-#include "curl_addrinfo.h"
+#include "fetch_addrinfo.h"
 #include "timeval.h" /* for timediff_t */
 #include "asyn.h"
 #include "httpsrr.h"
@@ -42,12 +42,12 @@
  * required for storing all possible aliases and IP numbers is according to
  * Stevens' Unix Network Programming 2nd edition, p. 304: 8192 bytes!
  */
-#define CURL_HOSTENT_SIZE 9000
+#define FETCH_HOSTENT_SIZE 9000
 
-#define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
+#define FETCH_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
                                     many seconds for a name resolve */
 
-#define CURL_ASYNC_SUCCESS CURLE_OK
+#define FETCH_ASYNC_SUCCESS FETCHE_OK
 
 struct addrinfo;
 struct hostent;
@@ -56,9 +56,9 @@ struct connectdata;
 
 enum alpnid {
   ALPN_none = 0,
-  ALPN_h1 = CURLALTSVC_H1,
-  ALPN_h2 = CURLALTSVC_H2,
-  ALPN_h3 = CURLALTSVC_H3
+  ALPN_h1 = FETCHALTSVC_H1,
+  ALPN_h2 = FETCHALTSVC_H2,
+  ALPN_h3 = FETCHALTSVC_H3
 };
 
 /*
@@ -75,7 +75,7 @@ struct Curl_dns_entry {
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo *hinfo;
 #endif
-  /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (does not time out) */
+  /* timestamp == 0 -- permanent FETCHOPT_RESOLVE entry (does not time out) */
   time_t timestamp;
   /* reference counter, entry is freed on reaching 0 */
   size_t refcount;
@@ -96,10 +96,10 @@ bool Curl_host_is_ipnum(const char *hostname);
  */
 /* return codes */
 enum resolve_t {
-  CURLRESOLV_TIMEDOUT = -2,
-  CURLRESOLV_ERROR    = -1,
-  CURLRESOLV_RESOLVED =  0,
-  CURLRESOLV_PENDING  =  1
+  FETCHRESOLV_TIMEDOUT = -2,
+  FETCHRESOLV_ERROR    = -1,
+  FETCHRESOLV_RESOLVED =  0,
+  FETCHRESOLV_PENDING  =  1
 };
 enum resolve_t Curl_resolv(struct Curl_easy *data,
                            const char *hostname,
@@ -121,7 +121,7 @@ bool Curl_ipv6works(struct Curl_easy *data);
 #endif
 
 /*
- * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
+ * Curl_ipvalid() checks what FETCH_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
 bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn);
@@ -152,15 +152,15 @@ void Curl_hostcache_prune(struct Curl_easy *data);
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
-CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_connect);
+FETCHcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_connect);
 
 /*
  * Curl_addrinfo_callback() is used when we build with any asynch specialty.
  * Handles end of async request processing. Inserts ai into hostcache when
- * status is CURL_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
+ * status is FETCH_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
  * request completed whether successful or failed.
  */
-CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
+FETCHcode Curl_addrinfo_callback(struct Curl_easy *data,
                                 int status,
                                 struct Curl_addrinfo *ai);
 
@@ -196,35 +196,35 @@ Curl_cache_addr(struct Curl_easy *data, struct Curl_addrinfo *addr,
                 bool permanent);
 
 #ifndef INADDR_NONE
-#define CURL_INADDR_NONE (in_addr_t) ~0
+#define FETCH_INADDR_NONE (in_addr_t) ~0
 #else
-#define CURL_INADDR_NONE INADDR_NONE
+#define FETCH_INADDR_NONE INADDR_NONE
 #endif
 
 /*
  * Function provided by the resolver backend to set DNS servers to use.
  */
-CURLcode Curl_set_dns_servers(struct Curl_easy *data, char *servers);
+FETCHcode Curl_set_dns_servers(struct Curl_easy *data, char *servers);
 
 /*
  * Function provided by the resolver backend to set
  * outgoing interface to use for DNS requests
  */
-CURLcode Curl_set_dns_interface(struct Curl_easy *data,
+FETCHcode Curl_set_dns_interface(struct Curl_easy *data,
                                 const char *interf);
 
 /*
  * Function provided by the resolver backend to set
  * local IPv4 address to use as source address for DNS requests
  */
-CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
+FETCHcode Curl_set_dns_local_ip4(struct Curl_easy *data,
                                 const char *local_ip4);
 
 /*
  * Function provided by the resolver backend to set
  * local IPv6 address to use as source address for DNS requests
  */
-CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
+FETCHcode Curl_set_dns_local_ip6(struct Curl_easy *data,
                                 const char *local_ip6);
 
 /*
@@ -233,13 +233,13 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
 void Curl_hostcache_clean(struct Curl_easy *data, struct Curl_hash *hash);
 
 /*
- * Populate the cache with specified entries from CURLOPT_RESOLVE.
+ * Populate the cache with specified entries from FETCHOPT_RESOLVE.
  */
-CURLcode Curl_loadhostpairs(struct Curl_easy *data);
-CURLcode Curl_resolv_check(struct Curl_easy *data,
+FETCHcode Curl_loadhostpairs(struct Curl_easy *data);
+FETCHcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns);
 int Curl_resolv_getsock(struct Curl_easy *data,
-                        curl_socket_t *socks);
+                        fetch_socket_t *socks);
 
-CURLcode Curl_resolver_error(struct Curl_easy *data);
-#endif /* HEADER_CURL_HOSTIP_H */
+FETCHcode Curl_resolver_error(struct Curl_easy *data);
+#endif /* HEADER_FETCH_HOSTIP_H */

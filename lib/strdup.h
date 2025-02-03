@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_STRDUP_H
-#define HEADER_CURL_STRDUP_H
+#ifndef HEADER_FETCH_STRDUP_H
+#define HEADER_FETCH_STRDUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifndef HAVE_STRDUP
 char *Curl_strdup(const char *str);
@@ -35,4 +35,4 @@ void *Curl_memdup(const void *src, size_t buffer_length);
 void *Curl_saferealloc(void *ptr, size_t size);
 void *Curl_memdup0(const char *src, size_t length);
 
-#endif /* HEADER_CURL_STRDUP_H */
+#endif /* HEADER_FETCH_STRDUP_H */

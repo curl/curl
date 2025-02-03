@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HTTP_CHUNKS_H
-#define HEADER_CURL_HTTP_CHUNKS_H
+#ifndef HEADER_FETCH_HTTP_CHUNKS_H
+#define HEADER_FETCH_HTTP_CHUNKS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#ifndef CURL_DISABLE_HTTP
+#ifndef FETCH_DISABLE_HTTP
 
 #include "dynbuf.h"
 
@@ -33,9 +33,9 @@ struct connectdata;
 /*
  * The longest possible hexadecimal number we support in a chunked transfer.
  * Neither RFC2616 nor the later HTTP specs define a maximum chunk size.
- * For 64-bit curl_off_t we support 16 digits. For 32-bit, 8 digits.
+ * For 64-bit fetch_off_t we support 16 digits. For 32-bit, 8 digits.
  */
-#define CHUNK_MAXNUM_LEN (SIZEOF_CURL_OFF_T * 2)
+#define CHUNK_MAXNUM_LEN (SIZEOF_FETCH_OFF_T * 2)
 
 typedef enum {
   /* await and buffer all hexadecimal digits until we get one that is not a
@@ -87,11 +87,11 @@ typedef enum {
   CHUNKE_BAD_CHUNK,
   CHUNKE_BAD_ENCODING,
   CHUNKE_OUT_OF_MEMORY,
-  CHUNKE_PASSTHRU_ERROR /* Curl_httpchunk_read() returns a CURLcode to use */
+  CHUNKE_PASSTHRU_ERROR /* Curl_httpchunk_read() returns a FETCHcode to use */
 } CHUNKcode;
 
 struct Curl_chunker {
-  curl_off_t datasize;
+  fetch_off_t datasize;
   ChunkyState state;
   CHUNKcode last_code;
   struct dynbuf trailer; /* for chunked-encoded trailer */
@@ -123,7 +123,7 @@ void Curl_httpchunk_reset(struct Curl_easy *data, struct Curl_chunker *ch,
  * This function always uses ASCII hex values to accommodate non-ASCII hosts.
  * For example, 0x0d and 0x0a are used instead of '\r' and '\n'.
  */
-CURLcode Curl_httpchunk_read(struct Curl_easy *data, struct Curl_chunker *ch,
+FETCHcode Curl_httpchunk_read(struct Curl_easy *data, struct Curl_chunker *ch,
                              char *buf, size_t blen, size_t *pconsumed);
 
 /**
@@ -138,8 +138,8 @@ extern const struct Curl_crtype Curl_httpchunk_encoder;
 /**
  * Add a transfer-encoding "chunked" reader to the transfers reader stack
  */
-CURLcode Curl_httpchunk_add_reader(struct Curl_easy *data);
+FETCHcode Curl_httpchunk_add_reader(struct Curl_easy *data);
 
-#endif /* !CURL_DISABLE_HTTP */
+#endif /* !FETCH_DISABLE_HTTP */
 
-#endif /* HEADER_CURL_HTTP_CHUNKS_H */
+#endif /* HEADER_FETCH_HTTP_CHUNKS_H */

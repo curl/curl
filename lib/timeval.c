@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -26,13 +26,13 @@
 
 #if defined(_WIN32)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "system_win32.h"
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
-struct curltime Curl_now(void)
+struct fetchtime Curl_now(void)
 {
-  struct curltime now;
+  struct fetchtime now;
   if(Curl_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
@@ -60,7 +60,7 @@ struct curltime Curl_now(void)
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||  \
   defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 
-struct curltime Curl_now(void)
+struct fetchtime Curl_now(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -72,7 +72,7 @@ struct curltime Curl_now(void)
 #ifdef HAVE_GETTIMEOFDAY
   struct timeval now;
 #endif
-  struct curltime cnow;
+  struct fetchtime cnow;
   struct timespec tsnow;
 
   /*
@@ -134,7 +134,7 @@ struct curltime Curl_now(void)
 #include <stdint.h>
 #include <mach/mach_time.h>
 
-struct curltime Curl_now(void)
+struct fetchtime Curl_now(void)
 {
   /*
   ** Monotonic timer on macOS is provided by mach_absolute_time(), which
@@ -143,7 +143,7 @@ struct curltime Curl_now(void)
   ** mach_timebase_info().
   */
   static mach_timebase_info_data_t timebase;
-  struct curltime cnow;
+  struct fetchtime cnow;
   uint64_t usecs;
 
   if(0 == timebase.denom)
@@ -162,7 +162,7 @@ struct curltime Curl_now(void)
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct curltime Curl_now(void)
+struct fetchtime Curl_now(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -170,7 +170,7 @@ struct curltime Curl_now(void)
   ** forward or backward in time.
   */
   struct timeval now;
-  struct curltime ret;
+  struct fetchtime ret;
   (void)gettimeofday(&now, NULL);
   ret.tv_sec = now.tv_sec;
   ret.tv_usec = (int)now.tv_usec;
@@ -179,12 +179,12 @@ struct curltime Curl_now(void)
 
 #else
 
-struct curltime Curl_now(void)
+struct fetchtime Curl_now(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
   */
-  struct curltime now;
+  struct fetchtime now;
   now.tv_sec = time(NULL);
   now.tv_usec = 0;
   return now;
@@ -198,7 +198,7 @@ struct curltime Curl_now(void)
  *
  * @unittest: 1323
  */
-timediff_t Curl_timediff(struct curltime newer, struct curltime older)
+timediff_t Curl_timediff(struct fetchtime newer, struct fetchtime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIMEDIFF_T_MAX/1000))
@@ -212,7 +212,7 @@ timediff_t Curl_timediff(struct curltime newer, struct curltime older)
  * Returns: time difference in number of milliseconds, rounded up.
  * For too large diffs it returns max value.
  */
-timediff_t Curl_timediff_ceil(struct curltime newer, struct curltime older)
+timediff_t Curl_timediff_ceil(struct fetchtime newer, struct fetchtime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIMEDIFF_T_MAX/1000))
@@ -226,7 +226,7 @@ timediff_t Curl_timediff_ceil(struct curltime newer, struct curltime older)
  * Returns: time difference in number of microseconds. For too large diffs it
  * returns max value.
  */
-timediff_t Curl_timediff_us(struct curltime newer, struct curltime older)
+timediff_t Curl_timediff_us(struct fetchtime newer, struct fetchtime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIMEDIFF_T_MAX/1000000))

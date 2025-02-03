@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SETUP_ONCE_H
-#define HEADER_CURL_SETUP_ONCE_H
+#ifndef HEADER_FETCH_SETUP_ONCE_H
+#define HEADER_FETCH_SETUP_ONCE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -233,7 +233,7 @@ struct timeval {
 
 /*
  * Use a define to let 'true' and 'false' use those enums. There
- * are currently no use of true and false in libcurl proper, but
+ * are currently no use of true and false in libfetch proper, but
  * there are some in the examples. This will cater for any later
  * code happening to use true and false.
  */
@@ -265,7 +265,7 @@ typedef unsigned int bit;
 #define FALSE false
 #endif
 
-#include "curl_ctype.h"
+#include "fetch_ctype.h"
 
 
 /*
@@ -405,4 +405,4 @@ typedef unsigned int bit;
 #define ZERO_NULL 0
 
 
-#endif /* HEADER_CURL_SETUP_ONCE_H */
+#endif /* HEADER_FETCH_SETUP_ONCE_H */

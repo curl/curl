@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_DOH_H
-#define HEADER_CURL_DOH_H
+#ifndef HEADER_FETCH_DOH_H
+#define HEADER_FETCH_DOH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,18 +20,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 #include "urldata.h"
-#include "curl_addrinfo.h"
+#include "fetch_addrinfo.h"
 #ifdef USE_HTTPSRR
 # include <stdint.h>
 # include "httpsrr.h"
 #endif
 
-#ifndef CURL_DISABLE_DOH
+#ifndef FETCH_DISABLE_DOH
 
 typedef enum {
   DOH_OK,
@@ -61,7 +61,7 @@ typedef enum {
 
 /* one of these for each DoH request */
 struct doh_probe {
-  curl_off_t easy_mid; /* multi id of easy handle doing the lookup */
+  fetch_off_t easy_mid; /* multi id of easy handle doing the lookup */
   DNStype dnstype;
   unsigned char req_body[512];
   size_t req_body_len;
@@ -90,7 +90,7 @@ enum doh_slot_num {
 };
 
 struct doh_probes {
-  struct curl_slist *req_hds;
+  struct fetch_slist *req_hds;
   struct doh_probe probe[DOH_SLOT_COUNT];
   unsigned int pending; /* still outstanding probes */
   int port;
@@ -107,7 +107,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                                int port,
                                int *waitp);
 
-CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
+FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dns);
 
 #define DOH_MAX_ADDR 24
@@ -167,11 +167,11 @@ UNITTEST void de_init(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
-extern struct curl_trc_feat Curl_doh_trc;
+extern struct fetch_trc_feat Curl_doh_trc;
 
 #else /* if DoH is disabled */
 #define Curl_doh(a,b,c,d) NULL
-#define Curl_doh_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_doh_is_resolved(x,y) FETCHE_COULDNT_RESOLVE_HOST
 #endif
 
-#endif /* HEADER_CURL_DOH_H */
+#endif /* HEADER_FETCH_DOH_H */

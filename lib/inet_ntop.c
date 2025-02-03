@@ -17,10 +17,10 @@
  * SPDX-License-Identifier: ISC
  */
 /*
- * Original code by Paul Vixie. "curlified" by Gisle Vanem.
+ * Original code by Paul Vixie. "fetchified" by Gisle Vanem.
  */
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifndef HAVE_INET_NTOP
 
@@ -35,7 +35,7 @@
 #endif
 
 #include "inet_ntop.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 
 #define IN6ADDRSZ       16
 #define INADDRSZ         4

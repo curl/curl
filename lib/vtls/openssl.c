@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -27,7 +27,7 @@
  * but vtls.c should ever call or use these functions.
  */
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 
@@ -63,7 +63,7 @@
 #include "hostcheck.h"
 #include "multiif.h"
 #include "strerror.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
@@ -113,7 +113,7 @@
 #include "warnless.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #ifndef ARRAYSIZE
@@ -254,7 +254,7 @@ typedef int numcert_t;
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 /* up2date versions of OpenSSL maintain reasonably secure defaults without
- * breaking compatibility, so it is better not to override the defaults in curl
+ * breaking compatibility, so it is better not to override the defaults in fetch
  */
 #define DEFAULT_CIPHER_SELECTION NULL
 #else
@@ -305,23 +305,23 @@ typedef unsigned long sslerr_t;
 #define USE_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
 #endif /* !LIBRESSL_VERSION_NUMBER */
 
-static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl);
+static FETCHcode ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
-static CURLcode push_certinfo(struct Curl_easy *data,
+static FETCHcode push_certinfo(struct Curl_easy *data,
                               BIO *mem, const char *label, int num)
   WARN_UNUSED_RESULT;
 
-static CURLcode push_certinfo(struct Curl_easy *data,
+static FETCHcode push_certinfo(struct Curl_easy *data,
                               BIO *mem, const char *label, int num)
 {
   char *ptr;
   long len = BIO_get_mem_data(mem, &ptr);
-  CURLcode result = Curl_ssl_push_certinfo_len(data, num, label, ptr, len);
+  FETCHcode result = Curl_ssl_push_certinfo_len(data, num, label, ptr, len);
   (void)BIO_reset(mem);
   return result;
 }
 
-static CURLcode pubkey_show(struct Curl_easy *data,
+static FETCHcode pubkey_show(struct Curl_easy *data,
                             BIO *mem,
                             int num,
                             const char *type,
@@ -366,12 +366,12 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
   return 0;
 }
 
-static CURLcode X509V3_ext(struct Curl_easy *data,
+static FETCHcode X509V3_ext(struct Curl_easy *data,
                            int certnum,
                            CONST_EXTS STACK_OF(X509_EXTENSION) *exts)
 {
   int i;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   if((int)sk_X509_EXTENSION_num(exts) <= 0)
     /* no extensions, bail out */
@@ -404,9 +404,9 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
+static FETCHcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 {
-  CURLcode result;
+  FETCHcode result;
   STACK_OF(X509) *sk;
   int i;
   numcert_t numcerts;
@@ -416,7 +416,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   sk = SSL_get_peer_cert_chain(ssl);
   if(!sk) {
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   numcerts = sk_X509_num(sk);
@@ -427,7 +427,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   mem = BIO_new(BIO_s_mem());
   if(!mem)
-    result = CURLE_OUT_OF_MEMORY;
+    result = FETCHE_OUT_OF_MEMORY;
 
   for(i = 0; !result && (i < (int)numcerts); i++) {
     ASN1_INTEGER *num;
@@ -746,7 +746,7 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
-  CURLcode result = CURLE_SEND_ERROR;
+  FETCHcode result = FETCHE_SEND_ERROR;
 
   DEBUGASSERT(data);
   if(blen < 0)
@@ -754,12 +754,12 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
 
   nwritten = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, FALSE,
                                &result);
-  CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, err=%d",
+  FETCH_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, err=%d",
               blen, (int)nwritten, result);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
   if(nwritten < 0) {
-    if(CURLE_AGAIN == result)
+    if(FETCHE_AGAIN == result)
       BIO_set_retry_write(bio);
   }
   return (int)nwritten;
@@ -772,7 +772,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
-  CURLcode result = CURLE_RECV_ERROR;
+  FETCHcode result = FETCHE_RECV_ERROR;
 
   DEBUGASSERT(data);
   /* OpenSSL catches this case, so should we. */
@@ -782,12 +782,12 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &result);
-  CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, err=%d",
+  FETCH_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, err=%d",
               blen, (int)nread, result);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
   if(nread < 0) {
-    if(CURLE_AGAIN == result)
+    if(FETCHE_AGAIN == result)
       BIO_set_retry_read(bio);
   }
   else if(nread == 0) {
@@ -871,7 +871,7 @@ static void ossl_keylog_callback(const SSL *ssl, const char *line)
 }
 #else
 /*
- * ossl_log_tls12_secret is called by libcurl to make the CLIENT_RANDOMs if the
+ * ossl_log_tls12_secret is called by libfetch to make the CLIENT_RANDOMs if the
  * OpenSSL being used does not have native support for doing that.
  */
 static void
@@ -902,7 +902,7 @@ ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
 #endif
 
   /* The handshake has not progressed sufficiently yet, or this is a TLS 1.3
-   * session (when curl was built with older OpenSSL headers and running with
+   * session (when fetch was built with older OpenSSL headers and running with
    * newer OpenSSL runtime libraries). */
   if(master_key_length <= 0)
     return;
@@ -990,7 +990,7 @@ static int passwd_callback(char *buf, int num, int encrypting,
   DEBUGASSERT(0 == encrypting);
 
   if(!encrypting && num >= 0) {
-    int klen = curlx_uztosi(strlen((char *)global_passwd));
+    int klen = fetchx_uztosi(strlen((char *)global_passwd));
     if(num > klen) {
       memcpy(buf, global_passwd, klen + 1);
       return klen;
@@ -1007,22 +1007,22 @@ static bool rand_enough(void)
   return 0 != RAND_status();
 }
 
-static CURLcode ossl_seed(struct Curl_easy *data)
+static FETCHcode ossl_seed(struct Curl_easy *data)
 {
   /* This might get called before it has been added to a multi handle */
   if(data->multi && data->multi->ssl_seeded)
-    return CURLE_OK;
+    return FETCHE_OK;
 
   if(rand_enough()) {
     /* OpenSSL 1.1.0+ should return here */
     if(data->multi)
       data->multi->ssl_seeded = TRUE;
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 #ifdef HAVE_RANDOM_INIT_BY_DEFAULT
   /* with OpenSSL 1.1.0+, a failed RAND_status is a showstopper */
   failf(data, "Insufficient randomness");
-  return CURLE_SSL_CONNECT_ERROR;
+  return FETCHE_SSL_CONNECT_ERROR;
 #else
 
   /* fallback to a custom seeding of the PRNG using a hash based on a current
@@ -1031,8 +1031,8 @@ static CURLcode ossl_seed(struct Curl_easy *data)
     unsigned char randb[64];
     size_t len = sizeof(randb);
     size_t i, i_max;
-    for(i = 0, i_max = len / sizeof(struct curltime); i < i_max; ++i) {
-      struct curltime tv = Curl_now();
+    for(i = 0, i_max = len / sizeof(struct fetchtime); i < i_max; ++i) {
+      struct fetchtime tv = Curl_now();
       Curl_wait_ms(1);
       tv.tv_sec *= (time_t)i + 1;
       tv.tv_usec *= (int)i + 2;
@@ -1040,8 +1040,8 @@ static CURLcode ossl_seed(struct Curl_easy *data)
                     (time_t)(i + 3)) << 8;
       tv.tv_usec ^= (int) ((Curl_now().tv_sec + (time_t)Curl_now().tv_usec) *
                            (time_t)(i + 4)) << 16;
-      memcpy(&randb[i * sizeof(struct curltime)], &tv,
-             sizeof(struct curltime));
+      memcpy(&randb[i * sizeof(struct fetchtime)], &tv,
+             sizeof(struct fetchtime));
     }
     RAND_add(randb, (int)len, (double)len/2);
   } while(!rand_enough());
@@ -1055,13 +1055,13 @@ static CURLcode ossl_seed(struct Curl_easy *data)
       /* we got a filename to try */
       RAND_load_file(fname, RAND_LOAD_LENGTH);
       if(rand_enough())
-        return CURLE_OK;
+        return FETCHE_OK;
     }
   }
 
-  infof(data, "libcurl is now using a weak random seed");
-  return rand_enough() ? CURLE_OK :
-         CURLE_SSL_CONNECT_ERROR; /* confusing error code */
+  infof(data, "libfetch is now using a weak random seed");
+  return rand_enough() ? FETCHE_OK :
+         FETCHE_SSL_CONNECT_ERROR; /* confusing error code */
 #endif
 }
 
@@ -1144,22 +1144,22 @@ static bool is_pkcs11_uri(const char *string)
 
 #endif
 
-static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine);
+static FETCHcode ossl_set_engine(struct Curl_easy *data, const char *engine);
 #if !defined(USE_OPENSSL_ENGINE) && defined(OPENSSL_HAS_PROVIDERS)
-static CURLcode ossl_set_provider(struct Curl_easy *data,
+static FETCHcode ossl_set_provider(struct Curl_easy *data,
                                   const char *provider);
 #endif
 
-static int use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,
+static int use_certificate_blob(SSL_CTX *ctx, const struct fetch_blob *blob,
                                 int type, const char *key_passwd)
 {
   int ret = 0;
   X509 *x = NULL;
   /* the typecast of blob->len is fine since it is guaranteed to never be
-     larger than CURL_MAX_INPUT_LENGTH */
+     larger than FETCH_MAX_INPUT_LENGTH */
   BIO *in = BIO_new_mem_buf(blob->data, (int)(blob->len));
   if(!in)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   if(type == SSL_FILETYPE_ASN1) {
     /* j = ERR_R_ASN1_LIB; */
@@ -1187,14 +1187,14 @@ end:
   return ret;
 }
 
-static int use_privatekey_blob(SSL_CTX *ctx, const struct curl_blob *blob,
+static int use_privatekey_blob(SSL_CTX *ctx, const struct fetch_blob *blob,
                                int type, const char *key_passwd)
 {
   int ret = 0;
   EVP_PKEY *pkey = NULL;
   BIO *in = BIO_new_mem_buf(blob->data, (int)(blob->len));
   if(!in)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   if(type == SSL_FILETYPE_PEM)
     pkey = PEM_read_bio_PrivateKey(in, NULL, passwd_callback,
@@ -1215,7 +1215,7 @@ end:
 }
 
 static int
-use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
+use_certificate_chain_blob(SSL_CTX *ctx, const struct fetch_blob *blob,
                            const char *key_passwd)
 {
 /* SSL_CTX_add1_chain_cert introduced in OpenSSL 1.0.2 */
@@ -1227,7 +1227,7 @@ use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
   void *passwd_callback_userdata = (void *)key_passwd;
   BIO *in = BIO_new_mem_buf(blob->data, (int)(blob->len));
   if(!in)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   ERR_clear_error();
 
@@ -1285,10 +1285,10 @@ static
 int cert_stuff(struct Curl_easy *data,
                SSL_CTX* ctx,
                char *cert_file,
-               const struct curl_blob *cert_blob,
+               const struct fetch_blob *cert_blob,
                const char *cert_type,
                char *key_file,
-               const struct curl_blob *key_blob,
+               const struct fetch_blob *key_blob,
                const char *key_type,
                char *key_passwd)
 {
@@ -1323,7 +1323,7 @@ int cert_stuff(struct Curl_easy *data,
               "could not load PEM client certificate from %s, " OSSL_PACKAGE
               " error %s, "
               "(no key found, wrong pass phrase, or wrong file format?)",
-              (cert_blob ? "CURLOPT_SSLCERT_BLOB" : cert_file),
+              (cert_blob ? "FETCHOPT_SSLCERT_BLOB" : cert_file),
               ossl_strerror(ERR_get_error(), error_buffer,
                             sizeof(error_buffer)) );
         return 0;
@@ -1343,7 +1343,7 @@ int cert_stuff(struct Curl_easy *data,
               "could not load ASN1 client certificate from %s, " OSSL_PACKAGE
               " error %s, "
               "(no key found, wrong pass phrase, or wrong file format?)",
-              (cert_blob ? "CURLOPT_SSLCERT_BLOB" : cert_file),
+              (cert_blob ? "FETCHOPT_SSLCERT_BLOB" : cert_file),
               ossl_strerror(ERR_get_error(), error_buffer,
                             sizeof(error_buffer)) );
         return 0;
@@ -1356,7 +1356,7 @@ int cert_stuff(struct Curl_easy *data,
        * cert_file is a PKCS#11 URI */
       if(!data->state.engine) {
         if(is_pkcs11_uri(cert_file)) {
-          if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+          if(ossl_set_engine(data, "pkcs11") != FETCHE_OK) {
             return 0;
           }
         }
@@ -1417,7 +1417,7 @@ int cert_stuff(struct Curl_easy *data,
        * cert_file is a PKCS#11 URI */
       if(!data->state.provider) {
         if(is_pkcs11_uri(cert_file)) {
-          if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
+          if(ossl_set_provider(data, "pkcs11") != FETCHE_OK) {
             return 0;
           }
         }
@@ -1634,7 +1634,7 @@ fail:
        * key_file is a PKCS#11 URI */
       if(!data->state.engine) {
         if(is_pkcs11_uri(key_file)) {
-          if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+          if(ossl_set_engine(data, "pkcs11") != FETCHE_OK) {
             return 0;
           }
         }
@@ -1642,7 +1642,7 @@ fail:
 
       if(data->state.engine) {
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method((char *)"fetch user interface");
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -1681,7 +1681,7 @@ fail:
        * cert_file is a PKCS#11 URI */
       if(!data->state.provider) {
         if(is_pkcs11_uri(cert_file)) {
-          if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
+          if(ossl_set_provider(data, "pkcs11") != FETCHE_OK) {
             return 0;
           }
         }
@@ -1693,7 +1693,7 @@ fail:
         OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method((char *)"fetch user interface");
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -1829,12 +1829,12 @@ fail:
 }
 
 /* returns non-zero on failure */
-static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
+static FETCHcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
 {
   BIO *bio_out = BIO_new(BIO_s_mem());
   BUF_MEM *biomem;
   int rc;
-  CURLcode result = CURLE_OUT_OF_MEMORY;
+  FETCHcode result = FETCHE_OUT_OF_MEMORY;
 
   if(bio_out) {
     Curl_dyn_reset(d);
@@ -1863,7 +1863,7 @@ static int ossl_init(void)
     /* not present in BoringSSL */
     OPENSSL_INIT_ENGINE_ALL_BUILTIN |
 #endif
-#ifdef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+#ifdef FETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
     OPENSSL_INIT_NO_LOAD_CONFIG |
 #else
     OPENSSL_INIT_LOAD_CONFIG |
@@ -1883,7 +1883,7 @@ static int ossl_init(void)
 #define CONF_MFLAGS_DEFAULT_SECTION 0x0
 #endif
 
-#ifndef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+#ifndef FETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
   CONF_modules_load_file(NULL, NULL,
                          CONF_MFLAGS_DEFAULT_SECTION|
                          CONF_MFLAGS_IGNORE_MISSING_FILE);
@@ -1943,7 +1943,7 @@ static void ossl_cleanup(void)
 
 /* Selects an OpenSSL crypto engine
  */
-static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
+static FETCHcode ossl_set_engine(struct Curl_easy *data, const char *engine)
 {
 #ifdef USE_OPENSSL_ENGINE
   ENGINE *e;
@@ -1961,7 +1961,7 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
 
   if(!e) {
     failf(data, "SSL Engine '%s' not found", engine);
-    return CURLE_SSL_ENGINE_NOTFOUND;
+    return FETCHE_SSL_ENGINE_NOTFOUND;
   }
 
   if(data->state.engine) {
@@ -1975,20 +1975,20 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
     ENGINE_free(e);
     failf(data, "Failed to initialise SSL Engine '%s': %s",
           engine, ossl_strerror(ERR_get_error(), buf, sizeof(buf)));
-    return CURLE_SSL_ENGINE_INITFAILED;
+    return FETCHE_SSL_ENGINE_INITFAILED;
   }
   data->state.engine = e;
-  return CURLE_OK;
+  return FETCHE_OK;
 #else
   (void)engine;
   failf(data, "SSL Engine not supported");
-  return CURLE_SSL_ENGINE_NOTFOUND;
+  return FETCHE_SSL_ENGINE_NOTFOUND;
 #endif
 }
 
 /* Sets engine as default for all SSL operations
  */
-static CURLcode ossl_set_engine_default(struct Curl_easy *data)
+static FETCHcode ossl_set_engine_default(struct Curl_easy *data)
 {
 #ifdef USE_OPENSSL_ENGINE
   if(data->state.engine) {
@@ -1999,28 +1999,28 @@ static CURLcode ossl_set_engine_default(struct Curl_easy *data)
     else {
       failf(data, "set default crypto engine '%s' failed",
             ENGINE_get_id(data->state.engine));
-      return CURLE_SSL_ENGINE_SETFAILED;
+      return FETCHE_SSL_ENGINE_SETFAILED;
     }
   }
 #else
   (void) data;
 #endif
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /* Return list of OpenSSL crypto engine names.
  */
-static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
+static struct fetch_slist *ossl_engines_list(struct Curl_easy *data)
 {
-  struct curl_slist *list = NULL;
+  struct fetch_slist *list = NULL;
 #ifdef USE_OPENSSL_ENGINE
-  struct curl_slist *beg;
+  struct fetch_slist *beg;
   ENGINE *e;
 
   for(e = ENGINE_get_first(); e; e = ENGINE_get_next(e)) {
-    beg = curl_slist_append(list, ENGINE_get_id(e));
+    beg = fetch_slist_append(list, ENGINE_get_id(e));
     if(!beg) {
-      curl_slist_free_all(list);
+      fetch_slist_free_all(list);
       return NULL;
     }
     list = beg;
@@ -2033,7 +2033,7 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
 #if !defined(USE_OPENSSL_ENGINE) && defined(OPENSSL_HAS_PROVIDERS)
 /* Selects an OpenSSL crypto provider
  */
-static CURLcode ossl_set_provider(struct Curl_easy *data, const char *provider)
+static FETCHcode ossl_set_provider(struct Curl_easy *data, const char *provider)
 {
   OSSL_PROVIDER *pkcs11_provider = NULL;
   char error_buffer[256];
@@ -2041,10 +2041,10 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *provider)
   if(OSSL_PROVIDER_available(NULL, provider)) {
     /* already loaded through the configuration - no action needed */
     data->state.provider = TRUE;
-    return CURLE_OK;
+    return FETCHE_OK;
   }
   if(data->state.provider_failed) {
-    return CURLE_SSL_ENGINE_NOTFOUND;
+    return FETCHE_SSL_ENGINE_NOTFOUND;
   }
 
   pkcs11_provider = OSSL_PROVIDER_try_load(NULL, provider, 1);
@@ -2056,21 +2056,21 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *provider)
     data->state.provider_failed = TRUE;
     /* FIXME not the right error but much less fuss than creating a new
      * public one */
-    return CURLE_SSL_ENGINE_NOTFOUND;
+    return FETCHE_SSL_ENGINE_NOTFOUND;
   }
   data->state.provider = TRUE;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 #endif
 
 
-static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
+static FETCHcode ossl_shutdown(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool send_shutdown, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   char buf[1024];
   int nread = -1, err;
   unsigned long sslerr;
@@ -2082,7 +2082,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
     goto out;
   }
 
-  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  connssl->io_need = FETCH_SSL_IO_NEED_NONE;
   *done = FALSE;
   if(!(SSL_get_shutdown(octx->ssl) & SSL_SENT_SHUTDOWN)) {
     /* We have not started the shutdown from our side yet. Check
@@ -2090,7 +2090,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
     ERR_clear_error();
     for(i = 0; i < 10; ++i) {
       nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
-      CURL_TRC_CF(data, cf, "SSL shutdown not sent, read -> %d", nread);
+      FETCH_TRC_CF(data, cf, "SSL shutdown not sent, read -> %d", nread);
       if(nread <= 0)
         break;
     }
@@ -2099,7 +2099,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
       bool input_pending;
       /* Yes, it did. */
       if(!send_shutdown) {
-        CURL_TRC_CF(data, cf, "SSL shutdown received, not sending");
+        FETCH_TRC_CF(data, cf, "SSL shutdown received, not sending");
         *done = TRUE;
         goto out;
       }
@@ -2108,7 +2108,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
          * seems not interested to see our close notify, so do not
          * send it. We are done. */
         connssl->peer_closed = TRUE;
-        CURL_TRC_CF(data, cf, "peer closed connection");
+        FETCH_TRC_CF(data, cf, "peer closed connection");
         *done = TRUE;
         goto out;
       }
@@ -2119,15 +2119,15 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
    * was not complete, we are lacking the close notify from the server. */
   if(send_shutdown && !(SSL_get_shutdown(octx->ssl) & SSL_SENT_SHUTDOWN)) {
     ERR_clear_error();
-    CURL_TRC_CF(data, cf, "send SSL close notify");
+    FETCH_TRC_CF(data, cf, "send SSL close notify");
     if(SSL_shutdown(octx->ssl) == 1) {
-      CURL_TRC_CF(data, cf, "SSL shutdown finished");
+      FETCH_TRC_CF(data, cf, "SSL shutdown finished");
       *done = TRUE;
       goto out;
     }
     if(SSL_ERROR_WANT_WRITE == SSL_get_error(octx->ssl, nread)) {
-      CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
-      connssl->io_need = CURL_SSL_IO_NEED_SEND;
+      FETCH_TRC_CF(data, cf, "SSL shutdown still wants to send");
+      connssl->io_need = FETCH_SSL_IO_NEED_SEND;
       goto out;
     }
     /* Having sent the close notify, we use SSL_read() to get the
@@ -2137,7 +2137,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   for(i = 0; i < 10; ++i) {
     ERR_clear_error();
     nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
-    CURL_TRC_CF(data, cf, "SSL shutdown read -> %d", nread);
+    FETCH_TRC_CF(data, cf, "SSL shutdown read -> %d", nread);
     if(nread <= 0)
       break;
   }
@@ -2145,33 +2145,33 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   switch(err) {
   case SSL_ERROR_ZERO_RETURN: /* no more data */
     if(SSL_shutdown(octx->ssl) == 1)
-      CURL_TRC_CF(data, cf, "SSL shutdown finished");
+      FETCH_TRC_CF(data, cf, "SSL shutdown finished");
     else
-      CURL_TRC_CF(data, cf, "SSL shutdown not received, but closed");
+      FETCH_TRC_CF(data, cf, "SSL shutdown not received, but closed");
     *done = TRUE;
     break;
   case SSL_ERROR_NONE: /* just did not get anything */
   case SSL_ERROR_WANT_READ:
     /* SSL has send its notify and now wants to read the reply
      * from the server. We are not really interested in that. */
-    CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
-    connssl->io_need = CURL_SSL_IO_NEED_RECV;
+    FETCH_TRC_CF(data, cf, "SSL shutdown sent, want receive");
+    connssl->io_need = FETCH_SSL_IO_NEED_RECV;
     break;
   case SSL_ERROR_WANT_WRITE:
-    CURL_TRC_CF(data, cf, "SSL shutdown send blocked");
-    connssl->io_need = CURL_SSL_IO_NEED_SEND;
+    FETCH_TRC_CF(data, cf, "SSL shutdown send blocked");
+    connssl->io_need = FETCH_SSL_IO_NEED_SEND;
     break;
   default:
     /* Server seems to have closed the connection without sending us
      * a close notify. */
     sslerr = ERR_get_error();
-    CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
+    FETCH_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
                 (sslerr ?
                  ossl_strerror(sslerr, buf, sizeof(buf)) :
                  SSL_ERROR_to_str(err)),
                 SOCKERRNO);
     *done = TRUE;
-    result = CURLE_OK;
+    result = FETCHE_OK;
     break;
   }
 
@@ -2240,7 +2240,7 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
                                size_t hostlen,
                                const char *dispname)
 {
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FETCH_DISABLE_VERBOSE_STRINGS
   (void)dispname;
   (void)data;
 #endif
@@ -2274,7 +2274,7 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
 
    This function is now used from ngtcp2 (QUIC) as well.
 */
-static CURLcode ossl_verifyhost(struct Curl_easy *data,
+static FETCHcode ossl_verifyhost(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 struct ssl_peer *peer, X509 *server_cert)
 {
@@ -2287,7 +2287,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
 #else
   struct in_addr addr;
 #endif
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   bool dNSName = FALSE; /* if a dNSName field exists in the cert */
   bool iPAddress = FALSE; /* if an iPAddress field exists in the cert */
   size_t hostlen;
@@ -2295,27 +2295,27 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   (void)conn;
   hostlen = strlen(peer->hostname);
   switch(peer->type) {
-  case CURL_SSL_PEER_IPV4:
+  case FETCH_SSL_PEER_IPV4:
     if(!Curl_inet_pton(AF_INET, peer->hostname, &addr))
-      return CURLE_PEER_FAILED_VERIFICATION;
+      return FETCHE_PEER_FAILED_VERIFICATION;
     target = GEN_IPADD;
     addrlen = sizeof(struct in_addr);
     break;
 #ifdef USE_IPV6
-  case CURL_SSL_PEER_IPV6:
+  case FETCH_SSL_PEER_IPV6:
     if(!Curl_inet_pton(AF_INET6, peer->hostname, &addr))
-      return CURLE_PEER_FAILED_VERIFICATION;
+      return FETCHE_PEER_FAILED_VERIFICATION;
     target = GEN_IPADD;
     addrlen = sizeof(struct in6_addr);
     break;
 #endif
-  case CURL_SSL_PEER_DNS:
+  case FETCH_SSL_PEER_DNS:
     target = GEN_DNS;
     break;
   default:
     DEBUGASSERT(0);
     failf(data, "unexpected ssl peer type: %d", peer->type);
-    return CURLE_PEER_FAILED_VERIFICATION;
+    return FETCHE_PEER_FAILED_VERIFICATION;
   }
 
   /* get a "list" of alternative names */
@@ -2396,13 +2396,13 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     /* an alternative name matched */
     ;
   else if(dNSName || iPAddress) {
-    const char *tname = (peer->type == CURL_SSL_PEER_DNS) ? "hostname" :
-                        (peer->type == CURL_SSL_PEER_IPV4) ?
+    const char *tname = (peer->type == FETCH_SSL_PEER_DNS) ? "hostname" :
+                        (peer->type == FETCH_SSL_PEER_IPV4) ?
                         "ipv4 address" : "ipv6 address";
     infof(data, " subjectAltName does not match %s %s", tname, peer->dispname);
     failf(data, "SSL: no alternative certificate subject name matches "
           "target %s '%s'", tname, peer->dispname);
-    result = CURLE_PEER_FAILED_VERIFICATION;
+    result = FETCHE_PEER_FAILED_VERIFICATION;
   }
   else {
     /* we have to look to the last occurrence of a commonName in the
@@ -2443,12 +2443,12 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
         }
 
         if((cnlen <= 0) || !cn)
-          result = CURLE_OUT_OF_MEMORY;
+          result = FETCHE_OUT_OF_MEMORY;
         else if((size_t)cnlen != strlen((char *)cn)) {
           /* there was a terminating zero before the end of string, this
              cannot match and we return failure! */
           failf(data, "SSL: illegal cert name field");
-          result = CURLE_PEER_FAILED_VERIFICATION;
+          result = FETCHE_PEER_FAILED_VERIFICATION;
         }
       }
     }
@@ -2459,13 +2459,13 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     else if(!cn) {
       failf(data,
             "SSL: unable to obtain common name from peer certificate");
-      result = CURLE_PEER_FAILED_VERIFICATION;
+      result = FETCHE_PEER_FAILED_VERIFICATION;
     }
     else if(!Curl_cert_hostcheck((const char *)cn, cnlen,
                                  peer->hostname, hostlen)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
             "target hostname '%s'", cn, peer->dispname);
-      result = CURLE_PEER_FAILED_VERIFICATION;
+      result = FETCHE_PEER_FAILED_VERIFICATION;
     }
     else {
       infof(data, " common name: %s (matched)", cn);
@@ -2479,7 +2479,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
   !defined(OPENSSL_NO_OCSP)
-static CURLcode verifystatus(struct Curl_cfilter *cf,
+static FETCHcode verifystatus(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ossl_ctx *octx)
 {
@@ -2490,7 +2490,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   unsigned char *status;
 #endif
   const unsigned char *p;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   OCSP_RESPONSE *rsp = NULL;
   OCSP_BASICRESP *br = NULL;
   X509_STORE     *st = NULL;
@@ -2509,14 +2509,14 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
 
   if(!status) {
     failf(data, "No OCSP response received");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
   p = status;
   rsp = d2i_OCSP_RESPONSE(NULL, &p, len);
   if(!rsp) {
     failf(data, "Invalid OCSP response");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
@@ -2524,21 +2524,21 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   if(ocsp_status != OCSP_RESPONSE_STATUS_SUCCESSFUL) {
     failf(data, "Invalid OCSP response status: %s (%d)",
           OCSP_response_status_str(ocsp_status), ocsp_status);
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
   br = OCSP_response_get1_basic(rsp);
   if(!br) {
     failf(data, "Invalid OCSP response");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
   ch = SSL_get_peer_cert_chain(octx->ssl);
   if(!ch) {
     failf(data, "Could not get peer certificate chain");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
   st = SSL_CTX_get_cert_store(octx->ssl_ctx);
@@ -2563,7 +2563,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
       if(X509_check_issued(issuer, responder) == X509_V_OK) {
         if(!OCSP_basic_add1_cert(br, issuer)) {
           failf(data, "Could not add issuer cert to OCSP response");
-          result = CURLE_SSL_INVALIDCERTSTATUS;
+          result = FETCHE_SSL_INVALIDCERTSTATUS;
           goto end;
         }
       }
@@ -2573,7 +2573,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
 
   if(OCSP_basic_verify(br, ch, st, 0) <= 0) {
     failf(data, "OCSP response verification failed");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
@@ -2581,7 +2581,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   cert = SSL_get1_peer_certificate(octx->ssl);
   if(!cert) {
     failf(data, "Error getting peer certificate");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
@@ -2596,7 +2596,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
 
   if(!id) {
     failf(data, "Error computing OCSP ID");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
@@ -2606,14 +2606,14 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   OCSP_CERTID_free(id);
   if(ret != 1) {
     failf(data, "Could not find certificate ID in OCSP response");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
   /* Validate the corresponding single OCSP response */
   if(!OCSP_check_validity(thisupd, nextupd, 300L, -1L)) {
     failf(data, "OCSP response has expired");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
@@ -2625,14 +2625,14 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
     break;
 
   case V_OCSP_CERTSTATUS_REVOKED:
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     failf(data, "SSL certificate revocation reason: %s (%d)",
           OCSP_crl_reason_str(crl_reason), crl_reason);
     goto end;
 
   case V_OCSP_CERTSTATUS_UNKNOWN:
   default:
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    result = FETCHE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
 
@@ -2858,11 +2858,11 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
                         "%s (%s), %s, %s (%d):\n",
                         verstr, direction ? "OUT" : "IN",
                         tls_rt_name, msg_name, msg_type);
-    Curl_debug(data, CURLINFO_TEXT, ssl_buf, (size_t)txt_len);
+    Curl_debug(data, FETCHINFO_TEXT, ssl_buf, (size_t)txt_len);
   }
 
-  Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
-             CURLINFO_SSL_DATA_IN, (char *)buf, len);
+  Curl_debug(data, (direction == 1) ? FETCHINFO_SSL_DATA_OUT :
+             FETCHINFO_SSL_DATA_IN, (char *)buf, len);
   (void) ssl;
 }
 #endif
@@ -2878,15 +2878,15 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
-static CURLcode
+static FETCHcode
 ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   /* first, TLS min version... */
-  long curl_ssl_version_min = conn_config->version;
-  long curl_ssl_version_max;
+  long fetch_ssl_version_min = conn_config->version;
+  long fetch_ssl_version_max;
 
-  /* convert curl min SSL version option to OpenSSL constant */
+  /* convert fetch min SSL version option to OpenSSL constant */
 #if (defined(OPENSSL_IS_BORINGSSL)  || \
      defined(OPENSSL_IS_AWSLC)      || \
      defined(LIBRESSL_VERSION_NUMBER))
@@ -2896,59 +2896,59 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
   long ossl_ssl_version_min = 0;
   long ossl_ssl_version_max = 0;
 #endif
-  switch(curl_ssl_version_min) {
-  case CURL_SSLVERSION_TLSv1: /* TLS 1.x */
-  case CURL_SSLVERSION_TLSv1_0:
+  switch(fetch_ssl_version_min) {
+  case FETCH_SSLVERSION_TLSv1: /* TLS 1.x */
+  case FETCH_SSLVERSION_TLSv1_0:
     ossl_ssl_version_min = TLS1_VERSION;
     break;
-  case CURL_SSLVERSION_TLSv1_1:
+  case FETCH_SSLVERSION_TLSv1_1:
     ossl_ssl_version_min = TLS1_1_VERSION;
     break;
-  case CURL_SSLVERSION_TLSv1_2:
+  case FETCH_SSLVERSION_TLSv1_2:
     ossl_ssl_version_min = TLS1_2_VERSION;
     break;
-  case CURL_SSLVERSION_TLSv1_3:
+  case FETCH_SSLVERSION_TLSv1_3:
 #ifdef TLS1_3_VERSION
     ossl_ssl_version_min = TLS1_3_VERSION;
     break;
 #else
-    return CURLE_NOT_BUILT_IN;
+    return FETCHE_NOT_BUILT_IN;
 #endif
   }
 
-  /* CURL_SSLVERSION_DEFAULT means that no option was selected.
+  /* FETCH_SSLVERSION_DEFAULT means that no option was selected.
      We do not want to pass 0 to SSL_CTX_set_min_proto_version as
      it would enable all versions down to the lowest supported by
      the library.
      So we skip this, and stay with the library default
   */
-  if(curl_ssl_version_min != CURL_SSLVERSION_DEFAULT) {
+  if(fetch_ssl_version_min != FETCH_SSLVERSION_DEFAULT) {
     if(!SSL_CTX_set_min_proto_version(ctx, ossl_ssl_version_min)) {
-      return CURLE_SSL_CONNECT_ERROR;
+      return FETCHE_SSL_CONNECT_ERROR;
     }
   }
 
   /* ... then, TLS max version */
-  curl_ssl_version_max = (long)conn_config->version_max;
+  fetch_ssl_version_max = (long)conn_config->version_max;
 
-  /* convert curl max SSL version option to OpenSSL constant */
-  switch(curl_ssl_version_max) {
-  case CURL_SSLVERSION_MAX_TLSv1_0:
+  /* convert fetch max SSL version option to OpenSSL constant */
+  switch(fetch_ssl_version_max) {
+  case FETCH_SSLVERSION_MAX_TLSv1_0:
     ossl_ssl_version_max = TLS1_VERSION;
     break;
-  case CURL_SSLVERSION_MAX_TLSv1_1:
+  case FETCH_SSLVERSION_MAX_TLSv1_1:
     ossl_ssl_version_max = TLS1_1_VERSION;
     break;
-  case CURL_SSLVERSION_MAX_TLSv1_2:
+  case FETCH_SSLVERSION_MAX_TLSv1_2:
     ossl_ssl_version_max = TLS1_2_VERSION;
     break;
 #ifdef TLS1_3_VERSION
-  case CURL_SSLVERSION_MAX_TLSv1_3:
+  case FETCH_SSLVERSION_MAX_TLSv1_3:
     ossl_ssl_version_max = TLS1_3_VERSION;
     break;
 #endif
-  case CURL_SSLVERSION_MAX_NONE:  /* none selected */
-  case CURL_SSLVERSION_MAX_DEFAULT:  /* max selected */
+  case FETCH_SSLVERSION_MAX_NONE:  /* none selected */
+  case FETCH_SSLVERSION_MAX_DEFAULT:  /* max selected */
   default:
     /* SSL_CTX_set_max_proto_version states that:
        setting the maximum to 0 will enable
@@ -2959,10 +2959,10 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
   }
 
   if(!SSL_CTX_set_max_proto_version(ctx, ossl_ssl_version_max)) {
-    return CURLE_SSL_CONNECT_ERROR;
+    return FETCHE_SSL_CONNECT_ERROR;
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 #endif
 
@@ -2978,7 +2978,7 @@ typedef long ctx_option_t;
 #endif
 
 #if (OPENSSL_VERSION_NUMBER < 0x10100000L) /* 1.1.0 */
-static CURLcode
+static FETCHcode
 ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
@@ -2990,7 +2990,7 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
   (void) data; /* In case it is unused. */
 
   switch(ssl_version) {
-  case CURL_SSLVERSION_TLSv1_3:
+  case FETCH_SSLVERSION_TLSv1_3:
 #ifdef TLS1_3_VERSION
   {
     struct ssl_connect_data *connssl = cf->ctx;
@@ -3002,59 +3002,59 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 #else
   (void)ctx_options;
   failf(data, OSSL_PACKAGE " was built without TLS 1.3 support");
-  return CURLE_NOT_BUILT_IN;
+  return FETCHE_NOT_BUILT_IN;
 #endif
   FALLTHROUGH();
-  case CURL_SSLVERSION_TLSv1_2:
+  case FETCH_SSLVERSION_TLSv1_2:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_1;
 #else
     failf(data, OSSL_PACKAGE " was built without TLS 1.2 support");
-    return CURLE_NOT_BUILT_IN;
+    return FETCHE_NOT_BUILT_IN;
 #endif
     FALLTHROUGH();
-  case CURL_SSLVERSION_TLSv1_1:
+  case FETCH_SSLVERSION_TLSv1_1:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1;
 #else
     failf(data, OSSL_PACKAGE " was built without TLS 1.1 support");
-    return CURLE_NOT_BUILT_IN;
+    return FETCHE_NOT_BUILT_IN;
 #endif
     FALLTHROUGH();
-  case CURL_SSLVERSION_TLSv1_0:
-  case CURL_SSLVERSION_TLSv1:
+  case FETCH_SSLVERSION_TLSv1_0:
+  case FETCH_SSLVERSION_TLSv1:
     break;
   }
 
   switch(ssl_version_max) {
-  case CURL_SSLVERSION_MAX_TLSv1_0:
+  case FETCH_SSLVERSION_MAX_TLSv1_0:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_1;
 #endif
     FALLTHROUGH();
-  case CURL_SSLVERSION_MAX_TLSv1_1:
+  case FETCH_SSLVERSION_MAX_TLSv1_1:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_2;
 #endif
     FALLTHROUGH();
-  case CURL_SSLVERSION_MAX_TLSv1_2:
+  case FETCH_SSLVERSION_MAX_TLSv1_2:
 #ifdef TLS1_3_VERSION
     *ctx_options |= SSL_OP_NO_TLSv1_3;
 #endif
     break;
-  case CURL_SSLVERSION_MAX_TLSv1_3:
+  case FETCH_SSLVERSION_MAX_TLSv1_3:
 #ifdef TLS1_3_VERSION
     break;
 #else
     failf(data, OSSL_PACKAGE " was built without TLS 1.3 support");
-    return CURLE_NOT_BUILT_IN;
+    return FETCHE_NOT_BUILT_IN;
 #endif
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 #endif
 
-CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
+FETCHcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const char *ssl_peer_key,
                                SSL_SESSION *session,
@@ -3063,7 +3063,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
 {
   const struct ssl_config_data *config;
   unsigned char *der_session_buf = NULL;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   if(!cf || !data)
     goto out;
@@ -3076,25 +3076,25 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
 
     der_session_size = i2d_SSL_SESSION(session, NULL);
     if(der_session_size == 0) {
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
       goto out;
     }
 
     der_session_buf = der_session_ptr = malloc(der_session_size);
     if(!der_session_buf) {
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
       goto out;
     }
 
     der_session_size = i2d_SSL_SESSION(session, &der_session_ptr);
     if(der_session_size == 0) {
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
       goto out;
     }
 
     result = Curl_ssl_session_create(der_session_buf, der_session_size,
                                      ietf_tls_id, alpn,
-                                     (curl_off_t)time(NULL) +
+                                     (fetch_off_t)time(NULL) +
                                      SSL_SESSION_get_timeout(session), 0,
                                      &sc_session);
     der_session_buf = NULL;  /* took ownership of sdata */
@@ -3124,8 +3124,8 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   return 0;
 }
 
-static CURLcode load_cacert_from_memory(X509_STORE *store,
-                                        const struct curl_blob *ca_info_blob)
+static FETCHcode load_cacert_from_memory(X509_STORE *store,
+                                        const struct fetch_blob *ca_info_blob)
 {
   /* these need to be freed at the end */
   BIO *cbio = NULL;
@@ -3136,16 +3136,16 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
   X509_INFO *itmp = NULL;
 
   if(ca_info_blob->len > (size_t)INT_MAX)
-    return CURLE_SSL_CACERT_BADFILE;
+    return FETCHE_SSL_CACERT_BADFILE;
 
   cbio = BIO_new_mem_buf(ca_info_blob->data, (int)ca_info_blob->len);
   if(!cbio)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
   if(!inf) {
     BIO_free(cbio);
-    return CURLE_SSL_CACERT_BADFILE;
+    return FETCHE_SSL_CACERT_BADFILE;
   }
 
   /* add each entry from PEM file to x509_store */
@@ -3177,16 +3177,16 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
   BIO_free(cbio);
 
   /* if we did not end up importing anything, treat that as an error */
-  return (count > 0) ? CURLE_OK : CURLE_SSL_CACERT_BADFILE;
+  return (count > 0) ? FETCHE_OK : FETCHE_SSL_CACERT_BADFILE;
 }
 
 #if defined(USE_WIN32_CRYPTO)
-static CURLcode import_windows_cert_store(struct Curl_easy *data,
+static FETCHcode import_windows_cert_store(struct Curl_easy *data,
                                           const char *name,
                                           X509_STORE *store,
                                           bool *imported)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   HCERTSTORE hStore;
 
   *imported = FALSE;
@@ -3204,7 +3204,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
        the MS root store. If a certificate cannot be imported it is
        skipped. 'result' is used to store only hard-fail conditions (such
        as out of memory) that cause an early break. */
-    result = CURLE_OK;
+    result = FETCHE_OK;
     for(;;) {
       X509 *x509;
       FILETIME now;
@@ -3215,7 +3215,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
       if(!pContext)
         break;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
       else {
         char cert_name[256];
         if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
@@ -3258,7 +3258,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
 
           if(!tmp) {
             failf(data, "SSL: Out of memory allocating for OID list");
-            result = CURLE_OUT_OF_MEMORY;
+            result = FETCHE_OUT_OF_MEMORY;
             break;
           }
 
@@ -3304,7 +3304,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
          reasons such as duplicate certificate, which is allowed by MS but
          not OpenSSL. */
       if(X509_STORE_add_cert(store, x509) == 1) {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
         infof(data, "SSL: Imported cert");
 #endif
         *imported = TRUE;
@@ -3324,17 +3324,17 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
 }
 #endif
 
-static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
+static FETCHcode ossl_populate_x509_store(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
                                          X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   X509_LOOKUP *lookup = NULL;
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  const struct fetch_blob *ca_info_blob = conn_config->ca_info_blob;
   const char * const ssl_cafile =
-    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+    /* FETCHOPT_CAINFO_BLOB overrides FETCHOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
   const char * const ssl_capath = conn_config->CApath;
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
@@ -3342,10 +3342,10 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
   bool imported_native_ca = FALSE;
   bool imported_ca_info_blob = FALSE;
 
-  CURL_TRC_CF(data, cf, "ossl_populate_x509_store, path=%s, blob=%d",
+  FETCH_TRC_CF(data, cf, "ossl_populate_x509_store, path=%s, blob=%d",
               ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
   if(!store)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   if(verifypeer) {
 #if defined(USE_WIN32_CRYPTO)
@@ -3395,7 +3395,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
         if(!imported_native_ca && !imported_ca_info_blob) {
           /* Fail if we insist on successfully verifying the server. */
           failf(data, "error setting certificate file: %s", ssl_cafile);
-          return CURLE_SSL_CACERT_BADFILE;
+          return FETCHE_SSL_CACERT_BADFILE;
         }
         else
           infof(data, "error setting certificate file, continuing anyway");
@@ -3404,7 +3404,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
         if(!imported_native_ca && !imported_ca_info_blob) {
           /* Fail if we insist on successfully verifying the server. */
           failf(data, "error setting certificate path: %s", ssl_capath);
-          return CURLE_SSL_CACERT_BADFILE;
+          return FETCHE_SSL_CACERT_BADFILE;
         }
         else
           infof(data, "error setting certificate path, continuing anyway");
@@ -3419,7 +3419,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
                 "  CAfile: %s CApath: %s",
                 ssl_cafile ? ssl_cafile : "none",
                 ssl_capath ? ssl_capath : "none");
-          return CURLE_SSL_CACERT_BADFILE;
+          return FETCHE_SSL_CACERT_BADFILE;
         }
         else {
           infof(data, "error setting certificate verify locations,"
@@ -3431,7 +3431,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
       infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
     }
 
-#ifdef CURL_CA_FALLBACK
+#ifdef FETCH_CA_FALLBACK
     if(!ssl_cafile && !ssl_capath &&
        !imported_native_ca && !imported_ca_info_blob) {
       /* verifying the peer without any CA certificates will not
@@ -3448,7 +3448,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
     if(!lookup ||
        (!X509_load_crl_file(lookup, ssl_crlfile, X509_FILETYPE_PEM)) ) {
       failf(data, "error loading CRL file: %s", ssl_crlfile);
-      return CURLE_SSL_CRL_BADFILE;
+      return FETCHE_SSL_CRL_BADFILE;
     }
     /* Everything is fine. */
     infof(data, "successfully loaded CRL file:");
@@ -3495,7 +3495,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
 struct ossl_x509_share {
   char *CAfile;         /* CAfile path used to generate X509 store */
   X509_STORE *store;    /* cached X509 store or NULL if none */
-  struct curltime time; /* when the cached store was created */
+  struct fetchtime time; /* when the cached store was created */
 };
 
 static void oss_x509_share_free(void *key, size_t key_len, void *p)
@@ -3520,7 +3520,7 @@ ossl_cached_x509_store_expired(const struct Curl_easy *data,
   if(cfg->ca_cache_timeout < 0)
     return FALSE;
   else {
-    struct curltime now = Curl_now();
+    struct fetchtime now = Curl_now();
     timediff_t elapsed_ms = Curl_timediff(now, mb->time);
     timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
@@ -3609,13 +3609,13 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
   }
 }
 
-CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+FETCHcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    SSL_CTX *ssl_ctx)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   X509_STORE *cached_store;
   bool cache_criteria_met;
 
@@ -3637,7 +3637,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
     result = ossl_populate_x509_store(cf, data, store);
-    if(result == CURLE_OK && cache_criteria_met) {
+    if(result == FETCHE_OK && cache_criteria_met) {
       ossl_set_cached_x509_store(cf, data, store);
     }
   }
@@ -3645,7 +3645,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
   return result;
 }
 #else /* HAVE_SSL_X509_STORE_SHARE */
-CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+FETCHcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    SSL_CTX *ssl_ctx)
 {
@@ -3655,7 +3655,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 }
 #endif /* HAVE_SSL_X509_STORE_SHARE */
 
-CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
+FETCHcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
@@ -3665,7 +3665,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             Curl_ossl_new_session_cb *cb_new_session,
                             void *ssl_user_data)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   const char *ciphers;
   SSL_METHOD_QUAL SSL_METHOD *req_method = NULL;
   ctx_option_t ctx_options = 0;
@@ -3673,7 +3673,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   const long int ssl_version_min = conn_config->version;
   char * const ssl_cert = ssl_config->primary.clientcert;
-  const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
+  const struct fetch_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_cert_type = ssl_config->cert_type;
   const bool verifypeer = conn_config->verifypeer;
   char error_buffer[256];
@@ -3689,12 +3689,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   case TRNSPRT_TCP:
     /* check to see if we have been told to use an explicit SSL/TLS version */
     switch(ssl_version_min) {
-    case CURL_SSLVERSION_DEFAULT:
-    case CURL_SSLVERSION_TLSv1:
-    case CURL_SSLVERSION_TLSv1_0:
-    case CURL_SSLVERSION_TLSv1_1:
-    case CURL_SSLVERSION_TLSv1_2:
-    case CURL_SSLVERSION_TLSv1_3:
+    case FETCH_SSLVERSION_DEFAULT:
+    case FETCH_SSLVERSION_TLSv1:
+    case FETCH_SSLVERSION_TLSv1_0:
+    case FETCH_SSLVERSION_TLSv1_1:
+    case FETCH_SSLVERSION_TLSv1_2:
+    case FETCH_SSLVERSION_TLSv1_3:
       /* it will be handled later with the context options */
   #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
       req_method = TLS_client_method();
@@ -3702,22 +3702,22 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       req_method = SSLv23_client_method();
   #endif
       break;
-    case CURL_SSLVERSION_SSLv2:
+    case FETCH_SSLVERSION_SSLv2:
       failf(data, "No SSLv2 support");
-      return CURLE_NOT_BUILT_IN;
-    case CURL_SSLVERSION_SSLv3:
+      return FETCHE_NOT_BUILT_IN;
+    case FETCH_SSLVERSION_SSLv3:
       failf(data, "No SSLv3 support");
-      return CURLE_NOT_BUILT_IN;
+      return FETCHE_NOT_BUILT_IN;
     default:
-      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-      return CURLE_SSL_CONNECT_ERROR;
+      failf(data, "Unrecognized parameter passed via FETCHOPT_SSLVERSION");
+      return FETCHE_SSL_CONNECT_ERROR;
     }
     break;
   case TRNSPRT_QUIC:
     if(conn_config->version_max &&
-       (conn_config->version_max != CURL_SSLVERSION_MAX_TLSv1_3)) {
+       (conn_config->version_max != FETCH_SSLVERSION_MAX_TLSv1_3)) {
       failf(data, "QUIC needs at least TLS version 1.3");
-      return CURLE_SSL_CONNECT_ERROR;
+      return FETCHE_SSL_CONNECT_ERROR;
     }
 
 #ifdef USE_OPENSSL_QUIC
@@ -3730,7 +3730,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     break;
   default:
     failf(data, "unsupported transport %d in SSL init", peer->transport);
-    return CURLE_SSL_CONNECT_ERROR;
+    return FETCHE_SSL_CONNECT_ERROR;
   }
 
 
@@ -3740,7 +3740,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(!octx->ssl_ctx) {
     failf(data, "SSL: could not create a context: %s",
           ossl_strerror(ERR_peek_error(), error_buffer, sizeof(error_buffer)));
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   if(cb_setup) {
@@ -3769,11 +3769,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      into the proper RFC5077: https://datatracker.ietf.org/doc/html/rfc5077
 
      The enabled extension concerns the session management. I wonder how often
-     libcurl stops a connection and then resumes a TLS session. Also, sending
+     libfetch stops a connection and then resumes a TLS session. Also, sending
      the session data is some overhead. I suggest that you just use your
      proposed patch (which explicitly disables TICKET).
 
-     If someone writes an application with libcurl and OpenSSL who wants to
+     If someone writes an application with libfetch and OpenSSL who wants to
      enable the feature, one can do this in the SSL callback.
 
      SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG option enabling allowed proper
@@ -3816,17 +3816,17 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #endif
 
   switch(ssl_version_min) {
-  case CURL_SSLVERSION_SSLv2:
-  case CURL_SSLVERSION_SSLv3:
-    return CURLE_NOT_BUILT_IN;
+  case FETCH_SSLVERSION_SSLv2:
+  case FETCH_SSLVERSION_SSLv3:
+    return FETCHE_NOT_BUILT_IN;
 
     /* "--tlsv<x.y>" options mean TLS >= version <x.y> */
-  case CURL_SSLVERSION_DEFAULT:
-  case CURL_SSLVERSION_TLSv1: /* TLS >= version 1.0 */
-  case CURL_SSLVERSION_TLSv1_0: /* TLS >= version 1.0 */
-  case CURL_SSLVERSION_TLSv1_1: /* TLS >= version 1.1 */
-  case CURL_SSLVERSION_TLSv1_2: /* TLS >= version 1.2 */
-  case CURL_SSLVERSION_TLSv1_3: /* TLS >= version 1.3 */
+  case FETCH_SSLVERSION_DEFAULT:
+  case FETCH_SSLVERSION_TLSv1: /* TLS >= version 1.0 */
+  case FETCH_SSLVERSION_TLSv1_0: /* TLS >= version 1.0 */
+  case FETCH_SSLVERSION_TLSv1_1: /* TLS >= version 1.1 */
+  case FETCH_SSLVERSION_TLSv1_2: /* TLS >= version 1.2 */
+  case FETCH_SSLVERSION_TLSv1_3: /* TLS >= version 1.3 */
     /* asking for any TLS version as the minimum, means no SSL versions
        allowed */
     ctx_options |= SSL_OP_NO_SSLv2;
@@ -3837,13 +3837,13 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #else
     result = ossl_set_ssl_version_min_max_legacy(&ctx_options, cf, data);
 #endif
-    if(result != CURLE_OK)
+    if(result != FETCHE_OK)
       return result;
     break;
 
   default:
-    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-    return CURLE_SSL_CONNECT_ERROR;
+    failf(data, "Unrecognized parameter passed via FETCHOPT_SSLVERSION");
+    return FETCHE_SSL_CONNECT_ERROR;
   }
 
   SSL_CTX_set_options(octx->ssl_ctx, ctx_options);
@@ -3857,7 +3857,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #ifdef HAS_ALPN
     if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
       failf(data, "Error setting ALPN");
-      return CURLE_SSL_CONNECT_ERROR;
+      return FETCHE_SSL_CONNECT_ERROR;
     }
 #endif
   }
@@ -3868,7 +3868,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                    ssl_cert, ssl_cert_blob, ssl_cert_type,
                    ssl_config->key, ssl_config->key_blob,
                    ssl_config->key_type, ssl_config->key_passwd))
-      result = CURLE_SSL_CERTPROBLEM;
+      result = FETCHE_SSL_CERTPROBLEM;
     if(result)
       /* failf() is already done in cert_stuff() */
       return result;
@@ -3880,7 +3880,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(ciphers) {
     if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, ciphers)) {
       failf(data, "failed setting cipher list: %s", ciphers);
-      return CURLE_SSL_CIPHER;
+      return FETCHE_SSL_CIPHER;
     }
     infof(data, "Cipher selection: %s", ciphers);
   }
@@ -3891,7 +3891,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     if(ciphers13) {
       if(!SSL_CTX_set_ciphersuites(octx->ssl_ctx, ciphers13)) {
         failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers13);
-        return CURLE_SSL_CIPHER;
+        return FETCHE_SSL_CIPHER;
       }
       infof(data, "TLS 1.3 cipher selection: %s", ciphers13);
     }
@@ -3909,7 +3909,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     if(curves) {
       if(!SSL_CTX_set1_curves_list(octx->ssl_ctx, curves)) {
         failf(data, "failed setting curves list: '%s'", curves);
-        return CURLE_SSL_CIPHER;
+        return FETCHE_SSL_CIPHER;
       }
     }
   }
@@ -3923,18 +3923,18 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
     if(!SSL_CTX_set_srp_username(octx->ssl_ctx, ssl_username)) {
       failf(data, "Unable to set SRP username");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      return FETCHE_BAD_FUNCTION_ARGUMENT;
     }
     if(!SSL_CTX_set_srp_password(octx->ssl_ctx, ssl_password)) {
       failf(data, "failed setting SRP password");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      return FETCHE_BAD_FUNCTION_ARGUMENT;
     }
     if(!conn_config->cipher_list) {
       infof(data, "Setting cipher list SRP");
 
       if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, "SRP")) {
         failf(data, "failed setting SRP cipher list");
-        return CURLE_SSL_CIPHER;
+        return FETCHE_SSL_CIPHER;
       }
     }
   }
@@ -3992,7 +3992,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   octx->ssl = SSL_new(octx->ssl_ctx);
   if(!octx->ssl) {
     failf(data, "SSL: could not create a context (handle)");
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   SSL_set_app_data(octx->ssl, ssl_user_data);
@@ -4015,7 +4015,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(peer->sni) {
     if(!SSL_set_tlsext_host_name(octx->ssl, peer->sni)) {
       failf(data, "Failed set SNI");
-      return CURLE_SSL_CONNECT_ERROR;
+      return FETCHE_SSL_CONNECT_ERROR;
     }
   }
 
@@ -4026,7 +4026,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     char *outername = data->set.str[STRING_ECH_PUBLIC];
     int trying_ech_now = 0;
 
-    if(data->set.tls_ech & CURLECH_GREASE) {
+    if(data->set.tls_ech & FETCHECH_GREASE) {
       infof(data, "ECH: will GREASE ClientHello");
 # if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
       SSL_set_enable_ech_grease(octx->ssl, 1);
@@ -4034,28 +4034,28 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
 # endif
     }
-    else if(data->set.tls_ech & CURLECH_CLA_CFG) {
+    else if(data->set.tls_ech & FETCHECH_CLA_CFG) {
 # if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
       /* have to do base64 decode here for BoringSSL */
       const char *b64 = data->set.str[STRING_ECH_CONFIG];
 
       if(!b64) {
         infof(data, "ECH: ECHConfig from command line empty");
-        return CURLE_SSL_CONNECT_ERROR;
+        return FETCHE_SSL_CONNECT_ERROR;
       }
       ech_config_len = 2 * strlen(b64);
       result = Curl_base64_decode(b64, &ech_config, &ech_config_len);
       if(result || !ech_config) {
         infof(data, "ECH: cannot base64 decode ECHConfig from command line");
-        if(data->set.tls_ech & CURLECH_HARD)
+        if(data->set.tls_ech & FETCHECH_HARD)
           return result;
       }
       if(SSL_set1_ech_config_list(octx->ssl, ech_config,
                                   ech_config_len) != 1) {
         infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-        if(data->set.tls_ech & CURLECH_HARD) {
+        if(data->set.tls_ech & FETCHECH_HARD) {
           free(ech_config);
-          return CURLE_SSL_CONNECT_ERROR;
+          return FETCHE_SSL_CONNECT_ERROR;
         }
       }
       free(ech_config);
@@ -4064,14 +4064,14 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       ech_config = (unsigned char *) data->set.str[STRING_ECH_CONFIG];
       if(!ech_config) {
         infof(data, "ECH: ECHConfig from command line empty");
-        return CURLE_SSL_CONNECT_ERROR;
+        return FETCHE_SSL_CONNECT_ERROR;
       }
       ech_config_len = strlen(data->set.str[STRING_ECH_CONFIG]);
       if(SSL_set1_ech_config_list(octx->ssl, ech_config,
                                   ech_config_len) != 1) {
         infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-        if(data->set.tls_ech & CURLECH_HARD)
-          return CURLE_SSL_CONNECT_ERROR;
+        if(data->set.tls_ech & FETCHECH_HARD)
+          return FETCHE_SSL_CONNECT_ERROR;
       }
       else
         trying_ech_now = 1;
@@ -4085,8 +4085,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         dns = Curl_fetch_addr(data, peer->hostname, peer->port);
       if(!dns) {
         infof(data, "ECH: requested but no DNS info available");
-        if(data->set.tls_ech & CURLECH_HARD)
-          return CURLE_SSL_CONNECT_ERROR;
+        if(data->set.tls_ech & FETCHECH_HARD)
+          return FETCHE_SSL_CONNECT_ERROR;
       }
       else {
         struct Curl_https_rrinfo *rinfo = NULL;
@@ -4099,8 +4099,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
           infof(data, "ECH: ECHConfig from DoH HTTPS RR");
           if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
             infof(data, "ECH: SSL_set1_ech_config_list failed");
-            if(data->set.tls_ech & CURLECH_HARD)
-              return CURLE_SSL_CONNECT_ERROR;
+            if(data->set.tls_ech & FETCHECH_HARD)
+              return FETCHE_SSL_CONNECT_ERROR;
           }
           else {
             trying_ech_now = 1;
@@ -4109,8 +4109,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         }
         else {
           infof(data, "ECH: requested but no ECHConfig available");
-          if(data->set.tls_ech & CURLECH_HARD)
-            return CURLE_SSL_CONNECT_ERROR;
+          if(data->set.tls_ech & FETCHECH_HARD)
+            return FETCHE_SSL_CONNECT_ERROR;
         }
         Curl_resolv_unlink(data, &dns);
       }
@@ -4118,7 +4118,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 # if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
     if(trying_ech_now && outername) {
       infof(data, "ECH: setting public_name not supported with BoringSSL");
-      return CURLE_SSL_CONNECT_ERROR;
+      return FETCHE_SSL_CONNECT_ERROR;
     }
 # else
     if(trying_ech_now && outername) {
@@ -4129,14 +4129,14 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                                         0 /* do send outer */);
       if(result != 1) {
         infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
-        return CURLE_SSL_CONNECT_ERROR;
+        return FETCHE_SSL_CONNECT_ERROR;
       }
     }
 # endif  /* OPENSSL_IS_BORINGSSL || OPENSSL_IS_AWSLC */
     if(trying_ech_now
        && SSL_set_min_proto_version(octx->ssl, TLS1_3_VERSION) != 1) {
       infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
-      return CURLE_SSL_CONNECT_ERROR;
+      return FETCHE_SSL_CONNECT_ERROR;
     }
   }
 #endif  /* USE_ECH_OPENSSL */
@@ -4177,17 +4177,17 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     Curl_ssl_scache_return(cf, data, peer->scache_key, sc_session);
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
+static FETCHcode ossl_connect_step1(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct alpn_proto_buf proto;
   BIO *bio;
-  CURLcode result;
+  FETCHcode result;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
   DEBUGASSERT(octx);
@@ -4197,7 +4197,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
     result = Curl_alpn_to_proto_buf(&proto, connssl->alpn);
     if(result) {
       failf(data, "Error determining ALPN");
-      return CURLE_SSL_CONNECT_ERROR;
+      return FETCHE_SSL_CONNECT_ERROR;
     }
   }
 #endif
@@ -4210,10 +4210,10 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
   octx->bio_method = ossl_bio_cf_method_create();
   if(!octx->bio_method)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   bio = BIO_new(octx->bio_method);
   if(!bio)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   BIO_set_data(bio, cf);
 #ifdef HAVE_SSL_SET0_WBIO
@@ -4236,7 +4236,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   }
 #endif
   connssl->connecting_state = ssl_connect_2;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 #ifdef USE_ECH_OPENSSL
@@ -4244,7 +4244,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
                                          int reason)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   size_t rcl = 0;
   int rv = 1;
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
@@ -4302,7 +4302,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
 
 #endif
 
-static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
+static FETCHcode ossl_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
   int err;
@@ -4312,7 +4312,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state);
   DEBUGASSERT(octx);
 
-  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  connssl->io_need = FETCH_SSL_IO_NEED_NONE;
   ERR_clear_error();
 
   err = SSL_connect(octx->ssl);
@@ -4320,7 +4320,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   if(!octx->x509_store_setup) {
     /* After having send off the ClientHello, we prepare the x509
      * store to verify the coming certificate from the server */
-    CURLcode result = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
+    FETCHcode result = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
     if(result)
       return result;
     octx->x509_store_setup = TRUE;
@@ -4339,39 +4339,39 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
      <0 is "handshake was not successful, because a fatal error occurred" */
   if(1 != err) {
     int detail = SSL_get_error(octx->ssl, err);
-    CURL_TRC_CF(data, cf, "SSL_connect() -> err=%d, detail=%d", err, detail);
+    FETCH_TRC_CF(data, cf, "SSL_connect() -> err=%d, detail=%d", err, detail);
 
     if(SSL_ERROR_WANT_READ == detail) {
-      CURL_TRC_CF(data, cf, "SSL_connect() -> want recv");
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
-      return CURLE_OK;
+      FETCH_TRC_CF(data, cf, "SSL_connect() -> want recv");
+      connssl->io_need = FETCH_SSL_IO_NEED_RECV;
+      return FETCHE_OK;
     }
     if(SSL_ERROR_WANT_WRITE == detail) {
-      CURL_TRC_CF(data, cf, "SSL_connect() -> want send");
-      connssl->io_need = CURL_SSL_IO_NEED_SEND;
-      return CURLE_OK;
+      FETCH_TRC_CF(data, cf, "SSL_connect() -> want send");
+      connssl->io_need = FETCH_SSL_IO_NEED_SEND;
+      return FETCHE_OK;
     }
 #ifdef SSL_ERROR_WANT_ASYNC
     if(SSL_ERROR_WANT_ASYNC == detail) {
-      CURL_TRC_CF(data, cf, "SSL_connect() -> want async");
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+      FETCH_TRC_CF(data, cf, "SSL_connect() -> want async");
+      connssl->io_need = FETCH_SSL_IO_NEED_RECV;
       connssl->connecting_state = ssl_connect_2;
-      return CURLE_OK;
+      return FETCHE_OK;
     }
 #endif
 #ifdef SSL_ERROR_WANT_RETRY_VERIFY
     if(SSL_ERROR_WANT_RETRY_VERIFY == detail) {
-      CURL_TRC_CF(data, cf, "SSL_connect() -> want retry_verify");
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+      FETCH_TRC_CF(data, cf, "SSL_connect() -> want retry_verify");
+      connssl->io_need = FETCH_SSL_IO_NEED_RECV;
       connssl->connecting_state = ssl_connect_2;
-      return CURLE_OK;
+      return FETCHE_OK;
     }
 #endif
     else {
       /* untreated error */
       sslerr_t errdetail;
       char error_buffer[256]="";
-      CURLcode result;
+      FETCHcode result;
       long lerr;
       int lib;
       int reason;
@@ -4390,7 +4390,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       if((lib == ERR_LIB_SSL) &&
          ((reason == SSL_R_CERTIFICATE_VERIFY_FAILED) ||
           (reason == SSL_R_SSLV3_ALERT_CERTIFICATE_EXPIRED))) {
-        result = CURLE_PEER_FAILED_VERIFICATION;
+        result = FETCHE_PEER_FAILED_VERIFICATION;
 
         lerr = SSL_get_verify_result(octx->ssl);
         if(lerr != X509_V_OK) {
@@ -4408,7 +4408,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
               (reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)) {
         /* If client certificate is required, communicate the
            error to client */
-        result = CURLE_SSL_CLIENTCERT;
+        result = FETCHE_SSL_CLIENTCERT;
         failf(data, "TLS cert problem: %s",
               ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
@@ -4424,13 +4424,13 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         /* trace retry_configs if we got some */
         ossl_trace_ech_retry_configs(data, octx->ssl, reason);
 
-        result = CURLE_ECH_REQUIRED;
+        result = FETCHE_ECH_REQUIRED;
         failf(data, "ECH required: %s",
               ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
 #endif
       else {
-        result = CURLE_SSL_CONNECT_ERROR;
+        result = FETCHE_SSL_CONNECT_ERROR;
         failf(data, "TLS connect error: %s",
               ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
@@ -4441,7 +4441,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
        * (RST connection, etc.), OpenSSL gives no explanation whatsoever and
        * the SO_ERROR is also lost.
        */
-      if(CURLE_SSL_CONNECT_ERROR == result && errdetail == 0) {
+      if(FETCHE_SSL_CONNECT_ERROR == result && errdetail == 0) {
         char extramsg[80]="";
         int sockerr = SOCKERRNO;
 
@@ -4530,9 +4530,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         ossl_trace_ech_retry_configs(data, octx->ssl, 0);
       }
       if(rv != SSL_ECH_STATUS_SUCCESS
-         && data->set.tls_ech & CURLECH_HARD) {
+         && data->set.tls_ech & FETCHECH_HARD) {
         infof(data, "ECH: ech-hard failed");
-        return CURLE_SSL_CONNECT_ERROR;
+        return FETCHE_SSL_CONNECT_ERROR;
       }
    }
    else {
@@ -4554,7 +4554,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
 #endif
 
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 }
 
@@ -4562,7 +4562,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
  * Heavily modified from:
  * https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning#OpenSSL
  */
-static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
+static FETCHcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
                                          const char *pinnedpubkey)
 {
   /* Scratch */
@@ -4570,11 +4570,11 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
   unsigned char *buff1 = NULL, *temp = NULL;
 
   /* Result is returned to caller */
-  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+  FETCHcode result = FETCHE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
-    return CURLE_OK;
+    return FETCHE_OK;
 
   if(!cert)
     return result;
@@ -4621,7 +4621,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
     LIBRESSL_VERSION_NUMBER < 0x3060000fL) && \
   !defined(OPENSSL_IS_BORINGSSL) && \
   !defined(OPENSSL_IS_AWSLC) && \
-  !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  !defined(FETCH_DISABLE_VERBOSE_STRINGS)
 static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 {
   STACK_OF(X509) *certstack;
@@ -4687,7 +4687,7 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 
 #define MAX_CERT_NAME_LENGTH 2048
 
-CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
+FETCHcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct ossl_ctx *octx,
                                   struct ssl_peer *peer)
@@ -4695,7 +4695,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   struct connectdata *conn = cf->conn;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   long lerr;
   X509 *issuer;
   BIO *fp = NULL;
@@ -4715,7 +4715,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
           " error %s",
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)) );
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   if(data->set.ssl.certinfo)
@@ -4726,10 +4726,10 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   if(!octx->server_cert) {
     BIO_free(mem);
     if(!strict)
-      return CURLE_OK;
+      return FETCHE_OK;
 
     failf(data, "SSL: could not get peer certificate");
-    return CURLE_PEER_FAILED_VERIFICATION;
+    return FETCHE_PEER_FAILED_VERIFICATION;
   }
 
   infof(data, "%s certificate:",
@@ -4739,7 +4739,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
                              &dname);
   infof(data, " subject: %s", result ? "[NONE]" : Curl_dyn_ptr(&dname));
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
   {
     long len;
     ASN1_TIME_print(mem, X509_get0_notBefore(octx->server_cert));
@@ -4771,7 +4771,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   if(result) {
     if(strict)
       failf(data, "SSL: could not get X509-issuer name");
-    result = CURLE_PEER_FAILED_VERIFICATION;
+    result = FETCHE_PEER_FAILED_VERIFICATION;
   }
   else {
     infof(data, " issuer: %s", Curl_dyn_ptr(&dname));
@@ -4793,7 +4793,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
                               sizeof(error_buffer)) );
           X509_free(octx->server_cert);
           octx->server_cert = NULL;
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
         }
       }
       else {
@@ -4806,7 +4806,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
                               sizeof(error_buffer)) );
           X509_free(octx->server_cert);
           octx->server_cert = NULL;
-          return CURLE_OUT_OF_MEMORY;
+          return FETCHE_OUT_OF_MEMORY;
         }
 
         if(BIO_read_filename(fp, conn_config->issuercert) <= 0) {
@@ -4816,7 +4816,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
           BIO_free(fp);
           X509_free(octx->server_cert);
           octx->server_cert = NULL;
-          return CURLE_SSL_ISSUER_ERROR;
+          return FETCHE_SSL_ISSUER_ERROR;
         }
       }
 
@@ -4829,7 +4829,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
         X509_free(issuer);
         X509_free(octx->server_cert);
         octx->server_cert = NULL;
-        return CURLE_SSL_ISSUER_ERROR;
+        return FETCHE_SSL_ISSUER_ERROR;
       }
 
       if(X509_check_issued(issuer, octx->server_cert) != X509_V_OK) {
@@ -4840,7 +4840,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
         X509_free(issuer);
         X509_free(octx->server_cert);
         octx->server_cert = NULL;
-        return CURLE_SSL_ISSUER_ERROR;
+        return FETCHE_SSL_ISSUER_ERROR;
       }
 
       infof(data, " SSL certificate issuer check ok (%s)",
@@ -4858,7 +4858,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
         if(strict)
           failf(data, "SSL certificate verify result: %s (%ld)",
                 X509_verify_cert_error_string(lerr), lerr);
-        result = CURLE_PEER_FAILED_VERIFICATION;
+        result = FETCHE_PEER_FAILED_VERIFICATION;
       }
       else
         infof(data, " SSL certificate verify result: %s (%ld),"
@@ -4885,9 +4885,9 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
 
   if(!strict)
     /* when not strict, we do not bother about the verify cert problems */
-    result = CURLE_OK;
+    result = FETCHE_OK;
 
-#ifndef CURL_DISABLE_PROXY
+#ifndef FETCH_DISABLE_PROXY
   ptr = Curl_ssl_cf_is_proxy(cf) ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
@@ -4906,10 +4906,10 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
+static FETCHcode ossl_connect_step3(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
 
@@ -4932,21 +4932,21 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
+static FETCHcode ossl_connect_common(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     bool nonblocking,
                                     bool *done)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
-  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+  fetch_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   int what;
 
-  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  connssl->io_need = FETCH_SSL_IO_NEED_NONE;
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
     *done = TRUE;
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
   if(ssl_connect_1 == connssl->connecting_state) {
@@ -4956,7 +4956,7 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
     if(timeout_ms < 0) {
       /* no need to continue if time is already up */
       failf(data, "SSL connection timeout");
-      return CURLE_OPERATION_TIMEDOUT;
+      return FETCHE_OPERATION_TIMEDOUT;
     }
 
     result = ossl_connect_step1(cf, data);
@@ -4972,29 +4972,29 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
       failf(data, "SSL connection timeout");
-      result = CURLE_OPERATION_TIMEDOUT;
+      result = FETCHE_OPERATION_TIMEDOUT;
       goto out;
     }
 
     /* if ssl is expecting something, check if it is available. */
     if(!nonblocking && connssl->io_need) {
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
-        sockfd : CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
-        sockfd : CURL_SOCKET_BAD;
+      fetch_socket_t writefd = (connssl->io_need & FETCH_SSL_IO_NEED_SEND) ?
+        sockfd : FETCH_SOCKET_BAD;
+      fetch_socket_t readfd = (connssl->io_need & FETCH_SSL_IO_NEED_RECV) ?
+        sockfd : FETCH_SOCKET_BAD;
 
-      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
+      what = Curl_socket_check(readfd, FETCH_SOCKET_BAD, writefd,
                                timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-        result = CURLE_SSL_CONNECT_ERROR;
+        result = FETCHE_SSL_CONNECT_ERROR;
         goto out;
       }
       if(0 == what) {
         /* timeout */
         failf(data, "SSL connection timeout");
-        result = CURLE_OPERATION_TIMEDOUT;
+        result = FETCHE_OPERATION_TIMEDOUT;
         goto out;
       }
       /* socket is readable or writable */
@@ -5032,17 +5032,17 @@ out:
   return result;
 }
 
-static CURLcode ossl_connect_nonblocking(struct Curl_cfilter *cf,
+static FETCHcode ossl_connect_nonblocking(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
                                          bool *done)
 {
   return ossl_connect_common(cf, data, TRUE, done);
 }
 
-static CURLcode ossl_connect(struct Curl_cfilter *cf,
+static FETCHcode ossl_connect(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
-  CURLcode result;
+  FETCHcode result;
   bool done = FALSE;
 
   result = ossl_connect_common(cf, data, FALSE, &done);
@@ -5051,7 +5051,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
 
   DEBUGASSERT(done);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static bool ossl_data_pending(struct Curl_cfilter *cf,
@@ -5071,7 +5071,7 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
                          struct Curl_easy *data,
                          const void *mem,
                          size_t len,
-                         CURLcode *curlcode)
+                         FETCHcode *fetchcode)
 {
   /* SSL_write() is said to return 'int' while write() and send() returns
      'size_t' */
@@ -5088,7 +5088,7 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
 
   ERR_clear_error();
 
-  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  connssl->io_need = FETCH_SSL_IO_NEED_NONE;
   memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   rc = SSL_write(octx->ssl, mem, memlen);
 
@@ -5097,20 +5097,20 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
 
     switch(err) {
     case SSL_ERROR_WANT_READ:
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
-      *curlcode = CURLE_AGAIN;
+      connssl->io_need = FETCH_SSL_IO_NEED_RECV;
+      *fetchcode = FETCHE_AGAIN;
       rc = -1;
       goto out;
     case SSL_ERROR_WANT_WRITE:
-      *curlcode = CURLE_AGAIN;
+      *fetchcode = FETCHE_AGAIN;
       rc = -1;
       goto out;
     case SSL_ERROR_SYSCALL:
     {
       int sockerr = SOCKERRNO;
 
-      if(octx->io_result == CURLE_AGAIN) {
-        *curlcode = CURLE_AGAIN;
+      if(octx->io_result == FETCHE_AGAIN) {
+        *fetchcode = FETCHE_AGAIN;
         rc = -1;
         goto out;
       }
@@ -5125,7 +5125,7 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
 
       failf(data, OSSL_PACKAGE " SSL_write: %s, errno %d",
             error_buffer, sockerr);
-      *curlcode = CURLE_SEND_ERROR;
+      *fetchcode = FETCHE_SEND_ERROR;
       rc = -1;
       goto out;
     }
@@ -5135,7 +5135,7 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
       sslerror = ERR_get_error();
       failf(data, "SSL_write() error: %s",
             ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)));
-      *curlcode = CURLE_SEND_ERROR;
+      *fetchcode = FETCHE_SEND_ERROR;
       rc = -1;
       goto out;
     }
@@ -5143,12 +5143,12 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
       /* a true error */
       failf(data, OSSL_PACKAGE " SSL_write: %s, errno %d",
             SSL_ERROR_to_str(err), SOCKERRNO);
-      *curlcode = CURLE_SEND_ERROR;
+      *fetchcode = FETCHE_SEND_ERROR;
       rc = -1;
       goto out;
     }
   }
-  *curlcode = CURLE_OK;
+  *fetchcode = FETCHE_OK;
 
 out:
   return (ssize_t)rc; /* number of bytes */
@@ -5158,7 +5158,7 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
                          struct Curl_easy *data,   /* transfer */
                          char *buf,                /* store read data here */
                          size_t buffersize,        /* max amount to read */
-                         CURLcode *curlcode)
+                         FETCHcode *fetchcode)
 {
   char error_buffer[256];
   unsigned long sslerror;
@@ -5173,7 +5173,7 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
 
   ERR_clear_error();
 
-  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  connssl->io_need = FETCH_SSL_IO_NEED_NONE;
   buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   nread = (ssize_t)SSL_read(octx->ssl, buf, buffsize);
 
@@ -5192,20 +5192,20 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
         connclose(conn, "TLS close_notify");
       break;
     case SSL_ERROR_WANT_READ:
-      *curlcode = CURLE_AGAIN;
+      *fetchcode = FETCHE_AGAIN;
       nread = -1;
       goto out;
     case SSL_ERROR_WANT_WRITE:
-      connssl->io_need = CURL_SSL_IO_NEED_SEND;
-      *curlcode = CURLE_AGAIN;
+      connssl->io_need = FETCH_SSL_IO_NEED_SEND;
+      *fetchcode = FETCHE_AGAIN;
       nread = -1;
       goto out;
     default:
       /* openssl/ssl.h for SSL_ERROR_SYSCALL says "look at error stack/return
          value/errno" */
       /* https://docs.openssl.org/master/man3/ERR_get_error/ */
-      if(octx->io_result == CURLE_AGAIN) {
-        *curlcode = CURLE_AGAIN;
+      if(octx->io_result == FETCHE_AGAIN) {
+        *fetchcode = FETCHE_AGAIN;
         nread = -1;
         goto out;
       }
@@ -5223,7 +5223,7 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
                     SSL_ERROR_to_str(err));
         failf(data, OSSL_PACKAGE " SSL_read: %s, errno %d",
               error_buffer, sockerr);
-        *curlcode = CURLE_RECV_ERROR;
+        *fetchcode = FETCHE_RECV_ERROR;
         nread = -1;
         goto out;
       }
@@ -5245,9 +5245,9 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
                     "Connection closed abruptly");
         }
         failf(data, OSSL_PACKAGE " SSL_read: %s, errno %d"
-              " (Fatal because this is a curl debug build)",
+              " (Fatal because this is a fetch debug build)",
               error_buffer, sockerr);
-        *curlcode = CURLE_RECV_ERROR;
+        *fetchcode = FETCHE_RECV_ERROR;
         nread = -1;
         goto out;
       }
@@ -5259,7 +5259,7 @@ out:
   return nread;
 }
 
-static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
+static FETCHcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
                                          struct dynbuf *binding)
 {
   /* required for X509_get_signature_nid support */
@@ -5292,19 +5292,19 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
 
   if(!octx) {
     failf(data, "Failed to find the SSL filter");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
   cert = SSL_get1_peer_certificate(octx->ssl);
   if(!cert) {
     /* No server certificate, don't do channel binding */
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
   if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
     failf(data,
           "Unable to find digest NID for certificate signature algorithm");
-    return CURLE_SSL_INVALIDCERTSTATUS;
+    return FETCHE_SSL_INVALIDCERTSTATUS;
   }
 
   /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
@@ -5317,29 +5317,29 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
       algo_name = OBJ_nid2sn(algo_nid);
       failf(data, "Could not find digest algorithm %s (NID %d)",
             algo_name ? algo_name : "(null)", algo_nid);
-      return CURLE_SSL_INVALIDCERTSTATUS;
+      return FETCHE_SSL_INVALIDCERTSTATUS;
     }
   }
 
   if(!X509_digest(cert, algo_type, buf, &length)) {
     failf(data, "X509_digest() failed");
-    return CURLE_SSL_INVALIDCERTSTATUS;
+    return FETCHE_SSL_INVALIDCERTSTATUS;
   }
 
   /* Append "tls-server-end-point:" */
-  if(Curl_dyn_addn(binding, prefix, sizeof(prefix) - 1) != CURLE_OK)
-    return CURLE_OUT_OF_MEMORY;
+  if(Curl_dyn_addn(binding, prefix, sizeof(prefix) - 1) != FETCHE_OK)
+    return FETCHE_OUT_OF_MEMORY;
   /* Append digest */
   if(Curl_dyn_addn(binding, buf, length))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 #else
   /* No X509_get_signature_nid support */
   (void)data; /* unused */
   (void)sockindex; /* unused */
   (void)binding; /* unused */
-  return CURLE_OK;
+  return FETCHE_OK;
 #endif
 }
 
@@ -5368,10 +5368,10 @@ size_t Curl_ossl_version(char *buffer, size_t size)
                    (LIBRESSL_VERSION_NUMBER >> 12) & 0xff);
 #endif
 #elif defined(OPENSSL_IS_BORINGSSL)
-#ifdef CURL_BORINGSSL_VERSION
+#ifdef FETCH_BORINGSSL_VERSION
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE,
-                   CURL_BORINGSSL_VERSION);
+                   FETCH_BORINGSSL_VERSION);
 #else
   return msnprintf(buffer, size, OSSL_PACKAGE);
 #endif
@@ -5424,25 +5424,25 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 }
 
 /* can be called with data == NULL */
-static CURLcode ossl_random(struct Curl_easy *data,
+static FETCHcode ossl_random(struct Curl_easy *data,
                             unsigned char *entropy, size_t length)
 {
   int rc;
   if(data) {
     if(ossl_seed(data)) /* Initiate the seed if not already done */
-      return CURLE_FAILED_INIT; /* could not seed for some reason */
+      return FETCHE_FAILED_INIT; /* could not seed for some reason */
   }
   else {
     if(!rand_enough())
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
   }
   /* RAND_bytes() returns 1 on success, 0 otherwise.  */
-  rc = RAND_bytes(entropy, (ossl_valsize_t)curlx_uztosi(length));
-  return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
+  rc = RAND_bytes(entropy, (ossl_valsize_t)fetchx_uztosi(length));
+  return rc == 1 ? FETCHE_OK : FETCHE_FAILED_INIT;
 }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
+static FETCHcode ossl_sha256sum(const unsigned char *tmp, /* input */
                                size_t tmplen,
                                unsigned char *sha256sum /* output */,
                                size_t unused)
@@ -5453,15 +5453,15 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
 
   mdctx = EVP_MD_CTX_create();
   if(!mdctx)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   if(!EVP_DigestInit(mdctx, EVP_sha256())) {
     EVP_MD_CTX_destroy(mdctx);
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
   }
   EVP_DigestUpdate(mdctx, tmp, tmplen);
   EVP_DigestFinal_ex(mdctx, sha256sum, &len);
   EVP_MD_CTX_destroy(mdctx);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 #endif
 
@@ -5476,17 +5476,17 @@ static bool ossl_cert_status_request(void)
 }
 
 static void *ossl_get_internals(struct ssl_connect_data *connssl,
-                                CURLINFO info)
+                                FETCHINFO info)
 {
-  /* Legacy: CURLINFO_TLS_SESSION must return an SSL_CTX pointer. */
+  /* Legacy: FETCHINFO_TLS_SESSION must return an SSL_CTX pointer. */
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   DEBUGASSERT(octx);
-  return info == CURLINFO_TLS_SESSION ?
+  return info == FETCHINFO_TLS_SESSION ?
     (void *)octx->ssl_ctx : (void *)octx->ssl;
 }
 
 const struct Curl_ssl Curl_ssl_openssl = {
-  { CURLSSLBACKEND_OPENSSL, "openssl" }, /* info */
+  { FETCHSSLBACKEND_OPENSSL, "openssl" }, /* info */
 
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |

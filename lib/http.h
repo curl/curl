@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HTTP_H
-#define HEADER_CURL_HTTP_H
+#ifndef HEADER_FETCH_HTTP_H
+#define HEADER_FETCH_HTTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_MSH3) && !defined(_WIN32)
 #include <pthread.h>
@@ -54,7 +54,7 @@ typedef enum {
 } followtype;
 
 
-#ifndef CURL_DISABLE_HTTP
+#ifndef FETCH_DISABLE_HTTP
 
 #if defined(USE_HTTP3)
 #include <stdint.h>
@@ -68,7 +68,7 @@ extern const struct Curl_handler Curl_handler_https;
 
 struct dynhds;
 
-CURLcode Curl_bump_headersize(struct Curl_easy *data,
+FETCHcode Curl_bump_headersize(struct Curl_easy *data,
                               size_t delta,
                               bool connect_only);
 
@@ -86,44 +86,44 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const char *thisheader,
                              const size_t thislen);
 
-CURLcode Curl_add_timecondition(struct Curl_easy *data, struct dynbuf *req);
-CURLcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
+FETCHcode Curl_add_timecondition(struct Curl_easy *data, struct dynbuf *req);
+FETCHcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
                                  int httpversion, struct dynbuf *req);
-CURLcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
+FETCHcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
                                 struct dynhds *hds);
 
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
 
 /* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_http_setup_conn(struct Curl_easy *data,
+FETCHcode Curl_http_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
-CURLcode Curl_http(struct Curl_easy *data, bool *done);
-CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
-CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
+FETCHcode Curl_http(struct Curl_easy *data, bool *done);
+FETCHcode Curl_http_done(struct Curl_easy *data, FETCHcode, bool premature);
+FETCHcode Curl_http_connect(struct Curl_easy *data, bool *done);
 int Curl_http_getsock_do(struct Curl_easy *data, struct connectdata *conn,
-                         curl_socket_t *socks);
-CURLcode Curl_http_write_resp(struct Curl_easy *data,
+                         fetch_socket_t *socks);
+FETCHcode Curl_http_write_resp(struct Curl_easy *data,
                               const char *buf, size_t blen,
                               bool is_eos);
-CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
+FETCHcode Curl_http_write_resp_hd(struct Curl_easy *data,
                                  const char *hd, size_t hdlen,
                                  bool is_eos);
 
 /* These functions are in http.c */
-CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
+FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth);
-CURLcode Curl_http_auth_act(struct Curl_easy *data);
+FETCHcode Curl_http_auth_act(struct Curl_easy *data);
 
 /* follow a redirect or not */
-CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
+FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
                           followtype type);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
-   to not having one selected. The other CURLAUTH_* defines are present in the
-   public curl/curl.h header. */
-#define CURLAUTH_PICKNONE (1<<30) /* do not use auth */
+   to not having one selected. The other FETCHAUTH_* defines are present in the
+   public fetch/fetch.h header. */
+#define FETCHAUTH_PICKNONE (1<<30) /* do not use auth */
 
 /* MAX_INITIAL_POST_SIZE indicates the number of bytes that will make the POST
    data get included in the initial data chunk sent to the server. If the
@@ -141,7 +141,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
 #define MAX_INITIAL_POST_SIZE (64*1024)
 #endif
 
-/* EXPECT_100_THRESHOLD is the request body size limit for when libcurl will
+/* EXPECT_100_THRESHOLD is the request body size limit for when libfetch will
  * automatically add an "Expect: 100-continue" header in HTTP requests. When
  * the size is unknown, it will always add it.
  *
@@ -151,18 +151,18 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
 #endif
 
 /* MAX_HTTP_RESP_HEADER_SIZE is the maximum size of all response headers
-   combined that libcurl allows for a single HTTP response, any HTTP
+   combined that libfetch allows for a single HTTP response, any HTTP
    version. This count includes CONNECT response headers. */
 #define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
 
 
-#endif /* CURL_DISABLE_HTTP */
+#endif /* FETCH_DISABLE_HTTP */
 
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
 
-CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
+FETCHcode Curl_http_write_resp_hds(struct Curl_easy *data,
                                   const char *buf, size_t blen,
                                   size_t *pconsumed);
 
@@ -180,9 +180,9 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
  * @param proxytunnel boolean if this is the request setting up a "proxy
  * tunnel"
  *
- * @returns CURLcode
+ * @returns FETCHcode
  */
-CURLcode
+FETCHcode
 Curl_http_output_auth(struct Curl_easy *data,
                       struct connectdata *conn,
                       const char *request,
@@ -192,7 +192,7 @@ Curl_http_output_auth(struct Curl_easy *data,
                                             up the proxy tunnel */
 
 /* Decode HTTP status code string. */
-CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
+FETCHcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
 
 
 /**
@@ -210,15 +210,15 @@ struct httpreq {
 /**
  * Create an HTTP request struct.
  */
-CURLcode Curl_http_req_make(struct httpreq **preq,
+FETCHcode Curl_http_req_make(struct httpreq **preq,
                             const char *method, size_t m_len,
                             const char *scheme, size_t s_len,
                             const char *authority, size_t a_len,
                             const char *path, size_t p_len);
 
-CURLcode Curl_http_req_make2(struct httpreq **preq,
+FETCHcode Curl_http_req_make2(struct httpreq **preq,
                              const char *method, size_t m_len,
-                             CURLU *url, const char *scheme_default);
+                             FETCHU *url, const char *scheme_default);
 
 void Curl_http_req_free(struct httpreq *req);
 
@@ -243,7 +243,7 @@ void Curl_http_req_free(struct httpreq *req);
  * @param req        the request to transform
  * @param data       the handle to lookup defaults like ' :scheme' from
  */
-CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
+FETCHcode Curl_http_req_to_h2(struct dynhds *h2_headers,
                              struct httpreq *req, struct Curl_easy *data);
 
 /**
@@ -260,10 +260,10 @@ struct http_resp {
 /**
  * Create an HTTP response struct.
  */
-CURLcode Curl_http_resp_make(struct http_resp **presp,
+FETCHcode Curl_http_resp_make(struct http_resp **presp,
                              int status,
                              const char *description);
 
 void Curl_http_resp_free(struct http_resp *resp);
 
-#endif /* HEADER_CURL_HTTP_H */
+#endif /* HEADER_FETCH_HTTP_H */

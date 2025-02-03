@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SCHANNEL_H
-#define HEADER_CURL_SCHANNEL_H
+#ifndef HEADER_FETCH_SCHANNEL_H
+#define HEADER_FETCH_SCHANNEL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,10 +21,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_SCHANNEL
 
@@ -50,7 +50,7 @@
 
 #include <schnlsp.h>
 #include <schannel.h>
-#include "curl_sspi.h"
+#include "fetch_sspi.h"
 
 #include "cfilters.h"
 #include "urldata.h"
@@ -76,11 +76,11 @@
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 
-CURLcode Curl_verify_host(struct Curl_cfilter *cf,
+FETCHcode Curl_verify_host(struct Curl_cfilter *cf,
                           struct Curl_easy *data);
 
-CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
+FETCHcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data);
 
 #endif /* USE_SCHANNEL */
-#endif /* HEADER_CURL_SCHANNEL_H */
+#endif /* HEADER_FETCH_SCHANNEL_H */

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_BUFREF_H
-#define HEADER_CURL_BUFREF_H
+#ifndef HEADER_FETCH_BUFREF_H
+#define HEADER_FETCH_BUFREF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -42,7 +42,7 @@ void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
                      void (*dtor)(void *));
 const unsigned char *Curl_bufref_ptr(const struct bufref *br);
 size_t Curl_bufref_len(const struct bufref *br);
-CURLcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len);
+FETCHcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len);
 void Curl_bufref_free(struct bufref *br);
 
 #endif

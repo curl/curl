@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,23 +18,23 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_WINDOWS_SSPI
 
-#include <curl/curl.h>
-#include "curl_sspi.h"
-#include "curl_multibyte.h"
+#include <fetch/fetch.h>
+#include "fetch_sspi.h"
+#include "fetch_multibyte.h"
 #include "system_win32.h"
 #include "version_win32.h"
 #include "warnless.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /* We use our own typedef here since some headers might lack these */
@@ -62,7 +62,7 @@ PSecurityFunctionTable Curl_pSecFn = NULL;
  *
  * This is used to load the Security Service Provider Interface (SSPI)
  * dynamic link library portably across all Windows versions, without
- * the need to directly link libcurl, nor the application using it, at
+ * the need to directly link libfetch, nor the application using it, at
  * build time.
  *
  * Once this function has been executed, Windows SSPI functions can be
@@ -72,9 +72,9 @@ PSecurityFunctionTable Curl_pSecFn = NULL;
  *
  * None.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_sspi_global_init(void)
+FETCHcode Curl_sspi_global_init(void)
 {
   INITSECURITYINTERFACE_FN pInitSecurityInterface;
 
@@ -85,33 +85,33 @@ CURLcode Curl_sspi_global_init(void)
      * have both these DLLs (security.dll forwards calls to secur32.dll) */
 
     /* Load SSPI dll into the address space of the calling process */
-    if(curlx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
+    if(fetchx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
       Curl_hSecDll = Curl_load_library(TEXT("security.dll"));
     else
       Curl_hSecDll = Curl_load_library(TEXT("secur32.dll"));
     if(!Curl_hSecDll)
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
     pInitSecurityInterface =
-      CURLX_FUNCTION_CAST(INITSECURITYINTERFACE_FN,
+      FETCHX_FUNCTION_CAST(INITSECURITYINTERFACE_FN,
                           (GetProcAddress(Curl_hSecDll, SECURITYENTRYPOINT)));
     if(!pInitSecurityInterface)
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
 
     /* Get pointer to Security Service Provider Interface dispatch table */
     Curl_pSecFn = pInitSecurityInterface();
     if(!Curl_pSecFn)
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
  * Curl_sspi_global_cleanup()
  *
- * This deinitializes the Security Service Provider Interface from libcurl.
+ * This deinitializes the Security Service Provider Interface from libfetch.
  *
  * Parameters:
  *
@@ -138,9 +138,9 @@ void Curl_sspi_global_cleanup(void)
  * passwdp  [in]     - The user's password.
  * identity [in/out] - The identity structure.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
+FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
                                    SEC_WINNT_AUTH_IDENTITY *identity)
 {
   xcharp_u useranddomain;
@@ -154,9 +154,9 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Initialize the identity */
   memset(identity, 0, sizeof(*identity));
 
-  useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)userp);
+  useranddomain.tchar_ptr = fetchx_convert_UTF8_to_tchar((char *)userp);
   if(!useranddomain.tchar_ptr)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, TEXT('\\'));
   if(!user.const_tchar_ptr)
@@ -176,46 +176,46 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Setup the identity's user and length */
   dup_user.tchar_ptr = _tcsdup(user.tchar_ptr);
   if(!dup_user.tchar_ptr) {
-    curlx_unicodefree(useranddomain.tchar_ptr);
-    return CURLE_OUT_OF_MEMORY;
+    fetchx_unicodefree(useranddomain.tchar_ptr);
+    return FETCHE_OUT_OF_MEMORY;
   }
   identity->User = dup_user.tbyte_ptr;
-  identity->UserLength = curlx_uztoul(_tcslen(dup_user.tchar_ptr));
+  identity->UserLength = fetchx_uztoul(_tcslen(dup_user.tchar_ptr));
   dup_user.tchar_ptr = NULL;
 
   /* Setup the identity's domain and length */
   dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
   if(!dup_domain.tchar_ptr) {
-    curlx_unicodefree(useranddomain.tchar_ptr);
-    return CURLE_OUT_OF_MEMORY;
+    fetchx_unicodefree(useranddomain.tchar_ptr);
+    return FETCHE_OUT_OF_MEMORY;
   }
   _tcsncpy(dup_domain.tchar_ptr, domain.tchar_ptr, domlen);
   *(dup_domain.tchar_ptr + domlen) = TEXT('\0');
   identity->Domain = dup_domain.tbyte_ptr;
-  identity->DomainLength = curlx_uztoul(domlen);
+  identity->DomainLength = fetchx_uztoul(domlen);
   dup_domain.tchar_ptr = NULL;
 
-  curlx_unicodefree(useranddomain.tchar_ptr);
+  fetchx_unicodefree(useranddomain.tchar_ptr);
 
   /* Setup the identity's password and length */
-  passwd.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)passwdp);
+  passwd.tchar_ptr = fetchx_convert_UTF8_to_tchar((char *)passwdp);
   if(!passwd.tchar_ptr)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   dup_passwd.tchar_ptr = _tcsdup(passwd.tchar_ptr);
   if(!dup_passwd.tchar_ptr) {
-    curlx_unicodefree(passwd.tchar_ptr);
-    return CURLE_OUT_OF_MEMORY;
+    fetchx_unicodefree(passwd.tchar_ptr);
+    return FETCHE_OUT_OF_MEMORY;
   }
   identity->Password = dup_passwd.tbyte_ptr;
-  identity->PasswordLength = curlx_uztoul(_tcslen(dup_passwd.tchar_ptr));
+  identity->PasswordLength = fetchx_uztoul(_tcslen(dup_passwd.tchar_ptr));
   dup_passwd.tchar_ptr = NULL;
 
-  curlx_unicodefree(passwd.tchar_ptr);
+  fetchx_unicodefree(passwd.tchar_ptr);
 
   /* Setup the identity's flags */
   identity->Flags = SECFLAG_WINNT_AUTH_IDENTITY;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*

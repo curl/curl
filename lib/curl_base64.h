@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_BASE64_H
-#define HEADER_CURL_BASE64_H
+#ifndef HEADER_FETCH_BASE64_H
+#define HEADER_FETCH_BASE64_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,22 +20,22 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#ifndef BUILDING_LIBCURL
+#ifndef BUILDING_LIBFETCH
 /* this renames functions so that the tool code can use the same code
    without getting symbol collisions */
-#define Curl_base64_encode(a,b,c,d) curlx_base64_encode(a,b,c,d)
-#define Curl_base64url_encode(a,b,c,d) curlx_base64url_encode(a,b,c,d)
-#define Curl_base64_decode(a,b,c) curlx_base64_decode(a,b,c)
+#define Curl_base64_encode(a,b,c,d) fetchx_base64_encode(a,b,c,d)
+#define Curl_base64url_encode(a,b,c,d) fetchx_base64url_encode(a,b,c,d)
+#define Curl_base64_decode(a,b,c) fetchx_base64_decode(a,b,c)
 #endif
 
-CURLcode Curl_base64_encode(const char *inputbuff, size_t insize,
+FETCHcode Curl_base64_encode(const char *inputbuff, size_t insize,
                             char **outptr, size_t *outlen);
-CURLcode Curl_base64url_encode(const char *inputbuff, size_t insize,
+FETCHcode Curl_base64url_encode(const char *inputbuff, size_t insize,
                                char **outptr, size_t *outlen);
-CURLcode Curl_base64_decode(const char *src,
+FETCHcode Curl_base64_decode(const char *src,
                             unsigned char **outptr, size_t *outlen);
-#endif /* HEADER_CURL_BASE64_H */
+#endif /* HEADER_FETCH_BASE64_H */

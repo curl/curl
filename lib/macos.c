@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,36 +18,36 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifdef CURL_MACOS_CALL_COPYPROXIES
+#ifdef FETCH_MACOS_CALL_COPYPROXIES
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "macos.h"
 
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 
-CURLcode Curl_macos_init(void)
+FETCHcode Curl_macos_init(void)
 {
   /*
    * The automagic conversion from IPv4 literals to IPv6 literals only
    * works if the SCDynamicStoreCopyProxies system function gets called
-   * first. As curl currently does not support system-wide HTTP proxies, we
+   * first. As fetch currently does not support system-wide HTTP proxies, we
    * therefore do not use any value this function might return.
    *
    * This function is only available on macOS and is not needed for
    * IPv4-only builds, hence the conditions for defining
-   * CURL_MACOS_CALL_COPYPROXIES in curl_setup.h.
+   * FETCH_MACOS_CALL_COPYPROXIES in fetch_setup.h.
    */
   CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
   if(dict)
     CFRelease(dict);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 #endif

@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,13 +19,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "urldata.h"
 #include "url.h"
@@ -43,8 +43,8 @@
 #include "strcase.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 
@@ -53,9 +53,9 @@
 #define CPOOL_LOCK(c)                                                   \
   do {                                                                  \
     if((c)) {                                                           \
-      if(CURL_SHARE_KEEP_CONNECT((c)->share))                           \
-        Curl_share_lock(((c)->idata), CURL_LOCK_DATA_CONNECT,           \
-                        CURL_LOCK_ACCESS_SINGLE);                       \
+      if(FETCH_SHARE_KEEP_CONNECT((c)->share))                           \
+        Curl_share_lock(((c)->idata), FETCH_LOCK_DATA_CONNECT,           \
+                        FETCH_LOCK_ACCESS_SINGLE);                       \
       DEBUGASSERT(!(c)->locked);                                        \
       (c)->locked = TRUE;                                               \
     }                                                                   \
@@ -66,8 +66,8 @@
     if((c)) {                                                           \
       DEBUGASSERT((c)->locked);                                         \
       (c)->locked = FALSE;                                              \
-      if(CURL_SHARE_KEEP_CONNECT((c)->share))                           \
-        Curl_share_unlock((c)->idata, CURL_LOCK_DATA_CONNECT);          \
+      if(FETCH_SHARE_KEEP_CONNECT((c)->share))                           \
+        Curl_share_unlock((c)->idata, FETCH_LOCK_DATA_CONNECT);          \
     }                                                                   \
   } while(0)
 
@@ -93,7 +93,7 @@ static void cpool_run_conn_shutdown(struct Curl_easy *data,
                                     bool *done);
 static void cpool_run_conn_shutdown_handler(struct Curl_easy *data,
                                             struct connectdata *conn);
-static CURLMcode cpool_update_shutdown_ev(struct Curl_multi *multi,
+static FETCHMcode cpool_update_shutdown_ev(struct Curl_multi *multi,
                                           struct Curl_easy *data,
                                           struct connectdata *conn);
 static void cpool_shutdown_all(struct cpool *cpool,
@@ -162,7 +162,7 @@ int Curl_cpool_init(struct cpool *cpool,
     return 1;
 
   /* allocate a new easy handle to use when closing cached connections */
-  cpool->idata = curl_easy_init();
+  cpool->idata = fetch_easy_init();
   if(!cpool->idata)
     return 1; /* bad */
   cpool->idata->state.internal = TRUE;
@@ -173,7 +173,7 @@ int Curl_cpool_init(struct cpool *cpool,
    * can be used for cpool operations. */
   cpool->idata->multi = multi;
 #ifdef DEBUGBUILD
-  if(getenv("CURL_DEBUG"))
+  if(getenv("FETCH_DEBUG"))
     cpool->idata->set.verbose = TRUE;
 #endif
 
@@ -203,7 +203,7 @@ void Curl_cpool_destroy(struct cpool *cpool)
 static struct cpool *cpool_get_instance(struct Curl_easy *data)
 {
   if(data) {
-    if(CURL_SHARE_KEEP_CONNECT(data->share))
+    if(FETCH_SHARE_KEEP_CONNECT(data->share))
       return &data->share->cpool;
     else if(data->multi_easy)
       return &data->multi_easy->cpool;
@@ -358,24 +358,24 @@ out:
   return result;
 }
 
-CURLcode Curl_cpool_add_conn(struct Curl_easy *data,
+FETCHcode Curl_cpool_add_conn(struct Curl_easy *data,
                              struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct cpool_bundle *bundle = NULL;
   struct cpool *cpool = cpool_get_instance(data);
   DEBUGASSERT(conn);
 
   DEBUGASSERT(cpool);
   if(!cpool)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
 
   CPOOL_LOCK(cpool);
   bundle = cpool_find_bundle(cpool, conn);
   if(!bundle) {
     bundle = cpool_add_bundle(cpool, conn);
     if(!bundle) {
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
       goto out;
     }
   }
@@ -528,7 +528,7 @@ cpool_bundle_get_oldest_idle(struct cpool_bundle *bundle)
   struct Curl_llist_node *curr;
   timediff_t highscore = -1;
   timediff_t score;
-  struct curltime now;
+  struct fetchtime now;
   struct connectdata *oldest_idle = NULL;
   struct connectdata *conn;
 
@@ -558,7 +558,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
   struct Curl_hash_element *he;
   struct connectdata *oldest_idle = NULL;
   struct cpool_bundle *bundle;
-  struct curltime now;
+  struct fetchtime now;
   timediff_t highscore =- 1;
   timediff_t score;
 
@@ -682,7 +682,7 @@ static void cpool_close_and_destroy_all(struct cpool *cpool)
     /* Just for testing, run graceful shutdown */
 #ifdef DEBUGBUILD
   {
-    char *p = getenv("CURL_GRACEFUL_SHUTDOWN");
+    char *p = getenv("FETCH_GRACEFUL_SHUTDOWN");
     if(p) {
       long l = strtol(p, NULL, 10);
       if(l > 0 && l < INT_MAX)
@@ -881,7 +881,7 @@ static void cpool_run_conn_shutdown(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     bool *done)
 {
-  CURLcode r1, r2;
+  FETCHcode r1, r2;
   bool done1, done2;
 
   /* We expect to be attached when called */
@@ -897,14 +897,14 @@ static void cpool_run_conn_shutdown(struct Curl_easy *data,
   if(!conn->connect_only && Curl_conn_is_connected(conn, FIRSTSOCKET))
     r1 = Curl_conn_shutdown(data, FIRSTSOCKET, &done1);
   else {
-    r1 = CURLE_OK;
+    r1 = FETCHE_OK;
     done1 = TRUE;
   }
 
   if(!conn->connect_only && Curl_conn_is_connected(conn, SECONDARYSOCKET))
     r2 = Curl_conn_shutdown(data, SECONDARYSOCKET, &done2);
   else {
-    r2 = CURLE_OK;
+    r2 = FETCHE_OK;
     done2 = TRUE;
   }
 
@@ -914,10 +914,10 @@ static void cpool_run_conn_shutdown(struct Curl_easy *data,
     conn->bits.shutdown_filters = TRUE;
 }
 
-static CURLcode cpool_add_pollfds(struct cpool *cpool,
-                                  struct curl_pollfds *cpfds)
+static FETCHcode cpool_add_pollfds(struct cpool *cpool,
+                                  struct fetch_pollfds *cpfds)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   if(Curl_llist_head(&cpool->shutdowns)) {
     struct Curl_llist_node *e;
@@ -943,10 +943,10 @@ out:
   return result;
 }
 
-CURLcode Curl_cpool_add_pollfds(struct cpool *cpool,
-                                struct curl_pollfds *cpfds)
+FETCHcode Curl_cpool_add_pollfds(struct cpool *cpool,
+                                struct fetch_pollfds *cpfds)
 {
-  CURLcode result;
+  FETCHcode result;
   CPOOL_LOCK(cpool);
   result = cpool_add_pollfds(cpool, cpfds);
   CPOOL_UNLOCK(cpool);
@@ -1004,14 +1004,14 @@ void Curl_cpool_setfds(struct cpool *cpool,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
-        if(ps.actions[i] & CURL_POLL_IN)
+        if(ps.actions[i] & FETCH_POLL_IN)
           FD_SET(ps.sockets[i], read_fd_set);
-        if(ps.actions[i] & CURL_POLL_OUT)
+        if(ps.actions[i] & FETCH_POLL_OUT)
           FD_SET(ps.sockets[i], write_fd_set);
 #if defined(__DJGPP__)
 #pragma GCC diagnostic pop
 #endif
-        if((ps.actions[i] & (CURL_POLL_OUT | CURL_POLL_IN)) &&
+        if((ps.actions[i] & (FETCH_POLL_OUT | FETCH_POLL_IN)) &&
            ((int)ps.sockets[i] > *maxfd))
           *maxfd = (int)ps.sockets[i];
       }
@@ -1026,8 +1026,8 @@ static void cpool_perform(struct cpool *cpool)
   struct Curl_llist_node *e = Curl_llist_head(&cpool->shutdowns);
   struct Curl_llist_node *enext;
   struct connectdata *conn;
-  struct curltime *nowp = NULL;
-  struct curltime now;
+  struct fetchtime *nowp = NULL;
+  struct fetchtime now;
   timediff_t next_from_now_ms = 0, ms;
   bool done;
 
@@ -1125,12 +1125,12 @@ static void cpool_close_and_destroy(struct cpool *cpool,
 }
 
 
-static CURLMcode cpool_update_shutdown_ev(struct Curl_multi *multi,
+static FETCHMcode cpool_update_shutdown_ev(struct Curl_multi *multi,
                                           struct Curl_easy *data,
                                           struct connectdata *conn)
 {
   struct easy_pollset ps;
-  CURLMcode mresult;
+  FETCHMcode mresult;
 
   DEBUGASSERT(data);
   DEBUGASSERT(multi);
@@ -1149,7 +1149,7 @@ static CURLMcode cpool_update_shutdown_ev(struct Curl_multi *multi,
 }
 
 void Curl_cpool_multi_socket(struct Curl_multi *multi,
-                             curl_socket_t s, int ev_bitmask)
+                             fetch_socket_t s, int ev_bitmask)
 {
   struct cpool *cpool = &multi->cpool;
   struct Curl_easy *data = cpool->idata;
@@ -1182,11 +1182,11 @@ void Curl_cpool_multi_socket(struct Curl_multi *multi,
 
 #define NUM_POLLS_ON_STACK 10
 
-static CURLcode cpool_shutdown_wait(struct cpool *cpool, int timeout_ms)
+static FETCHcode cpool_shutdown_wait(struct cpool *cpool, int timeout_ms)
 {
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
-  struct curl_pollfds cpfds;
-  CURLcode result;
+  struct fetch_pollfds cpfds;
+  FETCHcode result;
 
   Curl_pollfds_init(&cpfds, a_few_on_stack, NUM_POLLS_ON_STACK);
 
@@ -1194,7 +1194,7 @@ static CURLcode cpool_shutdown_wait(struct cpool *cpool, int timeout_ms)
   if(result)
     goto out;
 
-  Curl_poll(cpfds.pfds, cpfds.n, CURLMIN(timeout_ms, 1000));
+  Curl_poll(cpfds.pfds, cpfds.n, FETCHMIN(timeout_ms, 1000));
 
 out:
   Curl_pollfds_cleanup(&cpfds);
@@ -1205,7 +1205,7 @@ static void cpool_shutdown_all(struct cpool *cpool,
                                struct Curl_easy *data, int timeout_ms)
 {
   struct connectdata *conn;
-  struct curltime started = Curl_now();
+  struct fetchtime started = Curl_now();
 
   if(!data)
     return;
@@ -1254,7 +1254,7 @@ static void cpool_shutdown_all(struct cpool *cpool,
 }
 
 struct cpool_reaper_ctx {
-  struct curltime now;
+  struct fetchtime now;
 };
 
 static int cpool_reap_dead_cb(struct Curl_easy *data,
@@ -1301,28 +1301,28 @@ static int conn_upkeep(struct Curl_easy *data,
                        struct connectdata *conn,
                        void *param)
 {
-  struct curltime *now = param;
+  struct fetchtime *now = param;
   /* TODO, shall we reap connections that return an error here? */
   Curl_conn_upkeep(data, conn, now);
   return 0; /* continue iteration */
 }
 
-CURLcode Curl_cpool_upkeep(void *data)
+FETCHcode Curl_cpool_upkeep(void *data)
 {
   struct cpool *cpool = cpool_get_instance(data);
-  struct curltime now = Curl_now();
+  struct fetchtime now = Curl_now();
 
   if(!cpool)
-    return CURLE_OK;
+    return FETCHE_OK;
 
   CPOOL_LOCK(cpool);
   cpool_foreach(data, cpool, &now, conn_upkeep);
   CPOOL_UNLOCK(cpool);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 struct cpool_find_ctx {
-  curl_off_t id;
+  fetch_off_t id;
   struct connectdata *conn;
 };
 
@@ -1339,7 +1339,7 @@ static int cpool_find_conn(struct Curl_easy *data,
 }
 
 struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
-                                        curl_off_t conn_id)
+                                        fetch_off_t conn_id)
 {
   struct cpool *cpool = cpool_get_instance(data);
   struct cpool_find_ctx fctx;
@@ -1355,7 +1355,7 @@ struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
 }
 
 struct cpool_do_conn_ctx {
-  curl_off_t id;
+  fetch_off_t id;
   Curl_cpool_conn_do_cb *cb;
   void *cbdata;
 };
@@ -1372,7 +1372,7 @@ static int cpool_do_conn(struct Curl_easy *data,
   return 0;
 }
 
-void Curl_cpool_do_by_id(struct Curl_easy *data, curl_off_t conn_id,
+void Curl_cpool_do_by_id(struct Curl_easy *data, fetch_off_t conn_id,
                          Curl_cpool_conn_do_cb *cb, void *cbdata)
 {
   struct cpool *cpool = cpool_get_instance(data);

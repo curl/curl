@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
@@ -56,8 +56,8 @@
 #include "strcase.h"
 #include "if2ip.h"
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /* ------------------------------------------------------------------ */
@@ -92,7 +92,7 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 }
 #endif
 
-#ifndef CURL_DISABLE_BINDLOCAL
+#ifndef FETCH_DISABLE_BINDLOCAL
 
 #if defined(HAVE_GETIFADDRS)
 
@@ -192,7 +192,7 @@ if2ip_result_t Curl_if2ip(int af,
   struct ifreq req;
   struct in_addr in;
   struct sockaddr_in *s;
-  curl_socket_t dummy;
+  fetch_socket_t dummy;
   size_t len;
   const char *r;
 
@@ -209,7 +209,7 @@ if2ip_result_t Curl_if2ip(int af,
     return IF2IP_NOT_FOUND;
 
   dummy = socket(AF_INET, SOCK_STREAM, 0);
-  if(CURL_SOCKET_BAD == dummy)
+  if(FETCH_SOCKET_BAD == dummy)
     return IF2IP_NOT_FOUND;
 
   memset(&req, 0, sizeof(req));
@@ -265,4 +265,4 @@ if2ip_result_t Curl_if2ip(int af,
 
 #endif
 
-#endif /* CURL_DISABLE_BINDLOCAL */
+#endif /* FETCH_DISABLE_BINDLOCAL */

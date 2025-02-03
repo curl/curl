@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_MULTIHANDLE_H
-#define HEADER_CURL_MULTIHANDLE_H
+#ifndef HEADER_FETCH_MULTIHANDLE_H
+#define HEADER_FETCH_MULTIHANDLE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -34,8 +34,8 @@ struct connectdata;
 
 struct Curl_message {
   struct Curl_llist_node list;
-  /* the 'CURLMsg' is the part that is visible to the external user */
-  struct CURLMsg extmsg;
+  /* the 'FETCHMsg' is the part that is visible to the external user */
+  struct FETCHMsg extmsg;
 };
 
 /* NOTE: if you add a state here, add the name to the statename[] array as
@@ -63,7 +63,7 @@ typedef enum {
   MSTATE_COMPLETED,    /* 16 - operation complete */
   MSTATE_MSGSENT,      /* 17 - the operation complete message is sent */
   MSTATE_LAST          /* 18 - not a true state, never use this */
-} CURLMstate;
+} FETCHMstate;
 
 /* we support N sockets per easy handle. Set the corresponding bit to what
    action we should wait for */
@@ -71,19 +71,19 @@ typedef enum {
 #define GETSOCK_READABLE (0x00ff)
 #define GETSOCK_WRITABLE (0xff00)
 
-#define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
+#define FETCHPIPE_ANY (FETCHPIPE_MULTIPLEX)
 
-#if !defined(CURL_DISABLE_SOCKETPAIR)
+#if !defined(FETCH_DISABLE_SOCKETPAIR)
 #define ENABLE_WAKEUP
 #endif
 
 /* value for MAXIMUM CONCURRENT STREAMS upper limit */
 #define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
-/* This is the struct known as CURLM on the outside */
+/* This is the struct known as FETCHM on the outside */
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
-     this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
+     this multi handle with an easy handle. Set this to FETCH_MULTI_HANDLE. */
   unsigned int magic;
 
   unsigned int num_easy; /* amount of entries in the linked list above. */
@@ -96,14 +96,14 @@ struct Curl_multi {
   struct Curl_llist process; /* not in PENDING or MSGSENT */
   struct Curl_llist pending; /* in PENDING */
   struct Curl_llist msgsent; /* in MSGSENT */
-  curl_off_t next_easy_mid; /* next multi-id for easy handle added */
+  fetch_off_t next_easy_mid; /* next multi-id for easy handle added */
 
   /* callback function and user data pointer for the *socket() API */
-  curl_socket_callback socket_cb;
+  fetch_socket_callback socket_cb;
   void *socket_userp;
 
   /* callback function and user data pointer for server push */
-  curl_push_callback push_cb;
+  fetch_push_callback push_cb;
   void *push_userp;
 
   struct Curl_hash hostcache; /* Hostname cache */
@@ -150,16 +150,16 @@ struct Curl_multi {
                                  of connections in total */
 
   /* timer callback and user data pointer for the *socket() API */
-  curl_multi_timer_callback timer_cb;
+  fetch_multi_timer_callback timer_cb;
   void *timer_userp;
   long last_timeout_ms;        /* the last timeout value set via timer_cb */
-  struct curltime last_expire_ts; /* timestamp of last expiry */
+  struct fetchtime last_expire_ts; /* timestamp of last expiry */
 
 #ifdef USE_WINSOCK
   WSAEVENT wsa_event; /* Winsock event used for waits */
 #else
 #ifdef ENABLE_WAKEUP
-  curl_socket_t wakeup_pair[2]; /* eventfd()/pipe()/socketpair() used for
+  fetch_socket_t wakeup_pair[2]; /* eventfd()/pipe()/socketpair() used for
                                    wakeup 0 is used for read, 1 is used
                                    for write */
 #endif
@@ -188,4 +188,4 @@ struct Curl_multi {
 #endif
 };
 
-#endif /* HEADER_CURL_MULTIHANDLE_H */
+#endif /* HEADER_FETCH_MULTIHANDLE_H */

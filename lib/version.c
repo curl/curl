@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,27 +18,27 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_NGHTTP2
 #include <nghttp2/nghttp2.h>
 #endif
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "http2.h"
 #include "vssh/ssh.h"
 #include "vquic/vquic.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 #include "easy_lock.h"
 
 #ifdef USE_ARES
-#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
+#  if defined(FETCH_STATICLIB) && !defined(CARES_STATICLIB) &&   \
   defined(_WIN32)
 #    define CARES_STATICLIB
 #  endif
@@ -55,7 +55,7 @@
 
 #ifdef USE_LIBRTMP
 #include <librtmp/rtmp.h>
-#include "curl_rtmp.h"
+#include "fetch_rtmp.h"
 #endif
 
 #ifdef HAVE_LIBZ
@@ -162,7 +162,7 @@ static void idn_version(char *buf, size_t bufsz)
 #endif
 
 /*
- * curl_version() returns a pointer to a static buffer.
+ * fetch_version() returns a pointer to a static buffer.
  *
  * It is implemented to work multi-threaded by making sure repeated invokes
  * generate the exact same string and never write any temporary data like
@@ -171,7 +171,7 @@ static void idn_version(char *buf, size_t bufsz)
 
 #define VERSION_PARTS 16 /* number of substrings we can concatenate */
 
-char *curl_version(void)
+char *fetch_version(void)
 {
   static char out[300];
   char *outp;
@@ -220,15 +220,15 @@ char *curl_version(void)
   int j;
 
 #ifdef DEBUGBUILD
-  /* Override version string when environment variable CURL_VERSION is set */
-  const char *debugversion = getenv("CURL_VERSION");
+  /* Override version string when environment variable FETCH_VERSION is set */
+  const char *debugversion = getenv("FETCH_VERSION");
   if(debugversion) {
     msnprintf(out, sizeof(out), "%s", debugversion);
     return out;
   }
 #endif
 
-  src[i++] = LIBCURL_NAME "/" LIBCURL_VERSION;
+  src[i++] = LIBFETCH_NAME "/" LIBFETCH_VERSION;
 #ifdef USE_SSL
   Curl_ssl_version(ssl_version, sizeof(ssl_version));
   src[i++] = ssl_version;
@@ -307,58 +307,58 @@ char *curl_version(void)
   return out;
 }
 
-/* data for curl_version_info
+/* data for fetch_version_info
 
    Keep the list sorted alphabetically. It is also written so that each
    protocol line has its own #if line to make things easier on the eye.
  */
 
 static const char * const supported_protocols[] = {
-#ifndef CURL_DISABLE_DICT
+#ifndef FETCH_DISABLE_DICT
   "dict",
 #endif
-#ifndef CURL_DISABLE_FILE
+#ifndef FETCH_DISABLE_FILE
   "file",
 #endif
-#ifndef CURL_DISABLE_FTP
+#ifndef FETCH_DISABLE_FTP
   "ftp",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_FTP)
   "ftps",
 #endif
-#ifndef CURL_DISABLE_GOPHER
+#ifndef FETCH_DISABLE_GOPHER
   "gopher",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_GOPHER)
   "gophers",
 #endif
-#ifndef CURL_DISABLE_HTTP
+#ifndef FETCH_DISABLE_HTTP
   "http",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_HTTP)
   "https",
 #endif
-#ifndef CURL_DISABLE_IMAP
+#ifndef FETCH_DISABLE_IMAP
   "imap",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_IMAP)
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_IMAP)
   "imaps",
 #endif
-#ifndef CURL_DISABLE_LDAP
+#ifndef FETCH_DISABLE_LDAP
   "ldap",
-#if !defined(CURL_DISABLE_LDAPS) && \
+#if !defined(FETCH_DISABLE_LDAPS) && \
     ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
      (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
   "ldaps",
 #endif
 #endif
-#ifndef CURL_DISABLE_MQTT
+#ifndef FETCH_DISABLE_MQTT
   "mqtt",
 #endif
-#ifndef CURL_DISABLE_POP3
+#ifndef FETCH_DISABLE_POP3
   "pop3",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_POP3)
   "pop3s",
 #endif
 #ifdef USE_LIBRTMP
@@ -369,7 +369,7 @@ static const char * const supported_protocols[] = {
   "rtmpte",
   "rtmpts",
 #endif
-#ifndef CURL_DISABLE_RTSP
+#ifndef FETCH_DISABLE_RTSP
   "rtsp",
 #endif
 #if defined(USE_SSH) && !defined(USE_WOLFSSH)
@@ -378,30 +378,30 @@ static const char * const supported_protocols[] = {
 #ifdef USE_SSH
   "sftp",
 #endif
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
+#if !defined(FETCH_DISABLE_SMB) && defined(USE_FETCH_NTLM_CORE)
   "smb",
 #  ifdef USE_SSL
   "smbs",
 #  endif
 #endif
-#ifndef CURL_DISABLE_SMTP
+#ifndef FETCH_DISABLE_SMTP
   "smtp",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_SMTP)
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_SMTP)
   "smtps",
 #endif
-#ifndef CURL_DISABLE_TELNET
+#ifndef FETCH_DISABLE_TELNET
   "telnet",
 #endif
-#ifndef CURL_DISABLE_TFTP
+#ifndef FETCH_DISABLE_TFTP
   "tftp",
 #endif
-#ifndef CURL_DISABLE_HTTP
+#ifndef FETCH_DISABLE_HTTP
   /* WebSocket support relies on HTTP */
-#ifndef CURL_DISABLE_WEBSOCKETS
+#ifndef FETCH_DISABLE_WEBSOCKETS
   "ws",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_WEBSOCKETS)
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_WEBSOCKETS)
   "wss",
 #endif
 #endif
@@ -413,11 +413,11 @@ static const char * const supported_protocols[] = {
  * Feature presence runtime check functions.
  *
  * Warning: the value returned by these should not change between
- * curl_global_init() and curl_global_cleanup() calls.
+ * fetch_global_init() and fetch_global_cleanup() calls.
  */
 
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
-static int idn_present(curl_version_info_data *info)
+static int idn_present(fetch_version_info_data *info)
 {
 #if defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
   (void)info;
@@ -430,9 +430,9 @@ static int idn_present(curl_version_info_data *info)
 #define idn_present     NULL
 #endif
 
-#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
-  !defined(CURL_DISABLE_HTTP)
-static int https_proxy_present(curl_version_info_data *info)
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_PROXY) && \
+  !defined(FETCH_DISABLE_HTTP)
+static int https_proxy_present(fetch_version_info_data *info)
 {
   (void) info;
   return Curl_ssl_supports(NULL, SSLSUPP_HTTPS_PROXY);
@@ -440,7 +440,7 @@ static int https_proxy_present(curl_version_info_data *info)
 #endif
 
 #if defined(USE_SSL) && defined(USE_ECH)
-static int ech_present(curl_version_info_data *info)
+static int ech_present(fetch_version_info_data *info)
 {
   (void) info;
   return Curl_ssl_supports(NULL, SSLSUPP_ECH);
@@ -458,25 +458,25 @@ static int ech_present(curl_version_info_data *info)
 
 struct feat {
   const char *name;
-  int        (*present)(curl_version_info_data *info);
+  int        (*present)(fetch_version_info_data *info);
   int        bitmask;
 };
 
 static const struct feat features_table[] = {
-#ifndef CURL_DISABLE_ALTSVC
-  FEATURE("alt-svc",     NULL,                CURL_VERSION_ALTSVC),
+#ifndef FETCH_DISABLE_ALTSVC
+  FEATURE("alt-svc",     NULL,                FETCH_VERSION_ALTSVC),
 #endif
-#if defined(USE_ARES) && defined(CURLRES_THREADED) && defined(USE_HTTPSRR)
+#if defined(USE_ARES) && defined(FETCHRES_THREADED) && defined(USE_HTTPSRR)
   FEATURE("asyn-rr", NULL,             0),
 #endif
-#ifdef CURLRES_ASYNCH
-  FEATURE("AsynchDNS",   NULL,                CURL_VERSION_ASYNCHDNS),
+#ifdef FETCHRES_ASYNCH
+  FEATURE("AsynchDNS",   NULL,                FETCH_VERSION_ASYNCHDNS),
 #endif
 #ifdef HAVE_BROTLI
-  FEATURE("brotli",      NULL,                CURL_VERSION_BROTLI),
+  FEATURE("brotli",      NULL,                FETCH_VERSION_BROTLI),
 #endif
 #ifdef DEBUGBUILD
-  FEATURE("Debug",       NULL,                CURL_VERSION_DEBUG),
+  FEATURE("Debug",       NULL,                FETCH_VERSION_DEBUG),
 #endif
 #if defined(USE_SSL) && defined(USE_ECH)
   FEATURE("ECH",         ech_present,         0),
@@ -486,81 +486,81 @@ static const struct feat features_table[] = {
 #endif
 #endif
 #ifdef USE_GSASL
-  FEATURE("gsasl",       NULL,                CURL_VERSION_GSASL),
+  FEATURE("gsasl",       NULL,                FETCH_VERSION_GSASL),
 #endif
 #ifdef HAVE_GSSAPI
-  FEATURE("GSS-API",     NULL,                CURL_VERSION_GSSAPI),
+  FEATURE("GSS-API",     NULL,                FETCH_VERSION_GSSAPI),
 #endif
-#ifndef CURL_DISABLE_HSTS
-  FEATURE("HSTS",        NULL,                CURL_VERSION_HSTS),
+#ifndef FETCH_DISABLE_HSTS
+  FEATURE("HSTS",        NULL,                FETCH_VERSION_HSTS),
 #endif
 #if defined(USE_NGHTTP2)
-  FEATURE("HTTP2",       NULL,                CURL_VERSION_HTTP2),
+  FEATURE("HTTP2",       NULL,                FETCH_VERSION_HTTP2),
 #endif
 #if defined(USE_HTTP3)
-  FEATURE("HTTP3",       NULL,                CURL_VERSION_HTTP3),
+  FEATURE("HTTP3",       NULL,                FETCH_VERSION_HTTP3),
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
-  !defined(CURL_DISABLE_HTTP)
-  FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
+#if defined(USE_SSL) && !defined(FETCH_DISABLE_PROXY) && \
+  !defined(FETCH_DISABLE_HTTP)
+  FEATURE("HTTPS-proxy", https_proxy_present, FETCH_VERSION_HTTPS_PROXY),
 #endif
 #if defined(USE_HTTPSRR)
   FEATURE("HTTPSRR",     NULL,                0),
 #endif
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
-  FEATURE("IDN",         idn_present,         CURL_VERSION_IDN),
+  FEATURE("IDN",         idn_present,         FETCH_VERSION_IDN),
 #endif
 #ifdef USE_IPV6
-  FEATURE("IPv6",        NULL,                CURL_VERSION_IPV6),
+  FEATURE("IPv6",        NULL,                FETCH_VERSION_IPV6),
 #endif
 #ifdef USE_KERBEROS5
-  FEATURE("Kerberos",    NULL,                CURL_VERSION_KERBEROS5),
+  FEATURE("Kerberos",    NULL,                FETCH_VERSION_KERBEROS5),
 #endif
-#if (SIZEOF_CURL_OFF_T > 4) && \
+#if (SIZEOF_FETCH_OFF_T > 4) && \
     ( (SIZEOF_OFF_T > 4) || defined(USE_WIN32_LARGE_FILES) )
-  FEATURE("Largefile",   NULL,                CURL_VERSION_LARGEFILE),
+  FEATURE("Largefile",   NULL,                FETCH_VERSION_LARGEFILE),
 #endif
 #ifdef HAVE_LIBZ
-  FEATURE("libz",        NULL,                CURL_VERSION_LIBZ),
+  FEATURE("libz",        NULL,                FETCH_VERSION_LIBZ),
 #endif
-#ifdef CURL_WITH_MULTI_SSL
-  FEATURE("MultiSSL",    NULL,                CURL_VERSION_MULTI_SSL),
+#ifdef FETCH_WITH_MULTI_SSL
+  FEATURE("MultiSSL",    NULL,                FETCH_VERSION_MULTI_SSL),
 #endif
 #ifdef USE_NTLM
-  FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
+  FEATURE("NTLM",        NULL,                FETCH_VERSION_NTLM),
 #endif
 #if defined(USE_LIBPSL)
-  FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
+  FEATURE("PSL",         NULL,                FETCH_VERSION_PSL),
 #endif
 #ifdef USE_SPNEGO
-  FEATURE("SPNEGO",      NULL,                CURL_VERSION_SPNEGO),
+  FEATURE("SPNEGO",      NULL,                FETCH_VERSION_SPNEGO),
 #endif
 #ifdef USE_SSL
-  FEATURE("SSL",         NULL,                CURL_VERSION_SSL),
+  FEATURE("SSL",         NULL,                FETCH_VERSION_SSL),
 #endif
 #if defined(USE_SSLS_EXPORT)
   FEATURE("SSLS-EXPORT", NULL,                0),
 #endif
 #ifdef USE_WINDOWS_SSPI
-  FEATURE("SSPI",        NULL,                CURL_VERSION_SSPI),
+  FEATURE("SSPI",        NULL,                FETCH_VERSION_SSPI),
 #endif
 #ifdef GLOBAL_INIT_IS_THREADSAFE
-  FEATURE("threadsafe",  NULL,                CURL_VERSION_THREADSAFE),
+  FEATURE("threadsafe",  NULL,                FETCH_VERSION_THREADSAFE),
 #endif
 #ifdef USE_TLS_SRP
-  FEATURE("TLS-SRP",     NULL,                CURL_VERSION_TLSAUTH_SRP),
+  FEATURE("TLS-SRP",     NULL,                FETCH_VERSION_TLSAUTH_SRP),
 #endif
-#ifdef CURLDEBUG
-  FEATURE("TrackMemory", NULL,                CURL_VERSION_CURLDEBUG),
+#ifdef FETCHDEBUG
+  FEATURE("TrackMemory", NULL,                FETCH_VERSION_FETCHDEBUG),
 #endif
 #if defined(_WIN32) && defined(UNICODE) && defined(_UNICODE)
-  FEATURE("Unicode",     NULL,                CURL_VERSION_UNICODE),
+  FEATURE("Unicode",     NULL,                FETCH_VERSION_UNICODE),
 #endif
 #ifdef USE_UNIX_SOCKETS
-  FEATURE("UnixSockets", NULL,                CURL_VERSION_UNIX_SOCKETS),
+  FEATURE("UnixSockets", NULL,                FETCH_VERSION_UNIX_SOCKETS),
 #endif
 #ifdef HAVE_ZSTD
-  FEATURE("zstd",        NULL,                CURL_VERSION_ZSTD),
+  FEATURE("zstd",        NULL,                FETCH_VERSION_ZSTD),
 #endif
   {NULL,                 NULL,                0}
 };
@@ -569,11 +569,11 @@ static const char *feature_names[sizeof(features_table) /
                                  sizeof(features_table[0])] = {NULL};
 
 
-static curl_version_info_data version_info = {
-  CURLVERSION_NOW,
-  LIBCURL_VERSION,
-  LIBCURL_VERSION_NUM,
-  CURL_OS, /* as found by configure or set by hand at build-time */
+static fetch_version_info_data version_info = {
+  FETCHVERSION_NOW,
+  LIBFETCH_VERSION,
+  LIBFETCH_VERSION_NUM,
+  FETCH_OS, /* as found by configure or set by hand at build-time */
   0,    /* features bitmask is built at runtime */
   NULL, /* ssl_version */
   0,    /* ssl_version_num, this is kept at zero */
@@ -589,13 +589,13 @@ static curl_version_info_data version_info = {
   0,    /* nghttp2 version number */
   NULL, /* nghttp2 version string */
   NULL, /* quic library string */
-#ifdef CURL_CA_BUNDLE
-  CURL_CA_BUNDLE, /* cainfo */
+#ifdef FETCH_CA_BUNDLE
+  FETCH_CA_BUNDLE, /* cainfo */
 #else
   NULL,
 #endif
-#ifdef CURL_CA_PATH
-  CURL_CA_PATH,  /* capath */
+#ifdef FETCH_CA_PATH
+  FETCH_CA_PATH,  /* capath */
 #else
   NULL,
 #endif
@@ -607,7 +607,7 @@ static curl_version_info_data version_info = {
   NULL  /* rtmp version */
 };
 
-curl_version_info_data *curl_version_info(CURLversion stamp)
+fetch_version_info_data *fetch_version_info(FETCHversion stamp)
 {
   size_t n;
   const struct feat *p;
@@ -617,7 +617,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   static char ssh_buf[80];  /* 'ssh_buffer' clashes with libssh/libssh.h */
 #endif
 #ifdef USE_SSL
-#ifdef CURL_WITH_MULTI_SSL
+#ifdef FETCH_WITH_MULTI_SSL
   static char ssl_buffer[200];
 #else
   static char ssl_buffer[80];

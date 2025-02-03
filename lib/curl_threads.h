@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_THREADS_H
-#define HEADER_CURL_THREADS_H
+#ifndef HEADER_FETCH_THREADS_H
+#define HEADER_FETCH_THREADS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,25 +20,25 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(USE_THREADS_POSIX)
-#  define CURL_STDCALL
-#  define curl_mutex_t           pthread_mutex_t
-#  define curl_thread_t          pthread_t *
-#  define curl_thread_t_null     (pthread_t *)0
+#  define FETCH_STDCALL
+#  define fetch_mutex_t           pthread_mutex_t
+#  define fetch_thread_t          pthread_t *
+#  define fetch_thread_t_null     (pthread_t *)0
 #  define Curl_mutex_init(m)     pthread_mutex_init(m, NULL)
 #  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
 #  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
 #  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
 #elif defined(USE_THREADS_WIN32)
-#  define CURL_STDCALL           __stdcall
-#  define curl_mutex_t           CRITICAL_SECTION
-#  define curl_thread_t          HANDLE
-#  define curl_thread_t_null     (HANDLE)0
+#  define FETCH_STDCALL           __stdcall
+#  define fetch_mutex_t           CRITICAL_SECTION
+#  define fetch_thread_t          HANDLE
+#  define fetch_thread_t_null     (HANDLE)0
 #  if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
       (_WIN32_WINNT < _WIN32_WINNT_VISTA)
 #    define Curl_mutex_init(m)   InitializeCriticalSection(m)
@@ -52,19 +52,19 @@
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+fetch_thread_t Curl_thread_create(
+#if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP)
                                  DWORD
 #else
                                  unsigned int
 #endif
-                                 (CURL_STDCALL *func) (void *),
+                                 (FETCH_STDCALL *func) (void *),
                                  void *arg);
 
-void Curl_thread_destroy(curl_thread_t hnd);
+void Curl_thread_destroy(fetch_thread_t hnd);
 
-int Curl_thread_join(curl_thread_t *hnd);
+int Curl_thread_join(fetch_thread_t *hnd);
 
 #endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
 
-#endif /* HEADER_CURL_THREADS_H */
+#endif /* HEADER_FETCH_THREADS_H */

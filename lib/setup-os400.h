@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SETUP_OS400_H
-#define HEADER_CURL_SETUP_OS400_H
+#ifndef HEADER_FETCH_SETUP_OS400_H
+#define HEADER_FETCH_SETUP_OS400_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -55,7 +55,7 @@ typedef unsigned long   u_int32_t;
 #include <qsoasync.h>
 #include <gssapi.h>
 
-#ifdef BUILDING_LIBCURL
+#ifdef BUILDING_LIBFETCH
 
 extern int Curl_getaddrinfo_a(const char *nodename,
                               const char *servname,
@@ -63,7 +63,7 @@ extern int Curl_getaddrinfo_a(const char *nodename,
                               struct addrinfo **res);
 #define getaddrinfo             Curl_getaddrinfo_a
 
-/* Note socklen_t must be used as this is declared before curl_socklen_t */
+/* Note socklen_t must be used as this is declared before fetch_socklen_t */
 extern int Curl_getnameinfo_a(const struct sockaddr *sa,
                               socklen_t salen,
                               char *nodename, socklen_t nodenamelen,
@@ -152,6 +152,6 @@ extern int Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen);
 #define inflateEnd              Curl_os400_inflateEnd
 #endif
 
-#endif /* BUILDING_LIBCURL */
+#endif /* BUILDING_LIBFETCH */
 
-#endif /* HEADER_CURL_SETUP_OS400_H */
+#endif /* HEADER_FETCH_SETUP_OS400_H */

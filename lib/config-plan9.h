@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CONFIG_PLAN9_H
-#define HEADER_CURL_CONFIG_PLAN9_H
+#ifndef HEADER_FETCH_CONFIG_PLAN9_H
+#define HEADER_FETCH_CONFIG_PLAN9_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,20 +20,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#define BUILDING_LIBCURL 1
-#define CURL_CA_BUNDLE "/sys/lib/tls/ca.pem"
-#define CURL_CA_PATH "/sys/lib/tls"
-#define CURL_STATICLIB 1
+#define BUILDING_LIBFETCH 1
+#define FETCH_CA_BUNDLE "/sys/lib/tls/ca.pem"
+#define FETCH_CA_PATH "/sys/lib/tls"
+#define FETCH_STATICLIB 1
 #define USE_IPV6 1
-#define CURL_DISABLE_LDAP 1
+#define FETCH_DISABLE_LDAP 1
 
 #define NEED_REENTRANT 1
-#ifndef CURL_OS
-#define CURL_OS "plan9"
+#ifndef FETCH_OS
+#define FETCH_OS "plan9"
 #endif
 
 #define STDC_HEADERS 1
@@ -44,7 +44,7 @@
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
 #define SIZEOF_OFF_T 8
-#define SIZEOF_CURL_OFF_T 4 /* curl_off_t = timediff_t = int */
+#define SIZEOF_FETCH_OFF_T 4 /* fetch_off_t = timediff_t = int */
 #define SIZEOF_SIZE_T 4
 #define SIZEOF_TIME_T 4
 #endif
@@ -135,4 +135,4 @@
 #undef inline
 #endif
 
-#endif /* HEADER_CURL_CONFIG_PLAN9_H */
+#endif /* HEADER_FETCH_CONFIG_PLAN9_H */

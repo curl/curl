@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_TLS_H
-#define HEADER_CURL_VQUIC_TLS_H
+#ifndef HEADER_FETCH_VQUIC_TLS_H
+#define HEADER_FETCH_VQUIC_TLS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "bufq.h"
 #include "vtls/vtls.h"
 #include "vtls/openssl.h"
@@ -37,7 +37,7 @@
 struct ssl_peer;
 struct Curl_ssl_session;
 
-struct curl_tls_ctx {
+struct fetch_tls_ctx {
 #ifdef USE_OPENSSL
   struct ossl_ctx ossl;
 #elif defined(USE_GNUTLS)
@@ -54,11 +54,11 @@ struct curl_tls_ctx {
  * - openssl/wolfssl: SSL_CTX* has just been created
  * - gnutls: gtls_client_init() has run
  */
-typedef CURLcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,
+typedef FETCHcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
                                           void *cb_user_data);
 
-typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
+typedef FETCHcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
                                              struct Curl_easy *data,
                                              struct Curl_ssl_session *scs,
                                              bool *do_early_data);
@@ -78,7 +78,7 @@ typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
  * @param ssl_user_data  optional pointer to set in TLS application context
  * @param session_reuse_cb callback to handle session reuse, signal early data
  */
-CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
+FETCHcode Curl_vquic_tls_init(struct fetch_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ssl_peer *peer,
@@ -91,9 +91,9 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 /**
  * Cleanup all data that has been initialized.
  */
-void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx);
+void Curl_vquic_tls_cleanup(struct fetch_tls_ctx *ctx);
 
-CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
+FETCHcode Curl_vquic_tls_before_recv(struct fetch_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data);
 
@@ -101,11 +101,11 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
  * After the QUIC basic handshake has been, verify that the peer
  * (and its certificate) fulfill our requirements.
  */
-CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
+FETCHcode Curl_vquic_tls_verify_peer(struct fetch_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer);
 
 #endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */
 
-#endif /* HEADER_CURL_VQUIC_TLS_H */
+#endif /* HEADER_FETCH_VQUIC_TLS_H */

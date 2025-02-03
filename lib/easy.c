@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -45,7 +45,7 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "transfer.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
@@ -79,19 +79,19 @@
 #include "easy_lock.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
-/* true globals -- for curl_global_init() and curl_global_cleanup() */
+/* true globals -- for fetch_global_init() and fetch_global_cleanup() */
 static unsigned int  initialized;
 static long          easy_init_flags;
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
-static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
-#define global_init_lock() curl_simple_lock_lock(&s_lock)
-#define global_init_unlock() curl_simple_lock_unlock(&s_lock)
+static fetch_simple_lock s_lock = FETCH_SIMPLE_LOCK_INIT;
+#define global_init_lock() fetch_simple_lock_lock(&s_lock)
+#define global_init_unlock() fetch_simple_lock_unlock(&s_lock)
 
 #else
 
@@ -119,16 +119,16 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
 #endif
 
 /*
- * If a memory-using function (like curl_getenv) is used before
- * curl_global_init() is called, we need to have these pointers set already.
+ * If a memory-using function (like fetch_getenv) is used before
+ * fetch_global_init() is called, we need to have these pointers set already.
  */
-curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
-curl_free_callback Curl_cfree = (curl_free_callback)free;
-curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
-curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
+fetch_malloc_callback Curl_cmalloc = (fetch_malloc_callback)malloc;
+fetch_free_callback Curl_cfree = (fetch_free_callback)free;
+fetch_realloc_callback Curl_crealloc = (fetch_realloc_callback)realloc;
+fetch_strdup_callback Curl_cstrdup = (fetch_strdup_callback)system_strdup;
+fetch_calloc_callback Curl_ccalloc = (fetch_calloc_callback)calloc;
 #if defined(_WIN32) && defined(UNICODE)
-curl_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
+fetch_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -140,23 +140,23 @@ static char *leakpointer;
 #endif
 
 /**
- * curl_global_init() globally initializes curl given a bitwise set of the
+ * fetch_global_init() globally initializes fetch given a bitwise set of the
  * different features of what to initialize.
  */
-static CURLcode global_init(long flags, bool memoryfuncs)
+static FETCHcode global_init(long flags, bool memoryfuncs)
 {
   if(initialized++)
-    return CURLE_OK;
+    return FETCHE_OK;
 
   if(memoryfuncs) {
     /* Setup the default memory functions here (again) */
-    Curl_cmalloc = (curl_malloc_callback)malloc;
-    Curl_cfree = (curl_free_callback)free;
-    Curl_crealloc = (curl_realloc_callback)realloc;
-    Curl_cstrdup = (curl_strdup_callback)system_strdup;
-    Curl_ccalloc = (curl_calloc_callback)calloc;
+    Curl_cmalloc = (fetch_malloc_callback)malloc;
+    Curl_cfree = (fetch_free_callback)free;
+    Curl_crealloc = (fetch_realloc_callback)realloc;
+    Curl_cstrdup = (fetch_strdup_callback)system_strdup;
+    Curl_ccalloc = (fetch_calloc_callback)calloc;
 #if defined(_WIN32) && defined(UNICODE)
-    Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
+    Curl_cwcsdup = (fetch_wcsdup_callback)_wcsdup;
 #endif
   }
 
@@ -198,26 +198,26 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   easy_init_flags = flags;
 
 #ifdef DEBUGBUILD
-  if(getenv("CURL_GLOBAL_INIT"))
+  if(getenv("FETCH_GLOBAL_INIT"))
     /* alloc data that will leak if *cleanup() is not called! */
     leakpointer = malloc(1);
 #endif
 
-  return CURLE_OK;
+  return FETCHE_OK;
 
 fail:
   initialized--; /* undo the increase */
-  return CURLE_FAILED_INIT;
+  return FETCHE_FAILED_INIT;
 }
 
 
 /**
- * curl_global_init() globally initializes curl given a bitwise set of the
+ * fetch_global_init() globally initializes fetch given a bitwise set of the
  * different features of what to initialize.
  */
-CURLcode curl_global_init(long flags)
+FETCHcode fetch_global_init(long flags)
 {
-  CURLcode result;
+  FETCHcode result;
   global_init_lock();
 
   result = global_init(flags, TRUE);
@@ -228,28 +228,28 @@ CURLcode curl_global_init(long flags)
 }
 
 /*
- * curl_global_init_mem() globally initializes curl and also registers the
+ * fetch_global_init_mem() globally initializes fetch and also registers the
  * user provided callback routines.
  */
-CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
-                              curl_free_callback f, curl_realloc_callback r,
-                              curl_strdup_callback s, curl_calloc_callback c)
+FETCHcode fetch_global_init_mem(long flags, fetch_malloc_callback m,
+                              fetch_free_callback f, fetch_realloc_callback r,
+                              fetch_strdup_callback s, fetch_calloc_callback c)
 {
-  CURLcode result;
+  FETCHcode result;
 
   /* Invalid input, return immediately */
   if(!m || !f || !r || !s || !c)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
 
   global_init_lock();
 
   if(initialized) {
     /* Already initialized, do not do it again, but bump the variable anyway to
-       work like curl_global_init() and require the same amount of cleanup
+       work like fetch_global_init() and require the same amount of cleanup
        calls. */
     initialized++;
     global_init_unlock();
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
   /* set memory functions before global_init() in case it wants memory
@@ -269,11 +269,11 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
 }
 
 /**
- * curl_global_cleanup() globally cleanups curl, uses the value of
+ * fetch_global_cleanup() globally cleanups fetch, uses the value of
  * "easy_init_flags" to determine what needs to be cleaned up and what does
  * not.
  */
-void curl_global_cleanup(void)
+void fetch_global_cleanup(void)
 {
   global_init_lock();
 
@@ -308,12 +308,12 @@ void curl_global_cleanup(void)
 }
 
 /**
- * curl_global_trace() globally initializes curl logging.
+ * fetch_global_trace() globally initializes fetch logging.
  */
-CURLcode curl_global_trace(const char *config)
+FETCHcode fetch_global_trace(const char *config)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  CURLcode result;
+#ifndef FETCH_DISABLE_VERBOSE_STRINGS
+  FETCHcode result;
   global_init_lock();
 
   result = Curl_trc_opt(config);
@@ -323,17 +323,17 @@ CURLcode curl_global_trace(const char *config)
   return result;
 #else
   (void)config;
-  return CURLE_OK;
+  return FETCHE_OK;
 #endif
 }
 
 /*
- * curl_global_sslset() globally initializes the SSL backend to use.
+ * fetch_global_sslset() globally initializes the SSL backend to use.
  */
-CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
-                              const curl_ssl_backend ***avail)
+FETCHsslset fetch_global_sslset(fetch_sslbackend id, const char *name,
+                              const fetch_ssl_backend ***avail)
 {
-  CURLsslset rc;
+  FETCHsslset rc;
 
   global_init_lock();
 
@@ -345,29 +345,29 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
 }
 
 /*
- * curl_easy_init() is the external interface to alloc, setup and init an
+ * fetch_easy_init() is the external interface to alloc, setup and init an
  * easy handle that is returned. If anything goes wrong, NULL is returned.
  */
-CURL *curl_easy_init(void)
+FETCH *fetch_easy_init(void)
 {
-  CURLcode result;
+  FETCHcode result;
   struct Curl_easy *data;
 
   /* Make sure we inited the global SSL stuff */
   global_init_lock();
 
   if(!initialized) {
-    result = global_init(CURL_GLOBAL_DEFAULT, TRUE);
+    result = global_init(FETCH_GLOBAL_DEFAULT, TRUE);
     if(result) {
       /* something in the global init failed, return nothing */
-      DEBUGF(fprintf(stderr, "Error: curl_global_init failed\n"));
+      DEBUGF(fprintf(stderr, "Error: fetch_global_init failed\n"));
       global_init_unlock();
       return NULL;
     }
   }
   global_init_unlock();
 
-  /* We use curl_open() with undefined URL so far */
+  /* We use fetch_open() with undefined URL so far */
   result = Curl_open(&data);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: Curl_open failed\n"));
@@ -399,7 +399,7 @@ struct events {
  * Callback that gets called with a new value when the timeout should be
  * updated.
  */
-static int events_timer(CURLM *multi,    /* multi handle */
+static int events_timer(FETCHM *multi,    /* multi handle */
                         long timeout_ms, /* see above */
                         void *userp)     /* private callback pointer */
 {
@@ -416,31 +416,31 @@ static int events_timer(CURLM *multi,    /* multi handle */
 
 /* poll2cselect
  *
- * convert from poll() bit definitions to libcurl's CURL_CSELECT_* ones
+ * convert from poll() bit definitions to libfetch's FETCH_CSELECT_* ones
  */
 static int poll2cselect(int pollmask)
 {
   int omask = 0;
   if(pollmask & POLLIN)
-    omask |= CURL_CSELECT_IN;
+    omask |= FETCH_CSELECT_IN;
   if(pollmask & POLLOUT)
-    omask |= CURL_CSELECT_OUT;
+    omask |= FETCH_CSELECT_OUT;
   if(pollmask & POLLERR)
-    omask |= CURL_CSELECT_ERR;
+    omask |= FETCH_CSELECT_ERR;
   return omask;
 }
 
 
 /* socketcb2poll
  *
- * convert from libcurl' CURL_POLL_* bit definitions to poll()'s
+ * convert from libfetch' FETCH_POLL_* bit definitions to poll()'s
  */
 static short socketcb2poll(int pollmask)
 {
   short omask = 0;
-  if(pollmask & CURL_POLL_IN)
+  if(pollmask & FETCH_POLL_IN)
     omask |= POLLIN;
-  if(pollmask & CURL_POLL_OUT)
+  if(pollmask & FETCH_POLL_OUT)
     omask |= POLLOUT;
   return omask;
 }
@@ -450,8 +450,8 @@ static short socketcb2poll(int pollmask)
  * Callback that gets called with information about socket activity to
  * monitor.
  */
-static int events_socket(CURL *easy,      /* easy handle */
-                         curl_socket_t s, /* socket */
+static int events_socket(FETCH *easy,      /* easy handle */
+                         fetch_socket_t s, /* socket */
                          int what,        /* see above */
                          void *userp,     /* private callback
                                              pointer */
@@ -464,7 +464,7 @@ static int events_socket(CURL *easy,      /* easy handle */
   bool found = FALSE;
   struct Curl_easy *data = easy;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(FETCH_DISABLE_VERBOSE_STRINGS)
   (void) easy;
 #endif
   (void)socketp;
@@ -473,7 +473,7 @@ static int events_socket(CURL *easy,      /* easy handle */
   while(m) {
     if(m->socket.fd == s) {
       found = TRUE;
-      if(what == CURL_POLL_REMOVE) {
+      if(what == FETCH_POLL_REMOVE) {
         struct socketmonitor *nxt = m->next;
         /* remove this node from the list of monitored sockets */
         if(prev)
@@ -485,12 +485,12 @@ static int events_socket(CURL *easy,      /* easy handle */
       }
       else {
         /* The socket 's' is already being monitored, update the activity
-           mask. Convert from libcurl bitmask to the poll one. */
+           mask. Convert from libfetch bitmask to the poll one. */
         m->socket.events = socketcb2poll(what);
         infof(data, "socket cb: socket %" FMT_SOCKET_T
               " UPDATED as %s%s", s,
-              (what&CURL_POLL_IN) ? "IN" : "",
-              (what&CURL_POLL_OUT) ? "OUT" : "");
+              (what&FETCH_POLL_IN) ? "IN" : "",
+              (what&FETCH_POLL_OUT) ? "OUT" : "");
       }
       break;
     }
@@ -499,7 +499,7 @@ static int events_socket(CURL *easy,      /* easy handle */
   }
 
   if(!found) {
-    if(what == CURL_POLL_REMOVE) {
+    if(what == FETCH_POLL_REMOVE) {
       /* should not happen if our logic is correct, but is no drama. */
       DEBUGF(infof(data, "socket cb: asked to REMOVE socket %"
                    FMT_SOCKET_T "but not present!", s));
@@ -514,11 +514,11 @@ static int events_socket(CURL *easy,      /* easy handle */
         m->socket.revents = 0;
         ev->list = m;
         infof(data, "socket cb: socket %" FMT_SOCKET_T " ADDED as %s%s", s,
-              (what&CURL_POLL_IN) ? "IN" : "",
-              (what&CURL_POLL_OUT) ? "OUT" : "");
+              (what&FETCH_POLL_IN) ? "IN" : "",
+              (what&FETCH_POLL_OUT) ? "OUT" : "");
       }
       else
-        return CURLE_OUT_OF_MEMORY;
+        return FETCHE_OUT_OF_MEMORY;
     }
   }
 
@@ -534,12 +534,12 @@ static int events_socket(CURL *easy,      /* easy handle */
 static void events_setup(struct Curl_multi *multi, struct events *ev)
 {
   /* timer callback */
-  curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION, events_timer);
-  curl_multi_setopt(multi, CURLMOPT_TIMERDATA, ev);
+  fetch_multi_setopt(multi, FETCHMOPT_TIMERFUNCTION, events_timer);
+  fetch_multi_setopt(multi, FETCHMOPT_TIMERDATA, ev);
 
   /* socket callback */
-  curl_multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, events_socket);
-  curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, ev);
+  fetch_multi_setopt(multi, FETCHMOPT_SOCKETFUNCTION, events_socket);
+  fetch_multi_setopt(multi, FETCHMOPT_SOCKETDATA, ev);
 }
 
 
@@ -548,21 +548,21 @@ static void events_setup(struct Curl_multi *multi, struct events *ev)
  * waits for activity on any of the given sockets, or the timeout to trigger.
  */
 
-static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
+static FETCHcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 {
   bool done = FALSE;
-  CURLMcode mcode = CURLM_OK;
-  CURLcode result = CURLE_OK;
+  FETCHMcode mcode = FETCHM_OK;
+  FETCHcode result = FETCHE_OK;
 
   while(!done) {
-    CURLMsg *msg;
+    FETCHMsg *msg;
     struct socketmonitor *m;
     struct pollfd *f;
     struct pollfd fds[4];
     int numfds = 0;
     int pollrc;
     int i;
-    struct curltime before;
+    struct fetchtime before;
 
     /* populate the fds[] array */
     for(m = ev->list, f = &fds[0]; m; m = m->next) {
@@ -590,7 +590,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
               numfds, ev->ms, pollrc);
 #endif
       if(pollrc < 0)
-        return CURLE_UNRECOVERABLE_POLL;
+        return FETCHE_UNRECOVERABLE_POLL;
     }
     else {
 #if DEBUG_EV_POLL
@@ -606,8 +606,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     if(!pollrc) {
       /* timeout! */
       ev->ms = 0;
-      /* fprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
-      mcode = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
+      /* fprintf(stderr, "call fetch_multi_socket_action(TIMEOUT)\n"); */
+      mcode = fetch_multi_socket_action(multi, FETCH_SOCKET_TIMEOUT, 0,
                                        &ev->running_handles);
     }
     else {
@@ -621,13 +621,13 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       /* loop over the monitored sockets to see which ones had activity */
       for(i = 0; i < numfds; i++) {
         if(fds[i].revents) {
-          /* socket activity, tell libcurl */
+          /* socket activity, tell libfetch */
           int act = poll2cselect(fds[i].revents); /* convert */
 
           /* sending infof "randomly" to the first easy handle */
-          infof(data, "call curl_multi_socket_action(socket "
-                "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
-          mcode = curl_multi_socket_action(multi, fds[i].fd, act,
+          infof(data, "call fetch_multi_socket_action(socket "
+                "%" FMT_SOCKET_T ")", (fetch_socket_t)fds[i].fd);
+          mcode = fetch_multi_socket_action(multi, fds[i].fd, act,
                                            &ev->running_handles);
         }
       }
@@ -652,11 +652,11 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     }
 
     if(mcode)
-      return CURLE_URL_MALFORMAT;
+      return FETCHE_URL_MALFORMAT;
 
     /* we do not really care about the "msgs_in_queue" value returned in the
        second argument */
-    msg = curl_multi_info_read(multi, &pollrc);
+    msg = fetch_multi_info_read(multi, &pollrc);
     if(msg) {
       result = msg->data.result;
       done = TRUE;
@@ -671,10 +671,10 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
  *
  * Runs a transfer in a blocking manner using the events-based API
  */
-static CURLcode easy_events(struct Curl_multi *multi)
+static FETCHcode easy_events(struct Curl_multi *multi)
 {
   /* this struct is made static to allow it to be used after this function
-     returns and curl_multi_remove_handle() is called */
+     returns and fetch_multi_remove_handle() is called */
   static struct events evs = {-1, FALSE, 0, NULL, 0};
 
   /* if running event-based, do some further multi inits */
@@ -684,27 +684,27 @@ static CURLcode easy_events(struct Curl_multi *multi)
 }
 #else /* DEBUGBUILD */
 /* when not built with debug, this function does not exist */
-#define easy_events(x) CURLE_NOT_BUILT_IN
+#define easy_events(x) FETCHE_NOT_BUILT_IN
 #endif
 
-static CURLcode easy_transfer(struct Curl_multi *multi)
+static FETCHcode easy_transfer(struct Curl_multi *multi)
 {
   bool done = FALSE;
-  CURLMcode mcode = CURLM_OK;
-  CURLcode result = CURLE_OK;
+  FETCHMcode mcode = FETCHM_OK;
+  FETCHcode result = FETCHE_OK;
 
   while(!done && !mcode) {
     int still_running = 0;
 
-    mcode = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+    mcode = fetch_multi_poll(multi, NULL, 0, 1000, NULL);
 
     if(!mcode)
-      mcode = curl_multi_perform(multi, &still_running);
+      mcode = fetch_multi_perform(multi, &still_running);
 
-    /* only read 'still_running' if curl_multi_perform() return OK */
+    /* only read 'still_running' if fetch_multi_perform() return OK */
     if(!mcode && !still_running) {
       int rc;
-      CURLMsg *msg = curl_multi_info_read(multi, &rc);
+      FETCHMsg *msg = fetch_multi_info_read(multi, &rc);
       if(msg) {
         result = msg->data.result;
         done = TRUE;
@@ -714,10 +714,10 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
   /* Make sure to return some kind of error if there was a multi problem */
   if(mcode) {
-    result = (mcode == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
+    result = (mcode == FETCHM_OUT_OF_MEMORY) ? FETCHE_OUT_OF_MEMORY :
       /* The other multi errors should never happen, so return
          something suitably generic */
-      CURLE_BAD_FUNCTION_ARGUMENT;
+      FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
   return result;
@@ -729,7 +729,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
  * transfer as previously setup.
  *
  * CONCEPT: This function creates a multi handle, adds the easy handle to it,
- * runs curl_multi_perform() until the transfer is done, then detaches the
+ * runs fetch_multi_perform() until the transfer is done, then detaches the
  * easy handle, destroys the multi handle and returns the easy handle's return
  * code.
  *
@@ -739,17 +739,17 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
  * caches can be used.
  *
  * DEBUG: if 'events' is set TRUE, this function will use a replacement engine
- * instead of curl_multi_perform() and use curl_multi_socket_action().
+ * instead of fetch_multi_perform() and use fetch_multi_socket_action().
  */
-static CURLcode easy_perform(struct Curl_easy *data, bool events)
+static FETCHcode easy_perform(struct Curl_easy *data, bool events)
 {
   struct Curl_multi *multi;
-  CURLMcode mcode;
-  CURLcode result = CURLE_OK;
+  FETCHMcode mcode;
+  FETCHcode result = FETCHE_OK;
   SIGPIPE_VARIABLE(pipe_st);
 
   if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   if(data->set.errorbuffer)
     /* clear this as early as possible */
@@ -759,17 +759,17 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 
   if(data->multi) {
     failf(data, "easy handle already used in multi handle");
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
   }
 
   /* if the handle has a connection still attached (it is/was a connect-only
      handle) then disconnect before performing */
   if(data->conn) {
     struct connectdata *c;
-    curl_socket_t s;
+    fetch_socket_t s;
     Curl_detach_connection(data);
     s = Curl_getconnectinfo(data, &c);
-    if((s != CURL_SOCKET_BAD) && c) {
+    if((s != FETCH_SOCKET_BAD) && c) {
       Curl_cpool_disconnect(data, c, TRUE);
     }
     DEBUGASSERT(!data->conn);
@@ -782,25 +782,25 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
        it, so make it use minimal hash sizes */
     multi = Curl_multi_handle(1, 3, 7, 3);
     if(!multi)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
   }
 
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return FETCHE_RECURSIVE_API_CALL;
 
   /* Copy the MAXCONNECTS option to the multi handle */
-  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)data->set.maxconnects);
+  fetch_multi_setopt(multi, FETCHMOPT_MAXCONNECTS, (long)data->set.maxconnects);
 
   data->multi_easy = NULL; /* pretend it does not exist */
-  mcode = curl_multi_add_handle(multi, data);
+  mcode = fetch_multi_add_handle(multi, data);
   if(mcode) {
-    curl_multi_cleanup(multi);
-    if(mcode == CURLM_OUT_OF_MEMORY)
-      return CURLE_OUT_OF_MEMORY;
-    return CURLE_FAILED_INIT;
+    fetch_multi_cleanup(multi);
+    if(mcode == FETCHM_OUT_OF_MEMORY)
+      return FETCHE_OUT_OF_MEMORY;
+    return FETCHE_FAILED_INIT;
   }
 
-  /* assign this after curl_multi_add_handle() */
+  /* assign this after fetch_multi_add_handle() */
   data->multi_easy = multi;
 
   sigpipe_init(&pipe_st);
@@ -811,7 +811,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 
   /* ignoring the return code is not nice, but atm we cannot really handle
      a failure here, room for future improvement! */
-  (void)curl_multi_remove_handle(multi, data);
+  (void)fetch_multi_remove_handle(multi, data);
 
   sigpipe_restore(&pipe_st);
 
@@ -821,20 +821,20 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 
 
 /*
- * curl_easy_perform() is the external interface that performs a blocking
+ * fetch_easy_perform() is the external interface that performs a blocking
  * transfer as previously setup.
  */
-CURLcode curl_easy_perform(CURL *data)
+FETCHcode fetch_easy_perform(FETCH *data)
 {
   return easy_perform(data, FALSE);
 }
 
 #ifdef DEBUGBUILD
 /*
- * curl_easy_perform_ev() is the external interface that performs a blocking
+ * fetch_easy_perform_ev() is the external interface that performs a blocking
  * transfer using the event-based API internally.
  */
-CURLcode curl_easy_perform_ev(struct Curl_easy *data)
+FETCHcode fetch_easy_perform_ev(struct Curl_easy *data)
 {
   return easy_perform(data, TRUE);
 }
@@ -842,10 +842,10 @@ CURLcode curl_easy_perform_ev(struct Curl_easy *data)
 #endif
 
 /*
- * curl_easy_cleanup() is the external interface to cleaning/freeing the given
+ * fetch_easy_cleanup() is the external interface to cleaning/freeing the given
  * easy handle.
  */
-void curl_easy_cleanup(CURL *ptr)
+void fetch_easy_cleanup(FETCH *ptr)
 {
   struct Curl_easy *data = ptr;
   if(GOOD_EASY_HANDLE(data)) {
@@ -857,15 +857,15 @@ void curl_easy_cleanup(CURL *ptr)
 }
 
 /*
- * curl_easy_getinfo() is an external interface that allows an app to retrieve
+ * fetch_easy_getinfo() is an external interface that allows an app to retrieve
  * information from a performed transfer and similar.
  */
-#undef curl_easy_getinfo
-CURLcode curl_easy_getinfo(CURL *data, CURLINFO info, ...)
+#undef fetch_easy_getinfo
+FETCHcode fetch_easy_getinfo(FETCH *data, FETCHINFO info, ...)
 {
   va_list arg;
   void *paramp;
-  CURLcode result;
+  FETCHcode result;
 
   va_start(arg, info);
   paramp = va_arg(arg, void *);
@@ -876,9 +876,9 @@ CURLcode curl_easy_getinfo(CURL *data, CURLINFO info, ...)
   return result;
 }
 
-static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
+static FETCHcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   enum dupstring i;
   enum dupblob j;
 
@@ -890,7 +890,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
   memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
-  memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
+  memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct fetch_blob *));
 
   /* duplicate all strings */
   for(i = (enum dupstring)0; i < STRING_LASTZEROTERMINATED; i++) {
@@ -912,11 +912,11 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
     if(src->set.postfieldsize == -1)
       dst->set.str[i] = strdup(src->set.str[i]);
     else
-      /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
+      /* postfieldsize is fetch_off_t, Curl_memdup() takes a size_t ... */
       dst->set.str[i] = Curl_memdup(src->set.str[i],
-                                    curlx_sotouz(src->set.postfieldsize));
+                                    fetchx_sotouz(src->set.postfieldsize));
     if(!dst->set.str[i])
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
     /* point to the new copy */
     dst->set.postfields = dst->set.str[i];
   }
@@ -931,15 +931,15 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 }
 
 /*
- * curl_easy_duphandle() is an external interface to allow duplication of a
+ * fetch_easy_duphandle() is an external interface to allow duplication of a
  * given input easy handle. The returned handle will be a new working handle
  * with all options set exactly as the input source handle.
  */
-CURL *curl_easy_duphandle(CURL *d)
+FETCH *fetch_easy_duphandle(FETCH *d)
 {
   struct Curl_easy *data = d;
-  struct Curl_easy *outcurl = calloc(1, sizeof(struct Curl_easy));
-  if(!outcurl)
+  struct Curl_easy *outfetch = calloc(1, sizeof(struct Curl_easy));
+  if(!outfetch)
     goto fail;
 
   /*
@@ -947,144 +947,144 @@ CURL *curl_easy_duphandle(CURL *d)
    * get setup on-demand in the code, as that would probably decrease
    * the likeliness of us forgetting to init a buffer here in the future.
    */
-  outcurl->set.buffer_size = data->set.buffer_size;
+  outfetch->set.buffer_size = data->set.buffer_size;
 
   /* copy all userdefined values */
-  if(dupset(outcurl, data))
+  if(dupset(outfetch, data))
     goto fail;
 
-  Curl_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
-  Curl_netrc_init(&outcurl->state.netrc);
+  Curl_dyn_init(&outfetch->state.headerb, FETCH_MAX_HTTP_HEADER);
+  Curl_netrc_init(&outfetch->state.netrc);
 
   /* the connection pool is setup on demand */
-  outcurl->state.lastconnect_id = -1;
-  outcurl->state.recent_conn_id = -1;
-  outcurl->id = -1;
+  outfetch->state.lastconnect_id = -1;
+  outfetch->state.recent_conn_id = -1;
+  outfetch->id = -1;
 
-  outcurl->progress.flags    = data->progress.flags;
-  outcurl->progress.callback = data->progress.callback;
+  outfetch->progress.flags    = data->progress.flags;
+  outfetch->progress.callback = data->progress.callback;
 
-#ifndef CURL_DISABLE_COOKIES
-  outcurl->state.cookielist = NULL;
+#ifndef FETCH_DISABLE_COOKIES
+  outfetch->state.cookielist = NULL;
   if(data->cookies && data->state.cookie_engine) {
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
-    outcurl->cookies = Curl_cookie_init(outcurl, NULL, outcurl->cookies,
+    outfetch->cookies = Curl_cookie_init(outfetch, NULL, outfetch->cookies,
                                         data->set.cookiesession);
-    if(!outcurl->cookies)
+    if(!outfetch->cookies)
       goto fail;
   }
 
   if(data->state.cookielist) {
-    outcurl->state.cookielist = Curl_slist_duplicate(data->state.cookielist);
-    if(!outcurl->state.cookielist)
+    outfetch->state.cookielist = Curl_slist_duplicate(data->state.cookielist);
+    if(!outfetch->state.cookielist)
       goto fail;
   }
 #endif
 
   if(data->state.url) {
-    outcurl->state.url = strdup(data->state.url);
-    if(!outcurl->state.url)
+    outfetch->state.url = strdup(data->state.url);
+    if(!outfetch->state.url)
       goto fail;
-    outcurl->state.url_alloc = TRUE;
+    outfetch->state.url_alloc = TRUE;
   }
 
   if(data->state.referer) {
-    outcurl->state.referer = strdup(data->state.referer);
-    if(!outcurl->state.referer)
+    outfetch->state.referer = strdup(data->state.referer);
+    if(!outfetch->state.referer)
       goto fail;
-    outcurl->state.referer_alloc = TRUE;
+    outfetch->state.referer_alloc = TRUE;
   }
 
   /* Reinitialize an SSL engine for the new handle
    * note: the engine name has already been copied by dupset */
-  if(outcurl->set.str[STRING_SSL_ENGINE]) {
-    if(Curl_ssl_set_engine(outcurl, outcurl->set.str[STRING_SSL_ENGINE]))
+  if(outfetch->set.str[STRING_SSL_ENGINE]) {
+    if(Curl_ssl_set_engine(outfetch, outfetch->set.str[STRING_SSL_ENGINE]))
       goto fail;
   }
 
-#ifndef CURL_DISABLE_ALTSVC
+#ifndef FETCH_DISABLE_ALTSVC
   if(data->asi) {
-    outcurl->asi = Curl_altsvc_init();
-    if(!outcurl->asi)
+    outfetch->asi = Curl_altsvc_init();
+    if(!outfetch->asi)
       goto fail;
-    if(outcurl->set.str[STRING_ALTSVC])
-      (void)Curl_altsvc_load(outcurl->asi, outcurl->set.str[STRING_ALTSVC]);
+    if(outfetch->set.str[STRING_ALTSVC])
+      (void)Curl_altsvc_load(outfetch->asi, outfetch->set.str[STRING_ALTSVC]);
   }
 #endif
-#ifndef CURL_DISABLE_HSTS
+#ifndef FETCH_DISABLE_HSTS
   if(data->hsts) {
-    outcurl->hsts = Curl_hsts_init();
-    if(!outcurl->hsts)
+    outfetch->hsts = Curl_hsts_init();
+    if(!outfetch->hsts)
       goto fail;
-    if(outcurl->set.str[STRING_HSTS])
-      (void)Curl_hsts_loadfile(outcurl,
-                               outcurl->hsts, outcurl->set.str[STRING_HSTS]);
-    (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
+    if(outfetch->set.str[STRING_HSTS])
+      (void)Curl_hsts_loadfile(outfetch,
+                               outfetch->hsts, outfetch->set.str[STRING_HSTS]);
+    (void)Curl_hsts_loadcb(outfetch, outfetch->hsts);
   }
 #endif
 
-#ifdef CURLRES_ASYNCH
+#ifdef FETCHRES_ASYNCH
   /* Clone the resolver handle, if present, for the new handle */
-  if(Curl_resolver_duphandle(outcurl,
-                             &outcurl->state.async.resolver,
+  if(Curl_resolver_duphandle(outfetch,
+                             &outfetch->state.async.resolver,
                              data->state.async.resolver))
     goto fail;
 #endif
 
 #ifdef USE_ARES
   {
-    CURLcode rc;
+    FETCHcode rc;
 
-    rc = Curl_set_dns_servers(outcurl, data->set.str[STRING_DNS_SERVERS]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
+    rc = Curl_set_dns_servers(outfetch, data->set.str[STRING_DNS_SERVERS]);
+    if(rc && rc != FETCHE_NOT_BUILT_IN)
       goto fail;
 
-    rc = Curl_set_dns_interface(outcurl, data->set.str[STRING_DNS_INTERFACE]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
+    rc = Curl_set_dns_interface(outfetch, data->set.str[STRING_DNS_INTERFACE]);
+    if(rc && rc != FETCHE_NOT_BUILT_IN)
       goto fail;
 
-    rc = Curl_set_dns_local_ip4(outcurl, data->set.str[STRING_DNS_LOCAL_IP4]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
+    rc = Curl_set_dns_local_ip4(outfetch, data->set.str[STRING_DNS_LOCAL_IP4]);
+    if(rc && rc != FETCHE_NOT_BUILT_IN)
       goto fail;
 
-    rc = Curl_set_dns_local_ip6(outcurl, data->set.str[STRING_DNS_LOCAL_IP6]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
+    rc = Curl_set_dns_local_ip6(outfetch, data->set.str[STRING_DNS_LOCAL_IP6]);
+    if(rc && rc != FETCHE_NOT_BUILT_IN)
       goto fail;
   }
 #endif /* USE_ARES */
-#ifndef CURL_DISABLE_HTTP
-  Curl_llist_init(&outcurl->state.httphdrs, NULL);
+#ifndef FETCH_DISABLE_HTTP
+  Curl_llist_init(&outfetch->state.httphdrs, NULL);
 #endif
-  Curl_initinfo(outcurl);
+  Curl_initinfo(outfetch);
 
-  outcurl->magic = CURLEASY_MAGIC_NUMBER;
+  outfetch->magic = FETCHEASY_MAGIC_NUMBER;
 
   /* we reach this point and thus we are OK */
 
-  return outcurl;
+  return outfetch;
 
 fail:
 
-  if(outcurl) {
-#ifndef CURL_DISABLE_COOKIES
-    free(outcurl->cookies);
+  if(outfetch) {
+#ifndef FETCH_DISABLE_COOKIES
+    free(outfetch->cookies);
 #endif
-    Curl_dyn_free(&outcurl->state.headerb);
-    Curl_altsvc_cleanup(&outcurl->asi);
-    Curl_hsts_cleanup(&outcurl->hsts);
-    Curl_freeset(outcurl);
-    free(outcurl);
+    Curl_dyn_free(&outfetch->state.headerb);
+    Curl_altsvc_cleanup(&outfetch->asi);
+    Curl_hsts_cleanup(&outfetch->hsts);
+    Curl_freeset(outfetch);
+    free(outfetch);
   }
 
   return NULL;
 }
 
 /*
- * curl_easy_reset() is an external interface that allows an app to re-
+ * fetch_easy_reset() is an external interface that allows an app to re-
  * initialize a session handle to the default values.
  */
-void curl_easy_reset(CURL *d)
+void fetch_easy_reset(FETCH *d)
 {
   struct Curl_easy *data = d;
   Curl_req_hard_reset(&data->req, data);
@@ -1108,28 +1108,28 @@ void curl_easy_reset(CURL *d)
   memset(&data->state.authhost, 0, sizeof(struct auth));
   memset(&data->state.authproxy, 0, sizeof(struct auth));
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
+#if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
 }
 
 /*
- * curl_easy_pause() allows an application to pause or unpause a specific
+ * fetch_easy_pause() allows an application to pause or unpause a specific
  * transfer and direction. This function sets the full new state for the
  * current connection this easy handle operates on.
  *
  * NOTE: if you have the receiving paused and you call this function to remove
  * the pausing, you may get your write callback called at this point.
  *
- * Action is a bitmask consisting of CURLPAUSE_* bits in curl/curl.h
+ * Action is a bitmask consisting of FETCHPAUSE_* bits in fetch/fetch.h
  *
  * NOTE: This is one of few API functions that are allowed to be called from
  * within a callback.
  */
-CURLcode curl_easy_pause(CURL *d, int action)
+FETCHcode fetch_easy_pause(FETCH *d, int action)
 {
   struct SingleRequest *k;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   int oldstate;
   int newstate;
   bool recursive = FALSE;
@@ -1138,7 +1138,7 @@ CURLcode curl_easy_pause(CURL *d, int action)
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, do not continue */
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   if(Curl_is_in_callback(data))
     recursive = TRUE;
@@ -1147,8 +1147,8 @@ CURLcode curl_easy_pause(CURL *d, int action)
 
   /* first switch off both pause bits then set the new pause bits */
   newstate = (k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) |
-    ((action & CURLPAUSE_RECV) ? KEEP_RECV_PAUSE : 0) |
-    ((action & CURLPAUSE_SEND) ? KEEP_SEND_PAUSE : 0);
+    ((action & FETCHPAUSE_RECV) ? KEEP_RECV_PAUSE : 0) |
+    ((action & FETCHPAUSE_SEND) ? KEEP_SEND_PAUSE : 0);
 
   keep_changed = ((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) != oldstate);
   not_all_paused = (newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
@@ -1171,13 +1171,13 @@ CURLcode curl_easy_pause(CURL *d, int action)
     data->state.keeps_speed.tv_sec = 0;
     /* Simulate socket events on next run for unpaused directions */
     if(!(newstate & KEEP_SEND_PAUSE))
-      data->state.select_bits |= CURL_CSELECT_OUT;
+      data->state.select_bits |= FETCH_CSELECT_OUT;
     if(!(newstate & KEEP_RECV_PAUSE))
-      data->state.select_bits |= CURL_CSELECT_IN;
+      data->state.select_bits |= FETCH_CSELECT_IN;
     /* On changes, tell application to update its timers. */
     if(keep_changed && data->multi) {
       if(Curl_update_timer(data->multi)) {
-        result = CURLE_ABORTED_BY_CALLBACK;
+        result = FETCHE_ABORTED_BY_CALLBACK;
         goto out;
       }
     }
@@ -1209,44 +1209,44 @@ out:
 }
 
 
-static CURLcode easy_connection(struct Curl_easy *data,
+static FETCHcode easy_connection(struct Curl_easy *data,
                                 struct connectdata **connp)
 {
-  curl_socket_t sfd;
+  fetch_socket_t sfd;
 
   if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-  /* only allow these to be called on handles with CURLOPT_CONNECT_ONLY */
+  /* only allow these to be called on handles with FETCHOPT_CONNECT_ONLY */
   if(!data->set.connect_only) {
     failf(data, "CONNECT_ONLY is required");
-    return CURLE_UNSUPPORTED_PROTOCOL;
+    return FETCHE_UNSUPPORTED_PROTOCOL;
   }
 
   sfd = Curl_getconnectinfo(data, connp);
 
-  if(sfd == CURL_SOCKET_BAD) {
+  if(sfd == FETCH_SOCKET_BAD) {
     failf(data, "Failed to get recent socket");
-    return CURLE_UNSUPPORTED_PROTOCOL;
+    return FETCHE_UNSUPPORTED_PROTOCOL;
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
  * Receives data from the connected socket. Use after successful
- * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
- * Returns CURLE_OK on success, error code on error.
+ * fetch_easy_perform() with FETCHOPT_CONNECT_ONLY option.
+ * Returns FETCHE_OK on success, error code on error.
  */
-CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
+FETCHcode fetch_easy_recv(FETCH *d, void *buffer, size_t buflen, size_t *n)
 {
-  CURLcode result;
+  FETCHcode result;
   ssize_t n1;
   struct connectdata *c;
   struct Curl_easy *data = d;
 
   if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
+    return FETCHE_RECURSIVE_API_CALL;
 
   result = easy_connection(data, &c);
   if(result)
@@ -1264,13 +1264,13 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
     return result;
 
   *n = (size_t)n1;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-#ifndef CURL_DISABLE_WEBSOCKETS
-CURLcode Curl_connect_only_attach(struct Curl_easy *data)
+#ifndef FETCH_DISABLE_WEBSOCKETS
+FETCHcode Curl_connect_only_attach(struct Curl_easy *data)
 {
-  CURLcode result;
+  FETCHcode result;
   struct connectdata *c = NULL;
 
   result = easy_connection(data, &c);
@@ -1282,19 +1282,19 @@ CURLcode Curl_connect_only_attach(struct Curl_easy *data)
        needs to be reattached */
     Curl_attach_connection(data, c);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
-#endif /* !CURL_DISABLE_WEBSOCKETS */
+#endif /* !FETCH_DISABLE_WEBSOCKETS */
 
 /*
  * Sends data over the connected socket.
  *
- * This is the private internal version of curl_easy_send()
+ * This is the private internal version of fetch_easy_send()
  */
-CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
+FETCHcode Curl_senddata(struct Curl_easy *data, const void *buffer,
                        size_t buflen, size_t *n)
 {
-  CURLcode result;
+  FETCHcode result;
   struct connectdata *c = NULL;
   SIGPIPE_VARIABLE(pipe_st);
 
@@ -1312,22 +1312,22 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
   result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, FALSE, n);
   sigpipe_restore(&pipe_st);
 
-  if(result && result != CURLE_AGAIN)
-    return CURLE_SEND_ERROR;
+  if(result && result != FETCHE_AGAIN)
+    return FETCHE_SEND_ERROR;
   return result;
 }
 
 /*
  * Sends data over the connected socket. Use after successful
- * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ * fetch_easy_perform() with FETCHOPT_CONNECT_ONLY option.
  */
-CURLcode curl_easy_send(CURL *d, const void *buffer, size_t buflen, size_t *n)
+FETCHcode fetch_easy_send(FETCH *d, const void *buffer, size_t buflen, size_t *n)
 {
   size_t written = 0;
-  CURLcode result;
+  FETCHcode result;
   struct Curl_easy *data = d;
   if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
+    return FETCHE_RECURSIVE_API_CALL;
 
   result = Curl_senddata(data, buffer, buflen, &written);
   *n = written;
@@ -1337,28 +1337,28 @@ CURLcode curl_easy_send(CURL *d, const void *buffer, size_t buflen, size_t *n)
 /*
  * Performs connection upkeep for the given session handle.
  */
-CURLcode curl_easy_upkeep(CURL *d)
+FETCHcode fetch_easy_upkeep(FETCH *d)
 {
   struct Curl_easy *data = d;
   /* Verify that we got an easy handle we can work with. */
   if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
+    return FETCHE_RECURSIVE_API_CALL;
 
   /* Use the common function to keep connections alive. */
   return Curl_cpool_upkeep(data);
 }
 
-CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
+FETCHcode fetch_easy_ssls_import(FETCH *d, const char *session_key,
                                const unsigned char *shmac, size_t shmac_len,
                                const unsigned char *sdata, size_t sdata_len)
 {
 #ifdef USE_SSLS_EXPORT
   struct Curl_easy *data = d;
   if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   return Curl_ssl_session_import(data, session_key,
                                  shmac, shmac_len, sdata, sdata_len);
 #else
@@ -1368,23 +1368,23 @@ CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
   (void)shmac_len;
   (void)sdata;
   (void)sdata_len;
-  return CURLE_NOT_BUILT_IN;
+  return FETCHE_NOT_BUILT_IN;
 #endif
 }
 
-CURLcode curl_easy_ssls_export(CURL *d,
-                               curl_ssls_export_cb *export_fn,
+FETCHcode fetch_easy_ssls_export(FETCH *d,
+                               fetch_ssls_export_cb *export_fn,
                                void *userptr)
 {
 #ifdef USE_SSLS_EXPORT
   struct Curl_easy *data = d;
   if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   return Curl_ssl_session_export(data, export_fn, userptr);
 #else
   (void)d;
   (void)export_fn;
   (void)userptr;
-  return CURLE_NOT_BUILT_IN;
+  return FETCHE_NOT_BUILT_IN;
 #endif
 }

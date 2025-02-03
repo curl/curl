@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SOCKS_H
-#define HEADER_CURL_SOCKS_H
+#ifndef HEADER_FETCH_SOCKS_H
+#define HEADER_FETCH_SOCKS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,15 +20,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifdef CURL_DISABLE_PROXY
-#define Curl_SOCKS4(a,b,c,d,e) CURLE_NOT_BUILT_IN
-#define Curl_SOCKS5(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
+#ifdef FETCH_DISABLE_PROXY
+#define Curl_SOCKS4(a,b,c,d,e) FETCHE_NOT_BUILT_IN
+#define Curl_SOCKS5(a,b,c,d,e,f) FETCHE_NOT_BUILT_IN
 #define Curl_SOCKS_getsock(x,y,z) 0
 #else
 /*
@@ -47,15 +47,15 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
 /*
  * This function handles the SOCKS5 GSS-API negotiation and initialization
  */
-CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
+FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                       struct Curl_easy *data);
 #endif
 
-CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
+FETCHcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
                                           struct Curl_easy *data);
 
 extern struct Curl_cftype Curl_cft_socks_proxy;
 
-#endif /* CURL_DISABLE_PROXY */
+#endif /* FETCH_DISABLE_PROXY */
 
-#endif  /* HEADER_CURL_SOCKS_H */
+#endif  /* HEADER_FETCH_SOCKS_H */

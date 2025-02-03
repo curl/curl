@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CONFIG_WIN32_H
-#define HEADER_CURL_CONFIG_WIN32_H
+#ifndef HEADER_FETCH_CONFIG_WIN32_H
+#define HEADER_FETCH_CONFIG_WIN32_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -279,8 +279,8 @@
 #  define SIZEOF_SIZE_T 4
 #endif
 
-/* Define to the size of `curl_off_t', as computed by sizeof. */
-#define SIZEOF_CURL_OFF_T 8
+/* Define to the size of `fetch_off_t', as computed by sizeof. */
+#define SIZEOF_FETCH_OFF_T 8
 
 /* ---------------------------------------------------------------- */
 /*                        COMPILER SPECIFIC                         */
@@ -448,21 +448,21 @@ Vista
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#ifdef CURL_HAS_NOVELL_LDAPSDK
+#ifdef FETCH_HAS_NOVELL_LDAPSDK
 #undef USE_WIN32_LDAP
 #define HAVE_LDAP_SSL_H 1
 #define HAVE_LDAP_URL_PARSE 1
-#elif defined(CURL_HAS_OPENLDAP_LDAPSDK)
+#elif defined(FETCH_HAS_OPENLDAP_LDAPSDK)
 #undef USE_WIN32_LDAP
 #define HAVE_LDAP_URL_PARSE 1
-#elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#elif !defined(FETCH_WINDOWS_UWP) && !defined(UNDER_CE)
 #undef HAVE_LDAP_URL_PARSE
 #define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1
 #endif
 
 /* Define to use the Windows crypto library. */
-#ifndef CURL_WINDOWS_UWP
+#ifndef FETCH_WINDOWS_UWP
 #define USE_WIN32_CRYPTO
 #endif
 
@@ -476,29 +476,29 @@ Vista
 /* ---------------------------------------------------------------- */
 
 /* Define cpu-machine-OS */
-#ifndef CURL_OS
+#ifndef FETCH_OS
 #  ifdef UNDER_CE
 #    ifdef _M_ARM
-#    define CURL_OS "arm-pc-win32ce"
+#    define FETCH_OS "arm-pc-win32ce"
 #    else
-#    define CURL_OS "i386-pc-win32ce"
+#    define FETCH_OS "i386-pc-win32ce"
 #    endif
 #  else /* !UNDER_CE */
 #    if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
-#    define CURL_OS "i386-pc-win32"
+#    define FETCH_OS "i386-pc-win32"
 #    elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (VS2005+ or gcc) */
-#    define CURL_OS "x86_64-pc-win32"
+#    define FETCH_OS "x86_64-pc-win32"
 #    elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
-#    define CURL_OS "ia64-pc-win32"
+#    define FETCH_OS "ia64-pc-win32"
 #    elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 */
-#    define CURL_OS "thumbv7a-pc-win32"
+#    define FETCH_OS "thumbv7a-pc-win32"
 #    elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
-#    define CURL_OS "aarch64-pc-win32"
+#    define FETCH_OS "aarch64-pc-win32"
 #    else
-#    define CURL_OS "unknown-pc-win32"
+#    define FETCH_OS "unknown-pc-win32"
 #    endif
 #  endif /* UNDER_CE */
-#endif /* !CURL_OS */
+#endif /* !FETCH_OS */
 
 /* ---------------------------------------------------------------- */
 /*                            Windows CE                            */
@@ -514,9 +514,9 @@ Vista
 #define _UNICODE
 #endif
 
-#define CURL_DISABLE_FILE 1
-#define CURL_DISABLE_TELNET 1
-#define CURL_DISABLE_LDAP 1
+#define FETCH_DISABLE_FILE 1
+#define FETCH_DISABLE_TELNET 1
+#define FETCH_DISABLE_LDAP 1
 
 #define ENOSPC 1
 #define ENOMEM 2
@@ -526,4 +526,4 @@ extern int stat(const char *path, struct stat *buffer);
 
 #endif /* UNDER_CE */
 
-#endif /* HEADER_CURL_CONFIG_WIN32_H */
+#endif /* HEADER_FETCH_CONFIG_WIN32_H */

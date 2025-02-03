@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VAUTH_H
-#define HEADER_CURL_VAUTH_H
+#ifndef HEADER_FETCH_VAUTH_H
+#define HEADER_FETCH_VAUTH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,17 +20,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "bufref.h"
 
 struct Curl_easy;
 
-#if !defined(CURL_DISABLE_DIGEST_AUTH)
+#if !defined(FETCH_DISABLE_DIGEST_AUTH)
 struct digestdata;
 #endif
 
@@ -73,7 +73,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
 bool Curl_auth_user_contains_domain(const char *user);
 
 /* This is used to generate a PLAIN cleartext message */
-CURLcode Curl_auth_create_plain_message(const char *authzid,
+FETCHcode Curl_auth_create_plain_message(const char *authzid,
                                         const char *authcid,
                                         const char *passwd,
                                         struct bufref *out);
@@ -84,9 +84,9 @@ void Curl_auth_create_login_message(const char *value, struct bufref *out);
 /* This is used to generate an EXTERNAL cleartext message */
 void Curl_auth_create_external_message(const char *user, struct bufref *out);
 
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#ifndef FETCH_DISABLE_DIGEST_AUTH
 /* This is used to generate a CRAM-MD5 response message */
-CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
+FETCHcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
                                            const char *userp,
                                            const char *passwdp,
                                            struct bufref *out);
@@ -95,7 +95,7 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
 bool Curl_auth_is_digest_supported(void);
 
 /* This is used to generate a base64 encoded DIGEST-MD5 response message */
-CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const struct bufref *chlg,
                                              const char *userp,
                                              const char *passwdp,
@@ -103,11 +103,11 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              struct bufref *out);
 
 /* This is used to decode an HTTP DIGEST challenge message */
-CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
+FETCHcode Curl_auth_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest);
 
 /* This is used to generate an HTTP DIGEST response message */
-CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const unsigned char *request,
@@ -117,7 +117,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
 /* This is used to clean up the digest specific data */
 void Curl_auth_digest_cleanup(struct digestdata *digest);
-#endif /* !CURL_DISABLE_DIGEST_AUTH */
+#endif /* !FETCH_DISABLE_DIGEST_AUTH */
 
 #ifdef USE_GSASL
 /* This is used to evaluate if MECH is supported by gsasl */
@@ -125,13 +125,13 @@ bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
                                   const char *mech,
                                   struct gsasldata *gsasl);
 /* This is used to start a gsasl method */
-CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
+FETCHcode Curl_auth_gsasl_start(struct Curl_easy *data,
                                const char *userp,
                                const char *passwdp,
                                struct gsasldata *gsasl);
 
 /* This is used to process and generate a new SASL token */
-CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
+FETCHcode Curl_auth_gsasl_token(struct Curl_easy *data,
                                const struct bufref *chlg,
                                struct gsasldata *gsasl,
                                struct bufref *out);
@@ -145,7 +145,7 @@ void Curl_auth_gsasl_cleanup(struct gsasldata *digest);
 bool Curl_auth_is_ntlm_supported(void);
 
 /* This is used to generate a base64 encoded NTLM type-1 message */
-CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
                                              const char *service,
@@ -154,12 +154,12 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              struct bufref *out);
 
 /* This is used to decode a base64 encoded NTLM type-2 message */
-CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
+FETCHcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
                                              const struct bufref *type2,
                                              struct ntlmdata *ntlm);
 
 /* This is used to generate a base64 encoded NTLM type-3 message */
-CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
@@ -170,14 +170,14 @@ void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm);
 #endif /* USE_NTLM */
 
 /* This is used to generate a base64 encoded OAuth 2.0 message */
-CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
+FETCHcode Curl_auth_create_oauth_bearer_message(const char *user,
                                                const char *host,
                                                const long port,
                                                const char *bearer,
                                                struct bufref *out);
 
 /* This is used to generate a base64 encoded XOAuth 2.0 message */
-CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
+FETCHcode Curl_auth_create_xoauth_bearer_message(const char *user,
                                                 const char *bearer,
                                                 struct bufref *out);
 
@@ -187,7 +187,7 @@ bool Curl_auth_is_gssapi_supported(void);
 
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token
    message */
-CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
@@ -199,7 +199,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) security
    token message */
-CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
+FETCHcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
                                                   const char *authzid,
                                                   const struct bufref *chlg,
                                                   struct kerberos5data *krb5,
@@ -215,7 +215,7 @@ bool Curl_auth_is_spnego_supported(void);
 
 /* This is used to decode a base64 encoded SPNEGO (Negotiate) challenge
    message */
-CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
+FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                          const char *user,
                                          const char *password,
                                          const char *service,
@@ -225,7 +225,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
 /* This is used to generate a base64 encoded SPNEGO (Negotiate) response
    message */
-CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
+FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
                                          char **outptr, size_t *outlen);
 
 /* This is used to clean up the SPNEGO specific data */
@@ -233,4 +233,4 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego);
 
 #endif /* USE_SPNEGO */
 
-#endif /* HEADER_CURL_VAUTH_H */
+#endif /* HEADER_FETCH_VAUTH_H */

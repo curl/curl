@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
@@ -49,12 +49,12 @@
 
 #include <stddef.h>
 
-#include "curl_addrinfo.h"
+#include "fetch_addrinfo.h"
 #include "inet_pton.h"
 #include "warnless.h"
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /*
@@ -158,7 +158,7 @@ Curl_getaddrinfo_ex(const char *nodename,
     ca->ai_family    = ai->ai_family;
     ca->ai_socktype  = ai->ai_socktype;
     ca->ai_protocol  = ai->ai_protocol;
-    ca->ai_addrlen   = (curl_socklen_t)ss_size;
+    ca->ai_addrlen   = (fetch_socklen_t)ss_size;
     ca->ai_addr      = NULL;
     ca->ai_canonname = NULL;
     ca->ai_next      = NULL;
@@ -206,7 +206,7 @@ Curl_getaddrinfo_ex(const char *nodename,
 
   *result = cafirst;
 
-  /* This is not a CURLcode */
+  /* This is not a FETCHcode */
   return error;
 }
 #endif /* HAVE_GETADDRINFO */
@@ -224,14 +224,14 @@ Curl_getaddrinfo_ex(const char *nodename,
  * Curl_freeaddrinfo(). For each successful call to this function there
  * must be an associated call later to Curl_freeaddrinfo().
  *
- *   Curl_addrinfo defined in "lib/curl_addrinfo.h"
+ *   Curl_addrinfo defined in "lib/fetch_addrinfo.h"
  *
  *     struct Curl_addrinfo {
  *       int                   ai_flags;
  *       int                   ai_family;
  *       int                   ai_socktype;
  *       int                   ai_protocol;
- *       curl_socklen_t        ai_addrlen;   * Follow rfc3493 struct addrinfo *
+ *       fetch_socklen_t        ai_addrlen;   * Follow rfc3493 struct addrinfo *
  *       char                 *ai_canonname;
  *       struct sockaddr      *ai_addr;
  *       struct Curl_addrinfo *ai_next;
@@ -263,7 +263,7 @@ Curl_he2ai(const struct hostent *he, int port)
 #ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
 #endif
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   int i;
   char *curr;
 
@@ -286,7 +286,7 @@ Curl_he2ai(const struct hostent *he, int port)
     /* allocate memory to hold the struct, the address and the name */
     ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + namelen);
     if(!ai) {
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
       break;
     }
     /* put the address after the struct */
@@ -309,7 +309,7 @@ Curl_he2ai(const struct hostent *he, int port)
        the type must be ignored and conn->socktype be used instead! */
     ai->ai_socktype = SOCK_STREAM;
 
-    ai->ai_addrlen = (curl_socklen_t)ss_size;
+    ai->ai_addrlen = (fetch_socklen_t)ss_size;
 
     /* leave the rest of the struct filled with zero */
 
@@ -318,7 +318,7 @@ Curl_he2ai(const struct hostent *he, int port)
       addr = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr->sin_addr, curr, sizeof(struct in_addr));
-      addr->sin_family = (CURL_SA_FAMILY_T)(he->h_addrtype);
+      addr->sin_family = (FETCH_SA_FAMILY_T)(he->h_addrtype);
       addr->sin_port = htons((unsigned short)port);
       break;
 
@@ -327,7 +327,7 @@ Curl_he2ai(const struct hostent *he, int port)
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr6->sin6_addr, curr, sizeof(struct in6_addr));
-      addr6->sin6_family = (CURL_SA_FAMILY_T)(he->h_addrtype);
+      addr6->sin6_family = (FETCH_SA_FAMILY_T)(he->h_addrtype);
       addr6->sin6_port = htons((unsigned short)port);
       break;
 #endif
@@ -389,7 +389,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
   memcpy(ai->ai_canonname, hostname, namelen);
   ai->ai_family = af;
   ai->ai_socktype = SOCK_STREAM;
-  ai->ai_addrlen = (curl_socklen_t)addrsize;
+  ai->ai_addrlen = (fetch_socklen_t)addrsize;
   /* leave the rest of the struct filled with zero */
 
   switch(af) {
@@ -400,7 +400,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 #ifdef __MINGW32__
     addr->sin_family = (short)af;
 #else
-    addr->sin_family = (CURL_SA_FAMILY_T)af;
+    addr->sin_family = (FETCH_SA_FAMILY_T)af;
 #endif
     addr->sin_port = htons((unsigned short)port);
     break;
@@ -413,7 +413,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 #ifdef __MINGW32__
     addr6->sin6_family = (short)af;
 #else
-    addr6->sin6_family = (CURL_SA_FAMILY_T)af;
+    addr6->sin6_family = (FETCH_SA_FAMILY_T)af;
 #endif
     addr6->sin6_port = htons((unsigned short)port);
     break;
@@ -477,7 +477,7 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
 
   ai->ai_family = AF_UNIX;
   ai->ai_socktype = SOCK_STREAM; /* assume reliable transport for HTTP */
-  ai->ai_addrlen = (curl_socklen_t)
+  ai->ai_addrlen = (fetch_socklen_t)
     ((offsetof(struct sockaddr_un, sun_path) + path_len) & 0x7FFFFFFF);
 
   /* Abstract Unix domain socket have NULL prefix instead of suffix */
@@ -490,10 +490,10 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
 }
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) &&  \
+#if defined(FETCHDEBUG) && defined(HAVE_GETADDRINFO) &&  \
   defined(HAVE_FREEADDRINFO)
 /*
- * curl_dbg_freeaddrinfo()
+ * fetch_dbg_freeaddrinfo()
  *
  * This is strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
@@ -501,10 +501,10 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
  */
 
 void
-curl_dbg_freeaddrinfo(struct addrinfo *freethis,
+fetch_dbg_freeaddrinfo(struct addrinfo *freethis,
                       int line, const char *source)
 {
-  curl_dbg_log("ADDR %s:%d freeaddrinfo(%p)\n",
+  fetch_dbg_log("ADDR %s:%d freeaddrinfo(%p)\n",
                source, line, (void *)freethis);
 #ifdef USE_LWIPSOCK
   lwip_freeaddrinfo(freethis);
@@ -512,12 +512,12 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
   (freeaddrinfo)(freethis);
 #endif
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
+#endif /* defined(FETCHDEBUG) && defined(HAVE_FREEADDRINFO) */
 
 
-#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
+#if defined(FETCHDEBUG) && defined(HAVE_GETADDRINFO)
 /*
- * curl_dbg_getaddrinfo()
+ * fetch_dbg_getaddrinfo()
  *
  * This is strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
@@ -525,7 +525,7 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
  */
 
 int
-curl_dbg_getaddrinfo(const char *hostname,
+fetch_dbg_getaddrinfo(const char *hostname,
                     const char *service,
                     const struct addrinfo *hints,
                     struct addrinfo **result,
@@ -538,14 +538,14 @@ curl_dbg_getaddrinfo(const char *hostname,
 #endif
   if(0 == res)
     /* success */
-    curl_dbg_log("ADDR %s:%d getaddrinfo() = %p\n",
+    fetch_dbg_log("ADDR %s:%d getaddrinfo() = %p\n",
                  source, line, (void *)*result);
   else
-    curl_dbg_log("ADDR %s:%d getaddrinfo() failed\n",
+    fetch_dbg_log("ADDR %s:%d getaddrinfo() failed\n",
                  source, line);
   return res;
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */
+#endif /* defined(FETCHDEBUG) && defined(HAVE_GETADDRINFO) */
 
 #if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
 /*

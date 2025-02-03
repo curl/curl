@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SSLUSE_H
-#define HEADER_CURL_SSLUSE_H
+#ifndef HEADER_FETCH_SSLUSE_H
+#define HEADER_FETCH_SSLUSE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_OPENSSL
 /*
@@ -51,14 +51,14 @@
 
 struct ssl_peer;
 
-/* Struct to hold a curl OpenSSL instance */
+/* Struct to hold a fetch OpenSSL instance */
 struct ossl_ctx {
   /* these ones requires specific SSL-types */
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
   X509*    server_cert;
   BIO_METHOD *bio_method;
-  CURLcode io_result;       /* result of last BIO cfilter operation */
+  FETCHcode io_result;       /* result of last BIO cfilter operation */
 #ifndef HAVE_KEYLOG_CALLBACK
   /* Set to true once a valid keylog entry has been created to avoid dupes.
      This is a bool and not a bitfield because it is passed by address. */
@@ -70,13 +70,13 @@ struct ossl_ctx {
 
 size_t Curl_ossl_version(char *buffer, size_t size);
 
-typedef CURLcode Curl_ossl_ctx_setup_cb(struct Curl_cfilter *cf,
+typedef FETCHcode Curl_ossl_ctx_setup_cb(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         void *user_data);
 
 typedef int Curl_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid);
 
-CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
+FETCHcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
@@ -97,18 +97,18 @@ extern const struct Curl_ssl Curl_ssl_openssl;
  * easy handle `data`. Will allow reuse of a shared cache if suitable
  * and configured.
  */
-CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+FETCHcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    SSL_CTX *ssl_ctx);
 
-CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
+FETCHcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  SSL_CTX *ssl_ctx);
 
 /*
  * Add a new session to the cache. Takes ownership of the session.
  */
-CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
+FETCHcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const char *ssl_peer_key,
                                SSL_SESSION *ssl_sessionid,
@@ -120,10 +120,10 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
  * ssl config verifypeer or -host is set. Otherwise all this is for
  * informational purposes only!
  */
-CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
+FETCHcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct ossl_ctx *octx,
                                   struct ssl_peer *peer);
 
 #endif /* USE_OPENSSL */
-#endif /* HEADER_CURL_SSLUSE_H */
+#endif /* HEADER_FETCH_SSLUSE_H */

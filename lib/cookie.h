@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_COOKIE_H
-#define HEADER_CURL_COOKIE_H
+#ifndef HEADER_FETCH_COOKIE_H
+#define HEADER_FETCH_COOKIE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "llist.h"
 
@@ -37,7 +37,7 @@ struct Cookie {
   char *path;         /* path = <this> which is in Set-Cookie: */
   char *spath;        /* sanitized cookie path */
   char *domain;       /* domain = <this> */
-  curl_off_t expires; /* expires = <this> */
+  fetch_off_t expires; /* expires = <this> */
   unsigned int creationtime; /* time when the cookie was written */
   BIT(tailmatch);     /* tail-match the domain name */
   BIT(secure);        /* the 'secure' keyword was used */
@@ -59,7 +59,7 @@ struct Cookie {
 struct CookieInfo {
   /* linked lists of cookies we know of */
   struct Curl_llist cookielist[COOKIE_HASH_SIZE];
-  curl_off_t next_expiration; /* the next time at which expiration happens */
+  fetch_off_t next_expiration; /* the next time at which expiration happens */
   unsigned int numcookies;  /* number of cookies in the "jar" */
   unsigned int lastct;      /* last creation-time used in the jar */
   BIT(running);    /* state info, for cookie adding information */
@@ -94,12 +94,12 @@ struct CookieInfo {
 
 /** Limits for OUTGOING cookies **/
 
-/* Maximum size for an outgoing cookie line libcurl will use in an http
+/* Maximum size for an outgoing cookie line libfetch will use in an http
    request. This is the default maximum length used in some versions of Apache
    httpd. */
 #define MAX_COOKIE_HEADER_LEN 8190
 
-/* Maximum number of cookies libcurl will send in a single request, even if
+/* Maximum number of cookies libfetch will send in a single request, even if
    there might be more cookies that match. One reason to cap the number is to
    keep the maximum HTTP request within the maximum allowed size. */
 #define MAX_COOKIE_SEND_AMOUNT 150
@@ -123,7 +123,7 @@ int Curl_cookie_getlist(struct Curl_easy *data,
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
 
-#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
+#if defined(FETCH_DISABLE_HTTP) || defined(FETCH_DISABLE_COOKIES)
 #define Curl_cookie_list(x) NULL
 #define Curl_cookie_loadfiles(x) Curl_nop_stmt
 #define Curl_cookie_init(x,y,z,w) NULL
@@ -135,8 +135,8 @@ void Curl_cookie_cleanup(struct CookieInfo *c);
 struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
                                     const char *file, struct CookieInfo *inc,
                                     bool newsession);
-struct curl_slist *Curl_cookie_list(struct Curl_easy *data);
+struct fetch_slist *Curl_cookie_list(struct Curl_easy *data);
 void Curl_cookie_loadfiles(struct Curl_easy *data);
 #endif
 
-#endif /* HEADER_CURL_COOKIE_H */
+#endif /* HEADER_FETCH_COOKIE_H */

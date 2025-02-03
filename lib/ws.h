@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_WS_H
-#define HEADER_CURL_WS_H
+#ifndef HEADER_FETCH_WS_H
+#define HEADER_FETCH_WS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
 
 /* a client-side WS frame decoder, parsing frame headers and
  * payload, keeping track of current position and stats */
@@ -37,9 +37,9 @@ enum ws_dec_state {
 
 struct ws_decoder {
   int frame_age;        /* zero */
-  int frame_flags;      /* See the CURLWS_* defines */
-  curl_off_t payload_offset;   /* the offset parsing is at */
-  curl_off_t payload_len;
+  int frame_flags;      /* See the FETCHWS_* defines */
+  fetch_off_t payload_offset;   /* the offset parsing is at */
+  fetch_off_t payload_len;
   unsigned char head[10];
   int head_len, head_total;
   enum ws_dec_state state;
@@ -48,8 +48,8 @@ struct ws_decoder {
 /* a client-side WS frame encoder, generating frame headers and
  * converting payloads, tracking remaining data in current frame */
 struct ws_encoder {
-  curl_off_t payload_len;  /* payload length of current frame */
-  curl_off_t payload_remain;  /* remaining payload of current */
+  fetch_off_t payload_len;  /* payload length of current frame */
+  fetch_off_t payload_remain;  /* remaining payload of current */
   unsigned int xori; /* xor index */
   unsigned char mask[4]; /* 32-bit mask for this connection */
   unsigned char firstbyte; /* first byte of frame we encode */
@@ -64,12 +64,12 @@ struct websocket {
   struct ws_encoder enc;  /* decode of we frames */
   struct bufq recvbuf;    /* raw data from the server */
   struct bufq sendbuf;    /* raw data to be sent to the server */
-  struct curl_ws_frame frame;  /* the current WS FRAME received */
+  struct fetch_ws_frame frame;  /* the current WS FRAME received */
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
 };
 
-CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
-CURLcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
+FETCHcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
+FETCHcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
 
 extern const struct Curl_handler Curl_handler_ws;
 #ifdef USE_SSL
@@ -78,8 +78,8 @@ extern const struct Curl_handler Curl_handler_wss;
 
 
 #else
-#define Curl_ws_request(x,y) CURLE_OK
+#define Curl_ws_request(x,y) FETCHE_OK
 #define Curl_ws_free(x) Curl_nop_stmt
 #endif
 
-#endif /* HEADER_CURL_WS_H */
+#endif /* HEADER_FETCH_WS_H */

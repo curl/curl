@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "multiif.h"
@@ -32,18 +32,18 @@
 
 void Curl_speedinit(struct Curl_easy *data)
 {
-  memset(&data->state.keeps_speed, 0, sizeof(struct curltime));
+  memset(&data->state.keeps_speed, 0, sizeof(struct fetchtime));
 }
 
 /*
  * @unittest: 1606
  */
-CURLcode Curl_speedcheck(struct Curl_easy *data,
-                         struct curltime now)
+FETCHcode Curl_speedcheck(struct Curl_easy *data,
+                         struct fetchtime now)
 {
   if(data->req.keepon & KEEP_RECV_PAUSE)
     /* A paused transfer is not qualified for speed checks */
-    return CURLE_OK;
+    return FETCHE_OK;
 
   if((data->progress.current_speed >= 0) && data->set.low_speed_time) {
     if(data->progress.current_speed < data->set.low_speed_limit) {
@@ -61,7 +61,7 @@ CURLcode Curl_speedcheck(struct Curl_easy *data,
                 "Less than %ld bytes/sec transferred the last %ld seconds",
                 data->set.low_speed_limit,
                 data->set.low_speed_time);
-          return CURLE_OPERATION_TIMEDOUT;
+          return FETCHE_OPERATION_TIMEDOUT;
         }
       }
     }
@@ -75,5 +75,5 @@ CURLcode Curl_speedcheck(struct Curl_easy *data,
        connection's speed get checked again in a second */
     Curl_expire(data, 1000, EXPIRE_SPEEDCHECK);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }

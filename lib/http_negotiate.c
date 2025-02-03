@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
+#if !defined(FETCH_DISABLE_HTTP) && defined(USE_SPNEGO)
 
 #include "urldata.h"
 #include "cfilters.h"
@@ -34,14 +34,14 @@
 #include "vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
-CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
+FETCHcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
                               bool proxy, const char *header)
 {
-  CURLcode result;
+  FETCHcode result;
   size_t len;
 
   /* Point to the username, password, service and host */
@@ -52,10 +52,10 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 
   /* Point to the correct struct with this */
   struct negotiatedata *neg_ctx;
-  curlnegotiate state;
+  fetchnegotiate state;
 
   if(proxy) {
-#ifndef CURL_DISABLE_PROXY
+#ifndef FETCH_DISABLE_PROXY
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
@@ -64,7 +64,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
     neg_ctx = &conn->proxyneg;
     state = conn->proxy_negotiate_state;
 #else
-    return CURLE_NOT_BUILT_IN;
+    return FETCHE_NOT_BUILT_IN;
 #endif
   }
   else {
@@ -100,7 +100,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
       /* The server rejected our authentication and has not supplied any more
       negotiation mechanisms */
       Curl_http_auth_cleanup_negotiate(conn);
-      return CURLE_LOGIN_DENIED;
+      return FETCHE_LOGIN_DENIED;
     }
   }
 
@@ -135,24 +135,24 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   return result;
 }
 
-CURLcode Curl_output_negotiate(struct Curl_easy *data,
+FETCHcode Curl_output_negotiate(struct Curl_easy *data,
                                struct connectdata *conn, bool proxy)
 {
   struct negotiatedata *neg_ctx;
   struct auth *authp;
-  curlnegotiate *state;
+  fetchnegotiate *state;
   char *base64 = NULL;
   size_t len = 0;
   char *userp;
-  CURLcode result;
+  FETCHcode result;
 
   if(proxy) {
-#ifndef CURL_DISABLE_PROXY
+#ifndef FETCH_DISABLE_PROXY
     neg_ctx = &conn->proxyneg;
     authp = &data->state.authproxy;
     state = &conn->proxy_negotiate_state;
 #else
-    return CURLE_NOT_BUILT_IN;
+    return FETCHE_NOT_BUILT_IN;
 #endif
   }
   else {
@@ -184,11 +184,11 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
     }
     if(!neg_ctx->context) {
       result = Curl_input_negotiate(data, conn, proxy, "Negotiate");
-      if(result == CURLE_AUTH_ERROR) {
+      if(result == FETCHE_AUTH_ERROR) {
         /* negotiate auth failed, let's continue unauthenticated to stay
-         * compatible with the behavior before curl-7_64_0-158-g6c6035532 */
+         * compatible with the behavior before fetch-7_64_0-158-g6c6035532 */
         authp->done = TRUE;
-        return CURLE_OK;
+        return FETCHE_OK;
       }
       else if(result)
         return result;
@@ -202,7 +202,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
                     base64);
 
     if(proxy) {
-#ifndef CURL_DISABLE_PROXY
+#ifndef FETCH_DISABLE_PROXY
       Curl_safefree(data->state.aptr.proxyuserpwd);
       data->state.aptr.proxyuserpwd = userp;
 #endif
@@ -215,7 +215,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
     free(base64);
 
     if(!userp) {
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
     }
 
     *state = GSS_AUTHSENT;
@@ -242,7 +242,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
   neg_ctx->havenegdata = FALSE;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 void Curl_http_auth_cleanup_negotiate(struct connectdata *conn)
@@ -254,4 +254,4 @@ void Curl_http_auth_cleanup_negotiate(struct connectdata *conn)
   Curl_auth_cleanup_spnego(&conn->proxyneg);
 }
 
-#endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */
+#endif /* !FETCH_DISABLE_HTTP && USE_SPNEGO */

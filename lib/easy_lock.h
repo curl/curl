@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_EASY_LOCK_H
-#define HEADER_CURL_EASY_LOCK_H
+#ifndef HEADER_FETCH_EASY_LOCK_H
+#define HEADER_FETCH_EASY_LOCK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #define GLOBAL_INIT_IS_THREADSAFE
 
@@ -36,11 +36,11 @@
 #endif
 #endif /* __MINGW32__ */
 
-#define curl_simple_lock SRWLOCK
-#define CURL_SIMPLE_LOCK_INIT SRWLOCK_INIT
+#define fetch_simple_lock SRWLOCK
+#define FETCH_SIMPLE_LOCK_INIT SRWLOCK_INIT
 
-#define curl_simple_lock_lock(m) AcquireSRWLockExclusive(m)
-#define curl_simple_lock_unlock(m) ReleaseSRWLockExclusive(m)
+#define fetch_simple_lock_lock(m) AcquireSRWLockExclusive(m)
+#define fetch_simple_lock_unlock(m) ReleaseSRWLockExclusive(m)
 
 #elif defined(HAVE_ATOMIC) && defined(HAVE_STDATOMIC_H)
 #include <stdatomic.h>
@@ -48,8 +48,8 @@
 #include <sched.h>
 #endif
 
-#define curl_simple_lock atomic_int
-#define CURL_SIMPLE_LOCK_INIT 0
+#define fetch_simple_lock atomic_int
+#define FETCH_SIMPLE_LOCK_INIT 0
 
 /* a clang-thing */
 #ifndef __has_builtin
@@ -69,7 +69,7 @@
 
 #endif
 
-static CURL_INLINE void curl_simple_lock_lock(curl_simple_lock *lock)
+static FETCH_INLINE void fetch_simple_lock_lock(fetch_simple_lock *lock)
 {
   for(;;) {
     if(!atomic_exchange_explicit(lock, true, memory_order_acquire))
@@ -90,7 +90,7 @@ static CURL_INLINE void curl_simple_lock_lock(curl_simple_lock *lock)
   }
 }
 
-static CURL_INLINE void curl_simple_lock_unlock(curl_simple_lock *lock)
+static FETCH_INLINE void fetch_simple_lock_unlock(fetch_simple_lock *lock)
 {
   atomic_store_explicit(lock, false, memory_order_release);
 }
@@ -99,10 +99,10 @@ static CURL_INLINE void curl_simple_lock_unlock(curl_simple_lock *lock)
 
 #include <pthread.h>
 
-#define curl_simple_lock pthread_mutex_t
-#define CURL_SIMPLE_LOCK_INIT PTHREAD_MUTEX_INITIALIZER
-#define curl_simple_lock_lock(m) pthread_mutex_lock(m)
-#define curl_simple_lock_unlock(m) pthread_mutex_unlock(m)
+#define fetch_simple_lock pthread_mutex_t
+#define FETCH_SIMPLE_LOCK_INIT PTHREAD_MUTEX_INITIALIZER
+#define fetch_simple_lock_lock(m) pthread_mutex_lock(m)
+#define fetch_simple_lock_unlock(m) pthread_mutex_unlock(m)
 
 #else
 
@@ -110,4 +110,4 @@ static CURL_INLINE void curl_simple_lock_unlock(curl_simple_lock *lock)
 
 #endif
 
-#endif /* HEADER_CURL_EASY_LOCK_H */
+#endif /* HEADER_FETCH_EASY_LOCK_H */

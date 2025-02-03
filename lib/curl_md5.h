@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_MD5_H
-#define HEADER_CURL_MD5_H
+#ifndef HEADER_FETCH_MD5_H
+#define HEADER_FETCH_MD5_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,18 +20,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
-    || !defined(CURL_DISABLE_DIGEST_AUTH)
+#if (defined(USE_FETCH_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
+    || !defined(FETCH_DISABLE_DIGEST_AUTH)
 
-#include "curl_hmac.h"
+#include "fetch_hmac.h"
 
 #define MD5_DIGEST_LEN  16
 
-typedef CURLcode (*Curl_MD5_init_func)(void *context);
+typedef FETCHcode (*Curl_MD5_init_func)(void *context);
 typedef void (*Curl_MD5_update_func)(void *context,
                                      const unsigned char *data,
                                      unsigned int len);
@@ -53,15 +53,15 @@ struct MD5_context {
 extern const struct MD5_params Curl_DIGEST_MD5;
 extern const struct HMAC_params Curl_HMAC_MD5;
 
-CURLcode Curl_md5it(unsigned char *output, const unsigned char *input,
+FETCHcode Curl_md5it(unsigned char *output, const unsigned char *input,
                     const size_t len);
 
 struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params);
-CURLcode Curl_MD5_update(struct MD5_context *context,
+FETCHcode Curl_MD5_update(struct MD5_context *context,
                          const unsigned char *data,
                          unsigned int len);
-CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result);
+FETCHcode Curl_MD5_final(struct MD5_context *context, unsigned char *result);
 
 #endif
 
-#endif /* HEADER_CURL_MD5_H */
+#endif /* HEADER_FETCH_MD5_H */

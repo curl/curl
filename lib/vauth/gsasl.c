@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,17 +18,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  * RFC5802 SCRAM-SHA-1 authentication
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #ifdef USE_GSASL
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "vauth/vauth.h"
 #include "urldata.h"
@@ -37,8 +37,8 @@
 #include <gsasl.h>
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
@@ -62,7 +62,7 @@ bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
   return TRUE;
 }
 
-CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
+FETCHcode Curl_auth_gsasl_start(struct Curl_easy *data,
                                const char *userp,
                                const char *passwdp,
                                struct gsasldata *gsasl)
@@ -75,7 +75,7 @@ CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
 #if GSASL_VERSION_NUMBER >= 0x010b00
   if(res != GSASL_OK) {
     failf(data, "setting AUTHID failed: %s\n", gsasl_strerror(res));
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 #endif
 
@@ -86,16 +86,16 @@ CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
 #if GSASL_VERSION_NUMBER >= 0x010b00
   if(res != GSASL_OK) {
     failf(data, "setting PASSWORD failed: %s\n", gsasl_strerror(res));
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
 #endif
 
   (void)data;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
+FETCHcode Curl_auth_gsasl_token(struct Curl_easy *data,
                                const struct bufref *chlg,
                                struct gsasldata *gsasl,
                                struct bufref *out)
@@ -109,11 +109,11 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
                    &response, &outlen);
   if(res != GSASL_OK && res != GSASL_NEEDS_MORE) {
     failf(data, "GSASL step: %s\n", gsasl_strerror(res));
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
   }
 
   Curl_bufref_set(out, response, outlen, gsasl_free);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 void Curl_auth_gsasl_cleanup(struct gsasldata *gsasl)

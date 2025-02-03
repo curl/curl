@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_INET_NTOP_H
-#define HEADER_CURL_INET_NTOP_H
+#ifndef HEADER_FETCH_INET_NTOP_H
+#define HEADER_FETCH_INET_NTOP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
 
@@ -41,11 +41,11 @@ char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
 #elif defined(__AMIGA__)
 #define Curl_inet_ntop(af,addr,buf,size) \
         (char *)inet_ntop(af, (void *)addr, (unsigned char *)buf, \
-                          (curl_socklen_t)(size))
+                          (fetch_socklen_t)(size))
 #else
 #define Curl_inet_ntop(af,addr,buf,size) \
-        inet_ntop(af, addr, buf, (curl_socklen_t)(size))
+        inet_ntop(af, addr, buf, (fetch_socklen_t)(size))
 #endif
 #endif
 
-#endif /* HEADER_CURL_INET_NTOP_H */
+#endif /* HEADER_FETCH_INET_NTOP_H */

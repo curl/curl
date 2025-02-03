@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CONFIG_MAC_H
-#define HEADER_CURL_CONFIG_MAC_H
+#ifndef HEADER_FETCH_CONFIG_MAC_H
+#define HEADER_FETCH_CONFIG_MAC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,18 +20,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /* =================================================================== */
 /*                Hand crafted config file for Mac OS 9                */
 /* =================================================================== */
-/*   On macOS you must run configure to generate curl_config.h file    */
+/*   On macOS you must run configure to generate fetch_config.h file    */
 /* =================================================================== */
 
-#ifndef CURL_OS
-#define CURL_OS "mac"
+#ifndef FETCH_OS
+#define FETCH_OS "mac"
 #endif
 
 #include <ConditionalMacros.h>
@@ -65,7 +65,7 @@
 
 #define HAVE_SIGACTION          1
 
-#define CURL_DISABLE_LDAP       1
+#define FETCH_DISABLE_LDAP       1
 
 #define HAVE_IOCTL_FIONBIO      1
 
@@ -73,9 +73,9 @@
 #define SIZEOF_LONG             4
 #define SIZEOF_SIZE_T           4
 #ifdef HAVE_LONGLONG
-#define SIZEOF_CURL_OFF_T       8
+#define SIZEOF_FETCH_OFF_T       8
 #else
-#define SIZEOF_CURL_OFF_T       4
+#define SIZEOF_FETCH_OFF_T       4
 #endif
 
 #define HAVE_RECV 1
@@ -93,4 +93,4 @@
 #define SEND_TYPE_ARG4 int
 #define SEND_TYPE_RETV ssize_t
 
-#endif /* HEADER_CURL_CONFIG_MAC_H */
+#endif /* HEADER_FETCH_CONFIG_MAC_H */

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_PRINTF_H
-#define HEADER_CURL_PRINTF_H
+#ifndef HEADER_FETCH_PRINTF_H
+#define HEADER_FETCH_PRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,20 +20,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /*
- * This header should be included by ALL code in libcurl that uses any
+ * This header should be included by ALL code in libfetch that uses any
  * *rintf() functions.
  */
 
-#ifndef CURL_TEMP_PRINTF
-#error "CURL_TEMP_PRINTF must be set before including curl/mprintf.h"
+#ifndef FETCH_TEMP_PRINTF
+#error "FETCH_TEMP_PRINTF must be set before including fetch/mprintf.h"
 #endif
 
-#include <curl/mprintf.h>
+#include <fetch/mprintf.h>
 
 #define MERR_OK        0
 #define MERR_MEM       1
@@ -47,12 +47,12 @@
 # undef mvsnprintf
 # undef aprintf
 # undef vaprintf
-# define printf curl_mprintf
-# define fprintf curl_mfprintf
-# define msnprintf curl_msnprintf
-# define vprintf curl_mvprintf
-# define vfprintf curl_mvfprintf
-# define mvsnprintf curl_mvsnprintf
-# define aprintf curl_maprintf
-# define vaprintf curl_mvaprintf
-#endif /* HEADER_CURL_PRINTF_H */
+# define printf fetch_mprintf
+# define fprintf fetch_mfprintf
+# define msnprintf fetch_msnprintf
+# define vprintf fetch_mvprintf
+# define vfprintf fetch_mvfprintf
+# define mvsnprintf fetch_mvsnprintf
+# define aprintf fetch_maprintf
+# define vaprintf fetch_mvaprintf
+#endif /* HEADER_FETCH_PRINTF_H */

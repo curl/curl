@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,20 +18,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
-#include "curl_memory.h"
+#include <fetch/fetch.h>
+#include "fetch_memory.h"
 
 #include "memdebug.h"
 
 static char *GetEnv(const char *variable)
 {
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP) || \
+#if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP) || \
   defined(__ORBIS__) || defined(__PROSPERO__) /* PlayStation 4 and 5 */
   (void)variable;
   return NULL;
@@ -74,7 +74,7 @@ static char *GetEnv(const char *variable)
 #endif
 }
 
-char *curl_getenv(const char *v)
+char *fetch_getenv(const char *v)
 {
   return GetEnv(v);
 }

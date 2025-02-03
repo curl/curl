@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,24 +18,24 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_PROXY)
+#if !defined(FETCH_DISABLE_PROXY)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-haproxy.h"
-#include "curl_trc.h"
+#include "fetch_trc.h"
 #include "multiif.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 
@@ -65,11 +65,11 @@ static void cf_haproxy_ctx_free(struct cf_haproxy_ctx *ctx)
   }
 }
 
-static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
+static FETCHcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
                                         struct Curl_easy *data)
 {
   struct cf_haproxy_ctx *ctx = cf->ctx;
-  CURLcode result;
+  FETCHcode result;
   const char *client_ip;
   struct ip_quadruple ipquad;
   int is_ipv6;
@@ -103,18 +103,18 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
   return result;
 }
 
-static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
+static FETCHcode cf_haproxy_connect(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool blocking, bool *done)
 {
   struct cf_haproxy_ctx *ctx = cf->ctx;
-  CURLcode result;
+  FETCHcode result;
   size_t len;
 
   DEBUGASSERT(ctx);
   if(cf->connected) {
     *done = TRUE;
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 
   result = cf->next->cft->do_connect(cf->next, data, blocking, done);
@@ -136,14 +136,14 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
                                    Curl_dyn_ptr(&ctx->data_out), len, FALSE,
                                    &result);
       if(nwritten < 0) {
-        if(result != CURLE_AGAIN)
+        if(result != FETCHE_AGAIN)
           goto out;
-        result = CURLE_OK;
+        result = FETCHE_OK;
         nwritten = 0;
       }
       Curl_dyn_tail(&ctx->data_out, len - (size_t)nwritten);
       if(Curl_dyn_len(&ctx->data_out) > 0) {
-        result = CURLE_OK;
+        result = FETCHE_OK;
         goto out;
       }
     }
@@ -164,14 +164,14 @@ static void cf_haproxy_destroy(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   (void)data;
-  CURL_TRC_CF(data, cf, "destroy");
+  FETCH_TRC_CF(data, cf, "destroy");
   cf_haproxy_ctx_free(cf->ctx);
 }
 
 static void cf_haproxy_close(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
-  CURL_TRC_CF(data, cf, "close");
+  FETCH_TRC_CF(data, cf, "close");
   cf->connected = FALSE;
   cf_haproxy_ctx_reset(cf->ctx);
   if(cf->next)
@@ -208,17 +208,17 @@ struct Curl_cftype Curl_cft_haproxy = {
   Curl_cf_def_query,
 };
 
-static CURLcode cf_haproxy_create(struct Curl_cfilter **pcf,
+static FETCHcode cf_haproxy_create(struct Curl_cfilter **pcf,
                                   struct Curl_easy *data)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_haproxy_ctx *ctx;
-  CURLcode result;
+  FETCHcode result;
 
   (void)data;
   ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
   ctx->state = HAPROXY_INIT;
@@ -235,11 +235,11 @@ out:
   return result;
 }
 
-CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
+FETCHcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
                                       struct Curl_easy *data)
 {
   struct Curl_cfilter *cf;
-  CURLcode result;
+  FETCHcode result;
 
   result = cf_haproxy_create(&cf, data);
   if(result)
@@ -250,4 +250,4 @@ out:
   return result;
 }
 
-#endif /* !CURL_DISABLE_PROXY */
+#endif /* !FETCH_DISABLE_PROXY */

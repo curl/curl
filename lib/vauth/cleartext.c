@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,30 +18,30 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  * RFC4616 PLAIN authentication
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) ||       \
-  !defined(CURL_DISABLE_POP3) || \
-  (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
+#if !defined(FETCH_DISABLE_IMAP) || !defined(FETCH_DISABLE_SMTP) ||       \
+  !defined(FETCH_DISABLE_POP3) || \
+  (!defined(FETCH_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 
 #include "vauth/vauth.h"
 #include "warnless.h"
 #include "strtok.h"
 #include "sendf.h"
-#include "curl_printf.h"
+#include "fetch_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /*
@@ -57,9 +57,9 @@
  * passwd  [in]     - The password.
  * out     [out]    - The result storage.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_auth_create_plain_message(const char *authzid,
+FETCHcode Curl_auth_create_plain_message(const char *authzid,
                                         const char *authcid,
                                         const char *passwd,
                                         struct bufref *out)
@@ -77,12 +77,12 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
   /* Compute binary message length. Check for overflows. */
   if((zlen > SIZE_T_MAX/4) || (clen > SIZE_T_MAX/4) ||
      (plen > (SIZE_T_MAX/2 - 2)))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   plainlen = zlen + clen + plen + 2;
 
   plainauth = malloc(plainlen + 1);
   if(!plainauth)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Calculate the reply */
   if(zlen)
@@ -92,8 +92,8 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
   plainauth[zlen + clen + 1] = '\0';
   memcpy(plainauth + zlen + clen + 2, passwd, plen);
   plainauth[plainlen] = '\0';
-  Curl_bufref_set(out, plainauth, plainlen, curl_free);
-  return CURLE_OK;
+  Curl_bufref_set(out, plainauth, plainlen, fetch_free);
+  return FETCHE_OK;
 }
 
 /*

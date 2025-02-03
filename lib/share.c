@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 #include "connect.h"
 #include "share.h"
@@ -35,182 +35,182 @@
 #include "url.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
-CURLSH *
-curl_share_init(void)
+FETCHSH *
+fetch_share_init(void)
 {
   struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
   if(share) {
-    share->magic = CURL_GOOD_SHARE;
-    share->specifier |= (1 << CURL_LOCK_DATA_SHARE);
+    share->magic = FETCH_GOOD_SHARE;
+    share->specifier |= (1 << FETCH_LOCK_DATA_SHARE);
     Curl_init_dnscache(&share->hostcache, 23);
   }
 
   return share;
 }
 
-#undef curl_share_setopt
-CURLSHcode
-curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
+#undef fetch_share_setopt
+FETCHSHcode
+fetch_share_setopt(FETCHSH *sh, FETCHSHoption option, ...)
 {
   va_list param;
   int type;
-  curl_lock_function lockfunc;
-  curl_unlock_function unlockfunc;
+  fetch_lock_function lockfunc;
+  fetch_unlock_function unlockfunc;
   void *ptr;
-  CURLSHcode res = CURLSHE_OK;
+  FETCHSHcode res = FETCHSHE_OK;
   struct Curl_share *share = sh;
 
   if(!GOOD_SHARE_HANDLE(share))
-    return CURLSHE_INVALID;
+    return FETCHSHE_INVALID;
 
   if(share->dirty)
     /* do not allow setting options while one or more handles are already
        using this share */
-    return CURLSHE_IN_USE;
+    return FETCHSHE_IN_USE;
 
   va_start(param, option);
 
   switch(option) {
-  case CURLSHOPT_SHARE:
+  case FETCHSHOPT_SHARE:
     /* this is a type this share will share */
     type = va_arg(param, int);
 
     switch(type) {
-    case CURL_LOCK_DATA_DNS:
+    case FETCH_LOCK_DATA_DNS:
       break;
 
-    case CURL_LOCK_DATA_COOKIE:
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+    case FETCH_LOCK_DATA_COOKIE:
+#if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
       if(!share->cookies) {
         share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE);
         if(!share->cookies)
-          res = CURLSHE_NOMEM;
+          res = FETCHSHE_NOMEM;
       }
-#else   /* CURL_DISABLE_HTTP */
-      res = CURLSHE_NOT_BUILT_IN;
+#else   /* FETCH_DISABLE_HTTP */
+      res = FETCHSHE_NOT_BUILT_IN;
 #endif
       break;
 
-    case CURL_LOCK_DATA_HSTS:
-#ifndef CURL_DISABLE_HSTS
+    case FETCH_LOCK_DATA_HSTS:
+#ifndef FETCH_DISABLE_HSTS
       if(!share->hsts) {
         share->hsts = Curl_hsts_init();
         if(!share->hsts)
-          res = CURLSHE_NOMEM;
+          res = FETCHSHE_NOMEM;
       }
-#else   /* CURL_DISABLE_HSTS */
-      res = CURLSHE_NOT_BUILT_IN;
+#else   /* FETCH_DISABLE_HSTS */
+      res = FETCHSHE_NOT_BUILT_IN;
 #endif
       break;
 
-    case CURL_LOCK_DATA_SSL_SESSION:
+    case FETCH_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
       if(!share->ssl_scache) {
         /* There is no way (yet) for the application to configure the
-         * session cache size, shared between many transfers. As for curl
+         * session cache size, shared between many transfers. As for fetch
          * itself, a high session count will impact startup time. Also, the
          * scache is not optimized for several hundreds of peers. So,
          * keep it at a reasonable level. */
         if(Curl_ssl_scache_create(25, 2, &share->ssl_scache))
-          res = CURLSHE_NOMEM;
+          res = FETCHSHE_NOMEM;
       }
 #else
-      res = CURLSHE_NOT_BUILT_IN;
+      res = FETCHSHE_NOT_BUILT_IN;
 #endif
       break;
 
-    case CURL_LOCK_DATA_CONNECT:
+    case FETCH_LOCK_DATA_CONNECT:
       /* It is safe to set this option several times on a share. */
       if(!share->cpool.idata) {
         if(Curl_cpool_init(&share->cpool, Curl_on_disconnect,
                            NULL, share, 103))
-          res = CURLSHE_NOMEM;
+          res = FETCHSHE_NOMEM;
       }
       break;
 
-    case CURL_LOCK_DATA_PSL:
+    case FETCH_LOCK_DATA_PSL:
 #ifndef USE_LIBPSL
-      res = CURLSHE_NOT_BUILT_IN;
+      res = FETCHSHE_NOT_BUILT_IN;
 #endif
       break;
 
     default:
-      res = CURLSHE_BAD_OPTION;
+      res = FETCHSHE_BAD_OPTION;
     }
     if(!res)
       share->specifier |= (unsigned int)(1 << type);
     break;
 
-  case CURLSHOPT_UNSHARE:
+  case FETCHSHOPT_UNSHARE:
     /* this is a type this share will no longer share */
     type = va_arg(param, int);
     share->specifier &= ~(unsigned int)(1 << type);
     switch(type) {
-    case CURL_LOCK_DATA_DNS:
+    case FETCH_LOCK_DATA_DNS:
       break;
 
-    case CURL_LOCK_DATA_COOKIE:
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+    case FETCH_LOCK_DATA_COOKIE:
+#if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
       if(share->cookies) {
         Curl_cookie_cleanup(share->cookies);
         share->cookies = NULL;
       }
-#else   /* CURL_DISABLE_HTTP */
-      res = CURLSHE_NOT_BUILT_IN;
+#else   /* FETCH_DISABLE_HTTP */
+      res = FETCHSHE_NOT_BUILT_IN;
 #endif
       break;
 
-    case CURL_LOCK_DATA_HSTS:
-#ifndef CURL_DISABLE_HSTS
+    case FETCH_LOCK_DATA_HSTS:
+#ifndef FETCH_DISABLE_HSTS
       if(share->hsts) {
         Curl_hsts_cleanup(&share->hsts);
       }
-#else   /* CURL_DISABLE_HSTS */
-      res = CURLSHE_NOT_BUILT_IN;
+#else   /* FETCH_DISABLE_HSTS */
+      res = FETCHSHE_NOT_BUILT_IN;
 #endif
       break;
 
-    case CURL_LOCK_DATA_SSL_SESSION:
+    case FETCH_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
       if(share->ssl_scache) {
         Curl_ssl_scache_destroy(share->ssl_scache);
         share->ssl_scache = NULL;
       }
 #else
-      res = CURLSHE_NOT_BUILT_IN;
+      res = FETCHSHE_NOT_BUILT_IN;
 #endif
       break;
 
-    case CURL_LOCK_DATA_CONNECT:
+    case FETCH_LOCK_DATA_CONNECT:
       break;
 
     default:
-      res = CURLSHE_BAD_OPTION;
+      res = FETCHSHE_BAD_OPTION;
       break;
     }
     break;
 
-  case CURLSHOPT_LOCKFUNC:
-    lockfunc = va_arg(param, curl_lock_function);
+  case FETCHSHOPT_LOCKFUNC:
+    lockfunc = va_arg(param, fetch_lock_function);
     share->lockfunc = lockfunc;
     break;
 
-  case CURLSHOPT_UNLOCKFUNC:
-    unlockfunc = va_arg(param, curl_unlock_function);
+  case FETCHSHOPT_UNLOCKFUNC:
+    unlockfunc = va_arg(param, fetch_unlock_function);
     share->unlockfunc = unlockfunc;
     break;
 
-  case CURLSHOPT_USERDATA:
+  case FETCHSHOPT_USERDATA:
     ptr = va_arg(param, void *);
     share->clientdata = ptr;
     break;
 
   default:
-    res = CURLSHE_BAD_OPTION;
+    res = FETCHSHE_BAD_OPTION;
     break;
   }
 
@@ -219,33 +219,33 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
   return res;
 }
 
-CURLSHcode
-curl_share_cleanup(CURLSH *sh)
+FETCHSHcode
+fetch_share_cleanup(FETCHSH *sh)
 {
   struct Curl_share *share = sh;
   if(!GOOD_SHARE_HANDLE(share))
-    return CURLSHE_INVALID;
+    return FETCHSHE_INVALID;
 
   if(share->lockfunc)
-    share->lockfunc(NULL, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE,
+    share->lockfunc(NULL, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE,
                     share->clientdata);
 
   if(share->dirty) {
     if(share->unlockfunc)
-      share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);
-    return CURLSHE_IN_USE;
+      share->unlockfunc(NULL, FETCH_LOCK_DATA_SHARE, share->clientdata);
+    return FETCHSHE_IN_USE;
   }
 
-  if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
+  if(share->specifier & (1 << FETCH_LOCK_DATA_CONNECT)) {
     Curl_cpool_destroy(&share->cpool);
   }
   Curl_hash_destroy(&share->hostcache);
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
   Curl_cookie_cleanup(share->cookies);
 #endif
 
-#ifndef CURL_DISABLE_HSTS
+#ifndef FETCH_DISABLE_HSTS
   Curl_hsts_cleanup(&share->hsts);
 #endif
 
@@ -259,22 +259,22 @@ curl_share_cleanup(CURLSH *sh)
   Curl_psl_destroy(&share->psl);
 
   if(share->unlockfunc)
-    share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);
+    share->unlockfunc(NULL, FETCH_LOCK_DATA_SHARE, share->clientdata);
   share->magic = 0;
   free(share);
 
-  return CURLSHE_OK;
+  return FETCHSHE_OK;
 }
 
 
-CURLSHcode
-Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
-                curl_lock_access accesstype)
+FETCHSHcode
+Curl_share_lock(struct Curl_easy *data, fetch_lock_data type,
+                fetch_lock_access accesstype)
 {
   struct Curl_share *share = data->share;
 
   if(!share)
-    return CURLSHE_INVALID;
+    return FETCHSHE_INVALID;
 
   if(share->specifier & (unsigned int)(1 << type)) {
     if(share->lockfunc) /* only call this if set! */
@@ -282,21 +282,21 @@ Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
   }
   /* else if we do not share this, pretend successful lock */
 
-  return CURLSHE_OK;
+  return FETCHSHE_OK;
 }
 
-CURLSHcode
-Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
+FETCHSHcode
+Curl_share_unlock(struct Curl_easy *data, fetch_lock_data type)
 {
   struct Curl_share *share = data->share;
 
   if(!share)
-    return CURLSHE_INVALID;
+    return FETCHSHE_INVALID;
 
   if(share->specifier & (unsigned int)(1 << type)) {
     if(share->unlockfunc) /* only call this if set! */
       share->unlockfunc (data, type, share->clientdata);
   }
 
-  return CURLSHE_OK;
+  return FETCHSHE_OK;
 }

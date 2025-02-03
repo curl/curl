@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SOCKETPAIR_H
-#define HEADER_CURL_SOCKETPAIR_H
+#ifndef HEADER_FETCH_SOCKETPAIR_H
+#define HEADER_FETCH_SOCKETPAIR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #if defined(HAVE_EVENTFD) && \
     (defined(__x86_64__) || \
@@ -50,8 +50,8 @@
 #define wakeup_close  close
 #define wakeup_create(p,nb) Curl_eventfd(p,nb)
 
-#include <curl/curl.h>
-int Curl_eventfd(curl_socket_t socks[2], bool nonblocking);
+#include <fetch/fetch.h>
+int Curl_eventfd(fetch_socket_t socks[2], bool nonblocking);
 
 #elif defined(HAVE_PIPE)
 
@@ -60,8 +60,8 @@ int Curl_eventfd(curl_socket_t socks[2], bool nonblocking);
 #define wakeup_close  close
 #define wakeup_create(p,nb) Curl_pipe(p,nb)
 
-#include <curl/curl.h>
-int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
+#include <fetch/fetch.h>
+int Curl_pipe(fetch_socket_t socks[2], bool nonblocking);
 
 #else /* !USE_EVENTFD && !HAVE_PIPE */
 
@@ -88,11 +88,11 @@ Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
 
 #endif /* USE_EVENTFD */
 
-#ifndef CURL_DISABLE_SOCKETPAIR
-#include <curl/curl.h>
+#ifndef FETCH_DISABLE_SOCKETPAIR
+#include <fetch/fetch.h>
 
 int Curl_socketpair(int domain, int type, int protocol,
-                    curl_socket_t socks[2], bool nonblocking);
+                    fetch_socket_t socks[2], bool nonblocking);
 #endif
 
-#endif /* HEADER_CURL_SOCKETPAIR_H */
+#endif /* HEADER_FETCH_SOCKETPAIR_H */

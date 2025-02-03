@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_NOPROXY_H
-#define HEADER_CURL_NOPROXY_H
+#ifndef HEADER_FETCH_NOPROXY_H
+#define HEADER_FETCH_NOPROXY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifndef CURL_DISABLE_PROXY
+#ifndef FETCH_DISABLE_PROXY
 
 #ifdef UNITTESTS
 
@@ -40,4 +40,4 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
 bool Curl_check_noproxy(const char *name, const char *no_proxy);
 #endif
 
-#endif /* HEADER_CURL_NOPROXY_H */
+#endif /* HEADER_FETCH_NOPROXY_H */

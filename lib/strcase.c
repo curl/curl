@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "strcase.h"
 
@@ -83,7 +83,7 @@ char Curl_raw_tolower(char in)
 }
 
 /*
- * curl_strequal() is for doing "raw" case insensitive strings. This is meant
+ * fetch_strequal() is for doing "raw" case insensitive strings. This is meant
  * to be locale independent and only compare strings we know are safe for
  * this. See https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
  * further explanations as to why this function is necessary.
@@ -106,7 +106,7 @@ static int casecompare(const char *first, const char *second)
 }
 
 /* --- public function --- */
-int curl_strequal(const char *first, const char *second)
+int fetch_strequal(const char *first, const char *second)
 {
   if(first && second)
     /* both pointers point to something then compare them */
@@ -132,7 +132,7 @@ static int ncasecompare(const char *first, const char *second, size_t max)
 }
 
 /* --- public function --- */
-int curl_strnequal(const char *first, const char *second, size_t max)
+int fetch_strnequal(const char *first, const char *second, size_t max)
 {
   if(first && second)
     /* both pointers point to something then compare them */

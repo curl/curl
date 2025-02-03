@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_FNMATCH_H
-#define HEADER_CURL_FNMATCH_H
+#ifndef HEADER_FETCH_FNMATCH_H
+#define HEADER_FETCH_FNMATCH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#define CURL_FNMATCH_MATCH    0
-#define CURL_FNMATCH_NOMATCH  1
-#define CURL_FNMATCH_FAIL     2
+#define FETCH_FNMATCH_MATCH    0
+#define FETCH_FNMATCH_NOMATCH  1
+#define FETCH_FNMATCH_FAIL     2
 
 /* default pattern matching function
  * =================================
@@ -43,4 +43,4 @@
  */
 int Curl_fnmatch(void *ptr, const char *pattern, const char *string);
 
-#endif /* HEADER_CURL_FNMATCH_H */
+#endif /* HEADER_FETCH_FNMATCH_H */

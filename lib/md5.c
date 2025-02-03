@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,20 +18,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
-    || !defined(CURL_DISABLE_DIGEST_AUTH)
+#if (defined(USE_FETCH_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
+    || !defined(FETCH_DISABLE_DIGEST_AUTH)
 
 #include <string.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-#include "curl_md5.h"
-#include "curl_hmac.h"
+#include "fetch_md5.h"
+#include "fetch_hmac.h"
 #include "warnless.h"
 
 #ifdef USE_MBEDTLS
@@ -80,18 +80,18 @@
 #endif
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #if defined(USE_GNUTLS)
 
 typedef struct md5_ctx my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx)
+static FETCHcode my_md5_init(void *ctx)
 {
   md5_init(ctx);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_md5_update(void *ctx,
@@ -111,12 +111,12 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
 typedef MD5_CTX my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx)
+static FETCHcode my_md5_init(void *ctx)
 {
   if(!MD5_Init(ctx))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_md5_update(void *ctx,
@@ -135,12 +135,12 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
 typedef WOLFSSL_MD5_CTX my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx)
+static FETCHcode my_md5_init(void *ctx)
 {
   if(!wolfSSL_MD5_Init(ctx))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_md5_update(void *ctx,
@@ -159,18 +159,18 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
 typedef mbedtls_md5_context my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx)
+static FETCHcode my_md5_init(void *ctx)
 {
 #if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
   if(mbedtls_md5_starts(ctx))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 #elif defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
   if(mbedtls_md5_starts_ret(ctx))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 #else
   (void)mbedtls_md5_starts(ctx);
 #endif
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_md5_update(void *ctx,
@@ -203,12 +203,12 @@ static void my_md5_final(unsigned char *digest, void *ctx)
    reliable than defining COMMON_DIGEST_FOR_OPENSSL on older cats. */
 #  define my_md5_ctx CC_MD5_CTX
 
-static CURLcode my_md5_init(void *ctx)
+static FETCHcode my_md5_init(void *ctx)
 {
   if(!CC_MD5_Init(ctx))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_md5_update(void *ctx,
@@ -231,20 +231,20 @@ struct md5_ctx {
 };
 typedef struct md5_ctx my_md5_ctx;
 
-static CURLcode my_md5_init(void *in)
+static FETCHcode my_md5_init(void *in)
 {
   my_md5_ctx *ctx = (my_md5_ctx *)in;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   if(!CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash)) {
     CryptReleaseContext(ctx->hCryptProv, 0);
     ctx->hCryptProv = 0;
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_md5_update(void *in,
@@ -320,7 +320,7 @@ struct md5_ctx {
 };
 typedef struct md5_ctx my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx);
+static FETCHcode my_md5_init(void *ctx);
 static void my_md5_update(void *ctx, const unsigned char *data,
                           unsigned int size);
 static void my_md5_final(unsigned char *result, void *ctx);
@@ -483,7 +483,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
   return ptr;
 }
 
-static CURLcode my_md5_init(void *in)
+static FETCHcode my_md5_init(void *in)
 {
   my_md5_ctx *ctx = (my_md5_ctx *)in;
   ctx->a = 0x67452301;
@@ -494,7 +494,7 @@ static CURLcode my_md5_init(void *in)
   ctx->lo = 0;
   ctx->hi = 0;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void my_md5_update(void *in, const unsigned char *data,
@@ -555,33 +555,33 @@ static void my_md5_final(unsigned char *result, void *in)
   memset(&ctx->buffer[used], 0, available - 8);
 
   ctx->lo <<= 3;
-  ctx->buffer[56] = curlx_ultouc((ctx->lo)&0xff);
-  ctx->buffer[57] = curlx_ultouc((ctx->lo >> 8)&0xff);
-  ctx->buffer[58] = curlx_ultouc((ctx->lo >> 16)&0xff);
-  ctx->buffer[59] = curlx_ultouc(ctx->lo >> 24);
-  ctx->buffer[60] = curlx_ultouc((ctx->hi)&0xff);
-  ctx->buffer[61] = curlx_ultouc((ctx->hi >> 8)&0xff);
-  ctx->buffer[62] = curlx_ultouc((ctx->hi >> 16)&0xff);
-  ctx->buffer[63] = curlx_ultouc(ctx->hi >> 24);
+  ctx->buffer[56] = fetchx_ultouc((ctx->lo)&0xff);
+  ctx->buffer[57] = fetchx_ultouc((ctx->lo >> 8)&0xff);
+  ctx->buffer[58] = fetchx_ultouc((ctx->lo >> 16)&0xff);
+  ctx->buffer[59] = fetchx_ultouc(ctx->lo >> 24);
+  ctx->buffer[60] = fetchx_ultouc((ctx->hi)&0xff);
+  ctx->buffer[61] = fetchx_ultouc((ctx->hi >> 8)&0xff);
+  ctx->buffer[62] = fetchx_ultouc((ctx->hi >> 16)&0xff);
+  ctx->buffer[63] = fetchx_ultouc(ctx->hi >> 24);
 
   my_md5_body(ctx, ctx->buffer, 64);
 
-  result[0] = curlx_ultouc((ctx->a)&0xff);
-  result[1] = curlx_ultouc((ctx->a >> 8)&0xff);
-  result[2] = curlx_ultouc((ctx->a >> 16)&0xff);
-  result[3] = curlx_ultouc(ctx->a >> 24);
-  result[4] = curlx_ultouc((ctx->b)&0xff);
-  result[5] = curlx_ultouc((ctx->b >> 8)&0xff);
-  result[6] = curlx_ultouc((ctx->b >> 16)&0xff);
-  result[7] = curlx_ultouc(ctx->b >> 24);
-  result[8] = curlx_ultouc((ctx->c)&0xff);
-  result[9] = curlx_ultouc((ctx->c >> 8)&0xff);
-  result[10] = curlx_ultouc((ctx->c >> 16)&0xff);
-  result[11] = curlx_ultouc(ctx->c >> 24);
-  result[12] = curlx_ultouc((ctx->d)&0xff);
-  result[13] = curlx_ultouc((ctx->d >> 8)&0xff);
-  result[14] = curlx_ultouc((ctx->d >> 16)&0xff);
-  result[15] = curlx_ultouc(ctx->d >> 24);
+  result[0] = fetchx_ultouc((ctx->a)&0xff);
+  result[1] = fetchx_ultouc((ctx->a >> 8)&0xff);
+  result[2] = fetchx_ultouc((ctx->a >> 16)&0xff);
+  result[3] = fetchx_ultouc(ctx->a >> 24);
+  result[4] = fetchx_ultouc((ctx->b)&0xff);
+  result[5] = fetchx_ultouc((ctx->b >> 8)&0xff);
+  result[6] = fetchx_ultouc((ctx->b >> 16)&0xff);
+  result[7] = fetchx_ultouc(ctx->b >> 24);
+  result[8] = fetchx_ultouc((ctx->c)&0xff);
+  result[9] = fetchx_ultouc((ctx->c >> 8)&0xff);
+  result[10] = fetchx_ultouc((ctx->c >> 16)&0xff);
+  result[11] = fetchx_ultouc(ctx->c >> 24);
+  result[12] = fetchx_ultouc((ctx->d)&0xff);
+  result[13] = fetchx_ultouc((ctx->d >> 8)&0xff);
+  result[14] = fetchx_ultouc((ctx->d >> 16)&0xff);
+  result[15] = fetchx_ultouc(ctx->d >> 24);
 
   memset(ctx, 0, sizeof(*ctx));
 }
@@ -607,17 +607,17 @@ const struct MD5_params Curl_DIGEST_MD5 = {
 
 /*
  * @unittest: 1601
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_md5it(unsigned char *outbuffer, const unsigned char *input,
+FETCHcode Curl_md5it(unsigned char *outbuffer, const unsigned char *input,
                     const size_t len)
 {
-  CURLcode result;
+  FETCHcode result;
   my_md5_ctx ctx;
 
   result = my_md5_init(&ctx);
   if(!result) {
-    my_md5_update(&ctx, input, curlx_uztoui(len));
+    my_md5_update(&ctx, input, fetchx_uztoui(len));
     my_md5_final(outbuffer, &ctx);
   }
   return result;
@@ -651,23 +651,23 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
   return ctxt;
 }
 
-CURLcode Curl_MD5_update(struct MD5_context *context,
+FETCHcode Curl_MD5_update(struct MD5_context *context,
                          const unsigned char *data,
                          unsigned int len)
 {
   (*context->md5_hash->md5_update_func)(context->md5_hashctx, data, len);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
+FETCHcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
 {
   (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
 
   free(context->md5_hashctx);
   free(context);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 #endif /* Using NTLM (without SSPI) || Digest */

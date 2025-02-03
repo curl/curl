@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_ASYN_H
-#define HEADER_CURL_ASYN_H
+#ifndef HEADER_FETCH_ASYN_H
+#define HEADER_FETCH_ASYN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
-#include "curl_addrinfo.h"
+#include "fetch_setup.h"
+#include "fetch_addrinfo.h"
 #include "httpsrr.h"
 
 struct addrinfo;
@@ -34,19 +34,19 @@ struct Curl_easy;
 struct connectdata;
 struct Curl_dns_entry;
 
-#ifdef CURLRES_THREADED
-#include "curl_threads.h"
+#ifdef FETCHRES_THREADED
+#include "fetch_threads.h"
 
 /* Data for synchronization between resolver thread and its parent */
 struct thread_sync_data {
-  curl_mutex_t *mtx;
+  fetch_mutex_t *mtx;
   bool done;
   int port;
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifndef FETCH_DISABLE_SOCKETPAIR
   struct Curl_easy *data;
-  curl_socket_t sock_pair[2]; /* eventfd/pipes/socket pair */
+  fetch_socket_t sock_pair[2]; /* eventfd/pipes/socket pair */
 #endif
   int sock_error;
   struct Curl_addrinfo *res;
@@ -57,7 +57,7 @@ struct thread_sync_data {
 };
 
 struct thread_data {
-  curl_thread_t thread_hnd;
+  fetch_thread_t thread_hnd;
   unsigned int poll_interval;
   timediff_t interval_end;
   struct thread_sync_data tsd;
@@ -67,7 +67,7 @@ struct thread_data {
 #endif
 };
 
-#elif defined(CURLRES_ARES) /* CURLRES_THREADED */
+#elif defined(FETCHRES_ARES) /* FETCHRES_THREADED */
 
 struct thread_data {
   int num_pending; /* number of outstanding c-ares requests */
@@ -75,7 +75,7 @@ struct thread_data {
                                     parts */
   int last_status;
 #ifndef HAVE_CARES_GETADDRINFO
-  struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
+  struct fetchtime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #endif
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo hinfo;
@@ -83,7 +83,7 @@ struct thread_data {
   char hostname[1];
 };
 
-#endif /* CURLRES_ARES */
+#endif /* FETCHRES_ARES */
 
 #ifdef USE_ARES
 #include <ares.h>
@@ -91,7 +91,7 @@ struct thread_data {
 /* for HTTPS RR purposes as well */
 int Curl_ares_getsock(struct Curl_easy *data,
                       ares_channel channel,
-                      curl_socket_t *socks);
+                      fetch_socket_t *socks);
 int Curl_ares_perform(ares_channel channel,
                       timediff_t timeout_ms);
 #endif
@@ -107,30 +107,30 @@ int Curl_ares_perform(ares_channel channel,
 /*
  * Curl_resolver_global_init()
  *
- * Called from curl_global_init() to initialize global resolver environment.
- * Returning anything else than CURLE_OK fails curl_global_init().
+ * Called from fetch_global_init() to initialize global resolver environment.
+ * Returning anything else than FETCHE_OK fails fetch_global_init().
  */
 int Curl_resolver_global_init(void);
 
 /*
  * Curl_resolver_global_cleanup()
- * Called from curl_global_cleanup() to destroy global resolver environment.
+ * Called from fetch_global_cleanup() to destroy global resolver environment.
  */
 void Curl_resolver_global_cleanup(void);
 
 /*
  * Curl_resolver_init()
- * Called from curl_easy_init() -> Curl_open() to initialize resolver
+ * Called from fetch_easy_init() -> Curl_open() to initialize resolver
  * URL-state specific environment ('resolver' member of the UrlState
  * structure). Should fill the passed pointer by the initialized handler.
- * Returning anything else than CURLE_OK fails curl_easy_init() with the
+ * Returning anything else than FETCHE_OK fails fetch_easy_init() with the
  * correspondent code.
  */
-CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver);
+FETCHcode Curl_resolver_init(struct Curl_easy *easy, void **resolver);
 
 /*
  * Curl_resolver_cleanup()
- * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver
+ * Called from fetch_easy_cleanup() -> Curl_close() to cleanup resolver
  * URL-state specific environment ('resolver' member of the UrlState
  * structure). Should destroy the handler and free all resources connected to
  * it.
@@ -139,13 +139,13 @@ void Curl_resolver_cleanup(void *resolver);
 
 /*
  * Curl_resolver_duphandle()
- * Called from curl_easy_duphandle() to duplicate resolver URL-state specific
+ * Called from fetch_easy_duphandle() to duplicate resolver URL-state specific
  * environment ('resolver' member of the UrlState structure). Should
  * duplicate the 'from' handle and pass the resulting handle to the 'to'
- * pointer. Returning anything else than CURLE_OK causes failed
- * curl_easy_duphandle() call.
+ * pointer. Returning anything else than FETCHE_OK causes failed
+ * fetch_easy_duphandle() call.
  */
-CURLcode Curl_resolver_duphandle(struct Curl_easy *easy, void **to,
+FETCHcode Curl_resolver_duphandle(struct Curl_easy *easy, void **to,
                                  void *from);
 
 /*
@@ -180,7 +180,7 @@ void Curl_resolver_kill(struct Curl_easy *data);
  * return bitmask indicating what file descriptors (referring to array indexes
  * in the 'sock' array) to wait for, read/write.
  */
-int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *sock);
+int Curl_resolver_getsock(struct Curl_easy *data, fetch_socket_t *sock);
 
 /*
  * Curl_resolver_is_resolved()
@@ -189,9 +189,9 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *sock);
  * completed. It should also make sure to time-out if the operation seems to
  * take too long.
  *
- * Returns normal CURLcode errors.
+ * Returns normal FETCHcode errors.
  */
-CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
+FETCHcode Curl_resolver_is_resolved(struct Curl_easy *data,
                                    struct Curl_dns_entry **dns);
 
 /*
@@ -202,10 +202,10 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
  *
- * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
- * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
+ * Returns FETCHE_COULDNT_RESOLVE_HOST if the host was not resolved,
+ * FETCHE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  */
-CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
+FETCHcode Curl_resolver_wait_resolv(struct Curl_easy *data,
                                    struct Curl_dns_entry **dnsentry);
 
 /*
@@ -224,20 +224,20 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                                                 int port,
                                                 int *waitp);
 
-#ifndef CURLRES_ASYNCH
+#ifndef FETCHRES_ASYNCH
 /* convert these functions if an asynch resolver is not used */
 #define Curl_resolver_cancel(x) Curl_nop_stmt
 #define Curl_resolver_kill(x) Curl_nop_stmt
-#define Curl_resolver_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_wait_resolv(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_duphandle(x,y,z) CURLE_OK
-#define Curl_resolver_init(x,y) CURLE_OK
-#define Curl_resolver_global_init() CURLE_OK
+#define Curl_resolver_is_resolved(x,y) FETCHE_COULDNT_RESOLVE_HOST
+#define Curl_resolver_wait_resolv(x,y) FETCHE_COULDNT_RESOLVE_HOST
+#define Curl_resolver_duphandle(x,y,z) FETCHE_OK
+#define Curl_resolver_init(x,y) FETCHE_OK
+#define Curl_resolver_global_init() FETCHE_OK
 #define Curl_resolver_global_cleanup() Curl_nop_stmt
 #define Curl_resolver_cleanup(x) Curl_nop_stmt
 #endif
 
-#ifdef CURLRES_ASYNCH
+#ifdef FETCHRES_ASYNCH
 #define Curl_resolver_asynch() 1
 #else
 #define Curl_resolver_asynch() 0
@@ -245,4 +245,4 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 
 
 /********** end of generic resolver interface functions *****************/
-#endif /* HEADER_CURL_ASYN_H */
+#endif /* HEADER_FETCH_ASYN_H */

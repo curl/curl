@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #include <limits.h>
 
@@ -33,7 +33,7 @@
 #include <arpa/inet.h>
 #endif
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "sendf.h"
@@ -42,14 +42,14 @@
 #include "escape.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 #ifdef _WIN32
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600 && \
-  !defined(CURL_WINDOWS_UWP)
+  !defined(FETCH_WINDOWS_UWP)
 #  define HAVE_WIN_BCRYPTGENRANDOM
 #  include <bcrypt.h>
 #  ifdef _MSC_VER
@@ -68,41 +68,41 @@
 #  endif
 #endif
 
-CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
+FETCHcode Curl_win32_random(unsigned char *entropy, size_t length)
 {
   memset(entropy, 0, length);
 
 #if defined(HAVE_WIN_BCRYPTGENRANDOM)
   if(BCryptGenRandom(NULL, entropy, (ULONG)length,
                      BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
-    return CURLE_FAILED_INIT;
+    return FETCHE_FAILED_INIT;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 #elif defined(USE_WIN32_CRYPTO)
   {
     HCRYPTPROV hCryptProv = 0;
 
     if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
                             CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
 
     if(!CryptGenRandom(hCryptProv, (DWORD)length, entropy)) {
       CryptReleaseContext(hCryptProv, 0UL);
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
     }
 
     CryptReleaseContext(hCryptProv, 0UL);
   }
-  return CURLE_OK;
+  return FETCHE_OK;
 #else
-  return CURLE_NOT_BUILT_IN;
+  return FETCHE_NOT_BUILT_IN;
 #endif
 }
 #endif
 
 #if !defined(USE_SSL)
 /* ---- possibly non-cryptographic version following ---- */
-static CURLcode weak_random(struct Curl_easy *data,
+static FETCHcode weak_random(struct Curl_easy *data,
                           unsigned char *entropy,
                           size_t length) /* always 4, size of int */
 {
@@ -113,8 +113,8 @@ static CURLcode weak_random(struct Curl_easy *data,
 #ifdef _WIN32
   (void)data;
   {
-    CURLcode result = Curl_win32_random(entropy, length);
-    if(result != CURLE_NOT_BUILT_IN)
+    FETCHcode result = Curl_win32_random(entropy, length);
+    if(result != FETCHE_NOT_BUILT_IN)
       return result;
   }
 #endif
@@ -130,7 +130,7 @@ static CURLcode weak_random(struct Curl_easy *data,
     static bool seeded = FALSE;
     unsigned int rnd;
     if(!seeded) {
-      struct curltime now = Curl_now();
+      struct fetchtime now = Curl_now();
       randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
       randseed = randseed * 1103515245 + 12345;
       randseed = randseed * 1103515245 + 12345;
@@ -144,7 +144,7 @@ static CURLcode weak_random(struct Curl_easy *data,
     memcpy(entropy, &rnd, length);
   }
 #endif
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 #endif
 
@@ -154,12 +154,12 @@ static CURLcode weak_random(struct Curl_easy *data,
 #define _random(x,y,z) weak_random(x,y,z)
 #endif
 
-static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
+static FETCHcode randit(struct Curl_easy *data, unsigned int *rnd,
                        bool env_override)
 {
 #ifdef DEBUGBUILD
   if(env_override) {
-    char *force_entropy = getenv("CURL_ENTROPY");
+    char *force_entropy = getenv("FETCH_ENTROPY");
     if(force_entropy) {
       static unsigned int randseed;
       static bool seeded = FALSE;
@@ -176,7 +176,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
       else
         randseed++;
       *rnd = randseed;
-      return CURLE_OK;
+      return FETCHE_OK;
     }
   }
 #else
@@ -191,7 +191,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
  * Curl_rand() stores 'num' number of random unsigned characters in the buffer
  * 'rnd' points to.
  *
- * If libcurl is built without TLS support or with a TLS backend that lacks a
+ * If libfetch is built without TLS support or with a TLS backend that lacks a
  * proper random API (Rustls or mbedTLS), this function will use "weak"
  * random.
  *
@@ -203,13 +203,13 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
  *
  */
 
-CURLcode Curl_rand_bytes(struct Curl_easy *data,
+FETCHcode Curl_rand_bytes(struct Curl_easy *data,
 #ifdef DEBUGBUILD
                          bool env_override,
 #endif
                          unsigned char *rnd, size_t num)
 {
-  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  FETCHcode result = FETCHE_BAD_FUNCTION_ARGUMENT;
 #ifndef DEBUGBUILD
   const bool env_override = FALSE;
 #endif
@@ -241,10 +241,10 @@ CURLcode Curl_rand_bytes(struct Curl_easy *data,
  * size.
  */
 
-CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
+FETCHcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
                        size_t num)
 {
-  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  FETCHcode result = FETCHE_BAD_FUNCTION_ARGUMENT;
   unsigned char buffer[128];
   DEBUGASSERT(num > 1);
 
@@ -257,7 +257,7 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   if((num/2 >= sizeof(buffer)) || !(num&1)) {
     /* make sure it fits in the local buffer and that it is an odd number! */
     DEBUGF(infof(data, "invalid buffer size with Curl_rand_hex"));
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
   num--; /* save one for null-termination */
@@ -278,10 +278,10 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
 static const char alnum[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
+FETCHcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
                          size_t num)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   const unsigned int alnumspace = sizeof(alnum) - 1;
   unsigned int r;
   DEBUGASSERT(num > 1);

@@ -5,12 +5,12 @@ Copyright (C) Daniel Stenberg,
 <daniel@haxx.se
   >, et al. # # This software is licensed as described in the file COPYING,
   which # you should have received as part of this distribution. The terms # are
-  also available at https://curl.se/docs/copyright.html. # # You may opt to use,
+  also available at https://fetch.se/docs/copyright.html. # # You may opt to use,
   copy, modify, merge, publish, distribute and/or sell # copies of the Software,
   and permit persons to whom the Software is # furnished to do so, under the
   terms of the COPYING file. # # This software is distributed on an "AS IS"
   basis, WITHOUT WARRANTY OF ANY # KIND, either express or implied. # #
-  SPDX-License-Identifier: curl #
+  SPDX-License-Identifier: fetch #
   ###########################################################################
   LIB_VAUTH_CFILES = \ vauth/cleartext.c \ vauth/cram.c \ vauth/digest.c \
   vauth/digest_sspi.c \ vauth/gsasl.c \ vauth/krb5_gssapi.c \ vauth/krb5_sspi.c
@@ -26,19 +26,19 @@ Copyright (C) Daniel Stenberg,
   \ vtls/openssl.h \ vtls/rustls.h \ vtls/schannel.h \ vtls/schannel_int.h \
   vtls/sectransp.h \ vtls/vtls.h \ vtls/vtls_int.h \ vtls/vtls_scache.h \
   vtls/vtls_spack.h \ vtls/wolfssl.h \ vtls/x509asn1.h LIB_VQUIC_CFILES = \
-  vquic/curl_msh3.c \ vquic/curl_ngtcp2.c \ vquic/curl_osslq.c \
-  vquic/curl_quiche.c \ vquic/vquic.c \ vquic/vquic-tls.c LIB_VQUIC_HFILES = \
-  vquic/curl_msh3.h \ vquic/curl_ngtcp2.h \ vquic/curl_osslq.h \
-  vquic/curl_quiche.h \ vquic/vquic.h \ vquic/vquic_int.h \ vquic/vquic-tls.h
-  LIB_VSSH_CFILES = \ vssh/libssh.c \ vssh/libssh2.c \ vssh/curl_path.c \
-  vssh/wolfssh.c LIB_VSSH_HFILES = \ vssh/curl_path.h \ vssh/ssh.h LIB_CFILES =
+  vquic/fetch_msh3.c \ vquic/fetch_ngtcp2.c \ vquic/fetch_osslq.c \
+  vquic/fetch_quiche.c \ vquic/vquic.c \ vquic/vquic-tls.c LIB_VQUIC_HFILES = \
+  vquic/fetch_msh3.h \ vquic/fetch_ngtcp2.h \ vquic/fetch_osslq.h \
+  vquic/fetch_quiche.h \ vquic/vquic.h \ vquic/vquic_int.h \ vquic/vquic-tls.h
+  LIB_VSSH_CFILES = \ vssh/libssh.c \ vssh/libssh2.c \ vssh/fetch_path.c \
+  vssh/wolfssh.c LIB_VSSH_HFILES = \ vssh/fetch_path.h \ vssh/ssh.h LIB_CFILES =
   \ altsvc.c \ amigaos.c \ asyn-ares.c \ asyn-thread.c \ base64.c \ bufq.c \
   bufref.c \ cf-h1-proxy.c \ cf-h2-proxy.c \ cf-haproxy.c \ cf-https-connect.c \
   cf-socket.c \ cfilters.c \ conncache.c \ connect.c \ content_encoding.c \
-  cookie.c \ curl_addrinfo.c \ curl_des.c \ curl_endian.c \ curl_fnmatch.c \
-  curl_get_line.c \ curl_gethostname.c \ curl_gssapi.c \ curl_memrchr.c \
-  curl_multibyte.c \ curl_ntlm_core.c \ curl_range.c \ curl_rtmp.c \ curl_sasl.c
-  \ curl_sha512_256.c \ curl_sspi.c \ curl_threads.c \ curl_trc.c \ cw-out.c \
+  cookie.c \ fetch_addrinfo.c \ fetch_des.c \ fetch_endian.c \ fetch_fnmatch.c \
+  fetch_get_line.c \ fetch_gethostname.c \ fetch_gssapi.c \ fetch_memrchr.c \
+  fetch_multibyte.c \ fetch_ntlm_core.c \ fetch_range.c \ fetch_rtmp.c \ fetch_sasl.c
+  \ fetch_sha512_256.c \ fetch_sspi.c \ fetch_threads.c \ fetch_trc.c \ cw-out.c \
   dict.c \ dllmain.c \ doh.c \ dynbuf.c \ dynhds.c \ easy.c \ easygetopt.c \
   easyoptions.c \ escape.c \ file.c \ fileinfo.c \ fopen.c \ formdata.c \ ftp.c
   \ ftplistparser.c \ getenv.c \ getinfo.c \ gopher.c \ hash.c \ headers.c \
@@ -57,13 +57,13 @@ Copyright (C) Daniel Stenberg,
   ws.c LIB_HFILES = \ altsvc.h \ amigaos.h \ arpa_telnet.h \ asyn.h \ bufq.h \
   bufref.h \ cf-h1-proxy.h \ cf-h2-proxy.h \ cf-haproxy.h \ cf-https-connect.h \
   cf-socket.h \ cfilters.h \ conncache.h \ connect.h \ content_encoding.h \
-  cookie.h \ curl_addrinfo.h \ curl_base64.h \ curl_ctype.h \ curl_des.h \
-  curl_endian.h \ curl_fnmatch.h \ curl_get_line.h \ curl_gethostname.h \
-  curl_gssapi.h \ curl_hmac.h \ curl_krb5.h \ curl_ldap.h \ curl_md4.h \
-  curl_md5.h \ curl_memory.h \ curl_memrchr.h \ curl_multibyte.h \
-  curl_ntlm_core.h \ curl_printf.h \ curl_range.h \ curl_rtmp.h \ curl_sasl.h \
-  curl_setup.h \ curl_setup_once.h \ curl_sha256.h \ curl_sha512_256.h \
-  curl_sspi.h \ curl_threads.h \ curl_trc.h \ curlx.h \ cw-out.h \ dict.h \
+  cookie.h \ fetch_addrinfo.h \ fetch_base64.h \ fetch_ctype.h \ fetch_des.h \
+  fetch_endian.h \ fetch_fnmatch.h \ fetch_get_line.h \ fetch_gethostname.h \
+  fetch_gssapi.h \ fetch_hmac.h \ fetch_krb5.h \ fetch_ldap.h \ fetch_md4.h \
+  fetch_md5.h \ fetch_memory.h \ fetch_memrchr.h \ fetch_multibyte.h \
+  fetch_ntlm_core.h \ fetch_printf.h \ fetch_range.h \ fetch_rtmp.h \ fetch_sasl.h \
+  fetch_setup.h \ fetch_setup_once.h \ fetch_sha256.h \ fetch_sha512_256.h \
+  fetch_sspi.h \ fetch_threads.h \ fetch_trc.h \ fetchx.h \ cw-out.h \ dict.h \
   doh.h \ dynbuf.h \ dynhds.h \ easy_lock.h \ easyif.h \ easyoptions.h \
   escape.h \ file.h \ fileinfo.h \ fopen.h \ formdata.h \ ftp.h \
   ftplistparser.h \ functypes.h \ getinfo.h \ gopher.h \ hash.h \ headers.h \
@@ -78,7 +78,7 @@ Copyright (C) Daniel Stenberg,
   splay.h \ strcase.h \ strdup.h \ strerror.h \ strparse.h \ strtok.h \
   strtoofft.h \ system_win32.h \ telnet.h \ tftp.h \ timediff.h \ timeval.h \
   transfer.h \ url.h \ urlapi-int.h \ urldata.h \ version_win32.h \ warnless.h \
-  ws.h LIB_RCFILES = libcurl.rc CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES)
+  ws.h LIB_RCFILES = libfetch.rc CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES)
   $(LIB_VTLS_CFILES) \ $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES) HHEADERS =
   $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES) \ $(LIB_VQUIC_HFILES)
   $(LIB_VSSH_HFILES)

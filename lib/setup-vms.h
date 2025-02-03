@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SETUP_VMS_H
-#define HEADER_CURL_SETUP_VMS_H
+#ifndef HEADER_FETCH_SETUP_VMS_H
+#define HEADER_FETCH_SETUP_VMS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -173,7 +173,7 @@ static struct passwd *vms_getpwuid(uid_t uid)
   }
 
   /* Need to copy the structure returned */
-  /* Since curl is only using pw_dir, no need to fix up */
+  /* Since fetch is only using pw_dir, no need to fix up */
   /* the pw_shell when running under Bash */
   vms_passwd_cache.pw_name = my_passwd->pw_name;
   vms_passwd_cache.pw_uid = my_passwd->pw_uid;
@@ -370,7 +370,7 @@ static struct passwd *vms_getpwuid(uid_t uid)
 
 #define USE_UPPERCASE_KRBAPI 1
 
-/* AI_NUMERICHOST needed for IP V6 support in curl */
+/* AI_NUMERICHOST needed for IP V6 support in fetch */
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #ifndef AI_NUMERICHOST
@@ -441,4 +441,4 @@ static struct passwd *vms_getpwuid(uid_t uid)
 #endif
 #endif
 
-#endif /* HEADER_CURL_SETUP_VMS_H */
+#endif /* HEADER_FETCH_SETUP_VMS_H */

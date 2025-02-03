@@ -1,9 +1,9 @@
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 
 Makefile.soname.cmake
-curl_config.h
-curl_config.h.in
-libcurl.vers
-libcurl_unity.c
+fetch_config.h
+fetch_config.h.in
+libfetch.vers
+libfetch_unity.c

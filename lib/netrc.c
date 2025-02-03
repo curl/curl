@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
-#ifndef CURL_DISABLE_NETRC
+#include "fetch_setup.h"
+#ifndef FETCH_DISABLE_NETRC
 
 #ifdef HAVE_PWD_H
 #undef __NO_NET_API /* required for AmigaOS to declare getpwuid() */
@@ -31,14 +31,14 @@
 #define __NO_NET_API
 #endif
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "netrc.h"
 #include "strcase.h"
-#include "curl_get_line.h"
+#include "fetch_get_line.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 #include "memdebug.h"
 
 /* Get user and password from .netrc when given a machine name */
@@ -67,9 +67,9 @@ enum found_state {
 #define MAX_NETRC_FILE (128*1024)
 #define MAX_NETRC_TOKEN 4096
 
-static CURLcode file2memory(const char *filename, struct dynbuf *filebuf)
+static FETCHcode file2memory(const char *filename, struct dynbuf *filebuf)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   FILE *file = fopen(filename, FOPEN_READTEXT);
   struct dynbuf linebuf;
   Curl_dyn_init(&linebuf, MAX_NETRC_LINE);
@@ -361,7 +361,7 @@ int Curl_parsenetrc(struct store_netrc *store, const char *host,
     char pwbuf[1024];
 #endif
     char *home = NULL;
-    char *homea = curl_getenv("HOME"); /* portable environment reader */
+    char *homea = fetch_getenv("HOME"); /* portable environment reader */
     if(homea) {
       home = homea;
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
@@ -383,7 +383,7 @@ int Curl_parsenetrc(struct store_netrc *store, const char *host,
 #elif defined(_WIN32)
     }
     else {
-      homea = curl_getenv("USERPROFILE");
+      homea = fetch_getenv("USERPROFILE");
       if(homea) {
         home = homea;
       }

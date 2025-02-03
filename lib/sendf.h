@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SENDF_H
-#define HEADER_CURL_SENDF_H
+#ifndef HEADER_FETCH_SENDF_H
+#define HEADER_FETCH_SENDF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#include "curl_trc.h"
+#include "fetch_trc.h"
 
 /**
  * Type of data that is being written to the client (application)
@@ -55,7 +55,7 @@
  * Write `len` bytes at `prt` to the client. `type` indicates what
  * kind of data is being written.
  */
-CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
+FETCHcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 
 /**
@@ -73,7 +73,7 @@ void Curl_client_reset(struct Curl_easy *data);
  * A new request is starting, perform any ops like rewinding
  * previous readers when needed.
  */
-CURLcode Curl_client_start(struct Curl_easy *data);
+FETCHcode Curl_client_start(struct Curl_easy *data);
 
 /**
  * Client Writers - a chain passing transfer BODY data to the client.
@@ -81,8 +81,8 @@ CURLcode Curl_client_start(struct Curl_easy *data);
  * Other uses: monitoring of download progress
  *
  * Writers in the chain are order by their `phase`. First come all
- * writers in CURL_CW_RAW, followed by any in CURL_CW_TRANSFER_DECODE,
- * followed by any in CURL_CW_PROTOCOL, etc.
+ * writers in FETCH_CW_RAW, followed by any in FETCH_CW_TRANSFER_DECODE,
+ * followed by any in FETCH_CW_PROTOCOL, etc.
  *
  * When adding a writer, it is inserted as first in its phase. This means
  * the order of adding writers of the same phase matters, but writers for
@@ -96,20 +96,20 @@ CURLcode Curl_client_start(struct Curl_easy *data);
 
 /* Phase a writer operates at. */
 typedef enum {
-  CURL_CW_RAW,  /* raw data written, before any decoding */
-  CURL_CW_TRANSFER_DECODE, /* remove transfer-encodings */
-  CURL_CW_PROTOCOL, /* after transfer, but before content decoding */
-  CURL_CW_CONTENT_DECODE, /* remove content-encodings */
-  CURL_CW_CLIENT  /* data written to client */
+  FETCH_CW_RAW,  /* raw data written, before any decoding */
+  FETCH_CW_TRANSFER_DECODE, /* remove transfer-encodings */
+  FETCH_CW_PROTOCOL, /* after transfer, but before content decoding */
+  FETCH_CW_CONTENT_DECODE, /* remove content-encodings */
+  FETCH_CW_CLIENT  /* data written to client */
 } Curl_cwriter_phase;
 
 /* Client Writer Type, provides the implementation */
 struct Curl_cwtype {
   const char *name;        /* writer name. */
   const char *alias;       /* writer name alias, maybe NULL. */
-  CURLcode (*do_init)(struct Curl_easy *data,
+  FETCHcode (*do_init)(struct Curl_easy *data,
                       struct Curl_cwriter *writer);
-  CURLcode (*do_write)(struct Curl_easy *data,
+  FETCHcode (*do_write)(struct Curl_easy *data,
                        struct Curl_cwriter *writer, int type,
                        const char *buf, size_t nbytes);
   void (*do_close)(struct Curl_easy *data,
@@ -120,7 +120,7 @@ struct Curl_cwtype {
 /* Client writer instance, allocated on creation.
  * `void *ctx` is the pointer from the allocation of
  * the `struct Curl_cwriter` itself. This is suitable for "downcasting"
- * by the writers implementation. See https://github.com/curl/curl/pull/13054
+ * by the writers implementation. See https://github.com/fetch/fetch/pull/13054
  * for the alignment problems that arise otherwise.
  */
 struct Curl_cwriter {
@@ -135,7 +135,7 @@ struct Curl_cwriter {
  * inserted into the writer chain by this call.
  * Invokes `writer->do_init()`.
  */
-CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
+FETCHcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
                              struct Curl_easy *data,
                              const struct Curl_cwtype *ce_handler,
                              Curl_cwriter_phase phase);
@@ -156,7 +156,7 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase);
  * Adds a writer to the transfer's writer chain.
  * The writers `phase` determines where in the chain it is inserted.
  */
-CURLcode Curl_cwriter_add(struct Curl_easy *data,
+FETCHcode Curl_cwriter_add(struct Curl_easy *data,
                           struct Curl_cwriter *writer);
 
 /**
@@ -173,7 +173,7 @@ struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
  * Convenience method for calling `writer->do_write()` that
  * checks for NULL writer.
  */
-CURLcode Curl_cwriter_write(struct Curl_easy *data,
+FETCHcode Curl_cwriter_write(struct Curl_easy *data,
                             struct Curl_cwriter *writer, int type,
                             const char *buf, size_t nbytes);
 
@@ -185,15 +185,15 @@ bool Curl_cwriter_is_paused(struct Curl_easy *data);
 /**
  * Unpause client writer and flush any buffered date to the client.
  */
-CURLcode Curl_cwriter_unpause(struct Curl_easy *data);
+FETCHcode Curl_cwriter_unpause(struct Curl_easy *data);
 
 /**
  * Default implementations for do_init, do_write, do_close that
  * do nothing and pass the data through.
  */
-CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
+FETCHcode Curl_cwriter_def_init(struct Curl_easy *data,
                                struct Curl_cwriter *writer);
-CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
+FETCHcode Curl_cwriter_def_write(struct Curl_easy *data,
                                 struct Curl_cwriter *writer, int type,
                                 const char *buf, size_t nbytes);
 void Curl_cwriter_def_close(struct Curl_easy *data,
@@ -204,17 +204,17 @@ void Curl_cwriter_def_close(struct Curl_easy *data,
 /* Client Reader Type, provides the implementation */
 struct Curl_crtype {
   const char *name;        /* writer name. */
-  CURLcode (*do_init)(struct Curl_easy *data, struct Curl_creader *reader);
-  CURLcode (*do_read)(struct Curl_easy *data, struct Curl_creader *reader,
+  FETCHcode (*do_init)(struct Curl_easy *data, struct Curl_creader *reader);
+  FETCHcode (*do_read)(struct Curl_easy *data, struct Curl_creader *reader,
                       char *buf, size_t blen, size_t *nread, bool *eos);
   void (*do_close)(struct Curl_easy *data, struct Curl_creader *reader);
   bool (*needs_rewind)(struct Curl_easy *data, struct Curl_creader *reader);
-  curl_off_t (*total_length)(struct Curl_easy *data,
+  fetch_off_t (*total_length)(struct Curl_easy *data,
                              struct Curl_creader *reader);
-  CURLcode (*resume_from)(struct Curl_easy *data,
-                          struct Curl_creader *reader, curl_off_t offset);
-  CURLcode (*rewind)(struct Curl_easy *data, struct Curl_creader *reader);
-  CURLcode (*unpause)(struct Curl_easy *data, struct Curl_creader *reader);
+  FETCHcode (*resume_from)(struct Curl_easy *data,
+                          struct Curl_creader *reader, fetch_off_t offset);
+  FETCHcode (*rewind)(struct Curl_easy *data, struct Curl_creader *reader);
+  FETCHcode (*unpause)(struct Curl_easy *data, struct Curl_creader *reader);
   bool (*is_paused)(struct Curl_easy *data, struct Curl_creader *reader);
   void (*done)(struct Curl_easy *data,
                struct Curl_creader *reader, int premature);
@@ -223,17 +223,17 @@ struct Curl_crtype {
 
 /* Phase a reader operates at. */
 typedef enum {
-  CURL_CR_NET,  /* data send to the network (connection filters) */
-  CURL_CR_TRANSFER_ENCODE, /* add transfer-encodings */
-  CURL_CR_PROTOCOL, /* before transfer, but after content decoding */
-  CURL_CR_CONTENT_ENCODE, /* add content-encodings */
-  CURL_CR_CLIENT  /* data read from client */
+  FETCH_CR_NET,  /* data send to the network (connection filters) */
+  FETCH_CR_TRANSFER_ENCODE, /* add transfer-encodings */
+  FETCH_CR_PROTOCOL, /* before transfer, but after content decoding */
+  FETCH_CR_CONTENT_ENCODE, /* add content-encodings */
+  FETCH_CR_CLIENT  /* data read from client */
 } Curl_creader_phase;
 
 /* Client reader instance, allocated on creation.
  * `void *ctx` is the pointer from the allocation of
  * the `struct Curl_cwriter` itself. This is suitable for "downcasting"
- * by the writers implementation. See https://github.com/curl/curl/pull/13054
+ * by the writers implementation. See https://github.com/fetch/fetch/pull/13054
  * for the alignment problems that arise otherwise.
  */
 struct Curl_creader {
@@ -247,24 +247,24 @@ struct Curl_creader {
  * Default implementations for do_init, do_write, do_close that
  * do nothing and pass the data through.
  */
-CURLcode Curl_creader_def_init(struct Curl_easy *data,
+FETCHcode Curl_creader_def_init(struct Curl_easy *data,
                                struct Curl_creader *reader);
 void Curl_creader_def_close(struct Curl_easy *data,
                             struct Curl_creader *reader);
-CURLcode Curl_creader_def_read(struct Curl_easy *data,
+FETCHcode Curl_creader_def_read(struct Curl_easy *data,
                                struct Curl_creader *reader,
                                char *buf, size_t blen,
                                size_t *nread, bool *eos);
 bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
                                    struct Curl_creader *reader);
-curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
+fetch_off_t Curl_creader_def_total_length(struct Curl_easy *data,
                                          struct Curl_creader *reader);
-CURLcode Curl_creader_def_resume_from(struct Curl_easy *data,
+FETCHcode Curl_creader_def_resume_from(struct Curl_easy *data,
                                       struct Curl_creader *reader,
-                                      curl_off_t offset);
-CURLcode Curl_creader_def_rewind(struct Curl_easy *data,
+                                      fetch_off_t offset);
+FETCHcode Curl_creader_def_rewind(struct Curl_easy *data,
                                  struct Curl_creader *reader);
-CURLcode Curl_creader_def_unpause(struct Curl_easy *data,
+FETCHcode Curl_creader_def_unpause(struct Curl_easy *data,
                                   struct Curl_creader *reader);
 bool Curl_creader_def_is_paused(struct Curl_easy *data,
                                 struct Curl_creader *reader);
@@ -275,7 +275,7 @@ void Curl_creader_def_done(struct Curl_easy *data,
  * Convenience method for calling `reader->do_read()` that
  * checks for NULL reader.
  */
-CURLcode Curl_creader_read(struct Curl_easy *data,
+FETCHcode Curl_creader_read(struct Curl_easy *data,
                            struct Curl_creader *reader,
                            char *buf, size_t blen, size_t *nread, bool *eos);
 
@@ -284,7 +284,7 @@ CURLcode Curl_creader_read(struct Curl_easy *data,
  * inserted into the writer chain by this call.
  * Invokes `reader->do_init()`.
  */
-CURLcode Curl_creader_create(struct Curl_creader **preader,
+FETCHcode Curl_creader_create(struct Curl_creader **preader,
                              struct Curl_easy *data,
                              const struct Curl_crtype *cr_handler,
                              Curl_creader_phase phase);
@@ -299,16 +299,16 @@ void Curl_creader_free(struct Curl_easy *data, struct Curl_creader *reader);
  * Adds a reader to the transfer's reader chain.
  * The readers `phase` determines where in the chain it is inserted.
  */
-CURLcode Curl_creader_add(struct Curl_easy *data,
+FETCHcode Curl_creader_add(struct Curl_easy *data,
                           struct Curl_creader *reader);
 
 /**
- * Set the given reader, which needs to be of type CURL_CR_CLIENT,
+ * Set the given reader, which needs to be of type FETCH_CR_CLIENT,
  * as the new first reader. Discard any installed readers and init
  * the reader chain anew.
  * The function takes ownership of `r`.
  */
-CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r);
+FETCHcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r);
 
 /**
  * Read at most `blen` bytes at `buf` from the client.
@@ -317,9 +317,9 @@ CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r);
  * @param blen    the amount of memory at `buf`
  * @param nread   on return the number of bytes read into `buf`
  * @param eos     TRUE iff bytes are the end of data from client
- * @return CURLE_OK on successful read (even 0 length) or error
+ * @return FETCHE_OK on successful read (even 0 length) or error
  */
-CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
+FETCHcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
                           size_t *nread, bool *eos) WARN_UNUSED_RESULT;
 
 /**
@@ -345,35 +345,35 @@ void Curl_creader_set_rewind(struct Curl_easy *data, bool enable);
  * "crlf conversion" is installed, the returned length will be -1.
  * @return -1 if length is indeterminate
  */
-curl_off_t Curl_creader_total_length(struct Curl_easy *data);
+fetch_off_t Curl_creader_total_length(struct Curl_easy *data);
 
 /**
  * Get the total length of bytes provided by the reader at phase
- * CURL_CR_CLIENT. This may not match the amount of bytes read
+ * FETCH_CR_CLIENT. This may not match the amount of bytes read
  * for a request, depending if other, encoding readers are also installed.
  * However it allows for rough estimation of the overall length.
  * @return -1 if length is indeterminate
  */
-curl_off_t Curl_creader_client_length(struct Curl_easy *data);
+fetch_off_t Curl_creader_client_length(struct Curl_easy *data);
 
 /**
- * Ask the installed reader at phase CURL_CR_CLIENT to start
+ * Ask the installed reader at phase FETCH_CR_CLIENT to start
  * reading from the given offset. On success, this will reduce
  * the `total_length()` by the amount.
  * @param data    the transfer to read client bytes for
  * @param offset  the offset where to start reads from, negative
  *                values will be ignored.
- * @return CURLE_OK if offset could be set
- *         CURLE_READ_ERROR if not supported by reader or seek/read failed
+ * @return FETCHE_OK if offset could be set
+ *         FETCHE_READ_ERROR if not supported by reader or seek/read failed
  *                          of offset larger then total length
- *         CURLE_PARTIAL_FILE if offset led to 0 total length
+ *         FETCHE_PARTIAL_FILE if offset led to 0 total length
  */
-CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset);
+FETCHcode Curl_creader_resume_from(struct Curl_easy *data, fetch_off_t offset);
 
 /**
  * Unpause all installed readers.
  */
-CURLcode Curl_creader_unpause(struct Curl_easy *data);
+FETCHcode Curl_creader_unpause(struct Curl_easy *data);
 
 /**
  * Return TRUE iff any of the installed readers is paused.
@@ -396,17 +396,17 @@ struct Curl_creader *Curl_creader_get_by_type(struct Curl_easy *data,
 /**
  * Set the client reader to provide 0 bytes, immediate EOS.
  */
-CURLcode Curl_creader_set_null(struct Curl_easy *data);
+FETCHcode Curl_creader_set_null(struct Curl_easy *data);
 
 /**
  * Set the client reader the reads from fread callback.
  */
-CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len);
+FETCHcode Curl_creader_set_fread(struct Curl_easy *data, fetch_off_t len);
 
 /**
  * Set the client reader the reads from the supplied buf (NOT COPIED).
  */
-CURLcode Curl_creader_set_buf(struct Curl_easy *data,
+FETCHcode Curl_creader_set_buf(struct Curl_easy *data,
                               const char *buf, size_t blen);
 
-#endif /* HEADER_CURL_SENDF_H */
+#endif /* HEADER_FETCH_SENDF_H */

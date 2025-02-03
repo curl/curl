@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TIMEDIFF_H
-#define HEADER_CURL_TIMEDIFF_H
+#ifndef HEADER_FETCH_TIMEDIFF_H
+#define HEADER_FETCH_TIMEDIFF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,19 +20,19 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 /* Use a larger type even for 32-bit time_t systems so that we can keep
    microsecond accuracy in it */
-typedef curl_off_t timediff_t;
+typedef fetch_off_t timediff_t;
 #define FMT_TIMEDIFF_T FMT_OFF_T
 
-#define TIMEDIFF_T_MAX CURL_OFF_T_MAX
-#define TIMEDIFF_T_MIN CURL_OFF_T_MIN
+#define TIMEDIFF_T_MAX FETCH_OFF_T_MAX
+#define TIMEDIFF_T_MIN FETCH_OFF_T_MIN
 
 /*
  * Converts number of milliseconds into a timeval structure.
@@ -42,11 +42,11 @@ typedef curl_off_t timediff_t;
  *    tv with 0 in both fields IF ms == 0 (eg. 0ms timeout -> polling select)
  *    tv with converted fields IF ms > 0 (eg. >0ms timeout -> waiting select)
  */
-struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms);
+struct timeval *fetchx_mstotv(struct timeval *tv, timediff_t ms);
 
 /*
  * Converts a timeval structure into number of milliseconds.
  */
-timediff_t curlx_tvtoms(struct timeval *tv);
+timediff_t fetchx_tvtoms(struct timeval *tv);
 
-#endif /* HEADER_CURL_TIMEDIFF_H */
+#endif /* HEADER_FETCH_TIMEDIFF_H */

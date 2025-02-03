@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_FTPLISTPARSER_H
-#define HEADER_CURL_FTPLISTPARSER_H
+#ifndef HEADER_FETCH_FTPLISTPARSER_H
+#define HEADER_FETCH_FTPLISTPARSER_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,12 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifndef CURL_DISABLE_FTP
+#ifndef FETCH_DISABLE_FTP
 
 /* WRITEFUNCTION callback for parsing LIST responses */
 size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
@@ -33,7 +33,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
 
 struct ftp_parselist_data; /* defined inside ftplibparser.c */
 
-CURLcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data);
+FETCHcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data);
 
 struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void);
 
@@ -41,15 +41,15 @@ void Curl_ftp_parselist_data_free(struct ftp_parselist_data **pl_data);
 
 /* list of wildcard process states */
 typedef enum {
-  CURLWC_CLEAR = 0,
-  CURLWC_INIT = 1,
-  CURLWC_MATCHING, /* library is trying to get list of addresses for
+  FETCHWC_CLEAR = 0,
+  FETCHWC_INIT = 1,
+  FETCHWC_MATCHING, /* library is trying to get list of addresses for
                       downloading */
-  CURLWC_DOWNLOADING,
-  CURLWC_CLEAN, /* deallocate resources and reset settings */
-  CURLWC_SKIP,  /* skip over concrete file */
-  CURLWC_ERROR, /* error cases */
-  CURLWC_DONE   /* if is wildcard->state == CURLWC_DONE wildcard loop
+  FETCHWC_DOWNLOADING,
+  FETCHWC_CLEAN, /* deallocate resources and reset settings */
+  FETCHWC_SKIP,  /* skip over concrete file */
+  FETCHWC_ERROR, /* error cases */
+  FETCHWC_DONE   /* if is wildcard->state == FETCHWC_DONE wildcard loop
                    will end */
 } wildcard_states;
 
@@ -65,7 +65,7 @@ struct WildcardData {
   unsigned char state; /* wildcard_states */
 };
 
-CURLcode Curl_wildcard_init(struct WildcardData *wc);
+FETCHcode Curl_wildcard_init(struct WildcardData *wc);
 void Curl_wildcard_dtor(struct WildcardData **wcp);
 
 struct Curl_easy;
@@ -73,5 +73,5 @@ struct Curl_easy;
 #else
 /* FTP is disabled */
 #define Curl_wildcard_dtor(x)
-#endif /* CURL_DISABLE_FTP */
-#endif /* HEADER_CURL_FTPLISTPARSER_H */
+#endif /* FETCH_DISABLE_FTP */
+#endif /* HEADER_FETCH_FTPLISTPARSER_H */

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HASH_H
-#define HEADER_CURL_HASH_H
+#ifndef HEADER_FETCH_HASH_H
+#define HEADER_FETCH_HASH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
 #include <stddef.h>
 
@@ -111,13 +111,13 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter);
 void Curl_hash_print(struct Curl_hash *h,
                      void (*func)(void *));
 
-/* Hash for `curl_off_t` as key */
+/* Hash for `fetch_off_t` as key */
 void Curl_hash_offt_init(struct Curl_hash *h, size_t slots,
                          Curl_hash_dtor dtor);
 
-void *Curl_hash_offt_set(struct Curl_hash *h, curl_off_t id, void *elem);
-int Curl_hash_offt_remove(struct Curl_hash *h, curl_off_t id);
-void *Curl_hash_offt_get(struct Curl_hash *h, curl_off_t id);
+void *Curl_hash_offt_set(struct Curl_hash *h, fetch_off_t id, void *elem);
+int Curl_hash_offt_remove(struct Curl_hash *h, fetch_off_t id);
+void *Curl_hash_offt_get(struct Curl_hash *h, fetch_off_t id);
 
 
-#endif /* HEADER_CURL_HASH_H */
+#endif /* HEADER_FETCH_HASH_H */

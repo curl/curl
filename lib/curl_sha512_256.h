@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SHA512_256_H
-#define HEADER_CURL_SHA512_256_H
+#ifndef HEADER_FETCH_SHA512_256_H
+#define HEADER_FETCH_SHA512_256_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,25 +20,25 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
+#if !defined(FETCH_DISABLE_DIGEST_AUTH) && !defined(FETCH_DISABLE_SHA512_256)
 
-#include <curl/curl.h>
-#include "curl_hmac.h"
+#include <fetch/fetch.h>
+#include "fetch_hmac.h"
 
-#define CURL_HAVE_SHA512_256
+#define FETCH_HAVE_SHA512_256
 
 extern const struct HMAC_params Curl_HMAC_SHA512_256[1];
 
-#define CURL_SHA512_256_DIGEST_LENGTH 32
+#define FETCH_SHA512_256_DIGEST_LENGTH 32
 
-CURLcode
+FETCHcode
 Curl_sha512_256it(unsigned char *output, const unsigned char *input,
                   size_t input_size);
 
-#endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
+#endif /* !FETCH_DISABLE_DIGEST_AUTH && !FETCH_DISABLE_SHA512_256 */
 
-#endif /* HEADER_CURL_SHA256_H */
+#endif /* HEADER_FETCH_SHA256_H */

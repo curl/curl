@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#ifndef CURL_DISABLE_GOPHER
+#ifndef FETCH_DISABLE_GOPHER
 
 #include "urldata.h"
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 #include "transfer.h"
 #include "sendf.h"
 #include "cfilters.h"
@@ -40,8 +40,8 @@
 #include "url.h"
 #include "escape.h"
 #include "warnless.h"
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "fetch_printf.h"
+#include "fetch_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -49,10 +49,10 @@
  * Forward declarations.
  */
 
-static CURLcode gopher_do(struct Curl_easy *data, bool *done);
+static FETCHcode gopher_do(struct Curl_easy *data, bool *done);
 #ifdef USE_SSL
-static CURLcode gopher_connect(struct Curl_easy *data, bool *done);
-static CURLcode gopher_connecting(struct Curl_easy *data, bool *done);
+static FETCHcode gopher_connect(struct Curl_easy *data, bool *done);
+static FETCHcode gopher_connecting(struct Curl_easy *data, bool *done);
 #endif
 
 /*
@@ -81,8 +81,8 @@ const struct Curl_handler Curl_handler_gopher = {
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
   PORT_GOPHER,                          /* defport */
-  CURLPROTO_GOPHER,                     /* protocol */
-  CURLPROTO_GOPHER,                     /* family */
+  FETCHPROTO_GOPHER,                     /* protocol */
+  FETCHPROTO_GOPHER,                     /* family */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -107,22 +107,22 @@ const struct Curl_handler Curl_handler_gophers = {
   ZERO_NULL,                            /* attach connection */
   ZERO_NULL,                            /* follow */
   PORT_GOPHER,                          /* defport */
-  CURLPROTO_GOPHERS,                    /* protocol */
-  CURLPROTO_GOPHER,                     /* family */
+  FETCHPROTO_GOPHERS,                    /* protocol */
+  FETCHPROTO_GOPHER,                     /* family */
   PROTOPT_SSL                           /* flags */
 };
 
-static CURLcode gopher_connect(struct Curl_easy *data, bool *done)
+static FETCHcode gopher_connect(struct Curl_easy *data, bool *done)
 {
   (void)data;
   (void)done;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
+static FETCHcode gopher_connecting(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
-  CURLcode result;
+  FETCHcode result;
 
   result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
   if(result)
@@ -132,11 +132,11 @@ static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
 }
 #endif
 
-static CURLcode gopher_do(struct Curl_easy *data, bool *done)
+static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
-  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  fetch_socket_t sockfd = conn->sock[FIRSTSOCKET];
   char *gopherpath;
   char *path = data->state.up.path;
   char *query = data->state.up.query;
@@ -158,7 +158,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     gopherpath = strdup(path);
 
   if(!gopherpath)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
   if(strlen(gopherpath) <= 2) {
@@ -181,7 +181,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     sel_org = sel;
   }
 
-  k = curlx_uztosz(len);
+  k = fetchx_uztosz(len);
 
   for(;;) {
     /* Break out of the loop if the selector is empty because OpenSSL and/or
@@ -205,7 +205,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
     timeout_ms = Curl_timeleft(data, NULL, FALSE);
     if(timeout_ms < 0) {
-      result = CURLE_OPERATION_TIMEDOUT;
+      result = FETCHE_OPERATION_TIMEDOUT;
       break;
     }
     if(!timeout_ms)
@@ -219,11 +219,11 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     */
     what = SOCKET_WRITABLE(sockfd, timeout_ms);
     if(what < 0) {
-      result = CURLE_SEND_ERROR;
+      result = FETCHE_SEND_ERROR;
       break;
     }
     else if(!what) {
-      result = CURLE_OPERATION_TIMEDOUT;
+      result = FETCHE_OPERATION_TIMEDOUT;
       break;
     }
   }
@@ -240,7 +240,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
-  return CURLE_OK;
+  Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
+  return FETCHE_OK;
 }
-#endif /* CURL_DISABLE_GOPHER */
+#endif /* FETCH_DISABLE_GOPHER */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,28 +18,28 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /* Base64 encoding/decoding */
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
-  !defined(CURL_DISABLE_LDAP) || \
-  !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3) || \
-  !defined(CURL_DISABLE_IMAP) || \
-  !defined(CURL_DISABLE_DIGEST_AUTH) || \
-  !defined(CURL_DISABLE_DOH) || defined(USE_SSL) || defined(BUILDING_CURL)
-#include "curl/curl.h"
+#if !defined(FETCH_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
+  !defined(FETCH_DISABLE_LDAP) || \
+  !defined(FETCH_DISABLE_SMTP) || \
+  !defined(FETCH_DISABLE_POP3) || \
+  !defined(FETCH_DISABLE_IMAP) || \
+  !defined(FETCH_DISABLE_DIGEST_AUTH) || \
+  !defined(FETCH_DISABLE_DOH) || defined(USE_SSL) || defined(BUILDING_FETCH)
+#include "fetch/fetch.h"
 #include "warnless.h"
-#include "curl_base64.h"
+#include "fetch_base64.h"
 
 /* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
-#include "curl_memory.h"
+#ifdef BUILDING_LIBFETCH
+#include "fetch_memory.h"
 #endif
 #include "memdebug.h"
 
@@ -66,14 +66,14 @@ static const unsigned char decodetable[] =
  * pointer in *outptr to a newly allocated memory area holding decoded
  * data. Size of decoded data is returned in variable pointed by outlen.
  *
- * Returns CURLE_OK on success, otherwise specific error code. Function
- * output shall not be considered valid unless CURLE_OK is returned.
+ * Returns FETCHE_OK on success, otherwise specific error code. Function
+ * output shall not be considered valid unless FETCHE_OK is returned.
  *
  * When decoded data length is 0, returns NULL in *outptr.
  *
  * @unittest: 1302
  */
-CURLcode Curl_base64_decode(const char *src,
+FETCHcode Curl_base64_decode(const char *src,
                             unsigned char **outptr, size_t *outlen)
 {
   size_t srclen = 0;
@@ -92,7 +92,7 @@ CURLcode Curl_base64_decode(const char *src,
 
   /* Check the length of the input string is valid */
   if(!srclen || srclen % 4)
-    return CURLE_BAD_CONTENT_ENCODING;
+    return FETCHE_BAD_CONTENT_ENCODING;
 
   /* srclen is at least 4 here */
   while(src[srclen - 1 - padding] == '=') {
@@ -100,7 +100,7 @@ CURLcode Curl_base64_decode(const char *src,
     padding++;
     /* A maximum of two = padding characters is allowed */
     if(padding > 2)
-      return CURLE_BAD_CONTENT_ENCODING;
+      return FETCHE_BAD_CONTENT_ENCODING;
   }
 
   /* Calculate the number of quantums */
@@ -113,7 +113,7 @@ CURLcode Curl_base64_decode(const char *src,
   /* Allocate our buffer including room for a null-terminator */
   newstr = malloc(rawlen + 1);
   if(!newstr)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   pos = newstr;
 
@@ -179,13 +179,13 @@ CURLcode Curl_base64_decode(const char *src,
   *outptr = newstr;
   *outlen = rawlen;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 bad:
   free(newstr);
-  return CURLE_BAD_CONTENT_ENCODING;
+  return FETCHE_BAD_CONTENT_ENCODING;
 }
 
-static CURLcode base64_encode(const char *table64,
+static FETCHcode base64_encode(const char *table64,
                               const char *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
@@ -202,12 +202,12 @@ static CURLcode base64_encode(const char *table64,
 
 #if SIZEOF_SIZE_T == 4
   if(insize > UINT_MAX/4)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 #endif
 
   base64data = output = malloc((insize + 2) / 3 * 4 + 1);
   if(!output)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   while(insize >= 3) {
     *output++ = table64[ in[0] >> 2 ];
@@ -245,7 +245,7 @@ static CURLcode base64_encode(const char *table64,
   /* Return the length of the new data */
   *outlen = (size_t)(output - base64data);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /*
@@ -258,12 +258,12 @@ static CURLcode base64_encode(const char *table64,
  *
  * Input length of 0 indicates input buffer holds a NUL-terminated string.
  *
- * Returns CURLE_OK on success, otherwise specific error code. Function
- * output shall not be considered valid unless CURLE_OK is returned.
+ * Returns FETCHE_OK on success, otherwise specific error code. Function
+ * output shall not be considered valid unless FETCHE_OK is returned.
  *
  * @unittest: 1302
  */
-CURLcode Curl_base64_encode(const char *inputbuff, size_t insize,
+FETCHcode Curl_base64_encode(const char *inputbuff, size_t insize,
                             char **outptr, size_t *outlen)
 {
   return base64_encode(base64encdec, inputbuff, insize, outptr, outlen);
@@ -279,12 +279,12 @@ CURLcode Curl_base64_encode(const char *inputbuff, size_t insize,
  *
  * Input length of 0 indicates input buffer holds a NUL-terminated string.
  *
- * Returns CURLE_OK on success, otherwise specific error code. Function
- * output shall not be considered valid unless CURLE_OK is returned.
+ * Returns FETCHE_OK on success, otherwise specific error code. Function
+ * output shall not be considered valid unless FETCHE_OK is returned.
  *
  * @unittest: 1302
  */
-CURLcode Curl_base64url_encode(const char *inputbuff, size_t insize,
+FETCHcode Curl_base64url_encode(const char *inputbuff, size_t insize,
                                char **outptr, size_t *outlen)
 {
   return base64_encode(base64url, inputbuff, insize, outptr, outlen);

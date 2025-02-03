@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,22 +18,22 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  * RFC2104 Keyed-Hashing for Message Authentication
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||      \
-  !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) ||   \
+#if (defined(USE_FETCH_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||      \
+  !defined(FETCH_DISABLE_AWS) || !defined(FETCH_DISABLE_DIGEST_AUTH) ||   \
   defined(USE_SSL)
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-#include "curl_hmac.h"
-#include "curl_memory.h"
+#include "fetch_hmac.h"
+#include "fetch_memory.h"
 #include "warnless.h"
 
 /* The last #include file should be: */
@@ -143,26 +143,26 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
  * buflen     [in]     - The length of the data.
  * output     [in/out] - The output buffer.
  *
- * Returns CURLE_OK on success.
+ * Returns FETCHE_OK on success.
  */
-CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
+FETCHcode Curl_hmacit(const struct HMAC_params *hashparams,
                      const unsigned char *key, const size_t keylen,
                      const unsigned char *buf, const size_t buflen,
                      unsigned char *output)
 {
   struct HMAC_context *ctxt =
-    Curl_HMAC_init(hashparams, key, curlx_uztoui(keylen));
+    Curl_HMAC_init(hashparams, key, fetchx_uztoui(keylen));
 
   if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
-  Curl_HMAC_update(ctxt, buf, curlx_uztoui(buflen));
+  Curl_HMAC_update(ctxt, buf, fetchx_uztoui(buflen));
 
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, output);
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 #endif /* Using NTLM (without SSPI) or AWS */

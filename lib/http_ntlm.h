@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HTTP_NTLM_H
-#define HEADER_CURL_HTTP_NTLM_H
+#ifndef HEADER_FETCH_HTTP_NTLM_H
+#define HEADER_FETCH_HTTP_NTLM_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,25 +20,25 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
+#if !defined(FETCH_DISABLE_HTTP) && defined(USE_NTLM)
 
 /* this is for NTLM header input */
-CURLcode Curl_input_ntlm(struct Curl_easy *data, bool proxy,
+FETCHcode Curl_input_ntlm(struct Curl_easy *data, bool proxy,
                          const char *header);
 
 /* this is for creating NTLM header output */
-CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy);
+FETCHcode Curl_output_ntlm(struct Curl_easy *data, bool proxy);
 
 void Curl_http_auth_cleanup_ntlm(struct connectdata *conn);
 
-#else /* !CURL_DISABLE_HTTP && USE_NTLM */
+#else /* !FETCH_DISABLE_HTTP && USE_NTLM */
 #define Curl_http_auth_cleanup_ntlm(x)
 #endif
 
-#endif /* HEADER_CURL_HTTP_NTLM_H */
+#endif /* HEADER_FETCH_HTTP_NTLM_H */
