@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_URLGLOB_H
-#define HEADER_CURL_TOOL_URLGLOB_H
+#ifndef HEADER_FETCH_TOOL_URLGLOB_H
+#define HEADER_FETCH_TOOL_URLGLOB_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -38,7 +38,7 @@ struct URLPattern {
   union {
     struct {
       char **elements;
-      curl_off_t size;
+      fetch_off_t size;
       int ptr_s;
     } Set;
     struct {
@@ -48,11 +48,11 @@ struct URLPattern {
       int step;
     } CharRange;
     struct {
-      curl_off_t min_n;
-      curl_off_t max_n;
+      fetch_off_t min_n;
+      fetch_off_t max_n;
       int padlength;
-      curl_off_t ptr_n;
-      curl_off_t step;
+      fetch_off_t ptr_n;
+      fetch_off_t step;
     } NumRange;
   } content;
 };
@@ -70,9 +70,9 @@ struct URLGlob {
   size_t pos;        /* column position of error or 0 */
 };
 
-CURLcode glob_url(struct URLGlob**, char *, curl_off_t *, FILE *);
-CURLcode glob_next_url(char **, struct URLGlob *);
-CURLcode glob_match_url(char **, char *, struct URLGlob *);
+FETCHcode glob_url(struct URLGlob**, char *, fetch_off_t *, FILE *);
+FETCHcode glob_next_url(char **, struct URLGlob *);
+FETCHcode glob_match_url(char **, char *, struct URLGlob *);
 void glob_cleanup(struct URLGlob **glob);
 
-#endif /* HEADER_CURL_TOOL_URLGLOB_H */
+#endif /* HEADER_FETCH_TOOL_URLGLOB_H */

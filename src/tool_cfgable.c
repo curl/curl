@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -41,11 +41,11 @@ void config_init(struct OperationConfig *config)
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
   config->tcp_nodelay = TRUE; /* enabled by default */
-  config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
+  config->happy_eyeballs_timeout_ms = FETCH_HET_DEFAULT;
   config->http09_allowed = FALSE;
   config->ftp_skip_ip = TRUE;
   config->file_clobber_mode = CLOBBER_DEFAULT;
-  curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
+  fetchx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
 }
 
 static void free_config_fields(struct OperationConfig *config)
@@ -56,9 +56,9 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->altsvc);
   Curl_safefree(config->hsts);
   Curl_safefree(config->haproxy_clientip);
-  curl_slist_free_all(config->cookies);
+  fetch_slist_free_all(config->cookies);
   Curl_safefree(config->cookiejar);
-  curl_slist_free_all(config->cookiefiles);
+  fetch_slist_free_all(config->cookiefiles);
 
   Curl_dyn_free(&config->postdata);
   Curl_safefree(config->query);
@@ -88,7 +88,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->noproxy);
 
   Curl_safefree(config->mail_from);
-  curl_slist_free_all(config->mail_rcpt);
+  fetch_slist_free_all(config->mail_rcpt);
   Curl_safefree(config->mail_auth);
 
   Curl_safefree(config->netrc_file);
@@ -110,9 +110,9 @@ static void free_config_fields(struct OperationConfig *config)
   config->url_get = NULL;
   config->url_out = NULL;
 
-#ifndef CURL_DISABLE_IPFS
+#ifndef FETCH_DISABLE_IPFS
   Curl_safefree(config->ipfs_gateway);
-#endif /* !CURL_DISABLE_IPFS */
+#endif /* !FETCH_DISABLE_IPFS */
   Curl_safefree(config->doh_url);
   Curl_safefree(config->cipher_list);
   Curl_safefree(config->proxy_cipher_list);
@@ -153,22 +153,22 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->writeout);
   Curl_safefree(config->proto_default);
 
-  curl_slist_free_all(config->quote);
-  curl_slist_free_all(config->postquote);
-  curl_slist_free_all(config->prequote);
+  fetch_slist_free_all(config->quote);
+  fetch_slist_free_all(config->postquote);
+  fetch_slist_free_all(config->prequote);
 
-  curl_slist_free_all(config->headers);
-  curl_slist_free_all(config->proxyheaders);
+  fetch_slist_free_all(config->headers);
+  fetch_slist_free_all(config->proxyheaders);
 
-  curl_mime_free(config->mimepost);
+  fetch_mime_free(config->mimepost);
   config->mimepost = NULL;
   tool_mime_free(config->mimeroot);
   config->mimeroot = NULL;
   config->mimecurrent = NULL;
 
-  curl_slist_free_all(config->telnet_options);
-  curl_slist_free_all(config->resolve);
-  curl_slist_free_all(config->connect_to);
+  fetch_slist_free_all(config->telnet_options);
+  fetch_slist_free_all(config->resolve);
+  fetch_slist_free_all(config->connect_to);
 
   Curl_safefree(config->preproxy);
   Curl_safefree(config->proxy_service_name);

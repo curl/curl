@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -29,7 +29,7 @@
 #  include <direct.h>
 #endif
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_dirhie.h"
 #include "tool_msgs.h"
@@ -82,7 +82,7 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
 /*
  * Create the needed directory hierarchy recursively in order to save
  *  multi-GETs in file output, ie:
- *  curl "http://example.org/dir[1-5]/file[1-5].txt" -o "dir#1/file#2.txt"
+ *  fetch "http://example.org/dir[1-5]/file[1-5].txt" -o "dir#1/file#2.txt"
  *  should create all the dir* automagically
  */
 
@@ -94,24 +94,24 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
 #endif
 
 
-CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
+FETCHcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
 {
   char *tempdir;
   char *tempdir2;
   char *outdup;
   char *dirbuildup;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   size_t outlen;
 
   outlen = strlen(outfile);
   outdup = strdup(outfile);
   if(!outdup)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   dirbuildup = malloc(outlen + 1);
   if(!dirbuildup) {
     Curl_safefree(outdup);
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
   dirbuildup[0] = '\0';
 
@@ -151,7 +151,7 @@ CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
       if(!skip && (-1 == mkdir(dirbuildup, (mode_t)0000750)) &&
          (errno != EACCES) && (errno != EEXIST)) {
         show_dir_errno(global, dirbuildup);
-        result = CURLE_WRITE_ERROR;
+        result = FETCHE_WRITE_ERROR;
         break; /* get out of loop */
       }
     }

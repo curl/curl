@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_FILETIME_H
-#define HEADER_CURL_TOOL_FILETIME_H
+#ifndef HEADER_FETCH_TOOL_FILETIME_H
+#define HEADER_FETCH_TOOL_FILETIME_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -28,15 +28,15 @@
 struct GlobalConfig;
 
 int getfiletime(const char *filename, struct GlobalConfig *global,
-                curl_off_t *stamp);
+                fetch_off_t *stamp);
 
 #if defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||      \
-  (defined(_WIN32) && (SIZEOF_CURL_OFF_T >= 8))
-void setfiletime(curl_off_t filetime, const char *filename,
+  (defined(_WIN32) && (SIZEOF_FETCH_OFF_T >= 8))
+void setfiletime(fetch_off_t filetime, const char *filename,
                  struct GlobalConfig *global);
 #else
 #define setfiletime(a,b,c) Curl_nop_stmt
 #endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||        \
-          (defined(_WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
+          (defined(_WIN32) && (SIZEOF_FETCH_OFF_T >= 8)) */
 
-#endif /* HEADER_CURL_TOOL_FILETIME_H */
+#endif /* HEADER_FETCH_TOOL_FILETIME_H */

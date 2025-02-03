@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
@@ -32,7 +32,7 @@
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
 #include "dynbuf.h"
-#include "curl_base64.h"
+#include "fetch_base64.h"
 #include "tool_paramhlp.h"
 #include "tool_writeout_json.h"
 #include "var.h"
@@ -97,7 +97,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
                               size_t clen, /* content length */
                               char *f, /* functions */
                               size_t flen, /* function string length */
-                              struct curlx_dynbuf *out)
+                              struct fetchx_dynbuf *out)
 {
   bool alloc = FALSE;
   ParameterError err = PARAM_OK;
@@ -125,15 +125,15 @@ static ParameterError varfunc(struct GlobalConfig *global,
           len--;
       }
       /* put it in the output */
-      curlx_dyn_reset(out);
-      if(curlx_dyn_addn(out, c, len)) {
+      fetchx_dyn_reset(out);
+      if(fetchx_dyn_addn(out, c, len)) {
         err = PARAM_NO_MEM;
         break;
       }
     }
     else if(FUNCMATCH(f, FUNC_JSON, FUNC_JSON_LEN)) {
       f += FUNC_JSON_LEN;
-      curlx_dyn_reset(out);
+      fetchx_dyn_reset(out);
       if(clen) {
         if(jsonquoted(c, clen, out, FALSE)) {
           err = PARAM_NO_MEM;
@@ -143,38 +143,38 @@ static ParameterError varfunc(struct GlobalConfig *global,
     }
     else if(FUNCMATCH(f, FUNC_URL, FUNC_URL_LEN)) {
       f += FUNC_URL_LEN;
-      curlx_dyn_reset(out);
+      fetchx_dyn_reset(out);
       if(clen) {
-        char *enc = curl_easy_escape(NULL, c, (int)clen);
+        char *enc = fetch_easy_escape(NULL, c, (int)clen);
         if(!enc) {
           err = PARAM_NO_MEM;
           break;
         }
 
         /* put it in the output */
-        if(curlx_dyn_add(out, enc))
+        if(fetchx_dyn_add(out, enc))
           err = PARAM_NO_MEM;
-        curl_free(enc);
+        fetch_free(enc);
         if(err)
           break;
       }
     }
     else if(FUNCMATCH(f, FUNC_B64, FUNC_B64_LEN)) {
       f += FUNC_B64_LEN;
-      curlx_dyn_reset(out);
+      fetchx_dyn_reset(out);
       if(clen) {
         char *enc;
         size_t elen;
-        CURLcode result = curlx_base64_encode(c, clen, &enc, &elen);
+        FETCHcode result = fetchx_base64_encode(c, clen, &enc, &elen);
         if(result) {
           err = PARAM_NO_MEM;
           break;
         }
 
         /* put it in the output */
-        if(curlx_dyn_addn(out, enc, elen))
+        if(fetchx_dyn_addn(out, enc, elen))
           err = PARAM_NO_MEM;
-        curl_free(enc);
+        fetch_free(enc);
         if(err)
           break;
       }
@@ -189,8 +189,8 @@ static ParameterError varfunc(struct GlobalConfig *global,
     if(alloc)
       free(c);
 
-    clen = curlx_dyn_len(out);
-    c = Memdup(curlx_dyn_ptr(out), clen);
+    clen = fetchx_dyn_len(out);
+    c = Memdup(fetchx_dyn_ptr(out), clen);
     if(!c) {
       err = PARAM_NO_MEM;
       break;
@@ -200,32 +200,32 @@ static ParameterError varfunc(struct GlobalConfig *global,
   if(alloc)
     free(c);
   if(err)
-    curlx_dyn_free(out);
+    fetchx_dyn_free(out);
   return err;
 }
 
 ParameterError varexpand(struct GlobalConfig *global,
-                         const char *line, struct curlx_dynbuf *out,
+                         const char *line, struct fetchx_dynbuf *out,
                          bool *replaced)
 {
-  CURLcode result;
+  FETCHcode result;
   char *envp;
   bool added = FALSE;
   const char *input = line;
   *replaced = FALSE;
-  curlx_dyn_init(out, MAX_EXPAND_CONTENT);
+  fetchx_dyn_init(out, MAX_EXPAND_CONTENT);
   do {
     envp = strstr(line, "{{");
     if((envp > line) && envp[-1] == '\\') {
       /* preceding backslash, we want this verbatim */
 
       /* insert the text up to this point, minus the backslash */
-      result = curlx_dyn_addn(out, line, envp - line - 1);
+      result = fetchx_dyn_addn(out, line, envp - line - 1);
       if(result)
         return PARAM_NO_MEM;
 
       /* output '{{' then continue from here */
-      result = curlx_dyn_addn(out, "{{", 2);
+      result = fetchx_dyn_addn(out, "{{", 2);
       if(result)
         return PARAM_NO_MEM;
       line = &envp[2];
@@ -256,13 +256,13 @@ ParameterError varexpand(struct GlobalConfig *global,
       if(!nlen || (nlen >= sizeof(name))) {
         warnf(global, "bad variable name length '%s'", input);
         /* insert the text as-is since this is not an env variable */
-        result = curlx_dyn_addn(out, line, clp - line + prefix);
+        result = fetchx_dyn_addn(out, line, clp - line + prefix);
         if(result)
           return PARAM_NO_MEM;
       }
       else {
         /* insert the text up to this point */
-        result = curlx_dyn_addn(out, line, envp - prefix - line);
+        result = fetchx_dyn_addn(out, line, envp - prefix - line);
         if(result)
           return PARAM_NO_MEM;
 
@@ -276,7 +276,7 @@ ParameterError varexpand(struct GlobalConfig *global,
         if(i != nlen) {
           warnf(global, "bad variable name: %s", name);
           /* insert the text as-is since this is not an env variable */
-          result = curlx_dyn_addn(out, envp - prefix,
+          result = fetchx_dyn_addn(out, envp - prefix,
                                   clp - envp + prefix + 2);
           if(result)
             return PARAM_NO_MEM;
@@ -284,7 +284,7 @@ ParameterError varexpand(struct GlobalConfig *global,
         else {
           char *value;
           size_t vlen = 0;
-          struct curlx_dynbuf buf;
+          struct fetchx_dynbuf buf;
           const struct tool_var *v = varcontent(global, name, nlen);
           if(v) {
             value = (char *)v->content;
@@ -293,7 +293,7 @@ ParameterError varexpand(struct GlobalConfig *global,
           else
             value = NULL;
 
-          curlx_dyn_init(&buf, MAX_EXPAND_CONTENT);
+          fetchx_dyn_init(&buf, MAX_EXPAND_CONTENT);
           if(funcp) {
             /* apply the list of functions on the value */
             size_t flen = clp - funcp;
@@ -301,8 +301,8 @@ ParameterError varexpand(struct GlobalConfig *global,
                                          &buf);
             if(err)
               return err;
-            value = curlx_dyn_ptr(&buf);
-            vlen = curlx_dyn_len(&buf);
+            value = fetchx_dyn_ptr(&buf);
+            vlen = fetchx_dyn_len(&buf);
           }
 
           if(value && vlen > 0) {
@@ -315,8 +315,8 @@ ParameterError varexpand(struct GlobalConfig *global,
             }
           }
           /* insert the value */
-          result = curlx_dyn_addn(out, value, vlen);
-          curlx_dyn_free(&buf);
+          result = fetchx_dyn_addn(out, value, vlen);
+          fetchx_dyn_free(&buf);
           if(result)
             return PARAM_NO_MEM;
 
@@ -329,13 +329,13 @@ ParameterError varexpand(struct GlobalConfig *global,
   } while(envp);
   if(added && *line) {
     /* add the "suffix" as well */
-    result = curlx_dyn_add(out, line);
+    result = fetchx_dyn_add(out, line);
     if(result)
       return PARAM_NO_MEM;
   }
   *replaced = added;
   if(!added)
-    curlx_dyn_free(out);
+    fetchx_dyn_free(out);
   return PARAM_OK;
 }
 
@@ -389,8 +389,8 @@ ParameterError setvariable(struct GlobalConfig *global,
   bool import = FALSE;
   char *ge = NULL;
   char buf[MAX_VAR_LEN];
-  curl_off_t startoffset = 0;
-  curl_off_t endoffset = CURL_OFF_T_MAX;
+  fetch_off_t startoffset = 0;
+  fetch_off_t endoffset = FETCH_OFF_T_MAX;
 
   if(*input == '%') {
     import = TRUE;
@@ -405,7 +405,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     return PARAM_OK;
   }
   if(import) {
-    /* this does not use curl_getenv() because we want "" support for blank
+    /* this does not use fetch_getenv() because we want "" support for blank
        content */
     if(*line) {
       /* if there is a default action, we need to copy the name */
@@ -429,12 +429,12 @@ ParameterError setvariable(struct GlobalConfig *global,
     /* is there a byte range specified? [num-num] */
     if(ISDIGIT(line[1])) {
       char *endp;
-      if(curlx_strtoofft(&line[1], &endp, 10, &startoffset) || (*endp != '-'))
+      if(fetchx_strtoofft(&line[1], &endp, 10, &startoffset) || (*endp != '-'))
         return PARAM_VAR_SYNTAX;
       else {
         char *p = endp + 1; /* pass the '-' */
         if(*p != ']') {
-          if(curlx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
+          if(fetchx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
             return PARAM_VAR_SYNTAX;
           line = &endp[1];  /* pass the ']' */
         }
@@ -484,12 +484,12 @@ ParameterError setvariable(struct GlobalConfig *global,
     clen = strlen(line);
     /* this is the exact content */
     content = (char *)line;
-    if(startoffset || (endoffset != CURL_OFF_T_MAX)) {
-      if(startoffset >= (curl_off_t)clen)
+    if(startoffset || (endoffset != FETCH_OFF_T_MAX)) {
+      if(startoffset >= (fetch_off_t)clen)
         clen = 0;
       else {
         /* make the end offset no larger than the last byte */
-        if(endoffset >= (curl_off_t)clen)
+        if(endoffset >= (fetch_off_t)clen)
           endoffset = clen - 1;
         clen = (size_t)(endoffset - startoffset) + 1;
         content += startoffset;

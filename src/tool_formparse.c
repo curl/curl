@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,14 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
 #include "strcase.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
@@ -76,13 +76,13 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
 }
 
 /*
-** unsigned size_t to signed curl_off_t
+** unsigned size_t to signed fetch_off_t
 */
 
-#define CURL_MASK_UCOFFT  ((unsigned CURL_TYPEOF_CURL_OFF_T)~0)
-#define CURL_MASK_SCOFFT  (CURL_MASK_UCOFFT >> 1)
+#define FETCH_MASK_UCOFFT  ((unsigned FETCH_TYPEOF_FETCH_OFF_T)~0)
+#define FETCH_MASK_SCOFFT  (FETCH_MASK_UCOFFT >> 1)
 
-static curl_off_t uztoso(size_t uznum)
+static fetch_off_t uztoso(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -92,8 +92,8 @@ static curl_off_t uztoso(size_t uznum)
 #  pragma warning(disable:4310) /* cast truncates constant value */
 #endif
 
-  DEBUGASSERT(uznum <= (size_t) CURL_MASK_SCOFFT);
-  return (curl_off_t)(uznum & (size_t) CURL_MASK_SCOFFT);
+  DEBUGASSERT(uznum <= (size_t) FETCH_MASK_SCOFFT);
+  return (fetch_off_t)(uznum & (size_t) FETCH_MASK_SCOFFT);
 
 #if defined(__INTEL_COMPILER) || defined(_MSC_VER)
 #  pragma warning(pop)
@@ -103,12 +103,12 @@ static curl_off_t uztoso(size_t uznum)
 static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
                                                 const char *filename,
                                                 bool isremotefile,
-                                                CURLcode *errcode)
+                                                FETCHcode *errcode)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   struct tool_mime *m = NULL;
 
-  *errcode = CURLE_OUT_OF_MEMORY;
+  *errcode = FETCHE_OUT_OF_MEMORY;
   if(strcmp(filename, "-")) {
     /* This is a normal file. */
     char *filedup = strdup(filename);
@@ -120,18 +120,18 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
         m->data = filedup;
         if(!isremotefile)
           m->kind = TOOLMIME_FILEDATA;
-       *errcode = CURLE_OK;
+       *errcode = FETCHE_OK;
       }
     }
   }
   else {        /* Standard input. */
     int fd = fileno(stdin);
     char *data = NULL;
-    curl_off_t size;
-    curl_off_t origin;
+    fetch_off_t size;
+    fetch_off_t origin;
     struct_stat sbuf;
 
-    CURL_SET_BINMODE(stdin);
+    FETCH_SET_BINMODE(stdin);
     origin = ftell(stdin);
     /* If stdin is a regular file, do not buffer data but read it
        when needed. */
@@ -151,7 +151,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
       case PARAM_NO_MEM:
         return m;
       case PARAM_READ_ERROR:
-        result = CURLE_READ_ERROR;
+        result = FETCHE_READ_ERROR;
         break;
       default:
         if(!stdinsize) {
@@ -193,7 +193,7 @@ void tool_mime_free(struct tool_mime *mime)
     Curl_safefree(mime->type);
     Curl_safefree(mime->encoder);
     Curl_safefree(mime->data);
-    curl_slist_free_all(mime->headers);
+    fetch_slist_free_all(mime->headers);
     free(mime);
   }
 }
@@ -204,7 +204,7 @@ size_t tool_mime_stdin_read(char *buffer,
                             size_t size, size_t nitems, void *arg)
 {
   struct tool_mime *sip = (struct tool_mime *) arg;
-  curl_off_t bytesleft;
+  fetch_off_t bytesleft;
   (void) size;  /* Always 1: ignored. */
 
   if(sip->size >= 0) {
@@ -212,12 +212,12 @@ size_t tool_mime_stdin_read(char *buffer,
       return 0;  /* At eof. */
     bytesleft = sip->size - sip->curpos;
     if(uztoso(nitems) > bytesleft)
-      nitems = curlx_sotouz(bytesleft);
+      nitems = fetchx_sotouz(bytesleft);
   }
   if(nitems) {
     if(sip->data) {
       /* Return data from memory. */
-      memcpy(buffer, sip->data + curlx_sotouz(sip->curpos), nitems);
+      memcpy(buffer, sip->data + fetchx_sotouz(sip->curpos), nitems);
     }
     else {
       /* Read from stdin. */
@@ -228,7 +228,7 @@ size_t tool_mime_stdin_read(char *buffer,
           warnf(sip->config, "stdin: %s", strerror(errno));
           sip->config = NULL;
         }
-        return CURL_READFUNC_ABORT;
+        return FETCH_READFUNC_ABORT;
       }
     }
     sip->curpos += uztoso(nitems);
@@ -236,7 +236,7 @@ size_t tool_mime_stdin_read(char *buffer,
   return nitems;
 }
 
-int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
+int tool_mime_stdin_seek(void *instream, fetch_off_t offset, int whence)
 {
   struct tool_mime *sip = (struct tool_mime *) instream;
 
@@ -249,53 +249,53 @@ int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
     break;
   }
   if(offset < 0)
-    return CURL_SEEKFUNC_CANTSEEK;
+    return FETCH_SEEKFUNC_CANTSEEK;
   if(!sip->data) {
     if(fseek(stdin, (long) (offset + sip->origin), SEEK_SET))
-      return CURL_SEEKFUNC_CANTSEEK;
+      return FETCH_SEEKFUNC_CANTSEEK;
   }
   sip->curpos = offset;
-  return CURL_SEEKFUNC_OK;
+  return FETCH_SEEKFUNC_OK;
 }
 
-/* Translate an internal mime tree into a libcurl mime tree. */
+/* Translate an internal mime tree into a libfetch mime tree. */
 
-static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
-                               curl_mime *mime)
+static FETCHcode tool2fetchparts(FETCH *fetch, struct tool_mime *m,
+                               fetch_mime *mime)
 {
-  CURLcode ret = CURLE_OK;
-  curl_mimepart *part = NULL;
-  curl_mime *submime = NULL;
+  FETCHcode ret = FETCHE_OK;
+  fetch_mimepart *part = NULL;
+  fetch_mime *submime = NULL;
   const char *filename = NULL;
 
   if(m) {
-    ret = tool2curlparts(curl, m->prev, mime);
+    ret = tool2fetchparts(fetch, m->prev, mime);
     if(!ret) {
-      part = curl_mime_addpart(mime);
+      part = fetch_mime_addpart(mime);
       if(!part)
-        ret = CURLE_OUT_OF_MEMORY;
+        ret = FETCHE_OUT_OF_MEMORY;
     }
     if(!ret) {
       filename = m->filename;
       switch(m->kind) {
       case TOOLMIME_PARTS:
-        ret = tool2curlmime(curl, m, &submime);
+        ret = tool2fetchmime(fetch, m, &submime);
         if(!ret) {
-          ret = curl_mime_subparts(part, submime);
+          ret = fetch_mime_subparts(part, submime);
           if(ret)
-            curl_mime_free(submime);
+            fetch_mime_free(submime);
         }
         break;
 
       case TOOLMIME_DATA:
-        ret = curl_mime_data(part, m->data, CURL_ZERO_TERMINATED);
+        ret = fetch_mime_data(part, m->data, FETCH_ZERO_TERMINATED);
         break;
 
       case TOOLMIME_FILE:
       case TOOLMIME_FILEDATA:
-        ret = curl_mime_filedata(part, m->data);
+        ret = fetch_mime_filedata(part, m->data);
         if(!ret && m->kind == TOOLMIME_FILEDATA && !filename)
-          ret = curl_mime_filename(part, NULL);
+          ret = fetch_mime_filename(part, NULL);
         break;
 
       case TOOLMIME_STDIN:
@@ -303,9 +303,9 @@ static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
           filename = "-";
         FALLTHROUGH();
       case TOOLMIME_STDINDATA:
-        ret = curl_mime_data_cb(part, m->size,
-                                (curl_read_callback) tool_mime_stdin_read,
-                                (curl_seek_callback) tool_mime_stdin_seek,
+        ret = fetch_mime_data_cb(part, m->size,
+                                (fetch_read_callback) tool_mime_stdin_read,
+                                (fetch_seek_callback) tool_mime_stdin_seek,
                                 NULL, m);
         break;
 
@@ -315,30 +315,30 @@ static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
       }
     }
     if(!ret && filename)
-      ret = curl_mime_filename(part, filename);
+      ret = fetch_mime_filename(part, filename);
     if(!ret)
-      ret = curl_mime_type(part, m->type);
+      ret = fetch_mime_type(part, m->type);
     if(!ret)
-      ret = curl_mime_headers(part, m->headers, 0);
+      ret = fetch_mime_headers(part, m->headers, 0);
     if(!ret)
-      ret = curl_mime_encoder(part, m->encoder);
+      ret = fetch_mime_encoder(part, m->encoder);
     if(!ret)
-      ret = curl_mime_name(part, m->name);
+      ret = fetch_mime_name(part, m->name);
   }
   return ret;
 }
 
-CURLcode tool2curlmime(CURL *curl, struct tool_mime *m, curl_mime **mime)
+FETCHcode tool2fetchmime(FETCH *fetch, struct tool_mime *m, fetch_mime **mime)
 {
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
 
-  *mime = curl_mime_init(curl);
+  *mime = fetch_mime_init(fetch);
   if(!*mime)
-    ret = CURLE_OUT_OF_MEMORY;
+    ret = FETCHE_OUT_OF_MEMORY;
   else
-    ret = tool2curlparts(curl, m->subparts, *mime);
+    ret = tool2fetchparts(fetch, m->subparts, *mime);
   if(ret) {
-    curl_mime_free(*mime);
+    fetch_mime_free(*mime);
     *mime = NULL;
   }
   return ret;
@@ -409,9 +409,9 @@ static char *get_param_word(struct OperationConfig *config, char **str,
 }
 
 /* Append slist item and return -1 if failed. */
-static int slist_append(struct curl_slist **plist, const char *data)
+static int slist_append(struct fetch_slist **plist, const char *data)
 {
-  struct curl_slist *s = curl_slist_append(*plist, data);
+  struct fetch_slist *s = fetch_slist_append(*plist, data);
 
   if(!s)
     return -1;
@@ -423,7 +423,7 @@ static int slist_append(struct curl_slist **plist, const char *data)
 /* Read headers from a file and append to list. */
 static int read_field_headers(struct OperationConfig *config,
                               const char *filename, FILE *fp,
-                              struct curl_slist **pheaders)
+                              struct fetch_slist **pheaders)
 {
   size_t hdrlen = 0;
   size_t pos = 0;
@@ -485,7 +485,7 @@ static int read_field_headers(struct OperationConfig *config,
 static int get_param_part(struct OperationConfig *config, char endchar,
                           char **str, char **pdata, char **ptype,
                           char **pfilename, char **pencoder,
-                          struct curl_slist **pheaders)
+                          struct fetch_slist **pheaders)
 {
   char *p = *str;
   char *type = NULL;
@@ -495,7 +495,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
   char *tp;
   char sep;
   char *endct = NULL;
-  struct curl_slist *headers = NULL;
+  struct fetch_slist *headers = NULL;
 
   if(ptype)
     *ptype = NULL;
@@ -579,7 +579,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
 
           fclose(fp);
           if(i) {
-            curl_slist_free_all(headers);
+            fetch_slist_free_all(headers);
             return -1;
           }
         }
@@ -599,7 +599,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         *endpos = '\0';
         if(slist_append(&headers, hdr)) {
           errorf(config->global, "Out of memory for field header");
-          curl_slist_free_all(headers);
+          fetch_slist_free_all(headers);
           return -1;
         }
       }
@@ -664,7 +664,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
   else if(headers) {
     warnf(config->global,
           "Field headers not allowed here: %s", headers->data);
-    curl_slist_free_all(headers);
+    fetch_slist_free_all(headers);
   }
 
   *str = p;
@@ -714,7 +714,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
  * 'name=@filename;filename="play, play, and play.txt"'
  *
  * If filename/path contains ',' or ';', it must be quoted by double-quotes,
- * else curl will fail to figure out the correct filename. if the filename
+ * else fetch will fail to figure out the correct filename. if the filename
  * tobe quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
  *
  ***************************************************************************/
@@ -743,9 +743,9 @@ int formparse(struct OperationConfig *config,
   char *type = NULL;
   char *filename = NULL;
   char *encoder = NULL;
-  struct curl_slist *headers = NULL;
+  struct fetch_slist *headers = NULL;
   struct tool_mime *part = NULL;
-  CURLcode res;
+  FETCHcode res;
   int err = 1;
 
   /* Allocate the main mime structure if needed. */
@@ -826,10 +826,10 @@ int formparse(struct OperationConfig *config,
         part->headers = headers;
         headers = NULL;
         part->config = config->global;
-        if(res == CURLE_READ_ERROR) {
+        if(res == FETCHE_READ_ERROR) {
             /* An error occurred while reading stdin: if read has started,
                issue the error now. Else, delay it until processed by
-               libcurl. */
+               libfetch. */
           if(part->size > 0) {
             warnf(config->global,
                   "error while reading standard input");
@@ -838,7 +838,7 @@ int formparse(struct OperationConfig *config,
           Curl_safefree(part->data);
           part->data = NULL;
           part->size = -1;
-          res = CURLE_OK;
+          res = FETCHE_OK;
         }
         SET_TOOL_MIME_PTR(part, filename);
         SET_TOOL_MIME_PTR(part, type);
@@ -863,10 +863,10 @@ int formparse(struct OperationConfig *config,
         part->headers = headers;
         headers = NULL;
         part->config = config->global;
-        if(res == CURLE_READ_ERROR) {
+        if(res == FETCHE_READ_ERROR) {
             /* An error occurred while reading stdin: if read has started,
                issue the error now. Else, delay it until processed by
-               libcurl. */
+               libfetch. */
           if(part->size > 0) {
             warnf(config->global,
                   "error while reading standard input");
@@ -875,7 +875,7 @@ int formparse(struct OperationConfig *config,
           Curl_safefree(part->data);
           part->data = NULL;
           part->size = -1;
-          res = CURLE_OK;
+          res = FETCHE_OK;
         }
       }
       else {
@@ -916,6 +916,6 @@ int formparse(struct OperationConfig *config,
   err = 0;
 fail:
   Curl_safefree(contents);
-  curl_slist_free_all(headers);
+  fetch_slist_free_all(headers);
   return err;
 }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -39,7 +39,7 @@
 #include "tool_bname.h"
 #include "tool_doswin.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifdef _WIN32
@@ -480,12 +480,12 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
      */
   for(p = fname; p; p = (p == fname && fname != base ? base : NULL)) {
     size_t p_len;
-    int x = (curl_strnequal(p, "CON", 3) ||
-             curl_strnequal(p, "PRN", 3) ||
-             curl_strnequal(p, "AUX", 3) ||
-             curl_strnequal(p, "NUL", 3)) ? 3 :
-            (curl_strnequal(p, "CLOCK$", 6)) ? 6 :
-            (curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) ?
+    int x = (fetch_strnequal(p, "CON", 3) ||
+             fetch_strnequal(p, "PRN", 3) ||
+             fetch_strnequal(p, "AUX", 3) ||
+             fetch_strnequal(p, "NUL", 3)) ? 3 :
+            (fetch_strnequal(p, "CLOCK$", 6)) ? 6 :
+            (fetch_strnequal(p, "COM", 3) || fetch_strnequal(p, "LPT", 3)) ?
               (('1' <= p[3] && p[3] <= '9') ? 4 : 3) : 0;
 
     if(!x)
@@ -563,13 +563,13 @@ char **__crt0_glob_function(char *arg)
 
 #ifdef _WIN32
 
-#if !defined(CURL_WINDOWS_UWP) && \
-  !defined(CURL_DISABLE_CA_SEARCH) && !defined(CURL_CA_SEARCH_SAFE)
+#if !defined(FETCH_WINDOWS_UWP) && \
+  !defined(FETCH_DISABLE_CA_SEARCH) && !defined(FETCH_CA_SEARCH_SAFE)
 /* Search and set the CA cert file for Windows.
  *
  * Do not call this function if Schannel is the selected SSL backend. We allow
  * setting CA location for Schannel only when explicitly specified by the user
- * via CURLOPT_CAINFO / --cacert.
+ * via FETCHOPT_CAINFO / --cacert.
  *
  * Function to find CACert bundle on a Win32 platform using SearchPath.
  * (SearchPath is already declared via inclusions done in setup header file)
@@ -584,10 +584,10 @@ char **__crt0_glob_function(char *arg)
  * For WinXP and later search order actually depends on registry value:
  * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeProcessSearchMode
  */
-CURLcode FindWin32CACert(struct OperationConfig *config,
+FETCHcode FindWin32CACert(struct OperationConfig *config,
                          const TCHAR *bundle_file)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   DWORD res_len;
   TCHAR buf[PATH_MAX];
   TCHAR *ptr = NULL;
@@ -596,13 +596,13 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 
   res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
   if(res_len > 0) {
-    char *mstr = curlx_convert_tchar_to_UTF8(buf);
+    char *mstr = fetchx_convert_tchar_to_UTF8(buf);
     Curl_safefree(config->cacert);
     if(mstr)
       config->cacert = strdup(mstr);
-    curlx_unicodefree(mstr);
+    fetchx_unicodefree(mstr);
     if(!config->cacert)
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
   }
 
   return result;
@@ -612,10 +612,10 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 /* Get a list of all loaded modules with full paths.
  * Returns slist on success or NULL on error.
  */
-struct curl_slist *GetLoadedModulePaths(void)
+struct fetch_slist *GetLoadedModulePaths(void)
 {
-  struct curl_slist *slist = NULL;
-#if !defined(CURL_WINDOWS_UWP)
+  struct fetch_slist *slist = NULL;
+#if !defined(FETCH_WINDOWS_UWP)
   HANDLE hnd = INVALID_HANDLE_VALUE;
   MODULEENTRY32 mod = {0};
 
@@ -633,7 +633,7 @@ struct curl_slist *GetLoadedModulePaths(void)
 
   do {
     char *path; /* points to stack allocated buffer */
-    struct curl_slist *temp;
+    struct fetch_slist *temp;
 
 #ifdef UNICODE
     /* sizeof(mod.szExePath) is the max total bytes of wchars. the max total
@@ -646,7 +646,7 @@ struct curl_slist *GetLoadedModulePaths(void)
 #else
     path = mod.szExePath;
 #endif
-    temp = curl_slist_append(slist, path);
+    temp = fetch_slist_append(slist, path);
     if(!temp)
       goto error;
     slist = temp;
@@ -655,7 +655,7 @@ struct curl_slist *GetLoadedModulePaths(void)
   goto cleanup;
 
 error:
-  curl_slist_free_all(slist);
+  fetch_slist_free_all(slist);
   slist = NULL;
 cleanup:
   if(hnd != INVALID_HANDLE_VALUE)
@@ -666,7 +666,7 @@ cleanup:
 
 bool tool_term_has_bold;
 
-#ifndef CURL_WINDOWS_UWP
+#ifndef FETCH_WINDOWS_UWP
 /* The terminal settings to restore on exit */
 static struct TerminalSettings {
   HANDLE hStdOut;
@@ -707,7 +707,7 @@ static void init_terminal(void)
   if(TerminalSettings.hStdOut == INVALID_HANDLE_VALUE ||
      !GetConsoleMode(TerminalSettings.hStdOut,
                      &TerminalSettings.dwOutputMode) ||
-     !curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
+     !fetchx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
                                    VERSION_GREATER_THAN_EQUAL))
     return;
 
@@ -737,11 +737,11 @@ static void init_terminal(void)
 LARGE_INTEGER tool_freq;
 bool tool_isVistaOrGreater;
 
-CURLcode win32_init(void)
+FETCHcode win32_init(void)
 {
-  /* curlx_verify_windows_version must be called during init at least once
+  /* fetchx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
-  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+  if(fetchx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL))
     tool_isVistaOrGreater = true;
   else
@@ -749,11 +749,11 @@ CURLcode win32_init(void)
 
   QueryPerformanceFrequency(&tool_freq);
 
-#ifndef CURL_WINDOWS_UWP
+#ifndef FETCH_WINDOWS_UWP
   init_terminal();
 #endif
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 #endif /* _WIN32 */

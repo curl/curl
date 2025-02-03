@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -28,17 +28,17 @@
 
 #ifdef USE_XATTR
 
-/* mapping table of curl metadata to extended attribute names */
+/* mapping table of fetch metadata to extended attribute names */
 static const struct xattr_mapping {
   const char *attr; /* name of the xattr */
-  CURLINFO info;
+  FETCHINFO info;
 } mappings[] = {
   /* mappings proposed by
    * https://freedesktop.org/wiki/CommonExtendedAttributes/
    */
-  { "user.xdg.referrer.url", CURLINFO_REFERER },
-  { "user.mime_type",        CURLINFO_CONTENT_TYPE },
-  { NULL,                    CURLINFO_NONE } /* last element, abort here */
+  { "user.xdg.referrer.url", FETCHINFO_REFERER },
+  { "user.mime_type",        FETCHINFO_CONTENT_TYPE },
+  { NULL,                    FETCHINFO_NONE } /* last element, abort here */
 };
 
 /* returns a new URL that needs to be freed */
@@ -50,33 +50,33 @@ static
 #endif
 char *stripcredentials(const char *url)
 {
-  CURLU *u;
-  CURLUcode uc;
+  FETCHU *u;
+  FETCHUcode uc;
   char *nurl;
-  u = curl_url();
+  u = fetch_url();
   if(u) {
-    uc = curl_url_set(u, CURLUPART_URL, url, CURLU_GUESS_SCHEME);
+    uc = fetch_url_set(u, FETCHUPART_URL, url, FETCHU_GUESS_SCHEME);
     if(uc)
       goto error;
 
-    uc = curl_url_set(u, CURLUPART_USER, NULL, 0);
+    uc = fetch_url_set(u, FETCHUPART_USER, NULL, 0);
     if(uc)
       goto error;
 
-    uc = curl_url_set(u, CURLUPART_PASSWORD, NULL, 0);
+    uc = fetch_url_set(u, FETCHUPART_PASSWORD, NULL, 0);
     if(uc)
       goto error;
 
-    uc = curl_url_get(u, CURLUPART_URL, &nurl, 0);
+    uc = fetch_url_get(u, FETCHUPART_URL, &nurl, 0);
     if(uc)
       goto error;
 
-    curl_url_cleanup(u);
+    fetch_url_cleanup(u);
 
     return nurl;
   }
 error:
-  curl_url_cleanup(u);
+  fetch_url_cleanup(u);
   return NULL;
 }
 
@@ -87,7 +87,7 @@ static int xattr(int fd,
   int err = 0;
   if(value) {
 #ifdef DEBUGBUILD
-    if(getenv("CURL_FAKE_XATTR")) {
+    if(getenv("FETCH_FAKE_XATTR")) {
       printf("%s => %s\n", attr, value);
       return 0;
     }
@@ -108,18 +108,18 @@ static int xattr(int fd,
   }
   return err;
 }
-/* store metadata from the curl request alongside the downloaded
+/* store metadata from the fetch request alongside the downloaded
  * file using extended attributes
  */
-int fwrite_xattr(CURL *curl, const char *url, int fd)
+int fwrite_xattr(FETCH *fetch, const char *url, int fd)
 {
   int i = 0;
-  int err = xattr(fd, "user.creator", "curl");
+  int err = xattr(fd, "user.creator", "fetch");
 
-  /* loop through all xattr-curlinfo pairs and abort on a set error */
+  /* loop through all xattr-fetchinfo pairs and abort on a set error */
   while(!err && mappings[i].attr) {
     char *value = NULL;
-    CURLcode result = curl_easy_getinfo(curl, mappings[i].info, &value);
+    FETCHcode result = fetch_easy_getinfo(fetch, mappings[i].info, &value);
     if(!result && value)
       err = xattr(fd, mappings[i].attr, value);
     i++;
@@ -129,7 +129,7 @@ int fwrite_xattr(CURL *curl, const char *url, int fd)
     if(!nurl)
       return 1;
     err = xattr(fd, "user.xdg.origin.url", nurl);
-    curl_free(nurl);
+    fetch_free(nurl);
   }
   return err;
 }

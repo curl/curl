@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,14 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
 #include "strcase.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
@@ -167,9 +167,9 @@ static const struct LongShort aliases[]= {
   {"insecure",                   ARG_BOOL, 'k', C_INSECURE},
   {"interface",                  ARG_STRG, ' ', C_INTERFACE},
   {"ip-tos",                     ARG_STRG, ' ', C_IP_TOS},
-#ifndef CURL_DISABLE_IPFS
+#ifndef FETCH_DISABLE_IPFS
   {"ipfs-gateway",               ARG_STRG, ' ', C_IPFS_GATEWAY},
-#endif /* !CURL_DISABLE_IPFS */
+#endif /* !FETCH_DISABLE_IPFS */
   {"ipv4",                       ARG_NONE, '4', C_IPV4},
   {"ipv6",                       ARG_NONE, '6', C_IPV6},
   {"json",                       ARG_STRG, ' ', C_JSON},
@@ -181,7 +181,7 @@ static const struct LongShort aliases[]= {
   {"key-type",                   ARG_STRG, ' ', C_KEY_TYPE},
   {"krb",                        ARG_STRG, ' ', C_KRB},
   {"krb4",                       ARG_STRG, ' ', C_KRB4},
-  {"libcurl",                    ARG_STRG, ' ', C_LIBCURL},
+  {"libfetch",                    ARG_STRG, ' ', C_LIBFETCH},
   {"limit-rate",                 ARG_STRG, ' ', C_LIMIT_RATE},
   {"list-only",                  ARG_BOOL, 'l', C_LIST_ONLY},
   {"local-port",                 ARG_STRG, ' ', C_LOCAL_PORT},
@@ -353,7 +353,7 @@ static const struct LongShort aliases[]= {
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
  * We allow ':' and '\' to be escaped by '\' so that we can use certificate
- * nicknames containing ':'. See <https://sourceforge.net/p/curl/bugs/1196/>
+ * nicknames containing ':'. See <https://sourceforge.net/p/fetch/bugs/1196/>
  * for details. */
 #ifndef UNITTESTS
 static
@@ -377,7 +377,7 @@ void parse_cert_parameter(const char *cert_parameter,
    * looks like a RFC7512 PKCS#11 URI which can be used as-is.
    * Also if cert_parameter contains no colon nor backslash, this
    * means no passphrase was given and no characters escaped */
-  if(curl_strnequal(cert_parameter, "pkcs11:", 7) ||
+  if(fetch_strnequal(cert_parameter, "pkcs11:", 7) ||
      !strpbrk(cert_parameter, ":\\")) {
     *certname = strdup(cert_parameter);
     return;
@@ -501,12 +501,12 @@ GetFileAndPassword(char *nextarg, char **file, char **password)
 static ParameterError GetSizeParameter(struct GlobalConfig *global,
                                        const char *arg,
                                        const char *which,
-                                       curl_off_t *value_out)
+                                       fetch_off_t *value_out)
 {
   char *unit;
-  curl_off_t value;
+  fetch_off_t value;
 
-  if(curlx_strtoofft(arg, &unit, 10, &value)) {
+  if(fetchx_strtoofft(arg, &unit, 10, &value)) {
     warnf(global, "invalid number specified for %s", which);
     return PARAM_BAD_USE;
   }
@@ -519,19 +519,19 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   switch(*unit) {
   case 'G':
   case 'g':
-    if(value > (CURL_OFF_T_MAX / (1024*1024*1024)))
+    if(value > (FETCH_OFF_T_MAX / (1024*1024*1024)))
       return PARAM_NUMBER_TOO_LARGE;
     value *= 1024*1024*1024;
     break;
   case 'M':
   case 'm':
-    if(value > (CURL_OFF_T_MAX / (1024*1024)))
+    if(value > (FETCH_OFF_T_MAX / (1024*1024)))
       return PARAM_NUMBER_TOO_LARGE;
     value *= 1024*1024;
     break;
   case 'K':
   case 'k':
-    if(value > (CURL_OFF_T_MAX / 1024))
+    if(value > (FETCH_OFF_T_MAX / 1024))
       return PARAM_NUMBER_TOO_LARGE;
     value *= 1024;
     break;
@@ -601,7 +601,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     /* a '@' letter, it means that a filename or - (stdin) follows */
     if(!strcmp("-", p)) {
       file = stdin;
-      CURL_SET_BINMODE(stdin);
+      FETCH_SET_BINMODE(stdin);
     }
     else {
       file = fopen(p, "rb");
@@ -634,23 +634,23 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     size = 0;
   }
   else {
-    char *enc = curl_easy_escape(NULL, postdata, (int)size);
+    char *enc = fetch_easy_escape(NULL, postdata, (int)size);
     Curl_safefree(postdata); /* no matter if it worked or not */
     if(enc) {
       char *n;
       replace_url_encoded_space_by_plus(enc);
       if(nlen > 0) { /* only append '=' if we have a name */
-        struct curlx_dynbuf dyn;
-        curlx_dyn_init(&dyn, MAX_DATAURLENCODE);
-        if(curlx_dyn_addn(&dyn, nextarg, nlen) ||
-           curlx_dyn_addn(&dyn, "=", 1) ||
-           curlx_dyn_add(&dyn, enc)) {
-          curl_free(enc);
+        struct fetchx_dynbuf dyn;
+        fetchx_dyn_init(&dyn, MAX_DATAURLENCODE);
+        if(fetchx_dyn_addn(&dyn, nextarg, nlen) ||
+           fetchx_dyn_addn(&dyn, "=", 1) ||
+           fetchx_dyn_add(&dyn, enc)) {
+          fetch_free(enc);
           return PARAM_NO_MEM;
         }
-        curl_free(enc);
-        n = curlx_dyn_ptr(&dyn);
-        size = curlx_dyn_len(&dyn);
+        fetch_free(enc);
+        n = fetchx_dyn_ptr(&dyn);
+        size = fetchx_dyn_len(&dyn);
       }
       else {
         n = enc;
@@ -679,16 +679,16 @@ static void sethttpver(struct GlobalConfig *global,
   config->httpversion = httpversion;
 }
 
-static CURLcode set_trace_config(struct GlobalConfig *global,
+static FETCHcode set_trace_config(struct GlobalConfig *global,
                                  const char *config)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   char *token, *tmp, *name;
   bool toggle;
 
   tmp = strdup(config);
   if(!tmp)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   /* Allow strtok() here since this is not used threaded */
   /* !checksrc! disable BANNEDFUNC 2 */
@@ -712,7 +712,7 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
     if(strcasecompare(name, "all")) {
       global->traceids = toggle;
       global->tracetime = toggle;
-      result = curl_global_trace(token);
+      result = fetch_global_trace(token);
       if(result)
         goto out;
     }
@@ -723,7 +723,7 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
       global->tracetime = toggle;
     }
     else {
-      result = curl_global_trace(token);
+      result = fetch_global_trace(token);
       if(result)
         goto out;
     }
@@ -815,8 +815,8 @@ static ParameterError url_query(char *nextarg,
   size_t size = 0;
   ParameterError err = PARAM_OK;
   char *query;
-  struct curlx_dynbuf dyn;
-  curlx_dyn_init(&dyn, MAX_QUERY_LEN);
+  struct fetchx_dynbuf dyn;
+  fetchx_dyn_init(&dyn, MAX_QUERY_LEN);
 
   if(*nextarg == '+') {
     /* use without encoding */
@@ -829,13 +829,13 @@ static ParameterError url_query(char *nextarg,
 
   if(!err) {
     if(config->query) {
-      CURLcode result = curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
+      FETCHcode result = fetchx_dyn_addf(&dyn, "%s&%s", config->query, query);
       free(query);
       if(result)
         err = PARAM_NO_MEM;
       else {
         free(config->query);
-        config->query = curlx_dyn_ptr(&dyn);
+        config->query = fetchx_dyn_ptr(&dyn);
       }
     }
     else
@@ -867,7 +867,7 @@ static ParameterError set_data(cmdline_t cmd,
     if(!strcmp("-", nextarg)) {
       file = stdin;
       if(cmd == C_DATA_BINARY) /* forced data-binary */
-        CURL_SET_BINMODE(stdin);
+        FETCH_SET_BINMODE(stdin);
     }
     else {
       file = fopen(nextarg, "rb");
@@ -909,19 +909,19 @@ static ParameterError set_data(cmdline_t cmd,
   if(cmd == C_JSON)
     config->jsoned = TRUE;
 
-  if(curlx_dyn_len(&config->postdata)) {
+  if(fetchx_dyn_len(&config->postdata)) {
     /* skip separator append for --json */
     if(!err && (cmd != C_JSON)  &&
-       curlx_dyn_addn(&config->postdata, "&", 1))
+       fetchx_dyn_addn(&config->postdata, "&", 1))
       err = PARAM_NO_MEM;
   }
 
-  if(!err && curlx_dyn_addn(&config->postdata, postdata, size))
+  if(!err && fetchx_dyn_addn(&config->postdata, postdata, size))
     err = PARAM_NO_MEM;
 
   Curl_safefree(postdata);
 
-  config->postfields = curlx_dyn_ptr(&config->postdata);
+  config->postfields = fetchx_dyn_ptr(&config->postdata);
   return err;
 }
 
@@ -956,10 +956,10 @@ static ParameterError set_rate(struct GlobalConfig *global,
 
   if(div) {
     char unit = div[1];
-    curl_off_t numunits;
+    fetch_off_t numunits;
     char *endp;
 
-    if(curlx_strtoofft(&div[1], &endp, 10, &numunits)) {
+    if(fetchx_strtoofft(&div[1], &endp, 10, &numunits)) {
       /* if it fails, there is no legit number specified */
       if(endp == &div[1])
         /* if endp did not move, accept it as a 1 */
@@ -1129,7 +1129,7 @@ static ParameterError parse_ech(struct GlobalConfig *global,
 {
   ParameterError err = PARAM_OK;
   if(!feature_ech)
-    err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    err = PARAM_LIBFETCH_DOESNT_SUPPORT;
   else if(strlen(nextarg) > 4 && strncasecompare("pn:", nextarg, 3)) {
     /* a public_name */
     err = getstr(&config->ech_public, nextarg, DENY_BLANK);
@@ -1341,8 +1341,8 @@ static ParameterError parse_range(struct GlobalConfig *global,
      work-around it. */
   if(ISDIGIT(*nextarg) && !strchr(nextarg, '-')) {
     char buffer[32];
-    curl_off_t value;
-    if(curlx_strtoofft(nextarg, NULL, 10, &value)) {
+    fetch_off_t value;
+    if(fetchx_strtoofft(nextarg, NULL, 10, &value)) {
       warnf(global, "unsupported range point");
       err = PARAM_BAD_USE;
     }
@@ -1350,7 +1350,7 @@ static ParameterError parse_range(struct GlobalConfig *global,
       warnf(global,
             "A specified range MUST include at least one dash (-). "
             "Appending one for you");
-      msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
+      msnprintf(buffer, sizeof(buffer), "%" FETCH_FORMAT_FETCH_OFF_T "-",
                 value);
       Curl_safefree(config->range);
       config->range = strdup(buffer);
@@ -1525,22 +1525,22 @@ static ParameterError parse_time_cond(struct GlobalConfig *global,
     FALLTHROUGH();
   default:
     /* If-Modified-Since: (section 14.28 in RFC2068) */
-    config->timecond = CURL_TIMECOND_IFMODSINCE;
+    config->timecond = FETCH_TIMECOND_IFMODSINCE;
     break;
   case '-':
     /* If-Unmodified-Since:  (section 14.24 in RFC2068) */
-    config->timecond = CURL_TIMECOND_IFUNMODSINCE;
+    config->timecond = FETCH_TIMECOND_IFUNMODSINCE;
     nextarg++;
     break;
   case '=':
     /* Last-Modified:  (section 14.29 in RFC2068) */
-    config->timecond = CURL_TIMECOND_LASTMOD;
+    config->timecond = FETCH_TIMECOND_LASTMOD;
     nextarg++;
     break;
   }
-  config->condtime = (curl_off_t)curl_getdate(nextarg, NULL);
+  config->condtime = (fetch_off_t)fetch_getdate(nextarg, NULL);
   if(-1 == config->condtime) {
-    curl_off_t value;
+    fetch_off_t value;
     /* now let's see if it is a filename to get the time from instead! */
     int rc = getfiletime(nextarg, global, &value);
     if(!rc)
@@ -1548,11 +1548,11 @@ static ParameterError parse_time_cond(struct GlobalConfig *global,
       config->condtime = value;
     else {
       /* failed, remove time condition */
-      config->timecond = CURL_TIMECOND_NONE;
+      config->timecond = FETCH_TIMECOND_NONE;
       warnf(global,
             "Illegal date format for -z, --time-cond (and not "
             "a filename). Disabling time condition. "
-            "See curl_getdate(3) for valid date syntax.");
+            "See fetch_getdate(3) for valid date syntax.");
     }
   }
   return err;
@@ -1582,7 +1582,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     NULL
   };
   const struct LongShort *a = NULL;
-  curl_off_t value;
+  fetch_off_t value;
 #ifdef HAVE_WRITABLE_ARGV
   argv_item_t clearthis = NULL;
 #else
@@ -1623,7 +1623,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       goto error;
     }
     else if(expand && nextarg) {
-      struct curlx_dynbuf nbuf;
+      struct fetchx_dynbuf nbuf;
       bool replaced;
 
       if((ARGTYPE(a->desc) != ARG_STRG) &&
@@ -1634,11 +1634,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       err = varexpand(global, nextarg, &nbuf, &replaced);
       if(err) {
-        curlx_dyn_free(&nbuf);
+        fetchx_dyn_free(&nbuf);
         goto error;
       }
       if(replaced) {
-        nextarg = curlx_dyn_ptr(&nbuf);
+        nextarg = fetchx_dyn_ptr(&nbuf);
         nextalloc = TRUE;
       }
     }
@@ -1709,15 +1709,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
             a->lname);
       break;
     case C_DNS_IPV4_ADDR: /* --dns-ipv4-addr */
-      if(!curlinfo->ares_num) /* c-ares is needed for this */
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      if(!fetchinfo->ares_num) /* c-ares is needed for this */
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         /* addr in dot notation */
         err = getstr(&config->dns_ipv4_addr, nextarg, DENY_BLANK);
       break;
     case C_DNS_IPV6_ADDR: /* --dns-ipv6-addr */
-      if(!curlinfo->ares_num) /* c-ares is needed for this */
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      if(!fetchinfo->ares_num) /* c-ares is needed for this */
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         /* addr in dot notation */
         err = getstr(&config->dns_ipv6_addr, nextarg, DENY_BLANK);
@@ -1726,7 +1726,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->oauth_bearer, nextarg, DENY_BLANK);
       if(!err) {
         cleanarg(clearthis);
-        config->authtype |= CURLAUTH_BEARER;
+        config->authtype |= FETCHAUTH_BEARER;
       }
       break;
     case C_CONNECT_TIMEOUT: /* --connect-timeout */
@@ -1742,8 +1742,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->cipher_list, nextarg, DENY_BLANK);
       break;
     case C_DNS_INTERFACE: /* --dns-interface */
-      if(!curlinfo->ares_num) /* c-ares is needed for this */
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      if(!fetchinfo->ares_num) /* c-ares is needed for this */
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         /* interface name */
         err = getstr(&config->dns_interface, nextarg, DENY_BLANK);
@@ -1758,8 +1758,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->disable_epsv = !toggle;
       break;
     case C_DNS_SERVERS: /* --dns-servers */
-      if(!curlinfo->ares_num) /* c-ares is needed for this */
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      if(!fetchinfo->ares_num) /* c-ares is needed for this */
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         /* IP addrs of DNS servers */
         err = getstr(&config->dns_servers, nextarg, DENY_BLANK);
@@ -1799,7 +1799,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_COMPRESSED: /* --compressed */
       if(toggle && !(feature_libz || feature_brotli || feature_zstd))
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         config->encoding = toggle;
       break;
@@ -1808,35 +1808,35 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_DIGEST: /* --digest */
       if(toggle)
-        config->authtype |= CURLAUTH_DIGEST;
+        config->authtype |= FETCHAUTH_DIGEST;
       else
-        config->authtype &= ~CURLAUTH_DIGEST;
+        config->authtype &= ~FETCHAUTH_DIGEST;
       break;
     case C_NEGOTIATE: /* --negotiate */
       if(!toggle)
-        config->authtype &= ~CURLAUTH_NEGOTIATE;
+        config->authtype &= ~FETCHAUTH_NEGOTIATE;
       else if(feature_spnego)
-        config->authtype |= CURLAUTH_NEGOTIATE;
+        config->authtype |= FETCHAUTH_NEGOTIATE;
       else
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       break;
     case C_NTLM: /* --ntlm */
       if(!toggle)
-        config->authtype &= ~CURLAUTH_NTLM;
+        config->authtype &= ~FETCHAUTH_NTLM;
       else if(feature_ntlm)
-        config->authtype |= CURLAUTH_NTLM;
+        config->authtype |= FETCHAUTH_NTLM;
       else
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       break;
     case C_BASIC: /* --basic */
       if(toggle)
-        config->authtype |= CURLAUTH_BASIC;
+        config->authtype |= FETCHAUTH_BASIC;
       else
-        config->authtype &= ~CURLAUTH_BASIC;
+        config->authtype &= ~FETCHAUTH_BASIC;
       break;
     case C_ANYAUTH: /* --anyauth */
       if(toggle)
-        config->authtype = CURLAUTH_ANY;
+        config->authtype = FETCHAUTH_ANY;
       /* --no-anyauth simply does not touch it */
       break;
 #ifdef USE_WATT32
@@ -1860,14 +1860,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(!err && (config->maxredirs < -1))
         err = PARAM_BAD_NUMERIC;
       break;
-#ifndef CURL_DISABLE_IPFS
+#ifndef FETCH_DISABLE_IPFS
     case C_IPFS_GATEWAY: /* --ipfs-gateway */
       err = getstr(&config->ipfs_gateway, nextarg, DENY_BLANK);
       break;
-#endif /* !CURL_DISABLE_IPFS */
+#endif /* !FETCH_DISABLE_IPFS */
     case C_PROXY_NTLM: /* --proxy-ntlm */
       if(!feature_ntlm)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         config->proxyntlm = toggle;
       break;
@@ -1876,7 +1876,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->crlf = toggle;
       break;
     case C_AWS_SIGV4: /* --aws-sigv4 */
-      config->authtype |= CURLAUTH_AWS_SIGV4;
+      config->authtype |= FETCHAUTH_AWS_SIGV4;
       err = getstr(&config->aws_sigv4, nextarg, DENY_BLANK);
       break;
     case C_STDERR: /* --stderr */
@@ -1889,7 +1889,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_KRB: /* --krb */
       /* kerberos level string */
       if(!feature_spnego)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         err = getstr(&config->krblevel, nextarg, DENY_BLANK);
       break;
@@ -1919,7 +1919,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_FTP_SSL: /* --ftp-ssl */
     case C_SSL: /* --ssl */
       if(toggle && !feature_ssl)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else {
         config->ftp_ssl = toggle;
         if(config->ftp_ssl)
@@ -1935,19 +1935,19 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /*  socks5 proxy to use, and resolves the name locally and passes on the
           resolved address */
       err = getstr(&config->proxy, nextarg, DENY_BLANK);
-      config->proxyver = CURLPROXY_SOCKS5;
+      config->proxyver = FETCHPROXY_SOCKS5;
       break;
     case C_SOCKS4: /* --socks4 */
       err = getstr(&config->proxy, nextarg, DENY_BLANK);
-      config->proxyver = CURLPROXY_SOCKS4;
+      config->proxyver = FETCHPROXY_SOCKS4;
       break;
     case C_SOCKS4A: /* --socks4a */
       err = getstr(&config->proxy, nextarg, DENY_BLANK);
-      config->proxyver = CURLPROXY_SOCKS4A;
+      config->proxyver = FETCHPROXY_SOCKS4A;
       break;
     case C_SOCKS5_HOSTNAME: /* --socks5-hostname */
       err = getstr(&config->proxy, nextarg, DENY_BLANK);
-      config->proxyver = CURLPROXY_SOCKS5_HOSTNAME;
+      config->proxyver = FETCHPROXY_SOCKS5_HOSTNAME;
       break;
     case C_TCP_NODELAY: /* --tcp-nodelay */
       config->tcp_nodelay = toggle;
@@ -1991,14 +1991,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_PROXY_NEGOTIATE: /* --proxy-negotiate */
       if(!feature_spnego)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         config->proxynegotiate = toggle;
       break;
     case C_FORM_ESCAPE: /* --form-escape */
-      config->mime_options &= ~CURLMIMEOPT_FORMESCAPE;
+      config->mime_options &= ~FETCHMIMEOPT_FORMESCAPE;
       if(toggle)
-        config->mime_options |= CURLMIMEOPT_FORMESCAPE;
+        config->mime_options |= FETCHMIMEOPT_FORMESCAPE;
       break;
     case C_FTP_ACCOUNT: /* --ftp-account */
       err = getstr(&config->ftp_account, nextarg, DENY_BLANK);
@@ -2027,7 +2027,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_FTP_SSL_REQD: /* --ftp-ssl-reqd */
     case C_SSL_REQD: /* --ssl-reqd */
       if(toggle && !feature_ssl) {
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
         break;
       }
       config->ftp_ssl_reqd = toggle;
@@ -2037,26 +2037,26 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_FTP_SSL_CONTROL: /* --ftp-ssl-control */
       if(toggle && !feature_ssl)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         config->ftp_ssl_control = toggle;
       break;
     case C_FTP_SSL_CCC: /* --ftp-ssl-ccc */
       config->ftp_ssl_ccc = toggle;
       if(!config->ftp_ssl_ccc_mode)
-        config->ftp_ssl_ccc_mode = CURLFTPSSL_CCC_PASSIVE;
+        config->ftp_ssl_ccc_mode = FETCHFTPSSL_CCC_PASSIVE;
       break;
     case C_FTP_SSL_CCC_MODE: /* --ftp-ssl-ccc-mode */
       config->ftp_ssl_ccc = TRUE;
       config->ftp_ssl_ccc_mode = ftpcccmethod(config, nextarg);
       break;
-    case C_LIBCURL: /* --libcurl */
-#ifdef CURL_DISABLE_LIBCURL_OPTION
+    case C_LIBFETCH: /* --libfetch */
+#ifdef FETCH_DISABLE_LIBFETCH_OPTION
       warnf(global,
-            "--libcurl option was disabled at build-time");
+            "--libfetch option was disabled at build-time");
       err = PARAM_OPTION_UNKNOWN;
 #else
-      err = getstr(&global->libcurl, nextarg, DENY_BLANK);
+      err = getstr(&global->libfetch, nextarg, DENY_BLANK);
 #endif
       break;
     case C_RAW: /* --raw */
@@ -2090,7 +2090,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_PROXY1_0: /* --proxy1.0 */
       /* http 1.0 proxy */
       err = getstr(&config->proxy, nextarg, DENY_BLANK);
-      config->proxyver = CURLPROXY_HTTP_1_0;
+      config->proxyver = FETCHPROXY_HTTP_1_0;
       break;
     case C_TFTP_BLKSIZE: /* --tftp-blksize */
       err = str2unum(&config->tftp_blksize, nextarg);
@@ -2201,7 +2201,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       global->noprogress = !toggle;
       break;
     case C_PROGRESS_BAR: /* --progress-bar */
-      global->progressmode = toggle ? CURL_PROGRESS_BAR : CURL_PROGRESS_STATS;
+      global->progressmode = toggle ? FETCH_PROGRESS_BAR : FETCH_PROGRESS_STATS;
       break;
     case C_VARIABLE: /* --variable */
       err = setvariable(global, nextarg);
@@ -2211,37 +2211,37 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_HTTP1_0: /* --http1.0 */
       /* HTTP version 1.0 */
-      sethttpver(global, config, CURL_HTTP_VERSION_1_0);
+      sethttpver(global, config, FETCH_HTTP_VERSION_1_0);
       break;
     case C_HTTP1_1: /* --http1.1 */
       /* HTTP version 1.1 */
-      sethttpver(global, config, CURL_HTTP_VERSION_1_1);
+      sethttpver(global, config, FETCH_HTTP_VERSION_1_1);
       break;
     case C_HTTP2: /* --http2 */
       /* HTTP version 2.0 */
       if(!feature_http2)
-        return PARAM_LIBCURL_DOESNT_SUPPORT;
-      sethttpver(global, config, CURL_HTTP_VERSION_2_0);
+        return PARAM_LIBFETCH_DOESNT_SUPPORT;
+      sethttpver(global, config, FETCH_HTTP_VERSION_2_0);
       break;
     case C_HTTP2_PRIOR_KNOWLEDGE: /* --http2-prior-knowledge */
       /* HTTP version 2.0 over clean TCP */
       if(!feature_http2)
-        return PARAM_LIBCURL_DOESNT_SUPPORT;
-      sethttpver(global, config, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+        return PARAM_LIBFETCH_DOESNT_SUPPORT;
+      sethttpver(global, config, FETCH_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
       break;
     case C_HTTP3: /* --http3: */
       /* Try HTTP/3, allow fallback */
       if(!feature_http3)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
-        sethttpver(global, config, CURL_HTTP_VERSION_3);
+        sethttpver(global, config, FETCH_HTTP_VERSION_3);
       break;
     case C_HTTP3_ONLY: /* --http3-only */
       /* Try HTTP/3 without fallback */
       if(!feature_http3)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
-        sethttpver(global, config, CURL_HTTP_VERSION_3ONLY);
+        sethttpver(global, config, FETCH_HTTP_VERSION_3ONLY);
       break;
     case C_HTTP0_9: /* --http0.9 */
       /* Allow HTTP/0.9 responses! */
@@ -2249,24 +2249,24 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_PROXY_HTTP2: /* --proxy-http2 */
       if(!feature_httpsproxy || !feature_http2)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
-        config->proxyver = CURLPROXY_HTTPS2;
+        config->proxyver = FETCHPROXY_HTTPS2;
       break;
     case C_TLSV1: /* --tlsv1 */
-      config->ssl_version = CURL_SSLVERSION_TLSv1;
+      config->ssl_version = FETCH_SSLVERSION_TLSv1;
       break;
     case C_TLSV1_0: /* --tlsv1.0 */
-      config->ssl_version = CURL_SSLVERSION_TLSv1_0;
+      config->ssl_version = FETCH_SSLVERSION_TLSv1_0;
       break;
     case C_TLSV1_1: /* --tlsv1.1 */
-      config->ssl_version = CURL_SSLVERSION_TLSv1_1;
+      config->ssl_version = FETCH_SSLVERSION_TLSv1_1;
       break;
     case C_TLSV1_2: /* --tlsv1.2 */
-      config->ssl_version = CURL_SSLVERSION_TLSv1_2;
+      config->ssl_version = FETCH_SSLVERSION_TLSv1_2;
       break;
     case C_TLSV1_3: /* --tlsv1.3 */
-      config->ssl_version = CURL_SSLVERSION_TLSv1_3;
+      config->ssl_version = FETCH_SSLVERSION_TLSv1_3;
       break;
     case C_TLS13_CIPHERS: /* --tls13-ciphers */
       err = getstr(&config->cipher13_list, nextarg, DENY_BLANK);
@@ -2281,10 +2281,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       warnf(global, "Ignores instruction to use SSLv3");
       break;
     case C_IPV4: /* --ipv4 */
-      config->ip_version = CURL_IPRESOLVE_V4;
+      config->ip_version = FETCH_IPRESOLVE_V4;
       break;
     case C_IPV6: /* --ipv6 */
-      config->ip_version = CURL_IPRESOLVE_V6;
+      config->ip_version = FETCH_IPRESOLVE_V6;
       break;
     case C_APPEND: /* --append */
       /* This makes the FTP sessions use APPE instead of STOR */
@@ -2295,13 +2295,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_ALT_SVC: /* --alt-svc */
       if(!feature_altsvc)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         err = getstr(&config->altsvc, nextarg, ALLOW_BLANK);
       break;
     case C_HSTS: /* --hsts */
       if(!feature_hsts)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         err = getstr(&config->hsts, nextarg, ALLOW_BLANK);
       break;
@@ -2407,7 +2407,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_HOSTPUBSHA256: /* --hostpubsha256 */
       if(!feature_libssh2)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
       break;
@@ -2416,25 +2416,25 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_TLSUSER: /* --tlsuser */
       if(!feature_tls_srp)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         err = getstr(&config->tls_username, nextarg, DENY_BLANK);
       cleanarg(clearthis);
       break;
     case C_TLSPASSWORD: /* --tlspassword */
       if(!feature_tls_srp)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         err = getstr(&config->tls_password, nextarg, ALLOW_BLANK);
       cleanarg(clearthis);
       break;
     case C_TLSAUTHTYPE: /* --tlsauthtype */
       if(!feature_tls_srp)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else {
         err = getstr(&config->tls_authtype, nextarg, DENY_BLANK);
         if(!err && strcmp(config->tls_authtype, "SRP"))
-          err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
+          err = PARAM_LIBFETCH_DOESNT_SUPPORT; /* only support TLS-SRP */
       }
       break;
     case C_SSL_ALLOW_BEAST: /* --ssl-allow-beast */
@@ -2476,7 +2476,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(feature_ssls_export)
         err = getstr(&global->ssl_sessions, nextarg, DENY_BLANK);
       else
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       break;
     case C_TCP_FASTOPEN: /* --tcp-fastopen */
       config->tcp_fastopen = TRUE;
@@ -2484,24 +2484,24 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_PROXY_TLSUSER: /* --proxy-tlsuser */
       cleanarg(clearthis);
       if(!feature_tls_srp)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         err = getstr(&config->proxy_tls_username, nextarg, ALLOW_BLANK);
       break;
     case C_PROXY_TLSPASSWORD: /* --proxy-tlspassword */
       cleanarg(clearthis);
       if(!feature_tls_srp)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else
         err = getstr(&config->proxy_tls_password, nextarg, DENY_BLANK);
       break;
     case C_PROXY_TLSAUTHTYPE: /* --proxy-tlsauthtype */
       if(!feature_tls_srp)
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        err = PARAM_LIBFETCH_DOESNT_SUPPORT;
       else {
         err = getstr(&config->proxy_tls_authtype, nextarg, DENY_BLANK);
         if(!err && strcmp(config->proxy_tls_authtype, "SRP"))
-          err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
+          err = PARAM_LIBFETCH_DOESNT_SUPPORT; /* only support TLS-SRP */
       }
       break;
     case C_PROXY_CERT: /* --proxy-cert */
@@ -2546,19 +2546,19 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_PROXY_TLSV1: /* --proxy-tlsv1 */
       /* TLS version 1 for proxy */
-      config->proxy_ssl_version = CURL_SSLVERSION_TLSv1;
+      config->proxy_ssl_version = FETCH_SSLVERSION_TLSv1;
       break;
     case C_SOCKS5_BASIC: /* --socks5-basic */
       if(toggle)
-        config->socks5_auth |= CURLAUTH_BASIC;
+        config->socks5_auth |= FETCHAUTH_BASIC;
       else
-        config->socks5_auth &= ~CURLAUTH_BASIC;
+        config->socks5_auth &= ~FETCHAUTH_BASIC;
       break;
     case C_SOCKS5_GSSAPI: /* --socks5-gssapi */
       if(toggle)
-        config->socks5_auth |= CURLAUTH_GSSAPI;
+        config->socks5_auth |= FETCHAUTH_GSSAPI;
       else
-        config->socks5_auth &= ~CURLAUTH_GSSAPI;
+        config->socks5_auth &= ~FETCHAUTH_GSSAPI;
       break;
     case C_ETAG_SAVE: /* --etag-save */
       if(config->num_urls > 1) {
@@ -2712,7 +2712,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->netrc_file, nextarg, DENY_BLANK);
       break;
     case C_NETRC: /* --netrc */
-      /* pick info from .netrc, if this is used for http, curl will
+      /* pick info from .netrc, if this is used for http, fetch will
          automatically enforce user+password with the request */
       config->netrc = toggle;
       break;
@@ -2810,8 +2810,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_PROXY: /* --proxy */
       /* --proxy */
       err = getstr(&config->proxy, nextarg, ALLOW_BLANK);
-      if(config->proxyver != CURLPROXY_HTTPS2)
-        config->proxyver = CURLPROXY_HTTP;
+      if(config->proxyver != FETCHPROXY_HTTPS2)
+        config->proxyver = FETCHPROXY_HTTP;
       break;
     case C_REQUEST: /* --request */
       /* set custom request */
@@ -2878,7 +2878,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   struct OperationConfig *config = global->first;
 
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
-    orig_opt = curlx_convert_tchar_to_UTF8(argv[i]);
+    orig_opt = fetchx_convert_tchar_to_UTF8(argv[i]);
     if(!orig_opt)
       return PARAM_NO_MEM;
 
@@ -2892,9 +2892,9 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       else {
         char *nextarg = NULL;
         if(i < (argc - 1)) {
-          nextarg = curlx_convert_tchar_to_UTF8(argv[i + 1]);
+          nextarg = fetchx_convert_tchar_to_UTF8(argv[i + 1]);
           if(!nextarg) {
-            curlx_unicodefree(orig_opt);
+            fetchx_unicodefree(orig_opt);
             return PARAM_NO_MEM;
           }
         }
@@ -2902,7 +2902,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         result = getparameter(orig_opt, nextarg, argv[i + 1], &passarg,
                               global, config);
 
-        curlx_unicodefree(nextarg);
+        fetchx_unicodefree(nextarg);
         config = global->last;
         if(result == PARAM_NEXT_OPERATION) {
           /* Reset result as PARAM_NEXT_OPERATION is only used here and not
@@ -2946,7 +2946,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
     }
 
     if(!result)
-      curlx_unicodefree(orig_opt);
+      fetchx_unicodefree(orig_opt);
   }
 
   if(!result && config->content_disposition) {
@@ -2967,6 +2967,6 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       helpf(tool_stderr, "%s", reason);
   }
 
-  curlx_unicodefree(orig_opt);
+  fetchx_unicodefree(orig_opt);
   return result;
 }

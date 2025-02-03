@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -45,14 +45,14 @@
 unsigned int get_terminal_columns(void)
 {
   unsigned int width = 0;
-  char *colp = curl_getenv("COLUMNS");
+  char *colp = fetch_getenv("COLUMNS");
   if(colp) {
     char *endptr;
     long num = strtol(colp, &endptr, 10);
     if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 20) &&
        (num < 10000))
       width = (unsigned int)num;
-    curl_free(colp);
+    fetch_free(colp);
   }
 
   if(!width) {
@@ -66,7 +66,7 @@ unsigned int get_terminal_columns(void)
     struct winsize ts;
     if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
       cols = (int)ts.ws_col;
-#elif defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#elif defined(_WIN32) && !defined(FETCH_WINDOWS_UWP)
     {
       HANDLE  stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
       CONSOLE_SCREEN_BUFFER_INFO console_info;

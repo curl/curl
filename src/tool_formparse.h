@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_FORMPARSE_H
-#define HEADER_CURL_TOOL_FORMPARSE_H
+#ifndef HEADER_FETCH_TOOL_FORMPARSE_H
+#define HEADER_FETCH_TOOL_FORMPARSE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -48,26 +48,26 @@ struct tool_mime {
   char *filename;               /* Part's filename. */
   char *type;                   /* Part's mime type. */
   char *encoder;                /* Part's requested encoding. */
-  struct curl_slist *headers;   /* User-defined headers. */
+  struct fetch_slist *headers;   /* User-defined headers. */
   /* TOOLMIME_PARTS fields. */
   struct tool_mime *subparts;   /* Part's subparts. */
   /* TOOLMIME_STDIN/TOOLMIME_STDINDATA fields. */
-  curl_off_t origin;            /* Stdin read origin offset. */
-  curl_off_t size;              /* Stdin data size. */
-  curl_off_t curpos;            /* Stdin current read position. */
+  fetch_off_t origin;            /* Stdin read origin offset. */
+  fetch_off_t size;              /* Stdin data size. */
+  fetch_off_t curpos;            /* Stdin current read position. */
   struct GlobalConfig *config;  /* For access from callback. */
 };
 
 size_t tool_mime_stdin_read(char *buffer,
                             size_t size, size_t nitems, void *arg);
-int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence);
+int tool_mime_stdin_seek(void *instream, fetch_off_t offset, int whence);
 
 int formparse(struct OperationConfig *config,
               const char *input,
               struct tool_mime **mimeroot,
               struct tool_mime **mimecurrent,
               bool literal_value);
-CURLcode tool2curlmime(CURL *curl, struct tool_mime *m, curl_mime **mime);
+FETCHcode tool2fetchmime(FETCH *fetch, struct tool_mime *m, fetch_mime **mime);
 void tool_mime_free(struct tool_mime *mime);
 
-#endif /* HEADER_CURL_TOOL_FORMPARSE_H */
+#endif /* HEADER_FETCH_TOOL_FORMPARSE_H */

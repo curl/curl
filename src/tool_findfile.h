@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_HOMEDIR_H
-#define HEADER_CURL_TOOL_HOMEDIR_H
+#ifndef HEADER_FETCH_TOOL_HOMEDIR_H
+#define HEADER_FETCH_TOOL_HOMEDIR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,17 +20,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
 #ifdef _WIN32
-#define CURLRC_DOTSCORE 2 /* look for underscore-prefixed name too */
+#define FETCHRC_DOTSCORE 2 /* look for underscore-prefixed name too */
 #else
-#define CURLRC_DOTSCORE 1 /* regular .curlrc check */
+#define FETCHRC_DOTSCORE 1 /* regular .fetchrc check */
 #endif
 
 char *findfile(const char *fname, int dotscore);
 
-#endif /* HEADER_CURL_TOOL_HOMEDIR_H */
+#endif /* HEADER_FETCH_TOOL_HOMEDIR_H */

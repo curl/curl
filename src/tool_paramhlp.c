@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,14 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
 #include "strcase.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
@@ -92,22 +92,22 @@ static size_t memcrlf(char *orig,
 
 ParameterError file2string(char **bufp, FILE *file)
 {
-  struct curlx_dynbuf dyn;
-  curlx_dyn_init(&dyn, MAX_FILE2STRING);
+  struct fetchx_dynbuf dyn;
+  fetchx_dyn_init(&dyn, MAX_FILE2STRING);
   if(file) {
     do {
       char buffer[4096];
       char *ptr;
       size_t nread = fread(buffer, 1, sizeof(buffer), file);
       if(ferror(file)) {
-        curlx_dyn_free(&dyn);
+        fetchx_dyn_free(&dyn);
         *bufp = NULL;
         return PARAM_READ_ERROR;
       }
       ptr = buffer;
       while(nread) {
         size_t nlen = memcrlf(ptr, FALSE, nread);
-        if(curlx_dyn_addn(&dyn, ptr, nlen))
+        if(fetchx_dyn_addn(&dyn, ptr, nlen))
           return PARAM_NO_MEM;
         nread -= nlen;
 
@@ -120,11 +120,11 @@ ParameterError file2string(char **bufp, FILE *file)
       }
     } while(!feof(file));
   }
-  *bufp = curlx_dyn_ptr(&dyn);
+  *bufp = fetchx_dyn_ptr(&dyn);
   return PARAM_OK;
 }
 
-static int myfseek(void *stream, curl_off_t offset, int whence)
+static int myfseek(void *stream, fetch_off_t offset, int whence)
 {
 #if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
   return _fseeki64(stream, (__int64)offset, whence);
@@ -138,13 +138,13 @@ static int myfseek(void *stream, curl_off_t offset, int whence)
 }
 
 ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
-                                 curl_off_t starto, curl_off_t endo)
+                                 fetch_off_t starto, fetch_off_t endo)
 {
   if(file) {
     size_t nread;
-    struct curlx_dynbuf dyn;
-    curl_off_t offset = 0;
-    curl_off_t throwaway = 0;
+    struct fetchx_dynbuf dyn;
+    fetch_off_t offset = 0;
+    fetch_off_t throwaway = 0;
 
     if(starto) {
       if(file != stdin) {
@@ -158,14 +158,14 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
     }
 
     /* The size needs to fit in an int later */
-    curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
+    fetchx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
       char buffer[4096];
       size_t n_add;
       char *ptr_add;
       nread = fread(buffer, 1, sizeof(buffer), file);
       if(ferror(file)) {
-        curlx_dyn_free(&dyn);
+        fetchx_dyn_free(&dyn);
         *size = 0;
         *bufp = NULL;
         return PARAM_READ_ERROR;
@@ -174,7 +174,7 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
       ptr_add = buffer;
       if(nread) {
         if(throwaway) {
-          if(throwaway >= (curl_off_t)nread) {
+          if(throwaway >= (fetch_off_t)nread) {
             throwaway -= nread;
             offset += nread;
             n_add = 0; /* nothing to add */
@@ -188,10 +188,10 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
           }
         }
         if(n_add) {
-          if((curl_off_t)(n_add + offset) > endo)
+          if((fetch_off_t)(n_add + offset) > endo)
             n_add = (size_t)(endo - offset + 1);
 
-          if(curlx_dyn_addn(&dyn, ptr_add, n_add))
+          if(fetchx_dyn_addn(&dyn, ptr_add, n_add))
             return PARAM_NO_MEM;
 
           offset += n_add;
@@ -200,8 +200,8 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
         }
       }
     } while(!feof(file));
-    *size = curlx_dyn_len(&dyn);
-    *bufp = curlx_dyn_ptr(&dyn);
+    *size = fetchx_dyn_len(&dyn);
+    *bufp = fetchx_dyn_ptr(&dyn);
   }
   else {
     *size = 0;
@@ -212,7 +212,7 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
 
 ParameterError file2memory(char **bufp, size_t *size, FILE *file)
 {
-  return file2memory_range(bufp, size, file, 0, CURL_OFF_T_MAX);
+  return file2memory_range(bufp, size, file, 0, FETCH_OFF_T_MAX);
 }
 
 /*
@@ -409,7 +409,7 @@ static void protoset_clear(const char **protoset, const char *proto)
 }
 
 /*
- * Parse the string and provide an allocated libcurl compatible protocol
+ * Parse the string and provide an allocated libfetch compatible protocol
  * string output. Return non-zero on failure, zero on success.
  *
  * The string is a list of protocols
@@ -428,11 +428,11 @@ ParameterError proto2num(struct OperationConfig *config,
   const char *sep = ",";
   char *token;
   const char **protoset;
-  struct curlx_dynbuf obuf;
+  struct fetchx_dynbuf obuf;
   size_t proto;
-  CURLcode result;
+  FETCHcode result;
 
-  curlx_dyn_init(&obuf, MAX_PROTOSTRING);
+  fetchx_dyn_init(&obuf, MAX_PROTOSTRING);
 
   if(!str)
     return PARAM_OPTION_AMBIGUOUS;
@@ -482,7 +482,7 @@ ParameterError proto2num(struct OperationConfig *config,
       }
     }
 
-    if(curl_strequal(token, "all")) {
+    if(fetch_strequal(token, "all")) {
       switch(action) {
       case deny:
         protoset[0] = NULL;
@@ -524,23 +524,23 @@ ParameterError proto2num(struct OperationConfig *config,
   qsort((char *) protoset, protoset_index(protoset, NULL), sizeof(*protoset),
         struplocompare4sort);
 
-  result = curlx_dyn_addn(&obuf, "", 0);
+  result = fetchx_dyn_addn(&obuf, "", 0);
   for(proto = 0; protoset[proto] && !result; proto++)
-    result = curlx_dyn_addf(&obuf, "%s,", protoset[proto]);
+    result = fetchx_dyn_addf(&obuf, "%s,", protoset[proto]);
   free((char *) protoset);
-  curlx_dyn_setlen(&obuf, curlx_dyn_len(&obuf) - 1);
+  fetchx_dyn_setlen(&obuf, fetchx_dyn_len(&obuf) - 1);
   free(*ostr);
-  *ostr = curlx_dyn_ptr(&obuf);
+  *ostr = fetchx_dyn_ptr(&obuf);
 
   return *ostr ? PARAM_OK : PARAM_NO_MEM;
 }
 
 /**
- * Check if the given string is a protocol supported by libcurl
+ * Check if the given string is a protocol supported by libfetch
  *
  * @param str  the protocol name
  * @return PARAM_OK  protocol supported
- * @return PARAM_LIBCURL_UNSUPPORTED_PROTOCOL  protocol not supported
+ * @return PARAM_LIBFETCH_UNSUPPORTED_PROTOCOL  protocol not supported
  * @return PARAM_REQUIRES_PARAMETER   missing parameter
  */
 ParameterError check_protocol(const char *str)
@@ -550,7 +550,7 @@ ParameterError check_protocol(const char *str)
 
   if(proto_token(str))
     return PARAM_OK;
-  return PARAM_LIBCURL_UNSUPPORTED_PROTOCOL;
+  return PARAM_LIBFETCH_UNSUPPORTED_PROTOCOL;
 }
 
 /**
@@ -561,19 +561,19 @@ ParameterError check_protocol(const char *str)
  * @param str  the buffer containing the offset
  * @return PARAM_OK if successful, a parameter specific error enum if failure.
  */
-ParameterError str2offset(curl_off_t *val, const char *str)
+ParameterError str2offset(fetch_off_t *val, const char *str)
 {
   char *endptr;
   if(str[0] == '-')
     /* offsets are not negative, this indicates weird input */
     return PARAM_NEGATIVE_NUMERIC;
 
-#if(SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if(SIZEOF_FETCH_OFF_T > SIZEOF_LONG)
   {
-    CURLofft offt = curlx_strtoofft(str, &endptr, 10, val);
-    if(CURL_OFFT_FLOW == offt)
+    FETCHofft offt = fetchx_strtoofft(str, &endptr, 10, val);
+    if(FETCH_OFFT_FLOW == offt)
       return PARAM_NUMBER_TOO_LARGE;
-    else if(CURL_OFFT_INVAL == offt)
+    else if(FETCH_OFFT_INVAL == offt)
       return PARAM_BAD_NUMERIC;
   }
 #else
@@ -589,7 +589,7 @@ ParameterError str2offset(curl_off_t *val, const char *str)
 }
 
 #define MAX_USERPWDLENGTH (100*1024)
-static CURLcode checkpasswd(const char *kind, /* for what purpose */
+static FETCHcode checkpasswd(const char *kind, /* for what purpose */
                             const size_t i,   /* operation index */
                             const bool last,  /* TRUE if last operation */
                             char **userpwd)   /* pointer to allocated string */
@@ -598,7 +598,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
   char *osep;
 
   if(!*userpwd)
-    return CURLE_OK;
+    return FETCHE_OK;
 
   /* Attempt to find the password separator */
   psep = strchr(*userpwd, ':');
@@ -610,9 +610,9 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
     /* no password present, prompt for one */
     char passwd[2048] = "";
     char prompt[256];
-    struct curlx_dynbuf dyn;
+    struct fetchx_dynbuf dyn;
 
-    curlx_dyn_init(&dyn, MAX_USERPWDLENGTH);
+    fetchx_dyn_init(&dyn, MAX_USERPWDLENGTH);
     if(osep)
       *osep = '\0';
 
@@ -631,20 +631,20 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
     if(osep)
       *osep = ';';
 
-    if(curlx_dyn_addf(&dyn, "%s:%s", *userpwd, passwd))
-      return CURLE_OUT_OF_MEMORY;
+    if(fetchx_dyn_addf(&dyn, "%s:%s", *userpwd, passwd))
+      return FETCHE_OUT_OF_MEMORY;
 
     /* return the new string */
     free(*userpwd);
-    *userpwd = curlx_dyn_ptr(&dyn);
+    *userpwd = fetchx_dyn_ptr(&dyn);
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-ParameterError add2list(struct curl_slist **list, const char *ptr)
+ParameterError add2list(struct fetch_slist **list, const char *ptr)
 {
-  struct curl_slist *newlist = curl_slist_append(*list, ptr);
+  struct fetch_slist *newlist = fetch_slist_append(*list, ptr);
   if(newlist)
     *list = newlist;
   else
@@ -655,45 +655,45 @@ ParameterError add2list(struct curl_slist **list, const char *ptr)
 
 int ftpfilemethod(struct OperationConfig *config, const char *str)
 {
-  if(curl_strequal("singlecwd", str))
-    return CURLFTPMETHOD_SINGLECWD;
-  if(curl_strequal("nocwd", str))
-    return CURLFTPMETHOD_NOCWD;
-  if(curl_strequal("multicwd", str))
-    return CURLFTPMETHOD_MULTICWD;
+  if(fetch_strequal("singlecwd", str))
+    return FETCHFTPMETHOD_SINGLECWD;
+  if(fetch_strequal("nocwd", str))
+    return FETCHFTPMETHOD_NOCWD;
+  if(fetch_strequal("multicwd", str))
+    return FETCHFTPMETHOD_MULTICWD;
 
   warnf(config->global, "unrecognized ftp file method '%s', using default",
         str);
 
-  return CURLFTPMETHOD_MULTICWD;
+  return FETCHFTPMETHOD_MULTICWD;
 }
 
 int ftpcccmethod(struct OperationConfig *config, const char *str)
 {
-  if(curl_strequal("passive", str))
-    return CURLFTPSSL_CCC_PASSIVE;
-  if(curl_strequal("active", str))
-    return CURLFTPSSL_CCC_ACTIVE;
+  if(fetch_strequal("passive", str))
+    return FETCHFTPSSL_CCC_PASSIVE;
+  if(fetch_strequal("active", str))
+    return FETCHFTPSSL_CCC_ACTIVE;
 
   warnf(config->global, "unrecognized ftp CCC method '%s', using default",
         str);
 
-  return CURLFTPSSL_CCC_PASSIVE;
+  return FETCHFTPSSL_CCC_PASSIVE;
 }
 
 long delegation(struct OperationConfig *config, const char *str)
 {
-  if(curl_strequal("none", str))
-    return CURLGSSAPI_DELEGATION_NONE;
-  if(curl_strequal("policy", str))
-    return CURLGSSAPI_DELEGATION_POLICY_FLAG;
-  if(curl_strequal("always", str))
-    return CURLGSSAPI_DELEGATION_FLAG;
+  if(fetch_strequal("none", str))
+    return FETCHGSSAPI_DELEGATION_NONE;
+  if(fetch_strequal("policy", str))
+    return FETCHGSSAPI_DELEGATION_POLICY_FLAG;
+  if(fetch_strequal("always", str))
+    return FETCHGSSAPI_DELEGATION_FLAG;
 
   warnf(config->global, "unrecognized delegation method '%s', using none",
         str);
 
-  return CURLGSSAPI_DELEGATION_NONE;
+  return FETCHGSSAPI_DELEGATION_NONE;
 }
 
 /*
@@ -701,7 +701,7 @@ long delegation(struct OperationConfig *config, const char *str)
  */
 static char *my_useragent(void)
 {
-  return strdup(CURL_NAME "/" CURL_VERSION);
+  return strdup(FETCH_NAME "/" FETCH_VERSION);
 }
 
 #define isheadersep(x) ((((x)==':') || ((x)==';')))
@@ -710,7 +710,7 @@ static char *my_useragent(void)
  * inlist() returns true if the given 'checkfor' header is present in the
  * header list.
  */
-static bool inlist(const struct curl_slist *head,
+static bool inlist(const struct fetch_slist *head,
                    const char *checkfor)
 {
   size_t thislen = strlen(checkfor);
@@ -718,7 +718,7 @@ static bool inlist(const struct curl_slist *head,
   DEBUGASSERT(checkfor[thislen-1] != ':');
 
   for(; head; head = head->next) {
-    if(curl_strnequal(head->data, checkfor, thislen) &&
+    if(fetch_strnequal(head->data, checkfor, thislen) &&
        isheadersep(head->data[thislen]) )
       return TRUE;
   }
@@ -726,9 +726,9 @@ static bool inlist(const struct curl_slist *head,
   return FALSE;
 }
 
-CURLcode get_args(struct OperationConfig *config, const size_t i)
+FETCHcode get_args(struct OperationConfig *config, const size_t i)
 {
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
   bool last = (config->next ? FALSE : TRUE);
 
   if(config->jsoned) {
@@ -740,7 +740,7 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
     if(!err && !inlist(config->headers, "Accept"))
       err = add2list(&config->headers, "Accept: application/json");
     if(err)
-      return CURLE_OUT_OF_MEMORY;
+      return FETCHE_OUT_OF_MEMORY;
   }
 
   /* Check we have a password for the given host user */
@@ -762,7 +762,7 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
     config->useragent = my_useragent();
     if(!config->useragent) {
       errorf(config->global, "out of memory");
-      result = CURLE_OUT_OF_MEMORY;
+      result = FETCHE_OUT_OF_MEMORY;
     }
   }
 
@@ -784,11 +784,11 @@ ParameterError str2tls_max(long *val, const char *str)
     const char *tls_max_str;
     long tls_max;
   } const tls_max_array[] = {
-    { "default", CURL_SSLVERSION_MAX_DEFAULT },
-    { "1.0",     CURL_SSLVERSION_MAX_TLSv1_0 },
-    { "1.1",     CURL_SSLVERSION_MAX_TLSv1_1 },
-    { "1.2",     CURL_SSLVERSION_MAX_TLSv1_2 },
-    { "1.3",     CURL_SSLVERSION_MAX_TLSv1_3 }
+    { "default", FETCH_SSLVERSION_MAX_DEFAULT },
+    { "1.0",     FETCH_SSLVERSION_MAX_TLSv1_0 },
+    { "1.1",     FETCH_SSLVERSION_MAX_TLSv1_1 },
+    { "1.2",     FETCH_SSLVERSION_MAX_TLSv1_2 },
+    { "1.3",     FETCH_SSLVERSION_MAX_TLSv1_3 }
   };
   size_t i = 0;
   if(!str)

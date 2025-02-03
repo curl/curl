@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_CFGABLE_H
-#define HEADER_CURL_TOOL_CFGABLE_H
+#ifndef HEADER_FETCH_TOOL_CFGABLE_H
+#define HEADER_FETCH_TOOL_CFGABLE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -37,19 +37,19 @@ struct State {
   char *outfiles;
   char *httpgetfields;
   char *uploadfile;
-  curl_off_t infilenum; /* number of files to upload */
-  curl_off_t up;        /* upload file counter within a single upload glob */
-  curl_off_t urlnum;    /* how many iterations this single URL has with ranges
+  fetch_off_t infilenum; /* number of files to upload */
+  fetch_off_t up;        /* upload file counter within a single upload glob */
+  fetch_off_t urlnum;    /* how many iterations this single URL has with ranges
                            etc */
-  curl_off_t li;
+  fetch_off_t li;
 };
 
 struct OperationConfig {
   bool remote_time;
   char *useragent;
-  struct curl_slist *cookies;  /* cookies to serialize into a single line */
+  struct fetch_slist *cookies;  /* cookies to serialize into a single line */
   char *cookiejar;          /* write to this file */
-  struct curl_slist *cookiefiles;  /* file(s) to load cookies from */
+  struct fetch_slist *cookiefiles;  /* file(s) to load cookies from */
   char *altsvc;             /* alt-svc cache filename */
   char *hsts;               /* HSTS cache filename */
   bool cookiesession;       /* new session? */
@@ -66,15 +66,15 @@ struct OperationConfig {
   char *proto_redir_str;
   bool proto_redir_present;
   char *proto_default;
-  curl_off_t resume_from;
+  fetch_off_t resume_from;
   char *postfields;
-  struct curlx_dynbuf postdata;
+  struct fetchx_dynbuf postdata;
   char *referer;
   char *query;
   long timeout_ms;
   long connecttimeout_ms;
   long maxredirs;
-  curl_off_t max_filesize;
+  fetch_off_t max_filesize;
   char *output_dir;
   char *headerfile;
   char *ftpport;
@@ -101,10 +101,10 @@ struct OperationConfig {
   char *proxy_tls_authtype;
   char *proxyuserpwd;
   char *proxy;
-  int proxyver;             /* set to CURLPROXY_HTTP* define */
+  int proxyver;             /* set to FETCHPROXY_HTTP* define */
   char *noproxy;
   char *mail_from;
-  struct curl_slist *mail_rcpt;
+  struct fetch_slist *mail_rcpt;
   char *mail_auth;
   bool mail_rcpt_allowfails; /* --mail-rcpt-allowfails */
   char *sasl_authzid;       /* Authorization identity (identity to use) */
@@ -131,9 +131,9 @@ struct OperationConfig {
   struct getout *url_out;   /* point to the node to fill in outfile */
   struct getout *url_ul;    /* point to the node to fill in upload */
   size_t num_urls;          /* number of URLs added to the list */
-#ifndef CURL_DISABLE_IPFS
+#ifndef FETCH_DISABLE_IPFS
   char *ipfs_gateway;
-#endif /* !CURL_DISABLE_IPFS */
+#endif /* !FETCH_DISABLE_IPFS */
   char *doh_url;
   char *cipher_list;
   char *proxy_cipher_list;
@@ -192,29 +192,29 @@ struct OperationConfig {
   bool proxyanyauth;
   bool jsoned; /* added json content-type */
   char *writeout;           /* %-styled format string to output */
-  struct curl_slist *quote;
-  struct curl_slist *postquote;
-  struct curl_slist *prequote;
+  struct fetch_slist *quote;
+  struct fetch_slist *postquote;
+  struct fetch_slist *prequote;
   long ssl_version;
   long ssl_version_max;
   long proxy_ssl_version;
   long ip_version;
-  long create_file_mode; /* CURLOPT_NEW_FILE_PERMS */
-  curl_TimeCond timecond;
-  curl_off_t condtime;
-  struct curl_slist *headers;
-  struct curl_slist *proxyheaders;
+  long create_file_mode; /* FETCHOPT_NEW_FILE_PERMS */
+  fetch_TimeCond timecond;
+  fetch_off_t condtime;
+  struct fetch_slist *headers;
+  struct fetch_slist *proxyheaders;
   struct tool_mime *mimeroot;
   struct tool_mime *mimecurrent;
-  curl_mime *mimepost;
-  struct curl_slist *telnet_options;
-  struct curl_slist *resolve;
-  struct curl_slist *connect_to;
+  fetch_mime *mimepost;
+  struct fetch_slist *telnet_options;
+  struct fetch_slist *resolve;
+  struct fetch_slist *connect_to;
   HttpReq httpreq;
 
   /* for bandwidth limiting features: */
-  curl_off_t sendpersecond; /* send to peer */
-  curl_off_t recvpersecond; /* receive from peer */
+  fetch_off_t sendpersecond; /* send to peer */
+  fetch_off_t recvpersecond; /* receive from peer */
 
   bool ftp_ssl;
   bool ftp_ssl_reqd;
@@ -285,13 +285,13 @@ struct OperationConfig {
   bool synthetic_error;           /* if TRUE, this is tool-internal error */
   bool ssh_compression;           /* enable/disable SSH compression */
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
-                                     0 is valid. default: CURL_HET_DEFAULT. */
+                                     0 is valid. default: FETCH_HET_DEFAULT. */
   bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
   char *haproxy_clientip;         /* client IP for HAProxy protocol */
   bool disallow_username_in_url;  /* disallow usernames in URLs */
   char *aws_sigv4;
   enum {
-    CLOBBER_DEFAULT, /* Provides compatibility with previous versions of curl,
+    CLOBBER_DEFAULT, /* Provides compatibility with previous versions of fetch,
                         by using the default behavior for -o, -O, and -J.
                         If those options would have overwritten files, like
                         -o and -O would, then overwrite them. In the case of
@@ -324,8 +324,8 @@ struct GlobalConfig {
   trace tracetype;
   bool tracetime;                 /* include timestamp? */
   bool traceids;                  /* include xfer-/conn-id? */
-  int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
-  char *libcurl;                  /* Output libcurl code to this filename */
+  int progressmode;               /* FETCH_PROGRESS_BAR / FETCH_PROGRESS_STATS */
+  char *libfetch;                  /* Output libfetch code to this filename */
   bool fail_early;                /* exit on first transfer error */
   bool styled_output;             /* enable fancy output style detection */
   long ms_per_transfer;           /* start next transfer after (at least) this
@@ -348,4 +348,4 @@ struct GlobalConfig {
 void config_init(struct OperationConfig *config);
 void config_free(struct OperationConfig *config);
 
-#endif /* HEADER_CURL_TOOL_CFGABLE_H */
+#endif /* HEADER_FETCH_TOOL_CFGABLE_H */

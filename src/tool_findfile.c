@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -36,7 +36,7 @@
 #include <fcntl.h>
 #endif
 
-#include <curlx.h>
+#include <fetchx.h>
 
 #include "tool_findfile.h"
 
@@ -51,7 +51,7 @@ struct finder {
 /* The order of the variables below is important, as the index number is used
    in the findfile() function */
 static const struct finder conf_list[] = {
-  { "CURL_HOME", NULL, FALSE },
+  { "FETCH_HOME", NULL, FALSE },
   { "XDG_CONFIG_HOME", NULL, TRUE },
   { "HOME", NULL, FALSE },
 #ifdef _WIN32
@@ -59,8 +59,8 @@ static const struct finder conf_list[] = {
   { "APPDATA", NULL, FALSE },
   { "USERPROFILE", "\\Application Data", FALSE},
 #endif
-  /* these are for .curlrc if XDG_CONFIG_HOME is not defined */
-  { "CURL_HOME", "/.config", TRUE },
+  /* these are for .fetchrc if XDG_CONFIG_HOME is not defined */
+  { "FETCH_HOME", "/.config", TRUE },
   { "HOME", "/.config", TRUE },
 
   { NULL, NULL, FALSE }
@@ -81,10 +81,10 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
       if(fd >= 0) {
         char *path = strdup(c);
         close(fd);
-        curl_free(c);
+        fetch_free(c);
         return path;
       }
-      curl_free(c);
+      fetch_free(c);
     }
   }
   return NULL;
@@ -110,33 +110,33 @@ char *findfile(const char *fname, int dotscore)
     return NULL;
 
   for(i = 0; conf_list[i].env; i++) {
-    char *home = curl_getenv(conf_list[i].env);
+    char *home = fetch_getenv(conf_list[i].env);
     if(home) {
       char *path;
       const char *filename = fname;
       if(!home[0]) {
-        curl_free(home);
+        fetch_free(home);
         continue;
       }
       if(conf_list[i].append) {
         char *c = aprintf("%s%s", home, conf_list[i].append);
-        curl_free(home);
+        fetch_free(home);
         if(!c)
           return NULL;
         home = c;
       }
       if(conf_list[i].withoutdot) {
         if(!dotscore) {
-          /* this is not looking for .curlrc, or the XDG_CONFIG_HOME was
+          /* this is not looking for .fetchrc, or the XDG_CONFIG_HOME was
              defined so we skip the extended check */
-          curl_free(home);
+          fetch_free(home);
           continue;
         }
         filename++; /* move past the leading dot */
         dotscore = 0; /* disable it for this check */
       }
       path = checkhome(home, filename, dotscore ? dotscore - 1 : 0);
-      curl_free(home);
+      fetch_free(home);
       if(path)
         return path;
     }

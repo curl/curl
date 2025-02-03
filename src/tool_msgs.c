@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
@@ -34,12 +34,12 @@
 
 #define WARN_PREFIX "Warning: "
 #define NOTE_PREFIX "Note: "
-#define ERROR_PREFIX "curl: "
+#define ERROR_PREFIX "fetch: "
 
 static void voutf(struct GlobalConfig *config,
                   const char *prefix,
                   const char *fmt,
-                  va_list ap) CURL_PRINTF(3, 0);
+                  va_list ap) FETCH_PRINTF(3, 0);
 
 static void voutf(struct GlobalConfig *config,
                   const char *prefix,
@@ -84,7 +84,7 @@ static void voutf(struct GlobalConfig *config,
         len = 0;
       }
     }
-    curl_free(print_buffer);
+    fetch_free(print_buffer);
   }
 }
 
@@ -123,14 +123,14 @@ void helpf(FILE *errors, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     DEBUGASSERT(!strchr(fmt, '\n'));
-    fputs("curl: ", errors); /* prefix it */
+    fputs("fetch: ", errors); /* prefix it */
     vfprintf(errors, fmt, ap);
     va_end(ap);
     fputs("\n", errors); /* newline it */
   }
-  fprintf(errors, "curl: try 'curl --help' "
+  fprintf(errors, "fetch: try 'fetch --help' "
 #ifdef USE_MANUAL
-          "or 'curl --manual' "
+          "or 'fetch --manual' "
 #endif
           "for more information\n");
 }

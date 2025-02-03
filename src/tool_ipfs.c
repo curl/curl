@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifndef CURL_DISABLE_IPFS
-#include "curlx.h"
+#ifndef FETCH_DISABLE_IPFS
+#include "fetchx.h"
 #include "dynbuf.h"
 
 #include "tool_cfgable.h"
@@ -34,29 +34,29 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /* ensure input ends in slash */
-static CURLcode ensure_trailing_slash(char **input)
+static FETCHcode ensure_trailing_slash(char **input)
 {
   if(*input && **input) {
     size_t len = strlen(*input);
     if(((*input)[len - 1] != '/')) {
-      struct curlx_dynbuf dyn;
-      curlx_dyn_init(&dyn, len + 2);
+      struct fetchx_dynbuf dyn;
+      fetchx_dyn_init(&dyn, len + 2);
 
-      if(curlx_dyn_addn(&dyn, *input, len)) {
+      if(fetchx_dyn_addn(&dyn, *input, len)) {
         Curl_safefree(*input);
-        return CURLE_OUT_OF_MEMORY;
+        return FETCHE_OUT_OF_MEMORY;
       }
 
       Curl_safefree(*input);
 
-      if(curlx_dyn_addn(&dyn, "/", 1))
-        return CURLE_OUT_OF_MEMORY;
+      if(fetchx_dyn_addn(&dyn, "/", 1))
+        return FETCHE_OUT_OF_MEMORY;
 
-      *input = curlx_dyn_ptr(&dyn);
+      *input = fetchx_dyn_ptr(&dyn);
     }
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static char *ipfs_gateway(void)
@@ -64,7 +64,7 @@ static char *ipfs_gateway(void)
   char *ipfs_path = NULL;
   char *gateway_composed_file_path = NULL;
   FILE *gateway_file = NULL;
-  char *gateway = curl_getenv("IPFS_GATEWAY");
+  char *gateway = fetch_getenv("IPFS_GATEWAY");
 
   /* Gateway is found from environment variable. */
   if(gateway) {
@@ -74,7 +74,7 @@ static char *ipfs_gateway(void)
   }
 
   /* Try to find the gateway in the IPFS data folder. */
-  ipfs_path = curl_getenv("IPFS_PATH");
+  ipfs_path = fetch_getenv("IPFS_PATH");
 
   if(!ipfs_path) {
     char *home = getenv("HOME");
@@ -96,21 +96,21 @@ static char *ipfs_gateway(void)
 
   if(gateway_file) {
     int c;
-    struct curlx_dynbuf dyn;
-    curlx_dyn_init(&dyn, MAX_GATEWAY_URL_LEN);
+    struct fetchx_dynbuf dyn;
+    fetchx_dyn_init(&dyn, MAX_GATEWAY_URL_LEN);
 
     /* get the first line of the gateway file, ignore the rest */
     while((c = getc(gateway_file)) != EOF && c != '\n' && c != '\r') {
       char c_char = (char)c;
-      if(curlx_dyn_addn(&dyn, &c_char, 1))
+      if(fetchx_dyn_addn(&dyn, &c_char, 1))
         goto fail;
     }
 
     fclose(gateway_file);
     gateway_file = NULL;
 
-    if(curlx_dyn_len(&dyn))
-      gateway = curlx_dyn_ptr(&dyn);
+    if(fetchx_dyn_len(&dyn))
+      gateway = fetchx_dyn_ptr(&dyn);
 
     if(gateway)
       ensure_trailing_slash(&gateway);
@@ -134,11 +134,11 @@ fail:
  * Rewrite ipfs://<cid> and ipns://<cid> to an HTTP(S)
  * URL that can be handled by an IPFS gateway.
  */
-CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
+FETCHcode ipfs_url_rewrite(FETCHU *uh, const char *protocol, char **url,
                           struct OperationConfig *config)
 {
-  CURLcode result = CURLE_URL_MALFORMAT;
-  CURLUcode getResult;
+  FETCHcode result = FETCHE_URL_MALFORMAT;
+  FETCHUcode getResult;
   char *gateway = NULL;
   char *gwhost = NULL;
   char *gwpath = NULL;
@@ -149,14 +149,14 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   char *cid = NULL;
   char *pathbuffer = NULL;
   char *cloneurl;
-  CURLU *gatewayurl = curl_url();
+  FETCHU *gatewayurl = fetch_url();
 
   if(!gatewayurl) {
-    result = CURLE_FAILED_INIT;
+    result = FETCHE_FAILED_INIT;
     goto clean;
   }
 
-  getResult = curl_url_get(uh, CURLUPART_HOST, &cid, CURLU_URLDECODE);
+  getResult = fetch_url_get(uh, FETCHUPART_HOST, &cid, FETCHU_URLDECODE);
   if(getResult || !cid)
     goto clean;
 
@@ -165,22 +165,22 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
    */
   if(config->ipfs_gateway) {
     /* ensure the gateway ends in a trailing / */
-    if(ensure_trailing_slash(&config->ipfs_gateway) != CURLE_OK) {
-      result = CURLE_OUT_OF_MEMORY;
+    if(ensure_trailing_slash(&config->ipfs_gateway) != FETCHE_OK) {
+      result = FETCHE_OUT_OF_MEMORY;
       goto clean;
     }
 
-    if(!curl_url_set(gatewayurl, CURLUPART_URL, config->ipfs_gateway,
-                    CURLU_GUESS_SCHEME)) {
+    if(!fetch_url_set(gatewayurl, FETCHUPART_URL, config->ipfs_gateway,
+                    FETCHU_GUESS_SCHEME)) {
       gateway = strdup(config->ipfs_gateway);
       if(!gateway) {
-        result = CURLE_URL_MALFORMAT;
+        result = FETCHE_URL_MALFORMAT;
         goto clean;
       }
 
     }
     else {
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      result = FETCHE_BAD_FUNCTION_ARGUMENT;
       goto clean;
     }
   }
@@ -188,45 +188,45 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
     /* this is ensured to end in a trailing / within ipfs_gateway() */
     gateway = ipfs_gateway();
     if(!gateway) {
-      result = CURLE_FILE_COULDNT_READ_FILE;
+      result = FETCHE_FILE_COULDNT_READ_FILE;
       goto clean;
     }
 
-    if(curl_url_set(gatewayurl, CURLUPART_URL, gateway, 0)) {
-      result = CURLE_URL_MALFORMAT;
+    if(fetch_url_set(gatewayurl, FETCHUPART_URL, gateway, 0)) {
+      result = FETCHE_URL_MALFORMAT;
       goto clean;
     }
   }
 
   /* check for unsupported gateway parts */
-  if(curl_url_get(gatewayurl, CURLUPART_QUERY, &gwquery, 0)
-                  != CURLUE_NO_QUERY) {
-    result = CURLE_URL_MALFORMAT;
+  if(fetch_url_get(gatewayurl, FETCHUPART_QUERY, &gwquery, 0)
+                  != FETCHUE_NO_QUERY) {
+    result = FETCHE_URL_MALFORMAT;
     goto clean;
   }
 
   /* get gateway parts */
-  if(curl_url_get(gatewayurl, CURLUPART_HOST,
-                  &gwhost, CURLU_URLDECODE)) {
+  if(fetch_url_get(gatewayurl, FETCHUPART_HOST,
+                  &gwhost, FETCHU_URLDECODE)) {
     goto clean;
   }
 
-  if(curl_url_get(gatewayurl, CURLUPART_SCHEME,
-                  &gwscheme, CURLU_URLDECODE)) {
+  if(fetch_url_get(gatewayurl, FETCHUPART_SCHEME,
+                  &gwscheme, FETCHU_URLDECODE)) {
     goto clean;
   }
 
-  curl_url_get(gatewayurl, CURLUPART_PORT, &gwport, CURLU_URLDECODE);
-  curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE);
+  fetch_url_get(gatewayurl, FETCHUPART_PORT, &gwport, FETCHU_URLDECODE);
+  fetch_url_get(gatewayurl, FETCHUPART_PATH, &gwpath, FETCHU_URLDECODE);
 
   /* get the path from user input */
-  curl_url_get(uh, CURLUPART_PATH, &inputpath, CURLU_URLDECODE);
+  fetch_url_get(uh, FETCHUPART_PATH, &inputpath, FETCHU_URLDECODE);
   /* inputpath might be NULL or a valid pointer now */
 
   /* set gateway parts in input url */
-  if(curl_url_set(uh, CURLUPART_SCHEME, gwscheme, CURLU_URLENCODE) ||
-     curl_url_set(uh, CURLUPART_HOST, gwhost, CURLU_URLENCODE) ||
-     curl_url_set(uh, CURLUPART_PORT, gwport, CURLU_URLENCODE))
+  if(fetch_url_set(uh, FETCHUPART_SCHEME, gwscheme, FETCHU_URLENCODE) ||
+     fetch_url_set(uh, FETCHUPART_HOST, gwhost, FETCHU_URLENCODE) ||
+     fetch_url_set(uh, FETCHUPART_PORT, gwport, FETCHU_URLENCODE))
     goto clean;
 
   /* if the input path is just a slash, clear it */
@@ -242,44 +242,44 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
     goto clean;
   }
 
-  if(curl_url_set(uh, CURLUPART_PATH, pathbuffer, CURLU_URLENCODE)) {
+  if(fetch_url_set(uh, FETCHUPART_PATH, pathbuffer, FETCHU_URLENCODE)) {
     goto clean;
   }
 
   /* Free whatever it has now, rewriting is next */
   Curl_safefree(*url);
 
-  if(curl_url_get(uh, CURLUPART_URL, &cloneurl, CURLU_URLENCODE)) {
+  if(fetch_url_get(uh, FETCHUPART_URL, &cloneurl, FETCHU_URLENCODE)) {
     goto clean;
   }
   /* we need to strdup the URL so that we can call free() on it later */
   *url = strdup(cloneurl);
-  curl_free(cloneurl);
+  fetch_free(cloneurl);
   if(!*url)
     goto clean;
 
-  result = CURLE_OK;
+  result = FETCHE_OK;
 
 clean:
   free(gateway);
-  curl_free(gwhost);
-  curl_free(gwpath);
-  curl_free(gwquery);
-  curl_free(inputpath);
-  curl_free(gwscheme);
-  curl_free(gwport);
-  curl_free(cid);
-  curl_free(pathbuffer);
-  curl_url_cleanup(gatewayurl);
+  fetch_free(gwhost);
+  fetch_free(gwpath);
+  fetch_free(gwquery);
+  fetch_free(inputpath);
+  fetch_free(gwscheme);
+  fetch_free(gwport);
+  fetch_free(cid);
+  fetch_free(pathbuffer);
+  fetch_url_cleanup(gatewayurl);
   {
     switch(result) {
-    case CURLE_URL_MALFORMAT:
+    case FETCHE_URL_MALFORMAT:
       helpf(tool_stderr, "malformed target URL");
       break;
-    case CURLE_FILE_COULDNT_READ_FILE:
+    case FETCHE_FILE_COULDNT_READ_FILE:
       helpf(tool_stderr, "IPFS automatic gateway detection failed");
       break;
-    case CURLE_BAD_FUNCTION_ARGUMENT:
+    case FETCHE_BAD_FUNCTION_ARGUMENT:
       helpf(tool_stderr, "--ipfs-gateway was given a malformed URL");
       break;
     default:
@@ -288,4 +288,4 @@ clean:
   }
   return result;
 }
-#endif /* !CURL_DISABLE_IPFS */
+#endif /* !FETCH_DISABLE_IPFS */

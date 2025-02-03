@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_BINMODE_H
-#define HEADER_CURL_TOOL_BINMODE_H
+#ifndef HEADER_FETCH_TOOL_BINMODE_H
+#define HEADER_FETCH_TOOL_BINMODE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -28,12 +28,12 @@
 #if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
 /* Requires io.h and/or fcntl.h when available */
 #ifdef HAVE__SETMODE
-#  define CURL_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
+#  define FETCH_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
 #else
-#  define CURL_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
+#  define FETCH_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
 #endif
 #else
-#  define CURL_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
+#  define FETCH_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
 #endif
 
-#endif /* HEADER_CURL_TOOL_BINMODE_H */
+#endif /* HEADER_FETCH_TOOL_BINMODE_H */

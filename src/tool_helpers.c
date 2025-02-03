@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,14 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
 #include "strcase.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
@@ -55,10 +55,10 @@ const char *param2text(ParameterError error)
     return "expected a proper numerical parameter";
   case PARAM_NEGATIVE_NUMERIC:
     return "expected a positive numerical parameter";
-  case PARAM_LIBCURL_DOESNT_SUPPORT:
-    return "the installed libcurl version does not support this";
-  case PARAM_LIBCURL_UNSUPPORTED_PROTOCOL:
-    return "a specified protocol is unsupported by libcurl";
+  case PARAM_LIBFETCH_DOESNT_SUPPORT:
+    return "the installed libfetch version does not support this";
+  case PARAM_LIBFETCH_UNSUPPORTED_PROTOCOL:
+    return "a specified protocol is unsupported by libfetch";
   case PARAM_NO_MEM:
     return "out of memory";
   case PARAM_NO_PREFIX:
@@ -121,11 +121,11 @@ void customrequest_helper(struct OperationConfig *config, HttpReq req,
 
   if(!method)
     ;
-  else if(curl_strequal(method, dflt[req])) {
+  else if(fetch_strequal(method, dflt[req])) {
     notef(config->global, "Unnecessary use of -X or --request, %s is already "
           "inferred.", dflt[req]);
   }
-  else if(curl_strequal(method, "head")) {
+  else if(fetch_strequal(method, "head")) {
     warnf(config->global,
           "Setting custom HTTP method to HEAD with -X/--request may not work "
           "the way you want. Consider using -I/--head instead.");

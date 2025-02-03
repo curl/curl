@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_OPERATE_H
-#define HEADER_CURL_TOOL_OPERATE_H
+#ifndef HEADER_FETCH_TOOL_OPERATE_H
+#define HEADER_FETCH_TOOL_OPERATE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -33,8 +33,8 @@ struct per_transfer {
   struct per_transfer *next;
   struct per_transfer *prev;
   struct OperationConfig *config; /* for this transfer */
-  struct curl_certinfo *certinfo;
-  CURL *curl;
+  struct fetch_certinfo *certinfo;
+  FETCH *fetch;
   long retry_remaining;
   long retry_sleep_default;
   long retry_sleep;
@@ -55,12 +55,12 @@ struct per_transfer {
                      that has been set to sleep until this time before it
                      should get started (again) */
   /* for parallel progress bar */
-  curl_off_t dltotal;
-  curl_off_t dlnow;
-  curl_off_t ultotal;
-  curl_off_t ulnow;
-  curl_off_t uploadfilesize; /* expected total amount */
-  curl_off_t uploadedsofar; /* amount delivered from the callback */
+  fetch_off_t dltotal;
+  fetch_off_t dlnow;
+  fetch_off_t ultotal;
+  fetch_off_t ulnow;
+  fetch_off_t uploadfilesize; /* expected total amount */
+  fetch_off_t uploadedsofar; /* amount delivered from the callback */
   bool dltotal_added; /* if the total has been added from this */
   bool ultotal_added;
 
@@ -79,9 +79,9 @@ struct per_transfer {
   bool skip;  /* considered already done */
 };
 
-CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[]);
+FETCHcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[]);
 void single_transfer_cleanup(struct OperationConfig *config);
 
 extern struct per_transfer *transfers; /* first node */
 
-#endif /* HEADER_CURL_TOOL_OPERATE_H */
+#endif /* HEADER_FETCH_TOOL_OPERATE_H */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -30,9 +30,9 @@
 #include <unixlib.h>
 #endif
 
-#include "curlx.h"
+#include "fetchx.h"
 
-#include "curlmsg_vms.h"
+#include "fetchmsg_vms.h"
 #include "tool_vms.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -43,7 +43,7 @@ void decc$exit(int __status);
 static int vms_shell = -1;
 
 /* VMS has a DCL shell and also has Unix shells ported to it.
- * When curl is running under a Unix shell, we want it to be as much
+ * When fetch is running under a Unix shell, we want it to be as much
  * like Unix as possible.
  */
 int is_vms_shell(void)
@@ -84,7 +84,7 @@ int is_vms_shell(void)
  * feature macro settings, and one of the exit routines is hidden at compile
  * time.
  *
- * Since we want curl to work properly under the VMS DCL shell and Unix
+ * Since we want fetch to work properly under the VMS DCL shell and Unix
  * shells under VMS, this routine should compile correctly regardless of
  * the settings.
  */
@@ -100,8 +100,8 @@ void vms_special_exit(int code, int vms_show)
   }
 #endif
 
-  if(code > CURL_LAST) {   /* If CURL_LAST exceeded then */
-    vms_code = CURL_LAST;  /* curlmsg.h is out of sync.  */
+  if(code > FETCH_LAST) {   /* If FETCH_LAST exceeded then */
+    vms_code = FETCH_LAST;  /* fetchmsg.h is out of sync.  */
   }
   else {
     vms_code = vms_cond[code] | vms_show;

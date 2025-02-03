@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -28,7 +28,7 @@
 #include <unistd.h>
 #endif
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
@@ -58,13 +58,13 @@ static char *parse_filename(const char *ptr, size_t len);
 #endif
 
 #ifdef LINK
-static void write_linked_location(CURL *curl, const char *location,
+static void write_linked_location(FETCH *fetch, const char *location,
     size_t loclen, FILE *stream);
 #endif
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
 {
-  struct curl_slist *h = hdrcbdata->headlist;
+  struct fetch_slist *h = hdrcbdata->headlist;
   int rc = 1;
   while(h) {
     /* not "handled", just show it */
@@ -75,14 +75,14 @@ int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
   }
   rc = 0; /* success */
 fail:
-  curl_slist_free_all(hdrcbdata->headlist);
+  fetch_slist_free_all(hdrcbdata->headlist);
   hdrcbdata->headlist = NULL;
   return rc;
 }
 
 
 /*
-** callback for CURLOPT_HEADERFUNCTION
+** callback for FETCHOPT_HEADERFUNCTION
 */
 
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
@@ -98,12 +98,12 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   const char *scheme = NULL;
 
   if(!per->config)
-    return CURL_WRITEFUNC_ERROR;
+    return FETCH_WRITEFUNC_ERROR;
 
 #ifdef DEBUGBUILD
-  if(size * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
+  if(size * nmemb > (size_t)FETCH_MAX_HTTP_HEADER) {
     warnf(per->config->global, "Header data exceeds single call write limit");
-    return CURL_WRITEFUNC_ERROR;
+    return FETCH_WRITEFUNC_ERROR;
   }
 #endif
 
@@ -114,7 +114,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 #endif
 
   /*
-   * Write header data when curl option --dump-header (-D) is given.
+   * Write header data when fetch option --dump-header (-D) is given.
    */
 
   if(per->config->headerfile && heads->stream) {
@@ -125,15 +125,15 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if(fflush(heads->stream)) {
       errorf(per->config->global, "Failed writing headers to %s",
              per->config->headerfile);
-      return CURL_WRITEFUNC_ERROR;
+      return FETCH_WRITEFUNC_ERROR;
     }
   }
 
-  curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
+  fetch_easy_getinfo(per->fetch, FETCHINFO_SCHEME, &scheme);
   scheme = proto_token(scheme);
   if((scheme == proto_http || scheme == proto_https)) {
     long response = 0;
-    curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
+    fetch_easy_getinfo(per->fetch, FETCHINFO_RESPONSE_CODE, &response);
 
     if((response/100 != 2) && (response/100 != 3))
       /* only care about etag and content-disposition headers in 2xx and 3xx
@@ -160,11 +160,11 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
            */
 #ifdef HAVE_FTRUNCATE
           if(ftruncate(fileno(etag_save->stream), 0)) {
-            return CURL_WRITEFUNC_ERROR;
+            return FETCH_WRITEFUNC_ERROR;
           }
 #else
           if(fseek(etag_save->stream, 0, SEEK_SET)) {
-            return CURL_WRITEFUNC_ERROR;
+            return FETCH_WRITEFUNC_ERROR;
           }
 #endif
 
@@ -178,7 +178,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
     /*
      * This callback sets the filename where output shall be written when
-     * curl options --remote-name (-O) and --remote-header-name (-J) have
+     * fetch options --remote-name (-O) and --remote-header-name (-J) have
      * been simultaneously given and additionally server returns an HTTP
      * Content-Disposition header specifying a filename property.
      */
@@ -215,7 +215,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
             if(outs->stream) {
               /* indication of problem, get out! */
               free(filename);
-              return CURL_WRITEFUNC_ERROR;
+              return FETCH_WRITEFUNC_ERROR;
             }
 
             if(per->config->output_dir) {
@@ -223,7 +223,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
                                        filename);
               free(filename);
               if(!outs->filename)
-                return CURL_WRITEFUNC_ERROR;
+                return FETCH_WRITEFUNC_ERROR;
             }
             else
               outs->filename = filename;
@@ -234,16 +234,16 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
             outs->alloc_filename = TRUE;
             hdrcbdata->honor_cd_filename = FALSE; /* done now! */
             if(!tool_create_output_file(outs, per->config))
-              return CURL_WRITEFUNC_ERROR;
+              return FETCH_WRITEFUNC_ERROR;
             if(tool_write_headers(&per->hdrcbdata, outs->stream))
-              return CURL_WRITEFUNC_ERROR;
+              return FETCH_WRITEFUNC_ERROR;
           }
           break;
         }
         if(!outs->stream && !tool_create_output_file(outs, per->config))
-          return CURL_WRITEFUNC_ERROR;
+          return FETCH_WRITEFUNC_ERROR;
         if(tool_write_headers(&per->hdrcbdata, outs->stream))
-          return CURL_WRITEFUNC_ERROR;
+          return FETCH_WRITEFUNC_ERROR;
       } /* content-disposition handling */
 
       if(hdrcbdata->honor_cd_filename &&
@@ -252,18 +252,18 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
            memory. Since it is not zero terminated, we need an extra dance. */
         char *clone = aprintf("%.*s", (int)cb, (char *)str);
         if(clone) {
-          struct curl_slist *old = hdrcbdata->headlist;
-          hdrcbdata->headlist = curl_slist_append(old, clone);
+          struct fetch_slist *old = hdrcbdata->headlist;
+          hdrcbdata->headlist = fetch_slist_append(old, clone);
           free(clone);
           if(!hdrcbdata->headlist) {
-            curl_slist_free_all(old);
-            return CURL_WRITEFUNC_ERROR;
+            fetch_slist_free_all(old);
+            return FETCH_WRITEFUNC_ERROR;
           }
         }
         else {
-          curl_slist_free_all(hdrcbdata->headlist);
+          fetch_slist_free_all(hdrcbdata->headlist);
           hdrcbdata->headlist = NULL;
-          return CURL_WRITEFUNC_ERROR;
+          return FETCH_WRITEFUNC_ERROR;
         }
         return cb; /* done for now */
       }
@@ -287,7 +287,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     char *value = NULL;
 
     if(!outs->stream && !tool_create_output_file(outs, per->config))
-      return CURL_WRITEFUNC_ERROR;
+      return FETCH_WRITEFUNC_ERROR;
 
     if(hdrcbdata->global->isatty &&
 #ifdef _WIN32
@@ -301,8 +301,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 #ifndef LINK
       fwrite(&value[1], cb - namelen - 1, 1, outs->stream);
 #else
-      if(curl_strnequal("Location", ptr, namelen)) {
-        write_linked_location(per->curl, &value[1], cb - namelen - 1,
+      if(fetch_strnequal("Location", ptr, namelen)) {
+        write_linked_location(per->fetch, &value[1], cb - namelen - 1,
             outs->stream);
       }
       else
@@ -406,11 +406,11 @@ static char *parse_filename(const char *ptr, size_t len)
  * URLs here.
  */
 static
-void write_linked_location(CURL *curl, const char *location, size_t loclen,
+void write_linked_location(FETCH *fetch, const char *location, size_t loclen,
                            FILE *stream) {
-  /* This would so simple if CURLINFO_REDIRECT_URL were available here */
-  CURLU *u = NULL;
-  char *copyloc = NULL, *locurl = NULL, *scheme = NULL, *finalurl = NULL;
+  /* This would so simple if FETCHINFO_REDIRECT_URL were available here */
+  FETCHU *u = NULL;
+  char *copyloc = NULL, *lofetch = NULL, *scheme = NULL, *finalurl = NULL;
   const char *loc = location;
   size_t llen = loclen;
   int space_skipped = 0;
@@ -435,8 +435,8 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
   while(llen && (loc[llen-1] == '\n' || loc[llen-1] == '\r'))
     --llen;
 
-  /* CURLU makes it easy to handle the relative URL case */
-  u = curl_url();
+  /* FETCHU makes it easy to handle the relative URL case */
+  u = fetch_url();
   if(!u)
     goto locout;
 
@@ -448,19 +448,19 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
   copyloc[llen] = 0;
 
   /* The original URL to use as a base for a relative redirect URL */
-  if(curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &locurl))
+  if(fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &lofetch))
     goto locout;
-  if(curl_url_set(u, CURLUPART_URL, locurl, 0))
+  if(fetch_url_set(u, FETCHUPART_URL, lofetch, 0))
     goto locout;
 
   /* Redirected location. This can be either absolute or relative. */
-  if(curl_url_set(u, CURLUPART_URL, copyloc, 0))
+  if(fetch_url_set(u, FETCHUPART_URL, copyloc, 0))
     goto locout;
 
-  if(curl_url_get(u, CURLUPART_URL, &finalurl, CURLU_NO_DEFAULT_PORT))
+  if(fetch_url_get(u, FETCHUPART_URL, &finalurl, FETCHU_NO_DEFAULT_PORT))
     goto locout;
 
-  if(curl_url_get(u, CURLUPART_SCHEME, &scheme, 0))
+  if(fetch_url_get(u, FETCHUPART_SCHEME, &scheme, 0))
     goto locout;
 
   if(!strcmp("http", scheme) ||
@@ -482,9 +482,9 @@ locout:
 
 locdone:
   if(u) {
-    curl_free(finalurl);
-    curl_free(scheme);
-    curl_url_cleanup(u);
+    fetch_free(finalurl);
+    fetch_free(scheme);
+    fetch_url_cleanup(u);
     free(copyloc);
   }
 }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,14 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
 #include "tool_util.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 #if defined(_WIN32)
@@ -126,16 +126,16 @@ struct timeval tvnow(void)
 struct timeval tvrealnow(void)
 {
   /* UNIX EPOCH (1970-01-01) in FILETIME (1601-01-01) as 64-bit value */
-  static const curl_uint64_t EPOCH = (curl_uint64_t)116444736000000000ULL;
+  static const fetch_uint64_t EPOCH = (fetch_uint64_t)116444736000000000ULL;
   SYSTEMTIME systime;
   FILETIME ftime; /* 100ns since 1601-01-01, as double 32-bit value */
-  curl_uint64_t time; /* 100ns since 1601-01-01, as 64-bit value */
+  fetch_uint64_t time; /* 100ns since 1601-01-01, as 64-bit value */
   struct timeval now;
 
   GetSystemTime(&systime);
   SystemTimeToFileTime(&systime, &ftime);
-  time = ((curl_uint64_t)ftime.dwLowDateTime);
-  time += ((curl_uint64_t)ftime.dwHighDateTime) << 32;
+  time = ((fetch_uint64_t)ftime.dwLowDateTime);
+  time += ((fetch_uint64_t)ftime.dwHighDateTime) << 32;
 
   now.tv_sec  = (long)((time - EPOCH) / 10000000L); /* unit is 100ns */
   now.tv_usec = (long)(systime.wMilliseconds * 1000);
@@ -177,7 +177,7 @@ int struplocompare(const char *p1, const char *p2)
     return p2 ? -1 : 0;
   if(!p2)
     return 1;
-  return CURL_STRICMP(p1, p2);
+  return FETCH_STRICMP(p1, p2);
 }
 
 /* Indirect version to use as qsort callback. */
@@ -200,7 +200,7 @@ int struplocompare4sort(const void *p1, const void *p2)
  * Truncate a file handle at a 64-bit position 'where'.
  */
 
-int tool_ftruncate64(int fd, curl_off_t where)
+int tool_ftruncate64(int fd, fetch_off_t where)
 {
   intptr_t handle = _get_osfhandle(fd);
 

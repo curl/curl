@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
@@ -29,18 +29,18 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 .DELETE_ON_ERROR:
 
 EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
- curl.rc Makefile.inc CMakeLists.txt .checksrc
+ fetch.rc Makefile.inc CMakeLists.txt .checksrc
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
 # being currently built and tested are searched before the library which
 # might possibly already be installed in the system.
 #
-# $(top_srcdir)/include is for libcurl's external include files
-# $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
-# $(top_builddir)/src is for curl's generated src/curl_config.h file
-# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
-# $(top_srcdir)/src is for curl's src/tool_setup.h and "curl-private" files
+# $(top_srcdir)/include is for libfetch's external include files
+# $(top_builddir)/lib is for libfetch's generated lib/fetch_config.h file
+# $(top_builddir)/src is for fetch's generated src/fetch_config.h file
+# $(top_srcdir)/lib for libfetch's lib/fetch_setup.h and other "borrowed" files
+# $(top_srcdir)/src is for fetch's src/tool_setup.h and "fetch-private" files
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
@@ -48,12 +48,12 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib            \
               -I$(top_srcdir)/src
 
-bin_PROGRAMS = curl
+bin_PROGRAMS = fetch
 
-if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS += -DCURL_STATICLIB
+if USE_CPPFLAG_FETCH_STATICLIB
+AM_CPPFLAGS += -DFETCH_STATICLIB
 endif
-AM_CPPFLAGS += -DBUILDING_CURL
+AM_CPPFLAGS += -DBUILDING_FETCH
 
 AM_LDFLAGS =
 if USE_UNICODE
@@ -62,67 +62,67 @@ endif
 
 include Makefile.inc
 
-curl_cfiles_gen =
-curl_hfiles_gen =
+fetch_cfiles_gen =
+fetch_hfiles_gen =
 CLEANFILES =
 
 if USE_UNITY
-curl_EXCLUDE =
+fetch_EXCLUDE =
 if DEBUGBUILD
 # We must compile this source separately to avoid memdebug.h redefinitions
 # applying to them.
-curl_EXCLUDE += ../lib/curl_multibyte.c
+fetch_EXCLUDE += ../lib/fetch_multibyte.c
 endif
-if USE_CPPFLAG_CURL_STATICLIB
-curl_CURLX = $(CURLTOOL_LIBCURL_CFILES)
+if USE_CPPFLAG_FETCH_STATICLIB
+fetch_FETCHX = $(FETCHTOOL_LIBFETCH_CFILES)
 else
-curl_CURLX = $(CURLX_CFILES)
+fetch_FETCHX = $(FETCHX_CFILES)
 endif
-curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX) --exclude $(curl_EXCLUDE) > curltool_unity.c
+fetchtool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(FETCH_CFILES) $(fetch_cfiles_gen) $(fetch_FETCHX)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(FETCH_CFILES) $(fetch_cfiles_gen) $(fetch_FETCHX) --exclude $(fetch_EXCLUDE) > fetchtool_unity.c
 
-nodist_curl_SOURCES = curltool_unity.c
-curl_SOURCES = $(curl_EXCLUDE)
-CLEANFILES += curltool_unity.c
+nodist_fetch_SOURCES = fetchtool_unity.c
+fetch_SOURCES = $(fetch_EXCLUDE)
+CLEANFILES += fetchtool_unity.c
 else
-# CURL_FILES comes from Makefile.inc
-curl_SOURCES = $(CURL_FILES) $(curl_cfiles_gen) $(curl_hfiles_gen)
+# FETCH_FILES comes from Makefile.inc
+fetch_SOURCES = $(FETCH_FILES) $(fetch_cfiles_gen) $(fetch_hfiles_gen)
 endif
 if HAVE_WINDRES
-curl_SOURCES += $(CURL_RCFILES)
-$(CURL_RCFILES): tool_version.h
+fetch_SOURCES += $(FETCH_RCFILES)
+$(FETCH_RCFILES): tool_version.h
 endif
 
-curl_LDFLAGS = $(AM_LDFLAGS) $(CURL_LDFLAGS_BIN)
+fetch_LDFLAGS = $(AM_LDFLAGS) $(FETCH_LDFLAGS_BIN)
 
 # This might hold -Werror
-CFLAGS += @CURL_CFLAG_EXTRAS@
+CFLAGS += @FETCH_CFLAG_EXTRAS@
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
+fetch_LDADD = $(top_builddir)/lib/libfetch.la @LIBFETCH_PC_LIBS_PRIVATE@
 
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
-noinst_LTLIBRARIES = libcurltool.la
-libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
-libcurltool_la_CFLAGS =
-libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
+noinst_LTLIBRARIES = libfetchtool.la
+libfetchtool_la_CPPFLAGS = $(AM_CPPFLAGS) -DFETCH_STATICLIB -DUNITTESTS
+libfetchtool_la_CFLAGS =
+libfetchtool_la_LDFLAGS = -static $(LINKFLAGS)
 if USE_UNITY
-libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES) --exclude $(curl_EXCLUDE) > libcurltool_unity.c
+libfetchtool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(FETCH_CFILES) $(FETCHTOOL_LIBFETCH_CFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(FETCH_CFILES) $(FETCHTOOL_LIBFETCH_CFILES) --exclude $(fetch_EXCLUDE) > libfetchtool_unity.c
 
-nodist_libcurltool_la_SOURCES = libcurltool_unity.c
-libcurltool_la_SOURCES = $(curl_EXCLUDE)
-CLEANFILES += libcurltool_unity.c
+nodist_libfetchtool_la_SOURCES = libfetchtool_unity.c
+libfetchtool_la_SOURCES = $(fetch_EXCLUDE)
+CLEANFILES += libfetchtool_unity.c
 else
-libcurltool_la_SOURCES = $(CURL_FILES)
+libfetchtool_la_SOURCES = $(FETCH_FILES)
 endif
 endif
 
 # Use absolute directory to disable VPATH
-ASCIIPAGE=$(top_builddir)/docs/cmdline-opts/curl.txt
+ASCIIPAGE=$(top_builddir)/docs/cmdline-opts/fetch.txt
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 HUGE=tool_hugehelp.c
 
@@ -131,11 +131,11 @@ HUGEIT_0 = @echo "  HUGE    " $@;
 HUGEIT_1 =
 HUGEIT_ = $(HUGEIT_0)
 
-curl_CPPFLAGS = $(AM_CPPFLAGS)
+fetch_CPPFLAGS = $(AM_CPPFLAGS)
 
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
-curl_CPPFLAGS += -DUSE_MANUAL
+fetch_CPPFLAGS += -DUSE_MANUAL
 
 $(ASCIIPAGE):
 	cd $(top_builddir)/docs && $(MAKE)
@@ -163,21 +163,21 @@ $(HUGE):
 	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
-curl_cfiles_gen += $(HUGE)
-curl_hfiles_gen += tool_hugehelp.h
+fetch_cfiles_gen += $(HUGE)
+fetch_hfiles_gen += tool_hugehelp.h
 CLEANFILES += $(HUGE)
 
 CA_EMBED_CSOURCE = tool_ca_embed.c
-curl_cfiles_gen += $(CA_EMBED_CSOURCE)
+fetch_cfiles_gen += $(CA_EMBED_CSOURCE)
 CLEANFILES += $(CA_EMBED_CSOURCE)
-if CURL_CA_EMBED_SET
-curl_CPPFLAGS += -DCURL_CA_EMBED
+if FETCH_CA_EMBED_SET
+fetch_CPPFLAGS += -DFETCH_CA_EMBED
 MK_FILE_EMBED = $(top_srcdir)/src/mk-file-embed.pl
-$(CA_EMBED_CSOURCE): $(MK_FILE_EMBED) $(CURL_CA_EMBED)
-	$(PERL) $(MK_FILE_EMBED) --var curl_ca_embed < $(CURL_CA_EMBED) > $(CA_EMBED_CSOURCE)
+$(CA_EMBED_CSOURCE): $(MK_FILE_EMBED) $(FETCH_CA_EMBED)
+	$(PERL) $(MK_FILE_EMBED) --var fetch_ca_embed < $(FETCH_CA_EMBED) > $(CA_EMBED_CSOURCE)
 else
 $(CA_EMBED_CSOURCE):
-	echo 'extern const void *curl_ca_embed; const void *curl_ca_embed;' > $(CA_EMBED_CSOURCE)
+	echo 'extern const void *fetch_ca_embed; const void *fetch_ca_embed;' > $(CA_EMBED_CSOURCE)
 endif
 
 CHECKSRC = $(CS_$(V))
@@ -190,8 +190,8 @@ checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
 	  -W$(srcdir)/$(HUGE) \
 	  -W$(srcdir)/$(CA_EMBED_CSOURCE) \
-	  -W$(srcdir)/curltool_unity.c \
-	  -W$(srcdir)/libcurltool_unity.c \
+	  -W$(srcdir)/fetchtool_unity.c \
+	  -W$(srcdir)/libfetchtool_unity.c \
 	  $(srcdir)/*.[ch])
 
 if DEBUGBUILD
@@ -201,21 +201,21 @@ endif
 
 # disable the tests that are mostly causing false positives
 TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
-if CURL_WERROR
+if FETCH_WERROR
 TIDYFLAGS += --warnings-as-errors=*
 endif
 
 TIDY := clang-tidy
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
-	$(TIDY) $(CURL_CFILES) $(curl_cfiles_gen) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
+	$(TIDY) $(FETCH_CFILES) $(fetch_cfiles_gen) $(TIDYFLAGS) $(FETCH_CLANG_TIDYFLAGS) -- $(fetch_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)
 
 if HAVE_WINDRES
 .rc.o:
-	$(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
+	$(RC) -I$(top_srcdir)/include -DFETCH_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
 endif
 
 dist-hook:

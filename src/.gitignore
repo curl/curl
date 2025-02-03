@@ -1,9 +1,9 @@
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 
-curl
+fetch
 tool_ca_embed.c
 tool_hugehelp.c
-curltool_unity.c
-libcurltool_unity.c
+fetchtool_unity.c
+libfetchtool_unity.c

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_help.h"
 #include "tool_libinfo.h"
@@ -48,31 +48,31 @@ struct category_descriptors {
 
 static const struct category_descriptors categories[] = {
   /* important is left out because it is the default help page */
-  {"auth", "Authentication methods", CURLHELP_AUTH},
-  {"connection", "Manage connections", CURLHELP_CONNECTION},
-  {"curl", "The command line tool itself", CURLHELP_CURL},
-  {"deprecated", "Legacy", CURLHELP_DEPRECATED},
-  {"dns", "Names and resolving", CURLHELP_DNS},
-  {"file", "FILE protocol", CURLHELP_FILE},
-  {"ftp", "FTP protocol", CURLHELP_FTP},
-  {"global", "Global options", CURLHELP_GLOBAL},
-  {"http", "HTTP and HTTPS protocol", CURLHELP_HTTP},
-  {"imap", "IMAP protocol", CURLHELP_IMAP},
-  {"ldap", "LDAP protocol", CURLHELP_LDAP},
-  {"output", "Filesystem output", CURLHELP_OUTPUT},
-  {"pop3", "POP3 protocol", CURLHELP_POP3},
-  {"post", "HTTP POST specific", CURLHELP_POST},
-  {"proxy", "Options for proxies", CURLHELP_PROXY},
-  {"scp", "SCP protocol", CURLHELP_SCP},
-  {"sftp", "SFTP protocol", CURLHELP_SFTP},
-  {"smtp", "SMTP protocol", CURLHELP_SMTP},
-  {"ssh", "SSH protocol", CURLHELP_SSH},
-  {"telnet", "TELNET protocol", CURLHELP_TELNET},
-  {"tftp", "TFTP protocol", CURLHELP_TFTP},
-  {"timeout", "Timeouts and delays", CURLHELP_TIMEOUT},
-  {"tls", "TLS/SSL related", CURLHELP_TLS},
-  {"upload", "Upload, sending data", CURLHELP_UPLOAD},
-  {"verbose", "Tracing, logging etc", CURLHELP_VERBOSE}
+  {"auth", "Authentication methods", FETCHHELP_AUTH},
+  {"connection", "Manage connections", FETCHHELP_CONNECTION},
+  {"fetch", "The command line tool itself", FETCHHELP_FETCH},
+  {"deprecated", "Legacy", FETCHHELP_DEPRECATED},
+  {"dns", "Names and resolving", FETCHHELP_DNS},
+  {"file", "FILE protocol", FETCHHELP_FILE},
+  {"ftp", "FTP protocol", FETCHHELP_FTP},
+  {"global", "Global options", FETCHHELP_GLOBAL},
+  {"http", "HTTP and HTTPS protocol", FETCHHELP_HTTP},
+  {"imap", "IMAP protocol", FETCHHELP_IMAP},
+  {"ldap", "LDAP protocol", FETCHHELP_LDAP},
+  {"output", "Filesystem output", FETCHHELP_OUTPUT},
+  {"pop3", "POP3 protocol", FETCHHELP_POP3},
+  {"post", "HTTP POST specific", FETCHHELP_POST},
+  {"proxy", "Options for proxies", FETCHHELP_PROXY},
+  {"scp", "SCP protocol", FETCHHELP_SCP},
+  {"sftp", "SFTP protocol", FETCHHELP_SFTP},
+  {"smtp", "SMTP protocol", FETCHHELP_SMTP},
+  {"ssh", "SSH protocol", FETCHHELP_SSH},
+  {"telnet", "TELNET protocol", FETCHHELP_TELNET},
+  {"tftp", "TFTP protocol", FETCHHELP_TFTP},
+  {"timeout", "Timeouts and delays", FETCHHELP_TIMEOUT},
+  {"tls", "TLS/SSL related", FETCHHELP_TLS},
+  {"upload", "Upload, sending data", FETCHHELP_UPLOAD},
+  {"verbose", "Tracing, logging etc", FETCHHELP_VERBOSE}
 };
 
 static void print_category(unsigned int category, unsigned int cols)
@@ -114,7 +114,7 @@ static int get_category_content(const char *category, unsigned int cols)
 {
   unsigned int i;
   for(i = 0; i < ARRAYSIZE(categories); ++i)
-    if(curl_strequal(categories[i].opt, category)) {
+    if(fetch_strequal(categories[i].opt, category)) {
       printf("%s: %s\n", categories[i].opt, categories[i].desc);
       print_category(categories[i].category, cols);
       return 0;
@@ -240,18 +240,18 @@ void tool_help(char *category)
       "\nUse \"--help [option]\" to view documentation for a given option"
 #endif
       ;
-    puts("Usage: curl [options...] <url>");
-    print_category(CURLHELP_IMPORTANT, cols);
+    puts("Usage: fetch [options...] <url>");
+    print_category(FETCHHELP_IMPORTANT, cols);
     puts(category_note);
     get_categories_list(cols);
     puts(category_note2);
   }
   /* Lets print everything if "all" was provided */
-  else if(curl_strequal(category, "all"))
+  else if(fetch_strequal(category, "all"))
     /* Print everything */
-    print_category(CURLHELP_ALL, cols);
+    print_category(FETCHHELP_ALL, cols);
   /* Lets handle the string "category" differently to not print an errormsg */
-  else if(curl_strequal(category, "category"))
+  else if(fetch_strequal(category, "category"))
     get_categories();
   else if(category[0] == '-') {
 #ifdef USE_MANUAL
@@ -274,7 +274,7 @@ void tool_help(char *category)
       a = findshortopt(category[1]);
     if(!a) {
       fprintf(tool_stderr, "Incorrect option name to show help for,"
-              " see curl -h\n");
+              " see fetch -h\n");
     }
     else {
       char cmdbuf[80];
@@ -294,7 +294,7 @@ void tool_help(char *category)
     }
 #else
     fprintf(tool_stderr, "Cannot comply. "
-            "This curl was built without built-in manual\n");
+            "This fetch was built without built-in manual\n");
 #endif
   }
   /* Otherwise print category and handle the case if the cat was not found */
@@ -309,7 +309,7 @@ static bool is_debug(void)
 {
   const char *const *builtin;
   for(builtin = feature_names; *builtin; ++builtin)
-    if(curl_strequal("debug", *builtin))
+    if(fetch_strequal("debug", *builtin))
       return TRUE;
   return FALSE;
 }
@@ -318,20 +318,20 @@ void tool_version_info(void)
 {
   const char *const *builtin;
   if(is_debug())
-    fprintf(tool_stderr, "WARNING: this libcurl is Debug-enabled, "
+    fprintf(tool_stderr, "WARNING: this libfetch is Debug-enabled, "
             "do not use in production\n\n");
 
-  printf(CURL_ID "%s\n", curl_version());
-#ifdef CURL_PATCHSTAMP
+  printf(FETCH_ID "%s\n", fetch_version());
+#ifdef FETCH_PATCHSTAMP
   printf("Release-Date: %s, security patched: %s\n",
-         LIBCURL_TIMESTAMP, CURL_PATCHSTAMP);
+         LIBFETCH_TIMESTAMP, FETCH_PATCHSTAMP);
 #else
-  printf("Release-Date: %s\n", LIBCURL_TIMESTAMP);
+  printf("Release-Date: %s\n", LIBFETCH_TIMESTAMP);
 #endif
   if(built_in_protos[0]) {
-#ifndef CURL_DISABLE_IPFS
+#ifndef FETCH_DISABLE_IPFS
     const char *insert = NULL;
-    /* we have ipfs and ipns support if libcurl has http support */
+    /* we have ipfs and ipns support if libfetch has http support */
     for(builtin = built_in_protos; *builtin; ++builtin) {
       if(insert) {
         /* update insertion so ipfs will be printed in alphabetical order */
@@ -344,26 +344,26 @@ void tool_version_info(void)
         insert = *builtin;
       }
     }
-#endif /* !CURL_DISABLE_IPFS */
+#endif /* !FETCH_DISABLE_IPFS */
     printf("Protocols:");
     for(builtin = built_in_protos; *builtin; ++builtin) {
       /* Special case: do not list rtmp?* protocols.
          They may only appear together with "rtmp" */
-      if(!curl_strnequal(*builtin, "rtmp", 4) || !builtin[0][4])
+      if(!fetch_strnequal(*builtin, "rtmp", 4) || !builtin[0][4])
         printf(" %s", *builtin);
-#ifndef CURL_DISABLE_IPFS
+#ifndef FETCH_DISABLE_IPFS
       if(insert && insert == *builtin) {
         printf(" ipfs ipns");
         insert = NULL;
       }
-#endif /* !CURL_DISABLE_IPFS */
+#endif /* !FETCH_DISABLE_IPFS */
     }
     puts(""); /* newline */
   }
   if(feature_names[0]) {
     const char **feat_ext;
     size_t feat_ext_count = feature_count;
-#ifdef CURL_CA_EMBED
+#ifdef FETCH_CA_EMBED
     ++feat_ext_count;
 #endif
     feat_ext = malloc(sizeof(*feature_names) * (feat_ext_count + 1));
@@ -371,7 +371,7 @@ void tool_version_info(void)
       memcpy((void *)feat_ext, feature_names,
              sizeof(*feature_names) * feature_count);
       feat_ext_count = feature_count;
-#ifdef CURL_CA_EMBED
+#ifdef FETCH_CA_EMBED
       feat_ext[feat_ext_count++] = "CAcert";
 #endif
       feat_ext[feat_ext_count] = NULL;
@@ -384,19 +384,19 @@ void tool_version_info(void)
       free((void *)feat_ext);
     }
   }
-  if(strcmp(CURL_VERSION, curlinfo->version)) {
-    printf("WARNING: curl and libcurl versions do not match. "
+  if(strcmp(FETCH_VERSION, fetchinfo->version)) {
+    printf("WARNING: fetch and libfetch versions do not match. "
            "Functionality may be affected.\n");
   }
 }
 
 void tool_list_engines(void)
 {
-  CURL *curl = curl_easy_init();
-  struct curl_slist *engines = NULL;
+  FETCH *fetch = fetch_easy_init();
+  struct fetch_slist *engines = NULL;
 
   /* Get the list of engines */
-  curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
+  fetch_easy_getinfo(fetch, FETCHINFO_SSL_ENGINES, &engines);
 
   puts("Build-time engines:");
   if(engines) {
@@ -408,6 +408,6 @@ void tool_list_engines(void)
   }
 
   /* Cleanup the list of engines */
-  curl_slist_free_all(engines);
-  curl_easy_cleanup(curl);
+  fetch_slist_free_all(engines);
+  fetch_easy_cleanup(fetch);
 }

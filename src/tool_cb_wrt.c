@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -30,7 +30,7 @@
 
 #include <sys/stat.h>
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
@@ -66,7 +66,7 @@ bool tool_create_output_file(struct OutStruct *outs,
   else {
     int fd;
     do {
-      fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY, OPENMODE);
+      fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | FETCH_O_BINARY, OPENMODE);
       /* Keep retrying in the hope that it is not interrupted sometime */
     } while(fd == -1 && errno == EINTR);
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
@@ -93,7 +93,7 @@ bool tool_create_output_file(struct OutStruct *outs,
         msnprintf(newname + len + 1, 12, "%d", next_num);
         next_num++;
         do {
-          fd = open(newname, O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY,
+          fd = open(newname, O_CREAT | O_WRONLY | O_EXCL | FETCH_O_BINARY,
                              OPENMODE);
           /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
@@ -127,7 +127,7 @@ bool tool_create_output_file(struct OutStruct *outs,
 }
 
 /*
-** callback for CURLOPT_WRITEFUNCTION
+** callback for FETCHOPT_WRITEFUNCTION
 */
 
 size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
@@ -145,24 +145,24 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
 #ifdef DEBUGBUILD
   {
-    char *tty = curl_getenv("CURL_ISATTY");
+    char *tty = fetch_getenv("FETCH_ISATTY");
     if(tty) {
       is_tty = TRUE;
-      curl_free(tty);
+      fetch_free(tty);
     }
   }
 
   if(config->show_headers) {
-    if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
+    if(bytes > (size_t)FETCH_MAX_HTTP_HEADER) {
       warnf(config->global, "Header data size exceeds single call write "
             "limit");
-      return CURL_WRITEFUNC_ERROR;
+      return FETCH_WRITEFUNC_ERROR;
     }
   }
   else {
-    if(bytes > (size_t)CURL_MAX_WRITE_SIZE) {
+    if(bytes > (size_t)FETCH_MAX_WRITE_SIZE) {
       warnf(config->global, "Data size exceeds single call write limit");
-      return CURL_WRITEFUNC_ERROR;
+      return FETCH_WRITEFUNC_ERROR;
     }
   }
 
@@ -191,22 +191,22 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
     if(check_fails) {
       warnf(config->global, "Invalid output struct data for write callback");
-      return CURL_WRITEFUNC_ERROR;
+      return FETCH_WRITEFUNC_ERROR;
     }
   }
 #endif
 
   if(!outs->stream && !tool_create_output_file(outs, per->config))
-    return CURL_WRITEFUNC_ERROR;
+    return FETCH_WRITEFUNC_ERROR;
 
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
     /* binary output to terminal? */
     if(memchr(buffer, 0, bytes)) {
       warnf(config->global, "Binary output can mess up your terminal. "
-            "Use \"--output -\" to tell curl to output it to your terminal "
+            "Use \"--output -\" to tell fetch to output it to your terminal "
             "anyway, or consider \"--output <FILE>\" to save to a file.");
       config->synthetic_error = TRUE;
-      return CURL_WRITEFUNC_ERROR;
+      return FETCH_WRITEFUNC_ERROR;
     }
   }
 
@@ -273,7 +273,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
               prefix[1] ? 2 : 1,
               &chars_written,
               NULL)) {
-            return CURL_WRITEFUNC_ERROR;
+            return FETCH_WRITEFUNC_ERROR;
           }
         }
         /* else: UTF-8 input was not well formed and OS is pre-Vista which
@@ -314,17 +314,17 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
                                           NULL, 0);
       if(!wc_len)
-        return CURL_WRITEFUNC_ERROR;
+        return FETCH_WRITEFUNC_ERROR;
 
       wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
       if(!wc_buf)
-        return CURL_WRITEFUNC_ERROR;
+        return FETCH_WRITEFUNC_ERROR;
 
       wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
                                           wc_buf, (int)wc_len);
       if(!wc_len) {
         free(wc_buf);
-        return CURL_WRITEFUNC_ERROR;
+        return FETCH_WRITEFUNC_ERROR;
       }
 
       if(!WriteConsoleW(
@@ -334,7 +334,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
           &chars_written,
           NULL)) {
         free(wc_buf);
-        return CURL_WRITEFUNC_ERROR;
+        return FETCH_WRITEFUNC_ERROR;
       }
       free(wc_buf);
     }
@@ -346,7 +346,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   {
     if(per->hdrcbdata.headlist) {
       if(tool_write_headers(&per->hdrcbdata, outs->stream))
-        return CURL_WRITEFUNC_ERROR;
+        return FETCH_WRITEFUNC_ERROR;
     }
     rc = fwrite(buffer, sz, nmemb, outs->stream);
   }
@@ -357,14 +357,14 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->readbusy) {
     config->readbusy = FALSE;
-    curl_easy_pause(per->curl, CURLPAUSE_CONT);
+    fetch_easy_pause(per->fetch, FETCHPAUSE_CONT);
   }
 
   if(config->nobuffer) {
     /* output buffering disabled */
     int res = fflush(outs->stream);
     if(res)
-      return CURL_WRITEFUNC_ERROR;
+      return FETCH_WRITEFUNC_ERROR;
   }
 
   return rc;

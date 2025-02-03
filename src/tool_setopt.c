@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,14 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifndef CURL_DISABLE_LIBCURL_OPTION
+#ifndef FETCH_DISABLE_LIBFETCH_OPTION
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_easysrc.h"
@@ -44,126 +44,126 @@
 #define NV1(e, v) {#e, (v)}
 #define NVEND {NULL, 0}         /* sentinel to mark end of list */
 
-const struct NameValue setopt_nv_CURLPROXY[] = {
-  NV(CURLPROXY_HTTP),
-  NV(CURLPROXY_HTTP_1_0),
-  NV(CURLPROXY_HTTPS),
-  NV(CURLPROXY_SOCKS4),
-  NV(CURLPROXY_SOCKS5),
-  NV(CURLPROXY_SOCKS4A),
-  NV(CURLPROXY_SOCKS5_HOSTNAME),
+const struct NameValue setopt_nv_FETCHPROXY[] = {
+  NV(FETCHPROXY_HTTP),
+  NV(FETCHPROXY_HTTP_1_0),
+  NV(FETCHPROXY_HTTPS),
+  NV(FETCHPROXY_SOCKS4),
+  NV(FETCHPROXY_SOCKS5),
+  NV(FETCHPROXY_SOCKS4A),
+  NV(FETCHPROXY_SOCKS5_HOSTNAME),
   NVEND,
 };
 
-const struct NameValue setopt_nv_CURL_SOCKS_PROXY[] = {
-  NV(CURLPROXY_SOCKS4),
-  NV(CURLPROXY_SOCKS5),
-  NV(CURLPROXY_SOCKS4A),
-  NV(CURLPROXY_SOCKS5_HOSTNAME),
+const struct NameValue setopt_nv_FETCH_SOCKS_PROXY[] = {
+  NV(FETCHPROXY_SOCKS4),
+  NV(FETCHPROXY_SOCKS5),
+  NV(FETCHPROXY_SOCKS4A),
+  NV(FETCHPROXY_SOCKS5_HOSTNAME),
   NVEND,
 };
 
-const struct NameValueUnsigned setopt_nv_CURLHSTS[] = {
-  NV(CURLHSTS_ENABLE),
+const struct NameValueUnsigned setopt_nv_FETCHHSTS[] = {
+  NV(FETCHHSTS_ENABLE),
   NVEND,
 };
 
-const struct NameValueUnsigned setopt_nv_CURLAUTH[] = {
-  NV(CURLAUTH_ANY),             /* combination */
-  NV(CURLAUTH_ANYSAFE),         /* combination */
-  NV(CURLAUTH_BASIC),
-  NV(CURLAUTH_DIGEST),
-  NV(CURLAUTH_GSSNEGOTIATE),
-  NV(CURLAUTH_NTLM),
-  NV(CURLAUTH_DIGEST_IE),
-  NV(CURLAUTH_ONLY),
-  NV(CURLAUTH_NONE),
+const struct NameValueUnsigned setopt_nv_FETCHAUTH[] = {
+  NV(FETCHAUTH_ANY),             /* combination */
+  NV(FETCHAUTH_ANYSAFE),         /* combination */
+  NV(FETCHAUTH_BASIC),
+  NV(FETCHAUTH_DIGEST),
+  NV(FETCHAUTH_GSSNEGOTIATE),
+  NV(FETCHAUTH_NTLM),
+  NV(FETCHAUTH_DIGEST_IE),
+  NV(FETCHAUTH_ONLY),
+  NV(FETCHAUTH_NONE),
   NVEND,
 };
 
-const struct NameValue setopt_nv_CURL_HTTP_VERSION[] = {
-  NV(CURL_HTTP_VERSION_NONE),
-  NV(CURL_HTTP_VERSION_1_0),
-  NV(CURL_HTTP_VERSION_1_1),
-  NV(CURL_HTTP_VERSION_2_0),
-  NV(CURL_HTTP_VERSION_2TLS),
-  NV(CURL_HTTP_VERSION_3),
-  NV(CURL_HTTP_VERSION_3ONLY),
+const struct NameValue setopt_nv_FETCH_HTTP_VERSION[] = {
+  NV(FETCH_HTTP_VERSION_NONE),
+  NV(FETCH_HTTP_VERSION_1_0),
+  NV(FETCH_HTTP_VERSION_1_1),
+  NV(FETCH_HTTP_VERSION_2_0),
+  NV(FETCH_HTTP_VERSION_2TLS),
+  NV(FETCH_HTTP_VERSION_3),
+  NV(FETCH_HTTP_VERSION_3ONLY),
   NVEND,
 };
 
-const struct NameValue setopt_nv_CURL_SSLVERSION[] = {
-  NV(CURL_SSLVERSION_DEFAULT),
-  NV(CURL_SSLVERSION_TLSv1),
-  NV(CURL_SSLVERSION_SSLv2),
-  NV(CURL_SSLVERSION_SSLv3),
-  NV(CURL_SSLVERSION_TLSv1_0),
-  NV(CURL_SSLVERSION_TLSv1_1),
-  NV(CURL_SSLVERSION_TLSv1_2),
-  NV(CURL_SSLVERSION_TLSv1_3),
+const struct NameValue setopt_nv_FETCH_SSLVERSION[] = {
+  NV(FETCH_SSLVERSION_DEFAULT),
+  NV(FETCH_SSLVERSION_TLSv1),
+  NV(FETCH_SSLVERSION_SSLv2),
+  NV(FETCH_SSLVERSION_SSLv3),
+  NV(FETCH_SSLVERSION_TLSv1_0),
+  NV(FETCH_SSLVERSION_TLSv1_1),
+  NV(FETCH_SSLVERSION_TLSv1_2),
+  NV(FETCH_SSLVERSION_TLSv1_3),
   NVEND,
 };
 
-const struct NameValue setopt_nv_CURL_SSLVERSION_MAX[] = {
-  NV(CURL_SSLVERSION_MAX_NONE),
-  NV(CURL_SSLVERSION_MAX_DEFAULT),
-  NV(CURL_SSLVERSION_MAX_TLSv1_0),
-  NV(CURL_SSLVERSION_MAX_TLSv1_1),
-  NV(CURL_SSLVERSION_MAX_TLSv1_2),
-  NV(CURL_SSLVERSION_MAX_TLSv1_3),
+const struct NameValue setopt_nv_FETCH_SSLVERSION_MAX[] = {
+  NV(FETCH_SSLVERSION_MAX_NONE),
+  NV(FETCH_SSLVERSION_MAX_DEFAULT),
+  NV(FETCH_SSLVERSION_MAX_TLSv1_0),
+  NV(FETCH_SSLVERSION_MAX_TLSv1_1),
+  NV(FETCH_SSLVERSION_MAX_TLSv1_2),
+  NV(FETCH_SSLVERSION_MAX_TLSv1_3),
   NVEND,
 };
 
-const struct NameValue setopt_nv_CURL_TIMECOND[] = {
-  NV(CURL_TIMECOND_IFMODSINCE),
-  NV(CURL_TIMECOND_IFUNMODSINCE),
-  NV(CURL_TIMECOND_LASTMOD),
-  NV(CURL_TIMECOND_NONE),
+const struct NameValue setopt_nv_FETCH_TIMECOND[] = {
+  NV(FETCH_TIMECOND_IFMODSINCE),
+  NV(FETCH_TIMECOND_IFUNMODSINCE),
+  NV(FETCH_TIMECOND_LASTMOD),
+  NV(FETCH_TIMECOND_NONE),
   NVEND,
 };
 
-const struct NameValue setopt_nv_CURLFTPSSL_CCC[] = {
-  NV(CURLFTPSSL_CCC_NONE),
-  NV(CURLFTPSSL_CCC_PASSIVE),
-  NV(CURLFTPSSL_CCC_ACTIVE),
+const struct NameValue setopt_nv_FETCHFTPSSL_CCC[] = {
+  NV(FETCHFTPSSL_CCC_NONE),
+  NV(FETCHFTPSSL_CCC_PASSIVE),
+  NV(FETCHFTPSSL_CCC_ACTIVE),
   NVEND,
 };
 
-const struct NameValue setopt_nv_CURLUSESSL[] = {
-  NV(CURLUSESSL_NONE),
-  NV(CURLUSESSL_TRY),
-  NV(CURLUSESSL_CONTROL),
-  NV(CURLUSESSL_ALL),
+const struct NameValue setopt_nv_FETCHUSESSL[] = {
+  NV(FETCHUSESSL_NONE),
+  NV(FETCHUSESSL_TRY),
+  NV(FETCHUSESSL_CONTROL),
+  NV(FETCHUSESSL_ALL),
   NVEND,
 };
 
-const struct NameValueUnsigned setopt_nv_CURLSSLOPT[] = {
-  NV(CURLSSLOPT_ALLOW_BEAST),
-  NV(CURLSSLOPT_NO_REVOKE),
-  NV(CURLSSLOPT_NO_PARTIALCHAIN),
-  NV(CURLSSLOPT_REVOKE_BEST_EFFORT),
-  NV(CURLSSLOPT_NATIVE_CA),
-  NV(CURLSSLOPT_AUTO_CLIENT_CERT),
+const struct NameValueUnsigned setopt_nv_FETCHSSLOPT[] = {
+  NV(FETCHSSLOPT_ALLOW_BEAST),
+  NV(FETCHSSLOPT_NO_REVOKE),
+  NV(FETCHSSLOPT_NO_PARTIALCHAIN),
+  NV(FETCHSSLOPT_REVOKE_BEST_EFFORT),
+  NV(FETCHSSLOPT_NATIVE_CA),
+  NV(FETCHSSLOPT_AUTO_CLIENT_CERT),
   NVEND,
 };
 
-const struct NameValue setopt_nv_CURL_NETRC[] = {
-  NV(CURL_NETRC_IGNORED),
-  NV(CURL_NETRC_OPTIONAL),
-  NV(CURL_NETRC_REQUIRED),
+const struct NameValue setopt_nv_FETCH_NETRC[] = {
+  NV(FETCH_NETRC_IGNORED),
+  NV(FETCH_NETRC_OPTIONAL),
+  NV(FETCH_NETRC_REQUIRED),
   NVEND,
 };
 
 /* These options have non-zero default values. */
-static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
-  NV1(CURLOPT_SSL_VERIFYPEER, 1),
-  NV1(CURLOPT_SSL_VERIFYHOST, 1),
-  NV1(CURLOPT_SSL_ENABLE_NPN, 1),
-  NV1(CURLOPT_SSL_ENABLE_ALPN, 1),
-  NV1(CURLOPT_TCP_NODELAY, 1),
-  NV1(CURLOPT_PROXY_SSL_VERIFYPEER, 1),
-  NV1(CURLOPT_PROXY_SSL_VERIFYHOST, 1),
-  NV1(CURLOPT_SOCKS5_AUTH, 1),
+static const struct NameValue setopt_nv_FETCHNONZERODEFAULTS[] = {
+  NV1(FETCHOPT_SSL_VERIFYPEER, 1),
+  NV1(FETCHOPT_SSL_VERIFYHOST, 1),
+  NV1(FETCHOPT_SSL_ENABLE_NPN, 1),
+  NV1(FETCHOPT_SSL_ENABLE_ALPN, 1),
+  NV1(FETCHOPT_TCP_NODELAY, 1),
+  NV1(FETCHOPT_PROXY_SSL_VERIFYPEER, 1),
+  NV1(FETCHOPT_PROXY_SSL_VERIFYHOST, 1),
+  NV1(FETCHOPT_SOCKS5_AUTH, 1),
   NVEND
 };
 
@@ -180,7 +180,7 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 } while(0)
 #define NULL_CHECK(p) do { \
   if(!p) { \
-    ret = CURLE_OUT_OF_MEMORY; \
+    ret = FETCHE_OUT_OF_MEMORY; \
     goto nomem; \
   } \
 } while(0)
@@ -211,14 +211,14 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 #define MAX_STRING_LENGTH_OUTPUT 2000
 #define ZERO_TERMINATED -1
 
-static char *c_escape(const char *str, curl_off_t len)
+static char *c_escape(const char *str, fetch_off_t len)
 {
   const char *s;
   unsigned int cutoff = 0;
-  CURLcode result;
-  struct curlx_dynbuf escaped;
+  FETCHcode result;
+  struct fetchx_dynbuf escaped;
 
-  curlx_dyn_init(&escaped, 4 * MAX_STRING_LENGTH_OUTPUT + 3);
+  fetchx_dyn_init(&escaped, 4 * MAX_STRING_LENGTH_OUTPUT + 3);
 
   if(len == ZERO_TERMINATED)
     len = strlen(str);
@@ -229,7 +229,7 @@ static char *c_escape(const char *str, curl_off_t len)
     cutoff = 3;
   }
 
-  result = curlx_dyn_addn(&escaped, STRCONST(""));
+  result = fetchx_dyn_addn(&escaped, STRCONST(""));
   for(s = str; !result && len; s++, len--) {
     /* escape question marks as well, to prevent generating accidental
        trigraphs */
@@ -240,14 +240,14 @@ static char *c_escape(const char *str, curl_off_t len)
     if(!p && ISPRINT(*s))
       continue;
 
-    result = curlx_dyn_addn(&escaped, str, s - str);
+    result = fetchx_dyn_addn(&escaped, str, s - str);
     str = s + 1;
 
     if(!result) {
       if(p && *p)
-        result = curlx_dyn_addn(&escaped, to + 2 * (p - from), 2);
+        result = fetchx_dyn_addn(&escaped, to + 2 * (p - from), 2);
       else {
-        result = curlx_dyn_addf(&escaped,
+        result = fetchx_dyn_addf(&escaped,
                                 /* Octal escape to avoid >2 digit hex. */
                                 (len > 1 && ISXDIGIT(s[1])) ?
                                   "\\%03o" : "\\x%02x",
@@ -257,28 +257,28 @@ static char *c_escape(const char *str, curl_off_t len)
   }
 
   if(!result)
-    result = curlx_dyn_addn(&escaped, str, s - str);
+    result = fetchx_dyn_addn(&escaped, str, s - str);
 
   if(!result)
-    (void) !curlx_dyn_addn(&escaped, "...", cutoff);
+    (void) !fetchx_dyn_addn(&escaped, "...", cutoff);
 
-  return curlx_dyn_ptr(&escaped);
+  return fetchx_dyn_ptr(&escaped);
 }
 
 /* setopt wrapper for enum types */
-CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
-                          const char *name, CURLoption tag,
+FETCHcode tool_setopt_enum(FETCH *fetch, struct GlobalConfig *config,
+                          const char *name, FETCHoption tag,
                           const struct NameValue *nvlist, long lval)
 {
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
   bool skip = FALSE;
 
-  ret = curl_easy_setopt(curl, tag, lval);
+  ret = fetch_easy_setopt(fetch, tag, lval);
   if(!lval)
     skip = TRUE;
 
-  if(config->libcurl && !skip && !ret) {
-    /* we only use this for real if --libcurl was used */
+  if(config->libfetch && !skip && !ret) {
+    /* we only use this for real if --libfetch was used */
     const struct NameValue *nv = NULL;
     for(nv = nvlist; nv->name; nv++) {
       if(nv->value == lval)
@@ -288,10 +288,10 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
       /* If no definition was found, output an explicit value.
        * This could happen if new values are defined and used
        * but the NameValue list is not updated. */
-      CODE2("curl_easy_setopt(hnd, %s, %ldL);", name, lval);
+      CODE2("fetch_easy_setopt(hnd, %s, %ldL);", name, lval);
     }
     else {
-      CODE2("curl_easy_setopt(hnd, %s, (long)%s);", name, nv->name);
+      CODE2("fetch_easy_setopt(hnd, %s, (long)%s);", name, nv->name);
     }
   }
 
@@ -303,27 +303,27 @@ nomem:
   return ret;
 }
 
-/* setopt wrapper for CURLOPT_SSLVERSION */
-CURLcode tool_setopt_SSLVERSION(CURL *curl, struct GlobalConfig *config,
-                                const char *name, CURLoption tag,
+/* setopt wrapper for FETCHOPT_SSLVERSION */
+FETCHcode tool_setopt_SSLVERSION(FETCH *fetch, struct GlobalConfig *config,
+                                const char *name, FETCHoption tag,
                                 long lval)
 {
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
   bool skip = FALSE;
 
-  ret = curl_easy_setopt(curl, tag, lval);
+  ret = fetch_easy_setopt(fetch, tag, lval);
   if(!lval)
     skip = TRUE;
 
-  if(config->libcurl && !skip && !ret) {
-    /* we only use this for real if --libcurl was used */
+  if(config->libfetch && !skip && !ret) {
+    /* we only use this for real if --libfetch was used */
     const struct NameValue *nv = NULL;
     const struct NameValue *nv2 = NULL;
-    for(nv = setopt_nv_CURL_SSLVERSION; nv->name; nv++) {
+    for(nv = setopt_nv_FETCH_SSLVERSION; nv->name; nv++) {
       if(nv->value == (lval & 0xffff))
         break; /* found it */
     }
-    for(nv2 = setopt_nv_CURL_SSLVERSION_MAX; nv2->name; nv2++) {
+    for(nv2 = setopt_nv_FETCH_SSLVERSION_MAX; nv2->name; nv2++) {
       if(nv2->value == (lval & ~0xffff))
         break; /* found it */
     }
@@ -331,10 +331,10 @@ CURLcode tool_setopt_SSLVERSION(CURL *curl, struct GlobalConfig *config,
       /* If no definition was found, output an explicit value.
        * This could happen if new values are defined and used
        * but the NameValue list is not updated. */
-      CODE2("curl_easy_setopt(hnd, %s, %ldL);", name, lval);
+      CODE2("fetch_easy_setopt(hnd, %s, %ldL);", name, lval);
     }
     else {
-      CODE3("curl_easy_setopt(hnd, %s, (long)(%s | %s));",
+      CODE3("fetch_easy_setopt(hnd, %s, (long)(%s | %s));",
             name, nv->name, nv2->name);
     }
   }
@@ -348,25 +348,25 @@ nomem:
 }
 
 /* setopt wrapper for bitmasks */
-CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
-                             const char *name, CURLoption tag,
+FETCHcode tool_setopt_bitmask(FETCH *fetch, struct GlobalConfig *config,
+                             const char *name, FETCHoption tag,
                              const struct NameValueUnsigned *nvlist,
                              long lval)
 {
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
   bool skip = FALSE;
 
-  ret = curl_easy_setopt(curl, tag, lval);
+  ret = fetch_easy_setopt(fetch, tag, lval);
   if(!lval)
     skip = TRUE;
 
-  if(config->libcurl && !skip && !ret) {
-    /* we only use this for real if --libcurl was used */
+  if(config->libfetch && !skip && !ret) {
+    /* we only use this for real if --libfetch was used */
     char preamble[80];
     unsigned long rest = (unsigned long)lval;
     const struct NameValueUnsigned *nv = NULL;
     msnprintf(preamble, sizeof(preamble),
-              "curl_easy_setopt(hnd, %s, ", name);
+              "fetch_easy_setopt(hnd, %s, ", name);
     for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~ rest) == 0) {
         /* all value flags contained in rest */
@@ -391,25 +391,25 @@ nomem:
   return ret;
 }
 
-/* Generate code for a struct curl_slist. */
-static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
+/* Generate code for a struct fetch_slist. */
+static FETCHcode libfetch_generate_slist(struct fetch_slist *slist, int *slistno)
 {
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
   char *escaped = NULL;
 
   /* May need several slist variables, so invent name */
   *slistno = ++easysrc_slist_count;
 
-  DECL1("struct curl_slist *slist%d;", *slistno);
+  DECL1("struct fetch_slist *slist%d;", *slistno);
   DATA1("slist%d = NULL;", *slistno);
-  CLEAN1("curl_slist_free_all(slist%d);", *slistno);
+  CLEAN1("fetch_slist_free_all(slist%d);", *slistno);
   CLEAN1("slist%d = NULL;", *slistno);
   for(; slist; slist = slist->next) {
     Curl_safefree(escaped);
     escaped = c_escape(slist->data, ZERO_TERMINATED);
     if(!escaped)
-      return CURLE_OUT_OF_MEMORY;
-    DATA3("slist%d = curl_slist_append(slist%d, \"%s\");",
+      return FETCHE_OUT_OF_MEMORY;
+    DATA3("slist%d = fetch_slist_append(slist%d, \"%s\");",
                                        *slistno, *slistno, escaped);
   }
 
@@ -418,18 +418,18 @@ nomem:
   return ret;
 }
 
-static CURLcode libcurl_generate_mime(CURL *curl,
+static FETCHcode libfetch_generate_mime(FETCH *fetch,
                                       struct GlobalConfig *config,
                                       struct tool_mime *toolmime,
                                       int *mimeno);     /* Forward. */
 
 /* Wrapper to generate source code for a mime part. */
-static CURLcode libcurl_generate_mime_part(CURL *curl,
+static FETCHcode libfetch_generate_mime_part(FETCH *fetch,
                                            struct GlobalConfig *config,
                                            struct tool_mime *part,
                                            int mimeno)
 {
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
   int submimeno = 0;
   char *escaped = NULL;
   const char *data = NULL;
@@ -437,19 +437,19 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
 
   /* Parts are linked in reverse order. */
   if(part->prev) {
-    ret = libcurl_generate_mime_part(curl, config, part->prev, mimeno);
+    ret = libfetch_generate_mime_part(fetch, config, part->prev, mimeno);
     if(ret)
       return ret;
   }
 
   /* Create the part. */
-  CODE2("part%d = curl_mime_addpart(mime%d);", mimeno, mimeno);
+  CODE2("part%d = fetch_mime_addpart(mime%d);", mimeno, mimeno);
 
   switch(part->kind) {
   case TOOLMIME_PARTS:
-    ret = libcurl_generate_mime(curl, config, part, &submimeno);
+    ret = libfetch_generate_mime(fetch, config, part, &submimeno);
     if(!ret) {
-      CODE2("curl_mime_subparts(part%d, mime%d);", mimeno, submimeno);
+      CODE2("fetch_mime_subparts(part%d, mime%d);", mimeno, submimeno);
       CODE1("mime%d = NULL;", submimeno);   /* Avoid freeing in CLEAN. */
     }
     break;
@@ -460,7 +460,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
       Curl_safefree(escaped);
       escaped = c_escape(data, ZERO_TERMINATED);
       NULL_CHECK(escaped);
-      CODE2("curl_mime_data(part%d, \"%s\", CURL_ZERO_TERMINATED);",
+      CODE2("fetch_mime_data(part%d, \"%s\", FETCH_ZERO_TERMINATED);",
                             mimeno, escaped);
     }
     break;
@@ -469,9 +469,9 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   case TOOLMIME_FILEDATA:
     escaped = c_escape(part->data, ZERO_TERMINATED);
     NULL_CHECK(escaped);
-    CODE2("curl_mime_filedata(part%d, \"%s\");", mimeno, escaped);
+    CODE2("fetch_mime_filedata(part%d, \"%s\");", mimeno, escaped);
     if(part->kind == TOOLMIME_FILEDATA && !filename) {
-      CODE1("curl_mime_filename(part%d, NULL);", mimeno);
+      CODE1("fetch_mime_filename(part%d, NULL);", mimeno);
     }
     break;
 
@@ -481,9 +481,9 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
     FALLTHROUGH();
   case TOOLMIME_STDINDATA:
     /* Can only be reading stdin in the current context. */
-    CODE1("curl_mime_data_cb(part%d, -1, (curl_read_callback) fread, \\",
+    CODE1("fetch_mime_data_cb(part%d, -1, (fetch_read_callback) fread, \\",
           mimeno);
-    CODE0("                  (curl_seek_callback) fseek, NULL, stdin);");
+    CODE0("                  (fetch_seek_callback) fseek, NULL, stdin);");
     break;
   default:
     /* Other cases not possible in this context. */
@@ -494,36 +494,36 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
     Curl_safefree(escaped);
     escaped = c_escape(part->encoder, ZERO_TERMINATED);
     NULL_CHECK(escaped);
-    CODE2("curl_mime_encoder(part%d, \"%s\");", mimeno, escaped);
+    CODE2("fetch_mime_encoder(part%d, \"%s\");", mimeno, escaped);
   }
 
   if(!ret && filename) {
     Curl_safefree(escaped);
     escaped = c_escape(filename, ZERO_TERMINATED);
     NULL_CHECK(escaped);
-    CODE2("curl_mime_filename(part%d, \"%s\");", mimeno, escaped);
+    CODE2("fetch_mime_filename(part%d, \"%s\");", mimeno, escaped);
   }
 
   if(!ret && part->name) {
     Curl_safefree(escaped);
     escaped = c_escape(part->name, ZERO_TERMINATED);
     NULL_CHECK(escaped);
-    CODE2("curl_mime_name(part%d, \"%s\");", mimeno, escaped);
+    CODE2("fetch_mime_name(part%d, \"%s\");", mimeno, escaped);
   }
 
   if(!ret && part->type) {
     Curl_safefree(escaped);
     escaped = c_escape(part->type, ZERO_TERMINATED);
     NULL_CHECK(escaped);
-    CODE2("curl_mime_type(part%d, \"%s\");", mimeno, escaped);
+    CODE2("fetch_mime_type(part%d, \"%s\");", mimeno, escaped);
   }
 
   if(!ret && part->headers) {
     int slistno;
 
-    ret = libcurl_generate_slist(part->headers, &slistno);
+    ret = libfetch_generate_slist(part->headers, &slistno);
     if(!ret) {
-      CODE2("curl_mime_headers(part%d, slist%d, 1);", mimeno, slistno);
+      CODE2("fetch_mime_headers(part%d, slist%d, 1);", mimeno, slistno);
       CODE1("slist%d = NULL;", slistno); /* Prevent CLEANing. */
     }
   }
@@ -534,24 +534,24 @@ nomem:
 }
 
 /* Wrapper to generate source code for a mime structure. */
-static CURLcode libcurl_generate_mime(CURL *curl,
+static FETCHcode libfetch_generate_mime(FETCH *fetch,
                                       struct GlobalConfig *config,
                                       struct tool_mime *toolmime,
                                       int *mimeno)
 {
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
 
   /* May need several mime variables, so invent name. */
   *mimeno = ++easysrc_mime_count;
-  DECL1("curl_mime *mime%d;", *mimeno);
+  DECL1("fetch_mime *mime%d;", *mimeno);
   DATA1("mime%d = NULL;", *mimeno);
-  CODE1("mime%d = curl_mime_init(hnd);", *mimeno);
-  CLEAN1("curl_mime_free(mime%d);", *mimeno);
+  CODE1("mime%d = fetch_mime_init(hnd);", *mimeno);
+  CLEAN1("fetch_mime_free(mime%d);", *mimeno);
   CLEAN1("mime%d = NULL;", *mimeno);
 
   if(toolmime->subparts) {
-    DECL1("curl_mimepart *part%d;", *mimeno);
-    ret = libcurl_generate_mime_part(curl, config,
+    DECL1("fetch_mimepart *part%d;", *mimeno);
+    ret = libfetch_generate_mime_part(fetch, config,
                                      toolmime->subparts, *mimeno);
   }
 
@@ -559,41 +559,41 @@ nomem:
   return ret;
 }
 
-/* setopt wrapper for CURLOPT_MIMEPOST */
-CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
-                              const char *name, CURLoption tag,
-                              curl_mime *mimepost)
+/* setopt wrapper for FETCHOPT_MIMEPOST */
+FETCHcode tool_setopt_mimepost(FETCH *fetch, struct GlobalConfig *config,
+                              const char *name, FETCHoption tag,
+                              fetch_mime *mimepost)
 {
-  CURLcode ret = curl_easy_setopt(curl, tag, mimepost);
+  FETCHcode ret = fetch_easy_setopt(fetch, tag, mimepost);
   int mimeno = 0;
 
-  if(!ret && config->libcurl) {
-    ret = libcurl_generate_mime(curl, config,
+  if(!ret && config->libfetch) {
+    ret = libfetch_generate_mime(fetch, config,
                                 config->current->mimeroot, &mimeno);
 
     if(!ret)
-      CODE2("curl_easy_setopt(hnd, %s, mime%d);", name, mimeno);
+      CODE2("fetch_easy_setopt(hnd, %s, mime%d);", name, mimeno);
   }
 
 nomem:
   return ret;
 }
 
-/* setopt wrapper for curl_slist options */
-CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
-                           const char *name, CURLoption tag,
-                           struct curl_slist *list)
+/* setopt wrapper for fetch_slist options */
+FETCHcode tool_setopt_slist(FETCH *fetch, struct GlobalConfig *config,
+                           const char *name, FETCHoption tag,
+                           struct fetch_slist *list)
 {
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
 
-  ret = curl_easy_setopt(curl, tag, list);
+  ret = fetch_easy_setopt(fetch, tag, list);
 
-  if(config->libcurl && list && !ret) {
+  if(config->libfetch && list && !ret) {
     int i;
 
-    ret = libcurl_generate_slist(list, &i);
+    ret = libfetch_generate_slist(list, &i);
     if(!ret)
-      CODE2("curl_easy_setopt(hnd, %s, slist%d);", name, i);
+      CODE2("fetch_easy_setopt(hnd, %s, slist%d);", name, i);
   }
 
 nomem:
@@ -602,9 +602,9 @@ nomem:
 
 /* generic setopt wrapper for all other options.
  * Some type information is encoded in the tag value. */
-CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
+FETCHcode tool_setopt(FETCH *fetch, bool str, struct GlobalConfig *global,
                      struct OperationConfig *config,
-                     const char *name, CURLoption tag, ...)
+                     const char *name, FETCHoption tag, ...)
 {
   va_list arg;
   char buf[256];
@@ -613,16 +613,16 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
   bool skip = FALSE;
   bool escape = FALSE;
   char *escaped = NULL;
-  CURLcode ret = CURLE_OK;
+  FETCHcode ret = FETCHE_OK;
 
   va_start(arg, tag);
 
-  if(tag < CURLOPTTYPE_OBJECTPOINT) {
+  if(tag < FETCHOPTTYPE_OBJECTPOINT) {
     /* Value is expected to be a long */
     long lval = va_arg(arg, long);
     long defval = 0L;
     const struct NameValue *nv = NULL;
-    for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
+    for(nv = setopt_nv_FETCHNONZERODEFAULTS; nv->name; nv++) {
       if(!strcmp(name, nv->name)) {
         defval = nv->value;
         break; /* found it */
@@ -631,16 +631,16 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
 
     msnprintf(buf, sizeof(buf), "%ldL", lval);
     value = buf;
-    ret = curl_easy_setopt(curl, tag, lval);
+    ret = fetch_easy_setopt(fetch, tag, lval);
     if(lval == defval)
       skip = TRUE;
   }
-  else if(tag < CURLOPTTYPE_OFF_T) {
+  else if(tag < FETCHOPTTYPE_OFF_T) {
     /* Value is some sort of object pointer */
     void *pval = va_arg(arg, void *);
 
     /* function pointers are never printable */
-    if(tag >= CURLOPTTYPE_FUNCTIONPOINT) {
+    if(tag >= FETCHOPTTYPE_FUNCTIONPOINT) {
       if(pval) {
         value = "function pointer";
         remark = TRUE;
@@ -660,16 +660,16 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
     else
       skip = TRUE;
 
-    ret = curl_easy_setopt(curl, tag, pval);
+    ret = fetch_easy_setopt(fetch, tag, pval);
 
   }
-  else if(tag < CURLOPTTYPE_BLOB) {
-    /* Value is expected to be curl_off_t */
-    curl_off_t oval = va_arg(arg, curl_off_t);
+  else if(tag < FETCHOPTTYPE_BLOB) {
+    /* Value is expected to be fetch_off_t */
+    fetch_off_t oval = va_arg(arg, fetch_off_t);
     msnprintf(buf, sizeof(buf),
-              "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
+              "(fetch_off_t)%" FETCH_FORMAT_FETCH_OFF_T, oval);
     value = buf;
-    ret = curl_easy_setopt(curl, tag, oval);
+    ret = fetch_easy_setopt(fetch, tag, oval);
 
     if(!oval)
       skip = TRUE;
@@ -686,27 +686,27 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
     else
       skip = TRUE;
 
-    ret = curl_easy_setopt(curl, tag, pblob);
+    ret = fetch_easy_setopt(fetch, tag, pblob);
   }
 
   va_end(arg);
 
-  if(global->libcurl && !skip && !ret) {
-    /* we only use this for real if --libcurl was used */
+  if(global->libfetch && !skip && !ret) {
+    /* we only use this for real if --libfetch was used */
 
     if(remark)
       REM3("%s was set to a%s %s", name, (*value == 'o' ? "n" : ""), value);
     else {
       if(escape) {
-        curl_off_t len = ZERO_TERMINATED;
-        if(tag == CURLOPT_POSTFIELDS)
-          len = curlx_dyn_len(&config->postdata);
+        fetch_off_t len = ZERO_TERMINATED;
+        if(tag == FETCHOPT_POSTFIELDS)
+          len = fetchx_dyn_len(&config->postdata);
         escaped = c_escape(value, len);
         NULL_CHECK(escaped);
-        CODE2("curl_easy_setopt(hnd, %s, \"%s\");", name, escaped);
+        CODE2("fetch_easy_setopt(hnd, %s, \"%s\");", name, escaped);
       }
       else
-        CODE2("curl_easy_setopt(hnd, %s, %s);", name, value);
+        CODE2("fetch_easy_setopt(hnd, %s, %s);", name, value);
     }
   }
 
@@ -715,6 +715,6 @@ nomem:
   return ret;
 }
 
-#else /* CURL_DISABLE_LIBCURL_OPTION */
+#else /* FETCH_DISABLE_LIBFETCH_OPTION */
 
-#endif /* CURL_DISABLE_LIBCURL_OPTION */
+#endif /* FETCH_DISABLE_LIBFETCH_OPTION */

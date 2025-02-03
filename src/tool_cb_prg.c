@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
@@ -108,14 +108,14 @@ static void fly(struct ProgressData *bar, bool moved)
 }
 
 /*
-** callback for CURLOPT_XFERINFOFUNCTION
+** callback for FETCHOPT_XFERINFOFUNCTION
 */
 
-#if (SIZEOF_CURL_OFF_T < 8)
-#error "too small curl_off_t"
+#if (SIZEOF_FETCH_OFF_T < 8)
+#error "too small fetch_off_t"
 #else
-   /* assume SIZEOF_CURL_OFF_T == 8 */
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+   /* assume SIZEOF_FETCH_OFF_T == 8 */
+#  define FETCH_OFF_T_MAX FETCH_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
 
 static void update_width(struct ProgressData *bar)
@@ -130,15 +130,15 @@ static void update_width(struct ProgressData *bar)
 }
 
 int tool_progress_cb(void *clientp,
-                     curl_off_t dltotal, curl_off_t dlnow,
-                     curl_off_t ultotal, curl_off_t ulnow)
+                     fetch_off_t dltotal, fetch_off_t dlnow,
+                     fetch_off_t ultotal, fetch_off_t ulnow)
 {
   struct timeval now = tvnow();
   struct per_transfer *per = clientp;
   struct OperationConfig *config = per->config;
   struct ProgressData *bar = &per->progressbar;
-  curl_off_t total;
-  curl_off_t point;
+  fetch_off_t total;
+  fetch_off_t point;
 
   /* Calculate expected transfer size. initial_size can be less than zero when
      indicating that we are expecting to get the filesize from the remote */
@@ -146,10 +146,10 @@ int tool_progress_cb(void *clientp,
     if(dltotal || ultotal)
       total = dltotal + ultotal;
     else
-      total = CURL_OFF_T_MAX;
+      total = FETCH_OFF_T_MAX;
   }
-  else if((CURL_OFF_T_MAX - bar->initial_size) < (dltotal + ultotal))
-    total = CURL_OFF_T_MAX;
+  else if((FETCH_OFF_T_MAX - bar->initial_size) < (dltotal + ultotal))
+    total = FETCH_OFF_T_MAX;
   else
     total = dltotal + ultotal + bar->initial_size;
 
@@ -159,10 +159,10 @@ int tool_progress_cb(void *clientp,
     if(dltotal || ultotal)
       point = dlnow + ulnow;
     else
-      point = CURL_OFF_T_MAX;
+      point = FETCH_OFF_T_MAX;
   }
-  else if((CURL_OFF_T_MAX - bar->initial_size) < (dlnow + ulnow))
-    point = CURL_OFF_T_MAX;
+  else if((FETCH_OFF_T_MAX - bar->initial_size) < (dlnow + ulnow))
+    point = FETCH_OFF_T_MAX;
   else
     point = dlnow + ulnow + bar->initial_size;
 
@@ -226,7 +226,7 @@ int tool_progress_cb(void *clientp,
 
   if(config->readbusy) {
     config->readbusy = FALSE;
-    curl_easy_pause(per->curl, CURLPAUSE_CONT);
+    fetch_easy_pause(per->fetch, FETCHPAUSE_CONT);
   }
 
   return 0;

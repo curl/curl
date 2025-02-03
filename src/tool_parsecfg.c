@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
@@ -43,7 +43,7 @@
 static const char *unslashquote(const char *line, char *param);
 
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
-static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
+static bool my_get_line(FILE *fp, struct fetchx_dynbuf *, bool *error);
 
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
@@ -56,23 +56,23 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   char *pathalloc = NULL;
 
   if(!filename) {
-    /* NULL means load .curlrc from homedir! */
-    char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE);
-    if(curlrc) {
-      file = fopen(curlrc, FOPEN_READTEXT);
+    /* NULL means load .fetchrc from homedir! */
+    char *fetchrc = findfile(".fetchrc", FETCHRC_DOTSCORE);
+    if(fetchrc) {
+      file = fopen(fetchrc, FOPEN_READTEXT);
       if(!file) {
-        free(curlrc);
+        free(fetchrc);
         return 1;
       }
-      filename = pathalloc = curlrc;
+      filename = pathalloc = fetchrc;
     }
 #ifdef _WIN32 /* Windows */
     else {
       char *fullp;
-      /* check for .curlrc then _curlrc in the dir of the executable */
-      file = Curl_execpath(".curlrc", &fullp);
+      /* check for .fetchrc then _fetchrc in the dir of the executable */
+      file = Curl_execpath(".fetchrc", &fullp);
       if(!file)
-        file = Curl_execpath("_curlrc", &fullp);
+        file = Curl_execpath("_fetchrc", &fullp);
       if(file)
         /* this is the filename we read from */
         filename = fullp;
@@ -92,16 +92,16 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     char *param;
     int lineno = 0;
     bool dashed_option;
-    struct curlx_dynbuf buf;
+    struct fetchx_dynbuf buf;
     bool fileerror = FALSE;
-    curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
+    fetchx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
 
     while(!rc && my_get_line(file, &buf, &fileerror)) {
       ParameterError res;
       bool alloced_param = FALSE;
       lineno++;
-      line = curlx_dyn_ptr(&buf);
+      line = fetchx_dyn_ptr(&buf);
       if(!line) {
         rc = 1; /* out of memory */
         break;
@@ -118,7 +118,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       case '\n':
       case '*':
       case '\0':
-        curlx_dyn_reset(&buf);
+        fetchx_dyn_reset(&buf);
         continue;
       }
 
@@ -242,9 +242,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(alloced_param)
         Curl_safefree(param);
 
-      curlx_dyn_reset(&buf);
+      fetchx_dyn_reset(&buf);
     }
-    curlx_dyn_free(&buf);
+    fetchx_dyn_free(&buf);
     if(file != stdin)
       fclose(file);
     if(fileerror)
@@ -301,7 +301,7 @@ static const char *unslashquote(const char *line, char *param)
 /*
  * Reads a line from the given file, ensuring is NUL terminated.
  */
-static bool my_get_line(FILE *fp, struct curlx_dynbuf *db,
+static bool my_get_line(FILE *fp, struct fetchx_dynbuf *db,
                         bool *error)
 {
   char buf[4096];
@@ -311,8 +311,8 @@ static bool my_get_line(FILE *fp, struct curlx_dynbuf *db,
        occurs while no characters have been read. */
     if(!fgets(buf, sizeof(buf), fp))
       /* only if there is data in the line, return TRUE */
-      return curlx_dyn_len(db);
-    if(curlx_dyn_add(db, buf)) {
+      return fetchx_dyn_len(db);
+    if(fetchx_dyn_add(db, buf)) {
       *error = TRUE; /* error */
       return FALSE; /* stop reading */
     }

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_LIBINFO_H
-#define HEADER_CURL_TOOL_LIBINFO_H
+#ifndef HEADER_FETCH_TOOL_LIBINFO_H
+#define HEADER_FETCH_TOOL_LIBINFO_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,15 +20,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-/* global variable declarations, for libcurl runtime info */
+/* global variable declarations, for libfetch runtime info */
 
 
-extern curl_version_info_data *curlinfo;
+extern fetch_version_info_data *fetchinfo;
 
 extern const char * const *built_in_protos;
 extern size_t proto_count;
@@ -65,7 +65,7 @@ extern bool feature_zstd;
 extern bool feature_ech;
 extern bool feature_ssls_export;
 
-CURLcode get_libcurl_info(void);
+FETCHcode get_libfetch_info(void);
 const char *proto_token(const char *proto);
 
-#endif /* HEADER_CURL_TOOL_LIBINFO_H */
+#endif /* HEADER_FETCH_TOOL_LIBINFO_H */

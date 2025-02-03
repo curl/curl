@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -27,7 +27,7 @@
 #include <sys/select.h>
 #endif
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
@@ -39,7 +39,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /*
-** callback for CURLOPT_READFUNCTION
+** callback for FETCHOPT_READFUNCTION
 */
 
 size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
@@ -93,7 +93,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     if(errno == EAGAIN) {
       errno = 0;
       config->readbusy = TRUE;
-      return CURL_READFUNC_PAUSE;
+      return FETCH_READFUNC_PAUSE;
     }
     /* since size_t is unsigned we cannot return negative values fine */
     rc = 0;
@@ -101,9 +101,9 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   if((per->uploadfilesize != -1) &&
      (per->uploadedsofar + rc > per->uploadfilesize)) {
     /* do not allow uploading more than originally set out to do */
-    curl_off_t delta = per->uploadedsofar + rc - per->uploadfilesize;
+    fetch_off_t delta = per->uploadedsofar + rc - per->uploadfilesize;
     warnf(per->config->global, "File size larger in the end than when "
-          "started. Dropping at least %" CURL_FORMAT_CURL_OFF_T " bytes",
+          "started. Dropping at least %" FETCH_FORMAT_FETCH_OFF_T " bytes",
           delta);
     rc = (ssize_t)(per->uploadfilesize - per->uploadedsofar);
   }
@@ -114,12 +114,12 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 }
 
 /*
-** callback for CURLOPT_XFERINFOFUNCTION used to unpause busy reads
+** callback for FETCHOPT_XFERINFOFUNCTION used to unpause busy reads
 */
 
 int tool_readbusy_cb(void *clientp,
-                     curl_off_t dltotal, curl_off_t dlnow,
-                     curl_off_t ultotal, curl_off_t ulnow)
+                     fetch_off_t dltotal, fetch_off_t dlnow,
+                     fetch_off_t ultotal, fetch_off_t ulnow)
 {
   struct per_transfer *per = clientp;
   struct OperationConfig *config = per->config;
@@ -134,7 +134,7 @@ int tool_readbusy_cb(void *clientp,
        anything, get paused again and come back here immediately */
     static long rate = 500;
     static struct timeval prev;
-    static curl_off_t ulprev;
+    static fetch_off_t ulprev;
 
     if(ulprev == ulnow) {
       /* it did not upload anything since last call */
@@ -152,12 +152,12 @@ int tool_readbusy_cb(void *clientp,
     if(rate >= 50) {
       /* keeps the looping down to 20 times per second in the crazy case */
       config->readbusy = FALSE;
-      curl_easy_pause(per->curl, CURLPAUSE_CONT);
+      fetch_easy_pause(per->fetch, FETCHPAUSE_CONT);
     }
     else
       /* sleep half a period */
       tool_go_sleep(25);
   }
 
-  return per->noprogress ? 0 : CURL_PROGRESSFUNC_CONTINUE;
+  return per->noprogress ? 0 : FETCH_PROGRESSFUNC_CONTINUE;
 }

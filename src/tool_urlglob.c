@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include "fetchx.h"
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
@@ -35,7 +35,7 @@
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code
 
-static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
+static FETCHcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
 {
   struct URLPattern *pat = &glob->pattern[glob->size];
   pat->type = UPTSet;
@@ -46,25 +46,25 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
   pat->content.Set.elements = malloc(sizeof(char *));
 
   if(!pat->content.Set.elements)
-    return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
+    return GLOBERROR("out of memory", 0, FETCHE_OUT_OF_MEMORY);
 
   pat->content.Set.elements[0] = malloc(len + 1);
   if(!pat->content.Set.elements[0])
-    return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
+    return GLOBERROR("out of memory", 0, FETCHE_OUT_OF_MEMORY);
 
   memcpy(pat->content.Set.elements[0], fixed, len);
   pat->content.Set.elements[0][len] = 0;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 /* multiply
  *
  * Multiplies and checks for overflow.
  */
-static int multiply(curl_off_t *amount, curl_off_t with)
+static int multiply(fetch_off_t *amount, fetch_off_t with)
 {
-  curl_off_t sum;
+  fetch_off_t sum;
   DEBUGASSERT(*amount >= 0);
   DEBUGASSERT(with >= 0);
   if((with <= 0) || (*amount <= 0)) {
@@ -85,8 +85,8 @@ static int multiply(curl_off_t *amount, curl_off_t with)
   return 0;
 }
 
-static CURLcode glob_set(struct URLGlob *glob, char **patternp,
-                         size_t *posp, curl_off_t *amount,
+static FETCHcode glob_set(struct URLGlob *glob, char **patternp,
+                         size_t *posp, fetch_off_t *amount,
                          int globindex)
 {
   /* processes a set expression with the point behind the opening '{'
@@ -110,20 +110,20 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
   while(!done) {
     switch(*pattern) {
     case '\0':                  /* URL ended while set was still open */
-      return GLOBERROR("unmatched brace", opos, CURLE_URL_MALFORMAT);
+      return GLOBERROR("unmatched brace", opos, FETCHE_URL_MALFORMAT);
 
     case '{':
     case '[':                   /* no nested expressions at this time */
-      return GLOBERROR("nested brace", *posp, CURLE_URL_MALFORMAT);
+      return GLOBERROR("nested brace", *posp, FETCHE_URL_MALFORMAT);
 
     case '}':                           /* set element completed */
       if(opattern == pattern)
         return GLOBERROR("empty string within braces", *posp,
-                         CURLE_URL_MALFORMAT);
+                         FETCHE_URL_MALFORMAT);
 
       /* add 1 to size since it will be incremented below */
       if(multiply(amount, pat->content.Set.size + 1))
-        return GLOBERROR("range overflow", 0, CURLE_URL_MALFORMAT);
+        return GLOBERROR("range overflow", 0, FETCHE_URL_MALFORMAT);
 
       FALLTHROUGH();
     case ',':
@@ -134,7 +134,7 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
                                  (size_t)(pat->content.Set.size + 1) *
                                  sizeof(char *));
         if(!new_arr)
-          return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
+          return GLOBERROR("out of memory", 0, FETCHE_OUT_OF_MEMORY);
 
         pat->content.Set.elements = new_arr;
       }
@@ -142,12 +142,12 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
         pat->content.Set.elements = malloc(sizeof(char *));
 
       if(!pat->content.Set.elements)
-        return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
+        return GLOBERROR("out of memory", 0, FETCHE_OUT_OF_MEMORY);
 
       pat->content.Set.elements[pat->content.Set.size] =
         strdup(glob->glob_buffer);
       if(!pat->content.Set.elements[pat->content.Set.size])
-        return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
+        return GLOBERROR("out of memory", 0, FETCHE_OUT_OF_MEMORY);
       ++pat->content.Set.size;
 
       if(*pattern == '}') {
@@ -162,7 +162,7 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
       break;
 
     case ']':                           /* illegal closing bracket */
-      return GLOBERROR("unexpected close bracket", *posp, CURLE_URL_MALFORMAT);
+      return GLOBERROR("unexpected close bracket", *posp, FETCHE_URL_MALFORMAT);
 
     case '\\':                          /* escaped character, skip '\' */
       if(pattern[1]) {
@@ -177,11 +177,11 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
   }
 
   *patternp = pattern; /* return with the new position */
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-static CURLcode glob_range(struct URLGlob *glob, char **patternp,
-                           size_t *posp, curl_off_t *amount,
+static FETCHcode glob_range(struct URLGlob *glob, char **patternp,
+                           size_t *posp, fetch_off_t *amount,
                            int globindex)
 {
   /* processes a range expression with the point behind the opening '['
@@ -237,7 +237,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
        (min_c != max_c && (min_c > max_c || step > (unsigned)(max_c - min_c) ||
                            (max_c - min_c) > ('z' - 'a'))))
       /* the pattern is not well-formed */
-      return GLOBERROR("bad range", *posp, CURLE_URL_MALFORMAT);
+      return GLOBERROR("bad range", *posp, FETCHE_URL_MALFORMAT);
 
     /* if there was a ":[num]" thing, use that as step or else use 1 */
     pat->content.CharRange.step = (int)step;
@@ -247,7 +247,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
     if(multiply(amount, ((pat->content.CharRange.max_c -
                           pat->content.CharRange.min_c) /
                          pat->content.CharRange.step + 1)))
-      return GLOBERROR("range overflow", *posp, CURLE_URL_MALFORMAT);
+      return GLOBERROR("range overflow", *posp, FETCHE_URL_MALFORMAT);
   }
   else if(ISDIGIT(*pattern)) {
     /* numeric range detected */
@@ -314,7 +314,7 @@ fail:
        (min_n == max_n && step_n != 1) ||
        (min_n != max_n && (min_n > max_n || step_n > (max_n - min_n))))
       /* the pattern is not well-formed */
-      return GLOBERROR("bad range", *posp, CURLE_URL_MALFORMAT);
+      return GLOBERROR("bad range", *posp, FETCHE_URL_MALFORMAT);
 
     /* typecasting to ints are fine here since we make sure above that we
        are within 31 bits */
@@ -325,13 +325,13 @@ fail:
     if(multiply(amount, ((pat->content.NumRange.max_n -
                           pat->content.NumRange.min_n) /
                          pat->content.NumRange.step + 1)))
-      return GLOBERROR("range overflow", *posp, CURLE_URL_MALFORMAT);
+      return GLOBERROR("range overflow", *posp, FETCHE_URL_MALFORMAT);
   }
   else
-    return GLOBERROR("bad range specification", *posp, CURLE_URL_MALFORMAT);
+    return GLOBERROR("bad range specification", *posp, FETCHE_URL_MALFORMAT);
 
   *patternp = pattern;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 #define MAX_IP6LEN 128
@@ -344,10 +344,10 @@ static bool peek_ipv6(const char *str, size_t *skip)
    * - IPv6 literals contain no hyphens and >= 2 colons.
    */
   char hostname[MAX_IP6LEN];
-  CURLU *u;
+  FETCHU *u;
   char *endbr = strchr(str, ']');
   size_t hlen;
-  CURLUcode rc;
+  FETCHUcode rc;
   if(!endbr)
     return FALSE;
 
@@ -355,7 +355,7 @@ static bool peek_ipv6(const char *str, size_t *skip)
   if(hlen >= MAX_IP6LEN)
     return FALSE;
 
-  u = curl_url();
+  u = fetch_url();
   if(!u)
     return FALSE;
 
@@ -363,21 +363,21 @@ static bool peek_ipv6(const char *str, size_t *skip)
   hostname[hlen] = 0;
 
   /* ask to "guess scheme" as then it works without an https:// prefix */
-  rc = curl_url_set(u, CURLUPART_URL, hostname, CURLU_GUESS_SCHEME);
+  rc = fetch_url_set(u, FETCHUPART_URL, hostname, FETCHU_GUESS_SCHEME);
 
-  curl_url_cleanup(u);
+  fetch_url_cleanup(u);
   if(!rc)
     *skip = hlen;
   return rc ? FALSE : TRUE;
 }
 
-static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
-                           size_t pos, curl_off_t *amount)
+static FETCHcode glob_parse(struct URLGlob *glob, char *pattern,
+                           size_t pos, fetch_off_t *amount)
 {
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
    */
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
   int globindex = 0; /* count "actual" globs */
 
   *amount = 1;
@@ -402,7 +402,7 @@ static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
       }
       if(*pattern == '}' || *pattern == ']')
         return GLOBERROR("unmatched close brace/bracket", pos,
-                         CURLE_URL_MALFORMAT);
+                         FETCHE_URL_MALFORMAT);
 
       /* only allow \ to escape known "special letters" */
       if(*pattern == '\\' &&
@@ -444,12 +444,12 @@ static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
     }
 
     if(++glob->size >= GLOB_PATTERN_NUM)
-      return GLOBERROR("too many globs", pos, CURLE_URL_MALFORMAT);
+      return GLOBERROR("too many globs", pos, FETCHE_URL_MALFORMAT);
   }
   return res;
 }
 
-CURLcode glob_url(struct URLGlob **glob, char *url, curl_off_t *urlnum,
+FETCHcode glob_url(struct URLGlob **glob, char *url, fetch_off_t *urlnum,
                   FILE *error)
 {
   /*
@@ -457,21 +457,21 @@ CURLcode glob_url(struct URLGlob **glob, char *url, curl_off_t *urlnum,
    * as the specified URL!
    */
   struct URLGlob *glob_expand;
-  curl_off_t amount = 0;
+  fetch_off_t amount = 0;
   char *glob_buffer;
-  CURLcode res;
+  FETCHcode res;
 
   *glob = NULL;
 
   glob_buffer = malloc(strlen(url) + 1);
   if(!glob_buffer)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   glob_buffer[0] = 0;
 
   glob_expand = calloc(1, sizeof(struct URLGlob));
   if(!glob_expand) {
     Curl_safefree(glob_buffer);
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
   }
   glob_expand->urllen = strlen(url);
   glob_expand->glob_buffer = glob_buffer;
@@ -493,7 +493,7 @@ CURLcode glob_url(struct URLGlob **glob, char *url, curl_off_t *urlnum,
         t = glob_expand->error;
 
       /* send error description to the error-stream */
-      fprintf(error, "curl: (%d) %s\n", res, t);
+      fprintf(error, "fetch: (%d) %s\n", res, t);
     }
     /* it failed, we cleanup */
     glob_cleanup(&glob_expand);
@@ -502,13 +502,13 @@ CURLcode glob_url(struct URLGlob **glob, char *url, curl_off_t *urlnum,
   }
 
   *glob = glob_expand;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 void glob_cleanup(struct URLGlob **globp)
 {
   size_t i;
-  curl_off_t elem;
+  fetch_off_t elem;
   struct URLGlob *glob = *globp;
 
   if(!glob)
@@ -530,7 +530,7 @@ void glob_cleanup(struct URLGlob **globp)
   *globp = NULL;
 }
 
-CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
+FETCHcode glob_next_url(char **globbed, struct URLGlob *glob)
 {
   struct URLPattern *pat;
   size_t i;
@@ -576,11 +576,11 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
         break;
       default:
         printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
-        return CURLE_FAILED_INIT;
+        return FETCHE_FAILED_INIT;
       }
     }
     if(carry) {         /* first pattern ptr has run into overflow, done! */
-      return CURLE_OK;
+      return FETCHE_OK;
     }
   }
 
@@ -604,7 +604,7 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
       }
       break;
     case UPTNumRange:
-      msnprintf(buf, buflen, "%0*" CURL_FORMAT_CURL_OFF_T,
+      msnprintf(buf, buflen, "%0*" FETCH_FORMAT_FETCH_OFF_T,
                 pat->content.NumRange.padlength,
                 pat->content.NumRange.ptr_n);
       len = strlen(buf);
@@ -613,32 +613,32 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
       break;
     default:
       printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
-      return CURLE_FAILED_INIT;
+      return FETCHE_FAILED_INIT;
     }
   }
 
   *globbed = strdup(glob->glob_buffer);
   if(!*globbed)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 #define MAX_OUTPUT_GLOB_LENGTH (10*1024)
 
-CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
+FETCHcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
 {
   char numbuf[18];
   char *appendthis = (char *)"";
   size_t appendlen = 0;
-  struct curlx_dynbuf dyn;
+  struct fetchx_dynbuf dyn;
 
   *result = NULL;
 
   /* We cannot use the glob_buffer for storage since the filename may be
    * longer than the URL we use.
    */
-  curlx_dyn_init(&dyn, MAX_OUTPUT_GLOB_LENGTH);
+  fetchx_dyn_init(&dyn, MAX_OUTPUT_GLOB_LENGTH);
 
   while(*filename) {
     if(*filename == '#' && ISDIGIT(filename[1])) {
@@ -674,7 +674,7 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
           appendlen = 1;
           break;
         case UPTNumRange:
-          msnprintf(numbuf, sizeof(numbuf), "%0*" CURL_FORMAT_CURL_OFF_T,
+          msnprintf(numbuf, sizeof(numbuf), "%0*" FETCH_FORMAT_FETCH_OFF_T,
                     pat->content.NumRange.padlength,
                     pat->content.NumRange.ptr_n);
           appendthis = numbuf;
@@ -683,8 +683,8 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
         default:
           fprintf(tool_stderr, "internal error: invalid pattern type (%d)\n",
                   (int)pat->type);
-          curlx_dyn_free(&dyn);
-          return CURLE_FAILED_INIT;
+          fetchx_dyn_free(&dyn);
+          return FETCHE_FAILED_INIT;
         }
       }
       else {
@@ -698,27 +698,27 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
       appendthis = filename++;
       appendlen = 1;
     }
-    if(curlx_dyn_addn(&dyn, appendthis, appendlen))
-      return CURLE_OUT_OF_MEMORY;
+    if(fetchx_dyn_addn(&dyn, appendthis, appendlen))
+      return FETCHE_OUT_OF_MEMORY;
   }
 
-  if(curlx_dyn_addn(&dyn, "", 0))
-    return CURLE_OUT_OF_MEMORY;
+  if(fetchx_dyn_addn(&dyn, "", 0))
+    return FETCHE_OUT_OF_MEMORY;
 
 #if defined(_WIN32) || defined(MSDOS)
   {
     char *sanitized;
-    SANITIZEcode sc = sanitize_file_name(&sanitized, curlx_dyn_ptr(&dyn),
+    SANITIZEcode sc = sanitize_file_name(&sanitized, fetchx_dyn_ptr(&dyn),
                                          (SANITIZE_ALLOW_PATH |
                                           SANITIZE_ALLOW_RESERVED));
-    curlx_dyn_free(&dyn);
+    fetchx_dyn_free(&dyn);
     if(sc)
-      return CURLE_URL_MALFORMAT;
+      return FETCHE_URL_MALFORMAT;
     *result = sanitized;
-    return CURLE_OK;
+    return FETCHE_OK;
   }
 #else
-  *result = curlx_dyn_ptr(&dyn);
-  return CURLE_OK;
+  *result = fetchx_dyn_ptr(&dyn);
+  return FETCHE_OK;
 #endif /* _WIN32 || MSDOS */
 }

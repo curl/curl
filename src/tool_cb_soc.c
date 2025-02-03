@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -30,14 +30,14 @@
 #include "tool_cb_soc.h"
 
 /*
-** callback for CURLOPT_OPENSOCKETFUNCTION
+** callback for FETCHOPT_OPENSOCKETFUNCTION
 **
 ** Notice that only Linux is supported for the moment.
 */
 
-curl_socket_t tool_socket_open_mptcp_cb(void *clientp,
-                                        curlsocktype purpose,
-                                        struct curl_sockaddr *addr)
+fetch_socket_t tool_socket_open_mptcp_cb(void *clientp,
+                                        fetchsocktype purpose,
+                                        struct fetch_sockaddr *addr)
 {
   int protocol = addr->protocol;
 
@@ -51,7 +51,7 @@ curl_socket_t tool_socket_open_mptcp_cb(void *clientp,
 #  endif
     protocol = IPPROTO_MPTCP;
 #else
-    return CURL_SOCKET_BAD;
+    return FETCH_SOCKET_BAD;
 #endif
 
   return socket(addr->family, addr->socktype, protocol);

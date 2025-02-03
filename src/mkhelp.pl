@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -148,7 +148,7 @@ void hugehelp(void)
   }
   inflateEnd(&z);
 }
-/* Show the help text for the 'arg' curl argument on stdout */
+/* Show the help text for the 'arg' fetch argument on stdout */
 void showhelp(const char *trigger, const char *arg, const char *endarg)
 {
   unsigned char *buf;
@@ -197,7 +197,7 @@ exit;
 }
 else {
     print <<HEAD
-static const char * const curlman[] = {
+static const char * const fetchman[] = {
 HEAD
         ;
 }
@@ -225,19 +225,19 @@ print <<ENDLINE
 void hugehelp(void)
 {
   int i = 0;
-  while(curlman[i])
-    puts(curlman[i++]);
+  while(fetchman[i])
+    puts(fetchman[i++]);
 }
 
-/* Show the help text for the 'arg' curl argument on stdout */
+/* Show the help text for the 'arg' fetch argument on stdout */
 void showhelp(const char *trigger, const char *arg, const char *endarg)
 {
   int i = 0;
   struct scan_ctx ctx;
   inithelpscan(&ctx, trigger, arg, endarg);
-  while(curlman[i]) {
-    size_t len = strlen(curlman[i]);
-    if(!helpscan((unsigned char *)curlman[i], len, &ctx) ||
+  while(fetchman[i]) {
+    size_t len = strlen(fetchman[i]);
+    if(!helpscan((unsigned char *)fetchman[i], len, &ctx) ||
        !helpscan((unsigned char *)"\\n", 1, &ctx))
       break;
     i++;

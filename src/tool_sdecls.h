@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_SDECLS_H
-#define HEADER_CURL_TOOL_SDECLS_H
+#ifndef HEADER_FETCH_TOOL_SDECLS_H
+#define HEADER_FETCH_TOOL_SDECLS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
 
 /*
- * OutStruct variables keep track of information relative to curl's
+ * OutStruct variables keep track of information relative to fetch's
  * output writing, which may take place to a standard stream or a file.
  *
  * 'filename' member is either a pointer to a filename string or NULL
@@ -69,8 +69,8 @@ struct OutStruct {
   bool s_isreg;
   bool fopened;
   FILE *stream;
-  curl_off_t bytes;
-  curl_off_t init;
+  fetch_off_t bytes;
+  fetch_off_t init;
 #ifdef _WIN32
   unsigned char utf8seq[5];
 #endif
@@ -98,7 +98,7 @@ struct getout {
 #define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
 
 /*
- * 'trace' enumeration represents curl's output look'n feel possibilities.
+ * 'trace' enumeration represents fetch's output look'n feel possibilities.
  */
 
 typedef enum {
@@ -130,4 +130,4 @@ typedef enum {
 
 #include "tool_cfgable.h"
 
-#endif /* HEADER_CURL_TOOL_SDECLS_H */
+#endif /* HEADER_FETCH_TOOL_SDECLS_H */
