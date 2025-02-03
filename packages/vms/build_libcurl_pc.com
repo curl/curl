@@ -1,6 +1,6 @@
-$! File: build_libcurl_pc.com
+$! File: build_libfetch_pc.com
 $!
-$! Build the libcurl.pc file from the libcurl.pc.in file
+$! Build the libfetch.pc file from the libfetch.pc.in file
 $!
 $! Copyright (C) John Malmberg
 $!
@@ -20,14 +20,14 @@ $! SPDX-License-Identifier: ISC
 $!
 $!===========================================================================
 $!
-$! Skip this if the libcurl.pc already exists.
-$ if f$search("[--]libcurl.pc") .nes. "" then goto all_exit
+$! Skip this if the libfetch.pc already exists.
+$ if f$search("[--]libfetch.pc") .nes. "" then goto all_exit
 $!
 $! Need to know the kit type.
 $ kit_name = f$trnlnm("GNV_PCSI_KITNAME")
 $ if kit_name .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $!
@@ -46,17 +46,17 @@ $!
 $! kit type of "D" means a daily build
 $ kit_type = f$edit(f$extract(0, 1, majorver), "upcase")
 $!
-$ pc_file_in = "[--]libcurl^.pc.in"
+$ pc_file_in = "[--]libfetch^.pc.in"
 $!
 $ if f$search(pc_file_in) .eqs. ""
 $ then
-$    pc_file_in = "[--]libcurl.pc$5nin"
+$    pc_file_in = "[--]libfetch.pc$5nin"
 $    if f$search(pc_file_in) .eqs. ""
 $    then
-$        pc_file_in = "[--]libcurl.pc_in"
+$        pc_file_in = "[--]libfetch.pc_in"
 $        if f$search(pc_file_in) .eqs. ""
 $        then
-$            write sys$output "Can not find libcurl.pc.in."
+$            write sys$output "Can not find libfetch.pc.in."
 $            goto all_exit
 $        endif
 $    endif
@@ -72,7 +72,7 @@ $    if (arch_name .eqs. "") then arch_name = "UNK"
 $ endif
 $!
 $!
-$ curl_version = "0.0.0"
+$ fetch_version = "0.0.0"
 $ open/read vf [--.src]tool_version.h
 $version_loop:
 $   read vf/end=version_loop_end line_in
@@ -82,7 +82,7 @@ $   if key .nes. "#define" then goto version_loop
 $   name = f$element(1, " ", line_in)
 $   if name .eqs. "VERSION"
 $   then
-$       curl_version = f$element(2, " ", line_in) - """" - """"
+$       fetch_version = f$element(2, " ", line_in) - """" - """"
 $   else
 $       goto version_loop
 $   endif
@@ -90,8 +90,8 @@ $version_loop_end:
 $ close vf
 $!
 $!
-$ create [--]libcurl.pc
-$ open/append pco [--]libcurl.pc
+$ create [--]libfetch.pc
+$ open/append pco [--]libfetch.pc
 $ open/read pci 'pc_file_in'
 $pc_file_loop:
 $ read pci/end=pc_file_loop_end line_in
@@ -173,12 +173,12 @@ $        write pco "supported_features=""SSL IPv6 libz NTLM"""
 $    endif
 $    goto pc_file_loop
 $ endif
-$ if f$locate("@CURLVERSION@", line_in) .lt line_in_len
+$ if f$locate("@FETCHVERSION@", line_in) .lt line_in_len
 $ then
-$    write pco "Version: ''curl_version'"
+$    write pco "Version: ''fetch_version'"
 $    goto pc_file_loop
 $ endif
-$ if f$locate("@LIBCURL_PC_LIBS_PRIVATE@", line_in) .lt line_in_len
+$ if f$locate("@LIBFETCH_PC_LIBS_PRIVATE@", line_in) .lt line_in_len
 $ then
 $    if arch_name .eqs. "VAX"
 $    then
@@ -188,9 +188,9 @@ $        write pco "Libs.private: -lssl -lcrypto -lgssapi -lz"
 $    endif
 $    goto pc_file_loop
 $ endif
-$ if f$locate("@LIBCURL_PC_CFLAGS@", line_in) .lt line_in_len
+$ if f$locate("@LIBFETCH_PC_CFLAGS@", line_in) .lt line_in_len
 $ then
-$    write pco "Cflags: -I${includedir} -DCURL_STATICLIB"
+$    write pco "Cflags: -I${includedir} -DFETCH_STATICLIB"
 $    goto pc_file_loop
 $ endif
 $!

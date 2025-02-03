@@ -1,7 +1,7 @@
-$! File: Build_GNV_curl_release_notes.com
+$! File: Build_GNV_fetch_release_notes.com
 $!
 $! Build the release note file from the four components:
-$!    1. The curl_release_note_start.txt
+$!    1. The fetch_release_note_start.txt
 $!    2. The hp_ssl_release_info.txt
 $!    3. [--]readme. file from the Curl distribution.
 $!    4. The Curl_gnv-build_steps.txt.
@@ -30,28 +30,28 @@ $!
 $ base_file = f$trnlnm("GNV_PCSI_FILENAME_BASE")
 $ if base_file .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $!
 $!
-$ curl_readme = f$search("sys$disk:[--]readme.")
-$ if curl_readme .eqs. ""
+$ fetch_readme = f$search("sys$disk:[--]readme.")
+$ if fetch_readme .eqs. ""
 $ then
-$   curl_readme = f$search("sys$disk:[--]$README.")
+$   fetch_readme = f$search("sys$disk:[--]$README.")
 $ endif
-$ if curl_readme .eqs. ""
+$ if fetch_readme .eqs. ""
 $ then
 $    write sys$output "Can not find Curl readme file."
 $    goto all_exit
 $ endif
 $!
-$ curl_copying = f$search("sys$disk:[--]copying.")
-$ if curl_copying .eqs. ""
+$ fetch_copying = f$search("sys$disk:[--]copying.")
+$ if fetch_copying .eqs. ""
 $ then
-$   curl_copying = f$search("sys$disk:[--]$COPYING.")
+$   fetch_copying = f$search("sys$disk:[--]$COPYING.")
 $ endif
-$ if curl_copying .eqs. ""
+$ if fetch_copying .eqs. ""
 $ then
 $    write sys$output "Can not find Curl copying file."
 $    goto all_exit
@@ -68,12 +68,12 @@ $   write sys$output "Can not find VMS specific Curl readme file."
 $   goto all_exit
 $ endif
 $!
-$ curl_release_notes = f$search("sys$disk:[--]release-notes.")
-$ if curl_release_notes .eqs. ""
+$ fetch_release_notes = f$search("sys$disk:[--]release-notes.")
+$ if fetch_release_notes .eqs. ""
 $ then
-$   curl_release_notes = f$search("sys$disk:[--]$RELEASE-NOTES.")
+$   fetch_release_notes = f$search("sys$disk:[--]$RELEASE-NOTES.")
 $ endif
-$ if curl_release_notes .eqs. ""
+$ if fetch_release_notes .eqs. ""
 $ then
 $    write sys$output "Can not find Curl release-notes file."
 $    goto all_exit
@@ -81,16 +81,16 @@ $ endif
 $!
 $ if f$search("sys$disk:[]hp_ssl_release_info.txt") .eqs. ""
 $ then
-$   write sys$output "GNV_LINK_CURL.COM has not been run!"
+$   write sys$output "GNV_LINK_FETCH.COM has not been run!"
 $   goto all_exit
 $ endif
 $!
-$ type/noheader 'curl_readme', 'vms_readme', -
-                'curl_release_notes', -
-                sys$disk:[]curl_release_note_start.txt, -
+$ type/noheader 'fetch_readme', 'vms_readme', -
+                'fetch_release_notes', -
+                sys$disk:[]fetch_release_note_start.txt, -
                 sys$disk:[]hp_ssl_release_info.txt, -
-                'curl_copying', -
-                sys$disk:[]curl_gnv_build_steps.txt -
+                'fetch_copying', -
+                sys$disk:[]fetch_gnv_build_steps.txt -
                 /out='base_file'.release_notes
 $!
 $ purge 'base_file'.release_notes

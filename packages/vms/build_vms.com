@@ -20,9 +20,9 @@ $!
 $!    64        Compile with 64-bit pointers.
 $!              Note, you must match the pointer size that the OpenSSL
 $!              shared image expects.
-$!              Currently curl is not building properly with 64-bit pointers
+$!              Currently fetch is not building properly with 64-bit pointers
 $!              on VMS because it is trying to cast pointers to 32-bit
-$!              integers and some OpenVMS library routines called by curl
+$!              integers and some OpenVMS library routines called by fetch
 $!              do not yet support 64-bit pointers.
 $!    CCQUAL=x  Add "x" to the C compiler qualifiers.
 $!              Default qualifiers are:
@@ -58,7 +58,7 @@ $!              build done.)  Alias for CLEAN_ALL
 $!
 $! DCL Symbols:
 $!
-$!    CURL_CCDEFS="c_macro_1=value1 [, c_macro_2=value2 [...]]"
+$!    FETCH_CCDEFS="c_macro_1=value1 [, c_macro_2=value2 [...]]"
 $!              Compile with these additional C macros defined.
 $!
 $! Revisions:
@@ -70,8 +70,8 @@ $!                   and updated it to do hardware dependent builds.
 $! 29-JAN-2004, MSK, moved logical defines into defines.com
 $!  6-FEB-2004, MSK, put in various SSL support bits
 $!  9-MAR-2004, MSK, the config-vms.h* files are now copied to the lib and
-$!                   src directories as curl_config.h.
-$! 15-MAR-2004, MSK, All of the curlmsg*.* files have also been moved to
+$!                   src directories as fetch_config.h.
+$! 15-MAR-2004, MSK, All of the fetchmsg*.* files have also been moved to
 $!                   this build directory.  They will be copied to the src
 $!                   directory before build.  The .msg file will be compiled
 $!                   to get the .obj for messages, but the .h and .sdl files
@@ -86,7 +86,7 @@ $! 25-APR-2007, STL, allow compilation in 64-bit mode.
 $! 13-DEC-2009. SMS, Changed to skip unwanted source files without
 $!                   renaming the original files.
 $!                   Eliminated needless, persistent logical names.
-$!                   Added CURL_CCDEFS DCL symbol for user-specified C
+$!                   Added FETCH_CCDEFS DCL symbol for user-specified C
 $!                   macro definitions.
 $!                   Added CLEAN and CLEAN_ALL options.
 $!                   Added CCQUAL option for user-specified C compiler
@@ -124,18 +124,18 @@ $!                   KERBEROS support where available.
 $!                   LDAP default to on where available
 $!                   LARGEFILE default to on where available
 $!                   IEEE float default to on where available.
-$!                   Generate the curl_config.h file from system inspection.
+$!                   Generate the fetch_config.h file from system inspection.
 $!                   Linker finds ldap with out option file.
 $! 13-Mar-2013, Tom Grace
 $!                   Added missing slash in cc_full_list.
 $!                   Removed unwanted extra quotes inside symbol tool_main
 $!                   for non-VAX architectures that triggered link failure.
-$!                   Replaced curl_sys_inc with sys_inc.
+$!                   Replaced fetch_sys_inc with sys_inc.
 $! 19-Mar-2013, John Malmberg
 $!                   symbol tool_main needs to be quoted when parse style is
 $!                   set to extended in versions of VMS greater than 7.3-1.
-$!                   Remove curlbuild.h generation as it should be pre-built
-$!                   in the curl release or daily tarball.
+$!                   Remove fetchbuild.h generation as it should be pre-built
+$!                   in the fetch release or daily tarball.
 $! 12-Jul-2013, John Malmberg
 $!                   Adjust to find and use ZLIB from the Jean-Francois
 $!                   Pieronne shared image and newer GNV ZLIB kit that
@@ -158,7 +158,7 @@ $!
 $! Save the original default dev:[dir], and arrange for its restoration
 $! at exit.
 $!------------------------------------------------------------------------
-$ curl = ""
+$ fetch = ""
 $ orig_def = f$environment("DEFAULT")
 $ on error then goto Common_Exit
 $ on control_y then goto Common_Exit
@@ -296,10 +296,10 @@ $    cc_large = ",_LARGEFILE"
 $ endif
 $ cc_qual1 = ""
 $ cc_qual2 = ""
-$ if (f$type(CURL_CCDEFS) .nes. "")
+$ if (f$type(FETCH_CCDEFS) .nes. "")
 $ then
-$    CURL_CCDEFS = f$edit(CURL_CCDEFS, "TRIM")
-$    cc_defs = cc_defs + ", " + CURL_CCDEFS
+$    FETCH_CCDEFS = f$edit(FETCH_CCDEFS, "TRIM")
+$    cc_defs = cc_defs + ", " + FETCH_CCDEFS
 $ endif
 $ msg_qual = "/object = ''objdir'"
 $ ssl_opt = ""
@@ -343,9 +343,9 @@ $   file = "[]config_vms.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[]config.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[]curl-config."
+$   file = "[]fetch-config."
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[]libcurl.pc"
+$   file = "[]libfetch.pc"
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[.lib.cxx_repository]cxx$demangler_db."
 $   if f$search(file) .nes. "" then delete/log 'file';*
@@ -353,14 +353,14 @@ $   file = "[.src.cxx_repository]cxx$demangler_db."
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[.lib]config_vms.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]curl_crtl_init"
+$   file = "[...]fetch_crtl_init"
 $   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
 $   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
-$   file = "[...]gnv$curlmsg"
+$   file = "[...]gnv$fetchmsg"
 $   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
 $   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
 $   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
-$   file = "[...]curlmsg"
+$   file = "[...]fetchmsg"
 $   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
 $   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
 $   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
@@ -370,31 +370,31 @@ $   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
 $   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
 $   file = "[...]hp_ssl_release_info.txt"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]gnv_libcurl_xfer.mar_exact"
+$   file = "[...]gnv_libfetch_xfer.mar_exact"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]gnv_libcurl_xfer"
+$   file = "[...]gnv_libfetch_xfer"
 $   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
 $   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
 $   if f$search("''file'.opt") .nes. "" then delete/log 'file'.opt;*
-$   file = "[...]curl-*_original_src.bck"
+$   file = "[...]fetch-*_original_src.bck"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]curl_d-*_original_src.bck"
+$   file = "[...]fetch_d-*_original_src.bck"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]curl-*_vms_src.bck"
+$   file = "[...]fetch-*_vms_src.bck"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]curl_d-*_vms_src.bck"
+$   file = "[...]fetch_d-*_vms_src.bck"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]curl-*.release_notes"
+$   file = "[...]fetch-*.release_notes"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]curl_d-*.release_notes"
+$   file = "[...]fetch_d-*.release_notes"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]*curl*.pcsi$desc"
+$   file = "[...]*fetch*.pcsi$desc"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]*curl_d*.pcsi$desc"
+$   file = "[...]*fetch_d*.pcsi$desc"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]*curl*.pcsi$text"
+$   file = "[...]*fetch*.pcsi$text"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$   file = "[...]*curl_d*.pcsi$text"
+$   file = "[...]*fetch_d*.pcsi$text"
 $   if f$search(file) .nes. "" then delete/log 'file';*
 $!
 $   if clean_all .eq. 0 then goto Common_Exit
@@ -403,11 +403,11 @@ $!
 $!
 $ if clean_all .ne. 0
 $ then
-$   file = "[...]gnv$libcurl"
+$   file = "[...]gnv$libfetch"
 $   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
 $   if f$search("''file'.map") .nes. "" then delete/log 'file'.map;*
 $   if f$search("''file'.dsf") .nes. "" then delete/log 'file'.dsf;*
-$   file = "[.src]curl"
+$   file = "[.src]fetch"
 $   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
 $   if f$search("''file'.map") .nes. "" then delete/log 'file'.map;*
 $   if f$search("''file'.dsf") .nes. "" then delete/log 'file'.dsf;*
@@ -455,7 +455,7 @@ $   cc_debug = "/debug/nooptimize"
 $ endif
 $!
 $! We normally want IEEE float if it is available.  Programs that are
-$! calling libcurl will typically prefer IEEE behavior, unless on the
+$! calling libfetch will typically prefer IEEE behavior, unless on the
 $! VAX where we have no choice.
 $!
 $ if f$locate(",noieee,", args_lower) .lt. args_lower_len
@@ -612,9 +612,9 @@ $   ldap = 0
 $ endif
 $ if (ldap .eq. 0)
 $ then
-$!   cc_defs = cc_defs + ", CURL_DISABLE_LDAP=1"
+$!   cc_defs = cc_defs + ", FETCH_DISABLE_LDAP=1"
 $ else
-$   'vo_c' "%CURL-I-BLDHPLDAP, building with HP LDAP support"
+$   'vo_c' "%FETCH-I-BLDHPLDAP, building with HP LDAP support"
 $ endif
 $!
 $! KERBEROS
@@ -624,11 +624,11 @@ $ if f$search("''try_shr'.exe") .eqs. ""
 $ then
 $   nokerberos = 1
 $ endif
-$ curl_sys_krbinc = ""
+$ fetch_sys_krbinc = ""
 $ if nokerberos .eq. 0
 $ then
-$   'vo_c' "%CURL-I-BLDHPKERBEROS, building with HP KERBEROS support"
-$   curl_sys_krbinc = "sys$sysroot:[kerberos.include]"
+$   'vo_c' "%FETCH-I-BLDHPKERBEROS, building with HP KERBEROS support"
+$   fetch_sys_krbinc = "sys$sysroot:[kerberos.include]"
 $   gssrtlshr_line = "''try_shr'/share"
 $ endif
 $!
@@ -662,17 +662,17 @@ $ if f$search(try_shr) .eqs. ""
 $ then
 $   nozlib = 1
 $ endif
-$ curl_sys_zlibinc = ""
+$ fetch_sys_zlibinc = ""
 $ if nozlib .eq. 0
 $ then
 $   libzshr_line = "''try_shr'/share"
 $   if f$locate("LIBZ", try_shr) .eq. 0
 $   then
-$       'vo_c' "%CURL-I-BLDJFPLIBZ, building with JFP LIBZ support"
-$       curl_sys_zlibinc = "LIBZ:"
+$       'vo_c' "%FETCH-I-BLDJFPLIBZ, building with JFP LIBZ support"
+$       fetch_sys_zlibinc = "LIBZ:"
 $   else
-$       'vo_c' "%CURL-I-BLDGNVLIBZ, building with GNV LIBZ support"
-$       curl_sys_zlibinc = "GNV$ZLIB_INCLUDE:"
+$       'vo_c' "%FETCH-I-BLDGNVLIBZ, building with GNV LIBZ support"
+$       fetch_sys_zlibinc = "GNV$ZLIB_INCLUDE:"
 $   endif
 $ endif
 $!
@@ -691,20 +691,20 @@ $! Inform the victim of our plans.
 $!
 $ if (hpssl)
 $ then
-$    'vo_c' "%CURL-I-BLDHPSSL, building with HP SSL support"
+$    'vo_c' "%FETCH-I-BLDHPSSL, building with HP SSL support"
 $ else
 $    if (openssl .ne. 0)
 $    then
 $       if (openssl .eq. 1)
 $       then
 $          'vo_c' -
- "%CURL-I-BLDOSSL_OLB, building with OpenSSL (object library) support"
+ "%FETCH-I-BLDOSSL_OLB, building with OpenSSL (object library) support"
 $       else
 $          'vo_c' -
- "%CURL-I-BLDOSSL_EXE, building with OpenSSL (shared image) support"
+ "%FETCH-I-BLDOSSL_EXE, building with OpenSSL (shared image) support"
 $       endif
 $    else
-$       'vo_c' "%CURL-I-BLDNOSSL, building with NO SSL support"
+$       'vo_c' "%FETCH-I-BLDNOSSL, building with NO SSL support"
 $    endif
 $ endif
 $!
@@ -751,31 +751,31 @@ $       goto Common_Exit
 $   endif
 $ endif
 $!
-$! Define the "curl" (process) logical name for "#include <curl/xxx.h>".
+$! Define the "fetch" (process) logical name for "#include <fetch/xxx.h>".
 $!
-$ curl = f$trnlnm("curl", "LNM$PROCESS")
-$ if (curl .nes. "")
+$ fetch = f$trnlnm("fetch", "LNM$PROCESS")
+$ if (fetch .nes. "")
 $ then
 $   write sys$output ""
 $   write sys$output -
- "Process logical name ""curl"" is already defined, but this procedure"
+ "Process logical name ""fetch"" is already defined, but this procedure"
 $   write sys$output -
  "would override that definition.  Use a command like"
 $   write sys$output -
- "      deassign /process curl"
+ "      deassign /process fetch"
 $   write sys$output -
  "to cancel that logical name definition, and then and re-run this procedure."
 $   write sys$output ""
 $   goto Common_Exit
 $ endif
-$ curl_logical = top_dev_dir + ".include.curl" + delim
-$ curl_sys_inc2 = curl_logical
-$ curl_sys_inc1 = top_dev_dir + ".include" + delim
-$! define curl 'top_dev_dir'.include.curl'delim'
+$ fetch_logical = top_dev_dir + ".include.fetch" + delim
+$ fetch_sys_inc2 = fetch_logical
+$ fetch_sys_inc1 = top_dev_dir + ".include" + delim
+$! define fetch 'top_dev_dir'.include.fetch'delim'
 $!
 $! Generate config file into the product directory.
 $!
-$! call MoveIfDiff [.lib]config-vms.h 'objdir'curl_config.h
+$! call MoveIfDiff [.lib]config-vms.h 'objdir'fetch_config.h
 $!
 $ conf_params = ""
 $ if nossl .ne. 0 then conf_params = conf_params + ",nossl"
@@ -786,22 +786,22 @@ $ if nokerberos .ne. 0 then conf_params = conf_params + ",nokerberos"
 $ conf_params = conf_params - ","
 $!
 $!
-$ new_conf = f$search("''objdir'curl_config.h")
+$ new_conf = f$search("''objdir'fetch_config.h")
 $ if new_conf .eqs. ""
 $ then
 $!   set ver
-$   write sys$output "Generating curl custom config_vms.h"
-$   @'proc_dev_dir'generate_config_vms_h_curl.com ''conf_params'
+$   write sys$output "Generating fetch custom config_vms.h"
+$   @'proc_dev_dir'generate_config_vms_h_fetch.com ''conf_params'
 $!
-$   write sys$output "Generating curl_config.h"
-$   conf_in = f$search("[.lib]curl_config*.*in")
+$   write sys$output "Generating fetch_config.h"
+$   conf_in = f$search("[.lib]fetch_config*.*in")
 $   if conf_in .eqs. ""
 $   then
-$       write sys$output "Can not find [.lib]curl_config*.*in file!"
+$       write sys$output "Can not find [.lib]fetch_config*.*in file!"
 $       goto common_exit
 $   endif
 $   @'proc_dev_dir'config_h.com 'conf_in'
-$   copy config.h 'objdir'curl_config.h
+$   copy config.h 'objdir'fetch_config.h
 $   delete config.h;
 $!   set nover
 $ endif
@@ -810,31 +810,31 @@ $!
 $ on control_y then goto Common_Exit
 $!
 $ set default 'proc_dev_dir'
-$ sys_inc = "''curl_sys_inc1', ''curl_sys_inc2', ''curl_logical'"
-$ if curl_sys_krbinc .nes. ""
+$ sys_inc = "''fetch_sys_inc1', ''fetch_sys_inc2', ''fetch_logical'"
+$ if fetch_sys_krbinc .nes. ""
 $ then
-$   sys_inc = sys_inc + ",''curl_sys_krbinc'"
+$   sys_inc = sys_inc + ",''fetch_sys_krbinc'"
 $ endif
-$ if curl_sys_zlibinc .nes. ""
+$ if fetch_sys_zlibinc .nes. ""
 $ then
-$   sys_inc = sys_inc + ",''curl_sys_zlibinc'"
+$   sys_inc = sys_inc + ",''fetch_sys_zlibinc'"
 $ endif
 $! Build LIB
 $ cc_include = "/include=([-.lib],[-.lib.vtls],[-.packages.vms]"
 $ cc_include = cc_include + ",[-.packages.vms.''arch_name'])"
-$ call build "[--.lib]" "*.c" "''objdir'CURLLIB.OLB" "amigaos, nwlib, nwos"
+$ call build "[--.lib]" "*.c" "''objdir'FETCHLIB.OLB" "amigaos, nwlib, nwos"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
 $! Build VTLS
 $ cc_include = "/include=([--.lib.vtls],[--.lib],[--.src]"
 $ cc_include = cc_include + ",[--.packages.vms],[--.packages.vms.''arch_name'])"
-$ call build "[--.lib.vtls]" "*.c" "''objdir'CURLLIB.OLB" "amigaos, nwlib, nwos"
+$ call build "[--.lib.vtls]" "*.c" "''objdir'FETCHLIB.OLB" "amigaos, nwlib, nwos"
 $! Build SRC
 $ cc_include = "/include=([-.src],[-.lib],[-.lib.vtls]"
 $ cc_include = cc_include + ",[-.packages.vms],[-.packages.vms.''arch_name'])"
-$ call build "[--.src]" "*.c" "''objdir'CURLSRC.OLB"
+$ call build "[--.src]" "*.c" "''objdir'FETCHSRC.OLB"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
 $! Build MSG
-$ call build "[]" "*.msg" "''objdir'CURLSRC.OLB"
+$ call build "[]" "*.msg" "''objdir'FETCHSRC.OLB"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
 $!
 $!
@@ -842,24 +842,24 @@ $ if (openssl .ne. 0)
 $ then
 $   if (openssl .eq. 1)
 $   then
-$       'vo_l' "%CURL-I-LINK_OSSL, linking with OpenSSL (object library)"
+$       'vo_l' "%FETCH-I-LINK_OSSL, linking with OpenSSL (object library)"
 $   else
-$       'vo_l' "%CURL-I-LINK_HPSSL, linking with OpenSSL (shared image)"
+$       'vo_l' "%FETCH-I-LINK_HPSSL, linking with OpenSSL (shared image)"
 $   endif
 $ else
 $   if (hpssl)
 $   then
-$       'vo_l' "%CURL-I-LINK_HPSSL, linking with HP SSL"
+$       'vo_l' "%FETCH-I-LINK_HPSSL, linking with HP SSL"
 $   else
-$       'vo_l' "%CURL-I-LINK_NOSSL, linking with NO SSL support"
+$       'vo_l' "%FETCH-I-LINK_NOSSL, linking with NO SSL support"
 $   endif
 $ endif
 $!
 $!
-$! GNV helper files for building the test curl binary.
+$! GNV helper files for building the test fetch binary.
 $!-----------------------------------------------
-$ create 'exedir'gnv$curl.opt
-$ open/append opt 'exedir'gnv$curl.opt
+$ create 'exedir'gnv$fetch.opt
+$ open/append opt 'exedir'gnv$fetch.opt
 $ if libzshr_line .nes. "" then write opt libzshr_line
 $ if gssrtlshr_line .nes. "" then write opt gssrtlshr_line
 $ if libcryptoshr_line .nes. "" then write opt libcryptoshr_line
@@ -867,10 +867,10 @@ $ if libsslshr_line .nes. "" then write opt libsslshr_line
 $ close opt
 $!
 $!
-$! Create the libcurl
+$! Create the libfetch
 $!------------------------------------------------------
-$ create 'exedir'gnv_libcurl_linker.opt
-$ open/append opt 'exedir'gnv_libcurl_linker.opt
+$ create 'exedir'gnv_libfetch_linker.opt
+$ open/append opt 'exedir'gnv_libfetch_linker.opt
 $ if libzshr_line .nes. "" then write opt libzshr_line
 $ if gssrtlshr_line .nes. "" then write opt gssrtlshr_line
 $ if libcryptoshr_line .nes. "" then write opt libcryptoshr_line
@@ -892,31 +892,31 @@ $   if parse_style .eqs. "EXTENDED"
 $   then
 $      tool_main = """tool_main"""
 $   endif
-$   link_dsf1 = "/dsf=" + exedir + "CURL.DSF"
-$   link_dsf2 = "/dsf=" + exedir + "CURL_DEBUG.DSF"
+$   link_dsf1 = "/dsf=" + exedir + "FETCH.DSF"
+$   link_dsf2 = "/dsf=" + exedir + "FETCH_DEBUG.DSF"
 $ endif
 $ if (list .eq. 0)
 $ then
 $   link_map1 = "/nomap"
 $   link_map2 = "/nomap"
 $ else
-$   link_map1 = "/map=" + exedir + "CURL.MAP"
-$   link_map2 = "/map=" + exedir + "CURL_DEBUG.MAP"
+$   link_map1 = "/map=" + exedir + "FETCH.MAP"
+$   link_map2 = "/map=" + exedir + "FETCH_DEBUG.MAP"
 $ endif
 $!
 $!
 $! Make a normal image.
 $ set ver
-$ link 'link_map1' 'link_dsf1' /executable = 'exedir'CURL.EXE -
-   'objdir'curlsrc.olb /library /include = ('tool_main', curlmsg), -
-   'objdir'curllib.olb /library, -
-   'exedir'gnv$curl.opt/opt
+$ link 'link_map1' 'link_dsf1' /executable = 'exedir'FETCH.EXE -
+   'objdir'fetchsrc.olb /library /include = ('tool_main', fetchmsg), -
+   'objdir'fetchlib.olb /library, -
+   'exedir'gnv$fetch.opt/opt
 $!
 $! Also make a debug copy.
-$ link/debug 'link_map2' 'link_dsf2' /executable = 'exedir'CURL_DEBUG.EXE -
-   'objdir'curlsrc.olb /library /include = ('tool_main', curlmsg), -
-   'objdir'curllib.olb /library, -
-   'exedir'gnv$curl.opt/opt
+$ link/debug 'link_map2' 'link_dsf2' /executable = 'exedir'FETCH_DEBUG.EXE -
+   'objdir'fetchsrc.olb /library /include = ('tool_main', fetchmsg), -
+   'objdir'fetchlib.olb /library, -
+   'exedir'gnv$fetch.opt/opt
 $ set nover
 $!
 $ goto Common_Exit
@@ -968,10 +968,10 @@ $               goto EndLoop
 $           endif
 $           librarian /object 'p3' 'objfile'
 $       else
-$           'vo_o' "%CURL-I-OBJUTD, ", objfile, " is up to date"
+$           'vo_o' "%FETCH-I-OBJUTD, ", objfile, " is up to date"
 $       endif
 $   else
-$       'vo_o' "%CURL-I-OBJDNE, ", file, " does not exist"
+$       'vo_o' "%FETCH-I-OBJDNE, ", file, " does not exist"
 $       call compile 'file'
 $       sts = $status
 $       if .not. sts
@@ -999,8 +999,8 @@ $   typ = f$edit(f$parse(file, , , "TYPE"), "UPCASE") - "."
 $   if (typ .eqs. "C")
 $   then
 $       'vo_c' "CC (opts) ", file
-$       define/user curl 'curl_logical'
-$       if curl_sys_krbinc .nes. "" then define/user gssapi 'curl_sys_krbinc'
+$       define/user fetch 'fetch_logical'
+$       if fetch_sys_krbinc .nes. "" then define/user gssapi 'fetch_sys_krbinc'
 $       define/user decc$system_include 'sys_inc'
 $       CC 'cc_defs' -
          'cc_qual1' -

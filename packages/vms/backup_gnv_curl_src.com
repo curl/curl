@@ -1,4 +1,4 @@
-$! File: Backup_gnv_curl_src.com
+$! File: Backup_gnv_fetch_src.com
 $!
 $! Procedure to create backup save sets for installing in a PCSI kit.
 $!
@@ -50,19 +50,19 @@ $!
 $ kit_name = f$trnlnm("GNV_PCSI_KITNAME")
 $ if kit_name .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ producer = f$trnlnm("GNV_PCSI_PRODUCER")
 $ if producer .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ filename_base = f$trnlnm("GNV_PCSI_FILENAME_BASE")
 $ if filename_base .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $!
@@ -104,7 +104,7 @@ $ my_dir = f$parse(current_default,,,"DIRECTORY") - "[" - "<" - ">" - "]"
 $!
 $ src_root = "src_root:"
 $ if f$trnlnm("src_root1") .nes. "" then src_root = "src_root1:"
-$ backup'interchange' 'src_root'[curl...]*.*;0 -
+$ backup'interchange' 'src_root'[fetch...]*.*;0 -
            'filename_base'_original_src.bck/sav
 $ status = $status
 $!
@@ -120,7 +120,7 @@ $ if '$severity' .eq. 1 then files_found = 1
 $!
 $ if files_found .eq. 1
 $ then
-$   backup'interchange' 'vms_root'[curl...]*.*;0 -
+$   backup'interchange' 'vms_root'[fetch...]*.*;0 -
             'filename_base'_vms_src.bck/sav
 $   status = $status
 $ endif

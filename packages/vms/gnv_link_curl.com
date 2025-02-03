@@ -1,6 +1,6 @@
-$! File: gnv_link_curl.com
+$! File: gnv_link_fetch.com
 $!
-$! File to build images using gnv$libcurl.exe
+$! File to build images using gnv$libfetch.exe
 $!
 $! Copyright (C) John Malmberg
 $!
@@ -70,23 +70,23 @@ $!
 $!
 $! Build the Message file.
 $!--------------------------
-$ if f$search("[.packages.vms]curlmsg.obj") .eqs. ""
+$ if f$search("[.packages.vms]fetchmsg.obj") .eqs. ""
 $ then
-$   message [.packages.vms]curlmsg.msg/object=[.packages.vms]
+$   message [.packages.vms]fetchmsg.msg/object=[.packages.vms]
 $ endif
-$ if f$search("gnv$curlmsg.exe") .eqs. ""
+$ if f$search("gnv$fetchmsg.exe") .eqs. ""
 $ then
-$   link/share=gnv$curlmsg.exe [.packages.vms]curlmsg.obj
+$   link/share=gnv$fetchmsg.exe [.packages.vms]fetchmsg.obj
 $ endif
 $!
 $!
 $! Need to build the common init module.
 $!-------------------------------------------
 $ cflags = "/list/show=(expan,includ)"
-$ init_obj = "[.packages.vms]curl_crtl_init.obj"
+$ init_obj = "[.packages.vms]fetch_crtl_init.obj"
 $ if f$search(init_obj) .eqs. ""
 $ then
-$   cc'cflags' 'default_dir'curl_crtl_init.c/obj='init_obj'
+$   cc'cflags' 'default_dir'fetch_crtl_init.c/obj='init_obj'
 $ endif
 $ purge 'init_obj'
 $ rename 'init_obj' ;1
@@ -109,12 +109,12 @@ $   report_openssl_version := $'default_dir'report_openssl_version.exe
 $ endif
 $!
 $!
-$ base_link_opt_file = "[.packages.vms.''arch_name']gnv_libcurl_linker.opt"
-$ share_link_opt_file = "[.packages.vms.''arch_name']gnv_ssl_libcurl_linker.opt"
+$ base_link_opt_file = "[.packages.vms.''arch_name']gnv_libfetch_linker.opt"
+$ share_link_opt_file = "[.packages.vms.''arch_name']gnv_ssl_libfetch_linker.opt"
 $ if f$search(base_link_opt_file) .eqs. ""
 $ then
-$   base_link_opt_file = "[.packages.vms]gnv_libcurl_linker.opt"
-$   share_link_opt_file = "[.packages.vms]gnv_ssl_libcurl_linker.opt"
+$   base_link_opt_file = "[.packages.vms]gnv_libfetch_linker.opt"
+$   share_link_opt_file = "[.packages.vms]gnv_ssl_libfetch_linker.opt"
 $   if f$search(base_link_opt_file) .eqs. ""
 $   then
 $       write sys$output "Can not find base library option file!"
@@ -143,9 +143,9 @@ $   hp_ssl_libssl32 = "sys$common:[syslib]ssl$libssl_shr32.exe"
 $   if f$search(hp_ssl_libcrypto32) .nes. ""
 $   then
 $       use_hp_ssl = 1
-$       curl_ssl_libcrypto32 = hp_ssl_libcrypto32
-$       curl_ssl_libssl32 = hp_ssl_libssl32
-$       curl_ssl_version = "OpenSSL/0.9.6g"
+$       fetch_ssl_libcrypto32 = hp_ssl_libcrypto32
+$       fetch_ssl_libssl32 = hp_ssl_libssl32
+$       fetch_ssl_version = "OpenSSL/0.9.6g"
 $   else
 $       write sys$output "HP OpenSSL Shared images not found!"
 $       goto all_exit
@@ -160,14 +160,14 @@ $   hp_ssl_libcrypto32 = "sys$share:ssl$libcrypto_shr32.exe"
 $   hp_ssl_libssl32 = "sys$share:ssl$libssl_shr32.exe"
 $   if f$search(hp_ssl_libcrypto32) .nes. ""
 $   then
-$       curl_ssl_libcrypto32 = hp_ssl_libcrypto32
-$       curl_ssl_libssl32 = hp_ssl_libssl32
+$       fetch_ssl_libcrypto32 = hp_ssl_libcrypto32
+$       fetch_ssl_libssl32 = hp_ssl_libssl32
 $       report_openssl_version 'hp_ssl_libcrypto32' hp_ssl_version
 $   endif
 $!
 $   if f$type(hp_ssl_version) .eqs. "STRING"
 $   then
-$       curl_ssl_version = hp_ssl_version
+$       fetch_ssl_version = hp_ssl_version
 $       full_version = f$element(1, " ", hp_ssl_version)
 $       ver_maj = f$element(0, ".", full_version)
 $       ver_min = f$element(1, ".", full_version)
@@ -197,7 +197,7 @@ $set nover
 $       if use_hp_ssl .eq. 0
 $       then
 $           write sys$output -
-   " HP OpenSSL version of ""''hp_ssl_version'"" is too old for shared libcurl!"
+   " HP OpenSSL version of ""''hp_ssl_version'"" is too old for shared libfetch!"
 $       endif
 $   else
 $       write sys$output "Unable to get version of HP OpenSSL"
@@ -233,7 +233,7 @@ $       endif
 $       if use_gnv_ssl .eq. 0
 $       then
 $           write sys$output -
-   "GNV OpenSSL version of ""''gnv_ssl_version'" is too old for shared libcurl!"
+   "GNV OpenSSL version of ""''gnv_ssl_version'" is too old for shared libfetch!"
 $       endif
 $!
 $!      Prefer to break the tie with the lowest supported version
@@ -241,9 +241,9 @@ $!      For simplicity, if the GNV image is present, it will be used.
 $!      Version tuple is not a simple compare.
 $!
 $       if use_gnv_ssl .eq. 1 then
-$           curl_ssl_libcrypto32 = gnv_ssl_libcrypto32
-$           curl_ssl_libssl32 = gnv_ssl_libssl32
-$           curl_ssl_version = gnv_ssl_version
+$           fetch_ssl_libcrypto32 = gnv_ssl_libcrypto32
+$           fetch_ssl_libssl32 = gnv_ssl_libssl32
+$           fetch_ssl_version = gnv_ssl_version
 $           use_hp_ssl = 0
 $       endif
 !$!
@@ -289,8 +289,8 @@ and before installing Curl.
       /options=noconfirm -
       /destination=device:[vms$common.gnv.lib] SSL
 
-The [vms$common.sys$startup}curl_startup.com procedure will then configure
-libcurl to use these shared images instead of the system ones.
+The [vms$common.sys$startup}fetch_startup.com procedure will then configure
+libfetch to use these shared images instead of the system ones.
 
 When you upgrade SSL on VMS to the newer version of HP SSL, then these copies
 should be deleted.
@@ -298,7 +298,7 @@ should be deleted.
 $eod
 $!
 $ open/append sslr 'default_dir'hp_ssl_release_info.txt
-$ write sslr "OpenSSL version used for building this kit: ",curl_ssl_version
+$ write sslr "OpenSSL version used for building this kit: ",fetch_ssl_version
 $ write sslr ""
 $ close sslr
 $!
@@ -336,98 +336,98 @@ $   create 'share_link_opt_file'
 $   open/append slopt 'share_link_opt_file'
 $   if libzshr_line .nes. "" then write slopt libzshr_line
 $   if gssrtlshr_line .nes. "" then write slopt gssrtlshr_line
-$   write slopt "gnv$curl_ssl_libcryptoshr32/share"
-$   write slopt "gnv$curl_ssl_libsslshr32/share"
+$   write slopt "gnv$fetch_ssl_libcryptoshr32/share"
+$   write slopt "gnv$fetch_ssl_libsslshr32/share"
 $   close slopt
 $ endif
 $!
-$! DCL build puts curllib in architecture directory
+$! DCL build puts fetchlib in architecture directory
 $! GNV build uses the makefile.
-$ libfile = "[.packages.vms.''arch_name']curllib.olb"
+$ libfile = "[.packages.vms.''arch_name']fetchlib.olb"
 $ if f$search(libfile) .nes. ""
 $ then
 $   olb_file = libfile
 $ else
 $   ! GNV based build
-$   libfile = "[.lib.^.libs]libcurl.a"
+$   libfile = "[.lib.^.libs]libfetch.a"
 $   if f$search(libfile) .nes. ""
 $   then
 $       olb_file = libfile
 $   else
 $       write sys$output -
-  "Can not build shared image, libcurl object library not found!"
+  "Can not build shared image, libfetch object library not found!"
 $       goto all_exit
 $   endif
 $ endif
 $!
-$gnv_libcurl_share = "''default_dir'gnv$libcurl.exe"
+$gnv_libfetch_share = "''default_dir'gnv$libfetch.exe"
 $!
-$ if f$search(gnv_libcurl_share) .eqs. ""
+$ if f$search(gnv_libfetch_share) .eqs. ""
 $ then
 $   if arch_name .nes. "VAX"
 $   then
-$       define/user gnv$curl_ssl_libcryptoshr32 'curl_ssl_libcrypto32'
-$       define/user gnv$curl_ssl_libsslshr32 'curl_ssl_libssl32'
-$       link/dsf='default_dir'gnv$libcurl.dsf/share='gnv_libcurl_share' -
-            /map='default_dir'gnv$libcurl.map -
-            gnv_packages_vms:gnv_libcurl_symbols.opt/opt,-
+$       define/user gnv$fetch_ssl_libcryptoshr32 'fetch_ssl_libcrypto32'
+$       define/user gnv$fetch_ssl_libsslshr32 'fetch_ssl_libssl32'
+$       link/dsf='default_dir'gnv$libfetch.dsf/share='gnv_libfetch_share' -
+            /map='default_dir'gnv$libfetch.map -
+            gnv_packages_vms:gnv_libfetch_symbols.opt/opt,-
             'olb_file'/lib,-
             'share_link_opt_file'/opt
 $   else
 $!      VAX will not allow the logical name hack for the
 $!      SSL libcryto library, it is pulling it in twice if I try it.
-$       link/share='gnv_libcurl_share'/map='default_dir'gnv$libcurl.map -
-            gnv_packages_vms:gnv_libcurl_xfer.opt/opt,-
+$       link/share='gnv_libfetch_share'/map='default_dir'gnv$libfetch.map -
+            gnv_packages_vms:gnv_libfetch_xfer.opt/opt,-
             'olb_file'/lib,-
             'base_link_opt_file'/opt
 $   endif
 $ endif
 $!
 $!
-$ if f$search("[.src]curl-tool_main.o") .nes. ""
+$ if f$search("[.src]fetch-tool_main.o") .nes. ""
 $ then
 $!  From src/makefile.inc:
-$!  # libcurl has sources that provide functions named curlx_* that aren't
+$!  # libfetch has sources that provide functions named fetchx_* that aren't
 $!  # part of the official API, but we reuse the code here to avoid
 $!  # duplication.
 $!
 $!
-$   if f$search("[.src]curl.exe") .eqs. ""
+$   if f$search("[.src]fetch.exe") .eqs. ""
 $   then
-$       define/user gnv$libcurl 'gnv_libcurl_share'
-$       link'ldebug'/exe=[.src]curl.exe/dsf=[.src]curl.dsf -
-           [.src]curl-tool_main.o, -
-           [.src]curl-tool_bname.o, [.src]curl-tool_cb_dbg.o, -
-           [.src]curl-tool_cb_hdr.o, [.src]curl-tool_cb_prg.o, -
-           [.src]curl-tool_cb_rea.o, [.src]curl-tool_cb_see.o, -
-           [.src]curl-tool_cb_soc.o, -
-           [.src]curl-tool_cb_wrt.o, [.src]curl-tool_cfgable.o, -
-           [.src]curl-tool_convert.o, [.src]curl-tool_dirhie.o, -
-           [.src]curl-tool_doswin.o, [.src]curl-tool_easysrc.o, -
-           [.src]curl-tool_formparse.o, [.src]curl-tool_getparam.o, -
-           [.src]curl-tool_getpass.o, [.src]curl-tool_help.o, -
-           [.src]curl-tool_helpers.o, [.src]curl-tool_homedir.o, -
-           [.src]curl-tool_hugehelp.o, [.src]curl-tool_libinfo.o, -
-           [.src]curl-tool_mfiles.o, -
-           [.src]curl-tool_msgs.o, [.src]curl-tool_operate.o, -
-           [.src]curl-tool_operhlp.o, -
-           [.src]curl-tool_paramhlp.o, [.src]curl-tool_parsecfg.o, -
-           [.src]curl-tool_setopt.o, [.src]curl-tool_sleep.o, -
-           [.src]curl-tool_urlglob.o, [.src]curl-tool_util.o, -
-           [.src]curl-tool_vms.o, [.src]curl-tool_writeenv.o, -
-           [.src]curl-tool_writeout.o, [.src]curl-tool_xattr.o, -
-           [.src]curl-strtoofft.o, [.src]curl-strdup.o, [.src]curl-strcase.o, -
-           [.src]curl-nonblock.o, gnv_packages_vms:curlmsg.obj,-
+$       define/user gnv$libfetch 'gnv_libfetch_share'
+$       link'ldebug'/exe=[.src]fetch.exe/dsf=[.src]fetch.dsf -
+           [.src]fetch-tool_main.o, -
+           [.src]fetch-tool_bname.o, [.src]fetch-tool_cb_dbg.o, -
+           [.src]fetch-tool_cb_hdr.o, [.src]fetch-tool_cb_prg.o, -
+           [.src]fetch-tool_cb_rea.o, [.src]fetch-tool_cb_see.o, -
+           [.src]fetch-tool_cb_soc.o, -
+           [.src]fetch-tool_cb_wrt.o, [.src]fetch-tool_cfgable.o, -
+           [.src]fetch-tool_convert.o, [.src]fetch-tool_dirhie.o, -
+           [.src]fetch-tool_doswin.o, [.src]fetch-tool_easysrc.o, -
+           [.src]fetch-tool_formparse.o, [.src]fetch-tool_getparam.o, -
+           [.src]fetch-tool_getpass.o, [.src]fetch-tool_help.o, -
+           [.src]fetch-tool_helpers.o, [.src]fetch-tool_homedir.o, -
+           [.src]fetch-tool_hugehelp.o, [.src]fetch-tool_libinfo.o, -
+           [.src]fetch-tool_mfiles.o, -
+           [.src]fetch-tool_msgs.o, [.src]fetch-tool_operate.o, -
+           [.src]fetch-tool_operhlp.o, -
+           [.src]fetch-tool_paramhlp.o, [.src]fetch-tool_parsecfg.o, -
+           [.src]fetch-tool_setopt.o, [.src]fetch-tool_sleep.o, -
+           [.src]fetch-tool_urlglob.o, [.src]fetch-tool_util.o, -
+           [.src]fetch-tool_vms.o, [.src]fetch-tool_writeenv.o, -
+           [.src]fetch-tool_writeout.o, [.src]fetch-tool_xattr.o, -
+           [.src]fetch-strtoofft.o, [.src]fetch-strdup.o, [.src]fetch-strcase.o, -
+           [.src]fetch-nonblock.o, gnv_packages_vms:fetchmsg.obj,-
            sys$input:/opt
-gnv$libcurl/share
-gnv_packages_vms:curl_crtl_init.obj
+gnv$libfetch/share
+gnv_packages_vms:fetch_crtl_init.obj
 $   endif
 $ else
-$   curl_exe = "[.src]curl.exe"
-$   curl_dsf = "[.src]curl.dsf"
-$   curl_main = "[.packages.vms.''arch_name']tool_main.obj"
-$   curl_src = "[.packages.vms.''arch_name']curlsrc.olb"
-$   curl_lib = "[.packages.vms.''arch_name']curllib.olb"
+$   fetch_exe = "[.src]fetch.exe"
+$   fetch_dsf = "[.src]fetch.dsf"
+$   fetch_main = "[.packages.vms.''arch_name']tool_main.obj"
+$   fetch_src = "[.packages.vms.''arch_name']fetchsrc.olb"
+$   fetch_lib = "[.packages.vms.''arch_name']fetchlib.olb"
 $   strcase = "strcase"
 $   nonblock = "nonblock"
 $   warnless = "warnless"
@@ -440,17 +440,17 @@ $       strcase = """strcase"""
 $       nonblock = """nonblock"""
 $       warnless = """warnless"""
 $   endif
-$   if f$search(curl_exe) .eqs. ""
+$   if f$search(fetch_exe) .eqs. ""
 $   then
-$       define/user gnv$libcurl 'gnv_libcurl_share'
-$       link'ldebug'/exe='curl_exe'/dsf='curl_dsf' -
-           'curl_main','curl_src'/lib, -
-           'curl_lib'/library/include=-
+$       define/user gnv$libfetch 'gnv_libfetch_share'
+$       link'ldebug'/exe='fetch_exe'/dsf='fetch_dsf' -
+           'fetch_main','fetch_src'/lib, -
+           'fetch_lib'/library/include=-
            ('strcase','nonblock','warnless'),-
-           gnv_packages_vms:curlmsg.obj,-
+           gnv_packages_vms:fetchmsg.obj,-
            sys$input:/opt
-gnv$libcurl/share
-gnv_packages_vms:curl_crtl_init.obj
+gnv$libfetch/share
+gnv_packages_vms:fetch_crtl_init.obj
 $   endif
 $ endif
 $!
@@ -470,377 +470,377 @@ $   goto all_exit
 $ endif
 $ if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $ then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $ endif
 $!
 $!
 $ target = "anyauthput"
 $ if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $ then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $ endif
 $!
 $!
 $ target = "certinfo"
 $ if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $ then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $ endif
 $!
 $!
 $ target = "cookie_interface"
 $ if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $ then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $ endif
 $!
 $!
 $ target = "debug"
 $ if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $ then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $ endif
 $!
 $!
 $ target = "fileupload"
 $ if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $ then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $ endif
 $!
 $!
 $ target = "fopen"
 $ if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $ then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $ endif
 $!
 $!
 $target = "ftpget"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "ftpgetresp"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "ftpupload"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "getinfo"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "getinmemory"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "http-post"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "httpcustomheader"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "httpput"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "https"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "multi-app"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "multi-debugcallback"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "multi-double"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "multi-post"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "multi-single"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "persistent"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "post-callback"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "postit2"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "sendrecv"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "sepheaders"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "simple"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "simplepost"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $!
 $target = "simplessl"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
-$   define/user gnv$libcurl 'gnv_libcurl_share'
+$   define/user gnv$libfetch 'gnv_libfetch_share'
 $   link'ldebug'/exe=[.docs.examples]'target'.exe-
     /dsf=[.docs.examples]'target'.dsf -
     [.docs.examples]'target'.o,-
     gnv$'target'.opt/opt,-
     sys$input:/opt
-gnv$libcurl/share
+gnv$libfetch/share
 $endif
 $!
 $! =============== End of docs/examples =========================

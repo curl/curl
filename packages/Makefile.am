@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 SUBDIRS = vms
@@ -28,11 +28,11 @@ SUBDIRS = vms
 EXTRA_DIST = README.md \
   OS400/README.OS400 \
   OS400/rpg-examples \
-  OS400/ccsidcurl.c \
-  OS400/ccsidcurl.h \
-  OS400/curlcl.c \
-  OS400/curlmain.c \
-  OS400/curl.inc.in \
+  OS400/ccsidfetch.c \
+  OS400/ccsidfetch.h \
+  OS400/fetchcl.c \
+  OS400/fetchmain.c \
+  OS400/fetch.inc.in \
   OS400/initscript.sh \
   OS400/config400.default \
   OS400/make-docs.sh \
@@ -43,7 +43,7 @@ EXTRA_DIST = README.md \
   OS400/makefile.sh \
   OS400/os400sys.c \
   OS400/os400sys.h \
-  OS400/curl.cmd
+  OS400/fetch.cmd
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;

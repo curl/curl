@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,11 +21,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
-#       curl compilation script for the OS/400.
+#       fetch compilation script for the OS/400.
 #
 #
 #       This is a shell script since make is not a standard component of OS/400.
@@ -50,7 +50,7 @@ done
 #       Create the OS/400 library if it does not exist.
 
 if action_needed "${LIBIFSNAME}"
-then    CMD="CRTLIB LIB(${TARGETLIB}) TEXT('curl: multiprotocol support API')"
+then    CMD="CRTLIB LIB(${TARGETLIB}) TEXT('fetch: multiprotocol support API')"
         CLcommand "${CMD}"
 fi
 
@@ -117,9 +117,9 @@ done
 
 #       Compile the QADRTMAIN2 replacement module.
 
-if action_needed "${LIBIFSNAME}/CURLMAIN.MODULE" "${SCRIPTDIR}/curlmain.c"
-then    CMD="CRTCMOD MODULE(${TARGETLIB}/CURLMAIN)"
-        CMD="${CMD} SRCSTMF('${SCRIPTDIR}/curlmain.c')"
+if action_needed "${LIBIFSNAME}/FETCHMAIN.MODULE" "${SCRIPTDIR}/fetchmain.c"
+then    CMD="CRTCMOD MODULE(${TARGETLIB}/FETCHMAIN)"
+        CMD="${CMD} SRCSTMF('${SCRIPTDIR}/fetchmain.c')"
         CMD="${CMD} SYSIFCOPT(*IFS64IO) LOCALETYPE(*LOCALE) FLAG(10)"
         CMD="${CMD} TGTCCSID(${TGTCCSID}) TGTRLS(${TGTRLS})"
         CMD="${CMD} OUTPUT(${OUTPUT})"

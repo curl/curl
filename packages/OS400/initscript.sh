@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -76,27 +76,27 @@ fi
 
 #       Need to get the version definitions.
 
-LIBCURL_VERSION=$(grep '^#define  *LIBCURL_VERSION '                    \
-                        "${TOPDIR}/include/curl/curlver.h"              |
+LIBFETCH_VERSION=$(grep '^#define  *LIBFETCH_VERSION '                    \
+                        "${TOPDIR}/include/fetch/fetchver.h"              |
                 sed 's/.*"\(.*\)".*/\1/')
-LIBCURL_VERSION_MAJOR=$(grep '^#define  *LIBCURL_VERSION_MAJOR '        \
-                        "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/^#define  *LIBCURL_VERSION_MAJOR  *\([^ ]*\).*/\1/')
-LIBCURL_VERSION_MINOR=$(grep '^#define  *LIBCURL_VERSION_MINOR '        \
-                        "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/^#define  *LIBCURL_VERSION_MINOR  *\([^ ]*\).*/\1/')
-LIBCURL_VERSION_PATCH=$(grep '^#define  *LIBCURL_VERSION_PATCH '        \
-                        "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/^#define  *LIBCURL_VERSION_PATCH  *\([^ ]*\).*/\1/')
-LIBCURL_VERSION_NUM=$(grep '^#define  *LIBCURL_VERSION_NUM '            \
-                        "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/^#define  *LIBCURL_VERSION_NUM  *0x\([^ ]*\).*/\1/')
-LIBCURL_TIMESTAMP=$(grep '^#define  *LIBCURL_TIMESTAMP '                \
-                        "${TOPDIR}/include/curl/curlver.h"              |
+LIBFETCH_VERSION_MAJOR=$(grep '^#define  *LIBFETCH_VERSION_MAJOR '        \
+                        "${TOPDIR}/include/fetch/fetchver.h"              |
+                sed 's/^#define  *LIBFETCH_VERSION_MAJOR  *\([^ ]*\).*/\1/')
+LIBFETCH_VERSION_MINOR=$(grep '^#define  *LIBFETCH_VERSION_MINOR '        \
+                        "${TOPDIR}/include/fetch/fetchver.h"              |
+                sed 's/^#define  *LIBFETCH_VERSION_MINOR  *\([^ ]*\).*/\1/')
+LIBFETCH_VERSION_PATCH=$(grep '^#define  *LIBFETCH_VERSION_PATCH '        \
+                        "${TOPDIR}/include/fetch/fetchver.h"              |
+                sed 's/^#define  *LIBFETCH_VERSION_PATCH  *\([^ ]*\).*/\1/')
+LIBFETCH_VERSION_NUM=$(grep '^#define  *LIBFETCH_VERSION_NUM '            \
+                        "${TOPDIR}/include/fetch/fetchver.h"              |
+                sed 's/^#define  *LIBFETCH_VERSION_NUM  *0x\([^ ]*\).*/\1/')
+LIBFETCH_TIMESTAMP=$(grep '^#define  *LIBFETCH_TIMESTAMP '                \
+                        "${TOPDIR}/include/fetch/fetchver.h"              |
                 sed 's/.*"\(.*\)".*/\1/')
-export LIBCURL_VERSION
-export LIBCURL_VERSION_MAJOR LIBCURL_VERSION_MINOR LIBCURL_VERSION_PATCH
-export LIBCURL_VERSION_NUM LIBCURL_TIMESTAMP
+export LIBFETCH_VERSION
+export LIBFETCH_VERSION_MAJOR LIBFETCH_VERSION_MINOR LIBFETCH_VERSION_PATCH
+export LIBFETCH_VERSION_NUM LIBFETCH_TIMESTAMP
 
 ################################################################################
 #
@@ -198,7 +198,7 @@ make_module()
         CMD="${CMD} OPTION(*INCDIRFIRST)"
         CMD="${CMD} LOCALETYPE(*LOCALE) FLAG(10)"
         CMD="${CMD} INCDIR('${QADRTDIR}/include'"
-        CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}'"
+        CMD="${CMD} '${TOPDIR}/include/fetch' '${TOPDIR}/include' '${SRCDIR}'"
         CMD="${CMD} '${TOPDIR}/packages/OS400'"
 
         if [ "${WITH_ZLIB}" != "0" ]
@@ -251,7 +251,7 @@ db2_name()
         else    basename "${1}"                                         |
                 tr 'a-z-' 'A-Z_'                                        |
                 sed -e 's/\..*//'                                       \
-                    -e 's/^CURL_*/C/'                                   \
+                    -e 's/^FETCH_*/C/'                                   \
                     -e 's/^TOOL_*/T/'                                   \
                     -e 's/^\(.\).*\(.........\)$/\1\2/'
         fi
@@ -263,12 +263,12 @@ db2_name()
 versioned_copy()
 
 {
-        sed -e "s/@LIBCURL_VERSION@/${LIBCURL_VERSION}/g"               \
-            -e "s/@LIBCURL_VERSION_MAJOR@/${LIBCURL_VERSION_MAJOR}/g"   \
-            -e "s/@LIBCURL_VERSION_MINOR@/${LIBCURL_VERSION_MINOR}/g"   \
-            -e "s/@LIBCURL_VERSION_PATCH@/${LIBCURL_VERSION_PATCH}/g"   \
-            -e "s/@LIBCURL_VERSION_NUM@/${LIBCURL_VERSION_NUM}/g"       \
-            -e "s/@LIBCURL_TIMESTAMP@/${LIBCURL_TIMESTAMP}/g"           \
+        sed -e "s/@LIBFETCH_VERSION@/${LIBFETCH_VERSION}/g"               \
+            -e "s/@LIBFETCH_VERSION_MAJOR@/${LIBFETCH_VERSION_MAJOR}/g"   \
+            -e "s/@LIBFETCH_VERSION_MINOR@/${LIBFETCH_VERSION_MINOR}/g"   \
+            -e "s/@LIBFETCH_VERSION_PATCH@/${LIBFETCH_VERSION_PATCH}/g"   \
+            -e "s/@LIBFETCH_VERSION_NUM@/${LIBFETCH_VERSION_NUM}/g"       \
+            -e "s/@LIBFETCH_TIMESTAMP@/${LIBFETCH_TIMESTAMP}/g"           \
                 < "${1}" > "${2}"
 }
 

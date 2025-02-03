@@ -1,15 +1,15 @@
 $! File: generate_vax_transfer.com
 $!
 $! File to generate and compile the VAX transfer vectors from reading in the
-$! Alpha/Itanium gnv_libcurl_symbols.opt file.
+$! Alpha/Itanium gnv_libfetch_symbols.opt file.
 $!
 $! This procedure patches the VAX Macro32 assembler to be case sensitive
 $! and then compiles the generated
 $!
 $! The output of this procedure is:
-$!     gnv_libcurl_xfer.mar_exact
-$!     gnv_libcurl_xfer.obj
-$!     gnv_libcurl_xfer.opt
+$!     gnv_libfetch_xfer.mar_exact
+$!     gnv_libfetch_xfer.obj
+$!     gnv_libfetch_xfer.opt
 $!     macro32_exactcase.exe
 $!
 $! Copyright (C) John Malmberg
@@ -46,11 +46,11 @@ $   goto all_exit
 $ endif
 $!
 $!
-$! Get the libcurl version to generate the ident string.
+$! Get the libfetch version to generate the ident string.
 $! ident string is max of 31 characters.
 $!
 $ ident_string = "unknown"
-$ open/read cver [-.-.include.curl]curlver.h
+$ open/read cver [-.-.include.fetch]fetchver.h
 $cver_loop:
 $ read/end=cver_loop_end cver line_in
 $ line_in = f$edit(line_in, "COMPRESS,TRIM")
@@ -60,20 +60,20 @@ $ if code .nes. "#" then goto cver_loop
 $ directive = f$element(0, " ", line_in)
 $ if directive .nes. "#define" then goto cver_loop
 $ name = f$element(1, " ", line_in)
-$ if name .nes. "LIBCURL_VERSION" then goto cver_loop
+$ if name .nes. "LIBFETCH_VERSION" then goto cver_loop
 $ ident_string = f$element(2, " ", line_in) - "" - ""
 $cver_loop_end:
 $ close cver
 $!
-$ open/read aopt gnv_libcurl_symbols.opt
+$ open/read aopt gnv_libfetch_symbols.opt
 $!
 $! Write out the header
 $ gosub do_header
 $!
-$ open/append vopt gnv_libcurl_xfer.mar_exact
+$ open/append vopt gnv_libfetch_xfer.mar_exact
 $ write vopt tab,".IDENT /", ident_string, "/"
 $!
-$ write vopt tab, ".PSECT LIBCURL_XFERVECTORS  -"
+$ write vopt tab, ".PSECT LIBFETCH_XFERVECTORS  -"
 $ write vopt tab,tab,tab, "PIC,USR,CON,REL,GBL,SHR,EXE,RD,NOWRT,QUAD"
 $ write vopt ""
 $ write vopt tab, "SPARE", tab, "; never delete this spare"
@@ -98,7 +98,7 @@ $       symbol_type = f$element(2, "=", line_u) - ")"
 $       symbol_name = f$element(1, "/", symbol_string)
 $       if symbol_type .nes. "PROCEDURE"
 $       then
-$           write sys$output "%CURLBUILD-W-NOTPROC, " + -
+$           write sys$output "%FETCHBUILD-W-NOTPROC, " + -
 $                            "This procedure can only handle procedure vectors"
 $           write sys$output -
 "Data vectors require manual construction for which this procedure or"
@@ -132,7 +132,7 @@ $ if alias_count .eq. 0 then goto finish_file
 $!
 $! Start pass 2, write stub routine header
 $!
-$ open/read aopt gnv_libcurl_symbols.opt
+$ open/read aopt gnv_libfetch_symbols.opt
 $!
 $alias_loop:
 $!
@@ -185,14 +185,14 @@ $   copy sys$system:macro32.exe 'patched_macro'
 $   patch @macro32_exactcase.patch
 $ endif
 $ define/user macro32 'patched_macro'
-$ macro/object=gnv_libcurl_xfer.obj gnv_libcurl_xfer.mar_exact
+$ macro/object=gnv_libfetch_xfer.obj gnv_libfetch_xfer.mar_exact
 $!
 $! Create the option file for linking the shared image.
-$ create gnv_libcurl_xfer.opt
-$ open/append lco gnv_libcurl_xfer.opt
+$ create gnv_libfetch_xfer.opt
+$ open/append lco gnv_libfetch_xfer.opt
 $ write lco "gsmatch=lequal,1,1"
-$ write lco "cluster=transfer_vector,,,''default_dir'gnv_libcurl_xfer"
-$ write lco "collect=libcurl_global, libcurl_xfervectors"
+$ write lco "cluster=transfer_vector,,,''default_dir'gnv_libfetch_xfer"
+$ write lco "collect=libfetch_global, libfetch_xfervectors"
 $ close lco
 $!
 $!
@@ -202,9 +202,9 @@ $! Process the header
 $do_header:
 $!
 $! Force the mode of the file to same as text editor generated.
-$ create gnv_libcurl_xfer.mar_exact
+$ create gnv_libfetch_xfer.mar_exact
 $deck
-; File: gnv_libcurl_xfer.mar_exact
+; File: gnv_libfetch_xfer.mar_exact
 ;
 ; VAX transfer vectors
 ;
@@ -231,7 +231,7 @@ $deck
 ;
 ;*************************************************************************
 
-        .TITLE libcurl_xfer - Transfer vector for libcurl
+        .TITLE libfetch_xfer - Transfer vector for libfetch
         .DISABLE GLOBAL
 
 ;

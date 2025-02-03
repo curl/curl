@@ -1,6 +1,6 @@
-$! File: PCSI_PRODUCT_GNV_CURL.COM
+$! File: PCSI_PRODUCT_GNV_FETCH.COM
 $!
-$! This command file packages up the product CURL into a sequential
+$! This command file packages up the product FETCH into a sequential
 $! format kit
 $!
 $! Copyright (C) John Malmberg
@@ -57,22 +57,22 @@ $ endif
 $!
 $! Make sure that the kit name is up to date for this build
 $!----------------------------------------------------------
-$ @MAKE_PCSI_CURL_KIT_NAME.COM
+$ @MAKE_PCSI_FETCH_KIT_NAME.COM
 $!
 $!
 $! Make sure that the image is built
 $!----------------------------------
 $ arch_name = f$edit(f$getsyi("arch_name"),"UPCASE")
-$ if f$search("[--.src]curl.exe") .eqs. ""
+$ if f$search("[--.src]fetch.exe") .eqs. ""
 $ then
 $   build_it = 1
-$   libfile = "[.packages.vms.''arch_name']curllib.olb"
+$   libfile = "[.packages.vms.''arch_name']fetchlib.olb"
 $   if f$search(libfile) .nes. ""
 $   then
 $       build_it = 0
 $   else
 $       ! GNV based build
-$       libfile = "[.lib.^.libs]libcurl.a"
+$       libfile = "[.lib.^.libs]libfetch.a"
 $       if f$search(libfile) .nes. ""
 $       then
 $           build_it = 0;
@@ -82,27 +82,27 @@ $   if build_it .eq. 1
 $   then
 $       @build_vms list
 $   endif
-$   @gnv_link_curl.com
+$   @gnv_link_fetch.com
 $ endif
 $!
 $! Make sure that the release note file name is up to date
 $!---------------------------------------------------------
-$ @BUILD_GNV_CURL_RELEASE_NOTES.COM
+$ @BUILD_GNV_FETCH_RELEASE_NOTES.COM
 $!
 $!
 $! Make sure that the source has been backed up.
 $!----------------------------------------------
 $ arch_type = f$getsyi("ARCH_NAME")
 $ arch_code = f$extract(0, 1, arch_type)
-$ @backup_gnv_curl_src.com
+$ @backup_gnv_fetch_src.com
 $!
 $! Regenerate the PCSI description file.
 $!--------------------------------------
-$ @BUILD_GNV_CURL_PCSI_DESC.COM
+$ @BUILD_GNV_FETCH_PCSI_DESC.COM
 $!
 $! Regenerate the PCSI Text file.
 $!---------------------------------
-$ @BUILD_GNV_CURL_PCSI_TEXT.COM
+$ @BUILD_GNV_FETCH_PCSI_TEXT.COM
 $!
 $!
 $! Parse the kit name into components.
@@ -110,7 +110,7 @@ $!---------------------------------------
 $ kit_name = f$trnlnm("GNV_PCSI_KITNAME")
 $ if kit_name .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ producer = f$element(0, "-", kit_name)
@@ -131,8 +131,8 @@ $ else
 $   version = "''mmversion'"
 $ endif
 $!
-$ @stage_curl_install remove
-$ @stage_curl_install
+$ @stage_fetch_install remove
+$ @stage_fetch_install
 $!
 $! Move to the base directories
 $ set def [--]
@@ -143,7 +143,7 @@ $!
 $!
 $ source = "''default_dir'"
 $ src1 = "new_gnu:[usr.bin],"
-$ src2 = "new_gnu:[usr.include.curl],"
+$ src2 = "new_gnu:[usr.include.fetch],"
 $ src3 = "new_gnu:[usr.lib],"
 $ src4 = "new_gnu:[usr.lib.pkgconfig],"
 $ src5 = "new_gnu:[usr.share.man.man1],"

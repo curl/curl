@@ -1,6 +1,6 @@
-$! File: curl_Startup.com
+$! File: fetch_Startup.com
 $!
-$! Procedure to setup the CURL libraries for use by programs from the
+$! Procedure to setup the FETCH libraries for use by programs from the
 $! VMS SYSTARTUP*.COM procedure.
 $!
 $! Copyright (C) John Malmberg
@@ -51,47 +51,47 @@ $   endif
 $ endif
 $!
 $!
-$ curl_ssl_libcrypto32 = ""
-$ curl_ssl_libssl32 = ""
+$ fetch_ssl_libcrypto32 = ""
+$ fetch_ssl_libssl32 = ""
 $ gnv_ssl_libcrypto32 = "gnv$gnu:[lib]ssl$libcrypto_shr32.exe"
 $ gnv_ssl_libssl32 = "gnv$gnu:[lib]ssl$libssl_shr32.exe"
 $ if f$search(gnv_ssl_libcrypto32) .nes. ""
 $ then
-$   curl_ssl_libcrypto32 = gnv_ssl_libcrypto32
-$   curl_ssl_libssl32 = gnv_ssl_libssl32
+$   fetch_ssl_libcrypto32 = gnv_ssl_libcrypto32
+$   fetch_ssl_libssl32 = gnv_ssl_libssl32
 $ else
 $   hp_ssl_libcrypto32 = "sys$share:ssl$libcrypto_shr32.exe"
 $   hp_ssl_libssl32 = "sys$share:ssl$libssl_shr32.exe"
 $   if f$search(hp_ssl_libcrypto32) .nes. ""
 $   then
-$       curl_ssl_libcrypto32 = hp_ssl_libcrypto32
-$       curl_ssl_libssl32 = hp_ssl_libssl32
+$       fetch_ssl_libcrypto32 = hp_ssl_libcrypto32
+$       fetch_ssl_libssl32 = hp_ssl_libssl32
 $   else
 $       write sys$output "HP SSL package not found and is required."
 $   endif
 $ endif
 $!
-$ define/system/exec gnv$curl_ssl_libcryptoshr32 'curl_ssl_libcrypto32'
-$ define/system/exec gnv$curl_ssl_libsslshr32 'curl_ssl_libssl32'
+$ define/system/exec gnv$fetch_ssl_libcryptoshr32 'fetch_ssl_libcrypto32'
+$ define/system/exec gnv$fetch_ssl_libsslshr32 'fetch_ssl_libssl32'
 $!
 $!
-$! CURL setup
-$ define/system/exec gnv$libcurl gnv$gnu:[usr.lib]GNV$LIBCURL.EXE
-$ define/system/exec gnv$curl_include gnv$gnu:[usr.include.curl]
-$ if .not. f$file_attributes("gnv$libcurl", "known")
+$! FETCH setup
+$ define/system/exec gnv$libfetch gnv$gnu:[usr.lib]GNV$LIBFETCH.EXE
+$ define/system/exec gnv$fetch_include gnv$gnu:[usr.include.fetch]
+$ if .not. f$file_attributes("gnv$libfetch", "known")
 $ then
-$   install ADD gnv$libcurl/OPEN/SHARE/HEADER
+$   install ADD gnv$libfetch/OPEN/SHARE/HEADER
 $ else
-$   install REPLACE gnv$libcurl/OPEN/SHARE/HEADER
+$   install REPLACE gnv$libfetch/OPEN/SHARE/HEADER
 $ endif
 $!
 $!
-$ curl_exe = "gnv$gnu:[usr.bin]gnv$curl.exe"
-$ if .not. f$file_attributes(curl_exe, "known")
+$ fetch_exe = "gnv$gnu:[usr.bin]gnv$fetch.exe"
+$ if .not. f$file_attributes(fetch_exe, "known")
 $ then
-$   install ADD 'curl_exe'/OPEN/SHARE/HEADER
+$   install ADD 'fetch_exe'/OPEN/SHARE/HEADER
 $ else
-$   install REPLACE 'curl_exe'/OPEN/SHARE/HEADER
+$   install REPLACE 'fetch_exe'/OPEN/SHARE/HEADER
 $ endif
 $!
 $all_exit:

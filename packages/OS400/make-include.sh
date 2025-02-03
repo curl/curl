@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -39,14 +39,14 @@ SRCPF="${LIBIFSNAME}/H.FILE"
 
 if action_needed "${SRCPF}"
 then    CMD="CRTSRCPF FILE(${TARGETLIB}/H) RCDLEN(112)"
-        CMD="${CMD} CCSID(${TGTCCSID}) TEXT('curl: Header files')"
+        CMD="${CMD} CCSID(${TGTCCSID}) TEXT('fetch: Header files')"
         CLcommand "${CMD}"
 fi
 
 
 #       Create the IFS directory for the header files.
 
-IFSINCLUDE="${IFSDIR}/include/curl"
+IFSINCLUDE="${IFSDIR}/include/fetch"
 
 if action_needed "${IFSINCLUDE}"
 then    mkdir -p "${IFSINCLUDE}"
@@ -72,7 +72,7 @@ copy_hfile()
 
 #       Copy the header files.
 
-for HFILE in curl/*.h ${SCRIPTDIR}/ccsidcurl.h
+for HFILE in fetch/*.h ${SCRIPTDIR}/ccsidfetch.h
 do      case "$(basename "${HFILE}" .h)" in
         stdcheaders|typecheck-gcc)
                 continue;;
@@ -91,18 +91,18 @@ done
 
 #       Copy the ILE/RPG header file, setting-up version number.
 
-versioned_copy "${SCRIPTDIR}/curl.inc.in" "${SRCPF}/CURL.INC.MBR"
-rm -f "${IFSINCLUDE}/curl.inc.rpgle"
-ln -s "${SRCPF}/CURL.INC.MBR" "${IFSINCLUDE}/curl.inc.rpgle"
+versioned_copy "${SCRIPTDIR}/fetch.inc.in" "${SRCPF}/FETCH.INC.MBR"
+rm -f "${IFSINCLUDE}/fetch.inc.rpgle"
+ln -s "${SRCPF}/FETCH.INC.MBR" "${IFSINCLUDE}/fetch.inc.rpgle"
 
 
-#       Duplicate file H as CURL to support more include path forms.
+#       Duplicate file H as FETCH to support more include path forms.
 
-if action_needed "${LIBIFSNAME}/CURL.FILE"
+if action_needed "${LIBIFSNAME}/FETCH.FILE"
 then    :
-else    CLcommand "DLTF FILE(${TARGETLIB}/CURL)"
+else    CLcommand "DLTF FILE(${TARGETLIB}/FETCH)"
 fi
 
 CMD="CRTDUPOBJ OBJ(H) FROMLIB(${TARGETLIB}) OBJTYPE(*FILE) TOLIB(*FROMLIB)"
-CMD="${CMD} NEWOBJ(CURL) DATA(*YES)"
+CMD="${CMD} NEWOBJ(FETCH) DATA(*YES)"
 CLcommand "${CMD}"

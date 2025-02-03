@@ -2,7 +2,7 @@
       *
      h DFTACTGRP(*NO) ACTGRP(*NEW)
      h OPTION(*NOSHOWCPY)
-     h BNDDIR('CURL')
+     h BNDDIR('FETCH')
       *
       **************************************************************************
       *                                  _   _ ____  _
@@ -15,7 +15,7 @@
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
-      * are also available at https://curl.se/docs/copyright.html.
+      * are also available at https://fetch.se/docs/copyright.html.
       *
       * You may opt to use, copy, modify, merge, publish, distribute and/or sell
       * copies of the Software, and permit persons to whom the Software is
@@ -24,11 +24,11 @@
       * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
       * ANY KIND, either express or implied.
       *
-      * SPDX-License-Identifier: curl
+      * SPDX-License-Identifier: fetch
       *
       **************************************************************************
       *
-      /include H,CURL.INC
+      /include H,FETCH.INC
       *
       * Example to request the URL given as command line parameter and count
       * HTML tags in its response.
@@ -46,23 +46,23 @@
 
         urllen = trimmed_length(url: %len(url));
 
-        // Do the curl stuff.
+        // Do the fetch stuff.
 
-        curl_global_init(CURL_GLOBAL_ALL);
+        fetch_global_init(FETCH_GLOBAL_ALL);
         main();
-        curl_global_cleanup();
+        fetch_global_cleanup();
         *inlr = *on;            // Exit
       *
       **************************************************************************
-      * Main procedure: do the curl job.
+      * Main procedure: do the fetch job.
       **************************************************************************
       *
      p main            b
      d main            pi
       *
      d h               s               *                                        Easy handle
-     d result          s                   like(CURLcode)                       Curl return code
-     d                                     inz(CURLE_OUT_OF_MEMORY)
+     d result          s                   like(FETCHcode)                       Curl return code
+     d                                     inz(FETCHE_OUT_OF_MEMORY)
      d errmsgp         s               *                                        Error string pointer
      d response        s             52                                         For error display
      d counter         ds                  likeds(countdata)                    HTML tag counter
@@ -70,25 +70,25 @@
         counter.tagcount = 0;
         counter.tagopen = *off;
 
-            // Create and fill curl handle.
+            // Create and fill fetch handle.
 
-        h = curl_easy_init();
+        h = fetch_easy_init();
         if h <> *NULL;
-            curl_easy_setopt_ccsid(h: CURLOPT_URL: %subst(url: 1: urllen): 0);
-            curl_easy_setopt(h: CURLOPT_FOLLOWLOCATION: 1);
-            curl_easy_setopt(h: CURLOPT_WRITEFUNCTION: %paddr(in_data_cb));
-            curl_easy_setopt(h: CURLOPT_WRITEDATA: %addr(counter));
+            fetch_easy_setopt_ccsid(h: FETCHOPT_URL: %subst(url: 1: urllen): 0);
+            fetch_easy_setopt(h: FETCHOPT_FOLLOWLOCATION: 1);
+            fetch_easy_setopt(h: FETCHOPT_WRITEFUNCTION: %paddr(in_data_cb));
+            fetch_easy_setopt(h: FETCHOPT_WRITEDATA: %addr(counter));
 
             // Perform the request.
 
-            result = curl_easy_perform(h);
-            curl_easy_cleanup(h);       // Release handle
+            result = fetch_easy_perform(h);
+            fetch_easy_cleanup(h);       // Release handle
         endif;
 
         // Check for error and report if some.
 
-        if result <> CURLE_OK;
-            errmsgp = curl_easy_strerror_ccsid(result: 0);
+        if result <> FETCHE_OK;
+            errmsgp = fetch_easy_strerror_ccsid(result: 0);
             response = %str(errmsgp);
             dsply '' '*EXT' response;
         else;
@@ -116,7 +116,7 @@
      d i               s             10u 0                                      Character position
       *
         size = size * nmemb;                                   // The size in bytes.
-        ebcdata = curl_to_ccsid(%str(ptr: size): 0);           // Convert to EBCDIC.
+        ebcdata = fetch_to_ccsid(%str(ptr: size): 0);           // Convert to EBCDIC.
         i = 1;
         dow i <= size;
             if counter.tagopen;                                // Did we see '<' ?
@@ -133,7 +133,7 @@
             endif;
             i = i + 1;
         enddo;
-        curl_free(ebcdata);
+        fetch_free(ebcdata);
         return size;
      p in_data_cb      e
       *

@@ -2,7 +2,7 @@
       *
      h DFTACTGRP(*NO) ACTGRP(*NEW)
      h OPTION(*NOSHOWCPY)
-     h BNDDIR('CURL')
+     h BNDDIR('FETCH')
       *
       **************************************************************************
       *                                  _   _ ____  _
@@ -15,7 +15,7 @@
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
-      * are also available at https://curl.se/docs/copyright.html.
+      * are also available at https://fetch.se/docs/copyright.html.
       *
       * You may opt to use, copy, modify, merge, publish, distribute and/or sell
       * copies of the Software, and permit persons to whom the Software is
@@ -24,11 +24,11 @@
       * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
       * ANY KIND, either express or implied.
       *
-      * SPDX-License-Identifier: curl
+      * SPDX-License-Identifier: fetch
       *
       **************************************************************************
       *
-      /include H,CURL.INC
+      /include H,FETCH.INC
       *
       * Extract headers post transfer with the header API.
       *
@@ -41,72 +41,72 @@
 
         urllen = trimmed_length(url: %len(url));
 
-        // Do the curl stuff.
+        // Do the fetch stuff.
 
-        curl_global_init(CURL_GLOBAL_ALL);
+        fetch_global_init(FETCH_GLOBAL_ALL);
         main();
-        curl_global_cleanup();
+        fetch_global_cleanup();
         *inlr = *on;            // Exit
       *
       **************************************************************************
-      * Main procedure: do the curl job.
+      * Main procedure: do the fetch job.
       **************************************************************************
       *
      p main            b
      d main            pi
       *
      d h               s               *                                        Easy handle
-     d result          s                   like(CURLcode)                       Curl return code
-     d                                     inz(CURLE_OUT_OF_MEMORY)
-     d header          ds                  likeds(curl_header) based(hp)
+     d result          s                   like(FETCHcode)                       Curl return code
+     d                                     inz(FETCHE_OUT_OF_MEMORY)
+     d header          ds                  likeds(fetch_header) based(hp)
      d strp1           s               *                                        Work string pointer
      d strp2           s               *                                        Work string pointer
      d inout           s             52                                         For error display
 
-        // Create and fill curl handle.
+        // Create and fill fetch handle.
 
-        h = curl_easy_init();
+        h = fetch_easy_init();
         if h <> *NULL;
-            curl_easy_setopt_ccsid(h: CURLOPT_URL: %subst(url: 1: urllen): 0);
-            curl_easy_setopt(h: CURLOPT_FOLLOWLOCATION: 1);
-            curl_easy_setopt(h: CURLOPT_WRITEFUNCTION: %paddr(in_data_cb));     // Ignore input data
+            fetch_easy_setopt_ccsid(h: FETCHOPT_URL: %subst(url: 1: urllen): 0);
+            fetch_easy_setopt(h: FETCHOPT_FOLLOWLOCATION: 1);
+            fetch_easy_setopt(h: FETCHOPT_WRITEFUNCTION: %paddr(in_data_cb));     // Ignore input data
 
             // Perform the request.
 
-            result = curl_easy_perform(h);
+            result = fetch_easy_perform(h);
         endif;
 
         // Check for error and report if some.
 
-        if result <> CURLE_OK;
-            inout = %str(curl_easy_strerror_ccsid(result: 0));
+        if result <> FETCHE_OK;
+            inout = %str(fetch_easy_strerror_ccsid(result: 0));
             dsply '' '*EXT' inout;
         else;
-            if curl_easy_header_ccsid(h: 'Content-Type': 0: CURLH_HEADER: -1:
-                                      hp: 0) = CURLHE_OK;
-                strp2 = curl_to_ccsid(header.value: 0);
+            if fetch_easy_header_ccsid(h: 'Content-Type': 0: FETCHH_HEADER: -1:
+                                      hp: 0) = FETCHHE_OK;
+                strp2 = fetch_to_ccsid(header.value: 0);
                 inout = 'Content-Type: ' + %str(strp2);
                 dsply inout;
-                curl_free(strp2);
+                fetch_free(strp2);
             endif;
             dsply '    All server headers:';
             hp = *NULL;
             dow *on;
-                hp = curl_easy_nextheader(h: CURLH_HEADER: -1: hp);
+                hp = fetch_easy_nextheader(h: FETCHH_HEADER: -1: hp);
                 if hp = *NULL;
                     leave;
                 endif;
-                strp1 = curl_to_ccsid(header.name: 0);
-                strp2 = curl_to_ccsid(header.value: 0);
+                strp1 = fetch_to_ccsid(header.name: 0);
+                strp2 = fetch_to_ccsid(header.value: 0);
                 inout = %str(strp1) + ': ' + %str(strp2) +
                         ' (' + %char(header.amount) + ')';
-                curl_free(strp2);
-                curl_free(strp1);
+                fetch_free(strp2);
+                fetch_free(strp1);
                 dsply inout;
             enddo;
             inout = 'Done';
             dsply '' '*EXT' inout;
-            curl_easy_cleanup(h);       // Release handle
+            fetch_easy_cleanup(h);       // Release handle
         endif;
      p main            e
       *

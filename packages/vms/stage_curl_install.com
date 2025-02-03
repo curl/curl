@@ -1,25 +1,25 @@
-$! File: stage_curl_install.com
+$! File: stage_fetch_install.com
 $!
-$! This updates or removes the GNV$CURL.EXE and related files for the
+$! This updates or removes the GNV$FETCH.EXE and related files for the
 $! new_gnu:[*...] directory tree for running the self tests.
 $!
 $! The files installed/removed are:
-$!     [usr.bin]gnv$curl.exe
-$!     [usr.bin]curl-config.
-$!     [usr.lib]gnv$libcurl.exe
-$!     [usr.bin]curl. hard link for [usr.bin]gnv$curl.exe
-$!     [usr.include.curl]curl.h
-$!     [usr.include.curl]curlver.h
-$!     [usr.include.curl]easy.h
-$!     [usr.include.curl]mprintf.h
-$!     [usr.include.curl]multi.h
-$!     [usr.include.curl]stdcheaders.h
-$!     [usr.include.curl]typecheck-gcc.h
-$!     [usr.lib.pkgconfig]libcurl.pc
-$!     [usr.share.man.man1]curl-config.1
-$!     [usr.share.man.man1]curl.1
-$!     [usr.share.man.man3]curl*.3
-$!     [usr.share.man.man3]libcurl*.3
+$!     [usr.bin]gnv$fetch.exe
+$!     [usr.bin]fetch-config.
+$!     [usr.lib]gnv$libfetch.exe
+$!     [usr.bin]fetch. hard link for [usr.bin]gnv$fetch.exe
+$!     [usr.include.fetch]fetch.h
+$!     [usr.include.fetch]fetchver.h
+$!     [usr.include.fetch]easy.h
+$!     [usr.include.fetch]mprintf.h
+$!     [usr.include.fetch]multi.h
+$!     [usr.include.fetch]stdcheaders.h
+$!     [usr.include.fetch]typecheck-gcc.h
+$!     [usr.lib.pkgconfig]libfetch.pc
+$!     [usr.share.man.man1]fetch-config.1
+$!     [usr.share.man.man1]fetch.1
+$!     [usr.share.man.man3]fetch*.3
+$!     [usr.share.man.man3]libfetch*.3
 $! Future: A symbolic link to the release notes?
 $!
 $! Copyright (C) John Malmberg
@@ -57,24 +57,24 @@ $ remove_files = 0
 $ if remove_filesq .eqs. "R" then remove_files = 1
 $!
 $!
-$! If we are staging files, make sure that the libcurl.pc and curl-config
+$! If we are staging files, make sure that the libfetch.pc and fetch-config
 $! files are present.
 $ if remove_files .eq. 0
 $ then
-$   if f$search("[--]libcurl.pc") .eqs. ""
+$   if f$search("[--]libfetch.pc") .eqs. ""
 $   then
-$       @build_libcurl_pc.com
+$       @build_libfetch_pc.com
 $   endif
-$   if f$search("[--]curl-config") .eqs. ""
+$   if f$search("[--]fetch-config") .eqs. ""
 $   then
-$       @build_curl-config_script.com
+$       @build_fetch-config_script.com
 $   endif
 $ endif
 $!
 $!
 $! Dest dirs
 $!------------------
-$ dest_dirs1 = "[usr],[usr.bin],[usr.include],[usr.include.curl]"
+$ dest_dirs1 = "[usr],[usr.bin],[usr.include],[usr.include.fetch]"
 $ dest_dirs2 = ",[usr.bin],[usr.lib.pkgconfig],[usr.share]"
 $ dest_dirs3 = ",[usr.share.man],[usr.share.man.man1],[usr.share.man.man3]"
 $ dest_dirs = dest_dirs1 + dest_dirs2 + dest_dirs3
@@ -82,89 +82,89 @@ $!
 $!
 $!   Alias links needed.
 $!-------------------------
-$ source_curl = "gnv$curl.exe"
-$ dest_curl = "[bin]gnv$curl.exe"
-$ curl_links = "[bin]curl."
+$ source_fetch = "gnv$fetch.exe"
+$ dest_fetch = "[bin]gnv$fetch.exe"
+$ fetch_links = "[bin]fetch."
 $ new_gnu = "new_gnu:"
 $!
 $!
 $! Create the directories if they do not exist
 $!---------------------------------------------
 $ i = 0
-$curl_dir_loop:
+$fetch_dir_loop:
 $   this_dir = f$element(i, ",", dest_dirs)
 $   i = i + 1
-$   if this_dir .eqs. "" then goto curl_dir_loop
-$   if this_dir .eqs. "," then goto curl_dir_loop_end
+$   if this_dir .eqs. "" then goto fetch_dir_loop
+$   if this_dir .eqs. "," then goto fetch_dir_loop_end
 $!  Just create the directories, do not delete them.
 $!  --------------------------------------------------
 $   if remove_files .eq. 0
 $   then
 $       create/dir 'new_gnu''this_dir'/prot=(o:rwed)
 $   endif
-$   goto curl_dir_loop
-$curl_dir_loop_end:
+$   goto fetch_dir_loop
+$fetch_dir_loop_end:
 $!
 $!
 $! Need to add in the executable file
 $!-----------------------------------
 $ if remove_files .eq. 0
 $ then
-$   copy [--.src]curl.exe 'new_gnu'[usr.bin]gnv$curl.exe/prot=w:re
-$   copy [--]curl-config. 'new_gnu'[usr.bin]curl-config./prot=w:re
-$   copy sys$disk:[]gnv$libcurl.exe 'new_gnu'[usr.lib]gnv$libcurl.exe/prot=w:re
+$   copy [--.src]fetch.exe 'new_gnu'[usr.bin]gnv$fetch.exe/prot=w:re
+$   copy [--]fetch-config. 'new_gnu'[usr.bin]fetch-config./prot=w:re
+$   copy sys$disk:[]gnv$libfetch.exe 'new_gnu'[usr.lib]gnv$libfetch.exe/prot=w:re
 $ endif
 $!
 $ if remove_files .eq. 0
 $ then
-$   set file/enter='new_gnu'[bin]curl. 'new_gnu'[usr.bin]gnv$curl.exe
+$   set file/enter='new_gnu'[bin]fetch. 'new_gnu'[usr.bin]gnv$fetch.exe
 $ else
-$   file = "''new_gnu'[bin]curl."
+$   file = "''new_gnu'[bin]fetch."
 $   if f$search(file) .nes. "" then set file/remove 'file';*
 $ endif
 $!
 $!
 $ if remove_files .eq. 0
 $ then
-$   copy [--.include.curl]curl.h 'new_gnu'[usr.include.curl]curl.h
-$   copy [--.include.curl]system.h -
-         'new_gnu'[usr.include.curl]system.h
-$   copy [--.include.curl]curlver.h -
-         'new_gnu'[usr.include.curl]curlver.h
-$   copy [--.include.curl]easy.h -
-         'new_gnu'[usr.include.curl]easy.h
-$   copy [--.include.curl]mprintf.h -
-         'new_gnu'[usr.include.curl]mprintf.h
-$   copy [--.include.curl]multi.h -
-         'new_gnu'[usr.include.curl]multi.h
-$   copy [--.include.curl]stdcheaders.h -
-         'new_gnu'[usr.include.curl]stdcheaders.h
-$   copy [--.include.curl]typecheck-gcc.h -
-         'new_gnu'[usr.include.curl]typecheck-gcc.h
-$   copy [--]libcurl.pc 'new_gnu'[usr.lib.pkgconfig]libcurl.pc
+$   copy [--.include.fetch]fetch.h 'new_gnu'[usr.include.fetch]fetch.h
+$   copy [--.include.fetch]system.h -
+         'new_gnu'[usr.include.fetch]system.h
+$   copy [--.include.fetch]fetchver.h -
+         'new_gnu'[usr.include.fetch]fetchver.h
+$   copy [--.include.fetch]easy.h -
+         'new_gnu'[usr.include.fetch]easy.h
+$   copy [--.include.fetch]mprintf.h -
+         'new_gnu'[usr.include.fetch]mprintf.h
+$   copy [--.include.fetch]multi.h -
+         'new_gnu'[usr.include.fetch]multi.h
+$   copy [--.include.fetch]stdcheaders.h -
+         'new_gnu'[usr.include.fetch]stdcheaders.h
+$   copy [--.include.fetch]typecheck-gcc.h -
+         'new_gnu'[usr.include.fetch]typecheck-gcc.h
+$   copy [--]libfetch.pc 'new_gnu'[usr.lib.pkgconfig]libfetch.pc
 $!
-$   copy [--.docs]curl-config.1 'new_gnu'[usr.share.man.man1]curl-config.1
-$   copy [--.docs]curl.1 'new_gnu'[usr.share.man.man1]curl.1
+$   copy [--.docs]fetch-config.1 'new_gnu'[usr.share.man.man1]fetch-config.1
+$   copy [--.docs]fetch.1 'new_gnu'[usr.share.man.man1]fetch.1
 $!
-$   copy [--.docs.libcurl]*.3 -
+$   copy [--.docs.libfetch]*.3 -
          'new_gnu'[usr.share.man.man3]*.3
 $!
 $ else
-$   file = "''new_gnu'[usr.bin]curl-config."
+$   file = "''new_gnu'[usr.bin]fetch-config."
 $   if f$search(file) .nes. "" then delete 'file';*
-$   file = "''new_gnu'[usr.bin]gnv$curl.exe"
+$   file = "''new_gnu'[usr.bin]gnv$fetch.exe"
 $   if f$search(file) .nes. "" then delete 'file';*
-$   file = "''new_gnu'[usr.lib]gnv$libcurl.exe"
+$   file = "''new_gnu'[usr.lib]gnv$libfetch.exe"
 $   if f$search(file) .nes. "" then delete 'file';*
-$   file = "''new_gnu'[usr.include.curl]*.h"
+$   file = "''new_gnu'[usr.include.fetch]*.h"
 $   if f$search(file) .nes. "" then delete 'file';*
-$   file = "''new_gnu'[usr.share.man.man1]curl-config.1"
+$   file = "''new_gnu'[usr.share.man.man1]fetch-config.1"
 $   if f$search(file) .nes. "" then delete 'file';*
-$   file = "''new_gnu'[usr.share.man.man1]curl.1"
+$   file = "''new_gnu'[usr.share.man.man1]fetch.1"
 $   if f$search(file) .nes. "" then delete 'file';*
-$   file = "''new_gnu'[usr.share.man.man3]curl*.3"
+$   file = "''new_gnu'[usr.share.man.man3]fetch*.3"
 $   if f$search(file) .nes. "" then delete 'file';*
-$   file = "''new_gnu'[usr.share.man.man3]libcurl*.3"
+$   file = "''new_gnu'[usr.share.man.man3]libfetch*.3"
 $   if f$search(file) .nes. "" then delete 'file';*
 $ endif
 $!

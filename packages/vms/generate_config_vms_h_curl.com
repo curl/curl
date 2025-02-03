@@ -1,15 +1,15 @@
-$! File: GENERATE_CONFIG_H_CURL.COM
+$! File: GENERATE_CONFIG_H_FETCH.COM
 $!
 $! Curl like most open source products uses a variant of a config.h file.
-$! Depending on the curl version, this could be config.h or curl_config.h.
+$! Depending on the fetch version, this could be config.h or fetch_config.h.
 $!
 $! For GNV based builds, the configure script is run and that produces
-$! a [curl_]config.h file.  Configure scripts on VMS generally do not
+$! a [fetch_]config.h file.  Configure scripts on VMS generally do not
 $! know how to do everything, so there is also a [-.lib]config-vms.h file
 $! that has VMS specific code that compensates for bugs in some of the
 $! VMS shared images.
 $!
-$! This generates a [curl_]config.h file and also a config_vms.h file,
+$! This generates a [fetch_]config.h file and also a config_vms.h file,
 $! which is used to supplement that file.  Note that the config_vms.h file
 $! and the [.lib]config-vms.h file do two different tasks and that the
 $! filenames are slightly different.
@@ -110,7 +110,7 @@ $!------------------------------------------------------
 $if f$trnlnm("GNV$LIBIDNSHR") .nes. ""
 $then
 $   write sys$output "NOTICE:  A LIBIDN port has been detected."
-$   write sys$output " This port of curl for VMS has not been tested with it."
+$   write sys$output " This port of fetch for VMS has not been tested with it."
 $   if f$locate(",libidn,", args_lower) .lt. args_len
 $   then
 $       libidn = 1
@@ -129,7 +129,7 @@ $!------------------------------------------------------
 $if f$trnlnm("GNV$LIBSSH2SHR") .nes. ""
 $then
 $   write sys$output "NOTICE:  A LIBSSH2 port has been detected."
-$   write sys$output " This port of curl for VMS has not been tested with it."
+$   write sys$output " This port of fetch for VMS has not been tested with it."
 $   if f$locate(",libssh2,", args_lower) .lt. args_len
 $   then
 $       libssh2 = 1
@@ -186,8 +186,8 @@ $!
 $! Start the configuration file.
 $! Need to do a create and then an append to make the file have the
 $! typical file attributes of a VMS text file.
-$create sys$disk:[curl.lib]config_vms.h
-$open/append cvh sys$disk:[curl.lib]config_vms.h
+$create sys$disk:[fetch.lib]config_vms.h
+$open/append cvh sys$disk:[fetch.lib]config_vms.h
 $!
 $! Write the defines to prevent multiple includes.
 $! These are probably not needed in this case,
@@ -203,106 +203,106 @@ $! Now the DCL builds usually say xxx-HP-VMS and configure scripts
 $! may put DEC or COMPAQ or HP for the middle part.
 $!
 $write cvh "#if defined(__alpha)"
-$write cvh "#define CURL_OS ""ALPHA-HP-VMS"""
+$write cvh "#define FETCH_OS ""ALPHA-HP-VMS"""
 $write cvh "#elif defined(__vax)"
-$write cvh "#define CURL_OS ""VAX-HP-VMS"""
+$write cvh "#define FETCH_OS ""VAX-HP-VMS"""
 $write cvh "#elif defined(__ia64)"
-$write cvh "#define CURL_OS ""IA64-HP-VMS""
+$write cvh "#define FETCH_OS ""IA64-HP-VMS""
 $write cvh "#else"
-$write cvh "#define CURL_OS ""UNKNOWN-HP-VMS""
+$write cvh "#define FETCH_OS ""UNKNOWN-HP-VMS""
 $write cvh "#endif"
 $write cvh ""
 $!
 $! We are now setting this on the GNV build, so also do this
 $! for compatibility.
 $write cvh "/* Location of default ca path */"
-$write cvh "#define curl_ca_path ""gnv$curl_ca_path"""
+$write cvh "#define fetch_ca_path ""gnv$fetch_ca_path"""
 $!
 $! The config_h.com finds a bunch of default disable commands in
 $! configure and will incorrectly disable these options.  The config_h.com
 $! is a generic procedure and it would break more things to try to fix it
-$! to special case it for curl.  So we will fix it here.
+$! to special case it for fetch.  So we will fix it here.
 $!
 $! We do them all here, even the ones that config_h.com currently gets correct.
 $!
-$write cvh "#ifdef CURL_DISABLE_COOKIES"
-$write cvh "#undef CURL_DISABLE_COOKIES"
+$write cvh "#ifdef FETCH_DISABLE_COOKIES"
+$write cvh "#undef FETCH_DISABLE_COOKIES"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_DICT"
-$write cvh "#undef CURL_DISABLE_DICT"
+$write cvh "#ifdef FETCH_DISABLE_DICT"
+$write cvh "#undef FETCH_DISABLE_DICT"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_FILE"
-$write cvh "#undef CURL_DISABLE_FILE"
+$write cvh "#ifdef FETCH_DISABLE_FILE"
+$write cvh "#undef FETCH_DISABLE_FILE"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_FTP"
-$write cvh "#undef CURL_DISABLE_FTP"
+$write cvh "#ifdef FETCH_DISABLE_FTP"
+$write cvh "#undef FETCH_DISABLE_FTP"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_GOPHER"
-$write cvh "#undef CURL_DISABLE_GOPHER"
+$write cvh "#ifdef FETCH_DISABLE_GOPHER"
+$write cvh "#undef FETCH_DISABLE_GOPHER"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_HTTP"
-$write cvh "#undef CURL_DISABLE_HTTP"
+$write cvh "#ifdef FETCH_DISABLE_HTTP"
+$write cvh "#undef FETCH_DISABLE_HTTP"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_IMAP"
-$write cvh "#undef CURL_DISABLE_IMAP"
+$write cvh "#ifdef FETCH_DISABLE_IMAP"
+$write cvh "#undef FETCH_DISABLE_IMAP"
 $write cvh "#endif"
 $if .not. noldap
 $then
-$   write cvh "#ifdef CURL_DISABLE_LDAP"
-$   write cvh "#undef CURL_DISABLE_LDAP"
+$   write cvh "#ifdef FETCH_DISABLE_LDAP"
+$   write cvh "#undef FETCH_DISABLE_LDAP"
 $   write cvh "#endif"
 $   if .not. nossl
 $   then
-$       write cvh "#ifdef CURL_DISABLE_LDAPS"
-$       write cvh "#undef CURL_DISABLE_LDAPS"
+$       write cvh "#ifdef FETCH_DISABLE_LDAPS"
+$       write cvh "#undef FETCH_DISABLE_LDAPS"
 $       write cvh "#endif"
 $   endif
 $endif
-$write cvh "#ifdef CURL_DISABLE_LIBCURL_OPTION"
-$write cvh "#undef CURL_DISABLE_LIBCURL_OPTION"
+$write cvh "#ifdef FETCH_DISABLE_LIBFETCH_OPTION"
+$write cvh "#undef FETCH_DISABLE_LIBFETCH_OPTION"
 $write cvh "#endif"
 $write cvh "#ifndef __VAX"
-$write cvh "#ifdef CURL_DISABLE_NTLM"
-$write cvh "#undef CURL_DISABLE_NTLM"
+$write cvh "#ifdef FETCH_DISABLE_NTLM"
+$write cvh "#undef FETCH_DISABLE_NTLM"
 $write cvh "#endif"
 $write cvh "#else"
 $! NTLM needs long long or int64 support, missing from DECC C.
 $write cvh "#ifdef __DECC
-$write cvh "#ifndef CURL_DISABLE_NTLM"
-$write cvh "#define CURL_DISABLE_NTLM 1"
+$write cvh "#ifndef FETCH_DISABLE_NTLM"
+$write cvh "#define FETCH_DISABLE_NTLM 1"
 $write cvh "#endif"
 $write cvh "#endif"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_POP3"
-$write cvh "#undef CURL_DISABLE_POP3"
+$write cvh "#ifdef FETCH_DISABLE_POP3"
+$write cvh "#undef FETCH_DISABLE_POP3"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_PROXY"
-$write cvh "#undef CURL_DISABLE_PROXY"
+$write cvh "#ifdef FETCH_DISABLE_PROXY"
+$write cvh "#undef FETCH_DISABLE_PROXY"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_RTSP"
-$write cvh "#undef CURL_DISABLE_RTSP"
+$write cvh "#ifdef FETCH_DISABLE_RTSP"
+$write cvh "#undef FETCH_DISABLE_RTSP"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_SMTP"
-$write cvh "#undef CURL_DISABLE_SMTP"
+$write cvh "#ifdef FETCH_DISABLE_SMTP"
+$write cvh "#undef FETCH_DISABLE_SMTP"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_TELNET"
-$write cvh "#undef CURL_DISABLE_TELNET"
+$write cvh "#ifdef FETCH_DISABLE_TELNET"
+$write cvh "#undef FETCH_DISABLE_TELNET"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_TFTP"
-$write cvh "#undef CURL_DISABLE_TFTP"
+$write cvh "#ifdef FETCH_DISABLE_TFTP"
+$write cvh "#undef FETCH_DISABLE_TFTP"
 $write cvh "#endif"
-$write cvh "#ifdef CURL_DISABLE_POP3"
-$write cvh "#undef CURL_DISABLE_POP3"
+$write cvh "#ifdef FETCH_DISABLE_POP3"
+$write cvh "#undef FETCH_DISABLE_POP3"
 $write cvh "#endif"
 $if .not. nossl
 $then
-$   write cvh "#ifdef CURL_DISABLE_TLS_SRP"
-$   write cvh "#undef CURL_DISABLE_TLS_SRP"
+$   write cvh "#ifdef FETCH_DISABLE_TLS_SRP"
+$   write cvh "#undef FETCH_DISABLE_TLS_SRP"
 $   write cvh "#endif"
 $!
 $endif
-$write cvh "#ifdef CURL_DISABLE_VERBOSE_STRINGS"
-$write cvh "#undef CURL_DISABLE_VERBOSE_STRINGS"
+$write cvh "#ifdef FETCH_DISABLE_VERBOSE_STRINGS"
+$write cvh "#undef FETCH_DISABLE_VERBOSE_STRINGS"
 $write cvh "#endif"
 $!
 $! configure defaults to USE_*, a real configure on VMS chooses different.
@@ -343,7 +343,7 @@ $write cvh "#endif"
 $!
 $!
 $! Note:
-$! The CURL_EXTERN_SYMBOL is used for platforms that need the compiler
+$! The FETCH_EXTERN_SYMBOL is used for platforms that need the compiler
 $! to know about universal symbols.  VMS does not need this support so
 $! we do not set it here.
 $!
@@ -428,7 +428,7 @@ $   write cvh "#define HAVE_LIBZ 1"
 $endif
 $!
 $!
-$! Suppress a message in curl_gssapi.c compile.
+$! Suppress a message in fetch_gssapi.c compile.
 $write cvh "#pragma message disable notconstqual"
 $!
 $! Close out the file

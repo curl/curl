@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,12 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  *
  ***************************************************************************/
 
-/* CL interface program to curl cli tool. */
+/* CL interface program to fetch cli tool. */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,8 +32,8 @@
 #include <miptrnam.h>
 #include <mih/callpgmv.h>
 
-#ifndef CURLPGM
-#define CURLPGM "CURL"
+#ifndef FETCHPGM
+#define FETCHPGM "FETCH"
 #endif
 
 /* Variable-length string, with 16-bit length. */
@@ -159,7 +159,7 @@ main(int argsc, struct arguments *args)
       exitcode = -2;
     }
     else {
-      _SYSPTR pgmptr = rslvsp(WLI_PGM, (char *) CURLPGM, library, _AUTH_NONE);
+      _SYSPTR pgmptr = rslvsp(WLI_PGM, (char *) FETCHPGM, library, _AUTH_NONE);
       _LU_Work_Area_T *luwrka = (_LU_Work_Area_T *) _LUWRKA();
 
       parse_command_line(args->cmdargs->string, args->cmdargs->len,

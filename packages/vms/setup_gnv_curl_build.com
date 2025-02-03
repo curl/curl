@@ -1,4 +1,4 @@
-$! File: setup_gnv_curl_build.com
+$! File: setup_gnv_fetch_build.com
 $!
 $! Set up build environment for building Curl under GNV on VMS.
 $!
@@ -68,7 +68,7 @@ $ cxx :== cxx'clist''cnames'/nested_include_directory=none
 $ pointer_size = "32"
 $! Note 64-bit pointers requires all libraries to either have
 $! 64-bit pointers or have #pragma directives.
-$! Currently building curl on VMS with 64-bit pointers does not work.
+$! Currently building fetch on VMS with 64-bit pointers does not work.
 $!
 $! A logical name to make it easier to find some of the hacks.
 $ define/job gnv_hacks 'base_dir'
@@ -95,7 +95,7 @@ $   endif
 $ endif
 $!
 $! C compiler include path.
-$ define/job decc$system_include prj_root:[.include.curl],-
+$ define/job decc$system_include prj_root:[.include.fetch],-
     [-.packages.vms],-
     ssl$include:,gnv$gnu:[usr.include],-
     gnv$gnu:[usr.include.libz],gnv$gnu:[include],-
@@ -105,7 +105,7 @@ $!
 $! Set up an include list for the compiler to find all the header files
 $! that they need.
 $!
-$ define/job decc$user_include src_root:[.include.curl]
+$ define/job decc$user_include src_root:[.include.fetch]
 $ define ssl_lib sys$library:
 $!
 $! Calculate what is needed in the option files
@@ -159,11 +159,11 @@ $ rename 'base_dir'gnv$conftest.* ;1
 $!
 $!
 $!
-$! GNV helper files for building the test curl binary.
+$! GNV helper files for building the test fetch binary.
 $!-----------------------------------------------
-$ create [.src]gnv$curl.opt
-$ open/append opt [.src]gnv$curl.opt
-$ write opt "gnv_packages_vms:curlmsg.obj"
+$ create [.src]gnv$fetch.opt
+$ open/append opt [.src]gnv$fetch.opt
+$ write opt "gnv_packages_vms:fetchmsg.obj"
 $ if libzshr_line .nes. "" then write opt libzshr_line
 $ if gssrtlshr_line .nes. "" then write opt gssrtlshr_line
 $ if libcryptoshr_line .nes. "" then write opt libcryptoshr_line
@@ -173,10 +173,10 @@ $ purge [.src]gnv$*.*
 $ rename [.src]gnv$*.* ;1
 $!
 $!
-$! Create the libcurl
+$! Create the libfetch
 $!------------------------------------------------------
-$ create 'default_dir'gnv_libcurl_linker.opt
-$ open/append opt 'default_dir'gnv_libcurl_linker.opt
+$ create 'default_dir'gnv_libfetch_linker.opt
+$ open/append opt 'default_dir'gnv_libfetch_linker.opt
 $ if libzshr_line .nes. "" then write opt libzshr_line
 $ if gssrtlshr_line .nes. "" then write opt gssrtlshr_line
 $ if libcryptoshr_line .nes. "" then write opt libcryptoshr_line
@@ -188,7 +188,7 @@ $! Create the template linker file
 $!---------------------------------
 $ create 'default_dir'gnv_template_linker.opt
 $ open/append opt 'default_dir'gnv_template_linker.opt
-$ write opt "gnv_vms_common:vms_curl_init_unix.obj"
+$ write opt "gnv_vms_common:vms_fetch_init_unix.obj"
 $ if libzshr_line .nes. "" then write opt libzshr_line
 $ if gssrtlshr_line .nes. "" then write opt gssrtlshr_line
 $ if libcryptoshr_line .nes. "" then write opt libcryptoshr_line
@@ -256,23 +256,23 @@ $!
 $!
 $! Build the Message file.
 $!--------------------------
-$ if f$search("[.packages.vms]curlmsg.obj") .eqs. ""
+$ if f$search("[.packages.vms]fetchmsg.obj") .eqs. ""
 $ then
-$   message [.packages.vms]curlmsg.msg/object=[.packages.vms]
+$   message [.packages.vms]fetchmsg.msg/object=[.packages.vms]
 $ endif
-$ if f$search("gnv$curlmsg.exe") .eqs. ""
+$ if f$search("gnv$fetchmsg.exe") .eqs. ""
 $ then
-$   link/share=gnv$curlmsg.exe [.packages.vms]curlmsg.obj
+$   link/share=gnv$fetchmsg.exe [.packages.vms]fetchmsg.obj
 $ endif
 $!
 $!
 $!
 $! Need to build the common init module.
 $!-------------------------------------------
-$ init_obj = "[.packages.vms]curl_crtl_init.obj"
+$ init_obj = "[.packages.vms]fetch_crtl_init.obj"
 $ if f$search(init_obj) .eqs. ""
 $ then
-$   cc'cflags' 'default_dir'curl_crtl_init.c/obj='init_obj'
+$   cc'cflags' 'default_dir'fetch_crtl_init.c/obj='init_obj'
 $   purge 'init_obj'
 $   rename 'init_obj' ;1
 $ endif

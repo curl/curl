@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,11 +21,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
-#       libcurl compilation script for the OS/400.
+#       libfetch compilation script for the OS/400.
 #
 
 SCRIPTDIR=$(dirname "${0}")
@@ -43,12 +43,12 @@ fi
 #      Create and compile the identification source file.
 
 {
-        echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")'
+        echo '#pragma comment(user, "libfetch version '"${LIBFETCH_VERSION}"'")'
         echo '#pragma comment(user, __DATE__)'
         echo '#pragma comment(user, __TIME__)'
         echo '#pragma comment(copyright, "Copyright (C) Daniel Stenberg et al. OS/400 version by P. Monnerat")'
 } > os400.c
-make_module     OS400           os400.c         BUILDING_LIBCURL
+make_module     OS400           os400.c         BUILDING_LIBFETCH
 LINK=                           # No need to rebuild service program yet.
 MODULES=
 
@@ -63,12 +63,12 @@ get_make_vars Makefile.inc
 # shellcheck disable=SC2034
 INCLUDES="'$(pwd)'"
 
-make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"       BUILDING_LIBCURL
-make_module     CCSIDCURL       "${SCRIPTDIR}/ccsidcurl.c"      BUILDING_LIBCURL
+make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"       BUILDING_LIBFETCH
+make_module     CCSIDFETCH       "${SCRIPTDIR}/ccsidfetch.c"      BUILDING_LIBFETCH
 
 for SRC in ${CSOURCES}
 do      MODULE=$(db2_name "${SRC}")
-        make_module "${MODULE}" "${SRC}" BUILDING_LIBCURL
+        make_module "${MODULE}" "${SRC}" BUILDING_LIBFETCH
 done
 
 
@@ -97,24 +97,24 @@ fi
 
 if action_needed "${LIBIFSNAME}/TOOLS.FILE"
 then    CMD="CRTSRCPF FILE(${TARGETLIB}/TOOLS) RCDLEN(112)"
-        CMD="${CMD} TEXT('curl: build tools')"
+        CMD="${CMD} TEXT('fetch: build tools')"
         CLcommand "${CMD}"
 fi
 
 
 #       Gather the list of symbols to export.
 #       - Unfold lines from the header files so that they contain a semicolon.
-#       - Keep only CURL_EXTERN definitions.
-#       - Remove the CURL_DEPRECATED and CURL_TEMP_PRINTF macro calls.
+#       - Keep only FETCH_EXTERN definitions.
+#       - Remove the FETCH_DEPRECATED and FETCH_TEMP_PRINTF macro calls.
 #       - Drop the parenthesized function arguments and what follows.
 #       - Keep the trailing function name only.
 
-EXPORTS=$(cat "${TOPDIR}"/include/curl/*.h "${SCRIPTDIR}/ccsidcurl.h"   |
+EXPORTS=$(cat "${TOPDIR}"/include/fetch/*.h "${SCRIPTDIR}/ccsidfetch.h"   |
          sed -e 'H;s/.*//;x;s/\n//;s/.*/& /'                            \
-             -e '/^CURL_EXTERN[[:space:]]/!d'                           \
+             -e '/^FETCH_EXTERN[[:space:]]/!d'                           \
              -e '/\;/!{x;d;}'                                           \
-             -e 's/ CURL_DEPRECATED([^)]*)//g'                          \
-             -e 's/ CURL_TEMP_PRINTF([^)]*)//g'                         \
+             -e 's/ FETCH_DEPRECATED([^)]*)//g'                          \
+             -e 's/ FETCH_TEMP_PRINTF([^)]*)//g'                         \
              -e 's/[[:space:]]*(.*$//'                                  \
              -e 's/^.*[^A-Za-z0-9_]\([A-Za-z0-9_]*\)$/\1/')
 
@@ -128,7 +128,7 @@ then    LINK=YES
 fi
 
 if [ -n "${LINK}" ]
-then    echo " STRPGMEXP PGMLVL(*CURRENT) SIGNATURE('LIBCURL_${SONAME}')" \
+then    echo " STRPGMEXP PGMLVL(*CURRENT) SIGNATURE('LIBFETCH_${SONAME}')" \
             > "${BSF}"
         for EXPORT in ${EXPORTS}
         do      echo ' EXPORT    SYMBOL("'"${EXPORT}"'")' >> "${BSF}"
@@ -159,7 +159,7 @@ then    CMD="CRTSRVPGM SRVPGM(${TARGETLIB}/${SRVPGM})"
         fi
         CMD="${CMD})"
         CMD="${CMD} BNDSRVPGM(QADRTTS QGLDCLNT QGLDBRDR)"
-        CMD="${CMD} TEXT('curl API library')"
+        CMD="${CMD} TEXT('fetch API library')"
         CMD="${CMD} TGTRLS(${TGTRLS})"
         CLcommand "${CMD}"
         LINK=YES

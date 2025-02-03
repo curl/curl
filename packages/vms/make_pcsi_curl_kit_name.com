@@ -1,4 +1,4 @@
-$! File: MAKE_PCSI_CURL_KIT_NAME.COM
+$! File: MAKE_PCSI_FETCH_KIT_NAME.COM
 $!
 $! Calculates the PCSI kit name for use in building an installation kit.
 $! PCSI is HP's PolyCenter Software Installation Utility.
@@ -78,22 +78,22 @@ $ if (code .eqs. "V") then base = "VAXVMS"
 $ if (code .eqs. "A") then base = "AXPVMS"
 $!
 $!
-$ product = "curl"
+$ product = "fetch"
 $!
 $!
-$! We need to get the version from curlver_h.  It will have a line like
-$! #define LIBCURL_VERSION "7.31.0"
+$! We need to get the version from fetchver_h.  It will have a line like
+$! #define LIBFETCH_VERSION "7.31.0"
 $!   or
-$! #define LIBCURL_VERSION "7.32.0-20130731".
+$! #define LIBFETCH_VERSION "7.32.0-20130731".
 $!
 $! The dash indicates that this is a daily pre-release.
 $!
 $!
-$ open/read/error=version_loop_end vhf [.include.curl]curlver.h
+$ open/read/error=version_loop_end vhf [.include.fetch]fetchver.h
 $ version_loop:
 $   read vhf line_in
 $   if line_in .eqs. "" then goto version_loop
-$   if f$locate("#define LIBCURL_VERSION ", line_in) .ne. 0
+$   if f$locate("#define LIBFETCH_VERSION ", line_in) .ne. 0
 $   then
 $       goto version_loop
 $   endif
@@ -134,7 +134,7 @@ $! We encode the snapshot date into the version as an ECO since a daily
 $! can never have an ECO.
 $!
 $! version_type = 'V' for a production release, and 'D' for a build from a
-$! daiy snapshot of the curl source.
+$! daiy snapshot of the fetch source.
 $ majorver = f$element(0, ".", raw_version)
 $ minorver = f$element(1, ".", raw_version)
 $ raw_update = f$element(2, ".", raw_version)

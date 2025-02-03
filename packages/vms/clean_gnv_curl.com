@@ -1,4 +1,4 @@
-$! File: clean_gnv_curl.COM
+$! File: clean_gnv_fetch.COM
 $!
 $! The GNV environment leaves behind some during the configure and build
 $! procedure that need to be cleaned up.
@@ -6,12 +6,12 @@ $!
 $! The default is to remove all the left over stuff from running the
 $! configure script and to remove all intermediate binary files.
 $!
-$! This should be run with no parameters after the gnv_curl_configure.sh
+$! This should be run with no parameters after the gnv_fetch_configure.sh
 $! script is run.
 $!
 $! Parameter P1: REALCLEAN
 $!   This removes all build products and brings the environment back to
-$!   the point where the gnv_curl_configure.sh procedure needs to be run again.
+$!   the point where the gnv_fetch_configure.sh procedure needs to be run again.
 $!
 $! Copyright (C) John Malmberg
 $!
@@ -103,34 +103,34 @@ $!
 $ file = "lcl_root:[...]*.lai"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl-*_original_src.bck"
+$ file = "lcl_root:[.packages.vms]fetch-*_original_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl_d-*_original_src.bck"
+$ file = "lcl_root:[.packages.vms]fetch_d-*_original_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl-*_vms_src.bck"
+$ file = "lcl_root:[.packages.vms]fetch-*_vms_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl_d-*_vms_src.bck"
+$ file = "lcl_root:[.packages.vms]fetch_d-*_vms_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl-*.release_notes"
+$ file = "lcl_root:[.packages.vms]fetch-*.release_notes"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]curl_d-*.release_notes"
+$ file = "lcl_root:[.packages.vms]fetch_d-*.release_notes"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]*-curl-*.pcsi$desc"
+$ file = "lcl_root:[.packages.vms]*-fetch-*.pcsi$desc"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]*-curl_d-*.pcsi$desc"
+$ file = "lcl_root:[.packages.vms]*-fetch_d-*.pcsi$desc"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]*-curl-*.pcsi$text"
+$ file = "lcl_root:[.packages.vms]*-fetch-*.pcsi$text"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.vms]*-curl_d-*.pcsi$text"
+$ file = "lcl_root:[.packages.vms]*-fetch_d-*.pcsi$text"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $!======================================================================
@@ -152,10 +152,10 @@ $!
 $ file = "lcl_root:[...]POTFILES."
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[]libcurl.pc"
+$ file = "lcl_root:[]libfetch.pc"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[]curl-config."
+$ file = "lcl_root:[]fetch-config."
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $ file = "lcl_root:[]config.h"
@@ -164,7 +164,7 @@ $!
 $ file = "lcl_root:[.src]config.h"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.src]curl."
+$ file = "lcl_root:[.src]fetch."
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $ file = "lcl_root:[.tests]configurehelp.pm"
@@ -173,10 +173,10 @@ $!
 $ file = "lcl_root:[.lib]config.h"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.lib]curl_config.h"
+$ file = "lcl_root:[.lib]fetch_config.h"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.lib]libcurl.vers"
+$ file = "lcl_root:[.lib]libfetch.vers"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $ file = "lcl_root:[]ca-bundle.h"
@@ -227,7 +227,7 @@ $!
 $ file = "lcl_root:[.packages.vms]hp_ssl_release_info.txt"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.src]curl.exe"
+$ file = "lcl_root:[.src]fetch.exe"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $all_exit:

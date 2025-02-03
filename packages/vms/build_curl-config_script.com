@@ -1,6 +1,6 @@
-$! build_curl-config_script.com
+$! build_fetch-config_script.com
 $!
-$! This generates the curl-config. script from the curl-config.in file.
+$! This generates the fetch-config. script from the fetch-config.in file.
 $!
 $! Copyright (C) John Malmberg
 $!
@@ -20,8 +20,8 @@ $! SPDX-License-Identifier: ISC
 $!
 $!===========================================================================
 $!
-$! Skip this if the curl-config. already exists.
-$ if f$search("[--]curl-config.") .nes. "" then goto all_exit
+$! Skip this if the fetch-config. already exists.
+$ if f$search("[--]fetch-config.") .nes. "" then goto all_exit
 $!
 $ if (f$getsyi("HW_MODEL") .lt. 1024)
 $ then
@@ -35,15 +35,15 @@ $!
 $ x_prefix = "/usr"
 $ x_exec_prefix = "/usr"
 $ x_includedir = "${prefix}/include"
-$ x_cppflag_curl_staticlib = "-DCURL_STATICLIB"
+$ x_cppflag_fetch_staticlib = "-DFETCH_STATICLIB"
 $ x_enabled_shared = "no"
-$ x_curl_ca_bundle = ""
+$ x_fetch_ca_bundle = ""
 $ x_cc = "cc"
 $ x_support_features = "SSL IPv6 libz NTLM"
 $ x_support_protocols1 = "DICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP"
 $ x_support_protocols2 = " LDAPS POP3 POP3S RTSP SMTP SMTPS TELNET TFTP"
 $ x_support_protocols = x_support_protocols1 + x_support_protocols2
-$ x_curlversion = "0.0.0.0"
+$ x_fetchversion = "0.0.0.0"
 $ x_versionnum = ""
 $ x_libdir = "${prefix}/lib"
 $ x_require_lib_deps = ""
@@ -52,25 +52,25 @@ $ x_ldflags = ""
 $ part1 = "-L/usr/lib -L/SSL_LIB -lssl -lcrypto -lz"
 $ if arch_name .eqs. "VAX"
 $ then
-$   x_libcurl_libs = part1
+$   x_libfetch_libs = part1
 $ else
-$   x_libcurl_libs = part1 + " -lgssapi"
+$   x_libfetch_libs = part1 + " -lgssapi"
 $ endif
 $ x_libext = "a"
 $!
 $! Get the version number
 $!-----------------------
 $ i = 0
-$ open/read/error=version_loop_end vhf [--.include.curl]curlver.h
+$ open/read/error=version_loop_end vhf [--.include.fetch]fetchver.h
 $ version_loop:
 $   read/end=version_loop_end vhf line_in
 $   if line_in .eqs. "" then goto version_loop
-$   if f$locate("#define LIBCURL_VERSION ", line_in) .eq. 0
+$   if f$locate("#define LIBFETCH_VERSION ", line_in) .eq. 0
 $   then
-$       x_curlversion = f$element(2," ", line_in) - """" - """"
+$       x_fetchversion = f$element(2," ", line_in) - """" - """"
 $       i = i + 1
 $   endif
-$   if f$locate("#define LIBCURL_VERSION_NUM ", line_in) .eq. 0
+$   if f$locate("#define LIBFETCH_VERSION_NUM ", line_in) .eq. 0
 $   then
 $       x_versionnum = f$element(2," ", line_in) - """" - """"
 $       i = i + 1
@@ -80,7 +80,7 @@ $ version_loop_end:
 $ close vhf
 $!
 $ kit_type = "V"
-$ if f$locate("-", x_curlversion) .lt. f$length(x_curlversion)
+$ if f$locate("-", x_fetchversion) .lt. f$length(x_fetchversion)
 $ then
 $   kit_type = "D"
 $   x_prefix = "/beta"
@@ -100,14 +100,14 @@ $ else
 $    part3 = "'--with-gssapi' "
 $ endif
 $ part2 = "'--disable-dependency-tracking' '--disable-libtool-lock' "
-$ part4 = "'--disable-ntlm-wb' '--with-ca-path=gnv$curl_ca_path'"""
+$ part4 = "'--disable-ntlm-wb' '--with-ca-path=gnv$fetch_ca_path'"""
 $!
 $ x_configure_options = part1 + part2 + part3 + part4
 $!
 $!
-$ open/read/error=read_loop_end c_c_in sys$disk:[--]curl-config.in
-$ create sys$disk:[--]curl-config.
-$ open/append c_c_out sys$disk:[--]curl-config.
+$ open/read/error=read_loop_end c_c_in sys$disk:[--]fetch-config.in
+$ create sys$disk:[--]fetch-config.
+$ open/append c_c_out sys$disk:[--]fetch-config.
 $read_loop:
 $   read/end=read_loop_end c_c_in line_in
 $   line_in_len = f$length(line_in)

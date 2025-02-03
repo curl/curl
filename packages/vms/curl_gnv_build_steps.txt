@@ -1,4 +1,4 @@
-From File: curl_gnv_build_steps.txt
+From File: fetch_gnv_build_steps.txt
 
  Copyright (C) John Malmberg
 
@@ -20,7 +20,7 @@ Currently building Curl using GNV takes longer than building Curl via DCL.
 The GNV procedure actually uses the same configure and makefiles that
 Unix builds use.
 
-Building CURL on OpenVMS using GNV requires GNV V2.1-2 or the updated
+Building FETCH on OpenVMS using GNV requires GNV V2.1-2 or the updated
 images that are available via anonymous FTP at encompasserve.org in the gnv
 directory.  It also requires the GNV Bash 4.2.45 kit as an update from the
 same location or from the sourceforge.net GNV project.
@@ -35,10 +35,10 @@ with extended character sets in them.  You may need to adjust the ownership
 of the restored files, since /Interchange/noconvert was not available at the
 time that this document was written.
 
-[gnv.common_src]curl_*_original_src.bck is the original source of the curl kit
-as provided by the curl project.  [gnv.vms_src]curl-*_vms_src.bck, if present,
+[gnv.common_src]fetch_*_original_src.bck is the original source of the fetch kit
+as provided by the fetch project.  [gnv.vms_src]fetch-*_vms_src.bck, if present,
 has the OpenVMS specific files that are used for building that are not yet in
-the curl source kits for that release distributed https://curl.se
+the fetch source kits for that release distributed https://fetch.se
 
 These backup savesets should be restored to different directory trees on
 an ODS-5 volume(s) which are referenced by concealed rooted logical names.
@@ -75,21 +75,21 @@ list such as NEW_GNU:,OLD_GNU:
 The directory NEW_GNU:[usr] should be created.  The make install phase should
 create all the other directories.
 
-The make install process may abort if curl is already because it can not
-uninstall the older version of curl because it does not have permission.
+The make install process may abort if fetch is already because it can not
+uninstall the older version of fetch because it does not have permission.
 
-The file stage_curl_install.com is used set up a new_gnu: directory tree
+The file stage_fetch_install.com is used set up a new_gnu: directory tree
 for testing.  The PCSI kitting procedure uses these files as input.
 
 These files do not create the directories in the VMS_ROOT and LCL_ROOT
 directory trees.  You can create them with commands similar to:
 
-  $ create/dir lcl_root:[curl]/prot=w:re
-  $ copy src_root:[curl...]*.dir -
-    lcl_root:[curl...]/prot=(o:rwed,w:re)
-  $ create/dir vms_root:[curl]/prot=w:re
-  $ copy src_root:[curl...]*.dir -
-    vms_root:[curl...]/prot=(o:rwed,w:re)
+  $ create/dir lcl_root:[fetch]/prot=w:re
+  $ copy src_root:[fetch...]*.dir -
+    lcl_root:[fetch...]/prot=(o:rwed,w:re)
+  $ create/dir vms_root:[fetch]/prot=w:re
+  $ copy src_root:[fetch...]*.dir -
+    vms_root:[fetch...]/prot=(o:rwed,w:re)
 
 One of the ways with to protect the source from being modified is to have
 the directories under src_root: owned by a user or resource where the build
@@ -100,7 +100,7 @@ Note to builders:
 
 GNV currently has a bug where configure scripts take a long time to run.
 Some of the configure steps take a while to complete, and on a 600 Mhz
-DS10 with IDE disks, taking an hour to run the CURL configure is normal.
+DS10 with IDE disks, taking an hour to run the FETCH configure is normal.
 
 The following messages can be ignored and may get fixed in a future version
 of GNV.  The GNV$*.OPT files are used to find the libraries as many have
@@ -116,21 +116,21 @@ GNV_CC_QUALIFIERS can override all other settings for the C Compiler.
 u unimplemented switch - ignored
 
 
-With these search lists set up and the properly, curl can be built by
-setting your default to PRJ_ROOT:[curl.packages.vms] and then issuing
+With these search lists set up and the properly, fetch can be built by
+setting your default to PRJ_ROOT:[fetch.packages.vms] and then issuing
 either the command:
 
-  $ @pcsi_product_gnv_curl.com
+  $ @pcsi_product_gnv_fetch.com
 
 or
 
-  $ @build_gnv_curl.com.
+  $ @build_gnv_fetch.com.
 
 The GNV configure procedure takes considerably longer than the DCL build
 procedure takes.  It is of use for testing the GNV build environment, and
 may not have been kept up to date.
 
-The pcsi_product_gnv_curl.com needs the following logical names which
+The pcsi_product_gnv_fetch.com needs the following logical names which
 are described in the section below:
 
   gnv_pcsi_producer
@@ -139,40 +139,40 @@ are described in the section below:
   vms_root1 (Optional if vms_root is on a NFS volume)
   src_root1 (Optional if src_root is on a NFS volume)
 
-The pcsi_product_gnv_curl.com is described in more detail below.  It does
+The pcsi_product_gnv_fetch.com is described in more detail below.  It does
 the following steps.  The build steps are only done if they are needed to
 allow using either DCL or GNV based building procedures.
 
   $ @build_vms list
 
-  $ @gnv_link_curl.com
+  $ @gnv_link_fetch.com
 
-  $ @build_gnv_curl_release_notes.com
+  $ @build_gnv_fetch_release_notes.com
 
-  $ @backup_gnv_curl_src.com
+  $ @backup_gnv_fetch_src.com
 
-  $ @build_gnv_curl_pcsi_desc.com
+  $ @build_gnv_fetch_pcsi_desc.com
 
-  $ @build_gnv_curl_pcsi_text.com
+  $ @build_gnv_fetch_pcsi_text.com
 
-  $ @stage_curl_install remove
-  $ @stage_curl_install
+  $ @stage_fetch_install remove
+  $ @stage_fetch_install
 
   Then builds the kit.
 
-The build_gnv_curl.com command procedure does the following:
+The build_gnv_fetch.com command procedure does the following:
 
-  $ @setup_gnv_curl_build.com
+  $ @setup_gnv_fetch_build.com
 
-  $ bash gnv_curl_configure.sh
+  $ bash gnv_fetch_configure.sh
 
-  $ @clean_gnv_curl.com
+  $ @clean_gnv_fetch.com
 
-  $ bash make_gnv_curl_install.sh
+  $ bash make_gnv_fetch_install.sh
 
-  $ @gnv_link_curl.com
+  $ @gnv_link_fetch.com
 
-  $ @stage_curl_install.com
+  $ @stage_fetch_install.com
 
   $ purge new_gnu:[*...]/log
 
@@ -184,12 +184,12 @@ used:
    bash$ make clean
    bash$ exit
 
-Then run the @clean_gnv_curl.com.  Use the parameter "realclean" if you are
-going to run the setup_gnv_curl_build.com and configure script again.
+Then run the @clean_gnv_fetch.com.  Use the parameter "realclean" if you are
+going to run the setup_gnv_fetch_build.com and configure script again.
 
-   $ @clean_gnv_curl.com realclean
+   $ @clean_gnv_fetch.com realclean
 
-If new public symbols have been added, adjust the file gnv_libcurl_symbols.opt
+If new public symbols have been added, adjust the file gnv_libfetch_symbols.opt
 to have the new symbols.  If the symbols are longer than 32 characters,
 then they will need to have the original be exact case CRC shortened and
 an alias in upper case with CRC shortened, in addition to having an exact
@@ -210,7 +210,7 @@ branding the PCSI kit based on who is making the kit.
    1. Make sure that you have a staging directory that can be referenced
       by the path STAGE_ROOT:[KIT]
 
-   2. Edit the file curl_release_note_start.txt or other text files to
+   2. Edit the file fetch_release_note_start.txt or other text files to
       reflect any changes.
 
    3. Define the logical name GNV_PCSI_PRODUCER to indicate who is making
@@ -224,7 +224,7 @@ branding the PCSI kit based on who is making the kit.
       vms_eco_level.h by changing the value for the VMS_ECO_LEVEL macro.
       This file is currently only used in building the PCSI kit.
 
-   6. Edit the file PCSI_GNV_CURL_FILE_LIST.TXT if there are new files added
+   6. Edit the file PCSI_GNV_FETCH_FILE_LIST.TXT if there are new files added
       to the kit.  These files should all be ODS-2 legal filenames and
       directories.
 
@@ -234,7 +234,7 @@ branding the PCSI kit based on who is making the kit.
       must have a unique name.  Then a procedure needs to be added to the kit
       to create an alias link on install and remove the link on remove.
 
-      Since at this time curl does not need this alias procedure, the steps
+      Since at this time fetch does not need this alias procedure, the steps
       to automatically build it are not included here.
 
       While newer versions of PCSI can support ODS-5 filenames, not all versions
@@ -242,8 +242,8 @@ branding the PCSI kit based on who is making the kit.
       step, the PCSI kit built by these steps does a rename to the correct
       case as a post install step.
 
-   7. Edit the build_curl_pcsi_desc.com and build_curl_pcsi_text.com if you
-      have changed the version of ZLIB that curl is built against.
+   7. Edit the build_fetch_pcsi_desc.com and build_fetch_pcsi_text.com if you
+      have changed the version of ZLIB that fetch is built against.
 
    8. Prepare to backup the files for building the kit.
 
@@ -255,15 +255,15 @@ branding the PCSI kit based on who is making the kit.
       reference local disks.  Make sure src_root1:[000000] and
       vms_root1:[000000] exist and can be written to.
 
-      The command procedure compare_curl_source can be used to check
+      The command procedure compare_fetch_source can be used to check
       those directories and keep them up to date.
 
-         @compare_curl_source.com SRCBCK UPDATE
+         @compare_fetch_source.com SRCBCK UPDATE
 
          This compares the reference project source with the backup
          staging directory for it and updates with any changes.
 
-         @compare_curl_source.com VMSBCK UPDATE
+         @compare_fetch_source.com VMSBCK UPDATE
 
          This compares the VMS specific source with the backup
          staging directory for it and updates with any changes.
@@ -274,16 +274,16 @@ branding the PCSI kit based on who is making the kit.
       separate directory for staging the sources for backup make sure
       that src_root1: and vms_root1: do not exist.
 
-   9. Build the PCSI kit with @pcsi_product_gnv_curl.com
+   9. Build the PCSI kit with @pcsi_product_gnv_fetch.com
 
        The following message is normal:
           %PCSI-I-CANNOTVAL, cannot validate
-            EAGLE$DQA0:[stage_root.][kit]VMSPORTS-AXPVMS-CURL-V0731-0-1.PCSI;1
+            EAGLE$DQA0:[stage_root.][kit]VMSPORTS-AXPVMS-FETCH-V0731-0-1.PCSI;1
           -PCSI-I-NOTSIGNED, product kit is not signed and therefore has
           no manifest file
 
        This will result in an uncompressed kit for the target platform.
-       On Alpha and Integrity, the pcsi_product_gnv_curl.com can be used with
+       On Alpha and Integrity, the pcsi_product_gnv_fetch.com can be used with
        the "COMPRESSED" parameter to build both a compressed and uncompressed
        kits.
 

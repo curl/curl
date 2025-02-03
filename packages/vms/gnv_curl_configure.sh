@@ -1,4 +1,4 @@
-# File: gnv_curl_configure.sh
+# File: gnv_fetch_configure.sh
 #
 # Set up and run the configure script for Curl so that it can find the
 # proper options for VMS.
@@ -30,7 +30,7 @@ export GNV_OPT_DIR=.
 # How to find the SSL library files.
 export LIB_OPENSSL=/SSL_LIB
 #
-# Override configure adding -std1 which is too strict for what curl
+# Override configure adding -std1 which is too strict for what fetch
 # actually wants.
 export GNV_CC_QUALIFIERS=/STANDARD=RELAXED
 #
@@ -40,5 +40,5 @@ cd ../..
 #
 ./configure  --prefix=/usr --exec-prefix=/usr --disable-dependency-tracking \
  --disable-libtool-lock --with-gssapi --disable-ntlm-wb \
- --with-ca-path=gnv\$curl_ca_path
+ --with-ca-path=gnv\$fetch_ca_path
 #

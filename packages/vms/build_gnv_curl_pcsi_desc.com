@@ -1,33 +1,33 @@
-$! File: Build_GNV_CURL_PCSI_DESC.COM
+$! File: Build_GNV_FETCH_PCSI_DESC.COM
 $!
 $! Build the *.pcsi$text file in the following sections:
 $!   Required software dependencies.
 $!   install/upgrade/postinstall steps.
-$!      1. Duplicate filenames need an alias procedure. (N/A for curl)
-$!      2. ODS-5 filenames need an alias procedure. (N/A for curl)
-$!      3. Special alias links for executables (curl. -> curl.exe)
+$!      1. Duplicate filenames need an alias procedure. (N/A for fetch)
+$!      2. ODS-5 filenames need an alias procedure. (N/A for fetch)
+$!      3. Special alias links for executables (fetch. -> fetch.exe)
 $!         if a lot, then an alias procedure is needed.
 $!      4. Rename the files to lowercase.
 $!   Move Release Notes to destination
 $!   Source kit option
 $!   Create directory lines
-$!   Add file lines for curl.
-$!   Add Link alias procedure file (N/A for curl)
-$!   Add [.SYS$STARTUP]curl_startup file
+$!   Add file lines for fetch.
+$!   Add Link alias procedure file (N/A for fetch)
+$!   Add [.SYS$STARTUP]fetch_startup file
 $!   Add Release notes file.
 $!
-$! The file PCSI_GNV_CURL_FILE_LIST.TXT is read in to get the files other
+$! The file PCSI_GNV_FETCH_FILE_LIST.TXT is read in to get the files other
 $! than the release notes file and the source backup file.
 $!
 $! The PCSI system can really only handle ODS-2 format filenames and
 $! assumes that there is only one source directory.  It also assumes that
 $! all destination files with the same name come from the same source file.
-$! Fortunately CURL does not trip most of these issues, so those steps
+$! Fortunately FETCH does not trip most of these issues, so those steps
 $! above are marked N/A.
 $!
 $! A rename action section is needed to make sure that the files are
 $! created in the GNV$GNU: in the correct case, and to create the alias
-$! link [usr.bin]curl. for [usr.bin]curl.exe.
+$! link [usr.bin]fetch. for [usr.bin]fetch.exe.
 $!
 $! Copyright (C) John Malmberg
 $!
@@ -50,19 +50,19 @@ $!
 $ kit_name = f$trnlnm("GNV_PCSI_KITNAME")
 $ if kit_name .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ producer = f$trnlnm("GNV_PCSI_PRODUCER")
 $ if producer .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ filename_base = f$trnlnm("GNV_PCSI_FILENAME_BASE")
 $ if filename_base .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $!
@@ -142,9 +142,9 @@ $!
 $!
 $! install/upgrade/postinstall steps.
 $!-----------------------------------
-$!      1. Duplicate filenames need an alias procedure. (N/A for curl)
-$!      2. ODS-5 filenames need an alias procedure. (N/A for curl)
-$!      3. Special alias links for executables (curl. -> curl.exe)
+$!      1. Duplicate filenames need an alias procedure. (N/A for fetch)
+$!      2. ODS-5 filenames need an alias procedure. (N/A for fetch)
+$!      3. Special alias links for executables (fetch. -> fetch.exe)
 $!         if a lot, then an alias procedure is needed.
 $!      4. Rename the files to lowercase.
 $!
@@ -157,7 +157,7 @@ $ line_out = ""
 $!
 $!   Read through the file list to set up aliases and rename commands.
 $!---------------------------------------------------------------------
-$ open/read flst pcsi_gnv_curl_file_list.txt
+$ open/read flst pcsi_gnv_fetch_file_list.txt
 $!
 $inst_alias_loop:
 $   read/end=inst_alias_loop_end flst line_in
@@ -396,7 +396,7 @@ $!
 $!
 $! Read through the file list again.
 $!----------------------------------
-$open/read flst pcsi_gnv_curl_file_list.txt
+$open/read flst pcsi_gnv_fetch_file_list.txt
 $!
 $!
 $!   Create directory lines
@@ -436,7 +436,7 @@ $   write pdsc "   directory ""''destname'"" PROTECTION PUBLIC ;"
 $   goto flst_dir_loop
 $!
 $!
-$!   Add file lines for curl.
+$!   Add file lines for fetch.
 $!---------------------------
 $flst_file_loop:
 $   read/end=flst_loop_end flst line_in
@@ -461,18 +461,18 @@ $!
 $flst_loop_end:
 $ close flst
 $!
-$!   Add Link alias procedure file (N/A for curl)
+$!   Add Link alias procedure file (N/A for fetch)
 $!------------------------------------------------
 $!
-$!   Add [.SYS$STARTUP]curl_startup file
+$!   Add [.SYS$STARTUP]fetch_startup file
 $!---------------------------------------
 $ if kit_type .eqs. "D"
 $ then
-$   write pdsc "   file ""[sys$startup]curl_daily_startup.com"""
+$   write pdsc "   file ""[sys$startup]fetch_daily_startup.com"""
 $ else
-$   write pdsc "   file ""[sys$startup]curl_startup.com"""
+$   write pdsc "   file ""[sys$startup]fetch_startup.com"""
 $ endif
-$ write pdsc "     source [usr.lib]curl_startup.com ;"
+$ write pdsc "     source [usr.lib]fetch_startup.com ;"
 $!
 $!   Add Release notes file.
 $!------------------------------

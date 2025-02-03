@@ -1,5 +1,5 @@
-#ifndef HEADER_CURLMSG_VMS_H
-#define HEADER_CURLMSG_VMS_H
+#ifndef HEADER_FETCHMSG_VMS_H
+#define HEADER_FETCHMSG_VMS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,25 +20,25 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /*                                                                          */
-/* CURLMSG_VMS.H                                                            */
+/* FETCHMSG_VMS.H                                                            */
 /*                                                                          */
-/* This defines the necessary bits to change CURLE_* error codes to VMS     */
-/* style error codes.  CURLMSG.H is built from CURLMSG.SDL which is built   */
-/* from CURLMSG.MSG.  The vms_cond array is used to return VMS errors by    */
-/* putting the VMS error codes into the array offset based on CURLE_* code. */
+/* This defines the necessary bits to change FETCHE_* error codes to VMS     */
+/* style error codes.  FETCHMSG.H is built from FETCHMSG.SDL which is built   */
+/* from FETCHMSG.MSG.  The vms_cond array is used to return VMS errors by    */
+/* putting the VMS error codes into the array offset based on FETCHE_* code. */
 /*                                                                          */
-/* If you update CURLMSG.MSG make sure to update this file to match.        */
+/* If you update FETCHMSG.MSG make sure to update this file to match.        */
 /*                                                                          */
 
-#include "curlmsg.h"
+#include "fetchmsg.h"
 
 /*
-#define   FAC_CURL      0xC01
+#define   FAC_FETCH      0xC01
 #define   FAC_SYSTEM    0
 #define   MSG_NORMAL    0
 */
@@ -53,91 +53,91 @@
 
 static const long vms_cond[] =
 {
-  CURL_OK,
-  CURL_UNSUPPORTED_PROTOCOL,
-  CURL_FAILED_INIT,
-  CURL_URL_MALFORMAT,
-  CURL_OBSOLETE4,
-  CURL_COULDNT_RESOLVE_PROXY,
-  CURL_COULDNT_RESOLVE_HOST,
-  CURL_COULDNT_CONNECT,
-  CURL_WEIRD_SERVER_REPLY,
-  CURL_FTP_ACCESS_DENIED,
-  CURL_OBSOLETE10,
-  CURL_FTP_WEIRD_PASS_REPLY,
-  CURL_OBSOLETE12,
-  CURL_FTP_WEIRD_PASV_REPLY,
-  CURL_FTP_WEIRD_227_FORMAT,
-  CURL_FTP_CANT_GET_HOST,
-  CURL_OBSOLETE16,
-  CURL_FTP_COULDNT_SET_TYPE,
-  CURL_PARTIAL_FILE,
-  CURL_FTP_COULDNT_RETR_FILE,
-  CURL_OBSOLETE20,
-  CURL_QUOTE_ERROR,
-  CURL_HTTP_RETURNED_ERROR,
-  CURL_WRITE_ERROR,
-  CURL_OBSOLETE24,
-  CURL_UPLOAD_FAILED,
-  CURL_READ_ERROR,
-  CURL_OUT_OF_MEMORY,
-  CURL_OPERATION_TIMEOUTED,
-  CURL_OBSOLETE29,
-  CURL_FTP_PORT_FAILED,
-  CURL_FTP_COULDNT_USE_REST,
-  CURL_OBSOLETE32,
-  CURL_RANGE_ERROR,
-  CURL_HTTP_POST_ERROR,
-  CURL_SSL_CONNECT_ERROR,
-  CURL_BAD_DOWNLOAD_RESUME,
-  CURL_FILE_COULDNT_READ_FILE,
-  CURL_LDAP_CANNOT_BIND,
-  CURL_LDAP_SEARCH_FAILED,
-  CURL_OBSOLETE40,
-  CURL_FUNCTION_NOT_FOUND,
-  CURL_ABORTED_BY_CALLBACK,
-  CURL_BAD_FUNCTION_ARGUMENT,
-  CURL_OBSOLETE44,
-  CURL_INTERFACE_FAILED,
-  CURL_OBSOLETE46,
-  CURL_TOO_MANY_REDIRECTS,
-  CURL_UNKNOWN_TELNET_OPTION,
-  CURL_TELNET_OPTION_SYNTAX,
-  CURL_OBSOLETE50,
-  CURL_PEER_FAILED_VERIF,
-  CURL_GOT_NOTHING,
-  CURL_SSL_ENGINE_NOTFOUND,
-  CURL_SSL_ENGINE_SETFAILED,
-  CURL_SEND_ERROR,
-  CURL_RECV_ERROR,
-  CURL_OBSOLETE57,
-  CURL_SSL_CERTPROBLEM,
-  CURL_SSL_CIPHER,
-  CURL_SSL_CACERT,
-  CURL_BAD_CONTENT_ENCODING,
-  CURL_LDAP_INVALID_URL,
-  CURL_FILESIZE_EXCEEDED,
-  CURL_USE_SSL_FAILED,
-  CURL_SEND_FAIL_REWIND,
-  CURL_SSL_ENGINE_INITFAILED,
-  CURL_LOGIN_DENIED,
-  CURL_TFTP_NOTFOUND,
-  CURL_TFTP_PERM,
-  CURL_REMOTE_DISK_FULL,
-  CURL_TFTP_ILLEGAL,
-  CURL_TFTP_UNKNOWNID,
-  CURL_REMOTE_FILE_EXISTS,
-  CURL_TFTP_NOSUCHUSER,
-  CURL_CONV_FAILED,
-  CURL_CONV_REQD,
-  CURL_SSL_CACERT_BADFILE,
-  CURL_REMOTE_FILE_NOT_FOUND,
-  CURL_SSH,
-  CURL_SSL_SHUTDOWN_FAILED,
-  CURL_AGAIN,
-  CURLE_SSL_CRL_BADFILE,
-  CURLE_SSL_ISSUER_ERROR,
-  CURL_CURL_LAST
+  FETCH_OK,
+  FETCH_UNSUPPORTED_PROTOCOL,
+  FETCH_FAILED_INIT,
+  FETCH_URL_MALFORMAT,
+  FETCH_OBSOLETE4,
+  FETCH_COULDNT_RESOLVE_PROXY,
+  FETCH_COULDNT_RESOLVE_HOST,
+  FETCH_COULDNT_CONNECT,
+  FETCH_WEIRD_SERVER_REPLY,
+  FETCH_FTP_ACCESS_DENIED,
+  FETCH_OBSOLETE10,
+  FETCH_FTP_WEIRD_PASS_REPLY,
+  FETCH_OBSOLETE12,
+  FETCH_FTP_WEIRD_PASV_REPLY,
+  FETCH_FTP_WEIRD_227_FORMAT,
+  FETCH_FTP_CANT_GET_HOST,
+  FETCH_OBSOLETE16,
+  FETCH_FTP_COULDNT_SET_TYPE,
+  FETCH_PARTIAL_FILE,
+  FETCH_FTP_COULDNT_RETR_FILE,
+  FETCH_OBSOLETE20,
+  FETCH_QUOTE_ERROR,
+  FETCH_HTTP_RETURNED_ERROR,
+  FETCH_WRITE_ERROR,
+  FETCH_OBSOLETE24,
+  FETCH_UPLOAD_FAILED,
+  FETCH_READ_ERROR,
+  FETCH_OUT_OF_MEMORY,
+  FETCH_OPERATION_TIMEOUTED,
+  FETCH_OBSOLETE29,
+  FETCH_FTP_PORT_FAILED,
+  FETCH_FTP_COULDNT_USE_REST,
+  FETCH_OBSOLETE32,
+  FETCH_RANGE_ERROR,
+  FETCH_HTTP_POST_ERROR,
+  FETCH_SSL_CONNECT_ERROR,
+  FETCH_BAD_DOWNLOAD_RESUME,
+  FETCH_FILE_COULDNT_READ_FILE,
+  FETCH_LDAP_CANNOT_BIND,
+  FETCH_LDAP_SEARCH_FAILED,
+  FETCH_OBSOLETE40,
+  FETCH_FUNCTION_NOT_FOUND,
+  FETCH_ABORTED_BY_CALLBACK,
+  FETCH_BAD_FUNCTION_ARGUMENT,
+  FETCH_OBSOLETE44,
+  FETCH_INTERFACE_FAILED,
+  FETCH_OBSOLETE46,
+  FETCH_TOO_MANY_REDIRECTS,
+  FETCH_UNKNOWN_TELNET_OPTION,
+  FETCH_TELNET_OPTION_SYNTAX,
+  FETCH_OBSOLETE50,
+  FETCH_PEER_FAILED_VERIF,
+  FETCH_GOT_NOTHING,
+  FETCH_SSL_ENGINE_NOTFOUND,
+  FETCH_SSL_ENGINE_SETFAILED,
+  FETCH_SEND_ERROR,
+  FETCH_RECV_ERROR,
+  FETCH_OBSOLETE57,
+  FETCH_SSL_CERTPROBLEM,
+  FETCH_SSL_CIPHER,
+  FETCH_SSL_CACERT,
+  FETCH_BAD_CONTENT_ENCODING,
+  FETCH_LDAP_INVALID_URL,
+  FETCH_FILESIZE_EXCEEDED,
+  FETCH_USE_SSL_FAILED,
+  FETCH_SEND_FAIL_REWIND,
+  FETCH_SSL_ENGINE_INITFAILED,
+  FETCH_LOGIN_DENIED,
+  FETCH_TFTP_NOTFOUND,
+  FETCH_TFTP_PERM,
+  FETCH_REMOTE_DISK_FULL,
+  FETCH_TFTP_ILLEGAL,
+  FETCH_TFTP_UNKNOWNID,
+  FETCH_REMOTE_FILE_EXISTS,
+  FETCH_TFTP_NOSUCHUSER,
+  FETCH_CONV_FAILED,
+  FETCH_CONV_REQD,
+  FETCH_SSL_CACERT_BADFILE,
+  FETCH_REMOTE_FILE_NOT_FOUND,
+  FETCH_SSH,
+  FETCH_SSL_SHUTDOWN_FAILED,
+  FETCH_AGAIN,
+  FETCHE_SSL_CRL_BADFILE,
+  FETCHE_SSL_ISSUER_ERROR,
+  FETCH_FETCH_LAST
 };
 
-#endif /* HEADER_CURLMSG_VMS_H */
+#endif /* HEADER_FETCHMSG_VMS_H */

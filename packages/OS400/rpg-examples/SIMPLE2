@@ -2,7 +2,7 @@
       *
         ctl-opt dftactgrp(*NO) actgrp(*NEW)
                 option(*NOSHOWCPY)
-                bnddir('CURL');
+                bnddir('FETCH');
       *
       **************************************************************************
       *                                  _   _ ____  _
@@ -15,7 +15,7 @@
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
-      * are also available at https://curl.se/docs/copyright.html.
+      * are also available at https://fetch.se/docs/copyright.html.
       *
       * You may opt to use, copy, modify, merge, publish, distribute and/or sell
       * copies of the Software, and permit persons to whom the Software is
@@ -24,11 +24,11 @@
       * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
       * ANY KIND, either express or implied.
       *
-      * SPDX-License-Identifier: curl
+      * SPDX-License-Identifier: fetch
       *
       **************************************************************************
 
-      /include H,CURL.INC
+      /include H,FETCH.INC
 
       * Simple free-format RPG program to request the URL given as command line
       * parameter and output its response.
@@ -43,43 +43,43 @@
 
         urllen = trimmed_length(url: %len(url));
 
-        // Do the curl stuff.
+        // Do the fetch stuff.
 
-        curl_global_init(CURL_GLOBAL_ALL);
+        fetch_global_init(FETCH_GLOBAL_ALL);
         main();
-        curl_global_cleanup();
+        fetch_global_cleanup();
         *inlr = *on;            // Exit
 
       **************************************************************************
-      * Main procedure: do the curl job.
+      * Main procedure: do the fetch job.
       **************************************************************************
 
         dcl-proc main;
             dcl-pi *N end-pi;
 
             dcl-s h pointer;                                            // Easy handle
-            dcl-s result like(CURLcode) inz(CURLE_OUT_OF_MEMORY);       // Curl return code
+            dcl-s result like(FETCHcode) inz(FETCHE_OUT_OF_MEMORY);       // Curl return code
             dcl-s errmsgp pointer;                                      // Error string pointer
             dcl-s response char(52);                                    // For error display
 
-            // Create and fill curl handle.
+            // Create and fill fetch handle.
 
-            h = curl_easy_init();
+            h = fetch_easy_init();
             if h <> *NULL;
-                curl_easy_setopt_ccsid(h: CURLOPT_URL: %subst(url: 1: urllen):
+                fetch_easy_setopt_ccsid(h: FETCHOPT_URL: %subst(url: 1: urllen):
                                        0);
-                curl_easy_setopt(h: CURLOPT_FOLLOWLOCATION: 1);
+                fetch_easy_setopt(h: FETCHOPT_FOLLOWLOCATION: 1);
 
                 // Perform the request.
 
-                result = curl_easy_perform(h);
-                curl_easy_cleanup(h);       // Release handle
+                result = fetch_easy_perform(h);
+                fetch_easy_cleanup(h);       // Release handle
             endif;
 
             // Check for error and report if some.
 
-            if result <> CURLE_OK;
-                errmsgp = curl_easy_strerror_ccsid(result: 0);
+            if result <> FETCHE_OK;
+                errmsgp = fetch_easy_strerror_ccsid(result: 0);
                 response = %str(errmsgp);
                 dsply '' '*EXT' response;
             endif;

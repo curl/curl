@@ -1,4 +1,4 @@
-$! Compare_curl_source.com
+$! Compare_fetch_source.com
 $!
 $! This procedure compares the files in two directories and reports the
 $! differences.  It is customized for the vmsports repository layout.
@@ -127,15 +127,15 @@ $ endif
 $!
 $ if p1 .eqs. "SRCBCK"
 $ then
-$   ref_base_dir = "curl"
-$   wrk_base_dir = "curl"
+$   ref_base_dir = "fetch"
+$   wrk_base_dir = "fetch"
 $   ref = "src_root:[" + ref_base_dir
 $   wrk = "src_root1:[" + wrk_base_dir
 $   if update_file
 $   then
-$       if f$search("src_root1:[000000]curl.dir") .eqs. ""
+$       if f$search("src_root1:[000000]fetch.dir") .eqs. ""
 $       then
-$           create/dir/prot=o:rwed src_root1:[curl]
+$           create/dir/prot=o:rwed src_root1:[fetch]
 $       endif
 $   endif
 $ endif
@@ -143,15 +143,15 @@ $!
 $!
 $ if p1 .eqs. "VMSBCK"
 $ then
-$   ref_base_dir = "curl"
-$   wrk_base_dir = "curl"
+$   ref_base_dir = "fetch"
+$   wrk_base_dir = "fetch"
 $   ref = "vms_root:[" + ref_base_dir
 $   wrk = "vms_root1:[" + wrk_base_dir
 $   if update_file
 $   then
-$       if f$search("vms_root1:[000000]curl.dir") .eqs. ""
+$       if f$search("vms_root1:[000000]fetch.dir") .eqs. ""
 $       then
-$           create/dir/prot=o:rwed vms_root1:[curl]
+$           create/dir/prot=o:rwed vms_root1:[fetch]
 $       endif
 $   endif
 $ endif

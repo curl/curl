@@ -2,7 +2,7 @@
       *
      h DFTACTGRP(*NO) ACTGRP(*NEW)
      h OPTION(*NOSHOWCPY)
-     h BNDDIR('CURL')
+     h BNDDIR('FETCH')
       *
       **************************************************************************
       *                                  _   _ ____  _
@@ -15,7 +15,7 @@
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
-      * are also available at https://curl.se/docs/copyright.html.
+      * are also available at https://fetch.se/docs/copyright.html.
       *
       * You may opt to use, copy, modify, merge, publish, distribute and/or sell
       * copies of the Software, and permit persons to whom the Software is
@@ -24,11 +24,11 @@
       * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
       * ANY KIND, either express or implied.
       *
-      * SPDX-License-Identifier: curl
+      * SPDX-License-Identifier: fetch
       *
       **************************************************************************
       *
-      /include H,CURL.INC
+      /include H,FETCH.INC
       *
       * Example to SMTP send source member as attachment via SMTP.
       *
@@ -40,7 +40,7 @@
       *
      d program_name    c                   'SMTPSRCMBR'                         Member name to send
      d sender_name     c                   'Curl'                               Sender name
-     d sender_mail     c                   'curl@example.com'                   Sender e-mail
+     d sender_mail     c                   'fetch@example.com'                   Sender e-mail
      d recipient_name  c                   'WIMC'                               Recipient name
      d crlf            c                   X'0D25'
       *
@@ -52,23 +52,23 @@
         urllen = trimmed_length(url: %len(url));
         rcptmlen = trimmed_length(recipient_mail: %len(recipient_mail));
 
-        // Do the curl stuff.
+        // Do the fetch stuff.
 
-        curl_global_init(CURL_GLOBAL_ALL);
+        fetch_global_init(FETCH_GLOBAL_ALL);
         main();
-        curl_global_cleanup();
+        fetch_global_cleanup();
         *inlr = *on;            // Exit
       *
       **************************************************************************
-      * Main procedure: do the curl job.
+      * Main procedure: do the fetch job.
       **************************************************************************
       *
      p main            b
      d main            pi
       *
      d h               s               *                                        Easy handle
-     d result          s                   like(CURLcode)                       Curl return code
-     d                                     inz(CURLE_OUT_OF_MEMORY)
+     d result          s                   like(FETCHcode)                       Curl return code
+     d                                     inz(FETCHE_OUT_OF_MEMORY)
      d errmsgp         s               *                                        Error string pointer
      d response        s             52                                         For error display
      d headers         s               *   inz(*NULL)                           Mail headers
@@ -76,55 +76,55 @@
      d mime            s               *                                        Mail MIME structure
      d mimepart        s               *                                        Mail part
 
-            // Create and fill curl handle.
+            // Create and fill fetch handle.
 
-        h = curl_easy_init();
+        h = fetch_easy_init();
         if h <> *NULL;
-            rcpts = curl_slist_append_ccsid(rcpts:
+            rcpts = fetch_slist_append_ccsid(rcpts:
                                         %subst(recipient_mail: 1: rcptmlen): 0);
-            headers = curl_slist_append_ccsid(headers: 'From: ' + sender_name +
+            headers = fetch_slist_append_ccsid(headers: 'From: ' + sender_name +
                                                        ' <' + sender_mail + '>':
                                               0);
-            headers = curl_slist_append_ccsid(headers: 'To: ' + recipient_name +
+            headers = fetch_slist_append_ccsid(headers: 'To: ' + recipient_name +
                            ' <' + %subst(recipient_mail: 1: rcptmlen) + '>': 0);
-            headers = curl_slist_append_ccsid(headers: 'Subject: An ILE/RPG ' +
+            headers = fetch_slist_append_ccsid(headers: 'Subject: An ILE/RPG ' +
                                               'source program': 0);
-            headers = curl_slist_append_ccsid(headers: 'Date: ' + mail_date():
+            headers = fetch_slist_append_ccsid(headers: 'Date: ' + mail_date():
                                               0);
-            curl_easy_setopt_ccsid(h: CURLOPT_URL: %subst(url: 1: urllen): 0);
-            curl_easy_setopt_ccsid(h: CURLOPT_MAIL_FROM: sender_mail: 0);
-            curl_easy_setopt(h: CURLOPT_MAIL_RCPT: rcpts);
-            curl_easy_setopt(h: CURLOPT_HTTPHEADER: headers);
-            mime = curl_mime_init(h);
-            mimepart = curl_mime_addpart(mime);
-            curl_mime_data_ccsid(mimepart: 'Please find the ILE/RPG program ' +
+            fetch_easy_setopt_ccsid(h: FETCHOPT_URL: %subst(url: 1: urllen): 0);
+            fetch_easy_setopt_ccsid(h: FETCHOPT_MAIL_FROM: sender_mail: 0);
+            fetch_easy_setopt(h: FETCHOPT_MAIL_RCPT: rcpts);
+            fetch_easy_setopt(h: FETCHOPT_HTTPHEADER: headers);
+            mime = fetch_mime_init(h);
+            mimepart = fetch_mime_addpart(mime);
+            fetch_mime_data_ccsid(mimepart: 'Please find the ILE/RPG program ' +
                                            program_name + ' source code in ' +
                                            'attachment.' + crlf:
-                                 CURL_ZERO_TERMINATED: 0);
-            mimepart = curl_mime_addpart(mime);
-            curl_mime_data_cb(mimepart: -1: %paddr(out_data_cb): *NULL: *NULL:
+                                 FETCH_ZERO_TERMINATED: 0);
+            mimepart = fetch_mime_addpart(mime);
+            fetch_mime_data_cb(mimepart: -1: %paddr(out_data_cb): *NULL: *NULL:
                               *NULL);
-            curl_mime_filename_ccsid(mimepart: program_name: 0);
-            curl_mime_encoder_ccsid(mimepart: 'quoted-printable': 0);
-            curl_easy_setopt(h: CURLOPT_MIMEPOST: mime);
+            fetch_mime_filename_ccsid(mimepart: program_name: 0);
+            fetch_mime_encoder_ccsid(mimepart: 'quoted-printable': 0);
+            fetch_easy_setopt(h: FETCHOPT_MIMEPOST: mime);
 
             // Perform the request.
 
             setll *start RPGXAMPLES;
-            result = curl_easy_perform(h);
+            result = fetch_easy_perform(h);
 
             // Cleanup.
 
-            curl_mime_free(mime);
-            curl_slist_free_all(headers);
-            curl_slist_free_all(rcpts);
-            curl_easy_cleanup(h);       // Release handle
+            fetch_mime_free(mime);
+            fetch_slist_free_all(headers);
+            fetch_slist_free_all(rcpts);
+            fetch_easy_cleanup(h);       // Release handle
         endif;
 
         // Check for error and report if some.
 
-        if result <> CURLE_OK;
-            errmsgp = curl_easy_strerror_ccsid(result: 0);
+        if result <> FETCHE_OK;
+            errmsgp = fetch_easy_strerror_ccsid(result: 0);
             response = %str(errmsgp);
             dsply '' '*EXT' response;
         else;
@@ -153,10 +153,10 @@
         i = 0;
         dow size - i >= %len(SRCDTA) + %len(crlf) and not %eof(RPGXAMPLES);
             read record;
-            lineptr = curl_from_ccsid(%trimr(SRCDTA) + crlf: 0);
+            lineptr = fetch_from_ccsid(%trimr(SRCDTA) + crlf: 0);
             linelen = %scan(X'00': line) - 1;
             %subst(buffer: i + 1: linelen) = %str(lineptr);
-            curl_free(lineptr);
+            fetch_free(lineptr);
             i = i + linelen;
         enddo;
         return i;

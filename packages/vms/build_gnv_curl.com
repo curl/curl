@@ -1,4 +1,4 @@
-$! File: build_gnv_curl.com
+$! File: build_gnv_fetch.com
 $!
 $! All in one build procedure
 $!
@@ -20,15 +20,15 @@ $! SPDX-License-Identifier: ISC
 $!
 $!-----------------------------------------------------------------------
 $!
-$ @setup_gnv_curl_build.com
+$ @setup_gnv_fetch_build.com
 $!
-$ bash gnv_curl_configure.sh
+$ bash gnv_fetch_configure.sh
 $!
-$ @clean_gnv_curl.com
+$ @clean_gnv_fetch.com
 $!
-$ bash make_gnv_curl_install.sh
+$ bash make_gnv_fetch_install.sh
 $!
-$ @gnv_link_curl.com
+$ @gnv_link_fetch.com
 $!
 $ purge new_gnu:[*...]/log
 $!

@@ -2,7 +2,7 @@
       *
      h DFTACTGRP(*NO) ACTGRP(*NEW)
      h OPTION(*NOSHOWCPY)
-     h BNDDIR('CURL')
+     h BNDDIR('FETCH')
       *
       **************************************************************************
       *                                  _   _ ____  _
@@ -15,7 +15,7 @@
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
-      * are also available at https://curl.se/docs/copyright.html.
+      * are also available at https://fetch.se/docs/copyright.html.
       *
       * You may opt to use, copy, modify, merge, publish, distribute and/or sell
       * copies of the Software, and permit persons to whom the Software is
@@ -24,11 +24,11 @@
       * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
       * ANY KIND, either express or implied.
       *
-      * SPDX-License-Identifier: curl
+      * SPDX-License-Identifier: fetch
       *
       **************************************************************************
       *
-      /include H,CURL.INC
+      /include H,FETCH.INC
       *
       * Simple example to request the URL given as command line parameter and
       * output its response.
@@ -42,45 +42,45 @@
       *
      c                   eval      urllen = trimmed_length(url: %len(url))
       *
-      * Do the curl stuff.
+      * Do the fetch stuff.
       *
-     c                   callp     curl_global_init(CURL_GLOBAL_ALL)
+     c                   callp     fetch_global_init(FETCH_GLOBAL_ALL)
      c                   callp     main
-     c                   callp     curl_global_cleanup()
+     c                   callp     fetch_global_cleanup()
      c                   seton                                            lr    Exit
       *
       **************************************************************************
-      * Main procedure: do the curl job.
+      * Main procedure: do the fetch job.
       **************************************************************************
       *
      p main            b
      d main            pi
       *
      d h               s               *                                        Easy handle
-     d result          s                   like(CURLcode)                       Curl return code
-     d                                     inz(CURLE_OUT_OF_MEMORY)
+     d result          s                   like(FETCHcode)                       Curl return code
+     d                                     inz(FETCHE_OUT_OF_MEMORY)
      d errmsgp         s               *                                        Error string pointer
      d response        s             52                                         For error display
       *
-      * Create and fill curl handle.
+      * Create and fill fetch handle.
       *
-     c                   eval      h = curl_easy_init()
+     c                   eval      h = fetch_easy_init()
      c                   if        h <> *NULL
-     c                   callp     curl_easy_setopt_ccsid(h: CURLOPT_URL:
+     c                   callp     fetch_easy_setopt_ccsid(h: FETCHOPT_URL:
      c                               %subst(url: 1: urllen): 0)
-     c                   callp     curl_easy_setopt_long(h:
-     c                               CURLOPT_FOLLOWLOCATION: 1)
+     c                   callp     fetch_easy_setopt_long(h:
+     c                               FETCHOPT_FOLLOWLOCATION: 1)
       *
       * Perform the request.
       *
-     c                   eval      result = curl_easy_perform(h)
-     c                   callp     curl_easy_cleanup(h)                         Release handle
+     c                   eval      result = fetch_easy_perform(h)
+     c                   callp     fetch_easy_cleanup(h)                         Release handle
      c                   endif
       *
       * Check for error and report if some.
       *
-     c                   if        result <> CURLE_OK
-     c                   eval      errmsgp = curl_easy_strerror_ccsid(result: 0)
+     c                   if        result <> FETCHE_OK
+     c                   eval      errmsgp = fetch_easy_strerror_ccsid(result: 0)
      c                   eval      response = %str(errmsgp)
      c                   dsply                   response
      c                   endif

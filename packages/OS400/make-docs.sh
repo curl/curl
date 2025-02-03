@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -41,8 +41,8 @@ cd "${TOPDIR}/docs" || exit 1
 
 (
         cd cmdline-opts || exit 1
-        MANPAGE=curl.1
-        TEXTPAGE=curl.txt
+        MANPAGE=fetch.1
+        TEXTPAGE=fetch.txt
         get_make_vars Makefile.inc
         rm -f "${IFSDIR}/docs/${MANPAGE}" "${IFSDIR}/docs/${TEXTPAGE}"
 

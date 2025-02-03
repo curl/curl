@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,15 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  *
  ***************************************************************************/
 
 /* OS/400 additional support. */
 
-#include <curl/curl.h>
-#include "config-os400.h"  /* Not curl_setup.h: we only need some defines. */
+#include <fetch/fetch.h>
+#include "config-os400.h"  /* Not fetch_setup.h: we only need some defines. */
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -48,7 +48,7 @@
 #include <gssapi.h>
 #endif
 
-#ifndef CURL_DISABLE_LDAP
+#ifndef FETCH_DISABLE_LDAP
 #include <ldap.h>
 #endif
 
@@ -60,7 +60,7 @@
 /**
 *** QADRT OS/400 ASCII runtime defines only the most used procedures, but a
 *** lot of them are not supported. This module implements ASCII wrappers for
-*** those that are used by libcurl, but not defined by QADRT.
+*** those that are used by libfetch, but not defined by QADRT.
 **/
 
 #pragma convert(0)                              /* Restore EBCDIC. */
@@ -509,7 +509,7 @@ Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
 
 #endif /* HAVE_GSSAPI */
 
-#ifndef CURL_DISABLE_LDAP
+#ifndef FETCH_DISABLE_LDAP
 
 /* ASCII wrappers for the LDAP procedures. */
 
@@ -786,7 +786,7 @@ Curl_ldap_next_attribute_a(void *ld,
   return cp;
 }
 
-#endif /* CURL_DISABLE_LDAP */
+#endif /* FETCH_DISABLE_LDAP */
 
 static int
 sockaddr2ebcdic(struct sockaddr_storage *dstaddr,

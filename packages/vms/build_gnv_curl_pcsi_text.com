@@ -1,4 +1,4 @@
-$! File: Build_GNV_curl_pcsi_text.com
+$! File: Build_GNV_fetch_pcsi_text.com
 $!
 $! Build the *.pcsi$text file from the four components:
 $!    1. Generated =product header section
@@ -31,19 +31,19 @@ $!
 $ kit_name = f$trnlnm("GNV_PCSI_KITNAME")
 $ if kit_name .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ producer = f$trnlnm("GNV_PCSI_PRODUCER")
 $ if producer .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ producer_full_name = f$trnlnm("GNV_PCSI_PRODUCER_FULL_NAME")
 $ if producer_full_name .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_FETCH_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $!

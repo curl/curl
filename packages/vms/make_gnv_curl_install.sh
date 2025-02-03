@@ -1,8 +1,8 @@
-# File: make_gnv_curl_install.sh
+# File: make_gnv_fetch_install.sh
 #
 # Set up and run the make script for Curl.
 #
-# This makes the library, the curl binary and attempts an install.
+# This makes the library, the fetch binary and attempts an install.
 # A search list should be set up for GNU (GNV$GNU).
 #
 # Copyright (C) John Malmberg
@@ -36,9 +36,9 @@ export GNV_CC_NO_INC_PRIMARY=1
 export GNV_CC_MAIN_POSIX_EXIT=1
 make
 cd ../..
-# adjust the libcurl.pc file, GNV currently ignores the Lib: line.
+# adjust the libfetch.pc file, GNV currently ignores the Lib: line.
 # but is noisy about it, so we just remove it.
-sed -e 's/^Libs:/#Libs:/g' libcurl.pc > libcurl.pc_new
-rm libcurl.pc
-mv libcurl.pc_new libcurl.pc
+sed -e 's/^Libs:/#Libs:/g' libfetch.pc > libfetch.pc_new
+rm libfetch.pc
+mv libfetch.pc_new libfetch.pc
 make install
