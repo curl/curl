@@ -501,7 +501,9 @@ Vista
 #define CURL_DISABLE_TELNET 1
 #define CURL_DISABLE_LDAP 1
 
+#ifndef _MSC_VER
 extern int stat(const char *path, struct stat *buffer);
+#endif
 
 #endif /* UNDER_CE */
 
