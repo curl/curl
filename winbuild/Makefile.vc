@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
@@ -60,10 +60,10 @@ CFGSET=true
 !ENDIF
 
 !INCLUDE "../lib/Makefile.inc"
-LIBCURL_OBJS=$(CSOURCES:.c=.obj)
+LIBFETCH_OBJS=$(CSOURCES:.c=.obj)
 
 !INCLUDE "../src/Makefile.inc"
-CURL_OBJS=$(CURL_CFILES:.c=.obj)
+FETCH_OBJS=$(FETCH_CFILES:.c=.obj)
 
 
 # backwards compatible check for USE_SSPI
@@ -137,7 +137,7 @@ USE_UNICODE = true
 USE_UNICODE = false
 !ENDIF
 
-CONFIG_NAME_LIB = libcurl
+CONFIG_NAME_LIB = libfetch
 
 !IF "$(WITH_SSL)"=="dll"
 USE_SSL = true
@@ -292,18 +292,18 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-msh3
 # data. MakefileBuild.vc uses the same variable names but allows some user
 # changes and therefore does not remove the directories.
 BUILD_DIR=../builds/$(CONFIG_NAME_LIB)
-LIBCURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
-CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
+LIBFETCH_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
+FETCH_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-fetch
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
 $(MODE):
-	@echo LIBCURL_OBJS = \> LIBCURL_OBJS.inc
-	@for %%i in ($(LIBCURL_OBJS)) do @echo $(LIBCURL_DIROBJ)/%%i \>> LIBCURL_OBJS.inc
-	@echo. >> LIBCURL_OBJS.inc
+	@echo LIBFETCH_OBJS = \> LIBFETCH_OBJS.inc
+	@for %%i in ($(LIBFETCH_OBJS)) do @echo $(LIBFETCH_DIROBJ)/%%i \>> LIBFETCH_OBJS.inc
+	@echo. >> LIBFETCH_OBJS.inc
 
-	@echo CURL_OBJS = \> CURL_OBJS.inc
-	@for %%i in ($(CURL_OBJS)) do @echo $(CURL_DIROBJ)/%%i \>> CURL_OBJS.inc
-	@echo. >> CURL_OBJS.inc
+	@echo FETCH_OBJS = \> FETCH_OBJS.inc
+	@for %%i in ($(FETCH_OBJS)) do @echo $(FETCH_DIROBJ)/%%i \>> FETCH_OBJS.inc
+	@echo. >> FETCH_OBJS.inc
 
 	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
 	@SET MACHINE=$(MACHINE)
@@ -321,10 +321,10 @@ $(MODE):
 
 copy_from_lib:
 	echo copying .c...
-	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\
+	FOR %%i IN ($(FETCHX_CFILES:/=\)) DO copy %%i ..\src\
 
 clean:
-	@if exist $(LIBCURL_DIROBJ) rd /s /q $(LIBCURL_DIROBJ)
-	@if exist $(CURL_DIROBJ) rd /s /q $(CURL_DIROBJ)
+	@if exist $(LIBFETCH_DIROBJ) rd /s /q $(LIBFETCH_DIROBJ)
+	@if exist $(FETCH_DIROBJ) rd /s /q $(FETCH_DIROBJ)
 	@if exist $(DIRDIST) rd /s /q $(DIRDIST)
 	$(MAKE) /NOLOGO /F MakefileBuild.vc $@

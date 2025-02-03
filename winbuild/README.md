@@ -1,18 +1,18 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# Building curl with Visual C++
+# Building fetch with Visual C++
 
- This document describes how to compile, build and install curl and libcurl
+ This document describes how to compile, build and install fetch and libfetch
  from sources using the Visual C++ build tool. To build with VC++, you have to
  first install VC++. The minimum required version of VC is 6 (part of Visual
  Studio 6). However using a more recent version is strongly recommended.
 
  VC++ is also part of the Windows Platform SDK. You do not have to install the
- full Visual Studio or Visual C++ if all you want is to build curl.
+ full Visual Studio or Visual C++ if all you want is to build fetch.
 
  The latest Platform SDK can be downloaded freely from [Windows SDK and
  emulator
@@ -24,7 +24,7 @@ SPDX-License-Identifier: curl
  separately and copy them to the `deps` directory as shown below:
 
     somedirectory\
-     |_curl-src
+     |_fetch-src
      | |_winbuild
      |
      |_deps
@@ -42,7 +42,7 @@ Open a Visual Studio Command prompt:
  Using the **'VS [version] [platform] [type] Command Prompt'** menu entry:
  where [version] is the Visual Studio version, [platform] is e.g. x64 and
  [type] Native or Cross platform build. This type of command prompt may not
- exist in all Visual Studio versions. For example, to build a 64-bit curl open
+ exist in all Visual Studio versions. For example, to build a 64-bit fetch open
  the x64 Native Tools prompt.
 
  See also:
@@ -55,10 +55,10 @@ Open a Visual Studio Command prompt:
 
 ## Build in the console
 
- Once you are in the console, go to the winbuild directory in the curl
+ Once you are in the console, go to the winbuild directory in the fetch
  sources:
 
-    cd curl-src\winbuild
+    cd fetch-src\winbuild
 
  Then you can call `nmake /f Makefile.vc` with the desired options (see
  below). The builds are in the top src directory, `builds\` directory, in a
@@ -119,7 +119,7 @@ where `<options>` is one or many of:
 ## Static linking of Microsoft's C runtime (CRT):
 
  If you are using mode=static, nmake creates and links to the static build of
- libcurl but *not* the static CRT. If you must you can force nmake to link in
+ libfetch but *not* the static CRT. If you must you can force nmake to link in
  the static CRT by passing `RTLIBCFG=static`. Typically you shouldn't use that
  option, and nmake defaults to the DLL CRT. `RTLIBCFG` is rarely used and
  therefore rarely tested. When passing `RTLIBCFG` for a configuration that was
@@ -131,72 +131,72 @@ where `<options>` is one or many of:
  to know how to match the runtime library for linking (that is, the CRT). If
  `RTLIBCFG=static` then release builds use `/MT` and debug builds use `/MTd`.
 
-## Building your own application with libcurl (Visual Studio example)
+## Building your own application with libfetch (Visual Studio example)
 
- When you build curl and libcurl, nmake shows the relative path where the
+ When you build fetch and libfetch, nmake shows the relative path where the
  output directory is. The output directory is named from the options nmake
  used when building. You may also see temp directories of the same name but
- with suffixes -obj-curl and -obj-lib.
+ with suffixes -obj-fetch and -obj-lib.
 
- For example let's say you have built curl.exe and libcurl.dll from the Visual
+ For example let's say you have built fetch.exe and libfetch.dll from the Visual
  Studio 2010 x64 Win64 Command Prompt:
 
     nmake /f Makefile.vc mode=dll VC=10
 
  The output directory has a name similar to
- `..\builds\libcurl-vc10-x64-release-dll-ipv6-sspi-schannel`.
+ `..\builds\libfetch-vc10-x64-release-dll-ipv6-sspi-schannel`.
 
  The output directory contains subdirectories bin, lib and include. Those are
  the directories to set in your Visual Studio project. You can either copy the
  output directory to your project or leave it in place. Following the example,
- let's assume you leave it in place and your curl top source directory is
- `C:\curl-7.82.0`. You would set these options for configurations using the
+ let's assume you leave it in place and your fetch top source directory is
+ `C:\fetch-7.82.0`. You would set these options for configurations using the
  x64 platform:
 
 ~~~
  - Configuration Properties > Debugging > Environment
-    PATH=C:\curl-7.82.0\builds\libcurl-vc10-x64-release-dll-ipv6-sspi-schannel\bin;%PATH%
+    PATH=C:\fetch-7.82.0\builds\libfetch-vc10-x64-release-dll-ipv6-sspi-schannel\bin;%PATH%
 
  - C/C++ > General > Additional Include Directories
-    C:\curl-7.82.0\builds\libcurl-vc10-x64-release-dll-ipv6-sspi-schannel\include;
+    C:\fetch-7.82.0\builds\libfetch-vc10-x64-release-dll-ipv6-sspi-schannel\include;
 
  - Linker > General > Additional Library Directories
-    C:\curl-7.82.0\builds\libcurl-vc10-x64-release-dll-ipv6-sspi-schannel\lib;
+    C:\fetch-7.82.0\builds\libfetch-vc10-x64-release-dll-ipv6-sspi-schannel\lib;
 
  - Linker > Input > Additional Dependencies
-    libcurl.lib;
+    libfetch.lib;
 ~~~
 
  For configurations using the x86 platform (aka Win32 platform) you would
- need to make a separate x86 build of libcurl.
+ need to make a separate x86 build of libfetch.
 
- If you build libcurl static (`mode=static`) or debug (`DEBUG=yes`) then the
+ If you build libfetch static (`mode=static`) or debug (`DEBUG=yes`) then the
  library name varies and separate builds may be necessary for separate
  configurations of your project within the same platform. This is discussed in
  the next section.
 
-## Building your own application with a static libcurl
+## Building your own application with a static libfetch
 
- When building an application that uses the static libcurl library on Windows,
- you must define `CURL_STATICLIB`. Otherwise the linker looks for dynamic
+ When building an application that uses the static libfetch library on Windows,
+ you must define `FETCH_STATICLIB`. Otherwise the linker looks for dynamic
  import symbols.
 
  The static library name has an `_a` suffix in the basename and the debug
  library name has a `_debug` suffix in the basename. For example,
- `libcurl_a_debug.lib` is a static debug build of libcurl.
+ `libfetch_a_debug.lib` is a static debug build of libfetch.
 
- You may need a separate build of libcurl for each VC configuration combination
+ You may need a separate build of libfetch for each VC configuration combination
  (for example: Debug|Win32, Debug|x64, Release|Win32, Release|x64).
 
  You must specify any additional dependencies needed by your build of static
- libcurl (for example:
+ libfetch (for example:
  `advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib`).
 
 ## Legacy Windows and SSL
 
- When you build curl using the build files in this directory the default SSL
+ When you build fetch using the build files in this directory the default SSL
  backend is Schannel (Windows SSPI), the native SSL library that comes with
  the Windows OS. Schannel in Windows 8 and earlier is not able to connect to
  servers that no longer support the legacy handshakes and algorithms used by
- those versions. If you are using curl in one of those earlier versions of
+ those versions. If you are using fetch in one of those earlier versions of
  Windows you should choose another SSL backend like OpenSSL.

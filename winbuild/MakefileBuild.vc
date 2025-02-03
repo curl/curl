@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,13 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
 ###########################################################################
 #
-# Makefile for building libcurl with MSVC
+# Makefile for building libfetch with MSVC
 #
 # Usage: see README.md
 #
@@ -50,11 +50,11 @@ CC = cl.exe
 !IF "$(VC)"=="6"
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /Gm /Zi /D_DEBUG /GZ
-CFLAGS      = /I. /I../lib /I../include /nologo /W4 /GX /YX /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I../lib /I../include /nologo /W4 /GX /YX /FD /c /DBUILDING_LIBFETCH
 !ELSE
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd
-CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /EHsc /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /EHsc /FD /c /DBUILDING_LIBFETCH
 !ENDIF
 
 LFLAGS     = /nologo /machine:$(MACHINE)
@@ -69,11 +69,11 @@ LNKLIB     = lib.exe
 CFLAGS_PDB = /Zi
 LFLAGS_PDB = /incremental:no /opt:ref,icf /DEBUG
 
-CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
+CFLAGS_LIBFETCH_STATIC  = /DFETCH_STATICLIB
 
 WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib crypt32.lib
 
-BASE_NAME              = libcurl
+BASE_NAME              = libfetch
 BASE_NAME_DEBUG        = $(BASE_NAME)_debug
 BASE_NAME_STATIC       = $(BASE_NAME)_a
 BASE_NAME_STATIC_DEBUG = $(BASE_NAME_STATIC)_debug
@@ -90,18 +90,18 @@ PDB_NAME_STATIC_DEBUG  = $(BASE_NAME_STATIC_DEBUG).pdb
 PDB_NAME_DLL           = $(BASE_NAME).pdb
 PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
-# CURL Command section
-PROGRAM_NAME  = curl.exe
-CURL_CFLAGS   = /I../lib /I../include /nologo /W4 /EHsc /FD /c
-CURL_LFLAGS   = /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console $(LFLAGS)
-CURL_RESFLAGS = /i../include
+# FETCH Command section
+PROGRAM_NAME  = fetch.exe
+FETCH_CFLAGS   = /I../lib /I../include /nologo /W4 /EHsc /FD /c
+FETCH_LFLAGS   = /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console $(LFLAGS)
+FETCH_RESFLAGS = /i../include
 
 #############################################################
 ## Nothing more to do below this line!
-LIBCURL_SRC_DIR = ..\lib
-CURL_SRC_DIR = ..\src
+LIBFETCH_SRC_DIR = ..\lib
+FETCH_SRC_DIR = ..\src
 
-!IF EXISTS($(CURL_SRC_DIR)\tool_hugehelp.c)
+!IF EXISTS($(FETCH_SRC_DIR)\tool_hugehelp.c)
 USE_MANUAL   = true
 CFLAGS       = $(CFLAGS) /DUSE_MANUAL
 !ENDIF
@@ -144,12 +144,12 @@ WIN_LIBS     = $(WIN_LIBS) gdi32.lib user32.lib crypt32.lib
 !IFDEF USE_SSL
 SSL_CFLAGS   = /DUSE_OPENSSL /I"$(SSL_INC_DIR)"
 !IF "$(ENABLE_OPENSSL_AUTO_LOAD_CONFIG)"=="false"
-SSL_CFLAGS   = $(SSL_CFLAGS) /DCURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+SSL_CFLAGS   = $(SSL_CFLAGS) /DFETCH_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
 !ENDIF
 !ENDIF
 
 !IF "$(DISABLE_WEBSOCKETS)"=="true"
-CFLAGS  = $(CFLAGS) /DCURL_DISABLE_WEBSOCKETS=1
+CFLAGS  = $(CFLAGS) /DFETCH_DISABLE_WEBSOCKETS=1
 !ENDIF
 
 !IFDEF NGHTTP2_PATH
@@ -418,7 +418,7 @@ GEN_PDB = true
 !IFDEF EMBED_MANIFEST
 MANIFESTTOOL = $(MT) -manifest $(DIRDIST)\bin\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\bin\$(PROGRAM_NAME);1
 !ELSE
-CURL_RC_FLAGS = $(CURL_RC_FLAGS) /dCURL_EMBED_MANIFEST
+FETCH_RC_FLAGS = $(FETCH_RC_FLAGS) /dFETCH_EMBED_MANIFEST
 !ENDIF
 
 # Runtime library configuration
@@ -432,12 +432,12 @@ RTLIB_DEBUG  = /MDd
 
 !IF "$(MODE)"=="static"
 TARGET = $(LIB_NAME_STATIC)
-CURL_LIBCURL_LIBNAME=$(LIB_NAME_STATIC)
+FETCH_LIBFETCH_LIBNAME=$(LIB_NAME_STATIC)
 AS_DLL = false
 CFGSET = true
 !ELSEIF "$(MODE)"=="dll"
 TARGET = $(LIB_NAME_DLL)
-CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
+FETCH_LIBFETCH_LIBNAME=$(LIB_NAME_IMP)
 AS_DLL = true
 CFGSET = true
 !ENDIF
@@ -448,16 +448,16 @@ CFGSET = true
 
 
 
-# CURL_XX macros are for the curl.exe command
+# FETCH_XX macros are for the fetch.exe command
 
 !IF "$(DEBUG)"=="yes"
-RC_FLAGS = /d_DEBUG /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-CURL_CC       = $(CC_DEBUG) $(RTLIB_DEBUG)
-CURL_RC_FLAGS = $(CURL_RC_FLAGS) /i../include /d_DEBUG /Fo $@ $(CURL_SRC_DIR)\curl.rc
+RC_FLAGS = /d_DEBUG /Fo $@ $(LIBFETCH_SRC_DIR)\libfetch.rc
+FETCH_CC       = $(CC_DEBUG) $(RTLIB_DEBUG)
+FETCH_RC_FLAGS = $(FETCH_RC_FLAGS) /i../include /d_DEBUG /Fo $@ $(FETCH_SRC_DIR)\fetch.rc
 !ELSE
-RC_FLAGS = /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-CURL_CC       = $(CC_NODEBUG) $(RTLIB)
-CURL_RC_FLAGS = $(CURL_RC_FLAGS) /i../include /Fo $@ $(CURL_SRC_DIR)\curl.rc
+RC_FLAGS = /Fo $@ $(LIBFETCH_SRC_DIR)\libfetch.rc
+FETCH_CC       = $(CC_NODEBUG) $(RTLIB)
+FETCH_RC_FLAGS = $(FETCH_RC_FLAGS) /i../include /Fo $@ $(FETCH_SRC_DIR)\fetch.rc
 !ENDIF
 
 !IF "$(AS_DLL)" == "true"
@@ -467,14 +467,14 @@ LNK       = $(LNKDLL) $(LFLAGS) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 TARGET    = $(LIB_NAME_DLL_DEBUG)
 LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
 PDB       = $(PDB_NAME_DLL_DEBUG)
-CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
+FETCH_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
 !ELSE
 TARGET    = $(LIB_NAME_DLL)
 LNK       = $(LNK)  /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 PDB       = $(PDB_NAME_DLL)
-CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
+FETCH_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 !ENDIF
-RESOURCE  = $(LIB_DIROBJ)\libcurl.res
+RESOURCE  = $(LIB_DIROBJ)\libfetch.res
 
 # AS_DLL
 !ELSE
@@ -487,7 +487,7 @@ TARGET   = $(LIB_NAME_STATIC)
 PDB      = $(PDB_NAME_STATIC)
 !ENDIF
 LNK      = $(LNKLIB) /out:$(LIB_DIROBJ)\$(TARGET)
-CURL_CC  = $(CURL_CC) $(CFLAGS_LIBCURL_STATIC)
+FETCH_CC  = $(FETCH_CC) $(CFLAGS_LIBFETCH_STATIC)
 
 # AS_DLL
 !ENDIF
@@ -560,7 +560,7 @@ LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
  || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WOLFSSL)"=="true" ) \
  || ( "$(USE_MBEDTLS)"=="true" && "$(USE_SCHANNEL)"=="true" ) \
  || ( "$(USE_WOLFSSL)"=="true" && "$(USE_SCHANNEL)"=="true" )
-CFLAGS = $(CFLAGS) /DCURL_WITH_MULTI_SSL
+CFLAGS = $(CFLAGS) /DFETCH_WITH_MULTI_SSL
 !ENDIF
 
 !IF "$(USE_UNICODE)"=="true"
@@ -568,7 +568,7 @@ CFLAGS = $(CFLAGS) /DUNICODE /D_UNICODE
 !ENDIF
 
 LIB_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
-CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
+FETCH_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-fetch
 
 !IFDEF WITH_PREFIX
 DIRDIST = $(WITH_PREFIX)
@@ -577,23 +577,23 @@ DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 !ENDIF
 
 #
-# curl.exe
+# fetch.exe
 #
-CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
+FETCH_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
 
 !IF "$(CFGSET)" != "FALSE"
 # A mode was provided, so the library can be built.
 #
-!include CURL_OBJS.inc
-!include LIBCURL_OBJS.inc
+!include FETCH_OBJS.inc
+!include LIBFETCH_OBJS.inc
 
 !IF "$(AS_DLL)" == "true"
-LIB_OBJS = $(LIBCURL_OBJS) $(RESOURCE)
+LIB_OBJS = $(LIBFETCH_OBJS) $(RESOURCE)
 !ELSE
-LIB_OBJS = $(LIBCURL_OBJS)
+LIB_OBJS = $(LIBFETCH_OBJS)
 !ENDIF
 
-EXE_OBJS = $(CURL_OBJS) $(CURL_DIROBJ)\curl.res
+EXE_OBJS = $(FETCH_OBJS) $(FETCH_DIROBJ)\fetch.res
 
 all : $(TARGET) $(PROGRAM_NAME)
 
@@ -629,14 +629,14 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DIRDIST)
 	@if exist $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) $(DIRDIST)\lib >nul 2<&1
 	@-copy $(LIB_DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
 	@-copy $(LIB_DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
-	@-copy ..\include\curl\*.h   $(DIRDIST)\include\curl\ /y  >nul 2<&1
+	@-copy ..\include\fetch\*.h   $(DIRDIST)\include\fetch\ /y  >nul 2<&1
 
 $(LIB_OBJS): $(LIB_DIROBJ) $(DIRDIST)
 
 $(DIRDIST):
 	@if not exist "$(DIRDIST)\bin" mkdir $(DIRDIST)\bin
 	@if not exist "$(DIRDIST)\include" mkdir $(DIRDIST)\include
-	@if not exist "$(DIRDIST)\include\curl" mkdir $(DIRDIST)\include\curl
+	@if not exist "$(DIRDIST)\include\fetch" mkdir $(DIRDIST)\include\fetch
 	@if not exist "$(DIRDIST)\lib" mkdir $(DIRDIST)\lib
 
 $(LIB_DIROBJ):
@@ -646,98 +646,98 @@ $(LIB_DIROBJ):
 	@if not exist "$(LIB_DIROBJ)\vssh" mkdir $(LIB_DIROBJ)\vssh
 	@if not exist "$(LIB_DIROBJ)\vquic" mkdir $(LIB_DIROBJ)\vquic
 
-$(CURL_DIROBJ):
-	@if not exist "$(CURL_DIROBJ)" mkdir $(CURL_DIROBJ)
-# we need a lib dir for the portability functions from libcurl
+$(FETCH_DIROBJ):
+	@if not exist "$(FETCH_DIROBJ)" mkdir $(FETCH_DIROBJ)
+# we need a lib dir for the portability functions from libfetch
 # we use the .c directly here
-	@if not exist "$(CURL_DIROBJ)" mkdir $(CURL_DIROBJ)\lib
+	@if not exist "$(FETCH_DIROBJ)" mkdir $(FETCH_DIROBJ)\lib
 
 .SUFFIXES: .c .obj .res
 
-{$(LIBCURL_SRC_DIR)\}.c{$(LIB_DIROBJ)\}.obj::
-	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\\"  $<
+{$(LIBFETCH_SRC_DIR)\}.c{$(LIB_DIROBJ)\}.obj::
+	$(FETCH_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\\"  $<
 
-{$(LIBCURL_SRC_DIR)\vauth\}.c{$(LIB_DIROBJ)\vauth\}.obj::
-	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vauth\\"  $<
+{$(LIBFETCH_SRC_DIR)\vauth\}.c{$(LIB_DIROBJ)\vauth\}.obj::
+	$(FETCH_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vauth\\"  $<
 
-{$(LIBCURL_SRC_DIR)\vtls\}.c{$(LIB_DIROBJ)\vtls\}.obj::
-	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vtls\\"  $<
+{$(LIBFETCH_SRC_DIR)\vtls\}.c{$(LIB_DIROBJ)\vtls\}.obj::
+	$(FETCH_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vtls\\"  $<
 
-{$(LIBCURL_SRC_DIR)\vssh\}.c{$(LIB_DIROBJ)\vssh\}.obj::
-	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vssh\\"  $<
+{$(LIBFETCH_SRC_DIR)\vssh\}.c{$(LIB_DIROBJ)\vssh\}.obj::
+	$(FETCH_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vssh\\"  $<
 
-{$(LIBCURL_SRC_DIR)\vquic\}.c{$(LIB_DIROBJ)\vquic\}.obj::
-	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vquic\\"  $<
+{$(LIBFETCH_SRC_DIR)\vquic\}.c{$(LIB_DIROBJ)\vquic\}.obj::
+	$(FETCH_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vquic\\"  $<
 
-$(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
+$(LIB_DIROBJ)\libfetch.res: $(LIBFETCH_SRC_DIR)\libfetch.rc
 	$(RC) $(RC_FLAGS)
 
 #
-# curl.exe
+# fetch.exe
 #
 
 
 !IF "$(MODE)"=="static"
 !IF "$(DEBUG)"=="yes"
-CURL_LIBCURL_LIBNAME=$(LIB_NAME_STATIC_DEBUG)
+FETCH_LIBFETCH_LIBNAME=$(LIB_NAME_STATIC_DEBUG)
 !ELSE
-CURL_LIBCURL_LIBNAME=$(LIB_NAME_STATIC)
+FETCH_LIBFETCH_LIBNAME=$(LIB_NAME_STATIC)
 !ENDIF
 !ELSEIF "$(MODE)"=="dll"
 !IF "$(DEBUG)"=="yes"
-CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP_DEBUG)
+FETCH_LIBFETCH_LIBNAME=$(LIB_NAME_IMP_DEBUG)
 !ELSE
-CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
+FETCH_LIBFETCH_LIBNAME=$(LIB_NAME_IMP)
 !ENDIF
 !ENDIF
 
-CURL_FROM_LIBCURL=\
- $(CURL_DIROBJ)\nonblock.obj \
- $(CURL_DIROBJ)\strtoofft.obj \
- $(CURL_DIROBJ)\warnless.obj \
- $(CURL_DIROBJ)\curl_get_line.obj \
- $(CURL_DIROBJ)\curl_multibyte.obj \
- $(CURL_DIROBJ)\version_win32.obj \
- $(CURL_DIROBJ)\dynbuf.obj \
- $(CURL_DIROBJ)\base64.obj
+FETCH_FROM_LIBFETCH=\
+ $(FETCH_DIROBJ)\nonblock.obj \
+ $(FETCH_DIROBJ)\strtoofft.obj \
+ $(FETCH_DIROBJ)\warnless.obj \
+ $(FETCH_DIROBJ)\fetch_get_line.obj \
+ $(FETCH_DIROBJ)\fetch_multibyte.obj \
+ $(FETCH_DIROBJ)\version_win32.obj \
+ $(FETCH_DIROBJ)\dynbuf.obj \
+ $(FETCH_DIROBJ)\base64.obj
 
 !IFDEF USE_MANUAL
-CURL_FROM_LIBCURL = $(CURL_FROM_LIBCURL) $(CURL_DIROBJ)\tool_hugehelp.obj
+FETCH_FROM_LIBFETCH = $(FETCH_FROM_LIBFETCH) $(FETCH_DIROBJ)\tool_hugehelp.obj
 !ENDIF
 
-$(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
-	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
+$(PROGRAM_NAME): $(FETCH_DIROBJ) $(FETCH_FROM_LIBFETCH) $(EXE_OBJS)
+	$(FETCH_LINK) $(FETCH_LFLAGS) $(FETCH_LIBFETCH_LIBNAME) $(WIN_LIBS) $(FETCH_FROM_LIBFETCH) $(EXE_OBJS)
 	$(MANIFESTTOOL)
 
-{$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj::
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$(CURL_DIROBJ)\\"  $<
+{$(FETCH_SRC_DIR)\}.c{$(FETCH_DIROBJ)\}.obj::
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$(FETCH_DIROBJ)\\"  $<
 
 !IFDEF USE_MANUAL
-$(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
-	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
+$(FETCH_DIROBJ)\tool_hugehelp.obj: $(FETCH_SRC_DIR)\tool_hugehelp.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Zm200 /Fo"$@" $(FETCH_SRC_DIR)\tool_hugehelp.c
 !ENDIF
-$(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
-$(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
-$(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
-$(CURL_DIROBJ)\curl_get_line.obj: ../lib/curl_get_line.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_get_line.c
-$(CURL_DIROBJ)\curl_multibyte.obj: ../lib/curl_multibyte.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_multibyte.c
-$(CURL_DIROBJ)\version_win32.obj: ../lib/version_win32.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/version_win32.c
-$(CURL_DIROBJ)\dynbuf.obj: ../lib/dynbuf.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/dynbuf.c
-$(CURL_DIROBJ)\base64.obj: ../lib/base64.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/base64.c
-$(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
-	$(RC) $(CURL_RC_FLAGS)
+$(FETCH_DIROBJ)\nonblock.obj: ../lib/nonblock.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$@" ../lib/nonblock.c
+$(FETCH_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$@" ../lib/strtoofft.c
+$(FETCH_DIROBJ)\warnless.obj: ../lib/warnless.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$@" ../lib/warnless.c
+$(FETCH_DIROBJ)\fetch_get_line.obj: ../lib/fetch_get_line.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$@" ../lib/fetch_get_line.c
+$(FETCH_DIROBJ)\fetch_multibyte.obj: ../lib/fetch_multibyte.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$@" ../lib/fetch_multibyte.c
+$(FETCH_DIROBJ)\version_win32.obj: ../lib/version_win32.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$@" ../lib/version_win32.c
+$(FETCH_DIROBJ)\dynbuf.obj: ../lib/dynbuf.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$@" ../lib/dynbuf.c
+$(FETCH_DIROBJ)\base64.obj: ../lib/base64.c
+	$(FETCH_CC) $(FETCH_CFLAGS) /Fo"$@" ../lib/base64.c
+$(FETCH_DIROBJ)\fetch.res: $(FETCH_SRC_DIR)\fetch.rc
+	$(RC) $(FETCH_RC_FLAGS)
 
 !ENDIF  # End of case where a config was provided.
 
-# Makefile.vc's clean removes (LIB)CURL_DIROBJ and DIRDIST dirs then calls
+# Makefile.vc's clean removes (LIB)FETCH_DIROBJ and DIRDIST dirs then calls
 # this clean. Note those are the original directories we control and not the
 # directories possibly modified by this makefile to point to user-specified
 # directories.
