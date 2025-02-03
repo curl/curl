@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -39,7 +39,7 @@ if($start eq "-h") {
     exit;
 }
 elsif($start eq "") {
-    $start = `git tag --sort=taggerdate | grep "^curl-" | tail -1`;
+    $start = `git tag --sort=taggerdate | grep "^fetch-" | tail -1`;
     chomp $start;
 }
 
@@ -66,15 +66,15 @@ sub setopts {
     open(H, "$f");
     my $opts;
     while(<H>) {
-        if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/))  {
+        if(/^  FETCHOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/))  {
             $opts++;
         }
     }
     close(H);
     return $opts;
 }
-$asetopts = setopts("<include/curl/curl.h");
-$bsetopts = setopts("git show $start:include/curl/curl.h|");
+$asetopts = setopts("<include/fetch/fetch.h");
+$bsetopts = setopts("git show $start:include/fetch/fetch.h|");
 $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
@@ -99,9 +99,9 @@ $elapsed=$now - $tagged; # number of seconds since tag
 $total=$now - `date -d 19980320 +%s`;
 $totalhttpget=$now - `date -d 19961111 +%s`;
 
-# Number of public functions in libcurl
-$apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
-$bpublic=`git grep ^CURL_EXTERN $start -- include/curl | wc -l`;
+# Number of public functions in libfetch
+$apublic=`git grep ^FETCH_EXTERN -- include/fetch | wc -l`;
+$bpublic=`git grep ^FETCH_EXTERN $start -- include/fetch | wc -l`;
 $public = $apublic - $bpublic;
 
 # diffstat
@@ -154,7 +154,7 @@ printf "Contributors:                   %d, %d new (total %d)\n",
     $numcontributors, $contribs, $acontribs;
 printf "New public functions:           %d (total %d)\n",
     $public, $apublic;
-printf "New curl_easy_setopt() options: %d (total %d)\n",
+printf "New fetch_easy_setopt() options: %d (total %d)\n",
     $nsetopts, $asetopts;
 printf "New command line options:       %d (total %d)\n",
     $noptions, $aoptions;

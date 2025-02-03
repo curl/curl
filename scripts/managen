@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -29,7 +29,7 @@
 
 This script generates the manpage.
 
-Example: managen <command> [files] > curl.1
+Example: managen <command> [files] > fetch.1
 
 Dev notes:
 
@@ -269,7 +269,7 @@ sub added {
         return "";
     }
     if($standalone) {
-        return ".SH \"ADDED\"\nAdded in curl version $data\n";
+        return ".SH \"ADDED\"\nAdded in fetch version $data\n";
     }
     else {
         return "Added in $data. ";
@@ -666,9 +666,9 @@ sub single {
     # quote "bare" minuses in opt
     $opt =~ s/-/\\-/g if($manpage);
     if($standalone) {
-        print ".TH curl 1 \"30 Nov 2016\" \"curl 7.52.0\" \"curl manual\"\n";
+        print ".TH fetch 1 \"30 Nov 2016\" \"fetch 7.52.0\" \"fetch manual\"\n";
         print ".SH OPTION\n";
-        print "curl $opt\n";
+        print "fetch $opt\n";
     }
     elsif($manpage) {
         print ".IP \"$opt\"\n";
@@ -772,7 +772,7 @@ sub single {
 
     if($requires) {
         my $l = $manpage ? manpageify($long) : "--$long";
-        push @foot, "$l requires that libcurl".
+        push @foot, "$l requires that libfetch".
             " is built to support $requires.\n";
     }
     if($mutexed) {
@@ -805,7 +805,7 @@ sub single {
                 $e =~ s!\$URL!https://example.com!g;
                 # convert single backslahes to doubles
                 $e =~ s/\\/\\\\/g;
-                print "curl $e\n";
+                print "fetch $e\n";
             }
             print ".fi\n";
         }
@@ -819,12 +819,12 @@ sub single {
             #
             foreach my $e (@examples) {
                 $e =~ s!\$URL!https://example.com!g;
-                my $maxwidth = 60; # plus the "    curl " 18 col prefix
+                my $maxwidth = 60; # plus the "    fetch " 18 col prefix
                 if(length($e) > $maxwidth) {
                     # a long example, shorten it
                     my $p = substr($e, 0, $maxwidth);
                     $p = maybespace($p);
-                    push @ex, "[0q] curl ".$p."\\";
+                    push @ex, "[0q] fetch ".$p."\\";
                     $e = substr($e, length($p));
                     do {
                         my $r = substr($e, 0, $maxwidth);
@@ -841,7 +841,7 @@ sub single {
                     } while(length($e));
                 }
                 else {
-                    push @ex, "[0q] curl $e\n";
+                    push @ex, "[0q] fetch $e\n";
                 }
             }
             printdesc($manpage, 2, @ex);
@@ -949,7 +949,7 @@ sub sourcecategories {
     open(H, "<$dir/../../src/tool_help.h") ||
         die "can't find the header file";
     while(<H>) {
-        if(/^\#define CURLHELP_([A-Z0-9]*)/) {
+        if(/^\#define FETCHHELP_([A-Z0-9]*)/) {
             $cats{lc($1)}++;
         }
     }
@@ -973,7 +973,7 @@ sub listhelp {
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -982,7 +982,7 @@ sub listhelp {
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -1019,7 +1019,7 @@ HEAD
                 exit 3;
             }
 
-            $bitmask .= 'CURLHELP_' . uc $categories[$i];
+            $bitmask .= 'FETCHHELP_' . uc $categories[$i];
             # If not last element, append |
             if($i < $#categories) {
                 $bitmask .= ' | ';
@@ -1064,7 +1064,7 @@ sub listcats {
     }
     @categories = sort @categories;
     for my $i (0..$#categories) {
-        printf("#define CURLHELP_%-10s (%s)\n",
+        printf("#define FETCHHELP_%-10s (%s)\n",
                uc($categories[$i]), "1u << ${i}u");
     }
 }
@@ -1136,7 +1136,7 @@ sub mainpage {
 .\\" *
 .\\" * This software is licensed as described in the file COPYING, which
 .\\" * you should have received as part of this distribution. The terms
-.\\" * are also available at https://curl.se/docs/copyright.html.
+.\\" * are also available at https://fetch.se/docs/copyright.html.
 .\\" *
 .\\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\\" * copies of the Software, and permit persons to whom the Software is
@@ -1145,13 +1145,13 @@ sub mainpage {
 .\\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\\" * KIND, either express or implied.
 .\\" *
-.\\" * SPDX-License-Identifier: curl
+.\\" * SPDX-License-Identifier: fetch
 .\\" *
 .\\" **************************************************************************
 .\\"
-.\\" DO NOT EDIT. Generated by the curl project managen manpage generator.
+.\\" DO NOT EDIT. Generated by the fetch project managen manpage generator.
 .\\"
-.TH curl 1 "$date" "curl $version" "curl Manual"
+.TH fetch 1 "$date" "fetch $version" "fetch Manual"
 HEADER
         if ($manpage);
 
@@ -1259,13 +1259,13 @@ elsif($cmd eq "-c") {
 my @files = @ARGV; # the rest are the files
 
 # can be overridden for releases
-if($ENV{'CURL_MAKETGZ_VERSION'}) {
-    $version = $ENV{'CURL_MAKETGZ_VERSION'};
+if($ENV{'FETCH_MAKETGZ_VERSION'}) {
+    $version = $ENV{'FETCH_MAKETGZ_VERSION'};
 }
 else {
-    open(INC, "<$include/curl/curlver.h");
+    open(INC, "<$include/fetch/fetchver.h");
     while(<INC>) {
-        if($_ =~ /^#define LIBCURL_VERSION \"([0-9.]*)/) {
+        if($_ =~ /^#define LIBFETCH_VERSION \"([0-9.]*)/) {
             $version = $1;
             last;
         }

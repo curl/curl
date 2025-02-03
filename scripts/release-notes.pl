@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -88,8 +88,8 @@ sub getref {
 
 # '#num'
 # 'num'
-# 'https://github.com/curl/curl/issues/6939'
-# 'https://github.com/curl/curl-www/issues/69'
+# 'https://github.com/fetch/fetch/issues/6939'
+# 'https://github.com/fetch/fetch-www/issues/69'
 # 'https://elsewhere.example.com/discussion'
 
 sub extract {
@@ -98,7 +98,7 @@ sub extract {
         # return the plain number
         return $2;
     }
-    elsif($ref =~ /^https:\/\/github.com\/curl\/curl\/.*\/(\d+)/) {
+    elsif($ref =~ /^https:\/\/github.com\/fetch\/fetch\/.*\/(\d+)/) {
         # return the plain number
         return $1;
     }
@@ -169,7 +169,7 @@ sub onecommit {
     }
 
     if($ref =~ /^#?(\d+)/) {
-        $ref = "https://curl.se/bug/?i=$1"
+        $ref = "https://fetch.se/bug/?i=$1"
     }
     if($ref) {
         my $r = getref();

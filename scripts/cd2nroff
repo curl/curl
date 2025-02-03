@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,13 +21,13 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
 =begin comment
 
-Converts a curldown file to nroff (manpage).
+Converts a fetchdown file to nroff (manpage).
 
 =end comment
 =cut
@@ -311,7 +311,7 @@ sub single {
                 print STDERR "$f:$line:1:ERROR: no 'Source:' in $f\n";
                 return 2;
             }
-            if(($source eq "libcurl") && !$addedin) {
+            if(($source eq "libfetch") && !$addedin) {
                 print STDERR "$f:$line:1:ERROR: no 'Added-in:' in $f\n";
                 return 2;
             }
@@ -433,8 +433,8 @@ sub single {
         # convert backslash-'<' or '> to just the second character
         $d =~ s/\\([<>])/$1/g;
 
-        # mentions of curl symbols with manpages use italics by default
-        $d =~ s/((lib|)curl([^ ]*\(3\)))/\\fI$1\\fP/gi;
+        # mentions of fetch symbols with manpages use italics by default
+        $d =~ s/((lib|)fetch([^ ]*\(3\)))/\\fI$1\\fP/gi;
 
         # backticked becomes italics
         $d =~ s/\`(.*?)\`/\\fI$1\\fP/g;
@@ -483,7 +483,7 @@ sub single {
                 if($addedin ne "n/a") {
                     # insert the generated AVAILABILITY section
                     push @desc, ".SH AVAILABILITY\n";
-                    push @desc, "Added in curl $addedin\n";
+                    push @desc, "Added in fetch $addedin\n";
                 }
                 $header = 1;
                 next;

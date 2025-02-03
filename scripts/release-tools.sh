@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -30,7 +30,7 @@ set -eu
 # this should ideally be passed in
 timestamp=${1:-unknown}
 version=${2:-unknown}
-tag=$(echo "curl-$version" | tr '.' '_')
+tag=$(echo "fetch-$version" | tr '.' '_')
 commit=${3}
 if [ -n "$commit" ] && [ -r "docs/tarball-commit.txt.dist" ]; then
   # If commit is given, then the tag likely doesn't actually exist
@@ -38,7 +38,7 @@ if [ -n "$commit" ] && [ -r "docs/tarball-commit.txt.dist" ]; then
 fi
 
 cat <<MOO
-# Release tools used for curl $version
+# Release tools used for fetch $version
 
 The following tools and their Debian package version numbers were used to
 produce this release tarball.

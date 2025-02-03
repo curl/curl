@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include <stdio.h>
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 /*
  * Use this tool to generate an updated table for the Curl_getn_scheme_handler
@@ -35,45 +35,45 @@ struct detail {
 };
 
 static const struct detail scheme[] = {
-  {"dict", "#ifndef CURL_DISABLE_DICT" },
-  {"file", "#ifndef CURL_DISABLE_FILE" },
-  {"ftp", "#ifndef CURL_DISABLE_FTP" },
-  {"ftps", "#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)" },
-  {"gopher", "#ifndef CURL_DISABLE_GOPHER" },
-  {"gophers", "#if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)" },
-  {"http", "#ifndef CURL_DISABLE_HTTP" },
-  {"https", "#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)" },
-  {"imap", "#ifndef CURL_DISABLE_IMAP" },
-  {"imaps", "#if defined(USE_SSL) && !defined(CURL_DISABLE_IMAP)" },
-  {"ldap", "#ifndef CURL_DISABLE_LDAP" },
-  {"ldaps", "#if !defined(CURL_DISABLE_LDAP) && \\\n"
-   "  !defined(CURL_DISABLE_LDAPS) && \\\n"
+  {"dict", "#ifndef FETCH_DISABLE_DICT" },
+  {"file", "#ifndef FETCH_DISABLE_FILE" },
+  {"ftp", "#ifndef FETCH_DISABLE_FTP" },
+  {"ftps", "#if defined(USE_SSL) && !defined(FETCH_DISABLE_FTP)" },
+  {"gopher", "#ifndef FETCH_DISABLE_GOPHER" },
+  {"gophers", "#if defined(USE_SSL) && !defined(FETCH_DISABLE_GOPHER)" },
+  {"http", "#ifndef FETCH_DISABLE_HTTP" },
+  {"https", "#if defined(USE_SSL) && !defined(FETCH_DISABLE_HTTP)" },
+  {"imap", "#ifndef FETCH_DISABLE_IMAP" },
+  {"imaps", "#if defined(USE_SSL) && !defined(FETCH_DISABLE_IMAP)" },
+  {"ldap", "#ifndef FETCH_DISABLE_LDAP" },
+  {"ldaps", "#if !defined(FETCH_DISABLE_LDAP) && \\\n"
+   "  !defined(FETCH_DISABLE_LDAPS) && \\\n"
    "  ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \\\n"
    "   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))" },
-  {"mqtt", "#ifndef CURL_DISABLE_MQTT" },
-  {"pop3", "#ifndef CURL_DISABLE_POP3" },
-  {"pop3s", "#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)" },
+  {"mqtt", "#ifndef FETCH_DISABLE_MQTT" },
+  {"pop3", "#ifndef FETCH_DISABLE_POP3" },
+  {"pop3s", "#if defined(USE_SSL) && !defined(FETCH_DISABLE_POP3)" },
   {"rtmp", "#ifdef USE_LIBRTMP" },
   {"rtmpt", "#ifdef USE_LIBRTMP" },
   {"rtmpe", "#ifdef USE_LIBRTMP" },
   {"rtmpte", "#ifdef USE_LIBRTMP" },
   {"rtmps", "#ifdef USE_LIBRTMP" },
   {"rtmpts", "#ifdef USE_LIBRTMP" },
-  {"rtsp", "#ifndef CURL_DISABLE_RTSP" },
+  {"rtsp", "#ifndef FETCH_DISABLE_RTSP" },
   {"scp", "#if defined(USE_SSH) && !defined(USE_WOLFSSH)" },
   {"sftp", "#if defined(USE_SSH)" },
-  {"smb", "#if !defined(CURL_DISABLE_SMB) && \\\n"
-   "  defined(USE_CURL_NTLM_CORE) && (SIZEOF_CURL_OFF_T > 4)" },
-  {"smbs", "#if defined(USE_SSL) && !defined(CURL_DISABLE_SMB) && \\\n"
-   "  defined(USE_CURL_NTLM_CORE) && (SIZEOF_CURL_OFF_T > 4)" },
-  {"smtp", "#ifndef CURL_DISABLE_SMTP" },
-  {"smtps", "#if defined(USE_SSL) && !defined(CURL_DISABLE_SMTP)" },
-  {"telnet", "#ifndef CURL_DISABLE_TELNET" },
-  {"tftp", "#ifndef CURL_DISABLE_TFTP" },
+  {"smb", "#if !defined(FETCH_DISABLE_SMB) && \\\n"
+   "  defined(USE_FETCH_NTLM_CORE) && (SIZEOF_FETCH_OFF_T > 4)" },
+  {"smbs", "#if defined(USE_SSL) && !defined(FETCH_DISABLE_SMB) && \\\n"
+   "  defined(USE_FETCH_NTLM_CORE) && (SIZEOF_FETCH_OFF_T > 4)" },
+  {"smtp", "#ifndef FETCH_DISABLE_SMTP" },
+  {"smtps", "#if defined(USE_SSL) && !defined(FETCH_DISABLE_SMTP)" },
+  {"telnet", "#ifndef FETCH_DISABLE_TELNET" },
+  {"tftp", "#ifndef FETCH_DISABLE_TFTP" },
   {"ws",
-   "#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)" },
-  {"wss", "#if !defined(CURL_DISABLE_WEBSOCKETS) && \\\n"
-   "  defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)" },
+   "#if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)" },
+  {"wss", "#if !defined(FETCH_DISABLE_WEBSOCKETS) && \\\n"
+   "  defined(USE_SSL) && !defined(FETCH_DISABLE_HTTP)" },
   { NULL, NULL }
 };
 

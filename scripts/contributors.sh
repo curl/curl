@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -40,12 +40,12 @@ if test "$start" = "-h"; then
   exit
 fi
 if test -z "$start"; then
-  start=$(git tag --sort=taggerdate | grep "^curl-" | tail -1)
+  start=$(git tag --sort=taggerdate | grep "^fetch-" | tail -1)
   echo "Since $start:"
 fi
 
-# We also include curl-www if possible. Override by setting CURLWWW
-CURLWWW="${CURLWWW:-../curl-www}"
+# We also include fetch-www if possible. Override by setting FETCHWWW
+FETCHWWW="${FETCHWWW:-../fetch-www}"
 
 # filter out Author:, Commit: and *by: lines
 # cut off the email parts
@@ -60,8 +60,8 @@ CURLWWW="${CURLWWW:-../curl-www}"
 {
   {
     git log --pretty=full --use-mailmap "$start..HEAD"
-    if [ -d "$CURLWWW" ]; then
-      git -C "$CURLWWW" log --pretty=full --use-mailmap "$start..HEAD"
+    if [ -d "$FETCHWWW" ]; then
+      git -C "$FETCHWWW" log --pretty=full --use-mailmap "$start..HEAD"
     fi
   } | \
   grep -Eai '(^Author|^Commit|by):' | \

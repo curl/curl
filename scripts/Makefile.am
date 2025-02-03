@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -33,10 +33,10 @@ FISH_FUNCTIONS_DIR = @FISH_FUNCTIONS_DIR@
 PERL = @PERL@
 
 if USE_ZSH_COMPLETION
-ZSH_COMPLETION_FUNCTION_FILENAME = _curl
+ZSH_COMPLETION_FUNCTION_FILENAME = _fetch
 endif
 if USE_FISH_COMPLETION
-FISH_COMPLETION_FUNCTION_FILENAME = curl.fish
+FISH_COMPLETION_FUNCTION_FILENAME = fetch.fish
 endif
 
 CLEANFILES = $(ZSH_COMPLETION_FUNCTION_FILENAME) $(FISH_COMPLETION_FUNCTION_FILENAME)
@@ -49,7 +49,7 @@ if CROSSCOMPILING
 	@echo "NOTICE: we can't generate zsh completion when cross-compiling!"
 else # if not cross-compiling:
 	if test -z "$(PERL)"; then echo "No perl: can't install completion script"; else \
-	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell zsh > $@ ; fi
+	$(PERL) $(srcdir)/completion.pl --fetch $(top_builddir)/src/fetch$(EXEEXT) --shell zsh > $@ ; fi
 endif
 endif
 
@@ -59,7 +59,7 @@ if CROSSCOMPILING
 	@echo "NOTICE: we can't generate fish completion when cross-compiling!"
 else # if not cross-compiling:
 	if test -z "$(PERL)"; then echo "No perl: can't install completion script"; else \
-	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell fish > $@ ; fi
+	$(PERL) $(srcdir)/completion.pl --fetch $(top_builddir)/src/fetch$(EXEEXT) --shell fish > $@ ; fi
 endif
 endif
 

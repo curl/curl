@@ -10,7 +10,7 @@
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
-# * are also available at https://curl.se/docs/copyright.html.
+# * are also available at https://fetch.se/docs/copyright.html.
 # *
 # * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # * copies of the Software, and permit persons to whom the Software is
@@ -19,10 +19,10 @@
 # * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # * KIND, either express or implied.
 # *
-# * SPDX-License-Identifier: curl
+# * SPDX-License-Identifier: fetch
 # *
 # ***************************************************************************
-# This Perl script creates a fresh ca-bundle.crt file for use with libcurl.
+# This Perl script creates a fresh ca-bundle.crt file for use with libfetch.
 # It downloads certdata.txt from Mozilla's source tree (see URL below),
 # then parses certdata.txt and extracts CA Root Certificates into PEM format.
 # These are then processed with the OpenSSL commandline tool to produce the
@@ -310,32 +310,32 @@ report "SHA256 of old file: $oldhash";
 if(!$opt_n) {
   report "Downloading $txt ...";
 
-  # If we have an HTTPS URL then use curl
+  # If we have an HTTPS URL then use fetch
   if($url =~ /^https:\/\//i) {
-    my $curl = `curl -V`;
-    if($curl) {
-      if($curl =~ /^Protocols:.* https( |$)/m) {
-        report "Get certdata with curl!";
+    my $fetch = `fetch -V`;
+    if($fetch) {
+      if($fetch =~ /^Protocols:.* https( |$)/m) {
+        report "Get certdata with fetch!";
         my $proto = !$opt_k ? "--proto =https" : "";
         my $quiet = $opt_q ? "-s" : "";
-        my @out = `curl -w %{response_code} $proto $quiet -o "$txt" "$url"`;
+        my @out = `fetch -w %{response_code} $proto $quiet -o "$txt" "$url"`;
         if(!$? && @out && $out[0] == 200) {
           $fetched = 1;
           report "Downloaded $txt";
         }
         else {
-          report "Failed downloading via HTTPS with curl";
+          report "Failed downloading via HTTPS with fetch";
           if(-e $txt && !unlink($txt)) {
             report "Failed to remove '$txt': $!";
           }
         }
       }
       else {
-        report "curl lacks https support";
+        report "fetch lacks https support";
       }
     }
     else {
-      report "curl not found";
+      report "fetch not found";
     }
   }
 
@@ -408,7 +408,7 @@ print CRT <<EOT;
 ##
 ## Certificate data from Mozilla ${datesrc}: ${currentdate} GMT
 ##
-## Find updated versions here: https://curl.se/docs/caextract.html
+## Find updated versions here: https://fetch.se/docs/caextract.html
 ##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
@@ -416,7 +416,7 @@ print CRT <<EOT;
 ## ${url}
 ##
 ## It contains the certificates in ${format}PEM format and therefore
-## can be directly used with curl / libcurl / php_curl, or with
+## can be directly used with fetch / libfetch / php_fetch, or with
 ## an Apache+mod_ssl webserver for SSL client authentication.
 ## Just configure this file as the SSLCACertificateFile.
 ##

@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -30,17 +30,17 @@ set -eu
 PREFIX="${1:-}"
 
 # Run this script in the root of the git clone. Point out the install prefix
-# where 'make install' has already installed curl.
+# where 'make install' has already installed fetch.
 
 if test -z "$PREFIX"; then
   echo "scripts/installcheck.sh [PREFIX]"
   exit
 fi
 
-diff -u <(find docs/libcurl/ -name "*.3" -printf "%f\n" | grep -v template | sort) <(find "$PREFIX/share/man/" -name "*.3" -printf "%f\n" | sort)
+diff -u <(find docs/libfetch/ -name "*.3" -printf "%f\n" | grep -v template | sort) <(find "$PREFIX/share/man/" -name "*.3" -printf "%f\n" | sort)
 
 if test "$?" -ne "0"; then
-  echo "ERROR: installed libcurl docs mismatch"
+  echo "ERROR: installed libfetch docs mismatch"
   exit 2
 fi
 
@@ -51,4 +51,4 @@ if test "$?" -ne "0"; then
   exit 1
 fi
 
-echo "installcheck: installed libcurl docs and include files look good"
+echo "installcheck: installed libfetch docs and include files look good"

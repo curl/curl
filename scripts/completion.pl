@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -30,11 +30,11 @@ use warnings;
 use Getopt::Long();
 use Pod::Usage();
 
-my $curl = 'curl';
+my $fetch = 'fetch';
 my $shell = 'zsh';
 my $help = 0;
 Getopt::Long::GetOptions(
-    'curl=s' => \$curl,
+    'fetch=s' => \$fetch,
     'shell=s' => \$shell,
     'help' => \$help,
 ) or Pod::Usage::pod2usage();
@@ -44,9 +44,9 @@ my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s*(\<.+?\>)?\s+(.*)';
 my @opts = parse_main_opts('--help all', $regex);
 
 if ($shell eq 'fish') {
-    print "# curl fish completion\n\n";
+    print "# fetch fish completion\n\n";
     print "# Complete file paths after @\n";
-    print q(complete -c curl -n 'string match -qr "^@" -- (commandline -ct)' -k -xa "(printf '%s\n' -- @(__fish_complete_suffix --complete=(commandline -ct | string replace -r '^@' '') ''))");
+    print q(complete -c fetch -n 'string match -qr "^@" -- (commandline -ct)' -k -xa "(printf '%s\n' -- @(__fish_complete_suffix --complete=(commandline -ct | string replace -r '^@' '') ''))");
     print "\n\n";
     print qq{$_ \n} foreach (@opts);
 } elsif ($shell eq 'zsh') {
@@ -56,9 +56,9 @@ if ($shell eq 'fish') {
     chomp $opts_str;
 
 my $tmpl = <<"EOS";
-#compdef curl
+#compdef fetch
 
-# curl zsh completion
+# fetch zsh completion
 
 local curcontext="\$curcontext" state state_descr line
 typeset -A opt_args
@@ -81,7 +81,7 @@ sub parse_main_opts {
     my ($cmd, $regex) = @_;
 
     my @list;
-    my @lines = call_curl($cmd);
+    my @lines = call_fetch($cmd);
 
     foreach my $line (@lines) {
         my ($short, $long, $arg, $desc) = ($line =~ /^$regex/) or next;
@@ -96,7 +96,7 @@ sub parse_main_opts {
         $desc =~ s/\:/\\\:/g if defined $desc;
 
         if ($shell eq 'fish') {
-            $option .= "complete --command curl";
+            $option .= "complete --command fetch";
             $option .= " --short-option '" . strip_dash(trim($short)) . "'"
                 if defined $short;
             $option .= " --long-option '" . strip_dash(trim($long)) . "'"
@@ -143,13 +143,13 @@ sub parse_main_opts {
 sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 sub strip_dash { my $s = shift; $s =~ s/^-+//g; return $s };
 
-sub call_curl {
+sub call_fetch {
     my ($cmd) = @_;
-    my $output = `"$curl" $cmd`;
+    my $output = `"$fetch" $cmd`;
     if ($? == -1) {
-        die "Could not run curl: $!";
+        die "Could not run fetch: $!";
     } elsif ((my $exit_code = $? >> 8) != 0) {
-        die "curl returned $exit_code with output:\n$output";
+        die "fetch returned $exit_code with output:\n$output";
     }
     return split /\n/, $output;
 }
@@ -164,7 +164,7 @@ completion.pl - Generates tab-completion files for various shells
 
 completion.pl [options...]
 
-    --curl   path to curl executable
+    --fetch   path to fetch executable
     --shell  zsh/fish
     --help   prints this help
 

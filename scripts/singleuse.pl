@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -30,7 +30,7 @@
 #
 # Use it like this:
 #
-# $ ./scripts/singleuse.pl [--unit] lib/.libs/libcurl.a
+# $ ./scripts/singleuse.pl [--unit] lib/.libs/libfetch.a
 #
 # --unit : built to support unit tests
 #
@@ -52,105 +52,105 @@ my %wl = (
 );
 
 my %api = (
-    'curl_easy_cleanup' => 'API',
-    'curl_easy_duphandle' => 'API',
-    'curl_easy_escape' => 'API',
-    'curl_easy_getinfo' => 'API',
-    'curl_easy_init' => 'API',
-    'curl_easy_pause' => 'API',
-    'curl_easy_perform' => 'API',
-    'curl_easy_recv' => 'API',
-    'curl_easy_reset' => 'API',
-    'curl_easy_send' => 'API',
-    'curl_easy_setopt' => 'API',
-    'curl_easy_ssls_export' => 'API',
-    'curl_easy_ssls_import' => 'API',
-    'curl_easy_strerror' => 'API',
-    'curl_easy_unescape' => 'API',
-    'curl_easy_upkeep' => 'API',
-    'curl_easy_option_by_id' => 'API',
-    'curl_easy_option_by_name' => 'API',
-    'curl_easy_option_next' => 'API',
-    'curl_escape' => 'API',
-    'curl_formadd' => 'API',
-    'curl_formfree' => 'API',
-    'curl_formget' => 'API',
-    'curl_free' => 'API',
-    'curl_getdate' => 'API',
-    'curl_getenv' => 'API',
-    'curl_global_cleanup' => 'API',
-    'curl_global_init' => 'API',
-    'curl_global_init_mem' => 'API',
-    'curl_global_sslset' => 'API',
-    'curl_global_trace' => 'API',
-    'curl_maprintf' => 'API',
-    'curl_mfprintf' => 'API',
-    'curl_mime_addpart' => 'API',
-    'curl_mime_data' => 'API',
-    'curl_mime_data_cb' => 'API',
-    'curl_mime_encoder' => 'API',
-    'curl_mime_filedata' => 'API',
-    'curl_mime_filename' => 'API',
-    'curl_mime_free' => 'API',
-    'curl_mime_headers' => 'API',
-    'curl_mime_init' => 'API',
-    'curl_mime_name' => 'API',
-    'curl_mime_subparts' => 'API',
-    'curl_mime_type' => 'API',
-    'curl_mprintf' => 'API',
-    'curl_msnprintf' => 'API',
-    'curl_msprintf' => 'API',
-    'curl_multi_add_handle' => 'API',
-    'curl_multi_assign' => 'API',
-    'curl_multi_cleanup' => 'API',
-    'curl_multi_fdset' => 'API',
-    'curl_multi_get_handles' => 'API',
-    'curl_multi_info_read' => 'API',
-    'curl_multi_init' => 'API',
-    'curl_multi_perform' => 'API',
-    'curl_multi_remove_handle' => 'API',
-    'curl_multi_setopt' => 'API',
-    'curl_multi_socket' => 'API',
-    'curl_multi_socket_action' => 'API',
-    'curl_multi_socket_all' => 'API',
-    'curl_multi_poll' => 'API',
-    'curl_multi_strerror' => 'API',
-    'curl_multi_timeout' => 'API',
-    'curl_multi_wait' => 'API',
-    'curl_multi_waitfds' => 'API',
-    'curl_multi_wakeup' => 'API',
-    'curl_mvaprintf' => 'API',
-    'curl_mvfprintf' => 'API',
-    'curl_mvprintf' => 'API',
-    'curl_mvsnprintf' => 'API',
-    'curl_mvsprintf' => 'API',
-    'curl_pushheader_byname' => 'API',
-    'curl_pushheader_bynum' => 'API',
-    'curl_share_cleanup' => 'API',
-    'curl_share_init' => 'API',
-    'curl_share_setopt' => 'API',
-    'curl_share_strerror' => 'API',
-    'curl_slist_append' => 'API',
-    'curl_slist_free_all' => 'API',
-    'curl_strequal' => 'API',
-    'curl_strnequal' => 'API',
-    'curl_unescape' => 'API',
-    'curl_url' => 'API',
-    'curl_url_cleanup' => 'API',
-    'curl_url_dup' => 'API',
-    'curl_url_get' => 'API',
-    'curl_url_set' => 'API',
-    'curl_url_strerror' => 'API',
-    'curl_version' => 'API',
-    'curl_version_info' => 'API',
-    'curl_easy_header' => 'API',
-    'curl_easy_nextheader' => 'API',
-    'curl_ws_meta' => 'API',
-    'curl_ws_recv' => 'API',
-    'curl_ws_send' => 'API',
+    'fetch_easy_cleanup' => 'API',
+    'fetch_easy_duphandle' => 'API',
+    'fetch_easy_escape' => 'API',
+    'fetch_easy_getinfo' => 'API',
+    'fetch_easy_init' => 'API',
+    'fetch_easy_pause' => 'API',
+    'fetch_easy_perform' => 'API',
+    'fetch_easy_recv' => 'API',
+    'fetch_easy_reset' => 'API',
+    'fetch_easy_send' => 'API',
+    'fetch_easy_setopt' => 'API',
+    'fetch_easy_ssls_export' => 'API',
+    'fetch_easy_ssls_import' => 'API',
+    'fetch_easy_strerror' => 'API',
+    'fetch_easy_unescape' => 'API',
+    'fetch_easy_upkeep' => 'API',
+    'fetch_easy_option_by_id' => 'API',
+    'fetch_easy_option_by_name' => 'API',
+    'fetch_easy_option_next' => 'API',
+    'fetch_escape' => 'API',
+    'fetch_formadd' => 'API',
+    'fetch_formfree' => 'API',
+    'fetch_formget' => 'API',
+    'fetch_free' => 'API',
+    'fetch_getdate' => 'API',
+    'fetch_getenv' => 'API',
+    'fetch_global_cleanup' => 'API',
+    'fetch_global_init' => 'API',
+    'fetch_global_init_mem' => 'API',
+    'fetch_global_sslset' => 'API',
+    'fetch_global_trace' => 'API',
+    'fetch_maprintf' => 'API',
+    'fetch_mfprintf' => 'API',
+    'fetch_mime_addpart' => 'API',
+    'fetch_mime_data' => 'API',
+    'fetch_mime_data_cb' => 'API',
+    'fetch_mime_encoder' => 'API',
+    'fetch_mime_filedata' => 'API',
+    'fetch_mime_filename' => 'API',
+    'fetch_mime_free' => 'API',
+    'fetch_mime_headers' => 'API',
+    'fetch_mime_init' => 'API',
+    'fetch_mime_name' => 'API',
+    'fetch_mime_subparts' => 'API',
+    'fetch_mime_type' => 'API',
+    'fetch_mprintf' => 'API',
+    'fetch_msnprintf' => 'API',
+    'fetch_msprintf' => 'API',
+    'fetch_multi_add_handle' => 'API',
+    'fetch_multi_assign' => 'API',
+    'fetch_multi_cleanup' => 'API',
+    'fetch_multi_fdset' => 'API',
+    'fetch_multi_get_handles' => 'API',
+    'fetch_multi_info_read' => 'API',
+    'fetch_multi_init' => 'API',
+    'fetch_multi_perform' => 'API',
+    'fetch_multi_remove_handle' => 'API',
+    'fetch_multi_setopt' => 'API',
+    'fetch_multi_socket' => 'API',
+    'fetch_multi_socket_action' => 'API',
+    'fetch_multi_socket_all' => 'API',
+    'fetch_multi_poll' => 'API',
+    'fetch_multi_strerror' => 'API',
+    'fetch_multi_timeout' => 'API',
+    'fetch_multi_wait' => 'API',
+    'fetch_multi_waitfds' => 'API',
+    'fetch_multi_wakeup' => 'API',
+    'fetch_mvaprintf' => 'API',
+    'fetch_mvfprintf' => 'API',
+    'fetch_mvprintf' => 'API',
+    'fetch_mvsnprintf' => 'API',
+    'fetch_mvsprintf' => 'API',
+    'fetch_pushheader_byname' => 'API',
+    'fetch_pushheader_bynum' => 'API',
+    'fetch_share_cleanup' => 'API',
+    'fetch_share_init' => 'API',
+    'fetch_share_setopt' => 'API',
+    'fetch_share_strerror' => 'API',
+    'fetch_slist_append' => 'API',
+    'fetch_slist_free_all' => 'API',
+    'fetch_strequal' => 'API',
+    'fetch_strnequal' => 'API',
+    'fetch_unescape' => 'API',
+    'fetch_url' => 'API',
+    'fetch_url_cleanup' => 'API',
+    'fetch_url_dup' => 'API',
+    'fetch_url_get' => 'API',
+    'fetch_url_set' => 'API',
+    'fetch_url_strerror' => 'API',
+    'fetch_version' => 'API',
+    'fetch_version_info' => 'API',
+    'fetch_easy_header' => 'API',
+    'fetch_easy_nextheader' => 'API',
+    'fetch_ws_meta' => 'API',
+    'fetch_ws_recv' => 'API',
+    'fetch_ws_send' => 'API',
 
     # the following functions are provided globally in debug builds
-    'curl_easy_perform_ev' => 'debug-build',
+    'fetch_easy_perform_ev' => 'debug-build',
     );
 
 sub doublecheck {
@@ -183,14 +183,14 @@ while (<N>) {
     if($l =~ /^([0-9a-z_-]+)\.o:/) {
         $file = $1;
     }
-    # libcurl.a(unity_0_c.c.o):
+    # libfetch.a(unity_0_c.c.o):
     elsif($l =~ /\(([0-9a-z_.-]+)\.o\):/) {  # Apple nm
         $file = $1;
     }
     if($l =~ /^([0-9a-f]+) T _?(.*)/) {
         my ($name)=($2);
         #print "Define $name in $file\n";
-        $file =~ s/^libcurl_la-//;
+        $file =~ s/^libfetch_la-//;
         $exist{$name} = $file;
     }
     elsif($l =~ /^                 U _?(.*)/) {
@@ -206,13 +206,13 @@ for(sort keys %exist) {
     #printf "%s is defined in %s, used by: %s\n", $_, $exist{$_}, $uses{$_};
     if(!$uses{$_}) {
         # this is a symbol with no "global" user
-        if($_ =~ /^curl_dbg_/) {
+        if($_ =~ /^fetch_dbg_/) {
             # we ignore the memdebug symbols
         }
-        elsif($_ =~ /^curl_/) {
+        elsif($_ =~ /^fetch_/) {
             if(!$api{$_}) {
                 # not present in the API, or for debug-builds
-                print STDERR "Bad curl-prefix: $_\n";
+                print STDERR "Bad fetch-prefix: $_\n";
                 $err++;
             }
         }
@@ -231,13 +231,13 @@ for(sort keys %exist) {
             #    }
         }
     }
-    elsif($_ =~ /^curl_/) {
+    elsif($_ =~ /^fetch_/) {
         # global prefix, make sure it is "blessed"
         if(!$api{$_}) {
             # not present in the API, or for debug-builds
-            if($_ !~ /^curl_dbg_/) {
+            if($_ !~ /^fetch_dbg_/) {
                 # ignore the memdebug symbols
-                print STDERR "Bad curl-prefix $_\n";
+                print STDERR "Bad fetch-prefix $_\n";
                 $err++;
             }
         }
