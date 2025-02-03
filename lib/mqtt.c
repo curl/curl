@@ -750,6 +750,8 @@ static CURLcode mqtt_done(struct Curl_easy *data,
 }
 
 /* we ping every 30 seconds to avoid being disconnected by the server */
+#define PingWaitTimeMS 30000
+
 static CURLcode mqtt_ping(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
@@ -763,7 +765,7 @@ static CURLcode mqtt_ping(struct Curl_easy *data)
     struct curltime t = Curl_now();
     timediff_t diff = Curl_timediff(t, mq->lastTime);
 
-    if(diff > 30000) {
+    if(diff > PingWaitTimeMS) {
       /* 0xC0 is PINGREQ, and 0x00 is remaining length */
       unsigned char packet[2] = { 0xC0, 0x00 };
       size_t packetlen = sizeof(packet);
