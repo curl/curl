@@ -38,20 +38,10 @@
 #if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
 #  ifdef HAVE_STRTOLL
 #    define strtooff strtoll
+#  elif defined(_MSC_VER)
+#    define strtooff _strtoi64
 #  else
-#    if defined(_MSC_VER) && (_MSC_VER >= 1300)
-#      if defined(_SAL_VERSION)
-         _Check_return_ _CRTIMP __int64 __cdecl _strtoi64(
-             _In_z_ const char *_String,
-             _Out_opt_ _Deref_post_z_ char **_EndPtr, _In_ int _Radix);
-#      else
-         _CRTIMP __int64 __cdecl _strtoi64(const char *_String,
-                                           char **_EndPtr, int _Radix);
-#      endif
-#      define strtooff _strtoi64
-#    else
-#      define PRIVATE_STRTOOFF 1
-#    endif
+#    define PRIVATE_STRTOOFF 1
 #  endif
 #else
 #  define strtooff strtol
@@ -62,7 +52,7 @@
 /* Range tests can be used for alphanum decoding if characters are consecutive,
    like in ASCII. Else an array is scanned. Determine this condition now. */
 
-#if('9' - '0') != 9 || ('Z' - 'A') != 25 || ('z' - 'a') != 25
+#if ('9' - '0') != 9 || ('Z' - 'A') != 25 || ('z' - 'a') != 25
 
 #define NO_RANGE_TEST
 
