@@ -1,9 +1,9 @@
-                                  _   _ ____  _
-                              ___| | | |  _ \| |
-                             / __| | | | |_) | |
-                            | (__| |_| |  _ <| |___
-                             \___|\___/|_| \_\_____|
-
+                          _____       __         .__     
+                        _/ ____\_____/  |_  ____ |  |__  
+                        \   __\/ __ \   __\/ ___\|  |  \ 
+                        |  | \  ___/|  | \  \___|   Y  \
+                        |__|  \___  >__|  \___  >___|  /
+                                  \/          \/     \/ 
  This document lists all command line options present in curl, together with
  exact information about the first curl version that supports it. The options
  are sorted alphabetically on the long name.
