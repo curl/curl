@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -29,17 +29,17 @@
 
 CFLAGS=$CFLAGS -I../include -I../lib -c
 
-OFILES=${CURL_CFILES:%.c=%.$O}
-HFILES=$CURL_HFILES
+OFILES=${FETCH_CFILES:%.c=%.$O}
+HFILES=$FETCH_HFILES
 
 LIB=\
-	/$objtype/lib/ape/libcurl.a\
+	/$objtype/lib/ape/libfetch.a\
 	/$objtype/lib/ape/libssl.a\
 	/$objtype/lib/ape/libcrypto.a\
 	/$objtype/lib/ape/libz.a\
 
 BIN=/$objtype/bin
-TARG=curl
+TARG=fetch
 
 CLEANFILES=tool_hugehelp.c
 

@@ -1,6 +1,6 @@
 Prerequirement
 ==============
-This document describes how to compile, build and install curl and libcurl
+This document describes how to compile, build and install fetch and libfetch
 from sources using mk. To build it, you will require to install latest
 9legacy patches into Plan 9. Also Plan 9 still have no configuration option so
 both zlib and libopenssl are required too.
@@ -24,7 +24,7 @@ First, you should construct namespace as like described below:
 
 Then you will see as shown below (excerpt):
 
-  curl.git/
+  fetch.git/
    |_plan9
    | |_BUILD.PLAN9.txt
    | |_CHANGES
