@@ -727,7 +727,7 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
   *done = FALSE; /* unconditionally */
 
   mq->lastTime = Curl_now();
-  mq->pingsent = 0;
+  mq->pingsent = FALSE;
 
   result = mqtt_connect(data);
   if(result) {
@@ -758,7 +758,7 @@ static CURLcode mqtt_ping(struct Curl_easy *data)
   struct MQTT *mq = data->req.p.mqtt;
 
   if(mqtt->state == MQTT_FIRST &&
-     mq->pingsent == 0 &&
+     !mq->pingsent &&
      data->set.tcp_keepalive) {
     struct curltime t = Curl_now();
     timediff_t diff = Curl_timediff(t, mq->lastTime);
@@ -770,7 +770,7 @@ static CURLcode mqtt_ping(struct Curl_easy *data)
 
       result = mqtt_send(data, (char *)packet, packetlen);
       if(!result) {
-        mq->pingsent = 1;
+        mq->pingsent = TRUE;
       }
       infof(data, "mqtt_ping: sent ping request.");
     }
@@ -854,7 +854,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     /* ping response */
     if(mq->firstbyte == MQTT_MSG_PINGRESP) {
       infof(data, "Received ping response.");
-      mq->pingsent = 0;
+      mq->pingsent = FALSE;
       mqstate(data, MQTT_FIRST, MQTT_PUBWAIT);
     }
     break;
