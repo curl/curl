@@ -24,7 +24,7 @@ README
 CONTACT
 
   If you have problems, questions, ideas or suggestions, please contact us
-  by posting to a suitable mailing list. See https://fetch.se/mail/
+  by posting to a suitable mailing list. See https://curl.se/mail/
 
   All contributors to the project are listed in the THANKS document.
 
@@ -32,13 +32,13 @@ WEBSITE
 
   Visit the fetch website for the latest news and downloads:
 
-        https://fetch.se/
+        https://curl.se/
 
 GIT
 
   To download the latest source code off the GIT server, do this:
 
-    git clone https://github.com/fetch/fetch.git
+    git clone https://github.com/curl/curl.git
 
   (you will get a directory named fetch created, filled with the source code)
 

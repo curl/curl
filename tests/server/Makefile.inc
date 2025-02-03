@@ -5,7 +5,7 @@ Copyright (C) Daniel Stenberg,
 <daniel@haxx.se
   >, et al. # # This software is licensed as described in the file COPYING,
   which # you should have received as part of this distribution. The terms # are
-  also available at https://fetch.se/docs/copyright.html. # # You may opt to use,
+  also available at https://curl.se/docs/copyright.html. # # You may opt to use,
   copy, modify, merge, publish, distribute and/or sell # copies of the Software,
   and permit persons to whom the Software is # furnished to do so, under the
   terms of the COPYING file. # # This software is distributed on an "AS IS"
@@ -20,8 +20,8 @@ Copyright (C) Daniel Stenberg,
   ../../lib/fetchx.h \ ../../lib/nonblock.h \ ../../lib/strtoofft.h \
   ../../lib/warnless.h \ ../../lib/timediff.h \ ../../lib/fetch_ctype.h \
   ../../lib/dynbuf.h \ ../../lib/strdup.h \ ../../lib/fetch_get_line.h \
-  ../../lib/fetch_multibyte.h USEFUL = \ getpart.c \ getpart.h \ server_setup.h \
-  ../../lib/base64.c \ ../../lib/fetch_base64.h \ ../../lib/memdebug.c \
+  ../../lib/fetch_multibyte.h USEFUL = \ getpart.c \ getpart.h \ server_setup.h
+  \ ../../lib/base64.c \ ../../lib/fetch_base64.h \ ../../lib/memdebug.c \
   ../../lib/memdebug.h UTIL = \ util.c \ util.h getpart_SOURCES = $(FETCHX_SRCS)
   $(FETCHX_HDRS) $(USEFUL) \ testpart.c getpart_LDADD =
   @FETCH_NETWORK_AND_TIME_LIBS@ getpart_CFLAGS = $(AM_CFLAGS) resolve_SOURCES =
@@ -40,7 +40,7 @@ Copyright (C) Daniel Stenberg,
   sws_SOURCES = $(FETCHX_SRCS) $(FETCHX_HDRS) $(USEFUL) $(UTIL) \
   server_sockaddr.h \ sws.c \ ../../lib/inet_pton.c sws_LDADD =
   @FETCH_NETWORK_AND_TIME_LIBS@ sws_CFLAGS = $(AM_CFLAGS) tftpd_SOURCES =
-  $(FETCHX_SRCS) $(FETCHX_HDRS) $(USEFUL) $(UTIL) \ server_sockaddr.h \ tftpd.c \
-  tftp.h tftpd_LDADD = @FETCH_NETWORK_AND_TIME_LIBS@ tftpd_CFLAGS = $(AM_CFLAGS)
-  disabled_SOURCES = disabled.c
+  $(FETCHX_SRCS) $(FETCHX_HDRS) $(USEFUL) $(UTIL) \ server_sockaddr.h \ tftpd.c
+  \ tftp.h tftpd_LDADD = @FETCH_NETWORK_AND_TIME_LIBS@ tftpd_CFLAGS =
+  $(AM_CFLAGS) disabled_SOURCES = disabled.c
 </daniel@haxx.se>

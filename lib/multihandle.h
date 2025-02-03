@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,8 @@
 
 struct connectdata;
 
-struct Curl_message {
+struct Curl_message
+{
   struct Curl_llist_node list;
   /* the 'FETCHMsg' is the part that is visible to the external user */
   struct FETCHMsg extmsg;
@@ -41,28 +42,29 @@ struct Curl_message {
 /* NOTE: if you add a state here, add the name to the statename[] array as
    well!
 */
-typedef enum {
-  MSTATE_INIT,         /* 0 - start in this state */
-  MSTATE_PENDING,      /* 1 - no connections, waiting for one */
-  MSTATE_SETUP,        /* 2 - start a new transfer */
-  MSTATE_CONNECT,      /* 3 - resolve/connect has been sent off */
-  MSTATE_RESOLVING,    /* 4 - awaiting the resolve to finalize */
-  MSTATE_CONNECTING,   /* 5 - awaiting the TCP connect to finalize */
-  MSTATE_TUNNELING,    /* 6 - awaiting HTTPS proxy SSL initialization to
-                          complete and/or proxy CONNECT to finalize */
-  MSTATE_PROTOCONNECT, /* 7 - initiate protocol connect procedure */
+typedef enum
+{
+  MSTATE_INIT,            /* 0 - start in this state */
+  MSTATE_PENDING,         /* 1 - no connections, waiting for one */
+  MSTATE_SETUP,           /* 2 - start a new transfer */
+  MSTATE_CONNECT,         /* 3 - resolve/connect has been sent off */
+  MSTATE_RESOLVING,       /* 4 - awaiting the resolve to finalize */
+  MSTATE_CONNECTING,      /* 5 - awaiting the TCP connect to finalize */
+  MSTATE_TUNNELING,       /* 6 - awaiting HTTPS proxy SSL initialization to
+                             complete and/or proxy CONNECT to finalize */
+  MSTATE_PROTOCONNECT,    /* 7 - initiate protocol connect procedure */
   MSTATE_PROTOCONNECTING, /* 8 - completing the protocol-specific connect
                              phase */
-  MSTATE_DO,           /* 9 - start send off the request (part 1) */
-  MSTATE_DOING,        /* 10 - sending off the request (part 1) */
-  MSTATE_DOING_MORE,   /* 11 - send off the request (part 2) */
-  MSTATE_DID,          /* 12 - done sending off request */
-  MSTATE_PERFORMING,   /* 13 - transfer data */
-  MSTATE_RATELIMITING, /* 14 - wait because limit-rate exceeded */
-  MSTATE_DONE,         /* 15 - post data transfer operation */
-  MSTATE_COMPLETED,    /* 16 - operation complete */
-  MSTATE_MSGSENT,      /* 17 - the operation complete message is sent */
-  MSTATE_LAST          /* 18 - not a true state, never use this */
+  MSTATE_DO,              /* 9 - start send off the request (part 1) */
+  MSTATE_DOING,           /* 10 - sending off the request (part 1) */
+  MSTATE_DOING_MORE,      /* 11 - send off the request (part 2) */
+  MSTATE_DID,             /* 12 - done sending off request */
+  MSTATE_PERFORMING,      /* 13 - transfer data */
+  MSTATE_RATELIMITING,    /* 14 - wait because limit-rate exceeded */
+  MSTATE_DONE,            /* 15 - post data transfer operation */
+  MSTATE_COMPLETED,       /* 16 - operation complete */
+  MSTATE_MSGSENT,         /* 17 - the operation complete message is sent */
+  MSTATE_LAST             /* 18 - not a true state, never use this */
 } FETCHMstate;
 
 /* we support N sockets per easy handle. Set the corresponding bit to what
@@ -81,12 +83,13 @@ typedef enum {
 #define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
 /* This is the struct known as FETCHM on the outside */
-struct Curl_multi {
+struct Curl_multi
+{
   /* First a simple identifier to easier detect if a user mix up
      this multi handle with an easy handle. Set this to FETCH_MULTI_HANDLE. */
   unsigned int magic;
 
-  unsigned int num_easy; /* amount of entries in the linked list above. */
+  unsigned int num_easy;  /* amount of entries in the linked list above. */
   unsigned int num_alive; /* amount of easy handles that are added but have
                              not yet reached COMPLETE state */
 
@@ -106,7 +109,7 @@ struct Curl_multi {
   fetch_push_callback push_cb;
   void *push_userp;
 
-  struct Curl_hash hostcache; /* Hostname cache */
+  struct Curl_hash hostcache;         /* Hostname cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
 
 #ifdef USE_LIBPSL
@@ -119,13 +122,13 @@ struct Curl_multi {
   struct Curl_tree *timetree;
 
   /* buffer used for transfer data, lazy initialized */
-  char *xfer_buf; /* the actual buffer */
-  size_t xfer_buf_len;      /* the allocated length */
+  char *xfer_buf;      /* the actual buffer */
+  size_t xfer_buf_len; /* the allocated length */
   /* buffer used for upload data, lazy initialized */
-  char *xfer_ulbuf; /* the actual buffer */
-  size_t xfer_ulbuf_len;      /* the allocated length */
+  char *xfer_ulbuf;      /* the actual buffer */
+  size_t xfer_ulbuf_len; /* the allocated length */
   /* buffer used for socket I/O operations, lazy initialized */
-  char *xfer_sockbuf; /* the actual buffer */
+  char *xfer_sockbuf;      /* the actual buffer */
   size_t xfer_sockbuf_len; /* the allocated length */
 
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
@@ -152,7 +155,7 @@ struct Curl_multi {
   /* timer callback and user data pointer for the *socket() API */
   fetch_multi_timer_callback timer_cb;
   void *timer_userp;
-  long last_timeout_ms;        /* the last timeout value set via timer_cb */
+  long last_timeout_ms;            /* the last timeout value set via timer_cb */
   struct fetchtime last_expire_ts; /* timestamp of last expiry */
 
 #ifdef USE_WINSOCK
@@ -169,22 +172,22 @@ struct Curl_multi {
                                entries we are allowed to grow the connection
                                cache to */
 #define IPV6_UNKNOWN 0
-#define IPV6_DEAD    1
-#define IPV6_WORKS   2
-  unsigned char ipv6_up;       /* IPV6_* defined */
-  BIT(multiplexing);           /* multiplexing wanted */
-  BIT(recheckstate);           /* see Curl_multi_connchanged */
-  BIT(in_callback);            /* true while executing a callback */
+#define IPV6_DEAD 1
+#define IPV6_WORKS 2
+  unsigned char ipv6_up; /* IPV6_* defined */
+  BIT(multiplexing);     /* multiplexing wanted */
+  BIT(recheckstate);     /* see Curl_multi_connchanged */
+  BIT(in_callback);      /* true while executing a callback */
 #ifdef USE_OPENSSL
   BIT(ssl_seeded);
 #endif
-  BIT(dead); /* a callback returned error, everything needs to crash and
-                burn */
-  BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
-  BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
-  BIT(xfer_sockbuf_borrowed);  /* xfer_sockbuf is currently being borrowed */
+  BIT(dead);                  /* a callback returned error, everything needs to crash and
+                                 burn */
+  BIT(xfer_buf_borrowed);     /* xfer_buf is currently being borrowed */
+  BIT(xfer_ulbuf_borrowed);   /* xfer_ulbuf is currently being borrowed */
+  BIT(xfer_sockbuf_borrowed); /* xfer_sockbuf is currently being borrowed */
 #ifdef DEBUGBUILD
-  BIT(warned);                 /* true after user warned of DEBUGBUILD */
+  BIT(warned); /* true after user warned of DEBUGBUILD */
 #endif
 };
 

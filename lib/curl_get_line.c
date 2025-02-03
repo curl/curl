@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,8 +24,8 @@
 
 #include "fetch_setup.h"
 
-#if !defined(FETCH_DISABLE_COOKIES) || !defined(FETCH_DISABLE_ALTSVC) ||  \
-  !defined(FETCH_DISABLE_HSTS) || !defined(FETCH_DISABLE_NETRC)
+#if !defined(FETCH_DISABLE_COOKIES) || !defined(FETCH_DISABLE_ALTSVC) || \
+    !defined(FETCH_DISABLE_HSTS) || !defined(FETCH_DISABLE_NETRC)
 
 #include "fetch_get_line.h"
 #ifdef BUILDING_LIBFETCH
@@ -43,31 +43,34 @@ int Curl_get_line(struct dynbuf *buf, FILE *input)
   FETCHcode result;
   char buffer[128];
   Curl_dyn_reset(buf);
-  while(1) {
+  while (1)
+  {
     char *b = fgets(buffer, sizeof(buffer), input);
 
-    if(b) {
+    if (b)
+    {
       size_t rlen = strlen(b);
 
-      if(!rlen)
+      if (!rlen)
         break;
 
       result = Curl_dyn_addn(buf, b, rlen);
-      if(result)
+      if (result)
         /* too long line or out of memory */
         return 0; /* error */
 
-      else if(b[rlen-1] == '\n')
+      else if (b[rlen - 1] == '\n')
         /* end of the line */
         return 1; /* all good */
 
-      else if(feof(input)) {
+      else if (feof(input))
+      {
         /* append a newline */
         result = Curl_dyn_addn(buf, "\n", 1);
-        if(result)
+        if (result)
           /* too long line or out of memory */
           return 0; /* error */
-        return 1; /* all good */
+        return 1;   /* all good */
       }
     }
     else

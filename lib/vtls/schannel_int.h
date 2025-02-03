@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,13 +30,11 @@
 
 #include "vtls.h"
 
-#if (defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)) \
-  && !defined(FETCH_WINDOWS_UWP)
+#if (defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)) && !defined(FETCH_WINDOWS_UWP)
 #define HAS_MANUAL_VERIFY_API
 #endif
 
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)   \
-  && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
 
@@ -62,60 +60,60 @@
 #undef CERT_STORE_PROV_MEMORY
 #undef CERT_STORE_PROV_SYSTEM_A
 #undef CERT_STORE_PROV_SYSTEM_W
-#define CERT_STORE_PROV_MEMORY    ((LPCSTR)(size_t)2)
-#define CERT_STORE_PROV_SYSTEM_A  ((LPCSTR)(size_t)9)
-#define CERT_STORE_PROV_SYSTEM_W  ((LPCSTR)(size_t)10)
+#define CERT_STORE_PROV_MEMORY ((LPCSTR)(size_t)2)
+#define CERT_STORE_PROV_SYSTEM_A ((LPCSTR)(size_t)9)
+#define CERT_STORE_PROV_SYSTEM_W ((LPCSTR)(size_t)10)
 #endif
 
 #ifndef SCH_CREDENTIALS_VERSION
 
-#define SCH_CREDENTIALS_VERSION  0x00000005
+#define SCH_CREDENTIALS_VERSION 0x00000005
 
 typedef enum _eTlsAlgorithmUsage
 {
-    TlsParametersCngAlgUsageKeyExchange,
-    TlsParametersCngAlgUsageSignature,
-    TlsParametersCngAlgUsageCipher,
-    TlsParametersCngAlgUsageDigest,
-    TlsParametersCngAlgUsageCertSig
+  TlsParametersCngAlgUsageKeyExchange,
+  TlsParametersCngAlgUsageSignature,
+  TlsParametersCngAlgUsageCipher,
+  TlsParametersCngAlgUsageDigest,
+  TlsParametersCngAlgUsageCertSig
 } eTlsAlgorithmUsage;
 
 typedef struct _CRYPTO_SETTINGS
 {
-    eTlsAlgorithmUsage  eAlgorithmUsage;
-    UNICODE_STRING      strCngAlgId;
-    DWORD               cChainingModes;
-    PUNICODE_STRING     rgstrChainingModes;
-    DWORD               dwMinBitLength;
-    DWORD               dwMaxBitLength;
-} CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
+  eTlsAlgorithmUsage eAlgorithmUsage;
+  UNICODE_STRING strCngAlgId;
+  DWORD cChainingModes;
+  PUNICODE_STRING rgstrChainingModes;
+  DWORD dwMinBitLength;
+  DWORD dwMaxBitLength;
+} CRYPTO_SETTINGS, *PCRYPTO_SETTINGS;
 
 typedef struct _TLS_PARAMETERS
 {
-    DWORD               cAlpnIds;
-    PUNICODE_STRING     rgstrAlpnIds;
-    DWORD               grbitDisabledProtocols;
-    DWORD               cDisabledCrypto;
-    PCRYPTO_SETTINGS    pDisabledCrypto;
-    DWORD               dwFlags;
-} TLS_PARAMETERS, * PTLS_PARAMETERS;
+  DWORD cAlpnIds;
+  PUNICODE_STRING rgstrAlpnIds;
+  DWORD grbitDisabledProtocols;
+  DWORD cDisabledCrypto;
+  PCRYPTO_SETTINGS pDisabledCrypto;
+  DWORD dwFlags;
+} TLS_PARAMETERS, *PTLS_PARAMETERS;
 
 typedef struct _SCH_CREDENTIALS
 {
-    DWORD               dwVersion;
-    DWORD               dwCredFormat;
-    DWORD               cCreds;
-    PCCERT_CONTEXT* paCred;
-    HCERTSTORE          hRootStore;
+  DWORD dwVersion;
+  DWORD dwCredFormat;
+  DWORD cCreds;
+  PCCERT_CONTEXT *paCred;
+  HCERTSTORE hRootStore;
 
-    DWORD               cMappers;
-    struct _HMAPPER **aphMappers;
+  DWORD cMappers;
+  struct _HMAPPER **aphMappers;
 
-    DWORD               dwSessionLifespan;
-    DWORD               dwFlags;
-    DWORD               cTlsParameters;
-    PTLS_PARAMETERS     pTlsParameters;
-} SCH_CREDENTIALS, * PSCH_CREDENTIALS;
+  DWORD dwSessionLifespan;
+  DWORD dwFlags;
+  DWORD cTlsParameters;
+  PTLS_PARAMETERS pTlsParameters;
+} SCH_CREDENTIALS, *PSCH_CREDENTIALS;
 
 #define SCH_CRED_MAX_SUPPORTED_PARAMETERS 16
 #define SCH_CRED_MAX_SUPPORTED_ALPN_IDS 16
@@ -124,7 +122,8 @@ typedef struct _SCH_CREDENTIALS
 
 #endif /* SCH_CREDENTIALS_VERSION */
 
-struct Curl_schannel_cred {
+struct Curl_schannel_cred
+{
   CredHandle cred_handle;
   TimeStamp time_stamp;
   TCHAR *sni_hostname;
@@ -134,12 +133,14 @@ struct Curl_schannel_cred {
   int refcount;
 };
 
-struct Curl_schannel_ctxt {
+struct Curl_schannel_ctxt
+{
   CtxtHandle ctxt_handle;
   TimeStamp time_stamp;
 };
 
-struct schannel_ssl_backend_data {
+struct schannel_ssl_backend_data
+{
   struct Curl_schannel_cred *cred;
   struct Curl_schannel_ctxt *ctxt;
   SecPkgContext_StreamSizes stream_sizes;
@@ -153,10 +154,10 @@ struct schannel_ssl_backend_data {
   bool encdata_is_incomplete;
   unsigned long req_flags, ret_flags;
   FETCHcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
-  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
-  bool recv_connection_closed; /* true if connection closed, regardless how */
-  bool recv_renegotiating;     /* true if recv is doing renegotiation */
-  bool use_alpn; /* true if ALPN is used for this connection */
+  bool recv_sspi_close_notify;      /* true if connection closed by close_notify */
+  bool recv_connection_closed;      /* true if connection closed, regardless how */
+  bool recv_renegotiating;          /* true if recv is doing renegotiation */
+  bool use_alpn;                    /* true if ALPN is used for this connection */
 #ifdef HAS_MANUAL_VERIFY_API
   bool use_manual_cred_validation; /* true if manual cred validation is used */
 #endif
@@ -164,25 +165,28 @@ struct schannel_ssl_backend_data {
 };
 
 /* key to use at `multi->proto_hash` */
-#define MPROTO_SCHANNEL_CERT_SHARE_KEY   "tls:schannel:cert:share"
+#define MPROTO_SCHANNEL_CERT_SHARE_KEY "tls:schannel:cert:share"
 
-struct schannel_cert_share {
+struct schannel_cert_share
+{
   unsigned char CAinfo_blob_digest[FETCH_SHA256_DIGEST_LENGTH];
-  size_t CAinfo_blob_size;           /* CA info blob size */
-  char *CAfile;                      /* CAfile path used to generate
-                                        certificate store */
-  HCERTSTORE cert_store;             /* cached certificate store or
-                                        NULL if none */
-  struct fetchtime time;              /* when the cached store was created */
+  size_t CAinfo_blob_size; /* CA info blob size */
+  char *CAfile;            /* CAfile path used to generate
+                              certificate store */
+  HCERTSTORE cert_store;   /* cached certificate store or
+                              NULL if none */
+  struct fetchtime time;   /* when the cached store was created */
 };
 
 /*
-* size of the structure: 20 bytes.
-*/
-struct num_ip_data {
+ * size of the structure: 20 bytes.
+ */
+struct num_ip_data
+{
   DWORD size; /* 04 bytes */
-  union {
-    struct in_addr  ia;  /* 04 bytes */
+  union
+  {
+    struct in_addr ia;   /* 04 bytes */
     struct in6_addr ia6; /* 16 bytes */
   } bData;
 };

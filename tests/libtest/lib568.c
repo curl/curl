@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,13 +52,15 @@ FETCHcode test(char *URL)
   int request = 1;
   struct fetch_slist *custom_headers = NULL;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -70,7 +72,8 @@ FETCHcode test(char *URL)
   test_setopt(fetch, FETCHOPT_URL, URL);
 
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -83,7 +86,8 @@ FETCHcode test(char *URL)
   close(sdp);
 
   sdpf = fopen(libtest_arg2, "rb");
-  if(!sdpf) {
+  if (!sdpf)
+  {
     fprintf(stderr, "can't open %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -92,12 +96,12 @@ FETCHcode test(char *URL)
 
   test_setopt(fetch, FETCHOPT_READDATA, sdpf);
   test_setopt(fetch, FETCHOPT_UPLOAD, 1L);
-  test_setopt(fetch, FETCHOPT_INFILESIZE_LARGE, (fetch_off_t) file_info.st_size);
+  test_setopt(fetch, FETCHOPT_INFILESIZE_LARGE, (fetch_off_t)file_info.st_size);
   test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* Do the ANNOUNCE */
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   test_setopt(fetch, FETCHOPT_UPLOAD, 0L);
@@ -106,7 +110,8 @@ FETCHcode test(char *URL)
 
   /* Make sure we can do a normal request now */
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -116,13 +121,14 @@ FETCHcode test(char *URL)
 
   test_setopt(fetch, FETCHOPT_RTSP_REQUEST, FETCH_RTSPREQ_DESCRIBE);
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   /* Now do a POST style one */
 
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -131,8 +137,9 @@ FETCHcode test(char *URL)
   stream_uri = NULL;
 
   custom_headers = fetch_slist_append(custom_headers,
-                                     "Content-Type: posty goodness");
-  if(!custom_headers) {
+                                      "Content-Type: posty goodness");
+  if (!custom_headers)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -142,7 +149,7 @@ FETCHcode test(char *URL)
               "postyfield=postystuff&project=fetch\n");
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   test_setopt(fetch, FETCHOPT_POSTFIELDS, NULL);
@@ -152,7 +159,8 @@ FETCHcode test(char *URL)
 
   /* Make sure we can do a normal request now */
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -165,12 +173,12 @@ FETCHcode test(char *URL)
 
 test_cleanup:
 
-  if(sdpf)
+  if (sdpf)
     fclose(sdpf);
 
   fetch_free(stream_uri);
 
-  if(custom_headers)
+  if (custom_headers)
     fetch_slist_free_all(custom_headers);
 
   fetch_easy_cleanup(fetch);

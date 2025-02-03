@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,19 +24,19 @@
 #include "tool_setup.h"
 
 #ifdef HAVE_SYS_SELECT_H
-#  include <sys/select.h>
+#include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
-#  include <unistd.h>
+#include <unistd.h>
 #endif
 
 #ifdef HAVE_POLL_H
-#  include <poll.h>
+#include <poll.h>
 #elif defined(HAVE_SYS_POLL_H)
-#  include <sys/poll.h>
+#include <sys/poll.h>
 #endif
 
 #ifdef MSDOS
-#  include <dos.h>
+#include <dos.h>
 #endif
 
 #include "tool_sleep.h"
@@ -54,6 +54,6 @@ void tool_go_sleep(long ms)
   timeout.tv_sec = ms / 1000L;
   ms = ms % 1000L;
   timeout.tv_usec = (int)ms * 1000;
-  select(0, NULL,  NULL, NULL, &timeout);
+  select(0, NULL, NULL, NULL, &timeout);
 #endif
 }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,7 @@
 #include "fetch_setup.h"
 
 #if (!defined(FETCH_DISABLE_HTTP) || !defined(FETCH_DISABLE_COOKIES)) || \
-  !defined(FETCH_DISABLE_ALTSVC)
+    !defined(FETCH_DISABLE_ALTSVC)
 
 #include "fetch_multibyte.h"
 #include "timeval.h"
@@ -48,15 +48,18 @@ int Curl_rename(const char *oldpath, const char *newpath)
   struct fetchtime start = Curl_now();
   TCHAR *tchar_oldpath = fetchx_convert_UTF8_to_tchar((char *)oldpath);
   TCHAR *tchar_newpath = fetchx_convert_UTF8_to_tchar((char *)newpath);
-  for(;;) {
+  for (;;)
+  {
     timediff_t diff;
-    if(MoveFileEx(tchar_oldpath, tchar_newpath, MOVEFILE_REPLACE_EXISTING)) {
+    if (MoveFileEx(tchar_oldpath, tchar_newpath, MOVEFILE_REPLACE_EXISTING))
+    {
       fetchx_unicodefree(tchar_oldpath);
       fetchx_unicodefree(tchar_newpath);
       break;
     }
     diff = Curl_timediff(Curl_now(), start);
-    if(diff < 0 || diff > max_wait_ms) {
+    if (diff < 0 || diff > max_wait_ms)
+    {
       fetchx_unicodefree(tchar_oldpath);
       fetchx_unicodefree(tchar_newpath);
       return 1;
@@ -64,7 +67,7 @@ int Curl_rename(const char *oldpath, const char *newpath)
     Sleep(1);
   }
 #else
-  if(rename(oldpath, newpath))
+  if (rename(oldpath, newpath))
     return 1;
 #endif
   return 0;

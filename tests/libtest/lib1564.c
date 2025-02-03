@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,7 +52,8 @@ FETCHcode test(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if (tutil_tvdiff(time_after_wait, time_before_wait) < 500)
+  {
     fprintf(stderr, "%s:%d fetch_multi_poll returned too early\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -69,7 +70,8 @@ FETCHcode test(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) > 500) {
+  if (tutil_tvdiff(time_after_wait, time_before_wait) > 500)
+  {
     fprintf(stderr, "%s:%d fetch_multi_poll returned too late\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -84,7 +86,8 @@ FETCHcode test(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if (tutil_tvdiff(time_after_wait, time_before_wait) < 500)
+  {
     fprintf(stderr, "%s:%d fetch_multi_poll returned too early\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -95,14 +98,15 @@ FETCHcode test(char *URL)
 
   /* try lots of wakeup */
 
-  for(i = 0; i < WAKEUP_NUM; ++i)
+  for (i = 0; i < WAKEUP_NUM; ++i)
     res_multi_wakeup(multi);
 
   time_before_wait = tutil_tvnow();
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) > 500) {
+  if (tutil_tvdiff(time_after_wait, time_before_wait) > 500)
+  {
     fprintf(stderr, "%s:%d fetch_multi_poll returned too late\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -117,7 +121,8 @@ FETCHcode test(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if (tutil_tvdiff(time_after_wait, time_before_wait) < 500)
+  {
     fprintf(stderr, "%s:%d fetch_multi_poll returned too early\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;

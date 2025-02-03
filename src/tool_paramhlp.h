@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,7 @@ struct getout *new_getout(struct OperationConfig *config);
 ParameterError file2string(char **bufp, FILE *file);
 
 #if SIZEOF_SIZE_T > 4
-#define MAX_FILE2MEMORY (16LL*1024*1024*1024)
+#define MAX_FILE2MEMORY (16LL * 1024 * 1024 * 1024)
 #else
 #define MAX_FILE2MEMORY (INT_MAX)
 #endif
@@ -47,7 +47,7 @@ ParameterError str2unummax(long *val, const char *str, long max);
 ParameterError secs2ms(long *val, const char *str);
 
 ParameterError proto2num(struct OperationConfig *config,
-                         const char * const *val, char **obuf,
+                         const char *const *val, char **obuf,
                          const char *str);
 
 ParameterError check_protocol(const char *str);

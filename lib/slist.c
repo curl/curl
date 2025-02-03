@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,15 +35,16 @@
 /* returns last node in linked list */
 static struct fetch_slist *slist_get_last(struct fetch_slist *list)
 {
-  struct fetch_slist     *item;
+  struct fetch_slist *item;
 
   /* if caller passed us a NULL, return now */
-  if(!list)
+  if (!list)
     return NULL;
 
   /* loop through to find the last item */
   item = list;
-  while(item->next) {
+  while (item->next)
+  {
     item = item->next;
   }
   return item;
@@ -60,20 +61,20 @@ static struct fetch_slist *slist_get_last(struct fetch_slist *list)
  */
 struct fetch_slist *Curl_slist_append_nodup(struct fetch_slist *list, char *data)
 {
-  struct fetch_slist     *last;
-  struct fetch_slist     *new_item;
+  struct fetch_slist *last;
+  struct fetch_slist *new_item;
 
   DEBUGASSERT(data);
 
   new_item = malloc(sizeof(struct fetch_slist));
-  if(!new_item)
+  if (!new_item)
     return NULL;
 
   new_item->next = NULL;
   new_item->data = data;
 
   /* if this is the first item, then new_item *is* the list */
-  if(!list)
+  if (!list)
     return new_item;
 
   last = slist_get_last(list);
@@ -89,15 +90,15 @@ struct fetch_slist *Curl_slist_append_nodup(struct fetch_slist *list, char *data
  * appropriately from within the program.
  */
 struct fetch_slist *fetch_slist_append(struct fetch_slist *list,
-                                     const char *data)
+                                       const char *data)
 {
   char *dupdata = strdup(data);
 
-  if(!dupdata)
+  if (!dupdata)
     return NULL;
 
   list = Curl_slist_append_nodup(list, dupdata);
-  if(!list)
+  if (!list)
     free(dupdata);
 
   return list;
@@ -113,10 +114,12 @@ struct fetch_slist *Curl_slist_duplicate(struct fetch_slist *inlist)
   struct fetch_slist *outlist = NULL;
   struct fetch_slist *tmp;
 
-  while(inlist) {
+  while (inlist)
+  {
     tmp = fetch_slist_append(outlist, inlist->data);
 
-    if(!tmp) {
+    if (!tmp)
+    {
       fetch_slist_free_all(outlist);
       return NULL;
     }
@@ -130,17 +133,18 @@ struct fetch_slist *Curl_slist_duplicate(struct fetch_slist *inlist)
 /* be nice and clean up resources */
 void fetch_slist_free_all(struct fetch_slist *list)
 {
-  struct fetch_slist     *next;
-  struct fetch_slist     *item;
+  struct fetch_slist *next;
+  struct fetch_slist *item;
 
-  if(!list)
+  if (!list)
     return;
 
   item = list;
-  do {
+  do
+  {
     next = item->next;
     Curl_safefree(item->data);
     free(item);
     item = next;
-  } while(next);
+  } while (next);
 }

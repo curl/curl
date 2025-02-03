@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,11 +27,11 @@
 #include <fetch/fetch.h>
 
 #if defined(USE_THREADS_POSIX)
-#  ifdef HAVE_PTHREAD_H
-#    include <pthread.h>
-#  endif
+#ifdef HAVE_PTHREAD_H
+#include <pthread.h>
+#endif
 #elif defined(USE_THREADS_WIN32)
-#  include <process.h>
+#include <process.h>
 #endif
 
 #include "fetch_threads.h"
@@ -43,7 +43,8 @@
 
 #if defined(USE_THREADS_POSIX)
 
-struct Curl_actual_call {
+struct Curl_actual_call
+{
   unsigned int (*func)(void *);
   void *arg;
 };
@@ -61,17 +62,17 @@ static void *fetch_thread_create_thunk(void *arg)
   return 0;
 }
 
-fetch_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
+fetch_thread_t Curl_thread_create(unsigned int (*func)(void *), void *arg)
 {
   fetch_thread_t t = malloc(sizeof(pthread_t));
   struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
-  if(!(ac && t))
+  if (!(ac && t))
     goto err;
 
   ac->func = func;
   ac->arg = arg;
 
-  if(pthread_create(t, NULL, fetch_thread_create_thunk, ac) != 0)
+  if (pthread_create(t, NULL, fetch_thread_create_thunk, ac) != 0)
     goto err;
 
   return t;
@@ -84,7 +85,8 @@ err:
 
 void Curl_thread_destroy(fetch_thread_t hnd)
 {
-  if(hnd != fetch_thread_t_null) {
+  if (hnd != fetch_thread_t_null)
+  {
     pthread_detach(*hnd);
     free(hnd);
   }
@@ -104,12 +106,12 @@ int Curl_thread_join(fetch_thread_t *hnd)
 
 fetch_thread_t Curl_thread_create(
 #if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP)
-                                 DWORD
+    DWORD
 #else
-                                 unsigned int
+    unsigned int
 #endif
-                                 (FETCH_STDCALL *func) (void *),
-                                 void *arg)
+    (FETCH_STDCALL *func)(void *),
+    void *arg)
 {
 #if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP)
   typedef HANDLE fetch_win_thread_handle_t;
@@ -124,12 +126,14 @@ fetch_thread_t Curl_thread_create(
   thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
 #endif
   t = (fetch_thread_t)thread_handle;
-  if((t == 0) || (t == LongToHandle(-1L))) {
+  if ((t == 0) || (t == LongToHandle(-1L)))
+  {
 #ifdef _WIN32_WCE
     DWORD gle = GetLastError();
     errno = ((gle == ERROR_ACCESS_DENIED ||
-              gle == ERROR_NOT_ENOUGH_MEMORY) ?
-             EACCES : EINVAL);
+              gle == ERROR_NOT_ENOUGH_MEMORY)
+                 ? EACCES
+                 : EINVAL);
 #endif
     return fetch_thread_t_null;
   }
@@ -138,7 +142,7 @@ fetch_thread_t Curl_thread_create(
 
 void Curl_thread_destroy(fetch_thread_t hnd)
 {
-  if(hnd != fetch_thread_t_null)
+  if (hnd != fetch_thread_t_null)
     CloseHandle(hnd);
 }
 

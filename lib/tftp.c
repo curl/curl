@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -73,22 +73,25 @@
 #define TFTP_OPTION_BLKSIZE "blksize"
 
 /* from RFC2349: */
-#define TFTP_OPTION_TSIZE    "tsize"
+#define TFTP_OPTION_TSIZE "tsize"
 #define TFTP_OPTION_INTERVAL "timeout"
 
-typedef enum {
+typedef enum
+{
   TFTP_MODE_NETASCII = 0,
   TFTP_MODE_OCTET
 } tftp_mode_t;
 
-typedef enum {
+typedef enum
+{
   TFTP_STATE_START = 0,
   TFTP_STATE_RX,
   TFTP_STATE_TX,
   TFTP_STATE_FIN
 } tftp_state_t;
 
-typedef enum {
+typedef enum
+{
   TFTP_EVENT_NONE = -1,
   TFTP_EVENT_INIT = 0,
   TFTP_EVENT_RRQ = 1,
@@ -100,7 +103,8 @@ typedef enum {
   TFTP_EVENT_TIMEOUT
 } tftp_event_t;
 
-typedef enum {
+typedef enum
+{
   TFTP_ERR_UNDEF = 0,
   TFTP_ERR_NOTFOUND,
   TFTP_ERR_PERM,
@@ -108,7 +112,7 @@ typedef enum {
   TFTP_ERR_ILLEGAL,
   TFTP_ERR_UNKNOWNID,
   TFTP_ERR_EXISTS,
-  TFTP_ERR_NOSUCHUSER,  /* This will never be triggered by this code */
+  TFTP_ERR_NOSUCHUSER, /* This will never be triggered by this code */
 
   /* The remaining error codes are internal to fetch */
   TFTP_ERR_NONE = -100,
@@ -116,80 +120,80 @@ typedef enum {
   TFTP_ERR_NORESPONSE
 } tftp_error_t;
 
-struct tftp_packet {
+struct tftp_packet
+{
   unsigned char *data;
 };
 
-struct tftp_state_data {
-  tftp_state_t    state;
-  tftp_mode_t     mode;
-  tftp_error_t    error;
-  tftp_event_t    event;
+struct tftp_state_data
+{
+  tftp_state_t state;
+  tftp_mode_t mode;
+  tftp_error_t error;
+  tftp_event_t event;
   struct Curl_easy *data;
-  fetch_socket_t   sockfd;
-  int             retries;
-  int             retry_time;
-  int             retry_max;
-  time_t          rx_time;
-  struct Curl_sockaddr_storage   local_addr;
-  struct Curl_sockaddr_storage   remote_addr;
-  fetch_socklen_t  remote_addrlen;
-  int             rbytes;
-  int             sbytes;
-  int             blksize;
-  int             requested_blksize;
-  unsigned short  block;
+  fetch_socket_t sockfd;
+  int retries;
+  int retry_time;
+  int retry_max;
+  time_t rx_time;
+  struct Curl_sockaddr_storage local_addr;
+  struct Curl_sockaddr_storage remote_addr;
+  fetch_socklen_t remote_addrlen;
+  int rbytes;
+  int sbytes;
+  int blksize;
+  int requested_blksize;
+  unsigned short block;
   struct tftp_packet rpacket;
   struct tftp_packet spacket;
 };
-
 
 /* Forward declarations */
 static FETCHcode tftp_rx(struct tftp_state_data *state, tftp_event_t event);
 static FETCHcode tftp_tx(struct tftp_state_data *state, tftp_event_t event);
 static FETCHcode tftp_connect(struct Curl_easy *data, bool *done);
 static FETCHcode tftp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn,
-                                bool dead_connection);
+                                 struct connectdata *conn,
+                                 bool dead_connection);
 static FETCHcode tftp_do(struct Curl_easy *data, bool *done);
 static FETCHcode tftp_done(struct Curl_easy *data,
-                          FETCHcode, bool premature);
+                           FETCHcode, bool premature);
 static FETCHcode tftp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
+                                       struct connectdata *conn);
 static FETCHcode tftp_multi_statemach(struct Curl_easy *data, bool *done);
 static FETCHcode tftp_doing(struct Curl_easy *data, bool *dophase_done);
 static int tftp_getsock(struct Curl_easy *data, struct connectdata *conn,
                         fetch_socket_t *socks);
 static FETCHcode tftp_translate_code(tftp_error_t error);
 
-
 /*
  * TFTP protocol handler.
  */
 
 const struct Curl_handler Curl_handler_tftp = {
-  "tftp",                               /* scheme */
-  tftp_setup_connection,                /* setup_connection */
-  tftp_do,                              /* do_it */
-  tftp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  tftp_connect,                         /* connect_it */
-  tftp_multi_statemach,                 /* connecting */
-  tftp_doing,                           /* doing */
-  tftp_getsock,                         /* proto_getsock */
-  tftp_getsock,                         /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  tftp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_TFTP,                            /* defport */
-  FETCHPROTO_TFTP,                       /* protocol */
-  FETCHPROTO_TFTP,                       /* family */
-  PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY /* flags */
+    "tftp",                                 /* scheme */
+    tftp_setup_connection,                  /* setup_connection */
+    tftp_do,                                /* do_it */
+    tftp_done,                              /* done */
+    ZERO_NULL,                              /* do_more */
+    tftp_connect,                           /* connect_it */
+    tftp_multi_statemach,                   /* connecting */
+    tftp_doing,                             /* doing */
+    tftp_getsock,                           /* proto_getsock */
+    tftp_getsock,                           /* doing_getsock */
+    ZERO_NULL,                              /* domore_getsock */
+    ZERO_NULL,                              /* perform_getsock */
+    tftp_disconnect,                        /* disconnect */
+    ZERO_NULL,                              /* write_resp */
+    ZERO_NULL,                              /* write_resp_hd */
+    ZERO_NULL,                              /* connection_check */
+    ZERO_NULL,                              /* attach connection */
+    ZERO_NULL,                              /* follow */
+    PORT_TFTP,                              /* defport */
+    FETCHPROTO_TFTP,                        /* protocol */
+    FETCHPROTO_TFTP,                        /* family */
+    PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY /* flags */
 };
 
 /**********************************************************
@@ -211,13 +215,14 @@ static FETCHcode tftp_set_timeouts(struct tftp_state_data *state)
   /* Compute drop-dead time */
   timeout_ms = Curl_timeleft(state->data, NULL, start);
 
-  if(timeout_ms < 0) {
+  if (timeout_ms < 0)
+  {
     /* time-out, bail out, go home */
     failf(state->data, "Connection time-out");
     return FETCHE_OPERATION_TIMEDOUT;
   }
 
-  if(timeout_ms > 0)
+  if (timeout_ms > 0)
     maxtime = (time_t)(timeout_ms + 500) / 1000;
   else
     maxtime = 3600; /* use for calculating block timeouts */
@@ -226,18 +231,18 @@ static FETCHcode tftp_set_timeouts(struct tftp_state_data *state)
   timeout = maxtime;
 
   /* Average reposting an ACK after 5 seconds */
-  state->retry_max = (int)timeout/5;
+  state->retry_max = (int)timeout / 5;
 
   /* But bound the total number */
-  if(state->retry_max < 3)
+  if (state->retry_max < 3)
     state->retry_max = 3;
 
-  if(state->retry_max > 50)
+  if (state->retry_max > 50)
     state->retry_max = 50;
 
   /* Compute the re-ACK interval to suit the timeout */
-  state->retry_time = (int)(timeout/state->retry_max);
-  if(state->retry_time < 1)
+  state->retry_time = (int)(timeout / state->retry_max);
+  if (state->retry_time < 1)
     state->retry_time = 1;
 
   infof(state->data,
@@ -264,7 +269,6 @@ static void setpacketevent(struct tftp_packet *packet, unsigned short num)
   packet->data[1] = (unsigned char)(num & 0xff);
 }
 
-
 static void setpacketblock(struct tftp_packet *packet, unsigned short num)
 {
   packet->data[2] = (unsigned char)(num >> 8);
@@ -284,7 +288,7 @@ static unsigned short getrpacketblock(const struct tftp_packet *packet)
 static size_t tftp_strnlen(const char *string, size_t maxlen)
 {
   const char *end = memchr(string, '\0', maxlen);
-  return end ? (size_t) (end - string) : maxlen;
+  return end ? (size_t)(end - string) : maxlen;
 }
 
 static const char *tftp_option_get(const char *buf, size_t len,
@@ -295,14 +299,14 @@ static const char *tftp_option_get(const char *buf, size_t len,
   loc = tftp_strnlen(buf, len);
   loc++; /* NULL term */
 
-  if(loc >= len)
+  if (loc >= len)
     return NULL;
   *option = buf;
 
-  loc += tftp_strnlen(buf + loc, len-loc);
+  loc += tftp_strnlen(buf + loc, len - loc);
   loc++; /* NULL term */
 
-  if(loc > len)
+  if (loc > len)
     return NULL;
   *value = &buf[strlen(*option) + 1];
 
@@ -310,7 +314,7 @@ static const char *tftp_option_get(const char *buf, size_t len,
 }
 
 static FETCHcode tftp_parse_option_ack(struct tftp_state_data *state,
-                                      const char *ptr, int len)
+                                       const char *ptr, int len)
 {
   const char *tmp = ptr;
   struct Curl_easy *data = state->data;
@@ -318,37 +322,44 @@ static FETCHcode tftp_parse_option_ack(struct tftp_state_data *state,
   /* if OACK does not contain blksize option, the default (512) must be used */
   state->blksize = TFTP_BLKSIZE_DEFAULT;
 
-  while(tmp < ptr + len) {
+  while (tmp < ptr + len)
+  {
     const char *option, *value;
 
     tmp = tftp_option_get(tmp, ptr + len - tmp, &option, &value);
-    if(!tmp) {
+    if (!tmp)
+    {
       failf(data, "Malformed ACK packet, rejecting");
       return FETCHE_TFTP_ILLEGAL;
     }
 
     infof(data, "got option=(%s) value=(%s)", option, value);
 
-    if(checkprefix(TFTP_OPTION_BLKSIZE, option)) {
+    if (checkprefix(TFTP_OPTION_BLKSIZE, option))
+    {
       long blksize;
 
       blksize = strtol(value, NULL, 10);
 
-      if(!blksize) {
+      if (!blksize)
+      {
         failf(data, "invalid blocksize value in OACK packet");
         return FETCHE_TFTP_ILLEGAL;
       }
-      if(blksize > TFTP_BLKSIZE_MAX) {
+      if (blksize > TFTP_BLKSIZE_MAX)
+      {
         failf(data, "%s (%d)", "blksize is larger than max supported",
               TFTP_BLKSIZE_MAX);
         return FETCHE_TFTP_ILLEGAL;
       }
-      else if(blksize < TFTP_BLKSIZE_MIN) {
+      else if (blksize < TFTP_BLKSIZE_MIN)
+      {
         failf(data, "%s (%d)", "blksize is smaller than min supported",
               TFTP_BLKSIZE_MIN);
         return FETCHE_TFTP_ILLEGAL;
       }
-      else if(blksize > state->requested_blksize) {
+      else if (blksize > state->requested_blksize)
+      {
         /* could realloc pkt buffers here, but the spec does not call out
          * support for the server requesting a bigger blksize than the client
          * requests */
@@ -361,7 +372,8 @@ static FETCHcode tftp_parse_option_ack(struct tftp_state_data *state,
       infof(data, "%s (%d) %s (%d)", "blksize parsed from OACK",
             state->blksize, "requested", state->requested_blksize);
     }
-    else if(checkprefix(TFTP_OPTION_TSIZE, option)) {
+    else if (checkprefix(TFTP_OPTION_TSIZE, option))
+    {
       long tsize = 0;
 
       tsize = strtol(value, NULL, 10);
@@ -369,8 +381,10 @@ static FETCHcode tftp_parse_option_ack(struct tftp_state_data *state,
 
       /* tsize should be ignored on upload: Who cares about the size of the
          remote file? */
-      if(!data->state.upload) {
-        if(!tsize) {
+      if (!data->state.upload)
+      {
+        if (!tsize)
+        {
           failf(data, "invalid tsize -:%s:- value in OACK packet", value);
           return FETCHE_TFTP_ILLEGAL;
         }
@@ -383,9 +397,9 @@ static FETCHcode tftp_parse_option_ack(struct tftp_state_data *state,
 }
 
 static FETCHcode tftp_option_add(struct tftp_state_data *state, size_t *csize,
-                                char *buf, const char *option)
+                                 char *buf, const char *option)
 {
-  if(( strlen(option) + *csize + 1) > (size_t)state->blksize)
+  if ((strlen(option) + *csize + 1) > (size_t)state->blksize)
     return FETCHE_TFTP_ILLEGAL;
   strcpy(buf, option);
   *csize += strlen(option) + 1;
@@ -393,7 +407,7 @@ static FETCHcode tftp_option_add(struct tftp_state_data *state, size_t *csize,
 }
 
 static FETCHcode tftp_connect_for_tx(struct tftp_state_data *state,
-                                    tftp_event_t event)
+                                     tftp_event_t event)
 {
   FETCHcode result;
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
@@ -403,13 +417,13 @@ static FETCHcode tftp_connect_for_tx(struct tftp_state_data *state,
 #endif
   state->state = TFTP_STATE_TX;
   result = tftp_set_timeouts(state);
-  if(result)
+  if (result)
     return result;
   return tftp_tx(state, event);
 }
 
 static FETCHcode tftp_connect_for_rx(struct tftp_state_data *state,
-                                    tftp_event_t event)
+                                     tftp_event_t event)
 {
   FETCHcode result;
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
@@ -419,13 +433,13 @@ static FETCHcode tftp_connect_for_rx(struct tftp_state_data *state,
 #endif
   state->state = TFTP_STATE_RX;
   result = tftp_set_timeouts(state);
-  if(result)
+  if (result)
     return result;
   return tftp_rx(state, event);
 }
 
 static FETCHcode tftp_send_first(struct tftp_state_data *state,
-                                tftp_event_t event)
+                                 tftp_event_t event)
 {
   size_t sbytes;
   ssize_t senddata;
@@ -435,28 +449,32 @@ static FETCHcode tftp_send_first(struct tftp_state_data *state,
   FETCHcode result = FETCHE_OK;
 
   /* Set ASCII mode if -B flag was used */
-  if(data->state.prefer_ascii)
+  if (data->state.prefer_ascii)
     mode = "netascii";
 
-  switch(event) {
+  switch (event)
+  {
 
   case TFTP_EVENT_INIT:    /* Send the first packet out */
   case TFTP_EVENT_TIMEOUT: /* Resend the first packet out */
     /* Increment the retry counter, quit if over the limit */
     state->retries++;
-    if(state->retries > state->retry_max) {
+    if (state->retries > state->retry_max)
+    {
       state->error = TFTP_ERR_NORESPONSE;
       state->state = TFTP_STATE_FIN;
       return result;
     }
 
-    if(data->state.upload) {
+    if (data->state.upload)
+    {
       /* If we are uploading, send an WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
-      if(data->state.infilesize != -1)
+      if (data->state.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
     }
-    else {
+    else
+    {
       /* If we are downloading, send an RRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_RRQ);
     }
@@ -465,10 +483,11 @@ static FETCHcode tftp_send_first(struct tftp_state_data *state,
        string. */
     result = Curl_urldecode(&state->data->state.up.path[1], 0,
                             &filename, NULL, REJECT_ZERO);
-    if(result)
+    if (result)
       return result;
 
-    if(strlen(filename) > (state->blksize - strlen(mode) - 4)) {
+    if (strlen(filename) > (state->blksize - strlen(mode) - 4))
+    {
       failf(data, "TFTP filename too long");
       free(filename);
       return FETCHE_TFTP_ILLEGAL; /* too long filename field */
@@ -476,45 +495,46 @@ static FETCHcode tftp_send_first(struct tftp_state_data *state,
 
     msnprintf((char *)state->spacket.data + 2,
               state->blksize,
-              "%s%c%s%c", filename, '\0',  mode, '\0');
+              "%s%c%s%c", filename, '\0', mode, '\0');
     sbytes = 4 + strlen(filename) + strlen(mode);
 
     /* optional addition of TFTP options */
-    if(!data->set.tftp_no_options) {
+    if (!data->set.tftp_no_options)
+    {
       char buf[64];
       /* add tsize option */
       msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
-                data->state.upload && (data->state.infilesize != -1) ?
-                data->state.infilesize : 0);
+                data->state.upload && (data->state.infilesize != -1) ? data->state.infilesize : 0);
 
       result = tftp_option_add(state, &sbytes,
                                (char *)state->spacket.data + sbytes,
                                TFTP_OPTION_TSIZE);
-      if(result == FETCHE_OK)
+      if (result == FETCHE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes, buf);
 
       /* add blksize option */
       msnprintf(buf, sizeof(buf), "%d", state->requested_blksize);
-      if(result == FETCHE_OK)
+      if (result == FETCHE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes,
                                  TFTP_OPTION_BLKSIZE);
-      if(result == FETCHE_OK)
+      if (result == FETCHE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes, buf);
 
       /* add timeout option */
       msnprintf(buf, sizeof(buf), "%d", state->retry_time);
-      if(result == FETCHE_OK)
+      if (result == FETCHE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes,
                                  TFTP_OPTION_INTERVAL);
-      if(result == FETCHE_OK)
+      if (result == FETCHE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes, buf);
 
-      if(result != FETCHE_OK) {
+      if (result != FETCHE_OK)
+      {
         failf(data, "TFTP buffer too small for options");
         free(filename);
         return FETCHE_TFTP_ILLEGAL;
@@ -525,9 +545,10 @@ static FETCHcode tftp_send_first(struct tftp_state_data *state,
        not have a size_t argument, like older unixes that want an 'int' */
     senddata = sendto(state->sockfd, (void *)state->spacket.data,
                       (SEND_TYPE_ARG3)sbytes, 0,
-                     (struct sockaddr *)&data->conn->remote_addr->fetch_sa_addr,
+                      (struct sockaddr *)&data->conn->remote_addr->fetch_sa_addr,
                       (fetch_socklen_t)data->conn->remote_addr->addrlen);
-    if(senddata != (ssize_t)sbytes) {
+    if (senddata != (ssize_t)sbytes)
+    {
       char buffer[STRERROR_LEN];
       failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     }
@@ -535,10 +556,12 @@ static FETCHcode tftp_send_first(struct tftp_state_data *state,
     break;
 
   case TFTP_EVENT_OACK:
-    if(data->state.upload) {
+    if (data->state.upload)
+    {
       result = tftp_connect_for_tx(state, event);
     }
-    else {
+    else
+    {
       result = tftp_connect_for_rx(state, event);
     }
     break;
@@ -565,7 +588,7 @@ static FETCHcode tftp_send_first(struct tftp_state_data *state,
 
 /* the next blocknum is x + 1 but it needs to wrap at an unsigned 16bit
    boundary */
-#define NEXT_BLOCKNUM(x) (((x) + 1)&0xffff)
+#define NEXT_BLOCKNUM(x) (((x) + 1) & 0xffff)
 
 /**********************************************************
  *
@@ -575,28 +598,32 @@ static FETCHcode tftp_send_first(struct tftp_state_data *state,
  *
  **********************************************************/
 static FETCHcode tftp_rx(struct tftp_state_data *state,
-                        tftp_event_t event)
+                         tftp_event_t event)
 {
   ssize_t sbytes;
   int rblock;
   struct Curl_easy *data = state->data;
   char buffer[STRERROR_LEN];
 
-  switch(event) {
+  switch (event)
+  {
 
   case TFTP_EVENT_DATA:
     /* Is this the block we expect? */
     rblock = getrpacketblock(&state->rpacket);
-    if(NEXT_BLOCKNUM(state->block) == rblock) {
+    if (NEXT_BLOCKNUM(state->block) == rblock)
+    {
       /* This is the expected block. Reset counters and ACK it. */
       state->retries = 0;
     }
-    else if(state->block == rblock) {
+    else if (state->block == rblock)
+    {
       /* This is the last recently received block again. Log it and ACK it
          again. */
       infof(data, "Received last DATA packet block %d again.", rblock);
     }
-    else {
+    else
+    {
       /* totally unexpected, just log it */
       infof(data,
             "Received unexpected DATA packet block %d, expecting block %d",
@@ -612,16 +639,19 @@ static FETCHcode tftp_rx(struct tftp_state_data *state,
                     4, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
-    if(sbytes < 0) {
+    if (sbytes < 0)
+    {
       failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return FETCHE_SEND_ERROR;
     }
 
     /* Check if completed (That is, a less than full packet is received) */
-    if(state->rbytes < (ssize_t)state->blksize + 4) {
+    if (state->rbytes < (ssize_t)state->blksize + 4)
+    {
       state->state = TFTP_STATE_FIN;
     }
-    else {
+    else
+    {
       state->state = TFTP_STATE_RX;
     }
     state->rx_time = time(NULL);
@@ -637,7 +667,8 @@ static FETCHcode tftp_rx(struct tftp_state_data *state,
                     4, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
-    if(sbytes < 0) {
+    if (sbytes < 0)
+    {
       failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return FETCHE_SEND_ERROR;
     }
@@ -653,17 +684,20 @@ static FETCHcode tftp_rx(struct tftp_state_data *state,
     infof(data,
           "Timeout waiting for block %d ACK. Retries = %d",
           NEXT_BLOCKNUM(state->block), state->retries);
-    if(state->retries > state->retry_max) {
+    if (state->retries > state->retry_max)
+    {
       state->error = TFTP_ERR_TIMEOUT;
       state->state = TFTP_STATE_FIN;
     }
-    else {
+    else
+    {
       /* Resend the previous ACK */
       sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                       4, SEND_4TH_ARG,
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
-      if(sbytes < 0) {
+      if (sbytes < 0)
+      {
         failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
         return FETCHE_SEND_ERROR;
       }
@@ -708,41 +742,46 @@ static FETCHcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
   char *bufptr;
   bool eos;
 
-  switch(event) {
+  switch (event)
+  {
 
   case TFTP_EVENT_ACK:
   case TFTP_EVENT_OACK:
-    if(event == TFTP_EVENT_ACK) {
+    if (event == TFTP_EVENT_ACK)
+    {
       /* Ack the packet */
       int rblock = getrpacketblock(&state->rpacket);
 
-      if(rblock != state->block &&
-         /* There is a bug in tftpd-hpa that causes it to send us an ack for
-          * 65535 when the block number wraps to 0. So when we are expecting
-          * 0, also accept 65535. See
-          * https://www.syslinux.org/archives/2010-September/015612.html
-          * */
-         !(state->block == 0 && rblock == 65535)) {
+      if (rblock != state->block &&
+          /* There is a bug in tftpd-hpa that causes it to send us an ack for
+           * 65535 when the block number wraps to 0. So when we are expecting
+           * 0, also accept 65535. See
+           * https://www.syslinux.org/archives/2010-September/015612.html
+           * */
+          !(state->block == 0 && rblock == 65535))
+      {
         /* This is not the expected block. Log it and up the retry counter */
         infof(data, "Received ACK for block %d, expecting %d",
               rblock, state->block);
         state->retries++;
         /* Bail out if over the maximum */
-        if(state->retries > state->retry_max) {
+        if (state->retries > state->retry_max)
+        {
           failf(data, "tftp_tx: giving up waiting for block %d ack",
                 state->block);
           result = FETCHE_SEND_ERROR;
         }
-        else {
+        else
+        {
           /* Re-send the data packet */
           sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                           4 + (SEND_TYPE_ARG3)state->sbytes, SEND_4TH_ARG,
                           (struct sockaddr *)&state->remote_addr,
                           state->remote_addrlen);
           /* Check all sbytes were sent */
-          if(sbytes < 0) {
-            failf(data, "%s", Curl_strerror(SOCKERRNO,
-                                            buffer, sizeof(buffer)));
+          if (sbytes < 0)
+          {
+            failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
             result = FETCHE_SEND_ERROR;
           }
         }
@@ -760,7 +799,8 @@ static FETCHcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
     state->retries = 0;
     setpacketevent(&state->spacket, TFTP_EVENT_DATA);
     setpacketblock(&state->spacket, state->block);
-    if(state->block > 1 && state->sbytes < state->blksize) {
+    if (state->block > 1 && state->sbytes < state->blksize)
+    {
       state->state = TFTP_STATE_FIN;
       return FETCHE_OK;
     }
@@ -771,21 +811,23 @@ static FETCHcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
      * */
     state->sbytes = 0;
     bufptr = (char *)state->spacket.data + 4;
-    do {
+    do
+    {
       result = Curl_client_read(data, bufptr, state->blksize - state->sbytes,
                                 &cb, &eos);
-      if(result)
+      if (result)
         return result;
       state->sbytes += (int)cb;
       bufptr += cb;
-    } while(state->sbytes < state->blksize && cb);
+    } while (state->sbytes < state->blksize && cb);
 
-    sbytes = sendto(state->sockfd, (void *) state->spacket.data,
+    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                     4 + (SEND_TYPE_ARG3)state->sbytes, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     /* Check all sbytes were sent */
-    if(sbytes < 0) {
+    if (sbytes < 0)
+    {
       failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return FETCHE_SEND_ERROR;
     }
@@ -798,20 +840,24 @@ static FETCHcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
     /* Increment the retry counter and log the timeout */
     state->retries++;
     infof(data, "Timeout waiting for block %d ACK. "
-          " Retries = %d", NEXT_BLOCKNUM(state->block), state->retries);
+                " Retries = %d",
+          NEXT_BLOCKNUM(state->block), state->retries);
     /* Decide if we have had enough */
-    if(state->retries > state->retry_max) {
+    if (state->retries > state->retry_max)
+    {
       state->error = TFTP_ERR_TIMEOUT;
       state->state = TFTP_STATE_FIN;
     }
-    else {
+    else
+    {
       /* Re-send the data packet */
       sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                       4 + (SEND_TYPE_ARG3)state->sbytes, SEND_4TH_ARG,
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
       /* Check all sbytes were sent */
-      if(sbytes < 0) {
+      if (sbytes < 0)
+      {
         failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
         return FETCHE_SEND_ERROR;
       }
@@ -851,8 +897,10 @@ static FETCHcode tftp_translate_code(tftp_error_t error)
 {
   FETCHcode result = FETCHE_OK;
 
-  if(error != TFTP_ERR_NONE) {
-    switch(error) {
+  if (error != TFTP_ERR_NONE)
+  {
+    switch (error)
+    {
     case TFTP_ERR_NOTFOUND:
       result = FETCHE_TFTP_NOTFOUND;
       break;
@@ -900,12 +948,13 @@ static FETCHcode tftp_translate_code(tftp_error_t error)
  *
  **********************************************************/
 static FETCHcode tftp_state_machine(struct tftp_state_data *state,
-                                   tftp_event_t event)
+                                    tftp_event_t event)
 {
   FETCHcode result = FETCHE_OK;
   struct Curl_easy *data = state->data;
 
-  switch(state->state) {
+  switch (state->state)
+  {
   case TFTP_STATE_START:
     DEBUGF(infof(data, "TFTP_STATE_START"));
     result = tftp_send_first(state, event);
@@ -939,14 +988,15 @@ static FETCHcode tftp_state_machine(struct tftp_state_data *state,
  *
  **********************************************************/
 static FETCHcode tftp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead_connection)
+                                 struct connectdata *conn, bool dead_connection)
 {
   struct tftp_state_data *state = conn->proto.tftpc;
-  (void) data;
-  (void) dead_connection;
+  (void)data;
+  (void)dead_connection;
 
   /* done, free dynamically allocated pkt buffers */
-  if(state) {
+  if (state)
+  {
     Curl_safefree(state->rpacket.data);
     Curl_safefree(state->spacket.data);
     free(state);
@@ -972,30 +1022,32 @@ static FETCHcode tftp_connect(struct Curl_easy *data, bool *done)
   blksize = TFTP_BLKSIZE_DEFAULT;
 
   state = conn->proto.tftpc = calloc(1, sizeof(struct tftp_state_data));
-  if(!state)
+  if (!state)
     return FETCHE_OUT_OF_MEMORY;
 
   /* alloc pkt buffers based on specified blksize */
-  if(data->set.tftp_blksize)
+  if (data->set.tftp_blksize)
     /* range checked when set */
     blksize = (int)data->set.tftp_blksize;
 
   need_blksize = blksize;
   /* default size is the fallback when no OACK is received */
-  if(need_blksize < TFTP_BLKSIZE_DEFAULT)
+  if (need_blksize < TFTP_BLKSIZE_DEFAULT)
     need_blksize = TFTP_BLKSIZE_DEFAULT;
 
-  if(!state->rpacket.data) {
+  if (!state->rpacket.data)
+  {
     state->rpacket.data = calloc(1, need_blksize + 2 + 2);
 
-    if(!state->rpacket.data)
+    if (!state->rpacket.data)
       return FETCHE_OUT_OF_MEMORY;
   }
 
-  if(!state->spacket.data) {
+  if (!state->spacket.data)
+  {
     state->spacket.data = calloc(1, need_blksize + 2 + 2);
 
-    if(!state->spacket.data)
+    if (!state->spacket.data)
       return FETCHE_OUT_OF_MEMORY;
   }
 
@@ -1011,11 +1063,12 @@ static FETCHcode tftp_connect(struct Curl_easy *data, bool *done)
   state->requested_blksize = blksize;
 
   ((struct sockaddr *)&state->local_addr)->sa_family =
-    (FETCH_SA_FAMILY_T)(conn->remote_addr->family);
+      (FETCH_SA_FAMILY_T)(conn->remote_addr->family);
 
   tftp_set_timeouts(state);
 
-  if(!conn->bits.bound) {
+  if (!conn->bits.bound)
+  {
     /* If not already bound, bind to any interface, random UDP port. If it is
      * reused or a custom local port was desired, this has already been done!
      *
@@ -1031,7 +1084,8 @@ static FETCHcode tftp_connect(struct Curl_easy *data, bool *done)
      */
     int rc = bind(state->sockfd, (struct sockaddr *)&state->local_addr,
                   (fetch_socklen_t)conn->remote_addr->addrlen);
-    if(rc) {
+    if (rc)
+    {
       char buffer[STRERROR_LEN];
       failf(data, "bind() failed; %s",
             Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
@@ -1055,20 +1109,20 @@ static FETCHcode tftp_connect(struct Curl_easy *data, bool *done)
  *
  **********************************************************/
 static FETCHcode tftp_done(struct Curl_easy *data, FETCHcode status,
-                          bool premature)
+                           bool premature)
 {
   FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
   struct tftp_state_data *state = conn->proto.tftpc;
 
-  (void)status; /* unused */
+  (void)status;    /* unused */
   (void)premature; /* not used */
 
-  if(Curl_pgrsDone(data))
+  if (Curl_pgrsDone(data))
     return FETCHE_ABORTED_BY_CALLBACK;
 
   /* If we have encountered an error */
-  if(state)
+  if (state)
     result = tftp_translate_code(state->error);
 
   return result;
@@ -1098,8 +1152,8 @@ static int tftp_getsock(struct Curl_easy *data,
  **********************************************************/
 static FETCHcode tftp_receive_packet(struct Curl_easy *data)
 {
-  fetch_socklen_t        fromlen;
-  FETCHcode              result = FETCHE_OK;
+  fetch_socklen_t fromlen;
+  FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
   struct tftp_state_data *state = conn->proto.tftpc;
 
@@ -1114,25 +1168,30 @@ static FETCHcode tftp_receive_packet(struct Curl_easy *data)
   state->remote_addrlen = fromlen;
 
   /* Sanity check packet length */
-  if(state->rbytes < 4) {
+  if (state->rbytes < 4)
+  {
     failf(data, "Received too short packet");
     /* Not a timeout, but how best to handle it? */
     state->event = TFTP_EVENT_TIMEOUT;
   }
-  else {
+  else
+  {
     /* The event is given by the TFTP packet time */
     unsigned short event = getrpacketevent(&state->rpacket);
     state->event = (tftp_event_t)event;
 
-    switch(state->event) {
+    switch (state->event)
+    {
     case TFTP_EVENT_DATA:
       /* Do not pass to the client empty or retransmitted packets */
-      if(state->rbytes > 4 &&
-         (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket))) {
+      if (state->rbytes > 4 &&
+          (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket)))
+      {
         result = Curl_client_write(data, CLIENTWRITE_BODY,
                                    (char *)state->rpacket.data + 4,
-                                   state->rbytes-4);
-        if(result) {
+                                   state->rbytes - 4);
+        if (result)
+        {
           tftp_state_machine(state, TFTP_EVENT_ERROR);
           return result;
         }
@@ -1144,7 +1203,7 @@ static FETCHcode tftp_receive_packet(struct Curl_easy *data)
       char *str = (char *)state->rpacket.data + 4;
       size_t strn = state->rbytes - 4;
       state->error = (tftp_error_t)error;
-      if(tftp_strnlen(str, strn) < strn)
+      if (tftp_strnlen(str, strn) < strn)
         infof(data, "TFTP error: %s", str);
       break;
     }
@@ -1153,8 +1212,8 @@ static FETCHcode tftp_receive_packet(struct Curl_easy *data)
     case TFTP_EVENT_OACK:
       result = tftp_parse_option_ack(state,
                                      (const char *)state->rpacket.data + 2,
-                                     state->rbytes-2);
-      if(result)
+                                     state->rbytes - 2);
+      if (result)
         return result;
       break;
     case TFTP_EVENT_RRQ:
@@ -1165,7 +1224,8 @@ static FETCHcode tftp_receive_packet(struct Curl_easy *data)
     }
 
     /* Update the progress meter */
-    if(Curl_pgrsUpdate(data)) {
+    if (Curl_pgrsUpdate(data))
+    {
       tftp_state_machine(state, TFTP_EVENT_ERROR);
       return FETCHE_ABORTED_BY_CALLBACK;
     }
@@ -1188,19 +1248,21 @@ static timediff_t tftp_state_timeout(struct Curl_easy *data,
   struct tftp_state_data *state = conn->proto.tftpc;
   timediff_t timeout_ms;
 
-  if(event)
+  if (event)
     *event = TFTP_EVENT_NONE;
 
   timeout_ms = Curl_timeleft(state->data, NULL,
                              (state->state == TFTP_STATE_START));
-  if(timeout_ms < 0) {
+  if (timeout_ms < 0)
+  {
     state->error = TFTP_ERR_TIMEOUT;
     state->state = TFTP_STATE_FIN;
     return 0;
   }
   current = time(NULL);
-  if(current > state->rx_time + state->retry_time) {
-    if(event)
+  if (current > state->rx_time + state->retry_time)
+  {
+    if (event)
       *event = TFTP_EVENT_TIMEOUT;
     state->rx_time = time(NULL); /* update even though we received nothing */
   }
@@ -1225,39 +1287,44 @@ static FETCHcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
 
   *done = FALSE;
 
-  if(timeout_ms < 0) {
+  if (timeout_ms < 0)
+  {
     failf(data, "TFTP response timeout");
     return FETCHE_OPERATION_TIMEDOUT;
   }
-  if(event != TFTP_EVENT_NONE) {
+  if (event != TFTP_EVENT_NONE)
+  {
     result = tftp_state_machine(state, event);
-    if(result)
+    if (result)
       return result;
     *done = (state->state == TFTP_STATE_FIN);
-    if(*done)
+    if (*done)
       /* Tell fetch we are done */
       Curl_xfer_setup_nop(data);
   }
-  else {
+  else
+  {
     /* no timeouts to handle, check our socket */
     int rc = SOCKET_READABLE(state->sockfd, 0);
 
-    if(rc == -1) {
+    if (rc == -1)
+    {
       /* bail out */
       int error = SOCKERRNO;
       char buffer[STRERROR_LEN];
       failf(data, "%s", Curl_strerror(error, buffer, sizeof(buffer)));
       state->event = TFTP_EVENT_ERROR;
     }
-    else if(rc) {
+    else if (rc)
+    {
       result = tftp_receive_packet(data);
-      if(result)
+      if (result)
         return result;
       result = tftp_state_machine(state, state->event);
-      if(result)
+      if (result)
         return result;
       *done = (state->state == TFTP_STATE_FIN);
-      if(*done)
+      if (*done)
         /* Tell fetch we are done */
         Curl_xfer_setup_nop(data);
     }
@@ -1279,14 +1346,16 @@ static FETCHcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
   FETCHcode result;
   result = tftp_multi_statemach(data, dophase_done);
 
-  if(*dophase_done) {
+  if (*dophase_done)
+  {
     DEBUGF(infof(data, "DO phase is complete"));
   }
-  else if(!result) {
+  else if (!result)
+  {
     /* The multi code does not have this logic for the DOING state so we
        provide it for TFTP since it may do the entire transfer in this
        state. */
-    if(Curl_pgrsUpdate(data))
+    if (Curl_pgrsUpdate(data))
       result = FETCHE_ABORTED_BY_CALLBACK;
     else
       result = Curl_speedcheck(data, Curl_now());
@@ -1311,17 +1380,16 @@ static FETCHcode tftp_perform(struct Curl_easy *data, bool *dophase_done)
 
   result = tftp_state_machine(state, TFTP_EVENT_INIT);
 
-  if((state->state == TFTP_STATE_FIN) || result)
+  if ((state->state == TFTP_STATE_FIN) || result)
     return result;
 
   tftp_multi_statemach(data, dophase_done);
 
-  if(*dophase_done)
+  if (*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));
 
   return result;
 }
-
 
 /**********************************************************
  *
@@ -1341,21 +1409,22 @@ static FETCHcode tftp_do(struct Curl_easy *data, bool *done)
 
   *done = FALSE;
 
-  if(!conn->proto.tftpc) {
+  if (!conn->proto.tftpc)
+  {
     result = tftp_connect(data, done);
-    if(result)
+    if (result)
       return result;
   }
 
   state = conn->proto.tftpc;
-  if(!state)
+  if (!state)
     return FETCHE_TFTP_ILLEGAL;
 
   result = tftp_perform(data, done);
 
   /* If tftp_perform() returned an error, use that for return code. If it
      was OK, see if tftp_translate_code() has an error. */
-  if(!result)
+  if (!result)
     /* If we have encountered an internal tftp error, translate it. */
     result = tftp_translate_code(state->error);
 
@@ -1363,7 +1432,7 @@ static FETCHcode tftp_do(struct Curl_easy *data, bool *done)
 }
 
 static FETCHcode tftp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn)
+                                       struct connectdata *conn)
 {
   char *type;
 
@@ -1373,15 +1442,17 @@ static FETCHcode tftp_setup_connection(struct Curl_easy *data,
    * we will try to get now! */
   type = strstr(data->state.up.path, ";mode=");
 
-  if(!type)
+  if (!type)
     type = strstr(conn->host.rawalloc, ";mode=");
 
-  if(type) {
+  if (type)
+  {
     char command;
-    *type = 0;                   /* it was in the middle of the hostname */
+    *type = 0; /* it was in the middle of the hostname */
     command = Curl_raw_toupper(type[6]);
 
-    switch(command) {
+    switch (command)
+    {
     case 'A': /* ASCII mode */
     case 'N': /* NETASCII mode */
       data->state.prefer_ascii = TRUE;

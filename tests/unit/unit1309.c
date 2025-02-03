@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,6 @@
 #include "splay.h"
 #include "warnless.h"
 
-
 static FETCHcode unit_setup(void)
 {
   return FETCHE_OK;
@@ -34,7 +33,6 @@ static FETCHcode unit_setup(void)
 
 static void unit_stop(void)
 {
-
 }
 
 static void splayprint(struct Curl_tree *t, int d, char output)
@@ -42,24 +40,26 @@ static void splayprint(struct Curl_tree *t, int d, char output)
   struct Curl_tree *node;
   int i;
   int count;
-  if(!t)
+  if (!t)
     return;
 
   splayprint(t->larger, d + 1, output);
-  for(i = 0; i < d; i++)
-    if(output)
+  for (i = 0; i < d; i++)
+    if (output)
       printf("  ");
 
-  if(output) {
+  if (output)
+  {
     printf("%ld.%ld[%d]", (long)t->key.tv_sec,
            (long)t->key.tv_usec, i);
   }
 
-  for(count = 0, node = t->samen; node != t; node = node->samen, count++)
+  for (count = 0, node = t->samen; node != t; node = node->samen, count++)
     ;
 
-  if(output) {
-    if(count)
+  if (output)
+  {
+    if (count)
       printf(" [%d more]\n", count);
     else
       printf("\n");
@@ -73,72 +73,79 @@ UNITTEST_START
 /* number of nodes to add to the splay tree */
 #define NUM_NODES 50
 
-  struct Curl_tree *root, *removed;
-  struct Curl_tree nodes[NUM_NODES*3];
-  size_t storage[NUM_NODES*3];
-  int rc;
-  int i, j;
-  struct fetchtime tv_now = {0, 0};
-  root = NULL;              /* the empty tree */
+struct Curl_tree *root, *removed;
+struct Curl_tree nodes[NUM_NODES * 3];
+size_t storage[NUM_NODES * 3];
+int rc;
+int i, j;
+struct fetchtime tv_now = {0, 0};
+root = NULL; /* the empty tree */
 
-  /* add nodes */
-  for(i = 0; i < NUM_NODES; i++) {
-    struct fetchtime key;
+/* add nodes */
+for (i = 0; i < NUM_NODES; i++)
+{
+  struct fetchtime key;
 
-    key.tv_sec = 0;
-    key.tv_usec = (541*i)%1023;
-    storage[i] = key.tv_usec;
-    Curl_splayset(&nodes[i], &storage[i]);
-    root = Curl_splayinsert(key, root, &nodes[i]);
-  }
+  key.tv_sec = 0;
+  key.tv_usec = (541 * i) % 1023;
+  storage[i] = key.tv_usec;
+  Curl_splayset(&nodes[i], &storage[i]);
+  root = Curl_splayinsert(key, root, &nodes[i]);
+}
 
-  puts("Result:");
+puts("Result:");
+splayprint(root, 0, 1);
+
+for (i = 0; i < NUM_NODES; i++)
+{
+  int rem = (i + 7) % NUM_NODES;
+  printf("Tree look:\n");
   splayprint(root, 0, 1);
-
-  for(i = 0; i < NUM_NODES; i++) {
-    int rem = (i + 7)%NUM_NODES;
-    printf("Tree look:\n");
-    splayprint(root, 0, 1);
-    printf("remove pointer %d, payload %zu\n", rem,
-           *(size_t *)Curl_splayget(&nodes[rem]));
-    rc = Curl_splayremove(root, &nodes[rem], &root);
-    if(rc) {
-      /* failed! */
-      printf("remove %d failed!\n", rem);
-      fail("remove");
-    }
+  printf("remove pointer %d, payload %zu\n", rem,
+         *(size_t *)Curl_splayget(&nodes[rem]));
+  rc = Curl_splayremove(root, &nodes[rem], &root);
+  if (rc)
+  {
+    /* failed! */
+    printf("remove %d failed!\n", rem);
+    fail("remove");
   }
+}
 
-  fail_unless(root == NULL, "tree not empty after removing all nodes");
+fail_unless(root == NULL, "tree not empty after removing all nodes");
 
-  /* rebuild tree */
-  for(i = 0; i < NUM_NODES; i++) {
-    struct fetchtime key;
+/* rebuild tree */
+for (i = 0; i < NUM_NODES; i++)
+{
+  struct fetchtime key;
 
-    key.tv_sec = 0;
-    key.tv_usec = (541*i)%1023;
+  key.tv_sec = 0;
+  key.tv_usec = (541 * i) % 1023;
 
-    /* add some nodes with the same key */
-    for(j = 0; j <= i % 3; j++) {
-      storage[i * 3 + j] = key.tv_usec*10 + j;
-      Curl_splayset(&nodes[i * 3 + j], &storage[i * 3 + j]);
-      root = Curl_splayinsert(key, root, &nodes[i * 3 + j]);
-    }
+  /* add some nodes with the same key */
+  for (j = 0; j <= i % 3; j++)
+  {
+    storage[i * 3 + j] = key.tv_usec * 10 + j;
+    Curl_splayset(&nodes[i * 3 + j], &storage[i * 3 + j]);
+    root = Curl_splayinsert(key, root, &nodes[i * 3 + j]);
   }
+}
 
-  removed = NULL;
-  for(i = 0; i <= 1100; i += 100) {
-    printf("Removing nodes not larger than %d\n", i);
-    tv_now.tv_usec = i;
+removed = NULL;
+for (i = 0; i <= 1100; i += 100)
+{
+  printf("Removing nodes not larger than %d\n", i);
+  tv_now.tv_usec = i;
+  root = Curl_splaygetbest(tv_now, root, &removed);
+  while (removed)
+  {
+    printf("removed payload %zu[%zu]\n",
+           *(size_t *)Curl_splayget(removed) / 10,
+           *(size_t *)Curl_splayget(removed) % 10);
     root = Curl_splaygetbest(tv_now, root, &removed);
-    while(removed) {
-      printf("removed payload %zu[%zu]\n",
-             *(size_t *)Curl_splayget(removed) / 10,
-             *(size_t *)Curl_splayget(removed) % 10);
-      root = Curl_splaygetbest(tv_now, root, &removed);
-    }
   }
+}
 
-  fail_unless(root == NULL, "tree not empty when it should be");
+fail_unless(root == NULL, "tree not empty when it should be");
 
 UNITTEST_STOP

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,12 +55,12 @@
    headers to enable the problematic attributes. This makes the feature check
    fail. Fixed in 14.2.0_1. Disable the workaround if the fix is detected. */
 #if defined(__APPLE__) && !defined(__clang__) && defined(__GNUC__) && \
-  defined(__has_attribute)
-#  if !defined(__has_feature)
-#    define availability fetch_pp_attribute_disabled
-#  elif !__has_feature(attribute_availability)
-#    define availability fetch_pp_attribute_disabled
-#  endif
+    defined(__has_attribute)
+#if !defined(__has_feature)
+#define availability fetch_pp_attribute_disabled
+#elif !__has_feature(attribute_availability)
+#define availability fetch_pp_attribute_disabled
+#endif
 #endif
 
 #if defined(__APPLE__)
@@ -76,10 +76,10 @@
    faulty dynamic detection. gcc is not affected (for now) because it lacks
    the necessary dynamic detection features, so the SDK falls back to
    a codepath that sets both the old and new macro to 1. */
-#if defined(TARGET_OS_MAC) && TARGET_OS_MAC && \
-  defined(TARGET_OS_OSX) && !TARGET_OS_OSX && \
-  (!defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE) && \
-  (!defined(TARGET_OS_SIMULATOR) || !TARGET_OS_SIMULATOR)
+#if defined(TARGET_OS_MAC) && TARGET_OS_MAC &&           \
+    defined(TARGET_OS_OSX) && !TARGET_OS_OSX &&          \
+    (!defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE) && \
+    (!defined(TARGET_OS_SIMULATOR) || !TARGET_OS_SIMULATOR)
 #undef TARGET_OS_OSX
 #define TARGET_OS_OSX TARGET_OS_MAC
 #endif
@@ -87,13 +87,13 @@
 
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
-#pragma warning(disable:4127)
+#pragma warning(disable : 4127)
 /* Avoid VS2005 and upper complaining about portable C functions. */
 #ifndef _CRT_NONSTDC_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
+#define _CRT_NONSTDC_NO_DEPRECATE /* for strdup(), write(), etc. */
 #endif
 #ifndef _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_DEPRECATE  /* for fopen(), getenv(), etc. */
+#define _CRT_SECURE_NO_DEPRECATE /* for fopen(), getenv(), etc. */
 #endif
 #endif /* _MSC_VER */
 
@@ -103,22 +103,22 @@
  * warnings and macro clashes.
  * Make sure to define this macro before including any Windows headers.
  */
-#  ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#  endif
-#  ifndef NOGDI
-#  define NOGDI
-#  endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOGDI
+#define NOGDI
+#endif
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
-#  if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
-     defined(WINAPI_FAMILY)
-#    include <winapifamily.h>
-#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
-       !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#      define FETCH_WINDOWS_UWP
-#    endif
-#  endif
+#if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+    defined(WINAPI_FAMILY)
+#include <winapifamily.h>
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && \
+    !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#define FETCH_WINDOWS_UWP
+#endif
+#endif
 #endif
 
 /* Compatibility */
@@ -138,23 +138,23 @@
 #else /* HAVE_CONFIG_H */
 
 #ifdef _WIN32
-#  include "config-win32.h"
+#include "config-win32.h"
 #endif
 
 #ifdef macintosh
-#  include "config-mac.h"
+#include "config-mac.h"
 #endif
 
 #ifdef __riscos__
-#  include "config-riscos.h"
+#include "config-riscos.h"
 #endif
 
 #ifdef __OS400__
-#  include "config-os400.h"
+#include "config-os400.h"
 #endif
 
 #ifdef __PLAN9__
-#  include "config-plan9.h"
+#include "config-plan9.h"
 #endif
 
 #endif /* HAVE_CONFIG_H */
@@ -174,9 +174,9 @@
  */
 
 #ifdef NEED_THREAD_SAFE
-#  ifndef _THREAD_SAFE
-#  define _THREAD_SAFE
-#  endif
+#ifndef _THREAD_SAFE
+#define _THREAD_SAFE
+#endif
 #endif
 
 /*
@@ -186,16 +186,16 @@
  */
 
 #ifdef NEED_REENTRANT
-#  ifndef _REENTRANT
-#  define _REENTRANT
-#  endif
+#ifndef _REENTRANT
+#define _REENTRANT
+#endif
 #endif
 
 /* Solaris needs this to get a POSIX-conformant getpwuid_r */
 #if defined(sun) || defined(__sun)
-#  ifndef _POSIX_PTHREAD_SEMANTICS
-#  define _POSIX_PTHREAD_SEMANTICS 1
-#  endif
+#ifndef _POSIX_PTHREAD_SEMANTICS
+#define _POSIX_PTHREAD_SEMANTICS 1
+#endif
 #endif
 
 /* ================================================================ */
@@ -205,7 +205,7 @@
 
 /* Give calloc a chance to be dragging in early, so we do not redefine */
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-#  include <pthread.h>
+#include <pthread.h>
 #endif
 
 /*
@@ -213,48 +213,48 @@
  */
 
 #ifdef HTTP_ONLY
-#  ifndef FETCH_DISABLE_DICT
-#    define FETCH_DISABLE_DICT
-#  endif
-#  ifndef FETCH_DISABLE_FILE
-#    define FETCH_DISABLE_FILE
-#  endif
-#  ifndef FETCH_DISABLE_FTP
-#    define FETCH_DISABLE_FTP
-#  endif
-#  ifndef FETCH_DISABLE_GOPHER
-#    define FETCH_DISABLE_GOPHER
-#  endif
-#  ifndef FETCH_DISABLE_IMAP
-#    define FETCH_DISABLE_IMAP
-#  endif
-#  ifndef FETCH_DISABLE_LDAP
-#    define FETCH_DISABLE_LDAP
-#  endif
-#  ifndef FETCH_DISABLE_LDAPS
-#    define FETCH_DISABLE_LDAPS
-#  endif
-#  ifndef FETCH_DISABLE_MQTT
-#    define FETCH_DISABLE_MQTT
-#  endif
-#  ifndef FETCH_DISABLE_POP3
-#    define FETCH_DISABLE_POP3
-#  endif
-#  ifndef FETCH_DISABLE_RTSP
-#    define FETCH_DISABLE_RTSP
-#  endif
-#  ifndef FETCH_DISABLE_SMB
-#    define FETCH_DISABLE_SMB
-#  endif
-#  ifndef FETCH_DISABLE_SMTP
-#    define FETCH_DISABLE_SMTP
-#  endif
-#  ifndef FETCH_DISABLE_TELNET
-#    define FETCH_DISABLE_TELNET
-#  endif
-#  ifndef FETCH_DISABLE_TFTP
-#    define FETCH_DISABLE_TFTP
-#  endif
+#ifndef FETCH_DISABLE_DICT
+#define FETCH_DISABLE_DICT
+#endif
+#ifndef FETCH_DISABLE_FILE
+#define FETCH_DISABLE_FILE
+#endif
+#ifndef FETCH_DISABLE_FTP
+#define FETCH_DISABLE_FTP
+#endif
+#ifndef FETCH_DISABLE_GOPHER
+#define FETCH_DISABLE_GOPHER
+#endif
+#ifndef FETCH_DISABLE_IMAP
+#define FETCH_DISABLE_IMAP
+#endif
+#ifndef FETCH_DISABLE_LDAP
+#define FETCH_DISABLE_LDAP
+#endif
+#ifndef FETCH_DISABLE_LDAPS
+#define FETCH_DISABLE_LDAPS
+#endif
+#ifndef FETCH_DISABLE_MQTT
+#define FETCH_DISABLE_MQTT
+#endif
+#ifndef FETCH_DISABLE_POP3
+#define FETCH_DISABLE_POP3
+#endif
+#ifndef FETCH_DISABLE_RTSP
+#define FETCH_DISABLE_RTSP
+#endif
+#ifndef FETCH_DISABLE_SMB
+#define FETCH_DISABLE_SMB
+#endif
+#ifndef FETCH_DISABLE_SMTP
+#define FETCH_DISABLE_SMTP
+#endif
+#ifndef FETCH_DISABLE_TELNET
+#define FETCH_DISABLE_TELNET
+#endif
+#ifndef FETCH_DISABLE_TFTP
+#define FETCH_DISABLE_TFTP
+#endif
 #endif
 
 /*
@@ -262,7 +262,7 @@
  */
 
 #if defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_RTSP)
-#  define FETCH_DISABLE_RTSP
+#define FETCH_DISABLE_RTSP
 #endif
 
 /*
@@ -270,16 +270,16 @@
  */
 
 #if defined(FETCH_DISABLE_HTTP)
-#  define FETCH_DISABLE_ALTSVC 1
-#  define FETCH_DISABLE_COOKIES 1
-#  define FETCH_DISABLE_BASIC_AUTH 1
-#  define FETCH_DISABLE_BEARER_AUTH 1
-#  define FETCH_DISABLE_AWS 1
-#  define FETCH_DISABLE_DOH 1
-#  define FETCH_DISABLE_FORM_API 1
-#  define FETCH_DISABLE_HEADERS_API 1
-#  define FETCH_DISABLE_HSTS 1
-#  define FETCH_DISABLE_HTTP_AUTH 1
+#define FETCH_DISABLE_ALTSVC 1
+#define FETCH_DISABLE_COOKIES 1
+#define FETCH_DISABLE_BASIC_AUTH 1
+#define FETCH_DISABLE_BEARER_AUTH 1
+#define FETCH_DISABLE_AWS 1
+#define FETCH_DISABLE_DOH 1
+#define FETCH_DISABLE_FORM_API 1
+#define FETCH_DISABLE_HEADERS_API 1
+#define FETCH_DISABLE_HSTS 1
+#define FETCH_DISABLE_HTTP_AUTH 1
 #endif
 
 /* ================================================================ */
@@ -292,7 +292,7 @@
  */
 
 #ifdef __OS400__
-#  include "setup-os400.h"
+#include "setup-os400.h"
 #endif
 
 /*
@@ -300,7 +300,7 @@
  */
 
 #ifdef __VMS
-#  include "setup-vms.h"
+#include "setup-vms.h"
 #endif
 
 /*
@@ -308,7 +308,7 @@
  */
 
 #ifdef _WIN32
-#  include "setup-win32.h"
+#include "setup-win32.h"
 #endif
 
 #include <fetch/system.h>
@@ -317,26 +317,26 @@
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
  */
-#define FETCH_CONC_MACROS_(A,B) A ## B
-#define FETCH_CONC_MACROS(A,B) FETCH_CONC_MACROS_(A,B)
+#define FETCH_CONC_MACROS_(A, B) A##B
+#define FETCH_CONC_MACROS(A, B) FETCH_CONC_MACROS_(A, B)
 
 /* fetch uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that is matches the GNU format attribute we
  * use with the MinGW compiler, allowing it to verify them at compile-time.
  */
-#ifdef  __MINGW32__
-#  undef FETCH_FORMAT_FETCH_OFF_T
-#  undef FETCH_FORMAT_FETCH_OFF_TU
-#  define FETCH_FORMAT_FETCH_OFF_T   "lld"
-#  define FETCH_FORMAT_FETCH_OFF_TU  "llu"
+#ifdef __MINGW32__
+#undef FETCH_FORMAT_FETCH_OFF_T
+#undef FETCH_FORMAT_FETCH_OFF_TU
+#define FETCH_FORMAT_FETCH_OFF_T "lld"
+#define FETCH_FORMAT_FETCH_OFF_TU "llu"
 #endif
 
 /* based on logic in "fetch/mprintf.h" */
 
-#if (defined(__GNUC__) || defined(__clang__) ||                         \
-  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
-  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(FETCH_NO_FMT_CHECKS)
+#if (defined(__GNUC__) || defined(__clang__) ||                   \
+     defined(__IAR_SYSTEMS_ICC__)) &&                             \
+    defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
+    !defined(FETCH_NO_FMT_CHECKS)
 #if defined(__MINGW32__) && !defined(__clang__)
 #define FETCH_PRINTF(fmt, arg) \
   __attribute__((format(gnu_printf, fmt, arg)))
@@ -354,13 +354,13 @@
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
    gcc (as of v14) is also missing it. */
-#if defined(__APPLE__) &&                                   \
-  ((!defined(__apple_build_version__) &&                    \
-    defined(__clang__) && __clang_major__ < 17) ||          \
-   (defined(__GNUC__) && __GNUC__ <= 14)) &&                \
-  defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && \
-  !defined(__ENVIRONMENT_OS_VERSION_MIN_REQUIRED__)
-#define __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__             \
+#if defined(__APPLE__) &&                                     \
+    ((!defined(__apple_build_version__) &&                    \
+      defined(__clang__) && __clang_major__ < 17) ||          \
+     (defined(__GNUC__) && __GNUC__ <= 14)) &&                \
+    defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && \
+    !defined(__ENVIRONMENT_OS_VERSION_MIN_REQUIRED__)
+#define __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__ \
   __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif
 
@@ -371,75 +371,75 @@
  */
 #if defined(__APPLE__) && !defined(USE_ARES)
 #define USE_RESOLVE_ON_IPS 1
-#  if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
-     defined(USE_IPV6)
-#    define FETCH_MACOS_CALL_COPYPROXIES 1
-#  endif
+#if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
+    defined(USE_IPV6)
+#define FETCH_MACOS_CALL_COPYPROXIES 1
+#endif
 #endif
 
 #ifdef USE_LWIPSOCK
-#  include <lwip/init.h>
-#  include <lwip/sockets.h>
-#  include <lwip/netdb.h>
+#include <lwip/init.h>
+#include <lwip/sockets.h>
+#include <lwip/netdb.h>
 #endif
 
 #ifdef macintosh
-#  include <extra/stricmp.h>
-#  include <extra/strdup.h>
+#include <extra/stricmp.h>
+#include <extra/strdup.h>
 #endif
 
 #ifdef __AMIGA__
-#  ifdef __amigaos4__
-#    define __USE_INLINE__
-     /* use our own resolver which uses runtime feature detection */
-#    define FETCHRES_AMIGA
-     /* getaddrinfo() currently crashes bsdsocket.library, so disable */
-#    undef HAVE_GETADDRINFO
-#    if !(defined(__NEWLIB__) || \
-          (defined(__CLIB2__) && defined(__THREAD_SAFE)))
-       /* disable threaded resolver with clib2 - requires newlib or clib-ts */
-#      undef USE_THREADS_POSIX
-#    endif
-#  endif
-#  include <exec/types.h>
-#  include <exec/execbase.h>
-#  include <proto/exec.h>
-#  include <proto/dos.h>
-#  include <unistd.h>
-#  if defined(HAVE_PROTO_BSDSOCKET_H) && \
+#ifdef __amigaos4__
+#define __USE_INLINE__
+/* use our own resolver which uses runtime feature detection */
+#define FETCHRES_AMIGA
+/* getaddrinfo() currently crashes bsdsocket.library, so disable */
+#undef HAVE_GETADDRINFO
+#if !(defined(__NEWLIB__) || \
+      (defined(__CLIB2__) && defined(__THREAD_SAFE)))
+/* disable threaded resolver with clib2 - requires newlib or clib-ts */
+#undef USE_THREADS_POSIX
+#endif
+#endif
+#include <exec/types.h>
+#include <exec/execbase.h>
+#include <proto/exec.h>
+#include <proto/dos.h>
+#include <unistd.h>
+#if defined(HAVE_PROTO_BSDSOCKET_H) && \
     (!defined(__amigaos4__) || defined(USE_AMISSL))
-     /* use bsdsocket.library directly, instead of libc networking functions */
-#    define _SYS_MBUF_H /* m_len define clashes with fetch */
-#    include <proto/bsdsocket.h>
-#    ifdef __amigaos4__
-       int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
-                             fd_set *errorfds, struct timeval *timeout);
-#      define select(a,b,c,d,e) Curl_amiga_select(a,b,c,d,e)
-#    else
-#      define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
-#    endif
-     /* must not use libc's fcntl() on bsdsocket.library sockfds! */
-#    undef HAVE_FCNTL
-#    undef HAVE_FCNTL_O_NONBLOCK
-#  else
-     /* use libc networking and hence close() and fnctl() */
-#    undef HAVE_CLOSESOCKET_CAMEL
-#    undef HAVE_IOCTLSOCKET_CAMEL
-#  endif
+/* use bsdsocket.library directly, instead of libc networking functions */
+#define _SYS_MBUF_H /* m_len define clashes with fetch */
+#include <proto/bsdsocket.h>
+#ifdef __amigaos4__
+int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
+                      fd_set *errorfds, struct timeval *timeout);
+#define select(a, b, c, d, e) Curl_amiga_select(a, b, c, d, e)
+#else
+#define select(a, b, c, d, e) WaitSelect(a, b, c, d, e, 0)
+#endif
+/* must not use libc's fcntl() on bsdsocket.library sockfds! */
+#undef HAVE_FCNTL
+#undef HAVE_FCNTL_O_NONBLOCK
+#else
+/* use libc networking and hence close() and fnctl() */
+#undef HAVE_CLOSESOCKET_CAMEL
+#undef HAVE_IOCTLSOCKET_CAMEL
+#endif
 /*
  * In clib2 arpa/inet.h warns that some prototypes may clash
  * with bsdsocket.library. This avoids the definition of those.
  */
-#  define __NO_NET_API
+#define __NO_NET_API
 #endif
 
 #include <stdio.h>
 #include <assert.h>
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
-#  if ! defined __LP64
-#    include <floss.h> /* FLOSS is only used for 32-bit builds. */
-#  endif
+#if !defined __LP64
+#include <floss.h> /* FLOSS is only used for 32-bit builds. */
+#endif
 #endif
 
 #ifndef STDC_HEADERS /* no standard C headers! */
@@ -457,30 +457,30 @@
  */
 
 #ifdef USE_WIN32_LARGE_FILES
-#  include <io.h>
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#  undef  lseek
-#  define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
-#  undef  fstat
-#  define fstat(fdes,stp)            _fstati64(fdes, stp)
-#  undef  stat
-#  define stat(fname,stp)            fetchx_win32_stat(fname, stp)
-#  define struct_stat                struct _stati64
-#  define LSEEK_ERROR                (__int64)-1
-#  define open                       fetchx_win32_open
-#  define fopen(fname,mode)          fetchx_win32_fopen(fname, mode)
-   int fetchx_win32_open(const char *filename, int oflag, ...);
-   int fetchx_win32_stat(const char *path, struct_stat *buffer);
-   FILE *fetchx_win32_fopen(const char *filename, const char *mode);
+#include <io.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#undef lseek
+#define lseek(fdes, offset, whence) _lseeki64(fdes, offset, whence)
+#undef fstat
+#define fstat(fdes, stp) _fstati64(fdes, stp)
+#undef stat
+#define stat(fname, stp) fetchx_win32_stat(fname, stp)
+#define struct_stat struct _stati64
+#define LSEEK_ERROR (__int64)-1
+#define open fetchx_win32_open
+#define fopen(fname, mode) fetchx_win32_fopen(fname, mode)
+int fetchx_win32_open(const char *filename, int oflag, ...);
+int fetchx_win32_stat(const char *path, struct_stat *buffer);
+FILE *fetchx_win32_fopen(const char *filename, const char *mode);
 #endif
 
 #ifdef __DJGPP__
 /* Requires DJGPP 2.04 */
-#  include <unistd.h>
-#  undef  lseek
-#  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
-#  define LSEEK_ERROR                (offset_t)-1
+#include <unistd.h>
+#undef lseek
+#define lseek(fdes, offset, whence) llseek(fdes, offset, whence)
+#define LSEEK_ERROR (offset_t) - 1
 #endif
 
 /*
@@ -488,22 +488,22 @@
  */
 
 #if defined(_WIN32) && !defined(USE_WIN32_LARGE_FILES)
-#  include <io.h>
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#  ifndef _WIN32_WCE
-#    undef  lseek
-#    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
-#    define fstat(fdes,stp)            _fstat(fdes, stp)
-#    define stat(fname,stp)            fetchx_win32_stat(fname, stp)
-#    define struct_stat                struct _stat
-#    define open                       fetchx_win32_open
-#    define fopen(fname,mode)          fetchx_win32_fopen(fname, mode)
-     int fetchx_win32_stat(const char *path, struct_stat *buffer);
-     int fetchx_win32_open(const char *filename, int oflag, ...);
-     FILE *fetchx_win32_fopen(const char *filename, const char *mode);
-#  endif
-#  define LSEEK_ERROR                (long)-1
+#include <io.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#ifndef _WIN32_WCE
+#undef lseek
+#define lseek(fdes, offset, whence) _lseek(fdes, (long)offset, whence)
+#define fstat(fdes, stp) _fstat(fdes, stp)
+#define stat(fname, stp) fetchx_win32_stat(fname, stp)
+#define struct_stat struct _stat
+#define open fetchx_win32_open
+#define fopen(fname, mode) fetchx_win32_fopen(fname, mode)
+int fetchx_win32_stat(const char *path, struct_stat *buffer);
+int fetchx_win32_open(const char *filename, int oflag, ...);
+FILE *fetchx_win32_fopen(const char *filename, const char *mode);
+#endif
+#define LSEEK_ERROR (long)-1
 #endif
 
 #ifndef struct_stat
@@ -511,7 +511,7 @@
 #endif
 
 #ifndef LSEEK_ERROR
-#define LSEEK_ERROR (off_t)-1
+#define LSEEK_ERROR (off_t) - 1
 #endif
 
 #ifndef SIZEOF_TIME_T
@@ -521,20 +521,20 @@
 
 #ifndef SIZEOF_FETCH_SOCKET_T
 /* configure and cmake check and set the define */
-#  ifdef _WIN64
-#    define SIZEOF_FETCH_SOCKET_T 8
-#  else
+#ifdef _WIN64
+#define SIZEOF_FETCH_SOCKET_T 8
+#else
 /* default guess */
-#    define SIZEOF_FETCH_SOCKET_T 4
-#  endif
+#define SIZEOF_FETCH_SOCKET_T 4
+#endif
 #endif
 
 #if SIZEOF_FETCH_SOCKET_T < 8
-#  define FMT_SOCKET_T "d"
+#define FMT_SOCKET_T "d"
 #elif defined(__MINGW32__)
-#  define FMT_SOCKET_T "zd"
+#define FMT_SOCKET_T "zd"
 #else
-#  define FMT_SOCKET_T "qd"
+#define FMT_SOCKET_T "qd"
 #endif
 
 /*
@@ -542,69 +542,69 @@
  */
 
 #ifndef SIZEOF_OFF_T
-#  if defined(__VMS) && !defined(__VAX)
-#    if defined(_LARGEFILE)
-#      define SIZEOF_OFF_T 8
-#    endif
-#  elif defined(__OS400__) && defined(__ILEC400__)
-#    if defined(_LARGE_FILES)
-#      define SIZEOF_OFF_T 8
-#    endif
-#  elif defined(__MVS__) && defined(__IBMC__)
-#    if defined(_LP64) || defined(_LARGE_FILES)
-#      define SIZEOF_OFF_T 8
-#    endif
-#  elif defined(__370__) && defined(__IBMC__)
-#    if defined(_LP64) || defined(_LARGE_FILES)
-#      define SIZEOF_OFF_T 8
-#    endif
-#  endif
-#  ifndef SIZEOF_OFF_T
-#    define SIZEOF_OFF_T 4
-#  endif
+#if defined(__VMS) && !defined(__VAX)
+#if defined(_LARGEFILE)
+#define SIZEOF_OFF_T 8
+#endif
+#elif defined(__OS400__) && defined(__ILEC400__)
+#if defined(_LARGE_FILES)
+#define SIZEOF_OFF_T 8
+#endif
+#elif defined(__MVS__) && defined(__IBMC__)
+#if defined(_LP64) || defined(_LARGE_FILES)
+#define SIZEOF_OFF_T 8
+#endif
+#elif defined(__370__) && defined(__IBMC__)
+#if defined(_LP64) || defined(_LARGE_FILES)
+#define SIZEOF_OFF_T 8
+#endif
+#endif
+#ifndef SIZEOF_OFF_T
+#define SIZEOF_OFF_T 4
+#endif
 #endif
 
 #if (SIZEOF_FETCH_OFF_T < 8)
 #error "too small fetch_off_t"
 #else
-   /* assume SIZEOF_FETCH_OFF_T == 8 */
-#  define FETCH_OFF_T_MAX FETCH_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+/* assume SIZEOF_FETCH_OFF_T == 8 */
+#define FETCH_OFF_T_MAX FETCH_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
 #define FETCH_OFF_T_MIN (-FETCH_OFF_T_MAX - FETCH_OFF_T_C(1))
 
 #if (SIZEOF_FETCH_OFF_T != 8)
-#  error "fetch_off_t must be exactly 64 bits"
+#error "fetch_off_t must be exactly 64 bits"
 #else
-  typedef unsigned FETCH_TYPEOF_FETCH_OFF_T fetch_uint64_t;
-  typedef FETCH_TYPEOF_FETCH_OFF_T  fetch_int64_t;
-#  ifndef FETCH_SUFFIX_FETCH_OFF_TU
-#    error "FETCH_SUFFIX_FETCH_OFF_TU must be defined"
-#  endif
-#  define FETCH_UINT64_SUFFIX  FETCH_SUFFIX_FETCH_OFF_TU
-#  define FETCH_UINT64_C(val)  FETCH_CONC_MACROS(val,FETCH_UINT64_SUFFIX)
-#  define FMT_PRId64  FETCH_FORMAT_FETCH_OFF_T
-#  define FMT_PRIu64  FETCH_FORMAT_FETCH_OFF_TU
+typedef unsigned FETCH_TYPEOF_FETCH_OFF_T fetch_uint64_t;
+typedef FETCH_TYPEOF_FETCH_OFF_T fetch_int64_t;
+#ifndef FETCH_SUFFIX_FETCH_OFF_TU
+#error "FETCH_SUFFIX_FETCH_OFF_TU must be defined"
+#endif
+#define FETCH_UINT64_SUFFIX FETCH_SUFFIX_FETCH_OFF_TU
+#define FETCH_UINT64_C(val) FETCH_CONC_MACROS(val, FETCH_UINT64_SUFFIX)
+#define FMT_PRId64 FETCH_FORMAT_FETCH_OFF_T
+#define FMT_PRIu64 FETCH_FORMAT_FETCH_OFF_TU
 #endif
 
 #define FMT_OFF_T FETCH_FORMAT_FETCH_OFF_T
 #define FMT_OFF_TU FETCH_FORMAT_FETCH_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
-#  ifdef HAVE_TIME_T_UNSIGNED
-#  define TIME_T_MAX UINT_MAX
-#  define TIME_T_MIN 0
-#  else
-#  define TIME_T_MAX INT_MAX
-#  define TIME_T_MIN INT_MIN
-#  endif
+#ifdef HAVE_TIME_T_UNSIGNED
+#define TIME_T_MAX UINT_MAX
+#define TIME_T_MIN 0
 #else
-#  ifdef HAVE_TIME_T_UNSIGNED
-#  define TIME_T_MAX 0xFFFFFFFFFFFFFFFF
-#  define TIME_T_MIN 0
-#  else
-#  define TIME_T_MAX 0x7FFFFFFFFFFFFFFF
-#  define TIME_T_MIN (-TIME_T_MAX - 1)
-#  endif
+#define TIME_T_MAX INT_MAX
+#define TIME_T_MIN INT_MIN
+#endif
+#else
+#ifdef HAVE_TIME_T_UNSIGNED
+#define TIME_T_MAX 0xFFFFFFFFFFFFFFFF
+#define TIME_T_MIN 0
+#else
+#define TIME_T_MAX 0x7FFFFFFFFFFFFFFF
+#define TIME_T_MIN (-TIME_T_MAX - 1)
+#endif
 #endif
 
 #ifndef SIZE_T_MAX
@@ -630,11 +630,11 @@
  */
 
 #ifndef GETHOSTNAME_TYPE_ARG2
-#  ifdef USE_WINSOCK
-#    define GETHOSTNAME_TYPE_ARG2 int
-#  else
-#    define GETHOSTNAME_TYPE_ARG2 size_t
-#  endif
+#ifdef USE_WINSOCK
+#define GETHOSTNAME_TYPE_ARG2 int
+#else
+#define GETHOSTNAME_TYPE_ARG2 size_t
+#endif
 #endif
 
 /* Below we define some functions. They should
@@ -645,32 +645,32 @@
 
 #ifdef _WIN32
 
-#  define DIR_CHAR      "\\"
+#define DIR_CHAR "\\"
 
 #else /* _WIN32 */
 
-#  ifdef MSDOS  /* Watt-32 */
+#ifdef MSDOS /* Watt-32 */
 
-#    include <sys/ioctl.h>
-#    define select(n,r,w,x,t) select_s(n,r,w,x,t)
-#    define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
-#    include <tcp.h>
-#    ifdef word
-#      undef word
-#    endif
-#    ifdef byte
-#      undef byte
-#    endif
+#include <sys/ioctl.h>
+#define select(n, r, w, x, t) select_s(n, r, w, x, t)
+#define ioctl(x, y, z) ioctlsocket(x, y, (char *)(z))
+#include <tcp.h>
+#ifdef word
+#undef word
+#endif
+#ifdef byte
+#undef byte
+#endif
 
-#  endif /* MSDOS */
+#endif /* MSDOS */
 
-#  ifdef __minix
-     /* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
-     extern char *strtok_r(char *s, const char *delim, char **last);
-     extern struct tm *gmtime_r(const time_t * const timep, struct tm *tmp);
-#  endif
+#ifdef __minix
+/* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
+extern char *strtok_r(char *s, const char *delim, char **last);
+extern struct tm *gmtime_r(const time_t *const timep, struct tm *tmp);
+#endif
 
-#  define DIR_CHAR      "/"
+#define DIR_CHAR "/"
 
 #endif /* _WIN32 */
 
@@ -684,9 +684,9 @@
  * _beginthreadex() is not available in single-threaded ones.
  * Single-threaded option was last available in VS2005: _MSC_VER <= 1400
  */
-#if defined(_MSC_VER) && !defined(_MT)  /* available in _MSC_VER <= 1400 */
-#  undef USE_THREADS_POSIX
-#  undef USE_THREADS_WIN32
+#if defined(_MSC_VER) && !defined(_MT) /* available in _MSC_VER <= 1400 */
+#undef USE_THREADS_POSIX
+#undef USE_THREADS_WIN32
 #endif
 
 /*
@@ -694,31 +694,31 @@
  */
 
 #if defined(USE_IPV6) && defined(HAVE_GETADDRINFO)
-#  define FETCHRES_IPV6
+#define FETCHRES_IPV6
 #elif defined(USE_IPV6) && (defined(_WIN32) || defined(__CYGWIN__))
 /* assume on Windows that IPv6 without getaddrinfo is a broken build */
-#  error "Unexpected build: IPv6 is enabled but getaddrinfo was not found."
+#error "Unexpected build: IPv6 is enabled but getaddrinfo was not found."
 #else
-#  define FETCHRES_IPV4
+#define FETCHRES_IPV4
 #endif
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-#  define FETCHRES_ASYNCH
-#  define FETCHRES_THREADED
+#define FETCHRES_ASYNCH
+#define FETCHRES_THREADED
 #elif defined(USE_ARES)
-#  define FETCHRES_ASYNCH
-#  define FETCHRES_ARES
+#define FETCHRES_ASYNCH
+#define FETCHRES_ARES
 /* now undef the stock libc functions just to avoid them being used */
-#  undef HAVE_GETADDRINFO
-#  undef HAVE_FREEADDRINFO
+#undef HAVE_GETADDRINFO
+#undef HAVE_FREEADDRINFO
 #else
-#  define FETCHRES_SYNCH
+#define FETCHRES_SYNCH
 #endif
 
 /* ---------------------------------------------------------------- */
 
 #if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && \
-  !defined(USE_WIN32_IDN) && !defined(USE_APPLE_IDN)
+    !defined(USE_WIN32_IDN) && !defined(USE_APPLE_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2
 #endif
@@ -727,21 +727,21 @@
 #error "libidn2 cannot be enabled with WinIDN or AppleIDN, choose one."
 #endif
 
-#if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_MBEDTLS) || \
-  defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
-  defined(USE_BEARSSL) || defined(USE_RUSTLS)
-#define USE_SSL    /* SSL support has been enabled */
+#if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||     \
+    defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
+    defined(USE_BEARSSL) || defined(USE_RUSTLS)
+#define USE_SSL /* SSL support has been enabled */
 #endif
 
 #if defined(USE_OPENSSL) && defined(USE_WOLFSSL)
-#  include <wolfssl/version.h>
-#  if LIBWOLFSSL_VERSION_HEX >= 0x05007006
-#    ifndef OPENSSL_COEXIST
-#    define OPENSSL_COEXIST
-#    endif
-#  else
-#    error "OpenSSL can only coexist with wolfSSL v5.7.6 or upper"
-#  endif
+#include <wolfssl/version.h>
+#if LIBWOLFSSL_VERSION_HEX >= 0x05007006
+#ifndef OPENSSL_COEXIST
+#define OPENSSL_COEXIST
+#endif
+#else
+#error "OpenSSL can only coexist with wolfSSL v5.7.6 or upper"
+#endif
 #endif
 
 #if defined(USE_WOLFSSL) && defined(USE_GNUTLS)
@@ -763,15 +763,15 @@
 
 /* Single point where USE_NTLM definition might be defined */
 #if !defined(FETCH_DISABLE_NTLM)
-#  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                   \
-  defined(USE_GNUTLS) || defined(USE_SECTRANSP) ||                      \
-  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
-  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
-#    define USE_FETCH_NTLM_CORE
-#  endif
-#  if defined(USE_FETCH_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
-#    define USE_NTLM
-#  endif
+#if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||          \
+    defined(USE_GNUTLS) || defined(USE_SECTRANSP) ||         \
+    defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) || \
+    (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
+#define USE_FETCH_NTLM_CORE
+#endif
+#if defined(USE_FETCH_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
+#define USE_NTLM
+#endif
 #endif
 
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH) || defined(USE_WOLFSSH)
@@ -785,31 +785,31 @@
  */
 
 #if defined(__GNUC__) && ((__GNUC__ >= 3) || \
-  ((__GNUC__ == 2) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 7)))
-#  define UNUSED_PARAM __attribute__((__unused__))
-#  define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+                          ((__GNUC__ == 2) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 7)))
+#define UNUSED_PARAM __attribute__((__unused__))
+#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #elif defined(__IAR_SYSTEMS_ICC__)
-#  define UNUSED_PARAM __attribute__((__unused__))
-#  if (__VER__ >= 9040001)
-#    define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
-#  else
-#    define WARN_UNUSED_RESULT
-#  endif
+#define UNUSED_PARAM __attribute__((__unused__))
+#if (__VER__ >= 9040001)
+#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #else
-#  define UNUSED_PARAM /* NOTHING */
-#  define WARN_UNUSED_RESULT
+#define WARN_UNUSED_RESULT
+#endif
+#else
+#define UNUSED_PARAM /* NOTHING */
+#define WARN_UNUSED_RESULT
 #endif
 
 /* noreturn attribute */
 
 #if !defined(FETCH_NORETURN)
 #if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__) || \
-  defined(__IAR_SYSTEMS_ICC__)
-#  define FETCH_NORETURN  __attribute__((__noreturn__))
+    defined(__IAR_SYSTEMS_ICC__)
+#define FETCH_NORETURN __attribute__((__noreturn__))
 #elif defined(_MSC_VER)
-#  define FETCH_NORETURN  __declspec(noreturn)
+#define FETCH_NORETURN __declspec(noreturn)
 #else
-#  define FETCH_NORETURN
+#define FETCH_NORETURN
 #endif
 #endif
 
@@ -818,9 +818,12 @@
 #if !defined(FALLTHROUGH)
 #if (defined(__GNUC__) && __GNUC__ >= 7) || \
     (defined(__clang__) && __clang_major__ >= 10)
-#  define FALLTHROUGH()  __attribute__((fallthrough))
+#define FALLTHROUGH() __attribute__((fallthrough))
 #else
-#  define FALLTHROUGH()  do {} while (0)
+#define FALLTHROUGH() \
+  do                  \
+  {                   \
+  } while (0)
 #endif
 #endif
 
@@ -837,7 +840,10 @@
  */
 
 #ifndef Curl_nop_stmt
-#define Curl_nop_stmt do { } while(0)
+#define Curl_nop_stmt \
+  do                  \
+  {                   \
+  } while (0)
 #endif
 
 /*
@@ -845,9 +851,9 @@
  */
 
 #if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
-#  if defined(SOCKET) || defined(USE_WINSOCK)
-#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
-#  endif
+#if defined(SOCKET) || defined(USE_WINSOCK)
+#error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
+#endif
 #endif
 
 /*
@@ -885,7 +891,7 @@
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
-Therefore we specify it explicitly. https://github.com/fetch/fetch/pull/258
+Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 */
 #if defined(_WIN32) || defined(MSDOS)
 #define FOPEN_READTEXT "rt"
@@ -909,31 +915,31 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* for systems that do not detect this in configure */
 #ifndef FETCH_SA_FAMILY_T
-#  if defined(HAVE_SA_FAMILY_T)
-#    define FETCH_SA_FAMILY_T sa_family_t
-#  elif defined(HAVE_ADDRESS_FAMILY)
-#    define FETCH_SA_FAMILY_T ADDRESS_FAMILY
-#  elif defined(__AMIGA__)
-#    define FETCH_SA_FAMILY_T unsigned char
-#  else
+#if defined(HAVE_SA_FAMILY_T)
+#define FETCH_SA_FAMILY_T sa_family_t
+#elif defined(HAVE_ADDRESS_FAMILY)
+#define FETCH_SA_FAMILY_T ADDRESS_FAMILY
+#elif defined(__AMIGA__)
+#define FETCH_SA_FAMILY_T unsigned char
+#else
 /* use a sensible default */
-#    define FETCH_SA_FAMILY_T unsigned short
-#  endif
+#define FETCH_SA_FAMILY_T unsigned short
+#endif
 #endif
 
 /* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with FETCH to prevent name collisions. */
-#define FETCHMAX(x,y) ((x)>(y)?(x):(y))
-#define FETCHMIN(x,y) ((x)<(y)?(x):(y))
+#define FETCHMAX(x, y) ((x) > (y) ? (x) : (y))
+#define FETCHMIN(x, y) ((x) < (y) ? (x) : (y))
 
 /* A convenience macro to provide both the string literal and the length of
    the string literal in one go, useful for functions that take "string,len"
    as their argument */
-#define STRCONST(x) x,sizeof(x)-1
+#define STRCONST(x) x, sizeof(x) - 1
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \
-  defined(__ANDROID_API__) && (__ANDROID_API__ < 21)
+    defined(__ANDROID_API__) && (__ANDROID_API__ < 21)
 struct passwd;
 int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
                size_t buflen, struct passwd **result);
@@ -949,7 +955,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define USE_HTTP2
 #endif
 
-#if (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || \
+#if (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) ||       \
     (defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)) || \
     defined(USE_QUICHE) || defined(USE_MSH3)
 
@@ -968,17 +974,18 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(_WIN32)
-#  if !defined(UNIX_PATH_MAX)
-     /* Replicating logic present in afunix.h
-        (distributed with newer Windows 10 SDK versions only) */
-#    define UNIX_PATH_MAX 108
-     /* !checksrc! disable TYPEDEFSTRUCT 1 */
-     typedef struct sockaddr_un {
-       FETCH_SA_FAMILY_T sun_family;
-       char sun_path[UNIX_PATH_MAX];
-     } SOCKADDR_UN, *PSOCKADDR_UN;
-#    define WIN32_SOCKADDR_UN
-#  endif
+#if !defined(UNIX_PATH_MAX)
+/* Replicating logic present in afunix.h
+   (distributed with newer Windows 10 SDK versions only) */
+#define UNIX_PATH_MAX 108
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct sockaddr_un
+{
+  FETCH_SA_FAMILY_T sun_family;
+  char sun_path[UNIX_PATH_MAX];
+} SOCKADDR_UN, *PSOCKADDR_UN;
+#define WIN32_SOCKADDR_UN
+#endif
 #endif
 
 /* OpenSSLv3 marks DES, MD5 and ENGINE functions deprecated but we have no
@@ -990,23 +997,23 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #if defined(FETCH_INLINE)
 /* 'FETCH_INLINE' defined, use as-is */
 #elif defined(inline)
-#  define FETCH_INLINE inline /* 'inline' defined, assumed correct */
+#define FETCH_INLINE inline /* 'inline' defined, assumed correct */
 #elif defined(__cplusplus)
 /* The code is compiled with C++ compiler.
    C++ always supports 'inline'. */
-#  define FETCH_INLINE inline /* 'inline' keyword supported */
+#define FETCH_INLINE inline /* 'inline' keyword supported */
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901
 /* C99 (and later) supports 'inline' keyword */
-#  define FETCH_INLINE inline /* 'inline' keyword supported */
+#define FETCH_INLINE inline /* 'inline' keyword supported */
 #elif defined(__GNUC__) && __GNUC__ >= 3
 /* GCC supports '__inline__' as an extension */
-#  define FETCH_INLINE __inline__
+#define FETCH_INLINE __inline__
 #elif defined(_MSC_VER)
-#  define FETCH_INLINE __inline
+#define FETCH_INLINE __inline
 #else
 /* Probably 'inline' is not supported by compiler.
    Define to the empty string to be on the safe side. */
-#  define FETCH_INLINE /* empty */
+#define FETCH_INLINE /* empty */
 #endif
 
 #endif /* HEADER_FETCH_SETUP_H */

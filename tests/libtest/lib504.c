@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,7 +52,7 @@ FETCHcode test(char *URL)
 
   /* The point here is that there must not be anything running on the given
      proxy port */
-  if(libtest_arg2)
+  if (libtest_arg2)
     easy_setopt(c, FETCHOPT_PROXY, libtest_arg2);
   easy_setopt(c, FETCHOPT_URL, URL);
   easy_setopt(c, FETCHOPT_VERBOSE, 1L);
@@ -61,7 +61,8 @@ FETCHcode test(char *URL)
 
   multi_add_handle(m, c);
 
-  for(;;) {
+  for (;;)
+  {
     struct timeval interval;
     int maxfd = -99;
 
@@ -72,11 +73,13 @@ FETCHcode test(char *URL)
 
     multi_perform(m, &running);
 
-    while(running) {
+    while (running)
+    {
       FETCHMcode mres;
       int num;
       mres = fetch_multi_wait(m, NULL, 0, TEST_HANG_TIMEOUT, &num);
-      if(mres != FETCHM_OK) {
+      if (mres != FETCHM_OK)
+      {
         printf("fetch_multi_wait() returned %d\n", mres);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
@@ -89,16 +92,17 @@ FETCHcode test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running) {
+    if (!running)
+    {
       /* This is where this code is expected to reach */
       int numleft;
       FETCHMsg *msg = fetch_multi_info_read(m, &numleft);
       fprintf(stderr, "Expected: not running\n");
-      if(msg && !numleft)
+      if (msg && !numleft)
         res = TEST_ERR_SUCCESS; /* this is where we should be */
       else
         res = TEST_ERR_FAILURE; /* not correct */
-      break; /* done */
+      break;                    /* done */
     }
     fprintf(stderr, "running == %d\n", running);
 

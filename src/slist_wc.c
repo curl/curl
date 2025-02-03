@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,13 +40,15 @@ struct slist_wc *slist_wc_append(struct slist_wc *list,
 {
   struct fetch_slist *new_item = fetch_slist_append(NULL, data);
 
-  if(!new_item)
+  if (!new_item)
     return NULL;
 
-  if(!list) {
+  if (!list)
+  {
     list = malloc(sizeof(struct slist_wc));
 
-    if(!list) {
+    if (!list)
+    {
       fetch_slist_free_all(new_item);
       return NULL;
     }
@@ -64,7 +66,7 @@ struct slist_wc *slist_wc_append(struct slist_wc *list,
 /* be nice and clean up resources */
 void slist_wc_free_all(struct slist_wc *list)
 {
-  if(!list)
+  if (!list)
     return;
 
   fetch_slist_free_all(list->first);

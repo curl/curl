@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -50,31 +50,30 @@ static void unit_stop(void)
 }
 
 UNITTEST_START
-  int *value;
-  int *value2;
-  int *nodep;
-  size_t klen = sizeof(int);
+int *value;
+int *value2;
+int *nodep;
+size_t klen = sizeof(int);
 
-  int key = 20;
-  int key2 = 25;
+int key = 20;
+int key2 = 25;
 
+value = malloc(sizeof(int));
+abort_unless(value != NULL, "Out of memory");
+*value = 199;
+nodep = Curl_hash_add(&hash_static, &key, klen, value);
+if (!nodep)
+  free(value);
+abort_unless(nodep, "insertion into hash failed");
+Curl_hash_clean(&hash_static);
 
-  value = malloc(sizeof(int));
-  abort_unless(value != NULL, "Out of memory");
-  *value = 199;
-  nodep = Curl_hash_add(&hash_static, &key, klen, value);
-  if(!nodep)
-    free(value);
-  abort_unless(nodep, "insertion into hash failed");
-  Curl_hash_clean(&hash_static);
-
-  /* Attempt to add another key/value pair */
-  value2 = malloc(sizeof(int));
-  abort_unless(value2 != NULL, "Out of memory");
-  *value2 = 204;
-  nodep = Curl_hash_add(&hash_static, &key2, klen, value2);
-  if(!nodep)
-    free(value2);
-  abort_unless(nodep, "insertion into hash failed");
+/* Attempt to add another key/value pair */
+value2 = malloc(sizeof(int));
+abort_unless(value2 != NULL, "Out of memory");
+*value2 = 204;
+nodep = Curl_hash_add(&hash_static, &key2, klen, value2);
+if (!nodep)
+  free(value2);
+abort_unless(nodep, "insertion into hash failed");
 
 UNITTEST_STOP

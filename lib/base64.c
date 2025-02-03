@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,12 +27,12 @@
 #include "fetch_setup.h"
 
 #if !defined(FETCH_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
-  !defined(FETCH_DISABLE_LDAP) || \
-  !defined(FETCH_DISABLE_SMTP) || \
-  !defined(FETCH_DISABLE_POP3) || \
-  !defined(FETCH_DISABLE_IMAP) || \
-  !defined(FETCH_DISABLE_DIGEST_AUTH) || \
-  !defined(FETCH_DISABLE_DOH) || defined(USE_SSL) || defined(BUILDING_FETCH)
+    !defined(FETCH_DISABLE_LDAP) ||                          \
+    !defined(FETCH_DISABLE_SMTP) ||                          \
+    !defined(FETCH_DISABLE_POP3) ||                          \
+    !defined(FETCH_DISABLE_IMAP) ||                          \
+    !defined(FETCH_DISABLE_DIGEST_AUTH) ||                   \
+    !defined(FETCH_DISABLE_DOH) || defined(USE_SSL) || defined(BUILDING_FETCH)
 #include "fetch/fetch.h"
 #include "warnless.h"
 #include "fetch_base64.h"
@@ -45,20 +45,20 @@
 
 /* ---- Base64 Encoding/Decoding Table --- */
 /* Padding character string starts at offset 64. */
-static const char base64encdec[]=
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+static const char base64encdec[] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 /* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
    section 5 */
-static const char base64url[]=
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+static const char base64url[] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 static const unsigned char decodetable[] =
-{ 62, 255, 255, 255, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 255, 255, 255,
-  255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-  17, 18, 19, 20, 21, 22, 23, 24, 25, 255, 255, 255, 255, 255, 255, 26, 27, 28,
-  29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-  48, 49, 50, 51 };
+    {62, 255, 255, 255, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 255, 255, 255,
+     255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+     17, 18, 19, 20, 21, 22, 23, 24, 25, 255, 255, 255, 255, 255, 255, 26, 27, 28,
+     29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+     48, 49, 50, 51};
 /*
  * Curl_base64_decode()
  *
@@ -74,7 +74,7 @@ static const unsigned char decodetable[] =
  * @unittest: 1302
  */
 FETCHcode Curl_base64_decode(const char *src,
-                            unsigned char **outptr, size_t *outlen)
+                             unsigned char **outptr, size_t *outlen)
 {
   size_t srclen = 0;
   size_t padding = 0;
@@ -91,15 +91,16 @@ FETCHcode Curl_base64_decode(const char *src,
   srclen = strlen(src);
 
   /* Check the length of the input string is valid */
-  if(!srclen || srclen % 4)
+  if (!srclen || srclen % 4)
     return FETCHE_BAD_CONTENT_ENCODING;
 
   /* srclen is at least 4 here */
-  while(src[srclen - 1 - padding] == '=') {
+  while (src[srclen - 1 - padding] == '=')
+  {
     /* count padding characters */
     padding++;
     /* A maximum of two = padding characters is allowed */
-    if(padding > 2)
+    if (padding > 2)
       return FETCHE_BAD_CONTENT_ENCODING;
   }
 
@@ -112,7 +113,7 @@ FETCHcode Curl_base64_decode(const char *src,
 
   /* Allocate our buffer including room for a null-terminator */
   newstr = malloc(rawlen + 1);
-  if(!newstr)
+  if (!newstr)
     return FETCHE_OUT_OF_MEMORY;
 
   pos = newstr;
@@ -129,14 +130,16 @@ FETCHcode Curl_base64_decode(const char *src,
   */
 
   /* Decode the complete quantums first */
-  for(i = 0; i < fullQuantums; i++) {
+  for (i = 0; i < fullQuantums; i++)
+  {
     unsigned char val;
     unsigned int x = 0;
     int j;
 
-    for(j = 0; j < 4; j++) {
+    for (j = 0; j < 4; j++)
+    {
       val = lookup[(unsigned char)*src++];
-      if(val == 0xff) /* bad symbol */
+      if (val == 0xff) /* bad symbol */
         goto bad;
       x = (x << 6) | val;
     }
@@ -145,28 +148,32 @@ FETCHcode Curl_base64_decode(const char *src,
     pos[0] = (x >> 16) & 0xff;
     pos += 3;
   }
-  if(padding) {
+  if (padding)
+  {
     /* this means either 8 or 16 bits output */
     unsigned char val;
     unsigned int x = 0;
     int j;
     size_t padc = 0;
-    for(j = 0; j < 4; j++) {
-      if(*src == '=') {
+    for (j = 0; j < 4; j++)
+    {
+      if (*src == '=')
+      {
         x <<= 6;
         src++;
-        if(++padc > padding)
+        if (++padc > padding)
           /* this is a badly placed '=' symbol! */
           goto bad;
       }
-      else {
+      else
+      {
         val = lookup[(unsigned char)*src++];
-        if(val == 0xff) /* bad symbol */
+        if (val == 0xff) /* bad symbol */
           goto bad;
         x = (x << 6) | val;
       }
     }
-    if(padding == 1)
+    if (padding == 1)
       pos[1] = (x >> 8) & 0xff;
     pos[0] = (x >> 16) & 0xff;
     pos += 3 - padding;
@@ -186,52 +193,57 @@ bad:
 }
 
 static FETCHcode base64_encode(const char *table64,
-                              const char *inputbuff, size_t insize,
-                              char **outptr, size_t *outlen)
+                               const char *inputbuff, size_t insize,
+                               char **outptr, size_t *outlen)
 {
   char *output;
   char *base64data;
   const unsigned char *in = (unsigned char *)inputbuff;
-  const char *padstr = &table64[64];    /* Point to padding string. */
+  const char *padstr = &table64[64]; /* Point to padding string. */
 
   *outptr = NULL;
   *outlen = 0;
 
-  if(!insize)
+  if (!insize)
     insize = strlen(inputbuff);
 
 #if SIZEOF_SIZE_T == 4
-  if(insize > UINT_MAX/4)
+  if (insize > UINT_MAX / 4)
     return FETCHE_OUT_OF_MEMORY;
 #endif
 
   base64data = output = malloc((insize + 2) / 3 * 4 + 1);
-  if(!output)
+  if (!output)
     return FETCHE_OUT_OF_MEMORY;
 
-  while(insize >= 3) {
-    *output++ = table64[ in[0] >> 2 ];
-    *output++ = table64[ ((in[0] & 0x03) << 4) | (in[1] >> 4) ];
-    *output++ = table64[ ((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6) ];
-    *output++ = table64[ in[2] & 0x3F ];
+  while (insize >= 3)
+  {
+    *output++ = table64[in[0] >> 2];
+    *output++ = table64[((in[0] & 0x03) << 4) | (in[1] >> 4)];
+    *output++ = table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)];
+    *output++ = table64[in[2] & 0x3F];
     insize -= 3;
     in += 3;
   }
-  if(insize) {
+  if (insize)
+  {
     /* this is only one or two bytes now */
-    *output++ = table64[ in[0] >> 2 ];
-    if(insize == 1) {
-      *output++ = table64[ ((in[0] & 0x03) << 4) ];
-      if(*padstr) {
+    *output++ = table64[in[0] >> 2];
+    if (insize == 1)
+    {
+      *output++ = table64[((in[0] & 0x03) << 4)];
+      if (*padstr)
+      {
         *output++ = *padstr;
         *output++ = *padstr;
       }
     }
-    else {
+    else
+    {
       /* insize == 2 */
-      *output++ = table64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4) ];
-      *output++ = table64[ ((in[1] & 0x0F) << 2) ];
-      if(*padstr)
+      *output++ = table64[((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4)];
+      *output++ = table64[((in[1] & 0x0F) << 2)];
+      if (*padstr)
         *output++ = *padstr;
     }
   }
@@ -264,7 +276,7 @@ static FETCHcode base64_encode(const char *table64,
  * @unittest: 1302
  */
 FETCHcode Curl_base64_encode(const char *inputbuff, size_t insize,
-                            char **outptr, size_t *outlen)
+                             char **outptr, size_t *outlen)
 {
   return base64_encode(base64encdec, inputbuff, insize, outptr, outlen);
 }
@@ -285,7 +297,7 @@ FETCHcode Curl_base64_encode(const char *inputbuff, size_t insize,
  * @unittest: 1302
  */
 FETCHcode Curl_base64url_encode(const char *inputbuff, size_t insize,
-                               char **outptr, size_t *outlen)
+                                char **outptr, size_t *outlen)
 {
   return base64_encode(base64url, inputbuff, insize, outptr, outlen);
 }

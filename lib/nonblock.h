@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@
 
 #include <fetch/fetch.h> /* for fetch_socket_t */
 
-int fetchx_nonblock(fetch_socket_t sockfd,    /* operate on this */
-                   int nonblock   /* TRUE or FALSE */);
+int fetchx_nonblock(fetch_socket_t sockfd, /* operate on this */
+                    int nonblock /* TRUE or FALSE */);
 
 #endif /* HEADER_FETCH_NONBLOCK_H */

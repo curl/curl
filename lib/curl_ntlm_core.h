@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,36 +31,36 @@
 /* Helpers to generate function byte arguments in little endian order */
 #define SHORTPAIR(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff))
 #define LONGQUARTET(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff)), \
-  ((int)(((x) >> 16) & 0xff)), ((int)(((x) >> 24) & 0xff))
+                       ((int)(((x) >> 16) & 0xff)), ((int)(((x) >> 24) & 0xff))
 
 void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results);
 
 FETCHcode Curl_ntlm_core_mk_lm_hash(const char *password,
-                                   unsigned char *lmbuffer /* 21 bytes */);
+                                    unsigned char *lmbuffer /* 21 bytes */);
 
 FETCHcode Curl_ntlm_core_mk_nt_hash(const char *password,
-                                   unsigned char *ntbuffer /* 21 bytes */);
+                                    unsigned char *ntbuffer /* 21 bytes */);
 
 #if !defined(USE_WINDOWS_SSPI)
 
 FETCHcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
-                       const unsigned char *data, unsigned int datalen,
-                       unsigned char *output);
+                        const unsigned char *data, unsigned int datalen,
+                        unsigned char *output);
 
 FETCHcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
-                                       const char *domain, size_t domlen,
-                                       unsigned char *ntlmhash,
-                                       unsigned char *ntlmv2hash);
+                                        const char *domain, size_t domlen,
+                                        unsigned char *ntlmhash,
+                                        unsigned char *ntlmv2hash);
 
-FETCHcode  Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
+FETCHcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
                                         unsigned char *challenge_client,
                                         struct ntlmdata *ntlm,
                                         unsigned char **ntresp,
                                         unsigned int *ntresp_len);
 
-FETCHcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
+FETCHcode Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
                                       unsigned char *challenge_client,
                                       unsigned char *challenge_server,
                                       unsigned char *lmresp);

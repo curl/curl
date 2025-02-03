@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,14 +37,14 @@ struct ssl_peer;
 
 /* RFC 8446 (TLSv1.3) restrict lifetime to one week max, for
  * other, less secure versions, we restrict it to a day */
-#define FETCH_SCACHE_MAX_13_LIFETIME_SEC    (60*60*24*7)
-#define FETCH_SCACHE_MAX_12_LIFETIME_SEC    (60*60*24)
+#define FETCH_SCACHE_MAX_13_LIFETIME_SEC (60 * 60 * 24 * 7)
+#define FETCH_SCACHE_MAX_12_LIFETIME_SEC (60 * 60 * 24)
 
 /* Create a session cache for up to max_peers endpoints with a total
  * of up to max_sessions SSL sessions per peer */
 FETCHcode Curl_ssl_scache_create(size_t max_peers,
-                                size_t max_sessions_per_peer,
-                                struct Curl_ssl_scache **pscache);
+                                 size_t max_sessions_per_peer,
+                                 struct Curl_ssl_scache **pscache);
 
 void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
 
@@ -61,9 +61,9 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
  * @param ppeer_key on successful return, the key generated
  */
 FETCHcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
-                                const struct ssl_peer *peer,
-                                const char *tls_id,
-                                char **ppeer_key);
+                                 const struct ssl_peer *peer,
+                                 const char *tls_id,
+                                 char **ppeer_key);
 
 /* Lock session cache mutex.
  * Call this before calling other Curl_ssl_*session* functions
@@ -109,22 +109,23 @@ typedef void Curl_ssl_scache_obj_dtor(void *sobj);
  * @param sobj_free_cb callback to free the session objectt
  */
 FETCHcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 const char *ssl_peer_key,
-                                 void *sobj,
-                                 Curl_ssl_scache_obj_dtor *sobj_dtor_cb);
+                                  struct Curl_easy *data,
+                                  const char *ssl_peer_key,
+                                  void *sobj,
+                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb);
 
 /* All about a SSL session ticket */
-struct Curl_ssl_session {
-  const unsigned char *sdata;  /* session ticket data, plain bytes */
-  size_t sdata_len;            /* number of bytes in sdata */
+struct Curl_ssl_session
+{
+  const unsigned char *sdata;   /* session ticket data, plain bytes */
+  size_t sdata_len;             /* number of bytes in sdata */
   fetch_off_t valid_until;      /* seconds since EPOCH until ticket expires */
-  int ietf_tls_id;             /* TLS protocol identifier negotiated */
-  char *alpn;                  /* APLN TLS negotiated protocol string */
-  size_t earlydata_max;        /* max 0-RTT data supported by peer */
+  int ietf_tls_id;              /* TLS protocol identifier negotiated */
+  char *alpn;                   /* APLN TLS negotiated protocol string */
+  size_t earlydata_max;         /* max 0-RTT data supported by peer */
   const unsigned char *quic_tp; /* Optional QUIC transport param bytes */
-  size_t quic_tp_len;          /* number of bytes in quic_tp */
-  struct Curl_llist_node list; /*  internal storage handling */
+  size_t quic_tp_len;           /* number of bytes in quic_tp */
+  struct Curl_llist_node list;  /*  internal storage handling */
 };
 
 /* Create a `session` instance. Does NOT need locking.
@@ -166,9 +167,9 @@ void Curl_ssl_session_destroy(struct Curl_ssl_session *s);
  * @param s       the scache session object
  */
 FETCHcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             const char *ssl_peer_key,
-                             struct Curl_ssl_session *s);
+                              struct Curl_easy *data,
+                              const char *ssl_peer_key,
+                              struct Curl_ssl_session *s);
 
 /* Take a matching scache session from the cache. Does NOT need locking.
  * @param cf      the connection filter wanting to use it
@@ -177,9 +178,9 @@ FETCHcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
  * @param s       on return, the scache session object or NULL
  */
 FETCHcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              const char *ssl_peer_key,
-                              struct Curl_ssl_session **ps);
+                               struct Curl_easy *data,
+                               const char *ssl_peer_key,
+                               struct Curl_ssl_session **ps);
 
 /* Return a taken scache session to the cache. Does NOT need locking.
  * Depending on TLS version and other criteria, it may cache it again
@@ -198,20 +199,23 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
 #ifdef USE_SSLS_EXPORT
 
 FETCHcode Curl_ssl_session_import(struct Curl_easy *data,
-                                 const char *ssl_peer_key,
-                                 const unsigned char *shmac, size_t shmac_len,
-                                 const unsigned char *sdata, size_t sdata_len);
+                                  const char *ssl_peer_key,
+                                  const unsigned char *shmac, size_t shmac_len,
+                                  const unsigned char *sdata, size_t sdata_len);
 
 FETCHcode Curl_ssl_session_export(struct Curl_easy *data,
-                                 fetch_ssls_export_cb *export_fn,
-                                 void *userptr);
+                                  fetch_ssls_export_cb *export_fn,
+                                  void *userptr);
 
 #endif /* USE_SSLS_EXPORT */
 
 #else /* USE_SSL */
 
-#define Curl_ssl_scache_create(x,y,z) ((void)x, FETCHE_OK)
-#define Curl_ssl_scache_destroy(x) do {} while(0)
+#define Curl_ssl_scache_create(x, y, z) ((void)x, FETCHE_OK)
+#define Curl_ssl_scache_destroy(x) \
+  do                               \
+  {                                \
+  } while (0)
 
 #endif /* USE_SSL (else) */
 

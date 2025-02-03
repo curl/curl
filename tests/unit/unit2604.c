@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,8 +34,8 @@ static void unit_stop(void)
 {
 }
 
-
-struct set {
+struct set
+{
   const char *cp;
   const char *expect; /* the returned content */
   const char *next;   /* what cp points to after the call */
@@ -58,25 +58,24 @@ UNITTEST_START
   int i;
   size_t too_long = 90720;
   struct set list[] = {
-    { "-too-long-", "", "", "", FETCHE_TOO_LARGE},
-    { SA540 " c", SA540, "c", "/", FETCHE_OK},
-    { "\" " SA540 "\" c", " " SA540, "c", "/", FETCHE_OK},
-    { "a a", "a", "a", "/home/", FETCHE_OK},
-    { "b a", "b", "a", "/", FETCHE_OK},
-    { "a", "a", "", "/home/", FETCHE_OK},
-    { "b", "b", "", "/", FETCHE_OK},
-    { "\"foo bar\"\tb", "foo bar", "b", "/", FETCHE_OK},
-    { "/~/hej", "/home/user/hej", "", "/home/user", FETCHE_OK},
-    { "\"foo bar", "", "", "/", FETCHE_QUOTE_ERROR},
-    { "\"foo\\\"bar\" a", "foo\"bar", "a", "/", FETCHE_OK},
-    { "\"foo\\\'bar\" b", "foo\'bar", "b", "/", FETCHE_OK},
-    { "\"foo\\\\bar\" c", "foo\\bar", "c", "/", FETCHE_OK},
-    { "\"foo\\pbar\" c", "foo\\bar", "", "/", FETCHE_QUOTE_ERROR},
-    { "\"\" c", "", "", "", FETCHE_QUOTE_ERROR},
-    { "foo\"", "foo\"", "", "/", FETCHE_OK},
-    { "foo \"", "foo", "\"", "/", FETCHE_OK},
-    { NULL, NULL, NULL, NULL, FETCHE_OK }
-  };
+      {"-too-long-", "", "", "", FETCHE_TOO_LARGE},
+      {SA540 " c", SA540, "c", "/", FETCHE_OK},
+      {"\" " SA540 "\" c", " " SA540, "c", "/", FETCHE_OK},
+      {"a a", "a", "a", "/home/", FETCHE_OK},
+      {"b a", "b", "a", "/", FETCHE_OK},
+      {"a", "a", "", "/home/", FETCHE_OK},
+      {"b", "b", "", "/", FETCHE_OK},
+      {"\"foo bar\"\tb", "foo bar", "b", "/", FETCHE_OK},
+      {"/~/hej", "/home/user/hej", "", "/home/user", FETCHE_OK},
+      {"\"foo bar", "", "", "/", FETCHE_QUOTE_ERROR},
+      {"\"foo\\\"bar\" a", "foo\"bar", "a", "/", FETCHE_OK},
+      {"\"foo\\\'bar\" b", "foo\'bar", "b", "/", FETCHE_OK},
+      {"\"foo\\\\bar\" c", "foo\\bar", "c", "/", FETCHE_OK},
+      {"\"foo\\pbar\" c", "foo\\bar", "", "/", FETCHE_QUOTE_ERROR},
+      {"\"\" c", "", "", "", FETCHE_QUOTE_ERROR},
+      {"foo\"", "foo\"", "", "/", FETCHE_OK},
+      {"foo \"", "foo", "\"", "/", FETCHE_OK},
+      {NULL, NULL, NULL, NULL, FETCHE_OK}};
 
 #if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic warning "-Woverlength-strings"
@@ -86,29 +85,33 @@ UNITTEST_START
   fail_unless(list[0].cp, "could not alloc too long value");
   memset((void *)list[0].cp, 'a', too_long);
 
-  for(i = 0; list[i].home; i++) {
+  for (i = 0; list[i].home; i++)
+  {
     char *path;
     const char *cp = list[i].cp;
     FETCHcode result = Curl_get_pathname(&cp, &path, list[i].home);
     printf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
            list[i].cp, list[i].home, list[i].result);
-    if(result != list[i].result) {
+    if (result != list[i].result)
+    {
       printf("... returned %d\n", result);
       unitfail++;
     }
-    if(!result) {
-      if(cp && strcmp(cp, list[i].next)) {
+    if (!result)
+    {
+      if (cp && strcmp(cp, list[i].next))
+      {
         printf("... cp points to '%s', not '%s' as expected \n",
                cp, list[i].next);
         unitfail++;
       }
-      if(path && strcmp(path, list[i].expect)) {
+      if (path && strcmp(path, list[i].expect))
+      {
         printf("... gave '%s', not '%s' as expected \n",
                path, list[i].expect);
         unitfail++;
       }
       fetch_free(path);
-
     }
   }
 

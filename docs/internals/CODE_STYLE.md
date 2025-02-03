@@ -35,7 +35,7 @@ other places of the code, just that the names should be logical,
 understandable and be named according to what they are used for. File-local
 functions should be made static. We like lower case names.
 
-See the [INTERNALS](https://fetch.se/dev/internals.html#symbols) document on
+See the [INTERNALS](https://curl.se/dev/internals.html#symbols) document on
 how we name non-exported library-global symbols.
 
 ## Indenting
@@ -54,7 +54,7 @@ if(something_is_true) {
 ## Comments
 
 Since we write C89 code, **//** comments are not allowed. They were not
-introduced in the C standard until C99. We use only __/* comments */__.
+introduced in the C standard until C99. We use only **/_ comments _/**.
 
 ```c
 /* this is a comment */

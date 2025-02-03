@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,12 +42,12 @@
 #include <fetch/fetch.h>
 
 #define URL_BASE "http://speedtest.your.domain/"
-#define URL_1M   URL_BASE "file_1M.bin"
-#define URL_2M   URL_BASE "file_2M.bin"
-#define URL_5M   URL_BASE "file_5M.bin"
-#define URL_10M  URL_BASE "file_10M.bin"
-#define URL_20M  URL_BASE "file_20M.bin"
-#define URL_50M  URL_BASE "file_50M.bin"
+#define URL_1M URL_BASE "file_1M.bin"
+#define URL_2M URL_BASE "file_2M.bin"
+#define URL_5M URL_BASE "file_5M.bin"
+#define URL_10M URL_BASE "file_10M.bin"
+#define URL_20M URL_BASE "file_20M.bin"
+#define URL_50M URL_BASE "file_50M.bin"
 #define URL_100M URL_BASE "file_100M.bin"
 
 #define CHKSPEED_VERSION "1.0"
@@ -69,11 +69,15 @@ int main(int argc, char *argv[])
   const char *url = URL_1M;
   char *appname = argv[0];
 
-  if(argc > 1) {
+  if (argc > 1)
+  {
     /* parse input parameters */
-    for(argc--, argv++; *argv; argc--, argv++) {
-      if(argv[0][0] == '-') {
-        switch(argv[0][1]) {
+    for (argc--, argv++; *argv; argc--, argv++)
+    {
+      if (argv[0][0] == '-')
+      {
+        switch (argv[0][1])
+        {
         case 'h':
         case 'H':
           fprintf(stderr,
@@ -99,9 +103,11 @@ int main(int argc, char *argv[])
           break;
         case 'm':
         case 'M':
-          if(argv[0][2] == '=') {
+          if (argv[0][2] == '=')
+          {
             long m = strtol((*argv) + 3, NULL, 10);
-            switch(m) {
+            switch (m)
+            {
             case 1:
               url = URL_1M;
               break;
@@ -139,18 +145,21 @@ int main(int argc, char *argv[])
           return 1;
         }
       }
-      else {
+      else
+      {
         url = *argv;
       }
     }
   }
 
   /* print separator line */
-  if(prtsep) {
+  if (prtsep)
+  {
     printf("-------------------------------------------------\n");
   }
   /* print localtime */
-  if(prttime) {
+  if (prttime)
+  {
     time_t t = time(NULL);
     printf("Localtime: %s", ctime(&t));
   }
@@ -170,46 +179,49 @@ int main(int argc, char *argv[])
   /* some servers do not like requests that are made without a user-agent
      field, so we provide one */
   fetch_easy_setopt(fetch_handle, FETCHOPT_USERAGENT,
-                   "libfetch-speedchecker/" CHKSPEED_VERSION);
+                    "libfetch-speedchecker/" CHKSPEED_VERSION);
 
   /* get it! */
   res = fetch_easy_perform(fetch_handle);
 
-  if(FETCHE_OK == res) {
+  if (FETCHE_OK == res)
+  {
     fetch_off_t val;
 
     /* check for bytes downloaded */
     res = fetch_easy_getinfo(fetch_handle, FETCHINFO_SIZE_DOWNLOAD_T, &val);
-    if((FETCHE_OK == res) && (val > 0))
+    if ((FETCHE_OK == res) && (val > 0))
       printf("Data downloaded: %lu bytes.\n", (unsigned long)val);
 
     /* check for total download time */
     res = fetch_easy_getinfo(fetch_handle, FETCHINFO_TOTAL_TIME_T, &val);
-    if((FETCHE_OK == res) && (val > 0))
+    if ((FETCHE_OK == res) && (val > 0))
       printf("Total download time: %lu.%06lu sec.\n",
              (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
 
     /* check for average download speed */
     res = fetch_easy_getinfo(fetch_handle, FETCHINFO_SPEED_DOWNLOAD_T, &val);
-    if((FETCHE_OK == res) && (val > 0))
+    if ((FETCHE_OK == res) && (val > 0))
       printf("Average download speed: %lu kbyte/sec.\n",
              (unsigned long)(val / 1024));
 
-    if(prtall) {
+    if (prtall)
+    {
       /* check for name resolution time */
       res = fetch_easy_getinfo(fetch_handle, FETCHINFO_NAMELOOKUP_TIME_T, &val);
-      if((FETCHE_OK == res) && (val > 0))
+      if ((FETCHE_OK == res) && (val > 0))
         printf("Name lookup time: %lu.%06lu sec.\n",
                (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
 
       /* check for connect time */
       res = fetch_easy_getinfo(fetch_handle, FETCHINFO_CONNECT_TIME_T, &val);
-      if((FETCHE_OK == res) && (val > 0))
+      if ((FETCHE_OK == res) && (val > 0))
         printf("Connect time: %lu.%06lu sec.\n",
                (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
     }
   }
-  else {
+  else
+  {
     fprintf(stderr, "Error while fetching '%s' : %s\n",
             url, fetch_easy_strerror(res));
   }

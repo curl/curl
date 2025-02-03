@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -65,7 +65,7 @@ void Curl_dyn_free(struct dynbuf *s)
  * Store/append an chunk of memory to the dynbuf.
  */
 static FETCHcode dyn_nappend(struct dynbuf *s,
-                            const unsigned char *mem, size_t len)
+                             const unsigned char *mem, size_t len)
 {
   size_t indx = s->leng;
   size_t a = s->allc;
@@ -79,33 +79,38 @@ static FETCHcode dyn_nappend(struct dynbuf *s,
   DEBUGASSERT(a <= s->toobig);
   DEBUGASSERT(!len || mem);
 
-  if(fit > s->toobig) {
+  if (fit > s->toobig)
+  {
     Curl_dyn_free(s);
     return FETCHE_TOO_LARGE;
   }
-  else if(!a) {
+  else if (!a)
+  {
     DEBUGASSERT(!indx);
     /* first invoke */
-    if(MIN_FIRST_ALLOC > s->toobig)
+    if (MIN_FIRST_ALLOC > s->toobig)
       a = s->toobig;
-    else if(fit < MIN_FIRST_ALLOC)
+    else if (fit < MIN_FIRST_ALLOC)
       a = MIN_FIRST_ALLOC;
     else
       a = fit;
   }
-  else {
-    while(a < fit)
+  else
+  {
+    while (a < fit)
       a *= 2;
-    if(a > s->toobig)
+    if (a > s->toobig)
       /* no point in allocating a larger buffer than this is allowed to use */
       a = s->toobig;
   }
 
-  if(a != s->allc) {
+  if (a != s->allc)
+  {
     /* this logic is not using Curl_saferealloc() to make the tool not have to
        include that as well when it uses this code */
     void *p = realloc(s->bufr, a);
-    if(!p) {
+    if (!p)
+    {
       Curl_dyn_free(s);
       return FETCHE_OUT_OF_MEMORY;
     }
@@ -113,7 +118,7 @@ static FETCHcode dyn_nappend(struct dynbuf *s,
     s->allc = a;
   }
 
-  if(len)
+  if (len)
     memcpy(&s->bufr[indx], mem, len);
   s->leng = indx + len;
   s->bufr[s->leng] = 0;
@@ -129,7 +134,7 @@ void Curl_dyn_reset(struct dynbuf *s)
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
-  if(s->leng)
+  if (s->leng)
     s->bufr[0] = 0;
   s->leng = 0;
 }
@@ -143,20 +148,21 @@ FETCHcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
-  if(trail > s->leng)
+  if (trail > s->leng)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
-  else if(trail == s->leng)
+  else if (trail == s->leng)
     return FETCHE_OK;
-  else if(!trail) {
+  else if (!trail)
+  {
     Curl_dyn_reset(s);
   }
-  else {
+  else
+  {
     memmove(&s->bufr[0], &s->bufr[s->leng - trail], trail);
     s->leng = trail;
     s->bufr[s->leng] = 0;
   }
   return FETCHE_OK;
-
 }
 
 /*
@@ -197,16 +203,17 @@ FETCHcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   DEBUGASSERT(fmt);
   rc = Curl_dyn_vprintf(s, fmt, ap);
 
-  if(!rc)
+  if (!rc)
     return FETCHE_OK;
-  else if(rc == MERR_TOO_LARGE)
+  else if (rc == MERR_TOO_LARGE)
     return FETCHE_TOO_LARGE;
   return FETCHE_OUT_OF_MEMORY;
 #else
   char *str;
   str = vaprintf(fmt, ap); /* this allocs a new string to append */
 
-  if(str) {
+  if (str)
+  {
     FETCHcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
     free(str);
     return result;
@@ -286,7 +293,7 @@ FETCHcode Curl_dyn_setlen(struct dynbuf *s, size_t set)
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
-  if(set > s->leng)
+  if (set > s->leng)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
   s->leng = set;
   s->bufr[s->leng] = 0;

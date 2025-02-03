@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,12 +27,13 @@
 #include "timeval.h"
 
 /* only use function calls to access this struct */
-struct Curl_tree {
+struct Curl_tree
+{
   struct Curl_tree *smaller; /* smaller node */
   struct Curl_tree *larger;  /* larger node */
   struct Curl_tree *samen;   /* points to the next node with identical key */
   struct Curl_tree *samep;   /* points to the prev node with identical key */
-  struct fetchtime key;       /* this node's "sort" key */
+  struct fetchtime key;      /* this node's "sort" key */
   void *ptr;                 /* data the splay code does not care about */
 };
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,7 +55,8 @@ FETCHcode test(char *URL)
 
   fprintf(stderr, "Start at URL 0\n");
 
-  for(;;) {
+  for (;;)
+  {
     struct timeval interval;
     fd_set rd, wr, exc;
     int maxfd = -99;
@@ -67,7 +68,7 @@ FETCHcode test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running)
+    if (!running)
       break; /* done */
 
     FD_ZERO(&rd);

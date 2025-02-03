@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,8 @@
 
 struct GlobalConfig;
 
-struct State {
+struct State
+{
   struct getout *urlnode;
   struct URLGlob *inglob;
   struct URLGlob *urls;
@@ -44,18 +45,19 @@ struct State {
   fetch_off_t li;
 };
 
-struct OperationConfig {
+struct OperationConfig
+{
   bool remote_time;
   char *useragent;
-  struct fetch_slist *cookies;  /* cookies to serialize into a single line */
-  char *cookiejar;          /* write to this file */
-  struct fetch_slist *cookiefiles;  /* file(s) to load cookies from */
-  char *altsvc;             /* alt-svc cache filename */
-  char *hsts;               /* HSTS cache filename */
-  bool cookiesession;       /* new session? */
-  bool encoding;            /* Accept-Encoding please */
-  bool tr_encoding;         /* Transfer-Encoding please */
-  unsigned long authtype;   /* auth bitmask */
+  struct fetch_slist *cookies;     /* cookies to serialize into a single line */
+  char *cookiejar;                 /* write to this file */
+  struct fetch_slist *cookiefiles; /* file(s) to load cookies from */
+  char *altsvc;                    /* alt-svc cache filename */
+  char *hsts;                      /* HSTS cache filename */
+  bool cookiesession;              /* new session? */
+  bool encoding;                   /* Accept-Encoding please */
+  bool tr_encoding;                /* Transfer-Encoding please */
+  unsigned long authtype;          /* auth bitmask */
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
@@ -101,36 +103,36 @@ struct OperationConfig {
   char *proxy_tls_authtype;
   char *proxyuserpwd;
   char *proxy;
-  int proxyver;             /* set to FETCHPROXY_HTTP* define */
+  int proxyver; /* set to FETCHPROXY_HTTP* define */
   char *noproxy;
   char *mail_from;
   struct fetch_slist *mail_rcpt;
   char *mail_auth;
   bool mail_rcpt_allowfails; /* --mail-rcpt-allowfails */
-  char *sasl_authzid;       /* Authorization identity (identity to use) */
-  bool sasl_ir;             /* Enable/disable SASL initial response */
+  char *sasl_authzid;        /* Authorization identity (identity to use) */
+  bool sasl_ir;              /* Enable/disable SASL initial response */
   bool proxytunnel;
-  bool ftp_append;          /* APPE on ftp */
-  bool use_ascii;           /* select ASCII or text transfer */
-  bool autoreferer;         /* automatically set referer */
-  bool failonerror;         /* fail on (HTTP) errors */
-  bool failwithbody;        /* fail on (HTTP) errors but still store body */
-  bool show_headers;        /* show headers to data output */
-  bool no_body;             /* do not get the body */
-  bool dirlistonly;         /* only get the FTP dir list */
-  bool followlocation;      /* follow http redirects */
-  bool unrestricted_auth;   /* Continue to send authentication (user+password)
-                               when following redirects, even when hostname
-                               changed */
+  bool ftp_append;        /* APPE on ftp */
+  bool use_ascii;         /* select ASCII or text transfer */
+  bool autoreferer;       /* automatically set referer */
+  bool failonerror;       /* fail on (HTTP) errors */
+  bool failwithbody;      /* fail on (HTTP) errors but still store body */
+  bool show_headers;      /* show headers to data output */
+  bool no_body;           /* do not get the body */
+  bool dirlistonly;       /* only get the FTP dir list */
+  bool followlocation;    /* follow http redirects */
+  bool unrestricted_auth; /* Continue to send authentication (user+password)
+                             when following redirects, even when hostname
+                             changed */
   bool netrc_opt;
   bool netrc;
   char *netrc_file;
-  struct getout *url_list;  /* point to the first node */
-  struct getout *url_last;  /* point to the last/current node */
-  struct getout *url_get;   /* point to the node to fill in URL */
-  struct getout *url_out;   /* point to the node to fill in outfile */
-  struct getout *url_ul;    /* point to the node to fill in upload */
-  size_t num_urls;          /* number of URLs added to the list */
+  struct getout *url_list; /* point to the first node */
+  struct getout *url_last; /* point to the last/current node */
+  struct getout *url_get;  /* point to the node to fill in URL */
+  struct getout *url_out;  /* point to the node to fill in outfile */
+  struct getout *url_ul;   /* point to the node to fill in upload */
+  size_t num_urls;         /* number of URLs added to the list */
 #ifndef FETCH_DISABLE_IPFS
   char *ipfs_gateway;
 #endif /* !FETCH_DISABLE_IPFS */
@@ -171,14 +173,14 @@ struct OperationConfig {
   long httpversion;
   bool http09_allowed;
   bool nobuffer;
-  bool readbusy;            /* set when reading input returns EAGAIN */
+  bool readbusy; /* set when reading input returns EAGAIN */
   bool globoff;
   bool use_httpget;
-  bool insecure_ok;         /* set TRUE to allow insecure SSL connects */
-  bool doh_insecure_ok;     /* set TRUE to allow insecure SSL connects
-                               for DoH */
-  bool proxy_insecure_ok;   /* set TRUE to allow insecure SSL connects
-                               for proxy */
+  bool insecure_ok;       /* set TRUE to allow insecure SSL connects */
+  bool doh_insecure_ok;   /* set TRUE to allow insecure SSL connects
+                             for DoH */
+  bool proxy_insecure_ok; /* set TRUE to allow insecure SSL connects
+                             for proxy */
   bool terminal_binary_ok;
   bool verifystatus;
   bool doh_verifystatus;
@@ -190,8 +192,8 @@ struct OperationConfig {
   bool proxydigest;
   bool proxybasic;
   bool proxyanyauth;
-  bool jsoned; /* added json content-type */
-  char *writeout;           /* %-styled format string to output */
+  bool jsoned;    /* added json content-type */
+  char *writeout; /* %-styled format string to output */
   struct fetch_slist *quote;
   struct fetch_slist *postquote;
   struct fetch_slist *prequote;
@@ -222,29 +224,29 @@ struct OperationConfig {
   bool ftp_ssl_ccc;
   int ftp_ssl_ccc_mode;
   char *preproxy;
-  bool socks5_gssapi_nec;   /* The NEC reference server does not protect the
-                               encryption type exchange */
-  unsigned long socks5_auth;/* auth bitmask for socks5 proxies */
-  char *proxy_service_name; /* set authentication service name for HTTP and
-                               SOCKS5 proxies */
-  char *service_name;       /* set authentication service name for DIGEST-MD5,
-                               Kerberos 5 and SPNEGO */
+  bool socks5_gssapi_nec;    /* The NEC reference server does not protect the
+                                encryption type exchange */
+  unsigned long socks5_auth; /* auth bitmask for socks5 proxies */
+  char *proxy_service_name;  /* set authentication service name for HTTP and
+                                SOCKS5 proxies */
+  char *service_name;        /* set authentication service name for DIGEST-MD5,
+                                Kerberos 5 and SPNEGO */
 
   bool tcp_nodelay;
   bool tcp_fastopen;
-  long req_retry;           /* number of retries */
-  bool retry_all_errors;    /* retry on any error */
-  bool retry_connrefused;   /* set connection refused as a transient error */
-  long retry_delay;         /* delay between retries (in seconds) */
-  long retry_maxtime;       /* maximum time to keep retrying */
+  long req_retry;         /* number of retries */
+  bool retry_all_errors;  /* retry on any error */
+  bool retry_connrefused; /* set connection refused as a transient error */
+  long retry_delay;       /* delay between retries (in seconds) */
+  long retry_maxtime;     /* maximum time to keep retrying */
 
-  char *ftp_account;        /* for ACCT */
-  char *ftp_alternative_to_user;  /* send command if USER/PASS fails */
+  char *ftp_account;             /* for ACCT */
+  char *ftp_alternative_to_user; /* send command if USER/PASS fails */
   int ftp_filemethod;
-  long mime_options;        /* Mime option flags. */
-  long tftp_blksize;        /* TFTP BLKSIZE option */
-  bool tftp_no_options;     /* do not send TFTP options requests */
-  bool ignorecl;            /* --ignore-content-length */
+  long mime_options;    /* Mime option flags. */
+  long tftp_blksize;    /* TFTP BLKSIZE option */
+  bool tftp_no_options; /* do not send TFTP options requests */
+  bool ignorecl;        /* --ignore-content-length */
   bool disable_sessionid;
 
   bool raw;
@@ -256,27 +258,27 @@ struct OperationConfig {
   long alivecnt;            /* keepalive-cnt */
   bool content_disposition; /* use Content-disposition filename */
 
-  int default_node_flags;   /* default flags to search for each 'node', which
-                               is basically each given URL to transfer */
+  int default_node_flags; /* default flags to search for each 'node', which
+                             is basically each given URL to transfer */
 
-  bool xattr;               /* store metadata in extended attributes */
+  bool xattr; /* store metadata in extended attributes */
   long gssapi_delegation;
-  bool ssl_allow_beast;     /* allow this SSL vulnerability */
-  bool ssl_allow_earlydata; /* allow use of TLSv1.3 early data */
-  bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy */
-  bool ssl_no_revoke;       /* disable SSL certificate revocation checks */
+  bool ssl_allow_beast;        /* allow this SSL vulnerability */
+  bool ssl_allow_earlydata;    /* allow use of TLSv1.3 early data */
+  bool proxy_ssl_allow_beast;  /* allow this SSL vulnerability for proxy */
+  bool ssl_no_revoke;          /* disable SSL certificate revocation checks */
   bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
                                   revocation list errors */
 
-  bool native_ca_store;        /* use the native OS CA store */
-  bool proxy_native_ca_store;  /* use the native OS CA store for proxy */
-  bool ssl_auto_client_cert;   /* automatically locate and use a client
-                                  certificate for authentication (Schannel) */
+  bool native_ca_store;            /* use the native OS CA store */
+  bool proxy_native_ca_store;      /* use the native OS CA store for proxy */
+  bool ssl_auto_client_cert;       /* automatically locate and use a client
+                                      certificate for authentication (Schannel) */
   bool proxy_ssl_auto_client_cert; /* proxy version of ssl_auto_client_cert */
-  char *oauth_bearer;             /* OAuth 2.0 bearer token */
-  bool noalpn;                    /* enable/disable TLS ALPN extension */
-  char *unix_socket_path;         /* path to Unix domain socket */
-  bool abstract_unix_socket;      /* path to an abstract Unix domain socket */
+  char *oauth_bearer;              /* OAuth 2.0 bearer token */
+  bool noalpn;                     /* enable/disable TLS ALPN extension */
+  char *unix_socket_path;          /* path to Unix domain socket */
+  bool abstract_unix_socket;       /* path to an abstract Unix domain socket */
   bool falsestart;
   bool path_as_is;
   long expect100timeout_ms;
@@ -290,47 +292,49 @@ struct OperationConfig {
   char *haproxy_clientip;         /* client IP for HAProxy protocol */
   bool disallow_username_in_url;  /* disallow usernames in URLs */
   char *aws_sigv4;
-  enum {
+  enum
+  {
     CLOBBER_DEFAULT, /* Provides compatibility with previous versions of fetch,
                         by using the default behavior for -o, -O, and -J.
                         If those options would have overwritten files, like
                         -o and -O would, then overwrite them. In the case of
                         -J, this will not overwrite any files. */
-    CLOBBER_NEVER, /* If the file exists, always fail */
-    CLOBBER_ALWAYS /* If the file exists, always overwrite it */
+    CLOBBER_NEVER,   /* If the file exists, always fail */
+    CLOBBER_ALWAYS   /* If the file exists, always overwrite it */
   } file_clobber_mode;
-  bool mptcp;                     /* enable MPTCP support */
+  bool mptcp; /* enable MPTCP support */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
-  struct OperationConfig *next;   /* Always last in the struct */
-  struct State state;             /* for create_transfer() */
-  bool rm_partial;                /* on error, remove partially written output
-                                     files */
+  struct OperationConfig *next; /* Always last in the struct */
+  struct State state;           /* for create_transfer() */
+  bool rm_partial;              /* on error, remove partially written output
+                                   files */
   bool skip_existing;
-  char *ech;                      /* Config set by --ech keywords */
-  char *ech_config;               /* Config set by "--ech esl:" option */
-  char *ech_public;               /* Config set by "--ech pn:" option */
+  char *ech;        /* Config set by --ech keywords */
+  char *ech_config; /* Config set by "--ech esl:" option */
+  char *ech_public; /* Config set by "--ech pn:" option */
 };
 
-struct GlobalConfig {
-  bool showerror;                 /* show errors when silent */
-  bool silent;                    /* do not show messages, --silent given */
-  bool noprogress;                /* do not show progress bar */
-  bool isatty;                    /* Updated internally if output is a tty */
-  unsigned char verbosity;        /* How verbose we should be */
-  char *trace_dump;               /* file to dump the network trace to */
+struct GlobalConfig
+{
+  bool showerror;          /* show errors when silent */
+  bool silent;             /* do not show messages, --silent given */
+  bool noprogress;         /* do not show progress bar */
+  bool isatty;             /* Updated internally if output is a tty */
+  unsigned char verbosity; /* How verbose we should be */
+  char *trace_dump;        /* file to dump the network trace to */
   FILE *trace_stream;
   bool trace_fopened;
   trace tracetype;
-  bool tracetime;                 /* include timestamp? */
-  bool traceids;                  /* include xfer-/conn-id? */
-  int progressmode;               /* FETCH_PROGRESS_BAR / FETCH_PROGRESS_STATS */
-  char *libfetch;                  /* Output libfetch code to this filename */
-  bool fail_early;                /* exit on first transfer error */
-  bool styled_output;             /* enable fancy output style detection */
-  long ms_per_transfer;           /* start next transfer after (at least) this
-                                     many milliseconds */
-  char *ssl_sessions;             /* file to load/save SSL session tickets */
+  bool tracetime;       /* include timestamp? */
+  bool traceids;        /* include xfer-/conn-id? */
+  int progressmode;     /* FETCH_PROGRESS_BAR / FETCH_PROGRESS_STATS */
+  char *libfetch;       /* Output libfetch code to this filename */
+  bool fail_early;      /* exit on first transfer error */
+  bool styled_output;   /* enable fancy output style detection */
+  long ms_per_transfer; /* start next transfer after (at least) this
+                           many milliseconds */
+  char *ssl_sessions;   /* file to load/save SSL session tickets */
 #ifdef DEBUGBUILD
   bool test_duphandle;
   bool test_event_based;
@@ -338,11 +342,11 @@ struct GlobalConfig {
   bool parallel;
   unsigned short parallel_max; /* MAX_PARALLEL is the maximum */
   bool parallel_connect;
-  char *help_category;            /* The help category, if set */
+  char *help_category; /* The help category, if set */
   struct tool_var *variables;
   struct OperationConfig *first;
   struct OperationConfig *current;
-  struct OperationConfig *last;   /* Always last in the struct */
+  struct OperationConfig *last; /* Always last in the struct */
 };
 
 void config_init(struct OperationConfig *config);

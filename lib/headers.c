@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,11 +60,11 @@ static void copy_header_external(struct Curl_header_store *hs,
 
 /* public API */
 FETCHHcode fetch_easy_header(FETCH *easy,
-                           const char *name,
-                           size_t nameindex,
-                           unsigned int type,
-                           int request,
-                           struct fetch_header **hout)
+                             const char *name,
+                             size_t nameindex,
+                             unsigned int type,
+                             int request,
+                             struct fetch_header **hout)
 {
   struct Curl_llist_node *e;
   struct Curl_llist_node *e_pick = NULL;
@@ -73,48 +73,54 @@ FETCHHcode fetch_easy_header(FETCH *easy,
   size_t amount = 0;
   struct Curl_header_store *hs = NULL;
   struct Curl_header_store *pick = NULL;
-  if(!name || !hout || !data ||
-     (type > (FETCHH_HEADER|FETCHH_TRAILER|FETCHH_CONNECT|FETCHH_1XX|
-              FETCHH_PSEUDO)) || !type || (request < -1))
+  if (!name || !hout || !data ||
+      (type > (FETCHH_HEADER | FETCHH_TRAILER | FETCHH_CONNECT | FETCHH_1XX |
+               FETCHH_PSEUDO)) ||
+      !type || (request < -1))
     return FETCHHE_BAD_ARGUMENT;
-  if(!Curl_llist_count(&data->state.httphdrs))
+  if (!Curl_llist_count(&data->state.httphdrs))
     return FETCHHE_NOHEADERS; /* no headers available */
-  if(request > data->state.requests)
+  if (request > data->state.requests)
     return FETCHHE_NOREQUEST;
-  if(request == -1)
+  if (request == -1)
     request = data->state.requests;
 
   /* we need a first round to count amount of this header */
-  for(e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e)) {
+  for (e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e))
+  {
     hs = Curl_node_elem(e);
-    if(strcasecompare(hs->name, name) &&
-       (hs->type & type) &&
-       (hs->request == request)) {
+    if (strcasecompare(hs->name, name) &&
+        (hs->type & type) &&
+        (hs->request == request))
+    {
       amount++;
       pick = hs;
       e_pick = e;
     }
   }
-  if(!amount)
+  if (!amount)
     return FETCHHE_MISSING;
-  else if(nameindex >= amount)
+  else if (nameindex >= amount)
     return FETCHHE_BADINDEX;
 
-  if(nameindex == amount - 1)
+  if (nameindex == amount - 1)
     /* if the last or only occurrence is what's asked for, then we know it */
     hs = pick;
-  else {
-    for(e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e)) {
+  else
+  {
+    for (e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e))
+    {
       hs = Curl_node_elem(e);
-      if(strcasecompare(hs->name, name) &&
-         (hs->type & type) &&
-         (hs->request == request) &&
-         (match++ == nameindex)) {
+      if (strcasecompare(hs->name, name) &&
+          (hs->type & type) &&
+          (hs->request == request) &&
+          (match++ == nameindex))
+      {
         e_pick = e;
         break;
       }
     }
-    if(!e) /* this should not happen */
+    if (!e) /* this should not happen */
       return FETCHHE_MISSING;
   }
   /* this is the name we want */
@@ -126,9 +132,9 @@ FETCHHcode fetch_easy_header(FETCH *easy,
 
 /* public API */
 struct fetch_header *fetch_easy_nextheader(FETCH *easy,
-                                         unsigned int type,
-                                         int request,
-                                         struct fetch_header *prev)
+                                           unsigned int type,
+                                           int request,
+                                           struct fetch_header *prev)
 {
   struct Curl_easy *data = easy;
   struct Curl_llist_node *pick;
@@ -137,14 +143,15 @@ struct fetch_header *fetch_easy_nextheader(FETCH *easy,
   size_t amount = 0;
   size_t index = 0;
 
-  if(request > data->state.requests)
+  if (request > data->state.requests)
     return NULL;
-  if(request == -1)
+  if (request == -1)
     request = data->state.requests;
 
-  if(prev) {
+  if (prev)
+  {
     pick = prev->anchor;
-    if(!pick)
+    if (!pick)
       /* something is wrong */
       return NULL;
     pick = Curl_node_next(pick);
@@ -152,17 +159,19 @@ struct fetch_header *fetch_easy_nextheader(FETCH *easy,
   else
     pick = Curl_llist_head(&data->state.httphdrs);
 
-  if(pick) {
+  if (pick)
+  {
     /* make sure it is the next header of the desired type */
-    do {
+    do
+    {
       hs = Curl_node_elem(pick);
-      if((hs->type & type) && (hs->request == request))
+      if ((hs->type & type) && (hs->request == request))
         break;
       pick = Curl_node_next(pick);
-    } while(pick);
+    } while (pick);
   }
 
-  if(!pick)
+  if (!pick)
     /* no more headers available */
     return NULL;
 
@@ -170,13 +179,14 @@ struct fetch_header *fetch_easy_nextheader(FETCH *easy,
 
   /* count number of occurrences of this name within the mask and figure out
      the index for the currently selected entry */
-  for(e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e)) {
+  for (e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e))
+  {
     struct Curl_header_store *check = Curl_node_elem(e);
-    if(strcasecompare(hs->name, check->name) &&
-       (check->request == request) &&
-       (check->type & type))
+    if (strcasecompare(hs->name, check->name) &&
+        (check->request == request) &&
+        (check->type & type))
       amount++;
-    if(e == pick)
+    if (e == pick)
       index = amount - 1;
   }
 
@@ -186,46 +196,47 @@ struct fetch_header *fetch_easy_nextheader(FETCH *easy,
 }
 
 static FETCHcode namevalue(char *header, size_t hlen, unsigned int type,
-                          char **name, char **value)
+                           char **name, char **value)
 {
   char *end = header + hlen - 1; /* point to the last byte */
   DEBUGASSERT(hlen);
   *name = header;
 
-  if(type == FETCHH_PSEUDO) {
-    if(*header != ':')
+  if (type == FETCHH_PSEUDO)
+  {
+    if (*header != ':')
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     header++;
   }
 
   /* Find the end of the header name */
-  while(*header && (*header != ':'))
+  while (*header && (*header != ':'))
     ++header;
 
-  if(*header)
+  if (*header)
     /* Skip over colon, null it */
     *header++ = 0;
   else
     return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   /* skip all leading space letters */
-  while(*header && ISBLANK(*header))
+  while (*header && ISBLANK(*header))
     header++;
 
   *value = header;
 
   /* skip all trailing space letters */
-  while((end > header) && ISSPACE(*end))
+  while ((end > header) && ISSPACE(*end))
     *end-- = 0; /* nul terminate */
   return FETCHE_OK;
 }
 
 static FETCHcode unfold_value(struct Curl_easy *data, const char *value,
-                             size_t vlen)  /* length of the incoming header */
+                              size_t vlen) /* length of the incoming header */
 {
   struct Curl_header_store *hs;
   struct Curl_header_store *newhs;
-  size_t olen; /* length of the old value */
+  size_t olen;   /* length of the old value */
   size_t oalloc; /* length of the old name + value + separator */
   size_t offset;
   DEBUGASSERT(data->state.prevhead);
@@ -235,11 +246,12 @@ static FETCHcode unfold_value(struct Curl_easy *data, const char *value,
   oalloc = olen + offset + 1;
 
   /* skip all trailing space letters */
-  while(vlen && ISSPACE(value[vlen - 1]))
+  while (vlen && ISSPACE(value[vlen - 1]))
     vlen--;
 
   /* save only one leading space */
-  while((vlen > 1) && ISBLANK(value[0]) && ISBLANK(value[1])) {
+  while ((vlen > 1) && ISBLANK(value[0]) && ISBLANK(value[1]))
+  {
     vlen--;
     value++;
   }
@@ -251,7 +263,7 @@ static FETCHcode unfold_value(struct Curl_easy *data, const char *value,
 
   /* new size = struct + new value length + old name+value length */
   newhs = Curl_saferealloc(hs, sizeof(*hs) + vlen + oalloc + 1);
-  if(!newhs)
+  if (!newhs)
     return FETCHE_OUT_OF_MEMORY;
   /* ->name and ->value point into ->buffer (to keep the header allocation
      in a single memory block), which now potentially have moved. Adjust
@@ -269,13 +281,12 @@ static FETCHcode unfold_value(struct Curl_easy *data, const char *value,
   return FETCHE_OK;
 }
 
-
 /*
  * Curl_headers_push() gets passed a full HTTP header to store. It gets called
  * immediately before the header callback. The header is CRLF terminated.
  */
 FETCHcode Curl_headers_push(struct Curl_easy *data, const char *header,
-                           unsigned char type)
+                            unsigned char type)
 {
   char *value = NULL;
   char *name = NULL;
@@ -284,43 +295,48 @@ FETCHcode Curl_headers_push(struct Curl_easy *data, const char *header,
   struct Curl_header_store *hs;
   FETCHcode result = FETCHE_OUT_OF_MEMORY;
 
-  if((header[0] == '\r') || (header[0] == '\n'))
+  if ((header[0] == '\r') || (header[0] == '\n'))
     /* ignore the body separator */
     return FETCHE_OK;
 
   end = strchr(header, '\r');
-  if(!end) {
+  if (!end)
+  {
     end = strchr(header, '\n');
-    if(!end)
+    if (!end)
       /* neither CR nor LF as terminator is not a valid header */
       return FETCHE_WEIRD_SERVER_REPLY;
   }
   hlen = end - header;
 
-  if((header[0] == ' ') || (header[0] == '\t')) {
-    if(data->state.prevhead)
+  if ((header[0] == ' ') || (header[0] == '\t'))
+  {
+    if (data->state.prevhead)
       /* line folding, append value to the previous header's value */
       return unfold_value(data, header, hlen);
-    else {
+    else
+    {
       /* cannot unfold without a previous header. Instead of erroring, just
          pass the leading blanks. */
-      while(hlen && ISBLANK(*header)) {
+      while (hlen && ISBLANK(*header))
+      {
         header++;
         hlen--;
       }
-      if(!hlen)
+      if (!hlen)
         return FETCHE_WEIRD_SERVER_REPLY;
     }
   }
 
   hs = calloc(1, sizeof(*hs) + hlen);
-  if(!hs)
+  if (!hs)
     return FETCHE_OUT_OF_MEMORY;
   memcpy(hs->buffer, header, hlen);
   hs->buffer[hlen] = 0; /* nul terminate */
 
   result = namevalue(hs->buffer, hlen, type, &name, &value);
-  if(!result) {
+  if (!result)
+  {
     hs->name = name;
     hs->value = value;
     hs->type = type;
@@ -344,55 +360,54 @@ static void headers_reset(struct Curl_easy *data)
   data->state.prevhead = NULL;
 }
 
-struct hds_cw_collect_ctx {
+struct hds_cw_collect_ctx
+{
   struct Curl_cwriter super;
 };
 
 static FETCHcode hds_cw_collect_write(struct Curl_easy *data,
-                                     struct Curl_cwriter *writer, int type,
-                                     const char *buf, size_t blen)
+                                      struct Curl_cwriter *writer, int type,
+                                      const char *buf, size_t blen)
 {
-  if((type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS)) {
-    unsigned char htype = (unsigned char)
-      (type & CLIENTWRITE_CONNECT ? FETCHH_CONNECT :
-       (type & CLIENTWRITE_1XX ? FETCHH_1XX :
-        (type & CLIENTWRITE_TRAILER ? FETCHH_TRAILER :
-         FETCHH_HEADER)));
+  if ((type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS))
+  {
+    unsigned char htype = (unsigned char)(type & CLIENTWRITE_CONNECT ? FETCHH_CONNECT : (type & CLIENTWRITE_1XX ? FETCHH_1XX : (type & CLIENTWRITE_TRAILER ? FETCHH_TRAILER : FETCHH_HEADER)));
     FETCHcode result = Curl_headers_push(data, buf, htype);
     FETCH_TRC_WRITE(data, "header_collect pushed(type=%x, len=%zu) -> %d",
-                   htype, blen, result);
-    if(result)
+                    htype, blen, result);
+    if (result)
       return result;
   }
   return Curl_cwriter_write(data, writer->next, type, buf, blen);
 }
 
 static const struct Curl_cwtype hds_cw_collect = {
-  "hds-collect",
-  NULL,
-  Curl_cwriter_def_init,
-  hds_cw_collect_write,
-  Curl_cwriter_def_close,
-  sizeof(struct hds_cw_collect_ctx)
-};
+    "hds-collect",
+    NULL,
+    Curl_cwriter_def_init,
+    hds_cw_collect_write,
+    Curl_cwriter_def_close,
+    sizeof(struct hds_cw_collect_ctx)};
 
 FETCHcode Curl_headers_init(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer;
   FETCHcode result;
 
-  if(data->conn && (data->conn->handler->protocol & PROTO_FAMILY_HTTP)) {
+  if (data->conn && (data->conn->handler->protocol & PROTO_FAMILY_HTTP))
+  {
     /* avoid installing it twice */
-    if(Curl_cwriter_get_by_name(data, hds_cw_collect.name))
+    if (Curl_cwriter_get_by_name(data, hds_cw_collect.name))
       return FETCHE_OK;
 
     result = Curl_cwriter_create(&writer, data, &hds_cw_collect,
                                  FETCH_CW_PROTOCOL);
-    if(result)
+    if (result)
       return result;
 
     result = Curl_cwriter_add(data, writer);
-    if(result) {
+    if (result)
+    {
       Curl_cwriter_free(data, writer);
       return result;
     }
@@ -408,7 +423,8 @@ FETCHcode Curl_headers_cleanup(struct Curl_easy *data)
   struct Curl_llist_node *e;
   struct Curl_llist_node *n;
 
-  for(e = Curl_llist_head(&data->state.httphdrs); e; e = n) {
+  for (e = Curl_llist_head(&data->state.httphdrs); e; e = n)
+  {
     struct Curl_header_store *hs = Curl_node_elem(e);
     n = Curl_node_next(e);
     free(hs);
@@ -420,11 +436,11 @@ FETCHcode Curl_headers_cleanup(struct Curl_easy *data)
 #else /* HTTP-disabled builds below */
 
 FETCHHcode fetch_easy_header(FETCH *easy,
-                           const char *name,
-                           size_t index,
-                           unsigned int origin,
-                           int request,
-                           struct fetch_header **hout)
+                             const char *name,
+                             size_t index,
+                             unsigned int origin,
+                             int request,
+                             struct fetch_header **hout)
 {
   (void)easy;
   (void)name;
@@ -436,9 +452,9 @@ FETCHHcode fetch_easy_header(FETCH *easy,
 }
 
 struct fetch_header *fetch_easy_nextheader(FETCH *easy,
-                                         unsigned int type,
-                                         int request,
-                                         struct fetch_header *prev)
+                                           unsigned int type,
+                                           int request,
+                                           struct fetch_header *prev)
 {
   (void)easy;
   (void)type;

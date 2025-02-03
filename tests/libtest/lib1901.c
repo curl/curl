@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,16 +27,12 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-
-
-static const char *chunks[]={
-  "one",
-  "two",
-  "three",
-  "four",
-  NULL
-};
-
+static const char *chunks[] = {
+    "one",
+    "two",
+    "three",
+    "four",
+    NULL};
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
@@ -44,7 +40,8 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   (void)size;
   (void)nmemb;
   (void)stream;
-  if(chunks[ix]) {
+  if (chunks[ix])
+  {
     size_t len = strlen(chunks[ix]);
     strcpy(ptr, chunks[ix]);
     ix++;
@@ -62,7 +59,8 @@ FETCHcode test(char *URL)
   fetch_global_init(FETCH_GLOBAL_ALL);
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* deliberately setting the size - to a wrong value to make sure libfetch
        ignores it */
     easy_setopt(fetch, FETCHOPT_POSTFIELDSIZE, 4L);
@@ -75,12 +73,13 @@ FETCHcode test(char *URL)
     easy_setopt(fetch, FETCHOPT_READDATA, NULL);
 
     chunk = fetch_slist_append(chunk, "Expect:");
-    if(chunk) {
+    if (chunk)
+    {
       struct fetch_slist *n =
-        fetch_slist_append(chunk, "Transfer-Encoding: chunked");
-      if(n)
+          fetch_slist_append(chunk, "Transfer-Encoding: chunked");
+      if (n)
         chunk = n;
-      if(n)
+      if (n)
         easy_setopt(fetch, FETCHOPT_HTTPHEADER, n);
     }
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,23 +38,25 @@
 #define TEST_HANG_TIMEOUT 60 * 1000
 
 static const char uploadthis[] =
-  "this is the blurb we want to upload\n";
+    "this is the blurb we want to upload\n";
 
-static size_t readcallback(char  *ptr,
+static size_t readcallback(char *ptr,
                            size_t size,
                            size_t nmemb,
                            void *clientp)
 {
   int *counter = (int *)clientp;
 
-  if(*counter) {
+  if (*counter)
+  {
     /* only do this once and then require a clearing of this */
     fprintf(stderr, "READ ALREADY DONE!\n");
     return 0;
   }
   (*counter)++; /* bump */
 
-  if(size * nmemb >= strlen(uploadthis)) {
+  if (size * nmemb >= strlen(uploadthis))
+  {
     fprintf(stderr, "READ!\n");
     strcpy(ptr, uploadthis);
     return strlen(uploadthis);
@@ -63,18 +65,18 @@ static size_t readcallback(char  *ptr,
   return 0;
 }
 static fetchioerr ioctlcallback(FETCH *handle,
-                               int cmd,
-                               void *clientp)
+                                int cmd,
+                                void *clientp)
 {
   int *counter = (int *)clientp;
   (void)handle; /* unused */
-  if(cmd == FETCHIOCMD_RESTARTREAD) {
+  if (cmd == FETCHIOCMD_RESTARTREAD)
+  {
     fprintf(stderr, "REWIND!\n");
     *counter = 0; /* clear counter to make the read callback restart */
   }
   return FETCHIOE_OK;
 }
-
 
 FETCHcode test(char *URL)
 {
@@ -96,9 +98,8 @@ FETCHcode test(char *URL)
 
   /* read the POST data from a callback */
   FETCH_IGNORE_DEPRECATION(
-    easy_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctlcallback);
-    easy_setopt(fetch, FETCHOPT_IOCTLDATA, &counter);
-  )
+      easy_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctlcallback);
+      easy_setopt(fetch, FETCHOPT_IOCTLDATA, &counter);)
   easy_setopt(fetch, FETCHOPT_READFUNCTION, readcallback);
   easy_setopt(fetch, FETCHOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
@@ -109,13 +110,14 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_PROXY, libtest_arg2);
   easy_setopt(fetch, FETCHOPT_PROXYUSERPWD, libtest_arg3);
   easy_setopt(fetch, FETCHOPT_PROXYAUTH,
-                   (long) (FETCHAUTH_NTLM | FETCHAUTH_DIGEST | FETCHAUTH_BASIC) );
+              (long)(FETCHAUTH_NTLM | FETCHAUTH_DIGEST | FETCHAUTH_BASIC));
 
   multi_init(m);
 
   multi_add_handle(m, fetch);
 
-  while(running) {
+  while (running)
+  {
     struct timeval timeout;
     fd_set fdread, fdwrite, fdexcep;
     int maxfd = -99;
@@ -127,7 +129,7 @@ FETCHcode test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running)
+    if (!running)
       break; /* done */
 
     FD_ZERO(&fdread);

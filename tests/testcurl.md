@@ -5,7 +5,7 @@ Title: testfetch.pl
 Section: 1
 Source: testfetch
 See-also:
- - runtests.pl
+  - runtests.pl
 Added-in: 7.11.2
 ---
 
@@ -19,22 +19,22 @@ testfetch.pl - (automatically) test fetch
 
 # DESCRIPTION
 
-*testfetch* is the master script to use for automatic distributed testing of
+_testfetch_ is the master script to use for automatic distributed testing of
 fetch from git or daily snapshots. It is written for the purpose of being run
 from a crontab job or similar at a regular interval. The output is suitable to
 be mailed to **fetch-autocompile@haxx.se** to be dealt with automatically (make
 sure the subject includes the word "autobuild" as the mail gets silently
 discarded otherwise). The most current build status (with a reasonable
-backlog) is published on the fetch site, at https://fetch.se/dev/builds.html
+backlog) is published on the fetch site, at https://curl.se/dev/builds.html
 
-*options* may be omitted. See *--setup* for what happens then.
+_options_ may be omitted. See _--setup_ for what happens then.
 
-*dir* is a fetch source directory, possibly a daily snapshot one. Using this
-makes *testfetch* skip the *autoreconf* stage and thus it removes the
+_dir_ is a fetch source directory, possibly a daily snapshot one. Using this
+makes _testfetch_ skip the _autoreconf_ stage and thus it removes the
 dependency on automake, autoconf, libtool, GNU m4 and possibly a few other
 things.
 
-*testfetch* runs `autoreconf` (or similar), configure, builds fetch and libfetch
+_testfetch_ runs `autoreconf` (or similar), configure, builds fetch and libfetch
 in a separate build directory and then runs `make test` to test the fresh
 build.
 
@@ -45,8 +45,9 @@ build.
 Configure options passed to configure.
 
 ## `--crosscompile`
+
 ``
-This is a cross-compile. Makes *testfetch* skip a few things.
+This is a cross-compile. Makes _testfetch_ skip a few things.
 
 ## `--desc=[desc]`
 
@@ -86,9 +87,9 @@ by force, and similar.
 ## `--setup=[filename]`
 
 filename to read setup from (deprecated). The old style of providing info. If
-info is missing when *testfetch* is started, it prompts you and then stores the
-info in a 'setup' file, which it looks for on each invoke. Use *--name*,
-*--email*, *--configure* and *--desc* instead.
+info is missing when _testfetch_ is started, it prompts you and then stores the
+info in a 'setup' file, which it looks for on each invoke. Use _--name_,
+_--email_, _--configure_ and _--desc_ instead.
 
 ## `--target=[your os]`
 
@@ -102,10 +103,10 @@ snapshots automatically):
 
     $ mkdir fetch-testing
     $ cd fetch-testing
-    $ git clone https://github.com/fetch/fetch.git
+    $ git clone https://github.com/curl/curl.git
 
 With the fetch sources checked out, or downloaded, you can start testing right
-away. If you want to use *testfetch* without command line arguments and to have
+away. If you want to use _testfetch_ without command line arguments and to have
 it store and remember the config in its 'setup' file, then start it manually
 now and fill in the answers to the questions it prompts you for:
 

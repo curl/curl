@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,29 +24,29 @@
 #include "tool_setup.h"
 
 #ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
+#include <fcntl.h>
 #endif
 
 #ifdef HAVE_LOCALE_H
-#  include <locale.h>
+#include <locale.h>
 #endif
 
 #ifdef HAVE_SYS_SELECT_H
-#  include <sys/select.h>
+#include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
-#  include <unistd.h>
+#include <unistd.h>
 #endif
 
 #ifdef __VMS
-#  include <fabdef.h>
+#include <fabdef.h>
 #endif
 
 #ifdef __AMIGA__
-#  include <proto/dos.h>
+#include <proto/dos.h>
 #endif
 
 #ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 
 #ifdef HAVE_UV_H
@@ -113,30 +113,31 @@ extern const unsigned char fetch_ca_embed[];
 #endif
 
 #ifndef SOL_IP
-#  define SOL_IP IPPROTO_IP
+#define SOL_IP IPPROTO_IP
 #endif
 
-#define FETCH_CA_CERT_ERRORMSG                                              \
-  "More details here: https://fetch.se/docs/sslcerts.html\n\n"              \
-  "fetch failed to verify the legitimacy of the server and therefore "      \
+#define FETCH_CA_CERT_ERRORMSG                                             \
+  "More details here: https://curl.se/docs/sslcerts.html\n\n"              \
+  "fetch failed to verify the legitimacy of the server and therefore "     \
   "could not\nestablish a secure connection to it. To learn more about "   \
   "this situation and\nhow to fix it, please visit the webpage mentioned " \
   "above.\n"
 
 static FETCHcode single_transfer(struct GlobalConfig *global,
-                                struct OperationConfig *config,
-                                FETCHSH *share,
-                                bool capath_from_env,
-                                bool *added,
-                                bool *skipped);
+                                 struct OperationConfig *config,
+                                 FETCHSH *share,
+                                 bool capath_from_env,
+                                 bool *added,
+                                 bool *skipped);
 static FETCHcode create_transfer(struct GlobalConfig *global,
-                                FETCHSH *share,
-                                bool *added,
-                                bool *skipped);
+                                 FETCHSH *share,
+                                 bool *added,
+                                 bool *skipped);
 
 static bool is_fatal_error(FETCHcode code)
 {
-  switch(code) {
+  switch (code)
+  {
   case FETCHE_FAILED_INIT:
   case FETCHE_OUT_OF_MEMORY:
   case FETCHE_UNKNOWN_OPTION:
@@ -156,10 +157,12 @@ static bool is_fatal_error(FETCHcode code)
  */
 static bool is_pkcs11_uri(const char *string)
 {
-  if(fetch_strnequal(string, "pkcs11:", 7)) {
+  if (fetch_strnequal(string, "pkcs11:", 7))
+  {
     return TRUE;
   }
-  else {
+  else
+  {
     return FALSE;
   }
 }
@@ -170,7 +173,7 @@ static int get_address_family(fetch_socket_t sockfd)
   struct sockaddr addr;
   fetch_socklen_t addrlen = sizeof(addr);
   memset(&addr, 0, sizeof(addr));
-  if(getsockname(sockfd, (struct sockaddr *)&addr, &addrlen) == 0)
+  if (getsockname(sockfd, (struct sockaddr *)&addr, &addrlen) == 0)
     return addr.sa_family;
   return AF_UNSPEC;
 }
@@ -181,15 +184,17 @@ static int sockopt_callback(void *clientp, fetch_socket_t fetchfd,
                             fetchsocktype purpose)
 {
   struct OperationConfig *config = (struct OperationConfig *)clientp;
-  if(purpose != FETCHSOCKTYPE_IPCXN)
+  if (purpose != FETCHSOCKTYPE_IPCXN)
     return FETCH_SOCKOPT_OK;
   (void)config;
   (void)fetchfd;
 #if defined(IP_TOS) || defined(IPV6_TCLASS)
-  if(config->ip_tos > 0) {
+  if (config->ip_tos > 0)
+  {
     int tos = (int)config->ip_tos;
     int result = 0;
-    switch(get_address_family(fetchfd)) {
+    switch (get_address_family(fetchfd))
+    {
     case AF_INET:
 #ifdef IP_TOS
       result = setsockopt(fetchfd, SOL_IP, IP_TOS, (void *)&tos, sizeof(tos));
@@ -202,7 +207,8 @@ static int sockopt_callback(void *clientp, fetch_socket_t fetchfd,
       break;
 #endif
     }
-    if(result < 0) {
+    if (result < 0)
+    {
       int error = errno;
       warnf(config->global,
             "Setting type of service to %d failed with errno %d: %s;\n",
@@ -211,10 +217,12 @@ static int sockopt_callback(void *clientp, fetch_socket_t fetchfd,
   }
 #endif
 #ifdef SO_PRIORITY
-  if(config->vlan_priority > 0) {
+  if (config->vlan_priority > 0)
+  {
     int priority = (int)config->vlan_priority;
-    if(setsockopt(fetchfd, SOL_SOCKET, SO_PRIORITY,
-      (void *)&priority, sizeof(priority)) != 0) {
+    if (setsockopt(fetchfd, SOL_SOCKET, SO_PRIORITY,
+                   (void *)&priority, sizeof(priority)) != 0)
+    {
       int error = errno;
       warnf(config->global, "VLAN priority %d failed with errno %d: %s;\n",
             priority, error, strerror(error));
@@ -224,7 +232,6 @@ static int sockopt_callback(void *clientp, fetch_socket_t fetchfd,
   return FETCH_SOCKOPT_OK;
 }
 #endif
-
 
 #ifdef __VMS
 /*
@@ -238,23 +245,25 @@ static int sockopt_callback(void *clientp, fetch_socket_t fetchfd,
  *
  */
 static fetch_off_t vms_realfilesize(const char *name,
-                                   const struct_stat *stat_buf)
+                                    const struct_stat *stat_buf)
 {
   char buffer[8192];
   fetch_off_t count;
   int ret_stat;
-  FILE * file;
+  FILE *file;
 
   /* !checksrc! disable FOPENMODE 1 */
   file = fopen(name, "r"); /* VMS */
-  if(!file) {
+  if (!file)
+  {
     return 0;
   }
   count = 0;
   ret_stat = 1;
-  while(ret_stat > 0) {
+  while (ret_stat > 0)
+  {
     ret_stat = fread(buffer, 1, sizeof(buffer), file);
-    if(ret_stat)
+    if (ret_stat)
       count += ret_stat;
   }
   fclose(file);
@@ -269,9 +278,10 @@ static fetch_off_t vms_realfilesize(const char *name,
  *
  */
 static fetch_off_t VmsSpecialSize(const char *name,
-                                 const struct_stat *stat_buf)
+                                  const struct_stat *stat_buf)
 {
-  switch(stat_buf->st_fab_rfm) {
+  switch (stat_buf->st_fab_rfm)
+  {
   case FAB$C_VAR:
   case FAB$C_VFC:
     return vms_realfilesize(name, stat_buf);
@@ -282,9 +292,9 @@ static fetch_off_t VmsSpecialSize(const char *name,
 }
 #endif /* __VMS */
 
-#define BUFFER_SIZE (100*1024)
+#define BUFFER_SIZE (100 * 1024)
 
-struct per_transfer *transfers; /* first node */
+struct per_transfer *transfers;         /* first node */
 static struct per_transfer *transfersl; /* last node */
 static fetch_off_t all_pers;
 
@@ -294,12 +304,13 @@ static FETCHcode add_per_transfer(struct per_transfer **per)
 {
   struct per_transfer *p;
   p = calloc(1, sizeof(struct per_transfer));
-  if(!p)
+  if (!p)
     return FETCHE_OUT_OF_MEMORY;
-  if(!transfers)
+  if (!transfers)
     /* first entry */
     transfersl = transfers = p;
-  else {
+  else
+  {
     /* make the last node point to the new node */
     transfersl->next = p;
     /* make the new node point back to the formerly last node */
@@ -327,12 +338,12 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   n = per->next;
   p = per->prev;
 
-  if(p)
+  if (p)
     p->next = n;
   else
     transfers = n;
 
-  if(n)
+  if (n)
     n->prev = p;
   else
     transfersl = p;
@@ -344,13 +355,14 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
 }
 
 static FETCHcode pre_transfer(struct GlobalConfig *global,
-                             struct per_transfer *per)
+                              struct per_transfer *per)
 {
   fetch_off_t uploadfilesize = -1;
   struct_stat fileinfo;
   FETCHcode result = FETCHE_OK;
 
-  if(per->uploadfile && !stdin_upload(per->uploadfile)) {
+  if (per->uploadfile && !stdin_upload(per->uploadfile))
+  {
     /* VMS Note:
      *
      * Reading binary from files can be a problem... Only FIXED, VAR
@@ -368,9 +380,11 @@ static FETCHcode pre_transfer(struct GlobalConfig *global,
 #ifdef __VMS
     /* Calculate the real upload size for VMS */
     per->infd = -1;
-    if(stat(per->uploadfile, &fileinfo) == 0) {
+    if (stat(per->uploadfile, &fileinfo) == 0)
+    {
       fileinfo.st_size = VmsSpecialSize(uploadfile, &fileinfo);
-      switch(fileinfo.st_fab_rfm) {
+      switch (fileinfo.st_fab_rfm)
+      {
       case FAB$C_VAR:
       case FAB$C_VFC:
       case FAB$C_STMCR:
@@ -381,14 +395,15 @@ static FETCHcode pre_transfer(struct GlobalConfig *global,
                          "rfm=stmlf", "ctx=stm");
       }
     }
-    if(per->infd == -1)
+    if (per->infd == -1)
 #else
-      per->infd = open(per->uploadfile, O_RDONLY | FETCH_O_BINARY);
-    if((per->infd == -1) || fstat(per->infd, &fileinfo))
+    per->infd = open(per->uploadfile, O_RDONLY | FETCH_O_BINARY);
+    if ((per->infd == -1) || fstat(per->infd, &fileinfo))
 #endif
     {
       helpf(tool_stderr, "cannot open '%s'", per->uploadfile);
-      if(per->infd != -1) {
+      if (per->infd != -1)
+      {
         close(per->infd);
         per->infd = STDIN_FILENO;
       }
@@ -397,21 +412,23 @@ static FETCHcode pre_transfer(struct GlobalConfig *global,
     per->infdopen = TRUE;
 
     /* we ignore file size for char/block devices, sockets, etc. */
-    if(S_ISREG(fileinfo.st_mode))
+    if (S_ISREG(fileinfo.st_mode))
       uploadfilesize = fileinfo.st_size;
 
 #ifdef DEBUGBUILD
     /* allow dedicated test cases to override */
     {
       char *ev = getenv("FETCH_UPLOAD_SIZE");
-      if(ev) {
+      if (ev)
+      {
         int sz = atoi(ev);
         uploadfilesize = (fetch_off_t)sz;
       }
     }
 #endif
 
-    if(uploadfilesize != -1) {
+    if (uploadfilesize != -1)
+    {
       struct OperationConfig *config = per->config; /* for the macro below */
 #ifdef FETCH_DISABLE_LIBFETCH_OPTION
       (void)config;
@@ -430,7 +447,8 @@ static char global_errorbuffer[FETCH_ERROR_SIZE];
 
 void single_transfer_cleanup(struct OperationConfig *config)
 {
-  if(config) {
+  if (config)
+  {
     struct State *state = &config->state;
     /* Free list of remaining URLs */
     glob_cleanup(&state->urls);
@@ -445,10 +463,10 @@ void single_transfer_cleanup(struct OperationConfig *config)
  * Call this after a transfer has completed.
  */
 static FETCHcode post_per_transfer(struct GlobalConfig *global,
-                                  struct per_transfer *per,
-                                  FETCHcode result,
-                                  bool *retryp,
-                                  long *delay) /* milliseconds! */
+                                   struct per_transfer *per,
+                                   FETCHcode result,
+                                   bool *retryp,
+                                   long *delay) /* milliseconds! */
 {
   struct OutStruct *outs = &per->outs;
   FETCH *fetch = per->fetch;
@@ -458,52 +476,58 @@ static FETCHcode post_per_transfer(struct GlobalConfig *global,
   *retryp = FALSE;
   *delay = 0; /* for no retry, keep it zero */
 
-  if(!fetch || !config)
+  if (!fetch || !config)
     return result;
 
-  if(per->infdopen)
+  if (per->infdopen)
     close(per->infd);
 
-  if(per->skip)
+  if (per->skip)
     goto skip;
 
 #ifdef __VMS
-  if(is_vms_shell()) {
+  if (is_vms_shell())
+  {
     /* VMS DCL shell behavior */
-    if(global->silent && !global->showerror)
+    if (global->silent && !global->showerror)
       vms_show = VMSSTS_HIDE;
   }
   else
 #endif
-    if(!config->synthetic_error && result &&
-       (!global->silent || global->showerror)) {
-      const char *msg = per->errorbuffer;
-      fprintf(tool_stderr, "fetch: (%d) %s\n", result,
-              (msg && msg[0]) ? msg : fetch_easy_strerror(result));
-      if(result == FETCHE_PEER_FAILED_VERIFICATION)
-        fputs(FETCH_CA_CERT_ERRORMSG, tool_stderr);
+      if (!config->synthetic_error && result &&
+          (!global->silent || global->showerror))
+  {
+    const char *msg = per->errorbuffer;
+    fprintf(tool_stderr, "fetch: (%d) %s\n", result,
+            (msg && msg[0]) ? msg : fetch_easy_strerror(result));
+    if (result == FETCHE_PEER_FAILED_VERIFICATION)
+      fputs(FETCH_CA_CERT_ERRORMSG, tool_stderr);
+  }
+  else if (config->failwithbody)
+  {
+    /* if HTTP response >= 400, return error */
+    long code = 0;
+    fetch_easy_getinfo(fetch, FETCHINFO_RESPONSE_CODE, &code);
+    if (code >= 400)
+    {
+      if (!global->silent || global->showerror)
+        fprintf(tool_stderr,
+                "fetch: (%d) The requested URL returned error: %ld\n",
+                FETCHE_HTTP_RETURNED_ERROR, code);
+      result = FETCHE_HTTP_RETURNED_ERROR;
     }
-    else if(config->failwithbody) {
-      /* if HTTP response >= 400, return error */
-      long code = 0;
-      fetch_easy_getinfo(fetch, FETCHINFO_RESPONSE_CODE, &code);
-      if(code >= 400) {
-        if(!global->silent || global->showerror)
-          fprintf(tool_stderr,
-                  "fetch: (%d) The requested URL returned error: %ld\n",
-                  FETCHE_HTTP_RETURNED_ERROR, code);
-        result = FETCHE_HTTP_RETURNED_ERROR;
-      }
-    }
+  }
   /* Set file extended attributes */
-  if(!result && config->xattr && outs->fopened && outs->stream) {
+  if (!result && config->xattr && outs->fopened && outs->stream)
+  {
     rc = fwrite_xattr(fetch, per->url, fileno(outs->stream));
-    if(rc)
+    if (rc)
       warnf(config->global, "Error setting extended attributes on '%s': %s",
             outs->filename, strerror(errno));
   }
 
-  if(!result && !outs->stream && !outs->bytes) {
+  if (!result && !outs->stream && !outs->bytes)
+  {
     /* we have received no data despite the transfer was successful
        ==> force creation of an empty output file (if an output file
        was specified) */
@@ -511,14 +535,16 @@ static FETCHcode post_per_transfer(struct GlobalConfig *global,
     /* do not create (or even overwrite) the file in case we get no
        data because of unmet condition */
     fetch_easy_getinfo(fetch, FETCHINFO_CONDITION_UNMET, &cond_unmet);
-    if(!cond_unmet && !tool_create_output_file(outs, config))
+    if (!cond_unmet && !tool_create_output_file(outs, config))
       result = FETCHE_WRITE_ERROR;
   }
 
-  if(!outs->s_isreg && outs->stream) {
+  if (!outs->s_isreg && outs->stream)
+  {
     /* Dump standard stream buffered data */
     rc = fflush(outs->stream);
-    if(!result && rc) {
+    if (!result && rc)
+    {
       /* something went wrong in the writing process */
       result = FETCHE_WRITE_ERROR;
       errorf(global, "Failed writing body");
@@ -527,17 +553,19 @@ static FETCHcode post_per_transfer(struct GlobalConfig *global,
 
 #ifdef _WIN32
   /* Discard incomplete UTF-8 sequence buffered from body */
-  if(outs->utf8seq[0])
+  if (outs->utf8seq[0])
     memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
 #endif
 
   /* if retry-max-time is non-zero, make sure we have not exceeded the
      time */
-  if(per->retry_remaining &&
-     (!config->retry_maxtime ||
-      (tvdiff(tvnow(), per->retrystart) <
-       config->retry_maxtime*1000L)) ) {
-    enum {
+  if (per->retry_remaining &&
+      (!config->retry_maxtime ||
+       (tvdiff(tvnow(), per->retrystart) <
+        config->retry_maxtime * 1000L)))
+  {
+    enum
+    {
       RETRY_NO,
       RETRY_ALL_ERRORS,
       RETRY_TIMEOUT,
@@ -547,33 +575,37 @@ static FETCHcode post_per_transfer(struct GlobalConfig *global,
       RETRY_LAST /* not used */
     } retry = RETRY_NO;
     long response = 0;
-    if((FETCHE_OPERATION_TIMEDOUT == result) ||
-       (FETCHE_COULDNT_RESOLVE_HOST == result) ||
-       (FETCHE_COULDNT_RESOLVE_PROXY == result) ||
-       (FETCHE_FTP_ACCEPT_TIMEOUT == result))
+    if ((FETCHE_OPERATION_TIMEDOUT == result) ||
+        (FETCHE_COULDNT_RESOLVE_HOST == result) ||
+        (FETCHE_COULDNT_RESOLVE_PROXY == result) ||
+        (FETCHE_FTP_ACCEPT_TIMEOUT == result))
       /* retry timeout always */
       retry = RETRY_TIMEOUT;
-    else if(config->retry_connrefused &&
-            (FETCHE_COULDNT_CONNECT == result)) {
+    else if (config->retry_connrefused &&
+             (FETCHE_COULDNT_CONNECT == result))
+    {
       long oserrno = 0;
       fetch_easy_getinfo(fetch, FETCHINFO_OS_ERRNO, &oserrno);
-      if(ECONNREFUSED == oserrno)
+      if (ECONNREFUSED == oserrno)
         retry = RETRY_CONNREFUSED;
     }
-    else if((FETCHE_OK == result) ||
-            ((config->failonerror || config->failwithbody) &&
-             (FETCHE_HTTP_RETURNED_ERROR == result))) {
+    else if ((FETCHE_OK == result) ||
+             ((config->failonerror || config->failwithbody) &&
+              (FETCHE_HTTP_RETURNED_ERROR == result)))
+    {
       /* If it returned OK. _or_ failonerror was enabled and it
          returned due to such an error, check for HTTP transient
          errors to retry on. */
       const char *scheme;
       fetch_easy_getinfo(fetch, FETCHINFO_SCHEME, &scheme);
       scheme = proto_token(scheme);
-      if(scheme == proto_http || scheme == proto_https) {
+      if (scheme == proto_http || scheme == proto_https)
+      {
         /* This was HTTP(S) */
         fetch_easy_getinfo(fetch, FETCHINFO_RESPONSE_CODE, &response);
 
-        switch(response) {
+        switch (response)
+        {
         case 408: /* Request Timeout */
         case 429: /* Too Many Requests (RFC6585) */
         case 500: /* Internal Server Error */
@@ -595,14 +627,15 @@ static FETCHcode post_per_transfer(struct GlobalConfig *global,
         }
       }
     } /* if FETCHE_OK */
-    else if(result) {
+    else if (result)
+    {
       const char *scheme;
 
       fetch_easy_getinfo(fetch, FETCHINFO_RESPONSE_CODE, &response);
       fetch_easy_getinfo(fetch, FETCHINFO_SCHEME, &scheme);
       scheme = proto_token(scheme);
 
-      if((scheme == proto_ftp || scheme == proto_ftps) && response / 100 == 4)
+      if ((scheme == proto_ftp || scheme == proto_ftps) && response / 100 == 4)
         /*
          * This is typically when the FTP server only allows a certain
          * amount of users and we are not one of them. All 4xx codes
@@ -611,68 +644,75 @@ static FETCHcode post_per_transfer(struct GlobalConfig *global,
         retry = RETRY_FTP;
     }
 
-    if(result && !retry && config->retry_all_errors)
+    if (result && !retry && config->retry_all_errors)
       retry = RETRY_ALL_ERRORS;
 
-    if(retry) {
+    if (retry)
+    {
       long sleeptime = 0;
       fetch_off_t retry_after = 0;
-      static const char * const m[]={
-        NULL,
-        "(retrying all errors)",
-        ": timeout",
-        ": connection refused",
-        ": HTTP error",
-        ": FTP error"
-      };
+      static const char *const m[] = {
+          NULL,
+          "(retrying all errors)",
+          ": timeout",
+          ": connection refused",
+          ": HTTP error",
+          ": FTP error"};
 
       sleeptime = per->retry_sleep;
-      if(RETRY_HTTP == retry) {
+      if (RETRY_HTTP == retry)
+      {
         fetch_easy_getinfo(fetch, FETCHINFO_RETRY_AFTER, &retry_after);
-        if(retry_after) {
+        if (retry_after)
+        {
           /* store in a 'long', make sure it does not overflow */
-          if(retry_after > LONG_MAX/1000)
+          if (retry_after > LONG_MAX / 1000)
             sleeptime = LONG_MAX;
-          else if((retry_after * 1000) > sleeptime)
+          else if ((retry_after * 1000) > sleeptime)
             sleeptime = (long)retry_after * 1000; /* milliseconds */
 
           /* if adding retry_after seconds to the process would exceed the
              maximum time allowed for retrying, then exit the retries right
              away */
-          if(config->retry_maxtime) {
-            fetch_off_t seconds = tvdiff(tvnow(), per->retrystart)/1000;
+          if (config->retry_maxtime)
+          {
+            fetch_off_t seconds = tvdiff(tvnow(), per->retrystart) / 1000;
 
-            if((FETCH_OFF_T_MAX - retry_after < seconds) ||
-               (seconds + retry_after > config->retry_maxtime)) {
+            if ((FETCH_OFF_T_MAX - retry_after < seconds) ||
+                (seconds + retry_after > config->retry_maxtime))
+            {
               warnf(config->global, "The Retry-After: time would "
-                    "make this command line exceed the maximum allowed time "
-                    "for retries.");
+                                    "make this command line exceed the maximum allowed time "
+                                    "for retries.");
               goto noretry;
             }
           }
         }
       }
       warnf(config->global, "Problem %s. "
-            "Will retry in %ld seconds. "
-            "%ld retries left.",
-            m[retry], sleeptime/1000L, per->retry_remaining);
+                            "Will retry in %ld seconds. "
+                            "%ld retries left.",
+            m[retry], sleeptime / 1000L, per->retry_remaining);
 
       per->retry_remaining--;
-      if(!config->retry_delay) {
+      if (!config->retry_delay)
+      {
         per->retry_sleep *= 2;
-        if(per->retry_sleep > RETRY_SLEEP_MAX)
+        if (per->retry_sleep > RETRY_SLEEP_MAX)
           per->retry_sleep = RETRY_SLEEP_MAX;
       }
-      if(outs->bytes && outs->filename && outs->stream) {
+      if (outs->bytes && outs->filename && outs->stream)
+      {
         /* We have written data to an output file, we truncate file
          */
         notef(config->global,
-              "Throwing away %"  FETCH_FORMAT_FETCH_OFF_T " bytes",
+              "Throwing away %" FETCH_FORMAT_FETCH_OFF_T " bytes",
               outs->bytes);
         fflush(outs->stream);
         /* truncate file at the position where we started appending */
 #if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
-        if(ftruncate(fileno(outs->stream), outs->init)) {
+        if (ftruncate(fileno(outs->stream), outs->init))
+        {
           /* when truncate fails, we cannot just append as then we will
              create something strange, bail out */
           errorf(config->global, "Failed to truncate file");
@@ -688,7 +728,8 @@ static FETCHcode post_per_transfer(struct GlobalConfig *global,
            most of those will have ftruncate. */
         rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
 #endif
-        if(rc) {
+        if (rc)
+        {
           errorf(config->global, "Failed seeking to end of file");
           return FETCHE_WRITE_ERROR;
         }
@@ -702,25 +743,29 @@ static FETCHcode post_per_transfer(struct GlobalConfig *global,
   } /* if retry_remaining */
 noretry:
 
-  if((global->progressmode == FETCH_PROGRESS_BAR) &&
-     per->progressbar.calls)
+  if ((global->progressmode == FETCH_PROGRESS_BAR) &&
+      per->progressbar.calls)
     /* if the custom progress bar has been displayed, we output a
        newline here */
     fputs("\n", per->progressbar.out);
 
   /* Close the outs file */
-  if(outs->fopened && outs->stream) {
+  if (outs->fopened && outs->stream)
+  {
     rc = fclose(outs->stream);
-    if(!result && rc) {
+    if (!result && rc)
+    {
       /* something went wrong in the writing process */
       result = FETCHE_WRITE_ERROR;
       errorf(config->global, "fetch: (%d) Failed writing body", result);
     }
-    if(result && config->rm_partial) {
+    if (result && config->rm_partial)
+    {
       struct_stat st;
-      if(!stat(outs->filename, &st) &&
-         S_ISREG(st.st_mode)) {
-        if(!unlink(outs->filename))
+      if (!stat(outs->filename, &st) &&
+          S_ISREG(st.st_mode))
+      {
+        if (!unlink(outs->filename))
           notef(global, "Removed output file: %s", outs->filename);
         else
           warnf(global, "Failed removing: %s", outs->filename);
@@ -732,7 +777,8 @@ noretry:
   }
 
   /* File time can only be set _after_ the file has been closed */
-  if(!result && config->remote_time && outs->s_isreg && outs->filename) {
+  if (!result && config->remote_time && outs->s_isreg && outs->filename)
+  {
     /* Ask libfetch if we got a remote file time */
     fetch_off_t filetime = -1;
     fetch_easy_getinfo(fetch, FETCHINFO_FILETIME_T, &filetime);
@@ -740,29 +786,29 @@ noretry:
   }
 skip:
   /* Write the --write-out data before cleanup but after result is final */
-  if(config->writeout)
+  if (config->writeout)
     ourWriteOut(config, per, result);
 
   /* Close function-local opened file descriptors */
-  if(per->heads.fopened && per->heads.stream)
+  if (per->heads.fopened && per->heads.stream)
     fclose(per->heads.stream);
 
-  if(per->heads.alloc_filename)
+  if (per->heads.alloc_filename)
     Curl_safefree(per->heads.filename);
 
-  if(per->etag_save.fopened && per->etag_save.stream)
+  if (per->etag_save.fopened && per->etag_save.stream)
     fclose(per->etag_save.stream);
 
-  if(per->etag_save.alloc_filename)
+  if (per->etag_save.alloc_filename)
     Curl_safefree(per->etag_save.filename);
 
   fetch_easy_cleanup(per->fetch);
-  if(outs->alloc_filename)
+  if (outs->alloc_filename)
     free(outs->filename);
   free(per->url);
   free(per->outfile);
   free(per->uploadfile);
-  if(global->parallel)
+  if (global->parallel)
     free(per->errorbuffer);
   fetch_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
@@ -774,8 +820,8 @@ skip:
  * scheme used in the given URL.
  */
 static FETCHcode url_proto_and_rewrite(char **url,
-                                      struct OperationConfig *config,
-                                      const char **scheme)
+                                       struct OperationConfig *config,
+                                       const char **scheme)
 {
   FETCHcode result = FETCHE_OK;
   FETCHU *uh = fetch_url();
@@ -783,29 +829,32 @@ static FETCHcode url_proto_and_rewrite(char **url,
   *scheme = NULL;
 
   DEBUGASSERT(url && *url);
-  if(uh) {
+  if (uh)
+  {
     char *schemep = NULL;
-    if(!fetch_url_set(uh, FETCHUPART_URL, *url,
-                     FETCHU_GUESS_SCHEME | FETCHU_NON_SUPPORT_SCHEME) &&
-       !fetch_url_get(uh, FETCHUPART_SCHEME, &schemep,
-                     FETCHU_DEFAULT_SCHEME)) {
+    if (!fetch_url_set(uh, FETCHUPART_URL, *url,
+                       FETCHU_GUESS_SCHEME | FETCHU_NON_SUPPORT_SCHEME) &&
+        !fetch_url_get(uh, FETCHUPART_SCHEME, &schemep,
+                       FETCHU_DEFAULT_SCHEME))
+    {
 #ifdef FETCH_DISABLE_IPFS
       (void)config;
 #else
-      if(fetch_strequal(schemep, proto_ipfs) ||
-         fetch_strequal(schemep, proto_ipns)) {
+      if (fetch_strequal(schemep, proto_ipfs) ||
+          fetch_strequal(schemep, proto_ipns))
+      {
         result = ipfs_url_rewrite(uh, schemep, url, config);
         /* short-circuit proto_token, we know it is ipfs or ipns */
-        if(fetch_strequal(schemep, proto_ipfs))
+        if (fetch_strequal(schemep, proto_ipfs))
           proto = proto_ipfs;
-        else if(fetch_strequal(schemep, proto_ipns))
+        else if (fetch_strequal(schemep, proto_ipns))
           proto = proto_ipns;
-        if(result)
+        if (result)
           config->synthetic_error = TRUE;
       }
       else
 #endif /* !FETCH_DISABLE_IPFS */
-        proto = proto_token(schemep);
+      proto = proto_token(schemep);
 
       fetch_free(schemep);
     }
@@ -823,10 +872,11 @@ static char *ssl_backend(void)
 {
   static char ssl_ver[80] = "no ssl";
   static bool already = FALSE;
-  if(!already) { /* if there is no existing version */
+  if (!already)
+  { /* if there is no existing version */
     const char *v = fetch_version_info(FETCHVERSION_NOW)->ssl_version;
-    if(v)
-      msnprintf(ssl_ver, sizeof(ssl_ver), "%.*s", (int) strcspn(v, " "), v);
+    if (v)
+      msnprintf(ssl_ver, sizeof(ssl_ver), "%.*s", (int)strcspn(v, " "), v);
     already = TRUE;
   }
   return ssl_ver;
@@ -834,38 +884,43 @@ static char *ssl_backend(void)
 
 static FETCHcode set_cert_types(struct OperationConfig *config)
 {
-  if(feature_ssl) {
+  if (feature_ssl)
+  {
     /* Check if config->cert is a PKCS#11 URI and set the config->cert_type if
      * necessary */
-    if(config->cert && !config->cert_type && is_pkcs11_uri(config->cert)) {
+    if (config->cert && !config->cert_type && is_pkcs11_uri(config->cert))
+    {
       config->cert_type = strdup("ENG");
-      if(!config->cert_type)
+      if (!config->cert_type)
         return FETCHE_OUT_OF_MEMORY;
     }
 
     /* Check if config->key is a PKCS#11 URI and set the config->key_type if
      * necessary */
-    if(config->key && !config->key_type && is_pkcs11_uri(config->key)) {
+    if (config->key && !config->key_type && is_pkcs11_uri(config->key))
+    {
       config->key_type = strdup("ENG");
-      if(!config->key_type)
+      if (!config->key_type)
         return FETCHE_OUT_OF_MEMORY;
     }
 
     /* Check if config->proxy_cert is a PKCS#11 URI and set the
      * config->proxy_type if necessary */
-    if(config->proxy_cert && !config->proxy_cert_type &&
-       is_pkcs11_uri(config->proxy_cert)) {
+    if (config->proxy_cert && !config->proxy_cert_type &&
+        is_pkcs11_uri(config->proxy_cert))
+    {
       config->proxy_cert_type = strdup("ENG");
-      if(!config->proxy_cert_type)
+      if (!config->proxy_cert_type)
         return FETCHE_OUT_OF_MEMORY;
     }
 
     /* Check if config->proxy_key is a PKCS#11 URI and set the
      * config->proxy_key_type if necessary */
-    if(config->proxy_key && !config->proxy_key_type &&
-       is_pkcs11_uri(config->proxy_key)) {
+    if (config->proxy_key && !config->proxy_key_type &&
+        is_pkcs11_uri(config->proxy_key))
+    {
       config->proxy_key_type = strdup("ENG");
-      if(!config->proxy_key_type)
+      if (!config->proxy_key_type)
         return FETCHE_OUT_OF_MEMORY;
     }
   }
@@ -873,19 +928,19 @@ static FETCHcode set_cert_types(struct OperationConfig *config)
 }
 
 static FETCHcode config2setopts(struct GlobalConfig *global,
-                               struct OperationConfig *config,
-                               struct per_transfer *per,
-                               bool capath_from_env,
-                               FETCH *fetch,
-                               FETCHSH *share)
+                                struct OperationConfig *config,
+                                struct per_transfer *per,
+                                bool capath_from_env,
+                                FETCH *fetch,
+                                FETCHSH *share)
 {
   const char *use_proto;
   FETCHcode result = url_proto_and_rewrite(&per->url, config, &use_proto);
 
   /* Avoid having this setopt added to the --libfetch source output. */
-  if(!result)
+  if (!result)
     result = fetch_easy_setopt(fetch, FETCHOPT_SHARE, share);
-  if(result)
+  if (result)
     return result;
 
 #ifndef DEBUGBUILD
@@ -895,17 +950,17 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
      Note: avoid having this setopt added to the --libfetch source
      output. */
   result = fetch_easy_setopt(fetch, FETCHOPT_QUICK_EXIT, 1L);
-  if(result)
+  if (result)
     return result;
 #endif
 
-  if(!config->tcp_nodelay)
+  if (!config->tcp_nodelay)
     my_setopt(fetch, FETCHOPT_TCP_NODELAY, 0L);
 
-  if(config->tcp_fastopen)
+  if (config->tcp_fastopen)
     my_setopt(fetch, FETCHOPT_TCP_FASTOPEN, 1L);
 
-  if(config->mptcp)
+  if (config->mptcp)
     my_setopt(fetch, FETCHOPT_OPENSOCKETFUNCTION,
               tool_socket_open_mptcp_cb);
 
@@ -935,62 +990,63 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   {
 #ifdef DEBUGBUILD
     char *env = getenv("FETCH_BUFFERSIZE");
-    if(env) {
+    if (env)
+    {
       long size = strtol(env, NULL, 10);
-      if(size)
+      if (size)
         my_setopt(fetch, FETCHOPT_BUFFERSIZE, size);
     }
     else
 #endif
-      if(config->recvpersecond &&
-         (config->recvpersecond < BUFFER_SIZE))
-        /* use a smaller sized buffer for better sleeps */
-        my_setopt(fetch, FETCHOPT_BUFFERSIZE, (long)config->recvpersecond);
-      else
-        my_setopt(fetch, FETCHOPT_BUFFERSIZE, (long)BUFFER_SIZE);
+        if (config->recvpersecond &&
+            (config->recvpersecond < BUFFER_SIZE))
+      /* use a smaller sized buffer for better sleeps */
+      my_setopt(fetch, FETCHOPT_BUFFERSIZE, (long)config->recvpersecond);
+    else
+      my_setopt(fetch, FETCHOPT_BUFFERSIZE, (long)BUFFER_SIZE);
   }
 
   my_setopt_str(fetch, FETCHOPT_URL, per->url);
   my_setopt(fetch, FETCHOPT_NOPROGRESS,
             global->noprogress || global->silent ? 1L : 0L);
-  if(config->no_body)
+  if (config->no_body)
     my_setopt(fetch, FETCHOPT_NOBODY, 1L);
 
-  if(config->oauth_bearer)
+  if (config->oauth_bearer)
     my_setopt_str(fetch, FETCHOPT_XOAUTH2_BEARER, config->oauth_bearer);
 
   my_setopt_str(fetch, FETCHOPT_PROXY, config->proxy);
 
-  if(config->proxy && result) {
+  if (config->proxy && result)
+  {
     errorf(global, "proxy support is disabled in this libfetch");
     config->synthetic_error = TRUE;
     return FETCHE_NOT_BUILT_IN;
   }
 
   /* new in libfetch 7.5 */
-  if(config->proxy)
+  if (config->proxy)
     my_setopt_enum(fetch, FETCHOPT_PROXYTYPE, config->proxyver);
 
   my_setopt_str(fetch, FETCHOPT_PROXYUSERPWD, config->proxyuserpwd);
 
   /* new in libfetch 7.3 */
-  my_setopt(fetch, FETCHOPT_HTTPPROXYTUNNEL, config->proxytunnel ?
-            1L : 0L);
+  my_setopt(fetch, FETCHOPT_HTTPPROXYTUNNEL, config->proxytunnel ? 1L : 0L);
 
   /* new in libfetch 7.52.0 */
-  if(config->preproxy)
+  if (config->preproxy)
     my_setopt_str(fetch, FETCHOPT_PRE_PROXY, config->preproxy);
 
   /* new in libfetch 7.10.6 */
-  if(config->proxyanyauth)
+  if (config->proxyanyauth)
     my_setopt_bitmask(fetch, FETCHOPT_PROXYAUTH, (long)FETCHAUTH_ANY);
-  else if(config->proxynegotiate)
+  else if (config->proxynegotiate)
     my_setopt_bitmask(fetch, FETCHOPT_PROXYAUTH, FETCHAUTH_GSSNEGOTIATE);
-  else if(config->proxyntlm)
+  else if (config->proxyntlm)
     my_setopt_bitmask(fetch, FETCHOPT_PROXYAUTH, FETCHAUTH_NTLM);
-  else if(config->proxydigest)
+  else if (config->proxydigest)
     my_setopt_bitmask(fetch, FETCHOPT_PROXYAUTH, FETCHAUTH_DIGEST);
-  else if(config->proxybasic)
+  else if (config->proxybasic)
     my_setopt_bitmask(fetch, FETCHOPT_PROXYAUTH, FETCHAUTH_BASIC);
 
   /* new in libfetch 7.19.4 */
@@ -1005,34 +1061,38 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   my_setopt(fetch, FETCHOPT_DIRLISTONLY, config->dirlistonly ? 1L : 0L);
   my_setopt(fetch, FETCHOPT_APPEND, config->ftp_append ? 1L : 0L);
 
-  if(config->netrc_opt)
+  if (config->netrc_opt)
     my_setopt_enum(fetch, FETCHOPT_NETRC, (long)FETCH_NETRC_OPTIONAL);
-  else if(config->netrc || config->netrc_file)
+  else if (config->netrc || config->netrc_file)
     my_setopt_enum(fetch, FETCHOPT_NETRC, (long)FETCH_NETRC_REQUIRED);
   else
     my_setopt_enum(fetch, FETCHOPT_NETRC, (long)FETCH_NETRC_IGNORED);
 
-  if(config->netrc_file)
+  if (config->netrc_file)
     my_setopt_str(fetch, FETCHOPT_NETRC_FILE, config->netrc_file);
 
   my_setopt(fetch, FETCHOPT_TRANSFERTEXT, config->use_ascii ? 1L : 0L);
-  if(config->login_options)
+  if (config->login_options)
     my_setopt_str(fetch, FETCHOPT_LOGIN_OPTIONS, config->login_options);
   my_setopt_str(fetch, FETCHOPT_USERPWD, config->userpwd);
   my_setopt_str(fetch, FETCHOPT_RANGE, config->range);
-  if(!global->parallel) {
+  if (!global->parallel)
+  {
     per->errorbuffer = global_errorbuffer;
     my_setopt(fetch, FETCHOPT_ERRORBUFFER, global_errorbuffer);
   }
   my_setopt(fetch, FETCHOPT_TIMEOUT_MS, config->timeout_ms);
 
-  switch(config->httpreq) {
+  switch (config->httpreq)
+  {
   case TOOL_HTTPREQ_SIMPLEPOST:
-    if(config->resume_from) {
+    if (config->resume_from)
+    {
       errorf(global, "cannot mix --continue-at with --data");
       result = FETCHE_FAILED_INIT;
     }
-    else {
+    else
+    {
       my_setopt_str(fetch, FETCHOPT_POSTFIELDS,
                     fetchx_dyn_ptr(&config->postdata));
       my_setopt(fetch, FETCHOPT_POSTFIELDSIZE_LARGE,
@@ -1043,38 +1103,42 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
     /* free previous remainders */
     fetch_mime_free(config->mimepost);
     config->mimepost = NULL;
-    if(config->resume_from) {
+    if (config->resume_from)
+    {
       errorf(global, "cannot mix --continue-at with --form");
       result = FETCHE_FAILED_INIT;
     }
-    else {
+    else
+    {
       result = tool2fetchmime(fetch, config->mimeroot, &config->mimepost);
-      if(!result)
+      if (!result)
         my_setopt_mimepost(fetch, FETCHOPT_MIMEPOST, config->mimepost);
     }
     break;
   default:
     break;
   }
-  if(result)
+  if (result)
     return result;
 
   /* new in libfetch 7.81.0 */
-  if(config->mime_options)
+  if (config->mime_options)
     my_setopt(fetch, FETCHOPT_MIME_OPTIONS, config->mime_options);
 
   /* new in libfetch 7.10.6 (default is Basic) */
-  if(config->authtype)
+  if (config->authtype)
     my_setopt_bitmask(fetch, FETCHOPT_HTTPAUTH, (long)config->authtype);
 
   my_setopt_slist(fetch, FETCHOPT_HTTPHEADER, config->headers);
 
-  if(proto_http || proto_rtsp) {
+  if (proto_http || proto_rtsp)
+  {
     my_setopt_str(fetch, FETCHOPT_REFERER, config->referer);
     my_setopt_str(fetch, FETCHOPT_USERAGENT, config->useragent);
   }
 
-  if(proto_http) {
+  if (proto_http)
+  {
     long postRedir = 0;
 
     my_setopt(fetch, FETCHOPT_FOLLOWLOCATION,
@@ -1085,7 +1149,8 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
     my_setopt(fetch, FETCHOPT_AUTOREFERER, config->autoreferer ? 1L : 0L);
 
     /* new in libfetch 7.36.0 */
-    if(config->proxyheaders) {
+    if (config->proxyheaders)
+    {
       my_setopt_slist(fetch, FETCHOPT_PROXYHEADER, config->proxyheaders);
       my_setopt(fetch, FETCHOPT_HEADEROPT, (long)FETCHHEADER_SEPARATE);
     }
@@ -1093,39 +1158,40 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
     /* new in libfetch 7.5 */
     my_setopt(fetch, FETCHOPT_MAXREDIRS, config->maxredirs);
 
-    if(config->httpversion)
+    if (config->httpversion)
       my_setopt_enum(fetch, FETCHOPT_HTTP_VERSION, config->httpversion);
-    else if(feature_http2)
+    else if (feature_http2)
       my_setopt_enum(fetch, FETCHOPT_HTTP_VERSION, FETCH_HTTP_VERSION_2TLS);
 
     /* fetch 7.19.1 (the 301 version existed in 7.18.2),
        303 was added in 7.26.0 */
-    if(config->post301)
+    if (config->post301)
       postRedir |= FETCH_REDIR_POST_301;
-    if(config->post302)
+    if (config->post302)
       postRedir |= FETCH_REDIR_POST_302;
-    if(config->post303)
+    if (config->post303)
       postRedir |= FETCH_REDIR_POST_303;
     my_setopt(fetch, FETCHOPT_POSTREDIR, postRedir);
 
     /* new in libfetch 7.21.6 */
-    if(config->encoding)
+    if (config->encoding)
       my_setopt_str(fetch, FETCHOPT_ACCEPT_ENCODING, "");
 
     /* new in libfetch 7.21.6 */
-    if(config->tr_encoding)
+    if (config->tr_encoding)
       my_setopt(fetch, FETCHOPT_TRANSFER_ENCODING, 1L);
     /* new in libfetch 7.64.0 */
     my_setopt(fetch, FETCHOPT_HTTP09_ALLOWED,
               config->http09_allowed ? 1L : 0L);
-    if(result) {
+    if (result)
+    {
       errorf(global, "HTTP/0.9 is not supported in this build");
       return result;
     }
 
   } /* (proto_http) */
 
-  if(proto_ftp)
+  if (proto_ftp)
     my_setopt_str(fetch, FETCHOPT_FTPPORT, config->ftpport);
   my_setopt(fetch, FETCHOPT_LOW_SPEED_LIMIT,
             config->low_speed_limit);
@@ -1135,7 +1201,7 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   my_setopt(fetch, FETCHOPT_MAX_RECV_SPEED_LARGE,
             config->recvpersecond);
 
-  if(config->use_resume)
+  if (config->use_resume)
     my_setopt(fetch, FETCHOPT_RESUME_FROM_LARGE, config->resume_from);
   else
     my_setopt(fetch, FETCHOPT_RESUME_FROM_LARGE, FETCH_OFF_T_C(0));
@@ -1143,7 +1209,8 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   my_setopt_str(fetch, FETCHOPT_KEYPASSWD, config->key_passwd);
   my_setopt_str(fetch, FETCHOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
 
-  if(use_proto == proto_scp || use_proto == proto_sftp) {
+  if (use_proto == proto_scp || use_proto == proto_sftp)
+  {
     /* SSH and SSL private key uses same command-line option */
     /* new in libfetch 7.16.1 */
     my_setopt_str(fetch, FETCHOPT_SSH_PRIVATE_KEYFILE, config->key);
@@ -1161,19 +1228,21 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
                   config->hostpubsha256);
 
     /* new in libfetch 7.56.0 */
-    if(config->ssh_compression)
+    if (config->ssh_compression)
       my_setopt(fetch, FETCHOPT_SSH_COMPRESSION, 1L);
 
-    if(!config->insecure_ok) {
+    if (!config->insecure_ok)
+    {
       char *known = findfile(".ssh/known_hosts", FALSE);
-      if(known) {
+      if (known)
+      {
         /* new in fetch 7.19.6 */
         result = res_setopt_str(fetch, FETCHOPT_SSH_KNOWNHOSTS, known);
         fetch_free(known);
-        if(result == FETCHE_UNKNOWN_OPTION)
+        if (result == FETCHE_UNKNOWN_OPTION)
           /* libssh2 version older than 1.1.1 */
           result = FETCHE_OK;
-        if(result)
+        if (result)
           return result;
       }
       else
@@ -1181,43 +1250,46 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
     }
   }
 
-  if(config->cacert)
+  if (config->cacert)
     my_setopt_str(fetch, FETCHOPT_CAINFO, config->cacert);
-  if(config->proxy_cacert)
+  if (config->proxy_cacert)
     my_setopt_str(fetch, FETCHOPT_PROXY_CAINFO, config->proxy_cacert);
 
-  if(config->capath) {
+  if (config->capath)
+  {
     result = res_setopt_str(fetch, FETCHOPT_CAPATH, config->capath);
-    if(result == FETCHE_NOT_BUILT_IN) {
+    if (result == FETCHE_NOT_BUILT_IN)
+    {
       warnf(global, "ignoring %s, not supported by libfetch with %s",
-            capath_from_env ?
-            "SSL_CERT_DIR environment variable" : "--capath",
+            capath_from_env ? "SSL_CERT_DIR environment variable" : "--capath",
             ssl_backend());
     }
-    else if(result)
+    else if (result)
       return result;
   }
   /* For the time being if --proxy-capath is not set then we use the
      --capath value for it, if any. See #1257 */
-  if(config->proxy_capath || config->capath) {
+  if (config->proxy_capath || config->capath)
+  {
     result = res_setopt_str(fetch, FETCHOPT_PROXY_CAPATH,
-                            (config->proxy_capath ?
-                             config->proxy_capath :
-                             config->capath));
-    if((result == FETCHE_NOT_BUILT_IN) ||
-       (result == FETCHE_UNKNOWN_OPTION)) {
-      if(config->proxy_capath) {
+                            (config->proxy_capath ? config->proxy_capath : config->capath));
+    if ((result == FETCHE_NOT_BUILT_IN) ||
+        (result == FETCHE_UNKNOWN_OPTION))
+    {
+      if (config->proxy_capath)
+      {
         warnf(global, "ignoring %s, not supported by libfetch with %s",
               config->proxy_capath ? "--proxy-capath" : "--capath",
               ssl_backend());
       }
     }
-    else if(result)
+    else if (result)
       return result;
   }
 
 #ifdef FETCH_CA_EMBED
-  if(!config->cacert && !config->capath) {
+  if (!config->cacert && !config->capath)
+  {
     struct fetch_blob blob;
     blob.data = (void *)fetch_ca_embed;
     blob.len = strlen((const char *)fetch_ca_embed);
@@ -1226,12 +1298,14 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
           "Using embedded CA bundle (%zu bytes)",
           blob.len);
     result = fetch_easy_setopt(fetch, FETCHOPT_CAINFO_BLOB, &blob);
-    if(result == FETCHE_NOT_BUILT_IN) {
+    if (result == FETCHE_NOT_BUILT_IN)
+    {
       warnf(global, "ignoring %s, not supported by libfetch with %s",
             "embedded CA bundle", ssl_backend());
     }
   }
-  if(!config->proxy_cacert && !config->proxy_capath) {
+  if (!config->proxy_cacert && !config->proxy_capath)
+  {
     struct fetch_blob blob;
     blob.data = (void *)fetch_ca_embed;
     blob.len = strlen((const char *)fetch_ca_embed);
@@ -1240,42 +1314,46 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
           "Using embedded CA bundle, for proxies (%zu bytes)",
           blob.len);
     result = fetch_easy_setopt(fetch, FETCHOPT_PROXY_CAINFO_BLOB, &blob);
-    if(result == FETCHE_NOT_BUILT_IN) {
+    if (result == FETCHE_NOT_BUILT_IN)
+    {
       warnf(global, "ignoring %s, not supported by libfetch with %s",
             "embedded CA bundle", ssl_backend());
     }
   }
 #endif
 
-  if(config->crlfile)
+  if (config->crlfile)
     my_setopt_str(fetch, FETCHOPT_CRLFILE, config->crlfile);
-  if(config->proxy_crlfile)
+  if (config->proxy_crlfile)
     my_setopt_str(fetch, FETCHOPT_PROXY_CRLFILE, config->proxy_crlfile);
-  else if(config->crlfile) /* FETCHOPT_PROXY_CRLFILE default is crlfile */
+  else if (config->crlfile) /* FETCHOPT_PROXY_CRLFILE default is crlfile */
     my_setopt_str(fetch, FETCHOPT_PROXY_CRLFILE, config->crlfile);
 
-  if(config->pinnedpubkey) {
+  if (config->pinnedpubkey)
+  {
     result = res_setopt_str(fetch, FETCHOPT_PINNEDPUBLICKEY,
                             config->pinnedpubkey);
-    if(result == FETCHE_NOT_BUILT_IN)
+    if (result == FETCHE_NOT_BUILT_IN)
       warnf(global, "ignoring %s, not supported by libfetch with %s",
             "--pinnedpubkey", ssl_backend());
   }
-  if(config->proxy_pinnedpubkey) {
+  if (config->proxy_pinnedpubkey)
+  {
     result = res_setopt_str(fetch, FETCHOPT_PROXY_PINNEDPUBLICKEY,
                             config->proxy_pinnedpubkey);
-    if(result == FETCHE_NOT_BUILT_IN)
+    if (result == FETCHE_NOT_BUILT_IN)
       warnf(global, "ignoring %s, not supported by libfetch with %s",
             "--proxy-pinnedpubkey", ssl_backend());
   }
 
-  if(config->ssl_ec_curves)
+  if (config->ssl_ec_curves)
     my_setopt_str(fetch, FETCHOPT_SSL_EC_CURVES, config->ssl_ec_curves);
 
-  if(config->writeout)
+  if (config->writeout)
     my_setopt_str(fetch, FETCHOPT_CERTINFO, 1L);
 
-  if(feature_ssl) {
+  if (feature_ssl)
+  {
     my_setopt_str(fetch, FETCHOPT_SSLCERT, config->cert);
     my_setopt_str(fetch, FETCHOPT_PROXY_SSLCERT, config->proxy_cert);
     my_setopt_str(fetch, FETCHOPT_SSLCERTTYPE, config->cert_type);
@@ -1288,73 +1366,68 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
                   config->proxy_key_type);
 
     /* libfetch default is strict verifyhost -> 1L, verifypeer -> 1L */
-    if(config->insecure_ok) {
+    if (config->insecure_ok)
+    {
       my_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 0L);
       my_setopt(fetch, FETCHOPT_SSL_VERIFYHOST, 0L);
     }
 
-    if(config->doh_insecure_ok) {
+    if (config->doh_insecure_ok)
+    {
       my_setopt(fetch, FETCHOPT_DOH_SSL_VERIFYPEER, 0L);
       my_setopt(fetch, FETCHOPT_DOH_SSL_VERIFYHOST, 0L);
     }
 
-    if(config->proxy_insecure_ok) {
+    if (config->proxy_insecure_ok)
+    {
       my_setopt(fetch, FETCHOPT_PROXY_SSL_VERIFYPEER, 0L);
       my_setopt(fetch, FETCHOPT_PROXY_SSL_VERIFYHOST, 0L);
     }
 
-    if(config->verifystatus)
+    if (config->verifystatus)
       my_setopt(fetch, FETCHOPT_SSL_VERIFYSTATUS, 1L);
 
-    if(config->doh_verifystatus)
+    if (config->doh_verifystatus)
       my_setopt(fetch, FETCHOPT_DOH_SSL_VERIFYSTATUS, 1L);
 
-    if(config->falsestart)
+    if (config->falsestart)
       my_setopt(fetch, FETCHOPT_SSL_FALSESTART, 1L);
 
     my_setopt_SSLVERSION(fetch, FETCHOPT_SSLVERSION,
                          config->ssl_version | config->ssl_version_max);
-    if(config->proxy)
+    if (config->proxy)
       my_setopt_SSLVERSION(fetch, FETCHOPT_PROXY_SSLVERSION,
                            config->proxy_ssl_version);
 
     {
       long mask =
-        (config->ssl_allow_beast ?
-         FETCHSSLOPT_ALLOW_BEAST : 0) |
-        (config->ssl_allow_earlydata ?
-         FETCHSSLOPT_EARLYDATA : 0) |
-        (config->ssl_no_revoke ?
-         FETCHSSLOPT_NO_REVOKE : 0) |
-        (config->ssl_revoke_best_effort ?
-         FETCHSSLOPT_REVOKE_BEST_EFFORT : 0) |
-        (config->native_ca_store ?
-         FETCHSSLOPT_NATIVE_CA : 0) |
-        (config->ssl_auto_client_cert ?
-         FETCHSSLOPT_AUTO_CLIENT_CERT : 0);
+          (config->ssl_allow_beast ? FETCHSSLOPT_ALLOW_BEAST : 0) |
+          (config->ssl_allow_earlydata ? FETCHSSLOPT_EARLYDATA : 0) |
+          (config->ssl_no_revoke ? FETCHSSLOPT_NO_REVOKE : 0) |
+          (config->ssl_revoke_best_effort ? FETCHSSLOPT_REVOKE_BEST_EFFORT : 0) |
+          (config->native_ca_store ? FETCHSSLOPT_NATIVE_CA : 0) |
+          (config->ssl_auto_client_cert ? FETCHSSLOPT_AUTO_CLIENT_CERT : 0);
 
-      if(mask)
+      if (mask)
         my_setopt_bitmask(fetch, FETCHOPT_SSL_OPTIONS, mask);
     }
 
     {
       long mask =
-        (config->proxy_ssl_allow_beast ?
-         FETCHSSLOPT_ALLOW_BEAST : 0) |
-        (config->proxy_ssl_auto_client_cert ?
-         FETCHSSLOPT_AUTO_CLIENT_CERT : 0) |
-        (config->proxy_native_ca_store ?
-         FETCHSSLOPT_NATIVE_CA : 0);
+          (config->proxy_ssl_allow_beast ? FETCHSSLOPT_ALLOW_BEAST : 0) |
+          (config->proxy_ssl_auto_client_cert ? FETCHSSLOPT_AUTO_CLIENT_CERT : 0) |
+          (config->proxy_native_ca_store ? FETCHSSLOPT_NATIVE_CA : 0);
 
-      if(mask)
+      if (mask)
         my_setopt_bitmask(fetch, FETCHOPT_PROXY_SSL_OPTIONS, mask);
     }
   }
 
-  if(config->path_as_is)
+  if (config->path_as_is)
     my_setopt(fetch, FETCHOPT_PATH_AS_IS, 1L);
 
-  if(config->no_body || config->remote_time) {
+  if (config->no_body || config->remote_time)
+  {
     /* no body or use remote time */
     my_setopt(fetch, FETCHOPT_FILETIME, 1L);
   }
@@ -1364,23 +1437,27 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   my_setopt_slist(fetch, FETCHOPT_POSTQUOTE, config->postquote);
   my_setopt_slist(fetch, FETCHOPT_PREQUOTE, config->prequote);
 
-  if(config->cookies) {
+  if (config->cookies)
+  {
     struct fetchx_dynbuf cookies;
     struct fetch_slist *cl;
 
     /* The maximum size needs to match MAX_NAME in cookie.h */
 #define MAX_COOKIE_LINE 8200
     fetchx_dyn_init(&cookies, MAX_COOKIE_LINE);
-    for(cl = config->cookies; cl; cl = cl->next) {
-      if(cl == config->cookies)
+    for (cl = config->cookies; cl; cl = cl->next)
+    {
+      if (cl == config->cookies)
         result = fetchx_dyn_addf(&cookies, "%s", cl->data);
       else
         result = fetchx_dyn_addf(&cookies, ";%s", cl->data);
 
-      if(result) {
+      if (result)
+      {
         warnf(global,
               "skipped provided cookie, the cookie header "
-              "would go over %u bytes", MAX_COOKIE_LINE);
+              "would go over %u bytes",
+              MAX_COOKIE_LINE);
         return result;
       }
     }
@@ -1389,20 +1466,20 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
     fetchx_dyn_free(&cookies);
   }
 
-  if(config->cookiefiles) {
+  if (config->cookiefiles)
+  {
     struct fetch_slist *cfl;
 
-    for(cfl = config->cookiefiles; cfl; cfl = cfl->next)
+    for (cfl = config->cookiefiles; cfl; cfl = cfl->next)
       my_setopt_str(fetch, FETCHOPT_COOKIEFILE, cfl->data);
   }
 
   /* new in libfetch 7.9 */
-  if(config->cookiejar)
+  if (config->cookiejar)
     my_setopt_str(fetch, FETCHOPT_COOKIEJAR, config->cookiejar);
 
   /* new in libfetch 7.9.7 */
-  my_setopt(fetch, FETCHOPT_COOKIESESSION, config->cookiesession ?
-            1L : 0L);
+  my_setopt(fetch, FETCHOPT_COOKIESESSION, config->cookiesession ? 1L : 0L);
 
   my_setopt_enum(fetch, FETCHOPT_TIMECONDITION, (long)config->timecond);
   my_setopt(fetch, FETCHOPT_TIMEVALUE_LARGE, config->condtime);
@@ -1415,14 +1492,16 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   my_setopt_str(fetch, FETCHOPT_KRBLEVEL, config->krblevel);
   progressbarinit(&per->progressbar, config);
 
-  if((global->progressmode == FETCH_PROGRESS_BAR) &&
-     !global->noprogress && !global->silent) {
+  if ((global->progressmode == FETCH_PROGRESS_BAR) &&
+      !global->noprogress && !global->silent)
+  {
     /* we want the alternative style, then we have to implement it
        ourselves! */
     my_setopt(fetch, FETCHOPT_XFERINFOFUNCTION, tool_progress_cb);
     my_setopt(fetch, FETCHOPT_XFERINFODATA, per);
   }
-  else if(per->uploadfile && !strcmp(per->uploadfile, ".")) {
+  else if (per->uploadfile && !strcmp(per->uploadfile, "."))
+  {
     /* when reading from stdin in non-blocking mode, we use the progress
        function to unpause a busy read */
     my_setopt(fetch, FETCHOPT_NOPROGRESS, 0L);
@@ -1431,15 +1510,15 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   }
 
   /* new in libfetch 7.24.0: */
-  if(config->dns_servers)
+  if (config->dns_servers)
     my_setopt_str(fetch, FETCHOPT_DNS_SERVERS, config->dns_servers);
 
   /* new in libfetch 7.33.0: */
-  if(config->dns_interface)
+  if (config->dns_interface)
     my_setopt_str(fetch, FETCHOPT_DNS_INTERFACE, config->dns_interface);
-  if(config->dns_ipv4_addr)
+  if (config->dns_ipv4_addr)
     my_setopt_str(fetch, FETCHOPT_DNS_LOCAL_IP4, config->dns_ipv4_addr);
-  if(config->dns_ipv6_addr)
+  if (config->dns_ipv6_addr)
     my_setopt_str(fetch, FETCHOPT_DNS_LOCAL_IP6, config->dns_ipv6_addr);
 
   /* new in libfetch 7.6.2: */
@@ -1448,126 +1527,130 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
   /* new in libfetch 7.7: */
   my_setopt(fetch, FETCHOPT_CONNECTTIMEOUT_MS, config->connecttimeout_ms);
 
-  if(config->doh_url)
+  if (config->doh_url)
     my_setopt_str(fetch, FETCHOPT_DOH_URL, config->doh_url);
 
-  if(config->cipher_list) {
+  if (config->cipher_list)
+  {
     result = res_setopt_str(fetch, FETCHOPT_SSL_CIPHER_LIST,
                             config->cipher_list);
-    if(result == FETCHE_NOT_BUILT_IN)
+    if (result == FETCHE_NOT_BUILT_IN)
       warnf(global, "ignoring %s, not supported by libfetch with %s",
             "--ciphers", ssl_backend());
   }
-  if(config->proxy_cipher_list) {
+  if (config->proxy_cipher_list)
+  {
     result = res_setopt_str(fetch, FETCHOPT_PROXY_SSL_CIPHER_LIST,
                             config->proxy_cipher_list);
-    if(result == FETCHE_NOT_BUILT_IN)
+    if (result == FETCHE_NOT_BUILT_IN)
       warnf(global, "ignoring %s, not supported by libfetch with %s",
             "--proxy-ciphers", ssl_backend());
   }
-  if(config->cipher13_list) {
+  if (config->cipher13_list)
+  {
     result = res_setopt_str(fetch, FETCHOPT_TLS13_CIPHERS,
                             config->cipher13_list);
-    if(result == FETCHE_NOT_BUILT_IN)
+    if (result == FETCHE_NOT_BUILT_IN)
       warnf(global, "ignoring %s, not supported by libfetch with %s",
             "--tls13-ciphers", ssl_backend());
   }
-  if(config->proxy_cipher13_list) {
+  if (config->proxy_cipher13_list)
+  {
     result = res_setopt_str(fetch, FETCHOPT_PROXY_TLS13_CIPHERS,
                             config->proxy_cipher13_list);
-    if(result == FETCHE_NOT_BUILT_IN)
+    if (result == FETCHE_NOT_BUILT_IN)
       warnf(global, "ignoring %s, not supported by libfetch with %s",
             "--proxy-tls13-ciphers", ssl_backend());
   }
 
   /* new in libfetch 7.9.2: */
-  if(config->disable_epsv)
+  if (config->disable_epsv)
     /* disable it */
     my_setopt(fetch, FETCHOPT_FTP_USE_EPSV, 0L);
 
   /* new in libfetch 7.10.5 */
-  if(config->disable_eprt)
+  if (config->disable_eprt)
     /* disable it */
     my_setopt(fetch, FETCHOPT_FTP_USE_EPRT, 0L);
 
-  if(global->tracetype != TRACE_NONE) {
+  if (global->tracetype != TRACE_NONE)
+  {
     my_setopt(fetch, FETCHOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(fetch, FETCHOPT_DEBUGDATA, config);
     my_setopt(fetch, FETCHOPT_VERBOSE, 1L);
   }
 
   /* new in fetch 7.9.3 */
-  if(config->engine) {
+  if (config->engine)
+  {
     result = res_setopt_str(fetch, FETCHOPT_SSLENGINE, config->engine);
-    if(result)
+    if (result)
       return result;
   }
 
   /* new in fetch 7.10.7, extended in 7.19.4. Modified to use
      CREATE_DIR_RETRY in 7.49.0 */
   my_setopt(fetch, FETCHOPT_FTP_CREATE_MISSING_DIRS,
-            (long)(config->ftp_create_dirs ?
-                   FETCHFTP_CREATE_DIR_RETRY : FETCHFTP_CREATE_DIR_NONE));
+            (long)(config->ftp_create_dirs ? FETCHFTP_CREATE_DIR_RETRY : FETCHFTP_CREATE_DIR_NONE));
 
   /* new in fetch 7.10.8 */
-  if(config->max_filesize)
+  if (config->max_filesize)
     my_setopt(fetch, FETCHOPT_MAXFILESIZE_LARGE,
               config->max_filesize);
 
   my_setopt(fetch, FETCHOPT_IPRESOLVE, config->ip_version);
 
   /* new in fetch 7.15.5 */
-  if(config->ftp_ssl_reqd)
+  if (config->ftp_ssl_reqd)
     my_setopt_enum(fetch, FETCHOPT_USE_SSL, (long)FETCHUSESSL_ALL);
 
   /* new in fetch 7.11.0 */
-  else if(config->ftp_ssl)
+  else if (config->ftp_ssl)
     my_setopt_enum(fetch, FETCHOPT_USE_SSL, (long)FETCHUSESSL_TRY);
 
   /* new in fetch 7.16.0 */
-  else if(config->ftp_ssl_control)
+  else if (config->ftp_ssl_control)
     my_setopt_enum(fetch, FETCHOPT_USE_SSL, (long)FETCHUSESSL_CONTROL);
 
   /* new in fetch 7.16.1 */
-  if(config->ftp_ssl_ccc)
+  if (config->ftp_ssl_ccc)
     my_setopt_enum(fetch, FETCHOPT_FTP_SSL_CCC,
                    (long)config->ftp_ssl_ccc_mode);
 
   /* new in fetch 7.19.4 */
-  if(config->socks5_gssapi_nec)
+  if (config->socks5_gssapi_nec)
     my_setopt_str(fetch, FETCHOPT_SOCKS5_GSSAPI_NEC, 1L);
 
   /* new in fetch 7.55.0 */
-  if(config->socks5_auth)
+  if (config->socks5_auth)
     my_setopt_bitmask(fetch, FETCHOPT_SOCKS5_AUTH,
                       (long)config->socks5_auth);
 
   /* new in fetch 7.43.0 */
-  if(config->proxy_service_name)
+  if (config->proxy_service_name)
     my_setopt_str(fetch, FETCHOPT_PROXY_SERVICE_NAME,
                   config->proxy_service_name);
 
   /* new in fetch 7.43.0 */
-  if(config->service_name)
+  if (config->service_name)
     my_setopt_str(fetch, FETCHOPT_SERVICE_NAME,
                   config->service_name);
 
   /* fetch 7.13.0 */
   my_setopt_str(fetch, FETCHOPT_FTP_ACCOUNT, config->ftp_account);
-  my_setopt(fetch, FETCHOPT_IGNORE_CONTENT_LENGTH, config->ignorecl ?
-            1L : 0L);
+  my_setopt(fetch, FETCHOPT_IGNORE_CONTENT_LENGTH, config->ignorecl ? 1L : 0L);
 
   /* fetch 7.14.2 */
-  my_setopt(fetch, FETCHOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip ?
-            1L : 0L);
+  my_setopt(fetch, FETCHOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip ? 1L : 0L);
 
   /* fetch 7.15.1 */
-  if(proto_ftp)
+  if (proto_ftp)
     my_setopt(fetch, FETCHOPT_FTP_FILEMETHOD,
               (long)config->ftp_filemethod);
 
   /* fetch 7.15.2 */
-  if(config->localport) {
+  if (config->localport)
+  {
     my_setopt(fetch, FETCHOPT_LOCALPORT, config->localport);
     my_setopt_str(fetch, FETCHOPT_LOCALPORTRANGE, config->localportrange);
   }
@@ -1577,37 +1660,40 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
                 config->ftp_alternative_to_user);
 
   /* fetch 7.16.0 */
-  if(config->disable_sessionid)
+  if (config->disable_sessionid)
     /* disable it */
     my_setopt(fetch, FETCHOPT_SSL_SESSIONID_CACHE, 0L);
 
   /* fetch 7.16.2 */
-  if(config->raw) {
+  if (config->raw)
+  {
     my_setopt(fetch, FETCHOPT_HTTP_CONTENT_DECODING, 0L);
     my_setopt(fetch, FETCHOPT_HTTP_TRANSFER_DECODING, 0L);
   }
 
   /* fetch 7.17.1 */
-  if(!config->nokeepalive) {
+  if (!config->nokeepalive)
+  {
     my_setopt(fetch, FETCHOPT_TCP_KEEPALIVE, 1L);
-    if(config->alivetime) {
+    if (config->alivetime)
+    {
       my_setopt(fetch, FETCHOPT_TCP_KEEPIDLE, config->alivetime);
       my_setopt(fetch, FETCHOPT_TCP_KEEPINTVL, config->alivetime);
     }
-    if(config->alivecnt)
+    if (config->alivecnt)
       my_setopt(fetch, FETCHOPT_TCP_KEEPCNT, config->alivecnt);
   }
   else
     my_setopt(fetch, FETCHOPT_TCP_KEEPALIVE, 0L);
 
   /* fetch 7.20.0 */
-  if(config->tftp_blksize && proto_tftp)
+  if (config->tftp_blksize && proto_tftp)
     my_setopt(fetch, FETCHOPT_TFTP_BLKSIZE, config->tftp_blksize);
 
-  if(config->mail_from)
+  if (config->mail_from)
     my_setopt_str(fetch, FETCHOPT_MAIL_FROM, config->mail_from);
 
-  if(config->mail_rcpt)
+  if (config->mail_rcpt)
     my_setopt_slist(fetch, FETCHOPT_MAIL_RCPT, config->mail_rcpt);
 
   /* fetch 7.69.x */
@@ -1615,141 +1701,150 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
             config->mail_rcpt_allowfails ? 1L : 0L);
 
   /* fetch 7.20.x */
-  if(config->ftp_pret)
+  if (config->ftp_pret)
     my_setopt(fetch, FETCHOPT_FTP_USE_PRET, 1L);
 
-  if(config->create_file_mode)
+  if (config->create_file_mode)
     my_setopt(fetch, FETCHOPT_NEW_FILE_PERMS, config->create_file_mode);
 
-  if(config->proto_present)
+  if (config->proto_present)
     my_setopt_str(fetch, FETCHOPT_PROTOCOLS_STR, config->proto_str);
-  if(config->proto_redir_present)
+  if (config->proto_redir_present)
     my_setopt_str(fetch, FETCHOPT_REDIR_PROTOCOLS_STR,
                   config->proto_redir_str);
 
   my_setopt(fetch, FETCHOPT_HEADERFUNCTION, tool_header_cb);
   my_setopt(fetch, FETCHOPT_HEADERDATA, per);
 
-  if(config->resolve)
+  if (config->resolve)
     /* new in 7.21.3 */
     my_setopt_slist(fetch, FETCHOPT_RESOLVE, config->resolve);
 
-  if(config->connect_to)
+  if (config->connect_to)
     /* new in 7.49.0 */
     my_setopt_slist(fetch, FETCHOPT_CONNECT_TO, config->connect_to);
 
   /* new in 7.21.4 */
-  if(feature_tls_srp) {
-    if(config->tls_username)
+  if (feature_tls_srp)
+  {
+    if (config->tls_username)
       my_setopt_str(fetch, FETCHOPT_TLSAUTH_USERNAME,
                     config->tls_username);
-    if(config->tls_password)
+    if (config->tls_password)
       my_setopt_str(fetch, FETCHOPT_TLSAUTH_PASSWORD,
                     config->tls_password);
-    if(config->tls_authtype)
+    if (config->tls_authtype)
       my_setopt_str(fetch, FETCHOPT_TLSAUTH_TYPE,
                     config->tls_authtype);
-    if(config->proxy_tls_username)
+    if (config->proxy_tls_username)
       my_setopt_str(fetch, FETCHOPT_PROXY_TLSAUTH_USERNAME,
                     config->proxy_tls_username);
-    if(config->proxy_tls_password)
+    if (config->proxy_tls_password)
       my_setopt_str(fetch, FETCHOPT_PROXY_TLSAUTH_PASSWORD,
                     config->proxy_tls_password);
-    if(config->proxy_tls_authtype)
+    if (config->proxy_tls_authtype)
       my_setopt_str(fetch, FETCHOPT_PROXY_TLSAUTH_TYPE,
                     config->proxy_tls_authtype);
   }
 
   /* new in 7.22.0 */
-  if(config->gssapi_delegation)
+  if (config->gssapi_delegation)
     my_setopt_str(fetch, FETCHOPT_GSSAPI_DELEGATION,
                   config->gssapi_delegation);
 
-  if(config->mail_auth)
+  if (config->mail_auth)
     my_setopt_str(fetch, FETCHOPT_MAIL_AUTH, config->mail_auth);
 
   /* new in 7.66.0 */
-  if(config->sasl_authzid)
+  if (config->sasl_authzid)
     my_setopt_str(fetch, FETCHOPT_SASL_AUTHZID, config->sasl_authzid);
 
   /* new in 7.31.0 */
-  if(config->sasl_ir)
+  if (config->sasl_ir)
     my_setopt(fetch, FETCHOPT_SASL_IR, 1L);
 
-  if(config->noalpn) {
+  if (config->noalpn)
+  {
     my_setopt(fetch, FETCHOPT_SSL_ENABLE_ALPN, 0L);
   }
 
   /* new in 7.40.0, abstract support added in 7.53.0 */
-  if(config->unix_socket_path) {
-    if(config->abstract_unix_socket) {
+  if (config->unix_socket_path)
+  {
+    if (config->abstract_unix_socket)
+    {
       my_setopt_str(fetch, FETCHOPT_ABSTRACT_UNIX_SOCKET,
                     config->unix_socket_path);
     }
-    else {
+    else
+    {
       my_setopt_str(fetch, FETCHOPT_UNIX_SOCKET_PATH,
                     config->unix_socket_path);
     }
   }
 
   /* new in 7.45.0 */
-  if(config->proto_default)
+  if (config->proto_default)
     my_setopt_str(fetch, FETCHOPT_DEFAULT_PROTOCOL, config->proto_default);
 
   /* new in 7.47.0 */
-  if(config->expect100timeout_ms > 0)
+  if (config->expect100timeout_ms > 0)
     my_setopt_str(fetch, FETCHOPT_EXPECT_100_TIMEOUT_MS,
                   config->expect100timeout_ms);
 
   /* new in 7.48.0 */
-  if(config->tftp_no_options && proto_tftp)
+  if (config->tftp_no_options && proto_tftp)
     my_setopt(fetch, FETCHOPT_TFTP_NO_OPTIONS, 1L);
 
   /* new in 7.59.0 */
-  if(config->happy_eyeballs_timeout_ms != FETCH_HET_DEFAULT)
+  if (config->happy_eyeballs_timeout_ms != FETCH_HET_DEFAULT)
     my_setopt(fetch, FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
               config->happy_eyeballs_timeout_ms);
 
   /* new in 7.60.0 */
-  if(config->haproxy_protocol)
+  if (config->haproxy_protocol)
     my_setopt(fetch, FETCHOPT_HAPROXYPROTOCOL, 1L);
 
   /* new in 8.2.0 */
-  if(config->haproxy_clientip)
+  if (config->haproxy_clientip)
     my_setopt_str(fetch, FETCHOPT_HAPROXY_CLIENT_IP,
                   config->haproxy_clientip);
 
-  if(config->disallow_username_in_url)
+  if (config->disallow_username_in_url)
     my_setopt(fetch, FETCHOPT_DISALLOW_USERNAME_IN_URL, 1L);
 
-  if(config->altsvc)
+  if (config->altsvc)
     my_setopt_str(fetch, FETCHOPT_ALTSVC, config->altsvc);
 
-  if(config->hsts)
+  if (config->hsts)
     my_setopt_str(fetch, FETCHOPT_HSTS, config->hsts);
 
-  if(feature_ech) {
+  if (feature_ech)
+  {
     /* only if enabled in libfetch */
-    if(config->ech) /* only if set (optional) */
+    if (config->ech) /* only if set (optional) */
       my_setopt_str(fetch, FETCHOPT_ECH, config->ech);
-    if(config->ech_public) /* only if set (optional) */
+    if (config->ech_public) /* only if set (optional) */
       my_setopt_str(fetch, FETCHOPT_ECH, config->ech_public);
-    if(config->ech_config) /* only if set (optional) */
+    if (config->ech_config) /* only if set (optional) */
       my_setopt_str(fetch, FETCHOPT_ECH, config->ech_config);
   }
 
   /* new in 8.9.0 */
-  if(config->ip_tos > 0 || config->vlan_priority > 0) {
+  if (config->ip_tos > 0 || config->vlan_priority > 0)
+  {
 #if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
     my_setopt(fetch, FETCHOPT_SOCKOPTFUNCTION, sockopt_callback);
     my_setopt(fetch, FETCHOPT_SOCKOPTDATA, config);
 #else
-    if(config->ip_tos > 0) {
+    if (config->ip_tos > 0)
+    {
       errorf(config->global,
              "Type of service is not supported in this build.");
       result = FETCHE_NOT_BUILT_IN;
     }
-    if(config->vlan_priority > 0) {
+    if (config->vlan_priority > 0)
+    {
       errorf(config->global,
              "VLAN priority is not supported in this build.");
       result = FETCHE_NOT_BUILT_IN;
@@ -1760,33 +1855,38 @@ static FETCHcode config2setopts(struct GlobalConfig *global,
 }
 
 static FETCHcode append2query(struct GlobalConfig *global,
-                             struct OperationConfig *config,
-                             struct per_transfer *per,
-                             const char *q)
+                              struct OperationConfig *config,
+                              struct per_transfer *per,
+                              const char *q)
 {
   FETCHcode result = FETCHE_OK;
   FETCHU *uh = fetch_url();
-  if(uh) {
+  if (uh)
+  {
     FETCHUcode uerr;
     uerr = fetch_url_set(uh, FETCHUPART_URL, per->url,
-                        FETCHU_GUESS_SCHEME);
-    if(uerr) {
+                         FETCHU_GUESS_SCHEME);
+    if (uerr)
+    {
       result = urlerr_cvt(uerr);
       errorf(global, "(%d) Could not parse the URL, "
-             "failed to set query", result);
+                     "failed to set query",
+             result);
       config->synthetic_error = TRUE;
     }
-    else {
+    else
+    {
       char *updated = NULL;
       uerr = fetch_url_set(uh, FETCHUPART_QUERY, q, FETCHU_APPENDQUERY);
-      if(!uerr)
+      if (!uerr)
         uerr = fetch_url_get(uh, FETCHUPART_URL, &updated,
-                            FETCHU_GUESS_SCHEME);
-      if(uerr)
+                             FETCHU_GUESS_SCHEME);
+      if (uerr)
         result = urlerr_cvt(uerr);
-      else {
+      else
+      {
         Curl_safefree(per->url); /* free previous URL */
-        per->url = updated; /* use our new URL instead! */
+        per->url = updated;      /* use our new URL instead! */
       }
     }
     fetch_url_cleanup(uh);
@@ -1796,11 +1896,11 @@ static FETCHcode append2query(struct GlobalConfig *global,
 
 /* create the next (singular) transfer */
 static FETCHcode single_transfer(struct GlobalConfig *global,
-                                struct OperationConfig *config,
-                                FETCHSH *share,
-                                bool capath_from_env,
-                                bool *added,
-                                bool *skipped)
+                                 struct OperationConfig *config,
+                                 FETCHSH *share,
+                                 bool capath_from_env,
+                                 bool *added,
+                                 bool *skipped)
 {
   FETCHcode result = FETCHE_OK;
   struct getout *urlnode;
@@ -1811,47 +1911,55 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
 
   *skipped = *added = FALSE; /* not yet */
 
-  if(config->postfields) {
-    if(config->use_httpget) {
-      if(!httpgetfields) {
+  if (config->postfields)
+  {
+    if (config->use_httpget)
+    {
+      if (!httpgetfields)
+      {
         /* Use the postfields data for an HTTP get */
         httpgetfields = state->httpgetfields = config->postfields;
         config->postfields = NULL;
-        if(SetHTTPrequest(config, (config->no_body ? TOOL_HTTPREQ_HEAD :
-                                   TOOL_HTTPREQ_GET), &config->httpreq)) {
+        if (SetHTTPrequest(config, (config->no_body ? TOOL_HTTPREQ_HEAD : TOOL_HTTPREQ_GET), &config->httpreq))
+        {
           result = FETCHE_FAILED_INIT;
         }
       }
     }
-    else {
-      if(SetHTTPrequest(config, TOOL_HTTPREQ_SIMPLEPOST, &config->httpreq))
+    else
+    {
+      if (SetHTTPrequest(config, TOOL_HTTPREQ_SIMPLEPOST, &config->httpreq))
         result = FETCHE_FAILED_INIT;
     }
-    if(result)
+    if (result)
       goto fail;
   }
-  if(!state->urlnode) {
+  if (!state->urlnode)
+  {
     /* first time caller, setup things */
     state->urlnode = config->url_list;
     state->infilenum = 1;
   }
 
   result = set_cert_types(config);
-  if(result)
+  if (result)
     goto fail;
 
-  for(; state->urlnode; state->urlnode = urlnode->next) {
+  for (; state->urlnode; state->urlnode = urlnode->next)
+  {
     static bool warn_more_options = FALSE;
     fetch_off_t urlnum;
 
     urlnode = state->urlnode;
     /* urlnode->url is the full URL or NULL */
-    if(!urlnode->url) {
+    if (!urlnode->url)
+    {
       /* This node has no URL. Free node data without destroying the
          node itself nor modifying next pointer and continue to next */
       urlnode->flags = 0;
       state->up = 0;
-      if(!warn_more_options) {
+      if (!warn_more_options)
+      {
         /* only show this once */
         warnf(config->global, "Got more output options than URLs");
         warn_more_options = TRUE;
@@ -1860,50 +1968,56 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
     }
 
     /* save outfile pattern before expansion */
-    if(urlnode->outfile && !state->outfiles) {
+    if (urlnode->outfile && !state->outfiles)
+    {
       state->outfiles = strdup(urlnode->outfile);
-      if(!state->outfiles) {
+      if (!state->outfiles)
+      {
         errorf(global, "out of memory");
         result = FETCHE_OUT_OF_MEMORY;
         break;
       }
     }
 
-    if(!config->globoff && urlnode->infile && !state->inglob) {
+    if (!config->globoff && urlnode->infile && !state->inglob)
+    {
       /* Unless explicitly shut off */
       result = glob_url(&state->inglob, urlnode->infile, &state->infilenum,
-                        (!global->silent || global->showerror) ?
-                        tool_stderr : NULL);
-      if(result)
+                        (!global->silent || global->showerror) ? tool_stderr : NULL);
+      if (result)
         break;
     }
 
-
-    if(state->up || urlnode->infile) {
-      if(!state->uploadfile) {
-        if(state->inglob) {
+    if (state->up || urlnode->infile)
+    {
+      if (!state->uploadfile)
+      {
+        if (state->inglob)
+        {
           result = glob_next_url(&state->uploadfile, state->inglob);
-          if(result == FETCHE_OUT_OF_MEMORY)
+          if (result == FETCHE_OUT_OF_MEMORY)
             errorf(global, "out of memory");
         }
-        else if(!state->up) {
+        else if (!state->up)
+        {
           /* copy the allocated string */
           state->uploadfile = urlnode->infile;
           urlnode->infile = NULL;
         }
       }
-      if(result)
+      if (result)
         break;
     }
 
-    if(!state->urlnum) {
-      if(!config->globoff) {
+    if (!state->urlnum)
+    {
+      if (!config->globoff)
+      {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         result = glob_url(&state->urls, urlnode->url, &state->urlnum,
-                          (!global->silent || global->showerror) ?
-                          tool_stderr : NULL);
-        if(result)
+                          (!global->silent || global->showerror) ? tool_stderr : NULL);
+        if (result)
           break;
         urlnum = state->urlnum;
       }
@@ -1913,7 +2027,8 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
     else
       urlnum = state->urlnum;
 
-    if(state->up < state->infilenum) {
+    if (state->up < state->infilenum)
+    {
       struct per_transfer *per = NULL;
       struct OutStruct *outs;
       struct OutStruct *heads;
@@ -1928,27 +2043,30 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
       etag_save->stream = stdout;
 
       /* --etag-compare */
-      if(config->etag_compare_file) {
+      if (config->etag_compare_file)
+      {
         char *etag_from_file = NULL;
         char *header = NULL;
         ParameterError pe;
 
         /* open file for reading: */
         FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
-        if(!file)
+        if (!file)
           warnf(global, "Failed to open %s: %s", config->etag_compare_file,
                 strerror(errno));
 
-        if((PARAM_OK == file2string(&etag_from_file, file)) &&
-           etag_from_file) {
+        if ((PARAM_OK == file2string(&etag_from_file, file)) &&
+            etag_from_file)
+        {
           header = aprintf("If-None-Match: %s", etag_from_file);
           Curl_safefree(etag_from_file);
         }
         else
           header = aprintf("If-None-Match: \"\"");
 
-        if(!header) {
-          if(file)
+        if (!header)
+        {
+          if (file)
             fclose(file);
           errorf(global,
                  "Failed to allocate memory for custom etag header");
@@ -1960,64 +2078,76 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
         pe = add2list(&config->headers, header);
         Curl_safefree(header);
 
-        if(file)
+        if (file)
           fclose(file);
-        if(pe != PARAM_OK) {
+        if (pe != PARAM_OK)
+        {
           result = FETCHE_OUT_OF_MEMORY;
           break;
         }
       }
 
-      if(config->etag_save_file) {
-        if(config->create_dirs) {
+      if (config->etag_save_file)
+      {
+        if (config->create_dirs)
+        {
           result = create_dir_hierarchy(config->etag_save_file, global);
-          if(result)
+          if (result)
             break;
         }
 
         /* open file for output: */
-        if(strcmp(config->etag_save_file, "-")) {
+        if (strcmp(config->etag_save_file, "-"))
+        {
           FILE *newfile = fopen(config->etag_save_file, "ab");
-          if(!newfile) {
+          if (!newfile)
+          {
             warnf(global, "Failed creating file for saving etags: \"%s\". "
-                  "Skip this transfer", config->etag_save_file);
+                          "Skip this transfer",
+                  config->etag_save_file);
             Curl_safefree(state->outfiles);
             glob_cleanup(&state->urls);
             return FETCHE_OK;
           }
-          else {
+          else
+          {
             etag_save->filename = config->etag_save_file;
             etag_save->s_isreg = TRUE;
             etag_save->fopened = TRUE;
             etag_save->stream = newfile;
           }
         }
-        else {
+        else
+        {
           /* always use binary mode for protocol header output */
           FETCH_SET_BINMODE(etag_save->stream);
         }
       }
 
       fetch = fetch_easy_init();
-      if(fetch)
+      if (fetch)
         result = add_per_transfer(&per);
       else
         result = FETCHE_OUT_OF_MEMORY;
-      if(result) {
+      if (result)
+      {
         fetch_easy_cleanup(fetch);
-        if(etag_save->fopened)
+        if (etag_save->fopened)
           fclose(etag_save->stream);
         break;
       }
       per->etag_save = etag_first; /* copy the whole struct */
-      if(state->uploadfile) {
+      if (state->uploadfile)
+      {
         per->uploadfile = strdup(state->uploadfile);
-        if(!per->uploadfile) {
+        if (!per->uploadfile)
+        {
           fetch_easy_cleanup(fetch);
           result = FETCHE_OUT_OF_MEMORY;
           break;
         }
-        if(SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq)) {
+        if (SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq))
+        {
           Curl_safefree(per->uploadfile);
           fetch_easy_cleanup(fetch);
           result = FETCHE_FAILED_INIT;
@@ -2034,14 +2164,17 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
       heads->stream = stdout;
 
       /* Single header file for all URLs */
-      if(config->headerfile) {
+      if (config->headerfile)
+      {
         /* open file for output: */
-        if(!strcmp(config->headerfile, "%")) {
+        if (!strcmp(config->headerfile, "%"))
+        {
           heads->stream = stderr;
           /* use binary mode for protocol header output */
           FETCH_SET_BINMODE(heads->stream);
         }
-        else if(strcmp(config->headerfile, "-")) {
+        else if (strcmp(config->headerfile, "-"))
+        {
           FILE *newfile;
 
           /*
@@ -2053,32 +2186,37 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
            * OperationConfig, so that it does not need to be opened/closed
            * for every transfer.
            */
-          if(config->create_dirs) {
+          if (config->create_dirs)
+          {
             result = create_dir_hierarchy(config->headerfile, global);
             /* create_dir_hierarchy shows error upon FETCHE_WRITE_ERROR */
-            if(result)
+            if (result)
               break;
           }
-          if(!per->prev || per->prev->config != config) {
+          if (!per->prev || per->prev->config != config)
+          {
             newfile = fopen(config->headerfile, "wb");
-            if(newfile)
+            if (newfile)
               fclose(newfile);
           }
           newfile = fopen(config->headerfile, "ab");
 
-          if(!newfile) {
+          if (!newfile)
+          {
             errorf(global, "Failed to open %s", config->headerfile);
             result = FETCHE_WRITE_ERROR;
             break;
           }
-          else {
+          else
+          {
             heads->filename = config->headerfile;
             heads->s_isreg = TRUE;
             heads->fopened = TRUE;
             heads->stream = newfile;
           }
         }
-        else {
+        else
+        {
           /* always use binary mode for protocol header output */
           FETCH_SET_BINMODE(heads->stream);
         }
@@ -2095,59 +2233,70 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
       /* default output stream is stdout */
       outs->stream = stdout;
 
-      if(state->urls) {
+      if (state->urls)
+      {
         result = glob_next_url(&per->url, state->urls);
-        if(result)
+        if (result)
           break;
       }
-      else if(!state->li) {
+      else if (!state->li)
+      {
         per->url = strdup(urlnode->url);
-        if(!per->url) {
+        if (!per->url)
+        {
           result = FETCHE_OUT_OF_MEMORY;
           break;
         }
       }
       else
         per->url = NULL;
-      if(!per->url)
+      if (!per->url)
         break;
 
-      if(state->outfiles) {
+      if (state->outfiles)
+      {
         per->outfile = strdup(state->outfiles);
-        if(!per->outfile) {
+        if (!per->outfile)
+        {
           result = FETCHE_OUT_OF_MEMORY;
           break;
         }
       }
 
-      if(((urlnode->flags&GETOUT_USEREMOTE) ||
-          (per->outfile && strcmp("-", per->outfile)))) {
+      if (((urlnode->flags & GETOUT_USEREMOTE) ||
+           (per->outfile && strcmp("-", per->outfile))))
+      {
 
         /*
          * We have specified a filename to store the result in, or we have
          * decided we want to use the remote filename.
          */
 
-        if(!per->outfile) {
+        if (!per->outfile)
+        {
           /* extract the filename from the URL */
           result = get_url_file_name(global, &per->outfile, per->url);
-          if(result) {
+          if (result)
+          {
             errorf(global, "Failed to extract a filename"
-                   " from the URL to use for storage");
+                           " from the URL to use for storage");
             break;
           }
         }
-        else if(state->urls) {
+        else if (state->urls)
+        {
           /* fill '#1' ... '#9' terms from URL pattern */
           char *storefile = per->outfile;
           result = glob_match_url(&per->outfile, storefile, state->urls);
           Curl_safefree(storefile);
-          if(result) {
+          if (result)
+          {
             /* bad globbing */
             warnf(global, "bad output glob");
             break;
           }
-          if(!*per->outfile) {
+          if (!*per->outfile)
+          {
             warnf(global, "output glob produces empty string");
             result = FETCHE_WRITE_ERROR;
             break;
@@ -2155,9 +2304,11 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
         }
         DEBUGASSERT(per->outfile);
 
-        if(config->output_dir && *config->output_dir) {
+        if (config->output_dir && *config->output_dir)
+        {
           char *d = aprintf("%s/%s", config->output_dir, per->outfile);
-          if(!d) {
+          if (!d)
+          {
             result = FETCHE_WRITE_ERROR;
             break;
           }
@@ -2167,16 +2318,19 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
         /* Create the directory hierarchy, if not pre-existent to a multiple
            file output call */
 
-        if(config->create_dirs) {
+        if (config->create_dirs)
+        {
           result = create_dir_hierarchy(per->outfile, global);
           /* create_dir_hierarchy shows error upon FETCHE_WRITE_ERROR */
-          if(result)
+          if (result)
             break;
         }
 
-        if(config->skip_existing) {
+        if (config->skip_existing)
+        {
           struct_stat fileinfo;
-          if(!stat(per->outfile, &fileinfo)) {
+          if (!stat(per->outfile, &fileinfo))
+          {
             /* file is present */
             notef(global, "skips transfer, \"%s\" exists locally",
                   per->outfile);
@@ -2184,18 +2338,19 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
             *skipped = TRUE;
           }
         }
-        if((urlnode->flags & GETOUT_USEREMOTE)
-           && config->content_disposition) {
+        if ((urlnode->flags & GETOUT_USEREMOTE) && config->content_disposition)
+        {
           /* Our header callback MIGHT set the filename */
           DEBUGASSERT(!outs->filename);
         }
 
-        if(config->resume_from_current) {
+        if (config->resume_from_current)
+        {
           /* We are told to continue from where we are now. Get the size
              of the file as it is now and open it for append instead */
           struct_stat fileinfo;
           /* VMS -- Danger, the filesize is only valid for stream files */
-          if(0 == stat(per->outfile, &fileinfo))
+          if (0 == stat(per->outfile, &fileinfo))
             /* set offset to current file size: */
             config->resume_from = fileinfo.st_size;
           else
@@ -2203,7 +2358,8 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
             config->resume_from = 0;
         }
 
-        if(config->resume_from) {
+        if (config->resume_from)
+        {
 #ifdef __VMS
           /* open file for output, forcing VMS output format into stream
              mode which is needed for stat() call above to always work. */
@@ -2213,7 +2369,8 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
           /* open file for output: */
           FILE *file = fopen(per->outfile, "ab");
 #endif
-          if(!file) {
+          if (!file)
+          {
             errorf(global, "cannot open '%s'", per->outfile);
             result = FETCHE_WRITE_ERROR;
             break;
@@ -2222,31 +2379,37 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
           outs->stream = file;
           outs->init = config->resume_from;
         }
-        else {
+        else
+        {
           outs->stream = NULL; /* open when needed */
         }
         outs->filename = per->outfile;
         outs->s_isreg = TRUE;
       }
 
-      if(per->uploadfile && !stdin_upload(per->uploadfile)) {
+      if (per->uploadfile && !stdin_upload(per->uploadfile))
+      {
         /*
          * We have specified a file to upload and it is not "-".
          */
         result = add_file_name_to_url(per->fetch, &per->url,
                                       per->uploadfile);
-        if(result)
+        if (result)
           break;
       }
-      else if(per->uploadfile && stdin_upload(per->uploadfile)) {
+      else if (per->uploadfile && stdin_upload(per->uploadfile))
+      {
         /* count to see if there are more than one auth bit set
            in the authtype field */
         int authbits = 0;
         int bitcheck = 0;
-        while(bitcheck < 32) {
-          if(config->authtype & (1UL << bitcheck++)) {
+        while (bitcheck < 32)
+        {
+          if (config->authtype & (1UL << bitcheck++))
+          {
             authbits++;
-            if(authbits > 1) {
+            if (authbits > 1)
+            {
               /* more than one, we are done! */
               break;
             }
@@ -2257,7 +2420,8 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
          * If the user has also selected --anyauth or --proxy-anyauth
          * we should warn them.
          */
-        if(config->proxyanyauth || (authbits > 1)) {
+        if (config->proxyanyauth || (authbits > 1))
+        {
           warnf(global,
                 "Using --anyauth or --proxy-anyauth with upload from stdin"
                 " involves a big risk of it not working. Use a temporary"
@@ -2268,37 +2432,41 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
         DEBUGASSERT(per->infd == STDIN_FILENO);
 
         FETCH_SET_BINMODE(stdin);
-        if(!strcmp(per->uploadfile, ".")) {
-          if(fetchx_nonblock((fetch_socket_t)per->infd, TRUE) < 0)
+        if (!strcmp(per->uploadfile, "."))
+        {
+          if (fetchx_nonblock((fetch_socket_t)per->infd, TRUE) < 0)
             warnf(global,
                   "fcntl failed on fd=%d: %s", per->infd, strerror(errno));
         }
       }
 
-      if(per->uploadfile && config->resume_from_current)
+      if (per->uploadfile && config->resume_from_current)
         config->resume_from = -1; /* -1 will then force get-it-yourself */
 
-      if(output_expected(per->url, per->uploadfile) && outs->stream &&
-         isatty(fileno(outs->stream)))
+      if (output_expected(per->url, per->uploadfile) && outs->stream &&
+          isatty(fileno(outs->stream)))
         /* we send the output to a tty, therefore we switch off the progress
            meter */
         per->noprogress = global->noprogress = global->isatty = TRUE;
-      else {
+      else
+      {
         /* progress meter is per download, so restore config
            values */
         per->noprogress = global->noprogress = orig_noprogress;
         global->isatty = orig_isatty;
       }
 
-      if(httpgetfields || config->query) {
+      if (httpgetfields || config->query)
+      {
         result = append2query(global, config, per,
                               httpgetfields ? httpgetfields : config->query);
-        if(result)
+        if (result)
           break;
       }
 
-      if((!per->outfile || !strcmp(per->outfile, "-")) &&
-         !config->use_ascii) {
+      if ((!per->outfile || !strcmp(per->outfile, "-")) &&
+          !config->use_ascii)
+      {
         /* We get the output to stdout and we have not got the ASCII/text
            flag, then set stdout to be binary */
         FETCH_SET_BINMODE(stdout);
@@ -2306,9 +2474,9 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
 
       /* explicitly passed to stdout means okaying binary gunk */
       config->terminal_binary_ok =
-        (per->outfile && !strcmp(per->outfile, "-"));
+          (per->outfile && !strcmp(per->outfile, "-"));
 
-      if(config->content_disposition && (urlnode->flags & GETOUT_USEREMOTE))
+      if (config->content_disposition && (urlnode->flags & GETOUT_USEREMOTE))
         hdrcbdata->honor_cd_filename = TRUE;
       else
         hdrcbdata->honor_cd_filename = FALSE;
@@ -2321,19 +2489,19 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
 
       result = config2setopts(global, config, per, capath_from_env,
                               fetch, share);
-      if(result)
+      if (result)
         break;
 
       /* initialize retry vars for loop below */
-      per->retry_sleep_default = (config->retry_delay) ?
-        config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
+      per->retry_sleep_default = (config->retry_delay) ? config->retry_delay * 1000L : RETRY_SLEEP_DEFAULT; /* ms */
       per->retry_remaining = config->req_retry;
       per->retry_sleep = per->retry_sleep_default; /* ms */
       per->retrystart = tvnow();
 
       state->li++;
       /* Here's looping around each globbed URL */
-      if(state->li >= urlnum) {
+      if (state->li >= urlnum)
+      {
         state->li = 0;
         state->urlnum = 0; /* forced reglob of URLs */
         glob_cleanup(&state->urls);
@@ -2341,7 +2509,8 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
         Curl_safefree(state->uploadfile); /* clear it to get the next */
       }
     }
-    else {
+    else
+    {
       /* Free this URL node data without destroying the
          node itself nor modifying next pointer. */
       urlnode->flags = 0;
@@ -2359,7 +2528,8 @@ static FETCHcode single_transfer(struct GlobalConfig *global,
   }
   Curl_safefree(state->outfiles);
 fail:
-  if(!*added || result) {
+  if (!*added || result)
+  {
     *added = FALSE;
     single_transfer_cleanup(config);
   }
@@ -2374,10 +2544,10 @@ static long all_added; /* number of easy handles currently added */
  * transfers were added.
  */
 static FETCHcode add_parallel_transfers(struct GlobalConfig *global,
-                                       FETCHM *multi,
-                                       FETCHSH *share,
-                                       bool *morep,
-                                       bool *addedp)
+                                        FETCHM *multi,
+                                        FETCHSH *share,
+                                        bool *morep,
+                                        bool *addedp)
 {
   struct per_transfer *per;
   FETCHcode result = FETCHE_OK;
@@ -2386,20 +2556,24 @@ static FETCHcode add_parallel_transfers(struct GlobalConfig *global,
   char *errorbuf;
   *addedp = FALSE;
   *morep = FALSE;
-  if(all_pers < (global->parallel_max*2)) {
+  if (all_pers < (global->parallel_max * 2))
+  {
     bool skipped = FALSE;
-    do {
+    do
+    {
       result = create_transfer(global, share, addedp, &skipped);
-      if(result)
+      if (result)
         return result;
-    } while(skipped);
+    } while (skipped);
   }
-  for(per = transfers; per && (all_added < global->parallel_max);
-      per = per->next) {
-    if(per->added || per->skip)
+  for (per = transfers; per && (all_added < global->parallel_max);
+       per = per->next)
+  {
+    if (per->added || per->skip)
       /* already added or to be skipped */
       continue;
-    if(per->startat && (time(NULL) < per->startat)) {
+    if (per->startat && (time(NULL) < per->startat))
+    {
       /* this is still delaying */
       sleeping = TRUE;
       continue;
@@ -2407,42 +2581,46 @@ static FETCHcode add_parallel_transfers(struct GlobalConfig *global,
     per->added = TRUE;
 
     result = pre_transfer(global, per);
-    if(result)
+    if (result)
       return result;
 
     errorbuf = malloc(FETCH_ERROR_SIZE);
-    if(!errorbuf)
+    if (!errorbuf)
       return FETCHE_OUT_OF_MEMORY;
 
     /* parallel connect means that we do not set PIPEWAIT since pipewait
        will make libfetch prefer multiplexing */
     (void)fetch_easy_setopt(per->fetch, FETCHOPT_PIPEWAIT,
-                           global->parallel_connect ? 0L : 1L);
+                            global->parallel_connect ? 0L : 1L);
     (void)fetch_easy_setopt(per->fetch, FETCHOPT_PRIVATE, per);
     (void)fetch_easy_setopt(per->fetch, FETCHOPT_XFERINFOFUNCTION, xferinfo_cb);
     (void)fetch_easy_setopt(per->fetch, FETCHOPT_XFERINFODATA, per);
     (void)fetch_easy_setopt(per->fetch, FETCHOPT_NOPROGRESS, 0L);
 #ifdef DEBUGBUILD
-    if(getenv("FETCH_FORBID_REUSE"))
+    if (getenv("FETCH_FORBID_REUSE"))
       (void)fetch_easy_setopt(per->fetch, FETCHOPT_FORBID_REUSE, 1L);
 #endif
 
     mcode = fetch_multi_add_handle(multi, per->fetch);
-    if(mcode) {
+    if (mcode)
+    {
       DEBUGASSERT(mcode == FETCHM_OUT_OF_MEMORY);
       result = FETCHE_OUT_OF_MEMORY;
     }
 
-    if(!result) {
+    if (!result)
+    {
       bool getadded = FALSE;
       bool skipped = FALSE;
-      do {
+      do
+      {
         result = create_transfer(global, share, &getadded, &skipped);
-        if(result)
+        if (result)
           break;
-      } while(skipped);
+      } while (skipped);
     }
-    if(result) {
+    if (result)
+    {
       free(errorbuf);
       return result;
     }
@@ -2457,7 +2635,8 @@ static FETCHcode add_parallel_transfers(struct GlobalConfig *global,
   return FETCHE_OK;
 }
 
-struct parastate {
+struct parastate
+{
   struct GlobalConfig *global;
   FETCHM *multi;
   FETCHSH *share;
@@ -2476,16 +2655,18 @@ struct parastate {
 
 #if defined(DEBUGBUILD) && defined(USE_LIBUV)
 
-#define DEBUG_UV    0
+#define DEBUG_UV 0
 
 /* object to pass to the callbacks */
-struct datauv {
+struct datauv
+{
   uv_timer_t timeout;
   uv_loop_t *loop;
   struct parastate *s;
 };
 
-struct contextuv {
+struct contextuv
+{
   uv_poll_t poll_handle;
   fetch_socket_t sockfd;
   struct datauv *uv;
@@ -2498,17 +2679,18 @@ static void check_multi_info(struct datauv *uv)
   FETCHcode result;
 
   result = check_finished(uv->s);
-  if(result && !uv->s->result)
+  if (result && !uv->s->result)
     uv->s->result = result;
 
-  if(uv->s->more_transfers) {
+  if (uv->s->more_transfers)
+  {
     result = add_parallel_transfers(uv->s->global, uv->s->multi,
                                     uv->s->share,
                                     &uv->s->more_transfers,
                                     &uv->s->added_transfers);
-    if(result && !uv->s->result)
+    if (result && !uv->s->result)
       uv->s->result = result;
-    if(result)
+    if (result)
       uv_stop(uv->loop);
   }
 }
@@ -2517,27 +2699,28 @@ static void check_multi_info(struct datauv *uv)
 static void on_uv_socket(uv_poll_t *req, int status, int events)
 {
   int flags = 0;
-  struct contextuv *c = (struct contextuv *) req->data;
+  struct contextuv *c = (struct contextuv *)req->data;
   (void)status;
-  if(events & UV_READABLE)
+  if (events & UV_READABLE)
     flags |= FETCH_CSELECT_IN;
-  if(events & UV_WRITABLE)
+  if (events & UV_WRITABLE)
     flags |= FETCH_CSELECT_OUT;
 
   fetch_multi_socket_action(c->uv->s->multi, c->sockfd, flags,
-                           &c->uv->s->still_running);
+                            &c->uv->s->still_running);
 }
 
 /* callback from libuv when timeout expires */
 static void on_uv_timeout(uv_timer_t *req)
 {
-  struct datauv *uv = (struct datauv *) req->data;
+  struct datauv *uv = (struct datauv *)req->data;
 #if DEBUG_UV
   fprintf(tool_stderr, "parallel_event: on_uv_timeout\n");
 #endif
-  if(uv && uv->s) {
+  if (uv && uv->s)
+  {
     fetch_multi_socket_action(uv->s->multi, FETCH_SOCKET_TIMEOUT, 0,
-                             &uv->s->still_running);
+                              &uv->s->still_running);
     check_multi_info(uv);
   }
 }
@@ -2550,10 +2733,11 @@ static int cb_timeout(FETCHM *multi, long timeout_ms,
 #if DEBUG_UV
   fprintf(tool_stderr, "parallel_event: cb_timeout=%ld\n", timeout_ms);
 #endif
-  if(timeout_ms < 0)
+  if (timeout_ms < 0)
     uv_timer_stop(&uv->timeout);
-  else {
-    if(timeout_ms == 0)
+  else
+  {
+    if (timeout_ms == 0)
       timeout_ms = 1; /* 0 means call fetch_multi_socket_action asap but NOT
                          within the callback itself */
     uv_timer_start(&uv->timeout, on_uv_timeout, timeout_ms,
@@ -2567,7 +2751,7 @@ static struct contextuv *create_context(fetch_socket_t sockfd,
 {
   struct contextuv *c;
 
-  c = (struct contextuv *) malloc(sizeof(*c));
+  c = (struct contextuv *)malloc(sizeof(*c));
 
   c->sockfd = sockfd;
   c->uv = uv;
@@ -2580,13 +2764,13 @@ static struct contextuv *create_context(fetch_socket_t sockfd,
 
 static void close_cb(uv_handle_t *handle)
 {
-  struct contextuv *c = (struct contextuv *) handle->data;
+  struct contextuv *c = (struct contextuv *)handle->data;
   free(c);
 }
 
 static void destroy_context(struct contextuv *c)
 {
-  uv_close((uv_handle_t *) &c->poll_handle, close_cb);
+  uv_close((uv_handle_t *)&c->poll_handle, close_cb);
 }
 
 /* callback from libfetch to update socket activity to wait for */
@@ -2598,24 +2782,25 @@ static int cb_socket(FETCH *easy, fetch_socket_t s, int action,
   int events = 0;
   (void)easy;
 
-  switch(action) {
+  switch (action)
+  {
   case FETCH_POLL_IN:
   case FETCH_POLL_OUT:
   case FETCH_POLL_INOUT:
-    c = socketp ?
-      (struct contextuv *) socketp : create_context(s, uv);
+    c = socketp ? (struct contextuv *)socketp : create_context(s, uv);
 
     fetch_multi_assign(uv->s->multi, s, c);
 
-    if(action != FETCH_POLL_IN)
+    if (action != FETCH_POLL_IN)
       events |= UV_WRITABLE;
-    if(action != FETCH_POLL_OUT)
+    if (action != FETCH_POLL_OUT)
       events |= UV_READABLE;
 
     uv_poll_start(&c->poll_handle, events, on_uv_socket);
     break;
   case FETCH_POLL_REMOVE:
-    if(socketp) {
+    if (socketp)
+    {
       c = (struct contextuv *)socketp;
       uv_poll_stop(&c->poll_handle);
       destroy_context(c);
@@ -2634,7 +2819,7 @@ static int cb_socket(FETCH *easy, fetch_socket_t s, int action,
 static FETCHcode parallel_event(struct parastate *s)
 {
   FETCHcode result = FETCHE_OK;
-  struct datauv uv = { 0 };
+  struct datauv uv = {0};
 
   s->result = FETCHE_OK;
   uv.s = s;
@@ -2650,12 +2835,14 @@ static FETCHcode parallel_event(struct parastate *s)
 
   /* kickstart the thing */
   fetch_multi_socket_action(s->multi, FETCH_SOCKET_TIMEOUT, 0,
-                           &s->still_running);
+                            &s->still_running);
 
-  while(!s->mcode && (s->still_running || s->more_transfers)) {
+  while (!s->mcode && (s->still_running || s->more_transfers))
+  {
 #if DEBUG_UV
     fprintf(tool_stderr, "parallel_event: uv_run(), mcode=%d, %d running, "
-            "%d more\n", s->mcode, uv.s->still_running, s->more_transfers);
+                         "%d more\n",
+            s->mcode, uv.s->still_running, s->more_transfers);
 #endif
     uv_run(uv.loop, UV_RUN_DEFAULT);
 #if DEBUG_UV
@@ -2663,15 +2850,18 @@ static FETCHcode parallel_event(struct parastate *s)
 #endif
 
     result = check_finished(s);
-    if(result && !s->result)
+    if (result && !s->result)
       s->result = result;
 
     /* early exit called */
-    if(s->wrapitup) {
-      if(s->still_running && !s->wrapitup_processed) {
+    if (s->wrapitup)
+    {
+      if (s->still_running && !s->wrapitup_processed)
+      {
         struct per_transfer *per;
-        for(per = transfers; per; per = per->next) {
-          if(per->added)
+        for (per = transfers; per; per = per->next)
+        {
+          if (per->added)
             per->abort = TRUE;
         }
         s->wrapitup_processed = TRUE;
@@ -2679,17 +2869,18 @@ static FETCHcode parallel_event(struct parastate *s)
       break;
     }
 
-    if(s->more_transfers) {
+    if (s->more_transfers)
+    {
       result = add_parallel_transfers(s->global, s->multi, s->share,
                                       &s->more_transfers, &s->added_transfers);
-      if(result && !s->result)
+      if (result && !s->result)
         s->result = result;
     }
   }
 
 #if DEBUG_UV
   fprintf(tool_stderr, "DONE parallel_event -> %d, mcode=%d, %d running, "
-          "%d more\n",
+                       "%d more\n",
           s->result, s->mcode, uv.s->still_running, s->more_transfers);
 #endif
   return s->result;
@@ -2705,9 +2896,11 @@ static FETCHcode check_finished(struct parastate *s)
   bool checkmore = FALSE;
   struct GlobalConfig *global = s->global;
   progress_meter(global, &s->start, FALSE);
-  do {
+  do
+  {
     msg = fetch_multi_info_read(s->multi, &rc);
-    if(msg) {
+    if (msg)
+    {
       bool retry;
       long delay;
       struct per_transfer *ended;
@@ -2716,59 +2909,66 @@ static FETCHcode check_finished(struct parastate *s)
       fetch_easy_getinfo(easy, FETCHINFO_PRIVATE, (void *)&ended);
       fetch_multi_remove_handle(s->multi, easy);
 
-      if(ended->abort && (tres == FETCHE_ABORTED_BY_CALLBACK) &&
-         ended->errorbuffer) {
+      if (ended->abort && (tres == FETCHE_ABORTED_BY_CALLBACK) &&
+          ended->errorbuffer)
+      {
         msnprintf(ended->errorbuffer, FETCH_ERROR_SIZE,
                   "Transfer aborted due to critical error "
                   "in another transfer");
       }
       tres = post_per_transfer(global, ended, tres, &retry, &delay);
       progress_finalize(ended); /* before it goes away */
-      all_added--; /* one fewer added */
+      all_added--;              /* one fewer added */
       checkmore = TRUE;
-      if(retry) {
+      if (retry)
+      {
         ended->added = FALSE; /* add it again */
         /* we delay retries in full integer seconds only */
-        ended->startat = delay ? time(NULL) + delay/1000 : 0;
+        ended->startat = delay ? time(NULL) + delay / 1000 : 0;
       }
-      else {
+      else
+      {
         /* result receives this transfer's error unless the transfer was
            marked for abort due to a critical error in another transfer */
-        if(tres && (!ended->abort || !result))
+        if (tres && (!ended->abort || !result))
           result = tres;
-        if(is_fatal_error(result) || (result && global->fail_early))
+        if (is_fatal_error(result) || (result && global->fail_early))
           s->wrapitup = TRUE;
         (void)del_per_transfer(ended);
       }
     }
-  } while(msg);
-  if(!s->wrapitup) {
-    if(!checkmore) {
+  } while (msg);
+  if (!s->wrapitup)
+  {
+    if (!checkmore)
+    {
       time_t tock = time(NULL);
-      if(s->tick != tock) {
+      if (s->tick != tock)
+      {
         checkmore = TRUE;
         s->tick = tock;
       }
     }
-    if(checkmore) {
+    if (checkmore)
+    {
       /* one or more transfers completed, add more! */
       FETCHcode tres = add_parallel_transfers(global, s->multi, s->share,
-                                             &s->more_transfers,
-                                             &s->added_transfers);
-      if(tres)
+                                              &s->more_transfers,
+                                              &s->added_transfers);
+      if (tres)
         result = tres;
-      if(s->added_transfers)
+      if (s->added_transfers)
         /* we added new ones, make sure the loop does not exit yet */
         s->still_running = 1;
     }
-    if(is_fatal_error(result) || (result && global->fail_early))
+    if (is_fatal_error(result) || (result && global->fail_early))
       s->wrapitup = TRUE;
   }
   return result;
 }
 
 static FETCHcode parallel_transfers(struct GlobalConfig *global,
-                                   FETCHSH *share)
+                                    FETCHSH *share)
 {
   FETCHcode result;
   struct parastate p;
@@ -2783,18 +2983,19 @@ static FETCHcode parallel_transfers(struct GlobalConfig *global,
   s->tick = time(NULL);
   s->global = global;
   s->multi = fetch_multi_init();
-  if(!s->multi)
+  if (!s->multi)
     return FETCHE_OUT_OF_MEMORY;
 
   result = add_parallel_transfers(global, s->multi, s->share,
                                   &s->more_transfers, &s->added_transfers);
-  if(result) {
+  if (result)
+  {
     fetch_multi_cleanup(s->multi);
     return result;
   }
 
 #ifdef DEBUGBUILD
-  if(global->test_event_based)
+  if (global->test_event_based)
 #ifdef USE_LIBUV
     result = parallel_event(s);
 #else
@@ -2803,18 +3004,23 @@ static FETCHcode parallel_transfers(struct GlobalConfig *global,
   else
 #endif
 
-  if(all_added) {
-    while(!s->mcode && (s->still_running || s->more_transfers)) {
+      if (all_added)
+  {
+    while (!s->mcode && (s->still_running || s->more_transfers))
+    {
       /* If stopping prematurely (eg due to a --fail-early condition) then
          signal that any transfers in the multi should abort (via progress
          callback). */
-      if(s->wrapitup) {
-        if(!s->still_running)
+      if (s->wrapitup)
+      {
+        if (!s->still_running)
           break;
-        if(!s->wrapitup_processed) {
+        if (!s->wrapitup_processed)
+        {
           struct per_transfer *per;
-          for(per = transfers; per; per = per->next) {
-            if(per->added)
+          for (per = transfers; per; per = per->next)
+          {
+            if (per->added)
               per->abort = TRUE;
           }
           s->wrapitup_processed = TRUE;
@@ -2822,9 +3028,9 @@ static FETCHcode parallel_transfers(struct GlobalConfig *global,
       }
 
       s->mcode = fetch_multi_poll(s->multi, NULL, 0, 1000, NULL);
-      if(!s->mcode)
+      if (!s->mcode)
         s->mcode = fetch_multi_perform(s->multi, &s->still_running);
-      if(!s->mcode)
+      if (!s->mcode)
         result = check_finished(s);
     }
 
@@ -2832,11 +3038,12 @@ static FETCHcode parallel_transfers(struct GlobalConfig *global,
   }
 
   /* Make sure to return some kind of error if there was a multi problem */
-  if(s->mcode) {
+  if (s->mcode)
+  {
     result = (s->mcode == FETCHM_OUT_OF_MEMORY) ? FETCHE_OUT_OF_MEMORY :
-      /* The other multi errors should never happen, so return
-         something suitably generic */
-      FETCHE_BAD_FUNCTION_ARGUMENT;
+                                                /* The other multi errors should never happen, so return
+                                                   something suitably generic */
+                 FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
   fetch_multi_cleanup(s->multi);
@@ -2845,7 +3052,7 @@ static FETCHcode parallel_transfers(struct GlobalConfig *global,
 }
 
 static FETCHcode serial_transfers(struct GlobalConfig *global,
-                                 FETCHSH *share)
+                                  FETCHSH *share)
 {
   FETCHcode returncode = FETCHE_OK;
   FETCHcode result = FETCHE_OK;
@@ -2854,46 +3061,52 @@ static FETCHcode serial_transfers(struct GlobalConfig *global,
   bool skipped = FALSE;
 
   result = create_transfer(global, share, &added, &skipped);
-  if(result)
+  if (result)
     return result;
-  if(!added) {
+  if (!added)
+  {
     errorf(global, "no transfer performed");
     return FETCHE_READ_ERROR;
   }
-  for(per = transfers; per;) {
+  for (per = transfers; per;)
+  {
     bool retry;
     long delay_ms;
     bool bailout = FALSE;
     struct timeval start;
 
     start = tvnow();
-    if(!per->skip) {
+    if (!per->skip)
+    {
       result = pre_transfer(global, per);
-      if(result)
+      if (result)
         break;
 
-      if(global->libfetch) {
+      if (global->libfetch)
+      {
         result = easysrc_perform();
-        if(result)
+        if (result)
           break;
       }
 
 #ifdef DEBUGBUILD
-      if(getenv("FETCH_FORBID_REUSE"))
+      if (getenv("FETCH_FORBID_REUSE"))
         (void)fetch_easy_setopt(per->fetch, FETCHOPT_FORBID_REUSE, 1L);
 
-      if(global->test_duphandle) {
+      if (global->test_duphandle)
+      {
         FETCH *dup = fetch_easy_duphandle(per->fetch);
         fetch_easy_cleanup(per->fetch);
         per->fetch = dup;
-        if(!dup) {
+        if (!dup)
+        {
           result = FETCHE_OUT_OF_MEMORY;
           break;
         }
         /* a duplicate needs the share re-added */
         (void)fetch_easy_setopt(per->fetch, FETCHOPT_SHARE, share);
       }
-      if(global->test_event_based)
+      if (global->test_event_based)
         result = fetch_easy_perform_ev(per->fetch);
       else
 #endif
@@ -2901,36 +3114,42 @@ static FETCHcode serial_transfers(struct GlobalConfig *global,
     }
 
     returncode = post_per_transfer(global, per, result, &retry, &delay_ms);
-    if(retry) {
+    if (retry)
+    {
       tool_go_sleep(delay_ms);
       continue;
     }
 
     /* Bail out upon critical errors or --fail-early */
-    if(is_fatal_error(returncode) || (returncode && global->fail_early))
+    if (is_fatal_error(returncode) || (returncode && global->fail_early))
       bailout = TRUE;
-    else {
-      do {
+    else
+    {
+      do
+      {
         /* setup the next one just before we delete this */
         result = create_transfer(global, share, &added, &skipped);
-        if(result) {
+        if (result)
+        {
           returncode = result;
           bailout = TRUE;
           break;
         }
-      } while(skipped);
+      } while (skipped);
     }
 
     per = del_per_transfer(per);
 
-    if(bailout)
+    if (bailout)
       break;
 
-    if(per && global->ms_per_transfer) {
+    if (per && global->ms_per_transfer)
+    {
       /* how long time did the most recent transfer take in number of
          milliseconds */
       long milli = tvdiff(tvnow(), start);
-      if(milli < global->ms_per_transfer) {
+      if (milli < global->ms_per_transfer)
+      {
         notef(global, "Transfer took %ld ms, waits %ldms as set by --rate",
               milli, global->ms_per_transfer - milli);
         /* The transfer took less time than wanted. Wait a little. */
@@ -2938,11 +3157,11 @@ static FETCHcode serial_transfers(struct GlobalConfig *global,
       }
     }
   }
-  if(returncode)
+  if (returncode)
     /* returncode errors have priority */
     result = returncode;
 
-  if(result)
+  if (result)
     single_transfer_cleanup(global->current);
 
   return result;
@@ -2954,22 +3173,24 @@ static FETCHcode is_using_schannel(int *using)
   static int using_schannel = -1; /* -1 = not checked
                                      0 = nope
                                      1 = yes */
-  if(using_schannel == -1) {
+  if (using_schannel == -1)
+  {
     FETCH *fetchtls = fetch_easy_init();
     /* The TLS backend remains, so keep the info */
     struct fetch_tlssessioninfo *tls_backend_info = NULL;
 
-    if(!fetchtls)
+    if (!fetchtls)
       result = FETCHE_OUT_OF_MEMORY;
-    else {
+    else
+    {
       result = fetch_easy_getinfo(fetchtls, FETCHINFO_TLS_SSL_PTR,
-                                 &tls_backend_info);
-      if(!result)
+                                  &tls_backend_info);
+      if (!result)
         using_schannel =
-          (tls_backend_info->backend == FETCHSSLBACKEND_SCHANNEL);
+            (tls_backend_info->backend == FETCHSSLBACKEND_SCHANNEL);
     }
     fetch_easy_cleanup(fetchtls);
-    if(result)
+    if (result)
       return result;
   }
   *using = using_schannel;
@@ -2989,41 +3210,47 @@ static FETCHcode cacertpaths(struct OperationConfig *config)
 {
   FETCHcode result = FETCHE_OUT_OF_MEMORY;
   char *env = fetch_getenv("FETCH_CA_BUNDLE");
-  if(env) {
+  if (env)
+  {
     config->cacert = strdup(env);
     fetch_free(env);
-    if(!config->cacert)
+    if (!config->cacert)
       goto fail;
   }
-  else {
+  else
+  {
     env = fetch_getenv("SSL_CERT_DIR");
-    if(env) {
+    if (env)
+    {
       config->capath = strdup(env);
       fetch_free(env);
-      if(!config->capath)
+      if (!config->capath)
         goto fail;
     }
     env = fetch_getenv("SSL_CERT_FILE");
-    if(env) {
+    if (env)
+    {
       config->cacert = strdup(env);
       fetch_free(env);
-      if(!config->cacert)
+      if (!config->cacert)
         goto fail;
     }
   }
 
 #ifdef _WIN32
-  if(!env) {
+  if (!env)
+  {
 #if defined(FETCH_CA_SEARCH_SAFE)
     char *cacert = NULL;
     FILE *cafile = Curl_execpath("fetch-ca-bundle.crt", &cacert);
-    if(cafile) {
+    if (cafile)
+    {
       fclose(cafile);
       config->cacert = strdup(cacert);
     }
 #elif !defined(FETCH_WINDOWS_UWP) && !defined(FETCH_DISABLE_CA_SEARCH)
     result = FindWin32CACert(config, TEXT("fetch-ca-bundle.crt"));
-    if(result)
+    if (result)
       goto fail;
 #endif
   }
@@ -3036,17 +3263,18 @@ fail:
 
 /* setup a transfer for the given config */
 static FETCHcode transfer_per_config(struct GlobalConfig *global,
-                                    struct OperationConfig *config,
-                                    FETCHSH *share,
-                                    bool *added,
-                                    bool *skipped)
+                                     struct OperationConfig *config,
+                                     FETCHSH *share,
+                                     bool *added,
+                                     bool *skipped)
 {
   FETCHcode result = FETCHE_OK;
   bool capath_from_env;
   *added = FALSE;
 
   /* Check we have a url */
-  if(!config->url_list || !config->url_list->url) {
+  if (!config->url_list || !config->url_list->url)
+  {
     helpf(tool_stderr, "(%d) no URL specified", FETCHE_FAILED_INIT);
     return FETCHE_FAILED_INIT;
   }
@@ -3061,10 +3289,11 @@ static FETCHcode transfer_per_config(struct GlobalConfig *global,
    * too. Just for the sake of it.
    */
   capath_from_env = false;
-  if(feature_ssl &&
-     !config->cacert &&
-     !config->capath &&
-     (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok))) {
+  if (feature_ssl &&
+      !config->cacert &&
+      !config->capath &&
+      (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok)))
+  {
     int using_schannel = -1;
 
     result = is_using_schannel(&using_schannel);
@@ -3073,11 +3302,11 @@ static FETCHcode transfer_per_config(struct GlobalConfig *global,
      * find a certificate bundle that was previously ignored. To maintain
      * backward compatibility, only perform this search if not using Schannel.
      */
-    if(!result && !using_schannel)
+    if (!result && !using_schannel)
       result = cacertpaths(config);
   }
 
-  if(!result)
+  if (!result)
     result = single_transfer(global, config, share, capath_from_env, added,
                              skipped);
 
@@ -3089,16 +3318,18 @@ static FETCHcode transfer_per_config(struct GlobalConfig *global,
  * returns TRUE.
  */
 static FETCHcode create_transfer(struct GlobalConfig *global,
-                                FETCHSH *share,
-                                bool *added,
-                                bool *skipped)
+                                 FETCHSH *share,
+                                 bool *added,
+                                 bool *skipped)
 {
   FETCHcode result = FETCHE_OK;
   *added = FALSE;
-  while(global->current) {
+  while (global->current)
+  {
     result = transfer_per_config(global, global->current, share, added,
                                  skipped);
-    if(!result && !*added) {
+    if (!result && !*added)
+    {
       /* when one set is drained, continue to next */
       global->current = global->current->next;
       continue;
@@ -3109,8 +3340,8 @@ static FETCHcode create_transfer(struct GlobalConfig *global,
 }
 
 static FETCHcode run_all_transfers(struct GlobalConfig *global,
-                                  FETCHSH *share,
-                                  FETCHcode result)
+                                   FETCHSH *share,
+                                   FETCHcode result)
 {
   /* Save the values of noprogress and isatty to restore them later on */
   bool orig_noprogress = global->noprogress;
@@ -3118,19 +3349,21 @@ static FETCHcode run_all_transfers(struct GlobalConfig *global,
   struct per_transfer *per;
 
   /* Time to actually do the transfers */
-  if(!result) {
-    if(global->parallel)
+  if (!result)
+  {
+    if (global->parallel)
       result = parallel_transfers(global, share);
     else
       result = serial_transfers(global, share);
   }
 
   /* cleanup if there are any left */
-  for(per = transfers; per;) {
+  for (per = transfers; per;)
+  {
     bool retry;
     long delay;
     FETCHcode result2 = post_per_transfer(global, per, result, &retry, &delay);
-    if(!result)
+    if (!result)
       /* do not overwrite the original error */
       result = result2;
 
@@ -3143,7 +3376,6 @@ static FETCHcode run_all_transfers(struct GlobalConfig *global,
   /* Reset the global config variables */
   global->noprogress = orig_noprogress;
   global->isatty = orig_isatty;
-
 
   return result;
 }
@@ -3160,13 +3392,15 @@ FETCHcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 #endif
 
   /* Parse .fetchrc if necessary */
-  if((argc == 1) ||
-     (first_arg && strncmp(first_arg, "-q", 2) &&
-      strcmp(first_arg, "--disable"))) {
+  if ((argc == 1) ||
+      (first_arg && strncmp(first_arg, "-q", 2) &&
+       strcmp(first_arg, "--disable")))
+  {
     parseconfig(NULL, global); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .fetchrc */
-    if((argc < 2) && (!global->first->url_list)) {
+    if ((argc < 2) && (!global->first->url_list))
+    {
       helpf(tool_stderr, NULL);
       result = FETCHE_FAILED_INIT;
     }
@@ -3174,17 +3408,20 @@ FETCHcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 
   fetchx_unicodefree(first_arg);
 
-  if(!result) {
+  if (!result)
+  {
     /* Parse the command line arguments */
     ParameterError res = parse_args(global, argc, argv);
-    if(res) {
+    if (res)
+    {
       result = FETCHE_OK;
 
       /* Check if we were asked for the help */
-      if(res == PARAM_HELP_REQUESTED)
+      if (res == PARAM_HELP_REQUESTED)
         tool_help(global->help_category);
       /* Check if we were asked for the manual */
-      else if(res == PARAM_MANUAL_REQUESTED) {
+      else if (res == PARAM_MANUAL_REQUESTED)
+      {
 #ifdef USE_MANUAL
         hugehelp();
 #else
@@ -3192,63 +3429,72 @@ FETCHcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 #endif
       }
       /* Check if we were asked for the version information */
-      else if(res == PARAM_VERSION_INFO_REQUESTED)
+      else if (res == PARAM_VERSION_INFO_REQUESTED)
         tool_version_info();
       /* Check if we were asked to list the SSL engines */
-      else if(res == PARAM_ENGINES_REQUESTED)
+      else if (res == PARAM_ENGINES_REQUESTED)
         tool_list_engines();
       /* Check if we were asked to dump the embedded CA bundle */
-      else if(res == PARAM_CA_EMBED_REQUESTED) {
+      else if (res == PARAM_CA_EMBED_REQUESTED)
+      {
 #ifdef FETCH_CA_EMBED
         printf("%s", fetch_ca_embed);
 #endif
       }
-      else if(res == PARAM_LIBFETCH_UNSUPPORTED_PROTOCOL)
+      else if (res == PARAM_LIBFETCH_UNSUPPORTED_PROTOCOL)
         result = FETCHE_UNSUPPORTED_PROTOCOL;
-      else if(res == PARAM_READ_ERROR)
+      else if (res == PARAM_READ_ERROR)
         result = FETCHE_READ_ERROR;
       else
         result = FETCHE_FAILED_INIT;
     }
-    else {
-      if(global->libfetch) {
+    else
+    {
+      if (global->libfetch)
+      {
         /* Initialise the libfetch source output */
         result = easysrc_init();
       }
 
       /* Perform the main operations */
-      if(!result) {
+      if (!result)
+      {
         size_t count = 0;
         struct OperationConfig *operation = global->first;
         FETCHSH *share = fetch_share_init();
-        if(!share) {
-          if(global->libfetch) {
+        if (!share)
+        {
+          if (global->libfetch)
+          {
             /* Cleanup the libfetch source output */
             easysrc_cleanup();
           }
           result = FETCHE_OUT_OF_MEMORY;
         }
 
-        if(!result) {
+        if (!result)
+        {
           fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_COOKIE);
           fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_DNS);
           fetch_share_setopt(share, FETCHSHOPT_SHARE,
-                            FETCH_LOCK_DATA_SSL_SESSION);
+                             FETCH_LOCK_DATA_SSL_SESSION);
           fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_CONNECT);
           fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_PSL);
           fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_HSTS);
 
-          if(global->ssl_sessions && feature_ssls_export)
+          if (global->ssl_sessions && feature_ssls_export)
             result = tool_ssls_load(global, global->first, share,
                                     global->ssl_sessions);
 
-          if(!result) {
+          if (!result)
+          {
             /* Get the required arguments for each operation */
-            do {
+            do
+            {
               result = get_args(operation, count++);
 
               operation = operation->next;
-            } while(!result && operation);
+            } while (!result && operation);
 
             /* Set the current operation pointer */
             global->current = global->first;
@@ -3256,16 +3502,18 @@ FETCHcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
             /* now run! */
             result = run_all_transfers(global, share, result);
 
-            if(global->ssl_sessions && feature_ssls_export) {
+            if (global->ssl_sessions && feature_ssls_export)
+            {
               FETCHcode r2 = tool_ssls_save(global, global->first, share,
-                                           global->ssl_sessions);
-              if(r2 && !result)
+                                            global->ssl_sessions);
+              if (r2 && !result)
                 result = r2;
             }
           }
 
           fetch_share_cleanup(share);
-          if(global->libfetch) {
+          if (global->libfetch)
+          {
             /* Cleanup the libfetch source output */
             easysrc_cleanup();
 

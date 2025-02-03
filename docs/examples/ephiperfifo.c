@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -77,18 +77,16 @@ callback.
 
 #define MSG_OUT stdout /* Send info to stdout, change to stderr if you want */
 
-
 /* Global information, common to all connections */
 typedef struct _GlobalInfo
 {
-  int epfd;    /* epoll filedescriptor */
-  int tfd;     /* timer filedescriptor */
-  int fifofd;  /* fifo filedescriptor */
+  int epfd;   /* epoll filedescriptor */
+  int tfd;    /* timer filedescriptor */
+  int fifofd; /* fifo filedescriptor */
   FETCHM *multi;
   int still_running;
   FILE *input;
 } GlobalInfo;
-
 
 /* Information associated with a specific easy handle */
 typedef struct _ConnInfo
@@ -98,7 +96,6 @@ typedef struct _ConnInfo
   GlobalInfo *global;
   char error[FETCH_ERROR_SIZE];
 } ConnInfo;
-
 
 /* Information associated with a specific socket */
 typedef struct _SockInfo
@@ -111,21 +108,32 @@ typedef struct _SockInfo
 } SockInfo;
 
 #define mycase(code) \
-  case code: s = __STRING(code)
+  case code:         \
+    s = __STRING(code)
 
 /* Die if we get a bad FETCHMcode somewhere */
 static void mcode_or_die(const char *where, FETCHMcode code)
 {
-  if(FETCHM_OK != code) {
+  if (FETCHM_OK != code)
+  {
     const char *s;
-    switch(code) {
-      mycase(FETCHM_BAD_HANDLE); break;
-      mycase(FETCHM_BAD_EASY_HANDLE); break;
-      mycase(FETCHM_OUT_OF_MEMORY); break;
-      mycase(FETCHM_INTERNAL_ERROR); break;
-      mycase(FETCHM_UNKNOWN_OPTION); break;
-      mycase(FETCHM_LAST); break;
-      default: s = "FETCHM_unknown"; break;
+    switch (code)
+    {
+      mycase(FETCHM_BAD_HANDLE);
+      break;
+      mycase(FETCHM_BAD_EASY_HANDLE);
+      break;
+      mycase(FETCHM_OUT_OF_MEMORY);
+      break;
+      mycase(FETCHM_INTERNAL_ERROR);
+      break;
+      mycase(FETCHM_UNKNOWN_OPTION);
+      break;
+      mycase(FETCHM_LAST);
+      break;
+    default:
+      s = "FETCHM_unknown";
+      break;
       mycase(FETCHM_BAD_SOCKET);
       fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
       /* ignore this error */
@@ -136,7 +144,7 @@ static void mcode_or_die(const char *where, FETCHMcode code)
   }
 }
 
-static void timer_cb(GlobalInfo* g, int revents);
+static void timer_cb(GlobalInfo *g, int revents);
 
 /* Update the timer after fetch_multi library does its thing. Curl informs the
  * application through this callback what it wants the new timeout to be,
@@ -147,13 +155,15 @@ static int multi_timer_cb(FETCHM *multi, long timeout_ms, GlobalInfo *g)
 
   fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
 
-  if(timeout_ms > 0) {
+  if (timeout_ms > 0)
+  {
     its.it_interval.tv_sec = 0;
     its.it_interval.tv_nsec = 0;
     its.it_value.tv_sec = timeout_ms / 1000;
     its.it_value.tv_nsec = (timeout_ms % 1000) * 1000 * 1000;
   }
-  else if(timeout_ms == 0) {
+  else if (timeout_ms == 0)
+  {
     /* libfetch wants us to timeout now, however setting both fields of
      * new_value.it_value to zero disarms the timer. The closest we can
      * do is to schedule the timer to fire in 1 ns. */
@@ -162,14 +172,14 @@ static int multi_timer_cb(FETCHM *multi, long timeout_ms, GlobalInfo *g)
     its.it_value.tv_sec = 0;
     its.it_value.tv_nsec = 1;
   }
-  else {
+  else
+  {
     memset(&its, 0, sizeof(struct itimerspec));
   }
 
-  timerfd_settime(g->tfd, /* flags= */0, &its, NULL);
+  timerfd_settime(g->tfd, /* flags= */ 0, &its, NULL);
   return 0;
 }
-
 
 /* Check for completed transfers, and remove their easy handles */
 static void check_multi_info(GlobalInfo *g)
@@ -182,8 +192,10 @@ static void check_multi_info(GlobalInfo *g)
   FETCHcode res;
 
   fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
-  while((msg = fetch_multi_info_read(g->multi, &msgs_left))) {
-    if(msg->msg == FETCHMSG_DONE) {
+  while ((msg = fetch_multi_info_read(g->multi, &msgs_left)))
+  {
+    if (msg->msg == FETCHMSG_DONE)
+    {
       easy = msg->easy_handle;
       res = msg->data.result;
       fetch_easy_getinfo(easy, FETCHINFO_PRIVATE, &conn);
@@ -210,7 +222,8 @@ static void event_cb(GlobalInfo *g, int fd, int revents)
   mcode_or_die("event_cb: fetch_multi_socket_action", rc);
 
   check_multi_info(g);
-  if(g->still_running <= 0) {
+  if (g->still_running <= 0)
+  {
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
     memset(&its, 0, sizeof(struct itimerspec));
     timerfd_settime(g->tfd, 0, &its, NULL);
@@ -218,51 +231,52 @@ static void event_cb(GlobalInfo *g, int fd, int revents)
 }
 
 /* Called by main loop when our timeout expires */
-static void timer_cb(GlobalInfo* g, int revents)
+static void timer_cb(GlobalInfo *g, int revents)
 {
   FETCHMcode rc;
   uint64_t count = 0;
   ssize_t err = 0;
 
   err = read(g->tfd, &count, sizeof(uint64_t));
-  if(err == -1) {
+  if (err == -1)
+  {
     /* Note that we may call the timer callback even if the timerfd is not
      * readable. It's possible that there are multiple events stored in the
      * epoll buffer (i.e. the timer may have fired multiple times). The event
      * count is cleared after the first call so future events in the epoll
      * buffer fails to read from the timer. */
-    if(errno == EAGAIN) {
+    if (errno == EAGAIN)
+    {
       fprintf(MSG_OUT, "EAGAIN on tfd %d\n", g->tfd);
       return;
     }
   }
-  if(err != sizeof(uint64_t)) {
+  if (err != sizeof(uint64_t))
+  {
     fprintf(stderr, "read(tfd) == %ld", err);
     perror("read(tfd)");
   }
 
   rc = fetch_multi_socket_action(g->multi,
-                                  FETCH_SOCKET_TIMEOUT, 0, &g->still_running);
+                                 FETCH_SOCKET_TIMEOUT, 0, &g->still_running);
   mcode_or_die("timer_cb: fetch_multi_socket_action", rc);
   check_multi_info(g);
 }
 
-
-
 /* Clean up the SockInfo structure */
-static void remsock(SockInfo *f, GlobalInfo* g)
+static void remsock(SockInfo *f, GlobalInfo *g)
 {
-  if(f) {
-    if(f->sockfd) {
-      if(epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL))
+  if (f)
+  {
+    if (f->sockfd)
+    {
+      if (epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL))
         fprintf(stderr, "EPOLL_CTL_DEL failed for fd: %d : %s\n",
                 f->sockfd, strerror(errno));
     }
     free(f);
   }
 }
-
-
 
 /* Assign information to a SockInfo structure */
 static void setsock(SockInfo *f, fetch_socket_t s, FETCH *e, int act,
@@ -272,8 +286,9 @@ static void setsock(SockInfo *f, fetch_socket_t s, FETCH *e, int act,
   int kind = ((act & FETCH_POLL_IN) ? EPOLLIN : 0) |
              ((act & FETCH_POLL_OUT) ? EPOLLOUT : 0);
 
-  if(f->sockfd) {
-    if(epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL))
+  if (f->sockfd)
+  {
+    if (epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL))
       fprintf(stderr, "EPOLL_CTL_DEL failed for fd: %d : %s\n",
               f->sockfd, strerror(errno));
   }
@@ -284,17 +299,15 @@ static void setsock(SockInfo *f, fetch_socket_t s, FETCH *e, int act,
 
   ev.events = kind;
   ev.data.fd = s;
-  if(epoll_ctl(g->epfd, EPOLL_CTL_ADD, s, &ev))
+  if (epoll_ctl(g->epfd, EPOLL_CTL_ADD, s, &ev))
     fprintf(stderr, "EPOLL_CTL_ADD failed for fd: %d : %s\n",
             s, strerror(errno));
 }
 
-
-
 /* Initialize a new SockInfo structure */
 static void addsock(fetch_socket_t s, FETCH *easy, int action, GlobalInfo *g)
 {
-  SockInfo *fdp = (SockInfo*)calloc(1, sizeof(SockInfo));
+  SockInfo *fdp = (SockInfo *)calloc(1, sizeof(SockInfo));
 
   fdp->global = g;
   setsock(fdp, s, easy, action, g);
@@ -304,22 +317,26 @@ static void addsock(fetch_socket_t s, FETCH *easy, int action, GlobalInfo *g)
 /* FETCHMOPT_SOCKETFUNCTION */
 static int sock_cb(FETCH *e, fetch_socket_t s, int what, void *cbp, void *sockp)
 {
-  GlobalInfo *g = (GlobalInfo*) cbp;
-  SockInfo *fdp = (SockInfo*) sockp;
-  const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
+  GlobalInfo *g = (GlobalInfo *)cbp;
+  SockInfo *fdp = (SockInfo *)sockp;
+  const char *whatstr[] = {"none", "IN", "OUT", "INOUT", "REMOVE"};
 
   fprintf(MSG_OUT,
           "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
-  if(what == FETCH_POLL_REMOVE) {
+  if (what == FETCH_POLL_REMOVE)
+  {
     fprintf(MSG_OUT, "\n");
     remsock(fdp, g);
   }
-  else {
-    if(!fdp) {
+  else
+  {
+    if (!fdp)
+    {
       fprintf(MSG_OUT, "Adding data: %s\n", whatstr[what]);
       addsock(s, e, what, g);
     }
-    else {
+    else
+    {
       fprintf(MSG_OUT,
               "Changing action from %s to %s\n",
               whatstr[fdp->action], whatstr[what]);
@@ -329,8 +346,6 @@ static int sock_cb(FETCH *e, fetch_socket_t s, int what, void *cbp, void *sockp)
   return 0;
 }
 
-
-
 /* FETCHOPT_WRITEFUNCTION */
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -338,7 +353,6 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
   (void)data;
   return size * nmemb;
 }
-
 
 /* FETCHOPT_PROGRESSFUNCTION */
 static int prog_cb(void *p, double dltotal, double dlnow, double ult,
@@ -352,18 +366,18 @@ static int prog_cb(void *p, double dltotal, double dlnow, double ult,
   return 0;
 }
 
-
 /* Create a new easy handle, and add it to the global fetch_multi */
 static void new_conn(const char *url, GlobalInfo *g)
 {
   ConnInfo *conn;
   FETCHMcode rc;
 
-  conn = (ConnInfo*)calloc(1, sizeof(ConnInfo));
+  conn = (ConnInfo *)calloc(1, sizeof(ConnInfo));
   conn->error[0] = '\0';
 
   conn->easy = fetch_easy_init();
-  if(!conn->easy) {
+  if (!conn->easy)
+  {
     fprintf(MSG_OUT, "fetch_easy_init() failed, exiting!\n");
     exit(2);
   }
@@ -391,22 +405,24 @@ static void new_conn(const char *url, GlobalInfo *g)
 }
 
 /* This gets called whenever data is received from the fifo */
-static void fifo_cb(GlobalInfo* g, int revents)
+static void fifo_cb(GlobalInfo *g, int revents)
 {
   char s[1024];
   long int rv = 0;
   int n = 0;
 
-  do {
-    s[0]='\0';
+  do
+  {
+    s[0] = '\0';
     rv = fscanf(g->input, "%1023s%n", s, &n);
-    s[n]='\0';
-    if(n && s[0]) {
+    s[n] = '\0';
+    if (n && s[0])
+    {
       new_conn(s, g); /* if we read a URL, go get it! */
     }
     else
       break;
-  } while(rv != EOF);
+  } while (rv != EOF);
 }
 
 /* Create a named pipe and tell libevent to monitor it */
@@ -418,20 +434,24 @@ static int init_fifo(GlobalInfo *g)
   struct epoll_event epev;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
-  if(lstat (fifo, &st) == 0) {
-    if((st.st_mode & S_IFMT) == S_IFREG) {
+  if (lstat(fifo, &st) == 0)
+  {
+    if ((st.st_mode & S_IFMT) == S_IFREG)
+    {
       errno = EEXIST;
       perror("lstat");
       exit(1);
     }
   }
   unlink(fifo);
-  if(mkfifo (fifo, 0600) == -1) {
+  if (mkfifo(fifo, 0600) == -1)
+  {
     perror("mkfifo");
     exit(1);
   }
   sockfd = open(fifo, O_RDWR | O_NONBLOCK, 0);
-  if(sockfd == -1) {
+  if (sockfd == -1)
+  {
     perror("open");
     exit(1);
   }
@@ -449,11 +469,10 @@ static int init_fifo(GlobalInfo *g)
 
 static void clean_fifo(GlobalInfo *g)
 {
-    epoll_ctl(g->epfd, EPOLL_CTL_DEL, g->fifofd, NULL);
-    fclose(g->input);
-    unlink(fifo);
+  epoll_ctl(g->epfd, EPOLL_CTL_DEL, g->fifofd, NULL);
+  fclose(g->input);
+  unlink(fifo);
 }
-
 
 int g_should_exit_ = 0;
 
@@ -476,13 +495,15 @@ int main(int argc, char **argv)
 
   memset(&g, 0, sizeof(GlobalInfo));
   g.epfd = epoll_create1(EPOLL_CLOEXEC);
-  if(g.epfd == -1) {
+  if (g.epfd == -1)
+  {
     perror("epoll_create1 failed");
     exit(1);
   }
 
   g.tfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
-  if(g.tfd == -1) {
+  if (g.tfd == -1)
+  {
     perror("timerfd_create failed");
     exit(1);
   }
@@ -510,29 +531,37 @@ int main(int argc, char **argv)
 
   fprintf(MSG_OUT, "Entering wait loop\n");
   fflush(MSG_OUT);
-  while(!g_should_exit_) {
+  while (!g_should_exit_)
+  {
     int idx;
     int err = epoll_wait(g.epfd, events,
-                         sizeof(events)/sizeof(struct epoll_event), 10000);
-    if(err == -1) {
-      if(errno == EINTR) {
+                         sizeof(events) / sizeof(struct epoll_event), 10000);
+    if (err == -1)
+    {
+      if (errno == EINTR)
+      {
         fprintf(MSG_OUT, "note: wait interrupted\n");
         continue;
       }
-      else {
+      else
+      {
         perror("epoll_wait");
         exit(1);
       }
     }
 
-    for(idx = 0; idx < err; ++idx) {
-      if(events[idx].data.fd == g.fifofd) {
+    for (idx = 0; idx < err; ++idx)
+    {
+      if (events[idx].data.fd == g.fifofd)
+      {
         fifo_cb(&g, events[idx].events);
       }
-      else if(events[idx].data.fd == g.tfd) {
+      else if (events[idx].data.fd == g.tfd)
+      {
         timer_cb(&g, events[idx].events);
       }
-      else {
+      else
+      {
         event_cb(&g, events[idx].data.fd, events[idx].events);
       }
     }

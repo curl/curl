@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,13 +40,13 @@ FETCHcode test(char *URL)
   fetch_easy_setopt(fetch, FETCHOPT_ERRORBUFFER, error_buffer);
   fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
   res = fetch_easy_perform(fetch);
-  if(!res)
+  if (!res)
     fprintf(stderr, "failure expected, "
-            "fetch_easy_perform returned %ld: <%s>, <%s>\n",
-            (long) res, fetch_easy_strerror(res), error_buffer);
+                    "fetch_easy_perform returned %ld: <%s>, <%s>\n",
+            (long)res, fetch_easy_strerror(res), error_buffer);
 
   /* print the used url */
-  if(!fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &url_after))
+  if (!fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &url_after))
     printf("Effective URL: %s\n", url_after);
 
   fetch_easy_cleanup(fetch);

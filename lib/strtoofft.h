@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,13 +42,14 @@
  * of 'long' the conversion function to use is strtol().
  */
 
-typedef enum {
-  FETCH_OFFT_OK,    /* parsed fine */
-  FETCH_OFFT_FLOW,  /* over or underflow */
-  FETCH_OFFT_INVAL  /* nothing was parsed */
+typedef enum
+{
+  FETCH_OFFT_OK,   /* parsed fine */
+  FETCH_OFFT_FLOW, /* over or underflow */
+  FETCH_OFFT_INVAL /* nothing was parsed */
 } FETCHofft;
 
 FETCHofft fetchx_strtoofft(const char *str, char **endp, int base,
-                         fetch_off_t *num);
+                           fetch_off_t *num);
 
 #endif /* HEADER_FETCH_STRTOOFFT_H */

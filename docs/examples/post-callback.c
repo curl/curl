@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,15 +30,16 @@
 #include <fetch/fetch.h>
 
 /* silly test data to POST */
-static const char data[]="Lorem ipsum dolor sit amet, consectetur adipiscing "
-  "elit. Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
-  "laoreet rhoncus, odio ipsum semper metus, at tempus ante urna in mauris. "
-  "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a varius "
-  "eget, mattis vitae ligula. Fusce ut pharetra est. Ut ullamcorper mi ac "
-  "sollicitudin semper. Praesent sit amet tellus varius, posuere nulla non, "
-  "rhoncus ipsum.";
+static const char data[] = "Lorem ipsum dolor sit amet, consectetur adipiscing "
+                           "elit. Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
+                           "laoreet rhoncus, odio ipsum semper metus, at tempus ante urna in mauris. "
+                           "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a varius "
+                           "eget, mattis vitae ligula. Fusce ut pharetra est. Ut ullamcorper mi ac "
+                           "sollicitudin semper. Praesent sit amet tellus varius, posuere nulla non, "
+                           "rhoncus ipsum.";
 
-struct WriteThis {
+struct WriteThis
+{
   const char *readptr;
   size_t sizeleft;
 };
@@ -46,12 +47,13 @@ struct WriteThis {
 static size_t read_callback(char *dest, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *wt = (struct WriteThis *)userp;
-  size_t buffer_size = size*nmemb;
+  size_t buffer_size = size * nmemb;
 
-  if(wt->sizeleft) {
+  if (wt->sizeleft)
+  {
     /* copy as much as possible from the source to the destination */
     size_t copy_this_much = wt->sizeleft;
-    if(copy_this_much > buffer_size)
+    if (copy_this_much > buffer_size)
       copy_this_much = buffer_size;
     memcpy(dest, wt->readptr, copy_this_much);
 
@@ -76,7 +78,8 @@ int main(void)
   /* In Windows, this inits the Winsock stuff */
   res = fetch_global_init(FETCH_GLOBAL_DEFAULT);
   /* Check for errors */
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed: %s\n",
             fetch_easy_strerror(res));
     return 1;
@@ -84,7 +87,8 @@ int main(void)
 
   /* get a fetch handle */
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* First set the URL that is about to receive our POST. */
     fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/index.cgi");
 
@@ -144,7 +148,7 @@ int main(void)
     /* Perform the request, res gets the return code */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

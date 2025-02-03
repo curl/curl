@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -59,9 +59,9 @@
 /* seek callback function */
 static int my_seek(void *userp, fetch_off_t offset, int origin)
 {
-  FILE *fp = (FILE *) userp;
+  FILE *fp = (FILE *)userp;
 
-  if(-1 == fseek(fp, (long) offset, origin))
+  if (-1 == fseek(fp, (long)offset, origin))
     /* could not seek */
     return FETCH_SEEKFUNC_CANTSEEK;
 
@@ -75,7 +75,8 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 
   nread = fread(ptr, size, nmemb, stream);
 
-  if(nread > 0) {
+  if (nread > 0)
+  {
     fprintf(stderr, "*** We read %lu bytes from file\n", (unsigned long)nread);
   }
 
@@ -92,7 +93,7 @@ int main(int argc, char **argv)
   char *file;
   char *url;
 
-  if(argc < 3)
+  if (argc < 3)
     return 1;
 
   file = argv[1];
@@ -100,7 +101,7 @@ int main(int argc, char **argv)
 
   /* get the file size of the local file */
   fp = fopen(file, "rb");
-  if(!fp)
+  if (!fp)
     return 2;
 
   fstat(fileno(fp), &file_info);
@@ -110,18 +111,19 @@ int main(int argc, char **argv)
 
   /* get a fetch handle */
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* we want to use our own read function */
     fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
     /* which file to upload */
-    fetch_easy_setopt(fetch, FETCHOPT_READDATA, (void *) fp);
+    fetch_easy_setopt(fetch, FETCHOPT_READDATA, (void *)fp);
 
     /* set the seek function */
     fetch_easy_setopt(fetch, FETCHOPT_SEEKFUNCTION, my_seek);
 
     /* pass the file descriptor to the seek callback as well */
-    fetch_easy_setopt(fetch, FETCHOPT_SEEKDATA, (void *) fp);
+    fetch_easy_setopt(fetch, FETCHOPT_SEEKDATA, (void *)fp);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
     fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
@@ -133,7 +135,7 @@ int main(int argc, char **argv)
     /* and give the size of the upload, this supports large file sizes
        on systems that have general support for it */
     fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
-                     (fetch_off_t)file_info.st_size);
+                      (fetch_off_t)file_info.st_size);
 
     /* tell libfetch we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT
@@ -146,7 +148,7 @@ int main(int argc, char **argv)
     /* Now run off and do what you have been told! */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

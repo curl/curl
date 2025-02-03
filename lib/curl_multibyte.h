@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,9 +27,9 @@
 
 #if defined(_WIN32)
 
- /*
-  * MultiByte conversions using Windows kernel32 library.
-  */
+/*
+ * MultiByte conversions using Windows kernel32 library.
+ */
 
 wchar_t *fetchx_convert_UTF8_to_wchar(const char *str_utf8);
 char *fetchx_convert_wchar_to_UTF8(const wchar_t *str_w);
@@ -60,10 +60,11 @@ char *fetchx_convert_wchar_to_UTF8(const wchar_t *str_w);
 #define fetchx_convert_UTF8_to_tchar(ptr) fetchx_convert_UTF8_to_wchar((ptr))
 #define fetchx_convert_tchar_to_UTF8(ptr) fetchx_convert_wchar_to_UTF8((ptr))
 
-typedef union {
-  unsigned short       *tchar_ptr;
+typedef union
+{
+  unsigned short *tchar_ptr;
   const unsigned short *const_tchar_ptr;
-  unsigned short       *tbyte_ptr;
+  unsigned short *tbyte_ptr;
   const unsigned short *const_tbyte_ptr;
 } xcharp_u;
 
@@ -72,21 +73,24 @@ typedef union {
 #define fetchx_convert_UTF8_to_tchar(ptr) (strdup)(ptr)
 #define fetchx_convert_tchar_to_UTF8(ptr) (strdup)(ptr)
 
-typedef union {
-  char                *tchar_ptr;
-  const char          *const_tchar_ptr;
-  unsigned char       *tbyte_ptr;
+typedef union
+{
+  char *tchar_ptr;
+  const char *const_tchar_ptr;
+  unsigned char *tbyte_ptr;
   const unsigned char *const_tbyte_ptr;
 } xcharp_u;
 
 #endif /* UNICODE && _WIN32 */
 
-#define fetchx_unicodefree(ptr)                          \
-  do {                                                  \
-    if(ptr) {                                           \
-      (free)(ptr);                                      \
-      (ptr) = NULL;                                     \
-    }                                                   \
-  } while(0)
+#define fetchx_unicodefree(ptr) \
+  do                            \
+  {                             \
+    if (ptr)                    \
+    {                           \
+      (free)(ptr);              \
+      (ptr) = NULL;             \
+    }                           \
+  } while (0)
 
 #endif /* HEADER_FETCH_MULTIBYTE_H */

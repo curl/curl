@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,12 +27,14 @@
 #define THREADS 2
 
 /* struct containing data of a thread */
-struct Tdata {
+struct Tdata
+{
   FETCHSH *share;
   char *url;
 };
 
-struct userdata {
+struct userdata
+{
   const char *text;
   int counter;
 };
@@ -47,22 +49,23 @@ static void test_lock(FETCH *handle, fetch_lock_data data,
   (void)handle;
   (void)laccess;
 
-  switch(data) {
-    case FETCH_LOCK_DATA_SHARE:
-      what = "share";
-      break;
-    case FETCH_LOCK_DATA_DNS:
-      what = "dns";
-      break;
-    case FETCH_LOCK_DATA_COOKIE:
-      what = "cookie";
-      break;
-    case FETCH_LOCK_DATA_SSL_SESSION:
-      what = "ssl_session";
-      break;
-    default:
-      fprintf(stderr, "lock: no such data: %d\n", (int)data);
-      return;
+  switch (data)
+  {
+  case FETCH_LOCK_DATA_SHARE:
+    what = "share";
+    break;
+  case FETCH_LOCK_DATA_DNS:
+    what = "dns";
+    break;
+  case FETCH_LOCK_DATA_COOKIE:
+    what = "cookie";
+    break;
+  case FETCH_LOCK_DATA_SSL_SESSION:
+    what = "ssl_session";
+    break;
+  default:
+    fprintf(stderr, "lock: no such data: %d\n", (int)data);
+    return;
   }
   printf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
@@ -74,22 +77,23 @@ static void test_unlock(FETCH *handle, fetch_lock_data data, void *useptr)
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
   (void)handle;
-  switch(data) {
-    case FETCH_LOCK_DATA_SHARE:
-      what = "share";
-      break;
-    case FETCH_LOCK_DATA_DNS:
-      what = "dns";
-      break;
-    case FETCH_LOCK_DATA_COOKIE:
-      what = "cookie";
-      break;
-    case FETCH_LOCK_DATA_SSL_SESSION:
-      what = "ssl_session";
-      break;
-    default:
-      fprintf(stderr, "unlock: no such data: %d\n", (int)data);
-      return;
+  switch (data)
+  {
+  case FETCH_LOCK_DATA_SHARE:
+    what = "share";
+    break;
+  case FETCH_LOCK_DATA_DNS:
+    what = "dns";
+    break;
+  case FETCH_LOCK_DATA_COOKIE:
+    what = "cookie";
+    break;
+  case FETCH_LOCK_DATA_SSL_SESSION:
+    what = "ssl_session";
+    break;
+  default:
+    fprintf(stderr, "unlock: no such data: %d\n", (int)data);
+    return;
   }
   printf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
@@ -99,24 +103,26 @@ static void test_unlock(FETCH *handle, fetch_lock_data data, void *useptr)
 static void *test_fire(void *ptr)
 {
   FETCHcode code;
-  struct Tdata *tdata = (struct Tdata*)ptr;
+  struct Tdata *tdata = (struct Tdata *)ptr;
   FETCH *fetch;
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     return NULL;
   }
 
   fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 0L);
-  fetch_easy_setopt(fetch, FETCHOPT_VERBOSE,    1L);
-  fetch_easy_setopt(fetch, FETCHOPT_URL,        tdata->url);
+  fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  fetch_easy_setopt(fetch, FETCHOPT_URL, tdata->url);
   printf("FETCHOPT_SHARE\n");
   fetch_easy_setopt(fetch, FETCHOPT_SHARE, tdata->share);
 
   printf("PERFORM\n");
   code = fetch_easy_perform(fetch);
-  if(code != FETCHE_OK) {
+  if (code != FETCHE_OK)
+  {
     int i = 0;
     fprintf(stderr, "perform url '%s' repeat %d failed, fetchcode %d\n",
             tdata->url, i, (int)code);
@@ -144,7 +150,8 @@ FETCHcode test(char *URL)
   user.counter = 0;
 
   printf("GLOBAL_INIT\n");
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -152,55 +159,61 @@ FETCHcode test(char *URL)
   /* prepare share */
   printf("SHARE_INIT\n");
   share = fetch_share_init();
-  if(!share) {
+  if (!share)
+  {
     fprintf(stderr, "fetch_share_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(FETCHSHE_OK == scode) {
+  if (FETCHSHE_OK == scode)
+  {
     printf("FETCHSHOPT_LOCKFUNC\n");
     scode = fetch_share_setopt(share, FETCHSHOPT_LOCKFUNC, test_lock);
   }
-  if(FETCHSHE_OK == scode) {
+  if (FETCHSHE_OK == scode)
+  {
     printf("FETCHSHOPT_UNLOCKFUNC\n");
     scode = fetch_share_setopt(share, FETCHSHOPT_UNLOCKFUNC, test_unlock);
   }
-  if(FETCHSHE_OK == scode) {
+  if (FETCHSHE_OK == scode)
+  {
     printf("FETCHSHOPT_USERDATA\n");
     scode = fetch_share_setopt(share, FETCHSHOPT_USERDATA, &user);
   }
-  if(FETCHSHE_OK == scode) {
+  if (FETCHSHE_OK == scode)
+  {
     printf("FETCH_LOCK_DATA_SSL_SESSION\n");
     scode = fetch_share_setopt(share, FETCHSHOPT_SHARE,
-                              FETCH_LOCK_DATA_SSL_SESSION);
+                               FETCH_LOCK_DATA_SSL_SESSION);
   }
 
-  if(FETCHSHE_OK != scode) {
+  if (FETCHSHE_OK != scode)
+  {
     fprintf(stderr, "fetch_share_setopt() failed\n");
     fetch_share_cleanup(share);
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-
   /* start treads */
-  for(i = 1; i <= THREADS; i++) {
+  for (i = 1; i <= THREADS; i++)
+  {
 
     /* set thread data */
-    tdata.url   = URL;
+    tdata.url = URL;
     tdata.share = share;
 
     /* simulate thread, direct call of "thread" function */
-    printf("*** run %d\n",i);
+    printf("*** run %d\n", i);
     test_fire(&tdata);
   }
-
 
   /* fetch another one */
   printf("*** run %d\n", i);
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_share_cleanup(share);
     fetch_global_cleanup();
@@ -218,11 +231,13 @@ FETCHcode test(char *URL)
   /* try to free share, expect to fail because share is in use */
   printf("try SHARE_CLEANUP...\n");
   scode = fetch_share_cleanup(share);
-  if(scode == FETCHSHE_OK) {
+  if (scode == FETCHSHE_OK)
+  {
     fprintf(stderr, "fetch_share_cleanup succeed but error expected\n");
     share = NULL;
   }
-  else {
+  else
+  {
     printf("SHARE_CLEANUP failed, correct\n");
   }
 
@@ -235,7 +250,7 @@ test_cleanup:
   /* free share */
   printf("SHARE_CLEANUP\n");
   scode = fetch_share_cleanup(share);
-  if(scode != FETCHSHE_OK)
+  if (scode != FETCHSHE_OK)
     fprintf(stderr, "fetch_share_cleanup failed, code errno %d\n",
             (int)scode);
 

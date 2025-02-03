@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,81 +48,94 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
   easy_setopt(fetch, FETCHOPT_URL, URL);
   easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 1L);
-  if(fetch_multi_add_handle(mfetch, fetch))
+  if (fetch_multi_add_handle(mfetch, fetch))
     goto test_cleanup;
 
-  while(time(NULL) - start < 5) {
+  while (time(NULL) - start < 5)
+  {
     struct fetch_waitfd waitfd;
 
     multi_perform(mfetch, &mrun);
-    for(;;) {
+    for (;;)
+    {
       int i;
       struct FETCHMsg *m = fetch_multi_info_read(mfetch, &i);
 
-      if(!m)
+      if (!m)
         break;
-      if(m->msg == FETCHMSG_DONE && m->easy_handle == fetch) {
+      if (m->msg == FETCHMSG_DONE && m->easy_handle == fetch)
+      {
         fetch_easy_getinfo(fetch, FETCHINFO_ACTIVESOCKET, &sock);
-        if(sock == FETCH_SOCKET_BAD)
+        if (sock == FETCH_SOCKET_BAD)
           goto test_cleanup;
         printf("Connected fine, extracted socket. Moving on\n");
       }
     }
 
-    if(sock != FETCH_SOCKET_BAD) {
+    if (sock != FETCH_SOCKET_BAD)
+    {
       waitfd.events = state ? FETCH_WAIT_POLLIN : FETCH_WAIT_POLLOUT;
       waitfd.revents = 0;
       fetch_easy_getinfo(fetch, FETCHINFO_ACTIVESOCKET, &sock);
       waitfd.fd = sock;
     }
     fetch_multi_wait(mfetch, &waitfd, sock == FETCH_SOCKET_BAD ? 0 : 1, 50,
-                    &mrun);
-    if((sock != FETCH_SOCKET_BAD) && (waitfd.revents & waitfd.events)) {
+                     &mrun);
+    if ((sock != FETCH_SOCKET_BAD) && (waitfd.revents & waitfd.events))
+    {
       size_t len = 0;
 
-      if(!state) {
+      if (!state)
+      {
         FETCHcode ec;
         ec = fetch_easy_send(fetch, testcmd + pos,
-                            sizeof(testcmd) - 1 - pos, &len);
-        if(ec == FETCHE_AGAIN) {
+                             sizeof(testcmd) - 1 - pos, &len);
+        if (ec == FETCHE_AGAIN)
+        {
           continue;
         }
-        else if(ec) {
+        else if (ec)
+        {
           fprintf(stderr, "fetch_easy_send() failed, with code %d (%s)\n",
                   (int)ec, fetch_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }
-        if(len > 0)
+        if (len > 0)
           pos += len;
         else
           pos = 0;
-        if(pos == sizeof(testcmd) - 1) {
+        if (pos == sizeof(testcmd) - 1)
+        {
           state++;
           pos = 0;
         }
       }
-      else if(pos < (ssize_t)sizeof(testbuf)) {
+      else if (pos < (ssize_t)sizeof(testbuf))
+      {
         FETCHcode ec;
         ec = fetch_easy_recv(fetch, testbuf + pos, sizeof(testbuf) - pos, &len);
-        if(ec == FETCHE_AGAIN) {
+        if (ec == FETCHE_AGAIN)
+        {
           continue;
         }
-        else if(ec) {
+        else if (ec)
+        {
           fprintf(stderr, "fetch_easy_recv() failed, with code %d (%s)\n",
                   (int)ec, fetch_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }
-        if(len > 0)
+        if (len > 0)
           pos += len;
       }
-      if(len <= 0)
+      if (len <= 0)
         sock = FETCH_SOCKET_BAD;
     }
   }
 
-  if(state) {
+  if (state)
+  {
     fwrite(testbuf, pos, 1, stdout);
     putchar('\n');
   }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,10 +28,10 @@
 #ifndef __OS400_SYS_
 #define __OS400_SYS_
 
-
 /* Per-thread item identifiers. */
 
-typedef enum {
+typedef enum
+{
         LK_GSK_ERROR,
         LK_LDAP_ERROR,
         LK_FETCH_VERSION,
@@ -44,14 +44,12 @@ typedef enum {
         LK_ZLIB_VERSION,
         LK_ZLIB_MSG,
         LK_LAST
-}               localkey_t;
+} localkey_t;
 
-
-extern char *   (* Curl_thread_buffer)(localkey_t key, long size);
-
+extern char *(*Curl_thread_buffer)(localkey_t key, long size);
 
 /* Maximum string expansion factor due to character code conversion. */
 
-#define MAX_CONV_EXPANSION      4       /* Can deal with UTF-8. */
+#define MAX_CONV_EXPANSION 4 /* Can deal with UTF-8. */
 
 #endif

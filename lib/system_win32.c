@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,7 +51,8 @@ FETCHcode Curl_win32_init(long flags)
   /* FETCH_GLOBAL_WIN32 controls the *optional* part of the initialization which
      is just for Winsock at the moment. Any required Win32 initialization
      should take place after this block. */
-  if(flags & FETCH_GLOBAL_WIN32) {
+  if (flags & FETCH_GLOBAL_WIN32)
+  {
 #ifdef USE_WINSOCK
     WORD wVersionRequested;
     WSADATA wsaData;
@@ -60,7 +61,7 @@ FETCHcode Curl_win32_init(long flags)
     wVersionRequested = MAKEWORD(2, 2);
     res = WSAStartup(wVersionRequested, &wsaData);
 
-    if(res)
+    if (res)
       /* Tell the user that we could not find a usable */
       /* winsock.dll.     */
       return FETCHE_FAILED_INIT;
@@ -71,8 +72,9 @@ FETCHcode Curl_win32_init(long flags)
     /* wVersionRequested in wVersion. wHighVersion contains the */
     /* highest supported version. */
 
-    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
+    if (LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
+        HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested))
+    {
       /* Tell the user that we could not find a usable */
 
       /* winsock.dll. */
@@ -88,26 +90,28 @@ FETCHcode Curl_win32_init(long flags)
 #ifdef USE_WINDOWS_SSPI
   {
     FETCHcode result = Curl_sspi_global_init();
-    if(result)
+    if (result)
       return result;
   }
 #endif
 
   s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
-  if(s_hIpHlpApiDll) {
+  if (s_hIpHlpApiDll)
+  {
     /* Get the address of the if_nametoindex function */
     IF_NAMETOINDEX_FN pIfNameToIndex =
-      FETCHX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
-                          (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
+        FETCHX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
+                             (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
 
-    if(pIfNameToIndex)
+    if (pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
   }
 
   /* fetchx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
-  if(fetchx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL)) {
+  if (fetchx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+                                    VERSION_GREATER_THAN_EQUAL))
+  {
     Curl_isVistaOrGreater = TRUE;
   }
   else
@@ -120,7 +124,8 @@ FETCHcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
-  if(s_hIpHlpApiDll) {
+  if (s_hIpHlpApiDll)
+  {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;
     Curl_if_nametoindex = NULL;
@@ -130,7 +135,8 @@ void Curl_win32_cleanup(long init_flags)
   Curl_sspi_global_cleanup();
 #endif
 
-  if(init_flags & FETCH_GLOBAL_WIN32) {
+  if (init_flags & FETCH_GLOBAL_WIN32)
+  {
 #ifdef USE_WINSOCK
     WSACleanup();
 #endif
@@ -138,25 +144,25 @@ void Curl_win32_cleanup(long init_flags)
 }
 
 #if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
-#define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
+#define LOAD_WITH_ALTERED_SEARCH_PATH 0x00000008
 #endif
 
 #if !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
-#define LOAD_LIBRARY_SEARCH_SYSTEM32   0x00000800
+#define LOAD_LIBRARY_SEARCH_SYSTEM32 0x00000800
 #endif
 
 /* We use our own typedef here since some headers might lack these */
-typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
+typedef HMODULE(APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 
 /* See function definitions in winbase.h */
 #ifdef UNICODE
-#  ifdef _WIN32_WCE
-#    define LOADLIBARYEX  L"LoadLibraryExW"
-#  else
-#    define LOADLIBARYEX  "LoadLibraryExW"
-#  endif
+#ifdef _WIN32_WCE
+#define LOADLIBARYEX L"LoadLibraryExW"
 #else
-#  define LOADLIBARYEX    "LoadLibraryExA"
+#define LOADLIBARYEX "LoadLibraryExW"
+#endif
+#else
+#define LOADLIBARYEX "LoadLibraryExA"
 #endif
 
 /*
@@ -181,51 +187,51 @@ HMODULE Curl_load_library(LPCTSTR filename)
 
   /* Get a handle to kernel32 so we can access its functions at runtime */
   HMODULE hKernel32 = GetModuleHandle(TEXT("kernel32"));
-  if(!hKernel32)
+  if (!hKernel32)
     return NULL;
 
   /* Attempt to find LoadLibraryEx() which is only available on Windows 2000
      and above */
   pLoadLibraryEx =
-    FETCHX_FUNCTION_CAST(LOADLIBRARYEX_FN,
-                        (GetProcAddress(hKernel32, LOADLIBARYEX)));
+      FETCHX_FUNCTION_CAST(LOADLIBRARYEX_FN,
+                           (GetProcAddress(hKernel32, LOADLIBARYEX)));
 
   /* Detect if there is already a path in the filename and load the library if
      there is. Note: Both back slashes and forward slashes have been supported
      since the earlier days of DOS at an API level although they are not
      supported by command prompt */
-  if(_tcspbrk(filename, TEXT("\\/"))) {
+  if (_tcspbrk(filename, TEXT("\\/")))
+  {
     /** !checksrc! disable BANNEDFUNC 1 **/
-    hModule = pLoadLibraryEx ?
-      pLoadLibraryEx(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
-      LoadLibrary(filename);
+    hModule = pLoadLibraryEx ? pLoadLibraryEx(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) : LoadLibrary(filename);
   }
   /* Detect if KB2533623 is installed, as LOAD_LIBRARY_SEARCH_SYSTEM32 is only
      supported on Windows Vista, Windows Server 2008, Windows 7 and Windows
      Server 2008 R2 with this patch or natively on Windows 8 and above */
-  else if(pLoadLibraryEx && GetProcAddress(hKernel32, "AddDllDirectory")) {
+  else if (pLoadLibraryEx && GetProcAddress(hKernel32, "AddDllDirectory"))
+  {
     /* Load the DLL from the Windows system directory */
     hModule = pLoadLibraryEx(filename, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
   }
-  else {
+  else
+  {
     /* Attempt to get the Windows system path */
     UINT systemdirlen = GetSystemDirectory(NULL, 0);
-    if(systemdirlen) {
+    if (systemdirlen)
+    {
       /* Allocate space for the full DLL path (Room for the null terminator
          is included in systemdirlen) */
       size_t filenamelen = _tcslen(filename);
       TCHAR *path = malloc(sizeof(TCHAR) * (systemdirlen + 1 + filenamelen));
-      if(path && GetSystemDirectory(path, systemdirlen)) {
+      if (path && GetSystemDirectory(path, systemdirlen))
+      {
         /* Calculate the full DLL path */
         _tcscpy(path + _tcslen(path), TEXT("\\"));
         _tcscpy(path + _tcslen(path), filename);
 
         /* Load the DLL from the Windows system directory */
         /** !checksrc! disable BANNEDFUNC 1 **/
-        hModule = pLoadLibraryEx ?
-          pLoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
-          LoadLibrary(path);
-
+        hModule = pLoadLibraryEx ? pLoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) : LoadLibrary(path);
       }
       free(path);
     }

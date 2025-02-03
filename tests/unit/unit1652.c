@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,9 +45,8 @@ int debugf_cb(FETCH *handle, fetch_infotype type, char *buf, size_t size,
  * for the unit test to inspect. Since we know that we're only dealing with
  * text we can afford the luxury of skipping the type check here.
  */
-int
-debugf_cb(FETCH *handle, fetch_infotype type, char *buf, size_t size,
-                void *userptr)
+int debugf_cb(FETCH *handle, fetch_infotype type, char *buf, size_t size,
+              void *userptr)
 {
   (void)handle;
   (void)type;
@@ -65,7 +64,8 @@ unit_setup(void)
 
   global_init(FETCH_GLOBAL_ALL);
   testdata = fetch_easy_init();
-  if(!testdata) {
+  if (!testdata)
+  {
     fetch_global_cleanup();
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -85,7 +85,7 @@ static int verify(const char *info, const char *two)
 {
   /* the 'info' one has a newline appended */
   char *nl = strchr(info, '\n');
-  if(!nl)
+  if (!nl)
     return 1; /* nope */
   return strncmp(info, two, nl - info);
 }

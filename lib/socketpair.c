@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,8 @@
 int Curl_eventfd(fetch_socket_t socks[2], bool nonblocking)
 {
   int efd = eventfd(0, nonblocking ? EFD_CLOEXEC | EFD_NONBLOCK : EFD_CLOEXEC);
-  if(efd == -1) {
+  if (efd == -1)
+  {
     socks[0] = socks[1] = FETCH_SOCKET_BAD;
     return -1;
   }
@@ -49,20 +50,23 @@ int Curl_eventfd(fetch_socket_t socks[2], bool nonblocking)
 
 int Curl_pipe(fetch_socket_t socks[2], bool nonblocking)
 {
-  if(pipe(socks))
+  if (pipe(socks))
     return -1;
 #ifdef HAVE_FCNTL
-  if(fcntl(socks[0], F_SETFD, FD_CLOEXEC) ||
-     fcntl(socks[1], F_SETFD, FD_CLOEXEC)) {
+  if (fcntl(socks[0], F_SETFD, FD_CLOEXEC) ||
+      fcntl(socks[1], F_SETFD, FD_CLOEXEC))
+  {
     close(socks[0]);
     close(socks[1]);
     socks[0] = socks[1] = FETCH_SOCKET_BAD;
     return -1;
   }
 #endif
-  if(nonblocking) {
-    if(fetchx_nonblock(socks[0], TRUE) < 0 ||
-       fetchx_nonblock(socks[1], TRUE) < 0) {
+  if (nonblocking)
+  {
+    if (fetchx_nonblock(socks[0], TRUE) < 0 ||
+        fetchx_nonblock(socks[1], TRUE) < 0)
+    {
       close(socks[0]);
       close(socks[1]);
       socks[0] = socks[1] = FETCH_SOCKET_BAD;
@@ -74,7 +78,6 @@ int Curl_pipe(fetch_socket_t socks[2], bool nonblocking)
 }
 #endif
 
-
 #ifndef FETCH_DISABLE_SOCKETPAIR
 #ifdef HAVE_SOCKETPAIR
 int Curl_socketpair(int domain, int type, int protocol,
@@ -83,12 +86,14 @@ int Curl_socketpair(int domain, int type, int protocol,
 #ifdef SOCK_NONBLOCK
   type = nonblocking ? type | SOCK_NONBLOCK : type;
 #endif
-  if(socketpair(domain, type, protocol, socks))
+  if (socketpair(domain, type, protocol, socks))
     return -1;
 #ifndef SOCK_NONBLOCK
-  if(nonblocking) {
-    if(fetchx_nonblock(socks[0], TRUE) < 0 ||
-       fetchx_nonblock(socks[1], TRUE) < 0) {
+  if (nonblocking)
+  {
+    if (fetchx_nonblock(socks[0], TRUE) < 0 ||
+        fetchx_nonblock(socks[1], TRUE) < 0)
+    {
       close(socks[0]);
       close(socks[1]);
       return -1;
@@ -131,7 +136,8 @@ int Curl_socketpair(int domain, int type, int protocol,
 int Curl_socketpair(int domain, int type, int protocol,
                     fetch_socket_t socks[2], bool nonblocking)
 {
-  union {
+  union
+  {
     struct sockaddr_in inaddr;
     struct sockaddr addr;
   } a;
@@ -144,7 +150,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   (void)protocol;
 
   listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  if(listener == FETCH_SOCKET_BAD)
+  if (listener == FETCH_SOCKET_BAD)
     return -1;
 
   memset(&a, 0, sizeof(a));
@@ -160,53 +166,55 @@ int Curl_socketpair(int domain, int type, int protocol,
 #ifdef SO_EXCLUSIVEADDRUSE
   {
     int exclusive = 1;
-    if(setsockopt(listener, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
-                  (char *)&exclusive, (fetch_socklen_t)sizeof(exclusive)) == -1)
+    if (setsockopt(listener, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
+                   (char *)&exclusive, (fetch_socklen_t)sizeof(exclusive)) == -1)
       goto error;
   }
 #endif
 #else
-  if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR,
-                (char *)&reuse, (fetch_socklen_t)sizeof(reuse)) == -1)
+  if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR,
+                 (char *)&reuse, (fetch_socklen_t)sizeof(reuse)) == -1)
     goto error;
 #endif
-  if(bind(listener, &a.addr, sizeof(a.inaddr)) == -1)
+  if (bind(listener, &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
-  if(getsockname(listener, &a.addr, &addrlen) == -1 ||
-     addrlen < (int)sizeof(a.inaddr))
+  if (getsockname(listener, &a.addr, &addrlen) == -1 ||
+      addrlen < (int)sizeof(a.inaddr))
     goto error;
-  if(listen(listener, 1) == -1)
+  if (listen(listener, 1) == -1)
     goto error;
   socks[0] = socket(AF_INET, SOCK_STREAM, 0);
-  if(socks[0] == FETCH_SOCKET_BAD)
+  if (socks[0] == FETCH_SOCKET_BAD)
     goto error;
-  if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
+  if (connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
 
   /* use non-blocking accept to make sure we do not block forever */
-  if(fetchx_nonblock(listener, TRUE) < 0)
+  if (fetchx_nonblock(listener, TRUE) < 0)
     goto error;
   pfd[0].fd = listener;
   pfd[0].events = POLLIN;
   pfd[0].revents = 0;
   (void)Curl_poll(pfd, 1, 1000); /* one second */
   socks[1] = accept(listener, NULL, NULL);
-  if(socks[1] == FETCH_SOCKET_BAD)
+  if (socks[1] == FETCH_SOCKET_BAD)
     goto error;
-  else {
+  else
+  {
     struct fetchtime start = Curl_now();
     char rnd[9];
     char check[sizeof(rnd)];
     char *p = &check[0];
     size_t s = sizeof(check);
 
-    if(Curl_rand(NULL, (unsigned char *)rnd, sizeof(rnd)))
+    if (Curl_rand(NULL, (unsigned char *)rnd, sizeof(rnd)))
       goto error;
 
     /* write data to the socket */
     swrite(socks[0], rnd, sizeof(rnd));
     /* verify that we read the correct data */
-    do {
+    do
+    {
       ssize_t nread;
 
       pfd[0].fd = socks[1];
@@ -215,41 +223,44 @@ int Curl_socketpair(int domain, int type, int protocol,
       (void)Curl_poll(pfd, 1, 1000); /* one second */
 
       nread = sread(socks[1], p, s);
-      if(nread == -1) {
+      if (nread == -1)
+      {
         int sockerr = SOCKERRNO;
         /* Do not block forever */
-        if(Curl_timediff(Curl_now(), start) > (60 * 1000))
+        if (Curl_timediff(Curl_now(), start) > (60 * 1000))
           goto error;
-        if(
+        if (
 #ifdef WSAEWOULDBLOCK
-          /* This is how Windows does it */
-          (WSAEWOULDBLOCK == sockerr)
+            /* This is how Windows does it */
+            (WSAEWOULDBLOCK == sockerr)
 #else
-          /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
-             returned due to its inability to send off data without
-             blocking. We therefore treat both error codes the same here */
-          (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
-          (EINTR == sockerr) || (EINPROGRESS == sockerr)
+            /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
+               returned due to its inability to send off data without
+               blocking. We therefore treat both error codes the same here */
+            (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
+            (EINTR == sockerr) || (EINPROGRESS == sockerr)
 #endif
-          ) {
+        )
+        {
           continue;
         }
         goto error;
       }
       s -= nread;
-      if(s) {
+      if (s)
+      {
         p += nread;
         continue;
       }
-      if(memcmp(rnd, check, sizeof(check)))
+      if (memcmp(rnd, check, sizeof(check)))
         goto error;
       break;
-    } while(1);
+    } while (1);
   }
 
-  if(nonblocking)
-    if(fetchx_nonblock(socks[0], TRUE) < 0 ||
-       fetchx_nonblock(socks[1], TRUE) < 0)
+  if (nonblocking)
+    if (fetchx_nonblock(socks[0], TRUE) < 0 ||
+        fetchx_nonblock(socks[1], TRUE) < 0)
       goto error;
   sclose(listener);
   return 0;

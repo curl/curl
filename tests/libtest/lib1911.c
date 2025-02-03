@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,7 +42,8 @@ FETCHcode test(char *URL)
 
   fetch_global_init(FETCH_GLOBAL_ALL);
   easy = fetch_easy_init();
-  if(!easy) {
+  if (!easy)
+  {
     fetch_global_cleanup();
     return (FETCHcode)1;
   }
@@ -53,35 +54,37 @@ FETCHcode test(char *URL)
 
   printf("string length: %d\n", (int)strlen(testbuf));
 
-  for(o = fetch_easy_option_next(NULL);
-      o;
-      o = fetch_easy_option_next(o)) {
-    if(o->type == FETCHOT_STRING) {
+  for (o = fetch_easy_option_next(NULL);
+       o;
+       o = fetch_easy_option_next(o))
+  {
+    if (o->type == FETCHOT_STRING)
+    {
       FETCHcode result;
       /*
        * Whitelist string options that are safe for abuse
        */
       FETCH_IGNORE_DEPRECATION(
-        switch(o->id) {
-        case FETCHOPT_PROXY_TLSAUTH_TYPE:
-        case FETCHOPT_TLSAUTH_TYPE:
-        case FETCHOPT_RANDOM_FILE:
-        case FETCHOPT_EGDSOCKET:
-          continue;
-        default:
-          /* check this */
-          break;
-        }
-      )
+          switch (o->id) {
+            case FETCHOPT_PROXY_TLSAUTH_TYPE:
+            case FETCHOPT_TLSAUTH_TYPE:
+            case FETCHOPT_RANDOM_FILE:
+            case FETCHOPT_EGDSOCKET:
+              continue;
+            default:
+              /* check this */
+              break;
+          })
 
       /* This is a string. Make sure that passing in a string longer
          FETCH_MAX_INPUT_LENGTH returns an error */
       result = fetch_easy_setopt(easy, o->id, testbuf);
-      switch(result) {
+      switch (result)
+      {
       case FETCHE_BAD_FUNCTION_ARGUMENT: /* the most normal */
-      case FETCHE_UNKNOWN_OPTION: /* left out from the build */
-      case FETCHE_NOT_BUILT_IN: /* not supported */
-      case FETCHE_UNSUPPORTED_PROTOCOL: /* detected by protocol2num() */
+      case FETCHE_UNKNOWN_OPTION:        /* left out from the build */
+      case FETCHE_NOT_BUILT_IN:          /* not supported */
+      case FETCHE_UNSUPPORTED_PROTOCOL:  /* detected by protocol2num() */
         break;
       default:
         /* all other return codes are unexpected */

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,7 @@
 #endif
 
 #define FETCHX_FUNCTION_CAST(target_type, func) \
-  (target_type)(void (*) (void))(func)
+  (target_type)(void (*)(void))(func)
 
 unsigned short fetchx_ultous(unsigned long ulnum);
 
@@ -73,9 +73,9 @@ ssize_t fetchx_write(int fd, const void *buf, size_t count);
 #define HEADER_FETCH_WARNLESS_H_REDEFS
 
 #if defined(_WIN32)
-#undef  read
-#define read(fd, buf, count)  fetchx_read(fd, buf, count)
-#undef  write
+#undef read
+#define read(fd, buf, count) fetchx_read(fd, buf, count)
+#undef write
 #define write(fd, buf, count) fetchx_write(fd, buf, count)
 #endif
 

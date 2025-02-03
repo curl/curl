@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@
 
 #include <fetch/fetch.h>
 
-static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
+static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   (void)stream;
   (void)ptr;
@@ -44,7 +44,8 @@ int main(void)
   fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_setopt(fetch, FETCHOPT_URL, "https://www.example.com/");
 
     fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, wrfu);
@@ -57,25 +58,26 @@ int main(void)
 
     res = fetch_easy_perform(fetch);
 
-    if(!res) {
+    if (!res)
+    {
       struct fetch_certinfo *certinfo;
 
       res = fetch_easy_getinfo(fetch, FETCHINFO_CERTINFO, &certinfo);
 
-      if(!res && certinfo) {
+      if (!res && certinfo)
+      {
         int i;
 
         printf("%d certs!\n", certinfo->num_of_certs);
 
-        for(i = 0; i < certinfo->num_of_certs; i++) {
+        for (i = 0; i < certinfo->num_of_certs; i++)
+        {
           struct fetch_slist *slist;
 
-          for(slist = certinfo->certinfo[i]; slist; slist = slist->next)
+          for (slist = certinfo->certinfo[i]; slist; slist = slist->next)
             printf("%s\n", slist->data);
-
         }
       }
-
     }
 
     fetch_easy_cleanup(fetch);

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,20 +26,20 @@
 #include "tool_setup.h"
 
 #ifdef HAVE_FSETXATTR
-#  include <sys/xattr.h> /* header from libc, not from libattr */
-#  define USE_XATTR
+#include <sys/xattr.h> /* header from libc, not from libattr */
+#define USE_XATTR
 #elif (defined(__FreeBSD_version) && (__FreeBSD_version > 500000)) || \
-      defined(__MidnightBSD_version)
-#  include <sys/types.h>
-#  include <sys/extattr.h>
-#  define USE_XATTR
+    defined(__MidnightBSD_version)
+#include <sys/types.h>
+#include <sys/extattr.h>
+#define USE_XATTR
 #endif
 
 #ifdef USE_XATTR
 int fwrite_xattr(FETCH *fetch, const char *url, int fd);
 
 #else
-#define fwrite_xattr(a,b,c) 0
+#define fwrite_xattr(a, b, c) 0
 #endif
 
 #endif /* HEADER_FETCH_TOOL_XATTR_H */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,10 +41,10 @@ static size_t myreadfunc(char *ptr, size_t size, size_t nmemb, void *stream)
   memset(buf, 'A', sizeof(buf));
 
   size *= nmemb;
-  if(size > total)
+  if (size > total)
     size = total;
 
-  if(size > sizeof(buf))
+  if (size > sizeof(buf))
     size = sizeof(buf);
 
   memcpy(ptr, buf, size);
@@ -64,30 +64,33 @@ FETCHcode test(char *URL)
   int i;
   struct fetch_slist *headerlist = NULL, *hl;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < NUM_HEADERS; i++) {
+  for (i = 0; i < NUM_HEADERS; i++)
+  {
     int len = msnprintf(testbuf, sizeof(testbuf), "Header%d: ", i);
     memset(&testbuf[len], 'A', SIZE_HEADERS);
     testbuf[len + SIZE_HEADERS] = 0; /* null-terminate */
     hl = fetch_slist_append(headerlist, testbuf);
-    if(!hl)
+    if (!hl)
       goto test_cleanup;
     headerlist = hl;
   }
 
   hl = fetch_slist_append(headerlist, "Expect: ");
-  if(!hl)
+  if (!hl)
     goto test_cleanup;
   headerlist = hl;
 

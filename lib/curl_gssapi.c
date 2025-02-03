@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@
 #include "memdebug.h"
 
 #if defined(__GNUC__)
-#define FETCH_ALIGN8  __attribute__((aligned(8)))
+#define FETCH_ALIGN8 __attribute__((aligned(8)))
 #else
 #define FETCH_ALIGN8
 #endif
@@ -46,11 +46,9 @@
 #endif
 
 gss_OID_desc Curl_spnego_mech_oid FETCH_ALIGN8 = {
-  6, (char *)"\x2b\x06\x01\x05\x05\x02"
-};
+    6, (char *)"\x2b\x06\x01\x05\x05\x02"};
 gss_OID_desc Curl_krb5_mech_oid FETCH_ALIGN8 = {
-  9, (char *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"
-};
+    9, (char *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"};
 
 OM_uint32 Curl_gss_init_sec_context(
     struct Curl_easy *data,
@@ -66,19 +64,20 @@ OM_uint32 Curl_gss_init_sec_context(
 {
   OM_uint32 req_flags = GSS_C_REPLAY_FLAG;
 
-  if(mutual_auth)
+  if (mutual_auth)
     req_flags |= GSS_C_MUTUAL_FLAG;
 
-  if(data->set.gssapi_delegation & FETCHGSSAPI_DELEGATION_POLICY_FLAG) {
+  if (data->set.gssapi_delegation & FETCHGSSAPI_DELEGATION_POLICY_FLAG)
+  {
 #ifdef GSS_C_DELEG_POLICY_FLAG
     req_flags |= GSS_C_DELEG_POLICY_FLAG;
 #else
     infof(data, "WARNING: support for FETCHGSSAPI_DELEGATION_POLICY_FLAG not "
-        "compiled in");
+                "compiled in");
 #endif
   }
 
-  if(data->set.gssapi_delegation & FETCHGSSAPI_DELEGATION_FLAG)
+  if (data->set.gssapi_delegation & FETCHGSSAPI_DELEGATION_FLAG)
     req_flags |= GSS_C_DELEG_FLAG;
 
   return gss_init_sec_context(minor_status,
@@ -98,28 +97,32 @@ OM_uint32 Curl_gss_init_sec_context(
 
 #define GSS_LOG_BUFFER_LEN 1024
 static size_t display_gss_error(OM_uint32 status, int type,
-                                char *buf, size_t len) {
+                                char *buf, size_t len)
+{
   OM_uint32 maj_stat;
   OM_uint32 min_stat;
   OM_uint32 msg_ctx = 0;
   gss_buffer_desc status_string = GSS_C_EMPTY_BUFFER;
 
-  do {
+  do
+  {
     maj_stat = gss_display_status(&min_stat,
                                   status,
                                   type,
                                   GSS_C_NO_OID,
                                   &msg_ctx,
                                   &status_string);
-    if(maj_stat == GSS_S_COMPLETE && status_string.length > 0) {
-      if(GSS_LOG_BUFFER_LEN > len + status_string.length + 3) {
+    if (maj_stat == GSS_S_COMPLETE && status_string.length > 0)
+    {
+      if (GSS_LOG_BUFFER_LEN > len + status_string.length + 3)
+      {
         len += msnprintf(buf + len, GSS_LOG_BUFFER_LEN - len,
                          "%.*s. ", (int)status_string.length,
                          (char *)status_string.value);
       }
     }
     gss_release_buffer(&min_stat, &status_string);
-  } while(!GSS_ERROR(maj_stat) && msg_ctx);
+  } while (!GSS_ERROR(maj_stat) && msg_ctx);
 
   return len;
 }
@@ -142,7 +145,7 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
   char buf[GSS_LOG_BUFFER_LEN];
   size_t len = 0;
 
-  if(major != GSS_S_FAILURE)
+  if (major != GSS_S_FAILURE)
     len = display_gss_error(major, GSS_C_GSS_CODE, buf, len);
 
   display_gss_error(minor, GSS_C_MECH_CODE, buf, len);

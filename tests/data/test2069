@@ -58,7 +58,7 @@ HTTP POST --digest with SHA-256, userhash=true and user-specified Content-Length
 </name>
 # This test is to ensure 'Content-Length: 0' is sent while negotiating auth
 # even when there is a user-specified Content-Length header.
-# https://github.com/fetch/fetch/pull/1242
+# https://github.com/curl/curl/pull/1242
 <command>
 -H "Content-Length: 11" -u auser:apasswd --digest -d "junkelijunk" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

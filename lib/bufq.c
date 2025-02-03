@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -57,7 +57,8 @@ static size_t chunk_append(struct buf_chunk *chunk,
   unsigned char *p = &chunk->x.data[chunk->w_offset];
   size_t n = chunk->dlen - chunk->w_offset;
   DEBUGASSERT(chunk->dlen >= chunk->w_offset);
-  if(n) {
+  if (n)
+  {
     n = FETCHMIN(n, len);
     memcpy(p, buf, n);
     chunk->w_offset += n;
@@ -71,15 +72,18 @@ static size_t chunk_read(struct buf_chunk *chunk,
   unsigned char *p = &chunk->x.data[chunk->r_offset];
   size_t n = chunk->w_offset - chunk->r_offset;
   DEBUGASSERT(chunk->w_offset >= chunk->r_offset);
-  if(!n) {
+  if (!n)
+  {
     return 0;
   }
-  else if(n <= len) {
+  else if (n <= len)
+  {
     memcpy(buf, p, n);
     chunk->r_offset = chunk->w_offset = 0;
     return n;
   }
-  else {
+  else
+  {
     memcpy(buf, p, len);
     chunk->r_offset += len;
     return len;
@@ -90,14 +94,17 @@ static size_t chunk_unwrite(struct buf_chunk *chunk, size_t len)
 {
   size_t n = chunk->w_offset - chunk->r_offset;
   DEBUGASSERT(chunk->w_offset >= chunk->r_offset);
-  if(!n) {
+  if (!n)
+  {
     return 0;
   }
-  else if(n <= len) {
+  else if (n <= len)
+  {
     chunk->r_offset = chunk->w_offset = 0;
     return n;
   }
-  else {
+  else
+  {
     chunk->w_offset -= len;
     return len;
   }
@@ -112,14 +119,16 @@ static ssize_t chunk_slurpn(struct buf_chunk *chunk, size_t max_len,
   ssize_t nread;
 
   DEBUGASSERT(chunk->dlen >= chunk->w_offset);
-  if(!n) {
+  if (!n)
+  {
     *err = FETCHE_AGAIN;
     return -1;
   }
-  if(max_len && n > max_len)
+  if (max_len && n > max_len)
     n = max_len;
   nread = reader(reader_ctx, p, n, err);
-  if(nread > 0) {
+  if (nread > 0)
+  {
     DEBUGASSERT((size_t)nread <= n);
     chunk->w_offset += nread;
   }
@@ -147,10 +156,11 @@ static size_t chunk_skip(struct buf_chunk *chunk, size_t amount)
 {
   size_t n = chunk->w_offset - chunk->r_offset;
   DEBUGASSERT(chunk->w_offset >= chunk->r_offset);
-  if(n) {
+  if (n)
+  {
     n = FETCHMIN(n, amount);
     chunk->r_offset += n;
-    if(chunk->r_offset == chunk->w_offset)
+    if (chunk->r_offset == chunk->w_offset)
       chunk->r_offset = chunk->w_offset = 0;
   }
   return n;
@@ -159,14 +169,13 @@ static size_t chunk_skip(struct buf_chunk *chunk, size_t amount)
 static void chunk_list_free(struct buf_chunk **anchor)
 {
   struct buf_chunk *chunk;
-  while(*anchor) {
+  while (*anchor)
+  {
     chunk = *anchor;
     *anchor = chunk->next;
     free(chunk);
   }
 }
-
-
 
 void Curl_bufcp_init(struct bufc_pool *pool,
                      size_t chunk_size, size_t spare_max)
@@ -179,11 +188,12 @@ void Curl_bufcp_init(struct bufc_pool *pool,
 }
 
 static FETCHcode bufcp_take(struct bufc_pool *pool,
-                           struct buf_chunk **pchunk)
+                            struct buf_chunk **pchunk)
 {
   struct buf_chunk *chunk = NULL;
 
-  if(pool->spare) {
+  if (pool->spare)
+  {
     chunk = pool->spare;
     pool->spare = chunk->next;
     --pool->spare_count;
@@ -193,7 +203,8 @@ static FETCHcode bufcp_take(struct bufc_pool *pool,
   }
 
   chunk = calloc(1, sizeof(*chunk) + pool->chunk_size);
-  if(!chunk) {
+  if (!chunk)
+  {
     *pchunk = NULL;
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -205,10 +216,12 @@ static FETCHcode bufcp_take(struct bufc_pool *pool,
 static void bufcp_put(struct bufc_pool *pool,
                       struct buf_chunk *chunk)
 {
-  if(pool->spare_count >= pool->spare_max) {
+  if (pool->spare_count >= pool->spare_max)
+  {
     free(chunk);
   }
-  else {
+  else
+  {
     chunk_reset(chunk);
     chunk->next = pool->spare;
     pool->spare = chunk;
@@ -262,7 +275,8 @@ void Curl_bufq_free(struct bufq *q)
 void Curl_bufq_reset(struct bufq *q)
 {
   struct buf_chunk *chunk;
-  while(q->head) {
+  while (q->head)
+  {
     chunk = q->head;
     q->head = chunk->next;
     chunk->next = q->spare;
@@ -275,7 +289,8 @@ size_t Curl_bufq_len(const struct bufq *q)
 {
   const struct buf_chunk *chunk = q->head;
   size_t len = 0;
-  while(chunk) {
+  while (chunk)
+  {
     len += chunk_len(chunk);
     chunk = chunk->next;
   }
@@ -289,11 +304,11 @@ bool Curl_bufq_is_empty(const struct bufq *q)
 
 bool Curl_bufq_is_full(const struct bufq *q)
 {
-  if(!q->tail || q->spare)
+  if (!q->tail || q->spare)
     return FALSE;
-  if(q->chunk_count < q->max_chunks)
+  if (q->chunk_count < q->max_chunks)
     return FALSE;
-  if(q->chunk_count > q->max_chunks)
+  if (q->chunk_count > q->max_chunks)
     return TRUE;
   /* we have no spares and cannot make more, is the tail full? */
   return chunk_is_full(q->tail);
@@ -303,25 +318,28 @@ static struct buf_chunk *get_spare(struct bufq *q)
 {
   struct buf_chunk *chunk = NULL;
 
-  if(q->spare) {
+  if (q->spare)
+  {
     chunk = q->spare;
     q->spare = chunk->next;
     chunk_reset(chunk);
     return chunk;
   }
 
-  if(q->chunk_count >= q->max_chunks && (!(q->opts & BUFQ_OPT_SOFT_LIMIT)))
+  if (q->chunk_count >= q->max_chunks && (!(q->opts & BUFQ_OPT_SOFT_LIMIT)))
     return NULL;
 
-  if(q->pool) {
-    if(bufcp_take(q->pool, &chunk))
+  if (q->pool)
+  {
+    if (bufcp_take(q->pool, &chunk))
       return NULL;
     ++q->chunk_count;
     return chunk;
   }
-  else {
+  else
+  {
     chunk = calloc(1, sizeof(*chunk) + q->chunk_size);
-    if(!chunk)
+    if (!chunk)
       return NULL;
     chunk->dlen = q->chunk_size;
     ++q->chunk_count;
@@ -333,24 +351,28 @@ static void prune_head(struct bufq *q)
 {
   struct buf_chunk *chunk;
 
-  while(q->head && chunk_is_empty(q->head)) {
+  while (q->head && chunk_is_empty(q->head))
+  {
     chunk = q->head;
     q->head = chunk->next;
-    if(q->tail == chunk)
+    if (q->tail == chunk)
       q->tail = q->head;
-    if(q->pool) {
+    if (q->pool)
+    {
       bufcp_put(q->pool, chunk);
       --q->chunk_count;
     }
-    else if((q->chunk_count > q->max_chunks) ||
-       (q->opts & BUFQ_OPT_NO_SPARES)) {
+    else if ((q->chunk_count > q->max_chunks) ||
+             (q->opts & BUFQ_OPT_NO_SPARES))
+    {
       /* SOFT_LIMIT allowed us more than max. free spares until
        * we are at max again. Or free them if we are configured
        * to not use spares. */
       free(chunk);
       --q->chunk_count;
     }
-    else {
+    else
+    {
       chunk->next = q->spare;
       q->spare = chunk;
     }
@@ -360,10 +382,11 @@ static void prune_head(struct bufq *q)
 static struct buf_chunk *chunk_prev(struct buf_chunk *head,
                                     struct buf_chunk *chunk)
 {
-  while(head) {
-    if(head == chunk)
+  while (head)
+  {
+    if (head == chunk)
       return NULL;
-    if(head->next == chunk)
+    if (head->next == chunk)
       return head;
     head = head->next;
   }
@@ -374,26 +397,30 @@ static void prune_tail(struct bufq *q)
 {
   struct buf_chunk *chunk;
 
-  while(q->tail && chunk_is_empty(q->tail)) {
+  while (q->tail && chunk_is_empty(q->tail))
+  {
     chunk = q->tail;
     q->tail = chunk_prev(q->head, chunk);
-    if(q->tail)
+    if (q->tail)
       q->tail->next = NULL;
-    if(q->head == chunk)
+    if (q->head == chunk)
       q->head = q->tail;
-    if(q->pool) {
+    if (q->pool)
+    {
       bufcp_put(q->pool, chunk);
       --q->chunk_count;
     }
-    else if((q->chunk_count > q->max_chunks) ||
-       (q->opts & BUFQ_OPT_NO_SPARES)) {
+    else if ((q->chunk_count > q->max_chunks) ||
+             (q->opts & BUFQ_OPT_NO_SPARES))
+    {
       /* SOFT_LIMIT allowed us more than max. free spares until
        * we are at max again. Or free them if we are configured
        * to not use spares. */
       free(chunk);
       --q->chunk_count;
     }
-    else {
+    else
+    {
       chunk->next = q->spare;
       q->spare = chunk;
     }
@@ -404,16 +431,19 @@ static struct buf_chunk *get_non_full_tail(struct bufq *q)
 {
   struct buf_chunk *chunk;
 
-  if(q->tail && !chunk_is_full(q->tail))
+  if (q->tail && !chunk_is_full(q->tail))
     return q->tail;
   chunk = get_spare(q);
-  if(chunk) {
+  if (chunk)
+  {
     /* new tail, and possibly new head */
-    if(q->tail) {
+    if (q->tail)
+    {
       q->tail->next = chunk;
       q->tail = chunk;
     }
-    else {
+    else
+    {
       DEBUGASSERT(!q->head);
       q->head = q->tail = chunk;
     }
@@ -430,23 +460,27 @@ ssize_t Curl_bufq_write(struct bufq *q,
   size_t n;
 
   DEBUGASSERT(q->max_chunks > 0);
-  while(len) {
+  while (len)
+  {
     tail = get_non_full_tail(q);
-    if(!tail) {
-      if((q->chunk_count < q->max_chunks) || (q->opts & BUFQ_OPT_SOFT_LIMIT)) {
+    if (!tail)
+    {
+      if ((q->chunk_count < q->max_chunks) || (q->opts & BUFQ_OPT_SOFT_LIMIT))
+      {
         *err = FETCHE_OUT_OF_MEMORY;
         return -1;
       }
       break;
     }
     n = chunk_append(tail, buf, len);
-    if(!n)
+    if (!n)
       break;
     nwritten += n;
     buf += n;
     len -= n;
   }
-  if(nwritten == 0 && len) {
+  if (nwritten == 0 && len)
+  {
     *err = FETCHE_AGAIN;
     return -1;
   }
@@ -455,8 +489,8 @@ ssize_t Curl_bufq_write(struct bufq *q,
 }
 
 FETCHcode Curl_bufq_cwrite(struct bufq *q,
-                          const char *buf, size_t len,
-                          size_t *pnwritten)
+                           const char *buf, size_t len,
+                           size_t *pnwritten)
 {
   ssize_t n;
   FETCHcode result;
@@ -467,7 +501,8 @@ FETCHcode Curl_bufq_cwrite(struct bufq *q,
 
 FETCHcode Curl_bufq_unwrite(struct bufq *q, size_t len)
 {
-  while(len && q->tail) {
+  while (len && q->tail)
+  {
     len -= chunk_unwrite(q->tail, len);
     prune_tail(q);
   }
@@ -481,16 +516,19 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
   size_t n;
 
   *err = FETCHE_OK;
-  while(len && q->head) {
+  while (len && q->head)
+  {
     n = chunk_read(q->head, buf, len);
-    if(n) {
+    if (n)
+    {
       nread += n;
       buf += n;
       len -= n;
     }
     prune_head(q);
   }
-  if(nread == 0) {
+  if (nread == 0)
+  {
     *err = FETCHE_AGAIN;
     return -1;
   }
@@ -498,7 +536,7 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
 }
 
 FETCHcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
-                         size_t *pnread)
+                          size_t *pnread)
 {
   ssize_t n;
   FETCHcode result;
@@ -510,10 +548,12 @@ FETCHcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
 bool Curl_bufq_peek(struct bufq *q,
                     const unsigned char **pbuf, size_t *plen)
 {
-  if(q->head && chunk_is_empty(q->head)) {
+  if (q->head && chunk_is_empty(q->head))
+  {
     prune_head(q);
   }
-  if(q->head && !chunk_is_empty(q->head)) {
+  if (q->head && !chunk_is_empty(q->head))
+  {
     chunk_peek(q->head, pbuf, plen);
     return TRUE;
   }
@@ -528,11 +568,13 @@ bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
   struct buf_chunk *c = q->head;
   size_t clen;
 
-  while(c) {
+  while (c)
+  {
     clen = chunk_len(c);
-    if(!clen)
+    if (!clen)
       break;
-    if(offset >= clen) {
+    if (offset >= clen)
+    {
       offset -= clen;
       c = c->next;
       continue;
@@ -549,7 +591,8 @@ void Curl_bufq_skip(struct bufq *q, size_t amount)
 {
   size_t n;
 
-  while(amount && q->head) {
+  while (amount && q->head)
+  {
     n = chunk_skip(q->head, amount);
     amount -= n;
     prune_head(q);
@@ -563,19 +606,24 @@ ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
   size_t blen;
   ssize_t nwritten = 0;
 
-  while(Curl_bufq_peek(q, &buf, &blen)) {
+  while (Curl_bufq_peek(q, &buf, &blen))
+  {
     ssize_t chunk_written;
 
     chunk_written = writer(writer_ctx, buf, blen, err);
-    if(chunk_written < 0) {
-      if(!nwritten || *err != FETCHE_AGAIN) {
+    if (chunk_written < 0)
+    {
+      if (!nwritten || *err != FETCHE_AGAIN)
+      {
         /* blocked on first write or real error, fail */
         nwritten = -1;
       }
       break;
     }
-    if(!chunk_written) {
-      if(!nwritten) {
+    if (!chunk_written)
+    {
+      if (!nwritten)
+      {
         /* treat as blocked */
         *err = FETCHE_AGAIN;
         nwritten = -1;
@@ -596,12 +644,16 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
   ssize_t nwritten = 0, n;
 
   *err = FETCHE_OK;
-  while(len) {
-    if(Curl_bufq_is_full(q)) {
+  while (len)
+  {
+    if (Curl_bufq_is_full(q))
+    {
       /* try to make room in case we are full */
       n = Curl_bufq_pass(q, writer, writer_ctx, err);
-      if(n < 0) {
-        if(*err != FETCHE_AGAIN) {
+      if (n < 0)
+      {
+        if (*err != FETCHE_AGAIN)
+        {
           /* real error, fail */
           return -1;
         }
@@ -612,8 +664,10 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
 
     /* Add whatever is remaining now to bufq */
     n = Curl_bufq_write(q, buf, len, err);
-    if(n < 0) {
-      if(*err != FETCHE_AGAIN) {
+    if (n < 0)
+    {
+      if (*err != FETCHE_AGAIN)
+      {
         /* real error, fail */
         return -1;
       }
@@ -622,7 +676,7 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
     }
     /* edge case of writer returning 0 (and len is >0)
      * break or we might enter an infinite loop here */
-    if(n == 0)
+    if (n == 0)
       break;
 
     /* Maybe only part of `data` has been added, continue to loop */
@@ -631,7 +685,8 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
     nwritten += (size_t)n;
   }
 
-  if(!nwritten && len) {
+  if (!nwritten && len)
+  {
     *err = FETCHE_AGAIN;
     return -1;
   }
@@ -648,8 +703,10 @@ ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
 
   *err = FETCHE_AGAIN;
   tail = get_non_full_tail(q);
-  if(!tail) {
-    if(q->chunk_count < q->max_chunks) {
+  if (!tail)
+  {
+    if (q->chunk_count < q->max_chunks)
+    {
       *err = FETCHE_OUT_OF_MEMORY;
       return -1;
     }
@@ -659,10 +716,12 @@ ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
   }
 
   nread = chunk_slurpn(tail, max_len, reader, reader_ctx, err);
-  if(nread < 0) {
+  if (nread < 0)
+  {
     return -1;
   }
-  else if(nread == 0) {
+  else if (nread == 0)
+  {
     /* eof */
     *err = FETCHE_OK;
   }
@@ -685,11 +744,14 @@ static ssize_t bufq_slurpn(struct bufq *q, size_t max_len,
   ssize_t nread = 0, n;
 
   *err = FETCHE_AGAIN;
-  while(1) {
+  while (1)
+  {
 
     n = Curl_bufq_sipn(q, max_len, reader, reader_ctx, err);
-    if(n < 0) {
-      if(!nread || *err != FETCHE_AGAIN) {
+    if (n < 0)
+    {
+      if (!nread || *err != FETCHE_AGAIN)
+      {
         /* blocked on first read or real error, fail */
         nread = -1;
       }
@@ -697,20 +759,22 @@ static ssize_t bufq_slurpn(struct bufq *q, size_t max_len,
         *err = FETCHE_OK;
       break;
     }
-    else if(n == 0) {
+    else if (n == 0)
+    {
       /* eof */
       *err = FETCHE_OK;
       break;
     }
     nread += (size_t)n;
-    if(max_len) {
+    if (max_len)
+    {
       DEBUGASSERT((size_t)n <= max_len);
       max_len -= (size_t)n;
-      if(!max_len)
+      if (!max_len)
         break;
     }
     /* give up slurping when we get less bytes than we asked for */
-    if(q->tail && !chunk_is_full(q->tail))
+    if (q->tail && !chunk_is_full(q->tail))
       break;
   }
   return nread;

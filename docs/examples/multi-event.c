@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,8 @@ static struct event_base *base;
 static FETCHM *fetch_handle;
 static struct event *timeout;
 
-typedef struct fetch_context_s {
+typedef struct fetch_context_s
+{
   struct event *event;
   fetch_socket_t sockfd;
 } fetch_context_t;
@@ -47,7 +48,7 @@ static fetch_context_t *create_fetch_context(fetch_socket_t sockfd)
 {
   fetch_context_t *context;
 
-  context = (fetch_context_t *) malloc(sizeof(*context));
+  context = (fetch_context_t *)malloc(sizeof(*context));
 
   context->sockfd = sockfd;
 
@@ -72,7 +73,8 @@ static void add_download(const char *url, int num)
   snprintf(filename, 50, "%d.download", num);
 
   file = fopen(filename, "wb");
-  if(!file) {
+  if (!file)
+  {
     fprintf(stderr, "Error opening %s\n", filename);
     return;
   }
@@ -93,8 +95,10 @@ static void check_multi_info(void)
   FETCH *easy_handle;
   FILE *file;
 
-  while((message = fetch_multi_info_read(fetch_handle, &pending))) {
-    switch(message->msg) {
+  while ((message = fetch_multi_info_read(fetch_handle, &pending)))
+  {
+    switch (message->msg)
+    {
     case FETCHMSG_DONE:
       /* Do not use message data after calling fetch_multi_remove_handle() and
          fetch_easy_cleanup(). As per fetch_multi_info_read() docs:
@@ -109,7 +113,8 @@ static void check_multi_info(void)
 
       fetch_multi_remove_handle(fetch_handle, easy_handle);
       fetch_easy_cleanup(easy_handle);
-      if(file) {
+      if (file)
+      {
         fclose(file);
       }
       break;
@@ -129,15 +134,15 @@ static void fetch_perform(int fd, short event, void *arg)
 
   (void)fd;
 
-  if(event & EV_READ)
+  if (event & EV_READ)
     flags |= FETCH_CSELECT_IN;
-  if(event & EV_WRITE)
+  if (event & EV_WRITE)
     flags |= FETCH_CSELECT_OUT;
 
-  context = (fetch_context_t *) arg;
+  context = (fetch_context_t *)arg;
 
   fetch_multi_socket_action(fetch_handle, context->sockfd, flags,
-                           &running_handles);
+                            &running_handles);
 
   check_multi_info();
 }
@@ -149,7 +154,7 @@ static void on_timeout(evutil_socket_t fd, short events, void *arg)
   (void)events;
   (void)arg;
   fetch_multi_socket_action(fetch_handle, FETCH_SOCKET_TIMEOUT, 0,
-                           &running_handles);
+                            &running_handles);
   check_multi_info();
 }
 
@@ -157,12 +162,14 @@ static int start_timeout(FETCHM *multi, long timeout_ms, void *userp)
 {
   (void)multi;
   (void)userp;
-  if(timeout_ms < 0) {
+  if (timeout_ms < 0)
+  {
     evtimer_del(timeout);
   }
-  else {
+  else
+  {
     struct timeval tv;
-    if(timeout_ms == 0)
+    if (timeout_ms == 0)
       timeout_ms = 1; /* 0 means call socket_action asap */
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
@@ -181,32 +188,33 @@ static int handle_socket(FETCH *easy, fetch_socket_t s, int action, void *userp,
   (void)easy;
   (void)userp;
 
-  switch(action) {
+  switch (action)
+  {
   case FETCH_POLL_IN:
   case FETCH_POLL_OUT:
   case FETCH_POLL_INOUT:
-    fetch_context = socketp ?
-      (fetch_context_t *) socketp : create_fetch_context(s);
+    fetch_context = socketp ? (fetch_context_t *)socketp : create_fetch_context(s);
 
-    fetch_multi_assign(fetch_handle, s, (void *) fetch_context);
+    fetch_multi_assign(fetch_handle, s, (void *)fetch_context);
 
-    if(action != FETCH_POLL_IN)
+    if (action != FETCH_POLL_IN)
       events |= EV_WRITE;
-    if(action != FETCH_POLL_OUT)
+    if (action != FETCH_POLL_OUT)
       events |= EV_READ;
 
     events |= EV_PERSIST;
 
     event_del(fetch_context->event);
     event_assign(fetch_context->event, base, fetch_context->sockfd,
-      (short)events, fetch_perform, fetch_context);
+                 (short)events, fetch_perform, fetch_context);
     event_add(fetch_context->event, NULL);
 
     break;
   case FETCH_POLL_REMOVE:
-    if(socketp) {
-      event_del(((fetch_context_t*) socketp)->event);
-      destroy_fetch_context((fetch_context_t*) socketp);
+    if (socketp)
+    {
+      event_del(((fetch_context_t *)socketp)->event);
+      destroy_fetch_context((fetch_context_t *)socketp);
       fetch_multi_assign(fetch_handle, s, NULL);
     }
     break;
@@ -219,10 +227,11 @@ static int handle_socket(FETCH *easy, fetch_socket_t s, int action, void *userp,
 
 int main(int argc, char **argv)
 {
-  if(argc <= 1)
+  if (argc <= 1)
     return 0;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL)) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL))
+  {
     fprintf(stderr, "Could not init fetch\n");
     return 1;
   }
@@ -234,7 +243,8 @@ int main(int argc, char **argv)
   fetch_multi_setopt(fetch_handle, FETCHMOPT_SOCKETFUNCTION, handle_socket);
   fetch_multi_setopt(fetch_handle, FETCHMOPT_TIMERFUNCTION, start_timeout);
 
-  while(argc-- > 1) {
+  while (argc-- > 1)
+  {
     add_download(argv[argc], argc);
   }
 

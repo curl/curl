@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,12 +25,11 @@
 
 #include "memdebug.h"
 
-
 /* write callback that does nothing */
 static size_t write_it(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-  (void) ptr;
-  (void) userdata;
+  (void)ptr;
+  (void)userdata;
   return size * nmemb;
 }
 
@@ -46,7 +45,8 @@ FETCHcode test(char *URL)
    * Check proper rewind when reusing a mime structure.
    */
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -76,10 +76,11 @@ FETCHcode test(char *URL)
   res = fetch_easy_perform(fetch);
 
   /* Check for errors */
-  if(res != FETCHE_OK)
+  if (res != FETCHE_OK)
     fprintf(stderr, "fetch_easy_perform() 1 failed: %s\n",
             fetch_easy_strerror(res));
-  else {
+  else
+  {
     /* phase two, create a mime struct using the mime1 handle */
     mime2 = fetch_mime_init(fetch);
     part = fetch_mime_addpart(mime2);
@@ -90,17 +91,18 @@ FETCHcode test(char *URL)
     /* Reuse previous mime structure as a child. */
     res = fetch_mime_subparts(part, mime1);
 
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_mime_subparts() failed: %sn",
               fetch_easy_strerror(res));
-    else {
+    else
+    {
       mime1 = NULL;
 
       /* Perform the request, res gets the return code */
       res = fetch_easy_perform(fetch);
 
       /* Check for errors */
-      if(res != FETCHE_OK)
+      if (res != FETCHE_OK)
         fprintf(stderr, "fetch_easy_perform() 2 failed: %s\n",
                 fetch_easy_strerror(res));
     }

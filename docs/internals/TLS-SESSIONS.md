@@ -45,12 +45,13 @@ string that carries hostname and port and any non-default TLS
 parameters involved in the connection.
 
 Examples:
-- `fetch.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for
-   a connection to `fetch.se:443` using `/etc/ssl/cert.pem` as CA
-   trust anchors and GnuTLS/3.8.7 as TLS backend.
-- `fetch.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
-   same as the previous, except it is configured to use TLSv1.2 as
-   min and max versions.
+
+- `curl.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for
+  a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA
+  trust anchors and GnuTLS/3.8.7 as TLS backend.
+- `curl.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
+  same as the previous, except it is configured to use TLSv1.2 as
+  min and max versions.
 
 Different configurations produce different keys which is just what
 fetch needs when handling SSL session tickets.
@@ -59,15 +60,14 @@ One important thing: peer keys do not contain confidential information. If you
 configure a client certificate or SRP authentication with username/password,
 these are not part of the peer key.
 
-However, peer keys carry the hostnames you use fetch for. They *do*
-leak the privacy of your communication. We recommend to *not* persist
+However, peer keys carry the hostnames you use fetch for. They _do_
+leak the privacy of your communication. We recommend to _not_ persist
 peer keys for this reason.
 
 **Caveat**: The key may contain filenames or paths. It does not reflect the
-*contents* in the filesystem. If you change `/etc/ssl/cert.pem` and reuse a
+_contents_ in the filesystem. If you change `/etc/ssl/cert.pem` and reuse a
 previous ticket, fetch might trust a server which no longer has a root
 certificate in the file.
-
 
 ## Session Cache Access
 
@@ -100,16 +100,16 @@ peer.
 
 ### Put, Take and Return
 
-when a filter accesses the session cache, it *takes*
+when a filter accesses the session cache, it _takes_
 a ticket from the cache, meaning a returned ticket is removed. The filter
-then configures its TLS backend and *returns* the ticket to the cache.
+then configures its TLS backend and _returns_ the ticket to the cache.
 
 The cache needs to treat tickets from TLSv1.2 and 1.3 differently. 1.2 tickets
 should be reused, but 1.3 tickets SHOULD NOT (RFC 8446). The session cache
 simply drops 1.3 tickets when they are returned after use, but keeps a 1.2
 ticket.
 
-When a ticket is *put* into the cache, there is also a difference. There
+When a ticket is _put_ into the cache, there is also a difference. There
 can be several 1.3 tickets at the same time, but only a single 1.2 ticket.
 TLSv1.2 tickets replace any other. 1.3 tickets accumulate up to a max
 amount.
@@ -140,17 +140,17 @@ sure that the peer key cannot be reversed and that a slightly different key
 still produces a different result.
 
 This means an attacker cannot just "grep" a session file for a particular
-entry, e.g. if they want to know if you accessed a specific host. They *can*
+entry, e.g. if they want to know if you accessed a specific host. They _can_
 however compute the SHA256 hashes for all salts in the file and find a
-specific entry. They *cannot* find a hostname they do not know. They would
+specific entry. They _cannot_ find a hostname they do not know. They would
 have to brute force by guessing.
 
 #### Import
 
 When session tickets are imported from a file, fetch only gets the salted
-hashes. The imported tickets belong to an *unknown* peer key.
+hashes. The imported tickets belong to an _unknown_ peer key.
 
-When a connection filter tries to *take* a session ticket, it passes its peer
+When a connection filter tries to _take_ a session ticket, it passes its peer
 key. This peer key initially does not match any tickets in the cache. The
 cache then checks all entries with unknown peer keys if the passed key matches
 their salted hash. If it does, the peer key is recovered and remembered at the

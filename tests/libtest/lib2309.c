@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,7 +44,8 @@ FETCHcode test(char *URL)
 
   global_init(FETCH_GLOBAL_ALL);
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, cb_ignore);
     fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
     fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
@@ -53,7 +54,8 @@ FETCHcode test(char *URL)
     fetch_easy_setopt(fetch, FETCHOPT_NETRC_FILE, libtest_arg2);
 
     fetchdupe = fetch_easy_duphandle(fetch);
-    if(fetchdupe) {
+    if (fetchdupe)
+    {
       res = fetch_easy_perform(fetchdupe);
       printf("Returned %d, should be %d.\n", res, FETCHE_WRITE_ERROR);
       fflush(stdout);

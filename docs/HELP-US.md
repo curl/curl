@@ -13,7 +13,7 @@ good starting points.
 You may subscribe to the [fetch-library mailing
 list](https://lists.haxx.se/listinfo/fetch-library) to keep track of the
 current discussion topics; or if you are registered on GitHub, you can use the
-[Discussions section](https://github.com/fetch/fetch/discussions) on the main
+[Discussions section](https://github.com/curl/curl/discussions) on the main
 fetch repository.
 
 ## Scratch your own itch
@@ -33,17 +33,17 @@ If you are looking for a smaller or simpler task in the project to help out
 with as an entry-point into the project, perhaps because you are a newcomer or
 even maybe not a terribly experienced developer, here's our advice:
 
- - Read through this document to get a grasp on a general approach to use
- - Consider adding a test case for something not currently tested (correctly)
- - Consider updating or adding documentation
- - One way to get started gently in the project, is to participate in an
-   existing issue/PR and help out by reproducing the issue, review the code in
-   the PR etc.
+- Read through this document to get a grasp on a general approach to use
+- Consider adding a test case for something not currently tested (correctly)
+- Consider updating or adding documentation
+- One way to get started gently in the project, is to participate in an
+  existing issue/PR and help out by reproducing the issue, review the code in
+  the PR etc.
 
 ## Help wanted
 
 In the issue tracker we occasionally mark bugs with [help
-wanted](https://github.com/fetch/fetch/labels/help%20wanted), as a sign that the
+wanted](https://github.com/curl/curl/labels/help%20wanted), as a sign that the
 bug is acknowledged to exist and that there is nobody known to work on this
 issue for the moment. Those are bugs that are fine to "grab" and provide a
 pull request for. The complexity level of these of course varies, so pick one
@@ -53,14 +53,14 @@ that piques your interest.
 
 Some bugs are known and have not yet received attention and work enough to get
 fixed. We collect such known existing flaws in the
-[KNOWN_BUGS](https://fetch.se/docs/knownbugs.html) page. Many of them link
+[KNOWN_BUGS](https://curl.se/docs/knownbugs.html) page. Many of them link
 to the original bug report with some additional details, but some may also
 have aged a bit and may require some verification that the bug still exists in
 the same way and that what was said about it in the past is still valid.
 
 ## Fix autobuild problems
 
-On the [autobuilds page](https://fetch.se/dev/builds.html) we show a
+On the [autobuilds page](https://curl.se/dev/builds.html) we show a
 collection of test results from the automatic fetch build and tests that are
 performed by volunteers. Fixing compiler warnings and errors shown there is
 something we value greatly. Also, if you own or run systems or architectures
@@ -71,7 +71,7 @@ volunteers running builds automatically to help us keep fetch portable.
 
 Ideas for features and functions that we have considered worthwhile to
 implement and provide are kept in the
-[TODO](https://fetch.se/docs/todo.html) file. Some of the ideas are
+[TODO](https://curl.se/docs/todo.html) file. Some of the ideas are
 rough. Some are well thought out. Some probably are not really suitable
 anymore.
 
@@ -89,6 +89,6 @@ specific implementation. Either way is fine.
 
 ## CONTRIBUTE
 
-We offer [guidelines](https://fetch.se/dev/contribute.html) that are suitable
+We offer [guidelines](https://curl.se/dev/contribute.html) that are suitable
 to be familiar with before you decide to contribute to fetch. If you are used
 to open source development, you probably do not find many surprises there.

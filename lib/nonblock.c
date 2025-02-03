@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,21 +43,21 @@
  * mode based on the 'nonblock' boolean argument. This function is highly
  * portable.
  */
-int fetchx_nonblock(fetch_socket_t sockfd,    /* operate on this */
-                   int nonblock   /* TRUE or FALSE */)
+int fetchx_nonblock(fetch_socket_t sockfd, /* operate on this */
+                    int nonblock /* TRUE or FALSE */)
 {
 #if defined(HAVE_FCNTL_O_NONBLOCK)
   /* most recent Unix versions */
   int flags;
   flags = sfcntl(sockfd, F_GETFL, 0);
-  if(flags < 0)
+  if (flags < 0)
     return -1;
   /* Check if the current file status flags have already satisfied
    * the request, if so, it is no need to call fcntl() to replicate it.
    */
-  if(!!(flags & O_NONBLOCK) == !!nonblock)
+  if (!!(flags & O_NONBLOCK) == !!nonblock)
     return 0;
-  if(nonblock)
+  if (nonblock)
     flags |= O_NONBLOCK;
   else
     flags &= ~O_NONBLOCK;
@@ -88,6 +88,6 @@ int fetchx_nonblock(fetch_socket_t sockfd,    /* operate on this */
   return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
 
 #else
-#  error "no non-blocking method was found/used/set"
+#error "no non-blocking method was found/used/set"
 #endif
 }

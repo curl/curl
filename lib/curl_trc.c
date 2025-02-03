@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,23 +54,27 @@
 #include "memdebug.h"
 
 #ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#define ARRAYSIZE(A) (sizeof(A) / sizeof((A)[0]))
 #endif
 
 void Curl_debug(struct Curl_easy *data, fetch_infotype type,
                 char *ptr, size_t size)
 {
-  if(data->set.verbose) {
+  if (data->set.verbose)
+  {
     static const char s_infotype[FETCHINFO_END][3] = {
-      "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
-    if(data->set.fdebug) {
+        "* ", "< ", "> ", "{ ", "} ", "{ ", "} "};
+    if (data->set.fdebug)
+    {
       bool inCallback = Curl_is_in_callback(data);
       Curl_set_in_callback(data, TRUE);
       (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
       Curl_set_in_callback(data, inCallback);
     }
-    else {
-      switch(type) {
+    else
+    {
+      switch (type)
+      {
       case FETCHINFO_TEXT:
       case FETCHINFO_HEADER_OUT:
       case FETCHINFO_HEADER_IN:
@@ -84,21 +88,22 @@ void Curl_debug(struct Curl_easy *data, fetch_infotype type,
   }
 }
 
-
 /* Curl_failf() is for messages stating why we failed.
  * The message SHALL NOT include any LF or CR.
  */
 void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(data->set.verbose || data->set.errorbuffer) {
+  if (data->set.verbose || data->set.errorbuffer)
+  {
     va_list ap;
     int len;
     char error[FETCH_ERROR_SIZE + 2];
     va_start(ap, fmt);
     len = mvsnprintf(error, FETCH_ERROR_SIZE, fmt, ap);
 
-    if(data->set.errorbuffer && !data->state.errorbuf) {
+    if (data->set.errorbuffer && !data->state.errorbuf)
+    {
       strcpy(data->set.errorbuffer, error);
       data->state.errorbuf = TRUE; /* wrote error string */
     }
@@ -115,17 +120,18 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 #define MAXINFO 2048
 
 static void trc_infof(struct Curl_easy *data, struct fetch_trc_feat *feat,
-                      const char * const fmt, va_list ap)  FETCH_PRINTF(3, 0);
+                      const char *const fmt, va_list ap) FETCH_PRINTF(3, 0);
 
 static void trc_infof(struct Curl_easy *data, struct fetch_trc_feat *feat,
-                      const char * const fmt, va_list ap)
+                      const char *const fmt, va_list ap)
 {
   int len = 0;
   char buffer[MAXINFO + 5];
-  if(feat)
+  if (feat)
     len = msnprintf(buffer, (MAXINFO + 1), "[%s] ", feat->name);
   len += mvsnprintf(buffer + len, (MAXINFO + 1) - len, fmt, ap);
-  if(len >= MAXINFO) { /* too long, shorten with '...' */
+  if (len >= MAXINFO)
+  { /* too long, shorten with '...' */
     --len;
     buffer[len++] = '.';
     buffer[len++] = '.';
@@ -139,7 +145,8 @@ static void trc_infof(struct Curl_easy *data, struct fetch_trc_feat *feat,
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(Curl_trc_is_verbose(data)) {
+  if (Curl_trc_is_verbose(data))
+  {
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, data->state.feat, fmt, ap);
@@ -151,16 +158,17 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
-  if(Curl_trc_cf_is_verbose(cf, data)) {
+  if (Curl_trc_cf_is_verbose(cf, data))
+  {
     va_list ap;
     int len = 0;
     char buffer[MAXINFO + 2];
-    if(data->state.feat)
+    if (data->state.feat)
       len += msnprintf(buffer + len, MAXINFO - len, "[%s] ",
                        data->state.feat->name);
-    if(cf->sockindex)
+    if (cf->sockindex)
       len += msnprintf(buffer + len, MAXINFO - len, "[%s-%d] ",
-                      cf->cft->name, cf->sockindex);
+                       cf->cft->name, cf->sockindex);
     else
       len += msnprintf(buffer + len, MAXINFO - len, "[%s] ", cf->cft->name);
     va_start(ap, fmt);
@@ -173,18 +181,19 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 }
 
 struct fetch_trc_feat Curl_trc_feat_read = {
-  "READ",
-  FETCH_LOG_LVL_NONE,
+    "READ",
+    FETCH_LOG_LVL_NONE,
 };
 struct fetch_trc_feat Curl_trc_feat_write = {
-  "WRITE",
-  FETCH_LOG_LVL_NONE,
+    "WRITE",
+    FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) {
+  if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read))
+  {
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_read, fmt, ap);
@@ -195,7 +204,8 @@ void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_write)) {
+  if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_write))
+  {
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_write, fmt, ap);
@@ -205,14 +215,15 @@ void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
 
 #ifndef FETCH_DISABLE_FTP
 struct fetch_trc_feat Curl_trc_feat_ftp = {
-  "FTP",
-  FETCH_LOG_LVL_NONE,
+    "FTP",
+    FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ftp)) {
+  if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ftp))
+  {
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_ftp, fmt, ap);
@@ -223,14 +234,15 @@ void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
 
 #ifndef FETCH_DISABLE_SMTP
 struct fetch_trc_feat Curl_trc_feat_smtp = {
-  "SMTP",
-  FETCH_LOG_LVL_NONE,
+    "SMTP",
+    FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp)) {
+  if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp))
+  {
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_smtp, fmt, ap);
@@ -241,14 +253,15 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 
 #ifdef USE_SSL
 struct fetch_trc_feat Curl_trc_feat_ssls = {
-  "SSLS",
-  FETCH_LOG_LVL_NONE,
+    "SSLS",
+    FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) {
+  if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls))
+  {
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_ssls, fmt, ap);
@@ -259,14 +272,15 @@ void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
 
 #if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
 struct fetch_trc_feat Curl_trc_feat_ws = {
-  "WS",
-  FETCH_LOG_LVL_NONE,
+    "WS",
+    FETCH_LOG_LVL_NONE,
 };
 
 void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) {
+  if (Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws))
+  {
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_ws, fmt, ap);
@@ -275,88 +289,94 @@ void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif /* !FETCH_DISABLE_WEBSOCKETS && !FETCH_DISABLE_HTTP */
 
-#define TRC_CT_NONE        (0)
-#define TRC_CT_PROTOCOL    (1<<(0))
-#define TRC_CT_NETWORK     (1<<(1))
-#define TRC_CT_PROXY       (1<<(2))
+#define TRC_CT_NONE (0)
+#define TRC_CT_PROTOCOL (1 << (0))
+#define TRC_CT_NETWORK (1 << (1))
+#define TRC_CT_PROXY (1 << (2))
 
-struct trc_feat_def {
+struct trc_feat_def
+{
   struct fetch_trc_feat *feat;
   unsigned int category;
 };
 
 static struct trc_feat_def trc_feats[] = {
-  { &Curl_trc_feat_read,      TRC_CT_NONE },
-  { &Curl_trc_feat_write,     TRC_CT_NONE },
+    {&Curl_trc_feat_read, TRC_CT_NONE},
+    {&Curl_trc_feat_write, TRC_CT_NONE},
 #ifndef FETCH_DISABLE_FTP
-  { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
+    {&Curl_trc_feat_ftp, TRC_CT_PROTOCOL},
 #endif
 #ifndef FETCH_DISABLE_DOH
-  { &Curl_doh_trc,            TRC_CT_NETWORK },
+    {&Curl_doh_trc, TRC_CT_NETWORK},
 #endif
 #ifndef FETCH_DISABLE_SMTP
-  { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },
+    {&Curl_trc_feat_smtp, TRC_CT_PROTOCOL},
 #endif
 #ifdef USE_SSL
-  { &Curl_trc_feat_ssls,      TRC_CT_NETWORK },
+    {&Curl_trc_feat_ssls, TRC_CT_NETWORK},
 #endif
 #if !defined(FETCH_DISABLE_WEBSOCKETS) && !defined(FETCH_DISABLE_HTTP)
-  { &Curl_trc_feat_ws,        TRC_CT_PROTOCOL },
+    {&Curl_trc_feat_ws, TRC_CT_PROTOCOL},
 #endif
 };
 
-struct trc_cft_def {
+struct trc_cft_def
+{
   struct Curl_cftype *cft;
   unsigned int category;
 };
 
 static struct trc_cft_def trc_cfts[] = {
-  { &Curl_cft_tcp,            TRC_CT_NETWORK },
-  { &Curl_cft_udp,            TRC_CT_NETWORK },
-  { &Curl_cft_unix,           TRC_CT_NETWORK },
-  { &Curl_cft_tcp_accept,     TRC_CT_NETWORK },
-  { &Curl_cft_happy_eyeballs, TRC_CT_NETWORK },
-  { &Curl_cft_setup,          TRC_CT_PROTOCOL },
+    {&Curl_cft_tcp, TRC_CT_NETWORK},
+    {&Curl_cft_udp, TRC_CT_NETWORK},
+    {&Curl_cft_unix, TRC_CT_NETWORK},
+    {&Curl_cft_tcp_accept, TRC_CT_NETWORK},
+    {&Curl_cft_happy_eyeballs, TRC_CT_NETWORK},
+    {&Curl_cft_setup, TRC_CT_PROTOCOL},
 #ifdef USE_NGHTTP2
-  { &Curl_cft_nghttp2,        TRC_CT_PROTOCOL },
+    {&Curl_cft_nghttp2, TRC_CT_PROTOCOL},
 #endif
 #ifdef USE_SSL
-  { &Curl_cft_ssl,            TRC_CT_NETWORK },
+    {&Curl_cft_ssl, TRC_CT_NETWORK},
 #ifndef FETCH_DISABLE_PROXY
-  { &Curl_cft_ssl_proxy,      TRC_CT_PROXY },
+    {&Curl_cft_ssl_proxy, TRC_CT_PROXY},
 #endif
 #endif
 #if !defined(FETCH_DISABLE_PROXY)
 #if !defined(FETCH_DISABLE_HTTP)
-  { &Curl_cft_h1_proxy,       TRC_CT_PROXY },
+    {&Curl_cft_h1_proxy, TRC_CT_PROXY},
 #ifdef USE_NGHTTP2
-  { &Curl_cft_h2_proxy,       TRC_CT_PROXY },
+    {&Curl_cft_h2_proxy, TRC_CT_PROXY},
 #endif
-  { &Curl_cft_http_proxy,     TRC_CT_PROXY },
+    {&Curl_cft_http_proxy, TRC_CT_PROXY},
 #endif /* !FETCH_DISABLE_HTTP */
-  { &Curl_cft_haproxy,        TRC_CT_PROXY },
-  { &Curl_cft_socks_proxy,    TRC_CT_PROXY },
+    {&Curl_cft_haproxy, TRC_CT_PROXY},
+    {&Curl_cft_socks_proxy, TRC_CT_PROXY},
 #endif /* !FETCH_DISABLE_PROXY */
 #ifdef USE_HTTP3
-  { &Curl_cft_http3,          TRC_CT_PROTOCOL },
+    {&Curl_cft_http3, TRC_CT_PROTOCOL},
 #endif
 #if !defined(FETCH_DISABLE_HTTP)
-  { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
+    {&Curl_cft_http_connect, TRC_CT_PROTOCOL},
 #endif
 };
 
-static void trc_apply_level_by_name(const char * const token, int lvl)
+static void trc_apply_level_by_name(const char *const token, int lvl)
 {
   size_t i;
 
-  for(i = 0; i < ARRAYSIZE(trc_cfts); ++i) {
-    if(strcasecompare(token, trc_cfts[i].cft->name)) {
+  for (i = 0; i < ARRAYSIZE(trc_cfts); ++i)
+  {
+    if (strcasecompare(token, trc_cfts[i].cft->name))
+    {
       trc_cfts[i].cft->log_level = lvl;
       break;
     }
   }
-  for(i = 0; i < ARRAYSIZE(trc_feats); ++i) {
-    if(strcasecompare(token, trc_feats[i].feat->name)) {
+  for (i = 0; i < ARRAYSIZE(trc_feats); ++i)
+  {
+    if (strcasecompare(token, trc_feats[i].feat->name))
+    {
       trc_feats[i].feat->log_level = lvl;
       break;
     }
@@ -367,12 +387,14 @@ static void trc_apply_level_by_category(int category, int lvl)
 {
   size_t i;
 
-  for(i = 0; i < ARRAYSIZE(trc_cfts); ++i) {
-    if(!category || (trc_cfts[i].category & category))
+  for (i = 0; i < ARRAYSIZE(trc_cfts); ++i)
+  {
+    if (!category || (trc_cfts[i].category & category))
       trc_cfts[i].cft->log_level = lvl;
   }
-  for(i = 0; i < ARRAYSIZE(trc_feats); ++i) {
-    if(!category || (trc_feats[i].category & category))
+  for (i = 0; i < ARRAYSIZE(trc_feats); ++i)
+  {
+    if (!category || (trc_feats[i].category & category))
       trc_feats[i].feat->log_level = lvl;
   }
 }
@@ -383,31 +405,33 @@ static FETCHcode trc_opt(const char *config)
   int lvl;
 
   tmp = strdup(config);
-  if(!tmp)
+  if (!tmp)
     return FETCHE_OUT_OF_MEMORY;
 
   token = Curl_strtok_r(tmp, ", ", &tok_buf);
-  while(token) {
-    switch(*token) {
-      case '-':
-        lvl = FETCH_LOG_LVL_NONE;
-        ++token;
-        break;
-      case '+':
-        lvl = FETCH_LOG_LVL_INFO;
-        ++token;
-        break;
-      default:
-        lvl = FETCH_LOG_LVL_INFO;
-        break;
+  while (token)
+  {
+    switch (*token)
+    {
+    case '-':
+      lvl = FETCH_LOG_LVL_NONE;
+      ++token;
+      break;
+    case '+':
+      lvl = FETCH_LOG_LVL_INFO;
+      ++token;
+      break;
+    default:
+      lvl = FETCH_LOG_LVL_INFO;
+      break;
     }
-    if(strcasecompare(token, "all"))
+    if (strcasecompare(token, "all"))
       trc_apply_level_by_category(TRC_CT_NONE, lvl);
-    else if(strcasecompare(token, "protocol"))
+    else if (strcasecompare(token, "protocol"))
       trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
-    else if(strcasecompare(token, "network"))
+    else if (strcasecompare(token, "network"))
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
-    else if(strcasecompare(token, "proxy"))
+    else if (strcasecompare(token, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
     else
       trc_apply_level_by_name(token, lvl);
@@ -423,9 +447,10 @@ FETCHcode Curl_trc_opt(const char *config)
   FETCHcode result = config ? trc_opt(config) : FETCHE_OK;
 #ifdef DEBUGBUILD
   /* FETCH_DEBUG can override anything */
-  if(!result) {
+  if (!result)
+  {
     const char *dbg_config = getenv("FETCH_DEBUG");
-    if(dbg_config)
+    if (dbg_config)
       result = trc_opt(dbg_config);
   }
 #endif /* DEBUGBUILD */
@@ -450,44 +475,52 @@ FETCHcode Curl_trc_init(void)
 
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 {
-  (void)data; (void)fmt;
+  (void)data;
+  (void)fmt;
 }
 
 void Curl_trc_cf_infof(struct Curl_easy *data,
                        struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
-  (void)data; (void)cf; (void)fmt;
+  (void)data;
+  (void)cf;
+  (void)fmt;
 }
 
 struct fetch_trc_feat;
 
 void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
 {
-  (void)data; (void)fmt;
+  (void)data;
+  (void)fmt;
 }
 
 void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 {
-  (void)data; (void)fmt;
+  (void)data;
+  (void)fmt;
 }
 
 #ifndef FETCH_DISABLE_FTP
 void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
 {
-  (void)data; (void)fmt;
+  (void)data;
+  (void)fmt;
 }
 #endif
 #ifndef FETCH_DISABLE_SMTP
 void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 {
-  (void)data; (void)fmt;
+  (void)data;
+  (void)fmt;
 }
 #endif
 #if !defined(FETCH_DISABLE_WEBSOCKETS) || !defined(FETCH_DISABLE_HTTP)
 void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
-  (void)data; (void)fmt;
+  (void)data;
+  (void)fmt;
 }
 #endif
 

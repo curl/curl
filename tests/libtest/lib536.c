@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,15 +25,15 @@
 
 #include "memdebug.h"
 
-#define WITH_PROXY     "http://usingproxy.com/"
-#define WITHOUT_PROXY  libtest_arg2
+#define WITH_PROXY "http://usingproxy.com/"
+#define WITHOUT_PROXY libtest_arg2
 
 static void proxystat(FETCH *fetch)
 {
   long wasproxy;
-  if(!fetch_easy_getinfo(fetch, FETCHINFO_USED_PROXY, &wasproxy)) {
-    printf("This %sthe proxy\n", wasproxy ? "used ":
-           "DID NOT use ");
+  if (!fetch_easy_getinfo(fetch, FETCHINFO_USED_PROXY, &wasproxy))
+  {
+    printf("This %sthe proxy\n", wasproxy ? "used " : "DID NOT use ");
   }
 }
 
@@ -43,20 +43,22 @@ FETCHcode test(char *URL)
   FETCH *fetch;
   struct fetch_slist *host = NULL;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   host = fetch_slist_append(NULL, libtest_arg3);
-  if(!host)
+  if (!host)
     goto test_cleanup;
 
   test_setopt(fetch, FETCHOPT_RESOLVE, host);
@@ -66,11 +68,12 @@ FETCHcode test(char *URL)
   test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   res = fetch_easy_perform(fetch);
-  if(!res) {
+  if (!res)
+  {
     proxystat(fetch);
     test_setopt(fetch, FETCHOPT_URL, WITHOUT_PROXY);
     res = fetch_easy_perform(fetch);
-    if(!res)
+    if (!res)
       proxystat(fetch);
   }
 

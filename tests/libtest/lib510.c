@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,16 +25,15 @@
 
 #include "memdebug.h"
 
-static const char * const testpost[]={
-  "one",
-  "two",
-  "three",
-  "and a final longer crap: four",
-  NULL
-};
+static const char *const testpost[] = {
+    "one",
+    "two",
+    "three",
+    "and a final longer crap: four",
+    NULL};
 
-
-struct WriteThis {
+struct WriteThis
+{
   int counter;
 };
 
@@ -43,14 +42,16 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   struct WriteThis *pooh = (struct WriteThis *)userp;
   const char *data;
 
-  if(size*nmemb < 1)
+  if (size * nmemb < 1)
     return 0;
 
   data = testpost[pooh->counter];
 
-  if(data) {
+  if (data)
+  {
     size_t len = strlen(data);
-    if(size*nmemb < len) {
+    if (size * nmemb < len)
+    {
       fprintf(stderr, "read buffer is too small to run test\n");
       return 0;
     }
@@ -58,7 +59,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
     pooh->counter++; /* advance pointer */
     return len;
   }
-  return 0;                         /* no more data left to deliver */
+  return 0; /* no more data left to deliver */
 }
 
 FETCHcode test(char *URL)
@@ -69,20 +70,23 @@ FETCHcode test(char *URL)
   struct WriteThis pooh;
   pooh.counter = 0;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   slist = fetch_slist_append(slist, "Transfer-Encoding: chunked");
-  if(!slist) {
+  if (!slist)
+  {
     fprintf(stderr, "fetch_slist_append() failed\n");
     fetch_easy_cleanup(fetch);
     fetch_global_cleanup();
@@ -121,7 +125,7 @@ FETCHcode test(char *URL)
 test_cleanup:
 
   /* clean up the headers list */
-  if(slist)
+  if (slist)
     fetch_slist_free_all(slist);
 
   /* always cleanup */

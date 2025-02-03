@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,7 +48,8 @@ FETCHcode test(char *URL)
   start_test_timing();
 
   upload = fopen(libtest_arg3, "rb");
-  if(!upload) {
+  if (!upload)
+  {
     fprintf(stderr, "fopen() failed with error: %d (%s)\n",
             errno, strerror(errno));
     fprintf(stderr, "Error opening file: (%s)\n", libtest_arg3);
@@ -56,7 +57,8 @@ FETCHcode test(char *URL)
   }
 
   res_global_init(FETCH_GLOBAL_ALL);
-  if(res) {
+  if (res)
+  {
     fclose(upload);
     return res;
   }
@@ -80,13 +82,14 @@ FETCHcode test(char *URL)
 
   /* server connection timeout */
   easy_setopt(easy, FETCHOPT_ACCEPTTIMEOUT_MS,
-              strtol(libtest_arg2, NULL, 10)*1000);
+              strtol(libtest_arg2, NULL, 10) * 1000);
 
   multi_init(multi);
 
   multi_add_handle(multi, easy);
 
-  for(;;) {
+  for (;;)
+  {
     struct timeval interval;
     fd_set fdread;
     fd_set fdwrite;
@@ -98,7 +101,7 @@ FETCHcode test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running)
+    if (!running)
       break; /* done */
 
     FD_ZERO(&fdread);
@@ -113,17 +116,19 @@ FETCHcode test(char *URL)
 
     /* At this point, timeout is guaranteed to be greater or equal than -1. */
 
-    if(timeout != -1L) {
+    if (timeout != -1L)
+    {
       int itimeout;
 #if LONG_MAX > INT_MAX
       itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
 #else
       itimeout = (int)timeout;
 #endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
-    else {
+    else
+    {
       interval.tv_sec = 0;
       interval.tv_usec = 100000L; /* 100 ms */
     }
@@ -134,7 +139,7 @@ FETCHcode test(char *URL)
   }
 
   msg = fetch_multi_info_read(multi, &msgs_left);
-  if(msg)
+  if (msg)
     res = msg->data.result;
 
 test_cleanup:

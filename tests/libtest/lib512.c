@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,22 +34,26 @@ FETCHcode test(char *URL)
   int rc = 99;
 
   code = fetch_global_init(FETCH_GLOBAL_ALL);
-  if(code == FETCHE_OK) {
+  if (code == FETCHE_OK)
+  {
     FETCH *fetch = fetch_easy_init();
-    if(fetch) {
+    if (fetch)
+    {
       FETCH *fetch2;
 
       fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
       fetch_easy_setopt(fetch, FETCHOPT_HEADER, 1L);
 
       fetch2 = fetch_easy_duphandle(fetch);
-      if(fetch2) {
+      if (fetch2)
+      {
 
         code = fetch_easy_setopt(fetch2, FETCHOPT_URL, URL);
-        if(code == FETCHE_OK) {
+        if (code == FETCHE_OK)
+        {
 
           code = fetch_easy_perform(fetch2);
-          if(code == FETCHE_OK)
+          if (code == FETCHE_OK)
             rc = 0;
           else
             rc = 1;

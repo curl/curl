@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -50,25 +50,26 @@
 #include "memdebug.h"
 
 /* for the (SOCKS) connect state machine */
-enum connect_t {
+enum connect_t
+{
   CONNECT_INIT,
-  CONNECT_SOCKS_INIT, /* 1 */
-  CONNECT_SOCKS_SEND, /* 2 waiting to send more first data */
+  CONNECT_SOCKS_INIT,      /* 1 */
+  CONNECT_SOCKS_SEND,      /* 2 waiting to send more first data */
   CONNECT_SOCKS_READ_INIT, /* 3 set up read */
-  CONNECT_SOCKS_READ, /* 4 read server response */
-  CONNECT_GSSAPI_INIT, /* 5 */
-  CONNECT_AUTH_INIT, /* 6 setup outgoing auth buffer */
-  CONNECT_AUTH_SEND, /* 7 send auth */
-  CONNECT_AUTH_READ, /* 8 read auth response */
-  CONNECT_REQ_INIT,  /* 9 init SOCKS "request" */
-  CONNECT_RESOLVING, /* 10 */
-  CONNECT_RESOLVED,  /* 11 */
-  CONNECT_RESOLVE_REMOTE, /* 12 */
-  CONNECT_REQ_SEND,  /* 13 */
-  CONNECT_REQ_SENDING, /* 14 */
-  CONNECT_REQ_READ,  /* 15 */
-  CONNECT_REQ_READ_MORE, /* 16 */
-  CONNECT_DONE /* 17 connected fine to the remote or the SOCKS proxy */
+  CONNECT_SOCKS_READ,      /* 4 read server response */
+  CONNECT_GSSAPI_INIT,     /* 5 */
+  CONNECT_AUTH_INIT,       /* 6 setup outgoing auth buffer */
+  CONNECT_AUTH_SEND,       /* 7 send auth */
+  CONNECT_AUTH_READ,       /* 8 read auth response */
+  CONNECT_REQ_INIT,        /* 9 init SOCKS "request" */
+  CONNECT_RESOLVING,       /* 10 */
+  CONNECT_RESOLVED,        /* 11 */
+  CONNECT_RESOLVE_REMOTE,  /* 12 */
+  CONNECT_REQ_SEND,        /* 13 */
+  CONNECT_REQ_SENDING,     /* 14 */
+  CONNECT_REQ_READ,        /* 15 */
+  CONNECT_REQ_READ_MORE,   /* 16 */
+  CONNECT_DONE             /* 17 connected fine to the remote or the SOCKS proxy */
 };
 
 #define FETCH_SOCKS_BUF_SIZE 600
@@ -78,10 +79,10 @@ enum connect_t {
 #error FETCH_SOCKS_BUF_SIZE must be at least 600
 #endif
 
-
-struct socks_state {
+struct socks_state
+{
   enum connect_t state;
-  ssize_t outstanding;  /* send this many bytes more */
+  ssize_t outstanding; /* send this many bytes more */
   unsigned char buffer[FETCH_SOCKS_BUF_SIZE];
   unsigned char *outp; /* send from this pointer */
 
@@ -99,10 +100,10 @@ struct socks_state {
  * This is STUPID BLOCKING behavior. Only used by the SOCKS GSSAPI functions.
  */
 int Curl_blockread_all(struct Curl_cfilter *cf,
-                       struct Curl_easy *data,   /* transfer */
-                       char *buf,                /* store read data here */
-                       ssize_t buffersize,       /* max amount to read */
-                       ssize_t *n)               /* amount bytes read */
+                       struct Curl_easy *data, /* transfer */
+                       char *buf,              /* store read data here */
+                       ssize_t buffersize,     /* max amount to read */
+                       ssize_t *n)             /* amount bytes read */
 {
   ssize_t nread = 0;
   ssize_t allread = 0;
@@ -110,36 +111,43 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
   FETCHcode err = FETCHE_OK;
 
   *n = 0;
-  for(;;) {
+  for (;;)
+  {
     timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
-    if(timeout_ms < 0) {
+    if (timeout_ms < 0)
+    {
       /* we already got the timeout */
       result = FETCHE_OPERATION_TIMEDOUT;
       break;
     }
-    if(!timeout_ms)
+    if (!timeout_ms)
       timeout_ms = TIMEDIFF_T_MAX;
-    if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0) {
+    if (SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0)
+    {
       result = ~FETCHE_OK;
       break;
     }
     nread = Curl_conn_cf_recv(cf->next, data, buf, buffersize, &err);
-    if(nread <= 0) {
+    if (nread <= 0)
+    {
       result = (int)err;
-      if(FETCHE_AGAIN == err)
+      if (FETCHE_AGAIN == err)
         continue;
-      if(err) {
+      if (err)
+      {
         break;
       }
     }
 
-    if(buffersize == nread) {
+    if (buffersize == nread)
+    {
       allread += nread;
       *n = allread;
       result = FETCHE_OK;
       break;
     }
-    if(!nread) {
+    if (!nread)
+    {
       result = ~FETCHE_OK;
       break;
     }
@@ -154,46 +162,46 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
 
 #if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
 #define DEBUG_AND_VERBOSE
-#define sxstate(x,d,y) socksstate(x,d,y, __LINE__)
+#define sxstate(x, d, y) socksstate(x, d, y, __LINE__)
 #else
-#define sxstate(x,d,y) socksstate(x,d,y)
+#define sxstate(x, d, y) socksstate(x, d, y)
 #endif
 
 /* always use this function to change state, to make debugging easier */
 static void socksstate(struct socks_state *sx, struct Curl_easy *data,
                        enum connect_t state
 #ifdef DEBUG_AND_VERBOSE
-                       , int lineno
+                       ,
+                       int lineno
 #endif
 )
 {
   enum connect_t oldstate = sx->state;
 #ifdef DEBUG_AND_VERBOSE
   /* synced with the state list in urldata.h */
-  static const char * const socks_statename[] = {
-    "INIT",
-    "SOCKS_INIT",
-    "SOCKS_SEND",
-    "SOCKS_READ_INIT",
-    "SOCKS_READ",
-    "GSSAPI_INIT",
-    "AUTH_INIT",
-    "AUTH_SEND",
-    "AUTH_READ",
-    "REQ_INIT",
-    "RESOLVING",
-    "RESOLVED",
-    "RESOLVE_REMOTE",
-    "REQ_SEND",
-    "REQ_SENDING",
-    "REQ_READ",
-    "REQ_READ_MORE",
-    "DONE"
-  };
+  static const char *const socks_statename[] = {
+      "INIT",
+      "SOCKS_INIT",
+      "SOCKS_SEND",
+      "SOCKS_READ_INIT",
+      "SOCKS_READ",
+      "GSSAPI_INIT",
+      "AUTH_INIT",
+      "AUTH_SEND",
+      "AUTH_READ",
+      "REQ_INIT",
+      "RESOLVING",
+      "RESOLVED",
+      "RESOLVE_REMOTE",
+      "REQ_SEND",
+      "REQ_SENDING",
+      "REQ_READ",
+      "REQ_READ_MORE",
+      "DONE"};
 #endif
 
   (void)data;
-  if(oldstate == state)
+  if (oldstate == state)
     /* do not bother when the new state is the same as the old state */
     return;
 
@@ -208,21 +216,24 @@ static void socksstate(struct socks_state *sx, struct Curl_easy *data,
 }
 
 static FETCHproxycode socks_state_send(struct Curl_cfilter *cf,
-                                      struct socks_state *sx,
-                                      struct Curl_easy *data,
-                                      FETCHproxycode failcode,
-                                      const char *description)
+                                       struct socks_state *sx,
+                                       struct Curl_easy *data,
+                                       FETCHproxycode failcode,
+                                       const char *description)
 {
   ssize_t nwritten;
   FETCHcode result;
 
   nwritten = Curl_conn_cf_send(cf->next, data, (char *)sx->outp,
                                sx->outstanding, FALSE, &result);
-  if(nwritten <= 0) {
-    if(FETCHE_AGAIN == result) {
+  if (nwritten <= 0)
+  {
+    if (FETCHE_AGAIN == result)
+    {
       return FETCHPX_OK;
     }
-    else if(FETCHE_OK == result) {
+    else if (FETCHE_OK == result)
+    {
       /* connection closed */
       failf(data, "connection to proxy closed");
       return FETCHPX_CLOSED;
@@ -239,21 +250,24 @@ static FETCHproxycode socks_state_send(struct Curl_cfilter *cf,
 }
 
 static FETCHproxycode socks_state_recv(struct Curl_cfilter *cf,
-                                      struct socks_state *sx,
-                                      struct Curl_easy *data,
-                                      FETCHproxycode failcode,
-                                      const char *description)
+                                       struct socks_state *sx,
+                                       struct Curl_easy *data,
+                                       FETCHproxycode failcode,
+                                       const char *description)
 {
   ssize_t nread;
   FETCHcode result;
 
   nread = Curl_conn_cf_recv(cf->next, data, (char *)sx->outp,
                             sx->outstanding, &result);
-  if(nread <= 0) {
-    if(FETCHE_AGAIN == result) {
+  if (nread <= 0)
+  {
+    if (FETCHE_AGAIN == result)
+    {
       return FETCHPX_OK;
     }
-    else if(FETCHE_OK == result) {
+    else if (FETCHE_OK == result)
+    {
       /* connection closed */
       failf(data, "connection to proxy closed");
       return FETCHPX_CLOSED;
@@ -270,33 +284,34 @@ static FETCHproxycode socks_state_recv(struct Curl_cfilter *cf,
 }
 
 /*
-* This function logs in to a SOCKS4 proxy and sends the specifics to the final
-* destination server.
-*
-* Reference :
-*   https://www.openssh.com/txt/socks4.protocol
-*
-* Note :
-*   Set protocol4a=true for  "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
-*   Nonsupport "Identification Protocol (RFC1413)"
-*/
+ * This function logs in to a SOCKS4 proxy and sends the specifics to the final
+ * destination server.
+ *
+ * Reference :
+ *   https://www.openssh.com/txt/socks4.protocol
+ *
+ * Note :
+ *   Set protocol4a=true for  "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
+ *   Nonsupport "Identification Protocol (RFC1413)"
+ */
 static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
-                               struct socks_state *sx,
-                               struct Curl_easy *data)
+                                struct socks_state *sx,
+                                struct Curl_easy *data)
 {
   struct connectdata *conn = cf->conn;
   const bool protocol4a =
-    (conn->socks_proxy.proxytype == FETCHPROXY_SOCKS4A);
+      (conn->socks_proxy.proxytype == FETCHPROXY_SOCKS4A);
   unsigned char *socksreq = sx->buffer;
   FETCHcode result;
   FETCHproxycode presult;
   struct Curl_dns_entry *dns = NULL;
 
-  switch(sx->state) {
+  switch (sx->state)
+  {
   case CONNECT_SOCKS_INIT:
     /* SOCKS4 can only do IPv4, insist! */
     conn->ip_version = FETCH_IPRESOLVE_V4;
-    if(conn->bits.httpproxy)
+    if (conn->bits.httpproxy)
       infof(data, "SOCKS4%s: connecting to HTTP proxy %s port %d",
             protocol4a ? "a" : "", sx->hostname, sx->remote_port);
 
@@ -314,19 +329,21 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
      * # of bytes:  1    1      2              4           variable       1
      */
 
-    socksreq[0] = 4; /* version (SOCKS4) */
-    socksreq[1] = 1; /* connect */
+    socksreq[0] = 4;                                              /* version (SOCKS4) */
+    socksreq[1] = 1;                                              /* connect */
     socksreq[2] = (unsigned char)((sx->remote_port >> 8) & 0xff); /* MSB */
     socksreq[3] = (unsigned char)(sx->remote_port & 0xff);        /* LSB */
 
     /* DNS resolve only for SOCKS4, not SOCKS4a */
-    if(!protocol4a) {
+    if (!protocol4a)
+    {
       enum resolve_t rc =
-        Curl_resolv(data, sx->hostname, sx->remote_port, TRUE, &dns);
+          Curl_resolv(data, sx->hostname, sx->remote_port, TRUE, &dns);
 
-      if(rc == FETCHRESOLV_ERROR)
+      if (rc == FETCHRESOLV_ERROR)
         return FETCHPX_RESOLVE_HOST;
-      else if(rc == FETCHRESOLV_PENDING) {
+      else if (rc == FETCHRESOLV_PENDING)
+      {
         sxstate(sx, data, CONNECT_RESOLVING);
         infof(data, "SOCKS4 non-blocking resolve of %s", sx->hostname);
         return FETCHPX_OK;
@@ -343,7 +360,8 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
     /* check if we have the name resolved by now */
     dns = Curl_fetch_addr(data, sx->hostname, conn->primary.remote_port);
 
-    if(dns) {
+    if (dns)
+    {
 #ifdef FETCHRES_ASYNCH
       data->state.async.dns = dns;
       data->state.async.done = TRUE;
@@ -351,31 +369,35 @@ static FETCHproxycode do_SOCKS4(struct Curl_cfilter *cf,
       infof(data, "Hostname '%s' was found", sx->hostname);
       sxstate(sx, data, CONNECT_RESOLVED);
     }
-    else {
+    else
+    {
       result = Curl_resolv_check(data, &dns);
-      if(!dns) {
-        if(result)
+      if (!dns)
+      {
+        if (result)
           return FETCHPX_RESOLVE_HOST;
         return FETCHPX_OK;
       }
     }
     FALLTHROUGH();
   case CONNECT_RESOLVED:
-CONNECT_RESOLVED:
+  CONNECT_RESOLVED:
   {
     struct Curl_addrinfo *hp = NULL;
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns. It
      * returns a Curl_addrinfo pointer that may not always look the same.
      */
-    if(dns) {
+    if (dns)
+    {
       hp = dns->addr;
 
       /* scan for the first IPv4 address */
-      while(hp && (hp->ai_family != AF_INET))
+      while (hp && (hp->ai_family != AF_INET))
         hp = hp->ai_next;
 
-      if(hp) {
+      if (hp)
+      {
         struct sockaddr_in *saddr_in;
         char buf[64];
         Curl_printable_address(hp, buf, sizeof(buf));
@@ -397,19 +419,21 @@ CONNECT_RESOLVED:
       failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.",
             sx->hostname);
 
-    if(!hp)
+    if (!hp)
       return FETCHPX_RESOLVE_HOST;
   }
     FALLTHROUGH();
   case CONNECT_REQ_INIT:
-CONNECT_REQ_INIT:
+  CONNECT_REQ_INIT:
     /*
      * This is currently not supporting "Identification Protocol (RFC1413)".
      */
     socksreq[8] = 0; /* ensure empty userid is NUL-terminated */
-    if(sx->proxy_user) {
+    if (sx->proxy_user)
+    {
       size_t plen = strlen(sx->proxy_user);
-      if(plen > 255) {
+      if (plen > 255)
+      {
         /* there is no real size limit to this field in the protocol, but
            SOCKS5 limits the proxy user field to 255 bytes and it seems likely
            that a longer field is either a mistake or malicious input */
@@ -425,10 +449,11 @@ CONNECT_REQ_INIT:
      */
     {
       size_t packetsize = 9 +
-        strlen((char *)socksreq + 8); /* size including NUL */
+                          strlen((char *)socksreq + 8); /* size including NUL */
 
       /* If SOCKS4a, set special invalid IP address 0.0.0.x */
-      if(protocol4a) {
+      if (protocol4a)
+      {
         size_t hostnamelen = 0;
         socksreq[4] = 0;
         socksreq[5] = 0;
@@ -436,10 +461,11 @@ CONNECT_REQ_INIT:
         socksreq[7] = 1;
         /* append hostname */
         hostnamelen = strlen(sx->hostname) + 1; /* length including NUL */
-        if((hostnamelen <= 255) &&
-           (packetsize + hostnamelen < sizeof(sx->buffer)))
+        if ((hostnamelen <= 255) &&
+            (packetsize + hostnamelen < sizeof(sx->buffer)))
           strcpy((char *)socksreq + packetsize, sx->hostname);
-        else {
+        else
+        {
           failf(data, "SOCKS4: too long hostname");
           return FETCHPX_LONG_HOSTNAME;
         }
@@ -455,9 +481,10 @@ CONNECT_REQ_INIT:
     /* Send request */
     presult = socks_state_send(cf, sx, data, FETCHPX_SEND_CONNECT,
                                "SOCKS4 connect request");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in sending state */
       return FETCHPX_OK;
     }
@@ -471,9 +498,10 @@ CONNECT_REQ_INIT:
     /* Receive response */
     presult = socks_state_recv(cf, sx, data, FETCHPX_RECV_CONNECT,
                                "connect request ack");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in reading state */
       return FETCHPX_OK;
     }
@@ -503,14 +531,16 @@ CONNECT_REQ_INIT:
    */
 
   /* wrong version ? */
-  if(socksreq[0]) {
+  if (socksreq[0])
+  {
     failf(data,
           "SOCKS4 reply has wrong version, version should be 0.");
     return FETCHPX_BAD_VERSION;
   }
 
   /* Result */
-  switch(socksreq[1]) {
+  switch (socksreq[1])
+  {
   case 90:
     infof(data, "SOCKS4%s request granted.", protocol4a ? "a" : "");
     break;
@@ -558,8 +588,8 @@ CONNECT_REQ_INIT:
  * destination server.
  */
 static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
-                               struct socks_state *sx,
-                               struct Curl_easy *data)
+                                struct socks_state *sx,
+                                struct Curl_easy *data)
 {
   /*
     According to the RFC1928, section "6. Replies". This is what a SOCK5
@@ -583,7 +613,7 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
   FETCHcode result;
   FETCHproxycode presult;
   bool socks5_resolve_local =
-    (conn->socks_proxy.proxytype == FETCHPROXY_SOCKS5);
+      (conn->socks_proxy.proxytype == FETCHPROXY_SOCKS5);
   const size_t hostname_len = strlen(sx->hostname);
   size_t len = 0;
   const unsigned char auth = data->set.socks5auth;
@@ -591,50 +621,53 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
   struct Curl_dns_entry *dns = NULL;
 
   DEBUGASSERT(auth & (FETCHAUTH_BASIC | FETCHAUTH_GSSAPI));
-  switch(sx->state) {
+  switch (sx->state)
+  {
   case CONNECT_SOCKS_INIT:
-    if(conn->bits.httpproxy)
+    if (conn->bits.httpproxy)
       infof(data, "SOCKS5: connecting to HTTP proxy %s port %d",
             sx->hostname, sx->remote_port);
 
     /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
-    if(!socks5_resolve_local && hostname_len > 255) {
+    if (!socks5_resolve_local && hostname_len > 255)
+    {
       failf(data, "SOCKS5: the destination hostname is too long to be "
-            "resolved remotely by the proxy.");
+                  "resolved remotely by the proxy.");
       return FETCHPX_LONG_HOSTNAME;
     }
 
-    if(auth & ~(FETCHAUTH_BASIC | FETCHAUTH_GSSAPI))
+    if (auth & ~(FETCHAUTH_BASIC | FETCHAUTH_GSSAPI))
       infof(data,
             "warning: unsupported value passed to FETCHOPT_SOCKS5_AUTH: %u",
             auth);
-    if(!(auth & FETCHAUTH_BASIC))
+    if (!(auth & FETCHAUTH_BASIC))
       /* disable username/password auth */
       sx->proxy_user = NULL;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(auth & FETCHAUTH_GSSAPI)
+    if (auth & FETCHAUTH_GSSAPI)
       allow_gssapi = TRUE;
 #endif
 
     idx = 0;
-    socksreq[idx++] = 5;   /* version */
-    idx++;                 /* number of authentication methods */
-    socksreq[idx++] = 0;   /* no authentication */
-    if(allow_gssapi)
+    socksreq[idx++] = 5; /* version */
+    idx++;               /* number of authentication methods */
+    socksreq[idx++] = 0; /* no authentication */
+    if (allow_gssapi)
       socksreq[idx++] = 1; /* GSS-API */
-    if(sx->proxy_user)
+    if (sx->proxy_user)
       socksreq[idx++] = 2; /* username/password */
     /* write the number of authentication methods */
-    socksreq[1] = (unsigned char) (idx - 2);
+    socksreq[1] = (unsigned char)(idx - 2);
 
     sx->outp = socksreq;
     DEBUGASSERT(idx <= sizeof(sx->buffer));
     sx->outstanding = idx;
     presult = socks_state_send(cf, sx, data, FETCHPX_SEND_CONNECT,
                                "initial SOCKS5 request");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in sending state */
       return FETCHPX_OK;
     }
@@ -643,59 +676,69 @@ static FETCHproxycode do_SOCKS5(struct Curl_cfilter *cf,
   case CONNECT_SOCKS_SEND:
     presult = socks_state_send(cf, sx, data, FETCHPX_SEND_CONNECT,
                                "initial SOCKS5 request");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in sending state */
       return FETCHPX_OK;
     }
     FALLTHROUGH();
   case CONNECT_SOCKS_READ_INIT:
-CONNECT_SOCKS_READ_INIT:
+  CONNECT_SOCKS_READ_INIT:
     sx->outstanding = 2; /* expect two bytes */
     sx->outp = socksreq; /* store it here */
     FALLTHROUGH();
   case CONNECT_SOCKS_READ:
     presult = socks_state_recv(cf, sx, data, FETCHPX_RECV_CONNECT,
                                "initial SOCKS5 response");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in reading state */
       return FETCHPX_OK;
     }
-    else if(socksreq[0] != 5) {
+    else if (socksreq[0] != 5)
+    {
       failf(data, "Received invalid version in initial SOCKS5 response.");
       return FETCHPX_BAD_VERSION;
     }
-    else if(socksreq[1] == 0) {
+    else if (socksreq[1] == 0)
+    {
       /* DONE! No authentication needed. Send request. */
       sxstate(sx, data, CONNECT_REQ_INIT);
       goto CONNECT_REQ_INIT;
     }
-    else if(socksreq[1] == 2) {
+    else if (socksreq[1] == 2)
+    {
       /* regular name + password authentication */
       sxstate(sx, data, CONNECT_AUTH_INIT);
       goto CONNECT_AUTH_INIT;
     }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    else if(allow_gssapi && (socksreq[1] == 1)) {
+    else if (allow_gssapi && (socksreq[1] == 1))
+    {
       sxstate(sx, data, CONNECT_GSSAPI_INIT);
       result = Curl_SOCKS5_gssapi_negotiate(cf, data);
-      if(result) {
+      if (result)
+      {
         failf(data, "Unable to negotiate SOCKS5 GSS-API context.");
         return FETCHPX_GSSAPI;
       }
     }
 #endif
-    else {
+    else
+    {
       /* error */
-      if(!allow_gssapi && (socksreq[1] == 1)) {
+      if (!allow_gssapi && (socksreq[1] == 1))
+      {
         failf(data,
               "SOCKS5 GSSAPI per-message authentication is not supported.");
         return FETCHPX_GSSAPI_PERMSG;
       }
-      else if(socksreq[1] == 255) {
+      else if (socksreq[1] == 255)
+      {
         failf(data, "No authentication method was acceptable.");
         return FETCHPX_NO_AUTH;
       }
@@ -712,15 +755,18 @@ CONNECT_SOCKS_READ_INIT:
   default: /* do nothing! */
     break;
 
-CONNECT_AUTH_INIT:
-  case CONNECT_AUTH_INIT: {
+  CONNECT_AUTH_INIT:
+  case CONNECT_AUTH_INIT:
+  {
     /* Needs username and password */
     size_t proxy_user_len, proxy_password_len;
-    if(sx->proxy_user && sx->proxy_password) {
+    if (sx->proxy_user && sx->proxy_password)
+    {
       proxy_user_len = strlen(sx->proxy_user);
       proxy_password_len = strlen(sx->proxy_password);
     }
-    else {
+    else
+    {
       proxy_user_len = 0;
       proxy_password_len = 0;
     }
@@ -733,21 +779,25 @@ CONNECT_AUTH_INIT:
      * +----+------+----------+------+----------+
      */
     len = 0;
-    socksreq[len++] = 1;    /* username/pw subnegotiation version */
-    socksreq[len++] = (unsigned char) proxy_user_len;
-    if(sx->proxy_user && proxy_user_len) {
+    socksreq[len++] = 1; /* username/pw subnegotiation version */
+    socksreq[len++] = (unsigned char)proxy_user_len;
+    if (sx->proxy_user && proxy_user_len)
+    {
       /* the length must fit in a single byte */
-      if(proxy_user_len > 255) {
+      if (proxy_user_len > 255)
+      {
         failf(data, "Excessive username length for proxy auth");
         return FETCHPX_LONG_USER;
       }
       memcpy(socksreq + len, sx->proxy_user, proxy_user_len);
     }
     len += proxy_user_len;
-    socksreq[len++] = (unsigned char) proxy_password_len;
-    if(sx->proxy_password && proxy_password_len) {
+    socksreq[len++] = (unsigned char)proxy_password_len;
+    if (sx->proxy_password && proxy_password_len)
+    {
       /* the length must fit in a single byte */
-      if(proxy_password_len > 255) {
+      if (proxy_password_len > 255)
+      {
         failf(data, "Excessive password length for proxy auth");
         return FETCHPX_LONG_PASSWD;
       }
@@ -763,9 +813,10 @@ CONNECT_AUTH_INIT:
   case CONNECT_AUTH_SEND:
     presult = socks_state_send(cf, sx, data, FETCHPX_SEND_AUTH,
                                "SOCKS5 sub-negotiation request");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in sending state */
       return FETCHPX_OK;
     }
@@ -776,14 +827,16 @@ CONNECT_AUTH_INIT:
   case CONNECT_AUTH_READ:
     presult = socks_state_recv(cf, sx, data, FETCHPX_RECV_AUTH,
                                "SOCKS5 sub-negotiation response");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in reading state */
       return FETCHPX_OK;
     }
     /* ignore the first (VER) byte */
-    else if(socksreq[1]) { /* status */
+    else if (socksreq[1])
+    { /* status */
       failf(data, "User was rejected by the SOCKS5 server (%d %d).",
             socksreq[0], socksreq[1]);
       return FETCHPX_USER_REJECTED;
@@ -793,15 +846,17 @@ CONNECT_AUTH_INIT:
     sxstate(sx, data, CONNECT_REQ_INIT);
     FALLTHROUGH();
   case CONNECT_REQ_INIT:
-CONNECT_REQ_INIT:
-    if(socks5_resolve_local) {
+  CONNECT_REQ_INIT:
+    if (socks5_resolve_local)
+    {
       enum resolve_t rc = Curl_resolv(data, sx->hostname, sx->remote_port,
                                       TRUE, &dns);
 
-      if(rc == FETCHRESOLV_ERROR)
+      if (rc == FETCHRESOLV_ERROR)
         return FETCHPX_RESOLVE_HOST;
 
-      if(rc == FETCHRESOLV_PENDING) {
+      if (rc == FETCHRESOLV_PENDING)
+      {
         sxstate(sx, data, CONNECT_RESOLVING);
         return FETCHPX_OK;
       }
@@ -814,7 +869,8 @@ CONNECT_REQ_INIT:
     /* check if we have the name resolved by now */
     dns = Curl_fetch_addr(data, sx->hostname, sx->remote_port);
 
-    if(dns) {
+    if (dns)
+    {
 #ifdef FETCHRES_ASYNCH
       data->state.async.dns = dns;
       data->state.async.done = TRUE;
@@ -822,32 +878,35 @@ CONNECT_REQ_INIT:
       infof(data, "SOCKS5: hostname '%s' found", sx->hostname);
     }
 
-    if(!dns) {
+    if (!dns)
+    {
       result = Curl_resolv_check(data, &dns);
-      if(!dns) {
-        if(result)
+      if (!dns)
+      {
+        if (result)
           return FETCHPX_RESOLVE_HOST;
         return FETCHPX_OK;
       }
     }
     FALLTHROUGH();
   case CONNECT_RESOLVED:
-CONNECT_RESOLVED:
+  CONNECT_RESOLVED:
   {
-    char dest[MAX_IPADR_LEN];  /* printable address */
+    char dest[MAX_IPADR_LEN]; /* printable address */
     struct Curl_addrinfo *hp = NULL;
-    if(dns)
+    if (dns)
       hp = dns->addr;
 #ifdef USE_IPV6
-    if(data->set.ipver != FETCH_IPRESOLVE_WHATEVER) {
-      int wanted_family = data->set.ipver == FETCH_IPRESOLVE_V4 ?
-        AF_INET : AF_INET6;
+    if (data->set.ipver != FETCH_IPRESOLVE_WHATEVER)
+    {
+      int wanted_family = data->set.ipver == FETCH_IPRESOLVE_V4 ? AF_INET : AF_INET6;
       /* scan for the first proper address */
-      while(hp && (hp->ai_family != wanted_family))
+      while (hp && (hp->ai_family != wanted_family))
         hp = hp->ai_next;
     }
 #endif
-    if(!hp) {
+    if (!hp)
+    {
       failf(data, "Failed to resolve \"%s\" for SOCKS5 connect.",
             sx->hostname);
       return FETCHPX_RESOLVE_HOST;
@@ -859,13 +918,15 @@ CONNECT_RESOLVED:
     socksreq[len++] = 5; /* version (SOCKS5) */
     socksreq[len++] = 1; /* connect */
     socksreq[len++] = 0; /* must be zero */
-    if(hp->ai_family == AF_INET) {
+    if (hp->ai_family == AF_INET)
+    {
       int i;
       struct sockaddr_in *saddr_in;
       socksreq[len++] = 1; /* ATYP: IPv4 = 1 */
 
       saddr_in = (struct sockaddr_in *)(void *)hp->ai_addr;
-      for(i = 0; i < 4; i++) {
+      for (i = 0; i < 4; i++)
+      {
         socksreq[len++] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[i];
       }
 
@@ -873,22 +934,25 @@ CONNECT_RESOLVED:
             sx->remote_port);
     }
 #ifdef USE_IPV6
-    else if(hp->ai_family == AF_INET6) {
+    else if (hp->ai_family == AF_INET6)
+    {
       int i;
       struct sockaddr_in6 *saddr_in6;
       socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 
       saddr_in6 = (struct sockaddr_in6 *)(void *)hp->ai_addr;
-      for(i = 0; i < 16; i++) {
+      for (i = 0; i < 16; i++)
+      {
         socksreq[len++] =
-          ((unsigned char *)&saddr_in6->sin6_addr.s6_addr)[i];
+            ((unsigned char *)&saddr_in6->sin6_addr.s6_addr)[i];
       }
 
       infof(data, "SOCKS5 connect to [%s]:%d (locally resolved)", dest,
             sx->remote_port);
     }
 #endif
-    else {
+    else
+    {
       hp = NULL; /* fail! */
       failf(data, "SOCKS5 connection to %s not supported", dest);
     }
@@ -896,7 +960,7 @@ CONNECT_RESOLVED:
     Curl_resolv_unlink(data, &dns); /* not used anymore from now on */
     goto CONNECT_REQ_SEND;
   }
-CONNECT_RESOLVE_REMOTE:
+  CONNECT_RESOLVE_REMOTE:
   case CONNECT_RESOLVE_REMOTE:
     /* Authentication is complete, now specify destination to the proxy */
     len = 0;
@@ -904,15 +968,17 @@ CONNECT_RESOLVE_REMOTE:
     socksreq[len++] = 1; /* connect */
     socksreq[len++] = 0; /* must be zero */
 
-    if(!socks5_resolve_local) {
+    if (!socks5_resolve_local)
+    {
       /* ATYP: domain name = 3,
          IPv6 == 4,
          IPv4 == 1 */
       unsigned char ip4[4];
 #ifdef USE_IPV6
-      if(conn->bits.ipv6_ip) {
+      if (conn->bits.ipv6_ip)
+      {
         char ip6[16];
-        if(1 != Curl_inet_pton(AF_INET6, sx->hostname, ip6))
+        if (1 != Curl_inet_pton(AF_INET6, sx->hostname, ip6))
           return FETCHPX_BAD_ADDRESS_TYPE;
         socksreq[len++] = 4;
         memcpy(&socksreq[len], ip6, sizeof(ip6));
@@ -920,14 +986,16 @@ CONNECT_RESOLVE_REMOTE:
       }
       else
 #endif
-      if(1 == Curl_inet_pton(AF_INET, sx->hostname, ip4)) {
+          if (1 == Curl_inet_pton(AF_INET, sx->hostname, ip4))
+      {
         socksreq[len++] = 1;
         memcpy(&socksreq[len], ip4, sizeof(ip4));
         len += sizeof(ip4);
       }
-      else {
+      else
+      {
         socksreq[len++] = 3;
-        socksreq[len++] = (unsigned char) hostname_len; /* one byte length */
+        socksreq[len++] = (unsigned char)hostname_len;      /* one byte length */
         memcpy(&socksreq[len], sx->hostname, hostname_len); /* w/o NULL */
         len += hostname_len;
       }
@@ -937,14 +1005,15 @@ CONNECT_RESOLVE_REMOTE:
     FALLTHROUGH();
 
   case CONNECT_REQ_SEND:
-CONNECT_REQ_SEND:
+  CONNECT_REQ_SEND:
     /* PORT MSB */
     socksreq[len++] = (unsigned char)((sx->remote_port >> 8) & 0xff);
     /* PORT LSB */
     socksreq[len++] = (unsigned char)(sx->remote_port & 0xff);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(conn->socks5_gssapi_enctype) {
+    if (conn->socks5_gssapi_enctype)
+    {
       failf(data, "SOCKS5 GSS-API protection not yet implemented.");
       return FETCHPX_GSSAPI_PROTECTION;
     }
@@ -957,14 +1026,16 @@ CONNECT_REQ_SEND:
   case CONNECT_REQ_SENDING:
     presult = socks_state_send(cf, sx, data, FETCHPX_SEND_REQUEST,
                                "SOCKS5 connect request");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in send state */
       return FETCHPX_OK;
     }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(conn->socks5_gssapi_enctype) {
+    if (conn->socks5_gssapi_enctype)
+    {
       failf(data, "SOCKS5 GSS-API protection not yet implemented.");
       return FETCHPX_GSSAPI_PROTECTION;
     }
@@ -976,34 +1047,38 @@ CONNECT_REQ_SEND:
   case CONNECT_REQ_READ:
     presult = socks_state_recv(cf, sx, data, FETCHPX_RECV_REQACK,
                                "SOCKS5 connect request ack");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in reading state */
       return FETCHPX_OK;
     }
-    else if(socksreq[0] != 5) { /* version */
+    else if (socksreq[0] != 5)
+    { /* version */
       failf(data,
             "SOCKS5 reply has wrong version, version should be 5.");
       return FETCHPX_BAD_VERSION;
     }
-    else if(socksreq[1]) { /* Anything besides 0 is an error */
+    else if (socksreq[1])
+    { /* Anything besides 0 is an error */
       FETCHproxycode rc = FETCHPX_REPLY_UNASSIGNED;
       int code = socksreq[1];
       failf(data, "cannot complete SOCKS5 connection to %s. (%d)",
             sx->hostname, (unsigned char)socksreq[1]);
-      if(code < 9) {
+      if (code < 9)
+      {
         /* RFC 1928 section 6 lists: */
         static const FETCHproxycode lookup[] = {
-          FETCHPX_OK,
-          FETCHPX_REPLY_GENERAL_SERVER_FAILURE,
-          FETCHPX_REPLY_NOT_ALLOWED,
-          FETCHPX_REPLY_NETWORK_UNREACHABLE,
-          FETCHPX_REPLY_HOST_UNREACHABLE,
-          FETCHPX_REPLY_CONNECTION_REFUSED,
-          FETCHPX_REPLY_TTL_EXPIRED,
-          FETCHPX_REPLY_COMMAND_NOT_SUPPORTED,
-          FETCHPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED,
+            FETCHPX_OK,
+            FETCHPX_REPLY_GENERAL_SERVER_FAILURE,
+            FETCHPX_REPLY_NOT_ALLOWED,
+            FETCHPX_REPLY_NETWORK_UNREACHABLE,
+            FETCHPX_REPLY_HOST_UNREACHABLE,
+            FETCHPX_REPLY_CONNECTION_REFUSED,
+            FETCHPX_REPLY_TTL_EXPIRED,
+            FETCHPX_REPLY_COMMAND_NOT_SUPPORTED,
+            FETCHPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED,
         };
         rc = lookup[code];
       }
@@ -1027,35 +1102,42 @@ CONNECT_REQ_SEND:
     */
 
     /* Calculate real packet size */
-    if(socksreq[3] == 3) {
+    if (socksreq[3] == 3)
+    {
       /* domain name */
-      int addrlen = (int) socksreq[4];
+      int addrlen = (int)socksreq[4];
       len = 5 + addrlen + 2;
     }
-    else if(socksreq[3] == 4) {
+    else if (socksreq[3] == 4)
+    {
       /* IPv6 */
       len = 4 + 16 + 2;
     }
-    else if(socksreq[3] == 1) {
+    else if (socksreq[3] == 1)
+    {
       len = 4 + 4 + 2;
     }
-    else {
+    else
+    {
       failf(data, "SOCKS5 reply has wrong address type.");
       return FETCHPX_BAD_ADDRESS_TYPE;
     }
 
     /* At this point we already read first 10 bytes */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(!conn->socks5_gssapi_enctype) {
+    if (!conn->socks5_gssapi_enctype)
+    {
       /* decrypt_gssapi_blockread already read the whole packet */
 #endif
-      if(len > 10) {
+      if (len > 10)
+      {
         DEBUGASSERT(len <= sizeof(sx->buffer));
         sx->outstanding = len - 10; /* get the rest */
         sx->outp = &socksreq[10];
         sxstate(sx, data, CONNECT_REQ_READ_MORE);
       }
-      else {
+      else
+      {
         sxstate(sx, data, CONNECT_DONE);
         break;
       }
@@ -1066,9 +1148,10 @@ CONNECT_REQ_SEND:
   case CONNECT_REQ_READ_MORE:
     presult = socks_state_recv(cf, sx, data, FETCHPX_RECV_ADDRESS,
                                "SOCKS5 connect request address");
-    if(FETCHPX_OK != presult)
+    if (FETCHPX_OK != presult)
       return presult;
-    else if(sx->outstanding) {
+    else if (sx->outstanding)
+    {
       /* remain in reading state */
       return FETCHPX_OK;
     }
@@ -1080,14 +1163,15 @@ CONNECT_REQ_SEND:
 }
 
 static FETCHcode connect_SOCKS(struct Curl_cfilter *cf,
-                              struct socks_state *sxstate,
-                              struct Curl_easy *data)
+                               struct socks_state *sxstate,
+                               struct Curl_easy *data)
 {
   FETCHcode result = FETCHE_OK;
   FETCHproxycode pxresult = FETCHPX_OK;
   struct connectdata *conn = cf->conn;
 
-  switch(conn->socks_proxy.proxytype) {
+  switch (conn->socks_proxy.proxytype)
+  {
   case FETCHPROXY_SOCKS5:
   case FETCHPROXY_SOCKS5_HOSTNAME:
     pxresult = do_SOCKS5(cf, sxstate, data);
@@ -1102,7 +1186,8 @@ static FETCHcode connect_SOCKS(struct Curl_cfilter *cf,
     failf(data, "unknown proxytype option given");
     result = FETCHE_COULDNT_CONNECT;
   } /* switch proxytype */
-  if(pxresult) {
+  if (pxresult)
+  {
     result = FETCHE_PROXY;
     data->info.pxcode = pxresult;
   }
@@ -1113,7 +1198,8 @@ static FETCHcode connect_SOCKS(struct Curl_cfilter *cf,
 static void socks_proxy_cf_free(struct Curl_cfilter *cf)
 {
   struct socks_state *sxstate = cf->ctx;
-  if(sxstate) {
+  if (sxstate)
+  {
     free(sxstate);
     cf->ctx = NULL;
   }
@@ -1127,53 +1213,53 @@ static void socks_proxy_cf_free(struct Curl_cfilter *cf)
 
 */
 static FETCHcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       bool blocking, bool *done)
+                                        struct Curl_easy *data,
+                                        bool blocking, bool *done)
 {
   FETCHcode result;
   struct connectdata *conn = cf->conn;
   int sockindex = cf->sockindex;
   struct socks_state *sx = cf->ctx;
 
-  if(cf->connected) {
+  if (cf->connected)
+  {
     *done = TRUE;
     return FETCHE_OK;
   }
 
   result = cf->next->cft->do_connect(cf->next, data, blocking, done);
-  if(result || !*done)
+  if (result || !*done)
     return result;
 
-  if(!sx) {
+  if (!sx)
+  {
     sx = calloc(1, sizeof(*sx));
-    if(!sx)
+    if (!sx)
       return FETCHE_OUT_OF_MEMORY;
     cf->ctx = sx;
   }
 
-  if(sx->state == CONNECT_INIT) {
+  if (sx->state == CONNECT_INIT)
+  {
     /* for the secondary socket (FTP), use the "connect to host"
      * but ignore the "connect to port" (use the secondary port)
      */
     sxstate(sx, data, CONNECT_SOCKS_INIT);
     sx->hostname =
-      conn->bits.httpproxy ?
-      conn->http_proxy.host.name :
-      conn->bits.conn_to_host ?
-      conn->conn_to_host.name :
-      sockindex == SECONDARYSOCKET ?
-      conn->secondaryhostname : conn->host.name;
+        conn->bits.httpproxy ? conn->http_proxy.host.name : conn->bits.conn_to_host    ? conn->conn_to_host.name
+                                                        : sockindex == SECONDARYSOCKET ? conn->secondaryhostname
+                                                                                       : conn->host.name;
     sx->remote_port =
-      conn->bits.httpproxy ? (int)conn->http_proxy.port :
-      sockindex == SECONDARYSOCKET ? conn->secondary_port :
-      conn->bits.conn_to_port ? conn->conn_to_port :
-      conn->remote_port;
+        conn->bits.httpproxy ? (int)conn->http_proxy.port : sockindex == SECONDARYSOCKET ? conn->secondary_port
+                                                        : conn->bits.conn_to_port        ? conn->conn_to_port
+                                                                                         : conn->remote_port;
     sx->proxy_user = conn->socks_proxy.user;
     sx->proxy_password = conn->socks_proxy.passwd;
   }
 
   result = connect_SOCKS(cf, sx, data);
-  if(!result && sx->state == CONNECT_DONE) {
+  if (!result && sx->state == CONNECT_DONE)
+  {
     cf->connected = TRUE;
     Curl_verboseconnect(data, conn, cf->sockindex);
     socks_proxy_cf_free(cf);
@@ -1184,16 +1270,18 @@ static FETCHcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
 }
 
 static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps)
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps)
 {
   struct socks_state *sx = cf->ctx;
 
-  if(!cf->connected && sx) {
+  if (!cf->connected && sx)
+  {
     /* If we are not connected, the filter below is and has nothing
      * to wait on, we determine what to wait for. */
     fetch_socket_t sock = Curl_conn_cf_get_socket(cf, data);
-    switch(sx->state) {
+    switch (sx->state)
+    {
     case CONNECT_RESOLVING:
     case CONNECT_SOCKS_READ:
     case CONNECT_AUTH_READ:
@@ -1232,44 +1320,46 @@ static void socks_cf_get_host(struct Curl_cfilter *cf,
                               int *pport)
 {
   (void)data;
-  if(!cf->connected) {
+  if (!cf->connected)
+  {
     *phost = cf->conn->socks_proxy.host.name;
     *pdisplay_host = cf->conn->http_proxy.host.dispname;
     *pport = (int)cf->conn->socks_proxy.port;
   }
-  else {
+  else
+  {
     cf->next->cft->get_host(cf->next, data, phost, pdisplay_host, pport);
   }
 }
 
 struct Curl_cftype Curl_cft_socks_proxy = {
-  "SOCKS-PROXYY",
-  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
-  0,
-  socks_proxy_cf_destroy,
-  socks_proxy_cf_connect,
-  socks_proxy_cf_close,
-  Curl_cf_def_shutdown,
-  socks_cf_get_host,
-  socks_cf_adjust_pollset,
-  Curl_cf_def_data_pending,
-  Curl_cf_def_send,
-  Curl_cf_def_recv,
-  Curl_cf_def_cntrl,
-  Curl_cf_def_conn_is_alive,
-  Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+    "SOCKS-PROXYY",
+    CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
+    0,
+    socks_proxy_cf_destroy,
+    socks_proxy_cf_connect,
+    socks_proxy_cf_close,
+    Curl_cf_def_shutdown,
+    socks_cf_get_host,
+    socks_cf_adjust_pollset,
+    Curl_cf_def_data_pending,
+    Curl_cf_def_send,
+    Curl_cf_def_recv,
+    Curl_cf_def_cntrl,
+    Curl_cf_def_conn_is_alive,
+    Curl_cf_def_conn_keep_alive,
+    Curl_cf_def_query,
 };
 
 FETCHcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                          struct Curl_easy *data)
+                                           struct Curl_easy *data)
 {
   struct Curl_cfilter *cf;
   FETCHcode result;
 
   (void)data;
   result = Curl_cf_create(&cf, &Curl_cft_socks_proxy, NULL);
-  if(!result)
+  if (!result)
     Curl_conn_cf_insert_after(cf_at, cf);
   return result;
 }

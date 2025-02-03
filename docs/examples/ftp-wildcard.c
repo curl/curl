@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,8 @@
 #include <fetch/fetch.h>
 #include <stdio.h>
 
-struct callback_data {
+struct callback_data
+{
   FILE *output;
 };
 
@@ -47,16 +48,17 @@ int main(int argc, char **argv)
   FETCH *handle;
 
   /* help data */
-  struct callback_data data = { 0 };
+  struct callback_data data = {0};
 
   /* global initialization */
   FETCHcode rc = fetch_global_init(FETCH_GLOBAL_ALL);
-  if(rc)
+  if (rc)
     return (int)rc;
 
   /* initialization of easy handle */
   handle = fetch_easy_init();
-  if(!handle) {
+  if (!handle)
+  {
     fetch_global_cleanup();
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -80,7 +82,7 @@ int main(int argc, char **argv)
   /* fetch_easy_setopt(handle, FETCHOPT_VERBOSE, 1L); */
 
   /* set a URL containing wildcard pattern (only in the last part) */
-  if(argc == 2)
+  if (argc == 2)
     fetch_easy_setopt(handle, FETCHOPT_URL, argv[1]);
   else
     fetch_easy_setopt(handle, FETCHOPT_URL, "ftp://example.com/test/*");
@@ -100,7 +102,8 @@ static long file_is_coming(struct fetch_fileinfo *finfo,
   printf("%3d %40s %10luB ", remains, finfo->filename,
          (unsigned long)finfo->size);
 
-  switch(finfo->filetype) {
+  switch (finfo->filetype)
+  {
   case FETCHFILETYPE_DIRECTORY:
     printf(" DIR\n");
     break;
@@ -112,15 +115,18 @@ static long file_is_coming(struct fetch_fileinfo *finfo,
     break;
   }
 
-  if(finfo->filetype == FETCHFILETYPE_FILE) {
+  if (finfo->filetype == FETCHFILETYPE_FILE)
+  {
     /* do not transfer files >= 50B */
-    if(finfo->size > 50) {
+    if (finfo->size > 50)
+    {
       printf("SKIPPED\n");
       return FETCH_CHUNK_BGN_FUNC_SKIP;
     }
 
     data->output = fopen(finfo->filename, "wb");
-    if(!data->output) {
+    if (!data->output)
+    {
       return FETCH_CHUNK_BGN_FUNC_FAIL;
     }
   }
@@ -130,7 +136,8 @@ static long file_is_coming(struct fetch_fileinfo *finfo,
 
 static long file_is_downloaded(struct callback_data *data)
 {
-  if(data->output) {
+  if (data->output)
+  {
     printf("DOWNLOADED\n");
     fclose(data->output);
     data->output = 0x0;
@@ -143,7 +150,7 @@ static size_t write_it(char *buff, size_t size, size_t nmemb,
 {
   struct callback_data *data = cb_data;
   size_t written = 0;
-  if(data->output)
+  if (data->output)
     written = fwrite(buff, size, nmemb, data->output);
   else
     /* listing output */

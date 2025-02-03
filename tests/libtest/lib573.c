@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,9 +44,10 @@ FETCHcode test(char *URL)
   double dbl_epsilon;
 
   dbl_epsilon = 1.0;
-  do {
+  do
+  {
     dbl_epsilon /= 2.0;
-  } while((double)(1.0 + (dbl_epsilon/2.0)) > (double)1.0);
+  } while ((double)(1.0 + (dbl_epsilon / 2.0)) > (double)1.0);
 
   start_test_timing();
 
@@ -67,7 +68,8 @@ FETCHcode test(char *URL)
 
   multi_add_handle(m, c);
 
-  while(running) {
+  while (running)
+  {
     struct timeval timeout;
     fd_set fdread, fdwrite, fdexcep;
     int maxfd = -99;
@@ -79,7 +81,7 @@ FETCHcode test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running)
+    if (!running)
       break; /* done */
 
     FD_ZERO(&fdread);
@@ -96,7 +98,8 @@ FETCHcode test(char *URL)
   }
 
   fetch_easy_getinfo(c, FETCHINFO_CONNECT_TIME, &connect_time);
-  if(connect_time < dbl_epsilon) {
+  if (connect_time < dbl_epsilon)
+  {
     fprintf(stderr, "connect time %e is < epsilon %e\n",
             connect_time, dbl_epsilon);
     res = TEST_ERR_MAJOR_BAD;

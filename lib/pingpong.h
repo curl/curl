@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,14 +27,15 @@
 #include "fetch_setup.h"
 
 #if !defined(FETCH_DISABLE_IMAP) || !defined(FETCH_DISABLE_FTP) || \
-  !defined(FETCH_DISABLE_POP3) || !defined(FETCH_DISABLE_SMTP)
+    !defined(FETCH_DISABLE_POP3) || !defined(FETCH_DISABLE_SMTP)
 #define USE_PINGPONG
 #endif
 
 /* forward-declaration, this is defined in urldata.h */
 struct connectdata;
 
-typedef enum {
+typedef enum
+{
   PPTRANSFER_BODY, /* yes do transfer a body */
   PPTRANSFER_INFO, /* do still go through to get info/headers */
   PPTRANSFER_NONE  /* do not get anything and do not get info */
@@ -46,18 +47,19 @@ typedef enum {
  *
  * It holds response cache and non-blocking sending data.
  */
-struct pingpong {
-  size_t nread_resp;  /* number of bytes currently read of a server response */
-  bool pending_resp;  /* set TRUE when a server response is pending or in
-                         progress, and is cleared once the last response is
-                         read */
-  char *sendthis; /* pointer to a buffer that is to be sent to the server */
-  size_t sendleft; /* number of bytes left to send from the sendthis buffer */
-  size_t sendsize; /* total size of the sendthis buffer */
+struct pingpong
+{
+  size_t nread_resp;         /* number of bytes currently read of a server response */
+  bool pending_resp;         /* set TRUE when a server response is pending or in
+                                progress, and is cleared once the last response is
+                                read */
+  char *sendthis;            /* pointer to a buffer that is to be sent to the server */
+  size_t sendleft;           /* number of bytes left to send from the sendthis buffer */
+  size_t sendsize;           /* total size of the sendthis buffer */
   struct fetchtime response; /* set to Curl_now() when a command has been sent
                                off, used to time-out response reading */
-  timediff_t response_time; /* When no timeout is given, this is the amount of
-                               milliseconds we await for a server response. */
+  timediff_t response_time;  /* When no timeout is given, this is the amount of
+                                milliseconds we await for a server response. */
   struct dynbuf sendbuf;
   struct dynbuf recvbuf;
   size_t overflow; /* number of bytes left after a final response line */
@@ -72,12 +74,13 @@ struct pingpong {
                     char *ptr, size_t len, int *code);
 };
 
-#define PINGPONG_SETUP(pp,s,e)                   \
-  do {                                           \
-    pp->response_time = RESP_TIMEOUT;            \
-    pp->statemachine = s;                        \
-    pp->endofresp = e;                           \
-  } while(0)
+#define PINGPONG_SETUP(pp, s, e)      \
+  do                                  \
+  {                                   \
+    pp->response_time = RESP_TIMEOUT; \
+    pp->statemachine = s;             \
+    pp->endofresp = e;                \
+  } while (0)
 
 /*
  * Curl_pp_statemach()
@@ -86,7 +89,7 @@ struct pingpong {
  * socket if there is no traffic.
  */
 FETCHcode Curl_pp_statemach(struct Curl_easy *data, struct pingpong *pp,
-                           bool block, bool disconnecting);
+                            bool block, bool disconnecting);
 
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp);
@@ -95,7 +98,6 @@ void Curl_pp_init(struct pingpong *pp);
    triggered */
 timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting);
-
 
 /***********************************************************************
  *
@@ -108,8 +110,8 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
  * made to never block
  */
 FETCHcode Curl_pp_sendf(struct Curl_easy *data,
-                       struct pingpong *pp,
-                       const char *fmt, ...) FETCH_PRINTF(3, 4);
+                        struct pingpong *pp,
+                        const char *fmt, ...) FETCH_PRINTF(3, 4);
 
 /***********************************************************************
  *
@@ -122,9 +124,9 @@ FETCHcode Curl_pp_sendf(struct Curl_easy *data,
  * made to never block
  */
 FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
-                        struct pingpong *pp,
-                        const char *fmt,
-                        va_list args) FETCH_PRINTF(3, 0);
+                         struct pingpong *pp,
+                         const char *fmt,
+                         va_list args) FETCH_PRINTF(3, 0);
 
 /*
  * Curl_pp_readresp()
@@ -132,23 +134,22 @@ FETCHcode Curl_pp_vsendf(struct Curl_easy *data,
  * Reads a piece of a server response.
  */
 FETCHcode Curl_pp_readresp(struct Curl_easy *data,
-                          int sockindex,
-                          struct pingpong *pp,
-                          int *code, /* return the server code if done */
-                          size_t *size); /* size of the response */
+                           int sockindex,
+                           struct pingpong *pp,
+                           int *code,     /* return the server code if done */
+                           size_t *size); /* size of the response */
 
 bool Curl_pp_needs_flush(struct Curl_easy *data,
                          struct pingpong *pp);
 
 FETCHcode Curl_pp_flushsend(struct Curl_easy *data,
-                           struct pingpong *pp);
+                            struct pingpong *pp);
 
 /* call this when a pingpong connection is disconnected */
 FETCHcode Curl_pp_disconnect(struct pingpong *pp);
 
 int Curl_pp_getsock(struct Curl_easy *data, struct pingpong *pp,
                     fetch_socket_t *socks);
-
 
 /***********************************************************************
  *

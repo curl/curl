@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -84,14 +84,14 @@
 #include "memdebug.h"
 
 #ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  EAGAIN
-#define EAGAIN  11 /* errno.h value */
-#undef  ENOMEM
-#define ENOMEM  12 /* errno.h value */
-#undef  EINVAL
-#define EINVAL  22 /* errno.h value */
+#undef EINTR
+#define EINTR 4 /* errno.h value */
+#undef EAGAIN
+#define EAGAIN 11 /* errno.h value */
+#undef ENOMEM
+#define ENOMEM 12 /* errno.h value */
+#undef EINVAL
+#define EINVAL 22 /* errno.h value */
 #endif
 
 #define DEFAULT_PORT 8905
@@ -111,9 +111,10 @@
 static const char *backendaddr = "127.0.0.1";
 static unsigned short backendport = 0; /* default is use client's */
 
-struct configurable {
-  unsigned char version; /* initial version byte in the request must match
-                            this */
+struct configurable
+{
+  unsigned char version;      /* initial version byte in the request must match
+                                 this */
   unsigned char nmethods_min; /* minimum number of nmethods to expect */
   unsigned char nmethods_max; /* maximum number of nmethods to expect */
   unsigned char responseversion;
@@ -121,7 +122,7 @@ struct configurable {
   unsigned char reqcmd;
   unsigned char connectrep;
   unsigned short port; /* backend port */
-  char addr[32]; /* backend IPv4 numerical */
+  char addr[32];       /* backend IPv4 numerical */
   char user[256];
   char password[256];
 };
@@ -131,7 +132,7 @@ struct configurable {
 #define CONFIG_NMETHODS_MAX 3
 #define CONFIG_RESPONSEVERSION CONFIG_VERSION
 #define CONFIG_RESPONSEMETHOD 0 /* no auth */
-#define CONFIG_REQCMD 1 /* CONNECT */
+#define CONFIG_REQCMD 1         /* CONNECT */
 #define CONFIG_PORT backendport
 #define CONFIG_ADDR backendaddr
 #define CONFIG_CONNECTREP 0
@@ -176,10 +177,12 @@ static unsigned short shortval(char *value)
 static enum {
   socket_domain_inet = AF_INET
 #ifdef USE_IPV6
-  , socket_domain_inet6 = AF_INET6
+  ,
+  socket_domain_inet6 = AF_INET6
 #endif
 #ifdef USE_UNIX_SOCKETS
-  , socket_domain_unix = AF_UNIX
+  ,
+  socket_domain_unix = AF_UNIX
 #endif
 } socket_domain = AF_INET;
 
@@ -187,38 +190,48 @@ static void getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
   resetdefaults();
-  if(fp) {
+  if (fp)
+  {
     char buffer[512];
     logmsg("parse config file");
-    while(fgets(buffer, sizeof(buffer), fp)) {
+    while (fgets(buffer, sizeof(buffer), fp))
+    {
       char key[32];
       char value[260];
-      if(2 == sscanf(buffer, "%31s %259s", key, value)) {
-        if(!strcmp(key, "version")) {
+      if (2 == sscanf(buffer, "%31s %259s", key, value))
+      {
+        if (!strcmp(key, "version"))
+        {
           config.version = byteval(value);
           logmsg("version [%d] set", config.version);
         }
-        else if(!strcmp(key, "nmethods_min")) {
+        else if (!strcmp(key, "nmethods_min"))
+        {
           config.nmethods_min = byteval(value);
           logmsg("nmethods_min [%d] set", config.nmethods_min);
         }
-        else if(!strcmp(key, "nmethods_max")) {
+        else if (!strcmp(key, "nmethods_max"))
+        {
           config.nmethods_max = byteval(value);
           logmsg("nmethods_max [%d] set", config.nmethods_max);
         }
-        else if(!strcmp(key, "backend")) {
+        else if (!strcmp(key, "backend"))
+        {
           strcpy(config.addr, value);
           logmsg("backend [%s] set", config.addr);
         }
-        else if(!strcmp(key, "backendport")) {
+        else if (!strcmp(key, "backendport"))
+        {
           config.port = shortval(value);
           logmsg("backendport [%d] set", config.port);
         }
-        else if(!strcmp(key, "user")) {
+        else if (!strcmp(key, "user"))
+        {
           strcpy(config.user, value);
           logmsg("user [%s] set", config.user);
         }
-        else if(!strcmp(key, "password")) {
+        else if (!strcmp(key, "password"))
+        {
           strcpy(config.password, value);
           logmsg("password [%s] set", config.password);
         }
@@ -227,11 +240,13 @@ static void getconfig(void)
            o  X'01' GSSAPI
            o  X'02' USERNAME/PASSWORD
         */
-        else if(!strcmp(key, "method")) {
+        else if (!strcmp(key, "method"))
+        {
           config.responsemethod = byteval(value);
           logmsg("method [%d] set", config.responsemethod);
         }
-        else if(!strcmp(key, "response")) {
+        else if (!strcmp(key, "response"))
+        {
           config.connectrep = byteval(value);
           logmsg("response [%d] set", config.connectrep);
         }
@@ -250,13 +265,14 @@ static void loghex(unsigned char *buffer, ssize_t len)
   ssize_t width = 0;
   int left = sizeof(data);
 
-  for(i = 0; i < len && (left >= 0); i++) {
+  for (i = 0; i < len && (left >= 0); i++)
+  {
     msnprintf(optr, left, "%02x", ptr[i]);
     width += 2;
     optr += 2;
     left -= 2;
   }
-  if(width)
+  if (width)
     logmsg("'%s'", data);
 }
 
@@ -283,12 +299,12 @@ static void loghex(unsigned char *buffer, ssize_t len)
 
 /* connect to a given IPv4 address, not the one asked for */
 static fetch_socket_t socksconnect(unsigned short connectport,
-                                  const char *connectaddr)
+                                   const char *connectaddr)
 {
   int rc;
   srvr_sockaddr_union_t me;
   fetch_socket_t sock = socket(AF_INET, SOCK_STREAM, 0);
-  if(sock == FETCH_SOCKET_BAD)
+  if (sock == FETCH_SOCKET_BAD)
     return FETCH_SOCKET_BAD;
   memset(&me.sa4, 0, sizeof(me.sa4));
   me.sa4.sin_family = AF_INET;
@@ -298,7 +314,8 @@ static fetch_socket_t socksconnect(unsigned short connectport,
 
   rc = connect(sock, &me.sa, sizeof(me.sa4));
 
-  if(rc) {
+  if (rc)
+  {
     int error = SOCKERRNO;
     logmsg("Error connecting to %s:%hu: (%d) %s",
            connectaddr, connectport, error, sstrerror(error));
@@ -309,54 +326,59 @@ static fetch_socket_t socksconnect(unsigned short connectport,
 }
 
 static fetch_socket_t socks4(fetch_socket_t fd,
-                            unsigned char *buffer,
-                            ssize_t rc)
+                             unsigned char *buffer,
+                             ssize_t rc)
 {
   unsigned char response[256 + 16];
   fetch_socket_t connfd;
   unsigned char cd;
   unsigned short s4port;
 
-  if(buffer[SOCKS4_CD] != 1) {
+  if (buffer[SOCKS4_CD] != 1)
+  {
     logmsg("SOCKS4 CD is not 1: %d", buffer[SOCKS4_CD]);
     return FETCH_SOCKET_BAD;
   }
-  if(rc < 9) {
+  if (rc < 9)
+  {
     logmsg("SOCKS4 connect message too short: %zd", rc);
     return FETCH_SOCKET_BAD;
   }
-  if(!config.port)
+  if (!config.port)
     s4port = (unsigned short)((buffer[SOCKS4_DSTPORT] << 8) |
                               (buffer[SOCKS4_DSTPORT + 1]));
   else
     s4port = config.port;
 
   connfd = socksconnect(s4port, config.addr);
-  if(connfd == FETCH_SOCKET_BAD) {
+  if (connfd == FETCH_SOCKET_BAD)
+  {
     /* failed */
     cd = 91;
   }
-  else {
+  else
+  {
     /* success */
     cd = 90;
   }
-  response[0] = 0; /* reply version 0 */
+  response[0] = 0;  /* reply version 0 */
   response[1] = cd; /* result */
   /* copy port and address from connect request */
   memcpy(&response[2], &buffer[SOCKS4_DSTPORT], 6);
   rc = (send)(fd, (char *)response, 8, 0);
-  if(rc != 8) {
+  if (rc != 8)
+  {
     logmsg("Sending SOCKS4 response failed!");
     return FETCH_SOCKET_BAD;
   }
   logmsg("Sent %zd bytes", rc);
   loghex(response, rc);
 
-  if(cd == 90)
+  if (cd == 90)
     /* now do the transfer */
     return connfd;
 
-  if(connfd != FETCH_SOCKET_BAD)
+  if (connfd != FETCH_SOCKET_BAD)
     sclose(connfd);
 
   return FETCH_SOCKET_BAD;
@@ -364,8 +386,8 @@ static fetch_socket_t socks4(fetch_socket_t fd,
 
 static fetch_socket_t sockit(fetch_socket_t fd)
 {
-  unsigned char buffer[2*256 + 16];
-  unsigned char response[2*256 + 16];
+  unsigned char buffer[2 * 256 + 16];
+  unsigned char response[2 * 256 + 16];
   ssize_t rc;
   unsigned char len;
   unsigned char type;
@@ -378,7 +400,8 @@ static fetch_socket_t sockit(fetch_socket_t fd)
   getconfig();
 
   rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
-  if(rc <= 0) {
+  if (rc <= 0)
+  {
     logmsg("SOCKS identifier message missing, recv returned %zd", rc);
     return FETCH_SOCKET_BAD;
   }
@@ -386,27 +409,31 @@ static fetch_socket_t sockit(fetch_socket_t fd)
   logmsg("READ %zd bytes", rc);
   loghex(buffer, rc);
 
-  if(buffer[SOCKS5_VERSION] == 4)
+  if (buffer[SOCKS5_VERSION] == 4)
     return socks4(fd, buffer, rc);
 
-  if(rc < 3) {
+  if (rc < 3)
+  {
     logmsg("SOCKS5 identifier message too short: %zd", rc);
     return FETCH_SOCKET_BAD;
   }
 
-  if(buffer[SOCKS5_VERSION] != config.version) {
+  if (buffer[SOCKS5_VERSION] != config.version)
+  {
     logmsg("VERSION byte not %d", config.version);
     return FETCH_SOCKET_BAD;
   }
-  if((buffer[SOCKS5_NMETHODS] < config.nmethods_min) ||
-     (buffer[SOCKS5_NMETHODS] > config.nmethods_max)) {
+  if ((buffer[SOCKS5_NMETHODS] < config.nmethods_min) ||
+      (buffer[SOCKS5_NMETHODS] > config.nmethods_max))
+  {
     logmsg("NMETHODS byte not within %d - %d ",
            config.nmethods_min, config.nmethods_max);
     return FETCH_SOCKET_BAD;
   }
   /* after NMETHODS follows that many bytes listing the methods the client
      says it supports */
-  if(rc != (buffer[SOCKS5_NMETHODS] + 2)) {
+  if (rc != (buffer[SOCKS5_NMETHODS] + 2))
+  {
     logmsg("Expected %d bytes, got %zd", buffer[SOCKS5_NMETHODS] + 2, rc);
     return FETCH_SOCKET_BAD;
   }
@@ -416,7 +443,8 @@ static fetch_socket_t sockit(fetch_socket_t fd)
   response[0] = config.responseversion;
   response[1] = config.responsemethod;
   rc = (send)(fd, (char *)response, 2, 0);
-  if(rc != 2) {
+  if (rc != 2)
+  {
     logmsg("Sending response failed!");
     return FETCH_SOCKET_BAD;
   }
@@ -425,7 +453,8 @@ static fetch_socket_t sockit(fetch_socket_t fd)
 
   /* expect the request or auth */
   rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
-  if(rc <= 0) {
+  if (rc <= 0)
+  {
     logmsg("SOCKS5 request or auth message missing, recv returned %zd", rc);
     return FETCH_SOCKET_BAD;
   }
@@ -433,7 +462,8 @@ static fetch_socket_t sockit(fetch_socket_t fd)
   logmsg("READ %zd bytes", rc);
   loghex(buffer, rc);
 
-  if(config.responsemethod == 2) {
+  if (config.responsemethod == 2)
+  {
     /* RFC 1929 authentication
        +----+------+----------+------+----------+
        |VER | ULEN |  UNAME   | PLEN |  PASSWD  |
@@ -444,28 +474,33 @@ static fetch_socket_t sockit(fetch_socket_t fd)
     unsigned char ulen;
     unsigned char plen;
     bool login = TRUE;
-    if(rc < 5) {
+    if (rc < 5)
+    {
       logmsg("Too short auth input: %zd", rc);
       return FETCH_SOCKET_BAD;
     }
-    if(buffer[SOCKS5_VERSION] != 1) {
+    if (buffer[SOCKS5_VERSION] != 1)
+    {
       logmsg("Auth VERSION byte not 1, got %d", buffer[SOCKS5_VERSION]);
       return FETCH_SOCKET_BAD;
     }
     ulen = buffer[SOCKS5_ULEN];
-    if(rc < 4 + ulen) {
+    if (rc < 4 + ulen)
+    {
       logmsg("Too short packet for username: %zd", rc);
       return FETCH_SOCKET_BAD;
     }
     plen = buffer[SOCKS5_ULEN + ulen + 1];
-    if(rc < 3 + ulen + plen) {
+    if (rc < 3 + ulen + plen)
+    {
       logmsg("Too short packet for ulen %d plen %d: %zd", ulen, plen, rc);
       return FETCH_SOCKET_BAD;
     }
-    if((ulen != strlen(config.user)) ||
-       (plen != strlen(config.password)) ||
-       memcmp(&buffer[SOCKS5_UNAME], config.user, ulen) ||
-       memcmp(&buffer[SOCKS5_UNAME + ulen + 1], config.password, plen)) {
+    if ((ulen != strlen(config.user)) ||
+        (plen != strlen(config.password)) ||
+        memcmp(&buffer[SOCKS5_UNAME], config.user, ulen) ||
+        memcmp(&buffer[SOCKS5_UNAME + ulen + 1], config.password, plen))
+    {
       /* no match! */
       logmsg("mismatched credentials!");
       login = FALSE;
@@ -473,18 +508,20 @@ static fetch_socket_t sockit(fetch_socket_t fd)
     response[0] = 1;
     response[1] = login ? 0 : 1;
     rc = (send)(fd, (char *)response, 2, 0);
-    if(rc != 2) {
+    if (rc != 2)
+    {
       logmsg("Sending auth response failed!");
       return FETCH_SOCKET_BAD;
     }
     logmsg("Sent %zd bytes", rc);
     loghex(response, rc);
-    if(!login)
+    if (!login)
       return FETCH_SOCKET_BAD;
 
     /* expect the request */
     rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
-    if(rc <= 0) {
+    if (rc <= 0)
+    {
       logmsg("SOCKS5 request message missing, recv returned %zd", rc);
       return FETCH_SOCKET_BAD;
     }
@@ -492,22 +529,26 @@ static fetch_socket_t sockit(fetch_socket_t fd)
     logmsg("READ %zd bytes", rc);
     loghex(buffer, rc);
   }
-  if(rc < 6) {
+  if (rc < 6)
+  {
     logmsg("Too short for request: %zd", rc);
     return FETCH_SOCKET_BAD;
   }
 
-  if(buffer[SOCKS5_VERSION] != config.version) {
+  if (buffer[SOCKS5_VERSION] != config.version)
+  {
     logmsg("Request VERSION byte not %d", config.version);
     return FETCH_SOCKET_BAD;
   }
   /* 1 == CONNECT */
-  if(buffer[SOCKS5_REQCMD] != config.reqcmd) {
+  if (buffer[SOCKS5_REQCMD] != config.reqcmd)
+  {
     logmsg("Request COMMAND byte not %d", config.reqcmd);
     return FETCH_SOCKET_BAD;
   }
   /* reserved, should be zero */
-  if(buffer[SOCKS5_RESERVED]) {
+  if (buffer[SOCKS5_RESERVED])
+  {
     logmsg("Request COMMAND byte not %d", config.reqcmd);
     return FETCH_SOCKET_BAD;
   }
@@ -518,7 +559,8 @@ static fetch_socket_t sockit(fetch_socket_t fd)
   */
   type = buffer[SOCKS5_ATYP];
   address = &buffer[SOCKS5_DSTADDR];
-  switch(type) {
+  switch (type)
+  {
   case 1:
     /* 4 bytes IPv4 address */
     len = 4;
@@ -537,7 +579,8 @@ static fetch_socket_t sockit(fetch_socket_t fd)
     logmsg("Unknown ATYP %d", type);
     return FETCH_SOCKET_BAD;
   }
-  if(rc < (4 + len + 2)) {
+  if (rc < (4 + len + 2))
+  {
     logmsg("Request too short: %zd, expected %d", rc, 4 + len + 2);
     return FETCH_SOCKET_BAD;
   }
@@ -546,10 +589,12 @@ static fetch_socket_t sockit(fetch_socket_t fd)
   {
     FILE *dump;
     dump = fopen(reqlogfile, "ab");
-    if(dump) {
+    if (dump)
+    {
       int i;
       fprintf(dump, "atyp %u =>", type);
-      switch(type) {
+      switch (type)
+      {
       case 1:
         /* 4 bytes IPv4 address */
         fprintf(dump, " %u.%u.%u.%u\n",
@@ -558,11 +603,12 @@ static fetch_socket_t sockit(fetch_socket_t fd)
       case 3:
         /* The first octet of the address field contains the number of octets
            of name that follow */
-        fprintf(dump, " %.*s\n", len-1, &address[1]);
+        fprintf(dump, " %.*s\n", len - 1, &address[1]);
         break;
       case 4:
         /* 16 bytes IPv6 address */
-        for(i = 0; i < 16; i++) {
+        for (i = 0; i < 16; i++)
+        {
           fprintf(dump, " %02x", address[i]);
         }
         fprintf(dump, "\n");
@@ -572,21 +618,24 @@ static fetch_socket_t sockit(fetch_socket_t fd)
     }
   }
 
-  if(!config.port) {
+  if (!config.port)
+  {
     unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
     s5port = (unsigned short)((portp[0] << 8) | (portp[1]));
   }
   else
     s5port = config.port;
 
-  if(!config.connectrep)
+  if (!config.connectrep)
     connfd = socksconnect(s5port, config.addr);
 
-  if(connfd == FETCH_SOCKET_BAD) {
+  if (connfd == FETCH_SOCKET_BAD)
+  {
     /* failed */
     rep = 1;
   }
-  else {
+  else
+  {
     rep = config.connectrep;
   }
 
@@ -608,7 +657,7 @@ static fetch_socket_t sockit(fetch_socket_t fd)
   */
   response[SOCKS5_REP] = rep;
   response[SOCKS5_RESERVED] = 0; /* must be zero */
-  response[SOCKS5_ATYP] = type; /* address type */
+  response[SOCKS5_ATYP] = type;  /* address type */
 
   /* mirror back the original addr + port */
 
@@ -620,23 +669,25 @@ static fetch_socket_t sockit(fetch_socket_t fd)
          &buffer[SOCKS5_DSTADDR + len], sizeof(socksport));
 
   rc = (send)(fd, (char *)response, (SEND_TYPE_ARG3)(len + 6), 0);
-  if(rc != (len + 6)) {
+  if (rc != (len + 6))
+  {
     logmsg("Sending connect response failed!");
     return FETCH_SOCKET_BAD;
   }
   logmsg("Sent %zd bytes", rc);
   loghex(response, rc);
 
-  if(!rep)
+  if (!rep)
     return connfd;
 
-  if(connfd != FETCH_SOCKET_BAD)
+  if (connfd != FETCH_SOCKET_BAD)
     sclose(connfd);
 
   return FETCH_SOCKET_BAD;
 }
 
-struct perclient {
+struct perclient
+{
   size_t fromremote;
   size_t fromclient;
   fetch_socket_t remotefd;
@@ -650,26 +701,30 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   ssize_t nread;
   ssize_t nwrite;
   char buffer[512];
-  if(FD_ISSET(cp->clientfd, fds)) {
+  if (FD_ISSET(cp->clientfd, fds))
+  {
     /* read from client, send to remote */
     nread = recv(cp->clientfd, buffer, sizeof(buffer), 0);
-    if(nread > 0) {
+    if (nread > 0)
+    {
       nwrite = send(cp->remotefd, (char *)buffer,
                     (SEND_TYPE_ARG3)nread, 0);
-      if(nwrite != nread)
+      if (nwrite != nread)
         return 1;
       cp->fromclient += nwrite;
     }
     else
       return 1;
   }
-  if(FD_ISSET(cp->remotefd, fds)) {
+  if (FD_ISSET(cp->remotefd, fds))
+  {
     /* read from remote, send to client */
     nread = recv(cp->remotefd, buffer, sizeof(buffer), 0);
-    if(nread > 0) {
+    if (nread > 0)
+    {
       nwrite = send(cp->clientfd, (char *)buffer,
                     (SEND_TYPE_ARG3)nread, 0);
-      if(nwrite != nread)
+      if (nwrite != nread)
         return 1;
       cp->fromremote += nwrite;
     }
@@ -694,20 +749,23 @@ static bool incoming(fetch_socket_t listenfd)
   struct perclient c[2];
 
   memset(c, 0, sizeof(c));
-  if(got_exit_signal) {
+  if (got_exit_signal)
+  {
     logmsg("signalled to die, exiting...");
     return FALSE;
   }
 
 #ifdef HAVE_GETPPID
   /* As a last resort, quit if socks5 process becomes orphan. */
-  if(getppid() <= 1) {
+  if (getppid() <= 1)
+  {
     logmsg("process becomes orphan, exiting");
     return FALSE;
   }
 #endif
 
-  do {
+  do
+  {
     int i;
     ssize_t rc;
     int error = 0;
@@ -728,8 +786,10 @@ static bool incoming(fetch_socket_t listenfd)
 #pragma GCC diagnostic pop
 #endif
 
-    for(i = 0; i < 2; i++) {
-      if(c[i].used) {
+    for (i = 0; i < 2; i++)
+    {
+      if (c[i].used)
+      {
         fetch_socket_t fd = c[i].clientfd;
 #if defined(__DJGPP__)
 #pragma GCC diagnostic push
@@ -739,7 +799,7 @@ static bool incoming(fetch_socket_t listenfd)
 #if defined(__DJGPP__)
 #pragma GCC diagnostic pop
 #endif
-        if((int)fd > maxfd)
+        if ((int)fd > maxfd)
           maxfd = (int)fd;
         fd = c[i].remotefd;
 #if defined(__DJGPP__)
@@ -750,48 +810,57 @@ static bool incoming(fetch_socket_t listenfd)
 #if defined(__DJGPP__)
 #pragma GCC diagnostic pop
 #endif
-        if((int)fd > maxfd)
+        if ((int)fd > maxfd)
           maxfd = (int)fd;
       }
     }
 
-    do {
+    do
+    {
       /* select() blocking behavior call on blocking descriptors please */
       rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, NULL);
-      if(got_exit_signal) {
+      if (got_exit_signal)
+      {
         logmsg("signalled to die, exiting...");
         return FALSE;
       }
-    } while((rc == -1) && ((error = errno) == EINTR));
+    } while ((rc == -1) && ((error = errno) == EINTR));
 
-    if(rc < 0) {
+    if (rc < 0)
+    {
       logmsg("select() failed with error: (%d) %s",
              error, strerror(error));
       return FALSE;
     }
 
-    if((clients < 2) && FD_ISSET(sockfd, &fds_read)) {
+    if ((clients < 2) && FD_ISSET(sockfd, &fds_read))
+    {
       fetch_socket_t newfd = accept(sockfd, NULL, NULL);
-      if(FETCH_SOCKET_BAD == newfd) {
+      if (FETCH_SOCKET_BAD == newfd)
+      {
         error = SOCKERRNO;
         logmsg("accept(%" FMT_SOCKET_T ", NULL, NULL) "
                "failed with error: (%d) %s",
                sockfd, error, sstrerror(error));
       }
-      else {
+      else
+      {
         fetch_socket_t remotefd;
         logmsg("====> Client connect, fd %" FMT_SOCKET_T ". "
-               "Read config from %s", newfd, configfile);
+               "Read config from %s",
+               newfd, configfile);
         remotefd = sockit(newfd); /* SOCKS until done */
-        if(remotefd == FETCH_SOCKET_BAD) {
+        if (remotefd == FETCH_SOCKET_BAD)
+        {
           logmsg("====> Client disconnect");
           sclose(newfd);
         }
-        else {
+        else
+        {
           struct perclient *cp = &c[0];
           logmsg("====> Tunnel transfer");
 
-          if(c[0].used)
+          if (c[0].used)
             cp = &c[1];
           cp->fromremote = 0;
           cp->fromclient = 0;
@@ -800,13 +869,15 @@ static bool incoming(fetch_socket_t listenfd)
           cp->used = TRUE;
           clients++;
         }
-
       }
     }
-    for(i = 0; i < 2; i++) {
+    for (i = 0; i < 2; i++)
+    {
       struct perclient *cp = &c[i];
-      if(cp->used) {
-        if(tunnel(cp, &fds_read)) {
+      if (cp->used)
+      {
+        if (tunnel(cp, &fds_read))
+        {
           logmsg("SOCKS transfer completed. Bytes: < %zu > %zu",
                  cp->fromremote, cp->fromclient);
           sclose(cp->clientfd);
@@ -816,17 +887,18 @@ static bool incoming(fetch_socket_t listenfd)
         }
       }
     }
-  } while(clients);
+  } while (clients);
 
   return TRUE;
 }
 
 static fetch_socket_t sockdaemon(fetch_socket_t sock,
-                                unsigned short *listenport
+                                 unsigned short *listenport
 #ifdef USE_UNIX_SOCKETS
-        , const char *unix_socket
+                                 ,
+                                 const char *unix_socket
 #endif
-        )
+)
 {
   /* passive daemon style */
   srvr_sockaddr_union_t listener;
@@ -838,18 +910,22 @@ static fetch_socket_t sockdaemon(fetch_socket_t sock,
   int attempt = 0;
   int error = 0;
 
-  do {
+  do
+  {
     attempt++;
     flag = 1;
     rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-         (void *)&flag, sizeof(flag));
-    if(rc) {
+                    (void *)&flag, sizeof(flag));
+    if (rc)
+    {
       error = SOCKERRNO;
       logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
              error, sstrerror(error));
-      if(maxretr) {
+      if (maxretr)
+      {
         rc = wait_ms(delay);
-        if(rc) {
+        if (rc)
+        {
           /* should not happen */
           error = errno;
           logmsg("wait_ms() failed with error: (%d) %s",
@@ -857,7 +933,8 @@ static fetch_socket_t sockdaemon(fetch_socket_t sock,
           sclose(sock);
           return FETCH_SOCKET_BAD;
         }
-        if(got_exit_signal) {
+        if (got_exit_signal)
+        {
           logmsg("signalled to die, exiting...");
           sclose(sock);
           return FETCH_SOCKET_BAD;
@@ -866,9 +943,10 @@ static fetch_socket_t sockdaemon(fetch_socket_t sock,
         delay *= 2; /* double the sleep for next attempt */
       }
     }
-  } while(rc && maxretr--);
+  } while (rc && maxretr--);
 
-  if(rc) {
+  if (rc)
+  {
     logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error: (%d) %s",
            attempt, totdelay, error, strerror(error));
     logmsg("Continuing anyway...");
@@ -877,33 +955,35 @@ static fetch_socket_t sockdaemon(fetch_socket_t sock,
   /* When the specified listener port is zero, it is actually a
      request to let the system choose a non-zero available port. */
 
-  switch(socket_domain) {
-    case AF_INET:
-      memset(&listener.sa4, 0, sizeof(listener.sa4));
-      listener.sa4.sin_family = AF_INET;
-      listener.sa4.sin_addr.s_addr = INADDR_ANY;
-      listener.sa4.sin_port = htons(*listenport);
-      rc = bind(sock, &listener.sa, sizeof(listener.sa4));
-      break;
+  switch (socket_domain)
+  {
+  case AF_INET:
+    memset(&listener.sa4, 0, sizeof(listener.sa4));
+    listener.sa4.sin_family = AF_INET;
+    listener.sa4.sin_addr.s_addr = INADDR_ANY;
+    listener.sa4.sin_port = htons(*listenport);
+    rc = bind(sock, &listener.sa, sizeof(listener.sa4));
+    break;
 #ifdef USE_IPV6
-    case AF_INET6:
-      memset(&listener.sa6, 0, sizeof(listener.sa6));
-      listener.sa6.sin6_family = AF_INET6;
-      listener.sa6.sin6_addr = in6addr_any;
-      listener.sa6.sin6_port = htons(*listenport);
-      rc = bind(sock, &listener.sa, sizeof(listener.sa6));
-      break;
+  case AF_INET6:
+    memset(&listener.sa6, 0, sizeof(listener.sa6));
+    listener.sa6.sin6_family = AF_INET6;
+    listener.sa6.sin6_addr = in6addr_any;
+    listener.sa6.sin6_port = htons(*listenport);
+    rc = bind(sock, &listener.sa, sizeof(listener.sa6));
+    break;
 #endif /* USE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
-    case AF_UNIX:
+  case AF_UNIX:
     rc = bind_unix_socket(sock, unix_socket, &listener.sau);
 #endif
   }
 
-  if(rc) {
+  if (rc)
+  {
     error = SOCKERRNO;
 #ifdef USE_UNIX_SOCKETS
-    if(socket_domain == AF_UNIX)
+    if (socket_domain == AF_UNIX)
       logmsg("Error binding socket on path %s: (%d) %s",
              unix_socket, error, sstrerror(error));
     else
@@ -914,30 +994,33 @@ static fetch_socket_t sockdaemon(fetch_socket_t sock,
     return FETCH_SOCKET_BAD;
   }
 
-  if(!*listenport
+  if (!*listenport
 #ifdef USE_UNIX_SOCKETS
-          && !unix_socket
+      && !unix_socket
 #endif
-    ) {
+  )
+  {
     /* The system was supposed to choose a port number, figure out which
        port we actually got and update the listener port value with it. */
     fetch_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
 #ifdef USE_IPV6
-    if(socket_domain == AF_INET6)
+    if (socket_domain == AF_INET6)
       la_size = sizeof(localaddr.sa6);
     else
 #endif
       la_size = sizeof(localaddr.sa4);
     memset(&localaddr.sa, 0, (size_t)la_size);
-    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
+    if (getsockname(sock, &localaddr.sa, &la_size) < 0)
+    {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error: (%d) %s",
              error, sstrerror(error));
       sclose(sock);
       return FETCH_SOCKET_BAD;
     }
-    switch(localaddr.sa.sa_family) {
+    switch (localaddr.sa.sa_family)
+    {
     case AF_INET:
       *listenport = ntohs(localaddr.sa4.sin_port);
       break;
@@ -949,7 +1032,8 @@ static fetch_socket_t sockdaemon(fetch_socket_t sock,
     default:
       break;
     }
-    if(!*listenport) {
+    if (!*listenport)
+    {
       /* Real failure, listener port shall not be zero beyond this point. */
       logmsg("Apparently getsockname() succeeded, with listener port zero.");
       logmsg("A valid reason for this failure is a binary built without");
@@ -962,7 +1046,8 @@ static fetch_socket_t sockdaemon(fetch_socket_t sock,
 
   /* start accepting connections */
   rc = listen(sock, 5);
-  if(0 != rc) {
+  if (0 != rc)
+  {
     error = SOCKERRNO;
     logmsg("listen(%" FMT_SOCKET_T ", 5) failed with error: (%d) %s",
            sock, error, sstrerror(error));
@@ -972,7 +1057,6 @@ static fetch_socket_t sockdaemon(fetch_socket_t sock,
 
   return sock;
 }
-
 
 int main(int argc, char *argv[])
 {
@@ -991,76 +1075,90 @@ int main(int argc, char *argv[])
   bool unlink_socket = false;
 #endif
 
-  while(argc > arg) {
-    if(!strcmp("--version", argv[arg])) {
+  while (argc > arg)
+  {
+    if (!strcmp("--version", argv[arg]))
+    {
       printf("socksd IPv4%s\n",
 #ifdef USE_IPV6
              "/IPv6"
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
-    else if(!strcmp("--pidfile", argv[arg])) {
+    else if (!strcmp("--pidfile", argv[arg]))
+    {
       arg++;
-      if(argc > arg)
+      if (argc > arg)
         pidname = argv[arg++];
     }
-    else if(!strcmp("--portfile", argv[arg])) {
+    else if (!strcmp("--portfile", argv[arg]))
+    {
       arg++;
-      if(argc > arg)
+      if (argc > arg)
         portname = argv[arg++];
     }
-    else if(!strcmp("--config", argv[arg])) {
+    else if (!strcmp("--config", argv[arg]))
+    {
       arg++;
-      if(argc > arg)
+      if (argc > arg)
         configfile = argv[arg++];
     }
-    else if(!strcmp("--backend", argv[arg])) {
+    else if (!strcmp("--backend", argv[arg]))
+    {
       arg++;
-      if(argc > arg)
+      if (argc > arg)
         backendaddr = argv[arg++];
     }
-    else if(!strcmp("--backendport", argv[arg])) {
+    else if (!strcmp("--backendport", argv[arg]))
+    {
       arg++;
-      if(argc > arg)
+      if (argc > arg)
         backendport = (unsigned short)atoi(argv[arg++]);
     }
-    else if(!strcmp("--logfile", argv[arg])) {
+    else if (!strcmp("--logfile", argv[arg]))
+    {
       arg++;
-      if(argc > arg)
+      if (argc > arg)
         serverlogfile = argv[arg++];
     }
-    else if(!strcmp("--reqfile", argv[arg])) {
+    else if (!strcmp("--reqfile", argv[arg]))
+    {
       arg++;
-      if(argc > arg)
+      if (argc > arg)
         reqlogfile = argv[arg++];
     }
-    else if(!strcmp("--ipv6", argv[arg])) {
+    else if (!strcmp("--ipv6", argv[arg]))
+    {
 #ifdef USE_IPV6
       socket_domain = AF_INET6;
       socket_type = "IPv6";
 #endif
       arg++;
     }
-    else if(!strcmp("--ipv4", argv[arg])) {
+    else if (!strcmp("--ipv4", argv[arg]))
+    {
       /* for completeness, we support this option as well */
 #ifdef USE_IPV6
       socket_type = "IPv4";
 #endif
       arg++;
     }
-    else if(!strcmp("--unix-socket", argv[arg])) {
+    else if (!strcmp("--unix-socket", argv[arg]))
+    {
       arg++;
-      if(argc > arg) {
+      if (argc > arg)
+      {
 #ifdef USE_UNIX_SOCKETS
         struct sockaddr_un sau;
         unix_socket = argv[arg];
-        if(strlen(unix_socket) >= sizeof(sau.sun_path)) {
+        if (strlen(unix_socket) >= sizeof(sau.sun_path))
+        {
           fprintf(stderr,
                   "socksd: socket path must be shorter than %zu chars: %s\n",
-              sizeof(sau.sun_path), unix_socket);
+                  sizeof(sau.sun_path), unix_socket);
           return 0;
         }
         socket_domain = AF_UNIX;
@@ -1069,16 +1167,19 @@ int main(int argc, char *argv[])
         arg++;
       }
     }
-    else if(!strcmp("--port", argv[arg])) {
+    else if (!strcmp("--port", argv[arg]))
+    {
       arg++;
-      if(argc > arg) {
+      if (argc > arg)
+      {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         port = fetchx_ultous(ulnum);
         arg++;
       }
     }
-    else {
+    else
+    {
       puts("Usage: socksd [option]\n"
            " --backend [ipv4 addr]\n"
            " --backendport [TCP port]\n"
@@ -1110,7 +1211,8 @@ int main(int argc, char *argv[])
 
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
-  if(FETCH_SOCKET_BAD == sock) {
+  if (FETCH_SOCKET_BAD == sock)
+  {
     error = SOCKERRNO;
     logmsg("Error creating socket: (%d) %s",
            error, sstrerror(error));
@@ -1121,10 +1223,12 @@ int main(int argc, char *argv[])
     /* passive daemon style */
     sock = sockdaemon(sock, &port
 #ifdef USE_UNIX_SOCKETS
-            , unix_socket
+                      ,
+                      unix_socket
 #endif
-            );
-    if(FETCH_SOCKET_BAD == sock) {
+    );
+    if (FETCH_SOCKET_BAD == sock)
+    {
       goto socks5_cleanup;
     }
 #ifdef USE_UNIX_SOCKETS
@@ -1136,51 +1240,57 @@ int main(int argc, char *argv[])
   logmsg("Running %s version", socket_type);
 
 #ifdef USE_UNIX_SOCKETS
-  if(socket_domain == AF_UNIX)
+  if (socket_domain == AF_UNIX)
     logmsg("Listening on Unix socket %s", unix_socket);
   else
 #endif
-  logmsg("Listening on port %hu", port);
+    logmsg("Listening on port %hu", port);
 
   wrotepidfile = write_pidfile(pidname);
-  if(!wrotepidfile) {
+  if (!wrotepidfile)
+  {
     goto socks5_cleanup;
   }
 
-  if(portname) {
+  if (portname)
+  {
     wroteportfile = write_portfile(portname, port);
-    if(!wroteportfile) {
+    if (!wroteportfile)
+    {
       goto socks5_cleanup;
     }
   }
 
-  do {
+  do
+  {
     juggle_again = incoming(sock);
-  } while(juggle_again);
+  } while (juggle_again);
 
 socks5_cleanup:
 
-  if((msgsock != sock) && (msgsock != FETCH_SOCKET_BAD))
+  if ((msgsock != sock) && (msgsock != FETCH_SOCKET_BAD))
     sclose(msgsock);
 
-  if(sock != FETCH_SOCKET_BAD)
+  if (sock != FETCH_SOCKET_BAD)
     sclose(sock);
 
 #ifdef USE_UNIX_SOCKETS
-  if(unlink_socket && socket_domain == AF_UNIX && unix_socket) {
+  if (unlink_socket && socket_domain == AF_UNIX && unix_socket)
+  {
     error = unlink(unix_socket);
     logmsg("unlink(%s) = %d (%s)", unix_socket, error, strerror(error));
   }
 #endif
 
-  if(wrotepidfile)
+  if (wrotepidfile)
     unlink(pidname);
-  if(wroteportfile)
+  if (wroteportfile)
     unlink(portname);
 
   restore_signal_handlers(false);
 
-  if(got_exit_signal) {
+  if (got_exit_signal)
+  {
     logmsg("============> socksd exits with signal (%d)", exit_signal);
     /*
      * To properly set the return status of the process we

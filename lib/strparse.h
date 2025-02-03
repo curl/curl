@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,18 +25,19 @@
  ***************************************************************************/
 #include "fetch_setup.h"
 
-#define STRE_OK       0
-#define STRE_BIG      1
-#define STRE_SHORT    2
+#define STRE_OK 0
+#define STRE_BIG 1
+#define STRE_SHORT 2
 #define STRE_BEGQUOTE 3
 #define STRE_ENDQUOTE 4
-#define STRE_BYTE     5
-#define STRE_NEWLINE  6
+#define STRE_BYTE 5
+#define STRE_NEWLINE 6
 #define STRE_OVERFLOW 7
 
-struct Curl_str {
-  char *str;
-  size_t len;
+struct Curl_str
+{
+   char *str;
+   size_t len;
 };
 
 /* Get a word until the first space

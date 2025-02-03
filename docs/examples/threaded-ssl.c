@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@
  * support for the underlying OS threading API is built-in. Older revisions
  * of this example demonstrated locking callbacks for the SSL library, which
  * are no longer necessary. An older revision with callbacks can be found at
- * https://github.com/fetch/fetch/blob/fetch-7_88_1/docs/examples/threaded-ssl.c
+ * https://github.com/curl/curl/blob/fetch-7_88_1/docs/examples/threaded-ssl.c
  */
 
 #define USE_OPENSSL /* or USE_GNUTLS accordingly */
@@ -45,11 +45,11 @@
 #define NUMT 4
 
 /* List of URLs to fetch.*/
-static const char * const urls[]= {
-  "https://www.example.com/",
-  "https://www2.example.com/",
-  "https://www3.example.com/",
-  "https://www4.example.com/",
+static const char *const urls[] = {
+    "https://www.example.com/",
+    "https://www2.example.com/",
+    "https://www3.example.com/",
+    "https://www4.example.com/",
 };
 
 static void *pull_one_url(void *url)
@@ -78,19 +78,21 @@ int main(int argc, char **argv)
   /* Must initialize libfetch before any threads are started */
   fetch_global_init(FETCH_GLOBAL_ALL);
 
-  for(i = 0; i < NUMT; i++) {
+  for (i = 0; i < NUMT; i++)
+  {
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
                                (void *)urls[i]);
-    if(0 != error)
+    if (0 != error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }
 
   /* now wait for all threads to terminate */
-  for(i = 0; i < NUMT; i++) {
+  for (i = 0; i < NUMT; i++)
+  {
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }

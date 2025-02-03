@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -69,13 +69,13 @@
 #undef recv
 
 #ifdef _WIN32
-#  ifdef UNICODE
-#    undef wcsdup
-#    undef _wcsdup
-#    undef _tcsdup
-#  else
-#    undef _tcsdup
-#  endif
+#ifdef UNICODE
+#undef wcsdup
+#undef _wcsdup
+#undef _tcsdup
+#else
+#undef _tcsdup
+#endif
 #endif
 
 #undef socket
@@ -156,24 +156,24 @@ extern fetch_wcsdup_callback Curl_cwcsdup;
 #undef malloc
 #define malloc(size) Curl_cmalloc(size)
 #undef calloc
-#define calloc(nbelem,size) Curl_ccalloc(nbelem, size)
+#define calloc(nbelem, size) Curl_ccalloc(nbelem, size)
 #undef realloc
-#define realloc(ptr,size) Curl_crealloc(ptr, size)
+#define realloc(ptr, size) Curl_crealloc(ptr, size)
 #undef free
 #define free(ptr) Curl_cfree(ptr)
 
 #ifdef _WIN32
-#  ifdef UNICODE
-#    undef wcsdup
-#    define wcsdup(ptr) Curl_cwcsdup(ptr)
-#    undef _wcsdup
-#    define _wcsdup(ptr) Curl_cwcsdup(ptr)
-#    undef _tcsdup
-#    define _tcsdup(ptr) Curl_cwcsdup(ptr)
-#  else
-#    undef _tcsdup
-#    define _tcsdup(ptr) Curl_cstrdup(ptr)
-#  endif
+#ifdef UNICODE
+#undef wcsdup
+#define wcsdup(ptr) Curl_cwcsdup(ptr)
+#undef _wcsdup
+#define _wcsdup(ptr) Curl_cwcsdup(ptr)
+#undef _tcsdup
+#define _tcsdup(ptr) Curl_cwcsdup(ptr)
+#else
+#undef _tcsdup
+#define _tcsdup(ptr) Curl_cstrdup(ptr)
+#endif
 #endif
 
 #endif /* FETCHDEBUG */

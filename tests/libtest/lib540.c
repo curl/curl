@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,44 +49,44 @@
 static FETCH *testeh[NUM_HANDLES];
 
 static FETCHcode init(int num, FETCHM *cm, const char *url, const char *userpwd,
-                     struct fetch_slist *headers)
+                      struct fetch_slist *headers)
 {
   FETCHcode res = FETCHE_OK;
 
   res_easy_init(testeh[num]);
-  if(res)
+  if (res)
     goto init_failed;
 
   res_easy_setopt(testeh[num], FETCHOPT_URL, url);
-  if(res)
+  if (res)
     goto init_failed;
 
   res_easy_setopt(testeh[num], FETCHOPT_PROXY, PROXY);
-  if(res)
+  if (res)
     goto init_failed;
 
   res_easy_setopt(testeh[num], FETCHOPT_PROXYUSERPWD, userpwd);
-  if(res)
+  if (res)
     goto init_failed;
 
   res_easy_setopt(testeh[num], FETCHOPT_PROXYAUTH, (long)FETCHAUTH_ANY);
-  if(res)
+  if (res)
     goto init_failed;
 
   res_easy_setopt(testeh[num], FETCHOPT_VERBOSE, 1L);
-  if(res)
+  if (res)
     goto init_failed;
 
   res_easy_setopt(testeh[num], FETCHOPT_HEADER, 1L);
-  if(res)
+  if (res)
     goto init_failed;
 
   res_easy_setopt(testeh[num], FETCHOPT_HTTPHEADER, headers); /* custom Host: */
-  if(res)
+  if (res)
     goto init_failed;
 
   res_multi_add_handle(cm, testeh[num]);
-  if(res)
+  if (res)
     goto init_failed;
 
   return FETCHE_OK; /* success */
@@ -100,7 +100,7 @@ init_failed:
 }
 
 static FETCHcode loop(int num, FETCHM *cm, const char *url, const char *userpwd,
-                     struct fetch_slist *headers)
+                      struct fetch_slist *headers)
 {
   FETCHMsg *msg;
   long L;
@@ -110,71 +110,79 @@ static FETCHcode loop(int num, FETCHM *cm, const char *url, const char *userpwd,
   FETCHcode res = FETCHE_OK;
 
   res = init(num, cm, url, userpwd, headers);
-  if(res)
+  if (res)
     return res;
 
-  while(U) {
+  while (U)
+  {
 
     int M = -99;
 
     res_multi_perform(cm, &U);
-    if(res)
+    if (res)
       return res;
 
     res_test_timedout();
-    if(res)
+    if (res)
       return res;
 
-    if(U) {
+    if (U)
+    {
       FD_ZERO(&R);
       FD_ZERO(&W);
       FD_ZERO(&E);
 
       res_multi_fdset(cm, &R, &W, &E, &M);
-      if(res)
+      if (res)
         return res;
 
       /* At this point, M is guaranteed to be greater or equal than -1. */
 
       res_multi_timeout(cm, &L);
-      if(res)
+      if (res)
         return res;
 
       /* At this point, L is guaranteed to be greater or equal than -1. */
 
-      if(L != -1) {
+      if (L != -1)
+      {
         int itimeout;
 #if LONG_MAX > INT_MAX
         itimeout = (L > INT_MAX) ? INT_MAX : (int)L;
 #else
         itimeout = (int)L;
 #endif
-        T.tv_sec = itimeout/1000;
-        T.tv_usec = (itimeout%1000)*1000;
+        T.tv_sec = itimeout / 1000;
+        T.tv_usec = (itimeout % 1000) * 1000;
       }
-      else {
+      else
+      {
         T.tv_sec = 5;
         T.tv_usec = 0;
       }
 
       res_select_test(M + 1, &R, &W, &E, &T);
-      if(res)
+      if (res)
         return res;
     }
 
-    while(1) {
+    while (1)
+    {
       msg = fetch_multi_info_read(cm, &Q);
-      if(!msg)
+      if (!msg)
         break;
-      if(msg->msg == FETCHMSG_DONE) {
+      if (msg->msg == FETCHMSG_DONE)
+      {
         int i;
         FETCH *e = msg->easy_handle;
         fprintf(stderr, "R: %d - %s\n", (int)msg->data.result,
                 fetch_easy_strerror(msg->data.result));
         fetch_multi_remove_handle(cm, e);
         fetch_easy_cleanup(e);
-        for(i = 0; i < NUM_HANDLES; i++) {
-          if(testeh[i] == e) {
+        for (i = 0; i < NUM_HANDLES; i++)
+        {
+          if (testeh[i] == e)
+          {
             testeh[i] = NULL;
             break;
           }
@@ -185,7 +193,7 @@ static FETCHcode loop(int num, FETCHM *cm, const char *url, const char *userpwd,
     }
 
     res_test_timedout();
-    if(res)
+    if (res)
       return res;
   }
 
@@ -200,38 +208,41 @@ FETCHcode test(char *URL)
   FETCHcode res = FETCHE_OK;
   int i;
 
-  for(i = 0; i < NUM_HANDLES; i++)
+  for (i = 0; i < NUM_HANDLES; i++)
     testeh[i] = NULL;
 
   start_test_timing();
 
-  if(test_argc < 4)
+  if (test_argc < 4)
     return (FETCHcode)99;
 
   msnprintf(buffer, sizeof(buffer), "Host: %s", HOST);
 
   /* now add a custom Host: header */
   headers = fetch_slist_append(headers, buffer);
-  if(!headers) {
+  if (!headers)
+  {
     fprintf(stderr, "fetch_slist_append() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   res_global_init(FETCH_GLOBAL_ALL);
-  if(res) {
+  if (res)
+  {
     fetch_slist_free_all(headers);
     return res;
   }
 
   res_multi_init(cm);
-  if(res) {
+  if (res)
+  {
     fetch_global_cleanup();
     fetch_slist_free_all(headers);
     return res;
   }
 
   res = loop(0, cm, URL, PROXYUSERPWD, headers);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   fprintf(stderr, "lib540: now we do the request again\n");
@@ -242,7 +253,8 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for (i = 0; i < NUM_HANDLES; i++)
+  {
     fetch_multi_remove_handle(cm, testeh[i]);
     fetch_easy_cleanup(testeh[i]);
   }

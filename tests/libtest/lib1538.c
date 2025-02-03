@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,17 +42,21 @@ FETCHcode test(char *URL)
   fetch_multi_strerror((FETCHMcode)-INT_MAX);
   fetch_share_strerror((FETCHSHcode)-INT_MAX);
   fetch_url_strerror((FETCHUcode)-INT_MAX);
-  for(easyret = FETCHE_OK; easyret <= FETCH_LAST; easyret++) {
+  for (easyret = FETCHE_OK; easyret <= FETCH_LAST; easyret++)
+  {
     printf("e%d: %s\n", (int)easyret, fetch_easy_strerror(easyret));
   }
-  for(multiret = FETCHM_CALL_MULTI_PERFORM; multiret <= FETCHM_LAST;
-      multiret++) {
+  for (multiret = FETCHM_CALL_MULTI_PERFORM; multiret <= FETCHM_LAST;
+       multiret++)
+  {
     printf("m%d: %s\n", (int)multiret, fetch_multi_strerror(multiret));
   }
-  for(shareret = FETCHSHE_OK; shareret <= FETCHSHE_LAST; shareret++) {
+  for (shareret = FETCHSHE_OK; shareret <= FETCHSHE_LAST; shareret++)
+  {
     printf("s%d: %s\n", (int)shareret, fetch_share_strerror(shareret));
   }
-  for(urlret = FETCHUE_OK; urlret <= FETCHUE_LAST; urlret++) {
+  for (urlret = FETCHUE_OK; urlret <= FETCHUE_LAST; urlret++)
+  {
     printf("u%d: %s\n", (int)urlret, fetch_url_strerror(urlret));
   }
 

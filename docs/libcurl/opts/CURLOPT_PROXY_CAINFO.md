@@ -27,11 +27,11 @@ FETCHOPT_PROXY_CAINFO - path to proxy Certificate Authority (CA) bundle
 
 # SYNOPSIS
 
-~~~c
+```c
 #include <fetch/fetch.h>
 
 FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY_CAINFO, char *path);
-~~~
+```
 
 # DESCRIPTION
 
@@ -70,7 +70,7 @@ Built-in system specific
 
 # EXAMPLE
 
-~~~c
+```c
 int main(void)
 {
   FETCH *fetch = fetch_easy_init();
@@ -84,13 +84,13 @@ int main(void)
     fetch_easy_cleanup(fetch);
   }
 }
-~~~
+```
 
 # NOTES
 
 For TLS backends that do not support certificate files, the
 FETCHOPT_PROXY_CAINFO(3) option is ignored. Refer to
-https://fetch.se/docs/ssl-compared.html
+https://curl.se/docs/ssl-compared.html
 
 # %AVAILABILITY%
 

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,15 +35,15 @@
  * Result is 1 if text matches and 0 if not.
  */
 
-#define strcasecompare(a,b) fetch_strequal(a,b)
-#define strncasecompare(a,b,c) fetch_strnequal(a,b,c)
+#define strcasecompare(a, b) fetch_strequal(a, b)
+#define strncasecompare(a, b, c) fetch_strnequal(a, b, c)
 
 char Curl_raw_toupper(char in);
 char Curl_raw_tolower(char in);
 
 /* checkprefix() is a shorter version of the above, used when the first
    argument is the string literal */
-#define checkprefix(a,b)    fetch_strnequal(b, STRCONST(a))
+#define checkprefix(a, b) fetch_strnequal(b, STRCONST(a))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
 void Curl_strntolower(char *dest, const char *src, size_t n);

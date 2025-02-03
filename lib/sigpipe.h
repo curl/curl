@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,17 +25,18 @@
  ***************************************************************************/
 #include "fetch_setup.h"
 
-#if defined(HAVE_SIGACTION) &&        \
-  (defined(USE_OPENSSL) || defined(USE_MBEDTLS) || defined(USE_WOLFSSL))
+#if defined(HAVE_SIGACTION) && \
+    (defined(USE_OPENSSL) || defined(USE_MBEDTLS) || defined(USE_WOLFSSL))
 #include <signal.h>
 
-struct sigpipe_ignore {
+struct sigpipe_ignore
+{
   struct sigaction old_pipe_act;
   bool no_signal;
 };
 
 #define SIGPIPE_VARIABLE(x) struct sigpipe_ignore x
-#define SIGPIPE_MEMBER(x)   struct sigpipe_ignore x
+#define SIGPIPE_MEMBER(x) struct sigpipe_ignore x
 
 static void sigpipe_init(struct sigpipe_ignore *ig)
 {
@@ -54,7 +55,8 @@ static void sigpipe_ignore(struct Curl_easy *data,
   /* get a local copy of no_signal because the Curl_easy might not be
      around when we restore */
   ig->no_signal = data->set.no_signal;
-  if(!data->set.no_signal) {
+  if (!data->set.no_signal)
+  {
     struct sigaction action;
     /* first, extract the existing situation */
     sigaction(SIGPIPE, NULL, &ig->old_pipe_act);
@@ -72,7 +74,7 @@ static void sigpipe_ignore(struct Curl_easy *data,
  */
 static void sigpipe_restore(struct sigpipe_ignore *ig)
 {
-  if(!ig->no_signal)
+  if (!ig->no_signal)
     /* restore the outside state */
     sigaction(SIGPIPE, &ig->old_pipe_act, NULL);
 }
@@ -80,7 +82,8 @@ static void sigpipe_restore(struct sigpipe_ignore *ig)
 static void sigpipe_apply(struct Curl_easy *data,
                           struct sigpipe_ignore *ig)
 {
-  if(data->set.no_signal != ig->no_signal) {
+  if (data->set.no_signal != ig->no_signal)
+  {
     sigpipe_restore(ig);
     sigpipe_ignore(data, ig);
   }
@@ -88,12 +91,12 @@ static void sigpipe_apply(struct Curl_easy *data,
 
 #else
 /* for systems without sigaction */
-#define sigpipe_ignore(x,y) Curl_nop_stmt
-#define sigpipe_apply(x,y) Curl_nop_stmt
-#define sigpipe_init(x)  Curl_nop_stmt
-#define sigpipe_restore(x)  Curl_nop_stmt
+#define sigpipe_ignore(x, y) Curl_nop_stmt
+#define sigpipe_apply(x, y) Curl_nop_stmt
+#define sigpipe_init(x) Curl_nop_stmt
+#define sigpipe_restore(x) Curl_nop_stmt
 #define SIGPIPE_VARIABLE(x)
-#define SIGPIPE_MEMBER(x)   bool x
+#define SIGPIPE_MEMBER(x) bool x
 #endif
 
 #endif /* HEADER_FETCH_SIGPIPE_H */

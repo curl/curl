@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,12 +42,14 @@ struct ip_quadruple;
  * used to pass / receive data to/from the fopensocket callback if this has
  * been set, before that, it is initialized from parameters.
  */
-struct Curl_sockaddr_ex {
+struct Curl_sockaddr_ex
+{
   int family;
   int socktype;
   int protocol;
   unsigned int addrlen;
-  union {
+  union
+  {
     struct sockaddr addr;
     struct Curl_sockaddr_storage buff;
   } _sa_ex_u;
@@ -56,9 +58,9 @@ struct Curl_sockaddr_ex {
 
 /*
  * Parse interface option, and return the interface name and the host part.
-*/
+ */
 FETCHcode Curl_parse_interface(const char *input,
-                              char **dev, char **iface, char **host);
+                               char **dev, char **iface, char **host);
 
 /*
  * Create a socket based on info from 'conn' and 'ai'.
@@ -68,10 +70,10 @@ FETCHcode Curl_parse_interface(const char *input,
  *
  */
 FETCHcode Curl_socket_open(struct Curl_easy *data,
-                            const struct Curl_addrinfo *ai,
-                            struct Curl_sockaddr_ex *addr,
-                            int transport,
-                            fetch_socket_t *sockfd);
+                           const struct Curl_addrinfo *ai,
+                           struct Curl_sockaddr_ex *addr,
+                           int transport,
+                           fetch_socket_t *sockfd);
 
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       fetch_socket_t sock);
@@ -96,8 +98,8 @@ void Curl_sndbuf_init(fetch_socket_t sockfd);
  * set the transport used.
  */
 FETCHcode Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
-                               const struct Curl_addrinfo *ai,
-                               int transport);
+                                const struct Curl_addrinfo *ai,
+                                int transport);
 
 /**
  * Creates a cfilter that opens a TCP socket to the given address
@@ -107,10 +109,10 @@ FETCHcode Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
  * method needs to be called.
  */
 FETCHcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
-                            struct Curl_easy *data,
-                            struct connectdata *conn,
-                            const struct Curl_addrinfo *ai,
-                            int transport);
+                             struct Curl_easy *data,
+                             struct connectdata *conn,
+                             const struct Curl_addrinfo *ai,
+                             int transport);
 
 /**
  * Creates a cfilter that opens a UDP socket to the given address
@@ -120,10 +122,10 @@ FETCHcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
  * method needs to be called.
  */
 FETCHcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
-                            struct Curl_easy *data,
-                            struct connectdata *conn,
-                            const struct Curl_addrinfo *ai,
-                            int transport);
+                             struct Curl_easy *data,
+                             struct connectdata *conn,
+                             const struct Curl_addrinfo *ai,
+                             int transport);
 
 /**
  * Creates a cfilter that opens a UNIX socket to the given address
@@ -133,18 +135,18 @@ FETCHcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
  * method needs to be called.
  */
 FETCHcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
-                             struct Curl_easy *data,
-                             struct connectdata *conn,
-                             const struct Curl_addrinfo *ai,
-                             int transport);
+                              struct Curl_easy *data,
+                              struct connectdata *conn,
+                              const struct Curl_addrinfo *ai,
+                              int transport);
 
 /**
  * Creates a cfilter that keeps a listening socket.
  */
 FETCHcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int sockindex,
-                                  fetch_socket_t *s);
+                                   struct connectdata *conn,
+                                   int sockindex,
+                                   fetch_socket_t *s);
 
 /**
  * Return TRUE iff the last filter at `sockindex` was set via
@@ -162,10 +164,10 @@ bool Curl_conn_is_tcp_listen(struct Curl_easy *data,
  * Returns error if the filter is of invalid type.
  */
 FETCHcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             fetch_socket_t *psock,
-                             const struct Curl_sockaddr_ex **paddr,
-                             struct ip_quadruple *pip);
+                              struct Curl_easy *data,
+                              fetch_socket_t *psock,
+                              const struct Curl_sockaddr_ex **paddr,
+                              struct ip_quadruple *pip);
 
 extern struct Curl_cftype Curl_cft_tcp;
 extern struct Curl_cftype Curl_cft_udp;

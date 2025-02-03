@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,8 +41,8 @@ static int ping(FETCH *fetch, const char *send_payload)
 {
   size_t sent;
   FETCHcode result =
-    fetch_ws_send(fetch, send_payload, strlen(send_payload), &sent, 0,
-                 FETCHWS_PING);
+      fetch_ws_send(fetch, send_payload, strlen(send_payload), &sent, 0,
+                    FETCHWS_PING);
   return (int)result;
 }
 
@@ -52,20 +52,25 @@ static int recv_pong(FETCH *fetch, const char *expected_payload)
   const struct fetch_ws_frame *meta;
   char buffer[256];
   FETCHcode result = fetch_ws_recv(fetch, buffer, sizeof(buffer), &rlen, &meta);
-  if(!result) {
-    if(meta->flags & FETCHWS_PONG) {
+  if (!result)
+  {
+    if (meta->flags & FETCHWS_PONG)
+    {
       int same = 0;
       fprintf(stderr, "ws: got PONG back\n");
-      if(rlen == strlen(expected_payload)) {
-        if(!memcmp(expected_payload, buffer, rlen)) {
+      if (rlen == strlen(expected_payload))
+      {
+        if (!memcmp(expected_payload, buffer, rlen))
+        {
           fprintf(stderr, "ws: got the same payload back\n");
           same = 1;
         }
       }
-      if(!same)
+      if (!same)
         fprintf(stderr, "ws: did NOT get the same payload back\n");
     }
-    else {
+    else
+    {
       fprintf(stderr, "recv_pong: got %u bytes rflags %x\n", (int)rlen,
               meta->flags);
     }
@@ -94,15 +99,17 @@ static void websocket_close(FETCH *fetch)
 static void websocket(FETCH *fetch)
 {
   int i = 0;
-  do {
+  do
+  {
     recv_any(fetch);
-    if(ping(fetch, "foobar"))
+    if (ping(fetch, "foobar"))
       return;
-    if(recv_pong(fetch, "foobar")) {
+    if (recv_pong(fetch, "foobar"))
+    {
       return;
     }
     sleep(2);
-  } while(i++ < 10);
+  } while (i++ < 10);
   websocket_close(fetch);
 }
 
@@ -112,7 +119,8 @@ int main(void)
   FETCHcode res;
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_setopt(fetch, FETCHOPT_URL, "wss://example.com");
 
     fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 2L); /* websocket style */
@@ -120,10 +128,11 @@ int main(void)
     /* Perform the request, res gets the return code */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
-    else {
+    else
+    {
       /* connected and ready */
       websocket(fetch);
     }

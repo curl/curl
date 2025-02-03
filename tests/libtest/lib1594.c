@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,11 +42,11 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_URL, URL);
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   res = fetch_easy_getinfo(fetch, FETCHINFO_RETRY_AFTER, &retry);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   printf("Retry-After %" FETCH_FORMAT_FETCH_OFF_T "\n", retry);

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,31 +25,31 @@
 #include "fetch_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#  include <arpa/inet.h>
+#include <arpa/inet.h>
 #endif
 #ifdef HAVE_NET_IF_H
-#  include <net/if.h>
+#include <net/if.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
-#  include <sys/ioctl.h>
+#include <sys/ioctl.h>
 #endif
 #ifdef HAVE_NETDB_H
-#  include <netdb.h>
+#include <netdb.h>
 #endif
 #ifdef HAVE_SYS_SOCKIO_H
-#  include <sys/sockio.h>
+#include <sys/sockio.h>
 #endif
 #ifdef HAVE_IFADDRS_H
-#  include <ifaddrs.h>
+#include <ifaddrs.h>
 #endif
 #ifdef HAVE_STROPTS_H
-#  include <stropts.h>
+#include <stropts.h>
 #endif
 #ifdef __VMS
-#  include <inet.h>
+#include <inet.h>
 #endif
 
 #include "inet_ntop.h"
@@ -66,14 +66,16 @@
 /* Return the scope of the given address. */
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 {
-  if(sa->sa_family == AF_INET6) {
-    const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *)(void *) sa;
+  if (sa->sa_family == AF_INET6)
+  {
+    const struct sockaddr_in6 *sa6 = (const struct sockaddr_in6 *)(void *)sa;
     const unsigned char *b = sa6->sin6_addr.s6_addr;
-    unsigned short w = (unsigned short) ((b[0] << 8) | b[1]);
+    unsigned short w = (unsigned short)((b[0] << 8) | b[1]);
 
-    if((b[0] & 0xFE) == 0xFC) /* Handle ULAs */
+    if ((b[0] & 0xFE) == 0xFC) /* Handle ULAs */
       return IPV6_SCOPE_UNIQUELOCAL;
-    switch(w & 0xFFC0) {
+    switch (w & 0xFFC0)
+    {
     case 0xFE80:
       return IPV6_SCOPE_LINKLOCAL;
     case 0xFEC0:
@@ -81,7 +83,7 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
     case 0x0000:
       w = b[1] | b[2] | b[3] | b[4] | b[5] | b[6] | b[7] | b[8] | b[9] |
           b[10] | b[11] | b[12] | b[13] | b[14];
-      if(w || b[15] != 0x01)
+      if (w || b[15] != 0x01)
         break;
       return IPV6_SCOPE_NODELOCAL;
     default:
@@ -109,65 +111,74 @@ if2ip_result_t Curl_if2ip(int af,
 
 #if defined(USE_IPV6) && \
     !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  (void) local_scope_id;
+  (void)local_scope_id;
 #endif
 
-  if(getifaddrs(&head) >= 0) {
-    for(iface = head; iface != NULL; iface = iface->ifa_next) {
-      if(iface->ifa_addr) {
-        if(iface->ifa_addr->sa_family == af) {
-          if(strcasecompare(iface->ifa_name, interf)) {
+  if (getifaddrs(&head) >= 0)
+  {
+    for (iface = head; iface != NULL; iface = iface->ifa_next)
+    {
+      if (iface->ifa_addr)
+      {
+        if (iface->ifa_addr->sa_family == af)
+        {
+          if (strcasecompare(iface->ifa_name, interf))
+          {
             void *addr;
             const char *ip;
             char scope[12] = "";
             char ipstr[64];
 #ifdef USE_IPV6
-            if(af == AF_INET6) {
+            if (af == AF_INET6)
+            {
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
               unsigned int scopeid = 0;
 #endif
               unsigned int ifscope = Curl_ipv6_scope(iface->ifa_addr);
 
-              if(ifscope != remote_scope) {
+              if (ifscope != remote_scope)
+              {
                 /* We are interested only in interface addresses whose scope
                    matches the remote address we want to connect to: global
                    for global, link-local for link-local, etc... */
-                if(res == IF2IP_NOT_FOUND)
+                if (res == IF2IP_NOT_FOUND)
                   res = IF2IP_AF_NOT_SUPPORTED;
                 continue;
               }
 
               addr =
-                &((struct sockaddr_in6 *)(void *)iface->ifa_addr)->sin6_addr;
+                  &((struct sockaddr_in6 *)(void *)iface->ifa_addr)->sin6_addr;
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
               /* Include the scope of this interface as part of the address */
               scopeid = ((struct sockaddr_in6 *)(void *)iface->ifa_addr)
                             ->sin6_scope_id;
 
               /* If given, scope id should match. */
-              if(local_scope_id && scopeid != local_scope_id) {
-                if(res == IF2IP_NOT_FOUND)
+              if (local_scope_id && scopeid != local_scope_id)
+              {
+                if (res == IF2IP_NOT_FOUND)
                   res = IF2IP_AF_NOT_SUPPORTED;
 
                 continue;
               }
 
-              if(scopeid)
+              if (scopeid)
                 msnprintf(scope, sizeof(scope), "%%%u", scopeid);
 #endif
             }
             else
 #endif
               addr =
-                &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
+                  &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
             res = IF2IP_FOUND;
             ip = Curl_inet_ntop(af, addr, ipstr, sizeof(ipstr));
             msnprintf(buf, buf_size, "%s%s", ip, scope);
             break;
           }
         }
-        else if((res == IF2IP_NOT_FOUND) &&
-                strcasecompare(iface->ifa_name, interf)) {
+        else if ((res == IF2IP_NOT_FOUND) &&
+                 strcasecompare(iface->ifa_name, interf))
+        {
           res = IF2IP_AF_NOT_SUPPORTED;
         }
       }
@@ -201,15 +212,15 @@ if2ip_result_t Curl_if2ip(int af,
   (void)local_scope_id;
 #endif
 
-  if(!interf || (af != AF_INET))
+  if (!interf || (af != AF_INET))
     return IF2IP_NOT_FOUND;
 
   len = strlen(interf);
-  if(len >= sizeof(req.ifr_name))
+  if (len >= sizeof(req.ifr_name))
     return IF2IP_NOT_FOUND;
 
   dummy = socket(AF_INET, SOCK_STREAM, 0);
-  if(FETCH_SOCKET_BAD == dummy)
+  if (FETCH_SOCKET_BAD == dummy)
     return IF2IP_NOT_FOUND;
 
   memset(&req, 0, sizeof(req));
@@ -221,7 +232,8 @@ if2ip_result_t Curl_if2ip(int af,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-sign-overflow"
 #endif
-  if(ioctl(dummy, SIOCGIFADDR, &req) < 0) {
+  if (ioctl(dummy, SIOCGIFADDR, &req) < 0)
+  {
 #if defined(__GNUC__) && defined(_AIX)
 #pragma GCC diagnostic pop
 #endif
@@ -237,7 +249,7 @@ if2ip_result_t Curl_if2ip(int af,
   r = Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
 
   sclose(dummy);
-  if(!r)
+  if (!r)
     return IF2IP_NOT_FOUND;
   return IF2IP_FOUND;
 }
@@ -252,15 +264,15 @@ if2ip_result_t Curl_if2ip(int af,
                           const char *interf,
                           char *buf, size_t buf_size)
 {
-    (void) af;
+  (void)af;
 #ifdef USE_IPV6
-    (void) remote_scope;
-    (void) local_scope_id;
+  (void)remote_scope;
+  (void)local_scope_id;
 #endif
-    (void) interf;
-    (void) buf;
-    (void) buf_size;
-    return IF2IP_NOT_FOUND;
+  (void)interf;
+  (void)buf;
+  (void)buf_size;
+  return IF2IP_NOT_FOUND;
 }
 
 #endif

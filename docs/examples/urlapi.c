@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,14 +46,16 @@ int main(void)
   /* init Curl URL */
   urlp = fetch_url();
   uc = fetch_url_set(urlp, FETCHUPART_URL,
-                    "http://example.com/path/index.html", 0);
+                     "http://example.com/path/index.html", 0);
 
-  if(uc) {
+  if (uc)
+  {
     fprintf(stderr, "fetch_url_set() failed: %s", fetch_url_strerror(uc));
     goto cleanup;
   }
 
-  if(fetch) {
+  if (fetch)
+  {
     /* set urlp to use as working URL */
     fetch_easy_setopt(fetch, FETCHOPT_FETCHU, urlp);
     fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
@@ -63,7 +65,7 @@ int main(void)
 
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

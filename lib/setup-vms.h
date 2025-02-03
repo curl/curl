@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,9 +38,9 @@
 /* Hide the stuff we are overriding */
 #define getenv decc_getenv
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE != 64
-#       define getpwuid decc_getpwuid
-#   endif
+#if __INITIAL_POINTER_SIZE != 64
+#define getpwuid decc_getpwuid
+#endif
 #endif
 #include <stdlib.h>
 char *decc$getenv(const char *__name);
@@ -60,25 +60,25 @@ char *decc$getenv(const char *__name);
 #define sys$qiow SYS$QIOW
 
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE
-#       pragma __pointer_size __save
-#   endif
+#if __INITIAL_POINTER_SIZE
+#pragma __pointer_size __save
+#endif
 #endif
 
 #if __USE_LONG_GID_T
-#   define decc_getpwuid DECC$__LONG_GID_GETPWUID
+#define decc_getpwuid DECC$__LONG_GID_GETPWUID
 #else
-#   if __INITIAL_POINTER_SIZE
-#       define decc_getpwuid decc$__32_getpwuid
-#   else
-#       define decc_getpwuid decc$getpwuid
-#   endif
+#if __INITIAL_POINTER_SIZE
+#define decc_getpwuid decc$__32_getpwuid
+#else
+#define decc_getpwuid decc$getpwuid
+#endif
 #endif
 
-    struct passwd *decc_getpwuid(uid_t uid);
+struct passwd *decc_getpwuid(uid_t uid);
 
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE == 32
+#if __INITIAL_POINTER_SIZE == 32
 /* Translate the path, but only if the path is a VMS file specification */
 /* The translation is usually only needed for older versions of VMS */
 static char *vms_translate_path(const char *path)
@@ -89,29 +89,31 @@ static char *vms_translate_path(const char *path)
   /* See if the result is in VMS format, if not, we are done */
   /* Assume that this is a PATH, not just some data */
   test_str = strpbrk(path, ":[<^");
-  if(!test_str) {
+  if (!test_str)
+  {
     return (char *)path;
   }
 
   unix_path = decc$translate_vms(path);
 
-  if((int)unix_path <= 0) {
+  if ((int)unix_path <= 0)
+  {
     /* We can not translate it, so return the original string */
     return (char *)path;
   }
 }
-#   else
-    /* VMS translate path is actually not needed on the current 64-bit */
-    /* VMS platforms, so instead of figuring out the pointer settings */
-    /* Change it to a noop */
-#   define vms_translate_path(__path) __path
-#   endif
+#else
+/* VMS translate path is actually not needed on the current 64-bit */
+/* VMS platforms, so instead of figuring out the pointer settings */
+/* Change it to a noop */
+#define vms_translate_path(__path) __path
+#endif
 #endif
 
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE
-#       pragma __pointer_size __restore
-#   endif
+#if __INITIAL_POINTER_SIZE
+#pragma __pointer_size __restore
+#endif
 #endif
 
 static char *vms_getenv(const char *envvar)
@@ -121,7 +123,8 @@ static char *vms_getenv(const char *envvar)
 
   /* first use the DECC getenv() function */
   result = decc$getenv(envvar);
-  if(!result) {
+  if (!result)
+  {
     return result;
   }
 
@@ -137,7 +140,6 @@ static char *vms_getenv(const char *envvar)
   return result;
 }
 
-
 static struct passwd vms_passwd_cache;
 
 static struct passwd *vms_getpwuid(uid_t uid)
@@ -146,29 +148,32 @@ static struct passwd *vms_getpwuid(uid_t uid)
 
 /* Hack needed to support 64-bit builds, decc_getpwnam is 32-bit only */
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE
+#if __INITIAL_POINTER_SIZE
   __char_ptr32 unix_path;
-#   else
+#else
   char *unix_path;
-#   endif
+#endif
 #else
   char *unix_path;
 #endif
 
   my_passwd = decc_getpwuid(uid);
-  if(!my_passwd) {
+  if (!my_passwd)
+  {
     return my_passwd;
   }
 
   unix_path = vms_translate_path(my_passwd->pw_dir);
 
-  if((long)unix_path <= 0) {
+  if ((long)unix_path <= 0)
+  {
     /* We can not translate it, so return the original string */
     return my_passwd;
   }
 
   /* If no changes needed just return it */
-  if(unix_path == my_passwd->pw_dir) {
+  if (unix_path == my_passwd->pw_dir)
+  {
     return my_passwd;
   }
 
@@ -208,16 +213,17 @@ static struct passwd *vms_getpwuid(uid_t uid)
 #define CRYPTO_malloc CRYPTO_MALLOC
 #define CONF_modules_load_file CONF_MODULES_LOAD_FILE
 #ifdef __VAX
-#  ifdef VMS_OLD_SSL
-  /* Ancient OpenSSL on VAX/VMS missing this constant */
-#    define CONF_MFLAGS_IGNORE_MISSING_FILE 0x10
-#    undef CONF_modules_load_file
-     static int CONF_modules_load_file(const char *filename,
-                                       const char *appname,
-                                       unsigned long flags) {
-             return 1;
-     }
-#  endif
+#ifdef VMS_OLD_SSL
+/* Ancient OpenSSL on VAX/VMS missing this constant */
+#define CONF_MFLAGS_IGNORE_MISSING_FILE 0x10
+#undef CONF_modules_load_file
+static int CONF_modules_load_file(const char *filename,
+                                  const char *appname,
+                                  unsigned long flags)
+{
+  return 1;
+}
+#endif
 #endif
 #define DES_ecb_encrypt DES_ECB_ENCRYPT
 #define DES_set_key DES_SET_KEY
@@ -394,50 +400,53 @@ static struct passwd *vms_getpwuid(uid_t uid)
 /* that way a newer port will also work if some one has one */
 #ifdef __VAX
 
-#   if (OPENSSL_VERSION_NUMBER < 0x00907001L)
-#       define des_set_odd_parity DES_SET_ODD_PARITY
-#       define des_set_key DES_SET_KEY
-#       define des_ecb_encrypt DES_ECB_ENCRYPT
+#if (OPENSSL_VERSION_NUMBER < 0x00907001L)
+#define des_set_odd_parity DES_SET_ODD_PARITY
+#define des_set_key DES_SET_KEY
+#define des_ecb_encrypt DES_ECB_ENCRYPT
 
-#   endif
-#   include <openssl/evp.h>
-#   ifndef OpenSSL_add_all_algorithms
-#       define OpenSSL_add_all_algorithms OPENSSL_ADD_ALL_ALGORITHMS
-        void OPENSSL_ADD_ALL_ALGORITHMS(void);
-#   endif
+#endif
+#include <openssl/evp.h>
+#ifndef OpenSSL_add_all_algorithms
+#define OpenSSL_add_all_algorithms OPENSSL_ADD_ALL_ALGORITHMS
+void OPENSSL_ADD_ALL_ALGORITHMS(void);
+#endif
 
-    /* Curl defines these to lower case and VAX needs them in upper case */
-    /* So we need static routines */
-#   if (OPENSSL_VERSION_NUMBER < 0x00907001L)
+/* Curl defines these to lower case and VAX needs them in upper case */
+/* So we need static routines */
+#if (OPENSSL_VERSION_NUMBER < 0x00907001L)
 
-#       undef des_set_odd_parity
-#       undef DES_set_odd_parity
-#       undef des_set_key
-#       undef DES_set_key
-#       undef des_ecb_encrypt
-#       undef DES_ecb_encrypt
+#undef des_set_odd_parity
+#undef DES_set_odd_parity
+#undef des_set_key
+#undef DES_set_key
+#undef des_ecb_encrypt
+#undef DES_ecb_encrypt
 
-        static void des_set_odd_parity(des_cblock *key) {
-            DES_SET_ODD_PARITY(key);
-        }
+static void des_set_odd_parity(des_cblock *key)
+{
+  DES_SET_ODD_PARITY(key);
+}
 
-        static int des_set_key(const_des_cblock *key,
-                               des_key_schedule schedule) {
-            return DES_SET_KEY(key, schedule);
-        }
+static int des_set_key(const_des_cblock *key,
+                       des_key_schedule schedule)
+{
+  return DES_SET_KEY(key, schedule);
+}
 
-        static void des_ecb_encrypt(const_des_cblock *input,
-                                    des_cblock *output,
-                                    des_key_schedule ks, int enc) {
-            DES_ECB_ENCRYPT(input, output, ks, enc);
-        }
+static void des_ecb_encrypt(const_des_cblock *input,
+                            des_cblock *output,
+                            des_key_schedule ks, int enc)
+{
+  DES_ECB_ENCRYPT(input, output, ks, enc);
+}
 #endif
 /* Need this to stop a macro redefinition error */
 #if OPENSSL_VERSION_NUMBER < 0x00907000L
-#   ifdef X509_STORE_set_flags
-#       undef X509_STORE_set_flags
-#       define X509_STORE_set_flags(x,y) Curl_nop_stmt
-#   endif
+#ifdef X509_STORE_set_flags
+#undef X509_STORE_set_flags
+#define X509_STORE_set_flags(x, y) Curl_nop_stmt
+#endif
 #endif
 #endif
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,8 @@ int main(void)
   FETCH *fetch;
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     FETCHcode res;
 
     fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
@@ -42,13 +43,14 @@ int main(void)
     /* Perform the request, res gets the return code */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
-    else {
+    else
+    {
       char *hdr;
       res = fetch_easy_getinfo(fetch, FETCHINFO_REFERER, &hdr);
-      if((res == FETCHE_OK) && hdr)
+      if ((res == FETCHE_OK) && hdr)
         printf("Referrer header: %s\n", hdr);
     }
 

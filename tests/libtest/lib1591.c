@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,13 +36,15 @@ static size_t consumed = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes fetch wants */
+  size_t amount = nmemb * size; /* Total bytes fetch wants */
 
-  if(consumed == strlen(testdata)) {
+  if (consumed == strlen(testdata))
+  {
     return 0;
   }
 
-  if(amount > strlen(testdata)-consumed) {
+  if (amount > strlen(testdata) - consumed)
+  {
     amount = strlen(testdata);
   }
 
@@ -61,13 +63,15 @@ static int trailers_callback(struct fetch_slist **list, void *userdata)
   struct fetch_slist *nlist2 = NULL;
   (void)userdata;
   nlist = fetch_slist_append(*list, "my-super-awesome-trailer: trail1");
-  if(nlist)
+  if (nlist)
     nlist2 = fetch_slist_append(nlist, "my-other-awesome-trailer: trail2");
-  if(nlist2) {
+  if (nlist2)
+  {
     *list = nlist2;
     return FETCH_TRAILERFUNC_OK;
   }
-  else {
+  else
+  {
     fetch_slist_free_all(nlist);
     return FETCH_TRAILERFUNC_ABORT;
   }
@@ -80,22 +84,24 @@ FETCHcode test(char *URL)
   /* http and proxy header list */
   struct fetch_slist *hhl = NULL;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   hhl = fetch_slist_append(hhl, "Trailer: my-super-awesome-trailer,"
-                               " my-other-awesome-trailer");
-  if(!hhl) {
+                                " my-other-awesome-trailer");
+  if (!hhl)
+  {
     goto test_cleanup;
   }
 

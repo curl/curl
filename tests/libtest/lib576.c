@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,13 +26,13 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-struct chunk_data {
+struct chunk_data
+{
   int remains;
   int print_content;
 };
 
-static
-long chunk_bgn(const void *f, void *ptr, int remains)
+static long chunk_bgn(const void *f, void *ptr, int remains)
 {
   const struct fetch_fileinfo *finfo = f;
   struct chunk_data *ch_d = ptr;
@@ -41,21 +41,23 @@ long chunk_bgn(const void *f, void *ptr, int remains)
   printf("=============================================================\n");
   printf("Remains:      %d\n", remains);
   printf("Filename:     %s\n", finfo->filename);
-  if(finfo->strings.perm) {
+  if (finfo->strings.perm)
+  {
     printf("Permissions:  %s", finfo->strings.perm);
-    if(finfo->flags & FETCHFINFOFLAG_KNOWN_PERM)
+    if (finfo->flags & FETCHFINFOFLAG_KNOWN_PERM)
       printf(" (parsed => %o)", finfo->perm);
     printf("\n");
   }
   printf("Size:         %ldB\n", (long)finfo->size);
-  if(finfo->strings.user)
+  if (finfo->strings.user)
     printf("User:         %s\n", finfo->strings.user);
-  if(finfo->strings.group)
+  if (finfo->strings.group)
     printf("Group:        %s\n", finfo->strings.group);
-  if(finfo->strings.time)
+  if (finfo->strings.time)
     printf("Time:         %s\n", finfo->strings.time);
   printf("Filetype:     ");
-  switch(finfo->filetype) {
+  switch (finfo->filetype)
+  {
   case FETCHFILETYPE_FILE:
     printf("regular file\n");
     break;
@@ -70,27 +72,29 @@ long chunk_bgn(const void *f, void *ptr, int remains)
     printf("other type\n");
     break;
   }
-  if(finfo->filetype == FETCHFILETYPE_FILE) {
+  if (finfo->filetype == FETCHFILETYPE_FILE)
+  {
     ch_d->print_content = 1;
     printf("Content:\n"
-      "-------------------------------------------------------------\n");
+           "-------------------------------------------------------------\n");
   }
-  if(strcmp(finfo->filename, "someothertext.txt") == 0) {
+  if (strcmp(finfo->filename, "someothertext.txt") == 0)
+  {
     printf("# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #\n");
     return FETCH_CHUNK_BGN_FUNC_SKIP;
   }
   return FETCH_CHUNK_BGN_FUNC_OK;
 }
 
-static
-long chunk_end(void *ptr)
+static long chunk_end(void *ptr)
 {
   struct chunk_data *ch_d = ptr;
-  if(ch_d->print_content) {
+  if (ch_d->print_content)
+  {
     ch_d->print_content = 0;
     printf("-------------------------------------------------------------\n");
   }
-  if(ch_d->remains == 1)
+  if (ch_d->remains == 1)
     printf("=============================================================\n");
   return FETCH_CHUNK_END_FUNC_OK;
 }
@@ -102,7 +106,8 @@ FETCHcode test(char *URL)
   struct chunk_data chunk_data = {0, 0};
   fetch_global_init(FETCH_GLOBAL_ALL);
   handle = fetch_easy_init();
-  if(!handle) {
+  if (!handle)
+  {
     res = FETCHE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
@@ -116,7 +121,7 @@ FETCHcode test(char *URL)
   res = fetch_easy_perform(handle);
 
 test_cleanup:
-  if(handle)
+  if (handle)
     fetch_easy_cleanup(handle);
   fetch_global_cleanup();
   return res;

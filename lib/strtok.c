@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,15 +32,16 @@
 char *
 Curl_strtok_r(char *ptr, const char *sep, char **end)
 {
-  if(!ptr)
+  if (!ptr)
     /* we got NULL input so then we get our last position instead */
     ptr = *end;
 
   /* pass all letters that are including in the separator string */
-  while(*ptr && strchr(sep, *ptr))
+  while (*ptr && strchr(sep, *ptr))
     ++ptr;
 
-  if(*ptr) {
+  if (*ptr)
+  {
     /* so this is where the next piece of string starts */
     char *start = ptr;
 
@@ -49,13 +50,14 @@ Curl_strtok_r(char *ptr, const char *sep, char **end)
 
     /* scan through the string to find where it ends, it ends on a
        null byte or a character that exists in the separator string */
-    while(**end && !strchr(sep, **end))
+    while (**end && !strchr(sep, **end))
       ++*end;
 
-    if(**end) {
+    if (**end)
+    {
       /* the end is not a null byte */
-      **end = '\0';  /* null-terminate it! */
-      ++*end;        /* advance the last pointer to beyond the null byte */
+      **end = '\0'; /* null-terminate it! */
+      ++*end;       /* advance the last pointer to beyond the null byte */
     }
 
     return start; /* return the position where the string starts */

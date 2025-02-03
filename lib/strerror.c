@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,11 +25,11 @@
 #include "fetch_setup.h"
 
 #ifdef HAVE_STRERROR_R
-#  if (!defined(HAVE_POSIX_STRERROR_R) && \
-       !defined(HAVE_GLIBC_STRERROR_R)) || \
-      (defined(HAVE_POSIX_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R))
-#    error "strerror_r MUST be either POSIX, glibc style"
-#  endif
+#if (!defined(HAVE_POSIX_STRERROR_R) &&  \
+     !defined(HAVE_GLIBC_STRERROR_R)) || \
+    (defined(HAVE_POSIX_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R))
+#error "strerror_r MUST be either POSIX, glibc style"
+#endif
 #endif
 
 #include <fetch/fetch.h>
@@ -56,7 +56,8 @@ const char *
 fetch_easy_strerror(FETCHcode error)
 {
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-  switch(error) {
+  switch (error)
+  {
   case FETCHE_OK:
     return "No error";
 
@@ -71,7 +72,7 @@ fetch_easy_strerror(FETCHcode error)
 
   case FETCHE_NOT_BUILT_IN:
     return "A requested feature, protocol or option was not found built-in in"
-      " this libfetch due to a build-time decision.";
+           " this libfetch due to a build-time decision.";
 
   case FETCHE_COULDNT_RESOLVE_PROXY:
     return "Could not resolve proxy name";
@@ -353,7 +354,7 @@ fetch_easy_strerror(FETCHcode error)
    */
   return "Unknown error";
 #else
-  if(!error)
+  if (!error)
     return "No error";
   else
     return "Error";
@@ -364,7 +365,8 @@ const char *
 fetch_multi_strerror(FETCHMcode error)
 {
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-  switch(error) {
+  switch (error)
+  {
   case FETCHM_CALL_MULTI_PERFORM:
     return "Please call fetch_multi_perform() soon";
 
@@ -413,7 +415,7 @@ fetch_multi_strerror(FETCHMcode error)
 
   return "Unknown error";
 #else
-  if(error == FETCHM_OK)
+  if (error == FETCHM_OK)
     return "No error";
   else
     return "Error";
@@ -424,7 +426,8 @@ const char *
 fetch_share_strerror(FETCHSHcode error)
 {
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-  switch(error) {
+  switch (error)
+  {
   case FETCHSHE_OK:
     return "No error";
 
@@ -449,7 +452,7 @@ fetch_share_strerror(FETCHSHcode error)
 
   return "FETCHSHcode unknown";
 #else
-  if(error == FETCHSHE_OK)
+  if (error == FETCHSHE_OK)
     return "No error";
   else
     return "Error";
@@ -460,7 +463,8 @@ const char *
 fetch_url_strerror(FETCHUcode error)
 {
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-  switch(error) {
+  switch (error)
+  {
   case FETCHUE_OK:
     return "No error";
 
@@ -563,7 +567,7 @@ fetch_url_strerror(FETCHUcode error)
 
   return "FETCHUcode unknown";
 #else
-  if(error == FETCHUE_OK)
+  if (error == FETCHUE_OK)
     return "No error";
   else
     return "Error";
@@ -583,7 +587,7 @@ get_winsock_error(int err, char *buf, size_t len)
   size_t alen;
 #endif
 
-  if(!len)
+  if (!len)
     return NULL;
 
   *buf = '\0';
@@ -592,7 +596,8 @@ get_winsock_error(int err, char *buf, size_t len)
   (void)err;
   return NULL;
 #else
-  switch(err) {
+  switch (err)
+  {
   case WSAEINTR:
     p = "Call interrupted";
     break;
@@ -720,7 +725,7 @@ get_winsock_error(int err, char *buf, size_t len)
   case WSAEREMOTE:
     p = "Remote error";
     break;
-#ifdef WSAEDISCON  /* missing in SalfordC! */
+#ifdef WSAEDISCON /* missing in SalfordC! */
   case WSAEDISCON:
     p = "Disconnected";
     break;
@@ -761,12 +766,12 @@ get_winsock_error(int err, char *buf, size_t len)
     return NULL;
   }
   alen = strlen(p);
-  if(alen < len)
+  if (alen < len)
     strcpy(buf, p);
   return buf;
 #endif
 }
-#endif   /* USE_WINSOCK */
+#endif /* USE_WINSOCK */
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
 /* This is a helper function for Curl_strerror that converts Windows API error
@@ -779,7 +784,7 @@ get_winapi_error(int err, char *buf, size_t buflen)
   char *p;
   wchar_t wbuf[256];
 
-  if(!buflen)
+  if (!buflen)
     return NULL;
 
   *buf = '\0';
@@ -789,11 +794,13 @@ get_winapi_error(int err, char *buf, size_t buflen)
      output to the user's terminal it will likely be with functions which
      expect the local codepage (eg fprintf, failf, infof).
      FormatMessageW -> wcstombs is used for Windows CE compatibility. */
-  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
-                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
-                    LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
+  if (FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
+                      FORMAT_MESSAGE_IGNORE_INSERTS),
+                     NULL, (DWORD)err,
+                     LANG_NEUTRAL, wbuf, sizeof(wbuf) / sizeof(wchar_t), NULL))
+  {
     size_t written = wcstombs(buf, wbuf, buflen - 1);
-    if(written != (size_t)-1)
+    if (written != (size_t)-1)
       buf[written] = '\0';
     else
       *buf = '\0';
@@ -801,9 +808,10 @@ get_winapi_error(int err, char *buf, size_t buflen)
 
   /* Truncate multiple lines */
   p = strchr(buf, '\n');
-  if(p) {
-    if(p > buf && *(p-1) == '\r')
-      *(p-1) = '\0';
+  if (p)
+  {
+    if (p > buf && *(p - 1) == '\r')
+      *(p - 1) = '\0';
     else
       *p = '\0';
   }
@@ -839,7 +847,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   int old_errno = errno;
   char *p;
 
-  if(!buflen)
+  if (!buflen)
     return NULL;
 
 #ifndef _WIN32
@@ -851,40 +859,41 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 #if defined(_WIN32) || defined(_WIN32_WCE)
 #if defined(_WIN32)
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
-  if(err >= 0 && err < sys_nerr)
+  if (err >= 0 && err < sys_nerr)
     msnprintf(buf, buflen, "%s", sys_errlist[err]);
   else
 #endif
   {
-    if(
+    if (
 #ifdef USE_WINSOCK
-       !get_winsock_error(err, buf, buflen) &&
+        !get_winsock_error(err, buf, buflen) &&
 #endif
-       !get_winapi_error(err, buf, buflen))
+        !get_winapi_error(err, buf, buflen))
       msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   }
 #else /* not Windows coming up */
 
 #if defined(HAVE_STRERROR_R) && defined(HAVE_POSIX_STRERROR_R)
- /*
-  * The POSIX-style strerror_r() may set errno to ERANGE if insufficient
-  * storage is supplied via 'strerrbuf' and 'buflen' to hold the generated
-  * message string, or EINVAL if 'errnum' is not a valid error number.
-  */
-  if(0 != strerror_r(err, buf, buflen)) {
-    if('\0' == buf[0])
+  /*
+   * The POSIX-style strerror_r() may set errno to ERANGE if insufficient
+   * storage is supplied via 'strerrbuf' and 'buflen' to hold the generated
+   * message string, or EINVAL if 'errnum' is not a valid error number.
+   */
+  if (0 != strerror_r(err, buf, buflen))
+  {
+    if ('\0' == buf[0])
       msnprintf(buf, buflen, "Unknown error %d", err);
   }
 #elif defined(HAVE_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R)
- /*
-  * The glibc-style strerror_r() only *might* use the buffer we pass to
-  * the function, but it always returns the error message as a pointer,
-  * so we must copy that string unconditionally (if non-NULL).
-  */
+  /*
+   * The glibc-style strerror_r() only *might* use the buffer we pass to
+   * the function, but it always returns the error message as a pointer,
+   * so we must copy that string unconditionally (if non-NULL).
+   */
   {
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
-    if(msg)
+    if (msg)
       msnprintf(buf, buflen, "%s", msg);
     else
       msnprintf(buf, buflen, "Unknown error %d", err);
@@ -893,7 +902,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   {
     /* !checksrc! disable BANNEDFUNC 1 */
     const char *msg = strerror(err);
-    if(msg)
+    if (msg)
       msnprintf(buf, buflen, "%s", msg);
     else
       msnprintf(buf, buflen, "Unknown error %d", err);
@@ -904,17 +913,17 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 
   /* strip trailing '\r\n' or '\n'. */
   p = strrchr(buf, '\n');
-  if(p && (p - buf) >= 2)
+  if (p && (p - buf) >= 2)
     *p = '\0';
   p = strrchr(buf, '\r');
-  if(p && (p - buf) >= 1)
+  if (p && (p - buf) >= 1)
     *p = '\0';
 
-  if(errno != old_errno)
+  if (errno != old_errno)
     errno = old_errno;
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
-  if(old_win_err != GetLastError())
+  if (old_win_err != GetLastError())
     SetLastError(old_win_err);
 #endif
 
@@ -933,28 +942,29 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #endif
   int old_errno = errno;
 
-  if(!buflen)
+  if (!buflen)
     return NULL;
 
   *buf = '\0';
 
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-  if(!get_winapi_error((int)err, buf, buflen)) {
+  if (!get_winapi_error((int)err, buf, buflen))
+  {
     msnprintf(buf, buflen, "Unknown error %lu (0x%08lX)", err, err);
   }
 #else
   {
     const char *txt = (err == ERROR_SUCCESS) ? "No error" : "Error";
-    if(strlen(txt) < buflen)
+    if (strlen(txt) < buflen)
       strcpy(buf, txt);
   }
 #endif
 
-  if(errno != old_errno)
+  if (errno != old_errno)
     errno = old_errno;
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
-  if(old_win_err != GetLastError())
+  if (old_win_err != GetLastError())
     SetLastError(old_win_err);
 #endif
 
@@ -975,18 +985,22 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
   int old_errno = errno;
   const char *txt;
 
-  if(!buflen)
+  if (!buflen)
     return NULL;
 
   *buf = '\0';
 
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
 
-  switch(err) {
-    case SEC_E_OK:
-      txt = "No error";
-      break;
-#define SEC2TXT(sec) case sec: txt = #sec; break
+  switch (err)
+  {
+  case SEC_E_OK:
+    txt = "No error";
+    break;
+#define SEC2TXT(sec) \
+  case sec:          \
+    txt = #sec;      \
+    break
     SEC2TXT(CRYPT_E_REVOKED);
     SEC2TXT(CRYPT_E_NO_REVOCATION_DLL);
     SEC2TXT(CRYPT_E_NO_REVOCATION_CHECK);
@@ -1071,39 +1085,41 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
     SEC2TXT(SEC_I_NO_LSA_CONTEXT);
     SEC2TXT(SEC_I_RENEGOTIATE);
     SEC2TXT(SEC_I_SIGNATURE_NEEDED);
-    default:
-      txt = "Unknown error";
+  default:
+    txt = "Unknown error";
   }
 
-  if(err == SEC_E_ILLEGAL_MESSAGE) {
+  if (err == SEC_E_ILLEGAL_MESSAGE)
+  {
     msnprintf(buf, buflen,
               "SEC_E_ILLEGAL_MESSAGE (0x%08X) - This error usually occurs "
               "when a fatal SSL/TLS alert is received (e.g. handshake failed)."
               " More detail may be available in the Windows System event log.",
               err);
   }
-  else {
+  else
+  {
     char msgbuf[256];
-    if(get_winapi_error(err, msgbuf, sizeof(msgbuf)))
+    if (get_winapi_error(err, msgbuf, sizeof(msgbuf)))
       msnprintf(buf, buflen, "%s (0x%08X) - %s", txt, err, msgbuf);
     else
       msnprintf(buf, buflen, "%s (0x%08X)", txt, err);
   }
 
 #else
-  if(err == SEC_E_OK)
+  if (err == SEC_E_OK)
     txt = "No error";
   else
     txt = "Error";
-  if(buflen > strlen(txt))
+  if (buflen > strlen(txt))
     strcpy(buf, txt);
 #endif
 
-  if(errno != old_errno)
+  if (errno != old_errno)
     errno = old_errno;
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
-  if(old_win_err != GetLastError())
+  if (old_win_err != GetLastError())
     SetLastError(old_win_err);
 #endif
 

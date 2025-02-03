@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,7 @@ FETCHcode test(char *URL)
 {
   static const unsigned char a[] = {
       0x9c, 0x26, 0x4b, 0x3d, 0x49, 0x4, 0xa1, 0x1,
-      0xe0, 0xd8, 0x7c,  0x20, 0xb7, 0xef, 0x53, 0x29, 0xfa,
+      0xe0, 0xd8, 0x7c, 0x20, 0xb7, 0xef, 0x53, 0x29, 0xfa,
       0x1d, 0x57, 0xe1};
 
   FETCH *easy;
@@ -40,26 +40,31 @@ FETCHcode test(char *URL)
 
   global_init(FETCH_GLOBAL_ALL);
   easy = fetch_easy_init();
-  if(!easy) {
+  if (!easy)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     res = TEST_ERR_MAJOR_BAD;
   }
-  else {
+  else
+  {
     int asize = (int)sizeof(a);
     char *s = fetch_easy_escape(easy, (const char *)a, asize);
 
-    if(s) {
+    if (s)
+    {
       printf("%s\n", s);
       fetch_free(s);
     }
 
     s = fetch_easy_escape(easy, "", 0);
-    if(s) {
+    if (s)
+    {
       printf("IN: '' OUT: '%s'\n", s);
       fetch_free(s);
     }
     s = fetch_easy_escape(easy, " 123", 3);
-    if(s) {
+    if (s)
+    {
       printf("IN: ' 12' OUT: '%s'\n", s);
       fetch_free(s);
     }

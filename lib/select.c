@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,7 +37,7 @@
 #endif
 
 #ifdef MSDOS
-#include <dos.h>  /* delay() */
+#include <dos.h> /* delay() */
 #endif
 
 #include <fetch/fetch.h>
@@ -71,9 +71,10 @@ int Curl_wait_ms(timediff_t timeout_ms)
 {
   int r = 0;
 
-  if(!timeout_ms)
+  if (!timeout_ms)
     return 0;
-  if(timeout_ms < 0) {
+  if (timeout_ms < 0)
+  {
     SET_SOCKERRNO(EINVAL);
     return -1;
   }
@@ -82,9 +83,9 @@ int Curl_wait_ms(timediff_t timeout_ms)
 #elif defined(_WIN32)
   /* prevent overflow, timeout_ms is typecast to ULONG/DWORD. */
 #if TIMEDIFF_T_MAX >= ULONG_MAX
-  if(timeout_ms >= ULONG_MAX)
-    timeout_ms = ULONG_MAX-1;
-    /* do not use ULONG_MAX, because that is equal to INFINITE */
+  if (timeout_ms >= ULONG_MAX)
+    timeout_ms = ULONG_MAX - 1;
+  /* do not use ULONG_MAX, because that is equal to INFINITE */
 #endif
   Sleep((ULONG)timeout_ms);
 #else
@@ -95,8 +96,9 @@ int Curl_wait_ms(timediff_t timeout_ms)
     r = select(0, NULL, NULL, NULL, fetchx_mstotv(&pending_tv, timeout_ms));
   }
 #endif /* _WIN32 */
-  if(r) {
-    if((r == -1) && (SOCKERRNO == EINTR))
+  if (r)
+  {
+    if ((r == -1) && (SOCKERRNO == EINTR))
       /* make EINTR from select or poll not a "lethal" error */
       r = 0;
     else
@@ -117,7 +119,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
  *    0 = timeout
  *    N = number of signalled file descriptors
  */
-static int our_select(fetch_socket_t maxfd,   /* highest socket number */
+static int our_select(fetch_socket_t maxfd,  /* highest socket number */
                       fd_set *fds_read,      /* sockets ready for reading */
                       fd_set *fds_write,     /* sockets ready for writing */
                       fd_set *fds_err,       /* sockets with errors */
@@ -128,9 +130,10 @@ static int our_select(fetch_socket_t maxfd,   /* highest socket number */
 
 #ifdef USE_WINSOCK
   /* Winsock select() cannot handle zero events. See the comment below. */
-  if((!fds_read || fds_read->fd_count == 0) &&
-     (!fds_write || fds_write->fd_count == 0) &&
-     (!fds_err || fds_err->fd_count == 0)) {
+  if ((!fds_read || fds_read->fd_count == 0) &&
+      (!fds_write || fds_write->fd_count == 0) &&
+      (!fds_err || fds_err->fd_count == 0))
+  {
     /* no sockets, just wait */
     return Curl_wait_ms(timeout_ms);
   }
@@ -185,14 +188,15 @@ static int our_select(fetch_socket_t maxfd,   /* highest socket number */
 int Curl_socket_check(fetch_socket_t readfd0, /* two sockets to read from */
                       fetch_socket_t readfd1,
                       fetch_socket_t writefd, /* socket to write to */
-                      timediff_t timeout_ms) /* milliseconds to wait */
+                      timediff_t timeout_ms)  /* milliseconds to wait */
 {
   struct pollfd pfd[3];
   int num;
   int r;
 
-  if((readfd0 == FETCH_SOCKET_BAD) && (readfd1 == FETCH_SOCKET_BAD) &&
-     (writefd == FETCH_SOCKET_BAD)) {
+  if ((readfd0 == FETCH_SOCKET_BAD) && (readfd1 == FETCH_SOCKET_BAD) &&
+      (writefd == FETCH_SOCKET_BAD))
+  {
     /* no sockets, just wait */
     return Curl_wait_ms(timeout_ms);
   }
@@ -203,49 +207,55 @@ int Curl_socket_check(fetch_socket_t readfd0, /* two sockets to read from */
      value indicating a blocking call should be performed. */
 
   num = 0;
-  if(readfd0 != FETCH_SOCKET_BAD) {
+  if (readfd0 != FETCH_SOCKET_BAD)
+  {
     pfd[num].fd = readfd0;
-    pfd[num].events = POLLRDNORM|POLLIN|POLLRDBAND|POLLPRI;
+    pfd[num].events = POLLRDNORM | POLLIN | POLLRDBAND | POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
-  if(readfd1 != FETCH_SOCKET_BAD) {
+  if (readfd1 != FETCH_SOCKET_BAD)
+  {
     pfd[num].fd = readfd1;
-    pfd[num].events = POLLRDNORM|POLLIN|POLLRDBAND|POLLPRI;
+    pfd[num].events = POLLRDNORM | POLLIN | POLLRDBAND | POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
-  if(writefd != FETCH_SOCKET_BAD) {
+  if (writefd != FETCH_SOCKET_BAD)
+  {
     pfd[num].fd = writefd;
-    pfd[num].events = POLLWRNORM|POLLOUT|POLLPRI;
+    pfd[num].events = POLLWRNORM | POLLOUT | POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
 
   r = Curl_poll(pfd, (unsigned int)num, timeout_ms);
-  if(r <= 0)
+  if (r <= 0)
     return r;
 
   r = 0;
   num = 0;
-  if(readfd0 != FETCH_SOCKET_BAD) {
-    if(pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
+  if (readfd0 != FETCH_SOCKET_BAD)
+  {
+    if (pfd[num].revents & (POLLRDNORM | POLLIN | POLLERR | POLLHUP))
       r |= FETCH_CSELECT_IN;
-    if(pfd[num].revents & (POLLPRI|POLLNVAL))
+    if (pfd[num].revents & (POLLPRI | POLLNVAL))
       r |= FETCH_CSELECT_ERR;
     num++;
   }
-  if(readfd1 != FETCH_SOCKET_BAD) {
-    if(pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
+  if (readfd1 != FETCH_SOCKET_BAD)
+  {
+    if (pfd[num].revents & (POLLRDNORM | POLLIN | POLLERR | POLLHUP))
       r |= FETCH_CSELECT_IN2;
-    if(pfd[num].revents & (POLLPRI|POLLNVAL))
+    if (pfd[num].revents & (POLLPRI | POLLNVAL))
       r |= FETCH_CSELECT_ERR;
     num++;
   }
-  if(writefd != FETCH_SOCKET_BAD) {
-    if(pfd[num].revents & (POLLWRNORM|POLLOUT))
+  if (writefd != FETCH_SOCKET_BAD)
+  {
+    if (pfd[num].revents & (POLLWRNORM | POLLOUT))
       r |= FETCH_CSELECT_OUT;
-    if(pfd[num].revents & (POLLERR|POLLHUP|POLLPRI|POLLNVAL))
+    if (pfd[num].revents & (POLLERR | POLLHUP | POLLPRI | POLLNVAL))
       r |= FETCH_CSELECT_ERR;
   }
 
@@ -279,15 +289,19 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   unsigned int i;
   int r;
 
-  if(ufds) {
-    for(i = 0; i < nfds; i++) {
-      if(ufds[i].fd != FETCH_SOCKET_BAD) {
+  if (ufds)
+  {
+    for (i = 0; i < nfds; i++)
+    {
+      if (ufds[i].fd != FETCH_SOCKET_BAD)
+      {
         fds_none = FALSE;
         break;
       }
     }
   }
-  if(fds_none) {
+  if (fds_none)
+  {
     /* no sockets, just wait */
     return Curl_wait_ms(timeout_ms);
   }
@@ -301,53 +315,57 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
 
   /* prevent overflow, timeout_ms is typecast to int. */
 #if TIMEDIFF_T_MAX > INT_MAX
-  if(timeout_ms > INT_MAX)
+  if (timeout_ms > INT_MAX)
     timeout_ms = INT_MAX;
 #endif
-  if(timeout_ms > 0)
+  if (timeout_ms > 0)
     pending_ms = (int)timeout_ms;
-  else if(timeout_ms < 0)
+  else if (timeout_ms < 0)
     pending_ms = -1;
   else
     pending_ms = 0;
   r = poll(ufds, nfds, pending_ms);
-  if(r <= 0) {
-    if((r == -1) && (SOCKERRNO == EINTR))
+  if (r <= 0)
+  {
+    if ((r == -1) && (SOCKERRNO == EINTR))
       /* make EINTR from select or poll not a "lethal" error */
       r = 0;
     return r;
   }
 
-  for(i = 0; i < nfds; i++) {
-    if(ufds[i].fd == FETCH_SOCKET_BAD)
+  for (i = 0; i < nfds; i++)
+  {
+    if (ufds[i].fd == FETCH_SOCKET_BAD)
       continue;
-    if(ufds[i].revents & POLLHUP)
+    if (ufds[i].revents & POLLHUP)
       ufds[i].revents |= POLLIN;
-    if(ufds[i].revents & POLLERR)
-      ufds[i].revents |= POLLIN|POLLOUT;
+    if (ufds[i].revents & POLLERR)
+      ufds[i].revents |= POLLIN | POLLOUT;
   }
 
-#else  /* HAVE_POLL */
+#else /* HAVE_POLL */
 
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
   FD_ZERO(&fds_err);
   maxfd = (fetch_socket_t)-1;
 
-  for(i = 0; i < nfds; i++) {
+  for (i = 0; i < nfds; i++)
+  {
     ufds[i].revents = 0;
-    if(ufds[i].fd == FETCH_SOCKET_BAD)
+    if (ufds[i].fd == FETCH_SOCKET_BAD)
       continue;
     VERIFY_SOCK(ufds[i].fd);
-    if(ufds[i].events & (POLLIN|POLLOUT|POLLPRI|
-                         POLLRDNORM|POLLWRNORM|POLLRDBAND)) {
-      if(ufds[i].fd > maxfd)
+    if (ufds[i].events & (POLLIN | POLLOUT | POLLPRI |
+                          POLLRDNORM | POLLWRNORM | POLLRDBAND))
+    {
+      if (ufds[i].fd > maxfd)
         maxfd = ufds[i].fd;
-      if(ufds[i].events & (POLLRDNORM|POLLIN))
+      if (ufds[i].events & (POLLRDNORM | POLLIN))
         FD_SET(ufds[i].fd, &fds_read);
-      if(ufds[i].events & (POLLWRNORM|POLLOUT))
+      if (ufds[i].events & (POLLWRNORM | POLLOUT))
         FD_SET(ufds[i].fd, &fds_write);
-      if(ufds[i].events & (POLLRDBAND|POLLPRI))
+      if (ufds[i].events & (POLLRDBAND | POLLPRI))
         FD_SET(ufds[i].fd, &fds_err);
     }
   }
@@ -359,41 +377,46 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
      value).
   */
   r = our_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
-  if(r <= 0) {
-    if((r == -1) && (SOCKERRNO == EINTR))
+  if (r <= 0)
+  {
+    if ((r == -1) && (SOCKERRNO == EINTR))
       /* make EINTR from select or poll not a "lethal" error */
       r = 0;
     return r;
   }
 
   r = 0;
-  for(i = 0; i < nfds; i++) {
+  for (i = 0; i < nfds; i++)
+  {
     ufds[i].revents = 0;
-    if(ufds[i].fd == FETCH_SOCKET_BAD)
+    if (ufds[i].fd == FETCH_SOCKET_BAD)
       continue;
-    if(FD_ISSET(ufds[i].fd, &fds_read)) {
-      if(ufds[i].events & POLLRDNORM)
+    if (FD_ISSET(ufds[i].fd, &fds_read))
+    {
+      if (ufds[i].events & POLLRDNORM)
         ufds[i].revents |= POLLRDNORM;
-      if(ufds[i].events & POLLIN)
+      if (ufds[i].events & POLLIN)
         ufds[i].revents |= POLLIN;
     }
-    if(FD_ISSET(ufds[i].fd, &fds_write)) {
-      if(ufds[i].events & POLLWRNORM)
+    if (FD_ISSET(ufds[i].fd, &fds_write))
+    {
+      if (ufds[i].events & POLLWRNORM)
         ufds[i].revents |= POLLWRNORM;
-      if(ufds[i].events & POLLOUT)
+      if (ufds[i].events & POLLOUT)
         ufds[i].revents |= POLLOUT;
     }
-    if(FD_ISSET(ufds[i].fd, &fds_err)) {
-      if(ufds[i].events & POLLRDBAND)
+    if (FD_ISSET(ufds[i].fd, &fds_err))
+    {
+      if (ufds[i].events & POLLRDBAND)
         ufds[i].revents |= POLLRDBAND;
-      if(ufds[i].events & POLLPRI)
+      if (ufds[i].events & POLLPRI)
         ufds[i].revents |= POLLPRI;
     }
-    if(ufds[i].revents)
+    if (ufds[i].revents)
       r++;
   }
 
-#endif  /* HAVE_POLL */
+#endif /* HAVE_POLL */
 
   return r;
 }
@@ -404,7 +427,8 @@ void Curl_pollfds_init(struct fetch_pollfds *cpfds,
 {
   DEBUGASSERT(cpfds);
   memset(cpfds, 0, sizeof(*cpfds));
-  if(static_pfds && static_count) {
+  if (static_pfds && static_count)
+  {
     cpfds->pfds = static_pfds;
     cpfds->count = static_count;
   }
@@ -413,7 +437,8 @@ void Curl_pollfds_init(struct fetch_pollfds *cpfds,
 void Curl_pollfds_cleanup(struct fetch_pollfds *cpfds)
 {
   DEBUGASSERT(cpfds);
-  if(cpfds->allocated_pfds) {
+  if (cpfds->allocated_pfds)
+  {
     free(cpfds->pfds);
   }
   memset(cpfds, 0, sizeof(*cpfds));
@@ -425,11 +450,11 @@ static FETCHcode cpfds_increase(struct fetch_pollfds *cpfds, unsigned int inc)
   unsigned int new_count = cpfds->count + inc;
 
   new_fds = calloc(new_count, sizeof(struct pollfd));
-  if(!new_fds)
+  if (!new_fds)
     return FETCHE_OUT_OF_MEMORY;
 
   memcpy(new_fds, cpfds->pfds, cpfds->count * sizeof(struct pollfd));
-  if(cpfds->allocated_pfds)
+  if (cpfds->allocated_pfds)
     free(cpfds->pfds);
   cpfds->pfds = new_fds;
   cpfds->count = new_count;
@@ -438,21 +463,25 @@ static FETCHcode cpfds_increase(struct fetch_pollfds *cpfds, unsigned int inc)
 }
 
 static FETCHcode cpfds_add_sock(struct fetch_pollfds *cpfds,
-                               fetch_socket_t sock, short events, bool fold)
+                                fetch_socket_t sock, short events, bool fold)
 {
   int i;
 
-  if(fold && cpfds->n <= INT_MAX) {
-    for(i = (int)cpfds->n - 1; i >= 0; --i) {
-      if(sock == cpfds->pfds[i].fd) {
+  if (fold && cpfds->n <= INT_MAX)
+  {
+    for (i = (int)cpfds->n - 1; i >= 0; --i)
+    {
+      if (sock == cpfds->pfds[i].fd)
+      {
         cpfds->pfds[i].events |= events;
         return FETCHE_OK;
       }
     }
   }
   /* not folded, add new entry */
-  if(cpfds->n >= cpfds->count) {
-    if(cpfds_increase(cpfds, 100))
+  if (cpfds->n >= cpfds->count)
+  {
+    if (cpfds_increase(cpfds, 100))
       return FETCHE_OUT_OF_MEMORY;
   }
   cpfds->pfds[cpfds->n].fd = sock;
@@ -462,26 +491,28 @@ static FETCHcode cpfds_add_sock(struct fetch_pollfds *cpfds,
 }
 
 FETCHcode Curl_pollfds_add_sock(struct fetch_pollfds *cpfds,
-                               fetch_socket_t sock, short events)
+                                fetch_socket_t sock, short events)
 {
   return cpfds_add_sock(cpfds, sock, events, FALSE);
 }
 
 FETCHcode Curl_pollfds_add_ps(struct fetch_pollfds *cpfds,
-                             struct easy_pollset *ps)
+                              struct easy_pollset *ps)
 {
   size_t i;
 
   DEBUGASSERT(cpfds);
   DEBUGASSERT(ps);
-  for(i = 0; i < ps->num; i++) {
+  for (i = 0; i < ps->num; i++)
+  {
     short events = 0;
-    if(ps->actions[i] & FETCH_POLL_IN)
+    if (ps->actions[i] & FETCH_POLL_IN)
       events |= POLLIN;
-    if(ps->actions[i] & FETCH_POLL_OUT)
+    if (ps->actions[i] & FETCH_POLL_OUT)
       events |= POLLOUT;
-    if(events) {
-      if(cpfds_add_sock(cpfds, ps->sockets[i], events, TRUE))
+    if (events)
+    {
+      if (cpfds_add_sock(cpfds, ps->sockets[i], events, TRUE))
         return FETCHE_OUT_OF_MEMORY;
     }
   }
@@ -503,20 +534,25 @@ static unsigned int cwfds_add_sock(struct Curl_waitfds *cwfds,
                                    fetch_socket_t sock, short events)
 {
   int i;
-  if(!cwfds->wfds) {
+  if (!cwfds->wfds)
+  {
     DEBUGASSERT(!cwfds->count && !cwfds->n);
     return 1;
   }
-  if(cwfds->n <= INT_MAX) {
-    for(i = (int)cwfds->n - 1; i >= 0; --i) {
-      if(sock == cwfds->wfds[i].fd) {
+  if (cwfds->n <= INT_MAX)
+  {
+    for (i = (int)cwfds->n - 1; i >= 0; --i)
+    {
+      if (sock == cwfds->wfds[i].fd)
+      {
         cwfds->wfds[i].events |= events;
         return 0;
       }
     }
   }
   /* not folded, add new entry */
-  if(cwfds->n < cwfds->count) {
+  if (cwfds->n < cwfds->count)
+  {
     cwfds->wfds[cwfds->n].fd = sock;
     cwfds->wfds[cwfds->n].events = events;
     ++cwfds->n;
@@ -532,13 +568,14 @@ unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
 
   DEBUGASSERT(cwfds);
   DEBUGASSERT(ps);
-  for(i = 0; i < ps->num; i++) {
+  for (i = 0; i < ps->num; i++)
+  {
     short events = 0;
-    if(ps->actions[i] & FETCH_POLL_IN)
+    if (ps->actions[i] & FETCH_POLL_IN)
       events |= FETCH_WAIT_POLLIN;
-    if(ps->actions[i] & FETCH_POLL_OUT)
+    if (ps->actions[i] & FETCH_POLL_OUT)
       events |= FETCH_WAIT_POLLOUT;
-    if(events)
+    if (events)
       need += cwfds_add_sock(cwfds, ps->sockets[i], events);
   }
   return need;

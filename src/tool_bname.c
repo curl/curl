@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,12 +37,13 @@ char *tool_basename(char *path)
   s1 = strrchr(path, '/');
   s2 = strrchr(path, '\\');
 
-  if(s1 && s2) {
+  if (s1 && s2)
+  {
     path = (s1 > s2) ? s1 + 1 : s2 + 1;
   }
-  else if(s1)
+  else if (s1)
     path = s1 + 1;
-  else if(s2)
+  else if (s2)
     path = s2 + 1;
 
   return path;

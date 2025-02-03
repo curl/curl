@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,23 +32,25 @@ typedef void (*Curl_llist_dtor)(void *user, void *elem);
 /* none of these struct members should be referenced directly, use the
    dedicated functions */
 
-struct Curl_llist {
-  struct Curl_llist_node *_head;
-  struct Curl_llist_node *_tail;
-  Curl_llist_dtor _dtor;
-  size_t _size;
+struct Curl_llist
+{
+   struct Curl_llist_node *_head;
+   struct Curl_llist_node *_tail;
+   Curl_llist_dtor _dtor;
+   size_t _size;
 #ifdef DEBUGBUILD
-  int _init;      /* detect API usage mistakes */
+   int _init; /* detect API usage mistakes */
 #endif
 };
 
-struct Curl_llist_node {
-  struct Curl_llist *_list; /* the list where this belongs */
-  void *_ptr;
-  struct Curl_llist_node *_prev;
-  struct Curl_llist_node *_next;
+struct Curl_llist_node
+{
+   struct Curl_llist *_list; /* the list where this belongs */
+   void *_ptr;
+   struct Curl_llist_node *_prev;
+   struct Curl_llist_node *_next;
 #ifdef DEBUGBUILD
-  int _init;      /* detect API usage mistakes */
+   int _init; /* detect API usage mistakes */
 #endif
 };
 

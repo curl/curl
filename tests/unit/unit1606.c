@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,8 @@ static FETCHcode unit_setup(void)
 
   global_init(FETCH_GLOBAL_ALL);
   easy = fetch_easy_init();
-  if(!easy) {
+  if (!easy)
+  {
     fetch_global_cleanup();
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -61,16 +62,17 @@ static int runawhile(long time_limit,
   fetch_easy_setopt(easy, FETCHOPT_LOW_SPEED_TIME, time_limit);
   Curl_speedinit(easy);
 
-  do {
+  do
+  {
     /* fake the current transfer speed */
     easy->progress.current_speed = speed;
     result = Curl_speedcheck(easy, now);
-    if(result)
+    if (result)
       break;
     /* step the time */
     now.tv_sec = ++counter;
     speed -= dec;
-  } while(counter < 100);
+  } while (counter < 100);
 
   finaltime = (int)(now.tv_sec - 1);
 
@@ -78,16 +80,16 @@ static int runawhile(long time_limit,
 }
 
 UNITTEST_START
-  fail_unless(runawhile(41, 41, 40, 0) == 41,
-              "wrong low speed timeout");
-  fail_unless(runawhile(21, 21, 20, 0) == 21,
-              "wrong low speed timeout");
-  fail_unless(runawhile(60, 60, 40, 0) == 60,
-              "wrong log speed timeout");
-  fail_unless(runawhile(50, 50, 40, 0) == 50,
-              "wrong log speed timeout");
-  fail_unless(runawhile(40, 40, 40, 0) == 99,
-              "should not time out");
-  fail_unless(runawhile(10, 50, 100, 2) == 36,
-              "bad timeout");
+fail_unless(runawhile(41, 41, 40, 0) == 41,
+            "wrong low speed timeout");
+fail_unless(runawhile(21, 21, 20, 0) == 21,
+            "wrong low speed timeout");
+fail_unless(runawhile(60, 60, 40, 0) == 60,
+            "wrong log speed timeout");
+fail_unless(runawhile(50, 50, 40, 0) == 50,
+            "wrong log speed timeout");
+fail_unless(runawhile(40, 40, 40, 0) == 99,
+            "should not time out");
+fail_unless(runawhile(10, 50, 100, 2) == 36,
+            "bad timeout");
 UNITTEST_STOP

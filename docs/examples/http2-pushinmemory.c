@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,8 @@
 /* fetch stuff */
 #include <fetch/fetch.h>
 
-struct Memory {
+struct Memory
+{
   char *memory;
   size_t size;
 };
@@ -43,7 +44,8 @@ write_cb(void *contents, size_t size, size_t nmemb, void *userp)
   size_t realsize = size * nmemb;
   struct Memory *mem = (struct Memory *)userp;
   char *ptr = realloc(mem->memory, mem->size + realsize + 1);
-  if(!ptr) {
+  if (!ptr)
+  {
     /* out of memory! */
     printf("not enough memory (realloc returned NULL)\n");
     return 0;
@@ -63,8 +65,8 @@ static int pushindex = 1;
 
 static void init_memory(struct Memory *chunk)
 {
-  chunk->memory = malloc(1);  /* grown as needed with realloc */
-  chunk->size = 0;            /* no data at this point */
+  chunk->memory = malloc(1); /* grown as needed with realloc */
+  chunk->size = 0;           /* no data at this point */
 }
 
 static void setup(FETCH *hnd)
@@ -97,10 +99,10 @@ static int server_push_callback(FETCH *parent,
 {
   char *headp;
   int *transfers = (int *)userp;
-  (void)parent; /* we have no use for this */
+  (void)parent;      /* we have no use for this */
   (void)num_headers; /* unused */
 
-  if(pushindex == MAX_FILES)
+  if (pushindex == MAX_FILES)
     /* cannot fit anymore */
     return FETCH_PUSH_DENY;
 
@@ -110,13 +112,12 @@ static int server_push_callback(FETCH *parent,
   pushindex++;
 
   headp = fetch_pushheader_byname(headers, ":path");
-  if(headp)
+  if (headp)
     fprintf(stderr, "* Pushed :path '%s'\n", headp /* skip :path + colon */);
 
   (*transfers)++; /* one more */
   return FETCH_PUSH_OK;
 }
-
 
 /*
  * Download a file over HTTP/2, take care of server push.
@@ -145,39 +146,40 @@ int main(void)
   fetch_multi_setopt(multi, FETCHMOPT_PUSHFUNCTION, server_push_callback);
   fetch_multi_setopt(multi, FETCHMOPT_PUSHDATA, &transfers);
 
-  while(transfers) {
+  while (transfers)
+  {
     int rc;
     FETCHMcode mcode = fetch_multi_perform(multi, &still_running);
-    if(mcode)
+    if (mcode)
       break;
 
     mcode = fetch_multi_wait(multi, NULL, 0, 1000, &rc);
-    if(mcode)
+    if (mcode)
       break;
-
 
     /*
      * When doing server push, libfetch itself created and added one or more
      * easy handles but *we* need to clean them up when they are done.
      */
-    do {
+    do
+    {
       int msgq = 0;
       m = fetch_multi_info_read(multi, &msgq);
-      if(m && (m->msg == FETCHMSG_DONE)) {
+      if (m && (m->msg == FETCHMSG_DONE))
+      {
         FETCH *e = m->easy_handle;
         transfers--;
         fetch_multi_remove_handle(multi, e);
         fetch_easy_cleanup(e);
       }
-    } while(m);
-
+    } while (m);
   }
-
 
   fetch_multi_cleanup(multi);
 
   /* 'pushindex' is now the number of received transfers */
-  for(i = 0; i < pushindex; i++) {
+  for (i = 0; i < pushindex; i++)
+  {
     /* do something fun with the data, and then free it when done */
     free(files[i].memory);
   }

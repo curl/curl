@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,19 +36,19 @@
 /* The maximum line length for an ecoded session ticket */
 #define MAX_SSLS_LINE (64 * 1024)
 
-
 static FETCHcode tool_ssls_easy(struct GlobalConfig *global,
-                               struct OperationConfig *config,
-                               FETCHSH *share, FETCH **peasy)
+                                struct OperationConfig *config,
+                                FETCHSH *share, FETCH **peasy)
 {
   FETCHcode result = FETCHE_OK;
 
   *peasy = fetch_easy_init();
-  if(!*peasy)
+  if (!*peasy)
     return FETCHE_OUT_OF_MEMORY;
 
   result = fetch_easy_setopt(*peasy, FETCHOPT_SHARE, share);
-  if(!result && (global->tracetype != TRACE_NONE)) {
+  if (!result && (global->tracetype != TRACE_NONE))
+  {
     my_setopt(*peasy, FETCHOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(*peasy, FETCHOPT_DEBUGDATA, config);
     my_setopt(*peasy, FETCHOPT_VERBOSE, 1L);
@@ -57,8 +57,8 @@ static FETCHcode tool_ssls_easy(struct GlobalConfig *global,
 }
 
 FETCHcode tool_ssls_load(struct GlobalConfig *global,
-                        struct OperationConfig *config,
-                        FETCHSH *share, const char *filename)
+                         struct OperationConfig *config,
+                         FETCHSH *share, const char *filename)
 {
   FILE *fp;
   FETCH *easy = NULL;
@@ -71,53 +71,60 @@ FETCHcode tool_ssls_load(struct GlobalConfig *global,
 
   fetchx_dyn_init(&buf, MAX_SSLS_LINE);
   fp = fopen(filename, FOPEN_READTEXT);
-  if(!fp) { /* ok if it does not exist */
+  if (!fp)
+  { /* ok if it does not exist */
     notef(global, "SSL session file does not exist (yet?): %s", filename);
     goto out;
   }
 
   r = tool_ssls_easy(global, config, share, &easy);
-  if(r)
+  if (r)
     goto out;
 
   i = imported = 0;
-  while(Curl_get_line(&buf, fp)) {
+  while (Curl_get_line(&buf, fp))
+  {
     ++i;
     fetch_free(shmac);
     fetch_free(sdata);
     line = Curl_dyn_ptr(&buf);
-    while(*line && ISBLANK(*line))
+    while (*line && ISBLANK(*line))
       line++;
-    if(*line == '#')
+    if (*line == '#')
       /* skip commented lines */
       continue;
 
     c = memchr(line, ':', strlen(line));
-    if(!c) {
+    if (!c)
+    {
       warnf(global, "unrecognized line %d in ssl session file %s",
             i, filename);
       continue;
     }
     *c = '\0';
     r = fetchx_base64_decode(line, &shmac, &shmac_len);
-    if(r) {
+    if (r)
+    {
       warnf(global, "invalid shmax base64 encoding in line %d", i);
       continue;
     }
     line = c + 1;
     end = line + strlen(line) - 1;
-    while((end > line) && (*end == '\n' || *end == '\r' || ISBLANK(*line))) {
+    while ((end > line) && (*end == '\n' || *end == '\r' || ISBLANK(*line)))
+    {
       *end = '\0';
       --end;
     }
     r = fetchx_base64_decode(line, &sdata, &sdata_len);
-    if(r) {
+    if (r)
+    {
       warnf(global, "invalid sdata base64 encoding in line %d: %s", i, line);
       continue;
     }
 
     r = fetch_easy_ssls_import(easy, NULL, shmac, shmac_len, sdata, sdata_len);
-    if(r) {
+    if (r)
+    {
       warnf(global, "import of session from line %d rejected(%d)", i, r);
       continue;
     }
@@ -126,9 +133,9 @@ FETCHcode tool_ssls_load(struct GlobalConfig *global,
   r = FETCHE_OK;
 
 out:
-  if(easy)
+  if (easy)
     fetch_easy_cleanup(easy);
-  if(fp)
+  if (fp)
     fclose(fp);
   fetchx_dyn_free(&buf);
   fetch_free(shmac);
@@ -136,18 +143,19 @@ out:
   return r;
 }
 
-struct tool_ssls_ctx {
+struct tool_ssls_ctx
+{
   struct GlobalConfig *global;
   FILE *fp;
   int exported;
 };
 
 static FETCHcode tool_ssls_exp(FETCH *easy, void *userptr,
-                              const char *session_key,
-                              const unsigned char *shmac, size_t shmac_len,
-                              const unsigned char *sdata, size_t sdata_len,
-                              fetch_off_t valid_until, int ietf_tls_id,
-                              const char *alpn, size_t earlydata_max)
+                               const char *session_key,
+                               const unsigned char *shmac, size_t shmac_len,
+                               const unsigned char *sdata, size_t sdata_len,
+                               fetch_off_t valid_until, int ietf_tls_id,
+                               const char *alpn, size_t earlydata_max)
 {
   struct tool_ssls_ctx *ctx = userptr;
   char *enc = NULL;
@@ -159,32 +167,32 @@ static FETCHcode tool_ssls_exp(FETCH *easy, void *userptr,
   (void)ietf_tls_id;
   (void)alpn;
   (void)earlydata_max;
-  if(!ctx->exported)
-    fputs("# Your SSL session cache. https://fetch.se/docs/ssl-sessions.html\n"
-        "# This file was generated by libfetch! Edit at your own risk.\n",
-        ctx->fp);
+  if (!ctx->exported)
+    fputs("# Your SSL session cache. https://curl.se/docs/ssl-sessions.html\n"
+          "# This file was generated by libfetch! Edit at your own risk.\n",
+          ctx->fp);
 
   r = fetchx_base64_encode((const char *)shmac, shmac_len, &enc, &enc_len);
-  if(r)
+  if (r)
     goto out;
   r = FETCHE_WRITE_ERROR;
-  if(enc_len != fwrite(enc, 1, enc_len, ctx->fp))
+  if (enc_len != fwrite(enc, 1, enc_len, ctx->fp))
     goto out;
-  if(EOF == fputc(':', ctx->fp))
+  if (EOF == fputc(':', ctx->fp))
     goto out;
   fetch_free(enc);
   r = fetchx_base64_encode((const char *)sdata, sdata_len, &enc, &enc_len);
-  if(r)
+  if (r)
     goto out;
   r = FETCHE_WRITE_ERROR;
-  if(enc_len != fwrite(enc, 1, enc_len, ctx->fp))
+  if (enc_len != fwrite(enc, 1, enc_len, ctx->fp))
     goto out;
-  if(EOF == fputc('\n', ctx->fp))
+  if (EOF == fputc('\n', ctx->fp))
     goto out;
   r = FETCHE_OK;
   ctx->exported++;
 out:
-  if(r)
+  if (r)
     warnf(ctx->global, "Warning: error saving SSL session for '%s': %d",
           session_key, r);
   fetch_free(enc);
@@ -192,8 +200,8 @@ out:
 }
 
 FETCHcode tool_ssls_save(struct GlobalConfig *global,
-                        struct OperationConfig *config,
-                        FETCHSH *share, const char *filename)
+                         struct OperationConfig *config,
+                         FETCHSH *share, const char *filename)
 {
   struct tool_ssls_ctx ctx;
   FETCH *easy = NULL;
@@ -202,21 +210,22 @@ FETCHcode tool_ssls_save(struct GlobalConfig *global,
   ctx.global = global;
   ctx.exported = 0;
   ctx.fp = fopen(filename, FOPEN_WRITETEXT);
-  if(!ctx.fp) {
+  if (!ctx.fp)
+  {
     warnf(global, "Warning: Failed to create SSL session file %s", filename);
     goto out;
   }
 
   r = tool_ssls_easy(global, config, share, &easy);
-  if(r)
+  if (r)
     goto out;
 
   r = fetch_easy_ssls_export(easy, tool_ssls_exp, &ctx);
 
 out:
-  if(easy)
+  if (easy)
     fetch_easy_cleanup(easy);
-  if(ctx.fp)
+  if (ctx.fp)
     fclose(ctx.fp);
   return r;
 }

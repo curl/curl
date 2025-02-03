@@ -19,11 +19,11 @@ FETCHOPT_COOKIEFILE - filename to read cookies from
 
 # SYNOPSIS
 
-~~~c
+```c
 #include <fetch/fetch.h>
 
 FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_COOKIEFILE, char *filename);
-~~~
+```
 
 # DESCRIPTION
 
@@ -70,7 +70,7 @@ NULL
 
 # EXAMPLE
 
-~~~c
+```c
 int main(void)
 {
   FETCH *fetch = fetch_easy_init();
@@ -86,12 +86,12 @@ int main(void)
     fetch_easy_cleanup(fetch);
   }
 }
-~~~
+```
 
 # Cookie file format
 
 The cookie file format and general cookie concepts in fetch are described
-online here: https://fetch.se/docs/http-cookies.html
+online here: https://curl.se/docs/http-cookies.html
 
 # %AVAILABILITY%
 

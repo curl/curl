@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,51 +30,56 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct testdata {
+struct testdata
+{
   char trace_ascii; /* 1 or 0 */
 };
 
-static
-void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text,
+                 FILE *stream, unsigned char *ptr, size_t size,
+                 char nohex)
 {
   size_t i;
   size_t c;
 
   unsigned int width = 0x10;
 
-  if(nohex)
+  if (nohex)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
   fprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
-  for(i = 0; i < size; i += width) {
+  for (i = 0; i < size; i += width)
+  {
 
     fprintf(stream, "%04zx: ", i);
 
-    if(!nohex) {
+    if (!nohex)
+    {
       /* hex not disabled, show it */
-      for(c = 0; c < width; c++)
-        if(i + c < size)
+      for (c = 0; c < width; c++)
+        if (i + c < size)
           fprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
 
-    for(c = 0; (c < width) && (i + c < size); c++) {
+    for (c = 0; (c < width) && (i + c < size); c++)
+    {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if(nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
-         ptr[i + c + 1] == 0x0A) {
+      if (nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
+          ptr[i + c + 1] == 0x0A)
+      {
         i += (c + 2 - width);
         break;
       }
       fprintf(stream, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
-         ptr[i + c + 2] == 0x0A) {
+      if (nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
+          ptr[i + c + 2] == 0x0A)
+      {
         i += (c + 3 - width);
         break;
       }
@@ -84,16 +89,16 @@ void dump(const char *text,
   fflush(stream);
 }
 
-static
-int my_trace(FETCH *handle, fetch_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(FETCH *handle, fetch_infotype type,
+                    char *data, size_t size,
+                    void *userp)
 {
   struct testdata *config = (struct testdata *)userp;
   const char *text;
   (void)handle; /* prevent compiler warning */
 
-  switch(type) {
+  switch (type)
+  {
   case FETCHINFO_TEXT:
     fprintf(stderr, "== Info: %s", (char *)data);
     return 0;
@@ -123,23 +128,21 @@ int my_trace(FETCH *handle, fetch_infotype type,
   return 0;
 }
 
-
 static size_t current_offset = 0;
 static char databuf[70000]; /* MUST be more than 64k OR
                                MAX_INITIAL_POST_SIZE */
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes fetch wants */
-  size_t  available = sizeof(databuf) - current_offset; /* What we have to
-                                                           give */
-  size_t  given = amount < available ? amount : available; /* What is given */
+  size_t amount = nmemb * size;                           /* Total bytes fetch wants */
+  size_t available = sizeof(databuf) - current_offset;    /* What we have to
+                                                             give */
+  size_t given = amount < available ? amount : available; /* What is given */
   (void)stream;
   memcpy(ptr, databuf + current_offset, given);
   current_offset += given;
   return given;
 }
-
 
 static size_t write_callback(char *ptr, size_t size, size_t nmemb,
                              void *stream)
@@ -150,11 +153,11 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-
 static fetchioerr ioctl_callback(FETCH *handle, int cmd, void *clientp)
 {
   (void)clientp;
-  if(cmd == FETCHIOCMD_RESTARTREAD) {
+  if (cmd == FETCHIOCMD_RESTARTREAD)
+  {
     printf("APPLICATION received a FETCHIOCMD_RESTARTREAD request\n");
     printf("APPLICATION ** REWINDING! **\n");
     current_offset = 0;
@@ -163,8 +166,6 @@ static fetchioerr ioctl_callback(FETCH *handle, int cmd, void *clientp)
   (void)handle;
   return FETCHIOE_UNKNOWNCMD;
 }
-
-
 
 FETCHcode test(char *URL)
 {
@@ -185,14 +186,14 @@ FETCHcode test(char *URL)
   test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* setup repeated data string */
-  for(i = 0; i < sizeof(databuf); ++i)
+  for (i = 0; i < sizeof(databuf); ++i)
     databuf[i] = fill[i % sizeof(fill)];
 
   /* Post */
   test_setopt(fetch, FETCHOPT_POST, 1L);
 
   /* Setup read callback */
-  test_setopt(fetch, FETCHOPT_POSTFIELDSIZE, (long) sizeof(databuf));
+  test_setopt(fetch, FETCHOPT_POSTFIELDSIZE, (long)sizeof(databuf));
   test_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
   /* Write callback */
@@ -200,8 +201,7 @@ FETCHcode test(char *URL)
 
   /* Ioctl function */
   FETCH_IGNORE_DEPRECATION(
-    test_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctl_callback);
-  )
+      test_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctl_callback);)
 
   test_setopt(fetch, FETCHOPT_PROXY, libtest_arg2);
 

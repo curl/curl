@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,8 +29,8 @@
 #include "urldata.h"
 
 FETCHcode Curl_getworkingpath(struct Curl_easy *data,
-                             char *homedir,
-                             char **path);
+                              char *homedir,
+                              char **path);
 
 FETCHcode Curl_get_pathname(const char **cpp, char **path, const char *homedir);
 #endif /* HEADER_FETCH_PATH_H */

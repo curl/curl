@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,8 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct transfer_status {
+struct transfer_status
+{
   FETCH *easy;
   int halted;
   int counter; /* count write callback invokes */
@@ -46,9 +47,11 @@ static int please_continue(void *userp,
   (void)dlnow;
   (void)ultotal;
   (void)ulnow;
-  if(st->halted) {
+  if (st->halted)
+  {
     st->please++;
-    if(st->please == 2) {
+    if (st->please == 2)
+    {
       /* waited enough, unpause! */
       fetch_easy_pause(st->easy, FETCHPAUSE_CONT);
     }
@@ -71,13 +74,14 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   struct transfer_status *st = (struct transfer_status *)userp;
   size_t len = size * nmemb;
   st->counter++;
-  if(st->counter > 1) {
+  if (st->counter > 1)
+  {
     /* the first call puts us on pause, so subsequent calls are after
        unpause */
     fwrite(ptr, size, nmemb, stdout);
     return len;
   }
-  if(len)
+  if (len)
     printf("Got bytes but pausing!\n");
   st->halted = 1;
   return FETCH_WRITEFUNC_PAUSE;

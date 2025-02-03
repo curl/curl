@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -62,54 +62,54 @@ static FETCHcode gopher_connecting(struct Curl_easy *data, bool *done);
  */
 
 const struct Curl_handler Curl_handler_gopher = {
-  "gopher",                             /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  gopher_do,                            /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_GOPHER,                          /* defport */
-  FETCHPROTO_GOPHER,                     /* protocol */
-  FETCHPROTO_GOPHER,                     /* family */
-  PROTOPT_NONE                          /* flags */
+    "gopher",          /* scheme */
+    ZERO_NULL,         /* setup_connection */
+    gopher_do,         /* do_it */
+    ZERO_NULL,         /* done */
+    ZERO_NULL,         /* do_more */
+    ZERO_NULL,         /* connect_it */
+    ZERO_NULL,         /* connecting */
+    ZERO_NULL,         /* doing */
+    ZERO_NULL,         /* proto_getsock */
+    ZERO_NULL,         /* doing_getsock */
+    ZERO_NULL,         /* domore_getsock */
+    ZERO_NULL,         /* perform_getsock */
+    ZERO_NULL,         /* disconnect */
+    ZERO_NULL,         /* write_resp */
+    ZERO_NULL,         /* write_resp_hd */
+    ZERO_NULL,         /* connection_check */
+    ZERO_NULL,         /* attach connection */
+    ZERO_NULL,         /* follow */
+    PORT_GOPHER,       /* defport */
+    FETCHPROTO_GOPHER, /* protocol */
+    FETCHPROTO_GOPHER, /* family */
+    PROTOPT_NONE       /* flags */
 };
 
 #ifdef USE_SSL
 const struct Curl_handler Curl_handler_gophers = {
-  "gophers",                            /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  gopher_do,                            /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  gopher_connect,                       /* connect_it */
-  gopher_connecting,                    /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_GOPHER,                          /* defport */
-  FETCHPROTO_GOPHERS,                    /* protocol */
-  FETCHPROTO_GOPHER,                     /* family */
-  PROTOPT_SSL                           /* flags */
+    "gophers",          /* scheme */
+    ZERO_NULL,          /* setup_connection */
+    gopher_do,          /* do_it */
+    ZERO_NULL,          /* done */
+    ZERO_NULL,          /* do_more */
+    gopher_connect,     /* connect_it */
+    gopher_connecting,  /* connecting */
+    ZERO_NULL,          /* doing */
+    ZERO_NULL,          /* proto_getsock */
+    ZERO_NULL,          /* doing_getsock */
+    ZERO_NULL,          /* domore_getsock */
+    ZERO_NULL,          /* perform_getsock */
+    ZERO_NULL,          /* disconnect */
+    ZERO_NULL,          /* write_resp */
+    ZERO_NULL,          /* write_resp_hd */
+    ZERO_NULL,          /* connection_check */
+    ZERO_NULL,          /* attach connection */
+    ZERO_NULL,          /* follow */
+    PORT_GOPHER,        /* defport */
+    FETCHPROTO_GOPHERS, /* protocol */
+    FETCHPROTO_GOPHER,  /* family */
+    PROTOPT_SSL         /* flags */
 };
 
 static FETCHcode gopher_connect(struct Curl_easy *data, bool *done)
@@ -125,7 +125,7 @@ static FETCHcode gopher_connecting(struct Curl_easy *data, bool *done)
   FETCHcode result;
 
   result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
-  if(result)
+  if (result)
     connclose(conn, "Failed TLS connection");
   *done = TRUE;
   return result;
@@ -152,21 +152,23 @@ static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
   /* path is guaranteed non-NULL */
   DEBUGASSERT(path);
 
-  if(query)
+  if (query)
     gopherpath = aprintf("%s?%s", path, query);
   else
     gopherpath = strdup(path);
 
-  if(!gopherpath)
+  if (!gopherpath)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
-  if(strlen(gopherpath) <= 2) {
+  if (strlen(gopherpath) <= 2)
+  {
     sel = (char *)"";
     len = strlen(sel);
     free(gopherpath);
   }
-  else {
+  else
+  {
     char *newp;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
@@ -176,39 +178,42 @@ static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
     /* ... and finally unescape */
     result = Curl_urldecode(newp, 0, &sel, &len, REJECT_ZERO);
     free(gopherpath);
-    if(result)
+    if (result)
       return result;
     sel_org = sel;
   }
 
   k = fetchx_uztosz(len);
 
-  for(;;) {
+  for (;;)
+  {
     /* Break out of the loop if the selector is empty because OpenSSL and/or
        LibreSSL fail with errno 0 if this is the case. */
-    if(strlen(sel) < 1)
+    if (strlen(sel) < 1)
       break;
 
     result = Curl_xfer_send(data, sel, k, FALSE, &amount);
-    if(!result) { /* Which may not have written it all! */
+    if (!result)
+    { /* Which may not have written it all! */
       result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
-      if(result)
+      if (result)
         break;
 
       k -= amount;
       sel += amount;
-      if(k < 1)
+      if (k < 1)
         break; /* but it did write it all */
     }
     else
       break;
 
     timeout_ms = Curl_timeleft(data, NULL, FALSE);
-    if(timeout_ms < 0) {
+    if (timeout_ms < 0)
+    {
       result = FETCHE_OPERATION_TIMEDOUT;
       break;
     }
-    if(!timeout_ms)
+    if (!timeout_ms)
       timeout_ms = TIMEDIFF_T_MAX;
 
     /* Do not busyloop. The entire loop thing is a work-around as it causes a
@@ -218,11 +223,13 @@ static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
        until the entire request is sent.
     */
     what = SOCKET_WRITABLE(sockfd, timeout_ms);
-    if(what < 0) {
+    if (what < 0)
+    {
       result = FETCHE_SEND_ERROR;
       break;
     }
-    else if(!what) {
+    else if (!what)
+    {
       result = FETCHE_OPERATION_TIMEDOUT;
       break;
     }
@@ -230,14 +237,15 @@ static FETCHcode gopher_do(struct Curl_easy *data, bool *done)
 
   free(sel_org);
 
-  if(!result)
+  if (!result)
     result = Curl_xfer_send(data, "\r\n", 2, FALSE, &amount);
-  if(result) {
+  if (result)
+  {
     failf(data, "Failed sending Gopher request");
     return result;
   }
   result = Curl_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
-  if(result)
+  if (result)
     return result;
 
   Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);

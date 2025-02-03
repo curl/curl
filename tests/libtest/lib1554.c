@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,15 +25,15 @@
 #include "memdebug.h"
 
 static const char *ldata_names[] = {
-  "NONE",
-  "SHARE",
-  "COOKIE",
-  "DNS",
-  "SESSION",
-  "CONNECT",
-  "PSL",
-  "HSTS",
-  "NULL",
+    "NONE",
+    "SHARE",
+    "COOKIE",
+    "DNS",
+    "SESSION",
+    "CONNECT",
+    "PSL",
+    "HSTS",
+    "NULL",
 };
 
 static void test_lock(FETCH *handle, fetch_lock_data data,
@@ -64,7 +64,8 @@ FETCHcode test(char *URL)
   global_init(FETCH_GLOBAL_ALL);
 
   share = fetch_share_init();
-  if(!share) {
+  if (!share)
+  {
     fprintf(stderr, "fetch_share_init() failed\n");
     goto test_cleanup;
   }
@@ -76,9 +77,11 @@ FETCHcode test(char *URL)
   /* Loop the transfer and cleanup the handle properly every lap. This will
      still reuse connections since the pool is in the shared object! */
 
-  for(i = 0; i < 3; i++) {
+  for (i = 0; i < 3; i++)
+  {
     FETCH *fetch = fetch_easy_init();
-    if(fetch) {
+    if (fetch)
+    {
       fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
 
       /* use the share object */
@@ -91,7 +94,8 @@ FETCHcode test(char *URL)
       fetch_easy_cleanup(fetch);
 
       /* Check for errors */
-      if(res != FETCHE_OK) {
+      if (res != FETCHE_OK)
+      {
         fprintf(stderr, "fetch_easy_perform() failed: %s\n",
                 fetch_easy_strerror(res));
         goto test_cleanup;

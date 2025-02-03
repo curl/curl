@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,7 @@
  */
 #ifdef _WIN32
 #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS  /* for inet_addr() */
+#define _WINSOCK_DEPRECATED_NO_WARNINGS /* for inet_addr() */
 #endif
 #endif
 
@@ -39,11 +39,11 @@
 #ifdef _WIN32
 #define close closesocket
 #else
-#include <sys/types.h>        /*  socket types              */
-#include <sys/socket.h>       /*  socket definitions        */
+#include <sys/types.h>  /*  socket types              */
+#include <sys/socket.h> /*  socket definitions        */
 #include <netinet/in.h>
-#include <arpa/inet.h>        /*  inet (3) functions        */
-#include <unistd.h>           /*  misc. Unix functions      */
+#include <arpa/inet.h> /*  inet (3) functions        */
+#include <unistd.h>    /*  misc. Unix functions      */
 #endif
 
 #include <errno.h>
@@ -70,8 +70,8 @@ static int closecb(void *clientp, fetch_socket_t item)
 }
 
 static fetch_socket_t opensocket(void *clientp,
-                                fetchsocktype purpose,
-                                struct fetch_sockaddr *address)
+                                 fetchsocktype purpose,
+                                 struct fetch_sockaddr *address)
 {
   fetch_socket_t sockfd;
   (void)purpose;
@@ -96,20 +96,22 @@ int main(void)
 {
   FETCH *fetch;
   FETCHcode res;
-  struct sockaddr_in servaddr;  /*  socket address structure  */
+  struct sockaddr_in servaddr; /*  socket address structure  */
   fetch_socket_t sockfd;
 
 #ifdef _WIN32
   WSADATA wsaData;
   int initwsa = WSAStartup(MAKEWORD(2, 2), &wsaData);
-  if(initwsa) {
+  if (initwsa)
+  {
     printf("WSAStartup failed: %d\n", initwsa);
     return 1;
   }
 #endif
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /*
      * Note that libfetch internally thinks that you connect to the host and
      * port that you specify in the URL option.
@@ -118,23 +120,26 @@ int main(void)
 
     /* Create the socket "manually" */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if(sockfd == FETCH_SOCKET_BAD) {
+    if (sockfd == FETCH_SOCKET_BAD)
+    {
       printf("Error creating listening socket.\n");
       return 3;
     }
 
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port   = htons(PORTNUM);
+    servaddr.sin_port = htons(PORTNUM);
 
     servaddr.sin_addr.s_addr = inet_addr(IPADDR);
-    if(INADDR_NONE == servaddr.sin_addr.s_addr) {
+    if (INADDR_NONE == servaddr.sin_addr.s_addr)
+    {
       close(sockfd);
       return 2;
     }
 
-    if(connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) ==
-       -1) {
+    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) ==
+        -1)
+    {
       close(sockfd);
       printf("client error: connect: %s\n", strerror(errno));
       return 1;
@@ -165,7 +170,8 @@ int main(void)
 
     close(sockfd);
 
-    if(res) {
+    if (res)
+    {
       printf("libfetch error: %d\n", res);
       return 4;
     }

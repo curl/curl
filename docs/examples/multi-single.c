@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,19 +54,21 @@ int main(void)
   /* add the individual transfers */
   fetch_multi_add_handle(multi_handle, http_handle);
 
-  do {
+  do
+  {
     FETCHMcode mc = fetch_multi_perform(multi_handle, &still_running);
 
-    if(!mc)
+    if (!mc)
       /* wait for activity, timeout or "nothing" */
       mc = fetch_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-    if(mc) {
+    if (mc)
+    {
       fprintf(stderr, "fetch_multi_poll() failed, code %d.\n", (int)mc);
       break;
     }
 
-  } while(still_running);
+  } while (still_running);
 
   fetch_multi_remove_handle(multi_handle, http_handle);
 

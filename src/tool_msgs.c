@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,37 +48,42 @@ static void voutf(struct GlobalConfig *config,
 {
   size_t width = (get_terminal_columns() - strlen(prefix));
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(!config->silent) {
+  if (!config->silent)
+  {
     size_t len;
     char *ptr;
     char *print_buffer;
 
     print_buffer = vaprintf(fmt, ap);
-    if(!print_buffer)
+    if (!print_buffer)
       return;
     len = strlen(print_buffer);
 
     ptr = print_buffer;
-    while(len > 0) {
+    while (len > 0)
+    {
       fputs(prefix, tool_stderr);
 
-      if(len > width) {
-        size_t cut = width-1;
+      if (len > width)
+      {
+        size_t cut = width - 1;
 
-        while(!ISBLANK(ptr[cut]) && cut) {
+        while (!ISBLANK(ptr[cut]) && cut)
+        {
           cut--;
         }
-        if(0 == cut)
+        if (0 == cut)
           /* not a single cutting position was found, just cut it at the
              max text width then! */
-          cut = width-1;
+          cut = width - 1;
 
         (void)fwrite(ptr, cut + 1, 1, tool_stderr);
         fputs("\n", tool_stderr);
         ptr += cut + 1; /* skip the space too */
         len -= cut + 1;
       }
-      else {
+      else
+      {
         fputs(ptr, tool_stderr);
         fputs("\n", tool_stderr);
         len = 0;
@@ -96,7 +101,7 @@ void notef(struct GlobalConfig *config, const char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  if(config->tracetype)
+  if (config->tracetype)
     voutf(config, NOTE_PREFIX, fmt, ap);
   va_end(ap);
 }
@@ -119,7 +124,8 @@ void warnf(struct GlobalConfig *config, const char *fmt, ...)
  */
 void helpf(FILE *errors, const char *fmt, ...)
 {
-  if(fmt) {
+  if (fmt)
+  {
     va_list ap;
     va_start(ap, fmt);
     DEBUGASSERT(!strchr(fmt, '\n'));
@@ -130,9 +136,9 @@ void helpf(FILE *errors, const char *fmt, ...)
   }
   fprintf(errors, "fetch: try 'fetch --help' "
 #ifdef USE_MANUAL
-          "or 'fetch --manual' "
+                  "or 'fetch --manual' "
 #endif
-          "for more information\n");
+                  "for more information\n");
 }
 
 /*
@@ -141,7 +147,8 @@ void helpf(FILE *errors, const char *fmt, ...)
  */
 void errorf(struct GlobalConfig *config, const char *fmt, ...)
 {
-  if(!config->silent || config->showerror) {
+  if (!config->silent || config->showerror)
+  {
     va_list ap;
     va_start(ap, fmt);
     voutf(config, ERROR_PREFIX, fmt, ap);

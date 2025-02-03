@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,9 +27,9 @@
 
 #include "fetch_setup.h"
 
-#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
-  defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
-  defined(USE_MBEDTLS)
+#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) ||     \
+    defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
+    defined(USE_MBEDTLS)
 
 #include "cfilters.h"
 #include "urldata.h"
@@ -39,17 +39,19 @@
  */
 
 /* ASN.1 parsed element. */
-struct Curl_asn1Element {
-  const char *header;         /* Pointer to header byte. */
-  const char *beg;            /* Pointer to element data. */
-  const char *end;            /* Pointer to 1st byte after element. */
-  unsigned char class;        /* ASN.1 element class. */
-  unsigned char tag;          /* ASN.1 element tag. */
-  bool          constructed;  /* Element is constructed. */
+struct Curl_asn1Element
+{
+  const char *header;  /* Pointer to header byte. */
+  const char *beg;     /* Pointer to element data. */
+  const char *end;     /* Pointer to 1st byte after element. */
+  unsigned char class; /* ASN.1 element class. */
+  unsigned char tag;   /* ASN.1 element tag. */
+  bool constructed;    /* Element is constructed. */
 };
 
 /* X509 certificate: RFC 5280. */
-struct Curl_X509certificate {
+struct Curl_X509certificate
+{
   struct Curl_asn1Element certificate;
   struct Curl_asn1Element version;
   struct Curl_asn1Element serialNumber;
@@ -74,17 +76,17 @@ struct Curl_X509certificate {
 int Curl_parseX509(struct Curl_X509certificate *cert,
                    const char *beg, const char *end);
 FETCHcode Curl_extract_certinfo(struct Curl_easy *data, int certnum,
-                               const char *beg, const char *end);
+                                const char *beg, const char *end);
 FETCHcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
-                         const char *beg, const char *end);
+                          const char *beg, const char *end);
 
 #ifdef UNITTESTS
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
-  defined(USE_MBEDTLS)
+    defined(USE_MBEDTLS)
 
 /* used by unit1656.c */
 FETCHcode Curl_x509_GTime2str(struct dynbuf *store,
-                             const char *beg, const char *end);
+                              const char *beg, const char *end);
 #endif
 #endif
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,16 +25,15 @@
 
 #include "memdebug.h"
 
-static const char * const testpost[]={
-  "one",
-  "two",
-  "three",
-  "and a final longer crap: four",
-  NULL
-};
+static const char *const testpost[] = {
+    "one",
+    "two",
+    "three",
+    "and a final longer crap: four",
+    NULL};
 
-
-struct WriteThis {
+struct WriteThis
+{
   int counter;
 };
 
@@ -55,15 +54,17 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
 {
   (void)clientp; /* UNUSED */
   (void)dltotal; /* UNUSED */
-  (void)dlnow; /* UNUSED */
+  (void)dlnow;   /* UNUSED */
 
-  if(started && ulnow <= 0.0 && last_ul) {
+  if (started && ulnow <= 0.0 && last_ul)
+  {
     progress_final_report();
   }
 
   last_ul = (size_t)ulnow;
   last_ul_total = (size_t)ultotal;
-  if(!started) {
+  if (!started)
+  {
     FILE *moo = fopen(libtest_arg2, "ab");
     fprintf(moo, "Progress: start UL %zu/%zu\n", last_ul, last_ul_total);
     started = TRUE;
@@ -78,18 +79,19 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   struct WriteThis *pooh = (struct WriteThis *)userp;
   const char *data;
 
-  if(size*nmemb < 1)
+  if (size * nmemb < 1)
     return 0;
 
   data = testpost[pooh->counter];
 
-  if(data) {
+  if (data)
+  {
     size_t len = strlen(data);
     memcpy(ptr, data, len);
     pooh->counter++; /* advance pointer */
     return len;
   }
-  return 0;                         /* no more data left to deliver */
+  return 0; /* no more data left to deliver */
 }
 
 FETCHcode test(char *URL)
@@ -100,20 +102,23 @@ FETCHcode test(char *URL)
   struct WriteThis pooh;
   pooh.counter = 0;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   slist = fetch_slist_append(slist, "Transfer-Encoding: chunked");
-  if(!slist) {
+  if (!slist)
+  {
     fprintf(stderr, "fetch_slist_append() failed\n");
     fetch_easy_cleanup(fetch);
     fetch_global_cleanup();
@@ -147,8 +152,7 @@ FETCHcode test(char *URL)
   /* we want to use our own progress function */
   test_setopt(fetch, FETCHOPT_NOPROGRESS, 0L);
   FETCH_IGNORE_DEPRECATION(
-    test_setopt(fetch, FETCHOPT_PROGRESSFUNCTION, progress_callback);
-  )
+      test_setopt(fetch, FETCHOPT_PROGRESSFUNCTION, progress_callback);)
 
   /* Perform the request, res will get the return code */
   res = fetch_easy_perform(fetch);
@@ -158,7 +162,7 @@ FETCHcode test(char *URL)
 test_cleanup:
 
   /* clean up the headers list */
-  if(slist)
+  if (slist)
     fetch_slist_free_all(slist);
 
   /* always cleanup */

@@ -1,5 +1,6 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
 <!-- SPDX-License-Identifier: fetch -->
+
 # VERSION
 
 This man page describes fetch `%VERSION`. If you use a later version, chances
@@ -9,7 +10,7 @@ version that introduced changes.
 
 You can always learn which the latest fetch version is by running
 
-    fetch https://fetch.se/info
+    fetch https://curl.se/info
 
 The online version of this man page is always showing the latest incarnation:
-https://fetch.se/docs/manpage.html
+https://curl.se/docs/manpage.html

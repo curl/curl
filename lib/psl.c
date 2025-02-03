@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,9 +38,10 @@
 
 void Curl_psl_destroy(struct PslCache *pslcache)
 {
-  if(pslcache->psl) {
-    if(pslcache->dynamic)
-      psl_free((psl_ctx_t *) pslcache->psl);
+  if (pslcache->psl)
+  {
+    if (pslcache->dynamic)
+      psl_free((psl_ctx_t *)pslcache->psl);
     pslcache->psl = NULL;
     pslcache->dynamic = FALSE;
   }
@@ -59,12 +60,13 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
   const psl_ctx_t *psl;
   time_t now;
 
-  if(!pslcache)
+  if (!pslcache)
     return NULL;
 
   Curl_share_lock(easy, FETCH_LOCK_DATA_PSL, FETCH_LOCK_ACCESS_SHARED);
   now = now_seconds();
-  if(!pslcache->psl || pslcache->expires <= now) {
+  if (!pslcache->psl || pslcache->expires <= now)
+  {
     /* Let a chance to other threads to do the job: avoids deadlock. */
     Curl_share_unlock(easy, FETCH_LOCK_DATA_PSL);
 
@@ -73,7 +75,8 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
 
     /* Recheck in case another thread did the job. */
     now = now_seconds();
-    if(!pslcache->psl || pslcache->expires <= now) {
+    if (!pslcache->psl || pslcache->expires <= now)
+    {
       bool dynamic = FALSE;
       time_t expires = TIME_T_MAX;
 
@@ -84,23 +87,24 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
       expires = now < TIME_T_MAX - PSL_TTL ? now + PSL_TTL : TIME_T_MAX;
 
       /* Only get the built-in PSL if we do not already have the "latest". */
-      if(!psl && !pslcache->dynamic)
+      if (!psl && !pslcache->dynamic)
 #endif
 
         psl = psl_builtin();
 
-      if(psl) {
+      if (psl)
+      {
         Curl_psl_destroy(pslcache);
         pslcache->psl = psl;
         pslcache->dynamic = dynamic;
         pslcache->expires = expires;
       }
     }
-    Curl_share_unlock(easy, FETCH_LOCK_DATA_PSL);  /* Release exclusive lock. */
+    Curl_share_unlock(easy, FETCH_LOCK_DATA_PSL); /* Release exclusive lock. */
     Curl_share_lock(easy, FETCH_LOCK_DATA_PSL, FETCH_LOCK_ACCESS_SHARED);
   }
   psl = pslcache->psl;
-  if(!psl)
+  if (!psl)
     Curl_share_unlock(easy, FETCH_LOCK_DATA_PSL);
   return psl;
 }

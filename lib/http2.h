@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,7 +39,7 @@
 void Curl_http2_ver(char *p, size_t len);
 
 FETCHcode Curl_http2_request_upgrade(struct dynbuf *req,
-                                    struct Curl_easy *data);
+                                     struct Curl_easy *data);
 
 /* returns true if the HTTP/2 stream error was HTTP_1_1_REQUIRED */
 bool Curl_h2_http_1_1_error(struct Curl_easy *data);
@@ -51,8 +51,8 @@ FETCHcode Curl_http2_switch(struct Curl_easy *data);
 FETCHcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data);
 
 FETCHcode Curl_http2_upgrade(struct Curl_easy *data,
-                            struct connectdata *conn, int sockindex,
-                            const char *ptr, size_t nread);
+                             struct connectdata *conn, int sockindex,
+                             const char *ptr, size_t nread);
 
 void *Curl_nghttp2_malloc(size_t size, void *user_data);
 void Curl_nghttp2_free(void *ptr, void *user_data);
@@ -65,9 +65,9 @@ extern struct Curl_cftype Curl_cft_nghttp2;
 
 #define Curl_http2_may_switch(a) FALSE
 
-#define Curl_http2_request_upgrade(x,y) FETCHE_UNSUPPORTED_PROTOCOL
-#define Curl_http2_switch(a)            FETCHE_UNSUPPORTED_PROTOCOL
-#define Curl_http2_upgrade(a,b,c,d,e)   FETCHE_UNSUPPORTED_PROTOCOL
+#define Curl_http2_request_upgrade(x, y) FETCHE_UNSUPPORTED_PROTOCOL
+#define Curl_http2_switch(a) FETCHE_UNSUPPORTED_PROTOCOL
+#define Curl_http2_upgrade(a, b, c, d, e) FETCHE_UNSUPPORTED_PROTOCOL
 #define Curl_h2_http_1_1_error(x) 0
 #endif
 

@@ -45,7 +45,7 @@ Note that to be able to specify a URL in the config file, you need to specify
 it using the --url option, and not by simply writing the URL on its own
 line. So, it could look similar to this:
 
-    url = "https://fetch.se/docs/"
+    url = "https://curl.se/docs/"
 
     # --- Example file ---
     # this is a comment
@@ -63,22 +63,22 @@ When fetch is invoked, it (unless --disable is used) checks for a default
 config file and uses it if found, even when --config is used. The default
 config file is checked for in the following places in this order:
 
-1) **"$FETCH_HOME/.fetchrc"**
+1. **"$FETCH_HOME/.fetchrc"**
 
-2) **"$XDG_CONFIG_HOME/fetchrc"** (Added in 7.73.0)
+2. **"$XDG_CONFIG_HOME/fetchrc"** (Added in 7.73.0)
 
-3) **"$HOME/.fetchrc"**
+3. **"$HOME/.fetchrc"**
 
-4) Windows: **"%USERPROFILE%\.fetchrc"**
+4. Windows: **"%USERPROFILE%\.fetchrc"**
 
-5) Windows: **"%APPDATA%\.fetchrc"**
+5. Windows: **"%APPDATA%\.fetchrc"**
 
-6) Windows: **"%USERPROFILE%\Application Data\.fetchrc"**
+6. Windows: **"%USERPROFILE%\Application Data\.fetchrc"**
 
-7) Non-Windows: use getpwuid to find the home directory
+7. Non-Windows: use getpwuid to find the home directory
 
-8) On Windows, if it finds no *.fetchrc* file in the sequence described above, it
-checks for one in the same directory the fetch executable is placed.
+8. On Windows, if it finds no _.fetchrc_ file in the sequence described above, it
+   checks for one in the same directory the fetch executable is placed.
 
-On Windows two filenames are checked per location: *.fetchrc* and *_fetchrc*,
-preferring the former. Older versions on Windows checked for *_fetchrc* only.
+On Windows two filenames are checked per location: _.fetchrc_ and _\_fetchrc_,
+preferring the former. Older versions on Windows checked for _\_fetchrc_ only.

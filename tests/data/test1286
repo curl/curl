@@ -69,7 +69,7 @@ crypto
 HTTP GET --digest increasing nonce-count
 </name>
 # This test is to ensure the nonce-count (nc) increases
-# https://github.com/fetch/fetch/pull/1251
+# https://github.com/curl/curl/pull/1251
 <command>
 -u auser:apasswd --location --digest http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

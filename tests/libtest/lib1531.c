@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,8 +38,8 @@ FETCHcode test(char *URL)
   FETCH *easy;
   FETCHM *multi_handle;
   int still_running; /* keep number of running handles */
-  FETCHMsg *msg; /* for picking up messages with the transfer status */
-  int msgs_left; /* how many messages are left */
+  FETCHMsg *msg;     /* for picking up messages with the transfer status */
+  int msgs_left;     /* how many messages are left */
   FETCHcode res = FETCHE_OK;
 
   start_test_timing();
@@ -65,9 +65,10 @@ FETCHcode test(char *URL)
 
   abort_on_test_timeout();
 
-  do {
+  do
+  {
     struct timeval timeout;
-    int rc; /* select() return code */
+    int rc;        /* select() return code */
     FETCHMcode mc; /* fetch_multi_fdset() return code */
 
     fd_set fdread;
@@ -86,9 +87,11 @@ FETCHcode test(char *URL)
     timeout.tv_usec = 0;
 
     fetch_multi_timeout(multi_handle, &fetch_timeo);
-    if(fetch_timeo >= 0) {
+    if (fetch_timeo >= 0)
+    {
       fetchx_mstotv(&timeout, fetch_timeo);
-      if(timeout.tv_sec > 1) {
+      if (timeout.tv_sec > 1)
+      {
         timeout.tv_sec = 1;
         timeout.tv_usec = 0;
       }
@@ -97,7 +100,8 @@ FETCHcode test(char *URL)
     /* get file descriptors from the transfers */
     mc = fetch_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != FETCHM_OK) {
+    if (mc != FETCHM_OK)
+    {
       fprintf(stderr, "fetch_multi_fdset() failed, code %d.\n", mc);
       break;
     }
@@ -108,7 +112,8 @@ FETCHcode test(char *URL)
        to sleep 100ms, which is the minimum suggested value in the
        fetch_multi_fdset() doc. */
 
-    if(maxfd == -1) {
+    if (maxfd == -1)
+    {
 #if defined(_WIN32)
       Sleep(100);
       rc = 0;
@@ -119,35 +124,39 @@ FETCHcode test(char *URL)
       rc = select(0, NULL, NULL, NULL, &wait);
 #endif
     }
-    else {
+    else
+    {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
       rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
-    switch(rc) {
+    switch (rc)
+    {
     case -1:
       /* select error */
       break;
-    case 0: /* timeout */
+    case 0:  /* timeout */
     default: /* action */
       fetch_multi_perform(multi_handle, &still_running);
       break;
     }
 
     abort_on_test_timeout();
-  } while(still_running);
+  } while (still_running);
 
   /* See how the transfers went */
-  do {
+  do
+  {
     msg = fetch_multi_info_read(multi_handle, &msgs_left);
-    if(msg && msg->msg == FETCHMSG_DONE) {
+    if (msg && msg->msg == FETCHMSG_DONE)
+    {
       printf("HTTP transfer completed with status %d\n", msg->data.result);
       break;
     }
 
     abort_on_test_timeout();
-  } while(msg);
+  } while (msg);
 
 test_cleanup:
   fetch_multi_cleanup(multi_handle);

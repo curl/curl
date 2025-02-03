@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,25 +34,27 @@ struct dynbuf;
  * A single header entry.
  * `name` and `value` are non-NULL and always NUL terminated.
  */
-struct dynhds_entry {
+struct dynhds_entry
+{
   char *name;
   char *value;
   size_t namelen;
   size_t valuelen;
 };
 
-struct dynhds {
+struct dynhds
+{
   struct dynhds_entry **hds;
-  size_t hds_len;   /* number of entries in hds */
-  size_t hds_allc;  /* size of hds allocation */
+  size_t hds_len;       /* number of entries in hds */
+  size_t hds_allc;      /* size of hds allocation */
   size_t max_entries;   /* size limit number of entries */
-  size_t strs_len; /* length of all strings */
+  size_t strs_len;      /* length of all strings */
   size_t max_strs_size; /* max length of all strings */
   int opts;
 };
 
-#define DYNHDS_OPT_NONE          (0)
-#define DYNHDS_OPT_LOWERCASE     (1 << 0)
+#define DYNHDS_OPT_NONE (0)
+#define DYNHDS_OPT_LOWERCASE (1 << 0)
 
 /**
  * Init for use on first time or after a reset.
@@ -126,33 +128,32 @@ size_t Curl_dynhds_remove(struct dynhds *dynhds,
                           const char *name, size_t namelen);
 size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name);
 
-
 /**
  * Set the give header name and value, replacing any entries with
  * the same name. The header is added at the end of all (remaining)
  * entries.
  */
 FETCHcode Curl_dynhds_set(struct dynhds *dynhds,
-                         const char *name, size_t namelen,
-                         const char *value, size_t valuelen);
+                          const char *name, size_t namelen,
+                          const char *value, size_t valuelen);
 #endif
 
 FETCHcode Curl_dynhds_cset(struct dynhds *dynhds,
-                          const char *name, const char *value);
+                           const char *name, const char *value);
 
 /**
  * Add a header, name + value, to `dynhds` at the end. Does *not*
  * check for duplicate names.
  */
 FETCHcode Curl_dynhds_add(struct dynhds *dynhds,
-                         const char *name, size_t namelen,
-                         const char *value, size_t valuelen);
+                          const char *name, size_t namelen,
+                          const char *value, size_t valuelen);
 
 /**
  * Add a header, c-string name + value, to `dynhds` at the end.
  */
 FETCHcode Curl_dynhds_cadd(struct dynhds *dynhds,
-                          const char *name, const char *value);
+                           const char *name, const char *value);
 
 /**
  * Add a single header from an HTTP/1.1 formatted line at the end. Line
@@ -167,7 +168,7 @@ FETCHcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line);
  * that will be ignored.
  */
 FETCHcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
-                                 const char *line, size_t line_len);
+                                  const char *line, size_t line_len);
 
 /**
  * Add the headers to the given `dynbuf` in HTTP/1.1 format with

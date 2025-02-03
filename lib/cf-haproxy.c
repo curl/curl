@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,14 +38,15 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-
-typedef enum {
-    HAPROXY_INIT,     /* init/default/no tunnel state */
-    HAPROXY_SEND,     /* data_out being sent */
-    HAPROXY_DONE      /* all work done */
+typedef enum
+{
+  HAPROXY_INIT, /* init/default/no tunnel state */
+  HAPROXY_SEND, /* data_out being sent */
+  HAPROXY_DONE  /* all work done */
 } haproxy_state;
 
-struct cf_haproxy_ctx {
+struct cf_haproxy_ctx
+{
   int state;
   struct dynbuf data_out;
 };
@@ -59,14 +60,15 @@ static void cf_haproxy_ctx_reset(struct cf_haproxy_ctx *ctx)
 
 static void cf_haproxy_ctx_free(struct cf_haproxy_ctx *ctx)
 {
-  if(ctx) {
+  if (ctx)
+  {
     Curl_dyn_free(&ctx->data_out);
     free(ctx);
   }
 }
 
-static FETCHcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
-                                        struct Curl_easy *data)
+static FETCHcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data)
 {
   struct cf_haproxy_ctx *ctx = cf->ctx;
   FETCHcode result;
@@ -77,25 +79,26 @@ static FETCHcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
   DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->state == HAPROXY_INIT);
 #ifdef USE_UNIX_SOCKETS
-  if(cf->conn->unix_domain_socket)
+  if (cf->conn->unix_domain_socket)
     /* the buffer is large enough to hold this! */
     result = Curl_dyn_addn(&ctx->data_out, STRCONST("PROXY UNKNOWN\r\n"));
-  else {
-#endif /* USE_UNIX_SOCKETS */
-  result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
-  if(result)
-    return result;
-
-  /* Emit the correct prefix for IPv6 */
-  if(data->set.str[STRING_HAPROXY_CLIENT_IP])
-    client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
   else
-    client_ip = ipquad.local_ip;
+  {
+#endif /* USE_UNIX_SOCKETS */
+    result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
+    if (result)
+      return result;
 
-  result = Curl_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
-                         is_ipv6 ? "TCP6" : "TCP4",
-                         client_ip, ipquad.remote_ip,
-                         ipquad.local_port, ipquad.remote_port);
+    /* Emit the correct prefix for IPv6 */
+    if (data->set.str[STRING_HAPROXY_CLIENT_IP])
+      client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
+    else
+      client_ip = ipquad.local_ip;
+
+    result = Curl_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
+                           is_ipv6 ? "TCP6" : "TCP4",
+                           client_ip, ipquad.remote_ip,
+                           ipquad.local_port, ipquad.remote_port);
 
 #ifdef USE_UNIX_SOCKETS
   }
@@ -104,45 +107,50 @@ static FETCHcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
 }
 
 static FETCHcode cf_haproxy_connect(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   bool blocking, bool *done)
+                                    struct Curl_easy *data,
+                                    bool blocking, bool *done)
 {
   struct cf_haproxy_ctx *ctx = cf->ctx;
   FETCHcode result;
   size_t len;
 
   DEBUGASSERT(ctx);
-  if(cf->connected) {
+  if (cf->connected)
+  {
     *done = TRUE;
     return FETCHE_OK;
   }
 
   result = cf->next->cft->do_connect(cf->next, data, blocking, done);
-  if(result || !*done)
+  if (result || !*done)
     return result;
 
-  switch(ctx->state) {
+  switch (ctx->state)
+  {
   case HAPROXY_INIT:
     result = cf_haproxy_date_out_set(cf, data);
-    if(result)
+    if (result)
       goto out;
     ctx->state = HAPROXY_SEND;
     FALLTHROUGH();
   case HAPROXY_SEND:
     len = Curl_dyn_len(&ctx->data_out);
-    if(len > 0) {
+    if (len > 0)
+    {
       ssize_t nwritten;
       nwritten = Curl_conn_cf_send(cf->next, data,
                                    Curl_dyn_ptr(&ctx->data_out), len, FALSE,
                                    &result);
-      if(nwritten < 0) {
-        if(result != FETCHE_AGAIN)
+      if (nwritten < 0)
+      {
+        if (result != FETCHE_AGAIN)
           goto out;
         result = FETCHE_OK;
         nwritten = 0;
       }
       Curl_dyn_tail(&ctx->data_out, len - (size_t)nwritten);
-      if(Curl_dyn_len(&ctx->data_out) > 0) {
+      if (Curl_dyn_len(&ctx->data_out) > 0)
+      {
         result = FETCHE_OK;
         goto out;
       }
@@ -174,7 +182,7 @@ static void cf_haproxy_close(struct Curl_cfilter *cf,
   FETCH_TRC_CF(data, cf, "close");
   cf->connected = FALSE;
   cf_haproxy_ctx_reset(cf->ctx);
-  if(cf->next)
+  if (cf->next)
     cf->next->cft->do_close(cf->next, data);
 }
 
@@ -182,7 +190,8 @@ static void cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct easy_pollset *ps)
 {
-  if(cf->next->connected && !cf->connected) {
+  if (cf->next->connected && !cf->connected)
+  {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are sending. */
     Curl_pollset_set_out_only(data, ps, Curl_conn_cf_get_socket(cf, data));
@@ -190,26 +199,26 @@ static void cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
 }
 
 struct Curl_cftype Curl_cft_haproxy = {
-  "HAPROXY",
-  CF_TYPE_PROXY,
-  0,
-  cf_haproxy_destroy,
-  cf_haproxy_connect,
-  cf_haproxy_close,
-  Curl_cf_def_shutdown,
-  Curl_cf_def_get_host,
-  cf_haproxy_adjust_pollset,
-  Curl_cf_def_data_pending,
-  Curl_cf_def_send,
-  Curl_cf_def_recv,
-  Curl_cf_def_cntrl,
-  Curl_cf_def_conn_is_alive,
-  Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+    "HAPROXY",
+    CF_TYPE_PROXY,
+    0,
+    cf_haproxy_destroy,
+    cf_haproxy_connect,
+    cf_haproxy_close,
+    Curl_cf_def_shutdown,
+    Curl_cf_def_get_host,
+    cf_haproxy_adjust_pollset,
+    Curl_cf_def_data_pending,
+    Curl_cf_def_send,
+    Curl_cf_def_recv,
+    Curl_cf_def_cntrl,
+    Curl_cf_def_conn_is_alive,
+    Curl_cf_def_conn_keep_alive,
+    Curl_cf_def_query,
 };
 
 static FETCHcode cf_haproxy_create(struct Curl_cfilter **pcf,
-                                  struct Curl_easy *data)
+                                   struct Curl_easy *data)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_haproxy_ctx *ctx;
@@ -217,7 +226,8 @@ static FETCHcode cf_haproxy_create(struct Curl_cfilter **pcf,
 
   (void)data;
   ctx = calloc(1, sizeof(*ctx));
-  if(!ctx) {
+  if (!ctx)
+  {
     result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
@@ -225,7 +235,7 @@ static FETCHcode cf_haproxy_create(struct Curl_cfilter **pcf,
   Curl_dyn_init(&ctx->data_out, DYN_HAXPROXY);
 
   result = Curl_cf_create(&cf, &Curl_cft_haproxy, ctx);
-  if(result)
+  if (result)
     goto out;
   ctx = NULL;
 
@@ -236,13 +246,13 @@ out:
 }
 
 FETCHcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
-                                      struct Curl_easy *data)
+                                       struct Curl_easy *data)
 {
   struct Curl_cfilter *cf;
   FETCHcode result;
 
   result = cf_haproxy_create(&cf, data);
-  if(result)
+  if (result)
     goto out;
   Curl_conn_cf_insert_after(cf_at, cf);
 

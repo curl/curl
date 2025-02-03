@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,11 +40,11 @@ FETCHcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
 bool Curl_on_disconnect(struct Curl_easy *data,
                         struct connectdata *, bool aborted);
 FETCHcode Curl_setup_conn(struct Curl_easy *data,
-                         bool *protocol_done);
+                          bool *protocol_done);
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);
 FETCHcode Curl_parse_login_details(const char *login, const size_t len,
-                                  char **userptr, char **passwdptr,
-                                  char **optionsptr);
+                                   char **userptr, char **passwdptr,
+                                   char **optionsptr);
 
 /* Get protocol handler for a URI scheme
  * @param scheme URI scheme, case-insensitive
@@ -54,12 +54,12 @@ const struct Curl_handler *Curl_get_scheme_handler(const char *scheme);
 const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
                                                     size_t len);
 
-#define FETCH_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
-#define FETCH_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
+#define FETCH_DEFAULT_PROXY_PORT 1080      /* default proxy port unless specified */
+#define FETCH_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless \
                                              specified */
 
 #ifdef FETCH_DISABLE_VERBOSE_STRINGS
-#define Curl_verboseconnect(x,y,z)  Curl_nop_stmt
+#define Curl_verboseconnect(x, y, z) Curl_nop_stmt
 #else
 void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn,
                          int sockindex);
@@ -77,8 +77,8 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
  * Perform upkeep operations on the connection.
  */
 FETCHcode Curl_conn_upkeep(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          struct fetchtime *now);
+                           struct connectdata *conn,
+                           struct fetchtime *now);
 
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
 void Curl_data_priority_clear_state(struct Curl_easy *data);
@@ -88,8 +88,8 @@ void Curl_data_priority_clear_state(struct Curl_easy *data);
 
 #ifdef USE_NGHTTP2
 FETCHcode Curl_data_priority_add_child(struct Curl_easy *parent,
-                                      struct Curl_easy *child,
-                                      bool exclusive);
+                                       struct Curl_easy *child,
+                                       bool exclusive);
 #else
 #define Curl_data_priority_add_child(x, y, z) FETCHE_NOT_BUILT_IN
 #endif

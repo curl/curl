@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,9 +33,9 @@ int Curl_inet_pton(int, const char *, void *);
 #include <arpa/inet.h>
 #endif
 #if defined(__AMIGA__)
-#define Curl_inet_pton(x,y,z) inet_pton(x,(unsigned char *)y,z)
+#define Curl_inet_pton(x, y, z) inet_pton(x, (unsigned char *)y, z)
 #else
-#define Curl_inet_pton(x,y,z) inet_pton(x,y,z)
+#define Curl_inet_pton(x, y, z) inet_pton(x, y, z)
 #endif
 #endif
 

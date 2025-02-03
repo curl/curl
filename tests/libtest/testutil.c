@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,7 +55,8 @@ struct timeval tutil_tvnow(void)
   */
   struct timeval now;
   struct timespec tsnow;
-  if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
+  if (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))
+  {
     now.tv_sec = tsnow.tv_sec;
     now.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
@@ -68,7 +69,8 @@ struct timeval tutil_tvnow(void)
   else
     (void)gettimeofday(&now, NULL);
 #else
-  else {
+  else
+  {
     now.tv_sec = time(NULL);
     now.tv_usec = 0;
   }
@@ -113,8 +115,8 @@ struct timeval tutil_tvnow(void)
  */
 long tutil_tvdiff(struct timeval newer, struct timeval older)
 {
-  return (long)(newer.tv_sec-older.tv_sec)*1000+
-    (long)(newer.tv_usec-older.tv_usec)/1000;
+  return (long)(newer.tv_sec - older.tv_sec) * 1000 +
+         (long)(newer.tv_usec - older.tv_usec) / 1000;
 }
 
 /*
@@ -124,10 +126,10 @@ long tutil_tvdiff(struct timeval newer, struct timeval older)
  */
 double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
 {
-  if(newer.tv_sec != older.tv_sec)
-    return (double)(newer.tv_sec-older.tv_sec)+
-      (double)(newer.tv_usec-older.tv_usec)/1000000.0;
-  return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
+  if (newer.tv_sec != older.tv_sec)
+    return (double)(newer.tv_sec - older.tv_sec) +
+           (double)(newer.tv_usec - older.tv_usec) / 1000000.0;
+  return (double)(newer.tv_usec - older.tv_usec) / 1000000.0;
 }
 
 #ifdef _WIN32
@@ -142,21 +144,21 @@ HMODULE win32_load_system_library(const TCHAR *filename)
   size_t written;
   TCHAR *path;
 
-  if(!filenamelen || filenamelen > 32768 ||
-     !systemdirlen || systemdirlen > 32768)
+  if (!filenamelen || filenamelen > 32768 ||
+      !systemdirlen || systemdirlen > 32768)
     return NULL;
 
   /* systemdirlen includes null character */
   path = malloc(sizeof(TCHAR) * (systemdirlen + 1 + filenamelen));
-  if(!path)
+  if (!path)
     return NULL;
 
   /* if written >= systemdirlen then nothing was written */
   written = GetSystemDirectory(path, (unsigned int)systemdirlen);
-  if(!written || written >= systemdirlen)
+  if (!written || written >= systemdirlen)
     return NULL;
 
-  if(path[written - 1] != _T('\\'))
+  if (path[written - 1] != _T('\\'))
     path[written++] = _T('\\');
 
   _tcscpy(path + written, filename);

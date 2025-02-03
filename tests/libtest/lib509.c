@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -68,7 +68,6 @@ static void custom_free(void *ptr)
   (free)(ptr);
 }
 
-
 FETCHcode test(char *URL)
 {
   unsigned char a[] = {0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
@@ -80,18 +79,20 @@ FETCHcode test(char *URL)
   (void)URL;
 
   res = fetch_global_init_mem(FETCH_GLOBAL_ALL,
-                             custom_malloc,
-                             custom_free,
-                             custom_realloc,
-                             custom_strdup,
-                             custom_calloc);
-  if(res != FETCHE_OK) {
+                              custom_malloc,
+                              custom_free,
+                              custom_realloc,
+                              custom_strdup,
+                              custom_calloc);
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init_mem() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -102,12 +103,12 @@ FETCHcode test(char *URL)
   asize = (int)sizeof(a);
   str = fetch_easy_escape(fetch, (char *)a, asize); /* uses realloc() */
 
-  if(seen)
+  if (seen)
     printf("Callbacks were invoked!\n");
 
 test_cleanup:
 
-  if(str)
+  if (str)
     fetch_free(str);
 
   fetch_easy_cleanup(fetch);

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,7 +40,8 @@
 
 const char *param2text(ParameterError error)
 {
-  switch(error) {
+  switch (error)
+  {
   case PARAM_GOT_EXTRA_PARAMETER:
     return "had unsupported trailing garbage";
   case PARAM_OPTION_UNKNOWN:
@@ -85,22 +86,22 @@ const char *param2text(ParameterError error)
 int SetHTTPrequest(struct OperationConfig *config, HttpReq req, HttpReq *store)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
-  const char *reqname[]= {
-    "", /* unspec */
-    "GET (-G, --get)",
-    "HEAD (-I, --head)",
-    "multipart formpost (-F, --form)",
-    "POST (-d, --data)",
-    "PUT (-T, --upload-file)"
-  };
+  const char *reqname[] = {
+      "", /* unspec */
+      "GET (-G, --get)",
+      "HEAD (-I, --head)",
+      "multipart formpost (-F, --form)",
+      "POST (-d, --data)",
+      "PUT (-T, --upload-file)"};
 
-  if((*store == TOOL_HTTPREQ_UNSPEC) ||
-     (*store == req)) {
+  if ((*store == TOOL_HTTPREQ_UNSPEC) ||
+      (*store == req))
+  {
     *store = req;
     return 0;
   }
   warnf(config->global, "You can only select one HTTP request method! "
-        "You asked for both %s and %s.",
+                        "You asked for both %s and %s.",
         reqname[req], reqname[*store]);
 
   return 1;
@@ -110,22 +111,24 @@ void customrequest_helper(struct OperationConfig *config, HttpReq req,
                           char *method)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
-  const char *dflt[]= {
-    "GET",
-    "GET",
-    "HEAD",
-    "POST",
-    "POST",
-    "PUT"
-  };
+  const char *dflt[] = {
+      "GET",
+      "GET",
+      "HEAD",
+      "POST",
+      "POST",
+      "PUT"};
 
-  if(!method)
+  if (!method)
     ;
-  else if(fetch_strequal(method, dflt[req])) {
+  else if (fetch_strequal(method, dflt[req]))
+  {
     notef(config->global, "Unnecessary use of -X or --request, %s is already "
-          "inferred.", dflt[req]);
+                          "inferred.",
+          dflt[req]);
   }
-  else if(fetch_strequal(method, "head")) {
+  else if (fetch_strequal(method, "head"))
+  {
     warnf(config->global,
           "Setting custom HTTP method to HEAD with -X/--request may not work "
           "the way you want. Consider using -I/--head instead.");

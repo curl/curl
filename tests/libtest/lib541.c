@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,13 +41,15 @@ FETCHcode test(char *URL)
   int hd;
   struct_stat file_info;
 
-  if(!libtest_arg2) {
+  if (!libtest_arg2)
+  {
     fprintf(stderr, "Usage: <url> <file-to-upload>\n");
     return TEST_ERR_USAGE;
   }
 
   hd_src = fopen(libtest_arg2, "rb");
-  if(!hd_src) {
+  if (!hd_src)
+  {
     fprintf(stderr, "fopen failed with error: %d %s\n",
             errno, strerror(errno));
     fprintf(stderr, "Error opening file: %s\n", libtest_arg2);
@@ -56,7 +58,8 @@ FETCHcode test(char *URL)
 
   /* get the file size of the local file */
   hd = fstat(fileno(hd_src), &file_info);
-  if(hd == -1) {
+  if (hd == -1)
+  {
     /* can't open file, bail out */
     fprintf(stderr, "fstat() failed with error: %d %s\n",
             errno, strerror(errno));
@@ -65,13 +68,15 @@ FETCHcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(!file_info.st_size) {
+  if (!file_info.st_size)
+  {
     fprintf(stderr, "ERROR: file %s has zero size!\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
@@ -79,7 +84,8 @@ FETCHcode test(char *URL)
 
   /* get a fetch handle */
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     fclose(hd_src);
@@ -100,7 +106,7 @@ FETCHcode test(char *URL)
 
   /* Now run off and do what you've been told! */
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   /* and now upload the exact same again, but without rewinding so it already

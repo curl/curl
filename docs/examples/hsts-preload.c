@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,25 +29,27 @@
 #include <string.h>
 #include <fetch/fetch.h>
 
-struct entry {
+struct entry
+{
   const char *name;
   const char *exp;
 };
 
 static const struct entry preload_hosts[] = {
-  { "example.com", "20370320 01:02:03" },
-  { "fetch.se",     "20370320 03:02:01" },
-  { NULL, NULL } /* end of list marker */
+    {"example.com", "20370320 01:02:03"},
+    {"curl.se", "20370320 03:02:01"},
+    {NULL, NULL} /* end of list marker */
 };
 
-struct state {
+struct state
+{
   int index;
 };
 
 /* "read" is from the point of the library, it wants data from us. One domain
    entry per invoke. */
 static FETCHSTScode hstsread(FETCH *easy, struct fetch_hstsentry *e,
-                            void *userp)
+                             void *userp)
 {
   const char *host;
   const char *expire;
@@ -56,7 +58,8 @@ static FETCHSTScode hstsread(FETCH *easy, struct fetch_hstsentry *e,
   host = preload_hosts[s->index].name;
   expire = preload_hosts[s->index++].exp;
 
-  if(host && (strlen(host) < e->namelen)) {
+  if (host && (strlen(host) < e->namelen))
+  {
     strcpy(e->name, host);
     e->includeSubDomains = 0;
     strcpy(e->expire, expire);
@@ -68,7 +71,7 @@ static FETCHSTScode hstsread(FETCH *easy, struct fetch_hstsentry *e,
 }
 
 static FETCHSTScode hstswrite(FETCH *easy, struct fetch_hstsentry *e,
-                             struct fetch_index *i, void *userp)
+                              struct fetch_index *i, void *userp)
 {
   (void)easy;
   (void)userp; /* we have no custom input */
@@ -83,7 +86,8 @@ int main(void)
   FETCHcode res;
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     struct state st = {0};
 
     /* enable HSTS for this handle */
@@ -100,14 +104,14 @@ int main(void)
 
     /* use the domain with HTTP but due to the preload, it should do the
        transfer using HTTPS */
-    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://fetch.se");
+    fetch_easy_setopt(fetch, FETCHOPT_URL, "http://curl.se");
 
     fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
     /* Perform the request, res gets the return code */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

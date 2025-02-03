@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,8 @@
 
 #include <fetch/fetch.h>
 
-struct MemoryStruct {
+struct MemoryStruct
+{
   char *memory;
   size_t size;
 };
@@ -45,7 +46,8 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
 
   char *ptr = realloc(mem->memory, mem->size + realsize + 1);
-  if(!ptr) {
+  if (!ptr)
+  {
     /* out of memory! */
     printf("not enough memory (realloc returned NULL)\n");
     return 0;
@@ -66,8 +68,8 @@ int main(void)
 
   struct MemoryStruct chunk;
 
-  chunk.memory = malloc(1);  /* grown as needed by the realloc above */
-  chunk.size = 0;    /* no data at this point */
+  chunk.memory = malloc(1); /* grown as needed by the realloc above */
+  chunk.size = 0;           /* no data at this point */
 
   fetch_global_init(FETCH_GLOBAL_ALL);
 
@@ -91,11 +93,13 @@ int main(void)
   res = fetch_easy_perform(fetch_handle);
 
   /* check for errors */
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_easy_perform() failed: %s\n",
             fetch_easy_strerror(res));
   }
-  else {
+  else
+  {
     /*
      * Now, our chunk.memory points to a memory block that is chunk.size
      * bytes big and contains the remote file.

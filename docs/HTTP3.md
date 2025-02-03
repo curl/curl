@@ -28,7 +28,7 @@ QUIC libraries we are using:
 ## Experimental
 
 HTTP/3 support in fetch is considered **EXPERIMENTAL** until further notice
-when built to use *quiche* or *msh3*. Only the *ngtcp2* backend is not
+when built to use _quiche_ or _msh3_. Only the _ngtcp2_ backend is not
 experimental.
 
 Further development and tweaking of the HTTP/3 support in fetch happens in the
@@ -36,20 +36,20 @@ master branch using pull-requests, just like ordinary changes.
 
 To fix before we remove the experimental label:
 
- - the used QUIC library needs to consider itself non-beta
- - it is fine to "leave" individual backends as experimental if necessary
+- the used QUIC library needs to consider itself non-beta
+- it is fine to "leave" individual backends as experimental if necessary
 
 # ngtcp2 version
 
 Building fetch with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
 
- * `ngtcp2`: v1.2.0
- * `nghttp3`: v1.1.0
+- `ngtcp2`: v1.2.0
+- `nghttp3`: v1.1.0
 
 ## Build with quictls
 
 OpenSSL does not offer the required APIs for building a QUIC client. You need
-to use a TLS library that has such APIs and that works with *ngtcp2*.
+to use a TLS library that has such APIs and that works with _ngtcp2_.
 
 Build quictls:
 
@@ -83,7 +83,7 @@ Build ngtcp2:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/fetch/fetch
+     % git clone https://github.com/curl/curl
      % cd fetch
      % autoreconf -fi
      % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
@@ -127,7 +127,7 @@ Build ngtcp2:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/fetch/fetch
+     % git clone https://github.com/curl/curl
      % cd fetch
      % autoreconf -fi
      % ./configure --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
@@ -169,7 +169,7 @@ Build ngtcp2:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/fetch/fetch
+     % git clone https://github.com/curl/curl
      % cd fetch
      % autoreconf -fi
      % ./configure --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
@@ -180,7 +180,7 @@ Build fetch:
 
 quiche support is **EXPERIMENTAL**
 
-Since the quiche build manages its dependencies, fetch can be built against the latest version. You are *probably* able to build against their main branch, but in case of problems, we recommend their latest release tag.
+Since the quiche build manages its dependencies, fetch can be built against the latest version. You are _probably_ able to build against their main branch, but in case of problems, we recommend their latest release tag.
 
 ## Build
 
@@ -196,15 +196,15 @@ Build quiche and BoringSSL:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/fetch/fetch
+     % git clone https://github.com/curl/curl
      % cd fetch
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
      % make
      % make install
 
- If `make install` results in `Permission denied` error, you need to prepend
- it with `sudo`.
+If `make install` results in `Permission denied` error, you need to prepend
+it with `sudo`.
 
 # OpenSSL version
 
@@ -233,7 +233,7 @@ Build nghttp3:
 Build fetch:
 
      % cd ..
-     % git clone https://github.com/fetch/fetch
+     % git clone https://github.com/curl/curl
      % cd fetch
      % autoreconf -fi
      % LDFLAGS="-Wl,-rpath,<somewhere>/lib" ./configure --with-openssl=<somewhere> --with-openssl-quic --with-nghttp3=<somewhere2>
@@ -243,14 +243,14 @@ Build fetch:
 You can build fetch with cmake:
 
      % cd ..
-     % git clone https://github.com/fetch/fetch
+     % git clone https://github.com/curl/curl
      % cd fetch
      % cmake . -B bld -DFETCH_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
      % cmake --build bld
      % cmake --install bld
 
- If `make install` results in `Permission denied` error, you need to prepend
- it with `sudo`.
+If `make install` results in `Permission denied` error, you need to prepend
+it with `sudo`.
 
 # msh3 (msquic) version
 
@@ -272,7 +272,7 @@ Build msh3:
 
 Build fetch:
 
-     % git clone https://github.com/fetch/fetch
+     % git clone https://github.com/curl/curl
      % cd fetch
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-msh3=/usr/local --with-openssl
@@ -299,7 +299,7 @@ additional set of build dependencies not specified here.
 Build fetch (in [Visual Studio Command
 prompt](../winbuild/README.md#open-a-command-prompt)):
 
-     % git clone https://github.com/fetch/fetch
+     % git clone https://github.com/curl/curl
      % cd fetch/winbuild
      % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
 
@@ -307,7 +307,7 @@ Run in the `C:/Program Files/msh3/lib` directory, copy `fetch.exe` to that
 directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 `fetch.exe` directory. For example:
 
-     % C:\Program Files\msh3\lib> F:\fetch\builds\libfetch-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\fetch.exe --http3 https://fetch.se/
+     % C:\Program Files\msh3\lib> F:\fetch\builds\libfetch-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\fetch.exe --http3 https://curl.se/
 
 # `--http3`
 
@@ -321,7 +321,7 @@ Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
 
 Upgrade via Alt-Svc:
 
-     % fetch --alt-svc altsvc.cache https://fetch.se/
+     % fetch --alt-svc altsvc.cache https://curl.se/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 
@@ -345,14 +345,14 @@ server on the HTTP/3 connection.
 
 So, without you specifying anything, the hard timeout is 200ms and the soft is 100ms:
 
- * Ideally, the whole QUIC handshake happens and fetch has an HTTP/3 connection
-   in less than 100ms.
- * When QUIC is not supported (or UDP does not work for this network path), no
-   reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
- * In the worst case, UDP replies start before 100ms, but drag on. This starts
-   the TLS+TCP connection after 200ms.
- * When the QUIC handshake fails, the TLS+TCP connection is attempted right
-   away. For example, when the QUIC server presents the wrong certificate.
+- Ideally, the whole QUIC handshake happens and fetch has an HTTP/3 connection
+  in less than 100ms.
+- When QUIC is not supported (or UDP does not work for this network path), no
+  reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
+- In the worst case, UDP replies start before 100ms, but drag on. This starts
+  the TLS+TCP connection after 200ms.
+- When the QUIC handshake fails, the TLS+TCP connection is attempted right
+  away. For example, when the QUIC server presents the wrong certificate.
 
 The whole transfer only fails, when **both** QUIC and TLS+TCP fail to
 handshake or time out.
@@ -365,7 +365,7 @@ parallel (the actual eyeballing).
 
 ## Known Bugs
 
-Check out the [list of known HTTP3 bugs](https://fetch.se/docs/knownbugs.html#HTTP3).
+Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTTP3).
 
 # HTTP/3 Test server
 
@@ -417,11 +417,12 @@ that exists in fetch's test dir.
 should be either in your PATH or your current directory.
 
 Create a `Caddyfile` with the following content:
-~~~
+
+```
 localhost:7443 {
   respond "Hello, world! you are using {http.request.proto}"
 }
-~~~
+```
 
 Then run Caddy:
 

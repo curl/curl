@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,11 +47,11 @@ void Curl_sspi_global_cleanup(void);
 
 /* This is used to populate the domain in a SSPI identity structure */
 FETCHcode Curl_override_sspi_http_realm(const char *chlg,
-                                       SEC_WINNT_AUTH_IDENTITY *identity);
+                                        SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* This is used to generate an SSPI identity structure */
 FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
-                                   SEC_WINNT_AUTH_IDENTITY *identity);
+                                    SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* This is used to free an SSPI identity structure */
 void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
@@ -61,54 +61,54 @@ extern HMODULE Curl_hSecDll;
 extern PSecurityFunctionTable Curl_pSecFn;
 
 /* Provide some definitions missing in old headers */
-#define SP_NAME_DIGEST              "WDigest"
-#define SP_NAME_NTLM                "NTLM"
-#define SP_NAME_NEGOTIATE           "Negotiate"
-#define SP_NAME_KERBEROS            "Kerberos"
+#define SP_NAME_DIGEST "WDigest"
+#define SP_NAME_NTLM "NTLM"
+#define SP_NAME_NEGOTIATE "Negotiate"
+#define SP_NAME_KERBEROS "Kerberos"
 
 #ifndef ISC_REQ_USE_HTTP_STYLE
-#define ISC_REQ_USE_HTTP_STYLE                0x01000000
+#define ISC_REQ_USE_HTTP_STYLE 0x01000000
 #endif
 
 #ifndef SEC_E_INVALID_PARAMETER
-# define SEC_E_INVALID_PARAMETER              ((HRESULT)0x8009035DL)
+#define SEC_E_INVALID_PARAMETER ((HRESULT)0x8009035DL)
 #endif
 #ifndef SEC_E_DELEGATION_POLICY
-# define SEC_E_DELEGATION_POLICY              ((HRESULT)0x8009035EL)
+#define SEC_E_DELEGATION_POLICY ((HRESULT)0x8009035EL)
 #endif
 #ifndef SEC_E_POLICY_NLTM_ONLY
-# define SEC_E_POLICY_NLTM_ONLY               ((HRESULT)0x8009035FL)
+#define SEC_E_POLICY_NLTM_ONLY ((HRESULT)0x8009035FL)
 #endif
 
 #ifndef SEC_I_SIGNATURE_NEEDED
-#define SEC_I_SIGNATURE_NEEDED                ((HRESULT)0x0009035CL)
+#define SEC_I_SIGNATURE_NEEDED ((HRESULT)0x0009035CL)
 #endif
 
 #ifndef CRYPT_E_REVOKED
-#define CRYPT_E_REVOKED                       ((HRESULT)0x80092010L)
+#define CRYPT_E_REVOKED ((HRESULT)0x80092010L)
 #endif
 
 #ifndef CRYPT_E_NO_REVOCATION_DLL
-#define CRYPT_E_NO_REVOCATION_DLL             ((HRESULT)0x80092011L)
+#define CRYPT_E_NO_REVOCATION_DLL ((HRESULT)0x80092011L)
 #endif
 
 #ifndef CRYPT_E_NO_REVOCATION_CHECK
-#define CRYPT_E_NO_REVOCATION_CHECK           ((HRESULT)0x80092012L)
+#define CRYPT_E_NO_REVOCATION_CHECK ((HRESULT)0x80092012L)
 #endif
 
 #ifndef CRYPT_E_REVOCATION_OFFLINE
-#define CRYPT_E_REVOCATION_OFFLINE            ((HRESULT)0x80092013L)
+#define CRYPT_E_REVOCATION_OFFLINE ((HRESULT)0x80092013L)
 #endif
 
 #ifndef CRYPT_E_NOT_IN_REVOCATION_DATABASE
-#define CRYPT_E_NOT_IN_REVOCATION_DATABASE    ((HRESULT)0x80092014L)
+#define CRYPT_E_NOT_IN_REVOCATION_DATABASE ((HRESULT)0x80092014L)
 #endif
 
 #ifdef UNICODE
-#  define SECFLAG_WINNT_AUTH_IDENTITY \
+#define SECFLAG_WINNT_AUTH_IDENTITY \
      (unsigned long)SEC_WINNT_AUTH_IDENTITY_UNICODE
 #else
-#  define SECFLAG_WINNT_AUTH_IDENTITY \
+#define SECFLAG_WINNT_AUTH_IDENTITY \
      (unsigned long)SEC_WINNT_AUTH_IDENTITY_ANSI
 #endif
 

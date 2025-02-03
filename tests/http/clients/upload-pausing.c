@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,7 @@
 
 #ifndef _MSC_VER
 /* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
+#include <unistd.h> /* getopt() */
 #endif
 
 #ifndef _MSC_VER
@@ -45,18 +45,16 @@ static void log_line_start(FILE *log, const char *idsbuf, fetch_infotype type)
    * This is the trace look that is similar to what libfetch makes on its
    * own.
    */
-  static const char * const s_infotype[] = {
-    "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
-  };
-  if(idsbuf && *idsbuf)
+  static const char *const s_infotype[] = {
+      "* ", "< ", "> ", "{ ", "} ", "{ ", "} "};
+  if (idsbuf && *idsbuf)
     fprintf(log, "%s%s", idsbuf, s_infotype[type]);
   else
     fputs(s_infotype[type], log);
 }
 
-#define TRC_IDS_FORMAT_IDS_1  "[%" FETCH_FORMAT_FETCH_OFF_T "-x] "
-#define TRC_IDS_FORMAT_IDS_2  "[%" FETCH_FORMAT_FETCH_OFF_T "-%" \
-                                   FETCH_FORMAT_FETCH_OFF_T "] "
+#define TRC_IDS_FORMAT_IDS_1 "[%" FETCH_FORMAT_FETCH_OFF_T "-x] "
+#define TRC_IDS_FORMAT_IDS_2 "[%" FETCH_FORMAT_FETCH_OFF_T "-%" FETCH_FORMAT_FETCH_OFF_T "] "
 /*
 ** callback for FETCHOPT_DEBUGFUNCTION
 */
@@ -73,27 +71,35 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
   (void)handle; /* not used */
   (void)userdata;
 
-  if(!fetch_easy_getinfo(handle, FETCHINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
-    if(!fetch_easy_getinfo(handle, FETCHINFO_CONN_ID, &conn_id) &&
-        conn_id >= 0) {
+  if (!fetch_easy_getinfo(handle, FETCHINFO_XFER_ID, &xfer_id) && xfer_id >= 0)
+  {
+    if (!fetch_easy_getinfo(handle, FETCHINFO_CONN_ID, &conn_id) &&
+        conn_id >= 0)
+    {
       fetch_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id,
-                     conn_id);
+                      conn_id);
     }
-    else {
+    else
+    {
       fetch_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
   }
   else
     idsbuf[0] = 0;
 
-  switch(type) {
+  switch (type)
+  {
   case FETCHINFO_HEADER_OUT:
-    if(size > 0) {
+    if (size > 0)
+    {
       size_t st = 0;
       size_t i;
-      for(i = 0; i < size - 1; i++) {
-        if(data[i] == '\n') { /* LF */
-          if(!newl) {
+      for (i = 0; i < size - 1; i++)
+      {
+        if (data[i] == '\n')
+        { /* LF */
+          if (!newl)
+          {
             log_line_start(output, idsbuf, type);
           }
           (void)fwrite(data + st, i - st + 1, 1, output);
@@ -101,7 +107,7 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
           newl = 0;
         }
       }
-      if(!newl)
+      if (!newl)
         log_line_start(output, idsbuf, type);
       (void)fwrite(data + st, i - st + 1, 1, output);
     }
@@ -110,7 +116,7 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
     break;
   case FETCHINFO_TEXT:
   case FETCHINFO_HEADER_IN:
-    if(!newl)
+    if (!newl)
       log_line_start(output, idsbuf, type);
     (void)fwrite(data, size, 1, output);
     newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
@@ -120,8 +126,9 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
   case FETCHINFO_DATA_IN:
   case FETCHINFO_SSL_DATA_IN:
   case FETCHINFO_SSL_DATA_OUT:
-    if(!traced_data) {
-      if(!newl)
+    if (!traced_data)
+    {
+      if (!newl)
         log_line_start(output, idsbuf, type);
       fprintf(output, "[%ld bytes data]\n", (long)size);
       newl = 0;
@@ -137,7 +144,7 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
   return 0;
 }
 
-#define PAUSE_READ_AFTER  1
+#define PAUSE_READ_AFTER 1
 static size_t total_read = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb,
@@ -146,11 +153,13 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb,
   (void)size;
   (void)nmemb;
   (void)userdata;
-  if(total_read >= PAUSE_READ_AFTER) {
+  if (total_read >= PAUSE_READ_AFTER)
+  {
     fprintf(stderr, "read_callback, return PAUSE\n");
     return FETCH_READFUNC_PAUSE;
   }
-  else {
+  else
+  {
     ptr[0] = '\n';
     ++total_read;
     fprintf(stderr, "read_callback, return 1 byte\n");
@@ -180,21 +189,21 @@ static int progress_callback(void *clientp,
   return 0;
 }
 
-#define ERR()                                                             \
-  do {                                                                    \
-    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
-    exit(2);                                                              \
-  } while(0)
+#define ERR()                                                            \
+  do                                                                     \
+  {                                                                      \
+    fprintf(stderr, "something unexpected went wrong - bailing out!\n"); \
+    exit(2);                                                             \
+  } while (0)
 
 static void usage(const char *msg)
 {
-  if(msg)
+  if (msg)
     fprintf(stderr, "%s\n", msg);
   fprintf(stderr,
-    "usage: [options] url\n"
-    "  upload and pause, options:\n"
-    "  -V http_version (http/1.1, h2, h3) http version to use\n"
-  );
+          "usage: [options] url\n"
+          "  upload and pause, options:\n"
+          "  -V http_version (http/1.1, h2, h3) http version to use\n");
 }
 #endif /* !_MSC_VER */
 
@@ -210,30 +219,35 @@ int main(int argc, char *argv[])
   int http_version = FETCH_HTTP_VERSION_1_1;
   int ch;
 
-  while((ch = getopt(argc, argv, "V:")) != -1) {
-    switch(ch) {
-    case 'V': {
-      if(!strcmp("http/1.1", optarg))
+  while ((ch = getopt(argc, argv, "V:")) != -1)
+  {
+    switch (ch)
+    {
+    case 'V':
+    {
+      if (!strcmp("http/1.1", optarg))
         http_version = FETCH_HTTP_VERSION_1_1;
-      else if(!strcmp("h2", optarg))
+      else if (!strcmp("h2", optarg))
         http_version = FETCH_HTTP_VERSION_2_0;
-      else if(!strcmp("h3", optarg))
+      else if (!strcmp("h3", optarg))
         http_version = FETCH_HTTP_VERSION_3ONLY;
-      else {
+      else
+      {
         usage("invalid http version");
         return 1;
       }
       break;
     }
     default:
-     usage("invalid option");
-     return 1;
+      usage("invalid option");
+      return 1;
     }
   }
   argc -= optind;
   argv += optind;
 
-  if(argc != 1) {
+  if (argc != 1)
+  {
     usage("not enough arguments");
     return 2;
   }
@@ -243,29 +257,34 @@ int main(int argc, char *argv[])
   fetch_global_trace("ids,time");
 
   cu = fetch_url();
-  if(!cu) {
+  if (!cu)
+  {
     fprintf(stderr, "out of memory\n");
     exit(1);
   }
-  if(fetch_url_set(cu, FETCHUPART_URL, url, 0)) {
+  if (fetch_url_set(cu, FETCHUPART_URL, url, 0))
+  {
     fprintf(stderr, "not a URL: '%s'\n", url);
     exit(1);
   }
-  if(fetch_url_get(cu, FETCHUPART_HOST, &host, 0)) {
+  if (fetch_url_get(cu, FETCHUPART_HOST, &host, 0))
+  {
     fprintf(stderr, "could not get host of '%s'\n", url);
     exit(1);
   }
-  if(fetch_url_get(cu, FETCHUPART_PORT, &port, 0)) {
+  if (fetch_url_get(cu, FETCHUPART_PORT, &port, 0))
+  {
     fprintf(stderr, "could not get port of '%s'\n", url);
     exit(1);
   }
   memset(&resolve, 0, sizeof(resolve));
-  fetch_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
-                 host, port);
+  fetch_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1",
+                  host, port);
   resolve = fetch_slist_append(resolve, resolve_buf);
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "out of memory\n");
     exit(1);
   }
@@ -290,10 +309,9 @@ int main(int argc, char *argv[])
   fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 0L);
   fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYHOST, 0L);
 
-  if(fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L) != FETCHE_OK ||
-     fetch_easy_setopt(fetch, FETCHOPT_DEBUGFUNCTION, debug_cb)
-     != FETCHE_OK ||
-     fetch_easy_setopt(fetch, FETCHOPT_RESOLVE, resolve) != FETCHE_OK)
+  if (fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L) != FETCHE_OK ||
+      fetch_easy_setopt(fetch, FETCHOPT_DEBUGFUNCTION, debug_cb) != FETCHE_OK ||
+      fetch_easy_setopt(fetch, FETCHOPT_RESOLVE, resolve) != FETCHE_OK)
     ERR();
 
   fetch_easy_setopt(fetch, FETCHOPT_URL, url);
@@ -301,7 +319,8 @@ int main(int argc, char *argv[])
 
   rc = fetch_easy_perform(fetch);
 
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_cleanup(fetch);
   }
 

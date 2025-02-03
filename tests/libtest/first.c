@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,12 +25,12 @@
 #include "first.h"
 
 #ifdef HAVE_LOCALE_H
-#  include <locale.h> /* for setlocale() */
+#include <locale.h> /* for setlocale() */
 #endif
 
 #ifdef FETCHDEBUG
-#  define MEMDEBUG_NODEFINES
-#  include "memdebug.h"
+#define MEMDEBUG_NODEFINES
+#include "memdebug.h"
 #endif
 
 #include "timediff.h"
@@ -40,7 +40,8 @@
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {
-  if(nfds < 0) {
+  if (nfds < 0)
+  {
     SET_SOCKERRNO(EINVAL);
     return -1;
   }
@@ -50,7 +51,8 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
    * pointers is not NULL and points to a non-empty fdset. IOW Winsock
    * select() can not be used to sleep without a single fd_set.
    */
-  if(!nfds) {
+  if (!nfds)
+  {
     Sleep((DWORD)fetchx_tvtoms(tv));
     return 0;
   }
@@ -60,7 +62,7 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
 
 void wait_ms(int ms)
 {
-  if(ms < 0)
+  if (ms < 0)
     return;
 #ifdef USE_WINSOCK
   Sleep((DWORD)ms);
@@ -88,11 +90,12 @@ static void memory_tracking_init(void)
   char *env;
   /* if FETCH_MEMDEBUG is set, this starts memory tracking message logging */
   env = fetch_getenv("FETCH_MEMDEBUG");
-  if(env) {
+  if (env)
+  {
     /* use the value as file name */
     char fname[FETCH_MT_LOGFNAME_BUFSIZE];
-    if(strlen(env) >= FETCH_MT_LOGFNAME_BUFSIZE)
-      env[FETCH_MT_LOGFNAME_BUFSIZE-1] = '\0';
+    if (strlen(env) >= FETCH_MT_LOGFNAME_BUFSIZE)
+      env[FETCH_MT_LOGFNAME_BUFSIZE - 1] = '\0';
     strcpy(fname, env);
     fetch_free(env);
     fetch_dbg_memdebug(fname);
@@ -102,16 +105,17 @@ static void memory_tracking_init(void)
   }
   /* if FETCH_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = fetch_getenv("FETCH_MEMLIMIT");
-  if(env) {
+  if (env)
+  {
     char *endptr;
     long num = strtol(env, &endptr, 10);
-    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
+    if ((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
       fetch_dbg_memlimit(num);
     fetch_free(env);
   }
 }
 #else
-#  define memory_tracking_init() Curl_nop_stmt
+#define memory_tracking_init() Curl_nop_stmt
 #endif
 
 /* returns a hexdump in a static memory area */
@@ -120,13 +124,12 @@ char *hexdump(const unsigned char *buf, size_t len)
   static char dump[200 * 3 + 1];
   char *p = dump;
   size_t i;
-  if(len > 200)
+  if (len > 200)
     return NULL;
-  for(i = 0; i < len; i++, p += 3)
+  for (i = 0; i < len; i++, p += 3)
     msnprintf(p, 4, "%02x ", buf[i]);
   return dump;
 }
-
 
 int main(int argc, char **argv)
 {
@@ -160,7 +163,8 @@ int main(int argc, char **argv)
 
     basearg = 2;
 
-    if(argc < (basearg + 1)) {
+    if (argc < (basearg + 1))
+    {
       fprintf(stderr, "Pass testname and URL as arguments please\n");
       return 1;
     }
@@ -169,15 +173,18 @@ int main(int argc, char **argv)
     test_func = NULL;
     {
       size_t tmp;
-      for(tmp = 0; tmp < (sizeof(s_tests)/sizeof((s_tests)[0])); ++tmp) {
-        if(strcmp(test_name, s_tests[tmp].name) == 0) {
+      for (tmp = 0; tmp < (sizeof(s_tests) / sizeof((s_tests)[0])); ++tmp)
+      {
+        if (strcmp(test_name, s_tests[tmp].name) == 0)
+        {
           test_func = s_tests[tmp].ptr;
           break;
         }
       }
     }
 
-    if(!test_func) {
+    if (!test_func)
+    {
       fprintf(stderr, "Test '%s' not found.\n", test_name);
       return 1;
     }
@@ -187,7 +194,8 @@ int main(int argc, char **argv)
 #else
   basearg = 1;
 
-  if(argc < (basearg + 1)) {
+  if (argc < (basearg + 1))
+  {
     fprintf(stderr, "Pass URL as argument please\n");
     return 1;
   }
@@ -195,10 +203,10 @@ int main(int argc, char **argv)
   test_func = test;
 #endif
 
-  if(argc > (basearg + 1))
+  if (argc > (basearg + 1))
     libtest_arg2 = argv[basearg + 1];
 
-  if(argc > (basearg + 2))
+  if (argc > (basearg + 2))
     libtest_arg3 = argv[basearg + 2];
 
   URL = argv[basearg]; /* provide this to the rest */

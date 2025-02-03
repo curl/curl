@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,29 +43,31 @@ static int fetchtest_1_1_required(request_rec *r);
 static int fetchtest_sslinfo_handler(request_rec *r);
 
 AP_DECLARE_MODULE(fetchtest) =
-{
-  STANDARD20_MODULE_STUFF,
-  NULL, /* func to create per dir config */
-  NULL,  /* func to merge per dir config */
-  NULL, /* func to create per server config */
-  NULL,  /* func to merge per server config */
-  NULL,              /* command handlers */
-  fetchtest_hooks,
+    {
+        STANDARD20_MODULE_STUFF,
+        NULL, /* func to create per dir config */
+        NULL, /* func to merge per dir config */
+        NULL, /* func to create per server config */
+        NULL, /* func to merge per server config */
+        NULL, /* command handlers */
+        fetchtest_hooks,
 #if defined(AP_MODULE_FLAG_NONE)
-  AP_MODULE_FLAG_ALWAYS_MERGE
+        AP_MODULE_FLAG_ALWAYS_MERGE
 #endif
 };
 
 static int fetchtest_post_config(apr_pool_t *p, apr_pool_t *plog,
-                                apr_pool_t *ptemp, server_rec *s)
+                                 apr_pool_t *ptemp, server_rec *s)
 {
   void *data = NULL;
   const char *key = "mod_fetchtest_init_counter";
 
-  (void)plog;(void)ptemp;
+  (void)plog;
+  (void)ptemp;
 
   apr_pool_userdata_get(&data, key, s->process->pool);
-  if(!data) {
+  if (!data)
+  {
     /* dry run */
     apr_pool_userdata_set((const void *)1, key,
                           apr_pool_cleanup_null, s->process->pool);
@@ -93,8 +95,8 @@ static void fetchtest_hooks(apr_pool_t *pool)
   ap_hook_handler(fetchtest_sslinfo_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
-#define SECS_PER_HOUR      (60*60)
-#define SECS_PER_DAY       (24*SECS_PER_HOUR)
+#define SECS_PER_HOUR (60 * 60)
+#define SECS_PER_DAY (24 * SECS_PER_HOUR)
 
 static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
                                    const char *value, const char *def_unit)
@@ -103,46 +105,52 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
   apr_int64_t n;
 
   n = apr_strtoi64(value, &endp, 10);
-  if(errno) {
+  if (errno)
+  {
     return errno;
   }
-  if(!endp || !*endp) {
-    if(!def_unit)
+  if (!endp || !*endp)
+  {
+    if (!def_unit)
       def_unit = "s";
   }
-  else if(endp == value) {
+  else if (endp == value)
+  {
     return APR_EINVAL;
   }
-  else {
+  else
+  {
     def_unit = endp;
   }
 
-  switch(*def_unit) {
+  switch (*def_unit)
+  {
   case 'D':
   case 'd':
     *ptimeout = apr_time_from_sec(n * SECS_PER_DAY);
     break;
   case 's':
   case 'S':
-    *ptimeout = (apr_interval_time_t) apr_time_from_sec(n);
+    *ptimeout = (apr_interval_time_t)apr_time_from_sec(n);
     break;
   case 'h':
   case 'H':
     /* Time is in hours */
-    *ptimeout = (apr_interval_time_t) apr_time_from_sec(n * SECS_PER_HOUR);
+    *ptimeout = (apr_interval_time_t)apr_time_from_sec(n * SECS_PER_HOUR);
     break;
   case 'm':
   case 'M':
-    switch(*(++def_unit)) {
+    switch (*(++def_unit))
+    {
     /* Time is in milliseconds */
     case 's':
     case 'S':
-      *ptimeout = (apr_interval_time_t) n * 1000;
+      *ptimeout = (apr_interval_time_t)n * 1000;
       break;
     /* Time is in minutes */
     case 'i':
     case 'I':
-      *ptimeout = (apr_interval_time_t) apr_time_from_sec(n * 60);
+      *ptimeout = (apr_interval_time_t)apr_time_from_sec(n * 60);
       break;
     default:
       return APR_EGENERAL;
@@ -150,11 +158,12 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
     break;
   case 'u':
   case 'U':
-    switch(*(++def_unit)) {
+    switch (*(++def_unit))
+    {
     /* Time is in microseconds */
     case 's':
     case 'S':
-      *ptimeout = (apr_interval_time_t) n;
+      *ptimeout = (apr_interval_time_t)n;
       break;
     default:
       return APR_EGENERAL;
@@ -168,11 +177,13 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
 
 static int status_from_str(const char *s, apr_status_t *pstatus)
 {
-  if(!strcmp("timeout", s)) {
+  if (!strcmp("timeout", s))
+  {
     *pstatus = APR_TIMEUP;
     return 1;
   }
-  else if(!strcmp("reset", s)) {
+  else if (!strcmp("reset", s))
+  {
     *pstatus = APR_ECONNRESET;
     return 1;
   }
@@ -191,33 +202,41 @@ static int fetchtest_echo_handler(request_rec *r)
   int just_die = 0, die_after_100 = 0;
   long l;
 
-  if(strcmp(r->handler, "fetchtest-echo")) {
+  if (strcmp(r->handler, "fetchtest-echo"))
+  {
     return DECLINED;
   }
-  if(r->method_number != M_GET && r->method_number != M_POST) {
+  if (r->method_number != M_GET && r->method_number != M_POST)
+  {
     return DECLINED;
   }
 
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "echo_handler: processing");
-  if(r->args) {
+  if (r->args)
+  {
     apr_array_header_t *args = NULL;
     int i;
     args = apr_cstr_split(r->args, "&", 1, r->pool);
-    for(i = 0; i < args->nelts; ++i) {
+    for (i = 0; i < args->nelts; ++i)
+    {
       char *s, *val, *arg = APR_ARRAY_IDX(args, i, char *);
       s = strchr(arg, '=');
-      if(s) {
+      if (s)
+      {
         *s = '\0';
         val = s + 1;
-        if(!strcmp("die_after", arg)) {
+        if (!strcmp("die_after", arg))
+        {
           die_after_len = (apr_off_t)apr_atoi64(val);
           continue;
         }
-        else if(!strcmp("just_die", arg)) {
+        else if (!strcmp("just_die", arg))
+        {
           just_die = 1;
           continue;
         }
-        else if(!strcmp("die_after_100", arg)) {
+        else if (!strcmp("die_after_100", arg))
+        {
           die_after_100 = 1;
           continue;
         }
@@ -225,7 +244,8 @@ static int fetchtest_echo_handler(request_rec *r)
     }
   }
 
-  if(just_die) {
+  if (just_die)
+  {
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r,
                   "echo_handler: dying right away");
     /* Generate no HTTP response at all. */
@@ -235,13 +255,15 @@ static int fetchtest_echo_handler(request_rec *r)
   }
 
   r->status = 200;
-  if(die_after_len >= 0) {
+  if (die_after_len >= 0)
+  {
     r->clength = die_after_len + 1;
     r->chunked = 0;
     apr_table_set(r->headers_out, "Content-Length",
                   apr_ltoa(r->pool, (long)r->clength));
   }
-  else {
+  else
+  {
     r->clength = -1;
     r->chunked = 1;
     apr_table_unset(r->headers_out, "Content-Length");
@@ -257,9 +279,10 @@ static int fetchtest_echo_handler(request_rec *r)
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* copy any request body into the response */
   rv = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK);
-  if(rv)
+  if (rv)
     goto cleanup;
-  if(die_after_100) {
+  if (die_after_100)
+  {
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r,
                   "echo_handler: dying after 100-continue");
     /* Generate no HTTP response at all. */
@@ -267,10 +290,13 @@ static int fetchtest_echo_handler(request_rec *r)
     r->connection->keepalive = AP_CONN_CLOSE;
     return AP_FILTER_ERROR;
   }
-  if(ap_should_client_block(r)) {
-    while(0 < (l = ap_get_client_block(r, &buffer[0], sizeof(buffer)))) {
+  if (ap_should_client_block(r))
+  {
+    while (0 < (l = ap_get_client_block(r, &buffer[0], sizeof(buffer))))
+    {
       total_read_len += l;
-      if(die_after_len >= 0 && total_read_len >= die_after_len) {
+      if (die_after_len >= 0 && total_read_len >= die_after_len)
+      {
         ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r,
                       "echo_handler: dying after %ld bytes as requested",
                       (long)total_read_len);
@@ -282,10 +308,10 @@ static int fetchtest_echo_handler(request_rec *r)
       ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
                     "echo_handler: copying %ld bytes from request body", l);
       rv = apr_brigade_write(bb, NULL, NULL, buffer, l);
-      if(APR_SUCCESS != rv)
+      if (APR_SUCCESS != rv)
         goto cleanup;
       rv = ap_pass_brigade(r->output_filters, bb);
-      if(APR_SUCCESS != rv)
+      if (APR_SUCCESS != rv)
         goto cleanup;
       ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
                     "echo_handler: passed %ld bytes from request body", l);
@@ -296,7 +322,8 @@ static int fetchtest_echo_handler(request_rec *r)
   APR_BRIGADE_INSERT_TAIL(bb, b);
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "echo_handler: request read");
 
-  if(r->trailers_in && !apr_is_empty_table(r->trailers_in)) {
+  if (r->trailers_in && !apr_is_empty_table(r->trailers_in))
+  {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE2, 0, r,
                   "echo_handler: seeing incoming trailers");
     apr_table_setn(r->trailers_out, "h2test-trailers-in",
@@ -306,13 +333,15 @@ static int fetchtest_echo_handler(request_rec *r)
   rv = ap_pass_brigade(r->output_filters, bb);
 
 cleanup:
-  if(rv == APR_SUCCESS ||
-     r->status != HTTP_OK ||
-     c->aborted) {
+  if (rv == APR_SUCCESS ||
+      r->status != HTTP_OK ||
+      c->aborted)
+  {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "echo_handler: done");
     return OK;
   }
-  else {
+  else
+  {
     /* no way to know what type of error occurred */
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "echo_handler failed");
     return AP_FILTER_ERROR;
@@ -326,7 +355,7 @@ static int fetchtest_tweak_handler(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[16*1024];
+  char buffer[16 * 1024];
   int i, chunks = 3, error_bucket = 1;
   size_t chunk_size = sizeof(buffer);
   const char *request_id = "none";
@@ -336,41 +365,54 @@ static int fetchtest_tweak_handler(request_rec *r)
   apr_status_t error = APR_SUCCESS, body_error = APR_SUCCESS;
   int close_conn = 0, with_cl = 0;
 
-  if(strcmp(r->handler, "fetchtest-tweak")) {
+  if (strcmp(r->handler, "fetchtest-tweak"))
+  {
     return DECLINED;
   }
-  if(r->method_number == M_DELETE) {
+  if (r->method_number == M_DELETE)
+  {
     http_status = 204;
     chunks = 0;
   }
-  else if(r->method_number != M_GET && r->method_number != M_POST) {
+  else if (r->method_number != M_GET && r->method_number != M_POST)
+  {
     return DECLINED;
   }
 
-  if(r->args) {
+  if (r->args)
+  {
     args = apr_cstr_split(r->args, "&", 1, r->pool);
-    for(i = 0; i < args->nelts; ++i) {
+    for (i = 0; i < args->nelts; ++i)
+    {
       char *s, *val, *arg = APR_ARRAY_IDX(args, i, char *);
       s = strchr(arg, '=');
-      if(s) {
+      if (s)
+      {
         *s = '\0';
         val = s + 1;
-        if(!strcmp("status", arg)) {
+        if (!strcmp("status", arg))
+        {
           http_status = (int)apr_atoi64(val);
-          if(http_status > 0) {
+          if (http_status > 0)
+          {
             continue;
           }
         }
-        else if(!strcmp("chunks", arg)) {
+        else if (!strcmp("chunks", arg))
+        {
           chunks = (int)apr_atoi64(val);
-          if(chunks >= 0) {
+          if (chunks >= 0)
+          {
             continue;
           }
         }
-        else if(!strcmp("chunk_size", arg)) {
+        else if (!strcmp("chunk_size", arg))
+        {
           chunk_size = (int)apr_atoi64(val);
-          if(chunk_size >= 0) {
-            if(chunk_size > sizeof(buffer)) {
+          if (chunk_size >= 0)
+          {
+            if (chunk_size > sizeof(buffer))
+            {
               ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
                             "chunk_size %zu too large", chunk_size);
               ap_die(HTTP_BAD_REQUEST, r);
@@ -379,57 +421,72 @@ static int fetchtest_tweak_handler(request_rec *r)
             continue;
           }
         }
-        else if(!strcmp("id", arg)) {
+        else if (!strcmp("id", arg))
+        {
           /* just an id for repeated requests with fetch's url globbing */
           request_id = val;
           continue;
         }
-        else if(!strcmp("error", arg)) {
-          if(status_from_str(val, &error)) {
+        else if (!strcmp("error", arg))
+        {
+          if (status_from_str(val, &error))
+          {
             continue;
           }
         }
-        else if(!strcmp("error_bucket", arg)) {
+        else if (!strcmp("error_bucket", arg))
+        {
           error_bucket = (int)apr_atoi64(val);
-          if(error_bucket >= 0) {
+          if (error_bucket >= 0)
+          {
             continue;
           }
         }
-        else if(!strcmp("body_error", arg)) {
-          if(status_from_str(val, &body_error)) {
+        else if (!strcmp("body_error", arg))
+        {
+          if (status_from_str(val, &body_error))
+          {
             continue;
           }
         }
-        else if(!strcmp("delay", arg)) {
+        else if (!strcmp("delay", arg))
+        {
           rv = duration_parse(&delay, val, "s");
-          if(APR_SUCCESS == rv) {
+          if (APR_SUCCESS == rv)
+          {
             continue;
           }
         }
-        else if(!strcmp("chunk_delay", arg)) {
+        else if (!strcmp("chunk_delay", arg))
+        {
           rv = duration_parse(&chunk_delay, val, "s");
-          if(APR_SUCCESS == rv) {
+          if (APR_SUCCESS == rv)
+          {
             continue;
           }
         }
-        else if(!strcmp("close_delay", arg)) {
+        else if (!strcmp("close_delay", arg))
+        {
           rv = duration_parse(&close_delay, val, "s");
-          if(APR_SUCCESS == rv) {
+          if (APR_SUCCESS == rv)
+          {
             continue;
           }
         }
       }
-      else if(!strcmp("close", arg)) {
+      else if (!strcmp("close", arg))
+      {
         /* we are asked to close the connection */
         close_conn = 1;
         continue;
       }
-      else if(!strcmp("with_cl", arg)) {
+      else if (!strcmp("with_cl", arg))
+      {
         with_cl = 1;
         continue;
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
+                                                 "understood: '%s' in %s",
                     arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
@@ -437,12 +494,14 @@ static int fetchtest_tweak_handler(request_rec *r)
   }
 
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "error_handler: processing "
-                "request, %s", r->args? r->args : "(no args)");
+                                                "request, %s",
+                r->args ? r->args : "(no args)");
   r->status = http_status;
   r->clength = with_cl ? (chunks * chunk_size) : -1;
   r->chunked = (r->proto_num >= HTTP_VERSION(1, 1)) && !with_cl;
   apr_table_setn(r->headers_out, "request-id", request_id);
-  if(r->clength >= 0) {
+  if (r->clength >= 0)
+  {
     apr_table_set(r->headers_out, "Content-Length",
                   apr_ltoa(r->pool, (long)r->clength));
   }
@@ -456,34 +515,39 @@ static int fetchtest_tweak_handler(request_rec *r)
   ap_set_content_type(r, "application/octet-stream");
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
 
-  if(delay) {
+  if (delay)
+  {
     apr_sleep(delay);
   }
-  if(error != APR_SUCCESS) {
+  if (error != APR_SUCCESS)
+  {
     return ap_map_http_request_error(error, HTTP_BAD_REQUEST);
   }
   /* flush response */
   b = apr_bucket_flush_create(c->bucket_alloc);
   APR_BRIGADE_INSERT_TAIL(bb, b);
   rv = ap_pass_brigade(r->output_filters, bb);
-  if(APR_SUCCESS != rv)
+  if (APR_SUCCESS != rv)
     goto cleanup;
 
   memset(buffer, 'X', sizeof(buffer));
-  for(i = 0; i < chunks; ++i) {
-    if(chunk_delay) {
+  for (i = 0; i < chunks; ++i)
+  {
+    if (chunk_delay)
+    {
       apr_sleep(chunk_delay);
     }
     rv = apr_brigade_write(bb, NULL, NULL, buffer, chunk_size);
-    if(APR_SUCCESS != rv)
+    if (APR_SUCCESS != rv)
       goto cleanup;
     rv = ap_pass_brigade(r->output_filters, bb);
-    if(APR_SUCCESS != rv)
+    if (APR_SUCCESS != rv)
       goto cleanup;
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
                   "error_handler: passed %lu bytes as response body",
                   (unsigned long)chunk_size);
-    if(body_error != APR_SUCCESS) {
+    if (body_error != APR_SUCCESS)
+    {
       rv = body_error;
       goto cleanup;
     }
@@ -497,8 +561,10 @@ static int fetchtest_tweak_handler(request_rec *r)
                 "error_handler: response passed");
 
 cleanup:
-  if(close_conn) {
-    if(close_delay) {
+  if (close_conn)
+  {
+    if (close_delay)
+    {
       b = apr_bucket_flush_create(c->bucket_alloc);
       APR_BRIGADE_INSERT_TAIL(bb, b);
       rv = ap_pass_brigade(r->output_filters, bb);
@@ -509,11 +575,14 @@ cleanup:
   }
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r,
                 "error_handler: request cleanup, r->status=%d, aborted=%d, "
-                "close=%d", r->status, c->aborted, close_conn);
-  if(rv == APR_SUCCESS) {
+                "close=%d",
+                r->status, c->aborted, close_conn);
+  if (rv == APR_SUCCESS)
+  {
     return OK;
   }
-  if(error_bucket) {
+  if (error_bucket)
+  {
     http_status = ap_map_http_request_error(rv, HTTP_BAD_REQUEST);
     b = ap_bucket_error_create(http_status, NULL, r->pool, c->bucket_alloc);
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r,
@@ -531,7 +600,7 @@ static int fetchtest_put_handler(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[128*1024];
+  char buffer[128 * 1024];
   const char *ct;
   apr_off_t rbody_len = 0;
   apr_off_t rbody_max_len = -1;
@@ -542,45 +611,56 @@ static int fetchtest_put_handler(request_rec *r)
   long l;
   int i;
 
-  if(strcmp(r->handler, "fetchtest-put")) {
+  if (strcmp(r->handler, "fetchtest-put"))
+  {
     return DECLINED;
   }
-  if(r->method_number != M_PUT) {
+  if (r->method_number != M_PUT)
+  {
     return DECLINED;
   }
 
-  if(r->args) {
+  if (r->args)
+  {
     args = apr_cstr_split(r->args, "&", 1, r->pool);
-    for(i = 0; i < args->nelts; ++i) {
+    for (i = 0; i < args->nelts; ++i)
+    {
       char *s, *val, *arg = APR_ARRAY_IDX(args, i, char *);
       s = strchr(arg, '=');
-      if(s) {
+      if (s)
+      {
         *s = '\0';
         val = s + 1;
-        if(!strcmp("id", arg)) {
+        if (!strcmp("id", arg))
+        {
           /* just an id for repeated requests with fetch's url globbing */
           request_id = val;
           continue;
         }
-        else if(!strcmp("read_delay", arg)) {
+        else if (!strcmp("read_delay", arg))
+        {
           rv = duration_parse(&read_delay, val, "s");
-          if(APR_SUCCESS == rv) {
+          if (APR_SUCCESS == rv)
+          {
             continue;
           }
         }
-        else if(!strcmp("chunk_delay", arg)) {
+        else if (!strcmp("chunk_delay", arg))
+        {
           rv = duration_parse(&chunk_delay, val, "s");
-          if(APR_SUCCESS == rv) {
+          if (APR_SUCCESS == rv)
+          {
             continue;
           }
         }
-        else if(!strcmp("max_upload", arg)) {
+        else if (!strcmp("max_upload", arg))
+        {
           rbody_max_len = (int)apr_atoi64(val);
           continue;
         }
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
+                                                 "understood: '%s' in %s",
                     arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
@@ -600,33 +680,38 @@ static int fetchtest_put_handler(request_rec *r)
   ct = apr_table_get(r->headers_in, "content-type");
   ap_set_content_type(r, ct ? ct : "text/plain");
 
-  if(read_delay) {
+  if (read_delay)
+  {
     apr_sleep(read_delay);
   }
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* copy any request body into the response */
   rv = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK);
-  if(rv)
+  if (rv)
     goto cleanup;
-  if(ap_should_client_block(r)) {
-    while(0 < (l = ap_get_client_block(r, &buffer[0], sizeof(buffer)))) {
+  if (ap_should_client_block(r))
+  {
+    while (0 < (l = ap_get_client_block(r, &buffer[0], sizeof(buffer))))
+    {
       ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
                     "put_handler: read %ld bytes from request body", l);
-      if(chunk_delay) {
+      if (chunk_delay)
+      {
         apr_sleep(chunk_delay);
       }
       rbody_len += l;
-      if((rbody_max_len > 0) && (rbody_len > rbody_max_len)) {
+      if ((rbody_max_len > 0) && (rbody_len > rbody_max_len))
+      {
         r->status = 413;
         break;
       }
     }
   }
   /* we are done */
-  s_rbody_len = apr_psprintf(r->pool, "%"APR_OFF_T_FMT, rbody_len);
+  s_rbody_len = apr_psprintf(r->pool, "%" APR_OFF_T_FMT, rbody_len);
   apr_table_setn(r->headers_out, "Received-Length", s_rbody_len);
   rv = apr_brigade_puts(bb, NULL, NULL, s_rbody_len);
-  if(APR_SUCCESS != rv)
+  if (APR_SUCCESS != rv)
     goto cleanup;
   b = apr_bucket_eos_create(c->bucket_alloc);
   APR_BRIGADE_INSERT_TAIL(bb, b);
@@ -634,18 +719,19 @@ static int fetchtest_put_handler(request_rec *r)
 
   rv = ap_pass_brigade(r->output_filters, bb);
 
-  if(r->status == 413) {
+  if (r->status == 413)
+  {
     apr_sleep(apr_time_from_sec(1));
   }
 
 cleanup:
-  if(rv == APR_SUCCESS
-     || r->status != HTTP_OK
-     || c->aborted) {
+  if (rv == APR_SUCCESS || r->status != HTTP_OK || c->aborted)
+  {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "put_handler: done");
     return OK;
   }
-  else {
+  else
+  {
     /* no way to know what type of error occurred */
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "put_handler failed");
     return AP_FILTER_ERROR;
@@ -659,7 +745,7 @@ static int fetchtest_1_1_required(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[16*1024];
+  char buffer[16 * 1024];
   const char *ct;
   const char *request_id = "none";
   apr_time_t chunk_delay = 0;
@@ -667,11 +753,13 @@ static int fetchtest_1_1_required(request_rec *r)
   long l;
   int i;
 
-  if(strcmp(r->handler, "fetchtest-1_1-required")) {
+  if (strcmp(r->handler, "fetchtest-1_1-required"))
+  {
     return DECLINED;
   }
 
-  if(HTTP_VERSION_MAJOR(r->proto_num) > 1) {
+  if (HTTP_VERSION_MAJOR(r->proto_num) > 1)
+  {
     apr_table_setn(r->notes, "ssl-renegotiate-forbidden", "1");
     ap_die(HTTP_FORBIDDEN, r);
     return OK;
@@ -695,12 +783,12 @@ static int fetchtest_1_1_required(request_rec *r)
   b = apr_bucket_flush_create(c->bucket_alloc);
   APR_BRIGADE_INSERT_TAIL(bb, b);
   rv = ap_pass_brigade(r->output_filters, bb);
-  if(APR_SUCCESS != rv)
+  if (APR_SUCCESS != rv)
     goto cleanup;
 
   /* we are done */
   rv = apr_brigade_printf(bb, NULL, NULL, "well done!");
-  if(APR_SUCCESS != rv)
+  if (APR_SUCCESS != rv)
     goto cleanup;
   b = apr_bucket_eos_create(c->bucket_alloc);
   APR_BRIGADE_INSERT_TAIL(bb, b);
@@ -709,13 +797,13 @@ static int fetchtest_1_1_required(request_rec *r)
   rv = ap_pass_brigade(r->output_filters, bb);
 
 cleanup:
-  if(rv == APR_SUCCESS
-     || r->status != HTTP_OK
-     || c->aborted) {
+  if (rv == APR_SUCCESS || r->status != HTTP_OK || c->aborted)
+  {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "1_1_handler: done");
     return OK;
   }
-  else {
+  else
+  {
     /* no way to know what type of error occurred */
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "1_1_handler failed");
     return AP_FILTER_ERROR;
@@ -728,7 +816,7 @@ static int brigade_env_var(request_rec *r, apr_bucket_brigade *bb,
 {
   const char *s;
   s = apr_table_get(r->subprocess_env, name);
-  if(s)
+  if (s)
     return apr_brigade_printf(bb, NULL, NULL, ",\n  \"%s\": \"%s\"", name, s);
   return 0;
 }
@@ -745,34 +833,41 @@ static int fetchtest_sslinfo_handler(request_rec *r)
   long l;
   int i;
 
-  if(strcmp(r->handler, "fetchtest-sslinfo")) {
+  if (strcmp(r->handler, "fetchtest-sslinfo"))
+  {
     return DECLINED;
   }
-  if(r->method_number != M_GET) {
+  if (r->method_number != M_GET)
+  {
     return DECLINED;
   }
 
-  if(r->args) {
+  if (r->args)
+  {
     apr_array_header_t *args = apr_cstr_split(r->args, "&", 1, r->pool);
-    for(i = 0; i < args->nelts; ++i) {
+    for (i = 0; i < args->nelts; ++i)
+    {
       char *s, *val, *arg = APR_ARRAY_IDX(args, i, char *);
       s = strchr(arg, '=');
-      if(s) {
+      if (s)
+      {
         *s = '\0';
         val = s + 1;
-        if(!strcmp("id", arg)) {
+        if (!strcmp("id", arg))
+        {
           /* just an id for repeated requests with fetch's url globbing */
           request_id = val;
           continue;
         }
       }
-      else if(!strcmp("close", arg)) {
+      else if (!strcmp("close", arg))
+      {
         /* we are asked to close the connection */
         close_conn = 1;
         continue;
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
+                                                 "understood: '%s' in %s",
                     arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
@@ -808,7 +903,7 @@ static int fetchtest_sslinfo_handler(request_rec *r)
   b = apr_bucket_flush_create(c->bucket_alloc);
   APR_BRIGADE_INSERT_TAIL(bb, b);
   rv = ap_pass_brigade(r->output_filters, bb);
-  if(APR_SUCCESS != rv)
+  if (APR_SUCCESS != rv)
     goto cleanup;
 
   /* we are done */
@@ -819,15 +914,15 @@ static int fetchtest_sslinfo_handler(request_rec *r)
   rv = ap_pass_brigade(r->output_filters, bb);
 
 cleanup:
-  if(close_conn)
+  if (close_conn)
     r->connection->keepalive = AP_CONN_CLOSE;
-  if(rv == APR_SUCCESS
-     || r->status != HTTP_OK
-     || c->aborted) {
+  if (rv == APR_SUCCESS || r->status != HTTP_OK || c->aborted)
+  {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "1_1_handler: done");
     return OK;
   }
-  else {
+  else
+  {
     /* no way to know what type of error occurred */
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "1_1_handler failed");
     return AP_FILTER_ERROR;

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,13 +42,13 @@ char *Curl_strdup(const char *str)
   size_t len;
   char *newstr;
 
-  if(!str)
+  if (!str)
     return (char *)NULL;
 
   len = strlen(str) + 1;
 
   newstr = malloc(len);
-  if(!newstr)
+  if (!newstr)
     return (char *)NULL;
 
   memcpy(newstr, str, len);
@@ -71,7 +71,7 @@ wchar_t *Curl_wcsdup(const wchar_t *src)
 {
   size_t length = wcslen(src);
 
-  if(length > (SIZE_T_MAX / sizeof(wchar_t)) - 1)
+  if (length > (SIZE_T_MAX / sizeof(wchar_t)) - 1)
     return (wchar_t *)NULL; /* integer overflow */
 
   return (wchar_t *)Curl_memdup(src, (length + 1) * sizeof(wchar_t));
@@ -91,7 +91,7 @@ wchar_t *Curl_wcsdup(const wchar_t *src)
 void *Curl_memdup(const void *src, size_t length)
 {
   void *buffer = malloc(length);
-  if(!buffer)
+  if (!buffer)
     return NULL; /* fail */
 
   memcpy(buffer, src, length);
@@ -112,7 +112,7 @@ void *Curl_memdup(const void *src, size_t length)
 void *Curl_memdup0(const char *src, size_t length)
 {
   char *buf = malloc(length + 1);
-  if(!buf)
+  if (!buf)
     return NULL;
   memcpy(buf, src, length);
   buf[length] = 0;
@@ -136,7 +136,7 @@ void *Curl_memdup0(const char *src, size_t length)
 void *Curl_saferealloc(void *ptr, size_t size)
 {
   void *datap = realloc(ptr, size);
-  if(size && !datap)
+  if (size && !datap)
     /* only free 'ptr' if size was non-zero */
     free(ptr);
   return datap;

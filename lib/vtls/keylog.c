@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,11 +23,11 @@
  ***************************************************************************/
 #include "fetch_setup.h"
 
-#if defined(USE_OPENSSL) || \
-  defined(USE_GNUTLS) || \
-  defined(USE_WOLFSSL) || \
-  (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || \
-  defined(USE_QUICHE)
+#if defined(USE_OPENSSL) ||                          \
+    defined(USE_GNUTLS) ||                           \
+    defined(USE_WOLFSSL) ||                          \
+    (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || \
+    defined(USE_QUICHE)
 
 #include "keylog.h"
 #include <fetch/fetch.h>
@@ -38,33 +38,34 @@
 
 #define KEYLOG_LABEL_MAXLEN (sizeof("CLIENT_HANDSHAKE_TRAFFIC_SECRET") - 1)
 
-#define CLIENT_RANDOM_SIZE  32
+#define CLIENT_RANDOM_SIZE 32
 
 /*
  * The master secret in TLS 1.2 and before is always 48 bytes. In TLS 1.3, the
  * secret size depends on the cipher suite's hash function which is 32 bytes
  * for SHA-256 and 48 bytes for SHA-384.
  */
-#define SECRET_MAXLEN       48
-
+#define SECRET_MAXLEN 48
 
 /* The fp for the open SSLKEYLOGFILE, or NULL if not open */
 static FILE *keylog_file_fp;
 
-void
-Curl_tls_keylog_open(void)
+void Curl_tls_keylog_open(void)
 {
   char *keylog_file_name;
 
-  if(!keylog_file_fp) {
+  if (!keylog_file_fp)
+  {
     keylog_file_name = fetch_getenv("SSLKEYLOGFILE");
-    if(keylog_file_name) {
+    if (keylog_file_name)
+    {
       keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
-      if(keylog_file_fp) {
+      if (keylog_file_fp)
+      {
 #ifdef _WIN32
-        if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))
+        if (setvbuf(keylog_file_fp, NULL, _IONBF, 0))
 #else
-        if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
+        if (setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
 #endif
         {
           fclose(keylog_file_fp);
@@ -76,40 +77,41 @@ Curl_tls_keylog_open(void)
   }
 }
 
-void
-Curl_tls_keylog_close(void)
+void Curl_tls_keylog_close(void)
 {
-  if(keylog_file_fp) {
+  if (keylog_file_fp)
+  {
     fclose(keylog_file_fp);
     keylog_file_fp = NULL;
   }
 }
 
-bool
-Curl_tls_keylog_enabled(void)
+bool Curl_tls_keylog_enabled(void)
 {
   return keylog_file_fp != NULL;
 }
 
-bool
-Curl_tls_keylog_write_line(const char *line)
+bool Curl_tls_keylog_write_line(const char *line)
 {
   /* The current maximum valid keylog line length LF and NUL is 195. */
   size_t linelen;
   char buf[256];
 
-  if(!keylog_file_fp || !line) {
+  if (!keylog_file_fp || !line)
+  {
     return FALSE;
   }
 
   linelen = strlen(line);
-  if(linelen == 0 || linelen > sizeof(buf) - 2) {
+  if (linelen == 0 || linelen > sizeof(buf) - 2)
+  {
     /* Empty line or too big to fit in a LF and NUL. */
     return FALSE;
   }
 
   memcpy(buf, line, linelen);
-  if(line[linelen - 1] != '\n') {
+  if (line[linelen - 1] != '\n')
+  {
     buf[linelen++] = '\n';
   }
   buf[linelen] = '\0';
@@ -120,22 +122,23 @@ Curl_tls_keylog_write_line(const char *line)
   return TRUE;
 }
 
-bool
-Curl_tls_keylog_write(const char *label,
-                      const unsigned char client_random[CLIENT_RANDOM_SIZE],
-                      const unsigned char *secret, size_t secretlen)
+bool Curl_tls_keylog_write(const char *label,
+                           const unsigned char client_random[CLIENT_RANDOM_SIZE],
+                           const unsigned char *secret, size_t secretlen)
 {
   const char *hex = "0123456789ABCDEF";
   size_t pos, i;
   char line[KEYLOG_LABEL_MAXLEN + 1 + 2 * CLIENT_RANDOM_SIZE + 1 +
             2 * SECRET_MAXLEN + 1 + 1];
 
-  if(!keylog_file_fp) {
+  if (!keylog_file_fp)
+  {
     return FALSE;
   }
 
   pos = strlen(label);
-  if(pos > KEYLOG_LABEL_MAXLEN || !secretlen || secretlen > SECRET_MAXLEN) {
+  if (pos > KEYLOG_LABEL_MAXLEN || !secretlen || secretlen > SECRET_MAXLEN)
+  {
     /* Should never happen - sanity check anyway. */
     return FALSE;
   }
@@ -144,14 +147,16 @@ Curl_tls_keylog_write(const char *label,
   line[pos++] = ' ';
 
   /* Client Random */
-  for(i = 0; i < CLIENT_RANDOM_SIZE; i++) {
+  for (i = 0; i < CLIENT_RANDOM_SIZE; i++)
+  {
     line[pos++] = hex[client_random[i] >> 4];
     line[pos++] = hex[client_random[i] & 0xF];
   }
   line[pos++] = ' ';
 
   /* Secret */
-  for(i = 0; i < secretlen; i++) {
+  for (i = 0; i < secretlen; i++)
+  {
     line[pos++] = hex[secret[i] >> 4];
     line[pos++] = hex[secret[i] & 0xF];
   }
@@ -164,4 +169,4 @@ Curl_tls_keylog_write(const char *label,
   return TRUE;
 }
 
-#endif  /* TLS or QUIC backend */
+#endif /* TLS or QUIC backend */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,6 @@ static bool unit_setup(void)
 
 static void unit_stop(void)
 {
-
 }
 
 /*
@@ -81,39 +80,39 @@ static void expect_timer_seconds(struct Curl_easy *data, int seconds)
  * second for the redirect request, then the resulting t_starttransfer should
  * be 3 seconds. */
 UNITTEST_START
-  struct Curl_easy data;
-  struct fetchtime now = Curl_now();
+struct Curl_easy data;
+struct fetchtime now = Curl_now();
 
-  data.progress.t_nslookup = 0;
-  data.progress.t_connect = 0;
-  data.progress.t_appconnect = 0;
-  data.progress.t_pretransfer = 0;
-  data.progress.t_starttransfer = 0;
-  data.progress.t_redirect = 0;
-  data.progress.start.tv_sec = now.tv_sec - 2;
-  data.progress.start.tv_usec = now.tv_usec;
-  fake_t_startsingle_time(&data, now, -2);
+data.progress.t_nslookup = 0;
+data.progress.t_connect = 0;
+data.progress.t_appconnect = 0;
+data.progress.t_pretransfer = 0;
+data.progress.t_starttransfer = 0;
+data.progress.t_redirect = 0;
+data.progress.start.tv_sec = now.tv_sec - 2;
+data.progress.start.tv_usec = now.tv_usec;
+fake_t_startsingle_time(&data, now, -2);
 
-  Curl_pgrsTime(&data, TIMER_NAMELOOKUP);
-  Curl_pgrsTime(&data, TIMER_CONNECT);
-  Curl_pgrsTime(&data, TIMER_APPCONNECT);
-  Curl_pgrsTime(&data, TIMER_PRETRANSFER);
-  Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
+Curl_pgrsTime(&data, TIMER_NAMELOOKUP);
+Curl_pgrsTime(&data, TIMER_CONNECT);
+Curl_pgrsTime(&data, TIMER_APPCONNECT);
+Curl_pgrsTime(&data, TIMER_PRETRANSFER);
+Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
 
-  expect_timer_seconds(&data, 2);
+expect_timer_seconds(&data, 2);
 
-  /* now simulate the redirect */
-  data.progress.t_redirect = data.progress.t_starttransfer + 1;
-  fake_t_startsingle_time(&data, now, -1);
+/* now simulate the redirect */
+data.progress.t_redirect = data.progress.t_starttransfer + 1;
+fake_t_startsingle_time(&data, now, -1);
 
-  Curl_pgrsTime(&data, TIMER_NAMELOOKUP);
-  Curl_pgrsTime(&data, TIMER_CONNECT);
-  Curl_pgrsTime(&data, TIMER_APPCONNECT);
-  Curl_pgrsTime(&data, TIMER_PRETRANSFER);
-  /* ensure t_starttransfer is only set on the first invocation by attempting
-   * to set it twice */
-  Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
-  Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
+Curl_pgrsTime(&data, TIMER_NAMELOOKUP);
+Curl_pgrsTime(&data, TIMER_CONNECT);
+Curl_pgrsTime(&data, TIMER_APPCONNECT);
+Curl_pgrsTime(&data, TIMER_PRETRANSFER);
+/* ensure t_starttransfer is only set on the first invocation by attempting
+ * to set it twice */
+Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
+Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
 
-  expect_timer_seconds(&data, 3);
+expect_timer_seconds(&data, 3);
 UNITTEST_STOP

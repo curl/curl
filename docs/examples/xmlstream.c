@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,12 +40,14 @@
 #include <expat.h>
 #include <fetch/fetch.h>
 
-struct MemoryStruct {
+struct MemoryStruct
+{
   char *memory;
   size_t size;
 };
 
-struct ParserStruct {
+struct ParserStruct
+{
   int ok;
   size_t tags;
   size_t depth;
@@ -55,7 +57,7 @@ struct ParserStruct {
 static void startElement(void *userData, const XML_Char *name,
                          const XML_Char **atts)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   state->tags++;
   state->depth++;
 
@@ -70,11 +72,12 @@ static void startElement(void *userData, const XML_Char *name,
 
 static void characterDataHandler(void *userData, const XML_Char *s, int len)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   struct MemoryStruct *mem = &state->characters;
 
   char *ptr = realloc(mem->memory, mem->size + (unsigned long)len + 1);
-  if(!ptr) {
+  if (!ptr)
+  {
     /* Out of memory. */
     fprintf(stderr, "Not enough memory (realloc returned NULL).\n");
     state->ok = 0;
@@ -89,7 +92,7 @@ static void characterDataHandler(void *userData, const XML_Char *s, int len)
 
 static void endElement(void *userData, const XML_Char *name)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   state->depth--;
 
   printf("%5lu   %10lu   %s\n", state->depth, state->characters.size, name);
@@ -98,15 +101,16 @@ static void endElement(void *userData, const XML_Char *name)
 static size_t parseStreamCallback(void *contents, size_t length, size_t nmemb,
                                   void *userp)
 {
-  XML_Parser parser = (XML_Parser) userp;
+  XML_Parser parser = (XML_Parser)userp;
   size_t real_size = length * nmemb;
-  struct ParserStruct *state = (struct ParserStruct *) XML_GetUserData(parser);
+  struct ParserStruct *state = (struct ParserStruct *)XML_GetUserData(parser);
 
   /* Only parse if we are not already in a failure state. */
-  if(state->ok && XML_Parse(parser, contents, (int)real_size, 0) == 0) {
+  if (state->ok && XML_Parse(parser, contents, (int)real_size, 0) == 0)
+  {
     enum XML_Error error_code = XML_GetErrorCode(parser);
     fprintf(stderr, "Parsing response buffer of length %lu failed"
-            " with error code %d (%s).\n",
+                    " with error code %d (%s).\n",
             real_size, error_code, XML_ErrorString(error_code));
     state->ok = 0;
   }
@@ -135,7 +139,7 @@ int main(void)
   fetch_global_init(FETCH_GLOBAL_DEFAULT);
   fetch_handle = fetch_easy_init();
   fetch_easy_setopt(fetch_handle, FETCHOPT_URL,
-                   "https://www.w3schools.com/xml/simple.xml");
+                    "https://www.w3schools.com/xml/simple.xml");
   fetch_easy_setopt(fetch_handle, FETCHOPT_WRITEFUNCTION, parseStreamCallback);
   fetch_easy_setopt(fetch_handle, FETCHOPT_WRITEDATA, (void *)parser);
 
@@ -143,18 +147,22 @@ int main(void)
 
   /* Perform the request and any follow-up parsing. */
   res = fetch_easy_perform(fetch_handle);
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_easy_perform() failed: %s\n",
             fetch_easy_strerror(res));
   }
-  else if(state.ok) {
+  else if (state.ok)
+  {
     /* Expat requires one final call to finalize parsing. */
-    if(XML_Parse(parser, NULL, 0, 1) == 0) {
+    if (XML_Parse(parser, NULL, 0, 1) == 0)
+    {
       enum XML_Error error_code = XML_GetErrorCode(parser);
       fprintf(stderr, "Finalizing parsing failed with error code %d (%s).\n",
               error_code, XML_ErrorString(error_code));
     }
-    else {
+    else
+    {
       printf("                     --------------\n");
       printf("                     %lu tags total\n", state.tags);
     }

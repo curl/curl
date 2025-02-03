@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,11 +45,11 @@ int main(void)
   fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
   fetch = fetch_easy_init();
-  if(!fetch)
+  if (!fetch)
     return 1;
 
   mfetch = fetch_multi_init();
-  if(!mfetch)
+  if (!mfetch)
     return 2;
 
   /* Set username and password */
@@ -62,16 +62,17 @@ int main(void)
   /* Tell the multi stack about our easy handle */
   fetch_multi_add_handle(mfetch, fetch);
 
-  do {
+  do
+  {
     FETCHMcode mc = fetch_multi_perform(mfetch, &still_running);
 
-    if(still_running)
+    if (still_running)
       /* wait for activity, timeout or "nothing" */
       mc = fetch_multi_poll(mfetch, NULL, 0, 1000, NULL);
 
-    if(mc)
+    if (mc)
       break;
-  } while(still_running);
+  } while (still_running);
 
   /* Always cleanup */
   fetch_multi_remove_handle(mfetch, fetch);

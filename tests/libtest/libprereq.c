@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,8 @@
  ***************************************************************************/
 #include "test.h"
 
-typedef struct prcs {
+typedef struct prcs
+{
   int prereq_retcode;
   int ipv6;
 } PRCS;
@@ -36,11 +37,13 @@ static int prereq_callback(void *clientp,
 {
   PRCS *prereq_cb = (PRCS *)clientp;
 
-  if(prereq_cb->ipv6) {
+  if (prereq_cb->ipv6)
+  {
     printf("Connected to [%s]\n", conn_primary_ip);
     printf("Connected from [%s]\n", conn_local_ip);
   }
-  else {
+  else
+  {
     printf("Connected to %s\n", conn_primary_ip);
     printf("Connected from %s\n", conn_local_ip);
   }
@@ -63,12 +66,15 @@ FETCHcode test(char *URL)
   fetch_global_init(FETCH_GLOBAL_ALL);
   fetch = fetch_easy_init();
 
-  if(fetch) {
-    if(strstr(URL, "#ipv6")) {
+  if (fetch)
+  {
+    if (strstr(URL, "#ipv6"))
+    {
       /* The IP addresses should be surrounded by brackets! */
       prereq_cb.ipv6 = 1;
     }
-    if(strstr(URL, "#err")) {
+    if (strstr(URL, "#err"))
+    {
       /* Set the callback to exit with failure */
       prereq_cb.prereq_retcode = FETCH_PREREQFUNC_ABORT;
     }
@@ -78,15 +84,17 @@ FETCHcode test(char *URL)
     fetch_easy_setopt(fetch, FETCHOPT_PREREQDATA, &prereq_cb);
     fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, stderr);
 
-    if(strstr(URL, "#redir")) {
+    if (strstr(URL, "#redir"))
+    {
       /* Enable follow-location */
       fetch_easy_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 1);
     }
 
     ret = fetch_easy_perform(fetch);
-    if(ret) {
+    if (ret)
+    {
       fprintf(stderr, "%s:%d fetch_easy_perform() failed with code %d (%s)\n",
-          __FILE__, __LINE__, ret, fetch_easy_strerror(ret));
+              __FILE__, __LINE__, ret, fetch_easy_strerror(ret));
       goto test_cleanup;
     }
   }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,18 +38,19 @@
 
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
    and RtlVerifyVersionInfo (RTLOSVERSIONINFOEXW) */
-struct OUR_OSVERSIONINFOEXW {
-  ULONG  dwOSVersionInfoSize;
-  ULONG  dwMajorVersion;
-  ULONG  dwMinorVersion;
-  ULONG  dwBuildNumber;
-  ULONG  dwPlatformId;
-  WCHAR  szCSDVersion[128];
+struct OUR_OSVERSIONINFOEXW
+{
+  ULONG dwOSVersionInfoSize;
+  ULONG dwMajorVersion;
+  ULONG dwMinorVersion;
+  ULONG dwBuildNumber;
+  ULONG dwPlatformId;
+  WCHAR szCSDVersion[128];
   USHORT wServicePackMajor;
   USHORT wServicePackMinor;
   USHORT wSuiteMask;
-  UCHAR  wProductType;
-  UCHAR  wReserved;
+  UCHAR wProductType;
+  UCHAR wReserved;
 };
 
 /*
@@ -72,10 +73,10 @@ struct OUR_OSVERSIONINFOEXW {
  * Returns TRUE if matched; otherwise FALSE.
  */
 bool fetchx_verify_windows_version(const unsigned int majorVersion,
-                                  const unsigned int minorVersion,
-                                  const unsigned int buildVersion,
-                                  const PlatformIdentifier platform,
-                                  const VersionCondition condition)
+                                   const unsigned int minorVersion,
+                                   const unsigned int buildVersion,
+                                   const PlatformIdentifier platform,
+                                   const VersionCondition condition)
 {
   bool matched = FALSE;
 
@@ -87,7 +88,8 @@ bool fetchx_verify_windows_version(const unsigned int majorVersion,
 
   (void)buildVersion;
 
-  switch(condition) {
+  switch (condition)
+  {
   case VERSION_LESS_THAN:
     matched = targetVersion < fullVersion;
     break;
@@ -109,7 +111,8 @@ bool fetchx_verify_windows_version(const unsigned int majorVersion,
     break;
   }
 
-  if(matched && (platform == PLATFORM_WINDOWS)) {
+  if (matched && (platform == PLATFORM_WINDOWS))
+  {
     /* we are always running on PLATFORM_WINNT */
     matched = FALSE;
   }
@@ -121,72 +124,76 @@ bool fetchx_verify_windows_version(const unsigned int majorVersion,
   osver.dwOSVersionInfoSize = sizeof(osver);
 
   /* Find out Windows version */
-  if(GetVersionEx(&osver)) {
+  if (GetVersionEx(&osver))
+  {
     /* Verify the Operating System version number */
-    switch(condition) {
+    switch (condition)
+    {
     case VERSION_LESS_THAN:
-      if(osver.dwMajorVersion < majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion < minorVersion) ||
-        (buildVersion != 0 &&
-         (osver.dwMajorVersion == majorVersion &&
-          osver.dwMinorVersion == minorVersion &&
-          osver.dwBuildNumber < buildVersion)))
+      if (osver.dwMajorVersion < majorVersion ||
+          (osver.dwMajorVersion == majorVersion &&
+           osver.dwMinorVersion < minorVersion) ||
+          (buildVersion != 0 &&
+           (osver.dwMajorVersion == majorVersion &&
+            osver.dwMinorVersion == minorVersion &&
+            osver.dwBuildNumber < buildVersion)))
         matched = TRUE;
       break;
 
     case VERSION_LESS_THAN_EQUAL:
-      if(osver.dwMajorVersion < majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion < minorVersion) ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion == minorVersion &&
-         (buildVersion == 0 ||
-          osver.dwBuildNumber <= buildVersion)))
+      if (osver.dwMajorVersion < majorVersion ||
+          (osver.dwMajorVersion == majorVersion &&
+           osver.dwMinorVersion < minorVersion) ||
+          (osver.dwMajorVersion == majorVersion &&
+           osver.dwMinorVersion == minorVersion &&
+           (buildVersion == 0 ||
+            osver.dwBuildNumber <= buildVersion)))
         matched = TRUE;
       break;
 
     case VERSION_EQUAL:
-      if(osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion == minorVersion &&
-        (buildVersion == 0 ||
-         osver.dwBuildNumber == buildVersion))
+      if (osver.dwMajorVersion == majorVersion &&
+          osver.dwMinorVersion == minorVersion &&
+          (buildVersion == 0 ||
+           osver.dwBuildNumber == buildVersion))
         matched = TRUE;
       break;
 
     case VERSION_GREATER_THAN_EQUAL:
-      if(osver.dwMajorVersion > majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion > minorVersion) ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion == minorVersion &&
-         (buildVersion == 0 ||
-          osver.dwBuildNumber >= buildVersion)))
+      if (osver.dwMajorVersion > majorVersion ||
+          (osver.dwMajorVersion == majorVersion &&
+           osver.dwMinorVersion > minorVersion) ||
+          (osver.dwMajorVersion == majorVersion &&
+           osver.dwMinorVersion == minorVersion &&
+           (buildVersion == 0 ||
+            osver.dwBuildNumber >= buildVersion)))
         matched = TRUE;
       break;
 
     case VERSION_GREATER_THAN:
-      if(osver.dwMajorVersion > majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion > minorVersion) ||
-        (buildVersion != 0 &&
-         (osver.dwMajorVersion == majorVersion &&
-          osver.dwMinorVersion == minorVersion &&
-          osver.dwBuildNumber > buildVersion)))
+      if (osver.dwMajorVersion > majorVersion ||
+          (osver.dwMajorVersion == majorVersion &&
+           osver.dwMinorVersion > minorVersion) ||
+          (buildVersion != 0 &&
+           (osver.dwMajorVersion == majorVersion &&
+            osver.dwMinorVersion == minorVersion &&
+            osver.dwBuildNumber > buildVersion)))
         matched = TRUE;
       break;
     }
 
     /* Verify the platform identifier (if necessary) */
-    if(matched) {
-      switch(platform) {
+    if (matched)
+    {
+      switch (platform)
+      {
       case PLATFORM_WINDOWS:
-        if(osver.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
+        if (osver.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
           matched = FALSE;
         break;
 
       case PLATFORM_WINNT:
-        if(osver.dwPlatformId != VER_PLATFORM_WIN32_NT)
+        if (osver.dwPlatformId != VER_PLATFORM_WIN32_NT)
           matched = FALSE;
         break;
 
@@ -206,18 +213,19 @@ bool fetchx_verify_windows_version(const unsigned int majorVersion,
   DWORD dwTypeMask = VER_MAJORVERSION | VER_MINORVERSION |
                      VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR;
 
-  typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
-    (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
+  typedef LONG(APIENTRY * RTLVERIFYVERSIONINFO_FN)(struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
   static RTLVERIFYVERSIONINFO_FN pRtlVerifyVersionInfo;
   static bool onetime = TRUE; /* safe because first call is during init */
 
-  if(onetime) {
+  if (onetime)
+  {
     pRtlVerifyVersionInfo = FETCHX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
+                                                 (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
     onetime = FALSE;
   }
 
-  switch(condition) {
+  switch (condition)
+  {
   case VERSION_LESS_THAN:
     majorCondition = VER_LESS;
     minorCondition = VER_LESS;
@@ -267,9 +275,9 @@ bool fetchx_verify_windows_version(const unsigned int majorVersion,
   osver.dwMajorVersion = majorVersion;
   osver.dwMinorVersion = minorVersion;
   osver.dwBuildNumber = buildVersion;
-  if(platform == PLATFORM_WINDOWS)
+  if (platform == PLATFORM_WINDOWS)
     osver.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
-  else if(platform == PLATFORM_WINNT)
+  else if (platform == PLATFORM_WINNT)
     osver.dwPlatformId = VER_PLATFORM_WIN32_NT;
 
   cm = VerSetConditionMask(cm, VER_MAJORVERSION, majorCondition);
@@ -277,7 +285,8 @@ bool fetchx_verify_windows_version(const unsigned int majorVersion,
   cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, spMajorCondition);
   cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, spMinorCondition);
 
-  if(platform != PLATFORM_DONT_CARE) {
+  if (platform != PLATFORM_DONT_CARE)
+  {
     cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
     dwTypeMask |= VER_PLATFORMID;
   }
@@ -287,7 +296,7 @@ bool fetchx_verify_windows_version(const unsigned int majorVersion,
      the real version always, so we use the Rtl variant of the function when
      possible. Note though the function signatures have underlying fundamental
      types that are the same, the return values are different. */
-  if(pRtlVerifyVersionInfo)
+  if (pRtlVerifyVersionInfo)
     matched = !pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
   else
     matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver, dwTypeMask, cm);
@@ -297,20 +306,21 @@ bool fetchx_verify_windows_version(const unsigned int majorVersion,
      do the same for build (eg 1.9 build 222 is not less than 2.0 build 111).
      Build comparison is only needed when build numbers are equal (eg 1.9 is
      always less than 2.0 so build comparison is not needed). */
-  if(matched && buildVersion &&
-     (condition == VERSION_EQUAL ||
-      ((condition == VERSION_GREATER_THAN_EQUAL ||
-        condition == VERSION_LESS_THAN_EQUAL) &&
+  if (matched && buildVersion &&
+      (condition == VERSION_EQUAL ||
+       ((condition == VERSION_GREATER_THAN_EQUAL ||
+         condition == VERSION_LESS_THAN_EQUAL) &&
         fetchx_verify_windows_version(majorVersion, minorVersion, 0,
-                                     platform, VERSION_EQUAL)))) {
+                                      platform, VERSION_EQUAL))))
+  {
 
     cm = VerSetConditionMask(0, VER_BUILDNUMBER, buildCondition);
     dwTypeMask = VER_BUILDNUMBER;
-    if(pRtlVerifyVersionInfo)
+    if (pRtlVerifyVersionInfo)
       matched = !pRtlVerifyVersionInfo(&osver, dwTypeMask, cm);
     else
       matched = !!VerifyVersionInfoW((OSVERSIONINFOEXW *)&osver,
-                                      dwTypeMask, cm);
+                                     dwTypeMask, cm);
   }
 
 #endif

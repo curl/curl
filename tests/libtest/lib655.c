@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,8 @@ resolver_alloc_cb_fail(void *resolver_state, void *reserved, void *userdata)
   (void)reserved;
 
   cb_count++;
-  if(strcmp(userdata, TEST_DATA_STRING)) {
+  if (strcmp(userdata, TEST_DATA_STRING))
+  {
     fprintf(stderr, "Invalid test data received");
     exit(1);
   }
@@ -50,7 +51,8 @@ resolver_alloc_cb_pass(void *resolver_state, void *reserved, void *userdata)
   (void)reserved;
 
   cb_count++;
-  if(strcmp(userdata, TEST_DATA_STRING)) {
+  if (strcmp(userdata, TEST_DATA_STRING))
+  {
     fprintf(stderr, "Invalid test data received");
     exit(1);
   }
@@ -63,12 +65,14 @@ FETCHcode test(char *URL)
   FETCH *fetch;
   FETCHcode res = FETCHE_OK;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -82,10 +86,12 @@ FETCHcode test(char *URL)
 
   /* this should fail */
   res = fetch_easy_perform(fetch);
-  if(res != FETCHE_COULDNT_RESOLVE_HOST) {
+  if (res != FETCHE_COULDNT_RESOLVE_HOST)
+  {
     fprintf(stderr, "fetch_easy_perform should have returned "
-            "FETCHE_COULDNT_RESOLVE_HOST but instead returned error %d\n", res);
-    if(res == FETCHE_OK)
+                    "FETCHE_COULDNT_RESOLVE_HOST but instead returned error %d\n",
+            res);
+    if (res == FETCHE_OK)
       res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
@@ -94,12 +100,14 @@ FETCHcode test(char *URL)
 
   /* this should succeed */
   res = fetch_easy_perform(fetch);
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "fetch_easy_perform failed.\n");
     goto test_cleanup;
   }
 
-  if(cb_count != 2) {
+  if (cb_count != 2)
+  {
     fprintf(stderr, "Unexpected number of callbacks: %d\n", cb_count);
     res = TEST_ERR_FAILURE;
     goto test_cleanup;

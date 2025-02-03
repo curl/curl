@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,15 +27,16 @@
 
 #if defined(_WIN32) || defined(MSDOS)
 
-#define SANITIZE_ALLOW_PATH      (1<<1)  /* Allow path separators and colons */
-#define SANITIZE_ALLOW_RESERVED  (1<<2)  /* Allow reserved device names */
+#define SANITIZE_ALLOW_PATH (1 << 1)     /* Allow path separators and colons */
+#define SANITIZE_ALLOW_RESERVED (1 << 2) /* Allow reserved device names */
 
-typedef enum {
-  SANITIZE_ERR_OK = 0,           /* 0 - OK */
-  SANITIZE_ERR_INVALID_PATH,     /* 1 - the path is invalid */
-  SANITIZE_ERR_BAD_ARGUMENT,     /* 2 - bad function parameter */
-  SANITIZE_ERR_OUT_OF_MEMORY,    /* 3 - out of memory */
-  SANITIZE_ERR_LAST /* never use! */
+typedef enum
+{
+  SANITIZE_ERR_OK = 0,        /* 0 - OK */
+  SANITIZE_ERR_INVALID_PATH,  /* 1 - the path is invalid */
+  SANITIZE_ERR_BAD_ARGUMENT,  /* 2 - bad function parameter */
+  SANITIZE_ERR_OUT_OF_MEMORY, /* 3 - out of memory */
+  SANITIZE_ERR_LAST           /* never use! */
 } SANITIZEcode;
 
 SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
@@ -48,9 +49,9 @@ char **__crt0_glob_function(char *arg);
 #ifdef _WIN32
 
 #if !defined(FETCH_WINDOWS_UWP) && \
-  !defined(FETCH_DISABLE_CA_SEARCH) && !defined(FETCH_CA_SEARCH_SAFE)
+    !defined(FETCH_DISABLE_CA_SEARCH) && !defined(FETCH_CA_SEARCH_SAFE)
 FETCHcode FindWin32CACert(struct OperationConfig *config,
-                         const TCHAR *bundle_file);
+                          const TCHAR *bundle_file);
 #endif
 struct fetch_slist *GetLoadedModulePaths(void);
 FETCHcode win32_init(void);

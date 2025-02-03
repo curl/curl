@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,8 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct headerinfo {
+struct headerinfo
+{
   size_t largest;
 };
 
@@ -37,7 +38,7 @@ static size_t header(char *ptr, size_t size, size_t nmemb, void *stream)
   struct headerinfo *info = (struct headerinfo *)stream;
   (void)ptr;
 
-  if(headersize > info->largest)
+  if (headersize > info->largest)
     /* remember the longest header */
     info->largest = headersize;
 
@@ -61,9 +62,10 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_URL, URL);
 
   code = fetch_easy_perform(fetch);
-  if(FETCHE_OK != code) {
+  if (FETCHE_OK != code)
+  {
     fprintf(stderr, "%s:%d fetch_easy_perform() failed, "
-            "with code %d (%s)\n",
+                    "with code %d (%s)\n",
             __FILE__, __LINE__, code, fetch_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;

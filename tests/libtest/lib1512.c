@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,7 +46,8 @@ FETCHcode test(char *URL)
   char target_url[256];
   (void)URL; /* URL is setup in the code */
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -57,7 +58,8 @@ FETCHcode test(char *URL)
   slist = fetch_slist_append(slist, dnsentry);
 
   /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for (i = 0; i < NUM_HANDLES; i++)
+  {
     /* get an easy handle */
     easy_init(fetch[i]);
     /* specify target */
@@ -72,17 +74,17 @@ FETCHcode test(char *URL)
     easy_setopt(fetch[i], FETCHOPT_HEADER, 1L);
 
     FETCH_IGNORE_DEPRECATION(
-      easy_setopt(fetch[i], FETCHOPT_DNS_USE_GLOBAL_CACHE, 1L);
-    )
+        easy_setopt(fetch[i], FETCHOPT_DNS_USE_GLOBAL_CACHE, 1L);)
   }
 
   /* make the first one populate the GLOBAL cache */
   easy_setopt(fetch[0], FETCHOPT_RESOLVE, slist);
 
   /* run NUM_HANDLES transfers */
-  for(i = 0; (i < NUM_HANDLES) && !res; i++) {
+  for (i = 0; (i < NUM_HANDLES) && !res; i++)
+  {
     res = fetch_easy_perform(fetch[i]);
-    if(res)
+    if (res)
       goto test_cleanup;
   }
 

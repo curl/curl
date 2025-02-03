@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,7 @@
  ***************************************************************************/
 /*
  * This test case is based on the sample code provided by Saqib Ali
- * https://fetch.se/mail/lib-2011-03/0066.html
+ * https://curl.se/mail/lib-2011-03/0066.html
  */
 
 #include "test.h"
@@ -49,7 +49,7 @@ FETCHcode test(char *URL)
   easy_init(fetch);
 
   easy_setopt(fetch, FETCHOPT_USERPWD, libtest_arg2);
-  easy_setopt(fetch, FETCHOPT_SSH_PUBLIC_KEYFILE,  test_argv[3]);
+  easy_setopt(fetch, FETCHOPT_SSH_PUBLIC_KEYFILE, test_argv[3]);
   easy_setopt(fetch, FETCHOPT_SSH_PRIVATE_KEYFILE, test_argv[4]);
 
   easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
@@ -71,9 +71,11 @@ FETCHcode test(char *URL)
 
   fprintf(stderr, "fetch_multi_remove_handle()...\n");
   mres = fetch_multi_remove_handle(multiHandle, fetch);
-  if(mres) {
+  if (mres)
+  {
     fprintf(stderr, "fetch_multi_remove_handle() failed, "
-            "with code %d\n", (int)mres);
+                    "with code %d\n",
+            (int)mres);
     res = TEST_ERR_MULTI;
   }
   else

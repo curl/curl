@@ -11,7 +11,7 @@ SPDX-License-Identifier: fetch
 ### Mailing Lists
 
 The mailing lists we have are all listed and described on the [fetch
-website](https://fetch.se/mail/).
+website](https://curl.se/mail/).
 
 Each mailing list is targeted to a specific set of users and subjects, please
 use the one or the ones that suit you the most.

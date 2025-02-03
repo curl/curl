@@ -27,11 +27,11 @@ FETCHOPT_TLS13_CIPHERS - ciphers suites to use for TLS 1.3
 
 # SYNOPSIS
 
-~~~c
+```c
 #include <fetch/fetch.h>
 
 FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_TLS13_CIPHERS, char *list);
-~~~
+```
 
 # DESCRIPTION
 
@@ -43,13 +43,14 @@ separated by colons.
 For setting TLS 1.2 (1.1, 1.0) ciphers see FETCHOPT_SSL_CIPHER_LIST(3).
 
 A valid example of a cipher list is:
-~~~c
+
+```c
 "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256"
-~~~
+```
 
 Find more details about cipher lists on this URL:
 
- https://fetch.se/docs/ssl-ciphers.html
+https://curl.se/docs/ssl-ciphers.html
 
 The application does not have to keep the string around after setting this
 option.
@@ -65,7 +66,7 @@ NULL, use internal built-in
 
 # EXAMPLE
 
-~~~c
+```c
 int main(void)
 {
   FETCH *fetch = fetch_easy_init();
@@ -78,7 +79,7 @@ int main(void)
     fetch_easy_cleanup(fetch);
   }
 }
-~~~
+```
 
 # HISTORY
 

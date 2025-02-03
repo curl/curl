@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,8 +28,8 @@
 
 #ifndef FETCH_DISABLE_DIGEST_AUTH
 
-#define DIGEST_MAX_VALUE_LENGTH           256
-#define DIGEST_MAX_CONTENT_LENGTH         1024
+#define DIGEST_MAX_VALUE_LENGTH 256
+#define DIGEST_MAX_CONTENT_LENGTH 1024
 
 /* This is used to extract the realm from a challenge message */
 bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,

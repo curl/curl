@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,19 +31,23 @@
  * Macros used in operate()
  */
 
-#define SETOPT_CHECK(v,opt) do {              \
-    result = (v);                             \
-  } while(0)
+#define SETOPT_CHECK(v, opt) \
+  do                         \
+  {                          \
+    result = (v);            \
+  } while (0)
 
 #ifndef FETCH_DISABLE_LIBFETCH_OPTION
 
 /* Associate symbolic names with option values */
-struct NameValue {
+struct NameValue
+{
   const char *name;
   long value;
 };
 
-struct NameValueUnsigned {
+struct NameValueUnsigned
+{
   const char *name;
   unsigned long value;
 };
@@ -80,80 +84,80 @@ extern const struct NameValueUnsigned setopt_nv_FETCHHSTS[];
 /* Intercept setopt calls for --libfetch */
 
 FETCHcode tool_setopt_enum(FETCH *fetch, struct GlobalConfig *config,
-                          const char *name, FETCHoption tag,
-                          const struct NameValue *nv, long lval);
-FETCHcode tool_setopt_SSLVERSION(FETCH *fetch, struct GlobalConfig *config,
-                                const char *name, FETCHoption tag,
-                                long lval);
-FETCHcode tool_setopt_flags(FETCH *fetch, struct GlobalConfig *config,
                            const char *name, FETCHoption tag,
                            const struct NameValue *nv, long lval);
+FETCHcode tool_setopt_SSLVERSION(FETCH *fetch, struct GlobalConfig *config,
+                                 const char *name, FETCHoption tag,
+                                 long lval);
+FETCHcode tool_setopt_flags(FETCH *fetch, struct GlobalConfig *config,
+                            const char *name, FETCHoption tag,
+                            const struct NameValue *nv, long lval);
 FETCHcode tool_setopt_bitmask(FETCH *fetch, struct GlobalConfig *config,
-                             const char *name, FETCHoption tag,
-                             const struct NameValueUnsigned *nv, long lval);
-FETCHcode tool_setopt_mimepost(FETCH *fetch, struct GlobalConfig *config,
                               const char *name, FETCHoption tag,
-                              fetch_mime *mimepost);
+                              const struct NameValueUnsigned *nv, long lval);
+FETCHcode tool_setopt_mimepost(FETCH *fetch, struct GlobalConfig *config,
+                               const char *name, FETCHoption tag,
+                               fetch_mime *mimepost);
 FETCHcode tool_setopt_slist(FETCH *fetch, struct GlobalConfig *config,
-                           const char *name, FETCHoption tag,
-                           struct fetch_slist *list);
+                            const char *name, FETCHoption tag,
+                            struct fetch_slist *list);
 FETCHcode tool_setopt(FETCH *fetch, bool str, struct GlobalConfig *global,
-                     struct OperationConfig *config,
-                     const char *name, FETCHoption tag, ...);
+                      struct OperationConfig *config,
+                      const char *name, FETCHoption tag, ...);
 
-#define my_setopt(x,y,z) \
+#define my_setopt(x, y, z) \
   SETOPT_CHECK(tool_setopt(x, FALSE, global, config, #y, y, z), y)
 
-#define my_setopt_str(x,y,z) \
+#define my_setopt_str(x, y, z) \
   SETOPT_CHECK(tool_setopt(x, TRUE, global, config, #y, y, z), y)
 
-#define my_setopt_enum(x,y,z) \
-  SETOPT_CHECK(tool_setopt_enum(x, global, #y, y, setopt_nv_ ## y, z), y)
+#define my_setopt_enum(x, y, z) \
+  SETOPT_CHECK(tool_setopt_enum(x, global, #y, y, setopt_nv_##y, z), y)
 
-#define my_setopt_SSLVERSION(x,y,z) \
+#define my_setopt_SSLVERSION(x, y, z) \
   SETOPT_CHECK(tool_setopt_SSLVERSION(x, global, #y, y, z), y)
 
-#define my_setopt_bitmask(x,y,z) \
-  SETOPT_CHECK(tool_setopt_bitmask(x, global, #y, y, setopt_nv_ ## y, z), y)
+#define my_setopt_bitmask(x, y, z) \
+  SETOPT_CHECK(tool_setopt_bitmask(x, global, #y, y, setopt_nv_##y, z), y)
 
-#define my_setopt_mimepost(x,y,z) \
+#define my_setopt_mimepost(x, y, z) \
   SETOPT_CHECK(tool_setopt_mimepost(x, global, #y, y, z), y)
 
-#define my_setopt_slist(x,y,z) \
+#define my_setopt_slist(x, y, z) \
   SETOPT_CHECK(tool_setopt_slist(x, global, #y, y, z), y)
 
-#define res_setopt(x,y,z) tool_setopt(x, FALSE, global, config, #y, y, z)
+#define res_setopt(x, y, z) tool_setopt(x, FALSE, global, config, #y, y, z)
 
-#define res_setopt_str(x,y,z) tool_setopt(x, TRUE, global, config, #y, y, z)
+#define res_setopt_str(x, y, z) tool_setopt(x, TRUE, global, config, #y, y, z)
 
 #else /* FETCH_DISABLE_LIBFETCH_OPTION */
 
 /* No --libfetch, so pass options directly to library */
 
-#define my_setopt(x,y,z) \
+#define my_setopt(x, y, z) \
   SETOPT_CHECK(fetch_easy_setopt(x, y, z), y)
 
-#define my_setopt_str(x,y,z) \
+#define my_setopt_str(x, y, z) \
   SETOPT_CHECK(fetch_easy_setopt(x, y, z), y)
 
-#define my_setopt_enum(x,y,z) \
+#define my_setopt_enum(x, y, z) \
   SETOPT_CHECK(fetch_easy_setopt(x, y, z), y)
 
-#define my_setopt_SSLVERSION(x,y,z) \
+#define my_setopt_SSLVERSION(x, y, z) \
   SETOPT_CHECK(fetch_easy_setopt(x, y, z), y)
 
-#define my_setopt_bitmask(x,y,z) \
+#define my_setopt_bitmask(x, y, z) \
   SETOPT_CHECK(fetch_easy_setopt(x, y, z), y)
 
-#define my_setopt_mimepost(x,y,z) \
+#define my_setopt_mimepost(x, y, z) \
   SETOPT_CHECK(fetch_easy_setopt(x, y, z), y)
 
-#define my_setopt_slist(x,y,z) \
+#define my_setopt_slist(x, y, z) \
   SETOPT_CHECK(fetch_easy_setopt(x, y, z), y)
 
-#define res_setopt(x,y,z) fetch_easy_setopt(x,y,z)
+#define res_setopt(x, y, z) fetch_easy_setopt(x, y, z)
 
-#define res_setopt_str(x,y,z) fetch_easy_setopt(x,y,z)
+#define res_setopt_str(x, y, z) fetch_easy_setopt(x, y, z)
 
 #endif /* FETCH_DISABLE_LIBFETCH_OPTION */
 

@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,8 +25,7 @@
  *
  ***************************************************************************/
 
-#if !defined(FETCH_DISABLE_AWS) || !defined(FETCH_DISABLE_DIGEST_AUTH) \
-    || defined(USE_LIBSSH2) || defined(USE_SSL)
+#if !defined(FETCH_DISABLE_AWS) || !defined(FETCH_DISABLE_DIGEST_AUTH) || defined(USE_LIBSSH2) || defined(USE_SSL)
 
 #include <fetch/fetch.h>
 #include "fetch_hmac.h"
@@ -38,7 +37,7 @@ extern const struct HMAC_params Curl_HMAC_SHA256;
 #endif
 
 FETCHcode Curl_sha256it(unsigned char *outbuffer, const unsigned char *input,
-                       const size_t len);
+                        const size_t len);
 
 #endif
 

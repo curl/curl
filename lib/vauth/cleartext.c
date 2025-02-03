@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,9 +27,9 @@
 
 #include "fetch_setup.h"
 
-#if !defined(FETCH_DISABLE_IMAP) || !defined(FETCH_DISABLE_SMTP) ||       \
-  !defined(FETCH_DISABLE_POP3) || \
-  (!defined(FETCH_DISABLE_LDAP) && defined(USE_OPENLDAP))
+#if !defined(FETCH_DISABLE_IMAP) || !defined(FETCH_DISABLE_SMTP) || \
+    !defined(FETCH_DISABLE_POP3) ||                                 \
+    (!defined(FETCH_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
 #include <fetch/fetch.h>
 #include "urldata.h"
@@ -60,9 +60,9 @@
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_create_plain_message(const char *authzid,
-                                        const char *authcid,
-                                        const char *passwd,
-                                        struct bufref *out)
+                                         const char *authcid,
+                                         const char *passwd,
+                                         struct bufref *out)
 {
   char *plainauth;
   size_t plainlen;
@@ -75,17 +75,17 @@ FETCHcode Curl_auth_create_plain_message(const char *authzid,
   plen = strlen(passwd);
 
   /* Compute binary message length. Check for overflows. */
-  if((zlen > SIZE_T_MAX/4) || (clen > SIZE_T_MAX/4) ||
-     (plen > (SIZE_T_MAX/2 - 2)))
+  if ((zlen > SIZE_T_MAX / 4) || (clen > SIZE_T_MAX / 4) ||
+      (plen > (SIZE_T_MAX / 2 - 2)))
     return FETCHE_OUT_OF_MEMORY;
   plainlen = zlen + clen + plen + 2;
 
   plainauth = malloc(plainlen + 1);
-  if(!plainauth)
+  if (!plainauth)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Calculate the reply */
-  if(zlen)
+  if (zlen)
     memcpy(plainauth, authzid, zlen);
   plainauth[zlen] = '\0';
   memcpy(plainauth + zlen + 1, authcid, clen);
@@ -128,7 +128,7 @@ void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
  * Returns void.
  */
 void Curl_auth_create_external_message(const char *user,
-                                           struct bufref *out)
+                                       struct bufref *out)
 {
   /* This is the same formatting as the login message */
   Curl_auth_create_login_message(user, out);

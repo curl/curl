@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,7 +51,8 @@ static void *run_thread(void *ptr)
 
   (void)ptr;
 
-  for(i = 0; i < CONN_NUM; i++) {
+  for (i = 0; i < CONN_NUM; i++)
+  {
     wait_ms(TIME_BETWEEN_START_SECS * 1000);
 
     easy_init(easy);
@@ -61,7 +62,8 @@ static void *run_thread(void *ptr)
 
     pthread_mutex_lock(&lock);
 
-    if(test_failure) {
+    if (test_failure)
+    {
       pthread_mutex_unlock(&lock);
       goto test_cleanup;
     }
@@ -81,7 +83,7 @@ test_cleanup:
 
   pthread_mutex_lock(&lock);
 
-  if(!test_failure)
+  if (!test_failure)
     test_failure = res;
 
   pthread_mutex_unlock(&lock);
@@ -112,30 +114,35 @@ FETCHcode test(char *URL)
   url = URL;
 
   result = pthread_create(&tid, NULL, run_thread, NULL);
-  if(!result)
+  if (!result)
     tid_valid = true;
-  else {
+  else
+  {
     fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
             __FILE__, __LINE__, result);
     goto test_cleanup;
   }
 
-  while(1) {
+  while (1)
+  {
     multi_perform(testmulti, &still_running);
 
     abort_on_test_timeout();
 
-    while((message = fetch_multi_info_read(testmulti, &num))) {
-      if(message->msg == FETCHMSG_DONE) {
+    while ((message = fetch_multi_info_read(testmulti, &num)))
+    {
+      if (message->msg == FETCHMSG_DONE)
+      {
         res = message->data.result;
-        if(res)
+        if (res)
           goto test_cleanup;
         multi_remove_handle(testmulti, message->easy_handle);
         finished_num++;
       }
-      else {
+      else
+      {
         fprintf(stderr, "%s:%d Got an unexpected message from fetch: %i\n",
-              __FILE__, __LINE__, (int)message->msg);
+                __FILE__, __LINE__, (int)message->msg);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
@@ -143,7 +150,7 @@ FETCHcode test(char *URL)
       abort_on_test_timeout();
     }
 
-    if(CONN_NUM == finished_num)
+    if (CONN_NUM == finished_num)
       break;
 
     multi_poll(testmulti, NULL, 0, TEST_HANG_TIMEOUT, &num);
@@ -152,9 +159,11 @@ FETCHcode test(char *URL)
 
     pthread_mutex_lock(&lock);
 
-    while(pending_num > 0) {
+    while (pending_num > 0)
+    {
       res_multi_add_handle(testmulti, pending_handles[pending_num - 1]);
-      if(res) {
+      if (res)
+      {
         pthread_mutex_unlock(&lock);
         goto test_cleanup;
       }
@@ -169,13 +178,15 @@ FETCHcode test(char *URL)
     abort_on_test_timeout();
   }
 
-  if(CONN_NUM != started_num) {
+  if (CONN_NUM != started_num)
+  {
     fprintf(stderr, "%s:%d Not all connections started: %d of %d\n",
             __FILE__, __LINE__, started_num, CONN_NUM);
     goto test_cleanup;
   }
 
-  if(CONN_NUM != finished_num) {
+  if (CONN_NUM != finished_num)
+  {
     fprintf(stderr, "%s:%d Not all connections finished: %d of %d\n",
             __FILE__, __LINE__, started_num, CONN_NUM);
     goto test_cleanup;
@@ -184,17 +195,17 @@ FETCHcode test(char *URL)
 test_cleanup:
 
   pthread_mutex_lock(&lock);
-  if(!test_failure)
+  if (!test_failure)
     test_failure = res;
   pthread_mutex_unlock(&lock);
 
-  if(tid_valid)
+  if (tid_valid)
     pthread_join(tid, NULL);
 
   fetch_multi_cleanup(testmulti);
-  for(i = 0; i < pending_num; i++)
+  for (i = 0; i < pending_num; i++)
     fetch_easy_cleanup(pending_handles[i]);
-  for(i = 0; i < started_num; i++)
+  for (i = 0; i < started_num; i++)
     fetch_easy_cleanup(started_handles[i]);
   fetch_global_cleanup();
 

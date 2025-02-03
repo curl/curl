@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,7 +42,8 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-struct finder {
+struct finder
+{
   const char *env;
   const char *append;
   bool withoutdot;
@@ -51,34 +52,36 @@ struct finder {
 /* The order of the variables below is important, as the index number is used
    in the findfile() function */
 static const struct finder conf_list[] = {
-  { "FETCH_HOME", NULL, FALSE },
-  { "XDG_CONFIG_HOME", NULL, TRUE },
-  { "HOME", NULL, FALSE },
+    {"FETCH_HOME", NULL, FALSE},
+    {"XDG_CONFIG_HOME", NULL, TRUE},
+    {"HOME", NULL, FALSE},
 #ifdef _WIN32
-  { "USERPROFILE", NULL, FALSE },
-  { "APPDATA", NULL, FALSE },
-  { "USERPROFILE", "\\Application Data", FALSE},
+    {"USERPROFILE", NULL, FALSE},
+    {"APPDATA", NULL, FALSE},
+    {"USERPROFILE", "\\Application Data", FALSE},
 #endif
-  /* these are for .fetchrc if XDG_CONFIG_HOME is not defined */
-  { "FETCH_HOME", "/.config", TRUE },
-  { "HOME", "/.config", TRUE },
+    /* these are for .fetchrc if XDG_CONFIG_HOME is not defined */
+    {"FETCH_HOME", "/.config", TRUE},
+    {"HOME", "/.config", TRUE},
 
-  { NULL, NULL, FALSE }
-};
+    {NULL, NULL, FALSE}};
 
 static char *checkhome(const char *home, const char *fname, bool dotscore)
 {
-  const char pref[2] = { '.', '_' };
+  const char pref[2] = {'.', '_'};
   int i;
-  for(i = 0; i < (dotscore ? 2 : 1); i++) {
+  for (i = 0; i < (dotscore ? 2 : 1); i++)
+  {
     char *c;
-    if(dotscore)
+    if (dotscore)
       c = aprintf("%s" DIR_CHAR "%c%s", home, pref[i], &fname[1]);
     else
       c = aprintf("%s" DIR_CHAR "%s", home, fname);
-    if(c) {
+    if (c)
+    {
       int fd = open(c, O_RDONLY);
-      if(fd >= 0) {
+      if (fd >= 0)
+      {
         char *path = strdup(c);
         close(fd);
         fetch_free(c);
@@ -106,47 +109,54 @@ char *findfile(const char *fname, int dotscore)
   DEBUGASSERT(fname && fname[0]);
   DEBUGASSERT((dotscore != 1) || (fname[0] == '.'));
 
-  if(!fname[0])
+  if (!fname[0])
     return NULL;
 
-  for(i = 0; conf_list[i].env; i++) {
+  for (i = 0; conf_list[i].env; i++)
+  {
     char *home = fetch_getenv(conf_list[i].env);
-    if(home) {
+    if (home)
+    {
       char *path;
       const char *filename = fname;
-      if(!home[0]) {
+      if (!home[0])
+      {
         fetch_free(home);
         continue;
       }
-      if(conf_list[i].append) {
+      if (conf_list[i].append)
+      {
         char *c = aprintf("%s%s", home, conf_list[i].append);
         fetch_free(home);
-        if(!c)
+        if (!c)
           return NULL;
         home = c;
       }
-      if(conf_list[i].withoutdot) {
-        if(!dotscore) {
+      if (conf_list[i].withoutdot)
+      {
+        if (!dotscore)
+        {
           /* this is not looking for .fetchrc, or the XDG_CONFIG_HOME was
              defined so we skip the extended check */
           fetch_free(home);
           continue;
         }
-        filename++; /* move past the leading dot */
+        filename++;   /* move past the leading dot */
         dotscore = 0; /* disable it for this check */
       }
       path = checkhome(home, filename, dotscore ? dotscore - 1 : 0);
       fetch_free(home);
-      if(path)
+      if (path)
         return path;
     }
   }
 #if defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
   {
     struct passwd *pw = getpwuid(geteuid());
-    if(pw) {
+    if (pw)
+    {
       char *home = pw->pw_dir;
-      if(home && home[0])
+      if (home && home[0])
         return checkhome(home, fname, FALSE);
     }
   }

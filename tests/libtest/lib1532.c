@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,19 +40,22 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_URL, URL);
 
   res = fetch_easy_perform(fetch);
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "%s:%d fetch_easy_perform() failed with code %d (%s)\n",
             __FILE__, __LINE__, res, fetch_easy_strerror(res));
     goto test_cleanup;
   }
 
   res = fetch_easy_getinfo(fetch, FETCHINFO_RESPONSE_CODE, &httpcode);
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "%s:%d fetch_easy_getinfo() failed with code %d (%s)\n",
             __FILE__, __LINE__, res, fetch_easy_strerror(res));
     goto test_cleanup;
   }
-  if(httpcode != 200) {
+  if (httpcode != 200)
+  {
     fprintf(stderr, "%s:%d unexpected response code %ld\n",
             __FILE__, __LINE__, httpcode);
     res = FETCHE_HTTP_RETURNED_ERROR;
@@ -63,14 +66,17 @@ FETCHcode test(char *URL)
   fetch_easy_reset(fetch);
 
   res = fetch_easy_getinfo(fetch, FETCHINFO_RESPONSE_CODE, &httpcode);
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "%s:%d fetch_easy_getinfo() failed with code %d (%s)\n",
             __FILE__, __LINE__, res, fetch_easy_strerror(res));
     goto test_cleanup;
   }
-  if(httpcode) {
+  if (httpcode)
+  {
     fprintf(stderr, "%s:%d fetch_easy_reset failed to zero the response code\n"
-            "possible regression of github bug 1017\n", __FILE__, __LINE__);
+                    "possible regression of github bug 1017\n",
+            __FILE__, __LINE__);
     res = FETCHE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }

@@ -12,7 +12,7 @@ project.
 ## Publishing Information
 
 All known and public fetch or libfetch related vulnerabilities are listed on
-[the fetch website security page](https://fetch.se/docs/security.html).
+[the fetch website security page](https://curl.se/docs/security.html).
 
 Security vulnerabilities **should not** be entered in the project's public bug
 tracker.
@@ -62,7 +62,7 @@ announcement.
   problem is, its impact, which versions it affects, solutions or workarounds,
   when the release is out and make sure to credit all contributors properly.
   Figure out the CWE (Common Weakness Enumeration) number for the flaw. See
-  [SECURITY-ADVISORY](https://fetch.se/dev/advisory.html) for help on creating
+  [SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
   the advisory.
 
 - Request a CVE Id for the issue. fetch is a CNA (CVE Numbering Authority) and
@@ -143,7 +143,7 @@ has been published.
 
 ## Bug Bounty
 
-See [BUG-BOUNTY](https://fetch.se/docs/bugbounty.html) for details on the
+See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
 bug bounty program.
 
 # Severity levels
@@ -173,7 +173,7 @@ confidentiality, integrity or availability problems.
 This is a security problem that is truly hard or unlikely to exploit or
 trigger. Due to timing, platform requirements or the fact that options or
 protocols involved are rare etc. [Past
-example](https://fetch.se/docs/CVE-2022-43552.html)
+example](https://curl.se/docs/CVE-2022-43552.html)
 
 ## Medium
 
@@ -181,14 +181,14 @@ This is a security problem that is less hard than **Low** to exploit or
 trigger. Less strict timing, wider platforms availability or involving more
 widely used options or protocols. A problem that usually needs something else
 to also happen to become serious. [Past
-example](https://fetch.se/docs/CVE-2022-32206.html)
+example](https://curl.se/docs/CVE-2022-32206.html)
 
 ## High
 
 This issue in itself a serious problem with real world impact. Flaws that can
 easily compromise the confidentiality, integrity or availability of resources.
 Exploiting or triggering this problem is not hard. [Past
-example](https://fetch.se/docs/CVE-2019-3822.html)
+example](https://curl.se/docs/CVE-2019-3822.html)
 
 ## Critical
 
@@ -196,7 +196,7 @@ Easily exploitable by a remote unauthenticated attacker and lead to system
 compromise (arbitrary code execution) without requiring user interaction, with
 a common configuration on a popular platform. This issue has few restrictions
 and requirements and can be exploited easily using most fetch configurations.
-[Past example](https://fetch.se/docs/CVE-2000-0973.html)
+[Past example](https://curl.se/docs/CVE-2000-0973.html)
 
 # Not security issues
 
@@ -208,7 +208,7 @@ We do not consider a small memory leak a security problem; even if the amount
 of allocated memory grows by a small amount every now and then. Long-living
 applications and services already need to have counter-measures and deal with
 growing memory usage, be it leaks or just increased use. A small memory or
-resource leak is then expected to *not* cause a security problem.
+resource leak is then expected to _not_ cause a security problem.
 
 Of course there can be a discussion if a leak is small or not. A large leak
 can be considered a security problem due to the DOS risk. If leaked memory
@@ -270,12 +270,12 @@ arguments even if some of them that are not blanked might contain sensitive
 data. We consider this functionality a best-effort and omissions are not
 security vulnerabilities.
 
- - not all systems allow the arguments to be blanked in the first place
- - since fetch blanks the argument itself they are readable for a short moment
-   no matter what
- - virtually every argument can contain sensitive data, depending on use
- - blanking all arguments would make it impractical for users to differentiate
-   fetch command lines in process listings
+- not all systems allow the arguments to be blanked in the first place
+- since fetch blanks the argument itself they are readable for a short moment
+  no matter what
+- virtually every argument can contain sensitive data, depending on use
+- blanking all arguments would make it impractical for users to differentiate
+  fetch command lines in process listings
 
 ## Busy-loops
 
@@ -325,10 +325,10 @@ security issues.
 
 ## Legacy dependencies
 
-Problems that can be triggered only by the use of a *legacy dependency* are
+Problems that can be triggered only by the use of a _legacy dependency_ are
 not considered security problems.
 
-A *legacy dependency* is here defined as:
+A _legacy dependency_ is here defined as:
 
 - the legacy version was released over ten years ago AND
 

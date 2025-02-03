@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,7 +41,6 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-
 /*
  * Curl_auth_create_cram_md5_message()
  *
@@ -58,9 +57,9 @@
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
-                                           const char *userp,
-                                           const char *passwdp,
-                                           struct bufref *out)
+                                            const char *userp,
+                                            const char *passwdp,
+                                            struct bufref *out)
 {
   struct HMAC_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];
@@ -68,13 +67,13 @@ FETCHcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
 
   /* Compute the digest using the password as the key */
   ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
-                        (const unsigned char *) passwdp,
+                        (const unsigned char *)passwdp,
                         fetchx_uztoui(strlen(passwdp)));
-  if(!ctxt)
+  if (!ctxt)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
-  if(Curl_bufref_len(chlg))
+  if (Curl_bufref_len(chlg))
     Curl_HMAC_update(ctxt, Curl_bufref_ptr(chlg),
                      fetchx_uztoui(Curl_bufref_len(chlg)));
 
@@ -83,11 +82,11 @@ FETCHcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
 
   /* Generate the response */
   response = aprintf(
-    "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-    userp, digest[0], digest[1], digest[2], digest[3], digest[4],
-    digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],
-    digest[11], digest[12], digest[13], digest[14], digest[15]);
-  if(!response)
+      "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+      userp, digest[0], digest[1], digest[2], digest[3], digest[4],
+      digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],
+      digest[11], digest[12], digest[13], digest[14], digest[15]);
+  if (!response)
     return FETCHE_OUT_OF_MEMORY;
 
   Curl_bufref_set(out, response, strlen(response), fetch_free);

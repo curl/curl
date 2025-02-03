@@ -80,7 +80,7 @@ the remote document (if no filename part is specified in the URL, this fails):
 
 Fetch two files and store them with their remote names:
 
-    fetch -O www.haxx.se/index.html -O fetch.se/download.html
+    fetch -O www.haxx.se/index.html -O curl.se/download.html
 
 ## Using Passwords
 
@@ -99,8 +99,8 @@ or specify them with the `-u` flag like
 It is just like for FTP, but you may also want to specify and use SSL-specific
 options for certificates etc.
 
-Note that using `FTPS://` as prefix is the *implicit* way as described in the
-standards while the recommended *explicit* way is done by using `FTP://` and
+Note that using `FTPS://` as prefix is the _implicit_ way as described in the
+standards while the recommended _explicit_ way is done by using `FTP://` and
 the `--ssl-reqd` option.
 
 ### SFTP / SCP
@@ -276,7 +276,6 @@ this:
 
     fetch --trace my-trace.txt www.haxx.se
 
-
 ## Detailed Information
 
 Different protocols provide different ways of getting detailed information
@@ -292,7 +291,7 @@ then stores the headers in the specified file.
 
 Store the HTTP headers in a separate file (headers.txt in the example):
 
-      fetch --dump-header headers.txt fetch.se
+      fetch --dump-header headers.txt curl.se
 
 Note that headers stored in a separate file can be useful at a later time if
 you want fetch to use cookies sent by the server. More about that in the
@@ -322,7 +321,7 @@ string, which is in the format
     <variable1>=<data1>&<variable2>=<data2>&...
 
 The variable names are the names set with `"name="` in the `<input>` tags, and
-the data is the contents you want to fill in for the inputs. The data *must*
+the data is the contents you want to fill in for the inputs. The data _must_
 be properly URL encoded. That means you replace space with + and that you
 replace weird letters with `%XX` where `XX` is the hexadecimal representation
 of the letter's ASCII code.
@@ -333,10 +332,10 @@ Example:
 
 ```html
 <form action="post.cgi" method="post">
-  <input name=user size=10>
-  <input name=pass type=password size=10>
-  <input name=id type=hidden value="blablabla">
-  <input name=ding value="submit">
+  <input name="user" size="10" />
+  <input name="pass" type="password" size="10" />
+  <input name="id" type="hidden" value="blablabla" />
+  <input name="ding" value="submit" />
 </form>
 ```
 
@@ -354,7 +353,7 @@ multipart/form-data type. This latter type supports things like file upload.
 `-F` accepts parameters like `-F "name=contents"`. If you want the contents to
 be read from a file, use `@filename` as contents. When specifying a file, you
 can also specify the file content type by appending `;type=<mime type>` to the
-filename. You can also post the contents of several files in one field.  For
+filename. You can also post the contents of several files in one field. For
 example, the field name `coolfiles` is used to send three files, with
 different content types using the following syntax:
 
@@ -504,19 +503,19 @@ happening. The different fields in the output have the following meaning:
 
 From left-to-right:
 
- - `%`           - percentage completed of the whole transfer
- - `Total`       - total size of the whole expected transfer
- - `%`           - percentage completed of the download
- - `Received`    - currently downloaded amount of bytes
- - `%`           - percentage completed of the upload
- - `Xferd`       - currently uploaded amount of bytes
- - `Average Speed Dload` - the average transfer speed of the download
- - `Average Speed Upload` - the average transfer speed of the upload
- - `Time Total`  - expected time to complete the operation
- - `Time Current` - time passed since the invoke
- - `Time Left`   - expected time left to completion
- - `Curr.Speed`  - the average transfer speed the last 5 seconds (the first
-                   5 seconds of a transfer is based on less time of course.)
+- `%` - percentage completed of the whole transfer
+- `Total` - total size of the whole expected transfer
+- `%` - percentage completed of the download
+- `Received` - currently downloaded amount of bytes
+- `%` - percentage completed of the upload
+- `Xferd` - currently uploaded amount of bytes
+- `Average Speed Dload` - the average transfer speed of the download
+- `Average Speed Upload` - the average transfer speed of the upload
+- `Time Total` - expected time to complete the operation
+- `Time Current` - time passed since the invoke
+- `Time Left` - expected time left to completion
+- `Curr.Speed` - the average transfer speed the last 5 seconds (the first
+  5 seconds of a transfer is based on less time of course.)
 
 The `-#` option displays a totally different progress bar that does not need
 much explanation!
@@ -541,7 +540,7 @@ operation must be completed in whole within 30 minutes:
 Forcing fetch not to transfer data faster than a given rate is also possible,
 which might be useful if you are using a limited bandwidth connection and you
 do not want your transfer to use all of it (sometimes referred to as
-*bandwidth throttle*).
+_bandwidth throttle_).
 
 Make fetch transfer data no faster than 10 kilobytes per second:
 
@@ -799,7 +798,7 @@ a fallback mechanism in case version 3 fails to connect.
 LDAP is a complex thing and writing an LDAP query is not an easy
 task. Familiarize yourself with the exact syntax description elsewhere. One
 such place might be: [RFC 2255, The LDAP URL
-Format](https://fetch.se/rfc/rfc2255.txt)
+Format](https://curl.se/rfc/rfc2255.txt)
 
 To show you an example, this is how to get all people from an LDAP server that
 has a certain subdomain in their email address:
@@ -861,7 +860,7 @@ use it for all protocols where authentication is used.
 
 A simple `.netrc` file could look something like:
 
-    machine fetch.se login iamdaniel password mysecret
+    machine curl.se login iamdaniel password mysecret
 
 ## Custom Output
 
@@ -908,8 +907,8 @@ tell the server we use a vt100 terminal, try something like:
 
 Other interesting options for it `-t` include:
 
- - `XDISPLOC=<X display>` Sets the X display location.
- - `NEW_ENV=<var,val>` Sets an environment variable.
+- `XDISPLOC=<X display>` Sets the X display location.
+- `NEW_ENV=<var,val>` Sets an environment variable.
 
 NOTE: The telnet protocol does not specify any way to login with a specified
 user and password so fetch cannot do that automatically. To do that, you need to
@@ -975,7 +974,7 @@ IPv6 addresses provided other than in URLs (e.g. to the `--proxy`,
 
 For your convenience, we have several open mailing lists to discuss fetch, its
 development and things relevant to this. Get all info at
-https://fetch.se/mail/.
+https://curl.se/mail/.
 
 Please direct fetch questions, feature requests and trouble reports to one of
 these mailing lists instead of mailing any individual.

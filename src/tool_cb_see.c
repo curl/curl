@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,8 +35,8 @@
    both represent the same value. Maximum offset used here when we lseek
    using a 'long' data type offset */
 
-#define OUR_MAX_SEEK_L  2147483647L - 1L
-#define OUR_MAX_SEEK_O  FETCH_OFF_T_C(0x7FFFFFFF) - FETCH_OFF_T_C(0x1)
+#define OUR_MAX_SEEK_L 2147483647L - 1L
+#define OUR_MAX_SEEK_O FETCH_OFF_T_C(0x7FFFFFFF) - FETCH_OFF_T_C(0x1)
 
 /*
 ** callback for FETCHOPT_SEEKFUNCTION
@@ -55,23 +55,25 @@ int tool_seek_cb(void *userdata, fetch_off_t offset, int whence)
      larger than off_t and we are not using the Win32 large file support
      macros that provide the support to do 64-bit seeks correctly */
 
-  if(offset > OUR_MAX_SEEK_O) {
+  if (offset > OUR_MAX_SEEK_O)
+  {
     /* Some precaution code to work around problems with different data sizes
        to allow seeking >32-bit even if off_t is 32-bit. Should be very rare
        and is really valid on weirdo-systems. */
     fetch_off_t left = offset;
 
-    if(whence != SEEK_SET)
+    if (whence != SEEK_SET)
       /* this code path does not support other types */
       return FETCH_SEEKFUNC_FAIL;
 
-    if(LSEEK_ERROR == lseek(per->infd, 0, SEEK_SET))
+    if (LSEEK_ERROR == lseek(per->infd, 0, SEEK_SET))
       /* could not rewind to beginning */
       return FETCH_SEEKFUNC_FAIL;
 
-    while(left) {
+    while (left)
+    {
       long step = (left > OUR_MAX_SEEK_O) ? OUR_MAX_SEEK_L : (long)left;
-      if(LSEEK_ERROR == lseek(per->infd, step, SEEK_CUR))
+      if (LSEEK_ERROR == lseek(per->infd, step, SEEK_CUR))
         /* could not seek forwards the desired amount */
         return FETCH_SEEKFUNC_FAIL;
       left -= step;
@@ -81,9 +83,9 @@ int tool_seek_cb(void *userdata, fetch_off_t offset, int whence)
 #endif
 
 #ifdef __AMIGA__
-  if(LSEEK_ERROR == lseek(per->infd, (off_t)offset, whence))
+  if (LSEEK_ERROR == lseek(per->infd, (off_t)offset, whence))
 #else
-  if(LSEEK_ERROR == lseek(per->infd, offset, whence))
+  if (LSEEK_ERROR == lseek(per->infd, offset, whence))
 #endif
     /* could not rewind, the reason is in errno but errno is just not portable
        enough and we do not actually care that much why we failed. We will let

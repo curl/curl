@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,19 +38,21 @@ FETCHcode test(char *URL)
   /* Checks huge binary-encoded mime post. */
 
   /* Create a testbuf with pseudo-binary data. */
-  for(i = 0; i < sizeof(testbuf); i++)
-    if(i % 77 == 76)
+  for (i = 0; i < sizeof(testbuf); i++)
+    if (i % 77 == 76)
       testbuf[i] = '\n';
     else
-      testbuf[i] = (char) (0x41 + i % 26); /* A...Z */
+      testbuf[i] = (char)(0x41 + i % 26); /* A...Z */
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -58,34 +60,40 @@ FETCHcode test(char *URL)
 
   /* Build mime structure. */
   mime = fetch_mime_init(fetch);
-  if(!mime) {
+  if (!mime)
+  {
     fprintf(stderr, "fetch_mime_init() failed\n");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   part = fetch_mime_addpart(mime);
-  if(!part) {
+  if (!part)
+  {
     fprintf(stderr, "fetch_mime_addpart() failed\n");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   res = fetch_mime_name(part, "upfile");
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "fetch_mime_name() failed\n");
     goto test_cleanup;
   }
   res = fetch_mime_filename(part, "myfile.txt");
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "fetch_mime_filename() failed\n");
     goto test_cleanup;
   }
   res = fetch_mime_data(part, testbuf, sizeof(testbuf));
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "fetch_mime_data() failed\n");
     goto test_cleanup;
   }
   res = fetch_mime_encoder(part, "binary");
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "fetch_mime_encoder() failed\n");
     goto test_cleanup;
   }

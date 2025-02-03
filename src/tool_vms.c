@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,19 +51,21 @@ int is_vms_shell(void)
   char *shell;
 
   /* Have we checked the shell yet? */
-  if(vms_shell >= 0)
+  if (vms_shell >= 0)
     return vms_shell;
 
   shell = getenv("SHELL");
 
   /* No shell, means DCL */
-  if(!shell) {
+  if (!shell)
+  {
     vms_shell = 1;
     return 1;
   }
 
   /* Have to make sure some one did not set shell to DCL */
-  if(strcmp(shell, "DCL") == 0) {
+  if (strcmp(shell, "DCL") == 0)
+  {
     vms_shell = 1;
     return 1;
   }
@@ -95,15 +97,18 @@ void vms_special_exit(int code, int vms_show)
 
   /* The POSIX exit mode is only available after VMS 7.0 */
 #if __CRTL_VER >= 70000000
-  if(is_vms_shell() == 0) {
+  if (is_vms_shell() == 0)
+  {
     decc$__posix_exit(code);
   }
 #endif
 
-  if(code > FETCH_LAST) {   /* If FETCH_LAST exceeded then */
-    vms_code = FETCH_LAST;  /* fetchmsg.h is out of sync.  */
+  if (code > FETCH_LAST)
+  {                        /* If FETCH_LAST exceeded then */
+    vms_code = FETCH_LAST; /* fetchmsg.h is out of sync.  */
   }
-  else {
+  else
+  {
     vms_code = vms_cond[code] | vms_show;
   }
   decc$exit(vms_code);
@@ -123,23 +128,23 @@ void vms_special_exit(int code, int vms_show)
  */
 
 /* Structure to hold a DECC$* feature name and its desired value. */
-struct decc_feat_t {
+struct decc_feat_t
+{
   char *name;
   int value;
 };
 
 /* Array of DECC$* feature names and their desired values. */
 static const struct decc_feat_t decc_feat_array[] = {
-  /* Preserve command-line case with SET PROCESS/PARSE_STYLE=EXTENDED */
-  { "DECC$ARGV_PARSE_STYLE", 1 },
-  /* Preserve case for filenames on ODS5 disks. */
-  { "DECC$EFS_CASE_PRESERVE", 1 },
-  /* Enable multiple dots (and most characters) in ODS5 filenames,
-     while preserving VMS-ness of ";version". */
-  { "DECC$EFS_CHARSET", 1 },
-  /* List terminator. */
-  { (char *)NULL, 0 }
-};
+    /* Preserve command-line case with SET PROCESS/PARSE_STYLE=EXTENDED */
+    {"DECC$ARGV_PARSE_STYLE", 1},
+    /* Preserve case for filenames on ODS5 disks. */
+    {"DECC$EFS_CASE_PRESERVE", 1},
+    /* Enable multiple dots (and most characters) in ODS5 filenames,
+       while preserving VMS-ness of ";version". */
+    {"DECC$EFS_CHARSET", 1},
+    /* List terminator. */
+    {(char *)NULL, 0}};
 
 /* Flag to sense if decc_init() was called. */
 static int decc_init_done = -1;
@@ -158,37 +163,42 @@ static void decc_init(void)
   decc_init_done = 1;
 
   /* Loop through all items in the decc_feat_array[]. */
-  for(i = 0; decc_feat_array[i].name != NULL; i++) {
+  for (i = 0; decc_feat_array[i].name != NULL; i++)
+  {
 
     /* Get the feature index. */
     feat_index = decc$feature_get_index(decc_feat_array[i].name);
 
-    if(feat_index >= 0) {
+    if (feat_index >= 0)
+    {
       /* Valid item. Collect its properties. */
       feat_value = decc$feature_get_value(feat_index, 1);
       feat_value_min = decc$feature_get_value(feat_index, 2);
       feat_value_max = decc$feature_get_value(feat_index, 3);
 
-      if((decc_feat_array[i].value >= feat_value_min) &&
-         (decc_feat_array[i].value <= feat_value_max)) {
+      if ((decc_feat_array[i].value >= feat_value_min) &&
+          (decc_feat_array[i].value <= feat_value_max))
+      {
         /* Valid value. Set it if necessary. */
-        if(feat_value != decc_feat_array[i].value) {
+        if (feat_value != decc_feat_array[i].value)
+        {
           sts = decc$feature_set_value(feat_index, 1,
                                        decc_feat_array[i].value);
         }
       }
-      else {
+      else
+      {
         /* Invalid DECC feature value. */
         printf(" INVALID DECC FEATURE VALUE, %d: %d <= %s <= %d.\n",
                feat_value,
                feat_value_min, decc_feat_array[i].name, feat_value_max);
       }
     }
-    else {
+    else
+    {
       /* Invalid DECC feature name. */
       printf(" UNKNOWN DECC FEATURE: %s.\n", decc_feat_array[i].name);
     }
-
   }
 }
 
@@ -209,7 +219,7 @@ void (*const x_decc_init)() = decc_init;
 #pragma extern_model save
 int LIB$INITIALIZE(void);
 #pragma extern_model strict_refdef
-int dmy_lib$initialize = (int) LIB$INITIALIZE;
+int dmy_lib$initialize = (int)LIB$INITIALIZE;
 #pragma extern_model restore
 
 #pragma standard

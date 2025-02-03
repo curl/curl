@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,30 +24,30 @@
 #include "tool_setup.h"
 
 #if defined(__AMIGA__) && !defined(__amigaos4__)
-#  undef HAVE_TERMIOS_H
+#undef HAVE_TERMIOS_H
 #endif
 
 #ifndef HAVE_GETPASS_R
 /* this file is only for systems without getpass_r() */
 
 #ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
+#include <fcntl.h>
 #endif
 
 #ifdef HAVE_TERMIOS_H
-#  include <termios.h>
+#include <termios.h>
 #elif defined(HAVE_TERMIO_H)
-#  include <termio.h>
+#include <termio.h>
 #endif
 
 #ifdef __VMS
-#  include descrip
-#  include starlet
-#  include iodef
+#include descrip
+#include starlet
+#include iodef
 #endif
 
 #ifdef _WIN32
-#  include <conio.h>
+#include <conio.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -68,23 +68,24 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   /* distribution so I created this. May revert back later to */
   /* struct _iosb iosb;                                        */
   struct _iosb
-     {
-     short int iosb$w_status; /* status     */
-     short int iosb$w_bcnt;   /* byte count */
-     int       unused;        /* unused     */
-     } iosb;
+  {
+    short int iosb$w_status; /* status     */
+    short int iosb$w_bcnt;   /* byte count */
+    int unused;              /* unused     */
+  } iosb;
 
   $DESCRIPTOR(ttdesc, "TT");
 
   buffer[0] = '\0';
   sts = sys$assign(&ttdesc, &chan, 0, 0);
-  if(sts & 1) {
+  if (sts & 1)
+  {
     sts = sys$qiow(0, chan,
                    IO$_READPROMPT | IO$M_NOECHO,
                    &iosb, 0, 0, buffer, buflen, 0, 0,
                    prompt, strlen(prompt));
 
-    if((sts & 1) && (iosb.iosb$w_status & 1))
+    if ((sts & 1) && (iosb.iosb$w_status & 1))
       buffer[iosb.iosb$w_bcnt] = '\0';
 
     sys$dassgn(chan);
@@ -101,23 +102,24 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   size_t i;
   fputs(prompt, tool_stderr);
 
-  for(i = 0; i < buflen; i++) {
+  for (i = 0; i < buflen; i++)
+  {
     buffer[i] = (char)_getch();
-    if(buffer[i] == '\r' || buffer[i] == '\n') {
+    if (buffer[i] == '\r' || buffer[i] == '\n')
+    {
       buffer[i] = '\0';
       break;
     }
-    else
-      if(buffer[i] == '\b')
-        /* remove this letter and if this is not the first key, remove the
-           previous one as well */
-        i = i - (i >= 1 ? 2 : 1);
+    else if (buffer[i] == '\b')
+      /* remove this letter and if this is not the first key, remove the
+         previous one as well */
+      i = i - (i >= 1 ? 2 : 1);
   }
   /* since echo is disabled, print a newline */
   fputs("\n", tool_stderr);
   /* if user did not hit ENTER, terminate buffer */
-  if(i == buflen)
-    buffer[buflen-1] = '\0';
+  if (i == buflen)
+    buffer[buflen - 1] = '\0';
 
   return buffer; /* we always return success */
 }
@@ -127,11 +129,11 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #ifndef DONE /* not previously provided */
 
 #ifdef HAVE_TERMIOS_H
-#  define struct_term  struct termios
+#define struct_term struct termios
 #elif defined(HAVE_TERMIO_H)
-#  define struct_term  struct termio
+#define struct_term struct termio
 #else
-#  undef  struct_term
+#undef struct_term
 #endif
 
 static bool ttyecho(bool enable, int fd)
@@ -140,7 +142,8 @@ static bool ttyecho(bool enable, int fd)
   static struct_term withecho;
   static struct_term noecho;
 #endif
-  if(!enable) {
+  if (!enable)
+  {
     /* disable echo by extracting the current 'withecho' mode and remove the
        ECHO bit and set back the struct */
 #ifdef HAVE_TERMIOS_H
@@ -179,25 +182,26 @@ char *getpass_r(const char *prompt, /* prompt to display */
   ssize_t nread;
   bool disabled;
   int fd = open("/dev/tty", O_RDONLY);
-  if(-1 == fd)
+  if (-1 == fd)
     fd = STDIN_FILENO; /* use stdin if the tty could not be used */
 
   disabled = ttyecho(FALSE, fd); /* disable terminal echo */
 
   fputs(prompt, tool_stderr);
   nread = read(fd, password, buflen);
-  if(nread > 0)
+  if (nread > 0)
     password[--nread] = '\0'; /* null-terminate where enter is stored */
   else
     password[0] = '\0'; /* got nothing */
 
-  if(disabled) {
+  if (disabled)
+  {
     /* if echo actually was disabled, add a newline */
     fputs("\n", tool_stderr);
     (void)ttyecho(TRUE, fd); /* enable echo */
   }
 
-  if(STDIN_FILENO != fd)
+  if (STDIN_FILENO != fd)
     close(fd);
 
   return password; /* return pointer to buffer */

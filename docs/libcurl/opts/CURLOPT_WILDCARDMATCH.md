@@ -20,15 +20,15 @@ FETCHOPT_WILDCARDMATCH - directory wildcard transfers
 
 # SYNOPSIS
 
-~~~c
+```c
 #include <fetch/fetch.h>
 
 FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_WILDCARDMATCH, long onoff);
-~~~
+```
 
 # DESCRIPTION
 
-Set *onoff* to 1 if you want to transfer multiple files according to a
+Set _onoff_ to 1 if you want to transfer multiple files according to a
 filename pattern. The pattern can be specified as part of the FETCHOPT_URL(3)
 option, using an **fnmatch**-like pattern (Shell Pattern Matching) in the last
 part of URL (filename).
@@ -39,7 +39,7 @@ FETCHOPT_FNMATCH_FUNCTION(3) option.
 
 A brief introduction of its syntax follows:
 
-## * - ASTERISK
+## \* - ASTERISK
 
     ftp://example.com/some/path/*.txt
 
@@ -81,7 +81,7 @@ Using the rules above, a filename pattern can be constructed:
 
 # EXAMPLE
 
-~~~c
+```c
 extern long begin_cb(struct fetch_fileinfo *, void *, int);
 extern long end_cb(void *ptr);
 
@@ -98,10 +98,10 @@ int main(void)
     /* callback is called after data from the file have been transferred */
     fetch_easy_setopt(fetch, FETCHOPT_CHUNK_END_FUNCTION, end_cb);
 
-    /* See more on https://fetch.se/libfetch/c/ftp-wildcard.html */
+    /* See more on https://curl.se/libfetch/c/ftp-wildcard.html */
   }
 }
-~~~
+```
 
 # %AVAILABILITY%
 

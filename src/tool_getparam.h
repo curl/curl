@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,8 @@
 /* one enum for every command line option. The name is the verbatim long
    option name, but in uppercase with periods and minuses replaced with
    underscores using a "C_" prefix. */
-typedef enum {
+typedef enum
+{
   C_ABSTRACT_UNIX_SOCKET,
   C_ALPN,
   C_ALT_SVC,
@@ -317,14 +318,16 @@ typedef enum {
 
 #define ARG_NO 0x80 /* set if the option is documented as --no-* */
 
-struct LongShort {
+struct LongShort
+{
   const char *lname;  /* long name option */
   unsigned char desc; /* type, see ARG_* */
-  char letter;  /* short name option or ' ' */
+  char letter;        /* short name option or ' ' */
   unsigned short cmd;
 };
 
-typedef enum {
+typedef enum
+{
   PARAM_OK = 0,
   PARAM_OPTION_AMBIGUOUS,
   PARAM_OPTION_UNKNOWN,

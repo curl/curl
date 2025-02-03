@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,18 +52,19 @@ FETCHcode test(char *URL)
   int request = 1;
   struct fetch_slist *custom_headers = NULL;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-
 
   test_setopt(fetch, FETCHOPT_HEADERDATA, stdout);
   test_setopt(fetch, FETCHOPT_WRITEDATA, stdout);
@@ -73,7 +74,8 @@ FETCHcode test(char *URL)
 
   /* SETUP */
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -84,11 +86,12 @@ FETCHcode test(char *URL)
   test_setopt(fetch, FETCHOPT_RTSP_TRANSPORT, "Planes/Trains/Automobiles");
   test_setopt(fetch, FETCHOPT_RTSP_REQUEST, FETCH_RTSPREQ_SETUP);
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -102,7 +105,8 @@ FETCHcode test(char *URL)
   close(params);
 
   paramsf = fopen(libtest_arg2, "rb");
-  if(!paramsf) {
+  if (!paramsf)
+  {
     fprintf(stderr, "can't open %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -111,10 +115,10 @@ FETCHcode test(char *URL)
 
   test_setopt(fetch, FETCHOPT_READDATA, paramsf);
   test_setopt(fetch, FETCHOPT_UPLOAD, 1L);
-  test_setopt(fetch, FETCHOPT_INFILESIZE_LARGE, (fetch_off_t) file_info.st_size);
+  test_setopt(fetch, FETCHOPT_INFILESIZE_LARGE, (fetch_off_t)file_info.st_size);
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   test_setopt(fetch, FETCHOPT_UPLOAD, 0L);
@@ -123,7 +127,8 @@ FETCHcode test(char *URL)
 
   /* Heartbeat GET_PARAMETERS */
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -132,13 +137,14 @@ FETCHcode test(char *URL)
   stream_uri = NULL;
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   /* POST GET_PARAMETERS */
 
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -150,14 +156,15 @@ FETCHcode test(char *URL)
   test_setopt(fetch, FETCHOPT_POSTFIELDS, "packets_received\njitter\n");
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   test_setopt(fetch, FETCHOPT_POSTFIELDS, NULL);
 
   /* Make sure we can do a normal request now */
   stream_uri = suburl(URL, request++);
-  if(!stream_uri) {
+  if (!stream_uri)
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -170,12 +177,12 @@ FETCHcode test(char *URL)
 
 test_cleanup:
 
-  if(paramsf)
+  if (paramsf)
     fclose(paramsf);
 
   fetch_free(stream_uri);
 
-  if(custom_headers)
+  if (custom_headers)
     fetch_slist_free_all(custom_headers);
 
   fetch_easy_cleanup(fetch);

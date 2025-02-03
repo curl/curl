@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@
  *  zero          : when i is equal   to   j
  *  positive when : when i is larger  than j
  */
-#define compare(i,j) Curl_timediff_us(i,j)
+#define compare(i, j) Curl_timediff_us(i, j)
 
 /*
  * Splay using the key i (which may or may not be in the tree.) The starting
@@ -45,40 +45,45 @@ struct Curl_tree *Curl_splay(struct fetchtime i,
 {
   struct Curl_tree N, *l, *r, *y;
 
-  if(!t)
+  if (!t)
     return NULL;
   N.smaller = N.larger = NULL;
   l = r = &N;
 
-  for(;;) {
+  for (;;)
+  {
     timediff_t comp = compare(i, t->key);
-    if(comp < 0) {
-      if(!t->smaller)
+    if (comp < 0)
+    {
+      if (!t->smaller)
         break;
-      if(compare(i, t->smaller->key) < 0) {
-        y = t->smaller;                           /* rotate smaller */
+      if (compare(i, t->smaller->key) < 0)
+      {
+        y = t->smaller; /* rotate smaller */
         t->smaller = y->larger;
         y->larger = t;
         t = y;
-        if(!t->smaller)
+        if (!t->smaller)
           break;
       }
-      r->smaller = t;                               /* link smaller */
+      r->smaller = t; /* link smaller */
       r = t;
       t = t->smaller;
     }
-    else if(comp > 0) {
-      if(!t->larger)
+    else if (comp > 0)
+    {
+      if (!t->larger)
         break;
-      if(compare(i, t->larger->key) > 0) {
-        y = t->larger;                          /* rotate larger */
+      if (compare(i, t->larger->key) > 0)
+      {
+        y = t->larger; /* rotate larger */
         t->larger = y->smaller;
         y->smaller = t;
         t = y;
-        if(!t->larger)
+        if (!t->larger)
           break;
       }
-      l->larger = t;                              /* link larger */
+      l->larger = t; /* link larger */
       l = t;
       t = t->larger;
     }
@@ -86,7 +91,7 @@ struct Curl_tree *Curl_splay(struct fetchtime i,
       break;
   }
 
-  l->larger = t->smaller;                                /* assemble */
+  l->larger = t->smaller; /* assemble */
   r->smaller = t->larger;
   t->smaller = N.larger;
   t->larger = N.smaller;
@@ -104,15 +109,16 @@ struct Curl_tree *Curl_splayinsert(struct fetchtime i,
                                    struct Curl_tree *node)
 {
   static const struct fetchtime KEY_NOTUSED = {
-    ~0, -1
-  }; /* will *NEVER* appear */
+      ~0, -1}; /* will *NEVER* appear */
 
   DEBUGASSERT(node);
 
-  if(t) {
+  if (t)
+  {
     t = Curl_splay(i, t);
     DEBUGASSERT(t);
-    if(compare(i, t->key) == 0) {
+    if (compare(i, t->key) == 0)
+    {
       /* There already exists a node in the tree with the same key. Build a
          doubly-linked circular list of nodes. We add the new 'node' struct to
          the end of this list. */
@@ -128,16 +134,18 @@ struct Curl_tree *Curl_splayinsert(struct fetchtime i,
     }
   }
 
-  if(!t) {
+  if (!t)
+  {
     node->smaller = node->larger = NULL;
   }
-  else if(compare(i, t->key) < 0) {
+  else if (compare(i, t->key) < 0)
+  {
     node->smaller = t->smaller;
     node->larger = t;
     t->smaller = NULL;
-
   }
-  else {
+  else
+  {
     node->larger = t->larger;
     node->smaller = t;
     t->larger = NULL;
@@ -160,7 +168,8 @@ struct Curl_tree *Curl_splaygetbest(struct fetchtime i,
   static const struct fetchtime tv_zero = {0, 0};
   struct Curl_tree *x;
 
-  if(!t) {
+  if (!t)
+  {
     *removed = NULL; /* none removed since there was no root */
     return NULL;
   }
@@ -168,7 +177,8 @@ struct Curl_tree *Curl_splaygetbest(struct fetchtime i,
   /* find smallest */
   t = Curl_splay(tv_zero, t);
   DEBUGASSERT(t);
-  if(compare(i, t->key) < 0) {
+  if (compare(i, t->key) < 0)
+  {
     /* even the smallest is too big */
     *removed = NULL;
     return t;
@@ -176,7 +186,8 @@ struct Curl_tree *Curl_splaygetbest(struct fetchtime i,
 
   /* FIRST! Check if there is a list with identical keys */
   x = t->samen;
-  if(x != t) {
+  if (x != t)
+  {
     /* there is, pick one from the list */
 
     /* 'x' is the new root node */
@@ -198,7 +209,6 @@ struct Curl_tree *Curl_splaygetbest(struct fetchtime i,
   return x;
 }
 
-
 /* Deletes the node we point out from the tree if it is there. Stores a
  * pointer to the new resulting tree in 'newroot'.
  *
@@ -215,19 +225,19 @@ int Curl_splayremove(struct Curl_tree *t,
                      struct Curl_tree **newroot)
 {
   static const struct fetchtime KEY_NOTUSED = {
-    ~0, -1
-  }; /* will *NEVER* appear */
+      ~0, -1}; /* will *NEVER* appear */
   struct Curl_tree *x;
 
-  if(!t)
+  if (!t)
     return 1;
 
   DEBUGASSERT(removenode);
 
-  if(compare(KEY_NOTUSED, removenode->key) == 0) {
+  if (compare(KEY_NOTUSED, removenode->key) == 0)
+  {
     /* Key set to NOTUSED means it is a subnode within a 'same' linked list
        and thus we can unlink it easily. */
-    if(removenode->samen == removenode)
+    if (removenode->samen == removenode)
       /* A non-subnode should never be set to KEY_NOTUSED */
       return 3;
 
@@ -251,13 +261,14 @@ int Curl_splayremove(struct Curl_tree *t,
      We cannot just compare the keys here as a double remove in quick
      succession of a node with key != KEY_NOTUSED && same != NULL
      could return the same key but a different node. */
-  if(t != removenode)
+  if (t != removenode)
     return 2;
 
   /* Check if there is a list with identical sizes, as then we are trying to
      remove the root node of a list of nodes with identical keys. */
   x = t->samen;
-  if(x != t) {
+  if (x != t)
+  {
     /* 'x' is the new root node, we just make it use the root node's
        smaller/larger links */
 
@@ -267,11 +278,13 @@ int Curl_splayremove(struct Curl_tree *t,
     x->samep = t->samep;
     t->samep->samen = x;
   }
-  else {
+  else
+  {
     /* Remove the root node */
-    if(!t->smaller)
+    if (!t->smaller)
       x = t->larger;
-    else {
+    else
+    {
       x = Curl_splay(removenode->key, t->smaller);
       DEBUGASSERT(x);
       x->larger = t->larger;

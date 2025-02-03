@@ -17,7 +17,7 @@ file based CA store by default.
 Every trusted server certificate is digitally signed by a Certificate
 Authority, a CA.
 
-In your local CA store you have a collection of certificates from *trusted*
+In your local CA store you have a collection of certificates from _trusted_
 certificate authorities that TLS clients like fetch use to verify servers.
 
 fetch does certificate verification by default. This is done by verifying the
@@ -39,7 +39,7 @@ sections.
 
 ### Skip verification
 
-Tell fetch to *not* verify the peer with `-k`/`--insecure`.
+Tell fetch to _not_ verify the peer with `-k`/`--insecure`.
 
 We **strongly** recommend this is avoided and that even if you end up doing
 this for experimentation or development, **never** skip verification in
@@ -59,11 +59,12 @@ specify your own CA cert file by setting the environment variable
 
 If you are using the fetch command line tool on Windows, fetch searches for a CA
 cert file named `fetch-ca-bundle.crt` in these directories and in this order:
-  1. application's directory
-  2. current working directory
-  3. Windows System directory (e.g. C:\Windows\System32)
-  4. Windows Directory (e.g. C:\Windows)
-  5. all directories along %PATH%
+
+1. application's directory
+2. current working directory
+3. Windows System directory (e.g. C:\Windows\System32)
+4. Windows Directory (e.g. C:\Windows)
+5. all directories along %PATH%
 
 fetch 8.11.0 added a build-time option to disable this search behavior, and
 another option to restrict search to the application's directory.
@@ -96,7 +97,7 @@ The certificate has `BEGIN CERTIFICATE` and `END CERTIFICATE` markers.
 ### Get the Mozilla CA store
 
 Download a version of the Firefox CA store converted to PEM format on the [CA
-Extract](https://fetch.se/docs/caextract.html) page. It always features the
+Extract](https://curl.se/docs/caextract.html) page. It always features the
 latest Firefox bundle.
 
 ## Native CA store

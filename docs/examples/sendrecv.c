@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,7 +40,7 @@
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
 #elif defined(_MSC_VER)
-#pragma warning(disable:4127)  /* conditional expression is constant */
+#pragma warning(disable : 4127) /* conditional expression is constant */
 #endif
 
 /* Auxiliary function that waits on the socket. */
@@ -64,10 +64,12 @@ static int wait_on_socket(fetch_socket_t sockfd, int for_recv, long timeout_ms)
 
   FD_SET(sockfd, &errfd); /* always check for error */
 
-  if(for_recv) {
+  if (for_recv)
+  {
     FD_SET(sockfd, &infd);
   }
-  else {
+  else
+  {
     FD_SET(sockfd, &outfd);
   }
 
@@ -92,7 +94,8 @@ int main(void)
   */
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     FETCHcode res;
     fetch_socket_t sockfd;
     size_t nsent_total = 0;
@@ -102,7 +105,8 @@ int main(void)
     fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 1L);
     res = fetch_easy_perform(fetch);
 
-    if(res != FETCHE_OK) {
+    if (res != FETCHE_OK)
+    {
       printf("Error: %s\n", fetch_easy_strerror(res));
       return 1;
     }
@@ -110,61 +114,71 @@ int main(void)
     /* Extract the socket from the fetch handle - we need it for waiting. */
     res = fetch_easy_getinfo(fetch, FETCHINFO_ACTIVESOCKET, &sockfd);
 
-    if(res != FETCHE_OK) {
+    if (res != FETCHE_OK)
+    {
       printf("Error: %s\n", fetch_easy_strerror(res));
       return 1;
     }
 
     printf("Sending request.\n");
 
-    do {
+    do
+    {
       /* Warning: This example program may loop indefinitely.
        * A production-quality program must define a timeout and exit this loop
        * as soon as the timeout has expired. */
       size_t nsent;
-      do {
+      do
+      {
         nsent = 0;
         res = fetch_easy_send(fetch, request + nsent_total,
-            request_len - nsent_total, &nsent);
+                              request_len - nsent_total, &nsent);
         nsent_total += nsent;
 
-        if(res == FETCHE_AGAIN && !wait_on_socket(sockfd, 0, 60000L)) {
+        if (res == FETCHE_AGAIN && !wait_on_socket(sockfd, 0, 60000L))
+        {
           printf("Error: timeout.\n");
           return 1;
         }
-      } while(res == FETCHE_AGAIN);
+      } while (res == FETCHE_AGAIN);
 
-      if(res != FETCHE_OK) {
+      if (res != FETCHE_OK)
+      {
         printf("Error: %s\n", fetch_easy_strerror(res));
         return 1;
       }
 
       printf("Sent %lu bytes.\n", (unsigned long)nsent);
 
-    } while(nsent_total < request_len);
+    } while (nsent_total < request_len);
 
     printf("Reading response.\n");
 
-    for(;;) {
+    for (;;)
+    {
       /* Warning: This example program may loop indefinitely (see above). */
       char buf[1024];
       size_t nread;
-      do {
+      do
+      {
         nread = 0;
         res = fetch_easy_recv(fetch, buf, sizeof(buf), &nread);
 
-        if(res == FETCHE_AGAIN && !wait_on_socket(sockfd, 1, 60000L)) {
+        if (res == FETCHE_AGAIN && !wait_on_socket(sockfd, 1, 60000L))
+        {
           printf("Error: timeout.\n");
           return 1;
         }
-      } while(res == FETCHE_AGAIN);
+      } while (res == FETCHE_AGAIN);
 
-      if(res != FETCHE_OK) {
+      if (res != FETCHE_OK)
+      {
         printf("Error: %s\n", fetch_easy_strerror(res));
         break;
       }
 
-      if(nread == 0) {
+      if (nread == 0)
+      {
         /* end of the response */
         break;
       }

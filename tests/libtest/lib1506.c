@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,12 +47,14 @@ FETCHcode test(char *URL)
   (void)URL;
 
   /* Create fake DNS entries for serverX.example.com for all handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for (i = 0; i < NUM_HANDLES; i++)
+  {
     msnprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s",
               i + 1, port, address);
     printf("%s\n", dnsentry);
     slist2 = fetch_slist_append(slist, dnsentry);
-    if(!slist2) {
+    if (!slist2)
+    {
       fprintf(stderr, "fetch_slist_append() failed\n");
       goto test_cleanup;
     }
@@ -68,7 +70,8 @@ FETCHcode test(char *URL)
   multi_setopt(m, FETCHMOPT_MAXCONNECTS, 3L);
 
   /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for (i = 0; i < NUM_HANDLES; i++)
+  {
     /* get an easy handle */
     easy_init(fetch[i]);
     /* specify target */
@@ -87,11 +90,13 @@ FETCHcode test(char *URL)
 
   fprintf(stderr, "Start at URL 0\n");
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for (i = 0; i < NUM_HANDLES; i++)
+  {
     /* add handle to multi */
     multi_add_handle(m, fetch[i]);
 
-    for(;;) {
+    for (;;)
+    {
       struct timeval interval;
       fd_set rd, wr, exc;
       int maxfd = -99;
@@ -103,7 +108,7 @@ FETCHcode test(char *URL)
 
       abort_on_test_timeout();
 
-      if(!running)
+      if (!running)
         break; /* done */
 
       FD_ZERO(&rd);
@@ -125,7 +130,8 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for (i = 0; i < NUM_HANDLES; i++)
+  {
     fetch_multi_remove_handle(m, fetch[i]);
     fetch_easy_cleanup(fetch[i]);
   }

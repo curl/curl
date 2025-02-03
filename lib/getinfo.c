@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -94,20 +94,25 @@ FETCHcode Curl_initinfo(struct Curl_easy *data)
 }
 
 static FETCHcode getinfo_char(struct Curl_easy *data, FETCHINFO info,
-                             const char **param_charp)
+                              const char **param_charp)
 {
-  switch(info) {
+  switch (info)
+  {
   case FETCHINFO_EFFECTIVE_URL:
     *param_charp = data->state.url ? data->state.url : (char *)"";
     break;
-  case FETCHINFO_EFFECTIVE_METHOD: {
+  case FETCHINFO_EFFECTIVE_METHOD:
+  {
     const char *m = data->set.str[STRING_CUSTOMREQUEST];
-    if(!m) {
-      if(data->set.opt_no_body)
+    if (!m)
+    {
+      if (data->set.opt_no_body)
         m = "HEAD";
 #ifndef FETCH_DISABLE_HTTP
-      else {
-        switch(data->state.httpreq) {
+      else
+      {
+        switch (data->state.httpreq)
+        {
         case HTTPREQ_POST:
         case HTTPREQ_POST_FORM:
         case HTTPREQ_POST_MIME:
@@ -129,12 +134,12 @@ static FETCHcode getinfo_char(struct Curl_easy *data, FETCHINFO info,
     }
     *param_charp = m;
   }
-    break;
+  break;
   case FETCHINFO_CONTENT_TYPE:
     *param_charp = data->info.contenttype;
     break;
   case FETCHINFO_PRIVATE:
-    *param_charp = (char *) data->set.private_data;
+    *param_charp = (char *)data->set.private_data;
     break;
   case FETCHINFO_FTP_ENTRY_PATH:
     /* Return the entrypath string from the most recent connection.
@@ -194,20 +199,23 @@ static FETCHcode getinfo_char(struct Curl_easy *data, FETCHINFO info,
 }
 
 static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
-                             long *param_longp)
+                              long *param_longp)
 {
   fetch_socket_t sockfd;
 
-  union {
+  union
+  {
     unsigned long *to_ulong;
-    long          *to_long;
+    long *to_long;
   } lptr;
 
 #ifdef DEBUGBUILD
   char *timestr = getenv("FETCH_TIME");
-  if(timestr) {
+  if (timestr)
+  {
     unsigned long val = strtoul(timestr, NULL, 10);
-    switch(info) {
+    switch (info)
+    {
     case FETCHINFO_LOCAL_PORT:
       *param_longp = (long)val;
       return FETCHE_OK;
@@ -217,9 +225,11 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
   }
   /* use another variable for this to allow different values */
   timestr = getenv("FETCH_DEBUG_SIZE");
-  if(timestr) {
+  if (timestr)
+  {
     unsigned long val = strtoul(timestr, NULL, 10);
-    switch(info) {
+    switch (info)
+    {
     case FETCHINFO_HEADER_SIZE:
     case FETCHINFO_REQUEST_SIZE:
       *param_longp = (long)val;
@@ -230,7 +240,8 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
   }
 #endif
 
-  switch(info) {
+  switch (info)
+  {
   case FETCHINFO_RESPONSE_CODE:
     *param_longp = data->info.httpcode;
     break;
@@ -238,10 +249,10 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
     *param_longp = data->info.httpproxycode;
     break;
   case FETCHINFO_FILETIME:
-    if(data->info.filetime > LONG_MAX)
+    if (data->info.filetime > LONG_MAX)
       *param_longp = LONG_MAX;
 #if !defined(MSDOS) && !defined(__AMIGA__)
-    else if(data->info.filetime < LONG_MIN)
+    else if (data->info.filetime < LONG_MIN)
       *param_longp = LONG_MIN;
 #endif
     else
@@ -293,7 +304,7 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
 
     /* note: this is not a good conversion for systems with 64-bit sockets and
        32-bit longs */
-    if(sockfd != FETCH_SOCKET_BAD)
+    if (sockfd != FETCH_SOCKET_BAD)
       *param_longp = (long)sockfd;
     else
       /* this interface is documented to return -1 in case of badness, which
@@ -312,7 +323,7 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
     *param_longp = (long)data->info.pxcode;
     break;
   case FETCHINFO_CONDITION_UNMET:
-    if(data->info.httpcode == 304)
+    if (data->info.httpcode == 304)
       *param_longp = 1L;
     else
       /* return if the condition prevented the document to get transferred */
@@ -336,7 +347,8 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
     break;
 #endif
   case FETCHINFO_HTTP_VERSION:
-    switch(data->info.httpversion) {
+    switch (data->info.httpversion)
+    {
     case 10:
       *param_longp = FETCH_HTTP_VERSION_1_0;
       break;
@@ -360,11 +372,11 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
   case FETCHINFO_USED_PROXY:
     *param_longp =
 #ifdef FETCH_DISABLE_PROXY
-      0
+        0
 #else
-      data->info.used_proxy
+        data->info.used_proxy
 #endif
-      ;
+        ;
     break;
   default:
     return FETCHE_UNKNOWN_OPTION;
@@ -373,16 +385,18 @@ static FETCHcode getinfo_long(struct Curl_easy *data, FETCHINFO info,
   return FETCHE_OK;
 }
 
-#define DOUBLE_SECS(x) (double)(x)/1000000
+#define DOUBLE_SECS(x) (double)(x) / 1000000
 
 static FETCHcode getinfo_offt(struct Curl_easy *data, FETCHINFO info,
-                             fetch_off_t *param_offt)
+                              fetch_off_t *param_offt)
 {
 #ifdef DEBUGBUILD
   char *timestr = getenv("FETCH_TIME");
-  if(timestr) {
+  if (timestr)
+  {
     unsigned long val = strtoul(timestr, NULL, 10);
-    switch(info) {
+    switch (info)
+    {
     case FETCHINFO_TOTAL_TIME_T:
     case FETCHINFO_NAMELOOKUP_TIME_T:
     case FETCHINFO_CONNECT_TIME_T:
@@ -401,7 +415,8 @@ static FETCHcode getinfo_offt(struct Curl_easy *data, FETCHINFO info,
     }
   }
 #endif
-  switch(info) {
+  switch (info)
+  {
   case FETCHINFO_FILETIME_T:
     *param_offt = (fetch_off_t)data->info.filetime;
     break;
@@ -418,14 +433,12 @@ static FETCHcode getinfo_offt(struct Curl_easy *data, FETCHINFO info,
     *param_offt = data->progress.ul.speed;
     break;
   case FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T:
-    *param_offt = (data->progress.flags & PGRS_DL_SIZE_KNOWN) ?
-      data->progress.dl.total_size : -1;
+    *param_offt = (data->progress.flags & PGRS_DL_SIZE_KNOWN) ? data->progress.dl.total_size : -1;
     break;
   case FETCHINFO_CONTENT_LENGTH_UPLOAD_T:
-    *param_offt = (data->progress.flags & PGRS_UL_SIZE_KNOWN) ?
-      data->progress.ul.total_size : -1;
+    *param_offt = (data->progress.flags & PGRS_UL_SIZE_KNOWN) ? data->progress.ul.total_size : -1;
     break;
-   case FETCHINFO_TOTAL_TIME_T:
+  case FETCHINFO_TOTAL_TIME_T:
     *param_offt = data->progress.timespent;
     break;
   case FETCHINFO_NAMELOOKUP_TIME_T:
@@ -459,8 +472,7 @@ static FETCHcode getinfo_offt(struct Curl_easy *data, FETCHINFO info,
     *param_offt = data->id;
     break;
   case FETCHINFO_CONN_ID:
-    *param_offt = data->conn ?
-      data->conn->connection_id : data->state.recent_conn_id;
+    *param_offt = data->conn ? data->conn->connection_id : data->state.recent_conn_id;
     break;
   case FETCHINFO_EARLYDATA_SENT_T:
     *param_offt = data->progress.earlydata_sent;
@@ -473,13 +485,15 @@ static FETCHcode getinfo_offt(struct Curl_easy *data, FETCHINFO info,
 }
 
 static FETCHcode getinfo_double(struct Curl_easy *data, FETCHINFO info,
-                               double *param_doublep)
+                                double *param_doublep)
 {
 #ifdef DEBUGBUILD
   char *timestr = getenv("FETCH_TIME");
-  if(timestr) {
+  if (timestr)
+  {
     unsigned long val = strtoul(timestr, NULL, 10);
-    switch(info) {
+    switch (info)
+    {
     case FETCHINFO_TOTAL_TIME:
     case FETCHINFO_NAMELOOKUP_TIME:
     case FETCHINFO_CONNECT_TIME:
@@ -496,7 +510,8 @@ static FETCHcode getinfo_double(struct Curl_easy *data, FETCHINFO info,
     }
   }
 #endif
-  switch(info) {
+  switch (info)
+  {
   case FETCHINFO_TOTAL_TIME:
     *param_doublep = DOUBLE_SECS(data->progress.timespent);
     break;
@@ -528,12 +543,10 @@ static FETCHcode getinfo_double(struct Curl_easy *data, FETCHINFO info,
     *param_doublep = (double)data->progress.ul.speed;
     break;
   case FETCHINFO_CONTENT_LENGTH_DOWNLOAD:
-    *param_doublep = (data->progress.flags & PGRS_DL_SIZE_KNOWN) ?
-      (double)data->progress.dl.total_size : -1;
+    *param_doublep = (data->progress.flags & PGRS_DL_SIZE_KNOWN) ? (double)data->progress.dl.total_size : -1;
     break;
   case FETCHINFO_CONTENT_LENGTH_UPLOAD:
-    *param_doublep = (data->progress.flags & PGRS_UL_SIZE_KNOWN) ?
-      (double)data->progress.ul.total_size : -1;
+    *param_doublep = (data->progress.flags & PGRS_UL_SIZE_KNOWN) ? (double)data->progress.ul.total_size : -1;
     break;
   case FETCHINFO_REDIRECT_TIME:
     *param_doublep = DOUBLE_SECS(data->progress.t_redirect);
@@ -547,14 +560,16 @@ static FETCHcode getinfo_double(struct Curl_easy *data, FETCHINFO info,
 }
 
 static FETCHcode getinfo_slist(struct Curl_easy *data, FETCHINFO info,
-                              struct fetch_slist **param_slistp)
+                               struct fetch_slist **param_slistp)
 {
-  union {
+  union
+  {
     struct fetch_certinfo *to_certinfo;
-    struct fetch_slist    *to_slist;
+    struct fetch_slist *to_slist;
   } ptr;
 
-  switch(info) {
+  switch (info)
+  {
   case FETCHINFO_SSL_ENGINES:
     *param_slistp = Curl_ssl_engines_list(data);
     break;
@@ -569,25 +584,26 @@ static FETCHcode getinfo_slist(struct Curl_easy *data, FETCHINFO info,
     break;
   case FETCHINFO_TLS_SESSION:
   case FETCHINFO_TLS_SSL_PTR:
+  {
+    struct fetch_tlssessioninfo **tsip = (struct fetch_tlssessioninfo **)
+        param_slistp;
+    struct fetch_tlssessioninfo *tsi = &data->tsi;
+#ifdef USE_SSL
+    struct connectdata *conn = data->conn;
+#endif
+
+    *tsip = tsi;
+    tsi->backend = Curl_ssl_backend();
+    tsi->internals = NULL;
+
+#ifdef USE_SSL
+    if (conn && tsi->backend != FETCHSSLBACKEND_NONE)
     {
-      struct fetch_tlssessioninfo **tsip = (struct fetch_tlssessioninfo **)
-                                          param_slistp;
-      struct fetch_tlssessioninfo *tsi = &data->tsi;
-#ifdef USE_SSL
-      struct connectdata *conn = data->conn;
-#endif
-
-      *tsip = tsi;
-      tsi->backend = Curl_ssl_backend();
-      tsi->internals = NULL;
-
-#ifdef USE_SSL
-      if(conn && tsi->backend != FETCHSSLBACKEND_NONE) {
-        tsi->internals = Curl_ssl_get_internals(data, FIRSTSOCKET, info, 0);
-      }
-#endif
+      tsi->internals = Curl_ssl_get_internals(data, FIRSTSOCKET, info, 0);
     }
-    break;
+#endif
+  }
+  break;
   default:
     return FETCHE_UNKNOWN_OPTION;
   }
@@ -596,9 +612,10 @@ static FETCHcode getinfo_slist(struct Curl_easy *data, FETCHINFO info,
 }
 
 static FETCHcode getinfo_socket(struct Curl_easy *data, FETCHINFO info,
-                               fetch_socket_t *param_socketp)
+                                fetch_socket_t *param_socketp)
 {
-  switch(info) {
+  switch (info)
+  {
   case FETCHINFO_ACTIVESOCKET:
     *param_socketp = Curl_getconnectinfo(data, NULL);
     break;
@@ -621,41 +638,42 @@ FETCHcode Curl_getinfo(struct Curl_easy *data, FETCHINFO info, ...)
   int type;
   FETCHcode result = FETCHE_UNKNOWN_OPTION;
 
-  if(!data)
+  if (!data)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, info);
 
   type = FETCHINFO_TYPEMASK & (int)info;
-  switch(type) {
+  switch (type)
+  {
   case FETCHINFO_STRING:
     param_charp = va_arg(arg, const char **);
-    if(param_charp)
+    if (param_charp)
       result = getinfo_char(data, info, param_charp);
     break;
   case FETCHINFO_LONG:
     param_longp = va_arg(arg, long *);
-    if(param_longp)
+    if (param_longp)
       result = getinfo_long(data, info, param_longp);
     break;
   case FETCHINFO_DOUBLE:
     param_doublep = va_arg(arg, double *);
-    if(param_doublep)
+    if (param_doublep)
       result = getinfo_double(data, info, param_doublep);
     break;
   case FETCHINFO_OFF_T:
     param_offt = va_arg(arg, fetch_off_t *);
-    if(param_offt)
+    if (param_offt)
       result = getinfo_offt(data, info, param_offt);
     break;
   case FETCHINFO_SLIST:
     param_slistp = va_arg(arg, struct fetch_slist **);
-    if(param_slistp)
+    if (param_slistp)
       result = getinfo_slist(data, info, param_slistp);
     break;
   case FETCHINFO_SOCKET:
     param_socketp = va_arg(arg, fetch_socket_t *);
-    if(param_socketp)
+    if (param_socketp)
       result = getinfo_socket(data, info, param_socketp);
     break;
   default:

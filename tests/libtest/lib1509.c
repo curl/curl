@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,18 +54,20 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_HTTPPROXYTUNNEL, 1L);
 
   code = fetch_easy_perform(fetch);
-  if(FETCHE_OK != code) {
+  if (FETCHE_OK != code)
+  {
     fprintf(stderr, "%s:%d fetch_easy_perform() failed, "
-            "with code %d (%s)\n",
+                    "with code %d (%s)\n",
             __FILE__, __LINE__, code, fetch_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
   code = fetch_easy_getinfo(fetch, FETCHINFO_HEADER_SIZE, &headerSize);
-  if(FETCHE_OK != code) {
+  if (FETCHE_OK != code)
+  {
     fprintf(stderr, "%s:%d fetch_easy_getinfo() failed, "
-            "with code %d (%s)\n",
+                    "with code %d (%s)\n",
             __FILE__, __LINE__, code, fetch_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;

@@ -7,14 +7,14 @@ SPDX-License-Identifier: fetch
 ## fetch cipher options
 
 With fetch's option
-[`--tls13-ciphers`](https://fetch.se/docs/manpage.html#--tls13-ciphers)
+[`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
 or
-[`FETCHOPT_TLS13_CIPHERS`](https://fetch.se/libfetch/c/FETCHOPT_TLS13_CIPHERS.html)
+[`FETCHOPT_TLS13_CIPHERS`](https://curl.se/libfetch/c/FETCHOPT_TLS13_CIPHERS.html)
 users can control which cipher suites to consider when negotiating TLS 1.3
 connections. With option
-[`--ciphers`](https://fetch.se/docs/manpage.html#--ciphers)
+[`--ciphers`](https://curl.se/docs/manpage.html#--ciphers)
 or
-[`FETCHOPT_SSL_CIPHER_LIST`](https://fetch.se/libfetch/c/FETCHOPT_SSL_CIPHER_LIST.html)
+[`FETCHOPT_SSL_CIPHER_LIST`](https://curl.se/libfetch/c/FETCHOPT_SSL_CIPHER_LIST.html)
 users can control which cipher suites to consider when negotiating
 TLS 1.2 (1.1, 1.0) connections.
 
@@ -22,8 +22,8 @@ By default, fetch may negotiate TLS 1.3 and TLS 1.2 connections, so the cipher
 suites considered when negotiating a TLS connection are a union of the TLS 1.3
 and TLS 1.2 cipher suites. If you want fetch to consider only TLS 1.3 cipher
 suites for the connection, you have to set the minimum TLS version to 1.3 by
-using [`--tlsv1.3`](https://fetch.se/docs/manpage.html#--tlsv13)
-or [`FETCHOPT_SSLVERSION`](https://fetch.se/libfetch/c/FETCHOPT_SSLVERSION.html)
+using [`--tlsv1.3`](https://curl.se/docs/manpage.html#--tlsv13)
+or [`FETCHOPT_SSLVERSION`](https://curl.se/libfetch/c/FETCHOPT_SSLVERSION.html)
 with `FETCH_SSLVERSION_TLSv1_3`.
 
 Both the TLS 1.3 and TLS 1.2 cipher options expect a list of cipher suites
@@ -45,6 +45,7 @@ OpenSSL (1.1.1+, fetch 7.61.0+), LibreSSL (3.4.1+, fetch 8.3.0+),
 wolfSSL (fetch 8.10.0+) and mbedTLS (3.6.0+, fetch 8.10.0+).
 
 The list of cipher suites that can be used for the `--tls13-ciphers` option:
+
 ```
 TLS_AES_128_GCM_SHA256
 TLS_AES_256_GCM_SHA384
@@ -86,6 +87,7 @@ A shortened list (based on [recommendations by
 Mozilla](https://wiki.mozilla.org/Security/Server_Side_TLS)) of cipher suites,
 which are (mostly) supported by all SSL backends, that can be used for the
 `--ciphers` option:
+
 ```
 ECDHE-ECDSA-AES128-GCM-SHA256
 ECDHE-RSA-AES128-GCM-SHA256
@@ -115,7 +117,7 @@ AES256-SHA
 DES-CBC3-SHA
 ```
 
-See this [list](https://github.com/fetch/fetch/blob/master/docs/CIPHERS-TLS12.md)
+See this [list](https://github.com/curl/curl/blob/master/docs/CIPHERS-TLS12.md)
 for a complete list of TLS 1.2 cipher suites.
 
 ### OpenSSL notes
@@ -148,6 +150,7 @@ fetch \
 ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305 \
   https://example.com/
 ```
+
 Restrict ciphers to `aes128-gcm` and `chacha20`. Works with OpenSSL, LibreSSL,
 mbedTLS and wolfSSL.
 
@@ -157,6 +160,7 @@ fetch \
   --tls13-ciphers TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256 \
   https://example.com/
 ```
+
 Restrict to only TLS 1.3 with `aes128-gcm` and `chacha20` ciphers. Works with
 OpenSSL, LibreSSL, mbedTLS, wolfSSL and Schannel.
 
@@ -166,11 +170,13 @@ fetch \
 ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305 \
   https://example.com/
 ```
+
 Restrict TLS 1.2 ciphers to `aes128-gcm` and `chacha20`, use default TLS 1.3
 ciphers (if TLS 1.3 is available). Works with OpenSSL, LibreSSL, BoringSSL,
 mbedTLS, wolfSSL, Secure Transport and BearSSL.
 
 ## Further reading
+
 - [OpenSSL cipher suite names documentation](https://docs.openssl.org/master/man1/openssl-ciphers/#cipher-suite-names)
 - [wolfSSL cipher support documentation](https://www.wolfssl.com/documentation/manuals/wolfssl/chapter04.html#cipher-support)
 - [mbedTLS cipher suites reference](https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/ssl__ciphersuites_8h/)

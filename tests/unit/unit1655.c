@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@ static FETCHcode unit_setup(void)
 
 static void unit_stop(void)
 {
-    /* done before shutting down and exiting */
+  /* done before shutting down and exiting */
 }
 
 #ifndef FETCH_DISABLE_DOH
@@ -46,46 +46,49 @@ UNITTEST_START
  *
  * Prove detection of other invalid input.
  */
-do {
+do
+{
   static const char max[] =
-    /* ..|....1.........2.........3.........4.........5.........6... */
-    /* 3456789012345678901234567890123456789012345678901234567890123 */
-    "this.is.a.maximum-length.hostname."                  /* 34:  34 */
-    "with-no-label-of-greater-length-than-the-sixty-three-characters."
-                                                          /* 64:  98 */
-    "specified.in.the.RFCs."                              /* 22: 120 */
-    "and.with.a.QNAME.encoding.whose.length.is.exactly."  /* 50: 170 */
-    "the.maximum.length.allowed."                         /* 27: 197 */
-    "that.is.two-hundred.and.fifty-six."                  /* 34: 231 */
-    "including.the.last.null."                            /* 24: 255 */
-    "";
+      /* ..|....1.........2.........3.........4.........5.........6... */
+      /* 3456789012345678901234567890123456789012345678901234567890123 */
+      "this.is.a.maximum-length.hostname." /* 34:  34 */
+      "with-no-label-of-greater-length-than-the-sixty-three-characters."
+      /* 64:  98 */
+      "specified.in.the.RFCs."                             /* 22: 120 */
+      "and.with.a.QNAME.encoding.whose.length.is.exactly." /* 50: 170 */
+      "the.maximum.length.allowed."                        /* 27: 197 */
+      "that.is.two-hundred.and.fifty-six."                 /* 34: 231 */
+      "including.the.last.null."                           /* 24: 255 */
+      "";
   static const char toolong[] =
-    /* ..|....1.........2.........3.........4.........5.........6... */
-    /* 3456789012345678901234567890123456789012345678901234567890123 */
-    "here.is.a.hostname.which.is.just.barely.too.long."   /* 49:  49 */
-    "to.be.encoded.as.a.QNAME.of.the.maximum.allowed.length."
-                                                          /* 55: 104 */
-    "which.is.256.including.a.final.zero-length.label."   /* 49: 153 */
-    "representing.the.root.node.so.that.a.name.with."     /* 47: 200 */
-    "a.trailing.dot.may.have.up.to."                      /* 30: 230 */
-    "255.characters.never.more."                          /* 26: 256 */
-    "";
+      /* ..|....1.........2.........3.........4.........5.........6... */
+      /* 3456789012345678901234567890123456789012345678901234567890123 */
+      "here.is.a.hostname.which.is.just.barely.too.long." /* 49:  49 */
+      "to.be.encoded.as.a.QNAME.of.the.maximum.allowed.length."
+      /* 55: 104 */
+      "which.is.256.including.a.final.zero-length.label." /* 49: 153 */
+      "representing.the.root.node.so.that.a.name.with."   /* 47: 200 */
+      "a.trailing.dot.may.have.up.to."                    /* 30: 230 */
+      "255.characters.never.more."                        /* 26: 256 */
+      "";
   static const char emptylabel[] =
-    "this.is.an.otherwise-valid.hostname."
-    ".with.an.empty.label.";
+      "this.is.an.otherwise-valid.hostname."
+      ".with.an.empty.label.";
   static const char outsizelabel[] =
-    "this.is.an.otherwise-valid.hostname."
-    "with-a-label-of-greater-length-than-the-sixty-three-characters-"
-    "specified.in.the.RFCs.";
+      "this.is.an.otherwise-valid.hostname."
+      "with-a-label-of-greater-length-than-the-sixty-three-characters-"
+      "specified.in.the.RFCs.";
   int i;
 
-  struct test {
+  struct test
+  {
     const char *name;
     const DOHcode expected_result;
   };
 
   /* plays the role of struct dnsprobe in urldata.h */
-  struct demo {
+  struct demo
+  {
     unsigned char dohbuffer[255 + 16]; /* deliberately short buffer */
     unsigned char canary1;
     unsigned char canary2;
@@ -93,13 +96,14 @@ do {
   };
 
   const struct test playlist[4] = {
-    { toolong, DOH_DNS_NAME_TOO_LONG },  /* expect early failure */
-    { emptylabel, DOH_DNS_BAD_LABEL },   /* also */
-    { outsizelabel, DOH_DNS_BAD_LABEL }, /* also */
-    { max, DOH_OK }                      /* expect buffer overwrite */
+      {toolong, DOH_DNS_NAME_TOO_LONG},  /* expect early failure */
+      {emptylabel, DOH_DNS_BAD_LABEL},   /* also */
+      {outsizelabel, DOH_DNS_BAD_LABEL}, /* also */
+      {max, DOH_OK}                      /* expect buffer overwrite */
   };
 
-  for(i = 0; i < (int)(sizeof(playlist)/sizeof(*playlist)); i++) {
+  for (i = 0; i < (int)(sizeof(playlist) / sizeof(*playlist)); i++)
+  {
     const char *name = playlist[i].name;
     size_t olen = 100000;
     struct demo victim;
@@ -114,12 +118,15 @@ do {
 
     fail_unless(d == playlist[i].expected_result,
                 "result returned was not as expected");
-    if(d == playlist[i].expected_result) {
-      if(name == max) {
+    if (d == playlist[i].expected_result)
+    {
+      if (name == max)
+      {
         fail_if(victim.canary1 == 87,
                 "demo one-byte buffer overwrite did not happen");
       }
-      else {
+      else
+      {
         fail_unless(victim.canary1 == 87,
                     "one-byte buffer overwrite has happened");
       }
@@ -128,17 +135,20 @@ do {
       fail_unless(victim.canary3 == 41,
                   "three-byte buffer overwrite has happened");
     }
-    else {
-      if(d == DOH_OK) {
+    else
+    {
+      if (d == DOH_OK)
+      {
         fail_unless(olen <= sizeof(victim.dohbuffer), "wrote outside bounds");
         fail_unless(olen > strlen(name), "unrealistic low size");
       }
     }
   }
-} while(0);
+} while (0);
 
 /* run normal cases and try to trigger buffer length related errors */
-do {
+do
+{
   DNStype dnstype = DNS_TYPE_A;
   unsigned char buffer[128];
   const size_t buflen = sizeof(buffer);
@@ -178,7 +188,7 @@ do {
   ret = doh_req_encode(sunshine1, dnstype, buffer, olen1, &olen);
   fail_unless(ret == DOH_OK, "minimal length buffer should be long enough");
   fail_unless(olen == olen1, "bad buffer length");
-} while(0);
+} while (0);
 UNITTEST_STOP
 
 #else /* FETCH_DISABLE_DOH */

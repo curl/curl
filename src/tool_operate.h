@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,8 @@
 #include "tool_cb_prg.h"
 #include "tool_sdecls.h"
 
-struct per_transfer {
+struct per_transfer
+{
   /* double linked */
   struct per_transfer *next;
   struct per_transfer *prev;
@@ -38,7 +39,7 @@ struct per_transfer {
   long retry_remaining;
   long retry_sleep_default;
   long retry_sleep;
-  long num_retries; /* counts the performed retries */
+  long num_retries;     /* counts the performed retries */
   struct timeval start; /* start of this transfer */
   struct timeval retrystart;
   char *url;
@@ -60,15 +61,15 @@ struct per_transfer {
   fetch_off_t ultotal;
   fetch_off_t ulnow;
   fetch_off_t uploadfilesize; /* expected total amount */
-  fetch_off_t uploadedsofar; /* amount delivered from the callback */
-  bool dltotal_added; /* if the total has been added from this */
+  fetch_off_t uploadedsofar;  /* amount delivered from the callback */
+  bool dltotal_added;         /* if the total has been added from this */
   bool ultotal_added;
 
   /* NULL or malloced */
   char *uploadfile;
   char *errorbuffer; /* allocated and assigned while this is used for a
                         transfer */
-  bool infdopen; /* TRUE if infd needs closing */
+  bool infdopen;     /* TRUE if infd needs closing */
   bool noprogress;
   bool was_last_header_empty;
 

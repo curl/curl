@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -66,12 +66,13 @@ FETCHcode Curl_setstropt(char **charp, const char *s)
 
   Curl_safefree(*charp);
 
-  if(s) {
-    if(strlen(s) > FETCH_MAX_INPUT_LENGTH)
+  if (s)
+  {
+    if (strlen(s) > FETCH_MAX_INPUT_LENGTH)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
 
     *charp = strdup(s);
-    if(!*charp)
+    if (!*charp)
       return FETCHE_OUT_OF_MEMORY;
   }
 
@@ -79,24 +80,26 @@ FETCHcode Curl_setstropt(char **charp, const char *s)
 }
 
 FETCHcode Curl_setblobopt(struct fetch_blob **blobp,
-                         const struct fetch_blob *blob)
+                          const struct fetch_blob *blob)
 {
   /* free the previous storage at `blobp' and replace by a dynamic storage
      copy of blob. If FETCH_BLOB_COPY is set, the data is copied. */
 
   Curl_safefree(*blobp);
 
-  if(blob) {
+  if (blob)
+  {
     struct fetch_blob *nblob;
-    if(blob->len > FETCH_MAX_INPUT_LENGTH)
+    if (blob->len > FETCH_MAX_INPUT_LENGTH)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     nblob = (struct fetch_blob *)
-      malloc(sizeof(struct fetch_blob) +
-             ((blob->flags & FETCH_BLOB_COPY) ? blob->len : 0));
-    if(!nblob)
+        malloc(sizeof(struct fetch_blob) +
+               ((blob->flags & FETCH_BLOB_COPY) ? blob->len : 0));
+    if (!nblob)
       return FETCHE_OUT_OF_MEMORY;
     *nblob = *blob;
-    if(blob->flags & FETCH_BLOB_COPY) {
+    if (blob->flags & FETCH_BLOB_COPY)
+    {
       /* put the data after the blob struct in memory */
       nblob->data = (char *)nblob + sizeof(struct fetch_blob);
       memcpy(nblob->data, blob->data, blob->len);
@@ -119,14 +122,15 @@ static FETCHcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 
   /* Parse the login details if specified. It not then we treat NULL as a hint
      to clear the existing data */
-  if(option) {
+  if (option)
+  {
     size_t len = strlen(option);
     FETCHcode result;
-    if(len > FETCH_MAX_INPUT_LENGTH)
+    if (len > FETCH_MAX_INPUT_LENGTH)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
 
     result = Curl_parse_login_details(option, len, &user, &passwd, NULL);
-    if(result)
+    if (result)
       return result;
   }
 
@@ -140,7 +144,7 @@ static FETCHcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 }
 
 static FETCHcode setstropt_interface(char *option, char **devp,
-                                    char **ifacep, char **hostp)
+                                     char **ifacep, char **hostp)
 {
   char *dev = NULL;
   char *iface = NULL;
@@ -151,10 +155,11 @@ static FETCHcode setstropt_interface(char *option, char **devp,
   DEBUGASSERT(ifacep);
   DEBUGASSERT(hostp);
 
-  if(option) {
+  if (option)
+  {
     /* Parse the interface details if set, otherwise clear them all */
     result = Curl_parse_interface(option, &dev, &iface, &host);
-    if(result)
+    if (result)
       return result;
   }
   free(*devp);
@@ -180,58 +185,63 @@ static FETCHcode protocol2num(const char *str, fetch_prot_t *val)
    */
   *val = 0;
 
-  if(!str)
+  if (!str)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-  if(fetch_strequal(str, "all")) {
-    *val = ~(fetch_prot_t) 0;
+  if (fetch_strequal(str, "all"))
+  {
+    *val = ~(fetch_prot_t)0;
     return FETCHE_OK;
   }
 
-  do {
+  do
+  {
     const char *token = str;
     size_t tlen;
 
     str = strchr(str, ',');
-    tlen = str ? (size_t) (str - token) : strlen(token);
-    if(tlen) {
+    tlen = str ? (size_t)(str - token) : strlen(token);
+    if (tlen)
+    {
       const struct Curl_handler *h = Curl_getn_scheme_handler(token, tlen);
 
-      if(!h)
+      if (!h)
         return FETCHE_UNSUPPORTED_PROTOCOL;
 
       *val |= h->protocol;
     }
-  } while(str && str++);
+  } while (str && str++);
 
-  if(!*val)
+  if (!*val)
     /* no protocol listed */
     return FETCHE_BAD_FUNCTION_ARGUMENT;
   return FETCHE_OK;
 }
 
 static FETCHcode httpauth(struct Curl_easy *data, bool proxy,
-                         unsigned long auth)
+                          unsigned long auth)
 {
-  if(auth != FETCHAUTH_NONE) {
+  if (auth != FETCHAUTH_NONE)
+  {
     int bitcheck = 0;
     bool authbits = FALSE;
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
     bool iestyle = !!(auth & FETCHAUTH_DIGEST_IE);
-    if(proxy)
+    if (proxy)
       data->state.authproxy.iestyle = iestyle;
     else
       data->state.authhost.iestyle = iestyle;
 
-    if(auth & FETCHAUTH_DIGEST_IE) {
-      auth |= FETCHAUTH_DIGEST; /* set standard digest bit */
+    if (auth & FETCHAUTH_DIGEST_IE)
+    {
+      auth |= FETCHAUTH_DIGEST;     /* set standard digest bit */
       auth &= ~FETCHAUTH_DIGEST_IE; /* unset ie digest bit */
     }
 
     /* switch off bits we cannot support */
 #ifndef USE_NTLM
-    auth &= ~FETCHAUTH_NTLM;    /* no NTLM support */
+    auth &= ~FETCHAUTH_NTLM; /* no NTLM support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~FETCHAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without GSS-API
@@ -239,16 +249,18 @@ static FETCHcode httpauth(struct Curl_easy *data, bool proxy,
 #endif
 
     /* check if any auth bit lower than FETCHAUTH_ONLY is still set */
-    while(bitcheck < 31) {
-      if(auth & (1UL << bitcheck++)) {
+    while (bitcheck < 31)
+    {
+      if (auth & (1UL << bitcheck++))
+      {
         authbits = TRUE;
         break;
       }
     }
-    if(!authbits)
+    if (!authbits)
       return FETCHE_NOT_BUILT_IN; /* no supported types left! */
   }
-  if(proxy)
+  if (proxy)
     data->set.proxyauth = auth;
   else
     data->set.httpauth = auth;
@@ -256,24 +268,26 @@ static FETCHcode httpauth(struct Curl_easy *data, bool proxy,
 }
 
 static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
-                            long arg)
+                             long arg)
 {
   bool enabled = (0 != arg);
   unsigned long uarg = (unsigned long)arg;
-  switch(option) {
+  switch (option)
+  {
   case FETCHOPT_DNS_CACHE_TIMEOUT:
-    if(arg < -1)
+    if (arg < -1)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX)
+    else if (arg > INT_MAX)
       arg = INT_MAX;
 
     data->set.dns_cache_timeout = (int)arg;
     break;
   case FETCHOPT_CA_CACHE_TIMEOUT:
-    if(Curl_ssl_supports(data, SSLSUPP_CA_CACHE)) {
-      if(arg < -1)
+    if (Curl_ssl_supports(data, SSLSUPP_CA_CACHE))
+    {
+      if (arg < -1)
         return FETCHE_BAD_FUNCTION_ARGUMENT;
-      else if(arg > INT_MAX)
+      else if (arg > INT_MAX)
         arg = INT_MAX;
 
       data->set.general_ssl.ca_cache_timeout = (int)arg;
@@ -286,11 +300,11 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * Set the absolute number of maximum simultaneous alive connection that
      * libfetch is allowed to have.
      */
-    if(uarg > UINT_MAX)
+    if (uarg > UINT_MAX)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.maxconnects = (unsigned int)uarg;
     break;
-   case FETCHOPT_FORBID_REUSE:
+  case FETCHOPT_FORBID_REUSE:
     /*
      * When this transfer is done, it must not be left to be reused by a
      * subsequent transfer but shall be closed immediately.
@@ -322,7 +336,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * Shut off the internal supported progress meter
      */
     data->set.hide_progress = enabled;
-    if(data->set.hide_progress)
+    if (data->set.hide_progress)
       data->progress.flags |= PGRS_HIDE;
     else
       data->progress.flags &= ~PGRS_HIDE;
@@ -333,10 +347,10 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      */
     data->set.opt_no_body = enabled;
 #ifndef FETCH_DISABLE_HTTP
-    if(data->set.opt_no_body)
+    if (data->set.opt_no_body)
       /* in HTTP lingo, no body means using the HEAD request... */
       data->set.method = HTTPREQ_HEAD;
-    else if(data->set.method == HTTPREQ_HEAD)
+    else if (data->set.method == HTTPREQ_HEAD)
       data->set.method = HTTPREQ_GET;
 #endif
     break;
@@ -356,7 +370,8 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * We want to sent data to the remote host. If this is HTTP, that equals
      * using the PUT request.
      */
-    if(arg) {
+    if (arg)
+    {
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->set.method = HTTPREQ_PUT;
       data->set.opt_no_body = FALSE; /* this is implied */
@@ -378,7 +393,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * Option that specifies how quickly a server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
+    if ((arg >= 0) && (arg <= (INT_MAX / 1000)))
       data->set.server_response_timeout = (unsigned int)arg * 1000;
     else
       return FETCHE_BAD_FUNCTION_ARGUMENT;
@@ -388,7 +403,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * Option that specifies how quickly a server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
-    if((arg >= 0) && (arg <= INT_MAX))
+    if ((arg >= 0) && (arg <= INT_MAX))
       data->set.server_response_timeout = (unsigned int)arg;
     else
       return FETCHE_BAD_FUNCTION_ARGUMENT;
@@ -405,9 +420,9 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * TFTP option that specifies the block size to use for data transmission.
      */
-    if(arg < TFTP_BLKSIZE_MIN)
+    if (arg < TFTP_BLKSIZE_MIN)
       arg = 512;
-    else if(arg > TFTP_BLKSIZE_MAX)
+    else if (arg > TFTP_BLKSIZE_MAX)
       arg = TFTP_BLKSIZE_MAX;
     data->set.tftp_blksize = arg;
     break;
@@ -417,7 +432,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Parse the $HOME/.netrc file
      */
-    if((arg < FETCH_NETRC_IGNORED) || (arg >= FETCH_NETRC_LAST))
+    if ((arg < FETCH_NETRC_IGNORED) || (arg >= FETCH_NETRC_LAST))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.use_netrc = (unsigned char)arg;
     break;
@@ -436,7 +451,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * Set HTTP time condition. This must be one of the defines in the
      * fetch/fetch.h header file.
      */
-    if((arg < FETCH_TIMECOND_NONE) || (arg >= FETCH_TIMECOND_LAST))
+    if ((arg < FETCH_TIMECOND_NONE) || (arg >= FETCH_TIMECOND_LAST))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.timecondition = (unsigned char)(fetch_TimeCond)arg;
     break;
@@ -456,41 +471,42 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * implementations are lame.
      */
 #ifdef USE_SSL
-    {
-      long version, version_max;
-      struct ssl_primary_config *primary = &data->set.ssl.primary;
+  {
+    long version, version_max;
+    struct ssl_primary_config *primary = &data->set.ssl.primary;
 #ifndef FETCH_DISABLE_PROXY
-      if(option != FETCHOPT_SSLVERSION)
-        primary = &data->set.proxy_ssl.primary;
+    if (option != FETCHOPT_SSLVERSION)
+      primary = &data->set.proxy_ssl.primary;
 #endif
-      version = C_SSLVERSION_VALUE(arg);
-      version_max = (long)C_SSLVERSION_MAX_VALUE(arg);
+    version = C_SSLVERSION_VALUE(arg);
+    version_max = (long)C_SSLVERSION_MAX_VALUE(arg);
 
-      if(version < FETCH_SSLVERSION_DEFAULT ||
-         version == FETCH_SSLVERSION_SSLv2 ||
-         version == FETCH_SSLVERSION_SSLv3 ||
-         version >= FETCH_SSLVERSION_LAST ||
-         version_max < FETCH_SSLVERSION_MAX_NONE ||
-         version_max >= FETCH_SSLVERSION_MAX_LAST)
-        return FETCHE_BAD_FUNCTION_ARGUMENT;
+    if (version < FETCH_SSLVERSION_DEFAULT ||
+        version == FETCH_SSLVERSION_SSLv2 ||
+        version == FETCH_SSLVERSION_SSLv3 ||
+        version >= FETCH_SSLVERSION_LAST ||
+        version_max < FETCH_SSLVERSION_MAX_NONE ||
+        version_max >= FETCH_SSLVERSION_MAX_LAST)
+      return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-      primary->version = (unsigned char)version;
-      primary->version_max = (unsigned int)version_max;
-    }
+    primary->version = (unsigned char)version;
+    primary->version_max = (unsigned int)version_max;
+  }
 #else
     return FETCHE_NOT_BUILT_IN;
 #endif
-    break;
+  break;
   case FETCHOPT_POSTFIELDSIZE:
     /*
      * The size of the POSTFIELD data to prevent libfetch to do strlen() to
      * figure it out. Enables binary posts.
      */
-    if(arg < -1)
+    if (arg < -1)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-    if(data->set.postfieldsize < arg &&
-       data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
+    if (data->set.postfieldsize < arg &&
+        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS])
+    {
       /* Previous FETCHOPT_COPYPOSTFIELDS is no longer valid. */
       Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
       data->set.postfields = NULL;
@@ -541,7 +557,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * The maximum amount of hops you allow fetch to follow Location:
      * headers. This should mostly be used to detect never-ending loops.
      */
-    if(arg < -1)
+    if (arg < -1)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.maxredirs = arg;
     break;
@@ -556,7 +572,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * FETCH_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
      * other - POST is kept as POST after 301 and 302
      */
-    if(arg < FETCH_REDIR_GET_ALL)
+    if (arg < FETCH_REDIR_GET_ALL)
       /* no return error on too high numbers since the bitmask could be
          extended in a future */
       return FETCHE_BAD_FUNCTION_ARGUMENT;
@@ -567,7 +583,8 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /* Does this option serve a purpose anymore? Yes it does, when
        FETCHOPT_POSTFIELDS is not used and the POST data is read off the
        callback! */
-    if(arg) {
+    if (arg)
+    {
       data->set.method = HTTPREQ_POST;
       data->set.opt_no_body = FALSE; /* this is implied */
     }
@@ -587,7 +604,8 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Set to force us do HTTP GET
      */
-    if(enabled) {
+    if (enabled)
+    {
       data->set.method = HTTPREQ_GET;
       data->set.opt_no_body = FALSE; /* this is implied */
     }
@@ -598,7 +616,8 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * This sets a requested HTTP version to be used. The value is one of
      * the listed enums in fetch/fetch.h.
      */
-    switch(arg) {
+    switch (arg)
+    {
     case FETCH_HTTP_VERSION_NONE:
 #ifdef USE_HTTP2
       /* TODO: this seems an undesirable quirk to force a behaviour on
@@ -626,7 +645,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
 #endif
     default:
       /* not accepted */
-      if(arg < FETCH_HTTP_VERSION_NONE)
+      if (arg < FETCH_HTTP_VERSION_NONE)
         return FETCHE_BAD_FUNCTION_ARGUMENT;
       return FETCHE_UNSUPPORTED_PROTOCOL;
     }
@@ -638,7 +657,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * Time to wait for a response to an HTTP request containing an
      * Expect: 100-continue header before sending the data anyway.
      */
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.expect_100_timeout = arg;
     break;
@@ -665,7 +684,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Explicitly set HTTP proxy port number.
      */
-    if((arg < 0) || (arg > 65535))
+    if ((arg < 0) || (arg > 65535))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.proxyport = (unsigned short)arg;
     break;
@@ -677,7 +696,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Set proxy type.
      */
-    if((arg < FETCHPROXY_HTTP) || (arg > FETCHPROXY_SOCKS5_HOSTNAME))
+    if ((arg < FETCHPROXY_HTTP) || (arg > FETCHPROXY_SOCKS5_HOSTNAME))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.proxytype = (unsigned char)(fetch_proxytype)arg;
     break;
@@ -686,13 +705,13 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy
      */
-    if(uarg > 1)
+    if (uarg > 1)
       /* reserve other values for future use */
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.proxy_transfer_mode = (bool)uarg;
     break;
   case FETCHOPT_SOCKS5_AUTH:
-    if(data->set.socks5auth & ~(FETCHAUTH_BASIC | FETCHAUTH_GSSAPI))
+    if (data->set.socks5auth & ~(FETCHAUTH_BASIC | FETCHAUTH_GSSAPI))
       return FETCHE_NOT_BUILT_IN;
     data->set.socks5auth = (unsigned char)uarg;
     break;
@@ -752,7 +771,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * How do access files over FTP.
      */
-    if((arg < FETCHFTPMETHOD_DEFAULT) || (arg >= FETCHFTPMETHOD_LAST))
+    if ((arg < FETCHFTPMETHOD_DEFAULT) || (arg >= FETCHFTPMETHOD_LAST))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.ftp_filemethod = (unsigned char)arg;
     break;
@@ -769,7 +788,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     break;
 
   case FETCHOPT_FTP_SSL_CCC:
-    if((arg < FETCHFTPSSL_CCC_NONE) || (arg >= FETCHFTPSSL_CCC_LAST))
+    if ((arg < FETCHFTPSSL_CCC_NONE) || (arg >= FETCHFTPSSL_CCC_LAST))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.ftp_ccc = (unsigned char)arg;
     break;
@@ -786,7 +805,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Set a specific auth for FTP-SSL transfers.
      */
-    if((arg < FETCHFTPAUTH_DEFAULT) || (arg >= FETCHFTPAUTH_LAST))
+    if ((arg < FETCHFTPAUTH_DEFAULT) || (arg >= FETCHFTPAUTH_LAST))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.ftpsslauth = (unsigned char)(fetch_ftpauth)arg;
     break;
@@ -794,7 +813,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * The maximum time for fetch to wait for FTP server connect
      */
-    if(uarg > UINT_MAX)
+    if (uarg > UINT_MAX)
       uarg = UINT_MAX;
     data->set.accepttimeout = (unsigned int)uarg;
     break;
@@ -809,7 +828,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * directories on the server.
      */
     /* reserve other values for future use */
-    if((arg < FETCHFTP_CREATE_DIR_NONE) || (arg > FETCHFTP_CREATE_DIR_RETRY))
+    if ((arg < FETCHFTP_CREATE_DIR_NONE) || (arg > FETCHFTP_CREATE_DIR_RETRY))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.ftp_create_missing_dirs = (unsigned char)arg;
     break;
@@ -819,7 +838,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * If known, this should inform fetch about the file size of the
      * to-be-uploaded file.
      */
-    if(arg < -1)
+    if (arg < -1)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.filesize = arg;
     break;
@@ -828,7 +847,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * The low speed limit that if transfers are below this for
      * FETCHOPT_LOW_SPEED_TIME, the transfer is aborted.
      */
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.low_speed_limit = arg;
     break;
@@ -837,7 +856,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * The low speed time that if transfers are below the set
      * FETCHOPT_LOW_SPEED_LIMIT during this time, the transfer is aborted.
      */
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.low_speed_time = arg;
     break;
@@ -845,7 +864,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * The port number to use when getting the URL. 0 disables it.
      */
-    if((arg < 0) || (arg > 65535))
+    if ((arg < 0) || (arg > 65535))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.use_port = (unsigned short)arg;
     break;
@@ -854,14 +873,14 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * The maximum time you allow fetch to use for a single transfer
      * operation.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
+    if ((arg >= 0) && (arg <= (INT_MAX / 1000)))
       data->set.timeout = (unsigned int)arg * 1000;
     else
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case FETCHOPT_TIMEOUT_MS:
-    if(uarg > UINT_MAX)
+    if (uarg > UINT_MAX)
       uarg = UINT_MAX;
     data->set.timeout = (unsigned int)uarg;
     break;
@@ -870,14 +889,14 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * The maximum time you allow fetch to use to connect.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
+    if ((arg >= 0) && (arg <= (INT_MAX / 1000)))
       data->set.connecttimeout = (unsigned int)arg * 1000;
     else
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case FETCHOPT_CONNECTTIMEOUT_MS:
-    if(uarg > UINT_MAX)
+    if (uarg > UINT_MAX)
       uarg = UINT_MAX;
     data->set.connecttimeout = (unsigned int)uarg;
     break;
@@ -886,7 +905,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Resume transfer at the given file position
      */
-    if(arg < -1)
+    if (arg < -1)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.set_resume_from = arg;
     break;
@@ -903,7 +922,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Set what local port to bind the socket to when performing an operation.
      */
-    if((arg < 0) || (arg > 65535))
+    if ((arg < 0) || (arg > 65535))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.localport = fetchx_sltous(arg);
     break;
@@ -911,7 +930,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Set number of local ports to try, starting with FETCHOPT_LOCALPORT.
      */
-    if((arg < 0) || (arg > 65535))
+    if ((arg < 0) || (arg > 65535))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.localportrange = fetchx_sltous(arg);
     break;
@@ -922,8 +941,8 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * GSS-API credential delegation bitmask
      */
-    data->set.gssapi_delegation = (unsigned char)uarg&
-      (FETCHGSSAPI_DELEGATION_POLICY_FLAG|FETCHGSSAPI_DELEGATION_FLAG);
+    data->set.gssapi_delegation = (unsigned char)uarg &
+                                  (FETCHGSSAPI_DELEGATION_POLICY_FLAG | FETCHGSSAPI_DELEGATION_FLAG);
     break;
 #endif
   case FETCHOPT_SSL_VERIFYPEER:
@@ -952,7 +971,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Enable certificate status verifying for DoH.
      */
-    if(!Curl_ssl_cert_status_request())
+    if (!Curl_ssl_cert_status_request())
       return FETCHE_NOT_BUILT_IN;
 
     data->set.doh_verifystatus = enabled;
@@ -975,7 +994,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Enable certificate status verifying.
      */
-    if(!Curl_ssl_cert_status_request())
+    if (!Curl_ssl_cert_status_request())
       return FETCHE_NOT_BUILT_IN;
 
     data->set.ssl.primary.verifystatus = enabled;
@@ -987,14 +1006,14 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Enable TLS false start.
      */
-    if(!Curl_ssl_false_start())
+    if (!Curl_ssl_false_start())
       return FETCHE_NOT_BUILT_IN;
 
     data->set.ssl.falsestart = enabled;
     break;
   case FETCHOPT_CERTINFO:
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CERTINFO))
+    if (Curl_ssl_supports(data, SSLSUPP_CERTINFO))
       data->set.ssl.certinfo = enabled;
     else
 #endif
@@ -1005,11 +1024,11 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * The application kindly asks for a differently sized receive buffer.
      * If it seems reasonable, we will use it.
      */
-    if(arg > READBUFFER_MAX)
+    if (arg > READBUFFER_MAX)
       arg = READBUFFER_MAX;
-    else if(arg < 1)
+    else if (arg < 1)
       arg = READBUFFER_SIZE;
-    else if(arg < READBUFFER_MIN)
+    else if (arg < READBUFFER_MIN)
       arg = READBUFFER_MIN;
 
     data->set.buffer_size = (unsigned int)arg;
@@ -1020,9 +1039,9 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * The application kindly asks for a differently sized upload buffer.
      * Cap it to sensible.
      */
-    if(arg > UPLOADBUFFER_MAX)
+    if (arg > UPLOADBUFFER_MAX)
       arg = UPLOADBUFFER_MAX;
-    else if(arg < UPLOADBUFFER_MIN)
+    else if (arg < UPLOADBUFFER_MIN)
       arg = UPLOADBUFFER_MIN;
 
     data->set.upload_buffer_size = (unsigned int)arg;
@@ -1039,7 +1058,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Set the maximum size of a file to download.
      */
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.max_filesize = arg;
     break;
@@ -1049,7 +1068,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Make transfers attempt to use SSL/TLS.
      */
-    if((arg < FETCHUSESSL_NONE) || (arg >= FETCHUSESSL_LAST))
+    if ((arg < FETCHUSESSL_NONE) || (arg >= FETCHUSESSL_LAST))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.use_ssl = (unsigned char)arg;
     break;
@@ -1073,18 +1092,18 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.proxy_ssl.no_revoke = !!(arg & FETCHSSLOPT_NO_REVOKE);
     data->set.proxy_ssl.no_partialchain = !!(arg & FETCHSSLOPT_NO_PARTIALCHAIN);
     data->set.proxy_ssl.revoke_best_effort =
-      !!(arg & FETCHSSLOPT_REVOKE_BEST_EFFORT);
+        !!(arg & FETCHSSLOPT_REVOKE_BEST_EFFORT);
     data->set.proxy_ssl.native_ca_store = !!(arg & FETCHSSLOPT_NATIVE_CA);
     data->set.proxy_ssl.auto_client_cert =
-      !!(arg & FETCHSSLOPT_AUTO_CLIENT_CERT);
+        !!(arg & FETCHSSLOPT_AUTO_CLIENT_CERT);
     break;
 #endif
 
 #endif /* USE_SSL */
   case FETCHOPT_IPRESOLVE:
-    if((arg < FETCH_IPRESOLVE_WHATEVER) || (arg > FETCH_IPRESOLVE_V6))
+    if ((arg < FETCH_IPRESOLVE_WHATEVER) || (arg > FETCH_IPRESOLVE_V6))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
-    data->set.ipver = (unsigned char) arg;
+    data->set.ipver = (unsigned char)arg;
     break;
   case FETCHOPT_TCP_NODELAY:
     /*
@@ -1104,7 +1123,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * (1) - only do connection
      * (2) - do first get request but get no content
      */
-    if(arg > 2)
+    if (arg > 2)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.connect_only = !!arg;
     data->set.connect_only_ws = (arg == 2);
@@ -1114,7 +1133,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.ssl.primary.cache_session = enabled;
 #ifndef FETCH_DISABLE_PROXY
     data->set.proxy_ssl.primary.cache_session =
-      data->set.ssl.primary.cache_session;
+        data->set.ssl.primary.cache_session;
 #endif
     break;
 
@@ -1151,7 +1170,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Uses these permissions instead of 0644
      */
-    if((arg < 0) || (arg > 0777))
+    if ((arg < 0) || (arg > 0777))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.new_file_perms = (unsigned int)arg;
     break;
@@ -1161,7 +1180,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     /*
      * Uses these permissions instead of 0755
      */
-    if((arg < 0) || (arg > 0777))
+    if ((arg < 0) || (arg > 0777))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.new_directory_perms = (unsigned int)arg;
     break;
@@ -1174,7 +1193,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * that the value fits into an unsigned 32-bit integer.
      */
 #if SIZEOF_LONG > 4
-    if(uarg > UINT_MAX)
+    if (uarg > UINT_MAX)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
 #endif
     data->set.scope_id = (unsigned int)uarg;
@@ -1213,7 +1232,8 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
      * Would this be better if the RTSPREQ_* were just moved into here?
      */
     Curl_RtspReq rtspreq = RTSPREQ_NONE;
-    switch(arg) {
+    switch (arg)
+    {
     case FETCH_RTSPREQ_OPTIONS:
       rtspreq = RTSPREQ_OPTIONS;
       break;
@@ -1284,29 +1304,29 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.tcp_keepalive = enabled;
     break;
   case FETCHOPT_TCP_KEEPIDLE:
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX)
+    else if (arg > INT_MAX)
       arg = INT_MAX;
     data->set.tcp_keepidle = (int)arg;
     break;
   case FETCHOPT_TCP_KEEPINTVL:
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX)
+    else if (arg > INT_MAX)
       arg = INT_MAX;
     data->set.tcp_keepintvl = (int)arg;
     break;
   case FETCHOPT_TCP_KEEPCNT:
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX)
+    else if (arg > INT_MAX)
       arg = INT_MAX;
     data->set.tcp_keepcnt = (int)arg;
     break;
   case FETCHOPT_TCP_FASTOPEN:
-#if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) ||        \
-  defined(TCP_FASTOPEN_CONNECT)
+#if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) || \
+    defined(TCP_FASTOPEN_CONNECT)
     data->set.tcp_fastopen = enabled;
 #else
     return FETCHE_NOT_BUILT_IN;
@@ -1325,7 +1345,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     break;
   case FETCHOPT_STREAM_WEIGHT:
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-    if((arg >= 1) && (arg <= 256))
+    if ((arg >= 1) && (arg <= 256))
       data->set.priority.weight = (int)arg;
     break;
 #else
@@ -1335,7 +1355,7 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     data->set.suppress_connect_headers = enabled;
     break;
   case FETCHOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
-    if(uarg > UINT_MAX)
+    if (uarg > UINT_MAX)
       uarg = UINT_MAX;
     data->set.happy_eyeballs_timeout = (unsigned int)uarg;
     break;
@@ -1349,26 +1369,28 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
     break;
 
   case FETCHOPT_UPKEEP_INTERVAL_MS:
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.upkeep_interval_ms = arg;
     break;
   case FETCHOPT_MAXAGE_CONN:
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.maxage_conn = arg;
     break;
   case FETCHOPT_MAXLIFETIME_CONN:
-    if(arg < 0)
+    if (arg < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.maxlifetime_conn = arg;
     break;
 #ifndef FETCH_DISABLE_HSTS
   case FETCHOPT_HSTS_CTRL:
-    if(arg & FETCHHSTS_ENABLE) {
-      if(!data->hsts) {
+    if (arg & FETCHHSTS_ENABLE)
+    {
+      if (!data->hsts)
+      {
         data->hsts = Curl_hsts_init();
-        if(!data->hsts)
+        if (!data->hsts)
           return FETCHE_OUT_OF_MEMORY;
       }
     }
@@ -1378,20 +1400,22 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
 #endif /* ! FETCH_DISABLE_HSTS */
 #ifndef FETCH_DISABLE_ALTSVC
   case FETCHOPT_ALTSVC_CTRL:
-    if(!arg) {
+    if (!arg)
+    {
       DEBUGF(infof(data, "bad FETCHOPT_ALTSVC_CTRL input"));
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     }
-    if(!data->asi) {
+    if (!data->asi)
+    {
       data->asi = Curl_altsvc_init();
-      if(!data->asi)
+      if (!data->asi)
         return FETCHE_OUT_OF_MEMORY;
     }
     return Curl_altsvc_ctrl(data->asi, arg);
 #endif /* ! FETCH_DISABLE_ALTSVC */
 #ifndef FETCH_DISABLE_WEBSOCKETS
   case FETCHOPT_WS_OPTIONS:
-    data->set.ws_raw_mode =  (bool)(arg & FETCHWS_RAW_MODE);
+    data->set.ws_raw_mode = (bool)(arg & FETCHWS_RAW_MODE);
     break;
 #endif
   case FETCHOPT_QUICK_EXIT:
@@ -1415,10 +1439,11 @@ static FETCHcode setopt_long(struct Curl_easy *data, FETCHoption option,
 }
 
 static FETCHcode setopt_slist(struct Curl_easy *data, FETCHoption option,
-                             struct fetch_slist *slist)
+                              struct fetch_slist *slist)
 {
   FETCHcode result = FETCHE_OK;
-  switch(option) {
+  switch (option)
+  {
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXYHEADER:
     /*
@@ -1512,10 +1537,11 @@ static FETCHcode setopt_slist(struct Curl_easy *data, FETCHoption option,
 
 /* assorted pointer type arguments */
 static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
-                                va_list param)
+                                 va_list param)
 {
   FETCHcode result = FETCHE_OK;
-  switch(option) {
+  switch (option)
+  {
 #ifndef FETCH_DISABLE_HTTP
 #ifndef FETCH_DISABLE_FORM_API
   case FETCHOPT_HTTPPOST:
@@ -1531,17 +1557,18 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
     break;
 #endif /* ! FETCH_DISABLE_FORM_API */
 #endif /* ! FETCH_DISABLE_HTTP */
-#if !defined(FETCH_DISABLE_HTTP) || !defined(FETCH_DISABLE_SMTP) ||       \
+#if !defined(FETCH_DISABLE_HTTP) || !defined(FETCH_DISABLE_SMTP) || \
     !defined(FETCH_DISABLE_IMAP)
-# ifndef FETCH_DISABLE_MIME
-    case FETCHOPT_MIMEPOST:
+#ifndef FETCH_DISABLE_MIME
+  case FETCHOPT_MIMEPOST:
     /*
      * Set to make us do MIME POST
      */
     result = Curl_mime_set_subparts(&data->set.mimepost,
                                     va_arg(param, fetch_mime *),
                                     FALSE);
-    if(!result) {
+    if (!result)
+    {
       data->set.method = HTTPREQ_POST_MIME;
       data->set.opt_no_body = FALSE; /* this is implied */
 #ifndef FETCH_DISABLE_FORM_API
@@ -1559,7 +1586,7 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
      * defaults to stderr for normal operations.
      */
     data->set.err = va_arg(param, FILE *);
-    if(!data->set.err)
+    if (!data->set.err)
       data->set.err = stderr;
     break;
   case FETCHOPT_SHARE:
@@ -1567,29 +1594,31 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
     struct Curl_share *set = va_arg(param, struct Curl_share *);
 
     /* disconnect from old share, if any */
-    if(data->share) {
+    if (data->share)
+    {
       Curl_share_lock(data, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE);
 
-      if(data->dns.hostcachetype == HCACHE_SHARED) {
+      if (data->dns.hostcachetype == HCACHE_SHARED)
+      {
         data->dns.hostcache = NULL;
         data->dns.hostcachetype = HCACHE_NONE;
       }
 
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
-      if(data->share->cookies == data->cookies)
+      if (data->share->cookies == data->cookies)
         data->cookies = NULL;
 #endif
 
 #ifndef FETCH_DISABLE_HSTS
-      if(data->share->hsts == data->hsts)
+      if (data->share->hsts == data->hsts)
         data->hsts = NULL;
 #endif
 #ifdef USE_SSL
-      if(data->share->ssl_scache == data->state.ssl_scache)
+      if (data->share->ssl_scache == data->state.ssl_scache)
         data->state.ssl_scache = data->multi ? data->multi->ssl_scache : NULL;
 #endif
 #ifdef USE_LIBPSL
-      if(data->psl == &data->share->psl)
+      if (data->psl == &data->share->psl)
         data->psl = data->multi ? &data->multi->psl : NULL;
 #endif
 
@@ -1599,41 +1628,45 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
       data->share = NULL;
     }
 
-    if(GOOD_SHARE_HANDLE(set))
+    if (GOOD_SHARE_HANDLE(set))
       /* use new share if it set */
       data->share = set;
-    if(data->share) {
+    if (data->share)
+    {
 
       Curl_share_lock(data, FETCH_LOCK_DATA_SHARE, FETCH_LOCK_ACCESS_SINGLE);
 
       data->share->dirty++;
 
-      if(data->share->specifier & (1 << FETCH_LOCK_DATA_DNS)) {
+      if (data->share->specifier & (1 << FETCH_LOCK_DATA_DNS))
+      {
         /* use shared host cache */
         data->dns.hostcache = &data->share->hostcache;
         data->dns.hostcachetype = HCACHE_SHARED;
       }
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)
-      if(data->share->cookies) {
+      if (data->share->cookies)
+      {
         /* use shared cookie list, first free own one if any */
         Curl_cookie_cleanup(data->cookies);
         /* enable cookies since we now use a share that uses cookies! */
         data->cookies = data->share->cookies;
       }
-#endif   /* FETCH_DISABLE_HTTP */
+#endif /* FETCH_DISABLE_HTTP */
 #ifndef FETCH_DISABLE_HSTS
-      if(data->share->hsts) {
+      if (data->share->hsts)
+      {
         /* first free the private one if any */
         Curl_hsts_cleanup(&data->hsts);
         data->hsts = data->share->hsts;
       }
 #endif
 #ifdef USE_SSL
-      if(data->share->ssl_scache)
+      if (data->share->ssl_scache)
         data->state.ssl_scache = data->share->ssl_scache;
 #endif
 #ifdef USE_LIBPSL
-      if(data->share->specifier & (1 << FETCH_LOCK_DATA_PSL))
+      if (data->share->specifier & (1 << FETCH_LOCK_DATA_PSL))
         data->psl = &data->share->psl;
 #endif
 
@@ -1646,9 +1679,10 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
 
 #ifdef USE_HTTP2
   case FETCHOPT_STREAM_DEPENDS:
-  case FETCHOPT_STREAM_DEPENDS_E: {
+  case FETCHOPT_STREAM_DEPENDS_E:
+  {
     struct Curl_easy *dep = va_arg(param, struct Curl_easy *);
-    if(!dep || GOOD_EASY_HANDLE(dep))
+    if (!dep || GOOD_EASY_HANDLE(dep))
       return Curl_data_priority_add_child(dep, data,
                                           option == FETCHOPT_STREAM_DEPENDS_E);
     break;
@@ -1662,19 +1696,21 @@ static FETCHcode setopt_pointers(struct Curl_easy *data, FETCHoption option,
 }
 
 static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
-                            char *ptr)
+                             char *ptr)
 {
   FETCHcode result = FETCHE_OK;
-  switch(option) {
+  switch (option)
+  {
   case FETCHOPT_SSL_CIPHER_LIST:
-    if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
+    if (Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
       /* set a list of cipher we want to use in the SSL connection */
       return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST], ptr);
     return FETCHE_NOT_BUILT_IN;
     break;
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_SSL_CIPHER_LIST:
-    if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST)) {
+    if (Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
+    {
       /* set a list of cipher we want to use in the SSL connection for proxy */
       return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_PROXY],
                             ptr);
@@ -1684,7 +1720,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     break;
 #endif
   case FETCHOPT_TLS13_CIPHERS:
-    if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES)) {
+    if (Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
+    {
       /* set preferred list of TLS 1.3 cipher suites */
       return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST], ptr);
     }
@@ -1693,7 +1730,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     break;
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_TLS13_CIPHERS:
-    if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
+    if (Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
       /* set preferred list of TLS 1.3 cipher suites for proxy */
       return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_PROXY],
                             ptr);
@@ -1722,28 +1759,31 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * If needed, FETCHOPT_POSTFIELDSIZE must have been set prior to
      *  FETCHOPT_COPYPOSTFIELDS and not altered later.
      */
-    if(!ptr || data->set.postfieldsize == -1)
+    if (!ptr || data->set.postfieldsize == -1)
       result = Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], ptr);
-    else {
-      if(data->set.postfieldsize < 0)
+    else
+    {
+      if (data->set.postfieldsize < 0)
         return FETCHE_BAD_FUNCTION_ARGUMENT;
 #if SIZEOF_FETCH_OFF_T > SIZEOF_SIZE_T
       /*
        *  Check that requested length does not overflow the size_t type.
        */
-      else if(data->set.postfieldsize > SIZE_T_MAX)
+      else if (data->set.postfieldsize > SIZE_T_MAX)
         return FETCHE_OUT_OF_MEMORY;
 #endif
-      else {
+      else
+      {
         /* Allocate even when size == 0. This satisfies the need of possible
            later address compare to detect the COPYPOSTFIELDS mode, and to
            mark that postfields is used rather than read function or form
            data.
         */
         char *p = Curl_memdup0(ptr, (size_t)data->set.postfieldsize);
-        if(!p)
+        if (!p)
           return FETCHE_OUT_OF_MEMORY;
-        else {
+        else
+        {
           free(data->set.str[STRING_COPYPOSTFIELDS]);
           data->set.str[STRING_COPYPOSTFIELDS] = p;
         }
@@ -1776,7 +1816,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * and ignore an received Content-Encoding header.
      *
      */
-    if(ptr && !*ptr) {
+    if (ptr && !*ptr)
+    {
       char all[256];
       Curl_all_content_encodings(all, sizeof(all));
       return Curl_setstropt(&data->set.str[STRING_ENCODING], all);
@@ -1793,7 +1834,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * Basic been set by default it need to be unset here
      */
-    if(data->set.str[STRING_AWS_SIGV4])
+    if (data->set.str[STRING_AWS_SIGV4])
       data->set.httpauth = FETCHAUTH_AWS_SIGV4;
     break;
 #endif
@@ -1801,7 +1842,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * String to set in the HTTP Referer: field.
      */
-    if(data->state.referer_alloc) {
+    if (data->state.referer_alloc)
+    {
       Curl_safefree(data->state.referer);
       data->state.referer_alloc = FALSE;
     }
@@ -1826,27 +1868,31 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * Set cookie file to read and parse. Can be used multiple times.
      */
-    if(ptr) {
+    if (ptr)
+    {
       struct fetch_slist *cl;
       /* general protection against mistakes and abuse */
-      if(strlen(ptr) > FETCH_MAX_INPUT_LENGTH)
+      if (strlen(ptr) > FETCH_MAX_INPUT_LENGTH)
         return FETCHE_BAD_FUNCTION_ARGUMENT;
       /* append the cookie filename to the list of filenames, and deal with
          them later */
       cl = fetch_slist_append(data->state.cookielist, ptr);
-      if(!cl) {
+      if (!cl)
+      {
         fetch_slist_free_all(data->state.cookielist);
         data->state.cookielist = NULL;
         return FETCHE_OUT_OF_MEMORY;
       }
       data->state.cookielist = cl; /* store the list for later use */
     }
-    else {
+    else
+    {
       /* clear the list of cookie files */
       fetch_slist_free_all(data->state.cookielist);
       data->state.cookielist = NULL;
 
-      if(!data->share || !data->share->cookies) {
+      if (!data->share || !data->share->cookies)
+      {
         /* throw away all existing cookies if this is not a shared cookie
            container */
         Curl_cookie_clearall(data->cookies);
@@ -1862,58 +1908,65 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set cookie filename to dump all cookies to when we are done.
      */
     result = Curl_setstropt(&data->set.str[STRING_COOKIEJAR], ptr);
-    if(!result) {
+    if (!result)
+    {
       /*
        * Activate the cookie parser. This may or may not already
        * have been made.
        */
       struct CookieInfo *newcookies =
-        Curl_cookie_init(data, NULL, data->cookies, data->set.cookiesession);
-      if(!newcookies)
+          Curl_cookie_init(data, NULL, data->cookies, data->set.cookiesession);
+      if (!newcookies)
         result = FETCHE_OUT_OF_MEMORY;
       data->cookies = newcookies;
     }
     break;
 
   case FETCHOPT_COOKIELIST:
-    if(!ptr)
+    if (!ptr)
       break;
 
-    if(strcasecompare(ptr, "ALL")) {
+    if (strcasecompare(ptr, "ALL"))
+    {
       /* clear all cookies */
       Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearall(data->cookies);
       Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
     }
-    else if(strcasecompare(ptr, "SESS")) {
+    else if (strcasecompare(ptr, "SESS"))
+    {
       /* clear session cookies */
       Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearsess(data->cookies);
       Curl_share_unlock(data, FETCH_LOCK_DATA_COOKIE);
     }
-    else if(strcasecompare(ptr, "FLUSH")) {
+    else if (strcasecompare(ptr, "FLUSH"))
+    {
       /* flush cookies to file, takes care of the locking */
       Curl_flush_cookies(data, FALSE);
     }
-    else if(strcasecompare(ptr, "RELOAD")) {
+    else if (strcasecompare(ptr, "RELOAD"))
+    {
       /* reload cookies from file */
       Curl_cookie_loadfiles(data);
       break;
     }
-    else {
-      if(!data->cookies) {
+    else
+    {
+      if (!data->cookies)
+      {
         /* if cookie engine was not running, activate it */
         data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
-        if(!data->cookies)
+        if (!data->cookies)
           return FETCHE_OUT_OF_MEMORY;
       }
 
       /* general protection against mistakes and abuse */
-      if(strlen(ptr) > FETCH_MAX_INPUT_LENGTH)
+      if (strlen(ptr) > FETCH_MAX_INPUT_LENGTH)
         return FETCHE_BAD_FUNCTION_ARGUMENT;
 
       Curl_share_lock(data, FETCH_LOCK_DATA_COOKIE, FETCH_LOCK_ACCESS_SINGLE);
-      if(checkprefix("Set-Cookie:", ptr))
+      if (checkprefix("Set-Cookie:", ptr))
         /* HTTP Header format line */
         Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11, NULL,
                         NULL, TRUE);
@@ -1962,7 +2015,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * to use the socks proxy.
      */
     return Curl_setstropt(&data->set.str[STRING_PRE_PROXY], ptr);
-#endif   /* FETCH_DISABLE_PROXY */
+#endif /* FETCH_DISABLE_PROXY */
 
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_SOCKS5_GSSAPI_SERVICE:
@@ -2029,7 +2082,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Set a SSL_CTX callback parameter pointer
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
+    if (Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
       data->set.ssl.fsslctxp = (void *)ptr;
     else
 #endif
@@ -2105,7 +2158,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * The URL to fetch.
      */
-    if(data->state.url_alloc) {
+    if (data->state.url_alloc)
+    {
       Curl_safefree(data->state.url);
       data->state.url_alloc = FALSE;
     }
@@ -2145,7 +2199,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     return Curl_setstropt(&data->set.str[STRING_BEARER], ptr);
 
 #ifndef FETCH_DISABLE_PROXY
-  case FETCHOPT_PROXYUSERPWD: {
+  case FETCHOPT_PROXYUSERPWD:
+  {
     /*
      * user:password needed to use the proxy
      */
@@ -2154,16 +2209,16 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     result = setstropt_userpwd(ptr, &u, &p);
 
     /* URL decode the components */
-    if(!result && u)
+    if (!result && u)
       result = Curl_urldecode(u, 0, &data->set.str[STRING_PROXYUSERNAME], NULL,
                               REJECT_ZERO);
-    if(!result && p)
+    if (!result && p)
       result = Curl_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     free(u);
     free(p);
   }
-    break;
+  break;
   case FETCHOPT_PROXYUSERNAME:
     /*
      * authentication username to use in the operation
@@ -2193,7 +2248,8 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * pass FETCHU to set URL
      */
-    if(data->state.url_alloc) {
+    if (data->state.url_alloc)
+    {
       Curl_safefree(data->state.url);
       data->state.url_alloc = FALSE;
     }
@@ -2274,9 +2330,11 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     /*
      * String that holds the SSL crypto engine.
      */
-    if(ptr && ptr[0]) {
+    if (ptr && ptr[0])
+    {
       result = Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], ptr);
-      if(!result) {
+      if (!result)
+      {
         result = Curl_ssl_set_engine(data, ptr);
       }
     }
@@ -2308,7 +2366,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Specify filename of the public key in DER format.
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
+    if (Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
       return Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY], ptr);
 #endif
     return FETCHE_NOT_BUILT_IN;
@@ -2320,7 +2378,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * Specify filename of the public key in DER format.
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
+    if (Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
       return Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
                             ptr);
 #endif
@@ -2347,7 +2405,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH))
+    if (Curl_ssl_supports(data, SSLSUPP_CA_PATH))
       /* This does not work on Windows. */
       return Curl_setstropt(&data->set.str[STRING_SSL_CAPATH], ptr);
 #endif
@@ -2359,7 +2417,7 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH))
+    if (Curl_ssl_supports(data, SSLSUPP_CA_PATH))
       /* This does not work on Windows. */
       return Curl_setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY], ptr);
 #endif
@@ -2462,17 +2520,17 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
 #endif /* USE_LIBSSH2 */
 #endif /* USE_SSH */
   case FETCHOPT_PROTOCOLS_STR:
-    if(ptr)
+    if (ptr)
       return protocol2num(ptr, &data->set.allowed_protocols);
     /* make a NULL argument reset to default */
-    data->set.allowed_protocols = (fetch_prot_t) FETCHPROTO_ALL;
+    data->set.allowed_protocols = (fetch_prot_t)FETCHPROTO_ALL;
     break;
 
   case FETCHOPT_REDIR_PROTOCOLS_STR:
-    if(ptr)
+    if (ptr)
       return protocol2num(ptr, &data->set.redir_protocols);
     /* make a NULL argument reset to default */
-    data->set.redir_protocols = (fetch_prot_t) FETCHPROTO_REDIR;
+    data->set.redir_protocols = (fetch_prot_t)FETCHPROTO_REDIR;
     break;
 
   case FETCHOPT_DEFAULT_PROTOCOL:
@@ -2544,12 +2602,12 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
     return Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY], ptr);
 #endif
   case FETCHOPT_TLSAUTH_TYPE:
-    if(ptr && !strcasecompare(ptr, "SRP"))
+    if (ptr && !strcasecompare(ptr, "SRP"))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     break;
 #ifndef FETCH_DISABLE_PROXY
   case FETCHOPT_PROXY_TLSAUTH_TYPE:
-    if(ptr && !strcasecompare(ptr, "SRP"))
+    if (ptr && !strcasecompare(ptr, "SRP"))
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     break;
 #endif
@@ -2557,25 +2615,25 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
 #ifdef USE_ARES
   case FETCHOPT_DNS_SERVERS:
     result = Curl_setstropt(&data->set.str[STRING_DNS_SERVERS], ptr);
-    if(result)
+    if (result)
       return result;
     return Curl_set_dns_servers(data, data->set.str[STRING_DNS_SERVERS]);
 
   case FETCHOPT_DNS_INTERFACE:
     result = Curl_setstropt(&data->set.str[STRING_DNS_INTERFACE], ptr);
-    if(result)
+    if (result)
       return result;
     return Curl_set_dns_interface(data, data->set.str[STRING_DNS_INTERFACE]);
 
   case FETCHOPT_DNS_LOCAL_IP4:
     result = Curl_setstropt(&data->set.str[STRING_DNS_LOCAL_IP4], ptr);
-    if(result)
+    if (result)
       return result;
     return Curl_set_dns_local_ip4(data, data->set.str[STRING_DNS_LOCAL_IP4]);
 
   case FETCHOPT_DNS_LOCAL_IP6:
     result = Curl_setstropt(&data->set.str[STRING_DNS_LOCAL_IP6], ptr);
-    if(result)
+    if (result)
       return result;
     return Curl_set_dns_local_ip6(data, data->set.str[STRING_DNS_LOCAL_IP6]);
 
@@ -2604,33 +2662,38 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
   case FETCHOPT_HSTSWRITEDATA:
     data->set.hsts_write_userp = (void *)ptr;
     break;
-  case FETCHOPT_HSTS: {
+  case FETCHOPT_HSTS:
+  {
     struct fetch_slist *h;
-    if(!data->hsts) {
+    if (!data->hsts)
+    {
       data->hsts = Curl_hsts_init();
-      if(!data->hsts)
+      if (!data->hsts)
         return FETCHE_OUT_OF_MEMORY;
     }
-    if(ptr) {
+    if (ptr)
+    {
       result = Curl_setstropt(&data->set.str[STRING_HSTS], ptr);
-      if(result)
+      if (result)
         return result;
       /* this needs to build a list of filenames to read from, so that it can
          read them later, as we might get a shared HSTS handle to load them
          into */
       h = fetch_slist_append(data->state.hstslist, ptr);
-      if(!h) {
+      if (!h)
+      {
         fetch_slist_free_all(data->state.hstslist);
         data->state.hstslist = NULL;
         return FETCHE_OUT_OF_MEMORY;
       }
       data->state.hstslist = h; /* store the list for later use */
     }
-    else {
+    else
+    {
       /* clear the list of HSTS files */
       fetch_slist_free_all(data->state.hstslist);
       data->state.hstslist = NULL;
-      if(!data->share || !data->share->hsts)
+      if (!data->share || !data->share->hsts)
         /* throw away the HSTS cache unless shared */
         Curl_hsts_cleanup(&data->hsts);
     }
@@ -2639,53 +2702,59 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
 #endif /* ! FETCH_DISABLE_HSTS */
 #ifndef FETCH_DISABLE_ALTSVC
   case FETCHOPT_ALTSVC:
-    if(!data->asi) {
+    if (!data->asi)
+    {
       data->asi = Curl_altsvc_init();
-      if(!data->asi)
+      if (!data->asi)
         return FETCHE_OUT_OF_MEMORY;
     }
     result = Curl_setstropt(&data->set.str[STRING_ALTSVC], ptr);
-    if(result)
+    if (result)
       return result;
-    if(ptr)
+    if (ptr)
       (void)Curl_altsvc_load(data->asi, ptr);
     break;
 #endif /* ! FETCH_DISABLE_ALTSVC */
 #ifdef USE_ECH
-  case FETCHOPT_ECH: {
+  case FETCHOPT_ECH:
+  {
     size_t plen = 0;
 
-    if(!ptr) {
+    if (!ptr)
+    {
       data->set.tls_ech = FETCHECH_DISABLE;
       return FETCHE_OK;
     }
     plen = strlen(ptr);
-    if(plen > FETCH_MAX_INPUT_LENGTH) {
+    if (plen > FETCH_MAX_INPUT_LENGTH)
+    {
       data->set.tls_ech = FETCHECH_DISABLE;
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     }
     /* set tls_ech flag value, preserving CLA_CFG bit */
-    if(!strcmp(ptr, "false"))
+    if (!strcmp(ptr, "false"))
       data->set.tls_ech = FETCHECH_DISABLE |
-        (data->set.tls_ech & FETCHECH_CLA_CFG);
-    else if(!strcmp(ptr, "grease"))
+                          (data->set.tls_ech & FETCHECH_CLA_CFG);
+    else if (!strcmp(ptr, "grease"))
       data->set.tls_ech = FETCHECH_GREASE |
-        (data->set.tls_ech & FETCHECH_CLA_CFG);
-    else if(!strcmp(ptr, "true"))
+                          (data->set.tls_ech & FETCHECH_CLA_CFG);
+    else if (!strcmp(ptr, "true"))
       data->set.tls_ech = FETCHECH_ENABLE |
-        (data->set.tls_ech & FETCHECH_CLA_CFG);
-    else if(!strcmp(ptr, "hard"))
+                          (data->set.tls_ech & FETCHECH_CLA_CFG);
+    else if (!strcmp(ptr, "hard"))
       data->set.tls_ech = FETCHECH_HARD |
-        (data->set.tls_ech & FETCHECH_CLA_CFG);
-    else if(plen > 5 && !strncmp(ptr, "ecl:", 4)) {
+                          (data->set.tls_ech & FETCHECH_CLA_CFG);
+    else if (plen > 5 && !strncmp(ptr, "ecl:", 4))
+    {
       result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], ptr + 4);
-      if(result)
+      if (result)
         return result;
       data->set.tls_ech |= FETCHECH_CLA_CFG;
     }
-    else if(plen > 4 && !strncmp(ptr, "pn:", 3)) {
+    else if (plen > 4 && !strncmp(ptr, "pn:", 3))
+    {
       result = Curl_setstropt(&data->set.str[STRING_ECH_PUBLIC], ptr + 3);
-      if(result)
+      if (result)
         return result;
     }
     break;
@@ -2698,15 +2767,16 @@ static FETCHcode setopt_cptr(struct Curl_easy *data, FETCHoption option,
 }
 
 static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
-                            va_list param)
+                             va_list param)
 {
-  switch(option) {
+  switch (option)
+  {
   case FETCHOPT_PROGRESSFUNCTION:
     /*
      * Progress callback function
      */
     data->set.fprogress = va_arg(param, fetch_progress_callback);
-    if(data->set.fprogress)
+    if (data->set.fprogress)
       data->progress.callback = TRUE; /* no longer internal */
     else
       data->progress.callback = FALSE; /* NULL enforces internal */
@@ -2717,7 +2787,7 @@ static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
      * Transfer info callback function
      */
     data->set.fxferinfo = va_arg(param, fetch_xferinfo_callback);
-    if(data->set.fxferinfo)
+    if (data->set.fxferinfo)
       data->progress.callback = TRUE; /* no longer internal */
     else
       data->progress.callback = FALSE; /* NULL enforces internal */
@@ -2743,7 +2813,7 @@ static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
      * Set data write callback
      */
     data->set.fwrite_func = va_arg(param, fetch_write_callback);
-    if(!data->set.fwrite_func)
+    if (!data->set.fwrite_func)
       /* When set to NULL, reset to our internal default function */
       data->set.fwrite_func = (fetch_write_callback)fwrite;
     break;
@@ -2752,7 +2822,8 @@ static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
      * Read data callback
      */
     data->set.fread_func_set = va_arg(param, fetch_read_callback);
-    if(!data->set.fread_func_set) {
+    if (!data->set.fread_func_set)
+    {
       data->set.is_fread_set = 0;
       /* When set to NULL, reset to our internal default function */
       data->set.fread_func_set = (fetch_read_callback)fread;
@@ -2777,7 +2848,7 @@ static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
      * Set a SSL_CTX callback
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
+    if (Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
       data->set.ssl.fsslctx = va_arg(param, fetch_ssl_ctx_callback);
     else
 #endif
@@ -2814,7 +2885,6 @@ static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
      */
     data->set.resolver_start = va_arg(param, fetch_resolver_start_callback);
     break;
-
 
 #ifdef USE_SSH
 #ifdef USE_LIBSSH2
@@ -2872,9 +2942,10 @@ static FETCHcode setopt_func(struct Curl_easy *data, FETCHoption option,
 }
 
 static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
-                            fetch_off_t offt)
+                             fetch_off_t offt)
 {
-  switch(option) {
+  switch (option)
+  {
   case FETCHOPT_TIMEVALUE_LARGE:
     /*
      * This is the value to compare with the remote document with the
@@ -2889,11 +2960,12 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
      * The size of the POSTFIELD data to prevent libfetch to do strlen() to
      * figure it out. Enables binary posts.
      */
-    if(offt < -1)
+    if (offt < -1)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-    if(data->set.postfieldsize < offt &&
-       data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
+    if (data->set.postfieldsize < offt &&
+        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS])
+    {
       /* Previous FETCHOPT_COPYPOSTFIELDS is no longer valid. */
       Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
       data->set.postfields = NULL;
@@ -2905,7 +2977,7 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
      * If known, this should inform fetch about the file size of the
      * to-be-uploaded file.
      */
-    if(offt < -1)
+    if (offt < -1)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.filesize = offt;
     break;
@@ -2914,7 +2986,7 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
      * When transfer uploads are faster then FETCHOPT_MAX_SEND_SPEED_LARGE
      * bytes per second the transfer is throttled..
      */
-    if(offt < 0)
+    if (offt < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.max_send_speed = offt;
     break;
@@ -2923,7 +2995,7 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
      * When receiving data faster than FETCHOPT_MAX_RECV_SPEED_LARGE bytes per
      * second the transfer is throttled..
      */
-    if(offt < 0)
+    if (offt < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.max_recv_speed = offt;
     break;
@@ -2931,7 +3003,7 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
     /*
      * Resume transfer at the given file position
      */
-    if(offt < -1)
+    if (offt < -1)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.set_resume_from = offt;
     break;
@@ -2939,7 +3011,7 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
     /*
      * Set the maximum size of a file to download.
      */
-    if(offt < 0)
+    if (offt < 0)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     data->set.max_filesize = offt;
     break;
@@ -2951,9 +3023,10 @@ static FETCHcode setopt_offt(struct Curl_easy *data, FETCHoption option,
 }
 
 static FETCHcode setopt_blob(struct Curl_easy *data, FETCHoption option,
-                            struct fetch_blob *blob)
+                             struct fetch_blob *blob)
 {
-  switch(option) {
+  switch (option)
+  {
   case FETCHOPT_SSLCERT_BLOB:
     /*
      * Blob that holds file content of the SSL certificate to use
@@ -2976,7 +3049,7 @@ static FETCHcode setopt_blob(struct Curl_easy *data, FETCHoption option,
      * Specify entire PEM of the CA certificate
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
+    if (Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
       return Curl_setblobopt(&data->set.blobs[BLOB_CAINFO_PROXY], blob);
 #endif
     return FETCHE_NOT_BUILT_IN;
@@ -2998,7 +3071,7 @@ static FETCHcode setopt_blob(struct Curl_easy *data, FETCHoption option,
      * Specify entire PEM of the CA certificate
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
+    if (Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
       return Curl_setblobopt(&data->set.blobs[BLOB_CAINFO], blob);
 #endif
     return FETCHE_NOT_BUILT_IN;
@@ -3020,12 +3093,14 @@ static FETCHcode setopt_blob(struct Curl_easy *data, FETCHoption option,
  */
 FETCHcode Curl_vsetopt(struct Curl_easy *data, FETCHoption option, va_list param)
 {
-  if(option < FETCHOPTTYPE_OBJECTPOINT)
+  if (option < FETCHOPTTYPE_OBJECTPOINT)
     return setopt_long(data, option, va_arg(param, long));
-  else if(option < FETCHOPTTYPE_FUNCTIONPOINT) {
+  else if (option < FETCHOPTTYPE_FUNCTIONPOINT)
+  {
     /* unfortunately, different pointer types cannot be identified any other
        way than being listed explicitly */
-    switch(option) {
+    switch (option)
+    {
     case FETCHOPT_HTTPHEADER:
     case FETCHOPT_QUOTE:
     case FETCHOPT_POSTQUOTE:
@@ -3050,9 +3125,9 @@ FETCHcode Curl_vsetopt(struct Curl_easy *data, FETCHoption option, va_list param
     /* the char pointer options */
     return setopt_cptr(data, option, va_arg(param, char *));
   }
-  else if(option < FETCHOPTTYPE_OFF_T)
+  else if (option < FETCHOPTTYPE_OFF_T)
     return setopt_func(data, option, param);
-  else if(option < FETCHOPTTYPE_BLOB)
+  else if (option < FETCHOPTTYPE_BLOB)
     return setopt_offt(data, option, va_arg(param, fetch_off_t));
   return setopt_blob(data, option, va_arg(param, struct fetch_blob *));
 }
@@ -3072,7 +3147,7 @@ FETCHcode fetch_easy_setopt(FETCH *d, FETCHoption tag, ...)
   FETCHcode result;
   struct Curl_easy *data = d;
 
-  if(!data)
+  if (!data)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, tag);
@@ -3081,7 +3156,7 @@ FETCHcode fetch_easy_setopt(FETCH *d, FETCHoption tag, ...)
 
   va_end(arg);
 #ifdef DEBUGBUILD
-  if(result == FETCHE_BAD_FUNCTION_ARGUMENT)
+  if (result == FETCHE_BAD_FUNCTION_ARGUMENT)
     infof(data, "setopt arg 0x%x returned FETCHE_BAD_FUNCTION_ARGUMENT", tag);
 #endif
   return result;

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,8 @@
 #ifndef FETCH_DISABLE_LIBFETCH_OPTION
 
 /* linked-list structure with last node cache for easysrc */
-struct slist_wc {
+struct slist_wc
+{
   struct fetch_slist *first;
   struct fetch_slist *last;
 };

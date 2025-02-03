@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,34 +44,36 @@ Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
 */
 
 FETCHcode Curl_input_digest(struct Curl_easy *data,
-                           bool proxy,
-                           const char *header) /* rest of the *-authenticate:
-                                                  header */
+                            bool proxy,
+                            const char *header) /* rest of the *-authenticate:
+                                                   header */
 {
   /* Point to the correct struct with this */
   struct digestdata *digest;
 
-  if(proxy) {
+  if (proxy)
+  {
     digest = &data->state.proxydigest;
   }
-  else {
+  else
+  {
     digest = &data->state.digest;
   }
 
-  if(!checkprefix("Digest", header) || !ISBLANK(header[6]))
+  if (!checkprefix("Digest", header) || !ISBLANK(header[6]))
     return FETCHE_BAD_CONTENT_ENCODING;
 
   header += strlen("Digest");
-  while(*header && ISBLANK(*header))
+  while (*header && ISBLANK(*header))
     header++;
 
   return Curl_auth_decode_digest_http_message(header, digest);
 }
 
 FETCHcode Curl_output_digest(struct Curl_easy *data,
-                            bool proxy,
-                            const unsigned char *request,
-                            const unsigned char *uripath)
+                             bool proxy,
+                             const unsigned char *request,
+                             const unsigned char *uripath)
 {
   FETCHcode result;
   unsigned char *path = NULL;
@@ -92,7 +94,8 @@ FETCHcode Curl_output_digest(struct Curl_easy *data,
   struct digestdata *digest;
   struct auth *authp;
 
-  if(proxy) {
+  if (proxy)
+  {
 #ifdef FETCH_DISABLE_PROXY
     return FETCHE_NOT_BUILT_IN;
 #else
@@ -103,7 +106,8 @@ FETCHcode Curl_output_digest(struct Curl_easy *data,
     authp = &data->state.authproxy;
 #endif
   }
-  else {
+  else
+  {
     digest = &data->state.digest;
     allocuserpwd = &data->state.aptr.userpwd;
     userp = data->state.aptr.user;
@@ -114,10 +118,10 @@ FETCHcode Curl_output_digest(struct Curl_easy *data,
   Curl_safefree(*allocuserpwd);
 
   /* not set means empty */
-  if(!userp)
+  if (!userp)
     userp = "";
 
-  if(!passwdp)
+  if (!passwdp)
     passwdp = "";
 
 #if defined(USE_WINDOWS_SSPI)
@@ -126,7 +130,8 @@ FETCHcode Curl_output_digest(struct Curl_easy *data,
   have_chlg = !!digest->nonce;
 #endif
 
-  if(!have_chlg) {
+  if (!have_chlg)
+  {
     authp->done = FALSE;
     return FETCHE_OK;
   }
@@ -144,31 +149,33 @@ FETCHcode Curl_output_digest(struct Curl_easy *data,
      http://www.fngtps.com/2006/09/http-authentication
   */
 
-  if(authp->iestyle) {
+  if (authp->iestyle)
+  {
     tmp = strchr((char *)uripath, '?');
-    if(tmp) {
+    if (tmp)
+    {
       size_t urilen = tmp - (char *)uripath;
       /* typecast is fine here since the value is always less than 32 bits */
-      path = (unsigned char *) aprintf("%.*s", (int)urilen, uripath);
+      path = (unsigned char *)aprintf("%.*s", (int)urilen, uripath);
     }
   }
-  if(!tmp)
-    path = (unsigned char *) strdup((char *) uripath);
+  if (!tmp)
+    path = (unsigned char *)strdup((char *)uripath);
 
-  if(!path)
+  if (!path)
     return FETCHE_OUT_OF_MEMORY;
 
   result = Curl_auth_create_digest_http_message(data, userp, passwdp, request,
                                                 path, digest, &response, &len);
   free(path);
-  if(result)
+  if (result)
     return result;
 
   *allocuserpwd = aprintf("%sAuthorization: Digest %s\r\n",
                           proxy ? "Proxy-" : "",
                           response);
   free(response);
-  if(!*allocuserpwd)
+  if (!*allocuserpwd)
     return FETCHE_OUT_OF_MEMORY;
 
   authp->done = TRUE;

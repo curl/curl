@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,11 +49,11 @@ static void unit_stop(void)
 }
 
 static void test_parse(
-  const char *input_data,
-  const char *exp_dev,
-  const char *exp_iface,
-  const char *exp_host,
-  FETCHcode exp_rc)
+    const char *input_data,
+    const char *exp_dev,
+    const char *exp_iface,
+    const char *exp_host,
+    FETCHcode exp_rc)
 {
   char *dev = NULL;
   char *iface = NULL;
@@ -65,7 +65,8 @@ static void test_parse(
   fail_unless(!!exp_iface == !!iface, "iface expectation failed");
   fail_unless(!!exp_host == !!host, "host expectation failed");
 
-  if(!unitfail) {
+  if (!unitfail)
+  {
     fail_unless(!exp_dev || strcmp(dev, exp_dev) == 0,
                 "dev should be equal to exp_dev");
     fail_unless(!exp_iface || strcmp(iface, exp_iface) == 0,

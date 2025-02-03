@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,11 +28,11 @@
 
 /* this is for Negotiate header input */
 FETCHcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
-                              bool proxy, const char *header);
+                               bool proxy, const char *header);
 
 /* this is for creating Negotiate header output */
 FETCHcode Curl_output_negotiate(struct Curl_easy *data,
-                               struct connectdata *conn, bool proxy);
+                                struct connectdata *conn, bool proxy);
 
 void Curl_http_auth_cleanup_negotiate(struct connectdata *conn);
 

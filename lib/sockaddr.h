@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,8 +26,10 @@
 
 #include "fetch_setup.h"
 
-struct Curl_sockaddr_storage {
-  union {
+struct Curl_sockaddr_storage
+{
+  union
+  {
     struct sockaddr sa;
     struct sockaddr_in sa_in;
 #ifdef USE_IPV6
@@ -36,7 +38,7 @@ struct Curl_sockaddr_storage {
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
     struct sockaddr_storage sa_stor;
 #else
-    char cbuf[256];   /* this should be big enough to fit a lot */
+    char cbuf[256]; /* this should be big enough to fit a lot */
 #endif
   } buffer;
 };

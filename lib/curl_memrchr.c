@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,8 +34,8 @@
 
 #ifndef HAVE_MEMRCHR
 #if (!defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_COOKIES)) || \
-  defined(USE_OPENSSL) || \
-  defined(USE_SCHANNEL)
+    defined(USE_OPENSSL) ||                                              \
+    defined(USE_SCHANNEL)
 
 /*
  * Curl_memrchr()
@@ -49,14 +49,16 @@
 void *
 Curl_memrchr(const void *s, int c, size_t n)
 {
-  if(n > 0) {
+  if (n > 0)
+  {
     const unsigned char *p = s;
     const unsigned char *q = s;
 
     p += n - 1;
 
-    while(p >= q) {
-      if(*p == (unsigned char)c)
+    while (p >= q)
+    {
+      if (*p == (unsigned char)c)
         return (void *)p;
       p--;
     }

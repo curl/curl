@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,13 +35,13 @@ int main(void)
   fetch_global_init(FETCH_GLOBAL_ALL);
 
   ver = fetch_version_info(FETCHVERSION_NOW);
-  if(ver->features & FETCH_VERSION_HTTP2)
+  if (ver->features & FETCH_VERSION_HTTP2)
     printf("HTTP/2 support is present\n");
 
-  if(ver->features & FETCH_VERSION_HTTP3)
+  if (ver->features & FETCH_VERSION_HTTP3)
     printf("HTTP/3 support is present\n");
 
-  if(ver->features & FETCH_VERSION_ALTSVC)
+  if (ver->features & FETCH_VERSION_ALTSVC)
     printf("Alt-svc support is present\n");
 
   fetch_global_cleanup();

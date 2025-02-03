@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,9 +45,9 @@
 static char *Memdup(const char *data, size_t len)
 {
   char *p = malloc(len + 1);
-  if(!p)
+  if (!p)
     return NULL;
-  if(len)
+  if (len)
     memcpy(p, data, len);
   p[len] = 0;
   return p;
@@ -57,7 +57,8 @@ static char *Memdup(const char *data, size_t len)
 void varcleanup(struct GlobalConfig *global)
 {
   struct tool_var *list = global->variables;
-  while(list) {
+  while (list)
+  {
     struct tool_var *t = list;
     list = list->next;
     free((char *)t->content);
@@ -69,9 +70,11 @@ static const struct tool_var *varcontent(struct GlobalConfig *global,
                                          const char *name, size_t nlen)
 {
   struct tool_var *list = global->variables;
-  while(list) {
-    if((strlen(list->name) == nlen) &&
-       !strncmp(name, list->name, nlen)) {
+  while (list)
+  {
+    if ((strlen(list->name) == nlen) &&
+        !strncmp(name, list->name, nlen))
+    {
       return list;
     }
     list = list->next;
@@ -80,7 +83,7 @@ static const struct tool_var *varcontent(struct GlobalConfig *global,
 }
 
 #define ENDOFFUNC(x) (((x) == '}') || ((x) == ':'))
-#define FUNCMATCH(ptr,name,len)                         \
+#define FUNCMATCH(ptr, name, len) \
   (!strncmp(ptr, name, len) && ENDOFFUNC(ptr[len]))
 
 #define FUNC_TRIM "trim"
@@ -93,9 +96,9 @@ static const struct tool_var *varcontent(struct GlobalConfig *global,
 #define FUNC_B64_LEN (sizeof(FUNC_B64) - 1)
 
 static ParameterError varfunc(struct GlobalConfig *global,
-                              char *c, /* content */
+                              char *c,     /* content */
                               size_t clen, /* content length */
-                              char *f, /* functions */
+                              char *f,     /* functions */
                               size_t flen, /* function string length */
                               struct fetchx_dynbuf *out)
 {
@@ -104,102 +107,118 @@ static ParameterError varfunc(struct GlobalConfig *global,
   const char *finput = f;
 
   /* The functions are independent and runs left to right */
-  while(*f && !err) {
-    if(*f == '}')
+  while (*f && !err)
+  {
+    if (*f == '}')
       /* end of functions */
       break;
     /* On entry, this is known to be a colon already. In subsequent laps, it
        is also known to be a colon since that is part of the FUNCMATCH()
        checks */
     f++;
-    if(FUNCMATCH(f, FUNC_TRIM, FUNC_TRIM_LEN)) {
+    if (FUNCMATCH(f, FUNC_TRIM, FUNC_TRIM_LEN))
+    {
       size_t len = clen;
       f += FUNC_TRIM_LEN;
-      if(clen) {
+      if (clen)
+      {
         /* skip leading white space, including CRLF */
-        while(*c && ISSPACE(*c)) {
+        while (*c && ISSPACE(*c))
+        {
           c++;
           len--;
         }
-        while(len && ISSPACE(c[len-1]))
+        while (len && ISSPACE(c[len - 1]))
           len--;
       }
       /* put it in the output */
       fetchx_dyn_reset(out);
-      if(fetchx_dyn_addn(out, c, len)) {
+      if (fetchx_dyn_addn(out, c, len))
+      {
         err = PARAM_NO_MEM;
         break;
       }
     }
-    else if(FUNCMATCH(f, FUNC_JSON, FUNC_JSON_LEN)) {
+    else if (FUNCMATCH(f, FUNC_JSON, FUNC_JSON_LEN))
+    {
       f += FUNC_JSON_LEN;
       fetchx_dyn_reset(out);
-      if(clen) {
-        if(jsonquoted(c, clen, out, FALSE)) {
+      if (clen)
+      {
+        if (jsonquoted(c, clen, out, FALSE))
+        {
           err = PARAM_NO_MEM;
           break;
         }
       }
     }
-    else if(FUNCMATCH(f, FUNC_URL, FUNC_URL_LEN)) {
+    else if (FUNCMATCH(f, FUNC_URL, FUNC_URL_LEN))
+    {
       f += FUNC_URL_LEN;
       fetchx_dyn_reset(out);
-      if(clen) {
+      if (clen)
+      {
         char *enc = fetch_easy_escape(NULL, c, (int)clen);
-        if(!enc) {
+        if (!enc)
+        {
           err = PARAM_NO_MEM;
           break;
         }
 
         /* put it in the output */
-        if(fetchx_dyn_add(out, enc))
+        if (fetchx_dyn_add(out, enc))
           err = PARAM_NO_MEM;
         fetch_free(enc);
-        if(err)
+        if (err)
           break;
       }
     }
-    else if(FUNCMATCH(f, FUNC_B64, FUNC_B64_LEN)) {
+    else if (FUNCMATCH(f, FUNC_B64, FUNC_B64_LEN))
+    {
       f += FUNC_B64_LEN;
       fetchx_dyn_reset(out);
-      if(clen) {
+      if (clen)
+      {
         char *enc;
         size_t elen;
         FETCHcode result = fetchx_base64_encode(c, clen, &enc, &elen);
-        if(result) {
+        if (result)
+        {
           err = PARAM_NO_MEM;
           break;
         }
 
         /* put it in the output */
-        if(fetchx_dyn_addn(out, enc, elen))
+        if (fetchx_dyn_addn(out, enc, elen))
           err = PARAM_NO_MEM;
         fetch_free(enc);
-        if(err)
+        if (err)
           break;
       }
     }
-    else {
+    else
+    {
       /* unsupported function */
       errorf(global, "unknown variable function in '%.*s'",
              (int)flen, finput);
       err = PARAM_EXPAND_ERROR;
       break;
     }
-    if(alloc)
+    if (alloc)
       free(c);
 
     clen = fetchx_dyn_len(out);
     c = Memdup(fetchx_dyn_ptr(out), clen);
-    if(!c) {
+    if (!c)
+    {
       err = PARAM_NO_MEM;
       break;
     }
     alloc = TRUE;
   }
-  if(alloc)
+  if (alloc)
     free(c);
-  if(err)
+  if (err)
     fetchx_dyn_free(out);
   return err;
 }
@@ -214,23 +233,26 @@ ParameterError varexpand(struct GlobalConfig *global,
   const char *input = line;
   *replaced = FALSE;
   fetchx_dyn_init(out, MAX_EXPAND_CONTENT);
-  do {
+  do
+  {
     envp = strstr(line, "{{");
-    if((envp > line) && envp[-1] == '\\') {
+    if ((envp > line) && envp[-1] == '\\')
+    {
       /* preceding backslash, we want this verbatim */
 
       /* insert the text up to this point, minus the backslash */
       result = fetchx_dyn_addn(out, line, envp - line - 1);
-      if(result)
+      if (result)
         return PARAM_NO_MEM;
 
       /* output '{{' then continue from here */
       result = fetchx_dyn_addn(out, "{{", 2);
-      if(result)
+      if (result)
         return PARAM_NO_MEM;
       line = &envp[2];
     }
-    else if(envp) {
+    else if (envp)
+    {
       char name[MAX_VAR_LEN];
       size_t nlen;
       size_t i;
@@ -238,7 +260,8 @@ ParameterError varexpand(struct GlobalConfig *global,
       char *clp = strstr(envp, "}}");
       size_t prefix;
 
-      if(!clp) {
+      if (!clp)
+      {
         /* uneven braces */
         warnf(global, "missing close '}}' in '%s'", input);
         break;
@@ -249,21 +272,23 @@ ParameterError varexpand(struct GlobalConfig *global,
 
       /* if there is a function, it ends the name with a colon */
       funcp = memchr(envp, ':', clp - envp);
-      if(funcp)
+      if (funcp)
         nlen = funcp - envp;
       else
         nlen = clp - envp;
-      if(!nlen || (nlen >= sizeof(name))) {
+      if (!nlen || (nlen >= sizeof(name)))
+      {
         warnf(global, "bad variable name length '%s'", input);
         /* insert the text as-is since this is not an env variable */
         result = fetchx_dyn_addn(out, line, clp - line + prefix);
-        if(result)
+        if (result)
           return PARAM_NO_MEM;
       }
-      else {
+      else
+      {
         /* insert the text up to this point */
         result = fetchx_dyn_addn(out, line, envp - prefix - line);
-        if(result)
+        if (result)
           return PARAM_NO_MEM;
 
         /* copy the name to separate buffer */
@@ -271,22 +296,27 @@ ParameterError varexpand(struct GlobalConfig *global,
         name[nlen] = 0;
 
         /* verify that the name looks sensible */
-        for(i = 0; (i < nlen) &&
-              (ISALNUM(name[i]) || (name[i] == '_')); i++);
-        if(i != nlen) {
+        for (i = 0; (i < nlen) &&
+                    (ISALNUM(name[i]) || (name[i] == '_'));
+             i++)
+          ;
+        if (i != nlen)
+        {
           warnf(global, "bad variable name: %s", name);
           /* insert the text as-is since this is not an env variable */
           result = fetchx_dyn_addn(out, envp - prefix,
-                                  clp - envp + prefix + 2);
-          if(result)
+                                   clp - envp + prefix + 2);
+          if (result)
             return PARAM_NO_MEM;
         }
-        else {
+        else
+        {
           char *value;
           size_t vlen = 0;
           struct fetchx_dynbuf buf;
           const struct tool_var *v = varcontent(global, name, nlen);
-          if(v) {
+          if (v)
+          {
             value = (char *)v->content;
             vlen = v->clen;
           }
@@ -294,22 +324,25 @@ ParameterError varexpand(struct GlobalConfig *global,
             value = NULL;
 
           fetchx_dyn_init(&buf, MAX_EXPAND_CONTENT);
-          if(funcp) {
+          if (funcp)
+          {
             /* apply the list of functions on the value */
             size_t flen = clp - funcp;
             ParameterError err = varfunc(global, value, vlen, funcp, flen,
                                          &buf);
-            if(err)
+            if (err)
               return err;
             value = fetchx_dyn_ptr(&buf);
             vlen = fetchx_dyn_len(&buf);
           }
 
-          if(value && vlen > 0) {
+          if (value && vlen > 0)
+          {
             /* A variable might contain null bytes. Such bytes cannot be shown
                using normal means, this is an error. */
             char *nb = memchr(value, '\0', vlen);
-            if(nb) {
+            if (nb)
+            {
               errorf(global, "variable contains null byte");
               return PARAM_EXPAND_ERROR;
             }
@@ -317,7 +350,7 @@ ParameterError varexpand(struct GlobalConfig *global,
           /* insert the value */
           result = fetchx_dyn_addn(out, value, vlen);
           fetchx_dyn_free(&buf);
-          if(result)
+          if (result)
             return PARAM_NO_MEM;
 
           added = true;
@@ -326,15 +359,16 @@ ParameterError varexpand(struct GlobalConfig *global,
       line = &clp[2];
     }
 
-  } while(envp);
-  if(added && *line) {
+  } while (envp);
+  if (added && *line)
+  {
     /* add the "suffix" as well */
     result = fetchx_dyn_add(out, line);
-    if(result)
+    if (result)
       return PARAM_NO_MEM;
   }
   *replaced = added;
-  if(!added)
+  if (!added)
     fetchx_dyn_free(out);
   return PARAM_OK;
 }
@@ -354,15 +388,17 @@ static ParameterError addvariable(struct GlobalConfig *global,
   struct tool_var *p;
   const struct tool_var *check = varcontent(global, name, nlen);
   DEBUGASSERT(nlen);
-  if(check)
+  if (check)
     notef(global, "Overwriting variable '%s'", check->name);
 
   p = calloc(1, sizeof(struct tool_var) + nlen);
-  if(p) {
+  if (p)
+  {
     memcpy(p->name, name, nlen);
 
     p->content = contalloc ? content : Memdup(content, clen);
-    if(p->content) {
+    if (p->content)
+    {
       p->clen = clen;
 
       p->next = global->variables;
@@ -392,62 +428,73 @@ ParameterError setvariable(struct GlobalConfig *global,
   fetch_off_t startoffset = 0;
   fetch_off_t endoffset = FETCH_OFF_T_MAX;
 
-  if(*input == '%') {
+  if (*input == '%')
+  {
     import = TRUE;
     line++;
   }
   name = line;
-  while(*line && (ISALNUM(*line) || (*line == '_')))
+  while (*line && (ISALNUM(*line) || (*line == '_')))
     line++;
   nlen = line - name;
-  if(!nlen || (nlen >= MAX_VAR_LEN)) {
+  if (!nlen || (nlen >= MAX_VAR_LEN))
+  {
     warnf(global, "Bad variable name length (%zd), skipping", nlen);
     return PARAM_OK;
   }
-  if(import) {
+  if (import)
+  {
     /* this does not use fetch_getenv() because we want "" support for blank
        content */
-    if(*line) {
+    if (*line)
+    {
       /* if there is a default action, we need to copy the name */
       memcpy(buf, name, nlen);
       buf[nlen] = 0;
       name = buf;
     }
     ge = getenv(name);
-    if(!*line && !ge) {
+    if (!*line && !ge)
+    {
       /* no assign, no variable, fail */
       errorf(global, "Variable '%s' import fail, not set", name);
       return PARAM_EXPAND_ERROR;
     }
-    else if(ge) {
+    else if (ge)
+    {
       /* there is a value to use */
       content = ge;
       clen = strlen(ge);
     }
   }
-  if(*line == '[') {
+  if (*line == '[')
+  {
     /* is there a byte range specified? [num-num] */
-    if(ISDIGIT(line[1])) {
+    if (ISDIGIT(line[1]))
+    {
       char *endp;
-      if(fetchx_strtoofft(&line[1], &endp, 10, &startoffset) || (*endp != '-'))
+      if (fetchx_strtoofft(&line[1], &endp, 10, &startoffset) || (*endp != '-'))
         return PARAM_VAR_SYNTAX;
-      else {
+      else
+      {
         char *p = endp + 1; /* pass the '-' */
-        if(*p != ']') {
-          if(fetchx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
+        if (*p != ']')
+        {
+          if (fetchx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
             return PARAM_VAR_SYNTAX;
-          line = &endp[1];  /* pass the ']' */
+          line = &endp[1]; /* pass the ']' */
         }
         else
           line = &p[1]; /* pass the ']' */
       }
-      if(startoffset > endoffset)
+      if (startoffset > endoffset)
         return PARAM_VAR_SYNTAX;
     }
   }
-  if(content)
+  if (content)
     ;
-  else if(*line == '@') {
+  else if (*line == '@')
+  {
     /* read from file or stdin */
     FILE *file;
     bool use_stdin;
@@ -457,52 +504,60 @@ ParameterError setvariable(struct GlobalConfig *global,
     Curl_dyn_init(&fname, MAX_FILENAME);
 
     use_stdin = !strcmp(line, "-");
-    if(use_stdin)
+    if (use_stdin)
       file = stdin;
-    else {
+    else
+    {
       file = fopen(line, "rb");
-      if(!file) {
+      if (!file)
+      {
         errorf(global, "Failed to open %s: %s", line,
                strerror(errno));
         err = PARAM_READ_ERROR;
       }
     }
-    if(!err) {
+    if (!err)
+    {
       err = file2memory_range(&content, &clen, file, startoffset, endoffset);
       /* in case of out of memory, this should fail the entire operation */
-      if(clen)
+      if (clen)
         contalloc = TRUE;
     }
     Curl_dyn_free(&fname);
-    if(!use_stdin && file)
+    if (!use_stdin && file)
       fclose(file);
-    if(err)
+    if (err)
       return err;
   }
-  else if(*line == '=') {
+  else if (*line == '=')
+  {
     line++;
     clen = strlen(line);
     /* this is the exact content */
     content = (char *)line;
-    if(startoffset || (endoffset != FETCH_OFF_T_MAX)) {
-      if(startoffset >= (fetch_off_t)clen)
+    if (startoffset || (endoffset != FETCH_OFF_T_MAX))
+    {
+      if (startoffset >= (fetch_off_t)clen)
         clen = 0;
-      else {
+      else
+      {
         /* make the end offset no larger than the last byte */
-        if(endoffset >= (fetch_off_t)clen)
+        if (endoffset >= (fetch_off_t)clen)
           endoffset = clen - 1;
         clen = (size_t)(endoffset - startoffset) + 1;
         content += startoffset;
       }
     }
   }
-  else {
+  else
+  {
     warnf(global, "Bad --variable syntax, skipping: %s", input);
     return PARAM_OK;
   }
   err = addvariable(global, name, nlen, content, clen, contalloc);
-  if(err) {
-    if(contalloc)
+  if (err)
+  {
+    if (contalloc)
       free(content);
   }
   return err;

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,35 +37,34 @@ FETCHcode test(char *URL)
 
   /* create a buffer with AAAA...BBBBB...CCCC...etc */
   int i;
-  int size = (int)sizeof(testbuf)/1000;
+  int size = (int)sizeof(testbuf) / 1000;
 
-  for(i = 0; i < size ; i++)
+  for (i = 0; i < size; i++)
     memset(&testbuf[i * 1000], 65 + i, 1000);
 
-  testbuf[sizeof(testbuf)-1] = 0; /* null-terminate */
+  testbuf[sizeof(testbuf) - 1] = 0; /* null-terminate */
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   FETCH_IGNORE_DEPRECATION(
-    /* Check proper name and data copying. */
-    formrc = fetch_formadd(&formpost, &lastptr,
-                          FETCHFORM_COPYNAME, "hello",
-                          FETCHFORM_COPYCONTENTS, testbuf,
-                          FETCHFORM_END);
-  )
-  if(formrc)
-    printf("fetch_formadd(1) = %d\n", (int) formrc);
-
+      /* Check proper name and data copying. */
+      formrc = fetch_formadd(&formpost, &lastptr,
+                             FETCHFORM_COPYNAME, "hello",
+                             FETCHFORM_COPYCONTENTS, testbuf,
+                             FETCHFORM_END);)
+  if (formrc)
+    printf("fetch_formadd(1) = %d\n", (int)formrc);
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     FETCH_IGNORE_DEPRECATION(
-      fetch_formfree(formpost);
-    )
+        fetch_formfree(formpost);)
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -74,9 +73,8 @@ FETCHcode test(char *URL)
   test_setopt(fetch, FETCHOPT_URL, URL);
 
   FETCH_IGNORE_DEPRECATION(
-    /* send a multi-part formpost */
-    test_setopt(fetch, FETCHOPT_HTTPPOST, formpost);
-  )
+      /* send a multi-part formpost */
+      test_setopt(fetch, FETCHOPT_HTTPPOST, formpost);)
 
   /* get verbose debug output please */
   test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
@@ -93,9 +91,8 @@ test_cleanup:
   fetch_easy_cleanup(fetch);
 
   FETCH_IGNORE_DEPRECATION(
-    /* now cleanup the formpost chain */
-    fetch_formfree(formpost);
-  )
+      /* now cleanup the formpost chain */
+      fetch_formfree(formpost);)
 
   fetch_global_cleanup();
 

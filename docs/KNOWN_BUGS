@@ -124,17 +124,17 @@ problems may have been fixed or changed somewhat since this was written.
 
 2.1 IMAPS connection fails with Rustls error
 
- https://github.com/fetch/fetch/issues/10457
+ https://github.com/curl/curl/issues/10457
 
 2.3 Unable to use PKCS12 certificate with Secure Transport
 
- See https://github.com/fetch/fetch/issues/5403
+ See https://github.com/curl/curl/issues/5403
 
 2.4 Secure Transport does not import PKCS#12 client certificates without a password
 
  libfetch calls SecPKCS12Import with the PKCS#12 client certificate, but that
  function rejects certificates that do not have a password.
- https://github.com/fetch/fetch/issues/1308
+ https://github.com/curl/curl/issues/1308
 
 2.5 Client cert handling with Issuer DN differs between backends
 
@@ -142,11 +142,11 @@ problems may have been fixed or changed somewhat since this was written.
  server-specified DNs, the OpenSSL and GnuTLS backends behave differently.
  The github discussion may contain a solution.
 
- See https://github.com/fetch/fetch/issues/1411
+ See https://github.com/curl/curl/issues/1411
 
 2.7 Client cert (MTLS) issues with Schannel
 
- See https://github.com/fetch/fetch/issues/3145
+ See https://github.com/curl/curl/issues/3145
 
 2.11 Schannel TLS 1.2 handshake bug in old Windows versions
 
@@ -154,15 +154,15 @@ problems may have been fixed or changed somewhat since this was written.
  implementation likely has a bug that can rarely cause the key exchange to
  fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
 
- https://github.com/fetch/fetch/issues/5488
+ https://github.com/curl/curl/issues/5488
 
 2.13 FETCHOPT_CERTINFO results in FETCHE_OUT_OF_MEMORY with Schannel
 
- https://github.com/fetch/fetch/issues/8741
+ https://github.com/curl/curl/issues/8741
 
 2.14 mbedTLS and FETCHE_AGAIN handling
 
- https://github.com/fetch/fetch/issues/15801
+ https://github.com/curl/curl/issues/15801
 
 3. Email protocols
 
@@ -171,7 +171,7 @@ problems may have been fixed or changed somewhat since this was written.
  IMAP "SEARCH ALL" truncates output on large boxes. "A quick search of the
  code reveals that pingpong.c contains some truncation code, at line 408, when
  it deems the server response to be too large truncating it to 40 characters"
- https://fetch.se/bug/view.cgi?id=1366
+ https://curl.se/bug/view.cgi?id=1366
 
 3.2 No disconnect command
 
@@ -183,17 +183,17 @@ problems may have been fixed or changed somewhat since this was written.
  Specifying "--login-options AUTH=PLAIN" on the command line does not seem to
  work correctly.
 
- See https://github.com/fetch/fetch/issues/4080
+ See https://github.com/curl/curl/issues/4080
 
 3.5 APOP authentication fails on POP3
 
- See https://github.com/fetch/fetch/issues/10073
+ See https://github.com/curl/curl/issues/10073
 
 3.6 POP3 issue when reading small chunks
 
  FETCH_DBG_SOCK_RMAX=4 ./runtests.pl -v 982
 
- See https://github.com/fetch/fetch/issues/12063
+ See https://github.com/curl/curl/issues/12063
 
 4. Command line
 
@@ -206,7 +206,7 @@ problems may have been fixed or changed somewhat since this was written.
  open(path) may not give you a file descriptor with a 0 offset from the start
  of the file.
 
- See https://github.com/fetch/fetch/issues/12177
+ See https://github.com/curl/curl/issues/12177
 
 4.2 -T - always uploads chunked
 
@@ -214,7 +214,7 @@ problems may have been fixed or changed somewhat since this was written.
  regular file in this case, and that it can do a non-chunked upload, like it
  would do if you used -T file.
 
- See https://github.com/fetch/fetch/issues/12171
+ See https://github.com/curl/curl/issues/12171
 
 5. Build and portability issues
 
@@ -224,7 +224,7 @@ problems may have been fixed or changed somewhat since this was written.
  libc/POSIX functions in the ILE, but IBM no longer supports or even offers
  this library to download.
 
- See https://github.com/fetch/fetch/issues/5176
+ See https://github.com/curl/curl/issues/5176
 
 5.2 fetch-config --libs contains private details
 
@@ -238,17 +238,17 @@ problems may have been fixed or changed somewhat since this was written.
  on the default loader/linker path), fails because the generated Makefile has
  LDFLAGS passed on after LIBS.
 
- See https://github.com/fetch/fetch/issues/14893
+ See https://github.com/curl/curl/issues/14893
 
 5.6 Cygwin: make install installs fetch-config.1 twice
 
- https://github.com/fetch/fetch/issues/8839
+ https://github.com/curl/curl/issues/8839
 
 5.11 configure --with-gssapi with Heimdal is ignored on macOS
 
  ... unless you also pass --with-gssapi-libs
 
- https://github.com/fetch/fetch/issues/3841
+ https://github.com/curl/curl/issues/3841
 
 5.12 flaky CI builds
 
@@ -258,7 +258,7 @@ problems may have been fixed or changed somewhat since this was written.
  us sometimes miss actual build problems and it is surprising to newcomers to
  the project who (rightfully) do not expect this.
 
- See https://github.com/fetch/fetch/issues/6972
+ See https://github.com/curl/curl/issues/6972
 
 5.13 long paths are not fully supported on Windows
 
@@ -267,17 +267,17 @@ problems may have been fixed or changed somewhat since this was written.
  path interpretation may work to allow fetch to access the path. For example:
  \\?\c:\longpath.
 
- See https://github.com/fetch/fetch/issues/8361
+ See https://github.com/curl/curl/issues/8361
 
 5.15 Unicode on Windows
 
  Passing in a Unicode filename with -o:
 
- https://github.com/fetch/fetch/issues/11461
+ https://github.com/curl/curl/issues/11461
 
  Passing in Unicode character with -d:
 
- https://github.com/fetch/fetch/issues/12231
+ https://github.com/curl/curl/issues/12231
 
  Windows Unicode builds use homedir in current locale
 
@@ -286,8 +286,8 @@ problems may have been fixed or changed somewhat since this was written.
  user's home directory is retrieved via fetch_getenv in the current locale and
  not as UTF-8 encoded Unicode.
 
- See https://github.com/fetch/fetch/pull/7252 and
-     https://github.com/fetch/fetch/pull/7281
+ See https://github.com/curl/curl/pull/7252 and
+     https://github.com/curl/curl/pull/7281
 
  Cannot handle Unicode arguments in non-Unicode builds on Windows
 
@@ -298,20 +298,20 @@ problems may have been fixed or changed somewhat since this was written.
  _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as
  a locale.
 
-  https://fetch.se/bug/?i=345
-  https://fetch.se/bug/?i=731
-  https://fetch.se/bug/?i=3747
+  https://curl.se/bug/?i=345
+  https://curl.se/bug/?i=731
+  https://curl.se/bug/?i=3747
 
  NTLM authentication and Unicode
 
  NTLM authentication involving Unicode username or password only works
  properly if built with UNICODE defined together with the Schannel backend.
  The original problem was mentioned in:
- https://fetch.se/mail/lib-2009-10/0024.html
- https://fetch.se/bug/view.cgi?id=896
+ https://curl.se/mail/lib-2009-10/0024.html
+ https://curl.se/bug/view.cgi?id=896
 
  The Schannel version verified to work as mentioned in
- https://fetch.se/mail/lib-2012-07/0073.html
+ https://curl.se/mail/lib-2012-07/0073.html
 
 6. Authentication
 
@@ -325,11 +325,11 @@ problems may have been fixed or changed somewhat since this was written.
 
  NTLM authentication using SSPI (on Windows) when (lib)fetch is running in
  "system context" makes it use wrong(?) username - at least when compared to
- what winhttp does. See https://fetch.se/bug/view.cgi?id=535
+ what winhttp does. See https://curl.se/bug/view.cgi?id=535
 
 6.5 NTLM does not support password with § character
 
- https://github.com/fetch/fetch/issues/2120
+ https://github.com/curl/curl/issues/2120
 
 6.6 libfetch can fail to try alternatives with --proxy-any
 
@@ -340,18 +340,18 @@ problems may have been fixed or changed somewhat since this was written.
  fails to set up Kerberos authentication does not proceed to try
  authentication using NTLM.
 
- https://github.com/fetch/fetch/issues/876
+ https://github.com/curl/curl/issues/876
 
 6.7 Do not clear digest for single realm
 
- https://github.com/fetch/fetch/issues/3267
+ https://github.com/curl/curl/issues/3267
 
 6.8 Heimdal memory leaks
 
  Running test 2077 and 2078 with fetch built to do GSS with Heimdal causes
  valgrind errors (memory leak).
 
- https://github.com/fetch/fetch/issues/14446
+ https://github.com/curl/curl/issues/14446
 
 6.9 SHA-256 digest not supported in Windows SSPI builds
 
@@ -362,13 +362,13 @@ problems may have been fixed or changed somewhat since this was written.
  Microsoft does not document supported digest algorithms and that SEC_E error
  code is not a documented error for InitializeSecurityContext (digest).
 
- https://github.com/fetch/fetch/issues/6302
+ https://github.com/curl/curl/issues/6302
 
 6.10 fetch never completes Negotiate over HTTP
 
  Apparently it is not working correctly...?
 
- See https://github.com/fetch/fetch/issues/5235
+ See https://github.com/curl/curl/issues/5235
 
 6.11 Negotiate on Windows fails
 
@@ -376,15 +376,15 @@ problems may have been fixed or changed somewhat since this was written.
  fails despite having a valid kerberos ticket cached. Works without any issue
  in Unix/Linux.
 
- https://github.com/fetch/fetch/issues/5881
+ https://github.com/curl/curl/issues/5881
 
 6.12 cannot use Secure Transport with Crypto Token Kit
 
- https://github.com/fetch/fetch/issues/7048
+ https://github.com/curl/curl/issues/7048
 
 6.13 Negotiate authentication against Hadoop HDFS
 
- https://github.com/fetch/fetch/issues/8264
+ https://github.com/curl/curl/issues/8264
 
 7. FTP
 
@@ -392,7 +392,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  When doing an operation over FTP that requires the ACCT command (but not when
  logging in), the operation fails since libfetch does not detect this and thus
- fails to issue the correct command: https://fetch.se/bug/view.cgi?id=635
+ fails to issue the correct command: https://curl.se/bug/view.cgi?id=635
 
 7.12 FTPS server compatibility on Windows with Schannel
 
@@ -414,7 +414,7 @@ problems may have been fixed or changed somewhat since this was written.
  instead the connection is "cancelled" (the operation is considered done)
  prematurely. There is a half-baked (busy-looping) patch provided in the bug
  report but it cannot be accepted as-is. See
- https://fetch.se/bug/view.cgi?id=748
+ https://curl.se/bug/view.cgi?id=748
 
 9.2 wolfssh: publickey auth does not work
 
@@ -422,14 +422,14 @@ problems may have been fixed or changed somewhat since this was written.
  authentication does not work. This is simply functionality not written for fetch
  yet, the necessary API for make this work is provided by wolfSSH.
 
- See https://github.com/fetch/fetch/issues/4820
+ See https://github.com/curl/curl/issues/4820
 
 9.3 Remote recursive folder creation with SFTP
 
  On this servers, the fetch fails to create directories on the remote server
  even when the FETCHOPT_FTP_CREATE_MISSING_DIRS option is set.
 
- See https://github.com/fetch/fetch/issues/5204
+ See https://github.com/curl/curl/issues/5204
 
 9.4 libssh blocking and infinite loop problem
 
@@ -437,13 +437,13 @@ problems may have been fixed or changed somewhat since this was written.
  blocking mode. If the network is suddenly disconnected during sftp
  transmission, fetch is stuck, even if fetch is configured with a timeout.
 
- https://github.com/fetch/fetch/issues/8632
+ https://github.com/curl/curl/issues/8632
 
 9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
  Running SCP and SFTP tests on Cygwin makes this warning message appear.
 
- https://github.com/fetch/fetch/issues/11244
+ https://github.com/curl/curl/issues/11244
 
 10. SOCKS
 
@@ -453,49 +453,49 @@ problems may have been fixed or changed somewhat since this was written.
 
  The struct needs to be expanded and code added to store this info.
 
- See https://github.com/fetch/fetch/issues/13492
+ See https://github.com/curl/curl/issues/13492
 
 11.2 error buffer not set if connection to multiple addresses fails
 
  If you ask libfetch to resolve a hostname like example.com to IPv6 addresses
  when you only have IPv4 connectivity. libfetch fails with
  FETCHE_COULDNT_CONNECT, but the error buffer set by FETCHOPT_ERRORBUFFER
- remains empty. Issue: https://github.com/fetch/fetch/issues/544
+ remains empty. Issue: https://github.com/curl/curl/issues/544
 
 11.3 TFTP tests fail on OpenBSD
 
  When adding an OpenBSD job with tests to GHA, some tests consistently fail
  to run.
 
- See https://github.com/fetch/fetch/issues/13623
+ See https://github.com/curl/curl/issues/13623
 
 11.4 HTTP test server 'connection-monitor' problems
 
  The 'connection-monitor' feature of the sws HTTP test server does not work
  properly if some tests are run in unexpected order. Like 1509 and then 1525.
 
- See https://github.com/fetch/fetch/issues/868
+ See https://github.com/curl/curl/issues/868
 
 11.5 Connection information when using TCP Fast Open
 
  FETCHINFO_LOCAL_PORT (and possibly a few other) fails when TCP Fast Open is
  enabled.
 
- See https://github.com/fetch/fetch/issues/1332 and
- https://github.com/fetch/fetch/issues/4296
+ See https://github.com/curl/curl/issues/1332 and
+ https://github.com/curl/curl/issues/4296
 
 11.6 test cases sometimes timeout
 
  Occasionally, one of the tests timeouts. Inexplicably.
 
- See https://github.com/fetch/fetch/issues/13350
+ See https://github.com/curl/curl/issues/13350
 
 11.7 FETCHOPT_CONNECT_TO does not work for HTTPS proxy
 
  It is unclear if the same option should even cover the proxy connection or if
  if requires a separate option.
 
- See https://github.com/fetch/fetch/issues/14481
+ See https://github.com/curl/curl/issues/14481
 
 11.8 WinIDN test failures
 
@@ -508,7 +508,7 @@ problems may have been fixed or changed somewhat since this was written.
  FETCHE_NOT_BUILT_IN instead of FETCHE_UNKNOWN_OPTION to signal the difference
  to the application
 
- See https://github.com/fetch/fetch/issues/15472
+ See https://github.com/curl/curl/issues/15472
 
 12. LDAP
 
@@ -528,23 +528,23 @@ problems may have been fixed or changed somewhat since this was written.
 
  Generic LDAP is synchronous: OK.
 
- See https://github.com/fetch/fetch/issues/622 and
-     https://fetch.se/mail/lib-2016-01/0101.html
+ See https://github.com/curl/curl/issues/622 and
+     https://curl.se/mail/lib-2016-01/0101.html
 
 12.2 LDAP on Windows does authentication wrong?
 
- https://github.com/fetch/fetch/issues/3116
+ https://github.com/curl/curl/issues/3116
 
 12.3 LDAP on Windows does not work
 
  A simple fetch command line getting "ldap://ldap.forumsys.com" returns an
  error that says "no memory" !
 
- https://github.com/fetch/fetch/issues/4261
+ https://github.com/curl/curl/issues/4261
 
 12.4 LDAPS requests to ActiveDirectory server hang
 
- https://github.com/fetch/fetch/issues/9580
+ https://github.com/curl/curl/issues/9580
 
 13. TCP/IP
 
@@ -554,7 +554,7 @@ problems may have been fixed or changed somewhat since this was written.
  detect if a port is already in use, so it tries the first port, uses that and
  then subsequently fails anyway if that was actually in use.
 
- https://github.com/fetch/fetch/issues/8112
+ https://github.com/curl/curl/issues/8112
 
 15. CMake
 
@@ -562,18 +562,18 @@ problems may have been fixed or changed somewhat since this was written.
 
  Something in the SONAME generation seems to be wrong in the cmake build.
 
- https://github.com/fetch/fetch/issues/11158
+ https://github.com/curl/curl/issues/11158
 
 15.6 uses -lpthread instead of Threads::Threads
 
- See https://github.com/fetch/fetch/issues/6166
+ See https://github.com/curl/curl/issues/6166
 
 15.7 generated .pc file contains strange entries
 
  The Libs.private field of the generated .pc file contains -lgcc -lgcc_s -lc
  -lgcc -lgcc_s
 
- See https://github.com/fetch/fetch/issues/6167
+ See https://github.com/curl/curl/issues/6167
 
 15.13 CMake build with MIT Kerberos does not work
 
@@ -584,27 +584,27 @@ problems may have been fixed or changed somewhat since this was written.
  that involve compilation are doomed from that point, the configured tree
  cannot be built.
 
- https://github.com/fetch/fetch/issues/6904
+ https://github.com/curl/curl/issues/6904
 
 16. aws-sigv4
 
 16.2 aws-sigv4 does not handle multipart/form-data correctly
 
- https://github.com/fetch/fetch/issues/13351
+ https://github.com/curl/curl/issues/13351
 
 16.3 aws-sigv4 has problems with particular URLs
 
- https://github.com/fetch/fetch/issues/13058
+ https://github.com/curl/curl/issues/13058
 
 16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
- https://github.com/fetch/fetch/issues/11007
+ https://github.com/curl/curl/issues/11007
 
 17. HTTP/2
 
 17.1 HTTP/2 prior knowledge over proxy
 
- https://github.com/fetch/fetch/issues/12641
+ https://github.com/curl/curl/issues/12641
 
 17.2 HTTP/2 frames while in the connection pool kill reuse
 
@@ -621,29 +621,29 @@ problems may have been fixed or changed somewhat since this was written.
  Infinite retries with 2 parallel requests on one connection receiving GOAWAY
  with ENHANCE_YOUR_CALM error code.
 
- See https://github.com/fetch/fetch/issues/5119
+ See https://github.com/curl/curl/issues/5119
 
 17.4 HTTP/2 + TLS spends a lot of time in recv
 
  It has been observered that by making the speed limit less accurate we could
  improve this performance. (by reverting
- https://github.com/fetch/fetch/commit/db5c9f4f9e0779b49624752b135281a0717b277b)
+ https://github.com/curl/curl/commit/db5c9f4f9e0779b49624752b135281a0717b277b)
  Can we find a golden middle ground?
 
- See https://fetch.se/mail/lib-2024-05/0026.html and
- https://github.com/fetch/fetch/issues/13416
+ See https://curl.se/mail/lib-2024-05/0026.html and
+ https://github.com/curl/curl/issues/13416
 
 18. HTTP/3
 
 18.1 connection migration does not work
 
- https://github.com/fetch/fetch/issues/7695
+ https://github.com/curl/curl/issues/7695
 
 18.2 quiche: QUIC connection is draining
 
  The transfer ends with error "QUIC connection is draining".
 
- https://github.com/fetch/fetch/issues/12037
+ https://github.com/curl/curl/issues/12037
 
 19. RTSP
 
@@ -653,4 +653,4 @@ problems may have been fixed or changed somewhat since this was written.
  always get responses without bodies, even though there seems to be no
  indication in the RFC that this is always the case.
 
- https://github.com/fetch/fetch/issues/12414
+ https://github.com/curl/curl/issues/12414

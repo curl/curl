@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,35 +38,33 @@
  * Note that this example requires libfetch 7.56.0 or above.
  */
 
-#define FROM    "<sender@example.org>"
-#define TO      "<addressee@example.net>"
-#define CC      "<info@example.org>"
+#define FROM "<sender@example.org>"
+#define TO "<addressee@example.net>"
+#define CC "<info@example.org>"
 
 static const char *headers_text[] = {
-  "Date: Tue, 22 Aug 2017 14:08:43 +0100",
-  "To: " TO,
-  "From: " FROM " (Example User)",
-  "Cc: " CC " (Another example User)",
-  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
+    "Date: Tue, 22 Aug 2017 14:08:43 +0100",
+    "To: " TO,
+    "From: " FROM " (Example User)",
+    "Cc: " CC " (Another example User)",
+    "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
     "rfcpedant.example.org>",
-  "Subject: example sending a MIME-formatted message",
-  NULL
-};
+    "Subject: example sending a MIME-formatted message",
+    NULL};
 
 static const char inline_text[] =
-  "This is the inline text message of the email.\r\n"
-  "\r\n"
-  "  It could be a lot of lines that would be displayed in an email\r\n"
-  "viewer that is not able to handle HTML.\r\n";
+    "This is the inline text message of the email.\r\n"
+    "\r\n"
+    "  It could be a lot of lines that would be displayed in an email\r\n"
+    "viewer that is not able to handle HTML.\r\n";
 
 static const char inline_html[] =
-  "<html><body>\r\n"
-  "<p>This is the inline <b>HTML</b> message of the email.</p>"
-  "<br />\r\n"
-  "<p>It could be a lot of HTML data that would be displayed by "
-  "email viewers able to handle HTML.</p>"
-  "</body></html>\r\n";
-
+    "<html><body>\r\n"
+    "<p>This is the inline <b>HTML</b> message of the email.</p>"
+    "<br />\r\n"
+    "<p>It could be a lot of HTML data that would be displayed by "
+    "email viewers able to handle HTML.</p>"
+    "</body></html>\r\n";
 
 int main(void)
 {
@@ -74,7 +72,8 @@ int main(void)
   FETCHcode res = FETCHE_OK;
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     struct fetch_slist *headers = NULL;
     struct fetch_slist *recipients = NULL;
     struct fetch_slist *slist = NULL;
@@ -106,7 +105,7 @@ int main(void)
     fetch_easy_setopt(fetch, FETCHOPT_MAIL_RCPT_ALLOWFAILS, 1L);
 
     /* Build and set the message header list. */
-    for(cpp = headers_text; *cpp; cpp++)
+    for (cpp = headers_text; *cpp; cpp++)
       headers = fetch_slist_append(headers, *cpp);
     fetch_easy_setopt(fetch, FETCHOPT_HTTPHEADER, headers);
 
@@ -142,7 +141,7 @@ int main(void)
     res = fetch_easy_perform(fetch);
 
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,8 @@ static FETCHcode unit_setup(void)
 
   global_init(FETCH_GLOBAL_ALL);
   testdata = fetch_easy_init();
-  if(!testdata) {
+  if (!testdata)
+  {
     fetch_global_cleanup();
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -143,7 +144,7 @@ verify_memory(decoded, "i", 2);
 Curl_safefree(decoded);
 
 /* This is illegal input as the data is too short */
-size = 1; /* not zero */
+size = 1;           /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("aQ", &decoded, &size);
 fail_unless(rc == FETCHE_BAD_CONTENT_ENCODING,
@@ -152,7 +153,7 @@ fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
 /* This is illegal input as it contains three padding characters */
-size = 1; /* not zero */
+size = 1;           /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("a===", &decoded, &size);
 fail_unless(rc == FETCHE_BAD_CONTENT_ENCODING,
@@ -161,7 +162,7 @@ fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
 /* This is illegal input as it contains a padding character mid input */
-size = 1; /* not zero */
+size = 1;           /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("a=Q=", &decoded, &size);
 fail_unless(rc == FETCHE_BAD_CONTENT_ENCODING,
@@ -170,7 +171,7 @@ fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
 /* This is also illegal input as it contains a padding character mid input */
-size = 1; /* not zero */
+size = 1;           /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("aWlpa=Q=", &decoded, &size);
 fail_unless(rc == FETCHE_BAD_CONTENT_ENCODING,
@@ -179,13 +180,12 @@ fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
 /* This is garbage input as it contains an illegal base64 character */
-size = 1; /* not zero */
+size = 1;           /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("a\x1f==", &decoded, &size);
 fail_unless(rc == FETCHE_BAD_CONTENT_ENCODING,
             "return code should be FETCHE_BAD_CONTENT_ENCODING");
 fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
-
 
 UNITTEST_STOP

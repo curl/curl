@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -56,7 +56,8 @@ int main(int argc, char *argv[])
   fetch_global_init(FETCH_GLOBAL_ALL);
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* Create the form */
     form = fetch_mime_init(fetch);
 
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
     headerlist = fetch_slist_append(headerlist, buf);
     /* what URL that receives this POST */
     fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com/examplepost.cgi");
-    if((argc == 2) && (!strcmp(argv[1], "noexpectheader")))
+    if ((argc == 2) && (!strcmp(argv[1], "noexpectheader")))
       /* only disable 100-continue header if explicitly requested */
       fetch_easy_setopt(fetch, FETCHOPT_HTTPHEADER, headerlist);
     fetch_easy_setopt(fetch, FETCHOPT_MIMEPOST, form);
@@ -88,7 +89,7 @@ int main(int argc, char *argv[])
     /* Perform the request, res gets the return code */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

@@ -24,7 +24,7 @@ Next, check out, build, and install the appropriate version of rustls-ffi:
 
 Now configure and build fetch with Rustls:
 
-    % git clone https://github.com/fetch/fetch
+    % git clone https://github.com/curl/curl
     % cd fetch
     % autoreconf -fi
     % ./configure --with-rustls=${HOME}/rustls-ffi-built

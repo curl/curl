@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,23 +41,24 @@ static void unit_stop(void)
 }
 
 static void test_parse(
-  const char *input,
-  const char *exp_username,
-  const char *exp_password,
-  const char *exp_options)
+    const char *input,
+    const char *exp_username,
+    const char *exp_password,
+    const char *exp_options)
 {
   char *userstr = NULL;
   char *passwdstr = NULL;
   char *options = NULL;
   FETCHcode rc = Curl_parse_login_details(input, strlen(input),
-                                &userstr, &passwdstr, &options);
+                                          &userstr, &passwdstr, &options);
   fail_unless(rc == FETCHE_OK, "Curl_parse_login_details() failed");
 
   fail_unless(!!exp_username == !!userstr, "username expectation failed");
   fail_unless(!!exp_password == !!passwdstr, "password expectation failed");
   fail_unless(!!exp_options == !!options, "options expectation failed");
 
-  if(!unitfail) {
+  if (!unitfail)
+  {
     fail_unless(!exp_username || strcmp(userstr, exp_username) == 0,
                 "userstr should be equal to exp_username");
     fail_unless(!exp_password || strcmp(passwdstr, exp_password) == 0,
@@ -81,7 +82,7 @@ UNITTEST_START
   bool protocol_connect = FALSE;
 
   rc = Curl_open(&empty);
-  if(rc)
+  if (rc)
     goto unit_test_abort;
   fail_unless(rc == FETCHE_OK, "Curl_open() failed");
 
@@ -119,13 +120,13 @@ UNITTEST_START
   test_parse("user;options:", "user", "", "options");
 
   Curl_freeset(empty);
-  for(i = (enum dupstring)0; i < STRING_LAST; i++) {
+  for (i = (enum dupstring)0; i < STRING_LAST; i++)
+  {
     fail_unless(empty->set.str[i] == NULL,
                 "Curl_free() did not set to NULL");
   }
 
   rc = Curl_close(&empty);
   fail_unless(rc == FETCHE_OK, "Curl_close() failed");
-
 }
 UNITTEST_STOP

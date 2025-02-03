@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,10 +29,11 @@
 #include <stdio.h>
 #include <fetch/fetch.h>
 
-#define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3000000
-#define STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES         6000
+#define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL 3000000
+#define STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES 6000
 
-struct myprogress {
+struct myprogress
+{
   fetch_off_t lastruntime; /* type depends on version, see above */
   FETCH *fetch;
 };
@@ -51,7 +52,8 @@ static int xferinfo(void *p,
   /* under certain circumstances it may be desirable for certain functionality
      to only run every N seconds, in order to do this the transaction time can
      be used */
-  if((curtime - myp->lastruntime) >= MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL) {
+  if ((curtime - myp->lastruntime) >= MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL)
+  {
     myp->lastruntime = curtime;
     fprintf(stderr, "TOTAL TIME: %lu.%06lu\r\n",
             (unsigned long)(curtime / 1000000),
@@ -62,7 +64,7 @@ static int xferinfo(void *p,
           (unsigned long)ulnow, (unsigned long)ultotal,
           (unsigned long)dlnow, (unsigned long)dltotal);
 
-  if(dlnow > STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES)
+  if (dlnow > STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES)
     return 1;
   return 0;
 }
@@ -74,7 +76,8 @@ int main(void)
   struct myprogress prog;
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     prog.lastruntime = 0;
     prog.fetch = fetch;
 
@@ -87,7 +90,7 @@ int main(void)
     fetch_easy_setopt(fetch, FETCHOPT_NOPROGRESS, 0L);
     res = fetch_easy_perform(fetch);
 
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "%s\n", fetch_easy_strerror(res));
 
     /* always cleanup */

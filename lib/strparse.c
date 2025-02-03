@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,13 +35,15 @@ int Curl_str_until(char **linep, struct Curl_str *out,
 
   out->str = NULL;
   out->len = 0;
-  while(*s && (*s != delim)) {
+  while (*s && (*s != delim))
+  {
     s++;
-    if(++len > max) {
+    if (++len > max)
+    {
       return STRE_BIG;
     }
   }
-  if(!len)
+  if (!len)
     return STRE_SHORT;
   out->str = *linep;
   out->len = len;
@@ -57,7 +59,6 @@ int Curl_str_word(char **linep, struct Curl_str *out,
   return Curl_str_until(linep, out, max, ' ');
 }
 
-
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
 int Curl_str_quotedword(char **linep, struct Curl_str *out,
@@ -69,15 +70,16 @@ int Curl_str_quotedword(char **linep, struct Curl_str *out,
 
   out->str = NULL;
   out->len = 0;
-  if(*s != '\"')
+  if (*s != '\"')
     return STRE_BEGQUOTE;
   s++;
-  while(*s && (*s != '\"')) {
+  while (*s && (*s != '\"'))
+  {
     s++;
-    if(++len > max)
+    if (++len > max)
       return STRE_BIG;
   }
-  if(*s != '\"')
+  if (*s != '\"')
     return STRE_ENDQUOTE;
   out->str = (*linep) + 1;
   out->len = len;
@@ -90,7 +92,7 @@ int Curl_str_quotedword(char **linep, struct Curl_str *out,
 int Curl_str_single(char **linep, char byte)
 {
   DEBUGASSERT(linep && *linep);
-  if(**linep != byte)
+  if (**linep != byte)
     return STRE_BYTE;
   (*linep)++; /* move over it */
   return STRE_OK;
@@ -110,12 +112,13 @@ int Curl_str_number(char **linep, size_t *nump, size_t max)
   size_t num = 0;
   DEBUGASSERT(linep && *linep && nump);
   *nump = 0;
-  while(ISDIGIT(**linep)) {
+  while (ISDIGIT(**linep))
+  {
     int n = **linep - '0';
-    if(num > ((SIZE_T_MAX - n) / 10))
+    if (num > ((SIZE_T_MAX - n) / 10))
       return STRE_OVERFLOW;
     num = num * 10 + n;
-    if(num > max)
+    if (num > max)
       return STRE_BIG; /** too big */
     (*linep)++;
   }
@@ -128,7 +131,8 @@ int Curl_str_number(char **linep, size_t *nump, size_t max)
 int Curl_str_newline(char **linep)
 {
   DEBUGASSERT(linep && *linep);
-  if(ISNEWLINE(**linep)) {
+  if (ISNEWLINE(**linep))
+  {
     (*linep)++;
     return STRE_OK; /* yessir */
   }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@
 /* OS/400 additional support. */
 
 #include <fetch/fetch.h>
-#include "config-os400.h"  /* Not fetch_setup.h: we only need some defines. */
+#include "config-os400.h" /* Not fetch_setup.h: we only need some defines. */
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -63,33 +63,35 @@
 *** those that are used by libfetch, but not defined by QADRT.
 **/
 
-#pragma convert(0)                              /* Restore EBCDIC. */
+#pragma convert(0) /* Restore EBCDIC. */
 
-#define MIN_BYTE_GAIN   1024    /* Minimum gain when shortening a buffer. */
+#define MIN_BYTE_GAIN 1024 /* Minimum gain when shortening a buffer. */
 
-struct buffer_t {
-  unsigned long size;            /* Buffer size. */
-  char *buf;                     /* Buffer address. */
+struct buffer_t
+{
+  unsigned long size; /* Buffer size. */
+  char *buf;          /* Buffer address. */
 };
-
 
 static char *buffer_undef(localkey_t key, long size);
 static char *buffer_threaded(localkey_t key, long size);
 static char *buffer_unthreaded(localkey_t key, long size);
 
-static pthread_mutex_t  mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_key_t    thdkey;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_key_t thdkey;
 static struct buffer_t *locbufs;
 
 char *(*Curl_thread_buffer)(localkey_t key, long size) = buffer_undef;
 
 static void thdbufdestroy(void *private)
 {
-  if(private) {
-    struct buffer_t *p = (struct buffer_t *) private;
+  if (private)
+  {
+    struct buffer_t *p = (struct buffer_t *)private;
     localkey_t i;
 
-    for(i = (localkey_t) 0; i < LK_LAST; i++) {
+    for (i = (localkey_t)0; i < LK_LAST; i++)
+    {
       free(p->buf);
       p++;
     }
@@ -98,24 +100,24 @@ static void thdbufdestroy(void *private)
   }
 }
 
-
 static void
 terminate(void)
 {
-  if(Curl_thread_buffer == buffer_threaded) {
+  if (Curl_thread_buffer == buffer_threaded)
+  {
     locbufs = pthread_getspecific(thdkey);
-    pthread_setspecific(thdkey, (void *) NULL);
+    pthread_setspecific(thdkey, (void *)NULL);
     pthread_key_delete(thdkey);
   }
 
-  if(Curl_thread_buffer != buffer_undef) {
-    thdbufdestroy((void *) locbufs);
-    locbufs = (struct buffer_t *) NULL;
+  if (Curl_thread_buffer != buffer_undef)
+  {
+    thdbufdestroy((void *)locbufs);
+    locbufs = (struct buffer_t *)NULL;
   }
 
   Curl_thread_buffer = buffer_undef;
 }
-
 
 static char *
 get_buffer(struct buffer_t *buf, long size)
@@ -125,45 +127,46 @@ get_buffer(struct buffer_t *buf, long size)
   /* If `size' >= 0, make sure buffer at `buf' is at least `size'-byte long.
      Return the buffer address. */
 
-  if(size < 0)
+  if (size < 0)
     return buf->buf;
 
-  if(!buf->buf) {
+  if (!buf->buf)
+  {
     buf->buf = malloc(size);
-    if(buf->buf)
+    if (buf->buf)
       buf->size = size;
 
     return buf->buf;
   }
 
-  if((unsigned long) size <= buf->size) {
+  if ((unsigned long)size <= buf->size)
+  {
     /* Shorten the buffer only if it frees a significant byte count. This
        avoids some realloc() overhead. */
 
-    if(buf->size - size < MIN_BYTE_GAIN)
+    if (buf->size - size < MIN_BYTE_GAIN)
       return buf->buf;
   }
 
   /* Resize the buffer. */
 
   cp = realloc(buf->buf, size);
-  if(cp) {
+  if (cp)
+  {
     buf->buf = cp;
     buf->size = size;
   }
-  else if(size <= buf->size)
+  else if (size <= buf->size)
     cp = buf->buf;
 
   return cp;
 }
-
 
 static char *
 buffer_unthreaded(localkey_t key, long size)
 {
   return get_buffer(locbufs + key, size);
 }
-
 
 static char *
 buffer_threaded(localkey_t key, long size)
@@ -174,27 +177,28 @@ buffer_threaded(localkey_t key, long size)
      make sure it is at least `size'-byte long. Set `size' to < 0 to get
      its address only. */
 
-  bufs = (struct buffer_t *) pthread_getspecific(thdkey);
+  bufs = (struct buffer_t *)pthread_getspecific(thdkey);
 
-  if(!bufs) {
-    if(size < 0)
-      return (char *) NULL;             /* No buffer yet. */
+  if (!bufs)
+  {
+    if (size < 0)
+      return (char *)NULL; /* No buffer yet. */
 
     /* Allocate buffer descriptors for the current thread. */
 
-    bufs = calloc((size_t) LK_LAST, sizeof(*bufs));
-    if(!bufs)
-      return (char *) NULL;
+    bufs = calloc((size_t)LK_LAST, sizeof(*bufs));
+    if (!bufs)
+      return (char *)NULL;
 
-    if(pthread_setspecific(thdkey, (void *) bufs)) {
+    if (pthread_setspecific(thdkey, (void *)bufs))
+    {
       free(bufs);
-      return (char *) NULL;
+      return (char *)NULL;
     }
   }
 
   return get_buffer(bufs + key, size);
 }
-
 
 static char *
 buffer_undef(localkey_t key, long size)
@@ -207,14 +211,17 @@ buffer_undef(localkey_t key, long size)
 
   /* Determine if we can use pthread-specific data. */
 
-  if(Curl_thread_buffer == buffer_undef) {      /* If unchanged during lock. */
-    if(!pthread_key_create(&thdkey, thdbufdestroy))
+  if (Curl_thread_buffer == buffer_undef)
+  { /* If unchanged during lock. */
+    if (!pthread_key_create(&thdkey, thdbufdestroy))
       Curl_thread_buffer = buffer_threaded;
-    else {
-      locbufs = calloc((size_t) LK_LAST, sizeof(*locbufs));
-      if(!locbufs) {
+    else
+    {
+      locbufs = calloc((size_t)LK_LAST, sizeof(*locbufs));
+      if (!locbufs)
+      {
         pthread_mutex_unlock(&mutex);
-        return (char *) NULL;
+        return (char *)NULL;
       }
       else
         Curl_thread_buffer = buffer_unthreaded;
@@ -227,20 +234,20 @@ buffer_undef(localkey_t key, long size)
   return Curl_thread_buffer(key, size);
 }
 
-
 static char *
 set_thread_string(localkey_t key, const char *s)
 {
   int i;
   char *cp;
 
-  if(!s)
-    return (char *) NULL;
+  if (!s)
+    return (char *)NULL;
 
   i = strlen(s) + 1;
   cp = Curl_thread_buffer(key, MAX_CONV_EXPANSION * i + 1);
 
-  if(cp) {
+  if (cp)
+  {
     i = QadrtConvertE2A(cp, s, MAX_CONV_EXPANSION * i, i);
     cp[i] = '\0';
   }
@@ -248,26 +255,27 @@ set_thread_string(localkey_t key, const char *s)
   return cp;
 }
 
-
-int
-Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
-                   char *nodename, socklen_t nodenamelen,
-                   char *servname, socklen_t servnamelen,
-                   int flags)
+int Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
+                       char *nodename, socklen_t nodenamelen,
+                       char *servname, socklen_t servnamelen,
+                       int flags)
 {
   char *enodename = NULL;
   char *eservname = NULL;
   int status;
 
-  if(nodename && nodenamelen) {
+  if (nodename && nodenamelen)
+  {
     enodename = malloc(nodenamelen);
-    if(!enodename)
+    if (!enodename)
       return EAI_MEMORY;
   }
 
-  if(servname && servnamelen) {
+  if (servname && servnamelen)
+  {
     eservname = malloc(servnamelen);
-    if(!eservname) {
+    if (!eservname)
+    {
       free(enodename);
       return EAI_MEMORY;
     }
@@ -276,15 +284,18 @@ Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
   status = getnameinfo(sa, salen, enodename, nodenamelen,
                        eservname, servnamelen, flags);
 
-  if(!status) {
+  if (!status)
+  {
     int i;
-    if(enodename) {
+    if (enodename)
+    {
       i = QadrtConvertE2A(nodename, enodename,
                           nodenamelen - 1, strlen(enodename));
       nodename[i] = '\0';
     }
 
-    if(eservname) {
+    if (eservname)
+    {
       i = QadrtConvertE2A(servname, eservname,
                           servnamelen - 1, strlen(eservname));
       servname[i] = '\0';
@@ -296,35 +307,37 @@ Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
   return status;
 }
 
-int
-Curl_getaddrinfo_a(const char *nodename, const char *servname,
-                   const struct addrinfo *hints,
-                   struct addrinfo **res)
+int Curl_getaddrinfo_a(const char *nodename, const char *servname,
+                       const struct addrinfo *hints,
+                       struct addrinfo **res)
 {
   char *enodename;
   char *eservname;
   int status;
   int i;
 
-  enodename = (char *) NULL;
-  eservname = (char *) NULL;
+  enodename = (char *)NULL;
+  eservname = (char *)NULL;
 
-  if(nodename) {
+  if (nodename)
+  {
     i = strlen(nodename);
 
     enodename = malloc(i + 1);
-    if(!enodename)
+    if (!enodename)
       return EAI_MEMORY;
 
     i = QadrtConvertA2E(enodename, nodename, i, i);
     enodename[i] = '\0';
   }
 
-  if(servname) {
+  if (servname)
+  {
     i = strlen(servname);
 
     eservname = malloc(i + 1);
-    if(!eservname) {
+    if (!eservname)
+    {
       free(enodename);
       return EAI_MEMORY;
     }
@@ -351,12 +364,14 @@ Curl_gss_convert_in_place(OM_uint32 *minor_status, gss_buffer_t buf)
   /* Convert `buf' in place, from EBCDIC to ASCII.
      If error, release the buffer and return -1. Else return 0. */
 
-  if(i) {
+  if (i)
+  {
     char *t = malloc(i);
-    if(!t) {
+    if (!t)
+    {
       gss_release_buffer(minor_status, buf);
 
-      if(minor_status)
+      if (minor_status)
         *minor_status = ENOMEM;
 
       return -1;
@@ -370,7 +385,6 @@ Curl_gss_convert_in_place(OM_uint32 *minor_status, gss_buffer_t buf)
   return 0;
 }
 
-
 OM_uint32
 Curl_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
                        gss_OID in_name_type, gss_name_t *out_name)
@@ -379,22 +393,23 @@ Curl_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
   unsigned int i;
   gss_buffer_desc in;
 
-  if(!in_name || !in_name->value || !in_name->length)
+  if (!in_name || !in_name->value || !in_name->length)
     return gss_import_name(minor_status, in_name, in_name_type, out_name);
 
-  memcpy((char *) &in, (char *) in_name, sizeof(in));
+  memcpy((char *)&in, (char *)in_name, sizeof(in));
   i = in.length;
 
   in.value = malloc(i + 1);
-  if(!in.value) {
-    if(minor_status)
+  if (!in.value)
+  {
+    if (minor_status)
       *minor_status = ENOMEM;
 
     return GSS_S_FAILURE;
   }
 
   QadrtConvertA2E(in.value, in_name->value, i, i);
-  ((char *) in.value)[i] = '\0';
+  ((char *)in.value)[i] = '\0';
   rc = gss_import_name(minor_status, &in, in_name_type, out_name);
   free(in.value);
   return rc;
@@ -411,15 +426,15 @@ Curl_gss_display_status_a(OM_uint32 *minor_status, OM_uint32 status_value,
   rc = gss_display_status(minor_status, status_value, status_type,
                           mech_type, message_context, status_string);
 
-  if(rc != GSS_S_COMPLETE || !status_string ||
-     !status_string->length || !status_string->value)
+  if (rc != GSS_S_COMPLETE || !status_string ||
+      !status_string->length || !status_string->value)
     return rc;
 
   /* No way to allocate a buffer here, because it will be released by
      gss_release_buffer(). The solution is to overwrite the EBCDIC buffer
      with ASCII to return it. */
 
-  if(Curl_gss_convert_in_place(minor_status, status_string))
+  if (Curl_gss_convert_in_place(minor_status, status_string))
     return GSS_S_FAILURE;
 
   return rc;
@@ -444,20 +459,23 @@ Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
   in.value = NULL;
   inp = input_token;
 
-  if(inp) {
-    if(inp->length && inp->value) {
+  if (inp)
+  {
+    if (inp->length && inp->value)
+    {
       unsigned int i = inp->length;
 
       in.value = malloc(i + 1);
-      if(!in.value) {
-        if(minor_status)
+      if (!in.value)
+      {
+        if (minor_status)
           *minor_status = ENOMEM;
 
         return GSS_S_FAILURE;
       }
 
       QadrtConvertA2E(in.value, input_token->value, i, i);
-      ((char *) in.value)[i] = '\0';
+      ((char *)in.value)[i] = '\0';
       in.length = i;
       inp = &in;
     }
@@ -469,20 +487,19 @@ Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
                             output_token, ret_flags, time_rec);
   free(in.value);
 
-  if(rc != GSS_S_COMPLETE || !output_token ||
-     !output_token->length || !output_token->value)
+  if (rc != GSS_S_COMPLETE || !output_token ||
+      !output_token->length || !output_token->value)
     return rc;
 
   /* No way to allocate a buffer here, because it will be released by
      gss_release_buffer(). The solution is to overwrite the EBCDIC buffer
      with ASCII to return it. */
 
-  if(Curl_gss_convert_in_place(minor_status, output_token))
+  if (Curl_gss_convert_in_place(minor_status, output_token))
     return GSS_S_FAILURE;
 
   return rc;
 }
-
 
 OM_uint32
 Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
@@ -493,15 +510,15 @@ Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
 
   rc = gss_delete_sec_context(minor_status, context_handle, output_token);
 
-  if(rc != GSS_S_COMPLETE || !output_token ||
-     !output_token->length || !output_token->value)
+  if (rc != GSS_S_COMPLETE || !output_token ||
+      !output_token->length || !output_token->value)
     return rc;
 
   /* No way to allocate a buffer here, because it will be released by
      gss_release_buffer(). The solution is to overwrite the EBCDIC buffer
      with ASCII to return it. */
 
-  if(Curl_gss_convert_in_place(minor_status, output_token))
+  if (Curl_gss_convert_in_place(minor_status, output_token))
     return GSS_S_FAILURE;
 
   return rc;
@@ -520,48 +537,50 @@ Curl_ldap_init_a(char *host, int port)
   char *ehost;
   void *result;
 
-  if(!host)
-    return (void *) ldap_init(host, port);
+  if (!host)
+    return (void *)ldap_init(host, port);
 
   i = strlen(host);
 
   ehost = malloc(i + 1);
-  if(!ehost)
-    return (void *) NULL;
+  if (!ehost)
+    return (void *)NULL;
 
   QadrtConvertA2E(ehost, host, i, i);
   ehost[i] = '\0';
-  result = (void *) ldap_init(ehost, port);
+  result = (void *)ldap_init(ehost, port);
   free(ehost);
   return result;
 }
 
-int
-Curl_ldap_simple_bind_s_a(void *ld, char *dn, char *passwd)
+int Curl_ldap_simple_bind_s_a(void *ld, char *dn, char *passwd)
 {
   int i;
   char *edn;
   char *epasswd;
 
-  edn = (char *) NULL;
-  epasswd = (char *) NULL;
+  edn = (char *)NULL;
+  epasswd = (char *)NULL;
 
-  if(dn) {
+  if (dn)
+  {
     i = strlen(dn);
 
     edn = malloc(i + 1);
-    if(!edn)
+    if (!edn)
       return LDAP_NO_MEMORY;
 
     QadrtConvertA2E(edn, dn, i, i);
     edn[i] = '\0';
   }
 
-  if(passwd) {
+  if (passwd)
+  {
     i = strlen(passwd);
 
     epasswd = malloc(i + 1);
-    if(!epasswd) {
+    if (!epasswd)
+    {
       free(edn);
       return LDAP_NO_MEMORY;
     }
@@ -576,9 +595,8 @@ Curl_ldap_simple_bind_s_a(void *ld, char *dn, char *passwd)
   return i;
 }
 
-int
-Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
-                     char **attrs, int attrsonly, LDAPMessage **res)
+int Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
+                         char **attrs, int attrsonly, LDAPMessage **res)
 {
   int i;
   int j;
@@ -587,48 +605,56 @@ Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
   char **eattrs;
   int status;
 
-  ebase = (char *) NULL;
-  efilter = (char *) NULL;
-  eattrs = (char **) NULL;
+  ebase = (char *)NULL;
+  efilter = (char *)NULL;
+  eattrs = (char **)NULL;
   status = LDAP_SUCCESS;
 
-  if(base) {
+  if (base)
+  {
     i = strlen(base);
 
     ebase = malloc(i + 1);
-    if(!ebase)
+    if (!ebase)
       status = LDAP_NO_MEMORY;
-    else {
+    else
+    {
       QadrtConvertA2E(ebase, base, i, i);
       ebase[i] = '\0';
     }
   }
 
-  if(filter && status == LDAP_SUCCESS) {
+  if (filter && status == LDAP_SUCCESS)
+  {
     i = strlen(filter);
 
     efilter = malloc(i + 1);
-    if(!efilter)
+    if (!efilter)
       status = LDAP_NO_MEMORY;
-    else {
+    else
+    {
       QadrtConvertA2E(efilter, filter, i, i);
       efilter[i] = '\0';
     }
   }
 
-  if(attrs && status == LDAP_SUCCESS) {
-    for(i = 0; attrs[i++];)
+  if (attrs && status == LDAP_SUCCESS)
+  {
+    for (i = 0; attrs[i++];)
       ;
 
     eattrs = calloc(i, sizeof(*eattrs));
-    if(!eattrs)
+    if (!eattrs)
       status = LDAP_NO_MEMORY;
-    else {
-      for(j = 0; attrs[j]; j++) {
+    else
+    {
+      for (j = 0; attrs[j]; j++)
+      {
         i = strlen(attrs[j]);
 
         eattrs[j] = malloc(i + 1);
-        if(!eattrs[j]) {
+        if (!eattrs[j])
+        {
           status = LDAP_NO_MEMORY;
           break;
         }
@@ -639,13 +665,14 @@ Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
     }
   }
 
-  if(status == LDAP_SUCCESS)
+  if (status == LDAP_SUCCESS)
     status = ldap_search_s(ld, ebase ? ebase : "", scope,
                            efilter ? efilter : "(objectclass=*)",
                            eattrs, attrsonly, res);
 
-  if(eattrs) {
-    for(j = 0; eattrs[j]; j++)
+  if (eattrs)
+  {
+    for (j = 0; eattrs[j]; j++)
       free(eattrs[j]);
 
     free(eattrs);
@@ -656,23 +683,24 @@ Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
   return status;
 }
 
-
 struct berval **
 Curl_ldap_get_values_len_a(void *ld, LDAPMessage *entry, const char *attr)
 {
   char *cp;
   struct berval **result;
 
-  cp = (char *) NULL;
+  cp = (char *)NULL;
 
-  if(attr) {
+  if (attr)
+  {
     int i = strlen(attr);
 
     cp = malloc(i + 1);
-    if(!cp) {
+    if (!cp)
+    {
       ldap_set_lderrno(ld, LDAP_NO_MEMORY, NULL,
                        ldap_err2string(LDAP_NO_MEMORY));
-      return (struct berval **) NULL;
+      return (struct berval **)NULL;
     }
 
     QadrtConvertA2E(cp, attr, i, i);
@@ -703,13 +731,13 @@ Curl_ldap_get_dn_a(void *ld, LDAPMessage *entry)
 
   cp = ldap_get_dn(ld, entry);
 
-  if(!cp)
+  if (!cp)
     return cp;
 
   i = strlen(cp);
 
   cp2 = malloc(i + 1);
-  if(!cp2)
+  if (!cp2)
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
@@ -734,13 +762,13 @@ Curl_ldap_first_attribute_a(void *ld,
 
   cp = ldap_first_attribute(ld, entry, berptr);
 
-  if(!cp)
+  if (!cp)
     return cp;
 
   i = strlen(cp);
 
   cp2 = malloc(i + 1);
-  if(!cp2)
+  if (!cp2)
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
@@ -765,13 +793,13 @@ Curl_ldap_next_attribute_a(void *ld,
 
   cp = ldap_next_attribute(ld, entry, berptr);
 
-  if(!cp)
+  if (!cp)
     return cp;
 
   i = strlen(cp);
 
   cp2 = malloc(i + 1);
-  if(!cp2)
+  if (!cp2)
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
@@ -799,19 +827,20 @@ sockaddr2ebcdic(struct sockaddr_storage *dstaddr,
 
   /* Convert a socket address to job CCSID, if needed. */
 
-  if(!srcaddr || srclen < offsetof(struct sockaddr, sa_family) +
-     sizeof(srcaddr->sa_family) || srclen > sizeof(*dstaddr)) {
+  if (!srcaddr || srclen < offsetof(struct sockaddr, sa_family) + sizeof(srcaddr->sa_family) || srclen > sizeof(*dstaddr))
+  {
     errno = EINVAL;
     return -1;
   }
 
-  memcpy((char *) dstaddr, (char *) srcaddr, srclen);
+  memcpy((char *)dstaddr, (char *)srcaddr, srclen);
 
-  switch(srcaddr->sa_family) {
+  switch (srcaddr->sa_family)
+  {
 
   case AF_UNIX:
-    srcu = (const struct sockaddr_un *) srcaddr;
-    dstu = (struct sockaddr_un *) dstaddr;
+    srcu = (const struct sockaddr_un *)srcaddr;
+    dstu = (struct sockaddr_un *)dstaddr;
     dstsize = sizeof(*dstaddr) - offsetof(struct sockaddr_un, sun_path);
     srclen -= offsetof(struct sockaddr_un, sun_path);
     i = QadrtConvertA2E(dstu->sun_path, srcu->sun_path, dstsize - 1, srclen);
@@ -821,7 +850,6 @@ sockaddr2ebcdic(struct sockaddr_storage *dstaddr,
 
   return srclen;
 }
-
 
 static int
 sockaddr2ascii(struct sockaddr *dstaddr, int dstlen,
@@ -833,27 +861,31 @@ sockaddr2ascii(struct sockaddr *dstaddr, int dstlen,
 
   /* Convert a socket address to ASCII, if needed. */
 
-  if(!srclen)
+  if (!srclen)
     return 0;
-  if(srclen > dstlen)
+  if (srclen > dstlen)
     srclen = dstlen;
-  if(!srcaddr || srclen < 0) {
+  if (!srcaddr || srclen < 0)
+  {
     errno = EINVAL;
     return -1;
   }
 
-  memcpy((char *) dstaddr, (char *) srcaddr, srclen);
+  memcpy((char *)dstaddr, (char *)srcaddr, srclen);
 
-  if(srclen >= offsetof(struct sockaddr_storage, ss_family) +
-     sizeof(srcaddr->ss_family)) {
-    switch(srcaddr->ss_family) {
+  if (srclen >= offsetof(struct sockaddr_storage, ss_family) +
+                    sizeof(srcaddr->ss_family))
+  {
+    switch (srcaddr->ss_family)
+    {
 
     case AF_UNIX:
-      srcu = (const struct sockaddr_un *) srcaddr;
-      dstu = (struct sockaddr_un *) dstaddr;
+      srcu = (const struct sockaddr_un *)srcaddr;
+      dstu = (struct sockaddr_un *)dstaddr;
       dstsize = dstlen - offsetof(struct sockaddr_un, sun_path);
       srclen -= offsetof(struct sockaddr_un, sun_path);
-      if(dstsize > 0 && srclen > 0) {
+      if (dstsize > 0 && srclen > 0)
+      {
         srclen = QadrtConvertE2A(dstu->sun_path, srcu->sun_path,
                                  dstsize - 1, srclen);
         dstu->sun_path[srclen] = '\0';
@@ -865,88 +897,85 @@ sockaddr2ascii(struct sockaddr *dstaddr, int dstlen,
   return srclen;
 }
 
-int
-Curl_os400_connect(int sd, struct sockaddr *destaddr, int addrlen)
+int Curl_os400_connect(int sd, struct sockaddr *destaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
 
   i = sockaddr2ebcdic(&laddr, destaddr, addrlen);
 
-  if(i < 0)
+  if (i < 0)
     return -1;
 
-  return connect(sd, (struct sockaddr *) &laddr, i);
+  return connect(sd, (struct sockaddr *)&laddr, i);
 }
 
-int
-Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen)
+int Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
 
   i = sockaddr2ebcdic(&laddr, localaddr, addrlen);
 
-  if(i < 0)
+  if (i < 0)
     return -1;
 
-  return bind(sd, (struct sockaddr *) &laddr, i);
+  return bind(sd, (struct sockaddr *)&laddr, i);
 }
 
-int
-Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
-                  const struct sockaddr *dstaddr, int addrlen)
+int Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
+                      const struct sockaddr *dstaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
 
   i = sockaddr2ebcdic(&laddr, dstaddr, addrlen);
 
-  if(i < 0)
+  if (i < 0)
     return -1;
 
-  return sendto(sd, buffer, buflen, flags, (struct sockaddr *) &laddr, i);
+  return sendto(sd, buffer, buflen, flags, (struct sockaddr *)&laddr, i);
 }
 
-int
-Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
-                    struct sockaddr *fromaddr, int *addrlen)
+int Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
+                        struct sockaddr *fromaddr, int *addrlen)
 {
   int rcvlen;
   struct sockaddr_storage laddr;
   int laddrlen = sizeof(laddr);
 
-  if(!fromaddr || !addrlen || *addrlen <= 0)
+  if (!fromaddr || !addrlen || *addrlen <= 0)
     return recvfrom(sd, buffer, buflen, flags, fromaddr, addrlen);
 
-  laddr.ss_family = AF_UNSPEC;          /* To detect if unused. */
+  laddr.ss_family = AF_UNSPEC; /* To detect if unused. */
   rcvlen = recvfrom(sd, buffer, buflen, flags,
-                    (struct sockaddr *) &laddr, &laddrlen);
+                    (struct sockaddr *)&laddr, &laddrlen);
 
-  if(rcvlen < 0)
+  if (rcvlen < 0)
     return rcvlen;
 
-  if(laddr.ss_family == AF_UNSPEC)
+  if (laddr.ss_family == AF_UNSPEC)
     laddrlen = 0;
-  else {
+  else
+  {
     laddrlen = sockaddr2ascii(fromaddr, *addrlen, &laddr, laddrlen);
-    if(laddrlen < 0)
+    if (laddrlen < 0)
       return laddrlen;
   }
   *addrlen = laddrlen;
   return rcvlen;
 }
 
-int
-Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
+int Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
 {
   struct sockaddr_storage laddr;
   int laddrlen = sizeof(laddr);
-  int retcode = getpeername(sd, (struct sockaddr *) &laddr, &laddrlen);
+  int retcode = getpeername(sd, (struct sockaddr *)&laddr, &laddrlen);
 
-  if(!retcode) {
+  if (!retcode)
+  {
     laddrlen = sockaddr2ascii(addr, *addrlen, &laddr, laddrlen);
-    if(laddrlen < 0)
+    if (laddrlen < 0)
       return laddrlen;
     *addrlen = laddrlen;
   }
@@ -954,23 +983,22 @@ Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
   return retcode;
 }
 
-int
-Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen)
+int Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen)
 {
   struct sockaddr_storage laddr;
   int laddrlen = sizeof(laddr);
-  int retcode = getsockname(sd, (struct sockaddr *) &laddr, &laddrlen);
+  int retcode = getsockname(sd, (struct sockaddr *)&laddr, &laddrlen);
 
-  if(!retcode) {
+  if (!retcode)
+  {
     laddrlen = sockaddr2ascii(addr, *addrlen, &laddr, laddrlen);
-    if(laddrlen < 0)
+    if (laddrlen < 0)
       return laddrlen;
     *addrlen = laddrlen;
   }
 
   return retcode;
 }
-
 
 #ifdef HAVE_LIBZ
 const char *
@@ -979,59 +1007,54 @@ Curl_os400_zlibVersion(void)
   return set_thread_string(LK_ZLIB_VERSION, zlibVersion());
 }
 
-
-int
-Curl_os400_inflateInit_(z_streamp strm, const char *version, int stream_size)
+int Curl_os400_inflateInit_(z_streamp strm, const char *version, int stream_size)
 {
   z_const char *msgb4 = strm->msg;
   int ret;
 
   ret = inflateInit(strm);
 
-  if(strm->msg != msgb4)
+  if (strm->msg != msgb4)
     strm->msg = set_thread_string(LK_ZLIB_MSG, strm->msg);
 
   return ret;
 }
 
-int
-Curl_os400_inflateInit2_(z_streamp strm, int windowBits,
-                         const char *version, int stream_size)
+int Curl_os400_inflateInit2_(z_streamp strm, int windowBits,
+                             const char *version, int stream_size)
 {
   z_const char *msgb4 = strm->msg;
   int ret;
 
   ret = inflateInit2(strm, windowBits);
 
-  if(strm->msg != msgb4)
+  if (strm->msg != msgb4)
     strm->msg = set_thread_string(LK_ZLIB_MSG, strm->msg);
 
   return ret;
 }
 
-int
-Curl_os400_inflate(z_streamp strm, int flush)
+int Curl_os400_inflate(z_streamp strm, int flush)
 {
   z_const char *msgb4 = strm->msg;
   int ret;
 
   ret = inflate(strm, flush);
 
-  if(strm->msg != msgb4)
+  if (strm->msg != msgb4)
     strm->msg = set_thread_string(LK_ZLIB_MSG, strm->msg);
 
   return ret;
 }
 
-int
-Curl_os400_inflateEnd(z_streamp strm)
+int Curl_os400_inflateEnd(z_streamp strm)
 {
   z_const char *msgb4 = strm->msg;
   int ret;
 
   ret = inflateEnd(strm);
 
-  if(strm->msg != msgb4)
+  if (strm->msg != msgb4)
     strm->msg = set_thread_string(LK_ZLIB_MSG, strm->msg);
 
   return ret;

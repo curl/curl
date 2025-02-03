@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -98,23 +98,23 @@ static size_t writecb(char *b, size_t size, size_t nitems, void *p)
   size_t i;
   size_t sent;
   unsigned char pong[] = {
-    0x8a, 0x0
-  };
+      0x8a, 0x0};
   size_t incoming = nitems;
   fprintf(stderr, "Called FETCHOPT_WRITEFUNCTION with %d bytes: ",
           (int)nitems);
-  for(i = 0; i < nitems; i++)
+  for (i = 0; i < nitems; i++)
     fprintf(stderr, "%02x ", (unsigned char)buffer[i]);
   fprintf(stderr, "\n");
   (void)size;
-  if(buffer[0] == 0x89) {
+  if (buffer[0] == 0x89)
+  {
     FETCHcode result;
     fprintf(stderr, "send back a simple PONG\n");
     result = fetch_ws_send(easy, pong, 2, &sent, 0, 0);
-    if(result)
+    if (result)
       nitems = 0;
   }
-  if(nitems != incoming)
+  if (nitems != incoming)
     fprintf(stderr, "returns error from callback\n");
   return nitems;
 }
@@ -127,7 +127,8 @@ FETCHcode test(char *URL)
   global_init(FETCH_GLOBAL_ALL);
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
 
     /* use the callback style */

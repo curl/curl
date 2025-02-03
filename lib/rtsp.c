@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,14 +46,14 @@
 #include "memdebug.h"
 
 #define RTP_PKT_LENGTH(p) ((((unsigned int)((unsigned char)((p)[2]))) << 8) | \
-                            ((unsigned int)((unsigned char)((p)[3]))))
+                           ((unsigned int)((unsigned char)((p)[3]))))
 
 /* protocol-specific functions set up to be called by the main engine */
 static FETCHcode rtsp_do(struct Curl_easy *data, bool *done);
 static FETCHcode rtsp_done(struct Curl_easy *data, FETCHcode, bool premature);
 static FETCHcode rtsp_connect(struct Curl_easy *data, bool *done);
 static FETCHcode rtsp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead);
+                                 struct connectdata *conn, bool dead);
 static int rtsp_getsock_do(struct Curl_easy *data,
                            struct connectdata *conn, fetch_socket_t *socks);
 
@@ -68,12 +68,12 @@ static int rtsp_getsock_do(struct Curl_easy *data,
  *                 is needed
  */
 static FETCHcode rtsp_rtp_write_resp(struct Curl_easy *data,
-                                    const char *buf,
-                                    size_t blen,
-                                    bool is_eos);
+                                     const char *buf,
+                                     size_t blen,
+                                     bool is_eos);
 
 static FETCHcode rtsp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
+                                       struct connectdata *conn);
 static unsigned int rtsp_conncheck(struct Curl_easy *data,
                                    struct connectdata *check,
                                    unsigned int checks_to_perform);
@@ -90,56 +90,52 @@ static int rtsp_getsock_do(struct Curl_easy *data, struct connectdata *conn,
   return GETSOCK_WRITESOCK(0);
 }
 
-static
-FETCHcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len);
-static
-FETCHcode rtsp_parse_transport(struct Curl_easy *data, const char *transport);
-
+static FETCHcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len);
+static FETCHcode rtsp_parse_transport(struct Curl_easy *data, const char *transport);
 
 /*
  * RTSP handler interface.
  */
 const struct Curl_handler Curl_handler_rtsp = {
-  "rtsp",                               /* scheme */
-  rtsp_setup_connection,                /* setup_connection */
-  rtsp_do,                              /* do_it */
-  rtsp_done,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  rtsp_connect,                         /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  rtsp_getsock_do,                      /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  rtsp_disconnect,                      /* disconnect */
-  rtsp_rtp_write_resp,                  /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  rtsp_conncheck,                       /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  Curl_http_follow,                     /* follow */
-  PORT_RTSP,                            /* defport */
-  FETCHPROTO_RTSP,                       /* protocol */
-  FETCHPROTO_RTSP,                       /* family */
-  PROTOPT_NONE                          /* flags */
+    "rtsp",                /* scheme */
+    rtsp_setup_connection, /* setup_connection */
+    rtsp_do,               /* do_it */
+    rtsp_done,             /* done */
+    ZERO_NULL,             /* do_more */
+    rtsp_connect,          /* connect_it */
+    ZERO_NULL,             /* connecting */
+    ZERO_NULL,             /* doing */
+    ZERO_NULL,             /* proto_getsock */
+    rtsp_getsock_do,       /* doing_getsock */
+    ZERO_NULL,             /* domore_getsock */
+    ZERO_NULL,             /* perform_getsock */
+    rtsp_disconnect,       /* disconnect */
+    rtsp_rtp_write_resp,   /* write_resp */
+    ZERO_NULL,             /* write_resp_hd */
+    rtsp_conncheck,        /* connection_check */
+    ZERO_NULL,             /* attach connection */
+    Curl_http_follow,      /* follow */
+    PORT_RTSP,             /* defport */
+    FETCHPROTO_RTSP,       /* protocol */
+    FETCHPROTO_RTSP,       /* family */
+    PROTOPT_NONE           /* flags */
 };
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
 
 static FETCHcode rtsp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn)
+                                       struct connectdata *conn)
 {
   struct RTSP *rtsp;
   (void)conn;
 
   data->req.p.rtsp = rtsp = calloc(1, sizeof(struct RTSP));
-  if(!rtsp)
+  if (!rtsp)
     return FETCHE_OUT_OF_MEMORY;
 
   Curl_dyn_init(&conn->proto.rtspc.buf, MAX_RTP_BUFFERSIZE);
   return FETCHE_OK;
 }
-
 
 /*
  * Function to check on various aspects of a connection.
@@ -151,15 +147,15 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
   unsigned int ret_val = CONNRESULT_NONE;
   (void)data;
 
-  if(checks_to_perform & CONNCHECK_ISDEAD) {
+  if (checks_to_perform & CONNCHECK_ISDEAD)
+  {
     bool input_pending;
-    if(!Curl_conn_is_alive(data, conn, &input_pending))
+    if (!Curl_conn_is_alive(data, conn, &input_pending))
       ret_val |= CONNRESULT_DEAD;
   }
 
   return ret_val;
 }
-
 
 static FETCHcode rtsp_connect(struct Curl_easy *data, bool *done)
 {
@@ -168,9 +164,9 @@ static FETCHcode rtsp_connect(struct Curl_easy *data, bool *done)
   httpStatus = Curl_http_connect(data, done);
 
   /* Initialize the CSeq if not already done */
-  if(data->state.rtsp_next_client_CSeq == 0)
+  if (data->state.rtsp_next_client_CSeq == 0)
     data->state.rtsp_next_client_CSeq = 1;
-  if(data->state.rtsp_next_server_CSeq == 0)
+  if (data->state.rtsp_next_server_CSeq == 0)
     data->state.rtsp_next_server_CSeq = 1;
 
   data->conn->proto.rtspc.rtp_channel = -1;
@@ -179,43 +175,46 @@ static FETCHcode rtsp_connect(struct Curl_easy *data, bool *done)
 }
 
 static FETCHcode rtsp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead)
+                                 struct connectdata *conn, bool dead)
 {
-  (void) dead;
-  (void) data;
+  (void)dead;
+  (void)data;
   Curl_dyn_free(&conn->proto.rtspc.buf);
   return FETCHE_OK;
 }
 
-
 static FETCHcode rtsp_done(struct Curl_easy *data,
-                          FETCHcode status, bool premature)
+                           FETCHcode status, bool premature)
 {
   struct RTSP *rtsp = data->req.p.rtsp;
   FETCHcode httpStatus;
 
   /* Bypass HTTP empty-reply checks on receive */
-  if(data->set.rtspreq == RTSPREQ_RECEIVE)
+  if (data->set.rtspreq == RTSPREQ_RECEIVE)
     premature = TRUE;
 
   httpStatus = Curl_http_done(data, status, premature);
 
-  if(rtsp && !status && !httpStatus) {
+  if (rtsp && !status && !httpStatus)
+  {
     /* Check the sequence numbers */
     long CSeq_sent = rtsp->CSeq_sent;
     long CSeq_recv = rtsp->CSeq_recv;
-    if((data->set.rtspreq != RTSPREQ_RECEIVE) && (CSeq_sent != CSeq_recv)) {
+    if ((data->set.rtspreq != RTSPREQ_RECEIVE) && (CSeq_sent != CSeq_recv))
+    {
       failf(data,
             "The CSeq of this request %ld did not match the response %ld",
             CSeq_sent, CSeq_recv);
       return FETCHE_RTSP_CSEQ_ERROR;
     }
-    if(data->set.rtspreq == RTSPREQ_RECEIVE &&
-       (data->conn->proto.rtspc.rtp_channel == -1)) {
+    if (data->set.rtspreq == RTSPREQ_RECEIVE &&
+        (data->conn->proto.rtspc.rtp_channel == -1))
+    {
       infof(data, "Got an RTP Receive with a CSeq of %ld", CSeq_recv);
     }
-    if(data->set.rtspreq == RTSPREQ_RECEIVE &&
-       data->req.eos_written) {
+    if (data->set.rtspreq == RTSPREQ_RECEIVE &&
+        data->req.eos_written)
+    {
       failf(data, "Server prematurely closed the RTSP connection.");
       return FETCHE_RECV_ERROR;
     }
@@ -255,9 +254,10 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
   /* Setup the first_* fields to allow auth details get sent
      to this origin */
 
-  if(!data->state.first_host) {
+  if (!data->state.first_host)
+  {
     data->state.first_host = strdup(conn->host.name);
-    if(!data->state.first_host)
+    if (!data->state.first_host)
       return FETCHE_OUT_OF_MEMORY;
 
     data->state.first_remote_port = conn->remote_port;
@@ -269,7 +269,8 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
    * support custom requests like HTTP.
    **/
   data->req.no_body = TRUE; /* most requests do not contain a body */
-  switch(rtspreq) {
+  switch (rtspreq)
+  {
   default:
     failf(data, "Got invalid RTSP request");
     return FETCHE_BAD_FUNCTION_ARGUMENT;
@@ -316,16 +317,18 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
   }
 
-  if(rtspreq == RTSPREQ_RECEIVE) {
+  if (rtspreq == RTSPREQ_RECEIVE)
+  {
     Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, TRUE);
     goto out;
   }
 
   p_session_id = data->set.str[STRING_RTSP_SESSION_ID];
-  if(!p_session_id &&
-     (rtspreq & ~(Curl_RtspReq)(RTSPREQ_OPTIONS |
-                                RTSPREQ_DESCRIBE |
-                                RTSPREQ_SETUP))) {
+  if (!p_session_id &&
+      (rtspreq & ~(Curl_RtspReq)(RTSPREQ_OPTIONS |
+                                 RTSPREQ_DESCRIBE |
+                                 RTSPREQ_SETUP)))
+  {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
           p_request);
     result = FETCHE_BAD_FUNCTION_ARGUMENT;
@@ -333,27 +336,32 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   /* Stream URI. Default to server '*' if not specified */
-  if(data->set.str[STRING_RTSP_STREAM_URI]) {
+  if (data->set.str[STRING_RTSP_STREAM_URI])
+  {
     p_stream_uri = data->set.str[STRING_RTSP_STREAM_URI];
   }
-  else {
+  else
+  {
     p_stream_uri = "*";
   }
 
   /* Transport Header for SETUP requests */
   p_transport = Curl_checkheaders(data, STRCONST("Transport"));
-  if(rtspreq == RTSPREQ_SETUP && !p_transport) {
+  if (rtspreq == RTSPREQ_SETUP && !p_transport)
+  {
     /* New Transport: setting? */
-    if(data->set.str[STRING_RTSP_TRANSPORT]) {
+    if (data->set.str[STRING_RTSP_TRANSPORT])
+    {
       Curl_safefree(data->state.aptr.rtsp_transport);
 
       data->state.aptr.rtsp_transport =
-        aprintf("Transport: %s\r\n",
-                data->set.str[STRING_RTSP_TRANSPORT]);
-      if(!data->state.aptr.rtsp_transport)
+          aprintf("Transport: %s\r\n",
+                  data->set.str[STRING_RTSP_TRANSPORT]);
+      if (!data->state.aptr.rtsp_transport)
         return FETCHE_OUT_OF_MEMORY;
     }
-    else {
+    else
+    {
       failf(data,
             "Refusing to issue an RTSP SETUP without a Transport: header.");
       result = FETCHE_BAD_FUNCTION_ARGUMENT;
@@ -364,19 +372,21 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   /* Accept Headers for DESCRIBE requests */
-  if(rtspreq == RTSPREQ_DESCRIBE) {
+  if (rtspreq == RTSPREQ_DESCRIBE)
+  {
     /* Accept Header */
-    p_accept = Curl_checkheaders(data, STRCONST("Accept")) ?
-      NULL : "Accept: application/sdp\r\n";
+    p_accept = Curl_checkheaders(data, STRCONST("Accept")) ? NULL : "Accept: application/sdp\r\n";
 
     /* Accept-Encoding header */
-    if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
-       data->set.str[STRING_ENCODING]) {
+    if (!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
+        data->set.str[STRING_ENCODING])
+    {
       Curl_safefree(data->state.aptr.accept_encoding);
       data->state.aptr.accept_encoding =
-        aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
+          aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
 
-      if(!data->state.aptr.accept_encoding) {
+      if (!data->state.aptr.accept_encoding)
+      {
         result = FETCHE_OUT_OF_MEMORY;
         goto out;
       }
@@ -388,19 +398,21 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */
-  if(Curl_checkheaders(data, STRCONST("User-Agent")) &&
-     data->state.aptr.uagent) {
+  if (Curl_checkheaders(data, STRCONST("User-Agent")) &&
+      data->state.aptr.uagent)
+  {
     Curl_safefree(data->state.aptr.uagent);
   }
-  else if(!Curl_checkheaders(data, STRCONST("User-Agent")) &&
-          data->set.str[STRING_USERAGENT]) {
+  else if (!Curl_checkheaders(data, STRCONST("User-Agent")) &&
+           data->set.str[STRING_USERAGENT])
+  {
     p_uagent = data->state.aptr.uagent;
   }
 
   /* setup the authentication headers */
   result = Curl_http_output_auth(data, conn, p_request, HTTPREQ_GET,
                                  p_stream_uri, FALSE);
-  if(result)
+  if (result)
     goto out;
 
 #ifndef FETCH_DISABLE_PROXY
@@ -410,7 +422,7 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
 
   /* Referrer */
   Curl_safefree(data->state.aptr.ref);
-  if(data->state.referer && !Curl_checkheaders(data, STRCONST("Referer")))
+  if (data->state.referer && !Curl_checkheaders(data, STRCONST("Referer")))
     data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
 
   p_referrer = data->state.aptr.ref;
@@ -421,11 +433,13 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
    *
    * Go ahead and use the Range stuff supplied for HTTP
    */
-  if(data->state.use_range &&
-     (rtspreq  & (RTSPREQ_PLAY | RTSPREQ_PAUSE | RTSPREQ_RECORD))) {
+  if (data->state.use_range &&
+      (rtspreq & (RTSPREQ_PLAY | RTSPREQ_PAUSE | RTSPREQ_RECORD)))
+  {
 
     /* Check to see if there is a range set in the custom headers */
-    if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
+    if (!Curl_checkheaders(data, STRCONST("Range")) && data->state.range)
+    {
       Curl_safefree(data->state.aptr.rangeline);
       data->state.aptr.rangeline = aprintf("Range: %s\r\n", data->state.range);
       p_range = data->state.aptr.rangeline;
@@ -435,32 +449,35 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
   /*
    * Sanity check the custom headers
    */
-  if(Curl_checkheaders(data, STRCONST("CSeq"))) {
+  if (Curl_checkheaders(data, STRCONST("CSeq")))
+  {
     failf(data, "CSeq cannot be set as a custom header.");
     result = FETCHE_RTSP_CSEQ_ERROR;
     goto out;
   }
-  if(Curl_checkheaders(data, STRCONST("Session"))) {
+  if (Curl_checkheaders(data, STRCONST("Session")))
+  {
     failf(data, "Session ID cannot be set as a custom header.");
     result = FETCHE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
 
   result =
-    Curl_dyn_addf(&req_buffer,
-                  "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
-                  "CSeq: %ld\r\n", /* CSeq */
-                  p_request, p_stream_uri, rtsp->CSeq_sent);
-  if(result)
+      Curl_dyn_addf(&req_buffer,
+                    "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
+                    "CSeq: %ld\r\n",     /* CSeq */
+                    p_request, p_stream_uri, rtsp->CSeq_sent);
+  if (result)
     goto out;
 
   /*
    * Rather than do a normal alloc line, keep the session_id unformatted
    * to make comparison easier
    */
-  if(p_session_id) {
+  if (p_session_id)
+  {
     result = Curl_dyn_addf(&req_buffer, "Session: %s\r\n", p_session_id);
-    if(result)
+    if (result)
       goto out;
   }
 
@@ -492,103 +509,119 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
    */
   Curl_safefree(data->state.aptr.userpwd);
 
-  if(result)
+  if (result)
     goto out;
 
-  if((rtspreq == RTSPREQ_SETUP) || (rtspreq == RTSPREQ_DESCRIBE)) {
+  if ((rtspreq == RTSPREQ_SETUP) || (rtspreq == RTSPREQ_DESCRIBE))
+  {
     result = Curl_add_timecondition(data, &req_buffer);
-    if(result)
+    if (result)
       goto out;
   }
 
   result = Curl_add_custom_headers(data, FALSE, httpversion, &req_buffer);
-  if(result)
+  if (result)
     goto out;
 
-  if(rtspreq == RTSPREQ_ANNOUNCE ||
-     rtspreq == RTSPREQ_SET_PARAMETER ||
-     rtspreq == RTSPREQ_GET_PARAMETER) {
+  if (rtspreq == RTSPREQ_ANNOUNCE ||
+      rtspreq == RTSPREQ_SET_PARAMETER ||
+      rtspreq == RTSPREQ_GET_PARAMETER)
+  {
     fetch_off_t req_clen; /* request content length */
 
-    if(data->state.upload) {
+    if (data->state.upload)
+    {
       req_clen = data->state.infilesize;
       data->state.httpreq = HTTPREQ_PUT;
       result = Curl_creader_set_fread(data, req_clen);
-      if(result)
+      if (result)
         goto out;
     }
-    else {
-      if(data->set.postfields) {
+    else
+    {
+      if (data->set.postfields)
+      {
         size_t plen = strlen(data->set.postfields);
         req_clen = (fetch_off_t)plen;
         result = Curl_creader_set_buf(data, data->set.postfields, plen);
       }
-      else if(data->state.infilesize >= 0) {
+      else if (data->state.infilesize >= 0)
+      {
         req_clen = data->state.infilesize;
         result = Curl_creader_set_fread(data, req_clen);
       }
-      else {
+      else
+      {
         req_clen = 0;
         result = Curl_creader_set_null(data);
       }
-      if(result)
+      if (result)
         goto out;
     }
 
-    if(req_clen > 0) {
+    if (req_clen > 0)
+    {
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
-      if(!Curl_checkheaders(data, STRCONST("Content-Length"))) {
+      if (!Curl_checkheaders(data, STRCONST("Content-Length")))
+      {
         result =
-          Curl_dyn_addf(&req_buffer, "Content-Length: %" FMT_OFF_T"\r\n",
-                        req_clen);
-        if(result)
+            Curl_dyn_addf(&req_buffer, "Content-Length: %" FMT_OFF_T "\r\n",
+                          req_clen);
+        if (result)
           goto out;
       }
 
-      if(rtspreq == RTSPREQ_SET_PARAMETER ||
-         rtspreq == RTSPREQ_GET_PARAMETER) {
-        if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
+      if (rtspreq == RTSPREQ_SET_PARAMETER ||
+          rtspreq == RTSPREQ_GET_PARAMETER)
+      {
+        if (!Curl_checkheaders(data, STRCONST("Content-Type")))
+        {
           result = Curl_dyn_addn(&req_buffer,
                                  STRCONST("Content-Type: "
                                           "text/parameters\r\n"));
-          if(result)
+          if (result)
             goto out;
         }
       }
 
-      if(rtspreq == RTSPREQ_ANNOUNCE) {
-        if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
+      if (rtspreq == RTSPREQ_ANNOUNCE)
+      {
+        if (!Curl_checkheaders(data, STRCONST("Content-Type")))
+        {
           result = Curl_dyn_addn(&req_buffer,
                                  STRCONST("Content-Type: "
                                           "application/sdp\r\n"));
-          if(result)
+          if (result)
             goto out;
         }
       }
     }
-    else if(rtspreq == RTSPREQ_GET_PARAMETER) {
+    else if (rtspreq == RTSPREQ_GET_PARAMETER)
+    {
       /* Check for an empty GET_PARAMETER (heartbeat) request */
       data->state.httpreq = HTTPREQ_HEAD;
       data->req.no_body = TRUE;
     }
   }
-  else {
+  else
+  {
     result = Curl_creader_set_null(data);
-    if(result)
+    if (result)
       goto out;
   }
 
   /* Finish the request buffer */
   result = Curl_dyn_addn(&req_buffer, STRCONST("\r\n"));
-  if(result)
+  if (result)
     goto out;
 
   Curl_xfer_setup1(data, FETCH_XFER_SENDRECV, -1, TRUE);
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer, httpversion);
-  if(result) {
+  if (result)
+  {
     failf(data, "Failed sending RTSP request");
     goto out;
   }
@@ -596,11 +629,12 @@ static FETCHcode rtsp_do(struct Curl_easy *data, bool *done)
   /* Increment the CSeq on success */
   data->state.rtsp_next_client_CSeq++;
 
-  if(data->req.writebytecount) {
+  if (data->req.writebytecount)
+  {
     /* if a request-body has been sent off, we make sure this progress is
        noted properly */
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    if(Curl_pgrsUpdate(data))
+    if (Curl_pgrsUpdate(data))
       result = FETCHE_ABORTED_BY_CALLBACK;
   }
 out:
@@ -612,8 +646,8 @@ out:
  * write any BODY bytes missing to the client, ignore the rest.
  */
 static FETCHcode rtp_write_body_junk(struct Curl_easy *data,
-                                    const char *buf,
-                                    size_t blen)
+                                     const char *buf,
+                                     size_t blen)
 {
   struct rtsp_conn *rtspc = &(data->conn->proto.rtspc);
   fetch_off_t body_remain;
@@ -624,8 +658,9 @@ static FETCHcode rtp_write_body_junk(struct Curl_easy *data,
             (data->req.bytecount < data->req.size);
   body_remain = in_body ? (data->req.size - data->req.bytecount) : 0;
   DEBUGASSERT(body_remain >= 0);
-  if(body_remain) {
-    if((fetch_off_t)blen > body_remain)
+  if (body_remain)
+  {
+    if ((fetch_off_t)blen > body_remain)
       blen = (size_t)body_remain;
     return Curl_client_write(data, CLIENTWRITE_BODY, (char *)buf, blen);
   }
@@ -633,31 +668,39 @@ static FETCHcode rtp_write_body_junk(struct Curl_easy *data,
 }
 
 static FETCHcode rtsp_filter_rtp(struct Curl_easy *data,
-                                     const char *buf,
-                                     size_t blen,
-                                     size_t *pconsumed)
+                                 const char *buf,
+                                 size_t blen,
+                                 size_t *pconsumed)
 {
   struct rtsp_conn *rtspc = &(data->conn->proto.rtspc);
   FETCHcode result = FETCHE_OK;
   size_t skip_len = 0;
 
   *pconsumed = 0;
-  while(blen) {
+  while (blen)
+  {
     bool in_body = (data->req.headerline && !rtspc->in_header) &&
                    (data->req.size >= 0) &&
                    (data->req.bytecount < data->req.size);
-    switch(rtspc->state) {
+    switch (rtspc->state)
+    {
 
-    case RTP_PARSE_SKIP: {
+    case RTP_PARSE_SKIP:
+    {
       DEBUGASSERT(Curl_dyn_len(&rtspc->buf) == 0);
-      while(blen && buf[0] != '$') {
-        if(!in_body && buf[0] == 'R' &&
-           data->set.rtspreq != RTSPREQ_RECEIVE) {
-          if(strncmp(buf, "RTSP/", (blen < 5) ? blen : 5) == 0) {
+      while (blen && buf[0] != '$')
+      {
+        if (!in_body && buf[0] == 'R' &&
+            data->set.rtspreq != RTSPREQ_RECEIVE)
+        {
+          if (strncmp(buf, "RTSP/", (blen < 5) ? blen : 5) == 0)
+          {
             /* This could be the next response, no consume and return */
-            if(*pconsumed) {
+            if (*pconsumed)
+            {
               DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "
-                           "skipping %zd bytes of junk", *pconsumed));
+                                 "skipping %zd bytes of junk",
+                           *pconsumed));
             }
             rtspc->state = RTP_PARSE_SKIP;
             rtspc->in_header = TRUE;
@@ -670,17 +713,20 @@ static FETCHcode rtsp_filter_rtp(struct Curl_easy *data,
         --blen;
         ++skip_len;
       }
-      if(blen && buf[0] == '$') {
+      if (blen && buf[0] == '$')
+      {
         /* possible start of an RTP message, buffer */
-        if(skip_len) {
+        if (skip_len)
+        {
           /* end of junk/BODY bytes, flush */
           result = rtp_write_body_junk(data,
                                        (char *)(buf - skip_len), skip_len);
           skip_len = 0;
-          if(result)
+          if (result)
             goto out;
         }
-        if(Curl_dyn_addn(&rtspc->buf, buf, 1)) {
+        if (Curl_dyn_addn(&rtspc->buf, buf, 1))
+        {
           result = FETCHE_OUT_OF_MEMORY;
           goto out;
         }
@@ -692,25 +738,29 @@ static FETCHcode rtsp_filter_rtp(struct Curl_easy *data,
       break;
     }
 
-    case RTP_PARSE_CHANNEL: {
+    case RTP_PARSE_CHANNEL:
+    {
       int idx = ((unsigned char)buf[0]) / 8;
       int off = ((unsigned char)buf[0]) % 8;
       DEBUGASSERT(Curl_dyn_len(&rtspc->buf) == 1);
-      if(!(data->state.rtp_channel_mask[idx] & (1 << off))) {
+      if (!(data->state.rtp_channel_mask[idx] & (1 << off)))
+      {
         /* invalid channel number, junk or BODY data */
         rtspc->state = RTP_PARSE_SKIP;
         DEBUGASSERT(skip_len == 0);
         /* we do not consume this byte, it is BODY data */
         DEBUGF(infof(data, "RTSP: invalid RTP channel %d, skipping", idx));
-        if(*pconsumed == 0) {
+        if (*pconsumed == 0)
+        {
           /* We did not consume the initial '$' in our buffer, but had
            * it from an earlier call. We cannot un-consume it and have
            * to write it directly as BODY data */
           result = rtp_write_body_junk(data, Curl_dyn_ptr(&rtspc->buf), 1);
-          if(result)
+          if (result)
             goto out;
         }
-        else {
+        else
+        {
           /* count the '$' as skip and continue */
           skip_len = 1;
         }
@@ -719,7 +769,8 @@ static FETCHcode rtsp_filter_rtp(struct Curl_easy *data,
       }
       /* a valid channel, so we expect this to be a real RTP message */
       rtspc->rtp_channel = (unsigned char)buf[0];
-      if(Curl_dyn_addn(&rtspc->buf, buf, 1)) {
+      if (Curl_dyn_addn(&rtspc->buf, buf, 1))
+      {
         result = FETCHE_OUT_OF_MEMORY;
         goto out;
       }
@@ -730,18 +781,20 @@ static FETCHcode rtsp_filter_rtp(struct Curl_easy *data,
       break;
     }
 
-    case RTP_PARSE_LEN: {
+    case RTP_PARSE_LEN:
+    {
       size_t rtp_len = Curl_dyn_len(&rtspc->buf);
       const char *rtp_buf;
       DEBUGASSERT(rtp_len >= 2 && rtp_len < 4);
-      if(Curl_dyn_addn(&rtspc->buf, buf, 1)) {
+      if (Curl_dyn_addn(&rtspc->buf, buf, 1))
+      {
         result = FETCHE_OUT_OF_MEMORY;
         goto out;
       }
       *pconsumed += 1;
       ++buf;
       --blen;
-      if(rtp_len == 2)
+      if (rtp_len == 2)
         break;
       rtp_buf = Curl_dyn_ptr(&rtspc->buf);
       rtspc->rtp_len = RTP_PKT_LENGTH(rtp_buf) + 4;
@@ -749,13 +802,16 @@ static FETCHcode rtsp_filter_rtp(struct Curl_easy *data,
       break;
     }
 
-    case RTP_PARSE_DATA: {
+    case RTP_PARSE_DATA:
+    {
       size_t rtp_len = Curl_dyn_len(&rtspc->buf);
       size_t needed;
       DEBUGASSERT(rtp_len < rtspc->rtp_len);
       needed = rtspc->rtp_len - rtp_len;
-      if(needed <= blen) {
-        if(Curl_dyn_addn(&rtspc->buf, buf, needed)) {
+      if (needed <= blen)
+      {
+        if (Curl_dyn_addn(&rtspc->buf, buf, needed))
+        {
           result = FETCHE_OUT_OF_MEMORY;
           goto out;
         }
@@ -769,11 +825,13 @@ static FETCHcode rtsp_filter_rtp(struct Curl_easy *data,
                                   rtspc->rtp_len);
         Curl_dyn_free(&rtspc->buf);
         rtspc->state = RTP_PARSE_SKIP;
-        if(result)
+        if (result)
           goto out;
       }
-      else {
-        if(Curl_dyn_addn(&rtspc->buf, buf, blen)) {
+      else
+      {
+        if (Curl_dyn_addn(&rtspc->buf, buf, blen))
+        {
           result = FETCHE_OUT_OF_MEMORY;
           goto out;
         }
@@ -790,23 +848,24 @@ static FETCHcode rtsp_filter_rtp(struct Curl_easy *data,
     }
   }
 out:
-  if(!result && skip_len)
+  if (!result && skip_len)
     result = rtp_write_body_junk(data, (char *)(buf - skip_len), skip_len);
   return result;
 }
 
 static FETCHcode rtsp_rtp_write_resp(struct Curl_easy *data,
-                                    const char *buf,
-                                    size_t blen,
-                                    bool is_eos)
+                                     const char *buf,
+                                     size_t blen,
+                                     bool is_eos)
 {
   struct rtsp_conn *rtspc = &(data->conn->proto.rtspc);
   FETCHcode result = FETCHE_OK;
   size_t consumed = 0;
 
-  if(!data->req.header)
+  if (!data->req.header)
     rtspc->in_header = FALSE;
-  if(!blen) {
+  if (!blen)
+  {
     goto out;
   }
 
@@ -814,64 +873,69 @@ static FETCHcode rtsp_rtp_write_resp(struct Curl_easy *data,
                blen, rtspc->in_header, is_eos));
 
   /* If header parsing is not ongoing, extract RTP messages */
-  if(!rtspc->in_header) {
+  if (!rtspc->in_header)
+  {
     result = rtsp_filter_rtp(data, buf, blen, &consumed);
-    if(result)
+    if (result)
       goto out;
     buf += consumed;
     blen -= consumed;
     /* either we consumed all or are at the start of header parsing */
-    if(blen && !data->req.header)
+    if (blen && !data->req.header)
       DEBUGF(infof(data, "RTSP: %zu bytes, possibly excess in response body",
                    blen));
   }
 
   /* we want to parse headers, do so */
-  if(data->req.header && blen) {
+  if (data->req.header && blen)
+  {
     rtspc->in_header = TRUE;
     result = Curl_http_write_resp_hds(data, buf, blen, &consumed);
-    if(result)
+    if (result)
       goto out;
 
     buf += consumed;
     blen -= consumed;
 
-    if(!data->req.header)
+    if (!data->req.header)
       rtspc->in_header = FALSE;
 
-    if(!rtspc->in_header) {
+    if (!rtspc->in_header)
+    {
       /* If header parsing is done, extract interleaved RTP messages */
-      if(data->req.size <= -1) {
+      if (data->req.size <= -1)
+      {
         /* Respect section 4.4 of rfc2326: If the Content-Length header is
            absent, a length 0 must be assumed. */
         data->req.size = 0;
         data->req.download_done = TRUE;
       }
       result = rtsp_filter_rtp(data, buf, blen, &consumed);
-      if(result)
+      if (result)
         goto out;
       blen -= consumed;
     }
   }
 
-  if(rtspc->state != RTP_PARSE_SKIP)
+  if (rtspc->state != RTP_PARSE_SKIP)
     data->req.done = FALSE;
   /* we SHOULD have consumed all bytes, unless the response is borked.
    * In which case we write out the left over bytes, letting the client
    * writer deal with it (it will report EXCESS and fail the transfer). */
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d "
-               " rtspc->state=%d, req.size=%" FMT_OFF_T ")",
+                     " rtspc->state=%d, req.size=%" FMT_OFF_T ")",
                blen, rtspc->in_header, data->req.done, rtspc->state,
                data->req.size));
-  if(!result && (is_eos || blen)) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY|
-                               (is_eos ? CLIENTWRITE_EOS : 0),
+  if (!result && (is_eos || blen))
+  {
+    result = Curl_client_write(data, CLIENTWRITE_BODY | (is_eos ? CLIENTWRITE_EOS : 0),
                                (char *)buf, blen);
   }
 
 out:
-  if((data->set.rtspreq == RTSPREQ_RECEIVE) &&
-     (rtspc->state == RTP_PARSE_SKIP)) {
+  if ((data->set.rtspreq == RTSPREQ_RECEIVE) &&
+      (rtspc->state == RTP_PARSE_SKIP))
+  {
     /* In special mode RECEIVE, we just process one chunk of network
      * data, so we stop the transfer here, if we have no incomplete
      * RTP message pending. */
@@ -880,14 +944,14 @@ out:
   return result;
 }
 
-static
-FETCHcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
+static FETCHcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
 {
   size_t wrote;
   fetch_write_callback writeit;
   void *user_ptr;
 
-  if(len == 0) {
+  if (len == 0)
+  {
     failf(data, "Cannot write a 0 size RTP packet.");
     return FETCHE_WRITE_ERROR;
   }
@@ -896,11 +960,13 @@ FETCHcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
      function and any configured FETCHOPT_INTERLEAVEDATA to write out the RTP
      data. Otherwise, use the FETCHOPT_WRITEFUNCTION with the FETCHOPT_WRITEDATA
      pointer to write out the RTP data. */
-  if(data->set.fwrite_rtp) {
+  if (data->set.fwrite_rtp)
+  {
     writeit = data->set.fwrite_rtp;
     user_ptr = data->set.rtp_out;
   }
-  else {
+  else
+  {
     writeit = data->set.fwrite_func;
     user_ptr = data->set.out;
   }
@@ -909,12 +975,14 @@ FETCHcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
   wrote = writeit((char *)ptr, 1, len, user_ptr);
   Curl_set_in_callback(data, FALSE);
 
-  if(FETCH_WRITEFUNC_PAUSE == wrote) {
+  if (FETCH_WRITEFUNC_PAUSE == wrote)
+  {
     failf(data, "Cannot pause RTP");
     return FETCHE_WRITE_ERROR;
   }
 
-  if(wrote != len) {
+  if (wrote != len)
+  {
     failf(data, "Failed writing RTP data");
     return FETCHE_WRITE_ERROR;
   }
@@ -924,33 +992,38 @@ FETCHcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
 
 FETCHcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 {
-  if(checkprefix("CSeq:", header)) {
+  if (checkprefix("CSeq:", header))
+  {
     long CSeq = 0;
     char *endp;
     const char *p = &header[5];
-    while(ISBLANK(*p))
+    while (ISBLANK(*p))
       p++;
     CSeq = strtol(p, &endp, 10);
-    if(p != endp) {
+    if (p != endp)
+    {
       struct RTSP *rtsp = data->req.p.rtsp;
-      rtsp->CSeq_recv = CSeq; /* mark the request */
+      rtsp->CSeq_recv = CSeq;            /* mark the request */
       data->state.rtsp_CSeq_recv = CSeq; /* update the handle */
     }
-    else {
+    else
+    {
       failf(data, "Unable to read the CSeq header: [%s]", header);
       return FETCHE_RTSP_CSEQ_ERROR;
     }
   }
-  else if(checkprefix("Session:", header)) {
+  else if (checkprefix("Session:", header))
+  {
     const char *start, *end;
     size_t idlen;
 
     /* Find the first non-space letter */
     start = header + 8;
-    while(*start && ISBLANK(*start))
+    while (*start && ISBLANK(*start))
       start++;
 
-    if(!*start) {
+    if (!*start)
+    {
       failf(data, "Got a blank Session ID");
       return FETCHE_RTSP_SESSION_ERROR;
     }
@@ -962,42 +1035,45 @@ FETCHcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
      * gstreamer does url-encoded session ID's not covered by the standard.
      */
     end = start;
-    while(*end && *end != ';' && !ISSPACE(*end))
+    while (*end && *end != ';' && !ISSPACE(*end))
       end++;
     idlen = end - start;
 
-    if(data->set.str[STRING_RTSP_SESSION_ID]) {
+    if (data->set.str[STRING_RTSP_SESSION_ID])
+    {
 
       /* If the Session ID is set, then compare */
-      if(strlen(data->set.str[STRING_RTSP_SESSION_ID]) != idlen ||
-         strncmp(start, data->set.str[STRING_RTSP_SESSION_ID], idlen)) {
+      if (strlen(data->set.str[STRING_RTSP_SESSION_ID]) != idlen ||
+          strncmp(start, data->set.str[STRING_RTSP_SESSION_ID], idlen))
+      {
         failf(data, "Got RTSP Session ID Line [%s], but wanted ID [%s]",
               start, data->set.str[STRING_RTSP_SESSION_ID]);
         return FETCHE_RTSP_SESSION_ERROR;
       }
     }
-    else {
+    else
+    {
       /* If the Session ID is not set, and we find it in a response, then set
        * it.
        */
 
       /* Copy the id substring into a new buffer */
       data->set.str[STRING_RTSP_SESSION_ID] = Curl_memdup0(start, idlen);
-      if(!data->set.str[STRING_RTSP_SESSION_ID])
+      if (!data->set.str[STRING_RTSP_SESSION_ID])
         return FETCHE_OUT_OF_MEMORY;
     }
   }
-  else if(checkprefix("Transport:", header)) {
+  else if (checkprefix("Transport:", header))
+  {
     FETCHcode result;
     result = rtsp_parse_transport(data, header + 10);
-    if(result)
+    if (result)
       return result;
   }
   return FETCHE_OK;
 }
 
-static
-FETCHcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
+static FETCHcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
 {
   /* If we receive multiple Transport response-headers, the linterleaved
      channels of each response header is recorded and used together for
@@ -1005,36 +1081,45 @@ FETCHcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
   /* e.g.: ' RTP/AVP/TCP;unicast;interleaved=5-6' */
   const char *start, *end;
   start = transport;
-  while(start && *start) {
-    while(*start && ISBLANK(*start) )
+  while (start && *start)
+  {
+    while (*start && ISBLANK(*start))
       start++;
     end = strchr(start, ';');
-    if(checkprefix("interleaved=", start)) {
+    if (checkprefix("interleaved=", start))
+    {
       long chan1, chan2, chan;
       char *endp;
       const char *p = start + 12;
       chan1 = strtol(p, &endp, 10);
-      if(p != endp && chan1 >= 0 && chan1 <= 255) {
+      if (p != endp && chan1 >= 0 && chan1 <= 255)
+      {
         unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
         chan2 = chan1;
-        if(*endp == '-') {
+        if (*endp == '-')
+        {
           p = endp + 1;
           chan2 = strtol(p, &endp, 10);
-          if(p == endp || chan2 < 0 || chan2 > 255) {
+          if (p == endp || chan2 < 0 || chan2 > 255)
+          {
             infof(data, "Unable to read the interleaved parameter from "
-                  "Transport header: [%s]", transport);
+                        "Transport header: [%s]",
+                  transport);
             chan2 = chan1;
           }
         }
-        for(chan = chan1; chan <= chan2; chan++) {
+        for (chan = chan1; chan <= chan2; chan++)
+        {
           long idx = chan / 8;
           long off = chan % 8;
           rtp_channel_mask[idx] |= (unsigned char)(1 << off);
         }
       }
-      else {
+      else
+      {
         infof(data, "Unable to read the interleaved parameter from "
-              "Transport header: [%s]", transport);
+                    "Transport header: [%s]",
+              transport);
       }
       break;
     }
@@ -1043,6 +1128,5 @@ FETCHcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
   }
   return FETCHE_OK;
 }
-
 
 #endif /* FETCH_DISABLE_RTSP */

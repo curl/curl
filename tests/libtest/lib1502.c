@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -53,7 +53,8 @@ FETCHcode test(char *URL)
   struct fetch_slist *dns_cache_list;
 
   res_global_init(FETCH_GLOBAL_ALL);
-  if(res) {
+  if (res)
+  {
     return res;
   }
 
@@ -63,7 +64,8 @@ FETCHcode test(char *URL)
   start_test_timing();
 
   dns_cache_list = fetch_slist_append(NULL, redirect);
-  if(!dns_cache_list) {
+  if (!dns_cache_list)
+  {
     fprintf(stderr, "fetch_slist_append() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -76,11 +78,13 @@ FETCHcode test(char *URL)
   easy_setopt(easy, FETCHOPT_RESOLVE, dns_cache_list);
 
   dup = fetch_easy_duphandle(easy);
-  if(dup) {
+  if (dup)
+  {
     fetch_easy_cleanup(easy);
     easy = dup;
   }
-  else {
+  else
+  {
     fetch_slist_free_all(dns_cache_list);
     fetch_easy_cleanup(easy);
     fetch_global_cleanup();
@@ -95,7 +99,8 @@ FETCHcode test(char *URL)
 
   abort_on_test_timeout();
 
-  while(still_running) {
+  while (still_running)
+  {
     struct timeval timeout;
     fd_set fdread;
     fd_set fdwrite;

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,7 +42,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 
-#define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
+#define DEFAULT_SHUTDOWN_TIMEOUT_MS (2 * 1000)
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
                          struct fetchtime *nowp);
@@ -69,7 +69,7 @@ bool Curl_shutdown_started(struct Curl_easy *data, int sockindex);
  * The returned socket will be FETCH_SOCKET_BAD in case of failure!
  */
 fetch_socket_t Curl_getconnectinfo(struct Curl_easy *data,
-                                  struct connectdata **connp);
+                                   struct connectdata **connp);
 
 bool Curl_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
                       char *addr, int *port);
@@ -93,18 +93,19 @@ bool Curl_addr2string(struct sockaddr *sa, fetch_socklen_t salen,
 void Curl_conncontrol(struct connectdata *conn,
                       int closeit
 #if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
-                      , const char *reason
+                      ,
+                      const char *reason
 #endif
-  );
+);
 
 #if defined(DEBUGBUILD) && !defined(FETCH_DISABLE_VERBOSE_STRINGS)
-#define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
-#define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
-#define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
+#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
+#define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
+#define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
 #else /* if !DEBUGBUILD || FETCH_DISABLE_VERBOSE_STRINGS */
-#define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM)
-#define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
-#define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
+#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM)
+#define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
+#define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
 /**
@@ -119,16 +120,16 @@ void Curl_conncontrol(struct connectdata *conn,
  * it MAY be installed in the connection filter chain to serve transfers.
  */
 typedef FETCHcode cf_ip_connect_create(struct Curl_cfilter **pcf,
-                                      struct Curl_easy *data,
-                                      struct connectdata *conn,
-                                      const struct Curl_addrinfo *ai,
-                                      int transport);
+                                       struct Curl_easy *data,
+                                       struct connectdata *conn,
+                                       const struct Curl_addrinfo *ai,
+                                       int transport);
 
 FETCHcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
-                                    struct Curl_easy *data,
-                                    const struct Curl_dns_entry *remotehost,
-                                    int transport,
-                                    int ssl_mode);
+                                     struct Curl_easy *data,
+                                     const struct Curl_dns_entry *remotehost,
+                                     int transport,
+                                     int ssl_mode);
 
 /**
  * Setup the cfilters at `sockindex` in connection `conn`.
@@ -136,10 +137,10 @@ FETCHcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
  * in `data` and `conn? to install a suitable filter chain.
  */
 FETCHcode Curl_conn_setup(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         int sockindex,
-                         const struct Curl_dns_entry *remotehost,
-                         int ssl_mode);
+                          struct connectdata *conn,
+                          int sockindex,
+                          const struct Curl_dns_entry *remotehost,
+                          int ssl_mode);
 
 extern struct Curl_cftype Curl_cft_happy_eyeballs;
 extern struct Curl_cftype Curl_cft_setup;

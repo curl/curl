@@ -6,7 +6,7 @@ SPDX-License-Identifier: fetch
 
 # Anatomy of a fetch security advisory
 
-As described in the [Security Process](https://fetch.se/dev/secprocess.html)
+As described in the [Security Process](https://curl.se/dev/secprocess.html)
 document, when a security vulnerability has been reported to the project and
 confirmed, we author an advisory document for the issue. It should ideally
 be written in cooperation with the reporter to make sure all the angles and
@@ -15,7 +15,7 @@ details of the problem are gathered and described correctly and succinctly.
 ## New document
 
 A security advisory for fetch is created in the `docs/` folder in the
-[fetch-www](https://github.com/fetch/fetch-www) repository. It should be named
+[fetch-www](https://github.com/curl/curl-www) repository. It should be named
 `$CVEID.md` where `$CVEID` is the full CVE Id that has been registered for the
 flaw. Like `CVE-2016-0755`. The `.md` extension of course means that the
 document is written using markdown.
@@ -33,11 +33,11 @@ pipe character (`|`).
 
 The eleven fields for each CVE in `vuln.pm` are, in order:
 
- HTML page name, first vulnerable version, last vulnerable version, name of
- the issue, CVE Id, announce date (`YYYYMMDD`), report to the project date
- (`YYYYMMDD`), CWE, awarded reward amount (USD), area (single word), C-issue
- (`-` if not a C issue at all, `OVERFLOW` , `OVERREAD`, `DOUBLE_FREE`,
- `USE_AFTER_FREE`, `NULL_MISTAKE`, `UNINIT`)
+HTML page name, first vulnerable version, last vulnerable version, name of
+the issue, CVE Id, announce date (`YYYYMMDD`), report to the project date
+(`YYYYMMDD`), CWE, awarded reward amount (USD), area (single word), C-issue
+(`-` if not a C issue at all, `OVERFLOW` , `OVERREAD`, `DOUBLE_FREE`,
+`USE_AFTER_FREE`, `NULL_MISTAKE`, `UNINIT`)
 
 ### `Makefile`
 
@@ -78,7 +78,7 @@ the full (official) explanation on the right side of a colon. Like this:
 ### AFFECTED VERSIONS
 
 The third section first lists what versions that are affected, then adds
-clarity by stressing what versions that are *not* affected. A third line adds
+clarity by stressing what versions that are _not_ affected. A third line adds
 information about which specific git commit that introduced the vulnerability.
 
 The `Introduced-in` commit should be a full URL that displays the commit, but
@@ -87,11 +87,11 @@ cut out.
 
 An example using the correct syntax:
 
-~~~
+```
 - Affected versions: fetch 7.16.1 to and including 7.88.1
 - Not affected versions: fetch < 7.16.1 and fetch >= 8.0.0
-- Introduced-in: https://github.com/fetch/fetch/commit/2147284cad
-~~~
+- Introduced-in: https://github.com/curl/curl/commit/2147284cad
+```
 
 ### THE SOLUTION
 
@@ -104,7 +104,7 @@ out.
 
 Example:
 
-`- Fixed-in: https://github.com/fetch/fetch/commit/af369db4d3833272b8ed`
+`- Fixed-in: https://github.com/curl/curl/commit/af369db4d3833272b8ed`
 
 ### RECOMMENDATIONS
 
@@ -129,7 +129,7 @@ you think deserves a mention.
 If you want to mention more than one name, separate the names with comma
 (`,`).
 
-~~~
+```
 - Reported-by: Full Name
 - Patched-by: Full Name
-~~~
+```

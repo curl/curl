@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,7 +39,7 @@ static unsigned int WINAPI run_thread(void *ptr)
   FETCHcode *result = ptr;
 
   *result = fetch_global_init(FETCH_GLOBAL_ALL);
-  if(*result == FETCHE_OK)
+  if (*result == FETCHE_OK)
     fetch_global_cleanup();
 
   return 0;
@@ -57,12 +57,13 @@ FETCHcode test(char *URL)
   unsigned tid_count = NUM_THREADS, i;
   int test_failure = 0;
   fetch_version_info_data *ver;
-  (void) URL;
+  (void)URL;
 
   ver = fetch_version_info(FETCHVERSION_NOW);
-  if((ver->features & FETCH_VERSION_THREADSAFE) == 0) {
+  if ((ver->features & FETCH_VERSION_THREADSAFE) == 0)
+  {
     fprintf(stderr, "%s:%d On Windows but the "
-            "FETCH_VERSION_THREADSAFE feature flag is not set\n",
+                    "FETCH_VERSION_THREADSAFE feature flag is not set\n",
             __FILE__, __LINE__);
     return (FETCHcode)-1;
   }
@@ -75,7 +76,8 @@ FETCHcode test(char *URL)
   (void)win32_load_system_library(TEXT("secur32.dll"));
   (void)win32_load_system_library(TEXT("iphlpapi.dll"));
 
-  for(i = 0; i < tid_count; i++) {
+  for (i = 0; i < tid_count; i++)
+  {
     fetch_win_thread_handle_t th;
     results[i] = FETCH_LAST; /* initialize with invalid value */
 #if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP)
@@ -83,7 +85,8 @@ FETCHcode test(char *URL)
 #else
     th = _beginthreadex(NULL, 0, run_thread, &results[i], 0, NULL);
 #endif
-    if(!th) {
+    if (!th)
+    {
       fprintf(stderr, "%s:%d Couldn't create thread, errno %lu\n",
               __FILE__, __LINE__, GetLastError());
       tid_count = i;
@@ -94,13 +97,16 @@ FETCHcode test(char *URL)
   }
 
 cleanup:
-  for(i = 0; i < tid_count; i++) {
+  for (i = 0; i < tid_count; i++)
+  {
     WaitForSingleObject((HANDLE)ths[i], INFINITE);
     CloseHandle((HANDLE)ths[i]);
-    if(results[i] != FETCHE_OK) {
+    if (results[i] != FETCHE_OK)
+    {
       fprintf(stderr, "%s:%d thread[%u]: fetch_global_init() failed,"
-              "with code %d (%s)\n", __FILE__, __LINE__,
-              i, (int) results[i], fetch_easy_strerror(results[i]));
+                      "with code %d (%s)\n",
+              __FILE__, __LINE__,
+              i, (int)results[i], fetch_easy_strerror(results[i]));
       test_failure = -1;
     }
   }
@@ -117,7 +123,7 @@ static void *run_thread(void *ptr)
   FETCHcode *result = ptr;
 
   *result = fetch_global_init(FETCH_GLOBAL_ALL);
-  if(*result == FETCHE_OK)
+  if (*result == FETCHE_OK)
     fetch_global_cleanup();
 
   return NULL;
@@ -130,21 +136,24 @@ FETCHcode test(char *URL)
   unsigned tid_count = NUM_THREADS, i;
   FETCHcode test_failure = FETCHE_OK;
   fetch_version_info_data *ver;
-  (void) URL;
+  (void)URL;
 
   ver = fetch_version_info(FETCHVERSION_NOW);
-  if((ver->features & FETCH_VERSION_THREADSAFE) == 0) {
+  if ((ver->features & FETCH_VERSION_THREADSAFE) == 0)
+  {
     fprintf(stderr, "%s:%d Have pthread but the "
-            "FETCH_VERSION_THREADSAFE feature flag is not set\n",
+                    "FETCH_VERSION_THREADSAFE feature flag is not set\n",
             __FILE__, __LINE__);
     return (FETCHcode)-1;
   }
 
-  for(i = 0; i < tid_count; i++) {
+  for (i = 0; i < tid_count; i++)
+  {
     int res;
     results[i] = FETCH_LAST; /* initialize with invalid value */
     res = pthread_create(&tids[i], NULL, run_thread, &results[i]);
-    if(res) {
+    if (res)
+    {
       fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
               __FILE__, __LINE__, res);
       tid_count = i;
@@ -154,12 +163,15 @@ FETCHcode test(char *URL)
   }
 
 cleanup:
-  for(i = 0; i < tid_count; i++) {
+  for (i = 0; i < tid_count; i++)
+  {
     pthread_join(tids[i], NULL);
-    if(results[i] != FETCHE_OK) {
+    if (results[i] != FETCHE_OK)
+    {
       fprintf(stderr, "%s:%d thread[%u]: fetch_global_init() failed,"
-              "with code %d (%s)\n", __FILE__, __LINE__,
-              i, (int) results[i], fetch_easy_strerror(results[i]));
+                      "with code %d (%s)\n",
+              __FILE__, __LINE__,
+              i, (int)results[i], fetch_easy_strerror(results[i]));
       test_failure = (FETCHcode)-1;
     }
   }
@@ -174,9 +186,10 @@ FETCHcode test(char *URL)
   (void)URL;
 
   ver = fetch_version_info(FETCHVERSION_NOW);
-  if((ver->features & FETCH_VERSION_THREADSAFE) != 0) {
+  if ((ver->features & FETCH_VERSION_THREADSAFE) != 0)
+  {
     fprintf(stderr, "%s:%d No pthread but the "
-            "FETCH_VERSION_THREADSAFE feature flag is set\n",
+                    "FETCH_VERSION_THREADSAFE feature flag is set\n",
             __FILE__, __LINE__);
     return (FETCHcode)-1;
   }

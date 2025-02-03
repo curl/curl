@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,12 +38,13 @@ struct Curl_dns_entry;
 #include "fetch_threads.h"
 
 /* Data for synchronization between resolver thread and its parent */
-struct thread_sync_data {
+struct thread_sync_data
+{
   fetch_mutex_t *mtx;
   bool done;
   int port;
-  char *hostname;        /* hostname to resolve, Curl_async.hostname
-                            duplicate */
+  char *hostname; /* hostname to resolve, Curl_async.hostname
+                     duplicate */
 #ifndef FETCH_DISABLE_SOCKETPAIR
   struct Curl_easy *data;
   fetch_socket_t sock_pair[2]; /* eventfd/pipes/socket pair */
@@ -56,7 +57,8 @@ struct thread_sync_data {
   struct thread_data *td; /* for thread-self cleanup */
 };
 
-struct thread_data {
+struct thread_data
+{
   fetch_thread_t thread_hnd;
   unsigned int poll_interval;
   timediff_t interval_end;
@@ -69,8 +71,9 @@ struct thread_data {
 
 #elif defined(FETCHRES_ARES) /* FETCHRES_THREADED */
 
-struct thread_data {
-  int num_pending; /* number of outstanding c-ares requests */
+struct thread_data
+{
+  int num_pending;               /* number of outstanding c-ares requests */
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
   int last_status;
@@ -95,7 +98,6 @@ int Curl_ares_getsock(struct Curl_easy *data,
 int Curl_ares_perform(ares_channel channel,
                       timediff_t timeout_ms);
 #endif
-
 
 /*
  * This header defines all functions in the internal asynch resolver interface.
@@ -146,7 +148,7 @@ void Curl_resolver_cleanup(void *resolver);
  * fetch_easy_duphandle() call.
  */
 FETCHcode Curl_resolver_duphandle(struct Curl_easy *easy, void **to,
-                                 void *from);
+                                  void *from);
 
 /*
  * Curl_resolver_cancel().
@@ -192,7 +194,7 @@ int Curl_resolver_getsock(struct Curl_easy *data, fetch_socket_t *sock);
  * Returns normal FETCHcode errors.
  */
 FETCHcode Curl_resolver_is_resolved(struct Curl_easy *data,
-                                   struct Curl_dns_entry **dns);
+                                    struct Curl_dns_entry **dns);
 
 /*
  * Curl_resolver_wait_resolv()
@@ -206,7 +208,7 @@ FETCHcode Curl_resolver_is_resolved(struct Curl_easy *data,
  * FETCHE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  */
 FETCHcode Curl_resolver_wait_resolv(struct Curl_easy *data,
-                                   struct Curl_dns_entry **dnsentry);
+                                    struct Curl_dns_entry **dnsentry);
 
 /*
  * Curl_resolver_getaddrinfo() - when using this resolver
@@ -228,10 +230,10 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 /* convert these functions if an asynch resolver is not used */
 #define Curl_resolver_cancel(x) Curl_nop_stmt
 #define Curl_resolver_kill(x) Curl_nop_stmt
-#define Curl_resolver_is_resolved(x,y) FETCHE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_wait_resolv(x,y) FETCHE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_duphandle(x,y,z) FETCHE_OK
-#define Curl_resolver_init(x,y) FETCHE_OK
+#define Curl_resolver_is_resolved(x, y) FETCHE_COULDNT_RESOLVE_HOST
+#define Curl_resolver_wait_resolv(x, y) FETCHE_COULDNT_RESOLVE_HOST
+#define Curl_resolver_duphandle(x, y, z) FETCHE_OK
+#define Curl_resolver_init(x, y) FETCHE_OK
 #define Curl_resolver_global_init() FETCHE_OK
 #define Curl_resolver_global_cleanup() Curl_nop_stmt
 #define Curl_resolver_cleanup(x) Curl_nop_stmt
@@ -242,7 +244,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 #else
 #define Curl_resolver_asynch() 0
 #endif
-
 
 /********** end of generic resolver interface functions *****************/
 #endif /* HEADER_FETCH_ASYN_H */

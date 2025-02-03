@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -50,35 +50,35 @@ extern FILE *tool_stderr;
  */
 
 #ifdef macintosh
-#  define main(x,y) fetch_main(x,y)
+#define main(x, y) fetch_main(x, y)
 #endif
 
 #ifndef FETCH_OS
-#  define FETCH_OS "unknown"
+#define FETCH_OS "unknown"
 #endif
 
 #ifndef UNPRINTABLE_CHAR
-   /* define what to use for unprintable characters */
-#  define UNPRINTABLE_CHAR '.'
+/* define what to use for unprintable characters */
+#define UNPRINTABLE_CHAR '.'
 #endif
 
 #ifndef HAVE_STRDUP
-#  include "tool_strdup.h"
+#include "tool_strdup.h"
 #endif
 
 #if defined(_WIN32)
-#  define FETCH_STRICMP(p1, p2)  _stricmp(p1, p2)
+#define FETCH_STRICMP(p1, p2) _stricmp(p1, p2)
 #elif defined(HAVE_STRCASECMP)
-#  ifdef HAVE_STRINGS_H
-#    include <strings.h>
-#  endif
-#  define FETCH_STRICMP(p1, p2)  strcasecmp(p1, p2)
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#define FETCH_STRICMP(p1, p2) strcasecmp(p1, p2)
 #elif defined(HAVE_STRCMPI)
-#  define FETCH_STRICMP(p1, p2)  strcmpi(p1, p2)
+#define FETCH_STRICMP(p1, p2) strcmpi(p1, p2)
 #elif defined(HAVE_STRICMP)
-#  define FETCH_STRICMP(p1, p2)  stricmp(p1, p2)
+#define FETCH_STRICMP(p1, p2) stricmp(p1, p2)
 #else
-#  define FETCH_STRICMP(p1, p2)  strcmp(p1, p2)
+#define FETCH_STRICMP(p1, p2) strcmp(p1, p2)
 #endif
 
 #if defined(_WIN32)
@@ -93,13 +93,12 @@ extern bool tool_term_has_bold;
 
 int tool_ftruncate64(int fd, fetch_off_t where);
 
-#undef  ftruncate
-#define ftruncate(fd,where) tool_ftruncate64(fd,where)
+#undef ftruncate
+#define ftruncate(fd, where) tool_ftruncate64(fd, where)
 
 #define HAVE_FTRUNCATE 1
 #define USE_TOOL_FTRUNCATE 1
 
 #endif /* _WIN32 && ! HAVE_FTRUNCATE */
-
 
 #endif /* HEADER_FETCH_TOOL_SETUP_H */

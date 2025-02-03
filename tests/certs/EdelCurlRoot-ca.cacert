@@ -47,10 +47,10 @@ Certificate:
             X509v3 Authority Key Identifier: 
                 87:CB:B1:33:2E:C1:67:7E:71:E3:E5:2B:4C:4D:A4:B3:6E:D2:5B:A9
             Authority Information Access: 
-                CA Issuers - URI:http://test.fetch.se/ca/EdelCurlRoot.cer
+                CA Issuers - URI:http://test.curl.se/ca/EdelCurlRoot.cer
             X509v3 CRL Distribution Points: 
                 Full Name:
-                  URI:http://test.fetch.se/ca/EdelCurlRoot.crl
+                  URI:http://test.curl.se/ca/EdelCurlRoot.crl
     Signature Algorithm: sha256WithRSAEncryption
     Signature Value:
         86:19:bd:3d:12:4f:6b:8c:8e:1b:72:db:8f:9b:67:68:96:f8:

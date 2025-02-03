@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,19 +38,20 @@ FETCHcode test(char *URL)
   fetch_global_init(FETCH_GLOBAL_ALL);
 
   cm = fetch_multi_init();
-  if(!cm) {
+  if (!cm)
+  {
     fetch_global_cleanup();
     return (FETCHcode)1;
   }
   sh = fetch_share_init();
-  if(!sh)
+  if (!sh)
     goto cleanup;
 
   fetch_share_setopt(sh, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_COOKIE);
   fetch_share_setopt(sh, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_COOKIE);
 
   ch = fetch_easy_init();
-  if(!ch)
+  if (!ch)
     goto cleanup;
 
   fetch_easy_setopt(ch, FETCHOPT_SHARE, sh);
@@ -61,7 +62,8 @@ FETCHcode test(char *URL)
   fetch_multi_add_handle(cm, ch);
 
   unfinished = 1;
-  while(unfinished) {
+  while (unfinished)
+  {
     int MAX = 0;
     long max_tout;
     fd_set R, W, E;
@@ -75,10 +77,12 @@ FETCHcode test(char *URL)
     fetch_multi_fdset(cm, &R, &W, &E, &MAX);
     fetch_multi_timeout(cm, &max_tout);
 
-    if(max_tout > 0) {
+    if (max_tout > 0)
+    {
       fetchx_mstotv(&timeout, max_tout);
     }
-    else {
+    else
+    {
       timeout.tv_sec = 0;
       timeout.tv_usec = 1000;
     }

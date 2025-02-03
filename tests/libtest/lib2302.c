@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,9 +26,10 @@
 
 #ifndef FETCH_DISABLE_WEBSOCKETS
 
-struct ws_data {
+struct ws_data
+{
   FETCH *easy;
-  char buf[1024*1024];
+  char buf[1024 * 1024];
   size_t blen;
   size_t nwrites;
   int has_meta;
@@ -39,14 +40,14 @@ static void flush_data(struct ws_data *wd)
 {
   size_t i;
 
-  if(!wd->nwrites)
+  if (!wd->nwrites)
     return;
 
-  for(i = 0; i < wd->blen; ++i)
+  for (i = 0; i < wd->blen; ++i)
     printf("%02x ", (unsigned char)wd->buf[i]);
 
   printf("\n");
-  if(wd->has_meta)
+  if (wd->has_meta)
     printf("RECFLAGS: %x\n", wd->meta_flags);
   else
     fprintf(stderr, "RECFLAGS: NULL\n");
@@ -57,16 +58,18 @@ static void flush_data(struct ws_data *wd)
 static size_t add_data(struct ws_data *wd, const char *buf, size_t blen,
                        const struct fetch_ws_frame *meta)
 {
-  if((wd->nwrites == 0) ||
-     (!!meta != !!wd->has_meta) ||
-     (meta && meta->flags != wd->meta_flags)) {
-    if(wd->nwrites > 0)
+  if ((wd->nwrites == 0) ||
+      (!!meta != !!wd->has_meta) ||
+      (meta && meta->flags != wd->meta_flags))
+  {
+    if (wd->nwrites > 0)
       flush_data(wd);
     wd->has_meta = (meta != NULL);
     wd->meta_flags = meta ? meta->flags : 0;
   }
 
-  if(wd->blen + blen > sizeof(wd->buf)) {
+  if (wd->blen + blen > sizeof(wd->buf))
+  {
     return 0;
   }
   memcpy(wd->buf + wd->blen, buf, blen);
@@ -74,7 +77,6 @@ static size_t add_data(struct ws_data *wd, const char *buf, size_t blen,
   wd->nwrites++;
   return blen;
 }
-
 
 static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
 {
@@ -86,7 +88,7 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
   meta = fetch_ws_meta(ws_data->easy);
   incoming = add_data(ws_data, buffer, incoming, meta);
 
-  if(nitems != incoming)
+  if (nitems != incoming)
     fprintf(stderr, "returns error from callback\n");
   return nitems;
 }
@@ -97,11 +99,11 @@ FETCHcode test(char *URL)
   FETCHcode res = FETCHE_OK;
   struct ws_data ws_data;
 
-
   global_init(FETCH_GLOBAL_ALL);
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     memset(&ws_data, 0, sizeof(ws_data));
     ws_data.easy = fetch;
 

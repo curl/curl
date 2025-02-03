@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -99,10 +99,10 @@ int _CRT_glob = 0;
 static int main_checkfds(void)
 {
   int fd[2];
-  while((fcntl(STDIN_FILENO, F_GETFD) == -1) ||
-        (fcntl(STDOUT_FILENO, F_GETFD) == -1) ||
-        (fcntl(STDERR_FILENO, F_GETFD) == -1))
-    if(pipe(fd))
+  while ((fcntl(STDIN_FILENO, F_GETFD) == -1) ||
+         (fcntl(STDOUT_FILENO, F_GETFD) == -1) ||
+         (fcntl(STDERR_FILENO, F_GETFD) == -1))
+    if (pipe(fd))
       return 1;
   return 0;
 }
@@ -116,11 +116,12 @@ static void memory_tracking_init(void)
   char *env;
   /* if FETCH_MEMDEBUG is set, this starts memory tracking message logging */
   env = fetch_getenv("FETCH_MEMDEBUG");
-  if(env) {
+  if (env)
+  {
     /* use the value as filename */
     char fname[FETCH_MT_LOGFNAME_BUFSIZE];
-    if(strlen(env) >= FETCH_MT_LOGFNAME_BUFSIZE)
-      env[FETCH_MT_LOGFNAME_BUFSIZE-1] = '\0';
+    if (strlen(env) >= FETCH_MT_LOGFNAME_BUFSIZE)
+      env[FETCH_MT_LOGFNAME_BUFSIZE - 1] = '\0';
     strcpy(fname, env);
     fetch_free(env);
     fetch_dbg_memdebug(fname);
@@ -130,16 +131,17 @@ static void memory_tracking_init(void)
   }
   /* if FETCH_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = fetch_getenv("FETCH_MEMLIMIT");
-  if(env) {
+  if (env)
+  {
     char *endptr;
     long num = strtol(env, &endptr, 10);
-    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
+    if ((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
       fetch_dbg_memlimit(num);
     fetch_free(env);
   }
 }
 #else
-#  define memory_tracking_init() Curl_nop_stmt
+#define memory_tracking_init() Curl_nop_stmt
 #endif
 
 /*
@@ -157,35 +159,41 @@ static FETCHcode main_init(struct GlobalConfig *config)
 #endif
 
   /* Initialise the global config */
-  config->showerror = FALSE;          /* show errors when silent */
-  config->styled_output = TRUE;       /* enable detection */
+  config->showerror = FALSE;    /* show errors when silent */
+  config->styled_output = TRUE; /* enable detection */
   config->parallel_max = PARALLEL_DEFAULT;
 
   /* Allocate the initial operate config */
   config->first = config->last = malloc(sizeof(struct OperationConfig));
-  if(config->first) {
+  if (config->first)
+  {
     /* Perform the libfetch initialization */
     result = fetch_global_init(FETCH_GLOBAL_DEFAULT);
-    if(!result) {
+    if (!result)
+    {
       /* Get information about libfetch */
       result = get_libfetch_info();
 
-      if(!result) {
+      if (!result)
+      {
         /* Initialise the config */
         config_init(config->first);
         config->first->global = config;
       }
-      else {
+      else
+      {
         errorf(config, "error retrieving fetch library information");
         free(config->first);
       }
     }
-    else {
+    else
+    {
       errorf(config, "error initializing fetch library");
       free(config->first);
     }
   }
-  else {
+  else
+  {
     errorf(config, "error initializing fetch");
     result = FETCHE_FAILED_INIT;
   }
@@ -197,7 +205,7 @@ static void free_globalconfig(struct GlobalConfig *config)
 {
   Curl_safefree(config->trace_dump);
 
-  if(config->trace_fopened && config->trace_stream)
+  if (config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
   config->trace_stream = NULL;
 
@@ -245,22 +253,25 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
   /* Undocumented diagnostic option to list the full paths of all loaded
      modules. This is purposely pre-init. */
-  if(argc == 2 && !_tcscmp(argv[1], _T("--dump-module-paths"))) {
+  if (argc == 2 && !_tcscmp(argv[1], _T("--dump-module-paths")))
+  {
     struct fetch_slist *item, *head = GetLoadedModulePaths();
-    for(item = head; item; item = item->next)
+    for (item = head; item; item = item->next)
       printf("%s\n", item->data);
     fetch_slist_free_all(head);
     return head ? 0 : 1;
   }
   /* win32_init must be called before other init routines. */
   result = win32_init();
-  if(result) {
+  if (result)
+  {
     errorf(&global, "(%d) Windows-specific init failed", result);
     return (int)result;
   }
 #endif
 
-  if(main_checkfds()) {
+  if (main_checkfds())
+  {
     errorf(&global, "out of file descriptors");
     return FETCHE_FAILED_INIT;
   }
@@ -275,7 +286,8 @@ int main(int argc, char *argv[])
   /* Initialize the fetch library - do not call any libfetch functions before
      this point */
   result = main_init(&global);
-  if(!result) {
+  if (!result)
+  {
     /* Start our fetch operation */
     result = operate(&global, argc, argv);
 

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,10 +27,11 @@
 #include "tool_getparam.h"
 #include "dynbuf.h"
 
-struct tool_var {
+struct tool_var
+{
   struct tool_var *next;
   const char *content;
-  size_t clen; /* content length */
+  size_t clen;  /* content length */
   char name[1]; /* allocated as part of the struct */
 };
 

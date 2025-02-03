@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,6 +36,6 @@ struct fetch_slist *Curl_slist_duplicate(struct fetch_slist *inlist);
  * it to the list.
  */
 struct fetch_slist *Curl_slist_append_nodup(struct fetch_slist *list,
-                                           char *data);
+                                            char *data);
 
 #endif /* HEADER_FETCH_SLIST_H */

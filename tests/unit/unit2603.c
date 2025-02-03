@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,7 +38,8 @@ static void unit_stop(void)
 }
 
 #ifndef FETCH_DISABLE_HTTP
-struct tcase {
+struct tcase
+{
   const char **input;
   const char *default_scheme;
   const char *method;
@@ -51,17 +52,21 @@ struct tcase {
 
 static void check_eq(const char *s, const char *exp_s, const char *name)
 {
-  if(s && exp_s) {
-    if(strcmp(s, exp_s)) {
+  if (s && exp_s)
+  {
+    if (strcmp(s, exp_s))
+    {
       fprintf(stderr, "expected %s: '%s' but got '%s'\n", name, exp_s, s);
       fail("unexpected req component");
     }
   }
-  else if(!s && exp_s) {
+  else if (!s && exp_s)
+  {
     fprintf(stderr, "expected %s: '%s' but got NULL\n", name, exp_s);
     fail("unexpected req component");
   }
-  else if(s && !exp_s) {
+  else if (s && !exp_s)
+  {
     fprintf(stderr, "expected %s: NULL but got '%s'\n", name, s);
     fail("unexpected req component");
   }
@@ -77,19 +82,23 @@ static void parse_success(struct tcase *t)
 
   Curl_h1_req_parse_init(&p, 1024);
   in_len = in_consumed = 0;
-  for(i = 0; t->input[i]; ++i) {
+  for (i = 0; t->input[i]; ++i)
+  {
     buf = t->input[i];
     buflen = strlen(buf);
     in_len += buflen;
     nread = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
                                    0, &err);
-    if(nread < 0) {
+    if (nread < 0)
+    {
       fprintf(stderr, "got err %d parsing: '%s'\n", err, buf);
       fail("error consuming");
     }
     in_consumed += (size_t)nread;
-    if((size_t)nread != buflen) {
-      if(!p.done) {
+    if ((size_t)nread != buflen)
+    {
+      if (!p.done)
+      {
         fprintf(stderr, "only %zd/%zu consumed for: '%s'\n",
                 nread, buflen, buf);
         fail("not all consumed");
@@ -99,19 +108,22 @@ static void parse_success(struct tcase *t)
 
   fail_if(!p.done, "end not detected");
   fail_if(!p.req, "not request created");
-  if(t->input_remain != (in_len - in_consumed)) {
+  if (t->input_remain != (in_len - in_consumed))
+  {
     fprintf(stderr, "expected %zu input bytes to remain, but got %zu\n",
             t->input_remain, in_len - in_consumed);
     fail("unexpected input consumption");
   }
-  if(p.req) {
+  if (p.req)
+  {
     check_eq(p.req->method, t->method, "method");
     check_eq(p.req->scheme, t->scheme, "scheme");
     check_eq(p.req->authority, t->authority, "authority");
     check_eq(p.req->path, t->path, "path");
-    if(Curl_dynhds_count(&p.req->headers) != t->header_count) {
+    if (Curl_dynhds_count(&p.req->headers) != t->header_count)
+    {
       fprintf(stderr, "expected %zu headers but got %zu\n", t->header_count,
-             Curl_dynhds_count(&p.req->headers));
+              Curl_dynhds_count(&p.req->headers));
       fail("unexpected req header count");
     }
   }
@@ -120,75 +132,68 @@ static void parse_success(struct tcase *t)
 }
 
 static const char *T1_INPUT[] = {
-  "GET /path HTTP/1.1\r\nHost: test.fetch.se\r\n\r\n",
-  NULL,
+    "GET /path HTTP/1.1\r\nHost: test.curl.se\r\n\r\n",
+    NULL,
 };
 static struct tcase TEST1a = {
-  T1_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 0
-};
+    T1_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 0};
 static struct tcase TEST1b = {
-  T1_INPUT, "https", "GET", "https", NULL, "/path", 1, 0
-};
+    T1_INPUT, "https", "GET", "https", NULL, "/path", 1, 0};
 
 static const char *T2_INPUT[] = {
-  "GET /path HTT",
-  "P/1.1\r\nHost: te",
-  "st.fetch.se\r\n\r",
-  "\n12345678",
-  NULL,
+    "GET /path HTT",
+    "P/1.1\r\nHost: te",
+    "st.curl.se\r\n\r",
+    "\n12345678",
+    NULL,
 };
 static struct tcase TEST2 = {
-  T2_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 8
-};
+    T2_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 8};
 
 static const char *T3_INPUT[] = {
-  "GET ftp://ftp.fetch.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
-  "\nUser-Agent: xxx\r\n\r\n",
-  NULL,
+    "GET ftp://ftp.curl.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
+    "\nUser-Agent: xxx\r\n\r\n",
+    NULL,
 };
 static struct tcase TEST3a = {
-  T3_INPUT, NULL, "GET", "ftp", "ftp.fetch.se", "/xxx?a=2", 2, 0
-};
+    T3_INPUT, NULL, "GET", "ftp", "ftp.curl.se", "/xxx?a=2", 2, 0};
 
 static const char *T4_INPUT[] = {
-  "CONNECT ftp.fetch.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
-  "User-Agent: xxx\r\n",
-  "nothing:  \r\n\r\n\n\n",
-  NULL,
+    "CONNECT ftp.curl.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
+    "User-Agent: xxx\r\n",
+    "nothing:  \r\n\r\n\n\n",
+    NULL,
 };
 static struct tcase TEST4a = {
-  T4_INPUT, NULL, "CONNECT", NULL, "ftp.fetch.se:123", NULL, 3, 2
-};
+    T4_INPUT, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2};
 
 static const char *T5_INPUT[] = {
-  "OPTIONS * HTTP/1.1\r\nContent-Length: 0\r\nBlabla: xxx.yyy\r",
-  "\n\tzzzzzz\r\n\r\n",
-  "123",
-  NULL,
+    "OPTIONS * HTTP/1.1\r\nContent-Length: 0\r\nBlabla: xxx.yyy\r",
+    "\n\tzzzzzz\r\n\r\n",
+    "123",
+    NULL,
 };
 static struct tcase TEST5a = {
-  T5_INPUT, NULL, "OPTIONS", NULL, NULL, "*", 2, 3
-};
+    T5_INPUT, NULL, "OPTIONS", NULL, NULL, "*", 2, 3};
 
 static const char *T6_INPUT[] = {
-  "PUT /path HTTP/1.1\nHost: test.fetch.se\n\n123",
-  NULL,
+    "PUT /path HTTP/1.1\nHost: test.curl.se\n\n123",
+    NULL,
 };
 static struct tcase TEST6a = {
-  T6_INPUT, NULL, "PUT", NULL, NULL, "/path", 1, 3
-};
+    T6_INPUT, NULL, "PUT", NULL, NULL, "/path", 1, 3};
 #endif
 
 UNITTEST_START
 
 #ifndef FETCH_DISABLE_HTTP
-  parse_success(&TEST1a);
-  parse_success(&TEST1b);
-  parse_success(&TEST2);
-  parse_success(&TEST3a);
-  parse_success(&TEST4a);
-  parse_success(&TEST5a);
-  parse_success(&TEST6a);
+parse_success(&TEST1a);
+parse_success(&TEST1b);
+parse_success(&TEST2);
+parse_success(&TEST3a);
+parse_success(&TEST4a);
+parse_success(&TEST5a);
+parse_success(&TEST6a);
 #endif
 
 UNITTEST_STOP

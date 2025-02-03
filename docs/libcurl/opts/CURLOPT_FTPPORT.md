@@ -18,11 +18,11 @@ FETCHOPT_FTPPORT - make FTP transfer active
 
 # SYNOPSIS
 
-~~~c
+```c
 #include <fetch/fetch.h>
 
 FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_FTPPORT, char *spec);
-~~~
+```
 
 # DESCRIPTION
 
@@ -48,7 +48,7 @@ Examples with specified ports:
 
     eth0:0
     192.168.1.2:32000-33000
-    fetch.se:32123
+    curl.se:32123
     [::1]:1234-4567
 
 We strongly advise against specifying the address with a name, as it causes
@@ -74,7 +74,7 @@ NULL
 
 # EXAMPLE
 
-~~~c
+```c
 int main(void)
 {
   FETCH *fetch = fetch_easy_init();
@@ -87,7 +87,7 @@ int main(void)
     fetch_easy_cleanup(fetch);
   }
 }
-~~~
+```
 
 # %AVAILABILITY%
 

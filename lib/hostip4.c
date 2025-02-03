@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -61,7 +61,7 @@
 bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 {
   (void)data;
-  if(conn->ip_version == FETCH_IPRESOLVE_V6)
+  if (conn->ip_version == FETCH_IPRESOLVE_V6)
     /* An IPv6 address was requested and we cannot get/use one */
     return FALSE;
 
@@ -100,7 +100,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
   *waitp = 0; /* synchronous response only */
 
   ai = Curl_ipv4_resolve_r(hostname, port);
-  if(!ai)
+  if (!ai)
     infof(data, "Curl_ipv4_resolve_r failed for %s", hostname);
 
   return ai;
@@ -109,7 +109,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 #endif /* FETCHRES_IPV4 */
 
 #if defined(FETCHRES_IPV4) && \
-   !defined(FETCHRES_ARES) && !defined(FETCHRES_AMIGA)
+    !defined(FETCHRES_ARES) && !defined(FETCHRES_AMIGA)
 
 /*
  * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
@@ -122,7 +122,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                                           int port)
 {
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE)) && \
-   defined(HAVE_GETHOSTBYNAME_R_3)
+    defined(HAVE_GETHOSTBYNAME_R_3)
   int res;
 #endif
   struct Curl_addrinfo *ai = NULL;
@@ -139,7 +139,8 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = PF_INET;
   hints.ai_socktype = SOCK_STREAM;
-  if(port) {
+  if (port)
+  {
     msnprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr = sbuf;
   }
@@ -155,7 +156,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   int h_errnop;
 
   buf = calloc(1, FETCH_HOSTENT_SIZE);
-  if(!buf)
+  if (!buf)
     return NULL; /* major failure */
   /*
    * The clearing of the buffer is a workaround for a gethostbyname_r bug in
@@ -177,7 +178,8 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * used properly for threads.
    */
 
-  if(h) {
+  if (h)
+  {
     ;
   }
   else
@@ -185,11 +187,11 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   /* Linux */
 
   (void)gethostbyname_r(hostname,
-                      (struct hostent *)buf,
-                      (char *)buf + sizeof(struct hostent),
-                      FETCH_HOSTENT_SIZE - sizeof(struct hostent),
-                      &h, /* DIFFERENCE */
-                      &h_errnop);
+                        (struct hostent *)buf,
+                        (char *)buf + sizeof(struct hostent),
+                        FETCH_HOSTENT_SIZE - sizeof(struct hostent),
+                        &h, /* DIFFERENCE */
+                        &h_errnop);
   /* Redhat 8, using glibc 2.2.93 changed the behavior. Now all of a
    * sudden this function returns EAGAIN if the given buffer size is too
    * small. Previous versions are known to return ERANGE for the same
@@ -221,7 +223,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * thread-safe variable.
    */
 
-  if(!h) /* failure */
+  if (!h) /* failure */
 #elif defined(HAVE_GETHOSTBYNAME_R_3)
   /* AIX, Digital UNIX/Tru64, HP-UX 10, more? */
 
@@ -243,8 +245,9 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * thread-safe", but at least the gethostbyname() function is.
    */
 
-  if(FETCH_HOSTENT_SIZE >=
-     (sizeof(struct hostent) + sizeof(struct hostent_data))) {
+  if (FETCH_HOSTENT_SIZE >=
+      (sizeof(struct hostent) + sizeof(struct hostent_data)))
+  {
 
     /* August 22nd, 2000: Albert Chin-A-Young brought an updated version
      * that should work! September 20: Richard Prescott worked on the buffer
@@ -260,7 +263,8 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   else
     res = -1; /* failure, too smallish buffer size */
 
-  if(!res) { /* success */
+  if (!res)
+  { /* success */
 
     h = buf; /* result expected in h */
 
@@ -279,27 +283,28 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     h = NULL; /* set return code to NULL */
     free(buf);
   }
-#else /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
-          HAVE_GETHOSTBYNAME_R */
+#else  /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) || \
+           HAVE_GETHOSTBYNAME_R */
   /*
    * Here is code for platforms that do not have a thread safe
    * getaddrinfo() nor gethostbyname_r() function or for which
    * gethostbyname() is the preferred one.
    */
   h = gethostbyname((void *)hostname);
-#endif /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
+#endif /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) || \
            HAVE_GETHOSTBYNAME_R */
 
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
-  if(h) {
+  if (h)
+  {
     ai = Curl_he2ai(h, port);
 
-    if(buf) /* used a *_r() function */
+    if (buf) /* used a *_r() function */
       free(buf);
   }
 #endif
 
   return ai;
 }
-#endif /* defined(FETCHRES_IPV4) && !defined(FETCHRES_ARES) &&
+#endif /* defined(FETCHRES_IPV4) && !defined(FETCHRES_ARES) && \
                                    !defined(FETCHRES_AMIGA) */

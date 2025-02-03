@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,14 +26,14 @@
 
 FETCHcode Curl_rand_bytes(struct Curl_easy *data,
 #ifdef DEBUGBUILD
-                         bool allow_env_override,
+                          bool allow_env_override,
 #endif
-                         unsigned char *rnd, size_t num);
+                          unsigned char *rnd, size_t num);
 
 #ifdef DEBUGBUILD
-#define Curl_rand(a,b,c)   Curl_rand_bytes((a), TRUE, (b), (c))
+#define Curl_rand(a, b, c) Curl_rand_bytes((a), TRUE, (b), (c))
 #else
-#define Curl_rand(a,b,c)   Curl_rand_bytes((a), (b), (c))
+#define Curl_rand(a, b, c) Curl_rand_bytes((a), (b), (c))
 #endif
 
 /*
@@ -42,14 +42,14 @@ FETCHcode Curl_rand_bytes(struct Curl_easy *data,
  * size.
  */
 FETCHcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
-                       size_t num);
+                        size_t num);
 
 /*
  * Curl_rand_alnum() fills the 'rnd' buffer with a given 'num' size with random
  * alphanumerical chars PLUS a null-terminating byte.
  */
 FETCHcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
-                         size_t num);
+                          size_t num);
 
 #ifdef _WIN32
 /* Random generator shared between the Schannel vtls and Curl_rand*()

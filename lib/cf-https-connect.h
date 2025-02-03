@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,10 +36,10 @@ struct Curl_dns_entry;
 extern struct Curl_cftype Curl_cft_http_connect;
 
 FETCHcode Curl_cf_http_connect_add(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int sockindex,
-                                  const struct Curl_dns_entry *remotehost,
-                                  bool try_h3, bool try_h21);
+                                   struct connectdata *conn,
+                                   int sockindex,
+                                   const struct Curl_dns_entry *remotehost,
+                                   bool try_h3, bool try_h21);
 
 FETCHcode
 Curl_cf_http_connect_insert_after(struct Curl_cfilter *cf_at,
@@ -47,12 +47,10 @@ Curl_cf_http_connect_insert_after(struct Curl_cfilter *cf_at,
                                   const struct Curl_dns_entry *remotehost,
                                   bool try_h3, bool try_h21);
 
-
 FETCHcode Curl_cf_https_setup(struct Curl_easy *data,
-                             struct connectdata *conn,
-                             int sockindex,
-                             const struct Curl_dns_entry *remotehost);
-
+                              struct connectdata *conn,
+                              int sockindex,
+                              const struct Curl_dns_entry *remotehost);
 
 #endif /* !defined(FETCH_DISABLE_HTTP) */
 #endif /* HEADER_FETCH_CF_HTTP_H */

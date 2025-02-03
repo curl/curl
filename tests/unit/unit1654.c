@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,13 +47,15 @@ UNITTEST_START
   struct altsvcinfo *asi = Curl_altsvc_init();
   abort_if(!asi, "Curl_altsvc_i");
   result = Curl_altsvc_load(asi, arg);
-  if(result) {
+  if (result)
+  {
     fail_if(result, "Curl_altsvc_load");
     goto fail;
   }
   fetch_global_init(FETCH_GLOBAL_ALL);
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fail_if(!fetch, "fetch_easy_init");
     goto fail;
   }
@@ -91,15 +93,15 @@ UNITTEST_START
   fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 
   result =
-    Curl_altsvc_parse(fetch, asi,
-                      "h2=\":443\", h3=\":443\"; ma = 120; persist = 1\r\n",
-                      ALPN_h1, "fetch.se", 80);
+      Curl_altsvc_parse(fetch, asi,
+                        "h2=\":443\", h3=\":443\"; ma = 120; persist = 1\r\n",
+                        ALPN_h1, "curl.se", 80);
   fail_if(result, "Curl_altsvc_parse(5) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 12, "wrong number of entries");
 
   /* clear that one again and decrease the counter */
   result = Curl_altsvc_parse(fetch, asi, "clear;\r\n",
-                             ALPN_h1, "fetch.se", 80);
+                             ALPN_h1, "curl.se", 80);
   fail_if(result, "Curl_altsvc_parse(6) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 

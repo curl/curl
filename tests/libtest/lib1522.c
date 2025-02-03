@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "test.h"
 
-/* test case and code based on https://github.com/fetch/fetch/issues/2847 */
+/* test case and code based on https://github.com/curl/curl/issues/2847 */
 
 #include "testtrace.h"
 #include "testutil.h"
@@ -37,8 +37,8 @@ static int sockopt_callback(void *clientp, fetch_socket_t fetchfd,
 {
 #if defined(SOL_SOCKET) && defined(SO_SNDBUF)
   int sndbufsize = 4 * 1024; /* 4KB send buffer */
-  (void) clientp;
-  (void) purpose;
+  (void)clientp;
+  (void)purpose;
   setsockopt(fetchfd, SOL_SOCKET, SO_SNDBUF,
              (char *)&sndbufsize, sizeof(sndbufsize));
 #else
@@ -75,21 +75,25 @@ FETCHcode test(char *URL)
 
   code = fetch_easy_perform(fetch);
 
-  if(code == FETCHE_OK) {
+  if (code == FETCHE_OK)
+  {
     fetch_off_t uploadSize;
     fetch_easy_getinfo(fetch, FETCHINFO_SIZE_UPLOAD_T, &uploadSize);
 
     printf("uploadSize = %ld\n", (long)uploadSize);
 
-    if((size_t) uploadSize == sizeof(g_Data)) {
+    if ((size_t)uploadSize == sizeof(g_Data))
+    {
       printf("!!!!!!!!!! PASS\n");
     }
-    else {
+    else
+    {
       printf("sent %d, libfetch says %d\n",
              (int)sizeof(g_Data), (int)uploadSize);
     }
   }
-  else {
+  else
+  {
     printf("fetch_easy_perform() failed. e = %d\n", code);
   }
 test_cleanup:

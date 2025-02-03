@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,17 +38,17 @@
 #include "memdebug.h"
 
 /* We use our own typedef here since some headers might lack these */
-typedef PSecurityFunctionTable (APIENTRY *INITSECURITYINTERFACE_FN)(VOID);
+typedef PSecurityFunctionTable(APIENTRY *INITSECURITYINTERFACE_FN)(VOID);
 
 /* See definition of SECURITY_ENTRYPOINT in sspi.h */
 #ifdef UNICODE
-#  ifdef _WIN32_WCE
-#    define SECURITYENTRYPOINT L"InitSecurityInterfaceW"
-#  else
-#    define SECURITYENTRYPOINT "InitSecurityInterfaceW"
-#  endif
+#ifdef _WIN32_WCE
+#define SECURITYENTRYPOINT L"InitSecurityInterfaceW"
 #else
-#  define SECURITYENTRYPOINT "InitSecurityInterfaceA"
+#define SECURITYENTRYPOINT "InitSecurityInterfaceW"
+#endif
+#else
+#define SECURITYENTRYPOINT "InitSecurityInterfaceA"
 #endif
 
 /* Handle of security.dll or secur32.dll, depending on Windows version */
@@ -79,29 +79,30 @@ FETCHcode Curl_sspi_global_init(void)
   INITSECURITYINTERFACE_FN pInitSecurityInterface;
 
   /* If security interface is not yet initialized try to do this */
-  if(!Curl_hSecDll) {
+  if (!Curl_hSecDll)
+  {
     /* Security Service Provider Interface (SSPI) functions are located in
      * security.dll on WinNT 4.0 and in secur32.dll on Win9x. Win2K and XP
      * have both these DLLs (security.dll forwards calls to secur32.dll) */
 
     /* Load SSPI dll into the address space of the calling process */
-    if(fetchx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
+    if (fetchx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
       Curl_hSecDll = Curl_load_library(TEXT("security.dll"));
     else
       Curl_hSecDll = Curl_load_library(TEXT("secur32.dll"));
-    if(!Curl_hSecDll)
+    if (!Curl_hSecDll)
       return FETCHE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
     pInitSecurityInterface =
-      FETCHX_FUNCTION_CAST(INITSECURITYINTERFACE_FN,
-                          (GetProcAddress(Curl_hSecDll, SECURITYENTRYPOINT)));
-    if(!pInitSecurityInterface)
+        FETCHX_FUNCTION_CAST(INITSECURITYINTERFACE_FN,
+                             (GetProcAddress(Curl_hSecDll, SECURITYENTRYPOINT)));
+    if (!pInitSecurityInterface)
       return FETCHE_FAILED_INIT;
 
     /* Get pointer to Security Service Provider Interface dispatch table */
     Curl_pSecFn = pInitSecurityInterface();
-    if(!Curl_pSecFn)
+    if (!Curl_pSecFn)
       return FETCHE_FAILED_INIT;
   }
 
@@ -119,7 +120,8 @@ FETCHcode Curl_sspi_global_init(void)
  */
 void Curl_sspi_global_cleanup(void)
 {
-  if(Curl_hSecDll) {
+  if (Curl_hSecDll)
+  {
     FreeLibrary(Curl_hSecDll);
     Curl_hSecDll = NULL;
     Curl_pSecFn = NULL;
@@ -141,7 +143,7 @@ void Curl_sspi_global_cleanup(void)
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
-                                   SEC_WINNT_AUTH_IDENTITY *identity)
+                                    SEC_WINNT_AUTH_IDENTITY *identity)
 {
   xcharp_u useranddomain;
   xcharp_u user, dup_user;
@@ -155,19 +157,21 @@ FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   memset(identity, 0, sizeof(*identity));
 
   useranddomain.tchar_ptr = fetchx_convert_UTF8_to_tchar((char *)userp);
-  if(!useranddomain.tchar_ptr)
+  if (!useranddomain.tchar_ptr)
     return FETCHE_OUT_OF_MEMORY;
 
   user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, TEXT('\\'));
-  if(!user.const_tchar_ptr)
+  if (!user.const_tchar_ptr)
     user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, TEXT('/'));
 
-  if(user.tchar_ptr) {
+  if (user.tchar_ptr)
+  {
     domain.tchar_ptr = useranddomain.tchar_ptr;
     domlen = user.tchar_ptr - useranddomain.tchar_ptr;
     user.tchar_ptr++;
   }
-  else {
+  else
+  {
     user.tchar_ptr = useranddomain.tchar_ptr;
     domain.const_tchar_ptr = TEXT("");
     domlen = 0;
@@ -175,7 +179,8 @@ FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 
   /* Setup the identity's user and length */
   dup_user.tchar_ptr = _tcsdup(user.tchar_ptr);
-  if(!dup_user.tchar_ptr) {
+  if (!dup_user.tchar_ptr)
+  {
     fetchx_unicodefree(useranddomain.tchar_ptr);
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -185,7 +190,8 @@ FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 
   /* Setup the identity's domain and length */
   dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
-  if(!dup_domain.tchar_ptr) {
+  if (!dup_domain.tchar_ptr)
+  {
     fetchx_unicodefree(useranddomain.tchar_ptr);
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -199,10 +205,11 @@ FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 
   /* Setup the identity's password and length */
   passwd.tchar_ptr = fetchx_convert_UTF8_to_tchar((char *)passwdp);
-  if(!passwd.tchar_ptr)
+  if (!passwd.tchar_ptr)
     return FETCHE_OUT_OF_MEMORY;
   dup_passwd.tchar_ptr = _tcsdup(passwd.tchar_ptr);
-  if(!dup_passwd.tchar_ptr) {
+  if (!dup_passwd.tchar_ptr)
+  {
     fetchx_unicodefree(passwd.tchar_ptr);
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -229,7 +236,8 @@ FETCHcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
  */
 void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity)
 {
-  if(identity) {
+  if (identity)
+  {
     Curl_safefree(identity->User);
     Curl_safefree(identity->Password);
     Curl_safefree(identity->Domain);

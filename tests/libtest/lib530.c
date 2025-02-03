@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,13 +38,15 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-struct Sockets {
+struct Sockets
+{
   fetch_socket_t *sockets;
-  int count;      /* number of sockets actually stored in array */
-  int max_count;  /* max number of sockets that fit in allocated array */
+  int count;     /* number of sockets actually stored in array */
+  int max_count; /* max number of sockets that fit in allocated array */
 };
 
-struct ReadWriteSockets {
+struct ReadWriteSockets
+{
   struct Sockets read, write;
 };
 
@@ -55,14 +57,16 @@ static void removeFd(struct Sockets *sockets, fetch_socket_t fd, int mention)
 {
   int i;
 
-  if(mention)
-    fprintf(stderr, "Remove socket fd %d\n", (int) fd);
+  if (mention)
+    fprintf(stderr, "Remove socket fd %d\n", (int)fd);
 
-  for(i = 0; i < sockets->count; ++i) {
-    if(sockets->sockets[i] == fd) {
-      if(i < sockets->count - 1)
+  for (i = 0; i < sockets->count; ++i)
+  {
+    if (sockets->sockets[i] == fd)
+    {
+      if (i < sockets->count - 1)
         memmove(&sockets->sockets[i], &sockets->sockets[i + 1],
-              sizeof(fetch_socket_t) * (sockets->count - (i + 1)));
+                sizeof(fetch_socket_t) * (sockets->count - (i + 1)));
       --sockets->count;
     }
   }
@@ -78,21 +82,23 @@ static int addFd(struct Sockets *sockets, fetch_socket_t fd, const char *what)
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
-  fprintf(stderr, "Add socket fd %d for %s\n", (int) fd, what);
+  fprintf(stderr, "Add socket fd %d for %s\n", (int)fd, what);
   removeFd(sockets, fd, 0);
   /*
    * Allocate array storage when required.
    */
-  if(!sockets->sockets) {
+  if (!sockets->sockets)
+  {
     sockets->sockets = malloc(sizeof(fetch_socket_t) * 20U);
-    if(!sockets->sockets)
+    if (!sockets->sockets)
       return 1;
     sockets->max_count = 20;
   }
-  else if(sockets->count + 1 > sockets->max_count) {
+  else if (sockets->count + 1 > sockets->max_count)
+  {
     fetch_socket_t *ptr = realloc(sockets->sockets, sizeof(fetch_socket_t) *
-                                 (sockets->max_count + 20));
-    if(!ptr)
+                                                        (sockets->max_count + 20));
+    if (!ptr)
       /* cleanup in test_cleanup */
       return 1;
     sockets->sockets = ptr;
@@ -113,28 +119,30 @@ static int socket_calls = 0;
  * Callback invoked by fetch to poll reading / writing of a socket.
  */
 static int fetchSocketCallback(FETCH *easy, fetch_socket_t s, int action,
-                              void *userp, void *socketp)
+                               void *userp, void *socketp)
 {
   struct ReadWriteSockets *sockets = userp;
 
-  (void)easy; /* unused */
+  (void)easy;    /* unused */
   (void)socketp; /* unused */
 
   fprintf(stderr, "FETCHMOPT_SOCKETFUNCTION called: %u\n", socket_calls++);
-  if(socket_calls == max_socket_calls) {
+  if (socket_calls == max_socket_calls)
+  {
     fprintf(stderr, "fetchSocketCallback returns error\n");
     return -1;
   }
 
-  if(action == FETCH_POLL_IN || action == FETCH_POLL_INOUT)
-    if(addFd(&sockets->read, s, "read"))
+  if (action == FETCH_POLL_IN || action == FETCH_POLL_INOUT)
+    if (addFd(&sockets->read, s, "read"))
       return -1; /* bail out */
 
-  if(action == FETCH_POLL_OUT || action == FETCH_POLL_INOUT)
-    if(addFd(&sockets->write, s, "write"))
+  if (action == FETCH_POLL_OUT || action == FETCH_POLL_INOUT)
+    if (addFd(&sockets->write, s, "write"))
       return -1;
 
-  if(action == FETCH_POLL_REMOVE) {
+  if (action == FETCH_POLL_REMOVE)
+  {
     removeFd(&sockets->read, s, 1);
     removeFd(&sockets->write, s, 0);
   }
@@ -154,15 +162,18 @@ static int fetchTimerCallback(FETCHM *multi, long timeout_ms, void *userp)
 
   (void)multi; /* unused */
   fprintf(stderr, "FETCHMOPT_TIMERFUNCTION called: %u\n", timer_calls++);
-  if(timer_calls == max_timer_calls) {
+  if (timer_calls == max_timer_calls)
+  {
     fprintf(stderr, "fetchTimerCallback returns error\n");
     return -1;
   }
-  if(timeout_ms != -1) {
+  if (timeout_ms != -1)
+  {
     *timeout = tutil_tvnow();
     timeout->tv_usec += (int)timeout_ms * 1000;
   }
-  else {
+  else
+  {
     timeout->tv_sec = -1;
   }
   return 0;
@@ -175,19 +186,22 @@ static int checkForCompletion(FETCHM *fetch, int *success)
 {
   int result = 0;
   *success = 0;
-  while(1) {
+  while (1)
+  {
     int numMessages;
     FETCHMsg *message = fetch_multi_info_read(fetch, &numMessages);
-    if(!message)
+    if (!message)
       break;
-    if(message->msg == FETCHMSG_DONE) {
+    if (message->msg == FETCHMSG_DONE)
+    {
       result = 1;
-      if(message->data.result == FETCHE_OK)
+      if (message->data.result == FETCHE_OK)
         *success = 1;
       else
         *success = 0;
     }
-    else {
+    else
+    {
       fprintf(stderr, "Got an unexpected message from fetch: %i\n",
               message->msg);
       result = 1;
@@ -203,8 +217,8 @@ static int getMicroSecondTimeout(struct timeval *timeout)
   ssize_t result;
   now = tutil_tvnow();
   result = (ssize_t)((timeout->tv_sec - now.tv_sec) * 1000000 +
-    timeout->tv_usec - now.tv_usec);
-  if(result < 0)
+                     timeout->tv_usec - now.tv_usec);
+  if (result < 0)
     result = 0;
 
   return fetchx_sztosi(result);
@@ -213,11 +227,12 @@ static int getMicroSecondTimeout(struct timeval *timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
+static void updateFdSet(struct Sockets *sockets, fd_set *fdset,
                         fetch_socket_t *maxFd)
 {
   int i;
-  for(i = 0; i < sockets->count; ++i) {
+  for (i = 0; i < sockets->count; ++i)
+  {
 #if defined(__DJGPP__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
@@ -226,7 +241,8 @@ static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
 #if defined(__DJGPP__)
 #pragma GCC diagnostic pop
 #endif
-    if(*maxFd < sockets->sockets[i] + 1) {
+    if (*maxFd < sockets->sockets[i] + 1)
+    {
       *maxFd = sockets->sockets[i] + 1;
     }
   }
@@ -237,7 +253,8 @@ static int socket_action(FETCHM *fetch, fetch_socket_t s, int evBitmask,
 {
   int numhandles = 0;
   FETCHMcode result = fetch_multi_socket_action(fetch, s, evBitmask, &numhandles);
-  if(result != FETCHM_OK) {
+  if (result != FETCHM_OK)
+  {
     fprintf(stderr, "Curl error on %s: %i (%s)\n",
             info, result, fetch_multi_strerror(result));
   }
@@ -253,10 +270,12 @@ static int checkFdSet(FETCHM *fetch,
 {
   int i;
   int result = 0;
-  for(i = 0; i < sockets->count; ++i) {
-    if(FD_ISSET(sockets->sockets[i], fdset)) {
+  for (i = 0; i < sockets->count; ++i)
+  {
+    if (FD_ISSET(sockets->sockets[i], fdset))
+    {
       result = socket_action(fetch, sockets->sockets[i], evBitmask, name);
-      if(result)
+      if (result)
         break;
     }
   }
@@ -266,7 +285,8 @@ static int checkFdSet(FETCHM *fetch,
 static FETCHcode testone(char *URL, int timercb, int socketcb)
 {
   FETCHcode res = FETCHE_OK;
-  FETCH *fetch = NULL;  FETCHM *m = NULL;
+  FETCH *fetch = NULL;
+  FETCHM *m = NULL;
   struct ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct timeval timeout = {0};
@@ -282,7 +302,7 @@ static FETCHcode testone(char *URL, int timercb, int socketcb)
   start_test_timing();
 
   res_global_init(FETCH_GLOBAL_ALL);
-  if(res != FETCHE_OK)
+  if (res != FETCHE_OK)
     return res;
 
   easy_init(fetch);
@@ -303,12 +323,14 @@ static FETCHcode testone(char *URL, int timercb, int socketcb)
 
   multi_add_handle(m, fetch);
 
-  if(socket_action(m, FETCH_SOCKET_TIMEOUT, 0, "timeout")) {
+  if (socket_action(m, FETCH_SOCKET_TIMEOUT, 0, "timeout"))
+  {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
-  while(!checkForCompletion(m, &success)) {
+  while (!checkForCompletion(m, &success))
+  {
     fd_set readSet, writeSet;
     fetch_socket_t maxFd = 0;
     struct timeval tv = {0};
@@ -319,12 +341,14 @@ static FETCHcode testone(char *URL, int timercb, int socketcb)
     updateFdSet(&sockets.read, &readSet, &maxFd);
     updateFdSet(&sockets.write, &writeSet, &maxFd);
 
-    if(timeout.tv_sec != (time_t)-1) {
+    if (timeout.tv_sec != (time_t)-1)
+    {
       int usTimeout = getMicroSecondTimeout(&timeout);
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
-    else if(maxFd <= 0) {
+    else if (maxFd <= 0)
+    {
       tv.tv_sec = 0;
       tv.tv_usec = 100000;
     }
@@ -333,18 +357,22 @@ static FETCHcode testone(char *URL, int timercb, int socketcb)
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    if(checkFdSet(m, &sockets.read, &readSet, FETCH_CSELECT_IN, "read")) {
+    if (checkFdSet(m, &sockets.read, &readSet, FETCH_CSELECT_IN, "read"))
+    {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
-    if(checkFdSet(m, &sockets.write, &writeSet, FETCH_CSELECT_OUT, "write")) {
+    if (checkFdSet(m, &sockets.write, &writeSet, FETCH_CSELECT_OUT, "write"))
+    {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
 
-    if(timeout.tv_sec != (time_t)-1 && getMicroSecondTimeout(&timeout) == 0) {
+    if (timeout.tv_sec != (time_t)-1 && getMicroSecondTimeout(&timeout) == 0)
+    {
       /* Curl's timer has elapsed. */
-      if(socket_action(m, FETCH_SOCKET_TIMEOUT, 0, "timeout")) {
+      if (socket_action(m, FETCH_SOCKET_TIMEOUT, 0, "timeout"))
+      {
         res = TEST_ERR_BAD_TIMEOUT;
         goto test_cleanup;
       }
@@ -353,7 +381,8 @@ static FETCHcode testone(char *URL, int timercb, int socketcb)
     abort_on_test_timeout();
   }
 
-  if(!success) {
+  if (!success)
+  {
     fprintf(stderr, "Error getting file.\n");
     res = TEST_ERR_MAJOR_BAD;
   }
@@ -379,23 +408,23 @@ FETCHcode test(char *URL)
   /* rerun the same transfer multiple times and make it fail in different
      callback calls */
   rc = testone(URL, 0, 0);
-  if(rc)
+  if (rc)
     fprintf(stderr, "test 0/0 failed: %d\n", rc);
 
   rc = testone(URL, 1, 0);
-  if(!rc)
+  if (!rc)
     fprintf(stderr, "test 1/0 failed: %d\n", rc);
 
   rc = testone(URL, 2, 0);
-  if(!rc)
+  if (!rc)
     fprintf(stderr, "test 2/0 failed: %d\n", rc);
 
   rc = testone(URL, 0, 1);
-  if(!rc)
+  if (!rc)
     fprintf(stderr, "test 0/1 failed: %d\n", rc);
 
   rc = testone(URL, 0, 2);
-  if(!rc)
+  if (!rc)
     fprintf(stderr, "test 0/2 failed: %d\n", rc);
 
   return FETCHE_OK;

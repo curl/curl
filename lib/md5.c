@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,8 +24,7 @@
 
 #include "fetch_setup.h"
 
-#if (defined(USE_FETCH_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
-    || !defined(FETCH_DISABLE_DIGEST_AUTH)
+#if (defined(USE_FETCH_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) || !defined(FETCH_DISABLE_DIGEST_AUTH)
 
 #include <string.h>
 #include <fetch/fetch.h>
@@ -37,24 +36,24 @@
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
 
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
-   (MBEDTLS_VERSION_NUMBER < 0x03000000)
-  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
+#if (MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
+    (MBEDTLS_VERSION_NUMBER < 0x03000000)
+#define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
 #endif
 #endif /* USE_MBEDTLS */
 
 #ifdef USE_OPENSSL
-  #include <openssl/opensslconf.h>
-  #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-    #define USE_OPENSSL_MD5
-  #endif
+#include <openssl/opensslconf.h>
+#if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
+#define USE_OPENSSL_MD5
+#endif
 #endif
 
 #ifdef USE_WOLFSSL
-  #include <wolfssl/options.h>
-  #ifndef NO_MD5
-    #define USE_WOLFSSL_MD5
-  #endif
+#include <wolfssl/options.h>
+#ifndef NO_MD5
+#define USE_WOLFSSL_MD5
+#endif
 #endif
 
 #if defined(USE_GNUTLS)
@@ -65,14 +64,14 @@
 #include <wolfssl/openssl/md5.h>
 #elif defined(USE_MBEDTLS)
 #include <mbedtls/md5.h>
-#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
-       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
-              (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
-      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
-       defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
+#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) &&     \
+       (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) &&    \
+       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) &&    \
+       (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&      \
+     (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) &&    \
+     defined(__IPHONE_OS_VERSION_MIN_REQUIRED) &&     \
+     (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
 #define AN_APPLE_OS
 #include <CommonCrypto/CommonDigest.h>
 #elif defined(USE_WIN32_CRYPTO)
@@ -107,13 +106,13 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_OPENSSL_MD5) || \
-  (defined(USE_WOLFSSL_MD5) && !defined(OPENSSL_COEXIST))
+    (defined(USE_WOLFSSL_MD5) && !defined(OPENSSL_COEXIST))
 
 typedef MD5_CTX my_md5_ctx;
 
 static FETCHcode my_md5_init(void *ctx)
 {
-  if(!MD5_Init(ctx))
+  if (!MD5_Init(ctx))
     return FETCHE_OUT_OF_MEMORY;
 
   return FETCHE_OK;
@@ -137,7 +136,7 @@ typedef WOLFSSL_MD5_CTX my_md5_ctx;
 
 static FETCHcode my_md5_init(void *ctx)
 {
-  if(!wolfSSL_MD5_Init(ctx))
+  if (!wolfSSL_MD5_Init(ctx))
     return FETCHE_OUT_OF_MEMORY;
 
   return FETCHE_OK;
@@ -162,10 +161,10 @@ typedef mbedtls_md5_context my_md5_ctx;
 static FETCHcode my_md5_init(void *ctx)
 {
 #if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
-  if(mbedtls_md5_starts(ctx))
+  if (mbedtls_md5_starts(ctx))
     return FETCHE_OUT_OF_MEMORY;
 #elif defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  if(mbedtls_md5_starts_ret(ctx))
+  if (mbedtls_md5_starts_ret(ctx))
     return FETCHE_OUT_OF_MEMORY;
 #else
   (void)mbedtls_md5_starts(ctx);
@@ -178,18 +177,18 @@ static void my_md5_update(void *ctx,
                           unsigned int length)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_update(ctx, data, length);
+  (void)mbedtls_md5_update(ctx, data, length);
 #else
-  (void) mbedtls_md5_update_ret(ctx, data, length);
+  (void)mbedtls_md5_update_ret(ctx, data, length);
 #endif
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_finish(ctx, digest);
+  (void)mbedtls_md5_finish(ctx, digest);
 #else
-  (void) mbedtls_md5_finish_ret(ctx, digest);
+  (void)mbedtls_md5_finish_ret(ctx, digest);
 #endif
 }
 
@@ -201,11 +200,11 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
    Declaring the functions as static like this seems to be a bit more
    reliable than defining COMMON_DIGEST_FOR_OPENSSL on older cats. */
-#  define my_md5_ctx CC_MD5_CTX
+#define my_md5_ctx CC_MD5_CTX
 
 static FETCHcode my_md5_init(void *ctx)
 {
-  if(!CC_MD5_Init(ctx))
+  if (!CC_MD5_Init(ctx))
     return FETCHE_OUT_OF_MEMORY;
 
   return FETCHE_OK;
@@ -225,7 +224,8 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
 #elif defined(USE_WIN32_CRYPTO)
 
-struct md5_ctx {
+struct md5_ctx
+{
   HCRYPTPROV hCryptProv;
   HCRYPTHASH hHash;
 };
@@ -234,11 +234,12 @@ typedef struct md5_ctx my_md5_ctx;
 static FETCHcode my_md5_init(void *in)
 {
   my_md5_ctx *ctx = (my_md5_ctx *)in;
-  if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+  if (!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return FETCHE_OUT_OF_MEMORY;
 
-  if(!CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash)) {
+  if (!CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash))
+  {
     CryptReleaseContext(ctx->hCryptProv, 0);
     ctx->hCryptProv = 0;
     return FETCHE_FAILED_INIT;
@@ -260,11 +261,11 @@ static void my_md5_final(unsigned char *digest, void *in)
   my_md5_ctx *ctx = (my_md5_ctx *)in;
   unsigned long length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == 16)
+  if (length == 16)
     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
-  if(ctx->hHash)
+  if (ctx->hHash)
     CryptDestroyHash(ctx->hHash);
-  if(ctx->hCryptProv)
+  if (ctx->hCryptProv)
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
 
@@ -312,7 +313,8 @@ static void my_md5_final(unsigned char *digest, void *in)
 /* Any 32-bit or wider unsigned integer data type will do */
 typedef unsigned int MD5_u32plus;
 
-struct md5_ctx {
+struct md5_ctx
+{
   MD5_u32plus lo, hi;
   MD5_u32plus a, b, c, d;
   unsigned char buffer[64];
@@ -332,19 +334,19 @@ static void my_md5_final(unsigned char *result, void *ctx);
  * architectures that lack an AND-NOT instruction, just like in Colin Plumb's
  * implementation.
  */
-#define MD5_F(x, y, z)                  ((z) ^ ((x) & ((y) ^ (z))))
-#define MD5_G(x, y, z)                  ((y) ^ ((z) & ((x) ^ (y))))
-#define MD5_H(x, y, z)                  (((x) ^ (y)) ^ (z))
-#define MD5_H2(x, y, z)                 ((x) ^ ((y) ^ (z)))
-#define MD5_I(x, y, z)                  ((y) ^ ((x) | ~(z)))
+#define MD5_F(x, y, z) ((z) ^ ((x) & ((y) ^ (z))))
+#define MD5_G(x, y, z) ((y) ^ ((z) & ((x) ^ (y))))
+#define MD5_H(x, y, z) (((x) ^ (y)) ^ (z))
+#define MD5_H2(x, y, z) ((x) ^ ((y) ^ (z)))
+#define MD5_I(x, y, z) ((y) ^ ((x) | ~(z)))
 
 /*
  * The MD5 transformation for all four rounds.
  */
-#define MD5_STEP(f, a, b, c, d, x, t, s) \
-        (a) += f((b), (c), (d)) + (x) + (t); \
-        (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
-        (a) += (b);
+#define MD5_STEP(f, a, b, c, d, x, t, s)                     \
+  (a) += f((b), (c), (d)) + (x) + (t);                       \
+  (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
+  (a) += (b);
 
 /*
  * SET reads 4 input bytes in little-endian byte order and stores them
@@ -356,18 +358,18 @@ static void my_md5_final(unsigned char *result, void *ctx);
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD5_SET(n) \
-        (*(MD5_u32plus *)(void *)&ptr[(n) * 4])
+  (*(MD5_u32plus *)(void *)&ptr[(n) * 4])
 #define MD5_GET(n) \
-        MD5_SET(n)
+  MD5_SET(n)
 #else
-#define MD5_SET(n) \
-        (ctx->block[(n)] = \
-        (MD5_u32plus)ptr[(n) * 4] | \
-        ((MD5_u32plus)ptr[(n) * 4 + 1] << 8) | \
-        ((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
-        ((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
+#define MD5_SET(n)                             \
+  (ctx->block[(n)] =                           \
+       (MD5_u32plus)ptr[(n) * 4] |             \
+       ((MD5_u32plus)ptr[(n) * 4 + 1] << 8) |  \
+       ((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
+       ((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
 #define MD5_GET(n) \
-        (ctx->block[(n)])
+  (ctx->block[(n)])
 #endif
 
 /*
@@ -387,7 +389,8 @@ static const void *my_md5_body(my_md5_ctx *ctx,
   c = ctx->c;
   d = ctx->d;
 
-  do {
+  do
+  {
     MD5_u32plus saved_a, saved_b, saved_c, saved_d;
 
     saved_a = a;
@@ -395,7 +398,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     saved_c = c;
     saved_d = d;
 
-/* Round 1 */
+    /* Round 1 */
     MD5_STEP(MD5_F, a, b, c, d, MD5_SET(0), 0xd76aa478, 7)
     MD5_STEP(MD5_F, d, a, b, c, MD5_SET(1), 0xe8c7b756, 12)
     MD5_STEP(MD5_F, c, d, a, b, MD5_SET(2), 0x242070db, 17)
@@ -413,7 +416,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_F, c, d, a, b, MD5_SET(14), 0xa679438e, 17)
     MD5_STEP(MD5_F, b, c, d, a, MD5_SET(15), 0x49b40821, 22)
 
-/* Round 2 */
+    /* Round 2 */
     MD5_STEP(MD5_G, a, b, c, d, MD5_GET(1), 0xf61e2562, 5)
     MD5_STEP(MD5_G, d, a, b, c, MD5_GET(6), 0xc040b340, 9)
     MD5_STEP(MD5_G, c, d, a, b, MD5_GET(11), 0x265e5a51, 14)
@@ -431,7 +434,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_G, c, d, a, b, MD5_GET(7), 0x676f02d9, 14)
     MD5_STEP(MD5_G, b, c, d, a, MD5_GET(12), 0x8d2a4c8a, 20)
 
-/* Round 3 */
+    /* Round 3 */
     MD5_STEP(MD5_H, a, b, c, d, MD5_GET(5), 0xfffa3942, 4)
     MD5_STEP(MD5_H2, d, a, b, c, MD5_GET(8), 0x8771f681, 11)
     MD5_STEP(MD5_H, c, d, a, b, MD5_GET(11), 0x6d9d6122, 16)
@@ -449,7 +452,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_H, c, d, a, b, MD5_GET(15), 0x1fa27cf8, 16)
     MD5_STEP(MD5_H2, b, c, d, a, MD5_GET(2), 0xc4ac5665, 23)
 
-/* Round 4 */
+    /* Round 4 */
     MD5_STEP(MD5_I, a, b, c, d, MD5_GET(0), 0xf4292244, 6)
     MD5_STEP(MD5_I, d, a, b, c, MD5_GET(7), 0x432aff97, 10)
     MD5_STEP(MD5_I, c, d, a, b, MD5_GET(14), 0xab9423a7, 15)
@@ -473,7 +476,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     d += saved_d;
 
     ptr += 64;
-  } while(size -= 64);
+  } while (size -= 64);
 
   ctx->a = a;
   ctx->b = b;
@@ -506,16 +509,18 @@ static void my_md5_update(void *in, const unsigned char *data,
 
   saved_lo = ctx->lo;
   ctx->lo = (saved_lo + size) & 0x1fffffff;
-  if(ctx->lo < saved_lo)
+  if (ctx->lo < saved_lo)
     ctx->hi++;
   ctx->hi += (MD5_u32plus)size >> 29;
 
   used = saved_lo & 0x3f;
 
-  if(used) {
+  if (used)
+  {
     unsigned int available = 64 - used;
 
-    if(size < available) {
+    if (size < available)
+    {
       memcpy(&ctx->buffer[used], data, size);
       return;
     }
@@ -526,7 +531,8 @@ static void my_md5_update(void *in, const unsigned char *data,
     my_md5_body(ctx, ctx->buffer, 64);
   }
 
-  if(size >= 64) {
+  if (size >= 64)
+  {
     data = my_md5_body(ctx, data, size & ~(unsigned long)0x3f);
     size &= 0x3f;
   }
@@ -545,7 +551,8 @@ static void my_md5_final(unsigned char *result, void *in)
 
   available = 64 - used;
 
-  if(available < 8) {
+  if (available < 8)
+  {
     memset(&ctx->buffer[used], 0, available);
     my_md5_body(ctx, ctx->buffer, 64);
     used = 0;
@@ -555,32 +562,32 @@ static void my_md5_final(unsigned char *result, void *in)
   memset(&ctx->buffer[used], 0, available - 8);
 
   ctx->lo <<= 3;
-  ctx->buffer[56] = fetchx_ultouc((ctx->lo)&0xff);
-  ctx->buffer[57] = fetchx_ultouc((ctx->lo >> 8)&0xff);
-  ctx->buffer[58] = fetchx_ultouc((ctx->lo >> 16)&0xff);
+  ctx->buffer[56] = fetchx_ultouc((ctx->lo) & 0xff);
+  ctx->buffer[57] = fetchx_ultouc((ctx->lo >> 8) & 0xff);
+  ctx->buffer[58] = fetchx_ultouc((ctx->lo >> 16) & 0xff);
   ctx->buffer[59] = fetchx_ultouc(ctx->lo >> 24);
-  ctx->buffer[60] = fetchx_ultouc((ctx->hi)&0xff);
-  ctx->buffer[61] = fetchx_ultouc((ctx->hi >> 8)&0xff);
-  ctx->buffer[62] = fetchx_ultouc((ctx->hi >> 16)&0xff);
+  ctx->buffer[60] = fetchx_ultouc((ctx->hi) & 0xff);
+  ctx->buffer[61] = fetchx_ultouc((ctx->hi >> 8) & 0xff);
+  ctx->buffer[62] = fetchx_ultouc((ctx->hi >> 16) & 0xff);
   ctx->buffer[63] = fetchx_ultouc(ctx->hi >> 24);
 
   my_md5_body(ctx, ctx->buffer, 64);
 
-  result[0] = fetchx_ultouc((ctx->a)&0xff);
-  result[1] = fetchx_ultouc((ctx->a >> 8)&0xff);
-  result[2] = fetchx_ultouc((ctx->a >> 16)&0xff);
+  result[0] = fetchx_ultouc((ctx->a) & 0xff);
+  result[1] = fetchx_ultouc((ctx->a >> 8) & 0xff);
+  result[2] = fetchx_ultouc((ctx->a >> 16) & 0xff);
   result[3] = fetchx_ultouc(ctx->a >> 24);
-  result[4] = fetchx_ultouc((ctx->b)&0xff);
-  result[5] = fetchx_ultouc((ctx->b >> 8)&0xff);
-  result[6] = fetchx_ultouc((ctx->b >> 16)&0xff);
+  result[4] = fetchx_ultouc((ctx->b) & 0xff);
+  result[5] = fetchx_ultouc((ctx->b >> 8) & 0xff);
+  result[6] = fetchx_ultouc((ctx->b >> 16) & 0xff);
   result[7] = fetchx_ultouc(ctx->b >> 24);
-  result[8] = fetchx_ultouc((ctx->c)&0xff);
-  result[9] = fetchx_ultouc((ctx->c >> 8)&0xff);
-  result[10] = fetchx_ultouc((ctx->c >> 16)&0xff);
+  result[8] = fetchx_ultouc((ctx->c) & 0xff);
+  result[9] = fetchx_ultouc((ctx->c >> 8) & 0xff);
+  result[10] = fetchx_ultouc((ctx->c >> 16) & 0xff);
   result[11] = fetchx_ultouc(ctx->c >> 24);
-  result[12] = fetchx_ultouc((ctx->d)&0xff);
-  result[13] = fetchx_ultouc((ctx->d >> 8)&0xff);
-  result[14] = fetchx_ultouc((ctx->d >> 16)&0xff);
+  result[12] = fetchx_ultouc((ctx->d) & 0xff);
+  result[13] = fetchx_ultouc((ctx->d >> 8) & 0xff);
+  result[14] = fetchx_ultouc((ctx->d >> 16) & 0xff);
   result[15] = fetchx_ultouc(ctx->d >> 24);
 
   memset(ctx, 0, sizeof(*ctx));
@@ -589,20 +596,20 @@ static void my_md5_final(unsigned char *result, void *in)
 #endif /* CRYPTO LIBS */
 
 const struct HMAC_params Curl_HMAC_MD5 = {
-  my_md5_init,        /* Hash initialization function. */
-  my_md5_update,      /* Hash update function. */
-  my_md5_final,       /* Hash computation end function. */
-  sizeof(my_md5_ctx), /* Size of hash context structure. */
-  64,                 /* Maximum key length. */
-  16                  /* Result size. */
+    my_md5_init,        /* Hash initialization function. */
+    my_md5_update,      /* Hash update function. */
+    my_md5_final,       /* Hash computation end function. */
+    sizeof(my_md5_ctx), /* Size of hash context structure. */
+    64,                 /* Maximum key length. */
+    16                  /* Result size. */
 };
 
 const struct MD5_params Curl_DIGEST_MD5 = {
-  my_md5_init,        /* Digest initialization function */
-  my_md5_update,      /* Digest update function */
-  my_md5_final,       /* Digest computation end function */
-  sizeof(my_md5_ctx), /* Size of digest context struct */
-  16                  /* Result size */
+    my_md5_init,        /* Digest initialization function */
+    my_md5_update,      /* Digest update function */
+    my_md5_final,       /* Digest computation end function */
+    sizeof(my_md5_ctx), /* Size of digest context struct */
+    16                  /* Result size */
 };
 
 /*
@@ -610,13 +617,14 @@ const struct MD5_params Curl_DIGEST_MD5 = {
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_md5it(unsigned char *outbuffer, const unsigned char *input,
-                    const size_t len)
+                     const size_t len)
 {
   FETCHcode result;
   my_md5_ctx ctx;
 
   result = my_md5_init(&ctx);
-  if(!result) {
+  if (!result)
+  {
     my_md5_update(&ctx, input, fetchx_uztoui(len));
     my_md5_final(outbuffer, &ctx);
   }
@@ -630,19 +638,21 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
   /* Create MD5 context */
   ctxt = malloc(sizeof(*ctxt));
 
-  if(!ctxt)
+  if (!ctxt)
     return ctxt;
 
   ctxt->md5_hashctx = malloc(md5params->md5_ctxtsize);
 
-  if(!ctxt->md5_hashctx) {
+  if (!ctxt->md5_hashctx)
+  {
     free(ctxt);
     return NULL;
   }
 
   ctxt->md5_hash = md5params;
 
-  if((*md5params->md5_init_func)(ctxt->md5_hashctx)) {
+  if ((*md5params->md5_init_func)(ctxt->md5_hashctx))
+  {
     free(ctxt->md5_hashctx);
     free(ctxt);
     return NULL;
@@ -652,8 +662,8 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
 }
 
 FETCHcode Curl_MD5_update(struct MD5_context *context,
-                         const unsigned char *data,
-                         unsigned int len)
+                          const unsigned char *data,
+                          unsigned int len)
 {
   (*context->md5_hash->md5_update_func)(context->md5_hashctx, data, len);
 

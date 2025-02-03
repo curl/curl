@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,27 +27,27 @@
 
 #include "memdebug.h"
 
-#define PAUSE_TIME      5
-
+#define PAUSE_TIME 5
 
 static const char testname[] = "field";
 
-struct ReadThis {
+struct ReadThis
+{
   FETCH *easy;
   time_t origin;
   int count;
 };
 
-
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct ReadThis *pooh = (struct ReadThis *) userp;
+  struct ReadThis *pooh = (struct ReadThis *)userp;
   time_t delta;
 
-  if(size * nmemb < 1)
+  if (size * nmemb < 1)
     return 0;
 
-  switch(pooh->count++) {
+  switch (pooh->count++)
+  {
   case 0:
     *ptr = '\x41'; /* ASCII A. */
     return 1;
@@ -69,22 +69,24 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 static int xferinfo(void *clientp, fetch_off_t dltotal, fetch_off_t dlnow,
                     fetch_off_t ultotal, fetch_off_t ulnow)
 {
-  struct ReadThis *pooh = (struct ReadThis *) clientp;
+  struct ReadThis *pooh = (struct ReadThis *)clientp;
 
-  (void) dltotal;
-  (void) dlnow;
-  (void) ultotal;
-  (void) ulnow;
+  (void)dltotal;
+  (void)dlnow;
+  (void)ultotal;
+  (void)ulnow;
 
-  if(pooh->origin) {
+  if (pooh->origin)
+  {
     time_t delta = time(NULL) - pooh->origin;
 
-    if(delta >= 4 * PAUSE_TIME) {
+    if (delta >= 4 * PAUSE_TIME)
+    {
       fprintf(stderr, "unpausing failed: drain problem?\n");
       return FETCHE_ABORTED_BY_CALLBACK;
     }
 
-    if(delta >= PAUSE_TIME)
+    if (delta >= PAUSE_TIME)
       fetch_easy_pause(pooh->easy, FETCHPAUSE_CONT);
   }
 
@@ -117,12 +119,13 @@ FETCHcode test(char *URL)
    * Check proper pausing/unpausing from a mime or form read callback.
    */
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  pooh.origin = (time_t) 0;
+  pooh.origin = (time_t)0;
   pooh.count = 0;
   pooh.easy = fetch_easy_init();
 
@@ -140,30 +143,31 @@ FETCHcode test(char *URL)
   mime = fetch_mime_init(pooh.easy);
   part = fetch_mime_addpart(mime);
   res = fetch_mime_name(part, testname);
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr,
             "Something went wrong when building the mime structure: %d\n",
             res);
     goto test_cleanup;
   }
 
-  res = fetch_mime_data_cb(part, (fetch_off_t) 2, read_callback,
-                          NULL, NULL, &pooh);
+  res = fetch_mime_data_cb(part, (fetch_off_t)2, read_callback,
+                           NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
-  if(res == FETCHE_OK)
+  if (res == FETCHE_OK)
     test_setopt(pooh.easy, FETCHOPT_MIMEPOST, mime);
 #else
   FETCH_IGNORE_DEPRECATION(
-    /* Build the form. */
-    formrc = fetch_formadd(&formpost, &lastptr,
-                          FETCHFORM_COPYNAME, testname,
-                          FETCHFORM_STREAM, &pooh,
-                          FETCHFORM_CONTENTLEN, (fetch_off_t) 2,
-                          FETCHFORM_END);
-  )
-  if(formrc) {
-    fprintf(stderr, "fetch_formadd() = %d\n", (int) formrc);
+      /* Build the form. */
+      formrc = fetch_formadd(&formpost, &lastptr,
+                             FETCHFORM_COPYNAME, testname,
+                             FETCHFORM_STREAM, &pooh,
+                             FETCHFORM_CONTENTLEN, (fetch_off_t)2,
+                             FETCHFORM_END);)
+  if (formrc)
+  {
+    fprintf(stderr, "fetch_formadd() = %d\n", (int)formrc);
     goto test_cleanup;
   }
 
@@ -171,16 +175,16 @@ FETCHcode test(char *URL)
   test_setopt(pooh.easy, FETCHOPT_READFUNCTION, read_callback);
 
   FETCH_IGNORE_DEPRECATION(
-    /* Send a multi-part formpost. */
-    test_setopt(pooh.easy, FETCHOPT_HTTPPOST, formpost);
-  )
+      /* Send a multi-part formpost. */
+      test_setopt(pooh.easy, FETCHOPT_HTTPPOST, formpost);)
 #endif
 
 #if defined(LIB670) || defined(LIB672)
   /* Use the multi interface. */
   multi = fetch_multi_init();
   mres = fetch_multi_add_handle(multi, pooh.easy);
-  while(!mres) {
+  while (!mres)
+  {
     struct timeval timeout;
     int rc = 0;
     fd_set fdread;
@@ -189,19 +193,21 @@ FETCHcode test(char *URL)
     int maxfd = -1;
 
     mres = fetch_multi_perform(multi, &still_running);
-    if(!still_running || mres != FETCHM_OK)
+    if (!still_running || mres != FETCHM_OK)
       break;
 
-    if(pooh.origin) {
+    if (pooh.origin)
+    {
       time_t delta = time(NULL) - pooh.origin;
 
-      if(delta >= 4 * PAUSE_TIME) {
+      if (delta >= 4 * PAUSE_TIME)
+      {
         fprintf(stderr, "unpausing failed: drain problem?\n");
         res = FETCHE_OPERATION_TIMEDOUT;
         break;
       }
 
-      if(delta >= PAUSE_TIME)
+      if (delta >= PAUSE_TIME)
         fetch_easy_pause(pooh.easy, FETCHPAUSE_CONT);
     }
 
@@ -211,26 +217,29 @@ FETCHcode test(char *URL)
     timeout.tv_sec = 0;
     timeout.tv_usec = 1000000 * PAUSE_TIME / 10;
     mres = fetch_multi_fdset(multi, &fdread, &fdwrite, &fdexcept, &maxfd);
-    if(mres)
+    if (mres)
       break;
 #if defined(_WIN32)
-    if(maxfd == -1)
+    if (maxfd == -1)
       Sleep(100);
     else
 #endif
-    rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcept, &timeout);
-    if(rc == -1) {
+      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcept, &timeout);
+    if (rc == -1)
+    {
       fprintf(stderr, "Select error\n");
       break;
     }
   }
 
-  if(mres != FETCHM_OK)
-    for(;;) {
+  if (mres != FETCHM_OK)
+    for (;;)
+    {
       msg = fetch_multi_info_read(multi, &msgs_left);
-      if(!msg)
+      if (!msg)
         break;
-      if(msg->msg == FETCHMSG_DONE) {
+      if (msg->msg == FETCHMSG_DONE)
+      {
         res = msg->data.result;
       }
     }
@@ -246,15 +255,13 @@ FETCHcode test(char *URL)
   res = fetch_easy_perform(pooh.easy);
 #endif
 
-
 test_cleanup:
   fetch_easy_cleanup(pooh.easy);
 #if defined(LIB670) || defined(LIB671)
   fetch_mime_free(mime);
 #else
   FETCH_IGNORE_DEPRECATION(
-    fetch_formfree(formpost);
-  )
+      fetch_formfree(formpost);)
 #endif
 
   fetch_global_cleanup();

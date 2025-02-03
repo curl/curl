@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -67,7 +67,8 @@ FETCHcode test(char *URL)
 
   multi_add_handle(multi, easy);
 
-  for(;;) {
+  for (;;)
+  {
     struct timeval interval;
     fd_set fdread;
     fd_set fdwrite;
@@ -79,7 +80,7 @@ FETCHcode test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running)
+    if (!running)
       break; /* done */
 
     FD_ZERO(&fdread);
@@ -95,18 +96,20 @@ FETCHcode test(char *URL)
     /* At this point, timeout is guaranteed to be greater or equal than
        -1. */
 
-    if(timeout != -1L) {
+    if (timeout != -1L)
+    {
       int itimeout;
 #if LONG_MAX > INT_MAX
       itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
 #else
       itimeout = (int)timeout;
 #endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
-    else {
-      interval.tv_sec = TEST_HANG_TIMEOUT/1000 - 1;
+    else
+    {
+      interval.tv_sec = TEST_HANG_TIMEOUT / 1000 - 1;
       interval.tv_usec = 0;
     }
 
@@ -116,7 +119,7 @@ FETCHcode test(char *URL)
   }
 
   msg = fetch_multi_info_read(multi, &msgs_left);
-  if(msg)
+  if (msg)
     res = msg->data.result;
 
   multi_remove_handle(multi, easy);

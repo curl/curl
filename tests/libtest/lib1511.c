@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,11 +43,12 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_TIMEVALUE, 1566210680L);
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   fetch_easy_getinfo(fetch, FETCHINFO_CONDITION_UNMET, &unmet);
-  if(unmet != 1L) {
+  if (unmet != 1L)
+  {
     res = TEST_ERR_FAILURE; /* not correct */
     goto test_cleanup;
   }
@@ -56,11 +57,12 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_TIMEVALUE, 1L);
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   fetch_easy_getinfo(fetch, FETCHINFO_CONDITION_UNMET, &unmet);
-  if(unmet) {
+  if (unmet)
+  {
     res = TEST_ERR_FAILURE; /* not correct */
     goto test_cleanup;
   }

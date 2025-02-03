@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,8 +27,8 @@
 #include "memdebug.h"
 
 static fetch_socket_t opensocket(void *clientp,
-                                fetchsocktype purpose,
-                                struct fetch_sockaddr *address)
+                                 fetchsocktype purpose,
+                                 struct fetch_sockaddr *address)
 {
   (void)purpose;
   (void)address;
@@ -43,13 +43,15 @@ FETCHcode test(char *URL)
   FETCHcode res = FETCHE_FAILED_INIT;
   (void)URL;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;

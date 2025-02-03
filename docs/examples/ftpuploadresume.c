@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,8 +38,8 @@ static size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb,
   long len = 0;
 
   r = sscanf(ptr, "Content-Length: %ld\n", &len);
-  if(r)
-    *((long *) stream) = len;
+  if (r)
+    *((long *)stream) = len;
 
   return size * nmemb;
 }
@@ -58,14 +58,13 @@ static size_t readfunc(char *ptr, size_t size, size_t nmemb, void *stream)
   FILE *f = stream;
   size_t n;
 
-  if(ferror(f))
+  if (ferror(f))
     return FETCH_READFUNC_ABORT;
 
   n = fread(ptr, size, nmemb, f) * size;
 
   return n;
 }
-
 
 static int upload(FETCH *fetchhandle, const char *remotepath,
                   const char *localpath, long timeout, long tries)
@@ -76,7 +75,8 @@ static int upload(FETCH *fetchhandle, const char *remotepath,
   int c;
 
   f = fopen(localpath, "rb");
-  if(!f) {
+  if (!f)
+  {
     perror(NULL);
     return 0;
   }
@@ -85,7 +85,7 @@ static int upload(FETCH *fetchhandle, const char *remotepath,
 
   fetch_easy_setopt(fetchhandle, FETCHOPT_URL, remotepath);
 
-  if(timeout)
+  if (timeout)
     fetch_easy_setopt(fetchhandle, FETCHOPT_SERVER_RESPONSE_TIMEOUT, timeout);
 
   fetch_easy_setopt(fetchhandle, FETCHOPT_HEADERFUNCTION, getcontentlengthfunc);
@@ -106,9 +106,11 @@ static int upload(FETCH *fetchhandle, const char *remotepath,
 
   fetch_easy_setopt(fetchhandle, FETCHOPT_VERBOSE, 1L);
 
-  for(c = 0; (r != FETCHE_OK) && (c < tries); c++) {
+  for (c = 0; (r != FETCHE_OK) && (c < tries); c++)
+  {
     /* are we resuming? */
-    if(c) { /* yes */
+    if (c)
+    { /* yes */
       /* determine the length of the file already written */
 
       /*
@@ -121,7 +123,7 @@ static int upload(FETCH *fetchhandle, const char *remotepath,
       fetch_easy_setopt(fetchhandle, FETCHOPT_HEADER, 1L);
 
       r = fetch_easy_perform(fetchhandle);
-      if(r != FETCHE_OK)
+      if (r != FETCHE_OK)
         continue;
 
       fetch_easy_setopt(fetchhandle, FETCHOPT_NOBODY, 0L);
@@ -131,7 +133,8 @@ static int upload(FETCH *fetchhandle, const char *remotepath,
 
       fetch_easy_setopt(fetchhandle, FETCHOPT_APPEND, 1L);
     }
-    else { /* no */
+    else
+    { /* no */
       fetch_easy_setopt(fetchhandle, FETCHOPT_APPEND, 0L);
     }
 
@@ -140,9 +143,10 @@ static int upload(FETCH *fetchhandle, const char *remotepath,
 
   fclose(f);
 
-  if(r == FETCHE_OK)
+  if (r == FETCHE_OK)
     return 1;
-  else {
+  else
+  {
     fprintf(stderr, "%s\n", fetch_easy_strerror(r));
     return 0;
   }

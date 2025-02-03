@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://fetch.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -73,7 +73,7 @@ class ScoreCard:
         sample_size = 5
         self.info('TLS Handshake\n')
         for authority in [
-            'fetch.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
+            'curl.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
         ]:
             self.info(f'  {authority}...')
             props[authority] = {}

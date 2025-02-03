@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,9 +43,9 @@
  * Download an HTTP file and upload an FTP file simultaneously.
  */
 
-#define HANDLECOUNT 2   /* Number of simultaneous transfers */
-#define HTTP_HANDLE 0   /* Index for the HTTP transfer */
-#define FTP_HANDLE 1    /* Index for the FTP transfer */
+#define HANDLECOUNT 2 /* Number of simultaneous transfers */
+#define HTTP_HANDLE 0 /* Index for the HTTP transfer */
+#define FTP_HANDLE 1  /* Index for the FTP transfer */
 
 int main(void)
 {
@@ -59,7 +59,7 @@ int main(void)
   int msgs_left; /* how many messages are left */
 
   /* Allocate one fetch handle per transfer */
-  for(i = 0; i < HANDLECOUNT; i++)
+  for (i = 0; i < HANDLECOUNT; i++)
     handles[i] = fetch_easy_init();
 
   /* set the options (I left out a few, you get the point anyway) */
@@ -72,15 +72,16 @@ int main(void)
   multi_handle = fetch_multi_init();
 
   /* add the individual transfers */
-  for(i = 0; i < HANDLECOUNT; i++)
+  for (i = 0; i < HANDLECOUNT; i++)
     fetch_multi_add_handle(multi_handle, handles[i]);
 
   /* we start some action by calling perform right away */
   fetch_multi_perform(multi_handle, &still_running);
 
-  while(still_running) {
+  while (still_running)
+  {
     struct timeval timeout;
-    int rc; /* select() return code */
+    int rc;        /* select() return code */
     FETCHMcode mc; /* fetch_multi_fdset() return code */
 
     fd_set fdread;
@@ -99,13 +100,14 @@ int main(void)
     timeout.tv_usec = 0;
 
     fetch_multi_timeout(multi_handle, &fetch_timeo);
-    if(fetch_timeo >= 0) {
+    if (fetch_timeo >= 0)
+    {
 #if defined(MSDOS) || defined(__AMIGA__)
       timeout.tv_sec = (time_t)(fetch_timeo / 1000);
 #else
       timeout.tv_sec = fetch_timeo / 1000;
 #endif
-      if(timeout.tv_sec > 1)
+      if (timeout.tv_sec > 1)
         timeout.tv_sec = 1;
       else
 #if defined(MSDOS) || defined(__AMIGA__)
@@ -118,7 +120,8 @@ int main(void)
     /* get file descriptors from the transfers */
     mc = fetch_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != FETCHM_OK) {
+    if (mc != FETCHM_OK)
+    {
       fprintf(stderr, "fetch_multi_fdset() failed, code %d.\n", mc);
       break;
     }
@@ -129,7 +132,8 @@ int main(void)
        to sleep 100ms, which is the minimum suggested value in the
        fetch_multi_fdset() doc. */
 
-    if(maxfd == -1) {
+    if (maxfd == -1)
+    {
 #ifdef _WIN32
       Sleep(100);
       rc = 0;
@@ -140,17 +144,19 @@ int main(void)
       rc = select(0, NULL, NULL, NULL, &wait);
 #endif
     }
-    else {
+    else
+    {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
       rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
-    switch(rc) {
+    switch (rc)
+    {
     case -1:
       /* select error */
       break;
-    case 0: /* timeout */
+    case 0:  /* timeout */
     default: /* action */
       fetch_multi_perform(multi_handle, &still_running);
       break;
@@ -159,18 +165,22 @@ int main(void)
 
   /* See how the transfers went */
   /* !checksrc! disable EQUALSNULL 1 */
-  while((msg = fetch_multi_info_read(multi_handle, &msgs_left)) != NULL) {
-    if(msg->msg == FETCHMSG_DONE) {
+  while ((msg = fetch_multi_info_read(multi_handle, &msgs_left)) != NULL)
+  {
+    if (msg->msg == FETCHMSG_DONE)
+    {
       int idx;
 
       /* Find out which handle this message is about */
-      for(idx = 0; idx < HANDLECOUNT; idx++) {
+      for (idx = 0; idx < HANDLECOUNT; idx++)
+      {
         int found = (msg->easy_handle == handles[idx]);
-        if(found)
+        if (found)
           break;
       }
 
-      switch(idx) {
+      switch (idx)
+      {
       case HTTP_HANDLE:
         printf("HTTP transfer completed with status %d\n", msg->data.result);
         break;
@@ -184,7 +194,7 @@ int main(void)
   fetch_multi_cleanup(multi_handle);
 
   /* Free the fetch handles */
-  for(i = 0; i < HANDLECOUNT; i++)
+  for (i = 0; i < HANDLECOUNT; i++)
     fetch_easy_cleanup(handles[i]);
 
   return 0;

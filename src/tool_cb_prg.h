@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,15 +26,16 @@
 #include "tool_setup.h"
 
 #define FETCH_PROGRESS_STATS 0 /* default progress display */
-#define FETCH_PROGRESS_BAR   1
+#define FETCH_PROGRESS_BAR 1
 
-struct ProgressData {
-  int         calls;
-  fetch_off_t  prev;
+struct ProgressData
+{
+  int calls;
+  fetch_off_t prev;
   struct timeval prevtime;
-  int         width;
-  FILE       *out;  /* where to write everything to */
-  fetch_off_t  initial_size;
+  int width;
+  FILE *out; /* where to write everything to */
+  fetch_off_t initial_size;
   unsigned int tick;
   int bar;
   int barmove;

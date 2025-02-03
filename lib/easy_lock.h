@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -61,9 +61,9 @@
    __has_builtin() function, so override it. */
 
 /* if GCC on i386/x86_64 or if the built-in is present */
-#if ( (defined(__GNUC__) && !defined(__clang__)) &&     \
-      (defined(__i386__) || defined(__x86_64__))) ||    \
-  __has_builtin(__builtin_ia32_pause)
+#if ((defined(__GNUC__) && !defined(__clang__)) &&  \
+     (defined(__i386__) || defined(__x86_64__))) || \
+    __has_builtin(__builtin_ia32_pause)
 #define HAVE_BUILTIN_IA32_PAUSE
 #endif
 
@@ -71,11 +71,13 @@
 
 static FETCH_INLINE void fetch_simple_lock_lock(fetch_simple_lock *lock)
 {
-  for(;;) {
-    if(!atomic_exchange_explicit(lock, true, memory_order_acquire))
+  for (;;)
+  {
+    if (!atomic_exchange_explicit(lock, true, memory_order_acquire))
       break;
     /* Reduce cache coherency traffic */
-    while(atomic_load_explicit(lock, memory_order_relaxed)) {
+    while (atomic_load_explicit(lock, memory_order_relaxed))
+    {
       /* Reduce load (not mandatory) */
 #ifdef HAVE_BUILTIN_IA32_PAUSE
       __builtin_ia32_pause();
@@ -106,7 +108,7 @@ static FETCH_INLINE void fetch_simple_lock_unlock(fetch_simple_lock *lock)
 
 #else
 
-#undef  GLOBAL_INIT_IS_THREADSAFE
+#undef GLOBAL_INIT_IS_THREADSAFE
 
 #endif
 

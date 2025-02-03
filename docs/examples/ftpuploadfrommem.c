@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,18 +29,19 @@
 #include <string.h>
 #include <fetch/fetch.h>
 
-static const char data[]=
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-  "Nam rhoncus odio id venenatis volutpat. Vestibulum dapibus "
-  "bibendum ullamcorper. Maecenas finibus elit augue, vel "
-  "condimentum odio maximus nec. In hac habitasse platea dictumst. "
-  "Vestibulum vel dolor et turpis rutrum finibus ac at nulla. "
-  "Vivamus nec neque ac elit blandit pretium vitae maximus ipsum. "
-  "Quisque sodales magna vel erat auctor, sed pellentesque nisi "
-  "rhoncus. Donec vehicula maximus pretium. Aliquam eu tincidunt "
-  "lorem.";
+static const char data[] =
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+    "Nam rhoncus odio id venenatis volutpat. Vestibulum dapibus "
+    "bibendum ullamcorper. Maecenas finibus elit augue, vel "
+    "condimentum odio maximus nec. In hac habitasse platea dictumst. "
+    "Vestibulum vel dolor et turpis rutrum finibus ac at nulla. "
+    "Vivamus nec neque ac elit blandit pretium vitae maximus ipsum. "
+    "Quisque sodales magna vel erat auctor, sed pellentesque nisi "
+    "rhoncus. Donec vehicula maximus pretium. Aliquam eu tincidunt "
+    "lorem.";
 
-struct WriteThis {
+struct WriteThis
+{
   const char *readptr;
   size_t sizeleft;
 };
@@ -48,14 +49,15 @@ struct WriteThis {
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *upload = (struct WriteThis *)userp;
-  size_t max = size*nmemb;
+  size_t max = size * nmemb;
 
-  if(max < 1)
+  if (max < 1)
     return 0;
 
-  if(upload->sizeleft) {
+  if (upload->sizeleft)
+  {
     size_t copylen = max;
-    if(copylen > upload->sizeleft)
+    if (copylen > upload->sizeleft)
       copylen = upload->sizeleft;
     memcpy(ptr, upload->readptr, copylen);
     upload->readptr += copylen;
@@ -63,7 +65,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
     return copylen;
   }
 
-  return 0;                          /* no more data left to deliver */
+  return 0; /* no more data left to deliver */
 }
 
 int main(void)
@@ -79,7 +81,8 @@ int main(void)
   /* In Windows, this inits the Winsock stuff */
   res = fetch_global_init(FETCH_GLOBAL_DEFAULT);
   /* Check for errors */
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed: %s\n",
             fetch_easy_strerror(res));
     return 1;
@@ -87,10 +90,11 @@ int main(void)
 
   /* get a fetch handle */
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* First set the URL, the target file */
     fetch_easy_setopt(fetch, FETCHOPT_URL,
-                     "ftp://example.com/path/to/upload/file");
+                      "ftp://example.com/path/to/upload/file");
 
     /* User and password for the FTP login */
     fetch_easy_setopt(fetch, FETCHOPT_USERPWD, "login:secret");
@@ -109,12 +113,12 @@ int main(void)
 
     /* Set the expected upload size. */
     fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
-                     (fetch_off_t)upload.sizeleft);
+                      (fetch_off_t)upload.sizeleft);
 
     /* Perform the request, res gets the return code */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,14 +44,18 @@ wchar_t *fetchx_convert_UTF8_to_wchar(const char *str_utf8)
 {
   wchar_t *str_w = NULL;
 
-  if(str_utf8) {
+  if (str_utf8)
+  {
     int str_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
                                         str_utf8, -1, NULL, 0);
-    if(str_w_len > 0) {
+    if (str_w_len > 0)
+    {
       str_w = malloc(str_w_len * sizeof(wchar_t));
-      if(str_w) {
-        if(MultiByteToWideChar(CP_UTF8, 0, str_utf8, -1, str_w,
-                               str_w_len) == 0) {
+      if (str_w)
+      {
+        if (MultiByteToWideChar(CP_UTF8, 0, str_utf8, -1, str_w,
+                                str_w_len) == 0)
+        {
           free(str_w);
           return NULL;
         }
@@ -66,14 +70,18 @@ char *fetchx_convert_wchar_to_UTF8(const wchar_t *str_w)
 {
   char *str_utf8 = NULL;
 
-  if(str_w) {
+  if (str_w)
+  {
     int bytes = WideCharToMultiByte(CP_UTF8, 0, str_w, -1,
                                     NULL, 0, NULL, NULL);
-    if(bytes > 0) {
+    if (bytes > 0)
+    {
       str_utf8 = malloc(bytes);
-      if(str_utf8) {
-        if(WideCharToMultiByte(CP_UTF8, 0, str_w, -1, str_utf8, bytes,
-                               NULL, NULL) == 0) {
+      if (str_utf8)
+      {
+        if (WideCharToMultiByte(CP_UTF8, 0, str_w, -1, str_utf8, bytes,
+                                NULL, NULL) == 0)
+        {
           free(str_utf8);
           return NULL;
         }
@@ -86,7 +94,7 @@ char *fetchx_convert_wchar_to_UTF8(const wchar_t *str_w)
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
 #if defined(FETCH_WINDOWS_UWP) && defined(__MINGW32__) && \
-  (_WIN32_WINNT < _WIN32_WINNT_WIN10)
+    (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR, DWORD, LPWSTR, LPWSTR *);
 #endif
 
@@ -125,20 +133,20 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
   *out = NULL;
 
   /* skip paths already normalized */
-  if(!_tcsncmp(in, _T("\\\\?\\"), 4))
+  if (!_tcsncmp(in, _T("\\\\?\\"), 4))
     goto cleanup;
 
 #ifndef _UNICODE
   /* convert multibyte input to unicode */
   needed = mbstowcs(NULL, in, 0);
-  if(needed == (size_t)-1 || needed >= max_path_len)
+  if (needed == (size_t)-1 || needed >= max_path_len)
     goto cleanup;
   ++needed; /* for NUL */
   ibuf = malloc(needed * sizeof(wchar_t));
-  if(!ibuf)
+  if (!ibuf)
     goto cleanup;
   count = mbstowcs(ibuf, in, needed);
-  if(count == (size_t)-1 || count >= needed)
+  if (count == (size_t)-1 || count >= needed)
     goto cleanup;
   in_w = ibuf;
 #else
@@ -149,16 +157,16 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
      forward slashes to backslashes, processes .. to remove directory segments,
      etc. Unlike GetFullPathNameA it can process paths that exceed MAX_PATH. */
   needed = (size_t)GetFullPathNameW(in_w, 0, NULL, NULL);
-  if(!needed || needed > max_path_len)
+  if (!needed || needed > max_path_len)
     goto cleanup;
   /* skip paths that are not excessive and do not need modification */
-  if(needed <= MAX_PATH)
+  if (needed <= MAX_PATH)
     goto cleanup;
   fbuf = malloc(needed * sizeof(wchar_t));
-  if(!fbuf)
+  if (!fbuf)
     goto cleanup;
   count = (size_t)GetFullPathNameW(in_w, (DWORD)needed, fbuf, NULL);
-  if(!count || count >= needed)
+  if (!count || count >= needed)
     goto cleanup;
 
   /* prepend \\?\ or \\?\UNC\ to the excessively long path.
@@ -170,38 +178,42 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
    *
    * https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
    */
-  if(!wcsncmp(fbuf, L"\\\\?\\", 4))
+  if (!wcsncmp(fbuf, L"\\\\?\\", 4))
     ; /* do nothing */
-  else if(!wcsncmp(fbuf, L"\\\\.\\", 4))
+  else if (!wcsncmp(fbuf, L"\\\\.\\", 4))
     fbuf[2] = '?';
-  else if(!wcsncmp(fbuf, L"\\\\.", 3) || !wcsncmp(fbuf, L"\\\\?", 3)) {
+  else if (!wcsncmp(fbuf, L"\\\\.", 3) || !wcsncmp(fbuf, L"\\\\?", 3))
+  {
     /* Unexpected, not UNC. The formatting doc doesn't allow this AFAICT. */
     goto cleanup;
   }
-  else {
+  else
+  {
     wchar_t *temp;
 
-    if(!wcsncmp(fbuf, L"\\\\", 2)) {
+    if (!wcsncmp(fbuf, L"\\\\", 2))
+    {
       /* "\\?\UNC\" + full path without "\\" + null */
       needed = 8 + (count - 2) + 1;
-      if(needed > max_path_len)
+      if (needed > max_path_len)
         goto cleanup;
 
       temp = malloc(needed * sizeof(wchar_t));
-      if(!temp)
+      if (!temp)
         goto cleanup;
 
       wcsncpy(temp, L"\\\\?\\UNC\\", 8);
       wcscpy(temp + 8, fbuf + 2);
     }
-    else {
+    else
+    {
       /* "\\?\" + full path + null */
       needed = 4 + count + 1;
-      if(needed > max_path_len)
+      if (needed > max_path_len)
         goto cleanup;
 
       temp = malloc(needed * sizeof(wchar_t));
-      if(!temp)
+      if (!temp)
         goto cleanup;
 
       wcsncpy(temp, L"\\\\?\\", 4);
@@ -215,14 +227,14 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
 #ifndef _UNICODE
   /* convert unicode full path to multibyte output */
   needed = wcstombs(NULL, fbuf, 0);
-  if(needed == (size_t)-1 || needed >= max_path_len)
+  if (needed == (size_t)-1 || needed >= max_path_len)
     goto cleanup;
   ++needed; /* for NUL */
   obuf = malloc(needed);
-  if(!obuf)
+  if (!obuf)
     goto cleanup;
   count = wcstombs(obuf, fbuf, needed);
-  if(count == (size_t)-1 || count >= needed)
+  if (count == (size_t)-1 || count >= needed)
     goto cleanup;
   *out = obuf;
   obuf = NULL;
@@ -253,13 +265,14 @@ int fetchx_win32_open(const char *filename, int oflag, ...)
 
   va_list param;
   va_start(param, oflag);
-  if(oflag & O_CREAT)
+  if (oflag & O_CREAT)
     pmode = va_arg(param, int);
   va_end(param);
 
 #ifdef _UNICODE
-  if(filename_w) {
-    if(fix_excessive_path(filename_w, &fixed))
+  if (filename_w)
+  {
+    if (fix_excessive_path(filename_w, &fixed))
       target = fixed;
     else
       target = filename_w;
@@ -269,7 +282,7 @@ int fetchx_win32_open(const char *filename, int oflag, ...)
   else
     errno = EINVAL;
 #else
-  if(fix_excessive_path(filename, &fixed))
+  if (fix_excessive_path(filename, &fixed))
     target = fixed;
   else
     target = filename;
@@ -289,8 +302,9 @@ FILE *fetchx_win32_fopen(const char *filename, const char *mode)
 #ifdef _UNICODE
   wchar_t *filename_w = fetchx_convert_UTF8_to_wchar(filename);
   wchar_t *mode_w = fetchx_convert_UTF8_to_wchar(mode);
-  if(filename_w && mode_w) {
-    if(fix_excessive_path(filename_w, &fixed))
+  if (filename_w && mode_w)
+  {
+    if (fix_excessive_path(filename_w, &fixed))
       target = fixed;
     else
       target = filename_w;
@@ -301,7 +315,7 @@ FILE *fetchx_win32_fopen(const char *filename, const char *mode)
   fetchx_unicodefree(filename_w);
   fetchx_unicodefree(mode_w);
 #else
-  if(fix_excessive_path(filename, &fixed))
+  if (fix_excessive_path(filename, &fixed))
     target = fixed;
   else
     target = filename;
@@ -320,8 +334,9 @@ int fetchx_win32_stat(const char *path, struct_stat *buffer)
 
 #ifdef _UNICODE
   wchar_t *path_w = fetchx_convert_UTF8_to_wchar(path);
-  if(path_w) {
-    if(fix_excessive_path(path_w, &fixed))
+  if (path_w)
+  {
+    if (fix_excessive_path(path_w, &fixed))
       target = fixed;
     else
       target = path_w;
@@ -335,7 +350,7 @@ int fetchx_win32_stat(const char *path, struct_stat *buffer)
   else
     errno = EINVAL;
 #else
-  if(fix_excessive_path(path, &fixed))
+  if (fix_excessive_path(path, &fixed))
     target = fixed;
   else
     target = path;

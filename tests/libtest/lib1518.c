@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,7 +49,8 @@ FETCHcode test(char *URL)
   FETCHU *urlu = NULL;
 #endif
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -59,9 +60,10 @@ FETCHcode test(char *URL)
   {
     FETCHUcode rc = FETCHUE_OK;
     urlu = fetch_url();
-    if(urlu)
+    if (urlu)
       rc = fetch_url_set(urlu, FETCHUPART_URL, URL, FETCHU_ALLOW_SPACE);
-    if(!urlu || rc) {
+    if (!urlu || rc)
+    {
       goto test_cleanup;
     }
     test_setopt(fetch, FETCHOPT_FETCHU, urlu);
@@ -72,7 +74,6 @@ FETCHcode test(char *URL)
   /* just to make it explicit and visible in this test: */
   test_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 0L);
 #endif
-
 
   /* Perform the request, res will get the return code */
   res = fetch_easy_perform(fetch);

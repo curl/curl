@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,16 +29,17 @@
 #ifdef USE_XATTR
 
 /* mapping table of fetch metadata to extended attribute names */
-static const struct xattr_mapping {
+static const struct xattr_mapping
+{
   const char *attr; /* name of the xattr */
   FETCHINFO info;
 } mappings[] = {
-  /* mappings proposed by
-   * https://freedesktop.org/wiki/CommonExtendedAttributes/
-   */
-  { "user.xdg.referrer.url", FETCHINFO_REFERER },
-  { "user.mime_type",        FETCHINFO_CONTENT_TYPE },
-  { NULL,                    FETCHINFO_NONE } /* last element, abort here */
+    /* mappings proposed by
+     * https://freedesktop.org/wiki/CommonExtendedAttributes/
+     */
+    {"user.xdg.referrer.url", FETCHINFO_REFERER},
+    {"user.mime_type", FETCHINFO_CONTENT_TYPE},
+    {NULL, FETCHINFO_NONE} /* last element, abort here */
 };
 
 /* returns a new URL that needs to be freed */
@@ -54,21 +55,22 @@ char *stripcredentials(const char *url)
   FETCHUcode uc;
   char *nurl;
   u = fetch_url();
-  if(u) {
+  if (u)
+  {
     uc = fetch_url_set(u, FETCHUPART_URL, url, FETCHU_GUESS_SCHEME);
-    if(uc)
+    if (uc)
       goto error;
 
     uc = fetch_url_set(u, FETCHUPART_USER, NULL, 0);
-    if(uc)
+    if (uc)
       goto error;
 
     uc = fetch_url_set(u, FETCHUPART_PASSWORD, NULL, 0);
-    if(uc)
+    if (uc)
       goto error;
 
     uc = fetch_url_get(u, FETCHUPART_URL, &nurl, 0);
-    if(uc)
+    if (uc)
       goto error;
 
     fetch_url_cleanup(u);
@@ -85,9 +87,11 @@ static int xattr(int fd,
                  const char *value)
 {
   int err = 0;
-  if(value) {
+  if (value)
+  {
 #ifdef DEBUGBUILD
-    if(getenv("FETCH_FAKE_XATTR")) {
+    if (getenv("FETCH_FAKE_XATTR"))
+    {
       printf("%s => %s\n", attr, value);
       return 0;
     }
@@ -117,16 +121,18 @@ int fwrite_xattr(FETCH *fetch, const char *url, int fd)
   int err = xattr(fd, "user.creator", "fetch");
 
   /* loop through all xattr-fetchinfo pairs and abort on a set error */
-  while(!err && mappings[i].attr) {
+  while (!err && mappings[i].attr)
+  {
     char *value = NULL;
     FETCHcode result = fetch_easy_getinfo(fetch, mappings[i].info, &value);
-    if(!result && value)
+    if (!result && value)
       err = xattr(fd, mappings[i].attr, value);
     i++;
   }
-  if(!err) {
+  if (!err)
+  {
     char *nurl = stripcredentials(url);
-    if(!nurl)
+    if (!nurl)
       return 1;
     err = xattr(fd, "user.xdg.origin.url", nurl);
     fetch_free(nurl);

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,12 +60,14 @@ int main(void)
   /* Loop the transfer and cleanup the handle properly every lap. This still
      reuses connections since the pool is in the shared object! */
 
-  for(i = 0; i < 3; i++) {
+  for (i = 0; i < 3; i++)
+  {
     FETCH *fetch = fetch_easy_init();
-    if(fetch) {
+    if (fetch)
+    {
       FETCHcode res;
 
-      fetch_easy_setopt(fetch, FETCHOPT_URL, "https://fetch.se/");
+      fetch_easy_setopt(fetch, FETCHOPT_URL, "https://curl.se/");
 
       /* use the share object */
       fetch_easy_setopt(fetch, FETCHOPT_SHARE, share);
@@ -73,7 +75,7 @@ int main(void)
       /* Perform the request, res gets the return code */
       res = fetch_easy_perform(fetch);
       /* Check for errors */
-      if(res != FETCHE_OK)
+      if (res != FETCHE_OK)
         fprintf(stderr, "fetch_easy_perform() failed: %s\n",
                 fetch_easy_strerror(res));
 

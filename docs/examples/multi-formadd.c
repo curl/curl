@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,28 +49,27 @@ int main(void)
   static const char buf[] = "Expect:";
 
   FETCH_IGNORE_DEPRECATION(
-    /* Fill in the file upload field. This makes libfetch load data from
-       the given file name when fetch_easy_perform() is called. */
-    fetch_formadd(&formpost,
-                 &lastptr,
-                 FETCHFORM_COPYNAME, "sendfile",
-                 FETCHFORM_FILE, "multi-formadd.c",
-                 FETCHFORM_END);
+      /* Fill in the file upload field. This makes libfetch load data from
+         the given file name when fetch_easy_perform() is called. */
+      fetch_formadd(&formpost,
+                    &lastptr,
+                    FETCHFORM_COPYNAME, "sendfile",
+                    FETCHFORM_FILE, "multi-formadd.c",
+                    FETCHFORM_END);
 
-    /* Fill in the filename field */
-    fetch_formadd(&formpost,
-                 &lastptr,
-                 FETCHFORM_COPYNAME, "filename",
-                 FETCHFORM_COPYCONTENTS, "multi-formadd.c",
-                 FETCHFORM_END);
+      /* Fill in the filename field */
+      fetch_formadd(&formpost,
+                    &lastptr,
+                    FETCHFORM_COPYNAME, "filename",
+                    FETCHFORM_COPYCONTENTS, "multi-formadd.c",
+                    FETCHFORM_END);
 
-    /* Fill in the submit field too, even if this is rarely needed */
-    fetch_formadd(&formpost,
-                 &lastptr,
-                 FETCHFORM_COPYNAME, "submit",
-                 FETCHFORM_COPYCONTENTS, "send",
-                 FETCHFORM_END);
-  )
+      /* Fill in the submit field too, even if this is rarely needed */
+      fetch_formadd(&formpost,
+                    &lastptr,
+                    FETCHFORM_COPYNAME, "submit",
+                    FETCHFORM_COPYCONTENTS, "send",
+                    FETCHFORM_END);)
 
   fetch = fetch_easy_init();
   multi_handle = fetch_multi_init();
@@ -78,7 +77,8 @@ int main(void)
   /* initialize custom header list (stating that Expect: 100-continue is not
      wanted */
   headerlist = fetch_slist_append(headerlist, buf);
-  if(fetch && multi_handle) {
+  if (fetch && multi_handle)
+  {
 
     /* what URL that receives this POST */
     fetch_easy_setopt(fetch, FETCHOPT_URL, "https://www.example.com/upload.cgi");
@@ -86,22 +86,22 @@ int main(void)
 
     fetch_easy_setopt(fetch, FETCHOPT_HTTPHEADER, headerlist);
     FETCH_IGNORE_DEPRECATION(
-      fetch_easy_setopt(fetch, FETCHOPT_HTTPPOST, formpost);
-    )
+        fetch_easy_setopt(fetch, FETCHOPT_HTTPPOST, formpost);)
 
     fetch_multi_add_handle(multi_handle, fetch);
 
-    do {
+    do
+    {
       FETCHMcode mc = fetch_multi_perform(multi_handle, &still_running);
 
-      if(still_running)
+      if (still_running)
         /* wait for activity, timeout or "nothing" */
         mc = fetch_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-      if(mc)
+      if (mc)
         break;
 
-    } while(still_running);
+    } while (still_running);
 
     fetch_multi_cleanup(multi_handle);
 
@@ -109,9 +109,8 @@ int main(void)
     fetch_easy_cleanup(fetch);
 
     FETCH_IGNORE_DEPRECATION(
-      /* then cleanup the formpost chain */
-      fetch_formfree(formpost);
-    )
+        /* then cleanup the formpost chain */
+        fetch_formfree(formpost);)
 
     /* free slist */
     fetch_slist_free_all(headerlist);

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,12 +45,14 @@ FETCHcode test(char *URL)
   (void)URL;
 
   /* Create fake DNS entries for serverX.example.com for all handles */
-  for(i = 0; i < NUM_URLS; i++) {
+  for (i = 0; i < NUM_URLS; i++)
+  {
     msnprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s", i + 1,
               port, address);
     printf("%s\n", dnsentry);
     slist2 = fetch_slist_append(slist, dnsentry);
-    if(!slist2) {
+    if (!slist2)
+    {
       fprintf(stderr, "fetch_slist_append() failed\n");
       goto test_cleanup;
     }
@@ -74,7 +76,8 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_MAXCONNECTS, 3L);
 
   /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_URLS; i++) {
+  for (i = 0; i < NUM_URLS; i++)
+  {
     /* specify target */
     msnprintf(target_url, sizeof(target_url),
               "http://server%d.example.com:%s/path/1510%04i",
@@ -83,7 +86,7 @@ FETCHcode test(char *URL)
     easy_setopt(fetch, FETCHOPT_URL, target_url);
 
     res = fetch_easy_perform(fetch);
-    if(res)
+    if (res)
       goto test_cleanup;
 
     abort_on_test_timeout();

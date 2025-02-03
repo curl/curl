@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,7 +32,7 @@
 static char *GetEnv(const char *variable)
 {
 #if defined(_WIN32_WCE) || defined(FETCH_WINDOWS_UWP) || \
-  defined(__ORBIS__) || defined(__PROSPERO__) /* PlayStation 4 and 5 */
+    defined(__ORBIS__) || defined(__PROSPERO__) /* PlayStation 4 and 5 */
   (void)variable;
   return NULL;
 #elif defined(_WIN32)
@@ -44,9 +44,11 @@ static char *GetEnv(const char *variable)
   DWORD rc = 1;
   const DWORD max = 32768; /* max env var size from MSCRT source */
 
-  for(;;) {
+  for (;;)
+  {
     tmp = realloc(buf, rc);
-    if(!tmp) {
+    if (!tmp)
+    {
       free(buf);
       return NULL;
     }
@@ -57,13 +59,14 @@ static char *GetEnv(const char *variable)
     /* it is possible for rc to be 0 if the variable was found but empty.
        Since getenv does not make that distinction we ignore it as well. */
     rc = GetEnvironmentVariableA(variable, buf, bufsize);
-    if(!rc || rc == bufsize || rc > max) {
+    if (!rc || rc == bufsize || rc > max)
+    {
       free(buf);
       return NULL;
     }
 
     /* if rc < bufsize then rc is bytes written not including null */
-    if(rc < bufsize)
+    if (rc < bufsize)
       return buf;
 
     /* else rc is bytes needed, try again */

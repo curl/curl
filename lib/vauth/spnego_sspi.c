@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -58,14 +58,14 @@ bool Curl_auth_is_spnego_supported(void)
 
   /* Query the security package for Negotiate */
   status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
-                                              TEXT(SP_NAME_NEGOTIATE),
-                                              &SecurityPackage);
+                                                     TEXT(SP_NAME_NEGOTIATE),
+                                                 &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
-  if(status == SEC_E_OK) {
+  if (status == SEC_E_OK)
+  {
     Curl_pSecFn->FreeContextBuffer(SecurityPackage);
   }
-
 
   return status == SEC_E_OK;
 }
@@ -89,12 +89,12 @@ bool Curl_auth_is_spnego_supported(void)
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
-                                         const char *user,
-                                         const char *password,
-                                         const char *service,
-                                         const char *host,
-                                         const char *chlg64,
-                                         struct negotiatedata *nego)
+                                          const char *user,
+                                          const char *password,
+                                          const char *service,
+                                          const char *host,
+                                          const char *chlg64,
+                                          struct negotiatedata *nego)
 {
   FETCHcode result = FETCHE_OK;
   size_t chlglen = 0;
@@ -108,10 +108,11 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
 #if defined(FETCH_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+  (void)data;
 #endif
 
-  if(nego->context && nego->status == SEC_E_OK) {
+  if (nego->context && nego->status == SEC_E_OK)
+  {
     /* We finished successfully our part of authentication, but server
      * rejected it (since we are again here). Exit with an error since we
      * cannot invent anything better */
@@ -119,19 +120,22 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     return FETCHE_LOGIN_DENIED;
   }
 
-  if(!nego->spn) {
+  if (!nego->spn)
+  {
     /* Generate our SPN */
     nego->spn = Curl_auth_build_spn(service, host, NULL);
-    if(!nego->spn)
+    if (!nego->spn)
       return FETCHE_OUT_OF_MEMORY;
   }
 
-  if(!nego->output_token) {
+  if (!nego->output_token)
+  {
     /* Query the security package for Negotiate */
     nego->status = (DWORD)Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
-                                                       TEXT(SP_NAME_NEGOTIATE),
-                                                       &SecurityPackage);
-    if(nego->status != SEC_E_OK) {
+                                                                    TEXT(SP_NAME_NEGOTIATE),
+                                                                &SecurityPackage);
+    if (nego->status != SEC_E_OK)
+    {
       failf(data, "SSPI: could not get auth info");
       return FETCHE_AUTH_ERROR;
     }
@@ -143,16 +147,18 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
     /* Allocate our output buffer */
     nego->output_token = malloc(nego->token_max);
-    if(!nego->output_token)
+    if (!nego->output_token)
       return FETCHE_OUT_OF_MEMORY;
- }
+  }
 
-  if(!nego->credentials) {
+  if (!nego->credentials)
+  {
     /* Do we have credentials to use or are we using single sign-on? */
-    if(user && *user) {
+    if (user && *user)
+    {
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(user, password, &nego->identity);
-      if(result)
+      if (result)
         return result;
 
       /* Allow proper cleanup of the identity structure */
@@ -164,70 +170,74 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
     /* Allocate our credentials handle */
     nego->credentials = calloc(1, sizeof(CredHandle));
-    if(!nego->credentials)
+    if (!nego->credentials)
       return FETCHE_OUT_OF_MEMORY;
 
     /* Acquire our credentials handle */
     nego->status = (DWORD)
-      Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                         (TCHAR *)TEXT(SP_NAME_NEGOTIATE),
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         nego->p_identity, NULL, NULL,
-                                         nego->credentials, &expiry);
-    if(nego->status != SEC_E_OK)
+                       Curl_pSecFn->AcquireCredentialsHandle(NULL,
+                                                             (TCHAR *)TEXT(SP_NAME_NEGOTIATE),
+                                                             SECPKG_CRED_OUTBOUND, NULL,
+                                                             nego->p_identity, NULL, NULL,
+                                                             nego->credentials, &expiry);
+    if (nego->status != SEC_E_OK)
       return FETCHE_AUTH_ERROR;
 
     /* Allocate our new context handle */
     nego->context = calloc(1, sizeof(CtxtHandle));
-    if(!nego->context)
+    if (!nego->context)
       return FETCHE_OUT_OF_MEMORY;
   }
 
-  if(chlg64 && *chlg64) {
+  if (chlg64 && *chlg64)
+  {
     /* Decode the base-64 encoded challenge message */
-    if(*chlg64 != '=') {
+    if (*chlg64 != '=')
+    {
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);
-      if(result)
+      if (result)
         return result;
     }
 
     /* Ensure we have a valid challenge message */
-    if(!chlg) {
+    if (!chlg)
+    {
       infof(data, "SPNEGO handshake failure (empty challenge message)");
       return FETCHE_BAD_CONTENT_ENCODING;
     }
 
     /* Setup the challenge "input" security buffer */
-    chlg_desc.ulVersion    = SECBUFFER_VERSION;
-    chlg_desc.cBuffers     = 1;
-    chlg_desc.pBuffers     = &chlg_buf[0];
+    chlg_desc.ulVersion = SECBUFFER_VERSION;
+    chlg_desc.cBuffers = 1;
+    chlg_desc.pBuffers = &chlg_buf[0];
     chlg_buf[0].BufferType = SECBUFFER_TOKEN;
-    chlg_buf[0].pvBuffer   = chlg;
-    chlg_buf[0].cbBuffer   = fetchx_uztoul(chlglen);
+    chlg_buf[0].pvBuffer = chlg;
+    chlg_buf[0].cbBuffer = fetchx_uztoul(chlglen);
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
     /* ssl context comes from Schannel.
-    * When extended protection is used in IIS server,
-    * we have to pass a second SecBuffer to the SecBufferDesc
-    * otherwise IIS will not pass the authentication (401 response).
-    * Minimum supported version is Windows 7.
-    * https://docs.microsoft.com/en-us/security-updates
-    * /SecurityAdvisories/2009/973811
-    */
-    if(nego->sslContext) {
+     * When extended protection is used in IIS server,
+     * we have to pass a second SecBuffer to the SecBufferDesc
+     * otherwise IIS will not pass the authentication (401 response).
+     * Minimum supported version is Windows 7.
+     * https://docs.microsoft.com/en-us/security-updates
+     * /SecurityAdvisories/2009/973811
+     */
+    if (nego->sslContext)
+    {
       SEC_CHANNEL_BINDINGS channelBindings;
       SecPkgContext_Bindings pkgBindings;
       pkgBindings.Bindings = &channelBindings;
       nego->status = (DWORD)Curl_pSecFn->QueryContextAttributes(
           nego->sslContext,
           SECPKG_ATTR_ENDPOINT_BINDINGS,
-          &pkgBindings
-      );
-      if(nego->status == SEC_E_OK) {
+          &pkgBindings);
+      if (nego->status == SEC_E_OK)
+      {
         chlg_desc.cBuffers++;
         chlg_buf[1].BufferType = SECBUFFER_CHANNEL_BINDINGS;
-        chlg_buf[1].cbBuffer   = pkgBindings.BindingsLength;
-        chlg_buf[1].pvBuffer   = pkgBindings.Bindings;
+        chlg_buf[1].cbBuffer = pkgBindings.BindingsLength;
+        chlg_buf[1].pvBuffer = pkgBindings.Bindings;
       }
     }
 #endif
@@ -235,48 +245,51 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   /* Setup the response "output" security buffer */
   resp_desc.ulVersion = SECBUFFER_VERSION;
-  resp_desc.cBuffers  = 1;
-  resp_desc.pBuffers  = &resp_buf;
+  resp_desc.cBuffers = 1;
+  resp_desc.pBuffers = &resp_buf;
   resp_buf.BufferType = SECBUFFER_TOKEN;
-  resp_buf.pvBuffer   = nego->output_token;
-  resp_buf.cbBuffer   = fetchx_uztoul(nego->token_max);
+  resp_buf.pvBuffer = nego->output_token;
+  resp_buf.cbBuffer = fetchx_uztoul(nego->token_max);
 
   /* Generate our challenge-response message */
   nego->status =
-    (DWORD)Curl_pSecFn->InitializeSecurityContext(nego->credentials,
-                                                  chlg ? nego->context : NULL,
-                                                  nego->spn,
-                                                  ISC_REQ_CONFIDENTIALITY,
-                                                  0, SECURITY_NATIVE_DREP,
-                                                  chlg ? &chlg_desc : NULL,
-                                                  0, nego->context,
-                                                  &resp_desc, &attrs,
-                                                  &expiry);
+      (DWORD)Curl_pSecFn->InitializeSecurityContext(nego->credentials,
+                                                    chlg ? nego->context : NULL,
+                                                    nego->spn,
+                                                    ISC_REQ_CONFIDENTIALITY,
+                                                    0, SECURITY_NATIVE_DREP,
+                                                    chlg ? &chlg_desc : NULL,
+                                                    0, nego->context,
+                                                    &resp_desc, &attrs,
+                                                    &expiry);
 
   /* Free the decoded challenge as it is not required anymore */
   free(chlg);
 
-  if(GSS_ERROR(nego->status)) {
+  if (GSS_ERROR(nego->status))
+  {
     char buffer[STRERROR_LEN];
     failf(data, "InitializeSecurityContext failed: %s",
           Curl_sspi_strerror((int)nego->status, buffer, sizeof(buffer)));
 
-    if(nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
+    if (nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
       return FETCHE_OUT_OF_MEMORY;
 
     return FETCHE_AUTH_ERROR;
   }
 
-  if(nego->status == SEC_I_COMPLETE_NEEDED ||
-     nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
+  if (nego->status == SEC_I_COMPLETE_NEEDED ||
+      nego->status == SEC_I_COMPLETE_AND_CONTINUE)
+  {
     nego->status = (DWORD)Curl_pSecFn->CompleteAuthToken(nego->context,
-                                                      &resp_desc);
-    if(GSS_ERROR(nego->status)) {
+                                                         &resp_desc);
+    if (GSS_ERROR(nego->status))
+    {
       char buffer[STRERROR_LEN];
       failf(data, "CompleteAuthToken failed: %s",
             Curl_sspi_strerror((int)nego->status, buffer, sizeof(buffer)));
 
-      if(nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
+      if (nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
         return FETCHE_OUT_OF_MEMORY;
 
       return FETCHE_AUTH_ERROR;
@@ -305,13 +318,14 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
-                                         char **outptr, size_t *outlen)
+                                          char **outptr, size_t *outlen)
 {
   /* Base64 encode the already generated response */
-  FETCHcode result = Curl_base64_encode((const char *) nego->output_token,
-                                       nego->output_token_length, outptr,
-                                       outlen);
-  if(!result && (!*outptr || !*outlen)) {
+  FETCHcode result = Curl_base64_encode((const char *)nego->output_token,
+                                        nego->output_token_length, outptr,
+                                        outlen);
+  if (!result && (!*outptr || !*outlen))
+  {
     free(*outptr);
     result = FETCHE_REMOTE_ACCESS_DENIED;
   }
@@ -332,14 +346,16 @@ FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
 void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 {
   /* Free our security context */
-  if(nego->context) {
+  if (nego->context)
+  {
     Curl_pSecFn->DeleteSecurityContext(nego->context);
     free(nego->context);
     nego->context = NULL;
   }
 
   /* Free our credentials handle */
-  if(nego->credentials) {
+  if (nego->credentials)
+  {
     Curl_pSecFn->FreeCredentialsHandle(nego->credentials);
     free(nego->credentials);
     nego->credentials = NULL;

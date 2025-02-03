@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "test.h"
 
-/* test case and code based on https://github.com/fetch/fetch/issues/3927 */
+/* test case and code based on https://github.com/curl/curl/issues/3927 */
 
 #include "testutil.h"
 #include "warnless.h"
@@ -45,7 +45,7 @@ static size_t write_cb(char *d, size_t n, size_t l, void *p)
   /* take care of the data here, ignored in this example */
   (void)d;
   (void)p;
-  return n*l;
+  return n * l;
 }
 
 static FETCHcode run(FETCH *hnd, long limit, long time)
@@ -69,11 +69,11 @@ FETCHcode test(char *URL)
   fetch_easy_setopt(hnd, FETCHOPT_XFERINFOFUNCTION, dload_progress_cb);
 
   ret = run(hnd, 1, 2);
-  if(ret)
+  if (ret)
     fprintf(stderr, "error %d: %s\n", ret, buffer);
 
   ret = run(hnd, 12000, 1);
-  if(ret != FETCHE_OPERATION_TIMEDOUT)
+  if (ret != FETCHE_OPERATION_TIMEDOUT)
     fprintf(stderr, "error %d: %s\n", ret, buffer);
   else
     ret = FETCHE_OK;

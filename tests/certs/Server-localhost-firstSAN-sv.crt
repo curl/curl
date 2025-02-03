@@ -51,10 +51,10 @@ Certificate:
             X509v3 Basic Constraints: 
                 CA:FALSE
             Authority Information Access: 
-                CA Issuers - URI:http://test.fetch.se/ca/EdelCurlRoot.cer
+                CA Issuers - URI:http://test.curl.se/ca/EdelCurlRoot.cer
             X509v3 CRL Distribution Points: 
                 Full Name:
-                  URI:http://test.fetch.se/ca/EdelCurlRoot.crl
+                  URI:http://test.curl.se/ca/EdelCurlRoot.crl
     Signature Algorithm: sha256WithRSAEncryption
     Signature Value:
         75:0d:9b:eb:8a:df:ca:a7:7c:9d:9e:6a:eb:30:10:24:12:1b:

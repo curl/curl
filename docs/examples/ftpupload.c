@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,10 +43,10 @@
  * </DESC>
  */
 
-#define LOCAL_FILE      "/tmp/uploadthis.txt"
-#define UPLOAD_FILE_AS  "while-uploading.txt"
-#define REMOTE_URL      "ftp://example.com/"  UPLOAD_FILE_AS
-#define RENAME_FILE_TO  "renamed-and-fine.txt"
+#define LOCAL_FILE "/tmp/uploadthis.txt"
+#define UPLOAD_FILE_AS "while-uploading.txt"
+#define REMOTE_URL "ftp://example.com/" UPLOAD_FILE_AS
+#define RENAME_FILE_TO "renamed-and-fine.txt"
 
 /* NOTE: if you want this example to work on Windows with libfetch as a DLL,
    you MUST also provide a read callback with FETCHOPT_READFUNCTION. Failing to
@@ -60,7 +60,8 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
      by default internally */
   size_t retcode = fread(ptr, size, nmemb, stream);
 
-  if(retcode > 0) {
+  if (retcode > 0)
+  {
     nread = (unsigned long)retcode;
     fprintf(stderr, "*** We read %lu bytes from file\n", nread);
   }
@@ -77,11 +78,12 @@ int main(void)
   unsigned long fsize;
 
   struct fetch_slist *headerlist = NULL;
-  static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
-  static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
+  static const char buf_1[] = "RNFR " UPLOAD_FILE_AS;
+  static const char buf_2[] = "RNTO " RENAME_FILE_TO;
 
   /* get the file size of the local file */
-  if(stat(LOCAL_FILE, &file_info)) {
+  if (stat(LOCAL_FILE, &file_info))
+  {
     printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 1;
   }
@@ -91,7 +93,7 @@ int main(void)
 
   /* get a FILE * of the same file */
   hd_src = fopen(LOCAL_FILE, "rb");
-  if(!hd_src)
+  if (!hd_src)
     return 2;
 
   /* In Windows, this inits the Winsock stuff */
@@ -99,7 +101,8 @@ int main(void)
 
   /* get a fetch handle */
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* build a list of commands to pass to libfetch */
     headerlist = fetch_slist_append(headerlist, buf_1);
     headerlist = fetch_slist_append(headerlist, buf_2);
@@ -124,12 +127,12 @@ int main(void)
        fetch_off_t. If you use FETCHOPT_INFILESIZE (without _LARGE) you must
        make sure that to pass in a type 'long' argument. */
     fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
-                     (fetch_off_t)fsize);
+                      (fetch_off_t)fsize);
 
     /* Now run off and do what you have been told! */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

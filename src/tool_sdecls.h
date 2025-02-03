@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -62,7 +62,8 @@
  * until it can be completed (1-4 bytes) + NUL.
  */
 
-struct OutStruct {
+struct OutStruct
+{
   char *filename;
   bool alloc_filename;
   bool is_cd_filename;
@@ -82,46 +83,47 @@ struct OutStruct {
  * be stored or which file should be uploaded.
  */
 
-struct getout {
-  struct getout *next;      /* next one */
-  char          *url;       /* the URL we deal with */
-  char          *outfile;   /* where to store the output */
-  char          *infile;    /* file to upload, if GETOUT_UPLOAD is set */
-  int            flags;     /* options - composed of GETOUT_* bits */
-  int            num;       /* which URL number in an invocation */
+struct getout
+{
+  struct getout *next; /* next one */
+  char *url;           /* the URL we deal with */
+  char *outfile;       /* where to store the output */
+  char *infile;        /* file to upload, if GETOUT_UPLOAD is set */
+  int flags;           /* options - composed of GETOUT_* bits */
+  int num;             /* which URL number in an invocation */
 };
 
-#define GETOUT_OUTFILE    (1<<0)  /* set when outfile is deemed done */
-#define GETOUT_URL        (1<<1)  /* set when URL is deemed done */
-#define GETOUT_USEREMOTE  (1<<2)  /* use remote filename locally */
-#define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
-#define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
+#define GETOUT_OUTFILE (1 << 0)   /* set when outfile is deemed done */
+#define GETOUT_URL (1 << 1)       /* set when URL is deemed done */
+#define GETOUT_USEREMOTE (1 << 2) /* use remote filename locally */
+#define GETOUT_UPLOAD (1 << 3)    /* if set, -T has been used */
+#define GETOUT_NOUPLOAD (1 << 4)  /* if set, -T "" has been used */
 
 /*
  * 'trace' enumeration represents fetch's output look'n feel possibilities.
  */
 
-typedef enum {
+typedef enum
+{
   TRACE_NONE,  /* no trace/verbose output at all */
   TRACE_BIN,   /* tcpdump inspired look */
   TRACE_ASCII, /* like *BIN but without the hex output */
   TRACE_PLAIN  /* -v/--verbose type */
 } trace;
 
-
 /*
  * 'HttpReq' enumeration represents HTTP request types.
  */
 
-typedef enum {
-  TOOL_HTTPREQ_UNSPEC,  /* first in list */
+typedef enum
+{
+  TOOL_HTTPREQ_UNSPEC, /* first in list */
   TOOL_HTTPREQ_GET,
   TOOL_HTTPREQ_HEAD,
   TOOL_HTTPREQ_MIMEPOST,
   TOOL_HTTPREQ_SIMPLEPOST,
   TOOL_HTTPREQ_PUT
 } HttpReq;
-
 
 /*
  * Complete struct declarations which have OperationConfig struct members,

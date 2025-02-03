@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,8 @@
 #include "dynhds.h"
 #include "ws.h"
 
-typedef enum {
+typedef enum
+{
   HTTPREQ_GET,
   HTTPREQ_POST,
   HTTPREQ_POST_FORM, /* we make a difference internally */
@@ -42,17 +43,16 @@ typedef enum {
   HTTPREQ_HEAD
 } Curl_HttpReq;
 
-
 /* When redirecting transfers. */
-typedef enum {
+typedef enum
+{
   FOLLOW_NONE,  /* not used within the function, just a placeholder to
                    allow initing to this */
   FOLLOW_FAKE,  /* only records stuff, not actually following */
   FOLLOW_RETRY, /* set if this is a request retry as opposed to a real
                    redirect following */
-  FOLLOW_REDIR /* a full true redirect */
+  FOLLOW_REDIR  /* a full true redirect */
 } followtype;
-
 
 #ifndef FETCH_DISABLE_HTTP
 
@@ -69,15 +69,15 @@ extern const struct Curl_handler Curl_handler_https;
 struct dynhds;
 
 FETCHcode Curl_bump_headersize(struct Curl_easy *data,
-                              size_t delta,
-                              bool connect_only);
+                               size_t delta,
+                               bool connect_only);
 
 /* Header specific functions */
-bool Curl_compareheader(const char *headerline,  /* line to check */
-                        const char *header,   /* header keyword _with_ colon */
-                        const size_t hlen,   /* len of the keyword in bytes */
-                        const char *content, /* content string to find */
-                        const size_t clen);   /* len of the content in bytes */
+bool Curl_compareheader(const char *headerline, /* line to check */
+                        const char *header,     /* header keyword _with_ colon */
+                        const size_t hlen,      /* len of the keyword in bytes */
+                        const char *content,    /* content string to find */
+                        const size_t clen);     /* len of the content in bytes */
 
 char *Curl_copy_header_value(const char *header);
 
@@ -88,42 +88,42 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 
 FETCHcode Curl_add_timecondition(struct Curl_easy *data, struct dynbuf *req);
 FETCHcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
-                                 int httpversion, struct dynbuf *req);
+                                  int httpversion, struct dynbuf *req);
 FETCHcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
-                                struct dynhds *hds);
+                                 struct dynhds *hds);
 
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
 
 /* protocol-specific functions set up to be called by the main engine */
 FETCHcode Curl_http_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn);
+                               struct connectdata *conn);
 FETCHcode Curl_http(struct Curl_easy *data, bool *done);
 FETCHcode Curl_http_done(struct Curl_easy *data, FETCHcode, bool premature);
 FETCHcode Curl_http_connect(struct Curl_easy *data, bool *done);
 int Curl_http_getsock_do(struct Curl_easy *data, struct connectdata *conn,
                          fetch_socket_t *socks);
 FETCHcode Curl_http_write_resp(struct Curl_easy *data,
-                              const char *buf, size_t blen,
-                              bool is_eos);
+                               const char *buf, size_t blen,
+                               bool is_eos);
 FETCHcode Curl_http_write_resp_hd(struct Curl_easy *data,
-                                 const char *hd, size_t hdlen,
-                                 bool is_eos);
+                                  const char *hd, size_t hdlen,
+                                  bool is_eos);
 
 /* These functions are in http.c */
 FETCHcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
-                              const char *auth);
+                               const char *auth);
 FETCHcode Curl_http_auth_act(struct Curl_easy *data);
 
 /* follow a redirect or not */
 FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
-                          followtype type);
+                           followtype type);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
    to not having one selected. The other FETCHAUTH_* defines are present in the
    public fetch/fetch.h header. */
-#define FETCHAUTH_PICKNONE (1<<30) /* do not use auth */
+#define FETCHAUTH_PICKNONE (1 << 30) /* do not use auth */
 
 /* MAX_INITIAL_POST_SIZE indicates the number of bytes that will make the POST
    data get included in the initial data chunk sent to the server. If the
@@ -138,7 +138,7 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    It must not be greater than 64K to work on VMS.
 */
 #ifndef MAX_INITIAL_POST_SIZE
-#define MAX_INITIAL_POST_SIZE (64*1024)
+#define MAX_INITIAL_POST_SIZE (64 * 1024)
 #endif
 
 /* EXPECT_100_THRESHOLD is the request body size limit for when libfetch will
@@ -147,14 +147,13 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
  *
  */
 #ifndef EXPECT_100_THRESHOLD
-#define EXPECT_100_THRESHOLD (1024*1024)
+#define EXPECT_100_THRESHOLD (1024 * 1024)
 #endif
 
 /* MAX_HTTP_RESP_HEADER_SIZE is the maximum size of all response headers
    combined that libfetch allows for a single HTTP response, any HTTP
    version. This count includes CONNECT response headers. */
-#define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
-
+#define MAX_HTTP_RESP_HEADER_SIZE (300 * 1024)
 
 #endif /* FETCH_DISABLE_HTTP */
 
@@ -163,8 +162,8 @@ FETCHcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
  ***************************************************************************/
 
 FETCHcode Curl_http_write_resp_hds(struct Curl_easy *data,
-                                  const char *buf, size_t blen,
-                                  size_t *pconsumed);
+                                   const char *buf, size_t blen,
+                                   size_t *pconsumed);
 
 /**
  * Curl_http_output_auth() setups the authentication headers for the
@@ -194,11 +193,11 @@ Curl_http_output_auth(struct Curl_easy *data,
 /* Decode HTTP status code string. */
 FETCHcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
 
-
 /**
  * All about a core HTTP request, excluding body and trailers
  */
-struct httpreq {
+struct httpreq
+{
   char method[24];
   char *scheme;
   char *authority;
@@ -211,14 +210,14 @@ struct httpreq {
  * Create an HTTP request struct.
  */
 FETCHcode Curl_http_req_make(struct httpreq **preq,
-                            const char *method, size_t m_len,
-                            const char *scheme, size_t s_len,
-                            const char *authority, size_t a_len,
-                            const char *path, size_t p_len);
+                             const char *method, size_t m_len,
+                             const char *scheme, size_t s_len,
+                             const char *authority, size_t a_len,
+                             const char *path, size_t p_len);
 
 FETCHcode Curl_http_req_make2(struct httpreq **preq,
-                             const char *method, size_t m_len,
-                             FETCHU *url, const char *scheme_default);
+                              const char *method, size_t m_len,
+                              FETCHU *url, const char *scheme_default);
 
 void Curl_http_req_free(struct httpreq *req);
 
@@ -244,12 +243,13 @@ void Curl_http_req_free(struct httpreq *req);
  * @param data       the handle to lookup defaults like ' :scheme' from
  */
 FETCHcode Curl_http_req_to_h2(struct dynhds *h2_headers,
-                             struct httpreq *req, struct Curl_easy *data);
+                              struct httpreq *req, struct Curl_easy *data);
 
 /**
  * All about a core HTTP response, excluding body and trailers
  */
-struct http_resp {
+struct http_resp
+{
   int status;
   char *description;
   struct dynhds headers;
@@ -261,8 +261,8 @@ struct http_resp {
  * Create an HTTP response struct.
  */
 FETCHcode Curl_http_resp_make(struct http_resp **presp,
-                             int status,
-                             const char *description);
+                              int status,
+                              const char *description);
 
 void Curl_http_resp_free(struct http_resp *resp);
 

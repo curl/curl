@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,11 +60,11 @@ char *Curl_auth_build_spn(const char *service, const char *host,
   char *spn = NULL;
 
   /* Generate our SPN */
-  if(host && realm)
+  if (host && realm)
     spn = aprintf("%s/%s@%s", service, host, realm);
-  else if(host)
+  else if (host)
     spn = aprintf("%s/%s", service, host);
-  else if(realm)
+  else if (realm)
     spn = aprintf("%s@%s", service, realm);
 
   /* Return our newly allocated SPN */
@@ -78,7 +78,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
   TCHAR *tchar_spn = NULL;
   TCHAR *dupe_tchar_spn = NULL;
 
-  (void) realm;
+  (void)realm;
 
   /* Note: We could use DsMakeSPN() or DsClientMakeSpnForTargetServer() rather
      than doing this ourselves but the first is only available in Windows XP
@@ -89,7 +89,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
 
   /* Generate our UTF8 based SPN */
   utf8_spn = aprintf("%s/%s", service, host);
-  if(!utf8_spn)
+  if (!utf8_spn)
     return NULL;
 
   /* Allocate and return a TCHAR based SPN. Since fetchx_convert_UTF8_to_tchar
@@ -97,7 +97,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
      pointer this function returns can be normally free'd. */
   tchar_spn = fetchx_convert_UTF8_to_tchar(utf8_spn);
   free(utf8_spn);
-  if(!tchar_spn)
+  if (!tchar_spn)
     return NULL;
   dupe_tchar_spn = _tcsdup(tchar_spn);
   fetchx_unicodefree(tchar_spn);
@@ -130,7 +130,8 @@ bool Curl_auth_user_contains_domain(const char *user)
 {
   bool valid = FALSE;
 
-  if(user && *user) {
+  if (user && *user)
+  {
     /* Check we have a domain name or UPN present */
     char *p = strpbrk(user, "\\/@");
 

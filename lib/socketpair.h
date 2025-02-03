@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,11 +27,11 @@
 #include "fetch_setup.h"
 
 #if defined(HAVE_EVENTFD) && \
-    (defined(__x86_64__) || \
+    (defined(__x86_64__) ||  \
      defined(__aarch64__) || \
-     defined(__ia64__) || \
-     defined(__ppc64__) || \
-     defined(__mips64) || \
+     defined(__ia64__) ||    \
+     defined(__ppc64__) ||   \
+     defined(__mips64) ||    \
      defined(__sparc64__) || \
      defined(__riscv_64e) || \
      defined(__s390x__))
@@ -45,29 +45,29 @@
  */
 #define USE_EVENTFD 1
 
-#define wakeup_write  write
-#define wakeup_read   read
-#define wakeup_close  close
-#define wakeup_create(p,nb) Curl_eventfd(p,nb)
+#define wakeup_write write
+#define wakeup_read read
+#define wakeup_close close
+#define wakeup_create(p, nb) Curl_eventfd(p, nb)
 
 #include <fetch/fetch.h>
 int Curl_eventfd(fetch_socket_t socks[2], bool nonblocking);
 
 #elif defined(HAVE_PIPE)
 
-#define wakeup_write  write
-#define wakeup_read   read
-#define wakeup_close  close
-#define wakeup_create(p,nb) Curl_pipe(p,nb)
+#define wakeup_write write
+#define wakeup_read read
+#define wakeup_close close
+#define wakeup_create(p, nb) Curl_pipe(p, nb)
 
 #include <fetch/fetch.h>
 int Curl_pipe(fetch_socket_t socks[2], bool nonblocking);
 
 #else /* !USE_EVENTFD && !HAVE_PIPE */
 
-#define wakeup_write     swrite
-#define wakeup_read      sread
-#define wakeup_close     sclose
+#define wakeup_write swrite
+#define wakeup_read sread
+#define wakeup_close sclose
 
 #if defined(USE_UNIX_SOCKETS) && defined(HAVE_SOCKETPAIR)
 #define SOCKETPAIR_FAMILY AF_UNIX
@@ -83,8 +83,8 @@ int Curl_pipe(fetch_socket_t socks[2], bool nonblocking);
 #define SOCKETPAIR_TYPE SOCK_STREAM
 #endif
 
-#define wakeup_create(p,nb)\
-Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
+#define wakeup_create(p, nb) \
+    Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
 
 #endif /* USE_EVENTFD */
 

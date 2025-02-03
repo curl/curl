@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,19 +36,19 @@
 */
 
 fetch_socket_t tool_socket_open_mptcp_cb(void *clientp,
-                                        fetchsocktype purpose,
-                                        struct fetch_sockaddr *addr)
+                                         fetchsocktype purpose,
+                                         struct fetch_sockaddr *addr)
 {
   int protocol = addr->protocol;
 
   (void)clientp;
   (void)purpose;
 
-  if(protocol == IPPROTO_TCP)
+  if (protocol == IPPROTO_TCP)
 #if defined(__linux__)
-#  ifndef IPPROTO_MPTCP
-#  define IPPROTO_MPTCP 262
-#  endif
+#ifndef IPPROTO_MPTCP
+#define IPPROTO_MPTCP 262
+#endif
     protocol = IPPROTO_MPTCP;
 #else
     return FETCH_SOCKET_BAD;

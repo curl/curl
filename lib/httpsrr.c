@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,7 +38,7 @@
 #include "memdebug.h"
 
 FETCHcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
-                                  unsigned char *alpns)
+                                   unsigned char *alpns)
 {
   /*
    * spec here is as per RFC 9460, section-7.1.1
@@ -55,35 +55,39 @@ FETCHcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
   int idnum = 0;
 
   Curl_dyn_init(&dval, DYN_DOH_RESPONSE);
-  while(len > 0) {
-    size_t tlen = (size_t) *cp++;
+  while (len > 0)
+  {
+    size_t tlen = (size_t)*cp++;
     size_t i;
     enum alpnid id;
     len--;
-    if(tlen > len)
+    if (tlen > len)
       goto err;
     /* add escape char if needed, clunky but easier to read */
-    for(i = 0; i != tlen; i++) {
-      if('\\' == *cp || ',' == *cp) {
-        if(Curl_dyn_addn(&dval, "\\", 1))
+    for (i = 0; i != tlen; i++)
+    {
+      if ('\\' == *cp || ',' == *cp)
+      {
+        if (Curl_dyn_addn(&dval, "\\", 1))
           goto err;
       }
-      if(Curl_dyn_addn(&dval, cp++, 1))
+      if (Curl_dyn_addn(&dval, cp++, 1))
         goto err;
     }
     len -= tlen;
 
     /* we only store ALPN ids we know about */
     id = Curl_alpn2alpnid(Curl_dyn_ptr(&dval), Curl_dyn_len(&dval));
-    if(id != ALPN_none) {
-      if(idnum == MAX_HTTPSRR_ALPNS)
+    if (id != ALPN_none)
+    {
+      if (idnum == MAX_HTTPSRR_ALPNS)
         break;
       alpns[idnum++] = (unsigned char)id;
     }
     Curl_dyn_reset(&dval);
   }
   Curl_dyn_free(&dval);
-  if(idnum < MAX_HTTPSRR_ALPNS)
+  if (idnum < MAX_HTTPSRR_ALPNS)
     alpns[idnum] = ALPN_none; /* terminate the list */
   return FETCHE_OK;
 err:
@@ -102,9 +106,10 @@ static void httpsrr_opt(struct Curl_easy *data,
   unsigned short code;
   struct thread_data *res = data->state.async.tdata;
   struct Curl_https_rrinfo *hi = &res->hinfo;
-  code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
+  code = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
 
-  switch(code) {
+  switch (code)
+  {
   case HTTPS_RR_CODE_ALPN: /* str_list */
     Curl_httpsrr_decode_alpn(val, len, hi->alpns);
     infof(data, "HTTPS RR ALPN: %u %u %u %u",
@@ -143,21 +148,22 @@ void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
   res->num_pending--;
 #endif
   (void)timeouts;
-  if((ARES_SUCCESS != status) || !dnsrec)
+  if ((ARES_SUCCESS != status) || !dnsrec)
     return;
 
-  for(i = 0; i < ares_dns_record_rr_cnt(dnsrec, ARES_SECTION_ANSWER); i++) {
+  for (i = 0; i < ares_dns_record_rr_cnt(dnsrec, ARES_SECTION_ANSWER); i++)
+  {
     size_t opt;
     const ares_dns_rr_t *rr =
-      ares_dns_record_rr_get_const(dnsrec, ARES_SECTION_ANSWER, i);
-    if(ares_dns_rr_get_type(rr) != ARES_REC_TYPE_HTTPS)
+        ares_dns_record_rr_get_const(dnsrec, ARES_SECTION_ANSWER, i);
+    if (ares_dns_rr_get_type(rr) != ARES_REC_TYPE_HTTPS)
       continue;
     /* When SvcPriority is 0, the SVCB record is in AliasMode. Otherwise, it
        is in ServiceMode */
     infof(data, "HTTPS RR priority: %u",
           ares_dns_rr_get_u16(rr, ARES_RR_HTTPS_PRIORITY));
-    for(opt = 0; opt < ares_dns_rr_get_opt_cnt(rr, ARES_RR_HTTPS_PARAMS);
-        opt++)
+    for (opt = 0; opt < ares_dns_rr_get_opt_cnt(rr, ARES_RR_HTTPS_PARAMS);
+         opt++)
       httpsrr_opt(data, rr, ARES_RR_HTTPS_PARAMS, opt);
   }
 }

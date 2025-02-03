@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,8 +24,7 @@
 
 #include "fetch_setup.h"
 
-#if defined(USE_OPENSSL)                        \
-  || defined(USE_SCHANNEL)
+#if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
 /* these backends use functions from this file */
 
 #ifdef HAVE_NETINET_IN_H
@@ -49,7 +48,7 @@
 static bool pmatch(const char *hostname, size_t hostlen,
                    const char *pattern, size_t patternlen)
 {
-  if(hostlen != patternlen)
+  if (hostlen != patternlen)
     return FALSE;
   return strncasecompare(hostname, pattern, hostlen);
 }
@@ -91,27 +90,29 @@ static bool hostmatch(const char *hostname,
   DEBUGASSERT(hostlen);
 
   /* normalize pattern and hostname by stripping off trailing dots */
-  if(hostname[hostlen-1]=='.')
+  if (hostname[hostlen - 1] == '.')
     hostlen--;
-  if(pattern[patternlen-1]=='.')
+  if (pattern[patternlen - 1] == '.')
     patternlen--;
 
-  if(strncmp(pattern, "*.", 2))
+  if (strncmp(pattern, "*.", 2))
     return pmatch(hostname, hostlen, pattern, patternlen);
 
   /* detect IP address as hostname and fail the match if so */
-  else if(Curl_host_is_ipnum(hostname))
+  else if (Curl_host_is_ipnum(hostname))
     return FALSE;
 
   /* We require at least 2 dots in the pattern to avoid too wide wildcard
      match. */
   pattern_label_end = memchr(pattern, '.', patternlen);
-  if(!pattern_label_end ||
-     (memrchr(pattern, '.', patternlen) == pattern_label_end))
+  if (!pattern_label_end ||
+      (memrchr(pattern, '.', patternlen) == pattern_label_end))
     return pmatch(hostname, hostlen, pattern, patternlen);
-  else {
+  else
+  {
     const char *hostname_label_end = memchr(hostname, '.', hostlen);
-    if(hostname_label_end) {
+    if (hostname_label_end)
+    {
       size_t skiphost = hostname_label_end - hostname;
       size_t skiplen = pattern_label_end - pattern;
       return pmatch(hostname_label_end, hostlen - skiphost,
@@ -127,7 +128,7 @@ static bool hostmatch(const char *hostname,
 bool Curl_cert_hostcheck(const char *match, size_t matchlen,
                          const char *hostname, size_t hostlen)
 {
-  if(match && *match && hostname && *hostname)
+  if (match && *match && hostname && *hostname)
     return hostmatch(hostname, hostlen, match, matchlen);
   return FALSE;
 }

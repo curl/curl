@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,11 +55,12 @@ bool Curl_auth_is_ntlm_supported(void)
   SECURITY_STATUS status;
 
   /* Query the security package for NTLM */
-  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
-                                              &SecurityPackage);
+  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)TEXT(SP_NAME_NTLM),
+                                                 &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
-  if(status == SEC_E_OK) {
+  if (status == SEC_E_OK)
+  {
     Curl_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
@@ -85,12 +86,12 @@ bool Curl_auth_is_ntlm_supported(void)
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
-                                             const char *userp,
-                                             const char *passwdp,
-                                             const char *service,
-                                             const char *host,
-                                             struct ntlmdata *ntlm,
-                                             struct bufref *out)
+                                              const char *userp,
+                                              const char *passwdp,
+                                              const char *service,
+                                              const char *host,
+                                              struct ntlmdata *ntlm,
+                                              struct bufref *out)
 {
   PSecPkgInfo SecurityPackage;
   SecBuffer type_1_buf;
@@ -103,9 +104,10 @@ FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   Curl_auth_cleanup_ntlm(ntlm);
 
   /* Query the security package for NTLM */
-  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
-                                              &SecurityPackage);
-  if(status != SEC_E_OK) {
+  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)TEXT(SP_NAME_NTLM),
+                                                 &SecurityPackage);
+  if (status != SEC_E_OK)
+  {
     failf(data, "SSPI: could not get auth info");
     return FETCHE_AUTH_ERROR;
   }
@@ -117,15 +119,16 @@ FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Allocate our output buffer */
   ntlm->output_token = malloc(ntlm->token_max);
-  if(!ntlm->output_token)
+  if (!ntlm->output_token)
     return FETCHE_OUT_OF_MEMORY;
 
-  if(userp && *userp) {
+  if (userp && *userp)
+  {
     FETCHcode result;
 
     /* Populate our identity structure */
     result = Curl_create_sspi_identity(userp, passwdp, &ntlm->identity);
-    if(result)
+    if (result)
       return result;
 
     /* Allow proper cleanup of the identity structure */
@@ -137,48 +140,48 @@ FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Allocate our credentials handle */
   ntlm->credentials = calloc(1, sizeof(CredHandle));
-  if(!ntlm->credentials)
+  if (!ntlm->credentials)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Acquire our credentials handle */
   status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                              (TCHAR *) TEXT(SP_NAME_NTLM),
-                                              SECPKG_CRED_OUTBOUND, NULL,
-                                              ntlm->p_identity, NULL, NULL,
-                                              ntlm->credentials, &expiry);
-  if(status != SEC_E_OK)
+                                                 (TCHAR *)TEXT(SP_NAME_NTLM),
+                                                 SECPKG_CRED_OUTBOUND, NULL,
+                                                 ntlm->p_identity, NULL, NULL,
+                                                 ntlm->credentials, &expiry);
+  if (status != SEC_E_OK)
     return FETCHE_LOGIN_DENIED;
 
   /* Allocate our new context handle */
   ntlm->context = calloc(1, sizeof(CtxtHandle));
-  if(!ntlm->context)
+  if (!ntlm->context)
     return FETCHE_OUT_OF_MEMORY;
 
   ntlm->spn = Curl_auth_build_spn(service, host, NULL);
-  if(!ntlm->spn)
+  if (!ntlm->spn)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Setup the type-1 "output" security buffer */
   type_1_desc.ulVersion = SECBUFFER_VERSION;
-  type_1_desc.cBuffers  = 1;
-  type_1_desc.pBuffers  = &type_1_buf;
+  type_1_desc.cBuffers = 1;
+  type_1_desc.pBuffers = &type_1_buf;
   type_1_buf.BufferType = SECBUFFER_TOKEN;
-  type_1_buf.pvBuffer   = ntlm->output_token;
-  type_1_buf.cbBuffer   = fetchx_uztoul(ntlm->token_max);
+  type_1_buf.pvBuffer = ntlm->output_token;
+  type_1_buf.cbBuffer = fetchx_uztoul(ntlm->token_max);
 
   /* Generate our type-1 message */
   status = Curl_pSecFn->InitializeSecurityContext(ntlm->credentials, NULL,
-                                               ntlm->spn,
-                                               0, 0, SECURITY_NETWORK_DREP,
-                                               NULL, 0,
-                                               ntlm->context, &type_1_desc,
-                                               &attrs, &expiry);
-  if(status == SEC_I_COMPLETE_NEEDED ||
-    status == SEC_I_COMPLETE_AND_CONTINUE)
+                                                  ntlm->spn,
+                                                  0, 0, SECURITY_NETWORK_DREP,
+                                                  NULL, 0,
+                                                  ntlm->context, &type_1_desc,
+                                                  &attrs, &expiry);
+  if (status == SEC_I_COMPLETE_NEEDED ||
+      status == SEC_I_COMPLETE_AND_CONTINUE)
     Curl_pSecFn->CompleteAuthToken(ntlm->context, &type_1_desc);
-  else if(status == SEC_E_INSUFFICIENT_MEMORY)
+  else if (status == SEC_E_INSUFFICIENT_MEMORY)
     return FETCHE_OUT_OF_MEMORY;
-  else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED)
+  else if (status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED)
     return FETCHE_AUTH_ERROR;
 
   /* Return the response. */
@@ -200,15 +203,16 @@ FETCHcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
-                                             const struct bufref *type2,
-                                             struct ntlmdata *ntlm)
+                                              const struct bufref *type2,
+                                              struct ntlmdata *ntlm)
 {
 #if defined(FETCH_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+  (void)data;
 #endif
 
   /* Ensure we have a valid type-2 message */
-  if(!Curl_bufref_len(type2)) {
+  if (!Curl_bufref_len(type2))
+  {
     infof(data, "NTLM handshake failure (empty type-2 message)");
     return FETCHE_BAD_CONTENT_ENCODING;
   }
@@ -216,7 +220,7 @@ FETCHcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   /* Store the challenge for later use */
   ntlm->input_token = Curl_memdup0((const char *)Curl_bufref_ptr(type2),
                                    Curl_bufref_len(type2));
-  if(!ntlm->input_token)
+  if (!ntlm->input_token)
     return FETCHE_OUT_OF_MEMORY;
   ntlm->input_token_len = Curl_bufref_len(type2);
 
@@ -224,7 +228,7 @@ FETCHcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
 }
 
 /*
-* Curl_auth_create_ntlm_type3_message()
+ * Curl_auth_create_ntlm_type3_message()
  * Curl_auth_create_ntlm_type3_message()
  *
  * This is used to generate an already encoded NTLM type-3 message ready for
@@ -241,10 +245,10 @@ FETCHcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
-                                             const char *userp,
-                                             const char *passwdp,
-                                             struct ntlmdata *ntlm,
-                                             struct bufref *out)
+                                              const char *userp,
+                                              const char *passwdp,
+                                              struct ntlmdata *ntlm,
+                                              struct bufref *out)
 {
   FETCHcode result = FETCHE_OK;
   SecBuffer type_2_bufs[2];
@@ -256,38 +260,39 @@ FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
 #if defined(FETCH_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+  (void)data;
 #endif
-  (void) passwdp;
-  (void) userp;
+  (void)passwdp;
+  (void)userp;
 
   /* Setup the type-2 "input" security buffer */
-  type_2_desc.ulVersion     = SECBUFFER_VERSION;
-  type_2_desc.cBuffers      = 1;
-  type_2_desc.pBuffers      = &type_2_bufs[0];
+  type_2_desc.ulVersion = SECBUFFER_VERSION;
+  type_2_desc.cBuffers = 1;
+  type_2_desc.pBuffers = &type_2_bufs[0];
   type_2_bufs[0].BufferType = SECBUFFER_TOKEN;
-  type_2_bufs[0].pvBuffer   = ntlm->input_token;
-  type_2_bufs[0].cbBuffer   = fetchx_uztoul(ntlm->input_token_len);
+  type_2_bufs[0].pvBuffer = ntlm->input_token;
+  type_2_bufs[0].cbBuffer = fetchx_uztoul(ntlm->input_token_len);
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   /* ssl context comes from schannel.
-  * When extended protection is used in IIS server,
-  * we have to pass a second SecBuffer to the SecBufferDesc
-  * otherwise IIS will not pass the authentication (401 response).
-  * Minimum supported version is Windows 7.
-  * https://docs.microsoft.com/en-us/security-updates
-  * /SecurityAdvisories/2009/973811
-  */
-  if(ntlm->sslContext) {
+   * When extended protection is used in IIS server,
+   * we have to pass a second SecBuffer to the SecBufferDesc
+   * otherwise IIS will not pass the authentication (401 response).
+   * Minimum supported version is Windows 7.
+   * https://docs.microsoft.com/en-us/security-updates
+   * /SecurityAdvisories/2009/973811
+   */
+  if (ntlm->sslContext)
+  {
     SEC_CHANNEL_BINDINGS channelBindings;
     SecPkgContext_Bindings pkgBindings;
     pkgBindings.Bindings = &channelBindings;
     status = Curl_pSecFn->QueryContextAttributes(
-      ntlm->sslContext,
-      SECPKG_ATTR_ENDPOINT_BINDINGS,
-      &pkgBindings
-    );
-    if(status == SEC_E_OK) {
+        ntlm->sslContext,
+        SECPKG_ATTR_ENDPOINT_BINDINGS,
+        &pkgBindings);
+    if (status == SEC_E_OK)
+    {
       type_2_desc.cBuffers++;
       type_2_bufs[1].BufferType = SECBUFFER_CHANNEL_BINDINGS;
       type_2_bufs[1].cbBuffer = pkgBindings.BindingsLength;
@@ -298,26 +303,27 @@ FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
   /* Setup the type-3 "output" security buffer */
   type_3_desc.ulVersion = SECBUFFER_VERSION;
-  type_3_desc.cBuffers  = 1;
-  type_3_desc.pBuffers  = &type_3_buf;
+  type_3_desc.cBuffers = 1;
+  type_3_desc.pBuffers = &type_3_buf;
   type_3_buf.BufferType = SECBUFFER_TOKEN;
-  type_3_buf.pvBuffer   = ntlm->output_token;
-  type_3_buf.cbBuffer   = fetchx_uztoul(ntlm->token_max);
+  type_3_buf.pvBuffer = ntlm->output_token;
+  type_3_buf.cbBuffer = fetchx_uztoul(ntlm->token_max);
 
   /* Generate our type-3 message */
   status = Curl_pSecFn->InitializeSecurityContext(ntlm->credentials,
-                                               ntlm->context,
-                                               ntlm->spn,
-                                               0, 0, SECURITY_NETWORK_DREP,
-                                               &type_2_desc,
-                                               0, ntlm->context,
-                                               &type_3_desc,
-                                               &attrs, &expiry);
-  if(status != SEC_E_OK) {
+                                                  ntlm->context,
+                                                  ntlm->spn,
+                                                  0, 0, SECURITY_NETWORK_DREP,
+                                                  &type_2_desc,
+                                                  0, ntlm->context,
+                                                  &type_3_desc,
+                                                  &attrs, &expiry);
+  if (status != SEC_E_OK)
+  {
     infof(data, "NTLM handshake failure (type-3 message): Status=%lx",
           status);
 
-    if(status == SEC_E_INSUFFICIENT_MEMORY)
+    if (status == SEC_E_INSUFFICIENT_MEMORY)
       return FETCHE_OUT_OF_MEMORY;
 
     return FETCHE_AUTH_ERROR;
@@ -342,14 +348,16 @@ FETCHcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
 {
   /* Free our security context */
-  if(ntlm->context) {
+  if (ntlm->context)
+  {
     Curl_pSecFn->DeleteSecurityContext(ntlm->context);
     free(ntlm->context);
     ntlm->context = NULL;
   }
 
   /* Free our credentials handle */
-  if(ntlm->credentials) {
+  if (ntlm->credentials)
+  {
     Curl_pSecFn->FreeCredentialsHandle(ntlm->credentials);
     free(ntlm->credentials);
     ntlm->credentials = NULL;

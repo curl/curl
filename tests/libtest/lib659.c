@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,15 +42,17 @@ FETCHcode test(char *URL)
 
   urlp = fetch_url();
 
-  if(!urlp) {
+  if (!urlp)
+  {
     fprintf(stderr, "problem init URL api.");
     goto test_cleanup;
   }
 
   /* this doesn't set the PATH part */
-  if(fetch_url_set(urlp, FETCHUPART_HOST, "www.example.com", 0) ||
-     fetch_url_set(urlp, FETCHUPART_SCHEME, "http", 0) ||
-     fetch_url_set(urlp, FETCHUPART_PORT, "80", 0)) {
+  if (fetch_url_set(urlp, FETCHUPART_HOST, "www.example.com", 0) ||
+      fetch_url_set(urlp, FETCHUPART_SCHEME, "http", 0) ||
+      fetch_url_set(urlp, FETCHUPART_PORT, "80", 0))
+  {
     fprintf(stderr, "problem setting FETCHUPART");
     goto test_cleanup;
   }
@@ -61,7 +63,8 @@ FETCHcode test(char *URL)
 
   res = fetch_easy_perform(handle);
 
-  if(res) {
+  if (res)
+  {
     fprintf(stderr, "%s:%d fetch_easy_perform() failed with code %d (%s)\n",
             __FILE__, __LINE__, res, fetch_easy_strerror(res));
     goto test_cleanup;

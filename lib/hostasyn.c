@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,41 +64,45 @@
  * The storage operation locks and unlocks the DNS cache.
  */
 FETCHcode Curl_addrinfo_callback(struct Curl_easy *data,
-                                int status,
-                                struct Curl_addrinfo *ai)
+                                 int status,
+                                 struct Curl_addrinfo *ai)
 {
   struct Curl_dns_entry *dns = NULL;
   FETCHcode result = FETCHE_OK;
 
   data->state.async.status = status;
 
-  if(FETCH_ASYNC_SUCCESS == status) {
-    if(ai) {
-      if(data->share)
+  if (FETCH_ASYNC_SUCCESS == status)
+  {
+    if (ai)
+    {
+      if (data->share)
         Curl_share_lock(data, FETCH_LOCK_DATA_DNS, FETCH_LOCK_ACCESS_SINGLE);
 
       dns = Curl_cache_addr(data, ai,
                             data->state.async.hostname, 0,
                             data->state.async.port, FALSE);
-      if(data->share)
+      if (data->share)
         Curl_share_unlock(data, FETCH_LOCK_DATA_DNS);
 
-      if(!dns) {
+      if (!dns)
+      {
         /* failed to store, cleanup and return error */
         Curl_freeaddrinfo(ai);
         result = FETCHE_OUT_OF_MEMORY;
       }
     }
-    else {
+    else
+    {
       result = FETCHE_OUT_OF_MEMORY;
     }
   }
 
   data->state.async.dns = dns;
 
- /* Set async.done TRUE last in this function since it may be used multi-
-    threaded and once this is TRUE the other thread may read fields from the
-    async struct */
+  /* Set async.done TRUE last in this function since it may be used multi-
+     threaded and once this is TRUE the other thread may read fields from the
+     async struct */
   data->state.async.done = TRUE;
 
   /* IPv4: The input hostent struct will be freed by ares when we return from

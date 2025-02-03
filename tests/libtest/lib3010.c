@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,12 +35,14 @@ FETCHcode test(char *URL)
   fetch_global_init(FETCH_GLOBAL_ALL);
   fetch = fetch_easy_init();
 
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
     ret = fetch_easy_perform(fetch);
-    if(ret) {
+    if (ret)
+    {
       fprintf(stderr, "%s:%d fetch_easy_perform() failed with code %d (%s)\n",
-          __FILE__, __LINE__, ret, fetch_easy_strerror(ret));
+              __FILE__, __LINE__, ret, fetch_easy_strerror(ret));
       goto test_cleanup;
     }
     fetch_easy_getinfo(fetch, FETCHINFO_REDIRECT_URL, &follow_url);
@@ -48,9 +50,10 @@ FETCHcode test(char *URL)
     printf("Retry-After %" FETCH_FORMAT_FETCH_OFF_T "\n", retry_after);
     fetch_easy_setopt(fetch, FETCHOPT_URL, follow_url);
     ret = fetch_easy_perform(fetch);
-    if(ret) {
+    if (ret)
+    {
       fprintf(stderr, "%s:%d fetch_easy_perform() failed with code %d (%s)\n",
-          __FILE__, __LINE__, ret, fetch_easy_strerror(ret));
+              __FILE__, __LINE__, ret, fetch_easy_strerror(ret));
       goto test_cleanup;
     }
 

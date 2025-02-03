@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,14 +27,15 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct transfer_status {
+struct transfer_status
+{
   FETCH *easy;
   int hd_count;
   int bd_count;
   FETCHcode result;
 };
 
-#define KN(a)   a, #a
+#define KN(a) a, #a
 
 static int geterr(const char *name, FETCHcode val, int lineno)
 {
@@ -46,7 +47,7 @@ static int geterr(const char *name, FETCHcode val, int lineno)
 static void report_time(const char *key, const char *where, fetch_off_t time,
                         bool ok)
 {
-  if(ok)
+  if (ok)
     printf("%s on %s is OK\n", key, where);
   else
     printf("%s on %s is WRONG: %" FETCH_FORMAT_FETCH_OFF_T "\n",
@@ -58,7 +59,8 @@ static void check_time(FETCH *easy, int key, const char *name,
 {
   fetch_off_t tval;
   FETCHcode res = fetch_easy_getinfo(easy, (FETCHINFO)key, &tval);
-  if(res) {
+  if (res)
+  {
     geterr(name, res, __LINE__);
   }
   else
@@ -70,7 +72,8 @@ static void check_time0(FETCH *easy, int key, const char *name,
 {
   fetch_off_t tval;
   FETCHcode res = fetch_easy_getinfo(easy, (FETCHINFO)key, &tval);
-  if(res) {
+  if (res)
+  {
     geterr(name, res, __LINE__);
   }
   else
@@ -84,7 +87,8 @@ static size_t header_callback(char *ptr, size_t size, size_t nmemb,
   size_t len = size * nmemb;
 
   (void)ptr;
-  if(!st->hd_count++) {
+  if (!st->hd_count++)
+  {
     /* first header, check some FETCHINFO value to be reported. See #13125 */
     check_time(st->easy, KN(FETCHINFO_CONNECT_TIME_T), "1st header");
     check_time(st->easy, KN(FETCHINFO_PRETRANSFER_TIME_T), "1st header");

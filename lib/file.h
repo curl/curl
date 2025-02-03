@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,15 +24,15 @@
  *
  ***************************************************************************/
 
-
 /****************************************************************************
  * FILE unique setup
  ***************************************************************************/
-struct FILEPROTO {
-  char *path; /* the path we operate on */
+struct FILEPROTO
+{
+  char *path;     /* the path we operate on */
   char *freepath; /* pointer to the allocated block we must free, this might
                      differ from the 'path' pointer */
-  int fd;     /* open file descriptor to read from! */
+  int fd;         /* open file descriptor to read from! */
 };
 
 #ifndef FETCH_DISABLE_FILE

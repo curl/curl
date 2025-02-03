@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,8 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct transfer_status {
+struct transfer_status
+{
   FETCH *easy;
   fetch_off_t out_len;
   size_t hd_line;
@@ -45,31 +46,37 @@ static size_t header_callback(char *ptr, size_t size, size_t nmemb,
 
   (void)fwrite(ptr, size, nmemb, stdout);
   ++st->hd_line;
-  if(len == 2 && hd[0] == '\r' && hd[1] == '\n') {
+  if (len == 2 && hd[0] == '\r' && hd[1] == '\n')
+  {
     fetch_off_t clen;
     long httpcode = 0;
     /* end of a response */
     result = fetch_easy_getinfo(st->easy, FETCHINFO_RESPONSE_CODE, &httpcode);
     fprintf(stderr, "header_callback, get status: %ld, %d\n",
             httpcode, result);
-    if(httpcode < 100 || httpcode >= 1000) {
+    if (httpcode < 100 || httpcode >= 1000)
+    {
       fprintf(stderr, "header_callback, invalid status: %ld, %d\n",
               httpcode, result);
       return FETCHE_WRITE_ERROR;
     }
     st->http_status = (int)httpcode;
-    if(st->http_status >= 200 && st->http_status < 300) {
+    if (st->http_status >= 200 && st->http_status < 300)
+    {
       result = fetch_easy_getinfo(st->easy, FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                                 &clen);
+                                  &clen);
       fprintf(stderr, "header_callback, info Content-Length: %ld, %d\n",
               (long)clen, result);
-      if(result) {
+      if (result)
+      {
         st->result = result;
         return FETCHE_WRITE_ERROR;
       }
-      if(clen < 0) {
+      if (clen < 0)
+      {
         fprintf(stderr, "header_callback, expected known Content-Length, "
-                "got: %ld\n", (long)clen);
+                        "got: %ld\n",
+                (long)clen);
         return FETCHE_WRITE_ERROR;
       }
     }

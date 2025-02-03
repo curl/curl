@@ -27,7 +27,7 @@ FETCHINFO_TLS_SESSION, FETCHINFO_TLS_SSL_PTR - get TLS session info
 
 # SYNOPSIS
 
-~~~c
+```c
 #include <fetch/fetch.h>
 
 FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_TLS_SSL_PTR,
@@ -38,12 +38,12 @@ FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_TLS_SSL_PTR,
 
 FETCHcode fetch_easy_getinfo(FETCH *handle, FETCHINFO_TLS_SESSION,
                            struct fetch_tlssessioninfo **session);
-~~~
+```
 
 # DESCRIPTION
 
-Pass a pointer to a *struct fetch_tlssessioninfo **. The pointer is initialized
-to refer to a *struct fetch_tlssessioninfo ** that contains an enum indicating
+Pass a pointer to a *struct fetch_tlssessioninfo \*\*. The pointer is initialized
+to refer to a *struct fetch_tlssessioninfo \*\* that contains an enum indicating
 the SSL library used for the handshake and a pointer to the respective
 internal TLS session structure of this underlying SSL library.
 
@@ -51,21 +51,21 @@ This option may be useful for example to extract certificate information in a
 format convenient for further processing, such as manual validation. Refer to
 the **LIMITATIONS** section.
 
-~~~c
+```c
 struct fetch_tlssessioninfo {
   fetch_sslbackend backend;
   void *internals;
 };
-~~~
+```
 
-The *backend* struct member is one of the defines in the FETCHSSLBACKEND_*
+The _backend_ struct member is one of the defines in the FETCHSSLBACKEND\_\*
 series: FETCHSSLBACKEND_NONE (when built without TLS support),
 FETCHSSLBACKEND_WOLFSSL, FETCHSSLBACKEND_SECURETRANSPORT, FETCHSSLBACKEND_GNUTLS,
 FETCHSSLBACKEND_MBEDTLS, FETCHSSLBACKEND_NSS, FETCHSSLBACKEND_OPENSSL or
 FETCHSSLBACKEND_SCHANNEL. (Note that the OpenSSL
 forks are all reported as just OpenSSL here.)
 
-The *internals* struct member points to a TLS library specific pointer for
+The _internals_ struct member points to a TLS library specific pointer for
 the active ("in use") SSL connection, with the following underlying types:
 
 ## GnuTLS
@@ -74,31 +74,31 @@ the active ("in use") SSL connection, with the following underlying types:
 
 ## OpenSSL
 
-FETCHINFO_TLS_SESSION(3): **SSL_CTX ***
+FETCHINFO_TLS_SESSION(3): **SSL_CTX \***
 
-FETCHINFO_TLS_SSL_PTR(3): **SSL ***
-Since 7.48.0 the *internals* member can point to these other SSL backends
+FETCHINFO_TLS_SSL_PTR(3): **SSL \***
+Since 7.48.0 the _internals_ member can point to these other SSL backends
 as well:
 
 ## mbedTLS
 
-**mbedTLS_ssl_context ***
+**mbedTLS_ssl_context \***
 
 ## Secure Channel
 
-**CtxtHandle ***
+**CtxtHandle \***
 
 ## Secure Transport
 
-**SSLContext ***
+**SSLContext \***
 
 ## wolfSSL
 
-**SSL ***
+**SSL \***
 
 ##
 
-If the *internals* pointer is NULL then either the SSL backend is not
+If the _internals_ pointer is NULL then either the SSL backend is not
 supported, an SSL session has not yet been established or the connection is no
 longer associated with the easy handle (e.g. fetch_easy_perform(3) has
 returned).
@@ -132,13 +132,13 @@ That is safer and does not suffer from any of the problems above.
 
 How are you using this option? Are you affected by any of these limitations?
 Please let us know by making a comment at
-https://github.com/fetch/fetch/issues/685
+https://github.com/curl/curl/issues/685
 
 # %PROTOCOLS%
 
 # EXAMPLE
 
-~~~c
+```c
 #include <fetch/fetch.h>
 #include <openssl/ssl.h>
 
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
   }
   return res;
 }
-~~~
+```
 
 # HISTORY
 

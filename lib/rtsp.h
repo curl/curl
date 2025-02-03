@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,11 +32,12 @@ FETCHcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header);
 
 #else
 /* disabled */
-#define Curl_rtsp_parseheader(x,y) FETCHE_NOT_BUILT_IN
+#define Curl_rtsp_parseheader(x, y) FETCHE_NOT_BUILT_IN
 
 #endif /* FETCH_DISABLE_RTSP */
 
-typedef enum {
+typedef enum
+{
   RTP_PARSE_SKIP,
   RTP_PARSE_CHANNEL,
   RTP_PARSE_LEN,
@@ -47,7 +48,8 @@ typedef enum {
  *
  * Currently, only used for tracking incomplete RTP data reads
  */
-struct rtsp_conn {
+struct rtsp_conn
+{
   struct dynbuf buf;
   int rtp_channel;
   size_t rtp_len;
@@ -58,10 +60,10 @@ struct rtsp_conn {
 /****************************************************************************
  * RTSP unique setup
  ***************************************************************************/
-struct RTSP {
+struct RTSP
+{
   long CSeq_sent; /* CSeq of this request */
   long CSeq_recv; /* CSeq received */
 };
-
 
 #endif /* HEADER_FETCH_RTSP_H */

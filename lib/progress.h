@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,8 +26,8 @@
 
 #include "timeval.h"
 
-
-typedef enum {
+typedef enum
+{
   TIMER_NONE,
   TIMER_STARTOP,
   TIMER_STARTSINGLE, /* start of transfer, might get queued */
@@ -71,9 +71,9 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
 
 void Curl_pgrsEarlyData(struct Curl_easy *data, fetch_off_t sent);
 
-#define PGRS_HIDE    (1<<4)
-#define PGRS_UL_SIZE_KNOWN (1<<5)
-#define PGRS_DL_SIZE_KNOWN (1<<6)
-#define PGRS_HEADERS_OUT (1<<7) /* set when the headers have been written */
+#define PGRS_HIDE (1 << 4)
+#define PGRS_UL_SIZE_KNOWN (1 << 5)
+#define PGRS_DL_SIZE_KNOWN (1 << 6)
+#define PGRS_HEADERS_OUT (1 << 7) /* set when the headers have been written */
 
 #endif /* HEADER_FETCH_PROGRESS_H */

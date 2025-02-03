@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -56,37 +56,40 @@ char *fetch_unescape(const char *string, int length)
  * 'data' is ignored since 7.82.0.
  */
 char *fetch_easy_escape(FETCH *data, const char *string,
-                       int inlength)
+                        int inlength)
 {
   size_t length;
   struct dynbuf d;
   (void)data;
 
-  if(!string || (inlength < 0))
+  if (!string || (inlength < 0))
     return NULL;
 
   length = (inlength ? (size_t)inlength : strlen(string));
-  if(!length)
+  if (!length)
     return strdup("");
 
   Curl_dyn_init(&d, length * 3 + 1);
 
-  while(length--) {
+  while (length--)
+  {
     /* treat the characters unsigned */
     unsigned char in = (unsigned char)*string++;
 
-    if(ISUNRESERVED(in)) {
+    if (ISUNRESERVED(in))
+    {
       /* append this */
-      if(Curl_dyn_addn(&d, &in, 1))
+      if (Curl_dyn_addn(&d, &in, 1))
         return NULL;
     }
-    else {
+    else
+    {
       /* encode it */
       const char hex[] = "0123456789ABCDEF";
-      char out[3]={'%'};
+      char out[3] = {'%'};
       out[1] = hex[in >> 4];
       out[2] = hex[in & 0xf];
-      if(Curl_dyn_addn(&d, out, 3))
+      if (Curl_dyn_addn(&d, out, 3))
         return NULL;
     }
   }
@@ -95,10 +98,10 @@ char *fetch_easy_escape(FETCH *data, const char *string,
 }
 
 static const unsigned char hextable[] = {
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0,       /* 0x30 - 0x3f */
-  0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x40 - 0x4f */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,       /* 0x50 - 0x5f */
-  0, 10, 11, 12, 13, 14, 15                             /* 0x60 - 0x66 */
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0,       /* 0x30 - 0x3f */
+    0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x40 - 0x4f */
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,       /* 0x50 - 0x5f */
+    0, 10, 11, 12, 13, 14, 15                             /* 0x60 - 0x66 */
 };
 
 /* the input is a single hex digit */
@@ -121,8 +124,8 @@ static const unsigned char hextable[] = {
  */
 
 FETCHcode Curl_urldecode(const char *string, size_t length,
-                        char **ostring, size_t *olen,
-                        enum urlreject ctrl)
+                         char **ostring, size_t *olen,
+                         enum urlreject ctrl)
 {
   size_t alloc;
   char *ns;
@@ -133,29 +136,33 @@ FETCHcode Curl_urldecode(const char *string, size_t length,
   alloc = (length ? length : strlen(string));
   ns = malloc(alloc + 1);
 
-  if(!ns)
+  if (!ns)
     return FETCHE_OUT_OF_MEMORY;
 
   /* store output string */
   *ostring = ns;
 
-  while(alloc) {
+  while (alloc)
+  {
     unsigned char in = (unsigned char)*string;
-    if(('%' == in) && (alloc > 2) &&
-       ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
+    if (('%' == in) && (alloc > 2) &&
+        ISXDIGIT(string[1]) && ISXDIGIT(string[2]))
+    {
       /* this is two hexadecimal digits following a '%' */
       in = (unsigned char)(onehex2dec(string[1]) << 4) | onehex2dec(string[2]);
 
       string += 3;
       alloc -= 3;
     }
-    else {
+    else
+    {
       string++;
       alloc--;
     }
 
-    if(((ctrl == REJECT_CTRL) && (in < 0x20)) ||
-       ((ctrl == REJECT_ZERO) && (in == 0))) {
+    if (((ctrl == REJECT_CTRL) && (in < 0x20)) ||
+        ((ctrl == REJECT_ZERO) && (in == 0)))
+    {
       Curl_safefree(*ostring);
       return FETCHE_URL_MALFORMAT;
     }
@@ -164,7 +171,7 @@ FETCHcode Curl_urldecode(const char *string, size_t length,
   }
   *ns = 0; /* terminate it */
 
-  if(olen)
+  if (olen)
     /* store output size */
     *olen = ns - *ostring;
 
@@ -179,20 +186,22 @@ FETCHcode Curl_urldecode(const char *string, size_t length,
  * 'data' is ignored since 7.82.0.
  */
 char *fetch_easy_unescape(FETCH *data, const char *string,
-                         int length, int *olen)
+                          int length, int *olen)
 {
   char *str = NULL;
   (void)data;
-  if(string && (length >= 0)) {
+  if (string && (length >= 0))
+  {
     size_t inputlen = (size_t)length;
     size_t outputlen;
     FETCHcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
-                                  REJECT_NADA);
-    if(res)
+                                   REJECT_NADA);
+    if (res)
       return NULL;
 
-    if(olen) {
-      if(outputlen <= (size_t) INT_MAX)
+    if (olen)
+    {
+      if (outputlen <= (size_t)INT_MAX)
         *olen = fetchx_uztosi(outputlen);
       else
         /* too large to return in an int, fail! */
@@ -217,12 +226,14 @@ void fetch_free(void *p)
  * Null-terminated.
  */
 void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
-                    unsigned char *out, size_t olen) /* output buffer size */
+                    unsigned char *out, size_t olen)      /* output buffer size */
 {
   const char *hex = "0123456789abcdef";
   DEBUGASSERT(src && len && (olen >= 3));
-  if(src && len && (olen >= 3)) {
-    while(len-- && (olen >= 3)) {
+  if (src && len && (olen >= 3))
+  {
+    while (len-- && (olen >= 3))
+    {
       /* clang-tidy warns on this line without this comment: */
       /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
       *out++ = (unsigned char)hex[(*src & 0xF0) >> 4];
@@ -232,6 +243,6 @@ void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
     }
     *out = 0;
   }
-  else if(olen)
+  else if (olen)
     *out = 0;
 }

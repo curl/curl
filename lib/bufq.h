@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,12 +32,14 @@
  * The size is fixed a creation with read and write offset
  * for where unread content is.
  */
-struct buf_chunk {
-  struct buf_chunk *next;  /* to keep it in a list */
-  size_t dlen;             /* the amount of allocated x.data[] */
-  size_t r_offset;         /* first unread bytes */
-  size_t w_offset;         /* one after last written byte */
-  union {
+struct buf_chunk
+{
+  struct buf_chunk *next; /* to keep it in a list */
+  size_t dlen;            /* the amount of allocated x.data[] */
+  size_t r_offset;        /* first unread bytes */
+  size_t w_offset;        /* one after last written byte */
+  union
+  {
     unsigned char data[1]; /* the buffer for `dlen` bytes */
     void *dummy;           /* alignment */
   } x;
@@ -50,11 +52,12 @@ struct buf_chunk {
  * is not thread safe. All bufqs using it are supposed to operate in the
  * same thread.
  */
-struct bufc_pool {
-  struct buf_chunk *spare;  /* list of available spare chunks */
-  size_t chunk_size;        /* the size of chunks in this pool */
-  size_t spare_count;       /* current number of spare chunks in list */
-  size_t spare_max;         /* max number of spares to keep */
+struct bufc_pool
+{
+  struct buf_chunk *spare; /* list of available spare chunks */
+  size_t chunk_size;       /* the size of chunks in this pool */
+  size_t spare_count;      /* current number of spare chunks in list */
+  size_t spare_max;        /* max number of spares to keep */
 };
 
 void Curl_bufcp_init(struct bufc_pool *pool,
@@ -91,31 +94,32 @@ void Curl_bufcp_free(struct bufc_pool *pool);
  * When providing a pool to a bufq, all chunk creation and spare handling
  * will be delegated to that pool.
  */
-struct bufq {
-  struct buf_chunk *head;       /* chunk with bytes to read from */
-  struct buf_chunk *tail;       /* chunk to write to */
-  struct buf_chunk *spare;      /* list of free chunks, unless `pool` */
-  struct bufc_pool *pool;       /* optional pool for free chunks */
-  size_t chunk_count;           /* current number of chunks in `head+spare` */
-  size_t max_chunks;            /* max `head` chunks to use */
-  size_t chunk_size;            /* size of chunks to manage */
-  int opts;                     /* options for handling queue, see below */
+struct bufq
+{
+  struct buf_chunk *head;  /* chunk with bytes to read from */
+  struct buf_chunk *tail;  /* chunk to write to */
+  struct buf_chunk *spare; /* list of free chunks, unless `pool` */
+  struct bufc_pool *pool;  /* optional pool for free chunks */
+  size_t chunk_count;      /* current number of chunks in `head+spare` */
+  size_t max_chunks;       /* max `head` chunks to use */
+  size_t chunk_size;       /* size of chunks to manage */
+  int opts;                /* options for handling queue, see below */
 };
 
 /**
  * Default behaviour: chunk limit is "hard", meaning attempts to write
  * more bytes than can be hold in `max_chunks` is refused and will return
  * -1, FETCHE_AGAIN. */
-#define BUFQ_OPT_NONE        (0)
+#define BUFQ_OPT_NONE (0)
 /**
  * Make `max_chunks` a "soft" limit. A bufq will report that it is "full"
  * when `max_chunks` are used, but allows writing beyond this limit.
  */
-#define BUFQ_OPT_SOFT_LIMIT  (1 << 0)
+#define BUFQ_OPT_SOFT_LIMIT (1 << 0)
 /**
  * Do not keep spare chunks.
  */
-#define BUFQ_OPT_NO_SPARES   (1 << 1)
+#define BUFQ_OPT_NO_SPARES (1 << 1)
 
 /**
  * Initialize a buffer queue that can hold up to `max_chunks` buffers
@@ -171,8 +175,8 @@ ssize_t Curl_bufq_write(struct bufq *q,
                         FETCHcode *err);
 
 FETCHcode Curl_bufq_cwrite(struct bufq *q,
-                         const char *buf, size_t len,
-                         size_t *pnwritten);
+                           const char *buf, size_t len,
+                           size_t *pnwritten);
 
 /**
  * Remove `len` bytes from the end of the buffer queue again.
@@ -187,10 +191,10 @@ FETCHcode Curl_bufq_unwrite(struct bufq *q, size_t len);
  * cause. An err of FETCHE_AGAIN is returned if the buffer queue is empty.
  */
 ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
-                        FETCHcode *err);
+                       FETCHcode *err);
 
 FETCHcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
-                         size_t *pnread);
+                          size_t *pnread);
 
 /**
  * Peek at the head chunk in the buffer queue. Returns a pointer to

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,10 +25,11 @@
 
 #include "memdebug.h"
 
-static char testdata[]=
-  "dummy\n";
+static char testdata[] =
+    "dummy\n";
 
-struct WriteThis {
+struct WriteThis
+{
   char *readptr;
   fetch_off_t sizeleft;
   int freecount;
@@ -36,7 +37,7 @@ struct WriteThis {
 
 static void free_callback(void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *) userp;
+  struct WriteThis *pooh = (struct WriteThis *)userp;
 
   pooh->freecount++;
 }
@@ -46,20 +47,21 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   struct WriteThis *pooh = (struct WriteThis *)userp;
   int eof = !*pooh->readptr;
 
-  if(size*nmemb < 1)
+  if (size * nmemb < 1)
     return 0;
 
   eof = pooh->sizeleft <= 0;
-  if(!eof)
+  if (!eof)
     pooh->sizeleft--;
 
-  if(!eof) {
-    *ptr = *pooh->readptr;           /* copy one single byte */
-    pooh->readptr++;                 /* advance pointer */
-    return 1;                        /* we return 1 byte at a time! */
+  if (!eof)
+  {
+    *ptr = *pooh->readptr; /* copy one single byte */
+    pooh->readptr++;       /* advance pointer */
+    return 1;              /* we return 1 byte at a time! */
   }
 
-  return 0;                         /* no more data left to deliver */
+  return 0; /* no more data left to deliver */
 }
 
 FETCHcode test(char *URL)
@@ -77,7 +79,8 @@ FETCHcode test(char *URL)
    * easy handle.
    */
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -95,7 +98,7 @@ FETCHcode test(char *URL)
 
   /* Prepare the callback structure. */
   pooh.readptr = testdata;
-  pooh.sizeleft = (fetch_off_t) strlen(testdata);
+  pooh.sizeleft = (fetch_off_t)strlen(testdata);
   pooh.freecount = 0;
 
   /* Build the mime tree. */
@@ -110,15 +113,16 @@ FETCHcode test(char *URL)
   part = fetch_mime_addpart(mime);
   fetch_mime_filedata(part, libtest_arg2);
   part = fetch_mime_addpart(mime);
-  fetch_mime_data_cb(part, (fetch_off_t) -1, read_callback, NULL, free_callback,
-                    &pooh);
+  fetch_mime_data_cb(part, (fetch_off_t)-1, read_callback, NULL, free_callback,
+                     &pooh);
 
   /* Bind mime data to its easy handle. */
   test_setopt(easy, FETCHOPT_MIMEPOST, mime);
 
   /* Duplicate the handle. */
   easy2 = fetch_easy_duphandle(easy);
-  if(!easy2) {
+  if (!easy2)
+  {
     fprintf(stderr, "fetch_easy_duphandle() failed\n");
     res = TEST_ERR_FAILURE;
     goto test_cleanup;
@@ -127,11 +131,12 @@ FETCHcode test(char *URL)
   /* Now free the mime structure: it should unbind it from the first
      easy handle. */
   fetch_mime_free(mime);
-  mime = NULL;  /* Already cleaned up. */
+  mime = NULL; /* Already cleaned up. */
 
   /* Perform on the first handle: should not send any data. */
   res = fetch_easy_perform(easy);
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_easy_perform(original) failed\n");
     goto test_cleanup;
   }
@@ -139,7 +144,8 @@ FETCHcode test(char *URL)
   /* Perform on the second handle: if the bound mime structure has not been
      duplicated properly, it should cause a valgrind error. */
   res = fetch_easy_perform(easy2);
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_easy_perform(duplicated) failed\n");
     goto test_cleanup;
   }
@@ -148,9 +154,10 @@ FETCHcode test(char *URL)
      If the mime copy was bad or not automatically released, valgrind
      will signal it. */
   fetch_easy_cleanup(easy2);
-  easy2 = NULL;  /* Already cleaned up. */
+  easy2 = NULL; /* Already cleaned up. */
 
-  if(pooh.freecount != 2) {
+  if (pooh.freecount != 2)
+  {
     fprintf(stderr, "free_callback() called %d times instead of 2\n",
             pooh.freecount);
     res = TEST_ERR_FAILURE;

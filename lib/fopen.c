@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,8 +24,8 @@
 
 #include "fetch_setup.h"
 
-#if !defined(FETCH_DISABLE_COOKIES) || !defined(FETCH_DISABLE_ALTSVC) ||  \
-  !defined(FETCH_DISABLE_HSTS)
+#if !defined(FETCH_DISABLE_COOKIES) || !defined(FETCH_DISABLE_ALTSVC) || \
+    !defined(FETCH_DISABLE_HSTS)
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -68,18 +68,19 @@ static char *dirslash(const char *path)
   DEBUGASSERT(path);
   Curl_dyn_init(&out, FETCH_MAX_INPUT_LENGTH);
   n = strlen(path);
-  if(n) {
+  if (n)
+  {
     /* find the rightmost path separator, if any */
-    while(n && !IS_SEP(path[n-1]))
+    while (n && !IS_SEP(path[n - 1]))
       --n;
     /* skip over all the path separators, if any */
-    while(n && IS_SEP(path[n-1]))
+    while (n && IS_SEP(path[n - 1]))
       --n;
   }
-  if(Curl_dyn_addn(&out, path, n))
+  if (Curl_dyn_addn(&out, path, n))
     return NULL;
   /* if there was a directory, append a single trailing slash */
-  if(n && Curl_dyn_addn(&out, PATHSEP, 1))
+  if (n && Curl_dyn_addn(&out, PATHSEP, 1))
     return NULL;
   return Curl_dyn_ptr(&out);
 }
@@ -92,7 +93,7 @@ static char *dirslash(const char *path)
  * written.
  */
 FETCHcode Curl_fopen(struct Curl_easy *data, const char *filename,
-                    FILE **fh, char **tempname)
+                     FILE **fh, char **tempname)
 {
   FETCHcode result = FETCHE_WRITE_ERROR;
   unsigned char randbuf[41];
@@ -103,27 +104,30 @@ FETCHcode Curl_fopen(struct Curl_easy *data, const char *filename,
   *tempname = NULL;
 
   *fh = fopen(filename, FOPEN_WRITETEXT);
-  if(!*fh)
+  if (!*fh)
     goto fail;
-  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
+  if (fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode))
+  {
     return FETCHE_OK;
   }
   fclose(*fh);
   *fh = NULL;
 
   result = Curl_rand_alnum(data, randbuf, sizeof(randbuf));
-  if(result)
+  if (result)
     goto fail;
 
   dir = dirslash(filename);
-  if(dir) {
+  if (dir)
+  {
     /* The temp filename should not end up too long for the target file
        system */
     tempstore = aprintf("%s%s.tmp", dir, randbuf);
     free(dir);
   }
 
-  if(!tempstore) {
+  if (!tempstore)
+  {
     result = FETCHE_OUT_OF_MEMORY;
     goto fail;
   }
@@ -131,22 +135,23 @@ FETCHcode Curl_fopen(struct Curl_easy *data, const char *filename,
   result = FETCHE_WRITE_ERROR;
 #if (defined(ANDROID) || defined(__ANDROID__)) && \
     (defined(__i386__) || defined(__arm__))
-  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, (mode_t)(0600|sb.st_mode));
+  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, (mode_t)(0600 | sb.st_mode));
 #else
-  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600|sb.st_mode);
+  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600 | sb.st_mode);
 #endif
-  if(fd == -1)
+  if (fd == -1)
     goto fail;
 
   *fh = fdopen(fd, FOPEN_WRITETEXT);
-  if(!*fh)
+  if (!*fh)
     goto fail;
 
   *tempname = tempstore;
   return FETCHE_OK;
 
 fail:
-  if(fd != -1) {
+  if (fd != -1)
+  {
     close(fd);
     unlink(tempstore);
   }

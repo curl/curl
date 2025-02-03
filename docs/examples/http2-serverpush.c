@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,47 +37,51 @@
 #error "too old libfetch, cannot do HTTP/2 server push!"
 #endif
 
-static
-void dump(const char *text, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text, unsigned char *ptr, size_t size,
+                 char nohex)
 {
   size_t i;
   size_t c;
 
   unsigned int width = 0x10;
 
-  if(nohex)
+  if (nohex)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
   fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
-  for(i = 0; i < size; i += width) {
+  for (i = 0; i < size; i += width)
+  {
 
     fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
-    if(!nohex) {
+    if (!nohex)
+    {
       /* hex not disabled, show it */
-      for(c = 0; c < width; c++)
-        if(i + c < size)
+      for (c = 0; c < width; c++)
+        if (i + c < size)
           fprintf(stderr, "%02x ", ptr[i + c]);
         else
           fputs("   ", stderr);
     }
 
-    for(c = 0; (c < width) && (i + c < size); c++) {
+    for (c = 0; (c < width) && (i + c < size); c++)
+    {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if(nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
-         ptr[i + c + 1] == 0x0A) {
+      if (nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
+          ptr[i + c + 1] == 0x0A)
+      {
         i += (c + 2 - width);
         break;
       }
       fprintf(stderr, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
-         ptr[i + c + 2] == 0x0A) {
+      if (nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
+          ptr[i + c + 2] == 0x0A)
+      {
         i += (c + 3 - width);
         break;
       }
@@ -86,15 +90,15 @@ void dump(const char *text, unsigned char *ptr, size_t size,
   }
 }
 
-static
-int my_trace(FETCH *handle, fetch_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(FETCH *handle, fetch_infotype type,
+                    char *data, size_t size,
+                    void *userp)
 {
   const char *text;
   (void)handle; /* prevent compiler warning */
   (void)userp;
-  switch(type) {
+  switch (type)
+  {
   case FETCHINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
     return 0;
@@ -129,7 +133,7 @@ int my_trace(FETCH *handle, fetch_infotype type,
 static int setup(FETCH *hnd, const char *url)
 {
   FILE *out = fopen(OUTPUTFILE, "wb");
-  if(!out)
+  if (!out)
     /* failed */
     return 1;
 
@@ -177,7 +181,8 @@ static int server_push_callback(FETCH *parent,
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
-  if(!out) {
+  if (!out)
+  {
     /* if we cannot save it, deny it */
     fprintf(stderr, "Failed to create output file for push\n");
     return FETCH_PUSH_DENY;
@@ -189,20 +194,21 @@ static int server_push_callback(FETCH *parent,
   fprintf(stderr, "**** push callback approves stream %u, got %lu headers!\n",
           count, (unsigned long)num_headers);
 
-  for(i = 0; i < num_headers; i++) {
+  for (i = 0; i < num_headers; i++)
+  {
     headp = fetch_pushheader_bynum(headers, i);
     fprintf(stderr, "**** header %lu: %s\n", (unsigned long)i, headp);
   }
 
   headp = fetch_pushheader_byname(headers, ":path");
-  if(headp) {
+  if (headp)
+  {
     fprintf(stderr, "**** The PATH is %s\n", headp /* skip :path + colon */);
   }
 
   (*transfers)++; /* one more */
   return FETCH_PUSH_OK;
 }
-
 
 /*
  * Download a file over HTTP/2, take care of server push.
@@ -215,7 +221,7 @@ int main(int argc, char *argv[])
   struct FETCHMsg *m;
   const char *url = "https://localhost:8443/index.html";
 
-  if(argc == 2)
+  if (argc == 2)
     url = argv[1];
 
   /* init a multi stack */
@@ -224,7 +230,8 @@ int main(int argc, char *argv[])
   easy = fetch_easy_init();
 
   /* set options */
-  if(setup(easy, url)) {
+  if (setup(easy, url))
+  {
     fprintf(stderr, "failed\n");
     return 1;
   }
@@ -236,15 +243,16 @@ int main(int argc, char *argv[])
   fetch_multi_setopt(multi_handle, FETCHMOPT_PUSHFUNCTION, server_push_callback);
   fetch_multi_setopt(multi_handle, FETCHMOPT_PUSHDATA, &transfers);
 
-  do {
+  do
+  {
     int still_running; /* keep number of running handles */
     FETCHMcode mc = fetch_multi_perform(multi_handle, &still_running);
 
-    if(still_running)
+    if (still_running)
       /* wait for activity, timeout or "nothing" */
       mc = fetch_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-    if(mc)
+    if (mc)
       break;
 
     /*
@@ -253,21 +261,22 @@ int main(int argc, char *argv[])
      * when we are done.
      */
 
-    do {
+    do
+    {
       int msgq = 0;
       m = fetch_multi_info_read(multi_handle, &msgq);
-      if(m && (m->msg == FETCHMSG_DONE)) {
+      if (m && (m->msg == FETCHMSG_DONE))
+      {
         FETCH *e = m->easy_handle;
         transfers--;
         fetch_multi_remove_handle(multi_handle, e);
         fetch_easy_cleanup(e);
       }
-    } while(m);
+    } while (m);
 
-  } while(transfers); /* as long as we have transfers going */
+  } while (transfers); /* as long as we have transfers going */
 
   fetch_multi_cleanup(multi_handle);
-
 
   return 0;
 }

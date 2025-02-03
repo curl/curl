@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,7 @@ bool stdin_upload(const char *uploadfile);
 FETCHcode add_file_name_to_url(FETCH *fetch, char **inurlp, const char *filename);
 
 FETCHcode get_url_file_name(struct GlobalConfig *global,
-                           char **filename, const char *url);
+                            char **filename, const char *url);
 
 FETCHcode urlerr_cvt(FETCHUcode ucode);
 

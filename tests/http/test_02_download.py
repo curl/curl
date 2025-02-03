@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://fetch.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -284,7 +284,7 @@ class TestDownload:
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
     def test_02_20_h2_small_frames(self, env: Env, httpd):
         # Test case to reproduce content corruption as observed in
-        # https://github.com/fetch/fetch/issues/10525
+        # https://github.com/curl/curl/issues/10525
         # To reliably reproduce, we need an Apache httpd that supports
         # setting smaller frame sizes. This is not released yet, we
         # test if it works and back out if not.

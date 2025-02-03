@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -65,19 +65,21 @@
 #include <errno.h>
 #include <fetch/fetch.h>
 
-#define MSG_OUT g_print   /* Change to "g_error" to write to stderr */
-#define SHOW_VERBOSE 0    /* Set to non-zero for libfetch messages */
-#define SHOW_PROGRESS 0   /* Set to non-zero to enable progress callback */
+#define MSG_OUT g_print /* Change to "g_error" to write to stderr */
+#define SHOW_VERBOSE 0  /* Set to non-zero for libfetch messages */
+#define SHOW_PROGRESS 0 /* Set to non-zero to enable progress callback */
 
 /* Global information, common to all connections */
-typedef struct _GlobalInfo {
+typedef struct _GlobalInfo
+{
   FETCHM *multi;
   guint timer_event;
   int still_running;
 } GlobalInfo;
 
 /* Information associated with a specific easy handle */
-typedef struct _ConnInfo {
+typedef struct _ConnInfo
+{
   FETCH *easy;
   char *url;
   GlobalInfo *global;
@@ -85,7 +87,8 @@ typedef struct _ConnInfo {
 } ConnInfo;
 
 /* Information associated with a specific socket */
-typedef struct _SockInfo {
+typedef struct _SockInfo
+{
   fetch_socket_t sockfd;
   FETCH *easy;
   int action;
@@ -98,17 +101,34 @@ typedef struct _SockInfo {
 /* Die if we get a bad FETCHMcode somewhere */
 static void mcode_or_die(const char *where, FETCHMcode code)
 {
-  if(FETCHM_OK != code) {
+  if (FETCHM_OK != code)
+  {
     const char *s;
-    switch(code) {
-    case     FETCHM_BAD_HANDLE:         s = "FETCHM_BAD_HANDLE";         break;
-    case     FETCHM_BAD_EASY_HANDLE:    s = "FETCHM_BAD_EASY_HANDLE";    break;
-    case     FETCHM_OUT_OF_MEMORY:      s = "FETCHM_OUT_OF_MEMORY";      break;
-    case     FETCHM_INTERNAL_ERROR:     s = "FETCHM_INTERNAL_ERROR";     break;
-    case     FETCHM_BAD_SOCKET:         s = "FETCHM_BAD_SOCKET";         break;
-    case     FETCHM_UNKNOWN_OPTION:     s = "FETCHM_UNKNOWN_OPTION";     break;
-    case     FETCHM_LAST:               s = "FETCHM_LAST";               break;
-    default: s = "FETCHM_unknown";
+    switch (code)
+    {
+    case FETCHM_BAD_HANDLE:
+      s = "FETCHM_BAD_HANDLE";
+      break;
+    case FETCHM_BAD_EASY_HANDLE:
+      s = "FETCHM_BAD_EASY_HANDLE";
+      break;
+    case FETCHM_OUT_OF_MEMORY:
+      s = "FETCHM_OUT_OF_MEMORY";
+      break;
+    case FETCHM_INTERNAL_ERROR:
+      s = "FETCHM_INTERNAL_ERROR";
+      break;
+    case FETCHM_BAD_SOCKET:
+      s = "FETCHM_BAD_SOCKET";
+      break;
+    case FETCHM_UNKNOWN_OPTION:
+      s = "FETCHM_UNKNOWN_OPTION";
+      break;
+    case FETCHM_LAST:
+      s = "FETCHM_LAST";
+      break;
+    default:
+      s = "FETCHM_unknown";
     }
     MSG_OUT("ERROR: %s returns %s\n", where, s);
     exit(code);
@@ -122,8 +142,10 @@ static void check_multi_info(GlobalInfo *g)
   int msgs_left;
 
   MSG_OUT("REMAINING: %d\n", g->still_running);
-  while((msg = fetch_multi_info_read(g->multi, &msgs_left))) {
-    if(msg->msg == FETCHMSG_DONE) {
+  while ((msg = fetch_multi_info_read(g->multi, &msgs_left)))
+  {
+    if (msg->msg == FETCHMSG_DONE)
+    {
       FETCH *easy = msg->easy_handle;
       FETCHcode res = msg->data.result;
       char *eff_url;
@@ -146,7 +168,7 @@ static gboolean timer_cb(gpointer data)
   FETCHMcode rc;
 
   rc = fetch_multi_socket_action(g->multi,
-                                FETCH_SOCKET_TIMEOUT, 0, &g->still_running);
+                                 FETCH_SOCKET_TIMEOUT, 0, &g->still_running);
   mcode_or_die("timer_cb: fetch_multi_socket_action", rc);
   check_multi_info(g);
   return FALSE;
@@ -157,8 +179,8 @@ static int update_timeout_cb(FETCHM *multi, long timeout_ms, void *userp)
 {
   struct timeval timeout;
   GlobalInfo *g = (GlobalInfo *)userp;
-  timeout.tv_sec = timeout_ms/1000;
-  timeout.tv_usec = (timeout_ms%1000)*1000;
+  timeout.tv_sec = timeout_ms / 1000;
+  timeout.tv_usec = (timeout_ms % 1000) * 1000;
 
   MSG_OUT("*** update_timeout_cb %ld => %ld:%ld ***\n",
           timeout_ms, timeout.tv_sec, timeout.tv_usec);
@@ -169,7 +191,7 @@ static int update_timeout_cb(FETCHM *multi, long timeout_ms, void *userp)
    * For other values of timeout_ms, this should set or *update* the timer to
    * the new value
    */
-  if(timeout_ms >= 0)
+  if (timeout_ms >= 0)
     g->timer_event = g_timeout_add(timeout_ms, timer_cb, g);
   return 0;
 }
@@ -177,24 +199,27 @@ static int update_timeout_cb(FETCHM *multi, long timeout_ms, void *userp)
 /* Called by glib when we get action on a multi socket */
 static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 {
-  GlobalInfo *g = (GlobalInfo*) data;
+  GlobalInfo *g = (GlobalInfo *)data;
   FETCHMcode rc;
   int fd = g_io_channel_unix_get_fd(ch);
 
   int action =
-    ((condition & G_IO_IN) ? FETCH_CSELECT_IN : 0) |
-    ((condition & G_IO_OUT) ? FETCH_CSELECT_OUT : 0);
+      ((condition & G_IO_IN) ? FETCH_CSELECT_IN : 0) |
+      ((condition & G_IO_OUT) ? FETCH_CSELECT_OUT : 0);
 
   rc = fetch_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: fetch_multi_socket_action", rc);
 
   check_multi_info(g);
-  if(g->still_running) {
+  if (g->still_running)
+  {
     return TRUE;
   }
-  else {
+  else
+  {
     MSG_OUT("last transfer done, kill timeout\n");
-    if(g->timer_event) {
+    if (g->timer_event)
+    {
       g_source_remove(g->timer_event);
     }
     return FALSE;
@@ -204,10 +229,12 @@ static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 /* Clean up the SockInfo structure */
 static void remsock(SockInfo *f)
 {
-  if(!f) {
+  if (!f)
+  {
     return;
   }
-  if(f->ev) {
+  if (f->ev)
+  {
     g_source_remove(f->ev);
   }
   g_free(f);
@@ -218,13 +245,14 @@ static void setsock(SockInfo *f, fetch_socket_t s, FETCH *e, int act,
                     GlobalInfo *g)
 {
   GIOCondition kind =
-    ((act & FETCH_POLL_IN) ? G_IO_IN : 0) |
-    ((act & FETCH_POLL_OUT) ? G_IO_OUT : 0);
+      ((act & FETCH_POLL_IN) ? G_IO_IN : 0) |
+      ((act & FETCH_POLL_OUT) ? G_IO_OUT : 0);
 
   f->sockfd = s;
   f->action = act;
   f->easy = e;
-  if(f->ev) {
+  if (f->ev)
+  {
     g_source_remove(f->ev);
   }
   f->ev = g_io_add_watch(f->ch, kind, event_cb, g);
@@ -244,25 +272,29 @@ static void addsock(fetch_socket_t s, FETCH *easy, int action, GlobalInfo *g)
 /* FETCHMOPT_SOCKETFUNCTION */
 static int sock_cb(FETCH *e, fetch_socket_t s, int what, void *cbp, void *sockp)
 {
-  GlobalInfo *g = (GlobalInfo*) cbp;
-  SockInfo *fdp = (SockInfo*) sockp;
-  static const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
+  GlobalInfo *g = (GlobalInfo *)cbp;
+  SockInfo *fdp = (SockInfo *)sockp;
+  static const char *whatstr[] = {"none", "IN", "OUT", "INOUT", "REMOVE"};
 
   MSG_OUT("socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
-  if(what == FETCH_POLL_REMOVE) {
+  if (what == FETCH_POLL_REMOVE)
+  {
     MSG_OUT("\n");
     remsock(fdp);
   }
-  else {
-    if(!fdp) {
+  else
+  {
+    if (!fdp)
+    {
       MSG_OUT("Adding data: %s%s\n",
               (what & FETCH_POLL_IN) ? "READ" : "",
               (what & FETCH_POLL_OUT) ? "WRITE" : "");
       addsock(s, e, what, g);
     }
-    else {
+    else
+    {
       MSG_OUT(
-        "Changing action from %d to %d\n", fdp->action, what);
+          "Changing action from %d to %d\n", fdp->action, what);
       setsock(fdp, s, e, what, g);
     }
   }
@@ -273,7 +305,7 @@ static int sock_cb(FETCH *e, fetch_socket_t s, int what, void *cbp, void *sockp)
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
   size_t realsize = size * nmemb;
-  ConnInfo *conn = (ConnInfo*) data;
+  ConnInfo *conn = (ConnInfo *)data;
   (void)ptr;
   (void)conn;
   return realsize;
@@ -287,8 +319,7 @@ static int xferinfo_cb(void *p, fetch_off_t dltotal, fetch_off_t dlnow,
   (void)ult;
   (void)uln;
 
-  fprintf(MSG_OUT, "Progress: %s (%" FETCH_FORMAT_FETCH_OFF_T
-          "/%" FETCH_FORMAT_FETCH_OFF_T ")\n", conn->url, dlnow, dltotal);
+  fprintf(MSG_OUT, "Progress: %s (%" FETCH_FORMAT_FETCH_OFF_T "/%" FETCH_FORMAT_FETCH_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
 
@@ -301,7 +332,8 @@ static void new_conn(const char *url, GlobalInfo *g)
   conn = g_malloc0(sizeof(ConnInfo));
   conn->error[0] = '\0';
   conn->easy = fetch_easy_init();
-  if(!conn->easy) {
+  if (!conn->easy)
+  {
     MSG_OUT("fetch_easy_init() failed, exiting!\n");
     exit(2);
   }
@@ -337,48 +369,59 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
   gchar *buf, *tmp, *all = NULL;
   GIOStatus rv;
 
-  do {
+  do
+  {
     GError *err = NULL;
     rv = g_io_channel_read_line(ch, &buf, &len, &tp, &err);
-    if(buf) {
-      if(tp) {
-        buf[tp]='\0';
+    if (buf)
+    {
+      if (tp)
+      {
+        buf[tp] = '\0';
       }
-      new_conn(buf, (GlobalInfo*)data);
+      new_conn(buf, (GlobalInfo *)data);
       g_free(buf);
     }
-    else {
+    else
+    {
       buf = g_malloc(BUF_SIZE + 1);
-      while(TRUE) {
-        buf[BUF_SIZE]='\0';
+      while (TRUE)
+      {
+        buf[BUF_SIZE] = '\0';
         g_io_channel_read_chars(ch, buf, BUF_SIZE, &len, &err);
-        if(len) {
-          buf[len]='\0';
-          if(all) {
+        if (len)
+        {
+          buf[len] = '\0';
+          if (all)
+          {
             tmp = all;
             all = g_strdup_printf("%s%s", tmp, buf);
             g_free(tmp);
           }
-          else {
+          else
+          {
             all = g_strdup(buf);
           }
         }
-        else {
+        else
+        {
           break;
         }
       }
-      if(all) {
-        new_conn(all, (GlobalInfo*)data);
+      if (all)
+      {
+        new_conn(all, (GlobalInfo *)data);
         g_free(all);
       }
       g_free(buf);
     }
-    if(err) {
+    if (err)
+    {
       g_error("fifo_cb: %s", err->message);
       g_free(err);
       break;
     }
-  } while((len) && (rv == G_IO_STATUS_NORMAL));
+  } while ((len) && (rv == G_IO_STATUS_NORMAL));
   return TRUE;
 }
 
@@ -388,8 +431,10 @@ int init_fifo(void)
   const char *fifo = "hiper.fifo";
   int socket;
 
-  if(lstat(fifo, &st) == 0) {
-    if((st.st_mode & S_IFMT) == S_IFREG) {
+  if (lstat(fifo, &st) == 0)
+  {
+    if ((st.st_mode & S_IFMT) == S_IFREG)
+    {
       errno = EEXIST;
       perror("lstat");
       exit(1);
@@ -397,14 +442,16 @@ int init_fifo(void)
   }
 
   unlink(fifo);
-  if(mkfifo (fifo, 0600) == -1) {
+  if (mkfifo(fifo, 0600) == -1)
+  {
     perror("mkfifo");
     exit(1);
   }
 
   socket = open(fifo, O_RDWR | O_NONBLOCK, 0);
 
-  if(socket == -1) {
+  if (socket == -1)
+  {
     perror("open");
     exit(1);
   }
@@ -416,9 +463,9 @@ int init_fifo(void)
 int main(void)
 {
   GlobalInfo *g = g_malloc0(sizeof(GlobalInfo));
-  GMainLoop*gmain;
+  GMainLoop *gmain;
   int fd;
-  GIOChannel* ch;
+  GIOChannel *ch;
 
   fd = init_fifo();
   ch = g_io_channel_unix_new(fd);

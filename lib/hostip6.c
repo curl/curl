@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -62,7 +62,7 @@
  */
 bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 {
-  if(conn->ip_version == FETCH_IPRESOLVE_V6)
+  if (conn->ip_version == FETCH_IPRESOLVE_V6)
     return Curl_ipv6works(data);
 
   return TRUE;
@@ -74,7 +74,8 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 static void dump_addrinfo(const struct Curl_addrinfo *ai)
 {
   printf("dump_addrinfo:\n");
-  for(; ai; ai = ai->ai_next) {
+  for (; ai; ai = ai->ai_next)
+  {
     char buf[INET6_ADDRSTRLEN];
     printf("    fam %2d, CNAME %s, ",
            ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
@@ -112,39 +113,42 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   *waitp = 0; /* synchronous response only */
 
-  if((data->conn->ip_version != FETCH_IPRESOLVE_V4) && Curl_ipv6works(data))
+  if ((data->conn->ip_version != FETCH_IPRESOLVE_V4) && Curl_ipv6works(data))
     /* The stack seems to be IPv6-enabled */
     pf = PF_UNSPEC;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
-    SOCK_STREAM : SOCK_DGRAM;
+  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ? SOCK_STREAM : SOCK_DGRAM;
 
 #ifndef USE_RESOLVE_ON_IPS
   /*
    * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
    * an IPv4 address on iOS and macOS.
    */
-  if((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
-     (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf))) {
+  if ((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
+      (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf)))
+  {
     /* the given address is numerical only, prevent a reverse lookup */
     hints.ai_flags = AI_NUMERICHOST;
   }
 #endif
 
-  if(port) {
+  if (port)
+  {
     msnprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr = sbuf;
   }
 
   error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
-  if(error) {
+  if (error)
+  {
     infof(data, "getaddrinfo(3) failed for %s:%d", hostname, port);
     return NULL;
   }
 
-  if(port) {
+  if (port)
+  {
     Curl_addrinfo_set_port(res, port);
   }
 

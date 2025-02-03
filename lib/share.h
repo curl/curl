@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,11 +36,12 @@ struct Curl_ssl_scache;
 #define FETCH_GOOD_SHARE 0x7e117a1e
 #define GOOD_SHARE_HANDLE(x) ((x) && (x)->magic == FETCH_GOOD_SHARE)
 
-#define FETCH_SHARE_KEEP_CONNECT(s)    \
-        ((s) && ((s)->specifier & (1<< FETCH_LOCK_DATA_CONNECT)))
+#define FETCH_SHARE_KEEP_CONNECT(s) \
+  ((s) && ((s)->specifier & (1 << FETCH_LOCK_DATA_CONNECT)))
 
 /* this struct is libfetch-private, do not export details */
-struct Curl_share {
+struct Curl_share
+{
   unsigned int magic; /* FETCH_GOOD_SHARE */
   unsigned int specifier;
   volatile unsigned int dirty;
@@ -65,12 +66,12 @@ struct Curl_share {
 };
 
 FETCHSHcode Curl_share_lock(struct Curl_easy *, fetch_lock_data,
-                           fetch_lock_access);
+                            fetch_lock_access);
 FETCHSHcode Curl_share_unlock(struct Curl_easy *, fetch_lock_data);
 
 /* convenience macro to check if this handle is using a shared SSL spool */
-#define FETCH_SHARE_ssl_scache(data) (data->share &&                      \
-                                    (data->share->specifier &           \
-                                     (1<<FETCH_LOCK_DATA_SSL_SESSION)))
+#define FETCH_SHARE_ssl_scache(data) (data->share &&            \
+                                      (data->share->specifier & \
+                                       (1 << FETCH_LOCK_DATA_SSL_SESSION)))
 
 #endif /* HEADER_FETCH_SHARE_H */

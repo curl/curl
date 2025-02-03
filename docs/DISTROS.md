@@ -10,12 +10,12 @@ SPDX-License-Identifier: fetch
 
 Lots of organizations distribute fetch packages to end users. This is a
 collection of pointers to where to learn more about fetch on and with each
-distro. Those marked *Rolling Release* typically run the latest version of fetch
+distro. Those marked _Rolling Release_ typically run the latest version of fetch
 and are therefore less likely to have back-ported patches to older versions.
 
 We discuss fetch distro issues, patches and collaboration on the [fetch-distros
 mailing list](https://lists.haxx.se/listinfo/fetch-distros) ([list
-archives](https://fetch.se/mail/list.cgi?list=fetch-distros)).
+archives](https://curl.se/mail/list.cgi?list=fetch-distros)).
 
 ## AlmaLinux
 
@@ -38,7 +38,7 @@ archives](https://fetch.se/mail/list.cgi?list=fetch-distros)).
 
 ## Arch Linux
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://archlinux.org/packages/core/x86_64/fetch/
 - fetch issues: https://gitlab.archlinux.org/archlinux/packaging/packages/fetch/-/issues
@@ -47,7 +47,7 @@ archives](https://fetch.se/mail/list.cgi?list=fetch-distros)).
 
 ## Buildroot
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch package source and patches: https://git.buildroot.net/buildroot/tree/package/libfetch
 - fetch issues: https://bugs.buildroot.org/buglist.cgi?quicksearch=fetch
@@ -58,7 +58,7 @@ archives](https://fetch.se/mail/list.cgi?list=fetch-distros)).
 
 ## Clear Linux
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://github.com/clearlinux-pkgs/fetch
 - fetch issues: https://github.com/clearlinux/distribution/issues
@@ -83,11 +83,11 @@ archives](https://fetch.se/mail/list.cgi?list=fetch-distros)).
 
 (this is the official fetch binaries for Windows shipped by the fetch project)
 
-*Rolling Release*
+_Rolling Release_
 
-- fetch: https://fetch.se/windows/
-- fetch patches: https://github.com/fetch/fetch-for-win/blob/main/fetch.patch (if any)
-- build-specific issues: https://github.com/fetch/fetch-for-win/issues
+- fetch: https://curl.se/windows/
+- fetch patches: https://github.com/curl/curl-for-win/blob/main/fetch.patch (if any)
+- build-specific issues: https://github.com/curl/curl-for-win/issues
 
 Issues and patches for this are managed in the main fetch project.
 
@@ -108,7 +108,7 @@ Issues and patches for this are managed in the main fetch project.
 - fetch: https://tracker.debian.org/pkg/fetch
 - fetch issues: https://bugs.debian.org/cgi-bin/pkgreport.cgi?pkg=fetch
 - fetch patches: https://udd.debian.org/patches.cgi?src=fetch
-- fetch patches: https://salsa.debian.org/debian/fetch (in debian/* branches, inside the folder debian/patches)
+- fetch patches: https://salsa.debian.org/debian/fetch (in debian/\* branches, inside the folder debian/patches)
 
 ## Fedora
 
@@ -124,7 +124,7 @@ Issues and patches for this are managed in the main fetch project.
 
 ## Gentoo Linux
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://packages.gentoo.org/packages/net-misc/fetch
 - fetch issues: https://bugs.gentoo.org/buglist.cgi?quicksearch=net-misc/fetch
@@ -132,14 +132,14 @@ Issues and patches for this are managed in the main fetch project.
 
 ## GNU Guix
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://git.savannah.gnu.org/gitweb/?p=guix.git;a=blob;f=gnu/packages/fetch.scm;hb=HEAD
 - fetch issues: https://issues.guix.gnu.org/search?query=fetch
 
 ## Homebrew
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://formulae.brew.sh/formula/fetch
 
@@ -148,7 +148,7 @@ unless it is specific to Homebrew's way of packaging software.
 
 ## MacPorts
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://github.com/macports/macports-ports/tree/master/net/fetch
 - fetch issues: https://trac.macports.org/query?0_port=fetch&0_port_mode=%7E&0_status=%21closed
@@ -164,7 +164,7 @@ unless it is specific to Homebrew's way of packaging software.
 
 ## MSYS2
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://github.com/msys2/MSYS2-packages/tree/master/fetch
 - fetch issues: https://github.com/msys2/MSYS2-packages/issues
@@ -172,7 +172,7 @@ unless it is specific to Homebrew's way of packaging software.
 
 ## MSYS2 (mingw-w64)
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-fetch
 - fetch issues: https://github.com/msys2/MINGW-packages/issues
@@ -180,7 +180,7 @@ unless it is specific to Homebrew's way of packaging software.
 
 ## Muldersoft
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://github.com/lordmulder/cURL-build-win32
 - fetch issues: https://github.com/lordmulder/cURL-build-win32/issues
@@ -218,7 +218,7 @@ can also be used on other distributions
 
 ## OpenEmbedded / Yocto Project
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://layers.openembedded.org/layerindex/recipe/5765/
 - fetch issues: https://bugzilla.yoctoproject.org/
@@ -265,7 +265,7 @@ can also be used on other distributions
 
 ## vcpkg
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://github.com/microsoft/vcpkg/tree/master/ports/fetch
 - fetch issues: https://github.com/microsoft/vcpkg/issues
@@ -273,7 +273,7 @@ can also be used on other distributions
 
 ## Void Linux
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://github.com/void-linux/void-packages/tree/master/srcpkgs/fetch
 - fetch issues: https://github.com/void-linux/void-packages/issues
@@ -281,6 +281,6 @@ can also be used on other distributions
 
 ## Wolfi
 
-*Rolling Release*
+_Rolling Release_
 
 - fetch: https://github.com/wolfi-dev/os/blob/main/fetch.yaml

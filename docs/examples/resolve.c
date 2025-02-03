@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,10 +40,11 @@ int main(void)
      HOST and ADDRESS is the numerical IP address
    */
   struct fetch_slist *host = fetch_slist_append(NULL,
-                                              "example.com:443:127.0.0.1");
+                                                "example.com:443:127.0.0.1");
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_setopt(fetch, FETCHOPT_RESOLVE, host);
     fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
     res = fetch_easy_perform(fetch);

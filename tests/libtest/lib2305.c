@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@ static void websocket_close(FETCH *fetch)
 {
   size_t sent;
   FETCHcode result =
-    fetch_ws_send(fetch, "", 0, &sent, 0, FETCHWS_CLOSE);
+      fetch_ws_send(fetch, "", 0, &sent, 0, FETCHWS_CLOSE);
   fprintf(stderr,
           "ws: fetch_ws_send returned %d, sent %d\n", result, (int)sent);
 }
@@ -45,15 +45,17 @@ static void websocket(FETCH *fetch)
   size_t nread;
   size_t i = 0;
   FILE *save = fopen(libtest_arg2, FOPEN_WRITETEXT);
-  if(!save)
+  if (!save)
     return;
 
   /* Three 4097-bytes frames are expected, 12291 bytes */
-  while(i < 12291) {
+  while (i < 12291)
+  {
     FETCHcode result =
-      fetch_ws_recv(fetch, buffer, sizeof(buffer), &nread, &meta);
-    if(result) {
-      if(result == FETCHE_AGAIN)
+        fetch_ws_recv(fetch, buffer, sizeof(buffer), &nread, &meta);
+    if (result)
+    {
+      if (result == FETCHE_AGAIN)
         /* crude busy-loop */
         continue;
       fclose(save);
@@ -81,7 +83,8 @@ FETCHcode test(char *URL)
   global_init(FETCH_GLOBAL_ALL);
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
 
     /* use the callback style */
@@ -94,7 +97,7 @@ FETCHcode test(char *URL)
     fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 2L); /* websocket style */
     res = fetch_easy_perform(fetch);
     fprintf(stderr, "fetch_easy_perform() returned %d\n", res);
-    if(res == FETCHE_OK)
+    if (res == FETCHE_OK)
       websocket(fetch);
 
     /* always cleanup */

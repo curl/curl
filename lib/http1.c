@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,8 +37,7 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-
-#define H1_MAX_URL_LEN   (8*1024)
+#define H1_MAX_URL_LEN (8 * 1024)
 
 void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len)
 {
@@ -49,7 +48,8 @@ void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len)
 
 void Curl_h1_req_parse_free(struct h1_req_parser *parser)
 {
-  if(parser) {
+  if (parser)
+  {
     Curl_http_req_free(parser->req);
     Curl_dyn_free(&parser->scratch);
     parser->req = NULL;
@@ -60,22 +60,25 @@ void Curl_h1_req_parse_free(struct h1_req_parser *parser)
 static FETCHcode trim_line(struct h1_req_parser *parser, int options)
 {
   DEBUGASSERT(parser->line);
-  if(parser->line_len) {
-    if(parser->line[parser->line_len - 1] == '\n')
+  if (parser->line_len)
+  {
+    if (parser->line[parser->line_len - 1] == '\n')
       --parser->line_len;
-    if(parser->line_len) {
-      if(parser->line[parser->line_len - 1] == '\r')
+    if (parser->line_len)
+    {
+      if (parser->line[parser->line_len - 1] == '\r')
         --parser->line_len;
-      else if(options & H1_PARSE_OPT_STRICT)
+      else if (options & H1_PARSE_OPT_STRICT)
         return FETCHE_URL_MALFORMAT;
     }
-    else if(options & H1_PARSE_OPT_STRICT)
+    else if (options & H1_PARSE_OPT_STRICT)
       return FETCHE_URL_MALFORMAT;
   }
-  else if(options & H1_PARSE_OPT_STRICT)
+  else if (options & H1_PARSE_OPT_STRICT)
     return FETCHE_URL_MALFORMAT;
 
-  if(parser->line_len > parser->max_line_len) {
+  if (parser->line_len > parser->max_line_len)
+  {
     return FETCHE_URL_MALFORMAT;
   }
   return FETCHE_OK;
@@ -85,11 +88,12 @@ static ssize_t detect_line(struct h1_req_parser *parser,
                            const char *buf, const size_t buflen,
                            FETCHcode *err)
 {
-  const char  *line_end;
+  const char *line_end;
 
   DEBUGASSERT(!parser->line);
   line_end = memchr(buf, '\n', buflen);
-  if(!line_end) {
+  if (!line_end)
+  {
     *err = FETCHE_AGAIN;
     return -1;
   }
@@ -105,27 +109,31 @@ static ssize_t next_line(struct h1_req_parser *parser,
 {
   ssize_t nread = 0;
 
-  if(parser->line) {
+  if (parser->line)
+  {
     parser->line = NULL;
     parser->line_len = 0;
     Curl_dyn_reset(&parser->scratch);
   }
 
   nread = detect_line(parser, buf, buflen, err);
-  if(nread >= 0) {
-    if(Curl_dyn_len(&parser->scratch)) {
+  if (nread >= 0)
+  {
+    if (Curl_dyn_len(&parser->scratch))
+    {
       /* append detected line to scratch to have the complete line */
       *err = Curl_dyn_addn(&parser->scratch, parser->line, parser->line_len);
-      if(*err)
+      if (*err)
         return -1;
       parser->line = Curl_dyn_ptr(&parser->scratch);
       parser->line_len = Curl_dyn_len(&parser->scratch);
     }
     *err = trim_line(parser, options);
-    if(*err)
+    if (*err)
       return -1;
   }
-  else if(*err == FETCHE_AGAIN) {
+  else if (*err == FETCHE_AGAIN)
+  {
     /* no line end in `buf`, add it to our scratch */
     *err = Curl_dyn_addn(&parser->scratch, (const unsigned char *)buf, buflen);
     nread = (*err) ? -1 : (ssize_t)buflen;
@@ -134,9 +142,9 @@ static ssize_t next_line(struct h1_req_parser *parser,
 }
 
 static FETCHcode start_req(struct h1_req_parser *parser,
-                          const char *scheme_default, int options)
+                           const char *scheme_default, int options)
 {
-  const char  *p, *m, *target, *hv, *scheme, *authority, *path;
+  const char *p, *m, *target, *hv, *scheme, *authority, *path;
   size_t m_len, target_len, hv_len, scheme_len, authority_len, path_len;
   size_t i;
   FETCHU *url = NULL;
@@ -145,7 +153,7 @@ static FETCHcode start_req(struct h1_req_parser *parser,
   DEBUGASSERT(!parser->req);
   /* line must match: "METHOD TARGET HTTP_VERSION" */
   p = memchr(parser->line, ' ', parser->line_len);
-  if(!p || p == parser->line)
+  if (!p || p == parser->line)
     goto out;
 
   m = parser->line;
@@ -155,8 +163,10 @@ static FETCHcode start_req(struct h1_req_parser *parser,
   hv = NULL;
 
   /* URL may contain spaces so scan backwards */
-  for(i = parser->line_len; i > m_len; --i) {
-    if(parser->line[i] == ' ') {
+  for (i = parser->line_len; i > m_len; --i)
+  {
+    if (parser->line[i] == ' ')
+    {
       hv = &parser->line[i + 1];
       hv_len = parser->line_len - i;
       target_len = (hv - target) - 1;
@@ -164,7 +174,7 @@ static FETCHcode start_req(struct h1_req_parser *parser,
     }
   }
   /* no SPACE found or empty TARGET or empty HTTP_VERSION */
-  if(!target_len || !hv_len)
+  if (!target_len || !hv_len)
     goto out;
 
   /* TODO: we do not check HTTP_VERSION for conformity, should
@@ -186,22 +196,26 @@ static FETCHcode start_req(struct h1_req_parser *parser,
   scheme = authority = path = NULL;
   scheme_len = authority_len = path_len = 0;
 
-  if(target_len == 1 && target[0] == '*') {
+  if (target_len == 1 && target[0] == '*')
+  {
     /* asterisk-form */
     path = target;
     path_len = target_len;
   }
-  else if(!strncmp("CONNECT", m, m_len)) {
+  else if (!strncmp("CONNECT", m, m_len))
+  {
     /* authority-form */
     authority = target;
     authority_len = target_len;
   }
-  else if(target[0] == '/') {
+  else if (target[0] == '/')
+  {
     /* origin-form */
     path = target;
     path_len = target_len;
   }
-  else {
+  else
+  {
     /* origin-form OR absolute-form */
     FETCHUcode uc;
     char tmp[H1_MAX_URL_LEN];
@@ -211,41 +225,48 @@ static FETCHcode start_req(struct h1_req_parser *parser,
     path_len = target_len;
 
     /* URL parser wants 0-termination */
-    if(target_len >= sizeof(tmp))
+    if (target_len >= sizeof(tmp))
       goto out;
     memcpy(tmp, target, target_len);
     tmp[target_len] = '\0';
     /* See if treating TARGET as an absolute URL makes sense */
-    if(Curl_is_absolute_url(tmp, NULL, 0, FALSE)) {
+    if (Curl_is_absolute_url(tmp, NULL, 0, FALSE))
+    {
       unsigned int url_options;
 
       url = fetch_url();
-      if(!url) {
+      if (!url)
+      {
         result = FETCHE_OUT_OF_MEMORY;
         goto out;
       }
-      url_options = (FETCHU_NON_SUPPORT_SCHEME|
-                     FETCHU_PATH_AS_IS|
+      url_options = (FETCHU_NON_SUPPORT_SCHEME |
+                     FETCHU_PATH_AS_IS |
                      FETCHU_NO_DEFAULT_PORT);
-      if(!(options & H1_PARSE_OPT_STRICT))
+      if (!(options & H1_PARSE_OPT_STRICT))
         url_options |= FETCHU_ALLOW_SPACE;
       uc = fetch_url_set(url, FETCHUPART_URL, tmp, url_options);
-      if(uc) {
+      if (uc)
+      {
         goto out;
       }
     }
 
-    if(!url && (options & H1_PARSE_OPT_STRICT)) {
+    if (!url && (options & H1_PARSE_OPT_STRICT))
+    {
       /* we should have an absolute URL or have seen `/` earlier */
       goto out;
     }
   }
 
-  if(url) {
+  if (url)
+  {
     result = Curl_http_req_make2(&parser->req, m, m_len, url, scheme_default);
   }
-  else {
-    if(!scheme && scheme_default) {
+  else
+  {
+    if (!scheme && scheme_default)
+    {
       scheme = scheme_default;
       scheme_len = strlen(scheme_default);
     }
@@ -266,10 +287,13 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
   ssize_t nread = 0, n;
 
   *err = FETCHE_OK;
-  while(!parser->done) {
+  while (!parser->done)
+  {
     n = next_line(parser, buf, buflen, options, err);
-    if(n < 0) {
-      if(*err != FETCHE_AGAIN) {
+    if (n < 0)
+    {
+      if (*err != FETCHE_AGAIN)
+      {
         nread = -1;
       }
       *err = FETCHE_OK;
@@ -281,21 +305,26 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
     buf += (size_t)n;
     buflen -= (size_t)n;
 
-    if(!parser->line) {
+    if (!parser->line)
+    {
       /* consumed bytes, but line not complete */
-      if(!buflen)
+      if (!buflen)
         goto out;
     }
-    else if(!parser->req) {
+    else if (!parser->req)
+    {
       *err = start_req(parser, scheme_default, options);
-      if(*err) {
+      if (*err)
+      {
         nread = -1;
         goto out;
       }
     }
-    else if(parser->line_len == 0) {
+    else if (parser->line_len == 0)
+    {
       /* last, empty line, we are finished */
-      if(!parser->req) {
+      if (!parser->req)
+      {
         *err = FETCHE_URL_MALFORMAT;
         nread = -1;
         goto out;
@@ -304,10 +333,12 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
       Curl_dyn_reset(&parser->scratch);
       /* last chance adjustments */
     }
-    else {
+    else
+    {
       *err = Curl_dynhds_h1_add_line(&parser->req->headers,
                                      parser->line, parser->line_len);
-      if(*err) {
+      if (*err)
+      {
         nread = -1;
         goto out;
       }
@@ -319,7 +350,7 @@ out:
 }
 
 FETCHcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,
-                                struct dynbuf *dbuf)
+                                 struct dynbuf *dbuf)
 {
   FETCHcode result;
 
@@ -330,11 +361,11 @@ FETCHcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,
                          req->authority ? req->authority : "",
                          req->path ? req->path : "",
                          http_minor);
-  if(result)
+  if (result)
     goto out;
 
   result = Curl_dynhds_h1_dprint(&req->headers, dbuf);
-  if(result)
+  if (result)
     goto out;
 
   result = Curl_dyn_addn(dbuf, STRCONST("\r\n"));

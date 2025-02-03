@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,7 +25,8 @@
  *
  ***************************************************************************/
 
-enum smb_conn_state {
+enum smb_conn_state
+{
   SMB_NOT_CONNECTED = 0,
   SMB_CONNECTING,
   SMB_NEGOTIATE,
@@ -33,7 +34,8 @@ enum smb_conn_state {
   SMB_CONNECTED
 };
 
-struct smb_conn {
+struct smb_conn
+{
   enum smb_conn_state state;
   char *user;
   char *domain;
@@ -55,7 +57,7 @@ struct smb_conn {
 extern const struct Curl_handler Curl_handler_smb;
 extern const struct Curl_handler Curl_handler_smbs;
 
-#endif /* FETCH_DISABLE_SMB && USE_FETCH_NTLM_CORE &&
+#endif /* FETCH_DISABLE_SMB && USE_FETCH_NTLM_CORE && \
           SIZEOF_FETCH_OFF_T > 4 */
 
 #endif /* HEADER_FETCH_SMB_H */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,30 +33,37 @@
 #define MAX_CREDS_LENGTH 250
 #define APPROX_TOKEN_LEN 250
 
-enum min_err_code {
-    GSS_OK = 0,
-    GSS_NO_MEMORY,
-    GSS_INVALID_ARGS,
-    GSS_INVALID_CREDS,
-    GSS_INVALID_CTX,
-    GSS_SERVER_ERR,
-    GSS_NO_MECH,
-    GSS_LAST
+enum min_err_code
+{
+  GSS_OK = 0,
+  GSS_NO_MEMORY,
+  GSS_INVALID_ARGS,
+  GSS_INVALID_CREDS,
+  GSS_INVALID_CTX,
+  GSS_SERVER_ERR,
+  GSS_NO_MECH,
+  GSS_LAST
 };
 
 static const char *min_err_table[] = {
-  "stub-gss: no error",
-  "stub-gss: no memory",
-  "stub-gss: invalid arguments",
-  "stub-gss: invalid credentials",
-  "stub-gss: invalid context",
-  "stub-gss: server returned error",
-  "stub-gss: cannot find a mechanism",
-  NULL
-};
+    "stub-gss: no error",
+    "stub-gss: no memory",
+    "stub-gss: invalid arguments",
+    "stub-gss: invalid credentials",
+    "stub-gss: invalid context",
+    "stub-gss: server returned error",
+    "stub-gss: cannot find a mechanism",
+    NULL};
 
-struct gss_ctx_id_t_desc_struct {
-  enum { NONE, KRB5, NTLM1, NTLM3 } sent;
+struct gss_ctx_id_t_desc_struct
+{
+  enum
+  {
+    NONE,
+    KRB5,
+    NTLM1,
+    NTLM3
+  } sent;
   int have_krb5;
   int have_ntlm;
   OM_uint32 flags;
@@ -67,7 +74,7 @@ struct gss_ctx_id_t_desc_struct {
 static char *my_strndup(const char *ptr, size_t len)
 {
   char *copy = malloc(len + 1);
-  if(!copy)
+  if (!copy)
     return NULL;
   memcpy(copy, ptr, len);
   copy[len] = '\0';
@@ -75,18 +82,18 @@ static char *my_strndup(const char *ptr, size_t len)
 }
 
 OM_uint32 gss_init_sec_context(OM_uint32 *min,
-            gss_const_cred_id_t initiator_cred_handle,
-            gss_ctx_id_t *context_handle,
-            gss_const_name_t target_name,
-            const gss_OID mech_type,
-            OM_uint32 req_flags,
-            OM_uint32 time_req,
-            const gss_channel_bindings_t input_chan_bindings,
-            const gss_buffer_t input_token,
-            gss_OID *actual_mech_type,
-            gss_buffer_t output_token,
-            OM_uint32 *ret_flags,
-            OM_uint32 *time_rec)
+                               gss_const_cred_id_t initiator_cred_handle,
+                               gss_ctx_id_t *context_handle,
+                               gss_const_name_t target_name,
+                               const gss_OID mech_type,
+                               OM_uint32 req_flags,
+                               OM_uint32 time_req,
+                               const gss_channel_bindings_t input_chan_bindings,
+                               const gss_buffer_t input_token,
+                               gss_OID *actual_mech_type,
+                               gss_buffer_t output_token,
+                               OM_uint32 *ret_flags,
+                               OM_uint32 *time_rec)
 {
   /* The token will be encoded in base64 */
   size_t length = APPROX_TOKEN_LEN * 3 / 4;
@@ -101,24 +108,27 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   (void)input_chan_bindings;
   (void)actual_mech_type;
 
-  if(!min)
+  if (!min)
     return GSS_S_FAILURE;
 
   *min = 0;
 
-  if(!context_handle || !target_name || !output_token) {
+  if (!context_handle || !target_name || !output_token)
+  {
     *min = GSS_INVALID_ARGS;
     return GSS_S_FAILURE;
   }
 
   creds = getenv("FETCH_STUB_GSS_CREDS");
-  if(!creds || strlen(creds) >= MAX_CREDS_LENGTH) {
+  if (!creds || strlen(creds) >= MAX_CREDS_LENGTH)
+  {
     *min = GSS_INVALID_CREDS;
     return GSS_S_FAILURE;
   }
 
   ctx = *context_handle;
-  if(ctx && strcmp(ctx->creds, creds)) {
+  if (ctx && strcmp(ctx->creds, creds))
+  {
     *min = GSS_INVALID_CREDS;
     return GSS_S_FAILURE;
   }
@@ -126,21 +136,25 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   output_token->length = 0;
   output_token->value = NULL;
 
-  if(input_token && input_token->length) {
-    if(!ctx) {
+  if (input_token && input_token->length)
+  {
+    if (!ctx)
+    {
       *min = GSS_INVALID_CTX;
       return GSS_S_FAILURE;
     }
 
     /* Server response, either D (RA==) or C (Qw==) */
-    if(((char *) input_token->value)[0] == 'D') {
+    if (((char *)input_token->value)[0] == 'D')
+    {
       /* Done */
-      switch(ctx->sent) {
+      switch (ctx->sent)
+      {
       case KRB5:
       case NTLM3:
-        if(ret_flags)
+        if (ret_flags)
           *ret_flags = ctx->flags;
-        if(time_rec)
+        if (time_rec)
           *time_rec = GSS_C_INDEFINITE;
         return GSS_S_COMPLETE;
       default:
@@ -149,21 +163,25 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
       }
     }
 
-    if(((char *) input_token->value)[0] != 'C') {
+    if (((char *)input_token->value)[0] != 'C')
+    {
       /* We only support Done or Continue */
       *min = GSS_SERVER_ERR;
       return GSS_S_FAILURE;
     }
 
     /* Continue */
-    switch(ctx->sent) {
+    switch (ctx->sent)
+    {
     case KRB5:
       /* We sent KRB5 and it failed, let's try NTLM */
-      if(ctx->have_ntlm) {
+      if (ctx->have_ntlm)
+      {
         ctx->sent = NTLM1;
         break;
       }
-      else {
+      else
+      {
         *min = GSS_SERVER_ERR;
         return GSS_S_FAILURE;
       }
@@ -175,29 +193,33 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
   }
-  else {
-    if(ctx) {
+  else
+  {
+    if (ctx)
+    {
       *min = GSS_INVALID_CTX;
       return GSS_S_FAILURE;
     }
 
-    ctx = (gss_ctx_id_t) calloc(1, sizeof(*ctx));
-    if(!ctx) {
+    ctx = (gss_ctx_id_t)calloc(1, sizeof(*ctx));
+    if (!ctx)
+    {
       *min = GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
-    if(strstr(creds, "KRB5"))
+    if (strstr(creds, "KRB5"))
       ctx->have_krb5 = 1;
 
-    if(strstr(creds, "NTLM"))
+    if (strstr(creds, "NTLM"))
       ctx->have_ntlm = 1;
 
-    if(ctx->have_krb5)
+    if (ctx->have_krb5)
       ctx->sent = KRB5;
-    else if(ctx->have_ntlm)
+    else if (ctx->have_ntlm)
       ctx->sent = NTLM1;
-    else {
+    else
+    {
       free(ctx);
       *min = GSS_NO_MECH;
       return GSS_S_FAILURE;
@@ -208,7 +230,8 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   }
 
   token = malloc(length);
-  if(!token) {
+  if (!token)
+  {
     free(ctx);
     *min = GSS_NO_MEMORY;
     return GSS_S_FAILURE;
@@ -217,10 +240,11 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   /* Token format: creds:target:type:padding */
   /* Note: this is using the *real* snprintf() and not the fetch provided
      one */
-  used = (size_t) snprintf(token, length, "%s:%s:%d:", creds,
-                           (char *) target_name, ctx->sent);
+  used = (size_t)snprintf(token, length, "%s:%s:%d:", creds,
+                          (char *)target_name, ctx->sent);
 
-  if(used >= length) {
+  if (used >= length)
+  {
     free(token);
     free(ctx);
     *min = GSS_NO_MEMORY;
@@ -244,10 +268,11 @@ OM_uint32 gss_delete_sec_context(OM_uint32 *min,
 {
   (void)output_token;
 
-  if(!min)
+  if (!min)
     return GSS_S_FAILURE;
 
-  if(!context_handle) {
+  if (!context_handle)
+  {
     *min = GSS_INVALID_CTX;
     return GSS_S_FAILURE;
   }
@@ -262,10 +287,11 @@ OM_uint32 gss_delete_sec_context(OM_uint32 *min,
 OM_uint32 gss_release_buffer(OM_uint32 *min,
                              gss_buffer_t buffer)
 {
-  if(min)
+  if (min)
     *min = 0;
 
-  if(buffer && buffer->length) {
+  if (buffer && buffer->length)
+  {
     free(buffer->value);
     buffer->length = 0;
   }
@@ -281,21 +307,23 @@ OM_uint32 gss_import_name(OM_uint32 *min,
   char *name = NULL;
   (void)input_name_type;
 
-  if(!min)
+  if (!min)
     return GSS_S_FAILURE;
 
-  if(!input_name_buffer || !output_name) {
+  if (!input_name_buffer || !output_name)
+  {
     *min = GSS_INVALID_ARGS;
     return GSS_S_FAILURE;
   }
 
   name = my_strndup(input_name_buffer->value, input_name_buffer->length);
-  if(!name) {
+  if (!name)
+  {
     *min = GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
 
-  *output_name = (gss_name_t) name;
+  *output_name = (gss_name_t)name;
   *min = 0;
 
   return GSS_S_COMPLETE;
@@ -304,10 +332,10 @@ OM_uint32 gss_import_name(OM_uint32 *min,
 OM_uint32 gss_release_name(OM_uint32 *min,
                            gss_name_t *input_name)
 {
-  if(min)
+  if (min)
     *min = 0;
 
-  if(input_name)
+  if (input_name)
     free(*input_name);
 
   return GSS_S_COMPLETE;
@@ -322,31 +350,33 @@ OM_uint32 gss_display_status(OM_uint32 *min,
 {
   const char maj_str[] = "Stub GSS error";
   (void)mech_type;
-  if(min)
+  if (min)
     *min = 0;
 
-  if(message_context)
+  if (message_context)
     *message_context = 0;
 
-  if(status_string) {
+  if (status_string)
+  {
     status_string->value = NULL;
     status_string->length = 0;
 
-    if(status_value >= GSS_LAST)
+    if (status_value >= GSS_LAST)
       return GSS_S_FAILURE;
 
-    switch(status_type) {
-      case GSS_C_GSS_CODE:
-        status_string->value = strdup(maj_str);
-        break;
-      case GSS_C_MECH_CODE:
-        status_string->value = strdup(min_err_table[status_value]);
-        break;
-      default:
-        return GSS_S_FAILURE;
+    switch (status_type)
+    {
+    case GSS_C_GSS_CODE:
+      status_string->value = strdup(maj_str);
+      break;
+    case GSS_C_MECH_CODE:
+      status_string->value = strdup(min_err_table[status_value]);
+      break;
+    default:
+      return GSS_S_FAILURE;
     }
 
-    if(status_string->value)
+    if (status_string->value)
       status_string->length = strlen(status_string->value);
     else
       return GSS_S_FAILURE;

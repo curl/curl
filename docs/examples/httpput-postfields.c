@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,14 +29,14 @@
 #include <fcntl.h>
 #include <fetch/fetch.h>
 
-static const char olivertwist[]=
-  "Among other public buildings in a certain town, which for many reasons "
-  "it will be prudent to refrain from mentioning, and to which I will assign "
-  "no fictitious name, there is one anciently common to most towns, great or "
-  "small: to wit, a workhouse; and in this workhouse was born; on a day and "
-  "date which I need not trouble myself to repeat, inasmuch as it can be of "
-  "no possible consequence to the reader, in this stage of the business at "
-  "all events; the item of mortality whose name is prefixed";
+static const char olivertwist[] =
+    "Among other public buildings in a certain town, which for many reasons "
+    "it will be prudent to refrain from mentioning, and to which I will assign "
+    "no fictitious name, there is one anciently common to most towns, great or "
+    "small: to wit, a workhouse; and in this workhouse was born; on a day and "
+    "date which I need not trouble myself to repeat, inasmuch as it can be of "
+    "no possible consequence to the reader, in this stage of the business at "
+    "all events; the item of mortality whose name is prefixed";
 
 /* ... to the head of this chapter. String cut off to stick within the C90
    509 byte limit. */
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
   FETCHcode res;
   char *url;
 
-  if(argc < 2)
+  if (argc < 2)
     return 1;
 
   url = argv[1];
@@ -62,7 +62,8 @@ int main(int argc, char **argv)
 
   /* get a fetch handle */
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     struct fetch_slist *headers = NULL;
 
     /* default type with postfields is application/x-www-form-urlencoded,
@@ -88,7 +89,7 @@ int main(int argc, char **argv)
     /* Now run off and do what you have been told! */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

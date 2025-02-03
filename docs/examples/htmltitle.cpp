@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,7 +55,7 @@
 
 struct Context
 {
-  Context(): addTitle(false) { }
+  Context() : addTitle(false) {}
 
   bool addTitle;
   std::string title;
@@ -74,10 +74,10 @@ static std::string buffer;
 static size_t writer(char *data, size_t size, size_t nmemb,
                      std::string *writerData)
 {
-  if(writerData == NULL)
+  if (writerData == NULL)
     return 0;
 
-  writerData->append(data, size*nmemb);
+  writerData->append(data, size * nmemb);
 
   return size * nmemb;
 }
@@ -92,37 +92,43 @@ static bool init(FETCH *&conn, const char *url)
 
   conn = fetch_easy_init();
 
-  if(conn == NULL) {
+  if (conn == NULL)
+  {
     fprintf(stderr, "Failed to create FETCH connection\n");
     exit(EXIT_FAILURE);
   }
 
   code = fetch_easy_setopt(conn, FETCHOPT_ERRORBUFFER, errorBuffer);
-  if(code != FETCHE_OK) {
+  if (code != FETCHE_OK)
+  {
     fprintf(stderr, "Failed to set error buffer [%d]\n", code);
     return false;
   }
 
   code = fetch_easy_setopt(conn, FETCHOPT_URL, url);
-  if(code != FETCHE_OK) {
+  if (code != FETCHE_OK)
+  {
     fprintf(stderr, "Failed to set URL [%s]\n", errorBuffer);
     return false;
   }
 
   code = fetch_easy_setopt(conn, FETCHOPT_FOLLOWLOCATION, 1L);
-  if(code != FETCHE_OK) {
+  if (code != FETCHE_OK)
+  {
     fprintf(stderr, "Failed to set redirect option [%s]\n", errorBuffer);
     return false;
   }
 
   code = fetch_easy_setopt(conn, FETCHOPT_WRITEFUNCTION, writer);
-  if(code != FETCHE_OK) {
+  if (code != FETCHE_OK)
+  {
     fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
     return false;
   }
 
   code = fetch_easy_setopt(conn, FETCHOPT_WRITEDATA, &buffer);
-  if(code != FETCHE_OK) {
+  if (code != FETCHE_OK)
+  {
     fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
     return false;
   }
@@ -140,11 +146,12 @@ static void StartElement(void *voidContext,
 {
   Context *context = static_cast<Context *>(voidContext);
 
-  if(COMPARE(reinterpret_cast<const char *>(name), "TITLE")) {
+  if (COMPARE(reinterpret_cast<const char *>(name), "TITLE"))
+  {
     context->title = "";
     context->addTitle = true;
   }
-  (void) attributes;
+  (void)attributes;
 }
 
 //
@@ -156,7 +163,7 @@ static void EndElement(void *voidContext,
 {
   Context *context = static_cast<Context *>(voidContext);
 
-  if(COMPARE(reinterpret_cast<const char *>(name), "TITLE"))
+  if (COMPARE(reinterpret_cast<const char *>(name), "TITLE"))
     context->addTitle = false;
 }
 
@@ -168,7 +175,7 @@ static void handleCharacters(Context *context,
                              const xmlChar *chars,
                              int length)
 {
-  if(context->addTitle)
+  if (context->addTitle)
     context->title.append(reinterpret_cast<const char *>(chars),
                           (unsigned long)length);
 }
@@ -204,40 +211,39 @@ static void cdata(void *voidContext,
 //
 
 static htmlSAXHandler saxHandler =
-{
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  StartElement,
-  EndElement,
-  NULL,
-  Characters,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  cdata,
-  NULL,
-  0,
-  0,
-  0,
-  0,
-  NULL
-};
+    {
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        StartElement,
+        EndElement,
+        NULL,
+        Characters,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        cdata,
+        NULL,
+        0,
+        0,
+        0,
+        0,
+        NULL};
 
 //
 //  Parse given (assumed to be) HTML text and return the title
@@ -268,7 +274,8 @@ int main(int argc, char *argv[])
 
   // Ensure one argument is given
 
-  if(argc != 2) {
+  if (argc != 2)
+  {
     fprintf(stderr, "Usage: %s <url>\n", argv[0]);
     exit(EXIT_FAILURE);
   }
@@ -277,7 +284,8 @@ int main(int argc, char *argv[])
 
   // Initialize FETCH connection
 
-  if(!init(conn, argv[1])) {
+  if (!init(conn, argv[1]))
+  {
     fprintf(stderr, "Connection initialization failed\n");
     exit(EXIT_FAILURE);
   }
@@ -287,7 +295,8 @@ int main(int argc, char *argv[])
   code = fetch_easy_perform(conn);
   fetch_easy_cleanup(conn);
 
-  if(code != FETCHE_OK) {
+  if (code != FETCHE_OK)
+  {
     fprintf(stderr, "Failed to get '%s' [%s]\n", argv[1], errorBuffer);
     exit(EXIT_FAILURE);
   }

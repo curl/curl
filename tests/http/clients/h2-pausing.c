@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,7 +36,7 @@
 
 #ifndef _MSC_VER
 /* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
+#include <unistd.h> /* getopt() */
 #endif
 
 #ifndef _MSC_VER
@@ -48,18 +48,16 @@ static void log_line_start(FILE *log, const char *idsbuf, fetch_infotype type)
    * This is the trace look that is similar to what libfetch makes on its
    * own.
    */
-  static const char * const s_infotype[] = {
-    "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
-  };
-  if(idsbuf && *idsbuf)
+  static const char *const s_infotype[] = {
+      "* ", "< ", "> ", "{ ", "} ", "{ ", "} "};
+  if (idsbuf && *idsbuf)
     fprintf(log, "%s%s", idsbuf, s_infotype[type]);
   else
     fputs(s_infotype[type], log);
 }
 
-#define TRC_IDS_FORMAT_IDS_1  "[%" FETCH_FORMAT_FETCH_OFF_T "-x] "
-#define TRC_IDS_FORMAT_IDS_2  "[%" FETCH_FORMAT_FETCH_OFF_T "-%" \
-                                   FETCH_FORMAT_FETCH_OFF_T "] "
+#define TRC_IDS_FORMAT_IDS_1 "[%" FETCH_FORMAT_FETCH_OFF_T "-x] "
+#define TRC_IDS_FORMAT_IDS_2 "[%" FETCH_FORMAT_FETCH_OFF_T "-%" FETCH_FORMAT_FETCH_OFF_T "] "
 /*
 ** callback for FETCHOPT_DEBUGFUNCTION
 */
@@ -76,27 +74,35 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
   (void)handle; /* not used */
   (void)userdata;
 
-  if(!fetch_easy_getinfo(handle, FETCHINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
-    if(!fetch_easy_getinfo(handle, FETCHINFO_CONN_ID, &conn_id) &&
-        conn_id >= 0) {
+  if (!fetch_easy_getinfo(handle, FETCHINFO_XFER_ID, &xfer_id) && xfer_id >= 0)
+  {
+    if (!fetch_easy_getinfo(handle, FETCHINFO_CONN_ID, &conn_id) &&
+        conn_id >= 0)
+    {
       fetch_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id,
-                     conn_id);
+                      conn_id);
     }
-    else {
+    else
+    {
       fetch_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
   }
   else
     idsbuf[0] = 0;
 
-  switch(type) {
+  switch (type)
+  {
   case FETCHINFO_HEADER_OUT:
-    if(size > 0) {
+    if (size > 0)
+    {
       size_t st = 0;
       size_t i;
-      for(i = 0; i < size - 1; i++) {
-        if(data[i] == '\n') { /* LF */
-          if(!newl) {
+      for (i = 0; i < size - 1; i++)
+      {
+        if (data[i] == '\n')
+        { /* LF */
+          if (!newl)
+          {
             log_line_start(output, idsbuf, type);
           }
           (void)fwrite(data + st, i - st + 1, 1, output);
@@ -104,7 +110,7 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
           newl = 0;
         }
       }
-      if(!newl)
+      if (!newl)
         log_line_start(output, idsbuf, type);
       (void)fwrite(data + st, i - st + 1, 1, output);
     }
@@ -113,7 +119,7 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
     break;
   case FETCHINFO_TEXT:
   case FETCHINFO_HEADER_IN:
-    if(!newl)
+    if (!newl)
       log_line_start(output, idsbuf, type);
     (void)fwrite(data, size, 1, output);
     newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
@@ -123,8 +129,9 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
   case FETCHINFO_DATA_IN:
   case FETCHINFO_SSL_DATA_IN:
   case FETCHINFO_SSL_DATA_OUT:
-    if(!traced_data) {
-      if(!newl)
+    if (!traced_data)
+    {
+      if (!newl)
         log_line_start(output, idsbuf, type);
       fprintf(output, "[%ld bytes data]\n", (long)size);
       newl = 0;
@@ -140,21 +147,21 @@ static int debug_cb(FETCH *handle, fetch_infotype type,
   return 0;
 }
 
-#define ERR()                                                             \
-  do {                                                                    \
-    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
-    exit(2);                                                              \
-  } while(0)
+#define ERR()                                                            \
+  do                                                                     \
+  {                                                                      \
+    fprintf(stderr, "something unexpected went wrong - bailing out!\n"); \
+    exit(2);                                                             \
+  } while (0)
 
 static void usage(const char *msg)
 {
-  if(msg)
+  if (msg)
     fprintf(stderr, "%s\n", msg);
   fprintf(stderr,
-    "usage: [options] url\n"
-    "  pause downloads with following options:\n"
-    "  -V http_version (http/1.1, h2, h3) http version to use\n"
-  );
+          "usage: [options] url\n"
+          "  pause downloads with following options:\n"
+          "  -V http_version (http/1.1, h2, h3) http version to use\n");
 }
 
 struct handle
@@ -170,23 +177,24 @@ struct handle
 static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 {
   size_t realsize = size * nmemb;
-  struct handle *handle = (struct handle *) clientp;
+  struct handle *handle = (struct handle *)clientp;
   fetch_off_t totalsize;
 
   (void)data;
-  if(fetch_easy_getinfo(handle->h, FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                       &totalsize) == FETCHE_OK)
-    fprintf(stderr, "INFO: [%d] write, Content-Length %"FETCH_FORMAT_FETCH_OFF_T
-            "\n", handle->idx, totalsize);
+  if (fetch_easy_getinfo(handle->h, FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                         &totalsize) == FETCHE_OK)
+    fprintf(stderr, "INFO: [%d] write, Content-Length %" FETCH_FORMAT_FETCH_OFF_T "\n", handle->idx, totalsize);
 
-  if(!handle->resumed) {
+  if (!handle->resumed)
+  {
     ++handle->paused;
     fprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
             handle->idx, handle->paused, (long)realsize);
     assert(handle->paused == 1);
     return FETCH_WRITEFUNC_PAUSE;
   }
-  if(handle->fail_write) {
+  if (handle->fail_write)
+  {
     ++handle->errored;
     fprintf(stderr, "INFO: [%d] FAIL write of %lu bytes, %d time\n",
             handle->idx, (long)realsize, handle->errored);
@@ -216,33 +224,38 @@ int main(int argc, char *argv[])
   int http_version = FETCH_HTTP_VERSION_2_0;
   int ch;
 
-  while((ch = getopt(argc, argv, "hV:")) != -1) {
-    switch(ch) {
+  while ((ch = getopt(argc, argv, "hV:")) != -1)
+  {
+    switch (ch)
+    {
     case 'h':
       usage(NULL);
       return 2;
-    case 'V': {
-      if(!strcmp("http/1.1", optarg))
+    case 'V':
+    {
+      if (!strcmp("http/1.1", optarg))
         http_version = FETCH_HTTP_VERSION_1_1;
-      else if(!strcmp("h2", optarg))
+      else if (!strcmp("h2", optarg))
         http_version = FETCH_HTTP_VERSION_2_0;
-      else if(!strcmp("h3", optarg))
+      else if (!strcmp("h3", optarg))
         http_version = FETCH_HTTP_VERSION_3ONLY;
-      else {
+      else
+      {
         usage("invalid http version");
         return 1;
       }
       break;
     }
     default:
-     usage("invalid option");
-     return 1;
+      usage("invalid option");
+      return 1;
     }
   }
   argc -= optind;
   argv += optind;
 
-  if(argc != 1) {
+  if (argc != 1)
+  {
     fprintf(stderr, "ERROR: need URL as argument\n");
     return 2;
   }
@@ -252,107 +265,127 @@ int main(int argc, char *argv[])
   fetch_global_trace("ids,time,http/2,http/3");
 
   cu = fetch_url();
-  if(!cu) {
+  if (!cu)
+  {
     fprintf(stderr, "out of memory\n");
     exit(1);
   }
-  if(fetch_url_set(cu, FETCHUPART_URL, url, 0)) {
+  if (fetch_url_set(cu, FETCHUPART_URL, url, 0))
+  {
     fprintf(stderr, "not a URL: '%s'\n", url);
     exit(1);
   }
-  if(fetch_url_get(cu, FETCHUPART_HOST, &host, 0)) {
+  if (fetch_url_get(cu, FETCHUPART_HOST, &host, 0))
+  {
     fprintf(stderr, "could not get host of '%s'\n", url);
     exit(1);
   }
-  if(fetch_url_get(cu, FETCHUPART_PORT, &port, 0)) {
+  if (fetch_url_get(cu, FETCHUPART_PORT, &port, 0))
+  {
     fprintf(stderr, "could not get port of '%s'\n", url);
     exit(1);
   }
   memset(&resolve, 0, sizeof(resolve));
-  fetch_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
-                 host, port);
+  fetch_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1",
+                  host, port);
   resolve = fetch_slist_append(resolve, resolve_buf);
 
-  for(i = 0; i < HANDLECOUNT; i++) {
+  for (i = 0; i < HANDLECOUNT; i++)
+  {
     handles[i].idx = i;
     handles[i].paused = 0;
     handles[i].resumed = 0;
     handles[i].errored = 0;
     handles[i].fail_write = 1;
     handles[i].h = fetch_easy_init();
-    if(!handles[i].h ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_WRITEFUNCTION, cb) != FETCHE_OK ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_WRITEDATA, &handles[i])
-        != FETCHE_OK ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_FOLLOWLOCATION, 1L) != FETCHE_OK ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_VERBOSE, 1L) != FETCHE_OK ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_DEBUGFUNCTION, debug_cb)
-        != FETCHE_OK ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_SSL_VERIFYPEER, 0L) != FETCHE_OK ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_RESOLVE, resolve) != FETCHE_OK ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_PIPEWAIT, 1L) ||
-      fetch_easy_setopt(handles[i].h, FETCHOPT_URL, url) != FETCHE_OK) {
+    if (!handles[i].h ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_WRITEFUNCTION, cb) != FETCHE_OK ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_WRITEDATA, &handles[i]) != FETCHE_OK ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_FOLLOWLOCATION, 1L) != FETCHE_OK ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_VERBOSE, 1L) != FETCHE_OK ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_DEBUGFUNCTION, debug_cb) != FETCHE_OK ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_SSL_VERIFYPEER, 0L) != FETCHE_OK ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_RESOLVE, resolve) != FETCHE_OK ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_PIPEWAIT, 1L) ||
+        fetch_easy_setopt(handles[i].h, FETCHOPT_URL, url) != FETCHE_OK)
+    {
       ERR();
     }
     fetch_easy_setopt(handles[i].h, FETCHOPT_HTTP_VERSION, (long)http_version);
   }
 
   multi_handle = fetch_multi_init();
-  if(!multi_handle)
+  if (!multi_handle)
     ERR();
 
-  for(i = 0; i < HANDLECOUNT; i++) {
-    if(fetch_multi_add_handle(multi_handle, handles[i].h) != FETCHM_OK)
+  for (i = 0; i < HANDLECOUNT; i++)
+  {
+    if (fetch_multi_add_handle(multi_handle, handles[i].h) != FETCHM_OK)
       ERR();
   }
 
-  for(rounds = 0;; rounds++) {
+  for (rounds = 0;; rounds++)
+  {
     fprintf(stderr, "INFO: multi_perform round %d\n", rounds);
-    if(fetch_multi_perform(multi_handle, &still_running) != FETCHM_OK)
+    if (fetch_multi_perform(multi_handle, &still_running) != FETCHM_OK)
       ERR();
 
-    if(!still_running) {
+    if (!still_running)
+    {
       int as_expected = 1;
       fprintf(stderr, "INFO: no more handles running\n");
-      for(i = 0; i < HANDLECOUNT; i++) {
-        if(!handles[i].paused) {
+      for (i = 0; i < HANDLECOUNT; i++)
+      {
+        if (!handles[i].paused)
+        {
           fprintf(stderr, "ERROR: [%d] NOT PAUSED\n", i);
           as_expected = 0;
         }
-        else if(handles[i].paused != 1) {
+        else if (handles[i].paused != 1)
+        {
           fprintf(stderr, "ERROR: [%d] PAUSED %d times!\n",
                   i, handles[i].paused);
           as_expected = 0;
         }
-        else if(!handles[i].resumed) {
+        else if (!handles[i].resumed)
+        {
           fprintf(stderr, "ERROR: [%d] NOT resumed!\n", i);
           as_expected = 0;
         }
-        else if(handles[i].errored != 1) {
+        else if (handles[i].errored != 1)
+        {
           fprintf(stderr, "ERROR: [%d] NOT errored once, %d instead!\n",
                   i, handles[i].errored);
           as_expected = 0;
         }
       }
-      if(!as_expected) {
+      if (!as_expected)
+      {
         fprintf(stderr, "ERROR: handles not in expected state "
-                "after %d rounds\n", rounds);
+                        "after %d rounds\n",
+                rounds);
         rc = 1;
       }
       break;
     }
 
-    if(fetch_multi_poll(multi_handle, NULL, 0, 100, &numfds) != FETCHM_OK)
+    if (fetch_multi_poll(multi_handle, NULL, 0, 100, &numfds) != FETCHM_OK)
       ERR();
 
     /* !checksrc! disable EQUALSNULL 1 */
-    while((msg = fetch_multi_info_read(multi_handle, &msgs_left)) != NULL) {
-      if(msg->msg == FETCHMSG_DONE) {
-        for(i = 0; i < HANDLECOUNT; i++) {
-          if(msg->easy_handle == handles[i].h) {
-            if(handles[i].paused != 1 || !handles[i].resumed) {
+    while ((msg = fetch_multi_info_read(multi_handle, &msgs_left)) != NULL)
+    {
+      if (msg->msg == FETCHMSG_DONE)
+      {
+        for (i = 0; i < HANDLECOUNT; i++)
+        {
+          if (msg->easy_handle == handles[i].h)
+          {
+            if (handles[i].paused != 1 || !handles[i].resumed)
+            {
               fprintf(stderr, "ERROR: [%d] done, pauses=%d, resumed=%d, "
-                      "result %d - wtf?\n", i, handles[i].paused,
+                              "result %d - wtf?\n",
+                      i, handles[i].paused,
                       handles[i].resumed, msg->data.result);
               rc = 1;
               goto out;
@@ -363,22 +396,28 @@ int main(int argc, char *argv[])
     }
 
     /* Successfully paused? */
-    if(!all_paused) {
-      for(i = 0; i < HANDLECOUNT; i++) {
-        if(!handles[i].paused) {
+    if (!all_paused)
+    {
+      for (i = 0; i < HANDLECOUNT; i++)
+      {
+        if (!handles[i].paused)
+        {
           break;
         }
       }
       all_paused = (i == HANDLECOUNT);
-      if(all_paused) {
+      if (all_paused)
+      {
         fprintf(stderr, "INFO: all transfers paused\n");
         /* give transfer some rounds to mess things up */
         resume_round = rounds + 2;
       }
     }
-    if(resume_round > 0 && rounds == resume_round) {
+    if (resume_round > 0 && rounds == resume_round)
+    {
       /* time to resume */
-      for(i = 0; i < HANDLECOUNT; i++) {
+      for (i = 0; i < HANDLECOUNT; i++)
+      {
         fprintf(stderr, "INFO: [%d] resumed\n", i);
         handles[i].resumed = 1;
         fetch_easy_pause(handles[i].h, FETCHPAUSE_CONT);
@@ -387,11 +426,11 @@ int main(int argc, char *argv[])
   }
 
 out:
-  for(i = 0; i < HANDLECOUNT; i++) {
+  for (i = 0; i < HANDLECOUNT; i++)
+  {
     fetch_multi_remove_handle(multi_handle, handles[i].h);
     fetch_easy_cleanup(handles[i].h);
   }
-
 
   fetch_slist_free_all(resolve);
   fetch_free(host);

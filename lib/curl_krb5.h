@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,7 +24,8 @@
  *
  ***************************************************************************/
 
-struct Curl_sec_client_mech {
+struct Curl_sec_client_mech
+{
   const char *name;
   size_t size;
   int (*init)(void *);
@@ -35,9 +36,9 @@ struct Curl_sec_client_mech {
   int (*decode)(void *, void *, int, int, struct connectdata *);
 };
 
-#define AUTH_OK         0
-#define AUTH_CONTINUE   1
-#define AUTH_ERROR      2
+#define AUTH_OK 0
+#define AUTH_CONTINUE 1
+#define AUTH_ERROR 2
 
 #ifdef HAVE_GSSAPI
 int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn, char *,

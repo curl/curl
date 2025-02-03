@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -68,7 +68,8 @@
 #pragma nomember_alignment longword
 #pragma message save
 #pragma message disable misalgndmem
-struct itmlst_3 {
+struct itmlst_3
+{
   unsigned short int buflen;
   unsigned short int itmcode;
   void *bufadr;
@@ -84,23 +85,22 @@ struct itmlst_3 {
 
 #define ENABLE TRUE
 #define DISABLE 0
-int   decc$feature_get_index (const char *name);
-int   decc$feature_set_value (int index, int mode, int value);
+int decc$feature_get_index(const char *name);
+int decc$feature_set_value(int index, int mode, int value);
 #endif
 
-int   SYS$TRNLNM(
+int SYS$TRNLNM(
     const unsigned long *attr,
     const struct dsc$descriptor_s *table_dsc,
     struct dsc$descriptor_s *name_dsc,
     const unsigned char *acmode,
     const struct itmlst_3 *item_list);
-int   SYS$CRELNM(
+int SYS$CRELNM(
     const unsigned long *attr,
     const struct dsc$descriptor_s *table_dsc,
     const struct dsc$descriptor_s *name_dsc,
     const unsigned char *acmode,
     const struct itmlst_3 *item_list);
-
 
 /* Take all the fun out of simply looking up a logical name */
 static int sys_trnlnm(const char *logname,
@@ -129,7 +129,8 @@ static int sys_trnlnm(const char *logname,
 
   status = SYS$TRNLNM(&attr, &table_dsc, &name_dsc, 0, itlst);
 
-  if($VMS_STATUS_SUCCESS(status)) {
+  if ($VMS_STATUS_SUCCESS(status))
+  {
 
     /* Null terminate and return the string */
     /*--------------------------------------*/
@@ -149,12 +150,12 @@ static int sys_crelnm(const char *logname,
   struct dsc$descriptor_s logname_dsc;
   struct itmlst_3 item_list[2];
 
-  proc_table_dsc.dsc$a_pointer = (char *) proc_table;
+  proc_table_dsc.dsc$a_pointer = (char *)proc_table;
   proc_table_dsc.dsc$w_length = strlen(proc_table);
   proc_table_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
   proc_table_dsc.dsc$b_class = DSC$K_CLASS_S;
 
-  logname_dsc.dsc$a_pointer = (char *) logname;
+  logname_dsc.dsc$a_pointer = (char *)logname;
   logname_dsc.dsc$w_length = strlen(logname);
   logname_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
   logname_dsc.dsc$b_class = DSC$K_CLASS_S;
@@ -172,8 +173,7 @@ static int sys_crelnm(const char *logname,
   return ret_val;
 }
 
-
- /* Start of DECC RTL Feature handling */
+/* Start of DECC RTL Feature handling */
 
 /*
 ** Sets default value for a feature
@@ -190,8 +190,8 @@ static void set_feature_default(const char *name, int value)
 
   index = decc$feature_get_index(name);
 
-  if(index > 0)
-    decc$feature_set_value (index, 0, value);
+  if (index > 0)
+    decc$feature_set_value(index, 0, value);
 }
 #endif
 
@@ -202,8 +202,9 @@ static void set_features(void)
   int use_unix_settings = 1;
 
   status = sys_trnlnm("GNV$UNIX_SHELL",
-                      unix_shell_name, sizeof(unix_shell_name) -1);
-  if(!$VMS_STATUS_SUCCESS(status)) {
+                      unix_shell_name, sizeof(unix_shell_name) - 1);
+  if (!$VMS_STATUS_SUCCESS(status))
+  {
     use_unix_settings = 0;
   }
 
@@ -212,7 +213,6 @@ static void set_features(void)
 
   /* We always want the new parse style */
   set_feature_default("DECC$ARGV_PARSE_STYLE", ENABLE);
-
 
   /* Unless we are in POSIX compliant mode, we want the old POSIX root
    * enabled.
@@ -247,7 +247,8 @@ static void set_features(void)
   /* Fix mv aa.bb aa  */
   set_feature_default("DECC$RENAME_NO_INHERIT", ENABLE);
 
-  if(use_unix_settings) {
+  if (use_unix_settings)
+  {
 
     /* POSIX requires that open files be able to be removed */
     set_feature_default("DECC$ALLOW_REMOVE_OPEN_FILES", ENABLE);
@@ -263,9 +264,9 @@ static void set_features(void)
 
     set_feature_default("DECC$FILE_OWNER_UNIX", ENABLE);
     set_feature_default("DECC$POSIX_SEEK_STREAM_FILE", ENABLE);
-
   }
-  else {
+  else
+  {
     set_feature_default("DECC$FILENAME_UNIX_REPORT", ENABLE);
   }
 
@@ -289,7 +290,6 @@ static void set_features(void)
   /*  do_not_set_default ("DECC$POSIX_STYLE_UID", TRUE); */
 }
 
-
 /* Some boilerplate to force this to be a proper LIB$INITIALIZE section */
 
 #pragma nostandard
@@ -298,24 +298,23 @@ static void set_features(void)
 #pragma extern_model strict_refdef "LIB$INITIALIZE" nowrt, long, nopic
 #else
 #pragma extern_model strict_refdef "LIB$INITIALIZE" nowrt, long
-#    if __INITIAL_POINTER_SIZE
-#        pragma __pointer_size __save
-#        pragma __pointer_size 32
-#    else
-#        pragma __required_pointer_size __save
-#        pragma __required_pointer_size 32
-#    endif
+#if __INITIAL_POINTER_SIZE
+#pragma __pointer_size __save
+#pragma __pointer_size 32
+#else
+#pragma __required_pointer_size __save
+#pragma __required_pointer_size 32
+#endif
 #endif
 /* Set our contribution to the LIB$INITIALIZE array */
-void (* const iniarray[])(void) = {set_features };
+void (*const iniarray[])(void) = {set_features};
 #ifndef __VAX
-#    if __INITIAL_POINTER_SIZE
-#        pragma __pointer_size __restore
-#    else
-#        pragma __required_pointer_size __restore
-#    endif
+#if __INITIAL_POINTER_SIZE
+#pragma __pointer_size __restore
+#else
+#pragma __required_pointer_size __restore
 #endif
-
+#endif
 
 /*
 ** Force a reference to LIB$INITIALIZE to ensure it
@@ -325,7 +324,7 @@ int LIB$INITIALIZE(void);
 #ifdef __DECC
 #pragma extern_model strict_refdef
 #endif
-    int lib_init_ref = (int) LIB$INITIALIZE;
+int lib_init_ref = (int)LIB$INITIALIZE;
 #ifdef __DECC
 #pragma extern_model restore
 #pragma standard

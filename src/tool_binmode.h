@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,12 +28,14 @@
 #if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
 /* Requires io.h and/or fcntl.h when available */
 #ifdef HAVE__SETMODE
-#  define FETCH_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
+#define FETCH_SET_BINMODE(stream) (void)_setmode(fileno(stream), O_BINARY)
 #else
-#  define FETCH_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
+#define FETCH_SET_BINMODE(stream) (void)setmode(fileno(stream), O_BINARY)
 #endif
 #else
-#  define FETCH_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
+#define FETCH_SET_BINMODE(stream) \
+    (void)stream;                 \
+    Curl_nop_stmt
 #endif
 
 #endif /* HEADER_FETCH_TOOL_BINMODE_H */

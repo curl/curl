@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -57,12 +57,11 @@
  * Function provided by the resolver backend to set DNS servers to use.
  */
 FETCHcode Curl_set_dns_servers(struct Curl_easy *data,
-                              char *servers)
+                               char *servers)
 {
   (void)data;
   (void)servers;
   return FETCHE_NOT_BUILT_IN;
-
 }
 
 /*
@@ -70,7 +69,7 @@ FETCHcode Curl_set_dns_servers(struct Curl_easy *data,
  * outgoing interface to use for DNS requests
  */
 FETCHcode Curl_set_dns_interface(struct Curl_easy *data,
-                                const char *interf)
+                                 const char *interf)
 {
   (void)data;
   (void)interf;
@@ -82,7 +81,7 @@ FETCHcode Curl_set_dns_interface(struct Curl_easy *data,
  * local IPv4 address to use as source address for DNS requests
  */
 FETCHcode Curl_set_dns_local_ip4(struct Curl_easy *data,
-                                const char *local_ip4)
+                                 const char *local_ip4)
 {
   (void)data;
   (void)local_ip4;
@@ -94,7 +93,7 @@ FETCHcode Curl_set_dns_local_ip4(struct Curl_easy *data,
  * local IPv6 address to use as source address for DNS requests
  */
 FETCHcode Curl_set_dns_local_ip6(struct Curl_easy *data,
-                                const char *local_ip6)
+                                 const char *local_ip6)
 {
   (void)data;
   (void)local_ip6;

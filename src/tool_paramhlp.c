@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,11 +43,12 @@ struct getout *new_getout(struct OperationConfig *config)
 {
   struct getout *node = calloc(1, sizeof(struct getout));
   struct getout *last = config->url_last;
-  if(node) {
+  if (node)
+  {
     static int outnum = 0;
 
     /* append this new node last in the list */
-    if(last)
+    if (last)
       last->next = node;
     else
       config->url_list = node; /* first node */
@@ -80,9 +81,10 @@ static size_t memcrlf(char *orig,
 {
   char *ptr;
   size_t total = max;
-  for(ptr = orig; max; max--, ptr++) {
+  for (ptr = orig; max; max--, ptr++)
+  {
     bool crlf = ISCRLF(*ptr);
-    if(countcrlf ^ crlf)
+    if (countcrlf ^ crlf)
       return ptr - orig;
   }
   return total; /* no delimiter found */
@@ -94,31 +96,36 @@ ParameterError file2string(char **bufp, FILE *file)
 {
   struct fetchx_dynbuf dyn;
   fetchx_dyn_init(&dyn, MAX_FILE2STRING);
-  if(file) {
-    do {
+  if (file)
+  {
+    do
+    {
       char buffer[4096];
       char *ptr;
       size_t nread = fread(buffer, 1, sizeof(buffer), file);
-      if(ferror(file)) {
+      if (ferror(file))
+      {
         fetchx_dyn_free(&dyn);
         *bufp = NULL;
         return PARAM_READ_ERROR;
       }
       ptr = buffer;
-      while(nread) {
+      while (nread)
+      {
         size_t nlen = memcrlf(ptr, FALSE, nread);
-        if(fetchx_dyn_addn(&dyn, ptr, nlen))
+        if (fetchx_dyn_addn(&dyn, ptr, nlen))
           return PARAM_NO_MEM;
         nread -= nlen;
 
-        if(nread) {
+        if (nread)
+        {
           ptr += nlen;
           nlen = memcrlf(ptr, TRUE, nread);
           ptr += nlen;
           nread -= nlen;
         }
       }
-    } while(!feof(file));
+    } while (!feof(file));
   }
   *bufp = fetchx_dyn_ptr(&dyn);
   return PARAM_OK;
@@ -131,7 +138,7 @@ static int myfseek(void *stream, fetch_off_t offset, int whence)
 #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
   return fseeko(stream, (off_t)offset, whence);
 #else
-  if(offset > LONG_MAX)
+  if (offset > LONG_MAX)
     return -1;
   return fseek(stream, (long)offset, whence);
 #endif
@@ -140,15 +147,18 @@ static int myfseek(void *stream, fetch_off_t offset, int whence)
 ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
                                  fetch_off_t starto, fetch_off_t endo)
 {
-  if(file) {
+  if (file)
+  {
     size_t nread;
     struct fetchx_dynbuf dyn;
     fetch_off_t offset = 0;
     fetch_off_t throwaway = 0;
 
-    if(starto) {
-      if(file != stdin) {
-        if(myfseek(file, starto, SEEK_SET))
+    if (starto)
+    {
+      if (file != stdin)
+      {
+        if (myfseek(file, starto, SEEK_SET))
           return PARAM_READ_ERROR;
         offset = starto;
       }
@@ -159,12 +169,14 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
 
     /* The size needs to fit in an int later */
     fetchx_dyn_init(&dyn, MAX_FILE2MEMORY);
-    do {
+    do
+    {
       char buffer[4096];
       size_t n_add;
       char *ptr_add;
       nread = fread(buffer, 1, sizeof(buffer), file);
-      if(ferror(file)) {
+      if (ferror(file))
+      {
         fetchx_dyn_free(&dyn);
         *size = 0;
         *bufp = NULL;
@@ -172,14 +184,18 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
       }
       n_add = nread;
       ptr_add = buffer;
-      if(nread) {
-        if(throwaway) {
-          if(throwaway >= (fetch_off_t)nread) {
+      if (nread)
+      {
+        if (throwaway)
+        {
+          if (throwaway >= (fetch_off_t)nread)
+          {
             throwaway -= nread;
             offset += nread;
             n_add = 0; /* nothing to add */
           }
-          else {
+          else
+          {
             /* append the trailing piece */
             n_add = (size_t)(nread - throwaway);
             ptr_add = &buffer[throwaway];
@@ -187,23 +203,25 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
             throwaway = 0;
           }
         }
-        if(n_add) {
-          if((fetch_off_t)(n_add + offset) > endo)
+        if (n_add)
+        {
+          if ((fetch_off_t)(n_add + offset) > endo)
             n_add = (size_t)(endo - offset + 1);
 
-          if(fetchx_dyn_addn(&dyn, ptr_add, n_add))
+          if (fetchx_dyn_addn(&dyn, ptr_add, n_add))
             return PARAM_NO_MEM;
 
           offset += n_add;
-          if(offset > endo)
+          if (offset > endo)
             break;
         }
       }
-    } while(!feof(file));
+    } while (!feof(file));
     *size = fetchx_dyn_len(&dyn);
     *bufp = fetchx_dyn_ptr(&dyn);
   }
-  else {
+  else
+  {
     *size = 0;
     *bufp = NULL;
   }
@@ -225,18 +243,20 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
  */
 static ParameterError getnum(long *val, const char *str, int base)
 {
-  if(str) {
+  if (str)
+  {
     char *endptr = NULL;
     long num;
-    if(!str[0])
+    if (!str[0])
       return PARAM_BLANK_STRING;
     errno = 0;
     num = strtol(str, &endptr, base);
-    if(errno == ERANGE)
+    if (errno == ERANGE)
       return PARAM_NUMBER_TOO_LARGE;
-    if((endptr != str) && (*endptr == '\0')) {
+    if ((endptr != str) && (*endptr == '\0'))
+    {
       *val = num;
-      return PARAM_OK;  /* Ok */
+      return PARAM_OK; /* Ok */
     }
   }
   return PARAM_BAD_NUMERIC; /* badness */
@@ -250,11 +270,11 @@ ParameterError str2num(long *val, const char *str)
 ParameterError oct2nummax(long *val, const char *str, long max)
 {
   ParameterError result = getnum(val, str, 8);
-  if(result != PARAM_OK)
+  if (result != PARAM_OK)
     return result;
-  else if(*val > max)
+  else if (*val > max)
     return PARAM_NUMBER_TOO_LARGE;
-  else if(*val < 0)
+  else if (*val < 0)
     return PARAM_NEGATIVE_NUMERIC;
 
   return PARAM_OK;
@@ -272,9 +292,9 @@ ParameterError oct2nummax(long *val, const char *str, long max)
 ParameterError str2unum(long *val, const char *str)
 {
   ParameterError result = getnum(val, str, 10);
-  if(result != PARAM_OK)
+  if (result != PARAM_OK)
     return result;
-  if(*val < 0)
+  if (*val < 0)
     return PARAM_NEGATIVE_NUMERIC;
 
   return PARAM_OK;
@@ -293,14 +313,13 @@ ParameterError str2unum(long *val, const char *str)
 ParameterError str2unummax(long *val, const char *str, long max)
 {
   ParameterError result = str2unum(val, str);
-  if(result != PARAM_OK)
+  if (result != PARAM_OK)
     return result;
-  if(*val > max)
+  if (*val > max)
     return PARAM_NUMBER_TOO_LARGE;
 
   return PARAM_OK;
 }
-
 
 /*
  * Parse the string and write the double in the given address. Return PARAM_OK
@@ -316,20 +335,23 @@ ParameterError str2unummax(long *val, const char *str, long max)
 
 static ParameterError str2double(double *val, const char *str, double max)
 {
-  if(str) {
+  if (str)
+  {
     char *endptr;
     double num;
     errno = 0;
     num = strtod(str, &endptr);
-    if(errno == ERANGE)
+    if (errno == ERANGE)
       return PARAM_NUMBER_TOO_LARGE;
-    if(num > max) {
+    if (num > max)
+    {
       /* too large */
       return PARAM_NUMBER_TOO_LARGE;
     }
-    if((endptr != str) && (endptr == str + strlen(str))) {
+    if ((endptr != str) && (endptr == str + strlen(str)))
+    {
       *val = num;
-      return PARAM_OK;  /* Ok */
+      return PARAM_OK; /* Ok */
     }
   }
   return PARAM_BAD_NUMERIC; /* badness */
@@ -351,13 +373,13 @@ static ParameterError str2double(double *val, const char *str, double max)
 ParameterError secs2ms(long *valp, const char *str)
 {
   double value;
-  ParameterError result = str2double(&value, str, (double)LONG_MAX/1000);
-  if(result != PARAM_OK)
+  ParameterError result = str2double(&value, str, (double)LONG_MAX / 1000);
+  if (result != PARAM_OK)
     return result;
-  if(value < 0)
+  if (value < 0)
     return PARAM_NEGATIVE_NUMERIC;
 
-  *valp = (long)(value*1000);
+  *valp = (long)(value * 1000);
   return PARAM_OK;
 }
 
@@ -367,14 +389,14 @@ ParameterError secs2ms(long *valp, const char *str)
 
 /* Return index of prototype token in set, card(set) if not found.
    Can be called with proto == NULL to get card(set). */
-static size_t protoset_index(const char * const *protoset, const char *proto)
+static size_t protoset_index(const char *const *protoset, const char *proto)
 {
-  const char * const *p = protoset;
+  const char *const *p = protoset;
 
-  DEBUGASSERT(proto == proto_token(proto));     /* Ensure it is tokenized. */
+  DEBUGASSERT(proto == proto_token(proto)); /* Ensure it is tokenized. */
 
-  for(; *p; p++)
-    if(proto == *p)
+  for (; *p; p++)
+    if (proto == *p)
       break;
   return p - protoset;
 }
@@ -382,10 +404,12 @@ static size_t protoset_index(const char * const *protoset, const char *proto)
 /* Include protocol token in set. */
 static void protoset_set(const char **protoset, const char *proto)
 {
-  if(proto) {
+  if (proto)
+  {
     size_t n = protoset_index(protoset, proto);
 
-    if(!protoset[n]) {
+    if (!protoset[n])
+    {
       DEBUGASSERT(n < proto_count);
       protoset[n] = proto;
       protoset[n + 1] = NULL;
@@ -396,10 +420,12 @@ static void protoset_set(const char **protoset, const char *proto)
 /* Exclude protocol token from set. */
 static void protoset_clear(const char **protoset, const char *proto)
 {
-  if(proto) {
+  if (proto)
+  {
     size_t n = protoset_index(protoset, proto);
 
-    if(protoset[n]) {
+    if (protoset[n])
+    {
       size_t m = protoset_index(protoset, NULL) - 1;
 
       protoset[n] = protoset[m];
@@ -419,10 +445,10 @@ static void protoset_clear(const char **protoset, const char *proto)
  * data.
  */
 
-#define MAX_PROTOSTRING (64*11) /* Enough room for 64 10-chars proto names. */
+#define MAX_PROTOSTRING (64 * 11) /* Enough room for 64 10-chars proto names. */
 
 ParameterError proto2num(struct OperationConfig *config,
-                         const char * const *val, char **ostr, const char *str)
+                         const char *const *val, char **ostr, const char *str)
 {
   char *buffer;
   const char *sep = ",";
@@ -434,38 +460,48 @@ ParameterError proto2num(struct OperationConfig *config,
 
   fetchx_dyn_init(&obuf, MAX_PROTOSTRING);
 
-  if(!str)
+  if (!str)
     return PARAM_OPTION_AMBIGUOUS;
 
   buffer = strdup(str); /* because strtok corrupts it */
-  if(!buffer)
+  if (!buffer)
     return PARAM_NO_MEM;
 
   protoset = malloc((proto_count + 1) * sizeof(*protoset));
-  if(!protoset) {
+  if (!protoset)
+  {
     free(buffer);
     return PARAM_NO_MEM;
   }
 
   /* Preset protocol set with default values. */
   protoset[0] = NULL;
-  for(; *val; val++) {
+  for (; *val; val++)
+  {
     const char *p = proto_token(*val);
 
-    if(p)
+    if (p)
       protoset_set(protoset, p);
   }
 
   /* Allow strtok() here since this is not used threaded */
   /* !checksrc! disable BANNEDFUNC 2 */
-  for(token = strtok(buffer, sep);
-      token;
-      token = strtok(NULL, sep)) {
-    enum e_action { allow, deny, set } action = allow;
+  for (token = strtok(buffer, sep);
+       token;
+       token = strtok(NULL, sep))
+  {
+    enum e_action
+    {
+      allow,
+      deny,
+      set
+    } action = allow;
 
     /* Process token modifiers */
-    while(!ISALNUM(*token)) { /* may be NULL if token is all modifiers */
-      switch(*token++) {
+    while (!ISALNUM(*token))
+    { /* may be NULL if token is all modifiers */
+      switch (*token++)
+      {
       case '=':
         action = set;
         break;
@@ -477,28 +513,32 @@ ParameterError proto2num(struct OperationConfig *config,
         break;
       default: /* Includes case of terminating NULL */
         free(buffer);
-        free((char *) protoset);
+        free((char *)protoset);
         return PARAM_BAD_USE;
       }
     }
 
-    if(fetch_strequal(token, "all")) {
-      switch(action) {
+    if (fetch_strequal(token, "all"))
+    {
+      switch (action)
+      {
       case deny:
         protoset[0] = NULL;
         break;
       case allow:
       case set:
-        memcpy((char *) protoset,
+        memcpy((char *)protoset,
                built_in_protos, (proto_count + 1) * sizeof(*protoset));
         break;
       }
     }
-    else {
+    else
+    {
       const char *p = proto_token(token);
 
-      if(p)
-        switch(action) {
+      if (p)
+        switch (action)
+        {
         case deny:
           protoset_clear(protoset, p);
           break;
@@ -509,10 +549,11 @@ ParameterError proto2num(struct OperationConfig *config,
           protoset_set(protoset, p);
           break;
         }
-      else { /* unknown protocol */
+      else
+      { /* unknown protocol */
         /* If they have specified only this protocol, we say treat it as
            if no protocols are allowed */
-        if(action == set)
+        if (action == set)
           protoset[0] = NULL;
         warnf(config->global, "unrecognized protocol '%s'", token);
       }
@@ -521,13 +562,13 @@ ParameterError proto2num(struct OperationConfig *config,
   free(buffer);
 
   /* We need the protocols in alphabetic order for CI tests requirements. */
-  qsort((char *) protoset, protoset_index(protoset, NULL), sizeof(*protoset),
+  qsort((char *)protoset, protoset_index(protoset, NULL), sizeof(*protoset),
         struplocompare4sort);
 
   result = fetchx_dyn_addn(&obuf, "", 0);
-  for(proto = 0; protoset[proto] && !result; proto++)
+  for (proto = 0; protoset[proto] && !result; proto++)
     result = fetchx_dyn_addf(&obuf, "%s,", protoset[proto]);
-  free((char *) protoset);
+  free((char *)protoset);
   fetchx_dyn_setlen(&obuf, fetchx_dyn_len(&obuf) - 1);
   free(*ostr);
   *ostr = fetchx_dyn_ptr(&obuf);
@@ -545,10 +586,10 @@ ParameterError proto2num(struct OperationConfig *config,
  */
 ParameterError check_protocol(const char *str)
 {
-  if(!str)
+  if (!str)
     return PARAM_REQUIRES_PARAMETER;
 
-  if(proto_token(str))
+  if (proto_token(str))
     return PARAM_OK;
   return PARAM_LIBFETCH_UNSUPPORTED_PROTOCOL;
 }
@@ -564,40 +605,40 @@ ParameterError check_protocol(const char *str)
 ParameterError str2offset(fetch_off_t *val, const char *str)
 {
   char *endptr;
-  if(str[0] == '-')
+  if (str[0] == '-')
     /* offsets are not negative, this indicates weird input */
     return PARAM_NEGATIVE_NUMERIC;
 
-#if(SIZEOF_FETCH_OFF_T > SIZEOF_LONG)
+#if (SIZEOF_FETCH_OFF_T > SIZEOF_LONG)
   {
     FETCHofft offt = fetchx_strtoofft(str, &endptr, 10, val);
-    if(FETCH_OFFT_FLOW == offt)
+    if (FETCH_OFFT_FLOW == offt)
       return PARAM_NUMBER_TOO_LARGE;
-    else if(FETCH_OFFT_INVAL == offt)
+    else if (FETCH_OFFT_INVAL == offt)
       return PARAM_BAD_NUMERIC;
   }
 #else
   errno = 0;
   *val = strtol(str, &endptr, 0);
-  if((*val == LONG_MIN || *val == LONG_MAX) && errno == ERANGE)
+  if ((*val == LONG_MIN || *val == LONG_MAX) && errno == ERANGE)
     return PARAM_NUMBER_TOO_LARGE;
 #endif
-  if((endptr != str) && (endptr == str + strlen(str)))
+  if ((endptr != str) && (endptr == str + strlen(str)))
     return PARAM_OK;
 
   return PARAM_BAD_NUMERIC;
 }
 
-#define MAX_USERPWDLENGTH (100*1024)
+#define MAX_USERPWDLENGTH (100 * 1024)
 static FETCHcode checkpasswd(const char *kind, /* for what purpose */
-                            const size_t i,   /* operation index */
-                            const bool last,  /* TRUE if last operation */
-                            char **userpwd)   /* pointer to allocated string */
+                             const size_t i,   /* operation index */
+                             const bool last,  /* TRUE if last operation */
+                             char **userpwd)   /* pointer to allocated string */
 {
   char *psep;
   char *osep;
 
-  if(!*userpwd)
+  if (!*userpwd)
     return FETCHE_OK;
 
   /* Attempt to find the password separator */
@@ -606,18 +647,19 @@ static FETCHcode checkpasswd(const char *kind, /* for what purpose */
   /* Attempt to find the options separator */
   osep = strchr(*userpwd, ';');
 
-  if(!psep && **userpwd != ';') {
+  if (!psep && **userpwd != ';')
+  {
     /* no password present, prompt for one */
     char passwd[2048] = "";
     char prompt[256];
     struct fetchx_dynbuf dyn;
 
     fetchx_dyn_init(&dyn, MAX_USERPWDLENGTH);
-    if(osep)
+    if (osep)
       *osep = '\0';
 
     /* build a nice-looking prompt */
-    if(!i && last)
+    if (!i && last)
       msnprintf(prompt, sizeof(prompt),
                 "Enter %s password for user '%s':",
                 kind, *userpwd);
@@ -628,10 +670,10 @@ static FETCHcode checkpasswd(const char *kind, /* for what purpose */
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));
-    if(osep)
+    if (osep)
       *osep = ';';
 
-    if(fetchx_dyn_addf(&dyn, "%s:%s", *userpwd, passwd))
+    if (fetchx_dyn_addf(&dyn, "%s:%s", *userpwd, passwd))
       return FETCHE_OUT_OF_MEMORY;
 
     /* return the new string */
@@ -645,7 +687,7 @@ static FETCHcode checkpasswd(const char *kind, /* for what purpose */
 ParameterError add2list(struct fetch_slist **list, const char *ptr)
 {
   struct fetch_slist *newlist = fetch_slist_append(*list, ptr);
-  if(newlist)
+  if (newlist)
     *list = newlist;
   else
     return PARAM_NO_MEM;
@@ -655,11 +697,11 @@ ParameterError add2list(struct fetch_slist **list, const char *ptr)
 
 int ftpfilemethod(struct OperationConfig *config, const char *str)
 {
-  if(fetch_strequal("singlecwd", str))
+  if (fetch_strequal("singlecwd", str))
     return FETCHFTPMETHOD_SINGLECWD;
-  if(fetch_strequal("nocwd", str))
+  if (fetch_strequal("nocwd", str))
     return FETCHFTPMETHOD_NOCWD;
-  if(fetch_strequal("multicwd", str))
+  if (fetch_strequal("multicwd", str))
     return FETCHFTPMETHOD_MULTICWD;
 
   warnf(config->global, "unrecognized ftp file method '%s', using default",
@@ -670,9 +712,9 @@ int ftpfilemethod(struct OperationConfig *config, const char *str)
 
 int ftpcccmethod(struct OperationConfig *config, const char *str)
 {
-  if(fetch_strequal("passive", str))
+  if (fetch_strequal("passive", str))
     return FETCHFTPSSL_CCC_PASSIVE;
-  if(fetch_strequal("active", str))
+  if (fetch_strequal("active", str))
     return FETCHFTPSSL_CCC_ACTIVE;
 
   warnf(config->global, "unrecognized ftp CCC method '%s', using default",
@@ -683,11 +725,11 @@ int ftpcccmethod(struct OperationConfig *config, const char *str)
 
 long delegation(struct OperationConfig *config, const char *str)
 {
-  if(fetch_strequal("none", str))
+  if (fetch_strequal("none", str))
     return FETCHGSSAPI_DELEGATION_NONE;
-  if(fetch_strequal("policy", str))
+  if (fetch_strequal("policy", str))
     return FETCHGSSAPI_DELEGATION_POLICY_FLAG;
-  if(fetch_strequal("always", str))
+  if (fetch_strequal("always", str))
     return FETCHGSSAPI_DELEGATION_FLAG;
 
   warnf(config->global, "unrecognized delegation method '%s', using none",
@@ -704,7 +746,7 @@ static char *my_useragent(void)
   return strdup(FETCH_NAME "/" FETCH_VERSION);
 }
 
-#define isheadersep(x) ((((x)==':') || ((x)==';')))
+#define isheadersep(x) ((((x) == ':') || ((x) == ';')))
 
 /*
  * inlist() returns true if the given 'checkfor' header is present in the
@@ -715,11 +757,12 @@ static bool inlist(const struct fetch_slist *head,
 {
   size_t thislen = strlen(checkfor);
   DEBUGASSERT(thislen);
-  DEBUGASSERT(checkfor[thislen-1] != ':');
+  DEBUGASSERT(checkfor[thislen - 1] != ':');
 
-  for(; head; head = head->next) {
-    if(fetch_strnequal(head->data, checkfor, thislen) &&
-       isheadersep(head->data[thislen]) )
+  for (; head; head = head->next)
+  {
+    if (fetch_strnequal(head->data, checkfor, thislen) &&
+        isheadersep(head->data[thislen]))
       return TRUE;
   }
 
@@ -731,36 +774,41 @@ FETCHcode get_args(struct OperationConfig *config, const size_t i)
   FETCHcode result = FETCHE_OK;
   bool last = (config->next ? FALSE : TRUE);
 
-  if(config->jsoned) {
+  if (config->jsoned)
+  {
     ParameterError err = PARAM_OK;
     /* --json also implies json Content-Type: and Accept: headers - if
        they are not set with -H */
-    if(!inlist(config->headers, "Content-Type"))
+    if (!inlist(config->headers, "Content-Type"))
       err = add2list(&config->headers, "Content-Type: application/json");
-    if(!err && !inlist(config->headers, "Accept"))
+    if (!err && !inlist(config->headers, "Accept"))
       err = add2list(&config->headers, "Accept: application/json");
-    if(err)
+    if (err)
       return FETCHE_OUT_OF_MEMORY;
   }
 
   /* Check we have a password for the given host user */
-  if(config->userpwd && !config->oauth_bearer) {
+  if (config->userpwd && !config->oauth_bearer)
+  {
     result = checkpasswd("host", i, last, &config->userpwd);
-    if(result)
+    if (result)
       return result;
   }
 
   /* Check we have a password for the given proxy user */
-  if(config->proxyuserpwd) {
+  if (config->proxyuserpwd)
+  {
     result = checkpasswd("proxy", i, last, &config->proxyuserpwd);
-    if(result)
+    if (result)
       return result;
   }
 
   /* Check we have a user agent */
-  if(!config->useragent) {
+  if (!config->useragent)
+  {
     config->useragent = my_useragent();
-    if(!config->useragent) {
+    if (!config->useragent)
+    {
       errorf(config->global, "out of memory");
       result = FETCHE_OUT_OF_MEMORY;
     }
@@ -780,21 +828,23 @@ FETCHcode get_args(struct OperationConfig *config, const size_t i)
 
 ParameterError str2tls_max(long *val, const char *str)
 {
-   static struct s_tls_max {
+  static struct s_tls_max
+  {
     const char *tls_max_str;
     long tls_max;
   } const tls_max_array[] = {
-    { "default", FETCH_SSLVERSION_MAX_DEFAULT },
-    { "1.0",     FETCH_SSLVERSION_MAX_TLSv1_0 },
-    { "1.1",     FETCH_SSLVERSION_MAX_TLSv1_1 },
-    { "1.2",     FETCH_SSLVERSION_MAX_TLSv1_2 },
-    { "1.3",     FETCH_SSLVERSION_MAX_TLSv1_3 }
-  };
+      {"default", FETCH_SSLVERSION_MAX_DEFAULT},
+      {"1.0", FETCH_SSLVERSION_MAX_TLSv1_0},
+      {"1.1", FETCH_SSLVERSION_MAX_TLSv1_1},
+      {"1.2", FETCH_SSLVERSION_MAX_TLSv1_2},
+      {"1.3", FETCH_SSLVERSION_MAX_TLSv1_3}};
   size_t i = 0;
-  if(!str)
+  if (!str)
     return PARAM_REQUIRES_PARAMETER;
-  for(i = 0; i < sizeof(tls_max_array)/sizeof(tls_max_array[0]); i++) {
-    if(!strcmp(str, tls_max_array[i].tls_max_str)) {
+  for (i = 0; i < sizeof(tls_max_array) / sizeof(tls_max_array[0]); i++)
+  {
+    if (!strcmp(str, tls_max_array[i].tls_max_str))
+    {
       *val = tls_max_array[i].tls_max;
       return PARAM_OK;
     }

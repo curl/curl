@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,11 @@
 
 #ifdef __AMIGA__
 #include <stdio.h>
-int main(void) { printf("AmigaOS is not supported.\n"); return 1; }
+int main(void)
+{
+  printf("AmigaOS is not supported.\n");
+  return 1;
+}
 #else
 
 #ifdef _WIN32
@@ -68,13 +72,15 @@ int main(void) { printf("AmigaOS is not supported.\n"); return 1; }
 #define FALSE 0
 #endif
 
-struct ip {
+struct ip
+{
   /* The user-provided IP address or network (use CIDR) to filter */
   char *str;
   /* IP address family AF_INET (IPv4) or AF_INET6 (IPv6) */
   int family;
   /* IP in network byte format */
-  union netaddr {
+  union netaddr
+  {
     struct in_addr ipv4;
 #ifdef AF_INET6
     struct in6_addr ipv6;
@@ -88,12 +94,14 @@ struct ip {
   struct ip *next;
 };
 
-enum connection_filter_t {
+enum connection_filter_t
+{
   CONNECTION_FILTER_BLACKLIST,
   CONNECTION_FILTER_WHITELIST
 };
 
-struct connection_filter {
+struct connection_filter
+{
   struct ip *list;
   enum connection_filter_t type;
   int verbose;
@@ -111,10 +119,11 @@ static struct ip *ip_list_append(struct ip *list, const char *data)
   char *cidr;
 
   ip = (struct ip *)calloc(1, sizeof(*ip));
-  if(!ip)
+  if (!ip)
     return NULL;
 
-  if(strchr(data, ':')) {
+  if (strchr(data, ':'))
+  {
 #ifdef AF_INET6
     ip->family = AF_INET6;
 #else
@@ -126,20 +135,23 @@ static struct ip *ip_list_append(struct ip *list, const char *data)
     ip->family = AF_INET;
 
   ip->str = strdup(data);
-  if(!ip->str) {
+  if (!ip->str)
+  {
     free(ip);
     return NULL;
   }
 
   /* determine the number of bits that this IP will match against */
   cidr = strchr(ip->str, '/');
-  if(cidr) {
+  if (cidr)
+  {
     ip->maskbits = atoi(cidr + 1);
-    if(ip->maskbits <= 0 ||
+    if (ip->maskbits <= 0 ||
 #ifdef AF_INET6
-       (ip->family == AF_INET6 && ip->maskbits > 128) ||
+        (ip->family == AF_INET6 && ip->maskbits > 128) ||
 #endif
-       (ip->family == AF_INET && ip->maskbits > 32)) {
+        (ip->family == AF_INET && ip->maskbits > 32))
+    {
       free(ip->str);
       free(ip);
       return NULL;
@@ -147,25 +159,26 @@ static struct ip *ip_list_append(struct ip *list, const char *data)
     /* ignore the CIDR notation when converting ip->str to ip->netaddr */
     *cidr = '\0';
   }
-  else if(ip->family == AF_INET)
+  else if (ip->family == AF_INET)
     ip->maskbits = 32;
 #ifdef AF_INET6
-  else if(ip->family == AF_INET6)
+  else if (ip->family == AF_INET6)
     ip->maskbits = 128;
 #endif
 
-  if(1 != inet_pton(ip->family, ip->str, &ip->netaddr)) {
+  if (1 != inet_pton(ip->family, ip->str, &ip->netaddr))
+  {
     free(ip->str);
     free(ip);
     return NULL;
   }
 
-  if(cidr)
+  if (cidr)
     *cidr = '/';
 
-  if(!list)
+  if (!list)
     return ip;
-  for(last = list; last->next; last = last->next)
+  for (last = list; last->next; last = last->next)
     ;
   last->next = ip;
   return list;
@@ -174,7 +187,8 @@ static struct ip *ip_list_append(struct ip *list, const char *data)
 static void ip_list_free_all(struct ip *list)
 {
   struct ip *next;
-  while(list) {
+  while (list)
+  {
     next = list->next;
     free(list->str);
     free(list);
@@ -184,7 +198,8 @@ static void ip_list_free_all(struct ip *list)
 
 static void free_connection_filter(struct connection_filter *filter)
 {
-  if(filter) {
+  if (filter)
+  {
     ip_list_free_all(filter->list);
     free(filter);
   }
@@ -198,15 +213,17 @@ static int ip_match(struct ip *ip, void *netaddr)
   x = (unsigned char *)&ip->netaddr;
   y = (unsigned char *)netaddr;
 
-  for(bytes = ip->maskbits / 8; bytes; --bytes) {
-    if(*x++ != *y++)
+  for (bytes = ip->maskbits / 8; bytes; --bytes)
+  {
+    if (*x++ != *y++)
       return FALSE;
   }
 
   tailbits = ip->maskbits % 8;
-  if(tailbits) {
+  if (tailbits)
+  {
     unsigned char tailmask = (unsigned char)((0xFF << (8 - tailbits)) & 0xFF);
-    if((*x & tailmask) != (*y & tailmask))
+    if ((*x & tailmask) != (*y & tailmask))
       return FALSE;
   }
 
@@ -216,16 +233,18 @@ static int ip_match(struct ip *ip, void *netaddr)
 #ifdef AF_INET6
 static int is_ipv4_mapped_ipv6_address(int family, void *netaddr)
 {
-  if(family == AF_INET6) {
+  if (family == AF_INET6)
+  {
     int i;
     unsigned char *x = (unsigned char *)netaddr;
-    for(i = 0; i < 12; ++i) {
-      if(x[i])
+    for (i = 0; i < 12; ++i)
+    {
+      if (x[i])
         break;
     }
     /* support formats ::x.x.x.x (deprecated) and ::ffff:x.x.x.x */
-    if((i == 12 && (x[i] || x[i + 1] || x[i + 2] || x[i + 3])) ||
-       (i == 10 && (x[i] == 0xFF && x[i + 1] == 0xFF)))
+    if ((i == 12 && (x[i] || x[i + 1] || x[i + 2] || x[i + 3])) ||
+        (i == 10 && (x[i] == 0xFF && x[i + 1] == 0xFF)))
       return TRUE;
   }
 
@@ -234,40 +253,45 @@ static int is_ipv4_mapped_ipv6_address(int family, void *netaddr)
 #endif /* AF_INET6 */
 
 static fetch_socket_t opensocket(void *clientp,
-                                fetchsocktype purpose,
-                                struct fetch_sockaddr *address)
+                                 fetchsocktype purpose,
+                                 struct fetch_sockaddr *address)
 {
   /* filter the address */
-  if(purpose == FETCHSOCKTYPE_IPCXN) {
+  if (purpose == FETCHSOCKTYPE_IPCXN)
+  {
     void *cinaddr = NULL;
 
-    if(address->family == AF_INET)
+    if (address->family == AF_INET)
       cinaddr = &((struct sockaddr_in *)(void *)&address->addr)->sin_addr;
 #ifdef AF_INET6
-    else if(address->family == AF_INET6)
+    else if (address->family == AF_INET6)
       cinaddr = &((struct sockaddr_in6 *)(void *)&address->addr)->sin6_addr;
 #endif
 
-    if(cinaddr) {
+    if (cinaddr)
+    {
       struct ip *ip;
       struct connection_filter *filter = (struct connection_filter *)clientp;
 #ifdef AF_INET6
       int mapped = !filter->ipv6_v6only &&
-        is_ipv4_mapped_ipv6_address(address->family, cinaddr);
+                   is_ipv4_mapped_ipv6_address(address->family, cinaddr);
 #endif
 
-      for(ip = filter->list; ip; ip = ip->next) {
-        if(ip->family == address->family && ip_match(ip, cinaddr))
+      for (ip = filter->list; ip; ip = ip->next)
+      {
+        if (ip->family == address->family && ip_match(ip, cinaddr))
           break;
 #ifdef AF_INET6
-        if(mapped && ip->family == AF_INET && address->family == AF_INET6 &&
-           ip_match(ip, (unsigned char *)cinaddr + 12))
+        if (mapped && ip->family == AF_INET && address->family == AF_INET6 &&
+            ip_match(ip, (unsigned char *)cinaddr + 12))
           break;
 #endif
       }
 
-      if(ip && filter->type == CONNECTION_FILTER_BLACKLIST) {
-        if(filter->verbose) {
+      if (ip && filter->type == CONNECTION_FILTER_BLACKLIST)
+      {
+        if (filter->verbose)
+        {
           char buf[128] = {0};
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
           fprintf(stderr, "* Rejecting IP %s due to blacklist entry %s.\n",
@@ -275,12 +299,14 @@ static fetch_socket_t opensocket(void *clientp,
         }
         return FETCH_SOCKET_BAD;
       }
-      else if(!ip && filter->type == CONNECTION_FILTER_WHITELIST) {
-        if(filter->verbose) {
+      else if (!ip && filter->type == CONNECTION_FILTER_WHITELIST)
+      {
+        if (filter->verbose)
+        {
           char buf[128] = {0};
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
           fprintf(stderr,
-            "* Rejecting IP %s due to missing whitelist entry.\n", buf);
+                  "* Rejecting IP %s due to missing whitelist entry.\n", buf);
         }
         return FETCH_SOCKET_BAD;
       }
@@ -297,14 +323,14 @@ int main(void)
   struct connection_filter *filter;
 
   filter = (struct connection_filter *)calloc(1, sizeof(*filter));
-  if(!filter)
+  if (!filter)
     exit(1);
 
-  if(fetch_global_init(FETCH_GLOBAL_DEFAULT))
+  if (fetch_global_init(FETCH_GLOBAL_DEFAULT))
     exit(1);
 
   fetch = fetch_easy_init();
-  if(!fetch)
+  if (!fetch)
     exit(1);
 
   /* Set the target URL */
@@ -333,7 +359,8 @@ int main(void)
   res = fetch_easy_perform(fetch);
 
   /* Check for errors */
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_easy_perform() failed: %s\n",
             fetch_easy_strerror(res));
   }

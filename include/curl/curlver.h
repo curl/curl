@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -72,8 +72,8 @@
  */
 #define LIBFETCH_TIMESTAMP "[unreleased]"
 
-#define FETCH_VERSION_BITS(x,y,z) ((x)<<16|(y)<<8|(z))
-#define FETCH_AT_LEAST_VERSION(x,y,z) \
-  (LIBFETCH_VERSION_NUM >= FETCH_VERSION_BITS(x, y, z))
+#define FETCH_VERSION_BITS(x, y, z) ((x) << 16 | (y) << 8 | (z))
+#define FETCH_AT_LEAST_VERSION(x, y, z) \
+   (LIBFETCH_VERSION_NUM >= FETCH_VERSION_BITS(x, y, z))
 
 #endif /* FETCHINC_FETCHVER_H */

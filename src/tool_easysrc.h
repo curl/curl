@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,11 +28,11 @@
 
 /* global variable declarations, for easy-interface source code generation */
 
-extern struct slist_wc *easysrc_decl; /* Variable declarations */
-extern struct slist_wc *easysrc_data; /* Build slists, forms etc. */
-extern struct slist_wc *easysrc_code; /* Setopt calls etc. */
+extern struct slist_wc *easysrc_decl;    /* Variable declarations */
+extern struct slist_wc *easysrc_data;    /* Build slists, forms etc. */
+extern struct slist_wc *easysrc_code;    /* Setopt calls etc. */
 extern struct slist_wc *easysrc_toohard; /* Unconvertible setopt */
-extern struct slist_wc *easysrc_clean;  /* Clean up (reverse order) */
+extern struct slist_wc *easysrc_clean;   /* Clean up (reverse order) */
 
 extern int easysrc_mime_count;  /* Number of fetch_mime variables */
 extern int easysrc_slist_count; /* Number of fetch_slist variables */
@@ -40,7 +40,7 @@ extern int easysrc_slist_count; /* Number of fetch_slist variables */
 extern FETCHcode easysrc_init(void);
 extern FETCHcode easysrc_add(struct slist_wc **plist, const char *bupf);
 extern FETCHcode easysrc_addf(struct slist_wc **plist,
-                             const char *fmt, ...) FETCH_PRINTF(2, 3);
+                              const char *fmt, ...) FETCH_PRINTF(2, 3);
 extern FETCHcode easysrc_perform(void);
 extern FETCHcode easysrc_cleanup(void);
 

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,19 +27,19 @@
 #include "fetch_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #ifdef HAVE_NETDB_H
-#  include <netdb.h>
+#include <netdb.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#  include <arpa/inet.h>
+#include <arpa/inet.h>
 #endif
 
 #ifdef __VMS
-#  include <in.h>
-#  include <inet.h>
-#  include <stdlib.h>
+#include <in.h>
+#include <inet.h>
+#include <stdlib.h>
 #endif
 
 /*
@@ -49,26 +49,25 @@
  * IPv4 and IPV6 builds.
  */
 
-struct Curl_addrinfo {
-  int                   ai_flags;
-  int                   ai_family;
-  int                   ai_socktype;
-  int                   ai_protocol;
-  fetch_socklen_t        ai_addrlen;   /* Follow rfc3493 struct addrinfo */
-  char                 *ai_canonname;
-  struct sockaddr      *ai_addr;
+struct Curl_addrinfo
+{
+  int ai_flags;
+  int ai_family;
+  int ai_socktype;
+  int ai_protocol;
+  fetch_socklen_t ai_addrlen; /* Follow rfc3493 struct addrinfo */
+  char *ai_canonname;
+  struct sockaddr *ai_addr;
   struct Curl_addrinfo *ai_next;
 };
 
-void
-Curl_freeaddrinfo(struct Curl_addrinfo *cahead);
+void Curl_freeaddrinfo(struct Curl_addrinfo *cahead);
 
 #ifdef HAVE_GETADDRINFO
-int
-Curl_getaddrinfo_ex(const char *nodename,
-                    const char *servname,
-                    const struct addrinfo *hints,
-                    struct Curl_addrinfo **result);
+int Curl_getaddrinfo_ex(const char *nodename,
+                        const char *servname,
+                        const struct addrinfo *hints,
+                        struct Curl_addrinfo **result);
 #endif
 
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
@@ -88,22 +87,20 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
 
 #if defined(FETCHDEBUG) && defined(HAVE_GETADDRINFO) && \
     defined(HAVE_FREEADDRINFO)
-void
-fetch_dbg_freeaddrinfo(struct addrinfo *freethis, int line, const char *source);
+void fetch_dbg_freeaddrinfo(struct addrinfo *freethis, int line, const char *source);
 #endif
 
 #if defined(FETCHDEBUG) && defined(HAVE_GETADDRINFO)
-int
-fetch_dbg_getaddrinfo(const char *hostname, const char *service,
-                     const struct addrinfo *hints, struct addrinfo **result,
-                     int line, const char *source);
+int fetch_dbg_getaddrinfo(const char *hostname, const char *service,
+                          const struct addrinfo *hints, struct addrinfo **result,
+                          int line, const char *source);
 #endif
 
 #ifdef HAVE_GETADDRINFO
 #ifdef USE_RESOLVE_ON_IPS
 void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port);
 #else
-#define Curl_addrinfo_set_port(x,y)
+#define Curl_addrinfo_set_port(x, y)
 #endif
 #endif
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,7 +40,7 @@ static FETCHcode ntlmcb_res = FETCHE_OK;
 
 static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 {
-  ssize_t idx = ((FETCH **) data) - ntlm_easy;
+  ssize_t idx = ((FETCH **)data) - ntlm_easy;
   fetch_socket_t sock;
   long longdata;
   FETCHcode code;
@@ -51,27 +51,30 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 
   /* Get socket being used for this easy handle, otherwise FETCH_SOCKET_BAD */
   FETCH_IGNORE_DEPRECATION(
-    code = fetch_easy_getinfo(ntlm_easy[idx], FETCHINFO_LASTSOCKET, &longdata);
-  )
-  if(FETCHE_OK != code) {
+      code = fetch_easy_getinfo(ntlm_easy[idx], FETCHINFO_LASTSOCKET, &longdata);)
+  if (FETCHE_OK != code)
+  {
     fprintf(stderr, "%s:%d fetch_easy_getinfo() failed, "
-            "with code %d (%s)\n",
+                    "with code %d (%s)\n",
             __FILE__, __LINE__, (int)code, fetch_easy_strerror(code));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
-  if(longdata == -1L)
+  if (longdata == -1L)
     sock = FETCH_SOCKET_BAD;
   else
     sock = (fetch_socket_t)longdata;
 
-  if(sock != FETCH_SOCKET_BAD) {
+  if (sock != FETCH_SOCKET_BAD)
+  {
     /* Track relationship between this easy handle and the socket. */
-    if(ntlm_sockets[idx] == FETCH_SOCKET_BAD) {
+    if (ntlm_sockets[idx] == FETCH_SOCKET_BAD)
+    {
       /* An easy handle without previous socket, record the socket. */
       ntlm_sockets[idx] = sock;
     }
-    else if(sock != ntlm_sockets[idx]) {
+    else if (sock != ntlm_sockets[idx])
+    {
       /* An easy handle with a socket different to previously
          tracked one, log and fail right away. Known bug #37. */
       fprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
@@ -83,7 +86,8 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size * nmemb;
 }
 
-enum HandleState {
+enum HandleState
+{
   ReadyForNewHandle,
   NeedSocketForNewHandle,
   NoMoreHandles
@@ -102,25 +106,29 @@ FETCHcode test(char *url)
 
   start_test_timing();
 
-  if(!full_url) {
+  if (!full_url)
+  {
     fprintf(stderr, "Not enough memory for full url\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < MAX_EASY_HANDLES; ++i) {
+  for (i = 0; i < MAX_EASY_HANDLES; ++i)
+  {
     ntlm_easy[i] = NULL;
     ntlm_sockets[i] = FETCH_SOCKET_BAD;
   }
 
   res_global_init(FETCH_GLOBAL_ALL);
-  if(res) {
+  if (res)
+  {
     free(full_url);
     return res;
   }
 
   multi_init(multi);
 
-  for(;;) {
+  for (;;)
+  {
     struct timeval interval;
     fd_set fdread;
     fd_set fdwrite;
@@ -130,14 +138,17 @@ FETCHcode test(char *url)
     bool found_new_socket = FALSE;
 
     /* Start a new handle if we aren't at the max */
-    if(state == ReadyForNewHandle) {
+    if (state == ReadyForNewHandle)
+    {
       easy_init(ntlm_easy[num_handles]);
 
-      if(num_handles % 3 == 2) {
+      if (num_handles % 3 == 2)
+      {
         msnprintf(full_url, urllen, "%s0200", url);
         easy_setopt(ntlm_easy[num_handles], FETCHOPT_HTTPAUTH, FETCHAUTH_NTLM);
       }
-      else {
+      else
+      {
         msnprintf(full_url, urllen, "%s0100", url);
         easy_setopt(ntlm_easy[num_handles], FETCHOPT_HTTPAUTH, FETCHAUTH_BASIC);
       }
@@ -165,7 +176,7 @@ FETCHcode test(char *url)
 
     abort_on_test_timeout();
 
-    if(!running && state == NoMoreHandles)
+    if (!running && state == NoMoreHandles)
       break; /* done */
 
     FD_ZERO(&fdread);
@@ -176,10 +187,12 @@ FETCHcode test(char *url)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    if(state == NeedSocketForNewHandle) {
-      if(maxfd != -1 && !found_new_socket) {
+    if (state == NeedSocketForNewHandle)
+    {
+      if (maxfd != -1 && !found_new_socket)
+      {
         fprintf(stderr, "Warning: socket did not open immediately for new "
-                "handle (trying again)\n");
+                        "handle (trying again)\n");
         continue;
       }
       state = num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle
@@ -195,24 +208,27 @@ FETCHcode test(char *url)
     fprintf(stderr, "%s:%d num_handles %d timeout %ld running %d\n",
             __FILE__, __LINE__, num_handles, timeout, running);
 
-    if(timeout != -1L) {
+    if (timeout != -1L)
+    {
       int itimeout;
 #if LONG_MAX > INT_MAX
       itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
 #else
       itimeout = (int)timeout;
 #endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
-    else {
+    else
+    {
       interval.tv_sec = 0;
       interval.tv_usec = 5000;
 
       /* if there's no timeout and we get here on the last handle, we may
          already have read the last part of the stream so waiting makes no
          sense */
-      if(!running && num_handles == MAX_EASY_HANDLES) {
+      if (!running && num_handles == MAX_EASY_HANDLES)
+      {
         break;
       }
     }
@@ -226,7 +242,8 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < MAX_EASY_HANDLES; i++) {
+  for (i = 0; i < MAX_EASY_HANDLES; i++)
+  {
     printf("Data connection %d: %d\n", i, ntlm_counter[i]);
     fetch_multi_remove_handle(multi, ntlm_easy[i]);
     fetch_easy_cleanup(ntlm_easy[i]);

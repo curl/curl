@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 
 #ifdef _WIN32
-#  include <direct.h>
+#include <direct.h>
 #endif
 
 #include "fetchx.h"
@@ -37,15 +37,16 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 #if defined(_WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
-#  define mkdir(x,y) (mkdir)((x))
-#  ifndef F_OK
-#    define F_OK 0
-#  endif
+#define mkdir(x, y) (mkdir)((x))
+#ifndef F_OK
+#define F_OK 0
+#endif
 #endif
 
 static void show_dir_errno(struct GlobalConfig *global, const char *name)
 {
-  switch(errno) {
+  switch (errno)
+  {
 #ifdef EACCES
   case EACCES:
     errorf(global, "You do not have permission to create %s", name);
@@ -64,13 +65,15 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
 #ifdef ENOSPC
   case ENOSPC:
     errorf(global, "No space left on the file system that will "
-           "contain the directory %s", name);
+                   "contain the directory %s",
+           name);
     break;
 #endif
 #ifdef EDQUOT
   case EDQUOT:
     errorf(global, "Cannot create directory %s because you "
-           "exceeded your quota", name);
+                   "exceeded your quota",
+           name);
     break;
 #endif
   default:
@@ -93,7 +96,6 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
 #define PATH_DELIMITERS DIR_CHAR
 #endif
 
-
 FETCHcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
 {
   char *tempdir;
@@ -105,11 +107,12 @@ FETCHcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
 
   outlen = strlen(outfile);
   outdup = strdup(outfile);
-  if(!outdup)
+  if (!outdup)
     return FETCHE_OUT_OF_MEMORY;
 
   dirbuildup = malloc(outlen + 1);
-  if(!dirbuildup) {
+  if (!dirbuildup)
+  {
     Curl_safefree(outdup);
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -119,17 +122,21 @@ FETCHcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
   /* !checksrc! disable BANNEDFUNC 2 */
   tempdir = strtok(outdup, PATH_DELIMITERS);
 
-  while(tempdir) {
+  while (tempdir)
+  {
     bool skip = false;
     tempdir2 = strtok(NULL, PATH_DELIMITERS);
     /* since strtok returns a token for the last word even
        if not ending with DIR_CHAR, we need to prune it */
-    if(tempdir2) {
+    if (tempdir2)
+    {
       size_t dlen = strlen(dirbuildup);
-      if(dlen)
+      if (dlen)
         msnprintf(&dirbuildup[dlen], outlen - dlen, "%s%s", DIR_CHAR, tempdir);
-      else {
-        if(outdup == tempdir) {
+      else
+      {
+        if (outdup == tempdir)
+        {
 #if defined(_WIN32) || defined(MSDOS)
           /* Skip creating a drive's current directory.
              It may seem as though that would harmlessly fail but it could be
@@ -138,7 +145,7 @@ FETCHcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
              eg if outfile is X:\foo\bar\filename then do not mkdir X:
              This logic takes into account unsupported drives !:, 1:, etc. */
           char *p = strchr(tempdir, ':');
-          if(p && !p[1])
+          if (p && !p[1])
             skip = true;
 #endif
           /* the output string does not start with a separator */
@@ -148,8 +155,9 @@ FETCHcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
           msnprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);
       }
       /* Create directory. Ignore access denied error to allow traversal. */
-      if(!skip && (-1 == mkdir(dirbuildup, (mode_t)0000750)) &&
-         (errno != EACCES) && (errno != EEXIST)) {
+      if (!skip && (-1 == mkdir(dirbuildup, (mode_t)0000750)) &&
+          (errno != EACCES) && (errno != EEXIST))
+      {
         show_dir_errno(global, dirbuildup);
         result = FETCHE_WRITE_ERROR;
         break; /* get out of loop */

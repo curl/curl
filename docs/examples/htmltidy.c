@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,21 +47,26 @@ uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
 void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
 {
   TidyNode child;
-  for(child = tidyGetChild(tnod); child; child = tidyGetNext(child) ) {
+  for (child = tidyGetChild(tnod); child; child = tidyGetNext(child))
+  {
     ctmbstr name = tidyNodeGetName(child);
-    if(name) {
+    if (name)
+    {
       /* if it has a name, then it's an HTML tag ... */
       TidyAttr attr;
       printf("%*.*s%s ", indent, indent, "<", name);
       /* walk the attribute list */
-      for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr) ) {
+      for (attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr))
+      {
         printf("%s", tidyAttrName(attr));
         tidyAttrValue(attr) ? printf("=\"%s\" ",
-                                     tidyAttrValue(attr)) : printf(" ");
+                                     tidyAttrValue(attr))
+                            : printf(" ");
       }
       printf(">\n");
     }
-    else {
+    else
+    {
       /* if it does not have a name, then it's probably text, cdata, etc... */
       TidyBuffer buf;
       tidyBufInit(&buf);
@@ -73,10 +78,10 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
   }
 }
 
-
 int main(int argc, char **argv)
 {
-  if(argc == 2) {
+  if (argc == 2)
+  {
     FETCH *fetch;
     char fetch_errbuf[FETCH_ERROR_SIZE];
     TidyDoc tdoc;
@@ -99,14 +104,18 @@ int main(int argc, char **argv)
 
     fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, &docbuf);
     err = fetch_easy_perform(fetch);
-    if(!err) {
+    if (!err)
+    {
       err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
-      if(err >= 0) {
+      if (err >= 0)
+      {
         err = tidyCleanAndRepair(tdoc); /* fix any problems */
-        if(err >= 0) {
+        if (err >= 0)
+        {
           err = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
-          if(err >= 0) {
-            dumpNode(tdoc, tidyGetRoot(tdoc), 0); /* walk the tree */
+          if (err >= 0)
+          {
+            dumpNode(tdoc, tidyGetRoot(tdoc), 0);    /* walk the tree */
             fprintf(stderr, "%s\n", tidy_errbuf.bp); /* show errors */
           }
         }
@@ -121,7 +130,6 @@ int main(int argc, char **argv)
     tidyBufFree(&tidy_errbuf);
     tidyRelease(tdoc);
     return err;
-
   }
   else
     printf("usage: %s <url>\n", argv[0]);

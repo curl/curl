@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /*
- * See https://github.com/fetch/fetch/issues/3371
+ * See https://github.com/curl/curl/issues/3371
  *
  * This test case checks whether fetch_multi_remove_handle() cancels
  * asynchronous DNS resolvers without blocking where possible.  Obviously, it
@@ -60,7 +60,7 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_URL, URL);
 
   /* Set a DNS server that hopefully will not respond when using c-ares. */
-  if(fetch_easy_setopt(fetch, FETCHOPT_DNS_SERVERS, "0.0.0.0") == FETCHE_OK)
+  if (fetch_easy_setopt(fetch, FETCHOPT_DNS_SERVERS, "0.0.0.0") == FETCHE_OK)
     /* Since we could set the DNS server, presume we are working with a
        resolver that can be cancelled (i.e. c-ares).  Thus,
        fetch_multi_remove_handle() should not block even when the resolver
@@ -68,7 +68,8 @@ FETCHcode test(char *URL)
        test hang timeout so we will fail if the handle removal call incorrectly
        blocks. */
     timeout = TEST_HANG_TIMEOUT * 2;
-  else {
+  else
+  {
     /* If we can't set the DNS server, presume that we are configured to use a
        resolver that can't be cancelled (i.e. the threaded resolver or the
        non-threaded blocking resolver).  So, we just test that the
@@ -102,7 +103,8 @@ FETCHcode test(char *URL)
   fprintf(stderr, "fetch_multi_remove_handle()...\n");
   start_test_timing();
   mres = fetch_multi_remove_handle(multiHandle, fetch);
-  if(mres) {
+  if (mres)
+  {
     fprintf(stderr, "fetch_multi_remove_handle() failed, with code %d\n", mres);
     res = TEST_ERR_MULTI;
     goto test_cleanup;

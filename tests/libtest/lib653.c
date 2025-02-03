@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,6 @@
 #include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"
-
 
 FETCHcode test(char *URL)
 {
@@ -50,7 +49,7 @@ FETCHcode test(char *URL)
   easy_setopt(fetchs, FETCHOPT_NOPROGRESS, 1L);
 
   res = fetch_easy_perform(fetchs);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   /* Alter form and resubmit. */

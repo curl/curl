@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,13 +27,14 @@
 
 #if !defined(FETCH_DISABLE_HTTP) && !defined(FETCH_DISABLE_HEADERS_API)
 
-struct Curl_header_store {
+struct Curl_header_store
+{
   struct Curl_llist_node node;
-  char *name; /* points into 'buffer' */
-  char *value; /* points into 'buffer */
-  int request; /* 0 is the first request, then 1.. 2.. */
+  char *name;         /* points into 'buffer' */
+  char *value;        /* points into 'buffer */
+  int request;        /* 0 is the first request, then 1.. 2.. */
   unsigned char type; /* FETCHH_* defines */
-  char buffer[1]; /* this is the raw header blob */
+  char buffer[1];     /* this is the raw header blob */
 };
 
 /*
@@ -46,7 +47,7 @@ FETCHcode Curl_headers_init(struct Curl_easy *data);
  * Curl_headers_push() gets passed a full header to store.
  */
 FETCHcode Curl_headers_push(struct Curl_easy *data, const char *header,
-                           unsigned char type);
+                            unsigned char type);
 
 /*
  * Curl_headers_cleanup(). Free all stored headers and associated memory.
@@ -55,7 +56,7 @@ FETCHcode Curl_headers_cleanup(struct Curl_easy *data);
 
 #else
 #define Curl_headers_init(x) FETCHE_OK
-#define Curl_headers_push(x,y,z) FETCHE_OK
+#define Curl_headers_push(x, y, z) FETCHE_OK
 #define Curl_headers_cleanup(x) Curl_nop_stmt
 #endif
 

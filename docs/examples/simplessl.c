@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,40 +64,45 @@ int main(void)
   const char *pEngine;
 
 #ifdef USE_ENGINE
-  pKeyName  = "rsa_test";
-  pKeyType  = "ENG";
-  pEngine   = "chil";            /* for nChiper HSM... */
+  pKeyName = "rsa_test";
+  pKeyType = "ENG";
+  pEngine = "chil"; /* for nChiper HSM... */
 #else
-  pKeyName  = "testkey.pem";
-  pKeyType  = "PEM";
-  pEngine   = NULL;
+  pKeyName = "testkey.pem";
+  pKeyType = "PEM";
+  pEngine = NULL;
 #endif
 
   headerfile = fopen(pHeaderFile, "wb");
-  if(!headerfile)
+  if (!headerfile)
     return 1;
 
   fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* what call to write: */
     fetch_easy_setopt(fetch, FETCHOPT_URL, "HTTPS://your.favourite.ssl.site");
     fetch_easy_setopt(fetch, FETCHOPT_HEADERDATA, headerfile);
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4127)  /* conditional expression is constant */
+#pragma warning(disable : 4127) /* conditional expression is constant */
 #endif
-    do { /* dummy loop, just to break out from */
-      if(pEngine) {
+    do
+    { /* dummy loop, just to break out from */
+      if (pEngine)
+      {
         /* use crypto engine */
-        if(fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE, pEngine) != FETCHE_OK) {
+        if (fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE, pEngine) != FETCHE_OK)
+        {
           /* load the crypto engine */
           fprintf(stderr, "cannot set crypto engine\n");
           break;
         }
-        if(fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE_DEFAULT, 1L) != FETCHE_OK) {
+        if (fetch_easy_setopt(fetch, FETCHOPT_SSLENGINE_DEFAULT, 1L) != FETCHE_OK)
+        {
           /* set the crypto engine as default */
           /* only needed for the first time you load
              an engine in a fetch object... */
@@ -114,7 +119,7 @@ int main(void)
 
       /* sorry, for engine we must set the passphrase
          (if the key has one...) */
-      if(pPassphrase)
+      if (pPassphrase)
         fetch_easy_setopt(fetch, FETCHOPT_KEYPASSWD, pPassphrase);
 
       /* if we use a key stored in a crypto engine,
@@ -133,12 +138,12 @@ int main(void)
       /* Perform the request, res gets the return code */
       res = fetch_easy_perform(fetch);
       /* Check for errors */
-      if(res != FETCHE_OK)
+      if (res != FETCHE_OK)
         fprintf(stderr, "fetch_easy_perform() failed: %s\n",
                 fetch_easy_strerror(res));
 
       /* we are done... */
-    } while(0);
+    } while (0);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,8 @@
 #if defined(_WIN32)
 
 /* Version condition */
-typedef enum {
+typedef enum
+{
   VERSION_LESS_THAN,
   VERSION_LESS_THAN_EQUAL,
   VERSION_EQUAL,
@@ -38,7 +39,8 @@ typedef enum {
 } VersionCondition;
 
 /* Platform identifier */
-typedef enum {
+typedef enum
+{
   PLATFORM_DONT_CARE,
   PLATFORM_WINDOWS,
   PLATFORM_WINNT
@@ -46,10 +48,10 @@ typedef enum {
 
 /* This is used to verify if we are running on a specific Windows version */
 bool fetchx_verify_windows_version(const unsigned int majorVersion,
-                                  const unsigned int minorVersion,
-                                  const unsigned int buildVersion,
-                                  const PlatformIdentifier platform,
-                                  const VersionCondition condition);
+                                   const unsigned int minorVersion,
+                                   const unsigned int buildVersion,
+                                   const PlatformIdentifier platform,
+                                   const VersionCondition condition);
 
 #endif /* _WIN32 */
 

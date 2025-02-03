@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,17 +48,16 @@
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 int j = 0;
 gint num_urls = 9; /* Just make sure this is less than urls[]*/
-const char * const urls[]= {
-  "90022",
-  "90023",
-  "90024",
-  "90025",
-  "90026",
-  "90027",
-  "90028",
-  "90029",
-  "90030"
-};
+const char *const urls[] = {
+    "90022",
+    "90023",
+    "90024",
+    "90025",
+    "90026",
+    "90027",
+    "90028",
+    "90029",
+    "90030"};
 
 size_t write_file(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
@@ -71,7 +70,8 @@ static void run_one(gchar *http, int j)
   FETCH *fetch;
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     printf("j = %d\n", j);
 
     /* Set the URL and transfer type */
@@ -91,12 +91,14 @@ void *pull_one_url(void *NaN)
 {
   /* protect the reading and increasing of 'j' with a mutex */
   pthread_mutex_lock(&lock);
-  while(j < num_urls) {
+  while (j < num_urls)
+  {
     int i = j;
     j++;
     pthread_mutex_unlock(&lock);
     http = g_strdup_printf("https://example.com/%s", urls[i]);
-    if(http) {
+    if (http)
+    {
       run_one(http, i);
       g_free(http);
     }
@@ -106,11 +108,10 @@ void *pull_one_url(void *NaN)
   return NULL;
 }
 
-
 gboolean pulse_bar(gpointer data)
 {
   gdk_threads_enter();
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR (data));
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(data));
   gdk_threads_leave();
 
   /* Return true so the function is called again; returning false removes this
@@ -125,19 +126,21 @@ void *create_thread(void *progress_bar)
   int i;
 
   /* Make sure I do not create more threads than urls. */
-  for(i = 0; i < NUMT && i < num_urls ; i++) {
+  for (i = 0; i < NUMT && i < num_urls; i++)
+  {
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
                                NULL);
-    if(0 != error)
+    if (0 != error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }
 
   /* Wait for all threads to terminate. */
-  for(i = 0; i < NUMT && i < num_urls; i++) {
+  for (i = 0; i < NUMT && i < num_urls; i++)
+  {
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
@@ -153,9 +156,7 @@ void *create_thread(void *progress_bar)
   /* [Un]Comment this out to kill the program rather than pushing close. */
   /* gtk_main_quit(); */
 
-
   return NULL;
-
 }
 
 static gboolean cb_delete(GtkWidget *window, gpointer data)
@@ -194,7 +195,7 @@ int main(int argc, char **argv)
 
   /* Progress bar */
   progress_bar = gtk_progress_bar_new();
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR (progress_bar));
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(progress_bar));
   /* Make uniform pulsing */
   gint pulse_ref = g_timeout_add(300, pulse_bar, progress_bar);
   g_object_set_data(G_OBJECT(progress_bar), "pulse_id",
@@ -204,10 +205,10 @@ int main(int argc, char **argv)
   gtk_widget_show_all(top_window);
   printf("gtk_widget_show_all\n");
 
-  g_signal_connect(G_OBJECT (top_window), "delete-event",
+  g_signal_connect(G_OBJECT(top_window), "delete-event",
                    G_CALLBACK(cb_delete), NULL);
 
-  if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
+  if (!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
     g_warning("cannot create the thread");
 
   gtk_main();

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,12 +31,12 @@ struct dynbuf;
 struct Curl_ssl_session;
 
 FETCHcode Curl_ssl_session_pack(struct Curl_easy *data,
-                               struct Curl_ssl_session *s,
-                               struct dynbuf *buf);
+                                struct Curl_ssl_session *s,
+                                struct dynbuf *buf);
 
 FETCHcode Curl_ssl_session_unpack(struct Curl_easy *data,
-                                 const unsigned char *buf, size_t buflen,
-                                 struct Curl_ssl_session **ps);
+                                  const unsigned char *buf, size_t buflen,
+                                  struct Curl_ssl_session **ps);
 
 #endif /* USE_SSLS_EXPORT */
 

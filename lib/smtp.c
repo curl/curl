@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -90,25 +90,25 @@
 static FETCHcode smtp_regular_transfer(struct Curl_easy *data, bool *done);
 static FETCHcode smtp_do(struct Curl_easy *data, bool *done);
 static FETCHcode smtp_done(struct Curl_easy *data, FETCHcode status,
-                          bool premature);
+                           bool premature);
 static FETCHcode smtp_connect(struct Curl_easy *data, bool *done);
 static FETCHcode smtp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead);
+                                 struct connectdata *conn, bool dead);
 static FETCHcode smtp_multi_statemach(struct Curl_easy *data, bool *done);
 static int smtp_getsock(struct Curl_easy *data,
                         struct connectdata *conn, fetch_socket_t *socks);
 static FETCHcode smtp_doing(struct Curl_easy *data, bool *dophase_done);
 static FETCHcode smtp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn);
+                                       struct connectdata *conn);
 static FETCHcode smtp_parse_url_options(struct connectdata *conn);
 static FETCHcode smtp_parse_url_path(struct Curl_easy *data);
 static FETCHcode smtp_parse_custom_request(struct Curl_easy *data);
 static FETCHcode smtp_parse_address(const char *fqma,
-                                   char **address, struct hostname *host);
+                                    char **address, struct hostname *host);
 static FETCHcode smtp_perform_auth(struct Curl_easy *data, const char *mech,
-                                  const struct bufref *initresp);
+                                   const struct bufref *initresp);
 static FETCHcode smtp_continue_auth(struct Curl_easy *data, const char *mech,
-                                   const struct bufref *resp);
+                                    const struct bufref *resp);
 static FETCHcode smtp_cancel_auth(struct Curl_easy *data, const char *mech);
 static FETCHcode smtp_get_message(struct Curl_easy *data, struct bufref *out);
 static FETCHcode cr_eob_add(struct Curl_easy *data);
@@ -118,30 +118,29 @@ static FETCHcode cr_eob_add(struct Curl_easy *data);
  */
 
 const struct Curl_handler Curl_handler_smtp = {
-  "smtp",                           /* scheme */
-  smtp_setup_connection,            /* setup_connection */
-  smtp_do,                          /* do_it */
-  smtp_done,                        /* done */
-  ZERO_NULL,                        /* do_more */
-  smtp_connect,                     /* connect_it */
-  smtp_multi_statemach,             /* connecting */
-  smtp_doing,                       /* doing */
-  smtp_getsock,                     /* proto_getsock */
-  smtp_getsock,                     /* doing_getsock */
-  ZERO_NULL,                        /* domore_getsock */
-  ZERO_NULL,                        /* perform_getsock */
-  smtp_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
-  ZERO_NULL,                        /* write_resp_hd */
-  ZERO_NULL,                        /* connection_check */
-  ZERO_NULL,                        /* attach connection */
-  ZERO_NULL,                        /* follow */
-  PORT_SMTP,                        /* defport */
-  FETCHPROTO_SMTP,                   /* protocol */
-  FETCHPROTO_SMTP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS
-};
+    "smtp",                                    /* scheme */
+    smtp_setup_connection,                     /* setup_connection */
+    smtp_do,                                   /* do_it */
+    smtp_done,                                 /* done */
+    ZERO_NULL,                                 /* do_more */
+    smtp_connect,                              /* connect_it */
+    smtp_multi_statemach,                      /* connecting */
+    smtp_doing,                                /* doing */
+    smtp_getsock,                              /* proto_getsock */
+    smtp_getsock,                              /* doing_getsock */
+    ZERO_NULL,                                 /* domore_getsock */
+    ZERO_NULL,                                 /* perform_getsock */
+    smtp_disconnect,                           /* disconnect */
+    ZERO_NULL,                                 /* write_resp */
+    ZERO_NULL,                                 /* write_resp_hd */
+    ZERO_NULL,                                 /* connection_check */
+    ZERO_NULL,                                 /* attach connection */
+    ZERO_NULL,                                 /* follow */
+    PORT_SMTP,                                 /* defport */
+    FETCHPROTO_SMTP,                           /* protocol */
+    FETCHPROTO_SMTP,                           /* family */
+    PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
+        PROTOPT_URLOPTIONS};
 
 #ifdef USE_SSL
 /*
@@ -149,44 +148,43 @@ const struct Curl_handler Curl_handler_smtp = {
  */
 
 const struct Curl_handler Curl_handler_smtps = {
-  "smtps",                          /* scheme */
-  smtp_setup_connection,            /* setup_connection */
-  smtp_do,                          /* do_it */
-  smtp_done,                        /* done */
-  ZERO_NULL,                        /* do_more */
-  smtp_connect,                     /* connect_it */
-  smtp_multi_statemach,             /* connecting */
-  smtp_doing,                       /* doing */
-  smtp_getsock,                     /* proto_getsock */
-  smtp_getsock,                     /* doing_getsock */
-  ZERO_NULL,                        /* domore_getsock */
-  ZERO_NULL,                        /* perform_getsock */
-  smtp_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
-  ZERO_NULL,                        /* write_resp_hd */
-  ZERO_NULL,                        /* connection_check */
-  ZERO_NULL,                        /* attach connection */
-  ZERO_NULL,                        /* follow */
-  PORT_SMTPS,                       /* defport */
-  FETCHPROTO_SMTPS,                  /* protocol */
-  FETCHPROTO_SMTP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL
-  | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
+    "smtps",                                                                    /* scheme */
+    smtp_setup_connection,                                                      /* setup_connection */
+    smtp_do,                                                                    /* do_it */
+    smtp_done,                                                                  /* done */
+    ZERO_NULL,                                                                  /* do_more */
+    smtp_connect,                                                               /* connect_it */
+    smtp_multi_statemach,                                                       /* connecting */
+    smtp_doing,                                                                 /* doing */
+    smtp_getsock,                                                               /* proto_getsock */
+    smtp_getsock,                                                               /* doing_getsock */
+    ZERO_NULL,                                                                  /* domore_getsock */
+    ZERO_NULL,                                                                  /* perform_getsock */
+    smtp_disconnect,                                                            /* disconnect */
+    ZERO_NULL,                                                                  /* write_resp */
+    ZERO_NULL,                                                                  /* write_resp_hd */
+    ZERO_NULL,                                                                  /* connection_check */
+    ZERO_NULL,                                                                  /* attach connection */
+    ZERO_NULL,                                                                  /* follow */
+    PORT_SMTPS,                                                                 /* defport */
+    FETCHPROTO_SMTPS,                                                           /* protocol */
+    FETCHPROTO_SMTP,                                                            /* family */
+    PROTOPT_CLOSEACTION | PROTOPT_SSL | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
 };
 #endif
 
 /* SASL parameters for the smtp protocol */
 static const struct SASLproto saslsmtp = {
-  "smtp",               /* The service name */
-  smtp_perform_auth,    /* Send authentication command */
-  smtp_continue_auth,   /* Send authentication continuation */
-  smtp_cancel_auth,     /* Cancel authentication */
-  smtp_get_message,     /* Get SASL response message */
-  512 - 8,              /* Max line len - strlen("AUTH ") - 1 space - crlf */
-  334,                  /* Code received when continuation is expected */
-  235,                  /* Code to receive upon authentication success */
-  SASL_AUTH_DEFAULT,    /* Default mechanisms */
-  SASL_FLAG_BASE64      /* Configuration flags */
+    "smtp",             /* The service name */
+    smtp_perform_auth,  /* Send authentication command */
+    smtp_continue_auth, /* Send authentication continuation */
+    smtp_cancel_auth,   /* Cancel authentication */
+    smtp_get_message,   /* Get SASL response message */
+    512 - 8,            /* Max line len - strlen("AUTH ") - 1 space - crlf */
+    334,                /* Code received when continuation is expected */
+    235,                /* Code to receive upon authentication success */
+    SASL_AUTH_DEFAULT,  /* Default mechanisms */
+    SASL_FLAG_BASE64    /* Configuration flags */
 };
 
 #ifdef USE_SSL
@@ -218,14 +216,15 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
   (void)data;
 
   /* Nothing for us */
-  if(len < 4 || !ISDIGIT(line[0]) || !ISDIGIT(line[1]) || !ISDIGIT(line[2]))
+  if (len < 4 || !ISDIGIT(line[0]) || !ISDIGIT(line[1]) || !ISDIGIT(line[2]))
     return FALSE;
 
   /* Do we have a command response? This should be the response code followed
      by a space and optionally some text as per RFC-5321 and as outlined in
      Section 4. Examples of RFC-4954 but some email servers ignore this and
      only send the response code instead as per Section 4.2. */
-  if(line[3] == ' ' || len == 5) {
+  if (line[3] == ' ' || len == 5)
+  {
     char tmpline[6];
 
     result = TRUE;
@@ -234,14 +233,15 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
     *resp = fetchx_sltosi(strtol(tmpline, NULL, 10));
 
     /* Make sure real server never sends internal value */
-    if(*resp == 1)
+    if (*resp == 1)
       *resp = 0;
   }
   /* Do we have a multiline (continuation) response? */
-  else if(line[3] == '-' &&
-          (smtpc->state == SMTP_EHLO || smtpc->state == SMTP_COMMAND)) {
+  else if (line[3] == '-' &&
+           (smtpc->state == SMTP_EHLO || smtpc->state == SMTP_COMMAND))
+  {
     result = TRUE;
-    *resp = 1;  /* Internal response code */
+    *resp = 1; /* Internal response code */
   }
 
   return result;
@@ -258,16 +258,17 @@ static FETCHcode smtp_get_message(struct Curl_easy *data, struct bufref *out)
   char *message = Curl_dyn_ptr(&data->conn->proto.smtpc.pp.recvbuf);
   size_t len = data->conn->proto.smtpc.pp.nfinal;
 
-  if(len > 4) {
+  if (len > 4)
+  {
     /* Find the start of the message */
     len -= 4;
-    for(message += 4; *message == ' ' || *message == '\t'; message++, len--)
+    for (message += 4; *message == ' ' || *message == '\t'; message++, len--)
       ;
 
     /* Find the end of the message */
-    while(len--)
-      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-         message[len] != '\t')
+    while (len--)
+      if (message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
+          message[len] != '\t')
         break;
 
     /* Terminate the message */
@@ -292,26 +293,26 @@ static void smtp_state(struct Curl_easy *data, smtpstate newstate)
   struct smtp_conn *smtpc = &data->conn->proto.smtpc;
 #if !defined(FETCH_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
-  static const char * const names[] = {
-    "STOP",
-    "SERVERGREET",
-    "EHLO",
-    "HELO",
-    "STARTTLS",
-    "UPGRADETLS",
-    "AUTH",
-    "COMMAND",
-    "MAIL",
-    "RCPT",
-    "DATA",
-    "POSTDATA",
-    "QUIT",
-    /* LAST */
+  static const char *const names[] = {
+      "STOP",
+      "SERVERGREET",
+      "EHLO",
+      "HELO",
+      "STARTTLS",
+      "UPGRADETLS",
+      "AUTH",
+      "COMMAND",
+      "MAIL",
+      "RCPT",
+      "DATA",
+      "POSTDATA",
+      "QUIT",
+      /* LAST */
   };
 
-  if(smtpc->state != newstate)
+  if (smtpc->state != newstate)
     FETCH_TRC_SMTP(data, "state change from %s to %s",
-                  names[smtpc->state], names[newstate]);
+                   names[smtpc->state], names[newstate]);
 #endif
 
   smtpc->state = newstate;
@@ -339,7 +340,7 @@ static FETCHcode smtp_perform_ehlo(struct Curl_easy *data)
   /* Send the EHLO command */
   result = Curl_pp_sendf(data, &smtpc->pp, "EHLO %s", smtpc->domain);
 
-  if(!result)
+  if (!result)
     smtp_state(data, SMTP_EHLO);
 
   return result;
@@ -352,7 +353,7 @@ static FETCHcode smtp_perform_ehlo(struct Curl_easy *data)
  * Sends the HELO command to initialise communication with the SMTP server.
  */
 static FETCHcode smtp_perform_helo(struct Curl_easy *data,
-                                  struct connectdata *conn)
+                                   struct connectdata *conn)
 {
   FETCHcode result = FETCHE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
@@ -363,7 +364,7 @@ static FETCHcode smtp_perform_helo(struct Curl_easy *data,
   /* Send the HELO command */
   result = Curl_pp_sendf(data, &smtpc->pp, "HELO %s", smtpc->domain);
 
-  if(!result)
+  if (!result)
     smtp_state(data, SMTP_HELO);
 
   return result;
@@ -376,13 +377,13 @@ static FETCHcode smtp_perform_helo(struct Curl_easy *data,
  * Sends the STLS command to start the upgrade to TLS.
  */
 static FETCHcode smtp_perform_starttls(struct Curl_easy *data,
-                                      struct connectdata *conn)
+                                       struct connectdata *conn)
 {
   /* Send the STARTTLS command */
   FETCHcode result = Curl_pp_sendf(data, &conn->proto.smtpc.pp,
-                                  "%s", "STARTTLS");
+                                   "%s", "STARTTLS");
 
-  if(!result)
+  if (!result)
     smtp_state(data, SMTP_STARTTLS);
 
   return result;
@@ -402,19 +403,22 @@ static FETCHcode smtp_perform_upgrade_tls(struct Curl_easy *data)
   FETCHcode result;
   bool ssldone = FALSE;
 
-  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  if (!Curl_conn_is_ssl(conn, FIRSTSOCKET))
+  {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
-    if(result)
+    if (result)
       goto out;
   }
 
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-  if(!result) {
+  if (!result)
+  {
     smtpc->ssldone = ssldone;
-    if(smtpc->state != SMTP_UPGRADETLS)
+    if (smtpc->state != SMTP_UPGRADETLS)
       smtp_state(data, SMTP_UPGRADETLS);
 
-    if(smtpc->ssldone) {
+    if (smtpc->ssldone)
+    {
       smtp_to_smtps(conn);
       result = smtp_perform_ehlo(data);
     }
@@ -431,18 +435,20 @@ out:
  * authentication mechanism.
  */
 static FETCHcode smtp_perform_auth(struct Curl_easy *data,
-                                  const char *mech,
-                                  const struct bufref *initresp)
+                                   const char *mech,
+                                   const struct bufref *initresp)
 {
   FETCHcode result = FETCHE_OK;
   struct smtp_conn *smtpc = &data->conn->proto.smtpc;
-  const char *ir = (const char *) Curl_bufref_ptr(initresp);
+  const char *ir = (const char *)Curl_bufref_ptr(initresp);
 
-  if(ir) {                                  /* AUTH <mech> ...<crlf> */
+  if (ir)
+  { /* AUTH <mech> ...<crlf> */
     /* Send the AUTH command with the initial response */
     result = Curl_pp_sendf(data, &smtpc->pp, "AUTH %s %s", mech, ir);
   }
-  else {
+  else
+  {
     /* Send the AUTH command */
     result = Curl_pp_sendf(data, &smtpc->pp, "AUTH %s", mech);
   }
@@ -457,15 +463,15 @@ static FETCHcode smtp_perform_auth(struct Curl_easy *data,
  * Sends SASL continuation data.
  */
 static FETCHcode smtp_continue_auth(struct Curl_easy *data,
-                                   const char *mech,
-                                   const struct bufref *resp)
+                                    const char *mech,
+                                    const struct bufref *resp)
 {
   struct smtp_conn *smtpc = &data->conn->proto.smtpc;
 
   (void)mech;
 
   return Curl_pp_sendf(data, &smtpc->pp,
-                       "%s", (const char *) Curl_bufref_ptr(resp));
+                       "%s", (const char *)Curl_bufref_ptr(resp));
 }
 
 /***********************************************************************
@@ -499,8 +505,9 @@ static FETCHcode smtp_perform_authentication(struct Curl_easy *data)
 
   /* Check we have enough data to authenticate with, and the
      server supports authentication, and end the connect phase if not */
-  if(!smtpc->auth_supported ||
-     !Curl_sasl_can_authenticate(&smtpc->sasl, data)) {
+  if (!smtpc->auth_supported ||
+      !Curl_sasl_can_authenticate(&smtpc->sasl, data))
+  {
     smtp_state(data, SMTP_STOP);
     return result;
   }
@@ -508,10 +515,12 @@ static FETCHcode smtp_perform_authentication(struct Curl_easy *data)
   /* Calculate the SASL login details */
   result = Curl_sasl_start(&smtpc->sasl, data, FALSE, &progress);
 
-  if(!result) {
-    if(progress == SASL_INPROGRESS)
+  if (!result)
+  {
+    if (progress == SASL_INPROGRESS)
       smtp_state(data, SMTP_AUTH);
-    else {
+    else
+    {
       /* Other mechanisms not supported */
       infof(data, "No known authentication mechanisms supported");
       result = FETCHE_LOGIN_DENIED;
@@ -533,22 +542,24 @@ static FETCHcode smtp_perform_command(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   struct SMTP *smtp = data->req.p.smtp;
 
-  if(smtp->rcpt) {
+  if (smtp->rcpt)
+  {
     /* We notify the server we are sending UTF-8 data if a) it supports the
        SMTPUTF8 extension and b) The mailbox contains UTF-8 characters, in
        either the local address or hostname parts. This is regardless of
        whether the hostname is encoded using IDN ACE */
     bool utf8 = FALSE;
 
-    if((!smtp->custom) || (!smtp->custom[0])) {
+    if ((!smtp->custom) || (!smtp->custom[0]))
+    {
       char *address = NULL;
-      struct hostname host = { NULL, NULL, NULL, NULL };
+      struct hostname host = {NULL, NULL, NULL, NULL};
 
       /* Parse the mailbox to verify into the local address and hostname
          parts, converting the hostname to an IDN A-label if necessary */
       result = smtp_parse_address(smtp->rcpt->data,
                                   &address, &host);
-      if(result)
+      if (result)
         return result;
 
       /* Establish whether we should report SMTPUTF8 to the server for this
@@ -568,7 +579,8 @@ static FETCHcode smtp_perform_command(struct Curl_easy *data)
       Curl_free_idnconverted_hostname(&host);
       free(address);
     }
-    else {
+    else
+    {
       /* Establish whether we should report that we support SMTPUTF8 for EXPN
          commands to the server as per RFC-6531 sect. 3.1 point 6 */
       utf8 = (conn->proto.smtpc.utf8_supported) &&
@@ -584,10 +596,9 @@ static FETCHcode smtp_perform_command(struct Curl_easy *data)
   else
     /* Send the non-recipient based command such as HELP */
     result = Curl_pp_sendf(data, &conn->proto.smtpc.pp, "%s",
-                           smtp->custom && smtp->custom[0] != '\0' ?
-                           smtp->custom : "HELP");
+                           smtp->custom && smtp->custom[0] != '\0' ? smtp->custom : "HELP");
 
-  if(!result)
+  if (!result)
     smtp_state(data, SMTP_COMMAND);
 
   return result;
@@ -614,15 +625,16 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
   bool utf8 = FALSE;
 
   /* Calculate the FROM parameter */
-  if(data->set.str[STRING_MAIL_FROM]) {
+  if (data->set.str[STRING_MAIL_FROM])
+  {
     char *address = NULL;
-    struct hostname host = { NULL, NULL, NULL, NULL };
+    struct hostname host = {NULL, NULL, NULL, NULL};
 
     /* Parse the FROM mailbox into the local address and hostname parts,
        converting the hostname to an IDN A-label if necessary */
     result = smtp_parse_address(data->set.str[STRING_MAIL_FROM],
                                 &address, &host);
-    if(result)
+    if (result)
       goto out;
 
     /* Establish whether we should report SMTPUTF8 to the server for this
@@ -631,7 +643,8 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
            ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
             (!Curl_is_ASCII_name(host.name)));
 
-    if(host.name) {
+    if (host.name)
+    {
       from = aprintf("<%s@%s>", address, host.name);
 
       Curl_free_idnconverted_hostname(&host);
@@ -647,32 +660,36 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
     /* Null reverse-path, RFC-5321, sect. 3.6.3 */
     from = strdup("<>");
 
-  if(!from) {
+  if (!from)
+  {
     result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
 
   /* Calculate the optional AUTH parameter */
-  if(data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.sasl.authused) {
-    if(data->set.str[STRING_MAIL_AUTH][0] != '\0') {
+  if (data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.sasl.authused)
+  {
+    if (data->set.str[STRING_MAIL_AUTH][0] != '\0')
+    {
       char *address = NULL;
-      struct hostname host = { NULL, NULL, NULL, NULL };
+      struct hostname host = {NULL, NULL, NULL, NULL};
 
       /* Parse the AUTH mailbox into the local address and hostname parts,
          converting the hostname to an IDN A-label if necessary */
       result = smtp_parse_address(data->set.str[STRING_MAIL_AUTH],
                                   &address, &host);
-      if(result)
+      if (result)
         goto out;
 
       /* Establish whether we should report SMTPUTF8 to the server for this
          mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
-      if((!utf8) && (conn->proto.smtpc.utf8_supported) &&
-         ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
-          (!Curl_is_ASCII_name(host.name))))
+      if ((!utf8) && (conn->proto.smtpc.utf8_supported) &&
+          ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
+           (!Curl_is_ASCII_name(host.name))))
         utf8 = TRUE;
 
-      if(host.name) {
+      if (host.name)
+      {
         auth = aprintf("<%s@%s>", address, host.name);
 
         Curl_free_idnconverted_hostname(&host);
@@ -687,7 +704,8 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
       /* Empty AUTH, RFC-2554, sect. 5 */
       auth = strdup("<>");
 
-    if(!auth) {
+    if (!auth)
+    {
       result = FETCHE_OUT_OF_MEMORY;
       goto out;
     }
@@ -695,7 +713,8 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
 
 #ifndef FETCH_DISABLE_MIME
   /* Prepare the mime data if some. */
-  if(data->set.mimepost.kind != MIMEKIND_NONE) {
+  if (data->set.mimepost.kind != MIMEKIND_NONE)
+  {
     /* Use the whole structure as data. */
     data->set.mimepost.flags &= ~(unsigned int)MIME_BODY_ONLY;
 
@@ -704,14 +723,14 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
     result = Curl_mime_prepare_headers(data, &data->set.mimepost, NULL,
                                        NULL, MIMESTRATEGY_MAIL);
 
-    if(!result)
-      if(!Curl_checkheaders(data, STRCONST("Mime-Version")))
+    if (!result)
+      if (!Curl_checkheaders(data, STRCONST("Mime-Version")))
         result = Curl_mime_add_header(&data->set.mimepost.fetchheaders,
                                       "Mime-Version: 1.0");
 
-    if(!result)
+    if (!result)
       result = Curl_creader_set_mime(data, &data->set.mimepost);
-    if(result)
+    if (result)
       goto out;
     data->state.infilesize = Curl_creader_total_length(data);
   }
@@ -719,15 +738,17 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
 #endif
   {
     result = Curl_creader_set_fread(data, data->state.infilesize);
-    if(result)
+    if (result)
       goto out;
   }
 
   /* Calculate the optional SIZE parameter */
-  if(conn->proto.smtpc.size_supported && data->state.infilesize > 0) {
+  if (conn->proto.smtpc.size_supported && data->state.infilesize > 0)
+  {
     size = aprintf("%" FMT_OFF_T, data->state.infilesize);
 
-    if(!size) {
+    if (!size)
+    {
       result = FETCHE_OUT_OF_MEMORY;
       goto out;
     }
@@ -737,13 +758,15 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
      based address then quickly scan through the recipient list and check if
      any there do, as we need to correctly identify our support for SMTPUTF8
      in the envelope, as per RFC-6531 sect. 3.4 */
-  if(conn->proto.smtpc.utf8_supported && !utf8) {
+  if (conn->proto.smtpc.utf8_supported && !utf8)
+  {
     struct SMTP *smtp = data->req.p.smtp;
     struct fetch_slist *rcpt = smtp->rcpt;
 
-    while(rcpt && !utf8) {
+    while (rcpt && !utf8)
+    {
       /* Does the hostname contain non-ASCII characters? */
-      if(!Curl_is_ASCII_name(rcpt->data))
+      if (!Curl_is_ASCII_name(rcpt->data))
         utf8 = TRUE;
 
       rcpt = rcpt->next;
@@ -752,7 +775,7 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
 
   /* Add the client reader doing STMP EOB escaping */
   result = cr_eob_add(data);
-  if(result)
+  if (result)
     goto out;
 
   /* Send the MAIL command */
@@ -764,14 +787,14 @@ static FETCHcode smtp_perform_mail(struct Curl_easy *data)
                          size ? " SIZE=" : "", /* Optional on SIZE support  */
                          size ? size : "",     /*                           */
                          utf8 ? " SMTPUTF8"    /* Internationalised mailbox */
-                               : "");          /* included in our envelope  */
+                              : "");           /* included in our envelope  */
 
 out:
   free(from);
   free(auth);
   free(size);
 
-  if(!result)
+  if (!result)
     smtp_state(data, SMTP_MAIL);
 
   return result;
@@ -790,17 +813,17 @@ static FETCHcode smtp_perform_rcpt_to(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   struct SMTP *smtp = data->req.p.smtp;
   char *address = NULL;
-  struct hostname host = { NULL, NULL, NULL, NULL };
+  struct hostname host = {NULL, NULL, NULL, NULL};
 
   /* Parse the recipient mailbox into the local address and hostname parts,
      converting the hostname to an IDN A-label if necessary */
   result = smtp_parse_address(smtp->rcpt->data,
                               &address, &host);
-  if(result)
+  if (result)
     return result;
 
   /* Send the RCPT TO command */
-  if(host.name)
+  if (host.name)
     result = Curl_pp_sendf(data, &conn->proto.smtpc.pp, "RCPT TO:<%s@%s>",
                            address, host.name);
   else
@@ -812,7 +835,7 @@ static FETCHcode smtp_perform_rcpt_to(struct Curl_easy *data)
   Curl_free_idnconverted_hostname(&host);
   free(address);
 
-  if(!result)
+  if (!result)
     smtp_state(data, SMTP_RCPT);
 
   return result;
@@ -825,12 +848,12 @@ static FETCHcode smtp_perform_rcpt_to(struct Curl_easy *data)
  * Performs the quit action prior to sclose() being called.
  */
 static FETCHcode smtp_perform_quit(struct Curl_easy *data,
-                                  struct connectdata *conn)
+                                   struct connectdata *conn)
 {
   /* Send the QUIT command */
   FETCHcode result = Curl_pp_sendf(data, &conn->proto.smtpc.pp, "%s", "QUIT");
 
-  if(!result)
+  if (!result)
     smtp_state(data, SMTP_QUIT);
 
   return result;
@@ -838,13 +861,14 @@ static FETCHcode smtp_perform_quit(struct Curl_easy *data,
 
 /* For the initial server greeting */
 static FETCHcode smtp_state_servergreet_resp(struct Curl_easy *data,
-                                            int smtpcode,
-                                            smtpstate instate)
+                                             int smtpcode,
+                                             smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   (void)instate; /* no use for this yet */
 
-  if(smtpcode/100 != 2) {
+  if (smtpcode / 100 != 2)
+  {
     failf(data, "Got unexpected smtp-server response: %d", smtpcode);
     result = FETCHE_WEIRD_SERVER_REPLY;
   }
@@ -856,18 +880,20 @@ static FETCHcode smtp_state_servergreet_resp(struct Curl_easy *data,
 
 /* For STARTTLS responses */
 static FETCHcode smtp_state_starttls_resp(struct Curl_easy *data,
-                                         int smtpcode,
-                                         smtpstate instate)
+                                          int smtpcode,
+                                          smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   (void)instate; /* no use for this yet */
 
   /* Pipelining in response is forbidden. */
-  if(data->conn->proto.smtpc.pp.overflow)
+  if (data->conn->proto.smtpc.pp.overflow)
     return FETCHE_WEIRD_SERVER_REPLY;
 
-  if(smtpcode != 220) {
-    if(data->set.use_ssl != FETCHUSESSL_TRY) {
+  if (smtpcode != 220)
+  {
+    if (data->set.use_ssl != FETCHUSESSL_TRY)
+    {
       failf(data, "STARTTLS denied, code %d", smtpcode);
       result = FETCHE_USE_SSL_FAILED;
     }
@@ -882,8 +908,8 @@ static FETCHcode smtp_state_starttls_resp(struct Curl_easy *data,
 
 /* For EHLO responses */
 static FETCHcode smtp_state_ehlo_resp(struct Curl_easy *data,
-                                     struct connectdata *conn, int smtpcode,
-                                     smtpstate instate)
+                                      struct connectdata *conn, int smtpcode,
+                                      smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
@@ -892,33 +918,36 @@ static FETCHcode smtp_state_ehlo_resp(struct Curl_easy *data,
 
   (void)instate; /* no use for this yet */
 
-  if(smtpcode/100 != 2 && smtpcode != 1) {
-    if(data->set.use_ssl <= FETCHUSESSL_TRY
-       || Curl_conn_is_ssl(conn, FIRSTSOCKET))
+  if (smtpcode / 100 != 2 && smtpcode != 1)
+  {
+    if (data->set.use_ssl <= FETCHUSESSL_TRY || Curl_conn_is_ssl(conn, FIRSTSOCKET))
       result = smtp_perform_helo(data, conn);
-    else {
+    else
+    {
       failf(data, "Remote access denied: %d", smtpcode);
       result = FETCHE_REMOTE_ACCESS_DENIED;
     }
   }
-  else if(len >= 4) {
+  else if (len >= 4)
+  {
     line += 4;
     len -= 4;
 
     /* Does the server support the STARTTLS capability? */
-    if(len >= 8 && !memcmp(line, "STARTTLS", 8))
+    if (len >= 8 && !memcmp(line, "STARTTLS", 8))
       smtpc->tls_supported = TRUE;
 
     /* Does the server support the SIZE capability? */
-    else if(len >= 4 && !memcmp(line, "SIZE", 4))
+    else if (len >= 4 && !memcmp(line, "SIZE", 4))
       smtpc->size_supported = TRUE;
 
     /* Does the server support the UTF-8 capability? */
-    else if(len >= 8 && !memcmp(line, "SMTPUTF8", 8))
+    else if (len >= 8 && !memcmp(line, "SMTPUTF8", 8))
       smtpc->utf8_supported = TRUE;
 
     /* Does the server support authentication? */
-    else if(len >= 5 && !memcmp(line, "AUTH ", 5)) {
+    else if (len >= 5 && !memcmp(line, "AUTH ", 5))
+    {
       smtpc->auth_supported = TRUE;
 
       /* Advance past the AUTH keyword */
@@ -926,31 +955,33 @@ static FETCHcode smtp_state_ehlo_resp(struct Curl_easy *data,
       len -= 5;
 
       /* Loop through the data line */
-      for(;;) {
+      for (;;)
+      {
         size_t llen;
         size_t wordlen;
         unsigned short mechbit;
 
-        while(len &&
-              (*line == ' ' || *line == '\t' ||
-               *line == '\r' || *line == '\n')) {
+        while (len &&
+               (*line == ' ' || *line == '\t' ||
+                *line == '\r' || *line == '\n'))
+        {
 
           line++;
           len--;
         }
 
-        if(!len)
+        if (!len)
           break;
 
         /* Extract the word */
-        for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-              line[wordlen] != '\t' && line[wordlen] != '\r' &&
-              line[wordlen] != '\n';)
+        for (wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
+                          line[wordlen] != '\t' && line[wordlen] != '\r' &&
+                          line[wordlen] != '\n';)
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
         mechbit = Curl_sasl_decode_mech(line, wordlen, &llen);
-        if(mechbit && llen == wordlen)
+        if (mechbit && llen == wordlen)
           smtpc->sasl.authmechs |= mechbit;
 
         line += wordlen;
@@ -958,16 +989,19 @@ static FETCHcode smtp_state_ehlo_resp(struct Curl_easy *data,
       }
     }
 
-    if(smtpcode != 1) {
-      if(data->set.use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+    if (smtpcode != 1)
+    {
+      if (data->set.use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET))
+      {
         /* We do not have a SSL/TLS connection yet, but SSL is requested */
-        if(smtpc->tls_supported)
+        if (smtpc->tls_supported)
           /* Switch to TLS connection now */
           result = smtp_perform_starttls(data, conn);
-        else if(data->set.use_ssl == FETCHUSESSL_TRY)
+        else if (data->set.use_ssl == FETCHUSESSL_TRY)
           /* Fallback and carry on with authentication */
           result = smtp_perform_authentication(data);
-        else {
+        else
+        {
           failf(data, "STARTTLS not supported.");
           result = FETCHE_USE_SSL_FAILED;
         }
@@ -976,7 +1010,8 @@ static FETCHcode smtp_state_ehlo_resp(struct Curl_easy *data,
         result = smtp_perform_authentication(data);
     }
   }
-  else {
+  else
+  {
     failf(data, "Unexpectedly short EHLO response");
     result = FETCHE_WEIRD_SERVER_REPLY;
   }
@@ -986,12 +1021,13 @@ static FETCHcode smtp_state_ehlo_resp(struct Curl_easy *data,
 
 /* For HELO responses */
 static FETCHcode smtp_state_helo_resp(struct Curl_easy *data, int smtpcode,
-                                     smtpstate instate)
+                                      smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   (void)instate; /* no use for this yet */
 
-  if(smtpcode/100 != 2) {
+  if (smtpcode / 100 != 2)
+  {
     failf(data, "Remote access denied: %d", smtpcode);
     result = FETCHE_REMOTE_ACCESS_DENIED;
   }
@@ -1004,8 +1040,8 @@ static FETCHcode smtp_state_helo_resp(struct Curl_easy *data, int smtpcode,
 
 /* For SASL authentication responses */
 static FETCHcode smtp_state_auth_resp(struct Curl_easy *data,
-                                     int smtpcode,
-                                     smtpstate instate)
+                                      int smtpcode,
+                                      smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
@@ -1015,12 +1051,13 @@ static FETCHcode smtp_state_auth_resp(struct Curl_easy *data,
   (void)instate; /* no use for this yet */
 
   result = Curl_sasl_continue(&smtpc->sasl, data, smtpcode, &progress);
-  if(!result)
-    switch(progress) {
+  if (!result)
+    switch (progress)
+    {
     case SASL_DONE:
-      smtp_state(data, SMTP_STOP);  /* Authenticated */
+      smtp_state(data, SMTP_STOP); /* Authenticated */
       break;
-    case SASL_IDLE:            /* No mechanism left after cancellation */
+    case SASL_IDLE: /* No mechanism left after cancellation */
       failf(data, "Authentication cancelled");
       result = FETCHE_LOGIN_DENIED;
       break;
@@ -1033,7 +1070,7 @@ static FETCHcode smtp_state_auth_resp(struct Curl_easy *data,
 
 /* For command responses */
 static FETCHcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
-                                        smtpstate instate)
+                                         smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   struct SMTP *smtp = data->req.p.smtp;
@@ -1042,20 +1079,25 @@ static FETCHcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
 
   (void)instate; /* no use for this yet */
 
-  if((smtp->rcpt && smtpcode/100 != 2 && smtpcode != 553 && smtpcode != 1) ||
-     (!smtp->rcpt && smtpcode/100 != 2 && smtpcode != 1)) {
+  if ((smtp->rcpt && smtpcode / 100 != 2 && smtpcode != 553 && smtpcode != 1) ||
+      (!smtp->rcpt && smtpcode / 100 != 2 && smtpcode != 1))
+  {
     failf(data, "Command failed: %d", smtpcode);
     result = FETCHE_WEIRD_SERVER_REPLY;
   }
-  else {
-    if(!data->req.no_body)
+  else
+  {
+    if (!data->req.no_body)
       result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
 
-    if(smtpcode != 1) {
-      if(smtp->rcpt) {
+    if (smtpcode != 1)
+    {
+      if (smtp->rcpt)
+      {
         smtp->rcpt = smtp->rcpt->next;
 
-        if(smtp->rcpt) {
+        if (smtp->rcpt)
+        {
           /* Send the next command */
           result = smtp_perform_command(data);
         }
@@ -1074,12 +1116,13 @@ static FETCHcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
 
 /* For MAIL responses */
 static FETCHcode smtp_state_mail_resp(struct Curl_easy *data, int smtpcode,
-                                     smtpstate instate)
+                                      smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   (void)instate; /* no use for this yet */
 
-  if(smtpcode/100 != 2) {
+  if (smtpcode / 100 != 2)
+  {
     failf(data, "MAIL failed: %d", smtpcode);
     result = FETCHE_SEND_ERROR;
   }
@@ -1092,8 +1135,8 @@ static FETCHcode smtp_state_mail_resp(struct Curl_easy *data, int smtpcode,
 
 /* For RCPT responses */
 static FETCHcode smtp_state_rcpt_resp(struct Curl_easy *data,
-                                     struct connectdata *conn, int smtpcode,
-                                     smtpstate instate)
+                                      struct connectdata *conn, int smtpcode,
+                                      smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   struct SMTP *smtp = data->req.p.smtp;
@@ -1102,45 +1145,52 @@ static FETCHcode smtp_state_rcpt_resp(struct Curl_easy *data,
 
   (void)instate; /* no use for this yet */
 
-  is_smtp_err = (smtpcode/100 != 2);
+  is_smtp_err = (smtpcode / 100 != 2);
 
   /* If there is multiple RCPT TO to be issued, it is possible to ignore errors
      and proceed with only the valid addresses. */
   is_smtp_blocking_err = (is_smtp_err && !data->set.mail_rcpt_allowfails);
 
-  if(is_smtp_err) {
+  if (is_smtp_err)
+  {
     /* Remembering the last failure which we can report if all "RCPT TO" have
        failed and we cannot proceed. */
     smtp->rcpt_last_error = smtpcode;
 
-    if(is_smtp_blocking_err) {
+    if (is_smtp_blocking_err)
+    {
       failf(data, "RCPT failed: %d", smtpcode);
       result = FETCHE_SEND_ERROR;
     }
   }
-  else {
+  else
+  {
     /* Some RCPT TO commands have succeeded. */
     smtp->rcpt_had_ok = TRUE;
   }
 
-  if(!is_smtp_blocking_err) {
+  if (!is_smtp_blocking_err)
+  {
     smtp->rcpt = smtp->rcpt->next;
 
-    if(smtp->rcpt)
+    if (smtp->rcpt)
       /* Send the next RCPT TO command */
       result = smtp_perform_rcpt_to(data);
-    else {
+    else
+    {
       /* We were not able to issue a successful RCPT TO command while going
          over recipients (potentially multiple). Sending back last error. */
-      if(!smtp->rcpt_had_ok) {
+      if (!smtp->rcpt_had_ok)
+      {
         failf(data, "RCPT failed: %d (last error)", smtp->rcpt_last_error);
         result = FETCHE_SEND_ERROR;
       }
-      else {
+      else
+      {
         /* Send the DATA command */
         result = Curl_pp_sendf(data, &conn->proto.smtpc.pp, "%s", "DATA");
 
-        if(!result)
+        if (!result)
           smtp_state(data, SMTP_DATA);
       }
     }
@@ -1151,16 +1201,18 @@ static FETCHcode smtp_state_rcpt_resp(struct Curl_easy *data,
 
 /* For DATA response */
 static FETCHcode smtp_state_data_resp(struct Curl_easy *data, int smtpcode,
-                                     smtpstate instate)
+                                      smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
   (void)instate; /* no use for this yet */
 
-  if(smtpcode != 354) {
+  if (smtpcode != 354)
+  {
     failf(data, "DATA failed: %d", smtpcode);
     result = FETCHE_SEND_ERROR;
   }
-  else {
+  else
+  {
     /* Set the progress upload size */
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
@@ -1177,14 +1229,14 @@ static FETCHcode smtp_state_data_resp(struct Curl_easy *data, int smtpcode,
 /* For POSTDATA responses, which are received after the entire DATA
    part has been sent to the server */
 static FETCHcode smtp_state_postdata_resp(struct Curl_easy *data,
-                                         int smtpcode,
-                                         smtpstate instate)
+                                          int smtpcode,
+                                          smtpstate instate)
 {
   FETCHcode result = FETCHE_OK;
 
   (void)instate; /* no use for this yet */
 
-  if(smtpcode != 250)
+  if (smtpcode != 250)
     result = FETCHE_WEIRD_SERVER_REPLY;
 
   /* End of DONE phase */
@@ -1194,7 +1246,7 @@ static FETCHcode smtp_state_postdata_resp(struct Curl_easy *data,
 }
 
 static FETCHcode smtp_statemachine(struct Curl_easy *data,
-                                  struct connectdata *conn)
+                                   struct connectdata *conn)
 {
   FETCHcode result = FETCHE_OK;
   int smtpcode;
@@ -1204,28 +1256,30 @@ static FETCHcode smtp_statemachine(struct Curl_easy *data,
 
   /* Busy upgrading the connection; right now all I/O is SSL/TLS, not SMTP */
 upgrade_tls:
-  if(smtpc->state == SMTP_UPGRADETLS)
+  if (smtpc->state == SMTP_UPGRADETLS)
     return smtp_perform_upgrade_tls(data);
 
   /* Flush any data that needs to be sent */
-  if(pp->sendleft)
+  if (pp->sendleft)
     return Curl_pp_flushsend(data, pp);
 
-  do {
+  do
+  {
     /* Read the response from the server */
     result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &smtpcode, &nread);
-    if(result)
+    if (result)
       return result;
 
     /* Store the latest response for later retrieval if necessary */
-    if(smtpc->state != SMTP_QUIT && smtpcode != 1)
+    if (smtpc->state != SMTP_QUIT && smtpcode != 1)
       data->info.httpcode = smtpcode;
 
-    if(!smtpcode)
+    if (!smtpcode)
       break;
 
     /* We have now received a full SMTP server response */
-    switch(smtpc->state) {
+    switch (smtpc->state)
+    {
     case SMTP_SERVERGREET:
       result = smtp_state_servergreet_resp(data, smtpcode, smtpc->state);
       break;
@@ -1242,7 +1296,7 @@ upgrade_tls:
       result = smtp_state_starttls_resp(data, smtpcode, smtpc->state);
       /* During UPGRADETLS, leave the read loop as we need to connect
        * (e.g. TLS handshake) before we continue sending/receiving. */
-      if(!result && (smtpc->state == SMTP_UPGRADETLS))
+      if (!result && (smtpc->state == SMTP_UPGRADETLS))
         goto upgrade_tls;
       break;
 
@@ -1276,7 +1330,7 @@ upgrade_tls:
       smtp_state(data, SMTP_STOP);
       break;
     }
-  } while(!result && smtpc->state != SMTP_STOP && Curl_pp_moredata(pp));
+  } while (!result && smtpc->state != SMTP_STOP && Curl_pp_moredata(pp));
 
   return result;
 }
@@ -1288,11 +1342,12 @@ static FETCHcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
-  if(Curl_conn_is_ssl(conn, FIRSTSOCKET) && !smtpc->ssldone) {
+  if (Curl_conn_is_ssl(conn, FIRSTSOCKET) && !smtpc->ssldone)
+  {
     bool ssldone = FALSE;
     result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
     smtpc->ssldone = ssldone;
-    if(result || !smtpc->ssldone)
+    if (result || !smtpc->ssldone)
       return result;
   }
 
@@ -1303,13 +1358,13 @@ static FETCHcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
 }
 
 static FETCHcode smtp_block_statemach(struct Curl_easy *data,
-                                     struct connectdata *conn,
-                                     bool disconnecting)
+                                      struct connectdata *conn,
+                                      bool disconnecting)
 {
   FETCHcode result = FETCHE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
-  while(smtpc->state != SMTP_STOP && !result)
+  while (smtpc->state != SMTP_STOP && !result)
     result = Curl_pp_statemach(data, &smtpc->pp, TRUE, disconnecting);
 
   return result;
@@ -1323,7 +1378,7 @@ static FETCHcode smtp_init(struct Curl_easy *data)
   struct SMTP *smtp;
 
   smtp = data->req.p.smtp = calloc(1, sizeof(struct SMTP));
-  if(!smtp)
+  if (!smtp)
     result = FETCHE_OUT_OF_MEMORY;
 
   return result;
@@ -1368,12 +1423,12 @@ static FETCHcode smtp_connect(struct Curl_easy *data, bool *done)
 
   /* Parse the URL options */
   result = smtp_parse_url_options(conn);
-  if(result)
+  if (result)
     return result;
 
   /* Parse the URL path */
   result = smtp_parse_url_path(data);
-  if(result)
+  if (result)
     return result;
 
   /* Start off waiting for the server greeting response */
@@ -1394,7 +1449,7 @@ static FETCHcode smtp_connect(struct Curl_easy *data, bool *done)
  * Input argument is already checked for validity.
  */
 static FETCHcode smtp_done(struct Curl_easy *data, FETCHcode status,
-                          bool premature)
+                           bool premature)
 {
   FETCHcode result = FETCHE_OK;
   struct connectdata *conn = data->conn;
@@ -1402,18 +1457,20 @@ static FETCHcode smtp_done(struct Curl_easy *data, FETCHcode status,
 
   (void)premature;
 
-  if(!smtp)
+  if (!smtp)
     return FETCHE_OK;
 
   /* Cleanup our per-request based variables */
   Curl_safefree(smtp->custom);
 
-  if(status) {
+  if (status)
+  {
     connclose(conn, "SMTP done with bad status"); /* marked for closure */
-    result = status;         /* use the already set error code */
+    result = status;                              /* use the already set error code */
   }
-  else if(!data->set.connect_only && data->set.mail_rcpt &&
-          (data->state.upload || IS_MIME_POST(data))) {
+  else if (!data->set.connect_only && data->set.mail_rcpt &&
+           (data->state.upload || IS_MIME_POST(data)))
+  {
 
     smtp_state(data, SMTP_POSTDATA);
 
@@ -1424,7 +1481,7 @@ static FETCHcode smtp_done(struct Curl_easy *data, FETCHcode status,
   /* Clear the transfer mode for the next request */
   smtp->transfer = PPTRANSFER_BODY;
   FETCH_TRC_SMTP(data, "smtp_done(status=%d, premature=%d) -> %d",
-                status, premature, result);
+                 status, premature, result);
   return result;
 }
 
@@ -1436,7 +1493,7 @@ static FETCHcode smtp_done(struct Curl_easy *data, FETCHcode status,
  * or get some data according to the options previously setup.
  */
 static FETCHcode smtp_perform(struct Curl_easy *data, bool *connected,
-                             bool *dophase_done)
+                              bool *dophase_done)
 {
   /* This is SMTP and no proxy */
   FETCHcode result = FETCHE_OK;
@@ -1444,7 +1501,8 @@ static FETCHcode smtp_perform(struct Curl_easy *data, bool *connected,
 
   FETCH_TRC_SMTP(data, "smtp_perform(), start");
 
-  if(data->req.no_body) {
+  if (data->req.no_body)
+  {
     /* Requested no body means no transfer */
     smtp->transfer = PPTRANSFER_INFO;
   }
@@ -1466,14 +1524,14 @@ static FETCHcode smtp_perform(struct Curl_easy *data, bool *connected,
   smtp->eob = 2;
 
   /* Start the first command in the DO phase */
-  if((data->state.upload || IS_MIME_POST(data)) && data->set.mail_rcpt)
+  if ((data->state.upload || IS_MIME_POST(data)) && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(data);
   else
     /* SMTP based command (VRFY, EXPN, NOOP, RSET or HELP) */
     result = smtp_perform_command(data);
 
-  if(result)
+  if (result)
     goto out;
 
   /* Run the state-machine */
@@ -1483,7 +1541,7 @@ static FETCHcode smtp_perform(struct Curl_easy *data, bool *connected,
 
 out:
   FETCH_TRC_SMTP(data, "smtp_perform() -> %d, connected=%d, done=%d",
-                result, *connected, *dophase_done);
+                 result, *connected, *dophase_done);
   return result;
 }
 
@@ -1505,7 +1563,7 @@ static FETCHcode smtp_do(struct Curl_easy *data, bool *done)
 
   /* Parse the custom request */
   result = smtp_parse_custom_request(data);
-  if(result)
+  if (result)
     return result;
 
   result = smtp_regular_transfer(data, done);
@@ -1521,8 +1579,8 @@ static FETCHcode smtp_do(struct Curl_easy *data, bool *done)
  * resources. BLOCKING.
  */
 static FETCHcode smtp_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn,
-                                bool dead_connection)
+                                 struct connectdata *conn,
+                                 bool dead_connection)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   (void)data;
@@ -1531,8 +1589,9 @@ static FETCHcode smtp_disconnect(struct Curl_easy *data,
      bad in any way, sending quit and waiting around here will make the
      disconnect wait in vain and cause more problems than we need to. */
 
-  if(!dead_connection && conn->bits.protoconnstart) {
-    if(!smtp_perform_quit(data, conn))
+  if (!dead_connection && conn->bits.protoconnstart)
+  {
+    if (!smtp_perform_quit(data, conn))
       (void)smtp_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
   }
 
@@ -1556,7 +1615,7 @@ static FETCHcode smtp_dophase_done(struct Curl_easy *data, bool connected)
 
   (void)connected;
 
-  if(smtp->transfer != PPTRANSFER_BODY)
+  if (smtp->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
     Curl_xfer_setup_nop(data);
 
@@ -1568,9 +1627,10 @@ static FETCHcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
 {
   FETCHcode result = smtp_multi_statemach(data, dophase_done);
 
-  if(result)
+  if (result)
     DEBUGF(infof(data, "DO phase failed"));
-  else if(*dophase_done) {
+  else if (*dophase_done)
+  {
     result = smtp_dophase_done(data, FALSE /* not connected */);
 
     DEBUGF(infof(data, "DO phase is complete"));
@@ -1590,7 +1650,7 @@ static FETCHcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
  * remote host.
  */
 static FETCHcode smtp_regular_transfer(struct Curl_easy *data,
-                                      bool *dophase_done)
+                                       bool *dophase_done)
 {
   FETCHcode result = FETCHE_OK;
   bool connected = FALSE;
@@ -1608,16 +1668,16 @@ static FETCHcode smtp_regular_transfer(struct Curl_easy *data,
   result = smtp_perform(data, &connected, dophase_done);
 
   /* Perform post DO phase operations if necessary */
-  if(!result && *dophase_done)
+  if (!result && *dophase_done)
     result = smtp_dophase_done(data, connected);
 
   FETCH_TRC_SMTP(data, "smtp_regular_transfer() -> %d, done=%d",
-                result, *dophase_done);
+                 result, *dophase_done);
   return result;
 }
 
 static FETCHcode smtp_setup_connection(struct Curl_easy *data,
-                                      struct connectdata *conn)
+                                       struct connectdata *conn)
 {
   FETCHcode result;
 
@@ -1642,25 +1702,26 @@ static FETCHcode smtp_parse_url_options(struct connectdata *conn)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   const char *ptr = conn->options;
 
-  while(!result && ptr && *ptr) {
+  while (!result && ptr && *ptr)
+  {
     const char *key = ptr;
     const char *value;
 
-    while(*ptr && *ptr != '=')
+    while (*ptr && *ptr != '=')
       ptr++;
 
     value = ptr + 1;
 
-    while(*ptr && *ptr != ';')
+    while (*ptr && *ptr != ';')
       ptr++;
 
-    if(strncasecompare(key, "AUTH=", 5))
+    if (strncasecompare(key, "AUTH=", 5))
       result = Curl_sasl_parse_url_auth_option(&smtpc->sasl,
                                                value, ptr - value);
     else
       result = FETCHE_URL_MALFORMAT;
 
-    if(*ptr == ';')
+    if (*ptr == ';')
       ptr++;
   }
 
@@ -1682,8 +1743,9 @@ static FETCHcode smtp_parse_url_path(struct Curl_easy *data)
   char localhost[HOSTNAME_MAX + 1];
 
   /* Calculate the path if necessary */
-  if(!*path) {
-    if(!Curl_gethostname(localhost, sizeof(localhost)))
+  if (!*path)
+  {
+    if (!Curl_gethostname(localhost, sizeof(localhost)))
       path = localhost;
     else
       path = "localhost";
@@ -1706,7 +1768,7 @@ static FETCHcode smtp_parse_custom_request(struct Curl_easy *data)
   const char *custom = data->set.str[STRING_CUSTOMREQUEST];
 
   /* URL decode the custom request */
-  if(custom)
+  if (custom)
     result = Curl_urldecode(custom, 0, &smtp->custom, NULL, REJECT_CTRL);
 
   return result;
@@ -1747,31 +1809,33 @@ static FETCHcode smtp_parse_custom_request(struct Curl_easy *data)
  * the address part with the hostname being NULL.
  */
 static FETCHcode smtp_parse_address(const char *fqma, char **address,
-                                   struct hostname *host)
+                                    struct hostname *host)
 {
   FETCHcode result = FETCHE_OK;
   size_t length;
 
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it does not contain the delimiters if specified */
-  char *dup = strdup(fqma[0] == '<' ? fqma + 1  : fqma);
-  if(!dup)
+  char *dup = strdup(fqma[0] == '<' ? fqma + 1 : fqma);
+  if (!dup)
     return FETCHE_OUT_OF_MEMORY;
 
   length = strlen(dup);
-  if(length) {
-    if(dup[length - 1] == '>')
+  if (length)
+  {
+    if (dup[length - 1] == '>')
       dup[length - 1] = '\0';
   }
 
   /* Extract the hostname from the address (if we can) */
   host->name = strpbrk(dup, "@");
-  if(host->name) {
+  if (host->name)
+  {
     *host->name = '\0';
     host->name = host->name + 1;
 
     /* Attempt to convert the hostname to IDN ACE */
-    (void) Curl_idnconvert_hostname(host);
+    (void)Curl_idnconvert_hostname(host);
 
     /* If Curl_idnconvert_hostname() fails then we shall attempt to continue
        and send the hostname using UTF-8 rather than as 7-bit ACE (which is
@@ -1784,18 +1848,19 @@ static FETCHcode smtp_parse_address(const char *fqma, char **address,
   return result;
 }
 
-struct cr_eob_ctx {
+struct cr_eob_ctx
+{
   struct Curl_creader super;
   struct bufq buf;
-  size_t n_eob; /* how many EOB bytes we matched so far */
-  size_t eob;       /* Number of bytes of the EOB (End Of Body) that
-                       have been received so far */
-  BIT(read_eos);  /* we read an EOS from the next reader */
-  BIT(eos);       /* we have returned an EOS */
+  size_t n_eob;  /* how many EOB bytes we matched so far */
+  size_t eob;    /* Number of bytes of the EOB (End Of Body) that
+                    have been received so far */
+  BIT(read_eos); /* we read an EOS from the next reader */
+  BIT(eos);      /* we have returned an EOS */
 };
 
 static FETCHcode cr_eob_init(struct Curl_easy *data,
-                            struct Curl_creader *reader)
+                             struct Curl_creader *reader)
 {
   struct cr_eob_ctx *ctx = reader->ctx;
   (void)data;
@@ -1819,104 +1884,115 @@ static void cr_eob_close(struct Curl_easy *data, struct Curl_creader *reader)
 
 /* client reader doing SMTP End-Of-Body escaping. */
 static FETCHcode cr_eob_read(struct Curl_easy *data,
-                            struct Curl_creader *reader,
-                            char *buf, size_t blen,
-                            size_t *pnread, bool *peos)
+                             struct Curl_creader *reader,
+                             char *buf, size_t blen,
+                             size_t *pnread, bool *peos)
 {
   struct cr_eob_ctx *ctx = reader->ctx;
   FETCHcode result = FETCHE_OK;
   size_t nread, i, start, n;
   bool eos;
 
-  if(!ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
+  if (!ctx->read_eos && Curl_bufq_is_empty(&ctx->buf))
+  {
     /* Get more and convert it when needed */
     result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
-    if(result)
+    if (result)
       return result;
 
     ctx->read_eos = eos;
-    if(nread) {
-      if(!ctx->n_eob && !memchr(buf, SMTP_EOB[0], nread)) {
+    if (nread)
+    {
+      if (!ctx->n_eob && !memchr(buf, SMTP_EOB[0], nread))
+      {
         /* not in the middle of a match, no EOB start found, just pass */
         *pnread = nread;
         *peos = FALSE;
         return FETCHE_OK;
       }
       /* scan for EOB (continuation) and convert */
-      for(i = start = 0; i < nread; ++i) {
-        if(ctx->n_eob >= SMTP_EOB_FIND_LEN) {
+      for (i = start = 0; i < nread; ++i)
+      {
+        if (ctx->n_eob >= SMTP_EOB_FIND_LEN)
+        {
           /* matched the EOB prefix and seeing additional char, add '.' */
           result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
-          if(result)
+          if (result)
             return result;
           result = Curl_bufq_cwrite(&ctx->buf, ".", 1, &n);
-          if(result)
+          if (result)
             return result;
           ctx->n_eob = 0;
           start = i;
-          if(data->state.infilesize > 0)
+          if (data->state.infilesize > 0)
             data->state.infilesize++;
         }
 
-        if(buf[i] != SMTP_EOB[ctx->n_eob])
+        if (buf[i] != SMTP_EOB[ctx->n_eob])
           ctx->n_eob = 0;
 
-        if(buf[i] == SMTP_EOB[ctx->n_eob]) {
+        if (buf[i] == SMTP_EOB[ctx->n_eob])
+        {
           /* matching another char of the EOB */
           ++ctx->n_eob;
         }
       }
 
       /* add any remainder to buf */
-      if(start < nread) {
+      if (start < nread)
+      {
         result = Curl_bufq_cwrite(&ctx->buf, buf + start, nread - start, &n);
-        if(result)
+        if (result)
           return result;
       }
     }
 
-    if(ctx->read_eos) {
+    if (ctx->read_eos)
+    {
       /* if we last matched a CRLF or if the data was empty, add ".\r\n"
        * to end the body. If we sent something and it did not end with "\r\n",
        * add "\r\n.\r\n" to end the body */
       const char *eob = SMTP_EOB;
-      switch(ctx->n_eob) {
-        case 2:
-          /* seen a CRLF at the end, just add the remainder */
-          eob = &SMTP_EOB[2];
-          break;
-        case 3:
-          /* ended with '\r\n.', we should escpe the last '.' */
-          eob = "." SMTP_EOB;
-          break;
-        default:
-          break;
+      switch (ctx->n_eob)
+      {
+      case 2:
+        /* seen a CRLF at the end, just add the remainder */
+        eob = &SMTP_EOB[2];
+        break;
+      case 3:
+        /* ended with '\r\n.', we should escpe the last '.' */
+        eob = "." SMTP_EOB;
+        break;
+      default:
+        break;
       }
       result = Curl_bufq_cwrite(&ctx->buf, eob, strlen(eob), &n);
-      if(result)
+      if (result)
         return result;
     }
   }
 
   *peos = FALSE;
-  if(!Curl_bufq_is_empty(&ctx->buf)) {
+  if (!Curl_bufq_is_empty(&ctx->buf))
+  {
     result = Curl_bufq_cread(&ctx->buf, buf, blen, pnread);
   }
   else
     *pnread = 0;
 
-  if(ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
+  if (ctx->read_eos && Curl_bufq_is_empty(&ctx->buf))
+  {
     /* no more data, read all, done. */
     ctx->eos = TRUE;
   }
   *peos = ctx->eos;
   DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
-         blen, result, *pnread, *peos));
+               blen, result, *pnread, *peos));
   return result;
 }
 
 static fetch_off_t cr_eob_total_length(struct Curl_easy *data,
-                                      struct Curl_creader *reader)
+                                       struct Curl_creader *reader)
 {
   /* this reader changes length depending on input */
   (void)data;
@@ -1925,19 +2001,18 @@ static fetch_off_t cr_eob_total_length(struct Curl_easy *data,
 }
 
 static const struct Curl_crtype cr_eob = {
-  "cr-smtp-eob",
-  cr_eob_init,
-  cr_eob_read,
-  cr_eob_close,
-  Curl_creader_def_needs_rewind,
-  cr_eob_total_length,
-  Curl_creader_def_resume_from,
-  Curl_creader_def_rewind,
-  Curl_creader_def_unpause,
-  Curl_creader_def_is_paused,
-  Curl_creader_def_done,
-  sizeof(struct cr_eob_ctx)
-};
+    "cr-smtp-eob",
+    cr_eob_init,
+    cr_eob_read,
+    cr_eob_close,
+    Curl_creader_def_needs_rewind,
+    cr_eob_total_length,
+    Curl_creader_def_resume_from,
+    Curl_creader_def_rewind,
+    Curl_creader_def_unpause,
+    Curl_creader_def_is_paused,
+    Curl_creader_def_done,
+    sizeof(struct cr_eob_ctx)};
 
 static FETCHcode cr_eob_add(struct Curl_easy *data)
 {
@@ -1946,10 +2021,10 @@ static FETCHcode cr_eob_add(struct Curl_easy *data)
 
   result = Curl_creader_create(&reader, data, &cr_eob,
                                FETCH_CR_CONTENT_ENCODE);
-  if(!result)
+  if (!result)
     result = Curl_creader_add(data, reader);
 
-  if(result && reader)
+  if (result && reader)
     Curl_creader_free(data, reader);
   return result;
 }

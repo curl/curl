@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,9 +30,10 @@
 
 #include "memdebug.h"
 
-static char testdata[]="dummy";
+static char testdata[] = "dummy";
 
-struct WriteThis {
+struct WriteThis
+{
   char *readptr;
   size_t sizeleft;
 };
@@ -41,17 +42,18 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *pooh = (struct WriteThis *)userp;
 
-  if(size*nmemb < 1)
+  if (size * nmemb < 1)
     return 0;
 
-  if(pooh->sizeleft) {
+  if (pooh->sizeleft)
+  {
     *ptr = pooh->readptr[0]; /* copy one single byte */
-    pooh->readptr++;                 /* advance pointer */
-    pooh->sizeleft--;                /* less data left */
-    return 1;                        /* we return 1 byte at a time! */
+    pooh->readptr++;         /* advance pointer */
+    pooh->sizeleft--;        /* less data left */
+    return 1;                /* we return 1 byte at a time! */
   }
 
-  return 0;                         /* no more data left to deliver */
+  return 0; /* no more data left to deliver */
 }
 
 FETCHcode test(char *URL)
@@ -59,7 +61,7 @@ FETCHcode test(char *URL)
   FETCH *fetch;
   FETCHcode result = FETCHE_OK;
   FETCHcode res = FETCHE_OK;
-  struct WriteThis pooh = { testdata, sizeof(testdata)-1 };
+  struct WriteThis pooh = {testdata, sizeof(testdata) - 1};
 
   global_init(FETCH_GLOBAL_ALL);
 

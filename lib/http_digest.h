@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,13 +29,13 @@
 
 /* this is for digest header input */
 FETCHcode Curl_input_digest(struct Curl_easy *data,
-                           bool proxy, const char *header);
+                            bool proxy, const char *header);
 
 /* this is for creating digest header output */
 FETCHcode Curl_output_digest(struct Curl_easy *data,
-                            bool proxy,
-                            const unsigned char *request,
-                            const unsigned char *uripath);
+                             bool proxy,
+                             const unsigned char *request,
+                             const unsigned char *uripath);
 
 void Curl_http_auth_cleanup_digest(struct Curl_easy *data);
 

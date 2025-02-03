@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,7 +25,7 @@
 
 /*
   Based on a bug report recipe by Rene Bernhardt in
-  https://fetch.se/mail/lib-2011-10/0323.html
+  https://curl.se/mail/lib-2011-10/0323.html
 
   It is reproducible by the following steps:
 
@@ -44,13 +44,15 @@ FETCHcode test(char *URL)
   FETCH *fetch;
   long usedauth = 0;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -59,14 +61,15 @@ FETCHcode test(char *URL)
   test_setopt(fetch, FETCHOPT_URL, URL);
   test_setopt(fetch, FETCHOPT_HEADER, 1L);
   test_setopt(fetch, FETCHOPT_PROXYAUTH,
-              (long) (FETCHAUTH_BASIC | FETCHAUTH_DIGEST | FETCHAUTH_NTLM));
+              (long)(FETCHAUTH_BASIC | FETCHAUTH_DIGEST | FETCHAUTH_NTLM));
   test_setopt(fetch, FETCHOPT_PROXY, libtest_arg2); /* set in first.c */
   test_setopt(fetch, FETCHOPT_PROXYUSERPWD, "me:password");
 
   res = fetch_easy_perform(fetch);
 
   res = fetch_easy_getinfo(fetch, FETCHINFO_PROXYAUTH_USED, &usedauth);
-  if(FETCHAUTH_NTLM != usedauth) {
+  if (FETCHAUTH_NTLM != usedauth)
+  {
     printf("FETCHINFO_PROXYAUTH_USED did not say NTLM\n");
   }
 

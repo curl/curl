@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,12 +29,13 @@
 
 struct Curl_easy;
 
-#define PSL_TTL (72 * 3600)     /* PSL time to live before a refresh. */
+#define PSL_TTL (72 * 3600) /* PSL time to live before a refresh. */
 
-struct PslCache {
+struct PslCache
+{
   const psl_ctx_t *psl; /* The PSL. */
-  time_t expires; /* Time this PSL life expires. */
-  bool dynamic; /* PSL should be released when no longer needed. */
+  time_t expires;       /* Time this PSL life expires. */
+  bool dynamic;         /* PSL should be released when no longer needed. */
 };
 
 const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy);

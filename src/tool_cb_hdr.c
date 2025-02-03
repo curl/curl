@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -59,17 +59,18 @@ static char *parse_filename(const char *ptr, size_t len);
 
 #ifdef LINK
 static void write_linked_location(FETCH *fetch, const char *location,
-    size_t loclen, FILE *stream);
+                                  size_t loclen, FILE *stream);
 #endif
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
 {
   struct fetch_slist *h = hdrcbdata->headlist;
   int rc = 1;
-  while(h) {
+  while (h)
+  {
     /* not "handled", just show it */
     size_t len = strlen(h->data);
-    if(len != fwrite(h->data, 1, len, stream))
+    if (len != fwrite(h->data, 1, len, stream))
       goto fail;
     h = h->next;
   }
@@ -79,7 +80,6 @@ fail:
   hdrcbdata->headlist = NULL;
   return rc;
 }
-
 
 /*
 ** callback for FETCHOPT_HEADERFUNCTION
@@ -97,11 +97,12 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   const char *end = (char *)ptr + cb;
   const char *scheme = NULL;
 
-  if(!per->config)
+  if (!per->config)
     return FETCH_WRITEFUNC_ERROR;
 
 #ifdef DEBUGBUILD
-  if(size * nmemb > (size_t)FETCH_MAX_HTTP_HEADER) {
+  if (size * nmemb > (size_t)FETCH_MAX_HTTP_HEADER)
+  {
     warnf(per->config->global, "Header data exceeds single call write limit");
     return FETCH_WRITEFUNC_ERROR;
   }
@@ -109,7 +110,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
 #ifdef _WIN32
   /* Discard incomplete UTF-8 sequence buffered from body */
-  if(outs->utf8seq[0])
+  if (outs->utf8seq[0])
     memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
 #endif
 
@@ -117,12 +118,14 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
    * Write header data when fetch option --dump-header (-D) is given.
    */
 
-  if(per->config->headerfile && heads->stream) {
+  if (per->config->headerfile && heads->stream)
+  {
     size_t rc = fwrite(ptr, size, nmemb, heads->stream);
-    if(rc != cb)
+    if (rc != cb)
       return rc;
     /* flush the stream to send off what we got earlier */
-    if(fflush(heads->stream)) {
+    if (fflush(heads->stream))
+    {
       errorf(per->config->global, "Failed writing headers to %s",
              per->config->headerfile);
       return FETCH_WRITEFUNC_ERROR;
@@ -131,39 +134,45 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
   fetch_easy_getinfo(per->fetch, FETCHINFO_SCHEME, &scheme);
   scheme = proto_token(scheme);
-  if((scheme == proto_http || scheme == proto_https)) {
+  if ((scheme == proto_http || scheme == proto_https))
+  {
     long response = 0;
     fetch_easy_getinfo(per->fetch, FETCHINFO_RESPONSE_CODE, &response);
 
-    if((response/100 != 2) && (response/100 != 3))
+    if ((response / 100 != 2) && (response / 100 != 3))
       /* only care about etag and content-disposition headers in 2xx and 3xx
          responses */
       ;
     /*
      * Write etag to file when --etag-save option is given.
      */
-    else if(per->config->etag_save_file && etag_save->stream &&
-            /* match only header that start with etag (case insensitive) */
-            checkprefix("etag:", str)) {
+    else if (per->config->etag_save_file && etag_save->stream &&
+             /* match only header that start with etag (case insensitive) */
+             checkprefix("etag:", str))
+    {
       const char *etag_h = &str[5];
       const char *eot = end - 1;
-      if(*eot == '\n') {
-        while(ISBLANK(*etag_h) && (etag_h < eot))
+      if (*eot == '\n')
+      {
+        while (ISBLANK(*etag_h) && (etag_h < eot))
           etag_h++;
-        while(ISSPACE(*eot))
+        while (ISSPACE(*eot))
           eot--;
 
-        if(eot >= etag_h) {
+        if (eot >= etag_h)
+        {
           size_t etag_length = eot - etag_h + 1;
           /*
            * Truncate the etag save stream, it can have an existing etag value.
            */
 #ifdef HAVE_FTRUNCATE
-          if(ftruncate(fileno(etag_save->stream), 0)) {
+          if (ftruncate(fileno(etag_save->stream), 0))
+          {
             return FETCH_WRITEFUNC_ERROR;
           }
 #else
-          if(fseek(etag_save->stream, 0, SEEK_SET)) {
+          if (fseek(etag_save->stream, 0, SEEK_SET))
+          {
             return FETCH_WRITEFUNC_ERROR;
           }
 #endif
@@ -183,26 +192,30 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
      * Content-Disposition header specifying a filename property.
      */
 
-    else if(hdrcbdata->honor_cd_filename) {
-      if((cb > 20) && checkprefix("Content-disposition:", str)) {
+    else if (hdrcbdata->honor_cd_filename)
+    {
+      if ((cb > 20) && checkprefix("Content-disposition:", str))
+      {
         const char *p = str + 20;
 
         /* look for the 'filename=' parameter
            (encoded filenames (*=) are not supported) */
-        for(;;) {
+        for (;;)
+        {
           char *filename;
           size_t len;
 
-          while((p < end) && *p && !ISALPHA(*p))
+          while ((p < end) && *p && !ISALPHA(*p))
             p++;
-          if(p > end - 9)
+          if (p > end - 9)
             break;
 
-          if(memcmp(p, "filename=", 9)) {
+          if (memcmp(p, "filename=", 9))
+          {
             /* no match, find next parameter */
-            while((p < end) && *p && (*p != ';'))
+            while ((p < end) && *p && (*p != ';'))
               p++;
-            if((p < end) && *p)
+            if ((p < end) && *p)
               continue;
             else
               break;
@@ -211,18 +224,21 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
           len = cb - (size_t)(p - str);
           filename = parse_filename(p, len);
-          if(filename) {
-            if(outs->stream) {
+          if (filename)
+          {
+            if (outs->stream)
+            {
               /* indication of problem, get out! */
               free(filename);
               return FETCH_WRITEFUNC_ERROR;
             }
 
-            if(per->config->output_dir) {
+            if (per->config->output_dir)
+            {
               outs->filename = aprintf("%s/%s", per->config->output_dir,
                                        filename);
               free(filename);
-              if(!outs->filename)
+              if (!outs->filename)
                 return FETCH_WRITEFUNC_ERROR;
             }
             else
@@ -233,34 +249,38 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
             outs->fopened = FALSE;
             outs->alloc_filename = TRUE;
             hdrcbdata->honor_cd_filename = FALSE; /* done now! */
-            if(!tool_create_output_file(outs, per->config))
+            if (!tool_create_output_file(outs, per->config))
               return FETCH_WRITEFUNC_ERROR;
-            if(tool_write_headers(&per->hdrcbdata, outs->stream))
+            if (tool_write_headers(&per->hdrcbdata, outs->stream))
               return FETCH_WRITEFUNC_ERROR;
           }
           break;
         }
-        if(!outs->stream && !tool_create_output_file(outs, per->config))
+        if (!outs->stream && !tool_create_output_file(outs, per->config))
           return FETCH_WRITEFUNC_ERROR;
-        if(tool_write_headers(&per->hdrcbdata, outs->stream))
+        if (tool_write_headers(&per->hdrcbdata, outs->stream))
           return FETCH_WRITEFUNC_ERROR;
       } /* content-disposition handling */
 
-      if(hdrcbdata->honor_cd_filename &&
-         hdrcbdata->config->show_headers) {
+      if (hdrcbdata->honor_cd_filename &&
+          hdrcbdata->config->show_headers)
+      {
         /* still awaiting the Content-Disposition header, store the header in
            memory. Since it is not zero terminated, we need an extra dance. */
         char *clone = aprintf("%.*s", (int)cb, (char *)str);
-        if(clone) {
+        if (clone)
+        {
           struct fetch_slist *old = hdrcbdata->headlist;
           hdrcbdata->headlist = fetch_slist_append(old, clone);
           free(clone);
-          if(!hdrcbdata->headlist) {
+          if (!hdrcbdata->headlist)
+          {
             fetch_slist_free_all(old);
             return FETCH_WRITEFUNC_ERROR;
           }
         }
-        else {
+        else
+        {
           fetch_slist_free_all(hdrcbdata->headlist);
           hdrcbdata->headlist = NULL;
           return FETCH_WRITEFUNC_ERROR;
@@ -269,41 +289,46 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       }
     }
   }
-  if(hdrcbdata->config->writeout) {
+  if (hdrcbdata->config->writeout)
+  {
     char *value = memchr(ptr, ':', cb);
-    if(value) {
-      if(per->was_last_header_empty)
+    if (value)
+    {
+      if (per->was_last_header_empty)
         per->num_headers = 0;
       per->was_last_header_empty = FALSE;
       per->num_headers++;
     }
-    else if(ptr[0] == '\r' || ptr[0] == '\n')
+    else if (ptr[0] == '\r' || ptr[0] == '\n')
       per->was_last_header_empty = TRUE;
   }
-  if(hdrcbdata->config->show_headers &&
-    (scheme == proto_http || scheme == proto_https ||
-     scheme == proto_rtsp || scheme == proto_file)) {
+  if (hdrcbdata->config->show_headers &&
+      (scheme == proto_http || scheme == proto_https ||
+       scheme == proto_rtsp || scheme == proto_file))
+  {
     /* bold headers only for selected protocols */
     char *value = NULL;
 
-    if(!outs->stream && !tool_create_output_file(outs, per->config))
+    if (!outs->stream && !tool_create_output_file(outs, per->config))
       return FETCH_WRITEFUNC_ERROR;
 
-    if(hdrcbdata->global->isatty &&
+    if (hdrcbdata->global->isatty &&
 #ifdef _WIN32
-       tool_term_has_bold &&
+        tool_term_has_bold &&
 #endif
-       hdrcbdata->global->styled_output)
+        hdrcbdata->global->styled_output)
       value = memchr(ptr, ':', cb);
-    if(value) {
+    if (value)
+    {
       size_t namelen = value - ptr;
       fprintf(outs->stream, BOLD "%.*s" BOLDOFF ":", (int)namelen, ptr);
 #ifndef LINK
       fwrite(&value[1], cb - namelen - 1, 1, outs->stream);
 #else
-      if(fetch_strnequal("Location", ptr, namelen)) {
+      if (fetch_strnequal("Location", ptr, namelen))
+      {
         write_linked_location(per->fetch, &value[1], cb - namelen - 1,
-            outs->stream);
+                              outs->stream);
       }
       else
         fwrite(&value[1], cb - namelen - 1, 1, outs->stream);
@@ -324,17 +349,18 @@ static char *parse_filename(const char *ptr, size_t len)
   char *copy;
   char *p;
   char *q;
-  char  stop = '\0';
+  char stop = '\0';
 
   /* simple implementation of strndup() */
   copy = malloc(len + 1);
-  if(!copy)
+  if (!copy)
     return NULL;
   memcpy(copy, ptr, len);
   copy[len] = '\0';
 
   p = copy;
-  if(*p == '\'' || *p == '"') {
+  if (*p == '\'' || *p == '"')
+  {
     /* store the starting quote */
     stop = *p;
     p++;
@@ -344,14 +370,16 @@ static char *parse_filename(const char *ptr, size_t len)
 
   /* scan for the end letter and stop there */
   q = strchr(p, stop);
-  if(q)
+  if (q)
     *q = '\0';
 
   /* if the filename contains a path, only use filename portion */
   q = strrchr(p, '/');
-  if(q) {
+  if (q)
+  {
     p = q + 1;
-    if(!*p) {
+    if (!*p)
+    {
       Curl_safefree(copy);
       return NULL;
     }
@@ -361,9 +389,11 @@ static char *parse_filename(const char *ptr, size_t len)
      is that even systems that do not handle backslashes as path separators
      probably want the path removed for convenience. */
   q = strrchr(p, '\\');
-  if(q) {
+  if (q)
+  {
     p = q + 1;
-    if(!*p) {
+    if (!*p)
+    {
       Curl_safefree(copy);
       return NULL;
     }
@@ -371,14 +401,14 @@ static char *parse_filename(const char *ptr, size_t len)
 
   /* make sure the filename does not end in \r or \n */
   q = strchr(p, '\r');
-  if(q)
+  if (q)
     *q = '\0';
 
   q = strchr(p, '\n');
-  if(q)
+  if (q)
     *q = '\0';
 
-  if(copy != p)
+  if (copy != p)
     memmove(copy, p, strlen(p) + 1);
 
 #if defined(_WIN32) || defined(MSDOS)
@@ -386,7 +416,7 @@ static char *parse_filename(const char *ptr, size_t len)
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
     Curl_safefree(copy);
-    if(sc)
+    if (sc)
       return NULL;
     copy = sanitized;
   }
@@ -405,9 +435,9 @@ static char *parse_filename(const char *ptr, size_t len)
  * should not be needed but the real world returns plenty of relative
  * URLs here.
  */
-static
-void write_linked_location(FETCH *fetch, const char *location, size_t loclen,
-                           FILE *stream) {
+static void write_linked_location(FETCH *fetch, const char *location, size_t loclen,
+                                  FILE *stream)
+{
   /* This would so simple if FETCHINFO_REDIRECT_URL were available here */
   FETCHU *u = NULL;
   char *copyloc = NULL, *lofetch = NULL, *scheme = NULL, *finalurl = NULL;
@@ -416,57 +446,60 @@ void write_linked_location(FETCH *fetch, const char *location, size_t loclen,
   int space_skipped = 0;
   char *vver = getenv("VTE_VERSION");
 
-  if(vver) {
+  if (vver)
+  {
     long vvn = strtol(vver, NULL, 10);
     /* Skip formatting for old versions of VTE <= 0.48.1 (Mar 2017) since some
        of those versions have formatting bugs. (#10428) */
-    if(0 < vvn && vvn <= 4801)
+    if (0 < vvn && vvn <= 4801)
       goto locout;
   }
 
   /* Strip leading whitespace of the redirect URL */
-  while(llen && (*loc == ' ' || *loc == '\t')) {
+  while (llen && (*loc == ' ' || *loc == '\t'))
+  {
     ++loc;
     --llen;
     ++space_skipped;
   }
 
   /* Strip the trailing end-of-line characters, normally "\r\n" */
-  while(llen && (loc[llen-1] == '\n' || loc[llen-1] == '\r'))
+  while (llen && (loc[llen - 1] == '\n' || loc[llen - 1] == '\r'))
     --llen;
 
   /* FETCHU makes it easy to handle the relative URL case */
   u = fetch_url();
-  if(!u)
+  if (!u)
     goto locout;
 
   /* Create a NUL-terminated and whitespace-stripped copy of Location: */
   copyloc = malloc(llen + 1);
-  if(!copyloc)
+  if (!copyloc)
     goto locout;
   memcpy(copyloc, loc, llen);
   copyloc[llen] = 0;
 
   /* The original URL to use as a base for a relative redirect URL */
-  if(fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &lofetch))
+  if (fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &lofetch))
     goto locout;
-  if(fetch_url_set(u, FETCHUPART_URL, lofetch, 0))
+  if (fetch_url_set(u, FETCHUPART_URL, lofetch, 0))
     goto locout;
 
   /* Redirected location. This can be either absolute or relative. */
-  if(fetch_url_set(u, FETCHUPART_URL, copyloc, 0))
+  if (fetch_url_set(u, FETCHUPART_URL, copyloc, 0))
     goto locout;
 
-  if(fetch_url_get(u, FETCHUPART_URL, &finalurl, FETCHU_NO_DEFAULT_PORT))
+  if (fetch_url_get(u, FETCHUPART_URL, &finalurl, FETCHU_NO_DEFAULT_PORT))
     goto locout;
 
-  if(fetch_url_get(u, FETCHUPART_SCHEME, &scheme, 0))
+  if (fetch_url_get(u, FETCHUPART_SCHEME, &scheme, 0))
     goto locout;
 
-  if(!strcmp("http", scheme) ||
-     !strcmp("https", scheme) ||
-     !strcmp("ftp", scheme) ||
-     !strcmp("ftps", scheme)) {
+  if (!strcmp("http", scheme) ||
+      !strcmp("https", scheme) ||
+      !strcmp("ftp", scheme) ||
+      !strcmp("ftps", scheme))
+  {
     fprintf(stream, "%.*s" LINK "%s" LINKST "%.*s" LINKOFF,
             space_skipped, location,
             finalurl,
@@ -481,7 +514,8 @@ locout:
   fwrite(location, loclen, 1, stream);
 
 locdone:
-  if(u) {
+  if (u)
+  {
     fetch_free(finalurl);
     fetch_free(scheme);
     fetch_url_cleanup(u);

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,7 +55,8 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
      by default internally */
   retcode = fread(ptr, size, nmemb, stream);
 
-  if(retcode > 0) {
+  if (retcode > 0)
+  {
     nread = (unsigned long)retcode;
     fprintf(stderr, "*** We read %lu bytes from file\n", nread);
   }
@@ -67,13 +68,13 @@ int main(int argc, char **argv)
 {
   FETCH *fetch;
   FETCHcode res;
-  FILE * hd_src;
+  FILE *hd_src;
   struct stat file_info;
 
   char *file;
   char *url;
 
-  if(argc < 3)
+  if (argc < 3)
     return 1;
 
   file = argv[1];
@@ -86,7 +87,7 @@ int main(int argc, char **argv)
      fdopen() from the previous descriptor, but hey this is just
      an example! */
   hd_src = fopen(file, "rb");
-  if(!hd_src)
+  if (!hd_src)
     return 2;
 
   /* In Windows, this inits the Winsock stuff */
@@ -94,7 +95,8 @@ int main(int argc, char **argv)
 
   /* get a fetch handle */
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* we want to use our own read function */
     fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
@@ -111,12 +113,12 @@ int main(int argc, char **argv)
     /* provide the size of the upload, we typecast the value to fetch_off_t
        since we must be sure to use the correct data size */
     fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
-                     (fetch_off_t)file_info.st_size);
+                      (fetch_off_t)file_info.st_size);
 
     /* Now run off and do what you have been told! */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

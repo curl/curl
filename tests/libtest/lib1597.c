@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,8 @@
 
 #include "memdebug.h"
 
-struct pair {
+struct pair
+{
   const char *in;
   FETCHcode *exp;
 };
@@ -50,22 +51,22 @@ FETCHcode test(char *URL)
   static char protolist[1024];
 
   static const struct pair prots[] = {
-    {"goobar", &unsup},
-    {"http ", &unsup},
-    {" http", &unsup},
-    {"http", &httpcode},
-    {"http,", &httpcode},
-    {"https,", &httpscode},
-    {"https,http", &httpscode},
-    {"http,http", &httpcode},
-    {"HTTP,HTTP", &httpcode},
-    {",HTTP,HTTP", &httpcode},
-    {"http,http,ft", &unsup},
-    {"", &bad},
-    {",,", &bad},
-    {protolist, &ok},
-    {"all", &ok},
-    {NULL, NULL},
+      {"goobar", &unsup},
+      {"http ", &unsup},
+      {" http", &unsup},
+      {"http", &httpcode},
+      {"http,", &httpcode},
+      {"https,", &httpscode},
+      {"https,http", &httpscode},
+      {"http,http", &httpcode},
+      {"HTTP,HTTP", &httpcode},
+      {",HTTP,HTTP", &httpcode},
+      {"http,http,ft", &unsup},
+      {"", &bad},
+      {",,", &bad},
+      {protolist, &ok},
+      {"all", &ok},
+      {NULL, NULL},
   };
   (void)URL;
 
@@ -75,30 +76,35 @@ FETCHcode test(char *URL)
 
   /* Get enabled protocols.*/
   fetchinfo = fetch_version_info(FETCHVERSION_NOW);
-  if(!fetchinfo) {
+  if (!fetchinfo)
+  {
     fputs("fetch_version_info failed\n", stderr);
     res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
   n = 0;
-  for(proto = fetchinfo->protocols; *proto; proto++) {
-    if((size_t) n >= sizeof(protolist)) {
+  for (proto = fetchinfo->protocols; *proto; proto++)
+  {
+    if ((size_t)n >= sizeof(protolist))
+    {
       puts("protolist buffer too small\n");
       res = TEST_ERR_FAILURE;
       goto test_cleanup;
     }
     n += msnprintf(protolist + n, sizeof(protolist) - n, ",%s", *proto);
-    if(fetch_strequal(*proto, "http"))
+    if (fetch_strequal(*proto, "http"))
       httpcode = FETCHE_OK;
-    if(fetch_strequal(*proto, "https"))
+    if (fetch_strequal(*proto, "https"))
       httpscode = FETCHE_OK;
   }
 
   /* Run the tests. */
-  for(i = 0; prots[i].in; i++) {
+  for (i = 0; prots[i].in; i++)
+  {
     result = fetch_easy_setopt(fetch, FETCHOPT_PROTOCOLS_STR, prots[i].in);
-    if(result != *prots[i].exp) {
+    if (result != *prots[i].exp)
+    {
       printf("unexpectedly '%s' returned %d\n", prots[i].in, result);
       break;
     }

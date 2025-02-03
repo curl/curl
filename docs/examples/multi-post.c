@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,7 +46,8 @@ int main(void)
   fetch = fetch_easy_init();
   multi_handle = fetch_multi_init();
 
-  if(fetch && multi_handle) {
+  if (fetch && multi_handle)
+  {
     /* Create the form */
     form = fetch_mime_init(fetch);
 
@@ -78,16 +79,17 @@ int main(void)
 
     fetch_multi_add_handle(multi_handle, fetch);
 
-    do {
+    do
+    {
       FETCHMcode mc = fetch_multi_perform(multi_handle, &still_running);
 
-      if(still_running)
+      if (still_running)
         /* wait for activity, timeout or "nothing" */
         mc = fetch_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-      if(mc)
+      if (mc)
         break;
-    } while(still_running);
+    } while (still_running);
 
     fetch_multi_cleanup(multi_handle);
 

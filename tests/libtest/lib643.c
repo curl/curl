@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,10 +25,11 @@
 
 #include "memdebug.h"
 
-static char testdata[]=
-  "dummy\n";
+static char testdata[] =
+    "dummy\n";
 
-struct WriteThis {
+struct WriteThis
+{
   char *readptr;
   fetch_off_t sizeleft;
 };
@@ -38,22 +39,23 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   struct WriteThis *pooh = (struct WriteThis *)userp;
   int eof = !*pooh->readptr;
 
-  if(size*nmemb < 1)
+  if (size * nmemb < 1)
     return 0;
 
 #ifndef LIB645
   eof = pooh->sizeleft <= 0;
-  if(!eof)
+  if (!eof)
     pooh->sizeleft--;
 #endif
 
-  if(!eof) {
-    *ptr = *pooh->readptr;           /* copy one single byte */
-    pooh->readptr++;                 /* advance pointer */
-    return 1;                        /* we return 1 byte at a time! */
+  if (!eof)
+  {
+    *ptr = *pooh->readptr; /* copy one single byte */
+    pooh->readptr++;       /* advance pointer */
+    return 1;              /* we return 1 byte at a time! */
   }
 
-  return 0;                         /* no more data left to deliver */
+  return 0; /* no more data left to deliver */
 }
 
 static FETCHcode test_once(char *URL, bool oldstyle)
@@ -74,14 +76,16 @@ static FETCHcode test_once(char *URL, bool oldstyle)
   pooh.sizeleft = datasize;
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   mime = fetch_mime_init(fetch);
-  if(!mime) {
+  if (!mime)
+  {
     fprintf(stderr, "fetch_mime_init() failed\n");
     fetch_easy_cleanup(fetch);
     fetch_global_cleanup();
@@ -89,7 +93,8 @@ static FETCHcode test_once(char *URL, bool oldstyle)
   }
 
   part = fetch_mime_addpart(mime);
-  if(!part) {
+  if (!part)
+  {
     fprintf(stderr, "fetch_mime_addpart(1) failed\n");
     fetch_mime_free(mime);
     fetch_easy_cleanup(fetch);
@@ -98,25 +103,27 @@ static FETCHcode test_once(char *URL, bool oldstyle)
   }
 
   /* Fill in the file upload part */
-  if(oldstyle) {
+  if (oldstyle)
+  {
     res = fetch_mime_name(part, "sendfile");
-    if(!res)
+    if (!res)
       res = fetch_mime_data_cb(part, datasize, read_callback,
-                              NULL, NULL, &pooh);
-    if(!res)
+                               NULL, NULL, &pooh);
+    if (!res)
       res = fetch_mime_filename(part, "postit2.c");
   }
-  else {
+  else
+  {
     /* new style */
     res = fetch_mime_name(part, "sendfile alternative");
-    if(!res)
+    if (!res)
       res = fetch_mime_data_cb(part, datasize, read_callback,
-                              NULL, NULL, &pooh);
-    if(!res)
+                               NULL, NULL, &pooh);
+    if (!res)
       res = fetch_mime_filename(part, "file name 2");
   }
 
-  if(res)
+  if (res)
     printf("fetch_mime_xxx(1) = %s\n", fetch_easy_strerror(res));
 
   /* Now add the same data with another name and make it not look like
@@ -129,7 +136,8 @@ static FETCHcode test_once(char *URL, bool oldstyle)
   pooh2.sizeleft = datasize;
 
   part = fetch_mime_addpart(mime);
-  if(!part) {
+  if (!part)
+  {
     fprintf(stderr, "fetch_mime_addpart(2) failed\n");
     fetch_mime_free(mime);
     fetch_easy_cleanup(fetch);
@@ -138,15 +146,16 @@ static FETCHcode test_once(char *URL, bool oldstyle)
   }
   /* Fill in the file upload part */
   res = fetch_mime_name(part, "callbackdata");
-  if(!res)
+  if (!res)
     res = fetch_mime_data_cb(part, datasize, read_callback,
-                            NULL, NULL, &pooh2);
+                             NULL, NULL, &pooh2);
 
-  if(res)
+  if (res)
     printf("fetch_mime_xxx(2) = %s\n", fetch_easy_strerror(res));
 
   part = fetch_mime_addpart(mime);
-  if(!part) {
+  if (!part)
+  {
     fprintf(stderr, "fetch_mime_addpart(3) failed\n");
     fetch_mime_free(mime);
     fetch_easy_cleanup(fetch);
@@ -156,16 +165,17 @@ static FETCHcode test_once(char *URL, bool oldstyle)
 
   /* Fill in the filename field */
   res = fetch_mime_name(part, "filename");
-  if(!res)
+  if (!res)
     res = fetch_mime_data(part, "postit2.c",
-                         FETCH_ZERO_TERMINATED);
+                          FETCH_ZERO_TERMINATED);
 
-  if(res)
+  if (res)
     printf("fetch_mime_xxx(3) = %s\n", fetch_easy_strerror(res));
 
   /* Fill in a submit field too */
   part = fetch_mime_addpart(mime);
-  if(!part) {
+  if (!part)
+  {
     fprintf(stderr, "fetch_mime_addpart(4) failed\n");
     fetch_mime_free(mime);
     fetch_easy_cleanup(fetch);
@@ -173,15 +183,16 @@ static FETCHcode test_once(char *URL, bool oldstyle)
     return TEST_ERR_MAJOR_BAD;
   }
   res = fetch_mime_name(part, "submit");
-  if(!res)
+  if (!res)
     res = fetch_mime_data(part, "send",
-                         FETCH_ZERO_TERMINATED);
+                          FETCH_ZERO_TERMINATED);
 
-  if(res)
+  if (res)
     printf("fetch_mime_xxx(4) = %s\n", fetch_easy_strerror(res));
 
   part = fetch_mime_addpart(mime);
-  if(!part) {
+  if (!part)
+  {
     fprintf(stderr, "fetch_mime_addpart(5) failed\n");
     fetch_mime_free(mime);
     fetch_easy_cleanup(fetch);
@@ -189,12 +200,12 @@ static FETCHcode test_once(char *URL, bool oldstyle)
     return TEST_ERR_MAJOR_BAD;
   }
   res = fetch_mime_name(part, "somename");
-  if(!res)
+  if (!res)
     res = fetch_mime_filename(part, "somefile.txt");
-  if(!res)
+  if (!res)
     res = fetch_mime_data(part, "blah blah", 9);
 
-  if(res)
+  if (res)
     printf("fetch_mime_xxx(5) = %s\n", fetch_easy_strerror(res));
 
   /* First set the URL that is about to receive our POST. */
@@ -230,7 +241,8 @@ static FETCHcode cyclic_add(void)
   fetch_mimepart *part = fetch_mime_addpart(mime);
   FETCHcode a1 = fetch_mime_subparts(part, mime);
 
-  if(a1 == FETCHE_BAD_FUNCTION_ARGUMENT) {
+  if (a1 == FETCHE_BAD_FUNCTION_ARGUMENT)
+  {
     fetch_mime *submime = fetch_mime_init(easy);
     fetch_mimepart *subpart = fetch_mime_addpart(submime);
 
@@ -240,7 +252,7 @@ static FETCHcode cyclic_add(void)
 
   fetch_mime_free(mime);
   fetch_easy_cleanup(easy);
-  if(a1 != FETCHE_BAD_FUNCTION_ARGUMENT)
+  if (a1 != FETCHE_BAD_FUNCTION_ARGUMENT)
     /* that should have failed */
     return (FETCHcode)1;
 
@@ -251,16 +263,17 @@ FETCHcode test(char *URL)
 {
   FETCHcode res;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   res = test_once(URL, TRUE); /* old */
-  if(!res)
+  if (!res)
     res = test_once(URL, FALSE); /* new */
 
-  if(!res)
+  if (!res)
     res = cyclic_add();
 
   fetch_global_cleanup();

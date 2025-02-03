@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,25 +39,26 @@
  * Note that this example requires libfetch 7.20.0 or above.
  */
 
-#define FROM_MAIL     "<sender@example.com>"
-#define TO_MAIL       "<recipient@example.com>"
-#define CC_MAIL       "<info@example.com>"
+#define FROM_MAIL "<sender@example.com>"
+#define TO_MAIL "<recipient@example.com>"
+#define CC_MAIL "<info@example.com>"
 
 static const char *payload_text =
-  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
-  "To: " TO_MAIL "\r\n"
-  "From: " FROM_MAIL "\r\n"
-  "Cc: " CC_MAIL "\r\n"
-  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
-  "rfcpedant.example.org>\r\n"
-  "Subject: SMTP example message\r\n"
-  "\r\n" /* empty line to divide headers from body, see RFC 5322 */
-  "The body of the message starts here.\r\n"
-  "\r\n"
-  "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
-  "Check RFC 5322.\r\n";
+    "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
+    "To: " TO_MAIL "\r\n"
+    "From: " FROM_MAIL "\r\n"
+    "Cc: " CC_MAIL "\r\n"
+    "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
+    "rfcpedant.example.org>\r\n"
+    "Subject: SMTP example message\r\n"
+    "\r\n" /* empty line to divide headers from body, see RFC 5322 */
+    "The body of the message starts here.\r\n"
+    "\r\n"
+    "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
+    "Check RFC 5322.\r\n";
 
-struct upload_status {
+struct upload_status
+{
   size_t bytes_read;
 };
 
@@ -67,15 +68,17 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
   const char *data;
   size_t room = size * nmemb;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if ((size == 0) || (nmemb == 0) || ((size * nmemb) < 1))
+  {
     return 0;
   }
 
   data = &payload_text[upload_ctx->bytes_read];
 
-  if(data) {
+  if (data)
+  {
     size_t len = strlen(data);
-    if(room < len)
+    if (room < len)
       len = room;
     memcpy(ptr, data, len);
     upload_ctx->bytes_read += len;
@@ -91,10 +94,11 @@ int main(void)
   FETCH *fetch;
   FETCHcode res = FETCHE_OK;
   struct fetch_slist *recipients = NULL;
-  struct upload_status upload_ctx = { 0 };
+  struct upload_status upload_ctx = {0};
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* Set username and password */
     fetch_easy_setopt(fetch, FETCHOPT_USERNAME, "user");
     fetch_easy_setopt(fetch, FETCHOPT_PASSWORD, "secret");
@@ -158,7 +162,7 @@ int main(void)
     res = fetch_easy_perform(fetch);
 
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

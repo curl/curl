@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,15 +43,16 @@ int main(void)
   FETCHcode res = FETCHE_OK;
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* Set username and password */
     fetch_easy_setopt(fetch, FETCHOPT_USERNAME, "user");
     fetch_easy_setopt(fetch, FETCHOPT_PASSWORD, "secret");
 
     /* This fetches message 1 from the user's inbox. Note the use of
-    * imaps:// rather than imap:// to request a SSL based connection. */
+     * imaps:// rather than imap:// to request a SSL based connection. */
     fetch_easy_setopt(fetch, FETCHOPT_URL,
-                     "imaps://imap.example.com/INBOX/;UID=1");
+                      "imaps://imap.example.com/INBOX/;UID=1");
 
     /* If you want to connect to a site who is not using a certificate that is
      * signed by one of the certs in the CA bundle you have, you can skip the
@@ -82,7 +83,7 @@ int main(void)
     res = fetch_easy_perform(fetch);
 
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 

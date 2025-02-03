@@ -29,12 +29,12 @@ FETCHOPT_PROXY_SSL_CIPHER_LIST - ciphers to use for HTTPS proxy
 
 # SYNOPSIS
 
-~~~c
+```c
 #include <fetch/fetch.h>
 
 FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_PROXY_SSL_CIPHER_LIST,
                           char *list);
-~~~
+```
 
 # DESCRIPTION
 
@@ -46,17 +46,18 @@ strings separated by colons.
 For setting TLS 1.3 ciphers see FETCHOPT_PROXY_TLS13_CIPHERS(3).
 
 A valid example of a cipher list is:
-~~~
+
+```
 "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:"
 "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
-~~~
+```
 
 For Schannel, you can use this option to set algorithms but not specific
 cipher suites. Refer to the ciphers lists document for algorithms.
 
 Find more details about cipher lists on this URL:
 
- https://fetch.se/docs/ssl-ciphers.html
+https://curl.se/docs/ssl-ciphers.html
 
 The application does not have to keep the string around after setting this
 option.
@@ -72,7 +73,7 @@ NULL, use internal built-in list.
 
 # EXAMPLE
 
-~~~c
+```c
 int main(void)
 {
   FETCH *fetch = fetch_easy_init();
@@ -87,7 +88,7 @@ int main(void)
     fetch_easy_cleanup(fetch);
   }
 }
-~~~
+```
 
 # HISTORY
 

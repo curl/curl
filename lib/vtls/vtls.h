@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,67 +32,68 @@ struct Curl_cfilter;
 struct Curl_easy;
 struct dynbuf;
 
-#define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
-#define SSLSUPP_CERTINFO     (1<<1) /* supports FETCHOPT_CERTINFO */
-#define SSLSUPP_PINNEDPUBKEY (1<<2) /* supports FETCHOPT_PINNEDPUBLICKEY */
-#define SSLSUPP_SSL_CTX      (1<<3) /* supports FETCHOPT_SSL_CTX */
-#define SSLSUPP_HTTPS_PROXY  (1<<4) /* supports access via HTTPS proxies */
-#define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
-#define SSLSUPP_CAINFO_BLOB  (1<<6)
-#define SSLSUPP_ECH          (1<<7)
-#define SSLSUPP_CA_CACHE     (1<<8)
-#define SSLSUPP_CIPHER_LIST  (1<<9) /* supports TLS 1.0-1.2 ciphersuites */
+#define SSLSUPP_CA_PATH (1 << 0)            /* supports CAPATH */
+#define SSLSUPP_CERTINFO (1 << 1)           /* supports FETCHOPT_CERTINFO */
+#define SSLSUPP_PINNEDPUBKEY (1 << 2)       /* supports FETCHOPT_PINNEDPUBLICKEY */
+#define SSLSUPP_SSL_CTX (1 << 3)            /* supports FETCHOPT_SSL_CTX */
+#define SSLSUPP_HTTPS_PROXY (1 << 4)        /* supports access via HTTPS proxies */
+#define SSLSUPP_TLS13_CIPHERSUITES (1 << 5) /* supports TLS 1.3 ciphersuites */
+#define SSLSUPP_CAINFO_BLOB (1 << 6)
+#define SSLSUPP_ECH (1 << 7)
+#define SSLSUPP_CA_CACHE (1 << 8)
+#define SSLSUPP_CIPHER_LIST (1 << 9) /* supports TLS 1.0-1.2 ciphersuites */
 
 #ifdef USE_ECH
-# include "fetch_base64.h"
-# define ECH_ENABLED(__data__) \
-    (__data__->set.tls_ech && \
-     !(__data__->set.tls_ech & FETCHECH_DISABLE)\
-    )
+#include "fetch_base64.h"
+#define ECH_ENABLED(__data__) \
+  (__data__->set.tls_ech &&   \
+   !(__data__->set.tls_ech & FETCHECH_DISABLE))
 #endif /* USE_ECH */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
 
-#define VTLS_INFOF_NO_ALPN            \
+#define VTLS_INFOF_NO_ALPN \
   "ALPN: server did not agree on a protocol. Uses default."
-#define VTLS_INFOF_ALPN_OFFER_1STR    \
+#define VTLS_INFOF_ALPN_OFFER_1STR \
   "ALPN: fetch offers %s"
-#define VTLS_INFOF_ALPN_ACCEPTED      \
+#define VTLS_INFOF_ALPN_ACCEPTED \
   ALPN_ACCEPTED "%.*s"
 
-#define VTLS_INFOF_NO_ALPN_DEFERRED   \
+#define VTLS_INFOF_NO_ALPN_DEFERRED \
   "ALPN: deferred handshake for early data without specific protocol."
-#define VTLS_INFOF_ALPN_DEFERRED      \
+#define VTLS_INFOF_ALPN_DEFERRED \
   "ALPN: deferred handshake for early data using '%.*s'."
 
 /* IETF defined version numbers used in TLS protocol negotiation */
-#define FETCH_IETF_PROTO_UNKNOWN       0x0
-#define FETCH_IETF_PROTO_SSL3          0x0300
-#define FETCH_IETF_PROTO_TLS1          0x0301
-#define FETCH_IETF_PROTO_TLS1_1        0x0302
-#define FETCH_IETF_PROTO_TLS1_2        0x0303
-#define FETCH_IETF_PROTO_TLS1_3        0x0304
-#define FETCH_IETF_PROTO_DTLS1         0xFEFF
-#define FETCH_IETF_PROTO_DTLS1_2       0xFEFD
+#define FETCH_IETF_PROTO_UNKNOWN 0x0
+#define FETCH_IETF_PROTO_SSL3 0x0300
+#define FETCH_IETF_PROTO_TLS1 0x0301
+#define FETCH_IETF_PROTO_TLS1_1 0x0302
+#define FETCH_IETF_PROTO_TLS1_2 0x0303
+#define FETCH_IETF_PROTO_TLS1_3 0x0304
+#define FETCH_IETF_PROTO_DTLS1 0xFEFF
+#define FETCH_IETF_PROTO_DTLS1_2 0xFEFD
 
-typedef enum {
+typedef enum
+{
   FETCH_SSL_PEER_DNS,
   FETCH_SSL_PEER_IPV4,
   FETCH_SSL_PEER_IPV6
 } ssl_peer_type;
 
-struct ssl_peer {
-  char *hostname;        /* hostname for verification */
-  char *dispname;        /* display version of hostname */
-  char *sni;             /* SNI version of hostname or NULL if not usable */
-  char *scache_key;      /* for lookups in session cache */
-  ssl_peer_type type;    /* type of the peer information */
-  int port;              /* port we are talking to */
-  int transport;         /* one of TRNSPRT_* defines */
+struct ssl_peer
+{
+  char *hostname;     /* hostname for verification */
+  char *dispname;     /* display version of hostname */
+  char *sni;          /* SNI version of hostname or NULL if not usable */
+  char *scache_key;   /* for lookups in session cache */
+  ssl_peer_type type; /* type of the peer information */
+  int port;           /* port we are talking to */
+  int transport;      /* one of TRNSPRT_* defines */
 };
 
 FETCHsslset Curl_init_sslset_nolock(fetch_sslbackend id, const char *name,
-                                   const fetch_ssl_backend ***avail);
+                                    const fetch_ssl_backend ***avail);
 
 #ifndef MAX_PINNED_PUBKEY_SIZE
 #define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1MB */
@@ -119,7 +120,7 @@ FETCHcode Curl_ssl_easy_config_complete(struct Curl_easy *data);
  * Init SSL configs (main + proxy) for a new connection from the easy handle.
  */
 FETCHcode Curl_ssl_conn_config_init(struct Curl_easy *data,
-                                   struct connectdata *conn);
+                                    struct connectdata *conn);
 
 /**
  * Free allocated resources in SSL configs (main + proxy) for
@@ -145,9 +146,9 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
  * Init SSL peer information for filter. Can be called repeatedly.
  */
 FETCHcode Curl_ssl_peer_init(struct ssl_peer *peer,
-                            struct Curl_cfilter *cf,
-                            const char *tls_id,
-                            int transport);
+                             struct Curl_cfilter *cf,
+                             const char *tls_id,
+                             int transport);
 /**
  * Free all allocated data and reset peer information.
  */
@@ -167,25 +168,25 @@ struct fetch_slist *Curl_ssl_engines_list(struct Curl_easy *data);
 void Curl_ssl_version(char *buffer, size_t size);
 
 /* Certificate information list handling. */
-#define FETCH_X509_STR_MAX  100000
+#define FETCH_X509_STR_MAX 100000
 
 void Curl_ssl_free_certinfo(struct Curl_easy *data);
 FETCHcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num);
 FETCHcode Curl_ssl_push_certinfo_len(struct Curl_easy *data, int certnum,
-                                    const char *label, const char *value,
-                                    size_t valuelen);
+                                     const char *label, const char *value,
+                                     size_t valuelen);
 FETCHcode Curl_ssl_push_certinfo(struct Curl_easy *data, int certnum,
-                                const char *label, const char *value);
+                                 const char *label, const char *value);
 
 /* Functions to be used by SSL library adaptation functions */
 
 /* get N random bytes into the buffer */
 FETCHcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
-                         size_t length);
+                          size_t length);
 /* Check pinned public key. */
 FETCHcode Curl_pin_peer_pubkey(struct Curl_easy *data,
-                              const char *pinnedpubkey,
-                              const unsigned char *pubkey, size_t pubkeylen);
+                               const char *pinnedpubkey,
+                               const unsigned char *pubkey, size_t pubkeylen);
 
 bool Curl_ssl_cert_status_request(void);
 
@@ -213,18 +214,18 @@ FETCHcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 FETCHcode Curl_ssl_cfilter_add(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              int sockindex);
+                               struct connectdata *conn,
+                               int sockindex);
 
 FETCHcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
-                                  struct Curl_easy *data);
+                                   struct Curl_easy *data);
 
 FETCHcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
-                                 int sockindex, bool send_shutdown);
+                                  int sockindex, bool send_shutdown);
 
 #ifndef FETCH_DISABLE_PROXY
 FETCHcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                        struct Curl_easy *data);
+                                         struct Curl_easy *data);
 #endif /* !FETCH_DISABLE_PROXY */
 
 /**
@@ -254,7 +255,7 @@ struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
  * Get the primary config relevant for the filter from its connection.
  */
 struct ssl_primary_config *
-  Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
+Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
 
 extern struct Curl_cftype Curl_cft_ssl;
 #ifndef FETCH_DISABLE_PROXY
@@ -267,18 +268,18 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_init() 1
 #define Curl_ssl_cleanup() Curl_nop_stmt
 #define Curl_ssl_close_all(x) Curl_nop_stmt
-#define Curl_ssl_set_engine(x,y) FETCHE_NOT_BUILT_IN
+#define Curl_ssl_set_engine(x, y) FETCHE_NOT_BUILT_IN
 #define Curl_ssl_set_engine_default(x) FETCHE_NOT_BUILT_IN
 #define Curl_ssl_engines_list(x) NULL
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_random(x,y,z) ((void)x, FETCHE_NOT_BUILT_IN)
+#define Curl_ssl_random(x, y, z) ((void)x, FETCHE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start() FALSE
-#define Curl_ssl_get_internals(a,b,c,d) NULL
-#define Curl_ssl_supports(a,b) FALSE
-#define Curl_ssl_cfilter_add(a,b,c) FETCHE_NOT_BUILT_IN
-#define Curl_ssl_cfilter_remove(a,b,c) FETCHE_OK
-#define Curl_ssl_cf_get_config(a,b) NULL
+#define Curl_ssl_get_internals(a, b, c, d) NULL
+#define Curl_ssl_supports(a, b) FALSE
+#define Curl_ssl_cfilter_add(a, b, c) FETCHE_NOT_BUILT_IN
+#define Curl_ssl_cfilter_remove(a, b, c) FETCHE_OK
+#define Curl_ssl_cf_get_config(a, b) NULL
 #define Curl_ssl_cf_get_primary_config(a) NULL
 #endif
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,14 +26,14 @@
 #if defined(_WIN32) || defined(MSDOS)
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#  include <libgen.h>
+#include <libgen.h>
 #endif
 
 #ifdef _WIN32
-#  include <stdlib.h>
-#  include <tlhelp32.h>
-#  include "tool_cfgable.h"
-#  include "tool_libinfo.h"
+#include <stdlib.h>
+#include <tlhelp32.h>
+#include "tool_cfgable.h"
+#include "tool_libinfo.h"
 #endif
 
 #include "tool_bname.h"
@@ -43,24 +43,24 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifdef _WIN32
-#  undef  PATH_MAX
-#  define PATH_MAX MAX_PATH
+#undef PATH_MAX
+#define PATH_MAX MAX_PATH
 
-#  define _use_lfn(f) (1)  /* long filenames always available */
-#elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
-#  define _use_lfn(f) (0)  /* long filenames never available */
+#define _use_lfn(f) (1)                      /* long filenames always available */
+#elif !defined(__DJGPP__) || (__DJGPP__ < 2) /* DJGPP 2.0 has _use_lfn() */
+#define _use_lfn(f) (0)                      /* long filenames never available */
 #elif defined(__DJGPP__)
-#  include <fcntl.h>       /* _use_lfn(f) prototype */
+#include <fcntl.h> /* _use_lfn(f) prototype */
 #endif
 
 #ifdef MSDOS
 
 #ifndef S_ISCHR
-#  ifdef S_IFCHR
-#    define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
-#  else
-#    define S_ISCHR(m) (0) /* cannot tell if file is a device */
-#  endif
+#ifdef S_IFCHR
+#define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
+#else
+#define S_ISCHR(m) (0) /* cannot tell if file is a device */
+#endif
 #endif
 
 /* only used by msdosify() */
@@ -72,7 +72,6 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
 static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
                                            const char *file_name,
                                            int flags);
-
 
 /*
 Sanitize a file or path name.
@@ -107,39 +106,40 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   SANITIZEcode sc;
   size_t max_sanitized_len;
 
-  if(!sanitized)
+  if (!sanitized)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
   *sanitized = NULL;
 
-  if(!file_name)
+  if (!file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
-  if(flags & SANITIZE_ALLOW_PATH) {
+  if (flags & SANITIZE_ALLOW_PATH)
+  {
 #ifndef MSDOS
-    if(file_name[0] == '\\' && file_name[1] == '\\')
+    if (file_name[0] == '\\' && file_name[1] == '\\')
       /* UNC prefixed path \\ (eg \\?\C:\foo) */
-      max_sanitized_len = 32767-1;
+      max_sanitized_len = 32767 - 1;
     else
 #endif
-      max_sanitized_len = PATH_MAX-1;
+      max_sanitized_len = PATH_MAX - 1;
   }
   else
     /* The maximum length of a filename. FILENAME_MAX is often the same as
        PATH_MAX, in other words it is 260 and does not discount the path
        information therefore we should not use it. */
-    max_sanitized_len = (PATH_MAX-1 > 255) ? 255 : PATH_MAX-1;
+    max_sanitized_len = (PATH_MAX - 1 > 255) ? 255 : PATH_MAX - 1;
 
   len = strlen(file_name);
-  if(len > max_sanitized_len)
+  if (len > max_sanitized_len)
     return SANITIZE_ERR_INVALID_PATH;
 
   target = strdup(file_name);
-  if(!target)
+  if (!target)
     return SANITIZE_ERR_OUT_OF_MEMORY;
 
 #ifndef MSDOS
-  if((flags & SANITIZE_ALLOW_PATH) && !strncmp(target, "\\\\?\\", 4))
+  if ((flags & SANITIZE_ALLOW_PATH) && !strncmp(target, "\\\\?\\", 4))
     /* Skip the literal path prefix \\?\ */
     p = target + 4;
   else
@@ -147,18 +147,22 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
     p = target;
 
   /* replace control characters and other banned characters */
-  for(; *p; ++p) {
+  for (; *p; ++p)
+  {
     const char *banned;
 
-    if((1 <= *p && *p <= 31) ||
-       (!(flags & SANITIZE_ALLOW_PATH) && *p == ':') ||
-       (!(flags & SANITIZE_ALLOW_PATH) && (*p == '/' || *p == '\\'))) {
+    if ((1 <= *p && *p <= 31) ||
+        (!(flags & SANITIZE_ALLOW_PATH) && *p == ':') ||
+        (!(flags & SANITIZE_ALLOW_PATH) && (*p == '/' || *p == '\\')))
+    {
       *p = '_';
       continue;
     }
 
-    for(banned = "|<>\"?*"; *banned; ++banned) {
-      if(*p == *banned) {
+    for (banned = "|<>\"?*"; *banned; ++banned)
+    {
+      if (*p == *banned)
+      {
         *p = '_';
         break;
       }
@@ -166,18 +170,21 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   }
 
   /* remove trailing spaces and periods if not allowing paths */
-  if(!(flags & SANITIZE_ALLOW_PATH) && len) {
+  if (!(flags & SANITIZE_ALLOW_PATH) && len)
+  {
     char *clip = NULL;
 
     p = &target[len];
-    do {
+    do
+    {
       --p;
-      if(*p != ' ' && *p != '.')
+      if (*p != ' ' && *p != '.')
         break;
       clip = p;
-    } while(p != target);
+    } while (p != target);
 
-    if(clip) {
+    if (clip)
+    {
       *clip = '\0';
       len = clip - target;
     }
@@ -186,26 +193,29 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 #ifdef MSDOS
   sc = msdosify(&p, target, flags);
   free(target);
-  if(sc)
+  if (sc)
     return sc;
   target = p;
   len = strlen(target);
 
-  if(len > max_sanitized_len) {
+  if (len > max_sanitized_len)
+  {
     free(target);
     return SANITIZE_ERR_INVALID_PATH;
   }
 #endif
 
-  if(!(flags & SANITIZE_ALLOW_RESERVED)) {
+  if (!(flags & SANITIZE_ALLOW_RESERVED))
+  {
     sc = rename_if_reserved_dos(&p, target, flags);
     free(target);
-    if(sc)
+    if (sc)
       return sc;
     target = p;
     len = strlen(target);
 
-    if(len > max_sanitized_len) {
+    if (len > max_sanitized_len)
+    {
       free(target);
       return SANITIZE_ERR_INVALID_PATH;
     }
@@ -246,28 +256,30 @@ static SANITIZEcode truncate_dryrun(const char *path,
 {
   size_t len;
 
-  if(!path)
+  if (!path)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
   len = strlen(path);
 
-  if(truncate_pos > len)
+  if (truncate_pos > len)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
-  if(!len || !truncate_pos)
+  if (!len || !truncate_pos)
     return SANITIZE_ERR_INVALID_PATH;
 
-  if(strpbrk(&path[truncate_pos - 1], "\\/:"))
+  if (strpbrk(&path[truncate_pos - 1], "\\/:"))
     return SANITIZE_ERR_INVALID_PATH;
 
   /* C:\foo can be truncated but C:\foo:ads cannot */
-  if(truncate_pos > 1) {
+  if (truncate_pos > 1)
+  {
     const char *p = &path[truncate_pos - 1];
-    do {
+    do
+    {
       --p;
-      if(*p == ':')
+      if (*p == ':')
         return SANITIZE_ERR_INVALID_PATH;
-    } while(p != path && *p != '\\' && *p != '/');
+    } while (p != path && *p != '\\' && *p != '/');
   }
 
   return SANITIZE_ERR_OK;
@@ -295,8 +307,8 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
                              int flags)
 {
   char dos_name[PATH_MAX];
-  static const char illegal_chars_dos[] = ".+, ;=[]" /* illegal in DOS */
-    "|<>/\\\":?*"; /* illegal in DOS & W95 */
+  static const char illegal_chars_dos[] = ".+, ;=[]"     /* illegal in DOS */
+                                          "|<>/\\\":?*"; /* illegal in DOS & W95 */
   static const char *illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
   const char *s = file_name;
@@ -305,61 +317,71 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
   const char *illegal_aliens = illegal_chars_dos;
   size_t len = sizeof(illegal_chars_dos) - 1;
 
-  if(!sanitized)
+  if (!sanitized)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
   *sanitized = NULL;
 
-  if(!file_name)
+  if (!file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
-  if(strlen(file_name) > PATH_MAX-1)
+  if (strlen(file_name) > PATH_MAX - 1)
     return SANITIZE_ERR_INVALID_PATH;
 
   /* Support for Windows 9X VFAT systems, when available. */
-  if(_use_lfn(file_name)) {
+  if (_use_lfn(file_name))
+  {
     illegal_aliens = illegal_chars_w95;
     len -= (illegal_chars_w95 - illegal_chars_dos);
   }
 
   /* Get past the drive letter, if any. */
-  if(s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
+  if (s[0] >= 'A' && s[0] <= 'z' && s[1] == ':')
+  {
     *d++ = *s++;
     *d = ((flags & SANITIZE_ALLOW_PATH)) ? ':' : '_';
-    ++d; ++s;
+    ++d;
+    ++s;
   }
 
-  for(idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++) {
-    if(memchr(illegal_aliens, *s, len)) {
+  for (idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++)
+  {
+    if (memchr(illegal_aliens, *s, len))
+    {
 
-      if((flags & SANITIZE_ALLOW_PATH) && *s == ':')
+      if ((flags & SANITIZE_ALLOW_PATH) && *s == ':')
         *d = ':';
-      else if((flags & SANITIZE_ALLOW_PATH) && (*s == '/' || *s == '\\'))
+      else if ((flags & SANITIZE_ALLOW_PATH) && (*s == '/' || *s == '\\'))
         *d = *s;
       /* Dots are special: DOS does not allow them as the leading character,
          and a filename cannot have more than a single dot. We leave the
          first non-leading dot alone, unless it comes too close to the
          beginning of the name: we want sh.lex.c to become sh_lex.c, not
          sh.lex-c.  */
-      else if(*s == '.') {
-        if((flags & SANITIZE_ALLOW_PATH) && idx == 0 &&
-           (s[1] == '/' || s[1] == '\\' ||
-            (s[1] == '.' && (s[2] == '/' || s[2] == '\\')))) {
+      else if (*s == '.')
+      {
+        if ((flags & SANITIZE_ALLOW_PATH) && idx == 0 &&
+            (s[1] == '/' || s[1] == '\\' ||
+             (s[1] == '.' && (s[2] == '/' || s[2] == '\\'))))
+        {
           /* Copy "./" and "../" verbatim.  */
           *d++ = *s++;
-          if(d == dlimit)
+          if (d == dlimit)
             break;
-          if(*s == '.') {
+          if (*s == '.')
+          {
             *d++ = *s++;
-            if(d == dlimit)
+            if (d == dlimit)
               break;
           }
           *d = *s;
         }
-        else if(idx == 0)
+        else if (idx == 0)
           *d = '_';
-        else if(dot_idx >= 0) {
-          if(dot_idx < 5) { /* 5 is a heuristic ad-hoc'ery */
+        else if (dot_idx >= 0)
+        {
+          if (dot_idx < 5)
+          {                         /* 5 is a heuristic ad-hoc'ery */
             d[dot_idx - idx] = '_'; /* replace previous dot */
             *d = '.';
           }
@@ -369,25 +391,30 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
         else
           *d = '.';
 
-        if(*s == '.')
+        if (*s == '.')
           dot_idx = idx;
       }
-      else if(*s == '+' && s[1] == '+') {
-        if(idx - 2 == dot_idx) { /* .c++, .h++ etc. */
+      else if (*s == '+' && s[1] == '+')
+      {
+        if (idx - 2 == dot_idx)
+        { /* .c++, .h++ etc. */
           *d++ = 'x';
-          if(d == dlimit)
+          if (d == dlimit)
             break;
-          *d   = 'x';
+          *d = 'x';
         }
-        else {
+        else
+        {
           /* libg++ etc.  */
-          if(dlimit - d < 4) {
+          if (dlimit - d < 4)
+          {
             *d++ = 'x';
-            if(d == dlimit)
+            if (d == dlimit)
               break;
-            *d   = 'x';
+            *d = 'x';
           }
-          else {
+          else
+          {
             memcpy(d, "plus", 4);
             d += 3;
           }
@@ -400,7 +427,8 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
     }
     else
       *d = *s;
-    if(*s == '/' || *s == '\\') {
+    if (*s == '/' || *s == '\\')
+    {
       idx = 0;
       dot_idx = -1;
     }
@@ -409,11 +437,12 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
   }
   *d = '\0';
 
-  if(*s) {
+  if (*s)
+  {
     /* dos_name is truncated, check that truncation requirements are met,
        specifically truncating a filename suffixed by an alternate data stream
        or truncating the entire filename is not allowed. */
-    if(strpbrk(s, "\\/:") || truncate_dryrun(dos_name, d - dos_name))
+    if (strpbrk(s, "\\/:") || truncate_dryrun(dos_name, d - dos_name))
       return SANITIZE_ERR_INVALID_PATH;
   }
 
@@ -449,7 +478,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 #endif
   size_t len;
 
-  if(!sanitized || !file_name)
+  if (!sanitized || !file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
   *sanitized = NULL;
@@ -457,16 +486,17 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 
   /* Ignore UNC prefixed paths, they are allowed to contain a reserved name. */
 #ifndef MSDOS
-  if((flags & SANITIZE_ALLOW_PATH) &&
-     file_name[0] == '\\' && file_name[1] == '\\') {
+  if ((flags & SANITIZE_ALLOW_PATH) &&
+      file_name[0] == '\\' && file_name[1] == '\\')
+  {
     *sanitized = strdup(file_name);
-    if(!*sanitized)
+    if (!*sanitized)
       return SANITIZE_ERR_OUT_OF_MEMORY;
     return SANITIZE_ERR_OK;
   }
 #endif
 
-  if(len > PATH_MAX-1)
+  if (len > PATH_MAX - 1)
     return SANITIZE_ERR_INVALID_PATH;
 
   memcpy(fname, file_name, len);
@@ -478,51 +508,56 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
      https://support.microsoft.com/en-us/kb/74496
      https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx
      */
-  for(p = fname; p; p = (p == fname && fname != base ? base : NULL)) {
+  for (p = fname; p; p = (p == fname && fname != base ? base : NULL))
+  {
     size_t p_len;
     int x = (fetch_strnequal(p, "CON", 3) ||
              fetch_strnequal(p, "PRN", 3) ||
              fetch_strnequal(p, "AUX", 3) ||
-             fetch_strnequal(p, "NUL", 3)) ? 3 :
-            (fetch_strnequal(p, "CLOCK$", 6)) ? 6 :
-            (fetch_strnequal(p, "COM", 3) || fetch_strnequal(p, "LPT", 3)) ?
-              (('1' <= p[3] && p[3] <= '9') ? 4 : 3) : 0;
+             fetch_strnequal(p, "NUL", 3))
+                ? 3
+            : (fetch_strnequal(p, "CLOCK$", 6))                              ? 6
+            : (fetch_strnequal(p, "COM", 3) || fetch_strnequal(p, "LPT", 3)) ? (('1' <= p[3] && p[3] <= '9') ? 4 : 3)
+                                                                             : 0;
 
-    if(!x)
+    if (!x)
       continue;
 
     /* the devices may be accessible with an extension or ADS, for
        example CON.AIR and 'CON . AIR' and CON:AIR access console */
 
-    for(; p[x] == ' '; ++x)
+    for (; p[x] == ' '; ++x)
       ;
 
-    if(p[x] == '.') {
+    if (p[x] == '.')
+    {
       p[x] = '_';
       continue;
     }
-    else if(p[x] == ':') {
-      if(!(flags & SANITIZE_ALLOW_PATH)) {
+    else if (p[x] == ':')
+    {
+      if (!(flags & SANITIZE_ALLOW_PATH))
+      {
         p[x] = '_';
         continue;
       }
       ++x;
     }
-    else if(p[x]) /* no match */
+    else if (p[x]) /* no match */
       continue;
 
     /* p points to 'CON' or 'CON ' or 'CON:', etc */
     p_len = strlen(p);
 
     /* Prepend a '_' */
-    if(strlen(fname) == PATH_MAX-1)
+    if (strlen(fname) == PATH_MAX - 1)
       return SANITIZE_ERR_INVALID_PATH;
     memmove(p + 1, p, p_len + 1);
     p[0] = '_';
     ++p_len;
 
     /* if fname was just modified then the basename pointer must be updated */
-    if(p == fname)
+    if (p == fname)
       base = basename(fname);
   }
 
@@ -534,11 +569,13 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
      identify whether it is a reserved device name and not a regular
      filename. */
 #ifdef MSDOS
-  if(base && ((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
+  if (base && ((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode)))
+  {
     /* Prepend a '_' */
     size_t blen = strlen(base);
-    if(blen) {
-      if(strlen(fname) >= PATH_MAX-1)
+    if (blen)
+    {
+      if (strlen(fname) >= PATH_MAX - 1)
         return SANITIZE_ERR_INVALID_PATH;
       memmove(base + 1, base, blen + 1);
       base[0] = '_';
@@ -564,7 +601,7 @@ char **__crt0_glob_function(char *arg)
 #ifdef _WIN32
 
 #if !defined(FETCH_WINDOWS_UWP) && \
-  !defined(FETCH_DISABLE_CA_SEARCH) && !defined(FETCH_CA_SEARCH_SAFE)
+    !defined(FETCH_DISABLE_CA_SEARCH) && !defined(FETCH_CA_SEARCH_SAFE)
 /* Search and set the CA cert file for Windows.
  *
  * Do not call this function if Schannel is the selected SSL backend. We allow
@@ -585,7 +622,7 @@ char **__crt0_glob_function(char *arg)
  * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeProcessSearchMode
  */
 FETCHcode FindWin32CACert(struct OperationConfig *config,
-                         const TCHAR *bundle_file)
+                          const TCHAR *bundle_file)
 {
   FETCHcode result = FETCHE_OK;
   DWORD res_len;
@@ -595,13 +632,14 @@ FETCHcode FindWin32CACert(struct OperationConfig *config,
   buf[0] = TEXT('\0');
 
   res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
-  if(res_len > 0) {
+  if (res_len > 0)
+  {
     char *mstr = fetchx_convert_tchar_to_UTF8(buf);
     Curl_safefree(config->cacert);
-    if(mstr)
+    if (mstr)
       config->cacert = strdup(mstr);
     fetchx_unicodefree(mstr);
-    if(!config->cacert)
+    if (!config->cacert)
       result = FETCHE_OUT_OF_MEMORY;
   }
 
@@ -621,17 +659,19 @@ struct fetch_slist *GetLoadedModulePaths(void)
 
   mod.dwSize = sizeof(MODULEENTRY32);
 
-  do {
+  do
+  {
     hnd = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
-  } while(hnd == INVALID_HANDLE_VALUE && GetLastError() == ERROR_BAD_LENGTH);
+  } while (hnd == INVALID_HANDLE_VALUE && GetLastError() == ERROR_BAD_LENGTH);
 
-  if(hnd == INVALID_HANDLE_VALUE)
+  if (hnd == INVALID_HANDLE_VALUE)
     goto error;
 
-  if(!Module32First(hnd, &mod))
+  if (!Module32First(hnd, &mod))
     goto error;
 
-  do {
+  do
+  {
     char *path; /* points to stack allocated buffer */
     struct fetch_slist *temp;
 
@@ -639,18 +679,18 @@ struct fetch_slist *GetLoadedModulePaths(void)
     /* sizeof(mod.szExePath) is the max total bytes of wchars. the max total
        bytes of multibyte chars will not be more than twice that. */
     char buffer[sizeof(mod.szExePath) * 2];
-    if(!WideCharToMultiByte(CP_ACP, 0, mod.szExePath, -1,
-                            buffer, sizeof(buffer), NULL, NULL))
+    if (!WideCharToMultiByte(CP_ACP, 0, mod.szExePath, -1,
+                             buffer, sizeof(buffer), NULL, NULL))
       goto error;
     path = buffer;
 #else
     path = mod.szExePath;
 #endif
     temp = fetch_slist_append(slist, path);
-    if(!temp)
+    if (!temp)
       goto error;
     slist = temp;
-  } while(Module32Next(hnd, &mod));
+  } while (Module32Next(hnd, &mod));
 
   goto cleanup;
 
@@ -658,7 +698,7 @@ error:
   fetch_slist_free_all(slist);
   slist = NULL;
 cleanup:
-  if(hnd != INVALID_HANDLE_VALUE)
+  if (hnd != INVALID_HANDLE_VALUE)
     CloseHandle(hnd);
 #endif
   return slist;
@@ -668,7 +708,8 @@ bool tool_term_has_bold;
 
 #ifndef FETCH_WINDOWS_UWP
 /* The terminal settings to restore on exit */
-static struct TerminalSettings {
+static struct TerminalSettings
+{
   HANDLE hStdOut;
   DWORD dwOutputMode;
   LONG valid;
@@ -680,7 +721,7 @@ static struct TerminalSettings {
 
 static void restore_terminal(void)
 {
-  if(InterlockedExchange(&TerminalSettings.valid, (LONG)FALSE))
+  if (InterlockedExchange(&TerminalSettings.valid, (LONG)FALSE))
     SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
 }
 
@@ -689,7 +730,7 @@ static void restore_terminal(void)
  */
 static BOOL WINAPI signal_handler(DWORD type)
 {
-  if(type == CTRL_C_EVENT || type == CTRL_BREAK_EVENT)
+  if (type == CTRL_C_EVENT || type == CTRL_BREAK_EVENT)
     restore_terminal();
   return FALSE;
 }
@@ -704,28 +745,32 @@ static void init_terminal(void)
    * processing only performed on Win10 >= version 1709 (OS build 16299)
    * Creator's Update. Also, ANSI bold on/off supported since then.
    */
-  if(TerminalSettings.hStdOut == INVALID_HANDLE_VALUE ||
-     !GetConsoleMode(TerminalSettings.hStdOut,
-                     &TerminalSettings.dwOutputMode) ||
-     !fetchx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
-                                   VERSION_GREATER_THAN_EQUAL))
+  if (TerminalSettings.hStdOut == INVALID_HANDLE_VALUE ||
+      !GetConsoleMode(TerminalSettings.hStdOut,
+                      &TerminalSettings.dwOutputMode) ||
+      !fetchx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
+                                     VERSION_GREATER_THAN_EQUAL))
     return;
 
-  if((TerminalSettings.dwOutputMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+  if ((TerminalSettings.dwOutputMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
     tool_term_has_bold = true;
-  else {
+  else
+  {
     /* The signal handler is set before attempting to change the console mode
        because otherwise a signal would not be caught after the change but
        before the handler was installed. */
     (void)InterlockedExchange(&TerminalSettings.valid, (LONG)TRUE);
-    if(SetConsoleCtrlHandler(signal_handler, TRUE)) {
-      if(SetConsoleMode(TerminalSettings.hStdOut,
-                        (TerminalSettings.dwOutputMode |
-                         ENABLE_VIRTUAL_TERMINAL_PROCESSING))) {
+    if (SetConsoleCtrlHandler(signal_handler, TRUE))
+    {
+      if (SetConsoleMode(TerminalSettings.hStdOut,
+                         (TerminalSettings.dwOutputMode |
+                          ENABLE_VIRTUAL_TERMINAL_PROCESSING)))
+      {
         tool_term_has_bold = true;
         atexit(restore_terminal);
       }
-      else {
+      else
+      {
         SetConsoleCtrlHandler(signal_handler, FALSE);
         (void)InterlockedExchange(&TerminalSettings.valid, (LONG)FALSE);
       }
@@ -741,8 +786,8 @@ FETCHcode win32_init(void)
 {
   /* fetchx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
-  if(fetchx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL))
+  if (fetchx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+                                    VERSION_GREATER_THAN_EQUAL))
     tool_isVistaOrGreater = true;
   else
     tool_isVistaOrGreater = false;

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,13 +41,13 @@
  * than being provider dependent.
  */
 
-int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
+int Curl_gethostname(char *const name, GETHOSTNAME_TYPE_ARG2 namelen)
 {
 #ifndef HAVE_GETHOSTNAME
 
   /* Allow compilation and return failure when unavailable */
-  (void) name;
-  (void) namelen;
+  (void)name;
+  (void)namelen;
   return -1;
 
 #else
@@ -58,14 +58,16 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
 
   /* Override hostname when environment variable FETCH_GETHOSTNAME is set */
   const char *force_hostname = getenv("FETCH_GETHOSTNAME");
-  if(force_hostname) {
-    if(strlen(force_hostname) < (size_t)namelen)
+  if (force_hostname)
+  {
+    if (strlen(force_hostname) < (size_t)namelen)
       strcpy(name, force_hostname);
     else
       return 1; /* can't do it */
     err = 0;
   }
-  else {
+  else
+  {
     name[0] = '\0';
     err = gethostname(name, namelen);
   }
@@ -83,15 +85,14 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
 
   name[namelen - 1] = '\0';
 
-  if(err)
+  if (err)
     return err;
 
   /* Truncate domain, leave only machine name */
   dot = strchr(name, '.');
-  if(dot)
+  if (dot)
     *dot = '\0';
 
   return 0;
 #endif
-
 }

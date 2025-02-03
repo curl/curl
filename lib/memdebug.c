@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,9 +37,11 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-struct memdebug {
+struct memdebug
+{
   size_t size;
-  union {
+  union
+  {
     fetch_off_t o;
     double d;
     void *p;
@@ -58,8 +60,8 @@ struct memdebug {
 
 FILE *fetch_dbg_logfile = NULL;
 static bool registered_cleanup = FALSE; /* atexit registered cleanup */
-static bool memlimit = FALSE; /* enable memory limit */
-static long memsize = 0;  /* set number of mallocs allowed */
+static bool memlimit = FALSE;           /* enable memory limit */
+static long memsize = 0;                /* set number of mallocs allowed */
 
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
    on exit so the logfile must be closed explicitly or data could be lost.
@@ -67,9 +69,10 @@ static long memsize = 0;  /* set number of mallocs allowed */
    _exit() comes after the atexit handlers are called. fetch/fetch#6620 */
 static void fetch_dbg_cleanup(void)
 {
-  if(fetch_dbg_logfile &&
-     fetch_dbg_logfile != stderr &&
-     fetch_dbg_logfile != stdout) {
+  if (fetch_dbg_logfile &&
+      fetch_dbg_logfile != stderr &&
+      fetch_dbg_logfile != stdout)
+  {
     fclose(fetch_dbg_logfile);
   }
   fetch_dbg_logfile = NULL;
@@ -78,18 +81,19 @@ static void fetch_dbg_cleanup(void)
 /* this sets the log filename */
 void fetch_dbg_memdebug(const char *logname)
 {
-  if(!fetch_dbg_logfile) {
-    if(logname && *logname)
+  if (!fetch_dbg_logfile)
+  {
+    if (logname && *logname)
       fetch_dbg_logfile = fopen(logname, FOPEN_WRITETEXT);
     else
       fetch_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
     /* Flush the log file after every line so the log is not lost in a crash */
-    if(fetch_dbg_logfile)
+    if (fetch_dbg_logfile)
       setbuf(fetch_dbg_logfile, (char *)NULL);
 #endif
   }
-  if(!registered_cleanup)
+  if (!registered_cleanup)
     registered_cleanup = !atexit(fetch_dbg_cleanup);
 }
 
@@ -97,7 +101,8 @@ void fetch_dbg_memdebug(const char *logname)
    successfully! */
 void fetch_dbg_memlimit(long limit)
 {
-  if(!memlimit) {
+  if (!memlimit)
+  {
     memlimit = TRUE;
     memsize = limit;
   }
@@ -108,11 +113,13 @@ static bool countcheck(const char *func, int line, const char *source)
 {
   /* if source is NULL, then the call is made internally and this check
      should not be made */
-  if(memlimit && source) {
-    if(!memsize) {
+  if (memlimit && source)
+  {
+    if (!memsize)
+    {
       /* log to file */
       fetch_dbg_log("LIMIT %s:%d %s reached memlimit\n",
-                   source, line, func);
+                    source, line, func);
       /* log to stderr also */
       fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
               source, line, func);
@@ -122,42 +129,41 @@ static bool countcheck(const char *func, int line, const char *source)
     }
     else
       memsize--; /* countdown */
-
-
   }
 
   return FALSE; /* allow this */
 }
 
 ALLOC_FUNC void *fetch_dbg_malloc(size_t wantedsize,
-                                 int line, const char *source)
+                                  int line, const char *source)
 {
   struct memdebug *mem;
   size_t size;
 
   DEBUGASSERT(wantedsize != 0);
 
-  if(countcheck("malloc", line, source))
+  if (countcheck("malloc", line, source))
     return NULL;
 
   /* alloc at least 64 bytes */
   size = sizeof(struct memdebug) + wantedsize;
 
   mem = (Curl_cmalloc)(size);
-  if(mem) {
+  if (mem)
+  {
     mem->size = wantedsize;
   }
 
-  if(source)
+  if (source)
     fetch_dbg_log("MEM %s:%d malloc(%zu) = %p\n",
-                 source, line, wantedsize,
-                 mem ? (void *)mem->mem : (void *)0);
+                  source, line, wantedsize,
+                  mem ? (void *)mem->mem : (void *)0);
 
   return mem ? mem->mem : NULL;
 }
 
 ALLOC_FUNC void *fetch_dbg_calloc(size_t wanted_elements, size_t wanted_size,
-                                 int line, const char *source)
+                                  int line, const char *source)
 {
   struct memdebug *mem;
   size_t size, user_size;
@@ -165,7 +171,7 @@ ALLOC_FUNC void *fetch_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   DEBUGASSERT(wanted_elements != 0);
   DEBUGASSERT(wanted_size != 0);
 
-  if(countcheck("calloc", line, source))
+  if (countcheck("calloc", line, source))
     return NULL;
 
   /* alloc at least 64 bytes */
@@ -173,63 +179,63 @@ ALLOC_FUNC void *fetch_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   size = sizeof(struct memdebug) + user_size;
 
   mem = (Curl_ccalloc)(1, size);
-  if(mem)
+  if (mem)
     mem->size = user_size;
 
-  if(source)
+  if (source)
     fetch_dbg_log("MEM %s:%d calloc(%zu,%zu) = %p\n",
-                 source, line, wanted_elements, wanted_size,
-                 mem ? (void *)mem->mem : (void *)0);
+                  source, line, wanted_elements, wanted_size,
+                  mem ? (void *)mem->mem : (void *)0);
 
   return mem ? mem->mem : NULL;
 }
 
 ALLOC_FUNC char *fetch_dbg_strdup(const char *str,
-                                 int line, const char *source)
+                                  int line, const char *source)
 {
   char *mem;
   size_t len;
 
   DEBUGASSERT(str != NULL);
 
-  if(countcheck("strdup", line, source))
+  if (countcheck("strdup", line, source))
     return NULL;
 
   len = strlen(str) + 1;
 
   mem = fetch_dbg_malloc(len, 0, NULL); /* NULL prevents logging */
-  if(mem)
+  if (mem)
     memcpy(mem, str, len);
 
-  if(source)
+  if (source)
     fetch_dbg_log("MEM %s:%d strdup(%p) (%zu) = %p\n",
-                 source, line, (const void *)str, len, (const void *)mem);
+                  source, line, (const void *)str, len, (const void *)mem);
 
   return mem;
 }
 
 #if defined(_WIN32) && defined(UNICODE)
 ALLOC_FUNC wchar_t *fetch_dbg_wcsdup(const wchar_t *str,
-                                    int line, const char *source)
+                                     int line, const char *source)
 {
   wchar_t *mem;
   size_t wsiz, bsiz;
 
   DEBUGASSERT(str != NULL);
 
-  if(countcheck("wcsdup", line, source))
+  if (countcheck("wcsdup", line, source))
     return NULL;
 
   wsiz = wcslen(str) + 1;
   bsiz = wsiz * sizeof(wchar_t);
 
   mem = fetch_dbg_malloc(bsiz, 0, NULL); /* NULL prevents logging */
-  if(mem)
+  if (mem)
     memcpy(mem, str, bsiz);
 
-  if(source)
+  if (source)
     fetch_dbg_log("MEM %s:%d wcsdup(%p) (%zu) = %p\n",
-                source, line, (void *)str, bsiz, (void *)mem);
+                  source, line, (void *)str, bsiz, (void *)mem);
 
   return mem;
 }
@@ -238,7 +244,7 @@ ALLOC_FUNC wchar_t *fetch_dbg_wcsdup(const wchar_t *str,
 /* We provide a realloc() that accepts a NULL as pointer, which then
    performs a malloc(). In order to work with ares. */
 void *fetch_dbg_realloc(void *ptr, size_t wantedsize,
-                      int line, const char *source)
+                        int line, const char *source)
 {
   struct memdebug *mem = NULL;
 
@@ -246,29 +252,30 @@ void *fetch_dbg_realloc(void *ptr, size_t wantedsize,
 
   DEBUGASSERT(wantedsize != 0);
 
-  if(countcheck("realloc", line, source))
+  if (countcheck("realloc", line, source))
     return NULL;
 
 #ifdef __INTEL_COMPILER
-#  pragma warning(push)
-#  pragma warning(disable:1684)
-   /* 1684: conversion from pointer to same-sized integral type */
+#pragma warning(push)
+#pragma warning(disable : 1684)
+  /* 1684: conversion from pointer to same-sized integral type */
 #endif
 
-  if(ptr)
+  if (ptr)
     mem = (void *)((char *)ptr - offsetof(struct memdebug, mem));
 
 #ifdef __INTEL_COMPILER
-#  pragma warning(pop)
+#pragma warning(pop)
 #endif
 
   mem = (Curl_crealloc)(mem, size);
-  if(source)
+  if (source)
     fetch_dbg_log("MEM %s:%d realloc(%p, %zu) = %p\n",
-                source, line, (void *)ptr, wantedsize,
-                mem ? (void *)mem->mem : (void *)0);
+                  source, line, (void *)ptr, wantedsize,
+                  mem ? (void *)mem->mem : (void *)0);
 
-  if(mem) {
+  if (mem)
+  {
     mem->size = wantedsize;
     return mem->mem;
   }
@@ -278,102 +285,103 @@ void *fetch_dbg_realloc(void *ptr, size_t wantedsize,
 
 void fetch_dbg_free(void *ptr, int line, const char *source)
 {
-  if(ptr) {
+  if (ptr)
+  {
     struct memdebug *mem;
 
 #ifdef __INTEL_COMPILER
-#  pragma warning(push)
-#  pragma warning(disable:1684)
-   /* 1684: conversion from pointer to same-sized integral type */
+#pragma warning(push)
+#pragma warning(disable : 1684)
+    /* 1684: conversion from pointer to same-sized integral type */
 #endif
 
     mem = (void *)((char *)ptr - offsetof(struct memdebug, mem));
 
 #ifdef __INTEL_COMPILER
-#  pragma warning(pop)
+#pragma warning(pop)
 #endif
 
     /* free for real */
     (Curl_cfree)(mem);
   }
 
-  if(source && ptr)
+  if (source && ptr)
     fetch_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
 }
 
 fetch_socket_t fetch_dbg_socket(int domain, int type, int protocol,
-                             int line, const char *source)
+                                int line, const char *source)
 {
   fetch_socket_t sockfd;
 
-  if(countcheck("socket", line, source))
+  if (countcheck("socket", line, source))
     return FETCH_SOCKET_BAD;
 
   sockfd = socket(domain, type, protocol);
 
-  if(source && (sockfd != FETCH_SOCKET_BAD))
+  if (source && (sockfd != FETCH_SOCKET_BAD))
     fetch_dbg_log("FD %s:%d socket() = %" FMT_SOCKET_T "\n",
-                 source, line, sockfd);
+                  source, line, sockfd);
 
   return sockfd;
 }
 
 SEND_TYPE_RETV fetch_dbg_send(SEND_TYPE_ARG1 sockfd,
-                            SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
-                            SEND_TYPE_ARG3 len, SEND_TYPE_ARG4 flags, int line,
-                            const char *source)
+                              SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
+                              SEND_TYPE_ARG3 len, SEND_TYPE_ARG4 flags, int line,
+                              const char *source)
 {
   SEND_TYPE_RETV rc;
-  if(countcheck("send", line, source))
+  if (countcheck("send", line, source))
     return -1;
   rc = send(sockfd, buf, len, flags);
-  if(source)
+  if (source)
     fetch_dbg_log("SEND %s:%d send(%lu) = %ld\n",
-                source, line, (unsigned long)len, (long)rc);
+                  source, line, (unsigned long)len, (long)rc);
   return rc;
 }
 
 RECV_TYPE_RETV fetch_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
-                            RECV_TYPE_ARG3 len, RECV_TYPE_ARG4 flags, int line,
-                            const char *source)
+                              RECV_TYPE_ARG3 len, RECV_TYPE_ARG4 flags, int line,
+                              const char *source)
 {
   RECV_TYPE_RETV rc;
-  if(countcheck("recv", line, source))
+  if (countcheck("recv", line, source))
     return -1;
   rc = recv(sockfd, buf, len, flags);
-  if(source)
+  if (source)
     fetch_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
-                source, line, (unsigned long)len, (long)rc);
+                  source, line, (unsigned long)len, (long)rc);
   return rc;
 }
 
 #ifdef HAVE_SOCKETPAIR
 int fetch_dbg_socketpair(int domain, int type, int protocol,
-                       fetch_socket_t socket_vector[2],
-                       int line, const char *source)
+                         fetch_socket_t socket_vector[2],
+                         int line, const char *source)
 {
   int res = socketpair(domain, type, protocol, socket_vector);
 
-  if(source && (0 == res))
+  if (source && (0 == res))
     fetch_dbg_log("FD %s:%d socketpair() = "
-                 "%" FMT_SOCKET_T " %" FMT_SOCKET_T "\n",
-                 source, line, socket_vector[0], socket_vector[1]);
+                  "%" FMT_SOCKET_T " %" FMT_SOCKET_T "\n",
+                  source, line, socket_vector[0], socket_vector[1]);
 
   return res;
 }
 #endif
 
 fetch_socket_t fetch_dbg_accept(fetch_socket_t s, void *saddr, void *saddrlen,
-                             int line, const char *source)
+                                int line, const char *source)
 {
   struct sockaddr *addr = (struct sockaddr *)saddr;
   fetch_socklen_t *addrlen = (fetch_socklen_t *)saddrlen;
 
   fetch_socket_t sockfd = accept(s, addr, addrlen);
 
-  if(source && (sockfd != FETCH_SOCKET_BAD))
+  if (source && (sockfd != FETCH_SOCKET_BAD))
     fetch_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
-                 source, line, sockfd);
+                  source, line, sockfd);
 
   return sockfd;
 }
@@ -381,9 +389,9 @@ fetch_socket_t fetch_dbg_accept(fetch_socket_t s, void *saddr, void *saddrlen,
 /* separate function to allow libfetch to mark a "faked" close */
 void fetch_dbg_mark_sclose(fetch_socket_t sockfd, int line, const char *source)
 {
-  if(source)
+  if (source)
     fetch_dbg_log("FD %s:%d sclose(%" FMT_SOCKET_T ")\n",
-                 source, line, sockfd);
+                  source, line, sockfd);
 }
 
 /* this is our own defined way to close sockets on *ALL* platforms */
@@ -395,24 +403,24 @@ int fetch_dbg_sclose(fetch_socket_t sockfd, int line, const char *source)
 }
 
 ALLOC_FUNC FILE *fetch_dbg_fopen(const char *file, const char *mode,
-                                int line, const char *source)
+                                 int line, const char *source)
 {
   FILE *res = fopen(file, mode);
 
-  if(source)
+  if (source)
     fetch_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
-                source, line, file, mode, (void *)res);
+                  source, line, file, mode, (void *)res);
 
   return res;
 }
 
 ALLOC_FUNC FILE *fetch_dbg_fdopen(int filedes, const char *mode,
-                                 int line, const char *source)
+                                  int line, const char *source)
 {
   FILE *res = fdopen(filedes, mode);
-  if(source)
+  if (source)
     fetch_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
-                 source, line, filedes, mode, (void *)res);
+                  source, line, filedes, mode, (void *)res);
   return res;
 }
 
@@ -422,16 +430,16 @@ int fetch_dbg_fclose(FILE *file, int line, const char *source)
 
   DEBUGASSERT(file != NULL);
 
-  if(source)
+  if (source)
     fetch_dbg_log("FILE %s:%d fclose(%p)\n",
-                 source, line, (void *)file);
+                  source, line, (void *)file);
 
   res = fclose(file);
 
   return res;
 }
 
-#define LOGLINE_BUFSIZE  1024
+#define LOGLINE_BUFSIZE 1024
 
 /* this does the writing to the memory tracking log file */
 void fetch_dbg_log(const char *format, ...)
@@ -440,21 +448,21 @@ void fetch_dbg_log(const char *format, ...)
   int nchars;
   va_list ap;
 
-  if(!fetch_dbg_logfile)
+  if (!fetch_dbg_logfile)
     return;
 
   buf = (Curl_cmalloc)(LOGLINE_BUFSIZE);
-  if(!buf)
+  if (!buf)
     return;
 
   va_start(ap, format);
   nchars = mvsnprintf(buf, LOGLINE_BUFSIZE, format, ap);
   va_end(ap);
 
-  if(nchars > LOGLINE_BUFSIZE - 1)
+  if (nchars > LOGLINE_BUFSIZE - 1)
     nchars = LOGLINE_BUFSIZE - 1;
 
-  if(nchars > 0)
+  if (nchars > 0)
     fwrite(buf, 1, (size_t)nchars, fetch_dbg_logfile);
 
   (Curl_cfree)(buf);

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,29 +25,35 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-typedef enum {
+typedef enum
+{
   UPTSet = 1,
   UPTCharRange,
   UPTNumRange
 } URLPatternType;
 
-struct URLPattern {
+struct URLPattern
+{
   URLPatternType type;
   int globindex; /* the number of this particular glob or -1 if not used
                     within {} or [] */
-  union {
-    struct {
+  union
+  {
+    struct
+    {
       char **elements;
       fetch_off_t size;
       int ptr_s;
     } Set;
-    struct {
+    struct
+    {
       char min_c;
       char max_c;
       char ptr_c;
       int step;
     } CharRange;
-    struct {
+    struct
+    {
       fetch_off_t min_n;
       fetch_off_t max_n;
       int padlength;
@@ -60,7 +66,8 @@ struct URLPattern {
 /* the total number of globs supported */
 #define GLOB_PATTERN_NUM 100
 
-struct URLGlob {
+struct URLGlob
+{
   struct URLPattern pattern[GLOB_PATTERN_NUM];
   size_t size;
   size_t urllen;
@@ -70,7 +77,7 @@ struct URLGlob {
   size_t pos;        /* column position of error or 0 */
 };
 
-FETCHcode glob_url(struct URLGlob**, char *, fetch_off_t *, FILE *);
+FETCHcode glob_url(struct URLGlob **, char *, fetch_off_t *, FILE *);
 FETCHcode glob_next_url(char **, struct URLGlob *);
 FETCHcode glob_match_url(char **, char *, struct URLGlob *);
 void glob_cleanup(struct URLGlob **glob);

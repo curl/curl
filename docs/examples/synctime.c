@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -81,9 +81,8 @@
 #error "This example requires Windows."
 #endif
 
-
-#define MAX_STRING              256
-#define MAX_STRING1             MAX_STRING + 1
+#define MAX_STRING 256
+#define MAX_STRING1 MAX_STRING + 1
 
 #define SYNCTIME_UA "synctime/1.0"
 
@@ -95,92 +94,98 @@ typedef struct
 } conf_t;
 
 static const char DefaultTimeServer[3][MAX_STRING1] =
-{
-  "https://nist.time.gov/",
-  "https://www.google.com/"
-};
+    {
+        "https://nist.time.gov/",
+        "https://www.google.com/"};
 
 static const char *DayStr[] = {
-  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 static const char *MthStr[] = {
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 static int ShowAllHeader;
 static int AutoSyncTime;
 static SYSTEMTIME SYSTime;
 static SYSTEMTIME LOCALTime;
 
-#define HTTP_COMMAND_HEAD       0
-#define HTTP_COMMAND_GET        1
-
+#define HTTP_COMMAND_HEAD 0
+#define HTTP_COMMAND_GET 1
 
 static size_t SyncTime_FETCH_WriteOutput(void *ptr, size_t size, size_t nmemb,
-                                        void *stream)
+                                         void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
   return nmemb * size;
 }
 
 static size_t SyncTime_FETCH_WriteHeader(void *ptr, size_t size, size_t nmemb,
-                                        void *stream)
+                                         void *stream)
 {
   char TmpStr1[26], TmpStr2[26];
 
   (void)stream;
 
-  if(ShowAllHeader == 1)
+  if (ShowAllHeader == 1)
     fprintf(stderr, "%s", (char *)(ptr));
 
-  if(strncmp((char *)(ptr), "Date:", 5) == 0) {
-    if(ShowAllHeader == 0)
+  if (strncmp((char *)(ptr), "Date:", 5) == 0)
+  {
+    if (ShowAllHeader == 0)
       fprintf(stderr, "HTTP Server. %s", (char *)(ptr));
 
-    if(AutoSyncTime == 1) {
+    if (AutoSyncTime == 1)
+    {
       *TmpStr1 = 0;
       *TmpStr2 = 0;
-      if(strlen((char *)(ptr)) > 50) /* Can prevent buffer overflow to
-                                         TmpStr1 & 2? */
+      if (strlen((char *)(ptr)) > 50) /* Can prevent buffer overflow to
+                                          TmpStr1 & 2? */
         AutoSyncTime = 0;
-      else {
+      else
+      {
         int RetVal = sscanf((char *)(ptr), "Date: %25s %hu %s %hu %hu:%hu:%hu",
                             TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
                             &SYSTime.wHour, &SYSTime.wMinute,
                             &SYSTime.wSecond);
 
-        if(RetVal == 7) {
+        if (RetVal == 7)
+        {
           int i;
-          SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
-          for(i = 0; i < 12; i++) {
-            if(strcmp(MthStr[i], TmpStr2) == 0) {
+          SYSTime.wMilliseconds = 500; /* adjust to midpoint, 0.5 sec */
+          for (i = 0; i < 12; i++)
+          {
+            if (strcmp(MthStr[i], TmpStr2) == 0)
+            {
               SYSTime.wMonth = (WORD)(i + 1);
               break;
             }
           }
-          AutoSyncTime = 3;       /* Computer clock is adjusted */
+          AutoSyncTime = 3; /* Computer clock is adjusted */
         }
-        else {
-          AutoSyncTime = 0;       /* Error in sscanf() fields conversion */
+        else
+        {
+          AutoSyncTime = 0; /* Error in sscanf() fields conversion */
         }
       }
     }
   }
 
-  if(strncmp((char *)(ptr), "X-Cache: HIT", 12) == 0) {
+  if (strncmp((char *)(ptr), "X-Cache: HIT", 12) == 0)
+  {
     fprintf(stderr, "ERROR: HTTP Server data is cached."
-            " Server Date is no longer valid.\n");
+                    " Server Date is no longer valid.\n");
     AutoSyncTime = 0;
   }
   return nmemb * size;
 }
 
 static void SyncTime_FETCH_Init(FETCH *fetch, const char *proxy_port,
-                               const char *proxy_user_password)
+                                const char *proxy_user_password)
 {
-  if(strlen(proxy_port) > 0)
+  if (strlen(proxy_port) > 0)
     fetch_easy_setopt(fetch, FETCHOPT_PROXY, proxy_port);
 
-  if(strlen(proxy_user_password) > 0)
+  if (strlen(proxy_user_password) > 0)
     fetch_easy_setopt(fetch, FETCHOPT_PROXYUSERPWD, proxy_user_password);
 
   fetch_easy_setopt(fetch, FETCHOPT_USERAGENT, SYNCTIME_UA);
@@ -189,41 +194,42 @@ static void SyncTime_FETCH_Init(FETCH *fetch, const char *proxy_port,
 }
 
 static FETCHcode SyncTime_FETCH_Fetch(FETCH *fetch, const char *URL_Str,
-                                    const char *OutFileName, int HttpGetBody)
+                                      const char *OutFileName, int HttpGetBody)
 {
   FILE *outfile;
   FETCHcode res;
 
   outfile = NULL;
-  if(HttpGetBody == HTTP_COMMAND_HEAD)
+  if (HttpGetBody == HTTP_COMMAND_HEAD)
     fetch_easy_setopt(fetch, FETCHOPT_NOBODY, 1L);
-  else {
+  else
+  {
     outfile = fopen(OutFileName, "wb");
     fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, outfile);
   }
 
   fetch_easy_setopt(fetch, FETCHOPT_URL, URL_Str);
   res = fetch_easy_perform(fetch);
-  if(outfile)
+  if (outfile)
     fclose(outfile);
-  return res;  /* (FETCHE_OK) */
+  return res; /* (FETCHE_OK) */
 }
 
 static void showUsage(void)
 {
   fprintf(stderr, "synctime: Synchronising computer clock with time server"
-          " using HTTP protocol.\n");
+                  " using HTTP protocol.\n");
   fprintf(stderr, "Usage   : synctime [Option]\n");
   fprintf(stderr, "Options :\n");
   fprintf(stderr, " --server=WEBSERVER        Use this time server instead"
-          " of default.\n");
+                  " of default.\n");
   fprintf(stderr, " --showall                 Show all HTTP header.\n");
   fprintf(stderr, " --synctime                Synchronising computer clock"
-          " with time server.\n");
+                  " with time server.\n");
   fprintf(stderr, " --proxy-user=USER[:PASS]  Set proxy username and"
-          " password.\n");
+                  " password.\n");
   fprintf(stderr, " --proxy=HOST[:PORT]       Use HTTP proxy on given"
-          " port.\n");
+                  " port.\n");
   fprintf(stderr, " --help                    Print this help.\n");
   fprintf(stderr, "\n");
   return;
@@ -233,44 +239,47 @@ static int conf_init(conf_t *conf)
 {
   int i;
 
-  *conf->http_proxy       = 0;
-  for(i = 0; i < MAX_STRING1; i++)
-    conf->proxy_user[i]     = 0;    /* Clean up password from memory */
-  *conf->timeserver       = 0;
+  *conf->http_proxy = 0;
+  for (i = 0; i < MAX_STRING1; i++)
+    conf->proxy_user[i] = 0; /* Clean up password from memory */
+  *conf->timeserver = 0;
   return 1;
 }
 
 int main(int argc, char *argv[])
 {
-  FETCH    *fetch;
-  conf_t  conf[1];
-  int     RetValue;
+  FETCH *fetch;
+  conf_t conf[1];
+  int RetValue;
 
-  ShowAllHeader   = 0;    /* Do not show HTTP Header */
-  AutoSyncTime    = 0;    /* Do not synchronise computer clock */
-  RetValue        = 0;    /* Successful Exit */
+  ShowAllHeader = 0; /* Do not show HTTP Header */
+  AutoSyncTime = 0;  /* Do not synchronise computer clock */
+  RetValue = 0;      /* Successful Exit */
   conf_init(conf);
 
-  if(argc > 1) {
+  if (argc > 1)
+  {
     int OptionIndex = 0;
-    while(OptionIndex < argc) {
-      if(strncmp(argv[OptionIndex], "--server=", 9) == 0)
+    while (OptionIndex < argc)
+    {
+      if (strncmp(argv[OptionIndex], "--server=", 9) == 0)
         snprintf(conf->timeserver, MAX_STRING, "%s", &argv[OptionIndex][9]);
 
-      if(strcmp(argv[OptionIndex], "--showall") == 0)
+      if (strcmp(argv[OptionIndex], "--showall") == 0)
         ShowAllHeader = 1;
 
-      if(strcmp(argv[OptionIndex], "--synctime") == 0)
+      if (strcmp(argv[OptionIndex], "--synctime") == 0)
         AutoSyncTime = 1;
 
-      if(strncmp(argv[OptionIndex], "--proxy-user=", 13) == 0)
+      if (strncmp(argv[OptionIndex], "--proxy-user=", 13) == 0)
         snprintf(conf->proxy_user, MAX_STRING, "%s", &argv[OptionIndex][13]);
 
-      if(strncmp(argv[OptionIndex], "--proxy=", 8) == 0)
+      if (strncmp(argv[OptionIndex], "--proxy=", 8) == 0)
         snprintf(conf->http_proxy, MAX_STRING, "%s", &argv[OptionIndex][8]);
 
-      if((strcmp(argv[OptionIndex], "--help") == 0) ||
-          (strcmp(argv[OptionIndex], "/?") == 0)) {
+      if ((strcmp(argv[OptionIndex], "--help") == 0) ||
+          (strcmp(argv[OptionIndex], "/?") == 0))
+      {
         showUsage();
         return 0;
       }
@@ -278,13 +287,14 @@ int main(int argc, char *argv[])
     }
   }
 
-  if(*conf->timeserver == 0)     /* Use default server for time information */
+  if (*conf->timeserver == 0) /* Use default server for time information */
     snprintf(conf->timeserver, MAX_STRING, "%s", DefaultTimeServer[0]);
 
   /* Init FETCH before usage */
   fetch_global_init(FETCH_GLOBAL_ALL);
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     struct tm *lt;
     struct tm *gmt;
     time_t tt;
@@ -298,15 +308,15 @@ int main(int argc, char *argv[])
     SyncTime_FETCH_Init(fetch, conf->http_proxy, conf->proxy_user);
 
     /* Calculating time diff between GMT and localtime */
-    tt       = time(0);
-    lt       = localtime(&tt);
+    tt = time(0);
+    lt = localtime(&tt);
     tt_local = mktime(lt);
-    gmt      = gmtime(&tt);
-    tt_gmt   = mktime(gmt);
+    gmt = gmtime(&tt);
+    tt_gmt = mktime(gmt);
     tzonediffFloat = difftime(tt_local, tt_gmt);
-    tzonediffWord  = (int)(tzonediffFloat/3600.0);
+    tzonediffWord = (int)(tzonediffFloat / 3600.0);
 
-    if((double)(tzonediffWord * 3600) == tzonediffFloat)
+    if ((double)(tzonediffWord * 3600) == tzonediffFloat)
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
     else
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
@@ -316,7 +326,7 @@ int main(int argc, char *argv[])
     GetLocalTime(&LOCALTime);
     snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
              DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-             MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
+             MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear,
              LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
              LOCALTime.wMilliseconds);
 
@@ -325,28 +335,31 @@ int main(int argc, char *argv[])
 
     /* HTTP HEAD command to the Webserver */
     SyncTime_FETCH_Fetch(fetch, conf->timeserver, "index.htm",
-                        HTTP_COMMAND_HEAD);
+                         HTTP_COMMAND_HEAD);
 
     GetLocalTime(&LOCALTime);
     snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
              DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-             MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
+             MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear,
              LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
              LOCALTime.wMilliseconds);
     fprintf(stderr, "\nAfter  HTTP. Date: %s%s\n", timeBuf, tzoneBuf);
 
-    if(AutoSyncTime == 3) {
+    if (AutoSyncTime == 3)
+    {
       /* Synchronising computer clock */
-      if(!SetSystemTime(&SYSTime)) {  /* Set system time */
+      if (!SetSystemTime(&SYSTime))
+      { /* Set system time */
         fprintf(stderr, "ERROR: Unable to set system time.\n");
         RetValue = 1;
       }
-      else {
+      else
+      {
         /* Successfully re-adjusted computer clock */
         GetLocalTime(&LOCALTime);
         snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
                  DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-                 MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
+                 MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear,
                  LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
                  LOCALTime.wMilliseconds);
         fprintf(stderr, "\nNew System's Date: %s%s\n", timeBuf, tzoneBuf);

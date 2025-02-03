@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -80,12 +80,12 @@ bool Curl_auth_is_spnego_supported(void)
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
-                                         const char *user,
-                                         const char *password,
-                                         const char *service,
-                                         const char *host,
-                                         const char *chlg64,
-                                         struct negotiatedata *nego)
+                                          const char *user,
+                                          const char *password,
+                                          const char *service,
+                                          const char *host,
+                                          const char *chlg64,
+                                          struct negotiatedata *nego)
 {
   FETCHcode result = FETCHE_OK;
   size_t chlglen = 0;
@@ -99,10 +99,11 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
   struct gss_channel_bindings_struct chan;
 
-  (void) user;
-  (void) password;
+  (void)user;
+  (void)password;
 
-  if(nego->context && nego->status == GSS_S_COMPLETE) {
+  if (nego->context && nego->status == GSS_S_COMPLETE)
+  {
     /* We finished successfully our part of authentication, but server
      * rejected it (since we are again here). Exit with an error since we
      * cannot invent anything better */
@@ -110,10 +111,11 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     return FETCHE_LOGIN_DENIED;
   }
 
-  if(!nego->spn) {
+  if (!nego->spn)
+  {
     /* Generate our SPN */
     char *spn = Curl_auth_build_spn(service, NULL, host);
-    if(!spn)
+    if (!spn)
       return FETCHE_OUT_OF_MEMORY;
 
     /* Populate the SPN structure */
@@ -124,7 +126,8 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     major_status = gss_import_name(&minor_status, &spn_token,
                                    GSS_C_NT_HOSTBASED_SERVICE,
                                    &nego->spn);
-    if(GSS_ERROR(major_status)) {
+    if (GSS_ERROR(major_status))
+    {
       Curl_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
 
@@ -136,16 +139,19 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     free(spn);
   }
 
-  if(chlg64 && *chlg64) {
+  if (chlg64 && *chlg64)
+  {
     /* Decode the base-64 encoded challenge message */
-    if(*chlg64 != '=') {
+    if (*chlg64 != '=')
+    {
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);
-      if(result)
+      if (result)
         return result;
     }
 
     /* Ensure we have a valid challenge message */
-    if(!chlg) {
+    if (!chlg)
+    {
       infof(data, "SPNEGO handshake failure (empty challenge message)");
       return FETCHE_BAD_CONTENT_ENCODING;
     }
@@ -156,7 +162,8 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   /* Set channel binding data if available */
-  if(nego->channel_binding_data.leng > 0) {
+  if (nego->channel_binding_data.leng > 0)
+  {
     memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
     chan.application_data.length = nego->channel_binding_data.leng;
     chan.application_data.value = nego->channel_binding_data.bufr;
@@ -179,8 +186,9 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   Curl_safefree(input_token.value);
 
   nego->status = major_status;
-  if(GSS_ERROR(major_status)) {
-    if(output_token.value)
+  if (GSS_ERROR(major_status))
+  {
+    if (output_token.value)
       gss_release_buffer(&unused_status, &output_token);
 
     Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
@@ -189,15 +197,16 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     return FETCHE_AUTH_ERROR;
   }
 
-  if(!output_token.value || !output_token.length) {
-    if(output_token.value)
+  if (!output_token.value || !output_token.length)
+  {
+    if (output_token.value)
       gss_release_buffer(&unused_status, &output_token);
 
     return FETCHE_AUTH_ERROR;
   }
 
   /* Free previous token */
-  if(nego->output_token.length && nego->output_token.value)
+  if (nego->output_token.length && nego->output_token.value)
     gss_release_buffer(&unused_status, &nego->output_token);
 
   nego->output_token = output_token;
@@ -222,7 +231,7 @@ FETCHcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
-                                         char **outptr, size_t *outlen)
+                                          char **outptr, size_t *outlen)
 {
   FETCHcode result;
   OM_uint32 minor_status;
@@ -232,7 +241,8 @@ FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
                               nego->output_token.length,
                               outptr, outlen);
 
-  if(result) {
+  if (result)
+  {
     gss_release_buffer(&minor_status, &nego->output_token);
     nego->output_token.value = NULL;
     nego->output_token.length = 0;
@@ -240,7 +250,8 @@ FETCHcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
     return result;
   }
 
-  if(!*outptr || !*outlen) {
+  if (!*outptr || !*outlen)
+  {
     gss_release_buffer(&minor_status, &nego->output_token);
     nego->output_token.value = NULL;
     nego->output_token.length = 0;
@@ -266,21 +277,23 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   OM_uint32 minor_status;
 
   /* Free our security context */
-  if(nego->context != GSS_C_NO_CONTEXT) {
+  if (nego->context != GSS_C_NO_CONTEXT)
+  {
     gss_delete_sec_context(&minor_status, &nego->context, GSS_C_NO_BUFFER);
     nego->context = GSS_C_NO_CONTEXT;
   }
 
   /* Free the output token */
-  if(nego->output_token.value) {
+  if (nego->output_token.value)
+  {
     gss_release_buffer(&minor_status, &nego->output_token);
     nego->output_token.value = NULL;
     nego->output_token.length = 0;
-
   }
 
   /* Free the SPN */
-  if(nego->spn != GSS_C_NO_NAME) {
+  if (nego->spn != GSS_C_NO_NAME)
+  {
     gss_release_name(&minor_status, &nego->spn);
     nego->spn = GSS_C_NO_NAME;
   }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,9 +33,13 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#define EAT_SPACE(p) while(*(p) && ISSPACE(*(p))) (p)++
+#define EAT_SPACE(p)            \
+  while (*(p) && ISSPACE(*(p))) \
+  (p)++
 
-#define EAT_WORD(p)  while(*(p) && !ISSPACE(*(p)) && ('>' != *(p))) (p)++
+#define EAT_WORD(p)                               \
+  while (*(p) && !ISSPACE(*(p)) && ('>' != *(p))) \
+  (p)++
 
 #ifdef DEBUG_GETPART
 #define show(x) printf x
@@ -44,8 +48,8 @@
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(push)
-#  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
+#pragma warning(push)
+#pragma warning(disable : 4232) /* MSVC extension, dllimport identity */
 #endif
 
 fetch_malloc_callback Curl_cmalloc = (fetch_malloc_callback)malloc;
@@ -58,9 +62,8 @@ fetch_wcsdup_callback Curl_cwcsdup = (fetch_wcsdup_callback)_wcsdup;
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(pop)
+#pragma warning(pop)
 #endif
-
 
 /*
  * line_length()
@@ -73,11 +76,13 @@ static size_t line_length(const char *buffer, int bytestocheck)
 {
   size_t length = 1;
 
-  while(*buffer != '\n' && --bytestocheck) {
+  while (*buffer != '\n' && --bytestocheck)
+  {
     length++;
     buffer++;
   }
-  if(*buffer != '\n') {
+  if (*buffer != '\n')
+  {
     /*
      * We didn't find a new line so the last byte must be a
      * '\0' character inserted by fgets() which we should not
@@ -113,28 +118,30 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
   size_t offset = 0;
   char *newptr;
 
-  if(!*buffer) {
+  if (!*buffer)
+  {
     *buffer = calloc(1, 128);
-    if(!*buffer)
+    if (!*buffer)
       return GPE_OUT_OF_MEMORY;
     *bufsize = 128;
   }
 
-  for(;;) {
+  for (;;)
+  {
     int bytestoread = fetchx_uztosi(*bufsize - offset);
 
-    if(!fgets(*buffer + offset, bytestoread, stream))
+    if (!fgets(*buffer + offset, bytestoread, stream))
       return (offset != 0) ? GPE_OK : GPE_END_OF_FILE;
 
     *length = offset + line_length(*buffer + offset, bytestoread);
-    if(*(*buffer + *length - 1) == '\n')
+    if (*(*buffer + *length - 1) == '\n')
       break;
     offset = *length;
-    if(*length < *bufsize - 1)
+    if (*length < *bufsize - 1)
       continue;
 
     newptr = realloc(*buffer, *bufsize * 2);
-    if(!newptr)
+    if (!newptr)
       return GPE_OUT_OF_MEMORY;
     memset(&newptr[*bufsize], 0, *bufsize);
     *buffer = newptr;
@@ -170,33 +177,36 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
  *   GPE_OK
  */
 
-static int appenddata(char  **dst_buf,   /* dest buffer */
+static int appenddata(char **dst_buf,    /* dest buffer */
                       size_t *dst_len,   /* dest buffer data length */
                       size_t *dst_alloc, /* dest buffer allocated size */
-                      char   *src_buf,   /* source buffer */
-                      size_t  src_len,   /* source buffer length */
-                      int     src_b64)   /* != 0 if source is base64 encoded */
+                      char *src_buf,     /* source buffer */
+                      size_t src_len,    /* source buffer length */
+                      int src_b64)       /* != 0 if source is base64 encoded */
 {
   size_t need_alloc = 0;
 
-  if(!src_len)
+  if (!src_len)
     return GPE_OK;
 
   need_alloc = src_len + *dst_len + 1;
 
-  if(src_b64) {
-    if(src_buf[src_len - 1] == '\r')
+  if (src_b64)
+  {
+    if (src_buf[src_len - 1] == '\r')
       src_len--;
 
-    if(src_buf[src_len - 1] == '\n')
+    if (src_buf[src_len - 1] == '\n')
       src_len--;
   }
 
   /* enlarge destination buffer if required */
-  if(need_alloc > *dst_alloc) {
+  if (need_alloc > *dst_alloc)
+  {
     size_t newsize = need_alloc * 2;
     char *newptr = realloc(*dst_buf, newsize);
-    if(!newptr) {
+    if (!newptr)
+    {
       return GPE_OUT_OF_MEMORY;
     }
     *dst_alloc = newsize;
@@ -211,22 +221,23 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
   return GPE_OK;
 }
 
-static int decodedata(char  **buf,   /* dest buffer */
-                      size_t *len)   /* dest buffer data length */
+static int decodedata(char **buf,  /* dest buffer */
+                      size_t *len) /* dest buffer data length */
 {
   FETCHcode error = FETCHE_OK;
   unsigned char *buf64 = NULL;
   size_t src_len = 0;
 
-  if(!*len)
+  if (!*len)
     return GPE_OK;
 
   /* base64 decode the given buffer */
   error = Curl_base64_decode(*buf, &buf64, &src_len);
-  if(error)
+  if (error)
     return GPE_OUT_OF_MEMORY;
 
-  if(!src_len) {
+  if (!src_len)
+  {
     /*
     ** currently there is no way to tell apart an OOM condition in
     ** Curl_base64_decode() from zero length decoded data. For now,
@@ -273,7 +284,7 @@ static int decodedata(char  **buf,   /* dest buffer */
 int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
-# define MAX_TAG_LEN 200
+#define MAX_TAG_LEN 200
   char couter[MAX_TAG_LEN + 1]; /* current outermost section */
   char cmain[MAX_TAG_LEN + 1];  /* current main section */
   char csub[MAX_TAG_LEN + 1];   /* current sub section */
@@ -282,9 +293,10 @@ int getpart(char **outbuf, size_t *outlen,
   char *buffer = NULL;
   char *ptr;
   char *end;
-  union {
+  union
+  {
     ssize_t sig;
-     size_t uns;
+    size_t uns;
   } len;
   size_t bufsize = 0;
   size_t outalloc = 256;
@@ -294,33 +306,37 @@ int getpart(char **outbuf, size_t *outlen,
   int nonewline = 0;
   int error;
 
-  enum {
+  enum
+  {
     STATE_OUTSIDE = 0,
-    STATE_OUTER   = 1,
-    STATE_INMAIN  = 2,
-    STATE_INSUB   = 3,
+    STATE_OUTER = 1,
+    STATE_INMAIN = 2,
+    STATE_INSUB = 3,
     STATE_ILLEGAL = 4
   } state = STATE_OUTSIDE;
 
   *outlen = 0;
   *outbuf = malloc(outalloc);
-  if(!*outbuf)
+  if (!*outbuf)
     return GPE_OUT_OF_MEMORY;
   *(*outbuf) = '\0';
 
   couter[0] = cmain[0] = csub[0] = ptag[0] = patt[0] = '\0';
 
-  while((error = readline(&buffer, &bufsize, &datalen, stream)) == GPE_OK) {
+  while ((error = readline(&buffer, &bufsize, &datalen, stream)) == GPE_OK)
+  {
 
     ptr = buffer;
     EAT_SPACE(ptr);
 
-    if('<' != *ptr) {
-      if(in_wanted_part) {
+    if ('<' != *ptr)
+    {
+      if (in_wanted_part)
+      {
         show(("=> %s", buffer));
         error = appenddata(outbuf, outlen, &outalloc, buffer, datalen,
                            base64);
-        if(error)
+        if (error)
           break;
       }
       continue;
@@ -328,7 +344,8 @@ int getpart(char **outbuf, size_t *outlen,
 
     ptr++;
 
-    if('/' == *ptr) {
+    if ('/' == *ptr)
+    {
       /*
       ** closing section tag
       */
@@ -337,55 +354,63 @@ int getpart(char **outbuf, size_t *outlen,
       end = ptr;
       EAT_WORD(end);
       len.sig = end - ptr;
-      if(len.sig > MAX_TAG_LEN) {
+      if (len.sig > MAX_TAG_LEN)
+      {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
       memcpy(ptag, ptr, len.uns);
       ptag[len.uns] = '\0';
 
-      if((STATE_INSUB == state) && !strcmp(csub, ptag)) {
+      if ((STATE_INSUB == state) && !strcmp(csub, ptag))
+      {
         /* end of current sub section */
         state = STATE_INMAIN;
         csub[0] = '\0';
-        if(in_wanted_part) {
+        if (in_wanted_part)
+        {
           /* Do we need to base64 decode the data? */
-          if(base64) {
+          if (base64)
+          {
             error = decodedata(outbuf, outlen);
-            if(error)
+            if (error)
               return error;
           }
-          if(nonewline)
+          if (nonewline)
             (*outlen)--;
           break;
         }
       }
-      else if((STATE_INMAIN == state) && !strcmp(cmain, ptag)) {
+      else if ((STATE_INMAIN == state) && !strcmp(cmain, ptag))
+      {
         /* end of current main section */
         state = STATE_OUTER;
         cmain[0] = '\0';
-        if(in_wanted_part) {
+        if (in_wanted_part)
+        {
           /* Do we need to base64 decode the data? */
-          if(base64) {
+          if (base64)
+          {
             error = decodedata(outbuf, outlen);
-            if(error)
+            if (error)
               return error;
           }
-          if(nonewline)
+          if (nonewline)
             (*outlen)--;
           break;
         }
       }
-      else if((STATE_OUTER == state) && !strcmp(couter, ptag)) {
+      else if ((STATE_OUTER == state) && !strcmp(couter, ptag))
+      {
         /* end of outermost file section */
         state = STATE_OUTSIDE;
         couter[0] = '\0';
-        if(in_wanted_part)
+        if (in_wanted_part)
           break;
       }
-
     }
-    else if(!in_wanted_part) {
+    else if (!in_wanted_part)
+    {
       /*
       ** opening section tag
       */
@@ -394,7 +419,8 @@ int getpart(char **outbuf, size_t *outlen,
       end = ptr;
       EAT_WORD(end);
       len.sig = end - ptr;
-      if(len.sig > MAX_TAG_LEN) {
+      if (len.sig > MAX_TAG_LEN)
+      {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
@@ -402,7 +428,8 @@ int getpart(char **outbuf, size_t *outlen,
       ptag[len.uns] = '\0';
 
       /* ignore comments, doctypes and xml declarations */
-      if(('!' == ptag[0]) || ('?' == ptag[0])) {
+      if (('!' == ptag[0]) || ('?' == ptag[0]))
+      {
         show(("* ignoring (%s)", buffer));
         continue;
       }
@@ -411,53 +438,59 @@ int getpart(char **outbuf, size_t *outlen,
       ptr = end;
       EAT_SPACE(ptr);
       end = ptr;
-      while(*end && ('>' != *end))
+      while (*end && ('>' != *end))
         end++;
       len.sig = end - ptr;
-      if(len.sig > MAX_TAG_LEN) {
+      if (len.sig > MAX_TAG_LEN)
+      {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
       memcpy(patt, ptr, len.uns);
       patt[len.uns] = '\0';
 
-      if(STATE_OUTSIDE == state) {
+      if (STATE_OUTSIDE == state)
+      {
         /* outermost element (<testcase>) */
         strcpy(couter, ptag);
         state = STATE_OUTER;
         continue;
       }
-      else if(STATE_OUTER == state) {
+      else if (STATE_OUTER == state)
+      {
         /* start of a main section */
         strcpy(cmain, ptag);
         state = STATE_INMAIN;
         continue;
       }
-      else if(STATE_INMAIN == state) {
+      else if (STATE_INMAIN == state)
+      {
         /* start of a sub section */
         strcpy(csub, ptag);
         state = STATE_INSUB;
-        if(!strcmp(cmain, main) && !strcmp(csub, sub)) {
+        if (!strcmp(cmain, main) && !strcmp(csub, sub))
+        {
           /* start of wanted part */
           in_wanted_part = 1;
-          if(strstr(patt, "base64="))
-              /* bit rough test, but "mostly" functional, */
-              /* treat wanted part data as base64 encoded */
-              base64 = 1;
-          if(strstr(patt, "nonewline=")) {
+          if (strstr(patt, "base64="))
+            /* bit rough test, but "mostly" functional, */
+            /* treat wanted part data as base64 encoded */
+            base64 = 1;
+          if (strstr(patt, "nonewline="))
+          {
             show(("* setting nonewline\n"));
             nonewline = 1;
           }
         }
         continue;
       }
-
     }
 
-    if(in_wanted_part) {
+    if (in_wanted_part)
+    {
       show(("=> %s", buffer));
       error = appenddata(outbuf, outlen, &outalloc, buffer, datalen, base64);
-      if(error)
+      if (error)
         break;
     }
 
@@ -465,10 +498,12 @@ int getpart(char **outbuf, size_t *outlen,
 
   free(buffer);
 
-  if(error != GPE_OK) {
-    if(error == GPE_END_OF_FILE)
+  if (error != GPE_OK)
+  {
+    if (error == GPE_END_OF_FILE)
       error = GPE_OK;
-    else {
+    else
+    {
       free(*outbuf);
       *outbuf = NULL;
       *outlen = 0;

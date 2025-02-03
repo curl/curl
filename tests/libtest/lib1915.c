@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,32 +28,34 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct entry {
+struct entry
+{
   const char *name;
   const char *exp;
 };
 
 static const struct entry preload_hosts[] = {
 #if (SIZEOF_TIME_T < 5)
-  { "1.example.com", "20370320 01:02:03" },
-  { "2.example.com", "20370320 03:02:01" },
-  { "3.example.com", "20370319 01:02:03" },
+    {"1.example.com", "20370320 01:02:03"},
+    {"2.example.com", "20370320 03:02:01"},
+    {"3.example.com", "20370319 01:02:03"},
 #else
-  { "1.example.com", "25250320 01:02:03" },
-  { "2.example.com", "25250320 03:02:01" },
-  { "3.example.com", "25250319 01:02:03" },
+    {"1.example.com", "25250320 01:02:03"},
+    {"2.example.com", "25250320 03:02:01"},
+    {"3.example.com", "25250319 01:02:03"},
 #endif
-  { "4.example.com", "" },
-  { NULL, NULL } /* end of list marker */
+    {"4.example.com", ""},
+    {NULL, NULL} /* end of list marker */
 };
 
-struct state {
+struct state
+{
   int index;
 };
 
 /* "read" is from the point of the library, it wants data from us */
 static FETCHSTScode hstsread(FETCH *easy, struct fetch_hstsentry *e,
-                            void *userp)
+                             void *userp)
 {
   const char *host;
   const char *expire;
@@ -62,7 +64,8 @@ static FETCHSTScode hstsread(FETCH *easy, struct fetch_hstsentry *e,
   host = preload_hosts[s->index].name;
   expire = preload_hosts[s->index++].exp;
 
-  if(host && (strlen(host) < e->namelen)) {
+  if (host && (strlen(host) < e->namelen))
+  {
     strcpy(e->name, host);
     e->includeSubDomains = FALSE;
     strcpy(e->expire, expire);
@@ -75,7 +78,7 @@ static FETCHSTScode hstsread(FETCH *easy, struct fetch_hstsentry *e,
 
 /* verify error from callback */
 static FETCHSTScode hstsreadfail(FETCH *easy, struct fetch_hstsentry *e,
-                                void *userp)
+                                 void *userp)
 {
   (void)easy;
   (void)e;
@@ -85,7 +88,7 @@ static FETCHSTScode hstsreadfail(FETCH *easy, struct fetch_hstsentry *e,
 
 /* check that we get the hosts back in the save */
 static FETCHSTScode hstswrite(FETCH *easy, struct fetch_hstsentry *e,
-                             struct fetch_index *i, void *userp)
+                              struct fetch_index *i, void *userp)
 {
   (void)easy;
   (void)userp;
@@ -122,7 +125,7 @@ FETCHcode test(char *URL)
   res = fetch_easy_perform(hnd);
   fetch_easy_cleanup(hnd);
   hnd = NULL;
-  if(res == FETCHE_OPERATION_TIMEDOUT) /* we expect that on Windows */
+  if (res == FETCHE_OPERATION_TIMEDOUT) /* we expect that on Windows */
     res = FETCHE_COULDNT_CONNECT;
   printf("First request returned %d\n", res);
   res = FETCHE_OK;

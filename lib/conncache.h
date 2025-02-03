@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,17 +47,18 @@ typedef bool Curl_cpool_disconnect_cb(struct Curl_easy *data,
                                       struct connectdata *conn,
                                       bool aborted);
 
-struct cpool {
-   /* the pooled connections, bundled per destination */
+struct cpool
+{
+  /* the pooled connections, bundled per destination */
   struct Curl_hash dest2bundle;
   size_t num_conn;
   fetch_off_t next_connection_id;
   fetch_off_t next_easy_id;
   struct fetchtime last_cleanup;
-  struct Curl_llist shutdowns;  /* The connections being shut down */
-  struct Curl_easy *idata; /* internal handle used for discard */
-  struct Curl_multi *multi; /* != NULL iff pool belongs to multi */
-  struct Curl_share *share; /* != NULL iff pool belongs to share */
+  struct Curl_llist shutdowns; /* The connections being shut down */
+  struct Curl_easy *idata;     /* internal handle used for discard */
+  struct Curl_multi *multi;    /* != NULL iff pool belongs to multi */
+  struct Curl_share *share;    /* != NULL iff pool belongs to share */
   Curl_cpool_disconnect_cb *disconnect_cb;
   BIT(locked);
 };
@@ -85,16 +86,16 @@ struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
                                         fetch_off_t conn_id);
 
 FETCHcode Curl_cpool_add_conn(struct Curl_easy *data,
-                             struct connectdata *conn) WARN_UNUSED_RESULT;
+                              struct connectdata *conn) WARN_UNUSED_RESULT;
 
 /**
  * Return if the pool has reached its configured limits for adding
  * the given connection. Will try to discard the oldest, idle
  * connections to make space.
  */
-#define CPOOL_LIMIT_OK     0
-#define CPOOL_LIMIT_DEST   1
-#define CPOOL_LIMIT_TOTAL  2
+#define CPOOL_LIMIT_OK 0
+#define CPOOL_LIMIT_DEST 1
+#define CPOOL_LIMIT_TOTAL 2
 int Curl_cpool_check_limits(struct Curl_easy *data,
                             struct connectdata *conn);
 
@@ -182,7 +183,7 @@ void Curl_cpool_do_locked(struct Curl_easy *data,
  * Add sockets and POLLIN/OUT flags for connections handled by the pool.
  */
 FETCHcode Curl_cpool_add_pollfds(struct cpool *connc,
-                                struct fetch_pollfds *cpfds);
+                                 struct fetch_pollfds *cpfds);
 unsigned int Curl_cpool_add_waitfds(struct cpool *connc,
                                     struct Curl_waitfds *cwfds);
 
@@ -198,6 +199,5 @@ void Curl_cpool_multi_perform(struct Curl_multi *multi);
 
 void Curl_cpool_multi_socket(struct Curl_multi *multi,
                              fetch_socket_t s, int ev_bitmask);
-
 
 #endif /* HEADER_FETCH_CONNCACHE_H */

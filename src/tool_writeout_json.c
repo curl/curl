@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,8 +42,10 @@ int jsonquoted(const char *in, size_t len,
   const unsigned char *in_end = &i[len];
   FETCHcode result = FETCHE_OK;
 
-  for(; (i < in_end) && !result; i++) {
-    switch(*i) {
+  for (; (i < in_end) && !result; i++)
+  {
+    switch (*i)
+    {
     case '\\':
       result = fetchx_dyn_addn(out, "\\\\", 2);
       break;
@@ -66,11 +68,12 @@ int jsonquoted(const char *in, size_t len,
       result = fetchx_dyn_addn(out, "\\t", 2);
       break;
     default:
-      if(*i < 32)
+      if (*i < 32)
         result = fetchx_dyn_addf(out, "\\u%04x", *i);
-      else {
+      else
+      {
         char o = (char)*i;
-        if(lowercase && (o >= 'A' && o <= 'Z'))
+        if (lowercase && (o >= 'A' && o <= 'Z'))
           /* do not use tolower() since that is locale specific */
           o |= ('a' - 'A');
         result = fetchx_dyn_addn(out, &o, 1);
@@ -78,7 +81,7 @@ int jsonquoted(const char *in, size_t len,
       break;
     }
   }
-  if(result)
+  if (result)
     return (int)result;
   return 0;
 }
@@ -88,9 +91,10 @@ void jsonWriteString(FILE *stream, const char *in, bool lowercase)
   struct fetchx_dynbuf out;
   fetchx_dyn_init(&out, MAX_JSON_STRING);
 
-  if(!jsonquoted(in, strlen(in), &out, lowercase)) {
+  if (!jsonquoted(in, strlen(in), &out, lowercase))
+  {
     fputc('\"', stream);
-    if(fetchx_dyn_len(&out))
+    if (fetchx_dyn_len(&out))
       fputs(fetchx_dyn_ptr(&out), stream);
     fputc('\"', stream);
   }
@@ -105,9 +109,10 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
 
   fputs("{", stream);
 
-  for(i = 0; i < nentries; i++) {
-    if(mappings[i].writefunc &&
-       mappings[i].writefunc(stream, &mappings[i], per, per_result, true))
+  for (i = 0; i < nentries; i++)
+  {
+    if (mappings[i].writefunc &&
+        mappings[i].writefunc(stream, &mappings[i], per, per_result, true))
       fputs(",", stream);
   }
 
@@ -120,7 +125,7 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4706) /* assignment within conditional expression */
+#pragma warning(disable : 4706) /* assignment within conditional expression */
 #endif
 
 void headerJSON(FILE *stream, struct per_transfer *per)
@@ -129,35 +134,40 @@ void headerJSON(FILE *stream, struct per_transfer *per)
   struct fetch_header *prev = NULL;
 
   fputc('{', stream);
-  while((header = fetch_easy_nextheader(per->fetch, FETCHH_HEADER, -1,
-                                       prev))) {
-    if(header->amount > 1) {
-      if(!header->index) {
+  while ((header = fetch_easy_nextheader(per->fetch, FETCHH_HEADER, -1,
+                                         prev)))
+  {
+    if (header->amount > 1)
+    {
+      if (!header->index)
+      {
         /* act on the 0-index entry and pull the others in, then output in a
            JSON list */
         size_t a = header->amount;
         size_t i = 0;
         char *name = header->name;
-        if(prev)
+        if (prev)
           fputs(",\n", stream);
         jsonWriteString(stream, header->name, TRUE);
         fputc(':', stream);
         prev = header;
         fputc('[', stream);
-        do {
+        do
+        {
           jsonWriteString(stream, header->value, FALSE);
-          if(++i >= a)
+          if (++i >= a)
             break;
           fputc(',', stream);
-          if(fetch_easy_header(per->fetch, name, i, FETCHH_HEADER,
-                              -1, &header))
+          if (fetch_easy_header(per->fetch, name, i, FETCHH_HEADER,
+                                -1, &header))
             break;
-        } while(1);
+        } while (1);
         fputc(']', stream);
       }
     }
-    else {
-      if(prev)
+    else
+    {
+      if (prev)
         fputs(",\n", stream);
       jsonWriteString(stream, header->name, TRUE);
       fputc(':', stream);

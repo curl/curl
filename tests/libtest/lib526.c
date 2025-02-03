@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -61,7 +61,7 @@ FETCHcode test(char *URL)
   int current = 0;
   int i;
 
-  for(i = 0; i < NUM_HANDLES; i++)
+  for (i = 0; i < NUM_HANDLES; i++)
     fetch[i] = NULL;
 
   start_test_timing();
@@ -69,7 +69,8 @@ FETCHcode test(char *URL)
   global_init(FETCH_GLOBAL_ALL);
 
   /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for (i = 0; i < NUM_HANDLES; i++)
+  {
     easy_init(fetch[i]);
     /* specify target */
     easy_setopt(fetch[i], FETCHOPT_URL, URL);
@@ -83,7 +84,8 @@ FETCHcode test(char *URL)
 
   fprintf(stderr, "Start at URL 0\n");
 
-  for(;;) {
+  for (;;)
+  {
     struct timeval interval;
     fd_set rd, wr, exc;
     int maxfd = -99;
@@ -95,7 +97,8 @@ FETCHcode test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running) {
+    if (!running)
+    {
 #ifdef LIB527
       /* NOTE: this code does not remove the handle from the multi handle
          here, which would be the nice, sane and documented way of working.
@@ -103,7 +106,8 @@ FETCHcode test(char *URL)
       fetch_easy_cleanup(fetch[current]);
       fetch[current] = NULL;
 #endif
-      if(++current < NUM_HANDLES) {
+      if (++current < NUM_HANDLES)
+      {
         fprintf(stderr, "Advancing to URL %d\n", current);
 #ifdef LIB532
         /* first remove the only handle we use */
@@ -122,7 +126,8 @@ FETCHcode test(char *URL)
         multi_add_handle(m, fetch[current]);
 #endif
       }
-      else {
+      else
+      {
         break; /* done */
       }
     }
@@ -147,7 +152,8 @@ test_cleanup:
   /* test 526 and 528 */
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for (i = 0; i < NUM_HANDLES; i++)
+  {
     fetch_multi_remove_handle(m, fetch[i]);
     fetch_easy_cleanup(fetch[i]);
   }
@@ -163,8 +169,8 @@ test_cleanup:
      cleanup'ed yet, in this case we have to cleanup them or otherwise these
      will be leaked, let's use undocumented cleanup sequence - type UB */
 
-  if(res != FETCHE_OK)
-    for(i = 0; i < NUM_HANDLES; i++)
+  if (res != FETCHE_OK)
+    for (i = 0; i < NUM_HANDLES; i++)
       fetch_easy_cleanup(fetch[i]);
 
   fetch_multi_cleanup(m);
@@ -175,7 +181,7 @@ test_cleanup:
   /* test 532 */
   /* undocumented cleanup sequence - type UB */
 
-  for(i = 0; i < NUM_HANDLES; i++)
+  for (i = 0; i < NUM_HANDLES; i++)
     fetch_easy_cleanup(fetch[i]);
   fetch_multi_cleanup(m);
   fetch_global_cleanup();

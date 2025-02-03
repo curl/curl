@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@
 #include <setjmp.h>
 
 #ifdef USE_HTTPSRR
-# include <stdint.h>
+#include <stdint.h>
 #endif
 
 /* Allocate enough memory to hold the full name information structs and
@@ -44,7 +44,7 @@
  */
 #define FETCH_HOSTENT_SIZE 9000
 
-#define FETCH_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
+#define FETCH_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this \
                                     many seconds for a name resolve */
 
 #define FETCH_ASYNC_SUCCESS FETCHE_OK
@@ -54,7 +54,8 @@ struct hostent;
 struct Curl_easy;
 struct connectdata;
 
-enum alpnid {
+enum alpnid
+{
   ALPN_none = 0,
   ALPN_h1 = FETCHALTSVC_H1,
   ALPN_h2 = FETCHALTSVC_H2,
@@ -70,7 +71,8 @@ enum alpnid {
  */
 struct Curl_hash *Curl_global_host_cache_init(void);
 
-struct Curl_dns_entry {
+struct Curl_dns_entry
+{
   struct Curl_addrinfo *addr;
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo *hinfo;
@@ -95,11 +97,12 @@ bool Curl_host_is_ipnum(const char *hostname);
  * use, or we will leak memory!
  */
 /* return codes */
-enum resolve_t {
+enum resolve_t
+{
   FETCHRESOLV_TIMEDOUT = -2,
-  FETCHRESOLV_ERROR    = -1,
-  FETCHRESOLV_RESOLVED =  0,
-  FETCHRESOLV_PENDING  =  1
+  FETCHRESOLV_ERROR = -1,
+  FETCHRESOLV_RESOLVED = 0,
+  FETCHRESOLV_PENDING = 1
 };
 enum resolve_t Curl_resolv(struct Curl_easy *data,
                            const char *hostname,
@@ -126,7 +129,6 @@ bool Curl_ipv6works(struct Curl_easy *data);
  */
 bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn);
 
-
 /*
  * Curl_getaddrinfo() is the generic low-level name resolve API within this
  * source file. There are several versions of this function - for different
@@ -137,7 +139,6 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
                                        const char *hostname,
                                        int port,
                                        int *waitp);
-
 
 /* unlink a dns entry, potentially shared with a cache */
 void Curl_resolv_unlink(struct Curl_easy *data,
@@ -161,8 +162,8 @@ FETCHcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_connect);
  * request completed whether successful or failed.
  */
 FETCHcode Curl_addrinfo_callback(struct Curl_easy *data,
-                                int status,
-                                struct Curl_addrinfo *ai);
+                                 int status,
+                                 struct Curl_addrinfo *ai);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
@@ -211,21 +212,21 @@ FETCHcode Curl_set_dns_servers(struct Curl_easy *data, char *servers);
  * outgoing interface to use for DNS requests
  */
 FETCHcode Curl_set_dns_interface(struct Curl_easy *data,
-                                const char *interf);
+                                 const char *interf);
 
 /*
  * Function provided by the resolver backend to set
  * local IPv4 address to use as source address for DNS requests
  */
 FETCHcode Curl_set_dns_local_ip4(struct Curl_easy *data,
-                                const char *local_ip4);
+                                 const char *local_ip4);
 
 /*
  * Function provided by the resolver backend to set
  * local IPv6 address to use as source address for DNS requests
  */
 FETCHcode Curl_set_dns_local_ip6(struct Curl_easy *data,
-                                const char *local_ip6);
+                                 const char *local_ip6);
 
 /*
  * Clean off entries from the cache
@@ -237,7 +238,7 @@ void Curl_hostcache_clean(struct Curl_easy *data, struct Curl_hash *hash);
  */
 FETCHcode Curl_loadhostpairs(struct Curl_easy *data);
 FETCHcode Curl_resolv_check(struct Curl_easy *data,
-                           struct Curl_dns_entry **dns);
+                            struct Curl_dns_entry **dns);
 int Curl_resolv_getsock(struct Curl_easy *data,
                         fetch_socket_t *socks);
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,9 +27,9 @@
 #include "fetchx.h"
 
 #ifdef HAVE_UTIME_H
-#  include <utime.h>
+#include <utime.h>
 #elif defined(HAVE_SYS_UTIME_H)
-#  include <sys/utime.h>
+#include <sys/utime.h>
 #endif
 
 /* Returns 0 on success, non-zero on file problems */
@@ -46,38 +46,43 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
   TCHAR *tchar_filename = fetchx_convert_UTF8_to_tchar((char *)filename);
 
   hfile = CreateFile(tchar_filename, FILE_READ_ATTRIBUTES,
-                      (FILE_SHARE_READ | FILE_SHARE_WRITE |
-                       FILE_SHARE_DELETE),
-                      NULL, OPEN_EXISTING, 0, NULL);
+                     (FILE_SHARE_READ | FILE_SHARE_WRITE |
+                      FILE_SHARE_DELETE),
+                     NULL, OPEN_EXISTING, 0, NULL);
   fetchx_unicodefree(tchar_filename);
-  if(hfile != INVALID_HANDLE_VALUE) {
+  if (hfile != INVALID_HANDLE_VALUE)
+  {
     FILETIME ft;
-    if(GetFileTime(hfile, NULL, NULL, &ft)) {
-      fetch_off_t converted = (fetch_off_t)ft.dwLowDateTime
-        | ((fetch_off_t)ft.dwHighDateTime) << 32;
+    if (GetFileTime(hfile, NULL, NULL, &ft))
+    {
+      fetch_off_t converted = (fetch_off_t)ft.dwLowDateTime | ((fetch_off_t)ft.dwHighDateTime) << 32;
 
-      if(converted < FETCH_OFF_T_C(116444736000000000))
+      if (converted < FETCH_OFF_T_C(116444736000000000))
         warnf(global, "Failed to get filetime: underflow");
-      else {
+      else
+      {
         *stamp = (converted - FETCH_OFF_T_C(116444736000000000)) / 10000000;
         rc = 0;
       }
     }
-    else {
+    else
+    {
       warnf(global, "Failed to get filetime: "
-            "GetFileTime failed: GetLastError %u",
+                    "GetFileTime failed: GetLastError %u",
             (unsigned int)GetLastError());
     }
     CloseHandle(hfile);
   }
-  else if(GetLastError() != ERROR_FILE_NOT_FOUND) {
+  else if (GetLastError() != ERROR_FILE_NOT_FOUND)
+  {
     warnf(global, "Failed to get filetime: "
-          "CreateFile failed: GetLastError %u",
+                  "CreateFile failed: GetLastError %u",
           (unsigned int)GetLastError());
   }
 #else
   struct_stat statbuf;
-  if(-1 != stat(filename, &statbuf)) {
+  if (-1 != stat(filename, &statbuf))
+  {
     *stamp = (fetch_off_t)statbuf.st_mtime;
     rc = 0;
   }
@@ -91,7 +96,8 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
 void setfiletime(fetch_off_t filetime, const char *filename,
                  struct GlobalConfig *global)
 {
-  if(filetime >= 0) {
+  if (filetime >= 0)
+  {
 /* Windows utime() may attempt to adjust the Unix GMT file time by a daylight
    saving time offset and since it is GMT that is bad behavior. When we have
    access to a 64-bit type we can bypass utime and set the times directly. */
@@ -101,9 +107,9 @@ void setfiletime(fetch_off_t filetime, const char *filename,
 
     /* 910670515199 is the maximum Unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */
-    if(filetime > FETCH_OFF_T_C(910670515199)) {
-      warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T
-            " on outfile: overflow", filetime);
+    if (filetime > FETCH_OFF_T_C(910670515199))
+    {
+      warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T " on outfile: overflow", filetime);
       fetchx_unicodefree(tchar_filename);
       return;
     }
@@ -113,22 +119,23 @@ void setfiletime(fetch_off_t filetime, const char *filename,
                         FILE_SHARE_DELETE),
                        NULL, OPEN_EXISTING, 0, NULL);
     fetchx_unicodefree(tchar_filename);
-    if(hfile != INVALID_HANDLE_VALUE) {
+    if (hfile != INVALID_HANDLE_VALUE)
+    {
       fetch_off_t converted = ((fetch_off_t)filetime * 10000000) +
-        FETCH_OFF_T_C(116444736000000000);
+                              FETCH_OFF_T_C(116444736000000000);
       FILETIME ft;
       ft.dwLowDateTime = (DWORD)(converted & 0xFFFFFFFF);
       ft.dwHighDateTime = (DWORD)(converted >> 32);
-      if(!SetFileTime(hfile, NULL, &ft, &ft)) {
-        warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T
-              " on outfile: SetFileTime failed: GetLastError %u",
+      if (!SetFileTime(hfile, NULL, &ft, &ft))
+      {
+        warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T " on outfile: SetFileTime failed: GetLastError %u",
               filetime, (unsigned int)GetLastError());
       }
       CloseHandle(hfile);
     }
-    else {
-      warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T
-            " on outfile: CreateFile failed: GetLastError %u",
+    else
+    {
+      warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T " on outfile: CreateFile failed: GetLastError %u",
             filetime, (unsigned int)GetLastError());
     }
 
@@ -136,21 +143,21 @@ void setfiletime(fetch_off_t filetime, const char *filename,
     struct timeval times[2];
     times[0].tv_sec = times[1].tv_sec = (time_t)filetime;
     times[0].tv_usec = times[1].tv_usec = 0;
-    if(utimes(filename, times)) {
-      warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T
-            " on '%s': %s", filetime, filename, strerror(errno));
+    if (utimes(filename, times))
+    {
+      warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T " on '%s': %s", filetime, filename, strerror(errno));
     }
 
 #elif defined(HAVE_UTIME)
     struct utimbuf times;
     times.actime = (time_t)filetime;
     times.modtime = (time_t)filetime;
-    if(utime(filename, &times)) {
-      warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T
-            " on '%s': %s", filetime, filename, strerror(errno));
+    if (utime(filename, &times))
+    {
+      warnf(global, "Failed to set filetime %" FETCH_FORMAT_FETCH_OFF_T " on '%s': %s", filetime, filename, strerror(errno));
     }
 #endif
   }
 }
-#endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||        \
+#endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) || \
           defined(_WIN32) */

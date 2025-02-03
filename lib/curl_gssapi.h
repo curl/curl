@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,9 +55,9 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
 #endif
 
 /* Define our privacy and integrity protection values */
-#define GSSAUTH_P_NONE      1
+#define GSSAUTH_P_NONE 1
 #define GSSAUTH_P_INTEGRITY 2
-#define GSSAUTH_P_PRIVACY   4
+#define GSSAUTH_P_PRIVACY 4
 
 #endif /* HAVE_GSSAPI */
 #endif /* HEADER_FETCH_GSSAPI_H */

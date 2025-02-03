@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,10 +25,11 @@
 
 #include "memdebug.h"
 
-static char testdata[]=
-  "dummy";
+static char testdata[] =
+    "dummy";
 
-struct WriteThis {
+struct WriteThis
+{
   char *readptr;
   fetch_off_t sizeleft;
 };
@@ -38,20 +39,21 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   struct WriteThis *pooh = (struct WriteThis *)userp;
   int eof = !*pooh->readptr;
 
-  if(size*nmemb < 1)
+  if (size * nmemb < 1)
     return 0;
 
   eof = pooh->sizeleft <= 0;
-  if(!eof)
+  if (!eof)
     pooh->sizeleft--;
 
-  if(!eof) {
-    *ptr = *pooh->readptr;           /* copy one single byte */
-    pooh->readptr++;                 /* advance pointer */
-    return 1;                        /* we return 1 byte at a time! */
+  if (!eof)
+  {
+    *ptr = *pooh->readptr; /* copy one single byte */
+    pooh->readptr++;       /* advance pointer */
+    return 1;              /* we return 1 byte at a time! */
   }
 
-  return 0;                         /* no more data left to deliver */
+  return 0; /* no more data left to deliver */
 }
 
 FETCHcode test(char *URL)
@@ -67,7 +69,8 @@ FETCHcode test(char *URL)
    * delivers data bytes one at a time. Use chunked encoding for accurate test.
    */
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -85,7 +88,7 @@ FETCHcode test(char *URL)
 
   /* Prepare the callback structure. */
   pooh.readptr = testdata;
-  pooh.sizeleft = (fetch_off_t) strlen(testdata);
+  pooh.sizeleft = (fetch_off_t)strlen(testdata);
 
   /* Build the mime tree. */
   mime = fetch_mime_init(easy);
@@ -93,14 +96,15 @@ FETCHcode test(char *URL)
   fetch_mime_name(part, "field");
   fetch_mime_encoder(part, "base64");
   /* Using an undefined length forces chunked transfer. */
-  fetch_mime_data_cb(part, (fetch_off_t) -1, read_callback, NULL, NULL, &pooh);
+  fetch_mime_data_cb(part, (fetch_off_t)-1, read_callback, NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
   test_setopt(easy, FETCHOPT_MIMEPOST, mime);
 
   /* Send data. */
   res = fetch_easy_perform(easy);
-  if(res != FETCHE_OK) {
+  if (res != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_easy_perform() failed\n");
   }
 

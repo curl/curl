@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -76,28 +76,28 @@ static FETCHcode dict_do(struct Curl_easy *data, bool *done);
  */
 
 const struct Curl_handler Curl_handler_dict = {
-  "dict",                               /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  dict_do,                              /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  ZERO_NULL,                            /* follow */
-  PORT_DICT,                            /* defport */
-  FETCHPROTO_DICT,                       /* protocol */
-  FETCHPROTO_DICT,                       /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
+    "dict",                           /* scheme */
+    ZERO_NULL,                        /* setup_connection */
+    dict_do,                          /* do_it */
+    ZERO_NULL,                        /* done */
+    ZERO_NULL,                        /* do_more */
+    ZERO_NULL,                        /* connect_it */
+    ZERO_NULL,                        /* connecting */
+    ZERO_NULL,                        /* doing */
+    ZERO_NULL,                        /* proto_getsock */
+    ZERO_NULL,                        /* doing_getsock */
+    ZERO_NULL,                        /* domore_getsock */
+    ZERO_NULL,                        /* perform_getsock */
+    ZERO_NULL,                        /* disconnect */
+    ZERO_NULL,                        /* write_resp */
+    ZERO_NULL,                        /* write_resp_hd */
+    ZERO_NULL,                        /* connection_check */
+    ZERO_NULL,                        /* attach connection */
+    ZERO_NULL,                        /* follow */
+    PORT_DICT,                        /* defport */
+    FETCHPROTO_DICT,                  /* protocol */
+    FETCHPROTO_DICT,                  /* family */
+    PROTOPT_NONE | PROTOPT_NOURLQUERY /* flags */
 };
 
 #define DYN_DICT_WORD 10000
@@ -110,14 +110,15 @@ static char *unescape_word(const char *input)
 
   /* According to RFC2229 section 2.2, these letters need to be escaped with
      \[letter] */
-  for(ptr = input; *ptr; ptr++) {
+  for (ptr = input; *ptr; ptr++)
+  {
     char ch = *ptr;
-    if((ch <= 32) || (ch == 127) ||
-       (ch == '\'') || (ch == '\"') || (ch == '\\'))
+    if ((ch <= 32) || (ch == 127) ||
+        (ch == '\'') || (ch == '\"') || (ch == '\\'))
       result = Curl_dyn_addn(&out, "\\", 1);
-    if(!result)
+    if (!result)
       result = Curl_dyn_addn(&out, ptr, 1);
-    if(result)
+    if (result)
       return NULL;
   }
   return Curl_dyn_ptr(&out);
@@ -125,7 +126,7 @@ static char *unescape_word(const char *input)
 
 /* sendf() sends formatted data to the server */
 static FETCHcode sendf(struct Curl_easy *data,
-                      const char *fmt, ...) FETCH_PRINTF(2, 3);
+                       const char *fmt, ...) FETCH_PRINTF(2, 3);
 
 static FETCHcode sendf(struct Curl_easy *data, const char *fmt, ...)
 {
@@ -138,23 +139,25 @@ static FETCHcode sendf(struct Curl_easy *data, const char *fmt, ...)
   va_start(ap, fmt);
   s = vaprintf(fmt, ap); /* returns an allocated string */
   va_end(ap);
-  if(!s)
+  if (!s)
     return FETCHE_OUT_OF_MEMORY; /* failure */
 
   bytes_written = 0;
   write_len = strlen(s);
   sptr = s;
 
-  for(;;) {
+  for (;;)
+  {
     /* Write the buffer to the socket */
     result = Curl_xfer_send(data, sptr, write_len, FALSE, &bytes_written);
 
-    if(result)
+    if (result)
       break;
 
     Curl_debug(data, FETCHINFO_DATA_OUT, sptr, (size_t)bytes_written);
 
-    if((size_t)bytes_written != write_len) {
+    if ((size_t)bytes_written != write_len)
+    {
       /* if not all was written at once, we must advance the pointer, decrease
          the size left and try again! */
       write_len -= bytes_written;
@@ -186,43 +189,52 @@ static FETCHcode dict_do(struct Curl_easy *data, bool *done)
 
   /* url-decode path before further evaluation */
   result = Curl_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
-  if(result)
+  if (result)
     return result;
 
-  if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
-     strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
-     strncasecompare(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
+  if (strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH) - 1) ||
+      strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2) - 1) ||
+      strncasecompare(path, DICT_MATCH3, sizeof(DICT_MATCH3) - 1))
+  {
 
     word = strchr(path, ':');
-    if(word) {
+    if (word)
+    {
       word++;
       database = strchr(word, ':');
-      if(database) {
+      if (database)
+      {
         *database++ = (char)0;
         strategy = strchr(database, ':');
-        if(strategy) {
+        if (strategy)
+        {
           *strategy++ = (char)0;
           nthdef = strchr(strategy, ':');
-          if(nthdef) {
+          if (nthdef)
+          {
             *nthdef = (char)0;
           }
         }
       }
     }
 
-    if(!word || (*word == (char)0)) {
+    if (!word || (*word == (char)0))
+    {
       infof(data, "lookup word is missing");
       word = (char *)"default";
     }
-    if(!database || (*database == (char)0)) {
+    if (!database || (*database == (char)0))
+    {
       database = (char *)"!";
     }
-    if(!strategy || (*strategy == (char)0)) {
+    if (!strategy || (*strategy == (char)0))
+    {
       strategy = (char *)".";
     }
 
     eword = unescape_word(word);
-    if(!eword) {
+    if (!eword)
+    {
       result = FETCHE_OUT_OF_MEMORY;
       goto error;
     }
@@ -238,39 +250,47 @@ static FETCHcode dict_do(struct Curl_easy *data, bool *done)
                    strategy,
                    eword);
 
-    if(result) {
+    if (result)
+    {
       failf(data, "Failed sending DICT request");
       goto error;
     }
     Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE); /* no upload */
   }
-  else if(strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
-          strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
-          strncasecompare(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
+  else if (strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE) - 1) ||
+           strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2) - 1) ||
+           strncasecompare(path, DICT_DEFINE3, sizeof(DICT_DEFINE3) - 1))
+  {
 
     word = strchr(path, ':');
-    if(word) {
+    if (word)
+    {
       word++;
       database = strchr(word, ':');
-      if(database) {
+      if (database)
+      {
         *database++ = (char)0;
         nthdef = strchr(database, ':');
-        if(nthdef) {
+        if (nthdef)
+        {
           *nthdef = (char)0;
         }
       }
     }
 
-    if(!word || (*word == (char)0)) {
+    if (!word || (*word == (char)0))
+    {
       infof(data, "lookup word is missing");
       word = (char *)"default";
     }
-    if(!database || (*database == (char)0)) {
+    if (!database || (*database == (char)0))
+    {
       database = (char *)"!";
     }
 
     eword = unescape_word(word);
-    if(!eword) {
+    if (!eword)
+    {
       result = FETCHE_OUT_OF_MEMORY;
       goto error;
     }
@@ -278,34 +298,40 @@ static FETCHcode dict_do(struct Curl_easy *data, bool *done)
     result = sendf(data,
                    "CLIENT " LIBFETCH_NAME " " LIBFETCH_VERSION "\r\n"
                    "DEFINE "
-                   "%s "     /* database */
-                   "%s\r\n"  /* word */
+                   "%s "    /* database */
+                   "%s\r\n" /* word */
                    "QUIT\r\n",
                    database,
                    eword);
 
-    if(result) {
+    if (result)
+    {
       failf(data, "Failed sending DICT request");
       goto error;
     }
     Curl_xfer_setup1(data, FETCH_XFER_RECV, -1, FALSE);
   }
-  else {
+  else
+  {
 
     ppath = strchr(path, '/');
-    if(ppath) {
+    if (ppath)
+    {
       int i;
 
       ppath++;
-      for(i = 0; ppath[i]; i++) {
-        if(ppath[i] == ':')
+      for (i = 0; ppath[i]; i++)
+      {
+        if (ppath[i] == ':')
           ppath[i] = ' ';
       }
       result = sendf(data,
                      "CLIENT " LIBFETCH_NAME " " LIBFETCH_VERSION "\r\n"
                      "%s\r\n"
-                     "QUIT\r\n", ppath);
-      if(result) {
+                     "QUIT\r\n",
+                     ppath);
+      if (result)
+      {
         failf(data, "Failed sending DICT request");
         goto error;
       }

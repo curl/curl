@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -77,7 +77,6 @@ callback.
 
 #define MSG_OUT stdout /* Send info to stdout, change to stderr if you want */
 
-
 /* Global information, common to all connections */
 typedef struct _GlobalInfo
 {
@@ -89,7 +88,6 @@ typedef struct _GlobalInfo
   FILE *input;
 } GlobalInfo;
 
-
 /* Information associated with a specific easy handle */
 typedef struct _ConnInfo
 {
@@ -98,7 +96,6 @@ typedef struct _ConnInfo
   GlobalInfo *global;
   char error[FETCH_ERROR_SIZE];
 } ConnInfo;
-
 
 /* Information associated with a specific socket */
 typedef struct _SockInfo
@@ -120,9 +117,10 @@ static int multi_timer_cb(FETCHM *multi, long timeout_ms, GlobalInfo *g)
   (void)multi;
   printf("%s %li\n", __PRETTY_FUNCTION__, timeout_ms);
   ev_timer_stop(g->loop, &g->timer_event);
-  if(timeout_ms >= 0) {
+  if (timeout_ms >= 0)
+  {
     /* -1 means delete, other values are timeout times in milliseconds */
-    double  t = timeout_ms / 1000;
+    double t = timeout_ms / 1000;
     ev_timer_init(&g->timer_event, timer_cb, t, 0.);
     ev_timer_start(g->loop, &g->timer_event);
   }
@@ -132,9 +130,11 @@ static int multi_timer_cb(FETCHM *multi, long timeout_ms, GlobalInfo *g)
 /* Die if we get a bad FETCHMcode somewhere */
 static void mcode_or_die(const char *where, FETCHMcode code)
 {
-  if(FETCHM_OK != code) {
+  if (FETCHM_OK != code)
+  {
     const char *s;
-    switch(code) {
+    switch (code)
+    {
     case FETCHM_BAD_HANDLE:
       s = "FETCHM_BAD_HANDLE";
       break;
@@ -167,8 +167,6 @@ static void mcode_or_die(const char *where, FETCHMcode code)
   }
 }
 
-
-
 /* Check for completed transfers, and remove their easy handles */
 static void check_multi_info(GlobalInfo *g)
 {
@@ -180,8 +178,10 @@ static void check_multi_info(GlobalInfo *g)
   FETCHcode res;
 
   fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
-  while((msg = fetch_multi_info_read(g->multi, &msgs_left))) {
-    if(msg->msg == FETCHMSG_DONE) {
+  while ((msg = fetch_multi_info_read(g->multi, &msgs_left)))
+  {
+    if (msg->msg == FETCHMSG_DONE)
+    {
       easy = msg->easy_handle;
       res = msg->data.result;
       fetch_easy_getinfo(easy, FETCHINFO_PRIVATE, &conn);
@@ -195,8 +195,6 @@ static void check_multi_info(GlobalInfo *g)
   }
 }
 
-
-
 /* Called by libevent when we get action on a multi socket */
 static void event_cb(EV_P_ struct ev_io *w, int revents)
 {
@@ -205,14 +203,15 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
   int action;
 
   printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
-  g = (GlobalInfo*) w->data;
+  g = (GlobalInfo *)w->data;
 
   action = ((revents & EV_READ) ? FETCH_POLL_IN : 0) |
            ((revents & EV_WRITE) ? FETCH_POLL_OUT : 0);
   rc = fetch_multi_socket_action(g->multi, w->fd, action, &g->still_running);
   mcode_or_die("event_cb: fetch_multi_socket_action", rc);
   check_multi_info(g);
-  if(g->still_running <= 0) {
+  if (g->still_running <= 0)
+  {
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
     ev_timer_stop(g->loop, &g->timer_event);
   }
@@ -229,7 +228,7 @@ static void timer_cb(EV_P_ struct ev_timer *w, int revents)
   g = (GlobalInfo *)w->data;
 
   rc = fetch_multi_socket_action(g->multi, FETCH_SOCKET_TIMEOUT, 0,
-                                &g->still_running);
+                                 &g->still_running);
   mcode_or_die("timer_cb: fetch_multi_socket_action", rc);
   check_multi_info(g);
 }
@@ -238,14 +237,13 @@ static void timer_cb(EV_P_ struct ev_timer *w, int revents)
 static void remsock(SockInfo *f, GlobalInfo *g)
 {
   printf("%s  \n", __PRETTY_FUNCTION__);
-  if(f) {
-    if(f->evset)
+  if (f)
+  {
+    if (f->evset)
       ev_io_stop(g->loop, &f->ev);
     free(f);
   }
 }
-
-
 
 /* Assign information to a SockInfo structure */
 static void setsock(SockInfo *f, fetch_socket_t s, FETCH *e, int act,
@@ -259,15 +257,13 @@ static void setsock(SockInfo *f, fetch_socket_t s, FETCH *e, int act,
   f->sockfd = s;
   f->action = act;
   f->easy = e;
-  if(f->evset)
+  if (f->evset)
     ev_io_stop(g->loop, &f->ev);
   ev_io_init(&f->ev, event_cb, f->sockfd, kind);
   f->ev.data = g;
   f->evset = 1;
   ev_io_start(g->loop, &f->ev);
 }
-
-
 
 /* Initialize a new SockInfo structure */
 static void addsock(fetch_socket_t s, FETCH *easy, int action, GlobalInfo *g)
@@ -282,25 +278,29 @@ static void addsock(fetch_socket_t s, FETCH *easy, int action, GlobalInfo *g)
 /* FETCHMOPT_SOCKETFUNCTION */
 static int sock_cb(FETCH *e, fetch_socket_t s, int what, void *cbp, void *sockp)
 {
-  GlobalInfo *g = (GlobalInfo*) cbp;
-  SockInfo *fdp = (SockInfo*) sockp;
-  const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE"};
+  GlobalInfo *g = (GlobalInfo *)cbp;
+  SockInfo *fdp = (SockInfo *)sockp;
+  const char *whatstr[] = {"none", "IN", "OUT", "INOUT", "REMOVE"};
 
   printf("%s e %p s %i what %i cbp %p sockp %p\n",
          __PRETTY_FUNCTION__, e, s, what, cbp, sockp);
 
   fprintf(MSG_OUT,
           "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
-  if(what == FETCH_POLL_REMOVE) {
+  if (what == FETCH_POLL_REMOVE)
+  {
     fprintf(MSG_OUT, "\n");
     remsock(fdp, g);
   }
-  else {
-    if(!fdp) {
+  else
+  {
+    if (!fdp)
+    {
       fprintf(MSG_OUT, "Adding data: %s\n", whatstr[what]);
       addsock(s, e, what, g);
     }
-    else {
+    else
+    {
       fprintf(MSG_OUT,
               "Changing action from %s to %s\n",
               whatstr[fdp->action], whatstr[what]);
@@ -310,12 +310,11 @@ static int sock_cb(FETCH *e, fetch_socket_t s, int what, void *cbp, void *sockp)
   return 0;
 }
 
-
 /* FETCHOPT_WRITEFUNCTION */
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
   size_t realsize = size * nmemb;
-  ConnInfo *conn = (ConnInfo*) data;
+  ConnInfo *conn = (ConnInfo *)data;
   (void)ptr;
   (void)conn;
   return realsize;
@@ -329,11 +328,9 @@ static int xferinfo_cb(void *p, fetch_off_t dltotal, fetch_off_t dlnow,
   (void)ult;
   (void)uln;
 
-  fprintf(MSG_OUT, "Progress: %s (%" FETCH_FORMAT_FETCH_OFF_T
-          "/%" FETCH_FORMAT_FETCH_OFF_T ")\n", conn->url, dlnow, dltotal);
+  fprintf(MSG_OUT, "Progress: %s (%" FETCH_FORMAT_FETCH_OFF_T "/%" FETCH_FORMAT_FETCH_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
-
 
 /* Create a new easy handle, and add it to the global fetch_multi */
 static void new_conn(const char *url, GlobalInfo *g)
@@ -342,10 +339,11 @@ static void new_conn(const char *url, GlobalInfo *g)
   FETCHMcode rc;
 
   conn = calloc(1, sizeof(ConnInfo));
-  conn->error[0]='\0';
+  conn->error[0] = '\0';
 
   conn->easy = fetch_easy_init();
-  if(!conn->easy) {
+  if (!conn->easy)
+  {
     fprintf(MSG_OUT, "fetch_easy_init() failed, exiting!\n");
     exit(2);
   }
@@ -382,16 +380,18 @@ static void fifo_cb(EV_P_ struct ev_io *w, int revents)
 
   (void)revents;
 
-  do {
-    s[0]='\0';
+  do
+  {
+    s[0] = '\0';
     rv = fscanf(g->input, "%1023s%n", s, &n);
-    s[n]='\0';
-    if(n && s[0]) {
-      new_conn(s, g);  /* if we read a URL, go get it! */
+    s[n] = '\0';
+    if (n && s[0])
+    {
+      new_conn(s, g); /* if we read a URL, go get it! */
     }
     else
       break;
-  } while(rv != EOF);
+  } while (rv != EOF);
 }
 
 /* Create a named pipe and tell libevent to monitor it */
@@ -402,20 +402,24 @@ static int init_fifo(GlobalInfo *g)
   fetch_socket_t sockfd;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
-  if(lstat (fifo, &st) == 0) {
-    if((st.st_mode & S_IFMT) == S_IFREG) {
+  if (lstat(fifo, &st) == 0)
+  {
+    if ((st.st_mode & S_IFMT) == S_IFREG)
+    {
       errno = EEXIST;
       perror("lstat");
       exit(1);
     }
   }
   unlink(fifo);
-  if(mkfifo (fifo, 0600) == -1) {
+  if (mkfifo(fifo, 0600) == -1)
+  {
     perror("mkfifo");
     exit(1);
   }
   sockfd = open(fifo, O_RDWR | O_NONBLOCK, 0);
-  if(sockfd == -1) {
+  if (sockfd == -1)
+  {
     perror("open");
     exit(1);
   }

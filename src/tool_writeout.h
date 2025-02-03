@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,8 +26,9 @@
 #include "tool_setup.h"
 #include "tool_operate.h"
 
-typedef enum {
-  VAR_NONE,       /* must be the first */
+typedef enum
+{
+  VAR_NONE, /* must be the first */
   VAR_APPCONNECT_TIME,
   VAR_CERT,
   VAR_CONNECT_TIME,
@@ -102,7 +103,8 @@ typedef enum {
   VAR_NUM_OF_VARS /* must be the last */
 } writeoutid;
 
-struct writeoutvar {
+struct writeoutvar
+{
   const char *name;
   writeoutid id;
   FETCHINFO ci;

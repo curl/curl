@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,14 +29,15 @@
 #ifndef FETCH_DISABLE_FORM_API
 
 /* used by FormAdd for temporary storage */
-struct FormInfo {
+struct FormInfo
+{
   char *name;
   size_t namelength;
   char *value;
   fetch_off_t contentslength;
   char *contenttype;
   long flags;
-  char *buffer;      /* pointer to existing buffer used for file upload */
+  char *buffer; /* pointer to existing buffer used for file upload */
   size_t bufferlength;
   char *showfilename; /* The filename to show. If not set, the actual
                          filename will be used */
@@ -50,10 +51,9 @@ struct FormInfo {
 };
 
 FETCHcode Curl_getformdata(FETCH *data,
-                          fetch_mimepart *,
-                          struct fetch_httppost *post,
-                          fetch_read_callback fread_func);
+                           fetch_mimepart *,
+                           struct fetch_httppost *post,
+                           fetch_read_callback fread_func);
 #endif /* FETCH_DISABLE_FORM_API */
-
 
 #endif /* HEADER_FETCH_FORMDATA_H */

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,7 +35,6 @@
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-
 static struct dynhds_entry *
 entry_new(const char *name, size_t namelen,
           const char *value, size_t valuelen, int opts)
@@ -46,7 +45,7 @@ entry_new(const char *name, size_t namelen,
   DEBUGASSERT(name);
   DEBUGASSERT(value);
   e = calloc(1, sizeof(*e) + namelen + valuelen + 2);
-  if(!e)
+  if (!e)
     return NULL;
   e->name = p = ((char *)e) + sizeof(*e);
   memcpy(p, name, namelen);
@@ -54,7 +53,7 @@ entry_new(const char *name, size_t namelen,
   e->value = p += namelen + 1; /* leave a \0 at the end of name */
   memcpy(p, value, valuelen);
   e->valuelen = valuelen;
-  if(opts & DYNHDS_OPT_LOWERCASE)
+  if (opts & DYNHDS_OPT_LOWERCASE)
     Curl_strntolower(e->name, e->name, e->namelen);
   return e;
 }
@@ -69,7 +68,7 @@ entry_append(struct dynhds_entry *e,
 
   DEBUGASSERT(value);
   e2 = calloc(1, sizeof(*e) + e->namelen + valuelen2 + 2);
-  if(!e2)
+  if (!e2)
     return NULL;
   e2->name = p = ((char *)e2) + sizeof(*e2);
   memcpy(p, e->name, e->namelen);
@@ -103,10 +102,12 @@ void Curl_dynhds_init(struct dynhds *dynhds, size_t max_entries,
 void Curl_dynhds_free(struct dynhds *dynhds)
 {
   DEBUGASSERT(dynhds);
-  if(dynhds->hds && dynhds->hds_len) {
+  if (dynhds->hds && dynhds->hds_len)
+  {
     size_t i;
     DEBUGASSERT(dynhds->hds);
-    for(i = 0; i < dynhds->hds_len; ++i) {
+    for (i = 0; i < dynhds->hds_len; ++i)
+    {
       entry_free(dynhds->hds[i]);
     }
   }
@@ -117,10 +118,12 @@ void Curl_dynhds_free(struct dynhds *dynhds)
 void Curl_dynhds_reset(struct dynhds *dynhds)
 {
   DEBUGASSERT(dynhds);
-  if(dynhds->hds_len) {
+  if (dynhds->hds_len)
+  {
     size_t i;
     DEBUGASSERT(dynhds->hds);
-    for(i = 0; i < dynhds->hds_len; ++i) {
+    for (i = 0; i < dynhds->hds_len; ++i)
+    {
       entry_free(dynhds->hds[i]);
       dynhds->hds[i] = NULL;
     }
@@ -148,9 +151,11 @@ struct dynhds_entry *Curl_dynhds_get(struct dynhds *dynhds, const char *name,
                                      size_t namelen)
 {
   size_t i;
-  for(i = 0; i < dynhds->hds_len; ++i) {
-    if(dynhds->hds[i]->namelen == namelen &&
-       strncasecompare(dynhds->hds[i]->name, name, namelen)) {
+  for (i = 0; i < dynhds->hds_len; ++i)
+  {
+    if (dynhds->hds[i]->namelen == namelen &&
+        strncasecompare(dynhds->hds[i]->name, name, namelen))
+    {
       return dynhds->hds[i];
     }
   }
@@ -163,33 +168,35 @@ struct dynhds_entry *Curl_dynhds_cget(struct dynhds *dynhds, const char *name)
 }
 
 FETCHcode Curl_dynhds_add(struct dynhds *dynhds,
-                         const char *name, size_t namelen,
-                         const char *value, size_t valuelen)
+                          const char *name, size_t namelen,
+                          const char *value, size_t valuelen)
 {
   struct dynhds_entry *entry = NULL;
   FETCHcode result = FETCHE_OUT_OF_MEMORY;
 
   DEBUGASSERT(dynhds);
-  if(dynhds->max_entries && dynhds->hds_len >= dynhds->max_entries)
+  if (dynhds->max_entries && dynhds->hds_len >= dynhds->max_entries)
     return FETCHE_OUT_OF_MEMORY;
-  if(dynhds->strs_len + namelen + valuelen > dynhds->max_strs_size)
+  if (dynhds->strs_len + namelen + valuelen > dynhds->max_strs_size)
     return FETCHE_OUT_OF_MEMORY;
 
-entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
-  if(!entry)
+  entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
+  if (!entry)
     goto out;
 
-  if(dynhds->hds_len + 1 >= dynhds->hds_allc) {
+  if (dynhds->hds_len + 1 >= dynhds->hds_allc)
+  {
     size_t nallc = dynhds->hds_len + 16;
     struct dynhds_entry **nhds;
 
-    if(dynhds->max_entries && nallc > dynhds->max_entries)
+    if (dynhds->max_entries && nallc > dynhds->max_entries)
       nallc = dynhds->max_entries;
 
     nhds = calloc(nallc, sizeof(struct dynhds_entry *));
-    if(!nhds)
+    if (!nhds)
       goto out;
-    if(dynhds->hds) {
+    if (dynhds->hds)
+    {
       memcpy(nhds, dynhds->hds,
              dynhds->hds_len * sizeof(struct dynhds_entry *));
       Curl_safefree(dynhds->hds);
@@ -203,19 +210,19 @@ entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
   result = FETCHE_OK;
 
 out:
-  if(entry)
+  if (entry)
     entry_free(entry);
   return result;
 }
 
 FETCHcode Curl_dynhds_cadd(struct dynhds *dynhds,
-                          const char *name, const char *value)
+                           const char *name, const char *value)
 {
   return Curl_dynhds_add(dynhds, name, strlen(name), value, strlen(value));
 }
 
 FETCHcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
-                                 const char *line, size_t line_len)
+                                  const char *line, size_t line_len)
 {
   const char *p;
   const char *name;
@@ -223,47 +230,51 @@ FETCHcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
   const char *value;
   size_t valuelen, i;
 
-  if(!line || !line_len)
+  if (!line || !line_len)
     return FETCHE_OK;
 
-  if((line[0] == ' ') || (line[0] == '\t')) {
+  if ((line[0] == ' ') || (line[0] == '\t'))
+  {
     struct dynhds_entry *e, *e2;
     /* header continuation, yikes! */
-    if(!dynhds->hds_len)
+    if (!dynhds->hds_len)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
 
-    while(line_len && ISBLANK(line[0])) {
+    while (line_len && ISBLANK(line[0]))
+    {
       ++line;
       --line_len;
     }
-    if(!line_len)
+    if (!line_len)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
-    e = dynhds->hds[dynhds->hds_len-1];
+    e = dynhds->hds[dynhds->hds_len - 1];
     e2 = entry_append(e, line, line_len);
-    if(!e2)
+    if (!e2)
       return FETCHE_OUT_OF_MEMORY;
-    dynhds->hds[dynhds->hds_len-1] = e2;
+    dynhds->hds[dynhds->hds_len - 1] = e2;
     entry_free(e);
     return FETCHE_OK;
   }
-  else {
+  else
+  {
     p = memchr(line, ':', line_len);
-    if(!p)
+    if (!p)
       return FETCHE_BAD_FUNCTION_ARGUMENT;
     name = line;
     namelen = p - line;
     p++; /* move past the colon */
-    for(i = namelen + 1; i < line_len; ++i, ++p) {
-      if(!ISBLANK(*p))
+    for (i = namelen + 1; i < line_len; ++i, ++p)
+    {
+      if (!ISBLANK(*p))
         break;
     }
     value = p;
     valuelen = line_len - i;
 
     p = memchr(value, '\r', valuelen);
-    if(!p)
+    if (!p)
       p = memchr(value, '\n', valuelen);
-    if(p)
+    if (p)
       valuelen = (size_t)(p - value);
 
     return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
@@ -293,11 +304,13 @@ size_t Curl_dynhds_count_name(struct dynhds *dynhds,
                               const char *name, size_t namelen)
 {
   size_t n = 0;
-  if(dynhds->hds_len) {
+  if (dynhds->hds_len)
+  {
     size_t i;
-    for(i = 0; i < dynhds->hds_len; ++i) {
-      if((namelen == dynhds->hds[i]->namelen) &&
-         strncasecompare(name, dynhds->hds[i]->name, namelen))
+    for (i = 0; i < dynhds->hds_len; ++i)
+    {
+      if ((namelen == dynhds->hds[i]->namelen) &&
+          strncasecompare(name, dynhds->hds[i]->name, namelen))
         ++n;
     }
   }
@@ -310,8 +323,8 @@ size_t Curl_dynhds_ccount_name(struct dynhds *dynhds, const char *name)
 }
 
 FETCHcode Curl_dynhds_set(struct dynhds *dynhds,
-                         const char *name, size_t namelen,
-                         const char *value, size_t valuelen)
+                          const char *name, size_t namelen,
+                          const char *value, size_t valuelen)
 {
   Curl_dynhds_remove(dynhds, name, namelen);
   return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
@@ -321,18 +334,22 @@ size_t Curl_dynhds_remove(struct dynhds *dynhds,
                           const char *name, size_t namelen)
 {
   size_t n = 0;
-  if(dynhds->hds_len) {
+  if (dynhds->hds_len)
+  {
     size_t i, len;
-    for(i = 0; i < dynhds->hds_len; ++i) {
-      if((namelen == dynhds->hds[i]->namelen) &&
-         strncasecompare(name, dynhds->hds[i]->name, namelen)) {
+    for (i = 0; i < dynhds->hds_len; ++i)
+    {
+      if ((namelen == dynhds->hds[i]->namelen) &&
+          strncasecompare(name, dynhds->hds[i]->name, namelen))
+      {
         ++n;
         --dynhds->hds_len;
         dynhds->strs_len -= (dynhds->hds[i]->namelen +
                              dynhds->hds[i]->valuelen);
         entry_free(dynhds->hds[i]);
         len = dynhds->hds_len - i; /* remaining entries */
-        if(len) {
+        if (len)
+        {
           memmove(&dynhds->hds[i], &dynhds->hds[i + 1],
                   len * sizeof(dynhds->hds[i]));
         }
@@ -355,14 +372,15 @@ FETCHcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
   FETCHcode result = FETCHE_OK;
   size_t i;
 
-  if(!dynhds->hds_len)
+  if (!dynhds->hds_len)
     return result;
 
-  for(i = 0; i < dynhds->hds_len; ++i) {
+  for (i = 0; i < dynhds->hds_len; ++i)
+  {
     result = Curl_dyn_addf(dbuf, "%.*s: %.*s\r\n",
-               (int)dynhds->hds[i]->namelen, dynhds->hds[i]->name,
-               (int)dynhds->hds[i]->valuelen, dynhds->hds[i]->value);
-    if(result)
+                           (int)dynhds->hds[i]->namelen, dynhds->hds[i]->name,
+                           (int)dynhds->hds[i]->valuelen, dynhds->hds[i]->value);
+    if (result)
       break;
   }
 
@@ -377,10 +395,11 @@ nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount)
   size_t i;
 
   *pcount = 0;
-  if(!nva)
+  if (!nva)
     return NULL;
 
-  for(i = 0; i < dynhds->hds_len; ++i) {
+  for (i = 0; i < dynhds->hds_len; ++i)
+  {
     struct dynhds_entry *e = dynhds->hds[i];
     DEBUGASSERT(e);
     nva[i].name = (unsigned char *)e->name;

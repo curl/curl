@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,18 +33,20 @@
 struct fetchtime Curl_now(void)
 {
   struct fetchtime now;
-  if(Curl_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
+  if (Curl_isVistaOrGreater)
+  { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
     now.tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
     now.tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
                         Curl_freq.QuadPart);
   }
-  else {
+  else
+  {
     /* Disable /analyze warning that GetTickCount64 is preferred  */
 #if defined(_MSC_VER)
 #pragma warning(push)
-#pragma warning(disable:28159)
+#pragma warning(disable : 28159)
 #endif
     DWORD milliseconds = GetTickCount();
 #if defined(_MSC_VER)
@@ -57,8 +59,8 @@ struct fetchtime Curl_now(void)
   return now;
 }
 
-#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||  \
-  defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
+#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) || \
+    defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 
 struct fetchtime Curl_now(void)
 {
@@ -81,31 +83,33 @@ struct fetchtime Curl_now(void)
   ** called on unsupported OS version.
   */
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
-        (HAVE_BUILTIN_AVAILABLE == 1)
+    (HAVE_BUILTIN_AVAILABLE == 1)
   bool have_clock_gettime = FALSE;
-  if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
+  if (__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
     have_clock_gettime = TRUE;
 #endif
 
 #ifdef HAVE_CLOCK_GETTIME_MONOTONIC_RAW
-  if(
-#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) &&    \
-        (HAVE_BUILTIN_AVAILABLE == 1)
-    have_clock_gettime &&
+  if (
+#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
+    (HAVE_BUILTIN_AVAILABLE == 1)
+      have_clock_gettime &&
 #endif
-    (0 == clock_gettime(CLOCK_MONOTONIC_RAW, &tsnow))) {
+      (0 == clock_gettime(CLOCK_MONOTONIC_RAW, &tsnow)))
+  {
     cnow.tv_sec = tsnow.tv_sec;
     cnow.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   else
 #endif
 
-  if(
+      if (
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
-        (HAVE_BUILTIN_AVAILABLE == 1)
-    have_clock_gettime &&
+    (HAVE_BUILTIN_AVAILABLE == 1)
+          have_clock_gettime &&
 #endif
-    (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
+          (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)))
+  {
     cnow.tv_sec = tsnow.tv_sec;
     cnow.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
@@ -115,13 +119,15 @@ struct fetchtime Curl_now(void)
   ** runtime. When this occurs simply fallback to other time source.
   */
 #ifdef HAVE_GETTIMEOFDAY
-  else {
+  else
+  {
     (void)gettimeofday(&now, NULL);
     cnow.tv_sec = now.tv_sec;
     cnow.tv_usec = (int)now.tv_usec;
   }
 #else
-  else {
+  else
+  {
     cnow.tv_sec = time(NULL);
     cnow.tv_usec = 0;
   }
@@ -146,8 +152,8 @@ struct fetchtime Curl_now(void)
   struct fetchtime cnow;
   uint64_t usecs;
 
-  if(0 == timebase.denom)
-    (void) mach_timebase_info(&timebase);
+  if (0 == timebase.denom)
+    (void)mach_timebase_info(&timebase);
 
   usecs = mach_absolute_time();
   usecs *= timebase.numer;
@@ -200,12 +206,12 @@ struct fetchtime Curl_now(void)
  */
 timediff_t Curl_timediff(struct fetchtime newer, struct fetchtime older)
 {
-  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
-  if(diff >= (TIMEDIFF_T_MAX/1000))
+  timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
+  if (diff >= (TIMEDIFF_T_MAX / 1000))
     return TIMEDIFF_T_MAX;
-  else if(diff <= (TIMEDIFF_T_MIN/1000))
+  else if (diff <= (TIMEDIFF_T_MIN / 1000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000 + (newer.tv_usec-older.tv_usec)/1000;
+  return diff * 1000 + (newer.tv_usec - older.tv_usec) / 1000;
 }
 
 /*
@@ -214,12 +220,12 @@ timediff_t Curl_timediff(struct fetchtime newer, struct fetchtime older)
  */
 timediff_t Curl_timediff_ceil(struct fetchtime newer, struct fetchtime older)
 {
-  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
-  if(diff >= (TIMEDIFF_T_MAX/1000))
+  timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
+  if (diff >= (TIMEDIFF_T_MAX / 1000))
     return TIMEDIFF_T_MAX;
-  else if(diff <= (TIMEDIFF_T_MIN/1000))
+  else if (diff <= (TIMEDIFF_T_MIN / 1000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000 + (newer.tv_usec - older.tv_usec + 999)/1000;
+  return diff * 1000 + (newer.tv_usec - older.tv_usec + 999) / 1000;
 }
 
 /*
@@ -228,10 +234,10 @@ timediff_t Curl_timediff_ceil(struct fetchtime newer, struct fetchtime older)
  */
 timediff_t Curl_timediff_us(struct fetchtime newer, struct fetchtime older)
 {
-  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
-  if(diff >= (TIMEDIFF_T_MAX/1000000))
+  timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
+  if (diff >= (TIMEDIFF_T_MAX / 1000000))
     return TIMEDIFF_T_MAX;
-  else if(diff <= (TIMEDIFF_T_MIN/1000000))
+  else if (diff <= (TIMEDIFF_T_MIN / 1000000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000000 + newer.tv_usec-older.tv_usec;
+  return diff * 1000000 + newer.tv_usec - older.tv_usec;
 }

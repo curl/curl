@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#define Curl_headersep(x) ((((x)==':') || ((x)==';')))
+#define Curl_headersep(x) ((((x) == ':') || ((x) == ';')))
 char *Curl_checkheaders(const struct Curl_easy *data,
                         const char *thisheader,
                         const size_t thislen);
@@ -52,8 +52,8 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
  *                 bytes of the response
  */
 FETCHcode Curl_xfer_write_resp(struct Curl_easy *data,
-                              const char *buf, size_t blen,
-                              bool is_eos);
+                               const char *buf, size_t blen,
+                               bool is_eos);
 
 /**
  * Write a single "header" line from a server response.
@@ -62,12 +62,12 @@ FETCHcode Curl_xfer_write_resp(struct Curl_easy *data,
  * @param is_eos   TRUE iff this is the end of the response
  */
 FETCHcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
-                                 const char *hd0, size_t hdlen, bool is_eos);
+                                  const char *hd0, size_t hdlen, bool is_eos);
 
-#define FETCH_XFER_NOP     (0)
-#define FETCH_XFER_RECV    (1<<(0))
-#define FETCH_XFER_SEND    (1<<(1))
-#define FETCH_XFER_SENDRECV (FETCH_XFER_RECV|FETCH_XFER_SEND)
+#define FETCH_XFER_NOP (0)
+#define FETCH_XFER_RECV (1 << (0))
+#define FETCH_XFER_SEND (1 << (1))
+#define FETCH_XFER_SENDRECV (FETCH_XFER_RECV | FETCH_XFER_SEND)
 
 /**
  * The transfer is neither receiving nor sending now.
@@ -120,8 +120,8 @@ FETCHcode Curl_xfer_flush(struct Curl_easy *data);
  * Will return FETCHE_OK on blocking with (*pnwritten == 0).
  */
 FETCHcode Curl_xfer_send(struct Curl_easy *data,
-                        const void *buf, size_t blen, bool eos,
-                        size_t *pnwritten);
+                         const void *buf, size_t blen, bool eos,
+                         size_t *pnwritten);
 
 /**
  * Receive data on the socket/connection filter designated
@@ -129,8 +129,8 @@ FETCHcode Curl_xfer_send(struct Curl_easy *data,
  * Will return FETCHE_AGAIN on blocking with (*pnrcvd == 0).
  */
 FETCHcode Curl_xfer_recv(struct Curl_easy *data,
-                        char *buf, size_t blen,
-                        ssize_t *pnrcvd);
+                         char *buf, size_t blen,
+                         ssize_t *pnrcvd);
 
 FETCHcode Curl_xfer_send_close(struct Curl_easy *data);
 FETCHcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done);

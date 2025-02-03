@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,19 +28,21 @@
 extern const struct Curl_handler Curl_handler_mqtt;
 #endif
 
-enum mqttstate {
-  MQTT_FIRST,             /* 0 */
-  MQTT_REMAINING_LENGTH,  /* 1 */
-  MQTT_CONNACK,           /* 2 */
-  MQTT_SUBACK,            /* 3 */
-  MQTT_SUBACK_COMING,     /* 4 - the SUBACK remainder */
-  MQTT_PUBWAIT,    /* 5 - wait for publish */
-  MQTT_PUB_REMAIN,  /* 6 - wait for the remainder of the publish */
+enum mqttstate
+{
+  MQTT_FIRST,            /* 0 */
+  MQTT_REMAINING_LENGTH, /* 1 */
+  MQTT_CONNACK,          /* 2 */
+  MQTT_SUBACK,           /* 3 */
+  MQTT_SUBACK_COMING,    /* 4 - the SUBACK remainder */
+  MQTT_PUBWAIT,          /* 5 - wait for publish */
+  MQTT_PUB_REMAIN,       /* 6 - wait for the remainder of the publish */
 
   MQTT_NOSTATE /* 7 - never used an actual state */
 };
 
-struct mqtt_conn {
+struct mqtt_conn
+{
   enum mqttstate state;
   enum mqttstate nextstate; /* switch to this after remaining length is
                                done */
@@ -48,7 +50,8 @@ struct mqtt_conn {
 };
 
 /* protocol-specific transfer-related data */
-struct MQTT {
+struct MQTT
+{
   char *sendleftovers;
   size_t nsend; /* size of sendleftovers */
 

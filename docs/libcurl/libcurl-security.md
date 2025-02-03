@@ -10,7 +10,9 @@ Protocol:
   - All
 Added-in: n/a
 ---
+
 <!-- markdown-link-check-disable -->
+
 # NAME
 
 libfetch-security - security considerations when using libfetch
@@ -38,7 +40,7 @@ should be aware.
 
 If you use a command line tool (such as fetch) that uses libfetch, and you give
 options to the tool on the command line those options can get read by other
-users of your system when they use *ps* or other tools to list currently
+users of your system when they use _ps_ or other tools to list currently
 running processes.
 
 To avoid these problems, never feed sensitive things to programs using command
@@ -243,9 +245,11 @@ mitigate against this by disabling cookies or clearing them between requests.
 
 SCP URLs can contain raw commands within the scp: URL, which is a side effect
 of how the SCP protocol is designed. E.g.
-~~~
+
+```
   scp://user:pass@host/a;date >/tmp/test;
-~~~
+```
+
 Applications must not allow unsanitized SCP: URLs to be passed in for
 downloads.
 
@@ -307,7 +311,7 @@ Remedies:
 
 ## Use --proto
 
-fetch command lines can use *--proto* to limit what URL schemes it accepts
+fetch command lines can use _--proto_ to limit what URL schemes it accepts
 
 ## Use FETCHOPT_PROTOCOLS_STR
 
@@ -368,7 +372,7 @@ hard to avoid.
 
 # Active FTP passes on the local IP address
 
-If you use fetch/libfetch to do *active* FTP transfers, fetch passes on the
+If you use fetch/libfetch to do _active_ FTP transfers, fetch passes on the
 address of your local IP to the remote server - even when for example using a
 SOCKS or HTTP proxy in between fetch and the target server.
 
@@ -403,7 +407,7 @@ transactions.
 # Server-supplied Names
 
 A server can supply data which the application may, in some cases, use as a
-filename. The fetch command-line tool does this with *--remote-header-name*,
+filename. The fetch command-line tool does this with _--remote-header-name_,
 using the Content-disposition: header to generate a filename. An application
 could also use FETCHINFO_EFFECTIVE_URL(3) to generate a filename from a
 server-supplied redirect URL. Special care must be taken to sanitize such
@@ -453,11 +457,11 @@ controlled by the user.
 
 # File descriptors, fork and NTLM
 
-An application that uses libfetch and invokes *fork()* gets all file
+An application that uses libfetch and invokes _fork()_ gets all file
 descriptors duplicated in the child process, including the ones libfetch
 created.
 
-libfetch itself uses *fork()* and *execl()* if told to use the
+libfetch itself uses _fork()_ and _execl()_ if told to use the
 **FETCHAUTH_NTLM_WB** authentication method which then invokes the helper
 command in a child process with file descriptors duplicated. Make sure that
 only the trusted and reliable helper program is invoked.
@@ -489,11 +493,11 @@ If libfetch is built with PSL (**Public Suffix List**) support, it detects and
 discards cookies that are specified for such suffix domains that should not be
 allowed to have cookies.
 
-if libfetch is *not* built with PSL support, it has no ability to stop super
+if libfetch is _not_ built with PSL support, it has no ability to stop super
 cookies.
 
 # Report Security Problems
 
 Should you detect or just suspect a security problem in libfetch or fetch,
 contact the project fetch security team immediately. See
-https://fetch.se/dev/secprocess.html for details.
+https://curl.se/dev/secprocess.html for details.

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,16 +29,18 @@
 
 /* a client-side WS frame decoder, parsing frame headers and
  * payload, keeping track of current position and stats */
-enum ws_dec_state {
+enum ws_dec_state
+{
   WS_DEC_INIT,
   WS_DEC_HEAD,
   WS_DEC_PAYLOAD
 };
 
-struct ws_decoder {
-  int frame_age;        /* zero */
-  int frame_flags;      /* See the FETCHWS_* defines */
-  fetch_off_t payload_offset;   /* the offset parsing is at */
+struct ws_decoder
+{
+  int frame_age;              /* zero */
+  int frame_flags;            /* See the FETCHWS_* defines */
+  fetch_off_t payload_offset; /* the offset parsing is at */
   fetch_off_t payload_len;
   unsigned char head[10];
   int head_len, head_total;
@@ -47,25 +49,27 @@ struct ws_decoder {
 
 /* a client-side WS frame encoder, generating frame headers and
  * converting payloads, tracking remaining data in current frame */
-struct ws_encoder {
-  fetch_off_t payload_len;  /* payload length of current frame */
-  fetch_off_t payload_remain;  /* remaining payload of current */
-  unsigned int xori; /* xor index */
-  unsigned char mask[4]; /* 32-bit mask for this connection */
-  unsigned char firstbyte; /* first byte of frame we encode */
-  BIT(contfragment); /* set TRUE if the previous fragment sent was not final */
+struct ws_encoder
+{
+  fetch_off_t payload_len;    /* payload length of current frame */
+  fetch_off_t payload_remain; /* remaining payload of current */
+  unsigned int xori;          /* xor index */
+  unsigned char mask[4];      /* 32-bit mask for this connection */
+  unsigned char firstbyte;    /* first byte of frame we encode */
+  BIT(contfragment);          /* set TRUE if the previous fragment sent was not final */
 };
 
 /* A websocket connection with en- and decoder that treat frames
  * and keep track of boundaries. */
-struct websocket {
-  struct Curl_easy *data; /* used for write callback handling */
-  struct ws_decoder dec;  /* decode of we frames */
-  struct ws_encoder enc;  /* decode of we frames */
-  struct bufq recvbuf;    /* raw data from the server */
-  struct bufq sendbuf;    /* raw data to be sent to the server */
-  struct fetch_ws_frame frame;  /* the current WS FRAME received */
-  size_t sendbuf_payload; /* number of payload bytes in sendbuf */
+struct websocket
+{
+  struct Curl_easy *data;      /* used for write callback handling */
+  struct ws_decoder dec;       /* decode of we frames */
+  struct ws_encoder enc;       /* decode of we frames */
+  struct bufq recvbuf;         /* raw data from the server */
+  struct bufq sendbuf;         /* raw data to be sent to the server */
+  struct fetch_ws_frame frame; /* the current WS FRAME received */
+  size_t sendbuf_payload;      /* number of payload bytes in sendbuf */
 };
 
 FETCHcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
@@ -76,9 +80,8 @@ extern const struct Curl_handler Curl_handler_ws;
 extern const struct Curl_handler Curl_handler_wss;
 #endif
 
-
 #else
-#define Curl_ws_request(x,y) FETCHE_OK
+#define Curl_ws_request(x, y) FETCHE_OK
 #define Curl_ws_free(x) Curl_nop_stmt
 #endif
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,38 +42,43 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
 
   unsigned int width = 0x10;
 
-  if(nohex)
+  if (nohex)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
   fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
-  for(i = 0; i < size; i += width) {
+  for (i = 0; i < size; i += width)
+  {
 
     fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
-    if(!nohex) {
+    if (!nohex)
+    {
       /* hex not disabled, show it */
-      for(c = 0; c < width; c++)
-        if(i + c < size)
+      for (c = 0; c < width; c++)
+        if (i + c < size)
           fprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
 
-    for(c = 0; (c < width) && (i + c < size); c++) {
+    for (c = 0; (c < width) && (i + c < size); c++)
+    {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if(nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
-         ptr[i + c + 1] == 0x0A) {
+      if (nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
+          ptr[i + c + 1] == 0x0A)
+      {
         i += (c + 2 - width);
         break;
       }
       fprintf(stream, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
-         ptr[i + c + 2] == 0x0A) {
+      if (nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
+          ptr[i + c + 2] == 0x0A)
+      {
         i += (c + 3 - width);
         break;
       }
@@ -83,17 +88,17 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
   fflush(stream);
 }
 
-static
-int my_trace(FETCH *handle, fetch_infotype type,
-             unsigned char *data, size_t size,
-             void *userp)
+static int my_trace(FETCH *handle, fetch_infotype type,
+                    unsigned char *data, size_t size,
+                    void *userp)
 {
   const char *text;
 
   (void)userp;
   (void)handle; /* prevent compiler warning */
 
-  switch(type) {
+  switch (type)
+  {
   case FETCHINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
     return 0;
@@ -141,17 +146,18 @@ int main(void)
   /* add the individual transfers */
   fetch_multi_add_handle(multi_handle, http_handle);
 
-  do {
+  do
+  {
     FETCHMcode mc = fetch_multi_perform(multi_handle, &still_running);
 
-    if(still_running)
+    if (still_running)
       /* wait for activity, timeout or "nothing" */
       mc = fetch_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-    if(mc)
+    if (mc)
       break;
 
-  } while(still_running);
+  } while (still_running);
 
   fetch_multi_cleanup(multi_handle);
 

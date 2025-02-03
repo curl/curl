@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,7 +43,8 @@ FETCHcode test(char *URL)
 
   start_test_timing();
 
-  if(!libtest_arg2) {
+  if (!libtest_arg2)
+  {
 #ifdef LIB529
     /* test 529 */
     fprintf(stderr, "Usage: lib529 [url] [uploadfile]\n");
@@ -55,7 +56,8 @@ FETCHcode test(char *URL)
   }
 
   hd_src = fopen(libtest_arg2, "rb");
-  if(!hd_src) {
+  if (!hd_src)
+  {
     fprintf(stderr, "fopen failed with error: %d (%s)\n",
             errno, strerror(errno));
     fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
@@ -64,7 +66,8 @@ FETCHcode test(char *URL)
 
   /* get the file size of the local file */
   hd = fstat(fileno(hd_src), &file_info);
-  if(hd == -1) {
+  if (hd == -1)
+  {
     /* can't open file, bail out */
     fprintf(stderr, "fstat() failed with error: %d (%s)\n",
             errno, strerror(errno));
@@ -74,7 +77,8 @@ FETCHcode test(char *URL)
   }
 
   res_global_init(FETCH_GLOBAL_ALL);
-  if(res) {
+  if (res)
+  {
     fclose(hd_src);
     return res;
   }
@@ -111,7 +115,8 @@ FETCHcode test(char *URL)
 
   multi_add_handle(m, fetch);
 
-  for(;;) {
+  for (;;)
+  {
     struct timeval interval;
     fd_set rd, wr, exc;
     int maxfd = -99;
@@ -123,7 +128,7 @@ FETCHcode test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running)
+    if (!running)
       break; /* done */
 
     FD_ZERO(&rd);

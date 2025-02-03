@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,14 +29,15 @@
 #include <sys/un.h> /* for sockaddr_un */
 #endif
 
-typedef union {
-  struct sockaddr      sa;
-  struct sockaddr_in   sa4;
+typedef union
+{
+  struct sockaddr sa;
+  struct sockaddr_in sa4;
 #ifdef USE_IPV6
-  struct sockaddr_in6  sa6;
+  struct sockaddr_in6 sa6;
 #endif
 #ifdef USE_UNIX_SOCKETS
-  struct sockaddr_un   sau;
+  struct sockaddr_un sau;
 #endif
 } srvr_sockaddr_union_t;
 

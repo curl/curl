@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -66,7 +66,8 @@ static FETCHcode do_one_request(FETCHM *m, char *URL, char *resolve)
 
   abort_on_test_timeout();
 
-  while(still_running) {
+  while (still_running)
+  {
     struct timeval timeout;
     fd_set fdread, fdwrite, fdexcep;
     int maxfd = -99;
@@ -86,13 +87,15 @@ static FETCHcode do_one_request(FETCHM *m, char *URL, char *resolve)
     abort_on_test_timeout();
   }
 
-  do {
+  do
+  {
     msg = fetch_multi_info_read(m, &msgs_left);
-    if(msg && msg->msg == FETCHMSG_DONE && msg->easy_handle == fetchs) {
+    if (msg && msg->msg == FETCHMSG_DONE && msg->easy_handle == fetchs)
+    {
       res = msg->data.result;
       break;
     }
-  } while(msg);
+  } while (msg);
 
 test_cleanup:
 
@@ -123,19 +126,21 @@ FETCHcode test(char *URL)
   fetch_global_trace("all");
   multi_init(multi);
 
-  for(i = 1; i <= count; i++) {
+  for (i = 1; i <= count; i++)
+  {
     char target_url[256];
     msnprintf(target_url, sizeof(target_url),
               "http://testserver.example.com:%s/%s%04d", port, path, i);
 
     /* second request must succeed like the first one */
     res = do_one_request(multi, target_url, dns_entry);
-    if(res != FETCHE_OK) {
+    if (res != FETCHE_OK)
+    {
       fprintf(stderr, "request %s failed with %d\n", target_url, res);
       goto test_cleanup;
     }
 
-    if(i < count)
+    if (i < count)
       sleep(DNS_TIMEOUT + 1);
   }
 

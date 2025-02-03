@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,7 +55,8 @@ FETCHcode test(char *URL)
 
   abort_on_test_timeout();
 
-  while(still_running) {
+  while (still_running)
+  {
     struct timeval timeout;
     fd_set fdread;
     fd_set fdwrite;
@@ -82,7 +83,7 @@ FETCHcode test(char *URL)
   }
 
   msg = fetch_multi_info_read(multi, &still_running);
-  if(msg)
+  if (msg)
     /* this should now contain a result code from the easy handle,
        get it */
     i = msg->data.result;
@@ -95,7 +96,7 @@ test_cleanup:
   fetch_easy_cleanup(fetchs);
   fetch_global_cleanup();
 
-  if(res)
+  if (res)
     i = res;
 
   return i; /* return the final return code */

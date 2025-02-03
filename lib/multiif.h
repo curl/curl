@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -34,7 +34,7 @@ bool Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 FETCHMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
 void Curl_attach_connection(struct Curl_easy *data,
-                             struct connectdata *conn);
+                            struct connectdata *conn);
 void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
@@ -62,7 +62,7 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize,
 #define GETSOCK_READSOCK(x) (1 << (x))
 
 /* mask for checking if read and/or write is set for index x */
-#define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
+#define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x) | GETSOCK_WRITESOCK(x))
 
 /*
  * Curl_multi_closed()
@@ -81,17 +81,16 @@ void Curl_multi_closed(struct Curl_easy *data, fetch_socket_t s);
  * differences are seen.
  */
 FETCHMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
-                                struct Curl_easy *data,
-                                struct easy_pollset *ps,
-                                struct easy_pollset *last_ps);
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps,
+                                 struct easy_pollset *last_ps);
 
 /*
  * Add a handle and move it into PERFORM state at once. For pushed streams.
  */
 FETCHMcode Curl_multi_add_perform(struct Curl_multi *multi,
-                                 struct Curl_easy *data,
-                                 struct connectdata *conn);
-
+                                  struct Curl_easy *data,
+                                  struct connectdata *conn);
 
 /* Return the value of the FETCHMOPT_MAX_CONCURRENT_STREAMS option */
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
@@ -112,7 +111,7 @@ unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
  *         FETCHE_AGAIN if the buffer is borrowed already.
  */
 FETCHcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
-                                   char **pbuf, size_t *pbuflen);
+                                     char **pbuf, size_t *pbuflen);
 /**
  * Release the borrowed buffer. All references into the buffer become
  * invalid after this.
@@ -136,7 +135,7 @@ void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf);
  *         FETCHE_AGAIN if the buffer is borrowed already.
  */
 FETCHcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
-                                      char **pbuf, size_t *pbuflen);
+                                       char **pbuf, size_t *pbuflen);
 
 /**
  * Release the borrowed upload buffer. All references into the buffer become
@@ -161,7 +160,7 @@ void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf);
  *         FETCHE_AGAIN if the buffer is borrowed already.
  */
 FETCHcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
-                                        size_t blen, char **pbuf);
+                                         size_t blen, char **pbuf);
 /**
  * Release the borrowed buffer. All references into the buffer become
  * invalid after this.

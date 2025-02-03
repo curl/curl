@@ -17,7 +17,7 @@ HackerOne program](https://hackerone.com/fetch).
 
 After you have reported a security issue, it has been deemed credible, and a
 patch and advisory has been made public, you may be eligible for a bounty from
-this program. See the [Security Process](https://fetch.se/dev/secprocess.html)
+this program. See the [Security Process](https://curl.se/dev/secprocess.html)
 document for how we work with security issues.
 
 ## What are the reward amounts?

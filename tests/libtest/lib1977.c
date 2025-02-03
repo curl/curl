@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,15 +43,14 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_FETCHU, fetchu);
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   effective = NULL;
   res = fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &effective);
-  if(res)
+  if (res)
     goto test_cleanup;
   printf("effective URL: %s\n", effective);
-
 
   /* second transfer: set URL + query in the second FETCHU handle */
   fetch_url_set(fetchu_2, FETCHUPART_URL, URL, FETCHU_DEFAULT_SCHEME);
@@ -59,15 +58,14 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_FETCHU, fetchu_2);
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   effective = NULL;
   res = fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &effective);
-  if(res)
+  if (res)
     goto test_cleanup;
   printf("effective URL: %s\n", effective);
-
 
   /* third transfer: append extra query in the second FETCHU handle, but do not
      set FETCHOPT_FETCHU again. this is to test that the contents of the handle
@@ -76,15 +74,14 @@ FETCHcode test(char *URL)
   fetch_url_set(fetchu_2, FETCHUPART_QUERY, "bar", FETCHU_APPENDQUERY);
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   effective = NULL;
   res = fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &effective);
-  if(res)
+  if (res)
     goto test_cleanup;
   printf("effective URL: %s\n", effective);
-
 
 test_cleanup:
   fetch_easy_cleanup(fetch);

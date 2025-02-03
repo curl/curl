@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,12 +40,14 @@
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,
                                        toolmimekind kind)
 {
-  struct tool_mime *m = (struct tool_mime *) calloc(1, sizeof(*m));
+  struct tool_mime *m = (struct tool_mime *)calloc(1, sizeof(*m));
 
-  if(m) {
+  if (m)
+  {
     m->kind = kind;
     m->parent = parent;
-    if(parent) {
+    if (parent)
+    {
       m->prev = parent->subparts;
       parent->subparts = m;
     }
@@ -65,9 +67,10 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
   struct tool_mime *m = NULL;
 
   mime_data_copy = strdup(mime_data);
-  if(mime_data_copy) {
+  if (mime_data_copy)
+  {
     m = tool_mime_new(parent, TOOLMIME_DATA);
-    if(!m)
+    if (!m)
       free(mime_data_copy);
     else
       m->data = mime_data_copy;
@@ -79,24 +82,24 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
 ** unsigned size_t to signed fetch_off_t
 */
 
-#define FETCH_MASK_UCOFFT  ((unsigned FETCH_TYPEOF_FETCH_OFF_T)~0)
-#define FETCH_MASK_SCOFFT  (FETCH_MASK_UCOFFT >> 1)
+#define FETCH_MASK_UCOFFT ((unsigned FETCH_TYPEOF_FETCH_OFF_T) ~0)
+#define FETCH_MASK_SCOFFT (FETCH_MASK_UCOFFT >> 1)
 
 static fetch_off_t uztoso(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
-#  pragma warning(push)
-#  pragma warning(disable:810) /* conversion may lose significant bits */
+#pragma warning(push)
+#pragma warning(disable : 810) /* conversion may lose significant bits */
 #elif defined(_MSC_VER)
-#  pragma warning(push)
-#  pragma warning(disable:4310) /* cast truncates constant value */
+#pragma warning(push)
+#pragma warning(disable : 4310) /* cast truncates constant value */
 #endif
 
-  DEBUGASSERT(uznum <= (size_t) FETCH_MASK_SCOFFT);
-  return (fetch_off_t)(uznum & (size_t) FETCH_MASK_SCOFFT);
+  DEBUGASSERT(uznum <= (size_t)FETCH_MASK_SCOFFT);
+  return (fetch_off_t)(uznum & (size_t)FETCH_MASK_SCOFFT);
 
 #if defined(__INTEL_COMPILER) || defined(_MSC_VER)
-#  pragma warning(pop)
+#pragma warning(pop)
 #endif
 }
 
@@ -109,22 +112,26 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
   struct tool_mime *m = NULL;
 
   *errcode = FETCHE_OUT_OF_MEMORY;
-  if(strcmp(filename, "-")) {
+  if (strcmp(filename, "-"))
+  {
     /* This is a normal file. */
     char *filedup = strdup(filename);
-    if(filedup) {
+    if (filedup)
+    {
       m = tool_mime_new(parent, TOOLMIME_FILE);
-      if(!m)
+      if (!m)
         free(filedup);
-      else {
+      else
+      {
         m->data = filedup;
-        if(!isremotefile)
+        if (!isremotefile)
           m->kind = TOOLMIME_FILEDATA;
-       *errcode = FETCHE_OK;
+        *errcode = FETCHE_OK;
       }
     }
   }
-  else {        /* Standard input. */
+  else
+  { /* Standard input. */
     int fd = fileno(stdin);
     char *data = NULL;
     fetch_off_t size;
@@ -135,29 +142,33 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     origin = ftell(stdin);
     /* If stdin is a regular file, do not buffer data but read it
        when needed. */
-    if(fd >= 0 && origin >= 0 && !fstat(fd, &sbuf) &&
+    if (fd >= 0 && origin >= 0 && !fstat(fd, &sbuf) &&
 #ifdef __VMS
-       sbuf.st_fab_rfm != FAB$C_VAR && sbuf.st_fab_rfm != FAB$C_VFC &&
+        sbuf.st_fab_rfm != FAB$C_VAR && sbuf.st_fab_rfm != FAB$C_VFC &&
 #endif
-       S_ISREG(sbuf.st_mode)) {
+        S_ISREG(sbuf.st_mode))
+    {
       size = sbuf.st_size - origin;
-      if(size < 0)
+      if (size < 0)
         size = 0;
     }
-    else {  /* Not suitable for direct use, buffer stdin data. */
+    else
+    { /* Not suitable for direct use, buffer stdin data. */
       size_t stdinsize = 0;
 
-      switch(file2memory(&data, &stdinsize, stdin)) {
+      switch (file2memory(&data, &stdinsize, stdin))
+      {
       case PARAM_NO_MEM:
         return m;
       case PARAM_READ_ERROR:
         result = FETCHE_READ_ERROR;
         break;
       default:
-        if(!stdinsize) {
+        if (!stdinsize)
+        {
           /* Zero-length data has been freed. Re-create it. */
           data = strdup("");
-          if(!data)
+          if (!data)
             return m;
         }
         break;
@@ -166,14 +177,15 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
       origin = 0;
     }
     m = tool_mime_new(parent, TOOLMIME_STDIN);
-    if(!m)
+    if (!m)
       Curl_safefree(data);
-    else {
+    else
+    {
       m->data = data;
       m->origin = origin;
       m->size = size;
       m->curpos = 0;
-      if(!isremotefile)
+      if (!isremotefile)
         m->kind = TOOLMIME_STDINDATA;
       *errcode = result;
     }
@@ -183,10 +195,11 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
 
 void tool_mime_free(struct tool_mime *mime)
 {
-  if(mime) {
-    if(mime->subparts)
+  if (mime)
+  {
+    if (mime->subparts)
       tool_mime_free(mime->subparts);
-    if(mime->prev)
+    if (mime->prev)
       tool_mime_free(mime->prev);
     Curl_safefree(mime->name);
     Curl_safefree(mime->filename);
@@ -198,33 +211,38 @@ void tool_mime_free(struct tool_mime *mime)
   }
 }
 
-
 /* Mime part callbacks for stdin. */
 size_t tool_mime_stdin_read(char *buffer,
                             size_t size, size_t nitems, void *arg)
 {
-  struct tool_mime *sip = (struct tool_mime *) arg;
+  struct tool_mime *sip = (struct tool_mime *)arg;
   fetch_off_t bytesleft;
-  (void) size;  /* Always 1: ignored. */
+  (void)size; /* Always 1: ignored. */
 
-  if(sip->size >= 0) {
-    if(sip->curpos >= sip->size)
-      return 0;  /* At eof. */
+  if (sip->size >= 0)
+  {
+    if (sip->curpos >= sip->size)
+      return 0; /* At eof. */
     bytesleft = sip->size - sip->curpos;
-    if(uztoso(nitems) > bytesleft)
+    if (uztoso(nitems) > bytesleft)
       nitems = fetchx_sotouz(bytesleft);
   }
-  if(nitems) {
-    if(sip->data) {
+  if (nitems)
+  {
+    if (sip->data)
+    {
       /* Return data from memory. */
       memcpy(buffer, sip->data + fetchx_sotouz(sip->curpos), nitems);
     }
-    else {
+    else
+    {
       /* Read from stdin. */
       nitems = fread(buffer, 1, nitems, stdin);
-      if(ferror(stdin)) {
+      if (ferror(stdin))
+      {
         /* Show error only once. */
-        if(sip->config) {
+        if (sip->config)
+        {
           warnf(sip->config, "stdin: %s", strerror(errno));
           sip->config = NULL;
         }
@@ -238,9 +256,10 @@ size_t tool_mime_stdin_read(char *buffer,
 
 int tool_mime_stdin_seek(void *instream, fetch_off_t offset, int whence)
 {
-  struct tool_mime *sip = (struct tool_mime *) instream;
+  struct tool_mime *sip = (struct tool_mime *)instream;
 
-  switch(whence) {
+  switch (whence)
+  {
   case SEEK_CUR:
     offset += sip->curpos;
     break;
@@ -248,10 +267,11 @@ int tool_mime_stdin_seek(void *instream, fetch_off_t offset, int whence)
     offset += sip->size;
     break;
   }
-  if(offset < 0)
+  if (offset < 0)
     return FETCH_SEEKFUNC_CANTSEEK;
-  if(!sip->data) {
-    if(fseek(stdin, (long) (offset + sip->origin), SEEK_SET))
+  if (!sip->data)
+  {
+    if (fseek(stdin, (long)(offset + sip->origin), SEEK_SET))
       return FETCH_SEEKFUNC_CANTSEEK;
   }
   sip->curpos = offset;
@@ -261,28 +281,33 @@ int tool_mime_stdin_seek(void *instream, fetch_off_t offset, int whence)
 /* Translate an internal mime tree into a libfetch mime tree. */
 
 static FETCHcode tool2fetchparts(FETCH *fetch, struct tool_mime *m,
-                               fetch_mime *mime)
+                                 fetch_mime *mime)
 {
   FETCHcode ret = FETCHE_OK;
   fetch_mimepart *part = NULL;
   fetch_mime *submime = NULL;
   const char *filename = NULL;
 
-  if(m) {
+  if (m)
+  {
     ret = tool2fetchparts(fetch, m->prev, mime);
-    if(!ret) {
+    if (!ret)
+    {
       part = fetch_mime_addpart(mime);
-      if(!part)
+      if (!part)
         ret = FETCHE_OUT_OF_MEMORY;
     }
-    if(!ret) {
+    if (!ret)
+    {
       filename = m->filename;
-      switch(m->kind) {
+      switch (m->kind)
+      {
       case TOOLMIME_PARTS:
         ret = tool2fetchmime(fetch, m, &submime);
-        if(!ret) {
+        if (!ret)
+        {
           ret = fetch_mime_subparts(part, submime);
-          if(ret)
+          if (ret)
             fetch_mime_free(submime);
         }
         break;
@@ -294,19 +319,19 @@ static FETCHcode tool2fetchparts(FETCH *fetch, struct tool_mime *m,
       case TOOLMIME_FILE:
       case TOOLMIME_FILEDATA:
         ret = fetch_mime_filedata(part, m->data);
-        if(!ret && m->kind == TOOLMIME_FILEDATA && !filename)
+        if (!ret && m->kind == TOOLMIME_FILEDATA && !filename)
           ret = fetch_mime_filename(part, NULL);
         break;
 
       case TOOLMIME_STDIN:
-        if(!filename)
+        if (!filename)
           filename = "-";
         FALLTHROUGH();
       case TOOLMIME_STDINDATA:
         ret = fetch_mime_data_cb(part, m->size,
-                                (fetch_read_callback) tool_mime_stdin_read,
-                                (fetch_seek_callback) tool_mime_stdin_seek,
-                                NULL, m);
+                                 (fetch_read_callback)tool_mime_stdin_read,
+                                 (fetch_seek_callback)tool_mime_stdin_seek,
+                                 NULL, m);
         break;
 
       default:
@@ -314,15 +339,15 @@ static FETCHcode tool2fetchparts(FETCH *fetch, struct tool_mime *m,
         break;
       }
     }
-    if(!ret && filename)
+    if (!ret && filename)
       ret = fetch_mime_filename(part, filename);
-    if(!ret)
+    if (!ret)
       ret = fetch_mime_type(part, m->type);
-    if(!ret)
+    if (!ret)
       ret = fetch_mime_headers(part, m->headers, 0);
-    if(!ret)
+    if (!ret)
       ret = fetch_mime_encoder(part, m->encoder);
-    if(!ret)
+    if (!ret)
       ret = fetch_mime_name(part, m->name);
   }
   return ret;
@@ -333,11 +358,12 @@ FETCHcode tool2fetchmime(FETCH *fetch, struct tool_mime *m, fetch_mime **mime)
   FETCHcode ret = FETCHE_OK;
 
   *mime = fetch_mime_init(fetch);
-  if(!*mime)
+  if (!*mime)
     ret = FETCHE_OUT_OF_MEMORY;
   else
     ret = tool2fetchparts(fetch, m->subparts, *mime);
-  if(ret) {
+  if (ret)
+  {
     fetch_mime_free(*mime);
     *mime = NULL;
   }
@@ -358,40 +384,47 @@ static char *get_param_word(struct OperationConfig *config, char **str,
   char *ptr2;
   char *escape = NULL;
 
-  if(*ptr == '"') {
+  if (*ptr == '"')
+  {
     ++ptr;
-    while(*ptr) {
-      if(*ptr == '\\') {
-        if(ptr[1] == '\\' || ptr[1] == '"') {
+    while (*ptr)
+    {
+      if (*ptr == '\\')
+      {
+        if (ptr[1] == '\\' || ptr[1] == '"')
+        {
           /* remember the first escape position */
-          if(!escape)
+          if (!escape)
             escape = ptr;
           /* skip escape of back-slash or double-quote */
           ptr += 2;
           continue;
         }
       }
-      if(*ptr == '"') {
+      if (*ptr == '"')
+      {
         bool trailing_data = FALSE;
         *end_pos = ptr;
-        if(escape) {
+        if (escape)
+        {
           /* has escape, we restore the unescaped string here */
           ptr = ptr2 = escape;
-          do {
-            if(*ptr == '\\' && (ptr[1] == '\\' || ptr[1] == '"'))
+          do
+          {
+            if (*ptr == '\\' && (ptr[1] == '\\' || ptr[1] == '"'))
               ++ptr;
             *ptr2++ = *ptr++;
-          }
-          while(ptr < *end_pos);
+          } while (ptr < *end_pos);
           *end_pos = ptr2;
         }
         ++ptr;
-        while(*ptr && *ptr != ';' && *ptr != endchar) {
-          if(!ISSPACE(*ptr))
+        while (*ptr && *ptr != ';' && *ptr != endchar)
+        {
+          if (!ISSPACE(*ptr))
             trailing_data = TRUE;
           ++ptr;
         }
-        if(trailing_data)
+        if (trailing_data)
           warnf(config->global, "Trailing data after quoted form parameter");
         *str = ptr;
         return word_begin + 1;
@@ -402,7 +435,7 @@ static char *get_param_word(struct OperationConfig *config, char **str,
     ptr = word_begin;
   }
 
-  while(*ptr && *ptr != ';' && *ptr != endchar)
+  while (*ptr && *ptr != ';' && *ptr != endchar)
     ++ptr;
   *str = *end_pos = ptr;
   return word_begin;
@@ -413,7 +446,7 @@ static int slist_append(struct fetch_slist **plist, const char *data)
 {
   struct fetch_slist *s = fetch_slist_append(*plist, data);
 
-  if(!s)
+  if (!s)
     return -1;
 
   *plist = s;
@@ -431,15 +464,19 @@ static int read_field_headers(struct OperationConfig *config,
   int lineno = 1;
   char hdrbuf[999] = ""; /* Max. header length + 1. */
 
-  for(;;) {
+  for (;;)
+  {
     int c = getc(fp);
-    if(c == EOF || (!pos && !ISSPACE(c))) {
+    if (c == EOF || (!pos && !ISSPACE(c)))
+    {
       /* Strip and flush the current header. */
-      while(hdrlen && ISSPACE(hdrbuf[hdrlen - 1]))
+      while (hdrlen && ISSPACE(hdrbuf[hdrlen - 1]))
         hdrlen--;
-      if(hdrlen) {
+      if (hdrlen)
+      {
         hdrbuf[hdrlen] = '\0';
-        if(slist_append(pheaders, hdrbuf)) {
+        if (slist_append(pheaders, hdrbuf))
+        {
           errorf(config->global, "Out of memory for field headers");
           return -1;
         }
@@ -447,36 +484,40 @@ static int read_field_headers(struct OperationConfig *config,
       }
     }
 
-    switch(c) {
+    switch (c)
+    {
     case EOF:
-      if(ferror(fp)) {
+      if (ferror(fp))
+      {
         errorf(config->global, "Header file %s read error: %s", filename,
                strerror(errno));
         return -1;
       }
-      return 0;    /* Done. */
+      return 0; /* Done. */
     case '\r':
-      continue;    /* Ignore. */
+      continue; /* Ignore. */
     case '\n':
       pos = 0;
       incomment = FALSE;
       lineno++;
       continue;
     case '#':
-      if(!pos)
+      if (!pos)
         incomment = TRUE;
       break;
     }
 
     pos++;
-    if(!incomment) {
-      if(hdrlen == sizeof(hdrbuf) - 1) {
+    if (!incomment)
+    {
+      if (hdrlen == sizeof(hdrbuf) - 1)
+      {
         warnf(config->global, "File %s line %d: header too long (truncated)",
               filename, lineno);
         c = ' ';
       }
-      if(hdrlen <= sizeof(hdrbuf) - 1)
-        hdrbuf[hdrlen++] = (char) c;
+      if (hdrlen <= sizeof(hdrbuf) - 1)
+        hdrbuf[hdrlen++] = (char)c;
     }
   }
   /* NOTREACHED */
@@ -497,31 +538,33 @@ static int get_param_part(struct OperationConfig *config, char endchar,
   char *endct = NULL;
   struct fetch_slist *headers = NULL;
 
-  if(ptype)
+  if (ptype)
     *ptype = NULL;
-  if(pfilename)
+  if (pfilename)
     *pfilename = NULL;
-  if(pheaders)
+  if (pheaders)
     *pheaders = NULL;
-  if(pencoder)
+  if (pencoder)
     *pencoder = NULL;
-  while(ISSPACE(*p))
+  while (ISSPACE(*p))
     p++;
   tp = p;
   *pdata = get_param_word(config, &p, &endpos, endchar);
   /* If not quoted, strip trailing spaces. */
-  if(*pdata == tp)
-    while(endpos > *pdata && ISSPACE(endpos[-1]))
+  if (*pdata == tp)
+    while (endpos > *pdata && ISSPACE(endpos[-1]))
       endpos--;
   sep = *p;
   *endpos = '\0';
-  while(sep == ';') {
-    while(p++ && ISSPACE(*p))
+  while (sep == ';')
+  {
+    while (p++ && ISSPACE(*p))
       ;
 
-    if(!endct && checkprefix("type=", p)) {
+    if (!endct && checkprefix("type=", p))
+    {
       size_t tlen;
-      for(p += 5; ISSPACE(*p); p++)
+      for (p += 5; ISSPACE(*p); p++)
         ;
       /* set type pointer */
       type = p;
@@ -532,136 +575,151 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       endct = p;
       sep = *p;
     }
-    else if(checkprefix("filename=", p)) {
-      if(endct) {
+    else if (checkprefix("filename=", p))
+    {
+      if (endct)
+      {
         *endct = '\0';
         endct = NULL;
       }
-      for(p += 9; ISSPACE(*p); p++)
+      for (p += 9; ISSPACE(*p); p++)
         ;
       tp = p;
       filename = get_param_word(config, &p, &endpos, endchar);
       /* If not quoted, strip trailing spaces. */
-      if(filename == tp)
-        while(endpos > filename && ISSPACE(endpos[-1]))
+      if (filename == tp)
+        while (endpos > filename && ISSPACE(endpos[-1]))
           endpos--;
       sep = *p;
       *endpos = '\0';
     }
-    else if(checkprefix("headers=", p)) {
-      if(endct) {
+    else if (checkprefix("headers=", p))
+    {
+      if (endct)
+      {
         *endct = '\0';
         endct = NULL;
       }
       p += 8;
-      if(*p == '@' || *p == '<') {
+      if (*p == '@' || *p == '<')
+      {
         char *hdrfile;
         FILE *fp;
         /* Read headers from a file. */
 
-        do {
+        do
+        {
           p++;
-        } while(ISSPACE(*p));
+        } while (ISSPACE(*p));
         tp = p;
         hdrfile = get_param_word(config, &p, &endpos, endchar);
         /* If not quoted, strip trailing spaces. */
-        if(hdrfile == tp)
-          while(endpos > hdrfile && ISSPACE(endpos[-1]))
+        if (hdrfile == tp)
+          while (endpos > hdrfile && ISSPACE(endpos[-1]))
             endpos--;
         sep = *p;
         *endpos = '\0';
         fp = fopen(hdrfile, FOPEN_READTEXT);
-        if(!fp)
+        if (!fp)
           warnf(config->global, "Cannot read from %s: %s", hdrfile,
                 strerror(errno));
-        else {
+        else
+        {
           int i = read_field_headers(config, hdrfile, fp, &headers);
 
           fclose(fp);
-          if(i) {
+          if (i)
+          {
             fetch_slist_free_all(headers);
             return -1;
           }
         }
       }
-      else {
+      else
+      {
         char *hdr;
 
-        while(ISSPACE(*p))
+        while (ISSPACE(*p))
           p++;
         tp = p;
         hdr = get_param_word(config, &p, &endpos, endchar);
         /* If not quoted, strip trailing spaces. */
-        if(hdr == tp)
-          while(endpos > hdr && ISSPACE(endpos[-1]))
+        if (hdr == tp)
+          while (endpos > hdr && ISSPACE(endpos[-1]))
             endpos--;
         sep = *p;
         *endpos = '\0';
-        if(slist_append(&headers, hdr)) {
+        if (slist_append(&headers, hdr))
+        {
           errorf(config->global, "Out of memory for field header");
           fetch_slist_free_all(headers);
           return -1;
         }
       }
     }
-    else if(checkprefix("encoder=", p)) {
-      if(endct) {
+    else if (checkprefix("encoder=", p))
+    {
+      if (endct)
+      {
         *endct = '\0';
         endct = NULL;
       }
-      for(p += 8; ISSPACE(*p); p++)
+      for (p += 8; ISSPACE(*p); p++)
         ;
       tp = p;
       encoder = get_param_word(config, &p, &endpos, endchar);
       /* If not quoted, strip trailing spaces. */
-      if(encoder == tp)
-        while(endpos > encoder && ISSPACE(endpos[-1]))
+      if (encoder == tp)
+        while (endpos > encoder && ISSPACE(endpos[-1]))
           endpos--;
       sep = *p;
       *endpos = '\0';
     }
-    else if(endct) {
+    else if (endct)
+    {
       /* This is part of content type. */
-      for(endct = p; *p && *p != ';' && *p != endchar; p++)
-        if(!ISSPACE(*p))
+      for (endct = p; *p && *p != ';' && *p != endchar; p++)
+        if (!ISSPACE(*p))
           endct = p + 1;
       sep = *p;
     }
-    else {
+    else
+    {
       /* unknown prefix, skip to next block */
       char *unknown = get_param_word(config, &p, &endpos, endchar);
 
       sep = *p;
       *endpos = '\0';
-      if(*unknown)
+      if (*unknown)
         warnf(config->global, "skip unknown form field: %s", unknown);
     }
   }
 
   /* Terminate content type. */
-  if(endct)
+  if (endct)
     *endct = '\0';
 
-  if(ptype)
+  if (ptype)
     *ptype = type;
-  else if(type)
+  else if (type)
     warnf(config->global, "Field content type not allowed here: %s", type);
 
-  if(pfilename)
+  if (pfilename)
     *pfilename = filename;
-  else if(filename)
+  else if (filename)
     warnf(config->global,
           "Field filename not allowed here: %s", filename);
 
-  if(pencoder)
+  if (pencoder)
     *pencoder = encoder;
-  else if(encoder)
+  else if (encoder)
     warnf(config->global,
           "Field encoder not allowed here: %s", encoder);
 
-  if(pheaders)
+  if (pheaders)
     *pheaders = headers;
-  else if(headers) {
+  else if (headers)
+  {
     warnf(config->global,
           "Field headers not allowed here: %s", headers->data);
     fetch_slist_free_all(headers);
@@ -670,7 +728,6 @@ static int get_param_part(struct OperationConfig *config, char endchar,
   *str = p;
   return sep & 0xFF;
 }
-
 
 /***************************************************************************
  *
@@ -719,14 +776,16 @@ static int get_param_part(struct OperationConfig *config, char endchar,
  *
  ***************************************************************************/
 
-#define SET_TOOL_MIME_PTR(m, field)                                     \
-  do {                                                                  \
-    if(field) {                                                         \
-      (m)->field = strdup(field);                                       \
-      if(!(m)->field)                                                   \
-        goto fail;                                                      \
-    }                                                                   \
-  } while(0)
+#define SET_TOOL_MIME_PTR(m, field) \
+  do                                \
+  {                                 \
+    if (field)                      \
+    {                               \
+      (m)->field = strdup(field);   \
+      if (!(m)->field)              \
+        goto fail;                  \
+    }                               \
+  } while (0)
 
 int formparse(struct OperationConfig *config,
               const char *input,
@@ -749,88 +808,100 @@ int formparse(struct OperationConfig *config,
   int err = 1;
 
   /* Allocate the main mime structure if needed. */
-  if(!*mimecurrent) {
+  if (!*mimecurrent)
+  {
     *mimeroot = tool_mime_new_parts(NULL);
-    if(!*mimeroot)
+    if (!*mimeroot)
       goto fail;
     *mimecurrent = *mimeroot;
   }
 
   /* Make a copy we can overwrite. */
   contents = strdup(input);
-  if(!contents)
+  if (!contents)
     goto fail;
 
   /* Scan for the end of the name. */
   contp = strchr(contents, '=');
-  if(contp) {
+  if (contp)
+  {
     int sep = '\0';
-    if(contp > contents)
+    if (contp > contents)
       name = contents;
     *contp++ = '\0';
 
-    if(*contp == '(' && !literal_value) {
+    if (*contp == '(' && !literal_value)
+    {
       /* Starting a multipart. */
       sep = get_param_part(config, '\0',
                            &contp, &data, &type, NULL, NULL, &headers);
-      if(sep < 0)
+      if (sep < 0)
         goto fail;
       part = tool_mime_new_parts(*mimecurrent);
-      if(!part)
+      if (!part)
         goto fail;
       *mimecurrent = part;
       part->headers = headers;
       headers = NULL;
       SET_TOOL_MIME_PTR(part, type);
     }
-    else if(!name && !strcmp(contp, ")") && !literal_value) {
+    else if (!name && !strcmp(contp, ")") && !literal_value)
+    {
       /* Ending a multipart. */
-      if(*mimecurrent == *mimeroot) {
+      if (*mimecurrent == *mimeroot)
+      {
         warnf(config->global, "no multipart to terminate");
         goto fail;
       }
       *mimecurrent = (*mimecurrent)->parent;
     }
-    else if('@' == contp[0] && !literal_value) {
+    else if ('@' == contp[0] && !literal_value)
+    {
 
       /* we use the @-letter to indicate filename(s) */
 
       struct tool_mime *subparts = NULL;
 
-      do {
+      do
+      {
         /* since this was a file, it may have a content-type specifier
            at the end too, or a filename. Or both. */
         ++contp;
         sep = get_param_part(config, ',', &contp,
                              &data, &type, &filename, &encoder, &headers);
-        if(sep < 0) {
+        if (sep < 0)
+        {
           goto fail;
         }
 
         /* now contp point to comma or string end.
            If more files to come, make sure we have multiparts. */
-        if(!subparts) {
-          if(sep != ',')    /* If there is a single file. */
+        if (!subparts)
+        {
+          if (sep != ',') /* If there is a single file. */
             subparts = *mimecurrent;
-          else {
+          else
+          {
             subparts = tool_mime_new_parts(*mimecurrent);
-            if(!subparts)
+            if (!subparts)
               goto fail;
           }
         }
 
         /* Store that file in a part. */
         part = tool_mime_new_filedata(subparts, data, TRUE, &res);
-        if(!part)
+        if (!part)
           goto fail;
         part->headers = headers;
         headers = NULL;
         part->config = config->global;
-        if(res == FETCHE_READ_ERROR) {
-            /* An error occurred while reading stdin: if read has started,
-               issue the error now. Else, delay it until processed by
-               libfetch. */
-          if(part->size > 0) {
+        if (res == FETCHE_READ_ERROR)
+        {
+          /* An error occurred while reading stdin: if read has started,
+             issue the error now. Else, delay it until processed by
+             libfetch. */
+          if (part->size > 0)
+          {
             warnf(config->global,
                   "error while reading standard input");
             goto fail;
@@ -845,29 +916,33 @@ int formparse(struct OperationConfig *config,
         SET_TOOL_MIME_PTR(part, encoder);
 
         /* *contp could be '\0', so we just check with the delimiter */
-      } while(sep); /* loop if there is another filename */
-      part = (*mimecurrent)->subparts;  /* Set name on group. */
+      } while (sep); /* loop if there is another filename */
+      part = (*mimecurrent)->subparts; /* Set name on group. */
     }
-    else {
-      if(*contp == '<' && !literal_value) {
+    else
+    {
+      if (*contp == '<' && !literal_value)
+      {
         ++contp;
         sep = get_param_part(config, '\0', &contp,
                              &data, &type, NULL, &encoder, &headers);
-        if(sep < 0)
+        if (sep < 0)
           goto fail;
 
         part = tool_mime_new_filedata(*mimecurrent, data, FALSE,
                                       &res);
-        if(!part)
+        if (!part)
           goto fail;
         part->headers = headers;
         headers = NULL;
         part->config = config->global;
-        if(res == FETCHE_READ_ERROR) {
-            /* An error occurred while reading stdin: if read has started,
-               issue the error now. Else, delay it until processed by
-               libfetch. */
-          if(part->size > 0) {
+        if (res == FETCHE_READ_ERROR)
+        {
+          /* An error occurred while reading stdin: if read has started,
+             issue the error now. Else, delay it until processed by
+             libfetch. */
+          if (part->size > 0)
+          {
             warnf(config->global,
                   "error while reading standard input");
             goto fail;
@@ -878,18 +953,20 @@ int formparse(struct OperationConfig *config,
           res = FETCHE_OK;
         }
       }
-      else {
-        if(literal_value)
+      else
+      {
+        if (literal_value)
           data = contp;
-        else {
+        else
+        {
           sep = get_param_part(config, '\0', &contp,
                                &data, &type, &filename, &encoder, &headers);
-          if(sep < 0)
+          if (sep < 0)
             goto fail;
         }
 
         part = tool_mime_new_data(*mimecurrent, data);
-        if(!part)
+        if (!part)
           goto fail;
         part->headers = headers;
         headers = NULL;
@@ -899,8 +976,9 @@ int formparse(struct OperationConfig *config,
       SET_TOOL_MIME_PTR(part, type);
       SET_TOOL_MIME_PTR(part, encoder);
 
-      if(sep) {
-        *contp = (char) sep;
+      if (sep)
+      {
+        *contp = (char)sep;
         warnf(config->global,
               "garbage at end of field specification: %s", contp);
       }
@@ -909,7 +987,8 @@ int formparse(struct OperationConfig *config,
     /* Set part name. */
     SET_TOOL_MIME_PTR(part, name);
   }
-  else {
+  else
+  {
     warnf(config->global, "Illegally formatted input field");
     goto fail;
   }

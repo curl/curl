@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,7 +27,8 @@
 
 /* Private structure for mime/parts. */
 
-typedef enum {
+typedef enum
+{
   TOOLMIME_NONE = 0,
   TOOLMIME_PARTS,
   TOOLMIME_DATA,
@@ -37,25 +38,26 @@ typedef enum {
   TOOLMIME_STDINDATA
 } toolmimekind;
 
-struct tool_mime {
+struct tool_mime
+{
   /* Structural fields. */
-  toolmimekind kind;            /* Part kind. */
-  struct tool_mime *parent;     /* Parent item. */
-  struct tool_mime *prev;       /* Previous sibling (reverse order link). */
+  toolmimekind kind;        /* Part kind. */
+  struct tool_mime *parent; /* Parent item. */
+  struct tool_mime *prev;   /* Previous sibling (reverse order link). */
   /* Common fields. */
-  char *data;                   /* Actual data or data filename. */
-  char *name;                   /* Part name. */
-  char *filename;               /* Part's filename. */
-  char *type;                   /* Part's mime type. */
-  char *encoder;                /* Part's requested encoding. */
-  struct fetch_slist *headers;   /* User-defined headers. */
+  char *data;                  /* Actual data or data filename. */
+  char *name;                  /* Part name. */
+  char *filename;              /* Part's filename. */
+  char *type;                  /* Part's mime type. */
+  char *encoder;               /* Part's requested encoding. */
+  struct fetch_slist *headers; /* User-defined headers. */
   /* TOOLMIME_PARTS fields. */
-  struct tool_mime *subparts;   /* Part's subparts. */
+  struct tool_mime *subparts; /* Part's subparts. */
   /* TOOLMIME_STDIN/TOOLMIME_STDINDATA fields. */
-  fetch_off_t origin;            /* Stdin read origin offset. */
-  fetch_off_t size;              /* Stdin data size. */
-  fetch_off_t curpos;            /* Stdin current read position. */
-  struct GlobalConfig *config;  /* For access from callback. */
+  fetch_off_t origin;          /* Stdin read origin offset. */
+  fetch_off_t size;            /* Stdin data size. */
+  fetch_off_t curpos;          /* Stdin current read position. */
+  struct GlobalConfig *config; /* For access from callback. */
 };
 
 size_t tool_mime_stdin_read(char *buffer,

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,4 +46,4 @@ double tutil_tvdiff_secs(struct timeval t1, struct timeval t2);
 HMODULE win32_load_system_library(const TCHAR *filename);
 #endif
 
-#endif  /* HEADER_FETCH_LIBTEST_TESTUTIL_H */
+#endif /* HEADER_FETCH_LIBTEST_TESTUTIL_H */

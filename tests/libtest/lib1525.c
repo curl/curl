@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,15 +36,15 @@ static char testdata[] = "Hello Cloud!\n";
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes fetch wants */
-  if(amount < strlen(testdata)) {
+  size_t amount = nmemb * size; /* Total bytes fetch wants */
+  if (amount < strlen(testdata))
+  {
     return strlen(testdata);
   }
   (void)stream;
   memcpy(ptr, testdata, strlen(testdata));
   return strlen(testdata);
 }
-
 
 FETCHcode test(char *URL)
 {
@@ -53,13 +53,15 @@ FETCHcode test(char *URL)
   /* http and proxy header list */
   struct fetch_slist *hhl = NULL;
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -67,7 +69,8 @@ FETCHcode test(char *URL)
 
   hhl = fetch_slist_append(hhl, "User-Agent: Http Agent");
 
-  if(!hhl) {
+  if (!hhl)
+  {
     goto test_cleanup;
   }
 

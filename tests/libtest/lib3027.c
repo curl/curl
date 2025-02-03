@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,15 +36,18 @@ FETCHcode test(char *URL)
   fetch_global_init(FETCH_GLOBAL_ALL);
 
   hnd = fetch_easy_init();
-  if(hnd) {
+  if (hnd)
+  {
     fetch_easy_setopt(hnd, FETCHOPT_URL, URL);
     fetch_easy_setopt(hnd, FETCHOPT_FILETIME, 1L);
     ret = fetch_easy_perform(hnd);
-    if(FETCHE_OK == ret) {
+    if (FETCHE_OK == ret)
+    {
       long filetime;
       ret = fetch_easy_getinfo(hnd, FETCHINFO_FILETIME, &filetime);
       /* MTDM fails with 550, so filetime should be -1 */
-      if((FETCHE_OK == ret) && (filetime != -1)) {
+      if ((FETCHE_OK == ret) && (filetime != -1))
+      {
         /* we just need to return something which is not FETCHE_OK */
         ret = FETCHE_UNSUPPORTED_PROTOCOL;
       }

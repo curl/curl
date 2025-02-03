@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,15 +46,16 @@ FETCHcode test(char *URL)
   /* set a port number that makes this request fail */
   easy_setopt(fetch, FETCHOPT_PORT, 1L);
   res = fetch_easy_perform(fetch);
-  if(res != FETCHE_COULDNT_CONNECT && res != FETCHE_OPERATION_TIMEDOUT) {
+  if (res != FETCHE_COULDNT_CONNECT && res != FETCHE_OPERATION_TIMEDOUT)
+  {
     fprintf(stderr, "failure expected, "
-            "fetch_easy_perform returned %d: <%s>, <%s>\n",
+                    "fetch_easy_perform returned %d: <%s>, <%s>\n",
             res, fetch_easy_strerror(res), error_buffer);
-    if(res == FETCHE_OK)
-      res = TEST_ERR_MAJOR_BAD;  /* force an error return */
+    if (res == FETCHE_OK)
+      res = TEST_ERR_MAJOR_BAD; /* force an error return */
     goto test_cleanup;
   }
-  res = FETCHE_OK;  /* reset for next use */
+  res = FETCHE_OK; /* reset for next use */
 
   /* print the used url */
   fetch_url_get(fetchu, FETCHUPART_URL, &url_after, 0);
@@ -66,9 +67,9 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_PORT, 0L);
 
   res = fetch_easy_perform(fetch);
-  if(res)
+  if (res)
     fprintf(stderr, "success expected, "
-            "fetch_easy_perform returned %d: <%s>, <%s>\n",
+                    "fetch_easy_perform returned %d: <%s>, <%s>\n",
             res, fetch_easy_strerror(res), error_buffer);
 
   /* print url */

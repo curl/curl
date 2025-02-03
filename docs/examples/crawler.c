@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,7 +55,8 @@ static void sighandler(int dummy)
 }
 
 /* resizable buffer */
-typedef struct {
+typedef struct
+{
   char *buf;
   size_t size;
 } memory;
@@ -63,9 +64,10 @@ typedef struct {
 static size_t grow_buffer(void *contents, size_t sz, size_t nmemb, void *ctx)
 {
   size_t realsize = sz * nmemb;
-  memory *mem = (memory*) ctx;
+  memory *mem = (memory *)ctx;
   char *ptr = realloc(mem->buf, mem->size + realsize);
-  if(!ptr) {
+  if (!ptr)
+  {
     /* out of memory */
     printf("not enough memory (realloc returned NULL)\n");
     return 0;
@@ -107,7 +109,7 @@ static FETCH *make_handle(const char *url)
   fetch_easy_setopt(handle, FETCHOPT_CONNECTTIMEOUT_MS, 2000L);
   /* skip files larger than a gigabyte */
   fetch_easy_setopt(handle, FETCHOPT_MAXFILESIZE_LARGE,
-                   (fetch_off_t)1024*1024*1024);
+                    (fetch_off_t)1024 * 1024 * 1024);
   fetch_easy_setopt(handle, FETCHOPT_COOKIEFILE, "");
   fetch_easy_setopt(handle, FETCHOPT_FILETIME, 1L);
   fetch_easy_setopt(handle, FETCHOPT_USERAGENT, "mini crawler");
@@ -121,7 +123,7 @@ static FETCH *make_handle(const char *url)
 /* HREF finder implemented in libxml2 but could be any HTML parser */
 static size_t follow_links(FETCHM *multi_handle, memory *mem, const char *url)
 {
-  int opts = HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | \
+  int opts = HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR |
              HTML_PARSE_NOWARNING | HTML_PARSE_NONET;
   htmlDocPtr doc = htmlReadMemory(mem->buf, (int)mem->size, url, NULL, opts);
   size_t count;
@@ -130,37 +132,41 @@ static size_t follow_links(FETCHM *multi_handle, memory *mem, const char *url)
   xmlNodeSetPtr nodeset;
   xmlXPathContextPtr context;
   xmlXPathObjectPtr result;
-  if(!doc)
+  if (!doc)
     return 0;
-  xpath = (xmlChar*) "//a/@href";
+  xpath = (xmlChar *)"//a/@href";
   context = xmlXPathNewContext(doc);
   result = xmlXPathEvalExpression(xpath, context);
   xmlXPathFreeContext(context);
-  if(!result)
+  if (!result)
     return 0;
   nodeset = result->nodesetval;
-  if(xmlXPathNodeSetIsEmpty(nodeset)) {
+  if (xmlXPathNodeSetIsEmpty(nodeset))
+  {
     xmlXPathFreeObject(result);
     return 0;
   }
   count = 0;
-  for(i = 0; i < nodeset->nodeNr; i++) {
+  for (i = 0; i < nodeset->nodeNr; i++)
+  {
     double r = rand();
     int x = (int)(r * nodeset->nodeNr / RAND_MAX);
     const xmlNode *node = nodeset->nodeTab[x]->xmlChildrenNode;
     xmlChar *href = xmlNodeListGetString(doc, node, 1);
     char *link;
-    if(follow_relative_links) {
+    if (follow_relative_links)
+    {
       xmlChar *orig = href;
-      href = xmlBuildURI(href, (xmlChar *) url);
+      href = xmlBuildURI(href, (xmlChar *)url);
       xmlFree(orig);
     }
-    link = (char *) href;
-    if(!link || strlen(link) < 20)
+    link = (char *)href;
+    if (!link || strlen(link) < 20)
       continue;
-    if(!strncmp(link, "http://", 7) || !strncmp(link, "https://", 8)) {
+    if (!strncmp(link, "http://", 7) || !strncmp(link, "https://", 8))
+    {
       fetch_multi_add_handle(multi_handle, make_handle(link));
-      if(count++ == max_link_per_page)
+      if (count++ == max_link_per_page)
         break;
     }
     xmlFree(link);
@@ -200,7 +206,8 @@ int main(void)
   pending = 0;
   complete = 0;
   still_running = 1;
-  while(still_running && !pending_interrupt) {
+  while (still_running && !pending_interrupt)
+  {
     int numfds;
     FETCHMsg *m;
 
@@ -209,32 +216,40 @@ int main(void)
 
     /* See how the transfers went */
     m = NULL;
-    while((m = fetch_multi_info_read(multi_handle, &msgs_left))) {
-      if(m->msg == FETCHMSG_DONE) {
+    while ((m = fetch_multi_info_read(multi_handle, &msgs_left)))
+    {
+      if (m->msg == FETCHMSG_DONE)
+      {
         FETCH *handle = m->easy_handle;
         char *url;
         memory *mem;
         fetch_easy_getinfo(handle, FETCHINFO_PRIVATE, &mem);
         fetch_easy_getinfo(handle, FETCHINFO_EFFECTIVE_URL, &url);
-        if(m->data.result == FETCHE_OK) {
+        if (m->data.result == FETCHE_OK)
+        {
           long res_status;
           fetch_easy_getinfo(handle, FETCHINFO_RESPONSE_CODE, &res_status);
-          if(res_status == 200) {
+          if (res_status == 200)
+          {
             char *ctype;
             fetch_easy_getinfo(handle, FETCHINFO_CONTENT_TYPE, &ctype);
             printf("[%d] HTTP 200 (%s): %s\n", complete, ctype, url);
-            if(is_html(ctype) && mem->size > 100) {
-              if(pending < max_requests && (complete + pending) < max_total) {
+            if (is_html(ctype) && mem->size > 100)
+            {
+              if (pending < max_requests && (complete + pending) < max_total)
+              {
                 pending += follow_links(multi_handle, mem, url);
                 still_running = 1;
               }
             }
           }
-          else {
-            printf("[%d] HTTP %d: %s\n", complete, (int) res_status, url);
+          else
+          {
+            printf("[%d] HTTP %d: %s\n", complete, (int)res_status, url);
           }
         }
-        else {
+        else
+        {
           printf("[%d] Connection failure: %s\n", complete, url);
         }
         fetch_multi_remove_handle(multi_handle, handle);

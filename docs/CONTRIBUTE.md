@@ -12,19 +12,19 @@ flaws or bugs.
 
 ## Join the Community
 
-Skip over to [https://fetch.se/mail/](https://fetch.se/mail/) and join
+Skip over to [https://curl.se/mail/](https://curl.se/mail/) and join
 the appropriate mailing list(s). Read up on details before you post
 questions. Read this file before you start sending patches. We prefer
 questions sent to and discussions being held on the mailing list(s), not sent
 to individuals.
 
 Before posting to one of the fetch mailing lists, please read up on the
-[mailing list etiquette](https://fetch.se/mail/etiquette.html).
+[mailing list etiquette](https://curl.se/mail/etiquette.html).
 
 We also hang out on IRC in #fetch on libera.chat
 
 If you are at all interested in the code side of things, consider clicking
-'watch' on the [fetch repository on GitHub](https://github.com/fetch/fetch) to be
+'watch' on the [fetch repository on GitHub](https://github.com/curl/curl) to be
 notified of pull requests and new issues posted there.
 
 ## License and copyright
@@ -53,11 +53,11 @@ provide us with your full real name when contributing,
 ## What To Read
 
 Source code, the man pages, the [INTERNALS
-document](https://fetch.se/dev/internals.html),
-[TODO](https://fetch.se/docs/todo.html),
-[KNOWN_BUGS](https://fetch.se/docs/knownbugs.html) and the [most recent
-changes](https://fetch.se/dev/sourceactivity.html) in git. Just lurking on the
-[fetch-library mailing list](https://fetch.se/mail/list.cgi?list=fetch-library)
+document](https://curl.se/dev/internals.html),
+[TODO](https://curl.se/docs/todo.html),
+[KNOWN_BUGS](https://curl.se/docs/knownbugs.html) and the [most recent
+changes](https://curl.se/dev/sourceactivity.html) in git. Just lurking on the
+[fetch-library mailing list](https://curl.se/mail/list.cgi?list=fetch-library)
 gives you a lot of insights on what's going on right now. Asking there is a
 good idea too.
 
@@ -66,7 +66,7 @@ good idea too.
 ### Follow code style
 
 When writing C code, follow the
-[CODE_STYLE](https://fetch.se/dev/code-style.html) already established in
+[CODE_STYLE](https://curl.se/dev/code-style.html) already established in
 the project. Consistent style makes code easier to read and mistakes less
 likely to happen. Run `make checksrc` before you submit anything, to make sure
 you follow the basic style. That script does not verify everything, but if it
@@ -134,9 +134,9 @@ verified your changes.
 ## Get your changes merged
 
 Ideally you file a [pull request on
-GitHub](https://github.com/fetch/fetch/pulls), but you can also send your plain
+GitHub](https://github.com/curl/curl/pulls), but you can also send your plain
 patch to [the fetch-library mailing
-list](https://fetch.se/mail/list.cgi?list=fetch-library).
+list](https://curl.se/mail/list.cgi?list=fetch-library).
 
 If you opt to post a patch on the mailing list, chances are someone converts
 it into a pull request for you, to have the CI jobs verify it proper before it
@@ -156,7 +156,7 @@ changes.
 ## About pull requests
 
 With GitHub it is easy to send a [pull
-request](https://github.com/fetch/fetch/pulls) to the fetch project to have
+request](https://github.com/curl/curl/pulls) to the fetch project to have
 changes merged.
 
 We strongly prefer pull requests to mailed patches, as it makes it a proper
@@ -166,7 +166,7 @@ lists.
 
 Every pull request submitted is automatically tested in several different
 ways. [See the CI document for more
-information](https://github.com/fetch/fetch/blob/master/tests/CI.md).
+information](https://github.com/curl/curl/blob/master/tests/CI.md).
 
 Sometimes the tests fail due to a dependency service temporarily being offline
 or otherwise unavailable, e.g. package downloads. In this case you can just
@@ -192,7 +192,7 @@ ask for approval.
 
 Once your pull request has been approved it can be merged by a maintainer.
 
-For new features, or changes, we require that the *feature window* is open for
+For new features, or changes, we require that the _feature window_ is open for
 the pull request to be merged. This is typically a three week period that
 starts ten days after a previous release. New features submitted as pull
 requests while the window is closed simply have to wait until it opens to get
@@ -224,9 +224,9 @@ How to write git commit messages in the fetch project.
 The first line is a succinct description of the change and should ideally work
 as a single line in the RELEASE NOTES.
 
- - use the imperative, present tense: **change** not "changed" nor "changes"
- - do not capitalize the first letter
- - no period (.) at the end
+- use the imperative, present tense: **change** not "changed" nor "changes"
+- do not capitalize the first letter
+- no period (.) at the end
 
 The `[area]` in the first line can be `http2`, `cookies`, `openssl` or
 similar. There is no fixed list to select from but using the same "area" as
@@ -238,36 +238,36 @@ Use the following ways to improve the message and provide pointers to related
 work.
 
 - `Follow-up to {shorthash}` - if this fixes or continues a previous commit;
-add a `Ref:` that commit's PR or issue if it is not a small, obvious fix;
-followed by an empty line
+  add a `Ref:` that commit's PR or issue if it is not a small, obvious fix;
+  followed by an empty line
 
 - `Bug: URL` to the source of the report or more related discussion; use
-`Fixes` for GitHub issues instead when that is appropriate.
+  `Fixes` for GitHub issues instead when that is appropriate.
 
 - `Approved-by: John Doe` - credit someone who approved the PR.
 
 - `Authored-by: John Doe` - credit the original author of the code; only use
-this if you cannot use `git commit --author=...`.
+  this if you cannot use `git commit --author=...`.
 
 - `Signed-off-by: John Doe` - we do not use this, but do not bother removing
   it.
 
 - `whatever-else-by:` credit all helpers, finders, doers; try to use one of
-the following keywords if at all possible, for consistency: `Acked-by:`,
-`Assisted-by:`, `Co-authored-by:`, `Found-by:`, `Reported-by:`,
-`Reviewed-by:`, `Suggested-by:`, `Tested-by:`.
+  the following keywords if at all possible, for consistency: `Acked-by:`,
+  `Assisted-by:`, `Co-authored-by:`, `Found-by:`, `Reported-by:`,
+  `Reviewed-by:`, `Suggested-by:`, `Tested-by:`.
 
 - `Ref: #1234` - if this is related to a GitHub issue or PR, possibly one that
-has already been closed.
+  has already been closed.
 
 - `Ref: URL` to more information about the commit; use `Bug:` instead for a
-reference to a bug on another bug tracker]
+  reference to a bug on another bug tracker]
 
 - `Fixes #1234` - if this fixes a GitHub issue; GitHub closes the issue once
-this commit is merged.
+  this commit is merged.
 
 - `Closes #1234` - if this merges a GitHub PR; GitHub closes the PR once this
-commit is merged.
+  commit is merged.
 
 Do not forget to use commit with `--author` if you commit someone else's work,
 and make sure that you have your own user and email setup correctly in git
@@ -289,12 +289,13 @@ Just ask if this is what you would want. You are required to have posted
 several high quality patches first, before you can be granted push access.
 
 ## Useful resources
- - [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
+
+- [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
 
 # Update copyright and license information
 
 There is a CI job called **REUSE compliance / check** that runs on every pull
-request and commit to verify that the *REUSE state* of all files are still
+request and commit to verify that the _REUSE state_ of all files are still
 fine.
 
 This means that all files need to have their license and copyright information

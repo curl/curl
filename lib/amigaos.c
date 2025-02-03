@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -32,14 +32,14 @@
 #include "amigaos.h"
 
 #ifdef HAVE_PROTO_BSDSOCKET_H
-#  if defined(__amigaos4__)
-#    include <bsdsocket/socketbasetags.h>
-#  elif !defined(USE_AMISSL)
-#    include <amitcp/socketbasetags.h>
-#  endif
-#  ifdef __libnix__
-#    include <stabs.h>
-#  endif
+#if defined(__amigaos4__)
+#include <bsdsocket/socketbasetags.h>
+#elif !defined(USE_AMISSL)
+#include <amitcp/socketbasetags.h>
+#endif
+#ifdef __libnix__
+#include <stabs.h>
+#endif
 #endif
 
 /* The last #include files should be: */
@@ -73,23 +73,26 @@ static struct SocketIFace *__CurlISocket = NULL;
 static uint32 SocketFeatures = 0;
 
 #define HAVE_BSDSOCKET_GETHOSTBYNAME_R 0x01
-#define HAVE_BSDSOCKET_GETADDRINFO     0x02
+#define HAVE_BSDSOCKET_GETADDRINFO 0x02
 
 FETCHcode Curl_amiga_init(void)
 {
   struct SocketIFace *ISocket;
   struct Library *base = OpenLibrary("bsdsocket.library", 4);
 
-  if(base) {
+  if (base)
+  {
     ISocket = (struct SocketIFace *)GetInterface(base, "main", 1, NULL);
-    if(ISocket) {
+    if (ISocket)
+    {
       ULONG enabled = 0;
 
       SocketBaseTags(SBTM_SETVAL(SBTC_CAN_SHARE_LIBRARY_BASES), TRUE,
                      SBTM_GETREF(SBTC_HAVE_GETHOSTADDR_R_API), (ULONG)&enabled,
                      TAG_DONE);
 
-      if(enabled) {
+      if (enabled)
+      {
         SocketFeatures |= HAVE_BSDSOCKET_GETHOSTBYNAME_R;
       }
 
@@ -107,7 +110,8 @@ FETCHcode Curl_amiga_init(void)
 
 void Curl_amiga_cleanup(void)
 {
-  if(__CurlISocket) {
+  if (__CurlISocket)
+  {
     struct Library *base = __CurlISocket->Data.LibBase;
     DropInterface((struct Interface *)__CurlISocket);
     CloseLibrary(base);
@@ -131,46 +135,54 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   struct hostent *h;
   struct SocketIFace *ISocket = __CurlISocket;
 
-  if(SocketFeatures & HAVE_BSDSOCKET_GETHOSTBYNAME_R) {
+  if (SocketFeatures & HAVE_BSDSOCKET_GETHOSTBYNAME_R)
+  {
     LONG h_errnop = 0;
     struct hostent *buf;
 
     buf = calloc(1, FETCH_HOSTENT_SIZE);
-    if(buf) {
+    if (buf)
+    {
       h = gethostbyname_r((STRPTR)hostname, buf,
                           (char *)buf + sizeof(struct hostent),
                           FETCH_HOSTENT_SIZE - sizeof(struct hostent),
                           &h_errnop);
-      if(h) {
+      if (h)
+      {
         ai = Curl_he2ai(h, port);
       }
       free(buf);
     }
   }
-  else {
-    #ifdef FETCHRES_THREADED
+  else
+  {
+#ifdef FETCHRES_THREADED
     /* gethostbyname() is not thread safe, so we need to reopen bsdsocket
      * on the thread's context
      */
     struct Library *base = OpenLibrary("bsdsocket.library", 4);
-    if(base) {
+    if (base)
+    {
       ISocket = (struct SocketIFace *)GetInterface(base, "main", 1, NULL);
-      if(ISocket) {
+      if (ISocket)
+      {
         h = gethostbyname((STRPTR)hostname);
-        if(h) {
+        if (h)
+        {
           ai = Curl_he2ai(h, port);
         }
         DropInterface((struct Interface *)ISocket);
       }
       CloseLibrary(base);
     }
-    #else
+#else
     /* not using threaded resolver - safe to use this as-is */
     h = gethostbyname(hostname);
-    if(h) {
+    if (h)
+    {
       ai = Curl_he2ai(h, port);
     }
-    #endif
+#endif
   }
 
   return ai;
@@ -184,7 +196,7 @@ int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
 {
   int r = WaitSelect(nfds, readfds, writefds, errorfds, timeout, 0);
   /* Ensure Ctrl-C signal is actioned */
-  if((r == -1) && (SOCKERRNO == EINTR))
+  if ((r == -1) && (SOCKERRNO == EINTR))
     raise(SIGINT);
   return r;
 }
@@ -200,12 +212,13 @@ struct Library *SocketBase = NULL;
 #ifdef __libnix__
 void __request(const char *msg);
 #else
-# define __request(msg)       Printf((const unsigned char *)(msg "\n\a"), 0)
+#define __request(msg) Printf((const unsigned char *)(msg "\n\a"), 0)
 #endif
 
 void Curl_amiga_cleanup(void)
 {
-  if(SocketBase) {
+  if (SocketBase)
+  {
     CloseLibrary(SocketBase);
     SocketBase = NULL;
   }
@@ -213,17 +226,19 @@ void Curl_amiga_cleanup(void)
 
 FETCHcode Curl_amiga_init(void)
 {
-  if(!SocketBase)
+  if (!SocketBase)
     SocketBase = OpenLibrary((const unsigned char *)"bsdsocket.library", 4);
 
-  if(!SocketBase) {
+  if (!SocketBase)
+  {
     __request("No TCP/IP Stack running!");
     return FETCHE_FAILED_INIT;
   }
 
-  if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
-                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "fetch",
-                    TAG_DONE)) {
+  if (SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG)&errno,
+                     SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "fetch",
+                     TAG_DONE))
+  {
     __request("SocketBaseTags ERROR");
     return FETCHE_FAILED_INIT;
   }

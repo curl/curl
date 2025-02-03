@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,14 +60,16 @@ int main(void)
 
   /* open the header file */
   headerfile = fopen(headerfilename, "wb");
-  if(!headerfile) {
+  if (!headerfile)
+  {
     fetch_easy_cleanup(fetch_handle);
     return -1;
   }
 
   /* open the body file */
   bodyfile = fopen(bodyfilename, "wb");
-  if(!bodyfile) {
+  if (!bodyfile)
+  {
     fetch_easy_cleanup(fetch_handle);
     fclose(headerfile);
     return -1;

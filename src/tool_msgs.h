@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,12 +27,12 @@
 #include "tool_cfgable.h"
 
 void warnf(struct GlobalConfig *config, const char *fmt, ...)
-  FETCH_PRINTF(2, 3);
+    FETCH_PRINTF(2, 3);
 void notef(struct GlobalConfig *config, const char *fmt, ...)
-  FETCH_PRINTF(2, 3);
+    FETCH_PRINTF(2, 3);
 void helpf(FILE *errors, const char *fmt, ...)
-  FETCH_PRINTF(2, 3);
+    FETCH_PRINTF(2, 3);
 void errorf(struct GlobalConfig *config, const char *fmt, ...)
-  FETCH_PRINTF(2, 3);
+    FETCH_PRINTF(2, 3);
 
 #endif /* HEADER_FETCH_TOOL_MSGS_H */

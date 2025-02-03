@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,22 +39,26 @@ void Curl_speedinit(struct Curl_easy *data)
  * @unittest: 1606
  */
 FETCHcode Curl_speedcheck(struct Curl_easy *data,
-                         struct fetchtime now)
+                          struct fetchtime now)
 {
-  if(data->req.keepon & KEEP_RECV_PAUSE)
+  if (data->req.keepon & KEEP_RECV_PAUSE)
     /* A paused transfer is not qualified for speed checks */
     return FETCHE_OK;
 
-  if((data->progress.current_speed >= 0) && data->set.low_speed_time) {
-    if(data->progress.current_speed < data->set.low_speed_limit) {
-      if(!data->state.keeps_speed.tv_sec)
+  if ((data->progress.current_speed >= 0) && data->set.low_speed_time)
+  {
+    if (data->progress.current_speed < data->set.low_speed_limit)
+    {
+      if (!data->state.keeps_speed.tv_sec)
         /* under the limit at this very moment */
         data->state.keeps_speed = now;
-      else {
+      else
+      {
         /* how long has it been under the limit */
         timediff_t howlong = Curl_timediff(now, data->state.keeps_speed);
 
-        if(howlong >= data->set.low_speed_time * 1000) {
+        if (howlong >= data->set.low_speed_time * 1000)
+        {
           /* too long */
           failf(data,
                 "Operation too slow. "
@@ -70,7 +74,7 @@ FETCHcode Curl_speedcheck(struct Curl_easy *data,
       data->state.keeps_speed.tv_sec = 0;
   }
 
-  if(data->set.low_speed_limit)
+  if (data->set.low_speed_limit)
     /* if low speed limit is enabled, set the expire timer to make this
        connection's speed get checked again in a second */
     Curl_expire(data, 1000, EXPIRE_SPEEDCHECK);

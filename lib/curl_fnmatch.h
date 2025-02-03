@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,9 +24,9 @@
  *
  ***************************************************************************/
 
-#define FETCH_FNMATCH_MATCH    0
-#define FETCH_FNMATCH_NOMATCH  1
-#define FETCH_FNMATCH_FAIL     2
+#define FETCH_FNMATCH_MATCH 0
+#define FETCH_FNMATCH_NOMATCH 1
+#define FETCH_FNMATCH_FAIL 2
 
 /* default pattern matching function
  * =================================

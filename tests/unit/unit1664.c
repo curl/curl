@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,21 +51,21 @@ static void unit_stop(void)
 UNITTEST_START
 {
   static const char *wordparse[] = {
-    "word",
-    "word ",
-    " word ",
-    "wo rd",
-    "word(",
-    "wor(d",
-    "perfect",
-    "",
-    "longerth",
-    NULL
-  };
+      "word",
+      "word ",
+      " word ",
+      "wo rd",
+      "word(",
+      "wor(d",
+      "perfect",
+      "",
+      "longerth",
+      NULL};
 
   int i;
   printf("Curl_str_word\n");
-  for(i = 0; wordparse[i]; i++) {
+  for (i = 0; wordparse[i]; i++)
+  {
     struct Curl_str out;
     char *line = (char *)wordparse[i];
     char *orgline = line;
@@ -76,7 +76,8 @@ UNITTEST_START
   }
 
   printf("Curl_str_until\n");
-  for(i = 0; wordparse[i]; i++) {
+  for (i = 0; wordparse[i]; i++)
+  {
     struct Curl_str out;
     char *line = (char *)wordparse[i];
     char *orgline = line;
@@ -88,23 +89,23 @@ UNITTEST_START
 
   {
     static const char *qwords[] = {
-      "\"word\"",
-      "\"word",
-      "word\"",
-      "\"word\"\"",
-      "\"word\" ",
-      " \"word\"",
-      "\"perfect\"",
-      "\"p r e t\"",
-      "\"perfec\\\"",
-      "\"\"",
-      "",
-      "\"longerth\"",
-      NULL
-    };
+        "\"word\"",
+        "\"word",
+        "word\"",
+        "\"word\"\"",
+        "\"word\" ",
+        " \"word\"",
+        "\"perfect\"",
+        "\"p r e t\"",
+        "\"perfec\\\"",
+        "\"\"",
+        "",
+        "\"longerth\"",
+        NULL};
 
     printf("Curl_str_quotedword\n");
-    for(i = 0; qwords[i]; i++) {
+    for (i = 0; qwords[i]; i++)
+    {
       struct Curl_str out;
       char *line = (char *)qwords[i];
       char *orgline = line;
@@ -117,17 +118,17 @@ UNITTEST_START
 
   {
     static const char *single[] = {
-      "a",
-      "aa",
-      "A",
-      "b",
-      "\\",
-      " ",
-      "",
-      NULL
-    };
+        "a",
+        "aa",
+        "A",
+        "b",
+        "\\",
+        " ",
+        "",
+        NULL};
     printf("Curl_str_single\n");
-    for(i = 0; single[i]; i++) {
+    for (i = 0; single[i]; i++)
+    {
       char *line = (char *)single[i];
       char *orgline = line;
       int rc = Curl_str_single(&line, 'a');
@@ -137,19 +138,19 @@ UNITTEST_START
   }
   {
     static const char *single[] = {
-      "a",
-      "aa",
-      "A",
-      "b",
-      "\\",
-      " ",
-      "\t",
-      "\n",
-      "",
-      NULL
-    };
+        "a",
+        "aa",
+        "A",
+        "b",
+        "\\",
+        " ",
+        "\t",
+        "\n",
+        "",
+        NULL};
     printf("Curl_str_singlespace\n");
-    for(i = 0; single[i]; i++) {
+    for (i = 0; single[i]; i++)
+    {
       char *line = (char *)single[i];
       char *orgline = line;
       int rc = Curl_str_singlespace(&line);
@@ -160,17 +161,17 @@ UNITTEST_START
 
   {
     static const char *single[] = {
-      "a",
-      "aa",
-      "A",
-      "b",
-      "\\",
-      " ",
-      "",
-      NULL
-    };
+        "a",
+        "aa",
+        "A",
+        "b",
+        "\\",
+        " ",
+        "",
+        NULL};
     printf("Curl_str_single\n");
-    for(i = 0; single[i]; i++) {
+    for (i = 0; single[i]; i++)
+    {
       char *line = (char *)single[i];
       char *orgline = line;
       int rc = Curl_str_single(&line, 'a');
@@ -180,22 +181,22 @@ UNITTEST_START
   }
   {
     static const char *nums[] = {
-      "1",
-      "10000",
-      "1234",
-      "1235",
-      "1236",
-      "01234",
-      "00000000000000000000000000001234",
-      "0123 345",
-      "0123O345",
-      "-12",
-      " 123",
-      "",
-      NULL
-    };
+        "1",
+        "10000",
+        "1234",
+        "1235",
+        "1236",
+        "01234",
+        "00000000000000000000000000001234",
+        "0123 345",
+        "0123O345",
+        "-12",
+        " 123",
+        "",
+        NULL};
     printf("Curl_str_number\n");
-    for(i = 0; nums[i]; i++) {
+    for (i = 0; nums[i]; i++)
+    {
       size_t num;
       char *line = (char *)nums[i];
       char *orgline = line;
@@ -208,15 +209,15 @@ UNITTEST_START
   {
     /* SIZE_T_MAX is typically 18446744073709551615 */
     static const char *nums[] = {
-      "9223372036854775808", /* 2^63 */
-      "9223372036854775809", /* 2^63 + 1 */
-      "18446744073709551615", /* 2^64 - 1 */
-      "18446744073709551616", /* 2^64 */
-      "18446744073709551617", /* 2^64 + 1 */
-      NULL
-    };
+        "9223372036854775808",  /* 2^63 */
+        "9223372036854775809",  /* 2^63 + 1 */
+        "18446744073709551615", /* 2^64 - 1 */
+        "18446744073709551616", /* 2^64 */
+        "18446744073709551617", /* 2^64 + 1 */
+        NULL};
     printf("Curl_str_number / max\n");
-    for(i = 0; nums[i]; i++) {
+    for (i = 0; nums[i]; i++)
+    {
       size_t num;
       char *line = (char *)nums[i];
       char *orgline = line;
@@ -228,20 +229,20 @@ UNITTEST_START
 
   {
     static const char *newl[] = {
-      "a",
-      "aa",
-      "A",
-      "b",
-      "\\",
-      " ",
-      "\n",
-      "\r",
-      "\r\n",
-      "",
-      NULL
-    };
+        "a",
+        "aa",
+        "A",
+        "b",
+        "\\",
+        " ",
+        "\n",
+        "\r",
+        "\r\n",
+        "",
+        NULL};
     printf("Curl_str_newline\n");
-    for(i = 0; newl[i]; i++) {
+    for (i = 0; newl[i]; i++)
+    {
       char *line = (char *)newl[i];
       char *orgline = line;
       int rc = Curl_str_newline(&line);
@@ -249,6 +250,5 @@ UNITTEST_START
              i, orgline, rc, (int)(line - orgline));
     }
   }
-
 }
 UNITTEST_STOP

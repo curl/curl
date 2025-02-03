@@ -10,7 +10,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -148,13 +148,13 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-
 /* From MacTypes.h (which we cannot include because it is not present in
    iOS: */
 #define ioErr -36
 #define paramErr -50
 
-struct st_ssl_backend_data {
+struct st_ssl_backend_data
+{
   SSLContextRef ssl_ctx;
   bool ssl_direction; /* true if writing, false if reading */
   size_t ssl_write_buffered_length;
@@ -169,56 +169,55 @@ struct st_ssl_backend_data {
  * and dangerous to use are supported"
  */
 static const uint16_t default_ciphers[] = {
-  TLS_RSA_WITH_3DES_EDE_CBC_SHA,                    /* 0x000A */
-  TLS_RSA_WITH_AES_128_CBC_SHA,                     /* 0x002F */
-  TLS_RSA_WITH_AES_256_CBC_SHA,                     /* 0x0035 */
+    TLS_RSA_WITH_3DES_EDE_CBC_SHA, /* 0x000A */
+    TLS_RSA_WITH_AES_128_CBC_SHA,  /* 0x002F */
+    TLS_RSA_WITH_AES_256_CBC_SHA,  /* 0x0035 */
 
 #if FETCH_BUILD_MAC_10_6 || FETCH_BUILD_IOS
-  TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,             /* 0xC009 */
-  TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,             /* 0xC00A */
-  TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,               /* 0xC013 */
-  TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,               /* 0xC014 */
-#endif /* FETCH_BUILD_MAC_10_6 || FETCH_BUILD_IOS */
+    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, /* 0xC009 */
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA, /* 0xC00A */
+    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,   /* 0xC013 */
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,   /* 0xC014 */
+#endif                                    /* FETCH_BUILD_MAC_10_6 || FETCH_BUILD_IOS */
 
 #if FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS
-  TLS_RSA_WITH_AES_128_CBC_SHA256,                  /* 0x003C */
-  TLS_RSA_WITH_AES_256_CBC_SHA256,                  /* 0x003D */
-  TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,              /* 0x0067 */
-  TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,              /* 0x006B */
-  TLS_RSA_WITH_AES_128_GCM_SHA256,                  /* 0x009C */
-  TLS_RSA_WITH_AES_256_GCM_SHA384,                  /* 0x009D */
-  TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,              /* 0x009E */
-  TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,              /* 0x009F */
-  TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,          /* 0xC023 */
-  TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,          /* 0xC024 */
-  TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,            /* 0xC027 */
-  TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,            /* 0xC028 */
-  TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,          /* 0xC02B */
-  TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,          /* 0xC02C */
-  TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,            /* 0xC02F */
-  TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,            /* 0xC030 */
-#endif /* FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS */
+    TLS_RSA_WITH_AES_128_CBC_SHA256,         /* 0x003C */
+    TLS_RSA_WITH_AES_256_CBC_SHA256,         /* 0x003D */
+    TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,     /* 0x0067 */
+    TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,     /* 0x006B */
+    TLS_RSA_WITH_AES_128_GCM_SHA256,         /* 0x009C */
+    TLS_RSA_WITH_AES_256_GCM_SHA384,         /* 0x009D */
+    TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,     /* 0x009E */
+    TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,     /* 0x009F */
+    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, /* 0xC023 */
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384, /* 0xC024 */
+    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,   /* 0xC027 */
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,   /* 0xC028 */
+    TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, /* 0xC02B */
+    TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, /* 0xC02C */
+    TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,   /* 0xC02F */
+    TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,   /* 0xC030 */
+#endif                                       /* FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS */
 
 #if FETCH_BUILD_MAC_10_13 || FETCH_BUILD_IOS_11
-  TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,      /* 0xCCA8 */
-  TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,    /* 0xCCA9 */
+    TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,   /* 0xCCA8 */
+    TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, /* 0xCCA9 */
 
-  /* TLSv1.3 is not supported by Secure Transport, but there is also other
-   * code referencing TLSv1.3, like: kTLSProtocol13 ? */
-  TLS_AES_128_GCM_SHA256,                           /* 0x1301 */
-  TLS_AES_256_GCM_SHA384,                           /* 0x1302 */
-  TLS_CHACHA20_POLY1305_SHA256,                     /* 0x1303 */
-#endif /* FETCH_BUILD_MAC_10_13 || FETCH_BUILD_IOS_11 */
+    /* TLSv1.3 is not supported by Secure Transport, but there is also other
+     * code referencing TLSv1.3, like: kTLSProtocol13 ? */
+    TLS_AES_128_GCM_SHA256,       /* 0x1301 */
+    TLS_AES_256_GCM_SHA384,       /* 0x1302 */
+    TLS_CHACHA20_POLY1305_SHA256, /* 0x1303 */
+#endif                            /* FETCH_BUILD_MAC_10_13 || FETCH_BUILD_IOS_11 */
 };
 
-#define DEFAULT_CIPHERS_LEN sizeof(default_ciphers)/sizeof(default_ciphers[0])
-
+#define DEFAULT_CIPHERS_LEN sizeof(default_ciphers) / sizeof(default_ciphers[0])
 
 /* pinned public key support tests */
 
 /* version 1 supports macOS 10.12+ and iOS 10+ */
 #if ((TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || \
-    (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED  >= 101200))
+     (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101200))
 #define SECTRANSP_PINNEDPUBKEY_V1 1
 #endif
 
@@ -235,41 +234,41 @@ static const uint16_t default_ciphers[] = {
 #ifdef SECTRANSP_PINNEDPUBKEY
 /* both new and old APIs return rsa keys missing the spki header (not DER) */
 static const unsigned char rsa4096SpkiHeader[] = {
-                                       0x30, 0x82, 0x02, 0x22, 0x30, 0x0d,
-                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
-                                       0x00, 0x03, 0x82, 0x02, 0x0f, 0x00};
+    0x30, 0x82, 0x02, 0x22, 0x30, 0x0d,
+    0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
+    0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
+    0x00, 0x03, 0x82, 0x02, 0x0f, 0x00};
 
 static const unsigned char rsa2048SpkiHeader[] = {
-                                       0x30, 0x82, 0x01, 0x22, 0x30, 0x0d,
-                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
-                                       0x00, 0x03, 0x82, 0x01, 0x0f, 0x00};
+    0x30, 0x82, 0x01, 0x22, 0x30, 0x0d,
+    0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
+    0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
+    0x00, 0x03, 0x82, 0x01, 0x0f, 0x00};
 #ifdef SECTRANSP_PINNEDPUBKEY_V1
 /* the *new* version does not return DER encoded ecdsa certs like the old... */
 static const unsigned char ecDsaSecp256r1SpkiHeader[] = {
-                                       0x30, 0x59, 0x30, 0x13, 0x06, 0x07,
-                                       0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
-                                       0x01, 0x06, 0x08, 0x2a, 0x86, 0x48,
-                                       0xce, 0x3d, 0x03, 0x01, 0x07, 0x03,
-                                       0x42, 0x00};
+    0x30, 0x59, 0x30, 0x13, 0x06, 0x07,
+    0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
+    0x01, 0x06, 0x08, 0x2a, 0x86, 0x48,
+    0xce, 0x3d, 0x03, 0x01, 0x07, 0x03,
+    0x42, 0x00};
 
 static const unsigned char ecDsaSecp384r1SpkiHeader[] = {
-                                       0x30, 0x76, 0x30, 0x10, 0x06, 0x07,
-                                       0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
-                                       0x01, 0x06, 0x05, 0x2b, 0x81, 0x04,
-                                       0x00, 0x22, 0x03, 0x62, 0x00};
+    0x30, 0x76, 0x30, 0x10, 0x06, 0x07,
+    0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
+    0x01, 0x06, 0x05, 0x2b, 0x81, 0x04,
+    0x00, 0x22, 0x03, 0x62, 0x00};
 #endif /* SECTRANSP_PINNEDPUBKEY_V1 */
 #endif /* SECTRANSP_PINNEDPUBKEY */
 
 static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
                                          void *buf,
-                                         size_t *dataLength)  /* IN/OUT */
+                                         size_t *dataLength) /* IN/OUT */
 {
   struct Curl_cfilter *cf = (struct Curl_cfilter *)connection;
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   FETCHcode result;
@@ -278,24 +277,28 @@ static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
   DEBUGASSERT(data);
   nread = Curl_conn_cf_recv(cf->next, data, buf, *dataLength, &result);
   FETCH_TRC_CF(data, cf, "bio_read(len=%zu) -> %zd, result=%d",
-              *dataLength, nread, result);
-  if(nread < 0) {
-    switch(result) {
-      case FETCHE_OK:
-      case FETCHE_AGAIN:
-        rtn = errSSLWouldBlock;
-        backend->ssl_direction = FALSE;
-        break;
-      default:
-        rtn = ioErr;
-        break;
+               *dataLength, nread, result);
+  if (nread < 0)
+  {
+    switch (result)
+    {
+    case FETCHE_OK:
+    case FETCHE_AGAIN:
+      rtn = errSSLWouldBlock;
+      backend->ssl_direction = FALSE;
+      break;
+    default:
+      rtn = ioErr;
+      break;
     }
     nread = 0;
   }
-  else if(nread == 0) {
+  else if (nread == 0)
+  {
     rtn = errSSLClosedGraceful;
   }
-  else if((size_t)nread < *dataLength) {
+  else if ((size_t)nread < *dataLength)
+  {
     rtn = errSSLWouldBlock;
   }
   *dataLength = nread;
@@ -304,12 +307,12 @@ static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
 
 static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
                                            const void *buf,
-                                           size_t *dataLength)  /* IN/OUT */
+                                           size_t *dataLength) /* IN/OUT */
 {
   struct Curl_cfilter *cf = (struct Curl_cfilter *)connection;
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   FETCHcode result;
@@ -319,18 +322,22 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   nwritten = Curl_conn_cf_send(cf->next, data, buf, *dataLength, FALSE,
                                &result);
   FETCH_TRC_CF(data, cf, "bio_send(len=%zu) -> %zd, result=%d",
-              *dataLength, nwritten, result);
-  if(nwritten <= 0) {
-    if(result == FETCHE_AGAIN) {
+               *dataLength, nwritten, result);
+  if (nwritten <= 0)
+  {
+    if (result == FETCHE_AGAIN)
+    {
       rtn = errSSLWouldBlock;
       backend->ssl_direction = TRUE;
     }
-    else {
+    else
+    {
       rtn = ioErr;
     }
     nwritten = 0;
   }
-  else if((size_t)nwritten < *dataLength) {
+  else if ((size_t)nwritten < *dataLength)
+  {
     rtn = errSSLWouldBlock;
   }
   *dataLength = nwritten;
@@ -349,12 +356,13 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
   /* Get the Darwin kernel version from the kernel using sysctl(): */
   mib[0] = CTL_KERN;
   mib[1] = KERN_OSRELEASE;
-  if(sysctl(mib, 2, NULL, &os_version_len, NULL, 0) == -1)
+  if (sysctl(mib, 2, NULL, &os_version_len, NULL, 0) == -1)
     return;
-  os_version = malloc(os_version_len*sizeof(char));
-  if(!os_version)
+  os_version = malloc(os_version_len * sizeof(char));
+  if (!os_version)
     return;
-  if(sysctl(mib, 2, os_version, &os_version_len, NULL, 0) == -1) {
+  if (sysctl(mib, 2, os_version, &os_version_len, NULL, 0) == -1)
+  {
     free(os_version);
     return;
   }
@@ -382,25 +390,25 @@ CF_INLINE CFStringRef getsubject(SecCertificateRef cert)
 #else
 #if FETCH_BUILD_MAC_10_7
   /* Lion & later: Get the long description if we can. */
-  if(&SecCertificateCopyLongDescription)
+  if (&SecCertificateCopyLongDescription)
     server_cert_summary =
-      SecCertificateCopyLongDescription(NULL, cert, NULL);
+        SecCertificateCopyLongDescription(NULL, cert, NULL);
   else
 #endif /* FETCH_BUILD_MAC_10_7 */
 #if FETCH_BUILD_MAC_10_6
-  /* Snow Leopard: Get the certificate summary. */
-  if(&SecCertificateCopySubjectSummary)
-    server_cert_summary = SecCertificateCopySubjectSummary(cert);
-  else
+    /* Snow Leopard: Get the certificate summary. */
+    if (&SecCertificateCopySubjectSummary)
+      server_cert_summary = SecCertificateCopySubjectSummary(cert);
+    else
 #endif /* FETCH_BUILD_MAC_10_6 */
-  /* Leopard is as far back as we go... */
-  (void)SecCertificateCopyCommonName(cert, &server_cert_summary);
+      /* Leopard is as far back as we go... */
+      (void)SecCertificateCopyCommonName(cert, &server_cert_summary);
 #endif /* FETCH_BUILD_IOS */
   return server_cert_summary;
 }
 
 static FETCHcode CopyCertSubject(struct Curl_easy *data,
-                                SecCertificateRef cert, char **certp)
+                                 SecCertificateRef cert, char **certp)
 {
   CFStringRef c = getsubject(cert);
   FETCHcode result = FETCHE_OK;
@@ -408,7 +416,8 @@ static FETCHcode CopyCertSubject(struct Curl_easy *data,
   char *cbuf = NULL;
   *certp = NULL;
 
-  if(!c) {
+  if (!c)
+  {
     failf(data, "SSL: invalid CA certificate subject");
     return FETCHE_PEER_FAILED_VERIFICATION;
   }
@@ -416,19 +425,24 @@ static FETCHcode CopyCertSubject(struct Curl_easy *data,
   /* If the subject is already available as UTF-8 encoded (ie 'direct') then
      use that, else convert it. */
   direct = CFStringGetCStringPtr(c, kCFStringEncodingUTF8);
-  if(direct) {
+  if (direct)
+  {
     *certp = strdup(direct);
-    if(!*certp) {
+    if (!*certp)
+    {
       failf(data, "SSL: out of memory");
       result = FETCHE_OUT_OF_MEMORY;
     }
   }
-  else {
+  else
+  {
     size_t cbuf_size = ((size_t)CFStringGetLength(c) * 4) + 1;
     cbuf = calloc(1, cbuf_size);
-    if(cbuf) {
-      if(!CFStringGetCString(c, cbuf, (CFIndex)cbuf_size,
-                             kCFStringEncodingUTF8)) {
+    if (cbuf)
+    {
+      if (!CFStringGetCString(c, cbuf, (CFIndex)cbuf_size,
+                              kCFStringEncodingUTF8))
+      {
         failf(data, "SSL: invalid CA certificate subject");
         result = FETCHE_PEER_FAILED_VERIFICATION;
       }
@@ -436,12 +450,13 @@ static FETCHcode CopyCertSubject(struct Curl_easy *data,
         /* pass back the buffer */
         *certp = cbuf;
     }
-    else {
+    else
+    {
       failf(data, "SSL: could not allocate %zu bytes of memory", cbuf_size);
       result = FETCHE_OUT_OF_MEMORY;
     }
   }
-  if(result)
+  if (result)
     free(cbuf);
   CFRelease(c);
   return result;
@@ -473,17 +488,19 @@ static OSStatus CopyIdentityWithLabelOldSchool(char *label,
                                                  kSecCertificateItemClass,
                                                  &attr_list,
                                                  &search);
-  if(status == noErr) {
+  if (status == noErr)
+  {
     status = SecKeychainSearchCopyNext(search,
                                        (SecKeychainItemRef *)&cert);
-    if(status == noErr && cert) {
+    if (status == noErr && cert)
+    {
       /* If we found a certificate, does it have a private key? */
       status = SecIdentityCreateWithCertificate(NULL, cert, out_c_a_k);
       CFRelease(cert);
     }
   }
 
-  if(search)
+  if (search)
     CFRelease(search);
   return status;
 }
@@ -502,17 +519,18 @@ static OSStatus CopyIdentityWithLabel(char *label,
   /* SecItemCopyMatching() was introduced in iOS and Snow Leopard.
      kSecClassIdentity was introduced in Lion. If both exist, let's use them
      to find the certificate. */
-  if(&SecItemCopyMatching && kSecClassIdentity) {
+  if (&SecItemCopyMatching && kSecClassIdentity)
+  {
     CFTypeRef keys[5];
     CFTypeRef values[5];
     CFDictionaryRef query_dict;
     CFStringRef label_cf = CFStringCreateWithCString(NULL, label,
-      kCFStringEncodingUTF8);
+                                                     kCFStringEncodingUTF8);
 
     /* Set up our search criteria and expected results: */
     values[0] = kSecClassIdentity; /* we want a certificate and a key */
     keys[0] = kSecClass;
-    values[1] = kCFBooleanTrue;    /* we want a reference */
+    values[1] = kCFBooleanTrue; /* we want a reference */
     keys[1] = kSecReturnRef;
     values[2] = kSecMatchLimitAll; /* kSecMatchLimitOne would be better if the
                                     * label matching below worked correctly */
@@ -530,21 +548,24 @@ static OSStatus CopyIdentityWithLabel(char *label,
     CFRelease(values[3]);
 
     /* Do we have a match? */
-    status = SecItemCopyMatching(query_dict, (CFTypeRef *) &keys_list);
+    status = SecItemCopyMatching(query_dict, (CFTypeRef *)&keys_list);
 
     /* Because kSecAttrLabel matching does not work with kSecClassIdentity,
      * we need to find the correct identity ourselves */
-    if(status == noErr) {
+    if (status == noErr)
+    {
       keys_list_count = CFArrayGetCount(keys_list);
       *out_cert_and_key = NULL;
       status = 1;
-      for(i = 0; i < keys_list_count; i++) {
+      for (i = 0; i < keys_list_count; i++)
+      {
         OSStatus err = noErr;
         SecCertificateRef cert = NULL;
         SecIdentityRef identity =
-          (SecIdentityRef) CFArrayGetValueAtIndex(keys_list, i);
+            (SecIdentityRef)CFArrayGetValueAtIndex(keys_list, i);
         err = SecIdentityCopyCertificate(identity, &cert);
-        if(err == noErr) {
+        if (err == noErr)
+        {
           CFStringRef common_name = NULL;
           OSStatus copy_status = noErr;
 #if FETCH_BUILD_IOS
@@ -552,8 +573,9 @@ static OSStatus CopyIdentityWithLabel(char *label,
 #elif FETCH_BUILD_MAC_10_7
           copy_status = SecCertificateCopyCommonName(cert, &common_name);
 #endif
-          if(copy_status == noErr &&
-            CFStringCompare(common_name, label_cf, 0) == kCFCompareEqualTo) {
+          if (copy_status == noErr &&
+              CFStringCompare(common_name, label_cf, 0) == kCFCompareEqualTo)
+          {
             CFRelease(cert);
             CFRelease(common_name);
             CFRetain(identity);
@@ -561,19 +583,20 @@ static OSStatus CopyIdentityWithLabel(char *label,
             status = noErr;
             break;
           }
-          if(common_name)
+          if (common_name)
             CFRelease(common_name);
         }
         CFRelease(cert);
       }
     }
 
-    if(keys_list)
+    if (keys_list)
       CFRelease(keys_list);
     CFRelease(query_dict);
     CFRelease(label_cf);
   }
-  else {
+  else
+  {
 #if FETCH_SUPPORT_MAC_10_6
     /* On Leopard and Snow Leopard, fall back to SecKeychainSearch. */
     status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
@@ -595,7 +618,8 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
   OSStatus status = errSecItemNotFound;
   CFURLRef pkcs_url = NULL;
   CFStringRef password = cPassword ? CFStringCreateWithCString(NULL,
-    cPassword, kCFStringEncodingUTF8) : NULL;
+                                                               cPassword, kCFStringEncodingUTF8)
+                                   : NULL;
   CFDataRef pkcs_data = NULL;
 
   /* We can import P12 files on iOS or macOS 10.7 or later: */
@@ -604,103 +628,109 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
 #if FETCH_BUILD_MAC_10_7 || FETCH_BUILD_IOS
   bool resource_imported;
 
-  if(blob) {
+  if (blob)
+  {
     pkcs_data = CFDataCreate(kCFAllocatorDefault,
                              (const unsigned char *)blob->data,
                              (CFIndex)blob->len);
     status = (pkcs_data != NULL) ? errSecSuccess : errSecAllocate;
     resource_imported = (pkcs_data != NULL);
   }
-  else {
+  else
+  {
     pkcs_url =
-      CFURLCreateFromFileSystemRepresentation(NULL,
-                                              (const UInt8 *)cPath,
-                                              (CFIndex)strlen(cPath), FALSE);
+        CFURLCreateFromFileSystemRepresentation(NULL,
+                                                (const UInt8 *)cPath,
+                                                (CFIndex)strlen(cPath), FALSE);
     resource_imported =
-      CFURLCreateDataAndPropertiesFromResource(NULL,
-                                               pkcs_url, &pkcs_data,
-                                               NULL, NULL, &status);
+        CFURLCreateDataAndPropertiesFromResource(NULL,
+                                                 pkcs_url, &pkcs_data,
+                                                 NULL, NULL, &status);
   }
 
-  if(resource_imported) {
+  if (resource_imported)
+  {
     CFArrayRef items = NULL;
 
-  /* On iOS SecPKCS12Import will never add the client certificate to the
-   * Keychain.
-   *
-   * It gives us back a SecIdentityRef that we can use directly. */
+    /* On iOS SecPKCS12Import will never add the client certificate to the
+     * Keychain.
+     *
+     * It gives us back a SecIdentityRef that we can use directly. */
 #if FETCH_BUILD_IOS
     const void *cKeys[] = {kSecImportExportPassphrase};
     const void *cValues[] = {password};
     CFDictionaryRef options = CFDictionaryCreate(NULL, cKeys, cValues,
-      password ? 1L : 0L, NULL, NULL);
+                                                 password ? 1L : 0L, NULL, NULL);
 
-    if(options) {
+    if (options)
+    {
       status = SecPKCS12Import(pkcs_data, options, &items);
       CFRelease(options);
     }
 
-
-  /* On macOS SecPKCS12Import will always add the client certificate to
-   * the Keychain.
-   *
-   * As this does not match iOS, and apps may not want to see their client
-   * certificate saved in the user's keychain, we use SecItemImport
-   * with a NULL keychain to avoid importing it.
-   *
-   * This returns a SecCertificateRef from which we can construct a
-   * SecIdentityRef.
-   */
+    /* On macOS SecPKCS12Import will always add the client certificate to
+     * the Keychain.
+     *
+     * As this does not match iOS, and apps may not want to see their client
+     * certificate saved in the user's keychain, we use SecItemImport
+     * with a NULL keychain to avoid importing it.
+     *
+     * This returns a SecCertificateRef from which we can construct a
+     * SecIdentityRef.
+     */
 #elif FETCH_BUILD_MAC_10_7
     SecItemImportExportKeyParameters keyParams;
     SecExternalFormat inputFormat = kSecFormatPKCS12;
     SecExternalItemType inputType = kSecItemTypeCertificate;
 
     memset(&keyParams, 0x00, sizeof(keyParams));
-    keyParams.version    = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+    keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
     keyParams.passphrase = password;
 
     status = SecItemImport(pkcs_data, NULL, &inputFormat, &inputType,
                            0, &keyParams, NULL, &items);
 #endif
 
-
     /* Extract the SecIdentityRef */
-    if(status == errSecSuccess && items && CFArrayGetCount(items)) {
+    if (status == errSecSuccess && items && CFArrayGetCount(items))
+    {
       CFIndex i, count;
       count = CFArrayGetCount(items);
 
-      for(i = 0; i < count; i++) {
-        CFTypeRef item = (CFTypeRef) CFArrayGetValueAtIndex(items, i);
-        CFTypeID  itemID = CFGetTypeID(item);
+      for (i = 0; i < count; i++)
+      {
+        CFTypeRef item = (CFTypeRef)CFArrayGetValueAtIndex(items, i);
+        CFTypeID itemID = CFGetTypeID(item);
 
-        if(itemID == CFDictionaryGetTypeID()) {
-          CFTypeRef identity = (CFTypeRef) CFDictionaryGetValue(
-                                                 (CFDictionaryRef) item,
-                                                 kSecImportItemIdentity);
+        if (itemID == CFDictionaryGetTypeID())
+        {
+          CFTypeRef identity = (CFTypeRef)CFDictionaryGetValue(
+              (CFDictionaryRef)item,
+              kSecImportItemIdentity);
           CFRetain(identity);
-          *out_cert_and_key = (SecIdentityRef) identity;
+          *out_cert_and_key = (SecIdentityRef)identity;
           break;
         }
 #if FETCH_BUILD_MAC_10_7
-        else if(itemID == SecCertificateGetTypeID()) {
+        else if (itemID == SecCertificateGetTypeID())
+        {
           status = SecIdentityCreateWithCertificate(NULL,
-                                                 (SecCertificateRef) item,
-                                                 out_cert_and_key);
+                                                    (SecCertificateRef)item,
+                                                    out_cert_and_key);
           break;
         }
 #endif
       }
     }
 
-    if(items)
+    if (items)
       CFRelease(items);
     CFRelease(pkcs_data);
   }
 #endif /* FETCH_BUILD_MAC_10_7 || FETCH_BUILD_IOS */
-  if(password)
+  if (password)
     CFRelease(password);
-  if(pkcs_url)
+  if (pkcs_url)
     CFRelease(pkcs_url);
   return status;
 }
@@ -716,10 +746,10 @@ CF_INLINE bool is_file(const char *filename)
 {
   struct_stat st;
 
-  if(!filename)
+  if (!filename)
     return FALSE;
 
-  if(stat(filename, &st) == 0)
+  if (stat(filename, &st) == 0)
     return S_ISREG(st.st_mode);
   return FALSE;
 }
@@ -735,53 +765,57 @@ sectransp_set_ssl_version_min_max(struct Curl_easy *data,
   SSLProtocol ver_max;
 
 #if FETCH_SUPPORT_MAC_10_7
-  if(!&SSLSetProtocolVersionMax)
+  if (!&SSLSetProtocolVersionMax)
     goto legacy;
 #endif
 
-  switch(conn_config->version) {
-    case FETCH_SSLVERSION_DEFAULT:
-    case FETCH_SSLVERSION_TLSv1:
-    case FETCH_SSLVERSION_TLSv1_0:
-      ver_min = kTLSProtocol1;
-      break;
-    case FETCH_SSLVERSION_TLSv1_1:
-      ver_min = kTLSProtocol11;
-      break;
-    case FETCH_SSLVERSION_TLSv1_2:
-      ver_min = kTLSProtocol12;
-      break;
-    case FETCH_SSLVERSION_TLSv1_3:
-    default:
-      failf(data, "SSL: unsupported minimum TLS version value");
-      return FETCHE_SSL_CONNECT_ERROR;
+  switch (conn_config->version)
+  {
+  case FETCH_SSLVERSION_DEFAULT:
+  case FETCH_SSLVERSION_TLSv1:
+  case FETCH_SSLVERSION_TLSv1_0:
+    ver_min = kTLSProtocol1;
+    break;
+  case FETCH_SSLVERSION_TLSv1_1:
+    ver_min = kTLSProtocol11;
+    break;
+  case FETCH_SSLVERSION_TLSv1_2:
+    ver_min = kTLSProtocol12;
+    break;
+  case FETCH_SSLVERSION_TLSv1_3:
+  default:
+    failf(data, "SSL: unsupported minimum TLS version value");
+    return FETCHE_SSL_CONNECT_ERROR;
   }
 
-  switch(conn_config->version_max) {
-    case FETCH_SSLVERSION_MAX_DEFAULT:
-    case FETCH_SSLVERSION_MAX_NONE:
-    case FETCH_SSLVERSION_MAX_TLSv1_3:
-    case FETCH_SSLVERSION_MAX_TLSv1_2:
-      ver_max = kTLSProtocol12;
-      break;
-    case FETCH_SSLVERSION_MAX_TLSv1_1:
-      ver_max = kTLSProtocol11;
-      break;
-    case FETCH_SSLVERSION_MAX_TLSv1_0:
-      ver_max = kTLSProtocol1;
-      break;
-    default:
-      failf(data, "SSL: unsupported maximum TLS version value");
-      return FETCHE_SSL_CONNECT_ERROR;
+  switch (conn_config->version_max)
+  {
+  case FETCH_SSLVERSION_MAX_DEFAULT:
+  case FETCH_SSLVERSION_MAX_NONE:
+  case FETCH_SSLVERSION_MAX_TLSv1_3:
+  case FETCH_SSLVERSION_MAX_TLSv1_2:
+    ver_max = kTLSProtocol12;
+    break;
+  case FETCH_SSLVERSION_MAX_TLSv1_1:
+    ver_max = kTLSProtocol11;
+    break;
+  case FETCH_SSLVERSION_MAX_TLSv1_0:
+    ver_max = kTLSProtocol1;
+    break;
+  default:
+    failf(data, "SSL: unsupported maximum TLS version value");
+    return FETCHE_SSL_CONNECT_ERROR;
   }
 
   err = SSLSetProtocolVersionMin(backend->ssl_ctx, ver_min);
-  if(err != noErr) {
+  if (err != noErr)
+  {
     failf(data, "SSL: failed to set minimum TLS version");
     return FETCHE_SSL_CONNECT_ERROR;
   }
   err = SSLSetProtocolVersionMax(backend->ssl_ctx, ver_max);
-  if(err != noErr) {
+  if (err != noErr)
+  {
     failf(data, "SSL: failed to set maximum TLS version");
     return FETCHE_SSL_CONNECT_ERROR;
   }
@@ -791,14 +825,15 @@ sectransp_set_ssl_version_min_max(struct Curl_easy *data,
 #if FETCH_SUPPORT_MAC_10_7
   goto legacy;
 legacy:
-  switch(conn_config->version) {
-    case FETCH_SSLVERSION_DEFAULT:
-    case FETCH_SSLVERSION_TLSv1:
-    case FETCH_SSLVERSION_TLSv1_0:
-      break;
-    default:
-      failf(data, "SSL: unsupported minimum TLS version value");
-      return FETCHE_SSL_CONNECT_ERROR;
+  switch (conn_config->version)
+  {
+  case FETCH_SSLVERSION_DEFAULT:
+  case FETCH_SSLVERSION_TLSv1:
+  case FETCH_SSLVERSION_TLSv1_0:
+    break;
+  default:
+    failf(data, "SSL: unsupported minimum TLS version value");
+    return FETCHE_SSL_CONNECT_ERROR;
   }
 
   /* only TLS 1.0 is supported, disable SSL 3.0 and SSL 2.0 */
@@ -813,21 +848,21 @@ static int sectransp_cipher_suite_get_str(uint16_t id, char *buf,
                                           size_t buf_size, bool prefer_rfc)
 {
   /* are these fortezza suites even supported ? */
-  if(id == SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA)
+  if (id == SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA)
     msnprintf(buf, buf_size, "%s", "SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA");
-  else if(id == SSL_FORTEZZA_DMS_WITH_NULL_SHA)
+  else if (id == SSL_FORTEZZA_DMS_WITH_NULL_SHA)
     msnprintf(buf, buf_size, "%s", "SSL_FORTEZZA_DMS_WITH_NULL_SHA");
   /* can TLS_EMPTY_RENEGOTIATION_INFO_SCSV even be set ? */
-  else if(id == TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
+  else if (id == TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
     msnprintf(buf, buf_size, "%s", "TLS_EMPTY_RENEGOTIATION_INFO_SCSV");
   /* do we still need to support these SSL2-only ciphers ? */
-  else if(id == SSL_RSA_WITH_RC2_CBC_MD5)
+  else if (id == SSL_RSA_WITH_RC2_CBC_MD5)
     msnprintf(buf, buf_size, "%s", "SSL_RSA_WITH_RC2_CBC_MD5");
-  else if(id == SSL_RSA_WITH_IDEA_CBC_MD5)
+  else if (id == SSL_RSA_WITH_IDEA_CBC_MD5)
     msnprintf(buf, buf_size, "%s", "SSL_RSA_WITH_IDEA_CBC_MD5");
-  else if(id == SSL_RSA_WITH_DES_CBC_MD5)
+  else if (id == SSL_RSA_WITH_DES_CBC_MD5)
     msnprintf(buf, buf_size, "%s", "SSL_RSA_WITH_DES_CBC_MD5");
-  else if(id == SSL_RSA_WITH_3DES_EDE_CBC_MD5)
+  else if (id == SSL_RSA_WITH_3DES_EDE_CBC_MD5)
     msnprintf(buf, buf_size, "%s", "SSL_RSA_WITH_3DES_EDE_CBC_MD5");
   else
     return Curl_cipher_suite_get_str(id, buf, buf_size, prefer_rfc);
@@ -840,46 +875,47 @@ static uint16_t sectransp_cipher_suite_walk_str(const char **str,
   uint16_t id = Curl_cipher_suite_walk_str(str, end);
   size_t len = *end - *str;
 
-  if(!id) {
+  if (!id)
+  {
     /* are these fortezza suites even supported ? */
-    if(strncasecompare("SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA", *str, len))
+    if (strncasecompare("SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA", *str, len))
       id = SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA;
-    else if(strncasecompare("SSL_FORTEZZA_DMS_WITH_NULL_SHA", *str, len))
+    else if (strncasecompare("SSL_FORTEZZA_DMS_WITH_NULL_SHA", *str, len))
       id = SSL_FORTEZZA_DMS_WITH_NULL_SHA;
     /* can TLS_EMPTY_RENEGOTIATION_INFO_SCSV even be set ? */
-    else if(strncasecompare("TLS_EMPTY_RENEGOTIATION_INFO_SCSV", *str, len))
+    else if (strncasecompare("TLS_EMPTY_RENEGOTIATION_INFO_SCSV", *str, len))
       id = TLS_EMPTY_RENEGOTIATION_INFO_SCSV;
     /* do we still need to support these SSL2-only ciphers ? */
-    else if(strncasecompare("SSL_RSA_WITH_RC2_CBC_MD5", *str, len))
+    else if (strncasecompare("SSL_RSA_WITH_RC2_CBC_MD5", *str, len))
       id = SSL_RSA_WITH_RC2_CBC_MD5;
-    else if(strncasecompare("SSL_RSA_WITH_IDEA_CBC_MD5", *str, len))
+    else if (strncasecompare("SSL_RSA_WITH_IDEA_CBC_MD5", *str, len))
       id = SSL_RSA_WITH_IDEA_CBC_MD5;
-    else if(strncasecompare("SSL_RSA_WITH_DES_CBC_MD5", *str, len))
+    else if (strncasecompare("SSL_RSA_WITH_DES_CBC_MD5", *str, len))
       id = SSL_RSA_WITH_DES_CBC_MD5;
-    else if(strncasecompare("SSL_RSA_WITH_3DES_EDE_CBC_MD5", *str, len))
+    else if (strncasecompare("SSL_RSA_WITH_3DES_EDE_CBC_MD5", *str, len))
       id = SSL_RSA_WITH_3DES_EDE_CBC_MD5;
   }
   return id;
 }
 
 /* allocated memory must be freed */
-static SSLCipherSuite * sectransp_get_supported_ciphers(SSLContextRef ssl_ctx,
-                                                        size_t *len)
+static SSLCipherSuite *sectransp_get_supported_ciphers(SSLContextRef ssl_ctx,
+                                                       size_t *len)
 {
   SSLCipherSuite *ciphers = NULL;
   OSStatus err = noErr;
   *len = 0;
 
   err = SSLGetNumberSupportedCiphers(ssl_ctx, len);
-  if(err != noErr)
+  if (err != noErr)
     goto failed;
 
   ciphers = malloc(*len * sizeof(SSLCipherSuite));
-  if(!ciphers)
+  if (!ciphers)
     goto failed;
 
   err = SSLGetSupportedCiphers(ssl_ctx, ciphers, len);
-  if(err != noErr)
+  if (err != noErr)
     goto failed;
 
 #if FETCH_BUILD_MAC
@@ -890,10 +926,12 @@ static SSLCipherSuite * sectransp_get_supported_ciphers(SSLContextRef ssl_ctx,
        ciphers (cipher suite 0xC001 through 0xC032) simply do not work.
        Work around the problem here by disabling those ciphers if we are
        running in an affected version of macOS. */
-    if(maj == 12 && min <= 3) {
+    if (maj == 12 && min <= 3)
+    {
       size_t i = 0, j = 0;
-      for(; i < *len; i++) {
-        if(ciphers[i] >= 0xC001 && ciphers[i] <= 0xC032)
+      for (; i < *len; i++)
+      {
+        if (ciphers[i] >= 0xC001 && ciphers[i] <= 0xC032)
           continue;
         ciphers[j++] = ciphers[i];
       }
@@ -910,7 +948,7 @@ failed:
 }
 
 static FETCHcode sectransp_set_default_ciphers(struct Curl_easy *data,
-                                              SSLContextRef ssl_ctx)
+                                               SSLContextRef ssl_ctx)
 {
   FETCHcode ret = FETCHE_SSL_CIPHER;
   size_t count = 0, i, j;
@@ -919,29 +957,35 @@ static FETCHcode sectransp_set_default_ciphers(struct Curl_easy *data,
   SSLCipherSuite *ciphers = NULL;
 
   ciphers = sectransp_get_supported_ciphers(ssl_ctx, &supported_len);
-  if(!ciphers) {
+  if (!ciphers)
+  {
     failf(data, "SSL: Failed to get supported ciphers");
     goto failed;
   }
 
   /* Intersect the ciphers supported by Secure Transport with the default
    * ciphers, using the order of the former. */
-  for(i = 0; i < supported_len; i++) {
-    for(j = 0; j < DEFAULT_CIPHERS_LEN; j++) {
-      if(default_ciphers[j] == ciphers[i]) {
+  for (i = 0; i < supported_len; i++)
+  {
+    for (j = 0; j < DEFAULT_CIPHERS_LEN; j++)
+    {
+      if (default_ciphers[j] == ciphers[i])
+      {
         ciphers[count++] = ciphers[i];
         break;
       }
     }
   }
 
-  if(count == 0) {
+  if (count == 0)
+  {
     failf(data, "SSL: no supported default ciphers");
     goto failed;
   }
 
   err = SSLSetEnabledCiphers(ssl_ctx, ciphers, count);
-  if(err != noErr) {
+  if (err != noErr)
+  {
     failf(data, "SSL: SSLSetEnabledCiphers() failed: OSStatus %d", err);
     goto failed;
   }
@@ -953,8 +997,8 @@ failed:
 }
 
 static FETCHcode sectransp_set_selected_ciphers(struct Curl_easy *data,
-                                               SSLContextRef ssl_ctx,
-                                               const char *ciphers)
+                                                SSLContextRef ssl_ctx,
+                                                const char *ciphers)
 {
   FETCHcode ret = FETCHE_SSL_CIPHER;
   size_t count = 0, i;
@@ -965,37 +1009,45 @@ static FETCHcode sectransp_set_selected_ciphers(struct Curl_easy *data,
   SSLCipherSuite *selected = NULL;
 
   supported = sectransp_get_supported_ciphers(ssl_ctx, &supported_len);
-  if(!supported) {
+  if (!supported)
+  {
     failf(data, "SSL: Failed to get supported ciphers");
     goto failed;
   }
 
   selected = malloc(supported_len * sizeof(SSLCipherSuite));
-  if(!selected) {
+  if (!selected)
+  {
     failf(data, "SSL: Failed to allocate memory");
     goto failed;
   }
 
-  for(ptr = ciphers; ptr[0] != '\0' && count < supported_len; ptr = end) {
+  for (ptr = ciphers; ptr[0] != '\0' && count < supported_len; ptr = end)
+  {
     uint16_t id = sectransp_cipher_suite_walk_str(&ptr, &end);
 
     /* Check if cipher is supported */
-    if(id) {
-      for(i = 0; i < supported_len && supported[i] != id; i++);
-      if(i == supported_len)
+    if (id)
+    {
+      for (i = 0; i < supported_len && supported[i] != id; i++)
+        ;
+      if (i == supported_len)
         id = 0;
     }
-    if(!id) {
-      if(ptr[0] != '\0')
-        infof(data, "SSL: unknown cipher in list: \"%.*s\"", (int) (end - ptr),
+    if (!id)
+    {
+      if (ptr[0] != '\0')
+        infof(data, "SSL: unknown cipher in list: \"%.*s\"", (int)(end - ptr),
               ptr);
       continue;
     }
 
     /* No duplicates allowed (so selected cannot overflow) */
-    for(i = 0; i < count && selected[i] != id; i++);
-    if(i < count) {
-      infof(data, "SSL: duplicate cipher in list: \"%.*s\"", (int) (end - ptr),
+    for (i = 0; i < count && selected[i] != id; i++)
+      ;
+    if (i < count)
+    {
+      infof(data, "SSL: duplicate cipher in list: \"%.*s\"", (int)(end - ptr),
             ptr);
       continue;
     }
@@ -1003,13 +1055,15 @@ static FETCHcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     selected[count++] = id;
   }
 
-  if(count == 0) {
+  if (count == 0)
+  {
     failf(data, "SSL: no supported cipher in list");
     goto failed;
   }
 
   err = SSLSetEnabledCiphers(ssl_ctx, selected, count);
-  if(err != noErr) {
+  if (err != noErr)
+  {
     failf(data, "SSL: SSLSetEnabledCiphers() failed: OSStatus %d", err);
     goto failed;
   }
@@ -1033,19 +1087,19 @@ static void sectransp_session_free(void *sessionid)
 }
 
 static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data)
+                                         struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   const struct fetch_blob *ssl_cablob = conn_config->ca_info_blob;
-  const char * const ssl_cafile =
-    /* FETCHOPT_CAINFO_BLOB overrides FETCHOPT_CAINFO */
-    (ssl_cablob ? NULL : conn_config->CAfile);
+  const char *const ssl_cafile =
+      /* FETCHOPT_CAINFO_BLOB overrides FETCHOPT_CAINFO */
+      (ssl_cablob ? NULL : conn_config->CAfile);
   const bool verifypeer = conn_config->verifypeer;
-  char * const ssl_cert = ssl_config->primary.clientcert;
+  char *const ssl_cert = ssl_config->primary.clientcert;
   const struct fetch_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   char *ciphers;
   OSStatus err = noErr;
@@ -1060,61 +1114,69 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #endif /* FETCH_BUILD_MAC */
 
 #if FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS
-  if(&SSLCreateContext) {  /* use the newer API if available */
-    if(backend->ssl_ctx)
+  if (&SSLCreateContext)
+  { /* use the newer API if available */
+    if (backend->ssl_ctx)
       CFRelease(backend->ssl_ctx);
     backend->ssl_ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
-    if(!backend->ssl_ctx) {
+    if (!backend->ssl_ctx)
+    {
       failf(data, "SSL: could not create a context");
       return FETCHE_OUT_OF_MEMORY;
     }
   }
-  else {
-  /* The old ST API does not exist under iOS, so do not compile it: */
+  else
+  {
+    /* The old ST API does not exist under iOS, so do not compile it: */
 #if FETCH_SUPPORT_MAC_10_8
-    if(backend->ssl_ctx)
+    if (backend->ssl_ctx)
       (void)SSLDisposeContext(backend->ssl_ctx);
     err = SSLNewContext(FALSE, &(backend->ssl_ctx));
-    if(err != noErr) {
+    if (err != noErr)
+    {
       failf(data, "SSL: could not create a context: OSStatus %d", err);
       return FETCHE_OUT_OF_MEMORY;
     }
 #endif /* FETCH_SUPPORT_MAC_10_8 */
   }
 #else
-  if(backend->ssl_ctx)
+  if (backend->ssl_ctx)
     (void)SSLDisposeContext(backend->ssl_ctx);
   err = SSLNewContext(FALSE, &(backend->ssl_ctx));
-  if(err != noErr) {
+  if (err != noErr)
+  {
     failf(data, "SSL: could not create a context: OSStatus %d", err);
     return FETCHE_OUT_OF_MEMORY;
   }
-#endif /* FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS */
+#endif                                      /* FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS */
   backend->ssl_write_buffered_length = 0UL; /* reset buffered write length */
 
   result = sectransp_set_ssl_version_min_max(data, backend, conn_config);
-  if(result != FETCHE_OK)
+  if (result != FETCHE_OK)
     return result;
 
 #if (FETCH_BUILD_MAC_10_13 || FETCH_BUILD_IOS_11) && \
     defined(HAVE_BUILTIN_AVAILABLE)
-  if(connssl->alpn) {
-    if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
+  if (connssl->alpn)
+  {
+    if (__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *))
+    {
       struct alpn_proto_buf proto;
       size_t i;
       CFStringRef cstr;
       CFMutableArrayRef alpnArr = CFArrayCreateMutable(NULL, 0,
                                                        &kCFTypeArrayCallBacks);
-      for(i = 0; i < connssl->alpn->count; ++i) {
+      for (i = 0; i < connssl->alpn->count; ++i)
+      {
         cstr = CFStringCreateWithCString(NULL, connssl->alpn->entries[i],
                                          kCFStringEncodingUTF8);
-        if(!cstr)
+        if (!cstr)
           return FETCHE_OUT_OF_MEMORY;
         CFArrayAppendValue(alpnArr, cstr);
         CFRelease(cstr);
       }
       err = SSLSetALPNProtocols(backend->ssl_ctx, alpnArr);
-      if(err != noErr)
+      if (err != noErr)
         infof(data, "WARNING: failed to set ALPN protocols; OSStatus %d",
               err);
       CFRelease(alpnArr);
@@ -1124,12 +1186,14 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
   }
 #endif
 
-  if(ssl_config->key) {
+  if (ssl_config->key)
+  {
     infof(data, "WARNING: SSL: FETCHOPT_SSLKEY is ignored by Secure "
-          "Transport. The private key must be in the Keychain.");
+                "Transport. The private key must be in the Keychain.");
   }
 
-  if(ssl_cert || ssl_cert_blob) {
+  if (ssl_cert || ssl_cert_blob)
+  {
     bool is_cert_data = ssl_cert_blob != NULL;
     bool is_cert_file = (!is_cert_data) && is_file(ssl_cert);
     SecIdentityRef cert_and_key = NULL;
@@ -1138,17 +1202,19 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
        the user wants to use an identity loaded from the Keychain. If not, try
        it as a file on disk */
 
-    if(!is_cert_data)
+    if (!is_cert_data)
       err = CopyIdentityWithLabel(ssl_cert, &cert_and_key);
     else
       err = !noErr;
-    if((err != noErr) && (is_cert_file || is_cert_data)) {
-      if(!ssl_config->cert_type)
+    if ((err != noErr) && (is_cert_file || is_cert_data))
+    {
+      if (!ssl_config->cert_type)
         infof(data, "SSL: Certificate type not set, assuming "
-              "PKCS#12 format.");
-      else if(!strcasecompare(ssl_config->cert_type, "P12")) {
+                    "PKCS#12 format.");
+      else if (!strcasecompare(ssl_config->cert_type, "P12"))
+      {
         failf(data, "SSL: The Security framework only supports "
-              "loading identities that are in PKCS#12 format.");
+                    "loading identities that are in PKCS#12 format.");
         return FETCHE_SSL_CERTPROBLEM;
       }
 
@@ -1157,64 +1223,75 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
                                        &cert_and_key);
     }
 
-    if(err == noErr && cert_and_key) {
+    if (err == noErr && cert_and_key)
+    {
       SecCertificateRef cert = NULL;
       CFTypeRef certs_c[1];
       CFArrayRef certs;
 
       /* If we found one, print it out: */
       err = SecIdentityCopyCertificate(cert_and_key, &cert);
-      if(err == noErr) {
+      if (err == noErr)
+      {
         char *certp;
         result = CopyCertSubject(data, cert, &certp);
-        if(!result) {
+        if (!result)
+        {
           infof(data, "Client certificate: %s", certp);
           free(certp);
         }
 
         CFRelease(cert);
-        if(result == FETCHE_PEER_FAILED_VERIFICATION)
+        if (result == FETCHE_PEER_FAILED_VERIFICATION)
           return FETCHE_SSL_CERTPROBLEM;
-        if(result)
+        if (result)
           return result;
       }
       certs_c[0] = cert_and_key;
       certs = CFArrayCreate(NULL, (const void **)certs_c, 1L,
                             &kCFTypeArrayCallBacks);
       err = SSLSetCertificate(backend->ssl_ctx, certs);
-      if(certs)
+      if (certs)
         CFRelease(certs);
-      if(err != noErr) {
+      if (err != noErr)
+      {
         failf(data, "SSL: SSLSetCertificate() failed: OSStatus %d", err);
         return FETCHE_SSL_CERTPROBLEM;
       }
       CFRelease(cert_and_key);
     }
-    else {
+    else
+    {
       const char *cert_showfilename_error =
-        is_cert_data ? "(memory blob)" : ssl_cert;
+          is_cert_data ? "(memory blob)" : ssl_cert;
 
-      switch(err) {
-      case errSecAuthFailed: case -25264: /* errSecPkcs12VerifyFailure */
+      switch (err)
+      {
+      case errSecAuthFailed:
+      case -25264: /* errSecPkcs12VerifyFailure */
         failf(data, "SSL: Incorrect password for the certificate \"%s\" "
-                    "and its private key.", cert_showfilename_error);
+                    "and its private key.",
+              cert_showfilename_error);
         break;
-      case -26275: /* errSecDecode */ case -25257: /* errSecUnknownFormat */
+      case -26275: /* errSecDecode */
+      case -25257: /* errSecUnknownFormat */
         failf(data, "SSL: Couldn't make sense of the data in the "
                     "certificate \"%s\" and its private key.",
-                    cert_showfilename_error);
+              cert_showfilename_error);
         break;
       case -25260: /* errSecPassphraseRequired */
         failf(data, "SSL The certificate \"%s\" requires a password.",
-                    cert_showfilename_error);
+              cert_showfilename_error);
         break;
       case errSecItemNotFound:
         failf(data, "SSL: cannot find the certificate \"%s\" and its private "
-                    "key in the Keychain.", cert_showfilename_error);
+                    "key in the Keychain.",
+              cert_showfilename_error);
         break;
       default:
         failf(data, "SSL: cannot load the certificate \"%s\" and its private "
-                    "key: OSStatus %d", cert_showfilename_error, err);
+                    "key: OSStatus %d",
+              cert_showfilename_error, err);
         break;
       }
       return FETCHE_SSL_CERTPROBLEM;
@@ -1241,25 +1318,30 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
   Darwin 15.x.x is El Capitan (10.11)
   */
 #if FETCH_BUILD_MAC
-  if(&SSLSetSessionOption && darwinver_maj >= 13) {
+  if (&SSLSetSessionOption && darwinver_maj >= 13)
+  {
 #else
-  if(&SSLSetSessionOption) {
+  if (&SSLSetSessionOption)
+  {
 #endif /* FETCH_BUILD_MAC */
     bool break_on_auth = !conn_config->verifypeer ||
-      ssl_cafile || ssl_cablob;
+                         ssl_cafile || ssl_cablob;
     err = SSLSetSessionOption(backend->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               break_on_auth);
-    if(err != noErr) {
+    if (err != noErr)
+    {
       failf(data, "SSL: SSLSetSessionOption() failed: OSStatus %d", err);
       return FETCHE_SSL_CONNECT_ERROR;
     }
   }
-  else {
+  else
+  {
 #if FETCH_SUPPORT_MAC_10_8
     err = SSLSetEnableCertVerify(backend->ssl_ctx,
                                  conn_config->verifypeer ? true : FALSE);
-    if(err != noErr) {
+    if (err != noErr)
+    {
       failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
       return FETCHE_SSL_CONNECT_ERROR;
     }
@@ -1268,17 +1350,20 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #else
   err = SSLSetEnableCertVerify(backend->ssl_ctx,
                                conn_config->verifypeer ? true : FALSE);
-  if(err != noErr) {
+  if (err != noErr)
+  {
     failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
     return FETCHE_SSL_CONNECT_ERROR;
   }
 #endif /* FETCH_BUILD_MAC_10_6 || FETCH_BUILD_IOS */
 
-  if((ssl_cafile || ssl_cablob) && verifypeer) {
+  if ((ssl_cafile || ssl_cablob) && verifypeer)
+  {
     bool is_cert_data = ssl_cablob != NULL;
     bool is_cert_file = (!is_cert_data) && is_file(ssl_cafile);
 
-    if(!(is_cert_file || is_cert_data)) {
+    if (!(is_cert_file || is_cert_data))
+    {
       failf(data, "SSL: cannot load CA certificate file %s",
             ssl_cafile ? ssl_cafile : "(blob memory)");
       return FETCHE_SSL_CACERT_BADFILE;
@@ -1288,63 +1373,74 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
   /* Configure hostname check. SNI is used if available.
    * Both hostname check and SNI require SSLSetPeerDomainName().
    * Also: the verifyhost setting influences SNI usage */
-  if(conn_config->verifyhost) {
-    char *server = connssl->peer.sni ?
-      connssl->peer.sni : connssl->peer.hostname;
+  if (conn_config->verifyhost)
+  {
+    char *server = connssl->peer.sni ? connssl->peer.sni : connssl->peer.hostname;
     err = SSLSetPeerDomainName(backend->ssl_ctx, server, strlen(server));
 
-    if(err != noErr) {
+    if (err != noErr)
+    {
       failf(data, "SSL: SSLSetPeerDomainName() failed: OSStatus %d",
             err);
       return FETCHE_SSL_CONNECT_ERROR;
     }
 
-    if(connssl->peer.type != FETCH_SSL_PEER_DNS) {
+    if (connssl->peer.type != FETCH_SSL_PEER_DNS)
+    {
       infof(data, "WARNING: using IP address, SNI is being disabled by "
-            "the OS.");
+                  "the OS.");
     }
   }
-  else {
+  else
+  {
     infof(data, "WARNING: disabling hostname validation also disables SNI.");
   }
 
   ciphers = conn_config->cipher_list;
-  if(ciphers) {
+  if (ciphers)
+  {
     result = sectransp_set_selected_ciphers(data, backend->ssl_ctx, ciphers);
   }
-  else {
+  else
+  {
     result = sectransp_set_default_ciphers(data, backend->ssl_ctx);
   }
-  if(result != FETCHE_OK) {
+  if (result != FETCHE_OK)
+  {
     failf(data, "SSL: Unable to set ciphers for SSL/TLS handshake. "
-          "Error code: %d", (int)result);
+                "Error code: %d",
+          (int)result);
     return FETCHE_SSL_CIPHER;
   }
 
 #if FETCH_BUILD_MAC_10_9 || FETCH_BUILD_IOS_7
   /* We want to enable 1/n-1 when using a CBC cipher unless the user
      specifically does not want us doing that: */
-  if(&SSLSetSessionOption) {
+  if (&SSLSetSessionOption)
+  {
     SSLSetSessionOption(backend->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
                         !ssl_config->enable_beast);
     SSLSetSessionOption(backend->ssl_ctx, kSSLSessionOptionFalseStart,
-                      ssl_config->falsestart); /* false start support */
+                        ssl_config->falsestart); /* false start support */
   }
 #endif /* FETCH_BUILD_MAC_10_9 || FETCH_BUILD_IOS_7 */
 
   /* Check if there is a cached ID we can/should use here! */
-  if(ssl_config->primary.cache_session) {
+  if (ssl_config->primary.cache_session)
+  {
     char *ssl_sessionid;
     size_t ssl_sessionid_len;
 
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
-                               (void **)&ssl_sessionid)) {
+    if (Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
+                                (void **)&ssl_sessionid))
+    {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid,
                          strlen(ssl_sessionid));
       Curl_ssl_scache_unlock(data);
-      if(err != noErr) {
+      if (err != noErr)
+      {
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return FETCHE_SSL_CONNECT_ERROR;
       }
@@ -1353,16 +1449,18 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
     }
     /* If there is not one, then let's make one up! This has to be done prior
        to starting the handshake. */
-    else {
+    else
+    {
       ssl_sessionid =
-        aprintf("%s:%d:%d:%s:%d",
-                ssl_cafile ? ssl_cafile : "(blob memory)",
-                verifypeer, conn_config->verifyhost, connssl->peer.hostname,
-                connssl->peer.port);
+          aprintf("%s:%d:%d:%s:%d",
+                  ssl_cafile ? ssl_cafile : "(blob memory)",
+                  verifypeer, conn_config->verifyhost, connssl->peer.hostname,
+                  connssl->peer.port);
       ssl_sessionid_len = strlen(ssl_sessionid);
 
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
-      if(err != noErr) {
+      if (err != noErr)
+      {
         Curl_ssl_scache_unlock(data);
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return FETCHE_SSL_CONNECT_ERROR;
@@ -1371,10 +1469,10 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
       /* This is all a bit weird, as we have not handshaked yet.
        * I hope this backend will go away soon. */
       result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
-                                      (void *)ssl_sessionid,
-                                      sectransp_session_free);
+                                       (void *)ssl_sessionid,
+                                       sectransp_session_free);
       Curl_ssl_scache_unlock(data);
-      if(result)
+      if (result)
         return result;
     }
   }
@@ -1382,13 +1480,15 @@ static FETCHcode sectransp_connect_step1(struct Curl_cfilter *cf,
   err = SSLSetIOFuncs(backend->ssl_ctx,
                       sectransp_bio_cf_in_read,
                       sectransp_bio_cf_out_write);
-  if(err != noErr) {
+  if (err != noErr)
+  {
     failf(data, "SSL: SSLSetIOFuncs() failed: OSStatus %d", err);
     return FETCHE_SSL_CONNECT_ERROR;
   }
 
   err = SSLSetConnection(backend->ssl_ctx, cf);
-  if(err != noErr) {
+  if (err != noErr)
+  {
     failf(data, "SSL: SSLSetConnection() failed: %d", err);
     return FETCHE_SSL_CONNECT_ERROR;
   }
@@ -1406,39 +1506,41 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
 
   /* Jump through the separators at the beginning of the certificate. */
   sep_start = strstr(in, "-----");
-  if(!sep_start)
+  if (!sep_start)
     return 0;
   cert_start = strstr(sep_start + 1, "-----");
-  if(!cert_start)
+  if (!cert_start)
     return -1;
 
   cert_start += 5;
 
   /* Find separator after the end of the certificate. */
   cert_end = strstr(cert_start, "-----");
-  if(!cert_end)
+  if (!cert_end)
     return -1;
 
   sep_end = strstr(cert_end + 1, "-----");
-  if(!sep_end)
+  if (!sep_end)
     return -1;
   sep_end += 5;
 
   len = cert_end - cert_start;
   b64 = malloc(len + 1);
-  if(!b64)
+  if (!b64)
     return -1;
 
   /* Create base64 string without linefeeds. */
-  for(i = 0, j = 0; i < len; i++) {
-    if(cert_start[i] != '\r' && cert_start[i] != '\n')
+  for (i = 0, j = 0; i < len; i++)
+  {
+    if (cert_start[i] != '\r' && cert_start[i] != '\n')
       b64[j++] = cert_start[i];
   }
   b64[j] = '\0';
 
   err = Curl_base64_decode((const char *)b64, out, outlen);
   free(b64);
-  if(err) {
+  if (err)
+  {
     free(*out);
     return -1;
   }
@@ -1446,7 +1548,7 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
   return sep_end - in;
 }
 
-#define MAX_CERTS_SIZE (50*1024*1024) /* arbitrary - to catch mistakes */
+#define MAX_CERTS_SIZE (50 * 1024 * 1024) /* arbitrary - to catch mistakes */
 
 static int read_cert(const char *file, unsigned char **out, size_t *outlen)
 {
@@ -1458,19 +1560,22 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
   Curl_dyn_init(&certs, MAX_CERTS_SIZE);
 
   fd = open(file, 0);
-  if(fd < 0)
+  if (fd < 0)
     return -1;
 
-  for(;;) {
+  for (;;)
+  {
     n = read(fd, buf, sizeof(buf));
-    if(!n)
+    if (!n)
       break;
-    if(n < 0) {
+    if (n < 0)
+    {
       close(fd);
       Curl_dyn_free(&certs);
       return -1;
     }
-    if(Curl_dyn_addn(&certs, buf, n)) {
+    if (Curl_dyn_addn(&certs, buf, n))
+    {
       close(fd);
       return -1;
     }
@@ -1484,52 +1589,55 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
 }
 
 static FETCHcode append_cert_to_array(struct Curl_easy *data,
-                                     const unsigned char *buf, size_t buflen,
-                                     CFMutableArrayRef array)
+                                      const unsigned char *buf, size_t buflen,
+                                      CFMutableArrayRef array)
 {
-    char *certp;
-    FETCHcode result;
-    SecCertificateRef cacert;
-    CFDataRef certdata;
+  char *certp;
+  FETCHcode result;
+  SecCertificateRef cacert;
+  CFDataRef certdata;
 
-    certdata = CFDataCreate(kCFAllocatorDefault, buf, (CFIndex)buflen);
-    if(!certdata) {
-      failf(data, "SSL: failed to allocate array for CA certificate");
-      return FETCHE_OUT_OF_MEMORY;
-    }
+  certdata = CFDataCreate(kCFAllocatorDefault, buf, (CFIndex)buflen);
+  if (!certdata)
+  {
+    failf(data, "SSL: failed to allocate array for CA certificate");
+    return FETCHE_OUT_OF_MEMORY;
+  }
 
-    cacert = SecCertificateCreateWithData(kCFAllocatorDefault, certdata);
-    CFRelease(certdata);
-    if(!cacert) {
-      failf(data, "SSL: failed to create SecCertificate from CA certificate");
-      return FETCHE_SSL_CACERT_BADFILE;
-    }
+  cacert = SecCertificateCreateWithData(kCFAllocatorDefault, certdata);
+  CFRelease(certdata);
+  if (!cacert)
+  {
+    failf(data, "SSL: failed to create SecCertificate from CA certificate");
+    return FETCHE_SSL_CACERT_BADFILE;
+  }
 
-    /* Check if cacert is valid. */
-    result = CopyCertSubject(data, cacert, &certp);
-    switch(result) {
-      case FETCHE_OK:
-        break;
-      case FETCHE_PEER_FAILED_VERIFICATION:
-        CFRelease(cacert);
-        return FETCHE_SSL_CACERT_BADFILE;
-      case FETCHE_OUT_OF_MEMORY:
-      default:
-        CFRelease(cacert);
-        return result;
-    }
-    free(certp);
-
-    CFArrayAppendValue(array, cacert);
+  /* Check if cacert is valid. */
+  result = CopyCertSubject(data, cacert, &certp);
+  switch (result)
+  {
+  case FETCHE_OK:
+    break;
+  case FETCHE_PEER_FAILED_VERIFICATION:
     CFRelease(cacert);
+    return FETCHE_SSL_CACERT_BADFILE;
+  case FETCHE_OUT_OF_MEMORY:
+  default:
+    CFRelease(cacert);
+    return result;
+  }
+  free(certp);
 
-    return FETCHE_OK;
+  CFArrayAppendValue(array, cacert);
+  CFRelease(cacert);
+
+  return FETCHE_OK;
 }
 
 static FETCHcode verify_cert_buf(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const unsigned char *certbuf, size_t buflen,
-                                SSLContextRef ctx)
+                                 struct Curl_easy *data,
+                                 const unsigned char *certbuf, size_t buflen,
+                                 SSLContextRef ctx)
 {
   int n = 0;
   FETCHcode rc;
@@ -1552,13 +1660,15 @@ static FETCHcode verify_cert_buf(struct Curl_cfilter *cf,
    * format.
    */
   array = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-  if(!array) {
+  if (!array)
+  {
     failf(data, "SSL: out of memory creating CA certificate array");
     result = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
 
-  while(offset < buflen) {
+  while (offset < buflen)
+  {
     n++;
 
     /*
@@ -1566,7 +1676,8 @@ static FETCHcode verify_cert_buf(struct Curl_cfilter *cf,
      * this fails, we assume the certificate is in DER format.
      */
     res = pem_to_der((const char *)certbuf + offset, &der, &derlen);
-    if(res < 0) {
+    if (res < 0)
+    {
       failf(data, "SSL: invalid CA certificate #%d (offset %zu) in bundle",
             n, offset);
       result = FETCHE_SSL_CACERT_BADFILE;
@@ -1574,24 +1685,28 @@ static FETCHcode verify_cert_buf(struct Curl_cfilter *cf,
     }
     offset += res;
 
-    if(res == 0 && offset == 0) {
+    if (res == 0 && offset == 0)
+    {
       /* This is not a PEM file, probably a certificate in DER format. */
       rc = append_cert_to_array(data, certbuf, buflen, array);
-      if(rc != FETCHE_OK) {
+      if (rc != FETCHE_OK)
+      {
         FETCH_TRC_CF(data, cf, "append_cert for CA failed");
         result = rc;
         goto out;
       }
       break;
     }
-    else if(res == 0) {
+    else if (res == 0)
+    {
       /* No more certificates in the bundle. */
       break;
     }
 
     rc = append_cert_to_array(data, der, derlen, array);
     free(der);
-    if(rc != FETCHE_OK) {
+    if (rc != FETCHE_OK)
+    {
       FETCH_TRC_CF(data, cf, "append_cert for CA failed");
       result = rc;
       goto out;
@@ -1599,82 +1714,91 @@ static FETCHcode verify_cert_buf(struct Curl_cfilter *cf,
   }
 
   ret = SSLCopyPeerTrust(ctx, &trust);
-  if(!trust) {
+  if (!trust)
+  {
     failf(data, "SSL: error getting certificate chain");
     goto out;
   }
-  else if(ret != noErr) {
+  else if (ret != noErr)
+  {
     failf(data, "SSLCopyPeerTrust() returned error %d", ret);
     goto out;
   }
 
   FETCH_TRC_CF(data, cf, "setting %d trust anchors", n);
   ret = SecTrustSetAnchorCertificates(trust, array);
-  if(ret != noErr) {
+  if (ret != noErr)
+  {
     failf(data, "SecTrustSetAnchorCertificates() returned error %d", ret);
     goto out;
   }
   ret = SecTrustSetAnchorCertificatesOnly(trust, TRUE);
-  if(ret != noErr) {
+  if (ret != noErr)
+  {
     failf(data, "SecTrustSetAnchorCertificatesOnly() returned error %d", ret);
     goto out;
   }
 
   trust_eval = 0;
   ret = SecTrustEvaluate(trust, &trust_eval);
-  if(ret != noErr) {
+  if (ret != noErr)
+  {
     failf(data, "SecTrustEvaluate() returned error %d", ret);
     goto out;
   }
 
-  switch(trust_eval) {
-    case kSecTrustResultUnspecified:
-      /* what does this really mean? */
-      FETCH_TRC_CF(data, cf, "trust result: Unspecified");
-      result = FETCHE_OK;
-      goto out;
-    case kSecTrustResultProceed:
-      FETCH_TRC_CF(data, cf, "trust result: Proceed");
-      result = FETCHE_OK;
-      goto out;
+  switch (trust_eval)
+  {
+  case kSecTrustResultUnspecified:
+    /* what does this really mean? */
+    FETCH_TRC_CF(data, cf, "trust result: Unspecified");
+    result = FETCHE_OK;
+    goto out;
+  case kSecTrustResultProceed:
+    FETCH_TRC_CF(data, cf, "trust result: Proceed");
+    result = FETCHE_OK;
+    goto out;
 
-    case kSecTrustResultRecoverableTrustFailure:
-      failf(data, "SSL: peer not verified:  RecoverableTrustFailure");
-      goto out;
-    case kSecTrustResultDeny:
-      failf(data, "SSL: peer not verified:  Deny");
-      goto out;
-    default:
-      failf(data, "SSL: perr not verified: result=%d", trust_eval);
-      goto out;
+  case kSecTrustResultRecoverableTrustFailure:
+    failf(data, "SSL: peer not verified:  RecoverableTrustFailure");
+    goto out;
+  case kSecTrustResultDeny:
+    failf(data, "SSL: peer not verified:  Deny");
+    goto out;
+  default:
+    failf(data, "SSL: perr not verified: result=%d", trust_eval);
+    goto out;
   }
 
 out:
-  if(trust)
+  if (trust)
     CFRelease(trust);
-  if(array)
+  if (array)
     CFRelease(array);
   return result;
 }
 
 static FETCHcode verify_cert(struct Curl_cfilter *cf,
-                            struct Curl_easy *data, const char *cafile,
-                            const struct fetch_blob *ca_info_blob,
-                            SSLContextRef ctx)
+                             struct Curl_easy *data, const char *cafile,
+                             const struct fetch_blob *ca_info_blob,
+                             SSLContextRef ctx)
 {
   FETCHcode result;
   unsigned char *certbuf;
   size_t buflen;
   bool free_certbuf = FALSE;
 
-  if(ca_info_blob) {
+  if (ca_info_blob)
+  {
     FETCH_TRC_CF(data, cf, "verify_peer, CA from config blob");
     certbuf = ca_info_blob->data;
     buflen = ca_info_blob->len;
   }
-  else if(cafile) {
+  else if (cafile)
+  {
     FETCH_TRC_CF(data, cf, "verify_peer, CA from file '%s'", cafile);
-    if(read_cert(cafile, &certbuf, &buflen) < 0) {
+    if (read_cert(cafile, &certbuf, &buflen) < 0)
+    {
       failf(data, "SSL: failed to read or invalid CA certificate");
       return FETCHE_SSL_CACERT_BADFILE;
     }
@@ -1684,17 +1808,16 @@ static FETCHcode verify_cert(struct Curl_cfilter *cf,
     return FETCHE_SSL_CACERT_BADFILE;
 
   result = verify_cert_buf(cf, data, certbuf, buflen, ctx);
-  if(free_certbuf)
+  if (free_certbuf)
     free(certbuf);
   return result;
 }
 
-
 #ifdef SECTRANSP_PINNEDPUBKEY
 static FETCHcode pkp_pin_peer_pubkey(struct Curl_easy *data,
-                                    SSLContextRef ctx,
-                                    const char *pinnedpubkey)
-{  /* Scratch */
+                                     SSLContextRef ctx,
+                                     const char *pinnedpubkey)
+{ /* Scratch */
   size_t pubkeylen, realpubkeylen, spkiHeaderLength = 24;
   unsigned char *pubkey = NULL, *realpubkey = NULL;
   const unsigned char *spkiHeader = NULL;
@@ -1704,32 +1827,32 @@ static FETCHcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   FETCHcode result = FETCHE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path was not specified, do not pin */
-  if(!pinnedpubkey)
+  if (!pinnedpubkey)
     return FETCHE_OK;
 
-
-  if(!ctx)
+  if (!ctx)
     return result;
 
-  do {
+  do
+  {
     SecTrustRef trust;
     OSStatus ret;
     SecKeyRef keyRef;
 
     ret = SSLCopyPeerTrust(ctx, &trust);
-    if(ret != noErr || !trust)
+    if (ret != noErr || !trust)
       break;
 
     keyRef = SecTrustCopyPublicKey(trust);
     CFRelease(trust);
-    if(!keyRef)
+    if (!keyRef)
       break;
 
 #ifdef SECTRANSP_PINNEDPUBKEY_V1
 
     publicKeyBits = SecKeyCopyExternalRepresentation(keyRef, NULL);
     CFRelease(keyRef);
-    if(!publicKeyBits)
+    if (!publicKeyBits)
       break;
 
 #elif SECTRANSP_PINNEDPUBKEY_V2
@@ -1739,7 +1862,7 @@ static FETCHcode pkp_pin_peer_pubkey(struct Curl_easy *data,
       success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
                               &publicKeyBits);
       CFRelease(keyRef);
-      if(success != errSecSuccess || !publicKeyBits)
+      if (success != errSecSuccess || !publicKeyBits)
         break;
     }
 
@@ -1748,43 +1871,44 @@ static FETCHcode pkp_pin_peer_pubkey(struct Curl_easy *data,
     pubkeylen = (size_t)CFDataGetLength(publicKeyBits);
     pubkey = (unsigned char *)CFDataGetBytePtr(publicKeyBits);
 
-    switch(pubkeylen) {
-      case 526:
-        /* 4096 bit RSA pubkeylen == 526 */
-        spkiHeader = rsa4096SpkiHeader;
-        break;
-      case 270:
-        /* 2048 bit RSA pubkeylen == 270 */
-        spkiHeader = rsa2048SpkiHeader;
-        break;
+    switch (pubkeylen)
+    {
+    case 526:
+      /* 4096 bit RSA pubkeylen == 526 */
+      spkiHeader = rsa4096SpkiHeader;
+      break;
+    case 270:
+      /* 2048 bit RSA pubkeylen == 270 */
+      spkiHeader = rsa2048SpkiHeader;
+      break;
 #ifdef SECTRANSP_PINNEDPUBKEY_V1
-      case 65:
-        /* ecDSA secp256r1 pubkeylen == 65 */
-        spkiHeader = ecDsaSecp256r1SpkiHeader;
-        spkiHeaderLength = 26;
-        break;
-      case 97:
-        /* ecDSA secp384r1 pubkeylen == 97 */
-        spkiHeader = ecDsaSecp384r1SpkiHeader;
-        spkiHeaderLength = 23;
-        break;
-      default:
-        infof(data, "SSL: unhandled public key length: %zu", pubkeylen);
+    case 65:
+      /* ecDSA secp256r1 pubkeylen == 65 */
+      spkiHeader = ecDsaSecp256r1SpkiHeader;
+      spkiHeaderLength = 26;
+      break;
+    case 97:
+      /* ecDSA secp384r1 pubkeylen == 97 */
+      spkiHeader = ecDsaSecp384r1SpkiHeader;
+      spkiHeaderLength = 23;
+      break;
+    default:
+      infof(data, "SSL: unhandled public key length: %zu", pubkeylen);
 #elif SECTRANSP_PINNEDPUBKEY_V2
-      default:
-        /* ecDSA secp256r1 pubkeylen == 91 header already included?
-         * ecDSA secp384r1 header already included too
-         * we assume rest of algorithms do same, so do nothing
-         */
-        result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
+    default:
+      /* ecDSA secp256r1 pubkeylen == 91 header already included?
+       * ecDSA secp384r1 header already included too
+       * we assume rest of algorithms do same, so do nothing
+       */
+      result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
                                     pubkeylen);
-#endif /* SECTRANSP_PINNEDPUBKEY_V2 */
-        continue; /* break from loop */
+#endif          /* SECTRANSP_PINNEDPUBKEY_V2 */
+      continue; /* break from loop */
     }
 
     realpubkeylen = pubkeylen + spkiHeaderLength;
     realpubkey = malloc(realpubkeylen);
-    if(!realpubkey)
+    if (!realpubkey)
       break;
 
     memcpy(realpubkey, spkiHeader, spkiHeaderLength);
@@ -1793,10 +1917,10 @@ static FETCHcode pkp_pin_peer_pubkey(struct Curl_easy *data,
     result = Curl_pin_peer_pubkey(data, pinnedpubkey, realpubkey,
                                   realpubkeylen);
 
-  } while(0);
+  } while (0);
 
   Curl_safefree(realpubkey);
-  if(publicKeyBits)
+  if (publicKeyBits)
     CFRelease(publicKeyBits);
 
   return result;
@@ -1804,11 +1928,11 @@ static FETCHcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 #endif /* SECTRANSP_PINNEDPUBKEY */
 
 static FETCHcode sectransp_connect_step2(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data)
+                                         struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   OSStatus err;
   SSLCipherSuite cipher;
@@ -1823,235 +1947,241 @@ check_handshake:
   connssl->io_need = FETCH_SSL_IO_NEED_NONE;
   err = SSLHandshake(backend->ssl_ctx);
 
-  if(err != noErr) {
-    switch(err) {
-      case errSSLWouldBlock:  /* they are not done with us yet */
-        connssl->io_need = backend->ssl_direction ?
-            FETCH_SSL_IO_NEED_SEND : FETCH_SSL_IO_NEED_RECV;
-        return FETCHE_OK;
+  if (err != noErr)
+  {
+    switch (err)
+    {
+    case errSSLWouldBlock: /* they are not done with us yet */
+      connssl->io_need = backend->ssl_direction ? FETCH_SSL_IO_NEED_SEND : FETCH_SSL_IO_NEED_RECV;
+      return FETCHE_OK;
 
-      /* The below is errSSLServerAuthCompleted; it is not defined in
-        Leopard's headers */
-      case -9841:
-        if((conn_config->CAfile || conn_config->ca_info_blob) &&
-           conn_config->verifypeer) {
-          FETCHcode result = verify_cert(cf, data, conn_config->CAfile,
-                                        conn_config->ca_info_blob,
-                                        backend->ssl_ctx);
-          if(result)
-            return result;
-        }
-        /* the documentation says we need to call SSLHandshake() again */
-        goto check_handshake;
+    /* The below is errSSLServerAuthCompleted; it is not defined in
+      Leopard's headers */
+    case -9841:
+      if ((conn_config->CAfile || conn_config->ca_info_blob) &&
+          conn_config->verifypeer)
+      {
+        FETCHcode result = verify_cert(cf, data, conn_config->CAfile,
+                                       conn_config->ca_info_blob,
+                                       backend->ssl_ctx);
+        if (result)
+          return result;
+      }
+      /* the documentation says we need to call SSLHandshake() again */
+      goto check_handshake;
 
-      /* Problem with encrypt / decrypt */
-      case errSSLPeerDecodeError:
-        failf(data, "Decode failed");
-        break;
-      case errSSLDecryptionFail:
-      case errSSLPeerDecryptionFail:
-        failf(data, "Decryption failed");
-        break;
-      case errSSLPeerDecryptError:
-        failf(data, "A decryption error occurred");
-        break;
-      case errSSLBadCipherSuite:
-        failf(data, "A bad SSL cipher suite was encountered");
-        break;
-      case errSSLCrypto:
-        failf(data, "An underlying cryptographic error was encountered");
-        break;
+    /* Problem with encrypt / decrypt */
+    case errSSLPeerDecodeError:
+      failf(data, "Decode failed");
+      break;
+    case errSSLDecryptionFail:
+    case errSSLPeerDecryptionFail:
+      failf(data, "Decryption failed");
+      break;
+    case errSSLPeerDecryptError:
+      failf(data, "A decryption error occurred");
+      break;
+    case errSSLBadCipherSuite:
+      failf(data, "A bad SSL cipher suite was encountered");
+      break;
+    case errSSLCrypto:
+      failf(data, "An underlying cryptographic error was encountered");
+      break;
 #if FETCH_BUILD_MAC_10_11 || FETCH_BUILD_IOS_9
-      case errSSLWeakPeerEphemeralDHKey:
-        failf(data, "Indicates a weak ephemeral Diffie-Hellman key");
-        break;
+    case errSSLWeakPeerEphemeralDHKey:
+      failf(data, "Indicates a weak ephemeral Diffie-Hellman key");
+      break;
 #endif
 
-      /* Problem with the message record validation */
-      case errSSLBadRecordMac:
-      case errSSLPeerBadRecordMac:
-        failf(data, "A record with a bad message authentication code (MAC) "
-                    "was encountered");
-        break;
-      case errSSLRecordOverflow:
-      case errSSLPeerRecordOverflow:
-        failf(data, "A record overflow occurred");
-        break;
+    /* Problem with the message record validation */
+    case errSSLBadRecordMac:
+    case errSSLPeerBadRecordMac:
+      failf(data, "A record with a bad message authentication code (MAC) "
+                  "was encountered");
+      break;
+    case errSSLRecordOverflow:
+    case errSSLPeerRecordOverflow:
+      failf(data, "A record overflow occurred");
+      break;
 
-      /* Problem with zlib decompression */
-      case errSSLPeerDecompressFail:
-        failf(data, "Decompression failed");
-        break;
+    /* Problem with zlib decompression */
+    case errSSLPeerDecompressFail:
+      failf(data, "Decompression failed");
+      break;
 
-      /* Problem with access */
-      case errSSLPeerAccessDenied:
-        failf(data, "Access was denied");
-        break;
-      case errSSLPeerInsufficientSecurity:
-        failf(data, "There is insufficient security for this operation");
-        break;
+    /* Problem with access */
+    case errSSLPeerAccessDenied:
+      failf(data, "Access was denied");
+      break;
+    case errSSLPeerInsufficientSecurity:
+      failf(data, "There is insufficient security for this operation");
+      break;
 
-      /* These are all certificate problems with the server: */
-      case errSSLXCertChainInvalid:
-        failf(data, "SSL certificate problem: Invalid certificate chain");
-        return FETCHE_PEER_FAILED_VERIFICATION;
-      case errSSLUnknownRootCert:
-        failf(data, "SSL certificate problem: Untrusted root certificate");
-        return FETCHE_PEER_FAILED_VERIFICATION;
-      case errSSLNoRootCert:
-        failf(data, "SSL certificate problem: No root certificate");
-        return FETCHE_PEER_FAILED_VERIFICATION;
-      case errSSLCertNotYetValid:
-        failf(data, "SSL certificate problem: The certificate chain had a "
-                    "certificate that is not yet valid");
-        return FETCHE_PEER_FAILED_VERIFICATION;
-      case errSSLCertExpired:
-      case errSSLPeerCertExpired:
-        failf(data, "SSL certificate problem: Certificate chain had an "
-              "expired certificate");
-        return FETCHE_PEER_FAILED_VERIFICATION;
-      case errSSLBadCert:
-      case errSSLPeerBadCert:
-        failf(data, "SSL certificate problem: Couldn't understand the server "
-              "certificate format");
-        return FETCHE_PEER_FAILED_VERIFICATION;
-      case errSSLPeerUnsupportedCert:
-        failf(data, "SSL certificate problem: An unsupported certificate "
-                    "format was encountered");
-        return FETCHE_PEER_FAILED_VERIFICATION;
-      case errSSLPeerCertRevoked:
-        failf(data, "SSL certificate problem: The certificate was revoked");
-        return FETCHE_PEER_FAILED_VERIFICATION;
-      case errSSLPeerCertUnknown:
-        failf(data, "SSL certificate problem: The certificate is unknown");
-        return FETCHE_PEER_FAILED_VERIFICATION;
+    /* These are all certificate problems with the server: */
+    case errSSLXCertChainInvalid:
+      failf(data, "SSL certificate problem: Invalid certificate chain");
+      return FETCHE_PEER_FAILED_VERIFICATION;
+    case errSSLUnknownRootCert:
+      failf(data, "SSL certificate problem: Untrusted root certificate");
+      return FETCHE_PEER_FAILED_VERIFICATION;
+    case errSSLNoRootCert:
+      failf(data, "SSL certificate problem: No root certificate");
+      return FETCHE_PEER_FAILED_VERIFICATION;
+    case errSSLCertNotYetValid:
+      failf(data, "SSL certificate problem: The certificate chain had a "
+                  "certificate that is not yet valid");
+      return FETCHE_PEER_FAILED_VERIFICATION;
+    case errSSLCertExpired:
+    case errSSLPeerCertExpired:
+      failf(data, "SSL certificate problem: Certificate chain had an "
+                  "expired certificate");
+      return FETCHE_PEER_FAILED_VERIFICATION;
+    case errSSLBadCert:
+    case errSSLPeerBadCert:
+      failf(data, "SSL certificate problem: Couldn't understand the server "
+                  "certificate format");
+      return FETCHE_PEER_FAILED_VERIFICATION;
+    case errSSLPeerUnsupportedCert:
+      failf(data, "SSL certificate problem: An unsupported certificate "
+                  "format was encountered");
+      return FETCHE_PEER_FAILED_VERIFICATION;
+    case errSSLPeerCertRevoked:
+      failf(data, "SSL certificate problem: The certificate was revoked");
+      return FETCHE_PEER_FAILED_VERIFICATION;
+    case errSSLPeerCertUnknown:
+      failf(data, "SSL certificate problem: The certificate is unknown");
+      return FETCHE_PEER_FAILED_VERIFICATION;
 
-      /* These are all certificate problems with the client: */
-      case errSecAuthFailed:
-        failf(data, "SSL authentication failed");
-        break;
-      case errSSLPeerHandshakeFail:
-        failf(data, "SSL peer handshake failed, the server most likely "
-              "requires a client certificate to connect");
-        break;
-      case errSSLPeerUnknownCA:
-        failf(data, "SSL server rejected the client certificate due to "
-              "the certificate being signed by an unknown certificate "
-              "authority");
-        break;
+    /* These are all certificate problems with the client: */
+    case errSecAuthFailed:
+      failf(data, "SSL authentication failed");
+      break;
+    case errSSLPeerHandshakeFail:
+      failf(data, "SSL peer handshake failed, the server most likely "
+                  "requires a client certificate to connect");
+      break;
+    case errSSLPeerUnknownCA:
+      failf(data, "SSL server rejected the client certificate due to "
+                  "the certificate being signed by an unknown certificate "
+                  "authority");
+      break;
 
-      /* This error is raised if the server's cert did not match the server's
-         hostname: */
-      case errSSLHostNameMismatch:
-        failf(data, "SSL certificate peer verification failed, the "
-              "certificate did not match \"%s\"\n", connssl->peer.dispname);
-        return FETCHE_PEER_FAILED_VERIFICATION;
+    /* This error is raised if the server's cert did not match the server's
+       hostname: */
+    case errSSLHostNameMismatch:
+      failf(data, "SSL certificate peer verification failed, the "
+                  "certificate did not match \"%s\"\n",
+            connssl->peer.dispname);
+      return FETCHE_PEER_FAILED_VERIFICATION;
 
-      /* Problem with SSL / TLS negotiation */
-      case errSSLNegotiation:
-        failf(data, "Could not negotiate an SSL cipher suite with the server");
-        break;
-      case errSSLBadConfiguration:
-        failf(data, "A configuration error occurred");
-        break;
-      case errSSLProtocol:
-        failf(data, "SSL protocol error");
-        break;
-      case errSSLPeerProtocolVersion:
-        failf(data, "A bad protocol version was encountered");
-        break;
-      case errSSLPeerNoRenegotiation:
-        failf(data, "No renegotiation is allowed");
-        break;
+    /* Problem with SSL / TLS negotiation */
+    case errSSLNegotiation:
+      failf(data, "Could not negotiate an SSL cipher suite with the server");
+      break;
+    case errSSLBadConfiguration:
+      failf(data, "A configuration error occurred");
+      break;
+    case errSSLProtocol:
+      failf(data, "SSL protocol error");
+      break;
+    case errSSLPeerProtocolVersion:
+      failf(data, "A bad protocol version was encountered");
+      break;
+    case errSSLPeerNoRenegotiation:
+      failf(data, "No renegotiation is allowed");
+      break;
 
-      /* Generic handshake errors: */
-      case errSSLConnectionRefused:
-        failf(data, "Server dropped the connection during the SSL handshake");
-        break;
-      case errSSLClosedAbort:
-        failf(data, "Server aborted the SSL handshake");
-        break;
-      case errSSLClosedGraceful:
-        failf(data, "The connection closed gracefully");
-        break;
-      case errSSLClosedNoNotify:
-        failf(data, "The server closed the session with no notification");
-        break;
-      /* Sometimes paramErr happens with buggy ciphers: */
-      case paramErr:
-      case errSSLInternal:
-      case errSSLPeerInternalError:
-        failf(data, "Internal SSL engine error encountered during the "
-              "SSL handshake");
-        break;
-      case errSSLFatalAlert:
-        failf(data, "Fatal SSL engine error encountered during the SSL "
-              "handshake");
-        break;
-      /* Unclassified error */
-      case errSSLBufferOverflow:
-        failf(data, "An insufficient buffer was provided");
-        break;
-      case errSSLIllegalParam:
-        failf(data, "An illegal parameter was encountered");
-        break;
-      case errSSLModuleAttach:
-        failf(data, "Module attach failure");
-        break;
-      case errSSLSessionNotFound:
-        failf(data, "An attempt to restore an unknown session failed");
-        break;
-      case errSSLPeerExportRestriction:
-        failf(data, "An export restriction occurred");
-        break;
-      case errSSLPeerUserCancelled:
-        failf(data, "The user canceled the operation");
-        break;
-      case errSSLPeerUnexpectedMsg:
-        failf(data, "Peer rejected unexpected message");
-        break;
+    /* Generic handshake errors: */
+    case errSSLConnectionRefused:
+      failf(data, "Server dropped the connection during the SSL handshake");
+      break;
+    case errSSLClosedAbort:
+      failf(data, "Server aborted the SSL handshake");
+      break;
+    case errSSLClosedGraceful:
+      failf(data, "The connection closed gracefully");
+      break;
+    case errSSLClosedNoNotify:
+      failf(data, "The server closed the session with no notification");
+      break;
+    /* Sometimes paramErr happens with buggy ciphers: */
+    case paramErr:
+    case errSSLInternal:
+    case errSSLPeerInternalError:
+      failf(data, "Internal SSL engine error encountered during the "
+                  "SSL handshake");
+      break;
+    case errSSLFatalAlert:
+      failf(data, "Fatal SSL engine error encountered during the SSL "
+                  "handshake");
+      break;
+    /* Unclassified error */
+    case errSSLBufferOverflow:
+      failf(data, "An insufficient buffer was provided");
+      break;
+    case errSSLIllegalParam:
+      failf(data, "An illegal parameter was encountered");
+      break;
+    case errSSLModuleAttach:
+      failf(data, "Module attach failure");
+      break;
+    case errSSLSessionNotFound:
+      failf(data, "An attempt to restore an unknown session failed");
+      break;
+    case errSSLPeerExportRestriction:
+      failf(data, "An export restriction occurred");
+      break;
+    case errSSLPeerUserCancelled:
+      failf(data, "The user canceled the operation");
+      break;
+    case errSSLPeerUnexpectedMsg:
+      failf(data, "Peer rejected unexpected message");
+      break;
 #if FETCH_BUILD_MAC_10_11 || FETCH_BUILD_IOS_9
-      /* Treating non-fatal error as fatal like before */
-      case errSSLClientHelloReceived:
-        failf(data, "A non-fatal result for providing a server name "
-                    "indication");
-        break;
+    /* Treating non-fatal error as fatal like before */
+    case errSSLClientHelloReceived:
+      failf(data, "A non-fatal result for providing a server name "
+                  "indication");
+      break;
 #endif
 
       /* Error codes defined in the enum but should never be returned.
          We list them here just in case. */
 #if FETCH_BUILD_MAC_10_6
-      /* Only returned when kSSLSessionOptionBreakOnCertRequested is set */
-      case errSSLClientCertRequested:
-        failf(data, "Server requested a client certificate during the "
-              "handshake");
-        return FETCHE_SSL_CLIENTCERT;
+    /* Only returned when kSSLSessionOptionBreakOnCertRequested is set */
+    case errSSLClientCertRequested:
+      failf(data, "Server requested a client certificate during the "
+                  "handshake");
+      return FETCHE_SSL_CLIENTCERT;
 #endif
 #if FETCH_BUILD_MAC_10_9
-      /* Alias for errSSLLast, end of error range */
-      case errSSLUnexpectedRecord:
-        failf(data, "Unexpected (skipped) record in DTLS");
-        break;
+    /* Alias for errSSLLast, end of error range */
+    case errSSLUnexpectedRecord:
+      failf(data, "Unexpected (skipped) record in DTLS");
+      break;
 #endif
-      default:
-        /* May also return codes listed in Security Framework Result Codes */
-        failf(data, "Unknown SSL protocol error in connection to %s:%d",
-              connssl->peer.hostname, err);
-        break;
+    default:
+      /* May also return codes listed in Security Framework Result Codes */
+      failf(data, "Unknown SSL protocol error in connection to %s:%d",
+            connssl->peer.hostname, err);
+      break;
     }
     return FETCHE_SSL_CONNECT_ERROR;
   }
-  else {
+  else
+  {
     char cipher_str[64];
     /* we have been connected fine, we are not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
 
 #ifdef SECTRANSP_PINNEDPUBKEY
-    if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+    if (data->set.str[STRING_SSL_PINNEDPUBLICKEY])
+    {
       FETCHcode result =
-        pkp_pin_peer_pubkey(data, backend->ssl_ctx,
-                            data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
-      if(result) {
+          pkp_pin_peer_pubkey(data, backend->ssl_ctx,
+                              data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
+      if (result)
+      {
         failf(data, "SSL: public key does not match pinned public key");
         return result;
       }
@@ -2062,56 +2192,61 @@ check_handshake:
     (void)SSLGetNegotiatedCipher(backend->ssl_ctx, &cipher);
     (void)SSLGetNegotiatedProtocolVersion(backend->ssl_ctx, &protocol);
 
-    sectransp_cipher_suite_get_str((uint16_t) cipher, cipher_str,
+    sectransp_cipher_suite_get_str((uint16_t)cipher, cipher_str,
                                    sizeof(cipher_str), TRUE);
-    switch(protocol) {
-      case kSSLProtocol2:
-        infof(data, "SSL 2.0 connection using %s", cipher_str);
-        break;
-      case kSSLProtocol3:
-        infof(data, "SSL 3.0 connection using %s", cipher_str);
-        break;
-      case kTLSProtocol1:
-        infof(data, "TLS 1.0 connection using %s", cipher_str);
-        break;
+    switch (protocol)
+    {
+    case kSSLProtocol2:
+      infof(data, "SSL 2.0 connection using %s", cipher_str);
+      break;
+    case kSSLProtocol3:
+      infof(data, "SSL 3.0 connection using %s", cipher_str);
+      break;
+    case kTLSProtocol1:
+      infof(data, "TLS 1.0 connection using %s", cipher_str);
+      break;
 #if FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS
-      case kTLSProtocol11:
-        infof(data, "TLS 1.1 connection using %s", cipher_str);
-        break;
-      case kTLSProtocol12:
-        infof(data, "TLS 1.2 connection using %s", cipher_str);
-        break;
+    case kTLSProtocol11:
+      infof(data, "TLS 1.1 connection using %s", cipher_str);
+      break;
+    case kTLSProtocol12:
+      infof(data, "TLS 1.2 connection using %s", cipher_str);
+      break;
 #endif /* FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS */
 #if FETCH_BUILD_MAC_10_13 || FETCH_BUILD_IOS_11
-      case kTLSProtocol13:
-        infof(data, "TLS 1.3 connection using %s", cipher_str);
-        break;
+    case kTLSProtocol13:
+      infof(data, "TLS 1.3 connection using %s", cipher_str);
+      break;
 #endif /* FETCH_BUILD_MAC_10_13 || FETCH_BUILD_IOS_11 */
-      default:
-        infof(data, "Unknown protocol connection");
-        break;
+    default:
+      infof(data, "Unknown protocol connection");
+      break;
     }
 
 #if (FETCH_BUILD_MAC_10_13 || FETCH_BUILD_IOS_11) && \
     defined(HAVE_BUILTIN_AVAILABLE)
-    if(connssl->alpn) {
-      if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
+    if (connssl->alpn)
+    {
+      if (__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *))
+      {
         CFArrayRef alpnArr = NULL;
         CFStringRef chosenProtocol = NULL;
         err = SSLCopyALPNProtocols(backend->ssl_ctx, &alpnArr);
 
-        if(err == noErr && alpnArr && CFArrayGetCount(alpnArr) >= 1)
+        if (err == noErr && alpnArr && CFArrayGetCount(alpnArr) >= 1)
           chosenProtocol = CFArrayGetValueAtIndex(alpnArr, 0);
 
 #ifdef USE_HTTP2
-        if(chosenProtocol &&
-           !CFStringCompare(chosenProtocol, CFSTR(ALPN_H2), 0)) {
+        if (chosenProtocol &&
+            !CFStringCompare(chosenProtocol, CFSTR(ALPN_H2), 0))
+        {
           cf->conn->alpn = FETCH_HTTP_VERSION_2;
         }
         else
 #endif
-        if(chosenProtocol &&
-           !CFStringCompare(chosenProtocol, CFSTR(ALPN_HTTP_1_1), 0)) {
+            if (chosenProtocol &&
+                !CFStringCompare(chosenProtocol, CFSTR(ALPN_HTTP_1_1), 0))
+        {
           cf->conn->alpn = FETCH_HTTP_VERSION_1_1;
         }
         else
@@ -2119,7 +2254,7 @@ check_handshake:
 
         /* chosenProtocol is a reference to the string within alpnArr
            and does not need to be freed separately */
-        if(alpnArr)
+        if (alpnArr)
           CFRelease(alpnArr);
       }
     }
@@ -2139,7 +2274,7 @@ add_cert_to_certinfo(struct Curl_easy *data,
   const char *end;
   CFDataRef cert_data = SecCertificateCopyData(server_cert);
 
-  if(!cert_data)
+  if (!cert_data)
     return FETCHE_PEER_FAILED_VERIFICATION;
 
   beg = (const char *)CFDataGetBytePtr(cert_data);
@@ -2157,23 +2292,25 @@ collect_server_cert_single(struct Curl_cfilter *cf, struct Curl_easy *data,
   FETCHcode result = FETCHE_OK;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
-  if(data->set.verbose) {
+  if (data->set.verbose)
+  {
     char *certp;
     result = CopyCertSubject(data, server_cert, &certp);
-    if(!result) {
+    if (!result)
+    {
       infof(data, "Server certificate: %s", certp);
       free(certp);
     }
   }
 #endif
-  if(ssl_config->certinfo)
+  if (ssl_config->certinfo)
     result = add_cert_to_certinfo(data, server_cert, (int)idx);
   return result;
 }
 
 /* This should be called during step3 of the connection at the earliest */
 static FETCHcode collect_server_cert(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data)
+                                     struct Curl_easy *data)
 {
 #ifndef FETCH_DISABLE_VERBOSE_STRINGS
   const bool show_verbose_server_cert = data->set.verbose;
@@ -2181,11 +2318,10 @@ static FETCHcode collect_server_cert(struct Curl_cfilter *cf,
   const bool show_verbose_server_cert = FALSE;
 #endif
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  FETCHcode result = ssl_config->certinfo ?
-    FETCHE_PEER_FAILED_VERIFICATION : FETCHE_OK;
+  FETCHcode result = ssl_config->certinfo ? FETCHE_PEER_FAILED_VERIFICATION : FETCHE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   CFArrayRef server_certs = NULL;
   SecCertificateRef server_cert;
   OSStatus err;
@@ -2194,10 +2330,10 @@ static FETCHcode collect_server_cert(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  if(!show_verbose_server_cert && !ssl_config->certinfo)
+  if (!show_verbose_server_cert && !ssl_config->certinfo)
     return FETCHE_OK;
 
-  if(!backend->ssl_ctx)
+  if (!backend->ssl_ctx)
     return result;
 
 #if FETCH_BUILD_MAC_10_7 || FETCH_BUILD_IOS
@@ -2206,11 +2342,13 @@ static FETCHcode collect_server_cert(struct Curl_cfilter *cf,
   err = SSLCopyPeerTrust(backend->ssl_ctx, &trust);
   /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
      a null trust, so be on guard for that: */
-  if(err == noErr && trust) {
+  if (err == noErr && trust)
+  {
     count = SecTrustGetCertificateCount(trust);
-    if(ssl_config->certinfo)
+    if (ssl_config->certinfo)
       result = Curl_ssl_init_certinfo(data, (int)count);
-    for(i = 0L ; !result && (i < count) ; i++) {
+    for (i = 0L; !result && (i < count); i++)
+    {
       server_cert = SecTrustGetCertificateAtIndex(trust, i);
       result = collect_server_cert_single(cf, data, server_cert, i);
     }
@@ -2223,31 +2361,37 @@ static FETCHcode collect_server_cert(struct Curl_cfilter *cf,
      private API and does not work as expected. So we have to look for
      a different symbol to make sure this code is only executed under
      Lion or later. */
-  if(&SecTrustCopyPublicKey) {
+  if (&SecTrustCopyPublicKey)
+  {
 #pragma unused(server_certs)
     err = SSLCopyPeerTrust(backend->ssl_ctx, &trust);
     /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
        a null trust, so be on guard for that: */
-    if(err == noErr && trust) {
+    if (err == noErr && trust)
+    {
       count = SecTrustGetCertificateCount(trust);
-      if(ssl_config->certinfo)
+      if (ssl_config->certinfo)
         result = Curl_ssl_init_certinfo(data, (int)count);
-      for(i = 0L ; !result && (i < count) ; i++) {
+      for (i = 0L; !result && (i < count); i++)
+      {
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
         result = collect_server_cert_single(cf, data, server_cert, i);
       }
       CFRelease(trust);
     }
   }
-  else {
+  else
+  {
 #if FETCH_SUPPORT_MAC_10_8
     err = SSLCopyPeerCertificates(backend->ssl_ctx, &server_certs);
     /* Just in case SSLCopyPeerCertificates() returns null too... */
-    if(err == noErr && server_certs) {
+    if (err == noErr && server_certs)
+    {
       count = CFArrayGetCount(server_certs);
-      if(ssl_config->certinfo)
+      if (ssl_config->certinfo)
         result = Curl_ssl_init_certinfo(data, (int)count);
-      for(i = 0L ; !result && (i < count) ; i++) {
+      for (i = 0L; !result && (i < count); i++)
+      {
         server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
                                                                 i);
         result = collect_server_cert_single(cf, data, server_cert, i);
@@ -2260,11 +2404,13 @@ static FETCHcode collect_server_cert(struct Curl_cfilter *cf,
 #else
 #pragma unused(trust)
   err = SSLCopyPeerCertificates(backend->ssl_ctx, &server_certs);
-  if(err == noErr) {
+  if (err == noErr)
+  {
     count = CFArrayGetCount(server_certs);
-    if(ssl_config->certinfo)
+    if (ssl_config->certinfo)
       result = Curl_ssl_init_certinfo(data, (int)count);
-    for(i = 0L ; !result && (i < count) ; i++) {
+    for (i = 0L; !result && (i < count); i++)
+    {
       server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
       result = collect_server_cert_single(cf, data, server_cert, i);
     }
@@ -2275,7 +2421,7 @@ static FETCHcode collect_server_cert(struct Curl_cfilter *cf,
 }
 
 static FETCHcode sectransp_connect_step3(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data)
+                                         struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   FETCHcode result;
@@ -2285,7 +2431,7 @@ static FETCHcode sectransp_connect_step3(struct Curl_cfilter *cf,
    * Well, okay, let's collect server certificates, and if verbose mode is on,
    * let's print the details of the server certificates. */
   result = collect_server_cert(cf, data);
-  if(result)
+  if (result)
     return result;
 
   connssl->connecting_state = ssl_connect_done;
@@ -2303,58 +2449,66 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
   int what;
 
   /* check if the connection has already been established */
-  if(ssl_connection_complete == connssl->state) {
+  if (ssl_connection_complete == connssl->state)
+  {
     *done = TRUE;
     return FETCHE_OK;
   }
 
-  if(ssl_connect_1 == connssl->connecting_state) {
+  if (ssl_connect_1 == connssl->connecting_state)
+  {
     /* Find out how much more time we are allowed */
     const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
-    if(timeout_ms < 0) {
+    if (timeout_ms < 0)
+    {
       /* no need to continue if time already is up */
       failf(data, "SSL connection timeout");
       return FETCHE_OPERATION_TIMEDOUT;
     }
 
     result = sectransp_connect_step1(cf, data);
-    if(result)
+    if (result)
       return result;
   }
 
-  while(ssl_connect_2 == connssl->connecting_state) {
+  while (ssl_connect_2 == connssl->connecting_state)
+  {
 
     /* check allowed time left */
     const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
-    if(timeout_ms < 0) {
+    if (timeout_ms < 0)
+    {
       /* no need to continue if time already is up */
       failf(data, "SSL connection timeout");
       return FETCHE_OPERATION_TIMEDOUT;
     }
 
     /* if ssl is expecting something, check if it is available. */
-    if(connssl->io_need) {
+    if (connssl->io_need)
+    {
 
-      fetch_socket_t writefd = (connssl->io_need & FETCH_SSL_IO_NEED_SEND) ?
-        sockfd : FETCH_SOCKET_BAD;
-      fetch_socket_t readfd = (connssl->io_need & FETCH_SSL_IO_NEED_RECV) ?
-        sockfd : FETCH_SOCKET_BAD;
+      fetch_socket_t writefd = (connssl->io_need & FETCH_SSL_IO_NEED_SEND) ? sockfd : FETCH_SOCKET_BAD;
+      fetch_socket_t readfd = (connssl->io_need & FETCH_SSL_IO_NEED_RECV) ? sockfd : FETCH_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, FETCH_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);
-      if(what < 0) {
+      if (what < 0)
+      {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
         return FETCHE_SSL_CONNECT_ERROR;
       }
-      else if(0 == what) {
-        if(nonblocking) {
+      else if (0 == what)
+      {
+        if (nonblocking)
+        {
           *done = FALSE;
           return FETCHE_OK;
         }
-        else {
+        else
+        {
           /* timeout */
           failf(data, "SSL connection timeout");
           return FETCHE_OPERATION_TIMEDOUT;
@@ -2370,19 +2524,20 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
      * or epoll() will always have a valid fdset to wait on.
      */
     result = sectransp_connect_step2(cf, data);
-    if(result || (nonblocking && (ssl_connect_2 == connssl->connecting_state)))
+    if (result || (nonblocking && (ssl_connect_2 == connssl->connecting_state)))
       return result;
 
   } /* repeat step2 until all transactions are done. */
 
-
-  if(ssl_connect_3 == connssl->connecting_state) {
+  if (ssl_connect_3 == connssl->connecting_state)
+  {
     result = sectransp_connect_step3(cf, data);
-    if(result)
+    if (result)
       return result;
   }
 
-  if(ssl_connect_done == connssl->connecting_state) {
+  if (ssl_connect_done == connssl->connecting_state)
+  {
     FETCH_TRC_CF(data, cf, "connected");
     connssl->state = ssl_connection_complete;
     *done = TRUE;
@@ -2397,21 +2552,21 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
 }
 
 static FETCHcode sectransp_connect_nonblocking(struct Curl_cfilter *cf,
-                                              struct Curl_easy *data,
-                                              bool *done)
+                                               struct Curl_easy *data,
+                                               bool *done)
 {
   return sectransp_connect_common(cf, data, TRUE, done);
 }
 
 static FETCHcode sectransp_connect(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data)
+                                   struct Curl_easy *data)
 {
   FETCHcode result;
   bool done = FALSE;
 
   result = sectransp_connect_common(cf, data, FALSE, &done);
 
-  if(result)
+  if (result)
     return result;
 
   DEBUGASSERT(done);
@@ -2426,19 +2581,20 @@ static ssize_t sectransp_recv(struct Curl_cfilter *cf,
                               FETCHcode *fetchcode);
 
 static FETCHcode sectransp_shutdown(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   bool send_shutdown, bool *done)
+                                    struct Curl_easy *data,
+                                    bool send_shutdown, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   FETCHcode result = FETCHE_OK;
   ssize_t nread = 0;
   char buf[1024];
   size_t i;
 
   DEBUGASSERT(backend);
-  if(!backend->ssl_ctx || cf->shutdown) {
+  if (!backend->ssl_ctx || cf->shutdown)
+  {
     *done = TRUE;
     goto out;
   }
@@ -2446,31 +2602,36 @@ static FETCHcode sectransp_shutdown(struct Curl_cfilter *cf,
   connssl->io_need = FETCH_SSL_IO_NEED_NONE;
   *done = FALSE;
 
-  if(send_shutdown && !backend->sent_shutdown) {
+  if (send_shutdown && !backend->sent_shutdown)
+  {
     OSStatus err;
 
     FETCH_TRC_CF(data, cf, "shutdown, send close notify");
     err = SSLClose(backend->ssl_ctx);
-    switch(err) {
-      case noErr:
-        backend->sent_shutdown = TRUE;
-        break;
-      case errSSLWouldBlock:
-        connssl->io_need = FETCH_SSL_IO_NEED_SEND;
-        result = FETCHE_OK;
-        goto out;
-      default:
-        FETCH_TRC_CF(data, cf, "shutdown, error: %d", (int)err);
-        result = FETCHE_SEND_ERROR;
-        goto out;
+    switch (err)
+    {
+    case noErr:
+      backend->sent_shutdown = TRUE;
+      break;
+    case errSSLWouldBlock:
+      connssl->io_need = FETCH_SSL_IO_NEED_SEND;
+      result = FETCHE_OK;
+      goto out;
+    default:
+      FETCH_TRC_CF(data, cf, "shutdown, error: %d", (int)err);
+      result = FETCHE_SEND_ERROR;
+      goto out;
     }
   }
 
-  for(i = 0; i < 10; ++i) {
-    if(!backend->sent_shutdown) {
+  for (i = 0; i < 10; ++i)
+  {
+    if (!backend->sent_shutdown)
+    {
       nread = sectransp_recv(cf, data, buf, (int)sizeof(buf), &result);
     }
-    else {
+    else
+    {
       /* We would like to read the close notify from the server using
        * Secure Transport, however SSLRead() no longer works after we
        * sent the notify from our side. So, we just read from the
@@ -2478,24 +2639,28 @@ static FETCHcode sectransp_shutdown(struct Curl_cfilter *cf,
       nread = Curl_conn_cf_recv(cf->next, data, buf, sizeof(buf), &result);
     }
     FETCH_TRC_CF(data, cf, "shutdown read -> %zd, %d", nread, result);
-    if(nread <= 0)
+    if (nread <= 0)
       break;
   }
 
-  if(nread > 0) {
+  if (nread > 0)
+  {
     /* still data coming in? */
     connssl->io_need = FETCH_SSL_IO_NEED_RECV;
   }
-  else if(nread == 0) {
+  else if (nread == 0)
+  {
     /* We got the close notify alert and are done. */
     FETCH_TRC_CF(data, cf, "shutdown done");
     *done = TRUE;
   }
-  else if(result == FETCHE_AGAIN) {
+  else if (result == FETCHE_AGAIN)
+  {
     connssl->io_need = FETCH_SSL_IO_NEED_RECV;
     result = FETCHE_OK;
   }
-  else {
+  else
+  {
     DEBUGASSERT(result);
     FETCH_TRC_CF(data, cf, "shutdown, error: %d", result);
   }
@@ -2509,21 +2674,22 @@ static void sectransp_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
 
-  (void) data;
+  (void)data;
 
   DEBUGASSERT(backend);
 
-  if(backend->ssl_ctx) {
+  if (backend->ssl_ctx)
+  {
     FETCH_TRC_CF(data, cf, "close");
 #if FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS
-    if(&SSLCreateContext)
+    if (&SSLCreateContext)
       CFRelease(backend->ssl_ctx);
 #if FETCH_SUPPORT_MAC_10_8
     else
       (void)SSLDisposeContext(backend->ssl_ctx);
-#endif  /* FETCH_SUPPORT_MAC_10_8 */
+#endif /* FETCH_SUPPORT_MAC_10_8 */
 #else
     (void)SSLDisposeContext(backend->ssl_ctx);
 #endif /* FETCH_BUILD_MAC_10_8 || FETCH_BUILD_IOS */
@@ -2541,17 +2707,18 @@ static bool sectransp_data_pending(struct Curl_cfilter *cf,
 {
   const struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   OSStatus err;
   size_t buffer;
 
   (void)data;
   DEBUGASSERT(backend);
 
-  if(backend->ssl_ctx) {  /* SSL is in use */
+  if (backend->ssl_ctx)
+  { /* SSL is in use */
     FETCH_TRC_CF((struct Curl_easy *)data, cf, "data_pending");
     err = SSLGetBufferedReadSize(backend->ssl_ctx, &buffer);
-    if(err == noErr)
+    if (err == noErr)
       return buffer > 0UL;
     return FALSE;
   }
@@ -2560,7 +2727,7 @@ static bool sectransp_data_pending(struct Curl_cfilter *cf,
 }
 
 static FETCHcode sectransp_random(struct Curl_easy *data UNUSED_PARAM,
-                                 unsigned char *entropy, size_t length)
+                                  unsigned char *entropy, size_t length)
 {
   /* arc4random_buf() is not available on cats older than Lion, so let's
      do this manually for the benefit of the older cats. */
@@ -2569,8 +2736,9 @@ static FETCHcode sectransp_random(struct Curl_easy *data UNUSED_PARAM,
 
   (void)data;
 
-  for(i = 0 ; i < length ; i++) {
-    if(i % sizeof(u_int32_t) == 0)
+  for (i = 0; i < length; i++)
+  {
+    if (i % sizeof(u_int32_t) == 0)
       random_number = arc4random();
     entropy[i] = random_number & 0xFF;
     random_number >>= 8;
@@ -2580,9 +2748,9 @@ static FETCHcode sectransp_random(struct Curl_easy *data UNUSED_PARAM,
 }
 
 static FETCHcode sectransp_sha256sum(const unsigned char *tmp, /* input */
-                                    size_t tmplen,
-                                    unsigned char *sha256sum, /* output */
-                                    size_t sha256len)
+                                     size_t tmplen,
+                                     unsigned char *sha256sum, /* output */
+                                     size_t sha256len)
 {
   (void)sha256len;
   assert(sha256len >= FETCH_SHA256_DIGEST_LENGTH);
@@ -2593,7 +2761,7 @@ static FETCHcode sectransp_sha256sum(const unsigned char *tmp, /* input */
 static bool sectransp_false_start(void)
 {
 #if FETCH_BUILD_MAC_10_9 || FETCH_BUILD_IOS_7
-  if(&SSLSetSessionOption)
+  if (&SSLSetSessionOption)
     return TRUE;
 #endif
   return FALSE;
@@ -2607,7 +2775,7 @@ static ssize_t sectransp_send(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   size_t processed = 0UL;
   OSStatus err;
 
@@ -2628,40 +2796,45 @@ static ssize_t sectransp_send(struct Curl_cfilter *cf,
      over again with no new data until it quits returning errSSLWouldBlock. */
 
   /* Do we have buffered data to write from the last time we were called? */
-  if(backend->ssl_write_buffered_length) {
+  if (backend->ssl_write_buffered_length)
+  {
     /* Write the buffered data: */
     err = SSLWrite(backend->ssl_ctx, NULL, 0UL, &processed);
-    switch(err) {
-      case noErr:
-        /* processed is always going to be 0 because we did not write to
-           the buffer, so return how much was written to the socket */
-        processed = backend->ssl_write_buffered_length;
-        backend->ssl_write_buffered_length = 0UL;
-        break;
-      case errSSLWouldBlock: /* argh, try again */
+    switch (err)
+    {
+    case noErr:
+      /* processed is always going to be 0 because we did not write to
+         the buffer, so return how much was written to the socket */
+      processed = backend->ssl_write_buffered_length;
+      backend->ssl_write_buffered_length = 0UL;
+      break;
+    case errSSLWouldBlock: /* argh, try again */
+      *fetchcode = FETCHE_AGAIN;
+      return -1L;
+    default:
+      failf(data, "SSLWrite() returned error %d", err);
+      *fetchcode = FETCHE_SEND_ERROR;
+      return -1L;
+    }
+  }
+  else
+  {
+    /* We have got new data to write: */
+    err = SSLWrite(backend->ssl_ctx, mem, len, &processed);
+    if (err != noErr)
+    {
+      switch (err)
+      {
+      case errSSLWouldBlock:
+        /* Data was buffered but not sent, we have to tell the caller
+           to try sending again, and remember how much was buffered */
+        backend->ssl_write_buffered_length = len;
         *fetchcode = FETCHE_AGAIN;
         return -1L;
       default:
         failf(data, "SSLWrite() returned error %d", err);
         *fetchcode = FETCHE_SEND_ERROR;
         return -1L;
-    }
-  }
-  else {
-    /* We have got new data to write: */
-    err = SSLWrite(backend->ssl_ctx, mem, len, &processed);
-    if(err != noErr) {
-      switch(err) {
-        case errSSLWouldBlock:
-          /* Data was buffered but not sent, we have to tell the caller
-             to try sending again, and remember how much was buffered */
-          backend->ssl_write_buffered_length = len;
-          *fetchcode = FETCHE_AGAIN;
-          return -1L;
-        default:
-          failf(data, "SSLWrite() returned error %d", err);
-          *fetchcode = FETCHE_SEND_ERROR;
-          return -1L;
       }
     }
   }
@@ -2676,7 +2849,7 @@ static ssize_t sectransp_recv(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   size_t processed = 0UL;
   OSStatus err;
@@ -2687,42 +2860,47 @@ again:
   *fetchcode = FETCHE_OK;
   err = SSLRead(backend->ssl_ctx, buf, buffersize, &processed);
 
-  if(err != noErr) {
-    switch(err) {
-      case errSSLWouldBlock:  /* return how much we read (if anything) */
-        if(processed) {
-          return (ssize_t)processed;
-        }
-        *fetchcode = FETCHE_AGAIN;
-        return -1L;
+  if (err != noErr)
+  {
+    switch (err)
+    {
+    case errSSLWouldBlock: /* return how much we read (if anything) */
+      if (processed)
+      {
+        return (ssize_t)processed;
+      }
+      *fetchcode = FETCHE_AGAIN;
+      return -1L;
 
-      /* errSSLClosedGraceful - server gracefully shut down the SSL session
-         errSSLClosedNoNotify - server hung up on us instead of sending a
-           closure alert notice, read() is returning 0
-         Either way, inform the caller that the server disconnected. */
-      case errSSLClosedGraceful:
-      case errSSLClosedNoNotify:
-        *fetchcode = FETCHE_OK;
-        return 0;
+    /* errSSLClosedGraceful - server gracefully shut down the SSL session
+       errSSLClosedNoNotify - server hung up on us instead of sending a
+         closure alert notice, read() is returning 0
+       Either way, inform the caller that the server disconnected. */
+    case errSSLClosedGraceful:
+    case errSSLClosedNoNotify:
+      *fetchcode = FETCHE_OK;
+      return 0;
 
-        /* The below is errSSLPeerAuthCompleted; it is not defined in
-           Leopard's headers */
-      case -9841:
-        if((conn_config->CAfile || conn_config->ca_info_blob) &&
-           conn_config->verifypeer) {
-          FETCHcode result = verify_cert(cf, data, conn_config->CAfile,
-                                        conn_config->ca_info_blob,
-                                        backend->ssl_ctx);
-          if(result) {
-            *fetchcode = result;
-            return -1;
-          }
+      /* The below is errSSLPeerAuthCompleted; it is not defined in
+         Leopard's headers */
+    case -9841:
+      if ((conn_config->CAfile || conn_config->ca_info_blob) &&
+          conn_config->verifypeer)
+      {
+        FETCHcode result = verify_cert(cf, data, conn_config->CAfile,
+                                       conn_config->ca_info_blob,
+                                       backend->ssl_ctx);
+        if (result)
+        {
+          *fetchcode = result;
+          return -1;
         }
-        goto again;
-      default:
-        failf(data, "SSLRead() return error %d", err);
-        *fetchcode = FETCHE_RECV_ERROR;
-        return -1L;
+      }
+      goto again;
+    default:
+      failf(data, "SSLRead() return error %d", err);
+      *fetchcode = FETCHE_RECV_ERROR;
+      return -1L;
     }
   }
   return (ssize_t)processed;
@@ -2732,46 +2910,46 @@ static void *sectransp_get_internals(struct ssl_connect_data *connssl,
                                      FETCHINFO info UNUSED_PARAM)
 {
   struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
+      (struct st_ssl_backend_data *)connssl->backend;
   (void)info;
   DEBUGASSERT(backend);
   return backend->ssl_ctx;
 }
 
 const struct Curl_ssl Curl_ssl_sectransp = {
-  { FETCHSSLBACKEND_SECURETRANSPORT, "secure-transport" }, /* info */
+    {FETCHSSLBACKEND_SECURETRANSPORT, "secure-transport"}, /* info */
 
-  SSLSUPP_CAINFO_BLOB |
-  SSLSUPP_CERTINFO |
+    SSLSUPP_CAINFO_BLOB |
+        SSLSUPP_CERTINFO |
 #ifdef SECTRANSP_PINNEDPUBKEY
-  SSLSUPP_PINNEDPUBKEY |
+        SSLSUPP_PINNEDPUBKEY |
 #endif /* SECTRANSP_PINNEDPUBKEY */
-  SSLSUPP_HTTPS_PROXY |
-  SSLSUPP_CIPHER_LIST,
+        SSLSUPP_HTTPS_PROXY |
+        SSLSUPP_CIPHER_LIST,
 
-  sizeof(struct st_ssl_backend_data),
+    sizeof(struct st_ssl_backend_data),
 
-  NULL,                               /* init */
-  NULL,                               /* cleanup */
-  sectransp_version,                  /* version */
-  sectransp_shutdown,                 /* shutdown */
-  sectransp_data_pending,             /* data_pending */
-  sectransp_random,                   /* random */
-  NULL,                               /* cert_status_request */
-  sectransp_connect,                  /* connect */
-  sectransp_connect_nonblocking,      /* connect_nonblocking */
-  Curl_ssl_adjust_pollset,            /* adjust_pollset */
-  sectransp_get_internals,            /* get_internals */
-  sectransp_close,                    /* close_one */
-  NULL,                               /* close_all */
-  NULL,                               /* set_engine */
-  NULL,                               /* set_engine_default */
-  NULL,                               /* engines_list */
-  sectransp_false_start,              /* false_start */
-  sectransp_sha256sum,                /* sha256sum */
-  sectransp_recv,                     /* recv decrypted data */
-  sectransp_send,                     /* send data to encrypt */
-  NULL,                               /* get_channel_binding */
+    NULL,                          /* init */
+    NULL,                          /* cleanup */
+    sectransp_version,             /* version */
+    sectransp_shutdown,            /* shutdown */
+    sectransp_data_pending,        /* data_pending */
+    sectransp_random,              /* random */
+    NULL,                          /* cert_status_request */
+    sectransp_connect,             /* connect */
+    sectransp_connect_nonblocking, /* connect_nonblocking */
+    Curl_ssl_adjust_pollset,       /* adjust_pollset */
+    sectransp_get_internals,       /* get_internals */
+    sectransp_close,               /* close_one */
+    NULL,                          /* close_all */
+    NULL,                          /* set_engine */
+    NULL,                          /* set_engine_default */
+    NULL,                          /* engines_list */
+    sectransp_false_start,         /* false_start */
+    sectransp_sha256sum,           /* sha256sum */
+    sectransp_recv,                /* recv decrypted data */
+    sectransp_send,                /* send data to encrypt */
+    NULL,                          /* get_channel_binding */
 };
 
 #if defined(__GNUC__) && defined(__APPLE__)

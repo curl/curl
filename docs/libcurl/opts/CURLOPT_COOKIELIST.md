@@ -20,16 +20,16 @@ FETCHOPT_COOKIELIST - add to or manipulate cookies held in memory
 
 # SYNOPSIS
 
-~~~c
+```c
 #include <fetch/fetch.h>
 
 FETCHcode fetch_easy_setopt(FETCH *handle, FETCHOPT_COOKIELIST,
                           char *cookie);
-~~~
+```
 
 # DESCRIPTION
 
-Pass a char pointer to a *cookie* string.
+Pass a char pointer to a _cookie_ string.
 
 Such a cookie can be either a single line in Netscape / Mozilla format or just
 regular HTTP-style header (`Set-Cookie:`) format. This option also enables the
@@ -74,7 +74,7 @@ NULL
 
 # EXAMPLE
 
-~~~c
+```c
 /* an inline import of a cookie in Netscape format. */
 
 #define SEP  "\t"  /* Tab separates the fields */
@@ -114,12 +114,12 @@ int main(void)
     fetch_easy_cleanup(fetch);  /* cookies exported to cookies.txt */
   }
 }
-~~~
+```
 
 # Cookie file format
 
 The cookie file format and general cookie concepts in fetch are described
-online here: https://fetch.se/docs/http-cookies.html
+online here: https://curl.se/docs/http-cookies.html
 
 # HISTORY
 

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,7 +44,7 @@ extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
 
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);
-#else  /* _WIN32 */
+#else /* _WIN32 */
 #define Curl_win32_init(x) FETCHE_OK
 #endif /* !_WIN32 */
 

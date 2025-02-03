@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -38,15 +38,14 @@
   If you intend to use a SSL-based protocol here you might need to setup TLS
   library mutex callbacks as described here:
 
-  https://fetch.se/libfetch/c/threadsafe.html
+  https://curl.se/libfetch/c/threadsafe.html
 
 */
-static const char * const urls[NUMT]= {
-  "https://fetch.se/",
-  "ftp://example.com/",
-  "https://example.net/",
-  "www.example"
-};
+static const char *const urls[NUMT] = {
+    "https://curl.se/",
+    "ftp://example.com/",
+    "https://example.net/",
+    "www.example"};
 
 static void *pull_one_url(void *url)
 {
@@ -59,7 +58,6 @@ static void *pull_one_url(void *url)
 
   return NULL;
 }
-
 
 /*
    int pthread_create(pthread_t *new_thread_ID,
@@ -75,19 +73,21 @@ int main(void)
   /* Must initialize libfetch before any threads are started */
   fetch_global_init(FETCH_GLOBAL_ALL);
 
-  for(i = 0; i < NUMT; i++) {
+  for (i = 0; i < NUMT; i++)
+  {
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
                                (void *)urls[i]);
-    if(0 != error)
+    if (0 != error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }
 
   /* now wait for all threads to terminate */
-  for(i = 0; i < NUMT; i++) {
+  for (i = 0; i < NUMT; i++)
+  {
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,7 +52,8 @@ int main(void)
   fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     fetch_easy_setopt(fetch, FETCHOPT_URL, ftpurl);
     /* No download if the file */
     fetch_easy_setopt(fetch, FETCHOPT_NOBODY, 1L);
@@ -65,20 +66,23 @@ int main(void)
 
     res = fetch_easy_perform(fetch);
 
-    if(FETCHE_OK == res) {
-      /* https://fetch.se/libfetch/c/fetch_easy_getinfo.html */
+    if (FETCHE_OK == res)
+    {
+      /* https://curl.se/libfetch/c/fetch_easy_getinfo.html */
       res = fetch_easy_getinfo(fetch, FETCHINFO_FILETIME, &filetime);
-      if((FETCHE_OK == res) && (filetime >= 0)) {
+      if ((FETCHE_OK == res) && (filetime >= 0))
+      {
         time_t file_time = (time_t)filetime;
         printf("filetime %s: %s", filename, ctime(&file_time));
       }
       res = fetch_easy_getinfo(fetch, FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                              &filesize);
-      if((FETCHE_OK == res) && (filesize > 0))
+                               &filesize);
+      if ((FETCHE_OK == res) && (filesize > 0))
         printf("filesize %s: %" FETCH_FORMAT_FETCH_OFF_T " bytes\n",
                filename, filesize);
     }
-    else {
+    else
+    {
       /* we failed */
       fprintf(stderr, "fetch told us %d\n", res);
     }

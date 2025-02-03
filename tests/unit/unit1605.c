@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,8 @@ static FETCHcode unit_setup(void)
 
   global_init(FETCH_GLOBAL_ALL);
   easy = fetch_easy_init();
-  if(!easy) {
+  if (!easy)
+  {
     fetch_global_cleanup();
     return FETCHE_OUT_OF_MEMORY;
   }
@@ -47,13 +48,13 @@ static void unit_stop(void)
 }
 
 UNITTEST_START
-  int len;
-  char *esc;
+int len;
+char *esc;
 
-  esc = fetch_easy_escape(easy, "", -1);
-  fail_unless(esc == NULL, "negative string length can't work");
+esc = fetch_easy_escape(easy, "", -1);
+fail_unless(esc == NULL, "negative string length can't work");
 
-  esc = fetch_easy_unescape(easy, "%41%41%41%41", -1, &len);
-  fail_unless(esc == NULL, "negative string length can't work");
+esc = fetch_easy_unescape(easy, "%41%41%41%41", -1, &len);
+fail_unless(esc == NULL, "negative string length can't work");
 
 UNITTEST_STOP

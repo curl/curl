@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -60,9 +60,8 @@ FETCHcode test(char *URL)
   easy_setopt(fetch, FETCHOPT_TIMEOUT, (long)7);
   easy_setopt(fetch, FETCHOPT_NOSIGNAL, (long)1);
   FETCH_IGNORE_DEPRECATION(
-    easy_setopt(fetch, FETCHOPT_PROGRESSFUNCTION, progressKiller);
-    easy_setopt(fetch, FETCHOPT_PROGRESSDATA, NULL);
-  )
+      easy_setopt(fetch, FETCHOPT_PROGRESSFUNCTION, progressKiller);
+      easy_setopt(fetch, FETCHOPT_PROGRESSDATA, NULL);)
   easy_setopt(fetch, FETCHOPT_NOPROGRESS, (long)0);
 
   res = fetch_easy_perform(fetch);

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,22 +27,23 @@
 #include "urldata.h"
 #include "fetch_addrinfo.h"
 #ifdef USE_HTTPSRR
-# include <stdint.h>
-# include "httpsrr.h"
+#include <stdint.h>
+#include "httpsrr.h"
 #endif
 
 #ifndef FETCH_DISABLE_DOH
 
-typedef enum {
+typedef enum
+{
   DOH_OK,
-  DOH_DNS_BAD_LABEL,    /* 1 */
-  DOH_DNS_OUT_OF_RANGE, /* 2 */
-  DOH_DNS_LABEL_LOOP,   /* 3 */
-  DOH_TOO_SMALL_BUFFER, /* 4 */
-  DOH_OUT_OF_MEM,       /* 5 */
-  DOH_DNS_RDATA_LEN,    /* 6 */
-  DOH_DNS_MALFORMAT,    /* 7 */
-  DOH_DNS_BAD_RCODE,    /* 8 - no such name */
+  DOH_DNS_BAD_LABEL,        /* 1 */
+  DOH_DNS_OUT_OF_RANGE,     /* 2 */
+  DOH_DNS_LABEL_LOOP,       /* 3 */
+  DOH_TOO_SMALL_BUFFER,     /* 4 */
+  DOH_OUT_OF_MEM,           /* 5 */
+  DOH_DNS_RDATA_LEN,        /* 6 */
+  DOH_DNS_MALFORMAT,        /* 7 */
+  DOH_DNS_BAD_RCODE,        /* 8 - no such name */
   DOH_DNS_UNEXPECTED_TYPE,  /* 9 */
   DOH_DNS_UNEXPECTED_CLASS, /* 10 */
   DOH_NO_CONTENT,           /* 11 */
@@ -50,17 +51,19 @@ typedef enum {
   DOH_DNS_NAME_TOO_LONG     /* 13 */
 } DOHcode;
 
-typedef enum {
+typedef enum
+{
   DNS_TYPE_A = 1,
   DNS_TYPE_NS = 2,
   DNS_TYPE_CNAME = 5,
   DNS_TYPE_AAAA = 28,
-  DNS_TYPE_DNAME = 39,           /* RFC6672 */
+  DNS_TYPE_DNAME = 39, /* RFC6672 */
   DNS_TYPE_HTTPS = 65
 } DNStype;
 
 /* one of these for each DoH request */
-struct doh_probe {
+struct doh_probe
+{
   fetch_off_t easy_mid; /* multi id of easy handle doing the lookup */
   DNStype dnstype;
   unsigned char req_body[512];
@@ -68,16 +71,17 @@ struct doh_probe {
   struct dynbuf resp_body;
 };
 
-enum doh_slot_num {
+enum doh_slot_num
+{
   /* Explicit values for first two symbols so as to match hard-coded
    * constants in existing code
    */
   DOH_SLOT_IPV4 = 0, /* make 'V4' stand out for readability */
   DOH_SLOT_IPV6 = 1, /* 'V6' likewise */
 
-  /* Space here for (possibly build-specific) additional slot definitions */
+/* Space here for (possibly build-specific) additional slot definitions */
 #ifdef USE_HTTPSRR
-  DOH_SLOT_HTTPS_RR = 2,     /* for HTTPS RR */
+  DOH_SLOT_HTTPS_RR = 2, /* for HTTPS RR */
 #endif
 
   /* for example */
@@ -89,7 +93,8 @@ enum doh_slot_num {
   DOH_SLOT_COUNT
 };
 
-struct doh_probes {
+struct doh_probes
+{
   struct fetch_slist *req_hds;
   struct doh_probe probe[DOH_SLOT_COUNT];
   unsigned int pending; /* still outstanding probes */
@@ -108,15 +113,17 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                                int *waitp);
 
 FETCHcode Curl_doh_is_resolved(struct Curl_easy *data,
-                              struct Curl_dns_entry **dns);
+                               struct Curl_dns_entry **dns);
 
 #define DOH_MAX_ADDR 24
 #define DOH_MAX_CNAME 4
 #define DOH_MAX_HTTPS 4
 
-struct dohaddr {
+struct dohaddr
+{
   int type;
-  union {
+  union
+  {
     unsigned char v4[4]; /* network byte order */
     unsigned char v6[16];
   } ip;
@@ -128,16 +135,18 @@ struct dohaddr {
  * These may need escaping when found within an ALPN string
  * value.
  */
-#define COMMA_CHAR                    ','
-#define BACKSLASH_CHAR                '\\'
+#define COMMA_CHAR ','
+#define BACKSLASH_CHAR '\\'
 
-struct dohhttps_rr {
-  uint16_t len; /* raw encoded length */
+struct dohhttps_rr
+{
+  uint16_t len;       /* raw encoded length */
   unsigned char *val; /* raw encoded octets */
 };
 #endif
 
-struct dohentry {
+struct dohentry
+{
   struct dynbuf cname[DOH_MAX_CNAME];
   struct dohaddr addr[DOH_MAX_ADDR];
   int numaddr;
@@ -155,9 +164,9 @@ void Curl_doh_cleanup(struct Curl_easy *data);
 #ifdef UNITTESTS
 UNITTEST DOHcode doh_req_encode(const char *host,
                                 DNStype dnstype,
-                                unsigned char *dnsp,  /* buffer */
-                                size_t len,  /* buffer size */
-                                size_t *olen);  /* output length */
+                                unsigned char *dnsp, /* buffer */
+                                size_t len,          /* buffer size */
+                                size_t *olen);       /* output length */
 UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
                                  size_t dohlen,
                                  DNStype dnstype,
@@ -170,8 +179,8 @@ UNITTEST void de_cleanup(struct dohentry *d);
 extern struct fetch_trc_feat Curl_doh_trc;
 
 #else /* if DoH is disabled */
-#define Curl_doh(a,b,c,d) NULL
-#define Curl_doh_is_resolved(x,y) FETCHE_COULDNT_RESOLVE_HOST
+#define Curl_doh(a, b, c, d) NULL
+#define Curl_doh_is_resolved(x, y) FETCHE_COULDNT_RESOLVE_HOST
 #endif
 
 #endif /* HEADER_FETCH_DOH_H */

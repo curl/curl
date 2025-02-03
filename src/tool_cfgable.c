@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -97,7 +97,8 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->proto_redir_str);
 
   urlnode = config->url_list;
-  while(urlnode) {
+  while (urlnode)
+  {
     struct getout *next = urlnode->next;
     Curl_safefree(urlnode->url);
     Curl_safefree(urlnode->outfile);
@@ -188,7 +189,8 @@ void config_free(struct OperationConfig *config)
   struct OperationConfig *last = config;
 
   /* Free each of the structures in reverse order */
-  while(last) {
+  while (last)
+  {
     struct OperationConfig *prev = last->prev;
 
     free_config_fields(last);

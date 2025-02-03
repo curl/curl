@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,8 +27,8 @@
 #include "fetch_setup.h"
 
 #if !defined(FETCH_DISABLE_IMAP) || !defined(FETCH_DISABLE_SMTP) || \
-  !defined(FETCH_DISABLE_POP3) || \
-  (!defined(FETCH_DISABLE_LDAP) && defined(USE_OPENLDAP))
+    !defined(FETCH_DISABLE_POP3) ||                                 \
+    (!defined(FETCH_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
 #include <fetch/fetch.h>
 #include "urldata.h"
@@ -58,21 +58,21 @@
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_create_oauth_bearer_message(const char *user,
-                                               const char *host,
-                                               const long port,
-                                               const char *bearer,
-                                               struct bufref *out)
+                                                const char *host,
+                                                const long port,
+                                                const char *bearer,
+                                                struct bufref *out)
 {
   char *oauth;
 
   /* Generate the message */
-  if(port == 0 || port == 80)
+  if (port == 0 || port == 80)
     oauth = aprintf("n,a=%s,\1host=%s\1auth=Bearer %s\1\1", user, host,
                     bearer);
   else
     oauth = aprintf("n,a=%s,\1host=%s\1port=%ld\1auth=Bearer %s\1\1", user,
                     host, port, bearer);
-  if(!oauth)
+  if (!oauth)
     return FETCHE_OUT_OF_MEMORY;
 
   Curl_bufref_set(out, oauth, strlen(oauth), fetch_free);
@@ -94,12 +94,12 @@ FETCHcode Curl_auth_create_oauth_bearer_message(const char *user,
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_auth_create_xoauth_bearer_message(const char *user,
-                                               const char *bearer,
-                                               struct bufref *out)
+                                                 const char *bearer,
+                                                 struct bufref *out)
 {
   /* Generate the message */
   char *xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
-  if(!xoauth)
+  if (!xoauth)
     return FETCHE_OUT_OF_MEMORY;
 
   Curl_bufref_set(out, xoauth, strlen(xoauth), fetch_free);

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -36,10 +36,9 @@ FETCHcode test(char *URL)
 
   easy_setopt(eh, FETCHOPT_URL, URL);
   FETCH_IGNORE_DEPRECATION(
-    fetch_formadd(&m_formpost, &lastptr, FETCHFORM_COPYNAME, "file",
-                 FETCHFORM_FILE, "missing-file", FETCHFORM_END);
-    fetch_easy_setopt(eh, FETCHOPT_HTTPPOST, m_formpost);
-  )
+      fetch_formadd(&m_formpost, &lastptr, FETCHFORM_COPYNAME, "file",
+                    FETCHFORM_FILE, "missing-file", FETCHFORM_END);
+      fetch_easy_setopt(eh, FETCHOPT_HTTPPOST, m_formpost);)
 
   (void)fetch_easy_perform(eh);
   (void)fetch_easy_perform(eh);
@@ -47,8 +46,7 @@ FETCHcode test(char *URL)
 test_cleanup:
 
   FETCH_IGNORE_DEPRECATION(
-    fetch_formfree(m_formpost);
-  )
+      fetch_formfree(m_formpost);)
   fetch_easy_cleanup(eh);
   fetch_global_cleanup();
 

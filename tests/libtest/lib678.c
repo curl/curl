@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,32 +31,35 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
 {
   size_t datasize = 0;
   void *data = NULL;
-  if(filename) {
+  if (filename)
+  {
     FILE *fInCert = fopen(filename, "rb");
 
-    if(fInCert) {
+    if (fInCert)
+    {
       long cert_tell = 0;
       bool continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
-      if(continue_reading)
+      if (continue_reading)
         cert_tell = ftell(fInCert);
-      if(cert_tell < 0)
+      if (cert_tell < 0)
         continue_reading = FALSE;
       else
         datasize = (size_t)cert_tell;
-      if(continue_reading)
+      if (continue_reading)
         continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
-      if(continue_reading)
+      if (continue_reading)
         data = malloc(datasize + 1);
-      if((!data) ||
-         ((int)fread(data, datasize, 1, fInCert) != 1))
+      if ((!data) ||
+          ((int)fread(data, datasize, 1, fInCert) != 1))
         continue_reading = FALSE;
       fclose(fInCert);
-      if(!continue_reading) {
+      if (!continue_reading)
+      {
         free(data);
         datasize = 0;
         data = NULL;
       }
-   }
+    }
   }
   *filesize = datasize;
   *filedata = data;
@@ -72,18 +75,20 @@ static FETCHcode test_cert_blob(const char *url, const char *cafile)
   void *certdata;
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     return FETCHE_FAILED_INIT;
   }
 
-  if(loadfile(cafile, &certdata, &certsize)) {
-    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE,     1L);
-    fetch_easy_setopt(fetch, FETCHOPT_HEADER,      1L);
-    fetch_easy_setopt(fetch, FETCHOPT_URL,         url);
-    fetch_easy_setopt(fetch, FETCHOPT_USERAGENT,   "FETCHOPT_CAINFO_BLOB");
+  if (loadfile(cafile, &certdata, &certsize))
+  {
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_HEADER, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, url);
+    fetch_easy_setopt(fetch, FETCHOPT_USERAGENT, "FETCHOPT_CAINFO_BLOB");
     fetch_easy_setopt(fetch, FETCHOPT_SSL_OPTIONS,
-                     FETCHSSLOPT_REVOKE_BEST_EFFORT);
+                      FETCHSSLOPT_REVOKE_BEST_EFFORT);
 
     blob.data = certdata;
     blob.len = certsize;
@@ -101,14 +106,16 @@ FETCHcode test(char *URL)
 {
   FETCHcode res = FETCHE_OK;
   fetch_global_init(FETCH_GLOBAL_DEFAULT);
-  if(!strcmp("check", URL)) {
+  if (!strcmp("check", URL))
+  {
     FETCH *e;
     FETCHcode w = FETCHE_OK;
     struct fetch_blob blob = {0};
     e = fetch_easy_init();
-    if(e) {
+    if (e)
+    {
       w = fetch_easy_setopt(e, FETCHOPT_CAINFO_BLOB, &blob);
-      if(w)
+      if (w)
         printf("FETCHOPT_CAINFO_BLOB is not supported\n");
       fetch_easy_cleanup(e);
     }

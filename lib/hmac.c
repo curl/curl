@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,9 +26,9 @@
 
 #include "fetch_setup.h"
 
-#if (defined(USE_FETCH_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||      \
-  !defined(FETCH_DISABLE_AWS) || !defined(FETCH_DISABLE_DIGEST_AUTH) ||   \
-  defined(USE_SSL)
+#if (defined(USE_FETCH_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||       \
+    !defined(FETCH_DISABLE_AWS) || !defined(FETCH_DISABLE_DIGEST_AUTH) || \
+    defined(USE_SSL)
 
 #include <fetch/fetch.h>
 
@@ -64,18 +64,19 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
   i = sizeof(*ctxt) + 2 * hashparams->ctxtsize + hashparams->resultlen;
   ctxt = malloc(i);
 
-  if(!ctxt)
+  if (!ctxt)
     return ctxt;
 
   ctxt->hash = hashparams;
-  ctxt->hashctxt1 = (void *) (ctxt + 1);
-  ctxt->hashctxt2 = (void *) ((char *) ctxt->hashctxt1 + hashparams->ctxtsize);
+  ctxt->hashctxt1 = (void *)(ctxt + 1);
+  ctxt->hashctxt2 = (void *)((char *)ctxt->hashctxt1 + hashparams->ctxtsize);
 
   /* If the key is too long, replace it by its hash digest. */
-  if(keylen > hashparams->maxkeylen) {
+  if (keylen > hashparams->maxkeylen)
+  {
     hashparams->hinit(ctxt->hashctxt1);
     hashparams->hupdate(ctxt->hashctxt1, key, keylen);
-    hkey = (unsigned char *) ctxt->hashctxt2 + hashparams->ctxtsize;
+    hkey = (unsigned char *)ctxt->hashctxt2 + hashparams->ctxtsize;
     hashparams->hfinal(hkey, ctxt->hashctxt1);
     key = hkey;
     keylen = hashparams->resultlen;
@@ -85,14 +86,16 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
   hashparams->hinit(ctxt->hashctxt1);
   hashparams->hinit(ctxt->hashctxt2);
 
-  for(i = 0; i < keylen; i++) {
+  for (i = 0; i < keylen; i++)
+  {
     b = (unsigned char)(*key ^ hmac_ipad);
     hashparams->hupdate(ctxt->hashctxt1, &b, 1);
     b = (unsigned char)(*key++ ^ hmac_opad);
     hashparams->hupdate(ctxt->hashctxt2, &b, 1);
   }
 
-  for(; i < hashparams->maxkeylen; i++) {
+  for (; i < hashparams->maxkeylen; i++)
+  {
     hashparams->hupdate(ctxt->hashctxt1, &hmac_ipad, 1);
     hashparams->hupdate(ctxt->hashctxt2, &hmac_opad, 1);
   }
@@ -110,7 +113,6 @@ int Curl_HMAC_update(struct HMAC_context *ctxt,
   return 0;
 }
 
-
 int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
 {
   const struct HMAC_params *hashparams = ctxt->hash;
@@ -118,8 +120,8 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
   /* Do not get output if called with a null parameter: only release
      storage. */
 
-  if(!output)
-    output = (unsigned char *) ctxt->hashctxt2 + ctxt->hash->ctxtsize;
+  if (!output)
+    output = (unsigned char *)ctxt->hashctxt2 + ctxt->hash->ctxtsize;
 
   hashparams->hfinal(output, ctxt->hashctxt1);
   hashparams->hupdate(ctxt->hashctxt2, output, hashparams->resultlen);
@@ -146,14 +148,14 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
  * Returns FETCHE_OK on success.
  */
 FETCHcode Curl_hmacit(const struct HMAC_params *hashparams,
-                     const unsigned char *key, const size_t keylen,
-                     const unsigned char *buf, const size_t buflen,
-                     unsigned char *output)
+                      const unsigned char *key, const size_t keylen,
+                      const unsigned char *buf, const size_t buflen,
+                      unsigned char *output)
 {
   struct HMAC_context *ctxt =
-    Curl_HMAC_init(hashparams, key, fetchx_uztoui(keylen));
+      Curl_HMAC_init(hashparams, key, fetchx_uztoui(keylen));
 
-  if(!ctxt)
+  if (!ctxt)
     return FETCHE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */

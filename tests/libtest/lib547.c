@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,21 +33,23 @@
 #define UPLOADTHIS "this is the blurb we want to upload\n"
 
 #ifndef LIB548
-static size_t readcallback(char  *ptr,
+static size_t readcallback(char *ptr,
                            size_t size,
                            size_t nmemb,
                            void *clientp)
 {
   int *counter = (int *)clientp;
 
-  if(*counter) {
+  if (*counter)
+  {
     /* only do this once and then require a clearing of this */
     fprintf(stderr, "READ ALREADY DONE!\n");
     return 0;
   }
   (*counter)++; /* bump */
 
-  if(size * nmemb >= strlen(UPLOADTHIS)) {
+  if (size * nmemb >= strlen(UPLOADTHIS))
+  {
     fprintf(stderr, "READ!\n");
     strcpy(ptr, UPLOADTHIS);
     return strlen(UPLOADTHIS);
@@ -56,19 +58,18 @@ static size_t readcallback(char  *ptr,
   return 0;
 }
 static fetchioerr ioctlcallback(FETCH *handle,
-                               int cmd,
-                               void *clientp)
+                                int cmd,
+                                void *clientp)
 {
   int *counter = (int *)clientp;
   (void)handle; /* unused */
-  if(cmd == FETCHIOCMD_RESTARTREAD) {
+  if (cmd == FETCHIOCMD_RESTARTREAD)
+  {
     fprintf(stderr, "REWIND!\n");
     *counter = 0; /* clear counter to make the read callback restart */
   }
   return FETCHIOE_OK;
 }
-
-
 
 #endif
 
@@ -80,13 +81,15 @@ FETCHcode test(char *URL)
   int counter = 0;
 #endif
 
-  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+  if (fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK)
+  {
     fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   fetch = fetch_easy_init();
-  if(!fetch) {
+  if (!fetch)
+  {
     fprintf(stderr, "fetch_easy_init() failed\n");
     fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -101,9 +104,8 @@ FETCHcode test(char *URL)
 #else
   /* 547 style, which means reading the POST data from a callback */
   FETCH_IGNORE_DEPRECATION(
-    test_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctlcallback);
-    test_setopt(fetch, FETCHOPT_IOCTLDATA, &counter);
-  )
+      test_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctlcallback);
+      test_setopt(fetch, FETCHOPT_IOCTLDATA, &counter);)
   test_setopt(fetch, FETCHOPT_READFUNCTION, readcallback);
   test_setopt(fetch, FETCHOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
@@ -114,7 +116,7 @@ FETCHcode test(char *URL)
   test_setopt(fetch, FETCHOPT_PROXY, libtest_arg2);
   test_setopt(fetch, FETCHOPT_PROXYUSERPWD, libtest_arg3);
   test_setopt(fetch, FETCHOPT_PROXYAUTH,
-                   (long) (FETCHAUTH_NTLM | FETCHAUTH_DIGEST | FETCHAUTH_BASIC) );
+              (long)(FETCHAUTH_NTLM | FETCHAUTH_DIGEST | FETCHAUTH_BASIC));
 
   res = fetch_easy_perform(fetch);
 

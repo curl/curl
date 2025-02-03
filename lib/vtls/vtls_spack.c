@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,19 +48,19 @@ typedef unsigned __int64 uint64_t;
 #endif /* _MSC_VER */
 
 #ifndef UINT16_MAX
-#define UINT16_MAX    0xffff
+#define UINT16_MAX 0xffff
 #endif
 #ifndef UINT32_MAX
-#define UINT32_MAX    0xffffffff
+#define UINT32_MAX 0xffffffff
 #endif
 
-#define FETCH_SPACK_VERSION       0x01
-#define FETCH_SPACK_IETF_ID       0x02
-#define FETCH_SPACK_VALID_UNTIL   0x03
-#define FETCH_SPACK_TICKET        0x04
-#define FETCH_SPACK_ALPN          0x05
-#define FETCH_SPACK_EARLYDATA     0x06
-#define FETCH_SPACK_QUICTP        0x07
+#define FETCH_SPACK_VERSION 0x01
+#define FETCH_SPACK_IETF_ID 0x02
+#define FETCH_SPACK_VALID_UNTIL 0x03
+#define FETCH_SPACK_TICKET 0x04
+#define FETCH_SPACK_ALPN 0x05
+#define FETCH_SPACK_EARLYDATA 0x06
+#define FETCH_SPACK_QUICTP 0x07
 
 static FETCHcode spack_enc8(struct dynbuf *buf, uint8_t b)
 {
@@ -70,7 +70,7 @@ static FETCHcode spack_enc8(struct dynbuf *buf, uint8_t b)
 static FETCHcode
 spack_dec8(uint8_t *val, const uint8_t **src, const uint8_t *end)
 {
-  if(end - *src < 1)
+  if (end - *src < 1)
     return FETCHE_READ_ERROR;
   *val = **src;
   *src += 1;
@@ -88,7 +88,7 @@ static FETCHcode spack_enc16(struct dynbuf *buf, uint16_t val)
 static FETCHcode
 spack_dec16(uint16_t *val, const uint8_t **src, const uint8_t *end)
 {
-  if(end - *src < 2)
+  if (end - *src < 2)
     return FETCHE_READ_ERROR;
   *val = (uint16_t)((*src)[0] << 8 | (*src)[1]);
   *src += 2;
@@ -108,7 +108,7 @@ static FETCHcode spack_enc32(struct dynbuf *buf, uint32_t val)
 static FETCHcode
 spack_dec32(uint32_t *val, const uint8_t **src, const uint8_t *end)
 {
-  if(end - *src < 4)
+  if (end - *src < 4)
     return FETCHE_READ_ERROR;
   *val = (uint32_t)(*src)[0] << 24 | (uint32_t)(*src)[1] << 16 |
          (uint32_t)(*src)[2] << 8 | (*src)[3];
@@ -122,7 +122,7 @@ static FETCHcode spack_enc64(struct dynbuf *buf, uint64_t val)
   nval[0] = (uint8_t)(val >> 56);
   nval[1] = (uint8_t)(val >> 48);
   nval[2] = (uint8_t)(val >> 40);
-  nval[3] = (uint8_t)(val >> 32);                  \
+  nval[3] = (uint8_t)(val >> 32);
   nval[4] = (uint8_t)(val >> 24);
   nval[5] = (uint8_t)(val >> 16);
   nval[6] = (uint8_t)(val >> 8);
@@ -133,7 +133,7 @@ static FETCHcode spack_enc64(struct dynbuf *buf, uint64_t val)
 static FETCHcode
 spack_dec64(uint64_t *val, const uint8_t **src, const uint8_t *end)
 {
-  if(end - *src < 8)
+  if (end - *src < 8)
     return FETCHE_READ_ERROR;
   *val = (uint64_t)(*src)[0] << 56 | (uint64_t)(*src)[1] << 48 |
          (uint64_t)(*src)[2] << 40 | (uint64_t)(*src)[3] << 32 |
@@ -147,10 +147,11 @@ static FETCHcode spack_encstr16(struct dynbuf *buf, const char *s)
 {
   size_t slen = strlen(s);
   FETCHcode r;
-  if(slen > UINT16_MAX)
+  if (slen > UINT16_MAX)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
   r = spack_enc16(buf, (uint16_t)slen);
-  if(!r) {
+  if (!r)
+  {
     r = Curl_dyn_addn(buf, s, slen);
   }
   return r;
@@ -164,9 +165,9 @@ spack_decstr16(char **val, const uint8_t **src, const uint8_t *end)
 
   *val = NULL;
   r = spack_dec16(&slen, src, end);
-  if(r)
+  if (r)
     return r;
-  if(end - *src < slen)
+  if (end - *src < slen)
     return FETCHE_READ_ERROR;
   *val = Curl_memdup0((const char *)(*src), slen);
   *src += slen;
@@ -174,13 +175,14 @@ spack_decstr16(char **val, const uint8_t **src, const uint8_t *end)
 }
 
 static FETCHcode spack_encdata16(struct dynbuf *buf,
-                                const uint8_t *data, size_t data_len)
+                                 const uint8_t *data, size_t data_len)
 {
   FETCHcode r;
-  if(data_len > UINT16_MAX)
+  if (data_len > UINT16_MAX)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
   r = spack_enc16(buf, (uint16_t)data_len);
-  if(!r) {
+  if (!r)
+  {
     r = Curl_dyn_addn(buf, data, data_len);
   }
   return r;
@@ -195,9 +197,9 @@ spack_decdata16(uint8_t **val, size_t *val_len,
 
   *val = NULL;
   r = spack_dec16(&data_len, src, end);
-  if(r)
+  if (r)
     return r;
-  if(end - *src < data_len)
+  if (end - *src < data_len)
     return FETCHE_READ_ERROR;
   *val = Curl_memdup0((const char *)(*src), data_len);
   *val_len = data_len;
@@ -206,56 +208,59 @@ spack_decdata16(uint8_t **val, size_t *val_len,
 }
 
 FETCHcode Curl_ssl_session_pack(struct Curl_easy *data,
-                               struct Curl_ssl_session *s,
-                               struct dynbuf *buf)
+                                struct Curl_ssl_session *s,
+                                struct dynbuf *buf)
 {
   FETCHcode r;
   DEBUGASSERT(s->sdata);
   DEBUGASSERT(s->sdata_len);
 
-  if(s->valid_until < 0)
+  if (s->valid_until < 0)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
 
   r = spack_enc8(buf, FETCH_SPACK_VERSION);
-  if(!r)
+  if (!r)
     r = spack_enc8(buf, FETCH_SPACK_TICKET);
-  if(!r)
+  if (!r)
     r = spack_encdata16(buf, s->sdata, s->sdata_len);
-  if(!r)
+  if (!r)
     r = spack_enc8(buf, FETCH_SPACK_IETF_ID);
-  if(!r)
+  if (!r)
     r = spack_enc16(buf, (uint16_t)s->ietf_tls_id);
-  if(!r)
+  if (!r)
     r = spack_enc8(buf, FETCH_SPACK_VALID_UNTIL);
-  if(!r)
+  if (!r)
     r = spack_enc64(buf, (uint64_t)s->valid_until);
-  if(!r && s->alpn) {
+  if (!r && s->alpn)
+  {
     r = spack_enc8(buf, FETCH_SPACK_ALPN);
-    if(!r)
+    if (!r)
       r = spack_encstr16(buf, s->alpn);
   }
-  if(!r && s->earlydata_max) {
-    if(s->earlydata_max > UINT32_MAX)
+  if (!r && s->earlydata_max)
+  {
+    if (s->earlydata_max > UINT32_MAX)
       r = FETCHE_BAD_FUNCTION_ARGUMENT;
-    if(!r)
+    if (!r)
       r = spack_enc8(buf, FETCH_SPACK_EARLYDATA);
-    if(!r)
+    if (!r)
       r = spack_enc32(buf, (uint32_t)s->earlydata_max);
   }
-  if(!r && s->quic_tp && s->quic_tp_len) {
+  if (!r && s->quic_tp && s->quic_tp_len)
+  {
     r = spack_enc8(buf, FETCH_SPACK_QUICTP);
-    if(!r)
+    if (!r)
       r = spack_encdata16(buf, s->quic_tp, s->quic_tp_len);
   }
 
-  if(r)
+  if (r)
     FETCH_TRC_SSLS(data, "error packing data: %d", r);
   return r;
 }
 
 FETCHcode Curl_ssl_session_unpack(struct Curl_easy *data,
-                                 const unsigned char *buf, size_t buflen,
-                                 struct Curl_ssl_session **ps)
+                                  const unsigned char *buf, size_t buflen,
+                                  struct Curl_ssl_session **ps)
 {
   struct Curl_ssl_session *s = NULL;
   const unsigned char *end = buf + buflen;
@@ -270,70 +275,77 @@ FETCHcode Curl_ssl_session_unpack(struct Curl_easy *data,
   *ps = NULL;
 
   r = spack_dec8(&val8, &buf, end);
-  if(r)
+  if (r)
     goto out;
-  if(val8 != FETCH_SPACK_VERSION) {
+  if (val8 != FETCH_SPACK_VERSION)
+  {
     r = FETCHE_READ_ERROR;
     goto out;
   }
 
   s = calloc(1, sizeof(*s));
-  if(!s) {
+  if (!s)
+  {
     r = FETCHE_OUT_OF_MEMORY;
     goto out;
   }
 
-  while(buf < end) {
+  while (buf < end)
+  {
     r = spack_dec8(&val8, &buf, end);
-    if(r)
+    if (r)
       goto out;
 
-    switch(val8) {
+    switch (val8)
+    {
     case FETCH_SPACK_ALPN:
       r = spack_decstr16(&s->alpn, &buf, end);
-      if(r)
+      if (r)
         goto out;
       break;
     case FETCH_SPACK_EARLYDATA:
       r = spack_dec32(&val32, &buf, end);
-      if(r)
+      if (r)
         goto out;
       s->earlydata_max = val32;
       break;
     case FETCH_SPACK_IETF_ID:
       r = spack_dec16(&val16, &buf, end);
-      if(r)
+      if (r)
         goto out;
       s->ietf_tls_id = val16;
       break;
-    case FETCH_SPACK_QUICTP: {
+    case FETCH_SPACK_QUICTP:
+    {
       r = spack_decdata16(&pval8, &s->quic_tp_len, &buf, end);
-      if(r)
+      if (r)
         goto out;
       s->quic_tp = pval8;
       break;
     }
-    case FETCH_SPACK_TICKET: {
+    case FETCH_SPACK_TICKET:
+    {
       r = spack_decdata16(&pval8, &s->sdata_len, &buf, end);
-      if(r)
+      if (r)
         goto out;
       s->sdata = pval8;
       break;
     }
     case FETCH_SPACK_VALID_UNTIL:
       r = spack_dec64(&val64, &buf, end);
-      if(r)
+      if (r)
         goto out;
       s->valid_until = (fetch_off_t)val64;
       break;
-    default:  /* unknown tag */
+    default: /* unknown tag */
       r = FETCHE_READ_ERROR;
       goto out;
     }
   }
 
 out:
-  if(r) {
+  if (r)
+  {
     FETCH_TRC_SSLS(data, "error unpacking data: %d", r);
     Curl_ssl_session_destroy(s);
   }

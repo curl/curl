@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   /* take care of the data here, ignored in this example */
   (void)data;
   (void)userp;
-  return n*l;
+  return n * l;
 }
 
 int main(void)
@@ -41,7 +41,8 @@ int main(void)
   FETCH *fetch;
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     FETCHcode res;
     struct fetch_header *header;
     fetch_easy_setopt(fetch, FETCHOPT_URL, "https://example.com");
@@ -54,25 +55,25 @@ int main(void)
     /* Perform the request, res gets the return code */
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK)
+    if (res != FETCHE_OK)
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
 
-    if(FETCHHE_OK == fetch_easy_header(fetch, "Content-Type", 0, FETCHH_HEADER,
-                                     -1, &header))
+    if (FETCHHE_OK == fetch_easy_header(fetch, "Content-Type", 0, FETCHH_HEADER,
+                                        -1, &header))
       printf("Got content-type: %s\n", header->value);
 
     printf("All server headers:\n");
     {
       struct fetch_header *h;
       struct fetch_header *prev = NULL;
-      do {
+      do
+      {
         h = fetch_easy_nextheader(fetch, FETCHH_HEADER, -1, prev);
-        if(h)
+        if (h)
           printf(" %s: %s (%u)\n", h->name, h->value, (int)h->amount);
         prev = h;
-      } while(h);
-
+      } while (h);
     }
     /* always cleanup */
     fetch_easy_cleanup(fetch);

@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4201)
+#pragma warning(disable : 4201)
 #endif
 #include <subauth.h>
 #ifdef _MSC_VER
@@ -69,18 +69,18 @@
  * (and only here).
  */
 #if defined(OPENSSL_IS_BORINGSSL)
-# undef X509_NAME
-# undef X509_CERT_PAIR
-# undef X509_EXTENSIONS
+#undef X509_NAME
+#undef X509_CERT_PAIR
+#undef X509_EXTENSIONS
 #endif
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 
 FETCHcode Curl_verify_host(struct Curl_cfilter *cf,
-                          struct Curl_easy *data);
+                           struct Curl_easy *data);
 
 FETCHcode Curl_verify_certificate(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data);
+                                  struct Curl_easy *data);
 
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_FETCH_SCHANNEL_H */

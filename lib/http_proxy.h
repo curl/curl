@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,23 +30,24 @@
 
 #include "urldata.h"
 
-enum Curl_proxy_use {
-  HEADER_SERVER,  /* direct to server */
-  HEADER_PROXY,   /* regular request to proxy */
-  HEADER_CONNECT  /* sending CONNECT to a proxy */
+enum Curl_proxy_use
+{
+  HEADER_SERVER, /* direct to server */
+  HEADER_PROXY,  /* regular request to proxy */
+  HEADER_CONNECT /* sending CONNECT to a proxy */
 };
 
 FETCHcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
-                                         const char **phostname,
-                                         int *pport, bool *pipv6_ip);
+                                          const char **phostname,
+                                          int *pport, bool *pipv6_ip);
 
 FETCHcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
-                                        struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        int http_version_major);
+                                         struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         int http_version_major);
 
 /* Default proxy timeout in milliseconds */
-#define PROXY_TIMEOUT (3600*1000)
+#define PROXY_TIMEOUT (3600 * 1000)
 
 void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
@@ -55,13 +56,13 @@ void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
                                  int *pport);
 
 FETCHcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                         struct Curl_easy *data);
+                                          struct Curl_easy *data);
 
 extern struct Curl_cftype Curl_cft_http_proxy;
 
 #endif /* !FETCH_DISABLE_PROXY  && !FETCH_DISABLE_HTTP */
 
-#define IS_HTTPS_PROXY(t) (((t) == FETCHPROXY_HTTPS) ||  \
+#define IS_HTTPS_PROXY(t) (((t) == FETCHPROXY_HTTPS) || \
                            ((t) == FETCHPROXY_HTTPS2))
 
 #endif /* HEADER_FETCH_HTTP_PROXY_H */

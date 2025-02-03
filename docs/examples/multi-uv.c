@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,24 +40,26 @@
 #include <fetch/fetch.h>
 
 /* object to pass to the callbacks */
-struct datauv {
+struct datauv
+{
   uv_timer_t timeout;
   uv_loop_t *loop;
   FETCHM *multi;
 };
 
-typedef struct fetch_context_s {
+typedef struct fetch_context_s
+{
   uv_poll_t poll_handle;
   fetch_socket_t sockfd;
   struct datauv *uv;
 } fetch_context_t;
 
 static fetch_context_t *create_fetch_context(fetch_socket_t sockfd,
-                                           struct datauv *uv)
+                                             struct datauv *uv)
 {
   fetch_context_t *context;
 
-  context = (fetch_context_t *) malloc(sizeof(*context));
+  context = (fetch_context_t *)malloc(sizeof(*context));
 
   context->sockfd = sockfd;
   context->uv = uv;
@@ -70,13 +72,13 @@ static fetch_context_t *create_fetch_context(fetch_socket_t sockfd,
 
 static void fetch_close_cb(uv_handle_t *handle)
 {
-  fetch_context_t *context = (fetch_context_t *) handle->data;
+  fetch_context_t *context = (fetch_context_t *)handle->data;
   free(context);
 }
 
 static void destroy_fetch_context(fetch_context_t *context)
 {
-  uv_close((uv_handle_t *) &context->poll_handle, fetch_close_cb);
+  uv_close((uv_handle_t *)&context->poll_handle, fetch_close_cb);
 }
 
 static void add_download(const char *url, int num, FETCHM *multi)
@@ -88,7 +90,8 @@ static void add_download(const char *url, int num, FETCHM *multi)
   snprintf(filename, 50, "%d.download", num);
 
   file = fopen(filename, "wb");
-  if(!file) {
+  if (!file)
+  {
     fprintf(stderr, "Error opening %s\n", filename);
     return;
   }
@@ -109,8 +112,10 @@ static void check_multi_info(fetch_context_t *context)
   FETCH *easy_handle;
   FILE *file;
 
-  while((message = fetch_multi_info_read(context->uv->multi, &pending))) {
-    switch(message->msg) {
+  while ((message = fetch_multi_info_read(context->uv->multi, &pending)))
+  {
+    switch (message->msg)
+    {
     case FETCHMSG_DONE:
       /* Do not use message data after calling fetch_multi_remove_handle() and
          fetch_easy_cleanup(). As per fetch_multi_info_read() docs:
@@ -125,7 +130,8 @@ static void check_multi_info(fetch_context_t *context)
 
       fetch_multi_remove_handle(context->uv->multi, easy_handle);
       fetch_easy_cleanup(easy_handle);
-      if(file) {
+      if (file)
+      {
         fclose(file);
       }
       break;
@@ -142,26 +148,27 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 {
   int running_handles;
   int flags = 0;
-  fetch_context_t *context = (fetch_context_t *) req->data;
+  fetch_context_t *context = (fetch_context_t *)req->data;
   (void)status;
-  if(events & UV_READABLE)
+  if (events & UV_READABLE)
     flags |= FETCH_CSELECT_IN;
-  if(events & UV_WRITABLE)
+  if (events & UV_WRITABLE)
     flags |= FETCH_CSELECT_OUT;
 
   fetch_multi_socket_action(context->uv->multi, context->sockfd, flags,
-                           &running_handles);
+                            &running_handles);
   check_multi_info(context);
 }
 
 /* callback from libuv when timeout expires */
 static void on_uv_timeout(uv_timer_t *req)
 {
-  fetch_context_t *context = (fetch_context_t *) req->data;
-  if(context) {
+  fetch_context_t *context = (fetch_context_t *)req->data;
+  if (context)
+  {
     int running_handles;
     fetch_multi_socket_action(context->uv->multi, FETCH_SOCKET_TIMEOUT, 0,
-                             &running_handles);
+                              &running_handles);
     check_multi_info(context);
   }
 }
@@ -171,10 +178,11 @@ static int cb_timeout(FETCHM *multi, long timeout_ms,
                       struct datauv *uv)
 {
   (void)multi;
-  if(timeout_ms < 0)
+  if (timeout_ms < 0)
     uv_timer_stop(&uv->timeout);
-  else {
-    if(timeout_ms == 0)
+  else
+  {
+    if (timeout_ms == 0)
       timeout_ms = 1; /* 0 means call fetch_multi_socket_action asap but NOT
                          within the callback itself */
     uv_timer_start(&uv->timeout, on_uv_timeout, (uint64_t)timeout_ms,
@@ -192,26 +200,27 @@ static int cb_socket(FETCH *easy, fetch_socket_t s, int action,
   int events = 0;
   (void)easy;
 
-  switch(action) {
+  switch (action)
+  {
   case FETCH_POLL_IN:
   case FETCH_POLL_OUT:
   case FETCH_POLL_INOUT:
-    fetch_context = socketp ?
-      (fetch_context_t *) socketp : create_fetch_context(s, uv);
+    fetch_context = socketp ? (fetch_context_t *)socketp : create_fetch_context(s, uv);
 
-    fetch_multi_assign(uv->multi, s, (void *) fetch_context);
+    fetch_multi_assign(uv->multi, s, (void *)fetch_context);
 
-    if(action != FETCH_POLL_IN)
+    if (action != FETCH_POLL_IN)
       events |= UV_WRITABLE;
-    if(action != FETCH_POLL_OUT)
+    if (action != FETCH_POLL_OUT)
       events |= UV_READABLE;
 
     uv_poll_start(&fetch_context->poll_handle, events, on_uv_socket);
     break;
   case FETCH_POLL_REMOVE:
-    if(socketp) {
-      uv_poll_stop(&((fetch_context_t*)socketp)->poll_handle);
-      destroy_fetch_context((fetch_context_t*) socketp);
+    if (socketp)
+    {
+      uv_poll_stop(&((fetch_context_t *)socketp)->poll_handle);
+      destroy_fetch_context((fetch_context_t *)socketp);
       fetch_multi_assign(uv->multi, s, NULL);
     }
     break;
@@ -224,10 +233,10 @@ static int cb_socket(FETCH *easy, fetch_socket_t s, int action,
 
 int main(int argc, char **argv)
 {
-  struct datauv uv = { 0 };
+  struct datauv uv = {0};
   int running_handles;
 
-  if(argc <= 1)
+  if (argc <= 1)
     return 0;
 
   fetch_global_init(FETCH_GLOBAL_ALL);
@@ -241,7 +250,8 @@ int main(int argc, char **argv)
   fetch_multi_setopt(uv.multi, FETCHMOPT_TIMERFUNCTION, cb_timeout);
   fetch_multi_setopt(uv.multi, FETCHMOPT_TIMERDATA, &uv);
 
-  while(argc-- > 1) {
+  while (argc-- > 1)
+  {
     add_download(argv[argc], argc, uv.multi);
   }
 

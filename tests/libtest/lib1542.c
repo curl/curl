@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,11 +54,11 @@ FETCHcode test(char *URL)
   easy_setopt(easy, FETCHOPT_VERBOSE, 1L);
 
   res = fetch_easy_perform(easy);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   res = fetch_easy_perform(easy);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   /* FETCHOPT_MAXLIFETIME_CONN is inclusive - the connection needs to be 2
@@ -66,13 +66,13 @@ FETCHcode test(char *URL)
   sleep(2);
 
   res = fetch_easy_perform(easy);
-  if(res)
+  if (res)
     goto test_cleanup;
 
   easy_setopt(easy, FETCHOPT_MAXLIFETIME_CONN, 1L);
 
   res = fetch_easy_perform(easy);
-  if(res)
+  if (res)
     goto test_cleanup;
 
 test_cleanup:

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,7 @@ long timediff(struct timeval newer, struct timeval older);
 
 #define TEST_DATA_PATH "%s/data/test%ld"
 #define ALTTEST_DATA_PATH "%s/test%ld"
-#define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
+#define SERVERLOGS_LOCKDIR "lock" /* within logdir */
 
 /* global variable, where to find the 'data' dir */
 extern const char *path;
@@ -45,7 +45,7 @@ extern const char *cmdfile;
 #include <process.h>
 #include <fcntl.h>
 
-#define sleep(sec) Sleep ((sec)*1000)
+#define sleep(sec) Sleep((sec) * 1000)
 
 #undef perror
 #define perror(m) win32_perror(m)
@@ -54,10 +54,10 @@ void win32_perror(const char *msg);
 void win32_init(void);
 void win32_cleanup(void);
 const char *sstrerror(int err);
-#else   /* _WIN32 */
+#else /* _WIN32 */
 
 #define sstrerror(e) strerror(e)
-#endif  /* _WIN32 */
+#endif /* _WIN32 */
 
 /* fopens the test case file */
 FILE *test2fopen(long testno, const char *logdir);
@@ -89,10 +89,10 @@ void restore_signal_handlers(bool keep_sigalrm);
 
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
-#endif /* HAVE_SYS_UN_H */
+#endif              /* HAVE_SYS_UN_H */
 
 int bind_unix_socket(fetch_socket_t sock, const char *unix_socket,
-        struct sockaddr_un *sau);
-#endif  /* USE_UNIX_SOCKETS */
+                     struct sockaddr_un *sau);
+#endif /* USE_UNIX_SOCKETS */
 
-#endif  /* HEADER_FETCH_SERVER_UTIL_H */
+#endif /* HEADER_FETCH_SERVER_UTIL_H */

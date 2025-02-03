@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,17 +28,18 @@
 
 #include "fetch_ctype.h"
 
-enum urlreject {
+enum urlreject
+{
   REJECT_NADA = 2,
   REJECT_CTRL,
   REJECT_ZERO
 };
 
 FETCHcode Curl_urldecode(const char *string, size_t length,
-                        char **ostring, size_t *olen,
-                        enum urlreject ctrl);
+                         char **ostring, size_t *olen,
+                         enum urlreject ctrl);
 
 void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
-                    unsigned char *out, size_t olen); /* output buffer size */
+                    unsigned char *out, size_t olen);     /* output buffer size */
 
 #endif /* HEADER_FETCH_ESCAPE_H */

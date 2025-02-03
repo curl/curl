@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -35,24 +35,24 @@
 
 #include <fetch/mprintf.h>
 
-#define MERR_OK        0
-#define MERR_MEM       1
+#define MERR_OK 0
+#define MERR_MEM 1
 #define MERR_TOO_LARGE 2
 
-# undef printf
-# undef fprintf
-# undef msnprintf
-# undef vprintf
-# undef vfprintf
-# undef mvsnprintf
-# undef aprintf
-# undef vaprintf
-# define printf fetch_mprintf
-# define fprintf fetch_mfprintf
-# define msnprintf fetch_msnprintf
-# define vprintf fetch_mvprintf
-# define vfprintf fetch_mvfprintf
-# define mvsnprintf fetch_mvsnprintf
-# define aprintf fetch_maprintf
-# define vaprintf fetch_mvaprintf
+#undef printf
+#undef fprintf
+#undef msnprintf
+#undef vprintf
+#undef vfprintf
+#undef mvsnprintf
+#undef aprintf
+#undef vaprintf
+#define printf fetch_mprintf
+#define fprintf fetch_mfprintf
+#define msnprintf fetch_msnprintf
+#define vprintf fetch_mvprintf
+#define vfprintf fetch_mvfprintf
+#define mvsnprintf fetch_mvsnprintf
+#define aprintf fetch_maprintf
+#define vaprintf fetch_mvaprintf
 #endif /* HEADER_FETCH_PRINTF_H */

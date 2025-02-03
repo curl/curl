@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,11 +37,13 @@
 
 void clean_getout(struct OperationConfig *config)
 {
-  if(config) {
+  if (config)
+  {
     struct getout *next;
     struct getout *node = config->url_list;
 
-    while(node) {
+    while (node)
+    {
       next = node->next;
       Curl_safefree(node->url);
       Curl_safefree(node->outfile);
@@ -56,10 +58,10 @@ void clean_getout(struct OperationConfig *config)
 
 bool output_expected(const char *url, const char *uploadfile)
 {
-  if(!uploadfile)
-    return TRUE;  /* download */
-  if(checkprefix("http://", url) || checkprefix("https://", url))
-    return TRUE;   /* HTTP(S) upload */
+  if (!uploadfile)
+    return TRUE; /* download */
+  if (checkprefix("http://", url) || checkprefix("https://", url))
+    return TRUE; /* HTTP(S) upload */
 
   return FALSE; /* non-HTTP upload, probably no output should be expected */
 }
@@ -72,13 +74,13 @@ bool stdin_upload(const char *uploadfile)
 /* Convert a FETCHUcode into a FETCHcode */
 FETCHcode urlerr_cvt(FETCHUcode ucode)
 {
-  if(ucode == FETCHUE_OUT_OF_MEMORY)
+  if (ucode == FETCHUE_OUT_OF_MEMORY)
     return FETCHE_OUT_OF_MEMORY;
-  else if(ucode == FETCHUE_UNSUPPORTED_SCHEME)
+  else if (ucode == FETCHUE_UNSUPPORTED_SCHEME)
     return FETCHE_UNSUPPORTED_PROTOCOL;
-  else if(ucode == FETCHUE_LACKS_IDN)
+  else if (ucode == FETCHUE_LACKS_IDN)
     return FETCHE_NOT_BUILT_IN;
-  else if(ucode == FETCHUE_BAD_HANDLE)
+  else if (ucode == FETCHUE_BAD_HANDLE)
     return FETCHE_BAD_FUNCTION_ARGUMENT;
   return FETCHE_URL_MALFORMAT;
 }
@@ -94,28 +96,33 @@ FETCHcode add_file_name_to_url(FETCH *fetch, char **inurlp, const char *filename
   FETCHU *uh = fetch_url();
   char *path = NULL;
   char *query = NULL;
-  if(uh) {
+  if (uh)
+  {
     char *ptr;
     uerr = fetch_url_set(uh, FETCHUPART_URL, *inurlp,
-                    FETCHU_GUESS_SCHEME|FETCHU_NON_SUPPORT_SCHEME);
-    if(uerr) {
+                         FETCHU_GUESS_SCHEME | FETCHU_NON_SUPPORT_SCHEME);
+    if (uerr)
+    {
       result = urlerr_cvt(uerr);
       goto fail;
     }
     uerr = fetch_url_get(uh, FETCHUPART_PATH, &path, 0);
-    if(uerr) {
+    if (uerr)
+    {
       result = urlerr_cvt(uerr);
       goto fail;
     }
     uerr = fetch_url_get(uh, FETCHUPART_QUERY, &query, 0);
-    if(!uerr && query) {
+    if (!uerr && query)
+    {
       fetch_free(query);
       fetch_free(path);
       fetch_url_cleanup(uh);
       return FETCHE_OK;
     }
     ptr = strrchr(path, '/');
-    if(!ptr || !*++ptr) {
+    if (!ptr || !*++ptr)
+    {
       /* The URL path has no filename part, add the local filename. In order
          to be able to do so, we have to create a new URL in another buffer.*/
 
@@ -125,19 +132,20 @@ FETCHcode add_file_name_to_url(FETCH *fetch, char **inurlp, const char *filename
       char *file2 = strrchr(filep ? filep : filename, '\\');
       char *encfile;
 
-      if(file2)
+      if (file2)
         filep = file2 + 1;
-      else if(filep)
+      else if (filep)
         filep++;
       else
         filep = filename;
 
       /* URL encode the filename */
       encfile = fetch_easy_escape(fetch, filep, 0 /* use strlen */);
-      if(encfile) {
+      if (encfile)
+      {
         char *newpath;
         char *newurl;
-        if(ptr)
+        if (ptr)
           /* there is a trailing slash on the path */
           newpath = aprintf("%s%s", path, encfile);
         else
@@ -146,16 +154,18 @@ FETCHcode add_file_name_to_url(FETCH *fetch, char **inurlp, const char *filename
 
         fetch_free(encfile);
 
-        if(!newpath)
+        if (!newpath)
           goto fail;
         uerr = fetch_url_set(uh, FETCHUPART_PATH, newpath, 0);
         free(newpath);
-        if(uerr) {
+        if (uerr)
+        {
           result = urlerr_cvt(uerr);
           goto fail;
         }
         uerr = fetch_url_get(uh, FETCHUPART_URL, &newurl, FETCHU_DEFAULT_SCHEME);
-        if(uerr) {
+        if (uerr)
+        {
           result = urlerr_cvt(uerr);
           goto fail;
         }
@@ -179,41 +189,46 @@ fail:
  * no name part, at location indicated by first argument.
  */
 FETCHcode get_url_file_name(struct GlobalConfig *global,
-                           char **filename, const char *url)
+                            char **filename, const char *url)
 {
   FETCHU *uh = fetch_url();
   char *path = NULL;
   FETCHUcode uerr;
 
-  if(!uh)
+  if (!uh)
     return FETCHE_OUT_OF_MEMORY;
 
   *filename = NULL;
 
   uerr = fetch_url_set(uh, FETCHUPART_URL, url, FETCHU_GUESS_SCHEME);
-  if(!uerr) {
+  if (!uerr)
+  {
     uerr = fetch_url_get(uh, FETCHUPART_PATH, &path, 0);
     fetch_url_cleanup(uh);
     uh = NULL;
-    if(!uerr) {
+    if (!uerr)
+    {
       int i;
       char *pc = NULL, *pc2 = NULL;
-      for(i = 0; i < 2; i++) {
+      for (i = 0; i < 2; i++)
+      {
         pc = strrchr(path, '/');
         pc2 = strrchr(pc ? pc + 1 : path, '\\');
-        if(pc2)
+        if (pc2)
           pc = pc2;
-        if(pc && !pc[1] && !i) {
+        if (pc && !pc[1] && !i)
+        {
           /* if the path ends with slash, try removing the trailing one
              and get the last directory part */
           *pc = 0;
         }
       }
 
-      if(pc)
+      if (pc)
         /* duplicate the string beyond the slash */
         pc++;
-      else {
+      else
+      {
         /* no slash => empty string, use default */
         pc = (char *)"fetch_response";
         warnf(global, "No remote file name, uses \"%s\"", pc);
@@ -221,7 +236,7 @@ FETCHcode get_url_file_name(struct GlobalConfig *global,
 
       *filename = strdup(pc);
       fetch_free(path);
-      if(!*filename)
+      if (!*filename)
         return FETCHE_OUT_OF_MEMORY;
 
 #if defined(_WIN32) || defined(MSDOS)
@@ -229,8 +244,9 @@ FETCHcode get_url_file_name(struct GlobalConfig *global,
         char *sanitized;
         SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
         Curl_safefree(*filename);
-        if(sc) {
-          if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+        if (sc)
+        {
+          if (sc == SANITIZE_ERR_OUT_OF_MEMORY)
             return FETCHE_OUT_OF_MEMORY;
           return FETCHE_URL_MALFORMAT;
         }

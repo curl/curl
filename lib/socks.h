@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,9 +27,9 @@
 #include "fetch_setup.h"
 
 #ifdef FETCH_DISABLE_PROXY
-#define Curl_SOCKS4(a,b,c,d,e) FETCHE_NOT_BUILT_IN
-#define Curl_SOCKS5(a,b,c,d,e,f) FETCHE_NOT_BUILT_IN
-#define Curl_SOCKS_getsock(x,y,z) 0
+#define Curl_SOCKS4(a, b, c, d, e) FETCHE_NOT_BUILT_IN
+#define Curl_SOCKS5(a, b, c, d, e, f) FETCHE_NOT_BUILT_IN
+#define Curl_SOCKS_getsock(x, y, z) 0
 #else
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it
@@ -48,14 +48,14 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
  * This function handles the SOCKS5 GSS-API negotiation and initialization
  */
 FETCHcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data);
+                                       struct Curl_easy *data);
 #endif
 
 FETCHcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                          struct Curl_easy *data);
+                                           struct Curl_easy *data);
 
 extern struct Curl_cftype Curl_cft_socks_proxy;
 
 #endif /* FETCH_DISABLE_PROXY */
 
-#endif  /* HEADER_FETCH_SOCKS_H */
+#endif /* HEADER_FETCH_SOCKS_H */

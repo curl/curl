@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -48,7 +48,6 @@ struct Curl_easy;
 #include "fetch_memory.h"
 #include "memdebug.h"
 
-
 #define HTTPPOST_PTRNAME FETCH_HTTPPOST_PTRNAME
 #define HTTPPOST_FILENAME FETCH_HTTPPOST_FILENAME
 #define HTTPPOST_PTRCONTENTS FETCH_HTTPPOST_PTRCONTENTS
@@ -80,13 +79,14 @@ AddHttpPost(char *name, size_t namelength,
             struct fetch_httppost **last_post)
 {
   struct fetch_httppost *post;
-  if(!namelength && name)
+  if (!namelength && name)
     namelength = strlen(name);
-  if((bufferlength > LONG_MAX) || (namelength > LONG_MAX))
+  if ((bufferlength > LONG_MAX) || (namelength > LONG_MAX))
     /* avoid overflow in typecasts below */
     return NULL;
   post = calloc(1, sizeof(struct fetch_httppost));
-  if(post) {
+  if (post)
+  {
     post->name = name;
     post->namelength = (long)namelength;
     post->contents = value;
@@ -102,16 +102,18 @@ AddHttpPost(char *name, size_t namelength,
   else
     return NULL;
 
-  if(parent_post) {
+  if (parent_post)
+  {
     /* now, point our 'more' to the original 'more' */
     post->more = parent_post->more;
 
     /* then move the original 'more' to point to ourselves */
     parent_post->more = post;
   }
-  else {
+  else
+  {
     /* make the previous point to this */
-    if(*last_post)
+    if (*last_post)
       (*last_post)->next = post;
     else
       (*httppost) = post;
@@ -137,15 +139,16 @@ static struct FormInfo *AddFormInfo(char *value,
 {
   struct FormInfo *form_info;
   form_info = calloc(1, sizeof(struct FormInfo));
-  if(!form_info)
+  if (!form_info)
     return NULL;
-  if(value)
+  if (value)
     form_info->value = value;
-  if(contenttype)
+  if (contenttype)
     form_info->contenttype = contenttype;
   form_info->flags = HTTPPOST_FILENAME;
 
-  if(parent_form_info) {
+  if (parent_form_info)
+  {
     /* now, point our 'more' to the original 'more' */
     form_info->more = parent_form_info->more;
 
@@ -205,10 +208,9 @@ static struct FormInfo *AddFormInfo(char *value,
  *
  ***************************************************************************/
 
-static
-FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
-                     struct fetch_httppost **last_post,
-                     va_list params)
+static FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
+                             struct fetch_httppost **last_post,
+                             va_list params)
 {
   struct FormInfo *first_form, *current_form, *form = NULL;
   FETCHFORMcode return_value = FETCH_FORMADD_OK;
@@ -227,7 +229,7 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
    * We need to allocate the first struct to fill in.
    */
   first_form = calloc(1, sizeof(struct FormInfo));
-  if(!first_form)
+  if (!first_form)
     return FETCH_FORMADD_MEMORY;
 
   current_form = first_form;
@@ -235,38 +237,44 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
   /*
    * Loop through all the options set. Break if we have an error to report.
    */
-  while(return_value == FETCH_FORMADD_OK) {
+  while (return_value == FETCH_FORMADD_OK)
+  {
 
     /* first see if we have more parts of the array param */
-    if(array_state && forms) {
+    if (array_state && forms)
+    {
       /* get the upcoming option from the given array */
       option = forms->option;
       array_value = (char *)forms->value;
 
       forms++; /* advance this to next entry */
-      if(FETCHFORM_END == option) {
+      if (FETCHFORM_END == option)
+      {
         /* end of array state */
         array_state = FALSE;
         continue;
       }
     }
-    else {
+    else
+    {
       /* This is not array-state, get next option. This gets an 'int' with
          va_arg() because FETCHformoption might be a smaller type than int and
          might cause compiler warnings and wrong behavior. */
       option = (FETCHformoption)va_arg(params, int);
-      if(FETCHFORM_END == option)
+      if (FETCHFORM_END == option)
         break;
     }
 
-    switch(option) {
+    switch (option)
+    {
     case FETCHFORM_ARRAY:
-      if(array_state)
+      if (array_state)
         /* we do not support an array from within an array */
         return_value = FETCH_FORMADD_ILLEGAL_ARRAY;
-      else {
+      else
+      {
         forms = va_arg(params, struct fetch_forms *);
-        if(forms)
+        if (forms)
           array_state = TRUE;
         else
           return_value = FETCH_FORMADD_NULL;
@@ -281,23 +289,23 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
 
       FALLTHROUGH();
     case FETCHFORM_COPYNAME:
-      if(current_form->name)
+      if (current_form->name)
         return_value = FETCH_FORMADD_OPTION_TWICE;
-      else {
-        char *name = array_state ?
-          array_value : va_arg(params, char *);
-        if(name)
+      else
+      {
+        char *name = array_state ? array_value : va_arg(params, char *);
+        if (name)
           current_form->name = name; /* store for the moment */
         else
           return_value = FETCH_FORMADD_NULL;
       }
       break;
     case FETCHFORM_NAMELENGTH:
-      if(current_form->namelength)
+      if (current_form->namelength)
         return_value = FETCH_FORMADD_OPTION_TWICE;
       else
         current_form->namelength =
-          array_state ? (size_t)array_value : (size_t)va_arg(params, long);
+            array_state ? (size_t)array_value : (size_t)va_arg(params, long);
       break;
 
       /*
@@ -307,12 +315,13 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
       current_form->flags |= HTTPPOST_PTRCONTENTS;
       FALLTHROUGH();
     case FETCHFORM_COPYCONTENTS:
-      if(current_form->value)
+      if (current_form->value)
         return_value = FETCH_FORMADD_OPTION_TWICE;
-      else {
+      else
+      {
         char *value =
-          array_state ? array_value : va_arg(params, char *);
-        if(value)
+            array_state ? array_value : va_arg(params, char *);
+        if (value)
           current_form->value = value; /* store for the moment */
         else
           return_value = FETCH_FORMADD_NULL;
@@ -320,28 +329,29 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
       break;
     case FETCHFORM_CONTENTSLENGTH:
       current_form->contentslength =
-        array_state ? (size_t)array_value : (size_t)va_arg(params, long);
+          array_state ? (size_t)array_value : (size_t)va_arg(params, long);
       break;
 
     case FETCHFORM_CONTENTLEN:
       current_form->flags |= FETCH_HTTPPOST_LARGE;
       current_form->contentslength =
-        array_state ? (fetch_off_t)(size_t)array_value :
-        va_arg(params, fetch_off_t);
+          array_state ? (fetch_off_t)(size_t)array_value : va_arg(params, fetch_off_t);
       break;
 
       /* Get contents from a given filename */
     case FETCHFORM_FILECONTENT:
-      if(current_form->flags & (HTTPPOST_PTRCONTENTS|HTTPPOST_READFILE))
+      if (current_form->flags & (HTTPPOST_PTRCONTENTS | HTTPPOST_READFILE))
         return_value = FETCH_FORMADD_OPTION_TWICE;
-      else {
-        const char *filename = array_state ?
-          array_value : va_arg(params, char *);
-        if(filename) {
+      else
+      {
+        const char *filename = array_state ? array_value : va_arg(params, char *);
+        if (filename)
+        {
           current_form->value = strdup(filename);
-          if(!current_form->value)
+          if (!current_form->value)
             return_value = FETCH_FORMADD_MEMORY;
-          else {
+          else
+          {
             current_form->flags |= HTTPPOST_READFILE;
             current_form->value_alloc = TRUE;
           }
@@ -353,62 +363,72 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
 
       /* We upload a file */
     case FETCHFORM_FILE:
-      {
-        const char *filename = array_state ? array_value :
-          va_arg(params, char *);
+    {
+      const char *filename = array_state ? array_value : va_arg(params, char *);
 
-        if(current_form->value) {
-          if(current_form->flags & HTTPPOST_FILENAME) {
-            if(filename) {
-              char *fname = strdup(filename);
-              if(!fname)
-                return_value = FETCH_FORMADD_MEMORY;
-              else {
-                form = AddFormInfo(fname, NULL, current_form);
-                if(!form) {
-                  free(fname);
-                  return_value = FETCH_FORMADD_MEMORY;
-                }
-                else {
-                  form->value_alloc = TRUE;
-                  current_form = form;
-                  form = NULL;
-                }
-              }
-            }
-            else
-              return_value = FETCH_FORMADD_NULL;
-          }
-          else
-            return_value = FETCH_FORMADD_OPTION_TWICE;
-        }
-        else {
-          if(filename) {
-            current_form->value = strdup(filename);
-            if(!current_form->value)
+      if (current_form->value)
+      {
+        if (current_form->flags & HTTPPOST_FILENAME)
+        {
+          if (filename)
+          {
+            char *fname = strdup(filename);
+            if (!fname)
               return_value = FETCH_FORMADD_MEMORY;
-            else {
-              current_form->flags |= HTTPPOST_FILENAME;
-              current_form->value_alloc = TRUE;
+            else
+            {
+              form = AddFormInfo(fname, NULL, current_form);
+              if (!form)
+              {
+                free(fname);
+                return_value = FETCH_FORMADD_MEMORY;
+              }
+              else
+              {
+                form->value_alloc = TRUE;
+                current_form = form;
+                form = NULL;
+              }
             }
           }
           else
             return_value = FETCH_FORMADD_NULL;
         }
-        break;
+        else
+          return_value = FETCH_FORMADD_OPTION_TWICE;
       }
+      else
+      {
+        if (filename)
+        {
+          current_form->value = strdup(filename);
+          if (!current_form->value)
+            return_value = FETCH_FORMADD_MEMORY;
+          else
+          {
+            current_form->flags |= HTTPPOST_FILENAME;
+            current_form->value_alloc = TRUE;
+          }
+        }
+        else
+          return_value = FETCH_FORMADD_NULL;
+      }
+      break;
+    }
 
     case FETCHFORM_BUFFERPTR:
-      current_form->flags |= HTTPPOST_PTRBUFFER|HTTPPOST_BUFFER;
-      if(current_form->buffer)
+      current_form->flags |= HTTPPOST_PTRBUFFER | HTTPPOST_BUFFER;
+      if (current_form->buffer)
         return_value = FETCH_FORMADD_OPTION_TWICE;
-      else {
+      else
+      {
         char *buffer =
-          array_state ? array_value : va_arg(params, char *);
-        if(buffer) {
+            array_state ? array_value : va_arg(params, char *);
+        if (buffer)
+        {
           current_form->buffer = buffer; /* store for the moment */
-          current_form->value = buffer; /* make it non-NULL to be accepted
-                                           as fine */
+          current_form->value = buffer;  /* make it non-NULL to be accepted
+                                            as fine */
         }
         else
           return_value = FETCH_FORMADD_NULL;
@@ -416,21 +436,23 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
       break;
 
     case FETCHFORM_BUFFERLENGTH:
-      if(current_form->bufferlength)
+      if (current_form->bufferlength)
         return_value = FETCH_FORMADD_OPTION_TWICE;
       else
         current_form->bufferlength =
-          array_state ? (size_t)array_value : (size_t)va_arg(params, long);
+            array_state ? (size_t)array_value : (size_t)va_arg(params, long);
       break;
 
     case FETCHFORM_STREAM:
       current_form->flags |= HTTPPOST_CALLBACK;
-      if(current_form->userp)
+      if (current_form->userp)
         return_value = FETCH_FORMADD_OPTION_TWICE;
-      else {
+      else
+      {
         char *userp =
-          array_state ? array_value : va_arg(params, char *);
-        if(userp) {
+            array_state ? array_value : va_arg(params, char *);
+        if (userp)
+        {
           current_form->userp = userp;
           current_form->value = userp; /* this is not strictly true but we
                                           derive a value from this later on
@@ -443,190 +465,211 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
       break;
 
     case FETCHFORM_CONTENTTYPE:
-      {
-        const char *contenttype =
+    {
+      const char *contenttype =
           array_state ? array_value : va_arg(params, char *);
-        if(current_form->contenttype) {
-          if(current_form->flags & HTTPPOST_FILENAME) {
-            if(contenttype) {
-              char *type = strdup(contenttype);
-              if(!type)
-                return_value = FETCH_FORMADD_MEMORY;
-              else {
-                form = AddFormInfo(NULL, type, current_form);
-                if(!form) {
-                  free(type);
-                  return_value = FETCH_FORMADD_MEMORY;
-                }
-                else {
-                  form->contenttype_alloc = TRUE;
-                  current_form = form;
-                  form = NULL;
-                }
-              }
-            }
-            else
-              return_value = FETCH_FORMADD_NULL;
-          }
-          else
-            return_value = FETCH_FORMADD_OPTION_TWICE;
-        }
-        else {
-          if(contenttype) {
-            current_form->contenttype = strdup(contenttype);
-            if(!current_form->contenttype)
+      if (current_form->contenttype)
+      {
+        if (current_form->flags & HTTPPOST_FILENAME)
+        {
+          if (contenttype)
+          {
+            char *type = strdup(contenttype);
+            if (!type)
               return_value = FETCH_FORMADD_MEMORY;
             else
-              current_form->contenttype_alloc = TRUE;
+            {
+              form = AddFormInfo(NULL, type, current_form);
+              if (!form)
+              {
+                free(type);
+                return_value = FETCH_FORMADD_MEMORY;
+              }
+              else
+              {
+                form->contenttype_alloc = TRUE;
+                current_form = form;
+                form = NULL;
+              }
+            }
           }
           else
             return_value = FETCH_FORMADD_NULL;
         }
-        break;
-      }
-    case FETCHFORM_CONTENTHEADER:
-      {
-        /* this "cast increases required alignment of target type" but
-           we consider it OK anyway */
-        struct fetch_slist *list = array_state ?
-          (struct fetch_slist *)(void *)array_value :
-          va_arg(params, struct fetch_slist *);
-
-        if(current_form->contentheader)
-          return_value = FETCH_FORMADD_OPTION_TWICE;
         else
-          current_form->contentheader = list;
-
-        break;
-      }
-    case FETCHFORM_FILENAME:
-    case FETCHFORM_BUFFER:
-      {
-        const char *filename = array_state ? array_value :
-          va_arg(params, char *);
-        if(current_form->showfilename)
           return_value = FETCH_FORMADD_OPTION_TWICE;
-        else {
-          current_form->showfilename = strdup(filename);
-          if(!current_form->showfilename)
+      }
+      else
+      {
+        if (contenttype)
+        {
+          current_form->contenttype = strdup(contenttype);
+          if (!current_form->contenttype)
             return_value = FETCH_FORMADD_MEMORY;
           else
-            current_form->showfilename_alloc = TRUE;
+            current_form->contenttype_alloc = TRUE;
         }
-        break;
+        else
+          return_value = FETCH_FORMADD_NULL;
       }
+      break;
+    }
+    case FETCHFORM_CONTENTHEADER:
+    {
+      /* this "cast increases required alignment of target type" but
+         we consider it OK anyway */
+      struct fetch_slist *list = array_state ? (struct fetch_slist *)(void *)array_value : va_arg(params, struct fetch_slist *);
+
+      if (current_form->contentheader)
+        return_value = FETCH_FORMADD_OPTION_TWICE;
+      else
+        current_form->contentheader = list;
+
+      break;
+    }
+    case FETCHFORM_FILENAME:
+    case FETCHFORM_BUFFER:
+    {
+      const char *filename = array_state ? array_value : va_arg(params, char *);
+      if (current_form->showfilename)
+        return_value = FETCH_FORMADD_OPTION_TWICE;
+      else
+      {
+        current_form->showfilename = strdup(filename);
+        if (!current_form->showfilename)
+          return_value = FETCH_FORMADD_MEMORY;
+        else
+          current_form->showfilename_alloc = TRUE;
+      }
+      break;
+    }
     default:
       return_value = FETCH_FORMADD_UNKNOWN_OPTION;
       break;
     }
   }
 
-  if(FETCH_FORMADD_OK != return_value) {
+  if (FETCH_FORMADD_OK != return_value)
+  {
     /* On error, free allocated fields for all nodes of the FormInfo linked
        list without deallocating nodes. List nodes are deallocated later on */
     struct FormInfo *ptr;
-    for(ptr = first_form; ptr != NULL; ptr = ptr->more) {
-      if(ptr->name_alloc) {
+    for (ptr = first_form; ptr != NULL; ptr = ptr->more)
+    {
+      if (ptr->name_alloc)
+      {
         Curl_safefree(ptr->name);
         ptr->name_alloc = FALSE;
       }
-      if(ptr->value_alloc) {
+      if (ptr->value_alloc)
+      {
         Curl_safefree(ptr->value);
         ptr->value_alloc = FALSE;
       }
-      if(ptr->contenttype_alloc) {
+      if (ptr->contenttype_alloc)
+      {
         Curl_safefree(ptr->contenttype);
         ptr->contenttype_alloc = FALSE;
       }
-      if(ptr->showfilename_alloc) {
+      if (ptr->showfilename_alloc)
+      {
         Curl_safefree(ptr->showfilename);
         ptr->showfilename_alloc = FALSE;
       }
     }
   }
 
-  if(FETCH_FORMADD_OK == return_value) {
+  if (FETCH_FORMADD_OK == return_value)
+  {
     /* go through the list, check for completeness and if everything is
      * alright add the HttpPost item otherwise set return_value accordingly */
 
     post = NULL;
-    for(form = first_form;
-        form != NULL;
-        form = form->more) {
-      if(((!form->name || !form->value) && !post) ||
-         ( (form->contentslength) &&
-           (form->flags & HTTPPOST_FILENAME) ) ||
-         ( (form->flags & HTTPPOST_FILENAME) &&
-           (form->flags & HTTPPOST_PTRCONTENTS) ) ||
+    for (form = first_form;
+         form != NULL;
+         form = form->more)
+    {
+      if (((!form->name || !form->value) && !post) ||
+          ((form->contentslength) &&
+           (form->flags & HTTPPOST_FILENAME)) ||
+          ((form->flags & HTTPPOST_FILENAME) &&
+           (form->flags & HTTPPOST_PTRCONTENTS)) ||
 
-         ( (!form->buffer) &&
+          ((!form->buffer) &&
            (form->flags & HTTPPOST_BUFFER) &&
-           (form->flags & HTTPPOST_PTRBUFFER) ) ||
+           (form->flags & HTTPPOST_PTRBUFFER)) ||
 
-         ( (form->flags & HTTPPOST_READFILE) &&
-           (form->flags & HTTPPOST_PTRCONTENTS) )
-        ) {
+          ((form->flags & HTTPPOST_READFILE) &&
+           (form->flags & HTTPPOST_PTRCONTENTS)))
+      {
         return_value = FETCH_FORMADD_INCOMPLETE;
         break;
       }
-      if(((form->flags & HTTPPOST_FILENAME) ||
-          (form->flags & HTTPPOST_BUFFER)) &&
-         !form->contenttype) {
-        char *f = (form->flags & HTTPPOST_BUFFER) ?
-          form->showfilename : form->value;
+      if (((form->flags & HTTPPOST_FILENAME) ||
+           (form->flags & HTTPPOST_BUFFER)) &&
+          !form->contenttype)
+      {
+        char *f = (form->flags & HTTPPOST_BUFFER) ? form->showfilename : form->value;
         char const *type;
         type = Curl_mime_contenttype(f);
-        if(!type)
+        if (!type)
           type = prevtype;
-        if(!type)
+        if (!type)
           type = FILE_CONTENTTYPE_DEFAULT;
 
         /* our contenttype is missing */
         form->contenttype = strdup(type);
-        if(!form->contenttype) {
+        if (!form->contenttype)
+        {
           return_value = FETCH_FORMADD_MEMORY;
           break;
         }
         form->contenttype_alloc = TRUE;
       }
-      if(form->name && form->namelength) {
+      if (form->name && form->namelength)
+      {
         /* Name should not contain nul bytes. */
         size_t i;
-        for(i = 0; i < form->namelength; i++)
-          if(!form->name[i]) {
+        for (i = 0; i < form->namelength; i++)
+          if (!form->name[i])
+          {
             return_value = FETCH_FORMADD_NULL;
             break;
           }
-        if(return_value != FETCH_FORMADD_OK)
+        if (return_value != FETCH_FORMADD_OK)
           break;
       }
-      if(!(form->flags & HTTPPOST_PTRNAME) &&
-         (form == first_form) ) {
+      if (!(form->flags & HTTPPOST_PTRNAME) &&
+          (form == first_form))
+      {
         /* Note that there is small risk that form->name is NULL here if the
            app passed in a bad combo, so we better check for that first. */
-        if(form->name) {
+        if (form->name)
+        {
           /* copy name (without strdup; possibly not null-terminated) */
-          form->name = Curl_memdup0(form->name, form->namelength ?
-                                    form->namelength :
-                                    strlen(form->name));
+          form->name = Curl_memdup0(form->name, form->namelength ? form->namelength : strlen(form->name));
         }
-        if(!form->name) {
+        if (!form->name)
+        {
           return_value = FETCH_FORMADD_MEMORY;
           break;
         }
         form->name_alloc = TRUE;
       }
-      if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
-                          HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
-                          HTTPPOST_CALLBACK)) && form->value) {
+      if (!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
+                           HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
+                           HTTPPOST_CALLBACK)) &&
+          form->value)
+      {
         /* copy value (without strdup; possibly contains null characters) */
-        size_t clen  = (size_t) form->contentslength;
-        if(!clen)
+        size_t clen = (size_t)form->contentslength;
+        if (!clen)
           clen = strlen(form->value) + 1;
 
         form->value = Curl_memdup(form->value, clen);
 
-        if(!form->value) {
+        if (!form->value)
+        {
           return_value = FETCH_FORMADD_MEMORY;
           break;
         }
@@ -641,33 +684,40 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
                          post, httppost,
                          last_post);
 
-      if(!post) {
+      if (!post)
+      {
         return_value = FETCH_FORMADD_MEMORY;
         break;
       }
 
-      if(form->contenttype)
+      if (form->contenttype)
         prevtype = form->contenttype;
     }
-    if(FETCH_FORMADD_OK != return_value) {
+    if (FETCH_FORMADD_OK != return_value)
+    {
       /* On error, free allocated fields for nodes of the FormInfo linked
          list which are not already owned by the httppost linked list
          without deallocating nodes. List nodes are deallocated later on */
       struct FormInfo *ptr;
-      for(ptr = form; ptr != NULL; ptr = ptr->more) {
-        if(ptr->name_alloc) {
+      for (ptr = form; ptr != NULL; ptr = ptr->more)
+      {
+        if (ptr->name_alloc)
+        {
           Curl_safefree(ptr->name);
           ptr->name_alloc = FALSE;
         }
-        if(ptr->value_alloc) {
+        if (ptr->value_alloc)
+        {
           Curl_safefree(ptr->value);
           ptr->value_alloc = FALSE;
         }
-        if(ptr->contenttype_alloc) {
+        if (ptr->contenttype_alloc)
+        {
           Curl_safefree(ptr->contenttype);
           ptr->contenttype_alloc = FALSE;
         }
-        if(ptr->showfilename_alloc) {
+        if (ptr->showfilename_alloc)
+        {
           Curl_safefree(ptr->showfilename);
           ptr->showfilename_alloc = FALSE;
         }
@@ -678,7 +728,8 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
   /* Always deallocate FormInfo linked list nodes without touching node
      fields given that these have either been deallocated or are owned
      now by the httppost linked list */
-  while(first_form) {
+  while (first_form)
+  {
     struct FormInfo *ptr = first_form->more;
     free(first_form);
     first_form = ptr;
@@ -694,8 +745,8 @@ FETCHFORMcode FormAdd(struct fetch_httppost **httppost,
  */
 
 FETCHFORMcode fetch_formadd(struct fetch_httppost **httppost,
-                          struct fetch_httppost **last_post,
-                          ...)
+                            struct fetch_httppost **last_post,
+                            ...)
 {
   va_list arg;
   FETCHFORMcode result;
@@ -713,33 +764,35 @@ FETCHFORMcode fetch_formadd(struct fetch_httppost **httppost,
  * @unittest: 1308
  */
 int fetch_formget(struct fetch_httppost *form, void *arg,
-                 fetch_formget_callback append)
+                  fetch_formget_callback append)
 {
   FETCHcode result;
   fetch_mimepart toppart;
 
   Curl_mime_initpart(&toppart); /* default form is empty */
   result = Curl_getformdata(NULL, &toppart, form, NULL);
-  if(!result)
+  if (!result)
     result = Curl_mime_prepare_headers(NULL, &toppart, "multipart/form-data",
                                        NULL, MIMESTRATEGY_FORM);
 
-  while(!result) {
+  while (!result)
+  {
     char buffer[8192];
     size_t nread = Curl_mime_read(buffer, 1, sizeof(buffer), &toppart);
 
-    if(!nread)
+    if (!nread)
       break;
 
-    if(nread > sizeof(buffer) || append(arg, buffer, nread) != nread) {
+    if (nread > sizeof(buffer) || append(arg, buffer, nread) != nread)
+    {
       result = FETCHE_READ_ERROR;
-      if(nread == FETCH_READFUNC_ABORT)
+      if (nread == FETCH_READFUNC_ABORT)
         result = FETCHE_ABORTED_BY_CALLBACK;
     }
   }
 
   Curl_mime_cleanpart(&toppart);
-  return (int) result;
+  return (int)result;
 }
 
 /*
@@ -750,29 +803,28 @@ void fetch_formfree(struct fetch_httppost *form)
 {
   struct fetch_httppost *next;
 
-  if(!form)
+  if (!form)
     /* no form to free, just get out of this */
     return;
 
-  do {
-    next = form->next;  /* the following form line */
+  do
+  {
+    next = form->next; /* the following form line */
 
     /* recurse to sub-contents */
     fetch_formfree(form->more);
 
-    if(!(form->flags & HTTPPOST_PTRNAME))
+    if (!(form->flags & HTTPPOST_PTRNAME))
       free(form->name); /* free the name */
-    if(!(form->flags &
-         (HTTPPOST_PTRCONTENTS|HTTPPOST_BUFFER|HTTPPOST_CALLBACK))
-      )
-      free(form->contents); /* free the contents */
-    free(form->contenttype); /* free the content type */
+    if (!(form->flags &
+          (HTTPPOST_PTRCONTENTS | HTTPPOST_BUFFER | HTTPPOST_CALLBACK)))
+      free(form->contents);   /* free the contents */
+    free(form->contenttype);  /* free the content type */
     free(form->showfilename); /* free the faked filename */
-    free(form);       /* free the struct */
+    free(form);               /* free the struct */
     form = next;
-  } while(form); /* continue */
+  } while (form); /* continue */
 }
-
 
 /* Set mime part name, taking care of non null-terminated name string. */
 static FETCHcode setname(fetch_mimepart *part, const char *name, size_t len)
@@ -780,10 +832,10 @@ static FETCHcode setname(fetch_mimepart *part, const char *name, size_t len)
   char *zname;
   FETCHcode res;
 
-  if(!name || !len)
+  if (!name || !len)
     return fetch_mime_name(part, name);
   zname = Curl_memdup0(name, len);
-  if(!zname)
+  if (!zname)
     return FETCHE_OUT_OF_MEMORY;
   res = fetch_mime_name(part, zname);
   free(zname);
@@ -798,7 +850,7 @@ static int fseeko_wrapper(void *stream, fetch_off_t offset, int whence)
 #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
   return fseeko(stream, (off_t)offset, whence);
 #else
-  if(offset > LONG_MAX)
+  if (offset > LONG_MAX)
     return -1;
   return fseek(stream, (long)offset, whence);
 #endif
@@ -815,9 +867,9 @@ static int fseeko_wrapper(void *stream, fetch_off_t offset, int whence)
  */
 
 FETCHcode Curl_getformdata(FETCH *data,
-                          fetch_mimepart *finalform,
-                          struct fetch_httppost *post,
-                          fetch_read_callback fread_func)
+                           fetch_mimepart *finalform,
+                           struct fetch_httppost *post,
+                           fetch_read_callback fread_func)
 {
   FETCHcode result = FETCHE_OK;
   fetch_mime *form = NULL;
@@ -826,92 +878,100 @@ FETCHcode Curl_getformdata(FETCH *data,
 
   Curl_mime_cleanpart(finalform); /* default form is empty */
 
-  if(!post)
+  if (!post)
     return result; /* no input => no output! */
 
   form = fetch_mime_init(data);
-  if(!form)
+  if (!form)
     result = FETCHE_OUT_OF_MEMORY;
 
-  if(!result)
+  if (!result)
     result = fetch_mime_subparts(finalform, form);
 
   /* Process each top part. */
-  for(; !result && post; post = post->next) {
+  for (; !result && post; post = post->next)
+  {
     /* If we have more than a file here, create a mime subpart and fill it. */
     fetch_mime *multipart = form;
-    if(post->more) {
+    if (post->more)
+    {
       part = fetch_mime_addpart(form);
-      if(!part)
+      if (!part)
         result = FETCHE_OUT_OF_MEMORY;
-      if(!result)
+      if (!result)
         result = setname(part, post->name, post->namelength);
-      if(!result) {
+      if (!result)
+      {
         multipart = fetch_mime_init(data);
-        if(!multipart)
+        if (!multipart)
           result = FETCHE_OUT_OF_MEMORY;
       }
-      if(!result)
+      if (!result)
         result = fetch_mime_subparts(part, multipart);
     }
 
     /* Generate all the part contents. */
-    for(file = post; !result && file; file = file->more) {
+    for (file = post; !result && file; file = file->more)
+    {
       /* Create the part. */
       part = fetch_mime_addpart(multipart);
-      if(!part)
+      if (!part)
         result = FETCHE_OUT_OF_MEMORY;
 
       /* Set the headers. */
-      if(!result)
+      if (!result)
         result = fetch_mime_headers(part, file->contentheader, 0);
 
       /* Set the content type. */
-      if(!result && file->contenttype)
+      if (!result && file->contenttype)
         result = fetch_mime_type(part, file->contenttype);
 
       /* Set field name. */
-      if(!result && !post->more)
+      if (!result && !post->more)
         result = setname(part, post->name, post->namelength);
 
       /* Process contents. */
-      if(!result) {
+      if (!result)
+      {
         fetch_off_t clen = post->contentslength;
 
-        if(post->flags & FETCH_HTTPPOST_LARGE)
+        if (post->flags & FETCH_HTTPPOST_LARGE)
           clen = post->contentlen;
 
-        if(post->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE)) {
-          if(!strcmp(file->contents, "-")) {
+        if (post->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE))
+        {
+          if (!strcmp(file->contents, "-"))
+          {
             /* There are a few cases where the code below will not work; in
                particular, freopen(stdin) by the caller is not guaranteed
                to result as expected. This feature has been kept for backward
                compatibility: use of "-" pseudo filename should be avoided. */
-            result = fetch_mime_data_cb(part, (fetch_off_t) -1,
-                                       (fetch_read_callback) fread,
-                                       fseeko_wrapper,
-                                       NULL, (void *) stdin);
+            result = fetch_mime_data_cb(part, (fetch_off_t)-1,
+                                        (fetch_read_callback)fread,
+                                        fseeko_wrapper,
+                                        NULL, (void *)stdin);
           }
           else
             result = fetch_mime_filedata(part, file->contents);
-          if(!result && (post->flags & HTTPPOST_READFILE))
+          if (!result && (post->flags & HTTPPOST_READFILE))
             result = fetch_mime_filename(part, NULL);
         }
-        else if(post->flags & HTTPPOST_BUFFER)
+        else if (post->flags & HTTPPOST_BUFFER)
           result = fetch_mime_data(part, post->buffer,
-                                  post->bufferlength ?
-                                  post->bufferlength : -1);
-        else if(post->flags & HTTPPOST_CALLBACK) {
+                                   post->bufferlength ? post->bufferlength : -1);
+        else if (post->flags & HTTPPOST_CALLBACK)
+        {
           /* the contents should be read with the callback and the size is set
              with the contentslength */
-          if(!clen)
+          if (!clen)
             clen = -1;
           result = fetch_mime_data_cb(part, clen,
-                                     fread_func, NULL, NULL, post->userp);
+                                      fread_func, NULL, NULL, post->userp);
         }
-        else {
+        else
+        {
           size_t uclen;
-          if(!clen)
+          if (!clen)
             uclen = FETCH_ZERO_TERMINATED;
           else
             uclen = (size_t)clen;
@@ -920,14 +980,14 @@ FETCHcode Curl_getformdata(FETCH *data,
       }
 
       /* Set fake filename. */
-      if(!result && post->showfilename)
-        if(post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
-                                        HTTPPOST_CALLBACK)))
+      if (!result && post->showfilename)
+        if (post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
+                                          HTTPPOST_CALLBACK)))
           result = fetch_mime_filename(part, post->showfilename);
     }
   }
 
-  if(result)
+  if (result)
     Curl_mime_cleanpart(finalform);
 
   return result;
@@ -936,8 +996,8 @@ FETCHcode Curl_getformdata(FETCH *data,
 #else
 /* if disabled */
 FETCHFORMcode fetch_formadd(struct fetch_httppost **httppost,
-                          struct fetch_httppost **last_post,
-                          ...)
+                            struct fetch_httppost **last_post,
+                            ...)
 {
   (void)httppost;
   (void)last_post;
@@ -945,11 +1005,11 @@ FETCHFORMcode fetch_formadd(struct fetch_httppost **httppost,
 }
 
 int fetch_formget(struct fetch_httppost *form, void *arg,
-                 fetch_formget_callback append)
+                  fetch_formget_callback append)
 {
-  (void) form;
-  (void) arg;
-  (void) append;
+  (void)form;
+  (void)arg;
+  (void)append;
   return FETCH_FORMADD_DISABLED;
 }
 
@@ -959,4 +1019,4 @@ void fetch_formfree(struct fetch_httppost *form)
   /* Nothing to do. */
 }
 
-#endif  /* if disabled */
+#endif /* if disabled */

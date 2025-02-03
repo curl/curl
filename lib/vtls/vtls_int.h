@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -44,50 +44,55 @@ struct ssl_connect_data;
 /* conservative sizes on the ALPN entries and count we are handling,
  * we can increase these if we ever feel the need or have to accommodate
  * ALPN strings from the "outside". */
-#define ALPN_NAME_MAX     10
-#define ALPN_ENTRIES_MAX  3
-#define ALPN_PROTO_BUF_MAX   (ALPN_ENTRIES_MAX * (ALPN_NAME_MAX + 1))
+#define ALPN_NAME_MAX 10
+#define ALPN_ENTRIES_MAX 3
+#define ALPN_PROTO_BUF_MAX (ALPN_ENTRIES_MAX * (ALPN_NAME_MAX + 1))
 
-struct alpn_spec {
+struct alpn_spec
+{
   const char entries[ALPN_ENTRIES_MAX][ALPN_NAME_MAX];
   size_t count; /* number of entries */
 };
 
-struct alpn_proto_buf {
+struct alpn_proto_buf
+{
   unsigned char data[ALPN_PROTO_BUF_MAX];
   int len;
 };
 
 FETCHcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
-                                const struct alpn_spec *spec);
+                                 const struct alpn_spec *spec);
 FETCHcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
-                                const struct alpn_spec *spec);
+                                 const struct alpn_spec *spec);
 
 FETCHcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct ssl_connect_data *connssl,
-                                  const unsigned char *proto,
-                                  size_t proto_len);
+                                   struct Curl_easy *data,
+                                   struct ssl_connect_data *connssl,
+                                   const unsigned char *proto,
+                                   size_t proto_len);
 
 bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
                               const char *proto);
 
 /* enum for the nonblocking SSL connection state machine */
-typedef enum {
+typedef enum
+{
   ssl_connect_1,
   ssl_connect_2,
   ssl_connect_3,
   ssl_connect_done
 } ssl_connect_state;
 
-typedef enum {
+typedef enum
+{
   ssl_connection_none,
   ssl_connection_deferred,
   ssl_connection_negotiating,
   ssl_connection_complete
 } ssl_connection_state;
 
-typedef enum {
+typedef enum
+{
   ssl_earlydata_none,
   ssl_earlydata_use,
   ssl_earlydata_sending,
@@ -96,45 +101,46 @@ typedef enum {
   ssl_earlydata_rejected
 } ssl_earlydata_state;
 
-#define FETCH_SSL_IO_NEED_NONE   (0)
-#define FETCH_SSL_IO_NEED_RECV   (1<<0)
-#define FETCH_SSL_IO_NEED_SEND   (1<<1)
+#define FETCH_SSL_IO_NEED_NONE (0)
+#define FETCH_SSL_IO_NEED_RECV (1 << 0)
+#define FETCH_SSL_IO_NEED_SEND (1 << 1)
 
 /* Max earlydata payload we want to send */
-#define FETCH_SSL_EARLY_MAX       (64*1024)
+#define FETCH_SSL_EARLY_MAX (64 * 1024)
 
 /* Information in each SSL cfilter context: cf->ctx */
-struct ssl_connect_data {
-  const struct Curl_ssl *ssl_impl;  /* TLS backend for this filter */
-  struct ssl_peer peer;             /* peer the filter talks to */
-  const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
-  void *backend;                    /* vtls backend specific props */
-  struct cf_call_data call_data;    /* data handle used in current call */
-  struct fetchtime handshake_done;   /* time when handshake finished */
-  struct {
-    char *alpn;                     /* ALPN value or NULL */
+struct ssl_connect_data
+{
+  const struct Curl_ssl *ssl_impl; /* TLS backend for this filter */
+  struct ssl_peer peer;            /* peer the filter talks to */
+  const struct alpn_spec *alpn;    /* ALPN to use or NULL for none */
+  void *backend;                   /* vtls backend specific props */
+  struct cf_call_data call_data;   /* data handle used in current call */
+  struct fetchtime handshake_done; /* time when handshake finished */
+  struct
+  {
+    char *alpn; /* ALPN value or NULL */
   } negotiated;
-  struct bufq earlydata;            /* earlydata to be send to peer */
-  size_t earlydata_max;             /* max earlydata allowed by peer */
-  size_t earlydata_skip;            /* sending bytes to skip when earlydata
-                                     * is accepted by peer */
+  struct bufq earlydata; /* earlydata to be send to peer */
+  size_t earlydata_max;  /* max earlydata allowed by peer */
+  size_t earlydata_skip; /* sending bytes to skip when earlydata
+                          * is accepted by peer */
   ssl_connection_state state;
   ssl_connect_state connecting_state;
   ssl_earlydata_state earlydata_state;
-  int io_need;                      /* TLS signals special SEND/RECV needs */
-  BIT(use_alpn);                    /* if ALPN shall be used in handshake */
-  BIT(peer_closed);                 /* peer has closed connection */
+  int io_need;      /* TLS signals special SEND/RECV needs */
+  BIT(use_alpn);    /* if ALPN shall be used in handshake */
+  BIT(peer_closed); /* peer has closed connection */
 };
 
-
 #undef CF_CTX_CALL_DATA
-#define CF_CTX_CALL_DATA(cf)  \
+#define CF_CTX_CALL_DATA(cf) \
   ((struct ssl_connect_data *)(cf)->ctx)->call_data
-
 
 /* Definitions for SSL Implementations */
 
-struct Curl_ssl {
+struct Curl_ssl
+{
   /*
    * This *must* be the first entry to allow returning the list of available
    * backends in fetch_global_sslset().
@@ -148,25 +154,25 @@ struct Curl_ssl {
 
   size_t (*version)(char *buffer, size_t size);
   FETCHcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        bool send_shutdown, bool *done);
+                         bool send_shutdown, bool *done);
   bool (*data_pending)(struct Curl_cfilter *cf,
                        const struct Curl_easy *data);
 
   /* return 0 if a find random is filled in */
   FETCHcode (*random)(struct Curl_easy *data, unsigned char *entropy,
-                     size_t length);
+                      size_t length);
   bool (*cert_status_request)(void);
 
   FETCHcode (*connect_blocking)(struct Curl_cfilter *cf,
-                               struct Curl_easy *data);
+                                struct Curl_easy *data);
   FETCHcode (*connect_nonblocking)(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  bool *done);
+                                   struct Curl_easy *data,
+                                   bool *done);
 
   /* During handshake/shutdown, adjust the pollset to include the socket
    * for POLLOUT or POLLIN as needed. Mandatory. */
   void (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          struct easy_pollset *ps);
+                         struct easy_pollset *ps);
   void *(*get_internals)(struct ssl_connect_data *connssl, FETCHINFO info);
   void (*close)(struct Curl_cfilter *cf, struct Curl_easy *data);
   void (*close_all)(struct Curl_easy *data);
@@ -177,15 +183,14 @@ struct Curl_ssl {
 
   bool (*false_start)(void);
   FETCHcode (*sha256sum)(const unsigned char *input, size_t inputlen,
-                    unsigned char *sha256sum, size_t sha256sumlen);
+                         unsigned char *sha256sum, size_t sha256sumlen);
   ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         char *buf, size_t len, FETCHcode *code);
   ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         const void *mem, size_t len, FETCHcode *code);
 
   FETCHcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
-                                  struct dynbuf *binding);
-
+                                   struct dynbuf *binding);
 };
 
 extern const struct Curl_ssl *Curl_ssl;

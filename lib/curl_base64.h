@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,15 +27,15 @@
 #ifndef BUILDING_LIBFETCH
 /* this renames functions so that the tool code can use the same code
    without getting symbol collisions */
-#define Curl_base64_encode(a,b,c,d) fetchx_base64_encode(a,b,c,d)
-#define Curl_base64url_encode(a,b,c,d) fetchx_base64url_encode(a,b,c,d)
-#define Curl_base64_decode(a,b,c) fetchx_base64_decode(a,b,c)
+#define Curl_base64_encode(a, b, c, d) fetchx_base64_encode(a, b, c, d)
+#define Curl_base64url_encode(a, b, c, d) fetchx_base64url_encode(a, b, c, d)
+#define Curl_base64_decode(a, b, c) fetchx_base64_decode(a, b, c)
 #endif
 
 FETCHcode Curl_base64_encode(const char *inputbuff, size_t insize,
-                            char **outptr, size_t *outlen);
+                             char **outptr, size_t *outlen);
 FETCHcode Curl_base64url_encode(const char *inputbuff, size_t insize,
-                               char **outptr, size_t *outlen);
+                                char **outptr, size_t *outlen);
 FETCHcode Curl_base64_decode(const char *src,
-                            unsigned char **outptr, size_t *outlen);
+                             unsigned char **outptr, size_t *outlen);
 #endif /* HEADER_FETCH_BASE64_H */

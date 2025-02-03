@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -40,10 +40,11 @@ void tool_set_stderr_file(struct GlobalConfig *global, char *filename)
 {
   FILE *fp;
 
-  if(!filename)
+  if (!filename)
     return;
 
-  if(!strcmp(filename, "-")) {
+  if (!strcmp(filename, "-"))
+  {
     tool_stderr = stdout;
     return;
   }
@@ -51,7 +52,8 @@ void tool_set_stderr_file(struct GlobalConfig *global, char *filename)
   /* precheck that filename is accessible to lessen the chance that the
      subsequent freopen will fail. */
   fp = fopen(filename, FOPEN_WRITETEXT);
-  if(!fp) {
+  if (!fp)
+  {
     warnf(global, "Warning: Failed to open %s", filename);
     return;
   }
@@ -61,7 +63,8 @@ void tool_set_stderr_file(struct GlobalConfig *global, char *filename)
      the latter may be set to stdout. */
   /* !checksrc! disable STDERR 1 */
   fp = freopen(filename, FOPEN_WRITETEXT, stderr);
-  if(!fp) {
+  if (!fp)
+  {
     /* stderr may have been closed by freopen. there is nothing to be done. */
     DEBUGASSERT(0);
     return;

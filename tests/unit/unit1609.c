@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,7 +43,8 @@ static FETCHcode unit_setup(void)
   return res;
 }
 
-struct testcase {
+struct testcase
+{
   /* host:port:address[,address]... */
   const char *optval;
 
@@ -54,7 +55,6 @@ struct testcase {
   /* 0 to 9 addresses expected from hostcache */
   const char *address[10];
 };
-
 
 /* FETCHOPT_RESOLVE address parsing test - to test the following defect fix:
 
@@ -89,13 +89,19 @@ Test:
 */
 
 static const struct testcase tests[] = {
-  /* spaces aren't allowed, for now */
-  { "test.com:80:127.0.0.1",
-    "test.com", 80, { "127.0.0.1", }
-  },
-  { "test.com:80:127.0.0.2",
-    "test.com", 80, { "127.0.0.2", }
-  },
+    /* spaces aren't allowed, for now */
+    {"test.com:80:127.0.0.1",
+     "test.com",
+     80,
+     {
+         "127.0.0.1",
+     }},
+    {"test.com:80:127.0.0.2",
+     "test.com",
+     80,
+     {
+         "127.0.0.2",
+     }},
 };
 
 UNITTEST_START
@@ -106,40 +112,42 @@ UNITTEST_START
   struct Curl_easy *easy = NULL;
   struct fetch_slist *list = NULL;
 
-/* important: we setup cache outside of the loop
-  and also clean cache after the loop. In contrast,for example,
-  test 1607 sets up and cleans cache on each iteration. */
+  /* important: we setup cache outside of the loop
+    and also clean cache after the loop. In contrast,for example,
+    test 1607 sets up and cleans cache on each iteration. */
 
-  for(i = 0; i < testnum; ++i) {
+  for (i = 0; i < testnum; ++i)
+  {
     int j;
-    int addressnum = sizeof (tests[i].address) / sizeof (*tests[i].address);
+    int addressnum = sizeof(tests[i].address) / sizeof(*tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
     void *entry_id;
     bool problem = false;
     easy = fetch_easy_init();
-    if(!easy) {
+    if (!easy)
+    {
       fetch_global_cleanup();
       return FETCHE_OUT_OF_MEMORY;
     }
     /* create a multi handle and add the easy handle to it so that the
        hostcache is setup */
     multi = fetch_multi_init();
-    if(!multi)
+    if (!multi)
       goto error;
     fetch_multi_add_handle(multi, easy);
 
     list = fetch_slist_append(NULL, tests[i].optval);
-    if(!list)
+    if (!list)
       goto error;
 
     fetch_easy_setopt(easy, FETCHOPT_RESOLVE, list);
 
-    if(Curl_loadhostpairs(easy))
+    if (Curl_loadhostpairs(easy))
       goto error;
 
     entry_id = (void *)aprintf("%s:%d", tests[i].host, tests[i].port);
-    if(!entry_id)
+    if (!entry_id)
       goto error;
 
     dns = Curl_hash_pick(easy->dns.hostcache, entry_id, strlen(entry_id) + 1);
@@ -148,48 +156,54 @@ UNITTEST_START
 
     addr = dns ? dns->addr : NULL;
 
-    for(j = 0; j < addressnum; ++j) {
+    for (j = 0; j < addressnum; ++j)
+    {
       int port = 0;
       char ipaddress[MAX_IPADR_LEN] = {0};
 
-      if(!addr && !tests[i].address[j])
+      if (!addr && !tests[i].address[j])
         break;
 
-      if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
-                                   ipaddress, &port)) {
+      if (addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
+                                    ipaddress, &port))
+      {
         fprintf(stderr, "%s:%d tests[%d] failed. Curl_addr2string failed.\n",
                 __FILE__, __LINE__, i);
         problem = true;
         break;
       }
 
-      if(addr && !tests[i].address[j]) {
+      if (addr && !tests[i].address[j])
+      {
         fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "is %s but tests[%d].address[%d] is NULL.\n",
+                        "is %s but tests[%d].address[%d] is NULL.\n",
                 __FILE__, __LINE__, i, ipaddress, i, j);
         problem = true;
         break;
       }
 
-      if(!addr && tests[i].address[j]) {
+      if (!addr && tests[i].address[j])
+      {
         fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "is NULL but tests[%d].address[%d] is %s.\n",
+                        "is NULL but tests[%d].address[%d] is %s.\n",
                 __FILE__, __LINE__, i, i, j, tests[i].address[j]);
         problem = true;
         break;
       }
 
-      if(!fetch_strequal(ipaddress, tests[i].address[j])) {
+      if (!fetch_strequal(ipaddress, tests[i].address[j]))
+      {
         fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "%s is not equal to tests[%d].address[%d] %s.\n",
+                        "%s is not equal to tests[%d].address[%d] %s.\n",
                 __FILE__, __LINE__, i, ipaddress, i, j, tests[i].address[j]);
         problem = true;
         break;
       }
 
-      if(port != tests[i].port) {
+      if (port != tests[i].port)
+      {
         fprintf(stderr, "%s:%d tests[%d] failed. the retrieved port "
-                "for tests[%d].address[%d] is %d but tests[%d].port is %d.\n",
+                        "for tests[%d].address[%d] is %d but tests[%d].port is %d.\n",
                 __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
         problem = true;
         break;
@@ -205,7 +219,8 @@ UNITTEST_START
     fetch_slist_free_all(list);
     list = NULL;
 
-    if(problem) {
+    if (problem)
+    {
       unitfail++;
       continue;
     }

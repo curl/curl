@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,20 +47,22 @@ int main(void)
   FILE *fd;
 
   fd = fopen("debugit", "rb"); /* open file to upload */
-  if(!fd)
+  if (!fd)
     return 1; /* cannot continue */
 
   /* to get the file size */
-  if(fstat(fileno(fd), &file_info) != 0) {
+  if (fstat(fileno(fd), &file_info) != 0)
+  {
     fclose(fd);
     return 1; /* cannot continue */
   }
 
   fetch = fetch_easy_init();
-  if(fetch) {
+  if (fetch)
+  {
     /* upload to this place */
     fetch_easy_setopt(fetch, FETCHOPT_URL,
-                     "file:///home/dast/src/fetch/debug/new");
+                      "file:///home/dast/src/fetch/debug/new");
 
     /* tell it to "upload" to the URL */
     fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
@@ -70,18 +72,20 @@ int main(void)
 
     /* and give the size of the upload (optional) */
     fetch_easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
-                     (fetch_off_t)file_info.st_size);
+                      (fetch_off_t)file_info.st_size);
 
     /* enable verbose for easier tracing */
     fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
     res = fetch_easy_perform(fetch);
     /* Check for errors */
-    if(res != FETCHE_OK) {
+    if (res != FETCHE_OK)
+    {
       fprintf(stderr, "fetch_easy_perform() failed: %s\n",
               fetch_easy_strerror(res));
     }
-    else {
+    else
+    {
       /* now extract transfer info */
       fetch_easy_getinfo(fetch, FETCHINFO_SPEED_UPLOAD_T, &speed_upload);
       fetch_easy_getinfo(fetch, FETCHINFO_TOTAL_TIME_T, &total_time);

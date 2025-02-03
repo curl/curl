@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,58 +31,60 @@
 /* Only include this function if one or more of FTP, FILE are enabled. */
 #if !defined(FETCH_DISABLE_FTP) || !defined(FETCH_DISABLE_FILE)
 
- /*
-  Check if this is a range download, and if so, set the internal variables
-  properly.
- */
+/*
+ Check if this is a range download, and if so, set the internal variables
+ properly.
+*/
 FETCHcode Curl_range(struct Curl_easy *data)
 {
   fetch_off_t from, to;
   char *ptr;
   char *ptr2;
 
-  if(data->state.use_range && data->state.range) {
+  if (data->state.use_range && data->state.range)
+  {
     FETCHofft from_t;
     FETCHofft to_t;
     from_t = fetchx_strtoofft(data->state.range, &ptr, 10, &from);
-    if(from_t == FETCH_OFFT_FLOW)
+    if (from_t == FETCH_OFFT_FLOW)
       return FETCHE_RANGE_ERROR;
-    while(*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
+    while (*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
       ptr++;
     to_t = fetchx_strtoofft(ptr, &ptr2, 10, &to);
-    if(to_t == FETCH_OFFT_FLOW)
+    if (to_t == FETCH_OFFT_FLOW)
       return FETCHE_RANGE_ERROR;
-    if((to_t == FETCH_OFFT_INVAL) && !from_t) {
+    if ((to_t == FETCH_OFFT_INVAL) && !from_t)
+    {
       /* X - */
       data->state.resume_from = from;
       DEBUGF(infof(data, "RANGE %" FMT_OFF_T " to end of file", from));
     }
-    else if((from_t == FETCH_OFFT_INVAL) && !to_t) {
+    else if ((from_t == FETCH_OFFT_INVAL) && !to_t)
+    {
       /* -Y */
       data->req.maxdownload = to;
       data->state.resume_from = -to;
       DEBUGF(infof(data, "RANGE the last %" FMT_OFF_T " bytes", to));
     }
-    else {
+    else
+    {
       /* X-Y */
       fetch_off_t totalsize;
 
       /* Ensure the range is sensible - to should follow from. */
-      if(from > to)
+      if (from > to)
         return FETCHE_RANGE_ERROR;
 
       totalsize = to - from;
-      if(totalsize == FETCH_OFF_T_MAX)
+      if (totalsize == FETCH_OFF_T_MAX)
         return FETCHE_RANGE_ERROR;
 
       data->req.maxdownload = totalsize + 1; /* include last byte */
       data->state.resume_from = from;
-      DEBUGF(infof(data, "RANGE from %" FMT_OFF_T
-                   " getting %" FMT_OFF_T " bytes",
+      DEBUGF(infof(data, "RANGE from %" FMT_OFF_T " getting %" FMT_OFF_T " bytes",
                    from, data->req.maxdownload));
     }
-    DEBUGF(infof(data, "range-download from %" FMT_OFF_T
-                 " to %" FMT_OFF_T ", totally %" FMT_OFF_T " bytes",
+    DEBUGF(infof(data, "range-download from %" FMT_OFF_T " to %" FMT_OFF_T ", totally %" FMT_OFF_T " bytes",
                  from, to, data->req.maxdownload));
   }
   else

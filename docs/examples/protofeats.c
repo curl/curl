@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://fetch.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <fetch/fetch.h>
 
-#if !FETCH_AT_LEAST_VERSION(7,87,0)
+#if !FETCH_AT_LEAST_VERSION(7, 87, 0)
 #error "too old libfetch"
 #endif
 
@@ -41,10 +41,10 @@ int main(void)
 
   ver = fetch_version_info(FETCHVERSION_NOW);
   printf("Protocols:\n");
-  for(ptr = ver->protocols; *ptr; ++ptr)
+  for (ptr = ver->protocols; *ptr; ++ptr)
     printf("  %s\n", *ptr);
   printf("Features:\n");
-  for(ptr = ver->feature_names; *ptr; ++ptr)
+  for (ptr = ver->feature_names; *ptr; ++ptr)
     printf("  %s\n", *ptr);
 
   fetch_global_cleanup();
