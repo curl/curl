@@ -103,12 +103,11 @@ if(PICKY_COMPILER)
       -Wmissing-field-initializers         # clang  2.7  gcc  4.1
       -Wmissing-noreturn                   # clang  2.7  gcc  4.1
       -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
+      -Wno-sign-conversion                 # clang  2.9  gcc  4.3
       -Wno-system-headers                  # clang  1.0  gcc  3.0
     # -Wpadded                             # clang  2.9  gcc  4.1               # Not used: We cannot change public structs
       -Wold-style-definition               # clang  2.7  gcc  3.4
       -Wredundant-decls                    # clang  2.7  gcc  4.1
-      -Wsign-conversion                    # clang  2.9  gcc  4.3
-        -Wno-error=sign-conversion
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
     # -Wswitch-enum                        # clang  2.7  gcc  4.1               # Not used: It basically disallows default case
       -Wtype-limits                        # clang  2.7  gcc  4.3
