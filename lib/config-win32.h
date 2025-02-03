@@ -39,7 +39,9 @@
 #define HAVE_FCNTL_H 1
 
 /* Define if you have the <io.h> header file. */
-#define HAVE_IO_H 1
+#ifndef UNDER_CE
+#define HAVE_IO_H 1  /* exists on __MINGW32CE__ */
+#endif
 
 /* Define if you have the <locale.h> header file. */
 #ifndef UNDER_CE
