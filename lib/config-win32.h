@@ -35,17 +35,17 @@
 /* Define if you have the <arpa/inet.h> header file. */
 /* #define HAVE_ARPA_INET_H 1 */
 
+#ifndef UNDER_CE
+
 /* Define if you have the <fcntl.h> header file. */
-#define HAVE_FCNTL_H 1
+#define HAVE_FCNTL_H 1  /* exists on __MINGW32CE__ */
 
 /* Define if you have the <io.h> header file. */
-#ifndef UNDER_CE
 #define HAVE_IO_H 1  /* exists on __MINGW32CE__ */
-#endif
 
 /* Define if you have the <locale.h> header file. */
-#ifndef UNDER_CE
 #define HAVE_LOCALE_H 1
+
 #endif
 
 /* Define if you have the <netdb.h> header file. */
