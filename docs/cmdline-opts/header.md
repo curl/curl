@@ -63,6 +63,6 @@ after redirects are followed, like when told with --location. This can lead to
 the header being sent to other hosts than the original host, so sensitive
 headers should be used with caution combined with following redirects.
 
-`Authorization:` and `Cookie:` headers are explcitly *not* passed on in HTTP
+`Authorization:` and `Cookie:` headers are explicitly *not* passed on in HTTP
 requests when following redirects to other origins, unless --location-trusted
 is used.
