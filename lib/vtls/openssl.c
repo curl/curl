@@ -3527,7 +3527,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const unsigned char *alpn, size_t alpn_len,
+                            const struct alpn_spec *alpns,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             Curl_ossl_new_session_cb *cb_new_session,
@@ -3722,14 +3722,21 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 #endif
 
-  if(alpn && alpn_len) {
 #ifdef HAS_ALPN_OPENSSL
-    if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
+  if(alpns && alpns->count) {
+    struct alpn_proto_buf proto;
+    memset(&proto, 0, sizeof(proto));
+    result = Curl_alpn_to_proto_buf(&proto, alpns);
+    if(result) {
+      failf(data, "Error determining ALPN");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, proto.data, (int)proto.len)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
-#endif
   }
+#endif
 
   if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
     if(!result &&
@@ -4053,25 +4060,14 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
-  struct alpn_proto_buf proto;
   BIO *bio;
   CURLcode result;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
   DEBUGASSERT(octx);
-  memset(&proto, 0, sizeof(proto));
-#ifdef HAS_ALPN_OPENSSL
-  if(connssl->alpn) {
-    result = Curl_alpn_to_proto_buf(&proto, connssl->alpn);
-    if(result) {
-      failf(data, "Error determining ALPN");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-#endif
 
   result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer,
-                              proto.data, proto.len, NULL, NULL,
+                              connssl->alpn, NULL, NULL,
                               ossl_new_session_cb, cf);
   if(result)
     return result;
@@ -4099,6 +4095,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
 #ifdef HAS_ALPN_OPENSSL
   if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    memset(&proto, 0, sizeof(proto));
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }

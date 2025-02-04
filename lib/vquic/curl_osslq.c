@@ -1163,13 +1163,15 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   const struct Curl_sockaddr_ex *peer_addr = NULL;
   BIO *bio = NULL;
   BIO_ADDR *baddr = NULL;
+static const struct alpn_spec ALPN_SPEC_H3 = {
+  { "h3" }, 1
+};
 
   DEBUGASSERT(ctx->initialized);
 
 #define H3_ALPN "\x2h3"
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
-                               H3_ALPN, sizeof(H3_ALPN) - 1,
-                               NULL, NULL, NULL, NULL);
+                               &ALPN_SPEC_H3, NULL, NULL, NULL, NULL);
   if(result)
     goto out;
 
