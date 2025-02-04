@@ -478,11 +478,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->maxage_conn = 118;
   set->maxlifetime_conn = 0;
   set->http09_allowed = FALSE;
-#ifdef USE_HTTP2
-  set->httpwant = CURL_HTTP_VERSION_2TLS
-#else
-  set->httpwant = CURL_HTTP_VERSION_1_1
-#endif
+  set->httpwant = CURL_HTTP_VERSION_NONE
     ;
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   memset(&set->priority, 0, sizeof(set->priority));
@@ -657,15 +653,20 @@ bool Curl_on_disconnect(struct Curl_easy *data,
 static bool xfer_may_multiplex(const struct Curl_easy *data,
                                const struct connectdata *conn)
 {
+#ifndef CURL_DISABLE_HTTP
   /* If an HTTP protocol and multiplexing is enabled */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      (!conn->bits.protoconnstart || !conn->bits.close)) {
 
     if(Curl_multiplex_wanted(data->multi) &&
-       (data->state.httpwant >= CURL_HTTP_VERSION_2))
+       (data->state.http_neg.allowed & (CURL_HTTP_V2x|CURL_HTTP_V3x)))
       /* allows HTTP/2 or newer */
       return TRUE;
   }
+#else
+  (void)data;
+  (void)conn;
+#endif
   return FALSE;
 }
 
@@ -999,8 +1000,9 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   }
 #endif
 
+#ifndef CURL_DISABLE_HTTP
   if(match->may_multiplex &&
-     (data->state.httpwant == CURL_HTTP_VERSION_2_0) &&
+     (data->state.http_neg.allowed & (CURL_HTTP_V2x|CURL_HTTP_V3x)) &&
      (needle->handler->protocol & CURLPROTO_HTTP) &&
      !conn->httpversion_seen) {
     if(data->set.pipewait) {
@@ -1012,6 +1014,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     infof(data, "Server upgrade cannot be used");
     return FALSE;
   }
+#endif
 
   if(!(needle->handler->flags & PROTOPT_CREDSPERREQUEST)) {
     /* This protocol requires credentials per connection,
@@ -1032,27 +1035,36 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 #endif
 
-  /* If looking for HTTP and the HTTP version we want is less
-   * than the HTTP version of conn, continue looking.
-   * CURL_HTTP_VERSION_2TLS is default which indicates no preference,
-   * so we take any existing connection. */
-  if((needle->handler->protocol & PROTO_FAMILY_HTTP) &&
-     (data->state.httpwant != CURL_HTTP_VERSION_2TLS)) {
-    unsigned char httpversion = Curl_conn_http_version(data);
-    if((httpversion >= 20) &&
-       (data->state.httpwant < CURL_HTTP_VERSION_2_0)) {
-      DEBUGF(infof(data, "nor reusing conn #%" CURL_FORMAT_CURL_OFF_T
-             " with httpversion=%d, we want a version less than h2",
-             conn->connection_id, httpversion));
-    }
-    if((httpversion >= 30) &&
-       (data->state.httpwant < CURL_HTTP_VERSION_3)) {
-      DEBUGF(infof(data, "nor reusing conn #%" CURL_FORMAT_CURL_OFF_T
-             " with httpversion=%d, we want a version less than h3",
-             conn->connection_id, httpversion));
-      return FALSE;
+#ifndef CURL_DISABLE_HTTP
+  /* If looking for HTTP and the HTTP versions allowed do not include
+   * the HTTP version of conn, continue looking. */
+  if((needle->handler->protocol & PROTO_FAMILY_HTTP)) {
+    switch(Curl_conn_http_version(data, conn)) {
+    case 30:
+      if(!(data->state.http_neg.allowed & CURL_HTTP_V3x)) {
+        DEBUGF(infof(data, "not reusing conn #%" CURL_FORMAT_CURL_OFF_T
+               ", we do not want h3", conn->connection_id));
+        return FALSE;
+      }
+      break;
+    case 20:
+      if(!(data->state.http_neg.allowed & CURL_HTTP_V2x)) {
+        DEBUGF(infof(data, "not reusing conn #%" CURL_FORMAT_CURL_OFF_T
+               ", we do not want h2", conn->connection_id));
+        return FALSE;
+      }
+      break;
+    default:
+      if(!(data->state.http_neg.allowed & CURL_HTTP_V1x)) {
+        DEBUGF(infof(data, "not reusing conn #%" CURL_FORMAT_CURL_OFF_T
+               ", we do not want h1", conn->connection_id));
+        return FALSE;
+      }
+      break;
     }
   }
+#endif
+
 #ifdef USE_SSH
   else if(get_protocol_family(needle->handler) & PROTO_FAMILY_SSH) {
     if(!ssh_config_matches(needle, conn))
@@ -3052,75 +3064,50 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
        )) {
     /* no connect_to match, try alt-svc! */
     enum alpnid srcalpnid = ALPN_none;
-    bool use_alt_svc = FALSE;
     bool hit = FALSE;
     struct altsvc *as = NULL;
-    const int allowed_versions = ( ALPN_h1
-#ifdef USE_HTTP2
-                                   | ALPN_h2
-#endif
-#ifdef USE_HTTP3
-                                   | ALPN_h3
-#endif
-      ) & data->asi->flags;
-    static enum alpnid alpn_ids[] = {
-#ifdef USE_HTTP3
-      ALPN_h3,
-#endif
-#ifdef USE_HTTP2
-      ALPN_h2,
-#endif
-      ALPN_h1,
-    };
-    size_t i;
+    int allowed_alpns = ALPN_none;
+    struct http_negotiation *neg = &data->state.http_neg;
 
-    switch(data->state.httpwant) {
-    case CURL_HTTP_VERSION_1_0:
-      break;
-    case CURL_HTTP_VERSION_1_1:
-      use_alt_svc = TRUE;
-      srcalpnid = ALPN_h1; /* only regard alt-svc advice for http/1.1 */
-      break;
-    case CURL_HTTP_VERSION_2_0:
-      use_alt_svc = TRUE;
-      srcalpnid = ALPN_h2; /* only regard alt-svc advice for h2 */
-      break;
-    case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
-      break;
-    case CURL_HTTP_VERSION_3:
-      use_alt_svc = TRUE;
-      srcalpnid = ALPN_h3; /* only regard alt-svc advice for h3 */
-      break;
-    case CURL_HTTP_VERSION_3ONLY:
-      break;
-    default: /* no specific HTTP version wanted, look at all of alt-svc */
-      use_alt_svc = TRUE;
-      srcalpnid = ALPN_none;
-      break;
-    }
-    if(!use_alt_svc)
-      return CURLE_OK;
+    DEBUGF(infof(data, "Alt-svc check wanted=%x, allowed=%x",
+                 neg->wanted, neg->allowed));
+    if(neg->allowed & CURL_HTTP_V3x)
+      allowed_alpns |= ALPN_h3;
+    if(neg->allowed & CURL_HTTP_V2x)
+      allowed_alpns |= ALPN_h2;
+    if(neg->allowed & CURL_HTTP_V1x)
+      allowed_alpns |= ALPN_h1;
+    allowed_alpns &= (int)data->asi->flags;
 
     host = conn->host.rawalloc;
     DEBUGF(infof(data, "check Alt-Svc for host %s", host));
-    if(srcalpnid == ALPN_none) {
-      /* scan all alt-svc protocol ids in order or relevance */
-      for(i = 0; !hit && (i < ARRAYSIZE(alpn_ids)); ++i) {
-        srcalpnid = alpn_ids[i];
-        hit = Curl_altsvc_lookup(data->asi,
-                                 srcalpnid, host, conn->remote_port, /* from */
-                                 &as /* to */,
-                                 allowed_versions);
-      }
-    }
-    else {
-      /* look for a specific alt-svc protocol id */
+#ifdef USE_HTTP3
+    if(!hit && (neg->wanted & CURL_HTTP_V3x)) {
+      srcalpnid = ALPN_h3;
       hit = Curl_altsvc_lookup(data->asi,
-                               srcalpnid, host, conn->remote_port, /* from */
+                               ALPN_h3, host, conn->remote_port, /* from */
                                &as /* to */,
-                               allowed_versions);
+                               allowed_alpns);
     }
-
+ #endif
+ #ifdef USE_HTTP2
+    if(!hit && (neg->wanted & CURL_HTTP_V2x) &&
+       !neg->h2_prior_knowledge) {
+      srcalpnid = ALPN_h2;
+      hit = Curl_altsvc_lookup(data->asi,
+                               ALPN_h2, host, conn->remote_port, /* from */
+                               &as /* to */,
+                               allowed_alpns);
+    }
+ #endif
+    if(!hit && (neg->wanted & CURL_HTTP_V1x) &&
+       !neg->only_10) {
+      srcalpnid = ALPN_h1;
+      hit = Curl_altsvc_lookup(data->asi,
+                               ALPN_h1, host, conn->remote_port, /* from */
+                               &as /* to */,
+                               allowed_alpns);
+    }
 
     if(hit) {
       char *hostd = strdup((char *)as->dst.host);
@@ -3139,14 +3126,15 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
         /* protocol version switch */
         switch(as->dst.alpnid) {
         case ALPN_h1:
-          data->state.httpwant = CURL_HTTP_VERSION_1_1;
+          neg->wanted = neg->allowed = CURL_HTTP_V1x;
+          neg->only_10 = FALSE;
           break;
         case ALPN_h2:
-          data->state.httpwant = CURL_HTTP_VERSION_2_0;
+          neg->wanted = neg->allowed = CURL_HTTP_V2x;
           break;
         case ALPN_h3:
           conn->transport = TRNSPRT_QUIC;
-          data->state.httpwant = CURL_HTTP_VERSION_3;
+          neg->wanted = neg->allowed = CURL_HTTP_V3x;
           break;
         default: /* should not be possible */
           break;

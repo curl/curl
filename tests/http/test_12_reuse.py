@@ -76,30 +76,24 @@ class TestReuse:
         assert r.total_connects == count
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_12_03_alt_svc_h2h3(self, env: Env, httpd, nghttpx):
+    def test_12_03_as_follow_h2h3(self, env: Env, httpd, nghttpx):
+        # Without '--http*` an Alt-Svc redirection from h2 to h3 is allowed
         httpd.clear_extra_configs()
         httpd.reload()
-        count = 2
-        # write a alt-svc file the advises h3 instead of h2
+        # write a alt-svc file that advises h3 instead of h2
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_03.txt')
-        ts = datetime.now() + timedelta(hours=24)
-        expires = f'{ts.year:04}{ts.month:02}{ts.day:02} {ts.hour:02}:{ts.minute:02}:{ts.second:02}'
-        with open(asfile, 'w') as fd:
-            fd.write(f'h2 {env.domain1} {env.https_port} h3 {env.domain1} {env.https_port} "{expires}" 0 0')
-        log.info(f'altscv: {open(asfile).readlines()}')
+        self.create_asfile(asfile, f'h2 {env.domain1} {env.https_port} h3 {env.domain1} {env.h3_port}')
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json'
         r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
             '--alt-svc', f'{asfile}',
         ])
-        r.check_response(count=count, http_status=200)
-        # We expect the connection to be reused
-        assert r.total_connects == 1
-        for s in r.stats:
-            assert s['http_version'] == '3', f'{s}'
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['http_version'] == '3', f'{r.stats}'
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_12_04_alt_svc_h3h2(self, env: Env, httpd, nghttpx):
+    def test_12_04_as_follow_h3h2(self, env: Env, httpd, nghttpx):
+        # With '--http3` an Alt-Svc redirection from h3 to h2 is allowed
         httpd.clear_extra_configs()
         httpd.reload()
         count = 2
@@ -111,9 +105,9 @@ class TestReuse:
             fd.write(f'h3 {env.domain1} {env.https_port} h2 {env.domain1} {env.https_port} "{expires}" 0 0')
         log.info(f'altscv: {open(asfile).readlines()}')
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
-            '--alt-svc', f'{asfile}',
+            '--alt-svc', f'{asfile}', '--http3'
         ])
         r.check_response(count=count, http_status=200)
         # We expect the connection to be reused and use HTTP/2
@@ -122,7 +116,8 @@ class TestReuse:
             assert s['http_version'] == '2', f'{s}'
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_12_05_alt_svc_h3h1(self, env: Env, httpd, nghttpx):
+    def test_12_05_as_follow_h3h1(self, env: Env, httpd, nghttpx):
+        # With '--http3` an Alt-Svc redirection from h3 to h1 is allowed
         httpd.clear_extra_configs()
         httpd.reload()
         count = 2
@@ -134,12 +129,59 @@ class TestReuse:
             fd.write(f'h3 {env.domain1} {env.https_port} http/1.1 {env.domain1} {env.https_port} "{expires}" 0 0')
         log.info(f'altscv: {open(asfile).readlines()}')
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
-            '--alt-svc', f'{asfile}',
+            '--alt-svc', f'{asfile}', '--http3'
         ])
         r.check_response(count=count, http_status=200)
         # We expect the connection to be reused and use HTTP/1.1
         assert r.total_connects == 1
         for s in r.stats:
             assert s['http_version'] == '1.1', f'{s}'
+
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
+    def test_12_06_as_ignore_h3h1(self, env: Env, httpd, nghttpx):
+        # With '--http3-only` an Alt-Svc redirection from h3 to h1 is ignored
+        httpd.clear_extra_configs()
+        httpd.reload()
+        count = 2
+        # write a alt-svc file the advises h1 instead of h3
+        asfile = os.path.join(env.gen_dir, 'alt-svc-12_05.txt')
+        ts = datetime.now() + timedelta(hours=24)
+        expires = f'{ts.year:04}{ts.month:02}{ts.day:02} {ts.hour:02}:{ts.minute:02}:{ts.second:02}'
+        with open(asfile, 'w') as fd:
+            fd.write(f'h3 {env.domain1} {env.https_port} http/1.1 {env.domain1} {env.https_port} "{expires}" 0 0')
+        log.info(f'altscv: {open(asfile).readlines()}')
+        curl = CurlClient(env=env)
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json?[0-{count-1}]'
+        r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
+            '--alt-svc', f'{asfile}', '--http3-only'
+        ])
+        r.check_response(count=count, http_status=200)
+        # We expect the connection to be stay on h3, since we used --http3-only
+        assert r.total_connects == 1
+        for s in r.stats:
+            assert s['http_version'] == '3', f'{s}'
+
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
+    def test_12_07_as_ignore_h2h3(self, env: Env, httpd, nghttpx):
+        # With '--http2` an Alt-Svc redirection from h2 to h3 is ignored
+        httpd.clear_extra_configs()
+        httpd.reload()
+        # write a alt-svc file that advises h3 instead of h2
+        asfile = os.path.join(env.gen_dir, 'alt-svc-12_03.txt')
+        self.create_asfile(asfile, f'h2 {env.domain1} {env.https_port} h3 {env.domain1} {env.h3_port}')
+        curl = CurlClient(env=env)
+        urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json'
+        r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
+            '--alt-svc', f'{asfile}', '--http2'
+        ])
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['http_version'] == '2', f'{r.stats}'
+
+    def create_asfile(self, fpath, line):
+        ts = datetime.now() + timedelta(hours=24)
+        expires = f'{ts.year:04}{ts.month:02}{ts.day:02} {ts.hour:02}:{ts.minute:02}:{ts.second:02}'
+        with open(fpath, 'w') as fd:
+            fd.write(f'{line} "{expires}" 0 0')
+        log.info(f'altscv: {open(fpath).readlines()}')
