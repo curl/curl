@@ -520,7 +520,7 @@ unsigned char Curl_conn_http_version(struct Curl_easy *data)
     if(cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_SSL))
       break;
   }
-  return result ? 0 : v;
+  return (unsigned char)(result ? 0 : v);
 }
 
 bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
