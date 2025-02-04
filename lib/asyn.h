@@ -39,7 +39,7 @@ struct Curl_dns_entry;
 
 /* Data for synchronization between resolver thread and its parent */
 struct thread_sync_data {
-  curl_mutex_t *mtx;
+  curl_mutex_t mtx;
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
 #ifndef CURL_DISABLE_SOCKETPAIR
@@ -57,13 +57,14 @@ struct thread_sync_data {
 
 struct thread_data {
   curl_thread_t thread_hnd;
-  unsigned int poll_interval;
+  struct curltime start; /* when the resolver thread started */
   timediff_t interval_end;
   struct thread_sync_data tsd;
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct Curl_https_rrinfo hinfo;
   ares_channel channel;
 #endif
+  unsigned int poll_interval;
 };
 
 #elif defined(CURLRES_ARES) /* CURLRES_THREADED */

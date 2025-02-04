@@ -100,7 +100,7 @@ static void httpsrr_opt(struct Curl_easy *data,
   size_t len = 0;
   const unsigned char *val = NULL;
   unsigned short code;
-  struct thread_data *res = data->state.async.tdata;
+  struct thread_data *res = &data->state.async.tdata;
   struct Curl_https_rrinfo *hi = &res->hinfo;
   code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
 

@@ -568,7 +568,7 @@ struct hostname {
 struct Curl_async {
   char *hostname;
   struct Curl_dns_entry *dns;
-  struct thread_data *tdata;
+  struct thread_data tdata;
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel e.g. */
   int port;
