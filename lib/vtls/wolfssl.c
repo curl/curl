@@ -1282,8 +1282,10 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   }
 
   wolfSSL_set_app_data(wctx->ssl, ssl_user_data);
+#ifdef WOLFSSL_QUIC
   if(cf->conn->transport == TRNSPRT_QUIC)
     wolfSSL_set_quic_use_legacy_codepoint(wctx->ssl, 0);
+#endif
 
 #ifdef WOLFSSL_HAVE_KYBER
   if(pqkem) {
