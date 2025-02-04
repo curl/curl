@@ -58,7 +58,7 @@ does not.
 ## DoH
 
 When HTTPS RR is enabled in the curl build, The DoH code asks for an HTTPS
-record in addition to the A and AAA records, and if an HTTPS RR answer is
+record in addition to the A and AAAA records, and if an HTTPS RR answer is
 returned, curl parses it and stores the retrieved information.
 
 ## Non-DoH
