@@ -25,6 +25,7 @@
 ###########################################################################
 #
 import logging
+import os
 import re
 import pytest
 
@@ -56,7 +57,11 @@ class TestShutdown:
     def test_19_01_check_tcp_rst(self, env: Env, httpd, proto):
         if env.ci_run:
             pytest.skip("seems not to work in CI")
-        curl = CurlClient(env=env)
+        # timing critical, disable trace overrides
+        run_env = os.environ.copy()
+        if 'CURL_DEBUG' in run_env:
+            del run_env['CURL_DEBUG']
+        curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
             '--parallel'

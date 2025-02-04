@@ -49,6 +49,7 @@
 #define HAVE_KEYLOG_CALLBACK
 #endif
 
+struct alpn_spec;
 struct ssl_peer;
 
 /* Struct to hold a curl OpenSSL instance */
@@ -80,7 +81,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const unsigned char *alpn, size_t alpn_len,
+                            const struct alpn_spec *alpns,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             Curl_ossl_new_session_cb *cb_new_session,
