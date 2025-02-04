@@ -4677,15 +4677,16 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   {
+    char *buf;
     long len;
     ASN1_TIME_print(mem, X509_get0_notBefore(octx->server_cert));
-    len = BIO_get_mem_data(mem, (char **) &ptr);
-    infof(data, " start date: %.*s", (int)len, ptr);
+    len = BIO_get_mem_data(mem, (char **) &buf);
+    infof(data, " start date: %.*s", (int)len, buf);
     (void)BIO_reset(mem);
 
     ASN1_TIME_print(mem, X509_get0_notAfter(octx->server_cert));
-    len = BIO_get_mem_data(mem, (char **) &ptr);
-    infof(data, " expire date: %.*s", (int)len, ptr);
+    len = BIO_get_mem_data(mem, (char **) &buf);
+    infof(data, " expire date: %.*s", (int)len, buf);
     (void)BIO_reset(mem);
   }
 #endif
