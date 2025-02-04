@@ -428,7 +428,7 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
     filealloc = aprintf("%s%s.netrc", home, DIR_CHAR);
     if(!filealloc) {
       free(homea);
-      return -1;
+      return NETRC_OUT_OF_MEMORY;
     }
     retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
     free(filealloc);
@@ -438,7 +438,7 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
       filealloc = aprintf("%s%s_netrc", home, DIR_CHAR);
       if(!filealloc) {
         free(homea);
-        return -1;
+        return NETRC_OUT_OF_MEMORY;
       }
       retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
       free(filealloc);
