@@ -2355,7 +2355,11 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
     gnutls_record_get_max_early_data_size(ctx->tls.gtls.session);
 #endif
 #ifdef USE_WOLFSSL
+#ifdef WOLFSSL_EARLY_DATA
   ctx->earlydata_max = scs->earlydata_max;
+#else
+  ctx->earlydata_max = 0;
+#endif /* WOLFSSL_EARLY_DATA */
 #endif
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL)
   if((!ctx->earlydata_max)) {
@@ -2389,6 +2393,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   (void)data;
   (void)ctx;
   (void)scs;
+  (void)alpns;
 #endif
   return result;
 }
