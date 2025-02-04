@@ -1591,8 +1591,7 @@ static CURLcode sftp_readdir(struct Curl_easy *data,
                                  sshp->readdir_filename,
                                  readdir_len);
       if(!result)
-        result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                   (char *)"\n", 1);
+        result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       if(result)
         return result;
     }
