@@ -1,0 +1,37 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+netrc
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+http
+</features>
+<name>
+netrc with missing netrc file
+</name>
+<command>
+--netrc --netrc-file %LOGDIR/netrc%TESTNUMBER http://user1@http.example/
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>
