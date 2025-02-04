@@ -335,7 +335,7 @@ out:
       /* success without a password, set a blank one */
       password = strdup("");
       if(!password)
-        retcode = 1; /* out of memory */
+        retcode = NETRC_OUT_OF_MEMORY; /* out of memory */
     }
     else if(!login && !password)
       /* a default with no credentials */
