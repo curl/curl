@@ -548,7 +548,8 @@ wssl_setup_session(struct Curl_cfilter *cf,
   CURLcode result;
 
   result = Curl_ssl_scache_take(cf, data, ssl_peer_key, &scs);
-  if(!result && scs && scs->sdata && scs->sdata_len) {
+  if(!result && scs && scs->sdata && scs->sdata_len &&
+     (!scs->alpn || Curl_alpn_contains_proto(alpns, scs->alpn))) {
     WOLFSSL_SESSION *session;
     /* wolfSSL changes the passed pointer for whatever reasons, yikes */
     const unsigned char *sdata = scs->sdata;
@@ -576,10 +577,7 @@ wssl_setup_session(struct Curl_cfilter *cf,
           if(do_early_data) {
             /* We only try the ALPN protocol the session used before,
              * otherwise we might send early data for the wrong protocol */
-            wolfSSL_set_alpn_protos(wss->ssl,
-                                    (unsigned char *)scs->alpn,
-                                    (unsigned int)strlen(scs->alpn));
-
+            Curl_alpn_restrict_to(alpns, scs->alpn);
           }
         }
       }
@@ -1295,6 +1293,13 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   }
 #endif
 
+  /* Check if there is a cached ID we can/should use here! */
+  if(ssl_config->primary.cache_session) {
+    /* Set session from cache if there is one */
+    (void)wssl_setup_session(cf, data, wctx, &alpns,
+                             peer->scache_key, sess_reuse_cb);
+  }
+
 #ifdef HAVE_ALPN
   if(alpns.count) {
     struct alpn_proto_buf proto;
@@ -1330,13 +1335,6 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     goto out;
   }
 #endif /* HAVE_SECURE_RENEGOTIATION */
-
-  /* Check if there is a cached ID we can/should use here! */
-  if(ssl_config->primary.cache_session) {
-    /* Set session from cache if there is one */
-    (void)wssl_setup_session(cf, data, wctx, &alpns,
-                             peer->scache_key, sess_reuse_cb);
-  }
 
 #ifdef USE_ECH_WOLFSSL
   if(ECH_ENABLED(data)) {
