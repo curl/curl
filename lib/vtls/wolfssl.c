@@ -36,6 +36,8 @@
 #include <wolfssl/options.h>
 #include <wolfssl/version.h>
 
+#undef WOLFSSL_EARLY_DATA
+
 #if LIBWOLFSSL_VERSION_HEX < 0x03004006 /* wolfSSL 3.4.6 (2015) */
 #error "wolfSSL version should be at least 3.4.6"
 #endif
@@ -425,7 +427,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
   struct Curl_ssl_session *sc_session = NULL;
   unsigned char *sdata = NULL, *qtp_clone = NULL;
   unsigned int sdata_len;
-  unsigned int earlydata_max;
+  unsigned int earlydata_max = 0;
 
   if(!session)
     goto out;
@@ -455,7 +457,9 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     }
   }
+#ifdef WOLFSSL_EARLY_DATA
   earlydata_max = wolfSSL_SESSION_get_max_early_data(session);
+#endif
 
   result = Curl_ssl_session_create2(sdata, sdata_len,
                                     ietf_tls_id, alpn,
@@ -505,8 +509,14 @@ static CURLcode wssl_on_session_reuse(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   *do_early_data = FALSE;
+#ifdef WOLFSSL_EARLY_DATA
   connssl->earlydata_max = wolfSSL_SESSION_get_max_early_data(
                             wolfSSL_get_session(wssl->ssl));
+#else
+  (void)wssl;
+  connssl->earlydata_max = 0;
+#endif
+
   if(!connssl->earlydata_max) {
     /* Seems to be GnuTLS way to signal no EarlyData in session */
     CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
@@ -1713,6 +1723,7 @@ static CURLcode wssl_handshake_step(struct Curl_cfilter *cf,
   }
 }
 
+#ifdef WOLFSSL_EARLY_DATA
 static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
 {
@@ -1764,6 +1775,7 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
 out:
   return result;
 }
+#endif /* WOLFSSL_EARLY_DATA */
 
 /* this function does a SSL/TLS (re-)handshake */
 static CURLcode wssl_handshake(struct Curl_cfilter *cf,
@@ -1776,6 +1788,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(wssl);
+#ifdef WOLFSSL_EARLY_DATA
   if(connssl->earlydata_state == ssl_earlydata_sending) {
     result = wssl_send_earlydata(cf, data);
     if(result)
@@ -1783,6 +1796,8 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
   }
   DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
               (connssl->earlydata_state == ssl_earlydata_sent));
+#endif /* WOLFSSL_EARLY_DATA */
+
   for(;;) {
     timediff_t timeout_ms;
 
@@ -1833,7 +1848,7 @@ out:
   return result;
 }
 
-
+#ifdef WOLFSSL_EARLY_DATA
 static CURLcode wssl_set_earlydata(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    const void *buf, size_t blen)
@@ -1877,6 +1892,7 @@ static CURLcode wssl_connect_deferred(struct Curl_cfilter *cf,
 
   return wssl_connect_common(cf, data, TRUE, done);
 }
+#endif /* WOLFSSL_EARLY_DATA */
 
 static ssize_t wssl_send(struct Curl_cfilter *cf,
                          struct Curl_easy *data,
@@ -1891,6 +1907,7 @@ static ssize_t wssl_send(struct Curl_cfilter *cf,
 
   wolfSSL_ERR_clear_error();
 
+#ifdef WOLFSSL_EARLY_DATA
   if(connssl->state == ssl_connection_deferred) {
     bool done = FALSE;
     *curlcode = wssl_connect_deferred(cf, data, buf, blen, &done);
@@ -1920,6 +1937,7 @@ static ssize_t wssl_send(struct Curl_cfilter *cf,
       connssl->earlydata_skip = 0;
     }
   }
+#endif /* WOLFSSL_EARLY_DATA */
 
   if(blen) {
     int memlen = (blen > (size_t)INT_MAX) ? INT_MAX : (int)blen;
@@ -2113,20 +2131,20 @@ static ssize_t wssl_recv(struct Curl_cfilter *cf,
 
   DEBUGASSERT(wssl);
 
+#ifdef WOLFSSL_EARLY_DATA
   if(connssl->state == ssl_connection_deferred) {
     bool done = FALSE;
     *curlcode = wssl_connect_deferred(cf, data, NULL, 0, &done);
     if(*curlcode) {
-      nread = -1;
-      goto out;
+      return -1;
     }
     else if(!done) {
       *curlcode = CURLE_AGAIN;
-      nread = -1;
-      goto out;
+      return-1;
     }
     DEBUGASSERT(connssl->state == ssl_connection_complete);
   }
+#endif
 
   wolfSSL_ERR_clear_error();
   *curlcode = CURLE_OK;
@@ -2175,7 +2193,7 @@ static ssize_t wssl_recv(struct Curl_cfilter *cf,
       return -1;
     }
   }
-out:
+
   CURL_TRC_CF(data, cf, "wssl_recv(len=%zu) -> %d", blen, nread);
   return nread;
 }
@@ -2324,6 +2342,7 @@ static CURLcode wssl_connect_common(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_done;
     connssl->state = ssl_connection_complete;
 
+#ifdef WOLFSSL_EARLY_DATA
     if(connssl->earlydata_state == ssl_earlydata_sent) {
       /* report the true time the handshake was done */
       connssl->handshake_done = Curl_now();
@@ -2342,6 +2361,7 @@ static CURLcode wssl_connect_common(struct Curl_cfilter *cf,
               connssl->earlydata_skip);
       }
     }
+#endif /* WOLFSSL_EARLY_DATA */
   }
 
   if((connssl->connecting_state == ssl_connect_done) ||
