@@ -17,7 +17,6 @@ problems may have been fixed or changed somewhat since this was written.
  2.1 IMAPS connection fails with Rustls error
  2.3 Unable to use PKCS12 certificate with Secure Transport
  2.4 Secure Transport does not import PKCS#12 client certificates without a password
- 2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
@@ -135,14 +134,6 @@ problems may have been fixed or changed somewhat since this was written.
  libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
  function rejects certificates that do not have a password.
  https://github.com/curl/curl/issues/1308
-
-2.5 Client cert handling with Issuer DN differs between backends
-
- When the specified client certificate does not match any of the
- server-specified DNs, the OpenSSL and GnuTLS backends behave differently.
- The github discussion may contain a solution.
-
- See https://github.com/curl/curl/issues/1411
 
 2.7 Client cert (MTLS) issues with Schannel
 
