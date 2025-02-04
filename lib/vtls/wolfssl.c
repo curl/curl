@@ -36,7 +36,6 @@
 #include <wolfssl/options.h>
 #include <wolfssl/version.h>
 
-#undef WOLFSSL_EARLY_DATA
 
 #if LIBWOLFSSL_VERSION_HEX < 0x03004006 /* wolfSSL 3.4.6 (2015) */
 #error "wolfSSL version should be at least 3.4.6"
@@ -1779,10 +1778,8 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
   CURLcode result = CURLE_OK;
 
-  DEBUGASSERT(wssl);
 #ifdef WOLFSSL_EARLY_DATA
   if(connssl->earlydata_state == ssl_earlydata_sending) {
     result = wssl_send_earlydata(cf, data);
