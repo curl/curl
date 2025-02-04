@@ -1361,6 +1361,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
       }
     }
     else {
+      struct ssl_connect_data *connssl = cf->ctx;
       struct Curl_dns_entry *dns = NULL;
 
       dns = Curl_fetch_addr(data, connssl->peer.hostname, connssl->peer.port);
@@ -1688,6 +1689,7 @@ static CURLcode wssl_handshake_step(struct Curl_cfilter *cf,
       else {
         char *b64str = NULL;
         size_t blen = 0;
+        CURLcode result;
 
         result = Curl_base64_encode((const char *)echConfigs, echConfigsLen,
                                     &b64str, &blen);
