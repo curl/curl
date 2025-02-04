@@ -730,7 +730,8 @@ static struct Curl_addrinfo *ares2addr(struct ares_addrinfo_node *node)
     ca->ai_canonname = NULL;
     ca->ai_next      = NULL;
 
-    ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
+    ca->ai_addr = (struct sockaddr *)
+      ((char *)ca + sizeof(struct Curl_addrinfo));
     memcpy(ca->ai_addr, ai->ai_addr, ss_size);
 
     /* if the return list is empty, this becomes the first element */

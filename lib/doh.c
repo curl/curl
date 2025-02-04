@@ -918,7 +918,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       break;
     }
     ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
-    ai->ai_canonname = (void *)((char *)ai->ai_addr + ss_size);
+    ai->ai_canonname = ((char *)ai->ai_addr + ss_size);
     memcpy(ai->ai_canonname, hostname, hostlen);
 
     if(!firstai)
@@ -941,7 +941,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
 
     switch(ai->ai_family) {
     case AF_INET:
-      addr = (void *)ai->ai_addr; /* storage area for this info */
+      addr = (void *)ai->ai_addr; /* storage area */
       DEBUGASSERT(sizeof(struct in_addr) == sizeof(de->addr[i].ip.v4));
       memcpy(&addr->sin_addr, &de->addr[i].ip.v4, sizeof(struct in_addr));
       addr->sin_family = (CURL_SA_FAMILY_T)addrtype;
@@ -950,7 +950,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
 
 #ifdef USE_IPV6
     case AF_INET6:
-      addr6 = (void *)ai->ai_addr; /* storage area for this info */
+      addr6 = (void *)ai->ai_addr; /* storage area */
       DEBUGASSERT(sizeof(struct in6_addr) == sizeof(de->addr[i].ip.v6));
       memcpy(&addr6->sin6_addr, &de->addr[i].ip.v6, sizeof(struct in6_addr));
       addr6->sin6_family = (CURL_SA_FAMILY_T)addrtype;

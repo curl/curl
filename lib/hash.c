@@ -107,8 +107,8 @@ mk_hash_element(const void *key, size_t key_len, const void *p,
 
 #define FETCH_LIST(x,y,z) &x->table[x->hash_func(y, z, x->slots)]
 
-void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
-                     Curl_hash_elem_dtor dtor)
+void *Curl_hash_add2(struct Curl_hash *h, const char *key, size_t key_len,
+                     void *p, Curl_hash_elem_dtor dtor)
 {
   struct Curl_hash_element  *he;
   struct Curl_llist_node *le;
@@ -131,7 +131,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
   for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
     he = (struct Curl_hash_element *) Curl_node_elem(le);
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
-      Curl_node_uremove(le, (void *)h);
+      Curl_node_uremove(le, h);
       --h->size;
       break;
     }
@@ -156,7 +156,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
  * @unittest: 1603
  */
 void *
-Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
+Curl_hash_add(struct Curl_hash *h, const char *key, size_t key_len, void *p)
 {
   return Curl_hash_add2(h, key, key_len, p, NULL);
 }
@@ -166,7 +166,7 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
  *
  * @unittest: 1603
  */
-int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
+int Curl_hash_delete(struct Curl_hash *h, const char *key, size_t key_len)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
@@ -178,7 +178,7 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
     for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
       struct Curl_hash_element *he = Curl_node_elem(le);
       if(h->comp_func(he->key, he->key_len, key, key_len)) {
-        Curl_node_uremove(le, (void *) h);
+        Curl_node_uremove(le, h);
         --h->size;
         return 0;
       }
@@ -192,7 +192,7 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
  * @unittest: 1603
  */
 void *
-Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
+Curl_hash_pick(struct Curl_hash *h, const char *key, size_t key_len)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(h->init == HASHINIT);
@@ -270,7 +270,7 @@ Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
       struct Curl_llist_node *lnext = Curl_node_next(le);
       /* ask the callback function if we shall remove this entry or not */
       if(!comp || comp(user, he->ptr)) {
-        Curl_node_uremove(le, (void *) h);
+        Curl_node_uremove(le, h);
         --h->size; /* one less entry in the hash now */
       }
       le = lnext;
@@ -278,9 +278,9 @@ Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
   }
 }
 
-size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
+size_t Curl_hash_str(const char *key, size_t key_length, size_t slots_num)
 {
-  const char *key_str = (const char *) key;
+  const char *key_str = key;
   const char *end = key_str + key_length;
   size_t h = 5381;
 
@@ -293,8 +293,8 @@ size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
   return (h % slots_num);
 }
 
-size_t Curl_str_key_compare(void *k1, size_t key1_len,
-                            void *k2, size_t key2_len)
+size_t Curl_str_key_compare(const char *k1, size_t key1_len,
+                            const char *k2, size_t key2_len)
 {
   if((key1_len == key2_len) && !memcmp(k1, k2, key1_len))
     return 1;
@@ -389,17 +389,28 @@ void Curl_hash_offt_init(struct Curl_hash *h,
   Curl_hash_init(h, slots, Curl_hash_str, Curl_str_key_compare, dtor);
 }
 
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:2312)
+/* error #2312: pointer cast involving 64-bit pointed-to type
+   on the (char *)&id typecasts below */
+#endif
+
 void *Curl_hash_offt_set(struct Curl_hash *h, curl_off_t id, void *elem)
 {
-  return Curl_hash_add(h, &id, sizeof(id), elem);
+  return Curl_hash_add(h, (char *)&id, sizeof(id), elem);
 }
 
 int Curl_hash_offt_remove(struct Curl_hash *h, curl_off_t id)
 {
-  return Curl_hash_delete(h, &id, sizeof(id));
+  return Curl_hash_delete(h, (char *)&id, sizeof(id));
 }
 
 void *Curl_hash_offt_get(struct Curl_hash *h, curl_off_t id)
 {
-  return Curl_hash_pick(h, &id, sizeof(id));
+  return Curl_hash_pick(h, (char *)&id, sizeof(id));
 }
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif

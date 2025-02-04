@@ -186,16 +186,14 @@ void
 Curl_node_uremove(struct Curl_llist_node *e, void *user)
 {
   struct Curl_llist *list;
-  void *ptr;
   if(!e)
     return;
 
   list = e->_list;
   DEBUGASSERT(list);
-  if(list) {
-    ptr = Curl_node_take_elem(e);
-    if(list->_dtor)
-      list->_dtor(user, ptr);
+  if(list && list->_dtor) {
+    void *ptr = Curl_node_take_elem(e);
+    list->_dtor(user, ptr);
   }
 }
 

@@ -77,7 +77,8 @@ Curl_he2ai(const struct hostent *he, int port);
 #endif
 
 struct Curl_addrinfo *
-Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port);
+Curl_ip2addr(CURL_SA_FAMILY_T af, const void *inaddr, const char *hostname,
+             int port);
 
 struct Curl_addrinfo *Curl_str2addr(char *dotted, int port);
 

@@ -248,14 +248,15 @@ static struct Curl_sh_entry *sh_getentry(struct Curl_hash *sh,
 #define TRHASH_SIZE 13
 
 /* the given key here is a struct Curl_easy pointer */
-static size_t trhash(void *key, size_t key_length, size_t slots_num)
+static size_t trhash(const char *key, size_t key_length, size_t slots_num)
 {
   unsigned char bytes = ((unsigned char *)key)[key_length - 1] ^
     ((unsigned char *)key)[0];
   return (bytes % slots_num);
 }
 
-static size_t trhash_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
+static size_t trhash_compare(const char *k1, size_t k1_len,
+                             const char *k2, size_t k2_len)
 {
   (void)k2_len;
   return !memcmp(k1, k2, k1_len);
@@ -339,17 +340,20 @@ static void sh_freeentry(void *freethis)
   free(p);
 }
 
-static size_t fd_key_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
+static size_t fd_key_compare(const char *k1, size_t k1_len,
+                             const char *k2, size_t k2_len)
 {
-  (void) k1_len; (void) k2_len;
-
-  return (*((curl_socket_t *) k1)) == (*((curl_socket_t *) k2));
+  (void) k2_len;
+  return !memcmp(k1, k2, k1_len);
 }
 
-static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
+static size_t hash_fd(const char *key, size_t key_length, size_t slots_num)
 {
-  curl_socket_t fd = *((curl_socket_t *) key);
+  curl_socket_t fd;
+  DEBUGASSERT(sizeof(fd) == key_length);
   (void) key_length;
+
+  memcpy(&fd, key, key_length);
 
   return (fd % (curl_socket_t)slots_num);
 }

@@ -76,7 +76,7 @@
 struct cpool_bundle {
   struct Curl_llist conns; /* connections in the bundle */
   size_t dest_len; /* total length of destination, including NUL */
-  char *dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
+  char dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
 };
 
 
@@ -147,10 +147,10 @@ static void cpool_bundle_free_entry(void *freethis)
 }
 
 int Curl_cpool_init(struct cpool *cpool,
-                        Curl_cpool_disconnect_cb *disconnect_cb,
-                        struct Curl_multi *multi,
-                        struct Curl_share *share,
-                        size_t size)
+                    Curl_cpool_disconnect_cb *disconnect_cb,
+                    struct Curl_multi *multi,
+                    struct Curl_share *share,
+                    size_t size)
 {
   DEBUGASSERT(!!multi != !!share); /* either one */
   Curl_hash_init(&cpool->dest2bundle, size, Curl_hash_str,
@@ -602,7 +602,7 @@ bool Curl_cpool_find(struct Curl_easy *data,
     return FALSE;
 
   CPOOL_LOCK(cpool);
-  bundle = Curl_hash_pick(&cpool->dest2bundle, (void *)destination, dest_len);
+  bundle = Curl_hash_pick(&cpool->dest2bundle, destination, dest_len);
   if(bundle) {
     struct Curl_llist_node *curr = Curl_llist_head(&bundle->conns);
     while(curr) {

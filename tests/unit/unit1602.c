@@ -50,6 +50,7 @@ static void unit_stop(void)
 }
 
 UNITTEST_START
+{
   int *value;
   int *value2;
   int *nodep;
@@ -62,7 +63,7 @@ UNITTEST_START
   value = malloc(sizeof(int));
   abort_unless(value != NULL, "Out of memory");
   *value = 199;
-  nodep = Curl_hash_add(&hash_static, &key, klen, value);
+  nodep = Curl_hash_add(&hash_static, (char *)&key, klen, value);
   if(!nodep)
     free(value);
   abort_unless(nodep, "insertion into hash failed");
@@ -72,9 +73,9 @@ UNITTEST_START
   value2 = malloc(sizeof(int));
   abort_unless(value2 != NULL, "Out of memory");
   *value2 = 204;
-  nodep = Curl_hash_add(&hash_static, &key2, klen, value2);
+  nodep = Curl_hash_add(&hash_static, (char *)&key2, klen, value2);
   if(!nodep)
     free(value2);
   abort_unless(nodep, "insertion into hash failed");
-
+}
 UNITTEST_STOP
