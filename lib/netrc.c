@@ -70,7 +70,7 @@ enum found_state {
 
 static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 {
-  NETRCcode ret = NETRC_FILE_MISSING; /* if it can't open the file */
+  NETRCcode ret = NETRC_FILE_MISSING; /* if it cannot open the file */
   FILE *file = fopen(filename, FOPEN_READTEXT);
   struct dynbuf linebuf;
   Curl_dyn_init(&linebuf, MAX_NETRC_LINE);
