@@ -1831,6 +1831,24 @@ bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
   return FALSE;
 }
 
+void Curl_alpn_restrict_to(struct alpn_spec *spec, const char *proto)
+{
+  size_t plen = strlen(proto);
+  DEBUGASSERT(plen < sizeof(spec->entries[0]));
+  if(plen < sizeof(spec->entries[0])) {
+    memcpy(spec->entries[0], proto, plen + 1);
+    spec->count = 1;
+  }
+}
+
+void Curl_alpn_copy(struct alpn_spec *dest, const struct alpn_spec *src)
+{
+  if(src)
+    memcpy(dest, src, sizeof(*dest));
+  else
+    memset(dest, 0, sizeof(*dest));
+}
+
 CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct ssl_connect_data *connssl,

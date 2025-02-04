@@ -703,8 +703,8 @@ class TestUpload:
                                        # of 128K.
     ])
     def test_07_70_put_earlydata(self, env: Env, httpd, nghttpx, proto, upload_size, exp_early):
-        if not env.curl_uses_lib('gnutls'):
-            pytest.skip('TLS earlydata only implemented in GnuTLS')
+        if not env.curl_uses_lib('gnutls') and not env.curl_uses_lib('wolfssl'):
+            pytest.skip('TLS earlydata only implemented in GnuTLS/wolfSSL')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
