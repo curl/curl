@@ -308,7 +308,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD4_SET(n) \
-        (*(MD4_u32plus *)(void *)&ptr[(n) * 4])
+        (*(const MD4_u32plus *)(const void *)&ptr[(n) * 4])
 #define MD4_GET(n) \
         MD4_SET(n)
 #else
