@@ -117,7 +117,7 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
 }
 
 static CURLcode mqtt_send(struct Curl_easy *data,
-                          char *buf, size_t len)
+                          const char *buf, size_t len)
 {
   CURLcode result = CURLE_OK;
   struct MQTT *mq = data->req.p.mqtt;
@@ -351,7 +351,7 @@ static CURLcode mqtt_disconnect(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   struct MQTT *mq = data->req.p.mqtt;
-  result = mqtt_send(data, (char *)"\xe0\x00", 2);
+  result = mqtt_send(data, "\xe0\x00", 2);
   Curl_safefree(mq->sendleftovers);
   Curl_dyn_free(&mq->recvbuf);
   return result;
@@ -471,7 +471,7 @@ static CURLcode mqtt_subscribe(struct Curl_easy *data)
   memcpy(&packet[5 + n], topic, topiclen);
   packet[5 + n + topiclen] = 0; /* QoS zero */
 
-  result = mqtt_send(data, (char *)packet, packetlen);
+  result = mqtt_send(data, (const char *)packet, packetlen);
 
 fail:
   free(topic);
@@ -558,7 +558,7 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   i += topiclen;
   memcpy(&pkt[i], payload, payloadlen);
   i += payloadlen;
-  result = mqtt_send(data, (char *)pkt, i);
+  result = mqtt_send(data, (const char *)pkt, i);
 
 fail:
   free(pkt);

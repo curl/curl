@@ -98,7 +98,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
 {
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
-    *param_charp = data->state.url ? data->state.url : (char *)"";
+    *param_charp = data->state.url ? data->state.url : "";
     break;
   case CURLINFO_EFFECTIVE_METHOD: {
     const char *m = data->set.str[STRING_CUSTOMREQUEST];
