@@ -49,7 +49,7 @@ on the sponsor page anymore. We thank you for your contributions.
 
 ## Donations
 
-Please note that sponsorships and donations are exactly that: donations to the
+Please note that sponsorship and donations are exactly that: donations to the
 curl project. They are used to help and further the project as the project
 leadership deems best. No goods or services are expected or promised in
 return. Requests for refunds for such purposes are rejected.
