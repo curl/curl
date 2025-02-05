@@ -1848,7 +1848,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       rc = ssh_scp_push_file(sshc->scp_session, protop->path,
-                             data->state.infilesize,
+                             (size_t)data->state.infilesize,
                              (int)data->set.new_file_perms);
       if(rc != SSH_OK) {
         err_msg = ssh_get_error(sshc->ssh_session);
