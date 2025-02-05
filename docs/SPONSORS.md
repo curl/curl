@@ -25,7 +25,8 @@ named sponsor level: **Silver**, **Gold**, **Platinum** or **Top**.
 
 Sponsors on a named level can provide their logo image and preferred URL and
 get recognition on the curl website's [sponsor
-page](https://curl.se/sponsors.html).
+page](https://curl.se/sponsors.html), assuming they meet the project's
+standards and requirements.
 
 - **Silver Sponsor** at least 100 USD/month
 - **Gold Sponsor** at least 500 USD/month
@@ -45,3 +46,10 @@ gambling, pornography, social media manipulation etc.
 
 Sponsors that stop paying are considered *Past Sponsors* and are not displayed
 on the sponsor page anymore. We thank you for your contributions.
+
+## Donations
+
+Please note that sponsorship and donations are exactly that: donations to the
+curl project. They are used to help and further the project as the project
+leadership deems best. No goods or services are expected or promised in
+return. Requests for refunds for such purposes are rejected.
