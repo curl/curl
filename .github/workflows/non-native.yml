@@ -156,13 +156,14 @@ jobs:
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             time make -j3 install
             src/curl --disable --version
+            desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time make -j3 -C tests
-              if [[ '${{ matrix.desc }}' != *'!runtests'* ]]; then
+              if [ "${desc#*!runtests*}" = "${desc}" ]; then
                 time make test-ci V=1 TFLAGS='-j4'
               fi
             fi
-            if [[ '${{ matrix.desc }}' != *'!examples'* ]]; then
+            if [ "${desc#*!examples*}" = "${desc}" ]; then
               echo '::group::build examples'
               time make -j3 examples
               echo '::endgroup::'
@@ -192,13 +193,14 @@ jobs:
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld --config Debug
             bld/src/curl --disable --version
+            desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --config Debug --target testdeps
-              if [[ '${{ matrix.desc }}' != *'!runtests'* ]]; then
+              if [ "${desc#*!runtests*}" = "${desc}" ]; then
                 time cmake --build bld --config Debug --target test-ci
               fi
             fi
-            if [[ '${{ matrix.desc }}' != *'!examples'* ]]; then
+            if [ "${desc#*!examples*}" = "${desc}" ]; then
               echo '::group::build examples'
               time cmake --build bld --config Debug --target curl-examples
               echo '::endgroup::'
