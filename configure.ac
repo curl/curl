@@ -5017,7 +5017,7 @@ if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1" \
                             -o "x$USE_THREADS_WIN32" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
-if test "x$USE_ARES" = "x1" -a "$want_threaded_resolver" = "yes"; then
+if test "x$USE_ARES" = "x1" -a "$want_threaded_resolver" = "yes" -a "x$want_httpsrr" != "xno"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES asyn-rr"
 fi
 if test "x$IDN_ENABLED" = "x1"; then
