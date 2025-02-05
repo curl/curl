@@ -623,10 +623,6 @@ elseif(NOT WIN32 AND NOT APPLE)
   endif()
 endif()
 
-if(WIN32)
-  list(APPEND CURL_LIBS "ws2_32" "bcrypt")
-endif()
-
 # Check SSL libraries
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
@@ -1308,9 +1304,9 @@ set(USE_LIBSSH2 OFF)
 if(CURL_USE_LIBSSH2)
   find_package(Libssh2)
   if(LIBSSH2_FOUND)
-    list(APPEND CURL_LIBS ${LIBSSH2_LIBRARIES})
+    set(CURL_LIBS ${LIBSSH2_LIBRARIES} ${CURL_LIBS})  # keep it before TLS-crypto, compression
     list(APPEND CURL_LIBDIRS ${LIBSSH2_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH2_PC_REQUIRES})
+    set(LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH2_PC_REQUIRES} ${LIBCURL_PC_REQUIRES_PRIVATE})
     include_directories(SYSTEM ${LIBSSH2_INCLUDE_DIRS})
     link_directories(${LIBSSH2_LIBRARY_DIRS})
     if(LIBSSH2_CFLAGS)
@@ -1325,9 +1321,9 @@ option(CURL_USE_LIBSSH "Use libssh" OFF)
 mark_as_advanced(CURL_USE_LIBSSH)
 if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(Libssh REQUIRED)
-  list(APPEND CURL_LIBS ${LIBSSH_LIBRARIES})
+  set(CURL_LIBS ${LIBSSH_LIBRARIES} ${CURL_LIBS})  # keep it before TLS-crypto, compression
   list(APPEND CURL_LIBDIRS ${LIBSSH_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH_PC_REQUIRES})
+  set(LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH_PC_REQUIRES} ${LIBCURL_PC_REQUIRES_PRIVATE})
   include_directories(SYSTEM ${LIBSSH_INCLUDE_DIRS})
   link_directories(${LIBSSH_LIBRARY_DIRS})
   if(LIBSSH_CFLAGS)
@@ -1344,7 +1340,7 @@ if(NOT USE_LIBSSH2 AND NOT USE_LIBSSH AND CURL_USE_WOLFSSH)
   if(USE_WOLFSSL)
     find_package(WolfSSH)
     if(WOLFSSH_FOUND)
-      list(APPEND CURL_LIBS ${WOLFSSH_LIBRARIES})
+      set(CURL_LIBS ${WOLFSSH_LIBRARIES} ${CURL_LIBS})  # keep it before TLS-crypto, compression
       include_directories(SYSTEM ${WOLFSSH_INCLUDE_DIRS})
       set(USE_WOLFSSH ON)
     endif()
@@ -1930,6 +1926,8 @@ include(CMake/OtherTests.cmake)
 add_definitions("-DHAVE_CONFIG_H")
 
 if(WIN32)
+  list(APPEND CURL_LIBS "ws2_32" "bcrypt")
+
   # _fseeki64() requires VS2005
   if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1400))
     set(USE_WIN32_LARGE_FILES ON)
