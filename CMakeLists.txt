@@ -765,6 +765,8 @@ if(CURL_USE_OPENSSL)
       list(APPEND CURL_LIBS "stdc++")
       list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
     endif()
+  elseif(WIN32 AND CMAKE_COMPILER_IS_GNUCC AND HAVE_LIBRESSL)
+    list(APPEND CURL_LIBS "ws2_32")  # Add a duplicate to make binutils ld resolve symbols
   endif()
 
   if(HAVE_BORINGSSL)
