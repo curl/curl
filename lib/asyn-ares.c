@@ -355,6 +355,9 @@ static void destroy_async_data(struct Curl_async *async)
         Curl_freeaddrinfo(res->temp_ai);
         res->temp_ai = NULL;
       }
+#ifdef USE_HTTPSRR_ARES
+      Curl_httpsrr_cleanup(&res->hinfo);
+#endif
       free(res);
     }
     async->tdata = NULL;
@@ -422,14 +425,14 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
        them */
     res->temp_ai = NULL;
 
+    result = res->result;
     if(!data->state.async.dns)
       result = Curl_resolver_error(data);
-    else {
+    if(!result) {
       *dns = data->state.async.dns;
 #ifdef USE_HTTPSRR_ARES
       {
-        struct Curl_https_rrinfo *lhrr =
-          Curl_memdup(&res->hinfo, sizeof(struct Curl_https_rrinfo));
+        struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&res->hinfo);
         if(!lhrr)
           result = CURLE_OUT_OF_MEMORY;
         else

@@ -1079,10 +1079,7 @@ static void hostcache_unlink_entry(void *entry)
     Curl_freeaddrinfo(dns->addr);
 #ifdef USE_HTTPSRR
     if(dns->hinfo) {
-      free(dns->hinfo->target);
-      free(dns->hinfo->ipv4hints);
-      free(dns->hinfo->echconfiglist);
-      free(dns->hinfo->ipv6hints);
+      Curl_httpsrr_cleanup(dns->hinfo);
       free(dns->hinfo);
     }
 #endif
