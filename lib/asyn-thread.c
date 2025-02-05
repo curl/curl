@@ -236,9 +236,8 @@ err_exit:
 static CURLcode getaddrinfo_complete(struct Curl_easy *data)
 {
   struct thread_sync_data *tsd = conn_thread_sync_data(data);
-  CURLcode result;
+  CURLcode result = Curl_addrinfo_callback(data, tsd->sock_error, tsd->res);
 
-  result = Curl_addrinfo_callback(data, tsd->sock_error, tsd->res);
   /* The tsd->res structure has been copied to async.dns and perhaps the DNS
      cache. Set our copy to NULL so destroy_thread_sync_data does not free it.
   */
@@ -364,50 +363,49 @@ CURL_STDCALL gethostbyname_thread(void *arg)
 static void destroy_async_data(struct Curl_easy *data)
 {
   struct Curl_async *async;
+  struct thread_data *td;
+  bool done;
   DEBUGASSERT(data);
   async = &data->state.async;
   DEBUGASSERT(async);
-  {
-    struct thread_data *td = &async->tdata;
-    bool done;
-#ifndef CURL_DISABLE_SOCKETPAIR
-    curl_socket_t sock_rd = td->tsd.sock_pair[0];
-#endif
+  td = &async->tdata;
 
 #ifdef USE_HTTPSRR_ARES
-    ares_destroy(data->state.async.tdata.channel);
-    data->state.async.tdata.channel = NULL;
+  ares_destroy(data->state.async.tdata.channel);
+  data->state.async.tdata.channel = NULL;
 #endif
-    /*
-     * if the thread is still blocking in the resolve syscall, detach it and
-     * let the thread do the cleanup...
-     */
-    Curl_mutex_acquire(&td->tsd.mtx);
-    done = td->tsd.done;
-    td->tsd.done = TRUE;
-    Curl_mutex_release(&td->tsd.mtx);
+  /*
+   * if the thread is still blocking in the resolve syscall, detach it and
+   * let the thread do the cleanup...
+   */
+  Curl_mutex_acquire(&td->tsd.mtx);
+  done = td->tsd.done;
+  td->tsd.done = TRUE;
+  Curl_mutex_release(&td->tsd.mtx);
 
-    if(!done) {
-      Curl_thread_destroy(td->thread_hnd);
-    }
-    else {
-      if(td->thread_hnd != curl_thread_t_null)
-        Curl_thread_join(&td->thread_hnd);
+  if(!done) {
+    Curl_thread_destroy(td->thread_hnd);
+  }
+  else {
+    if(td->thread_hnd != curl_thread_t_null)
+      Curl_thread_join(&td->thread_hnd);
 
-      destroy_thread_sync_data(&td->tsd);
-    }
+    destroy_thread_sync_data(&td->tsd);
+  }
 #ifndef CURL_DISABLE_SOCKETPAIR
+  {
+    curl_socket_t sock_rd = td->tsd.sock_pair[0];
+
     /*
      * ensure CURLMOPT_SOCKETFUNCTION fires CURL_POLL_REMOVE
      * before the FD is invalidated to avoid EBADF on EPOLL_CTL_DEL
      */
     Curl_multi_closed(data, sock_rd);
     wakeup_close(sock_rd);
-#endif
   }
+#endif
 
-  free(async->hostname);
-  async->hostname = NULL;
+  Curl_safefree(async->hostname);
 }
 
 #ifdef USE_HTTPSRR_ARES
