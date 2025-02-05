@@ -138,7 +138,7 @@ void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
   struct Curl_easy *data = arg;
   size_t i;
 #ifdef CURLRES_ARES
-  struct thread_data *res = data->state.async.tdata;
+  struct thread_data *res = &data->state.async.tdata;
 
   res->num_pending--;
 #endif

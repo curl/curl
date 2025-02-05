@@ -348,17 +348,12 @@ void Curl_resolver_kill(struct Curl_easy *data)
  */
 static void destroy_async_data(struct Curl_async *async)
 {
-  if(async->tdata) {
-    struct thread_data *res = async->tdata;
-    if(res) {
-      if(res->temp_ai) {
-        Curl_freeaddrinfo(res->temp_ai);
-        res->temp_ai = NULL;
-      }
-      free(res);
-    }
-    async->tdata = NULL;
+  struct thread_data *res = &async->tdata;
+  if(res->temp_ai) {
+    Curl_freeaddrinfo(res->temp_ai);
+    res->temp_ai = NULL;
   }
+  Curl_safefree(res->hostname);
 }
 
 /*
@@ -382,7 +377,7 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
                                    struct Curl_dns_entry **dns)
 {
-  struct thread_data *res = data->state.async.tdata;
+  struct thread_data *res = &data->state.async.tdata;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(dns);
@@ -753,7 +748,7 @@ static void addrinfo_cb(void *arg, int status, int timeouts,
                         struct ares_addrinfo *result)
 {
   struct Curl_easy *data = (struct Curl_easy *)arg;
-  struct thread_data *res = data->state.async.tdata;
+  struct thread_data *res = &data->state.async.tdata;
   (void)timeouts;
   if(ARES_SUCCESS == status) {
     res->temp_ai = ares2addr(result->nodes);
@@ -778,19 +773,16 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                                                 int port,
                                                 int *waitp)
 {
-  struct thread_data *res = NULL;
-  size_t namelen = strlen(hostname);
+  struct thread_data *res = &data->state.async.tdata;
   *waitp = 0; /* default to synchronous response */
 
-  res = calloc(1, sizeof(struct thread_data) + namelen);
-  if(res) {
-    strcpy(res->hostname, hostname);
+  res->hostname = strdup(hostname);
+  if(res->hostname) {
     data->state.async.hostname = res->hostname;
     data->state.async.port = port;
     data->state.async.done = FALSE;   /* not done */
     data->state.async.status = 0;     /* clear */
     data->state.async.dns = NULL;     /* clear */
-    data->state.async.tdata = res;
 
     /* initial status - failed */
     res->last_status = ARES_ENOTFOUND;

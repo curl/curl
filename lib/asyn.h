@@ -70,9 +70,10 @@ struct thread_data {
 #elif defined(CURLRES_ARES) /* CURLRES_THREADED */
 
 struct thread_data {
-  int num_pending; /* number of outstanding c-ares requests */
+  char *hostname;
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
+  int num_pending; /* number of outstanding c-ares requests */
   int last_status;
 #ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
@@ -80,7 +81,6 @@ struct thread_data {
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo hinfo;
 #endif
-  char hostname[1];
 };
 
 #endif /* CURLRES_ARES */
