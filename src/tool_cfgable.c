@@ -46,6 +46,11 @@ void config_init(struct OperationConfig *config)
   config->ftp_skip_ip = TRUE;
   config->file_clobber_mode = CLOBBER_DEFAULT;
   curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
+
+#ifdef CURL_CA_NATIVE_BY_DEFAULT
+  config->native_ca_store = TRUE;
+  config->proxy_native_ca_store = TRUE;
+#endif
 }
 
 static void free_config_fields(struct OperationConfig *config)

@@ -1472,6 +1472,8 @@ endif()
 #
 # CA handling
 #
+option(CURL_CA_NATIVE_BY_DEFAULT "Use native CA store by default in the curl tool" OFF)
+
 if(_curl_ca_bundle_supported)
   set(CURL_CA_BUNDLE "auto" CACHE
     STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")

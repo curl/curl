@@ -177,6 +177,8 @@ assumes that CMake generates `Makefile`:
 - `CURL_CA_BUNDLE`:                         Path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_EMBED`:                          Path to the CA bundle to embed in the curl tool. Default: (disabled)
 - `CURL_CA_FALLBACK`:                       Use built-in CA store of TLS backend. Default: `OFF`
+- `CURL_CA_NATIVE_BY_DEFAULT`:              Use native CA store by default in the curl tool. Default: `OFF`
+                                            Supported by GnuTLS, OpenSSL (including forks) on Windows, wolfSSL.
 - `CURL_CA_PATH`:                           Location of default CA path. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
 
