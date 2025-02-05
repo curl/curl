@@ -138,7 +138,7 @@ jobs:
             "${DOCKER_IMAGE}" \
             sh -c ./_ci-linux-debian.sh
 
-  win-gcc-libssh-x86:
+  win-gcc-libssh-zlibng-x86:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -150,7 +150,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-win-x86-gcc-libssh1-nolibgroup'
+          export CW_CONFIG='-main-werror-win-x86-gcc-nolibgroup-libssh1-zlibng'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
           docker trust inspect --pretty "${DOCKER_IMAGE}"
