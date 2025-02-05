@@ -39,7 +39,6 @@ struct Curl_dns_entry;
 
 /* Data for synchronization between resolver thread and its parent */
 struct thread_sync_data {
-  curl_mutex_t mtx;
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
 #ifndef CURL_DISABLE_SOCKETPAIR
@@ -50,6 +49,7 @@ struct thread_sync_data {
   struct addrinfo hints;
 #endif
   struct thread_data *td; /* for thread-self cleanup */
+  curl_mutex_t mtx;
   int port;
   int sock_error;
   bool done;
