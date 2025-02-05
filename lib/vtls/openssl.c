@@ -140,6 +140,12 @@
 #include <openssl/ui.h>
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#define OSSL_UI_METHOD_CAST(x) (x)
+#else
+#define OSSL_UI_METHOD_CAST(x) CURL_UNCONST(x)
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L /* OpenSSL 1.1.0+ and LibreSSL */
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
@@ -1576,7 +1582,7 @@ fail:
 
       if(data->state.engine) {
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -1627,7 +1633,7 @@ fail:
         OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
