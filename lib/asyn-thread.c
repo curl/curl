@@ -668,9 +668,11 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
   timediff_t milli;
   timediff_t ms;
   struct resdata *reslv = (struct resdata *)data->state.async.resolver;
-  int socketi = 0;
 #ifndef CURL_DISABLE_SOCKETPAIR
   struct thread_data *td = data->state.async.tdata;
+#endif
+#if !defined(CURL_DISABLE_SOCKETPAIR) || defined(USE_HTTPSRR_ARES)
+  int socketi = 0;
 #else
   (void)socks;
 #endif
