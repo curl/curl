@@ -592,7 +592,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
        be valid so only defer it when we know the 'status' says its fine! */
     return;
 
-  res = data->state.async.tdata;
+  res = &data->state.async.tdata;
   if(res) {
     res->num_pending--;
 
