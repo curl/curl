@@ -1576,7 +1576,7 @@ fail:
 
       if(data->state.engine) {
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method((OSSL11_CONST char *)"curl user interface");
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -1627,7 +1627,7 @@ fail:
         OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method((OSSL11_CONST char *)"curl user interface");
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -2727,15 +2727,15 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
       tls_rt_name = "";
 
     if(content_type == SSL3_RT_CHANGE_CIPHER_SPEC) {
-      msg_type = *(char *)buf;
+      msg_type = *(const char *)buf;
       msg_name = "Change cipher spec";
     }
     else if(content_type == SSL3_RT_ALERT) {
-      msg_type = (((char *)buf)[0] << 8) + ((char *)buf)[1];
+      msg_type = (((const char *)buf)[0] << 8) + ((const char *)buf)[1];
       msg_name = SSL_alert_desc_string_long(msg_type);
     }
     else {
-      msg_type = *(char *)buf;
+      msg_type = *(const char *)buf;
       msg_name = ssl_msg_type(ssl_ver, msg_type);
     }
 
