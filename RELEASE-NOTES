@@ -33,6 +33,7 @@ This release includes the following bugfixes:
  o build: delete `-Wsign-conversion` related FIXMEs [137]
  o build: drop `-Winline` picky warning [53]
  o build: drop `tool_hugehelp.c.cvs`, tidy up macros, drop `buildconf.bat` [200]
+ o build: drop macro used to enable `-Wsign-conversion` warnings in CI [224]
  o build: drop unused feature macros, update exception list [51]
  o build: fix `-Wtrampolines` picky warning for gcc 4.x versions [156]
  o build: fix compiling with GCC 4.x versions [214]
@@ -288,14 +289,15 @@ advice from friends like these:
   Dexter Gerig, Donguk Kim, dwickr, Edoardo Lolletti, Ganesh Viswanathan,
   Harry Sintonen, Hermes Zhang, IcedCoffeee on github, Igor Todorovski,
   Jakub Jelen, Jeroen Ooms, Jiri Stary, Kai Pastor, Kevin Sun, Kuan-Wei Chiu,
-  Leon Timmermans, Manuel Einfalt, Marcel Raad, Martin Harrigan, mauke,
-  Michael Schuster, Milon Renatus, Mohammed Sadiq, na-trium-144 on github,
-  Neil Horman, Neil Johari, Nicolás San Martín, Patrick Monnerat,
-  prpr19xx on github, Qriist on github, Ralph Sennhauser, Randall S. Becker,
-  Ray Satiro, renovate[bot], Rudi Heitbaum, Samuel Henrique, Stefan Eissing,
-  Stephen Farrell, Tal Regev, Tamás Bálint Misius, Tamir Duberstein,
-  Viktor Szakats, Yedaya Katsman, Yihang Zhou, z2_
-  (63 contributors)
+  Leon Timmermans, MacKenzie, Manuel Einfalt, Marcel Raad, Martin Harrigan,
+  mauke, Michael Schuster, Milon Renatus, Mohammed Sadiq,
+  na-trium-144 on github, Neil Horman, Neil Johari, Nicolás San Martín,
+  Patrick Monnerat, prpr19xx on Github, Qriist on github, ralfjunker on github,
+  Ralph Sennhauser, Randall S. Becker, Ray Satiro, renovate[bot],
+  Rudi Heitbaum, Samuel Henrique, Stefan Eissing, Stephen Farrell, Tal Regev,
+  Tamás Bálint Misius, Tamir Duberstein, Viktor Szakats, Yedaya Katsman,
+  Yihang Zhou, z2_
+  (65 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -521,6 +523,7 @@ References to bug reports and discussions on issues:
  [221] = https://curl.se/bug/?i=16120
  [222] = https://curl.se/bug/?i=16121
  [223] = https://curl.se/bug/?i=16114
+ [224] = https://curl.se/bug/?i=16152
  [225] = https://curl.se/bug/?i=16113
  [226] = https://curl.se/bug/?i=16110
  [227] = https://curl.se/bug/?i=16105
