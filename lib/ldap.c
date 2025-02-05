@@ -389,55 +389,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
     int ldap_option;
     char *ldap_ca = conn->ssl_config.CAfile;
-#if defined(CURL_HAS_NOVELL_LDAPSDK)
-    rc = ldapssl_client_init(NULL, NULL);
-    if(rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ldapssl_client_init %s", ldap_err2string(rc));
-      result = CURLE_SSL_CERTPROBLEM;
-      goto quit;
-    }
-    if(conn->ssl_config.verifypeer) {
-      /* Novell SDK supports DER or BASE64 files. */
-      int cert_type = LDAPSSL_CERT_FILETYPE_B64;
-      if((data->set.ssl.cert_type) &&
-         (strcasecompare(data->set.ssl.cert_type, "DER")))
-        cert_type = LDAPSSL_CERT_FILETYPE_DER;
-      if(!ldap_ca) {
-        failf(data, "LDAP local: ERROR %s CA cert not set",
-              (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"));
-        result = CURLE_SSL_CERTPROBLEM;
-        goto quit;
-      }
-      infof(data, "LDAP local: using %s CA cert '%s'",
-            (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
-            ldap_ca);
-      rc = ldapssl_add_trusted_cert(ldap_ca, cert_type);
-      if(rc != LDAP_SUCCESS) {
-        failf(data, "LDAP local: ERROR setting %s CA cert: %s",
-              (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
-              ldap_err2string(rc));
-        result = CURLE_SSL_CERTPROBLEM;
-        goto quit;
-      }
-      ldap_option = LDAPSSL_VERIFY_SERVER;
-    }
-    else
-      ldap_option = LDAPSSL_VERIFY_NONE;
-    rc = ldapssl_set_verify_mode(ldap_option);
-    if(rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ERROR setting cert verify mode: %s",
-              ldap_err2string(rc));
-      result = CURLE_SSL_CERTPROBLEM;
-      goto quit;
-    }
-    server = ldapssl_init(host, conn->primary.remote_port, 1);
-    if(!server) {
-      failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, conn->primary.remote_port);
-      result = CURLE_COULDNT_CONNECT;
-      goto quit;
-    }
-#elif defined(LDAP_OPT_X_TLS)
+#ifdef LDAP_OPT_X_TLS
     if(conn->ssl_config.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
       if((data->set.ssl.cert_type) &&
@@ -758,10 +710,6 @@ quit:
     ldap_free_urldesc(ludp);
   if(server)
     ldap_unbind_s(server);
-#if defined(HAVE_LDAP_SSL) && defined(CURL_HAS_NOVELL_LDAPSDK)
-  if(ldap_ssl)
-    ldapssl_client_deinit();
-#endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
 
   FREE_ON_WINLDAP(host);
 
