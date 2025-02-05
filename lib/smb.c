@@ -881,14 +881,14 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
       return CURLE_COULDNT_CONNECT;
     }
     nrsp = msg;
-#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 1300
+#if defined(__GNUC__) && __GNUC__ >= 13
 #pragma GCC diagnostic push
 /* error: 'memcpy' offset [74, 80] from the object at '<unknown>' is out of
    the bounds of referenced subobject 'bytes' with type 'char[1]' */
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
     memcpy(smbc->challenge, nrsp->bytes, sizeof(smbc->challenge));
-#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 1300
+#if defined(__GNUC__) && __GNUC__ >= 13
 #pragma GCC diagnostic pop
 #endif
     smbc->session_key = smb_swap32(nrsp->session_key);
