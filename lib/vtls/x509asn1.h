@@ -85,6 +85,9 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
 /* used by unit1656.c */
 CURLcode Curl_x509_GTime2str(struct dynbuf *store,
                              const char *beg, const char *end);
+/* used by unit1657.c */
+CURLcode Curl_x509_getASN1Element(struct Curl_asn1Element *elem,
+                                  const char *beg, const char *end);
 #endif
 #endif
 

@@ -429,7 +429,7 @@ static void destroy_async_data(struct Curl_async *async)
 static CURLcode resolve_httpsrr(struct Curl_easy *data,
                                 struct Curl_async *asp)
 {
-  int status = ares_init(&asp->tdata->channel);
+  int status = ares_init_options(&asp->tdata->channel, NULL, 0);
   if(status != ARES_SUCCESS)
     return CURLE_FAILED_INIT;
 

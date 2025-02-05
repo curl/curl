@@ -172,7 +172,7 @@ jobs:
 
           - name: openssl -O3 valgrind
             install_packages: zlib1g-dev valgrind
-            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 --with-openssl --enable-debug
+            configure: CFLAGS=-O3 --with-openssl --enable-debug
 
           - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang

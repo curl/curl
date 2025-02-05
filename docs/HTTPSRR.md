@@ -32,6 +32,13 @@ resolver.
 The data extracted from the HTTPS RR is stored in the in-memory DNS cache to
 be reused on subsequent uses of the same hostnames.
 
+## limitations
+
+We have decided to work on the HTTPS RR support by following what seems to be
+(widely) used, and simply wait with implementing the details of the record
+that do not seem to be deployed. HTTPS RR is a DNS field with many odd corners
+and complexities and we might as well avoid them if no one seems to want them.
+
 ## build
 
     ./configure --enable-httpsrr
@@ -51,7 +58,7 @@ does not.
 ## DoH
 
 When HTTPS RR is enabled in the curl build, The DoH code asks for an HTTPS
-record in addition to the A and AAA records, and if an HTTPS RR answer is
+record in addition to the A and AAAA records, and if an HTTPS RR answer is
 returned, curl parses it and stores the retrieved information.
 
 ## Non-DoH

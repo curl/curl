@@ -49,6 +49,7 @@ struct curl_ws_frame {
   int flags;
   curl_off_t offset;
   curl_off_t bytesleft;
+  size_t len;
 };
 ~~~
 
@@ -63,38 +64,65 @@ See the list below.
 
 ## `offset`
 
-When this frame is a continuation of fragment data already delivered, this is
-the offset into the final fragment where this piece belongs.
+When this chunk is a continuation of frame data already delivered, this is
+the offset into the final frame data where this piece belongs to.
 
 ## `bytesleft`
 
 If this is not a complete fragment, the *bytesleft* field informs about how
 many additional bytes are expected to arrive before this fragment is complete.
 
+## `len`
+
+The length of the current data chunk.
+
 # FLAGS
+
+The *message type* flags (CURLWS_TEXT/BINARY/CLOSE/PING/PONG) are mutually
+exclusive.
 
 ## CURLWS_TEXT
 
-The buffer contains text data. Note that this makes a difference to WebSocket
+This is a message with text data. Note that this makes a difference to WebSocket
 but libcurl itself does not make any verification of the content or
 precautions that you actually receive valid UTF-8 content.
 
 ## CURLWS_BINARY
 
-This is binary data.
-
-## CURLWS_CONT
-
-This is not the final fragment of the message, it implies that there is
-another fragment coming as part of the same message.
+This is a message with binary data.
 
 ## CURLWS_CLOSE
 
-This transfer is now closed.
+This is a close message. No more data follows.
+
+It may contain a 2-byte unsigned integer in network byte order that indicates
+the close reason and may additionally contain up to 123 bytes of further
+textual payload for a total of at most 125 bytes. libcurl does not verify that
+the textual description is valid UTF-8.
 
 ## CURLWS_PING
 
-This as an incoming ping message, that expects a pong response.
+This is a ping message. It may contain up to 125 bytes of payload text.
+libcurl does not verify that the payload is valid UTF-8.
+
+Upon receiving a ping message, libcurl automatically responds with a pong
+message unless the **CURLWS_RAW_MODE** bit of CURLOPT_WS_OPTIONS(3) is set.
+
+## CURLWS_PONG
+
+This is a pong message. It may contain up to 125 bytes of payload text.
+libcurl does not verify that the payload is valid UTF-8.
+
+## CURLWS_CONT
+
+Can only occur in conjunction with CURLWS_TEXT or CURLWS_BINARY.
+
+This is not the final fragment of the message, it implies that there is
+another fragment coming as part of the same message. The application must
+reassemble the fragments to receive the complete message.
+
+Only a single fragmented message can be transmitted at a time, but it may
+be interrupted by CURLWS_CLOSE, CURLWS_PING or CURLWS_PONG frames.
 
 # %PROTOCOLS%
 
