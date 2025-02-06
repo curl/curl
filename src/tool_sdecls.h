@@ -96,6 +96,7 @@ struct getout {
 #define GETOUT_USEREMOTE  (1<<2)  /* use remote filename locally */
 #define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
 #define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
+#define GETOUT_NOGLOB     (1<<5)  /* disable globbing for this URL */
 
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.

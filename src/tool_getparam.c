@@ -1020,9 +1020,10 @@ const struct LongShort *findlongopt(const char *opt)
                  sizeof(aliases[0]), findarg);
 }
 
-static ParameterError parse_url(struct GlobalConfig *global,
-                                struct OperationConfig *config,
-                                const char *nextarg)
+static ParameterError add_url(struct GlobalConfig *global,
+                              struct OperationConfig *config,
+                              const char *thisurl,
+                              int extraflags)
 {
   ParameterError err = PARAM_OK;
   struct getout *url;
@@ -1050,16 +1051,75 @@ static ParameterError parse_url(struct GlobalConfig *global,
     return PARAM_NO_MEM;
   else {
     /* fill in the URL */
-    err = getstr(&url->url, nextarg, DENY_BLANK);
-    url->flags |= GETOUT_URL;
-    if(!err && (++config->num_urls > 1) && (config->etag_save_file ||
-                                            config->etag_compare_file)) {
+    err = getstr(&url->url, thisurl, DENY_BLANK);
+    url->flags |= GETOUT_URL | extraflags;
+    if(!err && (++config->num_urls > 1) &&
+       (config->etag_save_file || config->etag_compare_file)) {
       errorf(global, "The etag options only work on a single URL");
       return PARAM_BAD_USE;
     }
   }
   return err;
 }
+
+static ParameterError parse_url(struct GlobalConfig *global,
+                                struct OperationConfig *config,
+                                const char *nextarg)
+{
+  if(nextarg && (nextarg[0] == '@')) {
+    /* read URLs from a file, treat all as -O */
+    struct curlx_dynbuf line;
+    ParameterError err = PARAM_OK;
+    bool error = FALSE;
+    bool fromstdin = !strcmp("-", &nextarg[1]);
+    FILE *f;
+
+    if(fromstdin)
+      f = stdin;
+    else
+      f = fopen(&nextarg[1], FOPEN_READTEXT);
+    if(f) {
+      curlx_dyn_init(&line, 8092);
+      while(my_get_line(f, &line, &error)) {
+        /* every line has a newline that we strip off */
+        size_t len = curlx_dyn_len(&line);
+        const char *ptr;
+        if(len)
+          curlx_dyn_setlen(&line, len - 1);
+        ptr = curlx_dyn_ptr(&line);
+        /* line with # in the first non-blank column is a comment! */
+        while(*ptr && ISSPACE(*ptr))
+          ptr++;
+
+        switch(*ptr) {
+        case '#':
+        case '/':
+        case '\r':
+        case '\n':
+        case '*':
+        case '\0':
+          /* comment or weird line, skip it */
+          break;
+        default:
+          err = add_url(global, config, ptr, GETOUT_USEREMOTE | GETOUT_NOGLOB);
+          break;
+        }
+        if(err)
+          break;
+        curlx_dyn_reset(&line);
+      }
+      if(!fromstdin)
+        fclose(f);
+      curlx_dyn_free(&line);
+      if(error || err)
+        return PARAM_READ_ERROR;
+      return PARAM_OK;
+    }
+    return PARAM_READ_ERROR; /* file not found */
+  }
+  return add_url(global, config, nextarg, 0);
+}
+
 
 static ParameterError parse_localport(struct OperationConfig *config,
                                       char *nextarg)
