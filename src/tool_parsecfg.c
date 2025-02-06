@@ -43,8 +43,6 @@
 static const char *unslashquote(const char *line, char *param);
 
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
-static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
-
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
@@ -301,8 +299,7 @@ static const char *unslashquote(const char *line, char *param)
 /*
  * Reads a line from the given file, ensuring is NUL terminated.
  */
-static bool my_get_line(FILE *fp, struct curlx_dynbuf *db,
-                        bool *error)
+bool my_get_line(FILE *fp, struct curlx_dynbuf *db, bool *error)
 {
   char buf[4096];
   *error = FALSE;
