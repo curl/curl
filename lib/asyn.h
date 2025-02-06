@@ -81,6 +81,7 @@ struct thread_data {
   struct Curl_https_rrinfo hinfo;
 #endif
   char *hostname;
+  int port;
 };
 
 #endif /* CURLRES_ARES */
