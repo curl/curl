@@ -65,6 +65,13 @@ endif()
 
 ## Library definition
 
+if(NOT DEFINED IMPORT_LIB_SUFFIX)
+  set(IMPORT_LIB_SUFFIX "")
+endif()
+if(NOT DEFINED STATIC_LIB_SUFFIX)
+  set(STATIC_LIB_SUFFIX "")
+endif()
+
 # Add "_imp" as a suffix before the extension to avoid conflicting with
 # the statically linked "libcurl.lib" (typically with MSVC)
 if(WIN32 AND

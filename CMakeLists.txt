@@ -2469,6 +2469,7 @@ if(NOT CURL_DISABLE_INSTALL)
 endif()
 
 # Save build info for test runner to pick up and log
+set(_cmake_sysroot "")
 if(CMAKE_OSX_SYSROOT)
   set(_cmake_sysroot ${CMAKE_OSX_SYSROOT})
 elseif(CMAKE_SYSROOT)
