@@ -566,7 +566,6 @@ struct hostname {
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
 #define USE_CURL_ASYNC
 struct Curl_async {
-  char *hostname;
   struct Curl_dns_entry *dns;
 #ifdef CURLRES_ASYNCH
   struct thread_data thdata;

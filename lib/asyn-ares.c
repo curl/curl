@@ -779,7 +779,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   if(!res->hostname)
     return NULL;
 
-  data->state.async.hostname = res->hostname;
   data->state.async.port = port;
   data->state.async.done = FALSE;   /* not done */
   data->state.async.status = 0;     /* clear */
