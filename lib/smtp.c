@@ -383,13 +383,13 @@ static CURLcode smtp_perform_starttls(struct Curl_easy *data,
  */
 static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
 {
+#ifdef USE_SSL
   /* Start the SSL connection */
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   CURLcode result;
   bool ssldone = FALSE;
 
-#ifdef USE_SSL
   DEBUGASSERT(smtpc->state == SMTP_UPGRADETLS);
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
