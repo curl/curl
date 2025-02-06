@@ -226,39 +226,13 @@ struct ssh_conn {
 /* Feature detection based on version numbers to better work with
    non-configure platforms */
 
-#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x001000)
-#  error "SCP/SFTP protocols require libssh2 0.16 or later"
+#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x010208)
+#  error "SCP/SFTP protocols require libssh2 1.2.8 or later"
+/* 1.2.8 was released on April 5 2011 */
 #endif
 
-#if LIBSSH2_VERSION_NUM >= 0x010000
-#define HAVE_LIBSSH2_SFTP_SEEK64 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010100
-#define HAVE_LIBSSH2_VERSION 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010205
-#define HAVE_LIBSSH2_INIT 1
-#define HAVE_LIBSSH2_EXIT 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010206
-#define HAVE_LIBSSH2_KNOWNHOST_CHECKP 1
-#define HAVE_LIBSSH2_SCP_SEND64 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010208
-#define HAVE_LIBSSH2_SESSION_HANDSHAKE 1
-#endif
-
-#ifdef HAVE_LIBSSH2_VERSION
-/* get it runtime if possible */
+/* get it at runtime  */
 #define CURL_LIBSSH2_VERSION libssh2_version(0)
-#else
-/* use build-time if runtime not possible */
-#define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
-#endif
 
 #endif /* USE_LIBSSH2 */
 
