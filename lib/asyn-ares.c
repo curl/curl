@@ -781,7 +781,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
     return NULL;
 
   data->state.async.done = FALSE;   /* not done */
-  data->state.async.status = 0;     /* clear */
   data->state.async.dns = NULL;     /* clear */
 
   /* initial status - failed */

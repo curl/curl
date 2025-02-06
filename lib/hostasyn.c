@@ -71,8 +71,6 @@ CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
-  data->state.async.status = status;
-
   if(CURL_ASYNC_SUCCESS == status) {
     if(ai) {
       if(data->share)
