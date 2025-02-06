@@ -132,6 +132,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   const char *passwdp;
   const char *service = NULL;
   const char *hostname = NULL;
+  const char *localhostname;
 
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
@@ -164,6 +165,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     service = data->set.str[STRING_SERVICE_NAME] ?
       data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
+    localhostname = conn->options;
     ntlm = &conn->ntlm;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
@@ -176,6 +178,11 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   if(!passwdp)
     passwdp = "";
+
+  /* The fixed hostname we provide, in order to not leak our real local host
+     name. Copy the name used by Firefox. Make it configurable. */
+  if(!localhostname)
+    localhostname = "WORKSTATION";
 
 #ifdef USE_WINDOWS_SSPI
   if(!Curl_hSecDll) {
@@ -222,7 +229,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
     result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
-                                                 ntlm, &ntlmmsg);
+                                                 localhostname, ntlm, &ntlmmsg);
     if(!result && Curl_bufref_len(&ntlmmsg)) {
       result = Curl_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
                                   Curl_bufref_len(&ntlmmsg), &base64, &len);

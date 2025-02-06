@@ -558,6 +558,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
+                                             const char *localhostname,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out)
 {
@@ -590,9 +591,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   unsigned char *ptr_ntresp = &ntresp[0];
   unsigned char *ntlmv2resp = NULL;
   bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE);
-  /* The fixed hostname we provide, in order to not leak our real local host
-     name. Copy the name used by Firefox. */
-  static const char host[] = "WORKSTATION";
+  const char *host;
   const char *user;
   const char *domain = "";
   size_t hostoff = 0;
@@ -617,7 +616,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     user = userp;
 
   userlen = strlen(user);
-  hostlen = sizeof(host) - 1;
+
+  host = localhostname;
+  hostlen = strlen(host);
 
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
     unsigned char ntbuffer[0x18];
