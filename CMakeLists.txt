@@ -623,10 +623,6 @@ elseif(NOT WIN32 AND NOT APPLE)
   endif()
 endif()
 
-if(WIN32)
-  list(APPEND CURL_LIBS "ws2_32" "bcrypt")
-endif()
-
 # Check SSL libraries
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
@@ -765,8 +761,6 @@ if(CURL_USE_OPENSSL)
       list(APPEND CURL_LIBS "stdc++")
       list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
     endif()
-  elseif(WIN32 AND CMAKE_COMPILER_IS_GNUCC AND HAVE_LIBRESSL)
-    list(APPEND CURL_LIBS "ws2_32")  # Add a duplicate to make binutils ld resolve symbols
   endif()
 
   if(HAVE_BORINGSSL)
@@ -1932,6 +1926,8 @@ include(CMake/OtherTests.cmake)
 add_definitions("-DHAVE_CONFIG_H")
 
 if(WIN32)
+  list(APPEND CURL_LIBS "ws2_32" "bcrypt")
+
   # _fseeki64() requires VS2005
   if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1400))
     set(USE_WIN32_LARGE_FILES ON)
