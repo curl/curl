@@ -412,6 +412,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
 out:
   return result;
 #else
+  (void)data;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
