@@ -1640,7 +1640,6 @@ endif()
 
 # Pass these detection results to curl_internal_test() for use in CurlTests.c
 # Add here all feature flags referenced from CurlTests.c
-set(CURL_TEST_DEFINES "")
 foreach(_variable IN ITEMS
     HAVE_STDATOMIC_H
     HAVE_STDBOOL_H

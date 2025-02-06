@@ -34,6 +34,8 @@ macro(check_include_file_concat_curl _file _variable)
   endif()
 endmacro()
 
+set(CURL_TEST_DEFINES "")  # Initialize variable
+
 # For other curl specific tests, use this macro.
 # Return result in variable: CURL_TEST_OUTPUT
 macro(curl_internal_test _curl_test)
