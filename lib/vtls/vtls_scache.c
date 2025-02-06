@@ -359,7 +359,7 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
     char abspath[_MAX_PATH];
     if(_fullpath(abspath, path, _MAX_PATH))
       return Curl_dyn_addf(buf, ":%s-%s", name, abspath);
-#else
+#elif defined(HAVE_REALPATH)
     if(path[0] != '/') {
       char *abspath = realpath(path, NULL);
       if(abspath) {

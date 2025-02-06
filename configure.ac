@@ -4069,6 +4069,7 @@ AC_CHECK_FUNCS([\
   mach_absolute_time \
   pipe \
   poll \
+  realpath \
   sendmsg \
   sendmmsg \
   setlocale \
