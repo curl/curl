@@ -342,17 +342,11 @@ static int myssh_is_known(struct Curl_easy *data)
   struct curl_khkey *knownkeyp = NULL;
   curl_sshkeycallback func =
     data->set.ssh_keyfunc;
-
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
   struct ssh_knownhosts_entry *knownhostsentry = NULL;
   struct curl_khkey knownkey;
-#endif
 
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
   rc = ssh_get_server_publickey(sshc->ssh_session, &pubkey);
-#else
-  rc = ssh_get_publickey(sshc->ssh_session, &pubkey);
-#endif
+
   if(rc != SSH_OK)
     return rc;
 
@@ -388,7 +382,6 @@ static int myssh_is_known(struct Curl_easy *data)
 
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
 
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
     /* Get the known_key from the known hosts file */
     vstate = ssh_session_get_known_hosts_entry(sshc->ssh_session,
                                                &knownhostsentry);
@@ -446,22 +439,6 @@ static int myssh_is_known(struct Curl_easy *data)
       break;
     }
 
-#else
-    vstate = ssh_is_server_known(sshc->ssh_session);
-    switch(vstate) {
-    case SSH_SERVER_KNOWN_OK:
-      keymatch = CURLKHMATCH_OK;
-      break;
-    case SSH_SERVER_FILE_NOT_FOUND:
-    case SSH_SERVER_NOT_KNOWN:
-      keymatch = CURLKHMATCH_MISSING;
-      break;
-    default:
-      keymatch = CURLKHMATCH_MISMATCH;
-      break;
-    }
-#endif
-
     if(func) { /* use callback to determine action */
       rc = ssh_pki_export_pubkey_base64(pubkey, &found_base64);
       if(rc != SSH_OK)
@@ -478,18 +455,14 @@ static int myssh_is_known(struct Curl_easy *data)
         foundkey.keytype = CURLKHTYPE_RSA1;
         break;
       case SSH_KEYTYPE_ECDSA:
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
       case SSH_KEYTYPE_ECDSA_P256:
       case SSH_KEYTYPE_ECDSA_P384:
       case SSH_KEYTYPE_ECDSA_P521:
-#endif
         foundkey.keytype = CURLKHTYPE_ECDSA;
         break;
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,7,0)
       case SSH_KEYTYPE_ED25519:
         foundkey.keytype = CURLKHTYPE_ED25519;
         break;
-#endif
       case SSH_KEYTYPE_DSS:
         foundkey.keytype = CURLKHTYPE_DSS;
         break;
@@ -506,11 +479,7 @@ static int myssh_is_known(struct Curl_easy *data)
 
       switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
         rc = ssh_session_update_known_hosts(sshc->ssh_session);
-#else
-        rc = ssh_write_knownhost(sshc->ssh_session);
-#endif
         if(rc != SSH_OK) {
           goto cleanup;
         }
@@ -541,11 +510,9 @@ cleanup:
   if(hash)
     ssh_clean_pubkey_hash(&hash);
   ssh_key_free(pubkey);
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
   if(knownhostsentry) {
     ssh_knownhosts_entry_free(knownhostsentry);
   }
-#endif
   return rc;
 }
 
