@@ -123,12 +123,12 @@ jobs:
       - name: 'autoreconf'
         run: autoreconf -if
 
-      - name: 'configure (out-of-tree, c-ares, libssh, zstd, gssapi)'
+      - name: 'configure (out-of-tree, c-ares, libssh2, zstd, gssapi)'
         run: |
           mkdir bld-am
           cd bld-am
           ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi --with-librtmp \
+            --with-openssl --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../install-am
 
       - name: 'autoconf curl_config.h'
