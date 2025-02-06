@@ -334,14 +334,6 @@ jobs:
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
             perl-time-hires openssh stunnel sudo git
 
-      - name: 'fix kernel mmap rnd bits'
-        # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
-        # high-entropy ASLR in much newer kernels that GitHub runners are
-        # using leading to random crashes: https://reviews.llvm.org/D148280
-        # See https://github.com/actions/runner-images/issues/9491
-        continue-on-error: true
-        run: sudo sysctl vm.mmap_rnd_bits=28
-
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
