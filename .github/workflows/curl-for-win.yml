@@ -55,7 +55,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-linux-a64-x64-gcc-nolibgroup'
+          export CW_CONFIG='-main-werror-linux-a64-x64-gcc'
           export CW_REVISION='${{ github.sha }}'
           DOCKER_IMAGE='debian:bookworm-slim'
           export DOCKER_CONTENT_TRUST=1
@@ -150,7 +150,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-win-x86-gcc-nolibgroup-libssh1-zlibng'
+          export CW_CONFIG='-main-werror-win-x86-gcc-libssh1-zlibng'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
           docker trust inspect --pretty "${DOCKER_IMAGE}"
