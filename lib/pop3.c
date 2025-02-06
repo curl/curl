@@ -192,19 +192,6 @@ static const struct SASLproto saslpop3 = {
   SASL_FLAG_BASE64      /* Configuration flags */
 };
 
-#ifdef USE_SSL
-static void pop3_to_pop3s(struct connectdata *conn)
-{
-  /* Change the connection handler */
-  conn->handler = &Curl_handler_pop3s;
-
-  /* Set the connection's upgraded to TLS flag */
-  conn->bits.tls_upgraded = TRUE;
-}
-#else
-#define pop3_to_pop3s(x) Curl_nop_stmt
-#endif
-
 struct pop3_cmd {
   const char *name;
   unsigned short nlen;
@@ -425,6 +412,7 @@ static CURLcode pop3_perform_starttls(struct Curl_easy *data,
 static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
                                          struct connectdata *conn)
 {
+#ifdef USE_SSL
   /* Start the SSL connection */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result;
@@ -434,22 +422,27 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
+    /* Change the connection handler */
+    conn->handler = &Curl_handler_pop3s;
+    conn->bits.tls_upgraded = TRUE;
   }
 
+  DEBUGASSERT(!pop3c->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-
-  if(!result) {
+  DEBUGF(infof(data, "pop3_perform_upgrade_tls, connect -> %d, %d",
+         result, ssldone));
+  if(!result && ssldone) {
     pop3c->ssldone = ssldone;
-    if(pop3c->state != POP3_UPGRADETLS)
-      pop3_state(data, POP3_UPGRADETLS);
-
-    if(pop3c->ssldone) {
-      pop3_to_pop3s(conn);
-      result = pop3_perform_capa(data, conn);
-    }
+     /* perform CAPA now, changes pop3c->state out of POP3_UPGRADETLS */
+    result = pop3_perform_capa(data, conn);
   }
 out:
   return result;
+#else
+  (void)data;
+  (void)conn;
+  return CURLE_NOT_BUILT_IN;
+#endif
 }
 
 /***********************************************************************
@@ -861,7 +854,7 @@ static CURLcode pop3_state_starttls_resp(struct Curl_easy *data,
       result = pop3_perform_authentication(data, conn);
   }
   else
-    result = pop3_perform_upgrade_tls(data, conn);
+    pop3_state(data, POP3_UPGRADETLS);
 
   return result;
 }
@@ -1039,8 +1032,12 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
   (void)data;
 
   /* Busy upgrading the connection; right now all I/O is SSL/TLS, not POP3 */
-  if(pop3c->state == POP3_UPGRADETLS)
-    return pop3_perform_upgrade_tls(data, conn);
+upgrade_tls:
+  if(pop3c->state == POP3_UPGRADETLS) {
+    result = pop3_perform_upgrade_tls(data, conn);
+    if(result || (pop3c->state == POP3_UPGRADETLS))
+      return result;
+  }
 
   /* Flush any data that needs to be sent */
   if(pp->sendleft)
@@ -1067,6 +1064,10 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
 
     case POP3_STARTTLS:
       result = pop3_state_starttls_resp(data, conn, pop3code, pop3c->state);
+      /* During UPGRADETLS, leave the read loop as we need to connect
+       * (e.g. TLS handshake) before we continue sending/receiving. */
+      if(!result && (pop3c->state == POP3_UPGRADETLS))
+        goto upgrade_tls;
       break;
 
     case POP3_AUTH:
@@ -1111,17 +1112,6 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-
-  /* Issue #16166, STLS seems to stall and time out. Revert to previous
-   * check, but it remains to find out why this is wrong. */
-  /* if(Curl_conn_is_ssl(conn, FIRSTSOCKET) && !pop3c->ssldone) { */
-  if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
-    bool ssldone = FALSE;
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-    pop3c->ssldone = ssldone;
-    if(result || !pop3c->ssldone)
-      return result;
-  }
 
   result = Curl_pp_statemach(data, &pop3c->pp, FALSE, FALSE);
   *done = (pop3c->state == POP3_STOP);
