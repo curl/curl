@@ -507,7 +507,7 @@ sub torture {
         if($valgrind && !$gdbthis) {
             my @valgrindoption = getpart("verify", "valgrind");
             if((!@valgrindoption) || ($valgrindoption[0] !~ /disable/)) {
-                my $valgrindcmd = "$valgrind ";
+                my $valgrindcmd = shell_quote($valgrind) . " ";
                 $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
                 $valgrindcmd .= "--quiet --leak-check=yes ";
                 $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
