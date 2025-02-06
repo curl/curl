@@ -1170,8 +1170,11 @@ static CURLcode config2setopts(struct GlobalConfig *global,
       if(known) {
         /* new in curl 7.19.6 */
         result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
-        if(result)
+        if(result) {
+          global->knownhosts = NULL;
+          curl_free(known);
           return result;
+        }
         /* store it in global to avoid repeated checks */
         global->knownhosts = known;
       }
