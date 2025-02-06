@@ -91,12 +91,14 @@ jobs:
           echo '::group::raw'; cat bld-1/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld-1/lib/curl_config.h | sort || true
 
-      - name: 'cmake generate (out-of-tree, c-ares, libssh, zstd, gssapi)'
+      # when this job can get a libssh version 0.9.0 or later, this should get
+      # that enabled again
+      - name: 'cmake generate (out-of-tree, c-ares, zstd, gssapi)'
         run: |
           mkdir bld-cares
           cd bld-cares
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
-            -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_LIBRTMP=ON \
+            -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
       - name: 'cmake curl_config.h'
@@ -121,12 +123,12 @@ jobs:
       - name: 'autoreconf'
         run: autoreconf -if
 
-      - name: 'configure (out-of-tree, c-ares, libssh, zstd, gssapi)'
+      - name: 'configure (out-of-tree, c-ares, libssh2, zstd, gssapi)'
         run: |
           mkdir bld-am
           cd bld-am
           ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi --with-librtmp \
+            --with-openssl --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../install-am
 
       - name: 'autoconf curl_config.h'

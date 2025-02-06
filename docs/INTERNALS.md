@@ -29,6 +29,7 @@ versions of libs and build tools.
  - zlib         1.2.0.4
  - libssh2      1.2.8
  - c-ares       1.6.0
+ - libssh       0.9.0
  - libidn2      2.0.0
  - wolfSSL      3.4.6
  - OpenLDAP     2.0

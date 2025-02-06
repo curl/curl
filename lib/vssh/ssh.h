@@ -214,6 +214,12 @@ struct ssh_conn {
 #endif /* USE_LIBSSH */
 };
 
+#ifdef USE_LIBSSH
+#if LIBSSH_VERSION_INT < SSH_VERSION_INT(0, 9, 0)
+#  error "SCP/SFTP protocols require libssh 0.9.0 or later"
+#endif
+#endif
+
 #if defined(USE_LIBSSH2)
 
 /* Feature detection based on version numbers to better work with
