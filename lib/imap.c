@@ -193,19 +193,6 @@ static const struct SASLproto saslimap = {
 };
 
 
-#ifdef USE_SSL
-static void imap_to_imaps(struct connectdata *conn)
-{
-  /* Change the connection handler */
-  conn->handler = &Curl_handler_imaps;
-
-  /* Set the connection's upgraded to TLS flag */
-  conn->bits.tls_upgraded = TRUE;
-}
-#else
-#define imap_to_imaps(x) Curl_nop_stmt
-#endif
-
 /***********************************************************************
  *
  * imap_matchresp()
@@ -474,6 +461,7 @@ static CURLcode imap_perform_starttls(struct Curl_easy *data)
 static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
                                          struct connectdata *conn)
 {
+#ifdef USE_SSL
   /* Start the SSL connection */
   struct imap_conn *imapc = &conn->proto.imapc;
   CURLcode result;
@@ -483,21 +471,27 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
+    /* Change the connection handler */
+    conn->handler = &Curl_handler_imaps;
+    conn->bits.tls_upgraded = TRUE;
   }
 
+  DEBUGASSERT(!imapc->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-  if(!result) {
+  DEBUGF(infof(data, "imap_perform_upgrade_tls, connect -> %d, %d",
+         result, ssldone));
+  if(!result && ssldone) {
     imapc->ssldone = ssldone;
-    if(imapc->state != IMAP_UPGRADETLS)
-      imap_state(data, IMAP_UPGRADETLS);
-
-    if(imapc->ssldone) {
-      imap_to_imaps(conn);
-      result = imap_perform_capability(data, conn);
-    }
+     /* perform CAPA now, changes imapc->state out of IMAP_UPGRADETLS */
+     result = imap_perform_capability(data, conn);
   }
 out:
   return result;
+#else
+  (void)data;
+  (void)conn;
+  return CURLE_NOT_BUILT_IN;
+#endif
 }
 
 /***********************************************************************
@@ -998,7 +992,7 @@ static CURLcode imap_state_starttls_resp(struct Curl_easy *data,
       result = imap_perform_authentication(data, conn);
   }
   else
-    result = imap_perform_upgrade_tls(data, conn);
+    imap_state(data, IMAP_UPGRADETLS);
 
   return result;
 }
@@ -1307,8 +1301,12 @@ static CURLcode imap_statemachine(struct Curl_easy *data,
   (void)data;
 
   /* Busy upgrading the connection; right now all I/O is SSL/TLS, not IMAP */
-  if(imapc->state == IMAP_UPGRADETLS)
-    return imap_perform_upgrade_tls(data, conn);
+upgrade_tls:
+  if(imapc->state == IMAP_UPGRADETLS) {
+    result = imap_perform_upgrade_tls(data, conn);
+    if(result || (imapc->state == IMAP_UPGRADETLS))
+      return result;
+  }
 
   /* Flush any data that needs to be sent */
   if(pp->sendleft)
@@ -1339,6 +1337,10 @@ static CURLcode imap_statemachine(struct Curl_easy *data,
 
     case IMAP_STARTTLS:
       result = imap_state_starttls_resp(data, imapcode, imapc->state);
+      /* During UPGRADETLS, leave the read loop as we need to connect
+       * (e.g. TLS handshake) before we continue sending/receiving. */
+      if(!result && (imapc->state == IMAP_UPGRADETLS))
+        goto upgrade_tls;
       break;
 
     case IMAP_AUTHENTICATE:
@@ -1391,14 +1393,6 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct imap_conn *imapc = &conn->proto.imapc;
-
-  if(Curl_conn_is_ssl(conn, FIRSTSOCKET) && !imapc->ssldone) {
-    bool ssldone = FALSE;
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-    imapc->ssldone = ssldone;
-    if(result || !ssldone)
-      return result;
-  }
 
   result = Curl_pp_statemach(data, &imapc->pp, FALSE, FALSE);
   *done = (imapc->state == IMAP_STOP);
