@@ -189,19 +189,6 @@ static const struct SASLproto saslsmtp = {
   SASL_FLAG_BASE64      /* Configuration flags */
 };
 
-#ifdef USE_SSL
-static void smtp_to_smtps(struct connectdata *conn)
-{
-  /* Change the connection handler */
-  conn->handler = &Curl_handler_smtps;
-
-  /* Set the connection's upgraded to TLS flag */
-  conn->bits.tls_upgraded = TRUE;
-}
-#else
-#define smtp_to_smtps(x) Curl_nop_stmt
-#endif
-
 /***********************************************************************
  *
  * smtp_endofresp()
@@ -396,31 +383,38 @@ static CURLcode smtp_perform_starttls(struct Curl_easy *data,
  */
 static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
 {
+#ifdef USE_SSL
   /* Start the SSL connection */
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   CURLcode result;
   bool ssldone = FALSE;
 
+  DEBUGASSERT(smtpc->state == SMTP_UPGRADETLS);
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
+    /* Change the connection handler and SMTP state */
+    conn->handler = &Curl_handler_smtps;
+    conn->bits.tls_upgraded = TRUE;
   }
 
+  DEBUGASSERT(!smtpc->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-  if(!result) {
+  DEBUGF(infof(data, "smtp_perform_upgrade_tls, connect -> %d, %d",
+           result, ssldone));
+  if(!result && ssldone) {
     smtpc->ssldone = ssldone;
-    if(smtpc->state != SMTP_UPGRADETLS)
-      smtp_state(data, SMTP_UPGRADETLS);
-
-    if(smtpc->ssldone) {
-      smtp_to_smtps(conn);
-      result = smtp_perform_ehlo(data);
-    }
+    /* perform EHLO now, changes smpt->state out of SMTP_UPGRADETLS */
+    result = smtp_perform_ehlo(data);
   }
 out:
   return result;
+#else
+  (void)data;
+  return CURLE_NOT_BUILT_IN;
+#endif
 }
 
 /***********************************************************************
@@ -875,7 +869,7 @@ static CURLcode smtp_state_starttls_resp(struct Curl_easy *data,
       result = smtp_perform_authentication(data);
   }
   else
-    result = smtp_perform_upgrade_tls(data);
+    smtp_state(data, SMTP_UPGRADETLS);
 
   return result;
 }
@@ -1204,8 +1198,11 @@ static CURLcode smtp_statemachine(struct Curl_easy *data,
 
   /* Busy upgrading the connection; right now all I/O is SSL/TLS, not SMTP */
 upgrade_tls:
-  if(smtpc->state == SMTP_UPGRADETLS)
-    return smtp_perform_upgrade_tls(data);
+  if(smtpc->state == SMTP_UPGRADETLS) {
+    result = smtp_perform_upgrade_tls(data);
+    if(result || (smtpc->state == SMTP_UPGRADETLS))
+      return result;
+  }
 
   /* Flush any data that needs to be sent */
   if(pp->sendleft)
@@ -1287,14 +1284,6 @@ static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-
-  if(Curl_conn_is_ssl(conn, FIRSTSOCKET) && !smtpc->ssldone) {
-    bool ssldone = FALSE;
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-    smtpc->ssldone = ssldone;
-    if(result || !smtpc->ssldone)
-      return result;
-  }
 
   result = Curl_pp_statemach(data, &smtpc->pp, FALSE, FALSE);
   *done = (smtpc->state == SMTP_STOP);
