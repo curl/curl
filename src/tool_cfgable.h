@@ -29,11 +29,12 @@
 #include "var.h"
 
 /* the type we use for storing a single boolean bit */
+#ifndef BIT
 #ifdef _MSC_VER
 #define BIT(x) bool x
 #else
-typedef unsigned int bit;
-#define BIT(x) bit x:1
+#define BIT(x) unsigned int x:1
+#endif
 #endif
 
 struct GlobalConfig;
