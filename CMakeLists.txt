@@ -1640,6 +1640,7 @@ endif()
 
 # Pass these detection results to curl_internal_test() for use in CurlTests.c
 # Add here all feature flags referenced from CurlTests.c
+set(CURL_TEST_DEFINES "")
 foreach(_variable IN ITEMS
     HAVE_STDATOMIC_H
     HAVE_STDBOOL_H
@@ -2464,6 +2465,7 @@ if(NOT CURL_DISABLE_INSTALL)
 endif()
 
 # Save build info for test runner to pick up and log
+set(_cmake_sysroot "")
 if(CMAKE_OSX_SYSROOT)
   set(_cmake_sysroot ${CMAKE_OSX_SYSROOT})
 elseif(CMAKE_SYSROOT)

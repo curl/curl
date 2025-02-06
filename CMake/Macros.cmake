@@ -39,6 +39,7 @@ endmacro()
 macro(curl_internal_test _curl_test)
   if(NOT DEFINED "${_curl_test}")
     string(REPLACE ";" " " _cmake_required_definitions "${CMAKE_REQUIRED_DEFINITIONS}")
+    set(_curl_test_add_libraries "")
     if(CMAKE_REQUIRED_LIBRARIES)
       set(_curl_test_add_libraries
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
