@@ -103,7 +103,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 #elif defined(USE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
                                  DWORD
 #else
                                  unsigned int
@@ -111,25 +111,26 @@ curl_thread_t Curl_thread_create(
                                  (CURL_STDCALL *func) (void *),
                                  void *arg)
 {
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
   typedef HANDLE curl_win_thread_handle_t;
 #else
   typedef uintptr_t curl_win_thread_handle_t;
 #endif
   curl_thread_t t;
   curl_win_thread_handle_t thread_handle;
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
   thread_handle = CreateThread(NULL, 0, func, arg, 0, NULL);
 #else
   thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
 #endif
   t = (curl_thread_t)thread_handle;
   if((t == 0) || (t == LongToHandle(-1L))) {
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
     DWORD gle = GetLastError();
-    errno = ((gle == ERROR_ACCESS_DENIED ||
-              gle == ERROR_NOT_ENOUGH_MEMORY) ?
-             EACCES : EINVAL);
+    int err = (gle == ERROR_ACCESS_DENIED ||
+               gle == ERROR_NOT_ENOUGH_MEMORY) ?
+               EACCES : EINVAL;
+    CURL_SETERRNO(err);
 #endif
     return curl_thread_t_null;
   }

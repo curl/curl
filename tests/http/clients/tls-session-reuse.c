@@ -30,8 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/* #include <error.h> */
-#include <errno.h>
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {

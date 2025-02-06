@@ -80,7 +80,7 @@ Curl_inet_pton(int af, const char *src, void *dst)
   case AF_INET6:
     return inet_pton6(src, (unsigned char *)dst);
   default:
-    errno = EAFNOSUPPORT;
+    CURL_SETERRNO(EAFNOSUPPORT);
     return -1;
   }
   /* NOTREACHED */

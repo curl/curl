@@ -188,12 +188,10 @@ int struplocompare4sort(const void *p1, const void *p2)
 
 #ifdef USE_TOOL_FTRUNCATE
 
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
 /* 64-bit lseek-like function unavailable */
 #  undef _lseeki64
 #  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
-#  undef _get_osfhandle
-#  define _get_osfhandle(fd) (fd)
 #endif
 
 /*
@@ -215,7 +213,7 @@ int tool_ftruncate64(int fd, curl_off_t where)
 
 #endif /* USE_TOOL_FTRUNCATE */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
 FILE *Curl_execpath(const char *filename, char **pathp)
 {
   static char filebuffer[512];

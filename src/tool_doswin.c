@@ -563,7 +563,7 @@ char **__crt0_glob_function(char *arg)
 
 #ifdef _WIN32
 
-#if !defined(CURL_WINDOWS_UWP) && \
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
   !defined(CURL_DISABLE_CA_SEARCH) && !defined(CURL_CA_SEARCH_SAFE)
 /* Search and set the CA cert file for Windows.
  *
@@ -615,7 +615,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 struct curl_slist *GetLoadedModulePaths(void)
 {
   struct curl_slist *slist = NULL;
-#if !defined(CURL_WINDOWS_UWP)
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   HANDLE hnd = INVALID_HANDLE_VALUE;
   MODULEENTRY32 mod = {0};
 
@@ -666,7 +666,7 @@ cleanup:
 
 bool tool_term_has_bold;
 
-#ifndef CURL_WINDOWS_UWP
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 /* The terminal settings to restore on exit */
 static struct TerminalSettings {
   HANDLE hStdOut;
@@ -749,7 +749,7 @@ CURLcode win32_init(void)
 
   QueryPerformanceFrequency(&tool_freq);
 
-#ifndef CURL_WINDOWS_UWP
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   init_terminal();
 #endif
 

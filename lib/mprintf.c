@@ -337,7 +337,7 @@ static int parsefmt(const char *format,
         case 'h':
           flags |= FLAGS_SHORT;
           break;
-#if defined(_WIN32) || defined(_WIN32_WCE)
+#ifdef _WIN32
         case 'I':
           /* Non-ANSI integer extensions I32 I64 */
           if((fmt[0] == '3') && (fmt[1] == '2')) {
@@ -356,7 +356,7 @@ static int parsefmt(const char *format,
 #endif
           }
           break;
-#endif /* _WIN32 || _WIN32_WCE */
+#endif /* _WIN32 */
         case 'l':
           if(flags & FLAGS_LONG)
             flags |= FLAGS_LONGLONG;
