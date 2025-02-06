@@ -27,4 +27,6 @@
 
 int parseconfig(const char *filename, struct GlobalConfig *config);
 
+bool my_get_line(FILE *fp, struct curlx_dynbuf *db, bool *error);
+
 #endif /* HEADER_CURL_TOOL_PARSECFG_H */

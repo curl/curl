@@ -31,7 +31,7 @@
 #include "tool_ssls.h"
 #include "dynbuf.h"
 #include "curl_base64.h"
-#include "curl_get_line.h"
+#include "tool_parsecfg.h"
 
 /* The maximum line length for an ecoded session ticket */
 #define MAX_SSLS_LINE (64 * 1024)
@@ -68,6 +68,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
   size_t shmac_len, sdata_len;
   CURLcode r = CURLE_OK;
   int i, imported;
+  bool error = FALSE;
 
   curlx_dyn_init(&buf, MAX_SSLS_LINE);
   fp = fopen(filename, FOPEN_READTEXT);
@@ -81,7 +82,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
     goto out;
 
   i = imported = 0;
-  while(Curl_get_line(&buf, fp)) {
+  while(my_get_line(fp, &buf, &error)) {
     ++i;
     curl_free(shmac);
     curl_free(sdata);
@@ -123,7 +124,10 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
     }
     ++imported;
   }
-  r = CURLE_OK;
+  if(error)
+    r = CURLE_FAILED_INIT;
+  else
+    r = CURLE_OK;
 
 out:
   if(easy)

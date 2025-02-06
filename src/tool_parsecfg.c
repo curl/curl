@@ -43,8 +43,6 @@
 static const char *unslashquote(const char *line, char *param);
 
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
-static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
-
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
@@ -241,8 +239,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 
       if(alloced_param)
         Curl_safefree(param);
-
-      curlx_dyn_reset(&buf);
     }
     curlx_dyn_free(&buf);
     if(file != stdin)
@@ -301,22 +297,45 @@ static const char *unslashquote(const char *line, char *param)
 /*
  * Reads a line from the given file, ensuring is NUL terminated.
  */
-static bool my_get_line(FILE *fp, struct curlx_dynbuf *db,
-                        bool *error)
-{
-  char buf[4096];
-  *error = FALSE;
-  do {
-    /* fgets() returns s on success, and NULL on error or when end of file
-       occurs while no characters have been read. */
-    if(!fgets(buf, sizeof(buf), fp))
-      /* only if there is data in the line, return TRUE */
-      return curlx_dyn_len(db);
-    if(curlx_dyn_add(db, buf)) {
-      *error = TRUE; /* error */
-      return FALSE; /* stop reading */
-    }
-  } while(!strchr(buf, '\n'));
 
-  return TRUE; /* continue */
+bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
+{
+  CURLcode result;
+  char buffer[128];
+  curlx_dyn_reset(buf);
+  while(1) {
+    char *b = fgets(buffer, sizeof(buffer), input);
+
+    if(b) {
+      size_t rlen = strlen(b);
+
+      if(!rlen)
+        break;
+
+      result = curlx_dyn_addn(buf, b, rlen);
+      if(result) {
+        /* too long line or out of memory */
+        *error = TRUE;
+        return FALSE; /* error */
+      }
+
+      else if(b[rlen-1] == '\n')
+        /* end of the line */
+        return TRUE; /* all good */
+
+      else if(feof(input)) {
+        /* append a newline */
+        result = curlx_dyn_addn(buf, "\n", 1);
+        if(result) {
+          /* too long line or out of memory */
+          *error = TRUE;
+          return FALSE; /* error */
+        }
+        return TRUE; /* all good */
+      }
+    }
+    else
+      break;
+  }
+  return FALSE;
 }
