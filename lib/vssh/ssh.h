@@ -201,17 +201,10 @@ struct ssh_conn {
   Curl_send *tls_send;
 #endif
 
-#ifdef HAVE_LIBSSH2_AGENT_API
   LIBSSH2_AGENT *ssh_agent;     /* proxy to ssh-agent/pageant */
-  struct libssh2_agent_publickey *sshagent_identity,
-                                 *sshagent_prev_identity;
-#endif
-
-  /* note that HAVE_LIBSSH2_KNOWNHOST_API is a define set in the libssh2.h
-     header */
-#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+  struct libssh2_agent_publickey *sshagent_identity;
+  struct libssh2_agent_publickey *sshagent_prev_identity;
   LIBSSH2_KNOWNHOSTS *kh;
-#endif
 #elif defined(USE_WOLFSSH)
   WOLFSSH *ssh_session;
   WOLFSSH_CTX *ctx;
