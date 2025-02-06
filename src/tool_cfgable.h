@@ -28,6 +28,14 @@
 #include "tool_urlglob.h"
 #include "var.h"
 
+/* the type we use for storing a single boolean bit */
+#ifdef _MSC_VER
+#define BIT(x) bool x
+#else
+typedef unsigned int bit;
+#define BIT(x) bit x:1
+#endif
+
 struct GlobalConfig;
 
 struct State {
@@ -208,105 +216,105 @@ struct OperationConfig {
     CLOBBER_ALWAYS /* If the file exists, always overwrite it */
   } file_clobber_mode;
   unsigned short porttouse;
-  bool remote_time;
-  bool cookiesession;       /* new session? */
-  bool encoding;            /* Accept-Encoding please */
-  bool tr_encoding;         /* Transfer-Encoding please */
-  bool use_resume;
-  bool resume_from_current;
-  bool disable_epsv;
-  bool disable_eprt;
-  bool ftp_pret;
-  bool proto_present;
-  bool proto_redir_present;
-  bool mail_rcpt_allowfails; /* --mail-rcpt-allowfails */
-  bool sasl_ir;             /* Enable/disable SASL initial response */
-  bool proxytunnel;
-  bool ftp_append;          /* APPE on ftp */
-  bool use_ascii;           /* select ASCII or text transfer */
-  bool autoreferer;         /* automatically set referer */
-  bool failonerror;         /* fail on (HTTP) errors */
-  bool failwithbody;        /* fail on (HTTP) errors but still store body */
-  bool show_headers;        /* show headers to data output */
-  bool no_body;             /* do not get the body */
-  bool dirlistonly;         /* only get the FTP dir list */
-  bool followlocation;      /* follow http redirects */
-  bool unrestricted_auth;   /* Continue to send authentication (user+password)
+  BIT(remote_time);
+  BIT(cookiesession);       /* new session? */
+  BIT(encoding);            /* Accept-Encoding please */
+  BIT(tr_encoding);         /* Transfer-Encoding please */
+  BIT(use_resume);
+  BIT(resume_from_current);
+  BIT(disable_epsv);
+  BIT(disable_eprt);
+  BIT(ftp_pret);
+  BIT(proto_present);
+  BIT(proto_redir_present);
+  BIT(mail_rcpt_allowfails); /* --mail-rcpt-allowfails */
+  BIT(sasl_ir);             /* Enable/disable SASL initial response */
+  BIT(proxytunnel);
+  BIT(ftp_append);          /* APPE on ftp */
+  BIT(use_ascii);           /* select ASCII or text transfer */
+  BIT(autoreferer);         /* automatically set referer */
+  BIT(failonerror);         /* fail on (HTTP) errors */
+  BIT(failwithbody);        /* fail on (HTTP) errors but still store body */
+  BIT(show_headers);        /* show headers to data output */
+  BIT(no_body);             /* do not get the body */
+  BIT(dirlistonly);         /* only get the FTP dir list */
+  BIT(followlocation);      /* follow http redirects */
+  BIT(unrestricted_auth);   /* Continue to send authentication (user+password)
                                when following redirects, even when hostname
                                changed */
-  bool netrc_opt;
-  bool netrc;
-  bool crlf;
-  bool http09_allowed;
-  bool nobuffer;
-  bool readbusy;            /* set when reading input returns EAGAIN */
-  bool globoff;
-  bool use_httpget;
-  bool insecure_ok;         /* set TRUE to allow insecure SSL connects */
-  bool doh_insecure_ok;     /* set TRUE to allow insecure SSL connects
+  BIT(netrc_opt);
+  BIT(netrc);
+  BIT(crlf);
+  BIT(http09_allowed);
+  BIT(nobuffer);
+  BIT(readbusy);            /* set when reading input returns EAGAIN */
+  BIT(globoff);
+  BIT(use_httpget);
+  BIT(insecure_ok);         /* set TRUE to allow insecure SSL connects */
+  BIT(doh_insecure_ok);     /* set TRUE to allow insecure SSL connects
                                for DoH */
-  bool proxy_insecure_ok;   /* set TRUE to allow insecure SSL connects
+  BIT(proxy_insecure_ok);   /* set TRUE to allow insecure SSL connects
                                for proxy */
-  bool terminal_binary_ok;
-  bool verifystatus;
-  bool doh_verifystatus;
-  bool create_dirs;
-  bool ftp_create_dirs;
-  bool ftp_skip_ip;
-  bool proxynegotiate;
-  bool proxyntlm;
-  bool proxydigest;
-  bool proxybasic;
-  bool proxyanyauth;
-  bool jsoned; /* added json content-type */
-  bool ftp_ssl;
-  bool ftp_ssl_reqd;
-  bool ftp_ssl_control;
-  bool ftp_ssl_ccc;
-  bool socks5_gssapi_nec;   /* The NEC reference server does not protect the
+  BIT(terminal_binary_ok);
+  BIT(verifystatus);
+  BIT(doh_verifystatus);
+  BIT(create_dirs);
+  BIT(ftp_create_dirs);
+  BIT(ftp_skip_ip);
+  BIT(proxynegotiate);
+  BIT(proxyntlm);
+  BIT(proxydigest);
+  BIT(proxybasic);
+  BIT(proxyanyauth);
+  BIT(jsoned); /* added json content-type */
+  BIT(ftp_ssl);
+  BIT(ftp_ssl_reqd);
+  BIT(ftp_ssl_control);
+  BIT(ftp_ssl_ccc);
+  BIT(socks5_gssapi_nec);   /* The NEC reference server does not protect the
                                encryption type exchange */
-  bool tcp_nodelay;
-  bool tcp_fastopen;
-  bool retry_all_errors;    /* retry on any error */
-  bool retry_connrefused;   /* set connection refused as a transient error */
-  bool tftp_no_options;     /* do not send TFTP options requests */
-  bool ignorecl;            /* --ignore-content-length */
-  bool disable_sessionid;
+  BIT(tcp_nodelay);
+  BIT(tcp_fastopen);
+  BIT(retry_all_errors);    /* retry on any error */
+  BIT(retry_connrefused);   /* set connection refused as a transient error */
+  BIT(tftp_no_options);     /* do not send TFTP options requests */
+  BIT(ignorecl);            /* --ignore-content-length */
+  BIT(disable_sessionid);
 
-  bool raw;
-  bool post301;
-  bool post302;
-  bool post303;
-  bool nokeepalive;         /* for keepalive needs */
-  bool content_disposition; /* use Content-disposition filename */
+  BIT(raw);
+  BIT(post301);
+  BIT(post302);
+  BIT(post303);
+  BIT(nokeepalive);         /* for keepalive needs */
+  BIT(content_disposition); /* use Content-disposition filename */
 
-  bool xattr;               /* store metadata in extended attributes */
-  bool ssl_allow_beast;     /* allow this SSL vulnerability */
-  bool ssl_allow_earlydata; /* allow use of TLSv1.3 early data */
-  bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy */
-  bool ssl_no_revoke;       /* disable SSL certificate revocation checks */
-  bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
+  BIT(xattr);               /* store metadata in extended attributes */
+  BIT(ssl_allow_beast);     /* allow this SSL vulnerability */
+  BIT(ssl_allow_earlydata); /* allow use of TLSv1.3 early data */
+  BIT(proxy_ssl_allow_beast); /* allow this SSL vulnerability for proxy */
+  BIT(ssl_no_revoke);       /* disable SSL certificate revocation checks */
+  BIT(ssl_revoke_best_effort); /* ignore SSL revocation offline/missing
                                   revocation list errors */
 
-  bool native_ca_store;        /* use the native OS CA store */
-  bool proxy_native_ca_store;  /* use the native OS CA store for proxy */
-  bool ssl_auto_client_cert;   /* automatically locate and use a client
+  BIT(native_ca_store);        /* use the native OS CA store */
+  BIT(proxy_native_ca_store);  /* use the native OS CA store for proxy */
+  BIT(ssl_auto_client_cert);   /* automatically locate and use a client
                                   certificate for authentication (Schannel) */
-  bool proxy_ssl_auto_client_cert; /* proxy version of ssl_auto_client_cert */
-  bool noalpn;                    /* enable/disable TLS ALPN extension */
-  bool abstract_unix_socket;      /* path to an abstract Unix domain socket */
-  bool falsestart;
-  bool path_as_is;
-  bool suppress_connect_headers;  /* suppress proxy CONNECT response headers
+  BIT(proxy_ssl_auto_client_cert); /* proxy version of ssl_auto_client_cert */
+  BIT(noalpn);                    /* enable/disable TLS ALPN extension */
+  BIT(abstract_unix_socket);      /* path to an abstract Unix domain socket */
+  BIT(falsestart);
+  BIT(path_as_is);
+  BIT(suppress_connect_headers);  /* suppress proxy CONNECT response headers
                                      from user callbacks */
-  bool synthetic_error;           /* if TRUE, this is tool-internal error */
-  bool ssh_compression;           /* enable/disable SSH compression */
-  bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
-  bool disallow_username_in_url;  /* disallow usernames in URLs */
-  bool mptcp;                     /* enable MPTCP support */
-  bool rm_partial;                /* on error, remove partially written output
+  BIT(synthetic_error);           /* if TRUE, this is tool-internal error */
+  BIT(ssh_compression);           /* enable/disable SSH compression */
+  BIT(haproxy_protocol);          /* whether to send HAProxy protocol v1 */
+  BIT(disallow_username_in_url);  /* disallow usernames in URLs */
+  BIT(mptcp);                     /* enable MPTCP support */
+  BIT(rm_partial);                /* on error, remove partially written output
                                      files */
-  bool skip_existing;
+  BIT(skip_existing);
 };
 
 struct GlobalConfig {
@@ -326,20 +334,20 @@ struct GlobalConfig {
   unsigned short parallel_max; /* MAX_PARALLEL is the maximum */
   unsigned char verbosity;        /* How verbose we should be */
 #ifdef DEBUGBUILD
-  bool test_duphandle;
-  bool test_event_based;
+  BIT(test_duphandle);
+  BIT(test_event_based);
 #endif
-  bool parallel;
-  bool parallel_connect;
-  bool fail_early;                /* exit on first transfer error */
-  bool styled_output;             /* enable fancy output style detection */
-  bool trace_fopened;
-  bool tracetime;                 /* include timestamp? */
-  bool traceids;                  /* include xfer-/conn-id? */
-  bool showerror;                 /* show errors when silent */
-  bool silent;                    /* do not show messages, --silent given */
-  bool noprogress;                /* do not show progress bar */
-  bool isatty;                    /* Updated internally if output is a tty */
+  BIT(parallel);
+  BIT(parallel_connect);
+  BIT(fail_early);                /* exit on first transfer error */
+  BIT(styled_output);             /* enable fancy output style detection */
+  BIT(trace_fopened);
+  BIT(tracetime);                 /* include timestamp? */
+  BIT(traceids);                  /* include xfer-/conn-id? */
+  BIT(showerror);                 /* show errors when silent */
+  BIT(silent);                    /* do not show messages, --silent given */
+  BIT(noprogress);                /* do not show progress bar */
+  BIT(isatty);                    /* Updated internally if output is a tty */
 };
 
 void config_init(struct OperationConfig *config);
