@@ -1460,9 +1460,9 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
 {
   const char *host_or_proxy;
   CURLcode result;
+  struct connectdata *conn = data->conn;
 
 #ifndef CURL_DISABLE_PROXY
-  struct connectdata *conn = data->conn;
   if(conn->bits.httpproxy) {
     host_or_proxy = "proxy";
     result = CURLE_COULDNT_RESOLVE_PROXY;
@@ -1475,7 +1475,7 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
   }
 
   failf(data, "Could not resolve %s: %s", host_or_proxy,
-        data->state.async.hostname);
+        conn->host.name);
 
   return result;
 }

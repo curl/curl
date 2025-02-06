@@ -68,6 +68,7 @@ CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
                                 struct Curl_addrinfo *ai)
 {
   struct Curl_dns_entry *dns = NULL;
+  struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
   data->state.async.status = status;
@@ -78,8 +79,8 @@ CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
       dns = Curl_cache_addr(data, ai,
-                            data->state.async.hostname, 0,
-                            data->state.async.port, FALSE);
+                            conn->host.name, 0,
+                            conn->primary.remote_port, FALSE);
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
