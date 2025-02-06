@@ -433,6 +433,9 @@
 /* If you have poll */
 #cmakedefine HAVE_POLL 1
 
+/* If you have realpath */
+#cmakedefine HAVE_REALPATH 1
+
 /* Define to 1 if you have the <poll.h> header file. */
 #cmakedefine HAVE_POLL_H 1
 

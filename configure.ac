@@ -4080,7 +4080,10 @@ AC_CHECK_FUNCS([\
 ])
 
 if test "$curl_cv_native_windows" != 'yes'; then
-  AC_CHECK_FUNCS([sched_yield])
+  AC_CHECK_FUNCS([\
+  sched_yield \
+  realpath \
+  ])
   CURL_CHECK_FUNC_STRCASECMP
   CURL_CHECK_FUNC_STRCMPI
   CURL_CHECK_FUNC_STRICMP
