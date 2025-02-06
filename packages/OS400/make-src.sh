@@ -47,6 +47,13 @@ fi
 get_make_vars Makefile.inc
 
 
+#       Add hugehelp, as it is not included in Makefile.inc.
+if [ "${USE_MANUAL}" = "'USE_MANUAL'" ]
+then
+        CURL_CFILES="${CURL_CFILES} tool_hugehelp.c"
+        CURL_HFILES="${CURL_HFILES} tool_hugehelp.h"
+fi
+
 #       Compile the sources into modules.
 
 # shellcheck disable=SC2034
@@ -55,6 +62,7 @@ MODULES=
 # shellcheck disable=SC2034
 INCLUDES="'${TOPDIR}/lib'"
 
+# shellcheck disable=SC2153
 for SRC in ${CURLX_CFILES}
 do      MODULE=$(db2_name "${SRC}")
         MODULE=$(db2_name "X${MODULE}")
