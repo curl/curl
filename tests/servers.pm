@@ -669,6 +669,7 @@ sub verifyftp {
     }
     $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
+    logmsg "RUN: curl $flags for server $proto\n";
     my $cmd = "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
@@ -2566,7 +2567,7 @@ sub startservers {
             }
             if($run{$cproto} &&
                !responsive_pingpong_server($cproto, "", $verbose)) {
-                if(stopserver($cproto)) {
+                if(stopserver($what)) {
                     return ("failed stopping unresponsive $cproto server", 3);
                 }
             }
