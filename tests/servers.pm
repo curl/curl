@@ -112,6 +112,7 @@ use testutil qw(
     logmsg
     runclient
     runclientoutput
+    shell_quote
     );
 
 
@@ -1153,7 +1154,7 @@ sub runhttpserver {
     my $ip = $HOSTIP;
     my $ipvnum = 4;
     my $idnum = 1;
-    my $exe = "$perl $srcdir/http-server.pl";
+    my $exe = "$perl " . shell_quote("$srcdir/http-server.pl");
     my $verbose_flag = "--verbose ";
     my $keepalive_secs = 30; # forwarded to sws, was 5 by default which
                              # led to pukes in CI jobs
@@ -1253,7 +1254,7 @@ sub runhttp2server {
     my $proto="http/2";
     my $ipvnum = 4;
     my $idnum = 0;
-    my $exe = "$perl $srcdir/http2-server.pl";
+    my $exe = "$perl " . shell_quote("$srcdir/http2-server.pl");
     my $verbose_flag = "--verbose ";
 
     my $server = servername_id($proto, $ipvnum, $idnum);
@@ -1314,7 +1315,7 @@ sub runhttp3server {
     my $proto="http/3";
     my $ipvnum = 4;
     my $idnum = 0;
-    my $exe = "$perl $srcdir/http3-server.pl";
+    my $exe = "$perl " . shell_quote("$srcdir/http3-server.pl");
     my $verbose_flag = "--verbose ";
 
     my $server = servername_id($proto, $ipvnum, $idnum);
@@ -1423,7 +1424,7 @@ sub runhttpsserver {
 
     my $port = getfreeport($ipvnum);
     my $options = "$flags --accept $port";
-    my $cmd = "$perl $srcdir/secureserver.pl $options";
+    my $cmd = "$perl " . shell_quote("$srcdir/secureserver.pl") . " " . $options;
     my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($httpspid <= 0 || !pidexists($httpspid)) {
@@ -1551,7 +1552,7 @@ sub runpingpongserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port 0 --addr \"$ip\"";
 
-    my $cmd = "$perl $srcdir/ftpserver.pl $flags";
+    my $cmd = "$perl " . shell_quote("$srcdir/ftpserver.pl") . " " . $flags;
     my ($ftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ftppid <= 0 || !pidexists($ftppid)) {
@@ -1631,7 +1632,7 @@ sub runsecureserver {
     my $port = getfreeport($ipvnum);
     my $options = "$flags --accept $port";
 
-    my $cmd = "$perl $srcdir/secureserver.pl $options";
+    my $cmd = "$perl " . shell_quote("$srcdir/secureserver.pl") . " " . $options;
     my ($protospid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($protospid <= 0 || !pidexists($protospid)) {
@@ -1698,7 +1699,7 @@ sub runtftpserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port 0 --srcdir \"$srcdir\"";
 
-    my $cmd = "$perl $srcdir/tftpserver.pl $flags";
+    my $cmd = "$perl " . shell_quote("$srcdir/tftpserver.pl") . " " . $flags;
     my ($tftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($tftppid <= 0 || !pidexists($tftppid)) {
@@ -1774,7 +1775,7 @@ sub runrtspserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port 0 --srcdir \"$srcdir\"";
 
-    my $cmd = "$perl $srcdir/rtspserver.pl $flags";
+    my $cmd = "$perl " . shell_quote("$srcdir/rtspserver.pl") . " " . $flags;
     my ($rtsppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($rtsppid <= 0 || !pidexists($rtsppid)) {
@@ -1861,7 +1862,7 @@ sub runsshserver {
 
     my $options = "$flags --sshport $port";
 
-    my $cmd = "$perl $srcdir/sshserver.pl $options";
+    my $cmd = "$perl " . shell_quote("$srcdir/sshserver.pl") . " " . $options;
     my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
 
     # on loaded systems sshserver start up can take longer than the
