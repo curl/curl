@@ -61,22 +61,22 @@ struct per_transfer {
   curl_off_t ulnow;
   curl_off_t uploadfilesize; /* expected total amount */
   curl_off_t uploadedsofar; /* amount delivered from the callback */
-  bool dltotal_added; /* if the total has been added from this */
-  bool ultotal_added;
+  BIT(dltotal_added); /* if the total has been added from this */
+  BIT(ultotal_added);
 
   /* NULL or malloced */
   char *uploadfile;
   char *errorbuffer; /* allocated and assigned while this is used for a
                         transfer */
-  bool infdopen; /* TRUE if infd needs closing */
-  bool noprogress;
-  bool was_last_header_empty;
+  BIT(infdopen); /* TRUE if infd needs closing */
+  BIT(noprogress);
+  BIT(was_last_header_empty);
 
-  bool added; /* set TRUE when added to the multi handle */
-  bool abort; /* when doing parallel transfers and this is TRUE then a critical
+  BIT(added); /* set TRUE when added to the multi handle */
+  BIT(abort); /* when doing parallel transfers and this is TRUE then a critical
                  error (eg --fail-early) has occurred in another transfer and
                  this transfer will be aborted in the progress callback */
-  bool skip;  /* considered already done */
+  BIT(skip);  /* considered already done */
 };
 
 CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[]);
