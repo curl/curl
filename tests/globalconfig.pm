@@ -73,6 +73,9 @@ BEGIN {
 }
 use pathhelp qw(exe_ext);
 use Cwd qw(getcwd);
+use testutil qw(
+    shell_quote
+);
 
 
 #######################################################################
@@ -95,7 +98,7 @@ our $randseed = 0;    # random number seed
 # paths
 our $pwd = getcwd();  # current working directory
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
-our $perlcmd="$^X";
+our $perlcmd=shell_quote($^X);
 our $perl="$perlcmd -I. -I$srcdir"; # invoke perl like this
 our $LOGDIR="log";  # root of the log directory; this will be different for
                     # each runner in multiprocess mode
