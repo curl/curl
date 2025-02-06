@@ -58,6 +58,7 @@ struct thread_data {
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
   timediff_t interval_end;
+  struct curltime start;
   struct thread_sync_data tsd;
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct Curl_https_rrinfo hinfo;

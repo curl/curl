@@ -78,9 +78,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-struct resdata {
-  struct curltime start;
-};
 
 /*
  * Curl_resolver_global_init()
@@ -110,9 +107,7 @@ void Curl_resolver_global_cleanup(void)
 CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
 {
   (void)easy;
-  *resolver = calloc(1, sizeof(struct resdata));
-  if(!*resolver)
-    return CURLE_OUT_OF_MEMORY;
+  (void)resolver;
   return CURLE_OK;
 }
 
@@ -124,7 +119,7 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
  */
 void Curl_resolver_cleanup(void *resolver)
 {
-  free(resolver);
+  (void)resolver;
 }
 
 /*
@@ -452,6 +447,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
   async->status = 0;
   async->dns = NULL;
   td->thread_hnd = curl_thread_t_null;
+  td->start = Curl_now();
 
   if(!init_thread_sync_data(td, hostname, port, hints)) {
     free(td);
@@ -646,9 +642,6 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
 int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   int ret_val = 0;
-  timediff_t milli;
-  timediff_t ms;
-  struct resdata *reslv = (struct resdata *)data->state.async.resolver;
 #ifndef CURL_DISABLE_SOCKETPAIR
   struct thread_data *td = &data->state.async.thdata;
 #endif
@@ -668,14 +661,13 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
   }
 #endif
 #ifndef CURL_DISABLE_SOCKETPAIR
-  if(td) {
-    /* return read fd to client for polling the DNS resolution status */
-    socks[socketi] = td->tsd.sock_pair[0];
-    ret_val |= GETSOCK_READSOCK(socketi);
-  }
-  else {
-#endif
-    ms = Curl_timediff(Curl_now(), reslv->start);
+  /* return read fd to client for polling the DNS resolution status */
+  socks[socketi] = td->tsd.sock_pair[0];
+  ret_val |= GETSOCK_READSOCK(socketi);
+#else
+  {
+    timediff_t milli;
+    timediff_t ms = Curl_timediff(Curl_now(), td->start);
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)
@@ -685,10 +677,8 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
     else
       milli = 200;
     Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
-#ifndef CURL_DISABLE_SOCKETPAIR
   }
 #endif
-
 
   return ret_val;
 }
@@ -702,11 +692,9 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                                                 int port,
                                                 int *waitp)
 {
-  struct resdata *reslv = (struct resdata *)data->state.async.resolver;
+  struct thread_data *td = &data->state.async.thdata;
 
   *waitp = 0; /* default to synchronous response */
-
-  reslv->start = Curl_now();
 
   /* fire up a new resolver thread! */
   if(init_resolve_thread(data, hostname, port, NULL)) {
@@ -731,8 +719,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 {
   struct addrinfo hints;
   int pf = PF_INET;
-  struct resdata *reslv = (struct resdata *)data->state.async.resolver;
-
   *waitp = 0; /* default to synchronous response */
 
 #ifdef CURLRES_IPV6
@@ -750,7 +736,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
     SOCK_STREAM : SOCK_DGRAM;
 
-  reslv->start = Curl_now();
   /* fire up a new resolver thread! */
   if(init_resolve_thread(data, hostname, port, &hints)) {
     *waitp = 1; /* expect asynchronous response */
