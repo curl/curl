@@ -440,6 +440,7 @@ out:
   return result;
 #else
   (void)data;
+  (void)conn;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
