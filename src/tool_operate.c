@@ -674,9 +674,12 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
 
       /* Skip truncation of outfile if auto-resume is enabled for download and
          the partially received data is good. Currently this is only for HTTP
-         in limited circumstances. */
+         GET requests in limited circumstances. */
       if(config->use_resume && config->resume_from_current &&
          config->resume_from >= 0 && outs->init == config->resume_from &&
+         (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
+          config->httpreq == TOOL_HTTPREQ_GET) &&
+         (!config->customrequest || !strcmp(config->customrequest, "GET")) &&
          !config->use_ascii && !per->uploadfile &&
          result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR &&
          outs->bytes > 0 && outs->filename && outs->stream) {
