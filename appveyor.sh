@@ -29,8 +29,8 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 # build
 
 case "${TARGET}" in
-  x64)   openssl_suffix='-Win64';;
-  Win32) openssl_suffix='-Win32';;
+  *x64)   openssl_suffix='-Win64';;
+  *Win32) openssl_suffix='-Win32';;
 esac
 
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
