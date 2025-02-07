@@ -2253,6 +2253,7 @@ if(NOT CURL_DISABLE_INSTALL)
       endif()
     endif()
   endforeach()
+  list(APPEND _sys_libdirs ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES})
 
   foreach(_libdir IN LISTS _custom_libdirs CURL_LIBDIRS)
     if(NOT CMAKE_VERSION VERSION_LESS 3.20)
