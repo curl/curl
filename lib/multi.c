@@ -1538,15 +1538,6 @@ CURLMcode curl_multi_wakeup(CURLM *m)
      Curl_multi struct that are constant */
   struct Curl_multi *multi = m;
 
-#if defined(ENABLE_WAKEUP) && !defined(USE_WINSOCK)
-#ifdef USE_EVENTFD
-  const void *buf;
-  const uint64_t val = 1;
-#else
-  char buf[1];
-#endif
-#endif
-
   /* GOOD_MULTI_HANDLE can be safely called */
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1560,15 +1551,14 @@ CURLMcode curl_multi_wakeup(CURLM *m)
      making it safe to access from another thread after the init part
      and before cleanup */
   if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
-#ifdef USE_EVENTFD
-    buf = &val;
-    /* eventfd has a stringent rule of requiring the 8-byte buffer when
-       calling write(2) on it, which makes the sizeof(buf) below fine since
-       this is only used on 64-bit systems and then the pointer is 64-bit */
-#else
-    buf[0] = 1;
-#endif
     while(1) {
+#ifdef USE_EVENTFD
+      /* eventfd has a stringent rule of requiring the 8-byte buffer when
+         calling write(2) on it */
+      const uint64_t buf[1] = { 1 };
+#else
+      const char buf[1] = { 1 };
+#endif
       /* swrite() is not thread-safe in general, because concurrent calls
          can have their messages interleaved, but in this case the content
          of the messages does not matter, which makes it ok to call.
