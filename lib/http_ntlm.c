@@ -132,7 +132,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   const char *passwdp;
   const char *service = NULL;
   const char *hostname = NULL;
-  const char *localhostname;
+  const char *localhostname = NULL;
 
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
