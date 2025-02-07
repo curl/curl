@@ -39,7 +39,7 @@ Getopt::Long::GetOptions(
 Pod::Usage::pod2usage() if $help;
 
 my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s*(\<.+?\>)?\s+(.*)';
-my @opts = parse_main_opts('--help all', $regex);
+my @opts = parse_main_opts($regex);
 
 if ($shell eq 'fish') {
     print "# curl fish completion\n\n";
@@ -76,10 +76,10 @@ EOS
 }
 
 sub parse_main_opts {
-    my ($cmd, $regex) = @_;
+    my ($regex) = @_;
 
     my @list;
-    my @lines = call_curl($cmd);
+    my @lines = read_source_files();
 
     foreach my $line (@lines) {
         my ($short, $long, $arg, $desc) = ($line =~ /^$regex/) or next;
@@ -141,15 +141,22 @@ sub parse_main_opts {
 sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 sub strip_dash { my $s = shift; $s =~ s/^-+//g; return $s };
 
-sub call_curl {
-    my ($cmd) = @_;
-    my $output = `"$curl" $cmd`;
-    if ($? == -1) {
-        die "Could not run curl: $!";
-    } elsif ((my $exit_code = $? >> 8) != 0) {
-        die "curl returned $exit_code with output:\n$output";
+sub read_source_files {
+    my @files = (
+        'src/tool_help.c',
+        'src/tool_operate.c',
+        'src/tool_operhlp.c',
+    );
+
+    my @lines;
+    foreach my $file (@files) {
+        open my $fh, '<', $file or die "Could not open '$file': $!";
+        while (my $line = <$fh>) {
+            push @lines, $line;
+        }
+        close $fh;
     }
-    return split /\n/, $output;
+    return @lines;
 }
 
 __END__
