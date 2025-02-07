@@ -280,7 +280,7 @@ int main(void)
 #include <string.h>
 #include <errno.h>
 
-void check(char c) {}
+static void check(char c) { (void)c; }
 
 int main(void)
 {
@@ -296,7 +296,7 @@ int main(void)
 #include <errno.h>
 
 /* Float, because a pointer cannot be implicitly cast to float */
-void check(float f) {}
+static void check(float f) { (void)f; }
 
 int main(void)
 {
