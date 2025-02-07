@@ -383,7 +383,8 @@ static void destroy_async_data(struct Curl_easy *data)
 #endif
 
 #ifdef USE_HTTPSRR_ARES
-    ares_destroy(data->state.async.tdata->channel);
+    if(data->state.async.tdata->channel)
+      ares_destroy(data->state.async.tdata->channel);
 #endif
     /*
      * if the thread is still blocking in the resolve syscall, detach it and
@@ -490,7 +491,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
   }
 #ifdef USE_HTTPSRR_ARES
   if(resolve_httpsrr(data, asp))
-    goto err_exit;
+    infof(data, "Failed HTTPS RR operation");
 #endif
   return TRUE;
 
@@ -670,7 +671,7 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 #endif
 
 #ifdef USE_HTTPSRR_ARES
-  if(data->state.async.tdata) {
+  if(data->state.async.tdata && data->state.async.tdata->channel) {
     ret_val = Curl_ares_getsock(data, data->state.async.tdata->channel, socks);
     for(socketi = 0; socketi < (MAX_SOCKSPEREASYHANDLE - 1); socketi++)
       if(!ARES_GETSOCK_READABLE(ret_val, socketi) &&

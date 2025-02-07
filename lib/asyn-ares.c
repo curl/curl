@@ -109,6 +109,9 @@ int Curl_ares_perform(ares_channel channel,
   int i;
   int num = 0;
 
+  if(!channel)
+    return 0;
+
   bitmask = ares_getsock(channel, socks, ARES_GETSOCK_MAXNUM);
 
   for(i = 0; i < ARES_GETSOCK_MAXNUM; i++) {
