@@ -49,7 +49,7 @@ struct ssl_connect_data;
 #define ALPN_PROTO_BUF_MAX   (ALPN_ENTRIES_MAX * (ALPN_NAME_MAX + 1))
 
 struct alpn_spec {
-  const char entries[ALPN_ENTRIES_MAX][ALPN_NAME_MAX];
+  char entries[ALPN_ENTRIES_MAX][ALPN_NAME_MAX];
   size_t count; /* number of entries */
 };
 
@@ -62,6 +62,8 @@ CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
                                 const struct alpn_spec *spec);
 CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
                                 const struct alpn_spec *spec);
+void Curl_alpn_restrict_to(struct alpn_spec *spec, const char *proto);
+void Curl_alpn_copy(struct alpn_spec *dest, const struct alpn_spec *src);
 
 CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,

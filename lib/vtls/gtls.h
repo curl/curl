@@ -42,6 +42,7 @@
 
 struct Curl_easy;
 struct Curl_cfilter;
+struct alpn_spec;
 struct ssl_primary_config;
 struct ssl_config_data;
 struct ssl_peer;
@@ -81,6 +82,7 @@ typedef CURLcode Curl_gtls_ctx_setup_cb(struct Curl_cfilter *cf,
 
 typedef CURLcode Curl_gtls_init_session_reuse_cb(struct Curl_cfilter *cf,
                                                  struct Curl_easy *data,
+                                                 struct alpn_spec *alpns,
                                                  struct Curl_ssl_session *scs,
                                                  bool *do_early_data);
 
@@ -88,7 +90,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const unsigned char *alpn, size_t alpn_len,
+                            const struct alpn_spec *alpns,
                             Curl_gtls_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             void *ssl_user_data,
