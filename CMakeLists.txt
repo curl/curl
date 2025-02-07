@@ -204,7 +204,7 @@ if(WIN32)
   if(ENABLE_UNICODE)
     set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "UNICODE" "_UNICODE")
     if(MINGW)
-      add_compile_options("-municode")
+      set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-municode")
     endif()
   endif()
 
