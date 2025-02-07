@@ -22,7 +22,7 @@
 #
 ###########################################################################
 set(EXE_NAME curl)
-add_definitions("-DBUILDING_CURL")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_CURL")
 
 set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
