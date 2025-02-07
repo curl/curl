@@ -2236,7 +2236,7 @@ if(NOT CURL_DISABLE_INSTALL)
   endforeach()
 
   # Avoid getting unnecessary -L options for known system directories.
-  set(_sys_libdirs "")
+  set(_sys_libdirs "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
   foreach(_libdir IN LISTS CMAKE_SYSTEM_PREFIX_PATH)
     if(_libdir MATCHES "/$")
       string(APPEND _libdir "lib")
@@ -2253,7 +2253,6 @@ if(NOT CURL_DISABLE_INSTALL)
       endif()
     endif()
   endforeach()
-  list(APPEND _sys_libdirs ${CMAKE_C_IMPLICIT_LINK_DIRECTORIES})
 
   foreach(_libdir IN LISTS _custom_libdirs CURL_LIBDIRS)
     if(NOT CMAKE_VERSION VERSION_LESS 3.20)
@@ -2267,7 +2266,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   set(_implicit_libs "")
   if(NOT MINGW AND NOT UNIX)
-    set(_implicit_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})
+    set(_implicit_libs "${CMAKE_C_IMPLICIT_LINK_LIBRARIES}")
   endif()
 
   foreach(_lib IN LISTS _implicit_libs _custom_libs CURL_LIBS)
