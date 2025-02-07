@@ -184,10 +184,16 @@ if(PICKY_COMPILER)
           -Wstrict-aliasing=3              #             gcc  4.0
         )
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5 AND MINGW)
+      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
         list(APPEND _picky_enable
-          -Wno-pedantic-ms-format          #             gcc  4.5 (MinGW-only)
+          -Wjump-misses-init               #             gcc  4.5
         )
+
+        if(MINGW)
+          list(APPEND _picky_enable
+            -Wno-pedantic-ms-format        #             gcc  4.5 (MinGW-only)
+          )
+        endif()
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
         list(APPEND _picky_enable
