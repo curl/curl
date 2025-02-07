@@ -202,9 +202,9 @@ if(WIN32)
     set(ENABLE_UNICODE ON)
   endif()
   if(ENABLE_UNICODE)
-    add_definitions("-DUNICODE" "-D_UNICODE")
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "UNICODE" "_UNICODE")
     if(MINGW)
-      add_compile_options("-municode")
+      set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-municode")
     endif()
   endif()
 
@@ -216,7 +216,7 @@ if(WIN32)
 
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
-    add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to all feature checks
   endif()
 
@@ -513,7 +513,7 @@ endif()
 
 # If we are on AIX, do the _ALL_SOURCE magic
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
-  add_definitions("-D_ALL_SOURCE")
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "_ALL_SOURCE")
 endif()
 
 # If we are on Haiku, make sure that the network library is brought in.
@@ -605,8 +605,8 @@ if(ENABLE_IPV6)
   if(WIN32)
     check_struct_has_member("struct sockaddr_in6" "sin6_scope_id" "winsock2.h;ws2tcpip.h" HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   else()
-    check_struct_has_member("struct sockaddr_in6" "sin6_addr" "netinet/in.h" HAVE_SOCKADDR_IN6_SIN6_ADDR)
     check_struct_has_member("struct sockaddr_in6" "sin6_scope_id" "netinet/in.h" HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+    check_struct_has_member("struct sockaddr_in6" "sin6_addr" "netinet/in.h" HAVE_SOCKADDR_IN6_SIN6_ADDR)
     if(NOT HAVE_SOCKADDR_IN6_SIN6_ADDR)
       if(NOT DOS AND NOT AMIGA)
         message(WARNING "struct sockaddr_in6 not available, disabling IPv6 support")
@@ -1932,7 +1932,7 @@ endif()
 
 include(CMake/OtherTests.cmake)
 
-add_definitions("-DHAVE_CONFIG_H")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
