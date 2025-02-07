@@ -30,6 +30,8 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
   openssl_root_win='C:/OpenSSL-v34-Win64'
+elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
+  openssl_root_win='C:/OpenSSL-Win64'
 else
   openssl_root_win='C:/OpenSSL-v111-Win64'
 fi
