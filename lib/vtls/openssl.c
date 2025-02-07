@@ -2871,10 +2871,9 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 /* ====================================================== */
 
 /* Check for OpenSSL 1.0.2 which has ALPN support. */
-#undef HAS_ALPN
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L       \
   && !defined(OPENSSL_NO_TLSEXT)
-#  define HAS_ALPN 1
+#  define HAS_ALPN_OPENSSL
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
@@ -3854,7 +3853,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #endif
 
   if(alpn && alpn_len) {
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_OPENSSL
     if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
@@ -4192,7 +4191,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
   DEBUGASSERT(octx);
   memset(&proto, 0, sizeof(proto));
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_OPENSSL
   if(connssl->alpn) {
     result = Curl_alpn_to_proto_buf(&proto, connssl->alpn);
     if(result) {
@@ -4229,7 +4228,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   SSL_set_bio(octx->ssl, bio, bio);
 #endif
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_OPENSSL
   if(connssl->alpn) {
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
@@ -4541,7 +4540,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 # endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
 #endif  /* USE_ECH_OPENSSL */
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_OPENSSL
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
      * negotiated
      */
