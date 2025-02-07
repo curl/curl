@@ -28,17 +28,17 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # build
 
-case "${TARGET}" in
-  *x64)   openssl_suffix='-Win64';;
+case "${TARGET:-}" in
   *Win32) openssl_suffix='-Win32';;
+  *)      openssl_suffix='-Win64';;
 esac
 
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-  openssl_root_win="C:/OpenSSL-v34${openssl_suffix:-}"
+  openssl_root_win="C:/OpenSSL-v34${openssl_suffix}"
 elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
-  openssl_root_win="C:/OpenSSL${openssl_suffix:-}"
+  openssl_root_win="C:/OpenSSL${openssl_suffix}"
 else
-  openssl_root_win="C:/OpenSSL-v111${openssl_suffix:-}"
+  openssl_root_win="C:/OpenSSL-v111${openssl_suffix}"
 fi
 openssl_root="$(cygpath "${openssl_root_win}")"
 
