@@ -107,29 +107,6 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi);
 static void expire_ex(struct Curl_easy *data, const struct curltime *nowp,
                       timediff_t milli, expire_id id);
 
-#if defined( DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-static const char * const multi_statename[]={
-  "INIT",
-  "PENDING",
-  "SETUP",
-  "CONNECT",
-  "RESOLVING",
-  "CONNECTING",
-  "TUNNELING",
-  "PROTOCONNECT",
-  "PROTOCONNECTING",
-  "DO",
-  "DOING",
-  "DOING_MORE",
-  "DID",
-  "PERFORMING",
-  "RATELIMITING",
-  "DONE",
-  "COMPLETED",
-  "MSGSENT",
-};
-#endif
-
 /* function pointer called once when switching TO a state */
 typedef void (*init_multistate_func)(struct Curl_easy *data);
 
@@ -179,25 +156,17 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     NULL               /* MSGSENT */
   };
 
-#if defined(DEBUGBUILD) && defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) lineno;
-#endif
-
   if(oldstate == state)
     /* do not bother when the new state is the same as the old state */
     return;
 
-  data->mstate = state;
-
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  if(data->mstate >= MSTATE_PENDING &&
-     data->mstate < MSTATE_COMPLETED) {
-    infof(data,
-          "STATE: %s => %s handle %p; line %d",
-          multi_statename[oldstate], multi_statename[data->mstate],
-          (void *)data, lineno);
-  }
+#ifdef DEBUGBUILD
+  CURL_TRC_M(data, "-> [%s] (line %d)", CURL_MSTATE_NAME(state), lineno);
+#else
+  CURL_TRC_M(data, "-> [%s]", CURL_MSTATE_NAME(state));
 #endif
+
+  data->mstate = state;
 
   if(state == MSTATE_COMPLETED) {
     /* changing to COMPLETED means there is one less easy handle 'alive' */
@@ -621,9 +590,8 @@ static void multi_done_locked(struct connectdata *conn,
 
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
-    DEBUGF(infof(data, "Connection still in use %zu, "
-                 "no more multi_done now!",
-                 Curl_llist_count(&conn->easyq)));
+    CURL_TRC_M(data, "Connection still in use %zu, no more multi_done now!",
+               Curl_llist_count(&conn->easyq));
     return;
   }
 
@@ -660,12 +628,12 @@ static void multi_done_locked(struct connectdata *conn,
 #endif
      ) || conn->bits.close
        || (mdctx->premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
-    DEBUGF(infof(data, "multi_done, not reusing connection=%"
-                 FMT_OFF_T ", forbid=%d"
-                 ", close=%d, premature=%d, conn_multiplex=%d",
-                 conn->connection_id, data->set.reuse_forbid,
-                 conn->bits.close, mdctx->premature,
-                 Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
+    CURL_TRC_M(data, "multi_done, not reusing connection=%"
+                     FMT_OFF_T ", forbid=%d"
+                     ", close=%d, premature=%d, conn_multiplex=%d",
+                     conn->connection_id, data->set.reuse_forbid,
+                     conn->bits.close, mdctx->premature,
+                     Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn, "disconnecting");
     Curl_cpool_disconnect(data, conn, mdctx->premature);
   }
@@ -703,14 +671,8 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   memset(&mdctx, 0, sizeof(mdctx));
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
-               multi_statename[data->mstate],
-               (int)status, (int)premature, data->state.done));
-#else
-  DEBUGF(infof(data, "multi_done: status: %d prem: %d done: %d",
-               (int)status, (int)premature, data->state.done));
-#endif
+  CURL_TRC_M(data, "multi_done: status: %d prem: %d done: %d",
+             (int)status, (int)premature, data->state.done);
 
   if(data->state.done)
     /* Stop if multi_done() has already been called */
@@ -1143,6 +1105,11 @@ static void multi_getsock(struct Curl_easy *data,
     break;
   }
 
+  CURL_TRC_M(data, "pollset sockets=%u, ip_connected=%d, timeouts=%zu, "
+             "paused %d/%d (r/w)", ps->num,
+             Curl_conn_is_ip_connected(data, FIRSTSOCKET),
+             Curl_llist_count(&data->state.timeoutlist),
+             Curl_creader_is_paused(data), Curl_cwriter_is_paused(data));
   if(expect_sockets && !ps->num &&
      !Curl_llist_count(&data->state.timeoutlist) &&
      !Curl_cwriter_is_paused(data) && !Curl_creader_is_paused(data) &&
@@ -2362,7 +2329,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     rc = CURLM_OK;
 
     if(multi_ischanged(multi, TRUE)) {
-      DEBUGF(infof(data, "multi changed, check CONNECT_PEND queue"));
+      CURL_TRC_M(data, "multi changed, check CONNECT_PEND queue");
       process_pending_handles(multi); /* multiplexed */
     }
 
@@ -2983,6 +2950,7 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
       if(!entry)
         /* fatal */
         return CURLM_OUT_OF_MEMORY;
+      CURL_TRC_M(data, "added socket=%" FMT_SOCKET_T " to hash", s);
     }
     if(last_action && (last_action != cur_action)) {
       /* Socket was used already, but different action now */
@@ -2999,6 +2967,10 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
       }
       if(cur_action & CURL_POLL_OUT)
         entry->writers++;
+      CURL_TRC_M(data, "socket=%" FMT_SOCKET_T " action=0x%x, previously=0x%d"
+                 ", users=%d, readers=%d, writers=%d",
+                 s, cur_action, last_action,
+                 entry->users, entry->readers, entry->writers);
     }
     else if(!last_action &&
             !Curl_hash_pick(&entry->transfers, (char *)&data, /* hash key */
@@ -3016,6 +2988,9 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
         Curl_hash_destroy(&entry->transfers);
         return CURLM_OUT_OF_MEMORY;
       }
+      CURL_TRC_M(data, "socket=%" FMT_SOCKET_T " adding transfer, action=0x%x"
+                 ", users=%d, readers=%d, writers=%d", s, cur_action,
+                 entry->users, entry->readers, entry->writers);
     }
 
     comboaction = (entry->writers ? CURL_POLL_OUT : 0) |
@@ -3027,6 +3002,10 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
       continue;
 
     if(multi->socket_cb) {
+      CURL_TRC_M(data, "socket_callback(s=%" FMT_SOCKET_T ", %s%s%s)",
+                 s, (comboaction & CURL_POLL_IN) ? "POLLIN" : "",
+                 (comboaction == (CURL_POLL_IN|CURL_POLL_OUT)) ? "|" : "",
+                 (comboaction & CURL_POLL_OUT) ? "POLLOUT" : "");
       set_in_callback(multi, TRUE);
       rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
                             entry->socketp);
@@ -3074,6 +3053,7 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
       if(!entry->users) {
         bool dead = FALSE;
         if(multi->socket_cb) {
+          CURL_TRC_M(data, "socket_callback(s=%" FMT_SOCKET_T ", REMOVE)", s);
           set_in_callback(multi, TRUE);
           rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                                 multi->socket_userp, entry->socketp);
@@ -3123,18 +3103,19 @@ void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
   if(data) {
     /* if there is still an easy handle associated with this connection */
     struct Curl_multi *multi = data->multi;
-    DEBUGF(infof(data, "Curl_multi_closed, fd=%" FMT_SOCKET_T
-                 " multi is %p", s, (void *)multi));
+    CURL_TRC_M(data, "Curl_multi_closed, fd=%" FMT_SOCKET_T
+               " multi is %p", s, (void *)multi);
     if(multi) {
       /* this is set if this connection is part of a handle that is added to
          a multi handle, and only then this is necessary */
       struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
-      DEBUGF(infof(data, "Curl_multi_closed, fd=%" FMT_SOCKET_T
-                   " entry is %p", s, (void *)entry));
+      CURL_TRC_M(data, "Curl_multi_closed, fd=%" FMT_SOCKET_T
+                 " entry is %p", s, (void *)entry);
       if(entry) {
         int rc = 0;
         if(multi->socket_cb) {
+          CURL_TRC_M(data, "socket_callback(s=%" FMT_SOCKET_T ", REMOVE)", s);
           set_in_callback(multi, TRUE);
           rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                                 multi->socket_userp, entry->socketp);
@@ -3790,9 +3771,7 @@ bool Curl_expire_clear(struct Curl_easy *data)
     /* clear the timeout list too */
     Curl_llist_destroy(list, NULL);
 
-#ifdef DEBUGBUILD
-    infof(data, "Expire cleared");
-#endif
+    CURL_TRC_M(data, "Expire cleared");
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;
     return TRUE;
