@@ -446,4 +446,3 @@ class TestSSLUse:
             '--tls13-ciphers', 'NONSENSE', '--tls-max', '1.2'
         ])
         assert r.exit_code == 0, f'{r}'
-
