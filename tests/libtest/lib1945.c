@@ -26,24 +26,18 @@
 
 #include "memdebug.h"
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4706) /* assignment within conditional expression */
-#endif
 static void showem(CURL *easy, unsigned int type)
 {
   struct curl_header *header = NULL;
   struct curl_header *prev = NULL;
 
-  while((header = curl_easy_nextheader(easy, type, 0, prev))) {
+  /* !checksrc! disable EQUALSNULL 1 */
+  while((header = curl_easy_nextheader(easy, type, 0, prev)) != NULL) {
     printf(" %s == %s (%u/%u)\n", header->name, header->value,
            (int)header->index, (int)header->amount);
     prev = header;
   }
 }
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)
 {
