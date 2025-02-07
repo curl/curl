@@ -75,7 +75,22 @@ struct Curl_ssl_scache_peer {
   BIT(hmac_set);           /* if key_salt and key_hmac are present */
 };
 
+#define CURL_SCACHE_MAGIC 0x000e1551
+
+#ifdef DEBUGBUILD
+/* On a debug build, we want to fail hard on scaches that
+ * are not NULL, but no longer have the MAGIC touch. This gives
+ * us early warning on things only discovered by valgrind otherwise. */
+#define GOOD_SCACHE(x) \
+  (((x) && (x)->magic == CURL_SCACHE_MAGIC)? TRUE:      \
+  (DEBUGASSERT(!(x)), FALSE))
+#else
+#define GOOD_SCACHE(x) \
+  ((x) && (x)->magic == CURL_SCACHE_MAGIC)
+#endif
+
 struct Curl_ssl_scache {
+  unsigned int magic;
   struct Curl_ssl_scache_peer *peers;
   size_t peer_count;
   int default_lifetime_secs;
@@ -306,6 +321,7 @@ CURLcode Curl_ssl_scache_create(size_t max_peers,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  scache->magic = CURL_SCACHE_MAGIC;
   scache->default_lifetime_secs = (24*60*60); /* 1 day */
   scache->peer_count = max_peers;
   scache->peers = peers;
@@ -322,8 +338,9 @@ CURLcode Curl_ssl_scache_create(size_t max_peers,
 
 void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
 {
-  if(scache) {
+  if(scache && GOOD_SCACHE(scache)) {
     size_t i;
+    scache->magic = 0;
     for(i = 0; i < scache->peer_count; ++i) {
       cf_ssl_scache_clear_peer(&scache->peers[i]);
     }
@@ -588,6 +605,14 @@ cf_ssl_find_peer_by_key(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   *ppeer = NULL;
+  if(!GOOD_SCACHE(scache)) {
+    failf(data, "cf_ssl_find_peer_by_key with BAD sache magic!");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
+  CURL_TRC_SSLS(data, "find peer slot for %s among %zu slots",
+                ssl_peer_key, scache->peer_count);
+
   /* check for entries with known peer_key */
   for(i = 0; scache && i < scache->peer_count; i++) {
     if(scache->peers[i].ssl_peer_key &&
@@ -747,6 +772,11 @@ static CURLcode cf_scache_add_session(struct Curl_cfilter *cf,
     Curl_ssl_session_destroy(s);
     return CURLE_OK;
   }
+  if(!GOOD_SCACHE(scache)) {
+    Curl_ssl_session_destroy(s);
+    failf(data, "cf_scache_add_session with BAD scache magic!");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   if(s->valid_until <= 0)
     s->valid_until = now + scache->default_lifetime_secs;
@@ -801,6 +831,11 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
     Curl_ssl_session_destroy(s);
     return CURLE_OK;
   }
+  if(!GOOD_SCACHE(scache)) {
+    Curl_ssl_session_destroy(s);
+    failf(data, "Curl_ssl_scache_put with BAD scache magic!");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   Curl_ssl_scache_lock(data);
   result = cf_scache_add_session(cf, data, scache, ssl_peer_key, s);
@@ -836,6 +871,10 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
   *ps = NULL;
   if(!scache)
     return CURLE_OK;
+  if(!GOOD_SCACHE(scache)) {
+    failf(data, "Curl_ssl_scache_take with BAD scache magic!");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   Curl_ssl_scache_lock(data);
   result = cf_ssl_find_peer_by_key(data, scache, ssl_peer_key, conn_config,
@@ -878,6 +917,12 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
   DEBUGASSERT(sobj);
   DEBUGASSERT(sobj_free);
 
+  if(!GOOD_SCACHE(scache)) {
+    failf(data, "Curl_ssl_scache_add_obj with BAD scache magic!");
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
+  }
+
   result = cf_ssl_add_peer(data, scache, ssl_peer_key, conn_config, &peer);
   if(result || !peer) {
     CURL_TRC_SSLS(data, "unable to add scache peer: %d", result);
@@ -906,6 +951,10 @@ bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
   *sobj = NULL;
   if(!scache)
     return FALSE;
+  if(!GOOD_SCACHE(scache)) {
+    failf(data, "Curl_ssl_scache_get_obj with BAD scache magic!");
+    return FALSE;
+  }
 
   result = cf_ssl_find_peer_by_key(data, scache, ssl_peer_key, conn_config,
                                    &peer);
@@ -930,7 +979,7 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
   CURLcode result;
 
   (void)cf;
-  if(!scache)
+  if(!scache || !GOOD_SCACHE(scache))
     return;
 
   Curl_ssl_scache_lock(data);
@@ -977,6 +1026,9 @@ cf_ssl_find_peer_by_hmac(struct Curl_ssl_scache *scache,
   CURLcode result = CURLE_OK;
 
   *ppeer = NULL;
+  if(!GOOD_SCACHE(scache))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   /* look for an entry that matches salt+hmac exactly or has a known
    * ssl_peer_key which salt+hmac's to the same. */
   for(i = 0; scache && i < scache->peer_count; i++) {
@@ -1027,7 +1079,8 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
   bool locked = FALSE;
   CURLcode r;
 
-  if(!scache) {
+  if(!scache || !GOOD_SCACHE(scache)) {
+    failf(data, "Curl_ssl_session_import with BAD scache magic!");
     r = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
@@ -1104,6 +1157,10 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(!scache)
     return CURLE_OK;
+  if(!GOOD_SCACHE(scache)) {
+    failf(data, "Curl_ssl_session_export with BAD scache magic!");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   Curl_ssl_scache_lock(data);
 
