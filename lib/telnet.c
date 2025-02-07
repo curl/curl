@@ -777,15 +777,22 @@ static void printsub(struct Curl_easy *data,
   }
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4706) /* assignment within conditional expression */
+#endif
 static bool str_is_nonascii(const char *str)
 {
   char c;
-  while((c = *str++) != 0)
+  while((c = *str++))
     if(c & 0x80)
       return TRUE;
 
   return FALSE;
 }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 static CURLcode check_telnet_options(struct Curl_easy *data)
 {
