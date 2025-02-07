@@ -79,11 +79,9 @@
 #include "memdebug.h"
 
 /* ALPN for http2 */
-#ifdef USE_HTTP2
-#  undef HAS_ALPN
-#  ifdef MBEDTLS_SSL_ALPN
-#    define HAS_ALPN
-#  endif
+#undef HAS_ALPN
+#if defined(USE_HTTP2) && defined(MBEDTLS_SSL_ALPN)
+#  define HAS_ALPN
 #endif
 
 struct mbed_ssl_backend_data {
