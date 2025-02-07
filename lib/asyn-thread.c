@@ -282,13 +282,6 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
   struct thread_data *td = tsd->td;
   char service[12];
   int rc;
-#ifndef CURL_DISABLE_SOCKETPAIR
-#ifdef USE_EVENTFD
-  const uint64_t buf[1] = { 1 };
-#else
-  const char buf[1] = { 1 };
-#endif
-#endif
 
   msnprintf(service, sizeof(service), "%d", tsd->port);
 
@@ -313,6 +306,11 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
   else {
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
+#ifdef USE_EVENTFD
+      const uint64_t buf[1] = { 1 };
+#else
+      const char buf[1] = { 1 };
+#endif
       /* DNS has been resolved, signal client task */
       if(wakeup_write(tsd->sock_pair[1], buf, sizeof(buf)) < 0) {
         /* update sock_erro to errno */
