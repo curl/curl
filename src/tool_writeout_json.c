@@ -118,11 +118,6 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
   fprintf(stream, "}");
 }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4706) /* assignment within conditional expression */
-#endif
-
 void headerJSON(FILE *stream, struct per_transfer *per)
 {
   struct curl_header *header;
@@ -130,7 +125,7 @@ void headerJSON(FILE *stream, struct per_transfer *per)
 
   fputc('{', stream);
   while((header = curl_easy_nextheader(per->curl, CURLH_HEADER, -1,
-                                       prev))) {
+                                       prev)) != NULL) {
     if(header->amount > 1) {
       if(!header->index) {
         /* act on the 0-index entry and pull the others in, then output in a
@@ -169,7 +164,3 @@ void headerJSON(FILE *stream, struct per_transfer *per)
   }
   fputs("\n}", stream);
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
