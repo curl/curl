@@ -25,6 +25,7 @@
 ###########################################################################
 #
 import logging
+import os
 import re
 import pytest
 
@@ -71,10 +72,12 @@ class TestShutdown:
     def test_19_02_check_shutdown(self, env: Env, httpd, proto):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
-        curl = CurlClient(env=env, run_env={
+        run_env = os.environ.copy()
+        run_env.update({
             'CURL_GRACEFUL_SHUTDOWN': '2000',
-            'CURL_DEBUG': 'ssl,tcp'
+            'CURL_DEBUG': 'ssl,tcp,multi,connc'
         })
+        curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
             '--parallel'
@@ -131,13 +134,13 @@ class TestShutdown:
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         count = 10
-        curl = CurlClient(env=env, run_env={
-            # forbid connection reuse to trigger shutdowns after transfer
-            'CURL_FORBID_REUSE': '1',
-            # make socket receives block 50% of the time to delay shutdown
-            'CURL_DBG_SOCK_RBLOCK': '50',
-            'CURL_DEBUG': 'ssl'
-        })
+        run_env = os.environ.copy()
+        # forbid connection reuse to trigger shutdowns after transfer
+        run_env['CURL_FORBID_REUSE'] = '1'
+        # make socket receives block 50% of the time to delay shutdown
+        run_env['CURL_DBG_SOCK_RBLOCK'] = '50'
+        run_env['CURL_DEBUG'] = 'ssl,multi'
+        curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak/?'\
             f'id=[0-{count-1}]&with_cl&'
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
