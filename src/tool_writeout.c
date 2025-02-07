@@ -127,6 +127,8 @@ static const struct writeoutvar variables[] = {
   {"time_starttransfer", VAR_STARTTRANSFER_TIME, CURLINFO_STARTTRANSFER_TIME_T,
    writeTime},
   {"time_total", VAR_TOTAL_TIME, CURLINFO_TOTAL_TIME_T, writeTime},
+  {"tls_earlydata", VAR_TLS_EARLYDATA_SENT, CURLINFO_EARLYDATA_SENT_T,
+   writeOffset},
   {"url", VAR_INPUT_URL, CURLINFO_NONE, writeString},
   {"url.fragment", VAR_INPUT_URLFRAGMENT, CURLINFO_NONE, writeString},
   {"url.host", VAR_INPUT_URLHOST, CURLINFO_NONE, writeString},
