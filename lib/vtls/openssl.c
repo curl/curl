@@ -3670,7 +3670,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   ctx_option_t ctx_options = 0;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  const long int ssl_version_min = conn_config->version;
+  unsigned int ssl_version_min = conn_config->version;
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_cert_type = ssl_config->cert_type;
@@ -3713,6 +3713,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
     break;
   case TRNSPRT_QUIC:
+    ssl_version_min = CURL_SSLVERSION_TLSv1_3;
     if(conn_config->version_max &&
        (conn_config->version_max != CURL_SSLVERSION_MAX_TLSv1_3)) {
       failf(data, "QUIC needs at least TLS version 1.3");
@@ -3876,7 +3877,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   ciphers = conn_config->cipher_list;
   if(!ciphers && (peer->transport != TRNSPRT_QUIC))
     ciphers = DEFAULT_CIPHER_SELECTION;
-  if(ciphers) {
+  if(ciphers && (ssl_version_min < CURL_SSLVERSION_TLSv1_3)) {
     if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, ciphers)) {
       failf(data, "failed setting cipher list: %s", ciphers);
       return CURLE_SSL_CIPHER;
@@ -3887,7 +3888,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
   {
     const char *ciphers13 = conn_config->cipher_list13;
-    if(ciphers13) {
+    if(ciphers13 &&
+       (!conn_config->version_max ||
+        (conn_config->version_max >= CURL_SSLVERSION_MAX_TLSv1_3))) {
       if(!SSL_CTX_set_ciphersuites(octx->ssl_ctx, ciphers13)) {
         failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers13);
         return CURLE_SSL_CIPHER;
