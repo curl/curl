@@ -28,16 +28,23 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # build
 
+case "${TARGET:-}" in
+  *Win32) openssl_suffix='-Win32';;
+  *)      openssl_suffix='-Win64';;
+esac
+
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-  openssl_root_win='C:/OpenSSL-v34-Win64'
+  openssl_root_win="C:/OpenSSL-v34${openssl_suffix}"
+elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
+  openssl_root_win="C:/OpenSSL${openssl_suffix}"
 else
-  openssl_root_win='C:/OpenSSL-v111-Win64'
+  openssl_root_win="C:/OpenSSL-v111${openssl_suffix}"
 fi
 openssl_root="$(cygpath "${openssl_root_win}")"
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   options=''
-  [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+  [[ "${TARGET}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
   [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
   [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
   [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
@@ -45,7 +52,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
   # shellcheck disable=SC2086
-  cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
+  cmake -B _bld "-G${PRJ_GEN}" ${TARGET} ${options} \
     "-DCURL_USE_OPENSSL=${OPENSSL}" \
     "-DCURL_USE_SCHANNEL=${SCHANNEL}" \
     "-DHTTP_ONLY=${HTTP_ONLY}" \

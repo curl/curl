@@ -77,7 +77,7 @@
    https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
 */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_)
-#  define HAS_ALPN 1
+#  define HAS_ALPN_SCHANNEL
 #endif
 
 #ifndef BCRYPT_CHACHA20_POLY1305_ALGORITHM
@@ -888,7 +888,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   SecBufferDesc outbuf_desc;
   SecBuffer inbuf;
   SecBufferDesc inbuf_desc;
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_SCHANNEL
   unsigned char alpn_buffer[128];
 #endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
@@ -908,7 +908,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
           "connect to some servers due to lack of SNI, algorithms, etc.");
   }
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_SCHANNEL
   /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
      Also it does not seem to be supported for WINE, see curl bug #983. */
   backend->use_alpn = connssl->alpn &&
@@ -991,7 +991,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     infof(data, "schannel: using IP address, SNI is not supported by OS.");
   }
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_SCHANNEL
   if(backend->use_alpn) {
     int cur = 0;
     int list_start_index = 0;
@@ -1039,7 +1039,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     InitSecBuffer(&inbuf, SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, &inbuf, 1);
   }
-#else /* HAS_ALPN */
+#else /* HAS_ALPN_SCHANNEL */
   InitSecBuffer(&inbuf, SECBUFFER_EMPTY, NULL, 0);
   InitSecBufferDesc(&inbuf_desc, &inbuf, 1);
 #endif
@@ -1533,7 +1533,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_SCHANNEL
   SecPkgContext_ApplicationProtocol alpn_result;
 #endif
 
@@ -1562,7 +1562,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_SCHANNEL
   if(backend->use_alpn) {
     sspi_status =
       Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
