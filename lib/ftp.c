@@ -4198,7 +4198,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
 
         /* parse the URL path into separate path components */
         /* !checksrc! disable EQUALSNULL 1 */
-        while((slashPos = strchr(curPos, '/'))) {
+        while((slashPos = strchr(curPos, '/')) != NULL) {
           size_t compLen = slashPos - curPos;
 
           /* path starts with a slash: add that as a directory */
