@@ -77,17 +77,7 @@ struct Curl_ssl_scache_peer {
 
 #define CURL_SCACHE_MAGIC 0x000e1551
 
-#ifdef DEBUGBUILD
-/* On a debug build, we want to fail hard on scaches that
- * are not NULL, but no longer have the MAGIC touch. This gives
- * us early warning on things only discovered by valgrind otherwise. */
-#define GOOD_SCACHE(x) \
-  (((x) && (x)->magic == CURL_SCACHE_MAGIC)? TRUE:      \
-  (DEBUGASSERT(!(x)), FALSE))
-#else
-#define GOOD_SCACHE(x) \
-  ((x) && (x)->magic == CURL_SCACHE_MAGIC)
-#endif
+#define GOOD_SCACHE(x) ((x) && (x)->magic == CURL_SCACHE_MAGIC)
 
 struct Curl_ssl_scache {
   unsigned int magic;
@@ -96,6 +86,23 @@ struct Curl_ssl_scache {
   int default_lifetime_secs;
   long age;
 };
+
+static struct Curl_ssl_scache *cf_ssl_scache_get(struct Curl_easy *data)
+{
+  struct Curl_ssl_scache *scache = NULL;
+  /* If a share is present, its ssl_scache has preference over the multi */
+  if(data->share && data->share->ssl_scache)
+    scache = data->share->ssl_scache;
+  else if(data->multi && data->multi->ssl_scache)
+    scache = data->multi->ssl_scache;
+  if(scache && !GOOD_SCACHE(scache)) {
+    failf(data, "transfer would use an invalid scache at %p, denied",
+          (void *)scache);
+    DEBUGASSERT(0);
+    return NULL;
+  }
+  return scache;
+}
 
 static void cf_ssl_scache_clear_session(struct Curl_ssl_session *s)
 {
@@ -606,7 +613,6 @@ cf_ssl_find_peer_by_key(struct Curl_easy *data,
 
   *ppeer = NULL;
   if(!GOOD_SCACHE(scache)) {
-    failf(data, "cf_ssl_find_peer_by_key with BAD sache magic!");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
@@ -772,11 +778,6 @@ static CURLcode cf_scache_add_session(struct Curl_cfilter *cf,
     Curl_ssl_session_destroy(s);
     return CURLE_OK;
   }
-  if(!GOOD_SCACHE(scache)) {
-    Curl_ssl_session_destroy(s);
-    failf(data, "cf_scache_add_session with BAD scache magic!");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
 
   if(s->valid_until <= 0)
     s->valid_until = now + scache->default_lifetime_secs;
@@ -822,7 +823,7 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
                              const char *ssl_peer_key,
                              struct Curl_ssl_session *s)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result;
   DEBUGASSERT(ssl_config);
@@ -833,7 +834,6 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
   }
   if(!GOOD_SCACHE(scache)) {
     Curl_ssl_session_destroy(s);
-    failf(data, "Curl_ssl_scache_put with BAD scache magic!");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
@@ -861,7 +861,7 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               const char *ssl_peer_key,
                               struct Curl_ssl_session **ps)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   struct Curl_llist_node *n;
@@ -871,10 +871,6 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
   *ps = NULL;
   if(!scache)
     return CURLE_OK;
-  if(!GOOD_SCACHE(scache)) {
-    failf(data, "Curl_ssl_scache_take with BAD scache magic!");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
 
   Curl_ssl_scache_lock(data);
   result = cf_ssl_find_peer_by_key(data, scache, ssl_peer_key, conn_config,
@@ -909,7 +905,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_free)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result;
@@ -917,8 +913,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
   DEBUGASSERT(sobj);
   DEBUGASSERT(sobj_free);
 
-  if(!GOOD_SCACHE(scache)) {
-    failf(data, "Curl_ssl_scache_add_obj with BAD scache magic!");
+  if(!scache) {
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
@@ -943,7 +938,7 @@ bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
                              const char *ssl_peer_key,
                              void **sobj)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result;
@@ -951,10 +946,6 @@ bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
   *sobj = NULL;
   if(!scache)
     return FALSE;
-  if(!GOOD_SCACHE(scache)) {
-    failf(data, "Curl_ssl_scache_get_obj with BAD scache magic!");
-    return FALSE;
-  }
 
   result = cf_ssl_find_peer_by_key(data, scache, ssl_peer_key, conn_config,
                                    &peer);
@@ -973,13 +964,13 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const char *ssl_peer_key)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result;
 
   (void)cf;
-  if(!scache || !GOOD_SCACHE(scache))
+  if(!scache)
     return;
 
   Curl_ssl_scache_lock(data);
@@ -1073,14 +1064,13 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const unsigned char *shmac, size_t shmac_len,
                                  const unsigned char *sdata, size_t sdata_len)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct Curl_ssl_scache_peer *peer = NULL;
   struct Curl_ssl_session *s = NULL;
   bool locked = FALSE;
   CURLcode r;
 
-  if(!scache || !GOOD_SCACHE(scache)) {
-    failf(data, "Curl_ssl_session_import with BAD scache magic!");
+  if(!scache) {
     r = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
@@ -1145,7 +1135,7 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
                                  curl_ssls_export_cb *export_fn,
                                  void *userptr)
 {
-  struct Curl_ssl_scache *scache = data->state.ssl_scache;
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct Curl_ssl_scache_peer *peer;
   struct dynbuf sbuf, hbuf;
   struct Curl_llist_node *n;
@@ -1157,10 +1147,6 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(!scache)
     return CURLE_OK;
-  if(!GOOD_SCACHE(scache)) {
-    failf(data, "Curl_ssl_session_export with BAD scache magic!");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
 
   Curl_ssl_scache_lock(data);
 
