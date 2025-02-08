@@ -487,7 +487,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          export TFLAGS='-j4 ~WebSockets ${{ matrix.tflags }}'
+          export TFLAGS='-j8 ~WebSockets ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
