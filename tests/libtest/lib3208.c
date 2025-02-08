@@ -48,6 +48,7 @@ CURLcode test(char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   /* no peer verify */
   easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -84,6 +85,11 @@ CURLcode test(char *URL)
     /* this should now contain a result code from the easy handle,
        get it */
     i = msg->data.result;
+
+  curl_multi_remove_handle(multi, curl);
+
+  /* make a third transfer with the easy handle */
+  curl_easy_perform(curl);
 
 test_cleanup:
 
