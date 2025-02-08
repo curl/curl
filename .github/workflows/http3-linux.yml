@@ -308,7 +308,7 @@ jobs:
           cache-name: cache-quictls-no-deprecated
         with:
           path: ~/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
           fail-on-cache-miss: true
 
       - name: 'cache gnutls'
