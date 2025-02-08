@@ -36,7 +36,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-curl_easy_perform then curl_multi_perform the same handle
+easy_perform, multi_perform, easy_perform the same handle
 </name>
 <command>
 https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
