@@ -568,15 +568,18 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
 
-if(WIN32)
-  # Preload settings on Windows
-  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/win32-cache.cmake")
-elseif(APPLE)
-  # Fast-track predictable feature detections
-  set(HAVE_EVENTFD 0)
-  set(HAVE_GETPASS_R 0)
-  set(HAVE_SENDMMSG 0)
-elseif(AMIGA)
+option(_CURL_QUICK_DETECT "Fast-track known feature detection results (Windows, some Apple)" ON)
+if(_CURL_QUICK_DETECT)
+  if(WIN32)
+    include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/win32-cache.cmake")
+  elseif(APPLE)
+    set(HAVE_EVENTFD 0)
+    set(HAVE_GETPASS_R 0)
+    set(HAVE_SENDMMSG 0)
+  endif()
+endif()
+
+if(AMIGA)
   set(HAVE_GETADDRINFO 0)  # Breaks the build when detected and used.
 endif()
 if(DOS OR AMIGA)
