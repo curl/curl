@@ -154,7 +154,7 @@ int main(void)
   /* ioctlsocket source code */
   int socket = -1;
   unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
-  ;
+  (void)flags;
   return 0;
 }
 
@@ -183,7 +183,7 @@ int main(void)
   long flags = 0;
   if(0 != IoctlSocket(0, FIONBIO, &flags))
     return 1;
-  ;
+  (void)flags;
   return 0;
 }
 #endif
@@ -197,7 +197,7 @@ int main(void)
   unsigned long flags = 0;
   if(0 != ioctlsocket(0, FIONBIO, &flags))
     return 1;
-  ;
+  (void)flags;
   return 0;
 }
 #endif
@@ -224,7 +224,7 @@ int main(void)
   int flags = 0;
   if(0 != ioctl(0, FIONBIO, &flags))
     return 1;
-  ;
+  (void)flags;
   return 0;
 }
 #endif
@@ -252,7 +252,7 @@ int main(void)
   struct ifreq ifr;
   if(0 != ioctl(0, SIOCGIFADDR, &ifr))
     return 1;
-  ;
+  (void)ifr;
   return 0;
 }
 #endif
