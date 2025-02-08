@@ -67,7 +67,7 @@ jobs:
           cache-name: cache-quictls-no-deprecated
         with:
           path: ~/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
 
       - name: 'cache gnutls'
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
@@ -308,7 +308,7 @@ jobs:
           cache-name: cache-quictls-no-deprecated
         with:
           path: ~/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
           fail-on-cache-miss: true
 
       - name: 'cache gnutls'
