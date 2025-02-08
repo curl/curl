@@ -137,7 +137,7 @@ for my $l (@gitlog) {
             my $ref = extract($2);
             push @fixes, $ref if($ref);
         }
-        elsif($line =~ /^Clo(s|)es(:|) *(.*)/i) {
+        elsif($line =~ /^Cl([os]+)es(:|) *(.*)/i) {
             my $ref = extract($3);
             push @closes, $ref if($ref);
         }
