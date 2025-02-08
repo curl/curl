@@ -30,6 +30,14 @@
 #include <unistd.h>
 #include <curl/curl.h>
 
+/* Avoid warning in FD_SET() with pre-2020 Cygwin/MSYS releases:
+ * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
+ * may change the sign of the result [-Wsign-conversion]
+ */
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 /* Auxiliary function that waits on the socket. */
 static int wait_on_socket(curl_socket_t sockfd, long timeout_ms)
 {
@@ -44,19 +52,8 @@ static int wait_on_socket(curl_socket_t sockfd, long timeout_ms)
   FD_ZERO(&outfd);
   FD_ZERO(&errfd);
 
-/* Avoid this warning with pre-2020 Cygwin/MSYS releases:
- * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
- * may change the sign of the result [-Wsign-conversion]
- */
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#endif
   FD_SET(sockfd, &errfd); /* always check for error */
   FD_SET(sockfd, &infd);
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 
   /* select() returns the number of signalled sockets or -1 */
   res = select((int)sockfd + 1, &infd, &outfd, &errfd, &tv);
