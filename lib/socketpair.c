@@ -27,7 +27,7 @@
 #include "urldata.h"
 #include "rand.h"
 
-#if defined(USE_EVENTFD)
+#ifdef HAVE_EVENTFD
 #ifdef HAVE_SYS_EVENTFD_H
 #include <sys/eventfd.h>
 #endif
