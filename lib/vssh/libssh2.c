@@ -1633,10 +1633,10 @@ static CURLcode sftp_readdir(struct Curl_easy *data,
       return result;
     }
   }
-  else if(rc == 0) {
+  else if(!rc) {
     state(data, SSH_SFTP_READDIR_DONE);
   }
-  else if(rc < 0) {
+  else {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
     result = sftp_libssh2_error_to_CURLE(sftperr);
     sshc->actualcode = result ? result : CURLE_SSH;
