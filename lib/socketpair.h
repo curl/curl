@@ -27,7 +27,7 @@
 #include "curl_setup.h"
 
 #ifdef HAVE_EVENTFD
-#define USE_EVENTFD 1
+#define USE_EVENTFD
 
 #define wakeup_write  write
 #define wakeup_read   read
