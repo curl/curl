@@ -36,6 +36,33 @@ concurrency:
 permissions: {}
 
 jobs:
+  build-cache:
+    runs-on: windows-latest
+    steps:
+      - name: 'cache Git for Windows'
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-git-for-windows
+        env:
+          cache-name: cache-git-for-windows
+        with:
+          path: ~/_gfw
+          key: ${{ runner.os }}-${{ env.cache-name }}-v2.46.2.windows.1
+
+      - name: 'install Git for Windows'
+        if: steps.cache-git-for-windows.outputs.cache-hit != 'true'
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          mkdir "$HOME/_gfw"
+          cd "$HOME/_gfw" || exit 1
+          # The last known good Perl version (as of v2.47.1.windows.2) without pipe/signal MSYS2
+          # runtime (?) regressions that cause runtests.pl to run at 2.5x reduced speed, is this:
+          #   https://github.com/git-for-windows/git/releases/tag/v2.46.2.windows.1
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
+            --location https://github.com/git-for-windows/git/releases/download/v2.46.2.windows.1/PortableGit-2.46.2-64-bit.7z.exe --output bin.7z
+          7z x -bd -y bin.7z
+          rm -f bin.7z
+
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     runs-on: windows-latest
@@ -358,6 +385,8 @@ jobs:
     name: 'dl-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 20
+    needs:
+      - build-cache
     defaults:
       run:
         shell: C:\_gfw\usr\bin\bash.exe {0}
@@ -387,19 +416,15 @@ jobs:
             tflags: 'skiprun'
       fail-fast: false
     steps:
-      - name: 'install known good Git for Windows'
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          mkdir /c/_gfw
-          cd /c/_gfw || exit 1
-          # The last known good Perl version (as of v2.47.1.windows.2) without pipe/signal MSYS2
-          # runtime (?) regressions that cause runtests.pl to run at 2.5x reduced speed, is this:
-          #   https://github.com/git-for-windows/git/releases/tag/v2.46.2.windows.1
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
-            --location https://github.com/git-for-windows/git/releases/download/v2.46.2.windows.1/PortableGit-2.46.2-64-bit.7z.exe --output bin.7z
-          7z x -bd -y bin.7z
-          rm -f bin.7z
+      - name: 'cache Git for Windows'
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-git-for-windows
+        env:
+          cache-name: cache-git-for-windows
+        with:
+          path: ~/_gfw
+          key: ${{ runner.os }}-${{ env.cache-name }}-v2.46.2.windows.1
+          fail-on-cache-miss: true
 
       - name: 'cache compiler (gcc ${{ matrix.env }})'
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
@@ -584,6 +609,8 @@ jobs:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 55
+    needs:
+      - build-cache
     defaults:
       run:
         shell: C:\_gfw\usr\bin\bash.exe {0}
@@ -677,19 +704,15 @@ jobs:
 
       fail-fast: false
     steps:
-      - name: 'install known good Git for Windows'
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          mkdir /c/_gfw
-          cd /c/_gfw || exit 1
-          # The last known good Perl version (as of v2.47.1.windows.2) without pipe/signal MSYS2
-          # runtime (?) regressions that cause runtests.pl to run at 2.5x reduced speed, is this:
-          #   https://github.com/git-for-windows/git/releases/tag/v2.46.2.windows.1
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
-            --location https://github.com/git-for-windows/git/releases/download/v2.46.2.windows.1/PortableGit-2.46.2-64-bit.7z.exe --output bin.7z
-          7z x -bd -y bin.7z
-          rm -f bin.7z
+      - name: 'cache Git for Windows'
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-git-for-windows
+        env:
+          cache-name: cache-git-for-windows
+        with:
+          path: ~/_gfw
+          key: ${{ runner.os }}-{{ env.cache-name }}-v2.46.2.windows.1
+          fail-on-cache-miss: true
 
       - name: 'vcpkg cache setup'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
