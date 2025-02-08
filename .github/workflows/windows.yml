@@ -360,7 +360,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        shell: C:\_gfw\usr\bin\bash.exe {0}
+        shell: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && 'C:\_gfw\usr\bin\bash.exe {0}' || 'C:\msys64\usr\bin\bash.exe {0}' }}
     strategy:
       matrix:
         include:
@@ -388,6 +388,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install known good Git for Windows'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         shell: bash
         timeout-minutes: 5
         run: |
@@ -431,7 +432,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
           cmake -B bld -G 'MSYS Makefiles' ${options} \
@@ -455,7 +456,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
@@ -470,7 +471,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
@@ -491,14 +492,14 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
 
   linux-cross-mingw-w64:
@@ -586,7 +587,7 @@ jobs:
     timeout-minutes: 55
     defaults:
       run:
-        shell: C:\_gfw\usr\bin\bash.exe {0}
+        shell: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && 'C:\_gfw\usr\bin\bash.exe {0}' || 'C:\msys64\usr\bin\bash.exe {0}' }}
     env:
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
@@ -678,6 +679,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install known good Git for Windows'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         shell: bash
         timeout-minutes: 5
         run: |
@@ -715,7 +717,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           if [ '${{ matrix.plat }}' = 'uwp' ]; then
             options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
             cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
@@ -754,7 +756,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
@@ -770,7 +772,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
@@ -796,11 +798,11 @@ jobs:
             TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         run: |
-          PATH="/c/_gfw/usr/bin:$PATH"
+          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
