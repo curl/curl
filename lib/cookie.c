@@ -879,7 +879,7 @@ parse_netscape(struct Cookie *co,
       /*
        * flag: A TRUE/FALSE value indicating if all machines within a given
        * domain can access the variable. Set TRUE when the cookie says
-       * .domain.com and to false when the domain is complete www.domain.com
+       * .example.com and to false when the domain is complete www.example.com
        */
       co->tailmatch = !!strncasecompare(ptr, "TRUE", len);
       break;
