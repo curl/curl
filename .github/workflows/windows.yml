@@ -86,7 +86,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
             cmake -B bld -G Ninja ${options} \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=32 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
           else
@@ -252,7 +252,7 @@ jobs:
             cmake -B bld -G Ninja ${options} \
               -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
               -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=32 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
           else
@@ -438,7 +438,7 @@ jobs:
           cmake -B bld -G 'MSYS Makefiles' ${options} \
             -DCMAKE_C_COMPILER=gcc \
             -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+            -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
             -DCURL_USE_LIBPSL=OFF \
             ${{ matrix.config }}
