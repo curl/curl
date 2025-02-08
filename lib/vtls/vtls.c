@@ -915,7 +915,9 @@ static int multissl_init(void)
 {
   if(multissl_setup(NULL))
     return 1;
-  return Curl_ssl->init();
+  if(Curl_ssl->init)
+    return Curl_ssl->init();
+  return 1;
 }
 
 static CURLcode multissl_connect(struct Curl_cfilter *cf,
