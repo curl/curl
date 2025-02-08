@@ -567,12 +567,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 #endif
   data->state.httpreq = data->set.method;
 
-#ifdef USE_SSL
-  if(!data->state.ssl_scache)
-    /* There was no ssl session cache set via a share, use the multi one */
-    data->state.ssl_scache = data->multi->ssl_scache;
-#endif
-
   data->state.requests = 0;
   data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
