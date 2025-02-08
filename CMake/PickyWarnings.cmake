@@ -38,17 +38,19 @@ if(APPLE AND
    (CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.6) OR
    (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.3))
   list(APPEND _picky "-Werror=partial-availability")  # clang 3.6  appleclang 6.3
-elseif(MSVC)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  list(APPEND _picky "-Werror-implicit-function-declaration")  # clang 1.0  gcc 2.95
+endif()
+
+if(MSVC)
   if(CMAKE_C_FLAGS MATCHES "[/-]W[0-4]")
     string(REGEX REPLACE "[/-]W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   endif()
   list(APPEND _picky "-W4")
 elseif(BORLAND)
   list(APPEND _picky "-w-")  # Disable warnings on Borland to avoid changing 3rd party code.
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-  list(APPEND _picky "-Werror-implicit-function-declaration")  # clang 1.0  gcc 2.95
 endif()
 
 if(PICKY_COMPILER)
@@ -277,14 +279,6 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
     endif()
   endforeach()
   set(_picky ${_picky_tmp})
-endif()
-
-if(CURL_WERROR)
-  if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    list(APPEND _picky "-Werror")
-  elseif(MSVC)
-    list(APPEND _picky "-WX")
-  endif()
 endif()
 
 if(_picky)
