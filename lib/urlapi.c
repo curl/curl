@@ -395,7 +395,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   /* We will now try to extract the
    * possible login information in a string like:
-   * ftp://user:password@ftp.my.site:8021/README */
+   * ftp://user:password@ftp.site.example:8021/README */
   ptr++;
 
   /* if this is a known scheme, get some details */
