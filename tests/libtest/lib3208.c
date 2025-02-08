@@ -79,11 +79,16 @@ CURLcode test(char *URL)
     abort_on_test_timeout();
   }
 
+  curl_multi_remove_handle(multi, curl);
+
   msg = curl_multi_info_read(multi, &still_running);
   if(msg)
     /* this should now contain a result code from the easy handle,
        get it */
     i = msg->data.result;
+
+  /* make a third transfer with the easy handle */
+  curl_easy_perform(curl);
 
 test_cleanup:
 
