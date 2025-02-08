@@ -167,7 +167,7 @@ int main(void) { return 0; }
 int main(void)
 {
   /* ioctlsocket source code */
-  int socket;
+  int socket = -1;
   unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
   ;
   return 0;
