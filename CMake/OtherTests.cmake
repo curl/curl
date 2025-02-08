@@ -65,6 +65,9 @@ endif()
 set(_source_epilogue "#undef inline")
 curl_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 check_c_source_compiles("${_source_epilogue}
+  #ifdef _MSC_VER
+  #include <winsock2.h>
+  #endif
   #include <time.h>
   int main(void)
   {
