@@ -43,7 +43,7 @@ env:
   # handled in renovate.json
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
-  gnutls-version: 3.8.8
+  gnutls-version: 3.8.9
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   wolfssl-version: 5.7.6
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
