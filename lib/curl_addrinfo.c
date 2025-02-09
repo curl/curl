@@ -118,7 +118,7 @@ Curl_getaddrinfo_ex(const char *nodename,
 
   *result = NULL; /* assume failure */
 
-  error = getaddrinfo(nodename, servname, hints, &aihead);
+  error = CURL_GETADDRINFO(nodename, servname, hints, &aihead);
   if(error)
     return error;
 
@@ -184,7 +184,7 @@ Curl_getaddrinfo_ex(const char *nodename,
 
   /* destroy the addrinfo list */
   if(aihead)
-    freeaddrinfo(aihead);
+    CURL_FREEADDRINFO(aihead);
 
   /* if we failed, also destroy the Curl_addrinfo list */
   if(error) {
@@ -509,7 +509,7 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
 #ifdef USE_LWIPSOCK
   lwip_freeaddrinfo(freethis);
 #else
-  (freeaddrinfo)(freethis);
+  freeaddrinfo(freethis);
 #endif
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
@@ -534,7 +534,7 @@ curl_dbg_getaddrinfo(const char *hostname,
 #ifdef USE_LWIPSOCK
   int res = lwip_getaddrinfo(hostname, service, hints, result);
 #else
-  int res = (getaddrinfo)(hostname, service, hints, result);
+  int res = getaddrinfo(hostname, service, hints, result);
 #endif
   if(0 == res)
     /* success */

@@ -47,10 +47,6 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   if(WIN32)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
-  # getaddrinfo/freeaddrinfo overrides break UNITY build by overriding them
-  # before including system headers. Server code doesn't need these overrides,
-  # so it's safe to disable them globally.
-  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_GETADDRINFO_OVERRIDE")
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test server ${_target}")
