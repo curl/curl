@@ -58,11 +58,11 @@ int main(void)
 #if defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
-#   ifndef _REENTRANT
-#   define _REENTRANT
-#   endif
-    /* no idea whether _REENTRANT is always set, just invent a new flag */
-#   define TEST_GETHOSTBYFOO_REENTRANT
+#ifndef _REENTRANT
+#define _REENTRANT
+#endif
+/* no idea whether _REENTRANT is always set, just invent a new flag */
+#define TEST_GETHOSTBYFOO_REENTRANT
 #endif
 #if defined(HAVE_GETHOSTBYNAME_R_3) || \
     defined(HAVE_GETHOSTBYNAME_R_5) || \
