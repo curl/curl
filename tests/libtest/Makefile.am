@@ -90,8 +90,6 @@ libstubgss_la_DEPENDENCIES =
 endif
 
 if USE_TEST_BUNDLES
-AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
-
 libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl lib1521.c
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
 

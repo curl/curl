@@ -21,10 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_NO_GETADDRINFO_OVERRIDE
-#define CURL_NO_GETADDRINFO_OVERRIDE
-#endif
-
 #include "server_setup.h"
 
 /* Purpose

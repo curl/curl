@@ -153,28 +153,6 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
                      __LINE__, __FILE__)
 #endif
 
-#ifndef CURL_NO_GETADDRINFO_OVERRIDE
-#ifdef HAVE_GETADDRINFO
-#if defined(getaddrinfo) && defined(__osf__)
-/* OSF/1 and Tru64 have getaddrinfo as a define already, so we cannot define
-   our macro as for other platforms. Instead, we redefine the new name they
-   define getaddrinfo to become! */
-#define ogetaddrinfo(host,serv,hint,res) \
-  curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
-#else
-#undef getaddrinfo
-#define getaddrinfo(host,serv,hint,res) \
-  curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
-#endif
-#endif /* HAVE_GETADDRINFO */
-
-#ifdef HAVE_FREEADDRINFO
-#undef freeaddrinfo
-#define freeaddrinfo(data) \
-  curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
-#endif /* HAVE_FREEADDRINFO */
-#endif /* !CURL_NO_GETADDRINFO_OVERRIDE */
-
 /* sclose is probably already defined, redefine it! */
 #undef sclose
 #define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
