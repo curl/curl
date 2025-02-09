@@ -46,9 +46,6 @@
 
 #define DNS_CLASS_IN 0x01
 
-/* doh_print_buf truncates if the hex string will be more than this */
-#define LOCAL_PB_HEXMAX 400
-
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char * const errors[]={
   "",
@@ -192,6 +189,10 @@ doh_write_cb(char *contents, size_t size, size_t nmemb, void *userp)
 }
 
 #if defined(USE_HTTPSRR) && defined(DEBUGBUILD)
+
+/* doh_print_buf truncates if the hex string will be more than this */
+#define LOCAL_PB_HEXMAX 400
+
 static void doh_print_buf(struct Curl_easy *data,
                           const char *prefix,
                           unsigned char *buf, size_t len)
