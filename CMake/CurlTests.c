@@ -102,6 +102,7 @@ int main(void)
   (void)hp;
   (void)h_errnop;
 #endif
+  (void)h;
   (void)rc;
   return 0;
 }
