@@ -32,7 +32,9 @@
 
 #define MIN_FIRST_ALLOC 32
 
+#ifdef DEBUGBUILD
 #define DYNINIT 0xbee51da /* random pattern */
+#endif
 
 /*
  * Init a dynbuf struct.
