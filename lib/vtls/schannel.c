@@ -232,8 +232,6 @@ schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
   return CURLE_OK;
 }
 
-/* longest is 26, buffer is slightly bigger */
-#define LONGEST_ALG_ID 32
 #define CIPHEROPTION(x) {#x, x}
 
 struct algo {
