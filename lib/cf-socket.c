@@ -932,15 +932,6 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
   }
 }
 
-/* We have a recv buffer to enhance reads with len < NW_SMALL_READS.
- * This happens often on TLS connections where the TLS implementation
- * tries to read the head of a TLS record, determine the length of the
- * full record and then make a subsequent read for that.
- * On large reads, we will not fill the buffer to avoid the double copy. */
-#define NW_RECV_CHUNK_SIZE    (64 * 1024)
-#define NW_RECV_CHUNKS         1
-#define NW_SMALL_READS        (1024)
-
 struct cf_socket_ctx {
   int transport;
   struct Curl_sockaddr_ex addr;      /* address to connect to */
