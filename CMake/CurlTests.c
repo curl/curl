@@ -70,7 +70,7 @@ int main(void)
 #include <netdb.h>
 int main(void)
 {
-  char *address = "example.com";
+  const char *address = "example.com";
   int length = 0;
   int type = 0;
   struct hostent h;
