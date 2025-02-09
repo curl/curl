@@ -53,18 +53,18 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
   # shellcheck disable=SC2086
   cmake -B _bld "-G${PRJ_GEN}" ${TARGET} ${options} \
-    "-DCURL_USE_OPENSSL=${OPENSSL}" \
-    "-DCURL_USE_SCHANNEL=${SCHANNEL}" \
-    "-DHTTP_ONLY=${HTTP_ONLY}" \
-    "-DBUILD_SHARED_LIBS=${SHARED}" \
-    "-DCMAKE_UNITY_BUILD=${UNITY}" \
-    '-DCURL_TEST_BUNDLES=ON' \
-    '-DCURL_WERROR=ON' \
-    "-DENABLE_DEBUG=${DEBUG}" \
-    "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
-    '-DCMAKE_INSTALL_PREFIX=C:/curl' \
-    "-DCMAKE_BUILD_TYPE=${PRJ_CFG}" \
-    '-DCURL_USE_LIBPSL=OFF'
+    -DCURL_USE_OPENSSL="${OPENSSL}" \
+    -DCURL_USE_SCHANNEL="${SCHANNEL}" \
+    -DHTTP_ONLY="${HTTP_ONLY}" \
+    -DBUILD_SHARED_LIBS="${SHARED}" \
+    -DCMAKE_UNITY_BUILD="${UNITY}" \
+    -DCURL_TEST_BUNDLES=ON \
+    -DCURL_WERROR=ON \
+    -DENABLE_DEBUG="${DEBUG}" \
+    -DENABLE_UNICODE="${ENABLE_UNICODE}" \
+    -DCMAKE_INSTALL_PREFIX='C:/curl' \
+    -DCMAKE_BUILD_TYPE="${PRJ_CFG}" \
+    -DCURL_USE_LIBPSL=OFF
   if false; then
     cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
   fi
