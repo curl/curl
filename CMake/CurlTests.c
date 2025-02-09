@@ -136,9 +136,9 @@ int main(void) { return 0; }
    since some C++ compilers masquerading as C compilers
    incorrectly reject 9223372036854775807. */
 #define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                     && LARGE_OFF_T % 2147483647 == 1)
-                    ? 1 : -1];
+static int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721 &&
+                           LARGE_OFF_T % 2147483647 == 1)
+                          ? 1 : -1];
 int main(void) { return 0; }
 #endif
 
