@@ -90,6 +90,7 @@ int main(void)
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
       defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
   rc = gethostbyname_r(address, &h, &hdata);
+  (void)hdata;
 #elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT)
   rc = gethostbyname_r(address, &h, buffer, 8192, &h_errnop);
