@@ -85,8 +85,8 @@ int main(void)
       defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
   char buffer[8192];
-  int h_errnop;
   struct hostent *hp;
+  int h_errnop;
 #endif
 
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
@@ -97,9 +97,12 @@ int main(void)
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT)
   rc = gethostbyname_r(address, &h, buffer, 8192, &h_errnop);
   (void)hp; /* not used for test */
+  (void)h_errnop;
 #elif defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
   rc = gethostbyname_r(address, &h, buffer, 8192, &hp, &h_errnop);
+  (void)hp;
+  (void)h_errnop;
 #endif
 
   (void)length;
