@@ -132,6 +132,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   const char *passwdp;
   const char *service = NULL;
   const char *hostname = NULL;
+  const char *options = NULL;
   const char *localhostname = NULL;
 
   /* point to the correct struct with this */
@@ -151,6 +152,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
       data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
+    options = conn->options;
     ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
     authp = &data->state.authproxy;
@@ -165,7 +167,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     service = data->set.str[STRING_SERVICE_NAME] ?
       data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
-    localhostname = conn->options;
+    options = conn->options;
     ntlm = &conn->ntlm;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
@@ -181,7 +183,11 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   /* The fixed hostname we provide, in order to not leak our real local host
      name. Copy the name used by Firefox. Make it configurable. */
-  if(!localhostname)
+  if(options && strncasecompare(options, "LOCALHOSTNAME=", 14)) {
+    localhostname = strchr(options, '=');
+    localhostname++;
+  }
+  else
     localhostname = "WORKSTATION";
 
 #ifdef USE_WINDOWS_SSPI
