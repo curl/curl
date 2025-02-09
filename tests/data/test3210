@@ -36,7 +36,6 @@ Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 </file>
->>>>>>> 55d889c43 (src: add CURLOPT_UPLOAD_FLAGS)
 </client>
 
 #
