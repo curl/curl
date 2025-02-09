@@ -568,6 +568,8 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
 
+set(_CURL_QUICK_DETECT OFF)
+
 option(_CURL_QUICK_DETECT "Fast-track known feature detection results (Windows, some Apple)" ON)
 if(_CURL_QUICK_DETECT)
   if(WIN32)
