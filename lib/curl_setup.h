@@ -990,7 +990,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
    replacements (yet) so tell the compiler to not warn for them. */
 #  define OPENSSL_SUPPRESS_DEPRECATED
 #  ifdef _WIN32
-/* Silence warnings about symbol collisions. Available in LibreSSL 3.8.2+ */
+/* Silence LibreSSL warnings about wincrypt.h collision. Works in 3.8.2+ */
 #    ifndef LIBRESSL_DISABLE_OVERRIDE_WINCRYPT_DEFINES_WARNING
 #    define LIBRESSL_DISABLE_OVERRIDE_WINCRYPT_DEFINES_WARNING
 #    endif
