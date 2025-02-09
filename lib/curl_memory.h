@@ -84,16 +84,6 @@
 #undef socketpair
 #endif
 
-#ifdef HAVE_GETADDRINFO
-#undef CURL_GETADDRINFO
-#define CURL_GETADDRINFO getaddrinfo
-#endif /* HAVE_GETADDRINFO */
-
-#ifdef HAVE_FREEADDRINFO
-#undef CURL_FREEADDRINFO
-#define CURL_FREEADDRINFO freeaddrinfo
-#endif /* HAVE_FREEADDRINFO */
-
 /* sclose is probably already defined, redefine it! */
 #undef sclose
 #undef fopen
