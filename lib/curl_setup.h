@@ -935,10 +935,15 @@ endings either CRLF or LF so 't' is appropriate.
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
-#undef CURL_GETADDRINFO
+#ifdef CURLDEBUG
+#define CURL_GETADDRINFO(host,serv,hint,res) \
+  curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
+#define CURL_FREEADDRINFO(data) \
+  curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
+#else
 #define CURL_GETADDRINFO getaddrinfo
-#undef CURL_FREEADDRINFO
 #define CURL_FREEADDRINFO freeaddrinfo
+#endif
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \

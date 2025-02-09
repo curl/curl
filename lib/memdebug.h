@@ -153,18 +153,6 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
                      __LINE__, __FILE__)
 #endif
 
-#ifdef HAVE_GETADDRINFO
-#undef CURL_GETADDRINFO
-#define CURL_GETADDRINFO(host,serv,hint,res) \
-  curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
-#endif /* HAVE_GETADDRINFO */
-
-#ifdef HAVE_FREEADDRINFO
-#undef CURL_FREEADDRINFO
-#define CURL_FREEADDRINFO(data) \
-  curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
-#endif /* HAVE_FREEADDRINFO */
-
 /* sclose is probably already defined, redefine it! */
 #undef sclose
 #define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
