@@ -529,7 +529,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         const char *value_ptr;
         char option[32];
         unsigned long num;
-        char *end_ptr;
+        const char *end_ptr;
         bool quoted = FALSE;
         time_t maxage = 24 * 3600; /* default is 24 hours */
         bool persist = FALSE;

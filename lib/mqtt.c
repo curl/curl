@@ -117,7 +117,7 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
 }
 
 static CURLcode mqtt_send(struct Curl_easy *data,
-                          char *buf, size_t len)
+                          const char *buf, size_t len)
 {
   CURLcode result = CURLE_OK;
   struct MQTT *mq = data->req.p.mqtt;
@@ -351,7 +351,7 @@ static CURLcode mqtt_disconnect(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   struct MQTT *mq = data->req.p.mqtt;
-  result = mqtt_send(data, (char *)"\xe0\x00", 2);
+  result = mqtt_send(data, "\xe0\x00", 2);
   Curl_safefree(mq->sendleftovers);
   Curl_dyn_free(&mq->recvbuf);
   return result;
@@ -471,7 +471,7 @@ static CURLcode mqtt_subscribe(struct Curl_easy *data)
   memcpy(&packet[5 + n], topic, topiclen);
   packet[5 + n + topiclen] = 0; /* QoS zero */
 
-  result = mqtt_send(data, (char *)packet, packetlen);
+  result = mqtt_send(data, (const char *)packet, packetlen);
 
 fail:
   free(topic);
@@ -558,7 +558,7 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   i += topiclen;
   memcpy(&pkt[i], payload, payloadlen);
   i += payloadlen;
-  result = mqtt_send(data, (char *)pkt, i);
+  result = mqtt_send(data, (const char *)pkt, i);
 
 fail:
   free(pkt);
@@ -770,7 +770,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       result = CURLE_RECV_ERROR;
       break;
     }
-    Curl_debug(data, CURLINFO_HEADER_IN, (char *)&mq->firstbyte, 1);
+    Curl_debug(data, CURLINFO_HEADER_IN, (const char *)&mq->firstbyte, 1);
     /* remember the first byte */
     mq->npacket = 0;
     mqstate(data, MQTT_REMAINING_LENGTH, MQTT_NOSTATE);
@@ -780,7 +780,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       result = Curl_xfer_recv(data, (char *)&recvbyte, 1, &nread);
       if(result || !nread)
         break;
-      Curl_debug(data, CURLINFO_HEADER_IN, (char *)&recvbyte, 1);
+      Curl_debug(data, CURLINFO_HEADER_IN, (const char *)&recvbyte, 1);
       mq->pkt_hd[mq->npacket++] = recvbyte;
     } while((recvbyte & 0x80) && (mq->npacket < 4));
     if(!result && nread && (recvbyte & 0x80))

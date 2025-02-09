@@ -154,7 +154,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Initialize the identity */
   memset(identity, 0, sizeof(*identity));
 
-  useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)userp);
+  useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar(userp);
   if(!useranddomain.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -198,7 +198,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   curlx_unicodefree(useranddomain.tchar_ptr);
 
   /* Setup the identity's password and length */
-  passwd.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)passwdp);
+  passwd.tchar_ptr = curlx_convert_UTF8_to_tchar(passwdp);
   if(!passwd.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
   dup_passwd.tchar_ptr = _tcsdup(passwd.tchar_ptr);

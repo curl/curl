@@ -1026,7 +1026,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     len = ((elem.end - q) * 8);
     if(len) {
       unsigned int i;
-      for(i = *(unsigned char *) q; !(i & 0x80); i <<= 1)
+      for(i = *(const unsigned char *) q; !(i & 0x80); i <<= 1)
         len--;
     }
     if(len > 32)

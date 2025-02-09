@@ -150,7 +150,7 @@ struct outsegment {
   int precision; /* precision OR precision parameter number */
   unsigned int flags;
   unsigned int input; /* input argument array index */
-  char *start;      /* format string start to output */
+  const char *start;  /* format string start to output */
   size_t outlen;     /* number of bytes from the format string to output */
 };
 
@@ -169,7 +169,7 @@ struct asprintf {
 
    returns -1 if no valid number was provided.
 */
-static int dollarstring(char *input, char **end)
+static int dollarstring(const char *input, const char **end)
 {
   if(ISDIGIT(*input)) {
     int number = 0;
@@ -216,7 +216,7 @@ static int parsefmt(const char *format,
                     int *opieces,
                     int *ipieces, va_list arglist)
 {
-  char *fmt = (char *)format;
+  const char *fmt = format;
   int param_num = 0;
   int param;
   int width;
@@ -230,7 +230,7 @@ static int parsefmt(const char *format,
   size_t outlen = 0;
   struct outsegment *optr;
   int use_dollar = DOLLAR_UNKNOWN;
-  char *start = fmt;
+  const char *start = fmt;
 
   /* clear, set a bit for each used input */
   memset(usedinput, 0, sizeof(usedinput));
@@ -704,7 +704,7 @@ static int formatf(
     unsigned int flags = optr->flags;
 
     if(outlen) {
-      char *str = optr->start;
+      const char *str = optr->start;
       for(; outlen && *str; outlen--)
         OUTCHAR(*str++);
       if(optr->flags & FLAGS_SUBSTR)
