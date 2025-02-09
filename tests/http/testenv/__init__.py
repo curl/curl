@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#***************************************************************************
+# ***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -25,8 +25,10 @@
 ###########################################################################
 # ruff: noqa: F401, E402
 import pytest
-pytest.register_assert_rewrite("testenv.env", "testenv.curl", "testenv.caddy",
-                               "testenv.httpd", "testenv.nghttpx")
+
+pytest.register_assert_rewrite(
+    "testenv.env", "testenv.curl", "testenv.caddy", "testenv.httpd", "testenv.nghttpx"
+)
 
 from .env import Env
 from .certs import TestCA, Credentials

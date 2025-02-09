@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#***************************************************************************
+# ***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -39,19 +39,23 @@ log = logging.getLogger(__name__)
 
 
 class LocalClient:
-
-    def __init__(self, name: str, env: Env, run_dir: Optional[str] = None,
-                 timeout: Optional[float] = None,
-                 run_env: Optional[Dict[str,str]] = None):
+    def __init__(
+        self,
+        name: str,
+        env: Env,
+        run_dir: Optional[str] = None,
+        timeout: Optional[float] = None,
+        run_env: Optional[Dict[str, str]] = None,
+    ):
         self.name = name
-        self.path = os.path.join(env.build_dir, f'tests/http/clients/{name}')
+        self.path = os.path.join(env.build_dir, f"tests/http/clients/{name}")
         self.env = env
         self._run_env = run_env
         self._timeout = timeout if timeout else env.test_timeout
-        self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
+        self._curl = os.environ["CURL"] if "CURL" in os.environ else env.curl
         self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, name)
-        self._stdoutfile = f'{self._run_dir}/stdout'
-        self._stderrfile = f'{self._run_dir}/stderr'
+        self._stdoutfile = f"{self._run_dir}/stdout"
+        self._stderrfile = f"{self._run_dir}/stderr"
         self._rmrf(self._run_dir)
         self._mkpath(self._run_dir)
 
@@ -67,7 +71,7 @@ class LocalClient:
         return os.path.exists(self.path)
 
     def download_file(self, i: int) -> str:
-        return os.path.join(self._run_dir, f'download_{i}.data')
+        return os.path.join(self._run_dir, f"download_{i}.data")
 
     def _rmf(self, path):
         if os.path.exists(path):
@@ -91,31 +95,44 @@ class LocalClient:
         run_env = None
         if self._run_env:
             run_env = self._run_env.copy()
-            for key in ['CURL_DEBUG']:
+            for key in ["CURL_DEBUG"]:
                 if key in os.environ and key not in run_env:
                     run_env[key] = os.environ[key]
         try:
-            with open(self._stdoutfile, 'w') as cout, open(self._stderrfile, 'w') as cerr:
-                p = subprocess.run(myargs, stderr=cerr, stdout=cout,
-                                   cwd=self._run_dir, shell=False,
-                                   input=None, env=run_env,
-                                   timeout=self._timeout)
+            with open(self._stdoutfile, "w") as cout, open(
+                self._stderrfile, "w"
+            ) as cerr:
+                p = subprocess.run(
+                    myargs,
+                    stderr=cerr,
+                    stdout=cout,
+                    cwd=self._run_dir,
+                    shell=False,
+                    input=None,
+                    env=run_env,
+                    timeout=self._timeout,
+                )
                 exitcode = p.returncode
         except subprocess.TimeoutExpired:
-            log.warning(f'Timeout after {self._timeout}s: {args}')
+            log.warning(f"Timeout after {self._timeout}s: {args}")
             exitcode = -1
-            exception = 'TimeoutExpired'
+            exception = "TimeoutExpired"
         coutput = open(self._stdoutfile).readlines()
         cerrput = open(self._stderrfile).readlines()
-        return ExecResult(args=myargs, exit_code=exitcode, exception=exception,
-                          stdout=coutput, stderr=cerrput,
-                          duration=datetime.now() - start)
+        return ExecResult(
+            args=myargs,
+            exit_code=exitcode,
+            exception=exception,
+            stdout=coutput,
+            stderr=cerrput,
+            duration=datetime.now() - start,
+        )
 
     def dump_logs(self):
         lines = []
-        lines.append('>>--stdout ----------------------------------------------\n')
+        lines.append(">>--stdout ----------------------------------------------\n")
         lines.extend(open(self._stdoutfile).readlines())
-        lines.append('>>--stderr ----------------------------------------------\n')
+        lines.append(">>--stderr ----------------------------------------------\n")
         lines.extend(open(self._stderrfile).readlines())
-        lines.append('<<-------------------------------------------------------\n')
-        return ''.join(lines)
+        lines.append("<<-------------------------------------------------------\n")
+        return "".join(lines)

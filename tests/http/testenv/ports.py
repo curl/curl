@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#***************************************************************************
+# ***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -37,7 +37,7 @@ def alloc_ports(port_specs: Dict[str, int]) -> Dict[str, int]:
     for name, ptype in port_specs.items():
         try:
             s = socket.socket(type=ptype)
-            s.bind(('', 0))
+            s.bind(("", 0))
             ports[name] = s.getsockname()[1]
             socks.append(s)
         except Exception as e:

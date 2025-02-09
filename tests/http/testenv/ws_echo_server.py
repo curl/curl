@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#***************************************************************************
+# ***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -46,11 +46,13 @@ async def run_server(port):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='scorecard', description="""
+    parser = argparse.ArgumentParser(
+        prog="scorecard",
+        description="""
         Run a websocket echo server.
-        """)
-    parser.add_argument("--port", type=int,
-                        default=9876, help="port to listen on")
+        """,
+    )
+    parser.add_argument("--port", type=int, default=9876, help="port to listen on")
     args = parser.parse_args()
 
     logging.basicConfig(

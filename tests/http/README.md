@@ -98,6 +98,8 @@ all of curl's output and trace file are found in `tests/http/gen/curl`.
 
 There is a lot of [`pytest` documentation](https://docs.pytest.org/) with examples. No use in repeating that here. Assuming you are somewhat familiar with it, it is useful how *this* general test suite is setup. Especially if you want to add test cases.
 
+Please run [black](https://pypi.org/project/black/) when adding new tests.
+
 ### Servers
 
 In `conftest.py` 3 "fixtures" are defined that are used by all test cases:
