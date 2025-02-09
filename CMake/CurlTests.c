@@ -141,7 +141,11 @@ int main(void) { return 0; }
 static int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721 &&
                            LARGE_OFF_T % 2147483647 == 1)
                           ? 1 : -1];
-int main(void) { return 0; }
+int main(void)
+{
+  (void)off_t_is_large;
+  return 0;
+}
 #endif
 
 #ifdef HAVE_IOCTLSOCKET
