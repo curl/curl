@@ -626,7 +626,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
   result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
-                    NTLMv2_BLOB_LEN + 8, hmac_output);
+                       NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
     free(ptr);
     return result;
