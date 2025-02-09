@@ -46,11 +46,11 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#define MQTT_MSG_CONNECT   0x10
-#define MQTT_MSG_CONNACK   0x20
-#define MQTT_MSG_PUBLISH   0x30
-#define MQTT_MSG_SUBSCRIBE 0x82
-#define MQTT_MSG_SUBACK    0x90
+#define MQTT_MSG_CONNECT    0x10
+/* #define MQTT_MSG_CONNACK    0x20 */
+#define MQTT_MSG_PUBLISH    0x30
+#define MQTT_MSG_SUBSCRIBE  0x82
+#define MQTT_MSG_SUBACK     0x90
 #define MQTT_MSG_DISCONNECT 0xe0
 
 #define MQTT_CONNACK_LEN 2

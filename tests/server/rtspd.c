@@ -68,7 +68,6 @@ static const char *ipv_inuse = "IPv4";
 static int serverlogslocked = 0;
 
 #define REQBUFSIZ 150000
-#define REQBUFSIZ_TXT "149999"
 
 static long prevtestno = -1;    /* previous test number we served */
 static long prevpartno = -1;    /* previous part number we served */

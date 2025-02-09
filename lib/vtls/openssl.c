@@ -151,13 +151,6 @@
 #define CONST_EXTS const
 #define HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED 1
 
-/* funny typecast define due to difference in API */
-#ifdef LIBRESSL_VERSION_NUMBER
-#define ARG2_X509_signature_print (X509_ALGOR *)
-#else
-#define ARG2_X509_signature_print
-#endif
-
 #else
 /* For OpenSSL before 1.1.0 */
 #define ASN1_STRING_get0_data(x) ASN1_STRING_data(x)
@@ -850,14 +843,6 @@ static void ossl_bio_cf_method_free(BIO_METHOD *m)
 #endif
 
 
-/*
- * Number of bytes to read from the random number seed file. This must be
- * a finite value (because some entropy "files" like /dev/urandom have
- * an infinite length), but must be large enough to provide enough
- * entropy to properly seed OpenSSL's PRNG.
- */
-#define RAND_LOAD_LENGTH 1024
-
 #ifdef HAVE_KEYLOG_CALLBACK
 static void ossl_keylog_callback(const SSL *ssl, const char *line)
 {
@@ -1041,6 +1026,14 @@ static CURLcode ossl_seed(struct Curl_easy *data)
     }
     RAND_add(randb, (int)len, (double)len/2);
   } while(!rand_enough());
+
+  /*
+   * Number of bytes to read from the random number seed file. This must be
+   * a finite value (because some entropy "files" like /dev/urandom have
+   * an infinite length), but must be large enough to provide enough
+   * entropy to properly seed OpenSSL's PRNG.
+   */
+#  define RAND_LOAD_LENGTH 1024
 
   {
     /* generates a default path for the random seed file */

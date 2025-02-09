@@ -80,10 +80,6 @@
 #  define HAS_ALPN_SCHANNEL
 #endif
 
-#ifndef BCRYPT_CHACHA20_POLY1305_ALGORITHM
-#define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
-#endif
-
 #ifndef BCRYPT_CHAIN_MODE_CCM
 #define BCRYPT_CHAIN_MODE_CCM L"ChainingModeCCM"
 #endif
@@ -232,8 +228,6 @@ schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
   return CURLE_OK;
 }
 
-/* longest is 26, buffer is slightly bigger */
-#define LONGEST_ALG_ID 32
 #define CIPHEROPTION(x) {#x, x}
 
 struct algo {

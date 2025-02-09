@@ -483,7 +483,9 @@ static bool invalid_octets(const char *p)
 #define CERR_COMMENT       11 /* a commented line */
 #define CERR_RANGE         12 /* expire range problem */
 #define CERR_FIELDS        13 /* incomplete netscape line */
+#ifdef USE_LIBPSL
 #define CERR_PSL           14 /* a public suffix */
+#endif
 #define CERR_LIVE_WINS     15
 
 /* The maximum length we accept a date string for the 'expire' keyword. The

@@ -65,12 +65,6 @@
 #ifdef USE_WINSOCK
 #undef  EINTR
 #define EINTR    4 /* errno.h value */
-#undef  EAGAIN
-#define EAGAIN  11 /* errno.h value */
-#undef  ENOMEM
-#define ENOMEM  12 /* errno.h value */
-#undef  EINVAL
-#define EINVAL  22 /* errno.h value */
 #endif
 
 #define DEFAULT_PORT 1883 /* MQTT default port */
@@ -86,14 +80,10 @@
 #define MQTT_MSG_CONNECT    0x10
 #define MQTT_MSG_CONNACK    0x20
 #define MQTT_MSG_PUBLISH    0x30
-#define MQTT_MSG_PUBACK     0x40
+/* #define MQTT_MSG_PUBACK     0x40 */
 #define MQTT_MSG_SUBSCRIBE  0x82
 #define MQTT_MSG_SUBACK     0x90
 #define MQTT_MSG_DISCONNECT 0xe0
-
-#define MQTT_CONNACK_LEN 4
-#define MQTT_SUBACK_LEN 5
-#define MQTT_CLIENTID_LEN 12 /* "curl0123abcd" */
 
 struct configurable {
   unsigned char version; /* initial version byte in the request must match

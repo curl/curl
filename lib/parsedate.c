@@ -100,7 +100,9 @@ static int parsedate(const char *date, time_t *output);
 #define PARSEDATE_OK     0
 #define PARSEDATE_FAIL   -1
 #define PARSEDATE_LATER  1
+#if defined(HAVE_TIME_T_UNSIGNED) || (SIZEOF_TIME_T < 5)
 #define PARSEDATE_SOONER 2
+#endif
 
 #if !defined(CURL_DISABLE_PARSEDATE) || !defined(CURL_DISABLE_FTP) || \
   !defined(CURL_DISABLE_FILE)

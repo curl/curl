@@ -836,8 +836,6 @@ static bool ssh_config_matches(struct connectdata *one,
   return Curl_safecmp(one->proto.sshc.rsa, two->proto.sshc.rsa) &&
          Curl_safecmp(one->proto.sshc.rsa_pub, two->proto.sshc.rsa_pub);
 }
-#else
-#define ssh_config_matches(x,y) FALSE
 #endif
 
 struct url_conn_match {

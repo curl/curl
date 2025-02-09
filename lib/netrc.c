@@ -26,9 +26,13 @@
 #ifndef CURL_DISABLE_NETRC
 
 #ifdef HAVE_PWD_H
+#ifdef __AMIGA__
 #undef __NO_NET_API /* required for AmigaOS to declare getpwuid() */
+#endif
 #include <pwd.h>
+#ifdef __AMIGA__
 #define __NO_NET_API
+#endif
 #endif
 
 #include <curl/curl.h>

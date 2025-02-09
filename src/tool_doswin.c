@@ -45,8 +45,6 @@
 #ifdef _WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
-
-#  define _use_lfn(f) (1)  /* long filenames always available */
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
 #  define _use_lfn(f) (0)  /* long filenames never available */
 #elif defined(__DJGPP__)
@@ -215,7 +213,7 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   return SANITIZE_ERR_OK;
 }
 
-#if defined(MSDOS)
+#ifdef MSDOS
 /*
 Test if truncating a path to a file will leave at least a single character in
 the filename. Filenames suffixed by an alternate data stream cannot be

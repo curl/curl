@@ -82,7 +82,6 @@
 #  include <nettle/sha.h>
 #  if defined(SHA512_256_DIGEST_SIZE)
 #    define USE_GNUTLS_SHA512_256           1
-#    define HAS_SHA512_256_IMPLEMENTATION   1
 #  endif
 #endif /* ! HAS_SHA512_256_IMPLEMENTATION && USE_GNUTLS */
 
@@ -268,9 +267,6 @@ Curl_sha512_256_finish(unsigned char *digest,
 }
 
 #else /* No system or TLS backend SHA-512/256 implementation available */
-
-/* Use local implementation */
-#define HAS_SHA512_256_IMPLEMENTATION   1
 
 /* ** This implementation of SHA-512/256 hash calculation was originally ** *
  * ** written by Evgeny Grin (Karlson2k) for GNU libmicrohttpd.          ** *
