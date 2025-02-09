@@ -73,8 +73,6 @@ int main(void)
 int main(void)
 {
   const char *address = "example.com";
-  int length = 0;
-  int type = 0;
   struct hostent h;
   int rc = 0;
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
@@ -104,9 +102,6 @@ int main(void)
   (void)hp;
   (void)h_errnop;
 #endif
-
-  (void)length;
-  (void)type;
   (void)rc;
   return 0;
 }
