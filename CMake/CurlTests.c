@@ -75,8 +75,8 @@ int main(void)
   int type = 0;
   struct hostent h;
   int rc = 0;
-#if defined(HAVE_GETHOSTBYNAME_R_3) || \
-    defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
+#if   defined(HAVE_GETHOSTBYNAME_R_3) || \
+      defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
   struct hostent_data hdata;
 #elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
