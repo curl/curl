@@ -715,6 +715,4 @@ nomem:
   return ret;
 }
 
-#else /* CURL_DISABLE_LIBCURL_OPTION */
-
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
