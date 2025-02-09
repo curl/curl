@@ -14,8 +14,9 @@ The test cases and necessary files are in `tests/http`. You can invoke
 `pytest` from there or from the top level curl checkout and it finds all
 tests.
 
-```
-curl> pytest test/http
+```bash
+curl> cd tests
+curl> pytest http
 platform darwin -- Python 3.9.15, pytest-6.2.0, py-1.10.0, pluggy-0.13.1
 rootdir: /Users/sei/projects/curl
 collected 5 items
@@ -25,8 +26,8 @@ tests/http/test_01_basic.py .....
 
 Pytest takes arguments. `-v` increases its verbosity and can be used several times. `-k <expr>` can be used to run only matching test cases. The `expr` can be something resembling a python test or just a string that needs to match test cases in their names.
 
-```
-curl/tests/http> pytest -vv -k test_01_02
+```bash
+curl/tests> pytest -vv -k test_01_02
 ```
 
 runs all test cases that have `test_01_02` in their name. This does not have to be the start of the name.
@@ -37,7 +38,19 @@ skipping.
 
 # Prerequisites
 
-You need:
+Create a python virtual environment and activate:
+```bash
+curl> python -m venv venv
+curl> source venv/bin/activate
+```
+
+install requirements.txt
+
+```bash
+curl> pip -r tests/http/requirements.txt
+```
+
+You need to ensure to have:
 
 1. a recent Python, the `cryptography` module and, of course, `pytest`
 2. an apache httpd development version. On Debian/Ubuntu, the package `apache2-dev` has this
@@ -57,26 +70,26 @@ Via curl's `configure` script you may specify:
 
 Several test cases are parameterized, for example with the HTTP version to use. If you want to run a test with a particular protocol only, use a command line like:
 
-```
-curl/tests/http> pytest -k "test_02_06 and h2"
+```bash
+curl/tests> pytest -k "test_02_06 and h2"
 ```
 
 Test cases can be repeated, with the `pytest-repeat` module (`pip install pytest-repeat`). Like in:
 
-```
-curl/tests/http> pytest -k "test_02_06 and h2" --count=100
+```bash
+curl/tests> pytest -k "test_02_06 and h2" --count=100
 ```
 
 which then runs this test case a hundred times. In case of flaky tests, you can make pytest stop on the first one with:
 
-```
-curl/tests/http> pytest -k "test_02_06 and h2" --count=100 --maxfail=1
+```bash
+curl/tests> pytest -k "test_02_06 and h2" --count=100 --maxfail=1
 ```
 
 which allow you to inspect output and log files for the failed run. Speaking of log files, the verbosity of pytest is also used to collect curl trace output. If you specify `-v` three times, the `curl` command is started with `--trace`:
 
-```
-curl/tests/http> pytest -vvv -k "test_02_06 and h2" --count=100 --maxfail=1
+```bash
+curl/tests> pytest -vvv -k "test_02_06 and h2" --count=100 --maxfail=1
 ```
 
 all of curl's output and trace file are found in `tests/http/gen/curl`.
