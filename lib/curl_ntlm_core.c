@@ -144,9 +144,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
-#define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
-
 #if !defined(CURL_NTLM_NOT_SUPPORTED)
 /*
 * Turns a 56-bit key into being 64-bit wide.
@@ -608,6 +605,9 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   ptr = calloc(1, len);
   if(!ptr)
     return CURLE_OUT_OF_MEMORY;
+
+#define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
+#define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
 
   /* Create the BLOB structure */
   msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
