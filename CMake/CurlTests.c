@@ -30,14 +30,14 @@
 /* */
 #if defined(sun) || defined(__sun__) || \
     defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-# if defined(__SVR4) || defined(__srv4__)
-#  define PLATFORM_SOLARIS
-# else
-#  define PLATFORM_SUNOS4
-# endif
+#  if defined(__SVR4) || defined(__srv4__)
+#    define PLATFORM_SOLARIS
+#  else
+#    define PLATFORM_SUNOS4
+#  endif
 #endif
 #if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX41)
-# define PLATFORM_AIX_V3
+#  define PLATFORM_AIX_V3
 #endif
 /* */
 #if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
