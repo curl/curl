@@ -85,10 +85,6 @@
 #define MQTT_MSG_SUBACK     0x90
 #define MQTT_MSG_DISCONNECT 0xe0
 
-#define MQTT_CONNACK_LEN 4
-#define MQTT_SUBACK_LEN 5
-#define MQTT_CLIENTID_LEN 12 /* "curl0123abcd" */
-
 struct configurable {
   unsigned char version; /* initial version byte in the request must match
                             this */
