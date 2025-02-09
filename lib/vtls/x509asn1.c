@@ -64,12 +64,10 @@
 #define CURL_ASN1_MAX                   ((size_t) 0x40000)      /* 256K */
 
 /* ASN.1 classes. */
-#if 0
-#define CURL_ASN1_UNIVERSAL             0
-#define CURL_ASN1_APPLICATION           1
-#define CURL_ASN1_CONTEXT_SPECIFIC      2
-#define CURL_ASN1_PRIVATE               3
-#endif
+/* #define CURL_ASN1_UNIVERSAL             0 */
+/* #define CURL_ASN1_APPLICATION           1 */
+/* #define CURL_ASN1_CONTEXT_SPECIFIC      2 */
+/* #define CURL_ASN1_PRIVATE               3 */
 
 /* ASN.1 types. */
 #define CURL_ASN1_BOOLEAN               1
