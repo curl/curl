@@ -53,3 +53,8 @@ to trace the specific components you wish to see.
 Note that verbose output of curl activities and network traffic might contain
 sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.
+
+When the output contains protocol headers, those lines might include carriage
+return (ASCII code 13) characters, even on platforms that otherwise normally
+only use linefeed to signify line separations - as curl shows the exact
+contents arriving from the server.
