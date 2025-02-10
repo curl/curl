@@ -414,7 +414,8 @@ static int sshkeycallback(CURL *easy,
  * Earlier libssh2 versions did not do SCP properly beyond 32-bit sizes on
  * 32-bit architectures so we check of the necessary function is present.
  */
-#define SCP_SEND(a,b,c,d) libssh2_scp_send_ex(a, b, (int)(c), (size_t)d, 0, 0)
+#define SCP_SEND(a,b,c,d) libssh2_scp_send64(a, b, (int)(c),            \
+                                             (libssh2_int64_t)d, 0, 0)
 
 /*
  * libssh2 1.2.8 fixed the problem with 32-bit ints used for sockets on win64.
