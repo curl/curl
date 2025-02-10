@@ -219,7 +219,7 @@ bool progress_meter(struct GlobalConfig *global,
       msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
                 all_dlnow < (CURL_OFF_T_MAX/100) ?
                 (all_dlnow * 100 / all_dltotal) :
-                (all_dltotal / (all_dltotal/100)));
+                (all_dlnow / (all_dltotal/100)));
 
     if(ulknown && all_ultotal)
       msnprintf(ulpercen, sizeof(ulpercen), "%3" CURL_FORMAT_CURL_OFF_T,
