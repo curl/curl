@@ -4,7 +4,7 @@ curl and libcurl 8.12.1
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
- Contributors:                 3339
+ Contributors:                 3342
 
 This release includes the following changes:
 
@@ -14,6 +14,7 @@ This release includes the following bugfixes:
  o asyn-thread: fix build with `CURL_DISABLE_SOCKETPAIR` [47]
  o asyn-thread: fix HTTPS RR crash [10]
  o asyn-thread: fix the returned bitmask from Curl_resolver_getsock [18]
+ o asyn-thread: survive a c-ares channel set to NULL [52]
  o build: add tool_hugehelp.c into IBMi build [40]
  o cmake/Find: set `<Modulename>_FOUND` for compatibility when found via `pkg-config` [22]
  o cmake: add integration tests, run them in CI [21]
@@ -30,15 +31,19 @@ This release includes the following bugfixes:
  o configure/cmake: check for realpath [19]
  o configure/cmake: set asyn-rr a feature only if httpsrr is enabled [42]
  o content_encoding: #error on too old zlib [2]
+ o curl_global_sslset.md: Add SSL backend names [50]
  o CURLOPT_SSH_KNOWNHOSTS.md: strongly recommend using this [41]
  o CURLSHOPT_SHARE.md: adjust for the new SSL session cache [6]
  o docs: better explain multi-part byte range behavior [4]
+ o docs: use valid example domain names [54]
  o generate.bat: remove curl_get_line.c from the curlx file list [20]
  o header.md: mention `Authorization:` and `Cookie:` special treatment [43]
  o imap: TLS upgrade fix [14]
  o INTERNALS: fix c-ares, as we actually support 1.6.0 or later [37]
  o ldap: drop support for legacy Novell LDAP SDK [25]
  o lib: include necessary headers for `inet_ntop`/`inet_pton` [8]
+ o lib: silence LibreSSL collision warning on non-MSVC Windows [51]
+ o libssh2: comparison is always true because rc <= -1 [56]
  o libssh2: raise lowest supported version to 1.2.8 [3]
  o libssh: drop support for libssh older than 0.9.0 [33]
  o libssh: silence `-Wconversion` with a cast (Windows 32-bit) [7]
@@ -58,6 +63,8 @@ This release includes the following bugfixes:
  o tool_cfgable: sort struct fields by size, use bitfields for booleans [17]
  o tool_getparam: add "TLS required" flag for each such option [44]
  o tool_ssls: switch to tool-specific get_line function [34]
+ o vtls: fix multissl-init [60]
+ o vtsl: eliminate 'data->state.ssl_scache' [59]
  o wakeup_write: make sure the eventfd write sends eight bytes [46]
  o wolfssl: silence compiler warning (MSVC 2019), simplify existing [13]
 
@@ -83,9 +90,10 @@ advice from friends like these:
   Andrew Kirillov, arlt on github, Christian Schmitz, CueXXIII on Github,
   Dan Fandrich, Daniel Stenberg, deliciouslytyped on github, Fay Stegerman,
   Jan Engelhardt, Kai Pastor, Marcel Raad, Michael Kaufmann,
-  mschroeder-fzj on github, Philip Heiduck, qhill, Ralf A. Timmermann,
-  Ray Satiro, renovate[bot], Stefan Eissing, Viktor Szakats, zzq1015 on github
-  (21 contributors)
+  mschroeder-fzj on github, nono303 on github, Philip Heiduck, qhill,
+  Ralf A. Timmermann, Ray Satiro, renovate[bot], Stefan Eissing, Terence Eden,
+  thisisgk on github, Viktor Szakats, zzq1015 on github
+  (24 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -137,3 +145,10 @@ References to bug reports and discussions on issues:
  [46] = https://curl.se/bug/?i=16237
  [47] = https://curl.se/bug/?i=16179
  [48] = https://curl.se/bug/?i=16111
+ [50] = https://curl.se/bug/?i=16256
+ [51] = https://curl.se/bug/?i=16273
+ [52] = https://curl.se/bug/?i=16216
+ [54] = https://curl.se/bug/?i=16269
+ [56] = https://curl.se/bug/?i=16268
+ [59] = https://curl.se/bug/?i=16261
+ [60] = https://curl.se/bug/?i=16253
