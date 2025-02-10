@@ -1772,7 +1772,7 @@ endif()
 if(NOT MSVC)
   check_function_exists("snprintf" HAVE_SNPRINTF)  # to match detection method in ./configure
 elseif(MSVC_VERSION GREATER_EQUAL 1900)  # Earlier MSVC compilers had faulty snprintf implementations
-  check_symbol_exists("snprintf" "stdio.h" HAVE_SNPRINTF)  # snprintf may be a compatibility macro not an exported function
+  check_symbol_exists("snprintf" "stdio.h" HAVE_SNPRINTF)  # snprintf may be a compatibility macro, not an exported function
 endif()
 if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
