@@ -55,19 +55,12 @@ int main(void)
 #endif
 
 /* tests for gethostbyname_r */
-#if defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
-    defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
-    defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
-#ifndef _REENTRANT
-#define _REENTRANT
-#endif
-/* no idea whether _REENTRANT is always set, just invent a new flag */
-#define TEST_GETHOSTBYFOO_REENTRANT
-#endif
 #if defined(HAVE_GETHOSTBYNAME_R_3) || \
+    defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_5) || \
+    defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_6) || \
-    defined(TEST_GETHOSTBYFOO_REENTRANT)
+    defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
 #include <sys/types.h>
 #include <netdb.h>
 int main(void)
@@ -130,8 +123,6 @@ int main(void) { return 0; }
 #endif
 
 #ifdef HAVE_FILE_OFFSET_BITS
-#undef _FILE_OFFSET_BITS
-#define _FILE_OFFSET_BITS 64
 #include <sys/types.h>
 /* Check that off_t can represent 2**63 - 1 correctly.
    We cannot simply define LARGE_OFF_T to be 9223372036854775807,
