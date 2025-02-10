@@ -880,6 +880,11 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
   return result;
 }
 
+bool Curl_xfer_write_is_paused(struct Curl_easy *data)
+{
+  return Curl_cwriter_is_paused(data);
+}
+
 CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
                                  const char *hd0, size_t hdlen, bool is_eos)
 {

@@ -278,6 +278,15 @@ size_t Curl_dyn_len(const struct dynbuf *s)
   return s->leng;
 }
 
+size_t Curl_dyn_left(const struct dynbuf *s)
+{
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
+  DEBUGASSERT(!s->leng || s->bufr);
+  DEBUGASSERT(s->toobig);
+  return (s->leng < s->toobig) ? (s->toobig - s->leng - 1) : 0;
+}
+
 /*
  * Set a new (smaller) length.
  */

@@ -48,7 +48,7 @@ class Httpd:
         'authn_core', 'authn_file',
         'authz_user', 'authz_core', 'authz_host',
         'auth_basic', 'auth_digest',
-        'alias', 'env', 'filter', 'headers', 'mime', 'setenvif',
+        'alias', 'env', 'filter', 'headers', 'mime', 'setenvif', 'negotiation',
         'socache_shmcb',
         'rewrite', 'http2', 'ssl', 'proxy', 'proxy_http', 'proxy_connect',
         'brotli',
@@ -269,6 +269,8 @@ class Httpd:
                 f'Listen {self.env.proxys_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
                 'SSLSessionCache "shmcb:ssl_gcache_data(32000)"',
+                'AddEncoding x-gzip .gz .tgz .gzip',
+                'AddHandler type-map .var',
             ]
             if 'base' in self._extra_configs:
                 conf.extend(self._extra_configs['base'])
@@ -399,8 +401,11 @@ class Httpd:
             fd.write("\n".join(conf))
         with open(os.path.join(self._conf_dir, 'mime.types'), 'w') as fd:
             fd.write("\n".join([
+                'text/plain            txt',
                 'text/html             html',
                 'application/json      json',
+                'application/x-gzip    gzip',
+                'application/x-gzip    gz',
                 ''
             ]))
 

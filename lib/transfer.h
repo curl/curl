@@ -55,6 +55,8 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
                               const char *buf, size_t blen,
                               bool is_eos);
 
+bool Curl_xfer_write_is_paused(struct Curl_easy *data);
+
 /**
  * Write a single "header" line from a server response.
  * @param hd0      the 0-terminated, single header line

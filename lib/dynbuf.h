@@ -38,6 +38,7 @@
 #define Curl_dyn_ptr(a) curlx_dyn_ptr(a)
 #define Curl_dyn_uptr(a) curlx_dyn_uptr(a)
 #define Curl_dyn_len(a) curlx_dyn_len(a)
+#define Curl_dyn_left(a) curlx_dyn_left(a)
 #define Curl_dyn_reset(a) curlx_dyn_reset(a)
 #define Curl_dyn_take(a,b) curlx_dyn_take(a,b)
 #define Curl_dyn_tail(a,b) curlx_dyn_tail(a,b)
@@ -71,6 +72,7 @@ CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t set);
 char *Curl_dyn_ptr(const struct dynbuf *s);
 unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
 size_t Curl_dyn_len(const struct dynbuf *s);
+size_t Curl_dyn_left(const struct dynbuf *s);
 
 /* returns 0 on success, -1 on error */
 /* The implementation of this function exists in mprintf.c */

@@ -618,3 +618,25 @@ class Env:
                 i = int(fsize / line_length) + 1
                 fd.write(f"{i:09d}-{s}"[0:remain-1] + "\n")
         return fpath
+
+    def make_data_gzipbomb(self, indir: str, fname: str, fsize: int) -> str:
+        fpath = os.path.join(indir, fname)
+        gzpath = f'{fpath}.gz'
+        varpath = f'{fpath}.var'
+        with open(fpath, 'w') as fd:
+            fd.write('not what we are looking for!\n')
+        count = int(fsize / 1024)
+        args = [
+            f'dd if=/dev/zero bs=1024 count={count} | gzip - >{gzpath}'
+        ]
+        p = subprocess.run(args=args, shell=True)
+        if p.returncode != 0:
+            raise RuntimeError(f'"{args}" failed with exit code: {p.returncode}')
+        with open(varpath, 'w') as fd:
+            fd.write(f'URI: {fname}\n')
+            fd.write('\n')
+            fd.write(f'URI: {fname}.gz\n')
+            fd.write('Content-Type: text/plain\n')
+            fd.write('Content-Encoding: x-gzip\n')
+            fd.write('\n')
+        return fpath
