@@ -352,10 +352,13 @@ if test "$OPENSSL_ENABLED" = "1"; then
   AC_MSG_CHECKING([for SRP support in OpenSSL])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
+      #ifndef OPENSSL_SUPPRESS_DEPRECATED
+      #define OPENSSL_SUPPRESS_DEPRECATED
+      #endif
       #include <openssl/ssl.h>
     ]],[[
-      SSL_CTX_set_srp_username(NULL, "");
-      SSL_CTX_set_srp_password(NULL, "");
+      SSL_CTX_set_srp_username(NULL, NULL);
+      SSL_CTX_set_srp_password(NULL, NULL);
     ]])
   ],[
     AC_MSG_RESULT([yes])

@@ -306,6 +306,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
       ]],[[
         LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
         int res = ldap_unbind(ldp);
+        (void)res;
       ]])
     ],[
       curl_cv_header_ldap_h="yes"
@@ -354,6 +355,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
         #include <ldap_ssl.h>
       ]],[[
         LDAP *ldp = ldapssl_init("0.0.0.0", LDAPS_PORT, 1);
+        (void)ldp;
       ]])
     ],[
       curl_cv_header_ldap_ssl_h="yes"
@@ -433,6 +435,7 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
           LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
           ULONG res = ldap_unbind(ldp);
           ber_free(bep, 1);
+          (void)res;
         ]])
       ],[
         curl_cv_ldap_LIBS="$x_nlibs"
@@ -543,6 +546,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
           LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
           int res = ldap_unbind(ldp);
           ber_free(bep, 1);
+          (void)res;
         ]])
       ],[
         curl_cv_ldap_LIBS="$x_nlibs"
@@ -730,6 +734,7 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
         #endif
       ]],[[
         int flag=MSG_NOSIGNAL;
+        (void)flag;
       ]])
     ],[
       curl_cv_msg_nosignal="yes"
@@ -777,6 +782,7 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
         struct timeval ts;
         ts.tv_sec  = 0;
         ts.tv_usec = 0;
+        (void)ts;
       ]])
     ],[
       curl_cv_struct_timeval="yes"
@@ -814,6 +820,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
       ]],[[
         struct timespec ts;
         (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+        (void)ts;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -1090,7 +1097,7 @@ AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
     dnl point also is available run-time!
     AC_MSG_CHECKING([run-time libs availability])
     CURL_RUN_IFELSE([
-      int main()
+      int main(void)
       {
         return 0;
       }
