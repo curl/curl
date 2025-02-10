@@ -589,7 +589,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
+          [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           if [ -n '${{ matrix.build.PKG_CONFIG_PATH }}' ]; then
             export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
           fi
