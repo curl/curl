@@ -33,9 +33,6 @@
  * Read commands from FILE (set with --config). The commands control how to
  * act and is reset to defaults each client TCP connect.
  *
- * Config file keywords:
- *
- * TODO
  */
 
 /* based on sockfilt.c */
@@ -418,7 +415,7 @@ static int publish(FILE *dump,
   if(!packet)
     return 1;
 
-  packet[0] = MQTT_MSG_PUBLISH; /* TODO: set QoS? */
+  packet[0] = MQTT_MSG_PUBLISH;
   memcpy(&packet[1], rembuffer, encodedlen);
 
   (void)packetid;
@@ -684,10 +681,9 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       topiclen = (size_t)(buffer[1 + bytes] << 8) | buffer[2 + bytes];
       logmsg("Got %zu bytes topic", topiclen);
-      /* TODO: verify topiclen */
 
 #ifdef QOS
-      /* TODO: handle packetid if there is one. Send puback if QoS > 0 */
+      /* Handle packetid if there is one. Send puback if QoS > 0 */
       puback(dump, fd, 0);
 #endif
       /* expect a disconnect here */
