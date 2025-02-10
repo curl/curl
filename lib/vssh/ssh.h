@@ -230,9 +230,6 @@ struct ssh_conn {
 /* 1.2.8 was released on April 5 2011 */
 #endif
 
-/* get it at runtime  */
-#define CURL_LIBSSH2_VERSION libssh2_version(0)
-
 #endif /* USE_LIBSSH2 */
 
 #ifdef USE_SSH
