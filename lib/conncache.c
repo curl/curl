@@ -167,7 +167,7 @@ int Curl_cpool_init(struct cpool *cpool,
     return 1; /* bad */
   cpool->idata->state.internal = TRUE;
   /* This is quirky. We need an internal handle for certain operations, but we
-   * do not add it to the multi (if there is one). But we give it the multi so
+   * do not add it to the multi (if there is one). We give it the multi so
    * that socket event operations can work. Probably better to have an
    * internal handle owned by the multi that can be used for cpool
    * operations. */
