@@ -34,8 +34,10 @@
 #include "memdebug.h"
 
 /* random patterns for API verification */
+#ifdef DEBUGBUILD
 #define HASHINIT 0x7017e781
 #define ITERINIT 0x5FEDCBA9
+#endif
 
 static void
 hash_element_dtor(void *user, void *element)
