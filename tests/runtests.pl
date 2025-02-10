@@ -866,7 +866,7 @@ sub checksystemfeatures {
     }
     if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
         logmsg("*\n",
-               "*** DISABLES memory tracking when using threaded resolver\n",
+               "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
                "*\n");
     }
 
