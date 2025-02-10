@@ -958,7 +958,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  (void)blocking; /* TODO: do we want to support this? */
+  (void)blocking;
   DEBUGASSERT(ctx);
   *done = FALSE;
 

@@ -660,7 +660,6 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
     cf->ctx = ts;
   }
 
-  /* TODO: can we do blocking? */
   /* We want "seamless" operations through HTTP proxy tunnel */
 
   result = H1_CONNECT(cf, data, ts);

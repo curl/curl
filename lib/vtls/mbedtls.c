@@ -1633,7 +1633,6 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
                                   unsigned char *sha256sum,
                                   size_t sha256len UNUSED_PARAM)
 {
-  /* TODO: explain this for different mbedtls 2.x vs 3 version */
   (void)sha256len;
 #if MBEDTLS_VERSION_NUMBER < 0x02070000
   mbedtls_sha256(input, inputlen, sha256sum, 0);
