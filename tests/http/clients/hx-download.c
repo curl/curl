@@ -159,6 +159,7 @@ struct transfer {
   int paused;
   int resumed;
   int done;
+  CURLcode result;
 };
 
 static size_t transfer_count = 1;
@@ -240,6 +241,7 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, http_version);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(hnd, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
   curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_cb);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
@@ -472,7 +474,9 @@ int main(int argc, char *argv[])
         t = get_transfer_for_easy(e);
         if(t) {
           t->done = 1;
-          fprintf(stderr, "[t-%d] FINISHED\n", t->idx);
+          t->result = m->data.result;
+          fprintf(stderr, "[t-%d] FINISHED with result %d\n",
+                  t->idx, t->result);
           if(use_earlydata) {
             curl_off_t sent;
             curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
@@ -551,6 +555,8 @@ int main(int argc, char *argv[])
       curl_easy_cleanup(t->easy);
       t->easy = NULL;
     }
+    if(t->result)
+      result = t->result;
   }
   free(transfers);
 

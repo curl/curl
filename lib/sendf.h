@@ -182,6 +182,8 @@ CURLcode Curl_cwriter_write(struct Curl_easy *data,
  */
 bool Curl_cwriter_is_paused(struct Curl_easy *data);
 
+bool Curl_cwriter_is_content_decoding(struct Curl_easy *data);
+
 /**
  * Unpause client writer and flush any buffered date to the client.
  */

@@ -219,6 +219,7 @@ struct h2_stream_ctx {
   BIT(bodystarted);
   BIT(body_eos);    /* the complete body has been added to `sendbuf` and
                      * is being/has been processed from there. */
+  BIT(write_paused);  /* stream write is paused */
 };
 
 #define H2_STREAM_CTX(ctx,data)   ((struct h2_stream_ctx *)(\
@@ -289,14 +290,14 @@ static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
 
 static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
-                                       struct h2_stream_ctx *stream,
-                                       bool paused)
+                                       struct h2_stream_ctx *stream)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   int32_t dwsize;
   int rv;
 
-  dwsize = paused ? 0 : cf_h2_get_desired_local_win(cf, data);
+  dwsize = (stream->write_paused || stream->xfer_result) ?
+           0 : cf_h2_get_desired_local_win(cf, data);
   if(dwsize != stream->local_window_size) {
     int32_t wsize = nghttp2_session_get_stream_effective_local_window_size(
                       ctx->h2, stream->id);
@@ -332,13 +333,11 @@ static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
 
 static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
-                                       struct h2_stream_ctx *stream,
-                                       bool paused)
+                                       struct h2_stream_ctx *stream)
 {
   (void)cf;
   (void)data;
   (void)stream;
-  (void)paused;
   return CURLE_OK;
 }
 #endif /* !NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE */
@@ -1058,7 +1057,7 @@ static void h2_xfer_write_resp_hd(struct Curl_cfilter *cf,
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(!stream->xfer_result && !eos)
-      stream->xfer_result = cf_h2_update_local_win(cf, data, stream, FALSE);
+      stream->xfer_result = cf_h2_update_local_win(cf, data, stream);
     if(stream->xfer_result)
       CURL_TRC_CF(data, cf, "[%d] error %d writing %zu bytes of headers",
                   stream->id, stream->xfer_result, blen);
@@ -1074,8 +1073,6 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
   /* If we already encountered an error, skip further writes */
   if(!stream->xfer_result)
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
-  if(!stream->xfer_result && !eos)
-    stream->xfer_result = cf_h2_update_local_win(cf, data, stream, FALSE);
   /* If the transfer write is errored, we do not want any more data */
   if(stream->xfer_result) {
     struct cf_h2_ctx *ctx = cf->ctx;
@@ -1085,6 +1082,17 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
     nghttp2_submit_rst_stream(ctx->h2, 0, stream->id,
                               (uint32_t)NGHTTP2_ERR_CALLBACK_FAILURE);
   }
+  else if(!stream->write_paused && Curl_xfer_write_is_paused(data)) {
+    CURL_TRC_CF(data, cf, "[%d] stream output paused", stream->id);
+    stream->write_paused = TRUE;
+  }
+  else if(stream->write_paused && !Curl_xfer_write_is_paused(data)) {
+    CURL_TRC_CF(data, cf, "[%d] stream output unpaused", stream->id);
+    stream->write_paused = FALSE;
+  }
+
+  if(!stream->xfer_result && !eos)
+    stream->xfer_result = cf_h2_update_local_win(cf, data, stream);
 }
 
 static CURLcode on_stream_frame(struct Curl_cfilter *cf,
@@ -2579,7 +2587,10 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
 
   DEBUGASSERT(data);
   if(ctx && ctx->h2 && stream) {
-    CURLcode result = cf_h2_update_local_win(cf, data, stream, pause);
+    CURLcode result;
+
+    stream->write_paused = pause;
+    result = cf_h2_update_local_win(cf, data, stream);
     if(result)
       return result;
 
