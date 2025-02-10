@@ -266,7 +266,7 @@ endif()
 option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
 
 if(MSVC)
-  set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory + MSVC fails test 558 and 1330. Tested with static build, Debug mode.
+#  set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory + MSVC fails test 558 and 1330. Tested with static build, Debug mode.
 endif()
 
 if(ENABLE_DEBUG)
