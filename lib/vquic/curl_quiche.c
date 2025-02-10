@@ -926,8 +926,8 @@ static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
   nwritten = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->id,
                                  (uint8_t *)buf, len, eos);
   if(nwritten == QUICHE_H3_ERR_DONE || (nwritten == 0 && len > 0)) {
-    /* TODO: we seem to be blocked on flow control and should HOLD
-     * sending. But when do we open again? */
+    /* Blocked on flow control and should HOLD sending. But when do we open
+     * again? */
     if(!quiche_conn_stream_writable(ctx->qconn, stream->id, len)) {
       CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send_body(len=%zu) "
                   "-> window exhausted", stream->id, len);
@@ -1204,8 +1204,8 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool pause)
 {
-  /* TODO: there seems right now no API in quiche to shrink/enlarge
-   * the streams windows. As we do in HTTP/2. */
+  /* There seems to exist no API in quiche to shrink/enlarge the streams
+   * windows. As we do in HTTP/2. */
   if(!pause) {
     h3_drain_stream(cf, data);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);

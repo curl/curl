@@ -1598,8 +1598,8 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
 
   (void) size;   /* Always 1. */
 
-  /* TODO: this loop is broken. If `nitems` is <= 4, some encoders will
-   * return STOP_FILLING without adding any data and this loops infinitely. */
+  /* If `nitems` is <= 4, some encoders will return STOP_FILLING without
+   * adding any data and this loops infinitely. */
   do {
     hasread = FALSE;
     ret = readback_part(part, buffer, nitems, &hasread);

@@ -586,9 +586,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
            * or close/re-open the file so that the next attempt starts
            * over from the beginning.
            *
-           * TODO: similar action for the upload case. We might need
-           * to start over reading from a previous point if we have
-           * uploaded something when this was returned.
+           * For the upload case, we might need to start over reading from a
+           * previous point if we have uploaded something when this was
+           * returned.
            */
           break;
         }
@@ -2040,9 +2040,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
            * the headers, we need to open it in append mode, since transfers
            * might finish in any order.
            * The first transfer just clears the file.
-           * TODO: Consider placing the file handle inside the
-           * OperationConfig, so that it does not need to be opened/closed
-           * for every transfer.
+           *
+           * Consider placing the file handle inside the OperationConfig, so
+           * that it does not need to be opened/closed for every transfer.
            */
           if(config->create_dirs) {
             result = create_dir_hierarchy(config->headerfile, global);

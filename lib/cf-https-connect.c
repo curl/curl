@@ -696,7 +696,6 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
       break;
     case CURL_HTTP_VERSION_3:
       /* We assume that silently not even trying H3 is ok here */
-      /* TODO: should we fail instead? */
       if(Curl_conn_may_http3(data, conn) == CURLE_OK)
         alpn_ids[alpn_count++] = ALPN_h3;
       alpn_ids[alpn_count++] = ALPN_h2;

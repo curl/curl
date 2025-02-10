@@ -2049,8 +2049,6 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *provider)
                         sizeof(error_buffer)));
     /* Do not attempt to load it again */
     data->state.provider_failed = TRUE;
-    /* FIXME not the right error but much less fuss than creating a new
-     * public one */
     return CURLE_SSL_ENGINE_NOTFOUND;
   }
   data->state.provider = TRUE;
@@ -4283,7 +4281,6 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
       servername_type = SSL_get_servername_type(ssl);
       inner = SSL_get_servername(ssl, servername_type);
       SSL_get0_ech_name_override(ssl, &outer, &out_name_len);
-      /* TODO: get the inner from BoringSSL */
       infof(data, "ECH: retry_configs for %s from %s, %d %d",
             inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
 #endif

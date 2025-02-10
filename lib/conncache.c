@@ -166,11 +166,11 @@ int Curl_cpool_init(struct cpool *cpool,
   if(!cpool->idata)
     return 1; /* bad */
   cpool->idata->state.internal = TRUE;
-  /* TODO: this is quirky. We need an internal handle for certain
-   * operations, but we do not add it to the multi (if there is one).
-   * But we give it the multi so that socket event operations can work.
-   * Probably better to have an internal handle owned by the multi that
-   * can be used for cpool operations. */
+  /* This is quirky. We need an internal handle for certain operations, but we
+   * do not add it to the multi (if there is one). We give it the multi so
+   * that socket event operations can work. Probably better to have an
+   * internal handle owned by the multi that can be used for cpool
+   * operations. */
   cpool->idata->multi = multi;
 #ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
@@ -1302,7 +1302,6 @@ static int conn_upkeep(struct Curl_easy *data,
                        void *param)
 {
   struct curltime *now = param;
-  /* TODO, shall we reap connections that return an error here? */
   Curl_conn_upkeep(data, conn, now);
   return 0; /* continue iteration */
 }

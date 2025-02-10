@@ -1325,7 +1325,6 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  /* TODO: need to support blocking connect? */
   if(blocking)
     return CURLE_UNSUPPORTED_PROTOCOL;
 
@@ -1432,7 +1431,7 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
     /* A listening socket filter needs to be connected before the accept
      * for some weird FTP interaction. This should be rewritten, so that
      * FTP no longer does the socket checks and accept calls and delegates
-     * all that to the filter. TODO. */
+     * all that to the filter. */
     if(ctx->listening) {
       Curl_pollset_set_in_only(data, ps, ctx->sock);
       CURL_TRC_CF(data, cf, "adjust_pollset, listening, POLLIN fd=%"
@@ -1850,7 +1849,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
 
-  rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,  /* NOLINT FIXME */
+  rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,  /* NOLINT */
                (curl_socklen_t)ctx->addr.addrlen);
   if(-1 == rc) {
     return socket_connect_result(data, ctx->ip.remote_ip, SOCKERRNO);
@@ -2213,7 +2212,7 @@ struct Curl_cftype Curl_cft_tcp_accept = {
   cf_tcp_accept_connect,
   cf_socket_close,
   cf_socket_shutdown,
-  cf_socket_get_host,              /* TODO: not accurate */
+  cf_socket_get_host,
   cf_socket_adjust_pollset,
   cf_socket_data_pending,
   cf_socket_send,

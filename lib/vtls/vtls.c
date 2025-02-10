@@ -1941,8 +1941,8 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
     else {
       *palpn = CURL_HTTP_VERSION_NONE;
       failf(data, "unsupported ALPN protocol: '%.*s'", (int)proto_len, proto);
-      /* TODO: do we want to fail this? Previous code just ignored it and
-       * some vtls backends even ignore the return code of this function. */
+      /* Previous code just ignored it and some vtls backends even ignore the
+       * return code of this function. */
       /* return CURLE_NOT_BUILT_IN; */
       goto out;
     }

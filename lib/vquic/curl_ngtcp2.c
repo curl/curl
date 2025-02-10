@@ -394,7 +394,7 @@ static void quic_printf(void *user_data, const char *fmt, ...)
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
 
-  (void)ctx;  /* TODO: need an easy handle to infof() message */
+  (void)ctx;  /* need an easy handle to infof() message */
   va_list ap;
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
@@ -1591,7 +1591,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(ctx->tls_vrfy_result)
     return ctx->tls_vrfy_result;
 
-  (void)eos; /* TODO: use for stream EOF and block handling */
+  (void)eos; /* use for stream EOF and block handling */
   result = cf_progress_ingress(cf, data, &pktx);
   if(result) {
     *err = result;
@@ -1965,8 +1965,8 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool pause)
 {
-  /* TODO: there seems right now no API in ngtcp2 to shrink/enlarge
-   * the streams windows. As we do in HTTP/2. */
+  /* There seems to exist no API in ngtcp2 to shrink/enlarge the streams
+   * windows. As we do in HTTP/2. */
   if(!pause) {
     h3_drain_stream(cf, data);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);

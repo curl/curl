@@ -495,7 +495,6 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
             ongoing_auth ? " send, " : "");
     /* We decided to abort the ongoing transfer */
     streamclose(conn, "Mid-auth HTTP and much data left to send");
-    /* FIXME: questionable manipulation here, can we do this differently? */
     data->req.size = 0; /* do not download any more than 0 bytes */
   }
   return CURLE_OK;
@@ -2477,7 +2476,7 @@ static CURLcode http_range(struct Curl_easy *data,
       }
       else if(data->state.resume_from) {
         /* This is because "resume" was selected */
-        /* TODO: not sure if we want to send this header during authentication
+        /* Not sure if we want to send this header during authentication
          * negotiation, but test1084 checks for it. In which case we have a
          * "null" client reader installed that gives an unexpected length. */
         curl_off_t total_len = data->req.authneg ?
@@ -3597,10 +3596,9 @@ static CURLcode http_on_response(struct Curl_easy *data,
       }
 #endif
       else {
-        /* We silently accept this as the final response.
-         * TODO: this looks, uhm, wrong. What are we switching to if we
-         * did not ask for an Upgrade? Maybe the application provided an
-         * `Upgrade: xxx` header? */
+        /* We silently accept this as the final response. What are we
+         * switching to if we did not ask for an Upgrade? Maybe the
+         * application provided an `Upgrade: xxx` header? */
         k->header = FALSE;
       }
       break;
