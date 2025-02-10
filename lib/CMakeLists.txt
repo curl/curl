@@ -55,8 +55,8 @@ if(CURL_BUILD_TESTING)
   )
   target_compile_definitions(curlu PUBLIC "UNITTESTS" "CURL_STATICLIB")
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
-  # There is plenty parallelism already when building test targets.
-  # Omit slicing up curlu into batches for best performance.
+  # There is plenty of parallelism when building the testdeps target.
+  # Override the curlu batch size with the maximum to optimize performance.
   set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0)
 endif()
 
