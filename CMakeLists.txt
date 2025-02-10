@@ -2196,7 +2196,6 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # curl-config needs the following options to be set.
   set(CC                      "${CMAKE_C_COMPILER}")
-  # TODO: probably put a -D... options here?
   set(CONFIGURE_OPTIONS       "")
   set(CURLVERSION             "${_curl_version}")
   set(VERSIONNUM              "${_curl_version_num}")
