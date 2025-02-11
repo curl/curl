@@ -48,7 +48,7 @@ AC_DEFUN([CURL_CHECK_DEF], [
   tmp_exp=""
   AC_PREPROC_IFELSE([
     AC_LANG_SOURCE(
-ifelse($2,,,[$2])[[
+    ifelse($2,,,[$2])[[
       #ifdef $1
       CURL_DEF_TOKEN $1
       #endif
@@ -88,14 +88,13 @@ AC_DEFUN([CURL_CHECK_DEF_CC], [
   ifelse($3,,[AC_MSG_CHECKING([for compiler definition of $1])])
   AC_COMPILE_IFELSE([
     AC_LANG_SOURCE(
-ifelse($2,,,[$2])[[
+    ifelse($2,,,[$2])[[
       int main(void)
       {
-      #ifdef $1
-        return 0;
-      #else
+      #ifndef $1
         #error force compilation error
       #endif
+        return 0;
       }
     ]])
   ],[
@@ -126,12 +125,11 @@ AC_DEFUN([CURL_CHECK_LIB_XNET], [
       int main(void)
       {
       #if defined(__hpux) && defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600)
-        return 0;
       #elif defined(__hpux) && defined(_XOPEN_SOURCE_EXTENDED)
-        return 0;
       #else
         #error force compilation error
       #endif
+        return 0;
       }
     ]])
   ],[
@@ -180,7 +178,8 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
       AC_LANG_PROGRAM([[
       ]],[[
         #ifdef _WIN32
-          int dummy=1;
+          int dummy = 1;
+          (void)dummy;
         #else
           #error Not a native Windows build target.
         #endif
@@ -306,6 +305,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
       ]],[[
         LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
         int res = ldap_unbind(ldp);
+        (void)res;
       ]])
     ],[
       curl_cv_header_ldap_h="yes"
@@ -354,6 +354,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
         #include <ldap_ssl.h>
       ]],[[
         LDAP *ldp = ldapssl_init("0.0.0.0", LDAPS_PORT, 1);
+        (void)ldp;
       ]])
     ],[
       curl_cv_header_ldap_ssl_h="yes"
@@ -433,6 +434,7 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
           LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
           ULONG res = ldap_unbind(ldp);
           ber_free(bep, 1);
+          (void)res;
         ]])
       ],[
         curl_cv_ldap_LIBS="$x_nlibs"
@@ -543,6 +545,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
           LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
           int res = ldap_unbind(ldp);
           ber_free(bep, 1);
+          (void)res;
         ]])
       ],[
         curl_cv_ldap_LIBS="$x_nlibs"
@@ -729,7 +732,8 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
         #endif
         #endif
       ]],[[
-        int flag=MSG_NOSIGNAL;
+        int flag = MSG_NOSIGNAL;
+        (void)flag;
       ]])
     ],[
       curl_cv_msg_nosignal="yes"
@@ -777,6 +781,7 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
         struct timeval ts;
         ts.tv_sec  = 0;
         ts.tv_usec = 0;
+        (void)ts;
       ]])
     ],[
       curl_cv_struct_timeval="yes"
@@ -814,6 +819,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
       ]],[[
         struct timespec ts;
         (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+        (void)ts;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -848,6 +854,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
       ]],[[
         struct timespec ts;
         (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+        (void)ts;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -894,6 +901,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           ]],[[
             struct timespec ts;
             (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+            (void)ts;
           ]])
         ],[
           curl_cv_gclk_LIBS="$x_xlibs"
@@ -940,10 +948,10 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           #include <time.h>
         ]],[[
           struct timespec ts;
-          if (0 == clock_gettime(CLOCK_MONOTONIC, &ts))
-            exit(0);
-          else
-            exit(1);
+          if(0 == clock_gettime(CLOCK_MONOTONIC, &ts))
+            return 0;
+          (void)ts;
+          return 1;
         ]])
       ],[
         AC_MSG_RESULT([yes])
@@ -1090,7 +1098,7 @@ AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
     dnl point also is available run-time!
     AC_MSG_CHECKING([run-time libs availability])
     CURL_RUN_IFELSE([
-      int main()
+      int main(void)
       {
         return 0;
       }

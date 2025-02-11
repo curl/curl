@@ -30,14 +30,14 @@
 /* */
 #if defined(sun) || defined(__sun__) || \
     defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-# if defined(__SVR4) || defined(__srv4__)
-#  define PLATFORM_SOLARIS
-# else
-#  define PLATFORM_SUNOS4
-# endif
+#  if defined(__SVR4) || defined(__srv4__)
+#    define PLATFORM_SOLARIS
+#  else
+#    define PLATFORM_SUNOS4
+#  endif
 #endif
 #if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX41)
-# define PLATFORM_AIX_V3
+#  define PLATFORM_AIX_V3
 #endif
 /* */
 #if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
@@ -55,52 +55,47 @@ int main(void)
 #endif
 
 /* tests for gethostbyname_r */
-#if defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
-    defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
-    defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
-#   define _REENTRANT
-    /* no idea whether _REENTRANT is always set, just invent a new flag */
-#   define TEST_GETHOSTBYFOO_REENTRANT
-#endif
 #if defined(HAVE_GETHOSTBYNAME_R_3) || \
+    defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_5) || \
+    defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_6) || \
-    defined(TEST_GETHOSTBYFOO_REENTRANT)
+    defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
 #include <sys/types.h>
 #include <netdb.h>
 int main(void)
 {
   const char *address = "example.com";
-  int length = 0;
-  int type = 0;
   struct hostent h;
   int rc = 0;
-#if defined(HAVE_GETHOSTBYNAME_R_3) || \
-    defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
+#if   defined(HAVE_GETHOSTBYNAME_R_3) || \
+      defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
   struct hostent_data hdata;
 #elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
       defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
   char buffer[8192];
-  int h_errnop;
   struct hostent *hp;
+  int h_errnop;
 #endif
 
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
       defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
   rc = gethostbyname_r(address, &h, &hdata);
+  (void)hdata;
 #elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT)
   rc = gethostbyname_r(address, &h, buffer, 8192, &h_errnop);
   (void)hp; /* not used for test */
+  (void)h_errnop;
 #elif defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
   rc = gethostbyname_r(address, &h, buffer, 8192, &hp, &h_errnop);
+  (void)hp;
+  (void)h_errnop;
 #endif
-
-  (void)length;
-  (void)type;
+  (void)h;
   (void)rc;
   return 0;
 }
@@ -115,10 +110,7 @@ int main(void)
 #endif
 int main(void)
 {
-  if(sizeof(bool *))
-    return 0;
-  ;
-  return 0;
+  return (int)sizeof(bool *);
 }
 #endif
 
@@ -131,18 +123,20 @@ int main(void) { return 0; }
 #endif
 
 #ifdef HAVE_FILE_OFFSET_BITS
-#undef _FILE_OFFSET_BITS
-#define _FILE_OFFSET_BITS 64
 #include <sys/types.h>
 /* Check that off_t can represent 2**63 - 1 correctly.
    We cannot simply define LARGE_OFF_T to be 9223372036854775807,
    since some C++ compilers masquerading as C compilers
    incorrectly reject 9223372036854775807. */
 #define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                     && LARGE_OFF_T % 2147483647 == 1)
-                    ? 1 : -1];
-int main(void) { return 0; }
+static int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721 &&
+                           LARGE_OFF_T % 2147483647 == 1)
+                          ? 1 : -1];
+int main(void)
+{
+  (void)off_t_is_large;
+  return 0;
+}
 #endif
 
 #ifdef HAVE_IOCTLSOCKET
@@ -154,7 +148,7 @@ int main(void)
   /* ioctlsocket source code */
   int socket = -1;
   unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
-  ;
+  (void)flags;
   return 0;
 }
 
@@ -167,7 +161,6 @@ int main(void)
   /* IoctlSocket source code */
   if(0 != IoctlSocket(0, 0, 0))
     return 1;
-  ;
   return 0;
 }
 #endif
@@ -183,7 +176,7 @@ int main(void)
   long flags = 0;
   if(0 != IoctlSocket(0, FIONBIO, &flags))
     return 1;
-  ;
+  (void)flags;
   return 0;
 }
 #endif
@@ -197,7 +190,7 @@ int main(void)
   unsigned long flags = 0;
   if(0 != ioctlsocket(0, FIONBIO, &flags))
     return 1;
-  ;
+  (void)flags;
   return 0;
 }
 #endif
@@ -224,7 +217,7 @@ int main(void)
   int flags = 0;
   if(0 != ioctl(0, FIONBIO, &flags))
     return 1;
-  ;
+  (void)flags;
   return 0;
 }
 #endif
@@ -252,7 +245,7 @@ int main(void)
   struct ifreq ifr;
   if(0 != ioctl(0, SIOCGIFADDR, &ifr))
     return 1;
-  ;
+  (void)ifr;
   return 0;
 }
 #endif
@@ -271,7 +264,6 @@ int main(void)
 {
   if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
     return 1;
-  ;
   return 0;
 }
 #endif
@@ -280,7 +272,7 @@ int main(void)
 #include <string.h>
 #include <errno.h>
 
-void check(char c) {}
+static void check(char c) { (void)c; }
 
 int main(void)
 {
@@ -296,7 +288,7 @@ int main(void)
 #include <errno.h>
 
 /* Float, because a pointer cannot be implicitly cast to float */
-void check(float f) {}
+static void check(float f) { (void)f; }
 
 int main(void)
 {
@@ -329,8 +321,9 @@ int main(void)
 #include <time.h>
 int main(void)
 {
-  struct timespec ts = {0, 0};
-  clock_gettime(CLOCK_MONOTONIC, &ts);
+  struct timespec ts;
+  (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+  (void)ts;
   return 0;
 }
 #endif

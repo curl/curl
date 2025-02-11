@@ -511,11 +511,6 @@ if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
   endif()
 endif()
 
-# Disable warnings on Borland to avoid changing 3rd party code.
-if(BORLAND)
-  string(APPEND CMAKE_C_FLAGS " -w-")
-endif()
-
 # If we are on AIX, do the _ALL_SOURCE magic
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
   add_definitions("-D_ALL_SOURCE")
@@ -1813,16 +1808,43 @@ foreach(_curl_test IN ITEMS
     HAVE_GETHOSTBYNAME_R_3
     HAVE_GETHOSTBYNAME_R_5
     HAVE_GETHOSTBYNAME_R_6
-    HAVE_GETHOSTBYNAME_R_3_REENTRANT
-    HAVE_GETHOSTBYNAME_R_5_REENTRANT
-    HAVE_GETHOSTBYNAME_R_6_REENTRANT
     HAVE_BOOL_T
     STDC_HEADERS
-    HAVE_FILE_OFFSET_BITS
     HAVE_ATOMIC
     )
   curl_internal_test(${_curl_test})
 endforeach()
+
+# Check for reentrant
+cmake_push_check_state()
+list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_REENTRANT")
+foreach(_curl_test IN ITEMS
+    HAVE_GETHOSTBYNAME_R_3
+    HAVE_GETHOSTBYNAME_R_5
+    HAVE_GETHOSTBYNAME_R_6)
+  curl_internal_test(${_curl_test}_REENTRANT)
+  if(NOT ${_curl_test} AND ${_curl_test}_REENTRANT)
+    set(NEED_REENTRANT 1)
+  endif()
+endforeach()
+cmake_pop_check_state()
+
+if(NEED_REENTRANT)
+  foreach(_curl_test IN ITEMS
+      HAVE_GETHOSTBYNAME_R_3
+      HAVE_GETHOSTBYNAME_R_5
+      HAVE_GETHOSTBYNAME_R_6)
+    set(${_curl_test} 0)
+    if(${_curl_test}_REENTRANT)
+      set(${_curl_test} 1)
+    endif()
+  endforeach()
+endif()
+
+cmake_push_check_state()
+list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_FILE_OFFSET_BITS=64")
+curl_internal_test(HAVE_FILE_OFFSET_BITS)
+cmake_pop_check_state()
 
 cmake_push_check_state()
 if(HAVE_FILE_OFFSET_BITS)
@@ -1876,30 +1898,6 @@ endif()
 
 curl_internal_test(HAVE_GLIBC_STRERROR_R)
 curl_internal_test(HAVE_POSIX_STRERROR_R)
-
-# Check for reentrant
-foreach(_curl_test IN ITEMS
-    HAVE_GETHOSTBYNAME_R_3
-    HAVE_GETHOSTBYNAME_R_5
-    HAVE_GETHOSTBYNAME_R_6)
-  if(NOT ${_curl_test})
-    if(${_curl_test}_REENTRANT)
-      set(NEED_REENTRANT 1)
-    endif()
-  endif()
-endforeach()
-
-if(NEED_REENTRANT)
-  foreach(_curl_test IN ITEMS
-      HAVE_GETHOSTBYNAME_R_3
-      HAVE_GETHOSTBYNAME_R_5
-      HAVE_GETHOSTBYNAME_R_6)
-    set(${_curl_test} 0)
-    if(${_curl_test}_REENTRANT)
-      set(${_curl_test} 1)
-    endif()
-  endforeach()
-endif()
 
 if(NOT WIN32)
   curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)  # Check clock_gettime(CLOCK_MONOTONIC, x) support
@@ -1961,12 +1959,6 @@ endif()
 if(MSVC)
   # Disable default manifest added by CMake
   string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
-
-  if(CMAKE_C_FLAGS MATCHES "[/-]W[0-4]")
-    string(REGEX REPLACE "[/-]W[0-4]" "-W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-  else()
-    string(APPEND CMAKE_C_FLAGS " -W4")
-  endif()
 
   # Use multithreaded compilation on VS2008+
   if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION GREATER_EQUAL 1500)

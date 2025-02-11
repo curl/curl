@@ -1243,7 +1243,8 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "${with_amissl+set}" = set; then
   struct Library *SocketBase = NULL;
   #endif
     ]],[[
-      gethostbyname("localhost");
+      unsigned char host[] = "localhost";
+      gethostbyname(host);
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1717,10 +1718,9 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
       #include <netinet/in6.h>
       #endif
       #endif
-
       int main(void)
       {
-        struct sockaddr_in6 s;
+        int s = (int)sizeof(struct sockaddr_in6);
         (void)s;
         return socket(AF_INET6, SOCK_STREAM, 0) < 0;
       }
@@ -1754,6 +1754,7 @@ if test "$ipv6" = yes; then
     ]], [[
       struct sockaddr_in6 s;
       s.sin6_scope_id = 0;
+      (void)s;
     ]])
   ],[
     AC_MSG_RESULT([yes])

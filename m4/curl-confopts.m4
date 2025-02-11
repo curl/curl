@@ -504,11 +504,11 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       AC_LANG_PROGRAM([[
         #include <ares.h>
         /* set of dummy functions in case c-ares was built with debug */
-        void curl_dofree() { }
-        void curl_sclose() { }
-        void curl_domalloc() { }
-        void curl_docalloc() { }
-        void curl_socket() { }
+        void curl_dofree(void);   void curl_dofree(void) {}
+        void curl_sclose(void);   void curl_sclose(void) {}
+        void curl_domalloc(void); void curl_domalloc(void) {}
+        void curl_docalloc(void); void curl_docalloc(void) {}
+        void curl_socket(void);   void curl_socket(void) {}
       ]],[[
         ares_channel channel;
         ares_cancel(channel); /* added in 1.2.0 */
