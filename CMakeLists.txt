@@ -534,6 +534,8 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
 
+set(_CURL_PREFILL OFF)
+
 option(_CURL_PREFILL "Fast-track known feature detection results (Windows, some Apple)" "${WIN32}")
 if(_CURL_PREFILL)
   if(WIN32)
