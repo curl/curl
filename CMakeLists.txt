@@ -629,6 +629,51 @@ if(ENABLE_IPV6)
   set(USE_IPV6 ON)
 endif()
 
+# Check for compression libraries
+# Before other detections and before calling curl_openssl_check_symbol_exists().
+
+set(HAVE_LIBZ OFF)
+curl_dependency_option(CURL_ZLIB ZLIB "ZLIB")
+if(ZLIB_FOUND)
+  set(HAVE_LIBZ ON)
+  # Depend on ZLIB via imported targets. This allows our dependents to
+  # get our dependencies transitively.
+  list(APPEND CURL_LIBS ZLIB::ZLIB)
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "zlib")
+endif()
+
+set(HAVE_BROTLI OFF)
+curl_dependency_option(CURL_BROTLI Brotli "brotli")
+if(BROTLI_FOUND)
+  set(HAVE_BROTLI ON)
+  list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
+  list(APPEND CURL_LIBDIRS ${BROTLI_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${BROTLI_PC_REQUIRES})
+  include_directories(SYSTEM ${BROTLI_INCLUDE_DIRS})
+  link_directories(${BROTLI_LIBRARY_DIRS})
+  if(BROTLI_CFLAGS)
+    string(APPEND CMAKE_C_FLAGS " ${BROTLI_CFLAGS}")
+  endif()
+endif()
+
+set(HAVE_ZSTD OFF)
+curl_dependency_option(CURL_ZSTD Zstd "zstd")
+if(ZSTD_FOUND)
+  if(NOT ZSTD_VERSION VERSION_LESS 1.0.0)
+    set(HAVE_ZSTD ON)
+    list(APPEND CURL_LIBS ${ZSTD_LIBRARIES})
+    list(APPEND CURL_LIBDIRS ${ZSTD_LIBRARY_DIRS})
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${ZSTD_PC_REQUIRES})
+    include_directories(SYSTEM ${ZSTD_INCLUDE_DIRS})
+    link_directories(${ZSTD_LIBRARY_DIRS})
+    if(ZSTD_CFLAGS)
+      string(APPEND CMAKE_C_FLAGS " ${ZSTD_CFLAGS}")
+    endif()
+  else()
+    message(WARNING "zstd v1.0.0 or newer is required, disabling zstd support.")
+  endif()
+endif()
+
 # Check SSL libraries
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
@@ -900,51 +945,6 @@ endif()
 
 if(CURL_DEFAULT_SSL_BACKEND AND NOT _valid_default_ssl_backend)
   message(FATAL_ERROR "CURL_DEFAULT_SSL_BACKEND '${CURL_DEFAULT_SSL_BACKEND}' not enabled.")
-endif()
-
-# Keep ZLIB detection after TLS detection,
-# and before calling curl_openssl_check_symbol_exists().
-
-set(HAVE_LIBZ OFF)
-curl_dependency_option(CURL_ZLIB ZLIB "ZLIB")
-if(ZLIB_FOUND)
-  set(HAVE_LIBZ ON)
-  # Depend on ZLIB via imported targets. This allows our dependents to
-  # get our dependencies transitively.
-  list(APPEND CURL_LIBS ZLIB::ZLIB)
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "zlib")
-endif()
-
-set(HAVE_BROTLI OFF)
-curl_dependency_option(CURL_BROTLI Brotli "brotli")
-if(BROTLI_FOUND)
-  set(HAVE_BROTLI ON)
-  list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${BROTLI_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${BROTLI_PC_REQUIRES})
-  include_directories(SYSTEM ${BROTLI_INCLUDE_DIRS})
-  link_directories(${BROTLI_LIBRARY_DIRS})
-  if(BROTLI_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${BROTLI_CFLAGS}")
-  endif()
-endif()
-
-set(HAVE_ZSTD OFF)
-curl_dependency_option(CURL_ZSTD Zstd "zstd")
-if(ZSTD_FOUND)
-  if(NOT ZSTD_VERSION VERSION_LESS 1.0.0)
-    set(HAVE_ZSTD ON)
-    list(APPEND CURL_LIBS ${ZSTD_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${ZSTD_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${ZSTD_PC_REQUIRES})
-    include_directories(SYSTEM ${ZSTD_INCLUDE_DIRS})
-    link_directories(${ZSTD_LIBRARY_DIRS})
-    if(ZSTD_CFLAGS)
-      string(APPEND CMAKE_C_FLAGS " ${ZSTD_CFLAGS}")
-    endif()
-  else()
-    message(WARNING "zstd v1.0.0 or newer is required, disabling zstd support.")
-  endif()
 endif()
 
 # Check symbol in an OpenSSL-like TLS backend.
