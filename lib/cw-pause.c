@@ -39,7 +39,10 @@
 #include "memdebug.h"
 
 
-#define CW_PAUSE_BODY_CHUNK    (128 * 1024)
+/* body dynbuf sizes */
+#define CW_PAUSE_BUF_SIZE          (128 * 1024)
+/* when content decoding, write data in chunks */
+#define CW_PAUSE_DEC_WRITE_CHUNK   (4096)
 
 struct cw_pause_buf {
   struct cw_pause_buf *next;
@@ -118,25 +121,33 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
                                struct Curl_cwriter *cw_pause)
 {
   struct cw_pause_ctx *ctx = (struct cw_pause_ctx *)cw_pause;
+  bool decoding = Curl_cwriter_is_content_decoding(data);
   CURLcode result = CURLE_OK;
 
   /* write the end of the chain until it blocks or gets empty */
   while(ctx->buf && !Curl_cwriter_is_paused(data)) {
     struct cw_pause_buf **plast = &ctx->buf;
-    size_t wlen = 0;
+    size_t blen, wlen = 0;
     while((*plast)->next) /* got to last in list */
       plast = &(*plast)->next;
-    wlen = Curl_dyn_len(&(*plast)->b);
+    blen = Curl_dyn_len(&(*plast)->b);
+    wlen = (decoding && ((*plast)->type & CLIENTWRITE_BODY)) ?
+           CURLMIN(blen, CW_PAUSE_DEC_WRITE_CHUNK) : blen;
     result = Curl_cwriter_write(data, cw_pause->next, (*plast)->type,
                                 Curl_dyn_ptr(&(*plast)->b), wlen);
     CURL_TRC_WRITE(data, "[PAUSE] flushed %zu/%zu bytes, type=%x -> %d",
                    wlen, ctx->buf_total, (*plast)->type, result);
     if(result)
       return result;
-    cw_pause_buf_free(*plast);
+    if(wlen < blen) {
+      Curl_dyn_tail(&(*plast)->b, blen - wlen);
+    }
+    else {
+      cw_pause_buf_free(*plast);
+      *plast = NULL;
+    }
     DEBUGASSERT(ctx->buf_total >= wlen);
     ctx->buf_total -= wlen;
-    *plast = NULL;
   }
   return result;
 }
@@ -147,21 +158,36 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
 {
   struct cw_pause_ctx *ctx = writer->ctx;
   CURLcode result = CURLE_OK;
+  size_t wlen = 0;
+  bool decoding = Curl_cwriter_is_content_decoding(data);
 
-  if(!Curl_cwriter_is_paused(data) && ctx->buf) {
-    /* try to flush */
+  if(ctx->buf && !Curl_cwriter_is_paused(data)) {
     result = cw_pause_flush(data, writer);
     if(result)
       return result;
   }
 
-  if(!Curl_cwriter_is_paused(data)) {
+  while(!ctx->buf && !Curl_cwriter_is_paused(data)) {
+    int wtype = type;
     DEBUGASSERT(!ctx->buf);
-    return Curl_cwriter_write(data, writer->next, type, buf, blen);
+    /* content decoding might blow up size considerably, write smaller
+     * chunks to make pausing need buffer less. */
+    wlen = (decoding && (type & CLIENTWRITE_BODY)) ?
+           CURLMIN(blen, CW_PAUSE_DEC_WRITE_CHUNK) : blen;
+    if(wlen < blen)
+      wtype &= ~CLIENTWRITE_EOS;
+    result = Curl_cwriter_write(data, writer->next, wtype, buf, wlen);
+    CURL_TRC_WRITE(data, "[PAUSE] writing %zu/%zu bytes of type %x -> %d",
+                   wlen, blen, wtype, result);
+    if(result)
+      return result;
+    buf += wlen;
+    blen -= wlen;
+    if(!blen)
+      return result;
   }
 
   do {
-    size_t wlen = 0;
     /* prepend to ctx->buf list */
     if(ctx->buf && (ctx->buf->type == type) && (type & CLIENTWRITE_BODY) &&
        Curl_dyn_left(&ctx->buf->b)) {
@@ -171,7 +197,7 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
     }
     else {
       /* Need new buf(s) */
-      size_t clen = (type & CLIENTWRITE_BODY) ? CW_PAUSE_BODY_CHUNK : blen;
+      size_t clen = (type & CLIENTWRITE_BODY) ? CW_PAUSE_BUF_SIZE : blen;
       struct cw_pause_buf *cwbuf = cw_pause_buf_create(type, clen);
       if(!cwbuf)
         return CURLE_OUT_OF_MEMORY;

@@ -511,6 +511,16 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
   return NULL;
 }
 
+bool Curl_cwriter_is_content_decoding(struct Curl_easy *data)
+{
+  struct Curl_cwriter *writer;
+  for(writer = data->req.writer_stack; writer; writer = writer->next) {
+    if(writer->phase == CURL_CW_CONTENT_DECODE)
+      return TRUE;
+  }
+  return FALSE;
+}
+
 bool Curl_cwriter_is_paused(struct Curl_easy *data)
 {
   return Curl_cw_out_is_paused(data);
