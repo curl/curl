@@ -2265,8 +2265,8 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
         char ipv4res[sizeof "255.255.255.255"];
         unsigned char ipv6a[26];
         unsigned char ipv4a[5];
-        char *ipv6ptr = 0;
-        char *ipv4ptr = 0;
+        const char *ipv6ptr = 0;
+        const char *ipv4ptr = 0;
         /* - */
         ipv4res[0] = '\0';
         ipv4a[0] = 0xc0;
