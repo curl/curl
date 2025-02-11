@@ -472,6 +472,7 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
     ]],[[
       #ifdef _THREAD_SAFE
         int dummy=1;
+        (void)dummy;
       #else
         #error force compilation error
       #endif

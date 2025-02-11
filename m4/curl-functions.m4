@@ -2140,6 +2140,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
         struct tm *gmt = 0;
         struct tm result;
         gmt = gmtime_r(&local, &result);
+        (void)result;
         if(gmt)
           exit(0);
         else
@@ -3993,7 +3994,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
-#       include <errno.h>
+        #include <errno.h>
       ]],[[
         char buffer[1024];
         char *string = 0;
@@ -4054,7 +4055,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
-#       include <errno.h>
+        #include <errno.h>
       ]],[[
         char buffer[1024];
         int error = 1;
@@ -4463,6 +4464,7 @@ AC_DEFUN([CURL_ATOMIC],[
       ]],[[
         _Atomic int i = 0;
         i = 4;  // Force an atomic-write operation.
+        (void)i;
       ]])
     ],[
       AC_MSG_RESULT([yes])
