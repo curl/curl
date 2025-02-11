@@ -716,4 +716,3 @@ class TestDownload:
              '-P', f'{pause_offset}', '-V', proto, url
         ])
         r.check_exit_code(0)
-
