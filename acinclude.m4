@@ -181,6 +181,7 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
       ]],[[
         #ifdef _WIN32
           int dummy=1;
+          (void)dummy;
         #else
           #error Not a native Windows build target.
         #endif
@@ -733,7 +734,7 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
         #endif
         #endif
       ]],[[
-        int flag=MSG_NOSIGNAL;
+        int flag = MSG_NOSIGNAL;
         (void)flag;
       ]])
     ],[

@@ -284,6 +284,7 @@ if test "x$OPT_OPENSSL" != xno; then
         #include <openssl/opensslv.h>
       ]],[[
         int dummy = LIBRESSL_VERSION_NUMBER;
+        (void)dummy;
       ]])
     ],[
       AC_MSG_RESULT([yes])

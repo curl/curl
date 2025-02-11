@@ -1310,7 +1310,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE], [
   AC_MSG_CHECKING([if compiler halts on negative sized arrays])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
-      typedef char bad_t[sizeof(char) == sizeof(int) ? -1 : -1 ];
+      typedef char bad_t[sizeof(char) == sizeof(int) ? -1 : -1];
     ]],[[
       bad_t dummy;
       (void)dummy;
@@ -1343,8 +1343,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_STRUCT_MEMBER_SIZE], [
         struct mystruct *next;
       };
       struct mystruct myfunc();
-      typedef char good_t1[sizeof(myfunc().mi) == sizeof(int)  ? 1 : -1 ];
-      typedef char good_t2[sizeof(myfunc().mc) == sizeof(char) ? 1 : -1 ];
+      typedef char good_t1[sizeof(myfunc().mi) == sizeof(int)  ? 1 : -1];
+      typedef char good_t2[sizeof(myfunc().mc) == sizeof(char) ? 1 : -1];
     ]],[[
       good_t1 dummy1;
       good_t2 dummy2;
@@ -1367,8 +1367,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_STRUCT_MEMBER_SIZE], [
         struct mystruct *next;
       };
       struct mystruct myfunc();
-      typedef char bad_t1[sizeof(myfunc().mi) != sizeof(int)  ? 1 : -1 ];
-      typedef char bad_t2[sizeof(myfunc().mc) != sizeof(char) ? 1 : -1 ];
+      typedef char bad_t1[sizeof(myfunc().mi) != sizeof(int)  ? 1 : -1];
+      typedef char bad_t2[sizeof(myfunc().mc) != sizeof(char) ? 1 : -1];
     ]],[[
       bad_t1 dummy1;
       bad_t2 dummy2;
