@@ -3254,8 +3254,9 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   }
 
   if(data->set.ssh_compression &&
-     libssh2_session_flag(sshc->ssh_session, LIBSSH2_FLAG_COMPRESS, 1) < 0)
+     libssh2_session_flag(sshc->ssh_session, LIBSSH2_FLAG_COMPRESS, 1) < 0) {
     infof(data, "Failed to enable compression for ssh session");
+  }
 
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     int rc;
