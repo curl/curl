@@ -855,6 +855,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
       ]],[[
         struct timespec ts;
         (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+        (void)ts;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -901,6 +902,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           ]],[[
             struct timespec ts;
             (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+            (void)ts;
           ]])
         ],[
           curl_cv_gclk_LIBS="$x_xlibs"
@@ -947,10 +949,10 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           #include <time.h>
         ]],[[
           struct timespec ts;
-          if (0 == clock_gettime(CLOCK_MONOTONIC, &ts))
-            exit(0);
-          else
-            exit(1);
+          if(0 == clock_gettime(CLOCK_MONOTONIC, &ts))
+            return 0;
+          (void)ts;
+          return 1;
         ]])
       ],[
         AC_MSG_RESULT([yes])
