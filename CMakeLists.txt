@@ -511,11 +511,6 @@ if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
   endif()
 endif()
 
-# Disable warnings on Borland to avoid changing 3rd party code.
-if(BORLAND)
-  string(APPEND CMAKE_C_FLAGS " -w-")
-endif()
-
 # If we are on AIX, do the _ALL_SOURCE magic
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
   add_definitions("-D_ALL_SOURCE")
@@ -1961,12 +1956,6 @@ endif()
 if(MSVC)
   # Disable default manifest added by CMake
   string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
-
-  if(CMAKE_C_FLAGS MATCHES "[/-]W[0-4]")
-    string(REGEX REPLACE "[/-]W[0-4]" "-W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-  else()
-    string(APPEND CMAKE_C_FLAGS " -W4")
-  endif()
 
   # Use multithreaded compilation on VS2008+
   if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION GREATER_EQUAL 1500)
