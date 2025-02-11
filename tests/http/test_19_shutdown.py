@@ -75,7 +75,7 @@ class TestShutdown:
         run_env = os.environ.copy()
         run_env.update({
             'CURL_GRACEFUL_SHUTDOWN': '2000',
-            'CURL_DEBUG': 'ssl,tcp,multi,connc'
+            'CURL_DEBUG': 'ssl,tcp'
         })
         curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
@@ -94,7 +94,7 @@ class TestShutdown:
         count = 10
         curl = CurlClient(env=env, run_env={
             'CURL_GRACEFUL_SHUTDOWN': '2000',
-            'CURL_DEBUG': 'ssl'
+            'CURL_DEBUG': 'ssl,multi'
         })
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak/?'\
             f'id=[0-{count-1}]&with_cl&close'
@@ -115,7 +115,7 @@ class TestShutdown:
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='hx-download', env=env, run_env={
             'CURL_GRACEFUL_SHUTDOWN': '2000',
-            'CURL_DEBUG': 'ssl'
+            'CURL_DEBUG': 'ssl,multi'
         })
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
