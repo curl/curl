@@ -1653,8 +1653,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
       $curl_includes_unistd
       $curl_includes_bsdsocket
     ]],[[
-      if(0 != gethostname(0, 0))
+      char s[1];
+      if(0 != gethostname((void *)s, 0))
         return 1;
+      (void)s;
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1687,8 +1689,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
         $curl_includes_unistd
         $curl_includes_bsdsocket
       ]],[[
-        if(0 != gethostname(0, 0))
+        char s[1];
+        if(0 != gethostname((void *)s, 0))
           return 1;
+        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -1713,8 +1717,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               $curl_preprocess_callconv
               extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
-              if(0 != gethostname(0, 0))
+              char s[1];
+              if(0 != gethostname((tst_arg1)s, 0))
                 return 1;
+              (void)s;
             ]])
           ],[
             tst_gethostname_type_arg2="$tst_arg2"
@@ -3006,7 +3012,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != memrchr(0, 0, 0))
+        if(0 != memrchr("", 0, 0))
           return 1;
       ]])
     ],[
@@ -3945,8 +3951,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != strerror_r(0, 0, 0))
+        char s[1];
+        if(0 != strerror_r(0, s, 0))
           return 1;
+        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -3967,8 +3975,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             $curl_includes_string
             char *strerror_r(int errnum, char *workbuf, $arg3 bufsize);
           ]],[[
-            if(0 != strerror_r(0, 0, 0))
+            char s[1];
+            if(0 != strerror_r(0, s, 0))
               return 1;
+            (void)s;
           ]])
         ],[
           tst_glibc_strerror_r_type_arg3="$arg3"
@@ -4268,8 +4278,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOK_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != strtok_r(0, 0, 0))
+        char *s;
+        if(0 != strtok_r(0, "", &s))
           return 1;
+        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -4353,7 +4365,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOLL], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
       ]],[[
-        if(0 != strtoll(0, 0, 0))
+        if(0 != strtoll("", 0, 0))
           return 1;
       ]])
     ],[
