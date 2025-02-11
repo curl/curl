@@ -241,7 +241,7 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, http_version);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(hnd, CURLOPT_ACCEPT_ENCODING, ""); // all of them!
+  curl_easy_setopt(hnd, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
   curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_cb);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
