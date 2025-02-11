@@ -27,6 +27,7 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
+#include "bufq.h"
 #include "cfilters.h"
 #include "headers.h"
 #include "multiif.h"
@@ -40,13 +41,13 @@
 
 
 /* body dynbuf sizes */
-#define CW_PAUSE_BUF_SIZE          (128 * 1024)
+#define CW_PAUSE_BUF_CHUNK         (16 * 1024)
 /* when content decoding, write data in chunks */
 #define CW_PAUSE_DEC_WRITE_CHUNK   (4096)
 
 struct cw_pause_buf {
   struct cw_pause_buf *next;
-  struct dynbuf b;
+  struct bufq b;
   int type;
 };
 
@@ -55,7 +56,11 @@ static struct cw_pause_buf *cw_pause_buf_create(int type, size_t buflen)
   struct cw_pause_buf *cwbuf = calloc(1, sizeof(*cwbuf));
   if(cwbuf) {
     cwbuf->type = type;
-    Curl_dyn_init(&cwbuf->b, buflen + 1); /* dynbuf always adds a NUL */
+    if(type & CLIENTWRITE_BODY)
+      Curl_bufq_init2(&cwbuf->b, CW_PAUSE_BUF_CHUNK, 1,
+                      (BUFQ_OPT_SOFT_LIMIT|BUFQ_OPT_NO_SPARES));
+    else
+      Curl_bufq_init(&cwbuf->b, buflen, 1);
   }
   return cwbuf;
 }
@@ -63,7 +68,7 @@ static struct cw_pause_buf *cw_pause_buf_create(int type, size_t buflen)
 static void cw_pause_buf_free(struct cw_pause_buf *cwbuf)
 {
   if(cwbuf) {
-    Curl_dyn_free(&cwbuf->b);
+    Curl_bufq_free(&cwbuf->b);
     free(cwbuf);
   }
 }
@@ -128,26 +133,34 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
   while(ctx->buf && !Curl_cwriter_is_paused(data)) {
     struct cw_pause_buf **plast = &ctx->buf;
     size_t blen, wlen = 0;
+    const unsigned char *buf = NULL;
+
     while((*plast)->next) /* got to last in list */
       plast = &(*plast)->next;
-    blen = Curl_dyn_len(&(*plast)->b);
-    wlen = (decoding && ((*plast)->type & CLIENTWRITE_BODY)) ?
-           CURLMIN(blen, CW_PAUSE_DEC_WRITE_CHUNK) : blen;
-    result = Curl_cwriter_write(data, cw_pause->next, (*plast)->type,
-                                Curl_dyn_ptr(&(*plast)->b), wlen);
-    CURL_TRC_WRITE(data, "[PAUSE] flushed %zu/%zu bytes, type=%x -> %d",
-                   wlen, ctx->buf_total, (*plast)->type, result);
-    if(result)
-      return result;
-    if(wlen < blen) {
-      Curl_dyn_tail(&(*plast)->b, blen - wlen);
+    if(Curl_bufq_peek(&(*plast)->b, &buf, &blen)) {
+      wlen = (decoding && ((*plast)->type & CLIENTWRITE_BODY)) ?
+             CURLMIN(blen, CW_PAUSE_DEC_WRITE_CHUNK) : blen;
+      result = Curl_cwriter_write(data, cw_pause->next, (*plast)->type,
+                                  (const char *)buf, wlen);
+      CURL_TRC_WRITE(data, "[PAUSE] flushed %zu/%zu bytes, type=%x -> %d",
+                     wlen, ctx->buf_total, (*plast)->type, result);
+      Curl_bufq_skip(&(*plast)->b, wlen);
+      DEBUGASSERT(ctx->buf_total >= wlen);
+      ctx->buf_total -= wlen;
+      if(result)
+        return result;
     }
-    else {
+    else if((*plast)->type & CLIENTWRITE_EOS) {
+      result = Curl_cwriter_write(data, cw_pause->next, (*plast)->type,
+                                  (const char *)buf, 0);
+      CURL_TRC_WRITE(data, "[PAUSE] flushed 0/%zu bytes, type=%x -> %d",
+                     ctx->buf_total, (*plast)->type, result);
+    }
+
+    if(Curl_bufq_is_empty(&(*plast)->b)) {
       cw_pause_buf_free(*plast);
       *plast = NULL;
     }
-    DEBUGASSERT(ctx->buf_total >= wlen);
-    ctx->buf_total -= wlen;
   }
   return result;
 }
@@ -188,32 +201,29 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
   }
 
   do {
-    /* prepend to ctx->buf list */
-    if(ctx->buf && (ctx->buf->type == type) && (type & CLIENTWRITE_BODY) &&
-       Curl_dyn_left(&ctx->buf->b)) {
-      /* same type and body, append to current buffer as much as we can */
-      wlen = CURLMIN(blen, Curl_dyn_left(&ctx->buf->b));
-      result = Curl_dyn_addn(&ctx->buf->b, buf, wlen);
+    size_t nwritten = 0;
+    if(ctx->buf && (ctx->buf->type == type) && (type & CLIENTWRITE_BODY)) {
+      /* same type and body, append to current buffer which has a soft
+       * limit and should take everything up to OOM. */
+      result = Curl_bufq_cwrite(&ctx->buf->b, buf, blen, &nwritten);
     }
     else {
-      /* Need new buf(s) */
-      size_t clen = (type & CLIENTWRITE_BODY) ? CW_PAUSE_BUF_SIZE : blen;
-      struct cw_pause_buf *cwbuf = cw_pause_buf_create(type, clen);
+      /* Need a new buf, type changed */
+      struct cw_pause_buf *cwbuf = cw_pause_buf_create(type, blen);
       if(!cwbuf)
         return CURLE_OUT_OF_MEMORY;
       cwbuf->next = ctx->buf;
       ctx->buf = cwbuf;
-      wlen = CURLMIN(blen, Curl_dyn_left(&ctx->buf->b));
-      result = Curl_dyn_addn(&ctx->buf->b, buf, wlen);
+      result = Curl_bufq_cwrite(&ctx->buf->b, buf, blen, &nwritten);
     }
     CURL_TRC_WRITE(data, "[PAUSE] buffer %zu more bytes of type %x, "
-                   "total=%zu -> %d", wlen, type, ctx->buf_total + wlen,
+                   "total=%zu -> %d", nwritten, type, ctx->buf_total + wlen,
                    result);
     if(result)
       return result;
-    buf += wlen;
-    blen -= wlen;
-    ctx->buf_total += wlen;
+    buf += nwritten;
+    blen -= nwritten;
+    ctx->buf_total += nwritten;
   } while(blen);
 
   return result;
