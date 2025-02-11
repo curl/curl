@@ -85,6 +85,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 void Curl_trc_multi(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 const char *Curl_trc_mstate_name(int state);
+#define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
 void Curl_trc_write(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 void Curl_trc_read(struct Curl_easy *data,
@@ -118,7 +119,6 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_M(data, ...) \
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_multi)) \
          Curl_trc_multi(data, __VA_ARGS__); } while(0)
-#define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
 #define CURL_TRC_CF(data, cf, ...) \
   do { if(Curl_trc_cf_is_verbose(cf, data)) \
          Curl_trc_cf_infof(data, cf, __VA_ARGS__); } while(0)
