@@ -91,11 +91,10 @@ AC_DEFUN([CURL_CHECK_DEF_CC], [
 ifelse($2,,,[$2])[[
       int main(void)
       {
-      #ifdef $1
-        return 0;
-      #else
+      #ifndef $1
         #error force compilation error
       #endif
+        return 0;
       }
     ]])
   ],[
@@ -126,12 +125,11 @@ AC_DEFUN([CURL_CHECK_LIB_XNET], [
       int main(void)
       {
       #if defined(__hpux) && defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600)
-        return 0;
       #elif defined(__hpux) && defined(_XOPEN_SOURCE_EXTENDED)
-        return 0;
       #else
         #error force compilation error
       #endif
+        return 0;
       }
     ]])
   ],[
