@@ -32,10 +32,11 @@ output a newline by using \n, a carriage return with \r and a tab space with
 The output is by default written to standard output, but can be changed with
 %{stderr} and %output{}.
 
-Output HTTP headers from the most recent request by using *%header{name}*
-where *name* is the case insensitive name of the header (without the trailing
-colon). The header contents are exactly as sent over the network, with leading
-and trailing whitespace trimmed (added in 7.84.0).
+Output HTTP header values from the transfer's most recent server response by
+using *%header{name}* where *name* is the case insensitive name of the header
+(without the trailing colon). The header contents are exactly as delivered over
+the network but with leading and trailing whitespace and newlines stripped off
+(added in 7.84.0).
 
 Select a specific target destination file to write the output to, by using
 *%output{name}* (added in curl 8.3.0) where *name* is the full filename. The
@@ -86,6 +87,11 @@ most useful in combination with the --remote-header-name option.
 ## `ftp_entry_path`
 The initial path curl ended up in when logging on to the remote FTP
 server. (Added in 7.15.4)
+
+## `header{name}`
+The value of header `name` from the transfer's most recent server response.
+Unlike other variables, the variable name `header` is not in braces. For
+example `%header{date}`. Refer to --write-out remarks. (Added in 7.84.0)
 
 ## `header_json`
 A JSON object with all HTTP response headers from the recent transfer. Values
@@ -142,6 +148,12 @@ Number of retries actually performed when `--retry` has been used.
 ## `onerror`
 The rest of the output is only shown if the transfer returned a non-zero error.
 (Added in 7.75.0)
+
+## `output{filename}`
+From this point on, the --write-out output is written to the filename specified
+in braces. The filename can be prefixed with `>>` to append to the file. Unlike
+other variables, the variable name `output` is not in braces. For example
+`%output{>>stats.txt}`. Refer to --write-out remarks. (Added in 8.3.0)
 
 ## `proxy_ssl_verify_result`
 The result of the HTTPS proxy's SSL peer certificate verification that was
