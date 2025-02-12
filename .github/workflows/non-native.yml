@@ -311,7 +311,7 @@ jobs:
             https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz | tar -x
           cd libressl-${{ env.libressl-version }}
           # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
-          cmake . \
+          cmake -B . \
             -DHAVE_ENDIAN_H=0 \
             -DCMAKE_INSTALL_PREFIX="$HOME/libressl" \
             -DCMAKE_SYSTEM_NAME=iOS \

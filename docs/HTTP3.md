@@ -251,7 +251,7 @@ You can build curl with cmake:
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
-     % cmake . -B bld -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+     % cmake -B bld -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
      % cmake --build bld
      % cmake --install bld
 
