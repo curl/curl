@@ -60,7 +60,10 @@ sub getdocsvars {
     open(my $f, "<", "$root/../docs/cmdline-opts/write-out.md");
     while(<$f>) {
         if($_ =~ /^\#\# \`([^\`]*)\`/) {
-            $indocs{$1} = 1;
+            # ignore header and output because they're special cases
+            if($1 ne "header{name}" && $1 ne "output{filename}") {
+                $indocs{$1} = 1;
+            }
         }
     }
     close($f);
