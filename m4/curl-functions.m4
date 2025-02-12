@@ -3037,7 +3037,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != memrchr("", 0, 0))
+        if(0 != memrchr(0, 0, 0))
           return 1;
       ]])
     ],[
