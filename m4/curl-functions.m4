@@ -3836,7 +3836,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != strdup(""))
+        if(0 != strdup(0))
           return 1;
       ]])
     ],[
