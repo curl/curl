@@ -458,7 +458,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 #if defined(USE_NTLM)
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {
-      ongoing_auth = "NTML";
+      ongoing_auth = "NTLM";
       if((conn->http_ntlm_state != NTLMSTATE_NONE) ||
          (conn->proxy_ntlm_state != NTLMSTATE_NONE)) {
         /* The NTLM-negotiation has started, keep on sending.
