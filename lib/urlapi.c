@@ -336,12 +336,14 @@ static CURLUcode junkscan(const char *url, size_t *urllen, bool allowspace)
 {
   size_t n = strlen(url);
   size_t i;
+  unsigned char control;
   const unsigned char *p = (const unsigned char *)url;
   if(n > CURL_MAX_INPUT_LENGTH)
     return CURLUE_MALFORMED_INPUT;
 
+  control = allowspace ? 0x1f : 0x20;
   for(i = 0; i < n; i++) {
-    if(p[i] <= 31 || p[i] == 127 || (!allowspace && (p[i] == ' ')))
+    if(p[i] <= control || p[i] == 127)
       return CURLUE_MALFORMED_INPUT;
   }
   *urllen = n;
