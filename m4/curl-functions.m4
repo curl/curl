@@ -2392,7 +2392,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
       AC_LANG_PROGRAM([[
         $curl_includes_arpa_inet
       ]],[[
-        if(0 != inet_pton(0, 0, 0))
+        if(0 != inet_pton(0, 1, 1))
           return 1;
       ]])
     ],[
