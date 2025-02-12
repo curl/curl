@@ -197,7 +197,6 @@ struct Curl_sh_entry {
   struct Curl_hash transfers; /* hash of transfers using this socket */
   unsigned int action;  /* what combined action READ/WRITE this socket waits
                            for */
-  unsigned int users; /* number of transfers using this */
   void *socketp; /* settable by users with curl_multi_assign() */
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
@@ -2910,33 +2909,164 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
   return mresult;
 }
 
+static CURLMcode multi_sh_entry_update(struct Curl_multi *multi,
+                                       struct Curl_easy *data,
+                                       struct Curl_sh_entry *entry,
+                                       curl_socket_t s,
+                                       unsigned char last_action,
+                                       unsigned char cur_action)
+{
+  int rc, comboaction;
+  size_t n;
+
+  /* Transfer `data` goes from `last_action` to `cur_action` on socket `s`
+   * with `multi->sockhash` entry `entry`. Update `entry` and trigger
+   * `multi->socket_cb` on change, if the callback is set. */
+  if(last_action == cur_action)  /* nothing from `data` changed */
+    return CURLM_OK;
+
+  if(last_action & CURL_POLL_IN) {
+    DEBUGASSERT(entry->readers);
+    if(!(cur_action & CURL_POLL_IN))
+      entry->readers--;
+  }
+  else if(cur_action & CURL_POLL_IN)
+    entry->readers++;
+
+  if(last_action & CURL_POLL_OUT) {
+    DEBUGASSERT(entry->writers);
+    if(!(cur_action & CURL_POLL_OUT))
+      entry->writers--;
+  }
+  else if(cur_action & CURL_POLL_OUT)
+    entry->writers++;
+
+#ifdef DEBUGBUILD
+  n = Curl_hash_count(&entry->transfers);
+  DEBUGASSERT(n);
+  DEBUGASSERT(entry->readers <= n);
+  DEBUGASSERT(entry->writers <= n);
+  DEBUGASSERT(entry->writers + entry->readers);
+#else
+  (void)n;
+#endif
+
+  CURL_TRC_M(data, "sockhash fd=%" FMT_SOCKET_T ", action=0x%x, "
+             "previously=0x%d, transfers=%zu, readers=%d, writers=%d",
+             s, cur_action, last_action,
+             Curl_hash_count(&entry->transfers),
+             entry->readers, entry->writers);
+
+  /* If no one is interested, do not compute and update the
+   * entry->action. If a callback is installed later, we need to
+   * report any action, not just the diff to an unreported one. */
+  if(!multi->socket_cb)
+    return CURLM_OK;
+
+  comboaction = (entry->writers ? CURL_POLL_OUT : 0) |
+                (entry->readers ? CURL_POLL_IN : 0);
+  if(((int)entry->action == comboaction)) /* nothing for socket changed */
+    return CURLM_OK;
+
+  CURL_TRC_M(data, "socket_callback(fd=%" FMT_SOCKET_T ", %s%s%s)",
+             s, (comboaction & CURL_POLL_IN) ? "POLLIN" : "",
+             (comboaction == (CURL_POLL_IN|CURL_POLL_OUT)) ? "|" : "",
+             (comboaction & CURL_POLL_OUT) ? "POLLOUT" : "");
+  set_in_callback(multi, TRUE);
+  rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
+                        entry->socketp);
+
+  set_in_callback(multi, FALSE);
+  if(rc == -1) {
+    multi->dead = TRUE;
+    return CURLM_ABORTED_BY_CALLBACK;
+  }
+  entry->action = (unsigned int)comboaction;
+  return CURLM_OK;
+}
+
+static CURLMcode multi_sh_entry_closed(struct Curl_multi *multi,
+                                       struct Curl_easy *data,
+                                       struct Curl_sh_entry *entry,
+                                       curl_socket_t s)
+{
+  int rc = 0;
+  /* No one is interested in this socket any longer, report REMOVE
+   * and destroy entry */
+
+  DEBUGASSERT(entry->readers <= 1);
+  DEBUGASSERT(entry->writers <= 1);
+  CURL_TRC_M(data, "sockhash, closed fd=%" FMT_SOCKET_T, s);
+  if(multi->socket_cb) {
+    CURL_TRC_M(data, "socket_callback(fd=%" FMT_SOCKET_T ", REMOVE)", s);
+    set_in_callback(multi, TRUE);
+    rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
+                          multi->socket_userp, entry->socketp);
+    set_in_callback(multi, FALSE);
+  }
+
+  sh_delentry(entry, &multi->sockhash, s);
+  if(rc == -1) {
+    multi->dead = TRUE;
+    return CURLM_ABORTED_BY_CALLBACK;
+  }
+  return CURLM_OK;
+}
+
 CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
                                 struct Curl_easy *data,
                                 struct easy_pollset *ps,
                                 struct easy_pollset *last_ps)
 {
-  unsigned int i;
+  unsigned int i, j;
   struct Curl_sh_entry *entry;
   curl_socket_t s;
-  int rc;
+  CURLMcode mresult;
 
-  /* We have 0 .. N sockets already and we get to know about the 0 .. M
-     sockets we should have from now on. Detect the differences, remove no
-     longer supervised ones and add new ones */
+  /* The transfer `data` reports in `ps` the sockets it is interested
+   * in and which combinatino of CURL_POLL_IN/CURL_POLL_OUT it wants
+   * to have monitored for events.
+   * There can be more than 1 transfer interested in the same socket
+   * and 1 transfer might be interested in more than 1 socket.
+   * `last_ps` is the pollset copy from the previous call here. On
+   * the 1st call it will be empty.
+   */
 
-  /* walk over the sockets we got right now */
+  /* Handle changes to sockets the transfer is interested in. */
   for(i = 0; i < ps->num; i++) {
-    unsigned char cur_action = ps->actions[i];
-    unsigned char last_action = 0;
-    int comboaction;
+    unsigned char last_action;
+    bool first_time_data = FALSE; /* data appears first time on socket */
 
     s = ps->sockets[i];
-
-    /* get it from the hash */
+    /* Have we handled this socket before? */
     entry = sh_getentry(&multi->sockhash, s);
-    if(entry) {
-      /* check if new for this transfer */
-      unsigned int j;
+    if(!entry) {
+      /* new socket, add new entry */
+      first_time_data = TRUE;
+      entry = sh_addentry(&multi->sockhash, s);
+      if(!entry) /* fatal */
+        return CURLM_OUT_OF_MEMORY;
+      CURL_TRC_M(data, "sockhash, add fd=%" FMT_SOCKET_T, s);
+    }
+    else {
+      first_time_data = !Curl_hash_pick(&entry->transfers, (char *)&data,
+                                        sizeof(struct Curl_easy *));
+    }
+
+    last_action = 0;
+    if(first_time_data) {
+      /* register 'data' as user of entry */
+      if(!Curl_hash_add(&entry->transfers, (char *)&data, /* hash key */
+                        sizeof(struct Curl_easy *), data)) {
+        Curl_hash_destroy(&entry->transfers); /* really??? */
+        return CURLM_OUT_OF_MEMORY;
+      }
+      CURL_TRC_M(data, "sockhash fd=%" FMT_SOCKET_T ", add transfer", s);
+       /* detect weird values */
+      DEBUGASSERT(Curl_hash_count(&entry->transfers) < 100000);
+    }
+    else {
+      /* if `data` was registered, its previous POLL_IN/OUT is relevant */
       for(j = 0; j < last_ps->num; j++) {
         if(s == last_ps->sockets[j]) {
           last_action = last_ps->actions[j];
@@ -2944,93 +3074,21 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
         }
       }
     }
-    else {
-      /* this is a socket we did not have before, add it to the hash! */
-      entry = sh_addentry(&multi->sockhash, s);
-      if(!entry)
-        /* fatal */
-        return CURLM_OUT_OF_MEMORY;
-      CURL_TRC_M(data, "added socket=%" FMT_SOCKET_T " to hash", s);
-    }
-    if(last_action && (last_action != cur_action)) {
-      /* Socket was used already, but different action now */
-      if(last_action & CURL_POLL_IN) {
-        DEBUGASSERT(entry->readers);
-        entry->readers--;
-      }
-      if(last_action & CURL_POLL_OUT) {
-        DEBUGASSERT(entry->writers);
-        entry->writers--;
-      }
-      if(cur_action & CURL_POLL_IN) {
-        entry->readers++;
-      }
-      if(cur_action & CURL_POLL_OUT)
-        entry->writers++;
-      CURL_TRC_M(data, "socket=%" FMT_SOCKET_T " action=0x%x, previously=0x%d"
-                 ", users=%d, readers=%d, writers=%d",
-                 s, cur_action, last_action,
-                 entry->users, entry->readers, entry->writers);
-    }
-    else if(!last_action &&
-            !Curl_hash_pick(&entry->transfers, (char *)&data, /* hash key */
-                            sizeof(struct Curl_easy *))) {
-      DEBUGASSERT(entry->users < 100000); /* detect weird values */
-      /* a new transfer using this socket */
-      entry->users++;
-      if(cur_action & CURL_POLL_IN)
-        entry->readers++;
-      if(cur_action & CURL_POLL_OUT)
-        entry->writers++;
-      /* add 'data' to the transfer hash on this socket! */
-      if(!Curl_hash_add(&entry->transfers, (char *)&data, /* hash key */
-                        sizeof(struct Curl_easy *), data)) {
-        Curl_hash_destroy(&entry->transfers);
-        return CURLM_OUT_OF_MEMORY;
-      }
-      CURL_TRC_M(data, "socket=%" FMT_SOCKET_T " adding transfer, action=0x%x"
-                 ", users=%d, readers=%d, writers=%d", s, cur_action,
-                 entry->users, entry->readers, entry->writers);
-    }
-
-    comboaction = (entry->writers ? CURL_POLL_OUT : 0) |
-                   (entry->readers ? CURL_POLL_IN : 0);
-
-    /* socket existed before and has the same action set as before */
-    if(last_action && ((int)entry->action == comboaction))
-      /* same, continue */
-      continue;
-
-    if(multi->socket_cb) {
-      CURL_TRC_M(data, "socket_callback(s=%" FMT_SOCKET_T ", %s%s%s)",
-                 s, (comboaction & CURL_POLL_IN) ? "POLLIN" : "",
-                 (comboaction == (CURL_POLL_IN|CURL_POLL_OUT)) ? "|" : "",
-                 (comboaction & CURL_POLL_OUT) ? "POLLOUT" : "");
-      set_in_callback(multi, TRUE);
-      rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
-                            entry->socketp);
-
-      set_in_callback(multi, FALSE);
-      if(rc == -1) {
-        multi->dead = TRUE;
-        return CURLM_ABORTED_BY_CALLBACK;
-      }
-    }
-
-    /* store the current action state */
-    entry->action = (unsigned int)comboaction;
+    /* track readers/writers changes and report to socket callback */
+    mresult = multi_sh_entry_update(multi, data, entry, s,
+                                    last_action, ps->actions[i]);
+    if(mresult)
+      return mresult;
   }
 
-  /* Check for last_poll.sockets that no longer appear in ps->sockets.
-   * Need to remove the easy handle from the multi->sockhash->transfers and
-   * remove multi->sockhash entry when this was the last transfer */
+  /* Handle changes to sockets the transfer is NO LONGER interested in. */
   for(i = 0; i < last_ps->num; i++) {
-    unsigned int j;
     bool stillused = FALSE;
+
     s = last_ps->sockets[i];
     for(j = 0; j < ps->num; j++) {
       if(s == ps->sockets[j]) {
-        /* this is still supervised */
+        /* socket is still supervised */
         stillused = TRUE;
         break;
       }
@@ -3041,39 +3099,31 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
     entry = sh_getentry(&multi->sockhash, s);
     /* if this is NULL here, the socket has been closed and notified so
        already by Curl_multi_closed() */
-    if(entry) {
-      unsigned char oldactions = last_ps->actions[i];
-      /* this socket has been removed. Decrease user count */
-      DEBUGASSERT(entry->users);
-      entry->users--;
-      if(oldactions & CURL_POLL_OUT)
-        entry->writers--;
-      if(oldactions & CURL_POLL_IN)
-        entry->readers--;
-      if(!entry->users) {
-        bool dead = FALSE;
-        if(multi->socket_cb) {
-          CURL_TRC_M(data, "socket_callback(s=%" FMT_SOCKET_T ", REMOVE)", s);
-          set_in_callback(multi, TRUE);
-          rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
-                                multi->socket_userp, entry->socketp);
-          set_in_callback(multi, FALSE);
-          if(rc == -1)
-            dead = TRUE;
-        }
-        sh_delentry(entry, &multi->sockhash, s);
-        if(dead) {
-          multi->dead = TRUE;
-          return CURLM_ABORTED_BY_CALLBACK;
-        }
-      }
-      else {
-        /* still users, but remove this handle as a user of this socket */
-        if(Curl_hash_delete(&entry->transfers, (char *)&data,
-                            sizeof(struct Curl_easy *))) {
-          DEBUGASSERT(NULL);
-        }
-      }
+    if(!entry)
+      continue;
+
+    if(Curl_hash_delete(&entry->transfers, (char *)&data,
+                        sizeof(struct Curl_easy *))) {
+      /* `data` says in `last_ps` that it had been using a socket,
+       * but `data` has not been registered for it.
+       * This should not happen if our book-keeping is correct? */
+      CURL_TRC_M(data, "sockhash, transfer no longer uses fd=%" FMT_SOCKET_T
+                 " but is not registered", s);
+      DEBUGASSERT(NULL);
+      continue;
+    }
+
+    if(Curl_hash_count(&entry->transfers)) {
+      /* track readers/writers changes and report to socket callback */
+      mresult = multi_sh_entry_update(multi, data, entry, s,
+                                      last_ps->actions[i], 0);
+      if(mresult)
+        return mresult;
+    }
+    else {
+      mresult = multi_sh_entry_closed(multi, data, entry, s);
+      if(mresult)
+        return mresult;
     }
   } /* for loop over num */
 
@@ -3109,27 +3159,8 @@ void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
       /* this is set if this connection is part of a handle that is added to
          a multi handle, and only then this is necessary */
       struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
-
-      CURL_TRC_M(data, "Curl_multi_closed, fd=%" FMT_SOCKET_T
-                 " entry is %p", s, (void *)entry);
-      if(entry) {
-        int rc = 0;
-        if(multi->socket_cb) {
-          CURL_TRC_M(data, "socket_callback(s=%" FMT_SOCKET_T ", REMOVE)", s);
-          set_in_callback(multi, TRUE);
-          rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
-                                multi->socket_userp, entry->socketp);
-          set_in_callback(multi, FALSE);
-        }
-
-        /* now remove it from the socket hash */
-        sh_delentry(entry, &multi->sockhash, s);
-        if(rc == -1)
-          /* This just marks the multi handle as "dead" without returning an
-             error code primarily because this function is used from many
-             places where propagating an error back is tricky. */
-          multi->dead = TRUE;
-      }
+      if(entry)
+        multi_sh_entry_closed(multi, data, entry, s);
     }
   }
 }
