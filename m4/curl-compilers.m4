@@ -1458,8 +1458,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
     squeeze CFLAGS
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-        $tmp_EXTERN char *dummy(char *buff);
-        char *dummy(char *buff)
+        $tmp_EXTERN const char *dummy(const char *buff);
+        const char *dummy(const char *buff)
         {
           if(buff)
             return ++buff;
@@ -1467,14 +1467,10 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
             return buff;
         }
       ]],[[
-        char b[16];
-        char *r;
-        b[0] = ' ';
-        b[1] = ' ';
-        r = dummy(&b[0]);
+        const char *b = "example";
+        const char *r = dummy(&b[0]);
         if(r)
           return (int)*r;
-        (void)b;
       ]])
     ],[
       supports_symbol_hiding="yes"
