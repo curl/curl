@@ -24,6 +24,7 @@
 #
 ###########################################################################
 #
+import gzip
 import logging
 import os
 import re
@@ -623,15 +624,14 @@ class Env:
         fpath = os.path.join(indir, fname)
         gzpath = f'{fpath}.gz'
         varpath = f'{fpath}.var'
+
         with open(fpath, 'w') as fd:
             fd.write('not what we are looking for!\n')
         count = int(fsize / 1024)
-        args = [
-            f'dd if=/dev/zero bs=1024 count={count} | gzip - >{gzpath}'
-        ]
-        p = subprocess.run(args=args, shell=True)
-        if p.returncode != 0:
-            raise RuntimeError(f'"{args}" failed with exit code: {p.returncode}')
+        zero1k = bytearray(1024)
+        with gzip.open(gzpath, 'wb') as fd:
+            for _ in range(count):
+                fd.write(zero1k)
         with open(varpath, 'w') as fd:
             fd.write(f'URI: {fname}\n')
             fd.write('\n')
