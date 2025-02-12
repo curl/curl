@@ -3944,10 +3944,8 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        char s[1];
-        if(0 != strerror_r(0, s, 0))
+        if(0 != strerror_r(0, 0, 0))
           return 1;
-        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -4031,8 +4029,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             $curl_includes_string
             int strerror_r(int errnum, char *resultbuf, $arg3 bufsize);
           ]],[[
-            if(0 != strerror_r(0, 0, 0))
+            char s[1];
+            if(0 != strerror_r(0, s, 0))
               return 1;
+            (void)s;
           ]])
         ],[
           tst_posix_strerror_r_type_arg3="$arg3"
