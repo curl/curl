@@ -44,7 +44,7 @@ struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms)
 
   if(ms > 0) {
     timediff_t tv_sec = ms / 1000;
-    timediff_t tv_usec = (ms % 1000) * 1000; /* max=999999 */
+    timediff_t tv_usec = (ms % 1000) * 1000; /* max=999000 */
 #ifdef HAVE_SUSECONDS_T
 #if TIMEDIFF_T_MAX > TIME_T_MAX
     /* tv_sec overflow check in case time_t is signed */
