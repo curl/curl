@@ -46,6 +46,9 @@ if test "x$OPT_OPENSSL" != xno; then
       my_ac_save_LIBS=$LIBS
       LIBS="-lgdi32 $LIBS"
       AC_LINK_IFELSE([ AC_LANG_PROGRAM([[
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
         #include <windef.h>
         #include <wingdi.h>
         ]],
