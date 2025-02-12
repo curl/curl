@@ -3005,7 +3005,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != memrchr("", 0, 0))
+        if(0 != memrchr(0, 0, 0))
           return 1;
       ]])
     ],[
@@ -3667,7 +3667,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != strcasecmp("", ""))
+        if(0 != strcasecmp(0, 0))
           return 1;
       ]])
     ],[
@@ -4271,10 +4271,8 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOK_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        char *s;
-        if(0 != strtok_r(0, "", &s))
+        if(0 != strtok_r(0, 0, 0))
           return 1;
-        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -4358,7 +4356,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOLL], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
       ]],[[
-        if(0 != strtoll("", 0, 0))
+        if(0 != strtoll(0, 0, 0))
           return 1;
       ]])
     ],[
