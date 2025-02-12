@@ -2917,7 +2917,6 @@ static CURLMcode multi_sh_entry_update(struct Curl_multi *multi,
                                        unsigned char cur_action)
 {
   int rc, comboaction;
-  size_t n;
 
   /* Transfer `data` goes from `last_action` to `cur_action` on socket `s`
    * with `multi->sockhash` entry `entry`. Update `entry` and trigger
@@ -2942,13 +2941,13 @@ static CURLMcode multi_sh_entry_update(struct Curl_multi *multi,
     entry->writers++;
 
 #ifdef DEBUGBUILD
-  n = Curl_hash_count(&entry->transfers);
-  DEBUGASSERT(n);
-  DEBUGASSERT(entry->readers <= n);
-  DEBUGASSERT(entry->writers <= n);
-  DEBUGASSERT(entry->writers + entry->readers);
-#else
-  (void)n;
+  {
+    size_t n = Curl_hash_count(&entry->transfers);
+    DEBUGASSERT(n);
+    DEBUGASSERT(entry->readers <= n);
+    DEBUGASSERT(entry->writers <= n);
+    DEBUGASSERT(entry->writers + entry->readers);
+  }
 #endif
 
   CURL_TRC_M(data, "sockhash fd=%" FMT_SOCKET_T ", action=0x%x, "
