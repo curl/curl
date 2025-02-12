@@ -1652,10 +1652,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
       $curl_includes_unistd
       $curl_includes_bsdsocket
     ]],[[
-      char s[1];
-      if(0 != gethostname((void *)s, 0))
+      if(0 != gethostname(1, 0))
         return 1;
-      (void)s;
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1688,10 +1686,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
         $curl_includes_unistd
         $curl_includes_bsdsocket
       ]],[[
-        char s[1];
-        if(0 != gethostname((void *)s, 0))
+        if(0 != gethostname(1, 0))
           return 1;
-        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -1716,10 +1712,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               $curl_preprocess_callconv
               extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
-              char s[1];
-              if(0 != gethostname((tst_arg1)s, 0))
+              if(0 != gethostname(1, 0))
                 return 1;
-              (void)s;
             ]])
           ],[
             tst_gethostname_type_arg2="$tst_arg2"
