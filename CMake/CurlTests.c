@@ -323,6 +323,7 @@ int main(void)
 {
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC, &ts);
+  (void)ts;
   return 0;
 }
 #endif
