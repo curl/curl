@@ -1468,7 +1468,10 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
         }
       ]],[[
         char b[16];
-        char *r = dummy(&b[0]);
+        char *r;
+        b[0] = ' ';
+        b[1] = ' ';
+        r = dummy(&b[0]);
         if(r)
           return (int)*r;
         (void)b;
