@@ -56,7 +56,7 @@ jobs:
           run: |
             # https://pkgsrc.se/
             time sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
-            time cmake -B bld -G Ninja -D_CURL_QUICK_DETECT=ON \
+            time cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
@@ -97,7 +97,7 @@ jobs:
             # https://openbsd.app/
             # https://www.openbsd.org/faq/faq15.html
             time sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
-            time cmake -B bld -G Ninja -D_CURL_QUICK_DETECT=ON \
+            time cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
@@ -180,7 +180,7 @@ jobs:
             # https://ports.freebsd.org/
             time sudo pkg install -y cmake-core ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
-            time cmake -B bld -G Ninja -D_CURL_QUICK_DETECT=ON \
+            time cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_C_COMPILER='${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
