@@ -2940,15 +2940,9 @@ static CURLMcode multi_sh_entry_update(struct Curl_multi *multi,
   else if(cur_action & CURL_POLL_OUT)
     entry->writers++;
 
-#ifdef DEBUGBUILD
-  {
-    size_t n = Curl_hash_count(&entry->transfers);
-    DEBUGASSERT(n);
-    DEBUGASSERT(entry->readers <= n);
-    DEBUGASSERT(entry->writers <= n);
-    DEBUGASSERT(entry->writers + entry->readers);
-  }
-#endif
+  DEBUGASSERT(entry->readers <= Curl_hash_count(&entry->transfers));
+  DEBUGASSERT(entry->writers <= Curl_hash_count(&entry->transfers));
+  DEBUGASSERT(entry->writers + entry->readers);
 
   CURL_TRC_M(data, "sockhash fd=%" FMT_SOCKET_T ", action=0x%x, "
              "previously=0x%d, transfers=%zu, readers=%d, writers=%d",
