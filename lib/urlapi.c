@@ -332,7 +332,7 @@ static CURLUcode redirect_url(char *base, const char *relurl,
 }
 
 /* scan for byte values <= 31, 127 and sometimes space */
-static CURLUcode junkscan(const char *url, size_t *urllen, unsigned int flags)
+static CURLUcode junkscan(const char *url, size_t *urllen, bool allowspace)
 {
   size_t n = strlen(url);
   size_t i;
@@ -341,8 +341,7 @@ static CURLUcode junkscan(const char *url, size_t *urllen, unsigned int flags)
     return CURLUE_MALFORMED_INPUT;
 
   for(i = 0; i < n; i++) {
-    if(p[i] <= 31 || p[i] == 127 ||
-       (!(flags & CURLU_ALLOW_SPACE) && (p[i] == ' ')))
+    if(p[i] <= 31 || p[i] == 127 || (!allowspace && (p[i] == ' ')))
       return CURLUE_MALFORMED_INPUT;
   }
   *urllen = n;
@@ -938,7 +937,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 
   Curl_dyn_init(&host, CURL_MAX_INPUT_LENGTH);
 
-  result = junkscan(url, &urllen, flags);
+  result = junkscan(url, &urllen, !!(flags & CURLU_ALLOW_SPACE));
   if(result)
     goto fail;
 
