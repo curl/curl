@@ -266,17 +266,6 @@ jobs:
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'libressl'
-            install_steps: libressl
-            generator: Xcode
-            generate: >-
-              -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
-              -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
-              -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
-              -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
-              -DCURL_USE_LIBPSL=OFF
-
     steps:
       - name: 'brew install'
         if: ${{ matrix.build.configure }}
@@ -334,7 +323,6 @@ jobs:
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
-            [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
