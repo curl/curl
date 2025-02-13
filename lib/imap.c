@@ -242,7 +242,7 @@ static bool imap_matchresp(const char *line, size_t len, const char *cmd)
  * response which can be processed by the response handler.
  */
 static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
-                           char *line, size_t len, int *resp)
+                           const char *line, size_t len, int *resp)
 {
   struct IMAP *imap = data->req.p.imap;
   struct imap_conn *imapc = &conn->proto.imapc;
