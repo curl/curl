@@ -33,8 +33,6 @@
 #define CURLX_FUNCTION_CAST(target_type, func) \
   (target_type)(void (*) (void))(func)
 
-unsigned short curlx_ultous(unsigned long ulnum);
-
 unsigned char curlx_ultouc(unsigned long ulnum);
 
 int curlx_uztosi(size_t uznum);
