@@ -214,8 +214,8 @@ Build curl:
 
 QUIC support is **EXPERIMENTAL**
 
-Use OpenSSL 3.3.1 or newer (QUIC support was added in 3.3.0, with 
-shortcomings on some platforms like macOS). 3.4.1 or newer is recommended. 
+Use OpenSSL 3.3.1 or newer (QUIC support was added in 3.3.0, with
+shortcomings on some platforms like macOS). 3.4.1 or newer is recommended.
 Build via:
 
      % cd ..
