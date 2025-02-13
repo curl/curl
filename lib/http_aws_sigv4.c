@@ -390,7 +390,8 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
 #define S3_UNSIGNED_PAYLOAD "UNSIGNED-PAYLOAD"
 
 static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
-                                     Curl_HttpReq httpreq, char *provider1,
+                                     Curl_HttpReq httpreq,
+                                     const char *provider1,
                                      size_t plen,
                                      unsigned char *sha_hash,
                                      char *sha_hex, char *header)

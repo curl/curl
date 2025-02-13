@@ -416,7 +416,7 @@ skipsave:
 }
 
 /* only returns SERIOUS errors */
-static CURLcode hsts_add(struct hsts *h, char *line)
+static CURLcode hsts_add(struct hsts *h, const char *line)
 {
   /* Example lines:
      example.com "20191231 10:00:00"
