@@ -389,6 +389,7 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
     char abspath[_MAX_PATH];
     if(_fullpath(abspath, path, _MAX_PATH))
       return Curl_dyn_addf(buf, ":%s-%s", name, abspath);
+    *is_local = TRUE;
 #elif defined(HAVE_REALPATH)
     if(path[0] != '/') {
       char *abspath = realpath(path, NULL);
@@ -397,9 +398,9 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
         (free)(abspath); /* allocated by libc, free without memdebug */
         return r;
       }
+      *is_local = TRUE;
     }
 #endif
-    *is_local = TRUE;
     return Curl_dyn_addf(buf, ":%s-%s", name, path);
   }
   return CURLE_OK;
