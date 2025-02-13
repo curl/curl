@@ -1710,7 +1710,12 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               $curl_includes_unistd
               $curl_includes_bsdsocket
               $curl_preprocess_callconv
-              extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
+              #if defined(_WIN32) && defined(WINSOCK_API_LINKAGE)
+              WINSOCK_API_LINKAGE
+              #else
+              extern
+              #endif
+              int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
               if(0 != gethostname(0, 0))
                 return 1;
