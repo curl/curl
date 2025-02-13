@@ -4,23 +4,28 @@ curl and libcurl 8.12.1
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
- Contributors:                 3342
+ Contributors:                 3344
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o all: remove FIXME and TODO comments [55]
  o asyn-thread: fix build with `CURL_DISABLE_SOCKETPAIR` [47]
  o asyn-thread: fix HTTPS RR crash [10]
  o asyn-thread: fix the returned bitmask from Curl_resolver_getsock [18]
  o asyn-thread: survive a c-ares channel set to NULL [52]
  o build: add tool_hugehelp.c into IBMi build [40]
+ o checksrc.pl: warn on FIXME/TODO comments
  o cmake/Find: set `<Modulename>_FOUND` for compatibility when found via `pkg-config` [22]
  o cmake: add integration tests, run them in CI [21]
  o cmake: always reference OpenSSL and ZLIB via imported targets [24]
  o cmake: avoid unnecessary `-L` for implicit link dirs [11]
  o cmake: drop `LDAP_DEPRECATED=1` macro, to sync with autotools [23]
+ o cmake: fix `HAVE_GETHOSTBYNAME_R_*` detections with `CURL_WERROR=ON` [57]
+ o cmake: fix to detect `HAVE_OPENSSL_SRP` in MSVC UWP builds [62]
+ o cmake: fix/add missing feature detections for Windows/MS-DOS [58]
  o cmake: initialize variables where missing [27]
  o cmake: lib order fixes for picky linkers (e.g. binutils `ld`) [26]
  o cmake: normalize before matching paths with syspaths [30]
@@ -59,10 +64,14 @@ This release includes the following bugfixes:
  o SPONSORS.md: clarify that we don't promise goods or services [5]
  o test1516: avoid failure due to spaces in path [36]
  o test2080: simplify, avoid the null byte
+ o tests: fix test 558, 1330 for MSVC, allow TrackMemory with MSVC in cmake [53]
  o tidy-up: make per-file `ARRAYSIZE` macros global as `CURL_ARRAYSIZE` [48]
  o tool_cfgable: sort struct fields by size, use bitfields for booleans [17]
  o tool_getparam: add "TLS required" flag for each such option [44]
+ o tool_progress: fix percent output of large parallel transfers [61]
  o tool_ssls: switch to tool-specific get_line function [34]
+ o verbose.md: mention how carriage-return might occur in headers [49]
+ o vquic: make the "disable GSO" use infof, not failf [65]
  o vtls: fix multissl-init [60]
  o vtsl: eliminate 'data->state.ssl_scache' [59]
  o wakeup_write: make sure the eventfd write sends eight bytes [46]
@@ -70,7 +79,7 @@ This release includes the following bugfixes:
 
 This release includes the following known bugs:
 
- See docs/KNOWN_BUGS (https://curl.se/docs/knownbugs.html)
+ See https://curl.se/docs/knownbugs.html
 
 For all changes ever done in curl:
 
@@ -82,18 +91,19 @@ Planned upcoming removals include:
  o The winbuild build system
  o TLS libraries not supporting TLS 1.3
 
- See https://curl.se/dev/deprecate.html for details
+ See https://curl.se/dev/deprecate.html
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrew Kirillov, arlt on github, Christian Schmitz, CueXXIII on Github,
-  Dan Fandrich, Daniel Stenberg, deliciouslytyped on github, Fay Stegerman,
-  Jan Engelhardt, Kai Pastor, Marcel Raad, Michael Kaufmann,
+  Aaron Deadman, Andrei Korshikov, Andrew Kirillov, arlt on github,
+  Christian Schmitz, CueXXIII on Github, Dan Fandrich, Daniel Stenberg,
+  deliciouslytyped on github, Fay Stegerman, Jan Engelhardt,
+  jethrogb on github, Kai Pastor, Marcel Raad, Michael Kaufmann,
   mschroeder-fzj on github, nono303 on github, Philip Heiduck, qhill,
   Ralf A. Timmermann, Ray Satiro, renovate[bot], Stefan Eissing, Terence Eden,
   thisisgk on github, Viktor Szakats, zzq1015 on github
-  (24 contributors)
+  (27 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -145,10 +155,18 @@ References to bug reports and discussions on issues:
  [46] = https://curl.se/bug/?i=16237
  [47] = https://curl.se/bug/?i=16179
  [48] = https://curl.se/bug/?i=16111
+ [49] = https://curl.se/bug/?i=16285
  [50] = https://curl.se/bug/?i=16256
  [51] = https://curl.se/bug/?i=16273
  [52] = https://curl.se/bug/?i=16216
+ [53] = https://curl.se/bug/?i=16289
  [54] = https://curl.se/bug/?i=16269
+ [55] = https://curl.se/bug/?i=16283
  [56] = https://curl.se/bug/?i=16268
+ [57] = https://curl.se/bug/?i=16282
+ [58] = https://curl.se/bug/?i=16278
  [59] = https://curl.se/bug/?i=16261
  [60] = https://curl.se/bug/?i=16253
+ [61] = https://curl.se/bug/?i=16284
+ [62] = https://curl.se/bug/?i=16293
+ [65] = https://curl.se/bug/?i=16294
