@@ -43,7 +43,8 @@ fi
 openssl_root="$(cygpath "${openssl_root_win}")"
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  CHKPREFILL='_chkprefill'
+  # Set env CHKPREFILL to the value '_chkprefill' to compare feature detection
+  # results with and without the pre-fill feature. They have to match.
   for _chkprefill in '' ${CHKPREFILL:-}; do
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
