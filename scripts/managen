@@ -391,6 +391,23 @@ sub render {
         $d =~ s/`%VERSION`/$version/g;
         $d =~ s/`%GLOBALS`/$globals/g;
 
+        if(!$quote) {
+            if($d =~ /^(.*)  /) {
+                printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
+                    length($1);
+                return 3;
+            }
+            my $back = $d;
+
+            # remove all backticked pieces
+            $back =~ s/\`(.*?)\`//g;
+
+            if($back =~ /[^\\][\<\>]/) {
+                print STDERR "$f:$line:1:WARN: un-escaped < or > used: $back\n";
+                return 3;
+            }
+        }
+
         # convert backticks to double quotes
         $d =~ s/\`/\"/g;
 
@@ -410,17 +427,6 @@ sub render {
             }
         }
 
-        if(!$quote) {
-            if($d =~ /^(.*)  /) {
-                printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
-                    length($1);
-                return 3;
-            }
-            elsif($d =~ /[^\\][\<\>]/) {
-                print STDERR "$f:$line:1:WARN: un-escaped < or > used\n";
-                return 3;
-            }
-        }
         # convert backslash-'<' or '> to just the second character
         $d =~ s/\\([><])/$1/g;
         # convert single backslash to double-backslash
