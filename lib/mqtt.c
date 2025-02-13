@@ -749,9 +749,7 @@ static CURLcode mqtt_done(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/* we ping every 30 seconds to avoid being disconnected by the server */
-#define PingWaitTimeMS 30000
-
+/* we ping regularly to avoid being disconnected by the server */
 static CURLcode mqtt_ping(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
@@ -761,11 +759,11 @@ static CURLcode mqtt_ping(struct Curl_easy *data)
 
   if(mqtt->state == MQTT_FIRST &&
      !mq->pingsent &&
-     data->set.tcp_keepalive) {
+     data->set.upkeep_interval_ms > 0) {
     struct curltime t = Curl_now();
     timediff_t diff = Curl_timediff(t, mq->lastTime);
 
-    if(diff > PingWaitTimeMS) {
+    if(diff > data->set.upkeep_interval_ms) {
       /* 0xC0 is PINGREQ, and 0x00 is remaining length */
       unsigned char packet[2] = { 0xC0, 0x00 };
       size_t packetlen = sizeof(packet);
