@@ -87,7 +87,7 @@
 
 #if !defined(CURL_DISABLE_ALTSVC) || defined(USE_HTTPSRR)
 
-enum alpnid Curl_alpn2alpnid(char *name, size_t len)
+enum alpnid Curl_alpn2alpnid(const char *name, size_t len)
 {
   if(len == 2) {
     if(strncasecompare(name, "h1", 2))

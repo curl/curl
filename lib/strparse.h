@@ -35,37 +35,38 @@
 #define STRE_OVERFLOW 7
 
 struct Curl_str {
-  char *str;
+  const char *str;
   size_t len;
 };
 
 /* Get a word until the first space
    return non-zero on error */
-int Curl_str_word(char **linep, struct Curl_str *out, const size_t max);
+int Curl_str_word(const char **linep, struct Curl_str *out, const size_t max);
 
 /* Get a word until the first DELIM or end of string
    return non-zero on error */
-int Curl_str_until(char **linep, struct Curl_str *out, const size_t max,
+int Curl_str_until(const char **linep, struct Curl_str *out, const size_t max,
                    char delim);
 
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
-int Curl_str_quotedword(char **linep, struct Curl_str *out, const size_t max);
+int Curl_str_quotedword(const char **linep, struct Curl_str *out,
+                        const size_t max);
 
 /* Advance over a single character.
    return non-zero on error */
-int Curl_str_single(char **linep, char byte);
+int Curl_str_single(const char **linep, char byte);
 
 /* Advance over a single space.
    return non-zero on error */
-int Curl_str_singlespace(char **linep);
+int Curl_str_singlespace(const char **linep);
 
 /* Get an unsigned number
    return non-zero on error */
-int Curl_str_number(char **linep, size_t *nump, size_t max);
+int Curl_str_number(const char **linep, size_t *nump, size_t max);
 
 /* Check for CR or LF
    return non-zero on error */
-int Curl_str_newline(char **linep);
+int Curl_str_newline(const char **linep);
 
 #endif /* HEADER_CURL_STRPARSE_H */

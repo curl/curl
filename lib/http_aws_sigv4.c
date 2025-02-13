@@ -576,7 +576,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   CURLcode result = CURLE_OUT_OF_MEMORY;
   struct connectdata *conn = data->conn;
   size_t len;
-  char *line;
+  const char *line;
   struct Curl_str provider0;
   struct Curl_str provider1;
   struct Curl_str region = { NULL, 0};
