@@ -86,7 +86,7 @@ class TestTracing:
             m = re.match(r'^([0-9:.]+) \[0-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'
-            m = re.match(r'^([0-9:.]+) \[0-[0x]] . \[TCP].+', line)
+            m = re.match(r'^([0-9:.]+) \[0-[0x]] .+ \[TCP].+', line)
             if m is not None:
                 found_tcp = True
         if not found_tcp:

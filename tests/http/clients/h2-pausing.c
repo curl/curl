@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
   url = argv[0];
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl_global_trace("ids,time,http/2,http/3");
+  curl_global_trace("http/2,http/3");
 
   cu = curl_url();
   if(!cu) {

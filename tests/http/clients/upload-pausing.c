@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
   url = argv[0];
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl_global_trace("ids,time");
+  curl_global_trace("protocol");
 
   cu = curl_url();
   if(!cu) {
