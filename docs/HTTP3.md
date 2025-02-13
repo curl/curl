@@ -43,15 +43,20 @@ To fix before we remove the experimental label:
 
 Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
 
- * `ngtcp2`: v1.2.0
- * `nghttp3`: v1.1.0
+While any version of `ngtcp2` and `nghttp3` from v1.0.0 onwards are expected to
+work, getting the latest versions will often bring functional and performance
+improvements.
+
+The build examples use `$NGHTTP3_VERION` and `$NGTCP2_VERION` as placeholders
+for the version you build. Look at the github projects for information
+about their latest releases.
 
 ## Build with quictls
 
 OpenSSL does not offer the required APIs for building a QUIC client. You need
 to use a TLS library that has such APIs and that works with *ngtcp2*.
 
-Build quictls:
+Build quictls version 3.1.4 or newer:
 
      % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
      % cd openssl
@@ -62,7 +67,7 @@ Build quictls:
 Build nghttp3:
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -73,7 +78,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
@@ -106,7 +111,7 @@ Build GnuTLS:
 Build nghttp3:
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -117,7 +122,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
@@ -148,7 +153,7 @@ Build wolfSSL:
 Build nghttp3:
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -159,7 +164,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
@@ -210,7 +215,7 @@ Build curl:
 
 QUIC support is **EXPERIMENTAL**
 
-Build OpenSSL 3.3.1:
+Build OpenSSL 3.3.1 or newer:
 
      % cd ..
      % git clone -b openssl-3.3.1 https://github.com/openssl/openssl
@@ -222,7 +227,7 @@ Build OpenSSL 3.3.1:
 Build nghttp3:
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
