@@ -55,7 +55,7 @@ for the version you build.
 OpenSSL does not offer the required APIs for building a QUIC client. You need
 to use a TLS library that has such APIs and that works with *ngtcp2*.
 
-Build quictls version 3.1.4 or newer:
+Build quictls (any `+quic` tagged version works):
 
      % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
      % cd openssl
@@ -214,10 +214,12 @@ Build curl:
 
 QUIC support is **EXPERIMENTAL**
 
-Build OpenSSL 3.3.1 or newer:
+Use OpenSSL 3.3.1 or newer (QUIC support was added in 3.3.0, with 
+shortcomings on some platforms like macOS). 3.4.1 or newer is recommended. 
+Build via:
 
      % cd ..
-     % git clone -b openssl-3.3.1 https://github.com/openssl/openssl
+     % git clone -b $OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere> --libdir=lib
      % make
