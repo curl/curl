@@ -43,13 +43,12 @@ To fix before we remove the experimental label:
 
 Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
 
-While any version of `ngtcp2` and `nghttp3` from v1.0.0 onwards are expected to
-work, getting the latest versions will often bring functional and performance
+While any version of `ngtcp2` and `nghttp3` from v1.0.0 on are expected to
+work, using the latest versions often brings functional and performance
 improvements.
 
 The build examples use `$NGHTTP3_VERION` and `$NGTCP2_VERION` as placeholders
-for the version you build. Look at the github projects for information
-about their latest releases.
+for the version you build.
 
 ## Build with quictls
 
