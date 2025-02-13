@@ -79,6 +79,7 @@ endif()
 # the statically linked "libcurl.lib" (typically with MSVC)
 if(WIN32 AND
    NOT IMPORT_LIB_SUFFIX AND
+   BUILD_STATIC_CURL AND
    CMAKE_STATIC_LIBRARY_SUFFIX STREQUAL CMAKE_IMPORT_LIBRARY_SUFFIX)
   set(IMPORT_LIB_SUFFIX "_imp")
 endif()
