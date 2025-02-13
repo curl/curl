@@ -136,7 +136,7 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
         len = trc_print_ids(data, buf, TRC_MAX);
         len += msnprintf(buf + len, TRC_MAX - len, "%.*s",
                          (int)size, ptr);
-        len = trc_end_buf(buf, len, sizeof(buf), FALSE);
+        len = trc_end_buf(buf, len, TRC_MAX, FALSE);
         Curl_set_in_callback(data, TRUE);
         (void)(*data->set.fdebug)(data, type, buf, len, data->set.debugdata);
         Curl_set_in_callback(data, inCallback);
