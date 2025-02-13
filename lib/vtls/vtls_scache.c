@@ -217,7 +217,7 @@ static void cf_ssl_cache_peer_update(struct Curl_ssl_scache_peer *peer)
 {
   /* The sessions of this peer are exportable if
    * - it has no confidential information
-   * - it's peer key is not yet known, because sessions were
+   * - its peer key is not yet known, because sessions were
    *   imported using only the salt+hmac
    * - the peer key is global, e.g. carrying no relative paths */
   peer->exportable = (!peer->clientcert && !peer->srp_username &&
