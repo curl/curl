@@ -168,6 +168,8 @@ jobs:
           - { compiler: gcc-12, build: { torture: true } }
           - { compiler: llvm@15, build: { clang-tidy: true } }
           - { compiler: gcc-12, build: { clang-tidy: true } }
+          - { compiler: llvm@15, build: { chkprefill: '_chkprefill' } }
+          - { compiler: gcc-12, build: { chkprefill: '_chkprefill' } }
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@15, build: { compiler: 'clang' } }
           - { compiler: llvm@15, build: { compiler: 'gcc-12' } }
