@@ -78,8 +78,8 @@ static void trc_write(struct Curl_easy *data, curl_infotype type,
   }
 }
 
-/* info buffer size */
-#define TRC_MAX 2049
+/* max length we trace before ending in '...' */
+#define TRC_LINE_MAX 2048
 
 #define CURL_TRC_FMT_IDS1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
 #define CURL_TRC_FMT_IDS2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
@@ -106,16 +106,18 @@ static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
     return msnprintf(buf, maxlen, "[x-x] ");
 }
 
-static size_t trc_end_buf(char *buf, size_t len, size_t maxlen, bool nl)
+static size_t trc_end_buf(char *buf, size_t len, size_t maxlen, bool addnl)
 {
-  if(len >= (maxlen - 1)) { /* too long, shorten with '...' */
-    len = maxlen - 1;
+  /* make sure we end the trace line in `buf` properly. It needs
+   * to end with a terminating '\0' or '\n\0' */
+  if(len >= (maxlen - (addnl ? 2 : 1))) {
+    len = maxlen - 5;
     buf[len++] = '.';
     buf[len++] = '.';
     buf[len++] = '.';
     buf[len++] = '\n';
   }
-  else if(nl)
+  else if(addnl)
     buf[len++] = '\n';
   buf[len] = '\0';
   return len;
@@ -127,16 +129,16 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
   if(data->set.verbose) {
     static const char s_infotype[CURLINFO_END][3] = {
       "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
-    char buf[TRC_MAX + 4]; /* spare for '...' */
+    char buf[TRC_LINE_MAX];
     size_t len;
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
 
-      if(CURL_TRC_IDS(data) && (size < TRC_MAX)) {
-        len = trc_print_ids(data, buf, TRC_MAX);
-        len += msnprintf(buf + len, TRC_MAX - len, "%.*s",
+      if(CURL_TRC_IDS(data) && (size < TRC_LINE_MAX)) {
+        len = trc_print_ids(data, buf, TRC_LINE_MAX);
+        len += msnprintf(buf + len, TRC_LINE_MAX - len, "%.*s",
                          (int)size, ptr);
-        len = trc_end_buf(buf, len, TRC_MAX, FALSE);
+        len = trc_end_buf(buf, len, TRC_LINE_MAX, FALSE);
         Curl_set_in_callback(data, TRUE);
         (void)(*data->set.fdebug)(data, type, buf, len, data->set.debugdata);
         Curl_set_in_callback(data, inCallback);
@@ -153,7 +155,7 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       case CURLINFO_HEADER_OUT:
       case CURLINFO_HEADER_IN:
         if(CURL_TRC_IDS(data)) {
-          len = trc_print_ids(data, buf, TRC_MAX);
+          len = trc_print_ids(data, buf, TRC_LINE_MAX);
           fwrite(buf, len, 1, data->set.err);
         }
         fwrite(s_infotype[type], 2, 1, data->set.err);
@@ -204,22 +206,22 @@ static void trc_infof(struct Curl_easy *data,
                       const char * const fmt, va_list ap)
 {
   size_t len = 0;
-  char buffer[TRC_MAX + 4]; /* spare for '...' */
+  char buf[TRC_LINE_MAX];
 
   if(CURL_TRC_IDS(data))
-    len += trc_print_ids(data, buffer + len, TRC_MAX - len);
+    len += trc_print_ids(data, buf + len, TRC_LINE_MAX - len);
   if(feat)
-    len += msnprintf(buffer + len, TRC_MAX - len, "[%s] ", feat->name);
+    len += msnprintf(buf + len, TRC_LINE_MAX - len, "[%s] ", feat->name);
   if(opt_id) {
     if(opt_id_idx > 0)
-      len += msnprintf(buffer + len, TRC_MAX - len, "[%s-%d] ",
+      len += msnprintf(buf + len, TRC_LINE_MAX - len, "[%s-%d] ",
                        opt_id, opt_id_idx);
     else
-      len += msnprintf(buffer + len, TRC_MAX - len, "[%s] ", opt_id);
+      len += msnprintf(buf + len, TRC_LINE_MAX - len, "[%s] ", opt_id);
   }
-  len += mvsnprintf(buffer + len, TRC_MAX - len, fmt, ap);
-  len = trc_end_buf(buffer, len, TRC_MAX, TRUE);
-  trc_write(data, CURLINFO_TEXT, buffer, len);
+  len += mvsnprintf(buf + len, TRC_LINE_MAX - len, fmt, ap);
+  len = trc_end_buf(buf, len, TRC_LINE_MAX, TRUE);
+  trc_write(data, CURLINFO_TEXT, buf, len);
 }
 
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
