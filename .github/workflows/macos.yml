@@ -233,7 +233,7 @@ jobs:
               options=''
               [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-              cmake -B bld${_chkprefill} -G Ninja -D_CURL_PREFILL=ON \
+              cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
