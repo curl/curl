@@ -111,7 +111,7 @@
 # error "OpenSSL 1.0.2a or later required"
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x03000000fL && !defined(OPENSSL_NO_UI_CONSOLE)
+#if OPENSSL_VERSION_NUMBER >= 0x3000000fL && !defined(OPENSSL_NO_UI_CONSOLE)
 #include <openssl/provider.h>
 #include <openssl/store.h>
 /* this is used in the following conditions to make them easier to read */
