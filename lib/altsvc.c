@@ -149,7 +149,7 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
 }
 
 /* only returns SERIOUS errors */
-static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
+static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
 {
   /* Example line:
      h2 example.com 443 h3 shiny.example.com 8443 "20191231 10:00:00" 1

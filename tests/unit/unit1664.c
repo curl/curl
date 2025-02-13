@@ -67,8 +67,8 @@ UNITTEST_START
   printf("Curl_str_word\n");
   for(i = 0; wordparse[i]; i++) {
     struct Curl_str out;
-    char *line = (char *)wordparse[i];
-    char *orgline = line;
+    const char *line = wordparse[i];
+    const char *orgline = line;
     int rc = Curl_str_word(&line, &out, 7);
     printf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
            i, orgline, rc, (int)out.len, out.str, (int)out.len,
@@ -78,8 +78,8 @@ UNITTEST_START
   printf("Curl_str_until\n");
   for(i = 0; wordparse[i]; i++) {
     struct Curl_str out;
-    char *line = (char *)wordparse[i];
-    char *orgline = line;
+    const char *line = wordparse[i];
+    const char *orgline = line;
     int rc = Curl_str_until(&line, &out, 7, 'd');
     printf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
            i, orgline, rc, (int)out.len, out.str, (int)out.len,
@@ -106,8 +106,8 @@ UNITTEST_START
     printf("Curl_str_quotedword\n");
     for(i = 0; qwords[i]; i++) {
       struct Curl_str out;
-      char *line = (char *)qwords[i];
-      char *orgline = line;
+      const char *line = qwords[i];
+      const char *orgline = line;
       int rc = Curl_str_quotedword(&line, &out, 7);
       printf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
              i, orgline, rc, (int)out.len, out.str, (int)out.len,
@@ -128,8 +128,8 @@ UNITTEST_START
     };
     printf("Curl_str_single\n");
     for(i = 0; single[i]; i++) {
-      char *line = (char *)single[i];
-      char *orgline = line;
+      const char *line = single[i];
+      const char *orgline = line;
       int rc = Curl_str_single(&line, 'a');
       printf("%u: (\"%s\") %d, line %d\n",
              i, orgline, rc, (int)(line - orgline));
@@ -150,8 +150,8 @@ UNITTEST_START
     };
     printf("Curl_str_singlespace\n");
     for(i = 0; single[i]; i++) {
-      char *line = (char *)single[i];
-      char *orgline = line;
+      const char *line = single[i];
+      const char *orgline = line;
       int rc = Curl_str_singlespace(&line);
       printf("%u: (\"%s\") %d, line %d\n",
              i, orgline, rc, (int)(line - orgline));
@@ -171,8 +171,8 @@ UNITTEST_START
     };
     printf("Curl_str_single\n");
     for(i = 0; single[i]; i++) {
-      char *line = (char *)single[i];
-      char *orgline = line;
+      const char *line = single[i];
+      const char *orgline = line;
       int rc = Curl_str_single(&line, 'a');
       printf("%u: (\"%s\") %d, line %d\n",
              i, orgline, rc, (int)(line - orgline));
@@ -197,8 +197,8 @@ UNITTEST_START
     printf("Curl_str_number\n");
     for(i = 0; nums[i]; i++) {
       size_t num;
-      char *line = (char *)nums[i];
-      char *orgline = line;
+      const char *line = nums[i];
+      const char *orgline = line;
       int rc = Curl_str_number(&line, &num, 1235);
       printf("%u: (\"%s\") %d, [%u] line %d\n",
              i, orgline, rc, (int)num, (int)(line - orgline));
@@ -218,8 +218,8 @@ UNITTEST_START
     printf("Curl_str_number / max\n");
     for(i = 0; nums[i]; i++) {
       size_t num;
-      char *line = (char *)nums[i];
-      char *orgline = line;
+      const char *line = nums[i];
+      const char *orgline = line;
       int rc = Curl_str_number(&line, &num, SIZE_T_MAX);
       printf("%u: (\"%s\") %d, [%zu] line %d\n",
              i, orgline, rc, num, (int)(line - orgline));
@@ -242,8 +242,8 @@ UNITTEST_START
     };
     printf("Curl_str_newline\n");
     for(i = 0; newl[i]; i++) {
-      char *line = (char *)newl[i];
-      char *orgline = line;
+      const char *line = newl[i];
+      const char *orgline = line;
       int rc = Curl_str_newline(&line);
       printf("%u: (\"%s\") %d, line %d\n",
              i, orgline, rc, (int)(line - orgline));
