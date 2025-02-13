@@ -4005,8 +4005,6 @@ case $host_os in
     ;;
 esac
 
-TYPE_IN_ADDR_T
-
 TYPE_SOCKADDR_STORAGE
 
 CURL_CHECK_FUNC_SELECT

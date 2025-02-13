@@ -234,9 +234,6 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
-/* type to use in place of in_addr_t if not defined */
-#define in_addr_t       unsigned long
-
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
 

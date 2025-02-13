@@ -106,21 +106,6 @@ int main(void)
 }
 #endif
 
-#ifdef HAVE_IN_ADDR_T
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-int main(void)
-{
-  if((in_addr_t *) 0)
-    return 0;
-  if(sizeof(in_addr_t))
-    return 0;
-  ;
-  return 0;
-}
-#endif
-
 #ifdef HAVE_BOOL_T
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

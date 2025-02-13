@@ -797,9 +797,6 @@ ${SIZEOF_TIME_T_CODE}
 /* Define to empty if `const' does not conform to ANSI C. */
 #cmakedefine const ${const}
 
-/* Type to use in place of in_addr_t when system does not provide it. */
-#cmakedefine in_addr_t ${in_addr_t}
-
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #cmakedefine size_t ${size_t}
 
