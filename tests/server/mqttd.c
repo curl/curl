@@ -1003,7 +1003,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        port = curlx_ultous(ulnum);
+        port = util_ultous(ulnum);
         arg++;
       }
     }
