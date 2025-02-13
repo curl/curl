@@ -675,6 +675,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516'
+            chkprefill: '_chkprefill'
             # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
             #          read its configuration from, making it vulnerable to attacks on
             #          Windows. Do not use this component till there is a fix for these.
