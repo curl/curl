@@ -1652,6 +1652,10 @@ schannel_connect_common(struct Curl_cfilter *cf,
   curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   timediff_t timeout_ms;
   int what;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data*)connssl->backend;
+
+  DEBUGASSERT(backend);
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
@@ -1676,8 +1680,12 @@ schannel_connect_common(struct Curl_cfilter *cf,
 
   while(ssl_connect_2 == connssl->connecting_state) {
 
+    /* Renegotiation can happen after connect timeout has expired.
+     * It should not be checked against the connect timeout.
+     */
+    bool duringconnect = !backend->recv_renegotiating;
     /* check out how much more time we are allowed */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Curl_timeleft(data, NULL, duringconnect);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
@@ -1742,12 +1750,7 @@ schannel_connect_common(struct Curl_cfilter *cf,
      * binding to pass the IIS extended protection checks.
      * Available on Windows 7 or later.
      */
-    {
-      struct schannel_ssl_backend_data *backend =
-        (struct schannel_ssl_backend_data *)connssl->backend;
-      DEBUGASSERT(backend);
-      cf->conn->sslContext = &backend->ctxt->ctxt_handle;
-    }
+    cf->conn->sslContext = &backend->ctxt->ctxt_handle;
 #endif
 
     *done = TRUE;
