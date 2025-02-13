@@ -65,15 +65,7 @@
 #define ERANGE  34 /* errno.h value */
 #endif
 
-static enum {
-  socket_domain_inet = AF_INET
-#ifdef USE_IPV6
-  , socket_domain_inet6 = AF_INET6
-#endif
-#ifdef USE_UNIX_SOCKETS
-  , socket_domain_unix = AF_UNIX
-#endif
-} socket_domain = AF_INET;
+static int socket_domain = AF_INET;
 static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
