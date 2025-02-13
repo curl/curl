@@ -629,7 +629,6 @@ jobs:
             plat: 'uwp'
             type: 'Debug'
             tflags: 'skiprun'
-            chkprefill: '_chkprefill'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
