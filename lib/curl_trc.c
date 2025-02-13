@@ -109,7 +109,7 @@ static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 static size_t trc_end_buf(char *buf, size_t len, size_t maxlen, bool nl)
 {
   if(len >= (maxlen - 1)) { /* too long, shorten with '...' */
-    --len;
+    len = maxlen - 1;
     buf[len++] = '.';
     buf[len++] = '.';
     buf[len++] = '.';
