@@ -91,7 +91,7 @@ char Curl_raw_tolower(char in)
 
 static int casecompare(const char *first, const char *second)
 {
-  while(*first && *second) {
+  while(*first) {
     if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
       /* get out of the loop as soon as they do not match */
       return 0;
@@ -118,7 +118,7 @@ int curl_strequal(const char *first, const char *second)
 
 static int ncasecompare(const char *first, const char *second, size_t max)
 {
-  while(*first && *second && max) {
+  while(*first && max) {
     if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
       return 0;
     max--;
