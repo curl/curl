@@ -1,6 +1,6 @@
-curl and libcurl 8.12.1
+curl and libcurl 8.12.2
 
- Public curl releases:         265
+ Public curl releases:         266
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
@@ -11,71 +11,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o all: remove FIXME and TODO comments [55]
- o asyn-thread: fix build with `CURL_DISABLE_SOCKETPAIR` [47]
- o asyn-thread: fix HTTPS RR crash [10]
- o asyn-thread: fix the returned bitmask from Curl_resolver_getsock [18]
- o asyn-thread: survive a c-ares channel set to NULL [52]
- o build: add tool_hugehelp.c into IBMi build [40]
- o checksrc.pl: warn on FIXME/TODO comments
- o cmake/Find: set `<Modulename>_FOUND` for compatibility when found via `pkg-config` [22]
- o cmake: add integration tests, run them in CI [21]
- o cmake: always reference OpenSSL and ZLIB via imported targets [24]
- o cmake: avoid unnecessary `-L` for implicit link dirs [11]
- o cmake: drop `LDAP_DEPRECATED=1` macro, to sync with autotools [23]
- o cmake: fix `HAVE_GETHOSTBYNAME_R_*` detections with `CURL_WERROR=ON` [57]
- o cmake: fix to detect `HAVE_OPENSSL_SRP` in MSVC UWP builds [62]
- o cmake: fix/add missing feature detections for Windows/MS-DOS [58]
- o cmake: initialize variables where missing [27]
- o cmake: lib order fixes for picky linkers (e.g. binutils `ld`) [26]
- o cmake: normalize before matching paths with syspaths [30]
- o cmake: respect `GNUTLS_CFLAGS` when detected via `pkg-config` [38]
- o cmake: respect `GNUTLS_LIBRARY_DIRS` in `libcurl.pc` and `curl-config` [39]
- o cmake: save a line with `CMAKE_C_IMPLICIT_LINK_DIRECTORIES` exclusion [32]
- o cmake: tidy up string append and list prepend syntax [28]
- o configure/cmake: check for realpath [19]
- o configure/cmake: set asyn-rr a feature only if httpsrr is enabled [42]
- o content_encoding: #error on too old zlib [2]
- o curl_global_sslset.md: Add SSL backend names [50]
- o CURLOPT_SSH_KNOWNHOSTS.md: strongly recommend using this [41]
- o CURLSHOPT_SHARE.md: adjust for the new SSL session cache [6]
- o docs: better explain multi-part byte range behavior [4]
- o docs: use valid example domain names [54]
- o generate.bat: remove curl_get_line.c from the curlx file list [20]
- o header.md: mention `Authorization:` and `Cookie:` special treatment [43]
- o imap: TLS upgrade fix [14]
- o INTERNALS: fix c-ares, as we actually support 1.6.0 or later [37]
- o ldap: drop support for legacy Novell LDAP SDK [25]
- o lib: include necessary headers for `inet_ntop`/`inet_pton` [8]
- o lib: silence LibreSSL collision warning on non-MSVC Windows [51]
- o libssh2: comparison is always true because rc <= -1 [56]
- o libssh2: raise lowest supported version to 1.2.8 [3]
- o libssh: drop support for libssh older than 0.9.0 [33]
- o libssh: silence `-Wconversion` with a cast (Windows 32-bit) [7]
- o netrc: return code cleanup, fix missing file error [45]
- o openssl-quic: ignore ciphers for h3 [1]
- o openssl: fix out of scope variables in goto [12]
- o pop3: TLS upgrade fix [15]
- o runtests: fix the disabling of the memory tracking [29]
- o runtests: quote commands to support paths with spaces [35]
- o scache: add magic checks [31]
- o smb: silence `-Warray-bounds` with gcc 13+ [9]
- o smtp: TLS upgrade fix [16]
- o SPONSORS.md: clarify that we don't promise goods or services [5]
- o test1516: avoid failure due to spaces in path [36]
- o test2080: simplify, avoid the null byte
- o tests: fix test 558, 1330 for MSVC, allow TrackMemory with MSVC in cmake [53]
- o tidy-up: make per-file `ARRAYSIZE` macros global as `CURL_ARRAYSIZE` [48]
- o tool_cfgable: sort struct fields by size, use bitfields for booleans [17]
- o tool_getparam: add "TLS required" flag for each such option [44]
- o tool_progress: fix percent output of large parallel transfers [61]
- o tool_ssls: switch to tool-specific get_line function [34]
- o verbose.md: mention how carriage-return might occur in headers [49]
- o vquic: make the "disable GSO" use infof, not failf [65]
- o vtls: fix multissl-init [60]
- o vtsl: eliminate 'data->state.ssl_scache' [59]
- o wakeup_write: make sure the eventfd write sends eight bytes [46]
- o wolfssl: silence compiler warning (MSVC 2019), simplify existing [13]
+ o managen: correct the warning for un-escaped '<' and '>' [1]
+ o strparse: switch the API to work on 'const char *' [2]
+ o lib: better optimized casecompare() and ncasecompare() [3]
 
 This release includes the following known bugs:
 
@@ -96,77 +34,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aaron Deadman, Andrei Korshikov, Andrew Kirillov, arlt on github,
-  Christian Schmitz, CueXXIII on Github, Dan Fandrich, Daniel Stenberg,
-  deliciouslytyped on github, Fay Stegerman, Jan Engelhardt,
-  jethrogb on github, Kai Pastor, Marcel Raad, Michael Kaufmann,
-  mschroeder-fzj on github, nono303 on github, Philip Heiduck, qhill,
-  Ralf A. Timmermann, Ray Satiro, renovate[bot], Stefan Eissing, Terence Eden,
-  thisisgk on github, Viktor Szakats, zzq1015 on github
-  (27 contributors)
+  Daniel Stenberg, Sergey
+  (2 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=16232
- [2] = https://curl.se/bug/?i=16202
- [3] = https://curl.se/bug/?i=16199
- [4] = https://curl.se/bug/?i=16139
- [5] = https://curl.se/bug/?i=16196
- [6] = https://curl.se/bug/?i=16245
- [7] = https://curl.se/bug/?i=16194
- [8] = https://curl.se/bug/?i=16184
- [9] = https://curl.se/bug/?i=16187
- [10] = https://curl.se/bug/?i=16169
- [11] = https://curl.se/bug/?i=16233
- [12] = https://curl.se/bug/?i=16246
- [13] = https://curl.se/bug/?i=16230
- [14] = https://curl.se/bug/?i=16213
- [15] = https://curl.se/bug/?i=16208
- [16] = https://curl.se/bug/?i=16189
- [17] = https://curl.se/bug/?i=16211
- [18] = https://curl.se/bug/?i=16227
- [19] = https://curl.se/bug/?i=16209
- [20] = https://curl.se/bug/?i=16248
- [21] = https://curl.se/bug/?i=16126
- [22] = https://curl.se/bug/?i=16153
- [23] = https://curl.se/bug/?i=16146
- [24] = https://curl.se/bug/?i=16207
- [25] = https://curl.se/bug/?i=16176
- [26] = https://curl.se/bug/?i=16182
- [27] = https://curl.se/bug/?i=16198
- [28] = https://curl.se/bug/?i=16144
- [29] = https://curl.se/bug/?i=16226
- [30] = https://curl.se/bug/?i=16191
- [31] = https://curl.se/bug/?i=16240
- [32] = https://curl.se/bug/?i=16243
- [33] = https://curl.se/bug/?i=16200
- [34] = https://curl.se/bug/?i=16201
- [35] = https://curl.se/bug/?i=16220
- [36] = https://curl.se/bug/?i=16223
- [37] = https://curl.se/bug/?i=16221
- [38] = https://curl.se/bug/?i=16242
- [39] = https://curl.se/bug/?i=16190
- [40] = https://curl.se/bug/?i=16214
- [41] = https://curl.se/bug/?i=16204
- [42] = https://curl.se/bug/?i=16183
- [43] = https://curl.se/bug/?i=16160
- [44] = https://curl.se/bug/?i=16159
- [45] = https://curl.se/bug/?i=16163
- [46] = https://curl.se/bug/?i=16237
- [47] = https://curl.se/bug/?i=16179
- [48] = https://curl.se/bug/?i=16111
- [49] = https://curl.se/bug/?i=16285
- [50] = https://curl.se/bug/?i=16256
- [51] = https://curl.se/bug/?i=16273
- [52] = https://curl.se/bug/?i=16216
- [53] = https://curl.se/bug/?i=16289
- [54] = https://curl.se/bug/?i=16269
- [55] = https://curl.se/bug/?i=16283
- [56] = https://curl.se/bug/?i=16268
- [57] = https://curl.se/bug/?i=16282
- [58] = https://curl.se/bug/?i=16278
- [59] = https://curl.se/bug/?i=16261
- [60] = https://curl.se/bug/?i=16253
- [61] = https://curl.se/bug/?i=16284
- [62] = https://curl.se/bug/?i=16293
- [65] = https://curl.se/bug/?i=16294
+ [1] = https://curl.se/bug/?i=16315
+ [2] = https://curl.se/bug/?i=16316
+ [3] = https://curl.se/bug/?i=16311
