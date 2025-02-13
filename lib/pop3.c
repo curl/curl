@@ -244,7 +244,7 @@ static bool pop3_is_multiline(const char *cmdline)
  * types and allowed SASL mechanisms.
  */
 static bool pop3_endofresp(struct Curl_easy *data, struct connectdata *conn,
-                           char *line, size_t len, int *resp)
+                           const char *line, size_t len, int *resp)
 {
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   (void)data;

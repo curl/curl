@@ -34,6 +34,7 @@
 #include "inet_ntop.h"
 #include "strdup.h"
 #include "idn.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -445,7 +446,7 @@ out:
 UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
                                    bool has_scheme)
 {
-  char *portptr;
+  const char *portptr;
   char *hostname = Curl_dyn_ptr(host);
   /*
    * Find the end of an IPv6 address on the ']' ending bracket.
@@ -467,8 +468,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     portptr = strchr(hostname, ':');
 
   if(portptr) {
-    char *rest = NULL;
-    unsigned long port;
+    size_t port;
     size_t keep = portptr - hostname;
 
     /* Browser behavior adaptation. If there is a colon with no digits after,
@@ -483,19 +483,13 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     if(!*portptr)
       return has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
 
-    if(!ISDIGIT(*portptr))
-      return CURLUE_BAD_PORT_NUMBER;
-
-    errno = 0;
-    port = strtoul(portptr, &rest, 10);  /* Port number must be decimal */
-
-    if(errno || (port > 0xffff) || *rest)
+    if(Curl_str_number(&portptr, &port, 0xffff) || *portptr)
       return CURLUE_BAD_PORT_NUMBER;
 
     u->portnum = (unsigned short) port;
     /* generate a new port number string to get rid of leading zeroes etc */
     free(u->port);
-    u->port = aprintf("%ld", port);
+    u->port = aprintf("%zd", port);
     if(!u->port)
       return CURLUE_OUT_OF_MEMORY;
   }
@@ -1751,14 +1745,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       return CURLUE_BAD_PORT_NUMBER;
     else {
       char *tmp;
-      char *endp;
-      unsigned long port;
-      errno = 0;
-      port = strtoul(part, &endp, 10);  /* must be decimal */
-      if(errno || (port > 0xffff) || *endp)
+      size_t port;
+      if(Curl_str_number(&part, &port, 0xffff) || *part)
         /* weirdly provided number, not good! */
         return CURLUE_BAD_PORT_NUMBER;
-      tmp = strdup(part);
+      tmp = aprintf("%zd", port);
       if(!tmp)
         return CURLUE_OUT_OF_MEMORY;
       free(u->port);
