@@ -68,7 +68,9 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCMAKE_BUILD_TYPE="${PRJ_CFG}" \
       -DCURL_USE_LIBPSL=OFF ${options}
   done
-  [ -d bld_chkprefill ] && diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h || true
+  if [ -d bld_chkprefill ]; then
+    diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h
+  fi
   if false; then
     cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
   fi
