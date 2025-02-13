@@ -244,9 +244,6 @@
 /*                       TYPEDEF REPLACEMENTS                       */
 /* ---------------------------------------------------------------- */
 
-/* Define if in_addr_t is not an available 'typedefed' type. */
-#define in_addr_t unsigned long
-
 /* Define if ssize_t is not an available 'typedefed' type. */
 #ifndef _SSIZE_T_DEFINED
 #  ifdef __MINGW32__

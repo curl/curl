@@ -1810,7 +1810,6 @@ foreach(_curl_test IN ITEMS
     HAVE_GETHOSTBYNAME_R_3_REENTRANT
     HAVE_GETHOSTBYNAME_R_5_REENTRANT
     HAVE_GETHOSTBYNAME_R_6_REENTRANT
-    HAVE_IN_ADDR_T
     HAVE_BOOL_T
     STDC_HEADERS
     HAVE_FILE_OFFSET_BITS
@@ -1905,10 +1904,6 @@ if(APPLE)
 endif()
 
 # Some other minor tests
-
-if(NOT HAVE_IN_ADDR_T)
-  set(in_addr_t "unsigned long")
-endif()
 
 if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   include(CheckCCompilerFlag)
