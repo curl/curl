@@ -1060,7 +1060,7 @@ int main(int argc, char *argv[])
       if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = curlx_ultous(ulnum);
+        port = util_ultous(ulnum);
         arg++;
       }
     }
