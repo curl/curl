@@ -34,7 +34,6 @@
 #include "select.h"
 #include "warnless.h"
 #include "multihandle.h"
-#include "sigpipe.h"
 #include "socks.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
