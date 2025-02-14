@@ -566,15 +566,12 @@ struct hostname {
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
 #define USE_CURL_ASYNC
 struct Curl_async {
-  char *hostname;
   struct Curl_dns_entry *dns;
 #ifdef CURLRES_ASYNCH
   struct thread_data thdata;
 #endif
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel e.g. */
-  int port;
-  int status; /* if done is TRUE, this is the status from the callback */
   BIT(done);  /* set TRUE when the lookup is complete */
 };
 
