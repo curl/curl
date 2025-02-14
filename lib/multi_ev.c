@@ -300,7 +300,7 @@ CURLMcode Curl_multi_ev_pollset(struct Curl_multi *multi,
   /* For user transfers (id >= 0), we keep the last pollset at the transfer,
    * for internal transfers, we keep it at the connection */
   last_ps = (data && (data->id >= 0)) ? &data->last_poll :
-             (data->conn ? &data->conn->shutdown_poll : NULL);
+             ((data && data->conn) ? &data->conn->shutdown_poll : NULL);
   if(!last_ps)
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
