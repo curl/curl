@@ -110,7 +110,9 @@ int Curl_str_number(const char **linep, size_t *nump, size_t max)
   size_t num = 0;
   DEBUGASSERT(linep && *linep && nump);
   *nump = 0;
-  while(ISDIGIT(**linep)) {
+  if(!ISDIGIT(**linep))
+    return STRE_NO_NUM;
+  do {
     int n = **linep - '0';
     if(num > ((SIZE_T_MAX - n) / 10))
       return STRE_OVERFLOW;
@@ -118,7 +120,7 @@ int Curl_str_number(const char **linep, size_t *nump, size_t max)
     if(num > max)
       return STRE_BIG; /** too big */
     (*linep)++;
-  }
+  } while(ISDIGIT(**linep));
   *nump = num;
   return STRE_OK;
 }
