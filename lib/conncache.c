@@ -32,6 +32,7 @@
 #include "cfilters.h"
 #include "progress.h"
 #include "multiif.h"
+#include "multi_ev.h"
 #include "sendf.h"
 #include "conncache.h"
 #include "http_negotiate.h"
@@ -1139,7 +1140,7 @@ static CURLMcode cpool_update_shutdown_ev(struct Curl_multi *multi,
   Curl_conn_adjust_pollset(data, &ps);
   Curl_detach_connection(data);
 
-  mresult = Curl_multi_pollset_ev(multi, data, &ps, &conn->shutdown_poll);
+  mresult = Curl_multi_ev_pollset(multi, data, &ps, &conn->shutdown_poll);
 
   if(!mresult) /* Remember for next time */
     memcpy(&conn->shutdown_poll, &ps, sizeof(ps));
