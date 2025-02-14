@@ -86,10 +86,10 @@ endif()
 if(WIN32 AND BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS AND
    "${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL
    "${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  message(FATAL_ERROR "Library suffix collision detected for ${LIBCURL_OUTPUT_NAME}. "
-    "It's '${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}' for both import and static library. "
+  message(FATAL_ERROR "Library suffix is the same ('${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}') "
+    "for the import and static ${LIBCURL_OUTPUT_NAME} library. "
     "Set IMPORT_LIB_SUFFIX and/or STATIC_LIB_SUFFIX to different values, "
-    "or disable building either the shared or static library to avoid it.")
+    "or disable building either the shared or static library to avoid the collision.")
 endif()
 
 # Whether to do a single compilation pass for libcurl sources and reuse these
