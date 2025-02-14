@@ -86,6 +86,7 @@
 #include "hsts.h"
 #include "ws.h"
 #include "curl_ctype.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -3072,11 +3073,10 @@ static CURLcode http_header(struct Curl_easy *data,
 
       /* if it truly stopped on a digit */
       if(ISDIGIT(*ptr)) {
-        if(!curlx_strtoofft(ptr, NULL, 10, &k->offset)) {
-          if(data->state.resume_from == k->offset)
-            /* we asked for a resume and we got it */
-            k->content_range = TRUE;
-        }
+        if(!Curl_str_number(&ptr, &k->offset, CURL_OFF_T_MAX) &&
+           (data->state.resume_from == k->offset))
+          /* we asked for a resume and we got it */
+          k->content_range = TRUE;
       }
       else if(k->httpcode < 300)
         data->state.resume_from = 0; /* get everything */

@@ -331,7 +331,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
     infof(data, "got option=(%s) value=(%s)", option, value);
 
     if(checkprefix(TFTP_OPTION_BLKSIZE, option)) {
-      size_t blksize;
+      curl_off_t blksize;
       if(Curl_str_number(&value, &blksize, TFTP_BLKSIZE_MAX)) {
         failf(data, "%s (%d)", "blksize is larger than max supported",
               TFTP_BLKSIZE_MAX);
@@ -350,8 +350,8 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
         /* could realloc pkt buffers here, but the spec does not call out
          * support for the server requesting a bigger blksize than the client
          * requests */
-        failf(data, "server requested blksize larger than allocated (%zd)",
-              blksize);
+        failf(data, "server requested blksize larger than allocated (%"
+              CURL_FORMAT_CURL_OFF_T ")", blksize);
         return CURLE_TFTP_ILLEGAL;
       }
 
@@ -360,16 +360,17 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
             state->blksize, state->requested_blksize);
     }
     else if(checkprefix(TFTP_OPTION_TSIZE, option)) {
-      size_t tsize = 0;
+      curl_off_t tsize = 0;
       /* tsize should be ignored on upload: Who cares about the size of the
          remote file? */
       if(!data->state.upload &&
-         !Curl_str_number(&value, &tsize, SIZE_T_MAX)) {
+         !Curl_str_number(&value, &tsize, CURL_OFF_T_MAX)) {
         if(!tsize) {
           failf(data, "invalid tsize -:%s:- value in OACK packet", value);
           return CURLE_TFTP_ILLEGAL;
         }
-        infof(data, "tsize parsed from OACK (%zd)", tsize);
+        infof(data, "tsize parsed from OACK (%" CURL_FORMAT_CURL_OFF_T ")",
+              tsize);
         Curl_pgrsSetDownloadSize(data, tsize);
       }
     }

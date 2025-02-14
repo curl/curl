@@ -420,7 +420,7 @@ static int parsedate(const char *date, time_t *output)
         date = end;
       }
       else {
-        size_t lval;
+        curl_off_t lval;
         int num_digits = 0;
         const char *p = date;
         if(Curl_str_number(&p, &lval, 99999999))

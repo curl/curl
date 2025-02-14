@@ -55,6 +55,7 @@
 #include "multiif.h"
 #include "version_win32.h"
 #include "rand.h"
+#include "strparse.h"
 
 /* The last #include file should be: */
 #include "curl_memory.h"
@@ -344,9 +345,9 @@ static const struct algo algs[]= {
 };
 
 static int
-get_alg_id_by_name(char *name)
+get_alg_id_by_name(const char *name)
 {
-  char *nameEnd = strchr(name, ':');
+  const char *nameEnd = strchr(name, ':');
   size_t n = nameEnd ? (size_t)(nameEnd - name) : strlen(name);
   int i;
 
@@ -363,12 +364,13 @@ static CURLcode
 set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
                 ALG_ID *algIds)
 {
-  char *startCur = ciphers;
+  const char *startCur = ciphers;
   int algCount = 0;
   while(startCur && (0 != *startCur) && (algCount < NUM_CIPHERS)) {
-    long alg = strtol(startCur, 0, 0);
-    if(!alg)
+    curl_off_t alg;
+    if(Curl_str_number(&startCur, &alg, INT_MAX) || !alg)
       alg = get_alg_id_by_name(startCur);
+
     if(alg)
       algIds[algCount++] = (ALG_ID)alg;
     else if(!strncmp(startCur, "USE_STRONG_CRYPTO",

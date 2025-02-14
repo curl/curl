@@ -1134,7 +1134,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
     if(!hostp->data)
       continue;
     if(hostp->data[0] == '-') {
-      size_t num = 0;
+      curl_off_t num = 0;
       size_t entry_len;
       size_t hlen = 0;
       host_end = strchr(&hostp->data[1], ':');
@@ -1173,7 +1173,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       const char *addr_begin;
       const char *addr_end;
       const char *port_ptr;
-      size_t port = 0;
+      curl_off_t port = 0;
       const char *end_ptr;
       bool permanent = TRUE;
       bool error = TRUE;
@@ -1273,8 +1273,8 @@ err:
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
-        infof(data, "RESOLVE %.*s:%zd - old addresses discarded",
-              (int)hlen, host_begin, port);
+        infof(data, "RESOLVE %.*s:%" CURL_FORMAT_CURL_OFF_T
+              " - old addresses discarded", (int)hlen, host_begin, port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
          2. even if entry with correct addresses is already in the cache,
@@ -1306,14 +1306,15 @@ err:
         return CURLE_OUT_OF_MEMORY;
       }
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-      infof(data, "Added %.*s:%zd:%s to DNS cache%s",
+      infof(data, "Added %.*s:%" CURL_FORMAT_CURL_OFF_T ":%s to DNS cache%s",
             (int)hlen, host_begin, port, addresses,
             permanent ? "" : " (non-permanent)");
 #endif
 
       /* Wildcard hostname */
       if((hlen == 1) && (host_begin[0] == '*')) {
-        infof(data, "RESOLVE *:%zd using wildcard", port);
+        infof(data, "RESOLVE *:%" CURL_FORMAT_CURL_OFF_T " using wildcard",
+              port);
         data->state.wildcard_resolve = TRUE;
       }
     }

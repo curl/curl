@@ -73,7 +73,7 @@
 #include "select.h"
 #include "warnless.h"
 #include "curl_path.h"
-
+#include "strparse.h"
 #include <curl_base64.h> /* for base64 encoding/decoding */
 #include <curl_sha256.h>
 
@@ -1368,7 +1368,10 @@ sftp_quote_stat(struct Curl_easy *data,
 
   /* Now set the new attributes... */
   if(strncasecompare(cmd, "chgrp", 5)) {
-    sshp->quote_attrs.gid = strtoul(sshc->quote_path1, NULL, 10);
+    const char *p = sshc->quote_path1;
+    curl_off_t gid;
+    (void)Curl_str_number(&p, &gid, ULONG_MAX);
+    sshp->quote_attrs.gid = (unsigned long)gid;
     sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
     if(sshp->quote_attrs.gid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
        !sshc->acceptfail) {
@@ -1377,17 +1380,22 @@ sftp_quote_stat(struct Curl_easy *data,
     }
   }
   else if(strncasecompare(cmd, "chmod", 5)) {
-    sshp->quote_attrs.permissions = strtoul(sshc->quote_path1, NULL, 8);
-    sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_PERMISSIONS;
+    curl_off_t perms;
+    const char *p = sshc->quote_path1;
     /* permissions are octal */
-    if(sshp->quote_attrs.permissions == 0 &&
-       !ISDIGIT(sshc->quote_path1[0])) {
+    if(Curl_str_octal(&p, &perms, 07777)) {
       failf(data, "Syntax error: chmod permissions not a number");
       goto fail;
     }
+
+    sshp->quote_attrs.permissions = (unsigned long)perms;
+    sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_PERMISSIONS;
   }
   else if(strncasecompare(cmd, "chown", 5)) {
-    sshp->quote_attrs.uid = strtoul(sshc->quote_path1, NULL, 10);
+    const char *p = sshc->quote_path1;
+    curl_off_t uid;
+    (void)Curl_str_number(&p, &uid, ULONG_MAX);
+    sshp->quote_attrs.uid = (unsigned long)uid;
     sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
     if(sshp->quote_attrs.uid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
        !sshc->acceptfail) {

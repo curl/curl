@@ -81,10 +81,10 @@ CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
 #endif
 #ifdef DEBUGBUILD
   {
-    char *p = getenv("CURL_DBG_QUIC_WBLOCK");
+    const char *p = getenv("CURL_DBG_QUIC_WBLOCK");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l >= 0 && l <= 100)
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, 100))
         qctx->wblock_percent = (int)l;
     }
   }

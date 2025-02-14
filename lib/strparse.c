@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "strparse.h"
+#include "strcase.h"
 
 /* Get a word until the first DELIM or end of string. At least one byte long.
    return non-zero on error */
@@ -103,26 +104,62 @@ int Curl_str_singlespace(const char **linep)
   return Curl_str_single(linep, ' ');
 }
 
-/* Get an unsigned number. Leading zeroes are accepted.
-   return non-zero on error */
-int Curl_str_number(const char **linep, size_t *nump, size_t max)
+/* given an ASCII hexadecimal character, return the value */
+#define HEXDIGIT2NUM(x)                                         \
+  (((x) > '9') ? Curl_raw_tolower(x) - 'a' + 10 : x - '0')
+
+/* given an ASCII character and a given base, return TRUE if valid */
+#define valid_digit(digit, base)                                        \
+  (((base == 10) && ISDIGIT(digit)) ||                                  \
+   ((base == 16) && ISXDIGIT(digit)) ||                                 \
+   ((base == 8) && ISODIGIT(digit)))
+
+/* given an ASCII character and a given base, return the value */
+#define num_digit(digit, base)                          \
+  ((base != 16) ? digit - '0' : HEXDIGIT2NUM(digit))
+
+/* no support for 0x prefix nor leading spaces */
+static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
+                        int base) /* 8, 10 or 16, nothing else */
 {
-  size_t num = 0;
+  curl_off_t num = 0;
   DEBUGASSERT(linep && *linep && nump);
+  DEBUGASSERT((base == 8) || (base == 10) || (base == 16));
   *nump = 0;
-  if(!ISDIGIT(**linep))
+  if(!valid_digit(**linep, base))
     return STRE_NO_NUM;
   do {
-    int n = **linep - '0';
-    if(num > ((SIZE_T_MAX - n) / 10))
+    int n = num_digit(**linep, base);
+    if(num > ((CURL_OFF_T_MAX - n) / base))
       return STRE_OVERFLOW;
-    num = num * 10 + n;
+    num = num * base + n;
     if(num > max)
       return STRE_BIG; /** too big */
     (*linep)++;
-  } while(ISDIGIT(**linep));
+  } while(valid_digit(**linep, base));
   *nump = num;
   return STRE_OK;
+}
+
+/* Get an unsigned decimal number with no leading space or minus. Leading
+   zeroes are accepted. return non-zero on error */
+int Curl_str_number(const char **linep, curl_off_t *nump, curl_off_t max)
+{
+  return str_num_base(linep, nump, max, 10);
+}
+
+/* Get an unsigned hexadecimal number with no leading space or minus and no
+   "0x" support. Leading zeroes are accepted. return non-zero on error */
+int Curl_str_hex(const char **linep, curl_off_t *nump, curl_off_t max)
+{
+  return str_num_base(linep, nump, max, 16);
+}
+
+/* Get an unsigned octal number with no leading space or minus and no "0"
+   prefix support. Leading zeroes are accepted. return non-zero on error */
+int Curl_str_octal(const char **linep, curl_off_t *nump, curl_off_t max)
+{
+  return str_num_base(linep, nump, max, 8);
 }
 
 /* CR or LF

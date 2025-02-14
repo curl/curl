@@ -215,7 +215,7 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
      only send the response code instead as per Section 4.2. */
   if(line[3] == ' ' || len == 5) {
     char tmpline[6];
-    size_t code;
+    curl_off_t code;
     const char *p = tmpline;
     result = TRUE;
     memcpy(tmpline, line, (len == 5 ? 5 : 3));
