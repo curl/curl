@@ -1143,26 +1143,27 @@ CURLMcode curl_multi_fdset(CURLM *m,
 
   for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
     struct Curl_easy *data = Curl_node_elem(e);
+    struct easy_pollset ps;
 
-    multi_getsock(data, &data->last_poll);
+    multi_getsock(data, &ps);
 
-    for(i = 0; i < data->last_poll.num; i++) {
-      if(!FDSET_SOCK(data->last_poll.sockets[i]))
+    for(i = 0; i < ps.num; i++) {
+      if(!FDSET_SOCK(ps.sockets[i]))
         /* pretend it does not exist */
         continue;
 #if defined(__DJGPP__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
-      if(data->last_poll.actions[i] & CURL_POLL_IN)
-        FD_SET(data->last_poll.sockets[i], read_fd_set);
-      if(data->last_poll.actions[i] & CURL_POLL_OUT)
-        FD_SET(data->last_poll.sockets[i], write_fd_set);
+      if(ps.actions[i] & CURL_POLL_IN)
+        FD_SET(ps.sockets[i], read_fd_set);
+      if(ps.actions[i] & CURL_POLL_OUT)
+        FD_SET(ps.sockets[i], write_fd_set);
 #if defined(__DJGPP__)
 #pragma GCC diagnostic pop
 #endif
-      if((int)data->last_poll.sockets[i] > this_max_fd)
-        this_max_fd = (int)data->last_poll.sockets[i];
+      if((int)ps.sockets[i] > this_max_fd)
+        this_max_fd = (int)ps.sockets[i];
     }
   }
 
@@ -1196,8 +1197,10 @@ CURLMcode curl_multi_waitfds(CURLM *m,
   Curl_waitfds_init(&cwfds, ufds, size);
   for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
     struct Curl_easy *data = Curl_node_elem(e);
-    multi_getsock(data, &data->last_poll);
-    need += Curl_waitfds_add_ps(&cwfds, &data->last_poll);
+    struct easy_pollset ps;
+
+    multi_getsock(data, &ps);
+    need += Curl_waitfds_add_ps(&cwfds, &ps);
   }
 
   need += Curl_cpool_add_waitfds(&multi->cpool, &cwfds);
@@ -1269,9 +1272,10 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   /* Add the curl handles to our pollfds first */
   for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
     struct Curl_easy *data = Curl_node_elem(e);
+    struct easy_pollset ps;
 
-    multi_getsock(data, &data->last_poll);
-    if(Curl_pollfds_add_ps(&cpfds, &data->last_poll)) {
+    multi_getsock(data, &ps);
+    if(Curl_pollfds_add_ps(&cpfds, &ps)) {
       result = CURLM_OUT_OF_MEMORY;
       goto out;
     }
@@ -1406,23 +1410,14 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifdef USE_WINSOCK
       /* Count up all our own sockets that had activity,
          and remove them from the event. */
-      if(curl_nfds) {
-        for(e = Curl_llist_head(&multi->process); e && !result;
-            e = Curl_node_next(e)) {
-          struct Curl_easy *data = Curl_node_elem(e);
-
-          for(i = 0; i < data->last_poll.num; i++) {
-            wsa_events.lNetworkEvents = 0;
-            if(WSAEnumNetworkEvents(data->last_poll.sockets[i], NULL,
-                                    &wsa_events) == 0) {
-              if(ret && !pollrc && wsa_events.lNetworkEvents)
-                retcode++;
-            }
-            WSAEventSelect(data->last_poll.sockets[i], multi->wsa_event, 0);
-          }
+      for(i = 0; i < curl_nfds; ++i) {
+        wsa_events.lNetworkEvents = 0;
+        if(WSAEnumNetworkEvents(cpfds.pfds[i].fd, NULL, &wsa_events) == 0) {
+          if(ret && !pollrc && wsa_events.lNetworkEvents)
+            retcode++;
         }
+        WSAEventSelect(cpfds.pfds[i].fd, multi->wsa_event, 0);
       }
-
       WSAResetEvent(multi->wsa_event);
 #else
 #ifdef ENABLE_WAKEUP
