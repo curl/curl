@@ -68,19 +68,24 @@ endif()
 
 ## Library definition
 
+# Suffix implib name with "_imp" by default, to avoid conflicting with
+# the generated static "libcurl.lib" (typically with MSVC).
 if(NOT DEFINED IMPORT_LIB_SUFFIX)
-  set(IMPORT_LIB_SUFFIX "")
+  set(IMPORT_LIB_SUFFIX "_imp")
 endif()
 if(NOT DEFINED STATIC_LIB_SUFFIX)
   set(STATIC_LIB_SUFFIX "")
 endif()
 
-# Add "_imp" as a suffix before the extension to avoid conflicting with
-# the statically linked "libcurl.lib" (typically with MSVC)
-if(WIN32 AND
-   NOT IMPORT_LIB_SUFFIX AND
-   CMAKE_STATIC_LIBRARY_SUFFIX STREQUAL CMAKE_IMPORT_LIBRARY_SUFFIX)
-  set(IMPORT_LIB_SUFFIX "_imp")
+# Detect implib static lib filename collision
+if(WIN32 AND BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS AND
+   "${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL
+   "${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  message(FATAL_ERROR "Library suffix collision detected for ${LIBCURL_OUTPUT_NAME} ("
+    "implib: '${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}' vs. "
+    "static: '${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}'). "
+    "Set IMPORT_LIB_SUFFIX and/or STATIC_LIB_SUFFIX to different values, "
+    "or disable building either the shared or static library to avoid it.")
 endif()
 
 # Whether to do a single compilation pass for libcurl sources and reuse these
