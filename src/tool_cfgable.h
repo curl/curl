@@ -324,6 +324,8 @@ struct GlobalConfig {
   char *libcurl;                  /* Output libcurl code to this filename */
   char *ssl_sessions;             /* file to load/save SSL session tickets */
   char *help_category;            /* The help category, if set */
+  char *knownhosts;               /* known host path, if set. curl_free()
+                                     this */
   struct tool_var *variables;
   struct OperationConfig *first;
   struct OperationConfig *current;
