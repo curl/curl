@@ -33,7 +33,7 @@
 #
 # The following variables are available:
 #   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL/wolfSSL
-#   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL/wolfSSL
+#   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
 #   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in quiche
@@ -1003,9 +1003,9 @@ if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
     curl_openssl_check_symbol_exists("SSL_set0_wbio" "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
   endif()
-  if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
-    curl_openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP)
-  endif()
+endif()
+if(USE_OPENSSL AND NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
+  curl_openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP)
 endif()
 
 option(USE_HTTPSRR "Enable HTTPS RR support" OFF)
