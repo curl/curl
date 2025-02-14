@@ -1773,7 +1773,7 @@ static bool match_pasv_6nums(const char *p,
         return FALSE;
       p++;
     }
-    if(!ISDIGIT(*p) || Curl_str_number(&p, &num, 0xff))
+    if(Curl_str_number(&p, &num, 0xff))
       return FALSE;
     array[i] = (unsigned int)num;
   }

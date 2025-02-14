@@ -2906,7 +2906,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
     if(*host_portno) {
       size_t portparse;
       const char *p = host_portno;
-      if(!ISDIGIT(*p) || Curl_str_number(&p, &portparse, 0xffff)) {
+      if(Curl_str_number(&p, &portparse, 0xffff)) {
         failf(data, "No valid port number in connect to host string (%s)",
               host_portno);
         result = CURLE_SETOPT_OPTION_SYNTAX;

@@ -568,9 +568,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         if(*p == ':') {
           size_t port = 0;
           p++;
-          if(!ISDIGIT(*p) ||
-             Curl_str_number(&p, &port, 0xffff) ||
-             (*p != '\"')) {
+          if(Curl_str_number(&p, &port, 0xffff) || (*p != '\"')) {
             infof(data, "Unknown alt-svc port number, ignoring.");
             valid = FALSE;
           }

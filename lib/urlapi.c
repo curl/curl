@@ -483,9 +483,6 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     if(!*portptr)
       return has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
 
-    if(!ISDIGIT(*portptr))
-      return CURLUE_BAD_PORT_NUMBER;
-
     if(Curl_str_number(&portptr, &port, 0xffff) || *portptr)
       return CURLUE_BAD_PORT_NUMBER;
 
