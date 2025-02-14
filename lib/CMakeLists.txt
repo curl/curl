@@ -68,10 +68,15 @@ endif()
 
 ## Library definition
 
-# Suffix implib name with "_imp" by default, to avoid conflicting with
-# the generated static "libcurl.lib" (typically with MSVC).
 if(NOT DEFINED IMPORT_LIB_SUFFIX)
-  set(IMPORT_LIB_SUFFIX "_imp")
+  # Suffix implib name with "_imp" by default, to avoid conflicting with
+  # the generated static "libcurl.lib" (typically with MSVC).
+  if(WIN32 AND BUILD_SHARED_LIBS AND
+     CMAKE_IMPORT_LIBRARY_SUFFIX STREQUAL CMAKE_STATIC_LIBRARY_SUFFIX)
+    set(IMPORT_LIB_SUFFIX "_imp")
+  else()
+    set(IMPORT_LIB_SUFFIX "")
+  endif()
 endif()
 if(NOT DEFINED STATIC_LIB_SUFFIX)
   set(STATIC_LIB_SUFFIX "")
