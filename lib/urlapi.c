@@ -468,7 +468,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     portptr = strchr(hostname, ':');
 
   if(portptr) {
-    size_t port;
+    curl_off_t port;
     size_t keep = portptr - hostname;
 
     /* Browser behavior adaptation. If there is a colon with no digits after,
@@ -489,7 +489,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     u->portnum = (unsigned short) port;
     /* generate a new port number string to get rid of leading zeroes etc */
     free(u->port);
-    u->port = aprintf("%zd", port);
+    u->port = aprintf("%" CURL_FORMAT_CURL_OFF_T, port);
     if(!u->port)
       return CURLUE_OUT_OF_MEMORY;
   }
@@ -596,7 +596,7 @@ static int ipv4_normalize(struct dynbuf *host)
   bool done = FALSE;
   int n = 0;
   const char *c = Curl_dyn_ptr(host);
-  unsigned long parts[4] = {0, 0, 0, 0};
+  unsigned int parts[4] = {0, 0, 0, 0};
   CURLcode result = CURLE_OK;
 
   if(*c == '[')
@@ -604,22 +604,24 @@ static int ipv4_normalize(struct dynbuf *host)
 
   errno = 0; /* for strtoul */
   while(!done) {
-    char *endp = NULL;
-    unsigned long l;
-    if(!ISDIGIT(*c))
-      /* most importantly this does not allow a leading plus or minus */
-      return HOST_NAME;
-    l = strtoul(c, &endp, 0);
-    if(errno)
-      return HOST_NAME;
-#if SIZEOF_LONG > 4
-    /* a value larger than 32 bits */
-    if(l > UINT_MAX)
-      return HOST_NAME;
-#endif
+    int rc;
+    curl_off_t l;
+    if(*c == '0') {
+      c++;
+      if(*c == 'x') {
+        c++; /* skip the prefix */
+        rc = Curl_str_hex(&c, &l, UINT_MAX);
+      }
+      else
+        rc = Curl_str_octal(&c, &l, UINT_MAX);
+    }
+    else
+      rc = Curl_str_number(&c, &l, UINT_MAX);
 
-    parts[n] = l;
-    c = endp;
+    if(rc)
+      return HOST_NAME;
+
+    parts[n] = (unsigned int)l;
 
     switch(*c) {
     case '.':
@@ -643,30 +645,30 @@ static int ipv4_normalize(struct dynbuf *host)
     Curl_dyn_reset(host);
 
     result = Curl_dyn_addf(host, "%u.%u.%u.%u",
-                           (unsigned int)(parts[0] >> 24),
-                           (unsigned int)((parts[0] >> 16) & 0xff),
-                           (unsigned int)((parts[0] >> 8) & 0xff),
-                           (unsigned int)(parts[0] & 0xff));
+                           (parts[0] >> 24),
+                           ((parts[0] >> 16) & 0xff),
+                           ((parts[0] >> 8) & 0xff),
+                           (parts[0] & 0xff));
     break;
   case 1: /* a.b -- 8.24 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xffffff))
       return HOST_NAME;
     Curl_dyn_reset(host);
     result = Curl_dyn_addf(host, "%u.%u.%u.%u",
-                           (unsigned int)(parts[0]),
-                           (unsigned int)((parts[1] >> 16) & 0xff),
-                           (unsigned int)((parts[1] >> 8) & 0xff),
-                           (unsigned int)(parts[1] & 0xff));
+                           (parts[0]),
+                           ((parts[1] >> 16) & 0xff),
+                           ((parts[1] >> 8) & 0xff),
+                           (parts[1] & 0xff));
     break;
   case 2: /* a.b.c -- 8.8.16 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xffff))
       return HOST_NAME;
     Curl_dyn_reset(host);
     result = Curl_dyn_addf(host, "%u.%u.%u.%u",
-                           (unsigned int)(parts[0]),
-                           (unsigned int)(parts[1]),
-                           (unsigned int)((parts[2] >> 8) & 0xff),
-                           (unsigned int)(parts[2] & 0xff));
+                           (parts[0]),
+                           (parts[1]),
+                           ((parts[2] >> 8) & 0xff),
+                           (parts[2] & 0xff));
     break;
   case 3: /* a.b.c.d -- 8.8.8.8 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xff) ||
@@ -674,10 +676,10 @@ static int ipv4_normalize(struct dynbuf *host)
       return HOST_NAME;
     Curl_dyn_reset(host);
     result = Curl_dyn_addf(host, "%u.%u.%u.%u",
-                           (unsigned int)(parts[0]),
-                           (unsigned int)(parts[1]),
-                           (unsigned int)(parts[2]),
-                           (unsigned int)(parts[3]));
+                           (parts[0]),
+                           (parts[1]),
+                           (parts[2]),
+                           (parts[3]));
     break;
   }
   if(result)
@@ -1745,11 +1747,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       return CURLUE_BAD_PORT_NUMBER;
     else {
       char *tmp;
-      size_t port;
+      curl_off_t port;
       if(Curl_str_number(&part, &port, 0xffff) || *part)
         /* weirdly provided number, not good! */
         return CURLUE_BAD_PORT_NUMBER;
-      tmp = aprintf("%zd", port);
+      tmp = aprintf("%" CURL_FORMAT_CURL_OFF_T, port);
       if(!tmp)
         return CURLUE_OUT_OF_MEMORY;
       free(u->port);

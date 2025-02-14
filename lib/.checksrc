@@ -3,3 +3,5 @@ banfunc strncpy
 banfunc sscanf
 banfunc snprintf
 banfunc vsnprint
+banfunc strtoul
+banfunc strtol

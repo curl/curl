@@ -547,7 +547,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           parser->item_length ++;
           if(c == ' ') {
             const char *p = &mem[parser->item_offset];
-            size_t hlinks;
+            curl_off_t hlinks;
             mem[parser->item_offset + parser->item_length - 1] = 0;
 
             if(!Curl_str_number(&p, &hlinks, LONG_MAX)) {

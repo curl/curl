@@ -35,7 +35,6 @@
 #include "curl_get_line.h"
 #include "strcase.h"
 #include "sendf.h"
-#include "strtoofft.h"
 #include "parsedate.h"
 #include "fopen.h"
 #include "rename.h"
@@ -59,13 +58,12 @@
 time_t deltatime; /* allow for "adjustments" for unit test purposes */
 static time_t hsts_debugtime(void *unused)
 {
-  char *timestr = getenv("CURL_TIME");
+  const char *timestr = getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
     curl_off_t val;
-    (void)curlx_strtoofft(timestr, NULL, 10, &val);
-
-    val += (curl_off_t)deltatime;
+    if(!Curl_str_number(&timestr, &val, TIME_T_MAX))
+      val += (curl_off_t)deltatime;
     return (time_t)val;
   }
   return time(NULL);
@@ -160,8 +158,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       p++;
     if(strncasecompare("max-age", p, 7)) {
       bool quoted = FALSE;
-      CURLofft offt;
-      char *endp;
+      int rc;
 
       if(gotma)
         return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -178,13 +175,13 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         p++;
         quoted = TRUE;
       }
-      offt = curlx_strtoofft(p, &endp, 10, &expires);
-      if(offt == CURL_OFFT_FLOW)
+      rc = Curl_str_number(&p, &expires, TIME_T_MAX);
+      if(rc == STRE_OVERFLOW)
         expires = CURL_OFF_T_MAX;
-      else if(offt)
+      else if(rc)
         /* invalid max-age */
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      p = endp;
+
       if(quoted) {
         if(*p != '\"')
           return CURLE_BAD_FUNCTION_ARGUMENT;

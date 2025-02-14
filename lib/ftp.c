@@ -54,7 +54,6 @@
 #include "ftplistparser.h"
 #include "curl_range.h"
 #include "curl_krb5.h"
-#include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
@@ -473,7 +472,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data)
       r += pp->nfinal;
 
       if(LASTLINE(r)) {
-        size_t status;
+        curl_off_t status;
         if(!Curl_str_number(&r, &status, 999) && (status == 226)) {
           /* funny timing situation where we get the final message on the
              control connection before traffic on the data connection has been
@@ -544,7 +543,7 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
 static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
                           const char *line, size_t len, int *code)
 {
-  size_t status;
+  curl_off_t status;
   (void)data;
   (void)conn;
 
@@ -929,8 +928,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     if(ip_end) {
       const char *portp = strchr(ip_end, ':');
       if(portp) {
-        size_t start;
-        size_t end;
+        curl_off_t start;
+        curl_off_t end;
         portp++;
         if(!Curl_str_number(&portp, &start, 0xffff)) {
           /* got the first number */
@@ -1767,7 +1766,7 @@ static bool match_pasv_6nums(const char *p,
 {
   int i;
   for(i = 0; i < 6; i++) {
-    size_t num;
+    curl_off_t num;
     if(i) {
       if(*p != ',')
         return FALSE;
@@ -1805,11 +1804,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       ptr++;
       /* |||12345| */
       sep = ptr[0];
-      /* the ISDIGIT() check here is because strtoul() accepts leading minus
-         etc */
       if((ptr[1] == sep) && (ptr[2] == sep) && ISDIGIT(ptr[3])) {
         const char *p = &ptr[3];
-        size_t num;
+        curl_off_t num;
         if(Curl_str_number(&p, &num, 0xffff) || (*p != sep)) {
           failf(data, "Illegal port number in EPSV reply");
           return CURLE_FTP_WEIRD_PASV_REPLY;
@@ -2297,7 +2294,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
        for all the digits at the end of the response and parse only those as a
        number. */
     char *start = &buf[4];
-    char *fdigit = memchr(start, '\r', len);
+    const char *fdigit = memchr(start, '\r', len);
     if(fdigit) {
       fdigit--;
       if(*fdigit == '\n')
@@ -2307,9 +2304,8 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
     }
     else
       fdigit = start;
-    /* ignores parsing errors, which will make the size remain unknown */
-    (void)curlx_strtoofft(fdigit, NULL, 10, &filesize);
-
+    if(Curl_str_number(&fdigit, &filesize, CURL_OFF_T_MAX))
+      filesize = -1; /* size remain unknown */
   }
   else if(ftpcode == 550) { /* "No such file or directory" */
     /* allow a SIZE failure for (resumed) uploads, when probing what command
@@ -2471,7 +2467,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
        * those cases only confuses us.
        *
        * Example D above makes this parsing a little tricky */
-      char *bytes;
+      const char *bytes;
       char *buf = Curl_dyn_ptr(&conn->proto.ftpc.pp.recvbuf);
       bytes = strstr(buf, " bytes");
       if(bytes) {
@@ -2493,7 +2489,8 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
         if(bytes) {
           ++bytes;
           /* get the number! */
-          (void)curlx_strtoofft(bytes, NULL, 10, &size);
+          if(Curl_str_number(&bytes, &size, CURL_OFF_T_MAX))
+            size = 1;
         }
       }
     }
