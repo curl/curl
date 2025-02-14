@@ -42,6 +42,7 @@
 #include "connect.h"
 #include "content_encoding.h"
 #include "cw-out.h"
+#include "cw-pause.h"
 #include "vtls/vtls.h"
 #include "vssh/ssh.h"
 #include "easyif.h"
@@ -433,21 +434,37 @@ static CURLcode do_init_writer_stack(struct Curl_easy *data)
   if(result)
     return result;
 
-  result = Curl_cwriter_create(&writer, data, &cw_download, CURL_CW_PROTOCOL);
+  /* This places the "pause" writer behind the "download" writer that
+   * is added below. Meaning the "download" can do checks on content length
+   * and other things *before* write outs are buffered for paused transfers. */
+  result = Curl_cwriter_create(&writer, data, &Curl_cwt_pause,
+                               CURL_CW_PROTOCOL);
+  if(!result) {
+    result = Curl_cwriter_add(data, writer);
+    if(result)
+      Curl_cwriter_free(data, writer);
+  }
   if(result)
     return result;
-  result = Curl_cwriter_add(data, writer);
-  if(result) {
-    Curl_cwriter_free(data, writer);
+
+  result = Curl_cwriter_create(&writer, data, &cw_download, CURL_CW_PROTOCOL);
+  if(!result) {
+    result = Curl_cwriter_add(data, writer);
+    if(result)
+      Curl_cwriter_free(data, writer);
   }
+  if(result)
+    return result;
 
   result = Curl_cwriter_create(&writer, data, &cw_raw, CURL_CW_RAW);
+  if(!result) {
+    result = Curl_cwriter_add(data, writer);
+    if(result)
+      Curl_cwriter_free(data, writer);
+  }
   if(result)
     return result;
-  result = Curl_cwriter_add(data, writer);
-  if(result) {
-    Curl_cwriter_free(data, writer);
-  }
+
   return result;
 }
 
@@ -492,6 +509,16 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
       return writer;
   }
   return NULL;
+}
+
+bool Curl_cwriter_is_content_decoding(struct Curl_easy *data)
+{
+  struct Curl_cwriter *writer;
+  for(writer = data->req.writer_stack; writer; writer = writer->next) {
+    if(writer->phase == CURL_CW_CONTENT_DECODE)
+      return TRUE;
+  }
+  return FALSE;
 }
 
 bool Curl_cwriter_is_paused(struct Curl_easy *data)
