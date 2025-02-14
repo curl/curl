@@ -67,17 +67,13 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize,
 /* mask for checking if read and/or write is set for index x */
 #define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
 
-/*
- * Curl_multi_closed()
- *
- * Used by the connect code to tell the multi_socket code that one of the
- * sockets we were using is about to be closed. This function will then
- * remove it from the sockethash for this handle to make the multi_socket API
- * behave properly, especially for the case when libcurl will create another
- * socket again and it gets the same file descriptor number.
+/**
+ * Let the multi handle know that the socket is about to be closed.
+ * The multi will then remove anything it knows about the socket, so
+ * when the OS is using this socket (number) again subsequently,
+ * the internal book keeping will not get confused.
  */
-
-void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
+void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s);
 
 /*
  * Add a handle and move it into PERFORM state at once. For pushed streams.

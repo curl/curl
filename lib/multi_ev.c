@@ -41,7 +41,7 @@
 #include "memdebug.h"
 
 
-static void multi_ev_in_callback(struct Curl_multi *multi, bool value)
+static void mev_in_callback(struct Curl_multi *multi, bool value)
 {
   multi->in_callback = value;
 }
@@ -50,108 +50,65 @@ static void multi_ev_in_callback(struct Curl_multi *multi, bool value)
  * We add one of these structs to the sockhash for each socket
  */
 
-#define TRHASH_SIZE 13
+#define CURL_MEV_TRHASH_SIZE 13
 
 /* the given key here is a struct Curl_easy pointer */
-static size_t trhash(void *key, size_t key_length, size_t slots_num)
+static size_t mev_tr_entry_hash(void *key, size_t key_length, size_t slots_num)
 {
   unsigned char bytes = ((unsigned char *)key)[key_length - 1] ^
     ((unsigned char *)key)[0];
   return (bytes % slots_num);
 }
 
-static size_t trhash_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
+static size_t mev_tr_entry_compare(void *k1, size_t k1_len,
+                                   void *k2, size_t k2_len)
 {
   (void)k2_len;
   return !memcmp(k1, k2, k1_len);
 }
 
-static void trhash_dtor(void *nada)
+static void mev_tr_entry_dtor(void *nada)
 {
   (void)nada;
 }
 
-/*
- * free a sockhash entry
+/* Information about a socket for which we inform the libcurl application
+ * what to supervise (CURL_POLL_IN/CURL_POLL_OUT/CURL_POLL_REMOVE)
  */
-static void sh_freeentry(void *freethis)
-{
-  struct Curl_sh_entry *p = (struct Curl_sh_entry *) freethis;
-
-  free(p);
-}
-
-struct Curl_sh_entry {
+struct mev_sh_entry {
   struct Curl_hash transfers; /* hash of transfers using this socket */
-  unsigned int action;  /* what combined action READ/WRITE this socket waits
-                           for */
-  void *socketp; /* settable by users with curl_multi_assign() */
+  void *user_data;      /* libcurl app data via curl_multi_assign() */
+  unsigned int action;  /* CURL_POLL_IN/CURL_POLL_OUT we last told the
+                         * libcurl application to watch out for */
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
 };
 
-static size_t fd_key_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
-{
-  (void) k1_len; (void) k2_len;
-
-  return (*((curl_socket_t *) k1)) == (*((curl_socket_t *) k2));
-}
-
-static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
+static size_t mev_sh_entry_hash(void *key, size_t key_length, size_t slots_num)
 {
   curl_socket_t fd = *((curl_socket_t *) key);
   (void) key_length;
-
   return (fd % (curl_socket_t)slots_num);
 }
 
-/*
- * sh_init() creates a new socket hash and returns the handle for it.
- *
- * Quote from README.multi_socket:
- *
- * "Some tests at 7000 and 9000 connections showed that the socket hash lookup
- * is somewhat of a bottle neck. Its current implementation may be a bit too
- * limiting. It simply has a fixed-size array, and on each entry in the array
- * it has a linked list with entries. The hash only checks which list to scan
- * through. The code I had used so for used a list with merely 7 slots (as
- * that is what the DNS hash uses) but with 7000 connections that would make
- * an average of 1000 nodes in each list to run through. I upped that to 97
- * slots (I believe a prime is suitable) and noticed a significant speed
- * increase. I need to reconsider the hash implementation or use a rather
- * large default value like this. At 9000 connections I was still below 10us
- * per call."
- *
- */
-static void sh_init(struct Curl_hash *hash, size_t hashsize)
+static size_t mev_sh_entry_compare(void *k1, size_t k1_len,
+                                   void *k2, size_t k2_len)
 {
-  Curl_hash_init(hash, hashsize, hash_fd, fd_key_compare,
-                 sh_freeentry);
+  (void) k1_len; (void) k2_len;
+  return (*((curl_socket_t *) k1)) == (*((curl_socket_t *) k2));
 }
 
-/*
- * The sockhash has its own separate subhash in each entry that need to be
- * safely destroyed first.
- */
-static void sockhash_destroy(struct Curl_hash *h)
+/* sockhash entry destructor callback */
+static void mev_sh_entry_dtor(void *freethis)
 {
-  struct Curl_hash_iterator iter;
-  struct Curl_hash_element *he;
-
-  DEBUGASSERT(h);
-  Curl_hash_start_iterate(h, &iter);
-  he = Curl_hash_next_element(&iter);
-  while(he) {
-    struct Curl_sh_entry *sh = (struct Curl_sh_entry *)he->ptr;
-    Curl_hash_destroy(&sh->transfers);
-    he = Curl_hash_next_element(&iter);
-  }
-  Curl_hash_destroy(h);
+  struct mev_sh_entry *entry = (struct mev_sh_entry *)freethis;
+  Curl_hash_destroy(&entry->transfers);
+  free(entry);
 }
 
 /* look up a given socket in the socket hash, skip invalid sockets */
-static struct Curl_sh_entry *sh_getentry(struct Curl_hash *sh,
-                                         curl_socket_t s)
+static struct mev_sh_entry *
+mev_sh_entry_get(struct Curl_hash *sh, curl_socket_t s)
 {
   if(s != CURL_SOCKET_BAD) {
     /* only look for proper sockets */
@@ -161,11 +118,11 @@ static struct Curl_sh_entry *sh_getentry(struct Curl_hash *sh,
 }
 
 /* make sure this socket is present in the hash for this handle */
-static struct Curl_sh_entry *sh_addentry(struct Curl_hash *sh,
-                                         curl_socket_t s)
+static struct mev_sh_entry *
+mev_sh_entry_add(struct Curl_hash *sh, curl_socket_t s)
 {
-  struct Curl_sh_entry *there = sh_getentry(sh, s);
-  struct Curl_sh_entry *check;
+  struct mev_sh_entry *there = mev_sh_entry_get(sh, s);
+  struct mev_sh_entry *check;
 
   if(there) {
     /* it is present, return fine */
@@ -173,55 +130,79 @@ static struct Curl_sh_entry *sh_addentry(struct Curl_hash *sh,
   }
 
   /* not present, add it */
-  check = calloc(1, sizeof(struct Curl_sh_entry));
+  check = calloc(1, sizeof(struct mev_sh_entry));
   if(!check)
     return NULL; /* major failure */
 
-  Curl_hash_init(&check->transfers, TRHASH_SIZE, trhash, trhash_compare,
-                 trhash_dtor);
+  Curl_hash_init(&check->transfers, CURL_MEV_TRHASH_SIZE, mev_tr_entry_hash,
+                 mev_tr_entry_compare, mev_tr_entry_dtor);
 
   /* make/add new hash entry */
   if(!Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check)) {
-    Curl_hash_destroy(&check->transfers);
-    free(check);
+    mev_sh_entry_dtor(check);
     return NULL; /* major failure */
   }
 
   return check; /* things are good in sockhash land */
 }
 
-/* delete the given socket + handle from the hash */
-static void sh_delentry(struct Curl_sh_entry *entry,
-                        struct Curl_hash *sh, curl_socket_t s)
+/* delete the given socket entry from the hash */
+static void mev_sh_entry_kill(struct Curl_multi *multi, curl_socket_t s)
 {
-  Curl_hash_destroy(&entry->transfers);
-
-  /* We remove the hash entry. This will end up in a call to
-     sh_freeentry(). */
-  Curl_hash_delete(sh, (char *)&s, sizeof(curl_socket_t));
+  Curl_hash_delete(&multi->ev.sh_entries, (char *)&s, sizeof(curl_socket_t));
 }
 
-static CURLMcode multi_sh_entry_closed(struct Curl_multi *multi,
-                                       struct Curl_easy *data,
-                                       struct Curl_sh_entry *entry,
-                                       curl_socket_t s)
+static size_t mev_sh_entry_xfer_count(struct mev_sh_entry *e)
 {
-  int rc = 0;
-  /* No one is interested in this socket any longer, report REMOVE
-   * and destroy entry */
+  return Curl_hash_count(&e->transfers);
+}
 
-  DEBUGASSERT(entry->readers <= 1);
-  DEBUGASSERT(entry->writers <= 1);
-  CURL_TRC_M(data, "sockhash, closed fd=%" FMT_SOCKET_T, s);
+static bool mev_sh_entry_xfer_known(struct mev_sh_entry *e,
+                                    struct Curl_easy *data)
+{
+  return !!Curl_hash_pick(&e->transfers, (char *)&data,
+                          sizeof(struct Curl_easy *));
+}
+
+static bool mev_sh_entry_xfer_add(struct mev_sh_entry *e,
+                                  struct Curl_easy *data)
+{
+   /* detect weird values */
+  DEBUGASSERT(mev_sh_entry_xfer_count(e) < 100000);
+  return !!Curl_hash_add(&e->transfers, (char *)&data, /* hash key */
+                         sizeof(struct Curl_easy *), data);
+}
+
+static bool mev_sh_entry_xfer_remove(struct mev_sh_entry *e,
+                                     struct Curl_easy *data)
+{
+  return !Curl_hash_delete(&e->transfers, (char *)&data,
+                           sizeof(struct Curl_easy *));
+}
+
+/* Purge any information about socket `s`.
+ * Let the socket callback know as well when necessary */
+static CURLMcode mev_forget_socket(struct Curl_multi *multi,
+                                   struct Curl_easy *data,
+                                   curl_socket_t s)
+{
+  struct mev_sh_entry *entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
+  int rc = 0;
+
+  if(!entry) /* we never knew or already forgot about this socket */
+    return CURLM_OK;
+
+  /* We managed this socket before, tell the socket callback to forget it. */
+  CURL_TRC_M(data, "ev, forget about fd=%" FMT_SOCKET_T, s);
   if(multi->socket_cb) {
-    CURL_TRC_M(data, "socket_callback(fd=%" FMT_SOCKET_T ", REMOVE)", s);
-    multi_ev_in_callback(multi, TRUE);
+    CURL_TRC_M(data, "ev, socket_callback(fd=%" FMT_SOCKET_T ", REMOVE)", s);
+    mev_in_callback(multi, TRUE);
     rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
-                          multi->socket_userp, entry->socketp);
-    multi_ev_in_callback(multi, FALSE);
+                          multi->socket_userp, entry->user_data);
+    mev_in_callback(multi, FALSE);
   }
 
-  sh_delentry(entry, &multi->sockhash, s);
+  mev_sh_entry_kill(multi, s);
   if(rc == -1) {
     multi->dead = TRUE;
     return CURLM_ABORTED_BY_CALLBACK;
@@ -229,17 +210,17 @@ static CURLMcode multi_sh_entry_closed(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-static CURLMcode multi_sh_entry_update(struct Curl_multi *multi,
-                                       struct Curl_easy *data,
-                                       struct Curl_sh_entry *entry,
-                                       curl_socket_t s,
-                                       unsigned char last_action,
-                                       unsigned char cur_action)
+static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
+                                     struct Curl_easy *data,
+                                     struct mev_sh_entry *entry,
+                                     curl_socket_t s,
+                                     unsigned char last_action,
+                                     unsigned char cur_action)
 {
   int rc, comboaction;
 
   /* Transfer `data` goes from `last_action` to `cur_action` on socket `s`
-   * with `multi->sockhash` entry `entry`. Update `entry` and trigger
+   * with `multi->ev.sh_entries` entry `entry`. Update `entry` and trigger
    * `multi->socket_cb` on change, if the callback is set. */
   if(last_action == cur_action)  /* nothing from `data` changed */
     return CURLM_OK;
@@ -260,14 +241,14 @@ static CURLMcode multi_sh_entry_update(struct Curl_multi *multi,
   else if(cur_action & CURL_POLL_OUT)
     entry->writers++;
 
-  DEBUGASSERT(entry->readers <= Curl_hash_count(&entry->transfers));
-  DEBUGASSERT(entry->writers <= Curl_hash_count(&entry->transfers));
+  DEBUGASSERT(entry->readers <= mev_sh_entry_xfer_count(entry));
+  DEBUGASSERT(entry->writers <= mev_sh_entry_xfer_count(entry));
   DEBUGASSERT(entry->writers + entry->readers);
 
   CURL_TRC_M(data, "sockhash fd=%" FMT_SOCKET_T ", action=0x%x, "
              "previously=0x%d, transfers=%zu, readers=%d, writers=%d",
              s, cur_action, last_action,
-             Curl_hash_count(&entry->transfers),
+             mev_sh_entry_xfer_count(entry),
              entry->readers, entry->writers);
 
   /* If no one is interested, do not compute and update the
@@ -285,11 +266,11 @@ static CURLMcode multi_sh_entry_update(struct Curl_multi *multi,
              s, (comboaction & CURL_POLL_IN) ? "POLLIN" : "",
              (comboaction == (CURL_POLL_IN|CURL_POLL_OUT)) ? "|" : "",
              (comboaction & CURL_POLL_OUT) ? "POLLOUT" : "");
-  multi_ev_in_callback(multi, TRUE);
+  mev_in_callback(multi, TRUE);
   rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
-                        entry->socketp);
+                        entry->user_data);
 
-  multi_ev_in_callback(multi, FALSE);
+  mev_in_callback(multi, FALSE);
   if(rc == -1) {
     multi->dead = TRUE;
     return CURLM_ABORTED_BY_CALLBACK;
@@ -300,12 +281,12 @@ static CURLMcode multi_sh_entry_update(struct Curl_multi *multi,
 
 CURLMcode Curl_multi_ev_pollset(struct Curl_multi *multi,
                                 struct Curl_easy *data,
-                                struct easy_pollset *ps,
-                                struct easy_pollset *last_ps)
+                                struct easy_pollset *ps)
 {
-  unsigned int i, j;
-  struct Curl_sh_entry *entry;
+  struct easy_pollset *last_ps;
+  struct mev_sh_entry *entry;
   curl_socket_t s;
+  unsigned int i, j;
   CURLMcode mresult;
 
   /* The transfer `data` reports in `ps` the sockets it is interested
@@ -316,6 +297,12 @@ CURLMcode Curl_multi_ev_pollset(struct Curl_multi *multi,
    * `last_ps` is the pollset copy from the previous call here. On
    * the 1st call it will be empty.
    */
+  /* For user transfers (id >= 0), we keep the last pollset at the transfer,
+   * for internal transfers, we keep it at the connection */
+  last_ps = (data && (data->id >= 0)) ? &data->last_poll :
+             (data->conn ? &data->conn->shutdown_poll : NULL);
+  if(!last_ps)
+    return CURLM_BAD_FUNCTION_ARGUMENT;
 
   /* Handle changes to sockets the transfer is interested in. */
   for(i = 0; i < ps->num; i++) {
@@ -324,31 +311,25 @@ CURLMcode Curl_multi_ev_pollset(struct Curl_multi *multi,
 
     s = ps->sockets[i];
     /* Have we handled this socket before? */
-    entry = sh_getentry(&multi->sockhash, s);
+    entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
     if(!entry) {
       /* new socket, add new entry */
       first_time_data = TRUE;
-      entry = sh_addentry(&multi->sockhash, s);
+      entry = mev_sh_entry_add(&multi->ev.sh_entries, s);
       if(!entry) /* fatal */
         return CURLM_OUT_OF_MEMORY;
       CURL_TRC_M(data, "sockhash, add fd=%" FMT_SOCKET_T, s);
     }
     else {
-      first_time_data = !Curl_hash_pick(&entry->transfers, (char *)&data,
-                                        sizeof(struct Curl_easy *));
+      first_time_data = !mev_sh_entry_xfer_known(entry, data);
     }
 
     last_action = 0;
     if(first_time_data) {
-      /* register 'data' as user of entry */
-      if(!Curl_hash_add(&entry->transfers, (char *)&data, /* hash key */
-                        sizeof(struct Curl_easy *), data)) {
-        Curl_hash_destroy(&entry->transfers); /* really??? */
+      if(!mev_sh_entry_xfer_add(entry, data)) {
         return CURLM_OUT_OF_MEMORY;
       }
       CURL_TRC_M(data, "sockhash fd=%" FMT_SOCKET_T ", add transfer", s);
-       /* detect weird values */
-      DEBUGASSERT(Curl_hash_count(&entry->transfers) < 100000);
     }
     else {
       /* if `data` was registered, its previous POLL_IN/OUT is relevant */
@@ -360,8 +341,8 @@ CURLMcode Curl_multi_ev_pollset(struct Curl_multi *multi,
       }
     }
     /* track readers/writers changes and report to socket callback */
-    mresult = multi_sh_entry_update(multi, data, entry, s,
-                                    last_action, ps->actions[i]);
+    mresult = mev_sh_entry_update(multi, data, entry, s,
+                                  last_action, ps->actions[i]);
     if(mresult)
       return mresult;
   }
@@ -381,14 +362,14 @@ CURLMcode Curl_multi_ev_pollset(struct Curl_multi *multi,
     if(stillused)
       continue;
 
-    entry = sh_getentry(&multi->sockhash, s);
-    /* if this is NULL here, the socket has been closed and notified so
-       already by Curl_multi_closed() */
+    entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
+    /* if entry does not exist, we were either never told about it or
+     * have already cleaned up this socket via Curl_multi_ev_will_close().
+     * In other words: this is perfectly normal */
     if(!entry)
       continue;
 
-    if(Curl_hash_delete(&entry->transfers, (char *)&data,
-                        sizeof(struct Curl_easy *))) {
+    if(!mev_sh_entry_xfer_remove(entry, data)) {
       /* `data` says in `last_ps` that it had been using a socket,
        * but `data` has not been registered for it.
        * This should not happen if our book-keeping is correct? */
@@ -398,20 +379,22 @@ CURLMcode Curl_multi_ev_pollset(struct Curl_multi *multi,
       continue;
     }
 
-    if(Curl_hash_count(&entry->transfers)) {
+    if(mev_sh_entry_xfer_count(entry)) {
       /* track readers/writers changes and report to socket callback */
-      mresult = multi_sh_entry_update(multi, data, entry, s,
-                                      last_ps->actions[i], 0);
+      mresult = mev_sh_entry_update(multi, data, entry, s,
+                                    last_ps->actions[i], 0);
       if(mresult)
         return mresult;
     }
     else {
-      mresult = multi_sh_entry_closed(multi, data, entry, s);
+      mresult = mev_forget_socket(multi, data, s);
       if(mresult)
         return mresult;
     }
   } /* for loop over num */
 
+  /* Remember for next time */
+  memcpy(last_ps, ps, sizeof(*last_ps));
   return CURLM_OK;
 }
 
@@ -419,13 +402,10 @@ CURLMcode Curl_multi_ev_assign(struct Curl_multi *multi,
                                curl_socket_t s,
                                void *user_data)
 {
-  struct Curl_sh_entry *there;
-
-  there = sh_getentry(&multi->sockhash, s);
-  if(!there)
+  struct mev_sh_entry *e = mev_sh_entry_get(&multi->ev.sh_entries, s);
+  if(!e)
     return CURLM_BAD_SOCKET;
-
-  there->socketp = user_data;
+  e->user_data = user_data;
   return CURLM_OK;
 }
 
@@ -435,12 +415,12 @@ void Curl_multi_ev_expire_transfers(struct Curl_multi *multi,
                                     const struct curltime *nowp,
                                     bool *run_cpool)
 {
-  struct Curl_sh_entry *entry;
+  struct mev_sh_entry *entry;
 
   if(s == CURL_SOCKET_TIMEOUT)
     return;
 
-  entry = sh_getentry(&multi->sockhash, s);
+  entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
 
   if(!entry) {
     /* Unmatched socket, we cannot act on it but we ignore this fact. In
@@ -475,38 +455,19 @@ void Curl_multi_ev_expire_transfers(struct Curl_multi *multi,
   }
 }
 
-/*
- * Curl_multi_closed()
- *
- * Used by the connect code to tell the multi_socket code that one of the
- * sockets we were using is about to be closed. This function will then
- * remove it from the sockethash for this handle to make the multi_socket API
- * behave properly, especially for the case when libcurl will create another
- * socket again and it gets the same file descriptor number.
- */
-void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
+void Curl_multi_ev_will_close(struct Curl_multi *multi,
+                              struct Curl_easy *data, curl_socket_t s)
 {
-  if(data) {
-    /* if there is still an easy handle associated with this connection */
-    struct Curl_multi *multi = data->multi;
-    CURL_TRC_M(data, "Curl_multi_closed, fd=%" FMT_SOCKET_T
-               " multi is %p", s, (void *)multi);
-    if(multi) {
-      /* this is set if this connection is part of a handle that is added to
-         a multi handle, and only then this is necessary */
-      struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
-      if(entry)
-        multi_sh_entry_closed(multi, data, entry, s);
-    }
-  }
+  mev_forget_socket(multi, data, s);
 }
 
 void Curl_multi_ev_init(struct Curl_multi *multi, size_t hashsize)
 {
-  sh_init(&multi->sockhash, hashsize);
+  Curl_hash_init(&multi->ev.sh_entries, hashsize, mev_sh_entry_hash,
+                 mev_sh_entry_compare, mev_sh_entry_dtor);
 }
 
 void Curl_multi_ev_cleanup(struct Curl_multi *multi)
 {
-  sockhash_destroy(&multi->sockhash);
+  Curl_hash_destroy(&multi->ev.sh_entries);
 }

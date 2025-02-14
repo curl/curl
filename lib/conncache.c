@@ -1138,12 +1138,8 @@ static CURLMcode cpool_update_shutdown_ev(struct Curl_multi *multi,
   memset(&ps, 0, sizeof(ps));
   Curl_attach_connection(data, conn);
   Curl_conn_adjust_pollset(data, &ps);
+  mresult = Curl_multi_ev_pollset(multi, data, &ps);
   Curl_detach_connection(data);
-
-  mresult = Curl_multi_ev_pollset(multi, data, &ps, &conn->shutdown_poll);
-
-  if(!mresult) /* Remember for next time */
-    memcpy(&conn->shutdown_poll, &ps, sizeof(ps));
   return mresult;
 }
 

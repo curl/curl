@@ -420,7 +420,7 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
 
   if(use_callback && conn && conn->fclosesocket) {
     int rc;
-    Curl_multi_closed(data, sock);
+    Curl_multi_will_close(data, sock);
     Curl_set_in_callback(data, TRUE);
     rc = conn->fclosesocket(conn->closesocket_client, sock);
     Curl_set_in_callback(data, FALSE);
@@ -429,7 +429,7 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
 
   if(conn)
     /* tell the multi-socket code about this */
-    Curl_multi_closed(data, sock);
+    Curl_multi_will_close(data, sock);
 
   sclose(sock);
 

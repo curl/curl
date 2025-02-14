@@ -2734,16 +2734,11 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
                               struct Curl_easy *data)
 {
   struct easy_pollset cur_poll;
-  CURLMcode mresult;
 
   /* Fill in the 'current' struct with the state as it is now: what sockets to
      supervise and for what actions */
   multi_getsock(data, &cur_poll);
-  mresult = Curl_multi_ev_pollset(multi, data, &cur_poll, &data->last_poll);
-
-  if(!mresult) /* Remember for next time */
-    memcpy(&data->last_poll, &cur_poll, sizeof(cur_poll));
-  return mresult;
+  return Curl_multi_ev_pollset(multi, data, &cur_poll);
 }
 
 
@@ -2754,6 +2749,17 @@ CURLcode Curl_updatesocket(struct Curl_easy *data)
   return CURLE_OK;
 }
 
+
+void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s)
+{
+  if(data) {
+    struct Curl_multi *multi = data->multi;
+    if(multi) {
+      CURL_TRC_M(data, "Curl_multi_will_close fd=%" FMT_SOCKET_T, s);
+      Curl_multi_ev_will_close(multi, data, s);
+    }
+  }
+}
 
 /*
  * add_next_timeout()
