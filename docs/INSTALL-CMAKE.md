@@ -180,13 +180,14 @@ available if the given CURL was built and installed using CMake.
 
 Since version 8.12.0, `CURLConfig.cmake` publishes the supported CURL features
 and protocols (see [release notes](https://curl.se/ch/8.12.0.html)). These can
-be specified using the `find_package` component selection keywords `COMPONENTS`
-and `OPTIONAL_COMPONENTS`, with protocols in all caps, e.g. `HTTPS`, `LDAP`,
-while features should be in their original sentence case, e.g. `AsynchDNS`,
+be specified using the `find_package` keywords `COMPONENTS` and
+`OPTIONAL_COMPONENTS`, with protocols in all caps, e.g. `HTTPS`, `LDAP`, while
+features should be in their original sentence case, e.g. `AsynchDNS`,
 `UnixSockets`. If any of the `COMPONENTS` are missing, then CURL is considered
 as *not* found.
 
-Example of using `COMPONENTS` and `OPTIONAL_COMPONENTS`:
+Here is an example of using `COMPONENTS` and `OPTIONAL_COMPONENTS` in
+`find_package` with CURL:
 
 ```cmake
 # CURL_FOUND is FALSE if no HTTPS but brotli and zstd can be missing
