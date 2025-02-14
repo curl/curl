@@ -28,9 +28,9 @@ fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   rm -rf bld-curl
-  cmake ../.. -B bld-curl
+  cmake ../.. -B bld-curl -DCMAKE_INSTALL_PREFIX="${PWD}/bld-curl/_pkg"
   cmake --build bld-curl
-  cmake --install bld-curl --prefix bld-curl/_pkg
+  cmake --install bld-curl
   rm -rf bld-find_package
   cmake -B bld-find_package \
     -DTEST_INTEGRATION_MODE=find_package \
