@@ -174,7 +174,7 @@ find_package(CURL 8.12.0 REQUIRED)  # FATAL_ERROR if CURL is not found
 
 This invokes the CMake-provided
 [FindCURL](https://cmake.org/cmake/help/latest/module/FindCURL.html) find module,
-which will first perform a search using the `find_package`
+which first performs a search using the `find_package`
 [config mode](https://cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure).
 This is supported by the `CURLConfig.cmake` CMake config script which is
 available if the given CURL was built and installed using CMake.
@@ -561,5 +561,5 @@ translates to:
     > cmake . -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
     > cmake --build . --config Debug
 
-Again, as noted previously, the Visual Studio generators will ignore
-`CMAKE_BUILD_TYPE` because they are multi-config generators.
+Again, as noted previously, the Visual Studio generators ignore the
+`CMAKE_BUILD_TYPE` variable because they are multi-config generators.
