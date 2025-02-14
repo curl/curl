@@ -43,7 +43,6 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "rand.h"
-#include "strtoofft.h"
 #include "strdup.h"
 #include "transfer.h"
 #include "dynbuf.h"

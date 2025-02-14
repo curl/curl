@@ -65,7 +65,6 @@
 #include "http.h" /* for HTTP proxy tunnel stuff */
 #include "socks.h"
 #include "pop3.h"
-#include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
