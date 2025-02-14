@@ -1681,7 +1681,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 
   if(!uc && zoneid) {
     const char *p = zoneid;
-    size_t scope;
+    curl_off_t scope;
     if(!Curl_str_number(&p, &scope, UINT_MAX))
       /* A plain number, use it directly as a scope id. */
       conn->scope_id = (unsigned int)scope;
@@ -1919,7 +1919,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
   }
   else {
-    size_t port;
+    curl_off_t port;
     bool valid = TRUE;
     if(data->set.use_port && data->state.allow_port)
       port = data->set.use_port;
@@ -2258,7 +2258,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   (void)curl_url_get(uhp, CURLUPART_PORT, &portptr, 0);
 
   if(portptr) {
-    size_t num;
+    curl_off_t num;
     const char *p = portptr;
     if(!Curl_str_number(&p, &num, 0xffff))
       port = (int)num;
@@ -2902,7 +2902,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
     *host_portno = '\0'; /* cut off number from hostname */
     host_portno++;
     if(*host_portno) {
-      size_t portparse;
+      curl_off_t portparse;
       const char *p = host_portno;
       if(Curl_str_number(&p, &portparse, 0xffff)) {
         failf(data, "No valid port number in connect to host string (%s)",
@@ -2981,9 +2981,9 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
       /* check whether the URL's port matches */
       char *ptr_next = strchr(ptr, ':');
       if(ptr_next) {
-        size_t port_to_match;
+        curl_off_t port_to_match;
         if(!Curl_str_number(&ptr, &port_to_match, 0xffff) &&
-           (port_to_match == (size_t)conn->remote_port))
+           (port_to_match == (curl_off_t)conn->remote_port))
           port_match = TRUE;
         ptr = ptr_next + 1;
       }

@@ -64,7 +64,7 @@
 #include "socks.h"
 #include "imap.h"
 #include "mime.h"
-#include "strtoofft.h"
+#include "strparse.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
@@ -1156,9 +1156,9 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
      the continuation data contained within the curly brackets */
   ptr = memchr(ptr, '{', len);
   if(ptr) {
-    char *endptr;
-    if(!curlx_strtoofft(ptr + 1, &endptr, 10, &size) &&
-       (endptr - ptr > 1 && *endptr == '}'))
+    ptr++;
+    if(!Curl_str_number(&ptr, &size, CURL_OFF_T_MAX) &&
+       !Curl_str_single(&ptr, '}'))
       parsed = TRUE;
   }
 

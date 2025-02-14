@@ -62,9 +62,14 @@ int Curl_str_single(const char **linep, char byte);
    return non-zero on error */
 int Curl_str_singlespace(const char **linep);
 
-/* Get an unsigned number
-   return non-zero on error */
-int Curl_str_number(const char **linep, size_t *nump, size_t max);
+/* Get an unsigned decimal number. Return non-zero on error */
+int Curl_str_number(const char **linep, curl_off_t *nump, curl_off_t max);
+
+/* Get an unsigned hexadecimal number. Return non-zero on error */
+int Curl_str_hex(const char **linep, curl_off_t *nump, curl_off_t max);
+
+/* Get an unsigned octal number. Return non-zero on error */
+int Curl_str_octal(const char **linep, curl_off_t *nump, curl_off_t max);
 
 /* Check for CR or LF
    return non-zero on error */

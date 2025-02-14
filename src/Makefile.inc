@@ -42,6 +42,8 @@ CURLX_CFILES = \
   ../lib/dynbuf.c \
   ../lib/nonblock.c \
   ../lib/strtoofft.c \
+  ../lib/strparse.c \
+  ../lib/strcase.c \
   ../lib/timediff.c \
   ../lib/version_win32.c \
   ../lib/warnless.c
@@ -53,6 +55,8 @@ CURLX_HFILES = \
   ../lib/dynbuf.h \
   ../lib/nonblock.h \
   ../lib/strtoofft.h \
+  ../lib/strparse.h \
+  ../lib/strcase.h \
   ../lib/timediff.h \
   ../lib/version_win32.h \
   ../lib/warnless.h

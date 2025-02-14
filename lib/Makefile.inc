@@ -226,6 +226,7 @@ LIB_CFILES =         \
   splay.c            \
   strcase.c          \
   strdup.c           \
+  strequal.c         \
   strerror.c         \
   strparse.c         \
   strtok.c           \

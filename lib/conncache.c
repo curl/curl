@@ -41,6 +41,7 @@
 #include "connect.h"
 #include "select.h"
 #include "strcase.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -682,10 +683,10 @@ static void cpool_close_and_destroy_all(struct cpool *cpool)
     /* Just for testing, run graceful shutdown */
 #ifdef DEBUGBUILD
   {
-    char *p = getenv("CURL_GRACEFUL_SHUTDOWN");
+    const char *p = getenv("CURL_GRACEFUL_SHUTDOWN");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l > 0 && l < INT_MAX)
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, INT_MAX))
         timeout_ms = (int)l;
     }
   }

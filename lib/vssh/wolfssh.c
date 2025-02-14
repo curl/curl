@@ -34,7 +34,6 @@
 #include "sendf.h"
 #include "progress.h"
 #include "curl_path.h"
-#include "strtoofft.h"
 #include "transfer.h"
 #include "speedcheck.h"
 #include "select.h"

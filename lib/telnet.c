@@ -864,8 +864,8 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
         /* Window Size */
         if(strncasecompare(option, "WS", 2)) {
           const char *p = arg;
-          size_t x = 0;
-          size_t y = 0;
+          curl_off_t x = 0;
+          curl_off_t y = 0;
           if(Curl_str_number(&p, &x, 0xffff) ||
              Curl_str_single(&p, 'x') ||
              Curl_str_number(&p, &y, 0xffff)) {

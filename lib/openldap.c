@@ -560,7 +560,9 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 #ifdef CURL_OPENLDAP_DEBUG
   if(do_trace < 0) {
     const char *env = getenv("CURL_OPENLDAP_TRACE");
-    do_trace = (env && strtol(env, NULL, 10) > 0);
+    curl_off_t e = 0;
+    if(!Curl_str_number(&env, &e, INT_MAX))
+      do_trace = e > 0;
   }
   if(do_trace)
     ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);

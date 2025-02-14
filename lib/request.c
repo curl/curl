@@ -34,6 +34,7 @@
 #include "sendf.h"
 #include "transfer.h"
 #include "url.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -194,11 +195,11 @@ static CURLcode xfer_send(struct Curl_easy *data,
     /* Allow debug builds to override this logic to force short initial
        sends */
     size_t body_len = blen - hds_len;
-    char *p = getenv("CURL_SMALLREQSEND");
+    const char *p = getenv("CURL_SMALLREQSEND");
     if(p) {
-      size_t body_small = (size_t)strtoul(p, NULL, 10);
-      if(body_small && body_small < body_len)
-        blen = hds_len + body_small;
+      curl_off_t body_small;
+      if(!Curl_str_number(&p, &body_small, body_len))
+        blen = hds_len + (size_t)body_small;
     }
   }
 #endif

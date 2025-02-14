@@ -926,7 +926,7 @@ CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
 CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 {
   if(checkprefix("CSeq:", header)) {
-    size_t CSeq = 0;
+    curl_off_t CSeq = 0;
     struct RTSP *rtsp = data->req.p.rtsp;
     const char *p = &header[5];
     while(ISBLANK(*p))
@@ -1007,7 +1007,7 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
       start++;
     end = strchr(start, ';');
     if(checkprefix("interleaved=", start)) {
-      size_t chan1, chan2, chan;
+      curl_off_t chan1, chan2, chan;
       const char *p = start + 12;
       if(!Curl_str_number(&p, &chan1, 255)) {
         unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;

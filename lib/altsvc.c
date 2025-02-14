@@ -159,10 +159,10 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
   struct Curl_str srcalpn;
   struct Curl_str dstalpn;
   struct Curl_str date;
-  size_t srcport;
-  size_t dstport;
-  size_t persist;
-  size_t prio;
+  curl_off_t srcport;
+  curl_off_t dstport;
+  curl_off_t persist;
+  curl_off_t prio;
 
   if(Curl_str_word(&line, &srcalpn, MAX_ALTSVC_ALPNLEN) ||
      Curl_str_singlespace(&line) ||
@@ -193,8 +193,8 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
     memcpy(dbuf, date.str, date.len);
     dbuf[date.len] = 0;
     expires = Curl_getdate_capped(dbuf);
-    as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn, srcport,
-                       dstport);
+    as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
+                       (size_t)srcport, (size_t)dstport);
     if(as) {
       as->expires = expires;
       as->prio = 0; /* not supported to just set zero */
@@ -465,10 +465,11 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
    return */
 static time_t altsvc_debugtime(void *unused)
 {
-  char *timestr = getenv("CURL_TIME");
+  const char *timestr = getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
-    long val = strtol(timestr, NULL, 10);
+    curl_off_t val;
+    Curl_str_number(&timestr, &val, TIME_T_MAX);
     return (time_t)val;
   }
   return time(NULL);
@@ -528,7 +529,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         size_t dstlen = 0; /* destination hostname length */
         const char *value_ptr;
         char option[32];
-        size_t num;
+        curl_off_t num;
         bool quoted = FALSE;
         time_t maxage = 24 * 3600; /* default is 24 hours */
         bool persist = FALSE;
@@ -566,7 +567,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           dstlen = strlen(srchost);
         }
         if(*p == ':') {
-          size_t port = 0;
+          curl_off_t port = 0;
           p++;
           if(Curl_str_number(&p, &port, 0xffff) || (*p != '\"')) {
             infof(data, "Unknown alt-svc port number, ignoring.");
@@ -617,7 +618,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             while(*p && !ISBLANK(*p) && *p!= ';' && *p != ',')
               p++;
           }
-          if(!Curl_str_number(&value_ptr, &num, SIZE_T_MAX)) {
+          if(!Curl_str_number(&value_ptr, &num, TIME_T_MAX)) {
             if(strcasecompare("ma", option))
               maxage = (time_t)num;
             else if(strcasecompare("persist", option) && (num == 1))

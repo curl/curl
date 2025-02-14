@@ -2871,9 +2871,12 @@ static void sftp_quote_stat(struct Curl_easy *data)
 
   /* Now set the new attributes... */
   if(strncasecompare(cmd, "chgrp", 5)) {
-    sshc->quote_attrs->gid = (uint32_t)strtoul(sshc->quote_path1, NULL, 10);
+    const char *p = sshc->quote_path1;
+    curl_off_t gid;
+    (void)Curl_str_number(&p, &gid, UINT_MAX);
+    sshc->quote_attrs->gid = (uint32_t)gid;
     if(sshc->quote_attrs->gid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
-        !sshc->acceptfail) {
+       !sshc->acceptfail) {
       Curl_safefree(sshc->quote_path1);
       Curl_safefree(sshc->quote_path2);
       failf(data, "Syntax error: chgrp gid not a number");
@@ -2885,10 +2888,9 @@ static void sftp_quote_stat(struct Curl_easy *data)
     sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_UIDGID;
   }
   else if(strncasecompare(cmd, "chmod", 5)) {
-    mode_t perms;
-    perms = (mode_t)strtoul(sshc->quote_path1, NULL, 8);
-    /* permissions are octal */
-    if(perms == 0 && !ISDIGIT(sshc->quote_path1[0])) {
+    curl_off_t perms;
+    const char *p = sshc->quote_path1;
+    if(Curl_str_octal(&p, &perms, 07777)) {
       Curl_safefree(sshc->quote_path1);
       Curl_safefree(sshc->quote_path2);
       failf(data, "Syntax error: chmod permissions not a number");
@@ -2897,13 +2899,15 @@ static void sftp_quote_stat(struct Curl_easy *data)
       sshc->actualcode = CURLE_QUOTE_ERROR;
       return;
     }
-    sshc->quote_attrs->permissions = perms;
+    sshc->quote_attrs->permissions = (mode_t)perms;
     sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_PERMISSIONS;
   }
   else if(strncasecompare(cmd, "chown", 5)) {
-    sshc->quote_attrs->uid = (uint32_t)strtoul(sshc->quote_path1, NULL, 10);
+    const char *p = sshc->quote_path1;
+    curl_off_t uid;
+    (void)Curl_str_number(&p, &uid, UINT_MAX);
     if(sshc->quote_attrs->uid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
-        !sshc->acceptfail) {
+       !sshc->acceptfail) {
       Curl_safefree(sshc->quote_path1);
       Curl_safefree(sshc->quote_path2);
       failf(data, "Syntax error: chown uid not a number");

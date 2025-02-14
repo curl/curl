@@ -39,6 +39,7 @@
 #include "transfer.h"
 #include "select.h"
 #include "nonblock.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -778,12 +779,11 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
     data->conn->proto.ws = ws;
 #ifdef DEBUGBUILD
     {
-      char *p = getenv("CURL_WS_CHUNK_SIZE");
+      const char *p = getenv("CURL_WS_CHUNK_SIZE");
       if(p) {
-        long l = strtol(p, NULL, 10);
-        if(l > 0 && l <= (1*1024*1024)) {
+        curl_off_t l;
+        if(!Curl_str_number(&p, &l, 1*1024*1024))
           chunk_size = (size_t)l;
-        }
       }
     }
 #endif
@@ -1032,12 +1032,11 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
     /* Simulate a blocking send after this chunk has been sent */
     bool eagain_next = FALSE;
     size_t chunk_egain = 0;
-    char *p = getenv("CURL_WS_CHUNK_EAGAIN");
+    const char *p = getenv("CURL_WS_CHUNK_EAGAIN");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l > 0 && l <= (1*1024*1024)) {
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, 1*1024*1024))
         chunk_egain = (size_t)l;
-      }
     }
 #endif
 
