@@ -73,6 +73,7 @@
 #include "http_proxy.h"
 #include "socks.h"
 #include "strdup.h"
+#include "strparse.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -464,7 +465,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data)
   if(response) {
     infof(data, "Ctrl conn has data while waiting for data conn");
     if(pp->overflow > 3) {
-      char *r = Curl_dyn_ptr(&pp->recvbuf);
+      const char *r = Curl_dyn_ptr(&pp->recvbuf);
 
       DEBUGASSERT((pp->overflow + pp->nfinal) <=
                   Curl_dyn_len(&pp->recvbuf));
@@ -472,8 +473,8 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data)
       r += pp->nfinal;
 
       if(LASTLINE(r)) {
-        int status = curlx_sltosi(strtol(r, NULL, 10));
-        if(status == 226) {
+        size_t status;
+        if(!Curl_str_number(&r, &status, 999) && (status == 226)) {
           /* funny timing situation where we get the final message on the
              control connection before traffic on the data connection has been
              noticed. Leave the 226 in there and use this as a trigger to read
@@ -541,13 +542,14 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
 }
 
 static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
-                          char *line, size_t len, int *code)
+                          const char *line, size_t len, int *code)
 {
+  size_t status;
   (void)data;
   (void)conn;
 
-  if((len > 3) && LASTLINE(line)) {
-    *code = curlx_sltosi(strtol(line, NULL, 10));
+  if((len > 3) && LASTLINE(line) && !Curl_str_number(&line, &status, 999)) {
+    *code = (int)status;
     return TRUE;
   }
 
@@ -925,13 +927,20 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
     /* parse the port */
     if(ip_end) {
-      char *port_sep = NULL;
-      char *port_start = strchr(ip_end, ':');
-      if(port_start) {
-        port_min = curlx_ultous(strtoul(port_start + 1, NULL, 10));
-        port_sep = strchr(port_start, '-');
-        if(port_sep) {
-          port_max = curlx_ultous(strtoul(port_sep + 1, NULL, 10));
+      const char *portp = strchr(ip_end, ':');
+      if(portp) {
+        size_t start;
+        size_t end;
+        portp++;
+        if(!Curl_str_number(&portp, &start, 0xffff)) {
+          /* got the first number */
+          port_min = (unsigned short)start;
+          if(!Curl_str_single(&portp, '-')) {
+            /* got the dash */
+            if(!Curl_str_number(&portp, &end, 0xffff))
+              /* got the second number */
+              port_max = (unsigned short)end;
+          }
         }
         else
           port_max = port_min;
@@ -1758,20 +1767,15 @@ static bool match_pasv_6nums(const char *p,
 {
   int i;
   for(i = 0; i < 6; i++) {
-    unsigned long num;
-    char *endp;
+    size_t num;
     if(i) {
       if(*p != ',')
         return FALSE;
       p++;
     }
-    if(!ISDIGIT(*p))
-      return FALSE;
-    num = strtoul(p, &endp, 10);
-    if(num > 255)
+    if(Curl_str_number(&p, &num, 0xff))
       return FALSE;
     array[i] = (unsigned int)num;
-    p = endp;
   }
   return TRUE;
 }
@@ -1804,20 +1808,16 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       /* the ISDIGIT() check here is because strtoul() accepts leading minus
          etc */
       if((ptr[1] == sep) && (ptr[2] == sep) && ISDIGIT(ptr[3])) {
-        char *endp;
-        unsigned long num = strtoul(&ptr[3], &endp, 10);
-        if(*endp != sep)
-          ptr = NULL;
-        else if(num > 0xffff) {
+        const char *p = &ptr[3];
+        size_t num;
+        if(Curl_str_number(&p, &num, 0xffff) || (*p != sep)) {
           failf(data, "Illegal port number in EPSV reply");
           return CURLE_FTP_WEIRD_PASV_REPLY;
         }
-        if(ptr) {
-          ftpc->newport = (unsigned short)(num & 0xffff);
-          ftpc->newhost = strdup(control_address(conn));
-          if(!ftpc->newhost)
-            return CURLE_OUT_OF_MEMORY;
-        }
+        ftpc->newport = (unsigned short)num;
+        ftpc->newhost = strdup(control_address(conn));
+        if(!ftpc->newhost)
+          return CURLE_OUT_OF_MEMORY;
       }
       else
         ptr = NULL;

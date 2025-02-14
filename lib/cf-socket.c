@@ -83,6 +83,7 @@
 #include "share.h"
 #include "strdup.h"
 #include "version_win32.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -741,10 +742,9 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
                Curl_printable_address. The latter returns only numeric scope
                IDs and the former returns none at all. So the scope ID, if
                present, is known to be numeric */
-            unsigned long scope_id = strtoul(scope_ptr, NULL, 10);
-            if(scope_id > UINT_MAX)
+            size_t scope_id;
+            if(Curl_str_number((const char **)&scope_ptr, &scope_id, UINT_MAX))
               return CURLE_UNSUPPORTED_PROTOCOL;
-
             si6->sin6_scope_id = (unsigned int)scope_id;
           }
 #endif
@@ -931,15 +931,6 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
     return CURLE_COULDNT_CONNECT;
   }
 }
-
-/* We have a recv buffer to enhance reads with len < NW_SMALL_READS.
- * This happens often on TLS connections where the TLS implementation
- * tries to read the head of a TLS record, determine the length of the
- * full record and then make a subsequent read for that.
- * On large reads, we will not fill the buffer to avoid the double copy. */
-#define NW_RECV_CHUNK_SIZE    (64 * 1024)
-#define NW_RECV_CHUNKS         1
-#define NW_SMALL_READS        (1024)
 
 struct cf_socket_ctx {
   int transport;

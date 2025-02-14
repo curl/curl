@@ -58,6 +58,8 @@
 #include "warnless.h"
 #include "strcase.h"
 #include "easy_lock.h"
+#include "strparse.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -1122,7 +1124,7 @@ void Curl_hostcache_clean(struct Curl_easy *data,
 CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct curl_slist *hostp;
-  char *host_end;
+  const char *host_end;
 
   /* Default is no wildcard found */
   data->state.wildcard_resolve = FALSE;
@@ -1132,15 +1134,15 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
     if(!hostp->data)
       continue;
     if(hostp->data[0] == '-') {
-      unsigned long num = 0;
+      size_t num = 0;
       size_t entry_len;
       size_t hlen = 0;
       host_end = strchr(&hostp->data[1], ':');
 
       if(host_end) {
         hlen = host_end - &hostp->data[1];
-        num = strtoul(++host_end, NULL, 10);
-        if(!hlen || (num > 0xffff))
+        host_end++;
+        if(Curl_str_number(&host_end, &num, 0xffff))
           host_end = NULL;
       }
       if(!host_end) {
@@ -1166,15 +1168,14 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       size_t entry_len;
       char address[64];
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-      char *addresses = NULL;
+      const char *addresses = NULL;
 #endif
-      char *addr_begin;
-      char *addr_end;
-      char *port_ptr;
-      int port = 0;
-      char *end_ptr;
+      const char *addr_begin;
+      const char *addr_end;
+      const char *port_ptr;
+      size_t port = 0;
+      const char *end_ptr;
       bool permanent = TRUE;
-      unsigned long tmp_port;
       bool error = TRUE;
       char *host_begin = hostp->data;
       size_t hlen = 0;
@@ -1189,11 +1190,11 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       hlen = host_end - host_begin;
 
       port_ptr = host_end + 1;
-      tmp_port = strtoul(port_ptr, &end_ptr, 10);
-      if(tmp_port > USHRT_MAX || end_ptr == port_ptr || *end_ptr != ':')
+      if(Curl_str_number(&port_ptr, &port, 0xffff) ||
+         (*port_ptr != ':'))
         goto err;
+      end_ptr = port_ptr;
 
-      port = (int)tmp_port;
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       addresses = end_ptr + 1;
 #endif
@@ -1234,7 +1235,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         }
 #endif
 
-        ai = Curl_str2addr(address, port);
+        ai = Curl_str2addr(address, (int)port);
         if(!ai) {
           infof(data, "Resolve address '%s' found illegal", address);
           goto err;
@@ -1262,7 +1263,7 @@ err:
       }
 
       /* Create an entry id, based upon the hostname and port */
-      entry_len = create_hostcache_id(host_begin, hlen, port,
+      entry_len = create_hostcache_id(host_begin, hlen, (int)port,
                                       entry_id, sizeof(entry_id));
 
       if(data->share)
@@ -1272,7 +1273,7 @@ err:
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
-        infof(data, "RESOLVE %.*s:%d - old addresses discarded",
+        infof(data, "RESOLVE %.*s:%zd - old addresses discarded",
               (int)hlen, host_begin, port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
@@ -1289,7 +1290,8 @@ err:
       }
 
       /* put this new host in the cache */
-      dns = Curl_cache_addr(data, head, host_begin, hlen, port, permanent);
+      dns = Curl_cache_addr(data, head, host_begin, hlen, (int)port,
+                            permanent);
       if(dns) {
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
@@ -1304,14 +1306,14 @@ err:
         return CURLE_OUT_OF_MEMORY;
       }
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-      infof(data, "Added %.*s:%d:%s to DNS cache%s",
+      infof(data, "Added %.*s:%zd:%s to DNS cache%s",
             (int)hlen, host_begin, port, addresses,
             permanent ? "" : " (non-permanent)");
 #endif
 
       /* Wildcard hostname */
       if((hlen == 1) && (host_begin[0] == '*')) {
-        infof(data, "RESOLVE *:%d using wildcard", port);
+        infof(data, "RESOLVE *:%zd using wildcard", port);
         data->state.wildcard_resolve = TRUE;
       }
     }

@@ -69,7 +69,7 @@ struct pingpong {
 
   CURLcode (*statemachine)(struct Curl_easy *data, struct connectdata *conn);
   bool (*endofresp)(struct Curl_easy *data, struct connectdata *conn,
-                    char *ptr, size_t len, int *code);
+                    const char *ptr, size_t len, int *code);
 };
 
 #define PINGPONG_SETUP(pp,s,e)                   \

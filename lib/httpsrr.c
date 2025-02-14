@@ -100,7 +100,7 @@ static void httpsrr_opt(struct Curl_easy *data,
   size_t len = 0;
   const unsigned char *val = NULL;
   unsigned short code;
-  struct thread_data *res = data->state.async.tdata;
+  struct thread_data *res = &data->state.async.thdata;
   struct Curl_https_rrinfo *hi = &res->hinfo;
   code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
 
@@ -138,7 +138,7 @@ void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
   struct Curl_easy *data = arg;
   size_t i;
 #ifdef CURLRES_ARES
-  struct thread_data *res = data->state.async.tdata;
+  struct thread_data *res = &data->state.async.thdata;
 
   res->num_pending--;
 #endif

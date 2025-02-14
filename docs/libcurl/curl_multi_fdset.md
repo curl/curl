@@ -100,6 +100,10 @@ int main(void)
 
     /* call curl_multi_perform() */
 
+    FD_ZERO(&fdread);
+    FD_ZERO(&fdwrite);
+    FD_ZERO(&fdexcep);
+
     /* get file descriptors from the transfers */
     mc = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 

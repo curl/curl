@@ -528,8 +528,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         size_t dstlen = 0; /* destination hostname length */
         const char *value_ptr;
         char option[32];
-        unsigned long num;
-        char *end_ptr;
+        size_t num;
         bool quoted = FALSE;
         time_t maxage = 24 * 3600; /* default is 24 hours */
         bool persist = FALSE;
@@ -567,21 +566,14 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           dstlen = strlen(srchost);
         }
         if(*p == ':') {
-          unsigned long port = 0;
+          size_t port = 0;
           p++;
-          if(ISDIGIT(*p))
-            /* a port number */
-            port = strtoul(p, &end_ptr, 10);
-          else
-            end_ptr = (char *)p; /* not left uninitialized */
-          if(!port || port > USHRT_MAX || end_ptr == p || *end_ptr != '\"') {
+          if(Curl_str_number(&p, &port, 0xffff) || (*p != '\"')) {
             infof(data, "Unknown alt-svc port number, ignoring.");
             valid = FALSE;
           }
-          else {
-            dstport = curlx_ultous(port);
-            p = end_ptr;
-          }
+          else
+            dstport = (unsigned short)port;
         }
         if(*p++ != '\"')
           break;
@@ -625,8 +617,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             while(*p && !ISBLANK(*p) && *p!= ';' && *p != ',')
               p++;
           }
-          num = strtoul(value_ptr, &end_ptr, 10);
-          if((end_ptr != value_ptr) && (num < ULONG_MAX)) {
+          if(!Curl_str_number(&value_ptr, &num, SIZE_T_MAX)) {
             if(strcasecompare("ma", option))
               maxage = (time_t)num;
             else if(strcasecompare("persist", option) && (num == 1))
