@@ -63,7 +63,7 @@ static CURLcode unit_setup(void)
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
-  curl_global_trace("all");
+  curl_global_trace("protocol");
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
   return res;
 }
