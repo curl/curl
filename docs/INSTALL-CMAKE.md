@@ -159,6 +159,9 @@ assumes that CMake generates `Makefile`:
 
 # CMake usage
 
+Just as CURL can be built and installed using CMake, it can also be used from
+CMake.
+
 ## Using `find_package`
 
 To locate libcurl from CMake, one can use the standard
