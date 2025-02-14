@@ -135,6 +135,7 @@ jobs:
             install: llvm
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_APPLE_IDN=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
             clang-tidy: true
+            chkprefill: _chkprefill
           - name: 'OpenSSL +static libssh +examples'
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
@@ -228,11 +229,19 @@ jobs:
           fi
 
           if [ -n '${{ matrix.build.generate }}' ]; then
-            [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
-            cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              -DCMAKE_OSX_SYSROOT="${sysroot}" \
-              -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-              ${{ matrix.build.generate }} ${options}
+            for _chkprefill in '' ${{ matrix.build.chkprefill }}; do
+              options=''
+              [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
+              [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+              cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
+                -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+                -DCMAKE_OSX_SYSROOT="${sysroot}" \
+                -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
+                ${{ matrix.build.generate }} ${options}
+            done
+            if [ -d bld_chkprefill ]; then
+              diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h
+            fi
           else
             export CFLAGS
             if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
@@ -443,7 +452,8 @@ jobs:
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
             [ -n '${{ matrix.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, and libssh2
-            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+            cmake -B bld -D_CURL_PREFILL=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \

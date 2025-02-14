@@ -85,7 +85,7 @@ jobs:
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-            cmake -B bld -G Ninja ${options} \
+            cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
@@ -180,7 +180,7 @@ jobs:
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: ''                        , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON', type: 'Release', test: 'uwp', name: 'schannel' }
           # { build: 'autotools', sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '--without-debug --with-schannel --enable-shared', type: 'Release', test: 'uwp', name: 'schannel' }
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug' }
@@ -218,6 +218,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
+            ${{ matrix.chkprefill == '_chkprefill' && format('mingw-w64-{0}-diffutils', matrix.env) || '' }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -241,20 +242,27 @@ jobs:
             fi
           fi
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            if [[ '${{ matrix.env }}' = 'clang'* ]]; then
-              options='-DCMAKE_C_COMPILER=clang'
-            else
-              options='-DCMAKE_C_COMPILER=gcc'
+            for _chkprefill in '' ${{ matrix.chkprefill }}; do
+              if [[ '${{ matrix.env }}' = 'clang'* ]]; then
+                options='-DCMAKE_C_COMPILER=clang'
+              else
+                options='-DCMAKE_C_COMPILER=gcc'
+              fi
+              [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
+              [ '${{ matrix.test }}' = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
+              [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
+              [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+              cmake -B "bld${_chkprefill}" -G Ninja ${options} \
+                -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
+                -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+                -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+                -DCURL_WERROR=ON \
+                ${{ matrix.config }}
+            done
+            if [ -d bld_chkprefill ]; then
+              diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h
             fi
-            [ '${{ matrix.test }}' = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
-            [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-            [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
-            cmake -B bld -G Ninja ${options} \
-              -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
-              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
-              -DCURL_WERROR=ON \
-              ${{ matrix.config }}
           else
             export CFLAGS CPPFLAGS
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
@@ -667,6 +675,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516'
+            chkprefill: '_chkprefill'
             # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
             #          read its configuration from, making it vulnerable to attacks on
             #          Windows. Do not use this component till there is a fix for these.
@@ -718,31 +727,38 @@ jobs:
         timeout-minutes: 5
         run: |
           [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
-          if [ '${{ matrix.plat }}' = 'uwp' ]; then
-            options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
-            cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
-            ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
-            vsglobals=';AppxPackage=false;WindowsAppContainer=false'
+          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+            options=''
+            if [ '${{ matrix.plat }}' = 'uwp' ]; then
+              options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
+              ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
+              vsglobals=';AppxPackage=false;WindowsAppContainer=false'
+            fi
+            [ '${{ matrix.arch }}' = 'arm64' ] && options+=' -A ARM64'
+            [ '${{ matrix.arch }}' = 'x64' ] && options+=' -A x64'
+            [ '${{ matrix.arch }}' = 'x86' ] && options+=' -A Win32'
+            [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+            cmake -B "bld${_chkprefill}" ${options} \
+              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+              -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
+              -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
+              -DCMAKE_C_FLAGS="${cflags}" \
+              -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
+              -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
+              -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
+              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DENABLE_DEBUG=ON \
+              -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
+              ${{ matrix.config }}
+          done
+          if [ -d bld_chkprefill ]; then
+            diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h
           fi
-          [ '${{ matrix.arch }}' = 'arm64' ] && options+=' -A ARM64'
-          [ '${{ matrix.arch }}' = 'x64' ] && options+=' -A x64'
-          [ '${{ matrix.arch }}' = 'x86' ] && options+=' -A Win32'
-          cmake -B bld ${options} \
-            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-            -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
-            -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
-            -DCMAKE_C_FLAGS="${cflags}" \
-            -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-            -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-            -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
-            -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-            -DCURL_WERROR=ON \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DENABLE_DEBUG=ON \
-            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
-            ${{ matrix.config }}
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
