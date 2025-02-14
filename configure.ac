@@ -1719,7 +1719,8 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
       #endif
       int main(void)
       {
-        struct sockaddr_in6 s;
+        struct sockaddr_in6 s = { 0 };
+        (void)s;
         return socket(AF_INET6, SOCK_STREAM, 0) < 0;
       }
     ]])
