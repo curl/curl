@@ -21,6 +21,12 @@ CMake's GUIs.
 A CMake configuration of curl is similar to the autotools build of curl.
 It consists of the following steps after you have unpacked the source.
 
+We recommend building with CMake on Windows. For instructions on migrating
+from the `projects/Windows` Visual Studio solution files, see
+[this section](#migrating-from-visual-studio-ide-project-files). For
+instructions on migrating from the winbuild builds, see
+[the following section](#migrating-from-winbuild-builds).
+
 ## Using `cmake`
 
 You can configure for in source tree builds or for a build tree
@@ -31,9 +37,13 @@ that is apart from the source tree.
        $ cmake -B .
 
  - Build in a separate directory (parallel to the curl source tree in this
-   example). The build directory is created for you.
+   example). The build directory is created for you. This is recommended over
+   building in the source tree to separate source and build artifacts.
 
        $ cmake -B ../curl-build
+
+For the full list of CMake build configuration variables see
+[the corresponding section](#cmake-build-options).
 
 ### Fallback for CMake before version 3.13
 
@@ -129,6 +139,12 @@ Install to default location (you have to specify the build directory).
 
     $ cmake --install ../curl-build
 
+Do not use `--prefix` to change the installation prefix as the output produced
+by the `curl-config` script is determined at CMake configure time. If you want
+to set a custom install prefix for curl, set
+[`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
+when configuring the CMake build.
+
 ### Fallback for CMake before version 3.15
 
 CMake before version 3.15 does not support the `--install` option. In that
@@ -138,6 +154,68 @@ assumes that CMake generates `Makefile`:
 
     $ cd ../curl-build
     $ make install
+
+# CMake usage
+
+Just as curl can be built and installed using CMake, it can also be used from
+CMake.
+
+## Using `find_package`
+
+To locate libcurl from CMake, one can use the standard
+[`find_package`](https://cmake.org/cmake/help/latest/command/find_package.html)
+command in the typical fashion:
+
+```cmake
+find_package(CURL 8.12.0 REQUIRED)  # FATAL_ERROR if CURL is not found
+```
+
+This invokes the CMake-provided
+[FindCURL](https://cmake.org/cmake/help/latest/module/FindCURL.html) find module,
+which first performs a search using the `find_package`
+[config mode](https://cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure).
+This is supported by the `CURLConfig.cmake` CMake config script which is
+available if the given CURL was built and installed using CMake.
+
+### Detecting CURL features/protocols
+
+Since version 8.12.0, `CURLConfig.cmake` publishes the supported CURL features
+and protocols (see [release notes](https://curl.se/ch/8.12.0.html)). These can
+be specified using the `find_package` keywords `COMPONENTS` and
+`OPTIONAL_COMPONENTS`, with protocols in all caps, e.g. `HTTPS`, `LDAP`, while
+features should be in their original sentence case, e.g. `AsynchDNS`,
+`UnixSockets`. If any of the `COMPONENTS` are missing, then CURL is considered
+as *not* found.
+
+Here is an example of using `COMPONENTS` and `OPTIONAL_COMPONENTS` in
+`find_package` with CURL:
+
+```cmake
+# CURL_FOUND is FALSE if no HTTPS but brotli and zstd can be missing
+find_package(CURL 8.12.0 COMPONENTS HTTPS OPTIONAL_COMPONENTS brotli zstd)
+```
+
+One can also check the defined `CURL_SUPPORTS_<feature-or-protocol>` variables
+if a particular feature/protocol is supported. For example:
+
+```cmake
+# check HTTPS
+if(CURL_SUPPORTS_HTTPS)
+  message(STATUS "CURL supports HTTPS")
+else()
+  message(STATUS "CURL does NOT support HTTPS")
+endif()
+```
+
+### Linking against libcurl
+
+To link a CMake target against libcurl one can use
+[`target_link_libraries`](https://cmake.org/cmake/help/latest/command/target_link_libraries.html)
+as usual:
+
+```cmake
+target_link_libraries(my_target PRIVATE CURL::libcurl)
+```
 
 # CMake build options
 
@@ -380,7 +458,7 @@ Details via CMake
 
 # Migrating from Visual Studio IDE Project Files
 
-We recommend CMake to build curl with MSVC.
+We recommend using CMake to build curl with MSVC.
 
 The project build files reside in project/Windows/VC\* for VS2010, VS2010 and
 VS2013 respectively.
@@ -400,8 +478,8 @@ Configuration element             | Equivalent CMake options
 `Win32`                           | `-A Win32`
 `DLL`                             | `BUILD_SHARED_LIBS=ON`, `BUILD_STATIC_LIBS=OFF`, (default)
 `LIB`                             | `BUILD_SHARED_LIBS=OFF`, `BUILD_STATIC_LIBS=ON`
-`Debug`                           | `CMAKE_BUILD_TYPE=Debug`
-`Release`                         | `CMAKE_BUILD_TYPE=Release`
+`Debug`                           | `CMAKE_BUILD_TYPE=Debug` (`-G "NMake Makefiles"` only)
+`Release`                         | `CMAKE_BUILD_TYPE=Release` (`-G "NMake Makefiles"` only)
 `DLL Windows SSPI`                | `CURL_USE_SCHANNEL=ON` (with SSPI enabled by default)
 `DLL OpenSSL`                     | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
 `DLL libssh2`                     | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
@@ -415,7 +493,13 @@ For example these commands:
 
 translate to:
 
-    > cmake . -G "Visual Studio 12 2013" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DCURL_USE_LIBPSL=OFF
+    > cmake . -G "Visual Studio 12 2013" -A x64 -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DCURL_USE_LIBPSL=OFF
+    > cmake --build . --config Debug --parallel
+
+We do *not* specify `-DCMAKE_BUILD_TYPE=Debug` here as we might do for the
+`"NMake Makefiles"` generator because the Visual Studio generators are
+[multi-config generators](https://cmake.org/cmake/help/latest/prop_gbl/GENERATOR_IS_MULTI_CONFIG.html)
+and therefore ignore the value of `CMAKE_BUILD_TYPE`.
 
 # Migrating from winbuild builds
 
@@ -438,7 +522,7 @@ winbuild options                  | Equivalent CMake options
 `DEBUG`                           | `CMAKE_BUILD_TYPE=Debug`
 `GEN_PDB`                         | `CMAKE_EXE_LINKER_FLAGS=/Fd<path>`, `CMAKE_SHARED_LINKER_FLAGS=/Fd<path>`
 `LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBCURL_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
-`VC`                              | see CMake `-G` [options](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+`VC`: `<N>`                       | see the CMake [Visual Studio generators](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#visual-studio-generators)
 `MACHINE`: `x64`, `x86`           | `-A x64`, `-A Win32`
 `MODE`: `dll`, `static`           | `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF` (default: dll)
 `RTLIBCFG`: `static`              | `CURL_STATIC_CRT=ON`
@@ -468,4 +552,8 @@ For example this command-line:
 
 translates to:
 
-    > cmake . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
+    > cmake . -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
+    > cmake --build . --config Debug
+
+We use `--config` with `cmake --build` because the Visual Studio CMake
+generators are multi-config and therefore ignore `CMAKE_BUILD_TYPE`.
