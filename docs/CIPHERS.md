@@ -137,7 +137,7 @@ for a list of these algorithms. Also, (since curl 7.77.0)
 [documentation for the Windows version in
 use](https://learn.microsoft.com/en-us/windows/win32/secauthn/cipher-suites-in-schannel)
 to see how that affects the cipher suite selection. When not specifying the
-`--chiphers` and `--tl13-ciphers` options curl passes this flag by default.
+`--ciphers` and `--tls13-ciphers` options curl passes this flag by default.
 
 ## Examples
 
