@@ -81,9 +81,8 @@ endif()
 if(WIN32 AND BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS AND
    "${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL
    "${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  message(FATAL_ERROR "Library suffix collision detected for ${LIBCURL_OUTPUT_NAME} ("
-    "implib: '${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}' vs. "
-    "static: '${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}'). "
+  message(FATAL_ERROR "Library suffix collision detected for ${LIBCURL_OUTPUT_NAME}. "
+    "It's '${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}' for both import and static library. "
     "Set IMPORT_LIB_SUFFIX and/or STATIC_LIB_SUFFIX to different values, "
     "or disable building either the shared or static library to avoid it.")
 endif()
