@@ -52,7 +52,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
   # shellcheck disable=SC2086
-  cmake -B _bld "-G${PRJ_GEN}" ${TARGET} ${options} \
+  cmake -B _bld -G "${PRJ_GEN}" ${TARGET} ${options} \
     -DCURL_USE_OPENSSL="${OPENSSL}" \
     -DCURL_USE_SCHANNEL="${SCHANNEL}" \
     -DHTTP_ONLY="${HTTP_ONLY}" \
