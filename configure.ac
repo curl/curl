@@ -1243,7 +1243,7 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "${with_amissl+set}" = set; then
   struct Library *SocketBase = NULL;
   #endif
     ]],[[
-      char host[] = "localhost";
+      unsigned char host[] = "localhost";
       gethostbyname(host);
     ]])
   ],[
