@@ -321,7 +321,7 @@ int main(void)
 #include <time.h>
 int main(void)
 {
-  struct timespec ts = {0, 0};
+  struct timespec ts;
   (void)clock_gettime(CLOCK_MONOTONIC, &ts);
   (void)ts;
   return 0;
