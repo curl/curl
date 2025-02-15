@@ -1711,7 +1711,12 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               $curl_includes_unistd
               $curl_includes_bsdsocket
               $curl_preprocess_callconv
-              extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
+              #if defined(_WIN32) && defined(WINSOCK_API_LINKAGE)
+              WINSOCK_API_LINKAGE
+              #else
+              extern
+              #endif
+              int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
               if(0 != gethostname(0, 0))
                 return 1;
@@ -2141,6 +2146,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
         struct tm *gmt = 0;
         struct tm result;
         gmt = gmtime_r(&local, &result);
+        (void)result;
         if(gmt)
           exit(0);
         else
@@ -2259,8 +2265,8 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
         char ipv4res[sizeof "255.255.255.255"];
         unsigned char ipv6a[26];
         unsigned char ipv4a[5];
-        char *ipv6ptr = 0;
-        char *ipv4ptr = 0;
+        const char *ipv6ptr = 0;
+        const char *ipv4ptr = 0;
         /* - */
         ipv4res[0] = '\0';
         ipv4a[0] = 0xc0;
@@ -3966,8 +3972,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             $curl_includes_string
             char *strerror_r(int errnum, char *workbuf, $arg3 bufsize);
           ]],[[
-            if(0 != strerror_r(0, 0, 0))
+            char s[1];
+            if(0 != strerror_r(0, s, 0))
               return 1;
+            (void)s;
           ]])
         ],[
           tst_glibc_strerror_r_type_arg3="$arg3"
@@ -3994,7 +4002,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
-#       include <errno.h>
+        #include <errno.h>
       ]],[[
         char buffer[1024];
         char *string = 0;
@@ -4027,8 +4035,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             $curl_includes_string
             int strerror_r(int errnum, char *resultbuf, $arg3 bufsize);
           ]],[[
-            if(0 != strerror_r(0, 0, 0))
+            char s[1];
+            if(0 != strerror_r(0, s, 0))
               return 1;
+            (void)s;
           ]])
         ],[
           tst_posix_strerror_r_type_arg3="$arg3"
@@ -4055,7 +4065,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
-#       include <errno.h>
+        #include <errno.h>
       ]],[[
         char buffer[1024];
         int error = 1;
@@ -4467,6 +4477,7 @@ AC_DEFUN([CURL_ATOMIC],[
       ]],[[
         _Atomic int i = 0;
         i = 4;  // Force an atomic-write operation.
+        (void)i;
       ]])
     ],[
       AC_MSG_RESULT([yes])

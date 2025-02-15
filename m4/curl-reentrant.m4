@@ -56,7 +56,8 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
         #include <errno.h>
       ]],[[
         #ifdef errno
-          int dummy=1;
+          int dummy = 1;
+          (void)dummy;
         #else
           #error force compilation error
         #endif
@@ -70,7 +71,8 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
           #include <errno.h>
         ]],[[
           #ifdef errno
-            int dummy=1;
+            int dummy = 1;
+            (void)dummy;
           #else
             #error force compilation error
           #endif
@@ -411,7 +413,8 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
     AC_LANG_PROGRAM([[
     ]],[[
       #ifdef _REENTRANT
-        int dummy=1;
+        int dummy = 1;
+        (void)dummy;
       #else
         #error force compilation error
       #endif
@@ -471,7 +474,8 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
     AC_LANG_PROGRAM([[
     ]],[[
       #ifdef _THREAD_SAFE
-        int dummy=1;
+        int dummy = 1;
+        (void)dummy;
       #else
         #error force compilation error
       #endif
