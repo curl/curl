@@ -178,7 +178,7 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
       AC_LANG_PROGRAM([[
       ]],[[
         #ifdef _WIN32
-          int dummy=1;
+          int dummy = 1;
           (void)dummy;
         #else
           #error Not a native Windows build target.
