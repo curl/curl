@@ -1754,6 +1754,7 @@ if test "$ipv6" = yes; then
     ]], [[
       struct sockaddr_in6 s;
       s.sin6_scope_id = 0;
+      (void)s;
     ]])
   ],[
     AC_MSG_RESULT([yes])
