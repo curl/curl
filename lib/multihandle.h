@@ -38,9 +38,9 @@ struct Curl_message {
   struct CURLMsg extmsg;
 };
 
-/* NOTE: if you add a state here, add the name to the statename[] array as
-   well!
-*/
+/* NOTE: if you add a state here, add the name to the statenames[] array
+ * in curl_trc.c as well!
+ */
 typedef enum {
   MSTATE_INIT,         /* 0 - start in this state */
   MSTATE_PENDING,      /* 1 - no connections, waiting for one */

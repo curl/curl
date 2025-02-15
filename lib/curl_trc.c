@@ -110,16 +110,22 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 /* Curl_infof() is for info message along the way */
 #define MAXINFO 2048
 
-static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
-                      const char * const fmt, va_list ap)  CURL_PRINTF(3, 0);
+static void trc_infof(struct Curl_easy *data,
+                      struct curl_trc_feat *feat,
+                      const char *opt_id,
+                      const char * const fmt, va_list ap)  CURL_PRINTF(4, 0);
 
-static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
+static void trc_infof(struct Curl_easy *data,
+                      struct curl_trc_feat *feat,
+                      const char *opt_id,
                       const char * const fmt, va_list ap)
 {
   int len = 0;
   char buffer[MAXINFO + 5];
   if(feat)
     len = msnprintf(buffer, (MAXINFO + 1), "[%s] ", feat->name);
+  if(opt_id)
+    len += msnprintf(buffer + len, (MAXINFO + 1) - len, "[%s] ", opt_id);
   len += mvsnprintf(buffer + len, (MAXINFO + 1) - len, fmt, ap);
   if(len >= MAXINFO) { /* too long, shorten with '...' */
     --len;
@@ -138,7 +144,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   if(Curl_trc_is_verbose(data)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, data->state.feat, fmt, ap);
+    trc_infof(data, data->state.feat, NULL, fmt, ap);
     va_end(ap);
   }
 }
@@ -168,6 +174,10 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
   }
 }
 
+struct curl_trc_feat Curl_trc_feat_multi = {
+  "MULTI",
+  CURL_LOG_LVL_NONE,
+};
 struct curl_trc_feat Curl_trc_feat_read = {
   "READ",
   CURL_LOG_LVL_NONE,
@@ -177,13 +187,54 @@ struct curl_trc_feat Curl_trc_feat_write = {
   CURL_LOG_LVL_NONE,
 };
 
+static const char * const Curl_trc_mstate_names[]={
+  "INIT",
+  "PENDING",
+  "SETUP",
+  "CONNECT",
+  "RESOLVING",
+  "CONNECTING",
+  "TUNNELING",
+  "PROTOCONNECT",
+  "PROTOCONNECTING",
+  "DO",
+  "DOING",
+  "DOING_MORE",
+  "DID",
+  "PERFORMING",
+  "RATELIMITING",
+  "DONE",
+  "COMPLETED",
+  "MSGSENT",
+};
+
+const char *Curl_trc_mstate_name(int state)
+{
+  if((state >= 0) && ((size_t)state < CURL_ARRAYSIZE(Curl_trc_mstate_names)))
+    return Curl_trc_mstate_names[(size_t)state];
+  return "?";
+}
+
+void Curl_trc_multi(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_multi)) {
+    const char *sname = (data->id >= 0) ?
+                        Curl_trc_mstate_name(data->mstate) : NULL;
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_multi, sname, fmt, ap);
+    va_end(ap);
+  }
+}
+
 void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
   if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, &Curl_trc_feat_read, fmt, ap);
+    trc_infof(data, &Curl_trc_feat_read, NULL, fmt, ap);
     va_end(ap);
   }
 }
@@ -194,7 +245,7 @@ void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
   if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_write)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, &Curl_trc_feat_write, fmt, ap);
+    trc_infof(data, &Curl_trc_feat_write, NULL, fmt, ap);
     va_end(ap);
   }
 }
@@ -211,7 +262,7 @@ void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
   if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ftp)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, &Curl_trc_feat_ftp, fmt, ap);
+    trc_infof(data, &Curl_trc_feat_ftp, NULL, fmt, ap);
     va_end(ap);
   }
 }
@@ -229,7 +280,7 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
   if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, &Curl_trc_feat_smtp, fmt, ap);
+    trc_infof(data, &Curl_trc_feat_smtp, NULL, fmt, ap);
     va_end(ap);
   }
 }
@@ -247,7 +298,7 @@ void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
   if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, &Curl_trc_feat_ssls, fmt, ap);
+    trc_infof(data, &Curl_trc_feat_ssls, NULL, fmt, ap);
     va_end(ap);
   }
 }
@@ -265,7 +316,7 @@ void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
   if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, &Curl_trc_feat_ws, fmt, ap);
+    trc_infof(data, &Curl_trc_feat_ws, NULL, fmt, ap);
     va_end(ap);
   }
 }
@@ -275,6 +326,7 @@ void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 #define TRC_CT_PROTOCOL    (1<<(0))
 #define TRC_CT_NETWORK     (1<<(1))
 #define TRC_CT_PROXY       (1<<(2))
+#define TRC_CT_INTERNALS   (1<<(3))
 
 struct trc_feat_def {
   struct curl_trc_feat *feat;
@@ -282,6 +334,7 @@ struct trc_feat_def {
 };
 
 static struct trc_feat_def trc_feats[] = {
+  { &Curl_trc_feat_multi,     TRC_CT_INTERNALS },
   { &Curl_trc_feat_read,      TRC_CT_NONE },
   { &Curl_trc_feat_write,     TRC_CT_NONE },
 #ifndef CURL_DISABLE_FTP
@@ -457,6 +510,11 @@ void Curl_trc_cf_infof(struct Curl_easy *data,
 }
 
 struct curl_trc_feat;
+
+void Curl_trc_multi(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
 
 void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
 {
