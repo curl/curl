@@ -48,7 +48,7 @@ AC_DEFUN([CURL_CHECK_DEF], [
   tmp_exp=""
   AC_PREPROC_IFELSE([
     AC_LANG_SOURCE(
-ifelse($2,,,[$2])[[
+    ifelse($2,,,[$2])[[
       #ifdef $1
       CURL_DEF_TOKEN $1
       #endif
@@ -88,7 +88,7 @@ AC_DEFUN([CURL_CHECK_DEF_CC], [
   ifelse($3,,[AC_MSG_CHECKING([for compiler definition of $1])])
   AC_COMPILE_IFELSE([
     AC_LANG_SOURCE(
-ifelse($2,,,[$2])[[
+    ifelse($2,,,[$2])[[
       int main(void)
       {
       #ifndef $1
