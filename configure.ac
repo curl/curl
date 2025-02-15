@@ -596,9 +596,8 @@ case $host in
   *-apple-*) curl_cv_apple='yes';;
 esac
 
-CURL_DARWIN_CFLAGS
-
 if test "$curl_cv_apple" = 'yes'; then
+  CURL_DARWIN_CFLAGS
   CURL_SUPPORTS_BUILTIN_AVAILABLE
 fi
 
