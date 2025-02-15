@@ -2738,36 +2738,34 @@ dnl Check for the presence of AppleIDN
 dnl **********************************************************************
 
 tst_links_appleidn='no'
-case $host in
-  *-apple-*)
-    AC_MSG_CHECKING([whether to build with Apple IDN])
-    OPT_IDN="default"
-    AC_ARG_WITH(apple-idn,
+if test "$curl_cv_apple" = 'yes'; then
+  AC_MSG_CHECKING([whether to build with Apple IDN])
+  OPT_IDN="default"
+  AC_ARG_WITH(apple-idn,
 AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
 AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
-      [OPT_IDN=$withval])
-    case "$OPT_IDN" in
-      yes)
-        dnl --with-apple-idn option used
-        AC_MSG_RESULT([yes, check])
-        AC_CHECK_LIB(icucore, uidna_openUTS46,
-        [
-          AC_CHECK_HEADERS(unicode/uidna.h,
-            curl_idn_msg="enabled (AppleIDN)"
-            AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
-            USE_APPLE_IDN=1
-            IDN_ENABLED=1
-            LIBS="-licucore -liconv $LIBS"
-            tst_links_appleidn='yes'
-          )
-        ])
-        ;;
-      *)
-        AC_MSG_RESULT([no])
-        ;;
-    esac
-    ;;
-esac
+    [OPT_IDN=$withval])
+  case "$OPT_IDN" in
+    yes)
+      dnl --with-apple-idn option used
+      AC_MSG_RESULT([yes, check])
+      AC_CHECK_LIB(icucore, uidna_openUTS46,
+      [
+        AC_CHECK_HEADERS(unicode/uidna.h,
+          curl_idn_msg="enabled (AppleIDN)"
+          AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
+          USE_APPLE_IDN=1
+          IDN_ENABLED=1
+          LIBS="-licucore -liconv $LIBS"
+          tst_links_appleidn='yes'
+        )
+      ])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of libidn2
