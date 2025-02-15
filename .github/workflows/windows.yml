@@ -757,9 +757,6 @@ jobs:
               ${{ matrix.config }}
           done
           if [ -d bld_chkprefill ]; then
-            grep -F '#define' bld/lib/curl_config.h | sort || true
-            echo '----------------------'
-            grep -F '#define' bld_chkprefill/lib/curl_config.h | sort || true
             diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h
           fi
 
