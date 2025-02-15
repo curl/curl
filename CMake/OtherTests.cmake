@@ -107,11 +107,10 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
   check_c_source_compiles("${_source_epilogue}
     int main(void)
     {
-    #ifdef h_errno
-      return 0;
-    #else
+    #ifndef h_errno
       #error force compilation error
     #endif
+      return 0;
     }" HAVE_H_ERRNO)
 
   if(NOT HAVE_H_ERRNO)
