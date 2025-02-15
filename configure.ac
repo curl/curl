@@ -596,9 +596,8 @@ case $host in
   *-apple-*) curl_cv_apple='yes';;
 esac
 
-CURL_DARWIN_CFLAGS
-
 if test "$curl_cv_apple" = 'yes'; then
+  CURL_DARWIN_CFLAGS
   CURL_SUPPORTS_BUILTIN_AVAILABLE
 fi
 
@@ -1939,51 +1938,48 @@ if test x"$want_gss" = xyes; then
     LIBS="-lgss $LIBS"
     link_pkgconfig=1
   elif test -z "$GSSAPI_LIB_DIR"; then
-    case $host in
-      *-apple-*)
-        LIBS="-lgssapi_krb5 -lresolv $LIBS"
-        ;;
-      *)
-        if test $GSSAPI_ROOT != "/usr"; then
-          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
-        else
-          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
-        fi
-        if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
-          dnl krb5-config doesn't have --libs-only-L or similar, put everything
-          dnl into LIBS
-          gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
-          LIBS="$gss_libs $LIBS"
-        elif test "$PKGCONFIG" != "no"; then
-          gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
-          LIBS="$gss_libs $LIBS"
-          link_pkgconfig=1
-        elif test -f "$KRB5CONFIG"; then
-          dnl krb5-config doesn't have --libs-only-L or similar, put everything
-          dnl into LIBS
-          gss_libs=`$KRB5CONFIG --libs gssapi`
-          LIBS="$gss_libs $LIBS"
-          link_pkgconfig=1
-        else
-          case $host in
-            *-hp-hpux*)
-              gss_libname="gss"
-              ;;
-            *)
-              gss_libname="gssapi"
-              ;;
-          esac
+    if test "$curl_cv_apple" = 'yes'; then
+      LIBS="-lgssapi_krb5 -lresolv $LIBS"
+    else
+      if test $GSSAPI_ROOT != "/usr"; then
+        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+      else
+        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+      fi
+      if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl into LIBS
+        gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
+        LIBS="$gss_libs $LIBS"
+      elif test "$PKGCONFIG" != "no"; then
+        gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
+        LIBS="$gss_libs $LIBS"
+        link_pkgconfig=1
+      elif test -f "$KRB5CONFIG"; then
+        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl into LIBS
+        gss_libs=`$KRB5CONFIG --libs gssapi`
+        LIBS="$gss_libs $LIBS"
+        link_pkgconfig=1
+      else
+        case $host in
+          *-hp-hpux*)
+            gss_libname="gss"
+            ;;
+          *)
+            gss_libname="gssapi"
+            ;;
+        esac
 
-          if test "$GSSAPI_ROOT" != "yes"; then
-            LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
-            LDFLAGSPC="$LDFLAGSPC -L$GSSAPI_ROOT/lib$libsuff"
-            LIBS="-l$gss_libname $LIBS"
-          else
-            LIBS="-l$gss_libname $LIBS"
-          fi
+        if test "$GSSAPI_ROOT" != "yes"; then
+          LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+          LDFLAGSPC="$LDFLAGSPC -L$GSSAPI_ROOT/lib$libsuff"
+          LIBS="-l$gss_libname $LIBS"
+        else
+          LIBS="-l$gss_libname $LIBS"
         fi
-        ;;
-    esac
+      fi
+    fi
   else
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
@@ -2738,36 +2734,34 @@ dnl Check for the presence of AppleIDN
 dnl **********************************************************************
 
 tst_links_appleidn='no'
-case $host in
-  *-apple-*)
-    AC_MSG_CHECKING([whether to build with Apple IDN])
-    OPT_IDN="default"
-    AC_ARG_WITH(apple-idn,
+if test "$curl_cv_apple" = 'yes'; then
+  AC_MSG_CHECKING([whether to build with Apple IDN])
+  OPT_IDN="default"
+  AC_ARG_WITH(apple-idn,
 AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
 AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
-      [OPT_IDN=$withval])
-    case "$OPT_IDN" in
-      yes)
-        dnl --with-apple-idn option used
-        AC_MSG_RESULT([yes, check])
-        AC_CHECK_LIB(icucore, uidna_openUTS46,
-        [
-          AC_CHECK_HEADERS(unicode/uidna.h,
-            curl_idn_msg="enabled (AppleIDN)"
-            AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
-            USE_APPLE_IDN=1
-            IDN_ENABLED=1
-            LIBS="-licucore -liconv $LIBS"
-            tst_links_appleidn='yes'
-          )
-        ])
-        ;;
-      *)
-        AC_MSG_RESULT([no])
-        ;;
-    esac
-    ;;
-esac
+    [OPT_IDN=$withval])
+  case "$OPT_IDN" in
+    yes)
+      dnl --with-apple-idn option used
+      AC_MSG_RESULT([yes, check])
+      AC_CHECK_LIB(icucore, uidna_openUTS46,
+      [
+        AC_CHECK_HEADERS(unicode/uidna.h,
+          curl_idn_msg="enabled (AppleIDN)"
+          AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
+          USE_APPLE_IDN=1
+          IDN_ENABLED=1
+          LIBS="-licucore -liconv $LIBS"
+          tst_links_appleidn='yes'
+        )
+      ])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of libidn2
@@ -4143,7 +4137,7 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 CURL_CHECK_LIB_ARES
 CURL_CHECK_OPTION_THREADED_RESOLVER
 
-if test "$ipv6" = yes; then
+if test "$ipv6" = yes -a "$curl_cv_apple" = 'yes'; then
   CURL_DARWIN_SYSTEMCONFIGURATION
 fi
 

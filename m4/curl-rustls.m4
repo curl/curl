@@ -80,17 +80,14 @@ if test "x$OPT_RUSTLS" != xno; then
         LDFLAGS="$LDFLAGS $addld"
         LDFLAGSPC="$LDFLAGSPC $addld"
         if test "$addcflags" != "-I/usr/include"; then
-            CPPFLAGS="$CPPFLAGS $addcflags"
+          CPPFLAGS="$CPPFLAGS $addcflags"
         fi
 
-        case $host in
-          *-apple-*)
-            RUSTLS_LDFLAGS="-framework Security -framework Foundation"
-            ;;
-          *)
-            RUSTLS_LDFLAGS="-lpthread -ldl -lm"
-            ;;
-        esac
+        if test "$curl_cv_apple" = 'yes'; then
+          RUSTLS_LDFLAGS="-framework Security -framework Foundation"
+        else
+          RUSTLS_LDFLAGS="-lpthread -ldl -lm"
+        fi
         AC_CHECK_LIB(rustls, rustls_connection_read,
           [
           AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])

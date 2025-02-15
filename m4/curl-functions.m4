@@ -1408,11 +1408,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   #
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
-    case $host in
-      *-apple-*)
-        dnl Darwin 6.0 and macOS 10.2.X and newer
-        tst_tsafe_getaddrinfo="yes"
-    esac
+    if test "$curl_cv_apple" = 'yes'; then
+      dnl Darwin 6.0 and macOS 10.2.X and newer
+      tst_tsafe_getaddrinfo="yes"
+    fi
     case $host_os in
       aix[[1234]].* | aix5.[[01]].*)
         dnl AIX 5.1 and older
@@ -4398,21 +4397,18 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-  case $host in
-    *-apple-*)
-      AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
-      ;;
-    *)
-      oldcc=$CC
-      old=$LD_LIBRARY_PATH
-      CC="sh ./run-compiler"
-      LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
-      export LD_LIBRARY_PATH
-      AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
-      LD_LIBRARY_PATH=$old # restore
-      CC=$oldcc
-      ;;
-  esac
+  if test "$curl_cv_apple" = 'yes'; then
+    AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
+  else
+    oldcc=$CC
+    old=$LD_LIBRARY_PATH
+    CC="sh ./run-compiler"
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
+    AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
+    LD_LIBRARY_PATH=$old # restore
+    CC=$oldcc
+  fi
 ])
 
 dnl CURL_COVERAGE

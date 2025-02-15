@@ -1445,9 +1445,9 @@ dnl Save build info for test runner to pick up and log
 
 AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   curl_pflags=""
-  case $host in
-    *-apple-*) curl_pflags="${curl_pflags} APPLE";;
-  esac
+  if test "$curl_cv_apple" = 'yes'; then
+    curl_pflags="${curl_pflags} APPLE"
+  fi
   case $host in
     *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
       curl_pflags="${curl_pflags} UNIX";;
@@ -1561,27 +1561,13 @@ dnl with very low deployment targets.
 dnl
 
 AC_DEFUN([CURL_DARWIN_CFLAGS], [
-
-  tst_cflags="no"
-  case $host in
-    *-apple-*)
-      tst_cflags="yes"
-      ;;
-  esac
-
-  AC_MSG_CHECKING([for good-to-use Darwin CFLAGS])
-  AC_MSG_RESULT([$tst_cflags]);
-
-  if test "$tst_cflags" = "yes"; then
-    old_CFLAGS=$CFLAGS
-    CFLAGS="$CFLAGS -Werror=partial-availability"
-    AC_MSG_CHECKING([whether $CC accepts -Werror=partial-availability])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
-      [AC_MSG_RESULT([yes])],
-      [AC_MSG_RESULT([no])
-      CFLAGS=$old_CFLAGS])
-  fi
-
+  old_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS -Werror=partial-availability"
+  AC_MSG_CHECKING([whether $CC accepts -Werror=partial-availability])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+    [AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])
+    CFLAGS=$old_CFLAGS])
 ])
 
 
