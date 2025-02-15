@@ -1971,8 +1971,8 @@ endif()
 if(CURL_WERROR)
   if(MSVC)
     string(APPEND CMAKE_C_FLAGS " -WX")
-  elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    string(APPEND CMAKE_C_FLAGS " -Werror")
+  else()
+    string(APPEND CMAKE_C_FLAGS " -Werror")  # This assumes clang or gcc style options
   endif()
 endif()
 
