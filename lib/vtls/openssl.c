@@ -1452,7 +1452,7 @@ int cert_stuff(struct Curl_easy *data,
           failf(data, "No cert found in the openssl store: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
                               sizeof(error_buffer)));
-          goto fail;
+          return 0;
         }
 
         if(SSL_CTX_use_certificate(ctx, cert) != 1) {
@@ -1728,7 +1728,7 @@ fail:
           failf(data, "No private key found in the openssl store: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
                               sizeof(error_buffer)));
-          goto fail;
+          return 0;
         }
 
         if(SSL_CTX_use_PrivateKey(ctx, priv_key) != 1) {
