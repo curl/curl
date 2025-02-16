@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
   argv += optind;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl_global_trace("ids,time,http/2,http/3");
+  curl_global_trace("http/2,http/3");
 
   if(argc != 1) {
     usage("not enough arguments");

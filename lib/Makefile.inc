@@ -197,6 +197,7 @@ LIB_CFILES =         \
   mprintf.c          \
   mqtt.c             \
   multi.c            \
+  multi_ev.c         \
   netrc.c            \
   nonblock.c         \
   noproxy.c          \
@@ -334,6 +335,7 @@ LIB_HFILES =         \
   mime.h             \
   mqtt.h             \
   multihandle.h      \
+  multi_ev.h         \
   multiif.h          \
   netrc.h            \
   nonblock.h         \

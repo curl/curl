@@ -101,9 +101,15 @@ trace.
 
 Tracing of DNS-over-HTTP operations to resolve hostnames.
 
+## `multi`
+
+Traces multi operations managing transfers' state changes and sockets poll
+states.
+
 ## `read`
 
-Traces reading of upload data from the application in order to send it to the server.
+Traces reading of upload data from the application in order to send it to the
+server.
 
 ## `ssls`
 
