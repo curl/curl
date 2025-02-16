@@ -8,8 +8,8 @@ SPDX-License-Identifier: curl
 
  This document describes how to compile, build and install curl and libcurl
  from sources using the Visual C++ build tool. To build with VC++, you have to
- first install VC++. The minimum required version of VC is 6 (part of Visual
- Studio 6). However using a more recent version is strongly recommended.
+ first install VC++. The minimum required version of VC is 9 (part of Visual
+ Studio 2008). However using a more recent version is strongly recommended.
 
  VC++ is also part of the Windows Platform SDK. You do not have to install the
  full Visual Studio or Visual C++ if all you want is to build curl.
