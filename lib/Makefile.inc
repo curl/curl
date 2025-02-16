@@ -144,6 +144,7 @@ LIB_CFILES =         \
   curl_threads.c     \
   curl_trc.c         \
   cw-out.c           \
+  cw-pause.c         \
   dict.c             \
   dllmain.c          \
   doh.c              \
@@ -292,6 +293,7 @@ LIB_HFILES =         \
   curl_trc.h         \
   curlx.h            \
   cw-out.h           \
+  cw-pause.h         \
   dict.h             \
   doh.h              \
   dynbuf.h           \

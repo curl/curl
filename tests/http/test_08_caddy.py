@@ -234,7 +234,7 @@ class TestCaddy:
                 earlydata[int(m.group(1))] = int(m.group(2))
         assert earlydata[0] == 0, f'{earlydata}'
         if proto == 'h3':
-            assert earlydata[1] == 71, f'{earlydata}'
+            assert earlydata[1] == 113, f'{earlydata}'
         else:
             # Caddy does not support early data on TCP
             assert earlydata[1] == 0, f'{earlydata}'
