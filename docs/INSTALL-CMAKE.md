@@ -37,7 +37,8 @@ that is apart from the source tree.
        $ cmake -B .
 
  - Build in a separate directory (parallel to the curl source tree in this
-   example). The build directory is created for you.
+   example). The build directory is created for you. This is recommended over
+   building in the source tree to separate source and build artifacts.
 
        $ cmake -B ../curl-build
 
@@ -57,9 +58,6 @@ from there:
 If you want to build in the source tree, it is enough to do this:
 
     $ cmake .
-
-Note, however, that it is recommended to build apart from the source tree, to
-separate source and build artifacts.
 
 ### Build system generator selection
 
