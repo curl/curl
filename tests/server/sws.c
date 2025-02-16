@@ -133,7 +133,6 @@ static void storerequest(const char *reqbuf, size_t totalsize);
 #define DEFAULT_LOGFILE "log/sws.log"
 #endif
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *logdir = "log";
 static char loglockfile[256];
 
@@ -182,13 +181,6 @@ const char *cmdfile = DEFAULT_CMDFILE;
 #define CMD_NOEXPECT "no-expect"
 
 #define END_OF_HEADERS "\r\n\r\n"
-
-enum {
-  DOCNUMBER_NOTHING = -4,
-  DOCNUMBER_QUIT    = -3,
-  DOCNUMBER_WERULEZ = -2,
-  DOCNUMBER_404     = -1
-};
 
 static const char *end_of_headers = END_OF_HEADERS;
 
@@ -2057,6 +2049,8 @@ int main(int argc, char *argv[])
 
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
+
+  serverlogfile = DEFAULT_LOGFILE;
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

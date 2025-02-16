@@ -2,12 +2,14 @@
 #
 # SPDX-License-Identifier: curl
 
+server_bundle.c
+
 disabled
-getpart
 mqttd
 resolve
 rtspd
 sockfilt
 socksd
 sws
+testpart
 tftpd
