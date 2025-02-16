@@ -628,7 +628,7 @@ static CURLcode rtp_write_body_junk(struct Curl_easy *data,
   if(body_remain) {
     if((curl_off_t)blen > body_remain)
       blen = (size_t)body_remain;
-    return Curl_client_write(data, CLIENTWRITE_BODY, (char *)buf, blen);
+    return Curl_client_write(data, CLIENTWRITE_BODY, buf, blen);
   }
   return CURLE_OK;
 }
@@ -675,8 +675,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         /* possible start of an RTP message, buffer */
         if(skip_len) {
           /* end of junk/BODY bytes, flush */
-          result = rtp_write_body_junk(data,
-                                       (char *)(buf - skip_len), skip_len);
+          result = rtp_write_body_junk(data, buf - skip_len, skip_len);
           skip_len = 0;
           if(result)
             goto out;
@@ -792,7 +791,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
   }
 out:
   if(!result && skip_len)
-    result = rtp_write_body_junk(data, (char *)(buf - skip_len), skip_len);
+    result = rtp_write_body_junk(data, buf - skip_len, skip_len);
   return result;
 }
 
@@ -866,8 +865,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY|
-                               (is_eos ? CLIENTWRITE_EOS : 0),
-                               (char *)buf, blen);
+                               (is_eos ? CLIENTWRITE_EOS : 0), buf, blen);
   }
 
 out:

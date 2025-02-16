@@ -137,6 +137,12 @@
 #define SSL_METHOD_QUAL
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#define OSSL11_CONST const
+#else
+#define OSSL11
+#endif
+
 #if (OPENSSL_VERSION_NUMBER >= 0x10000000L)
 #define HAVE_ERR_REMOVE_THREAD_STATE 1
 #endif
@@ -1630,7 +1636,7 @@ fail:
 
       if(data->state.engine) {
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method((OSSL11_CONST char *)"curl user interface");
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -1681,7 +1687,7 @@ fail:
         OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method((OSSL11_CONST char *)"curl user interface");
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -2828,15 +2834,15 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
       tls_rt_name = "";
 
     if(content_type == SSL3_RT_CHANGE_CIPHER_SPEC) {
-      msg_type = *(char *)buf;
+      msg_type = *(const char *)buf;
       msg_name = "Change cipher spec";
     }
     else if(content_type == SSL3_RT_ALERT) {
-      msg_type = (((char *)buf)[0] << 8) + ((char *)buf)[1];
+      msg_type = (((const char *)buf)[0] << 8) + ((const char *)buf)[1];
       msg_name = SSL_alert_desc_string_long(msg_type);
     }
     else {
-      msg_type = *(char *)buf;
+      msg_type = *(const char *)buf;
       msg_name = ssl_msg_type(ssl_ver, msg_type);
     }
 
@@ -2848,7 +2854,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   }
 
   Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
-             CURLINFO_SSL_DATA_IN, (char *)buf, len);
+             CURLINFO_SSL_DATA_IN, (const char *)buf, len);
   (void) ssl;
 }
 #endif
@@ -4728,15 +4734,16 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   {
+    char *buf;
     long len;
     ASN1_TIME_print(mem, X509_get0_notBefore(octx->server_cert));
-    len = BIO_get_mem_data(mem, (char **) &ptr);
-    infof(data, " start date: %.*s", (int)len, ptr);
+    len = BIO_get_mem_data(mem, (char **) &buf);
+    infof(data, " start date: %.*s", (int)len, buf);
     (void)BIO_reset(mem);
 
     ASN1_TIME_print(mem, X509_get0_notAfter(octx->server_cert));
-    len = BIO_get_mem_data(mem, (char **) &ptr);
-    infof(data, " expire date: %.*s", (int)len, ptr);
+    len = BIO_get_mem_data(mem, (char **) &buf);
+    infof(data, " expire date: %.*s", (int)len, buf);
     (void)BIO_reset(mem);
   }
 #endif
