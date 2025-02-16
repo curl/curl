@@ -30,7 +30,7 @@ causes warnings is not accepted as-is.
 ## Readability
 
 A primary characteristic for code is readability. The intent and meaning of
-the code should be visible to the reader. Being clear and unambigious beats
+the code should be visible to the reader. Being clear and unambiguous beats
 being clever and saving two lines of code. Write simple code. You and others
 who come back to this code over the coming decades want to be able to quickly
 understand it when debugging.
