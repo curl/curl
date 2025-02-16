@@ -66,6 +66,7 @@
 #include "parsedate.h"          /* for the week day and month names */
 #include "sockaddr.h"           /* required for Curl_sockaddr_storage */
 #include "strtoofft.h"
+#include "strparse.h"
 #include "multiif.h"
 #include "select.h"
 #include "warnless.h"
