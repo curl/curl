@@ -1289,9 +1289,7 @@ int cert_stuff(struct Curl_easy *data,
   if(cert_file || cert_blob || (file_type == SSL_FILETYPE_ENGINE) ||
      (file_type == SSL_FILETYPE_PROVIDER)) {
     SSL *ssl;
-    X509 *x509 = NULL;
-    EVP_PKEY *pri = NULL;
-    STACK_OF(X509) *ca = NULL;
+    X509 *x509;
     int cert_done = 0;
     int cert_use_result;
 
@@ -1480,6 +1478,8 @@ int cert_stuff(struct Curl_easy *data,
     {
       BIO *cert_bio = NULL;
       PKCS12 *p12 = NULL;
+      EVP_PKEY *pri;
+      STACK_OF(X509) *ca = NULL;
       if(cert_blob) {
         cert_bio = BIO_new_mem_buf(cert_blob->data, (int)(cert_blob->len));
         if(!cert_bio) {
