@@ -27,10 +27,10 @@ set:
 When expanding variables, curl supports a set of functions that can make the
 variable contents more convenient to use. It can trim leading and trailing
 white space with `trim`, it can output the contents as a JSON quoted string
-with `json`, URL encode the string with `url` or base64 encode it with `b64`.
-To apply functions to a variable expansion, add them colon separated to the
-right side of the variable. Variable content holding null bytes that are not
-encoded when expanded cause error.
+with `json`, URL encode the string with `url`, base64 encode it with `b64` and
+base64 decode it with `64dec`. To apply functions to a variable expansion, add
+them colon separated to the right side of the variable. Variable content
+holding null bytes that are not encoded when expanded cause error.
 
 Example: get the contents of a file called $HOME/.secret into a variable
 called "fix". Make sure that the content is trimmed and percent-encoded when
