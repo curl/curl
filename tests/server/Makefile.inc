@@ -22,8 +22,7 @@
 #
 ###########################################################################
 
-noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd    \
- socksd disabled mqttd
+noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd socksd mqttd
 
 CURLX_SRCS = \
  ../../lib/mprintf.c \
@@ -114,5 +113,3 @@ tftpd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  tftp.h
 tftpd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 tftpd_CFLAGS = $(AM_CFLAGS)
-
-disabled_SOURCES = disabled.c

@@ -4727,6 +4727,25 @@ AS_HELP_STRING([--disable-dnsshuffle],[Disable DNS shuffling]),
 )
 
 dnl ************************************************************
+dnl disable type checks
+dnl
+AC_MSG_CHECKING([whether to enable type checks])
+AC_ARG_ENABLE(typecheck,
+AS_HELP_STRING([--enable-typecheck],[Enable type checks (default)])
+AS_HELP_STRING([--disable-typecheck],[Disable type checks]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checks])
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    ;;
+  esac ],
+    AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable the curl_easy_options API
 dnl
 AC_MSG_CHECKING([whether to support curl_easy_option*])

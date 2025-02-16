@@ -494,7 +494,7 @@ sub checksystemfeatures {
 
     my $curlverout="$LOGDIR/curlverout.log";
     my $curlvererr="$LOGDIR/curlvererr.log";
-    my $versioncmd=shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
+    my $versioncmd=shell_quote($CURL) . " --version-all 1>$curlverout 2>$curlvererr";
 
     unlink($curlverout);
     unlink($curlvererr);
@@ -509,15 +509,6 @@ sub checksystemfeatures {
     open(my $versout, "<", "$curlverout");
     @version = <$versout>;
     close($versout);
-
-    open(my $disabledh, "-|", "server/disabled".exe_ext('TOOL'));
-    @disabled = <$disabledh>;
-    close($disabledh);
-
-    if($disabled[0]) {
-        s/[\r\n]//g for @disabled;
-        $dis = join(", ", @disabled);
-    }
 
     $resolver="stock";
     for(@version) {
@@ -702,6 +693,10 @@ sub checksystemfeatures {
             # Thread-safe init
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
             $feature{"HTTPSRR"} = $feat =~ /HTTPSRR/;
+        }
+        elsif($_ =~ /^Disabled: (.*)/i) {
+            $dis = $1;
+            @disabled = split(' ', $dis);
         }
         #
         # Test harness currently uses a non-stunnel server in order to

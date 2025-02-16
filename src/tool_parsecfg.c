@@ -228,6 +228,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         if(res != PARAM_HELP_REQUESTED &&
            res != PARAM_MANUAL_REQUESTED &&
            res != PARAM_VERSION_INFO_REQUESTED &&
+           res != PARAM_VERSION_ALL_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
           const char *reason = param2text(res);

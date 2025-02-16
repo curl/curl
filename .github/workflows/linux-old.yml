@@ -84,7 +84,7 @@ jobs:
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
           make install
-          src/curl --disable --version
+          src/curl --disable --version-all
 
       - name: 'cmake build-only curl_config.h'
         run: |
@@ -109,7 +109,7 @@ jobs:
       - name: 'cmake build'
         run: |
           make -C bld-cares
-          bld-cares/src/curl --disable --version
+          bld-cares/src/curl --disable --version-all
 
       - name: 'cmake install'
         run: make -C bld-cares install
@@ -139,7 +139,7 @@ jobs:
       - name: 'autoconf build'
         run: |
           make -C bld-am
-          bld-am/src/curl --disable --version
+          bld-am/src/curl --disable --version-all
 
       - name: 'autoconf install'
         run: make -C bld-am install

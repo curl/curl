@@ -447,6 +447,8 @@ option(CURL_DISABLE_TELNET "Disable Telnet" OFF)
 mark_as_advanced(CURL_DISABLE_TELNET)
 option(CURL_DISABLE_TFTP "Disable TFTP" OFF)
 mark_as_advanced(CURL_DISABLE_TFTP)
+option(CURL_DISABLE_TYPECHECK "Disable type checks" OFF)
+mark_as_advanced(CURL_DISABLE_TYPECHECK)
 option(CURL_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
 
