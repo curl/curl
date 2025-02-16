@@ -139,9 +139,9 @@ Install to default location (you have to specify the build directory).
 
     $ cmake --install ../curl-build
 
-Do *not* use `--prefix` to change the installation prefix as the output
-produced by the `curl-config` script is determined at CMake configure time. If
-you want to set a custom install prefix for curl, use the
+Do not use `--prefix` to change the installation prefix as the output produced
+by the `curl-config` script is determined at CMake configure time. If you want
+to set a custom install prefix for curl, use the
 [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
 when configuring the CMake build.
 
