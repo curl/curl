@@ -24,7 +24,8 @@ versions of libs and build tools.
 
  We aim to support these or later versions.
 
- - OpenSSL      0.9.7
+ - OpenSSL      1.0.2a
+ - LibreSSL     2.9.1
  - GnuTLS       3.1.10
  - zlib         1.2.0.4
  - libssh2      1.2.8
