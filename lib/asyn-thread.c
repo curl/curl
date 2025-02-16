@@ -634,9 +634,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
 int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   int ret_val = 0;
-#ifndef CURL_DISABLE_SOCKETPAIR
   struct thread_data *td = &data->state.async.thdata;
-#endif
 #if !defined(CURL_DISABLE_SOCKETPAIR) || defined(USE_HTTPSRR_ARES)
   int socketi = 0;
 #else
