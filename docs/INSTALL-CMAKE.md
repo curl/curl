@@ -494,9 +494,9 @@ translate to:
     > cmake . -G "Visual Studio 12 2013" -A x64 -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DCURL_USE_LIBPSL=OFF
     > cmake --build . --config Debug --parallel
 
-Note that we did *not* specify `-DCMAKE_BUILD_TYPE=Debug` like we might do for
-the `"NMake Makefiles"` generator. This is because the Visual Studio generators
-are [multi-config generators](https://cmake.org/cmake/help/latest/prop_gbl/GENERATOR_IS_MULTI_CONFIG.html)
+We do *not* specify `-DCMAKE_BUILD_TYPE=Debug` here as we might do for the
+`"NMake Makefiles"` generator. This is because the Visual Studio generators are
+[multi-config generators](https://cmake.org/cmake/help/latest/prop_gbl/GENERATOR_IS_MULTI_CONFIG.html)
 and therefore ignore the value of `CMAKE_BUILD_TYPE`. The build config is
 instead selected at *build* time, e.g. when running `cmake --build`, with the
 `--config` flag. See the CMake documentation on
