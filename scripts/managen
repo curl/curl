@@ -1182,8 +1182,8 @@ HEADER
 }
 
 sub showonly {
-    my ($f) = @_;
-    if(single($f, 1)) {
+    my ($dir, $f) = @_;
+    if(single($dir, 1, $f, 1)) {
         print STDERR "$f: failed\n";
     }
 }
@@ -1218,7 +1218,7 @@ sub getargs {
         return;
     }
     elsif($f eq "single") {
-        showonly($s[0]);
+        showonly($dir, $s[0]);
         return;
     }
     elsif($f eq "protos") {
