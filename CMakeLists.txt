@@ -785,7 +785,7 @@ if(CURL_USE_OPENSSL)
     set(_openssl "AWS-LC")
   elseif(HAVE_LIBRESSL)
     set(_openssl "LibreSSL")
-    if(LIBRESSL_VERSION VERSION_LESS 3.1.0)  # 2020-04-08
+    if(LIBRESSL_VERSION AND LIBRESSL_VERSION VERSION_LESS 3.1.0)  # 2020-04-08
       message(WARNING "LibreSSL ${LIBRESSL_VERSION} does not support TLS 1.3.")
     endif()
   elseif(USE_AMISSL)
