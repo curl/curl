@@ -21,7 +21,7 @@ CMake's GUIs.
 A CMake configuration of curl is similar to the autotools build of curl.
 It consists of the following steps after you have unpacked the source.
 
-We recommend building with CMake on Windows, so for instructions on migrating
+We recommend building with CMake on Windows. For instructions on migrating
 from the `projects/Windows` Visual Studio solution files, see
 [this section](#migrating-from-visual-studio-ide-project-files). For
 instructions on migrating from the winbuild builds, see
@@ -42,7 +42,7 @@ that is apart from the source tree.
        $ cmake -B ../curl-build
 
 For the full list of CMake build configuration variables see
-[the corresponding section](#cmake-build-options) that provides the full table.
+[the corresponding section](#cmake-build-options).
 
 ### Fallback for CMake before version 3.13
 
@@ -143,7 +143,7 @@ Install to default location (you have to specify the build directory).
 
 Do *not* use `--prefix` to change the installation prefix as the output
 produced by the `curl-config` script is determined at CMake configure time. If
-you want to set a custom install prefix for CURL, use the
+you want to set a custom install prefix for curl, use the
 [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
 when configuring the CMake build.
 
@@ -159,7 +159,7 @@ assumes that CMake generates `Makefile`:
 
 # CMake usage
 
-Just as CURL can be built and installed using CMake, it can also be used from
+Just as curl can be built and installed using CMake, it can also be used from
 CMake.
 
 ## Using `find_package`
