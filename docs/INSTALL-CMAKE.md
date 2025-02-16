@@ -458,7 +458,7 @@ Details via CMake
 
 # Migrating from Visual Studio IDE Project Files
 
-We now recommend using CMake to build CURL with MSVC.
+We recommend using CMake to build curl with MSVC.
 
 The project build files reside in project/Windows/VC\* for VS2010, VS2010 and
 VS2013 respectively.
