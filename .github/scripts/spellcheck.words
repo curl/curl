@@ -251,6 +251,7 @@ Feltzing
 ffi
 filesize
 filesystem
+FindCURL
 FLOSS
 fnmatch
 footguns
@@ -564,6 +565,7 @@ Nios
 nitems
 NixOS
 NLST
+NMake
 nmake
 nmemb
 nocwd
