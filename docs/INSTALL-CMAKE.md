@@ -494,7 +494,7 @@ For example these commands:
 translate to:
 
     > cmake . -G "Visual Studio 12 2013" -A x64 -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DCURL_USE_LIBPSL=OFF
-    > cmake --build . --config Debug -j
+    > cmake --build . --config Debug --parallel
 
 Note that we did *not* specify `-DCMAKE_BUILD_TYPE=Debug` like we might do for
 the `"NMake Makefiles"` generator. This is because the Visual Studio generators
