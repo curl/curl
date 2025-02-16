@@ -302,7 +302,30 @@ sub render {
             # skip leading blank lines
             next;
         }
+
         $start = 1;
+
+        if(/^[ \t]*\n/) {
+            # count and ignore blank lines
+            $blankline++;
+            next;
+        }
+        elsif($d =~ /^    (.*)/) {
+            my $word = $1;
+            if(!$quote && $manpage) {
+                push @desc, "\n" if($blankline);
+                push @desc, ".nf\n";
+                $blankline = 0;
+            }
+            $quote = 1;
+            $d = "$word\n";
+        }
+        elsif($quote) {
+            # end of quote
+            push @desc, ".fi\n" if($manpage);
+            $quote = 0;
+        }
+
         if(/^# (.*)/) {
             $header = 1;
             if($top != 1) {
@@ -365,26 +388,6 @@ sub render {
             my ($cmd) = ($1);
             print STDERR "$f:$line:1:ERROR: $cmd detected, use ##-style\n";
             return 3;
-        }
-        elsif(/^[ \t]*\n/) {
-            # count and ignore blank lines
-            $blankline++;
-            next;
-        }
-        elsif($d =~ /^    (.*)/) {
-            my $word = $1;
-            if(!$quote && $manpage) {
-                push @desc, "\n" if($blankline);
-                push @desc, ".nf\n";
-                $blankline = 0;
-            }
-            $quote = 1;
-            $d = "$word\n";
-        }
-        elsif($quote && ($d !~ /^    (.*)/)) {
-            # end of quote
-            push @desc, ".fi\n" if($manpage);
-            $quote = 0;
         }
 
         $d =~ s/`%DATE`/$date/g;
