@@ -282,9 +282,6 @@ Curl_hash_destroy(struct Curl_hash *h)
   }
   DEBUGASSERT(h->size == 0);
   h->slots = 0;
-#ifdef DEBUGBUILD
-  h->init = 0;
-#endif
 }
 
 /* Removes all the entries in the given hash.
