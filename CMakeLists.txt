@@ -1728,7 +1728,6 @@ check_symbol_exists("gethostbyname_r" "netdb.h" HAVE_GETHOSTBYNAME_R)
 check_symbol_exists("gethostname"     "${CURL_INCLUDES}" HAVE_GETHOSTNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 
 check_symbol_exists("signal"          "signal.h" HAVE_SIGNAL)
-check_symbol_exists("strtoll"         "stdlib.h" HAVE_STRTOLL)
 check_symbol_exists("strerror_r"      "stdlib.h;string.h" HAVE_STRERROR_R)
 check_symbol_exists("sigaction"       "signal.h" HAVE_SIGACTION)
 check_symbol_exists("siginterrupt"    "signal.h" HAVE_SIGINTERRUPT)

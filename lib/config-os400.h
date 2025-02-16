@@ -155,9 +155,6 @@
 /* Define if you have the `strtok_r' function. */
 #define HAVE_STRTOK_R
 
-/* Define if you have the `strtoll' function. */
-#undef HAVE_STRTOLL             /* Allows ASCII compile on V5R1. */
-
 /* Define if you have the <sys/param.h> header file. */
 #define HAVE_SYS_PARAM_H
 
