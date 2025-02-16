@@ -405,7 +405,7 @@ class TestSSLUse:
            not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             pytest.skip('mbedtls TLSv1.3 session resume not working before 3.6.0')
         run_env = os.environ.copy()
-        run_env['CURL_DEBUG'] = 'ssl,scache'
+        run_env['CURL_DEBUG'] = 'ssl,ssls'
         # clean session file first, then reuse
         session_file = os.path.join(env.gen_dir, 'test_17_15.sessions')
         if os.path.exists(session_file):
