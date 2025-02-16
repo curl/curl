@@ -557,5 +557,5 @@ translates to:
     > cmake . -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
     > cmake --build . --config Debug
 
-Again, as noted previously, the Visual Studio generators ignore the
-`CMAKE_BUILD_TYPE` variable because they are multi-config generators.
+We must use `--config` here with `cmake --build` because the Visual Studio are
+multi-config generators and therefore ignore the `CMAKE_BUILD_TYPE` variable.
