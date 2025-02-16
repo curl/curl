@@ -212,13 +212,11 @@ endif()
 ### Linking against libcurl
 
 To link a CMake target against libcurl one can use
-[`taget_ilnk_libraries`](https://cmake.org/cmake/help/latest/command/target_link_libraries.html)
+[`target_link_libraries`](https://cmake.org/cmake/help/latest/command/target_link_libraries.html)
 as usual:
 
 ```cmake
-# note: may use PUBLIC or INTERFACE instead of PRIVATE depending on how the
-# link dependencies should be propagated in the linking interface
-target_link_libraries(my_target PRIVATE CURL::libcurl)
+target_link_libraries(my_target PUBLIC CURL::libcurl)
 ```
 
 # CMake build options
