@@ -995,7 +995,7 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
     p = getenv("CURL_DBG_SOCK_RMAX");
     if(p) {
       curl_off_t l;
-      if(!Curl_str_number(&p, &l, SIZE_T_MAX))
+      if(!Curl_str_number(&p, &l, CURL_OFF_T_MAX))
         ctx->recv_max = (size_t)l;
     }
   }
