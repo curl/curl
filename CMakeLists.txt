@@ -597,7 +597,19 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-if(DOS)
+if(WIN32)
+  if(WINCE)
+    set(_win32_winsock "ws2")
+  else()
+    set(_win32_winsock "ws2_32")
+  endif()
+  set(_win32_crypt32 "crypt32")
+
+  if(MINGW32CE)  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
+    set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/lib${_win32_winsock}.a")
+    set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_crypt32}.a")
+  endif()
+elseif(DOS)
   if(WATT_ROOT)
     set(USE_WATT32 ON)
     # FIXME upstream: must specify the full path to avoid CMake converting "watt" to "watt.lib"
@@ -618,7 +630,7 @@ elseif(AMIGA)
     set(CURL_USE_OPENSSL ON)
     set(CURL_CA_FALLBACK ON CACHE BOOL "")
   endif()
-elseif(NOT WIN32 AND NOT APPLE)
+elseif(NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
     set(CURL_LIBS "socket" ${CURL_LIBS})
@@ -1962,18 +1974,6 @@ include(CMake/OtherTests.cmake)
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 if(WIN32)
-  if(WINCE)
-    set(_win32_winsock "ws2")
-  else()
-    set(_win32_winsock "ws2_32")
-  endif()
-  set(_win32_crypt32 "crypt32")
-
-  if(MINGW32CE)  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
-    set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/lib${_win32_winsock}.a")
-    set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_crypt32}.a")
-  endif()
-
   list(APPEND CURL_LIBS "${_win32_winsock}")
   if(NOT WINCE)
     list(APPEND CURL_LIBS "bcrypt")
