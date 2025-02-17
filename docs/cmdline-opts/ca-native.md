@@ -12,25 +12,27 @@ See-also:
   - capath
   - dump-ca-embed
   - insecure
+  - proxy-ca-native
 Example:
   - --ca-native $URL
 ---
 
 # `--ca-native`
 
-Use the operating system's native CA store for certificate verification. If
-you set this option and also set a CA certificate file or directory, or curl
-was built with a default CA certificate location setting, then during
-verification those certificates are searched in addition to the native CA
-store.
+Use the operating system's native CA store for certificate verification.
 
-This option works for OpenSSL on Windows (added in 7.71.0).
+This option is independent of other CA certificate locations set at run time or
+build time. Those locations are searched in addition to the native CA store.
+
+This option works for OpenSSL and its forks (LibreSSL, BoringSSL, etc) on
+Windows (added in 7.71.0).
 
 This option works for wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo,
 Fedora, RHEL), macOS, Android and iOS (added in 8.3.0).
 
 This option works for GnuTLS (added in 8.5.0).
 
-This option has no effect on Schannel. Schannel is the native TLS library for
-Windows and therefore already uses the native CA store for verification unless
-it is overridden by a CA certificate location setting.
+This option currently has no effect for Schannel or Secure Transport. Those are
+native TLS libraries from Microsoft and Apple, respectively, that by default
+use the native CA store for verification unless overridden by a CA certificate
+location setting.
