@@ -518,7 +518,7 @@ parse_cookie_header(struct Curl_easy *data,
     size_t vlen;
     size_t nlen;
 
-    while(*ptr && ISBLANK(*ptr))
+    while(ISBLANK(*ptr))
       ptr++;
 
     /* we have a <name>=<value> pair or a stand-alone word here */
@@ -536,7 +536,12 @@ parse_cookie_header(struct Curl_easy *data,
         nlen--;
 
       if(*ptr == '=') {
-        vlen = strcspn(++ptr, ";\r\n");
+        ptr++;
+        /* Skip spaces and tabs before the value */
+        while(ISBLANK(*ptr))
+          ptr++;
+
+        vlen = strcspn(ptr, ";\r\n");
         valuep = ptr;
         sep = TRUE;
         ptr = &valuep[vlen];
@@ -544,12 +549,6 @@ parse_cookie_header(struct Curl_easy *data,
         /* Strip off trailing whitespace from the value */
         while(vlen && ISBLANK(valuep[vlen-1]))
           vlen--;
-
-        /* Skip leading whitespace from the value */
-        while(vlen && ISBLANK(*valuep)) {
-          valuep++;
-          vlen--;
-        }
 
         /* Reject cookies with a TAB inside the value */
         if(memchr(valuep, '\t', vlen)) {
@@ -769,7 +768,7 @@ parse_cookie_header(struct Curl_easy *data,
       /* this is an "illegal" <what>=<this> pair */
     }
 
-    while(*ptr && ISBLANK(*ptr))
+    while(ISBLANK(*ptr))
       ptr++;
     if(*ptr == ';')
       ptr++;
@@ -1283,7 +1282,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
           /* This is a cookie line, get it! */
           lineptr += 11;
           headerline = TRUE;
-          while(*lineptr && ISBLANK(*lineptr))
+          while(ISBLANK(*lineptr))
             lineptr++;
         }
 
