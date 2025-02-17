@@ -195,11 +195,13 @@ static CURLcode xfer_send(struct Curl_easy *data,
     /* Allow debug builds to override this logic to force short initial
        sends */
     size_t body_len = blen - hds_len;
-    const char *p = getenv("CURL_SMALLREQSEND");
-    if(p) {
-      curl_off_t body_small;
-      if(!Curl_str_number(&p, &body_small, body_len))
-        blen = hds_len + (size_t)body_small;
+    if(body_len) {
+      const char *p = getenv("CURL_SMALLREQSEND");
+      if(p) {
+        curl_off_t body_small;
+        if(!Curl_str_number(&p, &body_small, body_len))
+          blen = hds_len + (size_t)body_small;
+      }
     }
   }
 #endif

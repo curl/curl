@@ -104,40 +104,57 @@ int Curl_str_singlespace(const char **linep)
   return Curl_str_single(linep, ' ');
 }
 
-/* given an ASCII hexadecimal character, return the value */
-#define HEXDIGIT2NUM(x)                                         \
-  (((x) > '9') ? Curl_raw_tolower(x) - 'a' + 10 : x - '0')
-
-/* given an ASCII character and a given base, return TRUE if valid */
-#define valid_digit(digit, base)                                        \
-  (((base == 10) && ISDIGIT(digit)) ||                                  \
-   ((base == 16) && ISXDIGIT(digit)) ||                                 \
-   ((base == 8) && ISODIGIT(digit)))
-
-/* given an ASCII character and a given base, return the value */
-#define num_digit(digit, base)                          \
-  ((base != 16) ? digit - '0' : HEXDIGIT2NUM(digit))
+/* given an ASCII character and max ascii, return TRUE if valid */
+#define valid_digit(x,m) \
+  (((x) >= '0') && ((x) <= m) && hexasciitable[(x)-'0'])
 
 /* no support for 0x prefix nor leading spaces */
 static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
                         int base) /* 8, 10 or 16, nothing else */
 {
+  /* We use 16 for the zero index (and the necessary bitwise AND in the loop)
+     to be able to have a non-zero value there to make valid_digit() able to
+     use the info */
+  static const unsigned char hexasciitable[] = {
+    16, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 0x30: 0 - 9 */
+    0, 0, 0, 0, 0, 0, 0,
+    10, 11, 12, 13, 14, 15,       /* 0x41: A - F */
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0,
+    10, 11, 12, 13, 14, 15        /* 0x61: a - f */
+  };
+
   curl_off_t num = 0;
+  const char *p;
+  int m = (base == 10) ? '9' :   /* the largest digit possible */
+    (base == 16) ? 'f' : '7';
   DEBUGASSERT(linep && *linep && nump);
   DEBUGASSERT((base == 8) || (base == 10) || (base == 16));
+  DEBUGASSERT(max >= 0); /* mostly to catch SIZE_T_MAX, which is too large */
   *nump = 0;
-  if(!valid_digit(**linep, base))
+  p = *linep;
+  if(!valid_digit(*p, m))
     return STRE_NO_NUM;
-  do {
-    int n = num_digit(**linep, base);
-    if(num > ((CURL_OFF_T_MAX - n) / base))
-      return STRE_OVERFLOW;
-    num = num * base + n;
-    if(num > max)
-      return STRE_BIG; /** too big */
-    (*linep)++;
-  } while(valid_digit(**linep, base));
+  if(max < base) {
+    /* special-case low max scenario because check needs to be different */
+    do {
+      int n = hexasciitable[*p++ - '0'] & 0x0f;
+      num = num * base + n;
+      if(num > max)
+        return STRE_OVERFLOW;
+    } while(valid_digit(*p, m));
+  }
+  else {
+    do {
+      int n = hexasciitable[*p++ - '0'] & 0x0f;
+      if(num > ((max - n) / base))
+        return STRE_OVERFLOW;
+      num = num * base + n;
+    } while(valid_digit(*p, m));
+  }
   *nump = num;
+  *linep = p;
   return STRE_OK;
 }
 
