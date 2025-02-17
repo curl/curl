@@ -39,7 +39,7 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   *num = 0; /* clear by default */
   DEBUGASSERT((base == 10) || (base == 16));
 
-  while(*str && ISBLANK(*str))
+  while(ISBLANK(*str))
     str++;
 
   rc = base == 10 ?
