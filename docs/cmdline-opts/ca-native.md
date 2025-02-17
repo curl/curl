@@ -20,8 +20,9 @@ Example:
 
 Use the operating system's native CA store for certificate verification. If
 you set this option and also set a CA certificate file or directory, or curl
-was built with a default certificate location setting, then during verification
-those certificates are searched in addition to the native CA store.
+was built with a default CA certificate location setting, then during
+verification those certificates are searched in addition to the native CA
+store.
 
 This option works for OpenSSL on Windows (added in 7.71.0).
 
@@ -32,4 +33,4 @@ This option works for GnuTLS (added in 8.5.0).
 
 This option has no effect on Schannel. Schannel is the native TLS library for
 Windows and therefore already uses the native CA store for verification unless
-it is overridden by a certificate location setting.
+it is overridden by a CA certificate location setting.

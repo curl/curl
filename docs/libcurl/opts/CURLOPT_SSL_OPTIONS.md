@@ -69,7 +69,7 @@ precedence. (Added in 7.70.0)
 
 Tell libcurl to use the operating system's native CA store for certificate
 verification. If you set this option and also set a CA certificate file or
-directory, or libcurl was built with a default certificate location setting,
+directory, or libcurl was built with a default CA certificate location setting,
 then during verification those certificates are searched in addition to the
 native CA store.
 
