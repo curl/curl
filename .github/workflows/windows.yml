@@ -607,7 +607,7 @@ jobs:
             install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls wolfssl'
             arch: 'x64'
             plat: 'windows'
-            type: 'Release'
+            type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
