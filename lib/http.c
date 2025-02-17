@@ -257,7 +257,7 @@ char *Curl_copy_header_value(const char *header)
 
   /* Find the first non-space letter */
   start = header;
-  while(*start && ISSPACE(*start))
+  while(ISSPACE(*start))
     start++;
 
   end = strchr(start, '\r');
@@ -1016,7 +1016,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       auth++;
     if(*auth == ',') /* if we are on a comma, skip it */
       auth++;
-    while(*auth && ISSPACE(*auth))
+    while(ISSPACE(*auth))
       auth++;
   }
 
@@ -1404,7 +1404,7 @@ Curl_compareheader(const char *headerline, /* line to check */
   start = &headerline[hlen];
 
   /* pass all whitespace */
-  while(*start && ISSPACE(*start))
+  while(ISSPACE(*start))
     start++;
 
   /* find the end of the header line */
@@ -1597,7 +1597,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
         if(ptr) {
           optr = ptr;
           ptr++; /* pass the semicolon */
-          while(*ptr && ISSPACE(*ptr))
+          while(ISSPACE(*ptr))
             ptr++;
 
           if(*ptr) {
@@ -1625,7 +1625,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
         /* we require a colon for this to be a true header */
 
         ptr++; /* pass the colon */
-        while(*ptr && ISSPACE(*ptr))
+        while(ISSPACE(*ptr))
           ptr++;
 
         if(*ptr || semicolonp) {
@@ -3847,7 +3847,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
        */
       const char *p = hd;
 
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
       if(!strncmp(p, "HTTP/", 5)) {
         p += 5;
@@ -3907,7 +3907,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     }
     else if(data->conn->handler->protocol & CURLPROTO_RTSP) {
       const char *p = hd;
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
       if(!strncmp(p, "RTSP/", 5)) {
         p += 5;
@@ -4448,7 +4448,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     scheme = Curl_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
     if(scheme) {
       scheme += sizeof(HTTP_PSEUDO_SCHEME);
-      while(*scheme && ISBLANK(*scheme))
+      while(ISBLANK(*scheme))
         scheme++;
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }

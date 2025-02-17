@@ -108,7 +108,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         name = headers->data;
         namelen = ptr - headers->data;
         ptr++; /* pass the colon */
-        while(*ptr && ISSPACE(*ptr))
+        while(ISSPACE(*ptr))
           ptr++;
         if(*ptr) {
           value = ptr;
@@ -131,7 +131,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         name = headers->data;
         namelen = ptr - headers->data;
         ptr++; /* pass the semicolon */
-        while(*ptr && ISSPACE(*ptr))
+        while(ISSPACE(*ptr))
           ptr++;
         if(!*ptr) {
           /* quirk #2, send an empty header */

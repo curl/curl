@@ -62,7 +62,7 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
     return CURLE_BAD_CONTENT_ENCODING;
 
   header += strlen("Digest");
-  while(*header && ISBLANK(*header))
+  while(ISBLANK(*header))
     header++;
 
   return Curl_auth_decode_digest_http_message(header, digest);

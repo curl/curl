@@ -232,7 +232,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
     Curl_dyn_init(&buf, MAX_ALTSVC_LINE);
     while(Curl_get_line(&buf, fp)) {
       char *lineptr = Curl_dyn_ptr(&buf);
-      while(*lineptr && ISBLANK(*lineptr))
+      while(ISBLANK(*lineptr))
         lineptr++;
       if(*lineptr == '#')
         /* skip commented lines */
@@ -410,7 +410,7 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   size_t len;
   const char *protop;
   const char *p = *ptr;
-  while(*p && ISBLANK(*p))
+  while(ISBLANK(*p))
     p++;
   protop = p;
   while(*p && !ISBLANK(*p) && (*p != ';') && (*p != '='))
@@ -593,12 +593,12 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             /* skip option if name is too long */
             option[0] = '\0';
           }
-          while(*p && ISBLANK(*p))
+          while(ISBLANK(*p))
             p++;
           if(*p != '=')
             return CURLE_OK;
           p++;
-          while(*p && ISBLANK(*p))
+          while(ISBLANK(*p))
             p++;
           if(!*p)
             return CURLE_OK;

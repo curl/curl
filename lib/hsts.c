@@ -154,7 +154,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     return CURLE_OK;
 
   do {
-    while(*p && ISBLANK(*p))
+    while(ISBLANK(*p))
       p++;
     if(strncasecompare("max-age", p, 7)) {
       bool quoted = FALSE;
@@ -164,11 +164,11 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         return CURLE_BAD_FUNCTION_ARGUMENT;
 
       p += 7;
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
       if(*p++ != '=')
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
 
       if(*p == '\"') {
@@ -202,7 +202,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         p++;
     }
 
-    while(*p && ISBLANK(*p))
+    while(ISBLANK(*p))
       p++;
     if(*p == ';')
       p++;
@@ -534,7 +534,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
     Curl_dyn_init(&buf, MAX_HSTS_LINE);
     while(Curl_get_line(&buf, fp)) {
       char *lineptr = Curl_dyn_ptr(&buf);
-      while(*lineptr && ISBLANK(*lineptr))
+      while(ISBLANK(*lineptr))
         lineptr++;
       /*
        * Skip empty or commented lines, since we know the line will have a

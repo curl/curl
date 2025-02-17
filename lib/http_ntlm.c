@@ -70,7 +70,7 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
   if(checkprefix("NTLM", header)) {
     header += strlen("NTLM");
 
-    while(*header && ISSPACE(*header))
+    while(ISSPACE(*header))
       header++;
 
     if(*header) {

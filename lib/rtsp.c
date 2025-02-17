@@ -944,7 +944,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 
     /* Find the first non-space letter */
     start = header + 8;
-    while(*start && ISBLANK(*start))
+    while(ISBLANK(*start))
       start++;
 
     if(!*start) {
@@ -1003,7 +1003,7 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
   const char *start, *end;
   start = transport;
   while(start && *start) {
-    while(*start && ISBLANK(*start) )
+    while(ISBLANK(*start) )
       start++;
     end = strchr(start, ';');
     if(checkprefix("interleaved=", start)) {

@@ -95,12 +95,12 @@ static void trim_headers(struct curl_slist *head)
     store = value;
 
     /* skip leading whitespace */
-    while(*value && ISBLANK(*value))
+    while(ISBLANK(*value))
       value++;
 
     while(*value) {
       int space = 0;
-      while(*value && ISBLANK(*value)) {
+      while(ISBLANK(*value)) {
         value++;
         space++;
       }
@@ -356,7 +356,7 @@ static char *parse_content_sha_hdr(struct Curl_easy *data,
     return NULL;
   ++value;
 
-  while(*value && ISBLANK(*value))
+  while(ISBLANK(*value))
     ++value;
 
   len = strlen(value);
