@@ -625,23 +625,7 @@ $           write tf "#endif"
 $           goto cfgh_in_loop1
 $       endif
 $!
-$       if key2 .eqs. "HAVE_DECL_STRTOLL"
-$       then
-$           write tf "#ifndef ''key2'"
-$           write tf "#define ''key2' 1"
-$           write tf "#endif"
-$           goto cfgh_in_loop1
-$       endif
-$!
 $       if key2 .eqs. "HAVE_DECL_STRTOUL"
-$       then
-$           write tf "#ifndef ''key2'"
-$           write tf "#define ''key2' 1"
-$           write tf "#endif"
-$           goto cfgh_in_loop1
-$       endif
-$!
-$       if key2 .eqs. "HAVE_DECL_STRTOULL"
 $       then
 $           write tf "#ifndef ''key2'"
 $           write tf "#define ''key2' 1"
