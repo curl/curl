@@ -543,7 +543,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   TCHAR cert_hostname_buff[256];
   DWORD len;
 
-  /* TODO: Fix this for certificates with multiple alternative names.
+  /* This code does not support certificates with multiple alternative names.
    * Right now we are only asking for the first preferred alternative name.
    * Instead we would need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
    * (If Windows CE supports that?) and run this section in a loop for each.
