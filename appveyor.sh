@@ -67,7 +67,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DENABLE_DEBUG="${DEBUG}" \
       -DENABLE_UNICODE="${ENABLE_UNICODE}" \
       -DCMAKE_INSTALL_PREFIX='C:/curl' \
-      -DCMAKE_BUILD_TYPE="${PRJ_CFG}" \
       -DCURL_USE_LIBPSL=OFF ${options}
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
