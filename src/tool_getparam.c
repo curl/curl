@@ -2714,7 +2714,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_BUFFER: /* --buffer */
       /* disable the output I/O buffering. note that the option is called
          --buffer but is mostly used in the negative form: --no-buffer */
-      config->nobuffer = longopt ? !toggle : TRUE;
+      config->nobuffer = (bool)(longopt ? !toggle : TRUE);
       break;
     case C_REMOTE_NAME_ALL: /* --remote-name-all */
       config->default_node_flags = toggle ? GETOUT_USEREMOTE : 0;
