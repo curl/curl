@@ -11,9 +11,34 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o managen: correct the warning for un-escaped '<' and '>' [1]
- o strparse: switch the API to work on 'const char *' [2]
+ o addrinfo: add curl macro to avoid redefining foreign symbols [29]
+ o asyn-thread: avoid the separate 'struct resdata' alloc [20]
+ o asyn-thread: avoid the separate curl_mutex_t alloc [6]
+ o asyn-thread: do not allocate thread_data separately [21]
+ o build: set `HAVE_WRITABLE_ARGV` for Apple cross-builds [8]
+ o cmake: drop `HAVE_IN_ADDR_T` from pre-fill too
+ o cmake: drop two stray TLS feature checks for wolfSSL [9]
+ o cmake: fix `HAVE_ATOMIC`/`HAVE_STDATOMIC` pre-fill for clang-cl [28]
+ o cmake: mention 'insecure' in the debug build warning [15]
+ o cookie: simplify invalid_octets() [24]
+ o docs: add FD_ZERO to curl_multi_fdset example [19]
+ o docs: correct argument names & URL redirection [4]
+ o HTTP3.md: only speak about minimal versions [18]
+ o http: fix NTLM info message typo [22]
  o lib: better optimized casecompare() and ncasecompare() [3]
+ o lib: strtoofft.h header cleanup [17]
+ o lib: use Curl_str_number() for parsing decimal numbers [13]
+ o managen: correct the warning for un-escaped '<' and '>' [1]
+ o strparse: make Curl_str_number() return error for no digits [14]
+ o strparse: switch the API to work on 'const char *' [2]
+ o strparse: switch to curl_off_t as base data type [7]
+ o tests: fix enum/int confusion (Intel C), fix autotools `CFLAGS` for `servers` [27]
+ o tidy-up: delete, comment or scope C macros reported unused [16]
+ o tidy-up: drop unused `CURL_INADDR_NONE` macro and `in_addr_t` type [26]
+ o timediff: fix comment for curlx_mstotv() [25]
+ o urlapi: simplify junkscan [23]
+ o wolfssh: retrieve the error using wolfSSH_get_error [5]
+ o wolfssl: when using PQ KEM, use ML-KEM, not Kyber [10]
 
 This release includes the following known bugs:
 
@@ -34,11 +59,36 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Sergey
-  (2 contributors)
+  Anthony Hu, Daniel Stenberg, Harry Sintonen, Joseph Chen, kriztalz, Sergey,
+  Stefan Eissing, Viktor Szakats
+  (8 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=16315
  [2] = https://curl.se/bug/?i=16316
  [3] = https://curl.se/bug/?i=16311
+ [4] = https://curl.se/bug/?i=16334
+ [5] = https://curl.se/bug/?i=16335
+ [6] = https://curl.se/bug/?i=16323
+ [7] = https://curl.se/bug/?i=16336
+ [8] = https://curl.se/bug/?i=16338
+ [9] = https://curl.se/bug/?i=16339
+ [10] = https://curl.se/bug/?i=16337
+ [13] = https://curl.se/bug/?i=16319
+ [14] = https://curl.se/bug/?i=16319
+ [15] = https://curl.se/bug/?i=16327
+ [16] = https://curl.se/bug/?i=16279
+ [17] = https://curl.se/bug/?i=16331
+ [18] = https://curl.se/bug/?i=16320
+ [19] = https://curl.se/bug/?i=16325
+ [20] = https://curl.se/bug/?i=16321
+ [21] = https://curl.se/bug/?i=16241
+ [22] = https://curl.se/bug/?i=16305
+ [23] = https://curl.se/bug/?i=16307
+ [24] = https://curl.se/bug/?i=16306
+ [25] = https://curl.se/bug/?i=16310
+ [26] = https://curl.se/bug/?i=16318
+ [27] = https://curl.se/bug/?i=16314
+ [28] = https://curl.se/bug/?i=16313
+ [29] = https://curl.se/bug/?i=16274

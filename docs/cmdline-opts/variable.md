@@ -71,7 +71,7 @@ removes all leading and trailing white space.
 
 Example:
 
-    curl --expand-url https.//example.com/{{url:trim}}
+    curl --expand-url https://example.com/{{var:trim}}
 
 ## json
 outputs the content using JSON string quoting rules.

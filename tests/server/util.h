@@ -95,4 +95,6 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
         struct sockaddr_un *sau);
 #endif  /* USE_UNIX_SOCKETS */
 
+unsigned short util_ultous(unsigned long ulnum);
+
 #endif  /* HEADER_CURL_SERVER_UTIL_H */

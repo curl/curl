@@ -68,7 +68,6 @@ static const char *ipv_inuse = "IPv4";
 static int serverlogslocked = 0;
 
 #define REQBUFSIZ 150000
-#define REQBUFSIZ_TXT "149999"
 
 static long prevtestno = -1;    /* previous test number we served */
 static long prevpartno = -1;    /* previous part number we served */
@@ -1114,7 +1113,7 @@ int main(int argc, char *argv[])
       if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = curlx_ultous(ulnum);
+        port = util_ultous(ulnum);
         arg++;
       }
     }

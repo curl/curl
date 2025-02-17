@@ -144,9 +144,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
-#define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
-
 #if !defined(CURL_NTLM_NOT_SUPPORTED)
 /*
 * Turns a 56-bit key into being 64-bit wide.
@@ -465,6 +462,9 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
 
 #if !defined(USE_WINDOWS_SSPI)
 
+#define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
+#define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
+
 /* Timestamp in tenths of a microsecond since January 1, 1601 00:00:00 UTC. */
 struct ms_filetime {
   unsigned int dwLowDateTime;
@@ -626,7 +626,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
   result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
-                    NTLMv2_BLOB_LEN + 8, hmac_output);
+                       NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
     free(ptr);
     return result;

@@ -1408,11 +1408,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   #
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
-    case $host in
-      *-apple-*)
-        dnl Darwin 6.0 and macOS 10.2.X and newer
-        tst_tsafe_getaddrinfo="yes"
-    esac
+    if test "$curl_cv_apple" = 'yes'; then
+      dnl Darwin 6.0 and macOS 10.2.X and newer
+      tst_tsafe_getaddrinfo="yes"
+    fi
     case $host_os in
       aix[[1234]].* | aix5.[[01]].*)
         dnl AIX 5.1 and older
@@ -1711,7 +1710,12 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               $curl_includes_unistd
               $curl_includes_bsdsocket
               $curl_preprocess_callconv
-              extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
+              #if defined(_WIN32) && defined(WINSOCK_API_LINKAGE)
+              WINSOCK_API_LINKAGE
+              #else
+              extern
+              #endif
+              int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
               if(0 != gethostname(0, 0))
                 return 1;
@@ -2141,6 +2145,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
         struct tm *gmt = 0;
         struct tm result;
         gmt = gmtime_r(&local, &result);
+        (void)result;
         if(gmt)
           exit(0);
         else
@@ -2259,8 +2264,8 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
         char ipv4res[sizeof "255.255.255.255"];
         unsigned char ipv6a[26];
         unsigned char ipv4a[5];
-        char *ipv6ptr = 0;
-        char *ipv4ptr = 0;
+        const char *ipv6ptr = 0;
+        const char *ipv4ptr = 0;
         /* - */
         ipv4res[0] = '\0';
         ipv4a[0] = 0xc0;
@@ -3005,7 +3010,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != memrchr(0, 0, 0))
+        if(0 != memrchr("", 0, 0))
           return 1;
       ]])
     ],[
@@ -3667,7 +3672,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != strcasecmp(0, 0))
+        if(0 != strcasecmp("", ""))
           return 1;
       ]])
     ],[
@@ -3966,8 +3971,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             $curl_includes_string
             char *strerror_r(int errnum, char *workbuf, $arg3 bufsize);
           ]],[[
-            if(0 != strerror_r(0, 0, 0))
+            char s[1];
+            if(0 != strerror_r(0, s, 0))
               return 1;
+            (void)s;
           ]])
         ],[
           tst_glibc_strerror_r_type_arg3="$arg3"
@@ -3994,7 +4001,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
-#       include <errno.h>
+        #include <errno.h>
       ]],[[
         char buffer[1024];
         char *string = 0;
@@ -4027,8 +4034,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             $curl_includes_string
             int strerror_r(int errnum, char *resultbuf, $arg3 bufsize);
           ]],[[
-            if(0 != strerror_r(0, 0, 0))
+            char s[1];
+            if(0 != strerror_r(0, s, 0))
               return 1;
+            (void)s;
           ]])
         ],[
           tst_posix_strerror_r_type_arg3="$arg3"
@@ -4055,7 +4064,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
-#       include <errno.h>
+        #include <errno.h>
       ]],[[
         char buffer[1024];
         int error = 1;
@@ -4267,7 +4276,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOK_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != strtok_r(0, 0, 0))
+        if(0 != strtok_r(0, "", 0))
           return 1;
       ]])
     ],[
@@ -4305,91 +4314,6 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOK_R], [
   fi
 ])
 
-
-dnl CURL_CHECK_FUNC_STRTOLL
-dnl -------------------------------------------------
-dnl Verify if strtoll is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_strtoll, then
-dnl HAVE_STRTOLL will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_STRTOLL], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  #
-  tst_links_strtoll="unknown"
-  tst_proto_strtoll="unknown"
-  tst_compi_strtoll="unknown"
-  tst_allow_strtoll="unknown"
-  #
-  AC_MSG_CHECKING([if strtoll can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([strtoll])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_strtoll="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_strtoll="no"
-  ])
-  #
-  if test "$tst_links_strtoll" = "yes"; then
-    AC_MSG_CHECKING([if strtoll is prototyped])
-    AC_EGREP_CPP([strtoll],[
-      $curl_includes_stdlib
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_strtoll="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_strtoll="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_strtoll" = "yes"; then
-    AC_MSG_CHECKING([if strtoll is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_stdlib
-      ]],[[
-        if(0 != strtoll(0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_strtoll="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_strtoll="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_strtoll" = "yes"; then
-    AC_MSG_CHECKING([if strtoll usage allowed])
-    if test "x$curl_disallow_strtoll" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_strtoll="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_strtoll="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if strtoll might be used])
-  if test "$tst_links_strtoll" = "yes" &&
-     test "$tst_proto_strtoll" = "yes" &&
-     test "$tst_compi_strtoll" = "yes" &&
-     test "$tst_allow_strtoll" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_STRTOLL, 1,
-      [Define to 1 if you have the strtoll function.])
-    curl_cv_func_strtoll="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_strtoll="no"
-  fi
-])
-
 dnl CURL_RUN_IFELSE
 dnl -------------------------------------------------
 dnl Wrapper macro to use instead of AC_RUN_IFELSE. It
@@ -4398,21 +4322,18 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-  case $host in
-    *-apple-*)
-      AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
-      ;;
-    *)
-      oldcc=$CC
-      old=$LD_LIBRARY_PATH
-      CC="sh ./run-compiler"
-      LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
-      export LD_LIBRARY_PATH
-      AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
-      LD_LIBRARY_PATH=$old # restore
-      CC=$oldcc
-      ;;
-  esac
+  if test "$curl_cv_apple" = 'yes'; then
+    AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
+  else
+    oldcc=$CC
+    old=$LD_LIBRARY_PATH
+    CC="sh ./run-compiler"
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
+    AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
+    LD_LIBRARY_PATH=$old # restore
+    CC=$oldcc
+  fi
 ])
 
 dnl CURL_COVERAGE
@@ -4467,6 +4388,7 @@ AC_DEFUN([CURL_ATOMIC],[
       ]],[[
         _Atomic int i = 0;
         i = 4;  // Force an atomic-write operation.
+        (void)i;
       ]])
     ],[
       AC_MSG_RESULT([yes])

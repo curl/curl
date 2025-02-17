@@ -58,7 +58,6 @@
 #include <dirent.h>
 #endif
 
-#include "strtoofft.h"
 #include "urldata.h"
 #include <curl/curl.h>
 #include "progress.h"

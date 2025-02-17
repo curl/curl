@@ -34,7 +34,6 @@
 #include "sendf.h"
 #include "progress.h"
 #include "curl_path.h"
-#include "strtoofft.h"
 #include "transfer.h"
 #include "speedcheck.h"
 #include "select.h"
@@ -810,11 +809,15 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
     }
     case SSH_SFTP_CLOSE:
-      if(sshc->handleSz)
+      if(sshc->handleSz) {
         rc = wolfSSH_SFTP_Close(sshc->ssh_session, sshc->handle,
                                 sshc->handleSz);
-      else
+        if(rc != WS_SUCCESS)
+          rc = wolfSSH_get_error(sshc->ssh_session);
+      }
+      else {
         rc = WS_SUCCESS; /* directory listing */
+      }
       if(rc == WS_WANT_READ) {
         *block = TRUE;
         conn->waitfor = KEEP_RECV;

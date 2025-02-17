@@ -26,7 +26,7 @@
 #include <curl/curl.h>
 #include "curl_range.h"
 #include "sendf.h"
-#include "strtoofft.h"
+#include "strparse.h"
 
 /* Only include this function if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
@@ -37,28 +37,29 @@
  */
 CURLcode Curl_range(struct Curl_easy *data)
 {
-  curl_off_t from, to;
-  char *ptr;
-  char *ptr2;
-
   if(data->state.use_range && data->state.range) {
-    CURLofft from_t;
-    CURLofft to_t;
-    from_t = curlx_strtoofft(data->state.range, &ptr, 10, &from);
-    if(from_t == CURL_OFFT_FLOW)
+    curl_off_t from, to;
+    bool first_num = TRUE;
+    const char *p = data->state.range;
+    if(Curl_str_number(&p, &from, CURL_OFF_T_MAX))
+      first_num = FALSE;
+
+    if(Curl_str_single(&p, '-'))
+      /* no leading dash or after the first number is an error */
       return CURLE_RANGE_ERROR;
-    while(*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
-      ptr++;
-    to_t = curlx_strtoofft(ptr, &ptr2, 10, &to);
-    if(to_t == CURL_OFFT_FLOW)
-      return CURLE_RANGE_ERROR;
-    if((to_t == CURL_OFFT_INVAL) && !from_t) {
+
+    if(Curl_str_number(&p, &to, CURL_OFF_T_MAX)) {
+      /* no second number */
       /* X - */
       data->state.resume_from = from;
       DEBUGF(infof(data, "RANGE %" FMT_OFF_T " to end of file", from));
     }
-    else if((from_t == CURL_OFFT_INVAL) && !to_t) {
+    else if(!first_num) {
       /* -Y */
+      if(!to)
+        /* "-0" is just wrong */
+        return CURLE_RANGE_ERROR;
+
       data->req.maxdownload = to;
       data->state.resume_from = -to;
       DEBUGF(infof(data, "RANGE the last %" FMT_OFF_T " bytes", to));

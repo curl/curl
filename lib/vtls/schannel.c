@@ -55,6 +55,7 @@
 #include "multiif.h"
 #include "version_win32.h"
 #include "rand.h"
+#include "strparse.h"
 
 /* The last #include file should be: */
 #include "curl_memory.h"
@@ -78,10 +79,6 @@
 */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_)
 #  define HAS_ALPN_SCHANNEL
-#endif
-
-#ifndef BCRYPT_CHACHA20_POLY1305_ALGORITHM
-#define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
 #endif
 
 #ifndef BCRYPT_CHAIN_MODE_CCM
@@ -232,8 +229,6 @@ schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
   return CURLE_OK;
 }
 
-/* longest is 26, buffer is slightly bigger */
-#define LONGEST_ALG_ID 32
 #define CIPHEROPTION(x) {#x, x}
 
 struct algo {
@@ -350,9 +345,9 @@ static const struct algo algs[]= {
 };
 
 static int
-get_alg_id_by_name(char *name)
+get_alg_id_by_name(const char *name)
 {
-  char *nameEnd = strchr(name, ':');
+  const char *nameEnd = strchr(name, ':');
   size_t n = nameEnd ? (size_t)(nameEnd - name) : strlen(name);
   int i;
 
@@ -369,12 +364,13 @@ static CURLcode
 set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
                 ALG_ID *algIds)
 {
-  char *startCur = ciphers;
+  const char *startCur = ciphers;
   int algCount = 0;
   while(startCur && (0 != *startCur) && (algCount < NUM_CIPHERS)) {
-    long alg = strtol(startCur, 0, 0);
-    if(!alg)
+    curl_off_t alg;
+    if(Curl_str_number(&startCur, &alg, INT_MAX) || !alg)
       alg = get_alg_id_by_name(startCur);
+
     if(alg)
       algIds[algCount++] = (ALG_ID)alg;
     else if(!strncmp(startCur, "USE_STRONG_CRYPTO",

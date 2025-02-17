@@ -44,6 +44,15 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   list(APPEND _picky "-Werror-implicit-function-declaration")  # clang 1.0  gcc 2.95
 endif()
 
+if(MSVC)
+  if(CMAKE_C_FLAGS MATCHES "[/-]W[0-4]")
+    string(REGEX REPLACE "[/-]W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  endif()
+  list(APPEND _picky "-W4")
+elseif(BORLAND)
+  list(APPEND _picky "-w-")  # Disable warnings on Borland to avoid changing 3rd party code.
+endif()
+
 if(PICKY_COMPILER)
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 
@@ -113,6 +122,7 @@ if(PICKY_COMPILER)
       -Wtype-limits                        # clang  2.7  gcc  4.3
       -Wunreachable-code                   # clang  2.7  gcc  4.1
     # -Wunused-macros                      # clang  2.7  gcc  4.1               # Not practical
+    #   -Wno-error=unused-macros           # clang  2.7  gcc  4.1
       -Wunused-parameter                   # clang  2.7  gcc  4.1
       -Wvla                                # clang  2.8  gcc  4.3
     )

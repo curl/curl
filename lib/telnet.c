@@ -58,6 +58,7 @@
 #include "select.h"
 #include "strcase.h"
 #include "warnless.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -862,21 +863,19 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
       case 2:
         /* Window Size */
         if(strncasecompare(option, "WS", 2)) {
-          char *p;
-          unsigned long x = strtoul(arg, &p, 10);
-          unsigned long y = 0;
-          if(x && (x <= 0xffff) && Curl_raw_tolower(*p) == 'x') {
-            p++;
-            y = strtoul(p, NULL, 10);
-            if(y && (y <= 0xffff)) {
-              tn->subopt_wsx = (unsigned short)x;
-              tn->subopt_wsy = (unsigned short)y;
-              tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
-            }
-          }
-          if(!y) {
+          const char *p = arg;
+          curl_off_t x = 0;
+          curl_off_t y = 0;
+          if(Curl_str_number(&p, &x, 0xffff) ||
+             Curl_str_single(&p, 'x') ||
+             Curl_str_number(&p, &y, 0xffff)) {
             failf(data, "Syntax error in telnet option: %s", head->data);
             result = CURLE_SETOPT_OPTION_SYNTAX;
+          }
+          else {
+            tn->subopt_wsx = (unsigned short)x;
+            tn->subopt_wsy = (unsigned short)y;
+            tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
           }
         }
         else

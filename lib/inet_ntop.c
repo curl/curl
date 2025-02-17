@@ -38,7 +38,7 @@
 #include "curl_printf.h"
 
 #define IN6ADDRSZ       16
-#define INADDRSZ         4
+/* #define INADDRSZ         4 */
 #define INT16SZ          2
 
 /*

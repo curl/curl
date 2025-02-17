@@ -68,7 +68,6 @@
 #include "mime.h"
 #include "socks.h"
 #include "smtp.h"
-#include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
@@ -81,6 +80,8 @@
 #include "curl_sasl.h"
 #include "warnless.h"
 #include "idn.h"
+#include "strparse.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -198,7 +199,7 @@ static const struct SASLproto saslsmtp = {
  * supported authentication mechanisms.
  */
 static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
-                           char *line, size_t len, int *resp)
+                           const char *line, size_t len, int *resp)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   bool result = FALSE;
@@ -214,11 +215,14 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
      only send the response code instead as per Section 4.2. */
   if(line[3] == ' ' || len == 5) {
     char tmpline[6];
-
+    curl_off_t code;
+    const char *p = tmpline;
     result = TRUE;
-    memset(tmpline, '\0', sizeof(tmpline));
     memcpy(tmpline, line, (len == 5 ? 5 : 3));
-    *resp = curlx_sltosi(strtol(tmpline, NULL, 10));
+    tmpline[len == 5 ? 5 : 3 ] = 0;
+    if(Curl_str_number(&p, &code, len == 5 ? 99999 : 999))
+      return FALSE;
+    *resp = (int) code;
 
     /* Make sure real server never sends internal value */
     if(*resp == 1)

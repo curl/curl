@@ -83,6 +83,7 @@
 #include "strcase.h"
 #include "warnless.h"
 #include "parsedate.h"
+#include "strparse.h"
 
 /*
  * parsedate()
@@ -100,7 +101,9 @@ static int parsedate(const char *date, time_t *output);
 #define PARSEDATE_OK     0
 #define PARSEDATE_FAIL   -1
 #define PARSEDATE_LATER  1
+#if defined(HAVE_TIME_T_UNSIGNED) || (SIZEOF_TIME_T < 5)
 #define PARSEDATE_SOONER 2
+#endif
 
 #if !defined(CURL_DISABLE_PARSEDATE) || !defined(CURL_DISABLE_FTP) || \
   !defined(CURL_DISABLE_FILE)
@@ -409,7 +412,7 @@ static int parsedate(const char *date, time_t *output)
     }
     else if(ISDIGIT(*date)) {
       /* a digit */
-      int val;
+      unsigned int val;
       char *end;
       if((secnum == -1) &&
          match_time(date, &hournum, &minnum, &secnum, &end)) {
@@ -417,29 +420,18 @@ static int parsedate(const char *date, time_t *output)
         date = end;
       }
       else {
-        long lval;
-        int error;
-        int old_errno;
-
-        old_errno = errno;
-        errno = 0;
-        lval = strtol(date, &end, 10);
-        error = errno;
-        if(errno != old_errno)
-          errno = old_errno;
-
-        if(error)
+        curl_off_t lval;
+        int num_digits = 0;
+        const char *p = date;
+        if(Curl_str_number(&p, &lval, 99999999))
           return PARSEDATE_FAIL;
 
-#if LONG_MAX != INT_MAX
-        if((lval > (long)INT_MAX) || (lval < (long)INT_MIN))
-          return PARSEDATE_FAIL;
-#endif
-
-        val = curlx_sltosi(lval);
+        /* we know num_digits cannot be larger than 8 */
+        num_digits = (int)(p - date);
+        val = (unsigned int)lval;
 
         if((tzoff == -1) &&
-           ((end - date) == 4) &&
+           (num_digits == 4) &&
            (val <= 1400) &&
            (indate < date) &&
            ((date[-1] == '+' || date[-1] == '-'))) {
@@ -459,10 +451,10 @@ static int parsedate(const char *date, time_t *output)
           tzoff = date[-1]=='+' ? -tzoff : tzoff;
         }
 
-        if(((end - date) == 8) &&
-           (yearnum == -1) &&
-           (monnum == -1) &&
-           (mdaynum == -1)) {
+        else if((num_digits == 8) &&
+                (yearnum == -1) &&
+                (monnum == -1) &&
+                (mdaynum == -1)) {
           /* 8 digits, no year, month or day yet. This is YYYYMMDD */
           found = TRUE;
           yearnum = val/10000;
@@ -494,7 +486,7 @@ static int parsedate(const char *date, time_t *output)
         if(!found)
           return PARSEDATE_FAIL;
 
-        date = end;
+        date = p;
       }
     }
 

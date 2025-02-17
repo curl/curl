@@ -838,16 +838,10 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   MSH3_SET_PORT(&addr, (uint16_t)cf->conn->remote_port);
 
   if(verify && (conn_config->CAfile || conn_config->CApath)) {
-    /* Need a way to provide trust anchors to MSH3 */
-#ifdef DEBUGBUILD
-    /* we need this for our test cases to run */
-    CURL_TRC_CF(data, cf, "non-standard CA not supported, "
-                "switching off verifypeer in DEBUG mode");
-    verify = 0;
-#else
+    /* Note there's currently no way to provide trust anchors to MSH3 and
+       that causes tests to fail. */
     CURL_TRC_CF(data, cf, "non-standard CA not supported, "
                 "attempting with built-in verification");
-#endif
   }
 
   CURL_TRC_CF(data, cf, "connecting to %s:%d (verify=%d)",

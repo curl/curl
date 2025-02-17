@@ -31,13 +31,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/* OUR_MAX_SEEK_L has 'long' data type, OUR_MAX_SEEK_O has 'curl_off_t,
-   both represent the same value. Maximum offset used here when we lseek
-   using a 'long' data type offset */
-
-#define OUR_MAX_SEEK_L  2147483647L - 1L
-#define OUR_MAX_SEEK_O  CURL_OFF_T_C(0x7FFFFFFF) - CURL_OFF_T_C(0x1)
-
 /*
 ** callback for CURLOPT_SEEKFUNCTION
 **
@@ -50,6 +43,13 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   struct per_transfer *per = userdata;
 
 #if (SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
+
+/* OUR_MAX_SEEK_L has 'long' data type, OUR_MAX_SEEK_O has 'curl_off_t,
+   both represent the same value. Maximum offset used here when we lseek
+   using a 'long' data type offset */
+
+#define OUR_MAX_SEEK_L  2147483647L - 1L
+#define OUR_MAX_SEEK_O  CURL_OFF_T_C(0x7FFFFFFF) - CURL_OFF_T_C(0x1)
 
   /* The offset check following here is only interesting if curl_off_t is
      larger than off_t and we are not using the Win32 large file support
