@@ -173,3 +173,23 @@ int Curl_str_newline(const char **linep)
   }
   return STRE_NEWLINE;
 }
+
+/* case insensitive compare that the parsed string matches the
+   given string. Returns non-zero on match. */
+int Curl_str_casecompare(struct Curl_str *str, const char *check)
+{
+  size_t clen = check ? strlen(check) : 0;
+  return ((str->len == clen) && strncasecompare(str->str, check, clen));
+}
+
+/* Trim off 'num' number of bytes from the beginning (left side) of the
+   string. If 'num' is larger than the string, return error. */
+int Curl_str_nudge(struct Curl_str *str, size_t num)
+{
+  if(num <= str->len) {
+    str->str += num;
+    str->len -= num;
+    return STRE_OK;
+  }
+  return STRE_OVERFLOW;
+}

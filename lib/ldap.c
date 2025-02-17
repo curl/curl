@@ -89,7 +89,7 @@
 #include "progress.h"
 #include "transfer.h"
 #include "strcase.h"
-#include "strtok.h"
+#include "strparse.h"
 #include "curl_ldap.h"
 #include "curl_multibyte.h"
 #include "curl_base64.h"
@@ -761,36 +761,17 @@ static int str2scope(const char *p)
   return -1;
 }
 
-/*
- * Split 'str' into strings separated by commas.
- * Note: out[] points into 'str'.
- */
-static bool split_str(char *str, char ***out, size_t *count)
+/* number of entries in the attributes list */
+static size_t num_entries(const char *s)
 {
-  char **res;
-  char *lasts;
-  char *s;
-  size_t  i;
   size_t items = 1;
 
-  s = strchr(str, ',');
+  s = strchr(s, ',');
   while(s) {
     items++;
-    s = strchr(++s, ',');
+    s = strchr(s + 1, ',');
   }
-
-  res = calloc(items, sizeof(char *));
-  if(!res)
-    return FALSE;
-
-  for(i = 0, s = Curl_strtok_r(str, ",", &lasts); s && i < items;
-      s = Curl_strtok_r(NULL, ",", &lasts), i++)
-    res[i] = s;
-
-  *out = res;
-  *count = items;
-
-  return TRUE;
+  return items;
 }
 
 /*
@@ -884,15 +865,8 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     *q++ = '\0';
 
   if(*p) {
-    char **attributes;
-    size_t count = 0;
-
-    /* Split the string into an array of attributes */
-    if(!split_str(p, &attributes, &count)) {
-      rc = LDAP_NO_MEMORY;
-
-      goto quit;
-    }
+    size_t count = num_entries(p); /* at least one */
+    const char *atp = p;
 
     /* Allocate our array (+1 for the NULL entry) */
 #if defined(USE_WIN32_LDAP)
@@ -901,27 +875,25 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     ludp->lud_attrs = calloc(count + 1, sizeof(char *));
 #endif
     if(!ludp->lud_attrs) {
-      free(attributes);
-
       rc = LDAP_NO_MEMORY;
-
       goto quit;
     }
 
     for(i = 0; i < count; i++) {
       char *unescaped;
       CURLcode result;
+      struct Curl_str out;
 
-      LDAP_TRACE(("attr[%zu] '%s'\n", i, attributes[i]));
+      if(Curl_str_until(&atp, &out, 1024, ','))
+        break;
+
+      LDAP_TRACE(("attr[%zu] '%.*s'\n", i, (int)out.len, out.str));
 
       /* Unescape the attribute */
-      result = Curl_urldecode(attributes[i], 0, &unescaped, NULL,
+      result = Curl_urldecode(out.str, out.len, &unescaped, NULL,
                               REJECT_ZERO);
       if(result) {
-        free(attributes);
-
         rc = LDAP_NO_MEMORY;
-
         goto quit;
       }
 
@@ -933,10 +905,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
       free(unescaped);
 
       if(!ludp->lud_attrs[i]) {
-        free(attributes);
-
         rc = LDAP_NO_MEMORY;
-
         goto quit;
       }
 #else
@@ -944,9 +913,9 @@ static int _ldap_url_parse2(struct Curl_easy *data,
 #endif
 
       ludp->lud_attrs_dups++;
+      if(Curl_str_single(&atp, ','))
+        break;
     }
-
-    free(attributes);
   }
 
   p = q;

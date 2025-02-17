@@ -34,7 +34,7 @@
 
 #include "urldata.h" /* for the Curl_easy definition */
 #include "curl_base64.h"
-#include "strtok.h"
+#include "strparse.h"
 #include "multiif.h"
 #include "strcase.h"
 #include "x509asn1.h"
@@ -341,30 +341,28 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
 CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
 {
   int mib[2];
-  char *os_version;
   size_t os_version_len;
-  char *os_version_major, *os_version_minor;
-  char *tok_buf;
+  char buf[256];
 
   /* Get the Darwin kernel version from the kernel using sysctl(): */
   mib[0] = CTL_KERN;
   mib[1] = KERN_OSRELEASE;
   if(sysctl(mib, 2, NULL, &os_version_len, NULL, 0) == -1)
     return;
-  os_version = malloc(os_version_len*sizeof(char));
-  if(!os_version)
-    return;
-  if(sysctl(mib, 2, os_version, &os_version_len, NULL, 0) == -1) {
-    free(os_version);
-    return;
+  if(os_version_len < sizeof(buf)) {
+    if(sysctl(mib, 2, buf, &os_version_len, NULL, 0) != -1) {
+      const char *os = buf;
+      curl_off_t fnum;
+      curl_off_t snum;
+      /* Parse the version: */
+      if(!Curl_str_number(&os, &fnum, INT_MAX) &&
+         !Curl_str_single(&os, '.') &&
+         !Curl_str_number(&os, &snum, INT_MAX)) {
+        *major = (int)fnum;
+        *minor = (int)snum;
+      }
+    }
   }
-
-  /* Parse the version: */
-  os_version_major = Curl_strtok_r(os_version, ".", &tok_buf);
-  os_version_minor = Curl_strtok_r(NULL, ".", &tok_buf);
-  *major = atoi(os_version_major);
-  *minor = atoi(os_version_minor);
-  free(os_version);
 }
 #endif /* CURL_BUILD_MAC */
 

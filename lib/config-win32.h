@@ -225,11 +225,6 @@
 #define HAVE_BASENAME 1
 #endif
 
-/* Define to 1 if you have the strtok_r function. */
-#if defined(__MINGW32__) && !defined(__MINGW32CE__)
-#define HAVE_STRTOK_R 1
-#endif
-
 /* Define to 1 if you have the signal function. */
 #ifndef UNDER_CE
 #define HAVE_SIGNAL 1

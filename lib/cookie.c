@@ -76,7 +76,6 @@ Example set of cookies:
 #include "urldata.h"
 #include "cookie.h"
 #include "psl.h"
-#include "strtok.h"
 #include "sendf.h"
 #include "slist.h"
 #include "share.h"

@@ -41,7 +41,7 @@
 #include "curl_sha512_256.h"
 #include "vtls/vtls.h"
 #include "warnless.h"
-#include "strtok.h"
+#include "strparse.h"
 #include "strcase.h"
 #include "curl_printf.h"
 #include "rand.h"
@@ -219,32 +219,20 @@ static bool auth_digest_get_key_value(const char *chlg,
 
 static CURLcode auth_digest_get_qop_values(const char *options, int *value)
 {
-  char *tmp;
-  char *token;
-  char *tok_buf = NULL;
-
+  struct Curl_str out;
   /* Initialise the output */
   *value = 0;
 
-  /* Tokenise the list of qop values. Use a temporary clone of the buffer since
-     Curl_strtok_r() ruins it. */
-  tmp = strdup(options);
-  if(!tmp)
-    return CURLE_OUT_OF_MEMORY;
-
-  token = Curl_strtok_r(tmp, ",", &tok_buf);
-  while(token) {
-    if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH))
+  while(!Curl_str_until(&options, &out, 32, ',')) {
+    if(Curl_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH))
       *value |= DIGEST_QOP_VALUE_AUTH;
-    else if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_INT))
+    else if(Curl_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH_INT))
       *value |= DIGEST_QOP_VALUE_AUTH_INT;
-    else if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_CONF))
+    else if(Curl_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH_CONF))
       *value |= DIGEST_QOP_VALUE_AUTH_CONF;
-
-    token = Curl_strtok_r(NULL, ",", &tok_buf);
+    if(Curl_str_single(&options, ','))
+      break;
   }
-
-  free(tmp);
 
   return CURLE_OK;
 }
@@ -504,10 +492,6 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest)
 {
   bool before = FALSE; /* got a nonce before */
-  bool foundAuth = FALSE;
-  bool foundAuthInt = FALSE;
-  char *token = NULL;
-  char *tmp = NULL;
 
   /* If we already have received a nonce, keep that in mind */
   if(digest->nonce)
@@ -551,28 +535,24 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           return CURLE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "qop")) {
-        char *tok_buf = NULL;
-        /* Tokenize the list and choose auth if possible, use a temporary
-           clone of the buffer since Curl_strtok_r() ruins it */
-        tmp = strdup(content);
-        if(!tmp)
-          return CURLE_OUT_OF_MEMORY;
-
-        token = Curl_strtok_r(tmp, ",", &tok_buf);
-        while(token) {
-          /* Pass additional spaces here */
+        const char *token = content;
+        struct Curl_str out;
+        bool foundAuth = FALSE;
+        bool foundAuthInt = FALSE;
+        /* Pass leading spaces */
+        while(*token && ISBLANK(*token))
+          token++;
+        while(!Curl_str_until(&token, &out, 32, ',')) {
+          if(Curl_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH))
+            foundAuth = TRUE;
+          else if(Curl_str_casecompare(&out,
+                                       DIGEST_QOP_VALUE_STRING_AUTH_INT))
+            foundAuthInt = TRUE;
+          if(Curl_str_single(&token, ','))
+            break;
           while(*token && ISBLANK(*token))
             token++;
-          if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH)) {
-            foundAuth = TRUE;
-          }
-          else if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_INT)) {
-            foundAuthInt = TRUE;
-          }
-          token = Curl_strtok_r(NULL, ",", &tok_buf);
         }
-
-        free(tmp);
 
         /* Select only auth or auth-int. Otherwise, ignore */
         if(foundAuth) {
