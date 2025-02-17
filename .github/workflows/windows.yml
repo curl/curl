@@ -260,8 +260,9 @@ jobs:
                 -DCURL_WERROR=ON \
                 ${{ matrix.config }}
             done
-            if [ -d bld_chkprefill ]; then
-              diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h
+            if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
+              echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+              false
             fi
           else
             export CFLAGS CPPFLAGS
@@ -756,8 +757,9 @@ jobs:
               -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
               ${{ matrix.config }}
           done
-          if [ -d bld_chkprefill ]; then
-            diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h
+          if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
+            echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+            false
           fi
 
       - name: 'configure log'
