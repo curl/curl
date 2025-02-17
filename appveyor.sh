@@ -55,19 +55,18 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
     # shellcheck disable=SC2086
     cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET} \
+      -DCMAKE_UNITY_BUILD="${UNITY}" -DCURL_TEST_BUNDLES=ON \
+      -DCURL_WERROR=ON \
+      -DBUILD_SHARED_LIBS="${SHARED}" \
+      -DENABLE_DEBUG="${DEBUG}" \
+      -DENABLE_UNICODE="${ENABLE_UNICODE}" \
+      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
+      -DCMAKE_INSTALL_PREFIX='C:/curl' \
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_SCHANNEL="${SCHANNEL}" \
       -DHTTP_ONLY="${HTTP_ONLY}" \
-      -DBUILD_SHARED_LIBS="${SHARED}" \
-      -DCMAKE_UNITY_BUILD="${UNITY}" \
-      -DCURL_TEST_BUNDLES=ON \
-      -DCURL_WERROR=ON \
-      -DENABLE_DEBUG="${DEBUG}" \
-      -DENABLE_UNICODE="${ENABLE_UNICODE}" \
-      -DCMAKE_INSTALL_PREFIX='C:/curl' \
       -DCURL_USE_LIBPSL=OFF \
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
       ${options}
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
