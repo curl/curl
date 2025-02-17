@@ -748,13 +748,12 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
-              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+              -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
               -DENABLE_DEBUG=ON \
-              -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
               ${{ matrix.config }}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
