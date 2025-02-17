@@ -229,7 +229,6 @@ LIB_CFILES =         \
   strequal.c         \
   strerror.c         \
   strparse.c         \
-  strtok.c           \
   strtoofft.c        \
   system_win32.c     \
   telnet.c           \
@@ -367,7 +366,6 @@ LIB_HFILES =         \
   strdup.h           \
   strerror.h         \
   strparse.h         \
-  strtok.h           \
   strtoofft.h        \
   system_win32.h     \
   telnet.h           \

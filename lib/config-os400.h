@@ -152,9 +152,6 @@
 /* Define if you have the <stropts.h> header file. */
 #undef HAVE_STROPTS_H
 
-/* Define if you have the `strtok_r' function. */
-#define HAVE_STRTOK_R
-
 /* Define if you have the <sys/param.h> header file. */
 #define HAVE_SYS_PARAM_H
 

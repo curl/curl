@@ -75,7 +75,6 @@
 #include "strcase.h"
 #include "strerror.h"
 #include "escape.h"
-#include "strtok.h"
 #include "share.h"
 #include "content_encoding.h"
 #include "http_digest.h"

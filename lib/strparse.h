@@ -75,4 +75,10 @@ int Curl_str_octal(const char **linep, curl_off_t *nump, curl_off_t max);
    return non-zero on error */
 int Curl_str_newline(const char **linep);
 
+/* case insensitive compare that the parsed string matches the
+   given string. */
+int Curl_str_casecompare(struct Curl_str *str, const char *check);
+
+int Curl_str_nudge(struct Curl_str *str, size_t num);
+
 #endif /* HEADER_CURL_STRPARSE_H */

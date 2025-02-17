@@ -36,7 +36,6 @@
 
 #include "vauth/vauth.h"
 #include "warnless.h"
-#include "strtok.h"
 #include "sendf.h"
 #include "curl_printf.h"
 

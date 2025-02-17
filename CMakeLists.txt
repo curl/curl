@@ -1707,7 +1707,6 @@ check_function_exists("sendmsg"       HAVE_SENDMSG)
 check_function_exists("sendmmsg"      HAVE_SENDMMSG)
 check_symbol_exists("select"          "${CURL_INCLUDES}" HAVE_SELECT)  # proto/bsdsocket.h sys/select.h sys/socket.h
 check_symbol_exists("strdup"          "string.h" HAVE_STRDUP)
-check_symbol_exists("strtok_r"        "string.h" HAVE_STRTOK_R)
 check_symbol_exists("memrchr"         "string.h" HAVE_MEMRCHR)
 check_symbol_exists("alarm"           "unistd.h" HAVE_ALARM)
 check_symbol_exists("fcntl"           "fcntl.h" HAVE_FCNTL)

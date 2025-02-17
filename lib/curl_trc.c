@@ -44,7 +44,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "socks.h"
-#include "strtok.h"
+#include "strparse.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
@@ -341,18 +341,18 @@ static struct trc_cft_def trc_cfts[] = {
 #endif
 };
 
-static void trc_apply_level_by_name(const char * const token, int lvl)
+static void trc_apply_level_by_name(struct Curl_str *token, int lvl)
 {
   size_t i;
 
   for(i = 0; i < CURL_ARRAYSIZE(trc_cfts); ++i) {
-    if(strcasecompare(token, trc_cfts[i].cft->name)) {
+    if(Curl_str_casecompare(token, trc_cfts[i].cft->name)) {
       trc_cfts[i].cft->log_level = lvl;
       break;
     }
   }
   for(i = 0; i < CURL_ARRAYSIZE(trc_feats); ++i) {
-    if(strcasecompare(token, trc_feats[i].feat->name)) {
+    if(Curl_str_casecompare(token, trc_feats[i].feat->name)) {
       trc_feats[i].feat->log_level = lvl;
       break;
     }
@@ -375,42 +375,32 @@ static void trc_apply_level_by_category(int category, int lvl)
 
 static CURLcode trc_opt(const char *config)
 {
-  char *token, *tok_buf, *tmp;
-  int lvl;
+  struct Curl_str out;
+  while(!Curl_str_until(&config, &out, 32, ',')) {
+    int lvl = CURL_LOG_LVL_INFO;
+    const char *token = out.str;
 
-  tmp = strdup(config);
-  if(!tmp)
-    return CURLE_OUT_OF_MEMORY;
-
-  token = Curl_strtok_r(tmp, ", ", &tok_buf);
-  while(token) {
-    switch(*token) {
-      case '-':
-        lvl = CURL_LOG_LVL_NONE;
-        ++token;
-        break;
-      case '+':
-        lvl = CURL_LOG_LVL_INFO;
-        ++token;
-        break;
-      default:
-        lvl = CURL_LOG_LVL_INFO;
-        break;
+    if(*token == '-') {
+      lvl = CURL_LOG_LVL_NONE;
+      Curl_str_nudge(&out, 1);
     }
-    if(strcasecompare(token, "all"))
+    else if(*token == '+')
+      Curl_str_nudge(&out, 1);
+
+    if(Curl_str_casecompare(&out, "all"))
       trc_apply_level_by_category(TRC_CT_NONE, lvl);
-    else if(strcasecompare(token, "protocol"))
+    else if(Curl_str_casecompare(&out, "protocol"))
       trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
-    else if(strcasecompare(token, "network"))
+    else if(Curl_str_casecompare(&out, "network"))
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
-    else if(strcasecompare(token, "proxy"))
+    else if(Curl_str_casecompare(&out, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
     else
-      trc_apply_level_by_name(token, lvl);
+      trc_apply_level_by_name(&out, lvl);
 
-    token = Curl_strtok_r(NULL, ", ", &tok_buf);
+    if(Curl_str_single(&config, ','))
+      break;
   }
-  free(tmp);
   return CURLE_OK;
 }
 
