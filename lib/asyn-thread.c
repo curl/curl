@@ -336,15 +336,15 @@ CURL_STDCALL gethostbyname_thread(void *arg)
       tsd->sock_error = RESOLVER_ENOMEM;
   }
 
-  Curl_mutex_acquire(tsd->mtx);
+  Curl_mutex_acquire(&tsd->mutx);
   if(tsd->done) {
     /* too late, gotta clean up the mess */
-    Curl_mutex_release(tsd->mtx);
+    Curl_mutex_release(&tsd->mutx);
     destroy_thread_sync_data(tsd);
   }
   else {
     tsd->done = TRUE;
-    Curl_mutex_release(tsd->mtx);
+    Curl_mutex_release(&tsd->mutx);
   }
 
   return 0;
@@ -682,8 +682,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                                                 int port,
                                                 int *waitp)
 {
-  struct thread_data *td = &data->state.async.thdata;
-
   *waitp = 0; /* default to synchronous response */
 
   /* fire up a new resolver thread! */
