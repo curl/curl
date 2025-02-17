@@ -576,7 +576,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
   CURLcode result = CURLE_OUT_OF_MEMORY;
   struct connectdata *conn = data->conn;
-  size_t len;
   const char *line;
   struct Curl_str provider0;
   struct Curl_str provider1;
@@ -644,8 +643,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
   if(Curl_str_single(&line, ':') ||
      Curl_str_until(&line, &provider1, MAX_SIGV4_LEN, ':')) {
-    provider1.str = provider0.str;
-    provider1.len = provider0.len;
+    provider1 = provider0;
   }
   else if(Curl_str_single(&line, ':') ||
           Curl_str_until(&line, &region, MAX_SIGV4_LEN, ':') ||
@@ -655,40 +653,24 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
 
   if(!service.len) {
-    char *hostdot = strchr(hostname, '.');
-    if(!hostdot) {
+    const char *p = hostname;
+    if(Curl_str_until(&p, &service, MAX_SIGV4_LEN, '.') ||
+       Curl_str_single(&p, '.')) {
       failf(data, "aws-sigv4: service missing in parameters and hostname");
       result = CURLE_URL_MALFORMAT;
       goto fail;
     }
-    len = hostdot - hostname;
-    if(len > MAX_SIGV4_LEN) {
-      failf(data, "aws-sigv4: service too long in hostname");
-      result = CURLE_URL_MALFORMAT;
-      goto fail;
-    }
-    service.str = (char *)hostname;
-    service.len = len;
 
     infof(data, "aws_sigv4: picked service %.*s from host",
           (int)service.len, service.str);
 
     if(!region.len) {
-      const char *reg = hostdot + 1;
-      const char *hostreg = strchr(reg, '.');
-      if(!hostreg) {
+      if(Curl_str_until(&p, &region, MAX_SIGV4_LEN, '.') ||
+         Curl_str_single(&p, '.')) {
         failf(data, "aws-sigv4: region missing in parameters and hostname");
         result = CURLE_URL_MALFORMAT;
         goto fail;
       }
-      len = hostreg - reg;
-      if(len > MAX_SIGV4_LEN) {
-        failf(data, "aws-sigv4: region too long in hostname");
-        result = CURLE_URL_MALFORMAT;
-        goto fail;
-      }
-      region.str = (char *)reg;
-      region.len = len;
       infof(data, "aws_sigv4: picked region %.*s from host",
             (int)region.len, region.str);
     }
@@ -702,9 +684,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!payload_hash) {
     /* AWS S3 requires a x-amz-content-sha256 header, and supports special
      * values like UNSIGNED-PAYLOAD */
-    bool sign_as_s3 = ((provider0.len == 3) &&
-                       strncasecompare(provider0.str, "aws", 3)) &&
-      ((service.len == 2) && strncasecompare(service.str, "s3", 2));
+    bool sign_as_s3 = Curl_str_casecompare(&provider0, "aws") &&
+      Curl_str_casecompare(&service, "s3");
 
     if(sign_as_s3)
       result = calc_s3_payload_hash(data, httpreq,
