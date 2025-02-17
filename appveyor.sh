@@ -52,9 +52,9 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
     [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
-    [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
     # shellcheck disable=SC2086
     cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET} \
+      -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
       -DCMAKE_UNITY_BUILD="${UNITY}" -DCURL_TEST_BUNDLES=ON \
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
