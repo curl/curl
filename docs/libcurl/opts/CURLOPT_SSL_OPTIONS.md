@@ -69,8 +69,9 @@ precedence. (Added in 7.70.0)
 
 Tell libcurl to use the operating system's native CA store for certificate
 verification. If you set this option and also set a CA certificate file or
-directory then during verification those certificates are searched in addition
-to the native CA store.
+directory, or libcurl was built with a default certificate location setting,
+then during verification those certificates are searched in addition to the
+native CA store.
 
 Works with wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo, Fedora, RHEL),
 macOS, Android and iOS (added in 8.3.0), with GnuTLS (added in 8.5.0) or on

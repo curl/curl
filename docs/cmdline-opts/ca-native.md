@@ -18,12 +18,18 @@ Example:
 
 # `--ca-native`
 
-Use the CA store from the native operating system to verify the peer. By
-default, curl otherwise uses a CA store provided in a single file or
-directory, but when using this option it interfaces the operating system's own
-vault.
+Use the operating system's native CA store for certificate verification. If
+you set this option and also set a CA certificate file or directory, or curl
+was built with a default certificate location setting, then during verification
+those certificates are searched in addition to the native CA store.
 
-This option works for curl on Windows when built to use OpenSSL, wolfSSL
-(added in 8.3.0) or GnuTLS (added in 8.5.0). When curl on Windows is built to
-use Schannel, this feature is implied and curl then only uses the native CA
-store.
+This option works for OpenSSL on Windows (added in 7.71.0).
+
+This option works for wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo,
+Fedora, RHEL), macOS, Android and iOS (added in 8.3.0).
+
+This option works for GnuTLS (added in 8.5.0).
+
+This option has no effect on Schannel. Schannel is the native TLS library for
+Windows and therefore already uses the native CA store for verification unless
+it is overridden by a certificate location setting.
