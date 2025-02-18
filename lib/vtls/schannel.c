@@ -74,10 +74,10 @@
 
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
-
    https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
+   Or mingw-w64 9.0 or newer.
 */
-#if defined(__MINGW32__) || \
+#if (defined(__MINGW32__) && __MINGW64_VERSION_MAJOR >= 9) || \
   (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
 #  define HAS_ALPN_SCHANNEL
 #endif
