@@ -357,7 +357,7 @@ static struct trc_cft_def trc_cfts[] = {
 #endif
 };
 
-static void trc_apply_level_by_name(const struct Curl_str *token, int lvl)
+static void trc_apply_level_by_name(struct Curl_str *token, int lvl)
 {
   size_t i;
 
@@ -412,7 +412,7 @@ static CURLcode trc_opt(const char *config)
     else if(Curl_str_casecompare(&out, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
     else if(Curl_str_casecompare(&out, "doh")) {
-      const struct Curl_str dns = { "dns", 3 };
+      struct Curl_str dns = { "dns", 3 };
       trc_apply_level_by_name(&dns, lvl);
     }
     else

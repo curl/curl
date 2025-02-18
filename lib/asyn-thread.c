@@ -588,8 +588,10 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
     CURLcode result = td->result;
     getaddrinfo_complete(data);
 
-    if(!data->state.async.dns) {
+    if(!result && !data->state.async.dns)
       result = Curl_resolver_error(data);
+
+    if(result) {
       destroy_async_data(data);
       return result;
     }

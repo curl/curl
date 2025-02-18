@@ -176,7 +176,7 @@ int Curl_str_newline(const char **linep)
 
 /* case insensitive compare that the parsed string matches the
    given string. Returns non-zero on match. */
-int Curl_str_casecompare(const struct Curl_str *str, const char *check)
+int Curl_str_casecompare(struct Curl_str *str, const char *check)
 {
   size_t clen = check ? strlen(check) : 0;
   return ((str->len == clen) && strncasecompare(str->str, check, clen));
