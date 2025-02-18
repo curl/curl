@@ -3805,6 +3805,7 @@ dnl HAVE_STRDUP will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
   AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
   #
   tst_links_strdup="unknown"
   tst_proto_strdup="unknown"
@@ -3840,9 +3841,9 @@ AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_string
+        $curl_includes_stdlib
       ]],[[
-        if(0 != strdup(0))
-          return 1;
+        free(strdup(""));
       ]])
     ],[
       AC_MSG_RESULT([yes])
