@@ -106,6 +106,10 @@ if(NOT DEFINED SHARE_LIB_OBJECT)
   endif()
 endif()
 
+if(CMAKE_VERSION VERSION_LESS 3.12)
+  set(SHARE_LIB_OBJECT OFF)
+endif()
+
 if(SHARE_LIB_OBJECT)
   set(LIB_OBJECT "libcurl_object")
   add_library(${LIB_OBJECT} OBJECT ${HHEADERS} ${CSOURCES})
