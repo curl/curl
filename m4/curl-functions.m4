@@ -657,12 +657,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   #
   AC_MSG_CHECKING([if closesocket can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_winsock2
-    ]],[[
-      if(0 != closesocket(0))
-        return 1;
-    ]])
+    AC_LANG_FUNC_LINK_TRY([closesocket])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_closesocket="yes"
@@ -747,13 +742,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   #
   AC_MSG_CHECKING([if CloseSocket can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ]],[[
-      if(0 != CloseSocket(0))
-        return 1;
-    ]])
+    AC_LANG_FUNC_LINK_TRY([CloseSocket])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_closesocket_camel="yes"
@@ -975,13 +964,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
   #
   AC_MSG_CHECKING([if freeaddrinfo can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_ws2tcpip
-      $curl_includes_sys_socket
-      $curl_includes_netdb
-    ]],[[
-      freeaddrinfo(0);
-    ]])
+    AC_LANG_FUNC_LINK_TRY([freeaddrinfo])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_freeaddrinfo="yes"
@@ -1286,14 +1269,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   #
   AC_MSG_CHECKING([if getaddrinfo can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_ws2tcpip
-      $curl_includes_sys_socket
-      $curl_includes_netdb
-    ]],[[
-      if(0 != getaddrinfo(0, 0, 0, 0))
-        return 1;
-    ]])
+    AC_LANG_FUNC_LINK_TRY([getaddrinfo])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_getaddrinfo="yes"
@@ -1774,14 +1750,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
   #
   AC_MSG_CHECKING([if getpeername can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ]],[[
-      if(0 != getpeername(0, (void *)0, (void *)0))
-        return 1;
-    ]])
+    AC_LANG_FUNC_LINK_TRY([getpeername])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_getpeername="yes"
@@ -1872,14 +1841,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
   #
   AC_MSG_CHECKING([if getsockname can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ]],[[
-      if(0 != getsockname(0, (void *)0, (void *)0))
-        return 1;
-    ]])
+    AC_LANG_FUNC_LINK_TRY([getsockname])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_getsockname="yes"
@@ -2710,12 +2672,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   #
   AC_MSG_CHECKING([if ioctlsocket can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_winsock2
-    ]],[[
-      if(0 != ioctlsocket(0, 0, 0))
-        return 1;
-    ]])
+    AC_LANG_FUNC_LINK_TRY([ioctlsocket])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_ioctlsocket="yes"
@@ -2856,11 +2813,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   #
   AC_MSG_CHECKING([if IoctlSocket can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_bsdsocket
-    ]],[[
-      IoctlSocket(0, 0, 0);
-    ]])
+    AC_LANG_FUNC_LINK_TRY([IoctlSocket])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_ioctlsocket_camel="yes"
@@ -3456,14 +3409,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   #
   AC_MSG_CHECKING([if socket can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ]],[[
-      if(0 != socket(0, 0, 0))
-        return 1;
-    ]])
+    AC_LANG_FUNC_LINK_TRY([socket])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_socket="yes"
