@@ -2206,7 +2206,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
         $curl_includes_string
       ]],[[
         char ipv6res[sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")];
-        char ipv4res[sizeof "255.255.255.255"];
+        char ipv4res[sizeof("255.255.255.255")];
         unsigned char ipv6a[26];
         unsigned char ipv4a[5];
         const char *ipv6ptr = 0;
