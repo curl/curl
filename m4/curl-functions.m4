@@ -736,7 +736,6 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
-  tst_links_closesocket_camel="unknown"
   tst_compi_closesocket_camel="unknown"
   tst_allow_closesocket_camel="unknown"
   #
@@ -769,8 +768,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   fi
   #
   AC_MSG_CHECKING([if CloseSocket might be used])
-  if test "$tst_links_closesocket_camel" = "yes" &&
-     test "$tst_compi_closesocket_camel" = "yes" &&
+  if test "$tst_compi_closesocket_camel" = "yes" &&
      test "$tst_allow_closesocket_camel" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_CLOSESOCKET_CAMEL, 1,
@@ -2797,7 +2795,6 @@ dnl then HAVE_IOCTLSOCKET_CAMEL will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
-  tst_links_ioctlsocket_camel="unknown"
   tst_compi_ioctlsocket_camel="unknown"
   tst_allow_ioctlsocket_camel="unknown"
   #
@@ -2829,8 +2826,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   fi
   #
   AC_MSG_CHECKING([if IoctlSocket might be used])
-  if test "$tst_links_ioctlsocket_camel" = "yes" &&
-     test "$tst_compi_ioctlsocket_camel" = "yes" &&
+  if test "$tst_compi_ioctlsocket_camel" = "yes" &&
      test "$tst_allow_ioctlsocket_camel" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL, 1,
