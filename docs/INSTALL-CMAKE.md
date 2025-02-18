@@ -170,6 +170,7 @@ assumes that CMake generates `Makefile`:
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp` for MSVC-like toolchains, otherwise empty.
 - `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
 - `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
+- `SHARE_LIB_OBJECT`:                       Build shared and static libcurl in a single pass (requires CMake 3.12 or newer). Default: `ON` for Windows
 - `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
 
 ## CA bundle options
