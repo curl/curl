@@ -754,7 +754,7 @@ const struct LongShort *findshortopt(char letter)
 
   if(!singles_done) {
     unsigned int j;
-    for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
+    for(j = 0; j < CURL_ARRAYSIZE(aliases); j++) {
       if(aliases[j].letter != ' ') {
         unsigned char l = (unsigned char)aliases[j].letter;
         singles[l - ' '] = &aliases[j];
@@ -1016,7 +1016,7 @@ const struct LongShort *findlongopt(const char *opt)
   struct LongShort key;
   key.lname = opt;
 
-  return bsearch(&key, aliases, sizeof(aliases)/sizeof(aliases[0]),
+  return bsearch(&key, aliases, CURL_ARRAYSIZE(aliases),
                  sizeof(aliases[0]), findarg);
 }
 
@@ -1961,7 +1961,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       const struct TOSEntry *entry;
       find.name = nextarg;
       entry = bsearch(&find, tos_entries,
-                      sizeof(tos_entries)/sizeof(*tos_entries),
+                      CURL_ARRAYSIZE(tos_entries),
                       sizeof(*tos_entries), find_tos);
       if(entry)
         config->ip_tos = entry->value;

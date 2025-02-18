@@ -577,7 +577,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           if(!curlx_dyn_addn(&name, ptr, vlen)) {
             find.name = curlx_dyn_ptr(&name);
             wv = bsearch(&find,
-                         variables, sizeof(variables)/sizeof(variables[0]),
+                         variables, CURL_ARRAYSIZE(variables),
                          sizeof(variables[0]), matchvar);
           }
           if(wv) {
@@ -601,7 +601,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               break;
             case VAR_JSON:
               ourWriteOutJSON(stream, variables,
-                              sizeof(variables)/sizeof(variables[0]),
+                              CURL_ARRAYSIZE(variables),
                               per, per_result);
               break;
             case VAR_HEADER_JSON:

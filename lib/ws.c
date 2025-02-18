@@ -85,7 +85,7 @@ static const char *ws_frame_name_of_op(unsigned char proto_opcode)
 {
   unsigned char opcode = proto_opcode & WSBIT_OPCODE_MASK;
   size_t i;
-  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(WS_FRAMES); ++i) {
     if(WS_FRAMES[i].proto_opcode == opcode)
       return WS_FRAMES[i].name;
   }
@@ -96,7 +96,7 @@ static int ws_frame_op2flags(unsigned char proto_opcode)
 {
   unsigned char opcode = proto_opcode & WSBIT_OPCODE_MASK;
   size_t i;
-  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(WS_FRAMES); ++i) {
     if(WS_FRAMES[i].proto_opcode == opcode)
       return WS_FRAMES[i].flags;
   }
@@ -106,7 +106,7 @@ static int ws_frame_op2flags(unsigned char proto_opcode)
 static unsigned char ws_frame_flags2op(int flags)
 {
   size_t i;
-  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(WS_FRAMES); ++i) {
     if(WS_FRAMES[i].flags & flags)
       return (unsigned char)WS_FRAMES[i].proto_opcode;
   }
@@ -747,7 +747,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   }
   strcpy(keyval, randstr);
   free(randstr);
-  for(i = 0; !result && (i < sizeof(heads)/sizeof(heads[0])); i++) {
+  for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, STRCONST(heads[i].name))) {
       result = Curl_dyn_addf(req, "%s %s\r\n", heads[i].name,
                              heads[i].val);

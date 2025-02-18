@@ -4456,7 +4456,7 @@ static struct name_const H2_NON_FIELD[] = {
 static bool h2_non_field(const char *name, size_t namelen)
 {
   size_t i;
-  for(i = 0; i < sizeof(H2_NON_FIELD)/sizeof(H2_NON_FIELD[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(H2_NON_FIELD); ++i) {
     if(namelen < H2_NON_FIELD[i].namelen)
       return FALSE;
     if(namelen == H2_NON_FIELD[i].namelen &&

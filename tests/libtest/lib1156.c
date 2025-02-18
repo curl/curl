@@ -143,7 +143,7 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < sizeof(testparams) / sizeof(testparams[0]); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(testparams); i++) {
     curl = curl_easy_init();
     if(!curl) {
       fprintf(stderr, "curl_easy_init() failed\n");

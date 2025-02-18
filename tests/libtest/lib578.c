@@ -28,7 +28,7 @@
 /* The size of data should be kept below MAX_INITIAL_POST_SIZE! */
 static char testdata[]="this is a short string.\n";
 
-static size_t data_size = sizeof(testdata) / sizeof(char);
+static size_t data_size = CURL_ARRAYSIZE(testdata);
 
 static int progress_callback(void *clientp, double dltotal, double dlnow,
                              double ultotal, double ulnow)

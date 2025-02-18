@@ -793,7 +793,7 @@ ParameterError str2tls_max(long *val, const char *str)
   size_t i = 0;
   if(!str)
     return PARAM_REQUIRES_PARAMETER;
-  for(i = 0; i < sizeof(tls_max_array)/sizeof(tls_max_array[0]); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(tls_max_array); i++) {
     if(!strcmp(str, tls_max_array[i].tls_max_str)) {
       *val = tls_max_array[i].tls_max;
       return PARAM_OK;

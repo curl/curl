@@ -211,9 +211,6 @@ static const uint16_t default_ciphers[] = {
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
 };
 
-#define DEFAULT_CIPHERS_LEN sizeof(default_ciphers)/sizeof(default_ciphers[0])
-
-
 /* pinned public key support tests */
 
 /* version 1 supports macOS 10.12+ and iOS 10+ */
@@ -925,7 +922,7 @@ static CURLcode sectransp_set_default_ciphers(struct Curl_easy *data,
   /* Intersect the ciphers supported by Secure Transport with the default
    * ciphers, using the order of the former. */
   for(i = 0; i < supported_len; i++) {
-    for(j = 0; j < DEFAULT_CIPHERS_LEN; j++) {
+    for(j = 0; j < CURL_ARRAYSIZE(default_ciphers); j++) {
       if(default_ciphers[j] == ciphers[i]) {
         ciphers[count++] = ciphers[i];
         break;

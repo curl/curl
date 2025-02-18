@@ -256,7 +256,7 @@ static int checktz(const char *check, size_t len)
   if(len > 4) /* longer than any valid timezone */
     return -1;
 
-  for(i = 0; i < sizeof(tz)/sizeof(tz[0]); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(tz); i++) {
     size_t ilen = strlen(what->name);
     if((ilen == len) &&
        strncasecompare(check, what->name, len))
