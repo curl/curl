@@ -1643,7 +1643,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
         $curl_includes_bsdsocket
       ]],[[
         char s[1];
-        if(0 != gethostname(s, 0))
+        if(0 != gethostname((void *)s, 0))
           return 1;
         (void)s;
       ]])
