@@ -1286,7 +1286,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         $curl_includes_sys_socket
         $curl_includes_netdb
       ]],[[
-        if(0 != getaddrinfo(0, 0, 0, 0))
+        struct addrinfo *ai = 0;
+        if(0 != getaddrinfo(0, 0, 0, &ai))
           return 1;
       ]])
     ],[
