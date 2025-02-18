@@ -689,7 +689,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       #endif
       #endif
     ]],[[
-      send(0, 0, 0, 0);
+      send(0, (const void *)"", 0, 0);
     ]])
   ],[
     AC_MSG_RESULT([yes])
