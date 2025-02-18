@@ -909,7 +909,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   {
     bool wine;
 #ifdef CURL_WINDOWS_UWP
-    /* GetModuleHandle() not available for UWP. And WINE has no UWP support. */
+    /* GetModuleHandle() not available for UWP.
+       Assume no WINE because WINE has no UWP support. */
     wine = FALSE;
 #else
     wine = GetProcAddress(GetModuleHandle(TEXT("ntdll")), "wine_get_version");
