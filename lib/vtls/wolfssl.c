@@ -959,7 +959,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   word16 pqkem = 0;
   size_t idx = 0;
 #endif
- CURLcode result = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
 
   DEBUGASSERT(!wctx->ssl_ctx);
   DEBUGASSERT(!wctx->ssl);

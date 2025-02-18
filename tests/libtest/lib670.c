@@ -213,7 +213,7 @@ CURLcode test(char *URL)
     mres = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcept, &maxfd);
     if(mres)
       break;
-#if defined(_WIN32)
+#ifdef _WIN32
     if(maxfd == -1)
       Sleep(100);
     else

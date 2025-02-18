@@ -115,8 +115,8 @@ static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
   int level = IPPROTO_TCP;
   char buffer[STRERROR_LEN];
 
-  if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
-                sizeof(onoff)) < 0)
+  if(setsockopt(sockfd, level, TCP_NODELAY,
+                (void *)&onoff, sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
 #else
@@ -135,8 +135,8 @@ static void nosigpipe(struct Curl_easy *data,
 {
   int onoff = 1;
   (void)data;
-  if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
-                sizeof(onoff)) < 0) {
+  if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
+                (void *)&onoff, sizeof(onoff)) < 0) {
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
     char buffer[STRERROR_LEN];
     infof(data, "Could not set SO_NOSIGPIPE: %s",
@@ -183,7 +183,7 @@ tcpkeepalive(struct Curl_easy *data,
 
   /* only set IDLE and INTVL if setting KEEPALIVE is successful */
   if(setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
-        (void *)&optval, sizeof(optval)) < 0) {
+                (void *)&optval, sizeof(optval)) < 0) {
     infof(data, "Failed to set SO_KEEPALIVE on fd "
           "%" FMT_SOCKET_T ": errno %d",
           sockfd, SOCKERRNO);
@@ -236,7 +236,7 @@ tcpkeepalive(struct Curl_easy *data,
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
-          (void *)&optval, sizeof(optval)) < 0) {
+                  (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPIDLE on fd "
             "%" FMT_SOCKET_T ": errno %d",
             sockfd, SOCKERRNO);
@@ -246,7 +246,7 @@ tcpkeepalive(struct Curl_easy *data,
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
-      (void *)&optval, sizeof(optval)) < 0) {
+                  (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPALIVE on fd "
             "%" FMT_SOCKET_T ": errno %d",
             sockfd, SOCKERRNO);
@@ -256,7 +256,7 @@ tcpkeepalive(struct Curl_easy *data,
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_THRESHOLD,
-      (void *)&optval, sizeof(optval)) < 0) {
+                  (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPALIVE_THRESHOLD on fd "
             "%" FMT_SOCKET_T ": errno %d",
             sockfd, SOCKERRNO);
@@ -266,7 +266,7 @@ tcpkeepalive(struct Curl_easy *data,
     optval = curlx_sltosi(data->set.tcp_keepintvl);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
-          (void *)&optval, sizeof(optval)) < 0) {
+                  (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPINTVL on fd "
             "%" FMT_SOCKET_T ": errno %d",
             sockfd, SOCKERRNO);
@@ -287,7 +287,7 @@ tcpkeepalive(struct Curl_easy *data,
              curlx_sltosi(data->set.tcp_keepintvl);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_ABORT_THRESHOLD,
-          (void *)&optval, sizeof(optval)) < 0) {
+                  (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPALIVE_ABORT_THRESHOLD on fd "
             "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
@@ -295,7 +295,7 @@ tcpkeepalive(struct Curl_easy *data,
 #ifdef TCP_KEEPCNT
     optval = curlx_sltosi(data->set.tcp_keepcnt);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT,
-                (void *)&optval, sizeof(optval)) < 0) {
+                  (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPCNT on fd "
             "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }

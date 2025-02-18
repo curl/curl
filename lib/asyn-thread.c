@@ -69,7 +69,7 @@
 #ifdef USE_ARES
 #include <ares.h>
 #ifdef USE_HTTPSRR
-#define USE_HTTPSRR_ARES 1 /* the combo */
+#define USE_HTTPSRR_ARES  /* the combo */
 #endif
 #endif
 

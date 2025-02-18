@@ -970,7 +970,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
           ptr += 9; /* now points to the slash after the host */
         }
         else {
-#if defined(_WIN32)
+#ifdef _WIN32
           size_t len;
 
           /* the hostname, NetBIOS computer name, can not contain disallowed

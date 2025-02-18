@@ -42,7 +42,7 @@
   !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
 #define CURL_DEPRECATED(version, message)                       \
   __attribute__((deprecated("since " # version ". " message)))
-#if defined(__IAR_SYSTEMS_ICC__)
+#ifdef __IAR_SYSTEMS_ICC__
 #define CURL_IGNORE_DEPRECATION(statements) \
       _Pragma("diag_suppress=Pe1444") \
       statements \
@@ -97,7 +97,7 @@
 #include <sys/select.h>
 #endif
 
-#if !defined(_WIN32)
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <sys/time.h>
 #endif

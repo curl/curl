@@ -427,7 +427,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
    */
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL &&
      Curl_ssl_backend() != CURLSSLBACKEND_SECURETRANSPORT) {
-#if defined(CURL_CA_BUNDLE)
+#ifdef CURL_CA_BUNDLE
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
     if(result)
       return result;
@@ -438,7 +438,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
       return result;
 #endif
 #endif
-#if defined(CURL_CA_PATH)
+#ifdef CURL_CA_PATH
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
     if(result)
       return result;
@@ -1127,7 +1127,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     }
   }
 
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
   /* If we are looking for an HTTP+NTLM connection, check if this is
      already authenticating with the right credentials. If not, keep
      looking so that we can reuse NTLM connections if
@@ -1307,7 +1307,7 @@ void Curl_verboseconnect(struct Curl_easy *data,
     infof(data, "Connected to %s (%s) port %u",
           CURL_CONN_HOST_DISPNAME(conn), conn->primary.remote_ip,
           conn->primary.remote_port);
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_HTTP
     if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
       switch(conn->alpn) {
       case CURL_HTTP_VERSION_3:
@@ -1462,7 +1462,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-#if defined(USE_SSH)
+#ifdef USE_SSH
     &Curl_handler_sftp,
 #else
     NULL,
@@ -1709,7 +1709,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
     if(!Curl_str_number(&p, &scope, UINT_MAX))
       /* A plain number, use it directly as a scope id. */
       conn->scope_id = (unsigned int)scope;
-#if defined(HAVE_IF_NAMETOINDEX)
+#ifdef HAVE_IF_NAMETOINDEX
     else {
 #elif defined(_WIN32)
     else if(Curl_if_nametoindex) {
@@ -1718,7 +1718,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 #if defined(HAVE_IF_NAMETOINDEX) || defined(_WIN32)
       /* Zone identifier is not numeric */
       unsigned int scopeidx = 0;
-#if defined(_WIN32)
+#ifdef _WIN32
       scopeidx = Curl_if_nametoindex(zoneid);
 #else
       scopeidx = if_nametoindex(zoneid);
@@ -2868,7 +2868,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
   int port = -1;
   CURLcode result = CURLE_OK;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void) data;
 #endif
 
@@ -3687,7 +3687,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         goto out;
     }
 
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
     /* If NTLM is requested in a part of this connection, make sure we do not
        assume the state is fine as this is a fresh connection and NTLM is
        connection based. */
