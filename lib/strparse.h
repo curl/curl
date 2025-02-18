@@ -81,4 +81,7 @@ int Curl_str_casecompare(struct Curl_str *str, const char *check);
 
 int Curl_str_nudge(struct Curl_str *str, size_t num);
 
+int Curl_str_cspn(const char **linep, struct Curl_str *out, const char *cspn);
+void Curl_str_trimblanks(struct Curl_str *out);
+
 #endif /* HEADER_CURL_STRPARSE_H */

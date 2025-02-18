@@ -210,3 +210,34 @@ int Curl_str_nudge(struct Curl_str *str, size_t num)
   }
   return STRE_OVERFLOW;
 }
+
+/* Get the following character sequence that consists only of bytes not
+   present in the 'reject' string. Like strcspn(). */
+int Curl_str_cspn(const char **linep, struct Curl_str *out, const char *reject)
+{
+  const char *s = *linep;
+  size_t len;
+  DEBUGASSERT(linep && *linep);
+
+  len = strcspn(s, reject);
+  if(len) {
+    out->str = s;
+    out->len = len;
+    *linep = &s[len];
+    return STRE_OK;
+  }
+  out->str = NULL;
+  out->len = 0;
+  return STRE_SHORT;
+}
+
+/* remove ISBLANK()s from both ends of the string */
+void Curl_str_trimblanks(struct Curl_str *out)
+{
+  while(out->len && ISBLANK(*out->str))
+    Curl_str_nudge(out, 1);
+
+  /* trim trailing spaces and tabs */
+  while(out->len && ISBLANK(out->str[out->len - 1]))
+    out->len--;
+}
