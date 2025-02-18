@@ -129,7 +129,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
  * wolfSSL 4.4.0, but requires the -DHAVE_SECRET_CALLBACK build option. If that
  * option is not set, then TLS 1.3 will not be logged.
  * For TLS 1.2 and before, we use wolfSSL_get_keys().
- * SSL_get_client_random and wolfSSL_get_keys require OPENSSL_EXTRA
+ * wolfSSL_get_client_random and wolfSSL_get_keys require OPENSSL_EXTRA
  * (--enable-opensslextra or --enable-all).
  */
 #if defined(HAVE_SECRET_CALLBACK) && defined(WOLFSSL_TLS13)
@@ -171,7 +171,7 @@ wssl_tls13_secret_callback(SSL *ssl, int id, const unsigned char *secret,
     return 0;
   }
 
-  if(SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE) == 0) {
+  if(wolfSSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE) == 0) {
     /* Should never happen as wolfSSL_KeepArrays() was called before. */
     return 0;
   }
@@ -1428,11 +1428,11 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 
 out:
   if(result && wctx->ssl) {
-    SSL_free(wctx->ssl);
+    wolfSSL_free(wctx->ssl);
     wctx->ssl = NULL;
   }
   if(result && wctx->ssl_ctx) {
-    SSL_CTX_free(wctx->ssl_ctx);
+    wolfSSL_CTX_free(wctx->ssl_ctx);
     wctx->ssl_ctx = NULL;
   }
   return result;
@@ -1495,7 +1495,7 @@ wssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* pass the raw socket into the SSL layer */
   if(!wolfSSL_set_fd(wssl->ssl,
                      (int)Curl_conn_cf_get_socket(cf, data))) {
-    failf(data, "SSL: SSL_set_fd failed");
+    failf(data, "SSL: wolfSSL_set_fd failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
 #endif /* !USE_BIO_CHAIN */
@@ -1773,7 +1773,6 @@ out:
 }
 #endif /* WOLFSSL_EARLY_DATA */
 
-/* this function does a SSL/TLS (re-)handshake */
 static CURLcode wssl_handshake(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
@@ -1898,7 +1897,7 @@ static ssize_t wssl_send(struct Curl_cfilter *cf,
       switch(err) {
       case WOLFSSL_ERROR_WANT_READ:
       case WOLFSSL_ERROR_WANT_WRITE:
-        /* there is data pending, re-invoke SSL_write() */
+        /* there is data pending, re-invoke wolfSSL_write() */
         if(total_written) {
           *curlcode = CURLE_OK;
           nwritten = total_written;
@@ -1992,7 +1991,7 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
     }
   }
 
-  /* SSL should now have started the shutdown from our side. Since it
+  /* wolfSSL should now have started the shutdown from our side. Since it
    * was not complete, we are lacking the close notify from the server. */
   if(send_shutdown) {
     wolfSSL_ERR_clear_error();
@@ -2024,7 +2023,7 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
     break;
   case WOLFSSL_ERROR_NONE: /* just did not get anything */
   case WOLFSSL_ERROR_WANT_READ:
-    /* SSL has send its notify and now wants to read the reply
+    /* wolfSSL has send its notify and now wants to read the reply
      * from the server. We are not really interested in that. */
     CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
     connssl->io_need = CURL_SSL_IO_NEED_RECV;
@@ -2189,7 +2188,7 @@ static bool wssl_data_pending(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx && ctx->backend);
 
   wssl = (struct wssl_ctx *)ctx->backend;
-  if(wssl->ssl)   /* SSL is in use */
+  if(wssl->ssl)   /* wolfSSL is in use */
     return wolfSSL_pending(wssl->ssl);
   else
     return FALSE;
