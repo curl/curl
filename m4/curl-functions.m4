@@ -2183,7 +2183,9 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
       AC_LANG_PROGRAM([[
         $curl_includes_arpa_inet
       ]],[[
-        if(0 != inet_ntop(0, 0, 0, 0))
+        char ipv4res[sizeof("255.255.255.255")];
+        unsigned char ipv4a[5];
+        if(0 != inet_ntop(0, ipv4a, ipv4res, 0))
           return 1;
       ]])
     ],[
@@ -2342,7 +2344,9 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
       AC_LANG_PROGRAM([[
         $curl_includes_arpa_inet
       ]],[[
-        if(0 != inet_pton(0, 0, 0))
+        unsigned char ipv4a[4+1];
+        const char *ipv4src = "192.168.100.1";
+        if(0 != inet_pton(0, ipv4src, ipv4a))
           return 1;
       ]])
     ],[
