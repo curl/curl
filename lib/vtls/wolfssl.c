@@ -2201,7 +2201,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
