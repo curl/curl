@@ -1658,6 +1658,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
         char s[1];
         if(0 != gethostname(s, 0))
           return 1;
+        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
