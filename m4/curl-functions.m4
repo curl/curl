@@ -1647,15 +1647,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   #
   AC_MSG_CHECKING([if gethostname can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_winsock2
-      $curl_includes_unistd
-      $curl_includes_bsdsocket
-    ]],[[
-      char s[1];
-      if(0 != gethostname(s, 0))
-        return 1;
-    ]])
+    AC_LANG_FUNC_LINK_TRY([gethostname])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_gethostname="yes"
