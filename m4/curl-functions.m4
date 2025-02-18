@@ -740,35 +740,22 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   tst_compi_closesocket_camel="unknown"
   tst_allow_closesocket_camel="unknown"
   #
-  AC_MSG_CHECKING([if CloseSocket can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([CloseSocket])
+  AC_MSG_CHECKING([if CloseSocket is compilable])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ]],[[
+      if(0 != CloseSocket(0))
+        return 1;
+    ]])
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_closesocket_camel="yes"
+    tst_compi_closesocket_camel="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_closesocket_camel="no"
+    tst_compi_closesocket_camel="no"
   ])
-  #
-  if test "$tst_links_closesocket_camel" = "yes"; then
-    AC_MSG_CHECKING([if CloseSocket is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_bsdsocket
-        $curl_includes_sys_socket
-      ]],[[
-        if(0 != CloseSocket(0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_closesocket_camel="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_closesocket_camel="no"
-    ])
-  fi
   #
   if test "$tst_compi_closesocket_camel" = "yes"; then
     AC_MSG_CHECKING([if CloseSocket usage allowed])
@@ -2812,34 +2799,21 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   tst_compi_ioctlsocket_camel="unknown"
   tst_allow_ioctlsocket_camel="unknown"
   #
-  AC_MSG_CHECKING([if IoctlSocket can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([IoctlSocket])
+  AC_MSG_CHECKING([if IoctlSocket is compilable])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_bsdsocket
+    ]],[[
+      if(0 != IoctlSocket(0, 0, 0))
+        return 1;
+    ]])
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_ioctlsocket_camel="yes"
+    tst_compi_ioctlsocket_camel="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_ioctlsocket_camel="no"
+    tst_compi_ioctlsocket_camel="no"
   ])
-  #
-  if test "$tst_links_ioctlsocket_camel" = "yes"; then
-    AC_MSG_CHECKING([if IoctlSocket is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_bsdsocket
-      ]],[[
-        if(0 != IoctlSocket(0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_ioctlsocket_camel="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_ioctlsocket_camel="no"
-    ])
-  fi
   #
   if test "$tst_compi_ioctlsocket_camel" = "yes"; then
     AC_MSG_CHECKING([if IoctlSocket usage allowed])
