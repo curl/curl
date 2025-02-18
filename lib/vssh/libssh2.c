@@ -970,11 +970,11 @@ static CURLcode sftp_quote(struct Curl_easy *data,
    * Instead, we scan for commands used by OpenSSH's sftp program and call the
    * appropriate libssh2 functions.
    */
-  if(strncasecompare(cmd, "chgrp ", 6) ||
-     strncasecompare(cmd, "chmod ", 6) ||
-     strncasecompare(cmd, "chown ", 6) ||
-     strncasecompare(cmd, "atime ", 6) ||
-     strncasecompare(cmd, "mtime ", 6)) {
+  if(!strncmp(cmd, "chgrp ", 6) ||
+     !strncmp(cmd, "chmod ", 6) ||
+     !strncmp(cmd, "chown ", 6) ||
+     !strncmp(cmd, "atime ", 6) ||
+     !strncmp(cmd, "mtime ", 6)) {
     /* attribute change */
 
     /* sshc->quote_path1 contains the mode to set */
@@ -990,8 +990,8 @@ static CURLcode sftp_quote(struct Curl_easy *data,
     state(data, SSH_SFTP_QUOTE_STAT);
     return result;
   }
-  if(strncasecompare(cmd, "ln ", 3) ||
-     strncasecompare(cmd, "symlink ", 8)) {
+  if(!strncmp(cmd, "ln ", 3) ||
+     !strncmp(cmd, "symlink ", 8)) {
     /* symbolic linking */
     /* sshc->quote_path1 is the source */
     /* get the destination */
@@ -1005,12 +1005,12 @@ static CURLcode sftp_quote(struct Curl_easy *data,
     state(data, SSH_SFTP_QUOTE_SYMLINK);
     return result;
   }
-  else if(strncasecompare(cmd, "mkdir ", 6)) {
+  else if(!strncmp(cmd, "mkdir ", 6)) {
     /* create dir */
     state(data, SSH_SFTP_QUOTE_MKDIR);
     return result;
   }
-  else if(strncasecompare(cmd, "rename ", 7)) {
+  else if(!strncmp(cmd, "rename ", 7)) {
     /* rename file */
     /* first param is the source path */
     /* second param is the dest. path */
@@ -1024,16 +1024,16 @@ static CURLcode sftp_quote(struct Curl_easy *data,
     state(data, SSH_SFTP_QUOTE_RENAME);
     return result;
   }
-  else if(strncasecompare(cmd, "rmdir ", 6)) {
+  else if(!strncmp(cmd, "rmdir ", 6)) {
     /* delete dir */
     state(data, SSH_SFTP_QUOTE_RMDIR);
     return result;
   }
-  else if(strncasecompare(cmd, "rm ", 3)) {
+  else if(!strncmp(cmd, "rm ", 3)) {
     state(data, SSH_SFTP_QUOTE_UNLINK);
     return result;
   }
-  else if(strncasecompare(cmd, "statvfs ", 8)) {
+  else if(!strncmp(cmd, "statvfs ", 8)) {
     state(data, SSH_SFTP_QUOTE_STATVFS);
     return result;
   }
@@ -1345,7 +1345,7 @@ sftp_quote_stat(struct Curl_easy *data,
     sshc->acceptfail = TRUE;
   }
 
-  if(!strncasecompare(cmd, "chmod", 5)) {
+  if(!!strncmp(cmd, "chmod", 5)) {
     /* Since chown and chgrp only set owner OR group but libssh2 wants to set
      * them both at once, we need to obtain the current ownership first. This
      * takes an extra protocol round trip.
@@ -1367,7 +1367,7 @@ sftp_quote_stat(struct Curl_easy *data,
   }
 
   /* Now set the new attributes... */
-  if(strncasecompare(cmd, "chgrp", 5)) {
+  if(!strncmp(cmd, "chgrp", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t gid;
     (void)Curl_str_number(&p, &gid, ULONG_MAX);
@@ -1379,7 +1379,7 @@ sftp_quote_stat(struct Curl_easy *data,
       goto fail;
     }
   }
-  else if(strncasecompare(cmd, "chmod", 5)) {
+  else if(!strncmp(cmd, "chmod", 5)) {
     curl_off_t perms;
     const char *p = sshc->quote_path1;
     /* permissions are octal */
@@ -1391,7 +1391,7 @@ sftp_quote_stat(struct Curl_easy *data,
     sshp->quote_attrs.permissions = (unsigned long)perms;
     sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_PERMISSIONS;
   }
-  else if(strncasecompare(cmd, "chown", 5)) {
+  else if(!strncmp(cmd, "chown", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t uid;
     (void)Curl_str_number(&p, &uid, ULONG_MAX);
@@ -1403,8 +1403,8 @@ sftp_quote_stat(struct Curl_easy *data,
       goto fail;
     }
   }
-  else if(strncasecompare(cmd, "atime", 5) ||
-          strncasecompare(cmd, "mtime", 5)) {
+  else if(!strncmp(cmd, "atime", 5) ||
+          !strncmp(cmd, "mtime", 5)) {
     time_t date = Curl_getdate_capped(sshc->quote_path1);
     bool fail = FALSE;
 
@@ -1421,7 +1421,7 @@ sftp_quote_stat(struct Curl_easy *data,
 #endif
     if(fail)
       goto fail;
-    if(strncasecompare(cmd, "atime", 5))
+    if(!strncmp(cmd, "atime", 5))
       sshp->quote_attrs.atime = (unsigned long)date;
     else /* mtime */
       sshp->quote_attrs.mtime = (unsigned long)date;
