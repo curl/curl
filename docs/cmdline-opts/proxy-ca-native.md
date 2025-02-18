@@ -26,4 +26,5 @@ This option is independent of other HTTPS proxy CA certificate locations set at
 run time or build time. Those locations are searched in addition to the native
 CA store.
 
-Equivalent to --ca-native but used in HTTPS proxy context.
+Equivalent to --ca-native but used in HTTPS proxy context. Refer to --ca-native
+for TLS backend limitations.

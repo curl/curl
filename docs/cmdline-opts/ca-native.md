@@ -24,13 +24,13 @@ Use the operating system's native CA store for certificate verification.
 This option is independent of other CA certificate locations set at run time or
 build time. Those locations are searched in addition to the native CA store.
 
-This option works for OpenSSL and its forks (LibreSSL, BoringSSL, etc) on
-Windows (added in 7.71.0).
+This option works with OpenSSL and its forks (LibreSSL, BoringSSL, etc) on
+Windows. (Added in 7.71.0)
 
-This option works for wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo,
-Fedora, RHEL), macOS, Android and iOS (added in 8.3.0).
+This option works with wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo,
+Fedora, RHEL), macOS, Android and iOS. (Added in 8.3.0)
 
-This option works for GnuTLS (added in 8.5.0).
+This option works with GnuTLS. (Added in 8.5.0)
 
 This option currently has no effect for Schannel or Secure Transport. Those are
 native TLS libraries from Microsoft and Apple, respectively, that by default
