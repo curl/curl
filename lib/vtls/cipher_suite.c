@@ -725,7 +725,7 @@ static const struct cs_entry cs_list [] = {
   CS_ENTRY(0xCCAE, RSA,PSK,CHACHA20,POLY1305,,,,),
 #endif
 };
-#define CS_LIST_LEN (sizeof(cs_list) / sizeof(cs_list[0]))
+#define CS_LIST_LEN CURL_ARRAYSIZE(cs_list)
 
 static int cs_str_to_zip(const char *cs_str, size_t cs_len,
                          uint8_t zip[6])

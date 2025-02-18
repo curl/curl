@@ -619,7 +619,7 @@ static int proxy_h2_fr_print(const nghttp2_frame *frame,
                        frame->hd.flags & NGHTTP2_FLAG_ACK);
     case NGHTTP2_GOAWAY: {
       char scratch[128];
-      size_t s_len = sizeof(scratch)/sizeof(scratch[0]);
+      size_t s_len = CURL_ARRAYSIZE(scratch);
       size_t len = (frame->goaway.opaque_data_len < s_len) ?
         frame->goaway.opaque_data_len : s_len-1;
       if(len)
