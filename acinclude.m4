@@ -689,7 +689,8 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       #endif
       #endif
     ]],[[
-      send(0, 0, 0, 0);
+      char s[] = "";
+      send(0, (void *)s, 0, 0);
     ]])
   ],[
     AC_MSG_RESULT([yes])
