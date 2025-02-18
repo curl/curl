@@ -1675,8 +1675,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               #endif
               int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
-              $tst_arg1 s;
-              if(0 != gethostname(s, 0))
+              char s[1];
+              if(0 != gethostname(($tst_arg1)s, 0))
                 return 1;
               (void)s;
             ]])
