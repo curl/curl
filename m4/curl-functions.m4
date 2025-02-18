@@ -2064,7 +2064,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
       AC_LANG_PROGRAM([[
         $curl_includes_time
       ]],[[
-        if(0 != gmtime_r(0, 0))
+        time_t tm = 1170352587;
+        if(0 != gmtime_r(&tm, 0))
           return 1;
       ]])
     ],[
