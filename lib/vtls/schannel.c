@@ -906,13 +906,20 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifdef HAS_ALPN_SCHANNEL
-  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-     Also it does not seem to be supported for WINE, see curl bug #983. */
-  backend->use_alpn = connssl->alpn &&
-    !GetProcAddress(GetModuleHandle(TEXT("ntdll")),
-                    "wine_get_version") &&
-    curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
-                                 VERSION_GREATER_THAN_EQUAL);
+  {
+    bool wine;
+#ifdef CURL_WINDOWS_UWP
+    /* GetModuleHandle() not available for UWP. And WINE has no UWP support. */
+    wine = FALSE;
+#else
+    wine = GetProcAddress(GetModuleHandle(TEXT("ntdll")), "wine_get_version");
+#endif
+    /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
+       Also it does not seem to be supported for WINE, see curl bug #983. */
+    backend->use_alpn = connssl->alpn && !wine &&
+      curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
+                                   VERSION_GREATER_THAN_EQUAL);
+  }
 #else
   backend->use_alpn = FALSE;
 #endif
