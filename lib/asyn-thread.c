@@ -589,7 +589,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
     getaddrinfo_complete(data);
 
     if(!data->state.async.dns) {
-      CURLcode result = Curl_resolver_error(data);
+      result = Curl_resolver_error(data);
       destroy_async_data(data);
       return result;
     }
