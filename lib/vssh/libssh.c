@@ -2740,11 +2740,11 @@ static void sftp_quote(struct Curl_easy *data)
    * OpenSSH's sftp program and call the appropriate libssh
    * functions.
    */
-  if(strncasecompare(cmd, "chgrp ", 6) ||
-     strncasecompare(cmd, "chmod ", 6) ||
-     strncasecompare(cmd, "chown ", 6) ||
-     strncasecompare(cmd, "atime ", 6) ||
-     strncasecompare(cmd, "mtime ", 6)) {
+  if(!strncmp(cmd, "chgrp ", 6) ||
+     !strncmp(cmd, "chmod ", 6) ||
+     !strncmp(cmd, "chown ", 6) ||
+     !strncmp(cmd, "atime ", 6) ||
+     !strncmp(cmd, "mtime ", 6)) {
     /* attribute change */
 
     /* sshc->quote_path1 contains the mode to set */
@@ -2766,8 +2766,8 @@ static void sftp_quote(struct Curl_easy *data)
     state(data, SSH_SFTP_QUOTE_STAT);
     return;
   }
-  if(strncasecompare(cmd, "ln ", 3) ||
-     strncasecompare(cmd, "symlink ", 8)) {
+  if(!strncmp(cmd, "ln ", 3) ||
+     !strncmp(cmd, "symlink ", 8)) {
     /* symbolic linking */
     /* sshc->quote_path1 is the source */
     /* get the destination */
@@ -2786,12 +2786,12 @@ static void sftp_quote(struct Curl_easy *data)
     state(data, SSH_SFTP_QUOTE_SYMLINK);
     return;
   }
-  else if(strncasecompare(cmd, "mkdir ", 6)) {
+  else if(!strncmp(cmd, "mkdir ", 6)) {
     /* create dir */
     state(data, SSH_SFTP_QUOTE_MKDIR);
     return;
   }
-  else if(strncasecompare(cmd, "rename ", 7)) {
+  else if(!strncmp(cmd, "rename ", 7)) {
     /* rename file */
     /* first param is the source path */
     /* second param is the dest. path */
@@ -2810,17 +2810,17 @@ static void sftp_quote(struct Curl_easy *data)
     state(data, SSH_SFTP_QUOTE_RENAME);
     return;
   }
-  else if(strncasecompare(cmd, "rmdir ", 6)) {
+  else if(!strncmp(cmd, "rmdir ", 6)) {
     /* delete dir */
     state(data, SSH_SFTP_QUOTE_RMDIR);
     return;
   }
-  else if(strncasecompare(cmd, "rm ", 3)) {
+  else if(!strncmp(cmd, "rm ", 3)) {
     state(data, SSH_SFTP_QUOTE_UNLINK);
     return;
   }
 #ifdef HAS_STATVFS_SUPPORT
-  else if(strncasecompare(cmd, "statvfs ", 8)) {
+  else if(!strncmp(cmd, "statvfs ", 8)) {
     state(data, SSH_SFTP_QUOTE_STATVFS);
     return;
   }
@@ -2871,7 +2871,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
   }
 
   /* Now set the new attributes... */
-  if(strncasecompare(cmd, "chgrp", 5)) {
+  if(!strncmp(cmd, "chgrp", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t gid;
     (void)Curl_str_number(&p, &gid, UINT_MAX);
@@ -2888,7 +2888,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
     }
     sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_UIDGID;
   }
-  else if(strncasecompare(cmd, "chmod", 5)) {
+  else if(!strncmp(cmd, "chmod", 5)) {
     curl_off_t perms;
     const char *p = sshc->quote_path1;
     if(Curl_str_octal(&p, &perms, 07777)) {
@@ -2903,7 +2903,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
     sshc->quote_attrs->permissions = (mode_t)perms;
     sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_PERMISSIONS;
   }
-  else if(strncasecompare(cmd, "chown", 5)) {
+  else if(!strncmp(cmd, "chown", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t uid;
     (void)Curl_str_number(&p, &uid, UINT_MAX);
@@ -2919,8 +2919,8 @@ static void sftp_quote_stat(struct Curl_easy *data)
     }
     sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_UIDGID;
   }
-  else if(strncasecompare(cmd, "atime", 5) ||
-          strncasecompare(cmd, "mtime", 5)) {
+  else if(!strncmp(cmd, "atime", 5) ||
+          !strncmp(cmd, "mtime", 5)) {
     time_t date = Curl_getdate_capped(sshc->quote_path1);
     bool fail = FALSE;
     if(date == -1) {
@@ -2941,7 +2941,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
       sshc->actualcode = CURLE_QUOTE_ERROR;
       return;
     }
-    if(strncasecompare(cmd, "atime", 5))
+    if(!strncmp(cmd, "atime", 5))
       sshc->quote_attrs->atime = (uint32_t)date;
     else /* mtime */
       sshc->quote_attrs->mtime = (uint32_t)date;
