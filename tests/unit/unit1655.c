@@ -99,7 +99,7 @@ do {
     { max, DOH_OK }                      /* expect buffer overwrite */
   };
 
-  for(i = 0; i < (int)(sizeof(playlist)/sizeof(*playlist)); i++) {
+  for(i = 0; i < (int)(CURL_ARRAYSIZE(playlist)); i++) {
     const char *name = playlist[i].name;
     size_t olen = 100000;
     struct demo victim;

@@ -397,7 +397,7 @@ UNITTEST_START
 
   size_t i;
 
-  for(i = 0; i < sizeof(TEST_CASES)/sizeof(TEST_CASES[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(TEST_CASES); ++i) {
     test_connect(&TEST_CASES[i]);
   }
 

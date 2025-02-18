@@ -38,10 +38,6 @@ static void unit_stop(void)
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
   defined(USE_MBEDTLS)
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 struct test1657_spec {
   CURLcode (*setbuf)(struct test1657_spec *spec, struct dynbuf *buf);
   size_t n;
@@ -112,7 +108,7 @@ UNITTEST_START
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < ARRAYSIZE(test1657_specs); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(test1657_specs); ++i) {
     if(!do_test1657(&test1657_specs[i], i, &dbuf))
       all_ok = FALSE;
   }

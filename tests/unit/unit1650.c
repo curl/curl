@@ -160,7 +160,7 @@ UNITTEST_START
   size_t i;
   unsigned char *p;
 
-  for(i = 0; i < sizeof(req) / sizeof(req[0]); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(req); i++) {
     DOHcode rc = doh_req_encode(req[i].name, req[i].type,
                                 buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
@@ -183,7 +183,7 @@ UNITTEST_START
     }
   }
 
-  for(i = 0; i < sizeof(resp) / sizeof(resp[0]); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(resp); i++) {
     struct dohentry d;
     DOHcode rc;
     char *ptr;
