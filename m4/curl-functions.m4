@@ -1067,7 +1067,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
         AC_LANG_PROGRAM([[
           $curl_includes_sys_xattr
         ]],[[
-          if(0 != fsetxattr(0, 0, 0, 0, 0))
+          if(0 != fsetxattr(0, "", 0, 0, 0))
             return 1;
         ]])
       ],[
