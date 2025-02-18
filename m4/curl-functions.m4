@@ -2066,8 +2066,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
         $curl_includes_time
       ]],[[
         time_t tm = 1170352587;
-        if(0 != gmtime_r(&tm, 0))
+        struct tm result;
+        if(0 != gmtime_r(&tm, &result))
           return 1;
+        (void)result;
       ]])
     ],[
       AC_MSG_RESULT([yes])
