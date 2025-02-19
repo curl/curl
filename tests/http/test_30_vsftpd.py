@@ -103,6 +103,7 @@ class TestVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
+        assert r.total_connects == count + 1, 'should reuse the control conn'
 
     @pytest.mark.parametrize("docname", [
         'data-1k', 'data-1m', 'data-10m'
@@ -117,6 +118,7 @@ class TestVsFTPD:
         ])
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
+        assert r.total_connects > count + 1, 'should have used several control conns'
 
     @pytest.mark.parametrize("docname", [
         'upload-1k', 'upload-100k', 'upload-1m'

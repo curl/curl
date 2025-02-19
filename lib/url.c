@@ -954,13 +954,17 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 #endif
 
-  if((!(needle->handler->flags&PROTOPT_SSL) !=
-      !Curl_conn_is_ssl(conn, FIRSTSOCKET)) &&
-     !(get_protocol_family(conn->handler) == needle->handler->protocol &&
-       conn->bits.tls_upgraded))
-    /* Deny `conn` if it is not fit for `needle`'s SSL needs,
-     * UNLESS `conn` is the same protocol family and was upgraded to SSL. */
+  if(needle->handler->flags&PROTOPT_SSL) {
+    /* We are looking for SSL, if `conn` does not do it, not a match. */
+    if(!Curl_conn_is_ssl(conn, FIRSTSOCKET))
       return FALSE;
+  }
+  else if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+    /* We are not *requiring* SSL, however `conn` has it. If the
+     * protocol *family* is not the same, not a match. */
+    if(get_protocol_family(conn->handler) != needle->handler->protocol)
+      return FALSE;
+  }
 
 #ifndef CURL_DISABLE_PROXY
   if(needle->bits.httpproxy != conn->bits.httpproxy ||
