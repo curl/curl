@@ -154,6 +154,8 @@
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
+static bool s_os_has_alpn;
+
 static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
                                              struct Curl_easy *data,
                                              const char *pinnedpubkey);
@@ -905,46 +907,11 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
           "connect to some servers due to lack of SNI, algorithms, etc.");
   }
 
-  {
 #ifdef HAS_ALPN_SCHANNEL
-    static bool s_wine = FALSE;
-    static bool s_wine_has_alpn = FALSE;
-    bool os_has_alpn;
-
-#ifdef CURL_WINDOWS_UWP
-    /* GetModuleHandle() not available for UWP.
-       Assume no WINE because WINE has no UWP support. */
-    s_wine = FALSE;
+  backend->use_alpn = connssl->alpn && s_os_has_alpn;
 #else
-    typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
-    static WINE_GET_VERSION_FN s_p_wine_get_version;
-    static bool s_wine_init = FALSE;
-    if(!s_wine_init) {
-      s_p_wine_get_version =
-        CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
-                            (GetProcAddress(GetModuleHandle(TEXT("ntdll")),
-                                            "wine_get_version")));
-      s_wine = !!s_p_wine_get_version;
-      if(s_wine) {
-        const char *wine_version = s_p_wine_get_version(); /* e.g. "6.0.2" */
-        /* Assume ALPN support with WINE 6.0.0 or upper */
-        s_wine_has_alpn = wine_version && atoi(wine_version) >= 6;
-      }
-      s_wine_init = TRUE;
-    }
+  backend->use_alpn = FALSE;
 #endif
-    /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-       It is also supported under WINE 5.6+ with GnuTLS 3.2.0+ */
-    if(s_wine)
-      os_has_alpn = s_wine_has_alpn;
-    else
-      os_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
-                                                 VERSION_GREATER_THAN_EQUAL);
-    backend->use_alpn = connssl->alpn && os_has_alpn;
-#else
-    backend->use_alpn = FALSE;
-#endif
-  }
 
 #ifdef _WIN32_WCE
 #ifdef HAS_MANUAL_VERIFY_API
@@ -2492,6 +2459,34 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
+  bool wine;
+  bool wine_has_alpn;
+
+#ifdef CURL_WINDOWS_UWP
+  /* GetModuleHandle() not available for UWP.
+     Assume no WINE because WINE has no UWP support. */
+  wine = FALSE;
+#else
+  typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
+  WINE_GET_VERSION_FN s_p_wine_get_version =
+    CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
+                        (GetProcAddress(GetModuleHandle(TEXT("ntdll")),
+                                        "wine_get_version")));
+  wine = !!s_p_wine_get_version;
+  if(wine) {
+    const char *wine_version = s_p_wine_get_version(); /* e.g. "6.0.2" */
+    /* Assume ALPN support with WINE 6.0.0 or upper */
+    wine_has_alpn = wine_version && atoi(wine_version) >= 6;
+  }
+#endif
+  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
+     It is also supported under WINE 5.6+ with GnuTLS 3.2.0+ */
+  if(wine)
+    s_os_has_alpn = wine_has_alpn;
+  else
+    s_os_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
+                                                 VERSION_GREATER_THAN_EQUAL);
+
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
 
