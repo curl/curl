@@ -530,9 +530,6 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
     /* Initialize the SASL storage */
     Curl_sasl_init(&li->sasl, data, &saslldap);
 
-    /* Clear the TLS upgraded flag */
-    conn->bits.tls_upgraded = FALSE;
-
     result = oldap_parse_login_options(conn);
     if(result)
       return result;
@@ -797,7 +794,6 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
     if(result)
       result = oldap_map_error(code, CURLE_USE_SSL_FAILED);
     else if(ssl_installed(conn)) {
-      conn->bits.tls_upgraded = TRUE;
       if(li->sasl.prefmech != SASL_AUTH_NONE)
         result = oldap_perform_mechs(data);
       else if(data->state.aptr.user)

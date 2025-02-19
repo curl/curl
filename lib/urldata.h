@@ -513,7 +513,6 @@ struct ConnectBits {
 #ifdef USE_UNIX_SOCKETS
   BIT(abstract_unix_socket);
 #endif
-  BIT(tls_upgraded);
   BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
                          accept() */
   BIT(parallel_connect); /* set TRUE when a parallel connect attempt has

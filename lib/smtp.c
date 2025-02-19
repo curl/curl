@@ -401,7 +401,6 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
       goto out;
     /* Change the connection handler and SMTP state */
     conn->handler = &Curl_handler_smtps;
-    conn->bits.tls_upgraded = TRUE;
   }
 
   DEBUGASSERT(!smtpc->ssldone);
@@ -1613,9 +1612,6 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   CURLcode result;
-
-  /* Clear the TLS upgraded flag */
-  conn->bits.tls_upgraded = FALSE;
 
   /* Initialise the SMTP layer */
   result = smtp_init(data);
