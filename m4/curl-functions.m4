@@ -1245,38 +1245,24 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   #
-  tst_links_getaddrinfo="unknown"
   tst_proto_getaddrinfo="unknown"
   tst_compi_getaddrinfo="unknown"
   tst_works_getaddrinfo="unknown"
   tst_allow_getaddrinfo="unknown"
   tst_tsafe_getaddrinfo="unknown"
   #
-  AC_MSG_CHECKING([if getaddrinfo can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([getaddrinfo])
+  AC_MSG_CHECKING([if getaddrinfo is prototyped])
+  AC_EGREP_CPP([getaddrinfo],[
+    $curl_includes_ws2tcpip
+    $curl_includes_sys_socket
+    $curl_includes_netdb
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_getaddrinfo="yes"
+    tst_proto_getaddrinfo="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_getaddrinfo="no"
+    tst_proto_getaddrinfo="no"
   ])
-  #
-  if test "$tst_links_getaddrinfo" = "yes"; then
-    AC_MSG_CHECKING([if getaddrinfo is prototyped])
-    AC_EGREP_CPP([getaddrinfo],[
-      $curl_includes_ws2tcpip
-      $curl_includes_sys_socket
-      $curl_includes_netdb
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_getaddrinfo="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_getaddrinfo="no"
-    ])
-  fi
   #
   if test "$tst_proto_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is compilable])
@@ -1353,8 +1339,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
   #
   AC_MSG_CHECKING([if getaddrinfo might be used])
-  if test "$tst_links_getaddrinfo" = "yes" &&
-     test "$tst_proto_getaddrinfo" = "yes" &&
+  if test "$tst_proto_getaddrinfo" = "yes" &&
      test "$tst_compi_getaddrinfo" = "yes" &&
      test "$tst_allow_getaddrinfo" = "yes" &&
      test "$tst_works_getaddrinfo" != "no"; then
