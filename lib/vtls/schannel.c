@@ -907,20 +907,40 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   {
 #ifdef HAS_ALPN_SCHANNEL
-    bool wine;
+    static bool s_wine = FALSE;
+    static bool s_wine_has_alpn = FALSE;
+    bool os_has_alpn;
+
 #ifdef CURL_WINDOWS_UWP
     /* GetModuleHandle() not available for UWP.
        Assume no WINE because WINE has no UWP support. */
-    wine = FALSE;
+    s_wine = FALSE;
 #else
-    wine = !!GetProcAddress(GetModuleHandle(TEXT("ntdll")),
-                            "wine_get_version");
+    typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
+    static WINE_GET_VERSION_FN s_p_wine_get_version;
+    static bool s_wine_init = FALSE;
+    if(!s_wine_init) {
+      s_p_wine_get_version =
+        CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
+                            (GetProcAddress(GetModuleHandle(TEXT("ntdll")),
+                                            "wine_get_version")));
+      s_wine = !!s_p_wine_get_version;
+      if(s_wine) {
+        const char *wine_version = s_p_wine_get_version(); /* e.g. "6.0.2" */
+        /* Assume ALPN support with WINE 2.0.0 or upper */
+        s_wine_has_alpn = atoi(wine_version) >= 2;
+      }
+      s_wine_init = TRUE;
+    }
 #endif
     /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-       Also it does not seem to be supported for WINE, see curl bug #983. */
-    backend->use_alpn = connssl->alpn && !wine &&
-      curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
-                                   VERSION_GREATER_THAN_EQUAL);
+       Under WINE it is reported working in 1.9.0+, see curl bug #983. */
+    if(s_wine)
+      os_has_alpn = s_wine_has_alpn;
+    else
+      os_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
+                                                 VERSION_GREATER_THAN_EQUAL);
+    backend->use_alpn = connssl->alpn && os_has_alpn;
 #else
     backend->use_alpn = FALSE;
 #endif
