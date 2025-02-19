@@ -514,6 +514,7 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
   const char * const ssl_capath = conn_config->CApath;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   bool imported_native_ca = FALSE;
+  bool imported_ca_info_blob = FALSE;
 
 #if !defined(NO_FILESYSTEM) && defined(WOLFSSL_SYS_CA_CERTS)
   /* load native CA certificates */
@@ -524,7 +525,6 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
     else {
       imported_native_ca = TRUE;
       infof(data, "successfully imported native CA store");
-      wssl->x509_store_setup = TRUE;
     }
   }
 #endif /* !NO_FILESYSTEM */
@@ -535,17 +535,12 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
                                       (long)ca_info_blob->len,
                                       WOLFSSL_FILETYPE_PEM) !=
        WOLFSSL_SUCCESS) {
-      if(imported_native_ca) {
-        infof(data, "error importing CA certificate blob, continuing anyway");
-      }
-      else {
-        failf(data, "error importing CA certificate blob");
-        return CURLE_SSL_CACERT_BADFILE;
-      }
+      failf(data, "error importing CA certificate blob");
+      return CURLE_SSL_CACERT_BADFILE;
     }
     else {
+      imported_ca_info_blob = TRUE;
       infof(data, "successfully imported CA certificate blob");
-      wssl->x509_store_setup = TRUE;
     }
   }
 
@@ -557,14 +552,15 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
   if(!store)
     return CURLE_OUT_OF_MEMORY;
 
-  if((ssl_cafile || ssl_capath) && (!wssl->x509_store_setup)) {
+  if(ssl_cafile || ssl_capath) {
     int rc =
       wolfSSL_CTX_load_verify_locations_ex(wssl->ctx,
                                            ssl_cafile,
                                            ssl_capath,
                                            WOLFSSL_LOAD_FLAG_IGNORE_ERR);
     if(WOLFSSL_SUCCESS != rc) {
-      if(conn_config->verifypeer) {
+      if(conn_config->verifypeer &&
+         !imported_native_ca && !imported_ca_info_blob) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:"
               " CAfile: %s CApath: %s",
