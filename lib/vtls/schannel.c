@@ -156,7 +156,7 @@
      https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
    Or mingw-w64 9.0 or upper.
 */
-#if (defined(__MINGW32__) && __MINGW64_VERSION_MAJOR >= 9) || \
+#if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
   (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
 #define HAS_ALPN_SCHANNEL
 static bool s_win_has_alpn;
