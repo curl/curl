@@ -689,7 +689,7 @@ endif()
 if(CURL_USE_SCHANNEL)
   set(_ssl_enabled ON)
   set(USE_SCHANNEL ON)  # Windows native SSL/TLS support
-  set(USE_WINDOWS_SSPI ON)  # CURL_USE_SCHANNEL implies CURL_WINDOWS_SSPI
+  set(USE_WINDOWS_SSPI ON)  # CURL_USE_SCHANNEL requires CURL_WINDOWS_SSPI
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "schannel")
     set(_valid_default_ssl_backend TRUE)
