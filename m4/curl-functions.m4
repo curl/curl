@@ -2659,34 +2659,20 @@ dnl HAVE_IOCTLSOCKET will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   #
-  tst_links_ioctlsocket="unknown"
   tst_proto_ioctlsocket="unknown"
   tst_compi_ioctlsocket="unknown"
   tst_allow_ioctlsocket="unknown"
   #
-  AC_MSG_CHECKING([if ioctlsocket can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([ioctlsocket])
+  AC_MSG_CHECKING([if ioctlsocket is prototyped])
+  AC_EGREP_CPP([ioctlsocket],[
+    $curl_includes_winsock2
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_ioctlsocket="yes"
+    tst_proto_ioctlsocket="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_ioctlsocket="no"
+    tst_proto_ioctlsocket="no"
   ])
-  #
-  if test "$tst_links_ioctlsocket" = "yes"; then
-    AC_MSG_CHECKING([if ioctlsocket is prototyped])
-    AC_EGREP_CPP([ioctlsocket],[
-      $curl_includes_winsock2
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_ioctlsocket="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_ioctlsocket="no"
-    ])
-  fi
   #
   if test "$tst_proto_ioctlsocket" = "yes"; then
     AC_MSG_CHECKING([if ioctlsocket is compilable])
@@ -2718,8 +2704,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   fi
   #
   AC_MSG_CHECKING([if ioctlsocket might be used])
-  if test "$tst_links_ioctlsocket" = "yes" &&
-     test "$tst_proto_ioctlsocket" = "yes" &&
+  if test "$tst_proto_ioctlsocket" = "yes" &&
      test "$tst_compi_ioctlsocket" = "yes" &&
      test "$tst_allow_ioctlsocket" = "yes"; then
     AC_MSG_RESULT([yes])
