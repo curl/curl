@@ -661,6 +661,15 @@ ${SIZEOF_SIZE_T_CODE}
 /* The size of `time_t', as computed by sizeof. */
 ${SIZEOF_TIME_T_CODE}
 
+/* The size of `ssize_t', as computed by sizeof. */
+${SIZEOF_SSIZE_T_CODE}
+
+/* The size of `__int64', as computed by sizeof. */
+${SIZEOF___INT64_CODE}
+
+/* The size of `ADDRESS_FAMILY', as computed by sizeof. */
+${SIZEOF_ADDRESS_FAMILY_CODE}
+
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1
 
