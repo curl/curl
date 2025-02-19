@@ -927,14 +927,14 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       s_wine = !!s_p_wine_get_version;
       if(s_wine) {
         const char *wine_version = s_p_wine_get_version(); /* e.g. "6.0.2" */
-        /* Assume ALPN support with WINE 2.0.0 or upper */
-        s_wine_has_alpn = wine_version && atoi(wine_version) >= 2;
+        /* Assume ALPN support with WINE 6.0.0 or upper */
+        s_wine_has_alpn = wine_version && atoi(wine_version) >= 6;
       }
       s_wine_init = TRUE;
     }
 #endif
     /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-       Under WINE it is reported working in 1.9.0+, see curl bug #983. */
+       It is also supported under WINE 5.6+ with GnuTLS 3.2.0+ */
     if(s_wine)
       os_has_alpn = s_wine_has_alpn;
     else
