@@ -950,13 +950,17 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 #endif
 
-  if((!(needle->handler->flags&PROTOPT_SSL) !=
-      !Curl_conn_is_ssl(conn, FIRSTSOCKET)) &&
-     !(get_protocol_family(conn->handler) == needle->handler->protocol &&
-       conn->bits.tls_upgraded))
-    /* Deny `conn` if it is not fit for `needle`'s SSL needs,
-     * UNLESS `conn` is the same protocol family and was upgraded to SSL. */
+  if(needle->handler->flags&PROTOPT_SSL) {
+    /* We are looking for SSL, if `conn` does not do it, not a match. */
+    if(!Curl_conn_is_ssl(conn, FIRSTSOCKET))
       return FALSE;
+  }
+  else if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+    /* We are not *requiring* SSL, however `conn` has it. If the
+     * protocol *family* is not the same, not a match. */
+    if(get_protocol_family(conn->handler) != needle->handler->protocol)
+      return FALSE;
+  }
 
 #ifndef CURL_DISABLE_PROXY
   if(needle->bits.httpproxy != conn->bits.httpproxy ||
@@ -1084,12 +1088,21 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
      || !needle->bits.httpproxy || needle->bits.tunnel_proxy
 #endif
     ) {
-    /* Talking the same protocol scheme or a TLS upgraded protocol in the
-     * same protocol family? */
-    if(!strcasecompare(needle->handler->scheme, conn->handler->scheme) &&
-       (get_protocol_family(conn->handler) !=
-        needle->handler->protocol || !conn->bits.tls_upgraded))
-      return FALSE;
+    if(!strcasecompare(needle->handler->scheme, conn->handler->scheme)) {
+      /* `needle` and `conn` do not have the same scheme... */
+      if(get_protocol_family(conn->handler) != needle->handler->protocol) {
+        /* and `conn`s protocol family is not the protocol `needle` wants.
+         * IMAPS would work for IMAP, but no vice versa. */
+        return FALSE;
+      }
+      /* We are in an IMAPS vs IMAP like case. We expect `conn` to have SSL */
+      if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+        DEBUGF(infof(data,
+          "Connection #%" FMT_OFF_T " has compatible protocol famiy, "
+          "but no SSL, no match", conn->connection_id));
+        return FALSE;
+      }
+    }
 
     /* If needle has "conn_to_*" set, conn must match this */
     if((needle->bits.conn_to_host && !strcasecompare(
@@ -3590,18 +3603,25 @@ static CURLcode create_conn(struct Curl_easy *data,
      * `existing` and thus we need to cleanup the one we just
      * allocated before we can move along and use `existing`.
      */
+    bool tls_upgraded = (!(conn->given->flags & PROTOPT_SSL) &&
+                         Curl_conn_is_ssl(conn, FIRSTSOCKET));
+
     reuse_conn(data, conn, existing);
     conn = existing;
     *in_connect = conn;
 
 #ifndef CURL_DISABLE_PROXY
-    infof(data, "Re-using existing connection with %s %s",
+    infof(data, "Re-using existing %s: connection%s with %s %s",
+          conn->given->scheme,
+          tls_upgraded ? " (upgraded to SSL)" : "",
           conn->bits.proxy ? "proxy" : "host",
           conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
           conn->http_proxy.host.name ? conn->http_proxy.host.dispname :
           conn->host.dispname);
 #else
-    infof(data, "Re-using existing connection with host %s",
+    infof(data, "Re-using existing %s: connection%s with host %s",
+          conn->given->scheme,
+          tls_upgraded ? " (upgraded to SSL)" : "",
           conn->host.dispname);
 #endif
   }

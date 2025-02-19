@@ -473,7 +473,6 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
       goto out;
     /* Change the connection handler */
     conn->handler = &Curl_handler_imaps;
-    conn->bits.tls_upgraded = TRUE;
   }
 
   DEBUGASSERT(!imapc->ssldone);
@@ -1747,14 +1746,8 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   /* Initialise the IMAP layer */
-  CURLcode result = imap_init(data);
-  if(result)
-    return result;
-
-  /* Clear the TLS upgraded flag */
-  conn->bits.tls_upgraded = FALSE;
-
-  return CURLE_OK;
+  (void)conn;
+  return imap_init(data);
 }
 
 /***********************************************************************

@@ -419,7 +419,6 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
       goto out;
     /* Change the connection handler */
     conn->handler = &Curl_handler_pop3s;
-    conn->bits.tls_upgraded = TRUE;
   }
 
   DEBUGASSERT(!pop3c->ssldone);
@@ -1391,14 +1390,8 @@ static CURLcode pop3_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   /* Initialise the POP3 layer */
-  CURLcode result = pop3_init(data);
-  if(result)
-    return result;
-
-  /* Clear the TLS upgraded flag */
-  conn->bits.tls_upgraded = FALSE;
-
-  return CURLE_OK;
+  (void)conn;
+  return pop3_init(data);
 }
 
 /***********************************************************************
