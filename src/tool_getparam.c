@@ -1591,7 +1591,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 #ifdef HAVE_WRITABLE_ARGV
   argv_item_t clearthis = NULL;
 #else
-  (void)cleararg;
+  (void)cleararg1;
+  (void)cleararg2;
 #endif
 
   *usedarg = FALSE; /* default is that we do not use the arg */
