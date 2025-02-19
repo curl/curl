@@ -4,7 +4,7 @@ curl and libcurl 8.12.2
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
- Contributors:                 3345
+ Contributors:                 3347
 
 This release includes the following changes:
 
@@ -16,8 +16,10 @@ This release includes the following bugfixes:
  o asyn-thread: avoid the separate curl_mutex_t alloc [6]
  o asyn-thread: do not allocate thread_data separately [21]
  o asyn-thread: remove 'status' from struct Curl_async [36]
+ o build: enable -Wjump-misses-init for GCC 4.5+ [62]
  o build: fix compiler warnings in feature detections [39]
  o build: set `HAVE_WRITABLE_ARGV` for Apple cross-builds [8]
+ o cmake: `SHARE_LIB_OBJECT=ON` requires CMake 3.12 or newer [46]
  o cmake: add pre-fill for Unix, enable in GHA/macos, verify pre-fills [42]
  o cmake: allow empty custom `IMPORT_LIB_SUFFIX`, add suffix collision detection [41]
  o cmake: drop `HAVE_IN_ADDR_T` from pre-fill too
@@ -26,27 +28,41 @@ This release includes the following bugfixes:
  o cmake: fix ECH detection in custom-patched OpenSSL [32]
  o cmake: mention 'insecure' in the debug build warning [15]
  o cmake: misc tidy-ups [38]
+ o cmake: sync OpenSSL(-fork) feature checks with `./configure` [49]
  o CODE_STYLE: readability and banned functions [35]
  o configure: use `curl_cv_apple` variable [40]
+ o cookie: minor parser simplification [58]
  o cookie: simplify invalid_octets() [24]
  o curl_msh3: remove verify bypass from DEBUGBUILDs [43]
  o docs: add FD_ZERO to curl_multi_fdset example [19]
  o docs: correct argument names & URL redirection [4]
+ o hash: use single linked list for entries [57]
+ o hostip: make CURLOPT_RESOLVE support replacing IPv6 addresses [47]
  o HTTP3.md: only speak about minimal versions [18]
  o http: fix NTLM info message typo [22]
+ o http: version negotiation [45]
+ o http_aws_sigv4: use strparse more for parsing [55]
+ o https-rr: implementation improvements [44]
  o lib: better optimized casecompare() and ncasecompare() [3]
+ o lib: simplify more white space loops [60]
  o lib: strtoofft.h header cleanup [17]
+ o lib: use Curl_str_* instead of strtok_r() [59]
  o lib: use Curl_str_number() for parsing decimal numbers [13]
  o managen: correct the warning for un-escaped '<' and '>' [1]
+ o openssl: remove bad `goto`s into other scope [63]
  o scripts/managen: fix option 'single' [31]
  o scripts/managen: fix parsing of markdown code sections [30]
+ o ssh: consider sftp quote commands case sensitive [33]
+ o ssl session cache: add exportable flag [56]
  o strparse: make Curl_str_number() return error for no digits [14]
  o strparse: switch the API to work on 'const char *' [2]
  o strparse: switch to curl_off_t as base data type [7]
  o tests: fix enum/int confusion (Intel C), fix autotools `CFLAGS` for `servers` [27]
  o tidy-up: delete, comment or scope C macros reported unused [16]
  o tidy-up: drop unused `CURL_INADDR_NONE` macro and `in_addr_t` type [26]
+ o tidy-up: use `CURL_ARRAYSIZE()` [37]
  o timediff: fix comment for curlx_mstotv() [25]
+ o timediff: remove unnecessary double typecast [53]
  o urlapi: simplify junkscan [23]
  o variable.md: clarify 'trim' example [12]
  o wolfssh: retrieve the error using wolfSSH_get_error [5]
@@ -71,10 +87,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthony Hu, Daniel Stenberg, Harry Sintonen, Joseph Chen, kriztalz,
-  Marcel Raad, Ray Satiro, RubisetCie on Github, Sergey, Stefan Eissing,
+  Anthony Hu, Daniel Stenberg, dependabot[bot], Harry Sintonen, John Bampton,
+  Joseph Chen, kriztalz, Marcel Raad, Mark Phillips, Ray Satiro,
+  rmg-x on github, RubisetCie on Github, Sergey, Stefan Eissing,
   Viktor Szakats
-  (11 contributors)
+  (15 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -109,11 +126,27 @@ References to bug reports and discussions on issues:
  [30] = https://curl.se/bug/?i=16345
  [31] = https://curl.se/bug/?i=16344
  [32] = https://curl.se/bug/?i=16354
+ [33] = https://curl.se/bug/?i=16382
  [35] = https://curl.se/bug/?i=16349
  [36] = https://curl.se/bug/?i=16347
+ [37] = https://curl.se/bug/?i=16381
  [38] = https://curl.se/bug/?i=16238
  [39] = https://curl.se/bug/?i=16287
  [40] = https://curl.se/bug/?i=16340
  [41] = https://curl.se/bug/?i=16324
  [42] = https://curl.se/bug/?i=15841
  [43] = https://curl.se/bug/?i=16342
+ [44] = https://curl.se/bug/?i=16132
+ [45] = https://curl.se/bug/?i=16100
+ [46] = https://curl.se/bug/?i=16375
+ [47] = https://curl.se/bug/?i=16357
+ [49] = https://curl.se/bug/?i=16352
+ [53] = https://curl.se/bug/?i=16367
+ [55] = https://curl.se/bug/?i=16366
+ [56] = https://curl.se/bug/?i=16322
+ [57] = https://curl.se/bug/?i=16351
+ [58] = https://curl.se/bug/?i=16362
+ [59] = https://curl.se/bug/?i=16360
+ [60] = https://curl.se/bug/?i=16363
+ [62] = https://curl.se/bug/?i=16252
+ [63] = https://curl.se/bug/?i=16356
