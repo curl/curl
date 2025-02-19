@@ -2134,7 +2134,7 @@ curl_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 curl_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-curl_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
+curl_add_if("NTLM"          NOT CURL_DISABLE_NTLM AND
                             (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 curl_add_if("TLS-SRP"       USE_TLS_SRP)
 curl_add_if("HTTP2"         USE_NGHTTP2)
