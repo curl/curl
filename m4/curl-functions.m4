@@ -3874,7 +3874,6 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         char s[1];
         if(0 != strerror_r(0, s, 0))
           return 1;
-        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
