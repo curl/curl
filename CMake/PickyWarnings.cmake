@@ -268,6 +268,9 @@ if(PICKY_COMPILER)
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
         list(APPEND _picky "-Wno-type-limits")  # Avoid false positives
       endif()
+      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.1 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 5.5)
+        list(APPEND _picky "-Wno-conversion")  # Avoid false positives
+      endif()
     endif()
   endif()
 endif()
