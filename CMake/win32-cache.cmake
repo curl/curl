@@ -196,6 +196,37 @@ set(STDC_HEADERS 1)
 set(HAVE_SIZEOF_SUSECONDS_T 0)
 set(HAVE_SIZEOF_SA_FAMILY_T 0)
 
+if(MINGW OR MSVC)
+  curl_prefill_type_size("INT" 4)
+  curl_prefill_type_size("LONG" 4)
+  curl_prefill_type_size("LONG_LONG" 8)
+  curl_prefill_type_size("__INT64" 8)
+  curl_prefill_type_size("CURL_OFF_T" 8)
+  # CURL_SOCKET_T, SIZE_T: 8 for _WIN64, 4 otherwise
+  # TIME_T: 8 for _WIN64 or UCRT or MSVC, 4 otherwise
+  #   Also 4 for non-UCRT 32-bit when _USE_32BIT_TIME_T is set.
+  #   mingw-w64 sets _USE_32BIT_TIME_T unless __MINGW_USE_VC2005_COMPAT is explicit defined.
+  if(MSVC)
+    set(HAVE_SIZEOF_SSIZE_T 0)
+    set(HAVE_FILE_OFFSET_BITS 0)
+    curl_prefill_type_size("OFF_T" 4)
+    curl_prefill_type_size("ADDRESS_FAMILY" 2)
+  else()
+    # SSIZE_T: 8 for _WIN64, 4 otherwise
+    if(MINGW64_VERSION)
+      if(NOT MINGW64_VERSION VERSION_LESS 3.0)
+        set(HAVE_FILE_OFFSET_BITS 1)
+        curl_prefill_type_size("OFF_T" 8)
+      endif()
+      if(NOT MINGW64_VERSION VERSION_LESS 2.0)
+        curl_prefill_type_size("ADDRESS_FAMILY" 2)
+      else()
+        set(HAVE_SIZEOF_ADDRESS_FAMILY 0)
+      endif()
+    endif()
+  endif()
+endif()
+
 if(WINCE)  # Windows CE exceptions
   set(HAVE_LOCALE_H 0)
   set(HAVE_GETADDRINFO 0)
