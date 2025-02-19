@@ -40,7 +40,7 @@ void Curl_str_init(struct Curl_str *out)
 ~~~
 
 This initiates a string struct. The parser functions that store info in
-strings always init the string themselves, so this stand-alone use if often
+strings always init the string themselves, so this stand-alone use is often
 not necessary.
 
 ## `Curl_str_word`
