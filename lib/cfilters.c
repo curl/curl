@@ -459,6 +459,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     else {
       /* check allowed time left */
       const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+      curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       struct easy_pollset ps;
       int rc;
 
@@ -472,14 +473,16 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), do poll");
       Curl_pollfds_reset(&cpfds);
       memset(&ps, 0, sizeof(ps));
+      /* In general, we want to send after connect, wait on that. */
+      if(sockfd != CURL_SOCKET_BAD)
+        Curl_pollset_set_out_only(data, &ps, sockfd);
       Curl_conn_adjust_pollset(data, &ps);
-      DEBUGASSERT(ps.num);
       result = Curl_pollfds_add_ps(&cpfds, &ps);
       if(result)
         goto out;
-      DEBUGASSERT(cpfds.n);
 
-      rc = Curl_poll(cpfds.pfds, cpfds.n, CURLMIN(timeout_ms, 1000));
+      rc = Curl_poll(cpfds.pfds, cpfds.n,
+                     CURLMIN(timeout_ms, (cpfds.n ? 1000 : 10)));
       CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), Curl_poll() -> %d",
                   rc);
       if(rc < 0) {
