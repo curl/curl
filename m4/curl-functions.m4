@@ -3381,36 +3381,22 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
   #
-  tst_links_socket="unknown"
   tst_proto_socket="unknown"
   tst_compi_socket="unknown"
   tst_allow_socket="unknown"
   #
-  AC_MSG_CHECKING([if socket can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([socket])
+  AC_MSG_CHECKING([if socket is prototyped])
+  AC_EGREP_CPP([socket],[
+    $curl_includes_winsock2
+    $curl_includes_bsdsocket
+    $curl_includes_sys_socket
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_socket="yes"
+    tst_proto_socket="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_socket="no"
+    tst_proto_socket="no"
   ])
-  #
-  if test "$tst_links_socket" = "yes"; then
-    AC_MSG_CHECKING([if socket is prototyped])
-    AC_EGREP_CPP([socket],[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_socket="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_socket="no"
-    ])
-  fi
   #
   if test "$tst_proto_socket" = "yes"; then
     AC_MSG_CHECKING([if socket is compilable])
@@ -3444,8 +3430,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   fi
   #
   AC_MSG_CHECKING([if socket might be used])
-  if test "$tst_links_socket" = "yes" &&
-     test "$tst_proto_socket" = "yes" &&
+  if test "$tst_proto_socket" = "yes" &&
      test "$tst_compi_socket" = "yes" &&
      test "$tst_allow_socket" = "yes"; then
     AC_MSG_RESULT([yes])
