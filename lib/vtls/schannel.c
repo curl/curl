@@ -155,6 +155,8 @@
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
+static bool s_win_has_alpn;
+
 static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
                                              struct Curl_easy *data,
                                              const char *pinnedpubkey);
@@ -905,26 +907,11 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
           "connect to some servers due to lack of SNI, algorithms, etc.");
   }
 
-  {
 #ifdef HAS_ALPN_SCHANNEL
-    bool wine;
-#ifdef CURL_WINDOWS_UWP
-    /* GetModuleHandle() not available for UWP.
-       Assume no WINE because WINE has no UWP support. */
-    wine = FALSE;
+  backend->use_alpn = connssl->alpn && s_win_has_alpn;
 #else
-    wine = !!GetProcAddress(GetModuleHandle(TEXT("ntdll")),
-                            "wine_get_version");
+  backend->use_alpn = FALSE;
 #endif
-    /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-       Also it does not seem to be supported for WINE, see curl bug #983. */
-    backend->use_alpn = connssl->alpn && !wine &&
-      curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
-                                   VERSION_GREATER_THAN_EQUAL);
-#else
-    backend->use_alpn = FALSE;
-#endif
-  }
 
 #ifdef _WIN32_WCE
 #ifdef HAS_MANUAL_VERIFY_API
@@ -2387,6 +2374,32 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
+  bool wine = FALSE;
+  bool wine_has_alpn = FALSE;
+
+#ifndef CURL_WINDOWS_UWP
+  typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
+  /* GetModuleHandle() not available for UWP.
+     Assume no WINE because WINE has no UWP support. */
+  WINE_GET_VERSION_FN p_wine_get_version =
+    CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
+                        (GetProcAddress(GetModuleHandle(TEXT("ntdll")),
+                                        "wine_get_version")));
+  wine = !!p_wine_get_version;
+  if(wine) {
+    const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
+    /* Assume ALPN support with WINE 6.0 or upper */
+    wine_has_alpn = wine_version && atoi(wine_version) >= 6;
+  }
+#endif
+  if(wine)
+    s_win_has_alpn = wine_has_alpn;
+  else {
+    /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
+    s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
+                                                  VERSION_GREATER_THAN_EQUAL);
+  }
+
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
 
