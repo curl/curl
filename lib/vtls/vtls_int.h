@@ -157,11 +157,8 @@ struct Curl_ssl {
                      size_t length);
   bool (*cert_status_request)(void);
 
-  CURLcode (*connect_blocking)(struct Curl_cfilter *cf,
-                               struct Curl_easy *data);
-  CURLcode (*connect_nonblocking)(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  bool *done);
+  CURLcode (*do_connect)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         bool *done);
 
   /* During handshake/shutdown, adjust the pollset to include the socket
    * for POLLOUT or POLLIN as needed. Mandatory. */

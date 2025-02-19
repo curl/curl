@@ -779,48 +779,36 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 /* Given an established network connection, do a TLS handshake.
  *
- * If `blocking` is true, this function will block until the handshake is
- * complete. Otherwise it will return as soon as I/O would block.
- *
- * For the non-blocking I/O case, this function will set `*done` to true
- * once the handshake is complete. This function never reads the value of
- * `*done*`.
+ * This function will set `*done` to true once the handshake is complete.
+ * This function never reads the value of `*done*`.
  */
 static CURLcode
-cr_connect_common(struct Curl_cfilter *cf,
-                  struct Curl_easy *data,
-                  bool blocking,
-                  bool *done)
+cr_connect(struct Curl_cfilter *cf,
+           struct Curl_easy *data, bool *done)
 {
   struct ssl_connect_data *const connssl = cf->ctx;
-  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   struct rustls_ssl_backend_data *const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
   CURLcode tmperr = CURLE_OK;
   int result;
-  int what;
   bool wants_read;
   bool wants_write;
-  curl_socket_t writefd;
-  curl_socket_t readfd;
-  timediff_t timeout_ms;
-  timediff_t socket_check_timeout;
 
   DEBUGASSERT(backend);
 
-  CURL_TRC_CF(data, cf, "cr_connect_common, state=%d", connssl->state);
+  CURL_TRC_CF(data, cf, "cr_connect, state=%d", connssl->state);
   *done = FALSE;
+
   if(!backend->conn) {
     result = cr_init_backend(cf, data,
                (struct rustls_ssl_backend_data *)connssl->backend);
-    CURL_TRC_CF(data, cf, "cr_connect_common, init backend -> %d", result);
+    CURL_TRC_CF(data, cf, "cr_connect, init backend -> %d", result);
     if(result != CURLE_OK) {
       return result;
     }
     connssl->state = ssl_connection_negotiating;
   }
-
   rconn = backend->conn;
 
   /* Read/write data until the handshake is done or the socket would block. */
@@ -868,50 +856,14 @@ cr_connect_common(struct Curl_cfilter *cf,
     wants_write = rustls_connection_wants_write(rconn) ||
                   backend->plain_out_buffered;
     DEBUGASSERT(wants_read || wants_write);
-    writefd = wants_write ? sockfd : CURL_SOCKET_BAD;
-    readfd = wants_read ? sockfd : CURL_SOCKET_BAD;
-
-    /* check allowed time left */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
-
-    if(timeout_ms < 0) {
-      /* no need to continue if time already is up */
-      failf(data, "rustls: operation timed out before socket check");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
-
-    socket_check_timeout = blocking ? timeout_ms : 0;
-
-    what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                             socket_check_timeout);
-    if(what < 0) {
-      /* fatal error */
-      failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-    if(blocking && 0 == what) {
-      failf(data, "rustls: connection timeout after %" FMT_TIMEDIFF_T " ms",
-            socket_check_timeout);
-      return CURLE_OPERATION_TIMEDOUT;
-    }
-    if(0 == what) {
-      CURL_TRC_CF(data, cf, "Curl_socket_check: %s would block",
-            wants_read && wants_write ? "writing and reading" :
-            wants_write ? "writing" : "reading");
-      if(wants_write)
-        connssl->io_need |= CURL_SSL_IO_NEED_SEND;
-      if(wants_read)
-        connssl->io_need |= CURL_SSL_IO_NEED_RECV;
-      return CURLE_OK;
-    }
-    /* socket is readable or writable */
 
     if(wants_write) {
       CURL_TRC_CF(data, cf, "rustls_connection wants us to write_tls.");
       cr_send(cf, data, NULL, 0, &tmperr);
       if(tmperr == CURLE_AGAIN) {
         CURL_TRC_CF(data, cf, "writing would block");
-        /* fall through */
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
+        return CURLE_OK;
       }
       else if(tmperr != CURLE_OK) {
         return tmperr;
@@ -923,7 +875,8 @@ cr_connect_common(struct Curl_cfilter *cf,
       if(tls_recv_more(cf, data, &tmperr) < 0) {
         if(tmperr == CURLE_AGAIN) {
           CURL_TRC_CF(data, cf, "reading would block");
-          /* fall through */
+          connssl->io_need = CURL_SSL_IO_NEED_RECV;
+          return CURLE_OK;
         }
         else if(tmperr == CURLE_RECV_ERROR) {
           return CURLE_SSL_CONNECT_ERROR;
@@ -938,20 +891,6 @@ cr_connect_common(struct Curl_cfilter *cf,
   /* We should never fall through the loop. We should return either because
      the handshake is done or because we cannot read/write without blocking. */
   DEBUGASSERT(FALSE);
-}
-
-static CURLcode
-cr_connect_nonblocking(struct Curl_cfilter *cf,
-                       struct Curl_easy *data, bool *done)
-{
-  return cr_connect_common(cf, data, false, done);
-}
-
-static CURLcode
-cr_connect_blocking(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  bool done; /* unused */
-  return cr_connect_common(cf, data, true, &done);
 }
 
 static void *
@@ -1083,8 +1022,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   cr_data_pending,                 /* data_pending */
   cr_random,                       /* random */
   NULL,                            /* cert_status_request */
-  cr_connect_blocking,             /* connect */
-  cr_connect_nonblocking,          /* connect_nonblocking */
+  cr_connect,                      /* connect */
   Curl_ssl_adjust_pollset,         /* adjust_pollset */
   cr_get_internals,                /* get_internals */
   cr_close,                        /* close_one */

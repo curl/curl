@@ -1128,7 +1128,7 @@ static void socks_proxy_cf_free(struct Curl_cfilter *cf)
 */
 static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
-                                       bool blocking, bool *done)
+                                       bool *done)
 {
   CURLcode result;
   struct connectdata *conn = cf->conn;
@@ -1140,7 +1140,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, done);
   if(result || !*done)
     return result;
 

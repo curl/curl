@@ -2441,7 +2441,7 @@ static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
 
 static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done)
+                              bool *done)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -2455,7 +2455,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
 
   /* Connect the lower filters first */
   if(!cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }
@@ -2827,7 +2827,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data)
 
   if(cf->next) {
     bool done;
-    return Curl_conn_cf_connect(cf, data, FALSE, &done);
+    return Curl_conn_cf_connect(cf, data, &done);
   }
   return CURLE_OK;
 }
@@ -2849,7 +2849,7 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if(cf_h2->next) {
     bool done;
-    return Curl_conn_cf_connect(cf_h2, data, FALSE, &done);
+    return Curl_conn_cf_connect(cf_h2, data, &done);
   }
   return CURLE_OK;
 }
@@ -2900,7 +2900,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
 
   if(cf->next) {
     bool done;
-    return Curl_conn_cf_connect(cf, data, FALSE, &done);
+    return Curl_conn_cf_connect(cf, data, &done);
   }
   return CURLE_OK;
 }

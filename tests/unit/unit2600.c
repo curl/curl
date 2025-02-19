@@ -134,13 +134,12 @@ static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static CURLcode cf_test_connect(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                bool blocking, bool *done)
+                                bool *done)
 {
   struct cf_test_ctx *ctx = cf->ctx;
   timediff_t duration_ms;
 
   (void)data;
-  (void)blocking;
   *done = FALSE;
   duration_ms = Curl_timediff(Curl_now(), ctx->started);
   if(duration_ms >= ctx->fail_delay_ms) {

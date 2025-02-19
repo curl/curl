@@ -307,7 +307,7 @@ out:
 
 static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
-                                      bool blocking, bool *done)
+                                      bool *done)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
@@ -319,7 +319,7 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "connect");
 connect_sub:
-  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, done);
   if(result || !*done)
     return result;
 

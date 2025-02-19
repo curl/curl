@@ -368,10 +368,10 @@ bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done)
+                              bool *done)
 {
   if(cf)
-    return cf->cft->do_connect(cf, data, blocking, done);
+    return cf->cft->do_connect(cf, data, done);
   return CURLE_FAILED_INIT;
 }
 
@@ -405,6 +405,9 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
                            bool blocking,
                            bool *done)
 {
+#define CF_CONN_NUM_POLLS_ON_STACK 5
+  struct pollfd a_few_on_stack[CF_CONN_NUM_POLLS_ON_STACK];
+  struct curl_pollfds cpfds;
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
 
@@ -419,7 +422,11 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   }
 
   *done = cf->connected;
-  if(!*done) {
+  if(*done)
+    return CURLE_OK;
+
+  Curl_pollfds_init(&cpfds, a_few_on_stack, CF_CONN_NUM_POLLS_ON_STACK);
+  while(!*done) {
     if(Curl_conn_needs_flush(data, sockindex)) {
       DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
       result = Curl_conn_flush(data, sockindex);
@@ -427,7 +434,9 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
         return result;
     }
 
-    result = cf->cft->do_connect(cf, data, blocking, done);
+    result = cf->cft->do_connect(cf, data, done);
+    CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %d, done=%d",
+                blocking, result, *done);
     if(!result && *done) {
       /* Now that the complete filter chain is connected, let all filters
        * persist information at the connection. E.g. cf-socket sets the
@@ -436,12 +445,56 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       conn_report_connect_stats(data, data->conn);
       data->conn->keepalive = Curl_now();
       Curl_verboseconnect(data, data->conn, sockindex);
+      goto out;
     }
     else if(result) {
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
+                  result);
       conn_report_connect_stats(data, data->conn);
+      goto out;
+    }
+
+    if(!blocking)
+      goto out;
+    else {
+      /* check allowed time left */
+      const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+      curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+      struct easy_pollset ps;
+      int rc;
+
+      if(timeout_ms < 0) {
+        /* no need to continue if time already is up */
+        failf(data, "connect timeout");
+        result = CURLE_OPERATION_TIMEDOUT;
+        goto out;
+      }
+
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), do poll");
+      Curl_pollfds_reset(&cpfds);
+      memset(&ps, 0, sizeof(ps));
+      /* In general, we want to send after connect, wait on that. */
+      if(sockfd != CURL_SOCKET_BAD)
+        Curl_pollset_set_out_only(data, &ps, sockfd);
+      Curl_conn_adjust_pollset(data, &ps);
+      result = Curl_pollfds_add_ps(&cpfds, &ps);
+      if(result)
+        goto out;
+
+      rc = Curl_poll(cpfds.pfds, cpfds.n,
+                     CURLMIN(timeout_ms, (cpfds.n ? 1000 : 10)));
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), Curl_poll() -> %d",
+                  rc);
+      if(rc < 0) {
+        result = CURLE_COULDNT_CONNECT;
+        goto out;
+      }
+      /* continue iterating */
     }
   }
 
+out:
+  Curl_pollfds_cleanup(&cpfds);
   return result;
 }
 

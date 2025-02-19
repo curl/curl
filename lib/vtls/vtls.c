@@ -485,29 +485,8 @@ static void cf_ctx_free(struct ssl_connect_data *ctx)
   }
 }
 
-static CURLcode ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  CURLcode result;
-
-  if(!ssl_prefs_check(data))
-    return CURLE_SSL_CONNECT_ERROR;
-
-  /* mark this is being ssl-enabled from here on. */
-  connssl->state = ssl_connection_negotiating;
-
-  result = connssl->ssl_impl->connect_blocking(cf, data);
-
-  if(!result) {
-    DEBUGASSERT(connssl->state == ssl_connection_complete);
-  }
-
-  return result;
-}
-
 static CURLcode
-ssl_connect_nonblocking(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        bool *done)
+ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
 
@@ -515,7 +494,7 @@ ssl_connect_nonblocking(struct Curl_cfilter *cf, struct Curl_easy *data,
     return CURLE_SSL_CONNECT_ERROR;
 
   /* mark this is being ssl requested from here on. */
-  return connssl->ssl_impl->connect_nonblocking(cf, data, done);
+  return connssl->ssl_impl->do_connect(cf, data, done);
 }
 
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
@@ -923,20 +902,11 @@ static int multissl_init(void)
 }
 
 static CURLcode multissl_connect(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+                                 struct Curl_easy *data, bool *done)
 {
   if(multissl_setup(NULL))
     return CURLE_FAILED_INIT;
-  return Curl_ssl->connect_blocking(cf, data);
-}
-
-static CURLcode multissl_connect_nonblocking(struct Curl_cfilter *cf,
-                                             struct Curl_easy *data,
-                                             bool *done)
-{
-  if(multissl_setup(NULL))
-    return CURLE_FAILED_INIT;
-  return Curl_ssl->connect_nonblocking(cf, data, done);
+  return Curl_ssl->do_connect(cf, data, done);
 }
 
 static void multissl_adjust_pollset(struct Curl_cfilter *cf,
@@ -995,7 +965,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* random */
   NULL,                              /* cert_status_request */
   multissl_connect,                  /* connect */
-  multissl_connect_nonblocking,      /* connect_nonblocking */
   multissl_adjust_pollset,           /* adjust_pollset */
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
@@ -1343,7 +1312,7 @@ static void ssl_cf_close(struct Curl_cfilter *cf,
 
 static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               bool blocking, bool *done)
+                               bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
@@ -1360,7 +1329,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   }
 
   if(!cf->next->connected) {
-    result = cf->next->cft->do_connect(cf->next, data, blocking, done);
+    result = cf->next->cft->do_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }
@@ -1380,13 +1349,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-  if(blocking) {
-    result = ssl_connect(cf, data);
-    *done = (result == CURLE_OK);
-  }
-  else {
-    result = ssl_connect_nonblocking(cf, data, done);
-  }
+  result = ssl_connect(cf, data, done);
 
   if(!result && *done) {
     cf->connected = TRUE;

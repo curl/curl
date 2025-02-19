@@ -175,7 +175,7 @@ static CURLcode cf_hc_baller_connect(struct cf_hc_baller *b,
   struct Curl_cfilter *save = cf->next;
 
   cf->next = b->cf;
-  b->result = Curl_conn_cf_connect(cf->next, data, FALSE, done);
+  b->result = Curl_conn_cf_connect(cf->next, data, done);
   b->cf = cf->next; /* it might mutate */
   cf->next = save;
   return b->result;
@@ -291,14 +291,13 @@ static bool time_to_start_next(struct Curl_cfilter *cf,
 
 static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done)
+                              bool *done)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   struct curltime now;
   CURLcode result = CURLE_OK;
   size_t i, failed_ballers;
 
-  (void)blocking;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;

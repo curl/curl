@@ -593,7 +593,7 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
   *connected = baller->connected;
   if(!baller->result &&  !*connected) {
     /* evaluate again */
-    baller->result = Curl_conn_cf_connect(baller->cf, data, 0, connected);
+    baller->result = Curl_conn_cf_connect(baller->cf, data, connected);
 
     if(!baller->result) {
       if(*connected) {
@@ -948,7 +948,7 @@ static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
 
 static CURLcode cf_he_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done)
+                              bool *done)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -958,7 +958,6 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  (void)blocking;
   DEBUGASSERT(ctx);
   *done = FALSE;
 
@@ -1263,7 +1262,7 @@ struct cf_setup_ctx {
 
 static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 bool blocking, bool *done)
+                                 bool *done)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1276,7 +1275,7 @@ static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
   /* connect current sub-chain */
 connect_sub_chain:
   if(cf->next && !cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }
