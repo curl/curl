@@ -205,6 +205,7 @@ jobs:
             libnghttp2-devel
             libpsl-devel
             libssh2-devel
+            ${{ matrix.chkprefill == '_chkprefill' && 'diffutils' || '' }}
 
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         if: ${{ matrix.sys != 'msys' }}
@@ -507,15 +508,23 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
-          cmake -B bld -G 'MSYS Makefiles' ${options} \
-            -DCMAKE_C_COMPILER=gcc \
-            -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-            -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
-            -DCURL_WERROR=ON \
-            -DCURL_USE_LIBPSL=OFF \
-            ${{ matrix.config }}
+          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+            options=''
+            [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
+            [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
+            [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+            cmake -B "bld${_chkprefill}" -G 'MSYS Makefiles' ${options} \
+              -DCMAKE_C_COMPILER=gcc \
+              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_LIBPSL=OFF \
+              ${{ matrix.config }}
+          done
+          if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
+            echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+            false
+          fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
