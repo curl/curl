@@ -652,7 +652,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     /* nothing to do */
   }
 
-  if(!service.len) {
+  if(!Curl_strlen(&service)) {
     const char *p = hostname;
     if(Curl_str_until(&p, &service, MAX_SIGV4_LEN, '.') ||
        Curl_str_single(&p, '.')) {
@@ -662,9 +662,9 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     }
 
     infof(data, "aws_sigv4: picked service %.*s from host",
-          (int)service.len, service.str);
+          (int)Curl_strlen(&service), Curl_str(&service));
 
-    if(!region.len) {
+    if(!Curl_strlen(&region)) {
       if(Curl_str_until(&p, &region, MAX_SIGV4_LEN, '.') ||
          Curl_str_single(&p, '.')) {
         failf(data, "aws-sigv4: region missing in parameters and hostname");
@@ -672,14 +672,15 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
         goto fail;
       }
       infof(data, "aws_sigv4: picked region %.*s from host",
-            (int)region.len, region.str);
+            (int)Curl_strlen(&region), Curl_str(&region));
     }
   }
 
   Curl_http_method(data, conn, &method, &httpreq);
 
-  payload_hash = parse_content_sha_hdr(data, provider1.str, provider1.len,
-                                       &payload_hash_len);
+  payload_hash =
+    parse_content_sha_hdr(data, Curl_str(&provider1), Curl_strlen(&provider1),
+                          &payload_hash_len);
 
   if(!payload_hash) {
     /* AWS S3 requires a x-amz-content-sha256 header, and supports special
@@ -688,9 +689,9 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       Curl_str_casecompare(&service, "s3");
 
     if(sign_as_s3)
-      result = calc_s3_payload_hash(data, httpreq,
-                                    provider1.str, provider1.len,
-                                    sha_hash, sha_hex, content_sha256_hdr);
+      result = calc_s3_payload_hash(data, httpreq, Curl_str(&provider1),
+                                    Curl_strlen(&provider1), sha_hash, sha_hex,
+                                    content_sha256_hdr);
     else
       result = calc_payload_hash(data, sha_hash, sha_hex);
     if(result)
@@ -722,7 +723,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
 
   result = make_headers(data, hostname, timestamp,
-                        provider1.str, provider1.len,
+                        Curl_str(&provider1), Curl_strlen(&provider1),
                         &date_header, content_sha256_hdr,
                         &canonical_headers, &signed_headers);
   if(result)
@@ -767,17 +768,18 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   DEBUGF(infof(data, "Canonical request: %s", canonical_request));
 
-  request_type = aprintf("%.*s4_request", (int)provider0.len, provider0.str);
+  request_type = aprintf("%.*s4_request",
+                         (int)Curl_strlen(&provider0), Curl_str(&provider0));
   if(!request_type)
     goto fail;
 
   /* provider0 is lowercased *after* aprintf() so that the buffer can be
      written to */
-  Curl_strntolower(request_type, request_type, provider0.len);
+  Curl_strntolower(request_type, request_type, Curl_strlen(&provider0));
 
-  credential_scope = aprintf("%s/%.*s/%.*s/%s",
-                             date, (int)region.len, region.str,
-                             (int)service.len, service.str,
+  credential_scope = aprintf("%s/%.*s/%.*s/%s", date,
+                             (int)Curl_strlen(&region), Curl_str(&region),
+                             (int)Curl_strlen(&service), Curl_str(&service),
                              request_type);
   if(!credential_scope)
     goto fail;
@@ -796,7 +798,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                         "%s\n" /* RequestDateTime */
                         "%s\n" /* CredentialScope */
                         "%s",  /* HashedCanonicalRequest in hex */
-                        (int)provider0.len, provider0.str,
+                        (int)Curl_strlen(&provider0), Curl_str(&provider0),
                         timestamp,
                         credential_scope,
                         sha_hex);
@@ -804,19 +806,21 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     goto fail;
 
   /* make provider0 part done uppercase */
-  Curl_strntoupper(str_to_sign, provider0.str, provider0.len);
+  Curl_strntoupper(str_to_sign, Curl_str(&provider0), Curl_strlen(&provider0));
 
-  secret = aprintf("%.*s4%s", (int)provider0.len, provider0.str,
-                   data->state.aptr.passwd ?
+  secret = aprintf("%.*s4%s", (int)Curl_strlen(&provider0),
+                   Curl_str(&provider0), data->state.aptr.passwd ?
                    data->state.aptr.passwd : "");
   if(!secret)
     goto fail;
   /* make provider0 part done uppercase */
-  Curl_strntoupper(secret, provider0.str, provider0.len);
+  Curl_strntoupper(secret, Curl_str(&provider0), Curl_strlen(&provider0));
 
   HMAC_SHA256(secret, strlen(secret), date, strlen(date), sign0);
-  HMAC_SHA256(sign0, sizeof(sign0), region.str, region.len, sign1);
-  HMAC_SHA256(sign1, sizeof(sign1), service.str, service.len, sign0);
+  HMAC_SHA256(sign0, sizeof(sign0),
+              Curl_str(&region), Curl_strlen(&region), sign1);
+  HMAC_SHA256(sign1, sizeof(sign1),
+              Curl_str(&service), Curl_strlen(&service), sign0);
   HMAC_SHA256(sign0, sizeof(sign0), request_type, strlen(request_type), sign1);
   HMAC_SHA256(sign1, sizeof(sign1), str_to_sign, strlen(str_to_sign), sign0);
 
@@ -833,7 +837,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                           */
                          "%s"
                          "%s", /* optional sha256 header includes \r\n */
-                         (int)provider0.len, provider0.str,
+                         (int)Curl_strlen(&provider0), Curl_str(&provider0),
                          user,
                          credential_scope,
                          Curl_dyn_ptr(&signed_headers),
@@ -845,7 +849,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
   /* provider 0 uppercase */
   Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
-                   provider0.str, provider0.len);
+                   Curl_str(&provider0), Curl_strlen(&provider0));
 
   Curl_safefree(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;

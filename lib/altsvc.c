@@ -138,12 +138,14 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
                                     size_t srcport,
                                     size_t dstport)
 {
-  enum alpnid dstalpnid = Curl_alpn2alpnid(dstalpn->str, dstalpn->len);
-  enum alpnid srcalpnid = Curl_alpn2alpnid(srcalpn->str, srcalpn->len);
+  enum alpnid dstalpnid =
+    Curl_alpn2alpnid(Curl_str(dstalpn), Curl_strlen(dstalpn));
+  enum alpnid srcalpnid =
+    Curl_alpn2alpnid(Curl_str(srcalpn), Curl_strlen(srcalpn));
   if(!srcalpnid || !dstalpnid)
     return NULL;
-  return altsvc_createid(srchost->str, srchost->len,
-                         dsthost->str, dsthost->len,
+  return altsvc_createid(Curl_str(srchost), Curl_strlen(srchost),
+                         Curl_str(dsthost), Curl_strlen(dsthost),
                          srcalpnid, dstalpnid,
                          srcport, dstport);
 }
@@ -190,8 +192,8 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
 
     /* The date parser works on a null terminated string. The maximum length
        is upheld by Curl_str_quotedword(). */
-    memcpy(dbuf, date.str, date.len);
-    dbuf[date.len] = 0;
+    memcpy(dbuf, Curl_str(&date), Curl_strlen(&date));
+    dbuf[Curl_strlen(&date)] = 0;
     expires = Curl_getdate_capped(dbuf);
     as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
                        (size_t)srcport, (size_t)dstport);

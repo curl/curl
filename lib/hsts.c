@@ -433,26 +433,26 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
     struct stsentry *e;
     char dbuf[MAX_HSTS_DATELEN + 1];
     time_t expires;
+    const char *hp = Curl_str(&host);
 
     /* The date parser works on a null terminated string. The maximum length
        is upheld by Curl_str_quotedword(). */
-    memcpy(dbuf, date.str, date.len);
-    dbuf[date.len] = 0;
+    memcpy(dbuf, Curl_str(&date), Curl_strlen(&date));
+    dbuf[Curl_strlen(&date)] = 0;
 
     expires = strcmp(dbuf, UNLIMITED) ? Curl_getdate_capped(dbuf) :
       TIME_T_MAX;
 
-    if(host.str[0] == '.') {
-      host.str++;
-      host.len--;
+    if(hp[0] == '.') {
+      Curl_str_nudge(&host, 1);
       subdomain = TRUE;
     }
     /* only add it if not already present */
-    e = Curl_hsts(h, host.str, host.len, subdomain);
+    e = Curl_hsts(h, Curl_str(&host), Curl_strlen(&host), subdomain);
     if(!e)
-      result = hsts_create(h, host.str, host.len, subdomain, expires);
-    else if((strlen(e->host) == host.len) &&
-            strncasecompare(host.str, e->host, host.len)) {
+      result = hsts_create(h, Curl_str(&host), Curl_strlen(&host),
+                           subdomain, expires);
+    else if(Curl_str_casecompare(&host, e->host)) {
       /* the same hostname, use the largest expire time */
       if(expires > e->expires)
         e->expires = expires;
