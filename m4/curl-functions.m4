@@ -650,34 +650,20 @@ dnl HAVE_CLOSESOCKET will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   #
-  tst_links_closesocket="unknown"
   tst_proto_closesocket="unknown"
   tst_compi_closesocket="unknown"
   tst_allow_closesocket="unknown"
   #
-  AC_MSG_CHECKING([if closesocket can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([closesocket])
+  AC_MSG_CHECKING([if closesocket is prototyped])
+  AC_EGREP_CPP([closesocket],[
+    $curl_includes_winsock2
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_closesocket="yes"
+    tst_proto_closesocket="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_closesocket="no"
+    tst_proto_closesocket="no"
   ])
-  #
-  if test "$tst_links_closesocket" = "yes"; then
-    AC_MSG_CHECKING([if closesocket is prototyped])
-    AC_EGREP_CPP([closesocket],[
-      $curl_includes_winsock2
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_closesocket="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_closesocket="no"
-    ])
-  fi
   #
   if test "$tst_proto_closesocket" = "yes"; then
     AC_MSG_CHECKING([if closesocket is compilable])
@@ -709,8 +695,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   fi
   #
   AC_MSG_CHECKING([if closesocket might be used])
-  if test "$tst_links_closesocket" = "yes" &&
-     test "$tst_proto_closesocket" = "yes" &&
+  if test "$tst_proto_closesocket" = "yes" &&
      test "$tst_compi_closesocket" = "yes" &&
      test "$tst_allow_closesocket" = "yes"; then
     AC_MSG_RESULT([yes])
