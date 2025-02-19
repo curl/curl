@@ -905,8 +905,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
           "connect to some servers due to lack of SNI, algorithms, etc.");
   }
 
-#ifdef HAS_ALPN_SCHANNEL
   {
+#ifdef HAS_ALPN_SCHANNEL
     bool wine;
 #ifdef CURL_WINDOWS_UWP
     /* GetModuleHandle() not available for UWP.
@@ -920,10 +920,10 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     backend->use_alpn = connssl->alpn && !wine &&
       curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                    VERSION_GREATER_THAN_EQUAL);
-  }
 #else
-  backend->use_alpn = FALSE;
+    backend->use_alpn = FALSE;
 #endif
+  }
 
 #ifdef _WIN32_WCE
 #ifdef HAS_MANUAL_VERIFY_API
