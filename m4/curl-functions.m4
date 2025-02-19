@@ -1644,7 +1644,6 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
         char s[1];
         if(0 != gethostname((void *)s, 0))
           return 1;
-        (void)s;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -1677,7 +1676,6 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               char s[1];
               if(0 != gethostname(($tst_arg1)s, 0))
                 return 1;
-              (void)s;
             ]])
           ],[
             tst_gethostname_type_arg2="$tst_arg2"
