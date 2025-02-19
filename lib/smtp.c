@@ -1614,6 +1614,7 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
   CURLcode result;
 
   /* Initialise the SMTP layer */
+  (void)conn;
   result = smtp_init(data);
   CURL_TRC_SMTP(data, "smtp_setup_connection() -> %d", result);
   return result;

@@ -1390,6 +1390,7 @@ static CURLcode pop3_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   /* Initialise the POP3 layer */
+  (void)conn;
   return pop3_init(data);
 }
 

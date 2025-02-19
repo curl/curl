@@ -1746,6 +1746,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   /* Initialise the IMAP layer */
+  (void)conn;
   return imap_init(data);
 }
 
