@@ -1131,6 +1131,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Avoid false positives
           tmp_CFLAGS="$tmp_CFLAGS -Wno-type-limits"
         fi
+        if test "$compiler_num" -ge "501" -a "$compiler_num" -lt "505"; then
+          dnl Avoid false positives
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-conversion"
+        fi
         ;;
         #
       HP_UX_C)
