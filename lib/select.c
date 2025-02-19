@@ -410,6 +410,11 @@ void Curl_pollfds_init(struct curl_pollfds *cpfds,
   }
 }
 
+void Curl_pollfds_reset(struct curl_pollfds *cpfds)
+{
+  cpfds->n = 0;
+}
+
 void Curl_pollfds_cleanup(struct curl_pollfds *cpfds)
 {
   DEBUGASSERT(cpfds);

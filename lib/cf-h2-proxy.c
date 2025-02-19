@@ -1090,7 +1090,7 @@ out:
 
 static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
-                                    bool blocking, bool *done)
+                                    bool *done)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1105,7 +1105,7 @@ static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
 
   /* Connect the lower filters first */
   if(!cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }

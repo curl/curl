@@ -1378,7 +1378,7 @@ static CURLcode cf_quiche_verify_peer(struct Curl_cfilter *cf,
 
 static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  bool blocking, bool *done)
+                                  bool *done)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1390,7 +1390,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
 
   /* Connect the UDP filter first */
   if(!cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }

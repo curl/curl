@@ -51,7 +51,7 @@ typedef CURLcode Curl_cft_shutdown(struct Curl_cfilter *cf,
 
 typedef CURLcode Curl_cft_connect(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  bool blocking, bool *done);
+                                  bool *done);
 
 /* Return the hostname and port the connection goes to.
  * This may change with the connection state of filters when tunneling
@@ -324,7 +324,7 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done);
+                              bool *done);
 void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, bool eos,

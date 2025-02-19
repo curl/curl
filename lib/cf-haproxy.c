@@ -105,7 +105,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
 
 static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
-                                   bool blocking, bool *done)
+                                   bool *done)
 {
   struct cf_haproxy_ctx *ctx = cf->ctx;
   CURLcode result;
@@ -117,7 +117,7 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, done);
   if(result || !*done)
     return result;
 

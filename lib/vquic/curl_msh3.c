@@ -877,13 +877,12 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
 static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                bool blocking, bool *done)
+                                bool *done)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct cf_call_data save;
   CURLcode result = CURLE_OK;
 
-  (void)blocking;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;

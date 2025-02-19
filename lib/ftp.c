@@ -3603,7 +3603,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
     if(ftpc->wait_data_conn) {
       bool serv_conned;
 
-      result = Curl_conn_connect(data, SECONDARYSOCKET, TRUE, &serv_conned);
+      result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &serv_conned);
       if(result)
         return result; /* Failed to accept data connection */
 

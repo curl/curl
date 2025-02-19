@@ -1304,7 +1304,7 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               bool blocking, bool *done)
+                               bool *done)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_COULDNT_CONNECT;
@@ -1315,9 +1315,6 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     *done = TRUE;
     return CURLE_OK;
   }
-
-  if(blocking)
-    return CURLE_UNSUPPORTED_PROTOCOL;
 
   *done = FALSE; /* a negative world view is best */
   if(ctx->sock == CURL_SOCKET_BAD) {
@@ -1889,12 +1886,11 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 
 static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               bool blocking, bool *done)
+                               bool *done)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_COULDNT_CONNECT;
 
-  (void)blocking;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
@@ -2099,7 +2095,7 @@ static void cf_tcp_set_accepted_remote_ip(struct Curl_cfilter *cf,
 
 static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
-                                      bool blocking, bool *done)
+                                      bool *done)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 #ifdef USE_IPV6
@@ -2115,7 +2111,6 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
 
   /* we start accepted, if we ever close, we cannot go on */
   (void)data;
-  (void)blocking;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
