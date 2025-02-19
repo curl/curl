@@ -1564,7 +1564,8 @@ static ParameterError parse_time_cond(struct GlobalConfig *global,
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
-                            argv_item_t cleararg,
+                            argv_item_t cleararg1,
+                            argv_item_t cleararg2,
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -1590,7 +1591,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 #ifdef HAVE_WRITABLE_ARGV
   argv_item_t clearthis = NULL;
 #else
-  (void)cleararg;
+  (void)cleararg1;
+  (void)cleararg2;
 #endif
 
   *usedarg = FALSE; /* default is that we do not use the arg */
@@ -1669,6 +1671,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
         singleopt = TRUE;   /* do not loop anymore after this */
+#ifdef HAVE_WRITABLE_ARGV
+        clearthis = &cleararg1[parse + 2 - flag];
+#endif
       }
       else if(!nextarg) {
         err = PARAM_REQUIRES_PARAMETER;
@@ -1676,7 +1681,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       else {
 #ifdef HAVE_WRITABLE_ARGV
-        clearthis = cleararg;
+        clearthis = cleararg2;
 #endif
         *usedarg = TRUE; /* mark it as used */
       }
@@ -2889,8 +2894,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           }
         }
 
-        result = getparameter(orig_opt, nextarg, argv[i + 1], &passarg,
-                              global, config);
+        result = getparameter(orig_opt, nextarg, argv[i], argv[i + 1],
+                              &passarg, global, config);
 
         curlx_unicodefree(nextarg);
         config = global->last;
@@ -2932,7 +2937,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, argv[i], &used, global, config);
+      result = getparameter("--url", orig_opt, NULL, NULL,
+                            &used, global, config);
     }
 
     if(!result)
