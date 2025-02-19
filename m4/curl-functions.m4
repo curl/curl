@@ -1730,36 +1730,22 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
   AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
-  tst_links_getpeername="unknown"
   tst_proto_getpeername="unknown"
   tst_compi_getpeername="unknown"
   tst_allow_getpeername="unknown"
   #
-  AC_MSG_CHECKING([if getpeername can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([getpeername])
+  AC_MSG_CHECKING([if getpeername is prototyped])
+  AC_EGREP_CPP([getpeername],[
+    $curl_includes_winsock2
+    $curl_includes_bsdsocket
+    $curl_includes_sys_socket
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_getpeername="yes"
+    tst_proto_getpeername="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_getpeername="no"
+    tst_proto_getpeername="no"
   ])
-  #
-  if test "$tst_links_getpeername" = "yes"; then
-    AC_MSG_CHECKING([if getpeername is prototyped])
-    AC_EGREP_CPP([getpeername],[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_getpeername="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_getpeername="no"
-    ])
-  fi
   #
   if test "$tst_proto_getpeername" = "yes"; then
     AC_MSG_CHECKING([if getpeername is compilable])
@@ -1793,8 +1779,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
   fi
   #
   AC_MSG_CHECKING([if getpeername might be used])
-  if test "$tst_links_getpeername" = "yes" &&
-     test "$tst_proto_getpeername" = "yes" &&
+  if test "$tst_proto_getpeername" = "yes" &&
      test "$tst_compi_getpeername" = "yes" &&
      test "$tst_allow_getpeername" = "yes"; then
     AC_MSG_RESULT([yes])
