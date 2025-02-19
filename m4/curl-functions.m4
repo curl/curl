@@ -1602,36 +1602,22 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
   AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
   #
-  tst_links_gethostname="unknown"
   tst_proto_gethostname="unknown"
   tst_compi_gethostname="unknown"
   tst_allow_gethostname="unknown"
   #
-  AC_MSG_CHECKING([if gethostname can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([gethostname])
+  AC_MSG_CHECKING([if gethostname is prototyped])
+  AC_EGREP_CPP([gethostname],[
+    $curl_includes_winsock2
+    $curl_includes_unistd
+    $curl_includes_bsdsocket
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_gethostname="yes"
+    tst_proto_gethostname="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_gethostname="no"
+    tst_proto_gethostname="no"
   ])
-  #
-  if test "$tst_links_gethostname" = "yes"; then
-    AC_MSG_CHECKING([if gethostname is prototyped])
-    AC_EGREP_CPP([gethostname],[
-      $curl_includes_winsock2
-      $curl_includes_unistd
-      $curl_includes_bsdsocket
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_gethostname="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_gethostname="no"
-    ])
-  fi
   #
   if test "$tst_proto_gethostname" = "yes"; then
     AC_MSG_CHECKING([if gethostname is compilable])
@@ -1702,8 +1688,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   fi
   #
   AC_MSG_CHECKING([if gethostname might be used])
-  if test "$tst_links_gethostname" = "yes" &&
-     test "$tst_proto_gethostname" = "yes" &&
+  if test "$tst_proto_gethostname" = "yes" &&
      test "$tst_compi_gethostname" = "yes" &&
      test "$tst_allow_gethostname" = "yes"; then
     AC_MSG_RESULT([yes])
