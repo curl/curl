@@ -2459,15 +2459,13 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
-  bool wine;
-  bool wine_has_alpn;
+  bool wine = FALSE;
+  bool wine_has_alpn = FALSE;
 
-#ifdef CURL_WINDOWS_UWP
+#ifndef CURL_WINDOWS_UWP
+  typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
   /* GetModuleHandle() not available for UWP.
      Assume no WINE because WINE has no UWP support. */
-  wine = FALSE;
-#else
-  typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
   WINE_GET_VERSION_FN s_p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
                         (GetProcAddress(GetModuleHandle(TEXT("ntdll")),
