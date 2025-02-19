@@ -494,7 +494,7 @@ ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data, bool *done)
     return CURLE_SSL_CONNECT_ERROR;
 
   /* mark this is being ssl requested from here on. */
-  return connssl->ssl_impl->connect(cf, data, done);
+  return connssl->ssl_impl->do_connect(cf, data, done);
 }
 
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
@@ -906,7 +906,7 @@ static CURLcode multissl_connect(struct Curl_cfilter *cf,
 {
   if(multissl_setup(NULL))
     return CURLE_FAILED_INIT;
-  return Curl_ssl->connect(cf, data, done);
+  return Curl_ssl->do_connect(cf, data, done);
 }
 
 static void multissl_adjust_pollset(struct Curl_cfilter *cf,
