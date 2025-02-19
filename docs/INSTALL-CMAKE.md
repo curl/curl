@@ -476,8 +476,8 @@ Configuration element             | Equivalent CMake options
 `Win32`                           | `-A Win32`
 `DLL`                             | `BUILD_SHARED_LIBS=ON`, `BUILD_STATIC_LIBS=OFF`, (default)
 `LIB`                             | `BUILD_SHARED_LIBS=OFF`, `BUILD_STATIC_LIBS=ON`
-`Debug`                           | `CMAKE_BUILD_TYPE=Debug` (NMake Makefiles only)
-`Release`                         | `CMAKE_BUILD_TYPE=Release` (NMake Makefiles only)
+`Debug`                           | `CMAKE_BUILD_TYPE=Debug` (`-G "NMake Makefiles"` only)
+`Release`                         | `CMAKE_BUILD_TYPE=Release` (`-G "NMake Makefiles"` only)
 `DLL Windows SSPI`                | `CURL_USE_SCHANNEL=ON` (with SSPI enabled by default)
 `DLL OpenSSL`                     | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
 `DLL libssh2`                     | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
@@ -495,13 +495,9 @@ translate to:
     > cmake --build . --config Debug --parallel
 
 We do *not* specify `-DCMAKE_BUILD_TYPE=Debug` here as we might do for the
-`"NMake Makefiles"` generator. This is because the Visual Studio generators are
+`"NMake Makefiles"` generator because the Visual Studio generators are
 [multi-config generators](https://cmake.org/cmake/help/latest/prop_gbl/GENERATOR_IS_MULTI_CONFIG.html)
-and therefore ignore the value of `CMAKE_BUILD_TYPE`. The build config is
-instead selected at *build* time, e.g. when running `cmake --build`, with the
-`--config` flag. See the CMake documentation on
-[build configurations](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#build-configurations)
-for more detail.
+and therefore ignore the value of `CMAKE_BUILD_TYPE`.
 
 # Migrating from winbuild builds
 
