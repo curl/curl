@@ -928,7 +928,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(s_wine) {
         const char *wine_version = s_p_wine_get_version(); /* e.g. "6.0.2" */
         /* Assume ALPN support with WINE 2.0.0 or upper */
-        s_wine_has_alpn = atoi(wine_version) >= 2;
+        s_wine_has_alpn = wine_version && atoi(wine_version) >= 2;
       }
       s_wine_init = TRUE;
     }
