@@ -1821,36 +1821,22 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
   AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
-  tst_links_getsockname="unknown"
   tst_proto_getsockname="unknown"
   tst_compi_getsockname="unknown"
   tst_allow_getsockname="unknown"
   #
-  AC_MSG_CHECKING([if getsockname can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([getsockname])
+  AC_MSG_CHECKING([if getsockname is prototyped])
+  AC_EGREP_CPP([getsockname],[
+    $curl_includes_winsock2
+    $curl_includes_bsdsocket
+    $curl_includes_sys_socket
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_getsockname="yes"
+    tst_proto_getsockname="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_getsockname="no"
+    tst_proto_getsockname="no"
   ])
-  #
-  if test "$tst_links_getsockname" = "yes"; then
-    AC_MSG_CHECKING([if getsockname is prototyped])
-    AC_EGREP_CPP([getsockname],[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_getsockname="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_getsockname="no"
-    ])
-  fi
   #
   if test "$tst_proto_getsockname" = "yes"; then
     AC_MSG_CHECKING([if getsockname is compilable])
@@ -1884,8 +1870,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
   fi
   #
   AC_MSG_CHECKING([if getsockname might be used])
-  if test "$tst_links_getsockname" = "yes" &&
-     test "$tst_proto_getsockname" = "yes" &&
+  if test "$tst_proto_getsockname" = "yes" &&
      test "$tst_compi_getsockname" = "yes" &&
      test "$tst_allow_getsockname" = "yes"; then
     AC_MSG_RESULT([yes])
