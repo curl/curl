@@ -1664,15 +1664,6 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
-    /* check out how much more time we are allowed */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
-
-    if(timeout_ms < 0) {
-      /* no need to continue if time already is up */
-      failf(data, "SSL/TLS connection timeout");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
-
     result = schannel_connect_step1(cf, data);
     if(result)
       return result;
