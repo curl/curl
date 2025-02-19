@@ -913,7 +913,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
        Assume no WINE because WINE has no UWP support. */
     wine = FALSE;
 #else
-    wine = !!GetProcAddress(GetModuleHandle(TEXT("ntdll")), "wine_get_version");
+    wine = !!GetProcAddress(GetModuleHandle(TEXT("ntdll")),
+                            "wine_get_version");
 #endif
     /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
        Also it does not seem to be supported for WINE, see curl bug #983. */
