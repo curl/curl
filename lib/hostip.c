@@ -1150,7 +1150,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
       if(!Curl_str_number(&host, &num, 0xffff)) {
         /* Create an entry id, based upon the hostname and port */
-        entry_len = create_hostcache_id(source.str, source.len, (int)num,
+        entry_len = create_hostcache_id(Curl_str(&source),
+                                        Curl_strlen(&source), (int)num,
                                         entry_id, sizeof(entry_id));
         if(data->share)
           Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -1224,11 +1225,11 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         }
 #endif
 
-        if(target.len >= sizeof(address))
+        if(Curl_strlen(&target) >= sizeof(address))
           goto err;
 
-        memcpy(address, target.str, target.len);
-        address[target.len] = '\0';
+        memcpy(address, Curl_str(&target), Curl_strlen(&target));
+        address[Curl_strlen(&target)] = '\0';
 
         ai = Curl_str2addr(address, (int)port);
         if(!ai) {
@@ -1260,7 +1261,8 @@ err:
       }
 
       /* Create an entry id, based upon the hostname and port */
-      entry_len = create_hostcache_id(source.str, source.len, (int)port,
+      entry_len = create_hostcache_id(Curl_str(&source), Curl_strlen(&source),
+                                      (int)port,
                                       entry_id, sizeof(entry_id));
 
       if(data->share)
@@ -1271,7 +1273,8 @@ err:
 
       if(dns) {
         infof(data, "RESOLVE %.*s:%" CURL_FORMAT_CURL_OFF_T
-              " - old addresses discarded", (int)source.len, source.str, port);
+              " - old addresses discarded", (int)Curl_strlen(&source),
+              Curl_str(&source), port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
          2. even if entry with correct addresses is already in the cache,
@@ -1287,8 +1290,8 @@ err:
       }
 
       /* put this new host in the cache */
-      dns = Curl_cache_addr(data, head, source.str, source.len, (int)port,
-                            permanent);
+      dns = Curl_cache_addr(data, head, Curl_str(&source),
+                            Curl_strlen(&source), (int)port, permanent);
       if(dns) {
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
@@ -1304,12 +1307,12 @@ err:
       }
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "Added %.*s:%" CURL_FORMAT_CURL_OFF_T ":%s to DNS cache%s",
-            (int)source.len, source.str, port, addresses,
+            (int)Curl_strlen(&source), Curl_str(&source), port, addresses,
             permanent ? "" : " (non-permanent)");
 #endif
 
       /* Wildcard hostname */
-      if((source.len == 1) && (source.str[0] == '*')) {
+      if(Curl_str_casecompare(&source, "*")) {
         infof(data, "RESOLVE *:%" CURL_FORMAT_CURL_OFF_T " using wildcard",
               port);
         data->state.wildcard_resolve = TRUE;

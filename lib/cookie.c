@@ -507,15 +507,14 @@ parse_cookie_header(struct Curl_easy *data,
           Curl_str_trimblanks(&val);
 
           /* Reject cookies with a TAB inside the value */
-          if(memchr(val.str, '\t', val.len)) {
+          if(memchr(Curl_str(&val), '\t', Curl_strlen(&val))) {
             infof(data, "cookie contains TAB, dropping");
             return CERR_TAB;
           }
         }
       }
       else {
-        val.str = NULL;
-        val.len = 0;
+        Curl_str_init(&val);
       }
 
       /*
@@ -523,10 +522,11 @@ parse_cookie_header(struct Curl_easy *data,
        * combination of name + contents. Chrome and Firefox support 4095 or
        * 4096 bytes combo
        */
-      if(name.len >= (MAX_NAME-1) || val.len >= (MAX_NAME-1) ||
-         ((name.len + val.len) > MAX_NAME)) {
+      if(Curl_strlen(&name) >= (MAX_NAME-1) ||
+         Curl_strlen(&val) >= (MAX_NAME-1) ||
+         ((Curl_strlen(&name) + Curl_strlen(&val)) > MAX_NAME)) {
         infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
-              name.len, val.len);
+              Curl_strlen(&name), Curl_strlen(&val));
         return CERR_TOO_BIG;
       }
 
@@ -536,9 +536,9 @@ parse_cookie_header(struct Curl_easy *data,
        * "the rest". Prefixes must start with '__' and end with a '-', so
        * only test for names where that can possibly be true.
        */
-      if(strncasecompare("__Secure-", name.str, 9))
+      if(strncasecompare("__Secure-", Curl_str(&name), 9))
         co->prefix_secure = TRUE;
-      else if(strncasecompare("__Host-", name.str, 7))
+      else if(strncasecompare("__Host-", Curl_str(&name), 7))
         co->prefix_host = TRUE;
 
       /*
@@ -553,8 +553,8 @@ parse_cookie_header(struct Curl_easy *data,
           /* Bad name/value pair. */
           return CERR_NO_SEP;
 
-        strstore(&co->name, name.str, name.len);
-        strstore(&co->value, val.str, val.len);
+        strstore(&co->name, Curl_str(&name), Curl_strlen(&name));
+        strstore(&co->value, Curl_str(&val), Curl_strlen(&val));
         done = TRUE;
         if(!co->name || !co->value)
           return CERR_NO_NAME_VALUE;
@@ -564,7 +564,7 @@ parse_cookie_header(struct Curl_easy *data,
           return CERR_INVALID_OCTET;
         }
       }
-      else if(!val.len) {
+      else if(!Curl_strlen(&val)) {
         /*
          * this was a "<name>=" with no content, and we must allow
          * 'secure' and 'httponly' specified this weirdly
@@ -592,7 +592,7 @@ parse_cookie_header(struct Curl_easy *data,
       if(done)
         ;
       else if(Curl_str_casecompare(&name, "path")) {
-        strstore(&co->path, val.str, val.len);
+        strstore(&co->path, Curl_str(&val), Curl_strlen(&val));
         if(!co->path)
           return CERR_OUT_OF_MEMORY;
         free(co->spath); /* if this is set again */
@@ -600,15 +600,15 @@ parse_cookie_header(struct Curl_easy *data,
         if(!co->spath)
           return CERR_OUT_OF_MEMORY;
       }
-      else if(Curl_str_casecompare(&name, "domain") && val.len) {
+      else if(Curl_str_casecompare(&name, "domain") && Curl_strlen(&val)) {
         bool is_ip;
-
+        const char *v = Curl_str(&val);
         /*
          * Now, we make sure that our host is within the given domain, or
          * the given domain is not valid and thus cannot be set.
          */
 
-        if('.' == val.str[0])
+        if('.' == *v)
           Curl_str_nudge(&val, 1);
 
 #ifndef USE_LIBPSL
@@ -617,17 +617,18 @@ parse_cookie_header(struct Curl_easy *data,
          * TLD or otherwise "protected" suffix. To reduce risk, we require a
          * dot OR the exact hostname being "localhost".
          */
-        if(bad_domain(val.str, val.len))
+        if(bad_domain(Curl_str(&val), Curl_strlen(&val)))
           domain = ":";
 #endif
 
-        is_ip = Curl_host_is_ipnum(domain ? domain : val.str);
+        is_ip = Curl_host_is_ipnum(domain ? domain : Curl_str(&val));
 
         if(!domain
-           || (is_ip && !strncmp(val.str, domain, val.len) &&
-               (val.len == strlen(domain)))
-           || (!is_ip && cookie_tailmatch(val.str, val.len, domain))) {
-          strstore(&co->domain, val.str, val.len);
+           || (is_ip && !strncmp(Curl_str(&val), domain, Curl_strlen(&val)) &&
+               (Curl_strlen(&val) == strlen(domain)))
+           || (!is_ip && cookie_tailmatch(Curl_str(&val),
+                                          Curl_strlen(&val), domain))) {
+          strstore(&co->domain, Curl_str(&val), Curl_strlen(&val));
           if(!co->domain)
             return CERR_OUT_OF_MEMORY;
 
@@ -641,14 +642,14 @@ parse_cookie_header(struct Curl_easy *data,
            * not a domain to which the current host belongs. Mark as bad.
            */
           infof(data, "skipped cookie with bad tailmatch domain: %s",
-                val.str);
+                Curl_str(&val));
           return CERR_NO_TAILMATCH;
         }
       }
       else if(Curl_str_casecompare(&name, "version")) {
         /* just ignore */
       }
-      else if(Curl_str_casecompare(&name, "max-age") && val.len) {
+      else if(Curl_str_casecompare(&name, "max-age") && Curl_strlen(&val)) {
         /*
          * Defined in RFC2109:
          *
@@ -659,7 +660,7 @@ parse_cookie_header(struct Curl_easy *data,
          * cookie should be discarded immediately.
          */
         int rc;
-        const char *maxage = val.str;
+        const char *maxage = Curl_str(&val);
         if(*maxage == '\"')
           maxage++;
         rc = Curl_str_number(&maxage, &co->expires, CURL_OFF_T_MAX);
@@ -686,8 +687,8 @@ parse_cookie_header(struct Curl_easy *data,
         }
         cap_expires(now, co);
       }
-      else if(Curl_str_casecompare(&name, "expires") && val.len) {
-        if(!co->expires && (val.len < MAX_DATE_LENGTH)) {
+      else if(Curl_str_casecompare(&name, "expires") && Curl_strlen(&val)) {
+        if(!co->expires && (Curl_strlen(&val) < MAX_DATE_LENGTH)) {
           /*
            * Let max-age have priority.
            *
@@ -695,8 +696,8 @@ parse_cookie_header(struct Curl_easy *data,
            * will be treated as a session cookie
            */
           char dbuf[MAX_DATE_LENGTH + 1];
-          memcpy(dbuf, val.str, val.len);
-          dbuf[val.len] = 0;
+          memcpy(dbuf, Curl_str(&val), Curl_strlen(&val));
+          dbuf[Curl_strlen(&val)] = 0;
           co->expires = Curl_getdate_capped(dbuf);
 
           /*

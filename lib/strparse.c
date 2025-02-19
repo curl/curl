@@ -25,6 +25,12 @@
 #include "strparse.h"
 #include "strcase.h"
 
+void Curl_str_init(struct Curl_str *out)
+{
+  out->str = NULL;
+  out->len = 0;
+}
+
 /* Get a word until the first DELIM or end of string. At least one byte long.
    return non-zero on error */
 int Curl_str_until(const char **linep, struct Curl_str *out,
@@ -34,8 +40,7 @@ int Curl_str_until(const char **linep, struct Curl_str *out,
   size_t len = 0;
   DEBUGASSERT(linep && *linep && out && max && delim);
 
-  out->str = NULL;
-  out->len = 0;
+  Curl_str_init(out);
   while(*s && (*s != delim)) {
     s++;
     if(++len > max) {
@@ -68,8 +73,7 @@ int Curl_str_quotedword(const char **linep, struct Curl_str *out,
   size_t len = 0;
   DEBUGASSERT(linep && *linep && out && max);
 
-  out->str = NULL;
-  out->len = 0;
+  Curl_str_init(out);
   if(*s != '\"')
     return STRE_BEGQUOTE;
   s++;
@@ -226,8 +230,7 @@ int Curl_str_cspn(const char **linep, struct Curl_str *out, const char *reject)
     *linep = &s[len];
     return STRE_OK;
   }
-  out->str = NULL;
-  out->len = 0;
+  Curl_str_init(out);
   return STRE_SHORT;
 }
 

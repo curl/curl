@@ -394,7 +394,7 @@ static CURLcode trc_opt(const char *config)
   struct Curl_str out;
   while(!Curl_str_until(&config, &out, 32, ',')) {
     int lvl = CURL_LOG_LVL_INFO;
-    const char *token = out.str;
+    const char *token = Curl_str(&out);
 
     if(*token == '-') {
       lvl = CURL_LOG_LVL_NONE;
