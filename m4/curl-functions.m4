@@ -942,36 +942,22 @@ AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
   AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
   #
-  tst_links_freeaddrinfo="unknown"
   tst_proto_freeaddrinfo="unknown"
   tst_compi_freeaddrinfo="unknown"
   tst_allow_freeaddrinfo="unknown"
   #
-  AC_MSG_CHECKING([if freeaddrinfo can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([freeaddrinfo])
+  AC_MSG_CHECKING([if freeaddrinfo is prototyped])
+  AC_EGREP_CPP([freeaddrinfo],[
+    $curl_includes_ws2tcpip
+    $curl_includes_sys_socket
+    $curl_includes_netdb
   ],[
     AC_MSG_RESULT([yes])
-    tst_links_freeaddrinfo="yes"
+    tst_proto_freeaddrinfo="yes"
   ],[
     AC_MSG_RESULT([no])
-    tst_links_freeaddrinfo="no"
+    tst_proto_freeaddrinfo="no"
   ])
-  #
-  if test "$tst_links_freeaddrinfo" = "yes"; then
-    AC_MSG_CHECKING([if freeaddrinfo is prototyped])
-    AC_EGREP_CPP([freeaddrinfo],[
-      $curl_includes_ws2tcpip
-      $curl_includes_sys_socket
-      $curl_includes_netdb
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_freeaddrinfo="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_freeaddrinfo="no"
-    ])
-  fi
   #
   if test "$tst_proto_freeaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if freeaddrinfo is compilable])
@@ -1004,8 +990,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
   fi
   #
   AC_MSG_CHECKING([if freeaddrinfo might be used])
-  if test "$tst_links_freeaddrinfo" = "yes" &&
-     test "$tst_proto_freeaddrinfo" = "yes" &&
+  if test "$tst_proto_freeaddrinfo" = "yes" &&
      test "$tst_compi_freeaddrinfo" = "yes" &&
      test "$tst_allow_freeaddrinfo" = "yes"; then
     AC_MSG_RESULT([yes])
