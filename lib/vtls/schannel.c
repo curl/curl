@@ -2473,7 +2473,7 @@ static int schannel_init(void)
   wine = !!p_wine_get_version;
   if(wine) {
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
-    /* Assume ALPN support with WINE 6.0.0 or upper */
+    /* Assume ALPN support with WINE 6.0 or upper */
     wine_has_alpn = wine_version && atoi(wine_version) >= 6;
   }
 #endif
