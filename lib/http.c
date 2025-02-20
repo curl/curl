@@ -273,46 +273,28 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 #endif
 
 /*
- * Strip off leading and trailing whitespace from the value in the
- * given HTTP header line and return a strdupped copy. Returns NULL in
- * case of allocation failure. Returns an empty string if the header value
- * consists entirely of whitespace.
+ * Strip off leading and trailing whitespace from the value in the given HTTP
+ * header line and return a strdup()ed copy. Returns NULL in case of
+ * allocation failure or bad input. Returns an empty string if the header
+ * value consists entirely of whitespace.
+ *
+ * If the header is provided as "name;", ending with a semicolon, it must
+ * return a blank string.
  */
 char *Curl_copy_header_value(const char *header)
 {
-  const char *start;
-  const char *end;
-  size_t len;
+  struct Curl_str out;
 
-  /* Find the end of the header name */
-  while(*header && (*header != ':'))
-    ++header;
+  /* find the end of the header name */
+  if(!Curl_str_cspn(&header, &out, ";:") &&
+     (!Curl_str_single(&header, ':') || !Curl_str_single(&header, ';'))) {
+    Curl_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
+    Curl_str_trimblanks(&out);
 
-  if(*header)
-    /* Skip over colon */
-    ++header;
-
-  /* Find the first non-space letter */
-  start = header;
-  while(ISSPACE(*start))
-    start++;
-
-  end = strchr(start, '\r');
-  if(!end)
-    end = strchr(start, '\n');
-  if(!end)
-    end = strchr(start, '\0');
-  if(!end)
-    return NULL;
-
-  /* skip all trailing space letters */
-  while((end > start) && ISSPACE(*end))
-    end--;
-
-  /* get length of the type */
-  len = end - start + 1;
-
-  return Curl_memdup0(start, len);
+    return Curl_memdup0(Curl_str(&out), Curl_strlen(&out));
+  }
+  /* bad input */
+  return NULL;
 }
 
 #ifndef CURL_DISABLE_HTTP_AUTH
@@ -1468,9 +1450,8 @@ Curl_compareheader(const char *headerline, /* line to check */
    * The field value MAY be preceded by any amount of LWS, though a single SP
    * is preferred." */
 
-  size_t len;
-  const char *start;
-  const char *end;
+  const char *p;
+  struct Curl_str val;
   DEBUGASSERT(hlen);
   DEBUGASSERT(clen);
   DEBUGASSERT(header);
@@ -1480,31 +1461,21 @@ Curl_compareheader(const char *headerline, /* line to check */
     return FALSE; /* does not start with header */
 
   /* pass the header */
-  start = &headerline[hlen];
+  p = &headerline[hlen];
 
-  /* pass all whitespace */
-  while(ISSPACE(*start))
-    start++;
-
-  /* find the end of the header line */
-  end = strchr(start, '\r'); /* lines end with CRLF */
-  if(!end) {
-    /* in case there is a non-standard compliant line here */
-    end = strchr(start, '\n');
-
-    if(!end)
-      /* hm, there is no line ending here, use the zero byte! */
-      end = strchr(start, '\0');
-  }
-
-  len = end-start; /* length of the content part of the input line */
+  if(Curl_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE))
+    return FALSE;
+  Curl_str_trimblanks(&val);
 
   /* find the content string in the rest of the line */
-  for(; len >= clen; len--, start++) {
-    if(strncasecompare(start, content, clen))
-      return TRUE; /* match! */
+  if(Curl_strlen(&val) >= clen) {
+    size_t len;
+    p = Curl_str(&val);
+    for(len = Curl_strlen(&val); len >= Curl_strlen(&val); len--, p++) {
+      if(strncasecompare(p, content, clen))
+        return TRUE; /* match! */
+    }
   }
-
   return FALSE; /* no match */
 }
 
@@ -1623,7 +1594,6 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  bool is_connect, int httpversion,
                                  struct dynbuf *req)
 {
-  char *ptr;
   struct curl_slist *h[2];
   struct curl_slist *headers;
   int numlists = 1; /* by default */
@@ -1663,98 +1633,81 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
 
   /* loop through one or two lists */
   for(i = 0; i < numlists; i++) {
-    headers = h[i];
+    for(headers = h[i]; headers; headers = headers->next) {
+      CURLcode result = CURLE_OK;
+      bool blankheader = FALSE;
+      struct Curl_str name;
+      const char *p = headers->data;
+      const char *origp = p;
 
-    while(headers) {
-      char *semicolonp = NULL;
-      ptr = strchr(headers->data, ':');
-      if(!ptr) {
-        char *optr;
-        /* no colon, semicolon? */
-        ptr = strchr(headers->data, ';');
-        if(ptr) {
-          optr = ptr;
-          ptr++; /* pass the semicolon */
-          while(ISSPACE(*ptr))
-            ptr++;
-
-          if(*ptr) {
-            /* this may be used for something else in the future */
-            optr = NULL;
-          }
-          else {
-            if(*(--ptr) == ';') {
-              /* copy the source */
-              semicolonp = strdup(headers->data);
-              if(!semicolonp) {
-                Curl_dyn_free(req);
-                return CURLE_OUT_OF_MEMORY;
-              }
-              /* put a colon where the semicolon is */
-              semicolonp[ptr - headers->data] = ':';
-              /* point at the colon */
-              optr = &semicolonp [ptr - headers->data];
-            }
-          }
-          ptr = optr;
+      /* explicitly asked to send header without content is done by a header
+         that ends with a semicolon, but there must be no colon present in the
+         name */
+      if(!Curl_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ';') &&
+         !Curl_str_single(&p, ';') &&
+         !Curl_str_single(&p, '\0') &&
+         !memchr(Curl_str(&name), ':', Curl_strlen(&name)))
+        blankheader = TRUE;
+      else {
+        p = origp;
+        if(!Curl_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ':') &&
+           !Curl_str_single(&p, ':')) {
+          struct Curl_str val;
+          Curl_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE);
+          Curl_str_trimblanks(&val);
+          if(!Curl_strlen(&val))
+            /* no content, don't send this */
+            continue;
         }
+        else
+          /* no colon */
+          continue;
       }
-      if(ptr && (ptr != headers->data)) {
-        /* we require a colon for this to be a true header */
 
-        ptr++; /* pass the colon */
-        while(ISSPACE(*ptr))
-          ptr++;
+      /* only send this if the contents was non-blank or done special */
 
-        if(*ptr || semicolonp) {
-          /* only send this if the contents was non-blank or done special */
-          CURLcode result = CURLE_OK;
-          char *compare = semicolonp ? semicolonp : headers->data;
+      if(data->state.aptr.host &&
+         /* a Host: header was sent already, do not pass on any custom
+            Host: header as that will produce *two* in the same
+            request! */
+         Curl_str_casecompare(&name, "Host"))
+        ;
+      else if(data->state.httpreq == HTTPREQ_POST_FORM &&
+              /* this header (extended by formdata.c) is sent later */
+              Curl_str_casecompare(&name, "Content-Type"))
+        ;
+      else if(data->state.httpreq == HTTPREQ_POST_MIME &&
+              /* this header is sent later */
+              Curl_str_casecompare(&name, "Content-Type"))
+        ;
+      else if(data->req.authneg &&
+              /* while doing auth neg, do not allow the custom length since
+                 we will force length zero then */
+              Curl_str_casecompare(&name, "Content-Length"))
+        ;
+      else if(data->state.aptr.te &&
+              /* when asking for Transfer-Encoding, do not pass on a custom
+                 Connection: */
+              Curl_str_casecompare(&name, "Connection"))
+        ;
+      else if((httpversion >= 20) &&
+              Curl_str_casecompare(&name, "Transfer-Encoding"))
+        /* HTTP/2 does not support chunked requests */
+        ;
+      else if((Curl_str_casecompare(&name, "Authorization") ||
+               Curl_str_casecompare(&name, "Cookie")) &&
+              /* be careful of sending this potentially sensitive header to
+                 other hosts */
+              !Curl_auth_allowed_to_host(data))
+        ;
+      else if(blankheader)
+        result = Curl_dyn_addf(req, "%.*s:\r\n", (int)Curl_strlen(&name),
+                               Curl_str(&name));
+      else
+        result = Curl_dyn_addf(req, "%s\r\n", origp);
 
-          if(data->state.aptr.host &&
-             /* a Host: header was sent already, do not pass on any custom
-                Host: header as that will produce *two* in the same
-                request! */
-             checkprefix("Host:", compare))
-            ;
-          else if(data->state.httpreq == HTTPREQ_POST_FORM &&
-                  /* this header (extended by formdata.c) is sent later */
-                  checkprefix("Content-Type:", compare))
-            ;
-          else if(data->state.httpreq == HTTPREQ_POST_MIME &&
-                  /* this header is sent later */
-                  checkprefix("Content-Type:", compare))
-            ;
-          else if(data->req.authneg &&
-                  /* while doing auth neg, do not allow the custom length since
-                     we will force length zero then */
-                  checkprefix("Content-Length:", compare))
-            ;
-          else if(data->state.aptr.te &&
-                  /* when asking for Transfer-Encoding, do not pass on a custom
-                     Connection: */
-                  checkprefix("Connection:", compare))
-            ;
-          else if((httpversion >= 20) &&
-                  checkprefix("Transfer-Encoding:", compare))
-            /* HTTP/2 does not support chunked requests */
-            ;
-          else if((checkprefix("Authorization:", compare) ||
-                   checkprefix("Cookie:", compare)) &&
-                  /* be careful of sending this potentially sensitive header to
-                     other hosts */
-                  !Curl_auth_allowed_to_host(data))
-            ;
-          else {
-            result = Curl_dyn_addf(req, "%s\r\n", compare);
-          }
-          if(semicolonp)
-            free(semicolonp);
-          if(result)
-            return result;
-        }
-      }
-      headers = headers->next;
+      if(result)
+        return result;
     }
   }
 
