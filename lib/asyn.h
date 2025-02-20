@@ -64,6 +64,7 @@ struct thread_data {
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct Curl_https_rrinfo hinfo;
   ares_channel channel;
+  int num_pending; /* number of outstanding c-ares requests */
 #endif
   bool init;
 };

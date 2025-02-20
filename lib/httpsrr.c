@@ -187,11 +187,9 @@ void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
   struct Curl_easy *data = arg;
   CURLcode result = CURLE_OK;
   size_t i;
-#ifdef CURLRES_ARES
   struct thread_data *res = &data->state.async.thdata;
 
   res->num_pending--;
-#endif
   (void)timeouts;
   if((ARES_SUCCESS != status) || !dnsrec)
     return;
