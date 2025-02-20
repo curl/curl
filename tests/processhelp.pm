@@ -110,8 +110,8 @@ sub pidfromfile {
 #
 sub winpid_to_pid {
     my $vpid = $_[0];
-    if(($^O eq 'cygwin' || $^O eq 'msys') && $vpid > 65536) {
-        my $pid = Cygwin::winpid_to_pid($vpid - 65536);
+    if(($^O eq 'cygwin' || $^O eq 'msys') && $vpid > 4194304) {
+        my $pid = Cygwin::winpid_to_pid($vpid - 4194304);
         if($pid) {
             return $pid;
         } else {
@@ -133,8 +133,8 @@ sub pidexists {
     if($pid > 0) {
         # verify if currently existing Windows process
         $pid = winpid_to_pid($pid);
-        if ($pid > 65536 && os_is_win()) {
-            $pid -= 65536;
+        if ($pid > 4194304 && os_is_win()) {
+            $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
                 # https://ss64.com/nt/tasklist.html
@@ -164,8 +164,8 @@ sub pidterm {
     if($pid > 0) {
         # request the process to quit
         $pid = winpid_to_pid($pid);
-        if ($pid > 65536 && os_is_win()) {
-            $pid -= 65536;
+        if ($pid > 4194304 && os_is_win()) {
+            $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -t -pid $pid >nul 2>&1";
@@ -189,8 +189,8 @@ sub pidkill {
     if($pid > 0) {
         # request the process to quit
         $pid = winpid_to_pid($pid);
-        if ($pid > 65536 && os_is_win()) {
-            $pid -= 65536;
+        if ($pid > 4194304 && os_is_win()) {
+            $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
@@ -214,7 +214,7 @@ sub pidwait {
 
     $pid = winpid_to_pid($pid);
     # check if the process exists
-    if ($pid > 65536 && os_is_win()) {
+    if ($pid > 4194304 && os_is_win()) {
         if($flags == &WNOHANG) {
             return pidexists($pid)?0:$pid;
         }

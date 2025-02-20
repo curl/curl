@@ -55,7 +55,7 @@ def telnetserver(options):
         pid = os.getpid()
         # see tests/server/util.c function write_pidfile
         if os.name == "nt":
-            pid += 65536
+            pid += 4194304
         with open(options.pidfile, "w") as f:
             f.write(str(pid))
 
@@ -93,7 +93,7 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
                 pid = os.getpid()
                 # see tests/server/util.c function write_pidfile
                 if os.name == "nt":
-                    pid += 65536
+                    pid += 4194304
                 response = VERIFIED_RSP.format(pid=pid)
                 response_data = response.encode('utf-8')
             else:

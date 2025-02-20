@@ -55,7 +55,7 @@ def dictserver(options):
         pid = os.getpid()
         # see tests/server/util.c function write_pidfile
         if os.name == "nt":
-            pid += 65536
+            pid += 4194304
         with open(options.pidfile, "w") as f:
             f.write(str(pid))
 
@@ -90,7 +90,7 @@ class DictHandler(socketserver.BaseRequestHandler):
                 pid = os.getpid()
                 # see tests/server/util.c function write_pidfile
                 if os.name == "nt":
-                    pid += 65536
+                    pid += 4194304
                 response_data = VERIFIED_RSP.format(pid=pid)
             else:
                 log.debug("[DICT] Received normal request")
