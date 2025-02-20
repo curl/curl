@@ -286,9 +286,9 @@ jobs:
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
-          - name: Alpine MUSL
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
-            container: 'alpine:3.18'
+          - name: Alpine MUSL https-rr
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares --enable-httpsrr
+            container: 'alpine:3.20'
 
     steps:
       - name: 'install prereqs'
@@ -323,8 +323,9 @@ jobs:
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')
         run: |
-          apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev \
-            zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev \
+          apk add --no-cache build-base autoconf automake libtool perl openssl-dev \
+            libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev \
+            heimdal-dev libpsl-dev c-ares-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
             perl-time-hires openssh stunnel sudo git
 
