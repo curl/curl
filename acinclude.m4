@@ -1483,7 +1483,6 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
     curl_pflags="${curl_pflags} CYGWIN"
   fi
   case $host_os in
-    msys*) curl_pflags="${curl_pflags} MSYS";;
     msdos*) curl_pflags="${curl_pflags} DOS";;
     amiga*) curl_pflags="${curl_pflags} AMIGA";;
   esac
