@@ -72,6 +72,16 @@ environment:
       SHARED: 'ON'
       EXAMPLES: 'ON'
       CHKPREFILL: '_chkprefill'
+    - job_name: 'CMake, VS2008, Debug, x86, OpenSSL 1.1.1 + Schannel, Shared, no-CURLDEBUG, Build-tests & examples'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      PRJ_GEN: 'Visual Studio 9 2008'
+      TARGET: '-A Win32'
+      PRJ_CFG: Debug
+      OPENSSL: 'ON'
+      SCHANNEL: 'ON'
+      SHARED: 'ON'
+      EXAMPLES: 'ON'
+      CURLDEBUG: 'OFF'
     - job_name: 'CMake, VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       PRJ_GEN: 'Visual Studio 10 2010'
@@ -236,8 +246,8 @@ skip_commits:
     - 'packages/**/*'
     - 'plan9/**/*'
 
-#artifacts:
-#  - path: '**/curl.exe'
-#    name: curl
-#  - path: '**/*curl*.dll'
-#    name: libcurl dll
+artifacts:
+  - path: '**/curl.exe'
+    name: curl
+  - path: '**/*curl*.dll'
+    name: libcurl dll
