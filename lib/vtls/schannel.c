@@ -154,7 +154,7 @@
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
-static bool s_os_has_alpn;
+static bool s_win_has_alpn;
 
 static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
                                              struct Curl_easy *data,
@@ -908,7 +908,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifdef HAS_ALPN_SCHANNEL
-  backend->use_alpn = connssl->alpn && s_os_has_alpn;
+  backend->use_alpn = connssl->alpn && s_win_has_alpn;
 #else
   backend->use_alpn = FALSE;
 #endif
@@ -2478,11 +2478,11 @@ static int schannel_init(void)
   }
 #endif
   if(wine)
-    s_os_has_alpn = wine_has_alpn;
+    s_win_has_alpn = wine_has_alpn;
   else {
     /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
-    s_os_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
-                                                 VERSION_GREATER_THAN_EQUAL);
+    s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
+                                                  VERSION_GREATER_THAN_EQUAL);
   }
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
