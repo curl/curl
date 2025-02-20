@@ -71,6 +71,7 @@ environment:
       SCHANNEL: 'ON'
       SHARED: 'ON'
       EXAMPLES: 'ON'
+      CHKPREFILL: '_chkprefill'
     - job_name: 'CMake, VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       PRJ_GEN: 'Visual Studio 10 2010'
