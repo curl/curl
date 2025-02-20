@@ -56,6 +56,11 @@ int Curl_str_word(const char **linep, struct Curl_str *out, const size_t max);
 int Curl_str_until(const char **linep, struct Curl_str *out, const size_t max,
                    char delim);
 
+/* Get a word until a newline byte or end of string. At least one byte long.
+   return non-zero on error */
+int Curl_str_untilnl(const char **linep, struct Curl_str *out,
+                     const size_t max);
+
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
 int Curl_str_quotedword(const char **linep, struct Curl_str *out,
