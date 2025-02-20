@@ -412,6 +412,7 @@ static CURLcode resolve_httpsrr(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   memset(&async->thdata.hinfo, 0, sizeof(struct Curl_https_rrinfo));
+  async->thdata.hinfo.port = -1;
   ares_query_dnsrec(async->thdata.channel,
                     async->hostname, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,

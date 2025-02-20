@@ -843,6 +843,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   {
     res->num_pending++; /* one more */
     memset(&res->hinfo, 0, sizeof(struct Curl_https_rrinfo));
+    res->hinfo->port = -1;
     ares_query_dnsrec((ares_channel)data->state.async.resolver,
                       hostname, ARES_CLASS_IN,
                       ARES_REC_TYPE_HTTPS,
