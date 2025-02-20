@@ -287,7 +287,7 @@ jobs:
             container: 'andy5995/slackware-build-essential:15.0'
 
           - name: Alpine MUSL https-rr
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares=$HOME/c-ares --enable-httpsrr
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares --enable-httpsrr
             container: 'alpine:3.20'
 
     steps:
