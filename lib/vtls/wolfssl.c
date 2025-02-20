@@ -1762,7 +1762,6 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
       else {
         char *b64str = NULL;
         size_t blen = 0;
-        CURLcode result;
 
         result = Curl_base64_encode((const char *)echConfigs, echConfigsLen,
                                     &b64str, &blen);
