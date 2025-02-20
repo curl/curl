@@ -876,9 +876,11 @@ Curl_http_output_auth(struct Curl_easy *data,
   !defined(CURL_DISABLE_DIGEST_AUTH) || \
   !defined(CURL_DISABLE_BASIC_AUTH) || \
   !defined(CURL_DISABLE_BEARER_AUTH)
-static int is_valid_auth_separator(char ch)
+static bool authcmp(const char *auth, const char *line)
 {
-  return ch == '\0' || ch == ',' || ISSPACE(ch);
+  /* the auth string must not have an alnum following */
+  size_t n = strlen(auth);
+  return strncasecompare(auth, line, n) && !ISALNUM(auth[n]);
 }
 #endif
 
@@ -939,7 +941,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 
   while(*auth) {
 #ifdef USE_SPNEGO
-    if(checkprefix("Negotiate", auth) && is_valid_auth_separator(auth[9])) {
+    if(authcmp("Negotiate", auth)) {
       if((authp->avail & CURLAUTH_NEGOTIATE) ||
          Curl_auth_is_spnego_supported()) {
         *availp |= CURLAUTH_NEGOTIATE;
@@ -965,7 +967,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 #endif
 #ifdef USE_NTLM
       /* NTLM support requires the SSL crypto libs */
-      if(checkprefix("NTLM", auth) && is_valid_auth_separator(auth[4])) {
+      if(authcmp("NTLM", auth)) {
         if((authp->avail & CURLAUTH_NTLM) ||
            Curl_auth_is_ntlm_supported()) {
           *availp |= CURLAUTH_NTLM;
@@ -987,7 +989,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       else
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
-        if(checkprefix("Digest", auth) && is_valid_auth_separator(auth[6])) {
+        if(authcmp("Digest", auth)) {
           if((authp->avail & CURLAUTH_DIGEST) != 0)
             infof(data, "Ignoring duplicate digest auth header.");
           else if(Curl_auth_is_digest_supported()) {
@@ -1010,8 +1012,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         else
 #endif
 #ifndef CURL_DISABLE_BASIC_AUTH
-          if(checkprefix("Basic", auth) &&
-             is_valid_auth_separator(auth[5])) {
+          if(authcmp("Basic", auth)) {
             *availp |= CURLAUTH_BASIC;
             authp->avail |= CURLAUTH_BASIC;
             if(authp->picked == CURLAUTH_BASIC) {
@@ -1026,8 +1027,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
           else
 #endif
 #ifndef CURL_DISABLE_BEARER_AUTH
-            if(checkprefix("Bearer", auth) &&
-               is_valid_auth_separator(auth[6])) {
+            if(authcmp("Bearer", auth)) {
               *availp |= CURLAUTH_BEARER;
               authp->avail |= CURLAUTH_BEARER;
               if(authp->picked == CURLAUTH_BEARER) {
