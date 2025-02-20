@@ -1582,28 +1582,92 @@ static CURLcode wssl_verify_pinned(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static CURLcode wssl_handshake_step(struct Curl_cfilter *cf,
+#ifdef WOLFSSL_EARLY_DATA
+static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
 {
-  int ret = -1, detail;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
+  CURLcode result = CURLE_OK;
+  const unsigned char *buf;
+  size_t blen;
+
+  DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_sending);
+  wssl->io_result = CURLE_OK;
+  while(Curl_bufq_peek(&connssl->earlydata, &buf, &blen)) {
+    int nwritten = 0, rc;
+
+    wolfSSL_ERR_clear_error();
+    rc = wolfSSL_write_early_data(wssl->ssl, buf, (int)blen, &nwritten);
+    CURL_TRC_CF(data, cf, "wolfSSL_write_early_data(len=%zu) -> %d, %d",
+                blen, rc, nwritten);
+    if(rc < 0) {
+      int err = wolfSSL_get_error(wssl->ssl, rc);
+      switch(err) {
+      case WOLFSSL_ERROR_NONE: /* just did not get anything */
+      case WOLFSSL_ERROR_WANT_READ:
+      case WOLFSSL_ERROR_WANT_WRITE:
+        result = CURLE_AGAIN;
+        break;
+      default: {
+        char error_buffer[256];
+        int detail = wolfSSL_get_error(wssl->ssl, err);
+        CURL_TRC_CF(data, cf, "SSL send early data, error: '%s'(%d)",
+                    wssl_strerror((unsigned long)err, error_buffer,
+                                  sizeof(error_buffer)),
+                    detail);
+        result = CURLE_SEND_ERROR;
+        break;
+      }
+      }
+      goto out;
+    }
+
+    Curl_bufq_skip(&connssl->earlydata, (size_t)nwritten);
+  }
+  /* sent everything there was */
+  connssl->earlydata_state = ssl_earlydata_sent;
+  if(!Curl_ssl_cf_is_proxy(cf))
+    Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip);
+  infof(data, "SSL sending %" FMT_OFF_T " bytes of early data",
+        connssl->earlydata_skip);
+out:
+  return result;
+}
+#endif /* WOLFSSL_EARLY_DATA */
+
+static CURLcode wssl_handshake(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
+{
   struct ssl_connect_data *connssl = cf->ctx;
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  int ret = -1, detail;
+  CURLcode result;
 
   DEBUGASSERT(wssl);
-  CURL_TRC_CF(data, cf, "wssl_handshake_step()");
-
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
+
+#ifdef WOLFSSL_EARLY_DATA
+  if(connssl->earlydata_state == ssl_earlydata_sending) {
+    result = wssl_send_earlydata(cf, data);
+    if(result)
+      return result;
+  }
+  DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
+              (connssl->earlydata_state == ssl_earlydata_sent));
+#endif /* WOLFSSL_EARLY_DATA */
+
   wolfSSL_ERR_clear_error();
   ret = wolfSSL_connect(wssl->ssl);
 
   if(!wssl->x509_store_setup) {
     /* After having send off the ClientHello, we prepare the x509
      * store to verify the coming certificate from the server */
-    CURLcode r2 = Curl_wssl_setup_x509_store(cf, data, wssl);
-    if(r2) {
-      CURL_TRC_CF(data, cf, "Curl_wssl_setup_x509_store() -> %d", r2);
-      return r2;
+    result = Curl_wssl_setup_x509_store(cf, data, wssl);
+    if(result) {
+      CURL_TRC_CF(data, cf, "Curl_wssl_setup_x509_store() -> %d", result);
+      return result;
     }
   }
 
@@ -1717,82 +1781,6 @@ static CURLcode wssl_handshake_step(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-}
-
-#ifdef WOLFSSL_EARLY_DATA
-static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
-  CURLcode result = CURLE_OK;
-  const unsigned char *buf;
-  size_t blen;
-
-  DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_sending);
-  wssl->io_result = CURLE_OK;
-  while(Curl_bufq_peek(&connssl->earlydata, &buf, &blen)) {
-    int nwritten = 0, rc;
-
-    wolfSSL_ERR_clear_error();
-    rc = wolfSSL_write_early_data(wssl->ssl, buf, (int)blen, &nwritten);
-    CURL_TRC_CF(data, cf, "wolfSSL_write_early_data(len=%zu) -> %d, %d",
-                blen, rc, nwritten);
-    if(rc < 0) {
-      int err = wolfSSL_get_error(wssl->ssl, rc);
-      switch(err) {
-      case WOLFSSL_ERROR_NONE: /* just did not get anything */
-      case WOLFSSL_ERROR_WANT_READ:
-      case WOLFSSL_ERROR_WANT_WRITE:
-        result = CURLE_AGAIN;
-        break;
-      default: {
-        char error_buffer[256];
-        int detail = wolfSSL_get_error(wssl->ssl, err);
-        CURL_TRC_CF(data, cf, "SSL send early data, error: '%s'(%d)",
-                    wssl_strerror((unsigned long)err, error_buffer,
-                                  sizeof(error_buffer)),
-                    detail);
-        result = CURLE_SEND_ERROR;
-        break;
-      }
-      }
-      goto out;
-    }
-
-    Curl_bufq_skip(&connssl->earlydata, (size_t)nwritten);
-  }
-  /* sent everything there was */
-  connssl->earlydata_state = ssl_earlydata_sent;
-  if(!Curl_ssl_cf_is_proxy(cf))
-    Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip);
-  infof(data, "SSL sending %" FMT_OFF_T " bytes of early data",
-        connssl->earlydata_skip);
-out:
-  return result;
-}
-#endif /* WOLFSSL_EARLY_DATA */
-
-static CURLcode wssl_handshake(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  CURLcode result = CURLE_OK;
-
-#ifdef WOLFSSL_EARLY_DATA
-  if(connssl->earlydata_state == ssl_earlydata_sending) {
-    result = wssl_send_earlydata(cf, data);
-    if(result)
-      return result;
-  }
-  DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
-              (connssl->earlydata_state == ssl_earlydata_sent));
-#endif /* WOLFSSL_EARLY_DATA */
-
-  result = wssl_handshake_step(cf, data);
-
-  CURL_TRC_CF(data, cf, "wssl_handshake() -> %d", result);
-  return result;
 }
 
 #ifdef WOLFSSL_EARLY_DATA
