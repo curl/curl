@@ -684,10 +684,12 @@ static int formatf(
      byte as margin to avoid the (FALSE?) warning Coverity gives us
      otherwise */
   char *workend = &work[BUFFSIZE - 2];
+  OutputDebugString("formatf-0");
 
   /* Parse the format string */
   if(parsefmt(format, output, input, &ocount, &icount, ap_save))
     return 0;
+  OutputDebugString("formatf-1");
 
   for(i = 0; i < ocount; i++) {
     struct outsegment *optr = &output[i];
@@ -703,14 +705,23 @@ static int formatf(
     size_t outlen = optr->outlen;
     unsigned int flags = optr->flags;
 
+  OutputDebugString("formatf-2");
     if(outlen) {
       char *str = optr->start;
-      for(; outlen && *str; outlen--)
+      OutputDebugString("formatf-2a");
+      for(; outlen && *str; outlen--) {
+        OutputDebugString("formatf-2b");
         OUTCHAR(*str++);
-      if(optr->flags & FLAGS_SUBSTR)
+      }
+      OutputDebugString("formatf-2c");
+      if(optr->flags & FLAGS_SUBSTR) {
+        OutputDebugString("formatf-2d");
         /* this is just a substring */
         continue;
+      }
+      OutputDebugString("formatf-2e");
     }
+  OutputDebugString("formatf-3");
 
     /* pick up the specified width */
     if(flags & FLAGS_WIDTHPARAM) {
@@ -728,6 +739,7 @@ static int formatf(
     }
     else
       width = optr->width;
+  OutputDebugString("formatf-4");
 
     /* pick up the specified precision */
     if(flags & FLAGS_PRECPARAM) {
@@ -741,6 +753,7 @@ static int formatf(
       prec = optr->precision;
     else
       prec = -1;
+  OutputDebugString("formatf-5");
 
     is_alt = (flags & FLAGS_ALT) ? 1 : 0;
     iptr = &input[optr->input];
@@ -969,7 +982,9 @@ number:
         if(width >= BUFFSIZE)
           width = BUFFSIZE - 1;
         /* RECURSIVE USAGE */
+        OutputDebugString("formatf-6->");
         dlen = (size_t)curl_msnprintf(fptr, left, "%d", width);
+        OutputDebugString("formatf-6-<");
         fptr += dlen;
         left -= dlen;
       }
@@ -992,7 +1007,9 @@ number:
         if(prec < 0)
           prec = 0;
         /* RECURSIVE USAGE */
+        OutputDebugString("formatf-7->");
         len = curl_msnprintf(fptr, left, ".%d", prec);
+        OutputDebugString("formatf-7-<");
         fptr += len;
       }
       if(flags & FLAGS_LONG)
@@ -1014,14 +1031,23 @@ number:
       /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
          output characters */
 #ifdef HAVE_SNPRINTF
+  OutputDebugString("formatf-_l0");
+#ifdef _MSC_VER
+      _snprintf(work, BUFFSIZE, formatbuf, iptr->val.dnum); /* NOLINT */
+#else
       (snprintf)(work, BUFFSIZE, formatbuf, iptr->val.dnum); /* NOLINT */
+#endif
+  OutputDebugString("formatf-_l1");
 #ifdef _WIN32
       /* Old versions of the Windows CRT do not terminate the snprintf output
          buffer if it reaches the max size so we do that here. */
       work[BUFFSIZE - 1] = 0;
+  OutputDebugString("formatf-_l4");
 #endif
 #else
-      (sprintf)(work, formatbuf, iptr->val.dnum);
+  OutputDebugString("formatf-_l2");
+      sprintf(work, formatbuf, iptr->val.dnum);
+  OutputDebugString("formatf-_l3");
 #endif
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -1051,6 +1077,7 @@ number:
       break;
     }
   }
+  OutputDebugString("formatf-Z");
   return done;
 }
 
@@ -1072,12 +1099,14 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
 {
   int retcode;
   struct nsprintf info;
-
+OutputDebugString("curl_mvsnprintf-0");
   info.buffer = buffer;
   info.length = 0;
   info.max = maxlength;
 
+OutputDebugString("curl_mvsnprintf-1");
   retcode = formatf(&info, addbyter, format, ap_save);
+OutputDebugString("curl_mvsnprintf-2");
   if(info.max) {
     /* we terminate this with a zero byte */
     if(info.max == info.length) {
@@ -1089,6 +1118,7 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
     else
       info.buffer[0] = 0;
   }
+OutputDebugString("curl_mvsnprintf-3");
   return retcode;
 }
 
@@ -1096,9 +1126,13 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 {
   int retcode;
   va_list ap_save; /* argument pointer */
+  OutputDebugString("curl_msnprintf-0");
   va_start(ap_save, format);
+  OutputDebugString("curl_msnprintf-1");
   retcode = curl_mvsnprintf(buffer, maxlength, format, ap_save);
+  OutputDebugString("curl_msnprintf-2");
   va_end(ap_save);
+  OutputDebugString("curl_msnprintf-3");
   return retcode;
 }
 
@@ -1180,7 +1214,21 @@ static int fputc_wrapper(unsigned char outc, void *f)
 {
   int out = outc;
   FILE *s = f;
-  int rc = fputc(out, s);
+  int rc;
+  char buf[] = ">x|_|<<<";
+  buf[1] = (char)fileno(s) + '0';
+  buf[3] = outc;
+  OutputDebugString("fputc_wrapper-0");
+  if(s)
+    OutputDebugString("fputc_wrapper-0-f-not-NULL");
+  else
+    OutputDebugString("fputc_wrapper-0-f-IS-NULL");
+  OutputDebugString(buf);
+  #undef fputc
+  rc = fputc(out, s);
+  OutputDebugString("fputc_wrapper-1");
+  if(rc != EOF)
+    OutputDebugString("fputc_wrapper-1-rc-not-EOF");
   return rc == EOF;
 }
 
@@ -1199,9 +1247,13 @@ int curl_mfprintf(FILE *whereto, const char *format, ...)
 {
   int retcode;
   va_list ap_save; /* argument pointer */
+  OutputDebugString("curl_mfprintf-0");
   va_start(ap_save, format);
+  OutputDebugString("curl_mfprintf-1");
   retcode = formatf(whereto, fputc_wrapper, format, ap_save);
+  OutputDebugString("curl_mfprintf-2");
   va_end(ap_save);
+  OutputDebugString("curl_mfprintf-3");
   return retcode;
 }
 

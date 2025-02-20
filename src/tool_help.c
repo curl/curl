@@ -304,18 +304,30 @@ void tool_help(char *category)
 static bool is_debug(void)
 {
   const char *const *builtin;
-  for(builtin = feature_names; *builtin; ++builtin)
+printf("!ta0|%p|\n", (const void*)feature_names);
+  for(builtin = feature_names; *builtin; ++builtin) {
+printf("!ta2|%s|\n", *builtin);
     if(curl_strequal("debug", *builtin))
       return TRUE;
+  }
+printf("!ta1\n");
   return FALSE;
 }
 
 void tool_version_info(void)
 {
   const char *const *builtin;
-  if(is_debug())
+printf("!th0|%p|%p|\n", (const void*)tool_stderr, (const void*)stderr);
+  if(is_debug()) {
+    printf("!th2\n");
+    #undef fprintf
     fprintf(tool_stderr, "WARNING: this libcurl is Debug-enabled, "
             "do not use in production\n\n");
+    printf("!th3\n");
+    curl_mfprintf(tool_stderr, "WARNING: this libcurl is Debug-enabled, "
+                  "do not use in production\n\n");
+  }
+printf("!th1\n");
 
   printf(CURL_ID "%s\n", curl_version());
 #ifdef CURL_PATCHSTAMP
