@@ -67,6 +67,7 @@
                              itself */
 
 #ifdef USE_HTTPSRR
+/* 1.28.0 and later have ares_query_dnsrec */
 #if ARES_VERSION < 0x011c00
 #error "requires c-ares 1.28.0 or newer for HTTPSRR"
 #endif
@@ -186,11 +187,6 @@ int Curl_ares_perform(ares_channel channel,
 #if ARES_VERSION >= 0x011000
 /* 1.16.0 or later has ares_getaddrinfo */
 #define HAVE_CARES_GETADDRINFO 1
-#endif
-
-#if ARES_VERSION >= 0x011c00
-/* 1.28.0 and later have ares_query_dnsrec */
-#define HAVE_ARES_QUERY_DNSREC 1
 #endif
 
 /* The last 3 #include files should be in this order */
