@@ -53,6 +53,7 @@
 #include "x509asn1.h"
 #include "curl_printf.h"
 #include "multiif.h"
+#include "system_win32.h"
 #include "version_win32.h"
 #include "rand.h"
 #include "strparse.h"
@@ -651,8 +652,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         else
           pszPassword[0] = 0;
 
-        if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                        VERSION_GREATER_THAN_EQUAL))
+        if(Curl_isVistaOrGreater)
           cert_store = PFXImportCertStore(&datablob, pszPassword,
                                           PKCS12_NO_PERSIST_KEY);
         else
