@@ -154,6 +154,12 @@
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
+static bool s_win2000_eq;
+static bool s_winxp_le;
+static bool s_winvista;
+static bool s_win7;
+static bool s_win10_17763;
+static bool s_win10_20384;
 static bool s_win_has_alpn;
 
 static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
@@ -2461,6 +2467,19 @@ static int schannel_init(void)
 {
   bool wine = FALSE;
   bool wine_has_alpn = FALSE;
+
+  s_win2000_eq  = curlx_verify_windows_version(5, 0, 0, PLATFORM_WINNT,
+                                               VERSION_EQUAL);
+  s_winxp_le    = curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
+                                               VERSION_LESS_THAN_EQUAL);
+  s_winvista    = curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+                                               VERSION_GREATER_THAN_EQUAL);
+  s_win7        = curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
+                                               VERSION_GREATER_THAN_EQUAL);
+  s_win10_17763 = curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
+                                               VERSION_GREATER_THAN_EQUAL);
+  s_win10_20384 = curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
+                                               VERSION_GREATER_THAN_EQUAL);
 
 #ifndef CURL_WINDOWS_UWP
   typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
