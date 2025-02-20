@@ -799,6 +799,7 @@ cr_connect(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "cr_connect, state=%d", connssl->state);
   *done = FALSE;
+
   if(!backend->conn) {
     result = cr_init_backend(cf, data,
                (struct rustls_ssl_backend_data *)connssl->backend);
@@ -808,7 +809,6 @@ cr_connect(struct Curl_cfilter *cf,
     }
     connssl->state = ssl_connection_negotiating;
   }
-
   rconn = backend->conn;
 
   /* Read/write data until the handshake is done or the socket would block. */
@@ -862,7 +862,8 @@ cr_connect(struct Curl_cfilter *cf,
       cr_send(cf, data, NULL, 0, &tmperr);
       if(tmperr == CURLE_AGAIN) {
         CURL_TRC_CF(data, cf, "writing would block");
-        /* fall through */
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
+        return CURLE_OK;
       }
       else if(tmperr != CURLE_OK) {
         return tmperr;
@@ -874,7 +875,8 @@ cr_connect(struct Curl_cfilter *cf,
       if(tls_recv_more(cf, data, &tmperr) < 0) {
         if(tmperr == CURLE_AGAIN) {
           CURL_TRC_CF(data, cf, "reading would block");
-          /* fall through */
+          connssl->io_need = CURL_SSL_IO_NEED_RECV;
+          return CURLE_OK;
         }
         else if(tmperr == CURLE_RECV_ERROR) {
           return CURLE_SSL_CONNECT_ERROR;

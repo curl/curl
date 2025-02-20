@@ -935,7 +935,7 @@ static CURLcode bearssl_connect(struct Curl_cfilter *cf,
       return ret;
   }
 
-  while(ssl_connect_2 == connssl->connecting_state) {
+  if(ssl_connect_2 == connssl->connecting_state) {
     ret = bearssl_connect_step2(cf, data);
     if(ret)
       return ret;
