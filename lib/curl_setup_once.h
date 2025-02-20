@@ -286,7 +286,7 @@ typedef unsigned int bit;
  */
 
 #undef DEBUGASSERT
-#if defined(DEBUGBUILD)
+#ifdef DEBUGBUILD
 #define DEBUGASSERT(x) assert(x)
 #else
 #define DEBUGASSERT(x) do { } while(0)
