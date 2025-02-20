@@ -2472,18 +2472,18 @@ static int schannel_init(void)
                                         "wine_get_version")));
   wine = !!p_wine_get_version;
   if(wine) {
-    const char *wine_version = p_wine_get_version(); /* e.g. "6.0.2" */
+    const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
     /* Assume ALPN support with WINE 6.0.0 or upper */
     wine_has_alpn = wine_version && atoi(wine_version) >= 6;
   }
 #endif
-  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-     It is also supported under WINE 5.6+ with GnuTLS 3.2.0+ */
   if(wine)
     s_os_has_alpn = wine_has_alpn;
-  else
+  else {
+    /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
     s_os_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                  VERSION_GREATER_THAN_EQUAL);
+  }
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
