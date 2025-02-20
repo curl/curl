@@ -66,6 +66,18 @@
 #include <ares_version.h> /* really old c-ares did not include this by
                              itself */
 
+#ifdef USE_HTTPSRR
+/* 1.28.0 and later have ares_query_dnsrec */
+#if ARES_VERSION < 0x011c00
+#error "requires c-ares 1.28.0 or newer for HTTPSRR"
+#endif
+#define USE_HTTPSRR_ARES
+#else
+#if ARES_VERSION < 0x010600
+#error "requires c-ares 1.6.0 or newer"
+#endif
+#endif
+
 /*
  * Curl_ares_getsock() is called when the outside world (using
  * curl_multi_fdset()) wants to get our fd_set setup and we are talking with
@@ -157,11 +169,6 @@ int Curl_ares_perform(ares_channel channel,
 
 #ifdef CURLRES_ARES
 
-#if ARES_VERSION >= 0x010500
-/* c-ares 1.5.0 or later, the callback proto is modified */
-#define HAVE_CARES_CALLBACK_TIMEOUTS 1
-#endif
-
 #if ARES_VERSION >= 0x010601
 /* IPv6 supported since 1.6.1 */
 #define HAVE_CARES_IPV6 1
@@ -180,14 +187,6 @@ int Curl_ares_perform(ares_channel channel,
 #if ARES_VERSION >= 0x011000
 /* 1.16.0 or later has ares_getaddrinfo */
 #define HAVE_CARES_GETADDRINFO 1
-#endif
-
-#if ARES_VERSION >= 0x011c00
-/* 1.28.0 and later have ares_query_dnsrec */
-#define HAVE_ARES_QUERY_DNSREC 1
-#ifdef USE_HTTPSRR
-#define USE_HTTPSRR_ARES 1
-#endif
 #endif
 
 /* The last 3 #include files should be in this order */
@@ -577,17 +576,13 @@ static void compound_results(struct thread_data *res,
  */
 static void query_completed_cb(void *arg,  /* (struct connectdata *) */
                                int status,
-#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
                                int timeouts,
-#endif
                                struct hostent *hostent)
 {
   struct Curl_easy *data = (struct Curl_easy *)arg;
   struct thread_data *res = &data->state.async.thdata;
 
-#ifdef HAVE_CARES_CALLBACK_TIMEOUTS
   (void)timeouts; /* ignored */
-#endif
 
   if(ARES_EDESTRUCTION == status)
     /* when this ares handle is getting destroyed, the 'arg' pointer may not
