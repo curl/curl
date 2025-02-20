@@ -3606,19 +3606,26 @@ static CURLcode create_conn(struct Curl_easy *data,
      * `existing` and thus we need to cleanup the one we just
      * allocated before we can move along and use `existing`.
      */
+    bool tls_upgraded = (!(conn->given->flags & PROTOPT_SSL) &&
+                         Curl_conn_is_ssl(conn, FIRSTSOCKET));
+
     reuse_conn(data, conn, existing);
     conn = existing;
     *in_connect = conn;
 
 #ifndef CURL_DISABLE_PROXY
-    infof(data, "Re-using existing %s: connection with %s %s",
-          conn->handler->scheme, conn->bits.proxy ? "proxy" : "host",
+    infof(data, "Re-using existing %s: connection%s with %s %s",
+          conn->given->scheme,
+          tls_upgraded ? " (upgraded to SSL)" : "",
+          conn->bits.proxy ? "proxy" : "host",
           conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
           conn->http_proxy.host.name ? conn->http_proxy.host.dispname :
           conn->host.dispname);
 #else
-    infof(data, "Re-using existing %s: connection with host %s",
-          conn->handler->scheme, conn->host.dispname);
+    infof(data, "Re-using existing %s: connection%s with host %s",
+          conn->given->scheme,
+          tls_upgraded ? " (upgraded to SSL)" : "",
+          conn->host.dispname);
 #endif
   }
   else {
