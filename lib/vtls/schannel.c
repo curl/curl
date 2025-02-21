@@ -2381,7 +2381,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
-#ifdef HAS_ALPN_SCHANNEL
+#if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
   bool wine = FALSE;
   bool wine_has_alpn = FALSE;
 
@@ -2407,7 +2407,7 @@ static int schannel_init(void)
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }
-#endif /* HAS_ALPN_SCHANNEL */
+#endif /* HAS_ALPN_SCHANNEL && !UNDER_CE */
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
