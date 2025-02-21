@@ -503,6 +503,20 @@ jobs:
             make V=1 pytest-ci
           fi
 
+      - name: 'run pytest event based'
+        env:
+          TFLAGS: '${{ matrix.build.tflags }}'
+          CURL_TEST_EVENT: 1
+          CURL_CI: github
+          PYTEST_ADDOPTS: '--color=yes'
+        run: |
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --verbose --target curl-pytest-ci
+          else
+            make V=1 pytest-ci
+          fi
+
       - name: 'build examples'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
