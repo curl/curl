@@ -497,21 +497,7 @@ jobs:
           source $HOME/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
-      - name: 'run pytest'
-        env:
-          TFLAGS: '${{ matrix.build.tflags }}'
-          CURL_CI: github
-          PYTEST_ADDOPTS: '--color=yes'
-        run: |
-          source $HOME/venv/bin/activate
-          if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target curl-pytest-ci
-          else
-            make V=1 pytest-ci
-          fi
-
       - name: 'run pytest event based'
-        if: ${{ !matrix.build.generate }}
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
           CURL_TEST_EVENT: 1
