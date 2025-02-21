@@ -1951,7 +1951,7 @@ out:
     *done = FALSE;
     return CURLE_OK;
   }
-  *done = ((connssl->connecting_state == ssl_connection_complete) ||
+  *done = ((connssl->state == ssl_connection_complete) ||
            (connssl->state == ssl_connection_deferred));
   CURL_TRC_CF(data, cf, "gtls_connect_common() -> %d, done=%d", result, *done);
   return result;
