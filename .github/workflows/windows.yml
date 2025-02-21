@@ -397,7 +397,10 @@ jobs:
       fail-fast: false
     steps:
       - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 2
         run: |
+          sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
           /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'cache compiler (gcc ${{ matrix.env }})'
@@ -778,7 +781,10 @@ jobs:
       fail-fast: false
     steps:
       - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 2
         run: |
+          sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
           /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'vcpkg cache setup'
