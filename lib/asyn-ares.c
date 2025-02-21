@@ -71,7 +71,7 @@
 #if ARES_VERSION < 0x011c00
 #error "requires c-ares 1.28.0 or newer for HTTPSRR"
 #endif
-#define USE_HTTPSRR_ARES
+#define HTTPSRR_WORKS
 #else
 #if ARES_VERSION < 0x010600
 #error "requires c-ares 1.6.0 or newer"
@@ -423,7 +423,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
       result = Curl_resolver_error(data);
     if(!result) {
       *dns = data->state.async.dns;
-#ifdef USE_HTTPSRR_ARES
+#ifdef HTTPSRR_WORKS
       {
         struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&res->hinfo);
         if(!lhrr)
