@@ -3167,10 +3167,11 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 
   sshc = &conn->proto.sshc;
 
+  if(conn->user)
+    infof(data, "User: '%s'", conn->user);
+  else
+    infof(data, "User: NULL");
 #ifdef CURL_LIBSSH2_DEBUG
-  if(conn->user) {
-    infof(data, "User: %s", conn->user);
-  }
   if(conn->passwd) {
     infof(data, "Password: %s", conn->passwd);
   }
