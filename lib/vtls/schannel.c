@@ -2391,7 +2391,7 @@ static int schannel_init(void)
      Assume no WINE because WINE has no UWP support. */
   WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
-                        (GetProcAddress(GetModuleHandle(TEXT("ntdll")),
+                        (GetProcAddress(GetModuleHandleA("ntdll"),
                                         "wine_get_version")));
   wine = !!p_wine_get_version;
   if(wine) {
