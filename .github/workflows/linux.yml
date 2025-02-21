@@ -290,6 +290,10 @@ jobs:
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares --enable-httpsrr
             container: 'alpine:3.20'
 
+          - name: Alpine MUSL c-ares https-rr
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
+            container: 'alpine:3.20'
+
     steps:
       - name: 'install prereqs'
         if: matrix.build.container == null && !contains(matrix.build.name, 'i686')
