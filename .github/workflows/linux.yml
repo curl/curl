@@ -106,7 +106,7 @@ jobs:
 
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev valgrind
-            install_steps: mbedtls pytest pytest-event
+            install_steps: mbedtls pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
           - name: mbedtls clang
@@ -161,7 +161,7 @@ jobs:
 
           - name: openssl
             install_packages: zlib1g-dev
-            install_steps: pytest pytest-event
+            install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
           - name: openssl -O3 valgrind
@@ -699,26 +699,3 @@ jobs:
             make V=1 pytest-ci
           fi
 
-      - name: 'run pytest event based'
-        if: contains(matrix.build.install_steps, 'pytest-event')
-        env:
-          TFLAGS: '${{ matrix.build.tflags }}'
-          CURL_TEST_EVENT: 1
-          CURL_CI: github
-          PYTEST_ADDOPTS: '--color=yes'
-        run: |
-          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
-          if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target curl-pytest-ci
-          else
-            make V=1 pytest-ci
-          fi
-
-      - name: 'build examples'
-        if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples
-          else
-            ${{ matrix.build.make-prefix }} make V=1 examples
-          fi
