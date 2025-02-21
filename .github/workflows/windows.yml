@@ -412,7 +412,7 @@ jobs:
           rm -f bin.7z
 
       - name: 'cache compiler (gcc ${{ matrix.env }})'
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4
         id: cache-compiler
         with:
           path: ~\my-cache
@@ -608,7 +608,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'cache compiler (mingw32ce)'
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4
         id: cache-compiler
         with:
           path: ~/opt/mingw32ce
