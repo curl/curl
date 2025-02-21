@@ -76,7 +76,7 @@ SSL
 http
 </server>
 <name>
-HTTP with NTLM, Basic or Wild-and-crazy authorization
+HTTP with comma-separated WWW-Authenticate header
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth
