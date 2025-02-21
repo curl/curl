@@ -1970,46 +1970,46 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * Custom pointer to pass the header write callback function
      */
-    data->set.writeheader = (void *)ptr;
+    data->set.writeheader = ptr;
     break;
   case CURLOPT_READDATA:
     /*
      * FILE pointer to read the file to be uploaded from. Or possibly used as
      * argument to the read callback.
      */
-    data->set.in_set = (void *)ptr;
+    data->set.in_set = ptr;
     break;
   case CURLOPT_WRITEDATA:
     /*
      * FILE pointer to write to. Or possibly used as argument to the write
      * callback.
      */
-    data->set.out = (void *)ptr;
+    data->set.out = ptr;
     break;
   case CURLOPT_DEBUGDATA:
     /*
      * Set to a void * that should receive all error writes. This
      * defaults to CURLOPT_STDERR for normal operations.
      */
-    data->set.debugdata = (void *)ptr;
+    data->set.debugdata = ptr;
     break;
   case CURLOPT_PROGRESSDATA:
     /*
      * Custom client data to pass to the progress callback
      */
-    data->set.progress_client = (void *)ptr;
+    data->set.progress_client = ptr;
     break;
   case CURLOPT_SEEKDATA:
     /*
      * Seek control callback. Might be NULL.
      */
-    data->set.seek_client = (void *)ptr;
+    data->set.seek_client = ptr;
     break;
   case CURLOPT_IOCTLDATA:
     /*
      * I/O control data pointer. Might be NULL.
      */
-    data->set.ioctl_client = (void *)ptr;
+    data->set.ioctl_client = ptr;
     break;
   case CURLOPT_SSL_CTX_DATA:
     /*
@@ -2017,7 +2017,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
-      data->set.ssl.fsslctxp = (void *)ptr;
+      data->set.ssl.fsslctxp = ptr;
     else
 #endif
       return CURLE_NOT_BUILT_IN;
@@ -2026,33 +2026,33 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * socket callback data pointer. Might be NULL.
      */
-    data->set.sockopt_client = (void *)ptr;
+    data->set.sockopt_client = ptr;
     break;
   case CURLOPT_OPENSOCKETDATA:
     /*
      * socket callback data pointer. Might be NULL.
      */
-    data->set.opensocket_client = (void *)ptr;
+    data->set.opensocket_client = ptr;
     break;
   case CURLOPT_RESOLVER_START_DATA:
     /*
      * resolver start callback data pointer. Might be NULL.
      */
-    data->set.resolver_start_client = (void *)ptr;
+    data->set.resolver_start_client = ptr;
     break;
   case CURLOPT_CLOSESOCKETDATA:
     /*
      * socket callback data pointer. Might be NULL.
      */
-    data->set.closesocket_client = (void *)ptr;
+    data->set.closesocket_client = ptr;
     break;
   case CURLOPT_TRAILERDATA:
 #ifndef CURL_DISABLE_HTTP
-    data->set.trailer_data = (void *)ptr;
+    data->set.trailer_data = ptr;
 #endif
     break;
   case CURLOPT_PREREQDATA:
-    data->set.prereq_userp = (void *)ptr;
+    data->set.prereq_userp = ptr;
     break;
 
   case CURLOPT_ERRORBUFFER:
@@ -2388,7 +2388,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * Set private data pointer.
      */
-    data->set.private_data = (void *)ptr;
+    data->set.private_data = ptr;
     break;
 
 #ifdef USE_SSL
@@ -2430,7 +2430,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * Custom client data to pass to the SSH keyfunc callback
      */
-    data->set.ssh_keyfunc_userp = (void *)ptr;
+    data->set.ssh_keyfunc_userp = ptr;
     break;
 #ifdef USE_LIBSSH2
   case CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256:
@@ -2445,7 +2445,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * Custom client data to pass to the SSH keyfunc callback
      */
-    data->set.ssh_hostkeyfunc_userp = (void *)ptr;
+    data->set.ssh_hostkeyfunc_userp = ptr;
     break;
 #endif /* USE_LIBSSH2 */
 #endif /* USE_SSH */
@@ -2504,15 +2504,15 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     return Curl_setstropt(&data->set.str[STRING_RTSP_TRANSPORT], ptr);
 
   case CURLOPT_INTERLEAVEDATA:
-    data->set.rtp_out = (void *)ptr;
+    data->set.rtp_out = ptr;
     break;
 #endif /* ! CURL_DISABLE_RTSP */
 #ifndef CURL_DISABLE_FTP
   case CURLOPT_CHUNK_DATA:
-    data->set.wildcardptr = (void *)ptr;
+    data->set.wildcardptr = ptr;
     break;
   case CURLOPT_FNMATCH_DATA:
-    data->set.fnmatch_data = (void *)ptr;
+    data->set.fnmatch_data = ptr;
     break;
 #endif
 #ifdef USE_TLS_SRP
@@ -2587,10 +2587,10 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 #endif
 #ifndef CURL_DISABLE_HSTS
   case CURLOPT_HSTSREADDATA:
-    data->set.hsts_read_userp = (void *)ptr;
+    data->set.hsts_read_userp = ptr;
     break;
   case CURLOPT_HSTSWRITEDATA:
-    data->set.hsts_write_userp = (void *)ptr;
+    data->set.hsts_write_userp = ptr;
     break;
   case CURLOPT_HSTS: {
     struct curl_slist *h;
