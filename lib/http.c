@@ -880,7 +880,7 @@ static bool authcmp(const char *auth, const char *line)
 {
   /* the auth string must not have an alnum following */
   size_t n = strlen(auth);
-  return strncasecompare(auth, line, n) && !ISALNUM(auth[n]);
+  return strncasecompare(auth, line, n) && !ISALNUM(line[n]);
 }
 #endif
 
