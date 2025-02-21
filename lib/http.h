@@ -84,16 +84,6 @@ struct http_negotiation {
   BIT(only_10); /* When using major version 1x, use only 1.0 */
 };
 
-#if (defined(__GNUC__) || defined(__clang__) ||                         \
-  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
-  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(CURL_NO_FMT_CHECKS)
-#define CURL_NONNULL2(a,b) \
-  __attribute__((nonnull (a,b)))
-#else
-#define CURL_NONNULL2(a,b)
-#endif
-
 void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg);
 
 CURLcode Curl_bump_headersize(struct Curl_easy *data,
@@ -140,8 +130,7 @@ CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
 
 /* These functions are in http.c */
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
-                              const char *auth)
-  CURL_NONNULL2(1, 3);
+                              const char *auth);
 
 CURLcode Curl_http_auth_act(struct Curl_easy *data);
 
