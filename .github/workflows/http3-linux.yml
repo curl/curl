@@ -511,7 +511,7 @@ jobs:
           fi
 
       - name: 'run pytest event based'
-        if: ${{ matrix.build.generate }}
+        if: !${{ matrix.build.generate }}
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
           CURL_TEST_EVENT: 1
