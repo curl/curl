@@ -21,6 +21,7 @@ blablabla
 <client>
 <features>
 Mime
+!win32
 </features>
 <server>
 http
