@@ -609,9 +609,11 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
 
   /* We do not want to do this again, no matter the outcome */
   wssl->x509_store_setup = TRUE;
-#if !defined(NO_FILESYSTEM) && defined(WOLFSSL_SYS_CA_CERTS)
+
+#ifndef NO_FILESYSTEM
   /* load native CA certificates */
   if(ssl_config->native_ca_store) {
+#ifdef WOLFSSL_SYS_CA_CERTS
     if(wolfSSL_CTX_load_system_CA_certs(wssl->ssl_ctx) != WOLFSSL_SUCCESS) {
       infof(data, "error importing native CA store, continuing anyway");
     }
@@ -619,6 +621,10 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
       imported_native_ca = TRUE;
       infof(data, "successfully imported native CA store");
     }
+#else
+    infof(data, "ignoring native CA option because wolfSSL was built without "
+          "native CA support");
+#endif
   }
 #endif /* !NO_FILESYSTEM */
 
