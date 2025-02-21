@@ -270,7 +270,7 @@ jobs:
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-openssl=$HOME/openssl/build --with-openssl-quic
               --with-nghttp3=$HOME/nghttp3/build
-              -DCURL_USE_LIBUV=ON
+              --with-libuv
 
           - name: quiche
             configure: >-
@@ -280,7 +280,7 @@ jobs:
               --with-quiche=$HOME/quiche/target/release
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-ca-fallback
-              -DCURL_USE_LIBUV=ON
+              --with-libuv
 
           - name: quiche
             PKG_CONFIG_PATH: '$HOME/quiche/target/release'
@@ -511,6 +511,7 @@ jobs:
           fi
 
       - name: 'run pytest event based'
+        if: ${{ matrix.build.generate }}
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
           CURL_TEST_EVENT: 1

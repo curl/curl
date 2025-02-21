@@ -698,4 +698,3 @@ jobs:
           else
             make V=1 pytest-ci
           fi
-
