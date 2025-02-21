@@ -151,6 +151,15 @@ int Curl_str_casecompare(struct Curl_str *str, const char *check);
 Returns true if the provided string in the `str` argument matches the `check`
 string case insensitively.
 
+## `Curl_str_cmp`
+
+~~~c
+int Curl_str_cmp(struct Curl_str *str, const char *check);
+~~~
+
+Returns true if the provided string in the `str` argument matches the `check`
+string case sensitively. This is *not* the same return code as `strcmp`.
+
 ## `Curl_str_nudge`
 
 ~~~c

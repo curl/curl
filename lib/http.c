@@ -3987,30 +3987,22 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     }
     else if(data->conn->handler->protocol & CURLPROTO_RTSP) {
       const char *p = hd;
-      while(ISBLANK(*p))
-        p++;
-      if(!strncmp(p, "RTSP/", 5)) {
-        p += 5;
-        if(ISDIGIT(*p)) {
-          p++;
-          if((p[0] == '.') && ISDIGIT(p[1])) {
-            if(ISBLANK(p[2])) {
-              p += 3;
-              if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                  (p[2] - '0');
-                p += 3;
-                if(ISSPACE(*p)) {
-                  fine_statusline = TRUE;
-                  k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
-                }
-              }
-            }
-          }
+      struct Curl_str ver;
+      curl_off_t status;
+      /* we set the max string a little excessive to forgive some leading
+         spaces */
+      if(!Curl_str_until(&p, &ver, 32, ' ') &&
+         !Curl_str_single(&p, ' ') &&
+         !Curl_str_number(&p, &status, 999)) {
+        Curl_str_trimblanks(&ver);
+        if(Curl_str_cmp(&ver, "RTSP/1.0")) {
+          k->httpcode = (int)status;
+          fine_statusline = TRUE;
+          k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
         }
-        if(!fine_statusline)
-          return CURLE_WEIRD_SERVER_REPLY;
       }
+      if(!fine_statusline)
+        return CURLE_WEIRD_SERVER_REPLY;
     }
 
     if(fine_statusline) {
