@@ -312,7 +312,7 @@ int main(void)
 #include <sys/xattr.h> /* header from libc, not from libattr */
 int main(void)
 {
-  fsetxattr(0, 0, 0, 0, 0);
+  fsetxattr(0, "", 0, 0, 0);
   return 0;
 }
 #endif
