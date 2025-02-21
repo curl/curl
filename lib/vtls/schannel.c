@@ -73,16 +73,6 @@
 #define SCH_DEV(x) do { } while(0)
 #endif
 
-/* ALPN requires version 8.1 of the Windows SDK, which was
-   shipped with Visual Studio 2013, aka _MSC_VER 1800:
-     https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
-   Or mingw-w64 9.0 or upper.
-*/
-#if (defined(__MINGW32__) && __MINGW64_VERSION_MAJOR >= 9) || \
-  (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
-#  define HAS_ALPN_SCHANNEL
-#endif
-
 #ifndef BCRYPT_CHAIN_MODE_CCM
 #define BCRYPT_CHAIN_MODE_CCM L"ChainingModeCCM"
 #endif
@@ -155,7 +145,16 @@
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
+/* ALPN requires version 8.1 of the Windows SDK, which was
+   shipped with Visual Studio 2013, aka _MSC_VER 1800:
+     https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
+   Or mingw-w64 9.0 or upper.
+*/
+#if (defined(__MINGW32__) && __MINGW64_VERSION_MAJOR >= 9) || \
+  (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
+#define HAS_ALPN_SCHANNEL
 static bool s_win_has_alpn;
+#endif
 
 static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
                                              struct Curl_easy *data,
@@ -2374,6 +2373,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
+#ifdef HAS_ALPN_SCHANNEL
   bool wine = FALSE;
   bool wine_has_alpn = FALSE;
 
@@ -2399,6 +2399,7 @@ static int schannel_init(void)
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }
+#endif /* HAS_ALPN_SCHANNEL */
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
