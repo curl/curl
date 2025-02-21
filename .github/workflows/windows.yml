@@ -401,7 +401,7 @@ jobs:
         timeout-minutes: 2
         run: |
           sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          /usr/bin/pacman --verbose --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+          /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'cache compiler (gcc ${{ matrix.env }})'
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
@@ -785,7 +785,7 @@ jobs:
         timeout-minutes: 2
         run: |
           sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          /usr/bin/pacman --verbose --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+          /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'vcpkg cache setup'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
