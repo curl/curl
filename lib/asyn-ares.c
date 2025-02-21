@@ -71,7 +71,7 @@
 #if ARES_VERSION < 0x011c00
 #error "requires c-ares 1.28.0 or newer for HTTPSRR"
 #endif
-#define USE_HTTPSRR_ARES
+#define USE_HTTPSRR_ARES 1
 #else
 #if ARES_VERSION < 0x010600
 #error "requires c-ares 1.6.0 or newer"
