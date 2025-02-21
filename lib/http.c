@@ -1014,6 +1014,8 @@ static CURLcode auth_bearer(struct Curl_easy *data,
  * Curl_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
  * headers. They are dealt with both in the transfer.c main loop and in the
  * proxy CONNECT loop.
+ *
+ * The 'auth' line ends with a null byte without CR or LF present.
  */
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth) /* the first non-space */
