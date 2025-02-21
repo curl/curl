@@ -369,7 +369,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        shell: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && 'C:\_gfw\usr\bin\bash.exe {0}' || 'C:\msys64\usr\bin\bash.exe {0}' }}
+        shell: C:\msys64\usr\bin\bash.exe {0}
     strategy:
       matrix:
         include:
@@ -396,21 +396,6 @@ jobs:
             tflags: 'skiprun'
       fail-fast: false
     steps:
-      - name: 'install Git for Windows'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          mkdir /c/_gfw
-          cd /c/_gfw || exit 1
-          # The last known good Perl version (as of v2.47.1.windows.2) without pipe/signal MSYS2
-          # runtime (?) regressions that cause runtests.pl to run at 2.5x reduced speed, is this:
-          #   https://github.com/git-for-windows/git/releases/tag/v2.46.2.windows.1
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
-            --location https://github.com/git-for-windows/git/releases/download/v2.46.2.windows.1/PortableGit-2.46.2-64-bit.7z.exe --output bin.7z
-          7z x -bd -y bin.7z
-          rm -f bin.7z
-
       - name: 'cache compiler (gcc ${{ matrix.env }})'
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
         id: cache-compiler
@@ -441,7 +426,6 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
           cmake -B bld -G 'MSYS Makefiles' ${options} \
@@ -465,7 +449,6 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
@@ -480,7 +463,6 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
@@ -490,6 +472,15 @@ jobs:
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+
+      - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 2
+        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
+        # causing runtests.pl to run at 2-3x reduced speed.
+        run: |
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
+          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -501,14 +492,12 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
 
   linux-cross-mingw-w64:
@@ -701,7 +690,7 @@ jobs:
     timeout-minutes: 55
     defaults:
       run:
-        shell: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && 'C:\_gfw\usr\bin\bash.exe {0}' || 'C:\msys64\usr\bin\bash.exe {0}' }}
+        shell: C:\msys64\usr\bin\bash.exe {0}
     env:
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
@@ -793,21 +782,6 @@ jobs:
 
       fail-fast: false
     steps:
-      - name: 'install Git for Windows'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        shell: bash
-        timeout-minutes: 5
-        run: |
-          mkdir /c/_gfw
-          cd /c/_gfw || exit 1
-          # The last known good Perl version (as of v2.47.1.windows.2) without pipe/signal MSYS2
-          # runtime (?) regressions that cause runtests.pl to run at 2.5x reduced speed, is this:
-          #   https://github.com/git-for-windows/git/releases/tag/v2.46.2.windows.1
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
-            --location https://github.com/git-for-windows/git/releases/download/v2.46.2.windows.1/PortableGit-2.46.2-64-bit.7z.exe --output bin.7z
-          7z x -bd -y bin.7z
-          rm -f bin.7z
-
       - name: 'vcpkg cache setup'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
@@ -832,7 +806,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
+          PATH="/c/msys64/usr/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
             if [ '${{ matrix.plat }}' = 'uwp' ]; then
@@ -878,7 +852,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
+          PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
@@ -894,7 +868,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
+          PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
@@ -909,6 +883,15 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
+      - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 2
+        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
+        # causing runtests.pl to run at 2-3x reduced speed.
+        run: |
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
+          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
@@ -920,11 +903,11 @@ jobs:
             TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
+          PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         run: |
-          [ -d /c/_gfw ] && PATH="/c/_gfw/usr/bin:$PATH"
+          PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
