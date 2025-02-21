@@ -332,6 +332,9 @@ jobs:
             heimdal-dev libpsl-dev c-ares-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
             perl-time-hires openssh stunnel sudo git
+          echo '-------------------'
+          cat /usr/include/sched.h
+          echo '-------------------'
 
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')
