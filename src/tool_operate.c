@@ -1889,7 +1889,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     }
 
     if(!state->urlnum) {
-      if(!config->globoff) {
+      if(!config->globoff && !(urlnode->flags & GETOUT_NOGLOB)) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         result = glob_url(&state->urls, urlnode->url, &state->urlnum,
