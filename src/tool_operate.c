@@ -1156,16 +1156,24 @@ static CURLcode config2setopts(struct GlobalConfig *global,
       my_setopt(curl, CURLOPT_SSH_COMPRESSION, 1L);
 
     if(!config->insecure_ok) {
-      char *known = findfile(".ssh/known_hosts", FALSE);
+      char *known = global->knownhosts;
+
+      if(!known)
+        known = findfile(".ssh/known_hosts", FALSE);
       if(known) {
         /* new in curl 7.19.6 */
         result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
-        curl_free(known);
-        if(result == CURLE_UNKNOWN_OPTION)
-          /* libssh2 version older than 1.1.1 */
-          result = CURLE_OK;
-        if(result)
+        if(result) {
+          global->knownhosts = NULL;
+          curl_free(known);
           return result;
+        }
+        /* store it in global to avoid repeated checks */
+        global->knownhosts = known;
+      }
+      else if(!config->hostpubmd5 && !config->hostpubsha256) {
+        errorf(global, "Couldn't find a known_hosts file");
+        return CURLE_FAILED_INIT;
       }
       else
         warnf(global, "Couldn't find a known_hosts file");
@@ -3266,6 +3274,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
   }
 
   varcleanup(global);
+  curl_free(global->knownhosts);
 
   return result;
 }
