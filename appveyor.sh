@@ -82,21 +82,11 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
     find . -name BuildLog.htm -exec dos2unix '{}' +
     find . -name BuildLog.htm -exec cat '{}' +
-
-    case "${TARGET:-}" in
-      *Win32) PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH";;
-    esac
+    PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH";;
+    cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/"
   fi
-
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
   [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
-
-  case "${TARGET:-}" in
-    *Win32)
-      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/"
-      ;;
-  esac
-
   curl='_bld/src/curl.exe'
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
@@ -129,10 +119,6 @@ EOF
   )
   curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
 fi
-
-echo '------------'
-ls -1 '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT'
-echo '------------'
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
 #if [ -z "${SKIP_RUN:-}" ]; then
