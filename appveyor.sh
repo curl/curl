@@ -133,8 +133,6 @@ fi
 echo '------------'
 ls -1 '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT'
 echo '------------'
-ls -1 '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/amd64/Microsoft.VC90.DebugCRT'
-echo '------------'
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
 #if [ -z "${SKIP_RUN:-}" ]; then
