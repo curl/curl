@@ -79,15 +79,17 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-} || true
+  [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
+  [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
+  curl='_bld/src/curl.exe'
   if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
     find . -name BuildLog.htm -exec dos2unix '{}' +
     find . -name BuildLog.htm -exec cat '{}' +
     PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH";;
     cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/"
+    cp _bld/lib/libcurl_shared.dir/Debug/libcurl*.dll.embed.manifest "${curl}.manifest"
+    find '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist' || true
   fi
-  [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
-  [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
-  curl='_bld/src/curl.exe'
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
@@ -121,11 +123,11 @@ EOF
 fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
-#if [ -z "${SKIP_RUN:-}" ]; then
-#  "${curl}" --disable --version || true
-#else
-#  echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
-#fi
+if [ -z "${SKIP_RUN:-}" ]; then
+  "${curl}" --disable --version || true
+else
+  echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
+fi
 
 # build tests
 
