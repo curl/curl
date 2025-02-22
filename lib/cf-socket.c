@@ -422,7 +422,7 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
 
   if(use_callback && conn && conn->fclosesocket) {
     int rc;
-    Curl_multi_closed(data, sock);
+    Curl_multi_will_close(data, sock);
     Curl_set_in_callback(data, TRUE);
     rc = conn->fclosesocket(conn->closesocket_client, sock);
     Curl_set_in_callback(data, FALSE);
@@ -431,7 +431,7 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
 
   if(conn)
     /* tell the multi-socket code about this */
-    Curl_multi_closed(data, sock);
+    Curl_multi_will_close(data, sock);
 
   sclose(sock);
 
@@ -997,7 +997,7 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct cf_socket_ctx *ctx = cf->ctx;
 
   if(ctx && CURL_SOCKET_BAD != ctx->sock) {
-    CURL_TRC_CF(data, cf, "cf_socket_close(%" FMT_SOCKET_T ")", ctx->sock);
+    CURL_TRC_CF(data, cf, "cf_socket_close, fd=%" FMT_SOCKET_T, ctx->sock);
     if(ctx->sock == cf->conn->sock[cf->sockindex])
       cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
     socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
@@ -1019,7 +1019,7 @@ static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
   if(cf->connected) {
     struct cf_socket_ctx *ctx = cf->ctx;
 
-    CURL_TRC_CF(data, cf, "cf_socket_shutdown(%" FMT_SOCKET_T ")", ctx->sock);
+    CURL_TRC_CF(data, cf, "cf_socket_shutdown, fd=%" FMT_SOCKET_T, ctx->sock);
     /* On TCP, and when the socket looks well and non-blocking mode
      * can be enabled, receive dangling bytes before close to avoid
      * entering RST states unnecessarily. */

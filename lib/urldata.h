@@ -815,9 +815,6 @@ struct connectdata {
     struct curltime start[2]; /* when filter shutdown started */
     unsigned int timeout_ms; /* 0 means no timeout */
   } shutdown;
-  /* Last pollset used in connection shutdown. Used to detect changes
-   * for multi_socket API. */
-  struct easy_pollset shutdown_poll;
 
   struct ssl_primary_config ssl_config;
 #ifndef CURL_DISABLE_PROXY
@@ -1884,12 +1881,6 @@ struct Curl_easy {
   CURLcode result;   /* previous result */
 
   struct Curl_message msg; /* A single posted message. */
-
-  /* Array with the plain socket numbers this handle takes care of, in no
-     particular order. Note that all sockets are added to the sockhash, where
-     the state etc are also kept. This array is mostly used to detect when a
-     socket is to be removed from the hash. See singlesocket(). */
-  struct easy_pollset last_poll;
 
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle

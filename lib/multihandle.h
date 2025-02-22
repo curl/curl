@@ -27,6 +27,7 @@
 #include "llist.h"
 #include "hash.h"
 #include "conncache.h"
+#include "multi_ev.h"
 #include "psl.h"
 #include "socketpair.h"
 
@@ -38,9 +39,9 @@ struct Curl_message {
   struct CURLMsg extmsg;
 };
 
-/* NOTE: if you add a state here, add the name to the statename[] array as
-   well!
-*/
+/* NOTE: if you add a state here, add the name to the statenames[] array
+ * in curl_trc.c as well!
+ */
 typedef enum {
   MSTATE_INIT,         /* 0 - start in this state */
   MSTATE_PENDING,      /* 1 - no connections, waiting for one */
@@ -128,10 +129,9 @@ struct Curl_multi {
   char *xfer_sockbuf; /* the actual buffer */
   size_t xfer_sockbuf_len; /* the allocated length */
 
-  /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
-     the pluralis form, there can be more than one easy handle waiting on the
-     same actual socket) */
-  struct Curl_hash sockhash;
+  /* multi event related things */
+  struct curl_multi_ev ev;
+
   /* `proto_hash` is a general key-value store for protocol implementations
    * with the lifetime of the multi handle. The number of elements kept here
    * should be in the order of supported protocols (and sub-protocols like

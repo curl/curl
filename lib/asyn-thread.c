@@ -394,7 +394,7 @@ static void destroy_async_data(struct Curl_easy *data)
      * ensure CURLMOPT_SOCKETFUNCTION fires CURL_POLL_REMOVE
      * before the FD is invalidated to avoid EBADF on EPOLL_CTL_DEL
      */
-    Curl_multi_closed(data, sock_rd);
+    Curl_multi_will_close(data, sock_rd);
     wakeup_close(sock_rd);
 #endif
 

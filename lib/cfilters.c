@@ -200,8 +200,8 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   *done = FALSE;
   now = Curl_now();
   if(!Curl_shutdown_started(data, sockindex)) {
-    DEBUGF(infof(data, "shutdown start on%s connection",
-           sockindex ? " secondary" : ""));
+    CURL_TRC_M(data, "shutdown start on%s connection",
+               sockindex ? " secondary" : "");
     Curl_shutdown_start(data, sockindex, &now);
   }
   else {
@@ -476,7 +476,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       /* In general, we want to send after connect, wait on that. */
       if(sockfd != CURL_SOCKET_BAD)
         Curl_pollset_set_out_only(data, &ps, sockfd);
-      Curl_conn_adjust_pollset(data, &ps);
+      Curl_conn_adjust_pollset(data, data->conn, &ps);
       result = Curl_pollfds_add_ps(&cpfds, &ps);
       if(result)
         goto out;
@@ -626,14 +626,15 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
 }
 
 void Curl_conn_adjust_pollset(struct Curl_easy *data,
-                               struct easy_pollset *ps)
+                              struct connectdata *conn,
+                              struct easy_pollset *ps)
 {
   int i;
 
   DEBUGASSERT(data);
-  DEBUGASSERT(data->conn);
+  DEBUGASSERT(conn);
   for(i = 0; i < 2; ++i) {
-    Curl_conn_cf_adjust_pollset(data->conn->cfilter[i], data, ps);
+    Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
   }
 }
 
