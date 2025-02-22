@@ -2,16 +2,19 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: url
-Arg: <url>
-Help: URL to work with
+Arg: <url/file>
+Help: URL(s) to work with
 Category: curl
 Added: 7.5
 Multi: append
 See-also:
   - next
   - config
+  - path-as-is
+  - disallow-username-in-url
 Example:
   - --url $URL
+  - --url @file
 ---
 
 # `--url`
@@ -32,3 +35,15 @@ destination option unless --remote-name-all is used.
 
 On Windows, `file://` accesses can be converted to network accesses by the
 operating system.
+
+Starting in curl 8.13.0, curl can be told to download URLs provided in a text
+file, one URL per line. It is done by with `--url @filename`: so instead of a
+URL, you specify a filename prefixed with the `@` symbol. It can be told to
+load the list of URLs from stdin by providing an argument like `@-`.
+
+When downloading URLs given in a file, it implies using --remote-name for each
+provided URL. The URLs are full, there is no globbing applied or done on
+these. Features such as --skip-existing work fine in combination with this.
+
+Lines in the URL file that start with `#` are treated as comments and are
+skipped.
