@@ -85,7 +85,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
     find . -name BuildLog.htm -exec dos2unix '{}' +
     find . -name BuildLog.htm -exec cat '{}' +
-    PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH";;
+    PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH"
     cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/"
     cp _bld/lib/libcurl_shared.dir/Debug/libcurl*.dll.embed.manifest "${curl}.manifest"
     find '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist' || true
