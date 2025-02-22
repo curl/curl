@@ -137,11 +137,11 @@ ls -1 '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRed
 echo '------------'
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
-if [ -z "${SKIP_RUN:-}" ]; then
-  "${curl}" --disable --version || true
-else
-  echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
-fi
+#if [ -z "${SKIP_RUN:-}" ]; then
+#  "${curl}" --disable --version || true
+#else
+#  echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
+#fi
 
 # build tests
 
