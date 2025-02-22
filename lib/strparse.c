@@ -206,8 +206,11 @@ int Curl_str_casecompare(struct Curl_str *str, const char *check)
 /* case sensitive string compare. Returns non-zero on match. */
 int Curl_str_cmp(struct Curl_str *str, const char *check)
 {
-  size_t clen = check ? strlen(check) : 0;
-  return ((str->len == clen) && !strncmp(str->str, check, clen));
+  if(check) {
+    size_t clen = strlen(check);
+    return ((str->len == clen) && !strncmp(str->str, check, clen));
+  }
+  return !!(str->len);
 }
 
 /* Trim off 'num' number of bytes from the beginning (left side) of the
