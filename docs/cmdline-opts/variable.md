@@ -66,30 +66,45 @@ error.
 
 Available functions:
 
-## trim
+## `trim`
+
 removes all leading and trailing white space.
 
 Example:
 
     curl --expand-url https://example.com/{{var:trim}}
 
-## json
+## `json`
+
 outputs the content using JSON string quoting rules.
 
 Example:
 
     curl --expand-data {{data:json}} https://example.com
 
-## url
+## `url`
+
 shows the content URL (percent) encoded.
 
 Example:
 
     curl --expand-url https://example.com/{{path:url}}
 
-## b64
+## `b64`
+
 expands the variable base64 encoded
 
 Example:
 
     curl --expand-url https://example.com/{{var:b64}}
+
+## `64dec`
+
+decodes a base64 encoded character sequence. If the sequence is not possible
+to decode, it instead outputs `[64dec-fail]`
+
+Example:
+
+    curl --expand-url https://example.com/{{var:64dec}}
+
+(Added in 8.13.0)
