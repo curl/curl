@@ -245,7 +245,7 @@ static void sock_state_cb(void *data, ares_socket_t socket_fd,
   struct Curl_easy *easy = data;
   if(!readable && !writable) {
     DEBUGASSERT(easy);
-    Curl_multi_closed(easy, socket_fd);
+    Curl_multi_will_close(easy, socket_fd);
   }
 }
 

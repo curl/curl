@@ -191,13 +191,9 @@ void Curl_cpool_setfds(struct cpool *cpool,
                        int *maxfd);
 
 /**
- * Perform maintenance on connections in the pool. Specifically,
- * progress the shutdown of connections in the queue.
+ * Run connections on socket. If socket is CURL_SOCKET_TIMEOUT, run
+ * maintenance on all connections.
  */
-void Curl_cpool_multi_perform(struct Curl_multi *multi);
-
-void Curl_cpool_multi_socket(struct Curl_multi *multi,
-                             curl_socket_t s, int ev_bitmask);
-
+void Curl_cpool_multi_perform(struct Curl_multi *multi, curl_socket_t s);
 
 #endif /* HEADER_CURL_CONNCACHE_H */

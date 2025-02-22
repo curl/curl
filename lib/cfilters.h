@@ -455,7 +455,8 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
  * Adjust pollset from filters installed at transfer's connection.
  */
 void Curl_conn_adjust_pollset(struct Curl_easy *data,
-                               struct easy_pollset *ps);
+                              struct connectdata *conn,
+                              struct easy_pollset *ps);
 
 /**
  * Curl_poll() the filter chain at `cf` with timeout `timeout_ms`.
