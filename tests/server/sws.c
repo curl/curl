@@ -30,7 +30,9 @@
 
  */
 
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -65,15 +67,7 @@
 #define ERANGE  34 /* errno.h value */
 #endif
 
-static enum {
-  socket_domain_inet = AF_INET
-#ifdef USE_IPV6
-  , socket_domain_inet6 = AF_INET6
-#endif
-#ifdef USE_UNIX_SOCKETS
-  , socket_domain_unix = AF_UNIX
-#endif
-} socket_domain = AF_INET;
+static int socket_domain = AF_INET;
 static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
@@ -525,7 +519,7 @@ static int ProcessRequest(struct httprequest *req)
             if(!ulnum || (ulnum > 65535UL))
               logmsg("Invalid CONNECT port received");
             else
-              req->connect_port = curlx_ultous(ulnum);
+              req->connect_port = util_ultous(ulnum);
 
           }
           logmsg("Port number: %d, test case number: %ld",
@@ -630,7 +624,7 @@ static int ProcessRequest(struct httprequest *req)
       while(*ptr && ISSPACE(*ptr))
         ptr++;
       endptr = ptr;
-      errno = 0;
+      CURL_SETERRNO(0);
       clen = strtoul(ptr, &endptr, 10);
       if((ptr == endptr) || !ISSPACE(*endptr) || (ERANGE == errno)) {
         /* this assumes that a zero Content-Length is valid */
@@ -2152,7 +2146,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        port = curlx_ultous(ulnum);
+        port = util_ultous(ulnum);
         arg++;
       }
     }
@@ -2174,7 +2168,7 @@ int main(int argc, char *argv[])
                   "be number of seconds\n", argv[arg]);
           return 0;
         }
-        keepalive_secs = curlx_ultous(ulnum);
+        keepalive_secs = util_ultous(ulnum);
         arg++;
       }
     }

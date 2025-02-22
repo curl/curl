@@ -40,6 +40,7 @@
 #include "connect.h"
 #include "cfilters.h"
 #include "strdup.h"
+#include "strparse.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -925,21 +926,17 @@ CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
 CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 {
   if(checkprefix("CSeq:", header)) {
-    long CSeq = 0;
-    char *endp;
+    curl_off_t CSeq = 0;
+    struct RTSP *rtsp = data->req.p.rtsp;
     const char *p = &header[5];
     while(ISBLANK(*p))
       p++;
-    CSeq = strtol(p, &endp, 10);
-    if(p != endp) {
-      struct RTSP *rtsp = data->req.p.rtsp;
-      rtsp->CSeq_recv = CSeq; /* mark the request */
-      data->state.rtsp_CSeq_recv = CSeq; /* update the handle */
-    }
-    else {
+    if(Curl_str_number(&p, &CSeq, LONG_MAX)) {
       failf(data, "Unable to read the CSeq header: [%s]", header);
       return CURLE_RTSP_CSEQ_ERROR;
     }
+    rtsp->CSeq_recv = (long)CSeq; /* mark the request */
+    data->state.rtsp_CSeq_recv = (long)CSeq; /* update the handle */
   }
   else if(checkprefix("Session:", header)) {
     const char *start, *end;
@@ -947,7 +944,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 
     /* Find the first non-space letter */
     start = header + 8;
-    while(*start && ISBLANK(*start))
+    while(ISBLANK(*start))
       start++;
 
     if(!*start) {
@@ -1006,29 +1003,25 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
   const char *start, *end;
   start = transport;
   while(start && *start) {
-    while(*start && ISBLANK(*start) )
+    while(ISBLANK(*start) )
       start++;
     end = strchr(start, ';');
     if(checkprefix("interleaved=", start)) {
-      long chan1, chan2, chan;
-      char *endp;
+      curl_off_t chan1, chan2, chan;
       const char *p = start + 12;
-      chan1 = strtol(p, &endp, 10);
-      if(p != endp && chan1 >= 0 && chan1 <= 255) {
+      if(!Curl_str_number(&p, &chan1, 255)) {
         unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
         chan2 = chan1;
-        if(*endp == '-') {
-          p = endp + 1;
-          chan2 = strtol(p, &endp, 10);
-          if(p == endp || chan2 < 0 || chan2 > 255) {
+        if(!Curl_str_single(&p, '-')) {
+          if(Curl_str_number(&p, &chan2, 255)) {
             infof(data, "Unable to read the interleaved parameter from "
                   "Transport header: [%s]", transport);
             chan2 = chan1;
           }
         }
         for(chan = chan1; chan <= chan2; chan++) {
-          long idx = chan / 8;
-          long off = chan % 8;
+          int idx = (int)chan / 8;
+          int off = (int)chan % 8;
           rtp_channel_mask[idx] |= (unsigned char)(1 << off);
         }
       }

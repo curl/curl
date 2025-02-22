@@ -47,4 +47,4 @@
   | xargs \
   cmakelint \
     --spaces=2 --linelength=132 \
-    --filter=-whitespace/indent,-convention/filename,-package/stdargs
+    --filter=-whitespace/indent,-convention/filename,-package/stdargs,-readability/wonkycase

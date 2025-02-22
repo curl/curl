@@ -195,12 +195,6 @@ Curl_cache_addr(struct Curl_easy *data, struct Curl_addrinfo *addr,
                 const char *hostname, size_t hostlen, int port,
                 bool permanent);
 
-#ifndef INADDR_NONE
-#define CURL_INADDR_NONE (in_addr_t) ~0
-#else
-#define CURL_INADDR_NONE INADDR_NONE
-#endif
-
 /*
  * Function provided by the resolver backend to set DNS servers to use.
  */

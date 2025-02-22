@@ -275,7 +275,6 @@ enum system {
 
 UNITTEST_START
 {
-  int testnum = sizeof(tests) / sizeof(struct testcase);
   int i;
   enum system machine;
 
@@ -292,7 +291,7 @@ UNITTEST_START
   machine = SYSTEM_CUSTOM;
 #endif
 
-  for(i = 0; i < testnum; i++) {
+  for(i = 0; i < (int)CURL_ARRAYSIZE(tests); i++) {
     int result = tests[i].result;
     int rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
     if(result & (LINUX_DIFFER|MAC_DIFFER)) {

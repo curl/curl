@@ -493,8 +493,12 @@ dnl **********************************************************************
 CURL_CHECK_COMPILER
 CURL_CHECK_NATIVE_WINDOWS
 
+curl_cv_wince='no'
 curl_cv_winuwp='no'
 if test "$curl_cv_native_windows" = "yes"; then
+  case $host_os in
+    mingw32ce*) curl_cv_wince='yes';;
+  esac
   case "$CPPFLAGS" in
     *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
   esac
@@ -591,13 +595,15 @@ dnl **********************************************************************
 CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 
-CURL_DARWIN_CFLAGS
-
+curl_cv_apple='no'
 case $host in
-  *-apple-*)
-    CURL_SUPPORTS_BUILTIN_AVAILABLE
-    ;;
+  *-apple-*) curl_cv_apple='yes';;
 esac
+
+if test "$curl_cv_apple" = 'yes'; then
+  CURL_DARWIN_CFLAGS
+  CURL_SUPPORTS_BUILTIN_AVAILABLE
+fi
 
 curl_cv_cygwin='no'
 case $host_os in
@@ -881,7 +887,7 @@ AS_HELP_STRING([--disable-telnet],[Disable TELNET support]),
     AC_MSG_RESULT(yes)
 )
 
-if test "$curl_cv_winuwp" = 'yes'; then
+if test "$curl_cv_winuwp" = 'yes' -o "$curl_cv_wince" = 'yes'; then
   AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
   CURL_DISABLE_TELNET=1
 fi
@@ -1159,11 +1165,42 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   ])
 fi
 
+if test "$HAVE_GETHOSTBYNAME" != "1"; then
+  if test "$curl_cv_wince" = 'yes'; then
+    dnl This is for Windows CE systems
+    winsock_LIB="-lws2"
+    if test ! -z "$winsock_LIB"; then
+      my_ac_save_LIBS=$LIBS
+      LIBS="$winsock_LIB $LIBS"
+      AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([[
+          #ifdef _WIN32
+          #ifndef WIN32_LEAN_AND_MEAN
+          #define WIN32_LEAN_AND_MEAN
+          #endif
+          #include <winsock2.h>
+          #endif
+        ]],[[
+          gethostbyname("localhost");
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        HAVE_GETHOSTBYNAME="1"
+      ],[
+        AC_MSG_RESULT([no])
+        winsock_LIB=""
+        LIBS=$my_ac_save_LIBS
+      ])
+    fi
+  fi
+fi
+
 # In UWP mode gethostbyname gets detected via the core libs, but some
 # code (in6addr_any) still need ws2_32, so let us detect and add it.
 if test "$HAVE_GETHOSTBYNAME" != "1" -o "$curl_cv_winuwp" = "yes"; then
-  dnl This is for Winsock systems
   if test "$curl_cv_native_windows" = "yes"; then
+    dnl This is for Winsock systems
     winsock_LIB="-lws2_32"
     if test ! -z "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
@@ -1241,7 +1278,8 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "${with_amissl+set}" = set; then
   struct Library *SocketBase = NULL;
   #endif
     ]],[[
-      gethostbyname("localhost");
+      unsigned char host[] = "localhost";
+      gethostbyname(host);
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1715,12 +1753,11 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
       #include <netinet/in6.h>
       #endif
       #endif
-
       int main(void)
       {
-        struct sockaddr_in6 s;
+        int s = (int)sizeof(struct sockaddr_in6);
         (void)s;
-        return socket(AF_INET6, SOCK_STREAM, 0) < 0;
+        return socket(AF_INET6, SOCK_STREAM, 0) > 0;
       }
     ]])
   ],
@@ -1730,6 +1767,10 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
     ipv6=no
   )
 )
+
+if test "$curl_cv_wince" = 'yes'; then
+  ipv6=no
+fi
 
 if test "$ipv6" = yes; then
   curl_ipv6_msg="enabled"
@@ -1752,6 +1793,7 @@ if test "$ipv6" = yes; then
     ]], [[
       struct sockaddr_in6 s;
       s.sin6_scope_id = 0;
+      (void)s;
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1788,6 +1830,9 @@ int main(int argc, char **argv)
 ],[
   curl_cv_writable_argv=cross
 ])
+if test "$curl_cv_writable_argv" = 'cross' -a "$curl_cv_apple" = 'yes'; then
+  curl_cv_writable_argv=yes
+fi
 case $curl_cv_writable_argv in
   yes)
     AC_DEFINE(HAVE_WRITABLE_ARGV, 1, [Define this symbol if your OS supports changing the contents of argv])
@@ -1933,51 +1978,48 @@ if test x"$want_gss" = xyes; then
     LIBS="-lgss $LIBS"
     link_pkgconfig=1
   elif test -z "$GSSAPI_LIB_DIR"; then
-    case $host in
-      *-apple-*)
-        LIBS="-lgssapi_krb5 -lresolv $LIBS"
-        ;;
-      *)
-        if test $GSSAPI_ROOT != "/usr"; then
-          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
-        else
-          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
-        fi
-        if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
-          dnl krb5-config doesn't have --libs-only-L or similar, put everything
-          dnl into LIBS
-          gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
-          LIBS="$gss_libs $LIBS"
-        elif test "$PKGCONFIG" != "no"; then
-          gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
-          LIBS="$gss_libs $LIBS"
-          link_pkgconfig=1
-        elif test -f "$KRB5CONFIG"; then
-          dnl krb5-config doesn't have --libs-only-L or similar, put everything
-          dnl into LIBS
-          gss_libs=`$KRB5CONFIG --libs gssapi`
-          LIBS="$gss_libs $LIBS"
-          link_pkgconfig=1
-        else
-          case $host in
-            *-hp-hpux*)
-              gss_libname="gss"
-              ;;
-            *)
-              gss_libname="gssapi"
-              ;;
-          esac
+    if test "$curl_cv_apple" = 'yes'; then
+      LIBS="-lgssapi_krb5 -lresolv $LIBS"
+    else
+      if test $GSSAPI_ROOT != "/usr"; then
+        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+      else
+        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+      fi
+      if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl into LIBS
+        gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
+        LIBS="$gss_libs $LIBS"
+      elif test "$PKGCONFIG" != "no"; then
+        gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
+        LIBS="$gss_libs $LIBS"
+        link_pkgconfig=1
+      elif test -f "$KRB5CONFIG"; then
+        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl into LIBS
+        gss_libs=`$KRB5CONFIG --libs gssapi`
+        LIBS="$gss_libs $LIBS"
+        link_pkgconfig=1
+      else
+        case $host in
+          *-hp-hpux*)
+            gss_libname="gss"
+            ;;
+          *)
+            gss_libname="gssapi"
+            ;;
+        esac
 
-          if test "$GSSAPI_ROOT" != "yes"; then
-            LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
-            LDFLAGSPC="$LDFLAGSPC -L$GSSAPI_ROOT/lib$libsuff"
-            LIBS="-l$gss_libname $LIBS"
-          else
-            LIBS="-l$gss_libname $LIBS"
-          fi
+        if test "$GSSAPI_ROOT" != "yes"; then
+          LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+          LDFLAGSPC="$LDFLAGSPC -L$GSSAPI_ROOT/lib$libsuff"
+          LIBS="-l$gss_libname $LIBS"
+        else
+          LIBS="-l$gss_libname $LIBS"
         fi
-        ;;
-    esac
+      fi
+    fi
   else
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
@@ -2059,11 +2101,14 @@ CURL_WITH_RUSTLS
 
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
-  LIBS="-ladvapi32 -lcrypt32 $LIBS"
+  LIBS="-lcrypt32 $LIBS"
+  if test "$curl_cv_wince" = 'no'; then
+    LIBS="-ladvapi32 $LIBS"
+  fi
 fi
 
 dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
-if test "x$curl_cv_native_windows" = "xyes"; then
+if test "x$curl_cv_native_windows" = "xyes" -a "$curl_cv_wince" = 'no'; then
   LIBS="-lbcrypt $LIBS"
 fi
 
@@ -2329,8 +2374,8 @@ if test X"$OPT_LIBSSH2" != Xno; then
   CPPFLAGS="$CPPFLAGS $CPP_SSH2"
   LIBS="$LIB_SSH2 $LIBS"
 
-  dnl check for function added in libssh2 version 1.0
-  AC_CHECK_LIB(ssh2, libssh2_session_block_directions)
+  dnl check for function added in libssh2 version 1.2.8
+  AC_CHECK_LIB(ssh2, libssh2_free)
 
   AC_CHECK_HEADER(libssh2.h,
     curl_ssh_msg="enabled (libssh2)"
@@ -2608,7 +2653,11 @@ dnl ----------------------------
 dnl check Windows Unicode option
 dnl ----------------------------
 
-want_winuni="no"
+if test "$curl_cv_wince" = 'yes'; then
+  want_winuni="yes"
+else
+  want_winuni="no"
+fi
 if test "$curl_cv_native_windows" = "yes"; then
   if test "$curl_cv_winuwp" = 'yes'; then
     want_winuni="yes"
@@ -2732,36 +2781,34 @@ dnl Check for the presence of AppleIDN
 dnl **********************************************************************
 
 tst_links_appleidn='no'
-case $host in
-  *-apple-*)
-    AC_MSG_CHECKING([whether to build with Apple IDN])
-    OPT_IDN="default"
-    AC_ARG_WITH(apple-idn,
+if test "$curl_cv_apple" = 'yes'; then
+  AC_MSG_CHECKING([whether to build with Apple IDN])
+  OPT_IDN="default"
+  AC_ARG_WITH(apple-idn,
 AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
 AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
-      [OPT_IDN=$withval])
-    case "$OPT_IDN" in
-      yes)
-        dnl --with-apple-idn option used
-        AC_MSG_RESULT([yes, check])
-        AC_CHECK_LIB(icucore, uidna_openUTS46,
-        [
-          AC_CHECK_HEADERS(unicode/uidna.h,
-            curl_idn_msg="enabled (AppleIDN)"
-            AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
-            USE_APPLE_IDN=1
-            IDN_ENABLED=1
-            LIBS="-licucore -liconv $LIBS"
-            tst_links_appleidn='yes'
-          )
-        ])
-        ;;
-      *)
-        AC_MSG_RESULT([no])
-        ;;
-    esac
-    ;;
-esac
+    [OPT_IDN=$withval])
+  case "$OPT_IDN" in
+    yes)
+      dnl --with-apple-idn option used
+      AC_MSG_RESULT([yes, check])
+      AC_CHECK_LIB(icucore, uidna_openUTS46,
+      [
+        AC_CHECK_HEADERS(unicode/uidna.h,
+          curl_idn_msg="enabled (AppleIDN)"
+          AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
+          USE_APPLE_IDN=1
+          IDN_ENABLED=1
+          LIBS="-licucore -liconv $LIBS"
+          tst_links_appleidn='yes'
+        )
+      ])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of libidn2
@@ -4005,8 +4052,6 @@ case $host_os in
     ;;
 esac
 
-TYPE_IN_ADDR_T
-
 TYPE_SOCKADDR_STORAGE
 
 CURL_CHECK_FUNC_SELECT
@@ -4044,8 +4089,6 @@ CURL_CHECK_FUNC_SOCKET
 CURL_CHECK_FUNC_SOCKETPAIR
 CURL_CHECK_FUNC_STRDUP
 CURL_CHECK_FUNC_STRERROR_R
-CURL_CHECK_FUNC_STRTOK_R
-CURL_CHECK_FUNC_STRTOLL
 
 case $host in
   *msdosdjgpp)
@@ -4065,14 +4108,12 @@ AC_CHECK_FUNCS([\
   getpwuid_r \
   getrlimit \
   gettimeofday \
-  if_nametoindex \
   mach_absolute_time \
   pipe \
   poll \
   sendmsg \
   sendmmsg \
   setlocale \
-  setmode \
   setrlimit \
   snprintf \
   utime \
@@ -4080,14 +4121,21 @@ AC_CHECK_FUNCS([\
 ])
 
 if test "$curl_cv_native_windows" != 'yes'; then
-  AC_CHECK_FUNCS([sched_yield])
+  AC_CHECK_FUNCS([\
+    if_nametoindex \
+    realpath \
+    sched_yield \
+  ])
   CURL_CHECK_FUNC_STRCASECMP
   CURL_CHECK_FUNC_STRCMPI
   CURL_CHECK_FUNC_STRICMP
 fi
 
-if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
-  AC_CHECK_FUNCS([_setmode])
+if test "$curl_cv_wince" = 'no'; then
+  AC_CHECK_FUNCS([setmode])
+  if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
+    AC_CHECK_FUNCS([_setmode])
+  fi
 fi
 
 if test -z "$ssl_backends"; then
@@ -4136,7 +4184,7 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 CURL_CHECK_LIB_ARES
 CURL_CHECK_OPTION_THREADED_RESOLVER
 
-if test "$ipv6" = yes; then
+if test "$ipv6" = yes -a "$curl_cv_apple" = 'yes'; then
   CURL_DARWIN_SYSTEMCONFIGURATION
 fi
 
@@ -4467,7 +4515,7 @@ AS_HELP_STRING([--disable-unix-sockets],[Disable Unix domain sockets]),
     want_unix_sockets=auto
     ]
 )
-if test "x$want_unix_sockets" != "xno"; then
+if test "x$want_unix_sockets" != "xno" -a "$curl_cv_wince" = 'no'; then
   if test "x$curl_cv_native_windows" = "xyes"; then
     USE_UNIX_SOCKETS=1
     AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
@@ -5017,7 +5065,7 @@ if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1" \
                             -o "x$USE_THREADS_WIN32" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
-if test "x$USE_ARES" = "x1" -a "$want_threaded_resolver" = "yes"; then
+if test "x$USE_ARES" = "x1" -a "$want_threaded_resolver" = "yes" -a "x$want_httpsrr" != "xno"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES asyn-rr"
 fi
 if test "x$IDN_ENABLED" = "x1"; then

@@ -57,6 +57,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(ZSTD_FOUND)
+  set(Zstd_FOUND TRUE)
   string(REPLACE ";" " " ZSTD_CFLAGS "${ZSTD_CFLAGS}")
   message(STATUS "Found Zstd (via pkg-config): ${ZSTD_INCLUDE_DIRS} (found version \"${ZSTD_VERSION}\")")
 else()

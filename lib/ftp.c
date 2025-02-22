@@ -54,7 +54,6 @@
 #include "ftplistparser.h"
 #include "curl_range.h"
 #include "curl_krb5.h"
-#include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
@@ -73,6 +72,7 @@
 #include "http_proxy.h"
 #include "socks.h"
 #include "strdup.h"
+#include "strparse.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -464,7 +464,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data)
   if(response) {
     infof(data, "Ctrl conn has data while waiting for data conn");
     if(pp->overflow > 3) {
-      char *r = Curl_dyn_ptr(&pp->recvbuf);
+      const char *r = Curl_dyn_ptr(&pp->recvbuf);
 
       DEBUGASSERT((pp->overflow + pp->nfinal) <=
                   Curl_dyn_len(&pp->recvbuf));
@@ -472,8 +472,8 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data)
       r += pp->nfinal;
 
       if(LASTLINE(r)) {
-        int status = curlx_sltosi(strtol(r, NULL, 10));
-        if(status == 226) {
+        curl_off_t status;
+        if(!Curl_str_number(&r, &status, 999) && (status == 226)) {
           /* funny timing situation where we get the final message on the
              control connection before traffic on the data connection has been
              noticed. Leave the 226 in there and use this as a trigger to read
@@ -541,13 +541,14 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
 }
 
 static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
-                          char *line, size_t len, int *code)
+                          const char *line, size_t len, int *code)
 {
+  curl_off_t status;
   (void)data;
   (void)conn;
 
-  if((len > 3) && LASTLINE(line)) {
-    *code = curlx_sltosi(strtol(line, NULL, 10));
+  if((len > 3) && LASTLINE(line) && !Curl_str_number(&line, &status, 999)) {
+    *code = (int)status;
     return TRUE;
   }
 
@@ -925,13 +926,20 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
     /* parse the port */
     if(ip_end) {
-      char *port_sep = NULL;
-      char *port_start = strchr(ip_end, ':');
-      if(port_start) {
-        port_min = curlx_ultous(strtoul(port_start + 1, NULL, 10));
-        port_sep = strchr(port_start, '-');
-        if(port_sep) {
-          port_max = curlx_ultous(strtoul(port_sep + 1, NULL, 10));
+      const char *portp = strchr(ip_end, ':');
+      if(portp) {
+        curl_off_t start;
+        curl_off_t end;
+        portp++;
+        if(!Curl_str_number(&portp, &start, 0xffff)) {
+          /* got the first number */
+          port_min = (unsigned short)start;
+          if(!Curl_str_single(&portp, '-')) {
+            /* got the dash */
+            if(!Curl_str_number(&portp, &end, 0xffff))
+              /* got the second number */
+              port_max = (unsigned short)end;
+          }
         }
         else
           port_max = port_min;
@@ -1758,20 +1766,15 @@ static bool match_pasv_6nums(const char *p,
 {
   int i;
   for(i = 0; i < 6; i++) {
-    unsigned long num;
-    char *endp;
+    curl_off_t num;
     if(i) {
       if(*p != ',')
         return FALSE;
       p++;
     }
-    if(!ISDIGIT(*p))
-      return FALSE;
-    num = strtoul(p, &endp, 10);
-    if(num > 255)
+    if(Curl_str_number(&p, &num, 0xff))
       return FALSE;
     array[i] = (unsigned int)num;
-    p = endp;
   }
   return TRUE;
 }
@@ -1801,23 +1804,17 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       ptr++;
       /* |||12345| */
       sep = ptr[0];
-      /* the ISDIGIT() check here is because strtoul() accepts leading minus
-         etc */
       if((ptr[1] == sep) && (ptr[2] == sep) && ISDIGIT(ptr[3])) {
-        char *endp;
-        unsigned long num = strtoul(&ptr[3], &endp, 10);
-        if(*endp != sep)
-          ptr = NULL;
-        else if(num > 0xffff) {
+        const char *p = &ptr[3];
+        curl_off_t num;
+        if(Curl_str_number(&p, &num, 0xffff) || (*p != sep)) {
           failf(data, "Illegal port number in EPSV reply");
           return CURLE_FTP_WEIRD_PASV_REPLY;
         }
-        if(ptr) {
-          ftpc->newport = (unsigned short)(num & 0xffff);
-          ftpc->newhost = strdup(control_address(conn));
-          if(!ftpc->newhost)
-            return CURLE_OUT_OF_MEMORY;
-        }
+        ftpc->newport = (unsigned short)num;
+        ftpc->newhost = strdup(control_address(conn));
+        if(!ftpc->newhost)
+          return CURLE_OUT_OF_MEMORY;
       }
       else
         ptr = NULL;
@@ -2297,7 +2294,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
        for all the digits at the end of the response and parse only those as a
        number. */
     char *start = &buf[4];
-    char *fdigit = memchr(start, '\r', len);
+    const char *fdigit = memchr(start, '\r', len);
     if(fdigit) {
       fdigit--;
       if(*fdigit == '\n')
@@ -2307,9 +2304,8 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
     }
     else
       fdigit = start;
-    /* ignores parsing errors, which will make the size remain unknown */
-    (void)curlx_strtoofft(fdigit, NULL, 10, &filesize);
-
+    if(Curl_str_number(&fdigit, &filesize, CURL_OFF_T_MAX))
+      filesize = -1; /* size remain unknown */
   }
   else if(ftpcode == 550) { /* "No such file or directory" */
     /* allow a SIZE failure for (resumed) uploads, when probing what command
@@ -2471,7 +2467,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
        * those cases only confuses us.
        *
        * Example D above makes this parsing a little tricky */
-      char *bytes;
+      const char *bytes;
       char *buf = Curl_dyn_ptr(&conn->proto.ftpc.pp.recvbuf);
       bytes = strstr(buf, " bytes");
       if(bytes) {
@@ -2493,7 +2489,8 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
         if(bytes) {
           ++bytes;
           /* get the number! */
-          (void)curlx_strtoofft(bytes, NULL, 10, &size);
+          if(Curl_str_number(&bytes, &size, CURL_OFF_T_MAX))
+            size = 1;
         }
       }
     }
@@ -3293,7 +3290,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
 
   /* shut down the socket to inform the server we are done */
 
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
   shutdown(conn->sock[SECONDARYSOCKET], 2);  /* SD_BOTH */
 #endif
 
@@ -3606,7 +3603,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
     if(ftpc->wait_data_conn) {
       bool serv_conned;
 
-      result = Curl_conn_connect(data, SECONDARYSOCKET, TRUE, &serv_conned);
+      result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &serv_conned);
       if(result)
         return result; /* Failed to accept data connection */
 
@@ -4107,11 +4104,6 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4706) /* assignment within conditional expression */
-#endif
-
 /***********************************************************************
  *
  * ftp_parse_url_path()
@@ -4202,7 +4194,8 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
         }
 
         /* parse the URL path into separate path components */
-        while((slashPos = strchr(curPos, '/'))) {
+        /* !checksrc! disable EQUALSNULL 1 */
+        while((slashPos = strchr(curPos, '/')) != NULL) {
           size_t compLen = slashPos - curPos;
 
           /* path starts with a slash: add that as a directory */
@@ -4265,10 +4258,6 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
   free(rawPath);
   return CURLE_OK;
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 /* call this when the DO phase has completed */
 static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)

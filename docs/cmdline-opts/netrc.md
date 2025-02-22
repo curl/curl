@@ -30,9 +30,9 @@ On Windows two filenames in the home directory are checked: *.netrc* and
 only.
 
 A quick and simple example of how to setup a *.netrc* to allow curl to FTP to
-the machine host.domain.com with username 'myself' and password 'secret' could
+the machine host.example.com with username 'myself' and password 'secret' could
 look similar to:
 
-    machine host.domain.com
+    machine host.example.com
     login myself
     password secret

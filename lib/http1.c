@@ -167,8 +167,6 @@ static CURLcode start_req(struct h1_req_parser *parser,
   if(!target_len || !hv_len)
     goto out;
 
-  /* TODO: we do not check HTTP_VERSION for conformity, should
-   + do that when STRICT option is supplied. */
   (void)hv;
 
   /* The TARGET can be (rfc 9112, ch. 3.2):

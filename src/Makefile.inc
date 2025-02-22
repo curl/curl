@@ -32,30 +32,31 @@
 # libcurl sources to include in curltool lib we use for test binaries
 CURLTOOL_LIBCURL_CFILES = \
   ../lib/base64.c \
-  ../lib/dynbuf.c \
-  ../lib/curl_get_line.c
+  ../lib/dynbuf.c
 
 # libcurl has sources that provide functions named curlx_* that are not part of
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/base64.c \
-  ../lib/curl_get_line.c \
   ../lib/curl_multibyte.c \
   ../lib/dynbuf.c \
   ../lib/nonblock.c \
   ../lib/strtoofft.c \
+  ../lib/strparse.c \
+  ../lib/strcase.c \
   ../lib/timediff.c \
   ../lib/version_win32.c \
   ../lib/warnless.c
 
 CURLX_HFILES = \
   ../lib/curl_ctype.h \
-  ../lib/curl_get_line.h \
   ../lib/curl_multibyte.h \
   ../lib/curl_setup.h \
   ../lib/dynbuf.h \
   ../lib/nonblock.h \
   ../lib/strtoofft.h \
+  ../lib/strparse.h \
+  ../lib/strcase.h \
   ../lib/timediff.h \
   ../lib/version_win32.h \
   ../lib/warnless.h

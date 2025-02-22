@@ -33,8 +33,6 @@
  * https://www.innovation.ch/java/ntlm.html
  */
 
-#define DEBUG_ME 0
-
 #include "urldata.h"
 #include "sendf.h"
 #include "strcase.h"
@@ -55,12 +53,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if DEBUG_ME
-# define DEBUG_OUT(x) x
-#else
-# define DEBUG_OUT(x) Curl_nop_stmt
-#endif
-
 CURLcode Curl_input_ntlm(struct Curl_easy *data,
                          bool proxy,         /* if proxy or not */
                          const char *header) /* rest of the www-authenticate:
@@ -78,7 +70,7 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
   if(checkprefix("NTLM", header)) {
     header += strlen("NTLM");
 
-    while(*header && ISSPACE(*header))
+    while(ISSPACE(*header))
       header++;
 
     if(*header) {

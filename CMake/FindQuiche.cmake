@@ -48,6 +48,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(QUICHE_FOUND)
+  set(Quiche_FOUND TRUE)
   string(REPLACE ";" " " QUICHE_CFLAGS "${QUICHE_CFLAGS}")
   message(STATUS "Found Quiche (via pkg-config): ${QUICHE_INCLUDE_DIRS} (found version \"${QUICHE_VERSION}\")")
 else()

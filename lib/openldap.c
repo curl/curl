@@ -277,7 +277,7 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
     result = rc == LDAP_URL_ERR_MEM ? CURLE_OUT_OF_MEMORY :
       CURLE_URL_MALFORMAT;
     rc -= LDAP_URL_SUCCESS;
-    if((size_t) rc < sizeof(url_errs) / sizeof(url_errs[0]))
+    if((size_t) rc < CURL_ARRAYSIZE(url_errs))
       msg = url_errs[rc];
     failf(data, "LDAP local: %s", msg);
   }
@@ -530,9 +530,6 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
     /* Initialize the SASL storage */
     Curl_sasl_init(&li->sasl, data, &saslldap);
 
-    /* Clear the TLS upgraded flag */
-    conn->bits.tls_upgraded = FALSE;
-
     result = oldap_parse_login_options(conn);
     if(result)
       return result;
@@ -560,7 +557,9 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 #ifdef CURL_OPENLDAP_DEBUG
   if(do_trace < 0) {
     const char *env = getenv("CURL_OPENLDAP_TRACE");
-    do_trace = (env && strtol(env, NULL, 10) > 0);
+    curl_off_t e = 0;
+    if(!Curl_str_number(&env, &e, INT_MAX))
+      do_trace = e > 0;
   }
   if(do_trace)
     ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);
@@ -795,7 +794,6 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
     if(result)
       result = oldap_map_error(code, CURLE_USE_SSL_FAILED);
     else if(ssl_installed(conn)) {
-      conn->bits.tls_upgraded = TRUE;
       if(li->sasl.prefmech != SASL_AUTH_NONE)
         result = oldap_perform_mechs(data);
       else if(data->state.aptr.user)

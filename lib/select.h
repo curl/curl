@@ -122,6 +122,8 @@ void Curl_pollfds_init(struct curl_pollfds *cpfds,
                        struct pollfd *static_pfds,
                        unsigned int static_count);
 
+void Curl_pollfds_reset(struct curl_pollfds *cpfds);
+
 void Curl_pollfds_cleanup(struct curl_pollfds *cpfds);
 
 CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,

@@ -57,6 +57,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(WOLFSSL_FOUND)
+  set(WolfSSL_FOUND TRUE)
   string(REPLACE ";" " " WOLFSSL_CFLAGS "${WOLFSSL_CFLAGS}")
   message(STATUS "Found WolfSSL (via pkg-config): ${WOLFSSL_INCLUDE_DIRS} (found version \"${WOLFSSL_VERSION}\")")
 else()

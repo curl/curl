@@ -17,7 +17,6 @@ problems may have been fixed or changed somewhat since this was written.
  2.1 IMAPS connection fails with Rustls error
  2.3 Unable to use PKCS12 certificate with Secure Transport
  2.4 Secure Transport does not import PKCS#12 client certificates without a password
- 2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
@@ -68,7 +67,8 @@ problems may have been fixed or changed somewhat since this was written.
  9.4 libssh blocking and infinite loop problem
  9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
- 10. SOCKS
+ 10. Connection
+ 10.1 --interface with link-scoped IPv6 address
 
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
@@ -135,14 +135,6 @@ problems may have been fixed or changed somewhat since this was written.
  libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
  function rejects certificates that do not have a password.
  https://github.com/curl/curl/issues/1308
-
-2.5 Client cert handling with Issuer DN differs between backends
-
- When the specified client certificate does not match any of the
- server-specified DNs, the OpenSSL and GnuTLS backends behave differently.
- The github discussion may contain a solution.
-
- See https://github.com/curl/curl/issues/1411
 
 2.7 Client cert (MTLS) issues with Schannel
 
@@ -445,7 +437,23 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/11244
 
-10. SOCKS
+10. Connection
+
+10.1 --interface with link-scoped IPv6 address
+
+ When you give the `--interface` option telling curl to use a specific
+ interface for its outgoing traffic in combination with a IPv6 address in the
+ URL that uses a link-local scope, curl might pick the wrong address from the
+ named interface and the subsequent transfer fails.
+
+ Example command line:
+
+    curl --interface eth0 'http://[fe80:928d:xxff:fexx:xxxx]/'
+
+ The fact that the given IP address is link-scoped should probably be used as
+ input to somehow make curl make a better choice for this.
+
+ https://github.com/curl/curl/issues/14782
 
 11. Internals
 
@@ -625,7 +633,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 17.4 HTTP/2 + TLS spends a lot of time in recv
 
- It has been observered that by making the speed limit less accurate we could
+ It has been observed that by making the speed limit less accurate we could
  improve this performance. (by reverting
  https://github.com/curl/curl/commit/db5c9f4f9e0779b49624752b135281a0717b277b)
  Can we find a golden middle ground?

@@ -405,7 +405,7 @@ class TestSSLUse:
            not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             pytest.skip('mbedtls TLSv1.3 session resume not working before 3.6.0')
         run_env = os.environ.copy()
-        run_env['CURL_DEBUG'] = 'ssl,scache'
+        run_env['CURL_DEBUG'] = 'ssl,ssls'
         # clean session file first, then reuse
         session_file = os.path.join(env.gen_dir, 'test_17_15.sessions')
         if os.path.exists(session_file):
@@ -424,3 +424,25 @@ class TestSSLUse:
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=xargs)
         assert r.exit_code == 0, f'{r}'
         assert r.json['SSL_SESSION_RESUMED'] == 'Resumed', f'{r.json}\n{r.dump_logs()}'
+
+    # verify the ciphers are ignored when talking TLSv1.3 only
+    # see issue #16232
+    def test_17_16_h3_ignore_ciphers12(self, env: Env):
+        proto = 'h3'
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '--ciphers', 'NONSENSE'
+        ])
+        assert r.exit_code == 0, f'{r}'
+
+    def test_17_17_h1_ignore_ciphers13(self, env: Env):
+        proto = 'http/1.1'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '--tls13-ciphers', 'NONSENSE', '--tls-max', '1.2'
+        ])
+        assert r.exit_code == 0, f'{r}'

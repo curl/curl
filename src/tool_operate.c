@@ -50,12 +50,6 @@
 #endif
 
 #ifdef HAVE_UV_H
-/* Hack for Unity mode */
-#ifdef HEADER_CURL_MEMDEBUG_H
-#undef HEADER_CURL_MEMDEBUG_H
-#undef freeaddrinfo
-#undef getaddrinfo
-#endif
 /* this is for libuv-enabled debug builds only */
 #include <uv.h>
 #endif
@@ -126,7 +120,6 @@ extern const unsigned char curl_ca_embed[];
 static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
-                                bool capath_from_env,
                                 bool *added,
                                 bool *skipped);
 static CURLcode create_transfer(struct GlobalConfig *global,
@@ -587,9 +580,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
            * or close/re-open the file so that the next attempt starts
            * over from the beginning.
            *
-           * TODO: similar action for the upload case. We might need
-           * to start over reading from a previous point if we have
-           * uploaded something when this was returned.
+           * For the upload case, we might need to start over reading from a
+           * previous point if we have uploaded something when this was
+           * returned.
            */
           break;
         }
@@ -671,7 +664,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
               outs->bytes);
         fflush(outs->stream);
         /* truncate file at the position where we started appending */
-#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
+#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__) && \
+  !defined(__MINGW32CE__)
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot just append as then we will
              create something strange, bail out */
@@ -875,7 +869,6 @@ static CURLcode set_cert_types(struct OperationConfig *config)
 static CURLcode config2setopts(struct GlobalConfig *global,
                                struct OperationConfig *config,
                                struct per_transfer *per,
-                               bool capath_from_env,
                                CURL *curl,
                                CURLSH *share)
 {
@@ -1095,8 +1088,6 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
     if(config->httpversion)
       my_setopt_enum(curl, CURLOPT_HTTP_VERSION, config->httpversion);
-    else if(feature_http2)
-      my_setopt_enum(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
 
     /* curl 7.19.1 (the 301 version existed in 7.18.2),
        303 was added in 7.26.0 */
@@ -1188,13 +1179,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   if(config->capath) {
     result = res_setopt_str(curl, CURLOPT_CAPATH, config->capath);
-    if(result == CURLE_NOT_BUILT_IN) {
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
-            capath_from_env ?
-            "SSL_CERT_DIR environment variable" : "--capath",
-            ssl_backend());
-    }
-    else if(result)
+    if(result)
       return result;
   }
   /* For the time being if --proxy-capath is not set then we use the
@@ -1798,7 +1783,6 @@ static CURLcode append2query(struct GlobalConfig *global,
 static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
-                                bool capath_from_env,
                                 bool *added,
                                 bool *skipped)
 {
@@ -2049,9 +2033,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
            * the headers, we need to open it in append mode, since transfers
            * might finish in any order.
            * The first transfer just clears the file.
-           * TODO: Consider placing the file handle inside the
-           * OperationConfig, so that it does not need to be opened/closed
-           * for every transfer.
+           *
+           * Consider placing the file handle inside the OperationConfig, so
+           * that it does not need to be opened/closed for every transfer.
            */
           if(config->create_dirs) {
             result = create_dir_hierarchy(config->headerfile, global);
@@ -2319,8 +2303,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       hdrcbdata->global = global;
       hdrcbdata->config = config;
 
-      result = config2setopts(global, config, per, capath_from_env,
-                              curl, share);
+      result = config2setopts(global, config, per, curl, share);
       if(result)
         break;
 
@@ -3021,7 +3004,8 @@ static CURLcode cacertpaths(struct OperationConfig *config)
       fclose(cafile);
       config->cacert = strdup(cacert);
     }
-#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
+#elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
+  !defined(CURL_DISABLE_CA_SEARCH)
     result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
     if(result)
       goto fail;
@@ -3042,7 +3026,6 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
                                     bool *skipped)
 {
   CURLcode result = CURLE_OK;
-  bool capath_from_env;
   *added = FALSE;
 
   /* Check we have a url */
@@ -3060,7 +3043,6 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
    * We support the environment variable thing for non-Windows platforms
    * too. Just for the sake of it.
    */
-  capath_from_env = false;
   if(feature_ssl &&
      !config->cacert &&
      !config->capath &&
@@ -3078,8 +3060,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   }
 
   if(!result)
-    result = single_transfer(global, config, share, capath_from_env, added,
-                             skipped);
+    result = single_transfer(global, config, share, added, skipped);
 
   return result;
 }
@@ -3151,7 +3132,12 @@ static CURLcode run_all_transfers(struct GlobalConfig *global,
 CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
-  char *first_arg = argc > 1 ? curlx_convert_tchar_to_UTF8(argv[1]) : NULL;
+  char *first_arg;
+#ifdef UNDER_CE
+  first_arg = argc > 1 ? strdup(argv[1]) : NULL;
+#else
+  first_arg = argc > 1 ? curlx_convert_tchar_to_UTF8(argv[1]) : NULL;
+#endif
 
 #ifdef HAVE_SETLOCALE
   /* Override locale for number parsing (only) */

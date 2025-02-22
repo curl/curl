@@ -84,20 +84,6 @@
 #undef socketpair
 #endif
 
-#ifndef CURL_NO_GETADDRINFO_OVERRIDE
-#ifdef HAVE_GETADDRINFO
-#if defined(getaddrinfo) && defined(__osf__)
-#undef ogetaddrinfo
-#else
-#undef getaddrinfo
-#endif
-#endif /* HAVE_GETADDRINFO */
-
-#ifdef HAVE_FREEADDRINFO
-#undef freeaddrinfo
-#endif /* HAVE_FREEADDRINFO */
-#endif /* !CURL_NO_GETADDRINFO_OVERRIDE */
-
 /* sclose is probably already defined, redefine it! */
 #undef sclose
 #undef fopen

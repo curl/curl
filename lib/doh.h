@@ -167,8 +167,6 @@ UNITTEST void de_init(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
-extern struct curl_trc_feat Curl_doh_trc;
-
 #else /* if DoH is disabled */
 #define Curl_doh(a,b,c,d) NULL
 #define Curl_doh_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST

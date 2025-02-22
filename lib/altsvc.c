@@ -138,18 +138,20 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
                                     size_t srcport,
                                     size_t dstport)
 {
-  enum alpnid dstalpnid = Curl_alpn2alpnid(dstalpn->str, dstalpn->len);
-  enum alpnid srcalpnid = Curl_alpn2alpnid(srcalpn->str, srcalpn->len);
+  enum alpnid dstalpnid =
+    Curl_alpn2alpnid(Curl_str(dstalpn), Curl_strlen(dstalpn));
+  enum alpnid srcalpnid =
+    Curl_alpn2alpnid(Curl_str(srcalpn), Curl_strlen(srcalpn));
   if(!srcalpnid || !dstalpnid)
     return NULL;
-  return altsvc_createid(srchost->str, srchost->len,
-                         dsthost->str, dsthost->len,
+  return altsvc_createid(Curl_str(srchost), Curl_strlen(srchost),
+                         Curl_str(dsthost), Curl_strlen(dsthost),
                          srcalpnid, dstalpnid,
                          srcport, dstport);
 }
 
 /* only returns SERIOUS errors */
-static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
+static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
 {
   /* Example line:
      h2 example.com 443 h3 shiny.example.com 8443 "20191231 10:00:00" 1
@@ -159,10 +161,10 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
   struct Curl_str srcalpn;
   struct Curl_str dstalpn;
   struct Curl_str date;
-  size_t srcport;
-  size_t dstport;
-  size_t persist;
-  size_t prio;
+  curl_off_t srcport;
+  curl_off_t dstport;
+  curl_off_t persist;
+  curl_off_t prio;
 
   if(Curl_str_word(&line, &srcalpn, MAX_ALTSVC_ALPNLEN) ||
      Curl_str_singlespace(&line) ||
@@ -190,11 +192,11 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
 
     /* The date parser works on a null terminated string. The maximum length
        is upheld by Curl_str_quotedword(). */
-    memcpy(dbuf, date.str, date.len);
-    dbuf[date.len] = 0;
+    memcpy(dbuf, Curl_str(&date), Curl_strlen(&date));
+    dbuf[Curl_strlen(&date)] = 0;
     expires = Curl_getdate_capped(dbuf);
-    as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn, srcport,
-                       dstport);
+    as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
+                       (size_t)srcport, (size_t)dstport);
     if(as) {
       as->expires = expires;
       as->prio = 0; /* not supported to just set zero */
@@ -232,7 +234,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
     Curl_dyn_init(&buf, MAX_ALTSVC_LINE);
     while(Curl_get_line(&buf, fp)) {
       char *lineptr = Curl_dyn_ptr(&buf);
-      while(*lineptr && ISBLANK(*lineptr))
+      while(ISBLANK(*lineptr))
         lineptr++;
       if(*lineptr == '#')
         /* skip commented lines */
@@ -410,7 +412,7 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   size_t len;
   const char *protop;
   const char *p = *ptr;
-  while(*p && ISBLANK(*p))
+  while(ISBLANK(*p))
     p++;
   protop = p;
   while(*p && !ISBLANK(*p) && (*p != ';') && (*p != '='))
@@ -465,10 +467,11 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
    return */
 static time_t altsvc_debugtime(void *unused)
 {
-  char *timestr = getenv("CURL_TIME");
+  const char *timestr = getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
-    long val = strtol(timestr, NULL, 10);
+    curl_off_t val;
+    Curl_str_number(&timestr, &val, TIME_T_MAX);
     return (time_t)val;
   }
   return time(NULL);
@@ -528,8 +531,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         size_t dstlen = 0; /* destination hostname length */
         const char *value_ptr;
         char option[32];
-        unsigned long num;
-        char *end_ptr;
+        curl_off_t num;
         bool quoted = FALSE;
         time_t maxage = 24 * 3600; /* default is 24 hours */
         bool persist = FALSE;
@@ -567,21 +569,14 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           dstlen = strlen(srchost);
         }
         if(*p == ':') {
-          unsigned long port = 0;
+          curl_off_t port = 0;
           p++;
-          if(ISDIGIT(*p))
-            /* a port number */
-            port = strtoul(p, &end_ptr, 10);
-          else
-            end_ptr = (char *)p; /* not left uninitialized */
-          if(!port || port > USHRT_MAX || end_ptr == p || *end_ptr != '\"') {
+          if(Curl_str_number(&p, &port, 0xffff) || (*p != '\"')) {
             infof(data, "Unknown alt-svc port number, ignoring.");
             valid = FALSE;
           }
-          else {
-            dstport = curlx_ultous(port);
-            p = end_ptr;
-          }
+          else
+            dstport = (unsigned short)port;
         }
         if(*p++ != '\"')
           break;
@@ -600,12 +595,12 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             /* skip option if name is too long */
             option[0] = '\0';
           }
-          while(*p && ISBLANK(*p))
+          while(ISBLANK(*p))
             p++;
           if(*p != '=')
             return CURLE_OK;
           p++;
-          while(*p && ISBLANK(*p))
+          while(ISBLANK(*p))
             p++;
           if(!*p)
             return CURLE_OK;
@@ -625,8 +620,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             while(*p && !ISBLANK(*p) && *p!= ';' && *p != ',')
               p++;
           }
-          num = strtoul(value_ptr, &end_ptr, 10);
-          if((end_ptr != value_ptr) && (num < ULONG_MAX)) {
+          if(!Curl_str_number(&value_ptr, &num, TIME_T_MAX)) {
             if(strcasecompare("ma", option))
               maxage = (time_t)num;
             else if(strcasecompare("persist", option) && (num == 1))

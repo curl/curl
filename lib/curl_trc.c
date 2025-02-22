@@ -44,7 +44,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "socks.h"
-#include "strtok.h"
+#include "strparse.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
@@ -52,10 +52,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
 
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
                 char *ptr, size_t size)
@@ -180,6 +176,11 @@ struct curl_trc_feat Curl_trc_feat_write = {
   "WRITE",
   CURL_LOG_LVL_NONE,
 };
+struct curl_trc_feat Curl_trc_feat_dns = {
+  "DNS",
+  CURL_LOG_LVL_NONE,
+};
+
 
 void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 {
@@ -199,6 +200,17 @@ void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_write, fmt, ap);
+    va_end(ap);
+  }
+}
+
+void Curl_trc_dns(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_dns, fmt, ap);
     va_end(ap);
   }
 }
@@ -288,11 +300,11 @@ struct trc_feat_def {
 static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_read,      TRC_CT_NONE },
   { &Curl_trc_feat_write,     TRC_CT_NONE },
+  { &Curl_trc_feat_dns,       TRC_CT_NETWORK },
 #ifndef CURL_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
 #endif
 #ifndef CURL_DISABLE_DOH
-  { &Curl_doh_trc,            TRC_CT_NETWORK },
 #endif
 #ifndef CURL_DISABLE_SMTP
   { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },
@@ -345,18 +357,18 @@ static struct trc_cft_def trc_cfts[] = {
 #endif
 };
 
-static void trc_apply_level_by_name(const char * const token, int lvl)
+static void trc_apply_level_by_name(struct Curl_str *token, int lvl)
 {
   size_t i;
 
-  for(i = 0; i < ARRAYSIZE(trc_cfts); ++i) {
-    if(strcasecompare(token, trc_cfts[i].cft->name)) {
+  for(i = 0; i < CURL_ARRAYSIZE(trc_cfts); ++i) {
+    if(Curl_str_casecompare(token, trc_cfts[i].cft->name)) {
       trc_cfts[i].cft->log_level = lvl;
       break;
     }
   }
-  for(i = 0; i < ARRAYSIZE(trc_feats); ++i) {
-    if(strcasecompare(token, trc_feats[i].feat->name)) {
+  for(i = 0; i < CURL_ARRAYSIZE(trc_feats); ++i) {
+    if(Curl_str_casecompare(token, trc_feats[i].feat->name)) {
       trc_feats[i].feat->log_level = lvl;
       break;
     }
@@ -367,11 +379,11 @@ static void trc_apply_level_by_category(int category, int lvl)
 {
   size_t i;
 
-  for(i = 0; i < ARRAYSIZE(trc_cfts); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(trc_cfts); ++i) {
     if(!category || (trc_cfts[i].category & category))
       trc_cfts[i].cft->log_level = lvl;
   }
-  for(i = 0; i < ARRAYSIZE(trc_feats); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(trc_feats); ++i) {
     if(!category || (trc_feats[i].category & category))
       trc_feats[i].feat->log_level = lvl;
   }
@@ -379,42 +391,36 @@ static void trc_apply_level_by_category(int category, int lvl)
 
 static CURLcode trc_opt(const char *config)
 {
-  char *token, *tok_buf, *tmp;
-  int lvl;
+  struct Curl_str out;
+  while(!Curl_str_until(&config, &out, 32, ',')) {
+    int lvl = CURL_LOG_LVL_INFO;
+    const char *token = Curl_str(&out);
 
-  tmp = strdup(config);
-  if(!tmp)
-    return CURLE_OUT_OF_MEMORY;
-
-  token = Curl_strtok_r(tmp, ", ", &tok_buf);
-  while(token) {
-    switch(*token) {
-      case '-':
-        lvl = CURL_LOG_LVL_NONE;
-        ++token;
-        break;
-      case '+':
-        lvl = CURL_LOG_LVL_INFO;
-        ++token;
-        break;
-      default:
-        lvl = CURL_LOG_LVL_INFO;
-        break;
+    if(*token == '-') {
+      lvl = CURL_LOG_LVL_NONE;
+      Curl_str_nudge(&out, 1);
     }
-    if(strcasecompare(token, "all"))
-      trc_apply_level_by_category(TRC_CT_NONE, lvl);
-    else if(strcasecompare(token, "protocol"))
-      trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
-    else if(strcasecompare(token, "network"))
-      trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
-    else if(strcasecompare(token, "proxy"))
-      trc_apply_level_by_category(TRC_CT_PROXY, lvl);
-    else
-      trc_apply_level_by_name(token, lvl);
+    else if(*token == '+')
+      Curl_str_nudge(&out, 1);
 
-    token = Curl_strtok_r(NULL, ", ", &tok_buf);
+    if(Curl_str_casecompare(&out, "all"))
+      trc_apply_level_by_category(TRC_CT_NONE, lvl);
+    else if(Curl_str_casecompare(&out, "protocol"))
+      trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
+    else if(Curl_str_casecompare(&out, "network"))
+      trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
+    else if(Curl_str_casecompare(&out, "proxy"))
+      trc_apply_level_by_category(TRC_CT_PROXY, lvl);
+    else if(Curl_str_casecompare(&out, "doh")) {
+      struct Curl_str dns = { "dns", 3 };
+      trc_apply_level_by_name(&dns, lvl);
+    }
+    else
+      trc_apply_level_by_name(&out, lvl);
+
+    if(Curl_str_single(&config, ','))
+      break;
   }
-  free(tmp);
   return CURLE_OK;
 }
 

@@ -156,3 +156,4 @@ s/Testclutch//
 s/edmcln\z/edmcln on github/
 s/andrewkirillov-ibm/Andrew Kirillov/
 s/\(.*\) via #[0-9]*//
+s/jethrogb$/jethrogb on github/

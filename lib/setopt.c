@@ -600,11 +600,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      */
     switch(arg) {
     case CURL_HTTP_VERSION_NONE:
-#ifdef USE_HTTP2
-      /* TODO: this seems an undesirable quirk to force a behaviour on
-       * lower implementations that they should recognize independently? */
-      arg = CURL_HTTP_VERSION_2TLS;
-#endif
       /* accepted */
       break;
     case CURL_HTTP_VERSION_1_0:
@@ -1584,10 +1579,6 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
       if(data->share->hsts == data->hsts)
         data->hsts = NULL;
 #endif
-#ifdef USE_SSL
-      if(data->share->ssl_scache == data->state.ssl_scache)
-        data->state.ssl_scache = data->multi ? data->multi->ssl_scache : NULL;
-#endif
 #ifdef USE_LIBPSL
       if(data->psl == &data->share->psl)
         data->psl = data->multi ? &data->multi->psl : NULL;
@@ -1627,10 +1618,6 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
         Curl_hsts_cleanup(&data->hsts);
         data->hsts = data->share->hsts;
       }
-#endif
-#ifdef USE_SSL
-      if(data->share->ssl_scache)
-        data->state.ssl_scache = data->share->ssl_scache;
 #endif
 #ifdef USE_LIBPSL
       if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))
@@ -2425,6 +2412,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     return Curl_setstropt(&data->set.str[STRING_SSH_PRIVATE_KEY], ptr);
 
+#if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
   case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
     /*
      * Option to allow for the MD5 of the host public key to be checked
@@ -2437,7 +2425,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Store the filename to read known hosts from.
      */
     return Curl_setstropt(&data->set.str[STRING_SSH_KNOWNHOSTS], ptr);
-
+#endif
   case CURLOPT_SSH_KEYDATA:
     /*
      * Custom client data to pass to the SSH keyfunc callback

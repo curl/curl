@@ -73,6 +73,8 @@ resolves, include a string in the linked list that uses the format
 The entry to remove must be prefixed with a dash, and the hostname and port
 number must exactly match what was added previously.
 
+Provide IPv6 addresses within [brackets].
+
 Using this option multiple times makes the last set list override the previous
 ones. Set it to NULL to disable its use again.
 
@@ -90,6 +92,7 @@ int main(void)
   CURL *curl;
   struct curl_slist *host = NULL;
   host = curl_slist_append(NULL, "example.com:443:127.0.0.1");
+  host = curl_slist_append(host, "example.com:443:[2001:db8::252f:efd6]");
 
   curl = curl_easy_init();
   if(curl) {
@@ -116,6 +119,8 @@ Support for providing multiple IP addresses per entry was added in 7.59.0.
 
 Support for adding non-permanent entries by using the "+" prefix was added in
 7.75.0.
+
+Support for specifying the host component as an IPv6 address was added in 8.13.0.
 
 # %AVAILABILITY%
 

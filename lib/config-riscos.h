@@ -138,12 +138,6 @@
 /* Define if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
-/* Define if you have the `strtok_r' function. */
-#undef HAVE_STRTOK_R
-
-/* Define if you have the `strtoll' function. */
-#undef HAVE_STRTOLL
-
 /* Define if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
 

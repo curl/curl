@@ -315,6 +315,7 @@ typedef enum {
 #define ARG_TYPEMASK 0x03
 #define ARGTYPE(x) ((x) & ARG_TYPEMASK)
 
+#define ARG_TLS 0x40 /* requires TLS support */
 #define ARG_NO 0x80 /* set if the option is documented as --no-* */
 
 struct LongShort {
@@ -360,7 +361,8 @@ const struct LongShort *findlongopt(const char *opt);
 const struct LongShort *findshortopt(char letter);
 
 ParameterError getparameter(const char *flag, char *nextarg,
-                            argv_item_t cleararg,
+                            argv_item_t cleararg1,
+                            argv_item_t cleararg2,
                             bool *usedarg,
                             struct GlobalConfig *global,
                             struct OperationConfig *operation);

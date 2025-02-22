@@ -47,6 +47,7 @@ my %wl = (
     'Curl_creader_def_close' => 'internal api',
     'Curl_creader_def_read' => 'internal api',
     'Curl_creader_def_total_length' => 'internal api',
+    'Curl_trc_dns' => 'internal api',
 );
 
 my %api = (

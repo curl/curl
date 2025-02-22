@@ -33,39 +33,62 @@
 #define STRE_BYTE     5
 #define STRE_NEWLINE  6
 #define STRE_OVERFLOW 7
+#define STRE_NO_NUM   8
 
+/* public struct, but all accesses should be done using the provided
+   functions */
 struct Curl_str {
-  char *str;
+  const char *str;
   size_t len;
 };
 
+void Curl_str_init(struct Curl_str *out);
+
+#define Curl_str(x) ((x)->str)
+#define Curl_strlen(x) ((x)->len)
+
 /* Get a word until the first space
    return non-zero on error */
-int Curl_str_word(char **linep, struct Curl_str *out, const size_t max);
+int Curl_str_word(const char **linep, struct Curl_str *out, const size_t max);
 
 /* Get a word until the first DELIM or end of string
    return non-zero on error */
-int Curl_str_until(char **linep, struct Curl_str *out, const size_t max,
+int Curl_str_until(const char **linep, struct Curl_str *out, const size_t max,
                    char delim);
 
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
-int Curl_str_quotedword(char **linep, struct Curl_str *out, const size_t max);
+int Curl_str_quotedword(const char **linep, struct Curl_str *out,
+                        const size_t max);
 
 /* Advance over a single character.
    return non-zero on error */
-int Curl_str_single(char **linep, char byte);
+int Curl_str_single(const char **linep, char byte);
 
 /* Advance over a single space.
    return non-zero on error */
-int Curl_str_singlespace(char **linep);
+int Curl_str_singlespace(const char **linep);
 
-/* Get an unsigned number
-   return non-zero on error */
-int Curl_str_number(char **linep, size_t *nump, size_t max);
+/* Get an unsigned decimal number. Return non-zero on error */
+int Curl_str_number(const char **linep, curl_off_t *nump, curl_off_t max);
+
+/* Get an unsigned hexadecimal number. Return non-zero on error */
+int Curl_str_hex(const char **linep, curl_off_t *nump, curl_off_t max);
+
+/* Get an unsigned octal number. Return non-zero on error */
+int Curl_str_octal(const char **linep, curl_off_t *nump, curl_off_t max);
 
 /* Check for CR or LF
    return non-zero on error */
-int Curl_str_newline(char **linep);
+int Curl_str_newline(const char **linep);
+
+/* case insensitive compare that the parsed string matches the
+   given string. */
+int Curl_str_casecompare(struct Curl_str *str, const char *check);
+
+int Curl_str_nudge(struct Curl_str *str, size_t num);
+
+int Curl_str_cspn(const char **linep, struct Curl_str *out, const char *cspn);
+void Curl_str_trimblanks(struct Curl_str *out);
 
 #endif /* HEADER_CURL_STRPARSE_H */

@@ -35,15 +35,17 @@
 /* Define if you have the <arpa/inet.h> header file. */
 /* #define HAVE_ARPA_INET_H 1 */
 
+#ifndef UNDER_CE
+
 /* Define if you have the <fcntl.h> header file. */
-#define HAVE_FCNTL_H 1
+#define HAVE_FCNTL_H 1  /* exists on __MINGW32CE__ */
 
 /* Define if you have the <io.h> header file. */
-#define HAVE_IO_H 1
+#define HAVE_IO_H 1  /* exists on __MINGW32CE__ */
 
 /* Define if you have the <locale.h> header file. */
-#ifndef UNDER_CE
 #define HAVE_LOCALE_H 1
+
 #endif
 
 /* Define if you have the <netdb.h> header file. */
@@ -53,8 +55,10 @@
 /* #define HAVE_NETINET_IN_H 1 */
 
 /* Define to 1 if you have the <stdbool.h> header file. */
+#ifndef UNDER_CE
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_STDBOOL_H 1
+#define HAVE_STDBOOL_H 1  /* exists on __MINGW32CE__ */
+#endif
 #endif
 
 /* Define if you have the <sys/param.h> header file. */
@@ -109,8 +113,10 @@
 #define STDC_HEADERS 1
 
 /* Define to 1 if bool is an available type. */
+#ifndef UNDER_CE
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_BOOL_T 1
+#define HAVE_BOOL_T 1  /* exists on __MINGW32CE__ */
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -164,11 +170,6 @@
 
 /* Define if you have the strdup function. */
 #define HAVE_STRDUP 1
-
-/* Define if you have the strtoll function. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_STRTOLL 1
-#endif
 
 /* Define if you have the utime function. */
 #define HAVE_UTIME 1
@@ -230,11 +231,6 @@
 #define HAVE_BASENAME 1
 #endif
 
-/* Define to 1 if you have the strtok_r function. */
-#if defined(__MINGW32__) && !defined(__MINGW32CE__)
-#define HAVE_STRTOK_R 1
-#endif
-
 /* Define to 1 if you have the signal function. */
 #ifndef UNDER_CE
 #define HAVE_SIGNAL 1
@@ -243,9 +239,6 @@
 /* ---------------------------------------------------------------- */
 /*                       TYPEDEF REPLACEMENTS                       */
 /* ---------------------------------------------------------------- */
-
-/* Define if in_addr_t is not an available 'typedefed' type. */
-#define in_addr_t unsigned long
 
 /* Define if ssize_t is not an available 'typedefed' type. */
 #ifndef _SSIZE_T_DEFINED
@@ -296,13 +289,12 @@
 /* #undef HAVE_GMTIME_R */
 
 /* Define if the compiler supports the 'long long' data type. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1310)) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #define HAVE_LONGLONG 1
 #endif
 
-/* mingw-w64 and visual studio >= 2005 (MSVCR80)
-   all default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1400)) || defined(__MINGW32__)
+/* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #  ifndef _USE_32BIT_TIME_T
 #    define SIZEOF_TIME_T 8
 #  else
@@ -344,7 +336,7 @@
 #endif
 
 /* VS2008 default target settings and minimum build target check. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_MSC_VER <= 1600)
+#if defined(_MSC_VER) && (_MSC_VER <= 1600)
 #  ifndef _WIN32_WINNT
 #  define _WIN32_WINNT VS2008_DEF_TARGET
 #  endif
@@ -402,8 +394,7 @@ Vista
 
 #ifndef UNDER_CE
 
-/* _fseeki64() requires VS2005 */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1400)) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #  define USE_WIN32_LARGE_FILES
 /* Number of bits in a file offset, on hosts where this is settable. */
 #  ifdef __MINGW32__
@@ -448,11 +439,7 @@ Vista
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#ifdef CURL_HAS_NOVELL_LDAPSDK
-#undef USE_WIN32_LDAP
-#define HAVE_LDAP_SSL_H 1
-#define HAVE_LDAP_URL_PARSE 1
-#elif defined(CURL_HAS_OPENLDAP_LDAPSDK)
+#ifdef CURL_HAS_OPENLDAP_LDAPSDK
 #undef USE_WIN32_LDAP
 #define HAVE_LDAP_URL_PARSE 1
 #elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
@@ -518,11 +505,9 @@ Vista
 #define CURL_DISABLE_TELNET 1
 #define CURL_DISABLE_LDAP 1
 
-#define ENOSPC 1
-#define ENOMEM 2
-#define EAGAIN 3
-
+#ifndef _MSC_VER
 extern int stat(const char *path, struct stat *buffer);
+#endif
 
 #endif /* UNDER_CE */
 

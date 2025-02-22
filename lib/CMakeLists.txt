@@ -23,7 +23,7 @@
 ###########################################################################
 set(LIB_NAME "libcurl")
 set(LIBCURL_OUTPUT_NAME "libcurl" CACHE STRING "Basename of the curl library")
-add_definitions("-DBUILDING_LIBCURL")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_LIBCURL")
 
 configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
@@ -55,6 +55,9 @@ if(CURL_BUILD_TESTING)
   )
   target_compile_definitions(curlu PUBLIC "UNITTESTS" "CURL_STATICLIB")
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+  # There is plenty of parallelism when building the testdeps target.
+  # Override the curlu batch size with the maximum to optimize performance.
+  set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0)
 endif()
 
 if(ENABLE_CURLDEBUG)
@@ -65,12 +68,28 @@ endif()
 
 ## Library definition
 
-# Add "_imp" as a suffix before the extension to avoid conflicting with
-# the statically linked "libcurl.lib" (typically with MSVC)
-if(WIN32 AND
-   NOT IMPORT_LIB_SUFFIX AND
-   CMAKE_STATIC_LIBRARY_SUFFIX STREQUAL CMAKE_IMPORT_LIBRARY_SUFFIX)
-  set(IMPORT_LIB_SUFFIX "_imp")
+if(NOT DEFINED IMPORT_LIB_SUFFIX)
+  # Suffix implib name with "_imp" by default, to avoid conflicting with
+  # the generated static "libcurl.lib" (typically with MSVC).
+  if(WIN32 AND BUILD_SHARED_LIBS AND
+     CMAKE_IMPORT_LIBRARY_SUFFIX STREQUAL CMAKE_STATIC_LIBRARY_SUFFIX)
+    set(IMPORT_LIB_SUFFIX "_imp")
+  else()
+    set(IMPORT_LIB_SUFFIX "")
+  endif()
+endif()
+if(NOT DEFINED STATIC_LIB_SUFFIX)
+  set(STATIC_LIB_SUFFIX "")
+endif()
+
+# Detect implib static lib filename collision
+if(WIN32 AND BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS AND
+   "${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL
+   "${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  message(FATAL_ERROR "Library suffix is the same ('${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}') "
+    "for the import and static '${LIBCURL_OUTPUT_NAME}' library. "
+    "Set IMPORT_LIB_SUFFIX and/or STATIC_LIB_SUFFIX to different values, "
+    "or disable building either the shared or static library to avoid the filename collision.")
 endif()
 
 # Whether to do a single compilation pass for libcurl sources and reuse these
@@ -87,9 +106,9 @@ if(NOT DEFINED SHARE_LIB_OBJECT)
   endif()
 endif()
 
-if(SHARE_LIB_OBJECT)
+if(SHARE_LIB_OBJECT AND NOT CMAKE_VERSION VERSION_LESS 3.12)
   set(LIB_OBJECT "libcurl_object")
-  add_library(${LIB_OBJECT} OBJECT ${HHEADERS} ${CSOURCES})
+  add_library(${LIB_OBJECT} OBJECT ${HHEADERS} ${CSOURCES})  # Requires CMake 3.12
   if(WIN32)
     # Define CURL_STATICLIB always, to disable __declspec(dllexport) for
     # exported libcurl symbols. We handle exports via libcurl.def instead.

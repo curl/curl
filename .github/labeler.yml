@@ -78,7 +78,8 @@ build:
               plan9/**,\
               projects/**,\
               winbuild/**,\
-              lib/libcurl.def\
+              lib/libcurl.def,\
+              tests/cmake/**\
               }"
 
 CI:
@@ -100,7 +101,8 @@ cmake:
               **/CMakeLists.txt,\
               CMake/**,\
               docs/INSTALL-CMAKE.md,\
-              lib/curl_config.h.cmake\
+              lib/curl_config.h.cmake,\
+              tests/cmake/**\
               }"
 
 cmdline tool:

@@ -21,10 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_NO_GETADDRINFO_OVERRIDE
-#define CURL_NO_GETADDRINFO_OVERRIDE
-#endif
-
 #include "server_setup.h"
 
 /* Purpose
@@ -37,7 +33,6 @@
  *
  */
 
-#include <signal.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

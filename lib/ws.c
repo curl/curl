@@ -39,6 +39,7 @@
 #include "transfer.h"
 #include "select.h"
 #include "nonblock.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -84,7 +85,7 @@ static const char *ws_frame_name_of_op(unsigned char proto_opcode)
 {
   unsigned char opcode = proto_opcode & WSBIT_OPCODE_MASK;
   size_t i;
-  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(WS_FRAMES); ++i) {
     if(WS_FRAMES[i].proto_opcode == opcode)
       return WS_FRAMES[i].name;
   }
@@ -95,7 +96,7 @@ static int ws_frame_op2flags(unsigned char proto_opcode)
 {
   unsigned char opcode = proto_opcode & WSBIT_OPCODE_MASK;
   size_t i;
-  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(WS_FRAMES); ++i) {
     if(WS_FRAMES[i].proto_opcode == opcode)
       return WS_FRAMES[i].flags;
   }
@@ -105,7 +106,7 @@ static int ws_frame_op2flags(unsigned char proto_opcode)
 static unsigned char ws_frame_flags2op(int flags)
 {
   size_t i;
-  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(WS_FRAMES); ++i) {
     if(WS_FRAMES[i].flags & flags)
       return (unsigned char)WS_FRAMES[i].proto_opcode;
   }
@@ -746,7 +747,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   }
   strcpy(keyval, randstr);
   free(randstr);
-  for(i = 0; !result && (i < sizeof(heads)/sizeof(heads[0])); i++) {
+  for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, STRCONST(heads[i].name))) {
       result = Curl_dyn_addf(req, "%s %s\r\n", heads[i].name,
                              heads[i].val);
@@ -778,12 +779,11 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
     data->conn->proto.ws = ws;
 #ifdef DEBUGBUILD
     {
-      char *p = getenv("CURL_WS_CHUNK_SIZE");
+      const char *p = getenv("CURL_WS_CHUNK_SIZE");
       if(p) {
-        long l = strtol(p, NULL, 10);
-        if(l > 0 && l <= (1*1024*1024)) {
+        curl_off_t l;
+        if(!Curl_str_number(&p, &l, 1*1024*1024))
           chunk_size = (size_t)l;
-        }
       }
     }
 #endif
@@ -1032,12 +1032,11 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
     /* Simulate a blocking send after this chunk has been sent */
     bool eagain_next = FALSE;
     size_t chunk_egain = 0;
-    char *p = getenv("CURL_WS_CHUNK_EAGAIN");
+    const char *p = getenv("CURL_WS_CHUNK_EAGAIN");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l > 0 && l <= (1*1024*1024)) {
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, 1*1024*1024))
         chunk_egain = (size_t)l;
-      }
     }
 #endif
 
@@ -1309,7 +1308,10 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   /* WebSockets is 1.1 only (for now) */
-  data->state.httpwant = CURL_HTTP_VERSION_1_1;
+  data->state.http_neg.accept_09 = FALSE;
+  data->state.http_neg.only_10 = FALSE;
+  data->state.http_neg.wanted = CURL_HTTP_V1x;
+  data->state.http_neg.allowed = CURL_HTTP_V1x;
   return Curl_http_setup_conn(data, conn);
 }
 

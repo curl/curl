@@ -44,6 +44,7 @@
 #include "vquic.h"
 #include "vquic_int.h"
 #include "strerror.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -81,10 +82,10 @@ CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
 #endif
 #ifdef DEBUGBUILD
   {
-    char *p = getenv("CURL_DBG_QUIC_WBLOCK");
+    const char *p = getenv("CURL_DBG_QUIC_WBLOCK");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l >= 0 && l <= 100)
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, 100))
         qctx->wblock_percent = (int)l;
     }
   }
@@ -163,7 +164,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     case EIO:
       if(pktlen > gsolen) {
         /* GSO failure */
-        failf(data, "sendmsg() returned %zd (errno %d); disable GSO", sent,
+        infof(data, "sendmsg() returned %zd (errno %d); disable GSO", sent,
               SOCKERRNO);
         qctx->no_gso = TRUE;
         return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);

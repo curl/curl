@@ -1598,8 +1598,8 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
 
   (void) size;   /* Always 1. */
 
-  /* TODO: this loop is broken. If `nitems` is <= 4, some encoders will
-   * return STOP_FILLING without adding any data and this loops infinitely. */
+  /* If `nitems` is <= 4, some encoders will return STOP_FILLING without
+   * adding any data and this loops infinitely. */
   do {
     hasread = FALSE;
     ret = readback_part(part, buffer, nitems, &hasread);
@@ -1742,7 +1742,7 @@ const char *Curl_mime_contenttype(const char *filename)
     const char *nameend = filename + len1;
     unsigned int i;
 
-    for(i = 0; i < sizeof(ctts) / sizeof(ctts[0]); i++) {
+    for(i = 0; i < CURL_ARRAYSIZE(ctts); i++) {
       size_t len2 = strlen(ctts[i].extension);
 
       if(len1 >= len2 && strcasecompare(nameend - len2, ctts[i].extension))

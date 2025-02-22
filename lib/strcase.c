@@ -82,65 +82,6 @@ char Curl_raw_tolower(char in)
   return (char)tolowermap[(unsigned char) in];
 }
 
-/*
- * curl_strequal() is for doing "raw" case insensitive strings. This is meant
- * to be locale independent and only compare strings we know are safe for
- * this. See https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
- * further explanations as to why this function is necessary.
- */
-
-static int casecompare(const char *first, const char *second)
-{
-  while(*first && *second) {
-    if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
-      /* get out of the loop as soon as they do not match */
-      return 0;
-    first++;
-    second++;
-  }
-  /* If we are here either the strings are the same or the length is different.
-     We can just test if the "current" character is non-zero for one and zero
-     for the other. Note that the characters may not be exactly the same even
-     if they match, we only want to compare zero-ness. */
-  return !*first == !*second;
-}
-
-/* --- public function --- */
-int curl_strequal(const char *first, const char *second)
-{
-  if(first && second)
-    /* both pointers point to something then compare them */
-    return casecompare(first, second);
-
-  /* if both pointers are NULL then treat them as equal */
-  return NULL == first && NULL == second;
-}
-
-static int ncasecompare(const char *first, const char *second, size_t max)
-{
-  while(*first && *second && max) {
-    if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
-      return 0;
-    max--;
-    first++;
-    second++;
-  }
-  if(0 == max)
-    return 1; /* they are equal this far */
-
-  return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);
-}
-
-/* --- public function --- */
-int curl_strnequal(const char *first, const char *second, size_t max)
-{
-  if(first && second)
-    /* both pointers point to something then compare them */
-    return ncasecompare(first, second, max);
-
-  /* if both pointers are NULL then treat them as equal if max is non-zero */
-  return NULL == first && NULL == second && max;
-}
 /* Copy an upper case version of the string from src to dest. The
  * strings may overlap. No more than n characters of the string are copied
  * (including any NUL) and the destination string will NOT be

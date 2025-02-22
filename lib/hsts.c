@@ -35,7 +35,6 @@
 #include "curl_get_line.h"
 #include "strcase.h"
 #include "sendf.h"
-#include "strtoofft.h"
 #include "parsedate.h"
 #include "fopen.h"
 #include "rename.h"
@@ -59,13 +58,12 @@
 time_t deltatime; /* allow for "adjustments" for unit test purposes */
 static time_t hsts_debugtime(void *unused)
 {
-  char *timestr = getenv("CURL_TIME");
+  const char *timestr = getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
     curl_off_t val;
-    (void)curlx_strtoofft(timestr, NULL, 10, &val);
-
-    val += (curl_off_t)deltatime;
+    if(!Curl_str_number(&timestr, &val, TIME_T_MAX))
+      val += (curl_off_t)deltatime;
     return (time_t)val;
   }
   return time(NULL);
@@ -156,35 +154,34 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     return CURLE_OK;
 
   do {
-    while(*p && ISBLANK(*p))
+    while(ISBLANK(*p))
       p++;
     if(strncasecompare("max-age", p, 7)) {
       bool quoted = FALSE;
-      CURLofft offt;
-      char *endp;
+      int rc;
 
       if(gotma)
         return CURLE_BAD_FUNCTION_ARGUMENT;
 
       p += 7;
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
       if(*p++ != '=')
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
 
       if(*p == '\"') {
         p++;
         quoted = TRUE;
       }
-      offt = curlx_strtoofft(p, &endp, 10, &expires);
-      if(offt == CURL_OFFT_FLOW)
+      rc = Curl_str_number(&p, &expires, TIME_T_MAX);
+      if(rc == STRE_OVERFLOW)
         expires = CURL_OFF_T_MAX;
-      else if(offt)
+      else if(rc)
         /* invalid max-age */
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      p = endp;
+
       if(quoted) {
         if(*p != '\"')
           return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -205,7 +202,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         p++;
     }
 
-    while(*p && ISBLANK(*p))
+    while(ISBLANK(*p))
       p++;
     if(*p == ';')
       p++;
@@ -416,7 +413,7 @@ skipsave:
 }
 
 /* only returns SERIOUS errors */
-static CURLcode hsts_add(struct hsts *h, char *line)
+static CURLcode hsts_add(struct hsts *h, const char *line)
 {
   /* Example lines:
      example.com "20191231 10:00:00"
@@ -436,26 +433,26 @@ static CURLcode hsts_add(struct hsts *h, char *line)
     struct stsentry *e;
     char dbuf[MAX_HSTS_DATELEN + 1];
     time_t expires;
+    const char *hp = Curl_str(&host);
 
     /* The date parser works on a null terminated string. The maximum length
        is upheld by Curl_str_quotedword(). */
-    memcpy(dbuf, date.str, date.len);
-    dbuf[date.len] = 0;
+    memcpy(dbuf, Curl_str(&date), Curl_strlen(&date));
+    dbuf[Curl_strlen(&date)] = 0;
 
     expires = strcmp(dbuf, UNLIMITED) ? Curl_getdate_capped(dbuf) :
       TIME_T_MAX;
 
-    if(host.str[0] == '.') {
-      host.str++;
-      host.len--;
+    if(hp[0] == '.') {
+      Curl_str_nudge(&host, 1);
       subdomain = TRUE;
     }
     /* only add it if not already present */
-    e = Curl_hsts(h, host.str, host.len, subdomain);
+    e = Curl_hsts(h, Curl_str(&host), Curl_strlen(&host), subdomain);
     if(!e)
-      result = hsts_create(h, host.str, host.len, subdomain, expires);
-    else if((strlen(e->host) == host.len) &&
-            strncasecompare(host.str, e->host, host.len)) {
+      result = hsts_create(h, Curl_str(&host), Curl_strlen(&host),
+                           subdomain, expires);
+    else if(Curl_str_casecompare(&host, e->host)) {
       /* the same hostname, use the largest expire time */
       if(expires > e->expires)
         e->expires = expires;
@@ -537,7 +534,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
     Curl_dyn_init(&buf, MAX_HSTS_LINE);
     while(Curl_get_line(&buf, fp)) {
       char *lineptr = Curl_dyn_ptr(&buf);
-      while(*lineptr && ISBLANK(*lineptr))
+      while(ISBLANK(*lineptr))
         lineptr++;
       /*
        * Skip empty or commented lines, since we know the line will have a

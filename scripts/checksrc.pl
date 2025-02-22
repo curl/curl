@@ -525,6 +525,12 @@ sub scanfile {
                       $line, length($1) + 1, $file, $l,
                       "Missing space end comment end");
         }
+
+        if($l =~ /(.*)(FIXME|TODO)/) {
+            checkwarn("FIXME",
+                      $line, length($1), $file, $l,
+                      "Avoid $2 comments. Add to documentation instead");
+        }
         # ------------------------------------------------------------
         # Above this marker, the checks were done on lines *including*
         # comments

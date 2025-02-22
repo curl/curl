@@ -50,9 +50,12 @@
 #include "ftp.h"
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
-#include "curl_memory.h"
 #include "multiif.h"
-/* The last #include file should be: */
+#include "strparse.h"
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 typedef enum {
@@ -543,13 +546,13 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         case PL_UNIX_HLINKS_NUMBER:
           parser->item_length ++;
           if(c == ' ') {
-            char *p;
-            long int hlinks;
+            const char *p = &mem[parser->item_offset];
+            curl_off_t hlinks;
             mem[parser->item_offset + parser->item_length - 1] = 0;
-            hlinks = strtol(mem + parser->item_offset, &p, 10);
-            if(p[0] == '\0' && hlinks != LONG_MAX && hlinks != LONG_MIN) {
+
+            if(!Curl_str_number(&p, &hlinks, LONG_MAX)) {
               parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_HLINKCOUNT;
-              parser->file_data->info.hardlinks = hlinks;
+              parser->file_data->info.hardlinks = (long)hlinks;
             }
             parser->item_length = 0;
             parser->item_offset = 0;

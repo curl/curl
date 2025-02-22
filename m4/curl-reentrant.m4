@@ -56,7 +56,8 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
         #include <errno.h>
       ]],[[
         #ifdef errno
-          int dummy=1;
+          int dummy = 1;
+          (void)dummy;
         #else
           #error force compilation error
         #endif
@@ -70,7 +71,8 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
           #include <errno.h>
         ]],[[
           #ifdef errno
-            int dummy=1;
+            int dummy = 1;
+            (void)dummy;
           #else
             #error force compilation error
           #endif
@@ -182,40 +184,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRERROR_R], [
   fi
 ])
 
-
-dnl CURL_CHECK_NEED_REENTRANT_STRTOK_R
-dnl -------------------------------------------------
-dnl Checks if the preprocessor _REENTRANT definition
-dnl makes function strtok_r compiler visible.
-
-AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRTOK_R], [
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([strtok_r])
-  ],[
-    tmp_strtok_r="yes"
-  ],[
-    tmp_strtok_r="no"
-  ])
-  if test "$tmp_strtok_r" = "yes"; then
-    AC_EGREP_CPP([strtok_r],[
-      #include <sys/types.h>
-      #include <string.h>
-    ],[
-      tmp_strtok_r="proto_declared"
-    ],[
-      AC_EGREP_CPP([strtok_r],[
-        #define _REENTRANT
-        #include <sys/types.h>
-        #include <string.h>
-      ],[
-        tmp_strtok_r="proto_needs_reentrant"
-        tmp_need_reentrant="yes"
-      ])
-    ])
-  fi
-])
-
-
 dnl CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
 dnl -------------------------------------------------
 dnl Checks if the preprocessor _REENTRANT definition
@@ -297,9 +265,6 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_FUNCTIONS_R], [
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_STRERROR_R
-  fi
-  if test "$tmp_need_reentrant" = "no"; then
-    CURL_CHECK_NEED_REENTRANT_STRTOK_R
   fi
   if test "$tmp_need_reentrant" = "no"; then
     CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R
@@ -411,7 +376,8 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
     AC_LANG_PROGRAM([[
     ]],[[
       #ifdef _REENTRANT
-        int dummy=1;
+        int dummy = 1;
+        (void)dummy;
       #else
         #error force compilation error
       #endif
@@ -471,7 +437,8 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
     AC_LANG_PROGRAM([[
     ]],[[
       #ifdef _THREAD_SAFE
-        int dummy=1;
+        int dummy = 1;
+        (void)dummy;
       #else
         #error force compilation error
       #endif

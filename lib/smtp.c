@@ -68,7 +68,6 @@
 #include "mime.h"
 #include "socks.h"
 #include "smtp.h"
-#include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
@@ -81,6 +80,8 @@
 #include "curl_sasl.h"
 #include "warnless.h"
 #include "idn.h"
+#include "strparse.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -189,19 +190,6 @@ static const struct SASLproto saslsmtp = {
   SASL_FLAG_BASE64      /* Configuration flags */
 };
 
-#ifdef USE_SSL
-static void smtp_to_smtps(struct connectdata *conn)
-{
-  /* Change the connection handler */
-  conn->handler = &Curl_handler_smtps;
-
-  /* Set the connection's upgraded to TLS flag */
-  conn->bits.tls_upgraded = TRUE;
-}
-#else
-#define smtp_to_smtps(x) Curl_nop_stmt
-#endif
-
 /***********************************************************************
  *
  * smtp_endofresp()
@@ -211,7 +199,7 @@ static void smtp_to_smtps(struct connectdata *conn)
  * supported authentication mechanisms.
  */
 static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
-                           char *line, size_t len, int *resp)
+                           const char *line, size_t len, int *resp)
 {
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   bool result = FALSE;
@@ -227,11 +215,14 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
      only send the response code instead as per Section 4.2. */
   if(line[3] == ' ' || len == 5) {
     char tmpline[6];
-
+    curl_off_t code;
+    const char *p = tmpline;
     result = TRUE;
-    memset(tmpline, '\0', sizeof(tmpline));
     memcpy(tmpline, line, (len == 5 ? 5 : 3));
-    *resp = curlx_sltosi(strtol(tmpline, NULL, 10));
+    tmpline[len == 5 ? 5 : 3 ] = 0;
+    if(Curl_str_number(&p, &code, len == 5 ? 99999 : 999))
+      return FALSE;
+    *resp = (int) code;
 
     /* Make sure real server never sends internal value */
     if(*resp == 1)
@@ -396,31 +387,37 @@ static CURLcode smtp_perform_starttls(struct Curl_easy *data,
  */
 static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
 {
+#ifdef USE_SSL
   /* Start the SSL connection */
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   CURLcode result;
   bool ssldone = FALSE;
 
+  DEBUGASSERT(smtpc->state == SMTP_UPGRADETLS);
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
+    /* Change the connection handler and SMTP state */
+    conn->handler = &Curl_handler_smtps;
   }
 
+  DEBUGASSERT(!smtpc->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-  if(!result) {
+  DEBUGF(infof(data, "smtp_perform_upgrade_tls, connect -> %d, %d",
+           result, ssldone));
+  if(!result && ssldone) {
     smtpc->ssldone = ssldone;
-    if(smtpc->state != SMTP_UPGRADETLS)
-      smtp_state(data, SMTP_UPGRADETLS);
-
-    if(smtpc->ssldone) {
-      smtp_to_smtps(conn);
-      result = smtp_perform_ehlo(data);
-    }
+    /* perform EHLO now, changes smpt->state out of SMTP_UPGRADETLS */
+    result = smtp_perform_ehlo(data);
   }
 out:
   return result;
+#else
+  (void)data;
+  return CURLE_NOT_BUILT_IN;
+#endif
 }
 
 /***********************************************************************
@@ -875,7 +872,7 @@ static CURLcode smtp_state_starttls_resp(struct Curl_easy *data,
       result = smtp_perform_authentication(data);
   }
   else
-    result = smtp_perform_upgrade_tls(data);
+    smtp_state(data, SMTP_UPGRADETLS);
 
   return result;
 }
@@ -1204,8 +1201,11 @@ static CURLcode smtp_statemachine(struct Curl_easy *data,
 
   /* Busy upgrading the connection; right now all I/O is SSL/TLS, not SMTP */
 upgrade_tls:
-  if(smtpc->state == SMTP_UPGRADETLS)
-    return smtp_perform_upgrade_tls(data);
+  if(smtpc->state == SMTP_UPGRADETLS) {
+    result = smtp_perform_upgrade_tls(data);
+    if(result || (smtpc->state == SMTP_UPGRADETLS))
+      return result;
+  }
 
   /* Flush any data that needs to be sent */
   if(pp->sendleft)
@@ -1287,14 +1287,6 @@ static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-
-  if(Curl_conn_is_ssl(conn, FIRSTSOCKET) && !smtpc->ssldone) {
-    bool ssldone = FALSE;
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-    smtpc->ssldone = ssldone;
-    if(result || !smtpc->ssldone)
-      return result;
-  }
 
   result = Curl_pp_statemach(data, &smtpc->pp, FALSE, FALSE);
   *done = (smtpc->state == SMTP_STOP);
@@ -1621,10 +1613,8 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
 {
   CURLcode result;
 
-  /* Clear the TLS upgraded flag */
-  conn->bits.tls_upgraded = FALSE;
-
   /* Initialise the SMTP layer */
+  (void)conn;
   result = smtp_init(data);
   CURL_TRC_SMTP(data, "smtp_setup_connection() -> %d", result);
   return result;

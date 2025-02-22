@@ -34,7 +34,6 @@
 #include "sendf.h"
 #include "progress.h"
 #include "curl_path.h"
-#include "strtoofft.h"
 #include "transfer.h"
 #include "speedcheck.h"
 #include "select.h"
@@ -208,7 +207,7 @@ static void state(struct Curl_easy *data, sshstate nowstate)
   };
 
   /* a precaution to make sure the lists are in sync */
-  DEBUGASSERT(sizeof(names)/sizeof(names[0]) == SSH_LAST);
+  DEBUGASSERT(CURL_ARRAYSIZE(names) == SSH_LAST);
 
   if(sshc->state != nowstate) {
     infof(data, "wolfssh %p state change from %s to %s",
@@ -810,11 +809,15 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
     }
     case SSH_SFTP_CLOSE:
-      if(sshc->handleSz)
+      if(sshc->handleSz) {
         rc = wolfSSH_SFTP_Close(sshc->ssh_session, sshc->handle,
                                 sshc->handleSz);
-      else
+        if(rc != WS_SUCCESS)
+          rc = wolfSSH_get_error(sshc->ssh_session);
+      }
+      else {
         rc = WS_SUCCESS; /* directory listing */
+      }
       if(rc == WS_WANT_READ) {
         *block = TRUE;
         conn->waitfor = KEEP_RECV;

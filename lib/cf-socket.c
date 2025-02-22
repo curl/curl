@@ -82,7 +82,9 @@
 #include "rand.h"
 #include "share.h"
 #include "strdup.h"
+#include "system_win32.h"
 #include "version_win32.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -460,9 +462,6 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
    Windows. Following function trying to detect OS version and skips
    SO_SNDBUF adjustment for Windows Vista and above.
 */
-#define DETECT_OS_NONE 0
-#define DETECT_OS_PREVISTA 1
-#define DETECT_OS_VISTA_OR_LATER 2
 
 void Curl_sndbuf_init(curl_socket_t sockfd)
 {
@@ -470,17 +469,7 @@ void Curl_sndbuf_init(curl_socket_t sockfd)
   int curval = 0;
   int curlen = sizeof(curval);
 
-  static int detectOsState = DETECT_OS_NONE;
-
-  if(detectOsState == DETECT_OS_NONE) {
-    if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                    VERSION_GREATER_THAN_EQUAL))
-      detectOsState = DETECT_OS_VISTA_OR_LATER;
-    else
-      detectOsState = DETECT_OS_PREVISTA;
-  }
-
-  if(detectOsState == DETECT_OS_VISTA_OR_LATER)
+  if(Curl_isVistaOrGreater)
     return;
 
   if(getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&curval, &curlen) == 0)
@@ -741,10 +730,9 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
                Curl_printable_address. The latter returns only numeric scope
                IDs and the former returns none at all. So the scope ID, if
                present, is known to be numeric */
-            unsigned long scope_id = strtoul(scope_ptr, NULL, 10);
-            if(scope_id > UINT_MAX)
+            curl_off_t scope_id;
+            if(Curl_str_number((const char **)&scope_ptr, &scope_id, UINT_MAX))
               return CURLE_UNSUPPORTED_PROTOCOL;
-
             si6->sin6_scope_id = (unsigned int)scope_id;
           }
 #endif
@@ -855,7 +843,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    *    Someone got to verify this on Win-NT 4.0, 2000."
    */
 
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
   Sleep(0);
 #else
   SleepEx(0, FALSE);
@@ -865,7 +853,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 
   if(0 != getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
   /* Old Windows CE versions do not support SO_ERROR */
   if(WSAENOPROTOOPT == err) {
     SET_SOCKERRNO(0);
@@ -932,15 +920,6 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
   }
 }
 
-/* We have a recv buffer to enhance reads with len < NW_SMALL_READS.
- * This happens often on TLS connections where the TLS implementation
- * tries to read the head of a TLS record, determine the length of the
- * full record and then make a subsequent read for that.
- * On large reads, we will not fill the buffer to avoid the double copy. */
-#define NW_RECV_CHUNK_SIZE    (64 * 1024)
-#define NW_RECV_CHUNKS         1
-#define NW_SMALL_READS        (1024)
-
 struct cf_socket_ctx {
   int transport;
   struct Curl_sockaddr_ex addr;      /* address to connect to */
@@ -983,28 +962,28 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
 
 #ifdef DEBUGBUILD
   {
-    char *p = getenv("CURL_DBG_SOCK_WBLOCK");
+    const char *p = getenv("CURL_DBG_SOCK_WBLOCK");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l >= 0 && l <= 100)
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, 100))
         ctx->wblock_percent = (int)l;
     }
     p = getenv("CURL_DBG_SOCK_WPARTIAL");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l >= 0 && l <= 100)
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, 100))
         ctx->wpartial_percent = (int)l;
     }
     p = getenv("CURL_DBG_SOCK_RBLOCK");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l >= 0 && l <= 100)
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, 100))
         ctx->rblock_percent = (int)l;
     }
     p = getenv("CURL_DBG_SOCK_RMAX");
     if(p) {
-      long l = strtol(p, NULL, 10);
-      if(l >= 0)
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, CURL_OFF_T_MAX))
         ctx->recv_max = (size_t)l;
     }
   }
@@ -1313,7 +1292,7 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               bool blocking, bool *done)
+                               bool *done)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_COULDNT_CONNECT;
@@ -1324,10 +1303,6 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     *done = TRUE;
     return CURLE_OK;
   }
-
-  /* TODO: need to support blocking connect? */
-  if(blocking)
-    return CURLE_UNSUPPORTED_PROTOCOL;
 
   *done = FALSE; /* a negative world view is best */
   if(ctx->sock == CURL_SOCKET_BAD) {
@@ -1432,7 +1407,7 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
     /* A listening socket filter needs to be connected before the accept
      * for some weird FTP interaction. This should be rewritten, so that
      * FTP no longer does the socket checks and accept calls and delegates
-     * all that to the filter. TODO. */
+     * all that to the filter. */
     if(ctx->listening) {
       Curl_pollset_set_in_only(data, ps, ctx->sock);
       CURL_TRC_CF(data, cf, "adjust_pollset, listening, POLLIN fd=%"
@@ -1850,7 +1825,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
 
-  rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,  /* NOLINT FIXME */
+  rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,  /* NOLINT */
                (curl_socklen_t)ctx->addr.addrlen);
   if(-1 == rc) {
     return socket_connect_result(data, ctx->ip.remote_ip, SOCKERRNO);
@@ -1899,12 +1874,11 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 
 static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               bool blocking, bool *done)
+                               bool *done)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_COULDNT_CONNECT;
 
-  (void)blocking;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
@@ -2109,7 +2083,7 @@ static void cf_tcp_set_accepted_remote_ip(struct Curl_cfilter *cf,
 
 static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
-                                      bool blocking, bool *done)
+                                      bool *done)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 #ifdef USE_IPV6
@@ -2125,7 +2099,6 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
 
   /* we start accepted, if we ever close, we cannot go on */
   (void)data;
-  (void)blocking;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
@@ -2213,7 +2186,7 @@ struct Curl_cftype Curl_cft_tcp_accept = {
   cf_tcp_accept_connect,
   cf_socket_close,
   cf_socket_shutdown,
-  cf_socket_get_host,              /* TODO: not accurate */
+  cf_socket_get_host,
   cf_socket_adjust_pollset,
   cf_socket_data_pending,
   cf_socket_send,

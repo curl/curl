@@ -58,7 +58,6 @@
 #include <dirent.h>
 #endif
 
-#include "strtoofft.h"
 #include "urldata.h"
 #include <curl/curl.h>
 #include "progress.h"
@@ -548,7 +547,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   if(data->state.resume_from) {
     if(!S_ISDIR(statbuf.st_mode)) {
-#ifdef __AMIGA__
+#if defined(__AMIGA__) || defined(__MINGW32CE__)
       if(data->state.resume_from !=
           lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
 #else

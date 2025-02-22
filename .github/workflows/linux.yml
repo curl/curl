@@ -51,9 +51,9 @@ env:
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
   msh3-version: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.42.0
+  awslc-version: 1.45.0
   # handled in renovate.json
-  openssl-version: 3.4.0
+  openssl-version: 3.4.1
   # handled in renovate.json
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
@@ -163,12 +163,6 @@ jobs:
             install_packages: zlib1g-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
-
-          - name: openssl arm
-            install_packages: zlib1g-dev
-            install_steps: pytest
-            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
-            image: 'ubuntu-24.04-arm'
 
           - name: openssl -O3 valgrind
             install_packages: zlib1g-dev valgrind
@@ -292,9 +286,13 @@ jobs:
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
-          - name: Alpine MUSL
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
-            container: 'alpine:3.18'
+          - name: Alpine MUSL https-rr
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares --enable-httpsrr
+            container: 'alpine:3.20'
+
+          - name: Alpine MUSL c-ares https-rr
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
+            container: 'alpine:3.20'
 
     steps:
       - name: 'install prereqs'
@@ -329,18 +327,11 @@ jobs:
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')
         run: |
-          apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev \
-            zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev \
+          apk add --no-cache build-base autoconf automake libtool perl openssl-dev \
+            libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev \
+            heimdal-dev libpsl-dev c-ares-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
             perl-time-hires openssh stunnel sudo git
-
-      - name: 'fix kernel mmap rnd bits'
-        # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
-        # high-entropy ASLR in much newer kernels that GitHub runners are
-        # using leading to random crashes: https://reviews.llvm.org/D148280
-        # See https://github.com/actions/runner-images/issues/9491
-        continue-on-error: true
-        run: sudo sysctl vm.mmap_rnd_bits=28
 
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')
@@ -597,12 +588,13 @@ jobs:
 
       - name: 'configure'
         run: |
-          [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
+          [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           if [ -n '${{ matrix.build.PKG_CONFIG_PATH }}' ]; then
             export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
           fi
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake -B . -G Ninja \
+              -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               ${{ matrix.build.generate }}
@@ -651,7 +643,7 @@ jobs:
 
       - name: 'cmake install'
         if: ${{ matrix.build.generate }}
-        run: cmake --install . --prefix $HOME/curl --strip
+        run: cmake --install . --strip
 
       - name: 'build tests'
         if: ${{ matrix.build.install_steps != 'skipall' }}

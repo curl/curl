@@ -57,7 +57,9 @@
 
 /* based on sockfilt.c */
 
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -86,12 +88,6 @@
 #ifdef USE_WINSOCK
 #undef  EINTR
 #define EINTR    4 /* errno.h value */
-#undef  EAGAIN
-#define EAGAIN  11 /* errno.h value */
-#undef  ENOMEM
-#define ENOMEM  12 /* errno.h value */
-#undef  EINVAL
-#define EINVAL  22 /* errno.h value */
 #endif
 
 #define DEFAULT_PORT 8905
@@ -173,15 +169,7 @@ static unsigned short shortval(char *value)
   return num & 0xffff;
 }
 
-static enum {
-  socket_domain_inet = AF_INET
-#ifdef USE_IPV6
-  , socket_domain_inet6 = AF_INET6
-#endif
-#ifdef USE_UNIX_SOCKETS
-  , socket_domain_unix = AF_UNIX
-#endif
-} socket_domain = AF_INET;
+static int socket_domain = AF_INET;
 
 static void getconfig(void)
 {
@@ -1074,7 +1062,7 @@ int main(int argc, char *argv[])
       if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = curlx_ultous(ulnum);
+        port = util_ultous(ulnum);
         arg++;
       }
     }

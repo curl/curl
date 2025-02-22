@@ -422,8 +422,6 @@ static int idn_present(curl_version_info_data *info)
   return info->libidn != NULL;
 #endif
 }
-#else
-#define idn_present     NULL
 #endif
 
 #if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \

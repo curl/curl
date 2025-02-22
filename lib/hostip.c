@@ -42,7 +42,9 @@
 #endif
 
 #include <setjmp.h>
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -58,6 +60,8 @@
 #include "warnless.h"
 #include "strcase.h"
 #include "easy_lock.h"
+#include "strparse.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -1079,10 +1083,7 @@ static void hostcache_unlink_entry(void *entry)
     Curl_freeaddrinfo(dns->addr);
 #ifdef USE_HTTPSRR
     if(dns->hinfo) {
-      free(dns->hinfo->target);
-      free(dns->hinfo->ipv4hints);
-      free(dns->hinfo->echconfiglist);
-      free(dns->hinfo->ipv6hints);
+      Curl_httpsrr_cleanup(dns->hinfo);
       free(dns->hinfo);
     }
 #endif
@@ -1122,43 +1123,47 @@ void Curl_hostcache_clean(struct Curl_easy *data,
 CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct curl_slist *hostp;
-  char *host_end;
 
   /* Default is no wildcard found */
   data->state.wildcard_resolve = FALSE;
 
   for(hostp = data->state.resolve; hostp; hostp = hostp->next) {
     char entry_id[MAX_HOSTCACHE_LEN];
-    if(!hostp->data)
+    const char *host = hostp->data;
+    struct Curl_str source;
+    if(!host)
       continue;
-    if(hostp->data[0] == '-') {
-      unsigned long num = 0;
+    if(*host == '-') {
+      curl_off_t num = 0;
       size_t entry_len;
-      size_t hlen = 0;
-      host_end = strchr(&hostp->data[1], ':');
-
-      if(host_end) {
-        hlen = host_end - &hostp->data[1];
-        num = strtoul(++host_end, NULL, 10);
-        if(!hlen || (num > 0xffff))
-          host_end = NULL;
+      host++;
+      if(!Curl_str_single(&host, '[')) {
+        if(Curl_str_until(&host, &source, MAX_IPADR_LEN, ']') ||
+           Curl_str_single(&host, ']') ||
+           Curl_str_single(&host, ':'))
+          continue;
       }
-      if(!host_end) {
-        infof(data, "Bad syntax CURLOPT_RESOLVE removal entry '%s'",
-              hostp->data);
-        continue;
+      else {
+        if(Curl_str_until(&host, &source, 4096, ':') ||
+           Curl_str_single(&host, ':')) {
+          continue;
+        }
       }
-      /* Create an entry id, based upon the hostname and port */
-      entry_len = create_hostcache_id(&hostp->data[1], hlen, (int)num,
-                                      entry_id, sizeof(entry_id));
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-      /* delete entry, ignore if it did not exist */
-      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
+      if(!Curl_str_number(&host, &num, 0xffff)) {
+        /* Create an entry id, based upon the hostname and port */
+        entry_len = create_hostcache_id(Curl_str(&source),
+                                        Curl_strlen(&source), (int)num,
+                                        entry_id, sizeof(entry_id));
+        if(data->share)
+          Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+        /* delete entry, ignore if it did not exist */
+        Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
+
+        if(data->share)
+          Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+      }
     }
     else {
       struct Curl_dns_entry *dns;
@@ -1166,75 +1171,69 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       size_t entry_len;
       char address[64];
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-      char *addresses = NULL;
+      const char *addresses = NULL;
 #endif
-      char *addr_begin;
-      char *addr_end;
-      char *port_ptr;
-      int port = 0;
-      char *end_ptr;
+      curl_off_t port = 0;
       bool permanent = TRUE;
-      unsigned long tmp_port;
       bool error = TRUE;
-      char *host_begin = hostp->data;
-      size_t hlen = 0;
 
-      if(host_begin[0] == '+') {
-        host_begin++;
+      if(*host == '+') {
+        host++;
         permanent = FALSE;
       }
-      host_end = strchr(host_begin, ':');
-      if(!host_end)
+      if(!Curl_str_single(&host, '[')) {
+        if(Curl_str_until(&host, &source, MAX_IPADR_LEN, ']') ||
+           Curl_str_single(&host, ']'))
+          continue;
+      }
+      else {
+        if(Curl_str_until(&host, &source, 4096, ':'))
+          continue;
+      }
+      if(Curl_str_single(&host, ':') ||
+         Curl_str_number(&host, &port, 0xffff) ||
+         Curl_str_single(&host, ':'))
         goto err;
-      hlen = host_end - host_begin;
 
-      port_ptr = host_end + 1;
-      tmp_port = strtoul(port_ptr, &end_ptr, 10);
-      if(tmp_port > USHRT_MAX || end_ptr == port_ptr || *end_ptr != ':')
-        goto err;
-
-      port = (int)tmp_port;
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-      addresses = end_ptr + 1;
+      addresses = host;
 #endif
 
-      while(*end_ptr) {
-        size_t alen;
+      /* start the address section */
+      while(*host) {
+        struct Curl_str target;
         struct Curl_addrinfo *ai;
 
-        addr_begin = end_ptr + 1;
-        addr_end = strchr(addr_begin, ',');
-        if(!addr_end)
-          addr_end = addr_begin + strlen(addr_begin);
-        end_ptr = addr_end;
-
-        /* allow IP(v6) address within [brackets] */
-        if(*addr_begin == '[') {
-          if(addr_end == addr_begin || *(addr_end - 1) != ']')
+        if(!Curl_str_single(&host, '[')) {
+          if(Curl_str_until(&host, &target, MAX_IPADR_LEN, ']') ||
+             Curl_str_single(&host, ']'))
             goto err;
-          ++addr_begin;
-          --addr_end;
         }
-
-        alen = addr_end - addr_begin;
-        if(!alen)
-          continue;
-
-        if(alen >= sizeof(address))
-          goto err;
-
-        memcpy(address, addr_begin, alen);
-        address[alen] = '\0';
-
+        else {
+          if(Curl_str_until(&host, &target, 4096, ',')) {
+            if(Curl_str_single(&host, ','))
+              goto err;
+            /* survive nothing but just a comma */
+            continue;
+          }
+        }
 #ifndef USE_IPV6
-        if(strchr(address, ':')) {
+        if(memchr(target.str, ':', target.len)) {
           infof(data, "Ignoring resolve address '%s', missing IPv6 support.",
                 address);
+          if(Curl_str_single(&host, ','))
+            goto err;
           continue;
         }
 #endif
 
-        ai = Curl_str2addr(address, port);
+        if(Curl_strlen(&target) >= sizeof(address))
+          goto err;
+
+        memcpy(address, Curl_str(&target), Curl_strlen(&target));
+        address[Curl_strlen(&target)] = '\0';
+
+        ai = Curl_str2addr(address, (int)port);
         if(!ai) {
           infof(data, "Resolve address '%s' found illegal", address);
           goto err;
@@ -1247,6 +1246,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         else {
           head = tail = ai;
         }
+        if(Curl_str_single(&host, ','))
+          break;
       }
 
       if(!head)
@@ -1262,7 +1263,8 @@ err:
       }
 
       /* Create an entry id, based upon the hostname and port */
-      entry_len = create_hostcache_id(host_begin, hlen, port,
+      entry_len = create_hostcache_id(Curl_str(&source), Curl_strlen(&source),
+                                      (int)port,
                                       entry_id, sizeof(entry_id));
 
       if(data->share)
@@ -1272,8 +1274,9 @@ err:
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
-        infof(data, "RESOLVE %.*s:%d - old addresses discarded",
-              (int)hlen, host_begin, port);
+        infof(data, "RESOLVE %.*s:%" CURL_FORMAT_CURL_OFF_T
+              " - old addresses discarded", (int)Curl_strlen(&source),
+              Curl_str(&source), port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
          2. even if entry with correct addresses is already in the cache,
@@ -1289,7 +1292,8 @@ err:
       }
 
       /* put this new host in the cache */
-      dns = Curl_cache_addr(data, head, host_begin, hlen, port, permanent);
+      dns = Curl_cache_addr(data, head, Curl_str(&source),
+                            Curl_strlen(&source), (int)port, permanent);
       if(dns) {
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
@@ -1304,14 +1308,15 @@ err:
         return CURLE_OUT_OF_MEMORY;
       }
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-      infof(data, "Added %.*s:%d:%s to DNS cache%s",
-            (int)hlen, host_begin, port, addresses,
+      infof(data, "Added %.*s:%" CURL_FORMAT_CURL_OFF_T ":%s to DNS cache%s",
+            (int)Curl_strlen(&source), Curl_str(&source), port, addresses,
             permanent ? "" : " (non-permanent)");
 #endif
 
       /* Wildcard hostname */
-      if((hlen == 1) && (host_begin[0] == '*')) {
-        infof(data, "RESOLVE *:%d using wildcard", port);
+      if(Curl_str_casecompare(&source, "*")) {
+        infof(data, "RESOLVE *:%" CURL_FORMAT_CURL_OFF_T " using wildcard",
+              port);
         data->state.wildcard_resolve = TRUE;
       }
     }

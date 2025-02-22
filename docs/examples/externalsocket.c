@@ -25,7 +25,7 @@
  * Pass in a custom socket for libcurl to use.
  * </DESC>
  */
-#ifdef _WIN32
+#ifdef _MSC_VER
 #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS  /* for inet_addr() */
 #endif
@@ -46,7 +46,11 @@
 #include <unistd.h>           /*  misc. Unix functions      */
 #endif
 
+#ifdef UNDER_CE
+#define strerror(e) "?"
+#else
 #include <errno.h>
+#endif
 
 /* The IP address and port number to connect to */
 #define IPADDR "127.0.0.1"

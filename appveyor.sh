@@ -28,36 +28,50 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # build
 
+case "${TARGET:-}" in
+  *Win32) openssl_suffix='-Win32';;
+  *)      openssl_suffix='-Win64';;
+esac
+
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-  openssl_root_win='C:/OpenSSL-v34-Win64'
+  openssl_root_win="C:/OpenSSL-v34${openssl_suffix}"
+elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
+  openssl_root_win="C:/OpenSSL${openssl_suffix}"
 else
-  openssl_root_win='C:/OpenSSL-v111-Win64'
+  openssl_root_win="C:/OpenSSL-v111${openssl_suffix}"
 fi
 openssl_root="$(cygpath "${openssl_root_win}")"
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  options=''
-  [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
-  [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
-  [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
-  [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
-  [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-  [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
-  [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-  # shellcheck disable=SC2086
-  cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
-    "-DCURL_USE_OPENSSL=${OPENSSL}" \
-    "-DCURL_USE_SCHANNEL=${SCHANNEL}" \
-    "-DHTTP_ONLY=${HTTP_ONLY}" \
-    "-DBUILD_SHARED_LIBS=${SHARED}" \
-    "-DCMAKE_UNITY_BUILD=${UNITY}" \
-    '-DCURL_TEST_BUNDLES=ON' \
-    '-DCURL_WERROR=ON' \
-    "-DENABLE_DEBUG=${DEBUG}" \
-    "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
-    '-DCMAKE_INSTALL_PREFIX=C:/curl' \
-    "-DCMAKE_BUILD_TYPE=${PRJ_CFG}" \
-    '-DCURL_USE_LIBPSL=OFF'
+  # Set env CHKPREFILL to the value '_chkprefill' to compare feature detection
+  # results with and without the pre-fill feature. They have to match.
+  for _chkprefill in '' ${CHKPREFILL:-}; do
+    options=''
+    [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+    [[ "${TARGET}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+    [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
+    [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
+    [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
+    # shellcheck disable=SC2086
+    cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET} \
+      -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
+      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
+      -DCMAKE_UNITY_BUILD="${UNITY}" -DCURL_TEST_BUNDLES=ON \
+      -DCURL_WERROR=ON \
+      -DBUILD_SHARED_LIBS="${SHARED}" \
+      -DENABLE_DEBUG="${DEBUG}" \
+      -DENABLE_UNICODE="${ENABLE_UNICODE}" \
+      -DHTTP_ONLY="${HTTP_ONLY}" \
+      -DCURL_USE_SCHANNEL="${SCHANNEL}" \
+      -DCURL_USE_OPENSSL="${OPENSSL}" \
+      -DCURL_USE_LIBPSL=OFF \
+      ${options}
+  done
+  if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
+    cat _bld_chkprefill/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+    false
+  fi
   if false; then
     cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
   fi

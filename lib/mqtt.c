@@ -49,7 +49,7 @@
 /* first byte is command.
    second byte is for flags. */
 #define MQTT_MSG_CONNECT    0x10
-#define MQTT_MSG_CONNACK    0x20
+/* ##define MQTT_MSG_CONNACK    0x20 */
 #define MQTT_MSG_PUBLISH    0x30
 #define MQTT_MSG_SUBSCRIBE  0x82
 #define MQTT_MSG_SUBACK     0x90

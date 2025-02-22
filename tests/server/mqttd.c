@@ -33,14 +33,13 @@
  * Read commands from FILE (set with --config). The commands control how to
  * act and is reset to defaults each client TCP connect.
  *
- * Config file keywords:
- *
- * TODO
  */
 
 /* based on sockfilt.c */
 
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -68,12 +67,6 @@
 #ifdef USE_WINSOCK
 #undef  EINTR
 #define EINTR    4 /* errno.h value */
-#undef  EAGAIN
-#define EAGAIN  11 /* errno.h value */
-#undef  ENOMEM
-#define ENOMEM  12 /* errno.h value */
-#undef  EINVAL
-#define EINVAL  22 /* errno.h value */
 #endif
 
 #define DEFAULT_PORT 1883 /* MQTT default port */
@@ -89,14 +82,10 @@
 #define MQTT_MSG_CONNECT    0x10
 #define MQTT_MSG_CONNACK    0x20
 #define MQTT_MSG_PUBLISH    0x30
-#define MQTT_MSG_PUBACK     0x40
+/* #define MQTT_MSG_PUBACK     0x40 */
 #define MQTT_MSG_SUBSCRIBE  0x82
 #define MQTT_MSG_SUBACK     0x90
 #define MQTT_MSG_DISCONNECT 0xe0
-
-#define MQTT_CONNACK_LEN 4
-#define MQTT_SUBACK_LEN 5
-#define MQTT_CLIENTID_LEN 12 /* "curl0123abcd" */
 
 struct configurable {
   unsigned char version; /* initial version byte in the request must match
@@ -418,7 +407,7 @@ static int publish(FILE *dump,
   if(!packet)
     return 1;
 
-  packet[0] = MQTT_MSG_PUBLISH; /* TODO: set QoS? */
+  packet[0] = MQTT_MSG_PUBLISH;
   memcpy(&packet[1], rembuffer, encodedlen);
 
   (void)packetid;
@@ -684,10 +673,9 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       topiclen = (size_t)(buffer[1 + bytes] << 8) | buffer[2 + bytes];
       logmsg("Got %zu bytes topic", topiclen);
-      /* TODO: verify topiclen */
 
 #ifdef QOS
-      /* TODO: handle packetid if there is one. Send puback if QoS > 0 */
+      /* Handle packetid if there is one. Send puback if QoS > 0 */
       puback(dump, fd, 0);
 #endif
       /* expect a disconnect here */
@@ -1007,7 +995,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        port = curlx_ultous(ulnum);
+        port = util_ultous(ulnum);
         arg++;
       }
     }

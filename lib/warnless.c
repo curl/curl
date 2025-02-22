@@ -45,41 +45,16 @@
 #include <limits.h>
 
 #define CURL_MASK_UCHAR   ((unsigned char)~0)
-#define CURL_MASK_SCHAR   (CURL_MASK_UCHAR >> 1)
 
 #define CURL_MASK_USHORT  ((unsigned short)~0)
-#define CURL_MASK_SSHORT  (CURL_MASK_USHORT >> 1)
 
 #define CURL_MASK_UINT    ((unsigned int)~0)
 #define CURL_MASK_SINT    (CURL_MASK_UINT >> 1)
 
 #define CURL_MASK_ULONG   ((unsigned long)~0)
-#define CURL_MASK_SLONG   (CURL_MASK_ULONG >> 1)
-
-#define CURL_MASK_UCOFFT  ((unsigned CURL_TYPEOF_CURL_OFF_T)~0)
-#define CURL_MASK_SCOFFT  (CURL_MASK_UCOFFT >> 1)
 
 #define CURL_MASK_USIZE_T ((size_t)~0)
 #define CURL_MASK_SSIZE_T (CURL_MASK_USIZE_T >> 1)
-
-/*
-** unsigned long to unsigned short
-*/
-
-unsigned short curlx_ultous(unsigned long ulnum)
-{
-#ifdef __INTEL_COMPILER
-#  pragma warning(push)
-#  pragma warning(disable:810) /* conversion may lose significant bits */
-#endif
-
-  DEBUGASSERT(ulnum <= (unsigned long) CURL_MASK_USHORT);
-  return (unsigned short)(ulnum & (unsigned long) CURL_MASK_USHORT);
-
-#ifdef __INTEL_COMPILER
-#  pragma warning(pop)
-#endif
-}
 
 /*
 ** unsigned long to unsigned char

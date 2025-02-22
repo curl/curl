@@ -27,6 +27,14 @@ We also work hard on writing code that are warning-free on all the major
 platforms and in general on as many platforms as possible. Code that obviously
 causes warnings is not accepted as-is.
 
+## Readability
+
+A primary characteristic for code is readability. The intent and meaning of
+the code should be visible to the reader. Being clear and unambiguous beats
+being clever and saving two lines of code. Write simple code. You and others
+who come back to this code over the coming decades want to be able to quickly
+understand it when debugging.
+
 ## Naming
 
 Try using a non-confusing naming scheme for your new functions and variable
@@ -314,3 +322,42 @@ typedef struct {
 } something;
 something instance;
 ```
+
+## Banned functions
+
+To avoid footguns and unintended consequences we forbid the use of a number of
+C functions. The `checksrc` script finds and yells about them if used. This
+makes us write better code.
+
+This is the full list of functions generally banned.
+
+    _access
+    _mbscat
+    _mbsncat
+    _tcscat
+    _tcsncat
+    _waccess
+    _wcscat
+    _wcsncat
+    access
+    gets
+    gmtime
+    LoadLibrary
+    LoadLibraryA
+    LoadLibraryEx
+    LoadLibraryExA
+    LoadLibraryExW
+    LoadLibraryW
+    localtime
+    snprintf
+    sprintf
+    sscanf
+    strcat
+    strerror
+    strncat
+    strncpy
+    strtok
+    strtol
+    strtoul
+    vsnprint
+    vsprintf

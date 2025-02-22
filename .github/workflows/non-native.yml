@@ -117,13 +117,14 @@ jobs:
             echo '::endgroup::'
 
   freebsd:
-    name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl ${{ matrix.arch }}"
+    name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl${{ matrix.desc }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       matrix:
         include:
           - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
+          - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF -DCURL_TEST_BUNDLES=OFF', desc: ' !unity !bundle !runtests !examples' }
           - { build: 'autotools', arch: 'arm64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'arm64', compiler: 'clang' }
       fail-fast: false
@@ -148,18 +149,25 @@ jobs:
               --prefix="${HOME}"/install \
               --with-openssl \
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
-              --disable-dependency-tracking || { tail -n 1000 config.log; false; }
+              --disable-dependency-tracking \
+              ${{ matrix.options }} \
+              || { tail -n 1000 config.log; false; }
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             time make -j3 install
             src/curl --disable --version
+            desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time make -j3 -C tests
-              time make test-ci V=1 TFLAGS='-j4'
+              if [ "${desc#*!runtests*}" = "${desc}" ]; then
+                time make test-ci V=1 TFLAGS='-j4'
+              fi
             fi
-            echo '::group::build examples'
-            time make -j3 examples
-            echo '::endgroup::'
+            if [ "${desc#*!examples*}" = "${desc}" ]; then
+              echo '::group::build examples'
+              time make -j3 examples
+              echo '::endgroup::'
+            fi
 
       - name: 'cmake'
         if: ${{ matrix.build == 'cmake' }}
@@ -179,18 +187,24 @@ jobs:
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_USE_GSSAPI=ON \
+              ${{ matrix.options }} \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld --config Debug
             bld/src/curl --disable --version
+            desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --config Debug --target testdeps
-              time cmake --build bld --config Debug --target test-ci
+              if [ "${desc#*!runtests*}" = "${desc}" ]; then
+                time cmake --build bld --config Debug --target test-ci
+              fi
             fi
-            echo '::group::build examples'
-            time cmake --build bld --config Debug --target curl-examples
-            echo '::endgroup::'
+            if [ "${desc#*!examples*}" = "${desc}" ]; then
+              echo '::group::build examples'
+              time cmake --build bld --config Debug --target curl-examples
+              echo '::endgroup::'
+            fi
 
   omnios:
     name: 'OmniOS, AM gcc openssl amd64'
@@ -213,7 +227,8 @@ jobs:
             mkdir bld && cd bld && time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-openssl \
-              --disable-dependency-tracking || { tail -n 1000 config.log; false; }
+              --disable-dependency-tracking \
+              || { tail -n 1000 config.log; false; }
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             time gmake -j3 install
@@ -296,7 +311,7 @@ jobs:
             https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz | tar -x
           cd libressl-${{ env.libressl-version }}
           # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
-          cmake . \
+          cmake -B . \
             -DHAVE_ENDIAN_H=0 \
             -DCMAKE_INSTALL_PREFIX="$HOME/libressl" \
             -DCMAKE_SYSTEM_NAME=iOS \
@@ -320,7 +335,8 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
-            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+            cmake -B bld -D_CURL_PREFILL=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
               ${{ matrix.build.generate }} ${options}

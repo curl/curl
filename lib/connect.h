@@ -32,7 +32,7 @@
 struct Curl_dns_entry;
 struct ip_quadruple;
 
-enum alpnid Curl_alpn2alpnid(char *name, size_t len);
+enum alpnid Curl_alpn2alpnid(const char *name, size_t len);
 
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */

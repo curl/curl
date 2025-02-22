@@ -35,15 +35,12 @@
 #include "progress.h"
 #include "select.h"
 #include "warnless.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
 
 static void cf_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
@@ -371,10 +368,10 @@ bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done)
+                              bool *done)
 {
   if(cf)
-    return cf->cft->do_connect(cf, data, blocking, done);
+    return cf->cft->do_connect(cf, data, done);
   return CURLE_FAILED_INIT;
 }
 
@@ -408,6 +405,9 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
                            bool blocking,
                            bool *done)
 {
+#define CF_CONN_NUM_POLLS_ON_STACK 5
+  struct pollfd a_few_on_stack[CF_CONN_NUM_POLLS_ON_STACK];
+  struct curl_pollfds cpfds;
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
 
@@ -422,7 +422,11 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   }
 
   *done = cf->connected;
-  if(!*done) {
+  if(*done)
+    return CURLE_OK;
+
+  Curl_pollfds_init(&cpfds, a_few_on_stack, CF_CONN_NUM_POLLS_ON_STACK);
+  while(!*done) {
     if(Curl_conn_needs_flush(data, sockindex)) {
       DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
       result = Curl_conn_flush(data, sockindex);
@@ -430,7 +434,9 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
         return result;
     }
 
-    result = cf->cft->do_connect(cf, data, blocking, done);
+    result = cf->cft->do_connect(cf, data, done);
+    CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %d, done=%d",
+                blocking, result, *done);
     if(!result && *done) {
       /* Now that the complete filter chain is connected, let all filters
        * persist information at the connection. E.g. cf-socket sets the
@@ -439,12 +445,56 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       conn_report_connect_stats(data, data->conn);
       data->conn->keepalive = Curl_now();
       Curl_verboseconnect(data, data->conn, sockindex);
+      goto out;
     }
     else if(result) {
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
+                  result);
       conn_report_connect_stats(data, data->conn);
+      goto out;
+    }
+
+    if(!blocking)
+      goto out;
+    else {
+      /* check allowed time left */
+      const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+      curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+      struct easy_pollset ps;
+      int rc;
+
+      if(timeout_ms < 0) {
+        /* no need to continue if time already is up */
+        failf(data, "connect timeout");
+        result = CURLE_OPERATION_TIMEDOUT;
+        goto out;
+      }
+
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), do poll");
+      Curl_pollfds_reset(&cpfds);
+      memset(&ps, 0, sizeof(ps));
+      /* In general, we want to send after connect, wait on that. */
+      if(sockfd != CURL_SOCKET_BAD)
+        Curl_pollset_set_out_only(data, &ps, sockfd);
+      Curl_conn_adjust_pollset(data, &ps);
+      result = Curl_pollfds_add_ps(&cpfds, &ps);
+      if(result)
+        goto out;
+
+      rc = Curl_poll(cpfds.pfds, cpfds.n,
+                     CURLMIN(timeout_ms, (cpfds.n ? 1000 : 10)));
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), Curl_poll() -> %d",
+                  rc);
+      if(rc < 0) {
+        result = CURLE_COULDNT_CONNECT;
+        goto out;
+      }
+      /* continue iterating */
     }
   }
 
+out:
+  Curl_pollfds_cleanup(&cpfds);
   return result;
 }
 
@@ -500,13 +550,14 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
   return FALSE;
 }
 
-unsigned char Curl_conn_http_version(struct Curl_easy *data)
+unsigned char Curl_conn_http_version(struct Curl_easy *data,
+                                     struct connectdata *conn)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_UNKNOWN_OPTION;
   unsigned char v = 0;
 
-  cf = data->conn ? data->conn->cfilter[FIRSTSOCKET] : NULL;
+  cf = conn->cfilter[FIRSTSOCKET];
   for(; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_HTTP) {
       int value = 0;
@@ -724,7 +775,7 @@ static CURLcode cf_cntrl_all(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   size_t i;
 
-  for(i = 0; i < ARRAYSIZE(conn->cfilter); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
     result = Curl_conn_cf_cntrl(conn->cfilter[i], data, ignore_result,
                                 event, arg1, arg2);
     if(!ignore_result && result)
@@ -884,14 +935,14 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
   DEBUGASSERT(data->conn);
   conn = data->conn;
 #ifdef DEBUGBUILD
-  {
+  if(write_len) {
     /* Allow debug builds to override this logic to force short sends
     */
-    char *p = getenv("CURL_SMALLSENDS");
+    const char *p = getenv("CURL_SMALLSENDS");
     if(p) {
-      size_t altsize = (size_t)strtoul(p, NULL, 10);
-      if(altsize)
-        write_len = CURLMIN(write_len, altsize);
+      curl_off_t altsize;
+      if(!Curl_str_number(&p, &altsize, write_len))
+        write_len = (size_t)altsize;
     }
   }
 #endif

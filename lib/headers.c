@@ -209,7 +209,7 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* skip all leading space letters */
-  while(*header && ISBLANK(*header))
+  while(ISBLANK(*header))
     header++;
 
   *value = header;

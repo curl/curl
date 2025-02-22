@@ -65,6 +65,9 @@ endif()
 set(_source_epilogue "#undef inline")
 curl_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 check_c_source_compiles("${_source_epilogue}
+  #ifdef _MSC_VER
+  #include <winsock2.h>
+  #endif
   #include <time.h>
   int main(void)
   {
@@ -104,11 +107,10 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
   check_c_source_compiles("${_source_epilogue}
     int main(void)
     {
-    #ifdef h_errno
-      return 0;
-    #else
+    #ifndef h_errno
       #error force compilation error
     #endif
+      return 0;
     }" HAVE_H_ERRNO)
 
   if(NOT HAVE_H_ERRNO)
@@ -124,12 +126,11 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
         int main(void)
         {
         #if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
-          return 0;
         #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
-          return 0;
         #else
           #error force compilation error
         #endif
+          return 0;
         }" HAVE_H_ERRNO_SBS_ISSUE_7)
     endif()
   endif()

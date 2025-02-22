@@ -58,6 +58,7 @@
 #include "select.h"
 #include "strcase.h"
 #include "warnless.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -777,22 +778,15 @@ static void printsub(struct Curl_easy *data,
   }
 }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4706) /* assignment within conditional expression */
-#endif
 static bool str_is_nonascii(const char *str)
 {
   char c;
-  while((c = *str++))
+  while((c = *str++) != 0)
     if(c & 0x80)
       return TRUE;
 
   return FALSE;
 }
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 static CURLcode check_telnet_options(struct Curl_easy *data)
 {
@@ -869,21 +863,19 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
       case 2:
         /* Window Size */
         if(strncasecompare(option, "WS", 2)) {
-          char *p;
-          unsigned long x = strtoul(arg, &p, 10);
-          unsigned long y = 0;
-          if(x && (x <= 0xffff) && Curl_raw_tolower(*p) == 'x') {
-            p++;
-            y = strtoul(p, NULL, 10);
-            if(y && (y <= 0xffff)) {
-              tn->subopt_wsx = (unsigned short)x;
-              tn->subopt_wsy = (unsigned short)y;
-              tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
-            }
-          }
-          if(!y) {
+          const char *p = arg;
+          curl_off_t x = 0;
+          curl_off_t y = 0;
+          if(Curl_str_number(&p, &x, 0xffff) ||
+             Curl_str_single(&p, 'x') ||
+             Curl_str_number(&p, &y, 0xffff)) {
             failf(data, "Syntax error in telnet option: %s", head->data);
             result = CURLE_SETOPT_OPTION_SYNTAX;
+          }
+          else {
+            tn->subopt_wsx = (unsigned short)x;
+            tn->subopt_wsy = (unsigned short)y;
+            tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
           }
         }
         else
@@ -1559,10 +1551,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         /* returned not-zero, this an error */
         if(result) {
           keepon = FALSE;
-          /* TODO: in test 1452, macOS sees a ECONNRESET sometimes?
-           * Is this the telnet test server not shutting down the socket
-           * in a clean way? Seems to be timing related, happens more
-           * on slow debug build */
+          /* In test 1452, macOS sees a ECONNRESET sometimes? Is this the
+           * telnet test server not shutting down the socket in a clean way?
+           * Seems to be timing related, happens more on slow debug build */
           if(data->state.os_errno == ECONNRESET) {
             DEBUGF(infof(data, "telnet_do, unexpected ECONNRESET on recv"));
           }

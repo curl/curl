@@ -89,7 +89,7 @@
 #include "progress.h"
 #include "transfer.h"
 #include "strcase.h"
-#include "strtok.h"
+#include "strparse.h"
 #include "curl_ldap.h"
 #include "curl_multibyte.h"
 #include "curl_base64.h"
@@ -389,55 +389,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
     int ldap_option;
     char *ldap_ca = conn->ssl_config.CAfile;
-#if defined(CURL_HAS_NOVELL_LDAPSDK)
-    rc = ldapssl_client_init(NULL, NULL);
-    if(rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ldapssl_client_init %s", ldap_err2string(rc));
-      result = CURLE_SSL_CERTPROBLEM;
-      goto quit;
-    }
-    if(conn->ssl_config.verifypeer) {
-      /* Novell SDK supports DER or BASE64 files. */
-      int cert_type = LDAPSSL_CERT_FILETYPE_B64;
-      if((data->set.ssl.cert_type) &&
-         (strcasecompare(data->set.ssl.cert_type, "DER")))
-        cert_type = LDAPSSL_CERT_FILETYPE_DER;
-      if(!ldap_ca) {
-        failf(data, "LDAP local: ERROR %s CA cert not set",
-              (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"));
-        result = CURLE_SSL_CERTPROBLEM;
-        goto quit;
-      }
-      infof(data, "LDAP local: using %s CA cert '%s'",
-            (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
-            ldap_ca);
-      rc = ldapssl_add_trusted_cert(ldap_ca, cert_type);
-      if(rc != LDAP_SUCCESS) {
-        failf(data, "LDAP local: ERROR setting %s CA cert: %s",
-              (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
-              ldap_err2string(rc));
-        result = CURLE_SSL_CERTPROBLEM;
-        goto quit;
-      }
-      ldap_option = LDAPSSL_VERIFY_SERVER;
-    }
-    else
-      ldap_option = LDAPSSL_VERIFY_NONE;
-    rc = ldapssl_set_verify_mode(ldap_option);
-    if(rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ERROR setting cert verify mode: %s",
-              ldap_err2string(rc));
-      result = CURLE_SSL_CERTPROBLEM;
-      goto quit;
-    }
-    server = ldapssl_init(host, conn->primary.remote_port, 1);
-    if(!server) {
-      failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, conn->primary.remote_port);
-      result = CURLE_COULDNT_CONNECT;
-      goto quit;
-    }
-#elif defined(LDAP_OPT_X_TLS)
+#ifdef LDAP_OPT_X_TLS
     if(conn->ssl_config.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
       if((data->set.ssl.cert_type) &&
@@ -758,10 +710,6 @@ quit:
     ldap_free_urldesc(ludp);
   if(server)
     ldap_unbind_s(server);
-#if defined(HAVE_LDAP_SSL) && defined(CURL_HAS_NOVELL_LDAPSDK)
-  if(ldap_ssl)
-    ldapssl_client_deinit();
-#endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
 
   FREE_ON_WINLDAP(host);
 
@@ -780,7 +728,9 @@ static void _ldap_trace(const char *fmt, ...)
 
   if(do_trace == -1) {
     const char *env = getenv("CURL_TRACE");
-    do_trace = (env && strtol(env, NULL, 10) > 0);
+    curl_off_t e = 0;
+    if(!Curl_str_number(&env, &e, INT_MAX))
+      do_trace = e > 0;
   }
   if(!do_trace)
     return;
@@ -811,36 +761,17 @@ static int str2scope(const char *p)
   return -1;
 }
 
-/*
- * Split 'str' into strings separated by commas.
- * Note: out[] points into 'str'.
- */
-static bool split_str(char *str, char ***out, size_t *count)
+/* number of entries in the attributes list */
+static size_t num_entries(const char *s)
 {
-  char **res;
-  char *lasts;
-  char *s;
-  size_t  i;
   size_t items = 1;
 
-  s = strchr(str, ',');
+  s = strchr(s, ',');
   while(s) {
     items++;
-    s = strchr(++s, ',');
+    s = strchr(s + 1, ',');
   }
-
-  res = calloc(items, sizeof(char *));
-  if(!res)
-    return FALSE;
-
-  for(i = 0, s = Curl_strtok_r(str, ",", &lasts); s && i < items;
-      s = Curl_strtok_r(NULL, ",", &lasts), i++)
-    res[i] = s;
-
-  *out = res;
-  *count = items;
-
-  return TRUE;
+  return items;
 }
 
 /*
@@ -934,15 +865,8 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     *q++ = '\0';
 
   if(*p) {
-    char **attributes;
-    size_t count = 0;
-
-    /* Split the string into an array of attributes */
-    if(!split_str(p, &attributes, &count)) {
-      rc = LDAP_NO_MEMORY;
-
-      goto quit;
-    }
+    size_t count = num_entries(p); /* at least one */
+    const char *atp = p;
 
     /* Allocate our array (+1 for the NULL entry) */
 #if defined(USE_WIN32_LDAP)
@@ -951,27 +875,25 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     ludp->lud_attrs = calloc(count + 1, sizeof(char *));
 #endif
     if(!ludp->lud_attrs) {
-      free(attributes);
-
       rc = LDAP_NO_MEMORY;
-
       goto quit;
     }
 
     for(i = 0; i < count; i++) {
       char *unescaped;
       CURLcode result;
+      struct Curl_str out;
 
-      LDAP_TRACE(("attr[%zu] '%s'\n", i, attributes[i]));
+      if(Curl_str_until(&atp, &out, 1024, ','))
+        break;
+
+      LDAP_TRACE(("attr[%zu] '%.*s'\n", i, (int)out.len, out.str));
 
       /* Unescape the attribute */
-      result = Curl_urldecode(attributes[i], 0, &unescaped, NULL,
+      result = Curl_urldecode(out.str, out.len, &unescaped, NULL,
                               REJECT_ZERO);
       if(result) {
-        free(attributes);
-
         rc = LDAP_NO_MEMORY;
-
         goto quit;
       }
 
@@ -983,10 +905,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
       free(unescaped);
 
       if(!ludp->lud_attrs[i]) {
-        free(attributes);
-
         rc = LDAP_NO_MEMORY;
-
         goto quit;
       }
 #else
@@ -994,9 +913,9 @@ static int _ldap_url_parse2(struct Curl_easy *data,
 #endif
 
       ludp->lud_attrs_dups++;
+      if(Curl_str_single(&atp, ','))
+        break;
     }
-
-    free(attributes);
   }
 
   p = q;

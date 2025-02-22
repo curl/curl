@@ -144,6 +144,7 @@ LIB_CFILES =         \
   curl_threads.c     \
   curl_trc.c         \
   cw-out.c           \
+  cw-pause.c         \
   dict.c             \
   dllmain.c          \
   doh.c              \
@@ -226,9 +227,9 @@ LIB_CFILES =         \
   splay.c            \
   strcase.c          \
   strdup.c           \
+  strequal.c         \
   strerror.c         \
   strparse.c         \
-  strtok.c           \
   strtoofft.c        \
   system_win32.c     \
   telnet.c           \
@@ -291,6 +292,7 @@ LIB_HFILES =         \
   curl_trc.h         \
   curlx.h            \
   cw-out.h           \
+  cw-pause.h         \
   dict.h             \
   doh.h              \
   dynbuf.h           \
@@ -366,7 +368,6 @@ LIB_HFILES =         \
   strdup.h           \
   strerror.h         \
   strparse.h         \
-  strtok.h           \
   strtoofft.h        \
   system_win32.h     \
   telnet.h           \

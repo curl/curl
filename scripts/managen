@@ -302,7 +302,30 @@ sub render {
             # skip leading blank lines
             next;
         }
+
         $start = 1;
+
+        if(/^[ \t]*\n/) {
+            # count and ignore blank lines
+            $blankline++;
+            next;
+        }
+        elsif($d =~ /^    (.*)/) {
+            my $word = $1;
+            if(!$quote && $manpage) {
+                push @desc, "\n" if($blankline);
+                push @desc, ".nf\n";
+                $blankline = 0;
+            }
+            $quote = 1;
+            $d = "$word\n";
+        }
+        elsif($quote) {
+            # end of quote
+            push @desc, ".fi\n" if($manpage);
+            $quote = 0;
+        }
+
         if(/^# (.*)/) {
             $header = 1;
             if($top != 1) {
@@ -366,30 +389,27 @@ sub render {
             print STDERR "$f:$line:1:ERROR: $cmd detected, use ##-style\n";
             return 3;
         }
-        elsif(/^[ \t]*\n/) {
-            # count and ignore blank lines
-            $blankline++;
-            next;
-        }
-        elsif($d =~ /^    (.*)/) {
-            my $word = $1;
-            if(!$quote && $manpage) {
-                push @desc, "\n" if($blankline);
-                push @desc, ".nf\n";
-                $blankline = 0;
-            }
-            $quote = 1;
-            $d = "$word\n";
-        }
-        elsif($quote && ($d !~ /^    (.*)/)) {
-            # end of quote
-            push @desc, ".fi\n" if($manpage);
-            $quote = 0;
-        }
 
         $d =~ s/`%DATE`/$date/g;
         $d =~ s/`%VERSION`/$version/g;
         $d =~ s/`%GLOBALS`/$globals/g;
+
+        if(!$quote) {
+            if($d =~ /^(.*)  /) {
+                printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
+                    length($1);
+                return 3;
+            }
+            my $back = $d;
+
+            # remove all backticked pieces
+            $back =~ s/\`(.*?)\`//g;
+
+            if($back =~ /[^\\][\<\>]/) {
+                print STDERR "$f:$line:1:WARN: un-escaped < or > used: $back\n";
+                return 3;
+            }
+        }
 
         # convert backticks to double quotes
         $d =~ s/\`/\"/g;
@@ -410,17 +430,6 @@ sub render {
             }
         }
 
-        if(!$quote) {
-            if($d =~ /^(.*)  /) {
-                printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
-                    length($1);
-                return 3;
-            }
-            elsif($d =~ /[^\\][\<\>]/) {
-                print STDERR "$f:$line:1:WARN: un-escaped < or > used\n";
-                return 3;
-            }
-        }
         # convert backslash-'<' or '> to just the second character
         $d =~ s/\\([><])/$1/g;
         # convert single backslash to double-backslash
@@ -1176,8 +1185,8 @@ HEADER
 }
 
 sub showonly {
-    my ($f) = @_;
-    if(single($f, 1)) {
+    my ($dir, $f) = @_;
+    if(single($dir, 1, $f, 1)) {
         print STDERR "$f: failed\n";
     }
 }
@@ -1212,7 +1221,7 @@ sub getargs {
         return;
     }
     elsif($f eq "single") {
-        showonly($s[0]);
+        showonly($dir, $s[0]);
         return;
     }
     elsif($f eq "protos") {

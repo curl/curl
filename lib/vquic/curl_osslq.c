@@ -82,10 +82,6 @@
 #define H3_STREAM_SEND_CHUNKS \
           (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 typedef uint32_t sslerr_t;
 #else
@@ -458,7 +454,7 @@ static CURLcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
   struct cf_osslq_ctx *ctx = cf->ctx;
   curl_int64_t stream_id = (curl_int64_t)SSL_get_stream_id(stream_ssl);
 
-  if(h3->remote_ctrl_n >= ARRAYSIZE(h3->remote_ctrl)) {
+  if(h3->remote_ctrl_n >= CURL_ARRAYSIZE(h3->remote_ctrl)) {
     /* rejected, we are full */
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] rejecting remote stream",
                 stream_id);
@@ -1564,7 +1560,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     bool blocked = FALSE, eos_written = FALSE;
 
     n = nghttp3_conn_writev_stream(ctx->h3.conn, &stream_id, &eos,
-                                   vec, ARRAYSIZE(vec));
+                                   vec, CURL_ARRAYSIZE(vec));
     if(n < 0) {
       failf(data, "nghttp3_conn_writev_stream returned error: %s",
             nghttp3_strerror((int)n));
@@ -1722,7 +1718,7 @@ out:
 
 static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 bool blocking, bool *done)
+                                 bool *done)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1737,7 +1733,7 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
 
   /* Connect the UDP filter first */
   if(!cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }
@@ -1984,7 +1980,7 @@ static ssize_t cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t nwritten;
   CURLcode result;
 
-  (void)eos; /* TODO: use to end stream */
+  (void)eos; /* use to end stream */
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
   DEBUGASSERT(ctx->tls.ossl.ssl);

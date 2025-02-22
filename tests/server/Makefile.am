@@ -40,10 +40,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
+CFLAGS += @CURL_CFLAG_EXTRAS@
+
 if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
-AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
 
 # Makefile.inc provides neat definitions
 include Makefile.inc

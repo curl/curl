@@ -513,7 +513,6 @@ struct ConnectBits {
 #ifdef USE_UNIX_SOCKETS
   BIT(abstract_unix_socket);
 #endif
-  BIT(tls_upgraded);
   BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
                          accept() */
   BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
@@ -568,11 +567,12 @@ struct hostname {
 struct Curl_async {
   char *hostname;
   struct Curl_dns_entry *dns;
-  struct thread_data *tdata;
+#ifdef CURLRES_ASYNCH
+  struct thread_data thdata;
+#endif
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel e.g. */
   int port;
-  int status; /* if done is TRUE, this is the status from the callback */
   BIT(done);  /* set TRUE when the lookup is complete */
 };
 
@@ -1108,7 +1108,6 @@ struct Curl_data_prio_node {
 /**
  * Priority information for an easy handle in relation to others
  * on the same connection.
- * TODO: we need to adapt it to the new priority scheme as defined in RFC 9218
  */
 struct Curl_data_priority {
 #ifdef USE_NGHTTP2
@@ -1199,7 +1198,6 @@ struct UrlState {
   curl_prot_t first_remote_protocol;
 
   int retrycount; /* number of retries on a new connection */
-  struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
   int os_errno;  /* filled in with errno whenever an error occurs */
   long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */
@@ -1314,10 +1312,9 @@ struct UrlState {
     char *proxypasswd;
 #endif
   } aptr;
-  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
-                             to be used in the library's request(s) */
-  unsigned char httpversion; /* the lowest HTTP version*10 reported by any
-                                server involved in this request */
+#ifndef CURL_DISABLE_HTTP
+  struct http_negotiation http_neg;
+#endif
   unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
   unsigned char select_bits; /* != 0 -> bitmask of socket events for this

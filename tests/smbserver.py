@@ -112,7 +112,7 @@ def smbserver(options):
         pid = os.getpid()
         # see tests/server/util.c function write_pidfile
         if os.name == "nt":
-            pid += 65536
+            pid += 4194304
         with open(options.pidfile, "w") as f:
             f.write(str(pid))
 
@@ -331,7 +331,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             pid = os.getpid()
             # see tests/server/util.c function write_pidfile
             if os.name == "nt":
-                pid += 65536
+                pid += 4194304
             contents = VERIFIED_RSP.format(pid=pid).encode('utf-8')
 
         self.write_to_fid(fid, contents)

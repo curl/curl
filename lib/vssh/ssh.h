@@ -201,17 +201,10 @@ struct ssh_conn {
   Curl_send *tls_send;
 #endif
 
-#ifdef HAVE_LIBSSH2_AGENT_API
   LIBSSH2_AGENT *ssh_agent;     /* proxy to ssh-agent/pageant */
-  struct libssh2_agent_publickey *sshagent_identity,
-                                 *sshagent_prev_identity;
-#endif
-
-  /* note that HAVE_LIBSSH2_KNOWNHOST_API is a define set in the libssh2.h
-     header */
-#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+  struct libssh2_agent_publickey *sshagent_identity;
+  struct libssh2_agent_publickey *sshagent_prev_identity;
   LIBSSH2_KNOWNHOSTS *kh;
-#endif
 #elif defined(USE_WOLFSSH)
   WOLFSSH *ssh_session;
   WOLFSSH_CTX *ctx;
@@ -221,43 +214,20 @@ struct ssh_conn {
 #endif /* USE_LIBSSH */
 };
 
+#ifdef USE_LIBSSH
+#if LIBSSH_VERSION_INT < SSH_VERSION_INT(0, 9, 0)
+#  error "SCP/SFTP protocols require libssh 0.9.0 or later"
+#endif
+#endif
+
 #if defined(USE_LIBSSH2)
 
 /* Feature detection based on version numbers to better work with
    non-configure platforms */
 
-#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x001000)
-#  error "SCP/SFTP protocols require libssh2 0.16 or later"
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010000
-#define HAVE_LIBSSH2_SFTP_SEEK64 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010100
-#define HAVE_LIBSSH2_VERSION 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010205
-#define HAVE_LIBSSH2_INIT 1
-#define HAVE_LIBSSH2_EXIT 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010206
-#define HAVE_LIBSSH2_KNOWNHOST_CHECKP 1
-#define HAVE_LIBSSH2_SCP_SEND64 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010208
-#define HAVE_LIBSSH2_SESSION_HANDSHAKE 1
-#endif
-
-#ifdef HAVE_LIBSSH2_VERSION
-/* get it runtime if possible */
-#define CURL_LIBSSH2_VERSION libssh2_version(0)
-#else
-/* use build-time if runtime not possible */
-#define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
+#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x010208)
+#  error "SCP/SFTP protocols require libssh2 1.2.8 or later"
+/* 1.2.8 was released on April 5 2011 */
 #endif
 
 #endif /* USE_LIBSSH2 */

@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_STRTOK_H
-#define HEADER_CURL_STRTOK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,14 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
-#include <stddef.h>
+#include "curl/curl.h"
+#include <stdio.h>
 
-#ifdef HAVE_STRTOK_R
-#include <string.h>
-#define Curl_strtok_r strtok_r
-#else
-char *Curl_strtok_r(char *s, const char *delim, char **last);
-#endif
-
-#endif /* HEADER_CURL_STRTOK_H */
+int main(void)
+{
+  printf("curl_version(): |%s|\n", curl_version());
+  return 0;
+}

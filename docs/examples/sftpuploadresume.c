@@ -90,7 +90,9 @@ static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
 
   f = fopen(localpath, "rb");
   if(!f) {
+#ifndef UNDER_CE
     perror(NULL);
+#endif
     return 0;
   }
 
@@ -99,7 +101,7 @@ static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
   curl_easy_setopt(curlhandle, CURLOPT_READFUNCTION, readfunc);
   curl_easy_setopt(curlhandle, CURLOPT_READDATA, f);
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
   _fseeki64(f, remoteFileSizeByte, SEEK_SET);
 #else
   fseek(f, (long)remoteFileSizeByte, SEEK_SET);

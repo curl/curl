@@ -582,7 +582,7 @@ Example, set default time out and proxy in a config file:
     # We want a 30 minute timeout:
     -m 1800
     # ... and we use a proxy for all accesses:
-    proxy = proxy.our.domain.com:8080
+    proxy = proxy.our.domain.example.com:8080
 
 Whitespaces ARE significant at the end of lines, but all whitespace leading
 up to the first characters of each line are ignored.

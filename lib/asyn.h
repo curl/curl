@@ -39,32 +39,34 @@ struct Curl_dns_entry;
 
 /* Data for synchronization between resolver thread and its parent */
 struct thread_sync_data {
-  curl_mutex_t *mtx;
-  bool done;
-  int port;
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
+  curl_mutex_t mutx;
 #ifndef CURL_DISABLE_SOCKETPAIR
-  struct Curl_easy *data;
   curl_socket_t sock_pair[2]; /* eventfd/pipes/socket pair */
 #endif
-  int sock_error;
   struct Curl_addrinfo *res;
 #ifdef HAVE_GETADDRINFO
   struct addrinfo hints;
 #endif
-  struct thread_data *td; /* for thread-self cleanup */
+  int port;
+  int sock_error;
+  bool done;
 };
 
 struct thread_data {
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
   timediff_t interval_end;
+  struct curltime start;
   struct thread_sync_data tsd;
+  CURLcode result; /* CURLE_OK or error handling response */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct Curl_https_rrinfo hinfo;
   ares_channel channel;
+  int num_pending; /* number of outstanding c-ares requests */
 #endif
+  bool init;
 };
 
 #elif defined(CURLRES_ARES) /* CURLRES_THREADED */
@@ -74,13 +76,14 @@ struct thread_data {
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
   int last_status;
+  CURLcode result; /* CURLE_OK or error handling response */
 #ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #endif
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo hinfo;
 #endif
-  char hostname[1];
+  char *hostname;
 };
 
 #endif /* CURLRES_ARES */

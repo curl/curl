@@ -51,8 +51,7 @@ m4_define([AC_LANG_PROGRAM(C)],
 int main(void)
 {
 $2
- ;
- return 0;
+  return 0;
 }])
 
 dnl Override Autoconf's AC_LANG_CALL (C)

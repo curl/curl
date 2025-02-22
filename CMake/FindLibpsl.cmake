@@ -48,6 +48,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBPSL_FOUND AND LIBPSL_INCLUDE_DIRS)
+  set(Libpsl_FOUND TRUE)
   string(REPLACE ";" " " LIBPSL_CFLAGS "${LIBPSL_CFLAGS}")
   message(STATUS "Found Libpsl (via pkg-config): ${LIBPSL_INCLUDE_DIRS} (found version \"${LIBPSL_VERSION}\")")
 else()

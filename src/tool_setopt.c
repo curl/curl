@@ -185,12 +185,12 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
   } \
 } while(0)
 
-#define DECL0(s) ADD((&easysrc_decl, s))
+/* #define DECL0(s) ADD((&easysrc_decl, s)) */
 #define DECL1(f,a) ADDF((&easysrc_decl, f,a))
 
-#define DATA0(s) ADD((&easysrc_data, s))
+/* #define DATA0(s) ADD((&easysrc_data, s)) */
 #define DATA1(f,a) ADDF((&easysrc_data, f,a))
-#define DATA2(f,a,b) ADDF((&easysrc_data, f,a,b))
+/* #define DATA2(f,a,b) ADDF((&easysrc_data, f,a,b)) */
 #define DATA3(f,a,b,c) ADDF((&easysrc_data, f,a,b,c))
 
 #define CODE0(s) ADD((&easysrc_code, s))
@@ -198,11 +198,11 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 #define CODE2(f,a,b) ADDF((&easysrc_code, f,a,b))
 #define CODE3(f,a,b,c) ADDF((&easysrc_code, f,a,b,c))
 
-#define CLEAN0(s) ADD((&easysrc_clean, s))
+/* #define CLEAN0(s) ADD((&easysrc_clean, s)) */
 #define CLEAN1(f,a) ADDF((&easysrc_clean, f,a))
 
-#define REM0(s) ADD((&easysrc_toohard, s))
-#define REM1(f,a) ADDF((&easysrc_toohard, f,a))
+/* #define REM0(s) ADD((&easysrc_toohard, s)) */
+/* #define REM1(f,a) ADDF((&easysrc_toohard, f,a)) */
 #define REM3(f,a,b,c) ADDF((&easysrc_toohard, f,a,b,c))
 
 /* Escape string to C string syntax. Return NULL if out of memory.
@@ -714,7 +714,5 @@ nomem:
   Curl_safefree(escaped);
   return ret;
 }
-
-#else /* CURL_DISABLE_LIBCURL_OPTION */
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */

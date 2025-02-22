@@ -1538,15 +1538,6 @@ CURLMcode curl_multi_wakeup(CURLM *m)
      Curl_multi struct that are constant */
   struct Curl_multi *multi = m;
 
-#if defined(ENABLE_WAKEUP) && !defined(USE_WINSOCK)
-#ifdef USE_EVENTFD
-  const void *buf;
-  const uint64_t val = 1;
-#else
-  char buf[1];
-#endif
-#endif
-
   /* GOOD_MULTI_HANDLE can be safely called */
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1560,15 +1551,14 @@ CURLMcode curl_multi_wakeup(CURLM *m)
      making it safe to access from another thread after the init part
      and before cleanup */
   if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
-#ifdef USE_EVENTFD
-    buf = &val;
-    /* eventfd has a stringent rule of requiring the 8-byte buffer when
-       calling write(2) on it, which makes the sizeof(buf) below fine since
-       this is only used on 64-bit systems and then the pointer is 64-bit */
-#else
-    buf[0] = 1;
-#endif
     while(1) {
+#ifdef HAVE_EVENTFD
+      /* eventfd has a stringent rule of requiring the 8-byte buffer when
+         calling write(2) on it */
+      const uint64_t buf[1] = { 1 };
+#else
+      const char buf[1] = { 1 };
+#endif
       /* swrite() is not thread-safe in general, because concurrent calls
          can have their messages interleaved, but in this case the content
          of the messages does not matter, which makes it ok to call.
@@ -1920,6 +1910,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
       data->req.done = TRUE;
     }
   }
+#ifndef CURL_DISABLE_HTTP
   else if((CURLE_HTTP2_STREAM == result) &&
           Curl_h2_http_1_1_error(data)) {
     CURLcode ret = Curl_retry_request(data, &newurl);
@@ -1927,7 +1918,8 @@ static CURLMcode state_performing(struct Curl_easy *data,
     if(!ret) {
       infof(data, "Downgrades to HTTP/1.1");
       streamclose(data->conn, "Disconnect HTTP/2 for HTTP/1");
-      data->state.httpwant = CURL_HTTP_VERSION_1_1;
+      data->state.http_neg.wanted = CURL_HTTP_V1x;
+      data->state.http_neg.allowed = CURL_HTTP_V1x;
       /* clear the error message bit too as we ignore the one we got */
       data->state.errorbuf = FALSE;
       if(!newurl)
@@ -1942,6 +1934,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
     else
       result = ret;
   }
+#endif
 
   if(result) {
     /*
@@ -2880,7 +2873,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #else
 #ifdef ENABLE_WAKEUP
     wakeup_close(multi->wakeup_pair[0]);
-#ifndef USE_EVENTFD
+#ifndef HAVE_EVENTFD
     wakeup_close(multi->wakeup_pair[1]);
 #endif
 #endif

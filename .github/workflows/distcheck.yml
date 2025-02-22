@@ -159,3 +159,33 @@ jobs:
           mv curl-9.10.11.tar.gz _verify
           cd _verify
           ../scripts/verify-release curl-9.10.11.tar.gz
+
+  cmake-integration:
+    name: 'cmake-integration-on-${{ matrix.image }}'
+    runs-on: ${{ matrix.image }}
+    timeout-minutes: 10
+    env:
+      CC: clang
+      CMAKE_GENERATOR: Ninja
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ubuntu-latest, macos-latest]
+    steps:
+      - name: 'install prereqs'
+        run: |
+          if [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
+            sudo apt-get -o Dpkg::Use-Pty=0 install ninja-build libpsl-dev libssl-dev
+          else
+            brew install ninja libpsl openssl
+          fi
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+      - name: 'via FetchContent'
+        run: ./tests/cmake/test.sh FetchContent
+      - name: 'via add_subdirectory'
+        run: ./tests/cmake/test.sh add_subdirectory
+      - name: 'via find_package'
+        run: ./tests/cmake/test.sh find_package

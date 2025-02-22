@@ -81,7 +81,6 @@ foreach(_target IN LISTS LIBTESTPROGS)
   if(NOT CURL_TEST_BUNDLES)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS ${_upper_target})
   endif()
-  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_GETADDRINFO_OVERRIDE")
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test libtest ${_target}")

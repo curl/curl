@@ -38,10 +38,6 @@ static void unit_stop(void)
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
   defined(USE_MBEDTLS)
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 struct test_spec {
   const char *input;
   const char *exp_output;
@@ -111,7 +107,7 @@ UNITTEST_START
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < ARRAYSIZE(test_specs); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(test_specs); ++i) {
     if(!do_test(&test_specs[i], i, &dbuf))
       all_ok = FALSE;
   }

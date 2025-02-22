@@ -58,10 +58,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 #if defined(USE_WOLFSSL)
 
 #define QUIC_CIPHERS                                                          \

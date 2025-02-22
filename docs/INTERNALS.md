@@ -24,11 +24,13 @@ versions of libs and build tools.
 
  We aim to support these or later versions.
 
- - OpenSSL      0.9.7
+ - OpenSSL      1.0.2a
+ - LibreSSL     2.9.1
  - GnuTLS       3.1.10
  - zlib         1.2.0.4
- - libssh2      1.0
- - c-ares       1.16.0
+ - libssh2      1.2.8
+ - c-ares       1.6.0
+ - libssh       0.9.0
  - libidn2      2.0.0
  - wolfSSL      3.4.6
  - OpenLDAP     2.0

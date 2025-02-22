@@ -27,7 +27,7 @@
 #include "urldata.h"
 #include "rand.h"
 
-#if defined(USE_EVENTFD)
+#ifdef HAVE_EVENTFD
 #ifdef HAVE_SYS_EVENTFD_H
 #include <sys/eventfd.h>
 #endif
@@ -103,7 +103,9 @@ int Curl_socketpair(int domain, int type, int protocol,
  * This is a socketpair() implementation for Windows.
  */
 #include <string.h>
+#ifdef HAVE_IO_H
 #include <io.h>
+#endif
 #else
 #ifdef HAVE_NETDB_H
 #include <netdb.h>

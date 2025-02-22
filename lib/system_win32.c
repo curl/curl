@@ -96,9 +96,15 @@ CURLcode Curl_win32_init(long flags)
   s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
+#ifdef UNDER_CE
+    #define CURL_TEXT(n) TEXT(n)
+#else
+    #define CURL_TEXT(n) (n)
+#endif
     IF_NAMETOINDEX_FN pIfNameToIndex =
       CURLX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
-                          (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
+                          (GetProcAddress(s_hIpHlpApiDll,
+                                          CURL_TEXT("if_nametoindex"))));
 
     if(pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
@@ -150,7 +156,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 
 /* See function definitions in winbase.h */
 #ifdef UNICODE
-#  ifdef _WIN32_WCE
+#  ifdef UNDER_CE
 #    define LOADLIBARYEX  L"LoadLibraryExW"
 #  else
 #    define LOADLIBARYEX  "LoadLibraryExW"
@@ -175,7 +181,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  */
 HMODULE Curl_load_library(LPCTSTR filename)
 {
-#ifndef CURL_WINDOWS_UWP
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 

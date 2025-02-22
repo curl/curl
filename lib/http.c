@@ -86,6 +86,7 @@
 #include "hsts.h"
 #include "ws.h"
 #include "curl_ctype.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -186,19 +187,56 @@ const struct Curl_handler Curl_handler_https = {
 
 #endif
 
+void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg)
+{
+  memset(neg, 0, sizeof(*neg));
+  neg->accept_09 = data->set.http09_allowed;
+  switch(data->set.httpwant) {
+  case CURL_HTTP_VERSION_1_0:
+    neg->wanted = neg->allowed = (CURL_HTTP_V1x);
+    neg->only_10 = TRUE;
+    break;
+  case CURL_HTTP_VERSION_1_1:
+    neg->wanted = neg->allowed = (CURL_HTTP_V1x);
+    break;
+  case CURL_HTTP_VERSION_2_0:
+    neg->wanted = neg->allowed = (CURL_HTTP_V1x | CURL_HTTP_V2x);
+    neg->h2_upgrade = TRUE;
+    break;
+  case CURL_HTTP_VERSION_2TLS:
+    neg->wanted = neg->allowed = (CURL_HTTP_V1x | CURL_HTTP_V2x);
+    break;
+  case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
+    neg->wanted = neg->allowed = (CURL_HTTP_V2x);
+    data->state.http_neg.h2_prior_knowledge = TRUE;
+    break;
+  case CURL_HTTP_VERSION_3:
+    neg->wanted = (CURL_HTTP_V1x | CURL_HTTP_V2x | CURL_HTTP_V3x);
+    neg->allowed = neg->wanted;
+    break;
+  case CURL_HTTP_VERSION_3ONLY:
+    neg->wanted = neg->allowed = (CURL_HTTP_V3x);
+    break;
+  case CURL_HTTP_VERSION_NONE:
+  default:
+    neg->wanted = (CURL_HTTP_V1x | CURL_HTTP_V2x);
+    neg->allowed = (CURL_HTTP_V1x | CURL_HTTP_V2x | CURL_HTTP_V3x);
+    break;
+  }
+}
+
 CURLcode Curl_http_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
   connkeep(conn, "HTTP default");
-
-  if(data->state.httpwant == CURL_HTTP_VERSION_3ONLY) {
+  if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
+    /* only HTTP/3, needs to work */
     CURLcode result = Curl_conn_may_http3(data, conn);
     if(result)
       return result;
   }
-
   return CURLE_OK;
 }
 
@@ -256,7 +294,7 @@ char *Curl_copy_header_value(const char *header)
 
   /* Find the first non-space letter */
   start = header;
-  while(*start && ISSPACE(*start))
+  while(ISSPACE(*start))
     start++;
 
   end = strchr(start, '\r');
@@ -458,7 +496,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 #if defined(USE_NTLM)
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {
-      ongoing_auth = "NTML";
+      ongoing_auth = "NTLM";
       if((conn->http_ntlm_state != NTLMSTATE_NONE) ||
          (conn->proxy_ntlm_state != NTLMSTATE_NONE)) {
         /* The NTLM-negotiation has started, keep on sending.
@@ -495,7 +533,6 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
             ongoing_auth ? " send, " : "");
     /* We decided to abort the ongoing transfer */
     streamclose(conn, "Mid-auth HTTP and much data left to send");
-    /* FIXME: questionable manipulation here, can we do this differently? */
     data->req.size = 0; /* do not download any more than 0 bytes */
   }
   return CURLE_OK;
@@ -538,7 +575,8 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
        (data->req.httpversion_sent > 11)) {
       infof(data, "Forcing HTTP/1.1 for NTLM");
       connclose(conn, "Force HTTP/1.1 connection");
-      data->state.httpwant = CURL_HTTP_VERSION_1_1;
+      data->state.http_neg.wanted = CURL_HTTP_V1x;
+      data->state.http_neg.allowed = CURL_HTTP_V1x;
     }
   }
 #ifndef CURL_DISABLE_PROXY
@@ -838,9 +876,137 @@ Curl_http_output_auth(struct Curl_easy *data,
   !defined(CURL_DISABLE_DIGEST_AUTH) || \
   !defined(CURL_DISABLE_BASIC_AUTH) || \
   !defined(CURL_DISABLE_BEARER_AUTH)
-static int is_valid_auth_separator(char ch)
+static bool authcmp(const char *auth, const char *line)
 {
-  return ch == '\0' || ch == ',' || ISSPACE(ch);
+  /* the auth string must not have an alnum following */
+  size_t n = strlen(auth);
+  return strncasecompare(auth, line, n) && !ISALNUM(line[n]);
+}
+#endif
+
+#ifdef USE_SPNEGO
+static CURLcode auth_spnego(struct Curl_easy *data,
+                            bool proxy,
+                            const char *auth,
+                            struct auth *authp,
+                            unsigned long *availp)
+{
+  if((authp->avail & CURLAUTH_NEGOTIATE) || Curl_auth_is_spnego_supported()) {
+    *availp |= CURLAUTH_NEGOTIATE;
+    authp->avail |= CURLAUTH_NEGOTIATE;
+
+    if(authp->picked == CURLAUTH_NEGOTIATE) {
+      struct connectdata *conn = data->conn;
+      CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
+      curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
+        &conn->http_negotiate_state;
+      if(!result) {
+        free(data->req.newurl);
+        data->req.newurl = strdup(data->state.url);
+        if(!data->req.newurl)
+          return CURLE_OUT_OF_MEMORY;
+        data->state.authproblem = FALSE;
+        /* we received a GSS auth token and we dealt with it fine */
+        *negstate = GSS_AUTHRECV;
+      }
+      else
+        data->state.authproblem = TRUE;
+    }
+  }
+  return CURLE_OK;
+}
+#endif
+
+#ifdef USE_NTLM
+static CURLcode auth_ntlm(struct Curl_easy *data,
+                          bool proxy,
+                          const char *auth,
+                          struct auth *authp,
+                          unsigned long *availp)
+{
+  /* NTLM support requires the SSL crypto libs */
+  if((authp->avail & CURLAUTH_NTLM) || Curl_auth_is_ntlm_supported()) {
+    *availp |= CURLAUTH_NTLM;
+    authp->avail |= CURLAUTH_NTLM;
+
+    if(authp->picked == CURLAUTH_NTLM) {
+      /* NTLM authentication is picked and activated */
+      CURLcode result = Curl_input_ntlm(data, proxy, auth);
+      if(!result)
+        data->state.authproblem = FALSE;
+      else {
+        infof(data, "NTLM authentication problem, ignoring.");
+        data->state.authproblem = TRUE;
+      }
+    }
+  }
+  return CURLE_OK;
+}
+#endif
+
+#ifndef CURL_DISABLE_DIGEST_AUTH
+static CURLcode auth_digest(struct Curl_easy *data,
+                            bool proxy,
+                            const char *auth,
+                            struct auth *authp,
+                            unsigned long *availp)
+{
+  if(authp->avail & CURLAUTH_DIGEST)
+    infof(data, "Ignoring duplicate digest auth header.");
+  else if(Curl_auth_is_digest_supported()) {
+    CURLcode result;
+
+    *availp |= CURLAUTH_DIGEST;
+    authp->avail |= CURLAUTH_DIGEST;
+
+    /* We call this function on input Digest headers even if Digest
+     * authentication is not activated yet, as we need to store the
+     * incoming data from this header in case we are going to use
+     * Digest */
+    result = Curl_input_digest(data, proxy, auth);
+    if(result) {
+      infof(data, "Digest authentication problem, ignoring.");
+      data->state.authproblem = TRUE;
+    }
+  }
+  return CURLE_OK;
+}
+#endif
+
+#ifndef CURL_DISABLE_BASIC_AUTH
+static CURLcode auth_basic(struct Curl_easy *data,
+                           struct auth *authp,
+                           unsigned long *availp)
+{
+  *availp |= CURLAUTH_BASIC;
+  authp->avail |= CURLAUTH_BASIC;
+  if(authp->picked == CURLAUTH_BASIC) {
+    /* We asked for Basic authentication but got a 40X back
+       anyway, which basically means our name+password is not
+       valid. */
+    authp->avail = CURLAUTH_NONE;
+    infof(data, "Basic authentication problem, ignoring.");
+    data->state.authproblem = TRUE;
+  }
+  return CURLE_OK;
+}
+#endif
+
+#ifndef CURL_DISABLE_BEARER_AUTH
+static CURLcode auth_bearer(struct Curl_easy *data,
+                            struct auth *authp,
+                            unsigned long *availp)
+{
+  *availp |= CURLAUTH_BEARER;
+  authp->avail |= CURLAUTH_BEARER;
+  if(authp->picked == CURLAUTH_BEARER) {
+    /* We asked for Bearer authentication but got a 40X back
+       anyway, which basically means our token is not valid. */
+    authp->avail = CURLAUTH_NONE;
+    infof(data, "Bearer authentication problem, ignoring.");
+    data->state.authproblem = TRUE;
+  }
+  return CURLE_OK;
 }
 #endif
 
@@ -855,11 +1021,6 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   /*
    * This resource requires authentication
    */
-  struct connectdata *conn = data->conn;
-#ifdef USE_SPNEGO
-  curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
-    &conn->http_negotiate_state;
-#endif
 #if defined(USE_SPNEGO) ||                      \
   defined(USE_NTLM) ||                          \
   !defined(CURL_DISABLE_DIGEST_AUTH) ||         \
@@ -868,6 +1029,9 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 
   unsigned long *availp;
   struct auth *authp;
+  CURLcode result = CURLE_OK;
+  DEBUGASSERT(auth);
+  DEBUGASSERT(data);
 
   if(proxy) {
     availp = &data->info.proxyauthavail;
@@ -877,11 +1041,6 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
     availp = &data->info.httpauthavail;
     authp = &data->state.authhost;
   }
-#else
-  (void) proxy;
-#endif
-
-  (void) conn; /* In case conditionals make it unused. */
 
   /*
    * Here we check if we want the specific single authentication (using ==) and
@@ -901,126 +1060,44 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 
   while(*auth) {
 #ifdef USE_SPNEGO
-    if(checkprefix("Negotiate", auth) && is_valid_auth_separator(auth[9])) {
-      if((authp->avail & CURLAUTH_NEGOTIATE) ||
-         Curl_auth_is_spnego_supported()) {
-        *availp |= CURLAUTH_NEGOTIATE;
-        authp->avail |= CURLAUTH_NEGOTIATE;
-
-        if(authp->picked == CURLAUTH_NEGOTIATE) {
-          CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
-          if(!result) {
-            free(data->req.newurl);
-            data->req.newurl = strdup(data->state.url);
-            if(!data->req.newurl)
-              return CURLE_OUT_OF_MEMORY;
-            data->state.authproblem = FALSE;
-            /* we received a GSS auth token and we dealt with it fine */
-            *negstate = GSS_AUTHRECV;
-          }
-          else
-            data->state.authproblem = TRUE;
-        }
-      }
-    }
-    else
+    if(authcmp("Negotiate", auth))
+      result = auth_spnego(data, proxy, auth, authp, availp);
 #endif
 #ifdef USE_NTLM
-      /* NTLM support requires the SSL crypto libs */
-      if(checkprefix("NTLM", auth) && is_valid_auth_separator(auth[4])) {
-        if((authp->avail & CURLAUTH_NTLM) ||
-           Curl_auth_is_ntlm_supported()) {
-          *availp |= CURLAUTH_NTLM;
-          authp->avail |= CURLAUTH_NTLM;
-
-          if(authp->picked == CURLAUTH_NTLM) {
-            /* NTLM authentication is picked and activated */
-            CURLcode result = Curl_input_ntlm(data, proxy, auth);
-            if(!result) {
-              data->state.authproblem = FALSE;
-            }
-            else {
-              infof(data, "Authentication problem. Ignoring this.");
-              data->state.authproblem = TRUE;
-            }
-          }
-        }
-      }
-      else
+    if(!result && authcmp("NTLM", auth))
+      result = auth_ntlm(data, proxy, auth, authp, availp);
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
-        if(checkprefix("Digest", auth) && is_valid_auth_separator(auth[6])) {
-          if((authp->avail & CURLAUTH_DIGEST) != 0)
-            infof(data, "Ignoring duplicate digest auth header.");
-          else if(Curl_auth_is_digest_supported()) {
-            CURLcode result;
-
-            *availp |= CURLAUTH_DIGEST;
-            authp->avail |= CURLAUTH_DIGEST;
-
-            /* We call this function on input Digest headers even if Digest
-             * authentication is not activated yet, as we need to store the
-             * incoming data from this header in case we are going to use
-             * Digest */
-            result = Curl_input_digest(data, proxy, auth);
-            if(result) {
-              infof(data, "Authentication problem. Ignoring this.");
-              data->state.authproblem = TRUE;
-            }
-          }
-        }
-        else
+    if(!result && authcmp("Digest", auth))
+      result = auth_digest(data, proxy, auth, authp, availp);
 #endif
 #ifndef CURL_DISABLE_BASIC_AUTH
-          if(checkprefix("Basic", auth) &&
-             is_valid_auth_separator(auth[5])) {
-            *availp |= CURLAUTH_BASIC;
-            authp->avail |= CURLAUTH_BASIC;
-            if(authp->picked == CURLAUTH_BASIC) {
-              /* We asked for Basic authentication but got a 40X back
-                 anyway, which basically means our name+password is not
-                 valid. */
-              authp->avail = CURLAUTH_NONE;
-              infof(data, "Authentication problem. Ignoring this.");
-              data->state.authproblem = TRUE;
-            }
-          }
-          else
+    if(!result && authcmp("Basic", auth))
+      result = auth_basic(data, authp, availp);
 #endif
 #ifndef CURL_DISABLE_BEARER_AUTH
-            if(checkprefix("Bearer", auth) &&
-               is_valid_auth_separator(auth[6])) {
-              *availp |= CURLAUTH_BEARER;
-              authp->avail |= CURLAUTH_BEARER;
-              if(authp->picked == CURLAUTH_BEARER) {
-                /* We asked for Bearer authentication but got a 40X back
-                   anyway, which basically means our token is not valid. */
-                authp->avail = CURLAUTH_NONE;
-                infof(data, "Authentication problem. Ignoring this.");
-                data->state.authproblem = TRUE;
-              }
-            }
-#else
-            {
-              /*
-               * Empty block to terminate the if-else chain correctly.
-               *
-               * A semicolon would yield the same result here, but can cause a
-               * compiler warning when -Wextra is enabled.
-               */
-            }
+    if(authcmp("Bearer", auth))
+      result = auth_bearer(data, authp, availp);
 #endif
 
+    if(result)
+      break;
+
     /* there may be multiple methods on one line, so keep reading */
-    while(*auth && *auth != ',') /* read up to the next comma */
+    auth = strchr(auth, ',');
+    if(auth) /* if we are on a comma, skip it */
       auth++;
-    if(*auth == ',') /* if we are on a comma, skip it */
-      auth++;
-    while(*auth && ISSPACE(*auth))
+    else
+      break;
+    while(ISBLANK(*auth))
       auth++;
   }
+#else
+  (void) proxy;
+  /* nothing to do when disabled */
+#endif
 
-  return CURLE_OK;
+  return result;
 }
 
 /**
@@ -1404,7 +1481,7 @@ Curl_compareheader(const char *headerline, /* line to check */
   start = &headerline[hlen];
 
   /* pass all whitespace */
-  while(*start && ISSPACE(*start))
+  while(ISSPACE(*start))
     start++;
 
   /* find the end of the header line */
@@ -1502,29 +1579,28 @@ static bool http_may_use_1_1(const struct Curl_easy *data)
   const struct connectdata *conn = data->conn;
   /* We have seen a previous response for *this* transfer with 1.0,
    * on another connection or the same one. */
-  if(data->state.httpversion == 10)
+  if(data->state.http_neg.rcvd_min == 10)
     return FALSE;
   /* We have seen a previous response on *this* connection with 1.0. */
-  if(conn->httpversion_seen == 10)
+  if(conn && conn->httpversion_seen == 10)
     return FALSE;
   /* We want 1.0 and have seen no previous response on *this* connection
      with a higher version (maybe no response at all yet). */
-  if((data->state.httpwant == CURL_HTTP_VERSION_1_0) &&
-     (conn->httpversion_seen <= 10))
+  if((data->state.http_neg.only_10) &&
+     (!conn || conn->httpversion_seen <= 10))
     return FALSE;
-  /* We want something newer than 1.0 or have no preferences. */
-  return (data->state.httpwant == CURL_HTTP_VERSION_NONE) ||
-         (data->state.httpwant >= CURL_HTTP_VERSION_1_1);
+  /* We are not restricted to use 1.0 only. */
+  return !data->state.http_neg.only_10;
 }
 
 static unsigned char http_request_version(struct Curl_easy *data)
 {
-  unsigned char httpversion = Curl_conn_http_version(data);
-  if(!httpversion) {
+  unsigned char v = Curl_conn_http_version(data, data->conn);
+  if(!v) {
     /* No specific HTTP connection filter installed. */
-    httpversion = http_may_use_1_1(data) ? 11 : 10;
+    v = http_may_use_1_1(data) ? 11 : 10;
   }
-  return httpversion;
+  return v;
 }
 
 static const char *get_http_string(int httpversion)
@@ -1597,7 +1673,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
         if(ptr) {
           optr = ptr;
           ptr++; /* pass the semicolon */
-          while(*ptr && ISSPACE(*ptr))
+          while(ISSPACE(*ptr))
             ptr++;
 
           if(*ptr) {
@@ -1625,7 +1701,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
         /* we require a colon for this to be a true header */
 
         ptr++; /* pass the colon */
-        while(*ptr && ISSPACE(*ptr))
+        while(ISSPACE(*ptr))
           ptr++;
 
         if(*ptr || semicolonp) {
@@ -2477,7 +2553,7 @@ static CURLcode http_range(struct Curl_easy *data,
       }
       else if(data->state.resume_from) {
         /* This is because "resume" was selected */
-        /* TODO: not sure if we want to send this header during authentication
+        /* Not sure if we want to send this header during authentication
          * negotiation, but test1084 checks for it. In which case we have a
          * "null" client reader installed that gives an unexpected length. */
         curl_off_t total_len = data->req.authneg ?
@@ -2621,11 +2697,11 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   switch(conn->alpn) {
   case CURL_HTTP_VERSION_3:
-    DEBUGASSERT(Curl_conn_http_version(data) == 30);
+    DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
     break;
   case CURL_HTTP_VERSION_2:
 #ifndef CURL_DISABLE_PROXY
-    if((Curl_conn_http_version(data) != 20) &&
+    if((Curl_conn_http_version(data, conn) != 20) &&
        conn->bits.proxy && !conn->bits.tunnel_proxy
       ) {
       result = Curl_http2_switch(data);
@@ -2634,7 +2710,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     }
     else
 #endif
-      DEBUGASSERT(Curl_conn_http_version(data) == 20);
+      DEBUGASSERT(Curl_conn_http_version(data, conn) == 20);
     break;
   case CURL_HTTP_VERSION_1_1:
     /* continue with HTTP/1.x when explicitly requested */
@@ -2815,7 +2891,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET) && (httpversion < 20) &&
-     (data->state.httpwant == CURL_HTTP_VERSION_2)) {
+     (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
+     data->state.http_neg.h2_upgrade) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it is not done
        over SSL */
     result = Curl_http2_request_upgrade(&req, data);
@@ -3073,11 +3150,10 @@ static CURLcode http_header(struct Curl_easy *data,
 
       /* if it truly stopped on a digit */
       if(ISDIGIT(*ptr)) {
-        if(!curlx_strtoofft(ptr, NULL, 10, &k->offset)) {
-          if(data->state.resume_from == k->offset)
-            /* we asked for a resume and we got it */
-            k->content_range = TRUE;
-        }
+        if(!Curl_str_number(&ptr, &k->offset, CURL_OFF_T_MAX) &&
+           (data->state.resume_from == k->offset))
+          /* we asked for a resume and we got it */
+          k->content_range = TRUE;
       }
       else if(k->httpcode < 300)
         data->state.resume_from = 0; /* get everything */
@@ -3347,9 +3423,10 @@ static CURLcode http_statusline(struct Curl_easy *data,
   data->info.httpversion = k->httpversion;
   conn->httpversion_seen = (unsigned char)k->httpversion;
 
-  if(!data->state.httpversion || data->state.httpversion > k->httpversion)
+  if(!data->state.http_neg.rcvd_min ||
+     data->state.http_neg.rcvd_min > k->httpversion)
     /* store the lowest server version we encounter */
-    data->state.httpversion = (unsigned char)k->httpversion;
+    data->state.http_neg.rcvd_min = (unsigned char)k->httpversion;
 
   /*
    * This code executes as part of processing the header. As a
@@ -3597,10 +3674,9 @@ static CURLcode http_on_response(struct Curl_easy *data,
       }
 #endif
       else {
-        /* We silently accept this as the final response.
-         * TODO: this looks, uhm, wrong. What are we switching to if we
-         * did not ask for an Upgrade? Maybe the application provided an
-         * `Upgrade: xxx` header? */
+        /* We silently accept this as the final response. What are we
+         * switching to if we did not ask for an Upgrade? Maybe the
+         * application provided an `Upgrade: xxx` header? */
         k->header = FALSE;
       }
       break;
@@ -3849,7 +3925,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
        */
       const char *p = hd;
 
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
       if(!strncmp(p, "HTTP/", 5)) {
         p += 5;
@@ -3909,7 +3985,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     }
     else if(data->conn->handler->protocol & CURLPROTO_RTSP) {
       const char *p = hd;
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
       if(!strncmp(p, "RTSP/", 5)) {
         p += 5;
@@ -4016,7 +4092,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
             failf(data, "Invalid status line");
             return CURLE_WEIRD_SERVER_REPLY;
           }
-          if(!data->set.http09_allowed) {
+          if(!data->state.http_neg.accept_09) {
             failf(data, "Received HTTP/0.9 when not allowed");
             return CURLE_UNSUPPORTED_PROTOCOL;
           }
@@ -4053,7 +4129,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
           failf(data, "Invalid status line");
           return CURLE_WEIRD_SERVER_REPLY;
         }
-        if(!data->set.http09_allowed) {
+        if(!data->state.http_neg.accept_09) {
           failf(data, "Received HTTP/0.9 when not allowed");
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
@@ -4422,7 +4498,7 @@ static struct name_const H2_NON_FIELD[] = {
 static bool h2_non_field(const char *name, size_t namelen)
 {
   size_t i;
-  for(i = 0; i < sizeof(H2_NON_FIELD)/sizeof(H2_NON_FIELD[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(H2_NON_FIELD); ++i) {
     if(namelen < H2_NON_FIELD[i].namelen)
       return FALSE;
     if(namelen == H2_NON_FIELD[i].namelen &&
@@ -4450,7 +4526,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     scheme = Curl_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
     if(scheme) {
       scheme += sizeof(HTTP_PSEUDO_SCHEME);
-      while(*scheme && ISBLANK(*scheme))
+      while(ISBLANK(*scheme))
         scheme++;
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }

@@ -154,17 +154,19 @@ static const struct alpn_spec ALPN_SPEC_H2_H11 = {
 };
 #endif
 
-static const struct alpn_spec *alpn_get_spec(int httpwant, bool use_alpn)
+static const struct alpn_spec *
+alpn_get_spec(http_majors allowed, bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
 #ifdef USE_HTTP2
-  if(httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE)
+  if(allowed & CURL_HTTP_V2x) {
+    if(allowed & CURL_HTTP_V1x)
+      return &ALPN_SPEC_H2_H11;
     return &ALPN_SPEC_H2;
-  if(httpwant >= CURL_HTTP_VERSION_2)
-    return &ALPN_SPEC_H2_H11;
+  }
 #else
-  (void)httpwant;
+  (void)allowed;
 #endif
   /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
      Avoid "http/1.0" because some servers do not support it. */
@@ -483,29 +485,8 @@ static void cf_ctx_free(struct ssl_connect_data *ctx)
   }
 }
 
-static CURLcode ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  CURLcode result;
-
-  if(!ssl_prefs_check(data))
-    return CURLE_SSL_CONNECT_ERROR;
-
-  /* mark this is being ssl-enabled from here on. */
-  connssl->state = ssl_connection_negotiating;
-
-  result = connssl->ssl_impl->connect_blocking(cf, data);
-
-  if(!result) {
-    DEBUGASSERT(connssl->state == ssl_connection_complete);
-  }
-
-  return result;
-}
-
 static CURLcode
-ssl_connect_nonblocking(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        bool *done)
+ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
 
@@ -513,7 +494,7 @@ ssl_connect_nonblocking(struct Curl_cfilter *cf, struct Curl_easy *data,
     return CURLE_SSL_CONNECT_ERROR;
 
   /* mark this is being ssl requested from here on. */
-  return connssl->ssl_impl->connect_nonblocking(cf, data, done);
+  return connssl->ssl_impl->do_connect(cf, data, done);
 }
 
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
@@ -915,24 +896,17 @@ static int multissl_init(void)
 {
   if(multissl_setup(NULL))
     return 1;
-  return Curl_ssl->init();
+  if(Curl_ssl->init)
+    return Curl_ssl->init();
+  return 1;
 }
 
 static CURLcode multissl_connect(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+                                 struct Curl_easy *data, bool *done)
 {
   if(multissl_setup(NULL))
     return CURLE_FAILED_INIT;
-  return Curl_ssl->connect_blocking(cf, data);
-}
-
-static CURLcode multissl_connect_nonblocking(struct Curl_cfilter *cf,
-                                             struct Curl_easy *data,
-                                             bool *done)
-{
-  if(multissl_setup(NULL))
-    return CURLE_FAILED_INIT;
-  return Curl_ssl->connect_nonblocking(cf, data, done);
+  return Curl_ssl->do_connect(cf, data, done);
 }
 
 static void multissl_adjust_pollset(struct Curl_cfilter *cf,
@@ -991,7 +965,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* random */
   NULL,                              /* cert_status_request */
   multissl_connect,                  /* connect */
-  multissl_connect_nonblocking,      /* connect_nonblocking */
   multissl_adjust_pollset,           /* adjust_pollset */
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
@@ -1339,7 +1312,7 @@ static void ssl_cf_close(struct Curl_cfilter *cf,
 
 static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               bool blocking, bool *done)
+                               bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
@@ -1356,7 +1329,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   }
 
   if(!cf->next->connected) {
-    result = cf->next->cft->do_connect(cf->next, data, blocking, done);
+    result = cf->next->cft->do_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }
@@ -1376,13 +1349,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-  if(blocking) {
-    result = ssl_connect(cf, data);
-    *done = (result == CURLE_OK);
-  }
-  else {
-    result = ssl_connect_nonblocking(cf, data, done);
-  }
+  result = ssl_connect(cf, data, done);
 
   if(!result && *done) {
     cf->connected = TRUE;
@@ -1574,7 +1541,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 
   DEBUGASSERT(data->conn);
 
-  ctx = cf_ctx_new(data, alpn_get_spec(data->state.httpwant,
+  ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
                                        conn->bits.tls_enable_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1625,16 +1592,16 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct ssl_connect_data *ctx;
   CURLcode result;
   bool use_alpn = conn->bits.tls_enable_alpn;
-  int httpwant = CURL_HTTP_VERSION_1_1;
+  http_majors allowed = CURL_HTTP_V1x;
 
 #ifdef USE_HTTP2
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
-    httpwant = CURL_HTTP_VERSION_2;
+    allowed = (CURL_HTTP_V1x|CURL_HTTP_V2x);
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(httpwant, use_alpn));
+  ctx = cf_ctx_new(data, alpn_get_spec(allowed, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1939,8 +1906,8 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
     else {
       *palpn = CURL_HTTP_VERSION_NONE;
       failf(data, "unsupported ALPN protocol: '%.*s'", (int)proto_len, proto);
-      /* TODO: do we want to fail this? Previous code just ignored it and
-       * some vtls backends even ignore the return code of this function. */
+      /* Previous code just ignored it and some vtls backends even ignore the
+       * return code of this function. */
       /* return CURLE_NOT_BUILT_IN; */
       goto out;
     }

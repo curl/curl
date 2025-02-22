@@ -152,10 +152,11 @@ rem
       for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element %1 src "%%r" %3
     ) else if "!var!" == "CURL_SRC_X_C_FILES" (
       call :element %1 lib "strtoofft.c" %3
+      call :element %1 lib "strparse.c" %3
+      call :element %1 lib "strcase.c" %3
       call :element %1 lib "timediff.c" %3
       call :element %1 lib "nonblock.c" %3
       call :element %1 lib "warnless.c" %3
-      call :element %1 lib "curl_get_line.c" %3
       call :element %1 lib "curl_multibyte.c" %3
       call :element %1 lib "version_win32.c" %3
       call :element %1 lib "dynbuf.c" %3
@@ -164,11 +165,12 @@ rem
       call :element %1 lib "config-win32.h" %3
       call :element %1 lib "curl_setup.h" %3
       call :element %1 lib "strtoofft.h" %3
+      call :element %1 lib "strparse.h" %3
+      call :element %1 lib "strcase.h" %3
       call :element %1 lib "timediff.h" %3
       call :element %1 lib "nonblock.h" %3
       call :element %1 lib "warnless.h" %3
       call :element %1 lib "curl_ctype.h" %3
-      call :element %1 lib "curl_get_line.h" %3
       call :element %1 lib "curl_multibyte.h" %3
       call :element %1 lib "version_win32.h" %3
       call :element %1 lib "dynbuf.h" %3

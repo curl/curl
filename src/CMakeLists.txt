@@ -22,7 +22,7 @@
 #
 ###########################################################################
 set(EXE_NAME curl)
-add_definitions("-DBUILDING_CURL")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_CURL")
 
 set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
@@ -107,7 +107,7 @@ if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(ENABLE_UNICODE AND MINGW)
+if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
   target_link_libraries(${EXE_NAME} "-municode")
 endif()
 
