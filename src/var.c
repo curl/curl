@@ -91,6 +91,8 @@ static const struct tool_var *varcontent(struct GlobalConfig *global,
 #define FUNC_URL_LEN (sizeof(FUNC_URL) - 1)
 #define FUNC_B64 "b64"
 #define FUNC_B64_LEN (sizeof(FUNC_B64) - 1)
+#define FUNC_64DEC "64dec" /* base64 decode */
+#define FUNC_64DEC_LEN (sizeof(FUNC_64DEC) - 1)
 
 static ParameterError varfunc(struct GlobalConfig *global,
                               char *c, /* content */
@@ -175,6 +177,27 @@ static ParameterError varfunc(struct GlobalConfig *global,
         if(curlx_dyn_addn(out, enc, elen))
           err = PARAM_NO_MEM;
         curl_free(enc);
+        if(err)
+          break;
+      }
+    }
+    else if(FUNCMATCH(f, FUNC_64DEC, FUNC_64DEC_LEN)) {
+      f += FUNC_64DEC_LEN;
+      curlx_dyn_reset(out);
+      if(clen) {
+        unsigned char *enc;
+        size_t elen;
+        CURLcode result = curlx_base64_decode(c, &enc, &elen);
+        /* put it in the output */
+        if(result) {
+          if(curlx_dyn_add(out, "[64dec-fail]"))
+            err = PARAM_NO_MEM;
+        }
+        else {
+          if(curlx_dyn_addn(out, enc, elen))
+            err = PARAM_NO_MEM;
+          curl_free(enc);
+        }
         if(err)
           break;
       }
