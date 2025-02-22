@@ -85,7 +85,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
 
     case "${TARGET:-}" in
       *Win32) PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH";;
-      *)      PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/amd64/Microsoft.VC90.DebugCRT:$PATH";;
     esac
   fi
 
@@ -95,9 +94,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   case "${TARGET:-}" in
     *Win32)
       cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/"
-      ;;
-    *)
-      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/amd64/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/"
       ;;
   esac
 
