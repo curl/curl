@@ -85,11 +85,14 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
     find . -name BuildLog.htm -exec dos2unix '{}' +
     find . -name BuildLog.htm -exec cat '{}' +
-    find '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist' || true
-    find '_bld/lib/libcurl_shared.dir' || true
-    PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH"
-    cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/" || true
-    cp _bld/lib/libcurl_shared.dir/Debug/libcurl*.dll.embed.manifest "${curl}.manifest"
+    if [ "${PRJ_CFG}" = 'Release' ]; then
+      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86/Microsoft.VC90.CRT/'* "$PWD/_bld/lib/" || true
+      cp _bld/lib/libcurl_shared.dir/Release/libcurl.dll.intermediate.manifest "${curl}.manifest"
+    else
+      #PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH"
+      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/" || true
+      cp _bld/lib/libcurl_shared.dir/Debug/libcurl*.dll.intermediate.manifest "${curl}.manifest"
+    fi
   fi
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
