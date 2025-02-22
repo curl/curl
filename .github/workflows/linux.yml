@@ -292,7 +292,11 @@ jobs:
             container: 'alpine:3.20'
 
           - name: Alpine MUSL c-ares https-rr
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-werror
+            container: 'alpine:3.20'
+
+          - name: Alpine MUSL c-ares https-rr !debug
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-werror --disable-debug
             container: 'alpine:3.20'
 
     steps:
