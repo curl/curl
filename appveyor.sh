@@ -67,14 +67,12 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_USE_SCHANNEL="${SCHANNEL}" \
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_LIBPSL=OFF \
-      ${options}
+      ${options} \
+      || { cat _bld/CMakeFiles/CMake* 2>/dev/null; false; }
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
     cat _bld_chkprefill/CMakeFiles/CMake* 2>/dev/null || true
     false
-  fi
-  if false; then
-    cat _bld/CMakeFiles/CMake* 2>/dev/null || true
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
