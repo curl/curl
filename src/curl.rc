@@ -73,8 +73,13 @@ END
    Application Manifest doc, including the list of 'supportedOS Id's:
      https://msdn.microsoft.com/library/aa374191 */
 
+#ifdef CURL_EMBED_MANIFEST_ID3
+#undef CREATEPROCESS_MANIFEST_RESOURCE_ID
+#define CREATEPROCESS_MANIFEST_RESOURCE_ID  3
+#else
 #ifndef CREATEPROCESS_MANIFEST_RESOURCE_ID
 #define CREATEPROCESS_MANIFEST_RESOURCE_ID  1
+#endif
 #endif
 #ifndef RT_MANIFEST
 #define RT_MANIFEST  24
