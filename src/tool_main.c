@@ -242,11 +242,7 @@ int main(int argc, char *argv[])
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
 
-printf("trc-0\n");
-
   tool_init_stderr();
-
-printf("trc-1\n");
 
 #if defined(_WIN32) && !defined(UNDER_CE)
   /* Undocumented diagnostic option to list the full paths of all loaded
@@ -291,14 +287,10 @@ printf("trc-1\n");
     main_free(&global);
   }
 
-printf("trc-y\n");
-
 #ifdef _WIN32
   /* Flush buffers of all streams opened in write or update mode */
   fflush(NULL);
 #endif
-
-printf("trc-z\n");
 
 #ifdef __VMS
   vms_special_exit(result, vms_show);
