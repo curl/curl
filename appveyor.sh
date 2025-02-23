@@ -56,8 +56,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     # shellcheck disable=SC2086
     cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET:-} \
       -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
       -DCMAKE_UNITY_BUILD="${UNITY}" -DCURL_TEST_BUNDLES=ON \
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
@@ -83,9 +81,9 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     fi
     false
   fi
-  [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
-  [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll _bld/src; }
-  curl='_bld/src/curl.exe'
+  [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
+  [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll _bld/src/${PRJ_CFG}; }
+  curl="_bld/src/${PRJ_CFG}/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
