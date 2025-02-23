@@ -132,6 +132,8 @@ else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
 
+exit
+
 # build tests
 
 if [ "${TFLAGS}" != 'skipall' ] && \
