@@ -67,7 +67,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_USE_SCHANNEL="${SCHANNEL}" \
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_LIBPSL=OFF \
-      ${options} || true
+      ${options}
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
     cat _bld_chkprefill/CMakeFiles/CMake* 2>/dev/null || true
@@ -78,7 +78,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-} || true
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
   [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
   curl='_bld/src/curl.exe'
@@ -86,12 +86,11 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     find . -name BuildLog.htm -exec dos2unix '{}' +
     find . -name BuildLog.htm -exec cat '{}' +
     if [ "${PRJ_CFG}" = 'Release' ]; then
-      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86/Microsoft.VC90.CRT/'* "$PWD/_bld/lib/" || true
-      cp _bld/lib/libcurl_shared.dir/Release/libcurl.dll.intermediate.manifest "${curl}.manifest"
+      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86/Microsoft.VC90.CRT/msvcr90.dll' "$PWD/_bld/lib/"
+      cp '_bld/lib/libcurl_shared.dir/Release/libcurl.dll.intermediate.manifest' "${curl}.manifest"
     else
-      #PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT:$PATH"
-      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/'* "$PWD/_bld/lib/" || true
-      cp _bld/lib/libcurl_shared.dir/Debug/libcurl*.dll.intermediate.manifest "${curl}.manifest"
+      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/msvcr90d.dll' "$PWD/_bld/lib/"
+      cp '_bld/lib/libcurl_shared.dir/Debug/libcurl-d.dll.intermediate.manifest' "${curl}.manifest"
     fi
   fi
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
@@ -128,7 +127,7 @@ fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
 if [ -z "${SKIP_RUN:-}" ]; then
-  "${curl}" --disable --version || true
+  "${curl}" --disable --version
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
