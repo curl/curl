@@ -83,14 +83,14 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
   [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll _bld/src/${PRJ_CFG}; }
-  CURL_TOOL="_bld/src/${PRJ_CFG}/curl.exe"
+  curl="_bld/src/${PRJ_CFG}/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
     ./generate.bat "${VC_VERSION}"
     msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "Windows/${VC_VERSION}/curl-all.sln"
   )
-  CURL_TOOL="build/Win32/${VC_VERSION}/${PRJ_CFG}/curld.exe"
+  curl="build/Win32/${VC_VERSION}/${PRJ_CFG}/curld.exe"
 elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2015' ]; then
   (
     cd winbuild
@@ -102,7 +102,7 @@ EOF
     ./_make.bat
     rm _make.bat
   )
-  CURL_TOOL="builds/libcurl-vc14-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
+  curl="builds/libcurl-vc14-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2017' ]; then
   (
     cd winbuild
@@ -118,7 +118,7 @@ fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
 if [ -z "${SKIP_RUN:-}" ]; then
-  "${CURL_TOOL}" --disable --version
+  "${curl}" --disable --version
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
@@ -136,7 +136,7 @@ fi
 
 if [ "${TFLAGS}" != 'skipall' ] && \
    [ "${TFLAGS}" != 'skiprun' ]; then
-  export CURL_TOOL
+  TFLAGS+=" -c${curl}"
   if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
     TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
   elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
