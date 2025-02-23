@@ -1988,6 +1988,7 @@ if(WIN32)
   if(MSVC_VERSION EQUAL 1500)
     # Workaround to pass this macro to rc.exe
     set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_EMBED_MANIFEST")
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CREATEPROCESS_MANIFEST_RESOURCE_ID=2")
   endif()
 
   # We use crypto functions that are not available for UWP apps
@@ -2006,9 +2007,8 @@ endif()
 
 if(MSVC)
   # Disable default manifest added by CMake
-  #string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
-  if(MSVC_VERSION EQUAL 1500)
-    string(APPEND CMAKE_EXE_LINKER_FLAGS " /MANIFEST:EMBED,ID=2")
+  if(NOT MSVC_VERSION EQUAL 1500)
+    string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
   endif()
 
   string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
