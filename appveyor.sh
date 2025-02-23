@@ -82,6 +82,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && find . -name BuildLog.htm -exec dos2unix --to-stdout '{}' +
     false
   fi
+    [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && find . -name BuildLog.htm -exec dos2unix --to-stdout '{}' +
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
   [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
   curl='_bld/src/curl.exe'
