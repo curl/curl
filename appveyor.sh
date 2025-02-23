@@ -93,7 +93,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
   [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
   curl='_bld/src/curl.exe'
-  if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
+  #if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
     #if [ "${PRJ_CFG}" = 'Release' ]; then
     #  cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86/Microsoft.VC90.CRT/msvcr90.dll' "$PWD/_bld/lib/"
     #  #cp '_bld/lib/libcurl_shared.dir/Release/libcurl.dll.intermediate.manifest' "${curl}.manifest"
@@ -101,7 +101,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     #  cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/msvcr90d.dll' "$PWD/_bld/lib/"
     #  #cp '_bld/lib/libcurl_shared.dir/Debug/libcurl-d.dll.intermediate.manifest' "${curl}.manifest"
     #fi
-  fi
+  #fi
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
