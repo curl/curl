@@ -262,7 +262,7 @@ skip_commits:
     - 'plan9/**/*'
 
 artifacts:
-  - path: '**/curl.exe*'
+  - path: '**/curl.exe'
     name: curl
-  - path: '**/*.dll*'
+  - path: '**/*.dll'
     name: libcurl dll
