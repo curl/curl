@@ -47,6 +47,11 @@ libcurl then expects the application to monitor the sockets for the specific
 activities and tell libcurl again when something happens on one of them. Tell
 libcurl by calling curl_multi_socket_action(3).
 
+This callback may get invoked at any time when interacting with libcurl.
+This may even happen after all transfers are done and is *likely* to
+happen *during* a call to curl_multi_cleanup(3) when cached connections
+are shut down.
+
 # CALLBACK ARGUMENTS
 
 *easy* identifies the specific transfer for which this update is related.
