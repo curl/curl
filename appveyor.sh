@@ -122,6 +122,7 @@ fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
 if [ -z "${SKIP_RUN:-}" ]; then
+  # https://learn.microsoft.com/windows-server/administration/windows-commands/sxstrace
   sxstrace trace -logfile:sxstrace.etl -nostop
   "${curl}" --disable --version
   sxstrace stoptrace
