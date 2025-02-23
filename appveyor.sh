@@ -122,7 +122,7 @@ fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
 if [ -z "${SKIP_RUN:-}" ]; then
-  sxstrace trace -logfile:sxstrace.etl
+  sxstrace trace -logfile:sxstrace.etl -nostop
   "${curl}" --disable --version
   sxstrace parse -logfile:sxstrace.etl -outfile:sxstrace.txt
   echo '-----------------'
