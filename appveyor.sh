@@ -127,9 +127,7 @@ if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
   sxstrace stoptrace
   sxstrace parse -logfile:sxstrace.etl -outfile:sxstrace.txt
-  echo '-----------------'
   cat sxstrace.txt
-  echo '-----------------'
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
