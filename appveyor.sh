@@ -136,7 +136,7 @@ fi
 
 if [ "${TFLAGS}" != 'skipall' ] && \
    [ "${TFLAGS}" != 'skiprun' ]; then
-  TFLAGS+=" -c ${curl}"
+  TFLAGS+=" -c ../src/${PRJ_CFG}/curl.exe"
   if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
     TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
   elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
