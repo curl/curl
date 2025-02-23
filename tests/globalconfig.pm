@@ -104,7 +104,7 @@ our $LOGDIR="log";  # root of the log directory; this will be different for
                     # each runner in multiprocess mode
 our $LIBDIR="./libtest";
 our $TESTDIR="$srcdir/data";
-our $CURL="../src/curl".exe_ext('TOOL'); # what curl binary to run on the tests
+our $CURL=$ENV{'CURL_TOOL'} || "../src/curl".exe_ext('TOOL'); # what curl binary to run on the tests
 our $VCURL=$CURL;  # what curl binary to use to verify the servers with
                    # VCURL is handy to set to the system one when the one you
                    # just built hangs or crashes and thus prevent verification
