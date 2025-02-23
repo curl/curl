@@ -244,8 +244,6 @@ int main(int argc, char *argv[])
 
   tool_init_stderr();
 
-printf("trc-1\n");
-
 #if defined(_WIN32) && !defined(UNDER_CE)
   /* Undocumented diagnostic option to list the full paths of all loaded
      modules. This is purposely pre-init. */
