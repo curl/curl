@@ -122,7 +122,12 @@ fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
 if [ -z "${SKIP_RUN:-}" ]; then
+  sxstrace trace -logfile:sxstrace.etl
   "${curl}" --disable --version
+  sxstrace parse -logfile:sxstrace.etl -outfile:sxstrace.txt
+  echo '-----------------'
+  cat sxstrace.txt
+  echo '-----------------'
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
