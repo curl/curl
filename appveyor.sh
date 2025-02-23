@@ -52,7 +52,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
     [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
-    [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && options+=' -DCMAKE_EXE_LINKER_FLAGS=-MANIFEST'
+    #[ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && options+=' -DCMAKE_EXE_LINKER_FLAGS=-MANIFEST'
     #[ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && options+=' -DCURL_STATIC_CRT=ON'
     # shellcheck disable=SC2086
     cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET:-} \
@@ -86,10 +86,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     fi
     false
   fi
-    if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
-      find . -name BuildLog.htm -exec dos2unix '{}' +
-      find . -name BuildLog.htm -exec cat '{}' +
-    fi
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
   [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
   curl='_bld/src/curl.exe'

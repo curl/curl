@@ -2002,7 +2002,7 @@ endif()
 
 if(MSVC)
   # Disable default manifest added by CMake
-  string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
+  #string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
 
   string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
 endif()
