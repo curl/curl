@@ -29,7 +29,7 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include "bufq.h"
-#include "hash.h"
+#include "hash_offt.h"
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-socket.h"
@@ -97,7 +97,7 @@ struct cf_quiche_ctx {
   struct curltime started_at;        /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
-  struct Curl_hash streams;          /* hash `data->mid` to `stream_ctx` */
+  struct Curl_hash_offt streams;     /* hash `data->mid` to `stream_ctx` */
   curl_off_t data_recvd;
   BIT(initialized);
   BIT(goaway);                       /* got GOAWAY from server */
@@ -115,7 +115,7 @@ static void quiche_debug_log(const char *line, void *argp)
 }
 #endif
 
-static void h3_stream_hash_free(void *stream);
+static void h3_stream_hash_free(curl_off_t id, void *stream);
 
 static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
 {
@@ -142,8 +142,7 @@ static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
     Curl_ssl_peer_cleanup(&ctx->peer);
     vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_hash_clean(&ctx->streams);
-    Curl_hash_destroy(&ctx->streams);
+    Curl_hash_offt_destroy(&ctx->streams);
   }
   free(ctx);
 }
@@ -190,8 +189,9 @@ static void h3_stream_ctx_free(struct stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(void *stream)
+static void h3_stream_hash_free(curl_off_t id, void *stream)
 {
+  (void)id;
   DEBUGASSERT(stream);
   h3_stream_ctx_free((struct stream_ctx *)stream);
 }

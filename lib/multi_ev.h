@@ -24,14 +24,17 @@
  *
  ***************************************************************************/
 
+#include "hash.h"
+#include "hash_offt.h"
+
 struct Curl_easy;
 struct Curl_multi;
 struct easy_pollset;
 
 struct curl_multi_ev {
   struct Curl_hash sh_entries;
-  struct Curl_hash xfer_pollsets;
-  struct Curl_hash conn_pollsets;
+  struct Curl_hash_offt xfer_pollsets;
+  struct Curl_hash_offt conn_pollsets;
 };
 
 /* Setup/teardown of multi event book-keeping. */
