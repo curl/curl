@@ -985,7 +985,7 @@ jobs:
         timeout-minutes: 10
         run: |
           export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
-          TFLAGS+=' -c../bld/src/${{ matrix.type }}/curl.exe'
+          TFLAGS+=' -c ../bld/src/${{ matrix.type }}/curl.exe'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
