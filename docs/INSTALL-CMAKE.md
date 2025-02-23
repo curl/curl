@@ -141,7 +141,7 @@ Install to default location (you have to specify the build directory).
 
 Do not use `--prefix` to change the installation prefix as the output produced
 by the `curl-config` script is determined at CMake configure time. If you want
-to set a custom install prefix for curl, use the
+to set a custom install prefix for curl, set
 [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
 when configuring the CMake build.
 
@@ -201,9 +201,9 @@ if a particular feature/protocol is supported. For example:
 ```cmake
 # check HTTPS
 if(CURL_SUPPORTS_HTTPS)
-    message(STATUS "CURL supports HTTPS")
+  message(STATUS "CURL supports HTTPS")
 else()
-    message(STATUS "CURL does NOT support HTTPS")
+  message(STATUS "CURL does NOT support HTTPS")
 endif()
 ```
 
