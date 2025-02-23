@@ -67,7 +67,7 @@ CURLWWW="${CURLWWW:-../curl-www}"
   cut '-d(' -f1 | \
   cut '-d<' -f1 | \
   tr , '\012' | \
-  sed 's/ at github/ on github/' | \
+  sed 's/ at github/ on github/i' | \
   sed 's/on github/on github/i' | \
   sed 's/ and /\n/' | \
   sed -e 's/^ *//' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/i'
