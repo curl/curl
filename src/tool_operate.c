@@ -3152,7 +3152,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
   setlocale(LC_ALL, "");
   setlocale(LC_NUMERIC, "C");
 #endif
-printf("!op0\n");
+
   /* Parse .curlrc if necessary */
   if((argc == 1) ||
      (first_arg && strncmp(first_arg, "-q", 2) &&
@@ -3165,14 +3165,12 @@ printf("!op0\n");
       result = CURLE_FAILED_INIT;
     }
   }
-printf("!op1\n");
+
   curlx_unicodefree(first_arg);
-printf("!op2\n");
 
   if(!result) {
     /* Parse the command line arguments */
     ParameterError res = parse_args(global, argc, argv);
-printf("!op4\n");
     if(res) {
       result = CURLE_OK;
 
@@ -3188,11 +3186,8 @@ printf("!op4\n");
 #endif
       }
       /* Check if we were asked for the version information */
-      else if(res == PARAM_VERSION_INFO_REQUESTED) {
-        printf("!op5\n");
+      else if(res == PARAM_VERSION_INFO_REQUESTED)
         tool_version_info();
-        printf("!op6\n");
-      }
       /* Check if we were asked to list the SSL engines */
       else if(res == PARAM_ENGINES_REQUESTED)
         tool_list_engines();

@@ -256,10 +256,8 @@ int main(int argc, char *argv[])
   }
 #endif
 #ifdef _WIN32
-printf("!0\n");
   /* win32_init must be called before other init routines. */
   result = win32_init();
-printf("!1\n");
   if(result) {
     errorf(&global, "(%d) Windows-specific init failed", result);
     return (int)result;
@@ -270,26 +268,20 @@ printf("!1\n");
     errorf(&global, "out of file descriptors");
     return CURLE_FAILED_INIT;
   }
-printf("!2\n");
 
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE)
   (void)signal(SIGPIPE, SIG_IGN);
 #endif
-printf("!3\n");
 
   /* Initialize memory tracking */
   memory_tracking_init();
-printf("!4\n");
 
   /* Initialize the curl library - do not call any libcurl functions before
      this point */
   result = main_init(&global);
-printf("!5|%d\n", result);
   if(!result) {
     /* Start our curl operation */
-printf("!6\n");
     result = operate(&global, argc, argv);
-printf("!7\n");
 
     /* Perform the main cleanup */
     main_free(&global);
