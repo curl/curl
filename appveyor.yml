@@ -80,14 +80,14 @@ environment:
       EXAMPLES: 'OFF'
     - job_name: 'CMake, VS2008, Release, x64, Schannel, Static, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      PRJ_GEN: 'Visual Studio 9 2008 Win64'
+      PRJ_GEN: 'Visual Studio 9 2008 - Win64'
       PRJ_CFG: Release
       SCHANNEL: 'ON'
       EXAMPLES: 'OFF'
       TFLAGS: 'skipall'
     - job_name: 'CMake, VS2008, Debug, x64, OpenSSL 1.1.1 + Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      PRJ_GEN: 'Visual Studio 9 2008 Win64'
+      PRJ_GEN: 'Visual Studio 9 2008 - Win64'
       PRJ_CFG: Debug
       OPENSSL: 'ON'
       SCHANNEL: 'ON'
