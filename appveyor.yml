@@ -91,7 +91,6 @@ environment:
       OPENSSL: 'ON'
       SCHANNEL: 'ON'
       EXAMPLES: 'OFF'
-      CHKPREFILL: '_chkprefill'
       TFLAGS: 'skipall'
     - job_name: 'CMake, VS2008, Debug, x86, OpenSSL 1.1.1 + Schannel, Static, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
