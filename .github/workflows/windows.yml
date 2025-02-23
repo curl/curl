@@ -948,7 +948,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
+          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
           if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib:$PATH"
             bld/src/curl.exe --disable --version
