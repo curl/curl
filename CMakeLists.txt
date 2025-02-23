@@ -1989,9 +1989,6 @@ if(WIN32)
     set(USE_WIN32_LARGE_FILES ON)
   endif()
 
-  # Use the manifest embedded in the Windows Resource
-  string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")  # VS2008 generator fails to pass it to rc.exe (as of CMake v3.16.2)
-
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
     set(USE_WIN32_CRYPTO ON)
@@ -2007,12 +2004,6 @@ if(WIN32)
 endif()
 
 if(MSVC)
-  # Disable default manifest added by MSVC to avoid it overriding our custom one in curl.rc.
-  # Except for curl.exe built with VS2008, which requires the auto-generated manifest to find the CRT DLL
-  if(NOT MSVC_VERSION EQUAL 1500)
-    string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
-  endif()
-
   string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
 endif()
 

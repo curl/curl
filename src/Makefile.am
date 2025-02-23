@@ -213,7 +213,7 @@ listhelp:
 
 if HAVE_WINDRES
 .rc.o:
-	$(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
+	$(RC) -I$(top_srcdir)/include $(RCFLAGS) -i $< -o $@
 endif
 
 dist-hook:
