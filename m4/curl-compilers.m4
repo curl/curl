@@ -1059,6 +1059,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [trampolines])
           fi
           #
+          dnl only gcc 4.7 or later
+          if test "$compiler_num" -ge "407"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wmaybe-uninitialized"
+          fi
+          #
           dnl only gcc 4.8 or later
           if test "$compiler_num" -ge "408"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
