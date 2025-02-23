@@ -98,9 +98,6 @@ BEGIN
       _STR(LIBCURL_VERSION_PATCH) ".0"" type=""win32""/>"
     "<compatibility xmlns=""urn:schemas-microsoft-com:compatibility.v1"">"
       "<application>"
-#if _MSC_VER >= 1500 && _MSC_VER < 1600
-        "<supportedOS Id=""{ffffffff-1546-43c5-a5fe-ffffffffffff}""/>"
-#endif
         "<supportedOS Id=""{e2011457-1546-43c5-a5fe-008deee3d3f0}""/>"  /* Vista / Server 2008 */
         "<supportedOS Id=""{35138b9a-5d96-4fbd-8e2d-a2440225f93a}""/>"  /* 7 / Server 2008 R2 */
         "<supportedOS Id=""{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}""/>"  /* 8 / Server 2012 */
