@@ -64,7 +64,9 @@ USEFUL = \
 
 UTIL = \
  util.c \
- util.h
+ util.h \
+ ../../lib/strerror.c \
+ ../../lib/strerror.h
 
 getpart_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) \
  testpart.c

@@ -24,6 +24,7 @@
 #
 ###########################################################################
 #
+import gzip
 import logging
 import os
 import re
@@ -617,4 +618,25 @@ class Env:
             if remain != 0:
                 i = int(fsize / line_length) + 1
                 fd.write(f"{i:09d}-{s}"[0:remain-1] + "\n")
+        return fpath
+
+    def make_data_gzipbomb(self, indir: str, fname: str, fsize: int) -> str:
+        fpath = os.path.join(indir, fname)
+        gzpath = f'{fpath}.gz'
+        varpath = f'{fpath}.var'
+
+        with open(fpath, 'w') as fd:
+            fd.write('not what we are looking for!\n')
+        count = int(fsize / 1024)
+        zero1k = bytearray(1024)
+        with gzip.open(gzpath, 'wb') as fd:
+            for _ in range(count):
+                fd.write(zero1k)
+        with open(varpath, 'w') as fd:
+            fd.write(f'URI: {fname}\n')
+            fd.write('\n')
+            fd.write(f'URI: {fname}.gz\n')
+            fd.write('Content-Type: text/plain\n')
+            fd.write('Content-Encoding: x-gzip\n')
+            fd.write('\n')
         return fpath

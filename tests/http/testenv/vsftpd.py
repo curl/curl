@@ -40,11 +40,12 @@ log = logging.getLogger(__name__)
 
 class VsFTPD:
 
-    def __init__(self, env: Env, with_ssl=False):
+    def __init__(self, env: Env, with_ssl=False, ssl_implicit=False):
         self.env = env
         self._cmd = env.vsftpd
-        self._scheme = 'ftp'
         self._with_ssl = with_ssl
+        self._ssl_implicit = ssl_implicit and with_ssl
+        self._scheme = 'ftps' if self._ssl_implicit else 'ftp'
         if self._with_ssl:
             self._port = self.env.ftps_port
             name = 'vsftpds'
@@ -192,6 +193,9 @@ class VsFTPD:
                 # require_ssl_reuse=YES means ctrl and data connection need to use the same session
                 'require_ssl_reuse=NO',
             ])
-
+            if self._ssl_implicit:
+                conf.extend([
+                     'implicit_ssl=YES',
+                ])
         with open(self._conf_file, 'w') as fd:
             fd.write("\n".join(conf))

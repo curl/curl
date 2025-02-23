@@ -71,10 +71,6 @@ static const char *doh_strerror(DOHcode code)
   return "bad error code";
 }
 
-struct curl_trc_feat Curl_doh_trc = {
-  "DoH",
-  CURL_LOG_LVL_NONE,
-};
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 /* @unittest 1655
@@ -281,7 +277,7 @@ static CURLcode doh_run_probe(struct Curl_easy *data,
      the gcc typecheck helpers */
   doh->state.internal = TRUE;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  doh->state.feat = &Curl_doh_trc;
+  doh->state.feat = &Curl_trc_feat_dns;
 #endif
   ERROR_CHECK_SETOPT(CURLOPT_URL, url);
   ERROR_CHECK_SETOPT(CURLOPT_DEFAULT_PROTOCOL, "https");
@@ -305,7 +301,7 @@ static CURLcode doh_run_probe(struct Curl_easy *data,
   ERROR_CHECK_SETOPT(CURLOPT_SHARE, (CURLSH *)data->share);
   if(data->set.err && data->set.err != stderr)
     ERROR_CHECK_SETOPT(CURLOPT_STDERR, data->set.err);
-  if(Curl_trc_ft_is_verbose(data, &Curl_doh_trc))
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns))
     ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
   if(data->set.no_signal)
     ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
@@ -1087,12 +1083,14 @@ static CURLcode doh_test_alpn_escapes(void)
 }
 #endif
 
-static CURLcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
+static CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
+                                        unsigned char *cp, size_t len,
                                         struct Curl_https_rrinfo **hrr)
 {
   uint16_t pcode = 0, plen = 0;
   struct Curl_https_rrinfo *lhrr = NULL;
   char *dnsname = NULL;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
 
 #ifdef DEBUGBUILD
   /* a few tests of escaping, should not be here but ok for now */
@@ -1116,44 +1114,9 @@ static CURLcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
     plen = doh_get16bit(cp, 2);
     cp += 4;
     len -= 4;
-    switch(pcode) {
-    case HTTPS_RR_CODE_ALPN:
-      if(Curl_httpsrr_decode_alpn(cp, plen, lhrr->alpns) != CURLE_OK)
-        goto err;
-      break;
-    case HTTPS_RR_CODE_NO_DEF_ALPN:
-      lhrr->no_def_alpn = TRUE;
-      break;
-    case HTTPS_RR_CODE_IPV4:
-      if(!plen)
-        goto err;
-      lhrr->ipv4hints = Curl_memdup(cp, plen);
-      if(!lhrr->ipv4hints)
-        goto err;
-      lhrr->ipv4hints_len = (size_t)plen;
-      break;
-    case HTTPS_RR_CODE_ECH:
-      if(!plen)
-        goto err;
-      lhrr->echconfiglist = Curl_memdup(cp, plen);
-      if(!lhrr->echconfiglist)
-        goto err;
-      lhrr->echconfiglist_len = (size_t)plen;
-      break;
-    case HTTPS_RR_CODE_IPV6:
-      if(!plen)
-        goto err;
-      lhrr->ipv6hints = Curl_memdup(cp, plen);
-      if(!lhrr->ipv6hints)
-        goto err;
-      lhrr->ipv6hints_len = (size_t)plen;
-      break;
-    case HTTPS_RR_CODE_PORT:
-      lhrr->port = doh_get16bit(cp, 0);
-      break;
-    default:
-      break;
-    }
+    result = Curl_httpsrr_set(data, lhrr, pcode, cp, plen);
+    if(result)
+      goto err;
     if(plen > 0 && plen <= len) {
       cp += plen;
       len -= plen;
@@ -1163,10 +1126,9 @@ static CURLcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
   *hrr = lhrr;
   return CURLE_OK;
 err:
-  Curl_safefree(lhrr->target);
-  Curl_safefree(lhrr->echconfiglist);
+  Curl_httpsrr_cleanup(lhrr);
   Curl_safefree(lhrr);
-  return CURLE_OUT_OF_MEMORY;
+  return result;
 }
 
 # ifdef DEBUGBUILD
@@ -1256,8 +1218,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct Curl_addrinfo *ai;
 
 
-      if(Curl_trc_ft_is_verbose(data, &Curl_doh_trc)) {
-        infof(data, "[DoH] hostname: %s", dohp->host);
+      if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
+        CURL_TRC_DNS(data, "hostname: %s", dohp->host);
         doh_show(data, &de);
       }
 
@@ -1291,8 +1253,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 #ifdef USE_HTTPSRR
     if(de.numhttps_rrs > 0 && result == CURLE_OK && *dnsp) {
       struct Curl_https_rrinfo *hrr = NULL;
-      result = doh_resp_decode_httpsrr(de.https_rrs->val, de.https_rrs->len,
-                                       &hrr);
+      result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
+                                       de.https_rrs->len, &hrr);
       if(result) {
         infof(data, "Failed to decode HTTPS RR");
         return result;

@@ -107,7 +107,7 @@ if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(ENABLE_UNICODE AND MINGW)
+if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
   target_link_libraries(${EXE_NAME} "-municode")
 endif()
 

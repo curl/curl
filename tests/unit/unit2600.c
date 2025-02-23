@@ -40,9 +40,6 @@
 #include <inet.h>
 #endif
 
-#include <setjmp.h>
-#include <signal.h>
-
 #include "urldata.h"
 #include "connect.h"
 #include "cfilters.h"
@@ -134,13 +131,12 @@ static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static CURLcode cf_test_connect(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                bool blocking, bool *done)
+                                bool *done)
 {
   struct cf_test_ctx *ctx = cf->ctx;
   timediff_t duration_ms;
 
   (void)data;
-  (void)blocking;
   *done = FALSE;
   duration_ms = Curl_timediff(Curl_now(), ctx->started);
   if(duration_ms >= ctx->fail_delay_ms) {
@@ -397,7 +393,7 @@ UNITTEST_START
 
   size_t i;
 
-  for(i = 0; i < sizeof(TEST_CASES)/sizeof(TEST_CASES[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(TEST_CASES); ++i) {
     test_connect(&TEST_CASES[i]);
   }
 

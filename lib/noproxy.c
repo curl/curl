@@ -177,7 +177,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       bool match = FALSE;
 
       /* pass blanks */
-      while(*p && ISBLANK(*p))
+      while(ISBLANK(*p))
         p++;
 
       token = p;

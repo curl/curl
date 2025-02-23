@@ -56,6 +56,7 @@ class TestDownload:
         env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
         env.make_data_file(indir=indir, fname="data-10m", fsize=10*1024*1024)
         env.make_data_file(indir=indir, fname="data-50m", fsize=50*1024*1024)
+        env.make_data_gzipbomb(indir=indir, fname="bomb-100m.txt", fsize=100*1024*1024)
 
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -405,7 +406,7 @@ class TestDownload:
             '-n', f'{count}', '-m', f'{max_parallel}', '-a',
             '-A', f'{abort_offset}', '-V', proto, url
         ])
-        r.check_exit_code(0)
+        r.check_exit_code(42)  # CURLE_ABORTED_BY_CALLBACK
         srcfile = os.path.join(httpd.docs_dir, docname)
         # downloads should be there, but not necessarily complete
         self.check_downloads(client, srcfile, count, complete=False)
@@ -434,7 +435,7 @@ class TestDownload:
             '-n', f'{count}', '-m', f'{max_parallel}', '-a',
             '-F', f'{fail_offset}', '-V', proto, url
         ])
-        r.check_exit_code(0)
+        r.check_exit_code(23)  # CURLE_WRITE_ERROR
         srcfile = os.path.join(httpd.docs_dir, docname)
         # downloads should be there, but not necessarily complete
         self.check_downloads(client, srcfile, count, complete=False)
@@ -615,11 +616,11 @@ class TestDownload:
         assert reused_session, 'session was not reused for 2nd transfer'
         assert earlydata[0] == 0, f'{earlydata}'
         if proto == 'http/1.1':
-            assert earlydata[1] == 69, f'{earlydata}'
+            assert earlydata[1] == 111, f'{earlydata}'
         elif proto == 'h2':
-            assert earlydata[1] == 107, f'{earlydata}'
+            assert earlydata[1] == 127, f'{earlydata}'
         elif proto == 'h3':
-            assert earlydata[1] == 67, f'{earlydata}'
+            assert earlydata[1] == 109, f'{earlydata}'
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("max_host_conns", [0, 1, 5])
@@ -688,3 +689,30 @@ class TestDownload:
                     n = int(m.group(1))
                     assert n <= max_total_conns
             assert matched_lines > 0
+
+    # 2 parallel transers, pause and resume. Load a 100 MB zip bomb from
+    # the server with "Content-Encoding: gzip" that gets exloded during
+    # response writing to the client. Client pauses after 1MB unzipped data
+    # and causes buffers to fill while the server sends more response
+    # data.
+    # * http/1.1: not much buffering is done as curl does no longer
+    #   serve the connections that are paused
+    # * h2/h3: server continues sending what the stream window allows and
+    #   since the one connection involved unpaused transfers, data continues
+    #   to be received, requiring buffering.
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_35_pause_bomb(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 2
+        pause_offset = 1024 * 1024
+        docname = 'bomb-100m.txt.var'
+        url = f'https://localhost:{env.https_port}/{docname}'
+        client = LocalClient(name='hx-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}', '-m', f'{count}',
+             '-P', f'{pause_offset}', '-V', proto, url
+        ])
+        r.check_exit_code(0)

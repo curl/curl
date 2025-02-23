@@ -97,13 +97,38 @@ In order to find out all components involved in a transfer, run it with "all"
 configured. You can then see all names involved in your libcurl version in the
 trace.
 
+## `dns`
+
+Tracing of DNS operations to resolve hostnames and HTTPS records.
+
+## `lib-ids`
+
+Adds transfer and connection identifiers as prefix to every call to
+CURLOPT_DEBUGFUNCTION(3). The format is `[n-m]` where `n` is the identifier
+of the transfer and `m` is the identifier of the connection. A literal `x`
+is used for internal transfers or when no connection is assigned.
+
+For example, `[5-x]` is the prefix for transfer 5 that has no
+connection. The command line tool `curl`uses the same format for its
+`--trace-ids` option.
+
+`lib-ids` is intended for libcurl applications that handle multiple
+transfers but have no own way to identify in trace output which transfer
+a trace event is connected to.
+
 ## `doh`
 
-Tracing of DNS-over-HTTP operations to resolve hostnames.
+Former name for DNS-over-HTTP operations. Now an alias for `dns`.
+
+## `multi`
+
+Traces multi operations managing transfers' state changes and sockets poll
+states.
 
 ## `read`
 
-Traces reading of upload data from the application in order to send it to the server.
+Traces reading of upload data from the application in order to send it to the
+server.
 
 ## `ssls`
 

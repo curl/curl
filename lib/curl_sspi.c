@@ -42,7 +42,7 @@ typedef PSecurityFunctionTable (APIENTRY *INITSECURITYINTERFACE_FN)(VOID);
 
 /* See definition of SECURITY_ENTRYPOINT in sspi.h */
 #ifdef UNICODE
-#  ifdef _WIN32_WCE
+#  ifdef UNDER_CE
 #    define SECURITYENTRYPOINT L"InitSecurityInterfaceW"
 #  else
 #    define SECURITYENTRYPOINT "InitSecurityInterfaceW"

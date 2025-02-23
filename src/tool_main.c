@@ -29,7 +29,9 @@
 #include <tchar.h>
 #endif
 
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -224,7 +226,7 @@ static void main_free(struct GlobalConfig *config)
 /*
 ** curl tool main function.
 */
-#ifdef _UNICODE
+#if defined(_UNICODE) && !defined(UNDER_CE)
 #if defined(__GNUC__) || defined(__clang__)
 /* GCC does not know about wmain() */
 #pragma GCC diagnostic push
@@ -242,7 +244,7 @@ int main(int argc, char *argv[])
 
   tool_init_stderr();
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
   /* Undocumented diagnostic option to list the full paths of all loaded
      modules. This is purposely pre-init. */
   if(argc == 2 && !_tcscmp(argv[1], _T("--dump-module-paths"))) {
@@ -252,6 +254,8 @@ int main(int argc, char *argv[])
     curl_slist_free_all(head);
     return head ? 0 : 1;
   }
+#endif
+#ifdef _WIN32
   /* win32_init must be called before other init routines. */
   result = win32_init();
   if(result) {
@@ -295,7 +299,7 @@ int main(int argc, char *argv[])
 #endif
 }
 
-#ifdef _UNICODE
+#if defined(_UNICODE) && !defined(UNDER_CE)
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif

@@ -51,7 +51,7 @@ typedef CURLcode Curl_cft_shutdown(struct Curl_cfilter *cf,
 
 typedef CURLcode Curl_cft_connect(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  bool blocking, bool *done);
+                                  bool *done);
 
 /* Return the hostname and port the connection goes to.
  * This may change with the connection state of filters when tunneling
@@ -324,7 +324,7 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done);
+                              bool *done);
 void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, bool eos,
@@ -399,7 +399,8 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex);
  * Return the HTTP version used on the FIRSTSOCKET connection filters
  * or 0 if unknown. Value otherwise is 09, 10, 11, etc.
  */
-unsigned char Curl_conn_http_version(struct Curl_easy *data);
+unsigned char Curl_conn_http_version(struct Curl_easy *data,
+                                     struct connectdata *conn);
 
 /**
  * Close the filter chain at `sockindex` for connection `data->conn`.
@@ -454,7 +455,8 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
  * Adjust pollset from filters installed at transfer's connection.
  */
 void Curl_conn_adjust_pollset(struct Curl_easy *data,
-                               struct easy_pollset *ps);
+                              struct connectdata *conn,
+                              struct easy_pollset *ps);
 
 /**
  * Curl_poll() the filter chain at `cf` with timeout `timeout_ms`.

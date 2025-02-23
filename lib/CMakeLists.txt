@@ -106,9 +106,9 @@ if(NOT DEFINED SHARE_LIB_OBJECT)
   endif()
 endif()
 
-if(SHARE_LIB_OBJECT)
+if(SHARE_LIB_OBJECT AND NOT CMAKE_VERSION VERSION_LESS 3.12)
   set(LIB_OBJECT "libcurl_object")
-  add_library(${LIB_OBJECT} OBJECT ${HHEADERS} ${CSOURCES})
+  add_library(${LIB_OBJECT} OBJECT ${HHEADERS} ${CSOURCES})  # Requires CMake 3.12
   if(WIN32)
     # Define CURL_STATICLIB always, to disable __declspec(dllexport) for
     # exported libcurl symbols. We handle exports via libcurl.def instead.

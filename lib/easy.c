@@ -105,7 +105,7 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
  * ways, but at this point it must be defined as the system-supplied strdup
  * so the callback pointer is initialized correctly.
  */
-#if defined(_WIN32_WCE)
+#if defined(UNDER_CE)
 #define system_strdup _strdup
 #elif !defined(HAVE_STRDUP)
 #define system_strdup Curl_strdup
@@ -1195,10 +1195,10 @@ CURLcode curl_easy_pause(CURL *d, int action)
   }
 
 out:
-  if(!result && !data->state.done && keep_changed)
-    /* This transfer may have been moved in or out of the bundle, update the
-       corresponding socket callback, if used */
-    result = Curl_updatesocket(data);
+  if(!result && !data->state.done && keep_changed && data->multi)
+    /* pause/unpausing may result in multi event changes */
+    if(Curl_multi_ev_assess_xfer(data->multi, data))
+      result = CURLE_ABORTED_BY_CALLBACK;
 
   if(recursive)
     /* this might have called a callback recursively which might have set this

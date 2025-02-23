@@ -514,6 +514,7 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
   const char * const ssl_capath = conn_config->CApath;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   bool imported_native_ca = FALSE;
+  bool imported_ca_info_blob = FALSE;
 
 #if !defined(NO_FILESYSTEM) && defined(WOLFSSL_SYS_CA_CERTS)
   /* load native CA certificates */
@@ -524,7 +525,6 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
     else {
       imported_native_ca = TRUE;
       infof(data, "successfully imported native CA store");
-      wssl->x509_store_setup = TRUE;
     }
   }
 #endif /* !NO_FILESYSTEM */
@@ -535,17 +535,12 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
                                       (long)ca_info_blob->len,
                                       WOLFSSL_FILETYPE_PEM) !=
        WOLFSSL_SUCCESS) {
-      if(imported_native_ca) {
-        infof(data, "error importing CA certificate blob, continuing anyway");
-      }
-      else {
-        failf(data, "error importing CA certificate blob");
-        return CURLE_SSL_CACERT_BADFILE;
-      }
+      failf(data, "error importing CA certificate blob");
+      return CURLE_SSL_CACERT_BADFILE;
     }
     else {
+      imported_ca_info_blob = TRUE;
       infof(data, "successfully imported CA certificate blob");
-      wssl->x509_store_setup = TRUE;
     }
   }
 
@@ -557,14 +552,15 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
   if(!store)
     return CURLE_OUT_OF_MEMORY;
 
-  if((ssl_cafile || ssl_capath) && (!wssl->x509_store_setup)) {
+  if(ssl_cafile || ssl_capath) {
     int rc =
       wolfSSL_CTX_load_verify_locations_ex(wssl->ctx,
                                            ssl_cafile,
                                            ssl_capath,
                                            WOLFSSL_LOAD_FLAG_IGNORE_ERR);
     if(WOLFSSL_SUCCESS != rc) {
-      if(conn_config->verifypeer) {
+      if(conn_config->verifypeer &&
+         !imported_native_ca && !imported_ca_info_blob) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:"
               " CAfile: %s CApath: %s",
@@ -1842,15 +1838,12 @@ static bool wolfssl_data_pending(struct Curl_cfilter *cf,
     return FALSE;
 }
 
-static CURLcode
-wolfssl_connect_common(struct Curl_cfilter *cf,
-                       struct Curl_easy *data,
-                       bool nonblocking,
-                       bool *done)
+static CURLcode wolfssl_connect(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                bool *done)
 {
   CURLcode result;
   struct ssl_connect_data *connssl = cf->ctx;
-  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
@@ -1858,70 +1851,20 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
+  *done = FALSE;
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+
   if(ssl_connect_1 == connssl->connecting_state) {
-    /* Find out how much more time we are allowed */
-    const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
-
-    if(timeout_ms < 0) {
-      /* no need to continue if time already is up */
-      failf(data, "SSL connection timeout");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
-
     result = wolfssl_connect_step1(cf, data);
     if(result)
       return result;
   }
 
-  while(ssl_connect_2 == connssl->connecting_state) {
-
-    /* check allowed time left */
-    const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
-
-    if(timeout_ms < 0) {
-      /* no need to continue if time already is up */
-      failf(data, "SSL connection timeout");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
-
-    /* if ssl is expecting something, check if it is available. */
-    if(connssl->io_need) {
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
-        sockfd : CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
-        sockfd : CURL_SOCKET_BAD;
-      int what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                                   nonblocking ? 0 : timeout_ms);
-      if(what < 0) {
-        /* fatal error */
-        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      else if(0 == what) {
-        if(nonblocking) {
-          *done = FALSE;
-          return CURLE_OK;
-        }
-        else {
-          /* timeout */
-          failf(data, "SSL connection timeout");
-          return CURLE_OPERATION_TIMEDOUT;
-        }
-      }
-      /* socket is readable or writable */
-    }
-
-    /* Run transaction, and return to the caller if it failed or if
-     * this connection is part of a multi handle and this loop would
-     * execute again. This permits the owner of a multi handle to
-     * abort a connection attempt before step2 has completed while
-     * ensuring that a client using select() or epoll() will always
-     * have a valid fdset to wait on.
-     */
+  if(ssl_connect_2 == connssl->connecting_state) {
     result = wolfssl_connect_step2(cf, data);
-    if(result || (nonblocking && (ssl_connect_2 == connssl->connecting_state)))
+    if(result)
       return result;
-  } /* repeat step2 until all transactions are done. */
+  }
 
   if(ssl_connect_3 == connssl->connecting_state) {
     /* In other backends, this is where we verify the certificate, but
@@ -1933,38 +1876,10 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
     connssl->state = ssl_connection_complete;
     *done = TRUE;
   }
-  else
-    *done = FALSE;
-
-  /* Reset our connect state machine */
-  connssl->connecting_state = ssl_connect_1;
 
   return CURLE_OK;
 }
 
-
-static CURLcode wolfssl_connect_nonblocking(struct Curl_cfilter *cf,
-                                            struct Curl_easy *data,
-                                            bool *done)
-{
-  return wolfssl_connect_common(cf, data, TRUE, done);
-}
-
-
-static CURLcode wolfssl_connect(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
-{
-  CURLcode result;
-  bool done = FALSE;
-
-  result = wolfssl_connect_common(cf, data, FALSE, &done);
-  if(result)
-    return result;
-
-  DEBUGASSERT(done);
-
-  return CURLE_OK;
-}
 
 static CURLcode wolfssl_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
@@ -2037,7 +1952,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wolfssl_random,                  /* random */
   NULL,                            /* cert_status_request */
   wolfssl_connect,                 /* connect */
-  wolfssl_connect_nonblocking,     /* connect_nonblocking */
   Curl_ssl_adjust_pollset,         /* adjust_pollset */
   wolfssl_get_internals,           /* get_internals */
   wolfssl_close,                   /* close_one */

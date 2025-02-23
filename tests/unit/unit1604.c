@@ -210,7 +210,7 @@ UNITTEST_START
 
   size_t i;
 
-  for(i = 0; i < sizeof(data) / sizeof(data[0]); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(data); ++i) {
     char *output = NULL;
     char *flagstr = NULL;
     char *received_ccstr = NULL;

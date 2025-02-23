@@ -48,7 +48,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(_WIN32) || defined(_WIN32_WCE)
+#ifdef _WIN32
 #define PRESERVE_WINDOWS_ERROR_CODE
 #endif
 
@@ -768,7 +768,7 @@ get_winsock_error(int err, char *buf, size_t len)
 }
 #endif   /* USE_WINSOCK */
 
-#if defined(_WIN32) || defined(_WIN32_WCE)
+#ifdef _WIN32
 /* This is a helper function for Curl_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
@@ -791,7 +791,7 @@ get_winapi_error(int err, char *buf, size_t buflen)
      FormatMessageW -> wcstombs is used for Windows CE compatibility. */
   if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
-                    LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
+                    LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL)) {
     size_t written = wcstombs(buf, wbuf, buflen - 1);
     if(written != (size_t)-1)
       buf[written] = '\0';
@@ -810,7 +810,7 @@ get_winapi_error(int err, char *buf, size_t buflen)
 
   return *buf ? buf : NULL;
 }
-#endif /* _WIN32 || _WIN32_WCE */
+#endif /* _WIN32 */
 
 /*
  * Our thread-safe and smart strerror() replacement.
@@ -848,8 +848,8 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#if defined(_WIN32) || defined(_WIN32_WCE)
-#if defined(_WIN32)
+#ifdef _WIN32
+#ifndef UNDER_CE
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
     msnprintf(buf, buflen, "%s", sys_errlist[err]);
@@ -911,7 +911,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     *p = '\0';
 
   if(errno != old_errno)
-    errno = old_errno;
+    CURL_SETERRNO(old_errno);
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   if(old_win_err != GetLastError())
@@ -925,7 +925,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
  * Curl_winapi_strerror:
  * Variant of Curl_strerror if the error code is definitely Windows API.
  */
-#if defined(_WIN32) || defined(_WIN32_WCE)
+#ifdef _WIN32
 const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
@@ -951,7 +951,7 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    errno = old_errno;
+    CURL_SETERRNO(old_errno);
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   if(old_win_err != GetLastError())
@@ -960,7 +960,7 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
   return buf;
 }
-#endif /* _WIN32 || _WIN32_WCE */
+#endif /* _WIN32 */
 
 #ifdef USE_WINDOWS_SSPI
 /*
@@ -1100,7 +1100,7 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    errno = old_errno;
+    CURL_SETERRNO(old_errno);
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   if(old_win_err != GetLastError())

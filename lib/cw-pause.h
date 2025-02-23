@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_STRTOK_H
-#define HEADER_CURL_STRTOK_H
+#ifndef HEADER_CURL_CW_PAUSE_H
+#define HEADER_CURL_CW_PAUSE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,14 +23,18 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
 #include "curl_setup.h"
-#include <stddef.h>
 
-#ifdef HAVE_STRTOK_R
-#include <string.h>
-#define Curl_strtok_r strtok_r
-#else
-char *Curl_strtok_r(char *s, const char *delim, char **last);
-#endif
+#include "sendf.h"
 
-#endif /* HEADER_CURL_STRTOK_H */
+/**
+ * The client writer type "cw-pause" that buffers writes for
+ * paused transfer writes.
+ */
+extern struct Curl_cwtype Curl_cwt_pause;
+
+CURLcode Curl_cw_pause_flush(struct Curl_easy *data);
+
+
+#endif /* HEADER_CURL_CW_PAUSE_H */

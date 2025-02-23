@@ -219,6 +219,7 @@ struct h2_stream_ctx {
   BIT(bodystarted);
   BIT(body_eos);    /* the complete body has been added to `sendbuf` and
                      * is being/has been processed from there. */
+  BIT(write_paused);  /* stream write is paused */
 };
 
 #define H2_STREAM_CTX(ctx,data)   ((struct h2_stream_ctx *)(\
@@ -289,14 +290,14 @@ static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
 
 static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
-                                       struct h2_stream_ctx *stream,
-                                       bool paused)
+                                       struct h2_stream_ctx *stream)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   int32_t dwsize;
   int rv;
 
-  dwsize = paused ? 0 : cf_h2_get_desired_local_win(cf, data);
+  dwsize = (stream->write_paused || stream->xfer_result) ?
+           0 : cf_h2_get_desired_local_win(cf, data);
   if(dwsize != stream->local_window_size) {
     int32_t wsize = nghttp2_session_get_stream_effective_local_window_size(
                       ctx->h2, stream->id);
@@ -332,13 +333,11 @@ static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
 
 static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
-                                       struct h2_stream_ctx *stream,
-                                       bool paused)
+                                       struct h2_stream_ctx *stream)
 {
   (void)cf;
   (void)data;
   (void)stream;
-  (void)paused;
   return CURLE_OK;
 }
 #endif /* !NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE */
@@ -1058,7 +1057,7 @@ static void h2_xfer_write_resp_hd(struct Curl_cfilter *cf,
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(!stream->xfer_result && !eos)
-      stream->xfer_result = cf_h2_update_local_win(cf, data, stream, FALSE);
+      stream->xfer_result = cf_h2_update_local_win(cf, data, stream);
     if(stream->xfer_result)
       CURL_TRC_CF(data, cf, "[%d] error %d writing %zu bytes of headers",
                   stream->id, stream->xfer_result, blen);
@@ -1074,8 +1073,6 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
   /* If we already encountered an error, skip further writes */
   if(!stream->xfer_result)
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
-  if(!stream->xfer_result && !eos)
-    stream->xfer_result = cf_h2_update_local_win(cf, data, stream, FALSE);
   /* If the transfer write is errored, we do not want any more data */
   if(stream->xfer_result) {
     struct cf_h2_ctx *ctx = cf->ctx;
@@ -1085,6 +1082,17 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
     nghttp2_submit_rst_stream(ctx->h2, 0, stream->id,
                               (uint32_t)NGHTTP2_ERR_CALLBACK_FAILURE);
   }
+  else if(!stream->write_paused && Curl_xfer_write_is_paused(data)) {
+    CURL_TRC_CF(data, cf, "[%d] stream output paused", stream->id);
+    stream->write_paused = TRUE;
+  }
+  else if(stream->write_paused && !Curl_xfer_write_is_paused(data)) {
+    CURL_TRC_CF(data, cf, "[%d] stream output unpaused", stream->id);
+    stream->write_paused = FALSE;
+  }
+
+  if(!stream->xfer_result && !eos)
+    stream->xfer_result = cf_h2_update_local_win(cf, data, stream);
 }
 
 static CURLcode on_stream_frame(struct Curl_cfilter *cf,
@@ -1252,7 +1260,7 @@ static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
     }
     case NGHTTP2_GOAWAY: {
       char scratch[128];
-      size_t s_len = sizeof(scratch)/sizeof(scratch[0]);
+      size_t s_len = CURL_ARRAYSIZE(scratch);
       size_t len = (frame->goaway.opaque_data_len < s_len) ?
         frame->goaway.opaque_data_len : s_len-1;
       if(len)
@@ -2441,7 +2449,7 @@ static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
 
 static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done)
+                              bool *done)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -2455,7 +2463,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
 
   /* Connect the lower filters first */
   if(!cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }
@@ -2579,7 +2587,10 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
 
   DEBUGASSERT(data);
   if(ctx && ctx->h2 && stream) {
-    CURLcode result = cf_h2_update_local_win(cf, data, stream, pause);
+    CURLcode result;
+
+    stream->write_paused = pause;
+    result = cf_h2_update_local_win(cf, data, stream);
     if(result)
       return result;
 
@@ -2794,8 +2805,9 @@ out:
 
 bool Curl_http2_may_switch(struct Curl_easy *data)
 {
-  if(Curl_conn_http_version(data) < 20 &&
-     data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
+  if(Curl_conn_http_version(data, data->conn) < 20 &&
+     (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
+     data->state.http_neg.h2_prior_knowledge) {
 #ifndef CURL_DISABLE_PROXY
     if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy) {
       /* We do not support HTTP/2 proxies yet. Also it is debatable
@@ -2814,7 +2826,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data)
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  DEBUGASSERT(Curl_conn_http_version(data) < 20);
+  DEBUGASSERT(Curl_conn_http_version(data, data->conn) < 20);
 
   result = http2_cfilter_add(&cf, data, data->conn, FIRSTSOCKET, FALSE);
   if(result)
@@ -2826,7 +2838,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data)
 
   if(cf->next) {
     bool done;
-    return Curl_conn_cf_connect(cf, data, FALSE, &done);
+    return Curl_conn_cf_connect(cf, data, &done);
   }
   return CURLE_OK;
 }
@@ -2836,7 +2848,7 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct Curl_cfilter *cf_h2;
   CURLcode result;
 
-  DEBUGASSERT(Curl_conn_http_version(data) < 20);
+  DEBUGASSERT(Curl_conn_http_version(data, data->conn) < 20);
 
   result = http2_cfilter_insert_after(cf, data, FALSE);
   if(result)
@@ -2848,7 +2860,7 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if(cf_h2->next) {
     bool done;
-    return Curl_conn_cf_connect(cf_h2, data, FALSE, &done);
+    return Curl_conn_cf_connect(cf_h2, data, &done);
   }
   return CURLE_OK;
 }
@@ -2861,7 +2873,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   struct cf_h2_ctx *ctx;
   CURLcode result;
 
-  DEBUGASSERT(Curl_conn_http_version(data) <  20);
+  DEBUGASSERT(Curl_conn_http_version(data, conn) <  20);
   DEBUGASSERT(data->req.upgr101 == UPGR101_RECEIVED);
 
   result = http2_cfilter_add(&cf, data, conn, sockindex, TRUE);
@@ -2899,7 +2911,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
 
   if(cf->next) {
     bool done;
-    return Curl_conn_cf_connect(cf, data, FALSE, &done);
+    return Curl_conn_cf_connect(cf, data, &done);
   }
   return CURLE_OK;
 }
@@ -2908,7 +2920,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
    CURLE_HTTP2_STREAM error! */
 bool Curl_h2_http_1_1_error(struct Curl_easy *data)
 {
-  if(Curl_conn_http_version(data) == 20) {
+  if(Curl_conn_http_version(data, data->conn) == 20) {
     int err = Curl_conn_get_stream_error(data, data->conn, FIRSTSOCKET);
     return err == NGHTTP2_HTTP_1_1_REQUIRED;
   }

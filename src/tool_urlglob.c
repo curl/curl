@@ -215,7 +215,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
 
       if(end_c == ':') {
         char *endp;
-        errno = 0;
+        CURL_SETERRNO(0);
         step = strtoul(&pattern[4], &endp, 10);
         if(errno || &pattern[4] == endp || *endp != ']')
           step = 0;
@@ -269,7 +269,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
       }
     }
 
-    errno = 0;
+    CURL_SETERRNO(0);
     min_n = strtoul(pattern, &endp, 10);
     if(errno || (endp == pattern))
       endp = NULL;
@@ -284,14 +284,14 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
           endp = NULL;
           goto fail;
         }
-        errno = 0;
+        CURL_SETERRNO(0);
         max_n = strtoul(pattern, &endp, 10);
         if(errno)
           /* overflow */
           endp = NULL;
         else if(*endp == ':') {
           pattern = endp + 1;
-          errno = 0;
+          CURL_SETERRNO(0);
           step_n = strtoul(pattern, &endp, 10);
           if(errno)
             /* over/underflow situation */

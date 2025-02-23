@@ -142,7 +142,7 @@ UNITTEST_START
   testdata->progress.t_startop.tv_sec = BASE;
   testdata->progress.t_startop.tv_usec = 0;
 
-  for(i = 0; i < sizeof(run)/sizeof(run[0]); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(run); i++) {
     timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);

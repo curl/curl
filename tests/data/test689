@@ -11,7 +11,7 @@ OPTIONS
 # Server-side
 <reply>
 <data>
-RTSP/7.1 786          
+RTSP/1.0 786          
 
 RTSP/          
 </data>

@@ -117,33 +117,45 @@ fail_unless(strlen(output) == 1, "Empty string");
 Curl_infof(testdata, "%s", (char *)NULL);
 fail_unless(verify(output, "(nil)") == 0, "Passing NULL as string");
 
+/* Note: libcurl's tracebuffer hold 2048 bytes, so the max strlen() we
+ * get out of it is 2047, since we need a \0 at the end.
+ * Curl_infof() in addition adds a \n at the end, making the effective
+ * output 2046 characters.
+ * Any input that long or longer will truncated, ending in '...\n'.
+ */
+
 /* A string just long enough to not be truncated */
 memset(input, '\0', sizeof(input));
-memset(input, 'A', 2047);
+memset(input, 'A', 2045);
 Curl_infof(testdata, "%s", input);
-fail_unless(strlen(output) == 2048, "No truncation of infof input");
+fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
+/* output is input + \n */
+fail_unless(strlen(output) == 2046, "No truncation of infof input");
 fail_unless(verify(output, input) == 0, "No truncation of infof input");
 fail_unless(output[sizeof(output) - 1] == '\0',
             "No truncation of infof input");
 
 /* Just over the limit without newline for truncation via '...' */
-memset(input + 2047, 'A', 4);
+memset(input + 2045, 'A', 4);
 Curl_infof(testdata, "%s", input);
-fail_unless(strlen(output) == 2051, "Truncation of infof input 1");
+fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
+fail_unless(strlen(output) == 2047, "Truncation of infof input 1");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 1");
 
 /* Just over the limit with newline for truncation via '...' */
-memset(input + 2047, 'A', 4);
-memset(input + 2047 + 4, '\n', 1);
+memset(input + 2045, 'A', 4);
+memset(input + 2045 + 4, '\n', 1);
 Curl_infof(testdata, "%s", input);
-fail_unless(strlen(output) == 2051, "Truncation of infof input 2");
+fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
+fail_unless(strlen(output) == 2047, "Truncation of infof input 2");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 2");
 
 /* Way over the limit for truncation via '...' */
 memset(input, '\0', sizeof(input));
 memset(input, 'A', sizeof(input) - 1);
 Curl_infof(testdata, "%s", input);
-fail_unless(strlen(output) == 2051, "Truncation of infof input 3");
+fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
+fail_unless(strlen(output) == 2047, "Truncation of infof input 3");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 
 #if defined(CURL_GNUC_DIAG) && !defined(__clang__)

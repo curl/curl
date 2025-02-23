@@ -754,7 +754,7 @@ const struct LongShort *findshortopt(char letter)
 
   if(!singles_done) {
     unsigned int j;
-    for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
+    for(j = 0; j < CURL_ARRAYSIZE(aliases); j++) {
       if(aliases[j].letter != ' ') {
         unsigned char l = (unsigned char)aliases[j].letter;
         singles[l - ' '] = &aliases[j];
@@ -1016,7 +1016,7 @@ const struct LongShort *findlongopt(const char *opt)
   struct LongShort key;
   key.lname = opt;
 
-  return bsearch(&key, aliases, sizeof(aliases)/sizeof(aliases[0]),
+  return bsearch(&key, aliases, CURL_ARRAYSIZE(aliases),
                  sizeof(aliases[0]), findarg);
 }
 
@@ -1564,7 +1564,8 @@ static ParameterError parse_time_cond(struct GlobalConfig *global,
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
-                            argv_item_t cleararg,
+                            argv_item_t cleararg1,
+                            argv_item_t cleararg2,
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -1590,7 +1591,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 #ifdef HAVE_WRITABLE_ARGV
   argv_item_t clearthis = NULL;
 #else
-  (void)cleararg;
+  (void)cleararg1;
+  (void)cleararg2;
 #endif
 
   *usedarg = FALSE; /* default is that we do not use the arg */
@@ -1669,6 +1671,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
         singleopt = TRUE;   /* do not loop anymore after this */
+#ifdef HAVE_WRITABLE_ARGV
+        clearthis = &cleararg1[parse + 2 - flag];
+#endif
       }
       else if(!nextarg) {
         err = PARAM_REQUIRES_PARAMETER;
@@ -1676,7 +1681,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       else {
 #ifdef HAVE_WRITABLE_ARGV
-        clearthis = cleararg;
+        clearthis = cleararg2;
 #endif
         *usedarg = TRUE; /* mark it as used */
       }
@@ -1961,7 +1966,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       const struct TOSEntry *entry;
       find.name = nextarg;
       entry = bsearch(&find, tos_entries,
-                      sizeof(tos_entries)/sizeof(*tos_entries),
+                      CURL_ARRAYSIZE(tos_entries),
                       sizeof(*tos_entries), find_tos);
       if(entry)
         config->ip_tos = entry->value;
@@ -2709,7 +2714,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_BUFFER: /* --buffer */
       /* disable the output I/O buffering. note that the option is called
          --buffer but is mostly used in the negative form: --no-buffer */
-      config->nobuffer = longopt ? !toggle : TRUE;
+      config->nobuffer = (bool)(longopt ? !toggle : TRUE);
       break;
     case C_REMOTE_NAME_ALL: /* --remote-name-all */
       config->default_node_flags = toggle ? GETOUT_USEREMOTE : 0;
@@ -2868,7 +2873,11 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   struct OperationConfig *config = global->first;
 
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
+#ifdef UNDER_CE
+    orig_opt = strdup(argv[i]);
+#else
     orig_opt = curlx_convert_tchar_to_UTF8(argv[i]);
+#endif
     if(!orig_opt)
       return PARAM_NO_MEM;
 
@@ -2882,15 +2891,19 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       else {
         char *nextarg = NULL;
         if(i < (argc - 1)) {
+#ifdef UNDER_CE
+          nextarg = strdup(argv[i + 1]);
+#else
           nextarg = curlx_convert_tchar_to_UTF8(argv[i + 1]);
+#endif
           if(!nextarg) {
             curlx_unicodefree(orig_opt);
             return PARAM_NO_MEM;
           }
         }
 
-        result = getparameter(orig_opt, nextarg, argv[i + 1], &passarg,
-                              global, config);
+        result = getparameter(orig_opt, nextarg, argv[i], argv[i + 1],
+                              &passarg, global, config);
 
         curlx_unicodefree(nextarg);
         config = global->last;
@@ -2932,7 +2945,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, argv[i], &used, global, config);
+      result = getparameter("--url", orig_opt, NULL, NULL,
+                            &used, global, config);
     }
 
     if(!result)

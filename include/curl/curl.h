@@ -97,11 +97,8 @@
 #include <sys/select.h>
 #endif
 
-#if !defined(_WIN32) && !defined(_WIN32_WCE)
-#include <sys/socket.h>
-#endif
-
 #if !defined(_WIN32)
+#include <sys/socket.h>
 #include <sys/time.h>
 #endif
 

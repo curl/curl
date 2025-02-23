@@ -77,7 +77,7 @@ UNITTEST_START
     { "/.", "/" },
   };
 
-  for(i = 0; i < sizeof(pairs)/sizeof(pairs[0]); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(pairs); i++) {
     char *out;
     int err = dedotdotify(pairs[i].input, strlen(pairs[i].input), &out);
     abort_unless(err == 0, "returned error");

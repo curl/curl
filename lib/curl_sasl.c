@@ -50,7 +50,6 @@
 #include "curl_hmac.h"
 #include "curl_sasl.h"
 #include "warnless.h"
-#include "strtok.h"
 #include "sendf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

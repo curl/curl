@@ -60,9 +60,11 @@ struct thread_data {
   timediff_t interval_end;
   struct curltime start;
   struct thread_sync_data tsd;
+  CURLcode result; /* CURLE_OK or error handling response */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct Curl_https_rrinfo hinfo;
   ares_channel channel;
+  int num_pending; /* number of outstanding c-ares requests */
 #endif
   bool init;
 };
@@ -74,6 +76,7 @@ struct thread_data {
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
   int last_status;
+  CURLcode result; /* CURLE_OK or error handling response */
 #ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #endif
@@ -174,7 +177,7 @@ void Curl_resolver_kill(struct Curl_easy *data);
 
 /* Curl_resolver_getsock()
  *
- * This function is called from the multi_getsock() function.  'sock' is a
+ * This function is called from the Curl_multi_getsock() function.  'sock' is a
  * pointer to an array to hold the file descriptors, with 'numsock' being the
  * size of that array (in number of entries). This function is supposed to
  * return bitmask indicating what file descriptors (referring to array indexes

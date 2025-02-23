@@ -619,7 +619,7 @@ static int proxy_h2_fr_print(const nghttp2_frame *frame,
                        frame->hd.flags & NGHTTP2_FLAG_ACK);
     case NGHTTP2_GOAWAY: {
       char scratch[128];
-      size_t s_len = sizeof(scratch)/sizeof(scratch[0]);
+      size_t s_len = CURL_ARRAYSIZE(scratch);
       size_t len = (frame->goaway.opaque_data_len < s_len) ?
         frame->goaway.opaque_data_len : s_len-1;
       if(len)
@@ -1090,7 +1090,7 @@ out:
 
 static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
-                                    bool blocking, bool *done)
+                                    bool *done)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1105,7 +1105,7 @@ static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
 
   /* Connect the lower filters first */
   if(!cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }

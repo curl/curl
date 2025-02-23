@@ -78,6 +78,12 @@
 #endif
 #endif
 
+/* Visual Studio 2008 is the minimum Visual Studio version we support.
+   Workarounds for older versions of Visual Studio have been removed. */
+#if defined(_MSC_VER) && (_MSC_VER < 1500)
+#error "Ancient versions of Visual Studio are no longer supported due to bugs."
+#endif
+
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
@@ -459,7 +465,9 @@
  */
 
 #ifdef USE_WIN32_LARGE_FILES
+#  ifdef HAVE_IO_H
 #  include <io.h>
+#  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  undef  lseek
@@ -490,10 +498,12 @@
  */
 
 #if defined(_WIN32) && !defined(USE_WIN32_LARGE_FILES)
+#  ifdef HAVE_IO_H
 #  include <io.h>
+#  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifndef _WIN32_WCE
+#  ifndef UNDER_CE
 #    undef  lseek
 #    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #    define fstat(fdes,stp)            _fstat(fdes, stp)
@@ -668,7 +678,6 @@
 
 #  ifdef __minix
      /* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
-     extern char *strtok_r(char *s, const char *delim, char **last);
      extern struct tm *gmtime_r(const time_t * const timep, struct tm *tmp);
 #  endif
 
@@ -680,16 +689,6 @@
 /*             resolver specialty compile-time defines              */
 /*         CURLRES_* defines to use in the host*.c sources          */
 /* ---------------------------------------------------------------- */
-
-/*
- * MSVC threads support requires a multi-threaded runtime library.
- * _beginthreadex() is not available in single-threaded ones.
- * Single-threaded option was last available in VS2005: _MSC_VER <= 1400
- */
-#if defined(_MSC_VER) && !defined(_MT)  /* available in _MSC_VER <= 1400 */
-#  undef USE_THREADS_POSIX
-#  undef USE_THREADS_WIN32
-#endif
 
 /*
  * Mutually exclusive CURLRES_* definitions.
@@ -832,6 +831,24 @@
 
 #ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
+#endif
+
+#ifdef UNDER_CE
+#define getenv curl_getenv  /* Windows CE does not support getenv() */
+#define raise(s) ((void)(s))
+/* Terrible workarounds to make Windows CE compile */
+#define errno 0
+#define CURL_SETERRNO(x) ((void)(x))
+#define EAGAIN 11
+#define ENOMEM 12
+#define EACCES 13
+#define EEXIST 17
+#define EISDIR 21
+#define ENOSPC 28
+#define ERANGE 34
+#define strerror(x) "?"
+#else
+#define CURL_SETERRNO(x) (errno = (x))
 #endif
 
 /*

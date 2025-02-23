@@ -169,7 +169,7 @@ int main(int argc, char **argv)
     test_func = NULL;
     {
       size_t tmp;
-      for(tmp = 0; tmp < (sizeof(s_tests)/sizeof((s_tests)[0])); ++tmp) {
+      for(tmp = 0; tmp < CURL_ARRAYSIZE(s_tests); ++tmp) {
         if(strcmp(test_name, s_tests[tmp].name) == 0) {
           test_func = s_tests[tmp].ptr;
           break;
