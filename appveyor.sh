@@ -48,13 +48,13 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   for _chkprefill in '' ${CHKPREFILL:-}; do
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-    [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+    [[ "${TARGET}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
     [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
     [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
-    #[ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && options+=' -DCURL_STATIC_CRT=ON'
+    options+=' -DCURL_STATIC_CRT=ON'
     # shellcheck disable=SC2086
-    cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET:-} \
+    cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET} \
       -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
       -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
       -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
