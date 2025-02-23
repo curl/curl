@@ -78,7 +78,6 @@ else()
       set(HAVE_SNPRINTF 0)
     endif()
     set(HAVE_BASENAME 0)
-    set(HAVE_FILE_OFFSET_BITS 0)
   endif()
 endif()
 
