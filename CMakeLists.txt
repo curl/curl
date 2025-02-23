@@ -2001,7 +2001,7 @@ if(WIN32)
 endif()
 
 if(MSVC)
-  # Disable default manifest added by MSVC to avoid it overriding our custom one.
+  # Disable default manifest added by MSVC to avoid it overriding our custom one in curl.rc.
   # Except for curl.exe built with VS2008, which requires the auto-generated manifest to find the CRT DLL
   if(NOT MSVC_VERSION EQUAL 1500)
     string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
