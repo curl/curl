@@ -318,7 +318,7 @@ void tool_version_info(void)
 {
   const char *const *builtin;
 printf("!th0|%p|%p|\n", (const void*)tool_stderr, (const void*)stderr);
-  if(is_debug() || 1) {
+  if(is_debug()) {
     printf("!th2\n");
     #undef fprintf
     fprintf(tool_stderr, "WARNING: this libcurl is Debug-enabled, "
