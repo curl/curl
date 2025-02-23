@@ -287,14 +287,10 @@ int main(int argc, char *argv[])
     main_free(&global);
   }
 
-printf("trc-y\n");
-
 #ifdef _WIN32
   /* Flush buffers of all streams opened in write or update mode */
   fflush(NULL);
 #endif
-
-printf("trc-z\n");
 
 #ifdef __VMS
   vms_special_exit(result, vms_show);
