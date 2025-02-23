@@ -24,7 +24,6 @@
 
 #include "curl_setup.h"
 
-#if 0
 #ifdef USE_OPENSSL
 #include <openssl/crypto.h>
 #endif
@@ -80,4 +79,3 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 #endif /* OpenSSL */
 
 #endif /* DLL build */
-#endif
