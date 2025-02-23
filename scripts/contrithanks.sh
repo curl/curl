@@ -43,7 +43,7 @@ fi
 # We also include curl-www if possible. Override by setting CURLWWW
 CURLWWW="${CURLWWW:-../curl-www}"
 
-cat ./docs/THANKS
+cat ./docs/THANKS | sed 's/ github/ github/i'
 
 {
   {
@@ -57,9 +57,10 @@ cat ./docs/THANKS
   cut '-d(' -f1 | \
   cut '-d<' -f1 | \
   tr , '\012' | \
-  sed 's/ at github/ on github/' | \
+  sed 's/ at github/ on github/i' | \
   sed 's/ and /\n/' | \
-  sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
+  sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/i' | \
+  sed 's/ github/ github/i'
 
   # grep out the list of names from RELEASE-NOTES
   # split on ", "
