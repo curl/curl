@@ -86,7 +86,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     false
   fi
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
-  [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
+  [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll _bld/src; }
   curl='_bld/src/curl.exe'
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
