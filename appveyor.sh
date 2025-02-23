@@ -52,6 +52,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
     [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
+    [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && options+=' -DCMAKE_EXE_LINKER_FLAGS=-MANIFEST'
     #[ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && options+=' -DCURL_STATIC_CRT=ON'
     # shellcheck disable=SC2086
     cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET:-} \
@@ -91,10 +92,10 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
     if [ "${PRJ_CFG}" = 'Release' ]; then
       cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86/Microsoft.VC90.CRT/msvcr90.dll' "$PWD/_bld/lib/"
-      cp '_bld/lib/libcurl_shared.dir/Release/libcurl.dll.intermediate.manifest' "${curl}.manifest"
+      #cp '_bld/lib/libcurl_shared.dir/Release/libcurl.dll.intermediate.manifest' "${curl}.manifest"
     else
       cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT/msvcr90d.dll' "$PWD/_bld/lib/"
-      cp '_bld/lib/libcurl_shared.dir/Debug/libcurl-d.dll.intermediate.manifest' "${curl}.manifest"
+      #cp '_bld/lib/libcurl_shared.dir/Debug/libcurl-d.dll.intermediate.manifest' "${curl}.manifest"
     fi
   fi
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
