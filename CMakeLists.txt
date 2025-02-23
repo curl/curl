@@ -1991,7 +1991,6 @@ if(WIN32)
 
   # Use the manifest embedded in the Windows Resource
   string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")  # VS2008 generator fails to pass it to rc.exe (as of CMake v3.16.2)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_EMBED_MANIFEST")
 
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
