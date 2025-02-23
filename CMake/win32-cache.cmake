@@ -238,7 +238,7 @@ if(WINCE)  # Windows CE exceptions
     set(HAVE__SETMODE 0)
     set(HAVE_FILE_OFFSET_BITS 0)
     set(HAVE_SIZEOF_ADDRESS_FAMILY 0)
-    set(HAVE_SIZEOF_SSIZE_T 0)
+    curl_prefill_type_size("SSIZE_T" 4)
     curl_prefill_type_size("OFF_T" 4)
   endif()
 endif()
