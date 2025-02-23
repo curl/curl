@@ -1984,11 +1984,10 @@ if(WIN32)
   endif()
 
   # Use the manifest embedded in the Windows Resource
-  string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")
   if(MSVC_VERSION EQUAL 1500)
-    string(APPEND CMAKE_RC_FLAGS " /DCURL_EMBED_MANIFEST")
-    # Workaround to pass this macro to rc.exe
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_EMBED_MANIFEST")
+    string(APPEND CMAKE_RC_FLAGS " /DCURL_EMBED_MANIFEST")  # Workaround to pass this macro to rc.exe
+  else()
+    string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")
   endif()
 
   # We use crypto functions that are not available for UWP apps
