@@ -78,13 +78,17 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
+  if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
+    if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
+      find . -name BuildLog.htm -exec dos2unix '{}' +
+      find . -name BuildLog.htm -exec cat '{}' +
+    fi
+    false
+  fi
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
   [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
   curl='_bld/src/curl.exe'
   if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
-    find . -name BuildLog.htm -exec dos2unix '{}' +
-    find . -name BuildLog.htm -exec cat '{}' +
     if [ "${PRJ_CFG}" = 'Release' ]; then
       cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86/Microsoft.VC90.CRT/msvcr90.dll' "$PWD/_bld/lib/"
       cp '_bld/lib/libcurl_shared.dir/Release/libcurl.dll.intermediate.manifest' "${curl}.manifest"
