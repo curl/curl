@@ -52,7 +52,7 @@ $acommitters = `git shortlog -s | wc -l`;
 $ncommitters = $acommitters - $bcommitters;
 
 # number of contributors right now
-$acontribs = `./scripts/contrithanks.sh | grep -c '^[^ ]'`;
+$acontribs = `./scripts/contrithanks.sh stdout | wc -l`;
 # number when the tag was set
 $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
