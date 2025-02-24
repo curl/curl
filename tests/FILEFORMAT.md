@@ -134,7 +134,6 @@ Available substitute variables include:
 - `%CURL` - Path to the curl executable
 - `%DATE` - current YYYY-MM-DD date
 - `%DEV_NULL` - Null device (e.g. /dev/null)
-- `%DIRSUFFIX` - Directory suffix via `CURL_DIRSUFFIX` env.
 - `%FILE_PWD` - Current directory, on Windows prefixed with a slash
 - `%FTP6PORT` - IPv6 port number of the FTP server
 - `%FTPPORT` - Port number of the FTP server
@@ -164,6 +163,7 @@ Available substitute variables include:
 - `%POSIX_PWD` - Current directory somewhat MinGW friendly
 - `%PROXYPORT` - Port number of the HTTP proxy
 - `%PWD` - Current directory
+- `%RESOLVE` - server/resolve command
 - `%RTSP6PORT` - IPv6 port number of the RTSP server
 - `%RTSPPORT` - Port number of the RTSP server
 - `%SMBPORT` - Port number of the SMB server

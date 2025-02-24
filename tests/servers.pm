@@ -3115,6 +3115,8 @@ sub subvariables {
     $$thing =~ s/${prefix}VERNUM/$CURLVERNUM/g;
     $$thing =~ s/${prefix}DATE/$DATE/g;
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
+    my $resolve = server_exe("resolve");
+    $$thing =~ s/${prefix}RESOLVE/$resolve/g;
 
     # POSIX/MSYS/Cygwin curl needs: file://localhost/d/path/to
     # Windows native    curl needs: file://localhost/D:/path/to
@@ -3135,7 +3137,6 @@ sub subvariables {
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
     $$thing =~ s/${prefix}USER/$USER/g;
     $$thing =~ s/${prefix}DEV_NULL/$dev_null/g;
-    $$thing =~ s/${prefix}DIRSUFFIX/$ENV{'CURL_DIRSUFFIX'}/g;
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
