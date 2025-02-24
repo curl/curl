@@ -827,8 +827,6 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
-              -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
@@ -860,8 +858,8 @@ jobs:
         run: |
           PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
           if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
-            PATH="$PWD/bld/lib:$PATH"
-            bld/src/curl.exe --disable --version
+            PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH"
+            'bld/src/${{ matrix.type }}/curl.exe' --disable --version
           fi
 
       - name: 'build tests'
@@ -896,13 +894,14 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
+          export CURL_DIRSUFFIX='${{ matrix.type }}/'
           export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
             TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
           fi
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
+          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
