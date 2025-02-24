@@ -2239,10 +2239,10 @@ while(@ARGV) {
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-ds") {
-        # add this suffix to base paths
-        $LIBDIR = $LIBDIR.$ARGV[1];
-        $UNITDIR = $UNITDIR.$ARGV[1];
-        $SRVDIR = $SRVDIR.$ARGV[1];
+        # append this suffix to base paths
+        $LIBDIR .= $ARGV[1];
+        $UNITDIR .= $ARGV[1];
+        $SRVDIR .= $ARGV[1];
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-vc") {
