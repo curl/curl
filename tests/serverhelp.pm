@@ -60,6 +60,10 @@ BEGIN {
     }
 }
 
+use globalconfig;
+use pathhelp qw(
+    exe_ext
+    );
 
 our $logfile;  # server log file name, for logmsg
 
