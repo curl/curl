@@ -236,6 +236,18 @@ sub server_outputfilename {
 
 
 #***************************************************************************
+# Return filename for a server executable
+#
+sub server_exe {
+    my ($name, $ext) = @_;
+    if(!defined $ext) {
+        $ext = 'SRV';
+    }
+    return $SRVDIR . $name . exe_ext($ext);
+}
+
+
+#***************************************************************************
 # Return file name for main or primary sockfilter pid file.
 #
 sub mainsockf_pidfilename {
@@ -280,15 +292,6 @@ sub datasockf_logfilename {
         (lc($proto) =~ /^ftps?$/));
     my $trailer = '_sockdata.log';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
-}
-
-
-#***************************************************************************
-# Return filename for a server executable
-#
-sub server_exe {
-    my ($name) = @_;
-    return $SRVDIR . $name . exe_ext('SRV');
 }
 
 #***************************************************************************

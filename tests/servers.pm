@@ -3115,7 +3115,7 @@ sub subvariables {
     $$thing =~ s/${prefix}VERNUM/$CURLVERNUM/g;
     $$thing =~ s/${prefix}DATE/$DATE/g;
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
-    my $resolve = server_exe("resolve");
+    my $resolve = server_exe('resolve', 'TOOL');
     $$thing =~ s/${prefix}RESOLVE/$resolve/g;
 
     # POSIX/MSYS/Cygwin curl needs: file://localhost/d/path/to
