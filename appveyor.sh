@@ -65,20 +65,24 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_USE_SCHANNEL="${SCHANNEL}" \
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_LIBPSL=OFF \
-      ${options}
+      ${options} \
+      || { cat _bld/CMakeFiles/CMake* 2>/dev/null; false; }
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
-    cat _bld_chkprefill/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+    cat _bld_chkprefill/CMakeFiles/CMake* 2>/dev/null || true
     false
-  fi
-  if false; then
-    cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
+  if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
+    if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
+      find . -name BuildLog.htm -exec dos2unix '{}' +
+      find . -name BuildLog.htm -exec cat '{}' +
+    fi
+    false
+  fi
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
-  [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
+  [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
@@ -112,7 +116,7 @@ EOF
   curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
 fi
 
-find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
+find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
 else

@@ -83,14 +83,13 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
+          PATH=/usr/bin
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
           else
-            PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-openssl \
@@ -205,6 +204,7 @@ jobs:
             libnghttp2-devel
             libpsl-devel
             libssh2-devel
+            ${{ matrix.chkprefill == '_chkprefill' && 'diffutils' || '' }}
 
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         if: ${{ matrix.sys != 'msys' }}
@@ -426,15 +426,23 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
-          cmake -B bld -G 'MSYS Makefiles' ${options} \
-            -DCMAKE_C_COMPILER=gcc \
-            -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-            -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
-            -DCURL_WERROR=ON \
-            -DCURL_USE_LIBPSL=OFF \
-            ${{ matrix.config }}
+          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+            options=''
+            [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
+            [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
+            [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+            cmake -B "bld${_chkprefill}" -G 'MSYS Makefiles' ${options} \
+              -DCMAKE_C_COMPILER=gcc \
+              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_LIBPSL=OFF \
+              ${{ matrix.config }}
+          done
+          if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
+            echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+            false
+          fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
@@ -856,7 +864,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
+          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
           if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH"
             'bld/src/${{ matrix.type }}/curl.exe' --disable --version
