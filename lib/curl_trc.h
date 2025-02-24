@@ -85,7 +85,6 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 void Curl_trc_multi(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 const char *Curl_trc_mstate_name(int state);
-#define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
 void Curl_trc_write(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 void Curl_trc_read(struct Curl_easy *data,
@@ -179,13 +178,14 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #endif /* !CURL_HAVE_C99 */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-/* informational messages enabled */
-
 struct curl_trc_feat {
   const char *name;
   int log_level;
 };
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+/* informational messages enabled */
+
 extern struct curl_trc_feat Curl_trc_feat_multi;
 extern struct curl_trc_feat Curl_trc_feat_read;
 extern struct curl_trc_feat Curl_trc_feat_write;
@@ -201,6 +201,7 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
 #define Curl_trc_ft_is_verbose(data, ft) \
             (Curl_trc_is_verbose(data) && \
              (ft)->log_level >= CURL_LOG_LVL_INFO)
+#define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
 
 #else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
 /* All informational messages are not compiled in for size savings */
