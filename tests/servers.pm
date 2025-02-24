@@ -77,6 +77,7 @@ use serverhelp qw(
     server_pidfilename
     server_portfilename
     server_logfilename
+    server_exe
     );
 
 use sshhelp qw(
@@ -1959,7 +1960,7 @@ sub runmqttserver {
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     # start our MQTT server - on a random port!
-    my $cmd="server/mqttd".exe_ext('SRV').
+    my $cmd=server_exe("mqttd").
         " --port 0 ".
         " --pidfile $pidfile".
         " --portfile $portfile".
@@ -2017,7 +2018,7 @@ sub runsocksserver {
     # start our socks server, get commands from the FTP cmd file
     my $cmd="";
     if($is_unix) {
-        $cmd="server/socksd".exe_ext('SRV').
+        $cmd=server_exe("socksd").
             " --pidfile $pidfile".
             " --reqfile $LOGDIR/$SOCKSIN".
             " --logfile $logfile".
@@ -2025,7 +2026,7 @@ sub runsocksserver {
             " --backend $HOSTIP".
             " --config $LOGDIR/$SERVERCMD";
     } else {
-        $cmd="server/socksd".exe_ext('SRV').
+        $cmd=server_exe("socksd").
             " --port 0 ".
             " --pidfile $pidfile".
             " --portfile $portfile".

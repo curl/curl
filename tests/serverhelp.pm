@@ -49,6 +49,7 @@ BEGIN {
         mainsockf_logfilename
         datasockf_pidfilename
         datasockf_logfilename
+        server_exe
     );
 
     # sub second timestamping needs Time::HiRes
@@ -277,6 +278,14 @@ sub datasockf_logfilename {
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
+
+#***************************************************************************
+# Return filename for a server executable
+#
+sub server_exe {
+    my ($name) = @_;
+    return $SRVDIR . "/" . $name . exe_ext('SRV');
+}
 
 #***************************************************************************
 # End of library

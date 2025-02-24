@@ -42,6 +42,7 @@ BEGIN {
         $DATE
         $has_shared
         $LIBDIR
+        $SRVDIR
         $listonly
         $LOCKDIR
         $LOGDIR
@@ -103,6 +104,7 @@ our $perl="$perlcmd -I. " . shell_quote("-I$srcdir"); # invoke perl like this
 our $LOGDIR="log";  # root of the log directory; this will be different for
                     # each runner in multiprocess mode
 our $LIBDIR="./libtest";
+our $SRVDIR="./server";
 our $TESTDIR="$srcdir/data";
 our $CURL="../src/curl".exe_ext('TOOL'); # what curl binary to run on the tests
 our $VCURL=$CURL;  # what curl binary to use to verify the servers with
