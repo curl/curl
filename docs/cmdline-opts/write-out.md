@@ -151,9 +151,9 @@ The rest of the output is only shown if the transfer returned a non-zero error.
 
 ## `output{filename}`
 From this point on, the --write-out output is written to the filename specified
-in braces. The filename can be prefixed with `>>` to append to the file. Unlike
+in braces. The filename can be prefixed with `\>\>` to append to the file. Unlike
 other variables, the variable name `output` is not in braces. For example
-`%output{>>stats.txt}`. Refer to --write-out remarks. (Added in 8.3.0)
+`%output{\>\>stats.txt}`. Refer to --write-out remarks. (Added in 8.3.0)
 
 ## `proxy_ssl_verify_result`
 The result of the HTTPS proxy's SSL peer certificate verification that was
