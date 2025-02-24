@@ -987,7 +987,6 @@ jobs:
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}/'
           export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
-          TFLAGS+=' -c ../src/${{ matrix.type }}/curl.exe'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
