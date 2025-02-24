@@ -2472,7 +2472,7 @@ sub PASV_ftp {
     my @datasockfcmd = (server_exe('sockfilt'),
         "--ipv$ipvnum", "--port", 0,
         "--pidfile", $datasockf_pidfile,
-        "--logfile",  $datasockf_logfile);
+        "--logfile", $datasockf_logfile);
     if($nodataconn) {
         push(@datasockfcmd, '--bindonly');
     }
