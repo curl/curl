@@ -130,4 +130,4 @@ $flags .= "--pidfile \"$pidfile\" ".
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;
-exec("exec ".server_exe("rtspd")." $flags");
+exec("exec ".server_exe('rtspd')." $flags");

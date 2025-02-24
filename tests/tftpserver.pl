@@ -127,4 +127,4 @@ $flags .= "--pidfile \"$pidfile\" ".
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;
-exec("exec ".server_exe("tftpd")." $flags");
+exec("exec ".server_exe('tftpd')." $flags");
