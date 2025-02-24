@@ -43,6 +43,7 @@
 #include "connect.h" /* for the connect timeout */
 #include "cipher_suite.h"
 #include "rand.h"
+#include "x509asn1.h"
 
 struct rustls_ssl_backend_data
 {
@@ -845,6 +846,43 @@ cr_connect(struct Curl_cfilter *cf,
         infof(data, "rustls: handshake complete, %s, cipher: %s",
               ver, buf);
       }
+      if(data->set.ssl.certinfo) {
+        size_t num_certs = 0;
+        while(rustls_connection_get_peer_certificate(rconn, (int)num_certs)) {
+          num_certs++;
+        }
+        result = Curl_ssl_init_certinfo(data, (int)num_certs);
+        if(result)
+          return result;
+        for(size_t i = 0; i < num_certs; i++) {
+          const rustls_certificate *cert;
+          const unsigned char *der_data;
+          size_t der_len;
+          rustls_result rresult = RUSTLS_RESULT_OK;
+          cert = rustls_connection_get_peer_certificate(rconn, i);
+          DEBUGASSERT(cert); /* Should exist since we counted already */
+          rresult = rustls_certificate_get_der(cert, &der_data, &der_len);
+          if(rresult != RUSTLS_RESULT_OK) {
+            char errorbuf[255];
+            size_t errorlen;
+            rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
+            failf(data,
+              "Failed getting DER of server certificate #%ld: %.*s", i,
+              (int)errorlen, errorbuf);
+            return map_error(rresult);
+          }
+          {
+            const char *beg;
+            const char *end;
+            beg = (const char *)der_data;
+            end = (const char *)(der_data + der_len);
+            result = Curl_extract_certinfo(data, (int)i, beg, end);
+            if(result)
+              return result;
+          }
+        }
+      }
+
       connssl->state = ssl_connection_complete;
       *done = TRUE;
       return CURLE_OK;
@@ -1011,7 +1049,8 @@ const struct Curl_ssl Curl_ssl_rustls = {
   SSLSUPP_CAINFO_BLOB |            /* supports */
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CIPHER_LIST |
-  SSLSUPP_TLS13_CIPHERSUITES,
+  SSLSUPP_TLS13_CIPHERSUITES |
+  SSLSUPP_CERTINFO,
   sizeof(struct rustls_ssl_backend_data),
 
   NULL,                            /* init */

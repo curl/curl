@@ -15,6 +15,7 @@ TLS-backend:
   - GnuTLS
   - Schannel
   - Secure Transport
+  - rustls
 Added-in: 7.19.1
 ---
 

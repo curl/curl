@@ -25,7 +25,6 @@ SSL
 !wolfssl
 !bearssl
 !mbedtls
-!rustls
 </features>
 <server>
 http
