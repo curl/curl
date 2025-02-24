@@ -1324,8 +1324,6 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
 
   CF_DATA_SAVE(save, cf, data);
   CURL_TRC_CF(data, cf, "cf_connect()");
-  DEBUGASSERT(data->conn);
-  DEBUGASSERT(data->conn == cf->conn);
   DEBUGASSERT(connssl);
 
   *done = FALSE;
