@@ -107,6 +107,10 @@ Enable protocol debug: have the servers display protocol output. If used in
 conjunction with parallel testing, it is difficult to associate the logs with
 the specific test being run.
 
+## `-ds \<dir_suffix>\>`
+
+Suffix to use for libtest, unit and server binaries.
+
 ## `-E \<exclude_file\>`
 
 Load the **exclude_file** with additional reasons why certain tests should be
