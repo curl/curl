@@ -2440,7 +2440,6 @@ Usage: runtests.pl [options] [test selection(s)]
   -am      automake style output PASS/FAIL: [number] [name]
   -bundle  use test bundles
   -c path  use this curl executable
-  -ds suff add suffix to server tool paths
   -d       display server debug info
   -e, --test-event  event-based execution
   --test-duphandle  duplicate handles before use
