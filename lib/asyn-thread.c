@@ -400,7 +400,7 @@ static void destroy_async_data(struct Curl_easy *data)
 
     td->init = FALSE;
   }
-  Curl_safefree(async->hostname);
+
 }
 
 #ifdef USE_HTTPSRR_ARES
@@ -414,7 +414,7 @@ static CURLcode resolve_httpsrr(struct Curl_easy *data,
   memset(&async->thdata.hinfo, 0, sizeof(struct Curl_https_rrinfo));
   async->thdata.hinfo.port = -1;
   ares_query_dnsrec(async->thdata.channel,
-                    async->hostname, ARES_CLASS_IN,
+                    data->conn->host.name, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,
                     Curl_dnsrec_done_cb, data, NULL);
 
@@ -436,7 +436,6 @@ static bool init_resolve_thread(struct Curl_easy *data,
   int err = ENOMEM;
   struct Curl_async *async = &data->state.async;
 
-  async->port = port;
   async->done = FALSE;
   async->dns = NULL;
   td->thread_hnd = curl_thread_t_null;
@@ -446,11 +445,6 @@ static bool init_resolve_thread(struct Curl_easy *data,
     free(td);
     goto errno_exit;
   }
-
-  free(async->hostname);
-  async->hostname = strdup(hostname);
-  if(!async->hostname)
-    goto err_exit;
 
   /* The thread will set this TRUE when complete. */
   td->tsd.done = FALSE;
