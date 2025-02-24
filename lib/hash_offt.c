@@ -69,7 +69,7 @@ hash_offt_mk_entry(curl_off_t id, void *value)
 {
   struct Curl_hash_offt_entry *e;
 
-  /* allocate the struct plus memory after it to store the key */
+  /* allocate the struct for the hash entry */
   e = malloc(sizeof(*e));
   if(e) {
     e->id = id;
