@@ -513,7 +513,7 @@ sub checksystemfeatures {
     @version = <$versout>;
     close($versout);
 
-    open(my $disabledh, "-|", "server/disabled".exe_ext('TOOL'));
+    open(my $disabledh, "-|", $SRVDIR . "/" . "disabled" . exe_ext('TOOL'));
     @disabled = <$disabledh>;
     close($disabledh);
 
