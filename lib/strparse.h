@@ -43,6 +43,7 @@ struct Curl_str {
 };
 
 void Curl_str_init(struct Curl_str *out);
+void Curl_str_assign(struct Curl_str *out, const char *str, size_t len);
 
 #define Curl_str(x) ((x)->str)
 #define Curl_strlen(x) ((x)->len)
