@@ -1983,9 +1983,6 @@ if(WIN32)
     set(USE_WIN32_LARGE_FILES ON)
   endif()
 
-  # Use the manifest embedded in the Windows Resource
-  string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")
-
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
     set(USE_WIN32_CRYPTO ON)
@@ -2001,9 +1998,6 @@ if(WIN32)
 endif()
 
 if(MSVC)
-  # Disable default manifest added by CMake
-  string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
-
   string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
 endif()
 

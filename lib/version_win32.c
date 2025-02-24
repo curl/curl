@@ -113,88 +113,12 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
     /* we are always running on PLATFORM_WINNT */
     matched = FALSE;
   }
-#elif !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
-    (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
-  OSVERSIONINFO osver;
-
-  memset(&osver, 0, sizeof(osver));
-  osver.dwOSVersionInfoSize = sizeof(osver);
-
-  /* Find out Windows version */
-  if(GetVersionEx(&osver)) {
-    /* Verify the Operating System version number */
-    switch(condition) {
-    case VERSION_LESS_THAN:
-      if(osver.dwMajorVersion < majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion < minorVersion) ||
-        (buildVersion != 0 &&
-         (osver.dwMajorVersion == majorVersion &&
-          osver.dwMinorVersion == minorVersion &&
-          osver.dwBuildNumber < buildVersion)))
-        matched = TRUE;
-      break;
-
-    case VERSION_LESS_THAN_EQUAL:
-      if(osver.dwMajorVersion < majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion < minorVersion) ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion == minorVersion &&
-         (buildVersion == 0 ||
-          osver.dwBuildNumber <= buildVersion)))
-        matched = TRUE;
-      break;
-
-    case VERSION_EQUAL:
-      if(osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion == minorVersion &&
-        (buildVersion == 0 ||
-         osver.dwBuildNumber == buildVersion))
-        matched = TRUE;
-      break;
-
-    case VERSION_GREATER_THAN_EQUAL:
-      if(osver.dwMajorVersion > majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion > minorVersion) ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion == minorVersion &&
-         (buildVersion == 0 ||
-          osver.dwBuildNumber >= buildVersion)))
-        matched = TRUE;
-      break;
-
-    case VERSION_GREATER_THAN:
-      if(osver.dwMajorVersion > majorVersion ||
-        (osver.dwMajorVersion == majorVersion &&
-         osver.dwMinorVersion > minorVersion) ||
-        (buildVersion != 0 &&
-         (osver.dwMajorVersion == majorVersion &&
-          osver.dwMinorVersion == minorVersion &&
-          osver.dwBuildNumber > buildVersion)))
-        matched = TRUE;
-      break;
-    }
-
-    /* Verify the platform identifier (if necessary) */
-    if(matched) {
-      switch(platform) {
-      case PLATFORM_WINDOWS:
-        if(osver.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
-          matched = FALSE;
-        break;
-
-      case PLATFORM_WINNT:
-        if(osver.dwPlatformId != VER_PLATFORM_WIN32_NT)
-          matched = FALSE;
-        break;
-
-      default: /* like platform == PLATFORM_DONT_CARE */
-        break;
-      }
-    }
-  }
+#elif defined(UNDER_CE)
+  (void)majorVersion;
+  (void)minorVersion;
+  (void)buildVersion;
+  (void)platform;
+  (void)condition;
 #else
   ULONGLONG cm = 0;
   struct OUR_OSVERSIONINFOEXW osver;

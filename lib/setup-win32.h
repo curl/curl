@@ -93,12 +93,6 @@
  * newer symbols.
  */
 
-#ifndef _WIN32_WINNT_NT4
-#define _WIN32_WINNT_NT4            0x0400   /* Windows NT 4.0 */
-#endif
-#ifndef _WIN32_WINNT_WIN2K
-#define _WIN32_WINNT_WIN2K          0x0500   /* Windows 2000 */
-#endif
 #ifndef _WIN32_WINNT_WINXP
 #define _WIN32_WINNT_WINXP          0x0501   /* Windows XP */
 #endif

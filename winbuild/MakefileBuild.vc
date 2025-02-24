@@ -415,8 +415,6 @@ GEN_PDB = true
 
 !IFDEF EMBED_MANIFEST
 MANIFESTTOOL = $(MT) -manifest $(DIRDIST)\bin\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\bin\$(PROGRAM_NAME);1
-!ELSE
-CURL_RC_FLAGS = $(CURL_RC_FLAGS) /dCURL_EMBED_MANIFEST
 !ENDIF
 
 # Runtime library configuration
