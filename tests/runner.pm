@@ -924,7 +924,7 @@ sub singletest_run {
                 $CMDLINE=$LIBDIR . "libtests";
             }
             else {
-                $CMDLINE=$LIBDIR . "$tool";
+                $CMDLINE=$LIBDIR . $tool;
             }
         }
         elsif($tool =~ /^unit/) {
@@ -932,7 +932,7 @@ sub singletest_run {
                 $CMDLINE=$UNITDIR . "units";
             }
             else {
-                $CMDLINE=$UNITDIR . "$tool";
+                $CMDLINE=$UNITDIR . $tool;
             }
         }
 
