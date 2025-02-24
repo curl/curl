@@ -438,12 +438,16 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     # Make sure that permissions are restricted so openssh doesn't complain
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);
-    if(pathhelp::os_is_win()) {
-      # https://ss64.com/nt/icacls.html
-      $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
-      system("icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /reset");
-      system("icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /grant:r \"$username:(R)\"");
-      system("icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /inheritance:r");
+    if(($^O eq 'cygwin' || $^O eq 'msys') && -e "/bin/setfacl") {
+        # https://cygwin.com/cygwin-ug-net/setfacl.html
+        system "/bin/setfacl --remove-all " . pp($hstprvkeyf);
+    }
+    elsif(pathhelp::os_is_win()) {
+        # https://ss64.com/nt/icacls.html
+        $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
+        system "icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /reset";
+        system "icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /grant:r \"$username:(R)\"";
+        system "icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /inheritance:r";
     }
     # Save md5 and sha256 hashes of public host key
     open(my $rsakeyfile, "<", pp($hstpubkeyf));
