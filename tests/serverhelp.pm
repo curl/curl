@@ -45,11 +45,11 @@ BEGIN {
         server_cmdfilename
         server_inputfilename
         server_outputfilename
+        server_exe
         mainsockf_pidfilename
         mainsockf_logfilename
         datasockf_pidfilename
         datasockf_logfilename
-        server_exe
     );
 
     # sub second timestamping needs Time::HiRes
@@ -183,6 +183,7 @@ sub server_pidfilename {
     my $trailer = '_server.pid';
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
+
 
 #***************************************************************************
 # Return file name for server port file.

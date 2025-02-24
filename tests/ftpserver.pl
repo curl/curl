@@ -68,11 +68,11 @@ use serverhelp qw(
     servername_str
     server_pidfilename
     server_logfilename
+    server_exe
     mainsockf_pidfilename
     mainsockf_logfilename
     datasockf_pidfilename
     datasockf_logfilename
-    server_exe
     );
 
 use globalconfig qw(
