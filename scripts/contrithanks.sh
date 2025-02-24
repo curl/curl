@@ -43,8 +43,12 @@ fi
 # We also include curl-www if possible. Override by setting CURLWWW
 CURLWWW="${CURLWWW:-../curl-www}"
 
-cat ./docs/THANKS | sed 's/ github/ github/i'
+rand="./docs/THANKS.$$"
 
+# output the existing list of names with lowercase github
+tail -n +7 ./docs/THANKS | sed 's/ github/ github/i'  > $rand
+
+# get new names using git
 {
   {
     git log --use-mailmap "$start..HEAD"
@@ -71,4 +75,19 @@ cat ./docs/THANKS | sed 's/ github/ github/i'
 } | \
 sed -f ./docs/THANKS-filter | \
 sort -fu | \
-grep -aixvFf ./docs/THANKS
+grep -aixvFf ./docs/THANKS >> $rand
+
+# output header
+cat <<EOF >./docs/THANKS
+ This project has been alive for many years. Countless people have provided
+ feedback that have improved curl. Here follows a list of people that have
+ contributed (a-z order).
+
+ If you have contributed but are missing here, please let us know!
+
+EOF
+# append all the names, sorted case insensitively
+grep -v "^ " $rand | sort -f $rand >> ./docs/THANKS
+
+# get rid of the temp file
+rm $rand
