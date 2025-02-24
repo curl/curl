@@ -4,10 +4,13 @@ curl and libcurl 8.13.0
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
- Contributors:                 3349
+ Contributors:                 3352
 
 This release includes the following changes:
 
+ o curl: add write-out variable 'tls_earlydata' [79]
+ o var: add a '64dec' function that can base64 decode a string [78]
+ o wolfssl: tls early data support [50]
 
 This release includes the following bugfixes:
 
@@ -16,16 +19,21 @@ This release includes the following bugfixes:
  o asyn-thread: avoid the separate curl_mutex_t alloc [6]
  o asyn-thread: do not allocate thread_data separately [21]
  o asyn-thread: remove 'status' from struct Curl_async [36]
+ o build: add Windows CE / CeGCC support, with CI jobs [87]
  o build: enable -Wjump-misses-init for GCC 4.5+ [62]
  o build: fix compiler warnings in feature detections [39]
  o build: set `HAVE_WRITABLE_ARGV` for Apple cross-builds [8]
  o build: silence bogus `-Wconversion` warnings with gcc 5.1-5.4 [68]
+ o c-ares: error out for unsupported versions, drop unused macros [85]
  o ca-native.md: sync with CURLSSLOPT_NATIVE_CA [72]
  o cf-socket: deduplicate Windows Vista detection [11]
  o client writer: handle pause before deocding [61]
  o cmake: `SHARE_LIB_OBJECT=ON` requires CMake 3.12 or newer [46]
  o cmake: add pre-fill for Unix, enable in GHA/macos, verify pre-fills [42]
- o cmake: allow empty custom `IMPORT_LIB_SUFFIX`, add suffix collision detection [41]
+ o cmake: allow empty `IMPORT_LIB_SUFFIX`, add suffix collision detection [41]
+ o cmake: avoid `-Wnonnull` warning in `HAVE_FSETXATTR_5` detection [81]
+ o cmake: disable HTTPS-proxy as a feature if proxy is disabled [77]
+ o cmake: drop `CURL_DISABLE_TESTS` option [94]
  o cmake: drop `HAVE_IN_ADDR_T` from pre-fill too
  o cmake: drop two stray TLS feature checks for wolfSSL [9]
  o cmake: fix `HAVE_ATOMIC`/`HAVE_STDATOMIC` pre-fill for clang-cl [28]
@@ -34,17 +42,25 @@ This release includes the following bugfixes:
  o cmake: misc tidy-ups [38]
  o cmake: sync OpenSSL(-fork) feature checks with `./configure` [49]
  o CODE_STYLE: readability and banned functions [35]
+ o configure: silence compiler warnings in feature checks, drop duplicates [86]
  o configure: use `curl_cv_apple` variable [40]
  o conn: fix connection reuse when SSL is optional [54]
+ o contributors.sh: lowercase 'github' for consistency [52]
  o cookie: minor parser simplification [58]
  o cookie: simplify invalid_octets() [24]
  o curl_msh3: remove verify bypass from DEBUGBUILDs [43]
+ o CURLMOPT_SOCKETFUNCTION.md: add advice for socket callback invocation[69]
  o docs: add FD_ZERO to curl_multi_fdset example [19]
  o docs: correct argument names & URL redirection [4]
+ o eventfd: allow use on all CPUs [93]
+ o gnutls: fix connection state check on handshake [80]
  o hash: use single linked list for entries [57]
  o hostip: make CURLOPT_RESOLVE support replacing IPv6 addresses [47]
  o HTTP3.md: only speak about minimal versions [18]
+ o http: convert parsers to strparse [48]
  o http: fix NTLM info message typo [22]
+ o http: fix the auth check [88]
+ o http: make the RTSP version check stricter [73]
  o http: negotiation and room for alt-svc/https rr to navigate [64]
  o http: version negotiation [45]
  o http_aws_sigv4: use strparse more for parsing [55]
@@ -57,22 +73,31 @@ This release includes the following bugfixes:
  o lib: use Curl_str_* instead of strtok_r() [59]
  o lib: use Curl_str_number() for parsing decimal numbers [13]
  o managen: correct the warning for un-escaped '<' and '>' [1]
+ o msvc: drop support for VS2005 and older [96]
+ o multi: event based rework [74]
+ o openssl: drop support for old OpenSSL/LibreSSL versions [95]
  o openssl: remove bad `goto`s into other scope [63]
+ o schannel: deduplicate Windows Vista detection [98]
+ o schannel: enable ALPN support under WINE 6.0+ [92]
  o schannel: enable ALPN with MinGW, fix ALPN for UWP builds [71]
+ o schannel: guard ALPN init code to ALPN builds [91]
  o scripts/managen: fix option 'single' [31]
  o scripts/managen: fix parsing of markdown code sections [30]
+ o setopt: remove unnecesary void pointer typecasts [76]
  o ssh: consider sftp quote commands case sensitive [33]
  o ssl session cache: add exportable flag [56]
  o strparse: make Curl_str_number() return error for no digits [14]
  o strparse: switch the API to work on 'const char *' [2]
  o strparse: switch to curl_off_t as base data type [7]
- o tests: fix enum/int confusion (Intel C), fix autotools `CFLAGS` for `servers` [27]
+ o tests: fix enum/int confusion, fix autotools `CFLAGS` for `servers` [27]
+ o tidy-up: align MSYS2/Cygwin codepaths, follow Cygwin `MAX_PID` bump [97]
  o tidy-up: delete, comment or scope C macros reported unused [16]
  o tidy-up: drop unused `CURL_INADDR_NONE` macro and `in_addr_t` type [26]
  o tidy-up: use `CURL_ARRAYSIZE()` [37]
  o timediff: fix comment for curlx_mstotv() [25]
  o timediff: remove unnecessary double typecast [53]
  o tool_getparam: clear sensitive arguments better [66]
+ o tool_operate: fail SSH transfers without server auth [70]
  o urlapi: simplify junkscan [23]
  o variable.md: clarify 'trim' example [12]
  o wolfssh: retrieve the error using wolfSSH_get_error [5]
@@ -98,12 +123,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthony Hu, Daniel Stenberg, dependabot[bot], Dexter Gerig, Harry Sintonen,
-  John Bampton, Joseph Chen, kayrus on github, kriztalz, lf- on github,
-  Marcel Raad, Mark Phillips, Ray Satiro, rmg-x on github,
-  RubisetCie on github, Sergey, Stefan Eissing, Viktor Szakats,
-  Zenju on github
-  (19 contributors)
+  Anthony Hu, Dan Fandrich, Daniel Stenberg, dependabot[bot], Dexter Gerig,
+  Harry Sintonen, Jeremy Drake, John Bampton, Joseph Chen, kayrus on github,
+  kriztalz, lf- on github, Marcel Raad, Mark Phillips, qhill on github,
+  Ray Satiro, renovate[bot], rmg-x on github, RubisetCie on github, Sergey,
+  Stefan Eissing, Timo Tijhof, Viktor Szakats, Zenju on github
+  (24 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -154,8 +179,11 @@ References to bug reports and discussions on issues:
  [45] = https://curl.se/bug/?i=16100
  [46] = https://curl.se/bug/?i=16375
  [47] = https://curl.se/bug/?i=16357
+ [48] = https://curl.se/bug/?i=16436
  [49] = https://curl.se/bug/?i=16352
+ [50] = https://curl.se/bug/?i=16167
  [51] = https://curl.se/bug/?i=16409
+ [52] = https://curl.se/bug/?i=16443
  [53] = https://curl.se/bug/?i=16367
  [54] = https://curl.se/bug/?i=16384
  [55] = https://curl.se/bug/?i=16366
@@ -171,5 +199,27 @@ References to bug reports and discussions on issues:
  [66] = https://curl.se/bug/?i=16396
  [67] = https://curl.se/bug/?i=16399
  [68] = https://curl.se/bug/?i=16398
+ [69] = https://curl.se/bug/?i=16441
+ [70] = https://curl.se/bug/?i=16205
  [71] = https://curl.se/bug/?i=16385
  [72] = https://curl.se/bug/?i=16373
+ [73] = https://curl.se/bug/?i=16435
+ [74] = https://curl.se/bug/?i=16308
+ [76] = https://curl.se/bug/?i=16426
+ [77] = https://curl.se/bug/?i=16434
+ [78] = https://curl.se/bug/?i=16330
+ [79] = https://curl.se/bug/?i=15956
+ [80] = https://curl.se/bug/?i=16423
+ [81] = https://curl.se/bug/?i=16427
+ [85] = https://curl.se/bug/?i=16407
+ [86] = https://curl.se/bug/?i=16377
+ [87] = https://curl.se/bug/?i=15975
+ [88] = https://curl.se/bug/?i=16419
+ [91] = https://curl.se/bug/?i=16420
+ [92] = https://curl.se/bug/?i=16393
+ [93] = https://curl.se/bug/?i=16277
+ [94] = https://curl.se/bug/?i=16134
+ [95] = https://curl.se/bug/?i=16104
+ [96] = https://curl.se/bug/?i=16004
+ [97] = https://curl.se/bug/?i=16217
+ [98] = https://curl.se/bug/?i=16408
