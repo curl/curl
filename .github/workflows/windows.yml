@@ -83,7 +83,6 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
