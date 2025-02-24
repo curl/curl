@@ -184,7 +184,6 @@ sub server_pidfilename {
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return file name for server port file.
 #
@@ -294,6 +293,7 @@ sub datasockf_logfilename {
     my $trailer = '_sockdata.log';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
+
 
 #***************************************************************************
 # End of library
