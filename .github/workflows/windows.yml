@@ -395,98 +395,17 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
             type: 'Debug'
             tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '8.1.0-x86_64'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-win32/seh/x86_64-8.1.0-release-win32-seh-rt_v6-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '8.1.0-i686'
-            dir: 'mingw32'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/8.1.0/threads-win32/dwarf/i686-8.1.0-release-win32-dwarf-rt_v6-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '7.3.0-i686'
-            dir: 'mingw32'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/7.3.0/threads-win32/dwarf/i686-7.3.0-release-win32-dwarf-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '6.1.0-x86_64'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/6.1.0/threads-win32/seh/x86_64-6.1.0-release-win32-seh-rt_v5-rev1.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '5.4.0-i686'
-            dir: 'mingw32'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/5.4.0/threads-posix/dwarf/i686-5.4.0-release-posix-dwarf-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '5.1.0-i686'
-            dir: 'mingw32'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/5.1.0/threads-posix/dwarf/i686-5.1.0-release-posix-dwarf-rt_v4-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '5.1.0-x86_64'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/5.1.0/threads-win32/seh/x86_64-5.1.0-release-win32-seh-rt_v4-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '4.9.0-x86_64'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.0/threads-win32/seh/x86_64-4.9.0-release-win32-seh-rt_v3-rev2.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '4.8.5-x86_64'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.5/threads-win32/seh/x86_64-4.8.5-release-win32-seh-rt_v4-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '4.8.2-x86_64'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.2/threads-win32/seh/x86_64-4.8.2-release-win32-seh-rt_v3-rev4.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
-          - name: 'schannel'
-            env: '4.8.1-x86_64'
-            dir: 'mingw64'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Debug'
-            tflags: 'skiprun'
-
       fail-fast: false
     steps:
+      - name: 'cache compiler (gcc ${{ matrix.env }})'
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-compiler
+        with:
+          path: ~\my-cache
+          key: ${{ runner.os }}-mingw-w64-${{ matrix.env }}
+
       - name: 'install compiler (gcc ${{ matrix.env }})'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
         run: |
           cd "${USERPROFILE}" || exit 1
