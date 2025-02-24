@@ -2238,14 +2238,6 @@ while(@ARGV) {
         $DBGCURL=$CURL=$ARGV[1];
         shift @ARGV;
     }
-    elsif ($ARGV[0] eq "-ds") {
-        # append this suffix to base paths
-        print "Using test dir suffix: " . $ARGV[1] . "\n";
-        $LIBDIR .= $ARGV[1];
-        $UNITDIR .= $ARGV[1];
-        $SRVDIR .= $ARGV[1];
-        shift @ARGV;
-    }
     elsif ($ARGV[0] eq "-vc") {
         # use this path to a curl used to verify servers
 

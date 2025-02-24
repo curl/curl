@@ -985,9 +985,9 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
+          export CURL_DIRSUFFIX='/${{ matrix.type }}'
           export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
           TFLAGS+=' -c ../src/${{ matrix.type }}/curl.exe'
-          TFLAGS+=' -ds /${{ matrix.type }}'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
