@@ -43,7 +43,7 @@ fi
 # We also include curl-www if possible. Override by setting CURLWWW
 CURLWWW="${CURLWWW:-../curl-www}"
 
-cat ./docs/THANKS | sed 's/ github/ github/i'
+sed 's/ github/ github/i' ./docs/THANKS
 
 {
   {
