@@ -438,7 +438,11 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     # Make sure that permissions are restricted so openssh doesn't complain
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);
-    if(pathhelp::os_is_win()) {
+    if($^O eq 'cygwin' || $^O eq 'msys') {
+      system "setfacl --remove-all "                   . pp($hstprvkeyf);
+      system "setfacl --modify u:" . $username . ":r " . pp($hstprvkeyf);
+    }
+    elsif($^O eq 'MSWin32') {
       # https://ss64.com/nt/icacls.html
       $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
       system "icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /reset";
