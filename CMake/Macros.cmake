@@ -87,3 +87,10 @@ macro(curl_required_libpaths _libpaths_arg)
     list(APPEND CMAKE_REQUIRED_LINK_DIRECTORIES "${_libpaths_arg}")
   endif()
 endmacro()
+
+# Pre-fill variables set by a check_type_size() call.
+macro(curl_prefill_type_size _type _size)
+  set(HAVE_SIZEOF_${_type} TRUE)
+  set(SIZEOF_${_type} ${_size})
+  set(SIZEOF_${_type}_CODE "#define SIZEOF_${_type} ${_size}")
+endmacro()
