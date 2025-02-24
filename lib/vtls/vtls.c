@@ -485,18 +485,6 @@ static void cf_ctx_free(struct ssl_connect_data *ctx)
   }
 }
 
-static CURLcode
-ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data, bool *done)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-
-  if(!ssl_prefs_check(data))
-    return CURLE_SSL_CONNECT_ERROR;
-
-  /* mark this is being ssl requested from here on. */
-  return connssl->ssl_impl->do_connect(cf, data, done);
-}
-
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
                                        struct dynbuf *binding)
 {
@@ -1318,7 +1306,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   struct cf_call_data save;
   CURLcode result;
 
-  if(cf->connected) {
+  if(cf->connected && (connssl->state != ssl_connection_deferred)) {
     *done = TRUE;
     return CURLE_OK;
   }
@@ -1336,8 +1324,6 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
 
   CF_DATA_SAVE(save, cf, data);
   CURL_TRC_CF(data, cf, "cf_connect()");
-  DEBUGASSERT(data->conn);
-  DEBUGASSERT(data->conn == cf->conn);
   DEBUGASSERT(connssl);
 
   *done = FALSE;
@@ -1349,7 +1335,13 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-  result = ssl_connect(cf, data, done);
+  if(!connssl->prefs_checked) {
+    if(!ssl_prefs_check(data))
+      return CURLE_SSL_CONNECT_ERROR;
+    connssl->prefs_checked = TRUE;
+  }
+
+  result = connssl->ssl_impl->do_connect(cf, data, done);
 
   if(!result && *done) {
     cf->connected = TRUE;
@@ -1358,10 +1350,83 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||
                 connssl->state == ssl_connection_deferred);
+    DEBUGASSERT(connssl->state != ssl_connection_deferred ||
+                connssl->earlydata_state > ssl_earlydata_none);
   }
 out:
   CURL_TRC_CF(data, cf, "cf_connect() -> %d, done=%d", result, *done);
   CF_DATA_RESTORE(cf, save);
+  return result;
+}
+
+static CURLcode ssl_cf_set_earlydata(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     const void *buf, size_t blen)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  ssize_t nwritten = 0;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_await);
+  DEBUGASSERT(Curl_bufq_is_empty(&connssl->earlydata));
+  if(blen) {
+    if(blen > connssl->earlydata_max)
+      blen = connssl->earlydata_max;
+    nwritten = Curl_bufq_write(&connssl->earlydata, buf, blen, &result);
+    CURL_TRC_CF(data, cf, "ssl_cf_set_earlydata(len=%zu) -> %zd",
+                blen, nwritten);
+    if(nwritten < 0)
+      return result;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode ssl_cf_connect_deferred(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        const void *buf, size_t blen,
+                                        bool *done)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(connssl->state == ssl_connection_deferred);
+  *done = FALSE;
+  if(connssl->earlydata_state == ssl_earlydata_await) {
+    result = ssl_cf_set_earlydata(cf, data, buf, blen);
+    if(result)
+      return result;
+    /* we buffered any early data we'd like to send. Actually
+     * do the connect now which sends it and performs the handshake. */
+    connssl->earlydata_state = ssl_earlydata_sending;
+    connssl->earlydata_skip = Curl_bufq_len(&connssl->earlydata);
+  }
+
+  result = ssl_cf_connect(cf, data, done);
+
+  if(!result && *done) {
+    Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
+    switch(connssl->earlydata_state) {
+    case ssl_earlydata_none:
+      break;
+    case ssl_earlydata_accepted:
+      if(!Curl_ssl_cf_is_proxy(cf))
+        Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip);
+      infof(data, "Server accepted %zu bytes of TLS early data.",
+            connssl->earlydata_skip);
+      break;
+    case ssl_earlydata_rejected:
+      if(!Curl_ssl_cf_is_proxy(cf))
+        Curl_pgrsEarlyData(data, -(curl_off_t)connssl->earlydata_skip);
+      infof(data, "Server rejected TLS early data.");
+      connssl->earlydata_skip = 0;
+      break;
+    default:
+      /* This should not happen. Either we do not use early data or we
+       * should know if it was accepted or not. */
+      DEBUGASSERT(NULL);
+      break;
+    }
+  }
   return result;
 }
 
@@ -1383,21 +1448,57 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
 }
 
 static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
-                           struct Curl_easy *data, const void *buf, size_t len,
+                           struct Curl_easy *data,
+                           const void *buf, size_t blen,
                            bool eos, CURLcode *err)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
-  ssize_t nwritten = 0;
+  ssize_t nwritten = 0, early_written = 0;
 
   (void)eos;
-  /* OpenSSL and maybe other TLS libs do not like 0-length writes. Skip. */
   *err = CURLE_OK;
-  if(len > 0) {
-    CF_DATA_SAVE(save, cf, data);
-    nwritten = connssl->ssl_impl->send_plain(cf, data, buf, len, err);
-    CF_DATA_RESTORE(cf, save);
+  CF_DATA_SAVE(save, cf, data);
+
+  if(connssl->state == ssl_connection_deferred) {
+    bool done = FALSE;
+    *err = ssl_cf_connect_deferred(cf, data, buf, blen, &done);
+    if(*err) {
+      nwritten = -1;
+      goto out;
+    }
+    else if(!done) {
+      *err = CURLE_AGAIN;
+      nwritten = -1;
+      goto out;
+    }
+    DEBUGASSERT(connssl->state == ssl_connection_complete);
   }
+
+  if(connssl->earlydata_skip) {
+    if(connssl->earlydata_skip >= blen) {
+      connssl->earlydata_skip -= blen;
+      *err = CURLE_OK;
+      nwritten = (ssize_t)blen;
+      goto out;
+    }
+    else {
+      early_written = connssl->earlydata_skip;
+      buf = ((const char *)buf) + connssl->earlydata_skip;
+      blen -= connssl->earlydata_skip;
+      connssl->earlydata_skip = 0;
+    }
+  }
+
+  /* OpenSSL and maybe other TLS libs do not like 0-length writes. Skip. */
+  if(blen > 0)
+    nwritten = connssl->ssl_impl->send_plain(cf, data, buf, blen, err);
+
+  if(nwritten >= 0)
+    nwritten += early_written;
+
+out:
+  CF_DATA_RESTORE(cf, save);
   return nwritten;
 }
 
@@ -1411,6 +1512,21 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
 
   CF_DATA_SAVE(save, cf, data);
   *err = CURLE_OK;
+  if(connssl->state == ssl_connection_deferred) {
+    bool done = FALSE;
+    *err = ssl_cf_connect_deferred(cf, data, NULL, 0, &done);
+    if(*err) {
+      nread = -1;
+      goto out;
+    }
+    else if(!done) {
+      *err = CURLE_AGAIN;
+      nread = -1;
+      goto out;
+    }
+    DEBUGASSERT(connssl->state == ssl_connection_complete);
+  }
+
   nread = connssl->ssl_impl->recv_plain(cf, data, buf, len, err);
   if(nread > 0) {
     DEBUGASSERT((size_t)nread <= len);
@@ -1419,6 +1535,8 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
     /* eof */
     *err = CURLE_OK;
   }
+
+out:
   CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d", len,
               nread, *err);
   CF_DATA_RESTORE(cf, save);
@@ -1433,7 +1551,9 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   *done = TRUE;
-  if(!cf->shutdown && Curl_ssl->shut_down) {
+  /* If we have done the SSL handshake, shut down the connection cleanly */
+  if(cf->connected && (connssl->state == ssl_connection_complete) &&
+    !cf->shutdown && Curl_ssl->shut_down) {
     struct cf_call_data save;
 
     CF_DATA_SAVE(save, cf, data);
