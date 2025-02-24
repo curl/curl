@@ -88,7 +88,6 @@ use serverhelp qw(
     server_exe
     );
 use pathhelp qw(
-    exe_ext
     sys_native_current_path
     );
 use processhelp qw(
