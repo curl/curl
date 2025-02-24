@@ -1961,7 +1961,7 @@ sub runmqttserver {
 
     # start our MQTT server - on a random port!
     my $cmd=server_exe('mqttd').
-        " --port 0 ".
+        " --port 0".
         " --pidfile $pidfile".
         " --portfile $portfile".
         " --config $LOGDIR/$SERVERCMD".
@@ -2027,7 +2027,7 @@ sub runsocksserver {
             " --config $LOGDIR/$SERVERCMD";
     } else {
         $cmd=server_exe('socksd').
-            " --port 0 ".
+            " --port 0".
             " --pidfile $pidfile".
             " --portfile $portfile".
             " --reqfile $LOGDIR/$SOCKSIN".
