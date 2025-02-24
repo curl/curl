@@ -288,7 +288,7 @@ sub datasockf_logfilename {
 #
 sub server_exe {
     my ($name) = @_;
-    return $SRVDIR . "/" . $name . exe_ext('SRV');
+    return $SRVDIR . $name . exe_ext('SRV');
 }
 
 #***************************************************************************
