@@ -43,7 +43,9 @@ fi
 # We also include curl-www if possible. Override by setting CURLWWW
 CURLWWW="${CURLWWW:-../curl-www}"
 
-sed 's/ github/ github/i' ./docs/THANKS
+rand="./docs/THANKS.$$"
+
+sed 's/ github/ github/i' < ./docs/THANKS > $rand
 
 {
   {
@@ -71,4 +73,5 @@ sed 's/ github/ github/i' ./docs/THANKS
 } | \
 sed -f ./docs/THANKS-filter | \
 sort -fu | \
-grep -aixvFf ./docs/THANKS
+grep -aixvFf ./docs/THANKS >> $rand
+mv $rand ./docs/THANKS
