@@ -71,7 +71,8 @@ UNITTEST_START
   fail_unless(Curl_llist_count(&asi->list) == 6, "wrong number of entries");
 
   result = Curl_altsvc_parse(curl, asi,
-                             "h2=\"example.com:8080\", h3=\"yesyes.com\"\r\n",
+                             "h2=\"example.com:8080\", "
+                             "h3=\"yesyes.com:8080\"\r\n",
                              ALPN_h1, "3.example.org", 8080);
   fail_if(result, "Curl_altsvc_parse(3) failed!");
   /* that one should make two entries */
@@ -92,7 +93,8 @@ UNITTEST_START
 
   result =
     Curl_altsvc_parse(curl, asi,
-                      "h2=\":443\", h3=\":443\"; ma = 120; persist = 1\r\n",
+                      "h2=\":443\", h3=\":443\"; "
+                      "persist = \"1\"; ma = 120;\r\n",
                       ALPN_h1, "curl.se", 80);
   fail_if(result, "Curl_altsvc_parse(5) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 12, "wrong number of entries");
@@ -102,6 +104,26 @@ UNITTEST_START
                              ALPN_h1, "curl.se", 80);
   fail_if(result, "Curl_altsvc_parse(6) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
+
+  /* only a non-existing alpn */
+  result = Curl_altsvc_parse(curl, asi,
+                             "h6=\"example.net:443\"; ma=\"180\";\r\n",
+                             ALPN_h2, "5.example.net", 80);
+
+  /* missing quote in alpn host */
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"example.net:443,; ma=\"180\";\r\n",
+                             ALPN_h2, "6.example.net", 80);
+
+  /* missing port in host name */
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"example.net\"; ma=\"180\";\r\n",
+                             ALPN_h2, "7.example.net", 80);
+
+  /* illegal port in host name */
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"example.net:70000\"; ma=\"180\";\r\n",
+                             ALPN_h2, "8.example.net", 80);
 
   Curl_altsvc_save(curl, asi, outname);
 

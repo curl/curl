@@ -31,6 +31,12 @@ void Curl_str_init(struct Curl_str *out)
   out->len = 0;
 }
 
+void Curl_str_assign(struct Curl_str *out, const char *str, size_t len)
+{
+  out->str = str;
+  out->len = len;
+}
+
 /* Get a word until the first DELIM or end of string. At least one byte long.
    return non-zero on error */
 int Curl_str_until(const char **linep, struct Curl_str *out,

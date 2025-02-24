@@ -407,26 +407,6 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
-{
-  size_t len;
-  const char *protop;
-  const char *p = *ptr;
-  while(ISBLANK(*p))
-    p++;
-  protop = p;
-  while(*p && !ISBLANK(*p) && (*p != ';') && (*p != '='))
-    p++;
-  len = p - protop;
-  *ptr = p;
-
-  if(!len || (len >= buflen))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  memcpy(alpnbuf, protop, len);
-  alpnbuf[len] = 0;
-  return CURLE_OK;
-}
-
 /* hostcompare() returns true if 'host' matches 'check'. The first host
  * argument may have a trailing dot present that will be ignored.
  */
@@ -497,144 +477,124 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                            unsigned short srcport)
 {
   const char *p = value;
-  char alpnbuf[MAX_ALTSVC_ALPNLEN] = "";
   struct altsvc *as;
   unsigned short dstport = srcport; /* the same by default */
-  CURLcode result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
   size_t entries = 0;
-  size_t alpnlen = strlen(alpnbuf);
-  size_t srchostlen = strlen(srchost);
+  struct Curl_str alpn;
+  const char *sp;
+  time_t maxage = 24 * 3600; /* default is 24 hours */
+  bool persist = FALSE;
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
-  if(result) {
-    infof(data, "Excessive alt-svc header, ignoring.");
-    return CURLE_OK;
-  }
 
   DEBUGASSERT(asi);
 
-  /* "clear" is a magic keyword */
-  if(strcasecompare(alpnbuf, "clear")) {
-    /* Flush cached alternatives for this source origin */
-    altsvc_flush(asi, srcalpnid, srchost, srcport);
-    return CURLE_OK;
+  /* initial check for "clear" */
+  if(!Curl_str_until(&p, &alpn, MAX_ALTSVC_LINE, ';') &&
+     !Curl_str_single(&p, ';')) {
+    Curl_str_trimblanks(&alpn);
+    /* "clear" is a magic keyword */
+    if(Curl_str_casecompare(&alpn, "clear")) {
+      /* Flush cached alternatives for this source origin */
+      altsvc_flush(asi, srcalpnid, srchost, srcport);
+      return CURLE_OK;
+    }
+  }
+
+  p = value;
+
+  if(Curl_str_until(&p, &alpn, MAX_ALTSVC_LINE, '='))
+    return CURLE_OK; /* strange line */
+
+  Curl_str_trimblanks(&alpn);
+
+  /* Handle the optional 'ma' and 'persist' flags once first, as they need to
+     be known for each alternative service. Unknown flags are skipped. */
+  sp = strchr(p, ';');
+  if(sp) {
+    sp++; /* pass the semicolon */
+    for(;;) {
+      struct Curl_str name;
+      struct Curl_str val;
+      const char *vp;
+      curl_off_t num;
+      bool quoted;
+      /* allow some extra whitespaces around name and value */
+      if(Curl_str_until(&sp, &name, 20, '=') ||
+         Curl_str_single(&sp, '=') ||
+         Curl_str_until(&sp, &val, 80, ';'))
+        break;
+      Curl_str_trimblanks(&name);
+      Curl_str_trimblanks(&val);
+      /* the value might be quoted */
+      vp = Curl_str(&val);
+      quoted = (*vp == '\"');
+      if(quoted)
+        vp++;
+      if(!Curl_str_number(&vp, &num, TIME_T_MAX)) {
+        if(Curl_str_casecompare(&name, "ma"))
+          maxage = (time_t)num;
+        else if(Curl_str_casecompare(&name, "persist") && (num == 1))
+          persist = TRUE;
+      }
+      if(quoted && Curl_str_single(&sp, '\"'))
+        break;
+      if(Curl_str_single(&sp, ';'))
+        break;
+    }
   }
 
   do {
-    if(*p == '=') {
-      /* [protocol]="[host][:port]" */
-      enum alpnid dstalpnid = Curl_alpn2alpnid(alpnbuf, alpnlen);
-      p++;
-      if(*p == '\"') {
-        const char *dsthost = "";
-        size_t dstlen = 0; /* destination hostname length */
-        const char *value_ptr;
-        char option[32];
-        curl_off_t num;
-        bool quoted = FALSE;
-        time_t maxage = 24 * 3600; /* default is 24 hours */
-        bool persist = FALSE;
-        bool valid = TRUE;
-        p++;
-        if(*p != ':') {
+    if(!Curl_str_single(&p, '=')) {
+      /* [protocol]="[host][:port], [protocol]="[host][:port]" */
+      enum alpnid dstalpnid =
+        Curl_alpn2alpnid(Curl_str(&alpn), Curl_strlen(&alpn));
+      if(!Curl_str_single(&p, '\"')) {
+        struct Curl_str dsthost;
+        curl_off_t port = 0;
+        if(Curl_str_single(&p, ':')) {
           /* hostname starts here */
-          const char *hostp = p;
-          if(*p == '[') {
-            /* pass all valid IPv6 letters - does not handle zone id */
-            dstlen = strspn(++p, "0123456789abcdefABCDEF:.");
-            if(p[dstlen] != ']')
-              /* invalid host syntax, bail out */
+          if(Curl_str_single(&p, '[')) {
+            if(Curl_str_until(&p, &dsthost, MAX_ALTSVC_HOSTLEN, ':')) {
+              infof(data, "Bad alt-svc hostname, ignoring.");
               break;
-            /* we store the IPv6 numerical address *with* brackets */
-            dstlen += 2;
-            p = &p[dstlen-1];
+            }
           }
           else {
-            while(*p && (ISALNUM(*p) || (*p == '.') || (*p == '-')))
-              p++;
-            dstlen = p - hostp;
+            /* IPv6 host name */
+            if(Curl_str_until(&p, &dsthost, MAX_IPADR_LEN, ']') ||
+               Curl_str_single(&p, ']')) {
+              infof(data, "Bad alt-svc IPv6 hostname, ignoring.");
+              break;
+            }
           }
-          if(!dstlen || (dstlen >= MAX_ALTSVC_HOSTLEN)) {
-            infof(data, "Excessive alt-svc hostname, ignoring.");
-            valid = FALSE;
-          }
-          else {
-            dsthost = hostp;
-          }
+          if(Curl_str_single(&p, ':'))
+            break;
         }
-        else {
+        else
           /* no destination name, use source host */
-          dsthost = srchost;
-          dstlen = strlen(srchost);
-        }
-        if(*p == ':') {
-          curl_off_t port = 0;
-          p++;
-          if(Curl_str_number(&p, &port, 0xffff) || (*p != '\"')) {
-            infof(data, "Unknown alt-svc port number, ignoring.");
-            valid = FALSE;
-          }
-          else
-            dstport = (unsigned short)port;
-        }
-        if(*p++ != '\"')
+          Curl_str_assign(&dsthost, srchost, strlen(srchost));
+
+        if(Curl_str_number(&p, &port, 0xffff)) {
+          infof(data, "Unknown alt-svc port number, ignoring.");
           break;
-        /* Handle the optional 'ma' and 'persist' flags. Unknown flags
-           are skipped. */
-        for(;;) {
-          while(ISBLANK(*p))
-            p++;
-          if(*p != ';')
-            break;
-          p++; /* pass the semicolon */
-          if(!*p || ISNEWLINE(*p))
-            break;
-          result = getalnum(&p, option, sizeof(option));
-          if(result) {
-            /* skip option if name is too long */
-            option[0] = '\0';
-          }
-          while(ISBLANK(*p))
-            p++;
-          if(*p != '=')
-            return CURLE_OK;
-          p++;
-          while(ISBLANK(*p))
-            p++;
-          if(!*p)
-            return CURLE_OK;
-          if(*p == '\"') {
-            /* quoted value */
-            p++;
-            quoted = TRUE;
-          }
-          value_ptr = p;
-          if(quoted) {
-            while(*p && *p != '\"')
-              p++;
-            if(!*p++)
-              return CURLE_OK;
-          }
-          else {
-            while(*p && !ISBLANK(*p) && *p!= ';' && *p != ',')
-              p++;
-          }
-          if(!Curl_str_number(&value_ptr, &num, TIME_T_MAX)) {
-            if(strcasecompare("ma", option))
-              maxage = (time_t)num;
-            else if(strcasecompare("persist", option) && (num == 1))
-              persist = TRUE;
-          }
         }
-        if(dstalpnid && valid) {
+
+        dstport = (unsigned short)port;
+
+        if(Curl_str_single(&p, '\"'))
+          break;
+
+        if(dstalpnid) {
           if(!entries++)
             /* Flush cached alternatives for this source origin, if any - when
                this is the first entry of the line. */
             altsvc_flush(asi, srcalpnid, srchost, srcport);
 
-          as = altsvc_createid(srchost, srchostlen,
-                               dsthost, dstlen,
+          as = altsvc_createid(srchost, strlen(srchost),
+                               Curl_str(&dsthost),
+                               Curl_strlen(&dsthost),
                                srcalpnid, dstalpnid,
                                srcport, dstport);
           if(as) {
@@ -647,26 +607,28 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
               as->expires = maxage + secs;
             as->persist = persist;
             Curl_llist_append(&asi->list, as, &as->node);
-            infof(data, "Added alt-svc: %s:%d over %s", dsthost, dstport,
-                  Curl_alpnid2str(dstalpnid));
+            infof(data, "Added alt-svc: %.*s:%d over %s",
+                  (int)Curl_strlen(&dsthost), Curl_str(&dsthost),
+                  dstport, Curl_alpnid2str(dstalpnid));
           }
         }
       }
       else
         break;
+
       /* after the double quote there can be a comma if there is another
          string or a semicolon if no more */
-      if(*p == ',') {
-        /* comma means another alternative is presented */
-        p++;
-        result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
-        if(result)
-          break;
-      }
+      if(Curl_str_single(&p, ','))
+        break;
+
+      /* comma means another alternative is present */
+      if(Curl_str_until(&p, &alpn, MAX_ALTSVC_LINE, '='))
+        break;
+      Curl_str_trimblanks(&alpn);
     }
     else
       break;
-  } while(*p && (*p != ';') && (*p != '\n') && (*p != '\r'));
+  } while(1);
 
   return CURLE_OK;
 }
