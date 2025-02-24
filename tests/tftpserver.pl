@@ -34,7 +34,7 @@ BEGIN {
 use serverhelp qw(
     server_pidfilename
     server_logfilename
-    server_ext
+    server_exe
     );
 
 my $verbose = 0;     # set to 1 for debugging
