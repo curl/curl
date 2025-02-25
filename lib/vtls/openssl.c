@@ -4951,7 +4951,6 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
@@ -4998,6 +4997,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_done;
 #ifdef HAVE_OPENSSL_EARLYDATA
     if(connssl->earlydata_state > ssl_earlydata_none) {
+      struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
       /* We should be in this state by now */
       DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_sent);
       connssl->earlydata_state =
