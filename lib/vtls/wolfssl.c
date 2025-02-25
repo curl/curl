@@ -1635,8 +1635,7 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
   connssl->earlydata_state = ssl_earlydata_sent;
   if(!Curl_ssl_cf_is_proxy(cf))
     Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip);
-  infof(data, "SSL sending %" FMT_OFF_T " bytes of early data",
-        connssl->earlydata_skip);
+  infof(data, "SSL sending %zu bytes of early data", connssl->earlydata_skip);
 out:
   return result;
 }
