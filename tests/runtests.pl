@@ -161,7 +161,6 @@ my $globalabort; # flag signalling program abort
 # values for $singletest_state
 use constant {
     ST_INIT => 0,
-    ST_CLEARLOCKS => 1,
     ST_INITED => 2,
     ST_PREPROCESS => 3,
     ST_RUN => 4,
@@ -180,7 +179,6 @@ my %runnersrunning;    # tests currently running by runner ID
 my $short;
 my $no_debuginfod;
 my $keepoutfiles; # keep stdout and stderr files after tests
-my $clearlocks;   # force removal of files by killing locking processes
 my $postmortem;   # display detailed info about failed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
@@ -1866,33 +1864,13 @@ sub singletest {
     if($singletest_state{$runnerid} == ST_INIT) {
         my $logdir = getrunnerlogdir($runnerid);
         # first, remove all lingering log & lock files
-        if((!cleardir($logdir) || !cleardir("$logdir/$LOCKDIR"))
-            && $clearlocks) {
-            # On Windows, lock files can't be deleted when the process still
-            # has them open, so kill those processes first
-            if(runnerac_clearlocks($runnerid, "$logdir/$LOCKDIR")) {
-                logmsg "ERROR: runner $runnerid seems to have died\n";
-                $singletest_state{$runnerid} = ST_INIT;
-                return (-1, 0);
-            }
-            $singletest_state{$runnerid} = ST_CLEARLOCKS;
-        } else {
-            $singletest_state{$runnerid} = ST_INITED;
-            # Recursively call the state machine again because there is no
-            # event expected that would otherwise trigger a new call.
-            return singletest(@_);
+        if(!cleardir($logdir)) {
+            logmsg "Warning: $runnerid: cleardir($logdir) failed\n";
+        }
+        if(!cleardir("$logdir/$LOCKDIR")) {
+            logmsg "Warning: $runnerid: cleardir($logdir/$LOCKDIR) failed\n";
         }
 
-    } elsif($singletest_state{$runnerid} == ST_CLEARLOCKS) {
-        my ($rid, $logs) = runnerar($runnerid);
-        if(!$rid) {
-            logmsg "ERROR: runner $runnerid seems to have died\n";
-            $singletest_state{$runnerid} = ST_INIT;
-            return (-1, 0);
-        }
-        logmsg $logs;
-        my $logdir = getrunnerlogdir($runnerid);
-        cleardir($logdir);
         $singletest_state{$runnerid} = ST_INITED;
         # Recursively call the state machine again because there is no
         # event expected that would otherwise trigger a new call.
@@ -2447,10 +2425,6 @@ while(@ARGV) {
             $fullstats=1;
         }
     }
-    elsif($ARGV[0] eq "-rm") {
-        # force removal of files by killing locking processes
-        $clearlocks=1;
-    }
     elsif($ARGV[0] eq "-u") {
         # error instead of warning on server unexpectedly alive
         $err_unexpected=1;
@@ -2483,7 +2457,6 @@ Usage: runtests.pl [options] [test selection(s)]
   -R       scrambled order (uses the random seed, see --seed)
   -r       run time statistics
   -rf      full run time statistics
-  -rm      force removal of files by killing locking processes (Windows only)
   --repeat=[num] run the given tests this many times
   -s       short output
   --seed=[num] set the random seed to a fixed number

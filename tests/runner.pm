@@ -47,7 +47,6 @@ BEGIN {
         readtestkeywords
         restore_test_env
         runner_init
-        runnerac_clearlocks
         runnerac_shutdown
         runnerac_stopservers
         runnerac_test_preprocess
@@ -88,7 +87,6 @@ use processhelp qw(
     );
 use servers qw(
     checkcmd
-    clearlocks
     initserverconfig
     serverfortest
     stopserver
@@ -1272,12 +1270,6 @@ sub runner_test_run {
     return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
 }
 
-# Async call runner_clearlocks
-# Called by controller
-sub runnerac_clearlocks {
-    return controlleripccall(\&runner_clearlocks, @_);
-}
-
 # Async call runner_shutdown
 # This call does NOT generate an IPC response and must be the last IPC call
 # received.
@@ -1471,10 +1463,7 @@ sub ipcrecv {
     # print "ipcrecv $funcname\n";
     # Synchronously call the desired function
     my @res;
-    if($funcname eq "runner_clearlocks") {
-        @res = runner_clearlocks(@$argsarrayref);
-    }
-    elsif($funcname eq "runner_shutdown") {
+    if($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
         # Special case: no response will be forthcoming
         return 1;
@@ -1507,18 +1496,6 @@ sub ipcrecv {
 
     return 0;
 }
-
-###################################################################
-# Kill the server processes that still have lock files in a directory
-sub runner_clearlocks {
-    my ($lockdir)=@_;
-    if(clearlogs()) {
-        logmsg "Warning: log messages were lost\n";
-    }
-    clearlocks($lockdir);
-    return clearlogs();
-}
-
 
 ###################################################################
 # Kill all server processes
