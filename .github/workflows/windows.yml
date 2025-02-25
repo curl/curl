@@ -692,6 +692,129 @@ jobs:
             make -j5 -C bld examples
           fi
 
+  cygwin-wince:
+    name: "cygwin-mingw32ce, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} 4.4.0-arm schannel"
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: C:\cygwin\bin\bash.exe {0}
+    env:
+      toolchain-version: '0.59.1'
+      SHELLOPTS: 'igncr'
+    strategy:
+      matrix:
+        build: [autotools, cmake]
+      fail-fast: false
+    steps:
+      - run: git config --global core.autocrlf input
+        shell: pwsh
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: 'cache compiler (mingw32ce)'
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-compiler
+        with:
+          path: opt/mingw32ce
+          key: ${{ runner.os }}-mingw32ce-${{ env.toolchain-version }}-amd32
+
+      - name: 'install compiler (mingw32ce)'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        shell: cmd
+        run: |
+          curl -L https://downloads.sourceforge.net/cegcc/cegcc/${{ env.toolchain-version }}/cegcc_mingw32ce_cygwin1.7_r1399.tar.bz2 -o cegcc_mingw32ce_cygwin1.7_r1399.tar.bz2
+          7z x cegcc_mingw32ce_cygwin1.7_r1399.tar.bz2
+          7z x cegcc_mingw32ce_cygwin1.7_r1399.tar
+
+      - uses: cygwin/cygwin-install-action@f61179d72284ceddc397ed07ddb444d82bf9e559 # v5
+        with:
+          platform: x86
+          site: http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/2015/02/10/141012/
+          check-sig: false
+          packages: >-
+            autoconf libtool binutils
+            automake make ninja
+            curl unzip
+            libmpfr1
+
+      - name: 'configure'
+        run: |
+          MINGW32CE_ROOT="$(pwd)/opt/mingw32ce"
+          PATH="/usr/bin:${MINGW32CE_ROOT}/bin"
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            "/cygdrive/c/Program Files/CMake/bin/cmake.exe" -B bld -G "Unix Makefiles" \
+              -DCMAKE_SYSTEM_NAME=WindowsCE \
+              -DCMAKE_SYSTEM_VERSION=8.0 \
+              -DCMAKE_SYSTEM_PROCESSOR=arm \
+              -DCYGWIN=ON \
+              -DCMAKE_MAKE_PROGRAM=make \
+              -DCMAKE_INSTALL_LIBDIR=/usr/bin \
+              -DCMAKE_C_COMPILER_TARGET=arm-wince-mingw32ce \
+              -DCMAKE_C_COMPILER="arm-mingw32ce-gcc.exe" \
+              -DCMAKE_RC_COMPILER="arm-mingw32ce-windres.exe" \
+              -DMINGW32CE_LIBRARY_DIR="${MINGW32CE_ROOT}/arm-mingw32ce/lib" \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_SCHANNEL=ON \
+              -DCURL_USE_LIBPSL=OFF
+
+
+          else
+            autoreconf -fi
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              ac_cv_prog_cc_c99=no \
+              CC="${MINGW32CE_ROOT}/bin/arm-mingw32ce-gcc.exe" \
+              AR="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ar.exe" \
+              RANLIB="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ranlib.exe" \
+              RC="${MINGW32CE_ROOT}/bin/arm-mingw32ce-windres.exe" \
+              --host=arm-wince-mingw32ce \
+              --with-schannel \
+              --without-libpsl \
+              --disable-shared
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            MINGW32CE_ROOT="$(pwd)/opt/mingw32ce"
+            PATH="/usr/bin:${MINGW32CE_ROOT}/bin"
+            "/cygdrive/c/Program Files/CMake/bin/cmake.exe" --build bld
+          else
+            make -j5 -C bld
+          fi
+
+      - name: 'curl info'
+        run: |
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+
+      - name: 'build tests'
+        if: ${{ matrix.build == 'autotools' }}  # skip for cmake
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target testdeps
+          else
+            make -j5 -C bld -C tests
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build == 'autotools' }}  # skip for cmake
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target curl-examples
+          else
+            make -j5 -C bld examples
+          fi
+
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest
