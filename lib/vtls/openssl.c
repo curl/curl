@@ -4532,7 +4532,7 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
                                                sizeof(group_name), NULL);
       msnprintf(group_name_final, sizeof(group_name_final), "/%s", group_name);
     }
-    type_name = EVP_PKEY_get0_type_name(current_pkey);
+    type_name = current_pkey ? EVP_PKEY_get0_type_name(current_pkey) : NULL;
 #else
     get_group_name = 0;
     type_name = NULL;
