@@ -671,7 +671,6 @@ jobs:
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
@@ -681,7 +680,6 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
