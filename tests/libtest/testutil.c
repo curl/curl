@@ -26,7 +26,7 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 struct timeval tutil_tvnow(void)
 {

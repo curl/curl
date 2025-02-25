@@ -125,7 +125,7 @@ struct timeval {
 #endif
 
 
-#if defined(__minix)
+#ifdef __minix
 /* Minix does not support recv on TCP sockets */
 #define sread(x,y,z) (ssize_t)read((RECV_TYPE_ARG1)(x), \
                                    (RECV_TYPE_ARG2)(y), \
@@ -165,7 +165,7 @@ struct timeval {
 #endif /* HAVE_RECV */
 
 
-#if defined(__minix)
+#ifdef __minix
 /* Minix does not support send on TCP sockets */
 #define swrite(x,y,z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
                                     (SEND_TYPE_ARG2)(y), \
@@ -187,7 +187,7 @@ struct timeval {
  * Function-like macro definition used to close a socket.
  */
 
-#if defined(HAVE_CLOSESOCKET)
+#ifdef HAVE_CLOSESOCKET
 #  define sclose(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
 #  define sclose(x)  CloseSocket((x))
@@ -202,7 +202,7 @@ struct timeval {
 /*
  * Stack-independent version of fcntl() on sockets:
  */
-#if defined(USE_LWIPSOCK)
+#ifdef USE_LWIPSOCK
 #  define sfcntl  lwip_fcntl
 #else
 #  define sfcntl  fcntl

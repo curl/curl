@@ -298,7 +298,7 @@ size_t curlx_sitouz(int sinum)
 #endif
 }
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 ssize_t curlx_read(int fd, void *buf, size_t count)
 {
