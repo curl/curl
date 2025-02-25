@@ -22,8 +22,7 @@
 #
 ###########################################################################
 
-SERVERPROGS = rtspd sockfilt sws tftpd socksd disabled mqttd
-OTHERPROGS = resolve
+SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd
 
 CURLX_SRCS = \
  ../../lib/mprintf.c \
