@@ -245,7 +245,7 @@ sub server_exe {
         $ext = 'SRV';
     }
     my $cmd;
-    if($ENV{'CURL_TEST_BUNDLES'}) {
+    if($ENV{'CURL_TEST_BUNDLES'} && $name ne 'resolve') {
         $cmd = $SRVDIR . "servers" . exe_ext($ext) . " $name";
     }
     else {
@@ -264,7 +264,7 @@ sub server_exe_args {
         $ext = 'SRV';
     }
     my @cmd;
-    if($ENV{'CURL_TEST_BUNDLES'}) {
+    if($ENV{'CURL_TEST_BUNDLES'} && $name ne 'resolve') {
         @cmd = ($SRVDIR . "servers" . exe_ext($ext), $name);
     }
     else {
