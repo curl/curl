@@ -77,7 +77,7 @@ CURLcode test(char *URL)
     /* go http2 */
     easy_setopt(curl[i], CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_3ONLY);
     easy_setopt(curl[i], CURLOPT_CONNECTTIMEOUT_MS, (long)5000);
-    easy_setopt(curl[i], CURLOPT_CAINFO, "./certs/EdelCurlRoot-ca.cacert");
+    easy_setopt(curl[i], CURLOPT_CAINFO, libtest_arg4);
     /* wait for first connection established to see if we can share it */
     easy_setopt(curl[i], CURLOPT_PIPEWAIT, 1L);
     /* go verbose */
