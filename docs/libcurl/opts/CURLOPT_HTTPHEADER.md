@@ -167,8 +167,14 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
+    /* add this header */
     list = curl_slist_append(list, "Shoesize: 10");
+
+    /* remove this header */
     list = curl_slist_append(list, "Accept:");
+
+    /* change this header */
+    list = curl_slist_append(list, "Host: example.net");
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 
