@@ -525,7 +525,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * Follow Location: header hints on an HTTP-server.
      */
-    data->set.http_follow_location = enabled;
+    if(uarg > 3)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.http_follow_mode = (unsigned char)uarg;
     break;
 
   case CURLOPT_UNRESTRICTED_AUTH:
