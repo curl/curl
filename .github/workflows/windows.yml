@@ -629,7 +629,7 @@ jobs:
               -DCMAKE_SYSTEM_NAME=WindowsCE \
               -DCMAKE_SYSTEM_VERSION=8.0 \
               -DCMAKE_SYSTEM_PROCESSOR=arm \
-              -DCMAKE_C_FLAGS='-O2 -DNDEBUG' \
+              -DCMAKE_C_FLAGS='-O3 -DNDEBUG' \
               -DCMAKE_C_COMPILER_TARGET=arm-mingw32ce \
               -DCMAKE_C_COMPILER=arm-mingw32ce-gcc \
               -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
