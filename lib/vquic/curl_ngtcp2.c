@@ -482,6 +482,11 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   if(ctx->use_earlydata)
     Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
   if(ctx->use_earlydata) {
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA)
+    ctx->earlydata_accepted =
+      (SSL_get_early_data_status(ctx->tls.ossl.ssl) !=
+       SSL_EARLY_DATA_REJECTED);
+#endif
 #ifdef USE_GNUTLS
     int flags = gnutls_session_get_flags(ctx->tls.gtls.session);
     ctx->earlydata_accepted = !!(flags & GNUTLS_SFLAGS_EARLY_DATA);
@@ -2183,8 +2188,24 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   ctx = cf ? cf->ctx : NULL;
   data = cf ? CF_DATA_CURRENT(cf) : NULL;
   if(cf && data && ctx) {
+    unsigned char *quic_tp = NULL;
+    size_t quic_tp_len = 0;
+#ifdef HAVE_OPENSSL_EARLYDATA
+    ngtcp2_ssize tplen;
+    uint8_t tpbuf[256];
+
+    tplen = ngtcp2_conn_encode_0rtt_transport_params(ctx->qconn, tpbuf,
+                                                     sizeof(tpbuf));
+    if(tplen < 0)
+      CURL_TRC_CF(data, cf, "error encoding 0RTT transport data: %s",
+                  ngtcp2_strerror((int)tplen));
+    else {
+      quic_tp = (unsigned char *)tpbuf;
+      quic_tp_len = (size_t)tplen;
+    }
+#endif
     Curl_ossl_add_session(cf, data, ctx->peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), "h3");
+                          SSL_version(ssl), "h3", quic_tp, quic_tp_len);
     return 1;
   }
   return 0;
@@ -2355,6 +2376,9 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   *do_early_data = FALSE;
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA)
+  ctx->earlydata_max = scs->earlydata_max;
+#endif
 #ifdef USE_GNUTLS
   ctx->earlydata_max =
     gnutls_record_get_max_early_data_size(ctx->tls.gtls.session);
@@ -2366,7 +2390,8 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   ctx->earlydata_max = 0;
 #endif /* WOLFSSL_EARLY_DATA */
 #endif
-#if defined(USE_GNUTLS) || defined(USE_WOLFSSL)
+#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
+    (defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA))
   if((!ctx->earlydata_max)) {
     CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }
@@ -2394,7 +2419,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
       }
     }
   }
-#else /* USE_GNUTLS */
+#else /* not supported in the TLS backend */
   (void)data;
   (void)ctx;
   (void)scs;
