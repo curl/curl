@@ -1854,7 +1854,7 @@ sub singletest {
             && $clearlocks) {
             # On Windows, lock files can't be deleted when the process still
             # has them open, so kill those processes first
-            if(runnerac_clearlocks($runnerid, "$logdir/$LOCKDIR")) {
+            if(runnerac_clearlocks($runnerid)) {
                 logmsg "ERROR: runner $runnerid seems to have died\n";
                 $singletest_state{$runnerid} = ST_INIT;
                 return (-1, 0);
