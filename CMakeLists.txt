@@ -2044,6 +2044,8 @@ if(HAVE_MANUAL_TOOLS)
   add_subdirectory(docs)
 endif()
 
+list(REMOVE_DUPLICATES CURL_LIBDIRS)
+
 add_subdirectory(lib)
 
 if(BUILD_CURL_EXE)
