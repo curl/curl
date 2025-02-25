@@ -674,9 +674,9 @@ jobs:
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target testdeps
+            cmake --build bld --target testdeps --verbose
           else
-            make -j5 -C bld -C tests
+            make -j5 -C bld -C tests V=1
           fi
 
       - name: 'build examples'
