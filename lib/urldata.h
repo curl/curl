@@ -1690,6 +1690,9 @@ struct UserDefined {
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 #endif
   unsigned int maxconnects; /* Max idle connections in the connection cache */
+#ifdef USE_ECH
+  int tls_ech;      /* TLS ECH configuration  */
+#endif
   unsigned short use_port; /* which port to use (when not using default) */
 #ifndef CURL_DISABLE_BINDLOCAL
   unsigned short localport; /* local port number to bind to */
@@ -1826,9 +1829,6 @@ struct UserDefined {
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
 #ifndef CURL_DISABLE_WEBSOCKETS
   BIT(ws_raw_mode);
-#endif
-#ifdef USE_ECH
-  int tls_ech;      /* TLS ECH configuration  */
 #endif
 };
 
