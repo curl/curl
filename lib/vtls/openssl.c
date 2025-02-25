@@ -4065,6 +4065,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
               Curl_alpn_restrict_to(&alpns, scs->alpn);
             }
           }
+#else
+          (void)sess_reuse_cb;
 #endif
         }
         SSL_SESSION_free(ssl_session);
