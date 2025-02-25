@@ -4111,8 +4111,8 @@ AC_CHECK_FUNCS([\
   mach_absolute_time \
   pipe \
   poll \
-  sendmsg \
   sendmmsg \
+  sendmsg \
   setlocale \
   setrlimit \
   snprintf \
