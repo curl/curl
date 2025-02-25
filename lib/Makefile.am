@@ -163,7 +163,7 @@ TIDY := clang-tidy
 
 tidy:
 	(_csources=`echo ' $(CSOURCES)' | sed -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
-	$(TIDY) ${_csources} $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H)
+	$(TIDY) $$_csources $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H)
 
 optiontable:
 	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c
