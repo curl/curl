@@ -898,9 +898,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   unsigned char alpn_buffer[128];
 #endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
-#if 0  /* TEMP */
   struct Curl_schannel_cred *old_cred = NULL;
-#endif
   CURLcode result;
 
   DEBUGASSERT(backend);
@@ -955,7 +953,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   backend->cred = NULL;
 
-#if 0  /* TEMP */
   /* check for an existing reusable credential handle */
   if(ssl_config->primary.cache_session) {
     Curl_ssl_scache_lock(data);
@@ -972,7 +969,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     Curl_ssl_scache_unlock(data);
   }
-#endif
 
   if(!backend->cred) {
     char *snihost;
