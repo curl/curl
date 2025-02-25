@@ -434,46 +434,47 @@ jobs:
             export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
           fi
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake -B . -G Ninja \
+            cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               ${{ matrix.build.generate }}
           else
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --disable-dependency-tracking \
               ${{ matrix.build.configure }}
           fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' lib/curl_config.h | sort || true
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'test configs'
         run: |
-          cat tests/config || true
-          cat tests/http/config.ini || true
+          cat bld/tests/config || true
+          cat bld/tests/http/config.ini || true
 
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose
+            cmake --build bld --verbose
           else
-            make V=1
+            make -C bld V=1
           fi
 
       - name: 'check curl -V output'
-        run: ./src/curl -V
+        run: bld/src/curl -V
 
       - name: 'build tests'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target testdeps
+            cmake --build bld --verbose --target testdeps
           else
-            make V=1 -C tests
+            make -C bld V=1 -C tests
           fi
 
       - name: 'install test prereqs'
@@ -487,9 +488,9 @@ jobs:
         run: |
           source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target test-ci
+            cmake --build bld --verbose --target test-ci
           else
-            make V=1 test-ci
+            make -C bld V=1 test-ci
           fi
 
       - name: 'install pytest prereqs'
@@ -506,15 +507,15 @@ jobs:
         run: |
           source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target curl-pytest-ci
+            cmake --build bld --verbose --target curl-pytest-ci
           else
-            make V=1 pytest-ci
+            make -C bld V=1 pytest-ci
           fi
 
       - name: 'build examples'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target curl-examples
+            cmake --build bld --verbose --target curl-examples
           else
-            make V=1 examples
+            make -C bld V=1 examples
           fi
