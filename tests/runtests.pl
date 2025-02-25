@@ -543,7 +543,7 @@ sub checksystemfeatures {
                 $pwd = sys_native_current_path();
                 $feature{"win32"} = 1;
             }
-            if ($libcurl =~ /\s(winssl|schannel)\b/i) {
+            if ($libcurl =~ /\sschannel\b/i) {
                 $feature{"Schannel"} = 1;
                 $feature{"SSLpinning"} = 1;
             }

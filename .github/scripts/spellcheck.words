@@ -950,7 +950,6 @@ winbuild
 WinIDN
 WinLDAP
 winsock
-winssl
 Wireshark
 wolfSSH
 wolfSSL
