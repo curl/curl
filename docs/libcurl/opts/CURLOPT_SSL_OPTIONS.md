@@ -90,7 +90,7 @@ could be a privacy violation and unexpected.
 
 Tell libcurl to try sending application data as TLS1.3 early data. This option
 is supported for GnuTLS, wolfSSL, quictls and OpenSSL (but not BoringSSL
-or AWSLC). It works on TCP and QUIC connections using ngtcp2.
+or AWS-LC). It works on TCP and QUIC connections using ngtcp2.
 This option works on a best effort basis,
 in cases when it wasn't possible to send early data the request is resent
 normally post-handshake.

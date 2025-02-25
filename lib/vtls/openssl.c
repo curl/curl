@@ -4863,6 +4863,7 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
   return result;
 }
 
+#ifdef HAVE_OPENSSL_EARLYDATA
 static CURLcode ossl_send_earlydata(struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
 {
@@ -4940,6 +4941,7 @@ static CURLcode ossl_send_earlydata(struct Curl_cfilter *cf,
 out:
   return result;
 }
+#endif /* HAVE_OPENSSL_EARLYDATA */
 
 static CURLcode ossl_connect(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
@@ -4967,6 +4969,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
 
   if(ssl_connect_2 == connssl->connecting_state) {
     CURL_TRC_CF(data, cf, "ossl_connect, step2");
+#ifdef HAVE_OPENSSL_EARLYDATA
     if(connssl->earlydata_state == ssl_earlydata_await) {
       goto out;
     }
@@ -4976,6 +4979,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
         goto out;
       connssl->earlydata_state = ssl_earlydata_sent;
     }
+#endif
     DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
                 (connssl->earlydata_state == ssl_earlydata_sent));
 
