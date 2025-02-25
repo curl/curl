@@ -1333,8 +1333,9 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     size_t ssl_sessionid_len;
 
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
-                               (void **)&ssl_sessionid)) {
+    ssl_sessionid = Curl_ssl_scache_get_obj(cf, data,
+                                            connssl->peer.scache_key);
+    if(ssl_sessionid) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid,
                          strlen(ssl_sessionid));
