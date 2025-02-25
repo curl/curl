@@ -438,7 +438,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      */
     if((arg < CURL_TIMECOND_NONE) || (arg >= CURL_TIMECOND_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.timecondition = (unsigned char)(curl_TimeCond)arg;
+    data->set.timecondition = (unsigned char)arg;
     break;
   case CURLOPT_TIMEVALUE:
     /*

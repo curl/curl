@@ -2302,32 +2302,33 @@ enum {
 /*
  * Public API enums for RTSP requests
  */
-enum {
-    CURL_RTSPREQ_NONE, /* first in list */
-    CURL_RTSPREQ_OPTIONS,
-    CURL_RTSPREQ_DESCRIBE,
-    CURL_RTSPREQ_ANNOUNCE,
-    CURL_RTSPREQ_SETUP,
-    CURL_RTSPREQ_PLAY,
-    CURL_RTSPREQ_PAUSE,
-    CURL_RTSPREQ_TEARDOWN,
-    CURL_RTSPREQ_GET_PARAMETER,
-    CURL_RTSPREQ_SET_PARAMETER,
-    CURL_RTSPREQ_RECORD,
-    CURL_RTSPREQ_RECEIVE,
-    CURL_RTSPREQ_LAST /* last in list */
-};
+
+#define CURL_RTSPREQ_NONE          0L
+#define CURL_RTSPREQ_OPTIONS       1L
+#define CURL_RTSPREQ_DESCRIBE      2L
+#define CURL_RTSPREQ_ANNOUNCE      3L
+#define CURL_RTSPREQ_SETUP         4L
+#define CURL_RTSPREQ_PLAY          5L
+#define CURL_RTSPREQ_PAUSE         6L
+#define CURL_RTSPREQ_TEARDOWN      7L
+#define CURL_RTSPREQ_GET_PARAMETER 8L
+#define CURL_RTSPREQ_SET_PARAMETER 9L
+#define CURL_RTSPREQ_RECORD        10L
+#define CURL_RTSPREQ_RECEIVE       11L
+#define CURL_RTSPREQ_LAST          12L /* not used */
 
   /* These enums are for use with the CURLOPT_NETRC option. */
+#define CURL_NETRC_IGNORED  0L /* The .netrc will never be read.
+                                  This is the default. */
+#define CURL_NETRC_OPTIONAL 1L /* A user:password in the URL will be preferred
+                                  to one in the .netrc. */
+#define CURL_NETRC_REQUIRED 2L /* A user:password in the URL will be ignored.
+                                  Unless one is set programmatically, the
+                                  .netrc will be queried. */
 enum CURL_NETRC_OPTION {
-  CURL_NETRC_IGNORED,     /* The .netrc will never be read.
-                           * This is the default. */
-  CURL_NETRC_OPTIONAL,    /* A user:password in the URL will be preferred
-                           * to one in the .netrc. */
-  CURL_NETRC_REQUIRED,    /* A user:password in the URL will be ignored.
-                           * Unless one is set programmatically, the .netrc
-                           * will be queried. */
-  CURL_NETRC_LAST
+  /* we set a single member here, just to make sure we still provide the enum,
+     but the values to use are defined above with L suffixes */
+  CURL_NETRC_LAST = 3
 };
 
 #define CURL_SSLVERSION_DEFAULT 0
@@ -2351,10 +2352,13 @@ enum CURL_NETRC_OPTION {
   /* never use, keep last */
 #define CURL_SSLVERSION_MAX_LAST    (CURL_SSLVERSION_LAST    << 16)
 
+#define CURL_TLSAUTH_NONE 0L
+#define CURL_TLSAUTH_SRP  1L
+
 enum CURL_TLSAUTH {
-  CURL_TLSAUTH_NONE,
-  CURL_TLSAUTH_SRP,
-  CURL_TLSAUTH_LAST /* never use, keep last */
+  /* we set a single member here, just to make sure we still provide the enum,
+     but the values to use are defined above with L suffixes */
+  CURL_TLSAUTH_LAST = 2
 };
 
 /* symbols to use with CURLOPT_POSTREDIR.
@@ -2369,14 +2373,16 @@ enum CURL_TLSAUTH {
 #define CURL_REDIR_POST_ALL \
     (CURL_REDIR_POST_301|CURL_REDIR_POST_302|CURL_REDIR_POST_303)
 
+#define CURL_TIMECOND_NONE         0L
+#define CURL_TIMECOND_IFMODSINCE   1L
+#define CURL_TIMECOND_IFUNMODSINCE 2L
+#define CURL_TIMECOND_LASTMOD      3L
+
 typedef enum {
-  CURL_TIMECOND_NONE,
-
-  CURL_TIMECOND_IFMODSINCE,
-  CURL_TIMECOND_IFUNMODSINCE,
-  CURL_TIMECOND_LASTMOD,
-
-  CURL_TIMECOND_LAST
+  /* we set a single member here, just to make sure we still provide
+     the enum typedef, but the values to use are defined above with L
+     suffixes */
+  CURL_TIMECOND_LAST = 4
 } curl_TimeCond;
 
 /* Special size_t value signaling a null-terminated string. */

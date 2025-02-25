@@ -200,7 +200,7 @@ struct OperationConfig {
   long expect100timeout_ms;
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */
-  curl_TimeCond timecond;
+  unsigned long timecond;
   HttpReq httpreq;
   int proxyver;             /* set to CURLPROXY_HTTP* define */
   int ftp_ssl_ccc_mode;
