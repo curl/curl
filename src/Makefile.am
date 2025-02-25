@@ -206,7 +206,8 @@ endif
 TIDY := clang-tidy
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
-	$(TIDY) $(CURL_CFILES) $(curl_cfiles_gen) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
+	(_curl_cfiles=`echo ' $(CURL_CFILES)' | sed -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
+	$(TIDY) $$_curl_cfiles $(curl_cfiles_gen) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H)
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)
