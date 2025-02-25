@@ -82,6 +82,7 @@ my @reused_symbols = (
 
 # TODO: Some of these may be #undef-ed manually at the end of each source
 my @reused_macros = (
+    "DEFAULT_CONFIG",
     "DEFAULT_LOGFILE",
     "DEFAULT_PORT",
     "REQBUFSIZ",
