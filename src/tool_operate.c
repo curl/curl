@@ -1397,7 +1397,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession ?
             1L : 0L);
 
-  my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
+  my_setopt_enum(curl, CURLOPT_TIMECONDITION, config->timecond);
   my_setopt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
   my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
   customrequest_helper(config, config->httpreq, config->customrequest);
