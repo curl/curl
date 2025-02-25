@@ -110,6 +110,11 @@ elseif(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # mingw32ce build
 
   set(CMAKE_C_COMPILE_OPTIONS_PIC "")  # CMake sets it to '-fPIC', confusing the toolchain and breaking builds. Zap it.
 
+  string(APPEND CMAKE_C_FLAGS_DEBUG_INIT " -g")
+  string(APPEND CMAKE_C_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG")
+  string(APPEND CMAKE_C_FLAGS_RELEASE_INIT " -O3 -DNDEBUG")
+  string(APPEND CMAKE_C_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG")
+
   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
   set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
