@@ -629,11 +629,11 @@ jobs:
               -DCMAKE_SYSTEM_NAME=WindowsCE \
               -DCMAKE_SYSTEM_VERSION=8.0 \
               -DCMAKE_SYSTEM_PROCESSOR=arm \
+              -DCMAKE_C_FLAGS='-O3 -DNDEBUG' \
               -DCMAKE_C_COMPILER_TARGET=arm-mingw32ce \
               -DCMAKE_C_COMPILER=arm-mingw32ce-gcc \
               -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
               -DMINGW32CE_LIBRARY_DIR="$HOME/opt/mingw32ce/arm-mingw32ce/lib" \
-              -DCMAKE_C_FLAGS=-O2 \
               -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
