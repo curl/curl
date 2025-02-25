@@ -214,7 +214,7 @@ To link a CMake target against libcurl one can use
 as usual:
 
 ```cmake
-target_link_libraries(my_target PUBLIC CURL::libcurl)
+target_link_libraries(my_target PRIVATE CURL::libcurl)
 ```
 
 # CMake build options
@@ -554,5 +554,5 @@ translates to:
     > cmake . -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
     > cmake --build . --config Debug
 
-We must use `--config` here with `cmake --build` because the Visual Studio are
-multi-config generators and therefore ignore the `CMAKE_BUILD_TYPE` variable.
+We use `--config` with `cmake --build` because the Visual Studio CMake
+generators are multi-config and therefore ignore `CMAKE_BUILD_TYPE`.
