@@ -80,7 +80,7 @@ CURLcode test(char *URL)
 
     if(strstr(URL, "#redir")) {
       /* Enable follow-location */
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     }
 
     ret = curl_easy_perform(curl);
