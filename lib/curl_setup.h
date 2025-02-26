@@ -124,8 +124,7 @@
    C99 (-std=gnu99) mode */
 #if defined(__MINGW32CE__) && !defined(CURL_NO_FMT_CHECKS) && \
   (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) && \
-  (defined(__GNUC__) && \
-    ((__GNUC__ == 4) && (__GNUC_MINOR__ == 4)))
+  (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 4))
 #define CURL_NO_FMT_CHECKS
 #endif
 
