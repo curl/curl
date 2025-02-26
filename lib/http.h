@@ -33,15 +33,14 @@
 #include "dynhds.h"
 #include "ws.h"
 
-typedef enum {
-  HTTPREQ_GET,
-  HTTPREQ_POST,
-  HTTPREQ_POST_FORM, /* we make a difference internally */
-  HTTPREQ_POST_MIME, /* we make a difference internally */
-  HTTPREQ_PUT,
-  HTTPREQ_HEAD
-} Curl_HttpReq;
+#define HTTPREQ_GET       1L
+#define HTTPREQ_POST      2L
+#define HTTPREQ_POST_FORM 3L /* we make a difference internally */
+#define HTTPREQ_POST_MIME 4L /* we make a difference internally */
+#define HTTPREQ_PUT       5L
+#define HTTPREQ_HEAD      6L
 
+typedef long Curl_HttpReq;
 
 /* When redirecting transfers. */
 typedef enum {
