@@ -61,8 +61,8 @@ environment:
       SCHANNEL: 'ON'
       DEBUG: 'OFF'
       CURLDEBUG: 'ON'
-    - job_name: 'CMake, VS2008, Debug, x86, OpenSSL 1.1.1 + Schannel, Shared, Build-tests & examples'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+    - job_name: 'CMake, VS2008, Debug, x86, OpenSSL 1.0.2 + Schannel, Shared, Build-tests & examples'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
       PRJ_GEN: 'Visual Studio 9 2008'
       TARGET: '-A Win32'
       PRJ_CFG: Debug
