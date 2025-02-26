@@ -361,7 +361,7 @@ jobs:
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --verbose
+            cmake --build bld --parallel 4 --verbose
           else
             make -C bld V=1
           fi
@@ -372,7 +372,7 @@ jobs:
       - name: 'build tests'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target testdeps --verbose
+            cmake --build bld --parallel 4 --target testdeps --verbose
           else
             make -C bld V=1 -C tests
           fi
@@ -380,7 +380,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target curl-examples --verbose
+            cmake --build bld --parallel 4 --target curl-examples --verbose
           else
             make -C bld examples V=1
           fi
