@@ -253,8 +253,6 @@ jobs:
               fi
               [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
               [ '${{ matrix.test }}' = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
-              [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-              [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
@@ -289,7 +287,7 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}'
+            cmake --build bld
           else
             make -C bld V=1 install
           fi
@@ -314,7 +312,7 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}' --target testdeps
+            cmake --build bld --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -350,7 +348,7 @@ jobs:
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --config '${{ matrix.type }}' --target test-ci
+            cmake --build bld --target test-ci
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld V=1 test-ci
@@ -361,7 +359,7 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+            cmake --build bld --target curl-examples
           else
             make -C bld V=1 examples
           fi
