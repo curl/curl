@@ -60,11 +60,12 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       options+=' ..'
     else
       options+=" -B _bld${_chkprefill}"
+      options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
+      options+=" -DCMAKE_UNITY_BUILD=${UNITY}"
     fi
     # shellcheck disable=SC2086
     cmake -G "${PRJ_GEN}" ${TARGET} \
-      -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
-      -DCMAKE_UNITY_BUILD="${UNITY}" -DCURL_TEST_BUNDLES=ON \
+      -DCURL_TEST_BUNDLES=ON \
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
       -DCURL_STATIC_CRT=ON \
@@ -76,6 +77,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_USE_LIBPSL=OFF \
       ${options} \
       || { cat _bld/CMakeFiles/CMake* 2>/dev/null; false; }
+    if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
     cat _bld_chkprefill/CMakeFiles/CMake* 2>/dev/null || true
