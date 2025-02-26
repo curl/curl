@@ -43,6 +43,7 @@ struct curl_ws_frame {
 #define CURLWS_CLOSE      (1<<3)
 #define CURLWS_PING       (1<<4)
 #define CURLWS_OFFSET     (1<<5)
+#define CURLWS_FIN        (1<<6)
 
 /*
  * NAME curl_ws_recv()
