@@ -112,7 +112,7 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}'
+            cmake --build bld
           else
             make -C bld V=1 install
           fi
@@ -131,7 +131,7 @@ jobs:
         timeout-minutes: 15
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}' --target testdeps
+            cmake --build bld --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -146,7 +146,7 @@ jobs:
           fi
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --config '${{ matrix.type }}' --target test-ci
+            cmake --build bld --target test-ci
           else
             make -C bld V=1 test-ci
           fi
@@ -156,7 +156,7 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+            cmake --build bld --target curl-examples
           else
             make -C bld V=1 examples
           fi
