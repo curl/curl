@@ -124,6 +124,13 @@ reassemble the fragments to receive the complete message.
 Only a single fragmented message can be transmitted at a time, but it may
 be interrupted by CURLWS_CLOSE, CURLWS_PING or CURLWS_PONG frames.
 
+## CURLWS_FIN
+
+This flag is set when the FIN bit is present in the received WebSocket frame.
+In WebSocket protocol, the FIN bit indicates that this frame is the final
+frame of the message. When CURLWS_FIN is set, it means no further frames
+follow for this message.
+
 # %PROTOCOLS%
 
 # EXAMPLE
