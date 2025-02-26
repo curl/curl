@@ -58,10 +58,12 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       mkdir "_bld${_chkprefill}"
       cd "_bld${_chkprefill}"
       options+=' ..'
+      root='..'
     else
       options+=" -B _bld${_chkprefill}"
       options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
       options+=" -DCMAKE_UNITY_BUILD=${UNITY}"
+      root='.'
     fi
     # shellcheck disable=SC2086
     cmake -G "${PRJ_GEN}" ${TARGET} \
@@ -76,8 +78,8 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_LIBPSL=OFF \
       ${options} \
-      || { cat _bld/CMakeFiles/CMake* 2>/dev/null; false; }
-    if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
+      || { cat ${root}/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
+    [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
     cat _bld_chkprefill/CMakeFiles/CMake* 2>/dev/null || true
