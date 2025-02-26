@@ -4,11 +4,13 @@ curl and libcurl 8.13.0
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
- Contributors:                 3352
+ Contributors:                 3354
 
 This release includes the following changes:
 
  o curl: add write-out variable 'tls_earlydata' [79]
+ o rustls: add support for CERTINFO [106]
+ o tool_getparam: make --url support a file with URLs [104]
  o var: add a '64dec' function that can base64 decode a string [78]
  o wolfssl: tls early data support [50]
 
@@ -20,6 +22,7 @@ This release includes the following bugfixes:
  o asyn-thread: do not allocate thread_data separately [21]
  o asyn-thread: remove 'status' from struct Curl_async [36]
  o build: add Windows CE / CeGCC support, with CI jobs [87]
+ o build: drop unused `getpart` tool [107]
  o build: enable -Wjump-misses-init for GCC 4.5+ [62]
  o build: fix compiler warnings in feature detections [39]
  o build: set `HAVE_WRITABLE_ARGV` for Apple cross-builds [8]
@@ -38,19 +41,30 @@ This release includes the following bugfixes:
  o cmake: drop two stray TLS feature checks for wolfSSL [9]
  o cmake: fix `HAVE_ATOMIC`/`HAVE_STDATOMIC` pre-fill for clang-cl [28]
  o cmake: fix ECH detection in custom-patched OpenSSL [32]
+ o cmake: hide empty `MINGW64_VERSION` output for mingw32ce [114]
  o cmake: mention 'insecure' in the debug build warning [15]
  o cmake: misc tidy-ups [38]
+ o cmake: pre-fill known type sizes for Windows OSes [100]
+ o cmake: restrict static CRT builds to static curl exe, test in CI [113]
+ o cmake: sync cutoff version with autotools for picky option `-ftree-vrp` [99]
  o cmake: sync OpenSSL(-fork) feature checks with `./configure` [49]
  o CODE_STYLE: readability and banned functions [35]
  o configure: silence compiler warnings in feature checks, drop duplicates [86]
  o configure: use `curl_cv_apple` variable [40]
  o conn: fix connection reuse when SSL is optional [54]
  o contributors.sh: lowercase 'github' for consistency [52]
+ o contrithanks.sh: update docs/THANKS in place [119]
+ o cookie: do prefix matching case-sensitively [82]
  o cookie: minor parser simplification [58]
  o cookie: simplify invalid_octets() [24]
+ o curl.h: change some enums to defines with L suffix [84]
  o curl_msh3: remove verify bypass from DEBUGBUILDs [43]
+ o curl_trc: fix build with CURL_DISABLE_VERBOSE_STRINGS [109]
  o CURLMOPT_SOCKETFUNCTION.md: add advice for socket callback invocation[69]
+ o CURLOPT_HTTPHEADER.md: add comments to the example [90]
+ o CURLOPT_HTTPHEADER.md: rephrases [108]
  o docs: add FD_ZERO to curl_multi_fdset example [19]
+ o docs: bump `rustls` to 0.14.1 [111]
  o docs: correct argument names & URL redirection [4]
  o eventfd: allow use on all CPUs [93]
  o gnutls: fix connection state check on handshake [80]
@@ -67,16 +81,24 @@ This release includes the following bugfixes:
  o https-rr: implementation improvements [44]
  o httpsrr: fix port detection [51]
  o httpsrr: fix the HTTPS-RR threaded-resolver build combo [67]
+ o INSTALL-CMAKE.md: CMake usage updates [101]
+ o INSTALL-CMAKE.md: mention `ZLIB_USE_STATIC_LIBS` [112]
  o lib: better optimized casecompare() and ncasecompare() [3]
  o lib: simplify more white space loops [60]
  o lib: strtoofft.h header cleanup [17]
  o lib: use Curl_str_* instead of strtok_r() [59]
  o lib: use Curl_str_number() for parsing decimal numbers [13]
+ o libtest/libprereq.c: set CURLOPT_FOLLOWLOCATION with a long [89]
  o managen: correct the warning for un-escaped '<' and '>' [1]
  o msvc: drop support for VS2005 and older [96]
  o multi: event based rework [74]
+ o openssl: check return value of X509_get0_pubkey [105]
  o openssl: drop support for old OpenSSL/LibreSSL versions [95]
  o openssl: remove bad `goto`s into other scope [63]
+ o runtests: drop recognizing 'winssl' as Schannel [102]
+ o runtests: drop ref to unused external function
+ o runtests: recognize AWS-LC as OpenSSL [103]
+ o runtests: support multi-target cmake, drop workarounds from CI [116]
  o schannel: deduplicate Windows Vista detection [98]
  o schannel: enable ALPN support under WINE 6.0+ [92]
  o schannel: enable ALPN with MinGW, fix ALPN for UWP builds [71]
@@ -100,8 +122,10 @@ This release includes the following bugfixes:
  o tool_operate: fail SSH transfers without server auth [70]
  o urlapi: simplify junkscan [23]
  o variable.md: clarify 'trim' example [12]
+ o windows: drop code and curl manifest targeting W2K and older [115]
  o wolfssh: retrieve the error using wolfSSH_get_error [5]
  o wolfssl: fix CA certificate multiple location import [34]
+ o wolfssl: warn if CA native import option is ignored [65]
  o wolfssl: when using PQ KEM, use ML-KEM, not Kyber [10]
 
 This release includes the following known bugs:
@@ -123,12 +147,13 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthony Hu, Dan Fandrich, Daniel Stenberg, dependabot[bot], Dexter Gerig,
-  Harry Sintonen, Jeremy Drake, John Bampton, Joseph Chen, kayrus on github,
-  kriztalz, lf- on github, Marcel Raad, Mark Phillips, qhill on github,
-  Ray Satiro, renovate[bot], rmg-x on github, RubisetCie on github, Sergey,
-  Stefan Eissing, Timo Tijhof, Viktor Szakats, Zenju on github
-  (24 contributors)
+  Anthony Hu, Dan Fandrich, Daniel Stenberg, dependabot[bot], Derek Huang,
+  Dexter Gerig, Harry Sintonen, Jeremy Drake, John Bampton, Joseph Chen,
+  kayrus on github, kriztalz, Laurențiu Nicola, lf- on github, Marcel Raad,
+  Mark Phillips, qhill on github, Ray Satiro, renovate[bot], rmg-x on github,
+  RubisetCie on github, Sergey, Stefan Eissing, Tianyi Song, Timo Tijhof,
+  Viktor Szakats, Yedaya Katsman, Zenju on github
+  (28 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -196,6 +221,7 @@ References to bug reports and discussions on issues:
  [62] = https://curl.se/bug/?i=16252
  [63] = https://curl.se/bug/?i=16356
  [64] = https://curl.se/bug/?i=16117
+ [65] = https://curl.se/bug/?i=16417
  [66] = https://curl.se/bug/?i=16396
  [67] = https://curl.se/bug/?i=16399
  [68] = https://curl.se/bug/?i=16398
@@ -211,10 +237,14 @@ References to bug reports and discussions on issues:
  [79] = https://curl.se/bug/?i=15956
  [80] = https://curl.se/bug/?i=16423
  [81] = https://curl.se/bug/?i=16427
+ [82] = https://curl.se/bug/?i=16494
+ [84] = https://curl.se/bug/?i=16482
  [85] = https://curl.se/bug/?i=16407
  [86] = https://curl.se/bug/?i=16377
  [87] = https://curl.se/bug/?i=15975
  [88] = https://curl.se/bug/?i=16419
+ [89] = https://curl.se/bug/?i=16487
+ [90] = https://curl.se/bug/?i=16488
  [91] = https://curl.se/bug/?i=16420
  [92] = https://curl.se/bug/?i=16393
  [93] = https://curl.se/bug/?i=16277
@@ -223,3 +253,21 @@ References to bug reports and discussions on issues:
  [96] = https://curl.se/bug/?i=16004
  [97] = https://curl.se/bug/?i=16217
  [98] = https://curl.se/bug/?i=16408
+ [99] = https://curl.se/bug/?i=16478
+ [100] = https://curl.se/bug/?i=16464
+ [101] = https://curl.se/bug/?i=16329
+ [102] = https://curl.se/bug/?i=16467
+ [103] = https://curl.se/bug/?i=16466
+ [104] = https://curl.se/bug/?i=16099
+ [105] = https://curl.se/bug/?i=16468
+ [106] = https://curl.se/bug/?i=16459
+ [107] = https://curl.se/bug/?i=16460
+ [108] = https://curl.se/bug/?i=16461
+ [109] = https://curl.se/bug/?i=16462
+ [111] = https://curl.se/bug/?i=16446
+ [112] = https://curl.se/bug/?i=16457
+ [113] = https://curl.se/bug/?i=16456
+ [114] = https://curl.se/bug/?i=16455
+ [115] = https://curl.se/bug/?i=16453
+ [116] = https://curl.se/bug/?i=16452
+ [119] = https://curl.se/bug/?i=16448
