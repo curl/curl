@@ -523,6 +523,7 @@ jobs:
         compiler: [gcc]
     steps:
       - name: 'install packages'
+        timeout-minutes: 5
         run: sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -603,6 +604,7 @@ jobs:
     steps:
       - name: 'install packages'
         if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 5
         run: |
           echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
@@ -616,6 +618,7 @@ jobs:
 
       - name: 'install compiler (mingw32ce)'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        timeout-minutes: 5
         run: |
           cd "${HOME}" || exit 1
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused --proto-redir =https \
