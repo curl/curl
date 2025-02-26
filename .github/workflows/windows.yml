@@ -642,7 +642,6 @@ jobs:
           else
             autoreconf -fi
             mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              ac_cv_prog_cc_c99=no \
               CC="${MINGW32CE_ROOT}/bin/arm-mingw32ce-gcc" \
               AR="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ar" \
               RANLIB="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ranlib" \
