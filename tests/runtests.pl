@@ -160,7 +160,6 @@ my $globalabort; # flag signalling program abort
 # values for $singletest_state
 use constant {
     ST_INIT => 0,
-    ST_CLEARLOCKS => 1,
     ST_INITED => 2,
     ST_PREPROCESS => 3,
     ST_RUN => 4,
@@ -1856,21 +1855,6 @@ sub singletest {
             logmsg "ERROR: $runnerid: cleardir($logdir/$LOCKDIR) failed\n";
         }
 
-        $singletest_state{$runnerid} = ST_INITED;
-        # Recursively call the state machine again because there is no
-        # event expected that would otherwise trigger a new call.
-        return singletest(@_);
-
-    } elsif($singletest_state{$runnerid} == ST_CLEARLOCKS) {
-        my ($rid, $logs) = runnerar($runnerid);
-        if(!$rid) {
-            logmsg "ERROR: runner $runnerid seems to have died\n";
-            $singletest_state{$runnerid} = ST_INIT;
-            return (-1, 0);
-        }
-        logmsg $logs;
-        my $logdir = getrunnerlogdir($runnerid);
-        cleardir($logdir);
         $singletest_state{$runnerid} = ST_INITED;
         # Recursively call the state machine again because there is no
         # event expected that would otherwise trigger a new call.
