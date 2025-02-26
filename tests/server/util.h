@@ -37,7 +37,6 @@ enum {
 
 char *data_to_hex(char *data, size_t len);
 void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
-long timediff(struct timeval newer, struct timeval older);
 
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
