@@ -50,11 +50,12 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   for _chkprefill in '' ${CHKPREFILL:-}; do
     options=''
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-    [[ "${TARGET}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+    [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
     [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
     [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
     if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
+      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin/vcvars64.bat' '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin/amd64/vcvarsamd64.bat'
       mkdir "_bld${_chkprefill}"
       cd "_bld${_chkprefill}"
       options+=' ..'
@@ -66,7 +67,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       root='.'
     fi
     # shellcheck disable=SC2086
-    cmake -G "${PRJ_GEN}" ${TARGET} \
+    cmake -G "${PRJ_GEN}" ${TARGET:-} \
       -DCURL_TEST_BUNDLES=ON \
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
@@ -88,7 +89,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
   if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
-    if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
+    if [[ "${PRJ_GEN}" = 'Visual Studio 9 2008'* ]]; then
       find . -name BuildLog.htm -exec dos2unix '{}' +
       find . -name BuildLog.htm -exec cat '{}' +
     fi
