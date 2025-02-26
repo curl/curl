@@ -64,7 +64,7 @@ Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
 </protocol>
 <stdout mode="text">
 68 65 6c 6c 6f 
-RECFLAGS: 1
+RECFLAGS: 41
 </stdout>
 </verify>
 </testcase>
