@@ -496,8 +496,8 @@ CURL_CHECK_NATIVE_WINDOWS
 curl_cv_wince='no'
 curl_cv_winuwp='no'
 if test "$curl_cv_native_windows" = "yes"; then
-  case $host in
-    *mingw32ce*) curl_cv_wince='yes';;
+  case $host_os in
+    mingw32ce*) curl_cv_wince='yes';;
   esac
   case "$CPPFLAGS" in
     *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
