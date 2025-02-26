@@ -46,8 +46,6 @@ extern const char *path;
 /* global variable, log file name */
 extern const char *serverlogfile;
 
-extern const char *cmdfile;
-
 #ifdef _WIN32
 #include <process.h>
 #include <fcntl.h>

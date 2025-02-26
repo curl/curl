@@ -150,7 +150,7 @@ static char loglockfile[256];
 
 /* file in which additional instructions may be found */
 #define DEFAULT_CMDFILE "log/server.cmd"
-const char *cmdfile = DEFAULT_CMDFILE;
+static const char *cmdfile = DEFAULT_CMDFILE;
 
 /* very-big-path support */
 #define MAXDOCNAMELEN 140000
