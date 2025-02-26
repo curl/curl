@@ -179,7 +179,6 @@ my %runnersrunning;    # tests currently running by runner ID
 my $short;
 my $no_debuginfod;
 my $keepoutfiles; # keep stdout and stderr files after tests
-my $clearlocks;   # force removal of files by killing locking processes
 my $postmortem;   # display detailed info about failed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
@@ -1850,22 +1849,17 @@ sub singletest {
     if($singletest_state{$runnerid} == ST_INIT) {
         my $logdir = getrunnerlogdir($runnerid);
         # first, remove all lingering log & lock files
-        if((!cleardir($logdir) || !cleardir("$logdir/$LOCKDIR"))
-            && $clearlocks) {
-            # On Windows, lock files can't be deleted when the process still
-            # has them open, so kill those processes first
-            if(runnerac_clearlocks($runnerid)) {
-                logmsg "ERROR: runner $runnerid seems to have died\n";
-                $singletest_state{$runnerid} = ST_INIT;
-                return (-1, 0);
-            }
-            $singletest_state{$runnerid} = ST_CLEARLOCKS;
-        } else {
-            $singletest_state{$runnerid} = ST_INITED;
-            # Recursively call the state machine again because there is no
-            # event expected that would otherwise trigger a new call.
-            return singletest(@_);
+        if(!cleardir($logdir)) {
+            logmsg "ERROR: $runnerid: cleardir($logdir) failed\n";
         }
+        if(!cleardir("$logdir/$LOCKDIR")) {
+            logmsg "ERROR: $runnerid: cleardir($logdir/$LOCKDIR) failed\n";
+        }
+
+        $singletest_state{$runnerid} = ST_INITED;
+        # Recursively call the state machine again because there is no
+        # event expected that would otherwise trigger a new call.
+        return singletest(@_);
 
     } elsif($singletest_state{$runnerid} == ST_CLEARLOCKS) {
         my ($rid, $logs) = runnerar($runnerid);
