@@ -244,9 +244,9 @@ jobs:
     runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
+      MAKEFLAGS: -j 4
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.build.compiler || 'clang' }}
-      MAKEFLAGS: -j 4
       # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
       libressl-version: 4.0.0
     strategy:
@@ -390,9 +390,9 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 25
     env:
+      MAKEFLAGS: -j 5
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
-      MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
@@ -517,8 +517,8 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     env:
-      amissl-version: 5.18
       MAKEFLAGS: -j 5
+      amissl-version: 5.18
     strategy:
       matrix:
         build: [autotools, cmake]
@@ -616,8 +616,8 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     env:
-      toolchain-version: '3.4'
       MAKEFLAGS: -j 5
+      toolchain-version: '3.4'
     strategy:
       matrix:
         build: [autotools, cmake]

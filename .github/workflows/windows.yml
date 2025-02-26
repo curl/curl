@@ -44,8 +44,8 @@ jobs:
       run:
         shell: C:\cygwin\bin\bash.exe '{0}'
     env:
-      SHELLOPTS: 'igncr'
       MAKEFLAGS: -j 5
+      SHELLOPTS: 'igncr'
     strategy:
       matrix:
         include:
@@ -518,8 +518,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      TRIPLET: 'x86_64-w64-mingw32'
       MAKEFLAGS: -j 5
+      TRIPLET: 'x86_64-w64-mingw32'
     strategy:
       fail-fast: false
       matrix:
@@ -598,8 +598,8 @@ jobs:
     runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
-      toolchain-version: '0.59.1'
       MAKEFLAGS: -j 4
+      toolchain-version: '0.59.1'
     strategy:
       matrix:
         build: [autotools, cmake]
