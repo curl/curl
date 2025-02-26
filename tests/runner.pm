@@ -1034,12 +1034,12 @@ sub singletest_run {
     if ($torture) {
         $cmdres = torture($CMDLINE,
                           $testnum,
-                          "$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " -x $LOGDIR" . "gdbcmd");
+                          "$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " -x $LOGDIR/gdbcmd");
     }
     elsif($gdbthis == 1) {
         # gdb
         my $GDBW = ($gdbxwin) ? "-w" : "";
-        runclient("$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " $GDBW -x $LOGDIR" . "gdbcmd");
+        runclient("$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " $GDBW -x $LOGDIR/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
     elsif($gdbthis == 2) {
