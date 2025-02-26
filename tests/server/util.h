@@ -47,13 +47,11 @@ extern const char *path;
 extern const char *serverlogfile;
 
 #ifdef _WIN32
-#include <process.h>
 int win32_init(void);
 const char *sstrerror(int err);
-#else   /* _WIN32 */
-
+#else
 #define sstrerror(e) strerror(e)
-#endif  /* _WIN32 */
+#endif
 
 /* fopens the test case file */
 FILE *test2fopen(long testno, const char *logdir);
