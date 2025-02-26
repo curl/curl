@@ -1034,7 +1034,7 @@ sub singletest_run {
     if ($torture) {
         $cmdres = torture($CMDLINE,
                           $testnum,
-                          "$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " -x $LOGDIR" . "/gdbcmd");
+                          "$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " -x $LOGDIR/gdbcmd");
     }
     elsif($gdbthis == 1) {
         # gdb
