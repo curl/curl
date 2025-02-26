@@ -145,7 +145,7 @@ void logmsg(const char *msg, ...)
 
 #ifdef _WIN32
 /* use instead of perror() on generic Windows */
-void win32_perror(const char *msg)
+static void win32_perror(const char *msg)
 {
   char buf[512];
   int err = SOCKERRNO;
@@ -176,7 +176,7 @@ int win32_init(void)
   err = WSAStartup(wVersionRequested, &wsaData);
 
   if(err) {
-    perror("Winsock init failed");
+    win32_perror("Winsock init failed");
     logmsg("Error initialising Winsock -- aborting");
     return 1;
   }
@@ -184,7 +184,7 @@ int win32_init(void)
   if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
      HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
     WSACleanup();
-    perror("Winsock init failed");
+    win32_perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting");
     return 1;
   }
@@ -635,7 +635,7 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
   wc.hInstance = (HINSTANCE)lpParameter;
   wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
-    perror("RegisterClass failed");
+    win32_perror("RegisterClass failed");
     return (DWORD)-1;
   }
 
@@ -647,14 +647,14 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
                                       (HWND)NULL, (HMENU)NULL,
                                       wc.hInstance, (LPVOID)NULL);
   if(!hidden_main_window) {
-    perror("CreateWindowEx failed");
+    win32_perror("CreateWindowEx failed");
     return (DWORD)-1;
   }
 
   do {
     ret = GetMessage(&msg, NULL, 0, 0);
     if(ret == -1) {
-      perror("GetMessage failed");
+      win32_perror("GetMessage failed");
       return (DWORD)-1;
     }
     else if(ret) {
