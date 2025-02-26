@@ -54,6 +54,7 @@
 #include "getpart.h"
 #include "util.h"
 #include "timeval.h"
+#include "timediff.h"
 
 #ifdef USE_WINSOCK
 #undef  EINTR
@@ -63,6 +64,8 @@
 #endif
 
 const char *serverlogfile = "log/server_default.log";
+
+static long timediff(struct timeval newer, struct timeval older);
 
 static struct timeval tvnow(void);
 
@@ -457,7 +460,7 @@ static struct timeval tvnow(void)
 
 #endif
 
-long timediff(struct timeval newer, struct timeval older)
+static long timediff(struct timeval newer, struct timeval older)
 {
   timediff_t diff = newer.tv_sec-older.tv_sec;
   if(diff >= (LONG_MAX/1000))
