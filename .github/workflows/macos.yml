@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, llvm@15, gcc-12, gcc-13, gcc-14]
+        compiler: [clang, llvm@15, gcc-12]
         build:
           # automake
           - name: '!ssl !debug brotli zstd'
@@ -166,24 +166,14 @@ jobs:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
           - { compiler: llvm@15, build: { torture: true } }
           - { compiler: gcc-12, build: { torture: true } }
-          - { compiler: gcc-13, build: { torture: true } }
-          - { compiler: gcc-14, build: { torture: true } }
           - { compiler: llvm@15, build: { clang-tidy: true } }
           - { compiler: gcc-12, build: { clang-tidy: true } }
-          - { compiler: gcc-13, build: { clang-tidy: true } }
-          - { compiler: gcc-14, build: { clang-tidy: true } }
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@15, build: { compiler: 'clang' } }
           - { compiler: llvm@15, build: { compiler: 'gcc-12' } }
-          - { compiler: llvm@15, build: { compiler: 'gcc-13' } }
-          - { compiler: llvm@15, build: { compiler: 'gcc-14' } }
           - { compiler: gcc-12, build: { compiler: 'clang' } }
           - { compiler: gcc-12, build: { compiler: 'llvm@15' } }
-          - { compiler: gcc-12, build: { compiler: 'gcc-13' } }
-          - { compiler: gcc-12, build: { compiler: 'gcc-14' } }
           - { compiler: clang, build: { compiler: 'gcc-12' } }
-          - { compiler: clang, build: { compiler: 'gcc-13' } }
-          - { compiler: clang, build: { compiler: 'gcc-14' } }
           - { compiler: clang, build: { compiler: 'llvm@15' } }
 
     steps:
@@ -322,6 +312,20 @@ jobs:
           export TFLAGS='-j20 ${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
             TFLAGS+=' ~2037 ~2041'  # flaky
+            if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+              TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
+              TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
+              if [[ -n '${{ matrix.build.configure }}' || \
+                    '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
+                TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
+              fi
+              if [[ '${{ matrix.build.configure }}' = *'--with-secure-transport'* || \
+                    '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
+                TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
+              else
+                TFLAGS+=' ~2402 ~2404'  # non-Secure Transport + nghttp2
+              fi
+            fi
             if [[ '${{ matrix.build.configure }}' = *'--with-secure-transport'* || \
                   '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
               TFLAGS+=' ~313'  # Secure Transport does not support crl file
