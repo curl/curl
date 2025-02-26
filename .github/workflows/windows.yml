@@ -44,6 +44,7 @@ jobs:
       run:
         shell: C:\cygwin\bin\bash.exe '{0}'
     env:
+      MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
     strategy:
       matrix:
@@ -111,9 +112,9 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}'
+            cmake --build bld
           else
-            make -C bld -j5 V=1 install
+            make -C bld V=1 install
           fi
 
       - name: 'curl version'
@@ -130,9 +131,9 @@ jobs:
         timeout-minutes: 15
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}' --target testdeps
+            cmake --build bld --target testdeps
           else
-            make -C bld -j5 V=1 -C tests
+            make -C bld V=1 -C tests
           fi
 
       - name: 'run tests'
@@ -145,9 +146,9 @@ jobs:
           fi
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --config '${{ matrix.type }}' --target test-ci
+            cmake --build bld --target test-ci
           else
-            make -C bld -j5 V=1 test-ci
+            make -C bld V=1 test-ci
           fi
 
       - name: 'build examples'
@@ -155,9 +156,9 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+            cmake --build bld --target curl-examples
           else
-            make -C bld -j5 V=1 examples
+            make -C bld V=1 examples
           fi
 
   msys2:  # both msys and mingw-w64
@@ -167,6 +168,8 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    env:
+      MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
@@ -250,8 +253,6 @@ jobs:
               fi
               [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
               [ '${{ matrix.test }}' = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
-              [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-              [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
@@ -286,9 +287,9 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}'
+            cmake --build bld
           else
-            make -C bld -j5 V=1 install
+            make -C bld V=1 install
           fi
 
       - name: 'curl version'
@@ -311,9 +312,9 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}' --target testdeps
+            cmake --build bld --target testdeps
           else
-            make -C bld -j5 V=1 -C tests
+            make -C bld V=1 -C tests
           fi
           if [ '${{ matrix.build }}' != 'cmake' ]; then
             # avoid libtool's .exe wrappers
@@ -347,10 +348,10 @@ jobs:
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --config '${{ matrix.type }}' --target test-ci
+            cmake --build bld --target test-ci
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
-            make -C bld -j5 V=1 test-ci
+            make -C bld V=1 test-ci
           fi
 
       - name: 'build examples'
@@ -358,9 +359,9 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+            cmake --build bld --target curl-examples
           else
-            make -C bld -j5 V=1 examples
+            make -C bld V=1 examples
           fi
 
   mingw-w64-standalone-downloads:
@@ -370,6 +371,8 @@ jobs:
     defaults:
       run:
         shell: C:\msys64\usr\bin\bash.exe {0}
+    env:
+      MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
@@ -428,8 +431,6 @@ jobs:
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
-            [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-            [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             cmake -B "bld${_chkprefill}" -G 'MSYS Makefiles' ${options} \
               -DCMAKE_C_COMPILER=gcc \
@@ -457,7 +458,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+          cmake --build bld
 
       - name: 'curl version'
         timeout-minutes: 1
@@ -471,7 +472,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+          cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -500,27 +501,29 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cmake --build bld --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+          cmake --build bld --target curl-examples
 
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      MAKEFLAGS: -j 5
+      TRIPLET: 'x86_64-w64-mingw32'
     strategy:
       fail-fast: false
       matrix:
         build: [autotools, cmake]
         compiler: [gcc]
-    env:
-      TRIPLET: 'x86_64-w64-mingw32'
     steps:
       - name: 'install packages'
+        timeout-minutes: 5
         run: sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -564,7 +567,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld
           else
-            make -C bld -j5
+            make -C bld
           fi
 
       - name: 'curl info'
@@ -576,7 +579,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
-            make -C bld -j5 -C tests
+            make -C bld -C tests
           fi
 
       - name: 'build examples'
@@ -584,7 +587,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
-            make -C bld -j5 examples
+            make -C bld examples
           fi
 
   wince:
@@ -592,8 +595,8 @@ jobs:
     runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
-      toolchain-version: '0.59.1'
       MAKEFLAGS: -j 4
+      toolchain-version: '0.59.1'
     strategy:
       matrix:
         build: [autotools, cmake]
@@ -601,6 +604,7 @@ jobs:
     steps:
       - name: 'install packages'
         if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 5
         run: |
           echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
@@ -614,6 +618,7 @@ jobs:
 
       - name: 'install compiler (mingw32ce)'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        timeout-minutes: 5
         run: |
           cd "${HOME}" || exit 1
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused --proto-redir =https \

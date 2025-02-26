@@ -47,8 +47,8 @@ permissions: {}
 # newer than the 10.8 required by `CFURLCreateDataAndPropertiesFromResource`.
 
 env:
-  LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
   MAKEFLAGS: -j 4
+  LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
 
 jobs:
   macos:
