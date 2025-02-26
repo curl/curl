@@ -39,8 +39,6 @@ char *data_to_hex(char *data, size_t len);
 void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
 long timediff(struct timeval newer, struct timeval older);
 
-#define TEST_DATA_PATH "%s/data/test%ld"
-#define ALTTEST_DATA_PATH "%s/test%ld"
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
 /* global variable, where to find the 'data' dir */
