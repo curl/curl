@@ -248,6 +248,7 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
 
   /* protsep points to the start of the hostname, after [scheme]:// */
   const char *protsep = base + strlen(u->scheme) + 3;
+  DEBUGASSERT(base); /* it is set here */
 
   /* handle different relative URL types */
   switch(relurl[0]) {
@@ -1770,7 +1771,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
        || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
       return parseurl_and_replace(part, u, flags);
     }
-
+    DEBUGASSERT(oldurl); /* it is set here */
     /* apply the relative part to create a new URL */
     uc = redirect_url(oldurl, part, u, flags);
     free(oldurl);
