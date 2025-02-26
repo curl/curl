@@ -116,7 +116,7 @@ typedef void CURLSH;
 #ifdef CURL_STATICLIB
 #  define CURL_EXTERN
 #elif defined(_WIN32) || \
-     (__has_declspec_attribute && \
+     (defined(__has_declspec_attribute) && \
       __has_declspec_attribute(dllexport) && \
       __has_declspec_attribute(dllimport))
 #  if defined(BUILDING_LIBCURL)
