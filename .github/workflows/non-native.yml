@@ -140,6 +140,7 @@ jobs:
           version: '14.1'
           architecture: ${{ matrix.arch }}
           run: |
+            export MAKEFLAGS=-j3
             # https://ports.freebsd.org/
             time sudo pkg install -y autoconf automake libtool \
               pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
@@ -154,18 +155,18 @@ jobs:
               || { tail -n 1000 config.log; false; }
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
-            time make -j3 install
+            time make install
             src/curl --disable --version
             desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              time make -j3 -C tests
+              time make -C tests
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
                 time make test-ci V=1 TFLAGS='-j4'
               fi
             fi
             if [ "${desc#*!examples*}" = "${desc}" ]; then
               echo '::group::build examples'
-              time make -j3 examples
+              time make examples
               echo '::endgroup::'
             fi
 
@@ -223,6 +224,7 @@ jobs:
           run: |
             set -e
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
+            export MAKEFLAGS=-j3
             time autoreconf -fi
             mkdir bld && cd bld && time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
@@ -231,12 +233,12 @@ jobs:
               || { tail -n 1000 config.log; false; }
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
-            time gmake -j3 install
+            time gmake install
             src/curl --disable --version
-            time gmake -j3 -C tests
+            time gmake -C tests
             time gmake test-ci V=1
             echo '::group::build examples'
-            time gmake -j3 examples
+            time gmake examples
             echo '::endgroup::'
 
   ios:
