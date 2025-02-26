@@ -1849,10 +1849,10 @@ sub singletest {
         my $logdir = getrunnerlogdir($runnerid);
         # first, remove all lingering log & lock files
         if(!cleardir($logdir)) {
-            logmsg "ERROR: $runnerid: cleardir($logdir) failed\n";
+            logmsg "Warning: $runnerid: cleardir($logdir) failed\n";
         }
         if(!cleardir("$logdir/$LOCKDIR")) {
-            logmsg "ERROR: $runnerid: cleardir($logdir/$LOCKDIR) failed\n";
+            logmsg "Warning: $runnerid: cleardir($logdir/$LOCKDIR) failed\n";
         }
 
         $singletest_state{$runnerid} = ST_INITED;
