@@ -54,11 +54,6 @@ extern const char *cmdfile;
 #ifdef _WIN32
 #include <process.h>
 #include <fcntl.h>
-
-#undef perror
-#define perror(m) win32_perror(m)
-void win32_perror(const char *msg);
-
 int win32_init(void);
 const char *sstrerror(int err);
 #else   /* _WIN32 */
