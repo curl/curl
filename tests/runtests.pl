@@ -2435,10 +2435,6 @@ while(@ARGV) {
             $fullstats=1;
         }
     }
-    elsif($ARGV[0] eq "-rm") {
-        # force removal of files by killing locking processes
-        $clearlocks=1;
-    }
     elsif($ARGV[0] eq "-u") {
         # error instead of warning on server unexpectedly alive
         $err_unexpected=1;
@@ -2472,7 +2468,6 @@ Usage: runtests.pl [options] [test selection(s)]
   -R       scrambled order (uses the random seed, see --seed)
   -r       run time statistics
   -rf      full run time statistics
-  -rm      force removal of files by killing locking processes (Windows only)
   --repeat=[num] run the given tests this many times
   -s       short output
   --seed=[num] set the random seed to a fixed number
