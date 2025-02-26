@@ -54,8 +54,15 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
     [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
+    if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
+      mkdir "_bld${_chkprefill}"
+      cd "_bld${_chkprefill}"
+      options+=' ..'
+    else
+      options+=" -B _bld${_chkprefill}"
+    fi
     # shellcheck disable=SC2086
-    cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET:-} \
+    cmake -G "${PRJ_GEN}" ${TARGET:-} \
       -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
       -DCMAKE_UNITY_BUILD="${UNITY}" -DCURL_TEST_BUNDLES=ON \
       -DCURL_WERROR=ON \
