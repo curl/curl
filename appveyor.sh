@@ -66,7 +66,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       root='.'
     fi
     # shellcheck disable=SC2086
-    cmake -G "${PRJ_GEN}" ${TARGET} \
+    time cmake -G "${PRJ_GEN}" ${TARGET} \
       -DCURL_TEST_BUNDLES=ON \
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
@@ -87,7 +87,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
+  if ! time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
     if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
       find . -name BuildLog.htm -exec dos2unix '{}' +
       find . -name BuildLog.htm -exec cat '{}' +
@@ -140,7 +140,7 @@ fi
 
 if [ "${TFLAGS}" != 'skipall' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # run tests
@@ -155,12 +155,12 @@ if [ "${TFLAGS}" != 'skipall' ] && \
   fi
   TFLAGS+=' -j0'
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-    cmake --build _bld --config "${PRJ_CFG}" --target test-ci
+    time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     (
       TFLAGS="-a -p !flaky -r -rm ${TFLAGS}"
       cd _bld/tests
-      ./runtests.pl
+      time ./runtests.pl
     )
   fi
 fi
@@ -169,5 +169,5 @@ fi
 
 if [ "${EXAMPLES}" = 'ON' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
 fi
