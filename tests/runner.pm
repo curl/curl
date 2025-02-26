@@ -1467,10 +1467,7 @@ sub ipcrecv {
     # print "ipcrecv $funcname\n";
     # Synchronously call the desired function
     my @res;
-    if($funcname eq "runner_clearlocks") {
-        @res = runner_clearlocks(@$argsarrayref);
-    }
-    elsif($funcname eq "runner_shutdown") {
+    if($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
         # Special case: no response will be forthcoming
         return 1;
@@ -1503,16 +1500,6 @@ sub ipcrecv {
 
     return 0;
 }
-
-###################################################################
-# Kill the server processes that still have lock files in a directory
-sub runner_clearlocks {
-    if(clearlogs()) {
-        logmsg "Warning: log messages were lost\n";
-    }
-    return clearlogs();
-}
-
 
 ###################################################################
 # Kill all server processes
