@@ -36,6 +36,8 @@ esac
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
   openssl_root_win="C:/OpenSSL-v34${openssl_suffix}"
 elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
+  openssl_root_win="C:/OpenSSL-v11${openssl_suffix}"
+elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
   openssl_root_win="C:/OpenSSL${openssl_suffix}"
 else
   openssl_root_win="C:/OpenSSL-v111${openssl_suffix}"
@@ -52,10 +54,20 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
     [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
+    if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
+      mkdir "_bld${_chkprefill}"
+      cd "_bld${_chkprefill}"
+      options+=' ..'
+      root='..'
+    else
+      options+=" -B _bld${_chkprefill}"
+      options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
+      options+=" -DCMAKE_UNITY_BUILD=${UNITY}"
+      root='.'
+    fi
     # shellcheck disable=SC2086
-    cmake -B "_bld${_chkprefill}" -G "${PRJ_GEN}" ${TARGET} \
-      -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
-      -DCMAKE_UNITY_BUILD="${UNITY}" -DCURL_TEST_BUNDLES=ON \
+    time cmake -G "${PRJ_GEN}" ${TARGET} \
+      -DCURL_TEST_BUNDLES=ON \
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
       -DCURL_STATIC_CRT=ON \
@@ -66,7 +78,8 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_LIBPSL=OFF \
       ${options} \
-      || { cat _bld/CMakeFiles/CMake* 2>/dev/null; false; }
+      || { cat ${root}/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
+    [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
     cat _bld_chkprefill/CMakeFiles/CMake* 2>/dev/null || true
@@ -74,7 +87,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
+  if ! time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
     if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
       find . -name BuildLog.htm -exec dos2unix '{}' +
       find . -name BuildLog.htm -exec cat '{}' +
@@ -127,7 +140,7 @@ fi
 
 if [ "${TFLAGS}" != 'skipall' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # run tests
@@ -142,12 +155,12 @@ if [ "${TFLAGS}" != 'skipall' ] && \
   fi
   TFLAGS+=' -j0'
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-    cmake --build _bld --config "${PRJ_CFG}" --target test-ci
+    time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     (
       TFLAGS="-a -p !flaky -r -rm ${TFLAGS}"
       cd _bld/tests
-      ./runtests.pl
+      time ./runtests.pl
     )
   fi
 fi
@@ -156,5 +169,5 @@ fi
 
 if [ "${EXAMPLES}" = 'ON' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
 fi
