@@ -536,9 +536,9 @@ parse_cookie_header(struct Curl_easy *data,
        * "the rest". Prefixes must start with '__' and end with a '-', so
        * only test for names where that can possibly be true.
        */
-      if(strncasecompare("__Secure-", Curl_str(&name), 9))
+      if(!strncmp("__Secure-", Curl_str(&name), 9))
         co->prefix_secure = TRUE;
-      else if(strncasecompare("__Host-", Curl_str(&name), 7))
+      else if(!strncmp("__Host-", Curl_str(&name), 7))
         co->prefix_host = TRUE;
 
       /*
