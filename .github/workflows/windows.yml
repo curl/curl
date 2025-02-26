@@ -623,16 +623,16 @@ jobs:
 
       - name: 'configure'
         run: |
-          MINGW32CE_ROOT="${HOME}/opt/mingw32ce"
+          PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld \
               -DCMAKE_SYSTEM_NAME=WindowsCE \
               -DCMAKE_SYSTEM_VERSION=8.0 \
               -DCMAKE_SYSTEM_PROCESSOR=arm \
-              -DCMAKE_C_COMPILER_TARGET=arm-wince-mingw32ce \
-              -DCMAKE_C_COMPILER="${MINGW32CE_ROOT}/bin/arm-mingw32ce-gcc" \
-              -DCMAKE_RC_COMPILER="${MINGW32CE_ROOT}/bin/arm-mingw32ce-windres" \
-              -DMINGW32CE_LIBRARY_DIR="${MINGW32CE_ROOT}/arm-mingw32ce/lib" \
+              -DCMAKE_C_COMPILER_TARGET=arm-mingw32ce \
+              -DCMAKE_C_COMPILER=arm-mingw32ce-gcc \
+              -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
+              -DMINGW32CE_LIBRARY_DIR="$HOME/opt/mingw32ce/arm-mingw32ce/lib" \
               -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
@@ -642,12 +642,7 @@ jobs:
           else
             autoreconf -fi
             mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              ac_cv_prog_cc_c99=no \
-              CC="${MINGW32CE_ROOT}/bin/arm-mingw32ce-gcc" \
-              AR="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ar" \
-              RANLIB="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ranlib" \
-              RC="${MINGW32CE_ROOT}/bin/arm-mingw32ce-windres" \
-              --host=arm-wince-mingw32ce \
+              --host=arm-mingw32ce \
               --with-schannel \
               --without-libpsl \
               --disable-shared
@@ -664,6 +659,7 @@ jobs:
 
       - name: 'build'
         run: |
+          PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld
           else
@@ -677,6 +673,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
+          PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
@@ -686,6 +683,7 @@ jobs:
       - name: 'build examples'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
+          PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
