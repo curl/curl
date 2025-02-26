@@ -45,6 +45,7 @@ jobs:
         shell: C:\cygwin\bin\bash.exe '{0}'
     env:
       SHELLOPTS: 'igncr'
+      MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
@@ -113,7 +114,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --config '${{ matrix.type }}'
           else
-            make -C bld -j5 V=1 install
+            make -C bld V=1 install
           fi
 
       - name: 'curl version'
@@ -132,7 +133,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --config '${{ matrix.type }}' --target testdeps
           else
-            make -C bld -j5 V=1 -C tests
+            make -C bld V=1 -C tests
           fi
 
       - name: 'run tests'
@@ -147,7 +148,7 @@ jobs:
             PATH="$PWD/bld/lib:$PATH"
             cmake --build bld --config '${{ matrix.type }}' --target test-ci
           else
-            make -C bld -j5 V=1 test-ci
+            make -C bld V=1 test-ci
           fi
 
       - name: 'build examples'
@@ -157,7 +158,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --config '${{ matrix.type }}' --target curl-examples
           else
-            make -C bld -j5 V=1 examples
+            make -C bld V=1 examples
           fi
 
   msys2:  # both msys and mingw-w64
@@ -167,6 +168,8 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    env:
+      MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
@@ -288,7 +291,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --config '${{ matrix.type }}'
           else
-            make -C bld -j5 V=1 install
+            make -C bld V=1 install
           fi
 
       - name: 'curl version'
@@ -313,7 +316,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --config '${{ matrix.type }}' --target testdeps
           else
-            make -C bld -j5 V=1 -C tests
+            make -C bld V=1 -C tests
           fi
           if [ '${{ matrix.build }}' != 'cmake' ]; then
             # avoid libtool's .exe wrappers
@@ -350,7 +353,7 @@ jobs:
             cmake --build bld --config '${{ matrix.type }}' --target test-ci
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
-            make -C bld -j5 V=1 test-ci
+            make -C bld V=1 test-ci
           fi
 
       - name: 'build examples'
@@ -360,7 +363,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --config '${{ matrix.type }}' --target curl-examples
           else
-            make -C bld -j5 V=1 examples
+            make -C bld V=1 examples
           fi
 
   mingw-w64-standalone-downloads:
@@ -370,6 +373,8 @@ jobs:
     defaults:
       run:
         shell: C:\msys64\usr\bin\bash.exe {0}
+    env:
+      MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
@@ -457,7 +462,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+          cmake --build bld --config '${{ matrix.type }}'
 
       - name: 'curl version'
         timeout-minutes: 1
@@ -471,7 +476,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+          cmake --build bld --config '${{ matrix.type }}' --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -506,19 +511,20 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+          cmake --build bld --config '${{ matrix.type }}' --target curl-examples
 
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      TRIPLET: 'x86_64-w64-mingw32'
+      MAKEFLAGS: -j 5
     strategy:
       fail-fast: false
       matrix:
         build: [autotools, cmake]
         compiler: [gcc]
-    env:
-      TRIPLET: 'x86_64-w64-mingw32'
     steps:
       - name: 'install packages'
         run: sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
@@ -564,7 +570,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld
           else
-            make -C bld -j5
+            make -C bld
           fi
 
       - name: 'curl info'
@@ -576,7 +582,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
-            make -C bld -j5 -C tests
+            make -C bld -C tests
           fi
 
       - name: 'build examples'
@@ -584,7 +590,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
-            make -C bld -j5 examples
+            make -C bld examples
           fi
 
   wince:
@@ -859,7 +865,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+          cmake --build bld --config '${{ matrix.type }}'
 
       - name: 'curl version'
         timeout-minutes: 1
@@ -875,7 +881,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+          cmake --build bld --config '${{ matrix.type }}' --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -917,4 +923,4 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+          cmake --build bld --config '${{ matrix.type }}' --target curl-examples
