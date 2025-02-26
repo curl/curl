@@ -249,6 +249,8 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
   /* protsep points to the start of the hostname, after [scheme]:// */
   const char *protsep = base + strlen(u->scheme) + 3;
   DEBUGASSERT(base && relurl && u); /* all set here */
+  if(!base)
+    return CURLUE_MALFORMED_INPUT; /* should never happen */
 
   /* handle different relative URL types */
   switch(relurl[0]) {
