@@ -865,7 +865,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}'
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
@@ -881,7 +881,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --target testdeps
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -923,4 +923,4 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
