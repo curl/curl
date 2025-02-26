@@ -48,7 +48,6 @@ extern const char *serverlogfile;
 
 #ifdef _WIN32
 #include <process.h>
-#include <fcntl.h>
 int win32_init(void);
 const char *sstrerror(int err);
 #else   /* _WIN32 */
