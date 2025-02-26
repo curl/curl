@@ -47,7 +47,6 @@ BEGIN {
         readtestkeywords
         restore_test_env
         runner_init
-        runnerac_clearlocks
         runnerac_shutdown
         runnerac_stopservers
         runnerac_test_preprocess
@@ -1273,12 +1272,6 @@ sub runner_test_run {
     restore_test_env(0);
 
     return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
-}
-
-# Async call runner_clearlocks
-# Called by controller
-sub runnerac_clearlocks {
-    return controlleripccall(\&runner_clearlocks);
 }
 
 # Async call runner_shutdown
