@@ -55,6 +55,8 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
     if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
+      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/vcpackages/AMD64.VCPlatform.config' '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/vcpackages/AMD64.VCPlatform.Express.config'
+      cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/vcpackages/Itanium.VCPlatform.config' '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/vcpackages/Itanium.VCPlatform.Express.config'
       cp '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin/vcvars64.bat' '/c/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin/amd64/vcvarsamd64.bat'
       mkdir "_bld${_chkprefill}"
       cd "_bld${_chkprefill}"
