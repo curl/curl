@@ -1143,6 +1143,25 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static const struct redircase set_url_list[] = {
+  {"http://firstplace.example.com/want/1314",
+   "//somewhere.example.com/reply/1314",
+   "http://somewhere.example.com/reply/1314",
+   0, 0, CURLUE_OK },
+  {"http://127.0.0.1:46383/want?uri=http://anything/276?secondq/276",
+   "data/2760002.txt?coolsite=http://anotherurl/?a_second/2760002",
+   "http://127.0.0.1:46383/"
+   "data/2760002.txt?coolsite=http://anotherurl/?a_second/2760002",
+   0, 0, CURLUE_OK },
+  {"file:///basic#", "#yay",
+   "file:///basic#yay", 0, 0, CURLUE_OK},
+  {"file:///basic", "?yay",
+   "file:///basic?yay", 0, 0, CURLUE_OK},
+  {"file:///basic?", "?yay",
+   "file:///basic?yay", 0, 0, CURLUE_OK},
+  {"file:///basic?hello", "#frag",
+   "file:///basic?hello#frag", 0, 0, CURLUE_OK},
+  {"file:///basic?hello", "?q",
+   "file:///basic?q", 0, 0, CURLUE_OK},
   {"http://example.org#withs/ash", "/moo#frag",
    "http://example.org/moo#frag",
    0, 0, CURLUE_OK},
