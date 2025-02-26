@@ -55,8 +55,6 @@ extern const char *cmdfile;
 #include <process.h>
 #include <fcntl.h>
 
-#define sleep(sec) Sleep ((sec)*1000)
-
 #undef perror
 #define perror(m) win32_perror(m)
 void win32_perror(const char *msg);
