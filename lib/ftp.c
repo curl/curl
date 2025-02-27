@@ -587,8 +587,9 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
   }
 #endif
 
-  /* store the latest code for later retrieval */
-  data->info.httpcode = code;
+  /* store the latest code for later retrieval, except during shutdown */
+  if(!data->conn->proto.ftpc.shutdown)
+    data->info.httpcode = code;
 
   if(ftpcode)
     *ftpcode = code;
@@ -4081,6 +4082,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
      ftp_quit() will check the state of ftp->ctl_valid. If it is ok it
      will try to send the QUIT command, otherwise it will just return.
   */
+  ftpc->shutdown = TRUE;
   if(dead_connection)
     ftpc->ctl_valid = FALSE;
 

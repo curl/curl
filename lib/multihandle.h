@@ -27,11 +27,13 @@
 #include "llist.h"
 #include "hash.h"
 #include "conncache.h"
+#include "cshutdn.h"
 #include "multi_ev.h"
 #include "psl.h"
 #include "socketpair.h"
 
 struct connectdata;
+struct Curl_easy;
 
 struct Curl_message {
   struct Curl_llist_node list;
@@ -99,6 +101,8 @@ struct Curl_multi {
   struct Curl_llist msgsent; /* in MSGSENT */
   curl_off_t next_easy_mid; /* next multi-id for easy handle added */
 
+  struct Curl_easy *admin; /* internal easy handle for admin operations */
+
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;
   void *socket_userp;
@@ -140,8 +144,8 @@ struct Curl_multi {
    * the multi handle is cleaned up (see Curl_hash_add2()).*/
   struct Curl_hash proto_hash;
 
-  /* Shared connection cache (bundles)*/
-  struct cpool cpool;
+  struct cshutdn cshutdn; /* connection shutdown handling */
+  struct cpool cpool;     /* connection pool (bundles) */
 
   long max_host_connections; /* if >0, a fixed limit of the maximum number
                                 of connections per host */
