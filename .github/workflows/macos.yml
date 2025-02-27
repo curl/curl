@@ -186,6 +186,7 @@ jobs:
           echo ${{ matrix.build.generate && 'ninja' || 'automake libtool' }} \
             pkgconf libpsl libssh2 \
             ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }} \
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }} \
             ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
@@ -234,6 +235,7 @@ jobs:
             for _chkprefill in '' ${{ matrix.build.chkprefill }}; do
               options=''
               [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
+              [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
@@ -255,6 +257,7 @@ jobs:
               CFLAGS+=" --sysroot=${sysroot}"
             fi
             [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
+            [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' --with-test-nghttpx= ac_cv_path_HTTPD_NGHTTPX='
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
@@ -269,6 +272,9 @@ jobs:
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'test configs'
+        run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
       - name: 'build-cert'
         if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON') || contains(matrix.build.configure, '--with-secure-transport')
@@ -325,6 +331,25 @@ jobs:
             cmake --build bld --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
             make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+          fi
+
+      - name: 'install pytest prereqs'
+        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        run: |
+          source $HOME/venv/bin/activate
+          python3 -m pip install -r tests/http/requirements.txt
+
+      - name: 'run pytest'
+        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        env:
+          CURL_CI: github
+          PYTEST_ADDOPTS: '--color=yes'
+        run: |
+          source $HOME/venv/bin/activate
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build bld --verbose --target curl-pytest-ci
+          else
+            make -C bld V=1 pytest-ci
           fi
 
       - name: 'build examples'
