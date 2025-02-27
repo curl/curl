@@ -209,7 +209,8 @@ static int setup(struct input *i, int num, const char *upload)
   curl_off_t uploadsize;
   CURL *hnd;
 
-  hnd = i->hnd = curl_easy_init();
+  hnd = i->hnd = NULL;
+
   i->num = num;
   curl_msnprintf(filename, 128, "dl-%d", num);
   out = fopen(filename, "wb");
@@ -225,6 +226,7 @@ static int setup(struct input *i, int num, const char *upload)
   if(stat(upload, &file_info)) {
     fprintf(stderr, "error: could not stat file %s: %s\n", upload,
             strerror(errno));
+    fclose(out);
     return 1;
   }
 
@@ -234,8 +236,11 @@ static int setup(struct input *i, int num, const char *upload)
   if(!i->in) {
     fprintf(stderr, "error: could not open file %s for reading: %s\n", upload,
             strerror(errno));
+    fclose(out);
     return 1;
   }
+
+  hnd = i->hnd = curl_easy_init();
 
   /* write to this file */
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
