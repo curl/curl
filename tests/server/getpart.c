@@ -130,8 +130,10 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
   for(;;) {
     int bytestoread = curlx_uztosi(*bufsize - offset);
 
-    if(!fgets(*buffer + offset, bytestoread, stream))
+    if(!fgets(*buffer + offset, bytestoread, stream)) {
+      *length = 0;
       return (offset != 0) ? GPE_OK : GPE_END_OF_FILE;
+    }
 
     *length = offset + line_length(*buffer + offset, bytestoread);
     if(*(*buffer + *length - 1) == '\n')
