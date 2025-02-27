@@ -30,6 +30,7 @@
 #include "strcase.h"
 #include "vauth/vauth.h"
 #include "http_digest.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -62,8 +63,7 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
     return CURLE_BAD_CONTENT_ENCODING;
 
   header += strlen("Digest");
-  while(ISBLANK(*header))
-    header++;
+  Curl_str_passblanks(&header);
 
   return Curl_auth_decode_digest_http_message(header, digest);
 }
