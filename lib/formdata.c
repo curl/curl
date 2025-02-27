@@ -31,10 +31,6 @@ struct Curl_easy;
 #include "formdata.h"
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
 
-#if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#include <libgen.h>
-#endif
-
 #include "urldata.h" /* for struct Curl_easy */
 #include "mime.h"
 #include "vtls/vtls.h"

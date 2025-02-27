@@ -65,10 +65,10 @@ typedef CURLcode Curl_cft_connect(struct Curl_cfilter *cf,
  * @param pport  on return, contains the port number
  */
 typedef void     Curl_cft_get_host(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  const char **phost,
-                                  const char **pdisplay_host,
-                                  int *pport);
+                                   struct Curl_easy *data,
+                                   const char **phost,
+                                   const char **pdisplay_host,
+                                   int *pport);
 
 struct easy_pollset;
 
@@ -96,8 +96,8 @@ struct easy_pollset;
  * @param ps     the pollset (inout) for the easy handle
  */
 typedef void     Curl_cft_adjust_pollset(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
-                                          struct easy_pollset *ps);
+                                         struct Curl_easy *data,
+                                         struct easy_pollset *ps);
 
 typedef bool     Curl_cft_data_pending(struct Curl_cfilter *cf,
                                        const struct Curl_easy *data);
@@ -245,8 +245,8 @@ void     Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
                               const char **phost, const char **pdisplay_host,
                               int *pport);
 void     Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps);
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps);
 bool     Curl_cf_def_data_pending(struct Curl_cfilter *cf,
                                   const struct Curl_easy *data);
 ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -255,8 +255,8 @@ ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, CURLcode *err);
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                int event, int arg1, void *arg2);
+                           struct Curl_easy *data,
+                           int event, int arg1, void *arg2);
 bool     Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool *input_pending);
