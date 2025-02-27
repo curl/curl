@@ -2207,7 +2207,8 @@ int main(int argc, char *argv[])
             is_proxy ? "-proxy" : "", socket_type);
 
 #ifdef _WIN32
-  win32_init();
+  if(win32_init())
+    return 2;
   atexit(win32_cleanup);
 #endif
 

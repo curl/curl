@@ -153,7 +153,7 @@ void win32_perror(const char *msg)
   fprintf(stderr, "%s\n", buf);
 }
 
-void win32_init(void)
+int win32_init(void)
 {
 #ifdef USE_WINSOCK
   WORD wVersionRequested;
@@ -166,7 +166,7 @@ void win32_init(void)
   if(err) {
     perror("Winsock init failed");
     logmsg("Error initialising Winsock -- aborting");
-    exit(1);
+    return 1;
   }
 
   if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
@@ -174,9 +174,10 @@ void win32_init(void)
     WSACleanup();
     perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting");
-    exit(1);
+    return 1;
   }
 #endif  /* USE_WINSOCK */
+  return 0;
 }
 
 void win32_cleanup(void)
