@@ -176,7 +176,7 @@ typedef enum {
 #define CURLSSLBACKEND_DARWINSSL CURLSSLBACKEND_SECURETRANSPORT
 
 /* bits for the CURLOPT_FOLLOWLOCATION option */
-#define CURLFOLLOW_ENABLE    1L /* generic follow redirects */
+#define CURLFOLLOW_ALL       1L /* generic follow redirects */
 
 /* Do not use the custom method in the follow-up request if the HTTP code
    instructs so (301, 302, 303). */

@@ -70,7 +70,7 @@ protection from this happening when libcurl is told to follow redirects.
 
 Pick one of the following modes:
 
-## CURLFOLLOW_ENABLE (1)
+## CURLFOLLOW_ALL (1)
 
 Before 8.13.0 this bit had no name and 1L was just the value to enable this
 option. This makes a set custom method be used in all HTTP requests, even
