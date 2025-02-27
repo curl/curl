@@ -1954,22 +1954,6 @@ endif()
 
 # Some other minor tests
 
-if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
-  include(CheckCCompilerFlag)
-  check_c_compiler_flag("-Wno-long-double" HAVE_C_FLAG_Wno_long_double)
-  if(HAVE_C_FLAG_Wno_long_double)
-    # The Mac version of GCC warns about use of long double. Disable it.
-    get_source_file_property(_mprintf_compile_flags "mprintf.c" COMPILE_FLAGS)
-    if(_mprintf_compile_flags)
-      string(APPEND _mprintf_compile_flags " -Wno-long-double")
-    else()
-      set(_mprintf_compile_flags "-Wno-long-double")
-    endif()
-    set_source_files_properties("mprintf.c" PROPERTIES
-      COMPILE_FLAGS ${_mprintf_compile_flags})
-  endif()
-endif()
-
 if(_cmake_try_compile_target_type_save)
   set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save})
   unset(_cmake_try_compile_target_type_save)
