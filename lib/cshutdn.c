@@ -63,12 +63,17 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
     Curl_http_auth_cleanup_negotiate(conn);
 
     if(conn->handler && conn->handler->disconnect) {
+      unsigned int timeout_ms = data->set.server_response_timeout;
+
       /* This is set if protocol-specific cleanups should be made */
       DEBUGF(infof(data, "connection #%" FMT_OFF_T
                    ", shutdown protocol handler (aborted=%d)",
                    conn->connection_id, conn->bits.aborted));
-
+      /* There are protocol handlers that block on retrieving
+       * server responses here (FTP). Set a short timeout. */
+      data->set.server_response_timeout = CURLMIN(timeout_ms, 2 * 1000);
       conn->handler->disconnect(data, conn, conn->bits.aborted);
+      data->set.server_response_timeout = timeout_ms;
     }
 
     /* possible left-overs from the async name resolvers */
