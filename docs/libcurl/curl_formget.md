@@ -38,9 +38,9 @@ first argument to the curl_formget_callback function.
                                          size_t len);"
 ~~~
 
-The curl_formget_callback is invoked for each part of the HTTP POST chain. The
-character buffer passed to the callback must not be freed. The callback should
-return the buffer length passed to it on success.
+The *curl_formget_callback* is invoked for each part of the HTTP POST chain.
+The character buffer passed to the callback must not be freed. The callback
+should return the buffer length passed to it on success.
 
 If the **CURLFORM_STREAM** option is used in the formpost, it prevents
 curl_formget(3) from working until you have performed the actual HTTP request.

@@ -32,10 +32,10 @@ This option is deprecated. We strongly recommend using
 CURLOPT_REDIR_PROTOCOLS_STR(3) instead because this option cannot
 control all available protocols.
 
-Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
+Pass a long that holds a bitmask of protocol bits. If used, this bitmask
 limits what protocols libcurl may use in a transfer that it follows to in a
-redirect when CURLOPT_FOLLOWLOCATION(3) is enabled. This allows you to
-limit specific transfers to only be allowed to use a subset of protocols in
+redirect when CURLOPT_FOLLOWLOCATION(3) is enabled. This allows you to limit
+specific transfers to only be allowed to use a subset of protocols in
 redirections.
 
 Protocols denied by CURLOPT_PROTOCOLS(3) are not overridden by this
