@@ -300,12 +300,17 @@ int main(void)
   if(!filter)
     return 1;
 
-  if(curl_global_init(CURL_GLOBAL_DEFAULT))
+  if(curl_global_init(CURL_GLOBAL_DEFAULT)) {
+    free(filter);
     return 1;
+  }
 
   curl = curl_easy_init();
-  if(!curl)
+  if(!curl) {
+    curl_global_cleanup();
+    free(filter);
     return 1;
+  }
 
   /* Set the target URL */
   curl_easy_setopt(curl, CURLOPT_URL, "http://localhost");
