@@ -1210,14 +1210,13 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       struct dynbuf buf;
       Curl_dyn_init(&buf, MAX_COOKIE_LINE);
       while(Curl_get_line(&buf, fp)) {
-        char *lineptr = Curl_dyn_ptr(&buf);
+        const char *lineptr = Curl_dyn_ptr(&buf);
         bool headerline = FALSE;
         if(checkprefix("Set-Cookie:", lineptr)) {
           /* This is a cookie line, get it! */
           lineptr += 11;
           headerline = TRUE;
-          while(ISBLANK(*lineptr))
-            lineptr++;
+          Curl_str_passblanks(&lineptr);
         }
 
         Curl_cookie_add(data, ci, headerline, TRUE, lineptr, NULL, NULL, TRUE);

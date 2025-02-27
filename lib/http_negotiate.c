@@ -32,6 +32,7 @@
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -86,8 +87,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 
   /* Obtain the input token, if any */
   header += strlen("Negotiate");
-  while(ISBLANK(*header))
-    header++;
+  Curl_str_passblanks(&header);
 
   len = strlen(header);
   neg_ctx->havenegdata = len != 0;
