@@ -443,11 +443,10 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           else if(c == '\n') {
             mem[parser->item_length - 1] = 0;
             if(!strncmp("total ", mem, 6)) {
-              char *endptr = mem + 6;
+              const char *endptr = mem + 6;
               /* here we can deal with directory size, pass the leading
                  whitespace and then the digits */
-              while(ISBLANK(*endptr))
-                endptr++;
+              Curl_str_passblanks(&endptr);
               while(ISDIGIT(*endptr))
                 endptr++;
               if(*endptr) {

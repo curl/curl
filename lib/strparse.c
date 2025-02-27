@@ -283,3 +283,10 @@ void Curl_str_trimblanks(struct Curl_str *out)
   while(out->len && ISBLANK(out->str[out->len - 1]))
     out->len--;
 }
+
+/* increase the pointer until it has moved over all blanks */
+void Curl_str_passblanks(const char **linep)
+{
+  while(ISBLANK(**linep))
+    (*linep)++; /* move over it */
+}
