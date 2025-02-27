@@ -36,7 +36,10 @@ mark_as_advanced(VSFTPD)
 
 find_program(HTTPD "apache2")  # /usr/sbin/apache2
 if(NOT HTTPD)
-  set(HTTPD "")
+  find_program(HTTPD "httpd")
+  if(NOT HTTPD)
+    set(HTTPD "")
+  endif()
 endif()
 mark_as_advanced(HTTPD)
 
