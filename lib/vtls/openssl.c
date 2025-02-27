@@ -62,6 +62,7 @@
 #include "strcase.h"
 #include "hostcheck.h"
 #include "multiif.h"
+#include "strdup.h"
 #include "strerror.h"
 #include "curl_printf.h"
 
@@ -2927,10 +2928,13 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                const char *ssl_peer_key,
                                SSL_SESSION *session,
                                int ietf_tls_id,
-                               const char *alpn)
+                               const char *alpn,
+                               unsigned char *quic_tp,
+                               size_t quic_tp_len)
 {
   const struct ssl_config_data *config;
   unsigned char *der_session_buf = NULL;
+  unsigned char *qtp_clone = NULL;
   CURLcode result = CURLE_OK;
 
   if(!cf || !data)
@@ -2941,6 +2945,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     struct Curl_ssl_session *sc_session = NULL;
     size_t der_session_size;
     unsigned char *der_session_ptr;
+    size_t earlydata_max = 0;
 
     der_session_size = i2d_SSL_SESSION(session, NULL);
     if(der_session_size == 0) {
@@ -2960,11 +2965,23 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
       goto out;
     }
 
-    result = Curl_ssl_session_create(der_session_buf, der_session_size,
-                                     ietf_tls_id, alpn,
-                                     (curl_off_t)time(NULL) +
-                                     SSL_SESSION_get_timeout(session), 0,
-                                     &sc_session);
+#ifdef HAVE_OPENSSL_EARLYDATA
+    earlydata_max = SSL_SESSION_get_max_early_data(session);
+#endif
+    if(quic_tp && quic_tp_len) {
+      qtp_clone = Curl_memdup0((char *)quic_tp, quic_tp_len);
+      if(!qtp_clone) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
+    }
+
+    result = Curl_ssl_session_create2(der_session_buf, der_session_size,
+                                      ietf_tls_id, alpn,
+                                      (curl_off_t)time(NULL) +
+                                      SSL_SESSION_get_timeout(session),
+                                      earlydata_max, qtp_clone, quic_tp_len,
+                                      &sc_session);
     der_session_buf = NULL;  /* took ownership of sdata */
     if(!result) {
       result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -2987,7 +3004,8 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     struct ssl_connect_data *connssl = cf->ctx;
     Curl_ossl_add_session(cf, data, connssl->peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), connssl->negotiated.alpn);
+                          SSL_version(ssl), connssl->negotiated.alpn,
+                          NULL, 0);
   }
   return 0;
 }
@@ -3527,11 +3545,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const struct alpn_spec *alpns,
+                            const struct alpn_spec *alpns_requested,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             Curl_ossl_new_session_cb *cb_new_session,
-                            void *ssl_user_data)
+                            void *ssl_user_data,
+                            Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
 {
   CURLcode result = CURLE_OK;
   const char *ciphers;
@@ -3545,12 +3564,14 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   const char * const ssl_cert_type = ssl_config->cert_type;
   const bool verifypeer = conn_config->verifypeer;
   char error_buffer[256];
+  struct alpn_spec alpns;
 
   /* Make funny stuff to get random input */
   result = ossl_seed(data);
   if(result)
     return result;
 
+  Curl_alpn_copy(&alpns, alpns_requested);
   ssl_config->certverifyresult = !X509_V_OK;
 
   switch(peer->transport) {
@@ -3720,22 +3741,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #ifdef SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
   /* We do retry writes sometimes from another buffer address */
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
-#endif
-
-#ifdef HAS_ALPN_OPENSSL
-  if(alpns && alpns->count) {
-    struct alpn_proto_buf proto;
-    memset(&proto, 0, sizeof(proto));
-    result = Curl_alpn_to_proto_buf(&proto, alpns);
-    if(result) {
-      failf(data, "Error determining ALPN");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-    if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, proto.data, (int)proto.len)) {
-      failf(data, "Error setting ALPN");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
 #endif
 
   if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
@@ -4020,12 +4025,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   octx->reused_session = FALSE;
   if(ssl_config->primary.cache_session) {
-    struct Curl_ssl_session *sc_session = NULL;
+    struct Curl_ssl_session *scs = NULL;
 
-    result = Curl_ssl_scache_take(cf, data, peer->scache_key, &sc_session);
-    if(!result && sc_session && sc_session->sdata && sc_session->sdata_len) {
-      const unsigned char *der_sessionid = sc_session->sdata;
-      size_t der_sessionid_size = sc_session->sdata_len;
+    result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
+    if(!result && scs && scs->sdata && scs->sdata_len) {
+      const unsigned char *der_sessionid = scs->sdata;
+      size_t der_sessionid_size = scs->sdata_len;
       SSL_SESSION *ssl_session = NULL;
 
       /* If OpenSSL does not accept the session from the cache, this
@@ -4040,8 +4045,29 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                               sizeof(error_buffer)));
         }
         else {
-          infof(data, "SSL reusing session");
+          infof(data, "SSL reusing session with ALPN '%s'",
+                scs->alpn ? scs->alpn : "-");
           octx->reused_session = TRUE;
+#ifdef HAVE_OPENSSL_EARLYDATA
+          if(ssl_config->earlydata && scs->alpn &&
+             SSL_SESSION_get_max_early_data(ssl_session) &&
+             !cf->conn->connect_only &&
+             (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
+            bool do_early_data = FALSE;
+            if(sess_reuse_cb) {
+              result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
+              if(result)
+                return result;
+            }
+            if(do_early_data) {
+              /* We only try the ALPN protocol the session used before,
+               * otherwise we might send early data for the wrong protocol */
+              Curl_alpn_restrict_to(&alpns, scs->alpn);
+            }
+          }
+#else
+          (void)sess_reuse_cb;
+#endif
         }
         SSL_SESSION_free(ssl_session);
       }
@@ -4049,10 +4075,56 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         infof(data, "SSL session not accepted by OpenSSL, continuing without");
       }
     }
-    Curl_ssl_scache_return(cf, data, peer->scache_key, sc_session);
+    Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
   }
 
+#ifdef HAS_ALPN_OPENSSL
+  if(alpns.count) {
+    struct alpn_proto_buf proto;
+    memset(&proto, 0, sizeof(proto));
+    result = Curl_alpn_to_proto_buf(&proto, &alpns);
+    if(result) {
+      failf(data, "Error determining ALPN");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    if(SSL_set_alpn_protos(octx->ssl, proto.data, (int)proto.len)) {
+      failf(data, "Error setting ALPN");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+#endif
+
   return CURLE_OK;
+}
+
+static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      struct alpn_spec *alpns,
+                                      struct Curl_ssl_session *scs,
+                                      bool *do_early_data)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  *do_early_data = FALSE;
+  connssl->earlydata_max = scs->earlydata_max;
+  if(!connssl->earlydata_max) {
+    CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
+  }
+  else if(!Curl_alpn_contains_proto(alpns, scs->alpn)) {
+    CURL_TRC_CF(data, cf, "SSL session has different ALPN, no early data");
+  }
+  else {
+    infof(data, "SSL session allows %zu bytes of early data, "
+          "reusing ALPN '%s'", connssl->earlydata_max, scs->alpn);
+    connssl->earlydata_state = ssl_earlydata_await;
+    connssl->state = ssl_connection_deferred;
+    result = Curl_alpn_set_negotiated(cf, data, connssl,
+                    (const unsigned char *)scs->alpn,
+                    scs->alpn ? strlen(scs->alpn) : 0);
+    *do_early_data = !result;
+  }
+  return result;
 }
 
 static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
@@ -4068,7 +4140,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
   result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer,
                               connssl->alpn, NULL, NULL,
-                              ossl_new_session_cb, cf);
+                              ossl_new_session_cb, cf,
+                              ossl_on_session_reuse);
   if(result)
     return result;
 
@@ -4094,7 +4167,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 #endif
 
 #ifdef HAS_ALPN_OPENSSL
-  if(connssl->alpn) {
+  if(connssl->alpn && (connssl->state != ssl_connection_deferred)) {
     struct alpn_proto_buf proto;
     memset(&proto, 0, sizeof(proto));
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
@@ -4209,27 +4282,25 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     if(SSL_ERROR_WANT_READ == detail) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want recv");
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
-      return CURLE_OK;
+      return CURLE_AGAIN;
     }
     if(SSL_ERROR_WANT_WRITE == detail) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want send");
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
-      return CURLE_OK;
+      return CURLE_AGAIN;
     }
 #ifdef SSL_ERROR_WANT_ASYNC
     if(SSL_ERROR_WANT_ASYNC == detail) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want async");
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
-      connssl->connecting_state = ssl_connect_2;
-      return CURLE_OK;
+      return CURLE_AGAIN;
     }
 #endif
 #ifdef SSL_ERROR_WANT_RETRY_VERIFY
     if(SSL_ERROR_WANT_RETRY_VERIFY == detail) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want retry_verify");
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
-      connssl->connecting_state = ssl_connect_2;
-      return CURLE_OK;
+      return CURLE_AGAIN;
     }
 #endif
     else {
@@ -4787,14 +4858,91 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
    */
 
   result = Curl_oss_check_peer_cert(cf, data, octx, &connssl->peer);
-  if(!result)
-    connssl->connecting_state = ssl_connect_done;
-  else
+  if(result)
     /* on error, remove sessions we might have in the pool */
     Curl_ssl_scache_remove_all(cf, data, connssl->peer.scache_key);
 
   return result;
 }
+
+#ifdef HAVE_OPENSSL_EARLYDATA
+static CURLcode ossl_send_earlydata(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
+  CURLcode result = CURLE_OK;
+  const unsigned char *buf;
+  size_t blen, nwritten;
+  int rc;
+
+  DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_sending);
+  octx->io_result = CURLE_OK;
+  while(Curl_bufq_peek(&connssl->earlydata, &buf, &blen)) {
+    nwritten = 0;
+    rc = SSL_write_early_data(octx->ssl, buf, blen, &nwritten);
+    CURL_TRC_CF(data, cf, "SSL_write_early_data(len=%zu) -> %d, %zu",
+                blen, rc, nwritten);
+    if(rc <= 0) {
+      long sslerror;
+      char error_buffer[256];
+      int err = SSL_get_error(octx->ssl, rc);
+
+      switch(err) {
+      case SSL_ERROR_WANT_READ:
+        connssl->io_need = CURL_SSL_IO_NEED_RECV;
+        result = CURLE_AGAIN;
+        goto out;
+      case SSL_ERROR_WANT_WRITE:
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
+        result = CURLE_AGAIN;
+        goto out;
+      case SSL_ERROR_SYSCALL: {
+        int sockerr = SOCKERRNO;
+
+        if(octx->io_result == CURLE_AGAIN) {
+          result = CURLE_AGAIN;
+          goto out;
+        }
+        sslerror = ERR_get_error();
+        if(sslerror)
+          ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
+        else if(sockerr)
+          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+        else
+          msnprintf(error_buffer, sizeof(error_buffer), "%s",
+                    SSL_ERROR_to_str(err));
+
+        failf(data, OSSL_PACKAGE " SSL_write:early_data: %s, errno %d",
+              error_buffer, sockerr);
+        result = CURLE_SEND_ERROR;
+        goto out;
+      }
+      case SSL_ERROR_SSL: {
+        /*  A failure in the SSL library occurred, usually a protocol error.
+            The OpenSSL error queue contains more information on the error. */
+        sslerror = ERR_get_error();
+        failf(data, "SSL_write_early_data() error: %s",
+              ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)));
+        result = CURLE_SEND_ERROR;
+        goto out;
+      }
+      default:
+        /* a true error */
+        failf(data, OSSL_PACKAGE " SSL_write_early_data: %s, errno %d",
+              SSL_ERROR_to_str(err), SOCKERRNO);
+        result = CURLE_SEND_ERROR;
+        goto out;
+      }
+    }
+    Curl_bufq_skip(&connssl->earlydata, nwritten);
+  }
+  /* sent everything there was */
+  infof(data, "SSL sending %zu bytes of early data", connssl->earlydata_skip);
+out:
+  return result;
+}
+#endif /* HAVE_OPENSSL_EARLYDATA */
 
 static CURLcode ossl_connect(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
@@ -4813,29 +4961,63 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
+    CURL_TRC_CF(data, cf, "ossl_connect, step1");
     result = ossl_connect_step1(cf, data);
     if(result)
       goto out;
   }
 
   if(ssl_connect_2 == connssl->connecting_state) {
+    CURL_TRC_CF(data, cf, "ossl_connect, step2");
+#ifdef HAVE_OPENSSL_EARLYDATA
+    if(connssl->earlydata_state == ssl_earlydata_await) {
+      goto out;
+    }
+    else if(connssl->earlydata_state == ssl_earlydata_sending) {
+      result = ossl_send_earlydata(cf, data);
+      if(result)
+        goto out;
+      connssl->earlydata_state = ssl_earlydata_sent;
+    }
+#endif
+    DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
+                (connssl->earlydata_state == ssl_earlydata_sent));
+
     result = ossl_connect_step2(cf, data);
     if(result)
       goto out;
   }
 
   if(ssl_connect_3 == connssl->connecting_state) {
+    CURL_TRC_CF(data, cf, "ossl_connect, step3");
     result = ossl_connect_step3(cf, data);
     if(result)
       goto out;
+    connssl->connecting_state = ssl_connect_done;
+#ifdef HAVE_OPENSSL_EARLYDATA
+    if(connssl->earlydata_state > ssl_earlydata_none) {
+      struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
+      /* We should be in this state by now */
+      DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_sent);
+      connssl->earlydata_state =
+        (SSL_get_early_data_status(octx->ssl) == SSL_EARLY_DATA_ACCEPTED) ?
+        ssl_earlydata_accepted : ssl_earlydata_rejected;
+    }
+#endif
   }
 
   if(ssl_connect_done == connssl->connecting_state) {
+    CURL_TRC_CF(data, cf, "ossl_connect, done");
     connssl->state = ssl_connection_complete;
-    *done = TRUE;
   }
 
 out:
+  if(result == CURLE_AGAIN) {
+    *done = FALSE;
+    return CURLE_OK;
+  }
+  *done = ((connssl->state == ssl_connection_complete) ||
+           (connssl->state == ssl_connection_deferred));
   return result;
 }
 
