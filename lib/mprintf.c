@@ -66,11 +66,6 @@
 # undef FORMAT_INT
 #endif
 
-#if defined(__APPLE__) && !defined(__clang__) && defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wlong-double"
-#endif
-
 /* Lower-case digits.  */
 static const char lower_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -1226,7 +1221,3 @@ int curl_mvfprintf(FILE *whereto, const char *format, va_list ap_save)
 {
   return formatf(whereto, fputc_wrapper, format, ap_save);
 }
-
-#if defined(__APPLE__) && !defined(__clang__) && defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
