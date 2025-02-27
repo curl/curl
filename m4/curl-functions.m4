@@ -1270,6 +1270,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         struct addrinfo hints;
         struct addrinfo *ai = 0;
         int error;
+        int exitcode;
 
         #ifdef _WIN32
         WSADATA wsa;
@@ -1283,9 +1284,15 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         hints.ai_socktype = SOCK_STREAM;
         error = getaddrinfo("127.0.0.1", 0, &hints, &ai);
         if(error || !ai)
-          return 1; /* fail */
-        else
-          return 0;
+          exitcode = 1; /* fail */
+        else {
+          freeaddrinfo(ai);
+          exitcode = 0;
+        }
+        #ifdef _WIN32
+        WSACleanup();
+        #endif
+        return exitcode;
       ]])
     ],[
       AC_MSG_RESULT([yes])
