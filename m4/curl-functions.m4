@@ -1274,7 +1274,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         #ifdef _WIN32
         WSADATA wsa;
         if(WSAStartup(MAKEWORD(2, 2), &wsa))
-          return 2;
+          exit(2);
         #endif
 
         memset(&hints, 0, sizeof(hints));
@@ -1283,9 +1283,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         hints.ai_socktype = SOCK_STREAM;
         error = getaddrinfo("127.0.0.1", 0, &hints, &ai);
         if(error || !ai)
-          return 1; /* fail */
+          exit(1); /* fail */
         else
-          return 0;
+          exit(0);
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -1883,9 +1883,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
 
         error = getifaddrs(&ifa);
         if(error || !ifa)
-          return 1; /* fail */
+          exit(1); /* fail */
         else
-          return 0;
+          exit(0);
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -2003,9 +2003,9 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
         gmt = gmtime_r(&local, &result);
         (void)result;
         if(gmt)
-          return 0;
+          exit(0);
         else
-          return 1;
+          exit(1);
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -2134,13 +2134,13 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
         /* - */
         ipv4ptr = inet_ntop(AF_INET, ipv4a, ipv4res, sizeof(ipv4res));
         if(!ipv4ptr)
-          return 1; /* fail */
+          exit(1); /* fail */
         if(ipv4ptr != ipv4res)
-          return 1; /* fail */
+          exit(1); /* fail */
         if(!ipv4ptr[0])
-          return 1; /* fail */
+          exit(1); /* fail */
         if(memcmp(ipv4res, "192.168.100.1", 13) != 0)
-          return 1; /* fail */
+          exit(1); /* fail */
         /* - */
         ipv6res[0] = '\0';
         memset(ipv6a, 0, sizeof(ipv6a));
@@ -2158,15 +2158,15 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
         /* - */
         ipv6ptr = inet_ntop(AF_INET6, ipv6a, ipv6res, sizeof(ipv6res));
         if(!ipv6ptr)
-          return 1; /* fail */
+          exit(1); /* fail */
         if(ipv6ptr != ipv6res)
-          return 1; /* fail */
+          exit(1); /* fail */
         if(!ipv6ptr[0])
-          return 1; /* fail */
+          exit(1); /* fail */
         if(memcmp(ipv6res, "fe80::214:4fff:fe0b:76c8", 24) != 0)
-          return 1; /* fail */
+          exit(1); /* fail */
         /* - */
-        return 0;
+        exit(0);
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -2286,18 +2286,18 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
         /* - */
         memset(ipv4a, 1, sizeof(ipv4a));
         if(1 != inet_pton(AF_INET, ipv4src, ipv4a))
-          return 1; /* fail */
+          exit(1); /* fail */
         /* - */
         if( (ipv4a[0] != 0xc0) ||
             (ipv4a[1] != 0xa8) ||
             (ipv4a[2] != 0x64) ||
             (ipv4a[3] != 0x01) ||
             (ipv4a[4] != 0x01) )
-          return 1; /* fail */
+          exit(1); /* fail */
         /* - */
         memset(ipv6a, 1, sizeof(ipv6a));
         if(1 != inet_pton(AF_INET6, ipv6src, ipv6a))
-          return 1; /* fail */
+          exit(1); /* fail */
         /* - */
         if( (ipv6a[0]  != 0xfe) ||
             (ipv6a[1]  != 0x80) ||
@@ -2310,7 +2310,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
             (ipv6a[14] != 0x76) ||
             (ipv6a[15] != 0xc8) ||
             (ipv6a[16] != 0x01) )
-          return 1; /* fail */
+          exit(1); /* fail */
         /* - */
         if( (ipv6a[2]  != 0x0) ||
             (ipv6a[3]  != 0x0) ||
@@ -2318,9 +2318,9 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
             (ipv6a[5]  != 0x0) ||
             (ipv6a[6]  != 0x0) ||
             (ipv6a[7]  != 0x0) )
-          return 1; /* fail */
+          exit(1); /* fail */
         /* - */
-        return 0;
+        exit(0);
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -3809,11 +3809,11 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         buffer[0] = '\0';
         string = strerror_r(EACCES, buffer, sizeof(buffer));
         if(!string)
-          return 1; /* fail */
+          exit(1); /* fail */
         if(!string[0])
-          return 1; /* fail */
+          exit(1); /* fail */
         else
-          return 0;
+          exit(0);
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -3872,11 +3872,11 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         buffer[0] = '\0';
         error = strerror_r(EACCES, buffer, sizeof(buffer));
         if(error)
-          return 1; /* fail */
+          exit(1); /* fail */
         if(buffer[0] == '\0')
-          return 1; /* fail */
+          exit(1); /* fail */
         else
-          return 0;
+          exit(0);
       ]])
     ],[
       AC_MSG_RESULT([yes])
