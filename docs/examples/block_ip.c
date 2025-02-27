@@ -298,14 +298,19 @@ int main(void)
 
   filter = (struct connection_filter *)calloc(1, sizeof(*filter));
   if(!filter)
-    exit(1);
+    return 1;
 
-  if(curl_global_init(CURL_GLOBAL_DEFAULT))
-    exit(1);
+  if(curl_global_init(CURL_GLOBAL_DEFAULT)) {
+    free(filter);
+    return 1;
+  }
 
   curl = curl_easy_init();
-  if(!curl)
-    exit(1);
+  if(!curl) {
+    curl_global_cleanup();
+    free(filter);
+    return 1;
+  }
 
   /* Set the target URL */
   curl_easy_setopt(curl, CURLOPT_URL, "http://localhost");

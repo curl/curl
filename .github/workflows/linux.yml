@@ -304,7 +304,8 @@ jobs:
             libtool autoconf automake pkgconf ninja-build \
             ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' && 'stunnel4' || '' }} \
             libpsl-dev libbrotli-dev libzstd-dev \
-            ${{ matrix.build.install_packages }}
+            ${{ matrix.build.install_packages }} \
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd' || '' }}
           python3 -m venv $HOME/venv
 
       - name: 'install prereqs'
@@ -318,11 +319,6 @@ jobs:
             libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${{ matrix.build.install_packages }}
           python3 -m venv $HOME/venv
-
-      - name: 'install prereqs for pytest'
-        if: contains(matrix.build.install_steps, 'pytest')
-        run: |
-          sudo apt-get -o Dpkg::Use-Pty=0 install apache2 apache2-dev libnghttp2-dev vsftpd
 
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')

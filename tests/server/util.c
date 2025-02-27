@@ -153,7 +153,17 @@ void win32_perror(const char *msg)
   fprintf(stderr, "%s\n", buf);
 }
 
-void win32_init(void)
+static void win32_cleanup(void)
+{
+#ifdef USE_WINSOCK
+  WSACleanup();
+#endif  /* USE_WINSOCK */
+
+  /* flush buffers of all streams regardless of their mode */
+  _flushall();
+}
+
+int win32_init(void)
 {
 #ifdef USE_WINSOCK
   WORD wVersionRequested;
@@ -166,7 +176,7 @@ void win32_init(void)
   if(err) {
     perror("Winsock init failed");
     logmsg("Error initialising Winsock -- aborting");
-    exit(1);
+    return 1;
   }
 
   if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
@@ -174,19 +184,11 @@ void win32_init(void)
     WSACleanup();
     perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting");
-    exit(1);
+    return 1;
   }
 #endif  /* USE_WINSOCK */
-}
-
-void win32_cleanup(void)
-{
-#ifdef USE_WINSOCK
-  WSACleanup();
-#endif  /* USE_WINSOCK */
-
-  /* flush buffers of all streams regardless of their mode */
-  _flushall();
+  atexit(win32_cleanup);
+  return 0;
 }
 
 /* socket-safe strerror (works on Winsock errors, too) */
