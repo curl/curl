@@ -300,7 +300,7 @@ jobs:
 
       - name: 'cache libressl'
         if: contains(matrix.build.install_steps, 'libressl')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -631,7 +631,7 @@ jobs:
         run: sudo apt-get -o Dpkg::Use-Pty=0 install libfl2 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
 
       - name: 'cache compiler (djgpp)'
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
           path: ~/djgpp
