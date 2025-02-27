@@ -200,7 +200,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return retcode;
 }
 
-static void setup(struct input *i, int num, const char *upload)
+static int setup(struct input *i, int num, const char *upload)
 {
   FILE *out;
   char url[256];
@@ -216,7 +216,7 @@ static void setup(struct input *i, int num, const char *upload)
   if(!out) {
     fprintf(stderr, "error: could not open file %s for writing: %s\n", upload,
             strerror(errno));
-    exit(1);
+    return 1;
   }
 
   curl_msnprintf(url, 256, "https://localhost:8443/upload-%d", num);
@@ -225,7 +225,7 @@ static void setup(struct input *i, int num, const char *upload)
   if(stat(upload, &file_info)) {
     fprintf(stderr, "error: could not stat file %s: %s\n", upload,
             strerror(errno));
-    exit(1);
+    return 1;
   }
 
   uploadsize = file_info.st_size;
@@ -234,7 +234,7 @@ static void setup(struct input *i, int num, const char *upload)
   if(!i->in) {
     fprintf(stderr, "error: could not open file %s for reading: %s\n", upload,
             strerror(errno));
-    exit(1);
+    return 1;
   }
 
   /* write to this file */
@@ -269,6 +269,7 @@ static void setup(struct input *i, int num, const char *upload)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
 #endif
+  return 0;
 }
 
 /*
@@ -301,7 +302,8 @@ int main(int argc, char **argv)
   multi_handle = curl_multi_init();
 
   for(i = 0; i < num_transfers; i++) {
-    setup(&trans[i], i, filename);
+    if(setup(&trans[i], i, filename))
+      break;
 
     /* add the individual transfer */
     curl_multi_add_handle(multi_handle, trans[i].hnd);
