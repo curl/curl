@@ -1018,7 +1018,8 @@ int main(int argc, char *argv[])
             logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
 #ifdef _WIN32
-  win32_init();
+  if(win32_init())
+    return 2;
   atexit(win32_cleanup);
 #endif
 

@@ -1507,7 +1507,8 @@ int main(int argc, char *argv[])
   }
 
 #ifdef _WIN32
-  win32_init();
+  if(win32_init())
+    return 2;
   atexit(win32_cleanup);
 #endif
 
