@@ -29,6 +29,7 @@
 #include "strcase.h"
 #include "sendf.h"
 #include "headers.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -208,9 +209,8 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
   else
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  /* skip all leading space letters */
-  while(ISBLANK(*header))
-    header++;
+  /* skip all leading blank letters */
+  Curl_str_passblanks((const char **)&header);
 
   *value = header;
 
@@ -235,7 +235,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   oalloc = olen + offset + 1;
 
   /* skip all trailing space letters */
-  while(vlen && ISSPACE(value[vlen - 1]))
+  while(vlen && ISBLANK(value[vlen - 1]))
     vlen--;
 
   /* save only one leading space */

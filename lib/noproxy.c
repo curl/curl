@@ -29,6 +29,7 @@
 #include "inet_pton.h"
 #include "strcase.h"
 #include "noproxy.h"
+#include "strparse.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -177,8 +178,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       bool match = FALSE;
 
       /* pass blanks */
-      while(ISBLANK(*p))
-        p++;
+      Curl_str_passblanks(&p);
 
       token = p;
       /* pass over the pattern */
@@ -247,8 +247,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
           return TRUE;
       } /* if(tokenlen) */
       /* pass blanks after pattern */
-      while(ISBLANK(*p))
-        p++;
+      Curl_str_passblanks(&p);
       /* if not a comma, this ends the loop */
       if(*p != ',')
         break;

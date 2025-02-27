@@ -43,6 +43,7 @@
 #include "transfer.h"
 #include "multiif.h"
 #include "vauth/vauth.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -60,7 +61,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   struct dynhds *hds)
 {
   struct connectdata *conn = data->conn;
-  char *ptr;
+  const char *ptr;
   struct curl_slist *h[2];
   struct curl_slist *headers;
   int numlists = 1; /* by default */
@@ -108,8 +109,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         name = headers->data;
         namelen = ptr - headers->data;
         ptr++; /* pass the colon */
-        while(ISSPACE(*ptr))
-          ptr++;
+        Curl_str_passblanks(&ptr);
         if(*ptr) {
           value = ptr;
           valuelen = strlen(value);
@@ -131,8 +131,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         name = headers->data;
         namelen = ptr - headers->data;
         ptr++; /* pass the semicolon */
-        while(ISSPACE(*ptr))
-          ptr++;
+        Curl_str_passblanks(&ptr);
         if(!*ptr) {
           /* quirk #2, send an empty header */
           value = "";
