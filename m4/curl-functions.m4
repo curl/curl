@@ -1884,8 +1884,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
         error = getifaddrs(&ifa);
         if(error || !ifa)
           return 1; /* fail */
-        else
+        else {
+          freeifaddrs(ifa);
           return 0;
+        }
       ]])
     ],[
       AC_MSG_RESULT([yes])
