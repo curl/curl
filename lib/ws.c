@@ -195,6 +195,8 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       }
 
       dec->frame_flags = ws_frame_op2flags(dec->head[0]);
+      dec->frame_flags = dec->frame_flags |
+        ((dec->head[0] & WSBIT_FIN) ? CURLWS_FIN : 0);
       if(!dec->frame_flags) {
         failf(data, "WS: unknown opcode: %x",
               dec->head[0] & WSBIT_OPCODE_MASK);
