@@ -59,21 +59,21 @@ jobs:
             time cmake -B bld -G Ninja \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld --config Debug
+            time cmake --build bld
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --config Debug --target testdeps
+              time cmake --build bld --target testdeps
               export TFLAGS='-j4'
-              time cmake --build bld --config Debug --target test-ci
+              time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
-            time cmake --build bld --config Debug --target curl-examples
+            time cmake --build bld --target curl-examples
             echo '::endgroup::'
 
   openbsd:
@@ -100,20 +100,20 @@ jobs:
             time cmake -B bld -G Ninja \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld --config Debug
+            time cmake --build bld
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --config Debug --target testdeps
+              time cmake --build bld --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
-              time cmake --build bld --config Debug --target test-ci
+              time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
-            time cmake --build bld --config Debug --target curl-examples
+            time cmake --build bld --target curl-examples
             echo '::endgroup::'
 
   freebsd:
@@ -185,25 +185,25 @@ jobs:
               -DCMAKE_C_COMPILER='${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_USE_GSSAPI=ON \
               ${{ matrix.options }} \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld --config Debug
+            time cmake --build bld
             bld/src/curl --disable --version
             desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --config Debug --target testdeps
+              time cmake --build bld --target testdeps
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
-                time cmake --build bld --config Debug --target test-ci
+                time cmake --build bld --target test-ci
               fi
             fi
             if [ "${desc#*!examples*}" = "${desc}" ]; then
               echo '::group::build examples'
-              time cmake --build bld --config Debug --target curl-examples
+              time cmake --build bld --target curl-examples
               echo '::endgroup::'
             fi
 
