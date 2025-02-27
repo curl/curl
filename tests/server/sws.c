@@ -1611,7 +1611,7 @@ static void http_connect(curl_socket_t *infdp,
           if(!req2) {
             req2 = malloc(sizeof(*req2));
             if(!req2)
-              exit(1);
+              goto http_connect_cleanup;  /* fail */
           }
           memset(req2, 0, sizeof(*req2));
           logmsg("====> Client connect DATA");
