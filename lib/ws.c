@@ -374,13 +374,13 @@ static void update_meta(struct websocket *ws,
                         size_t cur_len)
 {
   curl_off_t bytesleft = (payload_len - payload_offset - cur_len);
-  
+
   ws->frame.age = frame_age;
   ws->frame.flags = frame_flags;
   ws->frame.offset = payload_offset;
   ws->frame.len = cur_len;
   ws->frame.bytesleft = bytesleft;
-  
+
   if(!ws->dec.fin_bit || bytesleft > 0) {
     ws->frame.flags |= CURLWS_CONT;
   }
