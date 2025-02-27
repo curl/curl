@@ -148,14 +148,14 @@ int main(int argc, char *argv[])
 
   if(argc != 2) {
     fprintf(stderr, "%s URL\n", argv[0]);
-    exit(2);
+    return 2;
   }
 
   url = argv[1];
   multi = curl_multi_init();
   if(!multi) {
     fprintf(stderr, "curl_multi_init failed\n");
-    exit(1);
+    return 1;
   }
 
   start_count = 200;
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
       easy = curl_easy_init();
       if(!easy) {
         fprintf(stderr, "curl_easy_init failed\n");
-        exit(1);
+        return 1;
       }
       curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
       curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, debug_cb);
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
       if(mc != CURLM_OK) {
         fprintf(stderr, "curl_multi_add_handle: %s\n",
                curl_multi_strerror(mc));
-        exit(1);
+        return 1;
       }
       --start_count;
     }
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
     if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_perform: %s\n",
              curl_multi_strerror(mc));
-      exit(1);
+      return 1;
     }
 
     if(running_handles) {
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
       if(mc != CURLM_OK) {
         fprintf(stderr, "curl_multi_poll: %s\n",
                curl_multi_strerror(mc));
-        exit(1);
+        return 1;
       }
     }
 
@@ -224,12 +224,12 @@ int main(int argc, char *argv[])
         else if(msg->data.result) {
           fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
                   ": failed with %d\n", xfer_id, msg->data.result);
-          exit(1);
+          return 1;
         }
         else if(status != 206) {
           fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
                   ": wrong http status %ld (expected 206)\n", xfer_id, status);
-          exit(1);
+          return 1;
         }
         curl_multi_remove_handle(multi, msg->easy_handle);
         curl_easy_cleanup(msg->easy_handle);
@@ -244,5 +244,5 @@ int main(int argc, char *argv[])
   } while(running_handles > 0 || start_count);
 
   fprintf(stderr, "exiting\n");
-  exit(EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
