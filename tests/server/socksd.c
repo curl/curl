@@ -1088,7 +1088,6 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
   if(win32_init())
     return 2;
-  atexit(win32_cleanup);
 #endif
 
   CURL_SET_BINMODE(stdin);

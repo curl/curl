@@ -153,6 +153,16 @@ void win32_perror(const char *msg)
   fprintf(stderr, "%s\n", buf);
 }
 
+static void win32_cleanup(void)
+{
+#ifdef USE_WINSOCK
+  WSACleanup();
+#endif  /* USE_WINSOCK */
+
+  /* flush buffers of all streams regardless of their mode */
+  _flushall();
+}
+
 int win32_init(void)
 {
 #ifdef USE_WINSOCK
@@ -177,17 +187,8 @@ int win32_init(void)
     return 1;
   }
 #endif  /* USE_WINSOCK */
+  atexit(win32_cleanup);
   return 0;
-}
-
-void win32_cleanup(void)
-{
-#ifdef USE_WINSOCK
-  WSACleanup();
-#endif  /* USE_WINSOCK */
-
-  /* flush buffers of all streams regardless of their mode */
-  _flushall();
 }
 
 /* socket-safe strerror (works on Winsock errors, too) */
