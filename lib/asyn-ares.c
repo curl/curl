@@ -592,7 +592,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
   res->num_pending--;
 
   if(CURL_ASYNC_SUCCESS == status) {
-    struct Curl_addrinfo *ai = Curl_he2ai(hostent, data->conn->localport);
+    struct Curl_addrinfo *ai = Curl_he2ai(hostent, data->conn->remote_port);
     if(ai) {
       compound_results(res, ai);
     }
