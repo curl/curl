@@ -454,9 +454,7 @@ jobs:
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'test configs'
-        run: |
-          cat bld/tests/config || true
-          cat bld/tests/http/config.ini || true
+        run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
       - name: 'build'
         run: |
@@ -500,7 +498,6 @@ jobs:
 
       - name: 'run pytest event based'
         env:
-          TFLAGS: '${{ matrix.build.tflags }}'
           CURL_TEST_EVENT: 1
           CURL_CI: github
           PYTEST_ADDOPTS: '--color=yes'
