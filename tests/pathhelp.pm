@@ -59,6 +59,7 @@ BEGIN {
     our @EXPORT_OK = qw(
         os_is_win
         exe_ext
+        dirsepadd
         sys_native_abs_path
         sys_native_current_path
         build_sys_abs_path
@@ -180,6 +181,15 @@ sub exe_ext {
         return '.exe';
     }
     return '';
+}
+
+#***************************************************************************
+# Add ending slash if missing
+#
+sub dirsepadd {
+    my ($dir) = @_;
+    $dir =~ s/\/$//;
+    return $dir . '/';
 }
 
 1;    # End of module
