@@ -142,7 +142,7 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-static void setup(struct transfer *t, int num)
+static int setup(struct transfer *t, int num)
 {
   char filename[128];
   CURL *hnd;
@@ -155,7 +155,7 @@ static void setup(struct transfer *t, int num)
   if(!t->out) {
     fprintf(stderr, "error: could not open file %s for writing: %s\n",
             filename, strerror(errno));
-    exit(1);
+    return 1;
   }
 
   /* write to this file */
@@ -179,6 +179,7 @@ static void setup(struct transfer *t, int num)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
 #endif
+  return 0;
 }
 
 /*
@@ -204,7 +205,8 @@ int main(int argc, char **argv)
   multi_handle = curl_multi_init();
 
   for(i = 0; i < num_transfers; i++) {
-    setup(&trans[i], i);
+    if(setup(&trans[i], i))
+      return 1;
 
     /* add the individual transfer */
     curl_multi_add_handle(multi_handle, trans[i].easy);

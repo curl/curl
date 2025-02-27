@@ -1611,7 +1611,7 @@ static void http_connect(curl_socket_t *infdp,
           if(!req2) {
             req2 = malloc(sizeof(*req2));
             if(!req2)
-              exit(1);
+              goto http_connect_cleanup;  /* fail */
           }
           memset(req2, 0, sizeof(*req2));
           logmsg("====> Client connect DATA");
@@ -2207,8 +2207,8 @@ int main(int argc, char *argv[])
             is_proxy ? "-proxy" : "", socket_type);
 
 #ifdef _WIN32
-  win32_init();
-  atexit(win32_cleanup);
+  if(win32_init())
+    return 2;
 #endif
 
   install_signal_handlers(false);

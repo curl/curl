@@ -51,8 +51,7 @@ extern const char *cmdfile;
 #define perror(m) win32_perror(m)
 void win32_perror(const char *msg);
 
-void win32_init(void);
-void win32_cleanup(void);
+int win32_init(void);
 const char *sstrerror(int err);
 #else   /* _WIN32 */
 

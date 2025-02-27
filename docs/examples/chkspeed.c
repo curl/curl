@@ -79,12 +79,12 @@ int main(int argc, char *argv[])
           fprintf(stderr,
                   "\rUsage: %s [-m=1|2|5|10|20|50|100] [-t] [-x] [url]\n",
                   appname);
-          exit(1);
+          return 1;
         case 'v':
         case 'V':
           fprintf(stderr, "\r%s %s - %s\n",
                   appname, CHKSPEED_VERSION, curl_version());
-          exit(1);
+          return 1;
         case 'a':
         case 'A':
           prtall = 1;
