@@ -770,7 +770,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     Curl_detach_connection(data);
     s = Curl_getconnectinfo(data, &c);
     if((s != CURL_SOCKET_BAD) && c) {
-      Curl_cpool_disconnect(data, c, TRUE);
+      Curl_conn_terminate(data, c, TRUE);
     }
     DEBUGASSERT(!data->conn);
   }

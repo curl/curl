@@ -29,6 +29,7 @@
 
 #include "urldata.h"
 #include "cfilters.h"
+#include "connect.h"
 #include "sendf.h"
 #include "select.h"
 #include "progress.h"
@@ -74,6 +75,11 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
   }
 
+  if(disconnecting) {
+    timediff_t total_left_ms = Curl_timeleft(data, NULL, FALSE);
+    timeout_ms = CURLMIN(timeout_ms, CURLMAX(total_left_ms, 0));
+  }
+
   return timeout_ms;
 }
 
@@ -96,6 +102,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     return CURLE_OPERATION_TIMEDOUT; /* already too little time */
   }
 
+  DEBUGF(infof(data, "pp_statematch, timeout=%" FMT_TIMEDIFF_T, timeout_ms));
   if(block) {
     interval_ms = 1000;  /* use 1 second timeout intervals */
     if(timeout_ms < interval_ms)
@@ -135,6 +142,8 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   }
   else if(rc)
     result = pp->statemachine(data, data->conn);
+  else if(disconnecting)
+    return CURLE_OPERATION_TIMEDOUT;
 
   return result;
 }
