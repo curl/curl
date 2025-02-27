@@ -183,7 +183,7 @@ typedef enum {
 #define CURLFOLLOW_OBEYCODE  2L
 
 /* Only use the custom method in the first request, always reset in the next */
-#define CURLFOLLOW_FIRSTONLY  3L
+#define CURLFOLLOW_FIRSTONLY 3L
 
 struct curl_httppost {
   struct curl_httppost *next;       /* next entry in the list */
