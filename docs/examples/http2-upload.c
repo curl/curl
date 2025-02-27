@@ -303,7 +303,7 @@ int main(int argc, char **argv)
 
   for(i = 0; i < num_transfers; i++) {
     if(setup(&trans[i], i, filename))
-      break;
+      return 1;
 
     /* add the individual transfer */
     curl_multi_add_handle(multi_handle, trans[i].hnd);
