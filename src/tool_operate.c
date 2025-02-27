@@ -2589,6 +2589,10 @@ static int cb_socket(CURL *easy, curl_socket_t s, int action,
   int events = 0;
   (void)easy;
 
+#if DEBUG_UV
+  fprintf(tool_stderr, "parallel_event: cb_socket, fd=%d, action=%x, p=%p\n",
+          (int)s, action, socketp);
+#endif
   switch(action) {
   case CURL_POLL_IN:
   case CURL_POLL_OUT:
@@ -2678,12 +2682,26 @@ static CURLcode parallel_event(struct parastate *s)
     }
   }
 
+  result = s->result;
+
+  /* Make sure to return some kind of error if there was a multi problem */
+  if(s->mcode) {
+    result = (s->mcode == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
+      /* The other multi errors should never happen, so return
+         something suitably generic */
+      CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
+  /* We need to cleanup the multi here, since the uv context lives on the
+   * stack and will be gone. multi_cleanup can triggere events! */
+  curl_multi_cleanup(s->multi);
+
 #if DEBUG_UV
   fprintf(tool_stderr, "DONE parallel_event -> %d, mcode=%d, %d running, "
           "%d more\n",
-          s->result, s->mcode, uv.s->still_running, s->more_transfers);
+          result, s->mcode, uv.s->still_running, s->more_transfers);
 #endif
-  return s->result;
+  return result;
 }
 
 #endif
@@ -2787,7 +2805,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
 #ifdef DEBUGBUILD
   if(global->test_event_based)
 #ifdef USE_LIBUV
-    result = parallel_event(s);
+    return parallel_event(s);
 #else
     errorf(global, "Testing --parallel event-based requires libuv");
 #endif
@@ -3228,7 +3246,9 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
           curl_share_setopt(share, CURLSHOPT_SHARE,
                             CURL_LOCK_DATA_SSL_SESSION);
-          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+          /* Running parallel, use the multi connection cache */
+          if(!global->parallel)
+            curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 

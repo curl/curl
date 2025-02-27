@@ -227,8 +227,23 @@ struct Curl_multi *Curl_multi_handle(size_t ev_hashsize,  /* event hash */
   Curl_hash_init(&multi->proto_hash, 23,
                  Curl_hash_str, Curl_str_key_compare, ph_freeentry);
 
+  multi->admin = curl_easy_init();
+  if(!multi->admin)
+    goto error;
+  /* Initialize admin handle to operate inside this multi */
+  multi->admin->multi = multi;
+  multi->admin->state.internal = TRUE;
+  Curl_llist_init(&multi->admin->state.timeoutlist, NULL);
+#ifdef DEBUGBUILD
+  if(getenv("CURL_DEBUG"))
+    multi->admin->set.verbose = TRUE;
+#endif
+
+  if(Curl_cshutdn_init(&multi->cshutdn, multi))
+    goto error;
+
   if(Curl_cpool_init(&multi->cpool, Curl_on_disconnect,
-                     multi, NULL, chashsize))
+                     multi->admin, NULL, chashsize))
     goto error;
 
   if(Curl_ssl_scache_create(sesssize, 2, &multi->ssl_scache))
@@ -264,7 +279,13 @@ error:
   Curl_hash_destroy(&multi->proto_hash);
   Curl_hash_destroy(&multi->hostcache);
   Curl_cpool_destroy(&multi->cpool);
+  Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
   Curl_ssl_scache_destroy(multi->ssl_scache);
+  if(multi->admin) {
+    multi->admin->multi = NULL;
+    Curl_close(&multi->admin);
+  }
+
   free(multi);
   return NULL;
 }
@@ -475,7 +496,7 @@ static void multi_done_locked(struct connectdata *conn,
                      conn->bits.close, mdctx->premature,
                      Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn, "disconnecting");
-    Curl_cpool_disconnect(data, conn, mdctx->premature);
+    Curl_conn_terminate(data, conn, mdctx->premature);
   }
   else {
     /* the connection is no longer in use by any transfer */
@@ -684,7 +705,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
     curl_socket_t s;
     s = Curl_getconnectinfo(data, &c);
     if((s != CURL_SOCKET_BAD) && c) {
-      Curl_cpool_disconnect(data, c, TRUE);
+      Curl_conn_terminate(data, c, TRUE);
     }
   }
 
@@ -1032,7 +1053,8 @@ CURLMcode curl_multi_fdset(CURLM *m,
     }
   }
 
-  Curl_cpool_setfds(&multi->cpool, read_fd_set, write_fd_set, &this_max_fd);
+  Curl_cshutdn_setfds(&multi->cshutdn, multi->admin,
+                      read_fd_set, write_fd_set, &this_max_fd);
 
   *max_fd = this_max_fd;
 
@@ -1068,7 +1090,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
     need += Curl_waitfds_add_ps(&cwfds, &ps);
   }
 
-  need += Curl_cpool_add_waitfds(&multi->cpool, &cwfds);
+  need += Curl_cshutdn_add_waitfds(&multi->cshutdn, multi->admin, &cwfds);
 
   if(need != cwfds.n && ufds) {
     result = CURLM_OUT_OF_MEMORY;
@@ -1146,7 +1168,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     }
   }
 
-  if(Curl_cpool_add_pollfds(&multi->cpool, &cpfds)) {
+  if(Curl_cshutdn_add_pollfds(&multi->cshutdn, multi->admin, &cpfds)) {
     result = CURLM_OUT_OF_MEMORY;
     goto out;
   }
@@ -2492,7 +2514,7 @@ statemachine_end:
                We do not have to do this in every case block above where a
                failure is detected */
             Curl_detach_connection(data);
-            Curl_cpool_disconnect(data, conn, dead_connection);
+            Curl_conn_terminate(data, conn, dead_connection);
           }
         }
         else if(data->mstate == MSTATE_CONNECT) {
@@ -2581,7 +2603,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
        pointer now */
     n = Curl_node_next(e);
 
-    if(data && data != multi->cpool.idata) {
+    if(data && data != multi->admin) {
       /* connection pool handle is processed below */
       sigpipe_apply(data, &pipe_st);
       result = multi_runsingle(multi, &now, data);
@@ -2590,8 +2612,8 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
     }
   }
 
-  sigpipe_apply(multi->cpool.idata, &pipe_st);
-  Curl_cpool_multi_perform(multi, CURL_SOCKET_TIMEOUT);
+  sigpipe_apply(multi->admin, &pipe_st);
+  Curl_cshutdn_perform(&multi->cshutdn, multi->admin, CURL_SOCKET_TIMEOUT);
   sigpipe_restore(&pipe_st);
 
   if(multi_ischanged(m, TRUE))
@@ -2690,6 +2712,11 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     }
 
     Curl_cpool_destroy(&multi->cpool);
+    Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
+    if(multi->admin) {
+      multi->admin->multi = NULL;
+      Curl_close(&multi->admin);
+    }
 
     multi->magic = 0; /* not good anymore */
 
@@ -2855,7 +2882,7 @@ static CURLMcode multi_run_expired(struct multi_run_ctx *mrc)
       continue;
 
     (void)add_next_timeout(mrc->now, multi, data);
-    if(data == multi->cpool.idata) {
+    if(data == multi->admin) {
       mrc->run_cpool = TRUE;
       continue;
     }
@@ -2931,8 +2958,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
 out:
   if(mrc.run_cpool) {
-    sigpipe_apply(multi->cpool.idata, &mrc.pipe_st);
-    Curl_cpool_multi_perform(multi, s);
+    sigpipe_apply(multi->admin, &mrc.pipe_st);
+    Curl_cshutdn_perform(&multi->cshutdn, multi->admin, s);
   }
   sigpipe_restore(&mrc.pipe_st);
 
