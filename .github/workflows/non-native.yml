@@ -263,6 +263,7 @@ jobs:
             install_steps: libressl
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
+              -DCMAKE_BUILD_TYPE=Debug
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
@@ -271,6 +272,7 @@ jobs:
           - name: 'libressl'
             install_steps: libressl
             generator: Xcode
+            options: --config Debug
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
@@ -363,7 +365,7 @@ jobs:
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --parallel 4 --verbose
+            cmake --build bld ${{ matrix.build.options }} --parallel 4 --verbose
           else
             make -C bld V=1
           fi
@@ -374,7 +376,7 @@ jobs:
       - name: 'build tests'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --parallel 4 --target testdeps --verbose
+            cmake --build bld ${{ matrix.build.options }} --parallel 4 --target testdeps --verbose
           else
             make -C bld V=1 -C tests
           fi
@@ -382,7 +384,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --parallel 4 --target curl-examples --verbose
+            cmake --build bld ${{ matrix.build.options }} --parallel 4 --target curl-examples --verbose
           else
             make -C bld examples V=1
           fi
