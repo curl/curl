@@ -959,7 +959,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
-    else if(ssl_config->key_passwd) {
+    else {
       const unsigned int supported_key_encryption_algorithms =
         GNUTLS_PKCS_USE_PKCS12_3DES | GNUTLS_PKCS_USE_PKCS12_ARCFOUR |
         GNUTLS_PKCS_USE_PKCS12_RC2_40 | GNUTLS_PKCS_USE_PBES2_3DES |
@@ -974,19 +974,9 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
            supported_key_encryption_algorithms);
       if(rc != GNUTLS_E_SUCCESS) {
         failf(data,
-              "error reading X.509 potentially-encrypted key file: %s",
+              "error reading X.509 %skey file: %s",
+              ssl_config->key_passwd ? "potentially-encrypted " : "",
               gnutls_strerror(rc));
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-    }
-    else {
-      if(gnutls_certificate_set_x509_key_file(
-           gtls->shared_creds->creds,
-           config->clientcert,
-           ssl_config->key ? ssl_config->key : config->clientcert,
-           gnutls_do_file_type(ssl_config->cert_type) ) !=
-         GNUTLS_E_SUCCESS) {
-        failf(data, "error reading X.509 key or certificate file");
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
