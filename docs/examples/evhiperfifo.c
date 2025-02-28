@@ -402,22 +402,22 @@ static int init_fifo(GlobalInfo *g)
   curl_socket_t sockfd;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
-  if(lstat (fifo, &st) == 0) {
+  if(lstat(fifo, &st) == 0) {
     if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
-      exit(1);
+      return 1;
     }
   }
   unlink(fifo);
-  if(mkfifo (fifo, 0600) == -1) {
+  if(mkfifo(fifo, 0600) == -1) {
     perror("mkfifo");
-    exit(1);
+    return 1;
   }
   sockfd = open(fifo, O_RDWR | O_NONBLOCK, 0);
   if(sockfd == -1) {
     perror("open");
-    exit(1);
+    return 1;
   }
   g->input = fdopen(sockfd, "r");
 
@@ -436,7 +436,8 @@ int main(int argc, char **argv)
   memset(&g, 0, sizeof(GlobalInfo));
   g.loop = ev_default_loop(0);
 
-  init_fifo(&g);
+  if(init_fifo(&g))
+    return 1;
   g.multi = curl_multi_init();
 
   ev_timer_init(&g.timer_event, timer_cb, 0., 0.);
