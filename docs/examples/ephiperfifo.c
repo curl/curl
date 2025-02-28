@@ -449,9 +449,9 @@ static int init_fifo(GlobalInfo *g)
 
 static void clean_fifo(GlobalInfo *g)
 {
-    epoll_ctl(g->epfd, EPOLL_CTL_DEL, g->fifofd, NULL);
-    fclose(g->input);
-    unlink(fifo);
+  epoll_ctl(g->epfd, EPOLL_CTL_DEL, g->fifofd, NULL);
+  fclose(g->input);
+  unlink(fifo);
 }
 
 
