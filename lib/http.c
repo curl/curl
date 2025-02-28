@@ -3893,7 +3893,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
                   (p[2] - '0');
                 p += 3;
-                if(ISSPACE(*p))
+                if(ISBLANK(*p))
                   fine_statusline = TRUE;
               }
             }
@@ -3913,7 +3913,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
             k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
               (p[2] - '0');
             p += 3;
-            if(!ISSPACE(*p))
+            if(!ISBLANK(*p))
               break;
             fine_statusline = TRUE;
           }
