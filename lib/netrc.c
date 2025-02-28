@@ -159,17 +159,13 @@ static NETRCcode parsenetrc(struct store_netrc *store,
 
       tok_end = tok;
       if(!quoted) {
-        size_t len = 0;
         CURLcode result;
-        while(!ISSPACE(*tok_end)) {
-          tok_end++;
-          len++;
-        }
-        if(!len) {
+        struct Curl_str out;
+        if(Curl_str_word(&tok_end, &out, MAX_NETRC_TOKEN)) {
           retcode = NETRC_SYNTAX_ERROR;
           goto out;
         }
-        result = Curl_dyn_addn(&token, tok, len);
+        result = Curl_dyn_addn(&token, Curl_str(&out), Curl_strlen(&out));
         if(result) {
           retcode = curl2netrc(result);
           goto out;
