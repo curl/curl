@@ -215,7 +215,7 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
   *value = header;
 
   /* skip all trailing space letters */
-  while((end > header) && ISSPACE(*end))
+  while((end > header) && ISBLANK(*end))
     *end-- = 0; /* nul terminate */
   return CURLE_OK;
 }

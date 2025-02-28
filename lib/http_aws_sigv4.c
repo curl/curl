@@ -233,7 +233,7 @@ static CURLcode make_headers(struct Curl_easy *data,
       sep = strchr(l->data, ';');
     if(!sep || (*sep == ':' && !*(sep + 1)))
       continue;
-    for(ptr = sep + 1; ISSPACE(*ptr); ++ptr)
+    for(ptr = sep + 1; ISBLANK(*ptr); ++ptr)
       ;
     if(!*ptr && ptr != sep + 1) /* a value of whitespace only */
       continue;
