@@ -36,7 +36,7 @@ http
 Download two URLs provided on stdin
 </name>
 <command>
---url @-
+--output-dir %LOGDIR --url @-
 </command>
 <stdin>
 http://%HOSTIP:%HTTPPORT/a
