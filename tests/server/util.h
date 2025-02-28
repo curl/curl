@@ -78,16 +78,13 @@ void install_signal_handlers(bool keep_sigalrm);
 void restore_signal_handlers(bool keep_sigalrm);
 
 #ifdef USE_UNIX_SOCKETS
-
 #include <curl/curl.h> /* for curl_socket_t */
-
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
-#endif /* HAVE_SYS_UN_H */
-
+#endif
 int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
-        struct sockaddr_un *sau);
-#endif  /* USE_UNIX_SOCKETS */
+                     struct sockaddr_un *sau);
+#endif /* USE_UNIX_SOCKETS */
 
 unsigned short util_ultous(unsigned long ulnum);
 
