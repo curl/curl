@@ -188,6 +188,7 @@ int main(int argc, char *argv[])
       if(mc != CURLM_OK) {
         fprintf(stderr, "curl_multi_add_handle: %s\n",
                 curl_multi_strerror(mc));
+        curl_easy_cleanup(easy);
         goto cleanup;
       }
       --start_count;
