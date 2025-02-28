@@ -183,11 +183,11 @@ int main(int argc, char *argv[])
   CURLMsg *msg;
   CURLSH *share = NULL;
   CURLU *cu;
-  struct curl_slist resolve;
+  struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
   int msgs_in_queue;
   int add_more, waits, ongoing = 0;
-  char *host, *port;
+  char *host = NULL, *port = NULL;
   int http_version = CURL_HTTP_VERSION_1_1;
   int exitcode = 1;
 
@@ -220,10 +220,9 @@ int main(int argc, char *argv[])
     goto cleanup;
   }
 
-  memset(&resolve, 0, sizeof(resolve));
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
                  host, port);
-  curl_slist_append(&resolve, resolve_buf);
+  resolve = curl_slist_append(resolve, resolve_buf);
 
   multi = curl_multi_init();
   if(!multi) {
@@ -239,7 +238,7 @@ int main(int argc, char *argv[])
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 
 
-  if(add_transfer(multi, share, &resolve, url, http_version))
+  if(add_transfer(multi, share, resolve, url, http_version))
     goto cleanup;
   ++ongoing;
   add_more = 6;
@@ -266,7 +265,7 @@ int main(int argc, char *argv[])
     }
     else {
       while(add_more) {
-        if(add_transfer(multi, share, &resolve, url, http_version))
+        if(add_transfer(multi, share, resolve, url, http_version))
           goto cleanup;
         ++ongoing;
         --add_more;
@@ -327,6 +326,9 @@ cleanup:
     curl_multi_cleanup(multi);
   }
   curl_share_cleanup(share);
+  curl_slist_free_all(resolve);
+  curl_free(host);
+  curl_free(port);
   curl_url_cleanup(cu);
 
   return exitcode;
