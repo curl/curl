@@ -58,15 +58,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  EAGAIN
-#define EAGAIN  11 /* errno.h value */
-#undef  ERANGE
-#define ERANGE  34 /* errno.h value */
-#endif
-
 static int socket_domain = AF_INET;
 static bool use_gopher = FALSE;
 static int serverlogslocked = 0;

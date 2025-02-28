@@ -25,6 +25,20 @@
  ***************************************************************************/
 #include "server_setup.h"
 
+#ifdef USE_WINSOCK
+/* errno.h values */
+#undef  EINTR
+#define EINTR    4
+#undef  EAGAIN
+#define EAGAIN  11
+#undef  ENOMEM
+#define ENOMEM  12
+#undef  EINVAL
+#define EINVAL  22
+#undef  ERANGE
+#define ERANGE  34
+#endif
+
 enum {
   DOCNUMBER_NOTHING    = -7,
   DOCNUMBER_QUIT       = -6,

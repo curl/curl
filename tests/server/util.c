@@ -56,13 +56,6 @@
 #include "timeval.h"
 #include "timediff.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  EINVAL
-#define EINVAL  22 /* errno.h value */
-#endif
-
 const char *serverlogfile = DEFAULT_LOGFILE;
 
 static struct timeval tvnow(void);

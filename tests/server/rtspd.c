@@ -56,13 +56,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  ERANGE
-#define ERANGE  34 /* errno.h value */
-#endif
-
 #ifdef USE_IPV6
 static bool use_ipv6 = FALSE;
 #endif

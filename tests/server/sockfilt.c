@@ -114,17 +114,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  EAGAIN
-#define EAGAIN  11 /* errno.h value */
-#undef  ENOMEM
-#define ENOMEM  12 /* errno.h value */
-#undef  EINVAL
-#define EINVAL  22 /* errno.h value */
-#endif
-
 #define DEFAULT_PORT 8999
 
 #ifndef DEFAULT_LOGFILE

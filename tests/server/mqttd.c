@@ -64,11 +64,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#endif
-
 #define DEFAULT_PORT 1883 /* MQTT default port */
 
 #ifndef DEFAULT_LOGFILE
