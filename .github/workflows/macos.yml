@@ -344,7 +344,7 @@ jobs:
         if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target curl-examples --verbose
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld examples V=1
           fi
