@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
   CURLMcode mc;
   int running_handles = 0, numfds;
   CURLMsg *msg;
-  CURLSH *share;
+  CURLSH *share = NULL;
   CURLU *cu;
   struct curl_slist resolve;
   char resolve_buf[1024];
@@ -325,6 +325,7 @@ cleanup:
     }
     curl_multi_cleanup(multi);
   }
+  curl_share_cleanup(share);
   curl_url_cleanup(cu);
 
   return exitcode;
