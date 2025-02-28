@@ -161,7 +161,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
       if(!quoted) {
         size_t len = 0;
         CURLcode result;
-        while(!ISSPACE(*tok_end)) {
+        while(*tok_end > ' ') {
           tok_end++;
           len++;
         }
