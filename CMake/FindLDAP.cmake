@@ -39,7 +39,7 @@
 # - `LDAP_CFLAGS`:        Required compiler flags.
 # - `LDAP_VERSION`:       Version of ldap.
 
-set(LDAP_PC_REQUIRES "ldap")
+set(LDAP_PC_REQUIRES "ldap" "lber")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LDAP_INCLUDE_DIR AND
@@ -47,14 +47,9 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LDAP_LBER_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(LDAP ${LDAP_PC_REQUIRES})
-  pkg_check_modules(LDAP_LBER "lber")
 endif()
 
-if(LDAP_FOUND AND LDAP_LBER_FOUND)
-  list(APPEND LDAP_LIBRARIES ${LDAP_LBER_LIBRARIES})
-  list(REVERSE LDAP_LIBRARIES)
-  list(REMOVE_DUPLICATES LDAP_LIBRARIES)
-  list(REVERSE LDAP_LIBRARIES)
+if(LDAP_FOUND)
   string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
   message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()
