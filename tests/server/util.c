@@ -65,8 +65,6 @@
 
 const char *serverlogfile = "log/server_default.log";
 
-static long timediff(struct timeval newer, struct timeval older);
-
 static struct timeval tvnow(void);
 
 /* This function returns a pointer to STATIC memory. It converts the given
@@ -223,6 +221,19 @@ FILE *test2fopen(long testno, const char *logdir2)
 
   return stream;
 }
+
+#if !defined(MSDOS) && !defined(USE_WINSOCK)
+static long timediff(struct timeval newer, struct timeval older)
+{
+  timediff_t diff = newer.tv_sec-older.tv_sec;
+  if(diff >= (LONG_MAX/1000))
+    return LONG_MAX;
+  else if(diff <= (LONG_MIN/1000))
+    return LONG_MIN;
+  return (long)(newer.tv_sec-older.tv_sec)*1000+
+    (long)(newer.tv_usec-older.tv_usec)/1000;
+}
+#endif
 
 /*
  * Portable function used for waiting a specific amount of ms.
@@ -459,17 +470,6 @@ static struct timeval tvnow(void)
 }
 
 #endif
-
-static long timediff(struct timeval newer, struct timeval older)
-{
-  timediff_t diff = newer.tv_sec-older.tv_sec;
-  if(diff >= (LONG_MAX/1000))
-    return LONG_MAX;
-  else if(diff <= (LONG_MIN/1000))
-    return LONG_MIN;
-  return (long)(newer.tv_sec-older.tv_sec)*1000+
-    (long)(newer.tv_usec-older.tv_usec)/1000;
-}
 
 /* vars used to keep around previous signal handlers */
 
