@@ -168,6 +168,7 @@ static int add_transfer(CURLM *multi, CURLSH *share,
   if(mc != CURLM_OK) {
     fprintf(stderr, "curl_multi_add_handle: %s\n",
             curl_multi_strerror(mc));
+    curl_easy_cleanup(easy);
     return 1;
   }
   return 0;
