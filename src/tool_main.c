@@ -242,6 +242,8 @@ int main(int argc, char *argv[])
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
 
+printf("trc-0\n");
+
   tool_init_stderr();
 
 #if defined(_WIN32) && !defined(UNDER_CE)
