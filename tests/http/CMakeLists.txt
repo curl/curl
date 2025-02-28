@@ -34,12 +34,9 @@ if(NOT VSFTPD)
 endif()
 mark_as_advanced(VSFTPD)
 
-find_program(HTTPD "apache2")  # /usr/sbin/apache2
+find_program(HTTPD NAMES "/usr/sbin/apache2" "httpd" "apache2")
 if(NOT HTTPD)
-  find_program(HTTPD "httpd")
-  if(NOT HTTPD)
-    set(HTTPD "")
-  endif()
+  set(HTTPD "")
 endif()
 mark_as_advanced(HTTPD)
 
