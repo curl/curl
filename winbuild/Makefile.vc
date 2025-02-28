@@ -58,11 +58,11 @@ CFGSET=true
 !ENDIF
 
 !INCLUDE "../lib/Makefile.inc"
-SRC=$(strip $(CSOURCES))
+SRC=$(subst   , ,$(CSOURCES))
 LIBCURL_OBJS=$(SRC:.c=.obj)
 
 !INCLUDE "../src/Makefile.inc"
-CSRC=$(strip $(CURL_CFILES))
+CSRC=$(subst   , ,$(CURL_CFILES))
 CURL_OBJS=$(CSRC:.c=.obj)
 
 # backwards compatible check for USE_SSPI
