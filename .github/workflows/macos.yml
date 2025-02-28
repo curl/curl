@@ -342,11 +342,9 @@ jobs:
         if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
         env:
           CURL_CI: github
-          PYTEST_ADDOPTS: '--color=yes --verbose'
+          PYTEST_ADDOPTS: '--color=yes'
         run: |
-          brew services start caddy
           brew services start httpd
-          brew services start vsftpd
           source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
