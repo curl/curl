@@ -498,7 +498,6 @@ jobs:
 
       - name: 'run pytest event based'
         env:
-          TFLAGS: '${{ matrix.build.tflags }}'
           CURL_TEST_EVENT: 1
           CURL_CI: github
           PYTEST_ADDOPTS: '--color=yes'
