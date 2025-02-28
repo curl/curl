@@ -559,7 +559,7 @@ int main(int argc, char **argv)
 
   memset(&test, 0, sizeof(test));
 
-  serverlogfile = "log/tftpd.log"
+  serverlogfile = "log/tftpd.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
