@@ -189,6 +189,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
+        if: ${{ contains(matrix.build.install, 'libressl') }}
         run: |
           if test -d $(brew --prefix)/include/openssl; then
             brew unlink openssl
