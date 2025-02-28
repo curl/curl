@@ -319,7 +319,7 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
         else if(charset[CURLFNM_PRINT])
           found = ISPRINT(*s);
         else if(charset[CURLFNM_SPACE])
-          found = ISSPACE(*s);
+          found = ISBLANK(*s);
         else if(charset[CURLFNM_UPPER])
           found = ISUPPER(*s);
         else if(charset[CURLFNM_LOWER])
