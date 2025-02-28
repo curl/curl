@@ -36,6 +36,10 @@ use Digest::SHA;
 use Digest::SHA 'sha256_base64';
 use MIME::Base64;
 use File::Basename;
+use POSIX qw(getgid);
+
+my $gid = getgid();
+print "$gid\n";
 
 #***************************************************************************
 # Variables and subs imported from sshhelp module
@@ -441,7 +445,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     if($^O eq 'cygwin' || $^O eq 'msys') {
       # https://cygwin.com/cygwin-ug-net/setfacl.html
       system "setfacl --remove-all " . pp($hstprvkeyf);
-      system "chgrp None "           . pp($hstprvkeyf);
+      system "chgrp " . getgid() . " " . pp($hstprvkeyf);
     }
     elsif($^O eq 'MSWin32') {
       # https://ss64.com/nt/icacls.html
