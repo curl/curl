@@ -417,6 +417,15 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   Curl_cpool_xfer_init(data);
   multi_warn_debug(multi, data);
 
+  /* The admin handle only ever has default timeouts set. To improve the
+     state somewhat we clone the timeouts from each added handle so that the
+     admin handle always has the same timeouts as the most recently added
+     easy handle. */
+  multi->admin->set.timeout = data->set.timeout;
+  multi->admin->set.server_response_timeout =
+    data->set.server_response_timeout;
+  multi->admin->set.no_signal = data->set.no_signal;
+
   CURL_TRC_M(data, "added, transfers=%u", multi->num_easy);
   return CURLM_OK;
 }

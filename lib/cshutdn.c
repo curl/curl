@@ -63,7 +63,14 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
     Curl_http_auth_cleanup_negotiate(conn);
 
     if(conn->handler && conn->handler->disconnect) {
-      unsigned int timeout_ms = data->set.server_response_timeout;
+      /* Some disconnect handlers do a blocking wait on server responses.
+       * FTP/IMAP/SMTP and SFTP are among them. When using the internal
+       * handle, set an overall short timeout so we do not hang for the
+       * default 120 seconds. */
+      if(data->state.internal) {
+        data->set.timeout = DEFAULT_SHUTDOWN_TIMEOUT_MS;
+        (void)Curl_pgrsTime(data, TIMER_STARTOP);
+      }
 
       /* This is set if protocol-specific cleanups should be made */
       DEBUGF(infof(data, "connection #%" FMT_OFF_T
@@ -71,9 +78,7 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
                    conn->connection_id, conn->bits.aborted));
       /* There are protocol handlers that block on retrieving
        * server responses here (FTP). Set a short timeout. */
-      data->set.server_response_timeout = CURLMIN(timeout_ms, 2 * 1000);
       conn->handler->disconnect(data, conn, conn->bits.aborted);
-      data->set.server_response_timeout = timeout_ms;
     }
 
     /* possible left-overs from the async name resolvers */

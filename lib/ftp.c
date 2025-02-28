@@ -3132,6 +3132,8 @@ static CURLcode ftp_block_statemach(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   while(ftpc->state != FTP_STOP) {
+    if(ftpc->shutdown)
+      CURL_TRC_FTP(data, "in shutdown, waiting for server response");
     result = Curl_pp_statemach(data, pp, TRUE, TRUE /* disconnecting */);
     if(result)
       break;
@@ -4043,6 +4045,7 @@ static CURLcode ftp_quit(struct Curl_easy *data, struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   if(conn->proto.ftpc.ctl_valid) {
+    CURL_TRC_FTP(data, "sending QUIT to close session");
     result = Curl_pp_sendf(data, &conn->proto.ftpc.pp, "%s", "QUIT");
     if(result) {
       failf(data, "Failure sending QUIT command: %s",
