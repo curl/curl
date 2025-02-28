@@ -1,4 +1,4 @@
-#***************************************************************************
+<#***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -58,11 +58,10 @@ CFGSET=true
 !ENDIF
 
 !INCLUDE "../lib/Makefile.inc"
-LIBCURL_OBJS=$(CSOURCES:.c=.obj)
+LIBCURL_OBJS=$(strip $(CSOURCES:.c=.obj))
 
 !INCLUDE "../src/Makefile.inc"
-CURL_OBJS=$(CURL_CFILES:.c=.obj)
-
+CURL_OBJS=$(strip $(CURL_CFILES:.c=.obj))
 
 # backwards compatible check for USE_SSPI
 !IFDEF USE_SSPI
