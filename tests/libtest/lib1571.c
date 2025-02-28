@@ -46,8 +46,11 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_URL, URL);
-  if((testno == 1571) || (testno == 1575)) {
+  if((testno == 1571) || (testno == 1575) || (testno == 1581)) {
     test_setopt(curl, CURLOPT_POSTFIELDS, "moo");
+  }
+  if(testno == 1581) {
+    test_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_301);
   }
 
   test_setopt(curl, CURLOPT_CUSTOMREQUEST, "IGLOO");
