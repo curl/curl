@@ -440,8 +440,8 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     system "chmod 600 " . pp($cliprvkeyf);
     if($^O eq 'cygwin' || $^O eq 'msys') {
       # https://cygwin.com/cygwin-ug-net/setfacl.html
-      system "setfacl --remove-all "                   . pp($hstprvkeyf);
-      system "setfacl --modify u:" . $username . ":r " . pp($hstprvkeyf);
+      system "setfacl --remove-all " . pp($hstprvkeyf);
+      system "chgrp None "           . pp($hstprvkeyf);
     }
     elsif($^O eq 'MSWin32') {
       # https://ss64.com/nt/icacls.html
