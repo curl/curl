@@ -57,11 +57,16 @@ CFGSET=true
 
 !ENDIF
 
+DOUBLESPACE=$(subst ',,'  ')
+SINGLESPACE=$(subst ',,' ')
+
 !INCLUDE "../lib/Makefile.inc"
-SRC=$(subst   , ,$(CSOURCES))
+SRC=$(subst $(DOUBLESPACE),$(SINGLESPACE),$(CSOURCES)))
 LIBCURL_OBJS=$(SRC:.c=.obj)
 
 !INCLUDE "../src/Makefile.inc"
+CSRC=$(subst $(DOUBLESPACE),$(SINGLESPACE),$(CURL_CFILES)))
+
 CSRC=$(subst   , ,$(CURL_CFILES))
 CURL_OBJS=$(CSRC:.c=.obj)
 
