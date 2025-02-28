@@ -123,9 +123,10 @@ jobs:
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
             tflags: --test-event
-          - name: 'OpenSSL libssh2 !ldap 10.15'
+          - name: 'quictls libssh2 !ldap 10.15'
             compiler: clang
-            configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)
+            install: quictls
+            configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix quictls) LDFLAGS="${LDFLAGS} -L$(brew --prefix quictls)/lib"
             macos-version-min: '10.15'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN'
@@ -136,9 +137,9 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_APPLE_IDN=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
             clang-tidy: true
             chkprefill: _chkprefill
-          - name: 'OpenSSL +static libssh +examples'
-            install: libssh
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
+          - name: 'quictls +static libssh +examples'
+            install: quictls libssh
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
           - name: 'SecureTransport debug'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
@@ -184,11 +185,12 @@ jobs:
         run: |
           echo ${{ matrix.build.generate && 'ninja' || 'automake libtool' }} \
             pkgconf libpsl libssh2 \
-            ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }} \
+            ${{ !matrix.build.clang-tidy && 'libnghttp2 stunnel' || '' }} \
             ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
+        if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
         run: |
           if test -d $(brew --prefix)/include/openssl; then
             brew unlink openssl
@@ -343,7 +345,7 @@ jobs:
         if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target curl-examples --verbose
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld examples V=1
           fi
