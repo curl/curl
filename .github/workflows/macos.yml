@@ -123,9 +123,10 @@ jobs:
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
             tflags: --test-event
-          - name: 'OpenSSL libssh2 !ldap 10.15'
+          - name: 'quictls libssh2 !ldap 10.15'
             compiler: clang
-            configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)
+            install: quictls
+            configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix quictls)
             macos-version-min: '10.15'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN'
@@ -145,6 +146,9 @@ jobs:
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON
+          - name: 'quictls brotli zstd'
+            install: brotli quictls zstd
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls)
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
@@ -189,7 +193,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'libressl') }}
+        if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
         run: |
           if test -d $(brew --prefix)/include/openssl; then
             brew unlink openssl
