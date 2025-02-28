@@ -122,10 +122,6 @@ static void storerequest(const char *reqbuf, size_t totalsize);
 
 #define DEFAULT_PORT 8999
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/sws.log"
-#endif
-
 static const char *logdir = "log";
 static char loglockfile[256];
 
@@ -2043,7 +2039,7 @@ int main(int argc, char *argv[])
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
 
-  serverlogfile = DEFAULT_LOGFILE;
+  serverlogfile = "log/sws.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

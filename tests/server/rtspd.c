@@ -117,10 +117,6 @@ static void storerequest(char *reqbuf, size_t totalsize);
 
 #define DEFAULT_PORT 8999
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/rtspd.log"
-#endif
-
 static const char *logdir = "log";
 static char loglockfile[256];
 
@@ -1045,7 +1041,7 @@ int main(int argc, char *argv[])
 
   memset(&req, 0, sizeof(req));
 
-  serverlogfile = DEFAULT_LOGFILE;
+  serverlogfile = "log/rtspd.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

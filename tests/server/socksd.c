@@ -87,10 +87,6 @@
 
 #define DEFAULT_PORT 8905
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/socksd.log"
-#endif
-
 #ifndef DEFAULT_REQFILE
 #define DEFAULT_REQFILE "log/socksd-request.log"
 #endif
@@ -973,7 +969,7 @@ int main(int argc, char *argv[])
   bool unlink_socket = false;
 #endif
 
-  serverlogfile = DEFAULT_LOGFILE;
+  serverlogfile = "log/socksd.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

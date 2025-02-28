@@ -150,10 +150,6 @@ struct bf {
 #undef MIN
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/tftpd.log"
-#endif
-
 #define REQUEST_DUMP  "server.input"
 
 #define DEFAULT_PORT 8999 /* UDP */
@@ -563,7 +559,7 @@ int main(int argc, char **argv)
 
   memset(&test, 0, sizeof(test));
 
-  serverlogfile = DEFAULT_LOGFILE;
+  serverlogfile = "log/tftpd.log"
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

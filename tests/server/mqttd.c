@@ -66,10 +66,6 @@
 
 #define DEFAULT_PORT 1883 /* MQTT default port */
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/mqttd.log"
-#endif
-
 #ifndef DEFAULT_CONFIG
 #define DEFAULT_CONFIG "mqttd.config"
 #endif
@@ -927,7 +923,7 @@ int main(int argc, char *argv[])
   int error;
   int arg = 1;
 
-  serverlogfile = DEFAULT_LOGFILE;
+  serverlogfile = "log/mqttd.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

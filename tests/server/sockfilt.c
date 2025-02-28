@@ -116,10 +116,6 @@
 
 #define DEFAULT_PORT 8999
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/sockfilt.log"
-#endif
-
 /* buffer is this excessively large only to be able to support things like
   test 1003 which tests exceedingly large server response lines */
 #define BUFFER_SIZE 17010
@@ -1393,7 +1389,7 @@ int main(int argc, char *argv[])
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
 
-  serverlogfile = DEFAULT_LOGFILE;
+  serverlogfile = "log/sockfilt.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
