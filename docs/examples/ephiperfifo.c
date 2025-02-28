@@ -418,7 +418,7 @@ static int init_fifo(GlobalInfo *g)
   struct epoll_event epev;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
-  if(lstat (fifo, &st) == 0) {
+  if(lstat(fifo, &st) == 0) {
     if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
@@ -426,7 +426,7 @@ static int init_fifo(GlobalInfo *g)
     }
   }
   unlink(fifo);
-  if(mkfifo (fifo, 0600) == -1) {
+  if(mkfifo(fifo, 0600) == -1) {
     perror("mkfifo");
     return 1;
   }

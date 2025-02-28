@@ -397,7 +397,7 @@ int init_fifo(void)
   }
 
   unlink(fifo);
-  if(mkfifo (fifo, 0600) == -1) {
+  if(mkfifo(fifo, 0600) == -1) {
     perror("mkfifo");
     return CURL_SOCKET_BAD;
   }
