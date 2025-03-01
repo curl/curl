@@ -27,8 +27,15 @@ private key located in a PKCS#11 device. A string beginning with `pkcs11:` is
 interpreted as a PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine
 option is set as `pkcs11` if none was provided and the --key-type option is
 set as `ENG` or `PROV` if none was provided (depending on OpenSSL version).
+For 
 
 If curl is built against Secure Transport or Schannel then this option is
 ignored for TLS protocols (HTTPS, etc). Those backends expect the private key
 to be already present in the keychain or PKCS#12 file containing the
 certificate.
+
+# Using OpenSSL Engine with TPM 2.0
+
+To use an OpenSSL engine with a TPM 2.0,
+use this command 
+`curl --key /path/to/key.tss --cert /path/to/cert.crt https://my-server.com/download/url`.
