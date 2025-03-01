@@ -572,6 +572,7 @@ struct Curl_async {
 #endif
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel e.g. */
+  int port;
   BIT(done);  /* set TRUE when the lookup is complete */
 };
 

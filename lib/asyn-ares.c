@@ -592,7 +592,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
   res->num_pending--;
 
   if(CURL_ASYNC_SUCCESS == status) {
-    struct Curl_addrinfo *ai = Curl_he2ai(hostent, data->conn->remote_port);
+    struct Curl_addrinfo *ai = Curl_he2ai(hostent, data->state.async.port);
     if(ai) {
       compound_results(res, ai);
     }
@@ -774,6 +774,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   if(!res->hostname)
     return NULL;
 
+  data->state.async.port = port;
   data->state.async.done = FALSE;   /* not done */
   data->state.async.dns = NULL;     /* clear */
 
@@ -809,7 +810,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                      service, &hints, addrinfo_cb, data);
   }
 #else
-  (void)port;
 
 #ifdef HAVE_CARES_IPV6
   if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
