@@ -123,7 +123,6 @@ LIB_CFILES =         \
   cf-socket.c        \
   cfilters.c         \
   conncache.c        \
-  cshutdn.c          \
   connect.c          \
   content_encoding.c \
   cookie.c           \
@@ -260,7 +259,6 @@ LIB_HFILES =         \
   cf-socket.h        \
   cfilters.h         \
   conncache.h        \
-  cshutdn.h          \
   connect.h          \
   content_encoding.h \
   cookie.h           \
