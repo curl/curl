@@ -957,7 +957,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
      * gstreamer does url-encoded session ID's not covered by the standard.
      */
     end = start;
-    while(*end && *end != ';' && !ISBLANK(*end))
+    while((*end > ' ') && (*end != ';'))
       end++;
     idlen = end - start;
 
