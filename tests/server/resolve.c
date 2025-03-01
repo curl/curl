@@ -99,8 +99,8 @@ int main(int argc, char *argv[])
   }
 
 #ifdef _WIN32
-  win32_init();
-  atexit(win32_cleanup);
+  if(win32_init())
+    return 2;
 #endif
 
 #if defined(CURLRES_IPV6)

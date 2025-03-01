@@ -28,11 +28,10 @@ const struct curl_easyoption *curl_easy_option_by_id(CURLoption id);
 # DESCRIPTION
 
 Given a *CURLoption* **id**, this function returns a pointer to the
-*curl_easyoption* struct, holding information about the
-curl_easy_setopt(3) option using that id. The option id is the CURLOPT_
-prefix ones provided in the standard curl/curl.h header file. This function
-returns the non-alias version of the cases where there is an alias function as
-well.
+*curl_easyoption* struct, holding information about the curl_easy_setopt(3)
+option using that id. The option id is the `CURLOPT_` prefixed ones provided
+in the standard curl/curl.h header file. This function returns the non-alias
+version of the cases where there is an alias function as well.
 
 If libcurl has no option with the given id, this function returns NULL.
 

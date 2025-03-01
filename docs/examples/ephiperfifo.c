@@ -418,22 +418,22 @@ static int init_fifo(GlobalInfo *g)
   struct epoll_event epev;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
-  if(lstat (fifo, &st) == 0) {
+  if(lstat(fifo, &st) == 0) {
     if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
-      exit(1);
+      return 1;
     }
   }
   unlink(fifo);
-  if(mkfifo (fifo, 0600) == -1) {
+  if(mkfifo(fifo, 0600) == -1) {
     perror("mkfifo");
-    exit(1);
+    return 1;
   }
   sockfd = open(fifo, O_RDWR | O_NONBLOCK, 0);
   if(sockfd == -1) {
     perror("open");
-    exit(1);
+    return 1;
   }
 
   g->fifofd = sockfd;
@@ -449,9 +449,9 @@ static int init_fifo(GlobalInfo *g)
 
 static void clean_fifo(GlobalInfo *g)
 {
-    epoll_ctl(g->epfd, EPOLL_CTL_DEL, g->fifofd, NULL);
-    fclose(g->input);
-    unlink(fifo);
+  epoll_ctl(g->epfd, EPOLL_CTL_DEL, g->fifofd, NULL);
+  fclose(g->input);
+  unlink(fifo);
 }
 
 
@@ -478,13 +478,13 @@ int main(int argc, char **argv)
   g.epfd = epoll_create1(EPOLL_CLOEXEC);
   if(g.epfd == -1) {
     perror("epoll_create1 failed");
-    exit(1);
+    return 1;
   }
 
   g.tfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
   if(g.tfd == -1) {
     perror("timerfd_create failed");
-    exit(1);
+    return 1;
   }
 
   memset(&its, 0, sizeof(struct itimerspec));
@@ -496,7 +496,8 @@ int main(int argc, char **argv)
   ev.data.fd = g.tfd;
   epoll_ctl(g.epfd, EPOLL_CTL_ADD, g.tfd, &ev);
 
-  init_fifo(&g);
+  if(init_fifo(&g))
+    return 1;
   g.multi = curl_multi_init();
 
   /* setup the generic multi interface options we want */
@@ -521,7 +522,7 @@ int main(int argc, char **argv)
       }
       else {
         perror("epoll_wait");
-        exit(1);
+        return 1;
       }
     }
 

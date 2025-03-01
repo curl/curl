@@ -94,7 +94,7 @@ static bool init(CURL *&conn, const char *url)
 
   if(conn == NULL) {
     fprintf(stderr, "Failed to create CURL connection\n");
-    exit(EXIT_FAILURE);
+    return false;
   }
 
   code = curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, errorBuffer);
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
 
   if(argc != 2) {
     fprintf(stderr, "Usage: %s <url>\n", argv[0]);
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
 
   if(!init(conn, argv[1])) {
     fprintf(stderr, "Connection initialization failed\n");
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
   // Retrieve content for the URL
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
 
   if(code != CURLE_OK) {
     fprintf(stderr, "Failed to get '%s' [%s]\n", argv[1], errorBuffer);
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
   // Parse the (assumed) HTML code

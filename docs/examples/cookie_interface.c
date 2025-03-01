@@ -34,8 +34,7 @@
 #include <curl/curl.h>
 #include <curl/mprintf.h>
 
-static void
-print_cookies(CURL *curl)
+static int print_cookies(CURL *curl)
 {
   CURLcode res;
   struct curl_slist *cookies;
@@ -47,7 +46,7 @@ print_cookies(CURL *curl)
   if(res != CURLE_OK) {
     fprintf(stderr, "Curl curl_easy_getinfo failed: %s\n",
             curl_easy_strerror(res));
-    exit(1);
+    return 1;
   }
   nc = cookies;
   i = 1;
@@ -60,6 +59,8 @@ print_cookies(CURL *curl)
     printf("(none)\n");
   }
   curl_slist_free_all(cookies);
+
+  return 0;
 }
 
 int

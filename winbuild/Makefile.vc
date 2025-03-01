@@ -58,9 +58,11 @@ CFGSET=true
 !ENDIF
 
 !INCLUDE "../lib/Makefile.inc"
+CSOURCES=$(CSOURCES:  = )
 LIBCURL_OBJS=$(CSOURCES:.c=.obj)
 
 !INCLUDE "../src/Makefile.inc"
+CURL_CFILES=$(CURL_CFILES:  = )
 CURL_OBJS=$(CURL_CFILES:.c=.obj)
 
 
