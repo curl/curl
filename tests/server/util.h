@@ -25,12 +25,19 @@
  ***************************************************************************/
 #include "server_setup.h"
 
+enum {
+  DOCNUMBER_NOTHING    = -7,
+  DOCNUMBER_QUIT       = -6,
+  DOCNUMBER_BADCONNECT = -5,
+  DOCNUMBER_INTERNAL   = -4,
+  DOCNUMBER_CONNECT    = -3,
+  DOCNUMBER_WERULEZ    = -2,
+  DOCNUMBER_404        = -1
+};
+
 char *data_to_hex(char *data, size_t len);
 void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
-long timediff(struct timeval newer, struct timeval older);
 
-#define TEST_DATA_PATH "%s/data/test%ld"
-#define ALTTEST_DATA_PATH "%s/test%ld"
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
 /* global variable, where to find the 'data' dir */
@@ -39,24 +46,12 @@ extern const char *path;
 /* global variable, log file name */
 extern const char *serverlogfile;
 
-extern const char *cmdfile;
-
 #ifdef _WIN32
-#include <process.h>
-#include <fcntl.h>
-
-#define sleep(sec) Sleep ((sec)*1000)
-
-#undef perror
-#define perror(m) win32_perror(m)
-void win32_perror(const char *msg);
-
 int win32_init(void);
 const char *sstrerror(int err);
-#else   /* _WIN32 */
-
+#else
 #define sstrerror(e) strerror(e)
-#endif  /* _WIN32 */
+#endif
 
 /* fopens the test case file */
 FILE *test2fopen(long testno, const char *logdir);

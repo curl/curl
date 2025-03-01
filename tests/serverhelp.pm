@@ -46,6 +46,7 @@ BEGIN {
         server_inputfilename
         server_outputfilename
         server_exe
+        server_exe_args
         mainsockf_pidfilename
         mainsockf_logfilename
         datasockf_pidfilename
@@ -243,7 +244,33 @@ sub server_exe {
     if(!defined $ext) {
         $ext = 'SRV';
     }
-    return $SRVDIR . $name . exe_ext($ext);
+    my $cmd;
+    if($ENV{'CURL_TEST_BUNDLES'}) {
+        $cmd = $SRVDIR . "servers" . exe_ext($ext) . " $name";
+    }
+    else {
+        $cmd = $SRVDIR . $name . exe_ext($ext);
+    }
+    return "$cmd";
+}
+
+
+#***************************************************************************
+# Return filename for a server executable as an argument list
+#
+sub server_exe_args {
+    my ($name, $ext) = @_;
+    if(!defined $ext) {
+        $ext = 'SRV';
+    }
+    my @cmd;
+    if($ENV{'CURL_TEST_BUNDLES'}) {
+        @cmd = ($SRVDIR . "servers" . exe_ext($ext), $name);
+    }
+    else {
+        @cmd = ($SRVDIR . $name . exe_ext($ext));
+    }
+    return @cmd;
 }
 
 

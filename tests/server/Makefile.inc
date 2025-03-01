@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-noinst_PROGRAMS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd
+SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd
 
 CURLX_SRCS = \
  ../../lib/mprintf.c \
@@ -61,11 +61,18 @@ USEFUL = \
  ../../lib/memdebug.c \
  ../../lib/memdebug.h
 
+INET_PTON = \
+ ../../lib/inet_pton.c
+
 UTIL = \
  util.c \
  util.h \
  ../../lib/strerror.c \
  ../../lib/strerror.h
+
+UTIL_BUNDLE = \
+ first.c \
+ first.h
 
 resolve_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  resolve.c
@@ -78,29 +85,27 @@ rtspd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
 rtspd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 rtspd_CFLAGS = $(AM_CFLAGS)
 
-sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
  server_sockaddr.h \
- sockfilt.c \
- ../../lib/inet_pton.c
+ sockfilt.c
 sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
 socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
- server_sockaddr.h socksd.c \
- ../../lib/inet_pton.c
+ server_sockaddr.h \
+ socksd.c
 socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 socksd_CFLAGS = $(AM_CFLAGS)
 
-mqttd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
- server_sockaddr.h mqttd.c \
- ../../lib/inet_pton.c
+mqttd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
+ server_sockaddr.h \
+ mqttd.c
 mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 mqttd_CFLAGS = $(AM_CFLAGS)
 
-sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
  server_sockaddr.h \
- sws.c \
- ../../lib/inet_pton.c
+ sws.c
 sws_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sws_CFLAGS = $(AM_CFLAGS)
 
