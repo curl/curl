@@ -159,6 +159,7 @@ typedef unsigned int curl_prot_t;
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
+#include "hash_offt.h"
 #include "splay.h"
 #include "dynbuf.h"
 #include "dynhds.h"

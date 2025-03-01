@@ -25,15 +25,16 @@
 
 #include "curlx.h"
 
-#include "hash.h"
+#include "hash_offt.h"
 
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_hash hash_static;
+static struct Curl_hash_offt hash_static;
 
-static void mydtor(void *elem)
+static void mydtor(curl_off_t id, void *elem)
 {
   int *ptr = (int *)elem;
+  (void)id;
   free(ptr);
 }
 
@@ -45,13 +46,13 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
-  Curl_hash_destroy(&hash_static);
+  Curl_hash_offt_destroy(&hash_static);
 }
 
 UNITTEST_START
   int *value, *v;
   int *value2;
-  int *nodep;
+  bool ok;
 
   curl_off_t key = 20;
   curl_off_t key2 = 25;
@@ -60,24 +61,24 @@ UNITTEST_START
   value = malloc(sizeof(int));
   abort_unless(value != NULL, "Out of memory");
   *value = 199;
-  nodep = Curl_hash_offt_set(&hash_static, key, value);
-  if(!nodep)
+  ok = Curl_hash_offt_set(&hash_static, key, value);
+  if(!ok)
     free(value);
-  abort_unless(nodep, "insertion into hash failed");
+  abort_unless(ok, "insertion into hash failed");
   v = Curl_hash_offt_get(&hash_static, key);
   abort_unless(v == value, "lookup present entry failed");
   v = Curl_hash_offt_get(&hash_static, key2);
   abort_unless(!v, "lookup missing entry failed");
-  Curl_hash_clean(&hash_static);
+  Curl_hash_offt_clear(&hash_static);
 
   /* Attempt to add another key/value pair */
   value2 = malloc(sizeof(int));
   abort_unless(value2 != NULL, "Out of memory");
   *value2 = 204;
-  nodep = Curl_hash_offt_set(&hash_static, key2, value2);
-  if(!nodep)
+  ok = Curl_hash_offt_set(&hash_static, key2, value2);
+  if(!ok)
     free(value2);
-  abort_unless(nodep, "insertion into hash failed");
+  abort_unless(ok, "insertion into hash failed");
   v = Curl_hash_offt_get(&hash_static, key2);
   abort_unless(v == value2, "lookup present entry failed");
   v = Curl_hash_offt_get(&hash_static, key);
