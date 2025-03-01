@@ -1209,7 +1209,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   }
   else if(Curl_conn_seems_dead(conn, data, NULL)) {
     /* removed and disconnect. Do not treat as aborted. */
-    Curl_cpool_disconnect(data, conn, FALSE);
+    Curl_conn_terminate(data, conn, FALSE);
     return FALSE;
   }
 
@@ -3540,14 +3540,12 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* Setup a "faked" transfer that will do nothing */
     if(!result) {
       Curl_attach_connection(data, conn);
-      result = Curl_cpool_add_conn(data, conn);
-      if(result)
-        goto out;
+      result = Curl_cpool_add(data, conn);
+      if(!result) {
+        /* Setup whatever necessary for a resumed transfer */
+        result = setup_range(data);
+      }
 
-      /*
-       * Setup whatever necessary for a resumed transfer
-       */
-      result = setup_range(data);
       if(result) {
         DEBUGASSERT(conn->handler->done);
         /* we ignore the return code for the protocol-specific DONE */
@@ -3684,7 +3682,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       }
 
       Curl_attach_connection(data, conn);
-      result = Curl_cpool_add_conn(data, conn);
+      result = Curl_cpool_add(data, conn);
       if(result)
         goto out;
     }
@@ -3823,7 +3821,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
     /* We are not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
     Curl_detach_connection(data);
-    Curl_cpool_disconnect(data, conn, TRUE);
+    Curl_conn_terminate(data, conn, TRUE);
   }
 
   return result;

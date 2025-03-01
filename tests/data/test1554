@@ -67,8 +67,6 @@ run 1: foobar and so on fun!
 -> Mutex lock SHARE
 <- Mutex unlock SHARE
 -> Mutex lock SHARE
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
 <- Mutex unlock SHARE
 </datacheck>
 </reply>

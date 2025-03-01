@@ -160,6 +160,7 @@ struct ftp_conn {
   BIT(cwdfail);     /* set TRUE if a CWD command fails, as then we must prevent
                        caching the current directory */
   BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
+  BIT(shutdown);    /* connection is being shutdown, e.g. QUIT */
 };
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */
