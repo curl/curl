@@ -66,7 +66,7 @@ extern FILE *tool_stderr;
 #  include "tool_strdup.h"
 #endif
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #  define CURL_STRICMP(p1, p2)  _stricmp(p1, p2)
 #elif defined(HAVE_STRCASECMP)
 #  ifdef HAVE_STRINGS_H

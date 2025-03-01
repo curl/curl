@@ -245,7 +245,7 @@ int wait_ms(int timeout_ms)
     CURL_SETERRNO(EINVAL);
     return -1;
   }
-#if defined(MSDOS)
+#ifdef MSDOS
   delay(timeout_ms);
 #elif defined(USE_WINSOCK)
   Sleep((DWORD)timeout_ms);
@@ -281,7 +281,7 @@ curl_off_t our_getpid(void)
   curl_off_t pid;
 
   pid = (curl_off_t)Curl_getpid();
-#if defined(_WIN32)
+#ifdef _WIN32
   /* store pid + MAX_PID to avoid conflict with Cygwin/msys PIDs, see also:
    * - 2019-01-31: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
    *               h=b5e1003722cb14235c4f166be72c09acdffc62ea
@@ -367,7 +367,7 @@ void clear_advisor_read_lock(const char *filename)
 }
 
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 static struct timeval tvnow(void)
 {

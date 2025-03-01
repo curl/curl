@@ -105,9 +105,9 @@ UNITTEST_START
   struct Curl_easy *easy = NULL;
   struct curl_slist *list = NULL;
 
-/* important: we setup cache outside of the loop
-  and also clean cache after the loop. In contrast,for example,
-  test 1607 sets up and cleans cache on each iteration. */
+  /* important: we setup cache outside of the loop
+     and also clean cache after the loop. In contrast,for example,
+     test 1607 sets up and cleans cache on each iteration. */
 
   for(i = 0; i < (int)CURL_ARRAYSIZE(tests); ++i) {
     int j;

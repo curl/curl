@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 #include <curl/curl.h>
 

@@ -28,7 +28,7 @@
 #include "curlx.h"
 #include "memdebug.h" /* keep this as LAST include */
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 /* In case of bug fix this function has a counterpart in timeval.c */
 struct timeval tvnow(void)
@@ -43,12 +43,12 @@ struct timeval tvnow(void)
   }
   else {
     /* Disable /analyze warning that GetTickCount64 is preferred  */
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:28159)
 #endif
     DWORD milliseconds = GetTickCount();
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
@@ -121,7 +121,7 @@ struct timeval tvnow(void)
 
 #endif
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 struct timeval tvrealnow(void)
 {
