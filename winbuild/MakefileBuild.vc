@@ -584,12 +584,12 @@ CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
 !include LIBCURL_OBJS.inc
 
 !IF "$(AS_DLL)" == "true"
-LIB_OBJS = @CURL_OBJS.lst $(RESOURCE)
+LIB_OBJS = $(LIBCURL_OBJS) $(RESOURCE)
 !ELSE
-LIB_OBJS = @CURL_OBJS.lst
+LIB_OBJS = $(LIBCURL_OBJS)
 !ENDIF
 
-EXE_OBJS = @LIBCURL_OBJS.lst $(CURL_DIROBJ)\curl.res
+EXE_OBJS = $(CURL_OBJS) $(CURL_DIROBJ)\curl.res
 
 all : $(TARGET) $(PROGRAM_NAME)
 

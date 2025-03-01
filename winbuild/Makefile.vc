@@ -300,14 +300,10 @@ $(MODE):
 	@echo LIBCURL_OBJS = \> LIBCURL_OBJS.inc
 	@for %%i in ($(LIBCURL_OBJS)) do @echo $(LIBCURL_DIROBJ)/%%i \>> LIBCURL_OBJS.inc
 	@echo. >> LIBCURL_OBJS.inc
-	@-erase LIBCURL_OBJS
-	@for %%i in ($(LIBCURL_OBJS)) do @echo "$(LIBCURL_DIROBJ)/%%i">> LIBCURL_OBJS.lst
 
 	@echo CURL_OBJS = \> CURL_OBJS.inc
 	@for %%i in ($(CURL_OBJS)) do @echo $(CURL_DIROBJ)/%%i \>> CURL_OBJS.inc
 	@echo. >> CURL_OBJS.inc
-	@-erase CURL_OBJS.lst
-	@for %%i in ($(CURL_OBJS)) do @echo "$(CURL_DIROBJ)/%%i">> CURL_OBJS.lst
 
 	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
 	@SET MACHINE=$(MACHINE)
