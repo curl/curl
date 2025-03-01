@@ -175,6 +175,16 @@ typedef enum {
 #define CURLSSLBACKEND_CYASSL CURLSSLBACKEND_WOLFSSL
 #define CURLSSLBACKEND_DARWINSSL CURLSSLBACKEND_SECURETRANSPORT
 
+/* bits for the CURLOPT_FOLLOWLOCATION option */
+#define CURLFOLLOW_ALL       1L /* generic follow redirects */
+
+/* Do not use the custom method in the follow-up request if the HTTP code
+   instructs so (301, 302, 303). */
+#define CURLFOLLOW_OBEYCODE  2L
+
+/* Only use the custom method in the first request, always reset in the next */
+#define CURLFOLLOW_FIRSTONLY 3L
+
 struct curl_httppost {
   struct curl_httppost *next;       /* next entry in the list */
   char *name;                       /* pointer to allocated name */

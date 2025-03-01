@@ -66,9 +66,15 @@ Many people have wrongly used this option to replace the entire request with
 their own, including multiple headers and POST contents. While that might work
 in many cases, it might cause libcurl to send invalid requests and it could
 possibly confuse the remote server badly. Use CURLOPT_POST(3) and
-CURLOPT_POSTFIELDS(3) to set POST data. Use CURLOPT_HTTPHEADER(3)
-to replace or extend the set of headers sent by libcurl. Use
-CURLOPT_HTTP_VERSION(3) to change HTTP version.
+CURLOPT_POSTFIELDS(3) to set POST data. Use CURLOPT_HTTPHEADER(3) to replace
+or extend the set of headers sent by libcurl. Use CURLOPT_HTTP_VERSION(3) to
+change the HTTP version.
+
+When this option is used together with CURLOPT_FOLLOWLOCATION(3), the custom
+set method overrides the method libcurl could otherwise change to for the
+subsequent requests. You can fine-tune that decision by using the
+CURLFOLLOW_OBEYCODE bit to CURLOPT_FOLLOWLOCATION(3) to make redirects adhere
+to the redirect response code as the protocol instructs.
 
 ## FTP
 
