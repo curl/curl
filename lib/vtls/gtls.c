@@ -1780,8 +1780,7 @@ static CURLcode gtls_send_earlydata(struct Curl_cfilter *cf,
     Curl_bufq_skip(&connssl->earlydata, (size_t)n);
   }
   /* sent everything there was */
-  infof(data, "SSL sending %" FMT_OFF_T " bytes of early data",
-        connssl->earlydata_skip);
+  infof(data, "SSL sending %zu bytes of early data", connssl->earlydata_skip);
 out:
   return result;
 }
