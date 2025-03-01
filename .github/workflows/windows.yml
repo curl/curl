@@ -593,6 +593,7 @@ jobs:
     timeout-minutes: 10
     env:
       toolchain-version: '0.59.1'
+      MAKEFLAGS: -j 4
     strategy:
       matrix:
         build: [autotools, cmake]
@@ -629,12 +630,13 @@ jobs:
               -DCMAKE_SYSTEM_NAME=WindowsCE \
               -DCMAKE_SYSTEM_VERSION=8.0 \
               -DCMAKE_SYSTEM_PROCESSOR=arm \
+              -DCMAKE_C_FLAGS='-O3 -DNDEBUG' \
               -DCMAKE_C_COMPILER_TARGET=arm-mingw32ce \
               -DCMAKE_C_COMPILER=arm-mingw32ce-gcc \
               -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
               -DMINGW32CE_LIBRARY_DIR="$HOME/opt/mingw32ce/arm-mingw32ce/lib" \
               -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON \
@@ -663,7 +665,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld
           else
-            make -j5 -C bld
+            make -C bld
           fi
 
       - name: 'curl info'
@@ -677,7 +679,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
-            make -j5 -C bld -C tests
+            make -C bld -C tests
           fi
 
       - name: 'build examples'
@@ -687,7 +689,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
-            make -j5 -C bld examples
+            make -C bld examples
           fi
 
   msvc:
