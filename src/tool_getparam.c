@@ -339,6 +339,7 @@ static const struct LongShort aliases[]= {
   {"trace-time",                 ARG_BOOL, ' ', C_TRACE_TIME},
   {"unix-socket",                ARG_FILE, ' ', C_UNIX_SOCKET},
   {"upload-file",                ARG_FILE, 'T', C_UPLOAD_FILE},
+  {"upload-flags",               ARG_STRG, ' ', C_UPLOAD_FLAGS},
   {"url",                        ARG_STRG, ' ', C_URL},
   {"url-query",                  ARG_STRG, ' ', C_URL_QUERY},
   {"use-ascii",                  ARG_BOOL, 'B', C_USE_ASCII},
@@ -1619,6 +1620,57 @@ static ParameterError parse_time_cond(struct GlobalConfig *global,
             "See curl_getdate(3) for valid date syntax.");
     }
   }
+  return err;
+}
+
+static ParameterError parse_upload_flags(struct OperationConfig *config,
+                                      char *nextarg)
+{
+  char *tmp, *upload_flag;
+  ParameterError err = PARAM_OK;
+  size_t flag_len;
+
+  tmp = strdup(nextarg);
+  if(!tmp)
+    return PARAM_NO_MEM;
+
+  /* Allow strtok() here since this is not used threaded */
+  /* !checksrc! disable BANNEDFUNC 2 */
+  upload_flag = strtok(tmp, ",");
+
+  while(upload_flag) {
+    flag_len = strlen(upload_flag);
+
+    if(flag_len == 8 && !strncmp(upload_flag, "Answered", 8))
+      config->upload_flags |= CURLULFLAG_ANSWERED;
+    else if(flag_len == 9 && !strncmp(upload_flag, "!Answered", 9))
+      config->upload_flags &= (unsigned char)~CURLULFLAG_ANSWERED;
+    else if(flag_len == 7 && !strncmp(upload_flag, "Deleted", 7))
+      config->upload_flags |= CURLULFLAG_DELETED;
+    else if(flag_len == 8 && !strncmp(upload_flag, "!Deleted", 8))
+      config->upload_flags &= (unsigned char)~CURLULFLAG_DELETED;
+    else if(flag_len == 5 && !strncmp(upload_flag, "Draft", 5))
+      config->upload_flags |= CURLULFLAG_DRAFT;
+    else if(flag_len == 6 && !strncmp(upload_flag, "!Draft", 6))
+      config->upload_flags &= (unsigned char)~CURLULFLAG_DRAFT;
+    else if(flag_len == 7 && !strncmp(upload_flag, "Flagged", 7))
+      config->upload_flags |= CURLULFLAG_FLAGGED;
+    else if(flag_len == 8 && !strncmp(upload_flag, "!Flagged", 8))
+      config->upload_flags &= (unsigned char)~CURLULFLAG_FLAGGED;
+    else if(flag_len == 4 && !strncmp(upload_flag, "Seen", 4))
+      config->upload_flags |= CURLULFLAG_SEEN;
+    else if(flag_len == 5 && !strncmp(upload_flag, "!Seen", 5))
+      config->upload_flags &= (unsigned char)~CURLULFLAG_SEEN;
+    else {
+      err = PARAM_OPTION_UNKNOWN;
+      break;
+    }
+
+    upload_flag = strtok(NULL, ",");
+  }
+
+  free(tmp);
+
   return err;
 }
 
@@ -2908,6 +2960,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_MPTCP: /* --mptcp */
       config->mptcp = TRUE;
+      break;
+    case C_UPLOAD_FLAGS: /* --upload-flags */
+      err = parse_upload_flags(config, nextarg);
       break;
     default: /* unknown flag */
       err = PARAM_OPTION_UNKNOWN;
