@@ -1073,8 +1073,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       auth++;
     else
       break;
-    while(ISBLANK(*auth))
-      auth++;
+    Curl_str_passblanks(&auth);
   }
 #else
   (void) proxy;
@@ -3880,8 +3879,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
        */
       const char *p = hd;
 
-      while(ISBLANK(*p))
-        p++;
+      Curl_str_passblanks(&p);
       if(!strncmp(p, "HTTP/", 5)) {
         p += 5;
         switch(*p) {
@@ -3895,7 +3893,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
                   (p[2] - '0');
                 p += 3;
-                if(ISSPACE(*p))
+                if(ISBLANK(*p))
                   fine_statusline = TRUE;
               }
             }
@@ -3915,7 +3913,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
             k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
               (p[2] - '0');
             p += 3;
-            if(!ISSPACE(*p))
+            if(!ISBLANK(*p))
               break;
             fine_statusline = TRUE;
           }
@@ -4473,8 +4471,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     scheme = Curl_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
     if(scheme) {
       scheme += sizeof(HTTP_PSEUDO_SCHEME);
-      while(ISBLANK(*scheme))
-        scheme++;
+      Curl_str_passblanks(&scheme);
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }
     else {

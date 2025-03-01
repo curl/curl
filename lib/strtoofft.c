@@ -39,9 +39,7 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   *num = 0; /* clear by default */
   DEBUGASSERT((base == 10) || (base == 16));
 
-  while(ISBLANK(*str))
-    str++;
-
+  Curl_str_passblanks(&str);
   rc = base == 10 ?
     Curl_str_number(&str, &number, CURL_OFF_T_MAX) :
     Curl_str_hex(&str, &number, CURL_OFF_T_MAX);
