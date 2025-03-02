@@ -384,6 +384,12 @@
 #  endif
 #endif
 
+#ifdef HAVE_LIBZ
+#ifndef ZLIB_CONST
+#define ZLIB_CONST  /* use z_const. supported by v1.2.5.2 and upper. */
+#endif
+#endif
+
 #ifdef USE_ARES
 #  ifndef CARES_NO_DEPRECATED
 #  define CARES_NO_DEPRECATED  /* for ares_getsock() */
