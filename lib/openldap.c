@@ -354,7 +354,7 @@ static CURLcode oldap_perform_auth(struct Curl_easy *data, const char *mech,
   struct berval *pcred = &cred;
   int rc;
 
-  cred.bv_val = (char *) Curl_bufref_ptr(initresp);
+  cred.bv_val = (char *)CURL_UNCONST(Curl_bufref_ptr(initresp));
   cred.bv_len = Curl_bufref_len(initresp);
   if(!cred.bv_val)
     pcred = NULL;
@@ -376,7 +376,7 @@ static CURLcode oldap_continue_auth(struct Curl_easy *data, const char *mech,
   struct berval *pcred = &cred;
   int rc;
 
-  cred.bv_val = (char *) Curl_bufref_ptr(resp);
+  cred.bv_val = (char *)CURL_UNCONST(Curl_bufref_ptr(resp));
   cred.bv_len = Curl_bufref_len(resp);
   if(!cred.bv_val)
     pcred = NULL;
