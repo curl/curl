@@ -1100,7 +1100,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 
   curves = conn_config->curves;
   if(!curves && cf->conn->transport == TRNSPRT_QUIC)
-    curves = (char *)QUIC_GROUPS;
+    curves = (char *)CURL_UNCONST(QUIC_GROUPS);
 
   if(curves) {
 #ifdef WOLFSSL_HAVE_KYBER
