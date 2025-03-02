@@ -173,7 +173,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
   /* NOTE that the cast is safe, neither of the krb5, gnu gss and heimdal
    * libraries modify the input buffer in gss_wrap()
    */
-  dec.value = (void *)from;
+  dec.value = CURL_UNCONST(from);
   dec.length = (size_t)length;
   maj = gss_wrap(&min, *context,
                  level == PROT_PRIVATE,
@@ -215,7 +215,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   struct gss_channel_bindings_struct chan;
   size_t base64_sz = 0;
   struct sockaddr_in *remote_addr =
-    (struct sockaddr_in *)(void *)&conn->remote_addr->curl_sa_addr;
+    (struct sockaddr_in *)CURL_UNCONST(&conn->remote_addr->curl_sa_addr);
   char *stringp;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
