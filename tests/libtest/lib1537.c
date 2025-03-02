@@ -80,7 +80,7 @@ CURLcode test(char *URL)
 
   /* weird input length */
   outlen = 2017; /* just a value */
-  ptr = curl_easy_unescape(NULL, (char *)"moahahaha", -1, &outlen);
+  ptr = curl_easy_unescape(NULL, "moahahaha", -1, &outlen);
   printf("unescape -1 length: %s %d\n", ptr, outlen);
 
 test_cleanup:
