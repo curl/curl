@@ -2263,7 +2263,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       /* only check alternatives of the same type the target is */
       if(check->type == target) {
         /* get data and length */
-        const char *altptr = (char *)ASN1_STRING_get0_data(check->d.ia5);
+        const char *altptr = (const char *)ASN1_STRING_get0_data(check->d.ia5);
         size_t altlen = (size_t) ASN1_STRING_length(check->d.ia5);
 
         switch(target) {
