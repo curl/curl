@@ -338,7 +338,7 @@ static unsigned x509_end_chain(const br_x509_class **ctx)
 static const br_x509_pkey *x509_get_pkey(const br_x509_class *const *ctx,
                                          unsigned *usages)
 {
-  const struct x509_context *x509 = (const struct x509_context *)ctx;
+  struct x509_context *x509 = (struct x509_context *)ctx;
 
   if(!x509->verifypeer) {
     /* Nothing in the chain is verified, just return the public key of the
@@ -616,7 +616,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
                                &sc_session);
     if(!ret && sc_session && sc_session->sdata && sc_session->sdata_len) {
       const br_ssl_session_parameters *session;
-      session = (const br_ssl_session_parameters *)(void *)sc_session->sdata;
+      session = (const br_ssl_session_parameters *)sc_session->sdata;
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
