@@ -400,7 +400,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
   msh3_lock_acquire(&stream->recv_lock);
 
   if((hd->NameLength == 7) &&
-     !strncmp(HTTP_PSEUDO_STATUS, (char *)hd->Name, 7)) {
+     !strncmp(HTTP_PSEUDO_STATUS, (const char *)hd->Name, 7)) {
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
 
