@@ -166,7 +166,11 @@ static CURLcode inflate_stream(struct Curl_easy *data,
   struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;         /* zlib state structure */
   uInt nread = z->avail_in;
+#ifdef z_const
+  z_const Bytef *orig_in = z->next_in;
+#else
   Bytef *orig_in = z->next_in;
+#endif
   bool done = FALSE;
   CURLcode result = CURLE_OK;   /* Curl_client_write status */
 
@@ -273,8 +277,12 @@ static CURLcode deflate_do_write(struct Curl_easy *data,
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
   /* Set the compressed input when this function is called */
-  z->next_in = (Bytef *) buf;
-  z->avail_in = (uInt) nbytes;
+#ifdef z_const
+  z->next_in = (z_const Bytef *)buf;
+#else
+  z->next_in = (Bytef *)buf;
+#endif
+  z->avail_in = (uInt)nbytes;
 
   if(zp->zlib_init == ZLIB_EXTERNAL_TRAILER)
     return process_trailer(data, zp);
@@ -332,8 +340,12 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
 
   if(zp->zlib_init == ZLIB_INIT_GZIP) {
     /* Let zlib handle the gzip decompression entirely */
-    z->next_in = (Bytef *) buf;
-    z->avail_in = (uInt) nbytes;
+#ifdef z_const
+    z->next_in = (z_const Bytef *)buf;
+#else
+    z->next_in = (Bytef *)buf;
+#endif
+    z->avail_in = (uInt)nbytes;
     /* Now uncompress the data */
     return inflate_stream(data, writer, type, ZLIB_INIT_GZIP);
   }
