@@ -28,6 +28,7 @@
 
 #include "urldata.h"
 #include "hash.h"
+#include "hash_offt.h"
 #include "timeval.h"
 #include "multiif.h"
 #include "sendf.h"
@@ -119,7 +120,7 @@ struct cf_msh3_ctx {
   struct cf_call_data call_data;
   struct curltime connect_started;   /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct Curl_hash streams;          /* hash `data->mid` to `stream_ctx` */
+  struct Curl_hash_offt streams;     /* hash `data->mid` to `stream_ctx` */
   /* Flags written by msh3/msquic thread */
   bool handshake_complete;
   bool handshake_succeeded;
@@ -130,7 +131,7 @@ struct cf_msh3_ctx {
   BIT(active);
 };
 
-static void h3_stream_hash_free(void *stream);
+static void h3_stream_hash_free(curl_off_t id, void *stream);
 
 static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
                                  const struct Curl_addrinfo *ai)
@@ -154,7 +155,7 @@ static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
 static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
-    Curl_hash_destroy(&ctx->streams);
+    Curl_hash_offt_destroy(&ctx->streams);
   }
   free(ctx);
 }
@@ -196,8 +197,9 @@ static void h3_stream_ctx_free(struct stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(void *stream)
+static void h3_stream_hash_free(curl_off_t id, void *stream)
 {
+  (void)id;
   DEBUGASSERT(stream);
   h3_stream_ctx_free((struct stream_ctx *)stream);
 }

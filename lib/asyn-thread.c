@@ -436,6 +436,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
   int err = ENOMEM;
   struct Curl_async *async = &data->state.async;
 
+  async->port = port;
   async->done = FALSE;
   async->dns = NULL;
   td->thread_hnd = curl_thread_t_null;

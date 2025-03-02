@@ -77,7 +77,7 @@ CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
 
       dns = Curl_cache_addr(data, ai,
                             data->conn->host.dispname, 0,
-                            data->conn->localport, FALSE);
+                            data->state.async.port, FALSE);
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
