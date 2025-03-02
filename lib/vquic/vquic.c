@@ -127,7 +127,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 #endif
 
   *psent = 0;
-  msg_iov.iov_base = (uint8_t *)pkt;
+  msg_iov.iov_base = (uint8_t *)CURL_UNCONST(pkt);
   msg_iov.iov_len = pktlen;
   msg.msg_iov = &msg_iov;
   msg.msg_iovlen = 1;
