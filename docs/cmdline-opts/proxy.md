@@ -59,4 +59,4 @@ used.
 
 Doing FTP over an HTTP proxy without --proxytunnel makes curl do HTTP with an
 FTP URL over the proxy. For such transfers, common FTP specific options do not
-work, including --ftp-ssl-reqd and --ftp-ssl-control.
+work, including --ssl-reqd and --ftp-ssl-control.

@@ -32,7 +32,7 @@ CURLINFO_SCHEME(3) instead, because this option cannot return all
 possible protocols.
 
 Pass a pointer to a long to receive the version used in the last http
-connection. The returned value is set to one of the CURLPROTO_* values:
+connection. The returned value is set to one of these values:
 
 ~~~c
 CURLPROTO_DICT, CURLPROTO_FILE, CURLPROTO_FTP, CURLPROTO_FTPS,

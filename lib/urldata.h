@@ -159,6 +159,7 @@ typedef unsigned int curl_prot_t;
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
+#include "hash_offt.h"
 #include "splay.h"
 #include "dynbuf.h"
 #include "dynhds.h"
@@ -565,7 +566,6 @@ struct hostname {
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
 #define USE_CURL_ASYNC
 struct Curl_async {
-  char *hostname;
   struct Curl_dns_entry *dns;
 #ifdef CURLRES_ASYNCH
   struct thread_data thdata;
@@ -755,6 +755,7 @@ struct ldapconninfo;
  */
 struct connectdata {
   struct Curl_llist_node cpool_node; /* conncache lists */
+  struct Curl_llist_node cshutdn_node; /* cshutdn list */
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
@@ -1135,6 +1136,7 @@ typedef enum {
   EXPIRE_QUIC,
   EXPIRE_FTP_ACCEPT,
   EXPIRE_ALPN_EYEBALLS,
+  EXPIRE_SHUTDOWN,
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 

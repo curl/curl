@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* used for test case 533, 534 and 535 */
+/* used for test case 533, 534, 535 and 546 */
 
 #include "test.h"
 

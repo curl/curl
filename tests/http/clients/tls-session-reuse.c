@@ -136,9 +136,9 @@ static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
   return size * nmemb;
 }
 
-static void add_transfer(CURLM *multi, CURLSH *share,
-                         struct curl_slist *resolve,
-                         const char *url, int http_version)
+static int add_transfer(CURLM *multi, CURLSH *share,
+                        struct curl_slist *resolve,
+                        const char *url, int http_version)
 {
   CURL *easy;
   CURLMcode mc;
@@ -146,7 +146,7 @@ static void add_transfer(CURLM *multi, CURLSH *share,
   easy = curl_easy_init();
   if(!easy) {
     fprintf(stderr, "curl_easy_init failed\n");
-    exit(1);
+    return 1;
   }
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, debug_cb);
@@ -167,30 +167,33 @@ static void add_transfer(CURLM *multi, CURLSH *share,
   mc = curl_multi_add_handle(multi, easy);
   if(mc != CURLM_OK) {
     fprintf(stderr, "curl_multi_add_handle: %s\n",
-           curl_multi_strerror(mc));
-    exit(1);
+            curl_multi_strerror(mc));
+    curl_easy_cleanup(easy);
+    return 1;
   }
+  return 0;
 }
 
 int main(int argc, char *argv[])
 {
   const char *url;
-  CURLM *multi;
+  CURLM *multi = NULL;
   CURLMcode mc;
   int running_handles = 0, numfds;
   CURLMsg *msg;
-  CURLSH *share;
+  CURLSH *share = NULL;
   CURLU *cu;
-  struct curl_slist resolve;
+  struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
   int msgs_in_queue;
   int add_more, waits, ongoing = 0;
-  char *host, *port;
+  char *host = NULL, *port = NULL;
   int http_version = CURL_HTTP_VERSION_1_1;
+  int exitcode = 1;
 
   if(argc != 3) {
     fprintf(stderr, "%s proto URL\n", argv[0]);
-    exit(2);
+    return 2;
   }
 
   if(!strcmp("h2", argv[1]))
@@ -202,41 +205,41 @@ int main(int argc, char *argv[])
   cu = curl_url();
   if(!cu) {
     fprintf(stderr, "out of memory\n");
-    exit(1);
+    return 1;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     fprintf(stderr, "not a URL: '%s'\n", url);
-    exit(1);
+    goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     fprintf(stderr, "could not get host of '%s'\n", url);
-    exit(1);
+    goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     fprintf(stderr, "could not get port of '%s'\n", url);
-    exit(1);
+    goto cleanup;
   }
 
-  memset(&resolve, 0, sizeof(resolve));
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
                  host, port);
-  curl_slist_append(&resolve, resolve_buf);
+  resolve = curl_slist_append(resolve, resolve_buf);
 
   multi = curl_multi_init();
   if(!multi) {
     fprintf(stderr, "curl_multi_init failed\n");
-    exit(1);
+    goto cleanup;
   }
 
   share = curl_share_init();
   if(!share) {
     fprintf(stderr, "curl_share_init failed\n");
-    exit(1);
+    goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 
 
-  add_transfer(multi, share, &resolve, url, http_version);
+  if(add_transfer(multi, share, resolve, url, http_version))
+    goto cleanup;
   ++ongoing;
   add_more = 6;
   waits = 3;
@@ -244,16 +247,16 @@ int main(int argc, char *argv[])
     mc = curl_multi_perform(multi, &running_handles);
     if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_perform: %s\n",
-             curl_multi_strerror(mc));
-      exit(1);
+              curl_multi_strerror(mc));
+      goto cleanup;
     }
 
     if(running_handles) {
       mc = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
       if(mc != CURLM_OK) {
         fprintf(stderr, "curl_multi_poll: %s\n",
-               curl_multi_strerror(mc));
-        exit(1);
+                curl_multi_strerror(mc));
+        goto cleanup;
       }
     }
 
@@ -262,7 +265,8 @@ int main(int argc, char *argv[])
     }
     else {
       while(add_more) {
-        add_transfer(multi, share, &resolve, url, http_version);
+        if(add_transfer(multi, share, resolve, url, http_version))
+          goto cleanup;
         ++ongoing;
         --add_more;
       }
@@ -284,12 +288,12 @@ int main(int argc, char *argv[])
         else if(msg->data.result) {
           fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
                   ": failed with %d\n", xfer_id, msg->data.result);
-          exit(1);
+          goto cleanup;
         }
         else if(status != 200) {
           fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
                   ": wrong http status %ld (expected 200)\n", xfer_id, status);
-          exit(1);
+          goto cleanup;
         }
         curl_multi_remove_handle(multi, msg->easy_handle);
         curl_easy_cleanup(msg->easy_handle);
@@ -305,5 +309,27 @@ int main(int argc, char *argv[])
   } while(ongoing || add_more);
 
   fprintf(stderr, "exiting\n");
-  exit(EXIT_SUCCESS);
+  exitcode = EXIT_SUCCESS;
+
+cleanup:
+
+  if(multi) {
+    CURL **list = curl_multi_get_handles(multi);
+    if(list) {
+      int i;
+      for(i = 0; list[i]; i++) {
+        curl_multi_remove_handle(multi, list[i]);
+        curl_easy_cleanup(list[i]);
+      }
+      curl_free(list);
+    }
+    curl_multi_cleanup(multi);
+  }
+  curl_share_cleanup(share);
+  curl_slist_free_all(resolve);
+  curl_free(host);
+  curl_free(port);
+  curl_url_cleanup(cu);
+
+  return exitcode;
 }

@@ -482,7 +482,7 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
         #endif
       ]],[[
         int i = 0;
-        exit(i);
+        return i;
       ]])
     ],[
       tmp_compiler_works="yes"

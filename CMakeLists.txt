@@ -352,13 +352,12 @@ endif()
 if(WIN32)
   option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
   if(CURL_STATIC_CRT AND MSVC)
-    if(BUILD_STATIC_CURL)
+    if(BUILD_STATIC_CURL OR NOT BUILD_CURL_EXE)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
       string(APPEND CMAKE_C_FLAGS_RELEASE " -MT")
       string(APPEND CMAKE_C_FLAGS_DEBUG " -MTd")
     else()
-      message(WARNING "Static CRT requires curl executable built with static libcurl "
-        "(BUILD_STATIC_LIBS=ON and BUILD_STATIC_CURL=ON).")
+      message(WARNING "Static CRT requires static or no curl executable.")
     endif()
   endif()
 endif()
@@ -1953,22 +1952,6 @@ if(APPLE)
 endif()
 
 # Some other minor tests
-
-if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
-  include(CheckCCompilerFlag)
-  check_c_compiler_flag("-Wno-long-double" HAVE_C_FLAG_Wno_long_double)
-  if(HAVE_C_FLAG_Wno_long_double)
-    # The Mac version of GCC warns about use of long double. Disable it.
-    get_source_file_property(_mprintf_compile_flags "mprintf.c" COMPILE_FLAGS)
-    if(_mprintf_compile_flags)
-      string(APPEND _mprintf_compile_flags " -Wno-long-double")
-    else()
-      set(_mprintf_compile_flags "-Wno-long-double")
-    endif()
-    set_source_files_properties("mprintf.c" PROPERTIES
-      COMPILE_FLAGS ${_mprintf_compile_flags})
-  endif()
-endif()
 
 if(_cmake_try_compile_target_type_save)
   set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save})

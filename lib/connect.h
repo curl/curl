@@ -45,7 +45,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 #define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
-                         struct curltime *nowp);
+                         int timeout_ms, struct curltime *nowp);
 
 /* return how much time there is left to shutdown the connection at
  * sockindex. Returns 0 if there is no limit or shutdown has not started. */

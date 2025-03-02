@@ -376,9 +376,8 @@ supports HTTP zstd content encoding using zstd library (Added in 7.72.0)
 
 *features* mask bit: CURL_VERSION_CONV
 
-libcurl was built with support for character conversions, as provided by the
-CURLOPT_CONV_* callbacks. Always 0 since 7.82.0. (Added in 7.15.4,
-deprecated.)
+libcurl was built with support for character conversions provided by
+callbacks. Always 0 since 7.82.0. (Added in 7.15.4, deprecated.)
 
 ## no name
 

@@ -316,4 +316,4 @@ filenames are now escaped before transmission.
 # RETURN VALUE
 
 0 means everything was OK, non-zero means an error occurred corresponding to a
-CURL_FORMADD_* constant defined in *\<curl/curl.h\>*.
+`CURL_FORMADD_*` constant defined in *\<curl/curl.h\>*.

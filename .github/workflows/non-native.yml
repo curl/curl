@@ -59,21 +59,21 @@ jobs:
             time cmake -B bld -G Ninja \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld --config Debug
+            time cmake --build bld
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --config Debug --target testdeps
+              time cmake --build bld --target testdeps
               export TFLAGS='-j4'
-              time cmake --build bld --config Debug --target test-ci
+              time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
-            time cmake --build bld --config Debug --target curl-examples
+            time cmake --build bld --target curl-examples
             echo '::endgroup::'
 
   openbsd:
@@ -100,20 +100,20 @@ jobs:
             time cmake -B bld -G Ninja \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld --config Debug
+            time cmake --build bld
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --config Debug --target testdeps
+              time cmake --build bld --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
-              time cmake --build bld --config Debug --target test-ci
+              time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
-            time cmake --build bld --config Debug --target curl-examples
+            time cmake --build bld --target curl-examples
             echo '::endgroup::'
 
   freebsd:
@@ -140,6 +140,7 @@ jobs:
           version: '14.1'
           architecture: ${{ matrix.arch }}
           run: |
+            export MAKEFLAGS=-j3
             # https://ports.freebsd.org/
             time sudo pkg install -y autoconf automake libtool \
               pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
@@ -154,18 +155,18 @@ jobs:
               || { tail -n 1000 config.log; false; }
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
-            time make -j3 install
+            time make install
             src/curl --disable --version
             desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              time make -j3 -C tests
+              time make -C tests
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
                 time make test-ci V=1 TFLAGS='-j4'
               fi
             fi
             if [ "${desc#*!examples*}" = "${desc}" ]; then
               echo '::group::build examples'
-              time make -j3 examples
+              time make examples
               echo '::endgroup::'
             fi
 
@@ -184,25 +185,25 @@ jobs:
               -DCMAKE_C_COMPILER='${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_USE_GSSAPI=ON \
               ${{ matrix.options }} \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld --config Debug
+            time cmake --build bld
             bld/src/curl --disable --version
             desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --config Debug --target testdeps
+              time cmake --build bld --target testdeps
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
-                time cmake --build bld --config Debug --target test-ci
+                time cmake --build bld --target test-ci
               fi
             fi
             if [ "${desc#*!examples*}" = "${desc}" ]; then
               echo '::group::build examples'
-              time cmake --build bld --config Debug --target curl-examples
+              time cmake --build bld --target curl-examples
               echo '::endgroup::'
             fi
 
@@ -223,6 +224,7 @@ jobs:
           run: |
             set -e
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
+            export MAKEFLAGS=-j3
             time autoreconf -fi
             mkdir bld && cd bld && time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
@@ -231,12 +233,12 @@ jobs:
               || { tail -n 1000 config.log; false; }
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
-            time gmake -j3 install
+            time gmake install
             src/curl --disable --version
-            time gmake -j3 -C tests
+            time gmake -C tests
             time gmake test-ci V=1
             echo '::group::build examples'
-            time gmake -j3 examples
+            time gmake examples
             echo '::endgroup::'
 
   ios:
@@ -244,9 +246,9 @@ jobs:
     runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
+      MAKEFLAGS: -j 4
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.build.compiler || 'clang' }}
-      MAKEFLAGS: -j 4
       # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
       libressl-version: 4.0.0
     strategy:
@@ -261,6 +263,7 @@ jobs:
             install_steps: libressl
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
+              -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
@@ -269,6 +272,7 @@ jobs:
           - name: 'libressl'
             install_steps: libressl
             generator: Xcode
+            options: --config Debug
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
@@ -361,7 +365,7 @@ jobs:
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --verbose
+            cmake --build bld ${{ matrix.build.options }} --parallel 4 --verbose
           else
             make -C bld V=1
           fi
@@ -372,7 +376,7 @@ jobs:
       - name: 'build tests'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target testdeps --verbose
+            cmake --build bld ${{ matrix.build.options }} --parallel 4 --target testdeps --verbose
           else
             make -C bld V=1 -C tests
           fi
@@ -380,7 +384,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target curl-examples --verbose
+            cmake --build bld ${{ matrix.build.options }} --parallel 4 --target curl-examples --verbose
           else
             make -C bld examples V=1
           fi
@@ -390,9 +394,9 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 25
     env:
+      MAKEFLAGS: -j 5
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
-      MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
@@ -490,7 +494,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --verbose
           else
-            make -j5 -C bld V=1
+            make -C bld V=1
           fi
 
       - name: 'curl info'
@@ -501,7 +505,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
-            make -j5 -C bld -C tests
+            make -C bld -C tests
           fi
 
       - name: 'build examples'
@@ -509,7 +513,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
-            make -j5 -C bld examples
+            make -C bld examples
           fi
 
   amiga:
@@ -517,6 +521,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     env:
+      MAKEFLAGS: -j 5
       amissl-version: 5.18
     strategy:
       matrix:
@@ -584,9 +589,9 @@ jobs:
       - name: 'build'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --parallel 5
+            cmake --build bld
           else
-            make -j5 -C bld
+            make -C bld
           fi
 
       - name: 'curl info'
@@ -596,18 +601,18 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --parallel 5 --target testdeps
+            cmake --build bld --target testdeps
           else
-            make -j5 -C bld -C tests
+            make -C bld -C tests
           fi
 
       - name: 'build examples'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --parallel 5 --target curl-examples
+            cmake --build bld --target curl-examples
           else
-            make -j5 -C bld examples
+            make -C bld examples
           fi
 
   msdos:
@@ -615,6 +620,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     env:
+      MAKEFLAGS: -j 5
       toolchain-version: '3.4'
     strategy:
       matrix:
@@ -694,7 +700,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld
           else
-            make -j5 -C bld
+            make -C bld
           fi
 
       - name: 'curl info'
@@ -706,7 +712,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
-            make -j5 -C bld -C tests
+            make -C bld -C tests
           fi
 
       - name: 'build examples'
@@ -715,5 +721,5 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
-            make -j5 -C bld examples
+            make -C bld examples
           fi

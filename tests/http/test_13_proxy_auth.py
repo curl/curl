@@ -25,6 +25,7 @@
 ###########################################################################
 #
 import logging
+import os
 import re
 import pytest
 
@@ -152,3 +153,15 @@ class TestProxyAuth:
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
         assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
             if tunnel == 'h2' else 'HTTP/1.1'
+
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('SPNEGO'),
+                        reason='curl lacks SPNEGO support')
+    def test_13_09_negotiate_http(self, env: Env, httpd):
+        run_env = os.environ.copy()
+        run_env['https_proxy'] = f'http://127.0.0.1:{env.proxy_port}'
+        curl = CurlClient(env=env, run_env=run_env)
+        url = f'https://localhost:{env.https_port}/data.json'
+        r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True, extra_args=[
+            '--negotiate', '--proxy-user', 'proxy:proxy'
+        ])
+        r1.check_response(count=1, http_status=200)

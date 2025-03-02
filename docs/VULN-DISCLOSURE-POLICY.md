@@ -247,11 +247,11 @@ local system or network, the bar is raised. If a local user wrongfully has
 elevated rights on your system enough to attack curl, they can probably
 already do much worse harm and the problem is not really in curl.
 
-## Experiments
+## Debug & Experiments
 
 Vulnerabilities in features which are off by default (in the build) and
-documented as experimental, are not eligible for a reward and we do not
-consider them security problems.
+documented as experimental, or exist only in debug mode, are not eligible for a
+reward and we do not consider them security problems.
 
 ## URL inconsistencies
 

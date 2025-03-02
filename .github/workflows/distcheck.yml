@@ -19,6 +19,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  MAKEFLAGS: -j 5
+
 jobs:
   maketgz-and-verify-in-tree:
     runs-on: ubuntu-latest
@@ -55,9 +58,9 @@ jobs:
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           ./configure --prefix=$HOME/temp --without-ssl --without-libpsl
-          make -j5
-          make -j5 test-ci
-          make -j5 install
+          make
+          make test-ci
+          make install
           popd
           # basic check of the installed files
           bash scripts/installcheck.sh $HOME/temp
@@ -80,8 +83,8 @@ jobs:
           mkdir build
           pushd build
           ../curl-99.98.97/configure --without-ssl --without-libpsl
-          make -j5
-          make -j5 test-ci
+          make
+          make test-ci
           popd
           rm -rf build
           rm -rf curl-99.98.97
@@ -103,9 +106,9 @@ jobs:
           mkdir build
           pushd build
           ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg" --without-libpsl
-          make -j5
-          make -j5 test-ci
-          make -j5 install
+          make
+          make test-ci
+          make install
 
   verify-out-of-tree-cmake:
     runs-on: ubuntu-latest
@@ -122,7 +125,7 @@ jobs:
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           cmake -B build -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
-          make -C build -j5
+          make -C build
 
   missing-files:
     runs-on: ubuntu-latest

@@ -51,7 +51,7 @@ stdout
 A common technique is to use the write callback to store the incoming data
 into a dynamically growing allocated buffer, and then this
 CURLOPT_WRITEDATA(3) is used to point to a struct or the buffer to store data
-in. Like in the getinmemory example:
+in. Like in the *getinmemory* example:
 https://curl.se/libcurl/c/getinmemory.html
 
 # HISTORY

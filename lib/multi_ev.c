@@ -54,8 +54,8 @@ static void mev_in_callback(struct Curl_multi *multi, bool value)
  * what to supervise (CURL_POLL_IN/CURL_POLL_OUT/CURL_POLL_REMOVE)
  */
 struct mev_sh_entry {
-  struct Curl_hash xfers; /* hash of transfers using this socket */
-  struct Curl_hash conns; /* hash of connections using this socket */
+  struct Curl_hash_offt xfers; /* hash of transfers using this socket */
+  struct Curl_hash_offt conns; /* hash of connections using this socket */
   void *user_data;      /* libcurl app data via curl_multi_assign() */
   unsigned int action;  /* CURL_POLL_IN/CURL_POLL_OUT we last told the
                          * libcurl application to watch out for */
@@ -81,8 +81,8 @@ static size_t mev_sh_entry_compare(void *k1, size_t k1_len,
 static void mev_sh_entry_dtor(void *freethis)
 {
   struct mev_sh_entry *entry = (struct mev_sh_entry *)freethis;
-  Curl_hash_destroy(&entry->xfers);
-  Curl_hash_destroy(&entry->conns);
+  Curl_hash_offt_destroy(&entry->xfers);
+  Curl_hash_offt_destroy(&entry->conns);
   free(entry);
 }
 
@@ -95,11 +95,6 @@ mev_sh_entry_get(struct Curl_hash *sh, curl_socket_t s)
     return Curl_hash_pick(sh, (char *)&s, sizeof(curl_socket_t));
   }
   return NULL;
-}
-
-static void mev_nop_dtor(void *e)
-{
-  (void)e; /* does nothing */
 }
 
 /* make sure this socket is present in the hash for this handle */
@@ -119,8 +114,8 @@ mev_sh_entry_add(struct Curl_hash *sh, curl_socket_t s)
   if(!check)
     return NULL; /* major failure */
 
-  Curl_hash_offt_init(&check->xfers, CURL_MEV_XFER_HASH_SIZE, mev_nop_dtor);
-  Curl_hash_offt_init(&check->conns, CURL_MEV_CONN_HASH_SIZE, mev_nop_dtor);
+  Curl_hash_offt_init(&check->xfers, CURL_MEV_XFER_HASH_SIZE, NULL);
+  Curl_hash_offt_init(&check->conns, CURL_MEV_CONN_HASH_SIZE, NULL);
 
   /* make/add new hash entry */
   if(!Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check)) {
@@ -139,7 +134,7 @@ static void mev_sh_entry_kill(struct Curl_multi *multi, curl_socket_t s)
 
 static size_t mev_sh_entry_user_count(struct mev_sh_entry *e)
 {
-  return Curl_hash_count(&e->xfers) + Curl_hash_count(&e->conns);
+  return Curl_hash_offt_count(&e->xfers) + Curl_hash_offt_count(&e->conns);
 }
 
 static bool mev_sh_entry_xfer_known(struct mev_sh_entry *e,
@@ -174,7 +169,7 @@ static bool mev_sh_entry_conn_add(struct mev_sh_entry *e,
 static bool mev_sh_entry_xfer_remove(struct mev_sh_entry *e,
                                      struct Curl_easy *data)
 {
-  return !Curl_hash_offt_remove(&e->xfers, data->id);
+  return Curl_hash_offt_remove(&e->xfers, data->id);
 }
 
 /* Purge any information about socket `s`.
@@ -341,8 +336,8 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
                  ", total=%zu/%zu (xfer/conn)", s,
                  conn ? "connection" : "transfer",
                  conn ? conn->connection_id : data->id,
-                 Curl_hash_count(&entry->xfers),
-                 Curl_hash_count(&entry->conns));
+                 Curl_hash_offt_count(&entry->xfers),
+                 Curl_hash_offt_count(&entry->conns));
     }
     else {
       for(j = 0; j < prev_ps->num; j++) {
@@ -399,8 +394,8 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
         return mresult;
       CURL_TRC_M(data, "ev entry fd=%" FMT_SOCKET_T ", removed transfer, "
                  "total=%zu/%zu (xfer/conn)", s,
-                 Curl_hash_count(&entry->xfers),
-                 Curl_hash_count(&entry->conns));
+                 Curl_hash_offt_count(&entry->xfers),
+                 Curl_hash_offt_count(&entry->conns));
     }
     else {
       mresult = mev_forget_socket(multi, data, s, "last user gone");
@@ -415,7 +410,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
 }
 
 static struct easy_pollset*
-mev_add_new_pollset(struct Curl_hash *h, curl_off_t id)
+mev_add_new_pollset(struct Curl_hash_offt *h, curl_off_t id)
 {
   struct easy_pollset *ps;
 
@@ -522,6 +517,20 @@ CURLMcode Curl_multi_ev_assign(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
+static bool mev_xfer_expire_cb(curl_off_t id, void *value, void *user_data)
+{
+  const struct curltime *nowp = user_data;
+  struct Curl_easy *data = value;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
+  if(data && id >= 0) {
+    /* Expire with out current now, so we will get it below when
+     * asking the splaytree for expired transfers. */
+    Curl_expire_ex(data, nowp, 0, EXPIRE_RUN_NOW);
+  }
+  return TRUE;
+}
 
 void Curl_multi_ev_expire_xfers(struct Curl_multi *multi,
                                 curl_socket_t s,
@@ -539,24 +548,9 @@ void Curl_multi_ev_expire_xfers(struct Curl_multi *multi,
      asked to get removed, so thus we better survive stray socket actions
      and just move on. */
   if(entry) {
-    struct Curl_hash_iterator iter;
-    struct Curl_hash_element *he;
+    Curl_hash_offt_visit(&entry->xfers, mev_xfer_expire_cb, (void *)nowp);
 
-    /* the socket can be shared by many transfers, iterate */
-    Curl_hash_start_iterate(&entry->xfers, &iter);
-    for(he = Curl_hash_next_element(&iter); he;
-        he = Curl_hash_next_element(&iter)) {
-      struct Curl_easy *data = (struct Curl_easy *)he->ptr;
-      DEBUGASSERT(data);
-      DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
-      DEBUGASSERT(data->id >= 0); /* we should not track internal handles */
-
-      /* Expire with out current now, so we will get it below when
-       * asking the splaytree for expired transfers. */
-      Curl_expire_ex(data, nowp, 0, EXPIRE_RUN_NOW);
-    }
-
-    if(Curl_hash_count(&entry->conns))
+    if(Curl_hash_offt_count(&entry->conns))
       *run_cpool = TRUE;
   }
 }
@@ -587,8 +581,9 @@ void Curl_multi_ev_conn_done(struct Curl_multi *multi,
 
 #define CURL_MEV_PS_HASH_SLOTS   (991)  /* nice prime */
 
-static void mev_hash_pollset_free(void *entry)
+static void mev_hash_pollset_free(curl_off_t id, void *entry)
 {
+  (void)id;
   free(entry);
 }
 
@@ -605,6 +600,6 @@ void Curl_multi_ev_init(struct Curl_multi *multi, size_t hashsize)
 void Curl_multi_ev_cleanup(struct Curl_multi *multi)
 {
   Curl_hash_destroy(&multi->ev.sh_entries);
-  Curl_hash_destroy(&multi->ev.xfer_pollsets);
-  Curl_hash_destroy(&multi->ev.conn_pollsets);
+  Curl_hash_offt_destroy(&multi->ev.xfer_pollsets);
+  Curl_hash_offt_destroy(&multi->ev.conn_pollsets);
 }

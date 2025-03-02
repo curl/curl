@@ -898,7 +898,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   unsigned char alpn_buffer[128];
 #endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  struct Curl_schannel_cred *old_cred = NULL;
   CURLcode result;
 
   DEBUGASSERT(backend);
@@ -955,9 +954,10 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* check for an existing reusable credential handle */
   if(ssl_config->primary.cache_session) {
+    struct Curl_schannel_cred *old_cred;
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
-                               (void **)&old_cred)) {
+    old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key);
+    if(old_cred) {
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 

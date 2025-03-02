@@ -962,31 +962,29 @@ out:
   return result;
 }
 
-bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             const char *ssl_peer_key,
-                             void **sobj)
+void *Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              const char *ssl_peer_key)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result;
+  void *sobj;
 
-  *sobj = NULL;
   if(!scache)
-    return FALSE;
+    return NULL;
 
   result = cf_ssl_find_peer_by_key(data, scache, ssl_peer_key, conn_config,
                                    &peer);
   if(result)
-    return FALSE;
+    return NULL;
 
-  if(peer)
-    *sobj = peer->sobj;
+  sobj = peer ? peer->sobj : NULL;
 
   CURL_TRC_SSLS(data, "%s cached session for '%s'",
-                *sobj ? "Found" : "No", ssl_peer_key);
-  return !!*sobj;
+                sobj ? "Found" : "No", ssl_peer_key);
+  return sobj;
 }
 
 void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,

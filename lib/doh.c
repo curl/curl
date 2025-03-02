@@ -1181,7 +1181,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
   if(dohp->probe[DOH_SLOT_IPV4].easy_mid < 0 &&
      dohp->probe[DOH_SLOT_IPV6].easy_mid < 0) {
-    failf(data, "Could not DoH-resolve: %s", data->state.async.hostname);
+    failf(data, "Could not DoH-resolve: %s", dohp->host);
     return CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
       CURLE_COULDNT_RESOLVE_HOST;
   }

@@ -85,12 +85,11 @@ void Curl_ssl_scache_unlock(struct Curl_easy *data);
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
  * @param ssl_peer_key the key for lookup
- * @param sobj    on return, the object for the peer key or NULL
+ * @retval sobj   the object for the peer key or NULL
  */
-bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             const char *ssl_peer_key,
-                             void **sobj);
+void *Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              const char *ssl_peer_key);
 
 typedef void Curl_ssl_scache_obj_dtor(void *sobj);
 
