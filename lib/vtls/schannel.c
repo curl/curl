@@ -2603,7 +2603,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                         CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
   if(!share || !share->cert_store) {
     return NULL;
@@ -2681,7 +2681,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                         CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
   if(!share) {
     share = calloc(1, sizeof(*share));
@@ -2689,7 +2689,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
       return FALSE;
     }
     if(!Curl_hash_add2(&multi->proto_hash,
-                       (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                       CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                        sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1,
                        share, schannel_cert_share_free)) {
       free(share);
