@@ -338,7 +338,7 @@ static unsigned x509_end_chain(const br_x509_class **ctx)
 static const br_x509_pkey *x509_get_pkey(const br_x509_class *const *ctx,
                                          unsigned *usages)
 {
-  struct x509_context *x509 = (struct x509_context *)ctx;
+  struct x509_context *x509 = (struct x509_context *)CURL_UNCONST(ctx);
 
   if(!x509->verifypeer) {
     /* Nothing in the chain is verified, just return the public key of the
