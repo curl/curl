@@ -170,7 +170,7 @@ void showhelp(const char *trigger, const char *arg, const char *endarg)
 #ifdef z_const
   z.next_in = (z_const Bytef *)hugehelpgz + HEADERLEN;
 #else
-  z.next_in = (Bytef *)hugehelpgz + HEADERLEN;
+  z.next_in = (Bytef *)CURL_UNCONST(hugehelpgz) + HEADERLEN;
 #endif
 
   if(inflateInit2(&z, -MAX_WBITS) != Z_OK)

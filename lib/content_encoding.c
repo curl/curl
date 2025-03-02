@@ -280,7 +280,7 @@ static CURLcode deflate_do_write(struct Curl_easy *data,
 #ifdef z_const
   z->next_in = (z_const Bytef *)buf;
 #else
-  z->next_in = (Bytef *)buf;
+  z->next_in = (Bytef *)CURL_UNCONST(buf);
 #endif
   z->avail_in = (uInt)nbytes;
 
@@ -343,7 +343,7 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
 #ifdef z_const
     z->next_in = (z_const Bytef *)buf;
 #else
-    z->next_in = (Bytef *)buf;
+    z->next_in = (Bytef *)CURL_UNCONST(buf);
 #endif
     z->avail_in = (uInt)nbytes;
     /* Now uncompress the data */
