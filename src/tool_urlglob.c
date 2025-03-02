@@ -609,7 +609,7 @@ CURLcode glob_match_url(char **result, const char *filename,
                         struct URLGlob *glob)
 {
   char numbuf[18];
-  const char *appendthis = (char *)"";
+  const char *appendthis = "";
   size_t appendlen = 0;
   struct curlx_dynbuf dyn;
 
