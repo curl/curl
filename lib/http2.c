@@ -1500,6 +1500,12 @@ static int on_begin_headers(nghttp2_session *session,
   return 0;
 }
 
+static void report_header_error(struct Curl_easy *data, CURLcode result)
+{
+  failf(data, "Error receiving HTTP2 header: %d(%s)", result,
+        curl_easy_strerror(result));
+}
+
 /* frame->hd.type is either NGHTTP2_HEADERS or NGHTTP2_PUSH_PROMISE */
 static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      const uint8_t *name, size_t namelen,
@@ -1599,8 +1605,10 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     result = Curl_dynhds_add(&stream->resp_trailers,
                              (const char *)name, namelen,
                              (const char *)value, valuelen);
-    if(result)
+    if(result) {
+      report_header_error(data_s, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
 
     return 0;
   }
@@ -1611,13 +1619,17 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     char buffer[32];
     result = Curl_http_decode_status(&stream->status_code,
                                      (const char *)value, valuelen);
-    if(result)
+    if(result) {
+      report_header_error(data_s, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
     msnprintf(buffer, sizeof(buffer), HTTP_PSEUDO_STATUS ":%u\r",
               stream->status_code);
     result = Curl_headers_push(data_s, buffer, CURLH_PSEUDO);
-    if(result)
+    if(result) {
+      report_header_error(data_s, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
     Curl_dyn_reset(&ctx->scratch);
     result = Curl_dyn_addn(&ctx->scratch, STRCONST("HTTP/2 "));
     if(!result)
@@ -1627,8 +1639,10 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     if(!result)
       h2_xfer_write_resp_hd(cf, data_s, stream, Curl_dyn_ptr(&ctx->scratch),
                             Curl_dyn_len(&ctx->scratch), FALSE);
-    if(result)
+    if(result) {
+      report_header_error(data_s, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
     /* if we receive data for another handle, wake that up */
     if(CF_DATA_CURRENT(cf) != data_s)
       Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
@@ -1652,8 +1666,10 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(!result)
     h2_xfer_write_resp_hd(cf, data_s, stream, Curl_dyn_ptr(&ctx->scratch),
                           Curl_dyn_len(&ctx->scratch), FALSE);
-  if(result)
+  if(result) {
+    report_header_error(data_s, result);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
   /* if we receive data for another handle, wake that up */
   if(CF_DATA_CURRENT(cf) != data_s)
     Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
