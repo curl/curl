@@ -95,7 +95,7 @@ test_thread(void *ptr)
   for(i = 0; i < PER_THREAD_SIZE; i++) {
     CURL *curl = curl_easy_init();
     if(curl) {
-      curl_easy_setopt(curl, CURLOPT_URL, (char *)ctx->URL);
+      curl_easy_setopt(curl, CURLOPT_URL, (char *)CURL_UNCONST(ctx->URL));
 
       /* use the share object */
       curl_easy_setopt(curl, CURLOPT_SHARE, ctx->share);
