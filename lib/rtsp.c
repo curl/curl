@@ -905,7 +905,7 @@ CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
   }
 
   Curl_set_in_callback(data, TRUE);
-  wrote = writeit((char *)ptr, 1, len, user_ptr);
+  wrote = writeit((char *)CURL_UNCONST(ptr), 1, len, user_ptr);
   Curl_set_in_callback(data, FALSE);
 
   if(CURL_WRITEFUNC_PAUSE == wrote) {

@@ -45,7 +45,7 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
     Curl_str_hex(&str, &number, CURL_OFF_T_MAX);
 
   if(endp)
-    *endp = (char *)str;
+    *endp = (char *)CURL_UNCONST(str);
   if(rc == STRE_OVERFLOW)
     /* overflow */
     return CURL_OFFT_FLOW;

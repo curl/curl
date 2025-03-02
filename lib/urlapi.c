@@ -1888,7 +1888,7 @@ nomem:
             bad = TRUE;
           free(decoded);
         }
-        else if(hostname_check(u, (char *)newp, n))
+        else if(hostname_check(u, (char *)CURL_UNCONST(newp), n))
           bad = TRUE;
         if(bad) {
           Curl_dyn_free(&enc);
@@ -1898,7 +1898,7 @@ nomem:
     }
 
     free(*storep);
-    *storep = (char *)newp;
+    *storep = (char *)CURL_UNCONST(newp);
   }
   return CURLUE_OK;
 }
