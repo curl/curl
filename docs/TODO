@@ -69,7 +69,6 @@
 
  5. HTTP
  5.1 Provide the error body from a CONNECT response
- 5.2 Obey Retry-After in redirects
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
@@ -597,14 +596,6 @@
  new callback? Through some other means?
 
  See https://github.com/curl/curl/issues/9513
-
-5.2 Obey Retry-After in redirects
-
- The Retry-After is said to dicate "the minimum time that the user agent is
- asked to wait before issuing the redirected request" and libcurl does not
- obey this.
-
- See https://github.com/curl/curl/issues/11447
 
 5.3 Rearrange request header order
 
