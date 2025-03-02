@@ -440,7 +440,7 @@ static CURLcode oldap_perform_mechs(struct Curl_easy *data)
   };
 
   rc = ldap_search_ext(li->ld, "", LDAP_SCOPE_BASE, "(objectclass=*)",
-                       (char **) supportedSASLMechanisms, 0,
+                       (char **)CURL_UNCONST(supportedSASLMechanisms), 0,
                        NULL, NULL, NULL, 0, &li->msgid);
   if(rc != LDAP_SUCCESS)
     return oldap_map_error(rc, CURLE_LOGIN_DENIED);
