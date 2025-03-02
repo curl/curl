@@ -729,7 +729,7 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
       return CURLE_OK;
     if(state & BR_SSL_SENDREC) {
       buf = br_ssl_engine_sendrec_buf(&backend->ctx.eng, &len);
-      ret = Curl_conn_cf_send(cf->next, data, (char *)buf, len, FALSE,
+      ret = Curl_conn_cf_send(cf->next, data, (const char *)buf, len, FALSE,
                               &result);
       CURL_TRC_CF(data, cf, "ssl_send(len=%zu) -> %zd, %d", len, ret, result);
       if(ret <= 0) {
