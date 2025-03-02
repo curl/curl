@@ -3795,7 +3795,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   {
     const char *curves = conn_config->curves;
     if(curves) {
-      if(!SSL_CTX_set1_curves_list(octx->ssl_ctx, curves)) {
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#define OSSL_CURVE_CAST(x) (x)
+#else
+#define OSSL_CURVE_CAST(x) (char *)CURL_UNCONST(x)
+#endif
+      if(!SSL_CTX_set1_curves_list(octx->ssl_ctx, OSSL_CURVE_CAST(curves))) {
         failf(data, "failed setting curves list: '%s'", curves);
         return CURLE_SSL_CIPHER;
       }
