@@ -62,7 +62,7 @@ UNITTEST_START
   /*
    * Test a non existent login in our netrc file.
    */
-  s_login = (char *)"me";
+  s_login = (char *)CURL_UNCONST("me");
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
                            "example.com", &s_login, &s_password, arg);
@@ -73,7 +73,7 @@ UNITTEST_START
   /*
    * Test a non existent login and host in our netrc file.
    */
-  s_login = (char *)"me";
+  s_login = (char *)CURL_UNCONST("me");
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
                            "test.example.com", &s_login, &s_password, arg);
@@ -85,7 +85,7 @@ UNITTEST_START
    * Test a non existent login (substring of an existing one) in our
    * netrc file.
    */
-  s_login = (char *)"admi";
+  s_login = (char *)CURL_UNCONST("admi");
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
                            "example.com", &s_login, &s_password, arg);
@@ -97,7 +97,7 @@ UNITTEST_START
    * Test a non existent login (superstring of an existing one)
    * in our netrc file.
    */
-  s_login = (char *)"adminn";
+  s_login = (char *)CURL_UNCONST("adminn");
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
                            "example.com", &s_login, &s_password, arg);
@@ -177,7 +177,6 @@ UNITTEST_START
   abort_unless(s_login != NULL, "returned NULL!");
   fail_unless(strncmp(s_login, "none", 4) == 0, "login should be 'none'");
   Curl_netrc_cleanup(&store);
-
 }
 UNITTEST_STOP
 
