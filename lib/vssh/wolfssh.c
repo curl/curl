@@ -263,7 +263,7 @@ static ssize_t wsftp_send(struct Curl_easy *data, int sockindex,
   rc = wolfSSH_SFTP_SendWritePacket(sshc->ssh_session, sshc->handle,
                                     sshc->handleSz,
                                     &offset[0],
-                                    (byte *)mem, (word32)len);
+                                    (byte *)CURL_UNCONST(mem), (word32)len);
 
   if(rc == WS_FATAL_ERROR)
     rc = wolfSSH_get_error(sshc->ssh_session);
@@ -504,7 +504,8 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       break;
     case SSH_SFTP_REALPATH:
-      name = wolfSSH_SFTP_RealPath(sshc->ssh_session, (char *)".");
+      name = wolfSSH_SFTP_RealPath(sshc->ssh_session,
+                                   (char *)CURL_UNCONST("."));
       rc = wolfSSH_get_error(sshc->ssh_session);
       if(rc == WS_WANT_READ) {
         *block = TRUE;
