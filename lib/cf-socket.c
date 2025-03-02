@@ -731,7 +731,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
                IDs and the former returns none at all. So the scope ID, if
                present, is known to be numeric */
             curl_off_t scope_id;
-            if(Curl_str_number((const char **)&scope_ptr, &scope_id, UINT_MAX))
+            if(Curl_str_number((const char **)CURL_UNCONST(&scope_ptr),
+                               &scope_id, UINT_MAX))
               return CURLE_UNSUPPORTED_PROTOCOL;
             si6->sin6_scope_id = (unsigned int)scope_id;
           }
