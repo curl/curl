@@ -85,7 +85,7 @@ Curl_llist_insert_next(struct Curl_llist *list,
 #ifdef DEBUGBUILD
   ne->_init = NODEINIT;
 #endif
-  ne->_ptr = (void *) p;
+  ne->_ptr = CURL_UNCONST(p);
   ne->_list = list;
   if(list->_size == 0) {
     list->_head = ne;

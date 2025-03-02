@@ -162,7 +162,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
   if(strlen(gopherpath) <= 2) {
-    sel = (char *)"";
+    sel = (char *)CURL_UNCONST("");
     len = strlen(sel);
     free(gopherpath);
   }

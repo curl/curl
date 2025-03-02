@@ -83,7 +83,7 @@ struct hsts *Curl_hsts_init(void)
 
 static void hsts_free(struct stsentry *e)
 {
-  free((char *)e->host);
+  free(CURL_UNCONST(e->host));
   free(e);
 }
 
@@ -300,7 +300,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
   struct tm stamp;
   CURLcode result;
 
-  e.name = (char *)sts->host;
+  e.name = (char *)CURL_UNCONST(sts->host);
   e.namelen = strlen(sts->host);
   e.includeSubDomains = sts->includeSubDomains;
 
