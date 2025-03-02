@@ -198,7 +198,7 @@ static int mbedtls_bio_cf_write(void *bio,
   if(!data)
     return 0;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (char *)buf, blen, FALSE,
+  nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, blen, FALSE,
                                &result);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %zd, err=%d",
               blen, nwritten, result);
