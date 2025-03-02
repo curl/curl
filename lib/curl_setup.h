@@ -967,8 +967,8 @@ endings either CRLF or LF so 't' is appropriate.
 
 #ifdef _WIN64
 #define CURL_UNCONST(p) ((void *)(curl_off_t)(const void *)(p))
-#elif defined(_WIN32)
-#define CURL_UNCONST(p) ((void *)(unsigned int)(const void *)(p))
+#else
+#define CURL_UNCONST(p) ((void *)(unsigned long)(const void *)(p))
 #endif
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
