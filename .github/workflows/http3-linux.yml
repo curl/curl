@@ -51,7 +51,7 @@ env:
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
   ngtcp2-version: 1.11.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
-  nghttp2-version: 1.64.0
+  nghttp2-version: 1.65.0
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
   quiche-version: 0.23.2
 
@@ -208,6 +208,7 @@ jobs:
           cd $HOME
           git clone --quiet --depth=1 -b v${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
           cd nghttp2
+          git submodule update --init --depth=1
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
             PKG_CONFIG_PATH="$HOME/quictls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig" \
