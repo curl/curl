@@ -140,6 +140,12 @@
 #include <openssl/ui.h>
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#define OSSL11_CONST const
+#else
+#define OSSL11
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L /* OpenSSL 1.1.0+ and LibreSSL */
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
