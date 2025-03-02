@@ -2886,9 +2886,21 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
       }
       if(global->test_event_based)
         result = curl_easy_perform_ev(per->curl);
-      else
+      else{
 #endif
         result = curl_easy_perform(per->curl);
+        /* Check if server returns retry after message */
+        if(result == CURLE_OK) {
+          curl_off_t wait = 0;
+          curl_easy_getinfo(per->curl,
+                            CURLINFO_RETRY_AFTER,
+                            &wait);
+          if(wait)
+            printf("Wait for %" CURL_FORMAT_CURL_OFF_T " seconds\n", wait);
+        }
+      #ifdef DEBUGBUILD
+      }
+      #endif
     }
 
     returncode = post_per_transfer(global, per, result, &retry, &delay_ms);
