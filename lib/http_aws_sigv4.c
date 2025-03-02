@@ -624,7 +624,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
    * are still using aws:amz as a prefix.
    */
   line = data->set.str[STRING_AWS_SIGV4] ?
-    data->set.str[STRING_AWS_SIGV4] : (char *)"aws:amz";
+    data->set.str[STRING_AWS_SIGV4] : "aws:amz";
 
   /* provider0[:provider1[:region[:service]]]
 
