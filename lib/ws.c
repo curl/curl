@@ -168,6 +168,7 @@ static void ws_dec_reset(struct ws_decoder *dec)
   dec->payload_len = 0;
   dec->head_len = dec->head_total = 0;
   dec->state = WS_DEC_INIT;
+  dec->fin_bit = TRUE;
 }
 
 static void ws_dec_init(struct ws_decoder *dec)
@@ -186,6 +187,8 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
     if(dec->head_len == 0) {
       dec->head[0] = *inbuf;
       Curl_bufq_skip(inraw, 1);
+
+      dec->fin_bit = (dec->head[0] & WSBIT_FIN) ? TRUE : FALSE;
 
       if(!ws_frame_rsv_supported(dec->head[0])) {
         failf(data, "WS: unknown reserved bit in frame header: %x",
@@ -370,11 +373,20 @@ static void update_meta(struct websocket *ws,
                         curl_off_t payload_len,
                         size_t cur_len)
 {
+  curl_off_t bytesleft = (payload_len - payload_offset - cur_len);
+
   ws->frame.age = frame_age;
   ws->frame.flags = frame_flags;
   ws->frame.offset = payload_offset;
   ws->frame.len = cur_len;
-  ws->frame.bytesleft = (payload_len - payload_offset - cur_len);
+  ws->frame.bytesleft = bytesleft;
+
+  if(!ws->dec.fin_bit || bytesleft > 0) {
+    ws->frame.flags |= CURLWS_CONT;
+  }
+  else {
+    ws->frame.flags &= ~CURLWS_CONT;
+  }
 }
 
 /* WebSockets decoding client writer */
