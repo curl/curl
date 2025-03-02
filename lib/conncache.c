@@ -566,7 +566,8 @@ bool Curl_cpool_find(struct Curl_easy *data,
     return FALSE;
 
   CPOOL_LOCK(cpool, data);
-  bundle = Curl_hash_pick(&cpool->dest2bundle, (void *)destination, dest_len);
+  bundle = Curl_hash_pick(&cpool->dest2bundle,
+                          CURL_UNCONST(destination), dest_len);
   if(bundle) {
     struct Curl_llist_node *curr = Curl_llist_head(&bundle->conns);
     while(curr) {
