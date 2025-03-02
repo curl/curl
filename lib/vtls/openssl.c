@@ -141,9 +141,9 @@
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-#define OSSL11_CONST const
+#define OSSL_UI_METHOD_CAST(x) (x)
 #else
-#define OSSL11
+#define OSSL_UI_METHOD_CAST(x) CURL_UNCONST(x)
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L /* OpenSSL 1.1.0+ and LibreSSL */
@@ -1581,7 +1581,7 @@ fail:
 
       if(data->state.engine) {
         UI_METHOD *ui_method =
-          UI_create_method((OSSL11_CONST char *)"curl user interface");
+          UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -1632,7 +1632,7 @@ fail:
         OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         UI_METHOD *ui_method =
-          UI_create_method((OSSL11_CONST char *)"curl user interface");
+          UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
