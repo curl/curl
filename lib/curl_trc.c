@@ -242,7 +242,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
@@ -593,8 +593,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 
-void Curl_trc_cf_infof(struct Curl_easy *data,
-                       struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   (void)data; (void)cf; (void)fmt;
