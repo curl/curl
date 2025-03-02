@@ -929,8 +929,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
     curl_off_t CSeq = 0;
     struct RTSP *rtsp = data->req.p.rtsp;
     const char *p = &header[5];
-    while(ISBLANK(*p))
-      p++;
+    Curl_str_passblanks(&p);
     if(Curl_str_number(&p, &CSeq, LONG_MAX)) {
       failf(data, "Unable to read the CSeq header: [%s]", header);
       return CURLE_RTSP_CSEQ_ERROR;
@@ -944,8 +943,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
 
     /* Find the first non-space letter */
     start = header + 8;
-    while(ISBLANK(*start))
-      start++;
+    Curl_str_passblanks(&start);
 
     if(!*start) {
       failf(data, "Got a blank Session ID");
@@ -959,7 +957,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
      * gstreamer does url-encoded session ID's not covered by the standard.
      */
     end = start;
-    while(*end && *end != ';' && !ISSPACE(*end))
+    while((*end > ' ') && (*end != ';'))
       end++;
     idlen = end - start;
 
@@ -1003,8 +1001,7 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
   const char *start, *end;
   start = transport;
   while(start && *start) {
-    while(ISBLANK(*start) )
-      start++;
+    Curl_str_passblanks(&start);
     end = strchr(start, ';');
     if(checkprefix("interleaved=", start)) {
       curl_off_t chan1, chan2, chan;

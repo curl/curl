@@ -758,7 +758,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
     name = enclist;
 
     for(namelen = 0; *enclist && *enclist != ','; enclist++)
-      if(!ISSPACE(*enclist))
+      if(*enclist > ' ')
         namelen = enclist - name + 1;
 
     if(namelen) {

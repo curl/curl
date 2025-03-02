@@ -128,10 +128,6 @@ static const char *find_host_sep(const char *url)
 /* convert CURLcode to CURLUcode */
 #define cc2cu(x) ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE :   \
                   CURLUE_OUT_OF_MEMORY)
-/*
- * Decide whether a character in a URL must be escaped.
- */
-#define urlchar_needs_escaping(c) (!(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c)))
 
 static const char hexdigits[] = "0123456789abcdef";
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
@@ -167,7 +163,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
       else
         result = Curl_dyn_addn(o, "+", 1);
     }
-    else if(urlchar_needs_escaping(*iptr)) {
+    else if((*iptr < ' ') || (*iptr >= 0x7f)) {
       char out[3]={'%'};
       out[1] = hexdigits[*iptr >> 4];
       out[2] = hexdigits[*iptr & 0xf];

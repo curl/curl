@@ -233,14 +233,10 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
     struct dynbuf buf;
     Curl_dyn_init(&buf, MAX_ALTSVC_LINE);
     while(Curl_get_line(&buf, fp)) {
-      char *lineptr = Curl_dyn_ptr(&buf);
-      while(ISBLANK(*lineptr))
-        lineptr++;
-      if(*lineptr == '#')
-        /* skip commented lines */
-        continue;
-
-      altsvc_add(asi, lineptr);
+      const char *lineptr = Curl_dyn_ptr(&buf);
+      Curl_str_passblanks(&lineptr);
+      if(Curl_str_single(&lineptr, '#'))
+        altsvc_add(asi, lineptr);
     }
     Curl_dyn_free(&buf); /* free the line buffer */
     fclose(fp);
