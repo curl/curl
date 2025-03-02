@@ -321,15 +321,15 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) results,
+  DES_ecb_encrypt((const DES_cblock*) plaintext, (DES_cblock*) results,
                   DESKEY(ks), DES_ENCRYPT);
 
   setup_des_key(keys + 7, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results + 8),
+  DES_ecb_encrypt((const DES_cblock*) plaintext, (DES_cblock*) (results + 8),
                   DESKEY(ks), DES_ENCRYPT);
 
   setup_des_key(keys + 14, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results + 16),
+  DES_ecb_encrypt((const DES_cblock*) plaintext, (DES_cblock*) (results + 16),
                   DESKEY(ks), DES_ENCRYPT);
 #elif defined(USE_GNUTLS)
   struct des_ctx des;
@@ -375,11 +375,11 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer,
+    DES_ecb_encrypt((const DES_cblock *)magic, (DES_cblock *)lmbuffer,
                     DESKEY(ks), DES_ENCRYPT);
 
     setup_des_key(pw + 7, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer + 8),
+    DES_ecb_encrypt((const DES_cblock *)magic, (DES_cblock *)(lmbuffer + 8),
                     DESKEY(ks), DES_ENCRYPT);
 #elif defined(USE_GNUTLS)
     struct des_ctx des;
