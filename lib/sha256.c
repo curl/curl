@@ -323,7 +323,7 @@ static const unsigned long K[64] = {
 
 /* Compress 512-bits */
 static int sha256_compress(struct sha256_state *md,
-                           unsigned char *buf)
+                           const unsigned char *buf)
 {
   unsigned long S[8], W[64];
   int i;
@@ -401,7 +401,7 @@ static void my_sha256_update(void *ctx,
     return;
   while(inlen > 0) {
     if(md->curlen == 0 && inlen >= CURL_SHA256_BLOCK_SIZE) {
-      if(sha256_compress(md, (unsigned char *)in) < 0)
+      if(sha256_compress(md, in) < 0)
         return;
       md->length += CURL_SHA256_BLOCK_SIZE * 8;
       in += CURL_SHA256_BLOCK_SIZE;
