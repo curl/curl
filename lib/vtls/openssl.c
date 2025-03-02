@@ -1119,7 +1119,7 @@ static int use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,
   else if(type == SSL_FILETYPE_PEM) {
     /* ERR_R_PEM_LIB; */
     x = PEM_read_bio_X509(in, NULL,
-                          passwd_callback, (void *)key_passwd);
+                          passwd_callback, CURL_UNCONST(key_passwd));
   }
   else {
     ret = 0;
@@ -1149,7 +1149,7 @@ static int use_privatekey_blob(SSL_CTX *ctx, const struct curl_blob *blob,
 
   if(type == SSL_FILETYPE_PEM)
     pkey = PEM_read_bio_PrivateKey(in, NULL, passwd_callback,
-                                   (void *)key_passwd);
+                                   CURL_UNCONST(key_passwd));
   else if(type == SSL_FILETYPE_ASN1)
     pkey = d2i_PrivateKey_bio(in, NULL);
   else
@@ -1171,7 +1171,6 @@ use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
 {
   int ret = 0;
   X509 *x = NULL;
-  void *passwd_callback_userdata = (void *)key_passwd;
   BIO *in = BIO_new_mem_buf(blob->data, (int)(blob->len));
   if(!in)
     return CURLE_OUT_OF_MEMORY;
@@ -1179,7 +1178,7 @@ use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
   ERR_clear_error();
 
   x = PEM_read_bio_X509_AUX(in, NULL,
-                            passwd_callback, (void *)key_passwd);
+                            passwd_callback, CURL_UNCONST(key_passwd));
   if(!x)
     goto end;
 
@@ -1198,7 +1197,7 @@ use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
     }
 
     while((ca = PEM_read_bio_X509(in, NULL, passwd_callback,
-                                  passwd_callback_userdata))
+                                  CURL_UNCONST(key_passwd)))
           != NULL) {
 
       if(!SSL_CTX_add0_chain_cert(ctx, ca)) {
@@ -1315,7 +1314,7 @@ int cert_stuff(struct Curl_easy *data,
 
         /* Does the engine supports LOAD_CERT_CTRL ? */
         if(!ENGINE_ctrl(data->state.engine, ENGINE_CTRL_GET_CMD_FROM_NAME,
-                        0, (void *)cmd_name, NULL)) {
+                        0, CURL_UNCONST(cmd_name), NULL)) {
           failf(data, "ssl engine does not support loading certificates");
           return 0;
         }
