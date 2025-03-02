@@ -153,7 +153,7 @@ static CURLcode load_cafile(struct cafile_source *source,
     }
     else if(source->type == CAFILE_SOURCE_BLOB) {
       n = source->len;
-      p = (unsigned char *) source->data;
+      p = (const unsigned char *) source->data;
     }
     while(n) {
       pushed = br_pem_decoder_push(&pc, p, n);
@@ -611,12 +611,12 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
 
   if(ssl_config->primary.cache_session) {
     struct Curl_ssl_session *sc_session = NULL;
-    const br_ssl_session_parameters *session;
 
     ret = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
                                &sc_session);
     if(!ret && sc_session && sc_session->sdata && sc_session->sdata_len) {
-      session = (br_ssl_session_parameters *)(void *)sc_session->sdata;
+      const br_ssl_session_parameters *session;
+      session = (const br_ssl_session_parameters *)sc_session->sdata;
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
