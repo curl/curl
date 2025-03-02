@@ -150,15 +150,12 @@
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
 #define HAVE_OPAQUE_RSA_DSA_DH 1 /* since 1.1.0 -pre5 */
-#define CONST_EXTS const
 #define HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED 1
-
 #else
 /* For OpenSSL before 1.1.0 */
 #define ASN1_STRING_get0_data(x) ASN1_STRING_data(x)
 #define X509_get0_notBefore(x) X509_get_notBefore(x)
 #define X509_get0_notAfter(x) X509_get_notAfter(x)
-#define CONST_EXTS /* nope */
 #define OpenSSL_version_num() SSLeay()
 #endif
 
@@ -323,10 +320,16 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
 
 static CURLcode X509V3_ext(struct Curl_easy *data,
                            int certnum,
-                           CONST_EXTS STACK_OF(X509_EXTENSION) *exts)
+                           const STACK_OF(X509_EXTENSION) *extsarg)
 {
   int i;
   CURLcode result = CURLE_OK;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+  !defined(LIBRESSL_VERSION_NUMBER)
+  const STACK_OF(X509_EXTENSION) *exts = extsarg;
+#else
+  STACK_OF(X509_EXTENSION) *exts = CURL_UNCONST(extsarg);
+#endif
 
   if((int)sk_X509_EXTENSION_num(exts) <= 0)
     /* no extensions, bail out */
