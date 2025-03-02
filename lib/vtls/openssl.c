@@ -3442,7 +3442,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
 
   DEBUGASSERT(multi);
   share = multi ? Curl_hash_pick(&multi->proto_hash,
-                                 (void *)MPROTO_OSSL_X509_KEY,
+                                 CURL_UNCONST(MPROTO_OSSL_X509_KEY),
                                  sizeof(MPROTO_OSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
@@ -3465,7 +3465,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
   if(!multi)
     return;
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_OSSL_X509_KEY,
+                         CURL_UNCONST(MPROTO_OSSL_X509_KEY),
                          sizeof(MPROTO_OSSL_X509_KEY)-1);
 
   if(!share) {
@@ -3473,7 +3473,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     if(!share)
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
-                       (void *)MPROTO_OSSL_X509_KEY,
+                       CURL_UNCONST(MPROTO_OSSL_X509_KEY),
                        sizeof(MPROTO_OSSL_X509_KEY)-1,
                        share, oss_x509_share_free)) {
       free(share);
