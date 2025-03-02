@@ -2357,7 +2357,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       if(tmp) {
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
           cnlen = ASN1_STRING_length(tmp);
-          cn = (unsigned char *) ASN1_STRING_get0_data(tmp);
+          cn = (unsigned char *)CURL_UNCONST(ASN1_STRING_get0_data(tmp));
         }
         else { /* not a UTF8 name */
           cnlen = ASN1_STRING_to_UTF8(&cn, tmp);
