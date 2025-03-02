@@ -1211,7 +1211,7 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     len = backend->send_blocked_len;
   }
 
-  ret = mbedtls_ssl_write(&backend->ssl, (unsigned char *)mem, len);
+  ret = mbedtls_ssl_write(&backend->ssl, (const unsigned char *)mem, len);
 
   if(ret < 0) {
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> -0x%04X",

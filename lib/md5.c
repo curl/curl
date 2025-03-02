@@ -252,7 +252,7 @@ static void my_md5_update(void *in,
                           unsigned int inputLen)
 {
   my_md5_ctx *ctx = in;
-  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+  CryptHashData(ctx->hHash, (const BYTE *)input, inputLen, 0);
 }
 
 static void my_md5_final(unsigned char *digest, void *in)
@@ -356,7 +356,7 @@ static void my_md5_final(unsigned char *result, void *ctx);
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD5_SET(n) \
-        (*(MD5_u32plus *)(void *)&ptr[(n) * 4])
+        (*(const MD5_u32plus *)(const void *)&ptr[(n) * 4])
 #define MD5_GET(n) \
         MD5_SET(n)
 #else
