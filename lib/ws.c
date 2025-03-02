@@ -168,7 +168,7 @@ static void ws_dec_reset(struct ws_decoder *dec)
   dec->payload_len = 0;
   dec->head_len = dec->head_total = 0;
   dec->state = WS_DEC_INIT;
-  dec->fin_bit = 1;
+  dec->fin_bit = TRUE;
 }
 
 static void ws_dec_init(struct ws_decoder *dec)
@@ -188,7 +188,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->head[0] = *inbuf;
       Curl_bufq_skip(inraw, 1);
 
-      dec->fin_bit = (dec->head[0] & WSBIT_FIN) ? 1 : 0;
+      dec->fin_bit = (dec->head[0] & WSBIT_FIN) ? TRUE : FALSE;
 
       if(!ws_frame_rsv_supported(dec->head[0])) {
         failf(data, "WS: unknown reserved bit in frame header: %x",
