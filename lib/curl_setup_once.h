@@ -168,8 +168,8 @@ struct timeval {
 #if defined(__minix)
 /* Minix does not support send on TCP sockets */
 #define swrite(x,y,z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
-                                    (SEND_TYPE_ARG2)(y), \
-                                    (SEND_TYPE_ARG3)(z))
+                                     (SEND_TYPE_ARG2)(y), \
+                                     (SEND_TYPE_ARG3)(z))
 
 #elif defined(HAVE_SEND)
 #define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
