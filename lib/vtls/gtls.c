@@ -564,7 +564,7 @@ gtls_get_cached_creds(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if(data->multi) {
     shared_creds = Curl_hash_pick(&data->multi->proto_hash,
-                                  (void *)MPROTO_GTLS_X509_KEY,
+                                  CURL_UNCONST(MPROTO_GTLS_X509_KEY),
                                   sizeof(MPROTO_GTLS_X509_KEY)-1);
      if(shared_creds && shared_creds->creds &&
         !gtls_shared_creds_expired(data, shared_creds) &&
@@ -608,7 +608,7 @@ static void gtls_set_cached_creds(struct Curl_cfilter *cf,
     return;
 
   if(!Curl_hash_add2(&data->multi->proto_hash,
-                    (void *)MPROTO_GTLS_X509_KEY,
+                    CURL_UNCONST(MPROTO_GTLS_X509_KEY),
                     sizeof(MPROTO_GTLS_X509_KEY)-1,
                     sc, gtls_shared_creds_hash_free)) {
     Curl_gtls_shared_creds_free(&sc); /* down reference again */
