@@ -1692,7 +1692,8 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                     const char *pinnedpubkey)
 {  /* Scratch */
   size_t pubkeylen, realpubkeylen, spkiHeaderLength = 24;
-  unsigned char *pubkey = NULL, *realpubkey = NULL;
+  const unsigned char *pubkey = NULL;
+  unsigned char *realpubkey = NULL;
   const unsigned char *spkiHeader = NULL;
   CFDataRef publicKeyBits = NULL;
 
@@ -1742,7 +1743,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 #endif /* SECTRANSP_PINNEDPUBKEY_V2 */
 
     pubkeylen = (size_t)CFDataGetLength(publicKeyBits);
-    pubkey = (unsigned char *)CFDataGetBytePtr(publicKeyBits);
+    pubkey = (const unsigned char *)CFDataGetBytePtr(publicKeyBits);
 
     switch(pubkeylen) {
       case 526:
