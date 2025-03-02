@@ -1400,7 +1400,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     break;
   case CURLUPART_URL: {
     char *url;
-    char *scheme;
+    const char *scheme;
     char *options = u->options;
     char *port = u->port;
     char *allochost = NULL;
@@ -1427,7 +1427,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
       if(u->scheme)
         scheme = u->scheme;
       else if(flags & CURLU_DEFAULT_SCHEME)
-        scheme = (char *) DEFAULT_SCHEME;
+        scheme = DEFAULT_SCHEME;
       else
         return CURLUE_NO_SCHEME;
 
