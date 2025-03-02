@@ -257,7 +257,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
 
         if(tr) {
           size_t trlen;
-          result = Curl_dyn_addn(&ch->trailer, (char *)STRCONST("\x0d\x0a"));
+          result = Curl_dyn_addn(&ch->trailer, STRCONST("\x0d\x0a"));
           if(result) {
             ch->state = CHUNK_FAILED;
             ch->last_code = CHUNKE_OUT_OF_MEMORY;
