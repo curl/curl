@@ -57,11 +57,11 @@ size_t Curl_hash_offt_count(struct Curl_hash_offt *h);
 
 
 typedef bool Curl_hash_offt_visit_cb(curl_off_t id, void *value,
-                                     void *user_data);
+                                     const void *user_data);
 
 void Curl_hash_offt_visit(struct Curl_hash_offt *h,
                           Curl_hash_offt_visit_cb *cb,
-                          void *user_data);
+                          const void *user_data);
 
 
 #endif /* HEADER_CURL_HASH_OFFT_H */
