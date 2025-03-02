@@ -50,6 +50,7 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waddress"
+#pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 
 #if defined(__GNUC__) && defined(__APPLE__)
