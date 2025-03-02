@@ -56,7 +56,7 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_UPLOAD, 1L);
   easy_setopt(curl, CURLOPT_HEADER, 1L);
   easy_setopt(curl, CURLOPT_READFUNCTION, put_callback);
-  pbuf.buf = (char *)testput;
+  pbuf.buf = (char *)CURL_UNCONST(testput);
   pbuf.len = strlen(testput);
   easy_setopt(curl, CURLOPT_READDATA, &pbuf);
   easy_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testput));
