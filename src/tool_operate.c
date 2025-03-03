@@ -2907,9 +2907,9 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
       else{
 #endif
         result = curl_easy_perform(per->curl);
+        curl_off_t wait = 0;
         /* Check if server returns retry after message */
         if(result == CURLE_OK) {
-          curl_off_t wait = 0;
           curl_easy_getinfo(per->curl,
                             CURLINFO_RETRY_AFTER,
                             &wait);
