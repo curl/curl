@@ -184,7 +184,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     chlg_desc.cBuffers  = 1;
     chlg_desc.pBuffers  = &chlg_buf;
     chlg_buf.BufferType = SECBUFFER_TOKEN;
-    chlg_buf.pvBuffer   = (void *) Curl_bufref_ptr(chlg);
+    chlg_buf.pvBuffer   = CURL_UNCONST(Curl_bufref_ptr(chlg));
     chlg_buf.cbBuffer   = curlx_uztoul(Curl_bufref_len(chlg));
   }
 
@@ -297,7 +297,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   input_desc.cBuffers = 2;
   input_desc.pBuffers = input_buf;
   input_buf[0].BufferType = SECBUFFER_STREAM;
-  input_buf[0].pvBuffer = (void *) Curl_bufref_ptr(chlg);
+  input_buf[0].pvBuffer = CURL_UNCONST(Curl_bufref_ptr(chlg));
   input_buf[0].cbBuffer = curlx_uztoul(Curl_bufref_len(chlg));
   input_buf[1].BufferType = SECBUFFER_DATA;
   input_buf[1].pvBuffer = NULL;
