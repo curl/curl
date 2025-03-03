@@ -45,6 +45,12 @@
 #elif defined(HAVE_ATOMIC) && defined(HAVE_STDATOMIC_H)
 #include <stdatomic.h>
 #if defined(HAVE_SCHED_YIELD)
+/* Hack for Unity mode. Avoid macro collisions with MUSL 1.25 and older */
+#ifdef HEADER_CURL_MEMDEBUG_H
+#undef HEADER_CURL_MEMDEBUG_H
+#undef calloc
+#undef free
+#endif
 #include <sched.h>
 #endif
 

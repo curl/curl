@@ -33,6 +33,11 @@
 #include <curl/curl.h>
 #include "functypes.h"
 
+/* Avoid double definitions/declarations, in case we include this header
+   again after a 'memdebug_reset.h'. */
+#ifndef HEADER_CURL_MEMDEBUG_H_DECL
+#define HEADER_CURL_MEMDEBUG_H_DECL
+
 #if defined(__GNUC__) && __GNUC__ >= 3
 #  define ALLOC_FUNC __attribute__((__malloc__))
 #  define ALLOC_SIZE(s) __attribute__((__alloc_size__(s)))
@@ -108,6 +113,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
                                              int line, const char *source);
 
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
+#endif /* HEADER_CURL_MEMDEBUG_H_DECL */
 
 #ifndef MEMDEBUG_NODEFINES
 
