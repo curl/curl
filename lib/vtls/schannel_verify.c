@@ -161,7 +161,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
         DWORD cert_size = (DWORD)
           ((end_cert_ptr + end_cert_len) - begin_cert_ptr);
 
-        cert_blob.pbData = (BYTE *)begin_cert_ptr;
+        cert_blob.pbData = (BYTE *)CURL_UNCONST(begin_cert_ptr);
         cert_blob.cbData = cert_size;
         if(!CryptQueryObject(CERT_QUERY_OBJECT_BLOB,
                              &cert_blob,
