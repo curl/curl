@@ -7,7 +7,7 @@ Protocols: HTTP
 Added: 7.88.0
 Mutexed: http1.1 http1.0 http2 http2-prior-knowledge http3
 Requires: HTTP/3
-Help: Use HTTP v3 only
+Help: Use HTTP/3 only
 Category: http
 Multi: mutex
 See-also:
