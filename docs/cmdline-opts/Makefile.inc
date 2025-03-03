@@ -239,6 +239,7 @@ DPAGES = \
   remote-name.md \
   remote-time.md \
   remove-on-error.md \
+  request-mode.md \
   request-target.md \
   request.md \
   resolve.md \

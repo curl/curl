@@ -271,6 +271,7 @@ static const struct LongShort aliases[]= {
   {"remote-time",                ARG_BOOL, 'R', C_REMOTE_TIME},
   {"remove-on-error",            ARG_BOOL, ' ', C_REMOVE_ON_ERROR},
   {"request",                    ARG_STRG, 'X', C_REQUEST},
+  {"request-mode",               ARG_STRG, ' ', C_REQUEST_MODE},
   {"request-target",             ARG_STRG, ' ', C_REQUEST_TARGET},
   {"resolve",                    ARG_STRG, ' ', C_RESOLVE},
   {"retry",                      ARG_STRG, ' ', C_RETRY},
@@ -1622,6 +1623,22 @@ static ParameterError parse_time_cond(struct GlobalConfig *global,
   return err;
 }
 
+static ParameterError parse_request_mode(struct GlobalConfig *global,
+                                         struct OperationConfig *config,
+                                         const char *nextarg)
+{
+  if(!strcmp("all", nextarg))
+    config->followlocation = CURLFOLLOW_ALL;
+  else if(!strcmp("obey", nextarg))
+    config->followlocation = CURLFOLLOW_OBEYCODE;
+  else if(!strcmp("first", nextarg))
+    config->followlocation = CURLFOLLOW_FIRSTONLY;
+  else
+    return PARAM_BAD_USE;
+  (void)global;
+  return PARAM_OK;
+}
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
                             argv_item_t cleararg1,
@@ -2685,6 +2702,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_GET: /* --get */
       config->use_httpget = toggle;
+      break;
+    case C_REQUEST_MODE: /* --request-mode */
+      err = parse_request_mode(global, config, nextarg);
       break;
     case C_REQUEST_TARGET: /* --request-target */
       err = getstr(&config->request_target, nextarg, DENY_BLANK);

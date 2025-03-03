@@ -205,6 +205,7 @@
 --remote-time (-R)                   7.9
 --remove-on-error                    7.83.0
 --request (-X)                       6.0
+--request-mode                       8.14.0
 --request-target                     7.55.0
 --resolve                            7.21.3
 --retry                              7.12.3

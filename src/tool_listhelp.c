@@ -623,6 +623,9 @@ const struct helptxt helptext[] = {
    "Specify request method to use",
    CURLHELP_CONNECTION | CURLHELP_POP3 | CURLHELP_FTP | CURLHELP_IMAP |
    CURLHELP_SMTP},
+  {"    --request-mode <mode>",
+   "Custom method redirect behavior",
+   CURLHELP_HTTP},
   {"    --request-target <path>",
    "Specify the target for this request",
    CURLHELP_HTTP},
