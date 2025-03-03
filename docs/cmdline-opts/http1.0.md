@@ -7,7 +7,7 @@ Tags: Versions
 Protocols: HTTP
 Added: 7.9.1
 Mutexed: http1.1 http2 http2-prior-knowledge http3
-Help: Use HTTP 1.0
+Help: Use HTTP/1.0
 Category: http
 Multi: mutex
 See-also:
