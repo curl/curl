@@ -1381,7 +1381,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
     while(nvecs < veccnt &&
           Curl_bufq_peek_at(&stream->sendbuf,
                             stream->sendbuf_len_in_flight,
-                            (const unsigned char **)&vec[nvecs].base,
+                            CURL_UNCONST(&vec[nvecs].base),
                             &vec[nvecs].len)) {
       stream->sendbuf_len_in_flight += vec[nvecs].len;
       nwritten += vec[nvecs].len;
