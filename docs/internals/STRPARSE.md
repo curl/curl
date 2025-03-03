@@ -81,7 +81,7 @@ int Curl_str_quotedword(char **linep, struct Curl_str *out, const size_t max);
 ~~~
 
 Get a "quoted" word. This means everything that is provided within a leading
-and an ending double character. No escaping possible.
+and an ending double quote character. No escaping possible.
 
 `max` is the longest accepted word, or it returns error.
 

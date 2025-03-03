@@ -895,6 +895,7 @@ CURLOPT_UNRESTRICTED_AUTH       7.10.4
 CURLOPT_UPKEEP_INTERVAL_MS      7.62.0
 CURLOPT_UPLOAD                  7.1
 CURLOPT_UPLOAD_BUFFERSIZE       7.62.0
+CURLOPT_UPLOAD_FLAGS            8.13.0
 CURLOPT_URL                     7.1
 CURLOPT_USE_SSL                 7.17.0
 CURLOPT_USERAGENT               7.1
@@ -1128,6 +1129,11 @@ CURLUPART_SCHEME                7.62.0
 CURLUPART_URL                   7.62.0
 CURLUPART_USER                  7.62.0
 CURLUPART_ZONEID                7.65.0
+CURLULFLAG_ANSWERED             8.13.0
+CURLULFLAG_DELETED              8.13.0
+CURLULFLAG_DRAFT                8.13.0
+CURLULFLAG_FLAGGED              8.13.0
+CURLULFLAG_SEEN                 8.13.0
 CURLUSESSL_ALL                  7.17.0
 CURLUSESSL_CONTROL              7.17.0
 CURLUSESSL_NONE                 7.17.0

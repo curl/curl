@@ -1403,7 +1403,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      */
     Curl_safefree(data->set.str[STRING_SSL_ENGINE]);
     return Curl_ssl_set_engine_default(data);
-
+  case CURLOPT_UPLOAD_FLAGS:
+    data->set.upload_flags = (unsigned char)arg;
+    break;
   default:
     /* unknown option */
     return CURLE_UNKNOWN_OPTION;
