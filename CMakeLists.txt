@@ -1986,7 +1986,7 @@ if(WIN32)
   endif()
 endif()
 
-if(MSVC)
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
 endif()
 
