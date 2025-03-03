@@ -2534,7 +2534,7 @@ static void schannel_checksum(const unsigned char *input,
 
 #ifdef __MINGW32CE__
     /* workaround for CeGCC, should be (const BYTE*) */
-    if(!CryptHashData(hHash, (BYTE*)input, (DWORD)inputlen, 0))
+    if(!CryptHashData(hHash, (BYTE*)CURL_UNCONST(input), (DWORD)inputlen, 0))
 #else
     if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
 #endif
