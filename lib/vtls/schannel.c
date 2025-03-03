@@ -806,11 +806,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 #endif
 
     sspi_status =
-      Curl_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         &credentials, NULL, NULL,
-                                         &backend->cred->cred_handle,
-                                         &backend->cred->time_stamp);
+      Curl_pSecFn->AcquireCredentialsHandle(NULL,
+                                            (TCHAR *)CURL_UNCONST(UNISP_NAME),
+                                            SECPKG_CRED_OUTBOUND, NULL,
+                                            &credentials, NULL, NULL,
+                                            &backend->cred->cred_handle,
+                                            &backend->cred->time_stamp);
   }
   else {
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
@@ -846,11 +847,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 #endif
 
     sspi_status =
-      Curl_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         &schannel_cred, NULL, NULL,
-                                         &backend->cred->cred_handle,
-                                         &backend->cred->time_stamp);
+      Curl_pSecFn->AcquireCredentialsHandle(NULL,
+                                            (TCHAR *)CURL_UNCONST(UNISP_NAME),
+                                            SECPKG_CRED_OUTBOUND, NULL,
+                                            &schannel_cred, NULL, NULL,
+                                            &backend->cred->cred_handle,
+                                            &backend->cred->time_stamp);
   }
 
 #ifdef HAS_CLIENT_CERT_PATH
