@@ -92,7 +92,7 @@ static void trim_headers(struct curl_slist *head)
     if(!*value)
       continue;
     ++value;
-    store = (char *)value;
+    store = (char *)CURL_UNCONST(value);
 
     /* skip leading whitespace */
     Curl_str_passblanks(&value);
