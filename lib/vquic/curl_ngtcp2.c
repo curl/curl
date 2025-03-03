@@ -2370,7 +2370,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   else {
     int rv;
     rv = ngtcp2_conn_decode_and_set_0rtt_transport_params(
-      ctx->qconn, (uint8_t *)scs->quic_tp, scs->quic_tp_len);
+      ctx->qconn, (const uint8_t *)scs->quic_tp, scs->quic_tp_len);
     if(rv)
       CURL_TRC_CF(data, cf, "no early data, failed to set 0RTT transport "
                   "parameters: %s", ngtcp2_strerror(rv));
