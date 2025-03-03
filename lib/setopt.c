@@ -2140,6 +2140,10 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * user:password needed to use the proxy
      */
+    if(data->set.str[STRING_PROXYUSERNAME] ||
+       data->set.str[STRING_PROXYPASSWORD]) {
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     char *u = NULL;
     char *p = NULL;
     result = setstropt_userpwd(ptr, &u, &p);
@@ -2159,12 +2163,18 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * authentication username to use in the operation
      */
+    if(data->set.str[STRING_PROXYUSERNAME]) {
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     return Curl_setstropt(&data->set.str[STRING_PROXYUSERNAME], ptr);
 
   case CURLOPT_PROXYPASSWORD:
     /*
      * authentication password to use in the operation
      */
+    if(data->set.str[STRING_PROXYPASSWORD]) {
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     return Curl_setstropt(&data->set.str[STRING_PROXYPASSWORD], ptr);
 
   case CURLOPT_NOPROXY:
