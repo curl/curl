@@ -275,7 +275,7 @@ static curl_off_t VmsSpecialSize(const char *name,
 }
 #endif /* __VMS */
 
-#define BUFFER_SIZE (100*1024)
+#define BUFFER_SIZE 102400L
 
 struct per_transfer *transfers; /* first node */
 static struct per_transfer *transfersl; /* last node */
@@ -940,7 +940,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
         /* use a smaller sized buffer for better sleeps */
         my_setopt(curl, CURLOPT_BUFFERSIZE, (long)config->recvpersecond);
       else
-        my_setopt(curl, CURLOPT_BUFFERSIZE, (long)BUFFER_SIZE);
+        my_setopt(curl, CURLOPT_BUFFERSIZE, BUFFER_SIZE);
   }
 
   my_setopt_str(curl, CURLOPT_URL, per->url);
@@ -999,11 +999,11 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt(curl, CURLOPT_APPEND, config->ftp_append ? 1L : 0L);
 
   if(config->netrc_opt)
-    my_setopt_enum(curl, CURLOPT_NETRC, (long)CURL_NETRC_OPTIONAL);
+    my_setopt_enum(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
   else if(config->netrc || config->netrc_file)
-    my_setopt_enum(curl, CURLOPT_NETRC, (long)CURL_NETRC_REQUIRED);
+    my_setopt_enum(curl, CURLOPT_NETRC, CURL_NETRC_REQUIRED);
   else
-    my_setopt_enum(curl, CURLOPT_NETRC, (long)CURL_NETRC_IGNORED);
+    my_setopt_enum(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
 
   if(config->netrc_file)
     my_setopt_str(curl, CURLOPT_NETRC_FILE, config->netrc_file);
@@ -1058,7 +1058,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in libcurl 7.10.6 (default is Basic) */
   if(config->authtype)
-    my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long)config->authtype);
+    my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, config->authtype);
 
   my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
 
@@ -1511,15 +1511,15 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in curl 7.15.5 */
   if(config->ftp_ssl_reqd)
-    my_setopt_enum(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+    my_setopt_enum(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
   /* new in curl 7.11.0 */
   else if(config->ftp_ssl)
-    my_setopt_enum(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_TRY);
+    my_setopt_enum(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
 
   /* new in curl 7.16.0 */
   else if(config->ftp_ssl_control)
-    my_setopt_enum(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_CONTROL);
+    my_setopt_enum(curl, CURLOPT_USE_SSL, CURLUSESSL_CONTROL);
 
   /* new in curl 7.16.1 */
   if(config->ftp_ssl_ccc)
