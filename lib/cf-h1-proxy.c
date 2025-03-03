@@ -315,8 +315,11 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
             k->httpcode);
     }
     else {
-      (void)curlx_strtoofft(header + strlen("Content-Length:"),
-                            NULL, 10, &ts->cl);
+      if(curlx_strtoofft(header + strlen("Content-Length:"),
+                         NULL, 10, &ts->cl)) {
+        failf(data, "Unsupported Content-Length value");
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
     }
   }
   else if(Curl_compareheader(header,

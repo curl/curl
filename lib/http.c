@@ -3228,18 +3228,22 @@ static CURLcode http_header(struct Curl_easy *data,
     if(v) {
       /* Retry-After = HTTP-date / delay-seconds */
       curl_off_t retry_after = 0; /* zero for unknown or "now" */
-      /* Try it as a decimal number, if it works it is not a date */
-      (void)curlx_strtoofft(v, NULL, 10, &retry_after);
-      if(!retry_after) {
-        time_t date = Curl_getdate_capped(v);
+      time_t date;
+      Curl_str_passblanks(&v);
+
+      /* try it as a date first, because a date can otherwise start with and
+         get treated as a number */
+      date = Curl_getdate_capped(v);
+
+      if((time_t)-1 != date) {
         time_t current = time(NULL);
-        if((time_t)-1 != date && date > current) {
+        if(date >= current)
           /* convert date to number of seconds into the future */
           retry_after = date - current;
-        }
       }
-      if(retry_after < 0)
-        retry_after = 0;
+      else
+        /* Try it as a decimal number */
+        Curl_str_number(&v, &retry_after, CURL_OFF_T_MAX);
       /* limit to 6 hours max. this is not documented so that it can be changed
          in the future if necessary. */
       if(retry_after > 21600)
