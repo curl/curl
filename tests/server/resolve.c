@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     struct hostent *he;
 
 #ifdef __AMIGA__
-    he = gethostbyname((unsigned char *)host);
+    he = gethostbyname((unsigned char *)CURL_UNCONST(host));
 #else
     he = gethostbyname(host);
 #endif

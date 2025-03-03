@@ -162,7 +162,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
   if(strlen(gopherpath) <= 2) {
-    sel = (char *)"";
+    sel = (char *)CURL_UNCONST("");
     len = strlen(sel);
     free(gopherpath);
   }
@@ -236,7 +236,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     failf(data, "Failed sending Gopher request");
     return result;
   }
-  result = Curl_client_write(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
+  result = Curl_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
   if(result)
     return result;
 

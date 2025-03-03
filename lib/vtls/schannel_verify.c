@@ -155,13 +155,13 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
       }
       else {
         CERT_BLOB cert_blob;
-        CERT_CONTEXT *cert_context = NULL;
+        const CERT_CONTEXT *cert_context = NULL;
         BOOL add_cert_result = FALSE;
         DWORD actual_content_type = 0;
         DWORD cert_size = (DWORD)
           ((end_cert_ptr + end_cert_len) - begin_cert_ptr);
 
-        cert_blob.pbData = (BYTE *)begin_cert_ptr;
+        cert_blob.pbData = (BYTE *)CURL_UNCONST(begin_cert_ptr);
         cert_blob.cbData = cert_size;
         if(!CryptQueryObject(CERT_QUERY_OBJECT_BLOB,
                              &cert_blob,
@@ -249,7 +249,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   size_t ca_file_bufsize = 0;
   DWORD total_bytes_read = 0;
 
-  ca_file_tstr = curlx_convert_UTF8_to_tchar((char *)ca_file);
+  ca_file_tstr = curlx_convert_UTF8_to_tchar(ca_file);
   if(!ca_file_tstr) {
     char buffer[STRERROR_LEN];
     failf(data,

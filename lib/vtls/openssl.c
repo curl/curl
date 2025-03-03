@@ -140,19 +140,22 @@
 #include <openssl/ui.h>
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#define OSSL_UI_METHOD_CAST(x) (x)
+#else
+#define OSSL_UI_METHOD_CAST(x) CURL_UNCONST(x)
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L /* OpenSSL 1.1.0+ and LibreSSL */
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
 #define HAVE_OPAQUE_RSA_DSA_DH 1 /* since 1.1.0 -pre5 */
-#define CONST_EXTS const
 #define HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED 1
-
 #else
 /* For OpenSSL before 1.1.0 */
 #define ASN1_STRING_get0_data(x) ASN1_STRING_data(x)
 #define X509_get0_notBefore(x) X509_get_notBefore(x)
 #define X509_get0_notAfter(x) X509_get_notAfter(x)
-#define CONST_EXTS /* nope */
 #define OpenSSL_version_num() SSLeay()
 #endif
 
@@ -317,10 +320,16 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
 
 static CURLcode X509V3_ext(struct Curl_easy *data,
                            int certnum,
-                           CONST_EXTS STACK_OF(X509_EXTENSION) *exts)
+                           const STACK_OF(X509_EXTENSION) *extsarg)
 {
   int i;
   CURLcode result = CURLE_OK;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+  !defined(LIBRESSL_VERSION_NUMBER)
+  const STACK_OF(X509_EXTENSION) *exts = extsarg;
+#else
+  STACK_OF(X509_EXTENSION) *exts = CURL_UNCONST(extsarg);
+#endif
 
   if((int)sk_X509_EXTENSION_num(exts) <= 0)
     /* no extensions, bail out */
@@ -1113,7 +1122,7 @@ static int use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,
   else if(type == SSL_FILETYPE_PEM) {
     /* ERR_R_PEM_LIB; */
     x = PEM_read_bio_X509(in, NULL,
-                          passwd_callback, (void *)key_passwd);
+                          passwd_callback, CURL_UNCONST(key_passwd));
   }
   else {
     ret = 0;
@@ -1143,7 +1152,7 @@ static int use_privatekey_blob(SSL_CTX *ctx, const struct curl_blob *blob,
 
   if(type == SSL_FILETYPE_PEM)
     pkey = PEM_read_bio_PrivateKey(in, NULL, passwd_callback,
-                                   (void *)key_passwd);
+                                   CURL_UNCONST(key_passwd));
   else if(type == SSL_FILETYPE_ASN1)
     pkey = d2i_PrivateKey_bio(in, NULL);
   else
@@ -1165,7 +1174,6 @@ use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
 {
   int ret = 0;
   X509 *x = NULL;
-  void *passwd_callback_userdata = (void *)key_passwd;
   BIO *in = BIO_new_mem_buf(blob->data, (int)(blob->len));
   if(!in)
     return CURLE_OUT_OF_MEMORY;
@@ -1173,7 +1181,7 @@ use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
   ERR_clear_error();
 
   x = PEM_read_bio_X509_AUX(in, NULL,
-                            passwd_callback, (void *)key_passwd);
+                            passwd_callback, CURL_UNCONST(key_passwd));
   if(!x)
     goto end;
 
@@ -1192,7 +1200,7 @@ use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
     }
 
     while((ca = PEM_read_bio_X509(in, NULL, passwd_callback,
-                                  passwd_callback_userdata))
+                                  CURL_UNCONST(key_passwd)))
           != NULL) {
 
       if(!SSL_CTX_add0_chain_cert(ctx, ca)) {
@@ -1309,7 +1317,7 @@ int cert_stuff(struct Curl_easy *data,
 
         /* Does the engine supports LOAD_CERT_CTRL ? */
         if(!ENGINE_ctrl(data->state.engine, ENGINE_CTRL_GET_CMD_FROM_NAME,
-                        0, (void *)cmd_name, NULL)) {
+                        0, CURL_UNCONST(cmd_name), NULL)) {
           failf(data, "ssl engine does not support loading certificates");
           return 0;
         }
@@ -1576,7 +1584,7 @@ fail:
 
       if(data->state.engine) {
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -1627,7 +1635,7 @@ fail:
         OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         UI_METHOD *ui_method =
-          UI_create_method((char *)"curl user interface");
+          UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
         if(!ui_method) {
           failf(data, "unable do create " OSSL_PACKAGE
                 " user-interface method");
@@ -2263,7 +2271,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       /* only check alternatives of the same type the target is */
       if(check->type == target) {
         /* get data and length */
-        const char *altptr = (char *)ASN1_STRING_get0_data(check->d.ia5);
+        const char *altptr = (const char *)ASN1_STRING_get0_data(check->d.ia5);
         size_t altlen = (size_t) ASN1_STRING_length(check->d.ia5);
 
         switch(target) {
@@ -2349,7 +2357,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       if(tmp) {
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
           cnlen = ASN1_STRING_length(tmp);
-          cn = (unsigned char *) ASN1_STRING_get0_data(tmp);
+          cn = (unsigned char *)CURL_UNCONST(ASN1_STRING_get0_data(tmp));
         }
         else { /* not a UTF8 name */
           cnlen = ASN1_STRING_to_UTF8(&cn, tmp);
@@ -2727,15 +2735,15 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
       tls_rt_name = "";
 
     if(content_type == SSL3_RT_CHANGE_CIPHER_SPEC) {
-      msg_type = *(char *)buf;
+      msg_type = *(const char *)buf;
       msg_name = "Change cipher spec";
     }
     else if(content_type == SSL3_RT_ALERT) {
-      msg_type = (((char *)buf)[0] << 8) + ((char *)buf)[1];
+      msg_type = (((const char *)buf)[0] << 8) + ((const char *)buf)[1];
       msg_name = SSL_alert_desc_string_long(msg_type);
     }
     else {
-      msg_type = *(char *)buf;
+      msg_type = *(const char *)buf;
       msg_name = ssl_msg_type(ssl_ver, msg_type);
     }
 
@@ -2747,7 +2755,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   }
 
   Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
-             CURLINFO_SSL_DATA_IN, (char *)buf, len);
+             CURLINFO_SSL_DATA_IN, (const char *)buf, len);
   (void) ssl;
 }
 #endif
@@ -3434,7 +3442,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
 
   DEBUGASSERT(multi);
   share = multi ? Curl_hash_pick(&multi->proto_hash,
-                                 (void *)MPROTO_OSSL_X509_KEY,
+                                 CURL_UNCONST(MPROTO_OSSL_X509_KEY),
                                  sizeof(MPROTO_OSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
@@ -3457,7 +3465,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
   if(!multi)
     return;
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_OSSL_X509_KEY,
+                         CURL_UNCONST(MPROTO_OSSL_X509_KEY),
                          sizeof(MPROTO_OSSL_X509_KEY)-1);
 
   if(!share) {
@@ -3465,7 +3473,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     if(!share)
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
-                       (void *)MPROTO_OSSL_X509_KEY,
+                       CURL_UNCONST(MPROTO_OSSL_X509_KEY),
                        sizeof(MPROTO_OSSL_X509_KEY)-1,
                        share, oss_x509_share_free)) {
       free(share);
@@ -3789,7 +3797,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   {
     const char *curves = conn_config->curves;
     if(curves) {
-      if(!SSL_CTX_set1_curves_list(octx->ssl_ctx, curves)) {
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#define OSSL_CURVE_CAST(x) (x)
+#else
+#define OSSL_CURVE_CAST(x) (char *)CURL_UNCONST(x)
+#endif
+      if(!SSL_CTX_set1_curves_list(octx->ssl_ctx, OSSL_CURVE_CAST(curves))) {
         failf(data, "failed setting curves list: '%s'", curves);
         return CURLE_SSL_CIPHER;
       }
@@ -4677,15 +4690,16 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   {
+    char *buf;
     long len;
     ASN1_TIME_print(mem, X509_get0_notBefore(octx->server_cert));
-    len = BIO_get_mem_data(mem, (char **) &ptr);
-    infof(data, " start date: %.*s", (int)len, ptr);
+    len = BIO_get_mem_data(mem, (char **) &buf);
+    infof(data, " start date: %.*s", (int)len, buf);
     (void)BIO_reset(mem);
 
     ASN1_TIME_print(mem, X509_get0_notAfter(octx->server_cert));
-    len = BIO_get_mem_data(mem, (char **) &ptr);
-    infof(data, " expire date: %.*s", (int)len, ptr);
+    len = BIO_get_mem_data(mem, (char **) &buf);
+    infof(data, " expire date: %.*s", (int)len, buf);
     (void)BIO_reset(mem);
   }
 #endif

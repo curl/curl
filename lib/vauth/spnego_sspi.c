@@ -57,9 +57,9 @@ bool Curl_auth_is_spnego_supported(void)
   SECURITY_STATUS status;
 
   /* Query the security package for Negotiate */
-  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
-                                              TEXT(SP_NAME_NEGOTIATE),
-                                              &SecurityPackage);
+  status = Curl_pSecFn->QuerySecurityPackageInfo(
+                                (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
+                                &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
   if(status == SEC_E_OK) {
@@ -128,9 +128,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(!nego->output_token) {
     /* Query the security package for Negotiate */
-    nego->status = (DWORD)Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
-                                                       TEXT(SP_NAME_NEGOTIATE),
-                                                       &SecurityPackage);
+    nego->status = (DWORD)Curl_pSecFn->QuerySecurityPackageInfo(
+                                (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
+                                &SecurityPackage);
     if(nego->status != SEC_E_OK) {
       failf(data, "SSPI: could not get auth info");
       return CURLE_AUTH_ERROR;
@@ -170,10 +170,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     /* Acquire our credentials handle */
     nego->status = (DWORD)
       Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                         (TCHAR *)TEXT(SP_NAME_NEGOTIATE),
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         nego->p_identity, NULL, NULL,
-                                         nego->credentials, &expiry);
+                                (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
+                                SECPKG_CRED_OUTBOUND, NULL,
+                                nego->p_identity, NULL, NULL,
+                                nego->credentials, &expiry);
     if(nego->status != SEC_E_OK)
       return CURLE_AUTH_ERROR;
 

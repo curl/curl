@@ -384,6 +384,12 @@
 #  endif
 #endif
 
+#ifdef HAVE_LIBZ
+#ifndef ZLIB_CONST
+#define ZLIB_CONST  /* use z_const. supported by v1.2.5.2 and upper. */
+#endif
+#endif
+
 #ifdef USE_ARES
 #  ifndef CARES_NO_DEPRECATED
 #  define CARES_NO_DEPRECATED  /* for ares_getsock() */
@@ -957,6 +963,21 @@ endings either CRLF or LF so 't' is appropriate.
    the string literal in one go, useful for functions that take "string,len"
    as their argument */
 #define STRCONST(x) x,sizeof(x)-1
+
+/* Macro to strip 'const' without triggering compiler warnings.
+   Use it for APIs that do not or cannot support the const qualifier. */
+#ifndef CURL_NO_UNCONST
+#ifndef CURL_UNCONST_TYPE
+#  ifdef _WIN64
+#    define CURL_UNCONST_TYPE curl_off_t
+#  else
+#    define CURL_UNCONST_TYPE unsigned long
+#  endif
+#endif /* !CURL_UNCONST_TYPE */
+#define CURL_UNCONST(p) ((void *)(CURL_UNCONST_TYPE)(const void *)(p))
+#else
+#define CURL_UNCONST(p) ((void *)(p))
+#endif /* !CURL_NO_UNCONST */
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 

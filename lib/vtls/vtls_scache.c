@@ -112,14 +112,14 @@ static void cf_ssl_scache_sesssion_ldestroy(void *udata, void *obj)
 {
   struct Curl_ssl_session *s = obj;
   (void)udata;
-  free((void *)s->sdata);
-  free((void *)s->quic_tp);
+  free(CURL_UNCONST(s->sdata));
+  free(CURL_UNCONST(s->quic_tp));
   free((void *)s->alpn);
   free(s);
 }
 
 CURLcode
-Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
+Curl_ssl_session_create(void *sdata, size_t sdata_len,
                         int ietf_tls_id, const char *alpn,
                         curl_off_t valid_until, size_t earlydata_max,
                         struct Curl_ssl_session **psession)
@@ -130,7 +130,7 @@ Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
 }
 
 CURLcode
-Curl_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
+Curl_ssl_session_create2(void *sdata, size_t sdata_len,
                          int ietf_tls_id, const char *alpn,
                          curl_off_t valid_until, size_t earlydata_max,
                          unsigned char *quic_tp, size_t quic_tp_len,
@@ -1089,7 +1089,7 @@ out:
 CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  const unsigned char *shmac, size_t shmac_len,
-                                 const unsigned char *sdata, size_t sdata_len)
+                                 const void *sdata, size_t sdata_len)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct Curl_ssl_scache_peer *peer = NULL;

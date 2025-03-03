@@ -210,7 +210,8 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* skip all leading blank letters */
-  Curl_str_passblanks((const char **)&header);
+  while(ISBLANK(*header))
+    header++;
 
   *value = header;
 
