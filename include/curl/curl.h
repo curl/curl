@@ -914,12 +914,13 @@ typedef int
 
 
 /* parameter for the CURLOPT_USE_SSL option */
+#define CURLUSESSL_NONE    0L /* do not attempt to use SSL */
+#define CURLUSESSL_TRY     1L /* try using SSL, proceed anyway otherwise */
+#define CURLUSESSL_CONTROL 2L /* SSL for the control connection or fail */
+#define CURLUSESSL_ALL     3L /* SSL for all communication or fail */
+
 typedef enum {
-  CURLUSESSL_NONE,    /* do not attempt to use SSL */
-  CURLUSESSL_TRY,     /* try using SSL, proceed anyway otherwise */
-  CURLUSESSL_CONTROL, /* SSL for the control connection or fail */
-  CURLUSESSL_ALL,     /* SSL for all communication or fail */
-  CURLUSESSL_LAST     /* not an option, never use */
+  CURLUSESSL_LAST = 4 /* not an option, never use */
 } curl_usessl;
 
 /* Definition of bits for the CURLOPT_SSL_OPTIONS argument: */
