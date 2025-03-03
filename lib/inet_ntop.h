@@ -40,7 +40,7 @@ char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
 #endif
 #ifdef __AMIGA__
 #define Curl_inet_ntop(af,addr,buf,size) \
-        (char *)inet_ntop(af, (void *)addr, (unsigned char *)buf, \
+        (char *)inet_ntop(af, CURL_UNCONST(addr), (unsigned char *)buf, \
                           (curl_socklen_t)(size))
 #else
 #define Curl_inet_ntop(af,addr,buf,size) \
