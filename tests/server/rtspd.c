@@ -56,13 +56,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  ERANGE
-#define ERANGE  34 /* errno.h value */
-#endif
-
 #ifdef USE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
@@ -124,11 +117,6 @@ static void storerequest(char *reqbuf, size_t totalsize);
 
 #define DEFAULT_PORT 8999
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/rtspd.log"
-#endif
-
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *logdir = "log";
 static char loglockfile[256];
 
@@ -154,16 +142,6 @@ static char loglockfile[256];
 #define CMD_STREAM "stream"
 
 #define END_OF_HEADERS "\r\n\r\n"
-
-enum {
-  DOCNUMBER_NOTHING = -7,
-  DOCNUMBER_QUIT    = -6,
-  DOCNUMBER_BADCONNECT = -5,
-  DOCNUMBER_INTERNAL = -4,
-  DOCNUMBER_CONNECT = -3,
-  DOCNUMBER_WERULEZ = -2,
-  DOCNUMBER_404     = -1
-};
 
 
 /* sent as reply to a QUIT */
@@ -1062,6 +1040,8 @@ int main(int argc, char *argv[])
   int arg = 1;
 
   memset(&req, 0, sizeof(req));
+
+  serverlogfile = "log/rtspd.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
