@@ -235,8 +235,8 @@ void showhelp(const char *trigger, const char *arg, const char *endarg)
   inithelpscan(&ctx, trigger, arg, endarg);
   while(curlman[i]) {
     size_t len = strlen(curlman[i]);
-    if(!helpscan((unsigned char *)curlman[i], len, &ctx) ||
-       !helpscan((unsigned char *)"\\n", 1, &ctx))
+    if(!helpscan((const unsigned char *)curlman[i], len, &ctx) ||
+       !helpscan((const unsigned char *)"\\n", 1, &ctx))
       break;
     i++;
   }
