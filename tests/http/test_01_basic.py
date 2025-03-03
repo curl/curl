@@ -203,4 +203,3 @@ class TestBasic:
             r.check_exit_code(16)  # CURLE_HTTP2
         else:
             r.check_exit_code(100)  # CURLE_TOO_LARGE
-

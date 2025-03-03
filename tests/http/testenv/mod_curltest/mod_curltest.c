@@ -466,11 +466,13 @@ static int curltest_tweak_handler(request_rec *r)
     memset(hd_val, 'X', hd_len);
     hd_val[hd_len - 1] = 0;
     for(i = 0; i < n; ++i) {
-      apr_table_setn(r->headers_out, apr_psprintf(r->pool, "X-Header-%d", i), hd_val);
+      apr_table_setn(r->headers_out,
+                     apr_psprintf(r->pool, "X-Header-%d", i), hd_val);
     }
     if(x_hd_len % hd_len) {
       hd_val[(x_hd_len % hd_len)] = 0;
-      apr_table_setn(r->headers_out, apr_psprintf(r->pool, "X-Header-%d", i), hd_val);
+      apr_table_setn(r->headers_out,
+                     apr_psprintf(r->pool, "X-Header-%d", i), hd_val);
     }
   }
   if(x_hd1_len > 0) {
