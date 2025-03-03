@@ -759,7 +759,7 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
     pending = !Curl_bufq_is_empty(&stream->recvbuf);
     msh3_lock_release(&stream->recv_lock);
     if(pending)
-      h3_drain_stream(cf, (struct Curl_easy *)data);
+      h3_drain_stream(cf, (struct Curl_easy *)CURL_UNCONST(data));
   }
 
   CF_DATA_RESTORE(cf, save);
