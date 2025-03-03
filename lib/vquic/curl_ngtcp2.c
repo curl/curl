@@ -977,7 +977,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   if(!stream)
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
-  h3_xfer_write_resp(cf, data, stream, (char *)buf, blen, FALSE);
+  h3_xfer_write_resp(cf, data, stream, (const char *)buf, blen, FALSE);
   if(blen) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] ACK %zu bytes of DATA",
                 stream->id, blen);
