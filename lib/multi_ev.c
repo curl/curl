@@ -140,7 +140,7 @@ static size_t mev_sh_entry_user_count(struct mev_sh_entry *e)
 static bool mev_sh_entry_xfer_known(struct mev_sh_entry *e,
                                     struct Curl_easy *data)
 {
-  return !!Curl_hash_offt_get(&e->xfers, data->id);
+  return !!Curl_hash_offt_get(&e->xfers, data->mid);
 }
 
 static bool mev_sh_entry_conn_known(struct mev_sh_entry *e,
@@ -154,7 +154,7 @@ static bool mev_sh_entry_xfer_add(struct mev_sh_entry *e,
 {
    /* detect weird values */
   DEBUGASSERT(mev_sh_entry_user_count(e) < 100000);
-  return !!Curl_hash_offt_set(&e->xfers, data->id, data);
+  return !!Curl_hash_offt_set(&e->xfers, data->mid, data);
 }
 
 static bool mev_sh_entry_conn_add(struct mev_sh_entry *e,
@@ -169,7 +169,7 @@ static bool mev_sh_entry_conn_add(struct mev_sh_entry *e,
 static bool mev_sh_entry_xfer_remove(struct mev_sh_entry *e,
                                      struct Curl_easy *data)
 {
-  return Curl_hash_offt_remove(&e->xfers, data->id);
+  return Curl_hash_offt_remove(&e->xfers, data->mid);
 }
 
 /* Purge any information about socket `s`.
@@ -335,7 +335,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
       CURL_TRC_M(data, "ev entry fd=%" FMT_SOCKET_T ", added %s #%" FMT_OFF_T
                  ", total=%zu/%zu (xfer/conn)", s,
                  conn ? "connection" : "transfer",
-                 conn ? conn->connection_id : data->id,
+                 conn ? conn->connection_id : data->mid,
                  Curl_hash_offt_count(&entry->xfers),
                  Curl_hash_offt_count(&entry->conns));
     }
@@ -434,7 +434,7 @@ mev_get_last_pollset(struct Curl_multi *multi,
       return Curl_hash_offt_get(&multi->ev.conn_pollsets,
                                 conn->connection_id);
     else if(data)
-      return Curl_hash_offt_get(&multi->ev.xfer_pollsets, data->id);
+      return Curl_hash_offt_get(&multi->ev.xfer_pollsets, data->mid);
   }
   return NULL;
 }
@@ -465,7 +465,7 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
         last_ps = mev_add_new_pollset(&multi->ev.conn_pollsets,
                                       data->conn->connection_id);
       else
-        last_ps = mev_add_new_pollset(&multi->ev.xfer_pollsets, data->id);
+        last_ps = mev_add_new_pollset(&multi->ev.xfer_pollsets, data->mid);
       if(!last_ps)
         return CURLM_OUT_OF_MEMORY;
     }
@@ -565,9 +565,9 @@ void Curl_multi_ev_xfer_done(struct Curl_multi *multi,
                              struct Curl_easy *data)
 {
   DEBUGASSERT(!data->conn); /* transfer should have been detached */
-  if(data->id >= 0) {
+  if(data->mid >= 0) {
     (void)mev_assess(multi, data, NULL);
-    Curl_hash_offt_remove(&multi->ev.xfer_pollsets, data->id);
+    Curl_hash_offt_remove(&multi->ev.xfer_pollsets, data->mid);
   }
 }
 
