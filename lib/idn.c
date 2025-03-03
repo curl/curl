@@ -64,7 +64,7 @@ static CURLcode iconv_to_utf8(const char *in, size_t inlen,
   iconv_t cd = iconv_open("UTF-8", nl_langinfo(CODESET));
   if(cd != (iconv_t)-1) {
     size_t iconv_outlen = *outlen;
-    char *iconv_in = (char *)in;
+    char *iconv_in = (char *)CURL_UNCONST(in);
     size_t iconv_inlen = inlen;
     size_t iconv_result = iconv(cd, &iconv_in, &iconv_inlen,
                                 out, &iconv_outlen);
