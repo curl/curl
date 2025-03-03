@@ -314,10 +314,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
 #else
 #define MD4_SET(n) \
         (ctx->block[(n)] = \
-        (MD4_u32plus)ptr[(n) * 4] | \
-        ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
-        ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
-        ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
+          (MD4_u32plus)ptr[(n) * 4] | \
+          ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
+          ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
+          ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
 #define MD4_GET(n) \
         (ctx->block[(n)])
 #endif
