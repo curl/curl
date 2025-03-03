@@ -155,7 +155,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
       }
       else {
         CERT_BLOB cert_blob;
-        CERT_CONTEXT *cert_context = NULL;
+        const CERT_CONTEXT *cert_context = NULL;
         BOOL add_cert_result = FALSE;
         DWORD actual_content_type = 0;
         DWORD cert_size = (DWORD)
