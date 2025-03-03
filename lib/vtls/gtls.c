@@ -1980,7 +1980,7 @@ static ssize_t gtls_send(struct Curl_cfilter *cf,
     nwritten = (size_t)rc;
     total_written += nwritten;
     DEBUGASSERT(nwritten <= blen);
-    buf = (char *)buf + nwritten;
+    buf = (char *)CURL_UNCONST(buf) + nwritten;
     blen -= nwritten;
   }
   rc = total_written;
