@@ -50,9 +50,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-static bool use_ipv6 = FALSE;
-static const char *ipv_inuse = "IPv4";
-
 int main(int argc, char *argv[])
 {
   int arg = 1;

@@ -63,12 +63,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#define DEFAULT_PORT 1883 /* MQTT default port */
-
-#ifndef DEFAULT_CONFIG
-#define DEFAULT_CONFIG "mqttd.config"
-#endif
-
 #define MQTT_MSG_CONNECT    0x10
 #define MQTT_MSG_CONNACK    0x20
 #define MQTT_MSG_PUBLISH    0x30
@@ -91,16 +85,6 @@ struct configurable {
 #define CONFIG_VERSION 5
 
 static struct configurable config;
-
-static const char *configfile = DEFAULT_CONFIG;
-static const char *logdir = "log";
-static char loglockfile[256];
-
-#ifdef USE_IPV6
-static bool use_ipv6 = FALSE;
-#endif
-static const char *ipv_inuse = "IPv4";
-static unsigned short server_port = DEFAULT_PORT;
 
 static void resetdefaults(void)
 {
@@ -923,6 +907,8 @@ int main(int argc, char *argv[])
   int arg = 1;
 
   serverlogfile = "log/mqttd.log";
+  configfile = "mqttd.config";
+  server_port = 1883; /* MQTT default port */
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

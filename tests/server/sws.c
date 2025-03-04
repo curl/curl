@@ -120,11 +120,6 @@ static size_t num_sockets = 0;
 static int ProcessRequest(struct httprequest *req);
 static void storerequest(const char *reqbuf, size_t totalsize);
 
-#define DEFAULT_PORT 8999
-
-static const char *logdir = "log";
-static char loglockfile[256];
-
 #define SWSVERSION "curl test suite HTTP server/0.1"
 
 #define REQUEST_DUMP  "server.input"
@@ -2019,7 +2014,7 @@ int main(int argc, char *argv[])
   int wrotepidfile = 0;
   int wroteportfile = 0;
   int flag;
-  unsigned short port = DEFAULT_PORT;
+  unsigned short port = 8999;
 #ifdef USE_UNIX_SOCKETS
   const char *unix_socket = NULL;
   bool unlink_socket = false;

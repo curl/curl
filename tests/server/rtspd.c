@@ -56,10 +56,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_IPV6
-static bool use_ipv6 = FALSE;
-#endif
-static const char *ipv_inuse = "IPv4";
 static int serverlogslocked = 0;
 
 #define REQBUFSIZ 150000
@@ -114,11 +110,6 @@ struct httprequest {
 
 static int ProcessRequest(struct httprequest *req);
 static void storerequest(char *reqbuf, size_t totalsize);
-
-#define DEFAULT_PORT 8999
-
-static const char *logdir = "log";
-static char loglockfile[256];
 
 #define RTSPDVERSION "curl test suite RTSP server/0.1"
 
@@ -1031,7 +1022,7 @@ int main(int argc, char *argv[])
   int wrotepidfile = 0;
   int wroteportfile = 0;
   int flag;
-  unsigned short port = DEFAULT_PORT;
+  unsigned short port = 8999;
   const char *pidname = ".rtsp.pid";
   const char *portname = NULL; /* none by default */
   struct httprequest req;

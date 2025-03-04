@@ -152,8 +152,6 @@ struct bf {
 
 #define REQUEST_DUMP  "server.input"
 
-#define DEFAULT_PORT 8999 /* UDP */
-
 /*****************************************************************************
 *                              GLOBAL VARIABLES                              *
 *****************************************************************************/
@@ -196,13 +194,6 @@ static curl_socket_t peer = CURL_SOCKET_BAD;
 static unsigned int timeout;
 static unsigned int maxtimeout = 5 * TIMEOUT;
 
-#ifdef USE_IPV6
-static bool use_ipv6 = FALSE;
-#endif
-static const char *ipv_inuse = "IPv4";
-
-static const char *logdir = "log";
-static char loglockfile[256];
 static const char *pidname = ".tftpd.pid";
 static const char *portname = NULL; /* none by default */
 static int serverlogslocked = 0;
@@ -549,7 +540,7 @@ int main(int argc, char **argv)
   struct tftphdr *tp;
   ssize_t n = 0;
   int arg = 1;
-  unsigned short port = DEFAULT_PORT;
+  unsigned short port = 8999; /* UDP */
   curl_socket_t sock = CURL_SOCKET_BAD;
   int flag;
   int rc;

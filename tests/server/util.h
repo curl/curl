@@ -59,6 +59,14 @@ extern const char *path;
 
 /* global variable, log file name */
 extern const char *serverlogfile;
+extern const char *configfile;
+extern const char *logdir;
+extern char loglockfile[256];
+#ifdef USE_IPV6
+extern bool use_ipv6;
+#endif
+extern const char *ipv_inuse;
+extern unsigned short server_port;
 
 #ifdef _WIN32
 int win32_init(void);

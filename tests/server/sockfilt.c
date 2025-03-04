@@ -114,19 +114,12 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#define DEFAULT_PORT 8999
-
 /* buffer is this excessively large only to be able to support things like
   test 1003 which tests exceedingly large server response lines */
 #define BUFFER_SIZE 17010
 
 static bool verbose = FALSE;
 static bool bind_only = FALSE;
-#ifdef USE_IPV6
-static bool use_ipv6 = FALSE;
-#endif
-static const char *ipv_inuse = "IPv4";
-static unsigned short server_port = DEFAULT_PORT;
 static unsigned short server_connectport = 0; /* if non-zero,
                                                  we activate this mode */
 
@@ -1392,6 +1385,7 @@ int main(int argc, char *argv[])
   const char *addr = NULL;
 
   serverlogfile = "log/sockfilt.log";
+  server_port = 8999;
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

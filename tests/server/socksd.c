@@ -85,14 +85,8 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#define DEFAULT_PORT 8905
-
 #ifndef DEFAULT_REQFILE
 #define DEFAULT_REQFILE "log/socksd-request.log"
-#endif
-
-#ifndef DEFAULT_CONFIG
-#define DEFAULT_CONFIG "socksd.config"
 #endif
 
 static const char *backendaddr = "127.0.0.1";
@@ -126,10 +120,8 @@ struct configurable {
 static struct configurable config;
 
 static const char *reqlogfile = DEFAULT_REQFILE;
-static const char *configfile = DEFAULT_CONFIG;
 
 static const char *socket_type = "IPv4";
-static unsigned short server_port = DEFAULT_PORT;
 
 static void resetdefaults(void)
 {
@@ -970,6 +962,8 @@ int main(int argc, char *argv[])
 #endif
 
   serverlogfile = "log/socksd.log";
+  configfile = "socksd.config";
+  server_port = 8905;
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

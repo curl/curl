@@ -57,6 +57,14 @@
 #include "timediff.h"
 
 const char *serverlogfile = NULL;  /* needs init from main() */
+const char *configfile = NULL;
+const char *logdir = "log";
+char loglockfile[256];
+#ifdef USE_IPV6
+bool use_ipv6 = FALSE;
+#endif
+const char *ipv_inuse = "IPv4";
+unsigned short server_port = 0;
 
 static struct timeval tvnow(void);
 
