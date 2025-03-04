@@ -735,8 +735,8 @@ static bool mqttd_incoming(curl_socket_t listenfd)
   return TRUE;
 }
 
-static curl_socket_t sockdaemon(curl_socket_t sock,
-                                unsigned short *listenport)
+static curl_socket_t mqttd_sockdaemon(curl_socket_t sock,
+                                      unsigned short *listenport)
 {
   /* passive daemon style */
   srvr_sockaddr_union_t listener;
@@ -997,7 +997,7 @@ int main(int argc, char *argv[])
 
   {
     /* passive daemon style */
-    sock = sockdaemon(sock, &server_port);
+    sock = mqttd_sockdaemon(sock, &server_port);
     if(CURL_SOCKET_BAD == sock) {
       goto mqttd_cleanup;
     }

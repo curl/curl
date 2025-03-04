@@ -762,8 +762,8 @@ static bool socksd_incoming(curl_socket_t listenfd)
   return TRUE;
 }
 
-static curl_socket_t sockdaemon(curl_socket_t sock,
-                                unsigned short *listenport
+static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
+                                       unsigned short *listenport
 #ifdef USE_UNIX_SOCKETS
         , const char *unix_socket
 #endif
@@ -1063,7 +1063,7 @@ int main(int argc, char *argv[])
 
   {
     /* passive daemon style */
-    sock = sockdaemon(sock, &server_port
+    sock = socksd_sockdaemon(sock, &server_port
 #ifdef USE_UNIX_SOCKETS
             , unix_socket
 #endif

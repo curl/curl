@@ -1226,8 +1226,8 @@ static bool juggle(curl_socket_t *sockfdp,
 #endif
 }
 
-static curl_socket_t sockdaemon(curl_socket_t sock,
-                                unsigned short *listenport)
+static curl_socket_t sockfilt_sockdaemon(curl_socket_t sock,
+                                         unsigned short *listenport)
 {
   /* passive daemon style */
   srvr_sockaddr_union_t listener;
@@ -1553,7 +1553,7 @@ int main(int argc, char *argv[])
   }
   else {
     /* passive daemon style */
-    sock = sockdaemon(sock, &server_port);
+    sock = sockfilt_sockdaemon(sock, &server_port);
     if(CURL_SOCKET_BAD == sock) {
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
