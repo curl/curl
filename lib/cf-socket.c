@@ -1843,8 +1843,9 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
    * non-blocking socket created by cf_socket_open() to it. Thus, we
    * do not need to call curlx_nonblock() in cf_udp_setup_quic() anymore.
    */
+#ifdef __linux__
   switch(ctx->addr.family) {
-#if defined(__linux__) && defined(IP_MTU_DISCOVER)
+#ifdef IP_MTU_DISCOVER
   case AF_INET: {
     int val = IP_PMTUDISC_DO;
     (void)setsockopt(ctx->sock, IPPROTO_IP, IP_MTU_DISCOVER, &val,
@@ -1852,7 +1853,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
     break;
   }
 #endif
-#if defined(__linux__) && defined(IPV6_MTU_DISCOVER)
+#ifdef IPV6_MTU_DISCOVER
   case AF_INET6: {
     int val = IPV6_PMTUDISC_DO;
     (void)setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
@@ -1862,11 +1863,12 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 #endif
   }
 
-#if defined(__linux__) && defined(UDP_GRO) &&                                 \
+#if defined(UDP_GRO) &&                                                       \
   (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)) &&                        \
   ((defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_QUICHE))
   (void)setsockopt(ctx->sock, IPPROTO_UDP, UDP_GRO, &one,
                    (socklen_t)sizeof(one));
+#endif
 #endif
 
   return CURLE_OK;
