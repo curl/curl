@@ -833,7 +833,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req);
 
 /* returns 1 if the connection should be serviced again immediately, 0 if there
    is no data waiting, or < 0 if it should be closed */
-static int get_request(curl_socket_t sock, struct httprequest *req)
+static int sws_get_request(curl_socket_t sock, struct httprequest *req)
 {
   int fail = 0;
   char *reqbuf = req->reqbuf;
@@ -1597,7 +1597,7 @@ static void http_connect(curl_socket_t *infdp,
 #endif
           init_httprequest(req2);
           while(!req2->done_processing) {
-            err = get_request(datafd, req2);
+            err = sws_get_request(datafd, req2);
             if(err < 0) {
               /* this socket must be closed, done or not */
               break;
@@ -1938,7 +1938,7 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
     return -1;
 
   while(!req->done_processing) {
-    int rc = get_request(msgsock, req);
+    int rc = sws_get_request(msgsock, req);
     if(rc <= 0) {
       /* Nothing further to read now, possibly because the socket was closed */
       return rc;
@@ -2328,8 +2328,8 @@ int main(int argc, char *argv[])
   if(!wroteportfile)
     goto sws_cleanup;
 
-  /* initialization of httprequest struct is done before get_request(), but
-     the pipelining struct field must be initialized previously to FALSE
+  /* initialization of httprequest struct is done before sws_get_request(),
+     but the pipelining struct field must be initialized previously to FALSE
      every time a new connection arrives. */
 
   init_httprequest(req);

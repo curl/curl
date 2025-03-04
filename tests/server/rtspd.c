@@ -614,7 +614,7 @@ storerequest_cleanup:
 }
 
 /* return 0 on success, non-zero on failure */
-static int get_request(curl_socket_t sock, struct httprequest *req)
+static int rtspd_get_request(curl_socket_t sock, struct httprequest *req)
 {
   int error;
   int fail = 0;
@@ -1271,9 +1271,9 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    /* initialization of httprequest struct is done in get_request(), but due
-       to pipelining treatment the pipelining struct field must be initialized
-       previously to FALSE every time a new connection arrives. */
+    /* initialization of httprequest struct is done in rtspd_get_request(),
+       but due to pipelining treatment the pipelining struct field must be
+       initialized previously to FALSE every time a new connection arrives. */
 
     req.pipelining = FALSE;
 
@@ -1281,7 +1281,7 @@ int main(int argc, char *argv[])
       if(got_exit_signal)
         break;
 
-      if(get_request(msgsock, &req))
+      if(rtspd_get_request(msgsock, &req))
         /* non-zero means error, break out of loop */
         break;
 
