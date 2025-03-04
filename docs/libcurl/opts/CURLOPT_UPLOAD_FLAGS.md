@@ -14,7 +14,7 @@ Added-in: 8.13.0
 
 # NAME
 
-CURLOPT_UPLOAD_FLAGS - configure upload flags
+CURLOPT_UPLOAD_FLAGS - upload flags for IMAP
 
 # SYNOPSIS
 
