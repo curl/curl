@@ -495,4 +495,3 @@ class TestSSLUse:
             assert r.json['SSL_CIPHER'] in ciphers, r.dump_logs()
         else:
             assert r.exit_code != 0, r.dump_logs()
-
