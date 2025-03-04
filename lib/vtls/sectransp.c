@@ -50,7 +50,6 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waddress"
-#pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 
 #if defined(__GNUC__) && defined(__APPLE__)
@@ -538,7 +537,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
         OSStatus err = noErr;
         SecCertificateRef cert = NULL;
         SecIdentityRef identity =
-          (SecIdentityRef) CFArrayGetValueAtIndex(keys_list, i);
+          (SecIdentityRef)CURL_UNCONST(CFArrayGetValueAtIndex(keys_list, i));
         err = SecIdentityCopyCertificate(identity, &cert);
         if(err == noErr) {
           CFStringRef common_name = NULL;
@@ -667,22 +666,22 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
       count = CFArrayGetCount(items);
 
       for(i = 0; i < count; i++) {
-        CFTypeRef item = (CFTypeRef) CFArrayGetValueAtIndex(items, i);
-        CFTypeID  itemID = CFGetTypeID(item);
+        const CFTypeRef item = CFArrayGetValueAtIndex(items, i);
+        CFTypeID itemID = CFGetTypeID(item);
 
         if(itemID == CFDictionaryGetTypeID()) {
-          CFTypeRef identity = (CFTypeRef) CFDictionaryGetValue(
-                                                 (CFDictionaryRef) item,
-                                                 kSecImportItemIdentity);
+          const CFTypeRef identity = CFDictionaryGetValue(
+                                           (CFDictionaryRef)item,
+                                           kSecImportItemIdentity);
           CFRetain(identity);
-          *out_cert_and_key = (SecIdentityRef) identity;
+          *out_cert_and_key = (SecIdentityRef)CURL_UNCONST(identity);
           break;
         }
 #if CURL_BUILD_MAC_10_7
         else if(itemID == SecCertificateGetTypeID()) {
           status = SecIdentityCreateWithCertificate(NULL,
-                                                 (SecCertificateRef) item,
-                                                 out_cert_and_key);
+                                         (SecCertificateRef)CURL_UNCONST(item),
+                                         out_cert_and_key);
           break;
         }
 #endif
@@ -2250,8 +2249,8 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
       if(ssl_config->certinfo)
         result = Curl_ssl_init_certinfo(data, (int)count);
       for(i = 0L ; !result && (i < count) ; i++) {
-        server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
-                                                                i);
+        server_cert = (SecCertificateRef)
+          CURL_UNCONST(CFArrayGetValueAtIndex(server_certs, i));
         result = collect_server_cert_single(cf, data, server_cert, i);
       }
       CFRelease(server_certs);
@@ -2267,7 +2266,8 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
     if(ssl_config->certinfo)
       result = Curl_ssl_init_certinfo(data, (int)count);
     for(i = 0L ; !result && (i < count) ; i++) {
-      server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
+      server_cert = (SecCertificateRef)
+        CURL_UNCONST(CFArrayGetValueAtIndex(server_certs, i));
       result = collect_server_cert_single(cf, data, server_cert, i);
     }
     CFRelease(server_certs);
