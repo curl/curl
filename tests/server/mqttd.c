@@ -97,7 +97,7 @@ static void resetdefaults(void)
   config.testnum = 0;
 }
 
-static void getconfig(void)
+static void mqttd_getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
   resetdefaults();
@@ -452,7 +452,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
   if(!dump)
     goto end;
 
-  getconfig();
+  mqttd_getconfig();
 
   testno = config.testnum;
 

@@ -143,7 +143,7 @@ static unsigned short shortval(char *value)
   return num & 0xffff;
 }
 
-static void getconfig(void)
+static void socksd_getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
   resetdefaults();
@@ -316,7 +316,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   curl_socket_t connfd = CURL_SOCKET_BAD;
   unsigned short s5port;
 
-  getconfig();
+  socksd_getconfig();
 
   rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
   if(rc <= 0) {
