@@ -1623,54 +1623,62 @@ static ParameterError parse_time_cond(struct GlobalConfig *global,
   return err;
 }
 
+struct flagmap {
+  const char* name;
+  size_t len;
+  unsigned char flag;
+};
+
+static const struct flagmap flag_table[] = {
+  {"answered", 8, CURLULFLAG_ANSWERED},
+  {"deleted",  7, CURLULFLAG_DELETED},
+  {"draft",    5, CURLULFLAG_DRAFT},
+  {"flagged",  7, CURLULFLAG_FLAGGED},
+  {"seen",     4, CURLULFLAG_SEEN},
+  {NULL,       0, 0}
+};
+
 static ParameterError parse_upload_flags(struct OperationConfig *config,
                                       char *nextarg)
 {
-  char *tmp, *upload_flag;
+  char *flag;
   ParameterError err = PARAM_OK;
-  size_t flag_len;
+  char *tmp = strdup(nextarg);
 
-  tmp = strdup(nextarg);
   if(!tmp)
     return PARAM_NO_MEM;
 
-  /* Allow strtok() here since this is not used threaded */
-  /* !checksrc! disable BANNEDFUNC 2 */
-  upload_flag = strtok(tmp, ",");
+  flag = tmp;
+  while(flag) {
+    bool negate;
+    const struct flagmap *map;
+    char *next = strchr(flag, ','); /* Find next comma or end */
+    if(next)
+      *next++ = '\0';
 
-  while(upload_flag) {
-    flag_len = strlen(upload_flag);
+    negate = (*flag == '-');
+    if(negate)
+      flag++;
 
-    if(flag_len == 8 && !strncmp(upload_flag, "Answered", 8))
-      config->upload_flags |= CURLULFLAG_ANSWERED;
-    else if(flag_len == 9 && !strncmp(upload_flag, "!Answered", 9))
-      config->upload_flags &= (unsigned char)~CURLULFLAG_ANSWERED;
-    else if(flag_len == 7 && !strncmp(upload_flag, "Deleted", 7))
-      config->upload_flags |= CURLULFLAG_DELETED;
-    else if(flag_len == 8 && !strncmp(upload_flag, "!Deleted", 8))
-      config->upload_flags &= (unsigned char)~CURLULFLAG_DELETED;
-    else if(flag_len == 5 && !strncmp(upload_flag, "Draft", 5))
-      config->upload_flags |= CURLULFLAG_DRAFT;
-    else if(flag_len == 6 && !strncmp(upload_flag, "!Draft", 6))
-      config->upload_flags &= (unsigned char)~CURLULFLAG_DRAFT;
-    else if(flag_len == 7 && !strncmp(upload_flag, "Flagged", 7))
-      config->upload_flags |= CURLULFLAG_FLAGGED;
-    else if(flag_len == 8 && !strncmp(upload_flag, "!Flagged", 8))
-      config->upload_flags &= (unsigned char)~CURLULFLAG_FLAGGED;
-    else if(flag_len == 4 && !strncmp(upload_flag, "Seen", 4))
-      config->upload_flags |= CURLULFLAG_SEEN;
-    else if(flag_len == 5 && !strncmp(upload_flag, "!Seen", 5))
-      config->upload_flags &= (unsigned char)~CURLULFLAG_SEEN;
-    else {
-      err = PARAM_OPTION_UNKNOWN;
-      break;
+    for(map = flag_table; map->name; map++) {
+      if(!strncmp(flag, map->name, map->len) && flag[map->len] == '\0') {
+        if(negate)
+          config->upload_flags &= (unsigned char)~map->flag;
+        else
+          config->upload_flags |= map->flag;
+        break;
+      }
     }
 
-    upload_flag = strtok(NULL, ",");
+   if(!map->name) {
+     err = PARAM_OPTION_UNKNOWN;
+     break;
+   }
+
+   flag = next;
   }
 
   free(tmp);
-
   return err;
 }
 

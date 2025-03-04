@@ -1014,11 +1014,11 @@ typedef enum {
 #define CURLALTSVC_H3           (1<<5)
 
 /* bitmask values for CURLOPT_UPLOAD_FLAGS */
-#define CURLULFLAG_ANSWERED (((unsigned char)1)<<0)
-#define CURLULFLAG_DELETED  (((unsigned char)1)<<1)
-#define CURLULFLAG_DRAFT    (((unsigned char)1)<<2)
-#define CURLULFLAG_FLAGGED  (((unsigned char)1)<<3)
-#define CURLULFLAG_SEEN     (((unsigned char)1)<<4)
+#define CURLULFLAG_ANSWERED (1L<<0)
+#define CURLULFLAG_DELETED  (1L<<1)
+#define CURLULFLAG_DRAFT    (1L<<2)
+#define CURLULFLAG_FLAGGED  (1L<<3)
+#define CURLULFLAG_SEEN     (1L<<4)
 
 struct curl_hstsentry {
   char *name;

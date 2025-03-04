@@ -23,7 +23,7 @@ imap
 Upload message unread via IMAP
 </name>
 <command>
-imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret --upload-flags !Seen
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret --upload-flags -seen
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">
 Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
