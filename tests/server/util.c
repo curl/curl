@@ -56,7 +56,9 @@
 #include "timeval.h"
 #include "timediff.h"
 
-const char *serverlogfile = NULL;  /* needs init from main() */
+/* need init from main() */
+const char *pidname = NULL;
+const char *serverlogfile = NULL;
 const char *configfile = NULL;
 const char *logdir = "log";
 char loglockfile[256];

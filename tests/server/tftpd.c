@@ -194,7 +194,6 @@ static curl_socket_t peer = CURL_SOCKET_BAD;
 static unsigned int timeout;
 static unsigned int maxtimeout = 5 * TIMEOUT;
 
-static const char *pidname = ".tftpd.pid";
 static const char *portname = NULL; /* none by default */
 static int serverlogslocked = 0;
 static int wrotepidfile = 0;
@@ -550,6 +549,7 @@ int main(int argc, char **argv)
 
   memset(&test, 0, sizeof(test));
 
+  pidname = ".tftpd.pid";
   serverlogfile = "log/tftpd.log";
 
   while(argc > arg) {

@@ -1023,7 +1023,6 @@ int main(int argc, char *argv[])
   int wroteportfile = 0;
   int flag;
   unsigned short port = 8999;
-  const char *pidname = ".rtsp.pid";
   const char *portname = NULL; /* none by default */
   struct httprequest req;
   int rc;
@@ -1032,6 +1031,7 @@ int main(int argc, char *argv[])
 
   memset(&req, 0, sizeof(req));
 
+  pidname = ".rtsp.pid";
   serverlogfile = "log/rtspd.log";
 
   while(argc > arg) {

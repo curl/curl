@@ -950,7 +950,6 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   int wroteportfile = 0;
-  const char *pidname = ".socksd.pid";
   const char *portname = NULL; /* none by default */
   bool juggle_again;
   int error;
@@ -961,6 +960,7 @@ int main(int argc, char *argv[])
   bool unlink_socket = false;
 #endif
 
+  pidname = ".socksd.pid";
   serverlogfile = "log/socksd.log";
   configfile = "socksd.config";
   server_port = 8905;

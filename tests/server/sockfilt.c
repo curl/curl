@@ -1375,7 +1375,6 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   int wroteportfile = 0;
-  const char *pidname = ".sockfilt.pid";
   const char *portname = NULL; /* none by default */
   bool juggle_again;
   int rc;
@@ -1384,6 +1383,7 @@ int main(int argc, char *argv[])
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
 
+  pidname = ".sockfilt.pid";
   serverlogfile = "log/sockfilt.log";
   server_port = 8999;
 

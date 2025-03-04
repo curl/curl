@@ -54,11 +54,10 @@ void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
 
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
-/* global variable, where to find the 'data' dir */
-extern const char *path;
-
-/* global variable, log file name */
-extern const char *serverlogfile;
+/* global variables */
+extern const char *path;  /* where to find the 'data' dir */
+extern const char *pidname;
+extern const char *serverlogfile;  /* log file name */
 extern const char *configfile;
 extern const char *logdir;
 extern char loglockfile[256];
