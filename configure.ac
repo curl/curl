@@ -663,6 +663,7 @@ AS_HELP_STRING([--disable-test-bundles],[Disable test bundles (default)]),
 )
 
 AM_CONDITIONAL([USE_TEST_BUNDLES], [test "$want_test_bundles" = 'yes'])
+AM_CONDITIONAL([USE_TEST_BUNDLES_SERVER], [test "$want_test_bundles" = 'DISABLED'])
 
 dnl ************************************************************
 dnl switch off particular protocols

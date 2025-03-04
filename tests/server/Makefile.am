@@ -53,7 +53,7 @@ include Makefile.inc
 
 EXTRA_DIST = base64.pl mk-bundle.pl CMakeLists.txt .checksrc
 
-if USE_TEST_BUNDLES
+if USE_TEST_BUNDLES_SERVER
 server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(UTIL_BUNDLE)
 	@PERL@ $(top_srcdir)/tests/server/mk-bundle.pl $(SERVERPROGS) > server_bundle.c
 

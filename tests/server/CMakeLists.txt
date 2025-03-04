@@ -32,7 +32,7 @@ set_source_files_properties(
   "../../lib/curl_multibyte.c"
   PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
-if(CURL_TEST_BUNDLES)
+if(CURL_TEST_BUNDLES_SERVER)
   add_custom_command(
     OUTPUT "server_bundle.c"
     COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${SERVERPROGS} > "server_bundle.c"
