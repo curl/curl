@@ -100,7 +100,7 @@ struct httprequest {
                      - skip bytes. */
   int rcmd;       /* doing a special command, see defines above */
   int prot_version;  /* HTTP version * 10 */
-  int callcount;  /* times ProcessRequest() gets called */
+  int callcount;  /* times sws_ProcessRequest() gets called */
   bool skipall;   /* skip all incoming data */
   bool noexpect;  /* refuse Expect: (don't read the body) */
   bool connmon;   /* monitor the state of the connection, log disconnects */
@@ -325,7 +325,7 @@ static int parse_servercmd(struct httprequest *req)
   return 0; /* OK! */
 }
 
-static int ProcessRequest(struct httprequest *req)
+static int sws_ProcessRequest(struct httprequest *req)
 {
   char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
@@ -945,7 +945,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
 
-    req->done_processing = ProcessRequest(req);
+    req->done_processing = sws_ProcessRequest(req);
     if(got_exit_signal)
       return -1;
   }

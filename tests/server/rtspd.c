@@ -166,7 +166,7 @@ static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
 #define RTP_DATA_SIZE 12
 static const char *RTP_DATA = "$_1234\n\0Rsdf";
 
-static int ProcessRequest(struct httprequest *req)
+static int rtspd_ProcessRequest(struct httprequest *req)
 {
   char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
@@ -176,7 +176,7 @@ static int ProcessRequest(struct httprequest *req)
   int prot_major, prot_minor;
   char *end = strstr(line, END_OF_HEADERS);
 
-  logmsg("ProcessRequest() called with testno %ld and line [%s]",
+  logmsg("rtspd_ProcessRequest() called with testno %ld and line [%s]",
          req->testno, line);
 
   /* try to figure out the request characteristics as soon as possible, but
@@ -405,10 +405,10 @@ static int ProcessRequest(struct httprequest *req)
 
   if(!end) {
     /* we don't have a complete request yet! */
-    logmsg("ProcessRequest returned without a complete request");
+    logmsg("rtspd_ProcessRequest returned without a complete request");
     return 0; /* not complete yet */
   }
-  logmsg("ProcessRequest found a complete request");
+  logmsg("rtspd_ProcessRequest found a complete request");
 
   if(req->pipe)
     /* we do have a full set, advance the checkindex to after the end of the
@@ -691,7 +691,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
 
-    done_processing = ProcessRequest(req);
+    done_processing = rtspd_ProcessRequest(req);
     if(got_exit_signal)
       return 1;
     if(done_processing && req->pipe) {
