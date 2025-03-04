@@ -51,6 +51,7 @@ enum {
 
 char *data_to_hex(char *data, size_t len);
 void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
+void loghex(unsigned char *buffer, ssize_t len);
 
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 

@@ -150,6 +150,25 @@ void logmsg(const char *msg, ...)
   }
 }
 
+void loghex(unsigned char *buffer, ssize_t len)
+{
+  char data[12000];
+  ssize_t i;
+  unsigned char *ptr = buffer;
+  char *optr = data;
+  ssize_t width = 0;
+  int left = sizeof(data);
+
+  for(i = 0; i < len && (left >= 0); i++) {
+    msnprintf(optr, left, "%02x", ptr[i]);
+    width += 2;
+    optr += 2;
+    left -= 2;
+  }
+  if(width)
+    logmsg("'%s'", data);
+}
+
 #ifdef _WIN32
 /* use instead of perror() on generic Windows */
 static void win32_perror(const char *msg)
