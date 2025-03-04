@@ -829,7 +829,7 @@ static void init_httprequest(struct httprequest *req)
   req->upgrade_request = 0;
 }
 
-static int send_doc(curl_socket_t sock, struct httprequest *req);
+static int sws_send_doc(curl_socket_t sock, struct httprequest *req);
 
 /* returns 1 if the connection should be serviced again immediately, 0 if there
    is no data waiting, or < 0 if it should be closed */
@@ -843,7 +843,7 @@ static int sws_get_request(curl_socket_t sock, struct httprequest *req)
   if(req->upgrade_request) {
     /* upgraded connection, work it differently until end of connection */
     logmsg("Upgraded connection, this is no longer HTTP/1");
-    send_doc(sock, req);
+    sws_send_doc(sock, req);
 
     /* dump the request received so far to the external file */
     reqbuf[req->offset] = '\0';
@@ -975,7 +975,7 @@ static int sws_get_request(curl_socket_t sock, struct httprequest *req)
 }
 
 /* returns -1 on failure */
-static int send_doc(curl_socket_t sock, struct httprequest *req)
+static int sws_send_doc(curl_socket_t sock, struct httprequest *req)
 {
   ssize_t written;
   size_t count;
@@ -1606,7 +1606,7 @@ static void http_connect(curl_socket_t *infdp,
 
           /* skip this and close the socket if err < 0 */
           if(err >= 0) {
-            err = send_doc(datafd, req2);
+            err = sws_send_doc(datafd, req2);
             if(!err && req2->connect_request) {
               /* sleep to prevent triggering libcurl known bug #39. */
               for(loop = 2; (loop > 0) && !got_exit_signal; loop--)
@@ -1958,7 +1958,7 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
     }
   }
 
-  send_doc(msgsock, req);
+  sws_send_doc(msgsock, req);
   if(got_exit_signal)
     return -1;
 

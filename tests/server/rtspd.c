@@ -725,7 +725,7 @@ static int rtspd_get_request(curl_socket_t sock, struct httprequest *req)
 }
 
 /* returns -1 on failure */
-static int send_doc(curl_socket_t sock, struct httprequest *req)
+static int rtspd_send_doc(curl_socket_t sock, struct httprequest *req)
 {
   ssize_t written;
   size_t count;
@@ -1298,7 +1298,7 @@ int main(int argc, char *argv[])
         }
       }
 
-      send_doc(msgsock, &req);
+      rtspd_send_doc(msgsock, &req);
       if(got_exit_signal)
         break;
 
