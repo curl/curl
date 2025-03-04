@@ -132,7 +132,7 @@ struct httprequest {
 
 
 /* sent as reply to a QUIT */
-static const char *docquit =
+static const char *docquit_rtsp =
 "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* sent as reply to a CONNECT */
@@ -778,7 +778,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct httprequest *req)
     switch(req->testno) {
     case DOCNUMBER_QUIT:
       logmsg("Replying to QUIT");
-      buffer = docquit;
+      buffer = docquit_rtsp;
       break;
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */

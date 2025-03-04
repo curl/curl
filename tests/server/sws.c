@@ -165,7 +165,7 @@ static const char *cmdfile = DEFAULT_CMDFILE;
 static const char *end_of_headers = END_OF_HEADERS;
 
 /* sent as reply to a QUIT */
-static const char *docquit =
+static const char *docquit_sws =
 "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* send back this on 404 file not found */
@@ -1027,7 +1027,7 @@ static int sws_send_doc(curl_socket_t sock, struct httprequest *req)
     switch(req->testno) {
     case DOCNUMBER_QUIT:
       logmsg("Replying to QUIT");
-      buffer = docquit;
+      buffer = docquit_sws;
       break;
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
