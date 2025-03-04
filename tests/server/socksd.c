@@ -92,7 +92,7 @@
 static const char *backendaddr = "127.0.0.1";
 static unsigned short backendport = 0; /* default is use client's */
 
-struct configurable {
+struct socksd_configurable {
   unsigned char version; /* initial version byte in the request must match
                             this */
   unsigned char nmethods_min; /* minimum number of nmethods to expect */
@@ -117,7 +117,7 @@ struct configurable {
 #define CONFIG_ADDR backendaddr
 #define CONFIG_CONNECTREP 0
 
-static struct configurable config;
+static struct socksd_configurable config;
 
 static const char *reqlogfile = DEFAULT_REQFILE;
 

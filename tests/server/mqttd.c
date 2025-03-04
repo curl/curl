@@ -71,7 +71,7 @@
 #define MQTT_MSG_SUBACK     0x90
 #define MQTT_MSG_DISCONNECT 0xe0
 
-struct configurable {
+struct mqttd_configurable {
   unsigned char version; /* initial version byte in the request must match
                             this */
   bool publish_before_suback;
@@ -84,7 +84,7 @@ struct configurable {
 #define REQUEST_DUMP  "server.input"
 #define CONFIG_VERSION 5
 
-static struct configurable config;
+static struct mqttd_configurable config;
 
 static void mqttd_resetdefaults(void)
 {
