@@ -740,7 +740,7 @@ static bool incoming(curl_socket_t listenfd)
         logmsg("signalled to die, exiting...");
         return FALSE;
       }
-    } while((rc == -1) && ((error = errno) == EINTR));
+    } while((rc == -1) && ((error = SOCKERRNO) == EINTR));
 
     if(rc < 0) {
       logmsg("select() failed with error: (%d) %s",

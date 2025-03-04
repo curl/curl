@@ -869,7 +869,8 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
           logmsg("Got %zu bytes from client", got);
         }
 
-        if((got == -1) && ((EAGAIN == errno) || (EWOULDBLOCK == errno))) {
+        if((got == -1) && ((SOCKERRNO == EAGAIN) ||
+                           (SOCKERRNO == EWOULDBLOCK))) {
           int rc;
           fd_set input;
           fd_set output;
@@ -891,7 +892,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
           do {
             logmsg("Wait until readable");
             rc = select((int)sock + 1, &input, &output, NULL, &timeout);
-          } while(rc < 0 && errno == EINTR && !got_exit_signal);
+          } while(rc < 0 && SOCKERRNO == EINTR && !got_exit_signal);
           logmsg("readable %d", rc);
           if(rc)
             got = 1;
@@ -1567,7 +1568,7 @@ static void http_connect(curl_socket_t *infdp,
 
     do {
       rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
-    } while(rc < 0 && errno == EINTR && !got_exit_signal);
+    } while(rc < 0 && SOCKERRNO == EINTR && !got_exit_signal);
 
     if(got_exit_signal)
       break;
@@ -2387,7 +2388,7 @@ int main(int argc, char *argv[])
 
     do {
       rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
-    } while(rc < 0 && errno == EINTR && !got_exit_signal);
+    } while(rc < 0 && SOCKERRNO == EINTR && !got_exit_signal);
 
     if(got_exit_signal)
       goto sws_cleanup;
