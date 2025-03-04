@@ -119,7 +119,7 @@
 #define BUFFER_SIZE 17010
 
 static bool verbose = FALSE;
-static bool bind_only = FALSE;
+static bool s_bind_only = FALSE;
 static unsigned short server_connectport = 0; /* if non-zero,
                                                  we activate this mode */
 
@@ -1227,7 +1227,8 @@ static bool juggle(curl_socket_t *sockfdp,
 }
 
 static curl_socket_t sockfilt_sockdaemon(curl_socket_t sock,
-                                         unsigned short *listenport)
+                                         unsigned short *listenport,
+                                         bool bind_only)
 {
   /* passive daemon style */
   srvr_sockaddr_union_t listener;
@@ -1432,7 +1433,7 @@ int main(int argc, char *argv[])
       arg++;
     }
     else if(!strcmp("--bindonly", argv[arg])) {
-      bind_only = TRUE;
+      s_bind_only = TRUE;
       arg++;
     }
     else if(!strcmp("--port", argv[arg])) {
@@ -1553,7 +1554,7 @@ int main(int argc, char *argv[])
   }
   else {
     /* passive daemon style */
-    sock = sockfilt_sockdaemon(sock, &server_port);
+    sock = sockfilt_sockdaemon(sock, &server_port, s_bind_only);
     if(CURL_SOCKET_BAD == sock) {
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
@@ -1565,7 +1566,7 @@ int main(int argc, char *argv[])
 
   if(server_connectport)
     logmsg("Connected to port %hu", server_connectport);
-  else if(bind_only)
+  else if(s_bind_only)
     logmsg("Bound without listening on port %hu", server_port);
   else
     logmsg("Listening on port %hu", server_port);
