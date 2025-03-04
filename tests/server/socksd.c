@@ -121,8 +121,6 @@ static struct configurable config;
 
 static const char *reqlogfile = DEFAULT_REQFILE;
 
-static const char *socket_type = "IPv4";
-
 static void resetdefaults(void)
 {
   logmsg("Reset to defaults");
@@ -150,8 +148,6 @@ static unsigned short shortval(char *value)
   unsigned long num = strtoul(value, NULL, 10);
   return num & 0xffff;
 }
-
-static int socket_domain = AF_INET;
 
 static void getconfig(void)
 {

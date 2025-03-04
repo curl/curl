@@ -67,6 +67,8 @@ extern bool use_ipv6;
 #endif
 extern const char *ipv_inuse;
 extern unsigned short server_port;
+extern const char *socket_type;
+extern int socket_domain;
 
 #ifdef _WIN32
 int win32_init(void);

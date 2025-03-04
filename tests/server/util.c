@@ -68,6 +68,8 @@ bool use_ipv6 = FALSE;
 #endif
 const char *ipv_inuse = "IPv4";
 unsigned short server_port = 0;
+const char *socket_type = "IPv4";
+int socket_domain = AF_INET;
 
 static struct timeval tvnow(void);
 

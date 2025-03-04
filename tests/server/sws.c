@@ -58,7 +58,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-static int socket_domain = AF_INET;
 static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
@@ -2024,7 +2023,6 @@ int main(int argc, char *argv[])
   int error;
   int arg = 1;
   const char *connecthost = "127.0.0.1";
-  const char *socket_type = "IPv4";
   char port_str[11];
   const char *location_str = port_str;
   int keepalive_secs = 5;
