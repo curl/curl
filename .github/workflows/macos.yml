@@ -187,7 +187,7 @@ jobs:
             pkgconf libpsl libssh2 \
             ${{ !matrix.build.clang-tidy && 'libnghttp2 stunnel' || '' }} \
             ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
         if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
@@ -413,7 +413,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: |
           echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'toolchain versions'
         run: |
