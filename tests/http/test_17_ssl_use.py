@@ -431,6 +431,8 @@ class TestSSLUse:
         proto = 'h3'
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if env.curl_uses_lib('gnutls'):
+            pytest.skip("gnutls does not ingore --ciphers on TLSv1.3")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
@@ -446,3 +448,50 @@ class TestSSLUse:
             '--tls13-ciphers', 'NONSENSE', '--tls-max', '1.2'
         ])
         assert r.exit_code == 0, f'{r}'
+
+    @pytest.mark.parametrize("priority, tls_proto, ciphers, success", [
+        ("", "", [], False),
+        ("NONSENSE", "", [], False),
+        ("+NONSENSE", "", [], False),
+        ("NORMAL:-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-CHACHA20-POLY1305'], True),
+        ("-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-CHACHA20-POLY1305'], True),
+        ("NORMAL", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
+        ("NORMAL:-VERS-ALL:+VERS-TLS1.3", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
+        ("-VERS-ALL:+VERS-TLS1.3", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
+        ("!CHACHA20-POLY1305", "TLSv1.3", ['TLS_AES_128_GCM_SHA256'], True),
+        ("-CIPHER-ALL:+CHACHA20-POLY1305", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
+        ("-CIPHER-ALL:+AES-256-GCM", "", [], False),
+        ("-CIPHER-ALL:+AES-128-GCM", "TLSv1.3", ['TLS_AES_128_GCM_SHA256'], True),
+        ("SECURE:-CIPHER-ALL:+AES-128-GCM:-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-AES128-GCM-SHA256'], True),
+        ("-MAC-ALL:+SHA256", "", [], False),
+        ("-MAC-ALL:+AEAD", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
+        ("-GROUP-ALL:+GROUP-X25519", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
+        ("-GROUP-ALL:+GROUP-SECP192R1", "", [], False),
+        ])
+    def test_17_18_gnutls_priority(self, env: Env, httpd, priority, tls_proto, ciphers, success):
+        # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
+        httpd.set_extra_config('base', [
+            'SSLCipherSuite SSL'
+                ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
+                ':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
+            'SSLCipherSuite TLSv1.3'
+                ' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
+        ])
+        httpd.reload_if_config_changed()
+        proto = 'http/1.1'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        # SSL backend specifics
+        if not env.curl_uses_lib('gnutls'):
+            pytest.skip('curl not build with GnuTLS')
+        # test
+        extra_args = ['--ciphers', f'{priority}']
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
+        if success:
+            assert r.exit_code == 0, r.dump_logs()
+            assert r.json['HTTPS'] == 'on', r.dump_logs()
+            if tls_proto:
+                assert r.json['SSL_PROTOCOL'] == tls_proto, r.dump_logs()
+            assert r.json['SSL_CIPHER'] in ciphers, r.dump_logs()
+        else:
+            assert r.exit_code != 0, r.dump_logs()
