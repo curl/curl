@@ -194,8 +194,8 @@ static curl_socket_t peer = CURL_SOCKET_BAD;
 static unsigned int timeout;
 static unsigned int maxtimeout = 5 * TIMEOUT;
 
-static int wrotepidfile = 0;
-static int wroteportfile = 0;
+static int tftpd_wrotepidfile = 0;
+static int tftpd_wroteportfile = 0;
 
 #ifdef HAVE_SIGSETJMP
 static sigjmp_buf timeoutbuf;
@@ -270,12 +270,12 @@ static void timer(int signum)
 
   timeout += rexmtval;
   if(timeout >= maxtimeout) {
-    if(wrotepidfile) {
-      wrotepidfile = 0;
+    if(tftpd_wrotepidfile) {
+      tftpd_wrotepidfile = 0;
       unlink(pidname);
     }
-    if(wroteportfile) {
-      wroteportfile = 0;
+    if(tftpd_wroteportfile) {
+      tftpd_wroteportfile = 0;
       unlink(portname);
     }
     if(serverlogslocked) {
@@ -733,15 +733,15 @@ int main(int argc, char **argv)
     }
   }
 
-  wrotepidfile = write_pidfile(pidname);
-  if(!wrotepidfile) {
+  tftpd_wrotepidfile = write_pidfile(pidname);
+  if(!tftpd_wrotepidfile) {
     result = 1;
     goto tftpd_cleanup;
   }
 
   if(portname) {
-    wroteportfile = write_portfile(portname, port);
-    if(!wroteportfile) {
+    tftpd_wroteportfile = write_portfile(portname, port);
+    if(!tftpd_wroteportfile) {
       result = 1;
       goto tftpd_cleanup;
     }
@@ -844,9 +844,9 @@ tftpd_cleanup:
   if(got_exit_signal)
     logmsg("signalled to die");
 
-  if(wrotepidfile)
+  if(tftpd_wrotepidfile)
     unlink(pidname);
-  if(wroteportfile)
+  if(tftpd_wroteportfile)
     unlink(portname);
 
   if(serverlogslocked) {
