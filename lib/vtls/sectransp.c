@@ -536,8 +536,8 @@ static OSStatus CopyIdentityWithLabel(char *label,
       for(i = 0; i < keys_list_count; i++) {
         OSStatus err = noErr;
         SecCertificateRef cert = NULL;
-        SecIdentityRef identity =
-          (SecIdentityRef)CURL_UNCONST(CFArrayGetValueAtIndex(keys_list, i));
+        const void *item = CFArrayGetValueAtIndex(keys_list, i);
+        SecIdentityRef identity = (SecIdentityRef)CURL_UNCONST(item);
         err = SecIdentityCopyCertificate(identity, &cert);
         if(err == noErr) {
           CFStringRef common_name = NULL;
@@ -2249,8 +2249,8 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
       if(ssl_config->certinfo)
         result = Curl_ssl_init_certinfo(data, (int)count);
       for(i = 0L ; !result && (i < count) ; i++) {
-        server_cert = (SecCertificateRef)
-          CURL_UNCONST(CFArrayGetValueAtIndex(server_certs, i));
+        const void *item = CFArrayGetValueAtIndex(server_certs, i);
+        server_cert = (SecCertificateRef)CURL_UNCONST(item);
         result = collect_server_cert_single(cf, data, server_cert, i);
       }
       CFRelease(server_certs);
@@ -2266,8 +2266,8 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
     if(ssl_config->certinfo)
       result = Curl_ssl_init_certinfo(data, (int)count);
     for(i = 0L ; !result && (i < count) ; i++) {
-      server_cert = (SecCertificateRef)
-        CURL_UNCONST(CFArrayGetValueAtIndex(server_certs, i));
+      const void *item = CFArrayGetValueAtIndex(server_certs, i);
+      server_cert = (SecCertificateRef)CURL_UNCONST(item);
       result = collect_server_cert_single(cf, data, server_cert, i);
     }
     CFRelease(server_certs);
