@@ -381,7 +381,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
 
 #define convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
-#define unicodefree(ptr) curlx_unicodefree(ptr)
+#define unicodefree(ptr) curlx_unicodefree((char *)ptr)
 
 #else
 
