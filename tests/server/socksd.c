@@ -85,10 +85,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifndef DEFAULT_REQFILE
-#define DEFAULT_REQFILE "log/socksd-request.log"
-#endif
-
 static const char *backendaddr = "127.0.0.1";
 static unsigned short backendport = 0; /* default is use client's */
 
@@ -119,7 +115,7 @@ struct socksd_configurable {
 
 static struct socksd_configurable config;
 
-static const char *reqlogfile = DEFAULT_REQFILE;
+static const char *reqlogfile = "log/socksd-request.log";
 
 static void socksd_resetdefaults(void)
 {
