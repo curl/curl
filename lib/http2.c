@@ -480,6 +480,10 @@ static ssize_t send_callback(nghttp2_session *h2,
                              void *userp);
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp);
+static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
+                                       const nghttp2_frame *frame,
+                                       int lib_error_code,
+                                       void *user_data);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp);
@@ -520,6 +524,8 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
 
   nghttp2_session_callbacks_set_send_callback(cbs, send_callback);
   nghttp2_session_callbacks_set_on_frame_recv_callback(cbs, on_frame_recv);
+  nghttp2_session_callbacks_set_on_invalid_frame_recv_callback(cbs,
+    cf_h2_on_invalid_frame_recv);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   nghttp2_session_callbacks_set_on_frame_send_callback(cbs, on_frame_send);
 #endif
@@ -1377,6 +1383,39 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   }
 
   return on_stream_frame(cf, data_s, frame) ? NGHTTP2_ERR_CALLBACK_FAILURE : 0;
+}
+
+static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
+                                       const nghttp2_frame *frame,
+                                       int ngerr, void *userp)
+{
+  struct Curl_cfilter *cf = userp;
+  struct cf_h2_ctx *ctx = cf->ctx;
+  struct Curl_easy *data;
+  int32_t stream_id = frame->hd.stream_id;
+
+  data = nghttp2_session_get_stream_user_data(session, stream_id);
+  if(data) {
+    struct h2_stream_ctx *stream;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+    char buffer[256];
+    int len;
+    len = fr_print(frame, buffer, sizeof(buffer)-1);
+    buffer[len] = 0;
+    failf(data, "[HTTP2] [%d] received invalid frame: %s, error %d: %s",
+          stream_id, buffer, ngerr, nghttp2_strerror(ngerr));
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+    stream = H2_STREAM_CTX(ctx, data);
+    if(stream) {
+      nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
+                                stream->id, NGHTTP2_STREAM_CLOSED);
+      stream->error = ngerr;
+      stream->closed = TRUE;
+      stream->reset = TRUE;
+      return 0;  /* keep the connection alive */
+    }
+  }
+  return NGHTTP2_ERR_CALLBACK_FAILURE;
 }
 
 static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
