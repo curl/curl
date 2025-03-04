@@ -327,7 +327,7 @@ static size_t encode_length(size_t packetlen,
 }
 
 
-static size_t decode_length(unsigned char *buf,
+static size_t decode_length(unsigned char *buffer,
                             size_t buflen, size_t *lenbytes)
 {
   size_t len = 0;
@@ -336,7 +336,7 @@ static size_t decode_length(unsigned char *buf,
   unsigned char encoded = 0x80;
 
   for(i = 0; (i < buflen) && (encoded & 0x80); i++) {
-    encoded = buf[i];
+    encoded = buffer[i];
     len += (encoded & 0x7f) * mult;
     mult *= 0x80;
   }
