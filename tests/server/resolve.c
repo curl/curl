@@ -71,11 +71,11 @@ int main(int argc, char *argv[])
 #if defined(CURLRES_IPV6)
       ipv_inuse = "IPv6";
       use_ipv6 = TRUE;
+      arg++;
 #else
       puts("IPv6 support has been disabled in this program");
       return 1;
 #endif
-      arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
