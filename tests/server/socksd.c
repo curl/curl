@@ -759,11 +759,8 @@ static bool socksd_incoming(curl_socket_t listenfd)
 }
 
 static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
-                                       unsigned short *listenport
-#ifdef USE_UNIX_SOCKETS
-        , const char *unix_socket
-#endif
-        )
+                                       unsigned short *listenport,
+                                       const char *unix_socket)
 {
   /* passive daemon style */
   srvr_sockaddr_union_t listener;
@@ -774,6 +771,10 @@ static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
   int delay = 20;
   int attempt = 0;
   int error = 0;
+
+#ifndef USE_UNIX_SOCKETS
+  (void)unix_socket;
+#endif
 
   do {
     attempt++;
@@ -921,8 +922,8 @@ int main(int argc, char *argv[])
   int error;
   int arg = 1;
 
-#ifdef USE_UNIX_SOCKETS
   const char *unix_socket = NULL;
+#ifdef USE_UNIX_SOCKETS
   bool unlink_socket = false;
 #endif
 
@@ -1059,11 +1060,7 @@ int main(int argc, char *argv[])
 
   {
     /* passive daemon style */
-    sock = socksd_sockdaemon(sock, &server_port
-#ifdef USE_UNIX_SOCKETS
-            , unix_socket
-#endif
-            );
+    sock = socksd_sockdaemon(sock, &server_port, unix_socket);
     if(CURL_SOCKET_BAD == sock) {
       goto socks5_cleanup;
     }
