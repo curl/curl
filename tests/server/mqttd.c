@@ -84,17 +84,17 @@ struct mqttd_configurable {
 #define REQUEST_DUMP  "server.input"
 #define CONFIG_VERSION 5
 
-static struct mqttd_configurable config;
+static struct mqttd_configurable m_config;
 
 static void mqttd_resetdefaults(void)
 {
   logmsg("Reset to defaults");
-  config.version = CONFIG_VERSION;
-  config.publish_before_suback = FALSE;
-  config.short_publish = FALSE;
-  config.excessive_remaining = FALSE;
-  config.error_connack = 0;
-  config.testnum = 0;
+  m_config.version = CONFIG_VERSION;
+  m_config.publish_before_suback = FALSE;
+  m_config.short_publish = FALSE;
+  m_config.excessive_remaining = FALSE;
+  m_config.error_connack = 0;
+  m_config.testnum = 0;
 }
 
 static void mqttd_getconfig(void)
@@ -109,28 +109,28 @@ static void mqttd_getconfig(void)
       char value[32];
       if(2 == sscanf(buffer, "%31s %31s", key, value)) {
         if(!strcmp(key, "version")) {
-          config.version = byteval(value);
-          logmsg("version [%d] set", config.version);
+          m_config.version = byteval(value);
+          logmsg("version [%d] set", m_config.version);
         }
         else if(!strcmp(key, "PUBLISH-before-SUBACK")) {
           logmsg("PUBLISH-before-SUBACK set");
-          config.publish_before_suback = TRUE;
+          m_config.publish_before_suback = TRUE;
         }
         else if(!strcmp(key, "short-PUBLISH")) {
           logmsg("short-PUBLISH set");
-          config.short_publish = TRUE;
+          m_config.short_publish = TRUE;
         }
         else if(!strcmp(key, "error-CONNACK")) {
-          config.error_connack = byteval(value);
-          logmsg("error-CONNACK = %d", config.error_connack);
+          m_config.error_connack = byteval(value);
+          logmsg("error-CONNACK = %d", m_config.error_connack);
         }
         else if(!strcmp(key, "Testnum")) {
-          config.testnum = atoi(value);
-          logmsg("testnum = %d", config.testnum);
+          m_config.testnum = atoi(value);
+          logmsg("testnum = %d", m_config.testnum);
         }
         else if(!strcmp(key, "excessive-remaining")) {
           logmsg("excessive-remaining set");
-          config.excessive_remaining = TRUE;
+          m_config.excessive_remaining = TRUE;
         }
       }
     }
@@ -177,7 +177,7 @@ static int connack(FILE *dump, curl_socket_t fd)
   };
   ssize_t rc;
 
-  packet[3] = config.error_connack;
+  packet[3] = m_config.error_connack;
 
   rc = swrite(fd, (char *)packet, sizeof(packet));
   if(rc > 0) {
@@ -338,7 +338,7 @@ static int publish(FILE *dump,
   unsigned char rembuffer[4];
   size_t encodedlen;
 
-  if(config.excessive_remaining) {
+  if(m_config.excessive_remaining) {
     /* manually set illegal remaining length */
     rembuffer[0] = 0xff;
     rembuffer[1] = 0xff;
@@ -369,7 +369,7 @@ static int publish(FILE *dump,
   memcpy(&packet[payloadindex], payload, payloadlen);
 
   sendamount = packetlen;
-  if(config.short_publish)
+  if(m_config.short_publish)
     sendamount -= 2;
 
   rc = swrite(fd, (char *)packet, sendamount);
@@ -454,7 +454,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
   mqttd_getconfig();
 
-  testno = config.testnum;
+  testno = m_config.testnum;
 
   if(testno)
     logmsg("Found test number %ld", testno);
@@ -586,7 +586,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       stream = test2fopen(testno, logdir);
       error = getpart(&data, &datalen, "reply", "data", stream);
       if(!error) {
-        if(!config.publish_before_suback) {
+        if(!m_config.publish_before_suback) {
           if(suback(dump, fd, packet_id)) {
             logmsg("failed sending SUBACK");
             free(data);
@@ -599,7 +599,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
           goto end;
         }
         free(data);
-        if(config.publish_before_suback) {
+        if(m_config.publish_before_suback) {
           if(suback(dump, fd, packet_id)) {
             logmsg("failed sending SUBACK");
             goto end;
