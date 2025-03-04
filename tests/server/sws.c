@@ -117,9 +117,6 @@ struct httprequest {
 static curl_socket_t all_sockets[MAX_SOCKETS];
 static size_t num_sockets = 0;
 
-static int ProcessRequest(struct httprequest *req);
-static void storerequest(const char *reqbuf, size_t totalsize);
-
 #define SWSVERSION "curl test suite HTTP server/0.1"
 
 #define REQUEST_DUMP  "server.input"

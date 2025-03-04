@@ -109,9 +109,6 @@ struct httprequest {
   size_t rtp_buffersize;
 };
 
-static int ProcessRequest(struct httprequest *req);
-static void storerequest(char *reqbuf, size_t totalsize);
-
 #define RTSPDVERSION "curl test suite RTSP server/0.1"
 
 #define REQUEST_DUMP  "server.input"
