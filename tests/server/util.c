@@ -170,6 +170,12 @@ void loghex(unsigned char *buffer, ssize_t len)
     logmsg("'%s'", data);
 }
 
+unsigned char byteval(char *value)
+{
+  unsigned long num = strtoul(value, NULL, 10);
+  return num & 0xff;
+}
+
 #ifdef _WIN32
 /* use instead of perror() on generic Windows */
 static void win32_perror(const char *msg)

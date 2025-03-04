@@ -97,12 +97,6 @@ static void resetdefaults(void)
   config.testnum = 0;
 }
 
-static unsigned char byteval(char *value)
-{
-  unsigned long num = strtoul(value, NULL, 10);
-  return num & 0xff;
-}
-
 static void getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);

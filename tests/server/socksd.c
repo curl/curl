@@ -137,12 +137,6 @@ static void resetdefaults(void)
   strcpy(config.password, "password");
 }
 
-static unsigned char byteval(char *value)
-{
-  unsigned long num = strtoul(value, NULL, 10);
-  return num & 0xff;
-}
-
 static unsigned short shortval(char *value)
 {
   unsigned long num = strtoul(value, NULL, 10);
