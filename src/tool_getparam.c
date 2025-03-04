@@ -1639,29 +1639,28 @@ static const struct flagmap flag_table[] = {
 };
 
 static ParameterError parse_upload_flags(struct OperationConfig *config,
-                                      char *nextarg)
+                                         const char *flag)
 {
-  char *flag;
   ParameterError err = PARAM_OK;
-  char *tmp = strdup(nextarg);
 
-  if(!tmp)
-    return PARAM_NO_MEM;
-
-  flag = tmp;
   while(flag) {
     bool negate;
     const struct flagmap *map;
+    size_t len;
     char *next = strchr(flag, ','); /* Find next comma or end */
     if(next)
-      *next++ = '\0';
+      len = next - flag;
+    else
+      len = strlen(flag);
 
     negate = (*flag == '-');
-    if(negate)
+    if(negate) {
       flag++;
+      len--;
+    }
 
     for(map = flag_table; map->name; map++) {
-      if(!strncmp(flag, map->name, map->len) && flag[map->len] == '\0') {
+      if((len == map->len) && !strncmp(flag, map->name, map->len)) {
         if(negate)
           config->upload_flags &= (unsigned char)~map->flag;
         else
@@ -1675,10 +1674,12 @@ static ParameterError parse_upload_flags(struct OperationConfig *config,
      break;
    }
 
+   if(next)
+     /* move over the comma */
+     next++;
    flag = next;
   }
 
-  free(tmp);
   return err;
 }
 
