@@ -744,7 +744,7 @@ static bool incoming(curl_socket_t listenfd)
 
     if(rc < 0) {
       logmsg("select() failed with error: (%d) %s",
-             error, strerror(error));
+             error, sstrerror(error));
       return FALSE;
     }
 
