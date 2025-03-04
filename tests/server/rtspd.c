@@ -59,11 +59,12 @@
 #undef REQBUFSIZ
 #define REQBUFSIZ 150000
 
-static long prevtestno = -1;    /* previous test number we served */
-static long prevpartno = -1;    /* previous part number we served */
-static bool prevbounce = FALSE; /* instructs the server to override the
-                                   requested part number to prevpartno + 1 when
-                                   prevtestno and current test are the same */
+static long rtspd_prevtestno = -1;    /* previous test number we served */
+static long rtspd_prevpartno = -1;    /* previous part number we served */
+static bool rtspd_prevbounce = FALSE; /* instructs the server to override the
+                                         requested part number to
+                                         prevpartno + 1 when prevtestno and
+                                         current test are the same */
 
 #define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
 #define RCMD_IDLE      1 /* told to sit idle */
@@ -877,11 +878,11 @@ static int rtspd_send_doc(curl_socket_t sock, struct httprequest *req)
     logmsg("connection close instruction \"swsclose\" found in response");
   }
   if(strstr(buffer, "swsbounce")) {
-    prevbounce = TRUE;
+    rtspd_prevbounce = TRUE;
     logmsg("enable \"swsbounce\" in the next request");
   }
   else
-    prevbounce = FALSE;
+    rtspd_prevbounce = FALSE;
 
   dump = fopen(responsedump, "ab");
   if(!dump) {
@@ -1003,8 +1004,8 @@ static int rtspd_send_doc(curl_socket_t sock, struct httprequest *req)
   free(cmd);
   req->open = persistent;
 
-  prevtestno = req->testno;
-  prevpartno = req->partno;
+  rtspd_prevtestno = req->testno;
+  rtspd_prevpartno = req->partno;
 
   return 0;
 }
@@ -1285,16 +1286,16 @@ int main(int argc, char *argv[])
         /* non-zero means error, break out of loop */
         break;
 
-      if(prevbounce) {
+      if(rtspd_prevbounce) {
         /* bounce treatment requested */
-        if(req.testno == prevtestno) {
-          req.partno = prevpartno + 1;
+        if(req.testno == rtspd_prevtestno) {
+          req.partno = rtspd_prevpartno + 1;
           logmsg("BOUNCE part number to %ld", req.partno);
         }
         else {
-          prevbounce = FALSE;
-          prevtestno = -1;
-          prevpartno = -1;
+          rtspd_prevbounce = FALSE;
+          rtspd_prevtestno = -1;
+          rtspd_prevpartno = -1;
         }
       }
 

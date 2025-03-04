@@ -66,11 +66,12 @@ static bool is_proxy = FALSE;
 
 #define MAX_SLEEP_TIME_MS 250
 
-static long prevtestno = -1;    /* previous test number we served */
-static long prevpartno = -1;    /* previous part number we served */
-static bool prevbounce = FALSE; /* instructs the server to override the
-                                   requested part number to prevpartno + 1 when
-                                   prevtestno and current test are the same */
+static long sws_prevtestno = -1;    /* previous test number we served */
+static long sws_prevpartno = -1;    /* previous part number we served */
+static bool sws_prevbounce = FALSE; /* instructs the server to override the
+                                       requested part number to
+                                       prevpartno + 1 when prevtestno and
+                                       current test are the same */
 
 #define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
 #define RCMD_IDLE      1 /* told to sit idle */
@@ -1121,11 +1122,11 @@ static int sws_send_doc(curl_socket_t sock, struct httprequest *req)
     logmsg("connection close instruction \"swsclose\" found in response");
   }
   if(strstr(buffer, "swsbounce")) {
-    prevbounce = TRUE;
+    sws_prevbounce = TRUE;
     logmsg("enable \"swsbounce\" in the next request");
   }
   else
-    prevbounce = FALSE;
+    sws_prevbounce = FALSE;
 
   dump = fopen(responsedump, "ab");
   if(!dump) {
@@ -1195,8 +1196,8 @@ retry:
     logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) "
            "were sent",
            responsesize-count, responsesize);
-    prevtestno = req->testno;
-    prevpartno = req->partno;
+    sws_prevtestno = req->testno;
+    sws_prevpartno = req->partno;
     free(ptr);
     free(cmd);
     return -1;
@@ -1243,8 +1244,8 @@ retry:
   free(cmd);
   req->open = use_gopher ? FALSE : persistent;
 
-  prevtestno = req->testno;
-  prevpartno = req->partno;
+  sws_prevtestno = req->testno;
+  sws_prevpartno = req->partno;
 
   return 0;
 }
@@ -1945,16 +1946,16 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
     }
   }
 
-  if(prevbounce) {
+  if(sws_prevbounce) {
     /* bounce treatment requested */
-    if(req->testno == prevtestno) {
-      req->partno = prevpartno + 1;
+    if(req->testno == sws_prevtestno) {
+      req->partno = sws_prevpartno + 1;
       logmsg("BOUNCE part number to %ld", req->partno);
     }
     else {
-      prevbounce = FALSE;
-      prevtestno = -1;
-      prevpartno = -1;
+      sws_prevbounce = FALSE;
+      sws_prevtestno = -1;
+      sws_prevpartno = -1;
     }
   }
 
