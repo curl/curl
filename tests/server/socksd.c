@@ -626,7 +626,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
   accept()
 */
-static bool incoming(curl_socket_t listenfd)
+static bool socksd_incoming(curl_socket_t listenfd)
 {
   fd_set fds_read;
   fd_set fds_write;
@@ -1099,7 +1099,7 @@ int main(int argc, char *argv[])
   }
 
   do {
-    juggle_again = incoming(sock);
+    juggle_again = socksd_incoming(sock);
   } while(juggle_again);
 
 socks5_cleanup:

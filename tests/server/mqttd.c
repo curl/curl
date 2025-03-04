@@ -657,7 +657,7 @@ end:
   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
   accept()
 */
-static bool incoming(curl_socket_t listenfd)
+static bool mqttd_incoming(curl_socket_t listenfd)
 {
   fd_set fds_read;
   fd_set fds_write;
@@ -1018,7 +1018,7 @@ int main(int argc, char *argv[])
   }
 
   do {
-    juggle_again = incoming(sock);
+    juggle_again = mqttd_incoming(sock);
   } while(juggle_again);
 
 mqttd_cleanup:
