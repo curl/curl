@@ -2132,7 +2132,7 @@ check_handshake:
 
 static CURLcode
 add_cert_to_certinfo(struct Curl_easy *data,
-                     SecCertificateRef server_cert,
+                     const SecCertificateRef server_cert,
                      int idx)
 {
   CURLcode result = CURLE_OK;
@@ -2152,7 +2152,7 @@ add_cert_to_certinfo(struct Curl_easy *data,
 
 static CURLcode
 collect_server_cert_single(struct Curl_cfilter *cf, struct Curl_easy *data,
-                           SecCertificateRef server_cert,
+                           const SecCertificateRef server_cert,
                            CFIndex idx)
 {
   CURLcode result = CURLE_OK;
