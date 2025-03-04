@@ -77,7 +77,7 @@ static bool sws_prevbounce = FALSE; /* instructs the server to override the
 #define RCMD_IDLE      1 /* told to sit idle */
 #define RCMD_STREAM    2 /* told to stream */
 
-struct httprequest {
+struct sws_httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
   bool connect_request; /* if a CONNECT */
   unsigned short connect_port; /* the port number CONNECT used */
@@ -204,7 +204,7 @@ static bool socket_domain_is_ip(void)
 #endif
 
 /* parse the file on disk that might have a test number for us */
-static int parse_cmdfile(struct httprequest *req)
+static int parse_cmdfile(struct sws_httprequest *req)
 {
   FILE *f = fopen(cmdfile, FOPEN_READTEXT);
   if(f) {
@@ -222,7 +222,7 @@ static int parse_cmdfile(struct httprequest *req)
 }
 
 /* based on the testno, parse the correct server commands */
-static int sws_parse_servercmd(struct httprequest *req)
+static int sws_parse_servercmd(struct sws_httprequest *req)
 {
   FILE *stream;
   int error;
@@ -326,7 +326,7 @@ static int sws_parse_servercmd(struct httprequest *req)
   return 0; /* OK! */
 }
 
-static int sws_ProcessRequest(struct httprequest *req)
+static int sws_ProcessRequest(struct sws_httprequest *req)
 {
   char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
@@ -803,7 +803,7 @@ storerequest_cleanup:
            dumpfile, errno, strerror(errno));
 }
 
-static void init_httprequest(struct httprequest *req)
+static void init_httprequest(struct sws_httprequest *req)
 {
   req->checkindex = 0;
   req->offset = 0;
@@ -830,11 +830,11 @@ static void init_httprequest(struct httprequest *req)
   req->upgrade_request = 0;
 }
 
-static int sws_send_doc(curl_socket_t sock, struct httprequest *req);
+static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req);
 
 /* returns 1 if the connection should be serviced again immediately, 0 if there
    is no data waiting, or < 0 if it should be closed */
-static int sws_get_request(curl_socket_t sock, struct httprequest *req)
+static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
 {
   int fail = 0;
   char *reqbuf = req->reqbuf;
@@ -976,7 +976,7 @@ static int sws_get_request(curl_socket_t sock, struct httprequest *req)
 }
 
 /* returns -1 on failure */
-static int sws_send_doc(curl_socket_t sock, struct httprequest *req)
+static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
 {
   ssize_t written;
   size_t count;
@@ -1578,7 +1578,7 @@ static void http_connect(curl_socket_t *infdp,
         /* a new connection on listener socket (most likely from client) */
         curl_socket_t datafd = accept(rootfd, NULL, NULL);
         if(datafd != CURL_SOCKET_BAD) {
-          static struct httprequest *req2;
+          static struct sws_httprequest *req2;
           int err = 0;
           if(!req2) {
             req2 = malloc(sizeof(*req2));
@@ -1841,7 +1841,7 @@ http_connect_cleanup:
   *infdp = CURL_SOCKET_BAD;
 }
 
-static void http_upgrade(struct httprequest *req)
+static void http_upgrade(struct sws_httprequest *req)
 {
   (void)req;
   logmsg("Upgraded to ... %u", req->upgrade_request);
@@ -1930,7 +1930,8 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 
 /* returns 1 if the connection should be serviced again immediately, 0 if there
    is no data waiting, or < 0 if it should be closed */
-static int service_connection(curl_socket_t msgsock, struct httprequest *req,
+static int service_connection(curl_socket_t msgsock,
+                              struct sws_httprequest *req,
                               curl_socket_t listensock,
                               const char *connecthost,
                               int keepalive_secs)
@@ -2016,7 +2017,7 @@ int main(int argc, char *argv[])
   const char *unix_socket = NULL;
   bool unlink_socket = false;
 #endif
-  struct httprequest *req = NULL;
+  struct sws_httprequest *req = NULL;
   int rc = 0;
   int error;
   int arg = 1;

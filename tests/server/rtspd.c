@@ -81,7 +81,7 @@ typedef enum {
 #define SET_RTP_PKT_LEN(p,l) (((p)[2] = (char)(((l) >> 8) & 0xFF)), \
                               ((p)[3] = (char)((l) & 0xFF)))
 
-struct httprequest {
+struct rtspd_httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
   size_t checkindex; /* where to start checking of the request */
   size_t offset;     /* size of the incoming request */
@@ -167,7 +167,7 @@ static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
 #define RTP_DATA_SIZE 12
 static const char *RTP_DATA = "$_1234\n\0Rsdf";
 
-static int rtspd_ProcessRequest(struct httprequest *req)
+static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 {
   char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
@@ -615,7 +615,7 @@ storerequest_cleanup:
 }
 
 /* return 0 on success, non-zero on failure */
-static int rtspd_get_request(curl_socket_t sock, struct httprequest *req)
+static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
 {
   int error;
   int fail = 0;
@@ -726,7 +726,7 @@ static int rtspd_get_request(curl_socket_t sock, struct httprequest *req)
 }
 
 /* returns -1 on failure */
-static int rtspd_send_doc(curl_socket_t sock, struct httprequest *req)
+static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
 {
   ssize_t written;
   size_t count;
@@ -1020,7 +1020,7 @@ int main(int argc, char *argv[])
   int wroteportfile = 0;
   int flag;
   unsigned short port = 8999;
-  struct httprequest req;
+  struct rtspd_httprequest req;
   int rc;
   int error;
   int arg = 1;
