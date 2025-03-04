@@ -760,7 +760,8 @@ static bool socksd_incoming(curl_socket_t listenfd)
 
 static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
                                        unsigned short *listenport,
-                                       const char *unix_socket)
+                                       const char *unix_socket,
+                                       bool bind_only)
 {
   /* passive daemon style */
   srvr_sockaddr_union_t listener;
@@ -896,6 +897,12 @@ static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
       sclose(sock);
       return CURL_SOCKET_BAD;
     }
+  }
+
+  /* bindonly option forces no listening */
+  if(bind_only) {
+    logmsg("instructed to bind port without listening");
+    return sock;
   }
 
   /* start accepting connections */
@@ -1060,7 +1067,7 @@ int main(int argc, char *argv[])
 
   {
     /* passive daemon style */
-    sock = socksd_sockdaemon(sock, &server_port, unix_socket);
+    sock = socksd_sockdaemon(sock, &server_port, unix_socket, FALSE);
     if(CURL_SOCKET_BAD == sock) {
       goto socks5_cleanup;
     }
