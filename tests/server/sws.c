@@ -128,8 +128,7 @@ static size_t num_sockets = 0;
 #define RESPONSE_PROXY_DUMP "proxy.response"
 
 /* file in which additional instructions may be found */
-#define DEFAULT_CMDFILE "log/server.cmd"
-static const char *cmdfile = DEFAULT_CMDFILE;
+static const char *cmdfile = "log/server.cmd";
 
 /* very-big-path support */
 #define MAXDOCNAMELEN 140000
