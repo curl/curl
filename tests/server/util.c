@@ -58,6 +58,7 @@
 
 /* need init from main() */
 const char *pidname = NULL;
+const char *portname = NULL; /* none by default */
 const char *serverlogfile = NULL;
 const char *configfile = NULL;
 const char *logdir = "log";

@@ -2019,7 +2019,6 @@ int main(int argc, char *argv[])
   const char *unix_socket = NULL;
   bool unlink_socket = false;
 #endif
-  const char *portname = ".http.port";
   struct httprequest *req = NULL;
   int rc = 0;
   int error;
@@ -2035,6 +2034,7 @@ int main(int argc, char *argv[])
   size_t socket_idx;
 
   pidname = ".http.pid";
+  portname = ".http.port";
   serverlogfile = "log/sws.log";
 
   while(argc > arg) {

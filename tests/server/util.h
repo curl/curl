@@ -57,6 +57,7 @@ void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
 /* global variables */
 extern const char *path;  /* where to find the 'data' dir */
 extern const char *pidname;
+extern const char *portname;
 extern const char *serverlogfile;  /* log file name */
 extern const char *configfile;
 extern const char *logdir;

@@ -1023,7 +1023,6 @@ int main(int argc, char *argv[])
   int wroteportfile = 0;
   int flag;
   unsigned short port = 8999;
-  const char *portname = NULL; /* none by default */
   struct httprequest req;
   int rc;
   int error;

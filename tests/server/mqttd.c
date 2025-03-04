@@ -900,12 +900,12 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   int wroteportfile = 0;
-  const char *portname = ".mqttd.port";
   bool juggle_again;
   int error;
   int arg = 1;
 
   pidname = ".mqttd.pid";
+  portname = ".mqttd.port";
   serverlogfile = "log/mqttd.log";
   configfile = "mqttd.config";
   server_port = 1883; /* MQTT default port */
