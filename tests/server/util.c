@@ -60,6 +60,7 @@
 const char *pidname = NULL;
 const char *portname = NULL; /* none by default */
 const char *serverlogfile = NULL;
+int serverlogslocked;
 const char *configfile = NULL;
 const char *logdir = "log";
 char loglockfile[256];

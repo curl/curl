@@ -194,7 +194,6 @@ static curl_socket_t peer = CURL_SOCKET_BAD;
 static unsigned int timeout;
 static unsigned int maxtimeout = 5 * TIMEOUT;
 
-static int serverlogslocked = 0;
 static int wrotepidfile = 0;
 static int wroteportfile = 0;
 
@@ -550,6 +549,7 @@ int main(int argc, char **argv)
 
   pidname = ".tftpd.pid";
   serverlogfile = "log/tftpd.log";
+  serverlogslocked = 0;
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

@@ -56,8 +56,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-static int serverlogslocked = 0;
-
 #undef REQBUFSIZ
 #define REQBUFSIZ 150000
 
@@ -1030,6 +1028,7 @@ int main(int argc, char *argv[])
 
   pidname = ".rtsp.pid";
   serverlogfile = "log/rtspd.log";
+  serverlogslocked = 0;
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

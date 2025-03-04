@@ -59,7 +59,6 @@
 #include "memdebug.h"
 
 static bool use_gopher = FALSE;
-static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
 
 #undef REQBUFSIZ
@@ -2032,6 +2031,7 @@ int main(int argc, char *argv[])
   pidname = ".http.pid";
   portname = ".http.port";
   serverlogfile = "log/sws.log";
+  serverlogslocked = 0;
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
