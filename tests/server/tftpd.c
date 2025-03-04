@@ -993,7 +993,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 }
 
 /* Based on the testno, parse the correct server commands. */
-static int parse_servercmd(struct testcase *req)
+static int tftpd_parse_servercmd(struct testcase *req)
 {
   FILE *stream;
   int error;
@@ -1107,7 +1107,7 @@ static int validate_access(struct testcase *test,
 
     test->testno = testno;
 
-    (void)parse_servercmd(test);
+    (void)tftpd_parse_servercmd(test);
 
     stream = test2fopen(testno, logdir);
 

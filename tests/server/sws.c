@@ -221,7 +221,7 @@ static int parse_cmdfile(struct httprequest *req)
 }
 
 /* based on the testno, parse the correct server commands */
-static int parse_servercmd(struct httprequest *req)
+static int sws_parse_servercmd(struct httprequest *req)
 {
   FILE *stream;
   int error;
@@ -506,7 +506,7 @@ static int sws_ProcessRequest(struct httprequest *req)
         req->testno = DOCNUMBER_404;
       }
       else
-        parse_servercmd(req);
+        sws_parse_servercmd(req);
     }
     else if((req->offset >= 3)) {
       unsigned char *l = (unsigned char *)line;
@@ -535,7 +535,7 @@ static int sws_ProcessRequest(struct httprequest *req)
   }
 
   /* find and parse <servercmd> for this test */
-  parse_servercmd(req);
+  sws_parse_servercmd(req);
 
   if(use_gopher) {
     /* when using gopher we cannot check the request until the entire
