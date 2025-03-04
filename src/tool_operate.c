@@ -3161,11 +3161,11 @@ static CURLcode run_all_transfers(struct GlobalConfig *global,
 CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
-  char *first_arg;
+  const char *first_arg;
 #ifdef UNDER_CE
   first_arg = argc > 1 ? strdup(argv[1]) : NULL;
 #else
-  first_arg = argc > 1 ? curlx_convert_tchar_to_UTF8(argv[1]) : NULL;
+  first_arg = argc > 1 ? convert_tchar_to_UTF8(argv[1]) : NULL;
 #endif
 
 #ifdef HAVE_SETLOCALE
@@ -3187,7 +3187,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
     }
   }
 
-  curlx_unicodefree(first_arg);
+  unicodefree(first_arg);
 
   if(!result) {
     /* Parse the command line arguments */

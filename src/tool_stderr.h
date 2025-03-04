@@ -27,6 +27,6 @@
 #include "tool_cfgable.h"
 
 void tool_init_stderr(void);
-void tool_set_stderr_file(struct GlobalConfig *global, char *filename);
+void tool_set_stderr_file(struct GlobalConfig *global, const char *filename);
 
 #endif /* HEADER_CURL_TOOL_STDERR_H */
