@@ -121,7 +121,7 @@ static struct configurable config;
 
 static const char *reqlogfile = DEFAULT_REQFILE;
 
-static void resetdefaults(void)
+static void socksd_resetdefaults(void)
 {
   logmsg("Reset to defaults");
   config.version = CONFIG_VERSION;
@@ -146,7 +146,7 @@ static unsigned short shortval(char *value)
 static void socksd_getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
-  resetdefaults();
+  socksd_resetdefaults();
   if(fp) {
     char buffer[512];
     logmsg("parse config file");

@@ -86,7 +86,7 @@ struct configurable {
 
 static struct configurable config;
 
-static void resetdefaults(void)
+static void mqttd_resetdefaults(void)
 {
   logmsg("Reset to defaults");
   config.version = CONFIG_VERSION;
@@ -100,7 +100,7 @@ static void resetdefaults(void)
 static void mqttd_getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
-  resetdefaults();
+  mqttd_resetdefaults();
   if(fp) {
     char buffer[512];
     logmsg("parse config file");
