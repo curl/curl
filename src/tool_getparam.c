@@ -685,28 +685,31 @@ static void sethttpver(struct GlobalConfig *global,
 }
 
 static CURLcode set_trace_config(struct GlobalConfig *global,
-                                 const char *config)
+                                 const char *token)
 {
   CURLcode result = CURLE_OK;
-  char *token, *tmp, *name;
+  const char *next, *name;
   bool toggle;
 
-  tmp = strdup(config);
-  if(!tmp)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* Allow strtok() here since this is not used threaded */
-  /* !checksrc! disable BANNEDFUNC 2 */
-  token = strtok(tmp, ", ");
   while(token) {
+    size_t len;
+    next = strchr(token, ',');
+
+    if(next)
+      len = next - token;
+    else
+      len = strlen(token);
+
     switch(*token) {
       case '-':
         toggle = FALSE;
         name = token + 1;
+        len--;
         break;
       case '+':
         toggle = TRUE;
         name = token + 1;
+        len--;
         break;
       default:
         toggle = TRUE;
@@ -714,28 +717,35 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
         break;
     }
 
-    if(strcasecompare(name, "all")) {
+    if((len == 3) && strncasecompare(name, "all", 3)) {
       global->traceids = toggle;
       global->tracetime = toggle;
       result = curl_global_trace(token);
       if(result)
         goto out;
     }
-    else if(strcasecompare(name, "ids")) {
+    else if((len == 3) && strncasecompare(name, "ids", 3)) {
       global->traceids = toggle;
     }
-    else if(strcasecompare(name, "time")) {
+    else if((len == 4) && strncasecompare(name, "time", 4)) {
       global->tracetime = toggle;
     }
     else {
-      result = curl_global_trace(token);
+      char buffer[32];
+      msnprintf(buffer, sizeof(buffer), "%c%.*s", toggle ? '+' : '-',
+                (int)len, name);
+      result = curl_global_trace(buffer);
       if(result)
         goto out;
     }
-    token = strtok(NULL, ", ");
+    if(next) {
+      next++;
+      if(*next == ' ')
+        next++;
+    }
+    token = next;
   }
 out:
-  free(tmp);
   return result;
 }
 
