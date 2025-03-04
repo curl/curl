@@ -2601,6 +2601,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
   for(e = Curl_llist_head(&multi->process); e; e = n) {
     struct Curl_easy *data = Curl_node_elem(e);
     CURLMcode result;
+    unsigned int num_alive = multi->num_alive;
     /* Do the loop and only alter the signal ignore state if the next handle
        has a different NO_SIGNAL state than the previous */
     if(first) {
@@ -2619,6 +2620,12 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
       if(result)
         returncode = result;
     }
+    if(num_alive != multi->num_alive)
+      /* Since more than one handle can be removed in a single call to
+         multi_runsingle(), we cannot easily continue on the next node when a
+         node has been removed since that node might ALSO have been
+         removed. */
+      n = Curl_llist_head(&multi->process);
   }
 
   sigpipe_apply(multi->admin, &pipe_st);
