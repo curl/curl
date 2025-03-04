@@ -560,7 +560,7 @@ static int rtspd_ProcessRequest(struct httprequest *req)
 }
 
 /* store the entire request in a file */
-static void storerequest(char *reqbuf, size_t totalsize)
+static void rtspd_storerequest(char *reqbuf, size_t totalsize)
 {
   int res;
   int error = 0;
@@ -682,7 +682,7 @@ static int rtspd_get_request(curl_socket_t sock, struct httprequest *req)
     if(fail) {
       /* dump the request received so far to the external file */
       reqbuf[req->offset] = '\0';
-      storerequest(reqbuf, req->offset);
+      rtspd_storerequest(reqbuf, req->offset);
       return 1;
     }
 
@@ -717,7 +717,7 @@ static int rtspd_get_request(curl_socket_t sock, struct httprequest *req)
     reqbuf[req->offset] = '\0';
 
   /* dump the request to an external file */
-  storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
+  rtspd_storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
   if(got_exit_signal)
     return 1;
 

@@ -748,7 +748,7 @@ static int sws_ProcessRequest(struct httprequest *req)
 }
 
 /* store the entire request in a file */
-static void storerequest(const char *reqbuf, size_t totalsize)
+static void sws_storerequest(const char *reqbuf, size_t totalsize)
 {
   int res;
   int error = 0;
@@ -847,7 +847,7 @@ static int sws_get_request(curl_socket_t sock, struct httprequest *req)
 
     /* dump the request received so far to the external file */
     reqbuf[req->offset] = '\0';
-    storerequest(reqbuf, req->offset);
+    sws_storerequest(reqbuf, req->offset);
     req->offset = 0;
 
     /* read websocket traffic */
@@ -897,7 +897,7 @@ static int sws_get_request(curl_socket_t sock, struct httprequest *req)
       logmsg("log the websocket traffic");
       /* dump the incoming websocket traffic to the external file */
       reqbuf[req->offset] = '\0';
-      storerequest(reqbuf, req->offset);
+      sws_storerequest(reqbuf, req->offset);
       req->offset = 0;
     }
     init_httprequest(req);
@@ -936,7 +936,7 @@ static int sws_get_request(curl_socket_t sock, struct httprequest *req)
     if(fail) {
       /* dump the request received so far to the external file */
       reqbuf[req->offset] = '\0';
-      storerequest(reqbuf, req->offset);
+      sws_storerequest(reqbuf, req->offset);
       return -1;
     }
 
@@ -967,7 +967,7 @@ static int sws_get_request(curl_socket_t sock, struct httprequest *req)
 
   /* at the end of a request dump it to an external file */
   if(fail || req->done_processing)
-    storerequest(reqbuf, req->offset);
+    sws_storerequest(reqbuf, req->offset);
   if(got_exit_signal)
     return -1;
 
@@ -2431,7 +2431,7 @@ int main(int argc, char *argv[])
 
             if(req->connmon) {
               const char *keepopen = "[DISCONNECT]\n";
-              storerequest(keepopen, strlen(keepopen));
+              sws_storerequest(keepopen, strlen(keepopen));
             }
 
             if(!req->open)
