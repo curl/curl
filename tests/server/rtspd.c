@@ -58,6 +58,7 @@
 
 static int serverlogslocked = 0;
 
+#undef REQBUFSIZ
 #define REQBUFSIZ 150000
 
 static long prevtestno = -1;    /* previous test number we served */

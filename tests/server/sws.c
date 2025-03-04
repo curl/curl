@@ -62,6 +62,7 @@ static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
 
+#undef REQBUFSIZ
 #define REQBUFSIZ (2*1024*1024)
 
 #define MAX_SLEEP_TIME_MS 250
