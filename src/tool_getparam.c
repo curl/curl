@@ -1624,7 +1624,7 @@ static ParameterError parse_time_cond(struct GlobalConfig *global,
 }
 
 struct flagmap {
-  const char* name;
+  const char *name;
   size_t len;
   unsigned char flag;
 };
