@@ -648,10 +648,8 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
 
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
     if(rv < 0) {
-      failf(data,
-            "process_pending_input: nghttp2_session_mem_recv() returned "
-            "%zd:%s", rv, nghttp2_strerror((int)rv));
-      *err = CURLE_RECV_ERROR;
+      failf(data, "nghttp2 error %zd: %s", rv, nghttp2_strerror((int)rv));
+      *err = CURLE_HTTP2;
       return -1;
     }
     Curl_bufq_skip(&ctx->inbufq, (size_t)rv);
@@ -1292,6 +1290,7 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
   struct Curl_cfilter *cf = userp;
+  struct cf_h2_ctx *ctx = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
 
   (void)session;
@@ -1302,6 +1301,13 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
     len = fr_print(frame, buffer, sizeof(buffer)-1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] -> %s", frame->hd.stream_id, buffer);
+  }
+  if((frame->hd.type == NGHTTP2_GOAWAY) && !ctx->sent_goaway) {
+    /* A GOAWAY not initiated by us, but by nghttp2 itself on detecting
+     * a protocol error on the connection */
+    failf(data, "nghttp2 shuts down connection with error %d: %s",
+          frame->goaway.error_code,
+          nghttp2_http2_strerror(frame->goaway.error_code));
   }
   return 0;
 }
@@ -2036,6 +2042,11 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   ssize_t nread;
 
+  if(should_close_session(ctx)) {
+    CURL_TRC_CF(data, cf, "progress ingress, session is closed");
+    return CURLE_HTTP2;
+  }
+
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
     CURL_TRC_CF(data, cf, "Process %zu bytes in connection buffer",
@@ -2610,6 +2621,7 @@ static CURLcode cf_h2_shutdown(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
 
   if(!ctx->sent_goaway) {
+    ctx->sent_goaway = TRUE;
     rv = nghttp2_submit_goaway(ctx->h2, NGHTTP2_FLAG_NONE,
                                ctx->local_max_sid, 0,
                                (const uint8_t *)"shutdown",
@@ -2620,7 +2632,6 @@ static CURLcode cf_h2_shutdown(struct Curl_cfilter *cf,
       result = CURLE_SEND_ERROR;
       goto out;
     }
-    ctx->sent_goaway = TRUE;
   }
   /* GOAWAY submitted, process egress and ingress until nghttp2 is done. */
   result = CURLE_OK;

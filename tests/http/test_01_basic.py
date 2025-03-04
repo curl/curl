@@ -203,3 +203,42 @@ class TestBasic:
             r.check_exit_code(16)  # CURLE_HTTP2
         else:
             r.check_exit_code(100)  # CURLE_TOO_LARGE
+
+    # http: several response headers, together > 256 KB
+    # nghttp2 error -905: Too many CONTINUATION frames following a HEADER frame
+    @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
+                        reason='httpd must be at least 2.4.64')
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_01_14_gigalarge_resp_headers(self, env: Env, httpd, proto):
+        httpd.set_extra_config('base', [
+            'LogLevel http2:trace2',
+            f'H2MaxHeaderBlockLen {1024 * 1024}',
+        ])
+        httpd.reload()
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+              f'/curltest/tweak?x-hd={256 * 1024}'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
+        if proto == 'h2':
+            r.check_exit_code(16)  # CURLE_HTTP2
+        else:
+            r.check_exit_code(0)   # 1.1 can do
+
+    # http: one response header > 256 KB
+    @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
+                        reason='httpd must be at least 2.4.64')
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_01_15_gigalarge_resp_headers(self, env: Env, httpd, proto):
+        httpd.set_extra_config('base', [
+            'LogLevel http2:trace2',
+            f'H2MaxHeaderBlockLen {1024 * 1024}',
+        ])
+        httpd.reload()
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+              f'/curltest/tweak?x-hd1={256 * 1024}'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
+        if proto == 'h2':
+            r.check_exit_code(16)  # CURLE_HTTP2
+        else:
+            r.check_exit_code(100)  # CURLE_TOO_LARGE
