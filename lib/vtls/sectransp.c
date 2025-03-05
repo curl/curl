@@ -1091,9 +1091,9 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   if(result != CURLE_OK)
     return result;
 
-#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
   if(connssl->alpn) {
-#ifdef HAVE_BUILTIN_AVAILABLE
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
+    defined(HAVE_BUILTIN_AVAILABLE)
     if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
 #else
     if(&SSLSetALPNProtocols && &SSLCopyALPNProtocols) {
@@ -1120,7 +1120,6 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
     }
   }
-#endif
 
   if(ssl_config->key) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
@@ -2091,9 +2090,9 @@ check_handshake:
         break;
     }
 
-#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
     if(connssl->alpn) {
-#ifdef HAVE_BUILTIN_AVAILABLE
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
+    defined(HAVE_BUILTIN_AVAILABLE)
       if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
 #else
       if(&SSLSetALPNProtocols && &SSLCopyALPNProtocols) {
@@ -2125,7 +2124,6 @@ check_handshake:
           CFRelease(alpnArr);
       }
     }
-#endif
 
     return CURLE_OK;
   }
