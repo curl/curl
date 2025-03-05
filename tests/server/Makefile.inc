@@ -92,8 +92,7 @@ socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 socksd_CFLAGS = $(AM_CFLAGS)
 
 mqttd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
- server_sockaddr.h mqttd.c \
- ../../lib/inet_pton.c
+ server_sockaddr.h mqttd.c
 mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 mqttd_CFLAGS = $(AM_CFLAGS)
 
