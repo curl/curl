@@ -69,6 +69,8 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->deductheadercount = 0;
   req->httpversion_sent = 0;
   req->httpversion = 0;
+  req->sendbuf_hds_len = 0;
+
   result = Curl_client_start(data);
   if(result)
     return result;
@@ -141,6 +143,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->httpcode = 0;
   req->keepon = 0;
   req->upgr101 = UPGR101_INIT;
+  req->sendbuf_hds_len = 0;
   req->timeofdoc = 0;
   req->location = NULL;
   req->newurl = NULL;
