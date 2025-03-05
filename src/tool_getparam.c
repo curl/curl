@@ -529,18 +529,21 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
                                        const char *which,
                                        curl_off_t *value_out)
 {
-  char *unit;
+  char *unit_in;
+  const char *unit;
   curl_off_t value;
 
-  if(curlx_strtoofft(arg, &unit, 10, &value)) {
+  if(curlx_strtoofft(arg, &unit_in, 10, &value)) {
     warnf(global, "invalid number specified for %s", which);
     return PARAM_BAD_USE;
   }
 
-  if(!*unit)
-    unit = (char *)CURL_UNCONST("b");
-  else if(strlen(unit) > 1)
-    unit = (char *)CURL_UNCONST("w"); /* unsupported */
+  if(!*unit_in)
+    unit = "b";
+  else if(strlen(unit_in) > 1)
+    unit = "w"; /* unsupported */
+  else
+    unit = unit_in;
 
   switch(*unit) {
   case 'G':
@@ -1797,8 +1800,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     if(ARGTYPE(a->desc) >= ARG_STRG) {
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
-        nextarg = (char *)CURL_UNCONST(&parse[1]); /* this is the actual
-                                                      extra parameter */
+        nextarg = &parse[1]; /* this is the actual extra parameter */
         singleopt = TRUE;   /* do not loop anymore after this */
 #ifdef HAVE_WRITABLE_ARGV
         clearthis = &cleararg1[parse + 2 - flag];
@@ -1841,7 +1843,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
          that use nextarg should be marked as such and they will check that
          nextarg is set before continuing, but code analyzers are not always
          that aware of that state */
-      nextarg = (char *)CURL_UNCONST("");
+      nextarg = "";
 
     switch(cmd) {
     case C_RANDOM_FILE: /* --random-file */
