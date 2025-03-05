@@ -19,7 +19,7 @@ and with TLSv1.3 the
 [authenticated encryption](https://en.wikipedia.org/wiki/Authenticated_encryption).
 In addition, there are other parameters that influence the TLS handshake, like
 [DHE](https://en.wikipedia.org/wiki/Diffie–Hellman_key_exchange) "groups" and
-[ECDH](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie–Hellman) with its
+[ECDHE](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie–Hellman) with its
 "curves".
 
 ### History
@@ -28,7 +28,7 @@ curl's way of letting users configure these settings closely followed OpenSSL
 in its API. TLS learned new parameters, OpenSSL added new API functions and
 curl added command line options.
 
-Several other TLS backends followed OpenSSL's approach, more or less closely
+Several other TLS backends followed the OpenSSL approach, more or less closely,
 and curl maps the command line options to these TLS backends. Some TLS
 backends do not support all of it and command line options are either
 ignored or lead to an error.
@@ -235,7 +235,7 @@ other keywords that tweak its operations. Applications or a system
 may define new alias names for priority strings that can then be used here.
 
 Since the order of items in priority strings is significant, it makes no
-sense for curl to puzzle other ssl options somwhow together. `--ciphers`
+sense for curl to puzzle other ssl options somehow together. `--ciphers`
 is the single way to change priority.
 
 ### Examples
