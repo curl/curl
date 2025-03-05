@@ -7,11 +7,11 @@ SPDX-License-Identifier: curl
 ## curl cipher options
 
 A TLS handshake involves many parameters which take part in the negotiation
-between client and server in order to agree on the TLS version and set of 
+between client and server in order to agree on the TLS version and set of
 algorithms to use for a connection.
 
-What has become known as a "cipher" or better "cipher suite" in TLS 
-are names for specific combinations of 
+What has become known as a "cipher" or better "cipher suite" in TLS
+are names for specific combinations of
 [key exchange](https://en.wikipedia.org/wiki/Key_exchange),
 [bulk encryption](https://en.wikipedia.org/wiki/Link_encryption),
 [message authentication code](https://en.wikipedia.org/wiki/Message_authentication_code)
@@ -33,7 +33,7 @@ and curl maps the command line options to these TLS backends. Some TLS
 backends do not support all of it and command line options will then either
 be ignored or lead to an error.
 
-Many examples below show the OpenSSL-like use of these options. GnuTLS 
+Many examples below show the OpenSSL-like use of these options. GnuTLS
 however chose a different approach. These are described in a separate
 section further below.
 
