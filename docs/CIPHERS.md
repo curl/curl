@@ -24,14 +24,14 @@ In addition, there are other parameters that influence the TLS handshake, like
 
 ### History
 
-Curl's way of lettting users configure these settings closely followed OpenSSL
+curl's way of letting users configure these settings closely followed OpenSSL
 in its API. TLS learned new parameters, OpenSSL added new API functions and
 curl added command line options.
 
 Several other TLS backends followed OpenSSL's approach, more or less closely
 and curl maps the command line options to these TLS backends. Some TLS
-backends do not support all of it and command line options will then either
-be ignored or lead to an error.
+backends do not support all of it and command line options are either
+ignored or lead to an error.
 
 Many examples below show the OpenSSL-like use of these options. GnuTLS
 however chose a different approach. These are described in a separate
@@ -221,7 +221,7 @@ the following way:
 * When the set string starts with '+', '-' or '!' it is *appended* to the
   priority string libcurl itself generates (separated by ':'). This initial
   priority depends other settings such as CURLOPT_SSLVERSION(3),
-  CURLOPT_TLSAUTH_USERNAME(3) (for SRP) or if a HTTP/3 (QUIC) connection
+  CURLOPT_TLSAUTH_USERNAME(3) (for SRP) or if HTTP/3 (QUIC)
   is being negotiated.
 * Otherwise, the set string fully *replaces* the libcurl generated one. While
   giving full control to the application, the set priority needs to
@@ -231,8 +231,8 @@ the following way:
 Users may specify via `--ciphers` anything that GnuTLS supports: ciphers,
 key exchange, MAC, compression, TLS versions, signature algorithms, groups,
 elliptic curves, certificate types. In addition, GnuTLS has a variety of
-other keywords that tweak its operations. And applications or a system
-may define new alias names for priority strings that may be used here.
+other keywords that tweak its operations. Applications or a system
+may define new alias names for priority strings that can then be used here.
 
 Since the order of items in priority strings is significant, it makes no
 sense for curl to puzzle other ssl options somwhow together. `--ciphers`
