@@ -36,11 +36,6 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_POLL_H
-#include <poll.h>
-#elif defined(HAVE_SYS_POLL_H)
-#include <sys/poll.h>
-#endif
 
 #ifdef MSDOS
 #include <dos.h>  /* delay() */
@@ -278,9 +273,7 @@ static long timediff(struct timeval newer, struct timeval older)
 int wait_ms(int timeout_ms)
 {
 #if !defined(MSDOS) && !defined(USE_WINSOCK)
-#ifndef HAVE_POLL
   struct timeval pending_tv;
-#endif
   struct timeval initial_tv;
   int pending_ms;
 #endif
@@ -297,17 +290,15 @@ int wait_ms(int timeout_ms)
 #elif defined(USE_WINSOCK)
   Sleep((DWORD)timeout_ms);
 #else
+  /* avoid using poll() for this since it behaves incorrectly with no sockets
+     on Apple operating systems */
   pending_ms = timeout_ms;
   initial_tv = tvnow();
   do {
     int error;
-#ifdef HAVE_POLL
-    r = poll(NULL, 0, pending_ms);
-#else
     pending_tv.tv_sec = pending_ms / 1000;
     pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     r = select(0, NULL, NULL, NULL, &pending_tv);
-#endif /* HAVE_POLL */
     if(r != -1)
       break;
     error = errno;
