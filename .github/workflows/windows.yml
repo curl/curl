@@ -335,12 +335,10 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          TFLAGS+=' ~613'  # SFTP
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~2301 ~2302 ~2310'  # WebSockets'
-            TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
-          else
-            TFLAGS+=' ~SFTP'
+            TFLAGS+=' ~612'  # SFTP
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -382,7 +380,6 @@ jobs:
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-            tflags: '~2301 ~2302 ~2310 ~3027'
           - name: 'schannel U'
             env: '7.3.0-x86_64'
             dir: 'mingw64'
@@ -496,7 +493,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          export TFLAGS='-j8 ~WebSockets ${{ matrix.tflags }}'
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -726,7 +723,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
@@ -737,7 +733,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
@@ -748,7 +743,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
@@ -759,7 +753,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
@@ -770,7 +763,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
@@ -782,7 +774,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516'
             chkprefill: '_chkprefill'
             # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
             #          read its configuration from, making it vulnerable to attacks on
@@ -908,12 +899,7 @@ jobs:
         timeout-minutes: 10
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
-          export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
-          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-            TFLAGS+=' ~SFTP'
-          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
-            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
-          fi
+          export TFLAGS='-j8 ${{ matrix.tflags }} ~2302 ~2303 ~2307'
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
