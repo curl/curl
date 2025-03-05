@@ -424,9 +424,6 @@ static void protoset_clear(const char **protoset, const char *proto)
 ParameterError proto2num(struct OperationConfig *config,
                          const char * const *val, char **ostr, const char *str)
 {
-  char *buffer;
-  const char *sep = ",";
-  char *token;
   const char **protoset;
   struct curlx_dynbuf obuf;
   size_t proto;
@@ -434,18 +431,9 @@ ParameterError proto2num(struct OperationConfig *config,
 
   curlx_dyn_init(&obuf, MAX_PROTOSTRING);
 
-  if(!str)
-    return PARAM_OPTION_AMBIGUOUS;
-
-  buffer = strdup(str); /* because strtok corrupts it */
-  if(!buffer)
-    return PARAM_NO_MEM;
-
   protoset = malloc((proto_count + 1) * sizeof(*protoset));
-  if(!protoset) {
-    free(buffer);
+  if(!protoset)
     return PARAM_NO_MEM;
-  }
 
   /* Preset protocol set with default values. */
   protoset[0] = NULL;
@@ -456,33 +444,35 @@ ParameterError proto2num(struct OperationConfig *config,
       protoset_set(protoset, p);
   }
 
-  /* Allow strtok() here since this is not used threaded */
-  /* !checksrc! disable BANNEDFUNC 2 */
-  for(token = strtok(buffer, sep);
-      token;
-      token = strtok(NULL, sep)) {
+  while(*str) {
+    const char *next = strchr(str, ',');
+    size_t plen;
     enum e_action { allow, deny, set } action = allow;
 
+    if(next)
+      plen = next - str - 1;
+    else
+      plen = strlen(str) - 1;
+
     /* Process token modifiers */
-    while(!ISALNUM(*token)) { /* may be NULL if token is all modifiers */
-      switch(*token++) {
-      case '=':
-        action = set;
-        break;
-      case '-':
-        action = deny;
-        break;
-      case '+':
-        action = allow;
-        break;
-      default: /* Includes case of terminating NULL */
-        free(buffer);
-        free((char *) protoset);
-        return PARAM_BAD_USE;
-      }
+    switch(*str++) {
+    case '=':
+      action = set;
+      break;
+    case '-':
+      action = deny;
+      break;
+    case '+':
+      action = allow;
+      break;
+    default:
+      /* no modifier */
+      str--;
+      plen++;
+      break;
     }
 
-    if(curl_strequal(token, "all")) {
+    if((plen == 3) && curl_strnequal(str, "all", 3)) {
       switch(action) {
       case deny:
         protoset[0] = NULL;
@@ -495,7 +485,11 @@ ParameterError proto2num(struct OperationConfig *config,
       }
     }
     else {
-      const char *p = proto_token(token);
+      char buffer[32];
+      const char *p;
+      msnprintf(buffer, sizeof(buffer), "%.*s", (int)plen, str);
+
+      p = proto_token(buffer);
 
       if(p)
         switch(action) {
@@ -514,11 +508,14 @@ ParameterError proto2num(struct OperationConfig *config,
            if no protocols are allowed */
         if(action == set)
           protoset[0] = NULL;
-        warnf(config->global, "unrecognized protocol '%s'", token);
+        warnf(config->global, "unrecognized protocol '%s'", buffer);
       }
     }
+    if(next)
+      str = next + 1;
+    else
+      break;
   }
-  free(buffer);
 
   /* We need the protocols in alphabetic order for CI tests requirements. */
   qsort((char *) protoset, protoset_index(protoset, NULL), sizeof(*protoset),
