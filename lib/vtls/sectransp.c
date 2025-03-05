@@ -1091,10 +1091,13 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   if(result != CURLE_OK)
     return result;
 
+  if(connssl->alpn) {
 #if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
     defined(HAVE_BUILTIN_AVAILABLE)
-  if(connssl->alpn) {
     if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
+#else
+    if(&SSLSetALPNProtocols && &SSLCopyALPNProtocols) {
+#endif
       struct alpn_proto_buf proto;
       size_t i;
       CFStringRef cstr;
@@ -1117,7 +1120,6 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
     }
   }
-#endif
 
   if(ssl_config->key) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
@@ -2088,10 +2090,13 @@ check_handshake:
         break;
     }
 
+    if(connssl->alpn) {
 #if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
     defined(HAVE_BUILTIN_AVAILABLE)
-    if(connssl->alpn) {
       if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
+#else
+      if(&SSLSetALPNProtocols && &SSLCopyALPNProtocols) {
+#endif
         CFArrayRef alpnArr = NULL;
         CFStringRef chosenProtocol = NULL;
         err = SSLCopyALPNProtocols(backend->ssl_ctx, &alpnArr);
@@ -2119,7 +2124,6 @@ check_handshake:
           CFRelease(alpnArr);
       }
     }
-#endif
 
     return CURLE_OK;
   }
