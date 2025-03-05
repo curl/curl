@@ -1001,7 +1001,7 @@ sub singletest_run {
         logmsg "$CMDLINE\n";
     }
 
-    open(my $cmdlog, ">", "$logdir/$CURLLOG") ||
+    open(my $cmdlog, ">", "$LOGDIR/$CURLLOG") ||
         die "Failure writing log file";
     print $cmdlog "$CMDLINE\n";
     close($cmdlog) || die "Failure writing log file";
