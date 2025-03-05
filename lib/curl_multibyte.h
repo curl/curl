@@ -84,7 +84,7 @@ typedef union {
 #define curlx_unicodefree(ptr)                          \
   do {                                                  \
     if(ptr) {                                           \
-      (free)(ptr);                                      \
+      (free)((char *)ptr);                              \
       (ptr) = NULL;                                     \
     }                                                   \
   } while(0)
