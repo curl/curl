@@ -2293,26 +2293,25 @@ typedef enum {
   /* Convenient "aliases" */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
 
-  /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
-enum {
-  CURL_HTTP_VERSION_NONE, /* setting this means we do not care, and that we
-                             would like the library to choose the best
-                             possible for us! */
-  CURL_HTTP_VERSION_1_0,  /* please use HTTP 1.0 in the request */
-  CURL_HTTP_VERSION_1_1,  /* please use HTTP 1.1 in the request */
-  CURL_HTTP_VERSION_2_0,  /* please use HTTP 2 in the request */
-  CURL_HTTP_VERSION_2TLS, /* use version 2 for HTTPS, version 1.1 for HTTP */
-  CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,  /* please use HTTP 2 without HTTP/1.1
-                                           Upgrade */
-  CURL_HTTP_VERSION_3 = 30, /* Use HTTP/3, fallback to HTTP/2 or HTTP/1 if
-                               needed. For HTTPS only. For HTTP, this option
-                               makes libcurl return error. */
-  CURL_HTTP_VERSION_3ONLY = 31, /* Use HTTP/3 without fallback. For HTTPS
-                                   only. For HTTP, this makes libcurl
-                                   return error. */
-
-  CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
-};
+/* These constants are for use with the CURLOPT_HTTP_VERSION option. */
+#define CURL_HTTP_VERSION_NONE  0L /* setting this means we do not care, and
+                                      that we would like the library to choose
+                                      the best possible for us! */
+#define CURL_HTTP_VERSION_1_0   1L /* please use HTTP 1.0 in the request */
+#define CURL_HTTP_VERSION_1_1   2L /* please use HTTP 1.1 in the request */
+#define CURL_HTTP_VERSION_2_0   3L /* please use HTTP 2 in the request */
+#define CURL_HTTP_VERSION_2TLS  4L /* use version 2 for HTTPS, version 1.1 for
+                                      HTTP */
+#define CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE 5L /* please use HTTP 2 without
+                                                  HTTP/1.1 Upgrade */
+#define CURL_HTTP_VERSION_3     30L /* Use HTTP/3, fallback to HTTP/2 or
+                                       HTTP/1 if needed. For HTTPS only. For
+                                       HTTP, this option makes libcurl
+                                       return error. */
+#define CURL_HTTP_VERSION_3ONLY 31L /* Use HTTP/3 without fallback. For
+                                       HTTPS only. For HTTP, this makes
+                                       libcurl return error. */
+#define CURL_HTTP_VERSION_LAST  32L /* *ILLEGAL* http version */
 
 /* Convenience definition simple because the name of the version is HTTP/2 and
    not 2.0. The 2_0 version of the enum name was set while the version was

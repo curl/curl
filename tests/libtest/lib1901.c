@@ -70,7 +70,7 @@ CURLcode test(char *URL)
     easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
     easy_setopt(curl, CURLOPT_POST, 1L);
     easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    easy_setopt(curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_1_1);
+    easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     easy_setopt(curl, CURLOPT_URL, URL);
     easy_setopt(curl, CURLOPT_READDATA, NULL);
 
