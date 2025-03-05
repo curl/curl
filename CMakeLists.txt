@@ -1617,24 +1617,9 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
-  if(HAVE_WIN32_WINNT)
-    if(HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
-      # Windows XP is required for freeaddrinfo, getaddrinfo
-      message(FATAL_ERROR "Building for Windows XP or newer is required.")
-    endif()
-
-    # Pre-fill detection results based on target OS version
-    if(MINGW OR MSVC OR WINCE)
-      if(WINCE OR HAVE_WIN32_WINNT LESS 0x0600)
-        set(HAVE_INET_NTOP 0)
-        set(HAVE_INET_PTON 0)
-      else()  # Windows Vista or newer
-        set(HAVE_INET_NTOP 1)
-        set(HAVE_INET_PTON 1)
-      endif()
-      unset(HAVE_INET_NTOP CACHE)
-      unset(HAVE_INET_PTON CACHE)
-    endif()
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
+    # Windows XP is required for freeaddrinfo, getaddrinfo
+    message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
 endif()
 
@@ -1819,8 +1804,10 @@ endif()
 if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 endif()
-check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h netinet/in.h sys/socket.h
-check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h netinet/in.h sys/socket.h
+if(NOT WIN32)
+  check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h netinet/in.h sys/socket.h
+  check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h netinet/in.h sys/socket.h
+endif()
 
 check_symbol_exists("fsetxattr" "sys/xattr.h" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
