@@ -856,7 +856,7 @@ sub checksystemfeatures {
     my $hostos=$^O;
 
     my $havediff;
-    if(system('diff') == 0) {
+    if(system("diff $TESTDIR/DISABLED $TESTDIR/DISABLED 2>$dev_null") == 0) {
       $havediff = 'available';
     }
     else {
