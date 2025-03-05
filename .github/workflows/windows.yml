@@ -192,7 +192,7 @@ jobs:
       - run: git config --global core.autocrlf input
         shell: pwsh
 
-      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+      - uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -209,7 +209,7 @@ jobs:
             libpsl-devel
             libssh2-devel
 
-      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+      - uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f # v2
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -222,6 +222,15 @@ jobs:
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
+
+      - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
+        timeout-minutes: 2
+        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
+        # causing runtests.pl to run at 2-3x reduced speed.
+        run: |
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
+          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
