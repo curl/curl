@@ -569,7 +569,7 @@ static CURLcode canon_query(struct Curl_easy *data,
 }
 
 
-CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
+CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OUT_OF_MEMORY;
   struct connectdata *conn = data->conn;
@@ -604,9 +604,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = {0};
   unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = {0};
   char *auth_headers = NULL;
-
-  DEBUGASSERT(!proxy);
-  (void)proxy;
 
   if(Curl_checkheaders(data, STRCONST("Authorization"))) {
     /* Authorization already present, Bailing out */
