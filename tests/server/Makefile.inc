@@ -83,12 +83,12 @@ rtspd_CFLAGS = $(AM_CFLAGS)
 
 sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
  server_sockaddr.h \
- sockfilt.c \
+ sockfilt.c
 sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
 socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
- server_sockaddr.h socksd.c \
+ server_sockaddr.h socksd.c
 socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 socksd_CFLAGS = $(AM_CFLAGS)
 
@@ -99,7 +99,7 @@ mqttd_CFLAGS = $(AM_CFLAGS)
 
 sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
  server_sockaddr.h \
- sws.c \
+ sws.c
 sws_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sws_CFLAGS = $(AM_CFLAGS)
 
