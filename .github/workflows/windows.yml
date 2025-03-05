@@ -200,6 +200,7 @@ jobs:
           install: >-
             gcc
             ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
+            diffutils
             openssh
             openssl-devel
             zlib-devel
@@ -207,7 +208,6 @@ jobs:
             libnghttp2-devel
             libpsl-devel
             libssh2-devel
-            ${{ matrix.chkprefill == '_chkprefill' && 'diffutils' || '' }}
 
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         if: ${{ matrix.sys != 'msys' }}
@@ -216,12 +216,12 @@ jobs:
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
+            mingw-w64-${{ matrix.env }}-diffutils
             openssh
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
-            ${{ matrix.chkprefill == '_chkprefill' && format('mingw-w64-{0}-diffutils', matrix.env) || '' }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
