@@ -417,7 +417,7 @@ sub showdiff {
     if(!$out[0]) {
         @out = `diff -c $file2 $file1 2>$dev_null`;
         if(!$out[0]) {
-            logmsg "FAIL to show diff. The diff tool may be missing\n";
+            logmsg "Failed to show diff. The diff tool may be missing.\n";
         }
     }
 
