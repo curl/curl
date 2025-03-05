@@ -380,7 +380,6 @@ jobs:
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-            tflags: ''
           - name: 'schannel U'
             env: '7.3.0-x86_64'
             dir: 'mingw64'
@@ -724,7 +723,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: ''
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
@@ -735,7 +733,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: ''
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
@@ -746,7 +743,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: ''
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
@@ -757,7 +753,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: ''
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
@@ -768,7 +763,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: ''
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
@@ -780,7 +774,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: ''
             chkprefill: '_chkprefill'
             # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
             #          read its configuration from, making it vulnerable to attacks on
