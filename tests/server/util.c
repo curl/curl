@@ -272,11 +272,6 @@ static long timediff(struct timeval newer, struct timeval older)
  */
 int wait_ms(int timeout_ms)
 {
-#if !defined(MSDOS) && !defined(USE_WINSOCK)
-  struct timeval pending_tv;
-  struct timeval initial_tv;
-  int pending_ms;
-#endif
   int r = 0;
 
   if(!timeout_ms)
@@ -292,22 +287,25 @@ int wait_ms(int timeout_ms)
 #else
   /* avoid using poll() for this since it behaves incorrectly with no sockets
      on Apple operating systems */
-  pending_ms = timeout_ms;
-  initial_tv = tvnow();
-  do {
-    int error;
-    pending_tv.tv_sec = pending_ms / 1000;
-    pending_tv.tv_usec = (pending_ms % 1000) * 1000;
-    r = select(0, NULL, NULL, NULL, &pending_tv);
-    if(r != -1)
-      break;
-    error = errno;
-    if(error && (error != EINTR))
-      break;
-    pending_ms = timeout_ms - (int)timediff(tvnow(), initial_tv);
-    if(pending_ms <= 0)
-      break;
-  } while(r == -1);
+  {
+    struct timeval pending_tv;
+    struct timeval initial_tv = tvnow();
+    int pending_ms = timeout_ms;
+    do {
+      int error;
+      pending_tv.tv_sec = pending_ms / 1000;
+      pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+      r = select(0, NULL, NULL, NULL, &pending_tv);
+      if(r != -1)
+        break;
+      error = errno;
+      if(error && (error != EINTR))
+        break;
+      pending_ms = timeout_ms - (int)timediff(tvnow(), initial_tv);
+      if(pending_ms <= 0)
+        break;
+    } while(r == -1);
+  }
 #endif /* USE_WINSOCK */
   if(r)
     r = -1;
