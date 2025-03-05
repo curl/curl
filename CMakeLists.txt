@@ -1617,24 +1617,9 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
-  if(HAVE_WIN32_WINNT)
-    if(HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
-      # Windows XP is required for freeaddrinfo, getaddrinfo
-      message(FATAL_ERROR "Building for Windows XP or newer is required.")
-    endif()
-
-    # Pre-fill detection results based on target OS version
-    if(MINGW OR MSVC OR WINCE)
-      if(WINCE OR HAVE_WIN32_WINNT LESS 0x0600)
-        set(HAVE_INET_NTOP 0)
-        set(HAVE_INET_PTON 0)
-      else()  # Windows Vista or newer
-        set(HAVE_INET_NTOP 1)
-        set(HAVE_INET_PTON 1)
-      endif()
-      unset(HAVE_INET_NTOP CACHE)
-      unset(HAVE_INET_PTON CACHE)
-    endif()
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
+    # Windows XP is required for freeaddrinfo, getaddrinfo
+    message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
 endif()
 
