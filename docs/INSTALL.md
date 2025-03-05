@@ -535,11 +535,8 @@ export NM=ppc_405-nm
     --exec-prefix=/usr/local
 ```
 
-You may also need to provide a parameter like `--with-random=/dev/urandom` to
-configure as it cannot detect the presence of a random number generating
-device for a target system. The `--prefix` parameter specifies where curl gets
-installed. If `configure` completes successfully, do `make` and `make install`
-as usual.
+The `--prefix` parameter specifies where curl gets installed. If `configure`
+completes successfully, do `make` and `make install` as usual.
 
 In some cases, you may be able to simplify the above commands to as little as:
 
