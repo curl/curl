@@ -1625,7 +1625,7 @@ if(WIN32)
 
     # Pre-fill detection results based on target OS version
     if(MINGW OR MSVC OR WINCE)
-      if(HAVE_WIN32_WINNT LESS 0x0600)
+      if(WINCE OR HAVE_WIN32_WINNT LESS 0x0600)
         set(HAVE_INET_NTOP 0)
         set(HAVE_INET_PTON 0)
       else()  # Windows Vista or newer
