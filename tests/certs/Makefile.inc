@@ -41,7 +41,6 @@ GENERATEDCERTS = \
   Server-localhost-sv.crt \
   Server-localhost-sv.csr \
   Server-localhost-sv.der \
-  Server-localhost-sv.dhp \
   Server-localhost-sv.key \
   Server-localhost-sv.pem \
   Server-localhost-sv.pub.der \
@@ -51,7 +50,6 @@ GENERATEDCERTS = \
   Server-localhost.nn-sv.crt \
   Server-localhost.nn-sv.csr \
   Server-localhost.nn-sv.der \
-  Server-localhost.nn-sv.dhp \
   Server-localhost.nn-sv.key \
   Server-localhost.nn-sv.pem \
   Server-localhost.nn-sv.pub.der \
@@ -61,7 +59,6 @@ GENERATEDCERTS = \
   Server-localhost0h-sv.crt \
   Server-localhost0h-sv.csr \
   Server-localhost0h-sv.der \
-  Server-localhost0h-sv.dhp \
   Server-localhost0h-sv.key \
   Server-localhost0h-sv.pem \
   Server-localhost0h-sv.pub.der \
@@ -71,7 +68,6 @@ GENERATEDCERTS = \
   Server-localhost-firstSAN-sv.crt \
   Server-localhost-firstSAN-sv.csr \
   Server-localhost-firstSAN-sv.der \
-  Server-localhost-firstSAN-sv.dhp \
   Server-localhost-firstSAN-sv.key \
   Server-localhost-firstSAN-sv.pem \
   Server-localhost-firstSAN-sv.pub.der \
@@ -81,7 +77,6 @@ GENERATEDCERTS = \
   Server-localhost-lastSAN-sv.crt \
   Server-localhost-lastSAN-sv.csr \
   Server-localhost-lastSAN-sv.der \
-  Server-localhost-lastSAN-sv.dhp \
   Server-localhost-lastSAN-sv.key \
   Server-localhost-lastSAN-sv.pem \
   Server-localhost-lastSAN-sv.pub.der \
@@ -91,7 +86,6 @@ GENERATEDCERTS = \
   stunnel-sv.crt \
   stunnel-sv.csr \
   stunnel-sv.der \
-  stunnel-sv.dhp \
   stunnel-sv.key \
   stunnel-sv.pem \
   stunnel-sv.der \
