@@ -64,6 +64,7 @@ jobs:
           packages: >-
             autoconf libtool gcc-core gcc-g++ binutils
             ${{ matrix.build }} make ninja
+            diffutils
             openssh
             libssl-devel
             libssh2-devel
@@ -79,11 +80,7 @@ jobs:
       - name: 'autoreconf'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 2
-        run: |
-          echo '---------------'
-          diff --version || true
-          echo '---------------'
-          autoreconf -fi
+        run: autoreconf -fi
 
       - name: 'configure'
         timeout-minutes: 5
