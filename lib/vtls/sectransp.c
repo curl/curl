@@ -1095,6 +1095,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   if(connssl->alpn) {
 #ifdef HAVE_BUILTIN_AVAILABLE
     if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
+#else
+    if(&SSLSetALPNProtocols && &SSLCopyALPNProtocols) {
 #endif
       struct alpn_proto_buf proto;
       size_t i;
@@ -1116,9 +1118,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       CFRelease(alpnArr);
       Curl_alpn_to_proto_str(&proto, connssl->alpn);
       infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
-#ifdef HAVE_BUILTIN_AVAILABLE
     }
-#endif
   }
 #endif
 
@@ -2095,6 +2095,8 @@ check_handshake:
     if(connssl->alpn) {
 #ifdef HAVE_BUILTIN_AVAILABLE
       if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
+#else
+      if(&SSLSetALPNProtocols && &SSLCopyALPNProtocols) {
 #endif
         CFArrayRef alpnArr = NULL;
         CFStringRef chosenProtocol = NULL;
@@ -2121,9 +2123,7 @@ check_handshake:
            and does not need to be freed separately */
         if(alpnArr)
           CFRelease(alpnArr);
-#ifdef HAVE_BUILTIN_AVAILABLE
       }
-#endif
     }
 #endif
 
