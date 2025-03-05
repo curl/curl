@@ -2994,7 +2994,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
 error:
   if(nextalloc)
-    free((char *)nextarg);
+    free(CURL_UNCONST(nextarg));
   return err;
 }
 
