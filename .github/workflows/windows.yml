@@ -839,7 +839,7 @@ jobs:
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-              -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
+              -DCMAKE_VS_GLOBALS="TrackFileAccess=false;IgnoreStandardErrorWarningFormat=true${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
