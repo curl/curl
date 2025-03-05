@@ -1284,8 +1284,6 @@ static ParameterError parse_header(struct GlobalConfig *global,
   /* A custom header to append to a list */
   if(nextarg[0] == '@') {
     /* read many headers from a file or stdin */
-    char *string;
-    size_t len;
     bool use_stdin = !strcmp(&nextarg[1], "-");
     FILE *file = use_stdin ? stdin : fopen(&nextarg[1], FOPEN_READTEXT);
     if(!file) {
@@ -1293,22 +1291,26 @@ static ParameterError parse_header(struct GlobalConfig *global,
       err = PARAM_READ_ERROR;
     }
     else {
-      err = file2memory(&string, &len, file);
-      if(!err && string) {
-        /* Allow strtok() here since this is not used threaded */
-        /* !checksrc! disable BANNEDFUNC 2 */
-        char *h = strtok(string, "\r\n");
-        while(h) {
-          if(cmd == C_PROXY_HEADER) /* --proxy-header */
-            err = add2list(&config->proxyheaders, h);
-          else
-            err = add2list(&config->headers, h);
+      struct dynbuf line;
+      bool error = FALSE;
+      curlx_dyn_init(&line, 1024*100);
+      while(my_get_line(file, &line, &error)) {
+        /* every line has a newline that we strip off */
+        size_t len = curlx_dyn_len(&line);
+        if(len) {
+          const char *ptr;
+          curlx_dyn_setlen(&line, len - 1);
+          ptr = curlx_dyn_ptr(&line);
+          err = add2list(cmd == C_PROXY_HEADER ? /* --proxy-header? */
+                         &config->proxyheaders :
+                         &config->headers, ptr);
           if(err)
             break;
-          h = strtok(NULL, "\r\n");
         }
-        free(string);
       }
+      if(error)
+        err = PARAM_READ_ERROR;
+      curlx_dyn_free(&line);
       if(!use_stdin)
         fclose(file);
     }
@@ -1415,7 +1417,7 @@ static ParameterError parse_quote(struct OperationConfig *config,
     /* prefixed with a plus makes it a just-before-transfer one */
     nextarg++;
     err = add2list(&config->prequote, nextarg);
-        break;
+    break;
   default:
     err = add2list(&config->quote, nextarg);
     break;
