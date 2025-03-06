@@ -87,11 +87,6 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
     curl_free(shmac);
     curl_free(sdata);
     line = Curl_dyn_ptr(&buf);
-    while(*line && ISBLANK(*line))
-      line++;
-    if(*line == '#')
-      /* skip commented lines */
-      continue;
 
     c = memchr(line, ':', strlen(line));
     if(!c) {

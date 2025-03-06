@@ -1113,29 +1113,9 @@ static ParameterError parse_url(struct GlobalConfig *global,
     if(f) {
       curlx_dyn_init(&line, 8092);
       while(my_get_line(f, &line, &error)) {
-        /* every line has a newline that we strip off */
-        size_t len = curlx_dyn_len(&line);
-        const char *ptr;
-        if(len)
-          curlx_dyn_setlen(&line, len - 1);
-        ptr = curlx_dyn_ptr(&line);
-        /* line with # in the first non-blank column is a comment! */
-        while(*ptr && ISSPACE(*ptr))
-          ptr++;
+        const char *ptr = curlx_dyn_ptr(&line);
 
-        switch(*ptr) {
-        case '#':
-        case '/':
-        case '\r':
-        case '\n':
-        case '*':
-        case '\0':
-          /* comment or weird line, skip it */
-          break;
-        default:
-          err = add_url(global, config, ptr, GETOUT_USEREMOTE | GETOUT_NOGLOB);
-          break;
-        }
+        err = add_url(global, config, ptr, GETOUT_USEREMOTE | GETOUT_NOGLOB);
         if(err)
           break;
         curlx_dyn_reset(&line);
@@ -1295,18 +1275,12 @@ static ParameterError parse_header(struct GlobalConfig *global,
       bool error = FALSE;
       curlx_dyn_init(&line, 1024*100);
       while(my_get_line(file, &line, &error)) {
-        /* every line has a newline that we strip off */
-        size_t len = curlx_dyn_len(&line);
-        if(len) {
-          const char *ptr;
-          curlx_dyn_setlen(&line, len - 1);
-          ptr = curlx_dyn_ptr(&line);
-          err = add2list(cmd == C_PROXY_HEADER ? /* --proxy-header? */
-                         &config->proxyheaders :
-                         &config->headers, ptr);
-          if(err)
-            break;
-        }
+        const char *ptr = curlx_dyn_ptr(&line);
+        err = add2list(cmd == C_PROXY_HEADER ? /* --proxy-header? */
+                       &config->proxyheaders :
+                       &config->headers, ptr);
+        if(err)
+          break;
       }
       if(error)
         err = PARAM_READ_ERROR;

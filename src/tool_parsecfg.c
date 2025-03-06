@@ -105,21 +105,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         break;
       }
 
-      /* line with # in the first non-blank column is a comment! */
-      while(*line && ISSPACE(*line))
-        line++;
-
-      switch(*line) {
-      case '#':
-      case '/':
-      case '\r':
-      case '\n':
-      case '*':
-      case '\0':
-        curlx_dyn_reset(&buf);
-        continue;
-      }
-
       /* the option keywords starts here */
       option = line;
 
@@ -295,11 +280,7 @@ static const char *unslashquote(const char *line, char *param)
   return line;
 }
 
-/*
- * Reads a line from the given file, ensuring is NUL terminated.
- */
-
-bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
+static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
 {
   CURLcode result;
   char buffer[128];
@@ -320,23 +301,43 @@ bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
         return FALSE; /* error */
       }
 
-      else if(b[rlen-1] == '\n')
-        /* end of the line */
-        return TRUE; /* all good */
-
-      else if(feof(input)) {
-        /* append a newline */
-        result = curlx_dyn_addn(buf, "\n", 1);
-        if(result) {
-          /* too long line or out of memory */
-          *error = TRUE;
-          return FALSE; /* error */
-        }
+      else if(b[rlen-1] == '\n') {
+        /* end of the line, drop the newline */
+        size_t len = curlx_dyn_len(buf);
+        curlx_dyn_setlen(buf, len - 1);
         return TRUE; /* all good */
       }
+
+      else if(feof(input))
+        return TRUE; /* all good */
     }
     else
       break;
   }
   return FALSE;
+}
+
+/*
+ * Returns a line from the given file. Every line is NULL terminated (no
+ * newline). Skips #-commented and space/tabs-only lines automatically.
+ */
+bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
+{
+  bool retcode;
+  do {
+    retcode = get_line(input, buf, error);
+    if(!*error && retcode) {
+      const char *line = curlx_dyn_ptr(buf);
+      if(line) {
+        while(ISBLANK(*line))
+          line++;
+
+        /* a line with # in the first non-blank column is a comment! */
+        if((*line == '#') || (*line == '\n'))
+          continue;
+      }
+    }
+    break;
+  } while(retcode);
+  return retcode;
 }
