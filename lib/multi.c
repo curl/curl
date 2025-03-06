@@ -2616,6 +2616,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
       /* connection pool handle is processed below */
       sigpipe_apply(data, &pipe_st);
       result = multi_runsingle(multi, &now, data);
+      sigpipe_restore(&pipe_st);
       if(result)
         returncode = result;
     }
@@ -2899,6 +2900,7 @@ static CURLMcode multi_run_expired(struct multi_run_ctx *mrc)
     mrc->run_xfers++;
     sigpipe_apply(data, &mrc->pipe_st);
     result = multi_runsingle(multi, &mrc->now, data);
+    sigpipe_restore(&mrc->pipe_st);
 
     if(CURLM_OK >= result) {
       /* reassess event handling of data */
@@ -2969,8 +2971,8 @@ out:
   if(mrc.run_cpool) {
     sigpipe_apply(multi->admin, &mrc.pipe_st);
     Curl_cshutdn_perform(&multi->cshutdn, multi->admin, s);
+    sigpipe_restore(&mrc.pipe_st);
   }
-  sigpipe_restore(&mrc.pipe_st);
 
   if(multi_ischanged(multi, TRUE))
     process_pending_handles(multi);
