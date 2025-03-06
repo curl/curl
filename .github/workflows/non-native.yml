@@ -269,17 +269,6 @@ jobs:
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'libressl !prefill'
-            install_steps: libressl
-            # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
-            generate: >-
-              -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
-              -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
-              -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
-              -DCURL_USE_LIBPSL=OFF
-              -D_CURL_PREFILL=OFF
-
           - name: 'libressl'
             install_steps: libressl
             generator: Xcode
