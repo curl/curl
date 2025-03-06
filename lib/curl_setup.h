@@ -987,8 +987,8 @@ endings either CRLF or LF so 't' is appropriate.
 #ifdef CURL_TYPEOF_UINTPTR_T
 #  define CURL_UNCONST(p) ((void *)(CURL_TYPEOF_UINTPTR_T)(const void *)(p))
 #else
-/* If we have no pointer-sized integer type, just cast to void and disable
-   the warnings this triggers. */
+/* If we have no pointer-sized integer type, just cast to void pointer and
+   disable the warnings this would trigger. */
 #  define CURL_UNCONST(p) ((void *)(p))
 #  if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #    pragma GCC diagnostic ignored "-Wcast-qual"
