@@ -975,12 +975,10 @@ endings either CRLF or LF so 't' is appropriate.
 #ifndef CURL_TYPEOF_UINTPTR_T
 #  ifdef HAVE_STDINT_H
 #    define CURL_TYPEOF_UINTPTR_T uintptr_t
-#  elif defined(_WIN64)
-#    define CURL_TYPEOF_UINTPTR_T curl_off_t
 #  elif defined(_WIN32)
-#    define CURL_TYPEOF_UINTPTR_T unsigned long
+#    define CURL_TYPEOF_UINTPTR_T ULONG_PTR
 #  endif
-#endif /* !CURL_TYPEOF_UINTPTR_T */
+#endif
 
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
