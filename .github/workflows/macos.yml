@@ -235,6 +235,7 @@ jobs:
               options=''
               [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+              [[ '${{ matrix.compiler }}' = 'gcc'* ]] && options+=' -DENABLE_DEBUG=ON'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
@@ -255,6 +256,7 @@ jobs:
               CFLAGS+=" --sysroot=${sysroot}"
             fi
             [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
+            [[ '${{ matrix.compiler }}' = 'gcc'* ]] && options+=' --enable-debug'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
@@ -315,10 +317,6 @@ jobs:
           if [ -z '${{ matrix.build.torture }}' ]; then
             TFLAGS+=' ~2037 ~2041'  # flaky
             if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-              if [[ -n '${{ matrix.build.configure }}' || \
-                    '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-                TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
-              fi
               if [[ '${{ matrix.build.configure }}' = *'--with-secure-transport'* || \
                     '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
                 TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
