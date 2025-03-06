@@ -1612,9 +1612,9 @@ fail:
     case SSL_FILETYPE_PROVIDER:
     {
       /* Implicitly use pkcs11 provider if none was provided and the
-       * cert_file is a PKCS#11 URI */
+       * key_file is a PKCS#11 URI */
       if(!data->state.provider) {
-        if(is_pkcs11_uri(cert_file)) {
+        if(is_pkcs11_uri(key_file)) {
           if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
             return 0;
           }
