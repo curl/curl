@@ -173,10 +173,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19'    , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy', name: '!proxy' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy', name: '!proxy' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver', name: 'default' }
-          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: '!19'    , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19'    , config: '--with-openssl', name: 'default R' }
+          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '--with-openssl', name: 'default R' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', name: 'default' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: ''       , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares', name: 'c-ares U' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
@@ -348,6 +348,8 @@ jobs:
           TFLAGS+=' ~613'  # SFTP
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~612'  # SFTP
+          else
+            TFLAGS+=' !19'  # 'attempt connect to non-listening socket'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
