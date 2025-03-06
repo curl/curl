@@ -28,13 +28,6 @@
 #define CURL_NO_OLDIES
 #endif
 
-/* Allow a way to disable these picky warnings. We appreciate reports of
-   issues that may need disabling them. */
-#if defined(CURL_NO_WARN_CAST_QUAL) && \
-  (defined(__GNUC__) || defined(__clang__))
-#pragma GCC diagnostic ignored "-Wcast-qual"
-#endif
-
 /* Tell "curl/curl.h" not to include "curl/mprintf.h" */
 #define CURL_SKIP_INCLUDE_MPRINTF
 
@@ -981,17 +974,24 @@ endings either CRLF or LF so 't' is appropriate.
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
 #ifndef CURL_NO_UNCONST
-#ifdef HAVE_STDINT_H
-#  define CURL_UNCONST_TYPE uintptr_t
-#elif defined(_WIN64)
-#  define CURL_UNCONST_TYPE curl_off_t
-#elif !defined(CURL_UNCONST_TYPE)
-#  define CURL_UNCONST_TYPE unsigned long
-#endif
-#define CURL_UNCONST(p) ((void *)(CURL_UNCONST_TYPE)(const void *)(p))
-#else
-#define CURL_UNCONST(p) ((void *)(p))
+#  ifdef HAVE_STDINT_H
+#    define CURL_UNCONST_TYPE uintptr_t
+#  elif defined(_WIN64)
+#    define CURL_UNCONST_TYPE curl_off_t
+#  elif defined(_WIN32)
+#    define CURL_UNCONST_TYPE unsigned long
+#  endif
 #endif /* !CURL_NO_UNCONST */
+#ifdef CURL_UNCONST_TYPE
+#  define CURL_UNCONST(p) ((void *)(CURL_UNCONST_TYPE)(const void *)(p))
+#else
+/* If we have no pointer-sized integer type, just cast to void and disable
+   the warnings this triggers. */
+#  define CURL_UNCONST(p) ((void *)(p))
+#  if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#    pragma GCC diagnostic ignored "-Wcast-qual"
+#  endif
+#endif /* CURL_UNCONST_TYPE */
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
