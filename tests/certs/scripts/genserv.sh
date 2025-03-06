@@ -36,8 +36,11 @@ command -v "$OPENSSL"
 
 USAGE='echo Usage is genserv.sh <prefix> <caprefix>'
 
-HOME=$(pwd)
-cd "$HOME"
+SRCDIR=$(pwd)
+
+GENDIR=${GENDIR:-$SRCDIR/gen}
+test -d "$GENDIR" || mkdir "$GENDIR"
+cd "$GENDIR"
 
 KEYSIZE=2048
 DURATION=300
@@ -46,7 +49,6 @@ DIGESTALGO=-sha256
 
 REQ=YES
 P12=NO
-DHP=NO
 
 NOTOK=
 
@@ -55,8 +57,8 @@ if [ -z "$PREFIX" ]; then
   echo 'No configuration prefix'
   NOTOK=1
 else
-  if [ ! -f "$PREFIX-sv.prm" ]; then
-    echo "No configuration file $PREFIX-sv.prm"
+  if [ ! -f "$SRCDIR/$PREFIX-sv.prm" ]; then
+    echo "No configuration file $SRCDIR/$PREFIX-sv.prm"
     NOTOK=1
   fi
 fi
@@ -86,11 +88,8 @@ echo "PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
 set -x
 
-if [ "$DHP" = YES ]; then
-  "$OPENSSL" dhparam -2 -out "$PREFIX-sv.dhp" "$KEYSIZE"
-fi
 if [ "$REQ" = YES ]; then
-  "$OPENSSL" req -config "$PREFIX-sv.prm" -newkey "rsa:$KEYSIZE" -keyout "$PREFIX-sv.key" -out "$PREFIX-sv.csr" -passout fd:0 <<EOF
+  "$OPENSSL" req -config "$SRCDIR/$PREFIX-sv.prm" -newkey "rsa:$KEYSIZE" -keyout "$PREFIX-sv.key" -out "$PREFIX-sv.csr" -passout fd:0 <<EOF
 pass:secret
 EOF
 fi
@@ -103,7 +102,7 @@ echo 'pseudo secrets generated'
 
 "$OPENSSL" rsa -in "$PREFIX-sv.key" -pubout -outform DER -out "$PREFIX-sv.pub.der"
 "$OPENSSL" rsa -in "$PREFIX-sv.key" -pubout -outform PEM -out "$PREFIX-sv.pub.pem"
-"$OPENSSL" x509 -extfile "$PREFIX-sv.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX-sv.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX-sv.crt"
+"$OPENSSL" x509 -extfile "$SRCDIR/$PREFIX-sv.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX-sv.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX-sv.crt"
 
 if [ "$P12" = YES ]; then
   "$OPENSSL" pkcs12 -export -des3 -out "$PREFIX-sv.p12" -caname "$CAPREFIX" -name "$PREFIX" -inkey "$PREFIX-sv.key" -in "$PREFIX-sv.crt" -certfile "$CAPREFIX-ca.crt"
@@ -114,20 +113,19 @@ fi
 # revoke server cert
 touch "$CAPREFIX-ca.db"
 echo 01 > "$CAPREFIX-ca.cnt"
-"$OPENSSL" ca -config "$CAPREFIX-ca.cnf" -revoke "$PREFIX-sv.crt"
+"$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -revoke "$PREFIX-sv.crt"
 
 # issue CRL
-"$OPENSSL" ca -config "$CAPREFIX-ca.cnf" -gencrl -out "$PREFIX-sv.crl"
+"$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -gencrl -out "$PREFIX-sv.crl"
 
 "$OPENSSL" x509 -in "$PREFIX-sv.crt" -outform der -out "$PREFIX-sv.der"
 
 # all together now
-touch "$PREFIX-sv.dhp"
-cat "$PREFIX-sv.prm" "$PREFIX-sv.key" "$PREFIX-sv.crt" "$PREFIX-sv.dhp" > "$PREFIX-sv.pem"
-chmod o-r "$PREFIX-sv.prm"
+cat "$SRCDIR/$PREFIX-sv.prm" "$PREFIX-sv.key" "$PREFIX-sv.crt" > "$PREFIX-sv.pem"
+chmod o-r "$SRCDIR/$PREFIX-sv.prm"
 
-"$OPENSSL" x509 -in "$PREFIX-sv.pem" -pubkey -noout | \
-"$OPENSSL" pkey -pubin -outform der | "$OPENSSL" dgst -sha256 -binary | \
-"$OPENSSL" enc -base64 > "$PREFIX-sv.pubkey-pinned"
-
-echo "$PREFIX-sv.pem done"
+#for ext in crl crt csr der key pem pub.der pub.pem; do
+for ext in crl crt key pem pub.der pub.pem; do
+  cp "$PREFIX-sv.$ext" $SRCDIR/
+done
+echo "$PREFIX-sv.pem generated."

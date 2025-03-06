@@ -32,7 +32,7 @@ EXTRA_DIST = $(CERTCONFIGS) $(GENERATEDCERTS) $(SRPFILES) CMakeLists.txt
 # Rebuild the certificates
 
 clean-certs:
-	cd $(srcdir); rm -f $(GENERATEDCERTS)
+	cd $(srcdir); rm -f $(GENERATEDCERTS); rm -rf gen
 
 build-certs: $(srcdir)/EdelCurlRoot-ca.cacert $(srcdir)/Server-localhost-sv.pem \
 	$(srcdir)/Server-localhost.nn-sv.pem $(srcdir)/Server-localhost0h-sv.pem \
