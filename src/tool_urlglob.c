@@ -278,7 +278,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
         endp = NULL;
       else {
         pattern = endp + 1;
-        while(*pattern && ISBLANK(*pattern))
+        while(ISBLANK(*pattern))
           pattern++;
         if(!ISDIGIT(*pattern)) {
           endp = NULL;

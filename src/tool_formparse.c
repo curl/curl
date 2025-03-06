@@ -509,23 +509,23 @@ static int get_param_part(struct OperationConfig *config, char endchar,
     *pheaders = NULL;
   if(pencoder)
     *pencoder = NULL;
-  while(ISSPACE(*p))
+  while(ISBLANK(*p))
     p++;
   tp = p;
   *pdata = get_param_word(config, &p, &endpos, endchar);
   /* If not quoted, strip trailing spaces. */
   if(*pdata == tp)
-    while(endpos > *pdata && ISSPACE(endpos[-1]))
+    while(endpos > *pdata && ISBLANK(endpos[-1]))
       endpos--;
   sep = *p;
   *endpos = '\0';
   while(sep == ';') {
-    while(p++ && ISSPACE(*p))
+    while(p++ && ISBLANK(*p))
       ;
 
     if(!endct && checkprefix("type=", p)) {
       size_t tlen;
-      for(p += 5; ISSPACE(*p); p++)
+      for(p += 5; ISBLANK(*p); p++)
         ;
       /* set type pointer */
       type = p;
@@ -541,13 +541,13 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         *endct = '\0';
         endct = NULL;
       }
-      for(p += 9; ISSPACE(*p); p++)
+      for(p += 9; ISBLANK(*p); p++)
         ;
       tp = p;
       filename = get_param_word(config, &p, &endpos, endchar);
       /* If not quoted, strip trailing spaces. */
       if(filename == tp)
-        while(endpos > filename && ISSPACE(endpos[-1]))
+        while(endpos > filename && ISBLANK(endpos[-1]))
           endpos--;
       sep = *p;
       *endpos = '\0';
@@ -562,15 +562,14 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         char *hdrfile;
         FILE *fp;
         /* Read headers from a file. */
-
         do {
           p++;
-        } while(ISSPACE(*p));
+        } while(ISBLANK(*p));
         tp = p;
         hdrfile = get_param_word(config, &p, &endpos, endchar);
         /* If not quoted, strip trailing spaces. */
         if(hdrfile == tp)
-          while(endpos > hdrfile && ISSPACE(endpos[-1]))
+          while(endpos > hdrfile && ISBLANK(endpos[-1]))
             endpos--;
         sep = *p;
         *endpos = '\0';
@@ -591,13 +590,13 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       else {
         char *hdr;
 
-        while(ISSPACE(*p))
+        while(ISBLANK(*p))
           p++;
         tp = p;
         hdr = get_param_word(config, &p, &endpos, endchar);
         /* If not quoted, strip trailing spaces. */
         if(hdr == tp)
-          while(endpos > hdr && ISSPACE(endpos[-1]))
+          while(endpos > hdr && ISBLANK(endpos[-1]))
             endpos--;
         sep = *p;
         *endpos = '\0';
@@ -613,7 +612,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         *endct = '\0';
         endct = NULL;
       }
-      for(p += 8; ISSPACE(*p); p++)
+      for(p += 8; ISBLANK(*p); p++)
         ;
       tp = p;
       encoder = get_param_word(config, &p, &endpos, endchar);
@@ -627,7 +626,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
     else if(endct) {
       /* This is part of content type. */
       for(endct = p; *p && *p != ';' && *p != endchar; p++)
-        if(!ISSPACE(*p))
+        if(!ISBLANK(*p))
           endct = p + 1;
       sep = *p;
     }
