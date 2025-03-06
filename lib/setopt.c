@@ -2145,12 +2145,16 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     result = setstropt_userpwd(ptr, &u, &p);
 
     /* URL decode the components */
-    if(!result && u)
+    if(!result && u) {
+      Curl_safefree(data->set.str[STRING_PROXYUSERNAME]);
       result = Curl_urldecode(u, 0, &data->set.str[STRING_PROXYUSERNAME], NULL,
                               REJECT_ZERO);
-    if(!result && p)
+    }
+    if(!result && p) {
+      Curl_safefree(data->set.str[STRING_PROXYPASSWORD]);
       result = Curl_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
+    }
     free(u);
     free(p);
   }
