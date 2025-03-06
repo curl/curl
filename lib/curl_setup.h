@@ -973,17 +973,17 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
-#ifndef CURL_NO_UNCONST
+#ifndef CURL_TYPEOF_UINTPTR_T
 #  ifdef HAVE_STDINT_H
-#    define CURL_UNCONST_TYPE uintptr_t
+#    define CURL_TYPEOF_UINTPTR_T uintptr_t
 #  elif defined(_WIN64)
-#    define CURL_UNCONST_TYPE curl_off_t
+#    define CURL_TYPEOF_UINTPTR_T curl_off_t
 #  elif defined(_WIN32)
-#    define CURL_UNCONST_TYPE unsigned long
+#    define CURL_TYPEOF_UINTPTR_T unsigned long
 #  endif
-#endif /* !CURL_NO_UNCONST */
-#ifdef CURL_UNCONST_TYPE
-#  define CURL_UNCONST(p) ((void *)(CURL_UNCONST_TYPE)(const void *)(p))
+#endif /* !CURL_TYPEOF_UINTPTR_T */
+#ifdef CURL_TYPEOF_UINTPTR_T
+#  define CURL_UNCONST(p) ((void *)(CURL_TYPEOF_UINTPTR_T)(const void *)(p))
 #else
 /* If we have no pointer-sized integer type, just cast to void and disable
    the warnings this triggers. */
@@ -991,7 +991,7 @@ endings either CRLF or LF so 't' is appropriate.
 #  if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #    pragma GCC diagnostic ignored "-Wcast-qual"
 #  endif
-#endif /* CURL_UNCONST_TYPE */
+#endif /* CURL_TYPEOF_UINTPTR_T */
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
