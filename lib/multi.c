@@ -2623,7 +2623,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
     if(num_alive != multi->num_alive)
       /* Since more than one handle can be removed in a single call to
          multi_runsingle(), we cannot easily continue on the next node when a
-         node has been removed since that node migth ALSO have been
+         node has been removed since that node might ALSO have been
          removed. */
       n = Curl_llist_head(&multi->process);
   }
