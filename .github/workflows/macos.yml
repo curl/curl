@@ -140,7 +140,7 @@ jobs:
           - name: 'quictls +static libssh +examples'
             install: quictls libssh
             install_steps: pytest
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DTEST_NGHTTPX= -DHTTPD_NGHTTPX=
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
           - name: 'SecureTransport debug'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
@@ -236,6 +236,7 @@ jobs:
             for _chkprefill in '' ${{ matrix.build.chkprefill }}; do
               options=''
               [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
+              [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
