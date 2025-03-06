@@ -26,17 +26,23 @@
 #include "server_setup.h"
 
 #ifdef USE_WINSOCK
-/* errno.h values */
-#undef  EINTR
-#define EINTR    4
-#undef  EAGAIN
-#define EAGAIN  11
-#undef  ENOMEM
-#define ENOMEM  12
-#undef  EINVAL
-#define EINVAL  22
-#undef  ERANGE
-#define ERANGE  34
+#define SOCKEINTR       WSAEINTR
+#define SOCKEAGAIN      EAGAIN
+#define SOCKENOMEM      WSAENOMEM
+#define SOCKEINVAL      WSAEINVAL
+#define SOCKERANGE      WSAERANGE
+#define SOCKEWOULDBLOCK WSAEWOULDBLOCK
+#define SOCKEADDRINUSE  WSAEADDRINUSE
+#define SOCKEINPROGRESS WSAEINPROGRESS
+#else
+#define SOCKEINTR       EINTR
+#define SOCKEAGAIN      EAGAIN
+#define SOCKENOMEM      ENOMEM
+#define SOCKEINVAL      EINVAL
+#define SOCKERANGE      ERANGE
+#define SOCKEWOULDBLOCK EWOULDBLOCK
+#define SOCKEADDRINUSE  EADDRINUSE
+#define SOCKEINPROGRESS EINPROGRESS
 #endif
 
 enum {

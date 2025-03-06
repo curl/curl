@@ -1075,7 +1075,7 @@ static bool juggle(curl_socket_t *sockfdp,
       return FALSE;
     }
 
-  } while((rc == -1) && ((error = SOCKERRNO) == EINTR));
+  } while((rc == -1) && ((error = SOCKERRNO) == SOCKEINTR));
 
   if(rc < 0) {
     logmsg("select() failed with error (%d) %s",
