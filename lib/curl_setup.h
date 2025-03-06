@@ -972,19 +972,13 @@ endings either CRLF or LF so 't' is appropriate.
 #    define CURL_TYPEOF_UINTPTR_T ULONG_PTR
 #  endif
 #endif
-
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
 #ifdef CURL_TYPEOF_UINTPTR_T
 #  define CURL_UNCONST(p) ((void *)(CURL_TYPEOF_UINTPTR_T)(const void *)(p))
 #else
-/* If we have no pointer-sized integer type, just cast to void pointer and
-   disable the warnings this would trigger. */
-#  define CURL_UNCONST(p) ((void *)(p))
-#  if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#    pragma GCC diagnostic ignored "-Wcast-qual"
-#  endif
-#endif /* CURL_TYPEOF_UINTPTR_T */
+#  define CURL_UNCONST(p) ((void *)(p))  /* Otherwise use simple cast */
+#endif
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
