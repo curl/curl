@@ -2140,12 +2140,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * user:password needed to use the proxy
      */
+    char *u = NULL;
+    char *p = NULL;
     if(data->set.str[STRING_PROXYUSERNAME] ||
        data->set.str[STRING_PROXYPASSWORD]) {
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    char *u = NULL;
-    char *p = NULL;
     result = setstropt_userpwd(ptr, &u, &p);
 
     /* URL decode the components */
