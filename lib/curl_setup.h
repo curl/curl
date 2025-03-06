@@ -964,20 +964,14 @@ endings either CRLF or LF so 't' is appropriate.
    as their argument */
 #define STRCONST(x) x,sizeof(x)-1
 
-/* Determine pointer-sized integer type */
-#ifndef CURL_TYPEOF_UINTPTR_T
-#  ifdef HAVE_STDINT_H
-#    define CURL_TYPEOF_UINTPTR_T uintptr_t
-#  elif defined(_WIN32)
-#    define CURL_TYPEOF_UINTPTR_T ULONG_PTR
-#  endif
-#endif
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
-#ifdef CURL_TYPEOF_UINTPTR_T
-#  define CURL_UNCONST(p) ((void *)(CURL_TYPEOF_UINTPTR_T)(const void *)(p))
+#ifdef HAVE_STDINT_H
+#  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
+#elif defined(_WIN32)
+#  define CURL_UNCONST(p) ((void *)(ULONG_PTR)(const void *)(p))
 #else
-#  define CURL_UNCONST(p) ((void *)(p))  /* Otherwise use simple cast */
+#  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
 #endif
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
