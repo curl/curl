@@ -33,45 +33,33 @@ CERTCONFIGS = \
 GENERATEDCERTS = \
   test-ca.cacert \
   test-ca.crt \
-  test-ca.csr \
-  test-ca.der \
   test-ca.key \
   test-localhost.crl \
   test-localhost.crt \
-  test-localhost.csr \
-  test-localhost.der \
   test-localhost.key \
   test-localhost.pem \
   test-localhost.pub.der \
   test-localhost.pub.pem \
   test-localhost.nn.crl \
   test-localhost.nn.crt \
-  test-localhost.nn.csr \
-  test-localhost.nn.der \
   test-localhost.nn.key \
   test-localhost.nn.pem \
   test-localhost.nn.pub.der \
   test-localhost.nn.pub.pem \
   test-localhost0h.crl \
   test-localhost0h.crt \
-  test-localhost0h.csr \
-  test-localhost0h.der \
   test-localhost0h.key \
   test-localhost0h.pem \
   test-localhost0h.pub.der \
   test-localhost0h.pub.pem \
   test-localhost-san-first.crl \
   test-localhost-san-first.crt \
-  test-localhost-san-first.csr \
-  test-localhost-san-first.der \
   test-localhost-san-first.key \
   test-localhost-san-first.pem \
   test-localhost-san-first.pub.der \
   test-localhost-san-first.pub.pem \
   test-localhost-san-last.crl \
   test-localhost-san-last.crt \
-  test-localhost-san-last.csr \
-  test-localhost-san-last.der \
   test-localhost-san-last.key \
   test-localhost-san-last.pem \
   test-localhost-san-last.pub.der \
