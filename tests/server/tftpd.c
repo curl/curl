@@ -1025,7 +1025,7 @@ static int parse_servercmd(struct testcase *req)
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
     fclose(stream);
     if(error) {
-      logmsg("getpart() failed with error: %d", error);
+      logmsg("getpart() failed with error (%d)", error);
       return 1; /* done */
     }
 
@@ -1135,7 +1135,7 @@ static int validate_access(struct testcase *test,
       int error = getpart(&test->buffer, &count, "reply", partbuf, stream);
       fclose(stream);
       if(error) {
-        logmsg("getpart() failed with error: %d", error);
+        logmsg("getpart() failed with error (%d)", error);
         return EACCESS;
       }
       if(test->buffer) {

@@ -288,7 +288,7 @@ static int ProcessRequest(struct httprequest *req)
         int error = getpart(&cmd, &cmdsize, "reply", "servercmd", stream);
         fclose(stream);
         if(error) {
-          logmsg("getpart() failed with error: %d", error);
+          logmsg("getpart() failed with error (%d)", error);
           req->open = FALSE; /* closes connection */
           return 1; /* done */
         }
@@ -844,7 +844,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       error = getpart(&ptr, &count, "reply", partbuf, stream);
       fclose(stream);
       if(error) {
-        logmsg("getpart() failed with error: %d", error);
+        logmsg("getpart() failed with error (%d)", error);
         return 0;
       }
       buffer = ptr;
@@ -869,7 +869,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       error = getpart(&cmd, &cmdsize, "reply", "postcmd", stream);
       fclose(stream);
       if(error) {
-        logmsg("getpart() failed with error: %d", error);
+        logmsg("getpart() failed with error (%d)", error);
         free(ptr);
         return 0;
       }

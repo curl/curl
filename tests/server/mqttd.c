@@ -802,7 +802,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
         rc = wait_ms(delay);
         if(rc) {
           /* should not happen */
-          logmsg("wait_ms() failed with error: %d", rc);
+          logmsg("wait_ms() failed with error (%d)", rc);
           sclose(sock);
           return CURL_SOCKET_BAD;
         }

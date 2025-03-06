@@ -525,7 +525,7 @@ HANDLE exit_event = NULL;
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
-  logmsg("exit_signal_handler: %d", signum);
+  logmsg("exit_signal_handler (%d)", signum);
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
