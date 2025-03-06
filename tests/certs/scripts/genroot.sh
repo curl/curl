@@ -82,6 +82,6 @@ EOF
 "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -text -nameopt multiline > "$PREFIX-ca.crt"
 
 for ext in key cacert crt; do
-  cp "$PREFIX-ca.$ext" $SRCDIR/
+  cp "$PREFIX-ca.$ext" "$SRCDIR"/
 done
 echo "ca root $PREFIX generated."

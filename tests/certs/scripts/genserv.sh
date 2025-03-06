@@ -126,6 +126,6 @@ chmod o-r "$SRCDIR/$PREFIX.prm"
 
 #for ext in crl crt csr der key pem pub.der pub.pem; do
 for ext in crl crt key pem pub.der pub.pem; do
-  cp "$PREFIX.$ext" $SRCDIR/
+  cp "$PREFIX.$ext" "$SRCDIR"/
 done
 echo "certificates for $PREFIX generated."
