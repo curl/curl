@@ -32,33 +32,33 @@ EXTRA_DIST = $(CERTCONFIGS) $(GENERATEDCERTS) $(SRPFILES) CMakeLists.txt
 # Rebuild the certificates
 
 clean-certs:
-	cd $(srcdir); rm -f $(GENERATEDCERTS); rm -rf gen
+	cd $(srcdir); rm -f $(GENERATEDCERTS)
 
-build-certs: $(srcdir)/EdelCurlRoot-ca.cacert $(srcdir)/Server-localhost-sv.pem \
+build-certs: $(srcdir)/test-ca.cacert $(srcdir)/Server-localhost-sv.pem \
 	$(srcdir)/Server-localhost.nn-sv.pem $(srcdir)/Server-localhost0h-sv.pem \
 	$(srcdir)/Server-localhost-firstSAN-sv.pem $(srcdir)/Server-localhost-lastSAN-sv.pem \
 	$(srcdir)/stunnel-sv.pem $(srcdir)/../stunnel.pem
 
-$(srcdir)/EdelCurlRoot-ca.cacert:
-	cd $(srcdir); scripts/genroot.sh EdelCurlRoot
+$(srcdir)/test-ca.cacert:
+	cd $(srcdir); scripts/genroot.sh test
 
-$(srcdir)/Server-localhost-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost EdelCurlRoot
+$(srcdir)/Server-localhost-sv.pem: $(srcdir)/test-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost test
 
-$(srcdir)/Server-localhost.nn-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost.nn EdelCurlRoot
+$(srcdir)/Server-localhost.nn-sv.pem: $(srcdir)/test-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost.nn test
 
-$(srcdir)/Server-localhost0h-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost0h EdelCurlRoot
+$(srcdir)/Server-localhost0h-sv.pem: $(srcdir)/test-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost0h test
 
-$(srcdir)/Server-localhost-firstSAN-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost-firstSAN EdelCurlRoot
+$(srcdir)/Server-localhost-firstSAN-sv.pem: $(srcdir)/test-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost-firstSAN test
 
-$(srcdir)/Server-localhost-lastSAN-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh Server-localhost-lastSAN EdelCurlRoot
+$(srcdir)/Server-localhost-lastSAN-sv.pem: $(srcdir)/test-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost-lastSAN test
 
-$(srcdir)/stunnel-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
-	cd $(srcdir); scripts/genserv.sh stunnel EdelCurlRoot
+$(srcdir)/stunnel-sv.pem: $(srcdir)/test-ca.cacert
+	cd $(srcdir); scripts/genserv.sh stunnel test
 
  $(srcdir)/../stunnel.pem: $(srcdir)/stunnel-sv.pem
 	cp $< $@

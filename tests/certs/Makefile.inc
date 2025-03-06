@@ -22,8 +22,8 @@
 #
 ###########################################################################
 CERTCONFIGS = \
-  EdelCurlRoot-ca.prm \
-  EdelCurlRoot-ca.cnf \
+  test-ca.prm \
+  test-ca.cnf \
   Server-localhost-sv.prm \
   Server-localhost.nn-sv.prm \
   Server-localhost0h-sv.prm \
@@ -32,11 +32,11 @@ CERTCONFIGS = \
   stunnel-sv.prm
 
 GENERATEDCERTS = \
-  EdelCurlRoot-ca.cacert \
-  EdelCurlRoot-ca.crt \
-  EdelCurlRoot-ca.csr \
-  EdelCurlRoot-ca.der \
-  EdelCurlRoot-ca.key \
+  test-ca.cacert \
+  test-ca.crt \
+  test-ca.csr \
+  test-ca.der \
+  test-ca.key \
   Server-localhost-sv.crl \
   Server-localhost-sv.crt \
   Server-localhost-sv.csr \
