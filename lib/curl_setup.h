@@ -974,15 +974,13 @@ endings either CRLF or LF so 't' is appropriate.
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
 #ifndef CURL_NO_UNCONST
-#ifndef CURL_UNCONST_TYPE
-#  ifdef HAVE_STDINT_H
-#    define CURL_UNCONST_TYPE uintptr_t
-#  elif defined(_WIN64)
-#    define CURL_UNCONST_TYPE curl_off_t
-#  else
-#    define CURL_UNCONST_TYPE unsigned long
-#  endif
-#endif /* !CURL_UNCONST_TYPE */
+#ifdef HAVE_STDINT_H
+#  define CURL_UNCONST_TYPE uintptr_t
+#elif defined(_WIN64)
+#  define CURL_UNCONST_TYPE curl_off_t
+#elif !defined(CURL_UNCONST_TYPE)
+#  define CURL_UNCONST_TYPE unsigned long
+#endif
 #define CURL_UNCONST(p) ((void *)(CURL_UNCONST_TYPE)(const void *)(p))
 #else
 #define CURL_UNCONST(p) ((void *)(p))
