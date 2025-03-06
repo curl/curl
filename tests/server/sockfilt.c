@@ -408,7 +408,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 
   *buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
   if(*buffer_len > maxlen) {
-    logmsg("ERROR: Buffer size (%zd bytes) too small for data size "
+    logmsg("Buffer size (%zd bytes) too small for data size error "
            "(%zd bytes)", maxlen, *buffer_len);
     return FALSE;
   }
@@ -558,7 +558,7 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
           /* if the pipe has NOT been closed, sleep and continue waiting */
           ret = GetLastError();
           if(ret != ERROR_BROKEN_PIPE) {
-            logmsg("[select_ws_wait_thread] PeekNamedPipe error: %lu", ret);
+            logmsg("[select_ws_wait_thread] PeekNamedPipe error (%lu)", ret);
             SleepEx(0, FALSE);
             continue;
           }
@@ -925,7 +925,7 @@ static bool disc_handshake(void)
         return FALSE;
       }
       else {
-        logmsg("Error: unexpected message; aborting");
+        logmsg("Unexpected message error; aborting");
         /*
          * The only other messages that could occur here are PING and PORT,
          * and both of them occur at the start of a test when nothing should be

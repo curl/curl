@@ -1140,7 +1140,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   if(!dump) {
     error = errno;
     logmsg("fopen() failed with error (%d) %s", error, strerror(error));
-    logmsg("  [5] Error opening file: %s", responsedump);
+    logmsg("  [5] Error opening file '%s'", responsedump);
     free(ptr);
     free(cmd);
     return -1;
@@ -1884,7 +1884,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
       /* nothing to accept */
       return 0;
     }
-    logmsg("MAJOR ERROR: accept() failed with error (%d) %s",
+    logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
            error, sstrerror(error));
     return CURL_SOCKET_BAD;
   }

@@ -278,7 +278,7 @@ static curl_socket_t socksconnect(unsigned short connectport,
 
   if(rc) {
     int error = SOCKERRNO;
-    logmsg("Error connecting to %s:%hu (%d) %s",
+    logmsg("Failed connecting to %s:%hu (%d) %s",
            connectaddr, connectport, error, sstrerror(error));
     return CURL_SOCKET_BAD;
   }

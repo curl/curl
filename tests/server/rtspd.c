@@ -900,8 +900,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   if(!dump) {
     error = errno;
     logmsg("fopen() failed with error (%d) %s", error, strerror(error));
-    logmsg("Error opening file: %s", responsedump);
-    logmsg("couldn't create logfile: %s", responsedump);
+    logmsg("Error opening file '%s'", responsedump);
+    logmsg("couldn't create logfile '%s'", responsedump);
     free(ptr);
     free(cmd);
     return -1;
@@ -1256,7 +1256,7 @@ int main(int argc, char *argv[])
       break;
     if(CURL_SOCKET_BAD == msgsock) {
       error = SOCKERRNO;
-      logmsg("MAJOR ERROR: accept() failed with error (%d) %s",
+      logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
              error, sstrerror(error));
       break;
     }

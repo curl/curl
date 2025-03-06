@@ -905,7 +905,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   if(!server) {
     int error = errno;
     logmsg("fopen() failed with error (%d) %s", error, strerror(error));
-    logmsg("Error opening file: %s", dumpfile);
+    logmsg("Error opening file '%s'", dumpfile);
     return -1;
   }
 

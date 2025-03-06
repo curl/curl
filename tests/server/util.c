@@ -100,7 +100,7 @@ void logmsg(const char *msg, ...)
   static int    known_offset;
 
   if(!serverlogfile) {
-    fprintf(stderr, "Error: serverlogfile not set\n");
+    fprintf(stderr, "Serverlogfile not set error\n");
     return;
   }
 
@@ -132,7 +132,7 @@ void logmsg(const char *msg, ...)
     int error = errno;
     fprintf(stderr, "fopen() failed with error (%d) %s\n",
             error, strerror(error));
-    fprintf(stderr, "Error opening file: %s\n", serverlogfile);
+    fprintf(stderr, "Error opening file '%s'\n", serverlogfile);
     fprintf(stderr, "Msg not logged: %s %s\n", timebuf, buffer);
   }
 }
