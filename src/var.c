@@ -119,7 +119,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
       f += FUNC_TRIM_LEN;
       if(clen) {
         /* skip leading white space, including CRLF */
-        while(*c && ISSPACE(*c)) {
+        while(ISSPACE(*c)) {
           c++;
           len--;
         }

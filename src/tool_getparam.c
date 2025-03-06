@@ -1114,11 +1114,9 @@ static ParameterError parse_url(struct GlobalConfig *global,
       curlx_dyn_init(&line, 8092);
       while(my_get_line(f, &line, &error)) {
         const char *ptr = curlx_dyn_ptr(&line);
-
         err = add_url(global, config, ptr, GETOUT_USEREMOTE | GETOUT_NOGLOB);
         if(err)
           break;
-        curlx_dyn_reset(&line);
       }
       if(!fromstdin)
         fclose(f);
@@ -1146,12 +1144,12 @@ static ParameterError parse_localport(struct OperationConfig *config,
   if(*p) {
     pp = p;
     /* check for ' - [end]' */
-    if(ISSPACE(*pp))
+    if(ISBLANK(*pp))
       pp++;
     if(*pp != '-')
       return PARAM_BAD_USE;
     pp++;
-    if(*pp && ISSPACE(*pp))
+    if(ISBLANK(*pp))
       pp++;
   }
   msnprintf(buffer, sizeof(buffer), "%.*s", (int)plen, nextarg);

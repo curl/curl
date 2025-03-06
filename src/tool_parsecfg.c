@@ -111,7 +111,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       /* the option starts with a dash? */
       dashed_option = (option[0] == '-');
 
-      while(*line && !ISSPACE(*line) && !ISSEP(*line, dashed_option))
+      while(*line && !ISBLANK(*line) && !ISSEP(*line, dashed_option))
         line++;
       /* ... and has ended here */
 
@@ -123,7 +123,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
 
       /* pass spaces and separator(s) */
-      while(*line && (ISSPACE(*line) || ISSEP(*line, dashed_option)))
+      while(ISBLANK(*line) || ISSEP(*line, dashed_option))
         line++;
 
       /* the parameter starts here (unless quoted) */
@@ -141,7 +141,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       }
       else {
         param = line; /* parameter starts here */
-        while(*line && !ISSPACE(*line))
+        while(*line && !ISSPACE(*line)) /* stop also on CRLF */
           line++;
 
         if(*line) {
@@ -150,7 +150,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           /* to detect mistakes better, see if there is data following */
           line++;
           /* pass all spaces */
-          while(*line && ISSPACE(*line))
+          while(ISBLANK(*line))
             line++;
 
           switch(*line) {
