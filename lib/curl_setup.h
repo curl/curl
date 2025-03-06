@@ -43,6 +43,13 @@
 #include <_mingw.h>
 #endif
 
+/* GCC <4.6 does not support '#pragma GCC diagnostic push' and
+   does not support 'pragma GCC diagnostic' inside functions. */
+#if (defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
+#define CURL_GNUC_DIAG
+#endif
+
 /* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0 (initial build)
    that started advertising the `availability` attribute, which then gets used
    by Apple SDK, but, in a way incompatible with gcc, resulting in misc errors
