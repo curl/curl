@@ -743,7 +743,7 @@ static bool incoming(curl_socket_t listenfd)
     } while((rc == -1) && ((error = SOCKERRNO) == EINTR));
 
     if(rc < 0) {
-      logmsg("select() failed with error: (%d) %s",
+      logmsg("select() failed with error (%d) %s",
              error, sstrerror(error));
       return FALSE;
     }
@@ -753,7 +753,7 @@ static bool incoming(curl_socket_t listenfd)
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
         logmsg("accept(%" FMT_SOCKET_T ", NULL, NULL) "
-               "failed with error: (%d) %s",
+               "failed with error (%d) %s",
                sockfd, error, sstrerror(error));
       }
       else {
@@ -823,14 +823,14 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
          (void *)&flag, sizeof(flag));
     if(rc) {
       error = SOCKERRNO;
-      logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+      logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
              error, sstrerror(error));
       if(maxretr) {
         rc = wait_ms(delay);
         if(rc) {
           /* should not happen */
           error = errno;
-          logmsg("wait_ms() failed with error: (%d) %s",
+          logmsg("wait_ms() failed with error (%d) %s",
                  error, strerror(error));
           sclose(sock);
           return CURL_SOCKET_BAD;
@@ -847,7 +847,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   } while(rc && maxretr--);
 
   if(rc) {
-    logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error: (%d) %s",
+    logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error (%d) %s",
            attempt, totdelay, error, strerror(error));
     logmsg("Continuing anyway...");
   }
@@ -910,7 +910,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
-      logmsg("getsockname() failed with error: (%d) %s",
+      logmsg("getsockname() failed with error (%d) %s",
              error, sstrerror(error));
       sclose(sock);
       return CURL_SOCKET_BAD;
@@ -942,7 +942,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen(%" FMT_SOCKET_T ", 5) failed with error: (%d) %s",
+    logmsg("listen(%" FMT_SOCKET_T ", 5) failed with error (%d) %s",
            sock, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;

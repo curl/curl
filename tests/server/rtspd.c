@@ -689,7 +689,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     }
     else if(got < 0) {
       error = SOCKERRNO;
-      logmsg("recv() returned error: (%d) %s", error, sstrerror(error));
+      logmsg("recv() returned error (%d) %s", error, sstrerror(error));
       fail = 1;
     }
     if(fail) {
@@ -995,7 +995,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
             if(res) {
               /* should not happen */
               error = errno;
-              logmsg("wait_ms() failed with error: (%d) %s",
+              logmsg("wait_ms() failed with error (%d) %s",
                      error, strerror(error));
               break;
             }
@@ -1150,7 +1150,7 @@ int main(int argc, char *argv[])
   if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
             (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
-    logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
     goto server_cleanup;
   }
@@ -1196,7 +1196,7 @@ int main(int argc, char *argv[])
     memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
-      logmsg("getsockname() failed with error: (%d) %s",
+      logmsg("getsockname() failed with error (%d) %s",
              error, sstrerror(error));
       sclose(sock);
       goto server_cleanup;
@@ -1229,7 +1229,7 @@ int main(int argc, char *argv[])
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen() failed with error: (%d) %s",
+    logmsg("listen() failed with error (%d) %s",
            error, sstrerror(error));
     goto server_cleanup;
   }
@@ -1256,7 +1256,7 @@ int main(int argc, char *argv[])
       break;
     if(CURL_SOCKET_BAD == msgsock) {
       error = SOCKERRNO;
-      logmsg("MAJOR ERROR: accept() failed with error: (%d) %s",
+      logmsg("MAJOR ERROR: accept() failed with error (%d) %s",
              error, sstrerror(error));
       break;
     }

@@ -939,7 +939,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
         /* nothing to read at the moment */
         return 0;
       }
-      logmsg("recv() returned error: (%d) %s", error, sstrerror(error));
+      logmsg("recv() returned error (%d) %s", error, sstrerror(error));
       fail = 1;
     }
     if(fail) {
@@ -1231,7 +1231,7 @@ retry:
             if(res) {
               /* should not happen */
               error = errno;
-              logmsg("wait_ms() failed with error: (%d) %s",
+              logmsg("wait_ms() failed with error (%d) %s",
                      error, strerror(error));
               break;
             }
@@ -1304,7 +1304,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
    * timeouts if the peer is not listening. */
   if(0 != curlx_nonblock(serverfd, TRUE)) {
     error = SOCKERRNO;
-    logmsg("curlx_nonblock(TRUE) failed with error: (%d) %s",
+    logmsg("curlx_nonblock(TRUE) failed with error (%d) %s",
            error, sstrerror(error));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
@@ -1398,7 +1398,7 @@ success:
 
   if(0 != curlx_nonblock(serverfd, FALSE)) {
     error = SOCKERRNO;
-    logmsg("curlx_nonblock(FALSE) failed with error: (%d) %s",
+    logmsg("curlx_nonblock(FALSE) failed with error (%d) %s",
            error, sstrerror(error));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
@@ -1884,14 +1884,14 @@ static curl_socket_t accept_connection(curl_socket_t sock)
       /* nothing to accept */
       return 0;
     }
-    logmsg("MAJOR ERROR: accept() failed with error: (%d) %s",
+    logmsg("MAJOR ERROR: accept() failed with error (%d) %s",
            error, sstrerror(error));
     return CURL_SOCKET_BAD;
   }
 
   if(0 != curlx_nonblock(msgsock, TRUE)) {
     error = SOCKERRNO;
-    logmsg("curlx_nonblock failed with error: (%d) %s",
+    logmsg("curlx_nonblock failed with error (%d) %s",
            error, sstrerror(error));
     sclose(msgsock);
     return CURL_SOCKET_BAD;
@@ -1900,7 +1900,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   if(0 != setsockopt(msgsock, SOL_SOCKET, SO_KEEPALIVE,
                      (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
-    logmsg("setsockopt(SO_KEEPALIVE) failed with error: (%d) %s",
+    logmsg("setsockopt(SO_KEEPALIVE) failed with error (%d) %s",
            error, sstrerror(error));
     sclose(msgsock);
     return CURL_SOCKET_BAD;
@@ -2214,13 +2214,13 @@ int main(int argc, char *argv[])
   if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
                      (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
-    logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
     goto sws_cleanup;
   }
   if(0 != curlx_nonblock(sock, TRUE)) {
     error = SOCKERRNO;
-    logmsg("curlx_nonblock failed with error: (%d) %s",
+    logmsg("curlx_nonblock failed with error (%d) %s",
            error, sstrerror(error));
     goto sws_cleanup;
   }
@@ -2276,7 +2276,7 @@ int main(int argc, char *argv[])
     memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
-      logmsg("getsockname() failed with error: (%d) %s",
+      logmsg("getsockname() failed with error (%d) %s",
              error, sstrerror(error));
       sclose(sock);
       goto sws_cleanup;
@@ -2315,7 +2315,7 @@ int main(int argc, char *argv[])
   rc = listen(sock, 50);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen() failed with error: (%d) %s", error, sstrerror(error));
+    logmsg("listen() failed with error (%d) %s", error, sstrerror(error));
     goto sws_cleanup;
   }
 
@@ -2395,7 +2395,7 @@ int main(int argc, char *argv[])
 
     if(rc < 0) {
       error = SOCKERRNO;
-      logmsg("select() failed with error: (%d) %s", error, sstrerror(error));
+      logmsg("select() failed with error (%d) %s", error, sstrerror(error));
       goto sws_cleanup;
     }
 

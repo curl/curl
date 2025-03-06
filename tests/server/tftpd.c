@@ -667,7 +667,7 @@ int main(int argc, char **argv)
   if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
             (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
-    logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
     result = 1;
     goto tftpd_cleanup;
@@ -715,7 +715,7 @@ int main(int argc, char **argv)
     memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
-      logmsg("getsockname() failed with error: (%d) %s",
+      logmsg("getsockname() failed with error (%d) %s",
              error, sstrerror(error));
       sclose(sock);
       goto tftpd_cleanup;
