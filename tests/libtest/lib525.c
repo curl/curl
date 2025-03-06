@@ -58,7 +58,7 @@ CURLcode test(char *URL)
   if(!hd_src) {
     fprintf(stderr, "fopen failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
+    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
 
@@ -72,7 +72,7 @@ CURLcode test(char *URL)
     /* can't open file, bail out */
     fprintf(stderr, "fstat() failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "ERROR: cannot open file (%s)\n", libtest_arg2);
+    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_FSTAT;
   }
