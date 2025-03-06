@@ -911,7 +911,10 @@ jobs:
           export TFLAGS='-j8 ${{ matrix.tflags }} ~2302 ~2303 ~2307'
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cd bld/tests
+          # Launching tests manually to avoid MSBuild pattern matching on stderr output.
+          # Keep these options synchronized with tests/CMakeLists.txt.
+          ../../tests/runtests.pl -a -p ~flaky ~timing-dependent -r -rm -bundle ${TFLAGS}
 
       - name: 'build examples'
         timeout-minutes: 5
