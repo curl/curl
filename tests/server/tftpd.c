@@ -904,7 +904,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   server = fopen(dumpfile, "ab");
   if(!server) {
     int error = errno;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
     logmsg("Error opening file: %s", dumpfile);
     return -1;
   }
@@ -1011,7 +1011,7 @@ static int parse_servercmd(struct testcase *req)
   stream = test2fopen(req->testno, logdir);
   if(!stream) {
     error = errno;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
     logmsg("  Couldn't open test file %ld", req->testno);
     return 1; /* done */
   }
@@ -1126,7 +1126,7 @@ static int validate_access(struct testcase *test,
 
     if(!stream) {
       int error = errno;
-      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("fopen() failed with error (%d) %s", error, strerror(error));
       logmsg("Couldn't open test file for test: %ld", testno);
       return EACCESS;
     }

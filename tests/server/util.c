@@ -130,7 +130,7 @@ void logmsg(const char *msg, ...)
   }
   else {
     int error = errno;
-    fprintf(stderr, "fopen() failed with error: %d %s\n",
+    fprintf(stderr, "fopen() failed with error (%d) %s\n",
             error, strerror(error));
     fprintf(stderr, "Error opening file: %s\n", serverlogfile);
     fprintf(stderr, "Msg not logged: %s %s\n", timebuf, buffer);
@@ -345,14 +345,14 @@ void set_advisor_read_lock(const char *filename)
     lockfile = fopen(filename, "wb");
   } while(!lockfile && ((error = errno) == EINTR));
   if(!lockfile) {
-    logmsg("Error creating lock file %s error: %d %s",
+    logmsg("Error creating lock file %s error (%d) %s",
            filename, error, strerror(error));
     return;
   }
 
   res = fclose(lockfile);
   if(res)
-    logmsg("Error closing lock file %s error: %d %s",
+    logmsg("Error closing lock file %s error (%d) %s",
            filename, errno, strerror(errno));
 }
 
@@ -371,7 +371,7 @@ void clear_advisor_read_lock(const char *filename)
     res = unlink(filename);
   } while(res && ((error = errno) == EINTR));
   if(res)
-    logmsg("Error removing lock file %s error: %d %s",
+    logmsg("Error removing lock file %s error (%d) %s",
            filename, error, strerror(error));
 }
 

@@ -241,7 +241,7 @@ static int parse_servercmd(struct httprequest *req)
 
   if(!stream) {
     error = errno;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
     logmsg("  Couldn't open test file %ld", req->testno);
     req->open = FALSE; /* closes connection */
     return 1; /* done */
@@ -778,7 +778,7 @@ static void storerequest(const char *reqbuf, size_t totalsize)
     dump = fopen(dumpfile, "ab");
   } while(!dump && ((error = errno) == EINTR));
   if(!dump) {
-    logmsg("[2] Error opening file %s error: %d %s",
+    logmsg("[2] Error opening file %s error (%d) %s",
            dumpfile, error, strerror(error));
     logmsg("Failed to write request input ");
     return;
@@ -797,7 +797,7 @@ static void storerequest(const char *reqbuf, size_t totalsize)
   if(writeleft == 0)
     logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
   else if(writeleft > 0) {
-    logmsg("Error writing file %s error: %d %s",
+    logmsg("Error writing file %s error (%d) %s",
            dumpfile, error, strerror(error));
     logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
            totalsize-writeleft, totalsize, dumpfile);
@@ -807,7 +807,7 @@ storerequest_cleanup:
 
   res = fclose(dump);
   if(res)
-    logmsg("Error closing file %s error: %d %s",
+    logmsg("Error closing file %s error (%d) %s",
            dumpfile, errno, strerror(errno));
 }
 
@@ -1078,7 +1078,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     stream = test2fopen(req->testno, logdir);
     if(!stream) {
       error = errno;
-      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("fopen() failed with error (%d) %s", error, strerror(error));
       return 0;
     }
     else {
@@ -1100,7 +1100,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     stream = test2fopen(req->testno, logdir);
     if(!stream) {
       error = errno;
-      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("fopen() failed with error (%d) %s", error, strerror(error));
       free(ptr);
       return 0;
     }
@@ -1139,7 +1139,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   dump = fopen(responsedump, "ab");
   if(!dump) {
     error = errno;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
     logmsg("  [5] Error opening file: %s", responsedump);
     free(ptr);
     free(cmd);
@@ -1191,7 +1191,7 @@ retry:
 
   res = fclose(dump);
   if(res)
-    logmsg("Error closing file %s error: %d %s",
+    logmsg("Error closing file %s error (%d) %s",
            responsedump, errno, strerror(errno));
 
   if(got_exit_signal) {
