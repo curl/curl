@@ -911,7 +911,7 @@ jobs:
           export TFLAGS='-j8 ${{ matrix.tflags }} ~2302 ~2303 ~2307'
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci -- /p:IgnoreStandardErrorWarningFormat=true
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci -- -p:IgnoreStandardErrorWarningFormat=true
 
       - name: 'build examples'
         timeout-minutes: 5
