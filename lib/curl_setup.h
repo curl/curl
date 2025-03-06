@@ -971,8 +971,7 @@ endings either CRLF or LF so 't' is appropriate.
    as their argument */
 #define STRCONST(x) x,sizeof(x)-1
 
-/* Macro to strip 'const' without triggering a compiler warning.
-   Use it for APIs that do not or cannot support the const qualifier. */
+/* Determine pointer-sized integer type */
 #ifndef CURL_TYPEOF_UINTPTR_T
 #  ifdef HAVE_STDINT_H
 #    define CURL_TYPEOF_UINTPTR_T uintptr_t
@@ -982,6 +981,9 @@ endings either CRLF or LF so 't' is appropriate.
 #    define CURL_TYPEOF_UINTPTR_T unsigned long
 #  endif
 #endif /* !CURL_TYPEOF_UINTPTR_T */
+
+/* Macro to strip 'const' without triggering a compiler warning.
+   Use it for APIs that do not or cannot support the const qualifier. */
 #ifdef CURL_TYPEOF_UINTPTR_T
 #  define CURL_UNCONST(p) ((void *)(CURL_TYPEOF_UINTPTR_T)(const void *)(p))
 #else
