@@ -65,7 +65,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef USE_WOLFSSL
+#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
 #endif
 
