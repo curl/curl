@@ -69,6 +69,16 @@
 #include <stdint.h>
 #endif
 
+/* Macro to strip 'const' without triggering a compiler warning.
+   Use it for APIs that do not or cannot support the const qualifier. */
+#ifdef HAVE_STDINT_H
+#  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
+#elif defined(_WIN32)
+#  define CURL_UNCONST(p) ((void *)(ULONG_PTR)(const void *)(p))
+#else
+#  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
+#endif
+
 #ifdef USE_SCHANNEL
 /* Must set this before <schannel.h> is included directly or indirectly by
    another Windows header. */
