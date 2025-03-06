@@ -56,9 +56,9 @@ CURLcode test(char *URL)
 
   hd_src = fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    fprintf(stderr, "fopen failed with error: %d %s\n",
+    fprintf(stderr, "fopen failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "Error opening file: %s\n", libtest_arg2);
+    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
 
@@ -70,15 +70,15 @@ CURLcode test(char *URL)
 #endif
   if(hd == -1) {
     /* can't open file, bail out */
-    fprintf(stderr, "fstat() failed with error: %d %s\n",
+    fprintf(stderr, "fstat() failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "ERROR: cannot open file %s\n", libtest_arg2);
+    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(!file_info.st_size) {
-    fprintf(stderr, "ERROR: file %s has zero size!\n", libtest_arg2);
+    fprintf(stderr, "File %s has zero size!\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }

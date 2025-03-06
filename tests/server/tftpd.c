@@ -658,7 +658,7 @@ int main(int argc, char **argv)
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
     result = 1;
     goto tftpd_cleanup;
   }
@@ -667,7 +667,7 @@ int main(int argc, char **argv)
   if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
             (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
-    logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
     result = 1;
     goto tftpd_cleanup;
@@ -693,7 +693,7 @@ int main(int argc, char **argv)
 #endif /* USE_IPV6 */
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu: (%d) %s", port, error,
+    logmsg("Error binding socket on port %hu (%d) %s", port, error,
            sstrerror(error));
     result = 1;
     goto tftpd_cleanup;
@@ -715,7 +715,7 @@ int main(int argc, char **argv)
     memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
-      logmsg("getsockname() failed with error: (%d) %s",
+      logmsg("getsockname() failed with error (%d) %s",
              error, sstrerror(error));
       sclose(sock);
       goto tftpd_cleanup;
@@ -904,8 +904,8 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   server = fopen(dumpfile, "ab");
   if(!server) {
     int error = errno;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", dumpfile);
+    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
+    logmsg("Error opening file '%s'", dumpfile);
     return -1;
   }
 
@@ -1011,7 +1011,7 @@ static int parse_servercmd(struct testcase *req)
   stream = test2fopen(req->testno, logdir);
   if(!stream) {
     error = errno;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
+    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
     logmsg("  Couldn't open test file %ld", req->testno);
     return 1; /* done */
   }
@@ -1025,7 +1025,7 @@ static int parse_servercmd(struct testcase *req)
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
     fclose(stream);
     if(error) {
-      logmsg("getpart() failed with error: %d", error);
+      logmsg("getpart() failed with error (%d)", error);
       return 1; /* done */
     }
 
@@ -1126,7 +1126,7 @@ static int validate_access(struct testcase *test,
 
     if(!stream) {
       int error = errno;
-      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("fopen() failed with error (%d) %s", error, strerror(error));
       logmsg("Couldn't open test file for test: %ld", testno);
       return EACCESS;
     }
@@ -1135,7 +1135,7 @@ static int validate_access(struct testcase *test,
       int error = getpart(&test->buffer, &count, "reply", partbuf, stream);
       fclose(stream);
       if(error) {
-        logmsg("getpart() failed with error: %d", error);
+        logmsg("getpart() failed with error (%d)", error);
         return EACCESS;
       }
       if(test->buffer) {

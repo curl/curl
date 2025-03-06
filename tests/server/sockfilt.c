@@ -242,7 +242,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
         return 0;
       }
       logmsg("reading from file descriptor: %d,", filedes);
-      logmsg("unrecoverable read() failure: (%d) %s",
+      logmsg("unrecoverable read() failure (%d) %s",
              error, strerror(error));
       return -1;
     }
@@ -288,7 +288,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("writing to file descriptor: %d,", filedes);
-      logmsg("unrecoverable write() failure: (%d) %s",
+      logmsg("unrecoverable write() failure (%d) %s",
              error, strerror(error));
       return -1;
     }
@@ -408,7 +408,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 
   *buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
   if(*buffer_len > maxlen) {
-    logmsg("ERROR: Buffer size (%zd bytes) too small for data size "
+    logmsg("Buffer size (%zd bytes) too small for data size error "
            "(%zd bytes)", maxlen, *buffer_len);
     return FALSE;
   }
@@ -558,7 +558,7 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
           /* if the pipe has NOT been closed, sleep and continue waiting */
           ret = GetLastError();
           if(ret != ERROR_BROKEN_PIPE) {
-            logmsg("[select_ws_wait_thread] PeekNamedPipe error: %lu", ret);
+            logmsg("[select_ws_wait_thread] PeekNamedPipe error (%lu)", ret);
             SleepEx(0, FALSE);
             continue;
           }
@@ -925,7 +925,7 @@ static bool disc_handshake(void)
         return FALSE;
       }
       else {
-        logmsg("Error: unexpected message; aborting");
+        logmsg("Unexpected message error; aborting");
         /*
          * The only other messages that could occur here are PING and PORT,
          * and both of them occur at the start of a test when nothing should be
@@ -1084,7 +1084,7 @@ static bool juggle(curl_socket_t *sockfdp,
   } while((rc == -1) && ((error = SOCKERRNO) == EINTR));
 
   if(rc < 0) {
-    logmsg("select() failed with error: (%d) %s",
+    logmsg("select() failed with error (%d) %s",
            error, sstrerror(error));
     return FALSE;
   }
@@ -1187,7 +1187,7 @@ static bool juggle(curl_socket_t *sockfdp,
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
         logmsg("accept(%" FMT_SOCKET_T ", NULL, NULL) "
-               "failed with error: (%d) %s", sockfd, error, sstrerror(error));
+               "failed with error (%d) %s", sockfd, error, sstrerror(error));
       }
       else {
         logmsg("====> Client connect");
@@ -1251,14 +1251,14 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
          (void *)&flag, sizeof(flag));
     if(rc) {
       error = SOCKERRNO;
-      logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+      logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
              error, sstrerror(error));
       if(maxretr) {
         rc = wait_ms(delay);
         if(rc) {
           /* should not happen */
           error = errno;
-          logmsg("wait_ms() failed with error: (%d) %s",
+          logmsg("wait_ms() failed with error (%d) %s",
                  error, strerror(error));
           sclose(sock);
           return CURL_SOCKET_BAD;
@@ -1275,7 +1275,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   } while(rc && maxretr--);
 
   if(rc) {
-    logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error: (%d) %s",
+    logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error (%d) %s",
            attempt, totdelay, error, strerror(error));
     logmsg("Continuing anyway...");
   }
@@ -1303,7 +1303,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 #endif /* USE_IPV6 */
   if(rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu: (%d) %s",
+    logmsg("Error binding socket on port %hu (%d) %s",
            *listenport, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
@@ -1325,7 +1325,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
-      logmsg("getsockname() failed with error: (%d) %s",
+      logmsg("getsockname() failed with error (%d) %s",
              error, sstrerror(error));
       sclose(sock);
       return CURL_SOCKET_BAD;
@@ -1363,7 +1363,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen(%" FMT_SOCKET_T ", 5) failed with error: (%d) %s",
+    logmsg("listen(%" FMT_SOCKET_T ", 5) failed with error (%d) %s",
            sock, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
@@ -1513,7 +1513,7 @@ int main(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
@@ -1548,7 +1548,7 @@ int main(int argc, char *argv[])
 #endif /* USE_IPV6 */
     if(rc) {
       error = SOCKERRNO;
-      logmsg("Error connecting to port %hu: (%d) %s",
+      logmsg("Error connecting to port %hu (%d) %s",
              connectport, error, sstrerror(error));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;

@@ -100,7 +100,7 @@ void logmsg(const char *msg, ...)
   static int    known_offset;
 
   if(!serverlogfile) {
-    fprintf(stderr, "Error: serverlogfile not set\n");
+    fprintf(stderr, "Serverlogfile not set error\n");
     return;
   }
 
@@ -130,9 +130,9 @@ void logmsg(const char *msg, ...)
   }
   else {
     int error = errno;
-    fprintf(stderr, "fopen() failed with error: %d %s\n",
+    fprintf(stderr, "fopen() failed with error (%d) %s\n",
             error, strerror(error));
-    fprintf(stderr, "Error opening file: %s\n", serverlogfile);
+    fprintf(stderr, "Error opening file '%s'\n", serverlogfile);
     fprintf(stderr, "Msg not logged: %s %s\n", timebuf, buffer);
   }
 }
@@ -345,14 +345,14 @@ void set_advisor_read_lock(const char *filename)
     lockfile = fopen(filename, "wb");
   } while(!lockfile && ((error = errno) == EINTR));
   if(!lockfile) {
-    logmsg("Error creating lock file %s error: %d %s",
+    logmsg("Error creating lock file %s error (%d) %s",
            filename, error, strerror(error));
     return;
   }
 
   res = fclose(lockfile);
   if(res)
-    logmsg("Error closing lock file %s error: %d %s",
+    logmsg("Error closing lock file %s error (%d) %s",
            filename, errno, strerror(errno));
 }
 
@@ -371,7 +371,7 @@ void clear_advisor_read_lock(const char *filename)
     res = unlink(filename);
   } while(res && ((error = errno) == EINTR));
   if(res)
-    logmsg("Error removing lock file %s error: %d %s",
+    logmsg("Error removing lock file %s error (%d) %s",
            filename, error, strerror(error));
 }
 
@@ -525,7 +525,7 @@ HANDLE exit_event = NULL;
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
-  logmsg("exit_signal_handler: %d", signum);
+  logmsg("exit_signal_handler (%d)", signum);
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
@@ -844,7 +844,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(CURL_SOCKET_BAD == unixfd) {
-      logmsg("Failed to create socket at %s: (%d) %s",
+      logmsg("Failed to create socket at %s (%d) %s",
              unix_socket, SOCKERRNO, sstrerror(SOCKERRNO));
       return -1;
     }
@@ -853,7 +853,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     error = SOCKERRNO;
     sclose(unixfd);
     if(0 != rc && ECONNREFUSED != error) {
-      logmsg("Failed to connect to %s: (%d) %s",
+      logmsg("Failed to connect to %s (%d) %s",
              unix_socket, error, sstrerror(error));
       return rc;
     }
@@ -865,7 +865,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = lstat(unix_socket, &statbuf);
 #endif
     if(0 != rc) {
-      logmsg("Error binding socket, failed to stat %s: (%d) %s",
+      logmsg("Error binding socket, failed to stat %s (%d) %s",
              unix_socket, errno, strerror(errno));
       return rc;
     }
@@ -878,7 +878,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* dead socket, cleanup and retry bind */
     rc = unlink(unix_socket);
     if(0 != rc) {
-      logmsg("Error binding socket, failed to unlink %s: (%d) %s",
+      logmsg("Error binding socket, failed to unlink %s (%d) %s",
              unix_socket, errno, strerror(errno));
       return rc;
     }

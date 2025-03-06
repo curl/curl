@@ -268,7 +268,7 @@ static int ProcessRequest(struct httprequest *req)
 
       if(!stream) {
         int error = errno;
-        logmsg("fopen() failed with error: %d %s", error, strerror(error));
+        logmsg("fopen() failed with error (%d) %s", error, strerror(error));
         logmsg("Couldn't open test file %ld", req->testno);
         req->open = FALSE; /* closes connection */
         return 1; /* done */
@@ -288,7 +288,7 @@ static int ProcessRequest(struct httprequest *req)
         int error = getpart(&cmd, &cmdsize, "reply", "servercmd", stream);
         fclose(stream);
         if(error) {
-          logmsg("getpart() failed with error: %d", error);
+          logmsg("getpart() failed with error (%d)", error);
           req->open = FALSE; /* closes connection */
           return 1; /* done */
         }
@@ -593,7 +593,7 @@ static void storerequest(char *reqbuf, size_t totalsize)
     dump = fopen(dumpfile, "ab");
   } while(!dump && ((error = errno) == EINTR));
   if(!dump) {
-    logmsg("Error opening file %s error: %d %s",
+    logmsg("Error opening file %s error (%d) %s",
            dumpfile, error, strerror(error));
     logmsg("Failed to write request input to %s", dumpfile);
     return;
@@ -612,7 +612,7 @@ static void storerequest(char *reqbuf, size_t totalsize)
   if(writeleft == 0)
     logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
   else if(writeleft > 0) {
-    logmsg("Error writing file %s error: %d %s",
+    logmsg("Error writing file %s error (%d) %s",
            dumpfile, error, strerror(error));
     logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
            totalsize-writeleft, totalsize, dumpfile);
@@ -622,7 +622,7 @@ storerequest_cleanup:
 
   res = fclose(dump);
   if(res)
-    logmsg("Error closing file %s error: %d %s",
+    logmsg("Error closing file %s error (%d) %s",
            dumpfile, errno, strerror(errno));
 }
 
@@ -689,7 +689,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     }
     else if(got < 0) {
       error = SOCKERRNO;
-      logmsg("recv() returned error: (%d) %s", error, sstrerror(error));
+      logmsg("recv() returned error (%d) %s", error, sstrerror(error));
       fail = 1;
     }
     if(fail) {
@@ -836,7 +836,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       msnprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
     if(!stream) {
       error = errno;
-      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("fopen() failed with error (%d) %s", error, strerror(error));
       logmsg("Couldn't open test file");
       return 0;
     }
@@ -844,7 +844,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       error = getpart(&ptr, &count, "reply", partbuf, stream);
       fclose(stream);
       if(error) {
-        logmsg("getpart() failed with error: %d", error);
+        logmsg("getpart() failed with error (%d)", error);
         return 0;
       }
       buffer = ptr;
@@ -859,7 +859,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     stream = test2fopen(req->testno, logdir);
     if(!stream) {
       error = errno;
-      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("fopen() failed with error (%d) %s", error, strerror(error));
       logmsg("Couldn't open test file");
       free(ptr);
       return 0;
@@ -869,7 +869,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       error = getpart(&cmd, &cmdsize, "reply", "postcmd", stream);
       fclose(stream);
       if(error) {
-        logmsg("getpart() failed with error: %d", error);
+        logmsg("getpart() failed with error (%d)", error);
         free(ptr);
         return 0;
       }
@@ -899,9 +899,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   dump = fopen(responsedump, "ab");
   if(!dump) {
     error = errno;
-    logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", responsedump);
-    logmsg("couldn't create logfile: %s", responsedump);
+    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
+    logmsg("Error opening file '%s'", responsedump);
+    logmsg("couldn't create logfile '%s'", responsedump);
     free(ptr);
     free(cmd);
     return -1;
@@ -955,7 +955,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   res = fclose(dump);
   if(res)
-    logmsg("Error closing file %s error: %d %s",
+    logmsg("Error closing file %s error (%d) %s",
            responsedump, errno, strerror(errno));
 
   if(got_exit_signal) {
@@ -995,7 +995,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
             if(res) {
               /* should not happen */
               error = errno;
-              logmsg("wait_ms() failed with error: (%d) %s",
+              logmsg("wait_ms() failed with error (%d) %s",
                      error, strerror(error));
               break;
             }
@@ -1142,7 +1142,7 @@ int main(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
     goto server_cleanup;
   }
 
@@ -1150,7 +1150,7 @@ int main(int argc, char *argv[])
   if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
             (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
-    logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
+    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
     goto server_cleanup;
   }
@@ -1175,7 +1175,7 @@ int main(int argc, char *argv[])
 #endif /* USE_IPV6 */
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu: (%d) %s",
+    logmsg("Error binding socket on port %hu (%d) %s",
            port, error, sstrerror(error));
     goto server_cleanup;
   }
@@ -1196,7 +1196,7 @@ int main(int argc, char *argv[])
     memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
-      logmsg("getsockname() failed with error: (%d) %s",
+      logmsg("getsockname() failed with error (%d) %s",
              error, sstrerror(error));
       sclose(sock);
       goto server_cleanup;
@@ -1229,7 +1229,7 @@ int main(int argc, char *argv[])
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen() failed with error: (%d) %s",
+    logmsg("listen() failed with error (%d) %s",
            error, sstrerror(error));
     goto server_cleanup;
   }
@@ -1256,7 +1256,7 @@ int main(int argc, char *argv[])
       break;
     if(CURL_SOCKET_BAD == msgsock) {
       error = SOCKERRNO;
-      logmsg("MAJOR ERROR: accept() failed with error: (%d) %s",
+      logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
              error, sstrerror(error));
       break;
     }

@@ -70,11 +70,11 @@ CURLcode test(char *URL)
 
   ret = run(hnd, 1, 2);
   if(ret)
-    fprintf(stderr, "error %d: %s\n", ret, buffer);
+    fprintf(stderr, "error (%d) %s\n", ret, buffer);
 
   ret = run(hnd, 12000, 1);
   if(ret != CURLE_OPERATION_TIMEDOUT)
-    fprintf(stderr, "error %d: %s\n", ret, buffer);
+    fprintf(stderr, "error (%d) %s\n", ret, buffer);
   else
     ret = CURLE_OK;
 
