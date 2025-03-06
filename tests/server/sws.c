@@ -1284,7 +1284,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   serverfd = socket(socket_domain, SOCK_STREAM, 0);
   if(CURL_SOCKET_BAD == serverfd) {
     error = SOCKERRNO;
-    logmsg("Error creating socket for server connection: (%d) %s",
+    logmsg("Error creating socket for server connection (%d) %s",
            error, sstrerror(error));
     return CURL_SOCKET_BAD;
   }
@@ -1387,7 +1387,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
       }
     }
 error:
-    logmsg("Error connecting to server port %hu: (%d) %s",
+    logmsg("Error connecting to server port %hu (%d) %s",
            port, error, sstrerror(error));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
@@ -2206,7 +2206,7 @@ int main(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
     goto sws_cleanup;
   }
 
@@ -2251,11 +2251,11 @@ int main(int argc, char *argv[])
     error = SOCKERRNO;
 #ifdef USE_UNIX_SOCKETS
     if(socket_domain == AF_UNIX)
-      logmsg("Error binding socket on path %s: (%d) %s",
+      logmsg("Error binding socket on path %s (%d) %s",
              unix_socket, error, sstrerror(error));
     else
 #endif
-      logmsg("Error binding socket on port %hu: (%d) %s",
+      logmsg("Error binding socket on port %hu (%d) %s",
              port, error, sstrerror(error));
     goto sws_cleanup;
   }

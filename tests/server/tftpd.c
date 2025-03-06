@@ -658,7 +658,7 @@ int main(int argc, char **argv)
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
     result = 1;
     goto tftpd_cleanup;
   }
@@ -693,7 +693,7 @@ int main(int argc, char **argv)
 #endif /* USE_IPV6 */
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu: (%d) %s", port, error,
+    logmsg("Error binding socket on port %hu (%d) %s", port, error,
            sstrerror(error));
     result = 1;
     goto tftpd_cleanup;

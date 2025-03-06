@@ -846,7 +846,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 #endif /* USE_IPV6 */
   if(rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu: (%d) %s",
+    logmsg("Error binding socket on port %hu (%d) %s",
            *listenport, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
@@ -1030,7 +1030,7 @@ int main(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
     goto mqttd_cleanup;
   }
 

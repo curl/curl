@@ -278,7 +278,7 @@ static curl_socket_t socksconnect(unsigned short connectport,
 
   if(rc) {
     int error = SOCKERRNO;
-    logmsg("Error connecting to %s:%hu: (%d) %s",
+    logmsg("Error connecting to %s:%hu (%d) %s",
            connectaddr, connectport, error, sstrerror(error));
     return CURL_SOCKET_BAD;
   }
@@ -882,11 +882,11 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     error = SOCKERRNO;
 #ifdef USE_UNIX_SOCKETS
     if(socket_domain == AF_UNIX)
-      logmsg("Error binding socket on path %s: (%d) %s",
+      logmsg("Error binding socket on path %s (%d) %s",
              unix_socket, error, sstrerror(error));
     else
 #endif
-      logmsg("Error binding socket on port %hu: (%d) %s",
+      logmsg("Error binding socket on port %hu (%d) %s",
              *listenport, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
@@ -1092,7 +1092,7 @@ int main(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s",
+    logmsg("Error creating socket (%d) %s",
            error, sstrerror(error));
     goto socks5_cleanup;
   }

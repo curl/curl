@@ -844,7 +844,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(CURL_SOCKET_BAD == unixfd) {
-      logmsg("Failed to create socket at %s: (%d) %s",
+      logmsg("Failed to create socket at %s (%d) %s",
              unix_socket, SOCKERRNO, sstrerror(SOCKERRNO));
       return -1;
     }
@@ -853,7 +853,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     error = SOCKERRNO;
     sclose(unixfd);
     if(0 != rc && ECONNREFUSED != error) {
-      logmsg("Failed to connect to %s: (%d) %s",
+      logmsg("Failed to connect to %s (%d) %s",
              unix_socket, error, sstrerror(error));
       return rc;
     }
@@ -865,7 +865,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = lstat(unix_socket, &statbuf);
 #endif
     if(0 != rc) {
-      logmsg("Error binding socket, failed to stat %s: (%d) %s",
+      logmsg("Error binding socket, failed to stat %s (%d) %s",
              unix_socket, errno, strerror(errno));
       return rc;
     }
@@ -878,7 +878,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* dead socket, cleanup and retry bind */
     rc = unlink(unix_socket);
     if(0 != rc) {
-      logmsg("Error binding socket, failed to unlink %s: (%d) %s",
+      logmsg("Error binding socket, failed to unlink %s (%d) %s",
              unix_socket, errno, strerror(errno));
       return rc;
     }

@@ -242,7 +242,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
         return 0;
       }
       logmsg("reading from file descriptor: %d,", filedes);
-      logmsg("unrecoverable read() failure: (%d) %s",
+      logmsg("unrecoverable read() failure (%d) %s",
              error, strerror(error));
       return -1;
     }
@@ -288,7 +288,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("writing to file descriptor: %d,", filedes);
-      logmsg("unrecoverable write() failure: (%d) %s",
+      logmsg("unrecoverable write() failure (%d) %s",
              error, strerror(error));
       return -1;
     }
@@ -1303,7 +1303,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 #endif /* USE_IPV6 */
   if(rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu: (%d) %s",
+    logmsg("Error binding socket on port %hu (%d) %s",
            *listenport, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
@@ -1513,7 +1513,7 @@ int main(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
@@ -1548,7 +1548,7 @@ int main(int argc, char *argv[])
 #endif /* USE_IPV6 */
     if(rc) {
       error = SOCKERRNO;
-      logmsg("Error connecting to port %hu: (%d) %s",
+      logmsg("Error connecting to port %hu (%d) %s",
              connectport, error, sstrerror(error));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
