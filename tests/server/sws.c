@@ -861,7 +861,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
         }
 
         if((got == -1) && ((SOCKERRNO == EAGAIN) ||
-                           (SOCKERRNO == EWOULDBLOCK))) {
+                           (SOCKERRNO == SOCKEWOULDBLOCK))) {
           int rc;
           fd_set input;
           fd_set output;
@@ -883,7 +883,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
           do {
             logmsg("Wait until readable");
             rc = select((int)sock + 1, &input, &output, NULL, &timeout);
-          } while(rc < 0 && SOCKERRNO == EINTR && !got_exit_signal);
+          } while(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal);
           logmsg("readable %d", rc);
           if(rc)
             got = 1;
@@ -926,7 +926,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
     }
     else if(got < 0) {
       int error = SOCKERRNO;
-      if(EAGAIN == error || EWOULDBLOCK == error) {
+      if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
         /* nothing to read at the moment */
         return 0;
       }
@@ -1149,7 +1149,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
 retry:
     written = swrite(sock, buffer, num);
     if(written < 0) {
-      if((EWOULDBLOCK == SOCKERRNO) || (EAGAIN == SOCKERRNO)) {
+      if((SOCKEWOULDBLOCK == SOCKERRNO) || (EAGAIN == SOCKERRNO)) {
         wait_ms(10);
         goto retry;
       }
@@ -1342,7 +1342,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
   if(rc) {
     error = SOCKERRNO;
-    if((error == EINPROGRESS) || (error == EWOULDBLOCK)) {
+    if((error == SOCKEINPROGRESS) || (error == SOCKEWOULDBLOCK)) {
       fd_set output;
       struct timeval timeout = {0};
       timeout.tv_sec = 1; /* 1000 ms */
@@ -1358,16 +1358,16 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 #endif
       while(1) {
         rc = select((int)serverfd + 1, NULL, &output, NULL, &timeout);
-        if(rc < 0 && SOCKERRNO != EINTR)
+        if(rc < 0 && SOCKERRNO != SOCKEINTR)
           goto error;
         else if(rc > 0) {
           curl_socklen_t errSize = sizeof(error);
           if(0 != getsockopt(serverfd, SOL_SOCKET, SO_ERROR,
                              (void *)&error, &errSize))
             error = SOCKERRNO;
-          if((0 == error) || (EISCONN == error))
+          if((0 == error) || (SOCKEISCONN == error))
             goto success;
-          else if((error != EINPROGRESS) && (error != EWOULDBLOCK))
+          else if((error != SOCKEINPROGRESS) && (error != SOCKEWOULDBLOCK))
             goto error;
         }
         else if(!rc) {
@@ -1559,7 +1559,7 @@ static void http_connect(curl_socket_t *infdp,
 
     do {
       rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
-    } while(rc < 0 && SOCKERRNO == EINTR && !got_exit_signal);
+    } while(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal);
 
     if(got_exit_signal)
       break;
@@ -1871,7 +1871,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 
   if(CURL_SOCKET_BAD == msgsock) {
     error = SOCKERRNO;
-    if(EAGAIN == error || EWOULDBLOCK == error) {
+    if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
       /* nothing to accept */
       return 0;
     }
@@ -2380,7 +2380,7 @@ int main(int argc, char *argv[])
 
     do {
       rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
-    } while(rc < 0 && SOCKERRNO == EINTR && !got_exit_signal);
+    } while(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal);
 
     if(got_exit_signal)
       goto sws_cleanup;

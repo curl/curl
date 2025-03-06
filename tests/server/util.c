@@ -299,7 +299,7 @@ int wait_ms(int timeout_ms)
       if(r != -1)
         break;
       error = errno;
-      if(error && (error != EINTR))
+      if(error && (error != SOCKEINTR))
         break;
       pending_ms = timeout_ms - (int)timediff(tvnow(), initial_tv);
       if(pending_ms <= 0)
@@ -866,7 +866,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   }
   strcpy(sau->sun_path, unix_socket);
   rc = bind(sock, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
-  if(0 != rc && SOCKERRNO == EADDRINUSE) {
+  if(0 != rc && SOCKERRNO == SOCKEADDRINUSE) {
     struct_stat statbuf;
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -879,7 +879,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = connect(unixfd, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
     error = SOCKERRNO;
     sclose(unixfd);
-    if(0 != rc && ECONNREFUSED != error) {
+    if(0 != rc && SOCKECONNREFUSED != error) {
       logmsg("Failed to connect to %s (%d) %s",
              unix_socket, error, sstrerror(error));
       return rc;
