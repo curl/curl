@@ -29,7 +29,7 @@ SSL
 local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
 <name>
 simple HTTPS GET

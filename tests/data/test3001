@@ -29,7 +29,7 @@ SSL
 local-http
 </features>
 <server>
-https Server-localhost-lastSAN-sv.pem
+https test-localhost-san-last.pem
 </server>
 <name>
 HTTPS GET to localhost, last subject alt name matches, CN does not match

@@ -20,7 +20,7 @@ SSL
 local-http
 </features>
 <server>
-https Server-localhost0h-sv.pem
+https test-localhost0h.pem
 </server>
 <name>
 HTTPS wrong subjectAltName but right CN

@@ -27,7 +27,7 @@ MooMoo
 SSL
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
 <name>
 HTTPS GET using CURLOPT_CAINFO_BLOB

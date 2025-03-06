@@ -21,7 +21,7 @@ SSLpinning
 local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
 <name>
 HTTPS wrong base64-sha256 pinnedpubkey but right CN

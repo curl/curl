@@ -1,0 +1,104 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            81:34:c8:2d:81:f0:54:1a
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer:
+            countryName               = NN
+            organizationName          = Edel Curl Arctic Illudium Research Cloud
+            commonName                = Northern Nowhere Trust Anchor
+        Validity
+            Not Before: Mar  6 11:19:04 2025 GMT
+            Not After : Dec 31 11:19:04 2025 GMT
+        Subject:
+            countryName               = NN
+            organizationName          = Edel Curl Arctic Illudium Research Cloud
+            commonName                = localhost.nn
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                RSA Public-Key: (2048 bit)
+                Modulus:
+                    00:aa:41:d1:cd:aa:2f:c3:f8:1f:95:53:2d:53:08:
+                    45:f3:9a:66:2e:49:1e:47:f3:79:74:d4:30:02:ee:
+                    ce:37:2c:16:b6:7e:6e:ba:73:fb:0c:b1:69:38:1e:
+                    20:2c:bb:8c:24:0c:e9:26:b6:3e:70:5e:bc:f5:a1:
+                    ed:67:a4:fc:90:47:3b:f1:9b:e4:23:11:89:e9:a1:
+                    36:ea:59:10:83:1f:ff:69:94:19:f4:26:80:35:18:
+                    dd:eb:48:9a:7d:0c:e1:39:0f:4e:39:43:b9:83:1b:
+                    17:49:d1:8b:10:9c:a4:f8:30:6d:1e:f0:1e:8a:ad:
+                    eb:e9:05:8f:bd:85:e3:05:42:2a:69:70:ed:3f:70:
+                    42:eb:8f:1e:4d:8e:83:0b:d9:fb:83:f7:dc:85:9e:
+                    cf:b9:ef:45:fd:78:b6:f0:c8:2b:d8:fe:79:bf:68:
+                    e5:5a:61:02:4b:67:38:ad:c1:8e:e7:92:cc:db:1c:
+                    b2:5e:d2:c1:d1:be:86:11:04:bf:7d:06:1c:99:42:
+                    57:75:36:ff:30:25:5e:74:21:fc:27:5f:dc:97:64:
+                    57:73:15:b4:05:f5:6e:7b:6a:27:21:47:62:58:6f:
+                    08:1d:9d:02:6b:85:97:12:f4:5a:fc:49:8f:06:ac:
+                    9d:8b:85:81:72:3e:1d:59:f0:19:96:ad:57:33:14:
+                    08:3f
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Subject Alternative Name: 
+                DNS:localhost.nn
+            X509v3 Key Usage: 
+                Digital Signature, Key Encipherment, Key Agreement
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Subject Key Identifier: 
+                25:11:BF:F6:5F:DA:82:A9:26:2B:56:56:F6:57:0D:AB:4C:F1:14:9D
+            X509v3 Authority Key Identifier: 
+                keyid:04:2C:76:0B:2F:18:04:65:37:6D:47:14:C6:13:05:31:2E:C0:24:66
+
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Authority Information Access: 
+                CA Issuers - URI:http://test.curl.se/ca/EdelCurlRoot.cer
+
+            X509v3 CRL Distribution Points: 
+
+                Full Name:
+                  URI:http://test.curl.se/ca/EdelCurlRoot.crl
+
+    Signature Algorithm: sha256WithRSAEncryption
+         7e:9c:be:4b:ef:e8:32:1e:b6:f2:88:5b:38:1f:12:2a:94:75:
+         a2:fe:fc:21:00:5e:2f:ca:8c:bf:d3:08:a0:bc:5c:8d:46:4d:
+         1a:89:55:31:fe:13:4c:d5:05:f3:ba:24:f3:42:87:c6:e4:7f:
+         c2:6b:62:a2:02:60:1f:ec:63:18:4a:04:d3:38:24:74:34:ab:
+         82:5e:75:3c:dd:11:bb:89:56:16:83:7e:44:56:7d:5f:5b:33:
+         c3:49:f8:a3:5d:d0:c3:56:fd:08:a0:10:3f:95:6f:dd:bd:6f:
+         d1:df:77:85:12:da:cc:bd:57:b0:83:15:0c:aa:9e:24:1a:3b:
+         e2:f8:1d:18:df:b6:e7:70:c8:71:e3:26:ad:0a:92:04:9c:f8:
+         0e:6f:d9:67:c1:23:6c:50:c2:8b:87:26:c0:b0:f4:59:8b:a8:
+         69:7e:f8:02:b5:1b:0f:17:ca:4b:4d:f5:16:7c:00:dc:32:d8:
+         45:16:fd:44:22:af:09:e0:41:dd:a0:b5:64:e6:f2:4b:7b:81:
+         5c:8b:db:ef:a4:2a:81:fd:f0:fd:b8:dd:f6:f8:cd:4d:82:4f:
+         f6:b4:f7:4f:42:cf:d3:58:0a:98:7f:02:64:77:c9:42:16:0a:
+         1a:5f:67:72:90:ce:7b:8d:22:ca:71:33:77:fa:71:19:5b:9f:
+         94:89:c9:fc
+-----BEGIN CERTIFICATE-----
+MIIETTCCAzWgAwIBAgIJAIE0yC2B8FQaMA0GCSqGSIb3DQEBCwUAMGgxCzAJBgNV
+BAYTAk5OMTEwLwYDVQQKDChFZGVsIEN1cmwgQXJjdGljIElsbHVkaXVtIFJlc2Vh
+cmNoIENsb3VkMSYwJAYDVQQDDB1Ob3J0aGVybiBOb3doZXJlIFRydXN0IEFuY2hv
+cjAeFw0yNTAzMDYxMTE5MDRaFw0yNTEyMzExMTE5MDRaMFcxCzAJBgNVBAYTAk5O
+MTEwLwYDVQQKDChFZGVsIEN1cmwgQXJjdGljIElsbHVkaXVtIFJlc2VhcmNoIENs
+b3VkMRUwEwYDVQQDDAxsb2NhbGhvc3Qubm4wggEiMA0GCSqGSIb3DQEBAQUAA4IB
+DwAwggEKAoIBAQCqQdHNqi/D+B+VUy1TCEXzmmYuSR5H83l01DAC7s43LBa2fm66
+c/sMsWk4HiAsu4wkDOkmtj5wXrz1oe1npPyQRzvxm+QjEYnpoTbqWRCDH/9plBn0
+JoA1GN3rSJp9DOE5D045Q7mDGxdJ0YsQnKT4MG0e8B6KrevpBY+9heMFQippcO0/
+cELrjx5NjoML2fuD99yFns+570X9eLbwyCvY/nm/aOVaYQJLZzitwY7nkszbHLJe
+0sHRvoYRBL99BhyZQld1Nv8wJV50IfwnX9yXZFdzFbQF9W57aichR2JYbwgdnQJr
+hZcS9Fr8SY8GrJ2LhYFyPh1Z8BmWrVczFAg/AgMBAAGjggEJMIIBBTAXBgNVHREE
+EDAOggxsb2NhbGhvc3Qubm4wCwYDVR0PBAQDAgOoMBMGA1UdJQQMMAoGCCsGAQUF
+BwMBMB0GA1UdDgQWBBQlEb/2X9qCqSYrVlb2Vw2rTPEUnTAfBgNVHSMEGDAWgBQE
+LHYLLxgEZTdtRxTGEwUxLsAkZjAJBgNVHRMEAjAAMEMGCCsGAQUFBwEBBDcwNTAz
+BggrBgEFBQcwAoYnaHR0cDovL3Rlc3QuY3VybC5zZS9jYS9FZGVsQ3VybFJvb3Qu
+Y2VyMDgGA1UdHwQxMC8wLaAroCmGJ2h0dHA6Ly90ZXN0LmN1cmwuc2UvY2EvRWRl
+bEN1cmxSb290LmNybDANBgkqhkiG9w0BAQsFAAOCAQEAfpy+S+/oMh628ohbOB8S
+KpR1ov78IQBeL8qMv9MIoLxcjUZNGolVMf4TTNUF87ok80KHxuR/wmtiogJgH+xj
+GEoE0zgkdDSrgl51PN0Ru4lWFoN+RFZ9X1szw0n4o13Qw1b9CKAQP5Vv3b1v0d93
+hRLazL1XsIMVDKqeJBo74vgdGN+253DIceMmrQqSBJz4Dm/ZZ8EjbFDCi4cmwLD0
+WYuoaX74ArUbDxfKS031FnwA3DLYRRb9RCKvCeBB3aC1ZObyS3uBXIvb76Qqgf3w
+/bjd9vjNTYJP9rT3T0LP01gKmH8CZHfJQhYKGl9ncpDOe40iynEzd/pxGVuflInJ
+/A==
+-----END CERTIFICATE-----

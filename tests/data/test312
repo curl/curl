@@ -20,7 +20,7 @@ SSL
 local-http
 </features>
 <server>
-https Server-localhost.nn-sv.pem
+https test-localhost.nn.pem
 </server>
 <name>
 HTTPS GET to localhost and null-prefixed CN cert
