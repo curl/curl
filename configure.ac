@@ -3902,6 +3902,7 @@ AC_CHECK_HEADERS(
   libgen.h \
   locale.h \
   stdbool.h \
+  stdint.h \
   sys/filio.h \
   sys/eventfd.h,
 dnl to do if not found
