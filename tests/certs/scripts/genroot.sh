@@ -36,8 +36,11 @@ command -v "$OPENSSL"
 
 USAGE='echo Usage is genroot.sh <name>'
 
-HOME=$(pwd)
-cd "$HOME"
+SRCDIR=$(pwd)
+
+GENDIR=${GENDIR:-$SRCDIR/gen}
+test -d "$GENDIR" || mkdir "$GENDIR"
+cd "$GENDIR"
 
 KEYSIZE=2048
 DURATION=6000
@@ -51,8 +54,8 @@ if [ -z "$PREFIX" ]; then
   echo 'No configuration prefix'
   NOTOK=1
 else
-  if [ ! -f "$PREFIX-ca.prm" ]; then
-    echo "No configuration file $PREFIX-ca.prm"
+  if [ ! -f "$SRCDIR/$PREFIX-ca.prm" ]; then
+    echo "No configuration file $SRCDIR/$PREFIX-ca.prm"
     NOTOK=1
   fi
 fi
@@ -70,12 +73,15 @@ set -x
 "$OPENSSL" genrsa -out "$PREFIX-ca.key" -passout fd:0 "$KEYSIZE" <<EOF
 pass:secret
 EOF
-"$OPENSSL" req -config "$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin fd:0 <<EOF
+"$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin fd:0 <<EOF
 pass:secret
 EOF
-"$OPENSSL" x509 -extfile "$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-raw-ca.cacert" "$DIGESTALGO"
-"$OPENSSL" x509 -text -in "$PREFIX-raw-ca.cacert" -nameopt multiline > "$PREFIX-ca.cacert"
+"$OPENSSL" x509 -extfile "$SRCDIR/$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-ca.raw-cacert" "$DIGESTALGO"
+"$OPENSSL" x509 -text -in "$PREFIX-ca.raw-cacert" -nameopt multiline > "$PREFIX-ca.cacert"
 "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -outform der -out "$PREFIX-ca.der"
 "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -text -nameopt multiline > "$PREFIX-ca.crt"
-"$OPENSSL" x509 -noout -text -in "$PREFIX-ca.cacert" -nameopt multiline
-# "$OPENSSL" rsa -in "../keys/$PREFIX-ca.key" -text -noout -pubout
+
+for ext in key cacert crt; do
+  cp "$PREFIX-ca.$ext" "$SRCDIR"/
+done
+echo "ca root $PREFIX generated."

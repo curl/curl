@@ -29,7 +29,7 @@ Schannel
 local-http
 </features>
 <server>
-https Server-localhost-firstSAN-sv.pem
+https test-localhost-san-first.pem
 </server>
 <name>
 HTTPS GET to localhost, first subject alt name matches, CN does not match (Schannel variant)
@@ -39,7 +39,7 @@ HTTPS GET to localhost, first subject alt name matches, CN does not match (Schan
 CURL_SSL_BACKEND=schannel
 </setenv>
 <command>
--4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/test-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

@@ -27,7 +27,7 @@ MooMoo
 SSL
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
 <name>
 HTTPS GET using CURLOPT_CAINFO_BLOB
@@ -37,7 +37,7 @@ lib%TESTNUMBER
 </tool>
 # provide URL and ca-cert
 <command>
-https://localhost:%HTTPSPORT/%TESTNUMBER %SRCDIR/certs/EdelCurlRoot-ca.crt
+https://localhost:%HTTPSPORT/%TESTNUMBER %SRCDIR/certs/test-ca.crt
 </command>
 # Ensure that we're running on localhost because we're checking the host name
 <precheck>

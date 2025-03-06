@@ -39,7 +39,7 @@ http/3
 HTTP/3 GET:
 </name>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --http3 --resolve localhost:%HTTP3PORT:%HOSTIP https://localhost:%HTTP3PORT/%TESTNUMBER
+--cacert %SRCDIR/certs/test-ca.crt --http3 --resolve localhost:%HTTP3PORT:%HOSTIP https://localhost:%HTTP3PORT/%TESTNUMBER
 </command>
 </client>
 

@@ -1,18 +1,10 @@
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 # SPDX-License-Identifier: curl
-339d83446859f914867398046270d40b6ca7538c0adfef45eb62c8a16abb6a51  ./tests/certs/EdelCurlRoot-ca.der
-c819fdeb4a6d27dde78895c2f3ed6467a31b332e72781e4ce6e11400bae9df3c  ./tests/certs/Server-localhost-firstSAN-sv.der
-f95d6b18fa02a0e2d98ed851cfa2f0b4b57d67fe8676ce4b1f78fc294ac22307  ./tests/certs/Server-localhost-firstSAN-sv.pub.der
-3520cdc749d32bbe93276be4d8f714e24b5b882284566966f28361f1cb8a4d1c  ./tests/certs/Server-localhost-lastSAN-sv.der
-d623be406f9c02b28b2f2a376b3d8e06ed25335b7cbf96cb2c8de9357a09250d  ./tests/certs/Server-localhost-lastSAN-sv.pub.der
-d89d7ea295af4baa5f57304c69570b4a71f2dd4f9fe06350ab50041287b6910a  ./tests/certs/Server-localhost-sv.der
-0005032e4e1cf7cc5c1540ef03d8bf32703d1ee3b4dc83e2d79afe0b1f4e5e77  ./tests/certs/Server-localhost-sv.pub.der
-5b22627a94c67159a18203ab5cd96b739188188cec61e73a444b2290e14d3d82  ./tests/certs/Server-localhost.nn-sv.der
-611cbce062c9c6924119d7498e19eacdee4326190e516cad9c212a4b4bb49930  ./tests/certs/Server-localhost.nn-sv.pub.der
-6eb66ef346068b4d9bbcc7c79244c48d3a4877f08618ff379b40ae02e067ba09  ./tests/certs/Server-localhost0h-sv.der
-b967734c9bfe3d7a1a7795f348f0bce4d9ba15ca9590697ef2d4d15b92822db0  ./tests/certs/Server-localhost0h-sv.pub.der
-6605cac758b09a954b12c2970c7d7a00f92658fc3ced250b281ae066e3ea6a73  ./tests/certs/stunnel-sv.der
-2e9634d7d8387fbffd1fe43e030746610b2fc088f627333a9b58e5cb224ad6ba  ./tests/certs/stunnel-sv.pub.der
+c68161dba1c0166e4ab8d8ce00f57326db25d29fdd52c33d9974d0972ec60990  ./tests/certs/test-localhost-san-first.pub.der
+82430be03ec1783e2f9fad6e07a6f42cce62f8a23d87ea81a95977b47110c200  ./tests/certs/test-localhost-san-last.pub.der
+47233a0092db614f53e96a4df83ddeaa7e5242899ede1c1a90c53423a0b13bba  ./tests/certs/test-localhost.nn.pub.der
+63898448aa199675a30fb6722046a665a7c1a5c24453e63d8c37397482a7dc52  ./tests/certs/test-localhost.pub.der
+f78c61bb06a71d1bf9b034ecfcb7fe35ae85b6a3b87bf3a73c085dc062747dc1  ./tests/certs/test-localhost0h.pub.der
 9e38c1fb0a151c4e23c8abddc44711c12afb3161c6b2a1c68e1bb2b0a4484e3b  ./tests/data/test1425
 26ee981dcb84b6a2adce601084b78e6b787b54a2a997549582a8bd42087ab51b  ./tests/data/test1426
 d640923e45809a3fe277e0af90459d82d32603aacc7b8db88754fcb335bf98df  ./tests/data/test1531

@@ -37,7 +37,7 @@ my $listenport = 9015;
 my $listenport2 = 9016;
 my $connect = "127.0.0.1,8990";
 my $conf = "nghttpx.conf";
-my $cert = "Server-localhost-sv";
+my $cert = "test-localhost";
 my $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
 
 #***************************************************************************

@@ -87,7 +87,6 @@ EXTRA_DIST =        \
  smbserver.py       \
  sshhelp.pm         \
  sshserver.pl       \
- stunnel.pem        \
  testcurl.pl        \
  testutil.pm        \
  tftpserver.pl      \

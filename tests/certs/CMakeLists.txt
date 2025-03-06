@@ -35,14 +35,12 @@ if(SH_EXECUTABLE)
 
   add_custom_target(build-certs
     DEPENDS ${CERTCONFIGS} ${SRPFILES}
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genroot.sh" EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost.nn EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost0h EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost-firstSAN EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" Server-localhost-lastSAN EdelCurlRoot
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" stunnel EdelCurlRoot
-    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/stunnel-sv.pem" "${CMAKE_CURRENT_SOURCE_DIR}/../stunnel.pem"
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genroot.sh" test
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" test-localhost test
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" test-localhost.nn test
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" test-localhost0h test
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" test-localhost-san-first test
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh" test-localhost-san-last test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 endif()
