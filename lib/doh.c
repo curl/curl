@@ -1088,6 +1088,7 @@ static CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
                                         struct Curl_https_rrinfo **hrr)
 {
   uint16_t pcode = 0, plen = 0;
+  uint32_t expected_min_pcode = 0;
   struct Curl_https_rrinfo *lhrr = NULL;
   char *dnsname = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
@@ -1114,13 +1115,16 @@ static CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
     plen = doh_get16bit(cp, 2);
     cp += 4;
     len -= 4;
+    if(pcode < expected_min_pcode || plen > len) {
+      result = CURLE_WEIRD_SERVER_REPLY;
+      goto err;
+    }
     result = Curl_httpsrr_set(data, lhrr, pcode, cp, plen);
     if(result)
       goto err;
-    if(plen > 0 && plen <= len) {
-      cp += plen;
-      len -= plen;
-    }
+    cp += plen;
+    len -= plen;
+    expected_min_pcode = pcode + 1;
   }
   DEBUGASSERT(!len);
   *hrr = lhrr;
