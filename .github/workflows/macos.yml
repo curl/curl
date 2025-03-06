@@ -323,7 +323,6 @@ jobs:
             if [[ '${{ matrix.build.configure }}' = *'--with-secure-transport'* || \
                   '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
               TFLAGS+=' ~313'  # Secure Transport does not support crl file
-              TFLAGS+=' ~1631 ~1632'  # Secure Transport is not able to shutdown ftp over https gracefully yet
             fi
           fi
           source $HOME/venv/bin/activate
