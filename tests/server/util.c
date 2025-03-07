@@ -879,7 +879,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = connect(unixfd, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
     error = SOCKERRNO;
     sclose(unixfd);
-    if(0 != rc && ECONNREFUSED != error) {
+    if(0 != rc && SOCKECONNREFUSED != error) {
       logmsg("Failed to connect to %s (%d) %s",
              unix_socket, error, sstrerror(error));
       return rc;
