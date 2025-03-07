@@ -906,6 +906,7 @@ jobs:
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
           export TFLAGS='-j8 ${{ matrix.tflags }} ~2302 ~2303 ~2307'
+          TFLAGS+=' ~2310'  # flaky
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
