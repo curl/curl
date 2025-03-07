@@ -72,8 +72,8 @@
 
 #ifdef HAVE_LIBZ
 
-#if !defined(ZLIB_VERNUM) || (ZLIB_VERNUM < 0x1204)
-#error "requires zlib 1.2.0.4 or newer"
+#if !defined(ZLIB_VERNUM) || (ZLIB_VERNUM < 0x1252)
+#error "requires zlib 1.2.5.2 or newer"
 #endif
 
 typedef enum {
@@ -186,13 +186,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
     z->next_out = (Bytef *) zp->buffer;
     z->avail_out = DECOMPRESS_BUFFER_SIZE;
 
-#ifdef Z_BLOCK
-    /* Z_BLOCK is only available in zlib ver. >= 1.2.0.5 */
     status = inflate(z, Z_BLOCK);
-#else
-    /* fallback for zlib ver. < 1.2.0.5 */
-    status = inflate(z, Z_SYNC_FLUSH);
-#endif
 
     /* Flush output data if some. */
     if(z->avail_out != DECOMPRESS_BUFFER_SIZE) {
@@ -223,9 +217,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       /* some servers seem to not generate zlib headers, so this is an attempt
          to fix and continue anyway */
       if(zp->zlib_init == ZLIB_INIT) {
-        /* Do not use inflateReset2(): only available since zlib 1.2.3.4. */
-        (void) inflateEnd(z);     /* do not care about the return code */
-        if(inflateInit2(z, -MAX_WBITS) == Z_OK) {
+        if(inflateReset2(z, -MAX_WBITS) == Z_OK) {
           z->next_in = orig_in;
           z->avail_in = nread;
           zp->zlib_init = ZLIB_INFLATING;
