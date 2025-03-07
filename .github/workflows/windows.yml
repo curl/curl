@@ -70,6 +70,7 @@ jobs:
             libpsl-devel
             zlib-devel
             libbrotli-devel
+            libzstd-devel
             libnghttp2-devel
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -205,6 +206,7 @@ jobs:
             openssl-devel
             zlib-devel
             brotli-devel
+            libzstd-devel
             libnghttp2-devel
             libpsl-devel
             libssh2-devel
@@ -371,47 +373,62 @@ jobs:
           fi
 
   mingw-w64-standalone-downloads:
-    name: 'dl-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
+    name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 20
     defaults:
       run:
-        shell: C:\msys64\usr\bin\bash.exe {0}
+        shell: msys2 {0}
     env:
       MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
           - name: 'schannel'
-            env: '9.5.0-x86_64'
             dir: 'mingw64'
+            env: 'x86_64'
+            ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-          - name: 'schannel U'
-            env: '7.3.0-x86_64'
+          - name: 'schannel mbedtls U'
             dir: 'mingw64'
+            env: 'x86_64'
+            ver: '7.3.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON'
+            install: mingw-w64-x86_64-mbedtls
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel !unity'
-            env: '6.4.0-i686'
             dir: 'mingw32'
+            env: 'i686'
+            ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
             type: 'Debug'
             tflags: 'skiprun'
       fail-fast: false
     steps:
-      - name: 'cache compiler (gcc ${{ matrix.env }})'
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        with:
+          msystem: ${{ matrix.dir }}
+          release: false
+          update: false
+          cache: false
+          path-type: inherit
+          install: >-
+            mingw-w64-${{ matrix.env }}-libpsl
+            ${{ matrix.install }}
+
+      - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
           path: ~\my-cache
-          key: ${{ runner.os }}-mingw-w64-${{ matrix.env }}
+          key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
-      - name: 'install compiler (gcc ${{ matrix.env }})'
+      - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
         run: |
@@ -433,16 +450,16 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-            cmake -B "bld${_chkprefill}" -G 'MSYS Makefiles' ${options} \
+            cmake -B "bld${_chkprefill}" -G "${{ contains(matrix.url, '/winlibs_mingw/') && 'Ninja' || 'MSYS Makefiles' }}" ${options} \
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DCURL_USE_LIBPSL=OFF \
+              -DUSE_LIBIDN2=OFF \
               ${{ matrix.config }}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
@@ -462,7 +479,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld
 
       - name: 'curl version'
@@ -476,7 +493,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
@@ -499,7 +516,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -510,7 +527,7 @@ jobs:
       - name: 'build examples'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld --target curl-examples
 
   linux-cross-mingw-w64:
