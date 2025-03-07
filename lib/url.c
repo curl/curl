@@ -557,6 +557,10 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 
   DEBUGASSERT(conn);
 
+  if(conn->handler && conn->handler->disconnect &&
+     !conn->bits.shutdown_handler)
+    conn->handler->disconnect(data, conn, TRUE);
+
   for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
     Curl_conn_cf_discard_all(data, conn, (int)i);
   }

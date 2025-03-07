@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+FTP
+ACCT
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+<servercmd>
+REPLY PASS 332 please provide account name
+REPLY ACCT 230 thank you
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<name>
+FTP with ACCT and connection reuse
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-account "one count" ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
+</command>
+</client>
+
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+QUIT
+</strip>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+ACCT one count
+PWD
+EPSV
+TYPE I
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
+EPSV
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+</testcase>
