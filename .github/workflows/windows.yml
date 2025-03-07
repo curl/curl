@@ -70,6 +70,7 @@ jobs:
             libpsl-devel
             zlib-devel
             libbrotli-devel
+            libzstd-devel
             libnghttp2-devel
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -205,6 +206,7 @@ jobs:
             openssl-devel
             zlib-devel
             brotli-devel
+            libzstd-devel
             libnghttp2-devel
             libpsl-devel
             libssh2-devel
