@@ -378,7 +378,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        shell: C:\msys64\usr\bin\bash.exe {0}
+        shell: msys2 {0}
     env:
       MAKEFLAGS: -j 5
     strategy:
@@ -409,6 +409,17 @@ jobs:
             tflags: 'skiprun'
       fail-fast: false
     steps:
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        with:
+          msystem: ${{ matrix.dir }}
+          release: false
+          update: false
+          cache: false
+          path-type: inherit
+          install: >-
+            mingw-w64-${{ matrix.env }}-libpsl
+            ${{ matrix.install }}
+
       - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
@@ -438,7 +449,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
@@ -467,7 +478,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld
 
       - name: 'curl version'
@@ -481,7 +492,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
@@ -504,7 +515,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -515,7 +526,7 @@ jobs:
       - name: 'build examples'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld --target curl-examples
 
   linux-cross-mingw-w64:
