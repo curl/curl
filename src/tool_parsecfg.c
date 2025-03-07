@@ -304,7 +304,8 @@ static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
       else if(b[rlen-1] == '\n') {
         /* end of the line, drop the newline */
         size_t len = curlx_dyn_len(buf);
-        curlx_dyn_setlen(buf, len - 1);
+        if(len)
+          curlx_dyn_setlen(buf, len - 1);
         return TRUE; /* all good */
       }
 
@@ -327,15 +328,18 @@ bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
   do {
     retcode = get_line(input, buf, error);
     if(!*error && retcode) {
-      const char *line = curlx_dyn_ptr(buf);
-      if(line) {
+      size_t len = curlx_dyn_len(buf);
+      if(len) {
+        const char *line = curlx_dyn_ptr(buf);
         while(ISBLANK(*line))
           line++;
 
         /* a line with # in the first non-blank column is a comment! */
-        if((*line == '#') || (*line == '\n'))
+        if((*line == '#') || !*line)
           continue;
       }
+      else
+        continue; /* avoid returning an empty line */
     }
     break;
   } while(retcode);
