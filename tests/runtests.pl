@@ -1136,30 +1136,47 @@ sub singletest_shouldrun {
     }
 
     my @info_keywords;
+    my @info_features;
     if(!$why) {
         @info_keywords = getpart("info", "keywords");
+        @info_features = getpart("client", "features");
 
         if(!$info_keywords[0]) {
             $why = "missing the <keywords> section!";
         }
+        # Only evaluate keywords if the section is present.
+        else {
+            # Prefix features with "feat:" and add to keywords list.
+            push @info_keywords, map { "feat:" . $_ } @info_features;
 
-        my $match;
-        for my $k (@info_keywords) {
-            chomp $k;
-            if ($disabled_keywords{lc($k)}) {
-                $why = "disabled by keyword";
+            my $match;
+            for my $k (@info_keywords) {
+                chomp $k;
+                if ($disabled_keywords{lc($k)}) {
+                    if ($k !~ /^feat:/) {
+                        $why = "disabled by keyword";
+                    }
+                    else {
+                        $why = "disabled by feature";
+                    }
+                }
+                elsif ($enabled_keywords{lc($k)}) {
+                    $match = 1;
+                }
+                if ($ignored_keywords{lc($k)}) {
+                    logmsg "Warning: test$testnum result is ignored due to $k\n";
+                    $errorreturncode = 2;
+                }
             }
-            elsif ($enabled_keywords{lc($k)}) {
-                $match = 1;
-            }
-            if ($ignored_keywords{lc($k)}) {
-                logmsg "Warning: test$testnum result is ignored due to $k\n";
-                $errorreturncode = 2;
-            }
-        }
 
-        if(!$why && !$match && %enabled_keywords) {
-            $why = "disabled by missing keyword";
+            if(!$why && !$match && %enabled_keywords) {
+                if (not grep { /^feat:/ } keys %enabled_keywords) {
+                    $why = "disabled by missing keyword";
+                }
+                else {
+                    $why = "disabled by missing feature";
+                }
+            }
         }
     }
 
