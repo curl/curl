@@ -346,6 +346,7 @@ jobs:
           CURL_CI: github
           PYTEST_ADDOPTS: '--color=yes'
         run: |
+          brew services start httpd
           source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
