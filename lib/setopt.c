@@ -689,7 +689,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.proxy_transfer_mode = (bool)uarg;
     break;
   case CURLOPT_SOCKS5_AUTH:
-    if(data->set.socks5auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
+    if(uarg & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
       return CURLE_NOT_BUILT_IN;
     data->set.socks5auth = (unsigned char)uarg;
     break;
