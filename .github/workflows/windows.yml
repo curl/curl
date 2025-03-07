@@ -373,7 +373,7 @@ jobs:
           fi
 
   mingw-w64-standalone-downloads:
-    name: 'dl-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
+    name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 20
     defaults:
@@ -385,35 +385,38 @@ jobs:
       matrix:
         include:
           - name: 'schannel'
-            env: '9.5.0-x86_64'
             dir: 'mingw64'
+            env: 'x86_64'
+            ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
           - name: 'schannel U'
-            env: '7.3.0-x86_64'
             dir: 'mingw64'
+            env: 'x86_64'
+            ver: '7.3.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel !unity'
-            env: '6.4.0-i686'
             dir: 'mingw32'
+            env: 'i686'
+            ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
             type: 'Debug'
             tflags: 'skiprun'
       fail-fast: false
     steps:
-      - name: 'cache compiler (gcc ${{ matrix.env }})'
+      - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
           path: ~\my-cache
-          key: ${{ runner.os }}-mingw-w64-${{ matrix.env }}
+          key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
-      - name: 'install compiler (gcc ${{ matrix.env }})'
+      - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
         run: |
