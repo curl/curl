@@ -340,7 +340,6 @@ typedef unsigned int bit;
 #ifndef ENAMETOOLONG     /* possible previous definition in errno.h */
 #define ENAMETOOLONG     WSAENAMETOOLONG
 #endif
-#define EDQUOT           WSAEDQUOT
 #endif
 
 /*
