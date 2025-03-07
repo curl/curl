@@ -439,7 +439,7 @@ jobs:
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-            cmake -B "bld${_chkprefill}" -G 'MSYS Makefiles' ${options} \
+            cmake -B "bld${_chkprefill}" -G "${{ contains(matrix.url, '/winlibs_mingw/') && 'Ninja' || 'MSYS Makefiles' }}" ${options} \
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
