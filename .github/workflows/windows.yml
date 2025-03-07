@@ -391,12 +391,13 @@ jobs:
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-          - name: 'schannel U'
+          - name: 'schannel openssl U'
             dir: 'mingw64'
             env: 'x86_64'
             ver: '7.3.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_OPENSSL=ON'
+            install: mingw-w64-x86_64-openssl
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel !unity'
@@ -417,7 +418,12 @@ jobs:
           cache: false
           path-type: inherit
           install: >-
+            mingw-w64-${{ matrix.env }}-zlib
+            mingw-w64-${{ matrix.env }}-brotli
+            mingw-w64-${{ matrix.env }}-zstd
+            mingw-w64-${{ matrix.env }}-nghttp2
             mingw-w64-${{ matrix.env }}-libpsl
+            mingw-w64-${{ matrix.env }}-libssh2
             ${{ matrix.install }}
 
       - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
