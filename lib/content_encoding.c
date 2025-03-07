@@ -186,13 +186,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
     z->next_out = (Bytef *) zp->buffer;
     z->avail_out = DECOMPRESS_BUFFER_SIZE;
 
-#ifdef Z_BLOCK
-    /* Z_BLOCK is only available in zlib ver. >= 1.2.0.5 */
     status = inflate(z, Z_BLOCK);
-#else
-    /* fallback for zlib ver. < 1.2.0.5 */
-    status = inflate(z, Z_SYNC_FLUSH);
-#endif
 
     /* Flush output data if some. */
     if(z->avail_out != DECOMPRESS_BUFFER_SIZE) {
