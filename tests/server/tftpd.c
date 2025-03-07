@@ -157,15 +157,15 @@ struct bf {
 *****************************************************************************/
 
 static struct errmsg errmsgs[] = {
-  { EUNDEF,       "Undefined error code" },
-  { ENOTFOUND,    "File not found" },
-  { EACCESS,      "Access violation" },
-  { ENOSPACE,     "Disk full or allocation exceeded" },
-  { EBADOP,       "Illegal TFTP operation" },
-  { EBADID,       "Unknown transfer ID" },
-  { EEXISTS,      "File already exists" },
-  { ENOUSER,      "No such user" },
-  { -1,           0 }
+  { TFTP_EUNDEF,       "Undefined error code" },
+  { TFTP_ENOTFOUND,    "File not found" },
+  { TFTP_EACCESS,      "Access violation" },
+  { TFTP_ENOSPACE,     "Disk full or allocation exceeded" },
+  { TFTP_EBADOP,       "Illegal TFTP operation" },
+  { TFTP_EBADID,       "Unknown transfer ID" },
+  { TFTP_EEXISTS,      "File already exists" },
+  { TFTP_ENOUSER,      "No such user" },
+  { -1,                0 }
 };
 
 static const struct formats formata[] = {
@@ -941,7 +941,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   } while(1);
 
   if(*cp || !mode) {
-    nak(EBADOP);
+    nak(TFTP_EBADOP);
     fclose(server);
     return 3;
   }
@@ -960,7 +960,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
     if(strcmp(pf->f_mode, mode) == 0)
       break;
   if(!pf->f_mode) {
-    nak(EBADOP);
+    nak(TFTP_EBADOP);
     return 2;
   }
   ecode = validate_access(test, filename, tp->th_opcode);
@@ -1118,7 +1118,7 @@ static int validate_access(struct testcase *test,
       int error = errno;
       logmsg("fopen() failed with error (%d) %s", error, strerror(error));
       logmsg("Couldn't open test file for test: %ld", testno);
-      return EACCESS;
+      return TFTP_EACCESS;
     }
     else {
       size_t count;
@@ -1126,7 +1126,7 @@ static int validate_access(struct testcase *test,
       fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
-        return EACCESS;
+        return TFTP_EACCESS;
       }
       if(test->buffer) {
         test->rptr = test->buffer; /* set read pointer */
@@ -1134,12 +1134,12 @@ static int validate_access(struct testcase *test,
         test->rcount = count;     /* set data left to read */
       }
       else
-        return EACCESS;
+        return TFTP_EACCESS;
     }
   }
   else {
     logmsg("no slash found in path");
-    return EACCESS; /* failure */
+    return TFTP_EACCESS; /* failure */
   }
 
   logmsg("file opened and all is good");
@@ -1295,7 +1295,7 @@ send_ack:
       if(size < 0)
         nak(errno + 100);
       else
-        nak(ENOSPACE);
+        nak(TFTP_ENOSPACE);
       goto abort;
     }
   } while(size == SEGSIZE);
@@ -1352,7 +1352,7 @@ static void nak(int error)
       break;
   if(pe->e_code < 0) {
     pe->e_msg = strerror(error - 100);
-    tp->th_code = EUNDEF;   /* set 'undef' errorcode */
+    tp->th_code = TFTP_EUNDEF;   /* set 'undef' errorcode */
   }
   length = (int)strlen(pe->e_msg);
 
