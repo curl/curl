@@ -416,6 +416,7 @@ jobs:
           release: false
           update: false
           cache: false
+          path-type: inherit
           install: >-
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install }}
