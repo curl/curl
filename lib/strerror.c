@@ -1110,3 +1110,161 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
   return buf;
 }
 #endif /* USE_WINDOWS_SSPI */
+
+#ifdef _WIN32
+int Curl_winsock_error_to_bsd_socket_error(int error)
+{
+  /* If it's already an acceptable BSD socket error code then return unchanged.
+     The range was determined based on MS doc highest POSIX error code 140. */
+  if(1 <= error && error <= 140 &&
+     Curl_bsd_socket_error_to_winsock_error(error) != WSASYSCALLFAILURE)
+    return error;
+
+  switch(error) {
+    case 0:                   return 0;
+    case WSAEBADF:            return EBADF;
+    case WSAEINTR:            return EINTR;
+    case WSAEINVAL:           return EINVAL;
+    case WSAEWOULDBLOCK:      return EWOULDBLOCK;
+    case WSAEINPROGRESS:      return EINPROGRESS;
+    case WSAEALREADY:         return EALREADY;
+    case WSAENOTSOCK:         return ENOTSOCK;
+    case WSAEDESTADDRREQ:     return EDESTADDRREQ;
+    case WSAEMSGSIZE:         return EMSGSIZE;
+    case WSAEPROTOTYPE:       return EPROTOTYPE;
+    case WSAENOPROTOOPT:      return ENOPROTOOPT;
+    case WSAEPROTONOSUPPORT:  return EPROTONOSUPPORT;
+#ifdef ESOCKTNOSUPPORT
+    case WSAESOCKTNOSUPPORT:  return ESOCKTNOSUPPORT;
+#endif
+    case WSAEOPNOTSUPP:       return EOPNOTSUPP;
+#ifdef EPFNOSUPPORT
+    case WSAEPFNOSUPPORT:     return EPFNOSUPPORT;
+#endif
+    case WSAEAFNOSUPPORT:     return EAFNOSUPPORT;
+    case WSAEADDRINUSE:       return EADDRINUSE;
+    case WSAEADDRNOTAVAIL:    return EADDRNOTAVAIL;
+    case WSAENETDOWN:         return ENETDOWN;
+    case WSAENETUNREACH:      return ENETUNREACH;
+    case WSAENETRESET:        return ENETRESET;
+    case WSAECONNABORTED:     return ECONNABORTED;
+    case WSAECONNRESET:       return ECONNRESET;
+    case WSAENOBUFS:          return ENOBUFS;
+    case WSAEISCONN:          return EISCONN;
+    case WSAENOTCONN:         return ENOTCONN;
+#ifdef ESHUTDOWN
+    case WSAESHUTDOWN:        return ESHUTDOWN;
+#endif
+#ifdef ETOOMANYREFS
+    case WSAETOOMANYREFS:     return ETOOMANYREFS;
+#endif
+    case WSAETIMEDOUT:        return ETIMEDOUT;
+    case WSAECONNREFUSED:     return ECONNREFUSED;
+    case WSAELOOP:            return ELOOP;
+    case WSAENAMETOOLONG:     return ENAMETOOLONG;
+#ifdef EHOSTDOWN
+    case WSAEHOSTDOWN:        return EHOSTDOWN;
+#endif
+    case WSAEHOSTUNREACH:     return EHOSTUNREACH;
+    case WSAENOTEMPTY:        return ENOTEMPTY;
+#ifdef EPROCLIM
+    case WSAEPROCLIM:         return EPROCLIM;
+#endif
+#ifdef EUSERS
+    case WSAEUSERS:           return EUSERS;
+#endif
+#ifdef EDQUOT
+    case WSAEDQUOT:           return EDQUOT;
+#endif
+#ifdef ESTALE
+    case WSAESTALE:           return ESTALE;
+#endif
+#ifdef EREMOTE
+    case WSAEREMOTE:          return EREMOTE;
+#endif
+  };
+
+  /* return ENOSYS for no known equivalent.
+     Curl_bsd_socket_error_to_winsock_error depends on this. */
+  return ENOSYS;
+}
+
+int Curl_bsd_socket_error_to_winsock_error(int error)
+{
+  /* If it's already an acceptable Winsock error code then return unchanged.
+     The range was determined based on MS SDK which says all Winsock error
+     codes have a "bias" of WSABASEERR (10000 + x). */
+  if(10000 <= error && error <= 19999 &&
+     Curl_winsock_error_to_bsd_socket_error(error) != ENOSYS) {
+    return error;
+  }
+
+  switch(error) {
+    case 0:                return 0;
+    case EBADF:            return WSAEBADF;
+    case EINTR:            return WSAEINTR;
+    case EINVAL:           return WSAEINVAL;
+    case EWOULDBLOCK:      return WSAEWOULDBLOCK;
+    case EINPROGRESS:      return WSAEINPROGRESS;
+    case EALREADY:         return WSAEALREADY;
+    case ENOTSOCK:         return WSAENOTSOCK;
+    case EDESTADDRREQ:     return WSAEDESTADDRREQ;
+    case EMSGSIZE:         return WSAEMSGSIZE;
+    case EPROTOTYPE:       return WSAEPROTOTYPE;
+    case ENOPROTOOPT:      return WSAENOPROTOOPT;
+    case EPROTONOSUPPORT:  return WSAEPROTONOSUPPORT;
+#ifdef ESOCKTNOSUPPORT
+    case ESOCKTNOSUPPORT:  return WSAESOCKTNOSUPPORT;
+#endif
+    case EOPNOTSUPP:       return WSAEOPNOTSUPP;
+#ifdef EPFNOSUPPORT
+    case EPFNOSUPPORT:     return WSAEPFNOSUPPORT;
+#endif
+    case EAFNOSUPPORT:     return WSAEAFNOSUPPORT;
+    case EADDRINUSE:       return WSAEADDRINUSE;
+    case EADDRNOTAVAIL:    return WSAEADDRNOTAVAIL;
+    case ENETDOWN:         return WSAENETDOWN;
+    case ENETUNREACH:      return WSAENETUNREACH;
+    case ENETRESET:        return WSAENETRESET;
+    case ECONNABORTED:     return WSAECONNABORTED;
+    case ECONNRESET:       return WSAECONNRESET;
+    case ENOBUFS:          return WSAENOBUFS;
+    case EISCONN:          return WSAEISCONN;
+    case ENOTCONN:         return WSAENOTCONN;
+#ifdef ESHUTDOWN
+    case ESHUTDOWN:        return WSAESHUTDOWN;
+#endif
+#ifdef ETOOMANYREFS
+    case ETOOMANYREFS:     return WSAETOOMANYREFS;
+#endif
+    case ETIMEDOUT:        return WSAETIMEDOUT;
+    case ECONNREFUSED:     return WSAECONNREFUSED;
+    case ELOOP:            return WSAELOOP;
+    case ENAMETOOLONG:     return WSAENAMETOOLONG;
+#ifdef EHOSTDOWN
+    case EHOSTDOWN:        return WSAEHOSTDOWN;
+#endif
+    case EHOSTUNREACH:     return WSAEHOSTUNREACH;
+    case ENOTEMPTY:        return WSAENOTEMPTY;
+#ifdef EPROCLIM
+    case EPROCLIM:         return WSAEPROCLIM;
+#endif
+#ifdef EUSERS
+    case EUSERS:           return WSAEUSERS;
+#endif
+#ifdef EDQUOT
+    case EDQUOT:           return WSAEDQUOT;
+#endif
+#ifdef ESTALE
+    case ESTALE:           return WSAESTALE;
+#endif
+#ifdef EREMOTE
+    case EREMOTE:          return WSAEREMOTE;
+#endif
+  };
+
+  /* return WSASYSCALLFAILURE for no known equivalent.
+     Curl_winsock_error_to_bsd_socket_error depends on this. */
+  return WSASYSCALLFAILURE;
+}
+#endif /* _WIN32 */

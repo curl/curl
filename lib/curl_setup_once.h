@@ -297,46 +297,17 @@ typedef unsigned int bit;
  * (or equivalent) on this platform to hide platform details to code using it.
  */
 
+int Curl_winsock_error_to_bsd_socket_error(int error);
+int Curl_bsd_socket_error_to_winsock_error(int error);
+
 #ifdef USE_WINSOCK
-#define SOCKERRNO         ((int)WSAGetLastError())
-#define SET_SOCKERRNO(x)  (WSASetLastError((int)(x)))
+#define SOCKERRNO \
+  (Curl_winsock_error_to_bsd_socket_error(WSAGetLastError()))
+#define SET_SOCKERRNO(x) \
+  (WSASetLastError(Curl_bsd_socket_error_to_winsock_error(x)))
 #else
 #define SOCKERRNO         (errno)
 #define SET_SOCKERRNO(x)  (errno = (x))
-#endif
-
-
-/*
- * Portable error number symbolic names defined to Winsock error codes.
- */
-
-#ifdef USE_WINSOCK
-#undef  EBADF            /* override definition in errno.h */
-#define EBADF            WSAEBADF
-#undef  EINTR            /* override definition in errno.h */
-#define EINTR            WSAEINTR
-#undef  EINVAL           /* override definition in errno.h */
-#define EINVAL           WSAEINVAL
-#undef  EWOULDBLOCK      /* override definition in errno.h */
-#define EWOULDBLOCK      WSAEWOULDBLOCK
-#undef  EINPROGRESS      /* override definition in errno.h */
-#define EINPROGRESS      WSAEINPROGRESS
-#undef  EMSGSIZE         /* override definition in errno.h */
-#define EMSGSIZE         WSAEMSGSIZE
-#undef  EAFNOSUPPORT     /* override definition in errno.h */
-#define EAFNOSUPPORT     WSAEAFNOSUPPORT
-#undef  EADDRINUSE       /* override definition in errno.h */
-#define EADDRINUSE       WSAEADDRINUSE
-#undef  EADDRNOTAVAIL    /* override definition in errno.h */
-#define EADDRNOTAVAIL    WSAEADDRNOTAVAIL
-#undef  ECONNRESET       /* override definition in errno.h */
-#define ECONNRESET       WSAECONNRESET
-#undef  EISCONN          /* override definition in errno.h */
-#define EISCONN          WSAEISCONN
-#undef  ETIMEDOUT        /* override definition in errno.h */
-#define ETIMEDOUT        WSAETIMEDOUT
-#undef  ECONNREFUSED     /* override definition in errno.h */
-#define ECONNREFUSED     WSAECONNREFUSED
 #endif
 
 /*
