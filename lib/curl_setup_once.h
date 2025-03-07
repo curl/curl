@@ -343,7 +343,6 @@ typedef unsigned int bit;
 #define ENAMETOOLONG     WSAENAMETOOLONG
 #endif
 #define EDQUOT           WSAEDQUOT
-#define EREMOTE          WSAEREMOTE
 #endif
 
 /*
