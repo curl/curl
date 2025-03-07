@@ -328,9 +328,9 @@ bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
   do {
     retcode = get_line(input, buf, error);
     if(!*error && retcode) {
-      const char *line = curlx_dyn_ptr(buf);
       size_t len = curlx_dyn_len(buf);
-      if(line && len) {
+      if(len) {
+        const char *line = curlx_dyn_ptr(buf);
         while(ISBLANK(*line))
           line++;
 
