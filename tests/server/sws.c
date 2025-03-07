@@ -860,7 +860,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
           logmsg("Got %zu bytes from client", got);
         }
 
-        if((got == -1) && ((SOCKERRNO == SOCKEAGAIN) ||
+        if((got == -1) && ((SOCKERRNO == EAGAIN) ||
                            (SOCKERRNO == SOCKEWOULDBLOCK))) {
           int rc;
           fd_set input;
@@ -926,7 +926,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
     }
     else if(got < 0) {
       int error = SOCKERRNO;
-      if(SOCKEAGAIN == error || SOCKEWOULDBLOCK == error) {
+      if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
         /* nothing to read at the moment */
         return 0;
       }
@@ -1149,7 +1149,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
 retry:
     written = swrite(sock, buffer, num);
     if(written < 0) {
-      if((SOCKEWOULDBLOCK == SOCKERRNO) || (SOCKEAGAIN == SOCKERRNO)) {
+      if((SOCKEWOULDBLOCK == SOCKERRNO) || (EAGAIN == SOCKERRNO)) {
         wait_ms(10);
         goto retry;
       }
@@ -1871,7 +1871,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 
   if(CURL_SOCKET_BAD == msgsock) {
     error = SOCKERRNO;
-    if(SOCKEAGAIN == error || SOCKEWOULDBLOCK == error) {
+    if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
       /* nothing to accept */
       return 0;
     }
