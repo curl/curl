@@ -590,6 +590,9 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 #endif
   Curl_safefree(conn->destination);
 
+  if(conn->handler && conn->handler->disconnect &&
+     !conn->bits.shutdown_handler)
+    conn->handler->disconnect(data, conn, TRUE);
   free(conn); /* free all the connection oriented data */
 }
 
