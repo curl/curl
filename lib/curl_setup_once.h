@@ -323,8 +323,6 @@ typedef unsigned int bit;
 #define EINPROGRESS      WSAEINPROGRESS
 #undef  EMSGSIZE         /* override definition in errno.h */
 #define EMSGSIZE         WSAEMSGSIZE
-#undef  ENOPROTOOPT      /* override definition in errno.h */
-#define ENOPROTOOPT      WSAENOPROTOOPT
 #undef  EAFNOSUPPORT     /* override definition in errno.h */
 #define EAFNOSUPPORT     WSAEAFNOSUPPORT
 #undef  EADDRINUSE       /* override definition in errno.h */
