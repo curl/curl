@@ -1080,7 +1080,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
         possibly_non_local = FALSE; /* do not try this again */
         continue;
       }
-      if(error != SOCKEADDRINUSE && error != EACCES) {
+      if(error != SOCKEADDRINUSE && error != SOCKEACCES) {
         failf(data, "bind(port=%hu) failed: %s", port,
               Curl_strerror(error, buffer, sizeof(buffer)));
         goto out;
