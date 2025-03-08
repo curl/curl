@@ -852,6 +852,7 @@
 #define EACCES 13
 #define EEXIST 17
 #define EISDIR 21
+#define EINVAL 22
 #define ENOSPC 28
 #define ERANGE 34
 #define strerror(x) "?"
