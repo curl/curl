@@ -48,7 +48,6 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
-#include "timediff.h"
 
 /* need init from main() */
 const char *pidname = NULL;
@@ -248,19 +247,6 @@ FILE *test2fopen(long testno, const char *logdir2)
   return stream;
 }
 
-#if !defined(MSDOS) && !defined(USE_WINSOCK)
-static long timediff(struct timeval newer, struct timeval older)
-{
-  timediff_t diff = newer.tv_sec-older.tv_sec;
-  if(diff >= (LONG_MAX/1000))
-    return LONG_MAX;
-  else if(diff <= (LONG_MIN/1000))
-    return LONG_MIN;
-  return (long)(newer.tv_sec-older.tv_sec)*1000+
-    (long)(newer.tv_usec-older.tv_usec)/1000;
-}
-#endif
-
 /*
  * Portable function used for waiting a specific amount of ms.
  * Waiting indefinitely with this function is not allowed, a
@@ -270,45 +256,41 @@ static long timediff(struct timeval newer, struct timeval older)
  *   -1 = system call error, or invalid timeout value
  *    0 = specified timeout has elapsed
  */
-int wait_ms(int timeout_ms)
+int wait_ms(timediff_t timeout_ms)
 {
   int r = 0;
 
   if(!timeout_ms)
     return 0;
   if(timeout_ms < 0) {
-    CURL_SETERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
-#ifdef MSDOS
-  delay(timeout_ms);
-#elif defined(USE_WINSOCK)
+#if defined(MSDOS)
+  delay((unsigned int)timeout_ms);
+#elif defined(_WIN32)
+  /* prevent overflow, timeout_ms is typecast to ULONG/DWORD. */
+#if TIMEDIFF_T_MAX >= ULONG_MAX
+  if(timeout_ms >= ULONG_MAX)
+    timeout_ms = ULONG_MAX-1;
+    /* do not use ULONG_MAX, because that is equal to INFINITE */
+#endif
   Sleep((DWORD)timeout_ms);
 #else
   /* avoid using poll() for this since it behaves incorrectly with no sockets
      on Apple operating systems */
   {
     struct timeval pending_tv;
-    struct timeval initial_tv = tvnow();
-    int pending_ms = timeout_ms;
-    do {
-      int error;
-      pending_tv.tv_sec = pending_ms / 1000;
-      pending_tv.tv_usec = (pending_ms % 1000) * 1000;
-      r = select(0, NULL, NULL, NULL, &pending_tv);
-      if(r != -1)
-        break;
-      error = errno;
-      if(error && (error != SOCKEINTR))
-        break;
-      pending_ms = timeout_ms - (int)timediff(tvnow(), initial_tv);
-      if(pending_ms <= 0)
-        break;
-    } while(r == -1);
+    r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
   }
-#endif /* USE_WINSOCK */
-  if(r)
-    r = -1;
+#endif /* _WIN32 */
+  if(r) {
+    if((r == -1) && (SOCKERRNO == SOCKEINTR))
+      /* make EINTR from select or poll not a "lethal" error */
+      r = 0;
+    else
+      r = -1;
+  }
   return r;
 }
 
