@@ -277,7 +277,7 @@ int wait_ms(int timeout_ms)
   if(!timeout_ms)
     return 0;
   if(timeout_ms < 0) {
-    CURL_SETERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
 #ifdef MSDOS
@@ -298,7 +298,7 @@ int wait_ms(int timeout_ms)
       r = select(0, NULL, NULL, NULL, &pending_tv);
       if(r != -1)
         break;
-      error = errno;
+      error = SOCKERRNO;
       if(error && (error != SOCKEINTR))
         break;
       pending_ms = timeout_ms - (int)timediff(tvnow(), initial_tv);
