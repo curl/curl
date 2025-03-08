@@ -1221,9 +1221,9 @@ retry:
             res = wait_ms(250);
             if(res) {
               /* should not happen */
-              error = errno;
+              error = SOCKERRNO;
               logmsg("wait_ms() failed with error (%d) %s",
-                     error, strerror(error));
+                     error, sstrerror(error));
               break;
             }
           }

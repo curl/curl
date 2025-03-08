@@ -87,7 +87,7 @@ const char *sstrerror(int err);
 /* fopens the test case file */
 FILE *test2fopen(long testno, const char *logdir);
 
-int wait_ms(int timeout_ms);
+int wait_ms(timediff_t timeout_ms);
 curl_off_t our_getpid(void);
 int write_pidfile(const char *filename);
 int write_portfile(const char *filename, int port);

@@ -30,7 +30,6 @@
 #include "urldata.h"
 #include "easyif.h"
 #include "cfilters.h"
-#include "timeval.h"
 #include "multiif.h"
 #include "strcase.h"
 
