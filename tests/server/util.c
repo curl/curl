@@ -48,7 +48,6 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
-#include "timediff.h"
 
 /* need init from main() */
 const char *pidname = NULL;
