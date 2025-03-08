@@ -337,9 +337,6 @@ typedef unsigned int bit;
 #define ETIMEDOUT        WSAETIMEDOUT
 #undef  ECONNREFUSED     /* override definition in errno.h */
 #define ECONNREFUSED     WSAECONNREFUSED
-#ifndef ENAMETOOLONG     /* possible previous definition in errno.h */
-#define ENAMETOOLONG     WSAENAMETOOLONG
-#endif
 #endif
 
 /*
