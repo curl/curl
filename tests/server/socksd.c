@@ -790,9 +790,9 @@ static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
         rc = wait_ms(delay);
         if(rc) {
           /* should not happen */
-          error = errno;
+          error = SOCKERRNO;
           logmsg("wait_ms() failed with error (%d) %s",
-                 error, strerror(error));
+                 error, sstrerror(error));
           sclose(sock);
           return CURL_SOCKET_BAD;
         }

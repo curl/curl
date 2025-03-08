@@ -982,9 +982,9 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
               break;
             if(res) {
               /* should not happen */
-              error = errno;
+              error = SOCKERRNO;
               logmsg("wait_ms() failed with error (%d) %s",
-                     error, strerror(error));
+                     error, sstrerror(error));
               break;
             }
           }
