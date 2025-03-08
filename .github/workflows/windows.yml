@@ -731,7 +731,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: 'openssl'
+          - name: 'openssl +examples'
             install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
             arch: 'x64'
             plat: 'uwp'
