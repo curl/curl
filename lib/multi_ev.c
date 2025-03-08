@@ -517,8 +517,7 @@ CURLMcode Curl_multi_ev_assign(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-static bool mev_xfer_expire_cb(curl_off_t id, void *value,
-                               const void *user_data)
+static bool mev_xfer_expire_cb(curl_off_t id, void *value, void *user_data)
 {
   const struct curltime *nowp = user_data;
   struct Curl_easy *data = value;
@@ -549,7 +548,7 @@ void Curl_multi_ev_expire_xfers(struct Curl_multi *multi,
      asked to get removed, so thus we better survive stray socket actions
      and just move on. */
   if(entry) {
-    Curl_hash_offt_visit(&entry->xfers, mev_xfer_expire_cb, nowp);
+    Curl_hash_offt_visit(&entry->xfers, mev_xfer_expire_cb, (void *)nowp);
 
     if(Curl_hash_offt_count(&entry->conns))
       *run_cpool = TRUE;
