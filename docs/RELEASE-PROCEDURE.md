@@ -103,11 +103,11 @@ pending release:
 - Release candidate one (**rc1**) ships the same Saturday the feature freeze
   starts. Twenty-five days before the release.
 
-- Release candidate two (**rc2**) ships nine days after rc1, sixteen days
-  before the release. On a Monday.
+- Release candidate two (**rc2**) ships nine days later, sixteen days before
+  the release. On a Monday.
 
-- Release candidate tree (**rc3**) ships nine days after rc2, seven days
-  before the release. On a Wednesday.
+- Release candidate tree (**rc3**) ships nine days later, seven days before
+  the release. On a Wednesday.
 
 Release candidate tarballs are ephemeral and each such tarball is only kept
 around for a few weeks. They are provided on their dedicated webpage at:
