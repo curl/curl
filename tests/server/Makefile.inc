@@ -50,58 +50,56 @@ CURLX_HDRS = \
  ../../lib/curl_get_line.h \
  ../../lib/curl_multibyte.h
 
-USEFUL = \
+UTIL = \
  getpart.c \
  getpart.h \
+ util.c \
+ util.h \
  server_setup.h \
  ../../lib/base64.c \
  ../../lib/curl_base64.h \
  ../../lib/memdebug.c \
- ../../lib/memdebug.h
+ ../../lib/memdebug.h \
+ ../../lib/strerror.c \
+ ../../lib/strerror.h
 
 INET_PTON = \
  ../../lib/inet_pton.c
 
-UTIL = \
- util.c \
- util.h \
- ../../lib/strerror.c \
- ../../lib/strerror.h
-
-resolve_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+resolve_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
  resolve.c
 resolve_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 resolve_CFLAGS = $(AM_CFLAGS)
 
-rtspd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+rtspd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
  server_sockaddr.h \
  rtspd.c
 rtspd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 rtspd_CFLAGS = $(AM_CFLAGS)
 
-sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
+sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
  server_sockaddr.h \
  sockfilt.c
 sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
-socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
+socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
  server_sockaddr.h socksd.c
 socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 socksd_CFLAGS = $(AM_CFLAGS)
 
-mqttd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+mqttd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
  server_sockaddr.h mqttd.c
 mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 mqttd_CFLAGS = $(AM_CFLAGS)
 
-sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
+sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
  server_sockaddr.h \
  sws.c
 sws_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sws_CFLAGS = $(AM_CFLAGS)
 
-tftpd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+tftpd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
  server_sockaddr.h \
  tftpd.c \
  tftp.h
