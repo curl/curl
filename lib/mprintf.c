@@ -25,6 +25,7 @@
 #include "curl_setup.h"
 #include "dynbuf.h"
 #include "curl_printf.h"
+#include "strparse.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -134,7 +135,7 @@ enum {
 struct va_input {
   FormatType type; /* FormatType */
   union {
-    char *str;
+    const char *str;
     void *ptr;
     mp_intmax_t nums; /* signed */
     mp_uintmax_t numu; /* unsigned */
@@ -150,7 +151,7 @@ struct outsegment {
   int precision; /* precision OR precision parameter number */
   unsigned int flags;
   unsigned int input; /* input argument array index */
-  char *start;      /* format string start to output */
+  const char *start; /* format string start to output */
   size_t outlen;     /* number of bytes from the format string to output */
 };
 
@@ -169,24 +170,14 @@ struct asprintf {
 
    returns -1 if no valid number was provided.
 */
-static int dollarstring(char *input, char **end)
+static int dollarstring(const char *p, const char **end)
 {
-  if(ISDIGIT(*input)) {
-    int number = 0;
-    do {
-      if(number < MAX_PARAMETERS) {
-        number *= 10;
-        number += *input - '0';
-      }
-      input++;
-    } while(ISDIGIT(*input));
-
-    if(number && (number <= MAX_PARAMETERS) && ('$' == *input)) {
-      *end = ++input;
-      return number - 1;
-    }
-  }
-  return -1;
+  curl_off_t num;
+  if(Curl_str_number(&p, &num, MAX_PARAMETERS) ||
+     Curl_str_single(&p, '$') || !num)
+    return -1;
+  *end = p;
+  return num - 1;
 }
 
 /*
@@ -216,7 +207,7 @@ static int parsefmt(const char *format,
                     int *opieces,
                     int *ipieces, va_list arglist)
 {
-  char *fmt = (char *)format;
+  const char *fmt = format;
   int param_num = 0;
   int param;
   int width;
@@ -230,7 +221,7 @@ static int parsefmt(const char *format,
   size_t outlen = 0;
   struct outsegment *optr;
   int use_dollar = DOLLAR_UNKNOWN;
-  char *start = fmt;
+  const char *start = fmt;
 
   /* clear, set a bit for each used input */
   memset(usedinput, 0, sizeof(usedinput));
@@ -312,19 +303,16 @@ static int parsefmt(const char *format,
           }
           else {
             bool is_neg = FALSE;
+            curl_off_t num;
             flags |= FLAGS_PREC;
             precision = 0;
             if('-' == *fmt) {
               is_neg = TRUE;
               fmt++;
             }
-            while(ISDIGIT(*fmt)) {
-              int n = *fmt - '0';
-              if(precision > (INT_MAX - n) / 10)
-                return PFMT_PREC;
-              precision = precision * 10 + n;
-              fmt++;
-            }
+            if(Curl_str_number(&fmt, &num, INT_MAX))
+              return PFMT_PREC;
+            precision = num;
             if(is_neg)
               precision = -precision;
           }
@@ -390,18 +378,15 @@ static int parsefmt(const char *format,
             flags |= FLAGS_PAD_NIL;
           FALLTHROUGH();
         case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
+        case '5': case '6': case '7': case '8': case '9': {
+          curl_off_t num;
           flags |= FLAGS_WIDTH;
-          width = 0;
           fmt--;
-          do {
-            int n = *fmt - '0';
-            if(width > (INT_MAX - n) / 10)
-              return PFMT_WIDTH;
-            width = width * 10 + n;
-            fmt++;
-          } while(ISDIGIT(*fmt));
+          if(Curl_str_number(&fmt, &num, INT_MAX))
+            return PFMT_WIDTH;
+          width = (int)num;
           break;
+        }
         case '*':  /* read width from argument list */
           flags |= FLAGS_WIDTHPARAM;
           if(use_dollar == DOLLAR_USE) {
@@ -596,7 +581,7 @@ static int parsefmt(const char *format,
     /* based on the type, read the correct argument */
     switch(iptr->type) {
     case FORMAT_STRING:
-      iptr->val.str = va_arg(arglist, char *);
+      iptr->val.str = va_arg(arglist, const char *);
       break;
 
     case FORMAT_INTPTR:
@@ -704,7 +689,7 @@ static int formatf(
     unsigned int flags = optr->flags;
 
     if(outlen) {
-      char *str = optr->start;
+      const char *str = optr->start;
       for(; outlen && *str; outlen--)
         OUTCHAR(*str++);
       if(optr->flags & FLAGS_SUBSTR)
@@ -873,7 +858,7 @@ number:
       const char *str;
       size_t len;
 
-      str = (char *)iptr->val.str;
+      str = iptr->val.str;
       if(!str) {
         /* Write null string if there is space.  */
         if(prec == -1 || prec >= (int) sizeof(nilstr) - 1) {
