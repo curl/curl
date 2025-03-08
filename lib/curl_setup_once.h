@@ -321,32 +321,21 @@ typedef unsigned int bit;
  */
 
 #ifdef USE_WINSOCK
-#undef  EBADF            /* override definition in errno.h */
-#define EBADF            WSAEBADF
-#undef  EINTR            /* override definition in errno.h */
-#define EINTR            WSAEINTR
-#undef  EINVAL           /* override definition in errno.h */
-#define EINVAL           WSAEINVAL
-#undef  EWOULDBLOCK      /* override definition in errno.h */
-#define EWOULDBLOCK      WSAEWOULDBLOCK
-#undef  EINPROGRESS      /* override definition in errno.h */
-#define EINPROGRESS      WSAEINPROGRESS
-#undef  EMSGSIZE         /* override definition in errno.h */
-#define EMSGSIZE         WSAEMSGSIZE
-#undef  EAFNOSUPPORT     /* override definition in errno.h */
-#define EAFNOSUPPORT     WSAEAFNOSUPPORT
-#undef  EADDRINUSE       /* override definition in errno.h */
-#define EADDRINUSE       WSAEADDRINUSE
-#undef  EADDRNOTAVAIL    /* override definition in errno.h */
-#define EADDRNOTAVAIL    WSAEADDRNOTAVAIL
-#undef  ECONNRESET       /* override definition in errno.h */
-#define ECONNRESET       WSAECONNRESET
-#undef  EISCONN          /* override definition in errno.h */
-#define EISCONN          WSAEISCONN
-#undef  ETIMEDOUT        /* override definition in errno.h */
-#define ETIMEDOUT        WSAETIMEDOUT
-#undef  ECONNREFUSED     /* override definition in errno.h */
-#define ECONNREFUSED     WSAECONNREFUSED
+#define SOCKEADDRINUSE   WSAEADDRINUSE
+#define SOCKECONNREFUSED WSAECONNREFUSED
+#define SOCKEINPROGRESS  WSAEINPROGRESS
+#define SOCKEINTR        WSAEINTR
+#define SOCKEINVAL       WSAEINVAL
+#define SOCKEISCONN      WSAEISCONN
+#define SOCKEWOULDBLOCK  WSAEWOULDBLOCK
+#else
+#define SOCKEADDRINUSE   EADDRINUSE
+#define SOCKECONNREFUSED ECONNREFUSED
+#define SOCKEINPROGRESS  EINPROGRESS
+#define SOCKEINTR        EINTR
+#define SOCKEINVAL       EINVAL
+#define SOCKEISCONN      EISCONN
+#define SOCKEWOULDBLOCK  EWOULDBLOCK
 #endif
 
 /*
