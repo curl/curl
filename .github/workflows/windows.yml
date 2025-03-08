@@ -937,7 +937,7 @@ jobs:
 
       - name: 'build examples'
         timeout-minutes: 5
-        if: ${{ !contains(matrix.build.name, '-examples') }}
+        if: ${{ !contains(matrix.name, '-examples') }}
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
