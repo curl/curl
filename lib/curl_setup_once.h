@@ -346,7 +346,9 @@ typedef unsigned int bit;
 #define SOCKEINVAL        EINVAL
 #define SOCKEISCONN       EISCONN
 #define SOCKEMSGSIZE      EMSGSIZE
+#ifdef ETIMEDOUT
 #define SOCKETIMEDOUT     ETIMEDOUT
+#endif
 #define SOCKEWOULDBLOCK   EWOULDBLOCK
 #endif
 
