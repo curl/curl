@@ -25,24 +25,6 @@
  ***************************************************************************/
 #include "server_setup.h"
 
-#ifdef USE_WINSOCK
-#define SOCKEADDRINUSE   WSAEADDRINUSE
-#define SOCKECONNREFUSED WSAECONNREFUSED
-#define SOCKEINPROGRESS  WSAEINPROGRESS
-#define SOCKEINTR        WSAEINTR
-#define SOCKEINVAL       WSAEINVAL
-#define SOCKEISCONN      WSAEISCONN
-#define SOCKEWOULDBLOCK  WSAEWOULDBLOCK
-#else
-#define SOCKEADDRINUSE   EADDRINUSE
-#define SOCKECONNREFUSED ECONNREFUSED
-#define SOCKEINPROGRESS  EINPROGRESS
-#define SOCKEINTR        EINTR
-#define SOCKEINVAL       EINVAL
-#define SOCKEISCONN      EISCONN
-#define SOCKEWOULDBLOCK  EWOULDBLOCK
-#endif
-
 enum {
   DOCNUMBER_NOTHING    = -7,
   DOCNUMBER_QUIT       = -6,
