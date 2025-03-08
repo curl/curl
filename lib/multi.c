@@ -1431,7 +1431,7 @@ CURLMcode curl_multi_wakeup(CURLM *m)
 #ifdef USE_WINSOCK
         return_success = SOCKEWOULDBLOCK == err;
 #else
-        if(EINTR == err)
+        if(SOCKEINTR == err)
           continue;
         return_success = SOCKEWOULDBLOCK == err || EAGAIN == err;
 #endif
