@@ -868,7 +868,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
     err = 0;
   }
 #endif
-  if((0 == err) || (EISCONN == err))
+  if((0 == err) || (SOCKEISCONN == err))
     /* we are connected, awesome! */
     rc = TRUE;
   else
@@ -891,10 +891,10 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
                                       const char *ipaddress, int error)
 {
   switch(error) {
-  case EINPROGRESS:
-  case EWOULDBLOCK:
+  case SOCKEINPROGRESS:
+  case SOCKEWOULDBLOCK:
 #if defined(EAGAIN)
-#if (EAGAIN) != (EWOULDBLOCK)
+#if (EAGAIN) != (SOCKEWOULDBLOCK)
     /* On some platforms EAGAIN and EWOULDBLOCK are the
      * same value, and on others they are different, hence
      * the odd #if
@@ -1515,15 +1515,16 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     int sockerr = SOCKERRNO;
 
     if(
-#ifdef WSAEWOULDBLOCK
+#ifdef USE_WINSOCK
       /* This is how Windows does it */
-      (WSAEWOULDBLOCK == sockerr)
+      (SOCKEWOULDBLOCK == sockerr)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
-      (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) || (EINTR == sockerr) ||
-      (EINPROGRESS == sockerr)
+      (SOCKEWOULDBLOCK == sockerr) ||
+      (EAGAIN == sockerr) || (SOCKEINTR == sockerr) ||
+      (SOCKEINPROGRESS == sockerr)
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */
@@ -1583,14 +1584,15 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     int sockerr = SOCKERRNO;
 
     if(
-#ifdef WSAEWOULDBLOCK
+#ifdef USE_WINSOCK
       /* This is how Windows does it */
-      (WSAEWOULDBLOCK == sockerr)
+      (SOCKEWOULDBLOCK == sockerr)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
-      (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) || (EINTR == sockerr)
+      (SOCKEWOULDBLOCK == sockerr) ||
+      (EAGAIN == sockerr) || (SOCKEINTR == sockerr)
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */

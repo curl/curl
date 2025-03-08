@@ -1063,7 +1063,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     if(bind(portsock, sa, sslen) ) {
       /* It failed. */
       error = SOCKERRNO;
-      if(possibly_non_local && (error == EADDRNOTAVAIL)) {
+      if(possibly_non_local && (error == SOCKEADDRNOTAVAIL)) {
         /* The requested bind address is not local. Use the address used for
          * the control connection instead and restart the port loop
          */
@@ -1080,7 +1080,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
         possibly_non_local = FALSE; /* do not try this again */
         continue;
       }
-      if(error != EADDRINUSE && error != EACCES) {
+      if(error != SOCKEADDRINUSE && error != SOCKEACCES) {
         failf(data, "bind(port=%hu) failed: %s", port,
               Curl_strerror(error, buffer, sizeof(buffer)));
         goto out;

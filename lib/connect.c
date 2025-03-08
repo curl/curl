@@ -306,7 +306,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 
   addr[0] = '\0';
   *port = 0;
-  CURL_SETERRNO(EAFNOSUPPORT);
+  CURL_SETERRNO(SOCKEAFNOSUPPORT);
   return FALSE;
 }
 
@@ -608,8 +608,8 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
       else if(Curl_timediff(*now, baller->started) >= baller->timeoutms) {
         infof(data, "%s connect timeout after %" FMT_TIMEDIFF_T
               "ms, move on!", baller->name, baller->timeoutms);
-#if defined(ETIMEDOUT)
-        baller->error = ETIMEDOUT;
+#ifdef SOCKETIMEDOUT
+        baller->error = SOCKETIMEDOUT;
 #endif
         baller->result = CURLE_OPERATION_TIMEDOUT;
       }
@@ -770,11 +770,8 @@ evaluate:
         Curl_timediff(now, data->progress.t_startsingle),
         curl_easy_strerror(result));
 
-#ifdef WSAETIMEDOUT
-  if(WSAETIMEDOUT == data->state.os_errno)
-    result = CURLE_OPERATION_TIMEDOUT;
-#elif defined(ETIMEDOUT)
-  if(ETIMEDOUT == data->state.os_errno)
+#ifdef SOCKETIMEDOUT
+  if(SOCKETIMEDOUT == data->state.os_errno)
     result = CURLE_OPERATION_TIMEDOUT;
 #endif
 

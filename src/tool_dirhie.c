@@ -48,6 +48,7 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
 {
   switch(errno) {
 #ifdef EACCES
+  /* !checksrc! disable ERRNOVAR 1 */
   case EACCES:
     errorf(global, "You do not have permission to create %s", name);
     break;
@@ -129,6 +130,7 @@ CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
       return result;
 
     /* Create directory. Ignore access denied error to allow traversal. */
+    /* !checksrc! disable ERRNOVAR 1 */
     if(!skip && (-1 == mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750)) &&
        (errno != EACCES) && (errno != EEXIST)) {
       show_dir_errno(global, curlx_dyn_ptr(&dirbuf));
