@@ -109,8 +109,8 @@ pending release:
 - Release candidate tree (rc3) ships nine days after rc2, seven days before
   the relase. On a Wednesday.
 
-Release candidate tarballs are ephemeral and each such tarball will only be
-provided for a few weeks. They are provided on their dedicated webpage at:
+Release candidate tarballs are ephemeral and each such tarball is only kept
+around for a few weeks. They are provided on their dedicated webpage at:
 https://curl.se/rc/
 
 **Do not use release candidates in production**. They are work in progress.
