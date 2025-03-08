@@ -1328,7 +1328,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
                when there is no more data, breaking the loop. */
             nread = wakeup_read(multi->wakeup_pair[0], buf, sizeof(buf));
             if(nread <= 0) {
-              if(nread < 0 && EINTR == SOCKERRNO)
+              if(nread < 0 && SOCKEINTR == SOCKERRNO)
                 continue;
               break;
             }
@@ -1429,11 +1429,11 @@ CURLMcode curl_multi_wakeup(CURLM *m)
         int err = SOCKERRNO;
         int return_success;
 #ifdef USE_WINSOCK
-        return_success = WSAEWOULDBLOCK == err;
+        return_success = SOCKEWOULDBLOCK == err;
 #else
-        if(EINTR == err)
+        if(SOCKEINTR == err)
           continue;
-        return_success = EWOULDBLOCK == err || EAGAIN == err;
+        return_success = SOCKEWOULDBLOCK == err || EAGAIN == err;
 #endif
         if(!return_success)
           return CURLM_WAKEUP_FAILURE;
