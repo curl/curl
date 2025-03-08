@@ -1113,7 +1113,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   size_t gtls_alpns_count = 0;
   bool gtls_session_setup = FALSE;
   struct alpn_spec alpns;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   int rc;
 
   DEBUGASSERT(gctx);
