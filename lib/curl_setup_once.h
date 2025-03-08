@@ -323,6 +323,7 @@ typedef unsigned int bit;
 #define SOCKEINVAL        WSAEINVAL
 #define SOCKEISCONN       WSAEISCONN
 #define SOCKEMSGSIZE      WSAEMSGSIZE
+#define SOCKENOMEM        WSA_NOT_ENOUGH_MEMORY
 #define SOCKETIMEDOUT     WSAETIMEDOUT
 #define SOCKEWOULDBLOCK   WSAEWOULDBLOCK
 #else
@@ -338,6 +339,7 @@ typedef unsigned int bit;
 #define SOCKEINVAL        EINVAL
 #define SOCKEISCONN       EISCONN
 #define SOCKEMSGSIZE      EMSGSIZE
+#define SOCKENOMEM        ENOMEM
 #ifdef ETIMEDOUT
 #define SOCKETIMEDOUT     ETIMEDOUT
 #endif
