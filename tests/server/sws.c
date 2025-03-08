@@ -860,8 +860,8 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
           logmsg("Got %zu bytes from client", got);
         }
 
-        if((got == -1) && ((SOCKERRNO == EAGAIN) ||
-                           (SOCKERRNO == SOCKEWOULDBLOCK))) {
+        if((got == -1) &&
+           ((SOCKERRNO == EAGAIN) || (SOCKERRNO == SOCKEWOULDBLOCK))) {
           int rc;
           fd_set input;
           fd_set output;
