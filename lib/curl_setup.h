@@ -853,6 +853,7 @@
 /* Terrible workarounds to make Windows CE compile */
 #define errno 0
 #define CURL_SETERRNO(x) ((void)(x))
+#define EINTR  4
 #define EAGAIN 11
 #define ENOMEM 12
 #define EACCES 13
