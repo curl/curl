@@ -93,7 +93,7 @@ int Curl_wait_ms(timediff_t timeout_ms);
 #define FDSET_SOCK(x) 1
 #define VERIFY_SOCK(x) do { \
   if(!VALID_SOCK(x)) { \
-    SET_SOCKERRNO(WSAEINVAL); \
+    SET_SOCKERRNO(SOCKEINVAL); \
     return -1; \
   } \
 } while(0)
@@ -105,7 +105,7 @@ int Curl_wait_ms(timediff_t timeout_ms);
 
 #define VERIFY_SOCK(x) do {                     \
     if(!VALID_SOCK(x) || !FDSET_SOCK(x)) {      \
-      SET_SOCKERRNO(EINVAL);                    \
+      SET_SOCKERRNO(SOCKEINVAL);                \
       return -1;                                \
     }                                           \
   } while(0)
