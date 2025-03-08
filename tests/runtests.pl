@@ -140,6 +140,8 @@ my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;  # key words of tests to skip
 my %ignored_keywords;   # key words of tests to ignore results
 my %enabled_keywords;   # key words of tests to run
+my %disabled_features;  # features of tests to skip
+my %enabled_features;   # features of tests to run
 my %disabled;           # disabled test cases
 my %ignored;            # ignored results of test cases
 my %ignoretestcodes;    # if test results are to be ignored
@@ -1136,30 +1138,31 @@ sub singletest_shouldrun {
     }
 
     my @info_keywords;
+    my @info_features;
     if(!$why) {
         @info_keywords = getpart("info", "keywords");
 
         if(!$info_keywords[0]) {
             $why = "missing the <keywords> section!";
         }
+        # Only evaluate keywords if the section is present.
+        else {
+            $why = evaluate_test_criteria(\@info_keywords, \%enabled_keywords,
+              \%disabled_keywords, "keyword");
 
-        my $match;
-        for my $k (@info_keywords) {
-            chomp $k;
-            if ($disabled_keywords{lc($k)}) {
-                $why = "disabled by keyword";
-            }
-            elsif ($enabled_keywords{lc($k)}) {
-                $match = 1;
-            }
-            if ($ignored_keywords{lc($k)}) {
-                logmsg "Warning: test$testnum result is ignored due to $k\n";
-                $errorreturncode = 2;
+            for my $k (@info_keywords) {
+                chomp $k;
+                if ($ignored_keywords{lc($k)}) {
+                    logmsg "Warning: test$testnum result is ignored due to $k\n";
+                    $errorreturncode = 2;
+                }
             }
         }
 
-        if(!$why && !$match && %enabled_keywords) {
-            $why = "disabled by missing keyword";
+        @info_features = getpart("client", "features");
+        if(!$why) {
+            $why = evaluate_test_criteria(\@info_features, \%enabled_features,
+              \%disabled_features, "feature");
         }
     }
 
@@ -1190,6 +1193,29 @@ sub singletest_shouldrun {
     return ($why, $errorreturncode);
 }
 
+#######################################################################
+# Check if an item (keyword or feature) should enable or disable a test.
+sub evaluate_test_criteria {
+    my ($items_ref, $enabled_ref, $disabled_ref, $type) = @_;
+    my $match = 0;
+    my $why;
+
+    for my $item (@$items_ref) {
+        chomp $item;
+        if ($disabled_ref->{lc($item)}) {
+            return "disabled by $type";
+        }
+        elsif ($enabled_ref->{lc($item)}) {
+            $match = 1;
+        }
+    }
+
+    if (!$why && !$match && %$enabled_ref) {
+        return "disabled by missing $type";
+    }
+
+    return $why;
+}
 
 #######################################################################
 # Print the test name and count tests
@@ -2486,6 +2512,8 @@ Usage: runtests.pl [options] [test selection(s)]
   [keyword] like "IPv6" to select only tests containing the key word
   [!keyword] like "!cookies" to disable any tests containing the key word
   [~keyword] like "~cookies" to ignore results of tests containing key word
+  [feat:name]  like "feat:debug" to enable a specific feature
+  [!feat:name] like "!feat:debug" to disable a specific feature
 EOHELP
     ;
         exit;
@@ -2512,6 +2540,12 @@ EOHELP
     elsif($ARGV[0] =~ /^~(\d+)/) {
         $fromnum = -1;
         $ignored{$1}=$1;
+    }
+    elsif($ARGV[0] =~ /^!feat:(.+)/) {
+        $disabled_features{lc($1)}=$1;
+    }
+    elsif($ARGV[0] =~ /^feat:(.+)/) {
+        $enabled_features{lc($1)}=$1;
     }
     elsif($ARGV[0] =~ /^!(.+)/) {
         $disabled_keywords{lc($1)}=$1;
