@@ -350,9 +350,6 @@ jobs:
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~612'  # SFTP
           fi
-          if [ '${{ matrix.sys }}' = 'clang64' ]; then
-            TFLAGS+=' ~2302 ~2303 ~2307'  # permafail with clang (and also MSVC) (but works with mingw64 and ucrt64)
-          fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -923,7 +920,7 @@ jobs:
         timeout-minutes: 10
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
-          export TFLAGS='-j8 ${{ matrix.tflags }} ~2302 ~2303 ~2307'
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
           TFLAGS+=' ~2310'  # flaky
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           PATH="/c/msys64/usr/bin:$PATH"
