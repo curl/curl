@@ -1170,7 +1170,7 @@ ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 
       ret = (li->recv)(data, FIRSTSOCKET, buf, len, &err);
       if(ret < 0 && err == CURLE_AGAIN) {
-        SET_SOCKERRNO(EWOULDBLOCK);
+        SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
     }
   }
@@ -1189,7 +1189,7 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
       CURLcode err = CURLE_SEND_ERROR;
       ret = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &err);
       if(ret < 0 && err == CURLE_AGAIN) {
-        SET_SOCKERRNO(EWOULDBLOCK);
+        SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
     }
   }
