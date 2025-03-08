@@ -176,8 +176,8 @@ jobs:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver', install: 'openssl-devel', name: 'default' }
           - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'openssl-devel', name: 'default' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '--with-openssl', install: 'openssl-devel', name: 'default R' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', install: 'openssl-devel', name: 'default' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: ''       , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares', install: 'openssl-devel', name: 'c-ares U' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', install: 'mingw-w64-x86_64-openssl', name: 'default' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: ''       , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares', install: 'mingw-w64-x86_64-openssl', name: 'c-ares U' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: ''       , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: '', type: 'Debug', name: 'schannel c-ares U' }
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON   -DENABLE_UNICODE=OF', install: 'mingw-w64-clang-x86_64-gnutls', type: 'Debug', name: 'gnutls' }
