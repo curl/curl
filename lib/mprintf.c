@@ -177,7 +177,7 @@ static int dollarstring(const char *p, const char **end)
      Curl_str_single(&p, '$') || !num)
     return -1;
   *end = p;
-  return num - 1;
+  return (int)num - 1;
 }
 
 /*
@@ -312,7 +312,7 @@ static int parsefmt(const char *format,
             }
             if(Curl_str_number(&fmt, &num, INT_MAX))
               return PFMT_PREC;
-            precision = num;
+            precision = (int)num;
             if(is_neg)
               precision = -precision;
           }
