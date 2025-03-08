@@ -35,7 +35,7 @@ my $what=$ARGV[2];
 open(CURL, "$ARGV[1]") || die "Can't open curl --version list in $ARGV[1]\n";
 $_ = <CURL>;
 chomp;
-/libcurl\/([\.\d]+((-DEV)|(-\d+))?)/;
+/libcurl\/([\.\d]+((-DEV)|(-rc\d)|(-\d+))?)/;
 my $version = $1;
 close CURL;
 
@@ -47,7 +47,7 @@ $_ = <CURLCONFIG>;
 chomp;
 my $filever=$_;
 if ( $what eq "version" ) {
-    if($filever =~ /^libcurl ([\.\d]+((-DEV)|(-\d+))?)$/) {
+    if($filever =~ /^libcurl ([\.\d]+((-DEV)|(-rc\d)|(-\d+))?)$/) {
         $curlconfigversion = $1;
     }
     else {
@@ -63,7 +63,7 @@ else { # "vernum" case
         $curlconfigversion = "illegal value";
     }
 
-    # Strip off the -DEV from the curl version if it's there
+    # Strip off the -DEV and -rc suffixes from the curl version if they're there
     $version =~ s/-\w*$//;
 }
 close CURLCONFIG;
