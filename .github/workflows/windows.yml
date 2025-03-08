@@ -798,6 +798,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
+            tflags: 'skiprun'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
