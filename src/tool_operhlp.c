@@ -210,16 +210,16 @@ CURLcode get_url_file_name(struct GlobalConfig *global,
         }
       }
 
-      if(pc)
+      if(pc) {
         /* duplicate the string beyond the slash */
-        pc++;
+        *filename = strdup(pc + 1);
+      }
       else {
         /* no slash => empty string, use default */
-        pc = (char *)"curl_response";
-        warnf(global, "No remote file name, uses \"%s\"", pc);
+        *filename = strdup("curl_response");
+        warnf(global, "No remote file name, uses \"%s\"", *filename);
       }
 
-      *filename = strdup(pc);
       curl_free(path);
       if(!*filename)
         return CURLE_OUT_OF_MEMORY;

@@ -67,7 +67,8 @@
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 {
   if(sa->sa_family == AF_INET6) {
-    const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *)(void *) sa;
+    const struct sockaddr_in6 * sa6 =
+      (const struct sockaddr_in6 *)(const void *) sa;
     const unsigned char *b = sa6->sin6_addr.s6_addr;
     unsigned short w = (unsigned short) ((b[0] << 8) | b[1]);
 

@@ -326,7 +326,7 @@ static size_t decode_length(unsigned char *buffer,
 /* return 0 on success */
 static int publish(FILE *dump,
                    curl_socket_t fd, unsigned short packetid,
-                   char *topic, char *payload, size_t payloadlen)
+                   char *topic, const char *payload, size_t payloadlen)
 {
   size_t topiclen = strlen(topic);
   unsigned char *packet;
@@ -607,7 +607,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
         }
       }
       else {
-        char *def = (char *)"this is random payload yes yes it is";
+        const char *def = "this is random payload yes yes it is";
         publish(dump, fd, packet_id, topic, def, strlen(def));
       }
       disconnect(dump, fd);

@@ -221,7 +221,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       break;
     wlen = max_write ? CURLMIN(blen, max_write) : blen;
     Curl_set_in_callback(data, TRUE);
-    nwritten = wcb((char *)buf, 1, wlen, wcb_data);
+    nwritten = wcb((char *)CURL_UNCONST(buf), 1, wlen, wcb_data);
     Curl_set_in_callback(data, FALSE);
     CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes -> %zu",
                    wlen, (otype == CW_OUT_BODY) ? "body" : "header",

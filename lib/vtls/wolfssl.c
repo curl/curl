@@ -744,7 +744,7 @@ static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
 
   DEBUGASSERT(multi);
   share = multi ? Curl_hash_pick(&multi->proto_hash,
-                                 (void *)MPROTO_WSSL_X509_KEY,
+                                 CURL_UNCONST(MPROTO_WSSL_X509_KEY),
                                  sizeof(MPROTO_WSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
      !wssl_cached_x509_store_expired(data, share) &&
@@ -767,7 +767,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
   if(!multi)
     return;
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_WSSL_X509_KEY,
+                         CURL_UNCONST(MPROTO_WSSL_X509_KEY),
                          sizeof(MPROTO_WSSL_X509_KEY)-1);
 
   if(!share) {
@@ -775,7 +775,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
     if(!share)
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
-                       (void *)MPROTO_WSSL_X509_KEY,
+                       CURL_UNCONST(MPROTO_WSSL_X509_KEY),
                        sizeof(MPROTO_WSSL_X509_KEY)-1,
                        share, wssl_x509_share_free)) {
       free(share);
@@ -1100,7 +1100,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 
   curves = conn_config->curves;
   if(!curves && cf->conn->transport == TRNSPRT_QUIC)
-    curves = (char *)QUIC_GROUPS;
+    curves = (char *)CURL_UNCONST(QUIC_GROUPS);
 
   if(curves) {
 #ifdef WOLFSSL_HAVE_KYBER

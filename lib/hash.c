@@ -121,7 +121,7 @@ hash_elem_create(const void *key, size_t key_len, const void *p,
     /* copy the key */
     memcpy(he->key, key, key_len);
     he->key_len = key_len;
-    he->ptr = (void *) p;
+    he->ptr = CURL_UNCONST(p);
     he->dtor = dtor;
   }
   return he;
