@@ -731,7 +731,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: 'openssl'
+          - name: 'openssl +examples'
             install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
             arch: 'x64'
             plat: 'uwp'
@@ -753,13 +753,13 @@ jobs:
               -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'schannel MultiSSL U'
-            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls wolfssl'
+            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl shiftmedia-libgnutls openssl mbedtls wolfssl'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             config: >-
               -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
+              -DCURL_USE_SCHANNEL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
               -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
 
           - name: 'libressl'
@@ -782,7 +782,7 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
               -DUSE_ECH=ON
 
-          - name: 'wolfssl'
+          - name: 'wolfssl +examples'
             install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
             arch: 'x64'
             plat: 'windows'
@@ -792,6 +792,19 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
               -DUSE_ECH=ON
+
+          - name: 'gnutls'
+            install: 'brotli zlib zstd libpsl nghttp2 shiftmedia-libgnutls libssh2 pkgconf gsasl ngtcp2[gnutls] nghttp3'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            # GnuTLS is not fully functional on Windows, so skip the tests
+            # https://github.com/ShiftMediaProject/gnutls/issues/23
+            tflags: 'skiprun'
+            config: >-
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
+              -DCURL_USE_GSASL=ON
 
           - name: 'mbedtls'
             install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
@@ -901,11 +914,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          # GnuTLS is not fully functional on Windows, so skip the tests
-          # https://github.com/ShiftMediaProject/gnutls/issues/23
-          if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
-            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
-          fi
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'downgrade msys2-runtime'
@@ -930,6 +939,7 @@ jobs:
 
       - name: 'build examples'
         timeout-minutes: 5
+        if: ${{ contains(matrix.name, '+examples') }}
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
