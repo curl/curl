@@ -49,9 +49,9 @@
 #endif
 
 #ifdef HAVE_GETADDRINFO
-#  define RESOLVER_ENOMEM  EAI_MEMORY
+#  define RESOLVER_ENOMEM  EAI_MEMORY  /* = WSA_NOT_ENOUGH_MEMORY on Windows */
 #else
-#  define RESOLVER_ENOMEM  ENOMEM
+#  define RESOLVER_ENOMEM  SOCKENOMEM
 #endif
 
 #include "urldata.h"
