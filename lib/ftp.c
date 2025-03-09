@@ -1907,7 +1907,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
-      Curl_safefree(ftpc->newhost);
+      free(ftpc->newhost);
       ftpc->newhost = strdup(control_address(conn));
       if(!ftpc->newhost)
         return CURLE_OUT_OF_MEMORY;
@@ -1952,7 +1952,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
   Curl_resolv_unlink(data, &addr); /* we are done using this address */
 
-  Curl_safefree(conn->secondaryhostname);
+  free(conn->secondaryhostname);
   conn->secondary_port = ftpc->newport;
   conn->secondaryhostname = strdup(ftpc->newhost);
   if(!conn->secondaryhostname)

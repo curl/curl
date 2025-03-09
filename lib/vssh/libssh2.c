@@ -1276,10 +1276,10 @@ sftp_pkey_init(struct Curl_easy *data,
         /* Nothing found; try the current dir. */
         sshc->rsa = strdup("id_rsa");
         if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
-          Curl_safefree(sshc->rsa);
+          free(sshc->rsa);
           sshc->rsa = strdup("id_dsa");
           if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
-            Curl_safefree(sshc->rsa);
+            free(sshc->rsa);
             /* Out of guesses. Set to the empty string to avoid
              * surprising info messages. */
             sshc->rsa = strdup("");

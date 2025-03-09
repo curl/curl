@@ -1503,7 +1503,7 @@ static ParameterError parse_verbose(struct GlobalConfig *global,
   switch(global->verbosity) {
   case 0:
     global->verbosity = 1;
-    Curl_safefree(global->trace_dump);
+    free(global->trace_dump);
     global->trace_dump = strdup("%");
     if(!global->trace_dump)
       err = PARAM_NO_MEM;
