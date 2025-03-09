@@ -33,6 +33,22 @@
 struct curltime Curl_now(void)
 {
   struct curltime now;
+#ifndef BUILDING_LIBCURL
+  /* When building for tool or tests, we initialize locally */
+  static LARGE_INTEGER Curl_freq;
+  static bool Curl_isVistaOrGreater;
+  static bool init = FALSE;
+  if(!init) {
+    if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+                                    VERSION_GREATER_THAN_EQUAL))
+      Curl_isVistaOrGreater = true;
+    else
+      Curl_isVistaOrGreater = false;
+
+    QueryPerformanceFrequency(&Curl_freq);
+    init = TRUE;
+  }
+#endif
   if(Curl_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
