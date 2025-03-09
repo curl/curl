@@ -37,7 +37,8 @@ CURLX_SRCS = \
  ../../lib/strdup.c \
  ../../lib/strcase.c \
  ../../lib/curl_get_line.c \
- ../../lib/curl_multibyte.c
+ ../../lib/curl_multibyte.c \
+ ../../lib/version_win32.c
 
 CURLX_HDRS = \
  ../../lib/curlx.h \
@@ -52,7 +53,8 @@ CURLX_HDRS = \
  ../../lib/strcase.h \
  ../../lib/strdup.h \
  ../../lib/curl_get_line.h \
- ../../lib/curl_multibyte.h
+ ../../lib/curl_multibyte.h \
+ ../../lib/version_win32.h
 
 USEFUL = \
  getpart.c \
