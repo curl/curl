@@ -88,7 +88,7 @@ use testutil qw(
 #
 
 # config variables overridden by command-line options
-our $verbose;         # 1 to show verbose test output
+our $verbose = 1;     # 1 to show verbose test output
 our $torture;         # 1 to enable torture testing
 our $proxy_address;   # external HTTP proxy address
 our $listonly;        # only list the tests

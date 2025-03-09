@@ -32,6 +32,7 @@ CURLX_SRCS = \
  ../../lib/strequal.c \
  ../../lib/warnless.c \
  ../../lib/timediff.c \
+ ../../lib/timeval.c \
  ../../lib/dynbuf.c \
  ../../lib/strdup.c \
  ../../lib/strcase.c \
@@ -45,6 +46,7 @@ CURLX_HDRS = \
  ../../lib/strcase.h \
  ../../lib/warnless.h \
  ../../lib/timediff.h \
+ ../../lib/timeval.h \
  ../../lib/curl_ctype.h \
  ../../lib/dynbuf.h \
  ../../lib/strcase.h \
