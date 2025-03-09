@@ -31,11 +31,13 @@ CURLX_SRCS = \
   ../../lib/strequal.c \
   ../../lib/warnless.c \
   ../../lib/timediff.c \
+  ../../lib/timeval.c \
   ../../lib/dynbuf.c \
   ../../lib/strdup.c \
   ../../lib/strcase.c \
   ../../lib/curl_get_line.c \
-  ../../lib/curl_multibyte.c
+  ../../lib/curl_multibyte.c \
+  ../../lib/version_win32.c
 
 CURLX_HDRS = \
   ../../lib/curlx.h \
@@ -43,12 +45,14 @@ CURLX_HDRS = \
   ../../lib/strcase.h \
   ../../lib/warnless.h \
   ../../lib/timediff.h \
+  ../../lib/timeval.h \
   ../../lib/curl_ctype.h \
   ../../lib/dynbuf.h \
   ../../lib/strcase.h \
   ../../lib/strdup.h \
   ../../lib/curl_get_line.h \
-  ../../lib/curl_multibyte.h
+  ../../lib/curl_multibyte.h \
+  ../../lib/version_win32.h
 
 UTIL = \
   getpart.c \

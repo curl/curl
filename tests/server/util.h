@@ -87,7 +87,7 @@ const char *sstrerror(int err);
 /* fopens the test case file */
 FILE *test2fopen(long testno, const char *logdir);
 
-#include "timediff.h"
+#include "timeval.h"
 
 int wait_ms(timediff_t timeout_ms);
 curl_off_t our_getpid(void);
