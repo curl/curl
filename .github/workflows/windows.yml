@@ -350,7 +350,7 @@ jobs:
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~612'  # SFTP
           fi
-          if [ '${{ matrix.sys }}' != 'clang64' ]; then
+          if [ '${{ matrix.sys }}' = 'clang64' ]; then
             TFLAGS+=' ~2302 ~2303 ~2307'  # permafail with clang (and also MSVC) (but works with mingw64 and ucrt64)
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
