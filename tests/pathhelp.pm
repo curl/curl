@@ -52,7 +52,6 @@ package pathhelp;
 use strict;
 use warnings;
 use Cwd 'abs_path';
-use File::Spec;
 
 BEGIN {
     use base qw(Exporter);
@@ -119,33 +118,20 @@ sub sys_native_abs_path {
     my ($path) = @_;
 
     # Return untouched on non-Windows platforms.
-    if(!os_is_win()) {
-        if(File::Spec->file_name_is_absolute($path)) {
-            return $path;
-        }
-        else {
-            return Cwd::abs_path($path);  # File must exist
-        }
-    }
+    return Cwd::abs_path($path) if !os_is_win();
 
     # Do not process empty path.
     return $path if ($path eq '');
 
     my $res;
     if($^O eq 'msys' || $^O eq 'cygwin') {
-        if(!File::Spec->file_name_is_absolute($path)) {
-            $path = Cwd::abs_path($path);  # File must exist
-        }
-        $res = Cygwin::posix_to_win_path($path);
+        $res = Cygwin::posix_to_win_path(Cwd::abs_path($path));
     }
     elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
         $res = uc($2) . ":/" . $3;
     }
-    elsif(File::Spec->file_name_is_absolute($path)) {
-        $res = $path;
-    }
     else {
-        $res = Cwd::abs_path($path);  # File must exist
+        $res = Cwd::abs_path($path);
     }
 
     $res =~ s{[/\\]+}{/}g;
@@ -161,26 +147,14 @@ sub build_sys_abs_path {
     my ($path) = @_;
 
     # Return untouched on non-Windows platforms.
-    if(!os_is_win()) {
-        if(File::Spec->file_name_is_absolute($path)) {
-            return $path;
-        }
-        else {
-            return Cwd::abs_path($path);  # File must exist
-        }
-    }
+    return Cwd::abs_path($path) if !os_is_win();
 
     my $res;
     if($^O eq 'msys' || $^O eq 'cygwin') {
         $res = Cygwin::win_to_posix_path($path, 1);
     }
     else {
-        if(File::Spec->file_name_is_absolute($path)) {
-            $res = $path;
-        }
-        else {
-            $res = Cwd::abs_path($path);  # File must exist
-        }
+        $res = Cwd::abs_path($path);
 
         if($res =~ m{^([A-Za-z]):(.*)}) {
             $res = "/" . lc($1) . $2;
