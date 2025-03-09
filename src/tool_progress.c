@@ -159,7 +159,7 @@ bool progress_meter(struct GlobalConfig *global,
   static struct curltime stamp;
   static bool header = FALSE;
   struct curltime now;
-  long diff;
+  timediff_t diff;
 
   if(global->noprogress || global->silent)
     return FALSE;
