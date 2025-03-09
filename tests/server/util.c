@@ -65,8 +65,6 @@ unsigned short server_port = 0;
 const char *socket_type = "IPv4";
 int socket_domain = AF_INET;
 
-static struct timeval tvnow(void);
-
 /* This function returns a pointer to STATIC memory. It converts the given
  * binary lump to a hex formatted string usable for output in logs or
  * whatever.
@@ -99,7 +97,7 @@ void logmsg(const char *msg, ...)
   va_list ap;
   char buffer[2048 + 1];
   FILE *logfp;
-  struct timeval tv;
+  struct curltime tv;
   time_t sec;
   struct tm *now;
   char timebuf[20];
@@ -111,7 +109,7 @@ void logmsg(const char *msg, ...)
     return;
   }
 
-  tv = tvnow();
+  tv = curlx_now();
   if(!known_offset) {
     epoch_offset = time(NULL) - tv.tv_sec;
     known_offset = 1;
@@ -193,26 +191,29 @@ static void win32_cleanup(void)
 
 int win32_init(void)
 {
+  curlx_now_init();
 #ifdef USE_WINSOCK
-  WORD wVersionRequested;
-  WSADATA wsaData;
-  int err;
+  {
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    int err;
 
-  wVersionRequested = MAKEWORD(2, 2);
-  err = WSAStartup(wVersionRequested, &wsaData);
+    wVersionRequested = MAKEWORD(2, 2);
+    err = WSAStartup(wVersionRequested, &wsaData);
 
-  if(err) {
-    win32_perror("Winsock init failed");
-    logmsg("Error initialising Winsock -- aborting");
-    return 1;
-  }
+    if(err) {
+      win32_perror("Winsock init failed");
+      logmsg("Error initialising Winsock -- aborting");
+      return 1;
+    }
 
-  if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-     HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-    WSACleanup();
-    win32_perror("Winsock init failed");
-    logmsg("No suitable winsock.dll found -- aborting");
-    return 1;
+    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
+       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
+      WSACleanup();
+      win32_perror("Winsock init failed");
+      logmsg("No suitable winsock.dll found -- aborting");
+      return 1;
+    }
   }
 #endif  /* USE_WINSOCK */
   atexit(win32_cleanup);
@@ -383,95 +384,6 @@ void clear_advisor_read_lock(const char *filename)
     logmsg("Error removing lock file %s error (%d) %s",
            filename, error, strerror(error));
 }
-
-
-#ifdef _WIN32
-
-static struct timeval tvnow(void)
-{
-  /*
-  ** GetTickCount() is available on _all_ Windows versions from W95 up
-  ** to nowadays. Returns milliseconds elapsed since last system boot,
-  ** increases monotonically and wraps once 49.7 days have elapsed.
-  **
-  ** GetTickCount64() is available on Windows version from Windows Vista
-  ** and Windows Server 2008 up to nowadays. The resolution of the
-  ** function is limited to the resolution of the system timer, which
-  ** is typically in the range of 10 milliseconds to 16 milliseconds.
-  */
-  struct timeval now;
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
-  ULONGLONG milliseconds = GetTickCount64();
-#else
-  DWORD milliseconds = GetTickCount();
-#endif
-  now.tv_sec = (long)(milliseconds / 1000);
-  now.tv_usec = (long)((milliseconds % 1000) * 1000);
-  return now;
-}
-
-#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
-
-static struct timeval tvnow(void)
-{
-  /*
-  ** clock_gettime() is granted to be increased monotonically when the
-  ** monotonic clock is queried. Time starting point is unspecified, it
-  ** could be the system start-up time, the Epoch, or something else,
-  ** in any case the time starting point does not change once that the
-  ** system has started up.
-  */
-  struct timeval now;
-  struct timespec tsnow;
-  if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
-    now.tv_sec = tsnow.tv_sec;
-    now.tv_usec = (int)(tsnow.tv_nsec / 1000);
-  }
-  /*
-  ** Even when the configure process has truly detected monotonic clock
-  ** availability, it might happen that it is not actually available at
-  ** run-time. When this occurs simply fallback to other time source.
-  */
-#ifdef HAVE_GETTIMEOFDAY
-  else
-    (void)gettimeofday(&now, NULL);
-#else
-  else {
-    now.tv_sec = time(NULL);
-    now.tv_usec = 0;
-  }
-#endif
-  return now;
-}
-
-#elif defined(HAVE_GETTIMEOFDAY)
-
-static struct timeval tvnow(void)
-{
-  /*
-  ** gettimeofday() is not granted to be increased monotonically, due to
-  ** clock drifting and external source time synchronization it can jump
-  ** forward or backward in time.
-  */
-  struct timeval now;
-  (void)gettimeofday(&now, NULL);
-  return now;
-}
-
-#else
-
-static struct timeval tvnow(void)
-{
-  /*
-  ** time() returns the value of time in seconds since the Epoch.
-  */
-  struct timeval now;
-  now.tv_sec = time(NULL);
-  now.tv_usec = 0;
-  return now;
-}
-
-#endif
 
 /* vars used to keep around previous signal handlers */
 

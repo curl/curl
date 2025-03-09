@@ -28,6 +28,18 @@
 
 #include "timediff.h"
 
+#ifndef BUILDING_LIBCURL
+/* this renames the functions so that the tool code can use the same code
+   without getting symbol collisions */
+#define Curl_now curlx_now
+#define Curl_timediff(a,b) curlx_timediff(a,b)
+#define Curl_timediff_ceil(a,b) curlx_timediff_ceil(a,b)
+#define Curl_timediff_us(a,b) curlx_timediff_us(a,b)
+
+/* For tool or tests, we must initialize before calling Curl_now() */
+void curlx_now_init(void);
+#endif
+
 struct curltime {
   time_t tv_sec; /* seconds */
   int tv_usec;   /* microseconds */

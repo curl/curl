@@ -32,7 +32,8 @@
 # libcurl sources to include in curltool lib we use for test binaries
 CURLTOOL_LIBCURL_CFILES = \
   ../lib/base64.c \
-  ../lib/dynbuf.c
+  ../lib/dynbuf.c \
+  ../lib/timeval.c
 
 # libcurl has sources that provide functions named curlx_* that are not part of
 # the official API, but we reuse the code here to avoid duplication.
@@ -44,6 +45,7 @@ CURLX_CFILES = \
   ../lib/strparse.c \
   ../lib/strcase.c \
   ../lib/timediff.c \
+  ../lib/timeval.c \
   ../lib/version_win32.c \
   ../lib/warnless.c
 
@@ -56,6 +58,7 @@ CURLX_HFILES = \
   ../lib/strparse.h \
   ../lib/strcase.h \
   ../lib/timediff.h \
+  ../lib/timeval.h \
   ../lib/version_win32.h \
   ../lib/warnless.h
 
