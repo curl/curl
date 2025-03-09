@@ -448,25 +448,19 @@ ParameterError setvariable(struct GlobalConfig *global,
       clen = strlen(ge);
     }
   }
-  if(*line == '[') {
+  if(*line == '[' && ISDIGIT(line[1])) {
     /* is there a byte range specified? [num-num] */
-    if(ISDIGIT(line[1])) {
-      char *endp;
-      if(curlx_strtoofft(&line[1], &endp, 10, &startoffset) || (*endp != '-'))
-        return PARAM_VAR_SYNTAX;
-      else {
-        char *p = endp + 1; /* pass the '-' */
-        if(*p != ']') {
-          if(curlx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
-            return PARAM_VAR_SYNTAX;
-          line = &endp[1];  /* pass the ']' */
-        }
-        else
-          line = &p[1]; /* pass the ']' */
-      }
-      if(startoffset > endoffset)
+    line++;
+    if(curlx_str_number(&line, &startoffset, CURL_OFF_T_MAX) ||
+       curlx_str_single(&line, '-'))
+      return PARAM_VAR_SYNTAX;
+    if(curlx_str_single(&line, ']')) {
+      if(curlx_str_number(&line, &endoffset, CURL_OFF_T_MAX) ||
+         curlx_str_single(&line, ']'))
         return PARAM_VAR_SYNTAX;
     }
+    if(startoffset > endoffset)
+      return PARAM_VAR_SYNTAX;
   }
   if(content)
     ;

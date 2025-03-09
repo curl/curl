@@ -414,13 +414,14 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
   const char *loc = location;
   size_t llen = loclen;
   int space_skipped = 0;
-  char *vver = getenv("VTE_VERSION");
+  const char *vver = getenv("VTE_VERSION");
 
   if(vver) {
-    long vvn = strtol(vver, NULL, 10);
-    /* Skip formatting for old versions of VTE <= 0.48.1 (Mar 2017) since some
-       of those versions have formatting bugs. (#10428) */
-    if(0 < vvn && vvn <= 4801)
+    curl_off_t num;
+    if(curlx_str_number(&vver, &num, CURL_OFF_T_MAX) ||
+       /* Skip formatting for old versions of VTE <= 0.48.1 (Mar 2017) since
+          some of those versions have formatting bugs. (#10428) */
+       (num <= 4801))
       goto locout;
   }
 

@@ -99,4 +99,9 @@ int Curl_str_cspn(const char **linep, struct Curl_str *out, const char *cspn);
 void Curl_str_trimblanks(struct Curl_str *out);
 void Curl_str_passblanks(const char **linep);
 
+#define curlx_str_number(x,y,z) Curl_str_number(x,y,z)
+#define curlx_str_octal(x,y,z) Curl_str_octal(x,y,z)
+#define curlx_str_single(x,y) Curl_str_single(x,y)
+#define curlx_str_passblanks(x) Curl_str_passblanks(x)
+
 #endif /* HEADER_CURL_STRPARSE_H */

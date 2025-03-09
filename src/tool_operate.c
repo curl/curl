@@ -930,9 +930,10 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 #ifdef DEBUGBUILD
     char *env = getenv("CURL_BUFFERSIZE");
     if(env) {
-      long size = strtol(env, NULL, 10);
-      if(size)
-        my_setopt(curl, CURLOPT_BUFFERSIZE, size);
+      curl_off_t num;
+      const char *p = env;
+      if(!Curl_str_number(&p, &num, LONG_MAX))
+        my_setopt(curl, CURLOPT_BUFFERSIZE, (long)num);
     }
     else
 #endif

@@ -24,7 +24,6 @@
 #include "tool_setup.h"
 
 #include "strcase.h"
-
 #include "curlx.h"
 
 #include "tool_cfgable.h"
@@ -225,17 +224,25 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
  */
 static ParameterError getnum(long *val, const char *str, int base)
 {
+  DEBUGASSERT((base == 8) || (base == 10));
   if(str) {
-    char *endptr = NULL;
-    long num;
-    if(!str[0])
-      return PARAM_BLANK_STRING;
-    CURL_SETERRNO(0);
-    num = strtol(str, &endptr, base);
-    if(errno == ERANGE)
-      return PARAM_NUMBER_TOO_LARGE;
-    if((endptr != str) && (*endptr == '\0')) {
-      *val = num;
+    curl_off_t num;
+    bool is_neg = FALSE;
+    if(base == 10) {
+      is_neg = (*str == '-');
+      if(is_neg)
+        str++;
+      if(curlx_str_number(&str, &num, LONG_MAX))
+        return PARAM_BAD_NUMERIC;
+    }
+    else { /* base == 8 */
+      if(curlx_str_octal(&str, &num, LONG_MAX))
+        return PARAM_BAD_NUMERIC;
+    }
+    if(!curlx_str_single(&str, '\0')) {
+      *val = (long)num;
+      if(is_neg)
+        *val = -*val;
       return PARAM_OK;  /* Ok */
     }
   }
@@ -301,40 +308,6 @@ ParameterError str2unummax(long *val, const char *str, long max)
   return PARAM_OK;
 }
 
-
-/*
- * Parse the string and write the double in the given address. Return PARAM_OK
- * on success, otherwise a parameter specific error enum.
- *
- * The 'max' argument is the maximum value allowed, as the numbers are often
- * multiplied when later used.
- *
- * Since this function gets called with the 'nextarg' pointer from within the
- * getparameter a lot, we must check it for NULL before accessing the str
- * data.
- */
-
-static ParameterError str2double(double *val, const char *str, double max)
-{
-  if(str) {
-    char *endptr;
-    double num;
-    CURL_SETERRNO(0);
-    num = strtod(str, &endptr);
-    if(errno == ERANGE)
-      return PARAM_NUMBER_TOO_LARGE;
-    if(num > max) {
-      /* too large */
-      return PARAM_NUMBER_TOO_LARGE;
-    }
-    if((endptr != str) && (endptr == str + strlen(str))) {
-      *val = num;
-      return PARAM_OK;  /* Ok */
-    }
-  }
-  return PARAM_BAD_NUMERIC; /* badness */
-}
-
 /*
  * Parse the string as seconds with decimals, and write the number of
  * milliseconds that corresponds in the given address. Return PARAM_OK on
@@ -350,14 +323,29 @@ static ParameterError str2double(double *val, const char *str, double max)
 
 ParameterError secs2ms(long *valp, const char *str)
 {
-  double value;
-  ParameterError result = str2double(&value, str, (double)LONG_MAX/1000);
-  if(result != PARAM_OK)
-    return result;
-  if(value < 0)
-    return PARAM_NEGATIVE_NUMERIC;
+  curl_off_t secs;
+  long ms = 0;
+  const unsigned int digs[] = { 1, 10, 100, 1000, 10000, 1000000,
+    1000000, 10000000, 100000000 };
+  if(!str ||
+     curlx_str_number(&str, &secs, CURL_OFF_T_MAX/100))
+    return PARAM_BAD_NUMERIC;
+  if(!curlx_str_single(&str, '.')) {
+    curl_off_t fracs;
+    const char *s = str;
+    size_t len;
+    if(curlx_str_number(&str, &fracs, CURL_OFF_T_MAX))
+      return PARAM_NUMBER_TOO_LARGE;
+    /* how many milliseconds are in fracs ? */
+    len = (str - s);
+    while((len > sizeof(CURL_ARRAYSIZE(digs)) || (fracs > LONG_MAX/100))) {
+      fracs /= 10;
+      len--;
+    }
+    ms = ((long)fracs * 100) / digs[len - 1];
+  }
 
-  *valp = (long)(value*1000);
+  *valp = (long)secs * 1000 + ms;
   return PARAM_OK;
 }
 
@@ -560,29 +548,10 @@ ParameterError check_protocol(const char *str)
  */
 ParameterError str2offset(curl_off_t *val, const char *str)
 {
-  char *endptr;
-  if(str[0] == '-')
-    /* offsets are not negative, this indicates weird input */
-    return PARAM_NEGATIVE_NUMERIC;
-
-#if(SIZEOF_CURL_OFF_T > SIZEOF_LONG)
-  {
-    CURLofft offt = curlx_strtoofft(str, &endptr, 10, val);
-    if(CURL_OFFT_FLOW == offt)
-      return PARAM_NUMBER_TOO_LARGE;
-    else if(CURL_OFFT_INVAL == offt)
-      return PARAM_BAD_NUMERIC;
-  }
-#else
-  CURL_SETERRNO(0);
-  *val = strtol(str, &endptr, 0);
-  if((*val == LONG_MIN || *val == LONG_MAX) && errno == ERANGE)
-    return PARAM_NUMBER_TOO_LARGE;
-#endif
-  if((endptr != str) && (endptr == str + strlen(str)))
-    return PARAM_OK;
-
-  return PARAM_BAD_NUMERIC;
+  if(curlx_str_number(&str, val, CURL_OFF_T_MAX) ||
+     curlx_str_single(&str, '\0'))
+    return PARAM_BAD_NUMERIC;
+  return PARAM_OK;
 }
 
 #define MAX_USERPWDLENGTH (100*1024)
