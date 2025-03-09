@@ -33,27 +33,34 @@
 struct curltime Curl_now(void)
 {
   struct curltime now;
-#ifndef BUILDING_LIBCURL
+  LARGE_INTEGER freq;
+  bool isVistaOrGreater;
+#ifdef BUILDING_LIBCURL
+  freq = Curl_freq;
+  isVistaOrGreater = Curl_isVistaOrGreater;
+#else
   /* When building for tool or tests, we initialize locally */
-  static LARGE_INTEGER Curl_freq;
-  static bool Curl_isVistaOrGreater;
-  static bool init = FALSE;
-  if(!init) {
+  static LARGE_INTEGER s_freq;
+  static bool s_isVistaOrGreater;
+  static bool s_init = FALSE;
+  if(!s_init) {
     if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL))
-      Curl_isVistaOrGreater = true;
+      s_isVistaOrGreater = true;
     else
-      Curl_isVistaOrGreater = false;
+      s_isVistaOrGreater = false;
 
-    QueryPerformanceFrequency(&Curl_freq);
-    init = TRUE;
+    QueryPerformanceFrequency(&s_freq);
+    s_init = TRUE;
   }
+  freq = s_freq;
+  isVistaOrGreater = s_isVistaOrGreater;
 #endif
-  if(Curl_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
+  if(isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
-    now.tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
-    now.tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
+    now.tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
+    now.tv_usec = (int)((count.QuadPart % freq.QuadPart) * 1000000 /
                         Curl_freq.QuadPart);
   }
   else {
