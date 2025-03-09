@@ -97,28 +97,31 @@ CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct ws_data ws_data;
 
   global_init(CURL_GLOBAL_ALL);
 
   curl = curl_easy_init();
   if(curl) {
+    struct ws_data ws_data;
     memset(&ws_data, 0, sizeof(ws_data));
     ws_data.easy = curl;
     ws_data.buf = (char *)calloc(LIB2302_BUFSIZE, 1);
-
-    curl_easy_setopt(curl, CURLOPT_URL, URL);
-    /* use the callback style */
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "webbie-sox/3");
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ws_data);
-    res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_easy_perform() returned %d\n", res);
-    /* always cleanup */
-    curl_easy_cleanup(curl);
-    flush_data(&ws_data);
-    free(ws_data.buf);
+    if(ws_data.buf) {
+      curl_easy_setopt(curl, CURLOPT_URL, URL);
+      /* use the callback style */
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, "webbie-sox/3");
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ws_data);
+      res = curl_easy_perform(curl);
+      fprintf(stderr, "curl_easy_perform() returned %d\n", res);
+      /* always cleanup */
+      curl_easy_cleanup(curl);
+      flush_data(&ws_data);
+      free(ws_data.buf);
+    }
+    else
+      res = TEST_ERR_MAJOR_BAD;
   }
   curl_global_cleanup();
   return res;
