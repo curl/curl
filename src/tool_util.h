@@ -25,11 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-/**
- * Return timeval of the MONOTONIC timer, depending on platform
- * this may be completely unrelated to the REALTIME.
- */
-struct timeval tvnow(void);
+#include "timeval.h"
 
 /**
  * Return timeval of the REALTIME clock.

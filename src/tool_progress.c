@@ -156,16 +156,16 @@ bool progress_meter(struct GlobalConfig *global,
                     struct timeval *start,
                     bool final)
 {
-  static struct timeval stamp;
+  static struct curltime stamp;
   static bool header = FALSE;
-  struct timeval now;
+  struct curltime now;
   long diff;
 
   if(global->noprogress || global->silent)
     return FALSE;
 
-  now = tvnow();
-  diff = tvdiff(now, stamp);
+  now = Curl_now();
+  diff = Curl_timediff(now, stamp);
 
   if(!header) {
     header = TRUE;
@@ -178,7 +178,7 @@ bool progress_meter(struct GlobalConfig *global,
     char time_total[10];
     char time_spent[10];
     char buffer[3][6];
-    curl_off_t spent = tvdiff(now, *start)/1000;
+    curl_off_t spent = Curl_timediff(now, *start)/1000;
     char dlpercen[4]="--";
     char ulpercen[4]="--";
     struct per_transfer *per;
@@ -239,20 +239,20 @@ bool progress_meter(struct GlobalConfig *global,
     }
 
     {
-      long deltams;
+      timediff_t deltams;
       curl_off_t dl;
       curl_off_t ul;
       curl_off_t dls;
       curl_off_t uls;
       if(indexwrapped) {
         /* 'speedindex' is the oldest stored data */
-        deltams = tvdiff(now, speedstore[speedindex].stamp);
+        deltams = Curl_timediff(now, speedstore[speedindex].stamp);
         dl = all_dlnow - speedstore[speedindex].dl;
         ul = all_ulnow - speedstore[speedindex].ul;
       }
       else {
         /* since the beginning */
-        deltams = tvdiff(now, *start);
+        deltams = Curl_timediff(now, *start);
         dl = all_dlnow;
         ul = all_ulnow;
       }
