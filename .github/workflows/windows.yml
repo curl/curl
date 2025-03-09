@@ -926,8 +926,6 @@ jobs:
           TFLAGS+=' ~612'  # SFTP
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
-          elif [[ '${{ matrix.install }}' = *'libssh2'* ]]; then
-            TFLAGS+=' ~615 ~616 ~618 ~620 ~622'  # Leak detected: memory still allocated: 22 bytes, allocated by D:/a/curl/curl/lib/vssh/libssh2.c:2006, sshc->homedir = strdup(sshp->readdir_filename);
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
             TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
           fi

@@ -2003,6 +2003,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
       if(rc > 0) {
         /* It seems that this string is not always NULL terminated */
         sshp->readdir_filename[rc] = '\0';
+        free(sshc->homedir);
         sshc->homedir = strdup(sshp->readdir_filename);
         if(!sshc->homedir) {
           state(data, SSH_SFTP_CLOSE);
