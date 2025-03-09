@@ -39,8 +39,8 @@ struct per_transfer {
   long retry_sleep_default;
   long retry_sleep;
   long num_retries; /* counts the performed retries */
-  struct timeval start; /* start of this transfer */
-  struct timeval retrystart;
+  struct curltime start; /* start of this transfer */
+  struct curltime retrystart;
   char *url;
   unsigned int urlnum; /* the index of the given URL */
   char *outfile;

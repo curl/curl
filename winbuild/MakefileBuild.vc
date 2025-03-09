@@ -691,6 +691,7 @@ CURL_FROM_LIBCURL=\
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\strparse.obj \
  $(CURL_DIROBJ)\strcase.obj \
+ $(CURL_DIROBJ)\timeval.obj \
  $(CURL_DIROBJ)\warnless.obj \
  $(CURL_DIROBJ)\curl_get_line.obj \
  $(CURL_DIROBJ)\curl_multibyte.obj \
@@ -719,6 +720,8 @@ $(CURL_DIROBJ)\strparse.obj: ../lib/strparse.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strparse.c
 $(CURL_DIROBJ)\strcase.obj: ../lib/strcase.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strcase.c
+$(CURL_DIROBJ)\timeval.obj: ../lib/timeval.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/timeval.c
 $(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
 $(CURL_DIROBJ)\curl_get_line.obj: ../lib/curl_get_line.c
