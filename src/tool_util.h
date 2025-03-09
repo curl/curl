@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "timeval.h"
-
 /**
  * Return timeval of the REALTIME clock.
  */

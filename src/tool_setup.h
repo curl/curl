@@ -45,6 +45,8 @@ extern FILE *tool_stderr;
 
 #include <curl/curl.h> /* external interface */
 
+#include "timeval.h"
+
 /*
  * Platform specific stuff.
  */
