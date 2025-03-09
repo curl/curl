@@ -756,7 +756,7 @@ jobs:
               -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'schannel MultiSSL U'
-            # GnuTLS is not fully functional on Windows, do a build only
+            # GnuTLS is not fully functional with MSVC, build-test only
             # https://github.com/ShiftMediaProject/gnutls/issues/23
             install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl shiftmedia-libgnutls openssl mbedtls wolfssl'
             arch: 'x64'
