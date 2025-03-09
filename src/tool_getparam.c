@@ -529,18 +529,18 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
                                        const char *which,
                                        curl_off_t *value_out)
 {
-  char *unit;
+  const char *unit = arg;
   curl_off_t value;
 
-  if(curlx_strtoofft(arg, &unit, 10, &value)) {
+  if(curlx_str_number(&unit, &value, CURL_OFF_T_MAX)) {
     warnf(global, "invalid number specified for %s", which);
     return PARAM_BAD_USE;
   }
 
   if(!*unit)
-    unit = (char *)"b";
+    unit = "b";
   else if(strlen(unit) > 1)
-    unit = (char *)"w"; /* unsupported */
+    unit = "w"; /* unsupported */
 
   switch(*unit) {
   case 'G':
@@ -973,7 +973,7 @@ static ParameterError set_rate(struct GlobalConfig *global,
      /d == per day (24 hours)
   */
   ParameterError err = PARAM_OK;
-  char *div = strchr(nextarg, '/');
+  const char *div = strchr(nextarg, '/');
   char number[26];
   long denominator;
   long numerator = 60*60*1000; /* default per hour */
@@ -991,22 +991,20 @@ static ParameterError set_rate(struct GlobalConfig *global,
     return PARAM_BAD_USE;
 
   if(div) {
-    char unit = div[1];
     curl_off_t numunits;
-    char *endp;
+    const char *s;
+    div++;
+    s = div;
 
-    if(curlx_strtoofft(&div[1], &endp, 10, &numunits)) {
-      /* if it fails, there is no legit number specified */
-      if(endp == &div[1])
-        /* if endp did not move, accept it as a 1 */
+    if(curlx_str_number(&div, &numunits, CURL_OFF_T_MAX)) {
+      if(s == div)
+        /* if div did not move, accept it as a 1 */
         numunits = 1;
       else
         return PARAM_BAD_USE;
     }
-    else
-      unit = *endp;
 
-    switch(unit) {
+    switch(*div) {
     case 's': /* per second */
       numerator = 1000;
       break;
@@ -1402,48 +1400,42 @@ static ParameterError parse_range(struct GlobalConfig *global,
                                   const char *nextarg)
 {
   ParameterError err = PARAM_OK;
+  curl_off_t value;
+  const char *orig = nextarg;
 
   if(config->use_resume) {
     errorf(global, "--continue-at is mutually exclusive with --range");
     return PARAM_BAD_USE;
   }
-  /* Specifying a range WITHOUT A DASH will create an illegal HTTP range
-     (and will not actually be range by definition). The manpage
-     previously claimed that to be a good way, why this code is added to
-     work-around it. */
-  if(ISDIGIT(*nextarg) && !strchr(nextarg, '-')) {
+  if(!curlx_str_number(&nextarg, &value, CURL_OFF_T_MAX) &&
+     curlx_str_single(&nextarg, '-')) {
+    /* Specifying a range WITHOUT A DASH will create an illegal HTTP range
+       (and will not actually be range by definition). The manpage previously
+       claimed that to be a good way, why this code is added to work-around
+       it. */
     char buffer[32];
-    curl_off_t value;
-    if(curlx_strtoofft(nextarg, NULL, 10, &value)) {
-      warnf(global, "unsupported range point");
-      err = PARAM_BAD_USE;
-    }
-    else {
-      warnf(global,
-            "A specified range MUST include at least one dash (-). "
-            "Appending one for you");
-      msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
-                value);
-      Curl_safefree(config->range);
-      config->range = strdup(buffer);
-      if(!config->range)
-        err = PARAM_NO_MEM;
-    }
+    warnf(global, "A specified range MUST include at least one dash (-). "
+          "Appending one for you");
+    msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
+              value);
+    free(config->range);
+    config->range = strdup(buffer);
+    if(!config->range)
+      err = PARAM_NO_MEM;
   }
   else {
     /* byte range requested */
-    const char *tmp_range = nextarg;
-    while(*tmp_range) {
-      if(!ISDIGIT(*tmp_range) && *tmp_range != '-' && *tmp_range != ',') {
+    while(*nextarg) {
+      if(!ISDIGIT(*nextarg) && *nextarg != '-' && *nextarg != ',') {
         warnf(global, "Invalid character is found in given range. "
               "A specified range MUST have only digits in "
               "\'start\'-\'stop\'. The server's response to this "
               "request is uncertain.");
         break;
       }
-      tmp_range++;
+      nextarg++;
     }
-    err = getstr(&config->range, nextarg, DENY_BLANK);
+    err = getstr(&config->range, orig, DENY_BLANK);
   }
   return err;
 }

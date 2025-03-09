@@ -25,6 +25,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#include "strparse.h"
 
 typedef enum {
   CURL_OFFT_OK,    /* parsed fine */
