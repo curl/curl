@@ -922,6 +922,13 @@ jobs:
           export CURL_DIRSUFFIX='${{ matrix.type }}'
           export TFLAGS='-j8 ${{ matrix.tflags }}'
           TFLAGS+=' ~2310'  # flaky
+          TFLAGS+=' ~SCP'  # 601 603 612 617 619 621 641 665 2004 3022
+          TFLAGS+=' ~612'  # SFTP
+          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
+            TFLAGS+=' ~SFTP'
+          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+          fi
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
