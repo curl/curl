@@ -65,18 +65,6 @@ struct timeval tvrealnow(void)
 
 #endif
 
-/*
- * Make sure that the first argument is the more recent time, as otherwise
- * we will get a weird negative time-diff back...
- *
- * Returns: the time difference in number of milliseconds.
- */
-long tvdiff(struct timeval newer, struct timeval older)
-{
-  return (long)(newer.tv_sec-older.tv_sec)*1000+
-    (long)(newer.tv_usec-older.tv_usec)/1000;
-}
-
 /* Case insensitive compare. Accept NULL pointers. */
 int struplocompare(const char *p1, const char *p2)
 {

@@ -141,7 +141,7 @@ curl_off_t all_xfers = 0;   /* current total */
 struct speedcount {
   curl_off_t dl;
   curl_off_t ul;
-  struct timeval stamp;
+  struct curltime stamp;
 };
 #define SPEEDCNT 10
 static unsigned int speedindex;
@@ -153,7 +153,7 @@ static struct speedcount speedstore[SPEEDCNT];
   |  6 --   9.9G     0     2     2   0:00:40  0:00:02  0:00:37 4087M
 */
 bool progress_meter(struct GlobalConfig *global,
-                    struct timeval *start,
+                    struct curltime *start,
                     bool final)
 {
   static struct curltime stamp;

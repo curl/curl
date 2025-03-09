@@ -32,7 +32,7 @@ int xferinfo_cb(void *clientp,
                 curl_off_t ulnow);
 
 bool progress_meter(struct GlobalConfig *global,
-                    struct timeval *start,
+                    struct curltime *start,
                     bool final);
 void progress_finalize(struct per_transfer *per);
 
