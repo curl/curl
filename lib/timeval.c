@@ -27,7 +27,11 @@
 #ifdef _WIN32
 
 #include <curl/curl.h>
+#ifdef BUILDING_LIBCURL
 #include "system_win32.h"
+#else
+#include "version_win32.h"
+#endif
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
 struct curltime Curl_now(void)
