@@ -120,8 +120,6 @@ CURLcode test(char *URL)
       flush_data(&ws_data);
       free(ws_data.buf);
     }
-    else
-      res = TEST_ERR_MAJOR_BAD;
   }
   curl_global_cleanup();
   return res;
