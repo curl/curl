@@ -132,9 +132,6 @@ my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
 my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
 my $posix_pwd = build_sys_abs_path($pwd);  # current working directory in POSIX format
 my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
-my $portrange = 999;       # space from which to choose a random port
-                           # don't increase without making sure generated port
-                           # numbers will always be valid (<=65535)
 my $HOSTIP="127.0.0.1";    # address on which the test server listens
 my $HOST6IP="[::1]";       # address on which the test server listens
 my $HTTPUNIXPATH;          # HTTP server Unix domain socket path
