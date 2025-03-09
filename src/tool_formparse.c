@@ -839,7 +839,6 @@ int formparse(struct OperationConfig *config,
             goto fail;
           }
           Curl_safefree(part->data);
-          part->data = NULL;
           part->size = -1;
           res = CURLE_OK;
         }
@@ -876,7 +875,6 @@ int formparse(struct OperationConfig *config,
             goto fail;
           }
           Curl_safefree(part->data);
-          part->data = NULL;
           part->size = -1;
           res = CURLE_OK;
         }

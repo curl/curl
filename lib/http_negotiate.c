@@ -203,12 +203,12 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-      Curl_safefree(data->state.aptr.proxyuserpwd);
+      free(data->state.aptr.proxyuserpwd);
       data->state.aptr.proxyuserpwd = userp;
 #endif
     }
     else {
-      Curl_safefree(data->state.aptr.userpwd);
+      free(data->state.aptr.userpwd);
       data->state.aptr.userpwd = userp;
     }
 

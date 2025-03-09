@@ -845,7 +845,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
                    Curl_str(&provider0), Curl_strlen(&provider0));
 
-  Curl_safefree(data->state.aptr.userpwd);
+  free(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
   result = CURLE_OK;

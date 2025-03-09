@@ -1907,7 +1907,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
-      Curl_safefree(ftpc->newhost);
+      free(ftpc->newhost);
       ftpc->newhost = strdup(control_address(conn));
       if(!ftpc->newhost)
         return CURLE_OUT_OF_MEMORY;
@@ -1952,7 +1952,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
   Curl_resolv_unlink(data, &addr); /* we are done using this address */
 
-  Curl_safefree(conn->secondaryhostname);
+  free(conn->secondaryhostname);
   conn->secondary_port = ftpc->newport;
   conn->secondaryhostname = strdup(ftpc->newhost);
   if(!conn->secondaryhostname)
@@ -2902,7 +2902,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
               free(dir);
               return result;
             }
-            Curl_safefree(ftpc->entrypath);
+            free(ftpc->entrypath);
             ftpc->entrypath = dir; /* remember this */
             infof(data, "Entry path is '%s'", ftpc->entrypath);
             /* also save it where getinfo can access it: */
@@ -2911,7 +2911,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
             break;
           }
 
-          Curl_safefree(ftpc->entrypath);
+          free(ftpc->entrypath);
           ftpc->entrypath = dir; /* remember this */
           infof(data, "Entry path is '%s'", ftpc->entrypath);
           /* also save it where getinfo can access it: */
@@ -2954,14 +2954,14 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
             return result;
           }
           /* remember target server OS */
-          Curl_safefree(ftpc->server_os);
+          free(ftpc->server_os);
           ftpc->server_os = os;
           ftp_state(data, FTP_NAMEFMT);
           break;
         }
         /* Nothing special for the target server. */
         /* remember target server OS */
-        Curl_safefree(ftpc->server_os);
+        free(ftpc->server_os);
         ftpc->server_os = os;
       }
       else {

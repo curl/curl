@@ -2261,7 +2261,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     goto error;
 
   if(proxyuser || proxypasswd) {
-    Curl_safefree(proxyinfo->user);
+    free(proxyinfo->user);
     proxyinfo->user = proxyuser;
     result = Curl_setstropt(&data->state.aptr.proxyuser, proxyuser);
     proxyuser = NULL;
@@ -2333,7 +2333,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
         result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
-      Curl_safefree(proxyinfo->host.rawalloc);
+      free(proxyinfo->host.rawalloc);
       proxyinfo->host.rawalloc = host;
       proxyinfo->host.name = host;
       host = NULL;
@@ -2342,7 +2342,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
 
   if(!is_unix_proxy) {
 #endif
-    Curl_safefree(proxyinfo->host.rawalloc);
+    free(proxyinfo->host.rawalloc);
     proxyinfo->host.rawalloc = host;
     if(host[0] == '[') {
       /* this is a numerical IPv6, strip off the brackets */
@@ -2529,7 +2529,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
         if(!conn->socks_proxy.user) {
           conn->socks_proxy.user = conn->http_proxy.user;
           conn->http_proxy.user = NULL;
-          Curl_safefree(conn->socks_proxy.passwd);
+          free(conn->socks_proxy.passwd);
           conn->socks_proxy.passwd = conn->http_proxy.passwd;
           conn->http_proxy.passwd = NULL;
         }
@@ -2764,7 +2764,7 @@ static CURLcode override_login(struct Curl_easy *data,
       }
     }
     if(url_provided) {
-      Curl_safefree(conn->user);
+      free(conn->user);
       conn->user = strdup(*userp);
       if(!conn->user)
         return CURLE_OUT_OF_MEMORY;
@@ -3283,8 +3283,8 @@ static void reuse_conn(struct Curl_easy *data,
    * be new for this request even when we reuse an existing connection */
   if(temp->user) {
     /* use the new username and password though */
-    Curl_safefree(existing->user);
-    Curl_safefree(existing->passwd);
+    free(existing->user);
+    free(existing->passwd);
     existing->user = temp->user;
     existing->passwd = temp->passwd;
     temp->user = NULL;
@@ -3295,10 +3295,10 @@ static void reuse_conn(struct Curl_easy *data,
   existing->bits.proxy_user_passwd = temp->bits.proxy_user_passwd;
   if(existing->bits.proxy_user_passwd) {
     /* use the new proxy username and proxy password though */
-    Curl_safefree(existing->http_proxy.user);
-    Curl_safefree(existing->socks_proxy.user);
-    Curl_safefree(existing->http_proxy.passwd);
-    Curl_safefree(existing->socks_proxy.passwd);
+    free(existing->http_proxy.user);
+    free(existing->socks_proxy.user);
+    free(existing->http_proxy.passwd);
+    free(existing->socks_proxy.passwd);
     existing->http_proxy.user = temp->http_proxy.user;
     existing->socks_proxy.user = temp->socks_proxy.user;
     existing->http_proxy.passwd = temp->http_proxy.passwd;
@@ -3335,8 +3335,7 @@ static void reuse_conn(struct Curl_easy *data,
   temp->conn_to_host.rawalloc = NULL;
   existing->conn_to_port = temp->conn_to_port;
   existing->remote_port = temp->remote_port;
-  Curl_safefree(existing->hostname_resolve);
-
+  free(existing->hostname_resolve);
   existing->hostname_resolve = temp->hostname_resolve;
   temp->hostname_resolve = NULL;
 
