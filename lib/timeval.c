@@ -61,7 +61,7 @@ struct curltime Curl_now(void)
     QueryPerformanceCounter(&count);
     now.tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
     now.tv_usec = (int)((count.QuadPart % freq.QuadPart) * 1000000 /
-                        Curl_freq.QuadPart);
+                        freq.QuadPart);
   }
   else {
     /* Disable /analyze warning that GetTickCount64 is preferred  */
