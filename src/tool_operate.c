@@ -2946,10 +2946,10 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
       timediff_t milli = Curl_timediff(Curl_now(), start);
       if(milli < global->ms_per_transfer) {
         notef(global, "Transfer took %" CURL_FORMAT_CURL_OFF_T " ms, "
-                      "waits %" CURL_FORMAT_CURL_OFF_T "ms as set by --rate",
-              milli, global->ms_per_transfer - milli);
+                      "waits %ldms as set by --rate",
+              milli, (long)(global->ms_per_transfer - milli));
         /* The transfer took less time than wanted. Wait a little. */
-        tool_go_sleep(global->ms_per_transfer - milli);
+        tool_go_sleep((long)(global->ms_per_transfer - milli));
       }
     }
   }

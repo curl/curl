@@ -331,7 +331,7 @@ struct GlobalConfig {
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
-  long ms_per_transfer;           /* start next transfer after (at least) this
+  timediff_t ms_per_transfer;     /* start next transfer after (at least) this
                                      many milliseconds */
   trace tracetype;
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
