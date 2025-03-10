@@ -1262,7 +1262,7 @@ sftp_pkey_init(struct Curl_easy *data,
         if(!sshc->rsa)
           out_of_memory = TRUE;
         else if(stat(sshc->rsa, &sbuf)) {
-          Curl_safefree(sshc->rsa);
+          free(sshc->rsa);
           sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
           if(!sshc->rsa)
             out_of_memory = TRUE;
