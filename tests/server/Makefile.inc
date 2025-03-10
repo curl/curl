@@ -33,20 +33,20 @@ CURLX_SRCS = \
   ../../lib/timediff.c \
   ../../lib/timeval.c \
   ../../lib/dynbuf.c \
-  ../../lib/strdup.c \
   ../../lib/strcase.c \
+  ../../lib/strdup.c \
   ../../lib/curl_get_line.c \
   ../../lib/curl_multibyte.c \
   ../../lib/version_win32.c
 
 CURLX_HDRS = \
   ../../lib/curlx.h \
+  ../../lib/curl_ctype.h \
   ../../lib/nonblock.h \
   ../../lib/strcase.h \
   ../../lib/warnless.h \
   ../../lib/timediff.h \
   ../../lib/timeval.h \
-  ../../lib/curl_ctype.h \
   ../../lib/dynbuf.h \
   ../../lib/strcase.h \
   ../../lib/strdup.h \
