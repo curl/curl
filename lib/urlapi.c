@@ -578,9 +578,8 @@ static int ipv4_normalize(struct dynbuf *host)
     int rc;
     curl_off_t l;
     if(*c == '0') {
-      c++;
-      if(*c == 'x') {
-        c++; /* skip the prefix */
+      if(c[1] == 'x') {
+        c += 2; /* skip the prefix */
         rc = Curl_str_hex(&c, &l, UINT_MAX);
       }
       else
