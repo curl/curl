@@ -45,7 +45,6 @@ void Curl_now_init(void) {
 
   QueryPerformanceFrequency(&s_freq);
 }
-
 #endif
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
