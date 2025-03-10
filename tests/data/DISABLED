@@ -63,7 +63,7 @@
 %if bearssl
 313
 %endif
-# Secure Transport does not support crl file
+# Secure Transport does not support CRL file
 %if sectransp
 313
 %endif
