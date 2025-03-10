@@ -352,7 +352,7 @@ static char *parse_filename(const char *ptr, size_t len)
   if(q) {
     p = q + 1;
     if(!*p) {
-      Curl_safefree(copy);
+      curlx_safefree(copy);
       return NULL;
     }
   }
@@ -364,7 +364,7 @@ static char *parse_filename(const char *ptr, size_t len)
   if(q) {
     p = q + 1;
     if(!*p) {
-      Curl_safefree(copy);
+      curlx_safefree(copy);
       return NULL;
     }
   }
@@ -385,7 +385,7 @@ static char *parse_filename(const char *ptr, size_t len)
   {
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
-    Curl_safefree(copy);
+    curlx_safefree(copy);
     if(sc)
       return NULL;
     copy = sanitized;

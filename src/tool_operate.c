@@ -427,8 +427,8 @@ void single_transfer_cleanup(struct OperationConfig *config)
     struct State *state = &config->state;
     /* Free list of remaining URLs */
     glob_cleanup(&state->urls);
-    Curl_safefree(state->outfiles);
-    Curl_safefree(state->uploadfile);
+    curlx_safefree(state->outfiles);
+    curlx_safefree(state->uploadfile);
     /* Free list of globbed upload files */
     glob_cleanup(&state->inglob);
   }
@@ -743,13 +743,13 @@ skip:
     fclose(per->heads.stream);
 
   if(per->heads.alloc_filename)
-    Curl_safefree(per->heads.filename);
+    curlx_safefree(per->heads.filename);
 
   if(per->etag_save.fopened && per->etag_save.stream)
     fclose(per->etag_save.stream);
 
   if(per->etag_save.alloc_filename)
-    Curl_safefree(per->etag_save.filename);
+    curlx_safefree(per->etag_save.filename);
 
   curl_easy_cleanup(per->curl);
   if(outs->alloc_filename)
@@ -1939,7 +1939,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if((PARAM_OK == file2string(&etag_from_file, file)) &&
            etag_from_file) {
           header = aprintf("If-None-Match: %s", etag_from_file);
-          Curl_safefree(etag_from_file);
+          curlx_safefree(etag_from_file);
         }
         else
           header = aprintf("If-None-Match: \"\"");
@@ -1955,7 +1955,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         /* add Etag from file to list of custom headers */
         pe = add2list(&config->headers, header);
-        Curl_safefree(header);
+        curlx_safefree(header);
 
         if(file)
           fclose(file);
@@ -1978,7 +1978,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(!newfile) {
             warnf(global, "Failed creating file for saving etags: \"%s\". "
                   "Skip this transfer", config->etag_save_file);
-            Curl_safefree(state->outfiles);
+            curlx_safefree(state->outfiles);
             glob_cleanup(&state->urls);
             return CURLE_OK;
           }
@@ -2015,7 +2015,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           break;
         }
         if(SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq)) {
-          Curl_safefree(per->uploadfile);
+          curlx_safefree(per->uploadfile);
           curl_easy_cleanup(curl);
           result = CURLE_FAILED_INIT;
           break;
@@ -2138,7 +2138,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* fill '#1' ... '#9' terms from URL pattern */
           char *storefile = per->outfile;
           result = glob_match_url(&per->outfile, storefile, state->urls);
-          Curl_safefree(storefile);
+          curlx_safefree(storefile);
           if(result) {
             /* bad globbing */
             warnf(global, "bad output glob");
@@ -2334,7 +2334,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         state->urlnum = 0; /* forced reglob of URLs */
         glob_cleanup(&state->urls);
         state->up++;
-        Curl_safefree(state->uploadfile); /* clear it to get the next */
+        curlx_safefree(state->uploadfile); /* clear it to get the next */
       }
     }
     else {
@@ -2344,8 +2344,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       glob_cleanup(&state->urls);
       state->urlnum = 0;
 
-      Curl_safefree(state->outfiles);
-      Curl_safefree(state->uploadfile);
+      curlx_safefree(state->outfiles);
+      curlx_safefree(state->uploadfile);
       /* Free list of globbed upload files */
       glob_cleanup(&state->inglob);
       state->up = 0;
@@ -2353,7 +2353,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     }
     break;
   }
-  Curl_safefree(state->outfiles);
+  curlx_safefree(state->outfiles);
 fail:
   if(!*added || result) {
     *added = FALSE;

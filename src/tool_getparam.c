@@ -661,7 +661,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
   }
   else {
     char *enc = curl_easy_escape(NULL, postdata, (int)size);
-    Curl_safefree(postdata); /* no matter if it worked or not */
+    curlx_safefree(postdata); /* no matter if it worked or not */
     if(enc) {
       char *n;
       replace_url_encoded_space_by_plus(enc);
@@ -955,7 +955,7 @@ static ParameterError set_data(cmdline_t cmd,
   if(!err && curlx_dyn_addn(&config->postdata, postdata, size))
     err = PARAM_NO_MEM;
 
-  Curl_safefree(postdata);
+  curlx_safefree(postdata);
 
   config->postfields = curlx_dyn_ptr(&config->postdata);
   return err;
@@ -1562,7 +1562,7 @@ static ParameterError parse_writeout(struct GlobalConfig *global,
         return PARAM_READ_ERROR;
       }
     }
-    Curl_safefree(config->writeout);
+    curlx_safefree(config->writeout);
     err = file2string(&config->writeout, file);
     if(file && (file != stdin))
       fclose(file);
@@ -1869,7 +1869,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->doh_url, nextarg, ALLOW_BLANK);
       if(!err && config->doh_url && !config->doh_url[0])
         /* if given a blank string, make it NULL again */
-        Curl_safefree(config->doh_url);
+        curlx_safefree(config->doh_url);
       break;
     case C_CIPHERS: /* -- ciphers */
       err = getstr(&config->cipher_list, nextarg, DENY_BLANK);
@@ -2058,7 +2058,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               a->lname);
       break;
     case C_FTP_PASV: /* --ftp-pasv */
-      Curl_safefree(config->ftpport);
+      curlx_safefree(config->ftpport);
       break;
     case C_SOCKS5: /* --socks5 */
       /*  socks5 proxy to use, and resolves the name locally and passes on the

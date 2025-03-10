@@ -415,7 +415,7 @@ static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
   }
 
 nomem:
-  Curl_safefree(escaped);
+  curlx_safefree(escaped);
   return ret;
 }
 
@@ -530,7 +530,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   }
 
 nomem:
-  Curl_safefree(escaped);
+  curlx_safefree(escaped);
   return ret;
 }
 
@@ -712,7 +712,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
   }
 
 nomem:
-  Curl_safefree(escaped);
+  curlx_safefree(escaped);
   return ret;
 }
 
