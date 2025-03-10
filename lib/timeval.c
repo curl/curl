@@ -52,17 +52,20 @@ void Curl_now_init(void) {
 struct curltime Curl_now(void)
 {
   struct curltime now;
-  LARGE_INTEGER freq;
   bool isVistaOrGreater;
 #ifdef BUILDING_LIBCURL
-  freq = Curl_freq;
   isVistaOrGreater = Curl_isVistaOrGreater;
 #else
-  freq = s_freq;
   isVistaOrGreater = s_isVistaOrGreater;
 #endif
   if(isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
+    LARGE_INTEGER freq;
+#ifdef BUILDING_LIBCURL
+    freq = Curl_freq;
+#else
+    freq = s_freq;
+#endif
     DEBUGASSERT(freq);
     QueryPerformanceCounter(&count);
     now.tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
