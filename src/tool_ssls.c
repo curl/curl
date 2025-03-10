@@ -86,7 +86,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
     ++i;
     curl_free(shmac);
     curl_free(sdata);
-    line = Curl_dyn_ptr(&buf);
+    line = curlx_dyn_ptr(&buf);
 
     c = memchr(line, ':', strlen(line));
     if(!c) {
