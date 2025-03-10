@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+SMTP DSN
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+# Special Replies, so the server does not have to understand DSN
+<servercmd>
+REPLY MAIL 250 Ok
+REPLY RCPT 250 Ok
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<name>
+SMTP DSN
+</name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt "<recipient@example.com> NOTIFY=SUCCESS,FAILURE" --mail-from "<sender@example.com> RET=HDRS" -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO %TESTNUMBER
+MAIL FROM:<sender@example.com> RET=HDRS
+RCPT TO:<recipient@example.com> NOTIFY=SUCCESS,FAILURE
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
+</verify>
+</testcase>
