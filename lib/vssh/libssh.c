@@ -1603,7 +1603,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         if(data->state.use_range) {
           curl_off_t from, to;
           const char *p = data->state.range;
-          char *ptr2;
           int from_t, to_t;
 
           from_t = Curl_str_number(&p, &from, CURL_OFF_T_MAX);
