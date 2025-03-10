@@ -1814,9 +1814,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
 
-      rc = ssh_scp_push_file(sshc->scp_session, protop->path,
-                             (size_t)data->state.infilesize,
-                             (int)data->set.new_file_perms);
+      rc = ssh_scp_push_file64(sshc->scp_session, protop->path,
+                               (uint64_t)data->state.infilesize,
+                               (int)data->set.new_file_perms);
+
       if(rc != SSH_OK) {
         err_msg = ssh_get_error(sshc->ssh_session);
         failf(data, "%s", err_msg);
