@@ -154,7 +154,7 @@ rem
       call :element %1 lib "strtoofft.c" %3
       call :element %1 lib "strparse.c" %3
       call :element %1 lib "strcase.c" %3
-      call :element %1 lib "timediff.c" %3
+      call :element %1 lib "timeval.c" %3
       call :element %1 lib "nonblock.c" %3
       call :element %1 lib "warnless.c" %3
       call :element %1 lib "curl_multibyte.c" %3
@@ -167,7 +167,7 @@ rem
       call :element %1 lib "strtoofft.h" %3
       call :element %1 lib "strparse.h" %3
       call :element %1 lib "strcase.h" %3
-      call :element %1 lib "timediff.h" %3
+      call :element %1 lib "timeval.h" %3
       call :element %1 lib "nonblock.h" %3
       call :element %1 lib "warnless.h" %3
       call :element %1 lib "curl_ctype.h" %3

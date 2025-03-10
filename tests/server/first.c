@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TOOL_PROGRESS_H
-#define HEADER_CURL_TOOL_PROGRESS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,19 +21,44 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
+#include <stdio.h>
+#include <string.h>
+#include "first.h"
 
-int xferinfo_cb(void *clientp,
-                curl_off_t dltotal,
-                curl_off_t dlnow,
-                curl_off_t ultotal,
-                curl_off_t ulnow);
+#ifdef CURLDEBUG
+#  define MEMDEBUG_NODEFINES
+#  include "memdebug.h"
+#endif
 
-bool progress_meter(struct GlobalConfig *global,
-                    struct curltime *start,
-                    bool final);
-void progress_finalize(struct per_transfer *per);
+int main(int argc, char **argv)
+{
+  main_func_t main_func;
+  char *main_name;
 
-extern curl_off_t all_xfers;   /* total number */
+  if(argc < 2) {
+    fprintf(stderr, "Pass servername as first argument\n");
+    return 1;
+  }
 
-#endif /* HEADER_CURL_TOOL_PROGRESS_H */
+  main_name = argv[1];
+  main_func = NULL;
+  {
+    size_t tmp;
+    for(tmp = 0; p_mains[tmp].ptr; ++tmp) {
+      if(strcmp(main_name, p_mains[tmp].name) == 0) {
+        main_func = p_mains[tmp].ptr;
+        break;
+      }
+    }
+  }
+
+  if(!main_func) {
+    fprintf(stderr, "Test '%s' not found.\n", main_name);
+    return 99;
+  }
+
+  --argc;
+  ++argv;
+
+  return main_func(argc, argv);
+}

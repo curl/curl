@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_PROGRESS_H
-#define HEADER_CURL_TOOL_PROGRESS_H
+#ifndef HEADER_SERVER_FIRST_H
+#define HEADER_SERVER_FIRST_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,19 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
+typedef int (*main_func_t)(int, char **);
 
-int xferinfo_cb(void *clientp,
-                curl_off_t dltotal,
-                curl_off_t dlnow,
-                curl_off_t ultotal,
-                curl_off_t ulnow);
+struct onemain {
+  const char *name;
+  main_func_t ptr;
+};
 
-bool progress_meter(struct GlobalConfig *global,
-                    struct curltime *start,
-                    bool final);
-void progress_finalize(struct per_transfer *per);
+extern const struct onemain p_mains[];
 
-extern curl_off_t all_xfers;   /* total number */
-
-#endif /* HEADER_CURL_TOOL_PROGRESS_H */
+#endif /* HEADER_SERVER_FIRST_H */
