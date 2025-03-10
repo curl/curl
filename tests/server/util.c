@@ -191,26 +191,29 @@ static void win32_cleanup(void)
 
 int win32_init(void)
 {
+  Curl_now_init();
 #ifdef USE_WINSOCK
-  WORD wVersionRequested;
-  WSADATA wsaData;
-  int err;
+  {
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    int err;
 
-  wVersionRequested = MAKEWORD(2, 2);
-  err = WSAStartup(wVersionRequested, &wsaData);
+    wVersionRequested = MAKEWORD(2, 2);
+    err = WSAStartup(wVersionRequested, &wsaData);
 
-  if(err) {
-    win32_perror("Winsock init failed");
-    logmsg("Error initialising Winsock -- aborting");
-    return 1;
-  }
+    if(err) {
+      win32_perror("Winsock init failed");
+      logmsg("Error initialising Winsock -- aborting");
+      return 1;
+    }
 
-  if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-     HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-    WSACleanup();
-    win32_perror("Winsock init failed");
-    logmsg("No suitable winsock.dll found -- aborting");
-    return 1;
+    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
+       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
+      WSACleanup();
+      win32_perror("Winsock init failed");
+      logmsg("No suitable winsock.dll found -- aborting");
+      return 1;
+    }
   }
 #endif  /* USE_WINSOCK */
   atexit(win32_cleanup);

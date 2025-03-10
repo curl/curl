@@ -31,6 +31,21 @@
 #include "system_win32.h"
 #else
 #include "version_win32.h"
+
+static LARGE_INTEGER s_freq;
+static bool s_isVistaOrGreater;
+
+/* For tool or tests, we must initialize before calling Curl_now() */
+void Curl_now_init(void) {
+  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+                                  VERSION_GREATER_THAN_EQUAL))
+    s_isVistaOrGreater = true;
+  else
+    s_isVistaOrGreater = false;
+
+  QueryPerformanceFrequency(&s_freq);
+}
+
 #endif
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
@@ -43,20 +58,6 @@ struct curltime Curl_now(void)
   freq = Curl_freq;
   isVistaOrGreater = Curl_isVistaOrGreater;
 #else
-  /* When building for tool or tests, we initialize locally */
-  static LARGE_INTEGER s_freq;
-  static bool s_isVistaOrGreater;
-  static bool s_init = FALSE;
-  if(!s_init) {
-    if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                    VERSION_GREATER_THAN_EQUAL))
-      s_isVistaOrGreater = true;
-    else
-      s_isVistaOrGreater = false;
-
-    QueryPerformanceFrequency(&s_freq);
-    s_init = TRUE;
-  }
   freq = s_freq;
   isVistaOrGreater = s_isVistaOrGreater;
 #endif
