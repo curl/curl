@@ -734,7 +734,7 @@ static void init_terminal(void)
 
 CURLcode win32_init(void)
 {
-  Curl_now_init();
+  curlx_now_init();
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   init_terminal();
 #endif

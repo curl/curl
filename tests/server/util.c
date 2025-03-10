@@ -109,7 +109,7 @@ void logmsg(const char *msg, ...)
     return;
   }
 
-  tv = Curl_now();
+  tv = curlx_now();
   if(!known_offset) {
     epoch_offset = time(NULL) - tv.tv_sec;
     known_offset = 1;
@@ -191,7 +191,7 @@ static void win32_cleanup(void)
 
 int win32_init(void)
 {
-  Curl_now_init();
+  curlx_now_init();
 #ifdef USE_WINSOCK
   {
     WORD wVersionRequested;

@@ -36,7 +36,7 @@ static LARGE_INTEGER s_freq;
 static bool s_isVistaOrGreater;
 
 /* For tool or tests, we must initialize before calling Curl_now() */
-void Curl_now_init(void)
+void curlx_now_init(void)
 {
   if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL))

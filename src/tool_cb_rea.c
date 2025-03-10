@@ -55,8 +55,8 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 
   if(config->timeout_ms) {
-    struct curltime now = Curl_now();
-    long msdelta = (long)Curl_timediff(now, per->start);
+    struct curltime now = curlx_now();
+    long msdelta = (long)curlx_timediff(now, per->start);
 
     if(msdelta > config->timeout_ms)
       /* timeout */
@@ -138,10 +138,10 @@ int tool_readbusy_cb(void *clientp,
 
     if(ulprev == ulnow) {
       /* it did not upload anything since last call */
-      struct curltime now = Curl_now();
+      struct curltime now = curlx_now();
       if(prev.tv_sec)
         /* get a rolling average rate */
-        rate -= rate/4 - Curl_timediff(now, prev)/4;
+        rate -= rate/4 - curlx_timediff(now, prev)/4;
       prev = now;
     }
     else {

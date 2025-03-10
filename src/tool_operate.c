@@ -408,7 +408,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
       my_setopt_offt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
   }
   per->uploadfilesize = uploadfilesize;
-  per->start = Curl_now();
+  per->start = curlx_now();
   return result;
 }
 
@@ -522,7 +522,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
      time */
   if(per->retry_remaining &&
      (!config->retry_maxtime ||
-      (Curl_timediff(Curl_now(), per->retrystart) <
+      (curlx_timediff(curlx_now(), per->retrystart) <
        config->retry_maxtime*1000L)) ) {
     enum {
       RETRY_NO,
@@ -627,8 +627,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
              maximum time allowed for retrying, then exit the retries right
              away */
           if(config->retry_maxtime) {
-            curl_off_t seconds = Curl_timediff(Curl_now(),
-                                               per->retrystart)/1000;
+            curl_off_t seconds = curlx_timediff(curlx_now(),
+                                                per->retrystart)/1000;
 
             if((CURL_OFF_T_MAX - retry_after < seconds) ||
                (seconds + retry_after > config->retry_maxtime)) {
@@ -2306,7 +2306,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
       per->retry_remaining = config->req_retry;
       per->retry_sleep = per->retry_sleep_default; /* ms */
-      per->retrystart = Curl_now();
+      per->retrystart = curlx_now();
 
       state->li++;
       /* Here's looping around each globbed URL */
@@ -2772,7 +2772,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   s->mcode = CURLM_OK;
   s->result = CURLE_OK;
   s->still_running = 1;
-  s->start = Curl_now();
+  s->start = curlx_now();
   s->wrapitup = FALSE;
   s->wrapitup_processed = FALSE;
   s->tick = time(NULL);
@@ -2861,7 +2861,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     bool bailout = FALSE;
     struct curltime start;
 
-    start = Curl_now();
+    start = curlx_now();
     if(!per->skip) {
       result = pre_transfer(global, per);
       if(result)
@@ -2924,7 +2924,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     if(per && global->ms_per_transfer) {
       /* how long time did the most recent transfer take in number of
          milliseconds */
-      timediff_t milli = Curl_timediff(Curl_now(), start);
+      timediff_t milli = curlx_timediff(curlx_now(), start);
       if(milli < global->ms_per_transfer) {
         notef(global, "Transfer took %" CURL_FORMAT_CURL_OFF_T " ms, "
                       "waits %ldms as set by --rate",
