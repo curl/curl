@@ -512,10 +512,10 @@ GetFileAndPassword(const char *nextarg, char **file, char **password)
   char *certname, *passphrase;
   if(nextarg) {
     parse_cert_parameter(nextarg, &certname, &passphrase);
-    Curl_safefree(*file);
+    free(*file);
     *file = certname;
     if(passphrase) {
-      Curl_safefree(*password);
+      free(*password);
       *password = passphrase;
     }
   }
