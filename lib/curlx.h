@@ -64,4 +64,6 @@
 #include "strparse.h"
 /* The curlx_str_* parsing functions */
 
+#define curlx_safefree(x) Curl_safefree(x)
+
 #endif /* HEADER_CURL_CURLX_H */

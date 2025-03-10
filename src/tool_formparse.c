@@ -171,7 +171,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     }
     m = tool_mime_new(parent, TOOLMIME_STDIN);
     if(!m)
-      Curl_safefree(data);
+      curlx_safefree(data);
     else {
       m->data = data;
       m->origin = origin;
@@ -192,11 +192,11 @@ void tool_mime_free(struct tool_mime *mime)
       tool_mime_free(mime->subparts);
     if(mime->prev)
       tool_mime_free(mime->prev);
-    Curl_safefree(mime->name);
-    Curl_safefree(mime->filename);
-    Curl_safefree(mime->type);
-    Curl_safefree(mime->encoder);
-    Curl_safefree(mime->data);
+    curlx_safefree(mime->name);
+    curlx_safefree(mime->filename);
+    curlx_safefree(mime->type);
+    curlx_safefree(mime->encoder);
+    curlx_safefree(mime->data);
     curl_slist_free_all(mime->headers);
     free(mime);
   }
@@ -838,7 +838,7 @@ int formparse(struct OperationConfig *config,
                   "error while reading standard input");
             goto fail;
           }
-          Curl_safefree(part->data);
+          curlx_safefree(part->data);
           part->size = -1;
           res = CURLE_OK;
         }
@@ -874,7 +874,7 @@ int formparse(struct OperationConfig *config,
                   "error while reading standard input");
             goto fail;
           }
-          Curl_safefree(part->data);
+          curlx_safefree(part->data);
           part->size = -1;
           res = CURLE_OK;
         }
@@ -916,7 +916,7 @@ int formparse(struct OperationConfig *config,
   }
   err = 0;
 fail:
-  Curl_safefree(contents);
+  curlx_safefree(contents);
   curl_slist_free_all(headers);
   return err;
 }
