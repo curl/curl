@@ -565,7 +565,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     struct curltime before;
 
     /* populate the fds[] array */
-    for(m = ev->list, f = &fds[0]; m; m = m->next) {
+    f = &fds[0];
+    for(m = ev->list; m; m = m->next) {
       f->fd = m->socket.fd;
       f->events = m->socket.events;
       f->revents = 0;
