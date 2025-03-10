@@ -28,7 +28,7 @@
 #endif
 
 #include "terminal.h"
-#include "strparse.h"
+#include "curlx.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
