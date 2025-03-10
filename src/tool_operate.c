@@ -1214,7 +1214,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 #ifdef CURL_CA_EMBED
   if(!config->cacert && !config->capath) {
     struct curl_blob blob;
-    blob.data = (void *)curl_ca_embed;
+    blob.data = CURL_UNCONST(curl_ca_embed);
     blob.len = strlen((const char *)curl_ca_embed);
     blob.flags = CURL_BLOB_NOCOPY;
     notef(config->global,
@@ -1228,7 +1228,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   }
   if(!config->proxy_cacert && !config->proxy_capath) {
     struct curl_blob blob;
-    blob.data = (void *)curl_ca_embed;
+    blob.data = CURL_UNCONST(curl_ca_embed);
     blob.len = strlen((const char *)curl_ca_embed);
     blob.flags = CURL_BLOB_NOCOPY;
     notef(config->global,

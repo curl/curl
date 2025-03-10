@@ -1454,7 +1454,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  h2_xfer_write_resp(cf, data_s, stream, (char *)mem, len, FALSE);
+  h2_xfer_write_resp(cf, data_s, stream, (const char *)mem, len, FALSE);
 
   nghttp2_session_consume(ctx->h2, stream_id, len);
   stream->nrcvd_data += (curl_off_t)len;

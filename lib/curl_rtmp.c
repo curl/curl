@@ -344,7 +344,7 @@ static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
   (void)sockindex; /* unused */
   (void)eos; /* unused */
 
-  num = RTMP_Write(r, (char *)buf, curlx_uztosi(len));
+  num = RTMP_Write(r, (const char *)buf, curlx_uztosi(len));
   if(num < 0)
     *err = CURLE_SEND_ERROR;
 

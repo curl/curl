@@ -46,8 +46,8 @@ int Curl_rename(const char *oldpath, const char *newpath)
      when there are open handles to the file. */
   const int max_wait_ms = 1000;
   struct curltime start = Curl_now();
-  TCHAR *tchar_oldpath = curlx_convert_UTF8_to_tchar((char *)oldpath);
-  TCHAR *tchar_newpath = curlx_convert_UTF8_to_tchar((char *)newpath);
+  TCHAR *tchar_oldpath = curlx_convert_UTF8_to_tchar(oldpath);
+  TCHAR *tchar_newpath = curlx_convert_UTF8_to_tchar(newpath);
   for(;;) {
     timediff_t diff;
     if(MoveFileEx(tchar_oldpath, tchar_newpath, MOVEFILE_REPLACE_EXISTING)) {

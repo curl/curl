@@ -339,7 +339,7 @@ match:
   *h = hh;
   *m = mm;
   *s = ss;
-  *endp = (char *)p;
+  *endp = (char *)CURL_UNCONST(p);
   return TRUE;
 }
 

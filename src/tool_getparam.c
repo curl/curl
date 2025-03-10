@@ -1789,7 +1789,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     if(ARGTYPE(a->desc) >= ARG_STRG) {
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
-        nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
+        nextarg = &parse[1]; /* this is the actual extra parameter */
         singleopt = TRUE;   /* do not loop anymore after this */
 #ifdef HAVE_WRITABLE_ARGV
         clearthis = &cleararg1[parse + 2 - flag];
@@ -1832,7 +1832,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
          that use nextarg should be marked as such and they will check that
          nextarg is set before continuing, but code analyzers are not always
          that aware of that state */
-      nextarg = (char *)"";
+      nextarg = "";
 
     switch(cmd) {
     case C_RANDOM_FILE: /* --random-file */
@@ -2985,7 +2985,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
 error:
   if(nextalloc)
-    free((char *)nextarg);
+    free(CURL_UNCONST(nextarg));
   return err;
 }
 
