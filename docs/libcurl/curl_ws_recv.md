@@ -52,9 +52,13 @@ pointer is permitted in this case. Note that frames without payload are consumed
 by this action.
 
 If the received message consists of multiple fragments, the *CURLWS_CONT* bit
-is set in all frames except the final one. The application is responsible for
-reassembling fragmented messages. See curl_ws_meta(3) for more details on
-*CURLWS_CONT*.
+is set in all frames except the final one. The appropriate *CURLWS_TEXT* or
+*CURLWS_BINARY* flag is set in every frame, regardless whether it is the first
+fragment, an intermediate fragment or the final fragment. The application is
+responsible for reassembling fragmented messages. Special care must be taken
+to correctly handle control frames (i.e. CLOSE, PING and PONG) arriving in
+between consecutive fragments of a fragmented TEXT or BINARY message. See
+curl_ws_meta(3) for more details on *CURLWS_CONT*.
 
 # %PROTOCOLS%
 
