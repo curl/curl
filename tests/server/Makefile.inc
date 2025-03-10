@@ -84,12 +84,14 @@ sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
 socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
- server_sockaddr.h socksd.c
+ server_sockaddr.h \
+ socksd.c
 socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 socksd_CFLAGS = $(AM_CFLAGS)
 
 mqttd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
- server_sockaddr.h mqttd.c
+ server_sockaddr.h \
+ mqttd.c
 mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 mqttd_CFLAGS = $(AM_CFLAGS)
 
