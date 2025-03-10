@@ -197,7 +197,7 @@ char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
   case AF_INET6:
     return inet_ntop6((const unsigned char *)src, buf, size);
   default:
-    CURL_SETERRNO(EAFNOSUPPORT);
+    CURL_SETERRNO(SOCKEAFNOSUPPORT);
     return NULL;
   }
 }
