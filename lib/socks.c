@@ -590,7 +590,6 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   bool allow_gssapi = FALSE;
   struct Curl_dns_entry *dns = NULL;
 
-  DEBUGASSERT(auth & (CURLAUTH_BASIC | CURLAUTH_GSSAPI));
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
     if(conn->bits.httpproxy)
