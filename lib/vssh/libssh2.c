@@ -3412,6 +3412,7 @@ static CURLcode ssh_done(struct Curl_easy *data, CURLcode status)
     result = status;
 
   Curl_safefree(sshp->path);
+  Curl_safefree(sshc->homedir);
   Curl_dyn_free(&sshp->readdir);
 
   if(Curl_pgrsDone(data))
