@@ -63,6 +63,7 @@ struct curltime Curl_now(void)
 #endif
   if(isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
+    DEBUGASSERT(freq);
     QueryPerformanceCounter(&count);
     now.tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
     now.tv_usec = (int)((count.QuadPart % freq.QuadPart) * 1000000 /
