@@ -471,7 +471,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     struct dynbuf fname;
     line++;
 
-    Curl_dyn_init(&fname, MAX_FILENAME);
+    curlx_dyn_init(&fname, MAX_FILENAME);
 
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
@@ -490,7 +490,7 @@ ParameterError setvariable(struct GlobalConfig *global,
       if(clen)
         contalloc = TRUE;
     }
-    Curl_dyn_free(&fname);
+    curlx_dyn_free(&fname);
     if(!use_stdin && file)
       fclose(file);
     if(err)
