@@ -68,7 +68,6 @@
 #include "inet_ntop.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "strtoofft.h"
 #include "multiif.h"
 #include "select.h"
 #include "warnless.h"
@@ -1474,20 +1473,19 @@ sftp_download_stat(struct Curl_easy *data,
     }
     if(data->state.use_range) {
       curl_off_t from, to;
-      char *ptr;
-      char *ptr2;
-      CURLofft to_t;
-      CURLofft from_t;
+      const char *p = data->state.range;
+      int to_t, from_t;
 
-      from_t = curlx_strtoofft(data->state.range, &ptr, 10, &from);
-      if(from_t == CURL_OFFT_FLOW)
+      from_t = Curl_str_number(&p, &from, CURL_OFF_T_MAX);
+      if(from_t == STRE_OVERFLOW)
         return CURLE_RANGE_ERROR;
-      while(*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
-        ptr++;
-      to_t = curlx_strtoofft(ptr, &ptr2, 10, &to);
-      if(to_t == CURL_OFFT_FLOW)
+      Curl_str_passblanks(&p);
+      (void)Curl_str_single(&p, '-');
+
+      to_t = Curl_str_numblanks(&p, &to);
+      if(to_t == STRE_OVERFLOW)
         return CURLE_RANGE_ERROR;
-      if((to_t == CURL_OFFT_INVAL) /* no "to" value given */
+      if((to_t == STRE_NO_NUM) /* no "to" value given */
          || (to >= size)) {
         to = size - 1;
       }

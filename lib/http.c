@@ -72,7 +72,6 @@
 #include "headers.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
-#include "strtoofft.h"
 #include "multiif.h"
 #include "strcase.h"
 #include "content_encoding.h"
@@ -3027,13 +3026,13 @@ static CURLcode http_header(struct Curl_easy *data,
       HD_VAL(hd, hdlen, "Content-Length:") : NULL;
     if(v) {
       curl_off_t contentlength;
-      CURLofft offt = curlx_strtoofft(v, NULL, 10, &contentlength);
+      int offt = Curl_str_numblanks(&v, &contentlength);
 
-      if(offt == CURL_OFFT_OK) {
+      if(offt == STRE_OK) {
         k->size = contentlength;
         k->maxdownload = k->size;
       }
-      else if(offt == CURL_OFFT_FLOW) {
+      else if(offt == STRE_OVERFLOW) {
         /* out of range */
         if(data->set.max_filesize) {
           failf(data, "Maximum file size exceeded");

@@ -41,7 +41,6 @@ CURLX_CFILES = \
   ../lib/curl_multibyte.c \
   ../lib/dynbuf.c \
   ../lib/nonblock.c \
-  ../lib/strtoofft.c \
   ../lib/strparse.c \
   ../lib/strcase.c \
   ../lib/timediff.c \
@@ -54,7 +53,6 @@ CURLX_HFILES = \
   ../lib/curl_setup.h \
   ../lib/dynbuf.h \
   ../lib/nonblock.h \
-  ../lib/strtoofft.h \
   ../lib/strparse.h \
   ../lib/strcase.h \
   ../lib/timediff.h \

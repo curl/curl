@@ -44,7 +44,7 @@
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
-#include "strtoofft.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -315,8 +315,8 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
             k->httpcode);
     }
     else {
-      if(curlx_strtoofft(header + strlen("Content-Length:"),
-                         NULL, 10, &ts->cl)) {
+      const char *p = header + strlen("Content-Length:");
+      if(Curl_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
         return CURLE_WEIRD_SERVER_REPLY;
       }
