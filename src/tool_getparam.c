@@ -512,10 +512,10 @@ GetFileAndPassword(const char *nextarg, char **file, char **password)
   char *certname, *passphrase;
   if(nextarg) {
     parse_cert_parameter(nextarg, &certname, &passphrase);
-    Curl_safefree(*file);
+    free(*file);
     *file = certname;
     if(passphrase) {
-      Curl_safefree(*password);
+      free(*password);
       *password = passphrase;
     }
   }
@@ -1503,7 +1503,7 @@ static ParameterError parse_verbose(struct GlobalConfig *global,
   switch(global->verbosity) {
   case 0:
     global->verbosity = 1;
-    Curl_safefree(global->trace_dump);
+    free(global->trace_dump);
     global->trace_dump = strdup("%");
     if(!global->trace_dump)
       err = PARAM_NO_MEM;

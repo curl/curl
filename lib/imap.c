@@ -1134,7 +1134,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data, int imapcode,
         Curl_dyn_init(&uid, 20);
         if(Curl_dyn_addn(&uid, p, len))
           return CURLE_OUT_OF_MEMORY;
-        Curl_safefree(imapc->mailbox_uidvalidity);
+        free(imapc->mailbox_uidvalidity);
         imapc->mailbox_uidvalidity = Curl_dyn_ptr(&uid);
       }
     }

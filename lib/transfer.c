@@ -656,7 +656,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
    * protocol.
    */
   if(data->set.str[STRING_USERAGENT]) {
-    Curl_safefree(data->state.aptr.uagent);
+    free(data->state.aptr.uagent);
     data->state.aptr.uagent =
       aprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
     if(!data->state.aptr.uagent)

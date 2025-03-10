@@ -240,7 +240,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   file->path = real_path;
   #endif
 #endif
-  Curl_safefree(file->freepath);
+  free(file->freepath);
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
