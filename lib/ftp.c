@@ -2902,7 +2902,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
               free(dir);
               return result;
             }
-            Curl_safefree(ftpc->entrypath);
+            free(ftpc->entrypath);
             ftpc->entrypath = dir; /* remember this */
             infof(data, "Entry path is '%s'", ftpc->entrypath);
             /* also save it where getinfo can access it: */
@@ -2911,7 +2911,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
             break;
           }
 
-          Curl_safefree(ftpc->entrypath);
+          free(ftpc->entrypath);
           ftpc->entrypath = dir; /* remember this */
           infof(data, "Entry path is '%s'", ftpc->entrypath);
           /* also save it where getinfo can access it: */
@@ -2954,14 +2954,14 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
             return result;
           }
           /* remember target server OS */
-          Curl_safefree(ftpc->server_os);
+          free(ftpc->server_os);
           ftpc->server_os = os;
           ftp_state(data, FTP_NAMEFMT);
           break;
         }
         /* Nothing special for the target server. */
         /* remember target server OS */
-        Curl_safefree(ftpc->server_os);
+        free(ftpc->server_os);
         ftpc->server_os = os;
       }
       else {

@@ -28,7 +28,6 @@
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "url.h" /* for Curl_safefree() */
 #include "sendf.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
