@@ -344,7 +344,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     dns = Curl_fetch_addr(data, sx->hostname, conn->primary.remote_port);
 
     if(dns) {
-#ifdef CURLRES_ASYNCH
+#ifdef USE_CURL_ASYNC
       data->state.async.dns = dns;
       data->state.async.done = TRUE;
 #endif
@@ -814,7 +814,7 @@ CONNECT_REQ_INIT:
     dns = Curl_fetch_addr(data, sx->hostname, sx->remote_port);
 
     if(dns) {
-#ifdef CURLRES_ASYNCH
+#ifdef USE_CURL_ASYNC
       data->state.async.dns = dns;
       data->state.async.done = TRUE;
 #endif
