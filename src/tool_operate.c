@@ -932,7 +932,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
     if(env) {
       curl_off_t num;
       const char *p = env;
-      if(!Curl_str_number(&p, &num, LONG_MAX))
+      if(!curlx_str_number(&p, &num, LONG_MAX))
         my_setopt(curl, CURLOPT_BUFFERSIZE, (long)num);
     }
     else
