@@ -692,6 +692,7 @@ CURL_FROM_LIBCURL=\
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\strparse.obj \
  $(CURL_DIROBJ)\strcase.obj \
+ $(CURL_DIROBJ)\timeval.obj \
  $(CURL_DIROBJ)\warnless.obj \
  $(CURL_DIROBJ)\curl_get_line.obj \
  $(CURL_DIROBJ)\curl_multibyte.obj \
