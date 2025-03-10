@@ -68,9 +68,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     else {
       char *fullp;
       /* check for .curlrc then _curlrc in the dir of the executable */
-      file = Curl_execpath(".curlrc", &fullp);
+      file = tool_execpath(".curlrc", &fullp);
       if(!file)
-        file = Curl_execpath("_curlrc", &fullp);
+        file = tool_execpath("_curlrc", &fullp);
       if(file)
         /* this is the filename we read from */
         filename = fullp;
