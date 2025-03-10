@@ -212,6 +212,16 @@ int Curl_str_octal(const char **linep, curl_off_t *nump, curl_off_t max)
   return str_num_base(linep, nump, max, 8);
 }
 
+/*
+ * Parse a positive number up to 63-bit number written in ASCII. Skip leading
+ * blanks. No support for prefixes.
+ */
+int Curl_str_numblanks(const char **str, curl_off_t *num)
+{
+  Curl_str_passblanks(str);
+  return Curl_str_number(str, num, CURL_OFF_T_MAX);
+}
+
 /* CR or LF
    return non-zero on error */
 int Curl_str_newline(const char **linep)

@@ -78,6 +78,9 @@ int Curl_str_singlespace(const char **linep);
 /* Get an unsigned decimal number. Return non-zero on error */
 int Curl_str_number(const char **linep, curl_off_t *nump, curl_off_t max);
 
+/* As above with CURL_OFF_T_MAX but also pass leading blanks */
+int Curl_str_numblanks(const char **str, curl_off_t *num);
+
 /* Get an unsigned hexadecimal number. Return non-zero on error */
 int Curl_str_hex(const char **linep, curl_off_t *nump, curl_off_t max);
 
