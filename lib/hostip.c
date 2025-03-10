@@ -747,7 +747,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       int st;
       Curl_set_in_callback(data, TRUE);
       st = data->set.resolver_start(
-#ifdef USE_CURL_ASYNC
+#ifdef CURLRES_ASYNCH
         data->state.async.resolver,
 #else
         NULL,

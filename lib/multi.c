@@ -2087,7 +2087,7 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
   dns = Curl_fetch_addr(data, hostname, conn->primary.remote_port);
 
   if(dns) {
-#ifdef CURLRES_ASYNCH
+#ifdef USE_CURL_ASYNC
     data->state.async.dns = dns;
     data->state.async.done = TRUE;
 #endif
