@@ -1783,7 +1783,7 @@ static CURLcode append2query(struct GlobalConfig *global,
       if(uerr)
         result = urlerr_cvt(uerr);
       else {
-        Curl_safefree(per->url); /* free previous URL */
+        free(per->url); /* free previous URL */
         per->url = updated; /* use our new URL instead! */
       }
     }
