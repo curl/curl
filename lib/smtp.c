@@ -657,7 +657,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
     if(data->set.str[STRING_MAIL_AUTH][0] != '\0') {
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
-      char const *suffix = "";
+      const char *suffix = "";
 
       /* Parse the AUTH mailbox into the local address and hostname parts,
          converting the hostname to an IDN A-label if necessary */
@@ -1754,7 +1754,7 @@ static CURLcode smtp_parse_address(const char *fqma, char **address,
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 
-  if(fqma[0] == '<') {
+  if(fqma[0] != '<') {
     length = strlen(dup);
     if(length) {
       if(dup[length - 1] == '>')
