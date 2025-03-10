@@ -207,6 +207,7 @@ static const struct LongShort aliases[]= {
   {"list-only",                  ARG_BOOL, 'l', C_LIST_ONLY},
   {"local-port",                 ARG_STRG, ' ', C_LOCAL_PORT},
   {"location",                   ARG_BOOL, 'L', C_LOCATION},
+  {"location-mode",              ARG_STRG, ' ', C_LOCATION_MODE},
   {"location-trusted",           ARG_BOOL, ' ', C_LOCATION_TRUSTED},
   {"login-options",              ARG_STRG, ' ', C_LOGIN_OPTIONS},
   {"mail-auth",                  ARG_STRG, ' ', C_MAIL_AUTH},
@@ -1682,6 +1683,22 @@ static ParameterError parse_upload_flags(struct OperationConfig *config,
   return err;
 }
 
+static ParameterError parse_location_mode(struct GlobalConfig *global,
+                                          struct OperationConfig *config,
+                                          const char *nextarg)
+{
+  if(!strcmp("all", nextarg))
+    config->followlocation = CURLFOLLOW_ALL;
+  else if(!strcmp("obey", nextarg))
+    config->followlocation = CURLFOLLOW_OBEYCODE;
+  else if(!strcmp("first", nextarg))
+    config->followlocation = CURLFOLLOW_FIRSTONLY;
+  else
+    return PARAM_BAD_USE;
+  (void)global;
+  return PARAM_OK;
+}
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             const char *nextarg,    /* NULL if unset */
                             argv_item_t cleararg1,
@@ -2809,6 +2826,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       FALLTHROUGH();
     case C_LOCATION: /* --location */
       config->followlocation = toggle; /* Follow Location: HTTP headers */
+      break;
+    case C_LOCATION_MODE: /* --location-mode */
+      err = parse_location_mode(global, config, nextarg);
       break;
     case C_MAX_TIME: /* --max-time */
       /* specified max time */
