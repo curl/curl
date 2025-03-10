@@ -106,7 +106,8 @@ static int ssh_getsock(struct Curl_easy *data, struct connectdata *conn,
 static CURLcode ssh_setup_connection(struct Curl_easy *data,
                                      struct connectdata *conn);
 static void ssh_attach(struct Curl_easy *data, struct connectdata *conn);
-
+static int sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
+                        bool block);
 /*
  * SCP protocol handler.
  */
@@ -2862,66 +2863,12 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_SESSION_FREE:
-      if(sshc->kh) {
-        libssh2_knownhost_free(sshc->kh);
-        sshc->kh = NULL;
-      }
-
-      if(sshc->ssh_agent) {
-        rc = libssh2_agent_disconnect(sshc->ssh_agent);
-        if(rc == LIBSSH2_ERROR_EAGAIN) {
-          break;
-        }
-        if(rc < 0) {
-          char *err_msg = NULL;
-          (void)libssh2_session_last_error(sshc->ssh_session,
-                                           &err_msg, NULL, 0);
-          infof(data, "Failed to disconnect from libssh2 agent: %d %s",
-                rc, err_msg);
-        }
-        libssh2_agent_free(sshc->ssh_agent);
-        sshc->ssh_agent = NULL;
-
-        /* NB: there is no need to free identities, they are part of internal
-           agent stuff */
-        sshc->sshagent_identity = NULL;
-        sshc->sshagent_prev_identity = NULL;
-      }
-
-      if(sshc->ssh_session) {
-        rc = libssh2_session_free(sshc->ssh_session);
-        if(rc == LIBSSH2_ERROR_EAGAIN) {
-          break;
-        }
-        if(rc < 0) {
-          char *err_msg = NULL;
-          (void)libssh2_session_last_error(sshc->ssh_session,
-                                           &err_msg, NULL, 0);
-          infof(data, "Failed to free libssh2 session: %d %s", rc, err_msg);
-        }
-        sshc->ssh_session = NULL;
-      }
-
-      /* worst-case scenario cleanup */
-
-      DEBUGASSERT(sshc->ssh_session == NULL);
-      DEBUGASSERT(sshc->ssh_channel == NULL);
-      DEBUGASSERT(sshc->sftp_session == NULL);
-      DEBUGASSERT(sshc->sftp_handle == NULL);
-      DEBUGASSERT(sshc->kh == NULL);
-      DEBUGASSERT(sshc->ssh_agent == NULL);
-
-      Curl_safefree(sshc->rsa_pub);
-      Curl_safefree(sshc->rsa);
-      Curl_safefree(sshc->quote_path1);
-      Curl_safefree(sshc->quote_path2);
-      Curl_safefree(sshc->homedir);
-
+      rc = sshc_cleanup(sshc, data, FALSE);
+      if(rc == LIBSSH2_ERROR_EAGAIN)
+        break;
       /* the code we are about to return */
       result = sshc->actualcode;
-
       memset(sshc, 0, sizeof(struct ssh_conn));
-
       connclose(conn, "SSH session free");
       sshc->state = SSH_SESSION_FREE; /* current */
       sshc->nextstate = SSH_NO_STATE;
@@ -3376,6 +3323,69 @@ static CURLcode ssh_do(struct Curl_easy *data, bool *done)
   return result;
 }
 
+static int sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
+                        bool block)
+{
+  int rc;
+
+  if(sshc->kh) {
+    libssh2_knownhost_free(sshc->kh);
+    sshc->kh = NULL;
+  }
+
+  if(sshc->ssh_agent) {
+    rc = libssh2_agent_disconnect(sshc->ssh_agent);
+    if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
+      return rc;
+    }
+    if(rc < 0) {
+      char *err_msg = NULL;
+      (void)libssh2_session_last_error(sshc->ssh_session,
+                                       &err_msg, NULL, 0);
+      infof(data, "Failed to disconnect from libssh2 agent: %d %s",
+            rc, err_msg);
+    }
+    libssh2_agent_free(sshc->ssh_agent);
+    sshc->ssh_agent = NULL;
+
+    /* NB: there is no need to free identities, they are part of internal
+       agent stuff */
+    sshc->sshagent_identity = NULL;
+    sshc->sshagent_prev_identity = NULL;
+  }
+
+  if(sshc->ssh_session) {
+    rc = libssh2_session_free(sshc->ssh_session);
+    if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
+      return rc;
+    }
+    if(rc < 0) {
+      char *err_msg = NULL;
+      (void)libssh2_session_last_error(sshc->ssh_session,
+                                       &err_msg, NULL, 0);
+      infof(data, "Failed to free libssh2 session: %d %s", rc, err_msg);
+    }
+    sshc->ssh_session = NULL;
+  }
+
+  /* worst-case scenario cleanup */
+  DEBUGASSERT(sshc->ssh_session == NULL);
+  DEBUGASSERT(sshc->ssh_channel == NULL);
+  DEBUGASSERT(sshc->sftp_session == NULL);
+  DEBUGASSERT(sshc->sftp_handle == NULL);
+  DEBUGASSERT(sshc->kh == NULL);
+  DEBUGASSERT(sshc->ssh_agent == NULL);
+
+  Curl_safefree(sshc->rsa_pub);
+  Curl_safefree(sshc->rsa);
+  Curl_safefree(sshc->quote_path1);
+  Curl_safefree(sshc->quote_path2);
+  Curl_safefree(sshc->homedir);
+
+  return 0;
+}
+
+
 /* BLOCKING, but the function is using the state machine so the only reason
    this is still blocking is that the multi interface code has no support for
    disconnecting operations that takes a while */
@@ -3393,6 +3403,7 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
     result = ssh_block_statemach(data, conn, TRUE);
   }
 
+  sshc_cleanup(sshc, data, TRUE);
   return result;
 }
 
@@ -3549,6 +3560,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
   }
 
   DEBUGF(infof(data, "SSH DISCONNECT is done"));
+  sshc_cleanup(sshc, data, TRUE);
 
   return result;
 
