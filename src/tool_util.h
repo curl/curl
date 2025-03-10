@@ -49,7 +49,7 @@ int struplocompare(const char *p1, const char *p2);
 int struplocompare4sort(const void *p1, const void *p2);
 
 #if defined(_WIN32) && !defined(UNDER_CE)
-FILE *Curl_execpath(const char *filename, char **pathp);
+FILE *tool_execpath(const char *filename, char **pathp);
 #endif
 
 #endif /* HEADER_CURL_TOOL_UTIL_H */
