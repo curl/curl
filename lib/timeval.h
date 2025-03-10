@@ -33,6 +33,11 @@ struct curltime {
   int tv_usec;   /* microseconds */
 };
 
+#ifndef BUILDING_LIBCURL
+/* For tool or tests, we must initialize before calling Curl_now() */
+void Curl_now_init(void);
+#endif
+
 struct curltime Curl_now(void);
 
 /*
