@@ -44,6 +44,7 @@ CURLX_CFILES = \
   ../lib/strparse.c \
   ../lib/strcase.c \
   ../lib/timediff.c \
+  ../lib/timeval.c \
   ../lib/version_win32.c \
   ../lib/warnless.c
 
@@ -56,6 +57,7 @@ CURLX_HFILES = \
   ../lib/strparse.h \
   ../lib/strcase.h \
   ../lib/timediff.h \
+  ../lib/timeval.h \
   ../lib/version_win32.h \
   ../lib/warnless.h
 
