@@ -46,7 +46,6 @@
 #endif
 
 #include "curlx.h" /* from the private lib dir */
-#include "getpart.h"
 #include "util.h"
 
 /* need init from main() */
