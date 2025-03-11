@@ -344,10 +344,10 @@ jobs:
         timeout-minutes: 10
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }}'
-          TFLAGS+=' ~613'  # SFTP
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~612'  # SFTP
+            TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
           fi
+          TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -904,7 +904,13 @@ jobs:
         timeout-minutes: 5
         run: |
           /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
+          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+          else  # OpenSSH-Windows
+            [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-Pre' ] && chocopkg+=' --prerelease'
+            chocopkg+=' openssh'
+          fi
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force ${chocopkg} stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'downgrade msys2-runtime'
@@ -920,15 +926,23 @@ jobs:
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
           export TFLAGS='-j8 ${{ matrix.tflags }}'
-          TFLAGS+=' ~2310'  # flaky
-          TFLAGS+=' ~SCP'  # 601 603 612 617 619 621 641 665 2004 3022
-          TFLAGS+=' ~612'  # SFTP
+          TFLAGS+=' ~2310'  # flaky 'WebSockets unknown reserved bit set in frame header', WebSockets
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-            TFLAGS+=' ~SFTP'
-          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
-            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+            TFLAGS+=' ~SCP ~SFTP'  # Fail with all tested openssh servers: curl: (67) Authentication failure
           fi
-          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
+          TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
+          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+            TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
+          else  # OpenSSH-Windows
+            TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
+            if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+              TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+            else
+              TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
+            fi
+            PATH="$PATH:/c/Program Files/OpenSSH-Win64"
+          fi
+          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
