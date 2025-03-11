@@ -4,7 +4,7 @@ curl and libcurl 8.13.0
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3365
+ Contributors:                 3367
 
 This release includes the following changes:
 
@@ -29,6 +29,7 @@ This release includes the following bugfixes:
  o build: cmake multi-pkg-config detection improvements (brotli, ldap, mbedtls) [192]
  o build: drop unused `getpart` tool [107]
  o build: enable -Wjump-misses-init for GCC 4.5+ [62]
+ o build: enable `-Wcast-qual`, fix or silence compiler warnings [208]
  o build: fix compiler warnings in feature detections [39]
  o build: set `-O3` and tune WinCE in CI, fix `getpart`, `vtls_scache` fallouts [137]
  o build: set `HAVE_STDINT_H` if `stdint.h` is available [155]
@@ -66,6 +67,7 @@ This release includes the following bugfixes:
  o cmake: sync cutoff version with autotools for picky option `-ftree-vrp` [99]
  o cmake: sync OpenSSL(-fork) feature checks with `./configure` [49]
  o CODE_STYLE: readability and banned functions [35]
+ o configure: call the blocking resolver "blocking", not "default" [220]
  o configure: silence compiler warnings in feature checks, drop duplicates [86]
  o configure: use `curl_cv_apple` variable [40]
  o conn: fix connection reuse when SSL is optional [54]
@@ -78,6 +80,7 @@ This release includes the following bugfixes:
  o curl.h: convert CURLUSESSL* names to defines [146]
  o curl.h: stop defining non-curl `__has_declspec_attribute` [142]
  o curl.h: switch `CURL_HTTP_VERSION*` enums to long constants [160]
+ o curl: add my_setopt_long() and _offt() [158]
  o curl_msh3: remove verify bypass from DEBUGBUILDs [43]
  o curl_setup_once: drop `E*` macro redefines unused (with winsock2) [164]
  o curl_setup_once: stop redefining `ENAMETOOLONG` to winsock2 error code [163]
@@ -85,6 +88,7 @@ This release includes the following bugfixes:
  o CURLMOPT_SOCKETFUNCTION.md: add advice for socket callback invocation[69]
  o CURLOPT_HTTPHEADER.md: add comments to the example [90]
  o CURLOPT_HTTPHEADER.md: rephrases [108]
+ o DISABLED: add 313 for sectransp (move from GHA/macos) [209]
  o docs/cmdline-opts: unify HTTP version style in --help output [139]
  o docs: adapt to removed --with-random [177]
  o docs: add FD_ZERO to curl_multi_fdset example [19]
@@ -93,6 +97,7 @@ This release includes the following bugfixes:
  o docs: minor edits to please the new spellchecker regime
  o docs: vulnerabilities in debug code are not eligible for a bounty [118]
  o doh: improve HTTPS RR svcparams parsing [198]
+ o easy: fix warning about possible comma misuse [219]
  o eventfd: allow use on all CPUs [93]
  o examples: prefer `return` over `exit()` (cont.) [110]
  o ftp: fix comment [135]
@@ -100,6 +105,7 @@ This release includes the following bugfixes:
  o gnutls: fix use of pkcs11 urls for keys/certs [122]
  o gtls: fix uninitialized variable [154]
  o hash: use single linked list for entries [57]
+ o hostip: don't use alarm() for DoH resolves [214]
  o hostip: make CURLOPT_RESOLVE support replacing IPv6 addresses [47]
  o http2: add on_invalid_frame callback for error detection [174]
  o http2: detect session being closed on ingress handling [173]
@@ -121,16 +127,24 @@ This release includes the following bugfixes:
  o INSTALL-CMAKE.md: CMake usage updates [101]
  o INSTALL-CMAKE.md: mention `ZLIB_USE_STATIC_LIBS` [112]
  o lib1156: pass longs to `curl_easy_setopt()` [159]
+ o lib2302: fix crash due to stack overflow on MSVC and clang Windows [228]
  o lib: better optimized casecompare() and ncasecompare() [3]
+ o lib: clear up CURLRES_ASYNCH vs USE_CURL_ASYNC use [215]
  o lib: fix two curlx_strtoofft invokes [128]
+ o lib: rename curlx_strtoofft to Curl_str_numblanks() [218]
  o lib: replace while(ISBLANK()) loops with Curl_str_passblanks() [148]
  o lib: simplify more white space loops [60]
  o lib: strtoofft.h header cleanup [17]
  o lib: use Curl_str_* instead of strtok_r() [59]
  o lib: use Curl_str_number() for parsing decimal numbers [13]
+ o libssh2: fix freeing of resources in disconnect [207]
+ o libssh2: fix memory leak in `SSH_SFTP_REALPATH` state [224]
  o libssh2: print user with verbose flag [125]
+ o libssh: fix freeing of resources in disconnect [206]
+ o libssh: fix scp large file upload for 32-bit size_t systems [211]
  o libtest/libprereq.c: set CURLOPT_FOLLOWLOCATION with a long [89]
  o managen: correct the warning for un-escaped '<' and '>' [1]
+ o mprintf: switch three number parsers to use strparse [221]
  o msvc: drop support for VS2005 and older [96]
  o multi: event based rework [74]
  o multi: start the loop over when handles are removed [129]
@@ -148,6 +162,7 @@ This release includes the following bugfixes:
  o runtests: check and report if `diff` tool is missing [162]
  o runtests: drop recognizing 'winssl' as Schannel [102]
  o runtests: drop ref to unused external function
+ o runtests: fix SSH server not starting in cases, re-ignore failing vcpkg CI jobs [225]
  o runtests: recognize AWS-LC as OpenSSL [103]
  o runtests: support multi-target cmake, drop workarounds from CI [116]
  o schannel: deduplicate Windows Vista detection [98]
@@ -161,8 +176,11 @@ This release includes the following bugfixes:
  o setopt: remove unnecessary void pointer typecasts [76]
  o setopt: setting PROXYUSERPWD after PROXYUSERNAME/PASSWORD is fine [197]
  o shutdowns: split shutdown handling from connection pool [156]
+ o socks: remove bad assert from do_SOCKS5() [216]
  o src: avoid strdup on platforms not doing UTF-8 conversions [176]
  o src: cleanup ISBLANK vs ISSPACE [195]
+ o src: remove Curl_ prefix from tool-specific function [205]
+ o src: replace strto[u][ld] with curlx_str_ parsers [222]
  o ssh: consider sftp quote commands case sensitive [33]
  o ssl session cache: add exportable flag [56]
  o strparse: make Curl_str_number() return error for no digits [14]
@@ -170,15 +188,19 @@ This release includes the following bugfixes:
  o strparse: switch to curl_off_t as base data type [7]
  o test1022: add support for rc releases [144]
  o test1167: catch #defines with extra whitespace [140]
+ o test489: set output dir [186]
  o tests/certs: cleanup [151]
  o tests/server: fix to check against winsock2 error codes on Windows [168]
  o tests/server: replace `errno` with `SOCKERRNO` in sockfilt, socksd, sws [183]
  o tests/server: replace `strerror` with `sstrerror` in socksd
+ o tests/server: sync `wait_ms()` with the libcurl implementation [226]
+ o tests/servers.pm: remove unused variable 'portrange' [227]
  o tests: fix comment in lib533 [121]
  o tests: fix enum/int confusion, fix autotools `CFLAGS` for `servers` [27]
  o tests: make sure 'commands.log' is generated in the correct logdir [172]
  o tests: mark tests 1631, 1632 flaky [157]
  o tests: reformat error messages to avoid tripping MSBuild [201]
+ o tftpd: prefix TFTP protocol error `E*` constants with `TFTP_` [189]
  o tidy-up: align MSYS2/Cygwin codepaths, follow Cygwin `MAX_PID` bump [97]
  o tidy-up: delete, comment or scope C macros reported unused [16]
  o tidy-up: drop unused `CURL_INADDR_NONE` macro and `in_addr_t` type [26]
@@ -204,6 +226,7 @@ This release includes the following bugfixes:
  o winbuild: reduce command-line length by dropping whitespace [117]
  o windows: do not use winsock2 `inet_ntop()`/`inet_pton()` [202]
  o windows: drop code and curl manifest targeting W2K and older [115]
+ o wolfssh: fix freeing of resources in disconnect [184]
  o wolfssh: retrieve the error using wolfSSH_get_error [5]
  o wolfssl: fix CA certificate multiple location import [34]
  o wolfssl: fix unused variable warning [190]
@@ -231,17 +254,18 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthony Hu, Carlos Henrique Lima Melara, Catena cyber, Dan Fandrich,
-  Daniel Stenberg, dependabot[bot], Derek Huang, Dexter Gerig, Ethan Wilkes,
-  Harry Sintonen, Jeremy Drake, John Bampton, Joseph Chen, Kai Pastor,
-  kayrus on github, kriztalz, Laurențiu Nicola, lf- on github, Marcel Raad,
-  Mark Phillips, Martxel, Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh,
-  Peng-Yu Chen, Philippe Antoine, qhill on github, Ray Satiro, renovate[bot],
+  Anthony Hu, Carlos Henrique Lima Melara, Catena cyber, Christian Schmitz,
+  Dan Fandrich, Daniel Stenberg, dependabot[bot], Derek Huang, Dexter Gerig,
+  Ethan Wilkes, Harry Sintonen, Jeremy Drake, John Bampton, Joseph Chen,
+  Justin Steventon, Kai Pastor, kayrus on github, kriztalz, Lars Karlitski,
+  Laurențiu Nicola, lf- on github, Marcel Raad, Mark Phillips, Martxel,
+  Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh, Peng-Yu Chen,
+  Philippe Antoine, qhill on github, Ray Satiro, renovate[bot],
   rmg-x on github, RubisetCie on github, saimen, Samuel Dionne-Riel,
   Samuel Henrique, Sergey, Stefan Eissing, stevenpackardblp on github,
   Tatsuhiro Tsujikawa, Tianyi Song, Timo Tijhof, tiymat, Viktor Szakats,
   Yedaya Katsman, Zenju on github, Zhang Wen, Zhaoming Luo
-  (46 contributors)
+  (49 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -402,6 +426,7 @@ References to bug reports and discussions on issues:
  [155] = https://curl.se/bug/?i=16585
  [156] = https://curl.se/bug/?i=16508
  [157] = https://curl.se/bug/?i=16584
+ [158] = https://curl.se/bug/?i=16669
  [159] = https://curl.se/bug/?i=16579
  [160] = https://curl.se/bug/?i=16580
  [161] = https://curl.se/bug/?i=16622
@@ -427,9 +452,12 @@ References to bug reports and discussions on issues:
  [181] = https://curl.se/bug/?i=16552
  [182] = https://curl.se/bug/?i=16607
  [183] = https://curl.se/bug/?i=16553
+ [184] = https://curl.se/bug/?i=16668
  [185] = https://issues.oss-fuzz.com/issues/401430844
+ [186] = https://curl.se/bug/?i=16670
  [187] = https://curl.se/bug/?i=16614
  [188] = https://curl.se/bug/?i=16611
+ [189] = https://curl.se/bug/?i=16666
  [190] = https://curl.se/bug/?i=16608
  [191] = https://curl.se/bug/?i=16610
  [192] = https://curl.se/bug/?i=16479
@@ -441,3 +469,22 @@ References to bug reports and discussions on issues:
  [200] = https://curl.se/bug/?i=16581
  [201] = https://curl.se/bug/?i=16583
  [202] = https://curl.se/bug/?i=16577
+ [205] = https://curl.se/bug/?i=16657
+ [206] = https://curl.se/bug/?i=16659
+ [207] = https://curl.se/bug/?i=16656
+ [208] = https://curl.se/bug/?i=16142
+ [209] = https://curl.se/bug/?i=16660
+ [211] = https://curl.se/bug/?i=16641
+ [214] = https://curl.se/bug/?i=16649
+ [215] = https://curl.se/bug/?i=16645
+ [216] = https://issues.oss-fuzz.com/issues/401869346
+ [218] = https://curl.se/bug/?i=16642
+ [219] = https://curl.se/bug/?i=16644
+ [220] = https://curl.se/bug/?i=16646
+ [221] = https://curl.se/bug/?i=16628
+ [222] = https://curl.se/bug/?i=16634
+ [224] = https://curl.se/bug/?i=16636
+ [225] = https://curl.se/bug/?i=16636
+ [226] = https://curl.se/bug/?i=16627
+ [227] = https://curl.se/bug/?i=16632
+ [228] = https://curl.se/bug/?i=16630
