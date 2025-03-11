@@ -962,8 +962,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt_str(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
 
   /* new in libcurl 7.3 */
-  my_setopt_long(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel ?
-                 1 : 0);
+  my_setopt_long(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel);
 
   /* new in libcurl 7.52.0 */
   if(config->preproxy)
@@ -1308,18 +1307,12 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
     {
       long mask =
-        (config->ssl_allow_beast ?
-         CURLSSLOPT_ALLOW_BEAST : 0) |
-        (config->ssl_allow_earlydata ?
-         CURLSSLOPT_EARLYDATA : 0) |
-        (config->ssl_no_revoke ?
-         CURLSSLOPT_NO_REVOKE : 0) |
-        (config->ssl_revoke_best_effort ?
-         CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
-        (config->native_ca_store ?
-         CURLSSLOPT_NATIVE_CA : 0) |
-        (config->ssl_auto_client_cert ?
-         CURLSSLOPT_AUTO_CLIENT_CERT : 0);
+        (config->ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
+        (config->ssl_allow_earlydata ? CURLSSLOPT_EARLYDATA : 0) |
+        (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0) |
+        (config->ssl_revoke_best_effort ? CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
+        (config->native_ca_store ? CURLSSLOPT_NATIVE_CA : 0) |
+        (config->ssl_auto_client_cert ? CURLSSLOPT_AUTO_CLIENT_CERT : 0);
 
       if(mask)
         my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);
@@ -1327,12 +1320,10 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
     {
       long mask =
-        (config->proxy_ssl_allow_beast ?
-         CURLSSLOPT_ALLOW_BEAST : 0) |
+        (config->proxy_ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
         (config->proxy_ssl_auto_client_cert ?
          CURLSSLOPT_AUTO_CLIENT_CERT : 0) |
-        (config->proxy_native_ca_store ?
-         CURLSSLOPT_NATIVE_CA : 0);
+        (config->proxy_native_ca_store ? CURLSSLOPT_NATIVE_CA : 0);
 
       if(mask)
         my_setopt_bitmask(curl, CURLOPT_PROXY_SSL_OPTIONS, mask);
@@ -1541,12 +1532,10 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* curl 7.13.0 */
   my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
-  my_setopt_long(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl ?
-                 1L : 0L);
+  my_setopt_long(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);
 
   /* curl 7.14.2 */
-  my_setopt_long(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip ?
-                 1L : 0L);
+  my_setopt_long(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip);
 
   /* curl 7.15.1 */
   if(proto_ftp)
