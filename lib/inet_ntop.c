@@ -74,7 +74,11 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 
   len = strlen(tmp);
   if(len == 0 || len >= size) {
+#ifdef USE_WINSOCK
+    CURL_SETERRNO(WSAEINVAL);
+#else
     CURL_SETERRNO(ENOSPC);
+#endif
     return NULL;
   }
   strcpy(dst, tmp);
@@ -170,7 +174,11 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
   /* Check for overflow, copy, and we are done.
    */
   if((size_t)(tp - tmp) > size) {
+#ifdef USE_WINSOCK
+    CURL_SETERRNO(WSAEINVAL);
+#else
     CURL_SETERRNO(ENOSPC);
+#endif
     return NULL;
   }
   strcpy(dst, tmp);
