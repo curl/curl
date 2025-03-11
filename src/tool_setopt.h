@@ -97,12 +97,24 @@ CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
 CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
                            const char *name, CURLoption tag,
                            struct curl_slist *list);
+CURLcode tool_setopt_long(CURL *curl, struct GlobalConfig *global,
+                          const char *name, CURLoption tag,
+                          long lval);
+CURLcode tool_setopt_offt(CURL *curl, struct GlobalConfig *global,
+                          const char *name, CURLoption tag,
+                          curl_off_t lval);
 CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
                      struct OperationConfig *config,
                      const char *name, CURLoption tag, ...);
 
 #define my_setopt(x,y,z) \
   SETOPT_CHECK(tool_setopt(x, FALSE, global, config, #y, y, z), y)
+
+#define my_setopt_long(x,y,z) \
+  SETOPT_CHECK(tool_setopt_long(x, global, #y, y, z), y)
+
+#define my_setopt_offt(x,y,z) \
+  SETOPT_CHECK(tool_setopt_offt(x, global, #y, y, z), y)
 
 #define my_setopt_str(x,y,z) \
   SETOPT_CHECK(tool_setopt(x, TRUE, global, config, #y, y, z), y)
