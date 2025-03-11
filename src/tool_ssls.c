@@ -51,7 +51,7 @@ static CURLcode tool_ssls_easy(struct GlobalConfig *global,
   if(!result && (global->tracetype != TRACE_NONE)) {
     my_setopt(*peasy, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(*peasy, CURLOPT_DEBUGDATA, config);
-    my_setopt(*peasy, CURLOPT_VERBOSE, 1L);
+    my_setopt_long(*peasy, CURLOPT_VERBOSE, 1L);
   }
   return result;
 }
