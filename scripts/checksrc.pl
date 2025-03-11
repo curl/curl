@@ -1022,6 +1022,12 @@ sub scanfile {
                       "space after exclamation mark");
         }
 
+        if($nostr =~ /(.*)\b(EACCES|EADDRINUSE|EADDRNOTAVAIL|EAFNOSUPPORT|EBADF|ECONNREFUSED|ECONNRESET|EINPROGRESS|EINTR|EINVAL|EISCONN|EMSGSIZE|ENOMEM|ETIMEDOUT|EWOULDBLOCK)\b/) {
+            checkwarn("ERRNOVAR",
+                      $line, length($1), $file, $ol,
+                      "use of bare errno define $2, use SOCK$2");
+        }
+
         # check for more than one consecutive space before open brace or
         # question mark. Skip lines containing strings since they make it hard
         # due to artificially getting multiple spaces
