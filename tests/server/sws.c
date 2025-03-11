@@ -588,26 +588,20 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
          have been received */
-      char *endptr;
-      char *ptr = line + 15;
-      unsigned long clen = 0;
-      while(*ptr && ISSPACE(*ptr))
-        ptr++;
-      endptr = ptr;
-      CURL_SETERRNO(0);
-      clen = strtoul(ptr, &endptr, 10);
-      if((ptr == endptr) || !ISSPACE(*endptr) || (ERANGE == errno)) {
+      curl_off_t clen;
+      const char *p = line + strlen("Content-Length:");
+      if(curlx_str_numblanks(&p, &clen)) {
         /* this assumes that a zero Content-Length is valid */
-        logmsg("Found invalid Content-Length: (%s) in the request", ptr);
+        logmsg("Found invalid '%s' in the request", line);
         req->open = FALSE; /* closes connection */
         return 1; /* done */
       }
       if(req->skipall)
         req->cl = 0;
       else
-        req->cl = clen - req->skip;
+        req->cl = (size_t)clen - req->skip;
 
-      logmsg("Found Content-Length: %lu in the request", clen);
+      logmsg("Found Content-Length: %zu in the request", (size_t)clen);
       if(req->skip)
         logmsg("... but will abort after %zu bytes", req->cl);
     }
