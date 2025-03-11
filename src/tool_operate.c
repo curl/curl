@@ -1525,8 +1525,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in curl 7.16.1 */
   if(config->ftp_ssl_ccc)
-    my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC,
-                   (long)config->ftp_ssl_ccc_mode);
+    my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
 
   /* new in curl 7.19.4 */
   if(config->socks5_gssapi_nec)
