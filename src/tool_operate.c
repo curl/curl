@@ -930,10 +930,9 @@ static CURLcode config2setopts(struct GlobalConfig *global,
     }
     else
 #endif
-      if(config->recvpersecond &&
-         (config->recvpersecond < BUFFER_SIZE))
+      if(config->recvpersecond && (config->recvpersecond < BUFFER_SIZE))
         /* use a smaller sized buffer for better sleeps */
-        my_setopt_long(curl, CURLOPT_BUFFERSIZE, config->recvpersecond);
+        my_setopt_long(curl, CURLOPT_BUFFERSIZE, (long)config->recvpersecond);
       else
         my_setopt_long(curl, CURLOPT_BUFFERSIZE, BUFFER_SIZE);
   }
