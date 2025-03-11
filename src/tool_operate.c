@@ -995,7 +995,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
             config->suppress_connect_headers ? 1L : 0L);
 
   my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror ? 1L : 0L);
-  my_setopt(curl, CURLOPT_REQUEST_TARGET, config->request_target);
+  my_setopt_str(curl, CURLOPT_REQUEST_TARGET, config->request_target);
   my_setopt(curl, CURLOPT_UPLOAD, per->uploadfile ? 1L : 0L);
   my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly ? 1L : 0L);
   my_setopt(curl, CURLOPT_APPEND, config->ftp_append ? 1L : 0L);
@@ -1530,7 +1530,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in curl 7.19.4 */
   if(config->socks5_gssapi_nec)
-    my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC, 1L);
+    my_setopt(curl, CURLOPT_SOCKS5_GSSAPI_NEC, 1L);
 
   /* new in curl 7.55.0 */
   if(config->socks5_auth)
@@ -1693,8 +1693,8 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in 7.47.0 */
   if(config->expect100timeout_ms > 0)
-    my_setopt_str(curl, CURLOPT_EXPECT_100_TIMEOUT_MS,
-                  config->expect100timeout_ms);
+    my_setopt(curl, CURLOPT_EXPECT_100_TIMEOUT_MS,
+              config->expect100timeout_ms);
 
   /* new in 7.48.0 */
   if(config->tftp_no_options && proto_tftp)
