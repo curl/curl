@@ -106,5 +106,6 @@ void Curl_str_passblanks(const char **linep);
 #define curlx_str_octal(x,y,z) Curl_str_octal(x,y,z)
 #define curlx_str_single(x,y) Curl_str_single(x,y)
 #define curlx_str_passblanks(x) Curl_str_passblanks(x)
+#define curlx_str_numblanks(x,y) Curl_str_numblanks(x,y)
 
 #endif /* HEADER_CURL_STRPARSE_H */
