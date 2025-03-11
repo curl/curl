@@ -1512,7 +1512,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in curl 7.19.4 */
   if(config->socks5_gssapi_nec)
-    my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC, 1L);
+    my_setopt_long(curl, CURLOPT_SOCKS5_GSSAPI_NEC, 1);
 
   /* new in curl 7.55.0 */
   if(config->socks5_auth)
@@ -1637,8 +1637,8 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in 7.22.0 */
   if(config->gssapi_delegation)
-    my_setopt_str(curl, CURLOPT_GSSAPI_DELEGATION,
-                  config->gssapi_delegation);
+    my_setopt_long(curl, CURLOPT_GSSAPI_DELEGATION,
+                   config->gssapi_delegation);
 
   if(config->mail_auth)
     my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
