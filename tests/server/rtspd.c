@@ -573,6 +573,7 @@ static void rtspd_storerequest(char *reqbuf, size_t totalsize)
 
   do {
     dump = fopen(dumpfile, "ab");
+    /* !checksrc! disable ERRNOVAR 1 */
   } while(!dump && ((error = errno) == EINTR));
   if(!dump) {
     logmsg("Error opening file %s error (%d) %s",
@@ -589,6 +590,7 @@ static void rtspd_storerequest(char *reqbuf, size_t totalsize)
       goto storerequest_cleanup;
     if(written > 0)
       writeleft -= written;
+    /* !checksrc! disable ERRNOVAR 1 */
   } while((writeleft > 0) && ((error = errno) == EINTR));
 
   if(writeleft == 0)

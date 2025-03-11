@@ -127,6 +127,7 @@ curl_thread_t Curl_thread_create(
   if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef UNDER_CE
     DWORD gle = GetLastError();
+    /* !checksrc! disable ERRNOVAR 1 */
     int err = (gle == ERROR_ACCESS_DENIED ||
                gle == ERROR_NOT_ENOUGH_MEMORY) ?
                EACCES : EINVAL;

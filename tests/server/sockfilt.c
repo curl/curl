@@ -228,6 +228,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
 
     if(rc < 0) {
       error = errno;
+      /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
         continue;
       if(error == CURL_WIN32_EPIPE) {
@@ -279,6 +280,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
 
     if(wc < 0) {
       error = errno;
+      /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("writing to file descriptor: %d,", filedes);

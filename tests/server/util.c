@@ -128,6 +128,7 @@ void logmsg(const char *msg, ...)
 
   do {
     logfp = fopen(serverlogfile, "ab");
+    /* !checksrc! disable ERRNOVAR 1 */
   } while(!logfp && (errno == EINTR));
   if(logfp) {
     fprintf(logfp, "%s %s\n", timebuf, buffer);
@@ -353,6 +354,7 @@ void set_advisor_read_lock(const char *filename)
 
   do {
     lockfile = fopen(filename, "wb");
+    /* !checksrc! disable ERRNOVAR 1 */
   } while(!lockfile && ((error = errno) == EINTR));
   if(!lockfile) {
     logmsg("Error creating lock file %s error (%d) %s",
@@ -379,6 +381,7 @@ void clear_advisor_read_lock(const char *filename)
 
   do {
     res = unlink(filename);
+    /* !checksrc! disable ERRNOVAR 1 */
   } while(res && ((error = errno) == EINTR));
   if(res)
     logmsg("Error removing lock file %s error (%d) %s",

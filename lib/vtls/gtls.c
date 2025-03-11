@@ -100,6 +100,7 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
               blen, nwritten, result);
   backend->gtls.io_result = result;
   if(nwritten < 0) {
+    /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
     nwritten = -1;
@@ -121,6 +122,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   if(!backend->gtls.shared_creds->trust_setup) {
     result = Curl_gtls_client_trust_setup(cf, data, &backend->gtls);
     if(result) {
+      /* !checksrc! disable ERRNOVAR 1 */
       gnutls_transport_set_errno(backend->gtls.session, EINVAL);
       backend->gtls.io_result = result;
       return -1;
@@ -132,6 +134,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
               blen, nread, result);
   backend->gtls.io_result = result;
   if(nread < 0) {
+    /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
     nread = -1;

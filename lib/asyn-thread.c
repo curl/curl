@@ -433,6 +433,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
                                 const struct addrinfo *hints)
 {
   struct thread_data *td = &data->state.async.thdata;
+  /* !checksrc! disable ERRNOVAR 1 */
   int err = ENOMEM;
   struct Curl_async *async = &data->state.async;
 

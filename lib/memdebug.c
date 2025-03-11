@@ -117,13 +117,12 @@ static bool countcheck(const char *func, int line, const char *source)
       fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
               source, line, func);
       fflush(curl_dbg_logfile); /* because it might crash now */
+      /* !checksrc! disable ERRNOVAR 1 */
       CURL_SETERRNO(ENOMEM);
       return TRUE; /* RETURN ERROR! */
     }
     else
       memsize--; /* countdown */
-
-
   }
 
   return FALSE; /* allow this */
