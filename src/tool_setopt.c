@@ -601,6 +601,50 @@ nomem:
   return ret;
 }
 
+/* options that set long */
+CURLcode tool_setopt_long(CURL *curl, struct GlobalConfig *global,
+                          const char *name, CURLoption tag,
+                          long lval)
+{
+  long defval = 0L;
+  const struct NameValue *nv = NULL;
+  CURLcode ret = CURLE_OK;
+  DEBUGASSERT(tag < CURLOPTTYPE_OBJECTPOINT);
+
+  for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
+    if(!strcmp(name, nv->name)) {
+      defval = nv->value;
+      break; /* found it */
+    }
+  }
+
+  ret = curl_easy_setopt(curl, tag, lval);
+  if((lval != defval) && global->libcurl && !ret) {
+    /* we only use this for real if --libcurl was used */
+    CODE2("curl_easy_setopt(hnd, %s, %ldL);", name, lval);
+  }
+nomem:
+  return ret;
+}
+
+/* options that set curl_off_t */
+CURLcode tool_setopt_offt(CURL *curl, struct GlobalConfig *global,
+                          const char *name, CURLoption tag,
+                          curl_off_t lval)
+{
+  CURLcode ret = CURLE_OK;
+  DEBUGASSERT((tag >= CURLOPTTYPE_OFF_T) && (tag < CURLOPTTYPE_BLOB));
+
+  ret = curl_easy_setopt(curl, tag, lval);
+  if(global->libcurl && !ret && lval) {
+    /* we only use this for real if --libcurl was used */
+    CODE2("curl_easy_setopt(hnd, %s, (curl_off_t)%"
+          CURL_FORMAT_CURL_OFF_T ");", name, lval);
+  }
+nomem:
+  return ret;
+}
+
 /* generic setopt wrapper for all other options.
  * Some type information is encoded in the tag value. */
 CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
@@ -608,87 +652,47 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
                      const char *name, CURLoption tag, ...)
 {
   va_list arg;
-  char buf[256];
   const char *value = NULL;
   bool remark = FALSE;
   bool skip = FALSE;
   bool escape = FALSE;
   char *escaped = NULL;
   CURLcode ret = CURLE_OK;
+  void *pval;
 
   va_start(arg, tag);
 
-  if(tag < CURLOPTTYPE_OBJECTPOINT) {
-    /* Value is expected to be a long */
-    long lval = va_arg(arg, long);
-    long defval = 0L;
-    const struct NameValue *nv = NULL;
-    for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
-      if(!strcmp(name, nv->name)) {
-        defval = nv->value;
-        break; /* found it */
-      }
-    }
+  DEBUGASSERT(tag >= CURLOPTTYPE_OBJECTPOINT);
+  DEBUGASSERT((tag < CURLOPTTYPE_OFF_T) || (tag >= CURLOPTTYPE_BLOB));
 
-    msnprintf(buf, sizeof(buf), "%ldL", lval);
-    value = buf;
-    ret = curl_easy_setopt(curl, tag, lval);
-    if(lval == defval)
-      skip = TRUE;
-  }
-  else if(tag < CURLOPTTYPE_OFF_T) {
-    /* Value is some sort of object pointer */
-    void *pval = va_arg(arg, void *);
+  /* we never set _BLOB options in the curl tool */
+  DEBUGASSERT(tag < CURLOPTTYPE_BLOB);
 
-    /* function pointers are never printable */
-    if(tag >= CURLOPTTYPE_FUNCTIONPOINT) {
-      if(pval) {
-        value = "function pointer";
-        remark = TRUE;
-      }
-      else
-        skip = TRUE;
-    }
+  /* Value is some sort of object pointer */
+  pval = va_arg(arg, void *);
 
-    else if(pval && str) {
-      value = (char *)pval;
-      escape = TRUE;
-    }
-    else if(pval) {
-      value = "object pointer";
+  /* function pointers are never printable */
+  if(tag >= CURLOPTTYPE_FUNCTIONPOINT) {
+    if(pval) {
+      value = "function pointer";
       remark = TRUE;
     }
     else
       skip = TRUE;
-
-    ret = curl_easy_setopt(curl, tag, pval);
-
   }
-  else if(tag < CURLOPTTYPE_BLOB) {
-    /* Value is expected to be curl_off_t */
-    curl_off_t oval = va_arg(arg, curl_off_t);
-    msnprintf(buf, sizeof(buf),
-              "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
-    value = buf;
-    ret = curl_easy_setopt(curl, tag, oval);
 
-    if(!oval)
-      skip = TRUE;
+  else if(pval && str) {
+    value = (char *)pval;
+    escape = TRUE;
   }
-  else {
-    /* Value is a blob */
-    void *pblob = va_arg(arg, void *);
-
-    /* blobs are never printable */
-    if(pblob) {
-      value = "blob pointer";
-      remark = TRUE;
-    }
-    else
-      skip = TRUE;
-
-    ret = curl_easy_setopt(curl, tag, pblob);
+  else if(pval) {
+    value = "object pointer";
+    remark = TRUE;
   }
+  else
+    skip = TRUE;
+
+  ret = curl_easy_setopt(curl, tag, pval);
 
   va_end(arg);
 
