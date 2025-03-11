@@ -859,7 +859,6 @@
 #define EEXIST 17
 #define EISDIR 21
 #define ENOSPC 28
-#define ERANGE 34
 #define strerror(x) "?"
 #else
 #define CURL_SETERRNO(x) (errno = (x))
