@@ -146,10 +146,10 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
   SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
 
 #define my_setopt_long(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), (long) (y))
+  SETOPT_CHECK(curl_easy_setopt(x, y, (long)(z)), y)
 
 #define my_setopt_offt(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), (curl_off_t) (y))
+  SETOPT_CHECK(curl_easy_setopt(x, y, (curl_off_t)(z)), y)
 
 #define my_setopt_str(x,y,z)                    \
   SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
