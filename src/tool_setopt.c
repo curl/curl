@@ -636,7 +636,7 @@ CURLcode tool_setopt_offt(CURL *curl, struct GlobalConfig *global,
   DEBUGASSERT((tag >= CURLOPTTYPE_OFF_T) && (tag < CURLOPTTYPE_BLOB));
 
   ret = curl_easy_setopt(curl, tag, lval);
-  if(global->libcurl && !ret) {
+  if(global->libcurl && !ret && lval) {
     /* we only use this for real if --libcurl was used */
     CODE2("curl_easy_setopt(hnd, %s, (curl_off_t)%"
           CURL_FORMAT_CURL_OFF_T ");", name, lval);
