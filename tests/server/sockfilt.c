@@ -626,7 +626,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* check if the input value is valid */
   if(nfds < 0) {
-    CURL_SETERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
 
@@ -647,7 +647,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* create internal event to abort waiting threads */
   abort = CreateEvent(NULL, TRUE, FALSE, NULL);
   if(!abort) {
-    CURL_SETERRNO(ENOMEM);
+    SET_SOCKERRNO(SOCKENOMEM);
     return -1;
   }
 
@@ -655,7 +655,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   data = calloc(nfds, sizeof(struct select_ws_data));
   if(!data) {
     CloseHandle(abort);
-    CURL_SETERRNO(ENOMEM);
+    SET_SOCKERRNO(SOCKENOMEM);
     return -1;
   }
 
@@ -664,7 +664,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   if(!handles) {
     CloseHandle(abort);
     free(data);
-    CURL_SETERRNO(ENOMEM);
+    SET_SOCKERRNO(SOCKENOMEM);
     return -1;
   }
 
