@@ -202,7 +202,6 @@ jobs:
             gcc
             ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
             diffutils
-            openssh
             zlib-devel
             brotli-devel
             libzstd-devel
@@ -219,20 +218,10 @@ jobs:
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
             mingw-w64-${{ matrix.env }}-diffutils
-            openssh
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
             ${{ matrix.install }}
-
-      - name: 'downgrade msys2-runtime'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
-        timeout-minutes: 2
-        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-        # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -339,17 +328,26 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+
+      - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
+        timeout-minutes: 2
+        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
+        # causing runtests.pl to run at 2-3x reduced speed.
+        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }}'
-          TFLAGS+=' ~613'  # SFTP
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~612'  # SFTP
+            TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
           fi
+          TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -500,6 +498,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
@@ -508,9 +507,7 @@ jobs:
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -724,7 +721,7 @@ jobs:
     timeout-minutes: 55
     defaults:
       run:
-        shell: C:\msys64\usr\bin\bash.exe {0}
+        shell: msys2 {0}
     env:
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
@@ -738,6 +735,7 @@ jobs:
             type: 'Debug'
             tflags: 'skiprun'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_LIBPSL=OFF
@@ -747,7 +745,9 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
+            openssh: 'OpenSSH-Windows-Pre'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
@@ -760,6 +760,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
               -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
@@ -770,6 +771,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
               -DCURL_CA_SEARCH_SAFE=ON -DUSE_SSLS_EXPORT=ON
@@ -780,6 +782,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
+              -DENABLE_DEBUG=OFF
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
               -DUSE_ECH=ON
@@ -790,12 +793,13 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
               -DUSE_ECH=ON
 
-          - name: 'mbedtls'
+          - name: 'mbedtls libssh'
             install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
             arch: 'x64'
             plat: 'windows'
@@ -806,12 +810,21 @@ jobs:
             #          Windows. Do not use this component till there is a fix for these.
             # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
               -DCURL_USE_GSASL=ON
 
       fail-fast: false
     steps:
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        with:
+          msystem: ucrt64
+          release: false
+          update: false
+          cache: false
+          path-type: inherit
+
       - name: 'vcpkg cache setup'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
@@ -836,7 +849,6 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="/c/msys64/usr/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
             if [ '${{ matrix.plat }}' = 'uwp' ]; then
@@ -860,7 +872,6 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
-              -DENABLE_DEBUG=ON \
               ${{ matrix.config }}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
@@ -879,9 +890,7 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
@@ -895,15 +904,20 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
+          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+          else  # OpenSSH-Windows
+            [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-Pre' ] && chocopkg+=' --prerelease'
+            chocopkg+=' openssh'
+          fi
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force ${chocopkg} stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'downgrade msys2-runtime'
@@ -911,9 +925,7 @@ jobs:
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -921,21 +933,26 @@ jobs:
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
           export TFLAGS='-j8 ${{ matrix.tflags }}'
-          TFLAGS+=' ~2310'  # flaky
-          TFLAGS+=' ~SCP'  # 601 603 612 617 619 621 641 665 2004 3022
-          TFLAGS+=' ~612'  # SFTP
+          TFLAGS+=' ~2310'  # flaky 'WebSockets unknown reserved bit set in frame header', WebSockets
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-            TFLAGS+=' ~SFTP'
-          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
-            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+            TFLAGS+=' ~SCP ~SFTP'  # Fail with all tested openssh servers: curl: (67) Authentication failure
           fi
-          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          PATH="/c/msys64/usr/bin:$PATH"
+          TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
+          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+            TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
+          else  # OpenSSH-Windows
+            TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
+            if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+              TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+            else
+              TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
+            fi
+            PATH="$PATH:/c/Program Files/OpenSSH-Win64"
+          fi
+          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         if: ${{ contains(matrix.name, '+examples') }}
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
