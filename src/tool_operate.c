@@ -1554,17 +1554,17 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   /* curl 7.16.0 */
   if(config->disable_sessionid)
     /* disable it */
-    my_setopt_long(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
+    my_setopt_long(curl, CURLOPT_SSL_SESSIONID_CACHE, 0);
 
   /* curl 7.16.2 */
   if(config->raw) {
-    my_setopt_long(curl, CURLOPT_HTTP_CONTENT_DECODING, 0L);
-    my_setopt_long(curl, CURLOPT_HTTP_TRANSFER_DECODING, 0L);
+    my_setopt_long(curl, CURLOPT_HTTP_CONTENT_DECODING, 0);
+    my_setopt_long(curl, CURLOPT_HTTP_TRANSFER_DECODING, 0);
   }
 
   /* curl 7.17.1 */
   if(!config->nokeepalive) {
-    my_setopt_long(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    my_setopt_long(curl, CURLOPT_TCP_KEEPALIVE, 1);
     if(config->alivetime) {
       my_setopt_long(curl, CURLOPT_TCP_KEEPIDLE, config->alivetime);
       my_setopt_long(curl, CURLOPT_TCP_KEEPINTVL, config->alivetime);
@@ -1573,7 +1573,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
       my_setopt_long(curl, CURLOPT_TCP_KEEPCNT, config->alivecnt);
   }
   else
-    my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 0L);
+    my_setopt_long(curl, CURLOPT_TCP_KEEPALIVE, 0);
 
   /* curl 7.20.0 */
   if(config->tftp_blksize && proto_tftp)
@@ -1591,7 +1591,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* curl 7.20.x */
   if(config->ftp_pret)
-    my_setopt_long(curl, CURLOPT_FTP_USE_PRET, 1L);
+    my_setopt_long(curl, CURLOPT_FTP_USE_PRET, 1);
 
   if(config->create_file_mode)
     my_setopt_long(curl, CURLOPT_NEW_FILE_PERMS, config->create_file_mode);
@@ -1649,10 +1649,10 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in 7.31.0 */
   if(config->sasl_ir)
-    my_setopt_long(curl, CURLOPT_SASL_IR, 1L);
+    my_setopt_long(curl, CURLOPT_SASL_IR, 1);
 
   if(config->noalpn) {
-    my_setopt_long(curl, CURLOPT_SSL_ENABLE_ALPN, 0L);
+    my_setopt_long(curl, CURLOPT_SSL_ENABLE_ALPN, 0);
   }
 
   /* new in 7.40.0, abstract support added in 7.53.0 */
@@ -1678,7 +1678,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in 7.48.0 */
   if(config->tftp_no_options && proto_tftp)
-    my_setopt_long(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
+    my_setopt_long(curl, CURLOPT_TFTP_NO_OPTIONS, 1);
 
   /* new in 7.59.0 */
   if(config->happy_eyeballs_timeout_ms != CURL_HET_DEFAULT)
@@ -1687,7 +1687,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in 7.60.0 */
   if(config->haproxy_protocol)
-    my_setopt_long(curl, CURLOPT_HAPROXYPROTOCOL, 1L);
+    my_setopt_long(curl, CURLOPT_HAPROXYPROTOCOL, 1);
 
   /* new in 8.2.0 */
   if(config->haproxy_clientip)
@@ -1695,7 +1695,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
                   config->haproxy_clientip);
 
   if(config->disallow_username_in_url)
-    my_setopt_long(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
+    my_setopt_long(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1);
 
   if(config->altsvc)
     my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
