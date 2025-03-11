@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+DOH
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+
+<servercmd>
+idle
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+
+# requires debug so that it can use the DoH server without https
+
+<features>
+Debug
+DoH
+</features>
+<name>
+DoH without response
+</name>
+<command>
+http://neverreached.example.com/ --doh-url http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -m 1
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+
+# curl: (28) Resolving timed out
+# curl: (6) Could not resolve hostname
+<errorcode>
+28,6
+</errorcode>
+</verify>
+</testcase>

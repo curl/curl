@@ -2478,7 +2478,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case MSTATE_PENDING:
     case MSTATE_MSGSENT:
       /* handles in these states should NOT be in this list */
-      DEBUGASSERT(0);
       break;
 
     default:
@@ -2676,8 +2675,10 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
 static void unlink_all_msgsent_handles(struct Curl_multi *multi)
 {
   struct Curl_llist_node *e;
-  for(e = Curl_llist_head(&multi->msgsent); e; e = Curl_node_next(e)) {
+  struct Curl_llist_node *n;
+  for(e = Curl_llist_head(&multi->msgsent); e; e = n) {
     struct Curl_easy *data = Curl_node_elem(e);
+    n = Curl_node_next(e);
     if(data) {
       DEBUGASSERT(data->mstate == MSTATE_MSGSENT);
       Curl_node_remove(&data->multi_queue);
@@ -2725,8 +2726,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       if(data->psl == &multi->psl)
         data->psl = NULL;
 #endif
+      if(data->state.internal)
+        Curl_close(&data);
     }
-
     Curl_cpool_destroy(&multi->cpool);
     Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
     if(multi->admin) {
