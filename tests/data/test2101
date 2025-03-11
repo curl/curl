@@ -42,8 +42,9 @@ http://neverreached.example.com/ --doh-url http://%HOSTIP:%HTTPPORT/%TESTNUMBER0
 <verify>
 
 # curl: (28) Resolving timed out
+# curl: (6) Could not resolve hostname
 <errorcode>
-28
+28,6
 </errorcode>
 </verify>
 </testcase>
