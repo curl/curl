@@ -160,8 +160,6 @@ static ssize_t read_wincon(int fd, void *buf, size_t count)
   CURL_SETERRNO((int)GetLastError());
   return -1;
 }
-#undef  read
-#define read(a,b,c) read_wincon(a,b,c)
 
 /*
  * write-wrapper to support writing to stdout and stderr on Windows.
@@ -195,8 +193,11 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
   CURL_SETERRNO((int)GetLastError());
   return -1;
 }
-#undef  write
-#define write(a,b,c) write_wincon(a,b,c)
+#define SOCKFILT_read  read_wincon
+#define SOCKFILT_write write_wincon
+#else
+#define SOCKFILT_read  read
+#define SOCKFILT_write write
 #endif
 
 #ifndef UNDER_CE
@@ -218,8 +219,9 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
   ssize_t nread = 0;
 
   do {
-    ssize_t rc = read(filedes,
-                      (unsigned char *)buffer + nread, nbytes - nread);
+    ssize_t rc = SOCKFILT_read(filedes,
+                               (unsigned char *)buffer + nread,
+                               nbytes - nread);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -270,8 +272,9 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
   ssize_t nwrite = 0;
 
   do {
-    ssize_t wc = write(filedes, (const unsigned char *)buffer + nwrite,
-                       nbytes - nwrite);
+    ssize_t wc = SOCKFILT_write(filedes,
+                                (const unsigned char *)buffer + nwrite,
+                                nbytes - nwrite);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -876,7 +879,9 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   return ret;
 }
-#define select(a,b,c,d,e) select_ws(a,b,c,d,e)
+#define SOCKFILT_select(a,b,c,d,e) select_ws(a,b,c,d,e)
+#else
+#define SOCKFILT_select(a,b,c,d,e) select(a,b,c,d,e)
 #endif  /* USE_WINSOCK */
 
 
@@ -1070,7 +1075,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
     /* select() blocking behavior call on blocking descriptors please */
 
-    rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+    rc = SOCKFILT_select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
 
     if(got_exit_signal) {
       logmsg("signalled to die, exiting...");
