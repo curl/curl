@@ -145,7 +145,13 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
 #define my_setopt(x,y,z) \
   SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
 
-#define my_setopt_str(x,y,z) \
+#define my_setopt_long(x,y,z) \
+  SETOPT_CHECK(curl_easy_setopt(x, y, z), (long) y)
+
+#define my_setopt_offt(x,y,z) \
+  SETOPT_CHECK(curl_easy_setopt(x, y, z), (curl_off_t) y)
+
+#define my_setopt_str(x,y,z)                    \
   SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
 
 #define my_setopt_enum(x,y,z) \
