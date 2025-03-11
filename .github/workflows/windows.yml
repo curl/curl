@@ -223,15 +223,6 @@ jobs:
             mingw-w64-${{ matrix.env }}-c-ares
             ${{ matrix.install }}
 
-      - name: 'downgrade msys2-runtime'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
-        timeout-minutes: 2
-        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-        # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
-
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
@@ -339,6 +330,15 @@ jobs:
         run: |
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+
+      - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
+        timeout-minutes: 2
+        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
+        # causing runtests.pl to run at 2-3x reduced speed.
+        run: |
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
+          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
