@@ -978,7 +978,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in libcurl 7.10.6 */
   if(config->proxyanyauth)
-    my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
+    my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
   else if(config->proxynegotiate)
     my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
   else if(config->proxyntlm)
@@ -1534,8 +1534,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in curl 7.55.0 */
   if(config->socks5_auth)
-    my_setopt_bitmask(curl, CURLOPT_SOCKS5_AUTH,
-                      (long)config->socks5_auth);
+    my_setopt_bitmask(curl, CURLOPT_SOCKS5_AUTH, config->socks5_auth);
 
   /* new in curl 7.43.0 */
   if(config->proxy_service_name)
