@@ -435,6 +435,7 @@ feature is NOT required. If the feature is present then the test is SKIPPED.
 
 Features testable here are:
 
+- `--libcurl`
 - `alt-svc`
 - `AppleIDN`
 - `asyn-rr` - c-ares is used for additional records only
