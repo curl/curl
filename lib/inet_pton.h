@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-int Curl_inet_pton(int, const char *, void *);
+int curlx_inet_pton(int, const char *, void *);
 
 #ifdef HAVE_INET_PTON
 #ifdef HAVE_NETINET_IN_H
@@ -39,9 +39,9 @@ int Curl_inet_pton(int, const char *, void *);
 #include <arpa/inet.h>
 #endif
 #ifdef __AMIGA__
-#define Curl_inet_pton(x,y,z) inet_pton(x,(unsigned char *)CURL_UNCONST(y),z)
+#define curlx_inet_pton(x,y,z) inet_pton(x,(unsigned char *)CURL_UNCONST(y),z)
 #else
-#define Curl_inet_pton(x,y,z) inet_pton(x,y,z)
+#define curlx_inet_pton(x,y,z) inet_pton(x,y,z)
 #endif
 #endif
 

@@ -1589,10 +1589,10 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     unsigned char addrbuf[sizeof(struct use_addr)];
     size_t addrlen = 0;
 
-    if(Curl_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
+    if(curlx_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
       addrlen = 4;
 #ifdef USE_IPV6
-    else if(Curl_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
+    else if(curlx_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
       addrlen = 16;
 #endif
 

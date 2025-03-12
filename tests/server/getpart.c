@@ -231,14 +231,14 @@ static int decodedata(char  **buf,   /* dest buffer */
     return GPE_OK;
 
   /* base64 decode the given buffer */
-  error = Curl_base64_decode(*buf, &buf64, &src_len);
+  error = curlx_base64_decode(*buf, &buf64, &src_len);
   if(error)
     return GPE_OUT_OF_MEMORY;
 
   if(!src_len) {
     /*
     ** currently there is no way to tell apart an OOM condition in
-    ** Curl_base64_decode() from zero length decoded data. For now,
+    ** curlx_base64_decode() from zero length decoded data. For now,
     ** let's just assume it is an OOM condition, currently we have
     ** no input for this function that decodes to zero length data.
     */

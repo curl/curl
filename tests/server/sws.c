@@ -1300,7 +1300,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     memset(&serveraddr.sa4, 0, sizeof(serveraddr.sa4));
     serveraddr.sa4.sin_family = AF_INET;
     serveraddr.sa4.sin_port = htons(port);
-    if(Curl_inet_pton(AF_INET, ipaddr, &serveraddr.sa4.sin_addr) < 1) {
+    if(curlx_inet_pton(AF_INET, ipaddr, &serveraddr.sa4.sin_addr) < 1) {
       logmsg("Error inet_pton failed AF_INET conversion of '%s'", ipaddr);
       sclose(serverfd);
       return CURL_SOCKET_BAD;
@@ -1313,7 +1313,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     memset(&serveraddr.sa6, 0, sizeof(serveraddr.sa6));
     serveraddr.sa6.sin6_family = AF_INET6;
     serveraddr.sa6.sin6_port = htons(port);
-    if(Curl_inet_pton(AF_INET6, ipaddr, &serveraddr.sa6.sin6_addr) < 1) {
+    if(curlx_inet_pton(AF_INET6, ipaddr, &serveraddr.sa6.sin6_addr) < 1) {
       logmsg("Error inet_pton failed AF_INET6 conversion of '%s'", ipaddr);
       sclose(serverfd);
       return CURL_SOCKET_BAD;
@@ -2509,7 +2509,7 @@ sws_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s sws (%s pid: %ld) exits with signal (%d)",
-           socket_type, location_str, (long)Curl_getpid(), exit_signal);
+           socket_type, location_str, (long)curlx_getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we

@@ -254,7 +254,7 @@ addr_next_match(const struct Curl_addrinfo *addr, int family)
 }
 
 /* retrieves ip address and port from a sockaddr structure.
-   note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
+   note it calls curlx_inet_ntop which sets errno on fail, not SOCKERRNO. */
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, int *port)
 {
@@ -271,8 +271,8 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
   switch(sa->sa_family) {
     case AF_INET:
       si = (struct sockaddr_in *)(void *) sa;
-      if(Curl_inet_ntop(sa->sa_family, &si->sin_addr,
-                        addr, MAX_IPADR_LEN)) {
+      if(curlx_inet_ntop(sa->sa_family, &si->sin_addr,
+                         addr, MAX_IPADR_LEN)) {
         unsigned short us_port = ntohs(si->sin_port);
         *port = us_port;
         return TRUE;
@@ -281,8 +281,8 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #ifdef USE_IPV6
     case AF_INET6:
       si6 = (struct sockaddr_in6 *)(void *) sa;
-      if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr,
-                        addr, MAX_IPADR_LEN)) {
+      if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr,
+                         addr, MAX_IPADR_LEN)) {
         unsigned short us_port = ntohs(si6->sin6_port);
         *port = us_port;
         return TRUE;

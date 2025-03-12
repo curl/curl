@@ -173,7 +173,7 @@ static void win32_perror(const char *msg)
 {
   char buf[512];
   int err = SOCKERRNO;
-  Curl_winapi_strerror(err, buf, sizeof(buf));
+  curlx_winapi_strerror(err, buf, sizeof(buf));
   if(msg)
     fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
@@ -224,7 +224,7 @@ int win32_init(void)
 const char *sstrerror(int err)
 {
   static char buf[512];
-  return Curl_winapi_strerror(err, buf, sizeof(buf));
+  return curlx_winapi_strerror(err, buf, sizeof(buf));
 }
 #endif  /* _WIN32 */
 
@@ -299,7 +299,7 @@ curl_off_t our_getpid(void)
 {
   curl_off_t pid;
 
-  pid = (curl_off_t)Curl_getpid();
+  pid = (curl_off_t)curlx_getpid();
 #ifdef _WIN32
   /* store pid + MAX_PID to avoid conflict with Cygwin/msys PIDs, see also:
    * - 2019-01-31: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵

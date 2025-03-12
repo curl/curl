@@ -829,7 +829,7 @@ get_winapi_error(int err, char *buf, size_t buflen)
  *
  * It may be more correct to call one of the variant functions instead:
  * Call Curl_sspi_strerror if the error code is definitely Windows SSPI.
- * Call Curl_winapi_strerror if the error code is definitely Windows API.
+ * Call curlx_winapi_strerror if the error code is definitely Windows API.
  */
 const char *Curl_strerror(int err, char *buf, size_t buflen)
 {
@@ -922,11 +922,11 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 }
 
 /*
- * Curl_winapi_strerror:
+ * curlx_winapi_strerror:
  * Variant of Curl_strerror if the error code is definitely Windows API.
  */
 #ifdef _WIN32
-const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
+const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   DWORD old_win_err = GetLastError();
