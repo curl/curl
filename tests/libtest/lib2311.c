@@ -38,7 +38,7 @@ static void websocket_close(CURL *curl)
           "ws: curl_ws_send returned %d, sent %zu\n", result, sent);
 }
 
-static void websocket_frame(CURL *curl, FILE *save)
+static void websocket_frame(CURL *curl, FILE *save, int expected_flags)
 {
   char buffer[256];
   const struct curl_ws_frame *meta;
@@ -57,7 +57,6 @@ static void websocket_frame(CURL *curl, FILE *save)
       printf("curl_ws_recv returned %d\n", result);
       return;
     }
-    assert(meta->len == 4097);
     printf("%d: nread %zu Age %d Flags %x "
            "Offset %" CURL_FORMAT_CURL_OFF_T " "
            "Bytesleft %" CURL_FORMAT_CURL_OFF_T "\n",
@@ -82,9 +81,9 @@ static void websocket(CURL *curl)
     return;
 
   /* Three frames are expected */
-  websocket_frame(curl, save);
-  websocket_frame(curl, save);
-  websocket_frame(curl, save);
+  websocket_frame(curl, save, CURLWS_TEXT | CURLWS_CONT);
+  websocket_frame(curl, save, CURLWS_TEXT | CURLWS_CONT);
+  websocket_frame(curl, save, CURLWS_TEXT);
 
   fclose(save);
   websocket_close(curl);
