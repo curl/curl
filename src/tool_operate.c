@@ -908,11 +908,10 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
 
   /* Note that if CURLOPT_READFUNCTION is fread (the default), then
-   * lib/telnet.c will Curl_poll() on the input file descriptor
-   * rather than calling the READFUNCTION at regular intervals.
-   * The circumstances in which it is preferable to enable this
-   * behavior, by omitting to set the READFUNCTION & READDATA options,
-   * have not been determined.
+   * lib/telnet.c will poll on the input file descriptor rather than calling
+   * the READFUNCTION at regular intervals. The circumstances in which it is
+   * preferable to enable this behavior, by omitting to set the READFUNCTION &
+   * READDATA options, have not been determined.
    */
   my_setopt(curl, CURLOPT_READDATA, per);
   /* what call to read */
