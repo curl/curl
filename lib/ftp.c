@@ -3371,10 +3371,13 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
        use checking further */
     ;
   else if(data->state.upload) {
-    if((-1 != data->state.infilesize) &&
-       (data->state.infilesize != data->req.writebytecount) &&
-       !data->set.crlf &&
-       (ftp->transfer == PPTRANSFER_BODY)) {
+    if((ftp->transfer == PPTRANSFER_BODY) &&
+       (data->state.infilesize != -1) && /* upload with known size */
+       ((!data->set.crlf && !data->state.prefer_ascii && /* no conversion */
+         (data->state.infilesize != data->req.writebytecount)) ||
+        ((data->set.crlf || data->state.prefer_ascii) && /* maybe crlf conv */
+         (data->state.infilesize > data->req.writebytecount))
+       )) {
       failf(data, "Uploaded unaligned file size (%" FMT_OFF_T
             " out of %" FMT_OFF_T " bytes)",
             data->req.writebytecount, data->state.infilesize);
