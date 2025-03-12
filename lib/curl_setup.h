@@ -469,9 +469,9 @@
 #endif
 
 #ifdef _WIN32
-#define Curl_getpid() GetCurrentProcessId()
+#define curlx_getpid() GetCurrentProcessId()
 #else
-#define Curl_getpid() getpid()
+#define curlx_getpid() getpid()
 #endif
 
 /*
