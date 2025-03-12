@@ -39,7 +39,6 @@ LIB_VAUTH_CFILES =      \
 
 LIB_VAUTH_HFILES =      \
   vauth/digest.h        \
-  vauth/ntlm.h          \
   vauth/vauth.h
 
 LIB_VTLS_CFILES =           \
