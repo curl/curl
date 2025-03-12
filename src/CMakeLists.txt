@@ -22,7 +22,6 @@
 #
 ###########################################################################
 set(EXE_NAME curl)
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NEED_BASE64")
 
 set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
