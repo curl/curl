@@ -45,6 +45,9 @@ static void websocket_frame(CURL *curl, FILE *save, int expected_flags)
   size_t nread;
   size_t total_read = 0;
 
+  /* silence "unused parameter" warning */
+  (void)expected_flags;
+
   /* Frames are expected to have 4097 bytes */
   while(true) {
     CURLcode result =
