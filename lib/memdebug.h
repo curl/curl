@@ -49,6 +49,10 @@
 
 #define CURL_MT_LOGFNAME_BUFSIZE 512
 
+/* Avoid redundant redeclaration warnings with modern compilers, when including
+   this header multiple times. */
+#ifndef HEADER_CURL_MEMDEBUG_H_EXTERNS
+#define HEADER_CURL_MEMDEBUG_H_EXTERNS
 extern FILE *curl_dbg_logfile;
 
 /* memory functions */
@@ -108,6 +112,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
                                              int line, const char *source);
 
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
+#endif /* HEADER_CURL_MEMDEBUG_H_EXTERNS */
 
 #ifndef MEMDEBUG_NODEFINES
 
