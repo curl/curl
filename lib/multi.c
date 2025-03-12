@@ -570,7 +570,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   }
 
   /* this calls the protocol-specific function pointer previously set */
-  if(conn->handler->done)
+  if(conn->handler->done && (data->mstate >= MSTATE_PROTOCONNECT))
     result = conn->handler->done(data, status, premature);
   else
     result = status;
