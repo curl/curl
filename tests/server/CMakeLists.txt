@@ -40,6 +40,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
     "${PROJECT_SOURCE_DIR}/src"  # for "tool_binmod.h", "tool_xattr.h"
   )
   target_link_libraries(${_target_name} ${CURL_LIBS})
+  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEFINITIONS}")
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convenience and to ease portability of these servers,
   # some source code files from the libcurl subdirectory are also used

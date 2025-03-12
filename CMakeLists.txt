@@ -291,14 +291,6 @@ if(ENABLE_DEBUG)
 endif()
 option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
 
-if(ENABLE_DEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DEBUGBUILD")
-endif()
-
-if(ENABLE_CURLDEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURLDEBUG")
-endif()
-
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
   set(CMAKE_UNITY_BUILD OFF)
@@ -376,6 +368,14 @@ option(CURL_USE_PKGCONFIG "Enable pkg-config to detect dependencies" ${_curl_use
 set(CURL_LIBS "")
 set(CURL_LIBDIRS "")
 set(LIBCURL_PC_REQUIRES_PRIVATE "")
+set(CURL_DEFINITIONS "")
+
+if(ENABLE_DEBUG)
+  list(APPEND CURL_DEFINITIONS "DEBUGBUILD")
+endif()
+if(ENABLE_CURLDEBUG)
+  list(APPEND CURL_DEFINITIONS "CURLDEBUG")
+endif()
 
 if(ENABLE_ARES)
   set(USE_ARES 1)
