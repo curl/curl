@@ -44,7 +44,7 @@ curl --engine tpm2tss --key-type ENG --key /path/to/key.tss --cert /path/to/cert
 export OPENSSL_CONF=/your/path/to/openssl.cnf
 # mTLS download with TSS key protected by TPM
 curl --key /path/to/key.tss --cert /path/to/cert.crt https://my-server.com/download/url
-# mTLS download with key persist in the TPM 
+# mTLS download with key persist in the TPM
 curl --key handle:0x81000000 --cert /path/to/cert.crt https://my-server.com/download/url
 ```
 
