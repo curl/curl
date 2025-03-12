@@ -6,7 +6,7 @@ WebSockets
 </info>
 
 #
-# Sends three 4097 bytes TEXT frames, as one single message
+# Sends three 4097 bytes TEXT frames, as fragments of one 12291 bytes message
 <reply>
 <data nocheck="yes">
 HTTP/1.1 101 Switching to WebSockets
@@ -17,8 +17,8 @@ Something: else
 Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
 
 %hex[%01%7e%10%01]hex%%repeat[256 x helothisisdaniel]%
-%hex[%01%7e%10%01]hex%%repeat[256 x helothisisdaniel]%
-%hex[%81%7e%10%01]hex%%repeat[256 x helothisisdaniel]%
+%hex[%00%7e%10%01]hex%%repeat[256 x helothisisdaniel]%
+%hex[%80%7e%10%01]hex%%repeat[256 x helothisisdaniel]%
 </data>
 # allow upgrade
 <servercmd>
@@ -38,7 +38,7 @@ ws
 http
 </server>
 <name>
-WebSocket curl_ws_recv() loop reading three larger frames
+WebSocket curl_ws_recv() read fragmented message
 </name>
 <tool>
 lib%TESTNUMBER
