@@ -749,55 +749,7 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
 
-          - name: 'openssl msfork'
-            openssh: 'OpenSSH-Windows'
-            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
-
-          - name: 'openssl msforkpre'
-            openssh: 'OpenSSH-Windows-Pre'
-            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
-
           - name: 'schannel MultiSSL U'
-            # GnuTLS is not fully functional with MSVC, build-test only
-            # https://github.com/ShiftMediaProject/gnutls/issues/23
-            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl shiftmedia-libgnutls openssl mbedtls wolfssl'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
-              -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
-
-          - name: 'schannel MultiSSL U msfork'
-            openssh: 'OpenSSH-Windows'
-            # GnuTLS is not fully functional with MSVC, build-test only
-            # https://github.com/ShiftMediaProject/gnutls/issues/23
-            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl shiftmedia-libgnutls openssl mbedtls wolfssl'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
-              -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
-
-          - name: 'schannel MultiSSL U msforkpre'
-            openssh: 'OpenSSH-Windows-Pre'
             # GnuTLS is not fully functional with MSVC, build-test only
             # https://github.com/ShiftMediaProject/gnutls/issues/23
             install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl shiftmedia-libgnutls openssl mbedtls wolfssl'
@@ -841,38 +793,6 @@ jobs:
               -DUSE_ECH=ON
 
           - name: 'mbedtls'
-            install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            chkprefill: '_chkprefill'
-            # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
-            #          read its configuration from, making it vulnerable to attacks on
-            #          Windows. Do not use this component till there is a fix for these.
-            # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
-            config: >-
-              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
-              -DCURL_USE_GSASL=ON
-
-          - name: 'mbedtls msfork'
-            openssh: 'OpenSSH-Windows'
-            install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            chkprefill: '_chkprefill'
-            # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
-            #          read its configuration from, making it vulnerable to attacks on
-            #          Windows. Do not use this component till there is a fix for these.
-            # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
-            config: >-
-              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
-              -DCURL_USE_GSASL=ON
-
-          - name: 'mbedtls msforkpre'
-            openssh: 'OpenSSH-Windows-Pre'
             install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
             arch: 'x64'
             plat: 'windows'
