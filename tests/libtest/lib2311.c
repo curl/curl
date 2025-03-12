@@ -63,6 +63,7 @@ static void websocket_frame(CURL *curl, FILE *save)
            "Bytesleft %" CURL_FORMAT_CURL_OFF_T "\n",
            (int)total_read,
            nread, meta->age, meta->flags, meta->offset, meta->bytesleft);
+    assert(meta->flags == expected_flags);
     total_read += nread;
     fwrite(buffer, 1, nread, save);
     /* exit condition */
