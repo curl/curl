@@ -154,6 +154,10 @@ jobs:
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
+          - name: openssl disable --libcurl
+            install_steps: skipall
+            configure: --with-openssl --disable-unity --disable-libcurl-option
+
           - name: openssl libssh2 sync-resolver valgrind
             install_packages: zlib1g-dev libssh2-1-dev valgrind
             install_steps: pytest
