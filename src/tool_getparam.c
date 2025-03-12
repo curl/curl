@@ -2481,8 +2481,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     }
       break;
     case C_CERT: /* --cert */
-      cleanarg(clearthis);
       GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
+      cleanarg(clearthis);
       break;
     case C_CACERT: /* --cacert */
       err = getstr(&config->cacert, nextarg, DENY_BLANK);
