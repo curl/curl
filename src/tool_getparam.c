@@ -2481,8 +2481,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     }
       break;
     case C_CERT: /* --cert */
-      cleanarg(clearthis);
       GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
+      cleanarg(clearthis);
       break;
     case C_CACERT: /* --cacert */
       err = getstr(&config->cacert, nextarg, DENY_BLANK);
@@ -2601,18 +2601,18 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->tcp_fastopen = TRUE;
       break;
     case C_PROXY_TLSUSER: /* --proxy-tlsuser */
-      cleanarg(clearthis);
       if(!feature_tls_srp)
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
       else
         err = getstr(&config->proxy_tls_username, nextarg, ALLOW_BLANK);
+      cleanarg(clearthis);
       break;
     case C_PROXY_TLSPASSWORD: /* --proxy-tlspassword */
-      cleanarg(clearthis);
       if(!feature_tls_srp)
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
       else
         err = getstr(&config->proxy_tls_password, nextarg, DENY_BLANK);
+      cleanarg(clearthis);
       break;
     case C_PROXY_TLSAUTHTYPE: /* --proxy-tlsauthtype */
       if(!feature_tls_srp)
@@ -2624,9 +2624,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case C_PROXY_CERT: /* --proxy-cert */
-      cleanarg(clearthis);
       GetFileAndPassword(nextarg, &config->proxy_cert,
                          &config->proxy_key_passwd);
+      cleanarg(clearthis);
       break;
     case C_PROXY_CERT_TYPE: /* --proxy-cert-type */
       err = getstr(&config->proxy_cert_type, nextarg, DENY_BLANK);
