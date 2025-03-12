@@ -137,13 +137,11 @@ alter it, you can select how to deal with each individual library.
 These options are provided to select the TLS backend to use.
 
  - AmiSSL: `--with-amissl`
- - BearSSL: `--with-bearssl`
  - GnuTLS: `--with-gnutls`.
  - mbedTLS: `--with-mbedtls`
  - OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
  - rustls: `--with-rustls`
  - Schannel: `--with-schannel`
- - Secure Transport: `--with-secure-transport`
  - wolfSSL: `--with-wolfssl`
 
 You can build curl with *multiple* TLS backends at your choice, but some TLS
@@ -337,85 +335,6 @@ Schannel in Windows <= XP is unable to connect to servers that no longer
 support the legacy handshakes and algorithms used by those versions. If you
 are using curl in one of those earlier versions of Windows you should choose
 another SSL backend such as OpenSSL.
-
-# Apple Platforms (macOS, iOS, tvOS, watchOS, and their simulator counterparts)
-
-On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
-implementation, Secure Transport, instead of OpenSSL. To build with Secure
-Transport for SSL/TLS, use the configure option `--with-secure-transport`.
-
-When Secure Transport is in use, the curl options `--cacert` and `--capath`
-and their libcurl equivalents, are ignored, because Secure Transport uses the
-certificates stored in the Keychain to evaluate whether or not to trust the
-server. This, of course, includes the root certificates that ship with the OS.
-The `--cert` and `--engine` options, and their libcurl equivalents, are
-currently unimplemented in curl with Secure Transport.
-
-In general, a curl build for an Apple `ARCH/SDK/DEPLOYMENT_TARGET` combination
-can be taken by providing appropriate values for `ARCH`, `SDK`, `DEPLOYMENT_TARGET`
-below and running the commands:
-
-```bash
-# Set these three according to your needs
-export ARCH=x86_64
-export SDK=macosx
-export DEPLOYMENT_TARGET=10.8
-
-export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
-make -j8
-make install
-```
-
-With CMake:
-
-```bash
-cmake . \
-  -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.8 \
-  -DCMAKE_OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
-```
-
-The above command lines build curl for macOS platform with `x86_64`
-architecture and `10.8` as deployment target.
-
-Here is an example for iOS device:
-
-```bash
-export ARCH=arm64
-export SDK=iphoneos
-export DEPLOYMENT_TARGET=11.0
-
-export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
-make -j8
-make install
-```
-
-With CMake (3.16 or upper recommended):
-
-```bash
-cmake . \
-  -DCMAKE_SYSTEM_NAME=iOS \
-  -DCMAKE_OSX_ARCHITECTURES=arm64 \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
-```
-
-Another example for watchOS simulator for macs with Apple Silicon:
-
-```bash
-export ARCH=arm64
-export SDK=watchsimulator
-export DEPLOYMENT_TARGET=5.0
-
-export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
-make -j8
-make install
-```
-
-In all above, the built libraries and executables can be found in the
-`artifacts` folder.
 
 # Android
 
