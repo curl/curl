@@ -793,7 +793,7 @@ jobs:
               -DCURL_USE_GSASL=ON
               -DUSE_ECH=ON
 
-          - name: 'mbedtls'
+          - name: 'mbedtls libssh'
             install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
             arch: 'x64'
             plat: 'windows'
