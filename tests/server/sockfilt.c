@@ -1526,7 +1526,7 @@ int main(int argc, char *argv[])
       me.sa4.sin_addr.s_addr = INADDR_ANY;
       if(!addr)
         addr = "127.0.0.1";
-      Curl_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
+      curlx_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
 
       rc = connect(sock, &me.sa, sizeof(me.sa4));
 #ifdef USE_IPV6
@@ -1537,7 +1537,7 @@ int main(int argc, char *argv[])
       me.sa6.sin6_port = htons(server_connectport);
       if(!addr)
         addr = "::1";
-      Curl_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
+      curlx_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
 
       rc = connect(sock, &me.sa, sizeof(me.sa6));
     }

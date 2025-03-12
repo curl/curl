@@ -721,7 +721,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
         if(scope_ptr)
           *(scope_ptr++) = '\0';
 #endif
-        if(Curl_inet_pton(AF_INET6, myhost, &si6->sin6_addr) > 0) {
+        if(curlx_inet_pton(AF_INET6, myhost, &si6->sin6_addr) > 0) {
           si6->sin6_family = AF_INET6;
           si6->sin6_port = htons(port);
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
@@ -744,7 +744,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 #endif
       /* IPv4 address */
       if((af == AF_INET) &&
-         (Curl_inet_pton(AF_INET, myhost, &si4->sin_addr) > 0)) {
+         (curlx_inet_pton(AF_INET, myhost, &si4->sin_addr) > 0)) {
         si4->sin_family = AF_INET;
         si4->sin_port = htons(port);
         sizeof_sa = sizeof(struct sockaddr_in);

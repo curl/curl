@@ -72,7 +72,7 @@ static int      inet_pton6(const char *src, unsigned char *dst);
  *      Paul Vixie, 1996.
  */
 int
-Curl_inet_pton(int af, const char *src, void *dst)
+curlx_inet_pton(int af, const char *src, void *dst)
 {
   switch(af) {
   case AF_INET:

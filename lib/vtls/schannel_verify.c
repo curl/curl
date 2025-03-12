@@ -461,14 +461,14 @@ static bool get_num_host_info(struct num_ip_data *ip_blob,
   struct in6_addr ia6;
   bool result = FALSE;
 
-  int res = Curl_inet_pton(AF_INET, hostname, &ia);
+  int res = curlx_inet_pton(AF_INET, hostname, &ia);
   if(res) {
     ip_blob->size = sizeof(struct in_addr);
     memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
     result = TRUE;
   }
   else {
-    res = Curl_inet_pton(AF_INET6, hostname, &ia6);
+    res = curlx_inet_pton(AF_INET6, hostname, &ia6);
     if(res) {
       ip_blob->size = sizeof(struct in6_addr);
       memcpy(&ip_blob->bData.ia6, &ia6, sizeof(struct in6_addr));

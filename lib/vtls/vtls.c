@@ -1191,10 +1191,10 @@ static ssl_peer_type get_peer_type(const char *hostname)
 #else
     struct in_addr addr;
 #endif
-    if(Curl_inet_pton(AF_INET, hostname, &addr))
+    if(curlx_inet_pton(AF_INET, hostname, &addr))
       return CURL_SSL_PEER_IPV4;
 #ifdef USE_IPV6
-    else if(Curl_inet_pton(AF_INET6, hostname, &addr)) {
+    else if(curlx_inet_pton(AF_INET6, hostname, &addr)) {
       return CURL_SSL_PEER_IPV6;
     }
 #endif

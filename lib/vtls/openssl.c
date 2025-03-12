@@ -2218,14 +2218,14 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   hostlen = strlen(peer->hostname);
   switch(peer->type) {
   case CURL_SSL_PEER_IPV4:
-    if(!Curl_inet_pton(AF_INET, peer->hostname, &addr))
+    if(!curlx_inet_pton(AF_INET, peer->hostname, &addr))
       return CURLE_PEER_FAILED_VERIFICATION;
     target = GEN_IPADD;
     addrlen = sizeof(struct in_addr);
     break;
 #ifdef USE_IPV6
   case CURL_SSL_PEER_IPV6:
-    if(!Curl_inet_pton(AF_INET6, peer->hostname, &addr))
+    if(!curlx_inet_pton(AF_INET6, peer->hostname, &addr))
       return CURLE_PEER_FAILED_VERIFICATION;
     target = GEN_IPADD;
     addrlen = sizeof(struct in6_addr);

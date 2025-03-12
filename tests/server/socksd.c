@@ -231,7 +231,7 @@ static curl_socket_t socksconnect(unsigned short connectport,
   me.sa4.sin_family = AF_INET;
   me.sa4.sin_port = htons(connectport);
   me.sa4.sin_addr.s_addr = INADDR_ANY;
-  Curl_inet_pton(AF_INET, connectaddr, &me.sa4.sin_addr);
+  curlx_inet_pton(AF_INET, connectaddr, &me.sa4.sin_addr);
 
   rc = connect(sock, &me.sa, sizeof(me.sa4));
 
