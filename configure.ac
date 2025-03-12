@@ -49,6 +49,7 @@ CURL_CHECK_OPTION_OPTIMIZE
 CURL_CHECK_OPTION_WARNINGS
 CURL_CHECK_OPTION_WERROR
 CURL_CHECK_OPTION_CURLDEBUG
+AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
 CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
 CURL_CHECK_OPTION_RT
@@ -587,6 +588,25 @@ else
   want_unittests=no
 fi
 AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_unittests = xyes)
+
+dnl Apply curl debug options to test servers
+OPT_SERVER_DEBUG="default"
+AC_ARG_ENABLE(server-debug,
+AS_HELP_STRING([--enable-server-debug],[Enable debug options for test servers])
+AS_HELP_STRING([--disable-server-debug],[Disable debug options for test servers]),
+OPT_SERVER_DEBUG=$enableval)
+case "$OPT_SERVER_DEBUG" in
+  no)
+    dnl --disable-server-debug option used
+    want_server_debug="no"
+    ;;
+  *)
+    dnl --enable-server-debug option used or not specified
+    want_server_debug="no"
+    ;;
+esac
+AC_MSG_RESULT([$want_server_debug])
+AM_CONDITIONAL(ENABLE_SERVER_DEBUG, test x$want_server_debug = xyes)
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.

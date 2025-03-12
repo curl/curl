@@ -24,6 +24,7 @@
 set(LIB_NAME "libcurl")
 set(LIBCURL_OUTPUT_NAME "libcurl" CACHE STRING "Basename of the curl library")
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_LIBCURL")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
 
 configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 

@@ -26,7 +26,7 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-if(ENABLE_CURLDEBUG)
+if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
   set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
 
@@ -40,6 +40,9 @@ foreach(_target IN LISTS noinst_PROGRAMS)
     "${PROJECT_SOURCE_DIR}/src"  # for "tool_binmod.h", "tool_xattr.h"
   )
   target_link_libraries(${_target_name} ${CURL_LIBS})
+  if(ENABLE_SERVER_DEBUG)
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+  endif()
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convenience and to ease portability of these servers,
   # some source code files from the libcurl subdirectory are also used

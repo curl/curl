@@ -45,6 +45,14 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
+if ENABLE_SERVER_DEBUG
+if DEBUGBUILD
+AM_CPPFLAGS += -DDEBUGBUILD
+endif
+if CURLDEBUG
+AM_CPPFLAGS += -DCURLDEBUG
+endif
+endif
 
 # Makefile.inc provides neat definitions
 include Makefile.inc

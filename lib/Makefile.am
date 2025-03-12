@@ -64,6 +64,12 @@ include Makefile.soname
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
 AM_CFLAGS =
+if DEBUGBUILD
+AM_CPPFLAGS += -DDEBUGBUILD
+endif
+if CURLDEBUG
+AM_CPPFLAGS += -DCURLDEBUG
+endif
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
