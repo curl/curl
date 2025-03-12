@@ -735,6 +735,7 @@ jobs:
             type: 'Debug'
             tflags: 'skiprun'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_LIBPSL=OFF
@@ -746,6 +747,7 @@ jobs:
             type: 'Debug'
             openssh: 'OpenSSH-Windows-Pre'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
@@ -758,6 +760,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
               -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
@@ -768,6 +771,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
               -DCURL_CA_SEARCH_SAFE=ON -DUSE_SSLS_EXPORT=ON
@@ -778,6 +782,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
               -DUSE_ECH=ON
@@ -788,6 +793,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
@@ -804,6 +810,7 @@ jobs:
             #          Windows. Do not use this component till there is a fix for these.
             # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
               -DCURL_USE_GSASL=ON
@@ -865,7 +872,6 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
-              -DENABLE_DEBUG=ON \
               ${{ matrix.config }}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
