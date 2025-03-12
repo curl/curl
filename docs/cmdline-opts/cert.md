@@ -38,6 +38,11 @@ certificate located in a PKCS#11 device. A string beginning with `pkcs11:` is
 interpreted as a PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine
 option is set as `pkcs11` if none was provided and the --cert-type option is
 set as `ENG` or `PROV` if none was provided (depending on OpenSSL version).
+Also the engine tpm2tss or the tpm2 provider can be used for a client
+certificate, where the private key is protected or stored in a TPM 2.0. Provide
+the path to the public part of the client certificate with the --cert option.
+See the --key option for details on how to specify the TPM 2.0 protected
+private key belonging to the client certificate.
 
 If curl is built against GnuTLS library, a PKCS#11 URI can be used to specify
 a certificate located in a PKCS#11 device. A string beginning with `pkcs11:`
