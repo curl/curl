@@ -43,7 +43,7 @@ unsigned char byteval(char *value);
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
 /* global variables */
-extern const char *path;  /* where to find the 'data' dir */
+extern const char *srcpath;  /* where to find the 'data' dir */
 extern const char *pidname;
 extern const char *portname;
 extern const char *serverlogfile;  /* log file name */

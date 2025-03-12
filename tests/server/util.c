@@ -229,7 +229,7 @@ const char *sstrerror(int err)
 #endif  /* _WIN32 */
 
 /* set by the main code to point to where the test dir is */
-const char *path = ".";
+const char *srcpath = ".";
 
 FILE *test2fopen(long testno, const char *logdir2)
 {
@@ -242,7 +242,7 @@ FILE *test2fopen(long testno, const char *logdir2)
     return stream;
 
   /* then try the source version */
-  msnprintf(filename, sizeof(filename), "%s/data/test%ld", path, testno);
+  msnprintf(filename, sizeof(filename), "%s/data/test%ld", srcpath, testno);
   stream = fopen(filename, "rb");
 
   return stream;
