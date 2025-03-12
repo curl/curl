@@ -782,7 +782,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             config: >-
-              -DENABLE_DEBUG=ON
+              -DENABLE_DEBUG=OFF
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
               -DUSE_ECH=ON
