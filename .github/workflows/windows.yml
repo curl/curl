@@ -744,6 +744,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
+            openssh: 'OpenSSH-Windows'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
