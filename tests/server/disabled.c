@@ -116,6 +116,9 @@ static const char *disabled[]={
   "win32-ca-search-safe",
 #endif
 #endif
+#ifdef CURL_DISABLE_LIBCURL_OPTION
+  "--libcurl",
+#endif
   NULL
 };
 
