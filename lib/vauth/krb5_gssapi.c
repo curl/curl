@@ -133,7 +133,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       infof(data, "GSSAPI handshake failure (empty challenge message)");
       return CURLE_BAD_CONTENT_ENCODING;
     }
-    input_token.value = (void *) Curl_bufref_ptr(chlg);
+    input_token.value = CURL_UNCONST(Curl_bufref_ptr(chlg));
     input_token.length = Curl_bufref_len(chlg);
   }
 
@@ -210,7 +210,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   }
 
   /* Setup the challenge "input" security buffer */
-  input_token.value = (void *) Curl_bufref_ptr(chlg);
+  input_token.value = CURL_UNCONST(Curl_bufref_ptr(chlg));
   input_token.length = Curl_bufref_len(chlg);
 
   /* Decrypt the inbound challenge and obtain the qop */

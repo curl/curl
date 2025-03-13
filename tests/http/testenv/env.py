@@ -383,6 +383,18 @@ class Env:
         return Env.CONFIG.curl_is_debug
 
     @staticmethod
+    def curl_can_early_data() -> bool:
+        return Env.curl_uses_lib('gnutls') or \
+            Env.curl_uses_lib('wolfssl') or \
+            Env.curl_uses_lib('quictls') or \
+            Env.curl_uses_lib('openssl')
+
+    @staticmethod
+    def curl_can_h3_early_data() -> bool:
+        return Env.curl_can_early_data() and \
+            Env.curl_uses_lib('ngtcp2')
+
+    @staticmethod
     def have_h3() -> bool:
         return Env.have_h3_curl() and Env.have_h3_server()
 

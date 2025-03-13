@@ -301,6 +301,7 @@ DPAGES = \
   trace.md \
   unix-socket.md \
   upload-file.md \
+  upload-flags.md \
   url.md \
   url-query.md \
   use-ascii.md \

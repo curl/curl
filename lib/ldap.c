@@ -285,8 +285,8 @@ static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
   PTCHAR inpass = NULL;
 
   if(user && passwd && (data->set.httpauth & CURLAUTH_BASIC)) {
-    inuser = curlx_convert_UTF8_to_tchar((char *) user);
-    inpass = curlx_convert_UTF8_to_tchar((char *) passwd);
+    inuser = curlx_convert_UTF8_to_tchar(user);
+    inpass = curlx_convert_UTF8_to_tchar(passwd);
 
     rc = (int)ldap_simple_bind_s(server, inuser, inpass);
 
@@ -543,7 +543,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #endif
       name_len = strlen(name);
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
       if(result) {
         FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
@@ -557,7 +557,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         goto quit;
       }
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       if(result) {
         FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
@@ -593,7 +593,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       vals = ldap_get_values_len(server, entryIterator, attribute);
       if(vals) {
         for(i = 0; (vals[i] != NULL); i++) {
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
+          result = Curl_client_write(data, CLIENTWRITE_BODY, "\t", 1);
           if(result) {
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
@@ -615,7 +615,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             goto quit;
           }
 
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)": ", 2);
+          result = Curl_client_write(data, CLIENTWRITE_BODY, ": ", 2);
           if(result) {
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
@@ -670,7 +670,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             }
           }
 
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+          result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
           if(result) {
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
@@ -690,7 +690,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       FREE_ON_WINLDAP(attr);
       ldap_memfree(attribute);
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       if(result)
         goto quit;
     }

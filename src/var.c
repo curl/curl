@@ -60,7 +60,7 @@ void varcleanup(struct GlobalConfig *global)
   while(list) {
     struct tool_var *t = list;
     list = list->next;
-    free((char *)t->content);
+    free(CURL_UNCONST(t->content));
     free(t);
   }
 }
@@ -119,7 +119,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
       f += FUNC_TRIM_LEN;
       if(clen) {
         /* skip leading white space, including CRLF */
-        while(*c && ISSPACE(*c)) {
+        while(ISSPACE(*c)) {
           c++;
           len--;
         }
@@ -310,7 +310,7 @@ ParameterError varexpand(struct GlobalConfig *global,
           struct curlx_dynbuf buf;
           const struct tool_var *v = varcontent(global, name, nlen);
           if(v) {
-            value = (char *)v->content;
+            value = (char *)CURL_UNCONST(v->content);
             vlen = v->clen;
           }
           else
@@ -448,25 +448,19 @@ ParameterError setvariable(struct GlobalConfig *global,
       clen = strlen(ge);
     }
   }
-  if(*line == '[') {
+  if(*line == '[' && ISDIGIT(line[1])) {
     /* is there a byte range specified? [num-num] */
-    if(ISDIGIT(line[1])) {
-      char *endp;
-      if(curlx_strtoofft(&line[1], &endp, 10, &startoffset) || (*endp != '-'))
-        return PARAM_VAR_SYNTAX;
-      else {
-        char *p = endp + 1; /* pass the '-' */
-        if(*p != ']') {
-          if(curlx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
-            return PARAM_VAR_SYNTAX;
-          line = &endp[1];  /* pass the ']' */
-        }
-        else
-          line = &p[1]; /* pass the ']' */
-      }
-      if(startoffset > endoffset)
+    line++;
+    if(curlx_str_number(&line, &startoffset, CURL_OFF_T_MAX) ||
+       curlx_str_single(&line, '-'))
+      return PARAM_VAR_SYNTAX;
+    if(curlx_str_single(&line, ']')) {
+      if(curlx_str_number(&line, &endoffset, CURL_OFF_T_MAX) ||
+         curlx_str_single(&line, ']'))
         return PARAM_VAR_SYNTAX;
     }
+    if(startoffset > endoffset)
+      return PARAM_VAR_SYNTAX;
   }
   if(content)
     ;
@@ -477,7 +471,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     struct dynbuf fname;
     line++;
 
-    Curl_dyn_init(&fname, MAX_FILENAME);
+    curlx_dyn_init(&fname, MAX_FILENAME);
 
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
@@ -496,7 +490,7 @@ ParameterError setvariable(struct GlobalConfig *global,
       if(clen)
         contalloc = TRUE;
     }
-    Curl_dyn_free(&fname);
+    curlx_dyn_free(&fname);
     if(!use_stdin && file)
       fclose(file);
     if(err)
@@ -506,7 +500,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     line++;
     clen = strlen(line);
     /* this is the exact content */
-    content = (char *)line;
+    content = (char *)CURL_UNCONST(line);
     if(startoffset || (endoffset != CURL_OFF_T_MAX)) {
       if(startoffset >= (curl_off_t)clen)
         clen = 0;

@@ -101,7 +101,7 @@ test654 test655 test656 test658 test659 test660 test661 test662 test663 \
 test664 test665 test666 test667 test668 test669 test670 test671 test672 \
 test673 test674 test675 test676 test677 test678 test679 test680 test681 \
 test682 test683 test684 test685 test686 test687 test688 test689 test690 \
-test691 test692 test693 test694 test695 test696 test697 \
+test691 test692 test693 test694 test695 test696 test697 test698 \
 \
 test700 test701 test702 test703 test704 test705 test706 test707 test708 \
 test709 test710 test711 test712 test713 test714 test715 test716 test717 \
@@ -207,7 +207,8 @@ test1540 test1541 test1542 test1543 test1544 test1545 test1546 \
 \
 test1550 test1551 test1552 test1553 test1554 test1555 test1556 test1557 \
 test1558 test1559 test1560 test1561 test1562 test1563 test1564 test1565 \
-test1566 test1567 test1568 test1569 test1570 \
+test1566 test1567 test1568 test1569 test1570 test1571 test1572 test1573 \
+test1574 test1575 test1576 test1577 test1578 test1579 test1580 test1581 \
 \
 test1590 test1591 test1592 test1593 test1594 test1595 test1596 test1597 \
 test1598 \
@@ -251,12 +252,12 @@ test2064 test2065 test2066 test2067 test2068 test2069 test2070 test2071 \
 test2072 test2073 test2074 test2075 test2076 test2077 test2078 test2079 \
 test2080 test2081 test2082 test2083 test2084 test2085 test2086 test2087 \
 \
-test2100 \
+test2100 test2101 \
 \
 test2200 test2201 test2202 test2203 test2204 test2205 \
 \
 test2300 test2301 test2302 test2303 test2304 test2305 test2306 test2307 \
-test2308 test2309 test2310 \
+test2308 test2309 test2310 test2311 \
 \
 test2400 test2401 test2402 test2403 test2404 test2405 test2406 \
 \
@@ -271,7 +272,8 @@ test3024 test3025 test3026 test3027 test3028 test3029 test3030 test3031 \
 test3032 \
 \
 test3100 test3101 test3102 test3103 test3104 test3105 \
-test3200 \
-test3201 test3202 test3203 test3204 test3205 test3207 test3208
+\
+test3200 test3201 test3202 test3203 test3204 test3205 test3207 test3208 \
+test3209 test3210
 
 EXTRA_DIST = $(TESTCASES) DISABLED

@@ -39,7 +39,6 @@ LIB_VAUTH_CFILES =      \
 
 LIB_VAUTH_HFILES =      \
   vauth/digest.h        \
-  vauth/ntlm.h          \
   vauth/vauth.h
 
 LIB_VTLS_CFILES =           \
@@ -233,7 +232,6 @@ LIB_CFILES =         \
   strequal.c         \
   strerror.c         \
   strparse.c         \
-  strtoofft.c        \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
@@ -374,7 +372,6 @@ LIB_HFILES =         \
   strdup.h           \
   strerror.h         \
   strparse.h         \
-  strtoofft.h        \
   system_win32.h     \
   telnet.h           \
   tftp.h             \

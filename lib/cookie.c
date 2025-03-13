@@ -1210,14 +1210,13 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       struct dynbuf buf;
       Curl_dyn_init(&buf, MAX_COOKIE_LINE);
       while(Curl_get_line(&buf, fp)) {
-        char *lineptr = Curl_dyn_ptr(&buf);
+        const char *lineptr = Curl_dyn_ptr(&buf);
         bool headerline = FALSE;
         if(checkprefix("Set-Cookie:", lineptr)) {
           /* This is a cookie line, get it! */
           lineptr += 11;
           headerline = TRUE;
-          while(ISBLANK(*lineptr))
-            lineptr++;
+          Curl_str_passblanks(&lineptr);
         }
 
         Curl_cookie_add(data, ci, headerline, TRUE, lineptr, NULL, NULL, TRUE);
@@ -1250,8 +1249,8 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
  */
 static int cookie_sort(const void *p1, const void *p2)
 {
-  struct Cookie *c1 = *(struct Cookie **)p1;
-  struct Cookie *c2 = *(struct Cookie **)p2;
+  const struct Cookie *c1 = *(const struct Cookie * const *)p1;
+  const struct Cookie *c2 = *(const struct Cookie * const *)p2;
   size_t l1, l2;
 
   /* 1 - compare cookie path lengths */
@@ -1286,8 +1285,8 @@ static int cookie_sort(const void *p1, const void *p2)
  */
 static int cookie_sort_ct(const void *p1, const void *p2)
 {
-  struct Cookie *c1 = *(struct Cookie **)p1;
-  struct Cookie *c2 = *(struct Cookie **)p2;
+  const struct Cookie *c1 = *(const struct Cookie * const *)p1;
+  const struct Cookie *c2 = *(const struct Cookie * const *)p2;
 
   return (c2->creationtime > c1->creationtime) ? 1 : -1;
 }

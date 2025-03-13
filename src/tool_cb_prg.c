@@ -133,7 +133,7 @@ int tool_progress_cb(void *clientp,
                      curl_off_t dltotal, curl_off_t dlnow,
                      curl_off_t ultotal, curl_off_t ulnow)
 {
-  struct timeval now = tvnow();
+  struct curltime now = curlx_now();
   struct per_transfer *per = clientp;
   struct OperationConfig *config = per->config;
   struct ProgressData *bar = &per->progressbar;
@@ -173,13 +173,13 @@ int tool_progress_cb(void *clientp,
       if(bar->prev == point)
         /* progress did not change since last invoke */
         return 0;
-      else if((tvdiff(now, bar->prevtime) < 100L) && point < total)
+      else if((curlx_timediff(now, bar->prevtime) < 100L) && point < total)
         /* limit progress-bar updating to 10 Hz except when we are at 100% */
         return 0;
     }
     else {
       /* total is unknown */
-      if(tvdiff(now, bar->prevtime) < 100L)
+      if(curlx_timediff(now, bar->prevtime) < 100L)
         /* limit progress-bar updating to 10 Hz */
         return 0;
       update_width(bar);

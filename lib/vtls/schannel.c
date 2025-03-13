@@ -806,11 +806,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 #endif
 
     sspi_status =
-      Curl_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         &credentials, NULL, NULL,
-                                         &backend->cred->cred_handle,
-                                         &backend->cred->time_stamp);
+      Curl_pSecFn->AcquireCredentialsHandle(NULL,
+                                            (TCHAR *)CURL_UNCONST(UNISP_NAME),
+                                            SECPKG_CRED_OUTBOUND, NULL,
+                                            &credentials, NULL, NULL,
+                                            &backend->cred->cred_handle,
+                                            &backend->cred->time_stamp);
   }
   else {
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
@@ -846,11 +847,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 #endif
 
     sspi_status =
-      Curl_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         &schannel_cred, NULL, NULL,
-                                         &backend->cred->cred_handle,
-                                         &backend->cred->time_stamp);
+      Curl_pSecFn->AcquireCredentialsHandle(NULL,
+                                            (TCHAR *)CURL_UNCONST(UNISP_NAME),
+                                            SECPKG_CRED_OUTBOUND, NULL,
+                                            &schannel_cred, NULL, NULL,
+                                            &backend->cred->cred_handle,
+                                            &backend->cred->time_stamp);
   }
 
 #ifdef HAS_CLIENT_CERT_PATH
@@ -2534,7 +2536,7 @@ static void schannel_checksum(const unsigned char *input,
 
 #ifdef __MINGW32CE__
     /* workaround for CeGCC, should be (const BYTE*) */
-    if(!CryptHashData(hHash, (BYTE*)input, (DWORD)inputlen, 0))
+    if(!CryptHashData(hHash, (BYTE*)CURL_UNCONST(input), (DWORD)inputlen, 0))
 #else
     if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
 #endif
@@ -2601,7 +2603,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                         CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
   if(!share || !share->cert_store) {
     return NULL;
@@ -2679,7 +2681,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                         CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
   if(!share) {
     share = calloc(1, sizeof(*share));
@@ -2687,7 +2689,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
       return FALSE;
     }
     if(!Curl_hash_add2(&multi->proto_hash,
-                       (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                       CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                        sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1,
                        share, schannel_cert_share_free)) {
       free(share);

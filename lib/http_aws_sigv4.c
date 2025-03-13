@@ -46,16 +46,16 @@
 
 #include "slist.h"
 
-#define HMAC_SHA256(k, kl, d, dl, o)           \
-  do {                                         \
-    result = Curl_hmacit(&Curl_HMAC_SHA256,    \
-                         (unsigned char *)k,   \
-                         kl,                   \
-                         (unsigned char *)d,   \
-                         dl, o);               \
-    if(result) {                               \
-      goto fail;                               \
-    }                                          \
+#define HMAC_SHA256(k, kl, d, dl, o)                \
+  do {                                              \
+    result = Curl_hmacit(&Curl_HMAC_SHA256,         \
+                         (const unsigned char *)k,  \
+                         kl,                        \
+                         (const unsigned char *)d,  \
+                         dl, o);                    \
+    if(result) {                                    \
+      goto fail;                                    \
+    }                                               \
   } while(0)
 
 #define TIMESTAMP_SIZE 17
@@ -83,7 +83,7 @@ static void trim_headers(struct curl_slist *head)
 {
   struct curl_slist *l;
   for(l = head; l; l = l->next) {
-    char *value; /* to read from */
+    const char *value; /* to read from */
     char *store;
     size_t colon = strcspn(l->data, ":");
     Curl_strntolower(l->data, l->data, colon);
@@ -92,11 +92,10 @@ static void trim_headers(struct curl_slist *head)
     if(!*value)
       continue;
     ++value;
-    store = value;
+    store = (char *)CURL_UNCONST(value);
 
     /* skip leading whitespace */
-    while(ISBLANK(*value))
-      value++;
+    Curl_str_passblanks(&value);
 
     while(*value) {
       int space = 0;
@@ -234,7 +233,7 @@ static CURLcode make_headers(struct Curl_easy *data,
       sep = strchr(l->data, ';');
     if(!sep || (*sep == ':' && !*(sep + 1)))
       continue;
-    for(ptr = sep + 1; ISSPACE(*ptr); ++ptr)
+    for(ptr = sep + 1; ISBLANK(*ptr); ++ptr)
       ;
     if(!*ptr && ptr != sep + 1) /* a value of whitespace only */
       continue;
@@ -261,16 +260,15 @@ static CURLcode make_headers(struct Curl_easy *data,
     *date_header = aprintf("%s: %s\r\n", date_hdr_key, timestamp);
   }
   else {
-    char *value;
-    char *endp;
+    const char *value;
+    const char *endp;
     value = strchr(*date_header, ':');
     if(!value) {
       *date_header = NULL;
       goto fail;
     }
     ++value;
-    while(ISBLANK(*value))
-      ++value;
+    Curl_str_passblanks(&value);
     endp = value;
     while(*endp && ISALNUM(*endp))
       ++endp;
@@ -334,14 +332,14 @@ fail:
                                 SHA256_HEX_LENGTH)
 
 /* try to parse a payload hash from the content-sha256 header */
-static char *parse_content_sha_hdr(struct Curl_easy *data,
-                                   const char *provider1,
-                                   size_t plen,
-                                   size_t *value_len)
+static const char *parse_content_sha_hdr(struct Curl_easy *data,
+                                         const char *provider1,
+                                         size_t plen,
+                                         size_t *value_len)
 {
   char key[CONTENT_SHA256_KEY_LEN];
   size_t key_len;
-  char *value;
+  const char *value;
   size_t len;
 
   key_len = msnprintf(key, sizeof(key), "x-%.*s-content-sha256",
@@ -356,8 +354,7 @@ static char *parse_content_sha_hdr(struct Curl_easy *data,
     return NULL;
   ++value;
 
-  while(ISBLANK(*value))
-    ++value;
+  Curl_str_passblanks(&value);
 
   len = strlen(value);
   while(len > 0 && ISBLANK(value[len-1]))
@@ -572,7 +569,7 @@ static CURLcode canon_query(struct Curl_easy *data,
 }
 
 
-CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
+CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OUT_OF_MEMORY;
   struct connectdata *conn = data->conn;
@@ -593,7 +590,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *date_header = NULL;
   Curl_HttpReq httpreq;
   const char *method = NULL;
-  char *payload_hash = NULL;
+  const char *payload_hash = NULL;
   size_t payload_hash_len = 0;
   unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
@@ -607,9 +604,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = {0};
   unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = {0};
   char *auth_headers = NULL;
-
-  DEBUGASSERT(!proxy);
-  (void)proxy;
 
   if(Curl_checkheaders(data, STRCONST("Authorization"))) {
     /* Authorization already present, Bailing out */
@@ -630,7 +624,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
    * are still using aws:amz as a prefix.
    */
   line = data->set.str[STRING_AWS_SIGV4] ?
-    data->set.str[STRING_AWS_SIGV4] : (char *)"aws:amz";
+    data->set.str[STRING_AWS_SIGV4] : "aws:amz";
 
   /* provider0[:provider1[:region[:service]]]
 
@@ -851,7 +845,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
                    Curl_str(&provider0), Curl_strlen(&provider0));
 
-  Curl_safefree(data->state.aptr.userpwd);
+  free(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
   result = CURLE_OK;

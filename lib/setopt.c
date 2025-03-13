@@ -525,7 +525,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * Follow Location: header hints on an HTTP-server.
      */
-    data->set.http_follow_location = enabled;
+    if(uarg > 3)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.http_follow_mode = (unsigned char)uarg;
     break;
 
   case CURLOPT_UNRESTRICTED_AUTH:
@@ -687,7 +689,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.proxy_transfer_mode = (bool)uarg;
     break;
   case CURLOPT_SOCKS5_AUTH:
-    if(data->set.socks5auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
+    if(uarg & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
       return CURLE_NOT_BUILT_IN;
     data->set.socks5auth = (unsigned char)uarg;
     break;
@@ -1401,7 +1403,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      */
     Curl_safefree(data->set.str[STRING_SSL_ENGINE]);
     return Curl_ssl_set_engine_default(data);
-
+  case CURLOPT_UPLOAD_FLAGS:
+    data->set.upload_flags = (unsigned char)arg;
+    break;
   default:
     /* unknown option */
     return CURLE_UNKNOWN_OPTION;
@@ -2141,12 +2145,16 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     result = setstropt_userpwd(ptr, &u, &p);
 
     /* URL decode the components */
-    if(!result && u)
+    if(!result && u) {
+      Curl_safefree(data->set.str[STRING_PROXYUSERNAME]);
       result = Curl_urldecode(u, 0, &data->set.str[STRING_PROXYUSERNAME], NULL,
                               REJECT_ZERO);
-    if(!result && p)
+    }
+    if(!result && p) {
+      Curl_safefree(data->set.str[STRING_PROXYPASSWORD]);
       result = Curl_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
+    }
     free(u);
     free(p);
   }

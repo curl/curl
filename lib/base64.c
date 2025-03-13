@@ -32,7 +32,7 @@
   !defined(CURL_DISABLE_POP3) || \
   !defined(CURL_DISABLE_IMAP) || \
   !defined(CURL_DISABLE_DIGEST_AUTH) || \
-  !defined(CURL_DISABLE_DOH) || defined(USE_SSL) || defined(BUILDING_CURL)
+  !defined(CURL_DISABLE_DOH) || defined(USE_SSL) || !defined(BUILDING_LIBCURL)
 #include "curl/curl.h"
 #include "warnless.h"
 #include "curl_base64.h"
@@ -191,7 +191,7 @@ static CURLcode base64_encode(const char *table64,
 {
   char *output;
   char *base64data;
-  const unsigned char *in = (unsigned char *)inputbuff;
+  const unsigned char *in = (const unsigned char *)inputbuff;
   const char *padstr = &table64[64];    /* Point to padding string. */
 
   *outptr = NULL;

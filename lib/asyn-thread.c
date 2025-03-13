@@ -49,9 +49,9 @@
 #endif
 
 #ifdef HAVE_GETADDRINFO
-#  define RESOLVER_ENOMEM  EAI_MEMORY
+#  define RESOLVER_ENOMEM  EAI_MEMORY  /* = WSA_NOT_ENOUGH_MEMORY on Windows */
 #else
-#  define RESOLVER_ENOMEM  ENOMEM
+#  define RESOLVER_ENOMEM  SOCKENOMEM
 #endif
 
 #include "urldata.h"
@@ -69,7 +69,7 @@
 #ifdef USE_ARES
 #include <ares.h>
 #ifdef USE_HTTPSRR
-#define USE_HTTPSRR_ARES 1 /* the combo */
+#define USE_HTTPSRR_ARES  /* the combo */
 #endif
 #endif
 
@@ -433,6 +433,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
                                 const struct addrinfo *hints)
 {
   struct thread_data *td = &data->state.async.thdata;
+  /* !checksrc! disable ERRNOVAR 1 */
   int err = ENOMEM;
   struct Curl_async *async = &data->state.async;
 

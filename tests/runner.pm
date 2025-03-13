@@ -126,7 +126,7 @@ our $tortalloc;
 
 # local variables
 my %oldenv;       # environment variables before test is started
-my $CURLLOG="$LOGDIR/commands.log"; # all command lines run
+my $CURLLOG = "commands.log"; # all command lines run
 my $defserverlogslocktimeout = 5; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 my $multiprocess;   # nonzero with a separate test runner process
@@ -1001,7 +1001,8 @@ sub singletest_run {
         logmsg "$CMDLINE\n";
     }
 
-    open(my $cmdlog, ">", $CURLLOG) || die "Failure writing log file";
+    open(my $cmdlog, ">", "$LOGDIR/$CURLLOG") ||
+        die "Failure writing log file";
     print $cmdlog "$CMDLINE\n";
     close($cmdlog) || die "Failure writing log file";
 

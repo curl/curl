@@ -569,9 +569,9 @@ struct Curl_async {
   struct Curl_dns_entry *dns;
 #ifdef CURLRES_ASYNCH
   struct thread_data thdata;
-#endif
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel e.g. */
+#endif
   int port;
   BIT(done);  /* set TRUE when the lookup is complete */
 };
@@ -1358,6 +1358,7 @@ struct UrlState {
   BIT(internal); /* internal: true if this easy handle was created for
                     internal use and the user does not have ownership of the
                     handle. */
+  BIT(http_ignorecustom); /* ignore custom method from now */
 };
 
 /*
@@ -1722,11 +1723,13 @@ struct UserDefined {
                              to be used in the library's request(s) */
   unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
                           file 0 - whatever, 1 - v2, 2 - v6 */
+  unsigned char upload_flags; /* flags set by CURLOPT_UPLOAD_FLAGS */
 #ifdef HAVE_GSSAPI
   /* GSS-API credential delegation, see the documentation of
      CURLOPT_GSSAPI_DELEGATION */
   unsigned char gssapi_delegation;
 #endif
+  unsigned char http_follow_mode; /* follow HTTP redirects */
   BIT(connect_only); /* make connection/request, then let application use the
                         socket */
   BIT(connect_only_ws); /* special websocket connect-only level */
@@ -1778,7 +1781,6 @@ struct UserDefined {
   BIT(hide_progress);    /* do not use the progress meter */
   BIT(http_fail_on_error);  /* fail on HTTP error codes >= 400 */
   BIT(http_keep_sending_on_error); /* for HTTP status codes >= 300 */
-  BIT(http_follow_location); /* follow HTTP redirects */
   BIT(http_transfer_encoding); /* request compressed HTTP transfer-encoding */
   BIT(allow_auth_to_other_hosts);
   BIT(include_header); /* include received protocol headers in data output */

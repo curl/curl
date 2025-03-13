@@ -595,7 +595,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
   res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
   if(res_len > 0) {
     char *mstr = curlx_convert_tchar_to_UTF8(buf);
-    Curl_safefree(config->cacert);
+    curlx_safefree(config->cacert);
     if(mstr)
       config->cacert = strdup(mstr);
     curlx_unicodefree(mstr);
@@ -732,21 +732,9 @@ static void init_terminal(void)
 }
 #endif
 
-LARGE_INTEGER tool_freq;
-bool tool_isVistaOrGreater;
-
 CURLcode win32_init(void)
 {
-  /* curlx_verify_windows_version must be called during init at least once
-     because it has its own initialization routine. */
-  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL))
-    tool_isVistaOrGreater = true;
-  else
-    tool_isVistaOrGreater = false;
-
-  QueryPerformanceFrequency(&tool_freq);
-
+  curlx_now_init();
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   init_terminal();
 #endif

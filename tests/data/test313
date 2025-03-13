@@ -16,13 +16,13 @@ SSL
 local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
 <name>
 CRL test
 </name>
 <command>
--4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --crlfile %SRCDIR/certs/Server-localhost-sv.crl https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/test-ca.crt --crlfile %SRCDIR/certs/test-localhost.crl https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

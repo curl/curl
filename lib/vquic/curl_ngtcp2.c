@@ -297,38 +297,6 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
-                                         struct Curl_easy *data,
-                                         int64_t stream_id,
-                                         struct h3_stream_ctx **pstream)
-{
-  struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct h3_stream_ctx *stream;
-
-  (void)cf;
-  stream = H3_STREAM_CTX(ctx, data);
-  if(stream && stream->id == stream_id) {
-    *pstream = stream;
-    return data;
-  }
-  else {
-    struct Curl_llist_node *e;
-    DEBUGASSERT(data->multi);
-    for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
-      struct Curl_easy *sdata = Curl_node_elem(e);
-      if(sdata->conn != data->conn)
-        continue;
-      stream = H3_STREAM_CTX(ctx, sdata);
-      if(stream && stream->id == stream_id) {
-        *pstream = stream;
-        return sdata;
-      }
-    }
-  }
-  *pstream = NULL;
-  return NULL;
-}
-
 static void h3_drain_stream(struct Curl_cfilter *cf,
                             struct Curl_easy *data)
 {
@@ -482,6 +450,11 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   if(ctx->use_earlydata)
     Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
   if(ctx->use_earlydata) {
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA)
+    ctx->earlydata_accepted =
+      (SSL_get_early_data_status(ctx->tls.ossl.ssl) !=
+       SSL_EARLY_DATA_REJECTED);
+#endif
 #ifdef USE_GNUTLS
     int flags = gnutls_session_get_flags(ctx->tls.gtls.session);
     ctx->earlydata_accepted = !!(flags & GNUTLS_SFLAGS_EARLY_DATA);
@@ -705,28 +678,26 @@ static int cb_extend_max_local_streams_bidi(ngtcp2_conn *tconn,
   return 0;
 }
 
-static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t sid,
+static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
                                      uint64_t max_data, void *user_data,
                                      void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  curl_int64_t stream_id = (curl_int64_t)sid;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  struct Curl_easy *s_data;
+  struct Curl_easy *s_data = stream_user_data;
   struct h3_stream_ctx *stream;
   int rv;
   (void)tconn;
   (void)max_data;
-  (void)stream_user_data;
 
   rv = nghttp3_conn_unblock_stream(ctx->h3conn, stream_id);
   if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
-  s_data = get_stream_easy(cf, data, stream_id, &stream);
-  if(s_data && stream && stream->quic_flow_blocked) {
-    CURL_TRC_CF(s_data, cf, "[%" FMT_PRId64 "] unblock quic flow", stream_id);
+  stream = H3_STREAM_CTX(ctx, s_data);
+  if(stream && stream->quic_flow_blocked) {
+    CURL_TRC_CF(s_data, cf, "[%" FMT_PRId64 "] unblock quic flow",
+                (curl_int64_t)stream_id);
     stream->quic_flow_blocked = FALSE;
     h3_drain_stream(cf, s_data);
   }
@@ -1006,7 +977,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   if(!stream)
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
-  h3_xfer_write_resp(cf, data, stream, (char *)buf, blen, FALSE);
+  h3_xfer_write_resp(cf, data, stream, (const char *)buf, blen, FALSE);
   if(blen) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] ACK %zu bytes of DATA",
                 stream->id, blen);
@@ -1410,7 +1381,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
     while(nvecs < veccnt &&
           Curl_bufq_peek_at(&stream->sendbuf,
                             stream->sendbuf_len_in_flight,
-                            (const unsigned char **)&vec[nvecs].base,
+                            CURL_UNCONST(&vec[nvecs].base),
                             &vec[nvecs].len)) {
       stream->sendbuf_len_in_flight += vec[nvecs].len;
       nwritten += vec[nvecs].len;
@@ -2183,8 +2154,24 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   ctx = cf ? cf->ctx : NULL;
   data = cf ? CF_DATA_CURRENT(cf) : NULL;
   if(cf && data && ctx) {
+    unsigned char *quic_tp = NULL;
+    size_t quic_tp_len = 0;
+#ifdef HAVE_OPENSSL_EARLYDATA
+    ngtcp2_ssize tplen;
+    uint8_t tpbuf[256];
+
+    tplen = ngtcp2_conn_encode_0rtt_transport_params(ctx->qconn, tpbuf,
+                                                     sizeof(tpbuf));
+    if(tplen < 0)
+      CURL_TRC_CF(data, cf, "error encoding 0RTT transport data: %s",
+                  ngtcp2_strerror((int)tplen));
+    else {
+      quic_tp = (unsigned char *)tpbuf;
+      quic_tp_len = (size_t)tplen;
+    }
+#endif
     Curl_ossl_add_session(cf, data, ctx->peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), "h3");
+                          SSL_version(ssl), "h3", quic_tp, quic_tp_len);
     return 1;
   }
   return 0;
@@ -2355,6 +2342,9 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   *do_early_data = FALSE;
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA)
+  ctx->earlydata_max = scs->earlydata_max;
+#endif
 #ifdef USE_GNUTLS
   ctx->earlydata_max =
     gnutls_record_get_max_early_data_size(ctx->tls.gtls.session);
@@ -2366,7 +2356,8 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   ctx->earlydata_max = 0;
 #endif /* WOLFSSL_EARLY_DATA */
 #endif
-#if defined(USE_GNUTLS) || defined(USE_WOLFSSL)
+#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
+    (defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA))
   if((!ctx->earlydata_max)) {
     CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }
@@ -2379,7 +2370,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   else {
     int rv;
     rv = ngtcp2_conn_decode_and_set_0rtt_transport_params(
-      ctx->qconn, (uint8_t *)scs->quic_tp, scs->quic_tp_len);
+      ctx->qconn, (const uint8_t *)scs->quic_tp, scs->quic_tp_len);
     if(rv)
       CURL_TRC_CF(data, cf, "no early data, failed to set 0RTT transport "
                   "parameters: %s", ngtcp2_strerror(rv));
@@ -2394,7 +2385,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
       }
     }
   }
-#else /* USE_GNUTLS */
+#else /* not supported in the TLS backend */
   (void)data;
   (void)ctx;
   (void)scs;

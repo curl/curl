@@ -238,7 +238,7 @@ static int socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
   if(result != CURLM_OK) {
-    fprintf(stderr, "Curl error on %s: %i (%s)\n",
+    fprintf(stderr, "Curl error on %s (%i) %s\n",
             info, result, curl_multi_strerror(result));
   }
   return (int)result;

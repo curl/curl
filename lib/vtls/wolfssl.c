@@ -744,7 +744,7 @@ static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
 
   DEBUGASSERT(multi);
   share = multi ? Curl_hash_pick(&multi->proto_hash,
-                                 (void *)MPROTO_WSSL_X509_KEY,
+                                 CURL_UNCONST(MPROTO_WSSL_X509_KEY),
                                  sizeof(MPROTO_WSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
      !wssl_cached_x509_store_expired(data, share) &&
@@ -767,7 +767,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
   if(!multi)
     return;
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_WSSL_X509_KEY,
+                         CURL_UNCONST(MPROTO_WSSL_X509_KEY),
                          sizeof(MPROTO_WSSL_X509_KEY)-1);
 
   if(!share) {
@@ -775,7 +775,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
     if(!share)
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
-                       (void *)MPROTO_WSSL_X509_KEY,
+                       CURL_UNCONST(MPROTO_WSSL_X509_KEY),
                        sizeof(MPROTO_WSSL_X509_KEY)-1,
                        share, wssl_x509_share_free)) {
       free(share);
@@ -959,7 +959,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   word16 pqkem = 0;
   size_t idx = 0;
 #endif
- CURLcode result = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
 
   DEBUGASSERT(!wctx->ssl_ctx);
   DEBUGASSERT(!wctx->ssl);
@@ -1100,7 +1100,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 
   curves = conn_config->curves;
   if(!curves && cf->conn->transport == TRNSPRT_QUIC)
-    curves = (char *)QUIC_GROUPS;
+    curves = (char *)CURL_UNCONST(QUIC_GROUPS);
 
   if(curves) {
 #ifdef WOLFSSL_HAVE_KYBER
@@ -1531,7 +1531,6 @@ static CURLcode wssl_verify_pinned(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
@@ -1542,6 +1541,7 @@ static CURLcode wssl_verify_pinned(struct Curl_cfilter *cf,
 
   if(pinnedpubkey) {
 #ifdef KEEP_PEER_CERT
+    struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
     WOLFSSL_X509 *x509;
     const char *x509_der;
     int x509_der_len;
@@ -1635,8 +1635,7 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
   connssl->earlydata_state = ssl_earlydata_sent;
   if(!Curl_ssl_cf_is_proxy(cf))
     Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip);
-  infof(data, "SSL sending %" FMT_OFF_T " bytes of early data",
-        connssl->earlydata_skip);
+  infof(data, "SSL sending %zu bytes of early data", connssl->earlydata_skip);
 out:
   return result;
 }

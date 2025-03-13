@@ -49,8 +49,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '', name: 'openssl R' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'openssl' }
+          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '--with-openssl', install: 'libssl-devel', name: 'openssl R' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel', name: 'openssl' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -65,11 +65,11 @@ jobs:
             autoconf libtool gcc-core gcc-g++ binutils
             ${{ matrix.build }} make ninja
             openssh
-            libssl-devel
             libssh2-devel
             libpsl-devel
             zlib-devel
             libbrotli-devel
+            libzstd-devel
             libnghttp2-devel
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -93,7 +93,6 @@ jobs:
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
-              --with-openssl \
               --with-libssh2 \
               --disable-dependency-tracking \
               ${{ matrix.config }}
@@ -173,26 +172,28 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy', name: '!proxy' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --with-openssl --disable-threaded-resolver', name: 'default' }
-          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--with-openssl', name: 'default R' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', name: 'default' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: ''                        , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares', name: 'c-ares U' }
-          # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: ''                        , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON', type: 'Release', test: 'uwp', name: 'schannel' }
-          # { build: 'autotools', sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '--without-debug --with-schannel --enable-shared', type: 'Release', test: 'uwp', name: 'schannel' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug' }
-          - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', name: 'schannel R' }
+          # MSYS
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy', install: 'openssl-devel', name: '!proxy' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver', install: 'openssl-devel', name: 'default' }
+          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'openssl-devel', name: 'default' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '--with-openssl', install: 'openssl-devel', name: 'default R' }
+          # MinGW
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', install: 'mingw-w64-x86_64-openssl', name: 'default' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: ''       , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --with-openssl-quic', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-nghttp3', name: 'c-ares U' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: ''       , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: '', type: 'Debug', name: 'schannel c-ares U' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON   -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON', install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2', type: 'Debug', name: 'gnutls' }
+          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', install: '', type: 'Release', name: 'schannel R TrackMemory' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', install: 'mingw-w64-clang-x86_64-openssl', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
+          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON', install: '', type: 'Release', test: 'uwp', name: 'schannel' }
+          # { build: 'autotools', sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun', config: '--without-debug --with-schannel --enable-shared', install: '', type: 'Release', test: 'uwp', name: 'schannel' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', install: '', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug' }
+          - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: '', type: 'Release', name: 'schannel R' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
         shell: pwsh
 
-      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+      - uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -200,28 +201,27 @@ jobs:
           install: >-
             gcc
             ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
-            openssh
-            openssl-devel
+            diffutils
             zlib-devel
             brotli-devel
+            libzstd-devel
             libnghttp2-devel
             libpsl-devel
             libssh2-devel
-            ${{ matrix.chkprefill == '_chkprefill' && 'diffutils' || '' }}
+            ${{ matrix.install }}
 
-      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+      - uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f # v2
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
-            openssh
-            mingw-w64-${{ matrix.env }}-openssl
+            mingw-w64-${{ matrix.env }}-diffutils
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
-            ${{ matrix.chkprefill == '_chkprefill' && format('mingw-w64-{0}-diffutils', matrix.env) || '' }}
+            ${{ matrix.install }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -328,20 +328,26 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+
+      - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
+        timeout-minutes: 2
+        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
+        # causing runtests.pl to run at 2-3x reduced speed.
+        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~2301 ~2302 ~2310'  # WebSockets'
-            TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
-          else
-            TFLAGS+=' ~SFTP'
+            TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
           fi
+          TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -365,48 +371,62 @@ jobs:
           fi
 
   mingw-w64-standalone-downloads:
-    name: 'dl-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
+    name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 20
     defaults:
       run:
-        shell: C:\msys64\usr\bin\bash.exe {0}
+        shell: msys2 {0}
     env:
       MAKEFLAGS: -j 5
     strategy:
       matrix:
         include:
           - name: 'schannel'
-            env: '9.5.0-x86_64'
             dir: 'mingw64'
+            env: 'x86_64'
+            ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-            tflags: '~2301 ~2302 ~2310 ~3027'
-          - name: 'schannel U'
-            env: '7.3.0-x86_64'
+          - name: 'schannel mbedtls U'
             dir: 'mingw64'
+            env: 'x86_64'
+            ver: '7.3.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON'
+            install: mingw-w64-x86_64-mbedtls
             type: 'Release'
-            tflags: '~2301 ~2302 ~2310 ~3027 ~3023 ~3024 ~1451'
+            tflags: 'skiprun'
           - name: 'schannel !unity'
-            env: '6.4.0-i686'
             dir: 'mingw32'
+            env: 'i686'
+            ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
             type: 'Debug'
             tflags: 'skiprun'
       fail-fast: false
     steps:
-      - name: 'cache compiler (gcc ${{ matrix.env }})'
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        with:
+          msystem: ${{ matrix.dir }}
+          release: false
+          update: false
+          cache: false
+          path-type: inherit
+          install: >-
+            mingw-w64-${{ matrix.env }}-libpsl
+            ${{ matrix.install }}
+
+      - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
           path: ~\my-cache
-          key: ${{ runner.os }}-mingw-w64-${{ matrix.env }}
+          key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
-      - name: 'install compiler (gcc ${{ matrix.env }})'
+      - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
         run: |
@@ -428,16 +448,16 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-            cmake -B "bld${_chkprefill}" -G 'MSYS Makefiles' ${options} \
+            cmake -B "bld${_chkprefill}" -G "${{ contains(matrix.url, '/winlibs_mingw/') && 'Ninja' || 'MSYS Makefiles' }}" ${options} \
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DCURL_USE_LIBPSL=OFF \
+              -DUSE_LIBIDN2=OFF \
               ${{ matrix.config }}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
@@ -457,7 +477,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld
 
       - name: 'curl version'
@@ -471,15 +491,15 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'downgrade msys2-runtime'
@@ -487,16 +507,14 @@ jobs:
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          export TFLAGS='-j8 ~WebSockets ${{ matrix.tflags }}'
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -506,7 +524,7 @@ jobs:
       - name: 'build examples'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
+          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld --target curl-examples
 
   linux-cross-mingw-w64:
@@ -607,10 +625,10 @@ jobs:
         timeout-minutes: 5
         run: |
           echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'cache compiler (mingw32ce)'
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
           path: ~/opt/mingw32ce
@@ -703,20 +721,21 @@ jobs:
     timeout-minutes: 55
     defaults:
       run:
-        shell: C:\msys64\usr\bin\bash.exe {0}
+        shell: msys2 {0}
     env:
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
         include:
-          - name: 'openssl'
+          - name: 'openssl +examples'
             install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
             arch: 'x64'
             plat: 'uwp'
             type: 'Debug'
             tflags: 'skiprun'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_LIBPSL=OFF
@@ -726,21 +745,24 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
+            openssh: 'OpenSSH-Windows-Pre'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'schannel MultiSSL U'
-            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls wolfssl'
+            # GnuTLS is not fully functional with MSVC, build-test only
+            # https://github.com/ShiftMediaProject/gnutls/issues/23
+            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl shiftmedia-libgnutls openssl mbedtls wolfssl'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
+              -DCURL_USE_SCHANNEL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
               -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
 
           - name: 'libressl'
@@ -748,8 +770,8 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
               -DCURL_CA_SEARCH_SAFE=ON -DUSE_SSLS_EXPORT=ON
@@ -759,42 +781,50 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
+              -DENABLE_DEBUG=OFF
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
               -DUSE_ECH=ON
 
-          - name: 'wolfssl'
+          - name: 'wolfssl +examples'
             install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516'
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
               -DUSE_ECH=ON
 
-          - name: 'mbedtls'
+          - name: 'mbedtls libssh'
             install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516'
             chkprefill: '_chkprefill'
             # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
             #          read its configuration from, making it vulnerable to attacks on
             #          Windows. Do not use this component till there is a fix for these.
             # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
             config: >-
+              -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
               -DCURL_USE_GSASL=ON
 
       fail-fast: false
     steps:
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        with:
+          msystem: ucrt64
+          release: false
+          update: false
+          cache: false
+          path-type: inherit
+
       - name: 'vcpkg cache setup'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
@@ -819,7 +849,6 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="/c/msys64/usr/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
             if [ '${{ matrix.plat }}' = 'uwp' ]; then
@@ -843,7 +872,6 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
-              -DENABLE_DEBUG=ON \
               ${{ matrix.config }}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
@@ -862,9 +890,7 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
@@ -878,20 +904,20 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          # GnuTLS is not fully functional on Windows, so skip the tests
-          # https://github.com/ShiftMediaProject/gnutls/issues/23
-          if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
-            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
+          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
+          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+          else  # OpenSSH-Windows
+            [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-Pre' ] && chocopkg+=' --prerelease'
+            chocopkg+=' openssh'
           fi
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force ${chocopkg} stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'downgrade msys2-runtime'
@@ -899,27 +925,34 @@ jobs:
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
-          export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          TFLAGS+=' ~2310'  # flaky 'WebSockets unknown reserved bit set in frame header', WebSockets
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-            TFLAGS+=' ~SFTP'
-          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
-            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+            TFLAGS+=' ~SCP ~SFTP'  # Fail with all tested openssh servers: curl: (67) Authentication failure
           fi
-          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          PATH="/c/msys64/usr/bin:$PATH"
+          TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
+          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+            TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
+          else  # OpenSSH-Windows
+            TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
+            if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+              TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+            else
+              TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
+            fi
+            PATH="$PATH:/c/Program Files/OpenSSH-Win64"
+          fi
+          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+        if: ${{ contains(matrix.name, '+examples') }}
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples

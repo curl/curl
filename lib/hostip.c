@@ -145,14 +145,14 @@ void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
   case AF_INET: {
     const struct sockaddr_in *sa4 = (const void *)ai->ai_addr;
     const struct in_addr *ipaddr4 = &sa4->sin_addr;
-    (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr4, buf, bufsize);
+    (void)curlx_inet_ntop(ai->ai_family, (const void *)ipaddr4, buf, bufsize);
     break;
   }
 #ifdef USE_IPV6
   case AF_INET6: {
     const struct sockaddr_in6 *sa6 = (const void *)ai->ai_addr;
     const struct in6_addr *ipaddr6 = &sa6->sin6_addr;
-    (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr6, buf, bufsize);
+    (void)curlx_inet_ntop(ai->ai_family, (const void *)ipaddr6, buf, bufsize);
     break;
   }
 #endif
@@ -549,7 +549,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   sa6.sin6_scope_id = 0;
 #endif
 
-  (void)Curl_inet_pton(AF_INET6, "::1", ipv6);
+  (void)curlx_inet_pton(AF_INET6, "::1", ipv6);
   memcpy(&sa6.sin6_addr, ipv6, sizeof(ipv6));
 
   ca->ai_flags     = 0;
@@ -583,7 +583,7 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
   memset(&sa, 0, sizeof(sa));
   sa.sin_family = AF_INET;
   sa.sin_port = htons(port16);
-  if(Curl_inet_pton(AF_INET, "127.0.0.1", (char *)&ipv4) < 1)
+  if(curlx_inet_pton(AF_INET, "127.0.0.1", (char *)&ipv4) < 1)
     return NULL;
   memcpy(&sa.sin_addr, &ipv4, sizeof(ipv4));
 
@@ -651,9 +651,9 @@ bool Curl_host_is_ipnum(const char *hostname)
 #ifdef USE_IPV6
   struct in6_addr in6;
 #endif
-  if(Curl_inet_pton(AF_INET, hostname, &in) > 0
+  if(curlx_inet_pton(AF_INET, hostname, &in) > 0
 #ifdef USE_IPV6
-     || Curl_inet_pton(AF_INET6, hostname, &in6) > 0
+     || curlx_inet_pton(AF_INET6, hostname, &in6) > 0
 #endif
     )
     return TRUE;
@@ -747,7 +747,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       int st;
       Curl_set_in_callback(data, TRUE);
       st = data->set.resolver_start(
-#ifdef USE_CURL_ASYNC
+#ifdef CURLRES_ASYNCH
         data->state.async.resolver,
 #else
         NULL,
@@ -761,7 +761,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 
 #ifndef USE_RESOLVE_ON_IPS
     /* First check if this is an IPv4 address string */
-    if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
+    if(curlx_inet_pton(AF_INET, hostname, &in) > 0) {
       /* This is a dotted IP address 123.123.123.123-style */
       addr = Curl_ip2addr(AF_INET, &in, hostname, port);
       if(!addr)
@@ -771,7 +771,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
     else {
       struct in6_addr in6;
       /* check if this is an IPv6 address string */
-      if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0) {
+      if(curlx_inet_pton(AF_INET6, hostname, &in6) > 0) {
         /* This is an IPv6 address literal */
         addr = Curl_ip2addr(AF_INET6, &in6, hostname, port);
         if(!addr)
@@ -783,14 +783,14 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 #else /* if USE_RESOLVE_ON_IPS */
 #ifndef CURL_DISABLE_DOH
     /* First check if this is an IPv4 address string */
-    if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
+    if(curlx_inet_pton(AF_INET, hostname, &in) > 0)
       /* This is a dotted IP address 123.123.123.123-style */
       ipnum = TRUE;
 #ifdef USE_IPV6
     else {
       struct in6_addr in6;
       /* check if this is an IPv6 address string */
-      if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
+      if(curlx_inet_pton(AF_INET6, hostname, &in6) > 0)
         /* This is an IPv6 address literal */
         ipnum = TRUE;
     }
@@ -932,8 +932,9 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
   else
     timeout = (timeoutms > LONG_MAX) ? LONG_MAX : (long)timeoutms;
 
-  if(!timeout)
-    /* USE_ALARM_TIMEOUT defined, but no timeout actually requested */
+  if(!timeout || data->set.doh)
+    /* USE_ALARM_TIMEOUT defined, but no timeout actually requested or resolve
+       done using DoH */
     return Curl_resolv(data, hostname, port, TRUE, entry);
 
   if(timeout < 1000) {

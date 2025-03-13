@@ -37,9 +37,11 @@ log = logging.getLogger(__name__)
 class TestBasic:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, nghttpx):
+    def _class_scope(self, env, httpd, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
+        httpd.clear_extra_configs()
+        httpd.reload()
 
     # simple http: GET
     def test_01_01_http_get(self, env: Env, httpd):
@@ -149,3 +151,94 @@ class TestBasic:
         assert len(r.responses) == 1, f'{r.responses}'
         assert r.responses[0]['status'] == 200, f'{r.responses[1]}'
         assert r.responses[0]['protocol'] == 'HTTP/2', f'{r.responses[1]}'
+
+    # http: large response headers
+    # send 48KB+ sized response headers to check we handle that correctly
+    # larger than 64KB headers expose a bug in Apache HTTP/2 that is not
+    # RSTing the stream correclty when its internal limits are exceeded.
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_01_11_large_resp_headers(self, env: Env, httpd, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+              f'/curltest/tweak?x-hd={48 * 1024}'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
+        r.check_exit_code(0)
+        assert len(r.responses) == 1, f'{r.responses}'
+        assert r.responses[0]['status'] == 200, f'{r.responses}'
+
+    # http: response headers larger than what curl buffers for
+    @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
+                        reason='httpd must be at least 2.4.64')
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_01_12_xlarge_resp_headers(self, env: Env, httpd, proto):
+        httpd.set_extra_config('base', [
+            f'H2MaxHeaderBlockLen {130 * 1024}',
+        ])
+        httpd.reload()
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+              f'/curltest/tweak?x-hd={128 * 1024}'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
+        r.check_exit_code(0)
+        assert len(r.responses) == 1, f'{r.responses}'
+        assert r.responses[0]['status'] == 200, f'{r.responses}'
+
+    # http: 1 response header larger than what curl buffers for
+    @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
+                        reason='httpd must be at least 2.4.64')
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_01_13_megalarge_resp_headers(self, env: Env, httpd, proto):
+        httpd.set_extra_config('base', [
+            'LogLevel http2:trace2',
+            f'H2MaxHeaderBlockLen {130 * 1024}',
+        ])
+        httpd.reload()
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+              f'/curltest/tweak?x-hd1={128 * 1024}'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
+        if proto == 'h2':
+            r.check_exit_code(16)  # CURLE_HTTP2
+        else:
+            r.check_exit_code(100)  # CURLE_TOO_LARGE
+
+    # http: several response headers, together > 256 KB
+    # nghttp2 error -905: Too many CONTINUATION frames following a HEADER frame
+    @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
+                        reason='httpd must be at least 2.4.64')
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_01_14_gigalarge_resp_headers(self, env: Env, httpd, proto):
+        httpd.set_extra_config('base', [
+            'LogLevel http2:trace2',
+            f'H2MaxHeaderBlockLen {1024 * 1024}',
+        ])
+        httpd.reload()
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+              f'/curltest/tweak?x-hd={256 * 1024}'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
+        if proto == 'h2':
+            r.check_exit_code(16)  # CURLE_HTTP2
+        else:
+            r.check_exit_code(0)   # 1.1 can do
+
+    # http: one response header > 256 KB
+    @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
+                        reason='httpd must be at least 2.4.64')
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_01_15_gigalarge_resp_headers(self, env: Env, httpd, proto):
+        httpd.set_extra_config('base', [
+            'LogLevel http2:trace2',
+            f'H2MaxHeaderBlockLen {1024 * 1024}',
+        ])
+        httpd.reload()
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+              f'/curltest/tweak?x-hd1={256 * 1024}'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
+        if proto == 'h2':
+            r.check_exit_code(16)  # CURLE_HTTP2
+        else:
+            r.check_exit_code(100)  # CURLE_TOO_LARGE

@@ -155,13 +155,13 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
       }
       else {
         CERT_BLOB cert_blob;
-        CERT_CONTEXT *cert_context = NULL;
+        const CERT_CONTEXT *cert_context = NULL;
         BOOL add_cert_result = FALSE;
         DWORD actual_content_type = 0;
         DWORD cert_size = (DWORD)
           ((end_cert_ptr + end_cert_len) - begin_cert_ptr);
 
-        cert_blob.pbData = (BYTE *)begin_cert_ptr;
+        cert_blob.pbData = (BYTE *)CURL_UNCONST(begin_cert_ptr);
         cert_blob.cbData = cert_size;
         if(!CryptQueryObject(CERT_QUERY_OBJECT_BLOB,
                              &cert_blob,
@@ -179,7 +179,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
                 "schannel: failed to extract certificate from CA file "
                 "'%s': %s",
                 ca_file_text,
-                Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+                curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
           result = CURLE_SSL_CACERT_BADFILE;
           more_certs = 0;
         }
@@ -208,8 +208,8 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
                     "schannel: failed to add certificate from CA file '%s' "
                     "to certificate store: %s",
                     ca_file_text,
-                    Curl_winapi_strerror(GetLastError(), buffer,
-                                         sizeof(buffer)));
+                    curlx_winapi_strerror(GetLastError(), buffer,
+                                          sizeof(buffer)));
               result = CURLE_SSL_CACERT_BADFILE;
               more_certs = 0;
             }
@@ -249,13 +249,13 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   size_t ca_file_bufsize = 0;
   DWORD total_bytes_read = 0;
 
-  ca_file_tstr = curlx_convert_UTF8_to_tchar((char *)ca_file);
+  ca_file_tstr = curlx_convert_UTF8_to_tchar(ca_file);
   if(!ca_file_tstr) {
     char buffer[STRERROR_LEN];
     failf(data,
           "schannel: invalid path name for CA file '%s': %s",
           ca_file,
-          Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+          curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
@@ -277,7 +277,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
     failf(data,
           "schannel: failed to open CA file '%s': %s",
           ca_file,
-          Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+          curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
@@ -287,7 +287,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
     failf(data,
           "schannel: failed to determine size of CA file '%s': %s",
           ca_file,
-          Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+          curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
@@ -317,7 +317,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
       failf(data,
             "schannel: failed to read from CA file '%s': %s",
             ca_file,
-            Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+            curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       result = CURLE_SSL_CACERT_BADFILE;
       goto cleanup;
     }
@@ -461,14 +461,14 @@ static bool get_num_host_info(struct num_ip_data *ip_blob,
   struct in6_addr ia6;
   bool result = FALSE;
 
-  int res = Curl_inet_pton(AF_INET, hostname, &ia);
+  int res = curlx_inet_pton(AF_INET, hostname, &ia);
   if(res) {
     ip_blob->size = sizeof(struct in_addr);
     memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
     result = TRUE;
   }
   else {
-    res = Curl_inet_pton(AF_INET6, hostname, &ia6);
+    res = curlx_inet_pton(AF_INET6, hostname, &ia6);
     if(res) {
       ip_blob->size = sizeof(struct in6_addr);
       memcpy(&ip_blob->bData.ia6, &ia6, sizeof(struct in6_addr));
@@ -805,7 +805,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
         if(!trust_store) {
           char buffer[STRERROR_LEN];
           failf(data, "schannel: failed to create certificate store: %s",
-                Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+                curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
           result = CURLE_SSL_CACERT_BADFILE;
         }
         else {
@@ -853,7 +853,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
         char buffer[STRERROR_LEN];
         failf(data,
               "schannel: failed to create certificate chain engine: %s",
-              Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+              curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
         result = CURLE_SSL_CACERT_BADFILE;
       }
     }
@@ -877,7 +877,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                 &pChainContext)) {
       char buffer[STRERROR_LEN];
       failf(data, "schannel: CertGetCertificateChain failed: %s",
-            Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+            curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       pChainContext = NULL;
       result = CURLE_PEER_FAILED_VERIFICATION;
     }

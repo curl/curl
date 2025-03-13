@@ -98,6 +98,7 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
                                     (char *)buf, len, &result);
   if(nread < 0) {
     nread = 0;
+    /* !checksrc! disable ERRNOVAR 4 */
     if(CURLE_AGAIN == result)
       ret = EAGAIN;
     else

@@ -30,7 +30,6 @@
 #include "urldata.h"
 #include "easyif.h"
 #include "cfilters.h"
-#include "timeval.h"
 #include "multiif.h"
 #include "strcase.h"
 
@@ -54,13 +53,14 @@
 #include "memdebug.h"
 
 static void trc_write(struct Curl_easy *data, curl_infotype type,
-                      char *ptr, size_t size)
+                      const char *ptr, size_t size)
 {
   if(data->set.verbose) {
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
       Curl_set_in_callback(data, TRUE);
-      (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+      (void)(*data->set.fdebug)(data, type, CURL_UNCONST(ptr), size,
+                                data->set.debugdata);
       Curl_set_in_callback(data, inCallback);
     }
     else {
@@ -131,7 +131,7 @@ static size_t trc_end_buf(char *buf, size_t len, size_t maxlen, bool addnl)
 }
 
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
-                char *ptr, size_t size)
+                const char *ptr, size_t size)
 {
   if(data->set.verbose) {
     static const char s_infotype[CURLINFO_END][3] = {
@@ -152,7 +152,8 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       }
       else {
         Curl_set_in_callback(data, TRUE);
-        (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+        (void)(*data->set.fdebug)(data, type, CURL_UNCONST(ptr),
+                                  size, data->set.debugdata);
         Curl_set_in_callback(data, inCallback);
       }
     }
@@ -242,7 +243,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
@@ -593,8 +594,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 
-void Curl_trc_cf_infof(struct Curl_easy *data,
-                       struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   (void)data; (void)cf; (void)fmt;

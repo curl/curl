@@ -72,7 +72,7 @@ static int      inet_pton6(const char *src, unsigned char *dst);
  *      Paul Vixie, 1996.
  */
 int
-Curl_inet_pton(int af, const char *src, void *dst)
+curlx_inet_pton(int af, const char *src, void *dst)
 {
   switch(af) {
   case AF_INET:
@@ -80,7 +80,7 @@ Curl_inet_pton(int af, const char *src, void *dst)
   case AF_INET6:
     return inet_pton6(src, (unsigned char *)dst);
   default:
-    CURL_SETERRNO(EAFNOSUPPORT);
+    CURL_SETERRNO(SOCKEAFNOSUPPORT);
     return -1;
   }
   /* NOTREACHED */

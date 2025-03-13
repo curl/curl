@@ -102,6 +102,7 @@ if(PICKY_COMPILER)
       -Waddress                            # clang  2.7  gcc  4.3
       -Wattributes                         # clang  2.7  gcc  4.1
       -Wcast-align                         # clang  1.0  gcc  4.2
+      -Wcast-qual                          # clang  3.0  gcc  3.4.6
       -Wdeclaration-after-statement        # clang  1.0  gcc  3.4
       -Wdiv-by-zero                        # clang  2.7  gcc  4.1
       -Wempty-body                         # clang  2.7  gcc  4.3

@@ -63,12 +63,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#define QUIC_PRIORITY \
-  "NORMAL:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:+AES-256-GCM:" \
-  "+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:+GROUP-SECP256R1:" \
-  "+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
-  "%DISABLE_TLS13_COMPAT_MODE"
-
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */
 
@@ -106,6 +100,7 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
               blen, nwritten, result);
   backend->gtls.io_result = result;
   if(nwritten < 0) {
+    /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
     nwritten = -1;
@@ -127,6 +122,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   if(!backend->gtls.shared_creds->trust_setup) {
     result = Curl_gtls_client_trust_setup(cf, data, &backend->gtls);
     if(result) {
+      /* !checksrc! disable ERRNOVAR 1 */
       gnutls_transport_set_errno(backend->gtls.session, EINVAL);
       backend->gtls.io_result = result;
       return -1;
@@ -138,6 +134,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
               blen, nread, result);
   backend->gtls.io_result = result;
   if(nread < 0) {
+    /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
     nread = -1;
@@ -319,12 +316,18 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
  */
 #define GNUTLS_SRP "+SRP"
 
+#define QUIC_PRIORITY \
+  "NORMAL:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:+AES-256-GCM:" \
+  "+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:+GROUP-SECP256R1:" \
+  "+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
+  "%DISABLE_TLS13_COMPAT_MODE"
+
 static CURLcode
 gnutls_set_ssl_version_min_max(struct Curl_easy *data,
                                struct ssl_peer *peer,
                                struct ssl_primary_config *conn_config,
                                const char **prioritylist,
-                               const char *tls13support)
+                               bool tls13support)
 {
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;
@@ -564,7 +567,7 @@ gtls_get_cached_creds(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if(data->multi) {
     shared_creds = Curl_hash_pick(&data->multi->proto_hash,
-                                  (void *)MPROTO_GTLS_X509_KEY,
+                                  CURL_UNCONST(MPROTO_GTLS_X509_KEY),
                                   sizeof(MPROTO_GTLS_X509_KEY)-1);
      if(shared_creds && shared_creds->creds &&
         !gtls_shared_creds_expired(data, shared_creds) &&
@@ -608,7 +611,7 @@ static void gtls_set_cached_creds(struct Curl_cfilter *cf,
     return;
 
   if(!Curl_hash_add2(&data->multi->proto_hash,
-                    (void *)MPROTO_GTLS_X509_KEY,
+                    CURL_UNCONST(MPROTO_GTLS_X509_KEY),
                     sizeof(MPROTO_GTLS_X509_KEY)-1,
                     sc, gtls_shared_creds_hash_free)) {
     Curl_gtls_shared_creds_free(&sc); /* down reference again */
@@ -780,6 +783,63 @@ static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
   return 0;
 }
 
+static CURLcode gtls_set_priority(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct gtls_ctx *gtls,
+                                 const char *priority)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct dynbuf buf;
+  const char *err = NULL;
+  CURLcode result = CURLE_OK;
+  int rc;
+
+  Curl_dyn_init(&buf, 4096);
+
+#ifdef USE_GNUTLS_SRP
+  if(conn_config->username) {
+    /* Only add SRP to the cipher list if SRP is requested. Otherwise
+     * GnuTLS will disable TLS 1.3 support. */
+    result = Curl_dyn_add(&buf, priority);
+    if(!result)
+      result = Curl_dyn_add(&buf, ":" GNUTLS_SRP);
+    if(result)
+      goto out;
+    priority = Curl_dyn_ptr(&buf);
+  }
+#endif
+
+  if(conn_config->cipher_list) {
+    if((conn_config->cipher_list[0] == '+') ||
+       (conn_config->cipher_list[0] == '-') ||
+       (conn_config->cipher_list[0] == '!')) {
+       /* add it to out own */
+      if(!Curl_dyn_len(&buf)) {  /* not added yet */
+        result = Curl_dyn_add(&buf, priority);
+        if(result)
+          goto out;
+      }
+      result = Curl_dyn_addf(&buf, ":%s", conn_config->cipher_list);
+      if(result)
+        goto out;
+      priority = Curl_dyn_ptr(&buf);
+    }
+    else /* replace our own completely */
+      priority = conn_config->cipher_list;
+  }
+
+  infof(data, "GnuTLS priority: %s", priority);
+  rc = gnutls_priority_set_direct(gtls->session, priority, &err);
+  if(rc != GNUTLS_E_SUCCESS) {
+    failf(data, "Error %d setting GnuTLS priority: %s", rc, err);
+    result = CURLE_SSL_CONNECT_ERROR;
+  }
+
+out:
+  Curl_dyn_free(&buf);
+  return result;
+}
+
 static CURLcode gtls_client_init(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct ssl_peer *peer,
@@ -792,8 +852,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   int rc;
   bool sni = TRUE; /* default is SNI enabled */
   const char *prioritylist;
-  const char *err = NULL;
-  const char *tls13support;
+  bool tls13support;
   CURLcode result;
 
   if(!gtls_inited)
@@ -888,7 +947,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
 
   /* "In GnuTLS 3.6.5, TLS 1.3 is enabled by default" */
-  tls13support = gnutls_check_version("3.6.5");
+  tls13support = !!gnutls_check_version("3.6.5");
 
   /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
    * removed if a runtime error indicates that SRP is not supported by this
@@ -913,33 +972,9 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-#ifdef USE_GNUTLS_SRP
-  /* Only add SRP to the cipher list if SRP is requested. Otherwise
-   * GnuTLS will disable TLS 1.3 support. */
-  if(config->username) {
-    char *prioritysrp = aprintf("%s:" GNUTLS_SRP, prioritylist);
-    if(!prioritysrp)
-      return CURLE_OUT_OF_MEMORY;
-    rc = gnutls_priority_set_direct(gtls->session, prioritysrp, &err);
-    free(prioritysrp);
-
-    if((rc == GNUTLS_E_INVALID_REQUEST) && err) {
-      infof(data, "This GnuTLS does not support SRP");
-    }
-  }
-  else {
-#endif
-    infof(data, "GnuTLS ciphers: %s", prioritylist);
-    rc = gnutls_priority_set_direct(gtls->session, prioritylist, &err);
-#ifdef USE_GNUTLS_SRP
-  }
-#endif
-
-  if(rc != GNUTLS_E_SUCCESS) {
-    failf(data, "Error %d setting GnuTLS cipher list starting with %s",
-          rc, err);
-    return CURLE_SSL_CONNECT_ERROR;
-  }
+  result = gtls_set_priority(cf, data, gtls, prioritylist);
+  if(result)
+    return result;
 
   if(config->clientcert) {
     if(!gtls->shared_creds->trust_setup) {
@@ -1081,7 +1116,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   size_t gtls_alpns_count = 0;
   bool gtls_session_setup = FALSE;
   struct alpn_spec alpns;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   int rc;
 
   DEBUGASSERT(gctx);
@@ -1557,10 +1592,10 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     unsigned char addrbuf[sizeof(struct use_addr)];
     size_t addrlen = 0;
 
-    if(Curl_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
+    if(curlx_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
       addrlen = 4;
 #ifdef USE_IPV6
-    else if(Curl_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
+    else if(curlx_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
       addrlen = 16;
 #endif
 
@@ -1780,8 +1815,7 @@ static CURLcode gtls_send_earlydata(struct Curl_cfilter *cf,
     Curl_bufq_skip(&connssl->earlydata, (size_t)n);
   }
   /* sent everything there was */
-  infof(data, "SSL sending %" FMT_OFF_T " bytes of early data",
-        connssl->earlydata_skip);
+  infof(data, "SSL sending %zu bytes of early data", connssl->earlydata_skip);
 out:
   return result;
 }
@@ -1949,7 +1983,7 @@ static ssize_t gtls_send(struct Curl_cfilter *cf,
     nwritten = (size_t)rc;
     total_written += nwritten;
     DEBUGASSERT(nwritten <= blen);
-    buf = (char *)buf + nwritten;
+    buf = (char *)CURL_UNCONST(buf) + nwritten;
     blen -= nwritten;
   }
   rc = total_written;
@@ -2156,6 +2190,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_CIPHER_LIST |
   SSLSUPP_CA_CACHE,
 
   sizeof(struct gtls_ssl_backend_data),

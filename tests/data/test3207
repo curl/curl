@@ -165,7 +165,7 @@ lib%TESTNUMBER
 </tool>
 # provide URL and ca-cert
 <command>
-https://localhost:%HTTPSPORT/%TESTNUMBER  %SRCDIR/certs/EdelCurlRoot-ca.crt
+https://localhost:%HTTPSPORT/%TESTNUMBER  %SRCDIR/certs/test-ca.crt
 </command>
 </client>
 

@@ -88,7 +88,8 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 #ifdef USE_OPENSSL
   (void)result;
   return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, alpns,
-                            cb_setup, cb_user_data, NULL, ssl_user_data);
+                            cb_setup, cb_user_data, NULL, ssl_user_data,
+                            session_reuse_cb);
 #elif defined(USE_GNUTLS)
   return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer, alpns,
                             cb_setup, cb_user_data, ssl_user_data,

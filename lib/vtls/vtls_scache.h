@@ -115,7 +115,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
 
 /* All about a SSL session ticket */
 struct Curl_ssl_session {
-  const unsigned char *sdata;  /* session ticket data, plain bytes */
+  const void *sdata;           /* session ticket data, plain bytes */
   size_t sdata_len;            /* number of bytes in sdata */
   curl_off_t valid_until;      /* seconds since EPOCH until ticket expires */
   int ietf_tls_id;             /* TLS protocol identifier negotiated */
@@ -137,7 +137,7 @@ struct Curl_ssl_session {
  * @param psession on return the scached session instance created
  */
 CURLcode
-Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
+Curl_ssl_session_create(void *sdata, size_t sdata_len,
                         int ietf_tls_id, const char *alpn,
                         curl_off_t valid_until,
                         size_t earlydata_max,
@@ -146,7 +146,7 @@ Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
 /* Variation of session creation with quic transport parameter bytes,
  * Takes ownership of `quic_tp` regardless of return code. */
 CURLcode
-Curl_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
+Curl_ssl_session_create2(void *sdata, size_t sdata_len,
                          int ietf_tls_id, const char *alpn,
                          curl_off_t valid_until,
                          size_t earlydata_max,
@@ -199,7 +199,7 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
 CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  const unsigned char *shmac, size_t shmac_len,
-                                 const unsigned char *sdata, size_t sdata_len);
+                                 const void *sdata, size_t sdata_len);
 
 CURLcode Curl_ssl_session_export(struct Curl_easy *data,
                                  curl_ssls_export_cb *export_fn,

@@ -30,13 +30,13 @@ SSLpinning
 local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
 <name>
 simple HTTPS GET with PEM public key pinning
 </name>
 <command>
--4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.pem https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/test-ca.crt --pinnedpubkey %SRCDIR/certs/test-localhost.pub.pem https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

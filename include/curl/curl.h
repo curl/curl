@@ -42,7 +42,7 @@
   !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
 #define CURL_DEPRECATED(version, message)                       \
   __attribute__((deprecated("since " # version ". " message)))
-#if defined(__IAR_SYSTEMS_ICC__)
+#ifdef __IAR_SYSTEMS_ICC__
 #define CURL_IGNORE_DEPRECATION(statements) \
       _Pragma("diag_suppress=Pe1444") \
       statements \
@@ -97,7 +97,7 @@
 #include <sys/select.h>
 #endif
 
-#if !defined(_WIN32)
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <sys/time.h>
 #endif
@@ -174,6 +174,16 @@ typedef enum {
 /* deprecated names: */
 #define CURLSSLBACKEND_CYASSL CURLSSLBACKEND_WOLFSSL
 #define CURLSSLBACKEND_DARWINSSL CURLSSLBACKEND_SECURETRANSPORT
+
+/* bits for the CURLOPT_FOLLOWLOCATION option */
+#define CURLFOLLOW_ALL       1L /* generic follow redirects */
+
+/* Do not use the custom method in the follow-up request if the HTTP code
+   instructs so (301, 302, 303). */
+#define CURLFOLLOW_OBEYCODE  2L
+
+/* Only use the custom method in the first request, always reset in the next */
+#define CURLFOLLOW_FIRSTONLY 3L
 
 struct curl_httppost {
   struct curl_httppost *next;       /* next entry in the list */
@@ -904,12 +914,13 @@ typedef int
 
 
 /* parameter for the CURLOPT_USE_SSL option */
+#define CURLUSESSL_NONE    0L /* do not attempt to use SSL */
+#define CURLUSESSL_TRY     1L /* try using SSL, proceed anyway otherwise */
+#define CURLUSESSL_CONTROL 2L /* SSL for the control connection or fail */
+#define CURLUSESSL_ALL     3L /* SSL for all communication or fail */
+
 typedef enum {
-  CURLUSESSL_NONE,    /* do not attempt to use SSL */
-  CURLUSESSL_TRY,     /* try using SSL, proceed anyway otherwise */
-  CURLUSESSL_CONTROL, /* SSL for the control connection or fail */
-  CURLUSESSL_ALL,     /* SSL for all communication or fail */
-  CURLUSESSL_LAST     /* not an option, never use */
+  CURLUSESSL_LAST = 4 /* not an option, never use */
 } curl_usessl;
 
 /* Definition of bits for the CURLOPT_SSL_OPTIONS argument: */
@@ -1013,6 +1024,12 @@ typedef enum {
 #define CURLALTSVC_H2           (1<<4)
 #define CURLALTSVC_H3           (1<<5)
 
+/* bitmask values for CURLOPT_UPLOAD_FLAGS */
+#define CURLULFLAG_ANSWERED (1L<<0)
+#define CURLULFLAG_DELETED  (1L<<1)
+#define CURLULFLAG_DRAFT    (1L<<2)
+#define CURLULFLAG_FLAGGED  (1L<<3)
+#define CURLULFLAG_SEEN     (1L<<4)
 
 struct curl_hstsentry {
   char *name;
@@ -2226,6 +2243,8 @@ typedef enum {
   /* maximum number of keepalive probes (Linux, *BSD, macOS, etc.) */
   CURLOPT(CURLOPT_TCP_KEEPCNT, CURLOPTTYPE_LONG, 326),
 
+  CURLOPT(CURLOPT_UPLOAD_FLAGS, CURLOPTTYPE_LONG, 327),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2274,26 +2293,25 @@ typedef enum {
   /* Convenient "aliases" */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
 
-  /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
-enum {
-  CURL_HTTP_VERSION_NONE, /* setting this means we do not care, and that we
-                             would like the library to choose the best
-                             possible for us! */
-  CURL_HTTP_VERSION_1_0,  /* please use HTTP 1.0 in the request */
-  CURL_HTTP_VERSION_1_1,  /* please use HTTP 1.1 in the request */
-  CURL_HTTP_VERSION_2_0,  /* please use HTTP 2 in the request */
-  CURL_HTTP_VERSION_2TLS, /* use version 2 for HTTPS, version 1.1 for HTTP */
-  CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,  /* please use HTTP 2 without HTTP/1.1
-                                           Upgrade */
-  CURL_HTTP_VERSION_3 = 30, /* Use HTTP/3, fallback to HTTP/2 or HTTP/1 if
-                               needed. For HTTPS only. For HTTP, this option
-                               makes libcurl return error. */
-  CURL_HTTP_VERSION_3ONLY = 31, /* Use HTTP/3 without fallback. For HTTPS
-                                   only. For HTTP, this makes libcurl
-                                   return error. */
-
-  CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
-};
+/* These constants are for use with the CURLOPT_HTTP_VERSION option. */
+#define CURL_HTTP_VERSION_NONE  0L /* setting this means we do not care, and
+                                      that we would like the library to choose
+                                      the best possible for us! */
+#define CURL_HTTP_VERSION_1_0   1L /* please use HTTP 1.0 in the request */
+#define CURL_HTTP_VERSION_1_1   2L /* please use HTTP 1.1 in the request */
+#define CURL_HTTP_VERSION_2_0   3L /* please use HTTP 2 in the request */
+#define CURL_HTTP_VERSION_2TLS  4L /* use version 2 for HTTPS, version 1.1 for
+                                      HTTP */
+#define CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE 5L /* please use HTTP 2 without
+                                                  HTTP/1.1 Upgrade */
+#define CURL_HTTP_VERSION_3     30L /* Use HTTP/3, fallback to HTTP/2 or
+                                       HTTP/1 if needed. For HTTPS only. For
+                                       HTTP, this option makes libcurl
+                                       return error. */
+#define CURL_HTTP_VERSION_3ONLY 31L /* Use HTTP/3 without fallback. For
+                                       HTTPS only. For HTTP, this makes
+                                       libcurl return error. */
+#define CURL_HTTP_VERSION_LAST  32L /* *ILLEGAL* http version */
 
 /* Convenience definition simple because the name of the version is HTTP/2 and
    not 2.0. The 2_0 version of the enum name was set while the version was

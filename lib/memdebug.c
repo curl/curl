@@ -117,13 +117,12 @@ static bool countcheck(const char *func, int line, const char *source)
       fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
               source, line, func);
       fflush(curl_dbg_logfile); /* because it might crash now */
+      /* !checksrc! disable ERRNOVAR 1 */
       CURL_SETERRNO(ENOMEM);
       return TRUE; /* RETURN ERROR! */
     }
     else
       memsize--; /* countdown */
-
-
   }
 
   return FALSE; /* allow this */
@@ -229,7 +228,7 @@ ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 
   if(source)
     curl_dbg_log("MEM %s:%d wcsdup(%p) (%zu) = %p\n",
-                source, line, (void *)str, bsiz, (void *)mem);
+                source, line, (const void *)str, bsiz, (void *)mem);
 
   return mem;
 }

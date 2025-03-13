@@ -238,7 +238,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
 - `CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX`:  Override default versioned symbol prefix. Default: `<TLS-BACKEND>_` or `MULTISSL_`
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
-- `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires static or no curl executable). Default: `OFF`
+- `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires UCRT, static libcurl or no curl executable). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
 - `CURL_TEST_BUNDLES`:                      Bundle `libtest` and `unittest` tests into single binaries. Default: `OFF`
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`

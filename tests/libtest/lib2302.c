@@ -28,12 +28,14 @@
 
 struct ws_data {
   CURL *easy;
-  char buf[1024*1024];
+  char *buf;
   size_t blen;
   size_t nwrites;
   int has_meta;
   int meta_flags;
 };
+
+#define LIB2302_BUFSIZE (1024 * 1024)
 
 static void flush_data(struct ws_data *wd)
 {
@@ -66,7 +68,7 @@ static size_t add_data(struct ws_data *wd, const char *buf, size_t blen,
     wd->meta_flags = meta ? meta->flags : 0;
   }
 
-  if(wd->blen + blen > sizeof(wd->buf)) {
+  if(wd->blen + blen > LIB2302_BUFSIZE) {
     return 0;
   }
   memcpy(wd->buf + wd->blen, buf, blen);
@@ -96,13 +98,16 @@ CURLcode test(char *URL)
   CURL *curl;
   CURLcode res = CURLE_OK;
   struct ws_data ws_data;
+  memset(&ws_data, 0, sizeof(ws_data));
 
+  ws_data.buf = (char *)calloc(LIB2302_BUFSIZE, 1);
+  if(!ws_data.buf)
+    return res;
 
   global_init(CURL_GLOBAL_ALL);
 
   curl = curl_easy_init();
   if(curl) {
-    memset(&ws_data, 0, sizeof(ws_data));
     ws_data.easy = curl;
 
     curl_easy_setopt(curl, CURLOPT_URL, URL);
@@ -118,6 +123,7 @@ CURLcode test(char *URL)
     flush_data(&ws_data);
   }
   curl_global_cleanup();
+  free(ws_data.buf);
   return res;
 }
 

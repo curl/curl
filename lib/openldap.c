@@ -354,7 +354,7 @@ static CURLcode oldap_perform_auth(struct Curl_easy *data, const char *mech,
   struct berval *pcred = &cred;
   int rc;
 
-  cred.bv_val = (char *) Curl_bufref_ptr(initresp);
+  cred.bv_val = (char *)CURL_UNCONST(Curl_bufref_ptr(initresp));
   cred.bv_len = Curl_bufref_len(initresp);
   if(!cred.bv_val)
     pcred = NULL;
@@ -376,7 +376,7 @@ static CURLcode oldap_continue_auth(struct Curl_easy *data, const char *mech,
   struct berval *pcred = &cred;
   int rc;
 
-  cred.bv_val = (char *) Curl_bufref_ptr(resp);
+  cred.bv_val = (char *)CURL_UNCONST(Curl_bufref_ptr(resp));
   cred.bv_len = Curl_bufref_len(resp);
   if(!cred.bv_val)
     pcred = NULL;
@@ -440,7 +440,7 @@ static CURLcode oldap_perform_mechs(struct Curl_easy *data)
   };
 
   rc = ldap_search_ext(li->ld, "", LDAP_SCOPE_BASE, "(objectclass=*)",
-                       (char **) supportedSASLMechanisms, 0,
+                       (char **)CURL_UNCONST(supportedSASLMechanisms), 0,
                        NULL, NULL, NULL, 0, &li->msgid);
   if(rc != LDAP_SUCCESS)
     return oldap_map_error(rc, CURLE_LOGIN_DENIED);
@@ -950,13 +950,13 @@ static CURLcode client_write(struct Curl_easy *data,
        separator, drop the latter. */
     if(!len && plen && prefix[plen - 1] == ' ')
       plen--;
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) prefix, plen);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, prefix, plen);
   }
   if(!result && value) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) value, len);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, value, len);
   }
   if(!result && suffix) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) suffix, slen);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, suffix, slen);
   }
   return result;
 }
@@ -1170,7 +1170,7 @@ ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
 
       ret = (li->recv)(data, FIRSTSOCKET, buf, len, &err);
       if(ret < 0 && err == CURLE_AGAIN) {
-        SET_SOCKERRNO(EWOULDBLOCK);
+        SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
     }
   }
@@ -1189,7 +1189,7 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
       CURLcode err = CURLE_SEND_ERROR;
       ret = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &err);
       if(ret < 0 && err == CURLE_AGAIN) {
-        SET_SOCKERRNO(EWOULDBLOCK);
+        SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
     }
   }

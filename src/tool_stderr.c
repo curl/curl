@@ -36,7 +36,7 @@ void tool_init_stderr(void)
   tool_stderr = stderr;
 }
 
-void tool_set_stderr_file(struct GlobalConfig *global, char *filename)
+void tool_set_stderr_file(struct GlobalConfig *global, const char *filename)
 {
   FILE *fp;
 

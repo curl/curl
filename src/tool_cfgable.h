@@ -216,6 +216,7 @@ struct OperationConfig {
     CLOBBER_NEVER, /* If the file exists, always fail */
     CLOBBER_ALWAYS /* If the file exists, always overwrite it */
   } file_clobber_mode;
+  unsigned char upload_flags; /* Bitmask for --upload-flags */
   unsigned short porttouse;
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */
@@ -330,7 +331,7 @@ struct GlobalConfig {
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
-  long ms_per_transfer;           /* start next transfer after (at least) this
+  timediff_t ms_per_transfer;     /* start next transfer after (at least) this
                                      many milliseconds */
   trace tracetype;
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */

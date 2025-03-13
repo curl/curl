@@ -72,7 +72,6 @@
 #include "headers.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
-#include "strtoofft.h"
 #include "multiif.h"
 #include "strcase.h"
 #include "content_encoding.h"
@@ -583,7 +582,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     /* In case this is GSS auth, the newurl field is already allocated so
        we must make sure to free it before allocating a new one. As figured
        out in bug #2284386 */
-    Curl_safefree(data->req.newurl);
+    free(data->req.newurl);
     data->req.newurl = strdup(data->state.url); /* clone URL */
     if(!data->req.newurl)
       return CURLE_OUT_OF_MEMORY;
@@ -634,9 +633,10 @@ output_auth_headers(struct Curl_easy *data,
   (void)path;
 #endif
 #ifndef CURL_DISABLE_AWS
-  if(authstatus->picked == CURLAUTH_AWS_SIGV4) {
+  if((authstatus->picked == CURLAUTH_AWS_SIGV4) && !proxy) {
+    /* this method is never for proxy */
     auth = "AWS_SIGV4";
-    result = Curl_output_aws_sigv4(data, proxy);
+    result = Curl_output_aws_sigv4(data);
     if(result)
       return result;
   }
@@ -1073,8 +1073,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       auth++;
     else
       break;
-    while(ISBLANK(*auth))
-      auth++;
+    Curl_str_passblanks(&auth);
   }
 #else
   (void) proxy;
@@ -1153,6 +1152,21 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode)
 #endif
 
   return data->state.authproblem;
+}
+
+static void http_switch_to_get(struct Curl_easy *data, int code)
+{
+  const char *req = data->set.str[STRING_CUSTOMREQUEST];
+  if((req || data->state.httpreq != HTTPREQ_GET) &&
+     (data->set.http_follow_mode == CURLFOLLOW_OBEYCODE)) {
+    infof(data, "Switch to GET because of %d response", code);
+    data->state.http_ignorecustom = TRUE;
+  }
+  else if(req && (data->set.http_follow_mode != CURLFOLLOW_FIRSTONLY))
+    infof(data, "Stick to %s instead of GET", req);
+
+  data->state.httpreq = HTTPREQ_GET;
+  Curl_creader_set_rewind(data, FALSE);
 }
 
 CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
@@ -1321,6 +1335,12 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
   data->state.url_alloc = TRUE;
   Curl_req_soft_reset(&data->req, data);
   infof(data, "Issue another request to this URL: '%s'", data->state.url);
+  if((data->set.http_follow_mode == CURLFOLLOW_FIRSTONLY) &&
+     data->set.str[STRING_CUSTOMREQUEST] &&
+     !data->state.http_ignorecustom) {
+    data->state.http_ignorecustom = TRUE;
+    infof(data, "Drop custom request method for next request");
+  }
 
   /*
    * We get here when the HTTP code is 300-399 (and 401). We need to perform
@@ -1362,11 +1382,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
-       && !(data->set.keep_post & CURL_REDIR_POST_301)) {
-      infof(data, "Switch from POST to GET");
-      data->state.httpreq = HTTPREQ_GET;
-      Curl_creader_set_rewind(data, FALSE);
-    }
+       && !(data->set.keep_post & CURL_REDIR_POST_301))
+      http_switch_to_get(data, 301);
     break;
   case 302: /* Found */
     /* (quote from RFC7231, section 6.4.3)
@@ -1388,11 +1405,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
-       && !(data->set.keep_post & CURL_REDIR_POST_302)) {
-      infof(data, "Switch from POST to GET");
-      data->state.httpreq = HTTPREQ_GET;
-      Curl_creader_set_rewind(data, FALSE);
-    }
+       && !(data->set.keep_post & CURL_REDIR_POST_302))
+      http_switch_to_get(data, 302);
     break;
 
   case 303: /* See Other */
@@ -1405,11 +1419,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
        ((data->state.httpreq != HTTPREQ_POST &&
          data->state.httpreq != HTTPREQ_POST_FORM &&
          data->state.httpreq != HTTPREQ_POST_MIME) ||
-        !(data->set.keep_post & CURL_REDIR_POST_303))) {
-      data->state.httpreq = HTTPREQ_GET;
-      infof(data, "Switch to %s",
-            data->req.no_body ? "HEAD" : "GET");
-    }
+        !(data->set.keep_post & CURL_REDIR_POST_303)))
+      http_switch_to_get(data, 303);
     break;
   case 304: /* Not Modified */
     /* 304 means we did a conditional request and it was "Not modified".
@@ -1803,8 +1814,10 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
     httpreq = HTTPREQ_PUT;
 
   /* Now set the 'request' pointer to the proper request string */
-  if(data->set.str[STRING_CUSTOMREQUEST])
+  if(data->set.str[STRING_CUSTOMREQUEST] &&
+     !data->state.http_ignorecustom) {
     request = data->set.str[STRING_CUSTOMREQUEST];
+  }
   else {
     if(data->req.no_body)
       request = "HEAD";
@@ -1897,7 +1910,7 @@ static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn)
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      Curl_safefree(aptr->cookiehost);
+      free(aptr->cookiehost);
       aptr->cookiehost = cookiehost;
     }
 #endif
@@ -2722,7 +2735,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
      data->set.str[STRING_ENCODING]) {
-    Curl_safefree(data->state.aptr.accept_encoding);
+    free(data->state.aptr.accept_encoding);
     data->state.aptr.accept_encoding =
       aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
     if(!data->state.aptr.accept_encoding)
@@ -3013,13 +3026,13 @@ static CURLcode http_header(struct Curl_easy *data,
       HD_VAL(hd, hdlen, "Content-Length:") : NULL;
     if(v) {
       curl_off_t contentlength;
-      CURLofft offt = curlx_strtoofft(v, NULL, 10, &contentlength);
+      int offt = Curl_str_numblanks(&v, &contentlength);
 
-      if(offt == CURL_OFFT_OK) {
+      if(offt == STRE_OK) {
         k->size = contentlength;
         k->maxdownload = k->size;
       }
-      else if(offt == CURL_OFFT_FLOW) {
+      else if(offt == STRE_OVERFLOW) {
         /* out of range */
         if(data->set.max_filesize) {
           failf(data, "Maximum file size exceeded");
@@ -3057,7 +3070,7 @@ static CURLcode http_header(struct Curl_easy *data,
         /* ignore empty data */
         free(contenttype);
       else {
-        Curl_safefree(data->info.contenttype);
+        free(data->info.contenttype);
         data->info.contenttype = contenttype;
       }
       return CURLE_OK;
@@ -3138,7 +3151,7 @@ static CURLcode http_header(struct Curl_easy *data,
       else {
         data->req.location = location;
 
-        if(data->set.http_follow_location) {
+        if(data->set.http_follow_mode) {
           DEBUGASSERT(!data->req.newurl);
           data->req.newurl = strdup(data->req.location); /* clone */
           if(!data->req.newurl)
@@ -3215,18 +3228,22 @@ static CURLcode http_header(struct Curl_easy *data,
     if(v) {
       /* Retry-After = HTTP-date / delay-seconds */
       curl_off_t retry_after = 0; /* zero for unknown or "now" */
-      /* Try it as a decimal number, if it works it is not a date */
-      (void)curlx_strtoofft(v, NULL, 10, &retry_after);
-      if(!retry_after) {
-        time_t date = Curl_getdate_capped(v);
+      time_t date;
+      Curl_str_passblanks(&v);
+
+      /* try it as a date first, because a date can otherwise start with and
+         get treated as a number */
+      date = Curl_getdate_capped(v);
+
+      if((time_t)-1 != date) {
         time_t current = time(NULL);
-        if((time_t)-1 != date && date > current) {
+        if(date >= current)
           /* convert date to number of seconds into the future */
           retry_after = date - current;
-        }
       }
-      if(retry_after < 0)
-        retry_after = 0;
+      else
+        /* Try it as a decimal number */
+        Curl_str_number(&v, &retry_after, CURL_OFF_T_MAX);
       /* limit to 6 hours max. this is not documented so that it can be changed
          in the future if necessary. */
       if(retry_after > 21600)
@@ -3524,7 +3541,7 @@ static CURLcode http_write_header(struct Curl_easy *data,
 
   /* now, only output this if the header AND body are requested:
    */
-  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
 
   writetype = CLIENTWRITE_HEADER |
     ((data->req.httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
@@ -3880,8 +3897,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
        */
       const char *p = hd;
 
-      while(ISBLANK(*p))
-        p++;
+      Curl_str_passblanks(&p);
       if(!strncmp(p, "HTTP/", 5)) {
         p += 5;
         switch(*p) {
@@ -3895,7 +3911,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
                   (p[2] - '0');
                 p += 3;
-                if(ISSPACE(*p))
+                if(ISBLANK(*p))
                   fine_statusline = TRUE;
               }
             }
@@ -3915,7 +3931,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
             k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
               (p[2] - '0');
             p += 3;
-            if(!ISSPACE(*p))
+            if(!ISBLANK(*p))
               break;
             fine_statusline = TRUE;
           }
@@ -3981,7 +3997,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
   /*
    * Taken in one (more) header. Write it to the client.
    */
-  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
 
   if(k->httpcode/100 == 1)
     writetype |= CLIENTWRITE_1XX;
@@ -4182,7 +4198,7 @@ CURLcode Curl_http_write_resp(struct Curl_easy *data,
     flags = CLIENTWRITE_BODY;
     if(is_eos)
       flags |= CLIENTWRITE_EOS;
-    result = Curl_client_write(data, flags, (char *)buf, blen);
+    result = Curl_client_write(data, flags, buf, blen);
   }
 out:
   return result;
@@ -4473,8 +4489,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     scheme = Curl_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
     if(scheme) {
       scheme += sizeof(HTTP_PSEUDO_SCHEME);
-      while(ISBLANK(*scheme))
-        scheme++;
+      Curl_str_passblanks(&scheme);
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }
     else {

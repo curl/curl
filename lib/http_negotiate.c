@@ -32,6 +32,7 @@
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -86,8 +87,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 
   /* Obtain the input token, if any */
   header += strlen("Negotiate");
-  while(ISBLANK(*header))
-    header++;
+  Curl_str_passblanks(&header);
 
   len = strlen(header);
   neg_ctx->havenegdata = len != 0;
@@ -203,12 +203,12 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-      Curl_safefree(data->state.aptr.proxyuserpwd);
+      free(data->state.aptr.proxyuserpwd);
       data->state.aptr.proxyuserpwd = userp;
 #endif
     }
     else {
-      Curl_safefree(data->state.aptr.userpwd);
+      free(data->state.aptr.userpwd);
       data->state.aptr.userpwd = userp;
     }
 

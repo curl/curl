@@ -352,12 +352,12 @@ endif()
 if(WIN32)
   option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
   if(CURL_STATIC_CRT AND MSVC)
-    if(BUILD_STATIC_CURL OR NOT BUILD_CURL_EXE)
+    if(MSVC_VERSION GREATER_EQUAL 1900 OR BUILD_STATIC_CURL OR NOT BUILD_CURL_EXE)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
       string(APPEND CMAKE_C_FLAGS_RELEASE " -MT")
       string(APPEND CMAKE_C_FLAGS_DEBUG " -MTd")
     else()
-      message(WARNING "Static CRT requires static or no curl executable.")
+      message(WARNING "Static CRT requires UCRT, static libcurl or no curl executable.")
     endif()
   endif()
 endif()
@@ -1617,24 +1617,9 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
-  if(HAVE_WIN32_WINNT)
-    if(HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
-      # Windows XP is required for freeaddrinfo, getaddrinfo
-      message(FATAL_ERROR "Building for Windows XP or newer is required.")
-    endif()
-
-    # Pre-fill detection results based on target OS version
-    if(MINGW OR MSVC OR WINCE)
-      if(HAVE_WIN32_WINNT LESS 0x0600)
-        set(HAVE_INET_NTOP 0)
-        set(HAVE_INET_PTON 0)
-      else()  # Windows Vista or newer
-        set(HAVE_INET_NTOP 1)
-        set(HAVE_INET_PTON 1)
-      endif()
-      unset(HAVE_INET_NTOP CACHE)
-      unset(HAVE_INET_PTON CACHE)
-    endif()
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
+    # Windows XP is required for freeaddrinfo, getaddrinfo
+    message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
 endif()
 
@@ -1676,6 +1661,7 @@ check_include_file("poll.h"           HAVE_POLL_H)
 check_include_file("pwd.h"            HAVE_PWD_H)
 check_include_file("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file("stdbool.h"        HAVE_STDBOOL_H)
+check_include_file("stdint.h"         HAVE_STDINT_H)
 check_include_file("strings.h"        HAVE_STRINGS_H)
 check_include_file("stropts.h"        HAVE_STROPTS_H)
 check_include_file("termio.h"         HAVE_TERMIO_H)
@@ -1818,8 +1804,10 @@ endif()
 if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 endif()
-check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h netinet/in.h sys/socket.h
-check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h netinet/in.h sys/socket.h
+if(NOT WIN32)
+  check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h netinet/in.h sys/socket.h
+  check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h netinet/in.h sys/socket.h
+endif()
 
 check_symbol_exists("fsetxattr" "sys/xattr.h" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
@@ -1986,7 +1974,7 @@ if(WIN32)
   endif()
 endif()
 
-if(MSVC)
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
 endif()
 
@@ -2055,6 +2043,8 @@ if(HAVE_MANUAL_TOOLS)
   set(CURL_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
   add_subdirectory(docs)
 endif()
+
+list(REMOVE_DUPLICATES CURL_LIBDIRS)
 
 add_subdirectory(lib)
 

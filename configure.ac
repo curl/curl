@@ -150,7 +150,7 @@ dnl initialize all the info variables
     curl_gss_msg="no      (--with-gssapi)"
   curl_gsasl_msg="no      (--with-gsasl)"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
-    curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
+    curl_res_msg="blocking (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
 curl_unix_sockets_msg="no      (--enable-unix-sockets)"
     curl_idn_msg="no      (--with-{libidn2,winidn})"
@@ -1522,7 +1522,7 @@ if test X"$OPT_BROTLI" != Xno; then
         AC_MSG_NOTICE([Added $DIR_BROTLI to CURL_LIBRARY_PATH])
       fi
     fi
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libbrotlidec"
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libbrotlidec libbrotlicommon"
   else
     dnl no brotli, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -3902,6 +3902,7 @@ AC_CHECK_HEADERS(
   libgen.h \
   locale.h \
   stdbool.h \
+  stdint.h \
   sys/filio.h \
   sys/eventfd.h,
 dnl to do if not found
@@ -4071,12 +4072,10 @@ CURL_CHECK_FUNC_FTRUNCATE
 CURL_CHECK_FUNC_GETADDRINFO
 CURL_CHECK_FUNC_GETHOSTBYNAME_R
 CURL_CHECK_FUNC_GETHOSTNAME
+CURL_CHECK_FUNC_GETIFADDRS
 CURL_CHECK_FUNC_GETPEERNAME
 CURL_CHECK_FUNC_GETSOCKNAME
-CURL_CHECK_FUNC_GETIFADDRS
 CURL_CHECK_FUNC_GMTIME_R
-CURL_CHECK_FUNC_INET_NTOP
-CURL_CHECK_FUNC_INET_PTON
 CURL_CHECK_FUNC_IOCTL
 CURL_CHECK_FUNC_IOCTLSOCKET
 CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL
@@ -4111,8 +4110,8 @@ AC_CHECK_FUNCS([\
   mach_absolute_time \
   pipe \
   poll \
-  sendmsg \
   sendmmsg \
+  sendmsg \
   setlocale \
   setrlimit \
   snprintf \
@@ -4126,6 +4125,8 @@ if test "$curl_cv_native_windows" != 'yes'; then
     realpath \
     sched_yield \
   ])
+  CURL_CHECK_FUNC_INET_NTOP
+  CURL_CHECK_FUNC_INET_PTON
   CURL_CHECK_FUNC_STRCASECMP
   CURL_CHECK_FUNC_STRCMPI
   CURL_CHECK_FUNC_STRICMP

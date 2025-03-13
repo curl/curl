@@ -570,7 +570,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   }
 
   /* this calls the protocol-specific function pointer previously set */
-  if(conn->handler->done)
+  if(conn->handler->done && (data->mstate >= MSTATE_PROTOCONNECT))
     result = conn->handler->done(data, status, premature);
   else
     result = status;
@@ -1328,7 +1328,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
                when there is no more data, breaking the loop. */
             nread = wakeup_read(multi->wakeup_pair[0], buf, sizeof(buf));
             if(nread <= 0) {
-              if(nread < 0 && EINTR == SOCKERRNO)
+              if(nread < 0 && SOCKEINTR == SOCKERRNO)
                 continue;
               break;
             }
@@ -1429,11 +1429,11 @@ CURLMcode curl_multi_wakeup(CURLM *m)
         int err = SOCKERRNO;
         int return_success;
 #ifdef USE_WINSOCK
-        return_success = WSAEWOULDBLOCK == err;
+        return_success = SOCKEWOULDBLOCK == err;
 #else
-        if(EINTR == err)
+        if(SOCKEINTR == err)
           continue;
-        return_success = EWOULDBLOCK == err || EAGAIN == err;
+        return_success = SOCKEWOULDBLOCK == err || EAGAIN == err;
 #endif
         if(!return_success)
           return CURLM_WAKEUP_FAILURE;
@@ -2087,7 +2087,7 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
   dns = Curl_fetch_addr(data, hostname, conn->primary.remote_port);
 
   if(dns) {
-#ifdef CURLRES_ASYNCH
+#ifdef USE_CURL_ASYNC
     data->state.async.dns = dns;
     data->state.async.done = TRUE;
 #endif
@@ -2478,7 +2478,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case MSTATE_PENDING:
     case MSTATE_MSGSENT:
       /* handles in these states should NOT be in this list */
-      DEBUGASSERT(0);
       break;
 
     default:
@@ -2601,6 +2600,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
   for(e = Curl_llist_head(&multi->process); e; e = n) {
     struct Curl_easy *data = Curl_node_elem(e);
     CURLMcode result;
+    unsigned int num_alive = multi->num_alive;
     /* Do the loop and only alter the signal ignore state if the next handle
        has a different NO_SIGNAL state than the previous */
     if(first) {
@@ -2619,6 +2619,12 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
       if(result)
         returncode = result;
     }
+    if(num_alive != multi->num_alive)
+      /* Since more than one handle can be removed in a single call to
+         multi_runsingle(), we cannot easily continue on the next node when a
+         node has been removed since that node might ALSO have been
+         removed. */
+      n = Curl_llist_head(&multi->process);
   }
 
   sigpipe_apply(multi->admin, &pipe_st);
@@ -2669,8 +2675,10 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
 static void unlink_all_msgsent_handles(struct Curl_multi *multi)
 {
   struct Curl_llist_node *e;
-  for(e = Curl_llist_head(&multi->msgsent); e; e = Curl_node_next(e)) {
+  struct Curl_llist_node *n;
+  for(e = Curl_llist_head(&multi->msgsent); e; e = n) {
     struct Curl_easy *data = Curl_node_elem(e);
+    n = Curl_node_next(e);
     if(data) {
       DEBUGASSERT(data->mstate == MSTATE_MSGSENT);
       Curl_node_remove(&data->multi_queue);
@@ -2718,8 +2726,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       if(data->psl == &multi->psl)
         data->psl = NULL;
 #endif
+      if(data->state.internal)
+        Curl_close(&data);
     }
-
     Curl_cpool_destroy(&multi->cpool);
     Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
     if(multi->admin) {

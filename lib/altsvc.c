@@ -233,14 +233,10 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
     struct dynbuf buf;
     Curl_dyn_init(&buf, MAX_ALTSVC_LINE);
     while(Curl_get_line(&buf, fp)) {
-      char *lineptr = Curl_dyn_ptr(&buf);
-      while(ISBLANK(*lineptr))
-        lineptr++;
-      if(*lineptr == '#')
-        /* skip commented lines */
-        continue;
-
-      altsvc_add(asi, lineptr);
+      const char *lineptr = Curl_dyn_ptr(&buf);
+      Curl_str_passblanks(&lineptr);
+      if(Curl_str_single(&lineptr, '#'))
+        altsvc_add(asi, lineptr);
     }
     Curl_dyn_free(&buf); /* free the line buffer */
     fclose(fp);
@@ -265,11 +261,11 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
 #ifdef USE_IPV6
   else {
     char ipv6_unused[16];
-    if(1 == Curl_inet_pton(AF_INET6, as->dst.host, ipv6_unused)) {
+    if(1 == curlx_inet_pton(AF_INET6, as->dst.host, ipv6_unused)) {
       dst6_pre = "[";
       dst6_post = "]";
     }
-    if(1 == Curl_inet_pton(AF_INET6, as->src.host, ipv6_unused)) {
+    if(1 == curlx_inet_pton(AF_INET6, as->src.host, ipv6_unused)) {
       src6_pre = "[";
       src6_post = "]";
     }

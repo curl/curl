@@ -60,7 +60,8 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib1534 lib1535 lib1536 lib1537 lib1538 lib1539 \
  lib1540 lib1541 lib1542 lib1543         lib1545 \
  lib1550 lib1551 lib1552 lib1553 lib1554 lib1555 lib1556 lib1557 \
- lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 lib1569 \
+ lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 lib1569 lib1571 \
+                         lib1576 lib1578 \
  lib1591 lib1592 lib1593 lib1594 lib1596 lib1597 lib1598 \
  \
  lib1662 \
@@ -73,6 +74,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib1960 lib1964 \
  lib1970 lib1971 lib1972 lib1973 lib1974 lib1975 lib1977 \
  lib2301 lib2302 lib2304 lib2305 lib2306         lib2308 lib2309 lib2310 \
+ lib2311 \
  lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
@@ -523,6 +525,14 @@ lib1568_SOURCES = lib1568.c $(SUPPORTFILES)
 
 lib1569_SOURCES = lib1569.c $(SUPPORTFILES)
 
+lib1571_SOURCES = lib1571.c $(SUPPORTFILES)
+lib1571_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1571
+
+lib1576_SOURCES = lib1576.c $(SUPPORTFILES)
+
+lib1578_SOURCES = lib1576.c $(SUPPORTFILES)
+lib1578_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1578
+
 lib1591_SOURCES = lib1591.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1591_LDADD = $(TESTUTIL_LIBS)
 
@@ -693,6 +703,9 @@ lib2309_LDADD = $(TESTUTIL_LIBS)
 
 lib2310_SOURCES = lib2310.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(MULTIBYTE)
 lib2310_LDADD = $(TESTUTIL_LIBS)
+
+lib2311_SOURCES = lib2311.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(MULTIBYTE)
+lib2311_LDADD = $(TESTUTIL_LIBS)
 
 lib2402_SOURCES = lib2402.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2402_LDADD = $(TESTUTIL_LIBS)

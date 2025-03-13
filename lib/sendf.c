@@ -360,7 +360,7 @@ static CURLcode cw_raw_write(struct Curl_easy *data,
                              const char *buf, size_t nbytes)
 {
   if(type & CLIENTWRITE_BODY && data->set.verbose && !data->req.ignorebody) {
-    Curl_debug(data, CURLINFO_DATA_IN, (char *)buf, nbytes);
+    Curl_debug(data, CURLINFO_DATA_IN, buf, nbytes);
   }
   return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 }
@@ -1030,13 +1030,6 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
       if(result)
         return result;
       start = i + 1;
-      if(!data->set.crlf && (data->state.infilesize != -1)) {
-        /* we are here only because FTP is in ASCII mode...
-           bump infilesize for the LF we just added */
-        data->state.infilesize++;
-        /* comment: this might work for FTP, but in HTTP we could not change
-         * the content length after having started the request... */
-      }
     }
 
     if(start < i) { /* leftover */
@@ -1313,6 +1306,15 @@ static bool cr_buf_needs_rewind(struct Curl_easy *data,
   return ctx->index > 0;
 }
 
+static CURLcode cr_buf_rewind(struct Curl_easy *data,
+                              struct Curl_creader *reader)
+{
+  struct cr_buf_ctx *ctx = reader->ctx;
+  (void)data;
+  ctx->index = 0;
+  return CURLE_OK;
+}
+
 static curl_off_t cr_buf_total_length(struct Curl_easy *data,
                                       struct Curl_creader *reader)
 {
@@ -1352,7 +1354,7 @@ static const struct Curl_crtype cr_buf = {
   cr_buf_needs_rewind,
   cr_buf_total_length,
   cr_buf_resume_from,
-  Curl_creader_def_rewind,
+  cr_buf_rewind,
   Curl_creader_def_unpause,
   Curl_creader_def_is_paused,
   Curl_creader_def_done,

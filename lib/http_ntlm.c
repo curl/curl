@@ -41,6 +41,7 @@
 #include "curl_base64.h"
 #include "vauth/vauth.h"
 #include "url.h"
+#include "strparse.h"
 
 /* SSL backend-specific #if branches in this file must be kept in the order
    documented in curl_ntlm_core. */
@@ -70,9 +71,7 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
   if(checkprefix("NTLM", header)) {
     header += strlen("NTLM");
 
-    while(ISSPACE(*header))
-      header++;
-
+    Curl_str_passblanks(&header);
     if(*header) {
       unsigned char *hdr;
       size_t hdrlen;

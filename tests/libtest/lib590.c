@@ -61,6 +61,10 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_PROXYAUTH,
               (long) (CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM));
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
+
+  /* set the name + password twice to test that the API is fine with it */
+  test_setopt(curl, CURLOPT_PROXYUSERNAME, "me");
+  test_setopt(curl, CURLOPT_PROXYPASSWORD, "password");
   test_setopt(curl, CURLOPT_PROXYUSERPWD, "me:password");
 
   res = curl_easy_perform(curl);

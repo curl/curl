@@ -416,6 +416,9 @@ sub showdiff {
 
     if(!$out[0]) {
         @out = `diff -c $file2 $file1 2>$dev_null`;
+        if(!$out[0]) {
+            logmsg "Failed to show diff. The diff tool may be missing.\n";
+        }
     }
 
     return @out;
@@ -828,6 +831,7 @@ sub checksystemfeatures {
     $feature{"large-time"} = 1;
     $feature{"large-size"} = 1;
     $feature{"sha512-256"} = 1;
+    $feature{"--libcurl"} = 1;
     $feature{"local-http"} = servers::localhttp();
     $feature{"codeset-utf8"} = lc(langinfo(CODESET())) eq "utf-8";
 
@@ -852,6 +856,14 @@ sub checksystemfeatures {
     chomp $hosttype;
     my $hostos=$^O;
 
+    my $havediff;
+    if(system("diff $TESTDIR/DISABLED $TESTDIR/DISABLED 2>$dev_null") == 0) {
+      $havediff = 'available';
+    }
+    else {
+      $havediff = 'missing';
+    }
+
     # display summary information about curl and the test host
     logmsg ("********* System characteristics ******** \n",
             "* $curl\n",
@@ -863,6 +875,7 @@ sub checksystemfeatures {
             "* System: $hosttype\n",
             "* OS: $hostos\n",
             "* Perl: $^V ($^X)\n",
+            "* diff: $havediff\n",
             "* Args: $args\n");
 
     if($jobs) {

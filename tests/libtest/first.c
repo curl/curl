@@ -41,7 +41,7 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {
   if(nfds < 0) {
-    SET_SOCKERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
 #ifdef USE_WINSOCK

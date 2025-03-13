@@ -411,6 +411,7 @@ man_MANS =                                      \
   CURLOPT_UPKEEP_INTERVAL_MS.3                  \
   CURLOPT_UPLOAD.3                              \
   CURLOPT_UPLOAD_BUFFERSIZE.3                   \
+  CURLOPT_UPLOAD_FLAGS.3                        \
   CURLOPT_URL.3                                 \
   CURLOPT_USE_SSL.3                             \
   CURLOPT_USERAGENT.3                           \
