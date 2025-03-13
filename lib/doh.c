@@ -1018,19 +1018,15 @@ static CURLcode doh_decode_rdata_name(unsigned char **buf, size_t *remaining,
                                       char **dnsname)
 {
   unsigned char *cp = NULL;
-  int rem = 0;
+  size_t rem = 0;
   unsigned char clen = 0; /* chunk len */
   struct dynbuf thename;
 
   DEBUGASSERT(buf && remaining && dnsname);
-  if(!buf || !remaining || !dnsname)
+  if(!buf || !remaining || !dnsname || !*remaining)
     return CURLE_OUT_OF_MEMORY;
-  rem = (int)*remaining;
-  if(rem <= 0) {
-    Curl_dyn_free(&thename);
-    return CURLE_OUT_OF_MEMORY;
-  }
   Curl_dyn_init(&thename, CURL_MAXLEN_host_name);
+  rem = *remaining;
   cp = *buf;
   clen = *cp++;
   if(clen == 0) {
