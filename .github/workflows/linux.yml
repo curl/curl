@@ -307,14 +307,6 @@ jobs:
             configure: --enable-debug --with-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
             container: 'alpine:3.20'
 
-          - name: Alpine MUSL MIN3 https-rr c-ares
-            configure: --enable-debug --with-ssl --without-zstd --without-brotli --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
-            container: 'alpine:3.20'
-
-          - name: Alpine MUSL MIN3 https-rr c-ares !debug
-            configure: --enable-debug --with-ssl --without-zstd --without-brotli --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
-            container: 'alpine:3.20'
-
           - name: Alpine MUSL MIN4 https-rr c-ares
             configure: --enable-debug --with-ssl --without-zlib --without-zstd --without-brotli --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
             container: 'alpine:3.20'
@@ -356,11 +348,10 @@ jobs:
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')
         run: |
-          apk add --no-cache build-base autoconf automake libtool perl openssl-dev \
-            libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev \
-            heimdal-dev libpsl-dev c-ares-dev \
+          apk add --no-cache build-base autoconf automake libtool perl libressl-dev \
+            c-ares-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
-            perl-time-hires openssh stunnel sudo git cmake
+            perl-time-hires openssh stunnel sudo git cmake ninja
 
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')
