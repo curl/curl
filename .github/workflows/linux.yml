@@ -185,8 +185,9 @@ jobs:
               --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
               --disable-imap --disable-pop3 --disable-smtp
-              --disable-rtmp --disable-rtsp
-              --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
+              --without-librtmp --disable-rtsp
+              --without-libssh2 --without-libssh --without-wolfssh
+              --disable-tftp --disable-ftp --disable-file --disable-smb
 
           - name: openssl torture !FTP
             install_packages: zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
