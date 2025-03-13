@@ -72,11 +72,11 @@ jobs:
 
           - name: Alpine MUSL https-rr
             configure: --enable-debug --with-ssl --without-libpsl --enable-ares --enable-httpsrr --enable-threaded-resolver
-            container: 'alpine:3.20'
+            container: 'alpine:3.22'
 
           - name: Alpine MUSL https-rr c-ares
             configure: --enable-debug --with-ssl --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
-            container: 'alpine:3.20'
+            container: 'alpine:3.21'
 
           - name: Alpine MUSL https-rr c-ares !debug
             configure: --enable-debug --with-ssl --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
@@ -84,7 +84,7 @@ jobs:
 
           - name: Alpine MUSL CMAKE1 https-rr c-ares !debug
             generate: -DCURL_USE_OPENSSL=ON -DUSE_HTTPSRR=ON -DENABLE_THREADED_RESOLVER=OFF -DENABLE_ARES=ON -DCURL_USE_LIBPSL=OFF -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON
-            container: 'alpine:3.20'
+            container: 'alpine:3.22'
 
     steps:
       - name: 'install prereqs'
