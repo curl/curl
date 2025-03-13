@@ -520,17 +520,21 @@ static CURLcode libcurl_generate_mime(CURL *curl,
   /* May need several mime variables, so invent name. */
   *mimeno = ++easysrc_mime_count;
   ret = easysrc_addf(&easysrc_decl, "curl_mime *mime%d;", *mimeno);
-  ret = easysrc_addf(&easysrc_data, "mime%d = NULL;", *mimeno);
+  if(!ret)
+    ret = easysrc_addf(&easysrc_data, "mime%d = NULL;", *mimeno);
   if(!ret)
     ret = easysrc_addf(&easysrc_code, "mime%d = curl_mime_init(hnd);",
                        *mimeno);
-  ret = easysrc_addf(&easysrc_clean, "curl_mime_free(mime%d);", *mimeno);
-  ret = easysrc_addf(&easysrc_clean, "mime%d = NULL;", *mimeno);
+  if(!ret)
+    ret = easysrc_addf(&easysrc_clean, "curl_mime_free(mime%d);", *mimeno);
+  if(!ret)
+    ret = easysrc_addf(&easysrc_clean, "mime%d = NULL;", *mimeno);
 
-  if(toolmime->subparts) {
+  if(toolmime->subparts && !ret) {
     ret = easysrc_addf(&easysrc_decl, "curl_mimepart *part%d;", *mimeno);
-    ret = libcurl_generate_mime_part(curl, config,
-                                     toolmime->subparts, *mimeno);
+    if(!ret)
+      ret = libcurl_generate_mime_part(curl, config,
+                                       toolmime->subparts, *mimeno);
   }
 
   return ret;
