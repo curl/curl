@@ -126,7 +126,9 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
                                            host, header, neg_ctx);
 
 #if defined(USE_SSL) && defined(HAVE_GSSAPI)
-  Curl_dyn_free(&neg_ctx->channel_binding_data);
+  if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+    Curl_dyn_free(&neg_ctx->channel_binding_data);
+  }
 #endif
 
   if(result)

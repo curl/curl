@@ -154,6 +154,7 @@ void Curl_pp_init(struct pingpong *pp)
   pp->nread_resp = 0;
   pp->response = Curl_now(); /* start response time-out now! */
   pp->pending_resp = TRUE;
+  pp->init = TRUE;
   Curl_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
   Curl_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
 }
@@ -450,8 +451,10 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
 
 CURLcode Curl_pp_disconnect(struct pingpong *pp)
 {
-  Curl_dyn_free(&pp->sendbuf);
-  Curl_dyn_free(&pp->recvbuf);
+  if(pp->init) {
+    Curl_dyn_free(&pp->sendbuf);
+    Curl_dyn_free(&pp->recvbuf);
+  }
   return CURLE_OK;
 }
 

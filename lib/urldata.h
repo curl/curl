@@ -249,6 +249,7 @@ struct krb5buffer {
   struct dynbuf buf;
   size_t index;
   BIT(eof_flag);
+  BIT(init);
 };
 
 enum protection_level {

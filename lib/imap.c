@@ -1502,6 +1502,7 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done)
   Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
   Curl_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
+  imapc->dyninit = TRUE;
   Curl_pp_init(pp);
 
   /* Parse the URL options */
@@ -1705,7 +1706,8 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&imapc->pp);
-  Curl_dyn_free(&imapc->dyn);
+  if(imapc->dyninit)
+    Curl_dyn_free(&imapc->dyn);
 
   /* Cleanup the SASL module */
   Curl_sasl_cleanup(conn, imapc->sasl.authused);
