@@ -645,18 +645,12 @@ nomem:
   return ret;
 }
 
-/* generic setopt wrapper for all other options.
- * Some type information is encoded in the tag value. */
+/* setopt wrapper for setting object and function pointer options */
 CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
                      struct OperationConfig *config,
                      const char *name, CURLoption tag, ...)
 {
   va_list arg;
-  const char *value = NULL;
-  bool remark = FALSE;
-  bool skip = FALSE;
-  bool escape = FALSE;
-  char *escaped = NULL;
   CURLcode ret = CURLE_OK;
   void *pval;
 
@@ -668,55 +662,37 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
   /* we never set _BLOB options in the curl tool */
   DEBUGASSERT(tag < CURLOPTTYPE_BLOB);
 
-  /* Value is some sort of object pointer */
+  /* argument is an object or function pointer */
   pval = va_arg(arg, void *);
-
-  /* function pointers are never printable */
-  if(tag >= CURLOPTTYPE_FUNCTIONPOINT) {
-    if(pval) {
-      value = "function pointer";
-      remark = TRUE;
-    }
-    else
-      skip = TRUE;
-  }
-
-  else if(pval && str) {
-    value = (char *)pval;
-    escape = TRUE;
-  }
-  else if(pval) {
-    value = "object pointer";
-    remark = TRUE;
-  }
-  else
-    skip = TRUE;
 
   ret = curl_easy_setopt(curl, tag, pval);
 
   va_end(arg);
 
-  if(global->libcurl && !skip && !ret) {
-    /* we only use this for real if --libcurl was used */
+  if(global->libcurl && pval && !ret) {
+    /* we only use this if --libcurl was used */
 
-    if(remark)
-      REM3("%s was set to a%s %s", name, (*value == 'o' ? "n" : ""), value);
+    if(!str) {
+      /* function pointers are never printable */
+      const char *remark = (tag >= CURLOPTTYPE_FUNCTIONPOINT) ?
+        "function" : "object";
+      REM3("%s was set to a%s %s pointer", name,
+           (*remark == 'o' ? "n" : ""), remark);
+    }
     else {
-      if(escape) {
-        curl_off_t len = ZERO_TERMINATED;
-        if(tag == CURLOPT_POSTFIELDS)
-          len = curlx_dyn_len(&config->postdata);
-        escaped = c_escape(value, len);
-        NULL_CHECK(escaped);
+      curl_off_t len = ZERO_TERMINATED;
+      char *escaped;
+      if(tag == CURLOPT_POSTFIELDS)
+        len = curlx_dyn_len(&config->postdata);
+      escaped = c_escape(pval, len);
+      if(escaped) {
         CODE2("curl_easy_setopt(hnd, %s, \"%s\");", name, escaped);
+        free(escaped);
       }
-      else
-        CODE2("curl_easy_setopt(hnd, %s, %s);", name, value);
     }
   }
 
 nomem:
-  curlx_safefree(escaped);
   return ret;
 }
 
