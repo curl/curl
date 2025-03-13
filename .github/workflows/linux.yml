@@ -115,10 +115,10 @@ jobs:
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')
         #   libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev \
+        #   zlib-dev brotli-dev zstd-dev libidn2-dev libpsl-dev \
         run: |
-          apk add --no-cache build-base autoconf automake libtool perl libressl-dev \
+          apk add --no-cache build-base autoconf automake libtool perl openssl-dev \
             c-ares-dev \
-            zlib-dev brotli-dev zstd-dev libidn2-dev libpsl-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
             perl-time-hires openssh stunnel sudo git cmake ninja
 
