@@ -146,7 +146,6 @@ LIB_CFILES =         \
   cw-out.c           \
   cw-pause.c         \
   dict.c             \
-  dllmain.c          \
   doh.c              \
   dynbuf.c           \
   dynhds.c           \
