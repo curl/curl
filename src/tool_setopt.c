@@ -399,15 +399,15 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   const char *filename = part->filename;
 
   /* Parts are linked in reverse order. */
-  if(part->prev) {
+  if(part->prev)
     ret = libcurl_generate_mime_part(curl, config, part->prev, mimeno);
-    if(ret)
-      return ret;
-  }
 
   /* Create the part. */
-  ret = easysrc_addf(&easysrc_code, "part%d = curl_mime_addpart(mime%d);",
-                     mimeno, mimeno);
+  if(!ret)
+    ret = easysrc_addf(&easysrc_code, "part%d = curl_mime_addpart(mime%d);",
+                       mimeno, mimeno);
+  if(ret)
+    return ret;
 
   switch(part->kind) {
   case TOOLMIME_PARTS:
