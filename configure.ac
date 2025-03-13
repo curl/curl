@@ -601,7 +601,7 @@ case "$OPT_SERVER_DEBUG" in
     want_server_debug="no"
     ;;
   *)
-    dnl --enable-server-debug option used
+    dnl --enable-server-debug option used or not specified
     want_server_debug="no"
     ;;
 esac
