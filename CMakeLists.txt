@@ -813,7 +813,7 @@ if(CURL_USE_OPENSSL)
   if(HAVE_BORINGSSL OR HAVE_AWSLC)
     if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang")
       # Try to detect a C++ library configured manually, and skip adding our default in that case.
-      if(NOT " ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}" MATCHES "( -l[a-z]*c\\+\\+|msvcpmt|libcprt)")
+      if(NOT " ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}" MATCHES "( -lc\\+\\+| -lstd\\+\\+|msvcpmt|libcprt)")
         list(APPEND CURL_LIBS "stdc++")
         list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
       endif()
