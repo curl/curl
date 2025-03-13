@@ -288,7 +288,7 @@ jobs:
             container: 'andy5995/slackware-build-essential:15.0'
 
           - name: Alpine MUSL https-rr
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-ares --enable-httpsrr --enable-threaded-resolver
+            configure: --enable-debug --with-ssl --without-libpsl --enable-ares --enable-httpsrr --enable-threaded-resolver
             container: 'alpine:3.20'
 
           - name: Alpine MUSL https-rr c-ares
@@ -331,6 +331,7 @@ jobs:
 
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')
+        #   libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev \
         run: |
           apk add --no-cache build-base autoconf automake libtool perl libressl-dev \
             c-ares-dev \
