@@ -299,12 +299,12 @@ jobs:
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
             container: 'alpine:3.20'
 
-          - name: Alpine MUSL https-rr c-ares
-            configure: --enable-debug --without-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
+          - name: Alpine MUSL MIN https-rr c-ares
+            configure: --enable-debug --without-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --with-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
             container: 'alpine:3.20'
 
-          - name: Alpine MUSL https-rr c-ares !debug
-            configure: --enable-debug --without-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
+          - name: Alpine MUSL MIN https-rr c-ares !debug
+            configure: --enable-debug --without-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --with-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
             container: 'alpine:3.20'
 
     steps:
