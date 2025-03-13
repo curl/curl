@@ -41,7 +41,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   )
   target_link_libraries(${_target_name} ${CURL_LIBS})
   if(ENABLE_SERVER_DEBUG)
-    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEFINITIONS}")
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
   endif()
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convenience and to ease portability of these servers,
