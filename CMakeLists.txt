@@ -811,17 +811,12 @@ if(CURL_USE_OPENSSL)
   cmake_pop_check_state()
 
   if(HAVE_BORINGSSL OR HAVE_AWSLC)
-    message(STATUS "CMAKE_EXE_LINKER_FLAGS|${CMAKE_EXE_LINKER_FLAGS}|")
-    message(STATUS "CMAKE_SHARED_LINKER_FLAGS|${CMAKE_SHARED_LINKER_FLAGS}|")
-    if(" ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}" MATCHES "( -l[a-z]*c\\+\\+|msvcpmt|libcprt)")
-      message(STATUS "|MATCH|")
-    else()
-      message(STATUS "|NOMATCH|")
-    endif()
-    if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang" AND
-       NOT " ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}" MATCHES "( -l[a-z]*c\\+\\+|msvcpmt|libcprt)")
-      list(APPEND CURL_LIBS "stdc++")
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
+    if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+      # Make an attempt to detect a C++ library configured manually, and skip adding our default in that case.
+      if(NOT " ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}" MATCHES "( -l[a-z]*c\\+\\+|msvcpmt|libcprt)")
+        list(APPEND CURL_LIBS "stdc++")
+        list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
+      endif()
     endif()
   endif()
 
