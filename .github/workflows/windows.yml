@@ -745,7 +745,6 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            openssh: 'OpenSSH-Windows-Pre'
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
