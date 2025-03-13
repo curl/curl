@@ -300,11 +300,27 @@ jobs:
             container: 'alpine:3.20'
 
           - name: Alpine MUSL MIN https-rr c-ares
-            configure: --enable-debug --without-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --with-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
+            configure: --enable-debug --with-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
             container: 'alpine:3.20'
 
           - name: Alpine MUSL MIN https-rr c-ares !debug
-            configure: --enable-debug --without-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --with-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
+            configure: --enable-debug --with-ssl --without-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
+            container: 'alpine:3.20'
+
+          - name: Alpine MUSL MIN2 https-rr c-ares
+            configure: --enable-debug --without-ssl --with-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
+            container: 'alpine:3.20'
+
+          - name: Alpine MUSL MIN2 https-rr c-ares !debug
+            configure: --enable-debug --without-ssl --with-libssh2 --without-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
+            container: 'alpine:3.20'
+
+          - name: Alpine MUSL MIN3 https-rr c-ares
+            configure: --enable-debug --without-ssl --without-libssh2 --with-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror
+            container: 'alpine:3.20'
+
+          - name: Alpine MUSL MIN3 https-rr c-ares !debug
+            configure: --enable-debug --without-ssl --without-libssh2 --with-libidn2 --without-gssapi --disable-ldap --without-libpsl --enable-ares --enable-httpsrr --disable-threaded-resolver --disable-werror --disable-debug
             container: 'alpine:3.20'
 
     steps:
