@@ -25,6 +25,8 @@
  ***************************************************************************/
 #include "server_setup.h"
 
+#include "strdup.h"
+
 #define GPE_NO_BUFFER_SPACE -2
 #define GPE_OUT_OF_MEMORY   -1
 #define GPE_OK               0

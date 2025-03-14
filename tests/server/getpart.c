@@ -50,6 +50,14 @@
 #define show(x) Curl_nop_stmt
 #endif
 
+#if defined(UNDER_CE)
+#define system_strdup _strdup
+#elif !defined(HAVE_STRDUP)
+#define system_strdup Curl_strdup
+#else
+#define system_strdup strdup
+#endif
+
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(push)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
@@ -58,10 +66,10 @@
 curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
 curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)strdup;
+curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 #if defined(_WIN32) && defined(UNICODE)
-curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
+curl_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
