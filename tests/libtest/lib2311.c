@@ -56,7 +56,6 @@ static void websocket_frame(CURL *curl, FILE *save, int expected_flags)
       if(result == CURLE_AGAIN)
         /* crude busy-loop */
         continue;
-      fclose(save);
       printf("curl_ws_recv returned %d\n", result);
       return;
     }
