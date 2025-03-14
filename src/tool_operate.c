@@ -2894,16 +2894,24 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
         result = curl_easy_perform_ev(per->curl);
       else{
 #endif
-        result = curl_easy_perform(per->curl);
         curl_off_t wait = 0;
-        /* Check if server returns retry after message */
-        if(result == CURLE_OK) {
-          curl_easy_getinfo(per->curl,
-                            CURLINFO_RETRY_AFTER,
-                            &wait);
-          if(wait)
-            printf("Wait for %" CURL_FORMAT_CURL_OFF_T " seconds\n", wait);
-        }
+        /* Perform easy transaction */
+        result = curl_easy_perform(per->curl);
+        do {
+          /* Check if server returns retry after message */
+          if(result == CURLE_OK) {
+            curl_easy_getinfo(per->curl,
+                              CURLINFO_RETRY_AFTER,
+                              &wait);
+            if(wait) {
+              printf("Waiting for %" CURL_FORMAT_CURL_OFF_T " seconds\n",
+                wait);
+              sleep((unsigned int)wait);
+            }
+            else
+              printf("No retry-after\n");
+          }
+        } while(wait);
       #ifdef DEBUGBUILD
       }
       #endif
