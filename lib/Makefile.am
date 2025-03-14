@@ -86,7 +86,7 @@ if USE_UNITY
 # Keep these separate to avoid duplicate definitions when linking libtests
 # in static mode.
 curl_EXCLUDE = curl_threads.c timediff.c warnless.c
-if DEBUGBUILD
+if CURLDEBUG
 # We must compile these sources separately to avoid memdebug.h redefinitions
 # applying to them.
 curl_EXCLUDE += memdebug.c curl_multibyte.c

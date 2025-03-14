@@ -71,7 +71,7 @@ CLEANFILES =
 
 if USE_UNITY
 curl_EXCLUDE =
-if DEBUGBUILD
+if CURLDEBUG
 # We must compile this source separately to avoid memdebug.h redefinitions
 # applying to them.
 curl_EXCLUDE += ../lib/curl_multibyte.c
