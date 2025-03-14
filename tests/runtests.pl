@@ -1143,24 +1143,39 @@ sub singletest_shouldrun {
         if(!$info_keywords[0]) {
             $why = "missing the <keywords> section!";
         }
+        # Only evaluate keywords if the section is present.
+        else {
+            # Prefix features with "feat:" and add to keywords list.
+            push @info_keywords, map { "feat:" . lc($_) } getpart("client", "features");
 
-        my $match;
-        for my $k (@info_keywords) {
-            chomp $k;
-            if ($disabled_keywords{lc($k)}) {
-                $why = "disabled by keyword";
+            my $match;
+            for my $k (@info_keywords) {
+                chomp $k;
+                if ($disabled_keywords{lc($k)}) {
+                    if ($k =~ /^feat:/) {
+                        $why = "disabled by feature";
+                    }
+                    else {
+                        $why = "disabled by keyword";
+                    }
+                }
+                elsif ($enabled_keywords{lc($k)}) {
+                    $match = 1;
+                }
+                if ($ignored_keywords{lc($k)}) {
+                    logmsg "Warning: test$testnum result is ignored due to $k\n";
+                    $errorreturncode = 2;
+                }
             }
-            elsif ($enabled_keywords{lc($k)}) {
-                $match = 1;
-            }
-            if ($ignored_keywords{lc($k)}) {
-                logmsg "Warning: test$testnum result is ignored due to $k\n";
-                $errorreturncode = 2;
-            }
-        }
 
-        if(!$why && !$match && %enabled_keywords) {
-            $why = "disabled by missing keyword";
+            if(!$why && !$match && %enabled_keywords) {
+                if (grep { /^feat:/ } keys %enabled_keywords) {
+                    $why = "disabled by missing feature";
+                }
+                else {
+                    $why = "disabled by missing keyword";
+                }
+            }
         }
     }
 
