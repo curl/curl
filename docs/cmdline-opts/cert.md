@@ -58,3 +58,15 @@ usually a SHA-1 hex string which you can see in certificate details. Following
 store locations are supported: *CurrentUser*, *LocalMachine*,
 *CurrentService*, *Services*, *CurrentUserGroupPolicy*,
 *LocalMachineGroupPolicy* and *LocalMachineEnterprise*.
+
+# Using OpenSSL Engine with TPM 2.0
+
+To use an OpenSSL engine with a TPM 2.0,
+use this command 
+`curl --key /path/to/key.tss --cert /path/to/cert.crt https://my-server.com/download/url`.
+
+
+The cert.crt is the client certificate (with the public key of course) 
+and the key.tss is the related private key but protected by the TPM. 
+TSS file means the key is not directly stored in the TPM but on normal disk/flash,
+however encrypted with an internal TPM key.
