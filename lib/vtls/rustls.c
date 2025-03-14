@@ -708,7 +708,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     if(conn_config->CRLfile) {
       struct dynbuf crl_contents;
-      Curl_dyn_init(&crl_contents, SIZE_MAX);
+      Curl_dyn_init(&crl_contents, DYN_CRLFILE_SIZE);
       if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
         failf(data, "rustls: failed to read revocation list file");
         Curl_dyn_free(&crl_contents);

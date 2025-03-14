@@ -1086,7 +1086,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--srcdir", argv[arg])) {
       arg++;
       if(argc > arg) {
-        path = argv[arg];
+        srcpath = argv[arg];
         arg++;
       }
     }

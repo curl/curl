@@ -290,13 +290,14 @@ if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
 option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
+option(ENABLE_SERVER_DEBUG "Apply curl debug options to test servers" OFF)
 
+set(CURL_DEBUG_MACROS "")
 if(ENABLE_DEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DEBUGBUILD")
+  list(APPEND CURL_DEBUG_MACROS "DEBUGBUILD")
 endif()
-
 if(ENABLE_CURLDEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURLDEBUG")
+  list(APPEND CURL_DEBUG_MACROS "CURLDEBUG")
 endif()
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)

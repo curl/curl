@@ -43,6 +43,7 @@ void Curl_dyn_init(struct dynbuf *s, size_t toobig)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(toobig);
+  DEBUGASSERT(toobig <= MAX_DYNBUF_SIZE); /* catch crazy mistakes */
   s->bufr = NULL;
   s->leng = 0;
   s->allc = 0;

@@ -49,7 +49,10 @@ in the section on *CURLWS_OFFSET* below.
 
 *flags* must contain at least one flag indicating the type of the message.
 To send a fragmented message consisting of multiple frames, additionally set
-the *CURLWS_CONT* bit in all frames except the final one.
+the *CURLWS_CONT* bit in all frames except the final one. The appropriate
+message type bit should be set in every frame of a fragmented message without
+exemption. Omitting the message type for continuation frames of a fragmented
+message is only supported for backwards compatibility and highly discouraged.
 
 For more details on the supported flags see below and in curl_ws_meta(3).
 
