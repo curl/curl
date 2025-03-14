@@ -22,7 +22,13 @@
 #
 ###########################################################################
 
-noinst_PROGRAMS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd
+SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd
+
+MEMDEBUG = \
+  ../../lib/curl_multibyte.c \
+  ../../lib/curl_multibyte.h \
+  ../../lib/memdebug.c \
+  ../../lib/memdebug.h
 
 CURLX_SRCS = \
   ../../lib/mprintf.c \
@@ -36,7 +42,6 @@ CURLX_SRCS = \
   ../../lib/strcase.c \
   ../../lib/strdup.c \
   ../../lib/curl_get_line.c \
-  ../../lib/curl_multibyte.c \
   ../../lib/version_win32.c
 
 CURLX_HDRS = \
@@ -51,7 +56,6 @@ CURLX_HDRS = \
   ../../lib/strcase.h \
   ../../lib/strdup.h \
   ../../lib/curl_get_line.h \
-  ../../lib/curl_multibyte.h \
   ../../lib/version_win32.h
 
 UTIL = \
@@ -62,50 +66,52 @@ UTIL = \
   server_setup.h \
   ../../lib/base64.c \
   ../../lib/curl_base64.h \
-  ../../lib/memdebug.c \
-  ../../lib/memdebug.h \
   ../../lib/strerror.c \
   ../../lib/strerror.h
+
+FIRSTFILES = \
+  first.c \
+  first.h
 
 INET_PTON = \
   ../../lib/inet_pton.c
 
-resolve_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
+resolve_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   resolve.c
 resolve_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 resolve_CFLAGS = $(AM_CFLAGS)
 
-rtspd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
+rtspd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   server_sockaddr.h \
   rtspd.c
 rtspd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 rtspd_CFLAGS = $(AM_CFLAGS)
 
-sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
+sockfilt_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
   server_sockaddr.h \
   sockfilt.c
 sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
-socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
+socksd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
   server_sockaddr.h \
   socksd.c
 socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 socksd_CFLAGS = $(AM_CFLAGS)
 
-mqttd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
+mqttd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   server_sockaddr.h \
   mqttd.c
 mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 mqttd_CFLAGS = $(AM_CFLAGS)
 
-sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
+sws_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
   server_sockaddr.h \
   sws.c
 sws_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sws_CFLAGS = $(AM_CFLAGS)
 
-tftpd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
+tftpd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   server_sockaddr.h \
   tftpd.c \
   tftp.h
