@@ -3910,9 +3910,9 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
               if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
                   (p[2] - '0');
-                p += 3;
-                if(ISBLANK(*p))
-                  fine_statusline = TRUE;
+                /* RFC 9112 requires a single space following the status code,
+                   but the browsers don't so let's not insist */
+                fine_statusline = TRUE;
               }
             }
           }
