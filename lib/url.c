@@ -420,10 +420,9 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   /* Set the default CA cert bundle/path detected/specified at build time.
    *
-   * If Schannel or Secure Transport is the selected SSL backend then these
-   * locations are ignored. We allow setting CA location for Schannel and
-   * Secure Transport when explicitly specified by the user via
-   *  CURLOPT_CAINFO / --cacert.
+   * If Schannel is the selected SSL backend then these locations are ignored.
+   * We allow setting CA location for Schannel when explicitly specified by
+   * the user via CURLOPT_CAINFO / --cacert.
    */
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL &&
      Curl_ssl_backend() != CURLSSLBACKEND_SECURETRANSPORT) {

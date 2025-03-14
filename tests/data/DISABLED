@@ -59,14 +59,6 @@
 %if wolfssl
 313
 %endif
-# The CRL test doesn't work with BearSSL
-%if bearssl
-313
-%endif
-# Secure Transport does not support CRL file
-%if sectransp
-313
-%endif
 %if WinIDN
 165
 %endif
