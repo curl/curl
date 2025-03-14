@@ -2895,6 +2895,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
       else{
 #endif
         curl_off_t wait = 0;
+        int retry_count = 0;
         /* Perform easy transaction */
         result = curl_easy_perform(per->curl);
         do {
@@ -2903,13 +2904,16 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
             curl_easy_getinfo(per->curl,
                               CURLINFO_RETRY_AFTER,
                               &wait);
-            if(wait) {
-              printf("Waiting for %" CURL_FORMAT_CURL_OFF_T " seconds\n",
+            if(wait > 10 && retry_count > 5) {
+              printf("429 | Waiting for %" CURL_FORMAT_CURL_OFF_T " seconds\n",
                 wait);
               sleep((unsigned int)wait);
+              retry_count++;
             }
-            else
-              printf("No retry-after\n");
+            else if(wait) {
+              printf("429 | Wait for: %" CURL_FORMAT_CURL_OFF_T " seconds\n",
+                wait);
+            }
           }
         } while(wait);
       #ifdef DEBUGBUILD
