@@ -31,9 +31,24 @@
 use strict;
 use warnings;
 
+if(!@ARGV) {
+    die "Usage: $0 [<inputs>] [--exclude <exclude-c-sources>]\n";
+}
+
+# Specific sources to exclude or add as an extra source file
 my @src;
+my %exclude;
+my $in_exclude = 0;
 foreach my $src (@ARGV) {
-    push @src, $src;
+    if($in_exclude) {
+        $exclude{$src} = 1;
+    }
+    elsif($src eq "--exclude") {
+        $in_exclude = 1;
+    }
+    else {
+        push @src, $src;
+    }
 }
 
 print <<HEADER
@@ -48,8 +63,10 @@ my $tlist = "";
 
 foreach my $src (@src) {
     if($src =~ /\.c$/) {
-        # Misc .c source to include
-        print "#include \"$src\"\n\n";
+        if(!exists $exclude{$src}) {
+            # Misc .c source to include
+            print "#include \"$src\"\n\n";
+        }
     }
     elsif($src !~ /\.h$/) {
         # Make 'main' unique across server sources
