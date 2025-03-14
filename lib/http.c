@@ -4238,11 +4238,9 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
   struct httpreq *req;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(method);
-  if(m_len + 1 > sizeof(req->method))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  DEBUGASSERT(method && m_len);
 
-  req = calloc(1, sizeof(*req));
+  req = calloc(1, sizeof(*req) + m_len);
   if(!req)
     goto out;
   memcpy(req->method, method, m_len);
@@ -4394,11 +4392,9 @@ CURLcode Curl_http_req_make2(struct httpreq **preq,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   CURLUcode uc;
 
-  DEBUGASSERT(method);
-  if(m_len + 1 > sizeof(req->method))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  DEBUGASSERT(method && m_len);
 
-  req = calloc(1, sizeof(*req));
+  req = calloc(1, sizeof(*req) + m_len);
   if(!req)
     goto out;
   memcpy(req->method, method, m_len);
