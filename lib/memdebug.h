@@ -34,15 +34,19 @@
 #include "functypes.h"
 
 #if defined(__GNUC__) && __GNUC__ >= 3
-#  define ALLOC_FUNC __attribute__((__malloc__))
-#  define ALLOC_SIZE(s) __attribute__((__alloc_size__(s)))
-#  define ALLOC_SIZE2(n, s) __attribute__((__alloc_size__(n, s)))
+#  if __GNUC__ >= 11
+#    define ALLOC_FUNC(ff)   __attribute__((__malloc__(ff)))
+#  else
+#    define ALLOC_FUNC(ff)   __attribute__((__malloc__))
+#  endif
+#  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
+#  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
 #elif defined(_MSC_VER)
-#  define ALLOC_FUNC __declspec(restrict)
+#  define ALLOC_FUNC(ff)     __declspec(restrict)
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
 #else
-#  define ALLOC_FUNC
+#  define ALLOC_FUNC(ff)
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
 #endif
