@@ -60,22 +60,20 @@
 extern FILE *curl_dbg_logfile;
 
 /* memory functions */
-CURL_EXTERN ALLOC_FUNC ALLOC_SIZE(1) void *curl_dbg_malloc(size_t size,
-                                                           int line,
-                                                           const char *source);
-CURL_EXTERN ALLOC_FUNC ALLOC_SIZE2(1, 2) void *curl_dbg_calloc(size_t elements,
-                                   size_t size, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC(curl_dbg_free) ALLOC_SIZE(1)
+  void *curl_dbg_malloc(size_t size, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC(curl_dbg_free) ALLOC_SIZE2(1, 2)
+  void *curl_dbg_calloc(size_t n, size_t size, int line, const char *source);
 CURL_EXTERN ALLOC_SIZE(2) void *curl_dbg_realloc(void *ptr,
                                                  size_t size,
                                                  int line,
                                                  const char *source);
 CURL_EXTERN void curl_dbg_free(void *ptr, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC char *curl_dbg_strdup(const char *str, int line,
-                                             const char *src);
+CURL_EXTERN ALLOC_FUNC(curl_dbg_free)
+  char *curl_dbg_strdup(const char *str, int line, const char *src);
 #if defined(_WIN32) && defined(UNICODE)
-CURL_EXTERN ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
-                                                int line,
-                                                const char *source);
+CURL_EXTERN ALLOC_FUNC(curl_dbg_free)
+  wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source);
 #endif
 
 CURL_EXTERN void curl_dbg_memdebug(const char *logname);
@@ -110,10 +108,12 @@ CURL_EXTERN RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd,
                                          const char *source);
 
 /* FILE functions */
-CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
-                                  int line, const char *source);
-CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
-                                             int line, const char *source);
+CURL_EXTERN ALLOC_FUNC(curl_dbg_fclose)
+  FILE *curl_dbg_fopen(const char *file, const char *mode,
+                       int line, const char *source);
+CURL_EXTERN ALLOC_FUNC(curl_dbg_fclose)
+  FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                        int line, const char *source);
 
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 #endif /* HEADER_CURL_MEMDEBUG_H_EXTERNS */
