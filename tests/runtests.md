@@ -219,11 +219,6 @@ Display run time statistics. (Requires the `Perl Time::HiRes` module)
 
 Display full run time statistics. (Requires the `Perl Time::HiRes` module)
 
-## `-rm`
-
-Force removal of files by killing locking processes. (Windows only, requires
-the **Sysinternals** `handle[64].exe` to be on PATH)
-
 ## `--repeat=[num]`
 
 This repeats the given set of test numbers this many times. If no test numbers
