@@ -944,7 +944,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         MOVE_TO_ERROR_STATE(CURLE_COULDNT_CONNECT);
         break;
       }
-      Curl_safefree(data->state.most_recent_ftp_entrypath);
+      free(data->state.most_recent_ftp_entrypath);
       data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
       if(!data->state.most_recent_ftp_entrypath)
         return CURLE_OUT_OF_MEMORY;

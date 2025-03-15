@@ -2008,7 +2008,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
           break;
         }
-        Curl_safefree(data->state.most_recent_ftp_entrypath);
+        free(data->state.most_recent_ftp_entrypath);
         data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
         if(!data->state.most_recent_ftp_entrypath)
           return CURLE_OUT_OF_MEMORY;

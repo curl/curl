@@ -2906,7 +2906,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
             ftpc->entrypath = dir; /* remember this */
             infof(data, "Entry path is '%s'", ftpc->entrypath);
             /* also save it where getinfo can access it: */
-            Curl_safefree(data->state.most_recent_ftp_entrypath);
+            free(data->state.most_recent_ftp_entrypath);
             data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
             if(!data->state.most_recent_ftp_entrypath)
               return CURLE_OUT_OF_MEMORY;
@@ -2918,7 +2918,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
           ftpc->entrypath = dir; /* remember this */
           infof(data, "Entry path is '%s'", ftpc->entrypath);
           /* also save it where getinfo can access it: */
-          Curl_safefree(data->state.most_recent_ftp_entrypath);
+          free(data->state.most_recent_ftp_entrypath);
           data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
           if(!data->state.most_recent_ftp_entrypath)
             return CURLE_OUT_OF_MEMORY;
