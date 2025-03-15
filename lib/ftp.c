@@ -2908,6 +2908,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
             /* also save it where getinfo can access it: */
             Curl_safefree(data->state.most_recent_ftp_entrypath);
             data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
+            if(!data->state.most_recent_ftp_entrypath)
+              return CURLE_OUT_OF_MEMORY;
             ftp_state(data, FTP_SYST);
             break;
           }
@@ -2918,6 +2920,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
           /* also save it where getinfo can access it: */
           Curl_safefree(data->state.most_recent_ftp_entrypath);
           data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
+          if(!data->state.most_recent_ftp_entrypath)
+            return CURLE_OUT_OF_MEMORY;
         }
         else {
           /* could not get the path */

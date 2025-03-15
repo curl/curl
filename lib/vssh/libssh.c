@@ -946,6 +946,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       Curl_safefree(data->state.most_recent_ftp_entrypath);
       data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
+      if(!data->state.most_recent_ftp_entrypath)
+        return CURLE_OUT_OF_MEMORY;
 
       /* This is the last step in the SFTP connect phase. Do note that while
          we get the homedir here, we get the "workingpath" in the DO action
