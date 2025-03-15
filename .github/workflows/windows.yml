@@ -932,9 +932,8 @@ jobs:
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
           export TFLAGS='-j8 ${{ matrix.tflags }}'
-          TFLAGS+=' ~2310'  # flaky 'WebSockets unknown reserved bit set in frame header', WebSockets
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-            TFLAGS+=' ~SCP ~SFTP'  # Fail with all tested openssh servers: curl: (67) Authentication failure
+            TFLAGS+=' !SCP !SFTP'  # Fail with all tested openssh servers: curl: (67) Authentication failure
           fi
           TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
           if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
