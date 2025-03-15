@@ -322,22 +322,11 @@ if($stunnel_version >= 400) {
     if($verbose) {
         print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
-        print "CApath = $capath\n";
-        print "cert = $certfile\n";
-        print "debug = $loglevel\n";
-        print "socket = $socketopt\n";
-        if($fips_support) {
-            print "fips = no\n";
-        }
-        if(!$tstunnel_windows) {
-            print "pid = $pidfile\n";
-            print "output = $logfile\n";
-            print "foreground = yes\n";
-        }
+        print "stunnel config at $conffile:\n";
+        open (my $writtenconf, '<', "$conffile") or die "$ssltext could not open the config file after writing\n";
+        print <$writtenconf>;
         print "\n";
-        print "[curltest]\n";
-        print "accept = $host_ip:$accept_port\n";
-        print "connect = $host_ip:$target_port\n";
+        close ($writtenconf);
     }
 }
 

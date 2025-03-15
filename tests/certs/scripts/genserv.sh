@@ -69,7 +69,7 @@ if [ -z "$CAPREFIX" ]; then
   NOTOK=1
 else
   if [ ! -f "$CAPREFIX-ca.cacert" ]; then
-    echo "No CA certificate file $CAPREFIX-ca.caert"
+    echo "No CA certificate file $CAPREFIX-ca.cacert"
     NOTOK=1
   fi
   if [ ! -f "$CAPREFIX-ca.key" ]; then
