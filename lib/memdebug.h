@@ -64,10 +64,8 @@ CURL_EXTERN ALLOC_FUNC(curl_dbg_free) ALLOC_SIZE(1)
   void *curl_dbg_malloc(size_t size, int line, const char *source);
 CURL_EXTERN ALLOC_FUNC(curl_dbg_free) ALLOC_SIZE2(1, 2)
   void *curl_dbg_calloc(size_t n, size_t size, int line, const char *source);
-CURL_EXTERN ALLOC_SIZE(2) void *curl_dbg_realloc(void *ptr,
-                                                 size_t size,
-                                                 int line,
-                                                 const char *source);
+CURL_EXTERN ALLOC_SIZE(2)
+  void *curl_dbg_realloc(void *ptr, size_t size, int line, const char *source);
 CURL_EXTERN void curl_dbg_free(void *ptr, int line, const char *source);
 CURL_EXTERN ALLOC_FUNC(curl_dbg_free)
   char *curl_dbg_strdup(const char *str, int line, const char *src);
