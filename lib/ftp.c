@@ -2906,7 +2906,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
             ftpc->entrypath = dir; /* remember this */
             infof(data, "Entry path is '%s'", ftpc->entrypath);
             /* also save it where getinfo can access it: */
-            data->state.most_recent_ftp_entrypath = ftpc->entrypath;
+            Curl_safefree(data->state.most_recent_ftp_entrypath);
+            data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
             ftp_state(data, FTP_SYST);
             break;
           }
@@ -2915,7 +2916,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
           ftpc->entrypath = dir; /* remember this */
           infof(data, "Entry path is '%s'", ftpc->entrypath);
           /* also save it where getinfo can access it: */
-          data->state.most_recent_ftp_entrypath = ftpc->entrypath;
+          Curl_safefree(data->state.most_recent_ftp_entrypath);
+          data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
         }
         else {
           /* could not get the path */
@@ -4095,16 +4097,10 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   /* The FTP session may or may not have been allocated/setup at this point! */
   (void)ftp_quit(data, conn); /* ignore errors on the QUIT */
 
-  if(ftpc->entrypath) {
-    if(data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
-      data->state.most_recent_ftp_entrypath = NULL;
-    }
-    Curl_safefree(ftpc->entrypath);
-  }
-
   freedirs(ftpc);
   Curl_safefree(ftpc->account);
   Curl_safefree(ftpc->alternative_to_user);
+  Curl_safefree(ftpc->entrypath);
   Curl_safefree(ftpc->prevpath);
   Curl_safefree(ftpc->server_os);
   Curl_pp_disconnect(pp);

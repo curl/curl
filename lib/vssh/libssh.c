@@ -944,7 +944,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         MOVE_TO_ERROR_STATE(CURLE_COULDNT_CONNECT);
         break;
       }
-      data->state.most_recent_ftp_entrypath = sshc->homedir;
+      Curl_safefree(data->state.most_recent_ftp_entrypath);
+      data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
 
       /* This is the last step in the SFTP connect phase. Do note that while
          we get the homedir here, we get the "workingpath" in the DO action
@@ -1763,7 +1764,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
-      data->state.most_recent_ftp_entrypath = NULL;
 
       state(data, SSH_SESSION_DISCONNECT);
       break;
@@ -1939,7 +1939,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
-      data->state.most_recent_ftp_entrypath = NULL;
 
       state(data, SSH_SESSION_FREE);
       FALLTHROUGH();
