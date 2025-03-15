@@ -444,6 +444,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
   td->start = Curl_now();
 
   if(!init_thread_sync_data(td, hostname, port, hints)) {
+    free(td);
     goto errno_exit;
   }
 
