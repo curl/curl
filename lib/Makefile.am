@@ -87,9 +87,9 @@ if USE_UNITY
 # in static mode.
 curl_EXCLUDE = curl_threads.c timediff.c warnless.c
 if CURLDEBUG
-# We must compile these sources separately to avoid memdebug.h redefinitions
-# applying to them.
-curl_EXCLUDE += memdebug.c curl_multibyte.c
+# We must compile this source separately to avoid memdebug.h redefinitions
+# applying to it.
+curl_EXCLUDE += memdebug.c
 endif
 # For Cygwin always compile dllmain.c as a separate unit since it
 # includes windows.h, which should not be included in other units.
