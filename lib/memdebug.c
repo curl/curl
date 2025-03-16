@@ -433,33 +433,25 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
   return res;
 }
 
-#define LOGLINE_BUFSIZE  1024
-
 /* this does the writing to the memory tracking log file */
 void curl_dbg_log(const char *format, ...)
 {
-  char *buf;
+  char buf[1024];
   int nchars;
   va_list ap;
 
   if(!curl_dbg_logfile)
     return;
 
-  buf = (Curl_cmalloc)(LOGLINE_BUFSIZE);
-  if(!buf)
-    return;
-
   va_start(ap, format);
-  nchars = mvsnprintf(buf, LOGLINE_BUFSIZE, format, ap);
+  nchars = mvsnprintf(buf, sizeof(buf), format, ap);
   va_end(ap);
 
-  if(nchars > LOGLINE_BUFSIZE - 1)
-    nchars = LOGLINE_BUFSIZE - 1;
+  if(nchars > (int)sizeof(buf) - 1)
+    nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0)
     fwrite(buf, 1, (size_t)nchars, curl_dbg_logfile);
-
-  (Curl_cfree)(buf);
 }
 
 #endif /* CURLDEBUG */
