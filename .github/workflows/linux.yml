@@ -57,7 +57,7 @@ env:
   # handled in renovate.json
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
-  rustls-version: 0.14.1
+  rustls-version: 0.15.0
 
 jobs:
   linux:
@@ -268,12 +268,11 @@ jobs:
           - name: rustls valgrind
             install_packages: valgrind
             install_steps: rust rustls pytest
-            configure: --with-rustls=$HOME/rustls --enable-debug
+            configure: --with-rustls --enable-debug
 
           - name: rustls
             install_steps: rust rustls skipall
-            PKG_CONFIG_PATH: '$HOME/rustls/lib/pkgconfig'  # Not built as of v0.14.0
-            generate: -DCURL_USE_RUSTLS=ON -DRUSTLS_INCLUDE_DIR=$HOME/rustls/include -DRUSTLS_LIBRARY=$HOME/rustls/lib/librustls.a -DENABLE_DEBUG=ON
+            generate: -DCURL_USE_RUSTLS=ON -DENABLE_DEBUG=ON
 
           - name: IntelC openssl
             install_packages: zlib1g-dev libssl-dev
@@ -551,20 +550,19 @@ jobs:
           path: ~/rustls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.rustls-version }}
 
-      - name: 'install rust'
-        if: contains(matrix.build.install_steps, 'rust') && steps.cache-rustls.outputs.cache-hit != 'true'
-        run: |
-          cd $HOME
-          curl -sSf --compressed https://sh.rustup.rs/ | sh -s -- -y
-          source $HOME/.cargo/env
-          rustup toolchain install stable --profile minimal
-
-      - name: 'build rustls'
+      - name: 'fetch rustls deb'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
-          cd rustls-ffi
-          make DESTDIR=$HOME/rustls install
+          mkdir -p ~/rustls
+          curl -L https://github.com/rustls/rustls-ffi/releases/download/v${{ env.rustls-version }}/librustls_${{ env.rustls-version }}_amd64.deb.zip -o ~/rustls/librustls.zip
+          unzip ~/rustls/librustls.zip -d ~/rustls
+          rm ~/rustls/librustls.zip
+
+      - name: 'build rustls'
+        # Note: we don't check cache-hit here. If the cache is hit, we still need to dpkg install the deb.
+        if: contains(matrix.build.install_steps, 'rustls')
+        run: |
+          sudo dpkg -i ~/rustls/librustls_${{ env.rustls-version }}_amd64.deb
 
       - name: 'install Intel compilers'
         if: contains(matrix.build.install_steps, 'intel')
