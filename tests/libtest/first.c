@@ -28,10 +28,7 @@
 #  include <locale.h> /* for setlocale() */
 #endif
 
-#ifdef CURLDEBUG
-#  define MEMDEBUG_NODEFINES
-#  include "memdebug.h"
-#endif
+#include "memdebug.h"
 
 #include "timediff.h"
 
