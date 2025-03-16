@@ -328,7 +328,6 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
 
@@ -498,7 +497,6 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
@@ -909,7 +907,6 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
           if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           else  # OpenSSH-Windows
