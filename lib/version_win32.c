@@ -31,9 +31,7 @@
 #include "warnless.h"
 
 /* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
-#endif
 #include "memdebug.h"
 
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)

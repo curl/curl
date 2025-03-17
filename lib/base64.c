@@ -38,9 +38,7 @@
 #include "curl_base64.h"
 
 /* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
-#endif
 #include "memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */

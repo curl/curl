@@ -25,9 +25,7 @@
 #include "curl_setup.h"
 #include "dynbuf.h"
 #include "curl_printf.h"
-#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
-#endif
 #include "memdebug.h"
 
 #define MIN_FIRST_ALLOC 32
