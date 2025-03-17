@@ -9,3 +9,4 @@ libtest_bundle.c
 libauthretry
 libntlmconnect
 libprereq
+libtests
