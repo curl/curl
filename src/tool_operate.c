@@ -644,10 +644,12 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         }
       }
       warnf(config->global, "Problem %s. "
-            "Will retry in %ld seconds. "
-            "%ld %s left.",
-            m[retry], sleeptime/1000L, per->retry_remaining,
-            (per->retry_remaining > 1 ? "retries" : "retry"));
+            "Will retry in %ld second%s. "
+            "%ld retr%s left.",
+            m[retry], sleeptime/1000L,
+            (sleeptime/1000L == 1 ? "" : "s"),
+            per->retry_remaining,
+            (per->retry_remaining > 1 ? "ies" : "y"));
 
       per->retry_remaining--;
       if(!config->retry_delay) {
