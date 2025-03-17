@@ -437,10 +437,10 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
               ${{ matrix.build.generate }}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               ${{ matrix.build.configure }}
           fi
