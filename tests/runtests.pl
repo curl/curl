@@ -88,6 +88,7 @@ use serverhelp qw(
     server_exe
     );
 use pathhelp qw(
+    exe_ext
     sys_native_current_path
     );
 use processhelp qw(
@@ -2265,11 +2266,6 @@ while(@ARGV) {
         $ACURL=shell_quote($ARGV[1]);
         shift @ARGV;
     }
-    elsif ($ARGV[0] eq "-bundle") {
-        # use test bundles
-        $bundle=1;
-        $ENV{'CURL_TEST_BUNDLES'} = 1;
-    }
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
         $debugprotocol=1;
@@ -2451,7 +2447,6 @@ Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
   -ac path use this curl only to talk to APIs (currently only CI test APIs)
   -am      automake style output PASS/FAIL: [number] [name]
-  -bundle  use test bundles
   -c path  use this curl executable
   -d       display server debug info
   -e, --test-event  event-based execution
@@ -2529,6 +2524,15 @@ EOHELP
         exit;
     }
     shift @ARGV;
+}
+
+# Detect a test bundle environment
+if(-e $LIBDIR . "libtests" . exe_ext('TOOL') &&
+   -e $UNITDIR . "units" . exe_ext('TOOL') &&
+   -e $SRVDIR . "servers" . exe_ext('SRV')) {
+    # use test bundles
+    $bundle=1;
+    $ENV{'CURL_TEST_BUNDLES'} = 1;
 }
 
 delete $ENV{'DEBUGINFOD_URLS'} if($ENV{'DEBUGINFOD_URLS'} && $no_debuginfod);
