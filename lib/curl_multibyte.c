@@ -23,11 +23,11 @@
  ***************************************************************************/
 
 /*
- * This file is 'mem-include-scan' clean, which means memdebug.h and
- * curl_memory.h are purposely not included in this file. See test 1132.
- *
- * The functions in this file are curlx functions which are not tracked by the
- * curl memory tracker memdebug.
+ * This file is 'mem-include-scan' clean, which means its memory allocations
+ * are not tracked by the curl memory tracker memdebug, so they must not use
+ * `CURLDEBUG` macro replacements in memdebug.h for free, malloc, etc. To avoid
+ * these macro replacements, wrap the names in parentheses to call the original
+ * versions: `ptr = (malloc)(123)`, `(free)(ptr)`, etc.
  */
 
 #include "curl_setup.h"
