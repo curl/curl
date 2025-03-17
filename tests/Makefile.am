@@ -123,9 +123,6 @@ if CROSSCOMPILING
 TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
 PYTEST = $(TEST)
 else # if not cross-compiling:
-if USE_TEST_BUNDLES
-TEST_COMMON += -bundle
-endif
 
 if BUILD_DOCS
 else
