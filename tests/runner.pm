@@ -916,24 +916,20 @@ sub singletest_run {
         # Default the tool to a unit test with the same name as the test spec
         if($keywords{"unittest"} && !$tool) {
             $tool_name="unit$testnum";
-            $tool = $tool_name;
+            $tool = $tool_name . exe_ext('TOOL');
         }
 
         if($tool =~ /^lib/) {
             if($bundle) {
-                $CMDLINE=$LIBDIR . "libtests";
+                $tool = "libtests" . exe_ext('TOOL');
             }
-            else {
-                $CMDLINE=$LIBDIR . $tool;
-            }
+            $CMDLINE=$LIBDIR . $tool;
         }
         elsif($tool =~ /^unit/) {
             if($bundle) {
-                $CMDLINE=$UNITDIR . "units";
+                $tool = "units" . exe_ext('TOOL')
             }
-            else {
-                $CMDLINE=$UNITDIR . $tool;
-            }
+            $CMDLINE=$UNITDIR . $tool;
         }
 
         if(! -f $CMDLINE) {
