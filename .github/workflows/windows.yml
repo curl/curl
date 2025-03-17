@@ -87,7 +87,7 @@ jobs:
           PATH=/usr/bin
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
           else
@@ -257,7 +257,7 @@ jobs:
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-                -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+                -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DCURL_TEST_BUNDLES=ON \
                 -DCURL_WERROR=ON \
                 ${{ matrix.config }}
             done
@@ -455,7 +455,7 @@ jobs:
             cmake -B "bld${_chkprefill}" -G "${{ contains(matrix.url, '/winlibs_mingw/') && 'Ninja' || 'MSYS Makefiles' }}" ${options} \
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
               ${{ matrix.config }}
@@ -659,7 +659,7 @@ jobs:
               -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
               -DMINGW32CE_LIBRARY_DIR="$HOME/opt/mingw32ce/arm-mingw32ce/lib" \
               -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON \
