@@ -88,7 +88,8 @@ unidirectional heartbeat.
 
 libcurl automatically responds to server PING messages with a PONG that echoes
 the payload of the PING message. libcurl does neither send any PING messages
-nor any unsolicited PONG messages automatically.
+nor any unsolicited PONG messages automatically. The automatic reply to PING
+messages can be disabled through CURLOPT_WS_OPTIONS(3).
 
 # MODELS
 

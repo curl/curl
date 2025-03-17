@@ -106,7 +106,8 @@ This is a ping message. It may contain up to 125 bytes of payload text.
 libcurl does not verify that the payload is valid UTF-8.
 
 Upon receiving a ping message, libcurl automatically responds with a pong
-message unless the **CURLWS_RAW_MODE** bit of CURLOPT_WS_OPTIONS(3) is set.
+message unless the **CURLWS_NOAUTOPONG** or **CURLWS_RAW_MODE** bit of
+CURLOPT_WS_OPTIONS(3) is set.
 
 ## CURLWS_PONG
 
