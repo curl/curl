@@ -87,11 +87,11 @@ jobs:
           PATH=/usr/bin
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-libssh2 \
               --disable-dependency-tracking \
@@ -257,7 +257,7 @@ jobs:
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-                -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
+                -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
                 -DCURL_WERROR=ON \
                 ${{ matrix.config }}
             done
@@ -267,7 +267,7 @@ jobs:
             fi
           else
             export CFLAGS CPPFLAGS
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-libssh2 \
               --disable-dependency-tracking \
@@ -455,7 +455,7 @@ jobs:
             cmake -B "bld${_chkprefill}" -G "${{ contains(matrix.url, '/winlibs_mingw/') && 'Ninja' || 'MSYS Makefiles' }}" ${options} \
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
               ${{ matrix.config }}
@@ -559,12 +559,12 @@ jobs:
               -DCMAKE_SYSTEM_NAME=Windows \
               -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
               -DCMAKE_C_COMPILER="${TRIPLET}-gcc" \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
               -DCURL_USE_LIBPSL=OFF
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --host="${TRIPLET}" \
               --with-schannel --with-winidn \
               --without-libpsl \
@@ -659,14 +659,14 @@ jobs:
               -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
               -DMINGW32CE_LIBRARY_DIR="$HOME/opt/mingw32ce/arm-mingw32ce/lib" \
               -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON \
               -DCURL_USE_LIBPSL=OFF
           else
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --host=arm-mingw32ce \
               --with-schannel \
               --without-libpsl \
@@ -868,7 +868,7 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
               ${{ matrix.config }}
