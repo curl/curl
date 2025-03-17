@@ -276,7 +276,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     target = fixed;
   else
     target = filename;
-  result = (_open)(target, oflag, pmode);
+  result = _open(target, oflag, pmode);
 #endif
 
   (free)(fixed);
