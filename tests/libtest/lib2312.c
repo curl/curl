@@ -94,7 +94,7 @@ CURLcode test(char *URL)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return res;
 }
 
 #else /* no websockets */
