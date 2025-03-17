@@ -93,12 +93,12 @@ CURLcode test(char *url)
   if(main_auth_scheme == CURLAUTH_NONE ||
       fallback_auth_scheme == CURLAUTH_NONE) {
     fprintf(stderr, "auth schemes not found on commandline\n");
-    return TEST_ERR_MAJOR_BAD;
+    return TEST_ERR_MAJOR_BAD;  /* NOLINT */
   }
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
+    return TEST_ERR_MAJOR_BAD;  /* NOLINT */
   }
 
   /* Send wrong password, then right password */
@@ -107,7 +107,7 @@ CURLcode test(char *url)
   if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    return TEST_ERR_MAJOR_BAD;  /* NOLINT */
   }
 
   res = send_wrong_password(curl, url, 100, main_auth_scheme);
@@ -125,7 +125,7 @@ CURLcode test(char *url)
   if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    return TEST_ERR_MAJOR_BAD;  /* NOLINT */
   }
 
   res = send_wrong_password(curl, url, 300, main_auth_scheme);
