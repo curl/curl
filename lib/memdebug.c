@@ -128,7 +128,7 @@ static bool countcheck(const char *func, int line, const char *source)
   return FALSE; /* allow this */
 }
 
-ALLOC_FUNC(curl_dbg_free)
+ALLOC_FUNC
 void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
 {
   struct memdebug *mem;
@@ -155,7 +155,7 @@ void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
   return mem ? mem->mem : NULL;
 }
 
-ALLOC_FUNC(curl_dbg_free)
+ALLOC_FUNC
 void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
                       int line, const char *source)
 {
@@ -184,7 +184,7 @@ void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   return mem ? mem->mem : NULL;
 }
 
-ALLOC_FUNC(curl_dbg_free)
+ALLOC_FUNC
 char *curl_dbg_strdup(const char *str, int line, const char *source)
 {
   char *mem;
@@ -209,7 +209,7 @@ char *curl_dbg_strdup(const char *str, int line, const char *source)
 }
 
 #if defined(_WIN32) && defined(UNICODE)
-ALLOC_FUNC(curl_dbg_free)
+ALLOC_FUNC
 wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source)
 {
   wchar_t *mem;
@@ -394,7 +394,7 @@ int curl_dbg_sclose(curl_socket_t sockfd, int line, const char *source)
   return res;
 }
 
-ALLOC_FUNC(curl_dbg_fclose)
+ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
@@ -407,7 +407,7 @@ FILE *curl_dbg_fopen(const char *file, const char *mode,
   return res;
 }
 
-ALLOC_FUNC(curl_dbg_fclose)
+ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
