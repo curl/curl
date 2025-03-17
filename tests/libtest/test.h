@@ -96,18 +96,18 @@ extern int unitfail;
 ** For portability reasons TEST_ERR_* values should be less than 127.
 */
 
-#define TEST_ERR_MAJOR_BAD     (CURLcode) 126
-#define TEST_ERR_RUNS_FOREVER  (CURLcode) 125
-#define TEST_ERR_EASY_INIT     (CURLcode) 124
-#define TEST_ERR_MULTI         (CURLcode) 123
-#define TEST_ERR_NUM_HANDLES   (CURLcode) 122
-#define TEST_ERR_SELECT        (CURLcode) 121
-#define TEST_ERR_SUCCESS       (CURLcode) 120
-#define TEST_ERR_FAILURE       (CURLcode) 119
-#define TEST_ERR_USAGE         (CURLcode) 118
-#define TEST_ERR_FOPEN         (CURLcode) 117
-#define TEST_ERR_FSTAT         (CURLcode) 116
-#define TEST_ERR_BAD_TIMEOUT   (CURLcode) 115
+#define TEST_ERR_MAJOR_BAD     CURLE_RESERVED126
+#define TEST_ERR_RUNS_FOREVER  CURLE_RESERVED125
+#define TEST_ERR_EASY_INIT     CURLE_RESERVED124
+#define TEST_ERR_MULTI         CURLE_RESERVED123
+#define TEST_ERR_NUM_HANDLES   CURLE_RESERVED122
+#define TEST_ERR_SELECT        CURLE_RESERVED121
+#define TEST_ERR_SUCCESS       CURLE_RESERVED120
+#define TEST_ERR_FAILURE       CURLE_RESERVED119
+#define TEST_ERR_USAGE         CURLE_RESERVED118
+#define TEST_ERR_FOPEN         CURLE_RESERVED117
+#define TEST_ERR_FSTAT         CURLE_RESERVED116
+#define TEST_ERR_BAD_TIMEOUT   CURLE_RESERVED115
 
 /*
 ** Macros for test source code readability/maintainability.
@@ -507,7 +507,7 @@ extern int unitfail;
   {                                             \
     (void)URL;                                  \
     fprintf(stderr, "Missing support\n");       \
-    return (CURLcode)1;                         \
+    return CURLE_UNSUPPORTED_PROTOCOL;          \
   }
 #endif
 
@@ -525,6 +525,6 @@ extern CURLcode test(char *URL); /* the actual test function provided by each
   {                                             \
     (void)URL;                                  \
     fprintf(stderr, "Missing support\n");       \
-    return (CURLcode)1;                         \
+    return CURLE_UNSUPPORTED_PROTOCOL;          \
   }
 #endif

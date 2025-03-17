@@ -96,7 +96,7 @@ CURLcode test(char *URL)
     fprintf(stderr, "pong = %ld\n", e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
-      res = (CURLcode) 100;
+      res = CURLE_TOO_LARGE;
       break;
     }
   }

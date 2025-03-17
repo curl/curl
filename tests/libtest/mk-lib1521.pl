@@ -594,6 +594,7 @@ MOO
 
 print $fh <<FOOTER
   )
+  /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
   curl_easy_setopt(curl, (CURLoption)1, 0);
   res = CURLE_OK;
 test_cleanup:

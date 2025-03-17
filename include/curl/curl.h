@@ -645,7 +645,20 @@ typedef enum {
   CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
   CURLE_TOO_LARGE,               /* 100 - a value/data met its maximum */
   CURLE_ECH_REQUIRED,            /* 101 - ECH tried but failed */
-  CURL_LAST /* never use! */
+  CURL_LAST, /* never use! */
+
+  CURLE_RESERVED115 = 115,       /* 115-126 - used in tests */
+  CURLE_RESERVED116 = 116,
+  CURLE_RESERVED117 = 117,
+  CURLE_RESERVED118 = 118,
+  CURLE_RESERVED119 = 119,
+  CURLE_RESERVED120 = 120,
+  CURLE_RESERVED121 = 121,
+  CURLE_RESERVED122 = 122,
+  CURLE_RESERVED123 = 123,
+  CURLE_RESERVED124 = 124,
+  CURLE_RESERVED125 = 125,
+  CURLE_RESERVED126 = 126
 } CURLcode;
 
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all

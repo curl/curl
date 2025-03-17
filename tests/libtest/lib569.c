@@ -110,6 +110,8 @@ CURLcode test(char *URL)
 
     test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_TEARDOWN);
     res = curl_easy_perform(curl);
+    if(res)
+      goto test_cleanup;
 
     /* Clear for the next go-round */
     test_setopt(curl, CURLOPT_RTSP_SESSION_ID, NULL);

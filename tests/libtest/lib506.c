@@ -261,8 +261,6 @@ CURLcode test(char *URL)
   curl_easy_cleanup(curl);
 
 
-  res = CURLE_OK;
-
   /* start treads */
   for(i = 1; i <= THREADS; i++) {
 
@@ -327,6 +325,8 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_COOKIEFILE, JAR);
   printf("CURLOPT_COOKIELIST RELOAD\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
+
+  res = CURLE_OK;
 
   code = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
   if(code != CURLE_OK) {

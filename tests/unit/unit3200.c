@@ -108,11 +108,11 @@ UNITTEST_START
       case 0:
         rc = Curl_get_line(&buf, fp);
         line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE1\n", line),
+        fail_unless(rc && line && !strcmp("LINE1\n", line),
                     "First line failed (1)");
         rc = Curl_get_line(&buf, fp);
         line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE2 NEWLINE\n", line),
+        fail_unless(rc && line && !strcmp("LINE2 NEWLINE\n", line),
                     "Second line failed (1)");
         rc = Curl_get_line(&buf, fp);
         abort_unless(!Curl_dyn_len(&buf), "Missed EOF (1)");
@@ -120,11 +120,11 @@ UNITTEST_START
       case 1:
         rc = Curl_get_line(&buf, fp);
         line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE1\n", line),
+        fail_unless(rc && line && !strcmp("LINE1\n", line),
                     "First line failed (2)");
         rc = Curl_get_line(&buf, fp);
         line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE2 NONEWLINE\n", line),
+        fail_unless(rc && line && !strcmp("LINE2 NONEWLINE\n", line),
                     "Second line failed (2)");
         rc = Curl_get_line(&buf, fp);
         abort_unless(!Curl_dyn_len(&buf), "Missed EOF (2)");
@@ -132,7 +132,7 @@ UNITTEST_START
       case 2:
         rc = Curl_get_line(&buf, fp);
         line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE1\n", line),
+        fail_unless(rc && line && !strcmp("LINE1\n", line),
                     "First line failed (3)");
         rc = Curl_get_line(&buf, fp);
         fail_unless(!Curl_dyn_len(&buf),
@@ -141,7 +141,7 @@ UNITTEST_START
       case 3:
         rc = Curl_get_line(&buf, fp);
         line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE1\n", line),
+        fail_unless(rc && line && !strcmp("LINE1\n", line),
                     "First line failed (4)");
         rc = Curl_get_line(&buf, fp);
         fail_unless(!Curl_dyn_len(&buf),
@@ -150,7 +150,7 @@ UNITTEST_START
       case 4:
         rc = Curl_get_line(&buf, fp);
         line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE1\n", line),
+        fail_unless(rc && line && !strcmp("LINE1\n", line),
                     "First line failed (5)");
         rc = Curl_get_line(&buf, fp);
         fail_unless(!Curl_dyn_len(&buf),
@@ -159,7 +159,7 @@ UNITTEST_START
       case 5:
         rc = Curl_get_line(&buf, fp);
         line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE1\x1aTEST\n", line),
+        fail_unless(rc && line && !strcmp("LINE1\x1aTEST\n", line),
                     "Missed/Misinterpreted ^Z (6)");
         rc = Curl_get_line(&buf, fp);
         abort_unless(!Curl_dyn_len(&buf), "Missed EOF (6)");

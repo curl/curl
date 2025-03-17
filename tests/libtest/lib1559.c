@@ -32,18 +32,21 @@ CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
-  char *longurl = malloc(EXCESSIVE);
+  char *longurl = NULL;
   CURLU *u;
   (void)URL;
 
-  if(!longurl)
-    return (CURLcode)1;
+  global_init(CURL_GLOBAL_ALL);
+  easy_init(curl);
+
+  longurl = malloc(EXCESSIVE);
+  if(!longurl) {
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
 
   memset(longurl, 'a', EXCESSIVE);
   longurl[EXCESSIVE-1] = 0;
-
-  global_init(CURL_GLOBAL_ALL);
-  easy_init(curl);
 
   res = curl_easy_setopt(curl, CURLOPT_URL, longurl);
   printf("CURLOPT_URL %d bytes URL == %d\n",

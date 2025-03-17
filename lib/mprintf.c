@@ -993,7 +993,9 @@ number:
       /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
          output characters */
 #ifdef HAVE_SNPRINTF
-      (snprintf)(work, BUFFSIZE, formatbuf, iptr->val.dnum); /* NOLINT */
+      /* !checksrc! disable LONGLINE */
+      /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
+      (snprintf)(work, BUFFSIZE, formatbuf, iptr->val.dnum);
 #ifdef _WIN32
       /* Old versions of the Windows CRT do not terminate the snprintf output
          buffer if it reaches the max size so we do that here. */
