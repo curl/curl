@@ -4,7 +4,7 @@ curl and libcurl 8.13.0
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3369
+ Contributors:                 3371
 
 This release includes the following changes:
 
@@ -25,9 +25,13 @@ This release includes the following bugfixes:
  o asyn-thread: avoid the separate curl_mutex_t alloc [6]
  o asyn-thread: do not allocate thread_data separately [21]
  o asyn-thread: remove 'status' from struct Curl_async [36]
+ o autotools: fix `dllmain.c` in unity builds [257]
+ o autotools: fix `libtest` bundle to depend on `FIRSTFILES` [240]
+ o autotools: use `CURLDEBUG` to exclude TrackMemory code from unity [253]
  o base64: drop `BUILDING_CURL` macro, always include in tests/server [234]
  o build: add Windows CE / CeGCC support, with CI jobs [87]
  o build: cmake multi-pkg-config detection improvements (brotli, ldap, mbedtls) [192]
+ o build: do not apply curl debug macros to `tests/server` by default [254]
  o build: drop unused `getpart` tool [107]
  o build: enable -Wjump-misses-init for GCC 4.5+ [62]
  o build: enable `-Wcast-qual`, fix or silence compiler warnings [208]
@@ -90,6 +94,7 @@ This release includes the following bugfixes:
  o curl_setup_once: drop `E*` macro redefines unused (with winsock2) [164]
  o curl_setup_once: stop redefining `ENAMETOOLONG` to winsock2 error code [163]
  o curl_trc: fix build with CURL_DISABLE_VERBOSE_STRINGS [109]
+ o curl_ws_recv.md: expand a little on the fragments the API delivers [251]
  o CURLMOPT_SOCKETFUNCTION.md: add advice for socket callback invocation[69]
  o CURLOPT_HTTPHEADER.md: add comments to the example [90]
  o CURLOPT_HTTPHEADER.md: rephrases [108]
@@ -107,6 +112,7 @@ This release includes the following bugfixes:
  o easy: fix warning about possible comma misuse [219]
  o eventfd: allow use on all CPUs [93]
  o examples: prefer `return` over `exit()` (cont.) [110]
+ o ftp/sftp: strdup data info memory [237]
  o ftp: fix comment [135]
  o gnutls: fix connection state check on handshake [80]
  o gnutls: fix use of pkcs11 urls for keys/certs [122]
@@ -124,6 +130,7 @@ This release includes the following bugfixes:
  o http: fix the auth check [88]
  o http: make the RTSP version check stricter [73]
  o http: negotiation and room for alt-svc/https rr to navigate [64]
+ o http: remove a HTTP method size restriction [241]
  o http: version negotiation [45]
  o http_aws_sigv4: cannot be used for proxy [171]
  o http_aws_sigv4: use strparse more for parsing [55]
@@ -206,9 +213,12 @@ This release includes the following bugfixes:
  o test1167: catch #defines with extra whitespace [140]
  o test489: set output dir [186]
  o tests/certs: cleanup [151]
+ o tests/server: drop unused `base64.pl` [258]
  o tests/server: fix to check against winsock2 error codes on Windows [168]
+ o tests/server: give global `path` variable a more descriptive name [255]
  o tests/server: replace `errno` with `SOCKERRNO` in sockfilt, socksd, sws [183]
  o tests/server: replace `strerror` with `sstrerror` in socksd
+ o tests/server: support bundle binary [217]
  o tests/server: sync `wait_ms()` with the libcurl implementation [226]
  o tests/server: use `curlx_str_numblanks()` to avoid `errno` [250]
  o tests/servers.pm: remove unused variable 'portrange' [227]
@@ -251,6 +261,7 @@ This release includes the following bugfixes:
  o wolfssl: warn if CA native import option is ignored [65]
  o wolfssl: when using PQ KEM, use ML-KEM, not Kyber [10]
  o ws: corrected curlws_cont to reflect its documented purpose [120]
+ o ws: fix and extend CURLWS_CONT handling [256]
  o zlib: bump minimum to 1.2.5.2 (was: 1.2.0.4) [179]
 
 This release includes the following known bugs:
@@ -272,19 +283,20 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthony Hu, Carlos Henrique Lima Melara, Catena cyber, Christian Schmitz,
-  Dan Fandrich, Daniel Stenberg, dependabot[bot], Derek Huang, Dexter Gerig,
-  Ethan Wilkes, Harry Sintonen, Jan Macku, Jeremy Drake, John Bampton,
-  Joseph Chen, Justin Steventon, Kai Pastor, kayrus on github, kriztalz,
-  Lars Karlitski, Laurențiu Nicola, lf- on github, Marcel Raad, Mark Phillips,
-  Martxel, Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh, Peng-Yu Chen,
+  Anthony Hu, Calvin Ruocco, Carlos Henrique Lima Melara, Catena cyber,
+  Christian Schmitz, Dan Fandrich, Daniel McCarney, Daniel Stenberg,
+  dependabot[bot], Derek Huang, Dexter Gerig, Ethan Wilkes, Harry Sintonen,
+  Jan Macku, Jeremy Drake, John Bampton, Joseph Chen, Justin Steventon,
+  Kai Pastor, kayrus on github, kriztalz, Lars Karlitski, Laurențiu Nicola,
+  lf- on github, Marcel Raad, Marius Albrecht, Mark Phillips, Martxel,
+  Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh, Peng-Yu Chen,
   Philippe Antoine, qhill on github, Ray Satiro, renovate[bot], Rinku Das,
   rmg-x on github, Ronald Crane, RubisetCie on github, saimen,
   Samuel Dionne-Riel, Samuel Henrique, Scott Talbert, Sergey, Stefan Eissing,
   stevenpackardblp on github, Tatsuhiro Tsujikawa, Tianyi Song, Timo Tijhof,
-  tiymat, Viktor Szakats, Yedaya Katsman, Zenju on github, Zhang Wen,
-  Zhaoming Luo
-  (53 contributors)
+  tiymat, Viktor Szakats, Vulpes Vulpes, Yedaya Katsman, Zenju on github,
+  Zhang Wen, Zhaoming Luo
+  (57 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -501,6 +513,7 @@ References to bug reports and discussions on issues:
  [214] = https://curl.se/bug/?i=16649
  [215] = https://curl.se/bug/?i=16645
  [216] = https://issues.oss-fuzz.com/issues/401869346
+ [217] = https://curl.se/bug/?i=15000
  [218] = https://curl.se/bug/?i=16642
  [219] = https://curl.se/bug/?i=16644
  [220] = https://curl.se/bug/?i=16646
@@ -517,7 +530,10 @@ References to bug reports and discussions on issues:
  [234] = https://curl.se/bug/?i=16691
  [235] = https://curl.se/bug/?i=16690
  [236] = https://curl.se/bug/?i=16689
+ [237] = https://curl.se/bug/?i=16733
  [238] = https://curl.se/bug/?i=16681
+ [240] = https://curl.se/bug/?i=16726
+ [241] = https://curl.se/bug/?i=16729
  [242] = https://curl.se/bug/?i=16678
  [243] = https://curl.se/bug/?i=16685
  [244] = https://issues.oss-fuzz.com/issues/402476456
@@ -525,3 +541,10 @@ References to bug reports and discussions on issues:
  [248] = https://curl.se/bug/?i=16674
  [249] = https://curl.se/bug/?i=16673
  [250] = https://curl.se/bug/?i=16671
+ [251] = https://curl.se/bug/?i=16720
+ [253] = https://curl.se/bug/?i=16723
+ [254] = https://curl.se/bug/?i=16705
+ [255] = https://curl.se/bug/?i=16719
+ [256] = https://curl.se/bug/?i=16687
+ [257] = https://curl.se/bug/?i=16712
+ [258] = https://curl.se/bug/?i=16713
