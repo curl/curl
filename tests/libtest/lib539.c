@@ -52,7 +52,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_SINGLECWD);
 
   res = curl_easy_perform(curl);
-  if(res == CURLE_OK)
+  if(res == CURLE_OK) {
     /*
      * Change the FTP_FILEMETHOD option to use full paths rather than a CWD
      * command. Use an innocuous QUOTE command, after which curl will CWD to
