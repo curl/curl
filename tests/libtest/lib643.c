@@ -242,7 +242,7 @@ static CURLcode cyclic_add(void)
   curl_easy_cleanup(easy);
   if(a1 != CURLE_BAD_FUNCTION_ARGUMENT)
     /* that should have failed */
-    return (CURLcode)1;
+    return TEST_ERR_FAILURE;
 
   return CURLE_OK;
 }
