@@ -135,31 +135,6 @@ e99: Unrecoverable error in select/poll
 e100: A value or data field grew larger than allowed
 e101: ECH attempted but failed
 e102: Unknown error
-e103: Unknown error
-e104: Unknown error
-e105: Unknown error
-e106: Unknown error
-e107: Unknown error
-e108: Unknown error
-e109: Unknown error
-e110: Unknown error
-e111: Unknown error
-e112: Unknown error
-e113: Unknown error
-e114: Unknown error
-e115: Unknown error
-e116: Unknown error
-e117: Unknown error
-e118: Unknown error
-e119: Unknown error
-e120: Unknown error
-e121: Unknown error
-e122: Unknown error
-e123: Unknown error
-e124: Unknown error
-e125: Unknown error
-e126: Unknown error
-e127: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error
 m1: Invalid multi handle
