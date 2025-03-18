@@ -34,7 +34,7 @@ CURLcode test(char *URL)
   CURL *curls = NULL;
   CURLM *multi = NULL;
   int still_running;
-  CURLcode i = (CURLcode)-1;
+  CURLcode i = TEST_ERR_MAJOR_BAD;
   CURLcode res = CURLE_OK;
   CURLMsg *msg;
 
