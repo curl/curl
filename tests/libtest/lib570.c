@@ -108,7 +108,7 @@ CURLcode test(char *URL)
   }
   else {
     fprintf(stderr, "Failed to detect a Session ID mismatch");
-    res = (CURLcode)1;
+    res = TEST_ERR_FAILURE;
   }
 
 test_cleanup:
