@@ -37,7 +37,7 @@ CURLcode test(char *URL)
   (void)URL;
 
   if(!longurl)
-    return TEST_ERR_FAILURE;
+    return TEST_ERR_MAJOR_BAD;
 
   memset(longurl, 'a', EXCESSIVE);
   longurl[EXCESSIVE-1] = 0;
