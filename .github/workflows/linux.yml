@@ -624,7 +624,7 @@ jobs:
           fi
 
       - name: 'single-use function check'
-        if: ${{ contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF') }}
+        if: ${{ matrix.build.make-custom-target != 'tidy' && (contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) }}
         run: |
           git config --global --add safe.directory "*"
           if [ -n '${{ matrix.build.generate }}' ]; then
