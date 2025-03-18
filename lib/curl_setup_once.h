@@ -69,12 +69,6 @@
 #include <stdint.h>
 #endif
 
-#if defined(__TANDEM) && !defined(__NSK_OPTIONAL_TYPES__)
-#ifndef CURL_NO_UINTPTR_T
-#define CURL_NO_UINTPTR_T
-#endif
-#endif
-
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
 #if defined(HAVE_STDINT_H) && !defined(CURL_NO_UINTPTR_T)

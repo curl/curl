@@ -459,6 +459,9 @@
 #include <assert.h>
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
+#  ifndef __NSK_OPTIONAL_TYPES__
+#    define CURL_NO_UINTPTR_T
+#  endif
 #  if ! defined __LP64
 #    include <floss.h> /* FLOSS is only used for 32-bit builds. */
 #  endif
