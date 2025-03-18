@@ -993,7 +993,7 @@ number:
       /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
          output characters */
 #ifdef HAVE_SNPRINTF
-      /* !checksrc! enable LONGLINE */
+      /* !checksrc! disable LONGLINE */
       /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
       (snprintf)(work, BUFFSIZE, formatbuf, iptr->val.dnum);
 #ifdef _WIN32
