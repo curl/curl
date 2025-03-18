@@ -36,7 +36,6 @@ struct pair {
 CURLcode test(char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
   CURLcode result = CURLE_OK;
   curl_version_info_data *curlinfo;
   const char *const *proto;
@@ -77,7 +76,7 @@ CURLcode test(char *URL)
   curlinfo = curl_version_info(CURLVERSION_NOW);
   if(!curlinfo) {
     fputs("curl_version_info failed\n", stderr);
-    res = TEST_ERR_FAILURE;
+    result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
@@ -85,7 +84,7 @@ CURLcode test(char *URL)
   for(proto = curlinfo->protocols; *proto; proto++) {
     if((size_t) n >= sizeof(protolist)) {
       puts("protolist buffer too small\n");
-      res = TEST_ERR_FAILURE;
+      result = TEST_ERR_FAILURE;
       goto test_cleanup;
     }
     n += msnprintf(protolist + n, sizeof(protolist) - n, ",%s", *proto);
