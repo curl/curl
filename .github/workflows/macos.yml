@@ -302,7 +302,7 @@ jobs:
       - name: 'build tests'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target testdeps
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -325,7 +325,7 @@ jobs:
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
             make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           fi
