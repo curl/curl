@@ -88,7 +88,7 @@ UNITTEST_START
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net:443\"; ma=\"180\";\r\n",
                              ALPN_h2, "example.net", 80);
-  fail_if(result, "Curl_altsvc_parse(4) failed!");
+  fail_if(result, "Curl_altsvc_parse(5) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 
   result =
@@ -96,13 +96,13 @@ UNITTEST_START
                       "h2=\":443\", h3=\":443\"; "
                       "persist = \"1\"; ma = 120;\r\n",
                       ALPN_h1, "curl.se", 80);
-  fail_if(result, "Curl_altsvc_parse(5) failed!");
+  fail_if(result, "Curl_altsvc_parse(6) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 12, "wrong number of entries");
 
   /* clear that one again and decrease the counter */
   result = Curl_altsvc_parse(curl, asi, "clear;\r\n",
                              ALPN_h1, "curl.se", 80);
-  fail_if(result, "Curl_altsvc_parse(6) failed!");
+  fail_if(result, "Curl_altsvc_parse(7) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 
   /* only a non-existing alpn */
