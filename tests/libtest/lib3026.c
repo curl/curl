@@ -148,7 +148,7 @@ CURLcode test(char *URL)
       fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
               __FILE__, __LINE__, res);
       tid_count = i;
-      test_failure = (CURLcode)-1;
+      test_failure = TEST_ERR_MAJOR_BAD;
       goto cleanup;
     }
   }
@@ -160,7 +160,7 @@ cleanup:
       fprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
               "with code %d (%s)\n", __FILE__, __LINE__,
               i, (int) results[i], curl_easy_strerror(results[i]));
-      test_failure = (CURLcode)-1;
+      test_failure = TEST_ERR_MAJOR_BAD;
     }
   }
 
