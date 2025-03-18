@@ -55,7 +55,7 @@ CURLcode test(char *URL)
   CURLcode results[NUM_THREADS];
   curl_win_thread_handle_t ths[NUM_THREADS];
   unsigned tid_count = NUM_THREADS, i;
-  int test_failure = 0;
+  CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
   (void) URL;
 
@@ -87,7 +87,7 @@ CURLcode test(char *URL)
       fprintf(stderr, "%s:%d Couldn't create thread, errno %lu\n",
               __FILE__, __LINE__, GetLastError());
       tid_count = i;
-      test_failure = -1;
+      test_failure = TEST_ERR_MAJOR_BAD;
       goto cleanup;
     }
     ths[i] = th;
@@ -101,11 +101,11 @@ cleanup:
       fprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
               "with code %d (%s)\n", __FILE__, __LINE__,
               i, (int) results[i], curl_easy_strerror(results[i]));
-      test_failure = -1;
+      test_failure = TEST_ERR_MAJOR_BAD;
     }
   }
 
-  return (CURLcode)test_failure;
+  return test_failure;
 }
 
 #elif defined(HAVE_PTHREAD_H)
