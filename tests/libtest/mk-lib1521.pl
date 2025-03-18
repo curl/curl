@@ -594,7 +594,7 @@ MOO
 
 print $fh <<FOOTER
   )
-  curl_easy_setopt(curl, (CURLoption)1, 0);
+  curl_easy_setopt(curl, (CURLoption)1, 0);  /* NOLINT */
   res = CURLE_OK;
 test_cleanup:
   curl_easy_cleanup(curl);
