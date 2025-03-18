@@ -77,7 +77,7 @@ CURLcode test(char *URL)
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
   if(res)
-    goto test_cleanup:
+    goto test_cleanup;
 
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &curlResponseCode);
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &curlRedirectCount);
