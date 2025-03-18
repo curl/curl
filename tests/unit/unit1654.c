@@ -109,21 +109,25 @@ UNITTEST_START
   result = Curl_altsvc_parse(curl, asi,
                              "h6=\"example.net:443\"; ma=\"180\";\r\n",
                              ALPN_h2, "5.example.net", 80);
+  fail_if(result, "Curl_altsvc_parse(8) failed!");
 
   /* missing quote in alpn host */
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net:443,; ma=\"180\";\r\n",
                              ALPN_h2, "6.example.net", 80);
+  fail_if(result, "Curl_altsvc_parse(9) failed!");
 
   /* missing port in host name */
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net\"; ma=\"180\";\r\n",
                              ALPN_h2, "7.example.net", 80);
+  fail_if(result, "Curl_altsvc_parse(10) failed!");
 
   /* illegal port in host name */
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net:70000\"; ma=\"180\";\r\n",
                              ALPN_h2, "8.example.net", 80);
+  fail_if(result, "Curl_altsvc_parse(11) failed!");
 
   Curl_altsvc_save(curl, asi, outname);
 
