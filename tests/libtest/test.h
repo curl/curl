@@ -507,7 +507,7 @@ extern int unitfail;
   {                                             \
     (void)URL;                                  \
     fprintf(stderr, "Missing support\n");       \
-    return (CURLcode)1;                         \
+    return CURLE_UNSUPPORTED_PROTOCOL;          \
   }
 #endif
 
@@ -525,6 +525,6 @@ extern CURLcode test(char *URL); /* the actual test function provided by each
   {                                             \
     (void)URL;                                  \
     fprintf(stderr, "Missing support\n");       \
-    return (CURLcode)1;                         \
+    return CURLE_UNSUPPORTED_PROTOCOL;          \
   }
 #endif
