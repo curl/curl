@@ -34,14 +34,14 @@ CURLcode test(char *URL)
   CURLUcode urlret;
   (void)URL;
 
-  curl_easy_strerror((CURLcode)INT_MAX);
-  curl_multi_strerror((CURLMcode)INT_MAX);
-  curl_share_strerror((CURLSHcode)INT_MAX);
-  curl_url_strerror((CURLUcode)INT_MAX);
-  curl_easy_strerror((CURLcode)-INT_MAX);
-  curl_multi_strerror((CURLMcode)-INT_MAX);
-  curl_share_strerror((CURLSHcode)-INT_MAX);
-  curl_url_strerror((CURLUcode)-INT_MAX);
+  curl_easy_strerror((CURLcode)INT_MAX);  /* NOLINT */
+  curl_multi_strerror((CURLMcode)INT_MAX);  /* NOLINT */
+  curl_share_strerror((CURLSHcode)INT_MAX);  /* NOLINT */
+  curl_url_strerror((CURLUcode)INT_MAX);  /* NOLINT */
+  curl_easy_strerror((CURLcode)-INT_MAX);  /* NOLINT */
+  curl_multi_strerror((CURLMcode)-INT_MAX);  /* NOLINT */
+  curl_share_strerror((CURLSHcode)-INT_MAX);  /* NOLINT */
+  curl_url_strerror((CURLUcode)-INT_MAX);  /* NOLINT */
   for(easyret = CURLE_OK; easyret <= CURL_LAST; easyret++) {
     printf("e%d: %s\n", (int)easyret, curl_easy_strerror(easyret));
   }
