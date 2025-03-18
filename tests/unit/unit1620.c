@@ -58,11 +58,14 @@ static void test_parse(
   fail_unless(!!exp_options == !!options, "options expectation failed");
 
   if(!unitfail) {
-    fail_unless(!exp_username || strcmp(userstr, exp_username) == 0,
+    fail_unless(!userstr || !exp_username ||
+                strcmp(userstr, exp_username) == 0,
                 "userstr should be equal to exp_username");
-    fail_unless(!exp_password || strcmp(passwdstr, exp_password) == 0,
+    fail_unless(!passwdstr || !exp_password ||
+                strcmp(passwdstr, exp_password) == 0,
                 "passwdstr should be equal to exp_password");
-    fail_unless(!exp_options || strcmp(options, exp_options) == 0,
+    fail_unless(!options || !exp_options ||
+                strcmp(options, exp_options) == 0,
                 "options should be equal to exp_options");
   }
 
