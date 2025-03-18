@@ -777,8 +777,9 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
       goto storerequest_cleanup;
     if(written > 0)
       writeleft -= written;
+    error = errno;
     /* !checksrc! disable ERRNOVAR 1 */
-  } while((writeleft > 0) && ((error = errno) == EINTR));
+  } while((writeleft > 0) && (error == EINTR));
 
   if(writeleft == 0)
     logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
