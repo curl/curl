@@ -40,7 +40,7 @@ CURLcode test(char *URL)
   cm = curl_multi_init();
   if(!cm) {
     curl_global_cleanup();
-    return TEST_ERR_FAILURE;
+    return TEST_ERR_MULTI_INIT;
   }
   sh = curl_share_init();
   if(!sh)
