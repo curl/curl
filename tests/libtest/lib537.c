@@ -512,7 +512,7 @@ CURLcode test(char *URL)
 {
   (void)URL;
   printf("system lacks necessary system function(s)");
-  return (CURLcode)1; /* skip test */
+  return TEST_ERR_MAJOR_BAD; /* skip test */
 }
 
 #endif /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */
