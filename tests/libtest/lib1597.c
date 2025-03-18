@@ -36,7 +36,7 @@ struct pair {
 CURLcode test(char *URL)
 {
   CURL *curl = NULL;
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
   curl_version_info_data *curlinfo;
   const char *const *proto;
   int n;
@@ -76,7 +76,7 @@ CURLcode test(char *URL)
   curlinfo = curl_version_info(CURLVERSION_NOW);
   if(!curlinfo) {
     fputs("curl_version_info failed\n", stderr);
-    result = TEST_ERR_FAILURE;
+    res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
@@ -84,7 +84,7 @@ CURLcode test(char *URL)
   for(proto = curlinfo->protocols; *proto; proto++) {
     if((size_t) n >= sizeof(protolist)) {
       puts("protolist buffer too small\n");
-      result = TEST_ERR_FAILURE;
+      res = TEST_ERR_FAILURE;
       goto test_cleanup;
     }
     n += msnprintf(protolist + n, sizeof(protolist) - n, ",%s", *proto);
@@ -96,9 +96,9 @@ CURLcode test(char *URL)
 
   /* Run the tests. */
   for(i = 0; prots[i].in; i++) {
-    result = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
-    if(result != *prots[i].exp) {
-      printf("unexpectedly '%s' returned %d\n", prots[i].in, result);
+    res = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
+    if(res != *prots[i].exp) {
+      printf("unexpectedly '%s' returned %d\n", prots[i].in, res);
       break;
     }
   }
@@ -108,5 +108,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return result;
+  return res;
 }
