@@ -45,9 +45,13 @@ static size_t last_ul_total = 0;
 static void progress_final_report(void)
 {
   FILE *moo = fopen(libtest_arg2, "ab");
-  fprintf(moo, "Progress: end UL %zu/%zu\n", last_ul, last_ul_total);
+  fprintf(moo ? moo : stderr, "Progress: end UL %zu/%zu\n",
+                              last_ul, last_ul_total);
+  if(moo)
+    fclose(moo);
+  else
+    fprintf(stderr, "Progress: can't open %s\n", libtest_arg2);
   started = FALSE;
-  fclose(moo);
 }
 
 static int progress_callback(void *clientp, double dltotal, double dlnow,
