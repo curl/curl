@@ -100,8 +100,10 @@ UNITTEST_START
   buffer = (const char *)Curl_bufref_ptr(&bufref);
   fail_unless(buffer, "Allocated pointer is NULL");
   fail_unless(bufref.len == 3, "Wrong data size stored");
-  fail_unless(!buffer[3], "Duplicated data should have been truncated");
-  fail_unless(!strcmp(buffer, "166"), "Bad duplicated data");
+  if(buffer) {
+    fail_unless(!buffer[3], "Duplicated data should have been truncated");
+    fail_unless(!strcmp(buffer, "166"), "Bad duplicated data");
+  }
 
   /**
    * testing Curl_bufref_free
