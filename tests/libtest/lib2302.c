@@ -100,11 +100,11 @@ CURLcode test(char *URL)
   struct ws_data ws_data;
   memset(&ws_data, 0, sizeof(ws_data));
 
+  global_init(CURL_GLOBAL_ALL);
+
   ws_data.buf = (char *)calloc(LIB2302_BUFSIZE, 1);
   if(!ws_data.buf)
-    return res;
-
-  global_init(CURL_GLOBAL_ALL);
+    goto test_cleanup;
 
   curl = curl_easy_init();
   if(curl) {
@@ -122,8 +122,9 @@ CURLcode test(char *URL)
     curl_easy_cleanup(curl);
     flush_data(&ws_data);
   }
-  curl_global_cleanup();
+test_cleanup:
   free(ws_data.buf);
+  curl_global_cleanup();
   return res;
 }
 
