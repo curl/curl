@@ -41,7 +41,7 @@
 struct Ctx {
   const char *URL;
   CURLSH *share;
-  int result;
+  CURLcode result;
   int thread_id;
   struct curl_slist *contents;
 };
@@ -120,7 +120,7 @@ test_thread(void *ptr)
   }
 
 test_cleanup:
-  ctx->result = (int)res;
+  ctx->result = res;
   return 0;
 }
 
@@ -203,7 +203,7 @@ CURLcode test(char *URL)
     ctx[i].share = share;
     ctx[i].URL = URL;
     ctx[i].thread_id = i;
-    ctx[i].result = 0;
+    ctx[i].result = CURLE_OK;
     ctx[i].contents = NULL;
   }
 
@@ -227,5 +227,5 @@ test_cleanup:
   if(share)
     curl_share_cleanup(share);
   curl_global_cleanup();
-  return (CURLcode)res;
+  return res;
 }
