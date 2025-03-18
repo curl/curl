@@ -335,6 +335,20 @@ curl_easy_strerror(CURLcode error)
   case CURLE_OBSOLETE62:
   case CURLE_OBSOLETE75:
   case CURLE_OBSOLETE76:
+
+    /* error codes used by curl tests */
+  case CURLE_RESERVED115:
+  case CURLE_RESERVED116:
+  case CURLE_RESERVED117:
+  case CURLE_RESERVED118:
+  case CURLE_RESERVED119:
+  case CURLE_RESERVED120:
+  case CURLE_RESERVED121:
+  case CURLE_RESERVED122:
+  case CURLE_RESERVED123:
+  case CURLE_RESERVED124:
+  case CURLE_RESERVED125:
+  case CURLE_RESERVED126:
   case CURL_LAST:
     break;
   }
