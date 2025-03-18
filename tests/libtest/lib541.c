@@ -51,7 +51,7 @@ CURLcode test(char *URL)
     fprintf(stderr, "fopen failed with error (%d) %s\n",
             errno, strerror(errno));
     fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
-    return (CURLcode)-2; /* if this happens things are major weird */
+    return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
 
   /* get the file size of the local file */
