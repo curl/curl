@@ -64,7 +64,7 @@ CURLcode test(char *URL)
     fprintf(stderr, "%s:%d On Windows but the "
             "CURL_VERSION_THREADSAFE feature flag is not set\n",
             __FILE__, __LINE__);
-    return (CURLcode)-1;
+    return TEST_ERR_MAJOR_BAD;
   }
 
   /* On Windows libcurl global init/cleanup calls LoadLibrary/FreeLibrary for
@@ -137,7 +137,7 @@ CURLcode test(char *URL)
     fprintf(stderr, "%s:%d Have pthread but the "
             "CURL_VERSION_THREADSAFE feature flag is not set\n",
             __FILE__, __LINE__);
-    return (CURLcode)-1;
+    return TEST_ERR_MAJOR_BAD;
   }
 
   for(i = 0; i < tid_count; i++) {
@@ -178,7 +178,7 @@ CURLcode test(char *URL)
     fprintf(stderr, "%s:%d No pthread but the "
             "CURL_VERSION_THREADSAFE feature flag is set\n",
             __FILE__, __LINE__);
-    return (CURLcode)-1;
+    return TEST_ERR_MAJOR_BAD;
   }
   return CURLE_OK;
 }
