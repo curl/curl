@@ -98,10 +98,10 @@ CURLcode test(char *URL)
   CURL *curl;
   CURLcode res = CURLE_OK;
   struct ws_data ws_data;
-  memset(&ws_data, 0, sizeof(ws_data));
 
   global_init(CURL_GLOBAL_ALL);
 
+  memset(&ws_data, 0, sizeof(ws_data));
   ws_data.buf = (char *)calloc(LIB2302_BUFSIZE, 1);
   if(ws_data.buf) {
     curl = curl_easy_init();
