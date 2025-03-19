@@ -2515,8 +2515,7 @@ EOHELP
 }
 
 # Detect a test bundle build.
-# Do not look for unittests because it may be missing depending on build
-# settings.
+# Do not look for 'units' because not all configurations build it.
 if(-e $LIBDIR . "libtests" . exe_ext('TOOL') &&
    -e $SRVDIR . "servers" . exe_ext('SRV')) {
     # use test bundles
