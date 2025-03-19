@@ -216,8 +216,8 @@ jobs:
 
           - name: clang-tidy
             install_packages: clang-tidy libssl-dev libssh2-1-dev
-            install_steps: skipall
-            configure: --with-openssl --with-libssh2
+            install_steps: skipall wolfssl-opensslextra wolfssh
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --with-wolfssh=$HOME/wolfssh --with-openssl --with-libssh2 --enable-ech
             make-custom-target: tidy
 
           - name: scanbuild
