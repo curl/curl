@@ -96,7 +96,7 @@ libstubgss_la_DEPENDENCIES =
 endif
 
 if USE_TEST_BUNDLES
-libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl $(FIRSTFILES) lib1521.c
+libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) lib1521.c
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
 
 noinst_PROGRAMS = libtests
