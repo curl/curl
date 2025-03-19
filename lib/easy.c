@@ -613,12 +613,6 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     }
     else {
       /* here pollrc is > 0 */
-      struct Curl_llist_node *e = Curl_llist_head(&multi->process);
-      struct Curl_easy *data;
-      DEBUGASSERT(e);
-      data = Curl_node_elem(e);
-      DEBUGASSERT(data);
-
       /* loop over the monitored sockets to see which ones had activity */
       for(i = 0; i < numfds; i++) {
         if(fds[i].revents) {
@@ -626,7 +620,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
           int act = poll2cselect(fds[i].revents); /* convert */
 
           /* sending infof "randomly" to the first easy handle */
-          infof(data, "call curl_multi_socket_action(socket "
+          infof(multi->admin, "call curl_multi_socket_action(socket "
                 "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
           mcode = curl_multi_socket_action(multi, fds[i].fd, act,
                                            &ev->running_handles);
@@ -781,7 +775,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   else {
     /* this multi handle will only ever have a single easy handle attached to
        it, so make it use minimal hash sizes */
-    multi = Curl_multi_handle(1, 3, 7, 3);
+    multi = Curl_multi_handle(16, 1, 3, 7, 3);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
   }

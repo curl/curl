@@ -213,10 +213,10 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
 {
   struct Curl_easy *data; /* the transfer that asked for the DoH probe */
 
-  data = Curl_multi_get_handle(doh->multi, doh->set.dohfor_mid);
+  data = Curl_multi_get_easy(doh->multi, doh->set.dohfor_mid);
   if(!data) {
-    DEBUGF(infof(doh, "doh_done: xfer for mid=%" FMT_OFF_T
-                 " not found", doh->set.dohfor_mid));
+    DEBUGF(infof(doh, "doh_done: xfer for mid=%u not found",
+           doh->set.dohfor_mid));
     DEBUGASSERT(0);
   }
   else {
@@ -389,7 +389,7 @@ static CURLcode doh_run_probe(struct Curl_easy *data,
 
 error:
   Curl_close(&doh);
-  p->easy_mid = -1;
+  p->easy_mid = 0;
   return result;
 }
 
@@ -420,7 +420,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     return NULL;
 
   for(i = 0; i < DOH_SLOT_COUNT; ++i) {
-    dohp->probe[i].easy_mid = -1;
+    dohp->probe[i].easy_mid = 0;
   }
 
   conn->bits.doh = TRUE;
@@ -1179,8 +1179,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
-  if(dohp->probe[DOH_SLOT_IPV4].easy_mid < 0 &&
-     dohp->probe[DOH_SLOT_IPV6].easy_mid < 0) {
+  if(!dohp->probe[DOH_SLOT_IPV4].easy_mid &&
+     !dohp->probe[DOH_SLOT_IPV6].easy_mid) {
     failf(data, "Could not DoH-resolve: %s", dohp->host);
     return CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
       CURLE_COULDNT_RESOLVE_HOST;
@@ -1283,20 +1283,19 @@ void Curl_doh_close(struct Curl_easy *data)
   struct doh_probes *doh = data->req.doh;
   if(doh && data->multi) {
     struct Curl_easy *probe_data;
-    curl_off_t mid;
+    unsigned int mid;
     size_t slot;
     for(slot = 0; slot < DOH_SLOT_COUNT; slot++) {
       mid = doh->probe[slot].easy_mid;
-      if(mid < 0)
+      if(!mid)
         continue;
-      doh->probe[slot].easy_mid = -1;
+      doh->probe[slot].easy_mid = 0;
       /* should have been called before data is removed from multi handle */
       DEBUGASSERT(data->multi);
-      probe_data = data->multi ? Curl_multi_get_handle(data->multi, mid) :
+      probe_data = data->multi ? Curl_multi_get_easy(data->multi, mid) :
         NULL;
       if(!probe_data) {
-        DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%"
-                     FMT_OFF_T " not found!",
+        DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%u not found!",
                      doh->probe[slot].easy_mid));
         continue;
       }

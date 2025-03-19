@@ -764,7 +764,8 @@ struct connectdata {
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) Curl_llist_count(&(c)->easyq)
+#define CONN_INUSE(c) (!Curl_uint_spbset_empty(&(c)->xfers_attached))
+#define CONN_ATTACHED(c) Curl_uint_spbset_count(&(c)->xfers_attached)
 
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
@@ -853,7 +854,7 @@ struct connectdata {
   struct kerberos5data krb5;  /* variables into the structure definition, */
 #endif                        /* however, some of them are ftp specific. */
 
-  struct Curl_llist easyq;    /* List of easy handles using this connection */
+  struct uint_spbset xfers_attached; /* mids of attached transfers */
 
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
@@ -1682,7 +1683,7 @@ struct UserDefined {
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   multidone_func fmultidone;
 #ifndef CURL_DISABLE_DOH
-  curl_off_t dohfor_mid; /* this is a DoH request for that transfer */
+  unsigned int dohfor_mid; /* this is a DoH request for that transfer */
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
 #ifndef CURL_DISABLE_HTTP
@@ -1875,11 +1876,9 @@ struct Curl_easy {
   /* once an easy handle is added to a multi, either explicitly by the
    * libcurl application or implicitly during `curl_easy_perform()`,
    * a unique identifier inside this one multi instance. */
-  curl_off_t mid;
+  unsigned int mid;
 
   struct connectdata *conn;
-  struct Curl_llist_node multi_queue; /* for multihandle list management */
-  struct Curl_llist_node conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */
