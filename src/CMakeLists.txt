@@ -94,7 +94,7 @@ add_library(
   EXCLUDE_FROM_ALL
   ${CURL_CFILES} ${CURLTOOL_LIBCURL_CFILES} ${CURL_HFILES}
 )
-target_compile_definitions(curltool PUBLIC "UNITTESTS" "CURL_STATICLIB")
+target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
 
 if(CURL_HAS_LTO)
