@@ -236,9 +236,13 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   Curl_uint_bset_init(&multi->process);
   Curl_uint_bset_init(&multi->pending);
   Curl_uint_bset_init(&multi->msgsent);
-
   Curl_hash_init(&multi->proto_hash, 23,
                  Curl_hash_str, Curl_str_key_compare, ph_freeentry);
+  Curl_llist_init(&multi->msglist, NULL);
+
+  multi->multiplexing = TRUE;
+  multi->max_concurrent_streams = 100;
+  multi->last_timeout_ms = -1;
 
   if(Curl_uint_bset_resize(&multi->process, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->pending, xfer_table_size) ||
@@ -268,12 +272,6 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
 
   if(Curl_ssl_scache_create(sesssize, 2, &multi->ssl_scache))
     goto error;
-
-  Curl_llist_init(&multi->msglist, NULL);
-
-  multi->multiplexing = TRUE;
-  multi->max_concurrent_streams = 100;
-  multi->last_timeout_ms = -1;
 
 #ifdef USE_WINSOCK
   multi->wsa_event = WSACreateEvent();
@@ -364,7 +362,6 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
   }
   /* Insert the easy into the table now that MUST have room for it */
   if(!Curl_uint_tbl_add(&multi->xfers, data, &data->mid)) {
-    /* should never happen */
     DEBUGASSERT(0);
     return CURLM_OUT_OF_MEMORY;
   }
@@ -740,6 +737,10 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
      timenode will remain in the splay tree after curl_easy_cleanup is
      called. Do it after multi_done() in case that sets another time! */
   removed_timer = Curl_expire_clear(data);
+
+  /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
+  if(!Curl_uint_bset_contains(&multi->msgsent, data->mid))
+    --multi->xfers_alive;
 
   /* Remove from all our sets */
   Curl_uint_bset_remove(&multi->process, data->mid);
