@@ -303,7 +303,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf ninja-build \
-            ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' && 'stunnel4' || '' }} \
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }} \
             libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }} \
             ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd' || '' }}
@@ -643,7 +643,7 @@ jobs:
         run: cmake --install bld --strip
 
       - name: 'build tests'
-        if: ${{ matrix.build.install_steps != 'skipall' }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --verbose --target testdeps
@@ -652,13 +652,13 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.container == null }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && matrix.build.container == null }}
         run: |
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
-        if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
