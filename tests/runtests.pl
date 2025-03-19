@@ -2514,9 +2514,10 @@ EOHELP
     shift @ARGV;
 }
 
-# Detect a test bundle build
+# Detect a test bundle build.
+# Do not look for unittests because it may be missing depending on build
+# settings.
 if(-e $LIBDIR . "libtests" . exe_ext('TOOL') &&
-   -e $UNITDIR . "units" . exe_ext('TOOL') &&
    -e $SRVDIR . "servers" . exe_ext('SRV')) {
     # use test bundles
     $bundle=1;
