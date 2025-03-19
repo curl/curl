@@ -35,7 +35,9 @@
 #endif
 
 #include "curl_threads.h"
+#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
+#endif
 /* The last #include file should be: */
 #include "memdebug.h"
 
