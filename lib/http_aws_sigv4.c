@@ -154,6 +154,57 @@ static int compare_header_names(const char *a, const char *b)
   return cmp;
 }
 
+/* Merge duplicate header definitions by comma delimiting their values
+   in the order defined the headers are defined, expecting headers to
+   be alpha-sorted and use ':' at this point */
+static CURLcode merge_duplicate_headers(struct curl_slist *head)
+{
+  struct curl_slist *curr = head;
+  CURLcode result = CURLE_OK;
+
+  while(curr) {
+    struct curl_slist *next = curr->next;
+    if(!next)
+      break;
+
+    if(compare_header_names(curr->data, next->data) == 0) {
+      struct dynbuf buf;
+      char *colon_next;
+      char *val_next;
+
+      Curl_dyn_init(&buf, CURL_MAX_HTTP_HEADER);
+
+      result = Curl_dyn_add(&buf, curr->data);
+      if(result)
+        return result;
+
+      colon_next = strchr(next->data, ':');
+      DEBUGASSERT(colon_next);
+      val_next = colon_next + 1;
+
+      result = Curl_dyn_addn(&buf, ",", 1);
+      if(result)
+        return result;
+
+      result = Curl_dyn_add(&buf, val_next);
+      if(result)
+        return result;
+
+      free(curr->data);
+      curr->data = Curl_dyn_ptr(&buf);
+
+      curr->next = next->next;
+      free(next->data);
+      free(next);
+    }
+    else {
+      curr = curr->next;
+    }
+  }
+
+  return CURLE_OK;
+}
+
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
 static CURLcode make_headers(struct Curl_easy *data,
                              const char *hostname,
@@ -298,6 +349,10 @@ static CURLcode make_headers(struct Curl_easy *data,
       }
     }
   } while(again);
+
+  ret = merge_duplicate_headers(head);
+  if(ret)
+    goto fail;
 
   for(l = head; l; l = l->next) {
     char *tmp;

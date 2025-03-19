@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+SSL
+Debug
+crypto
+</features>
+<name>
+HTTP AWS_SIGV4 canonical request duplicate header test
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+^Content-Length:.*
+^Accept:.*
+</strip>
+<protocol crlf="yes">
+PUT /%TESTNUMBER/testapi/test HTTP/1.1
+Host: 127.0.0.1:9000
+Authorization: AWS4-HMAC-SHA256 Credential=xxx/19700101/us-east-1/s3/aws4_request, SignedHeaders=curr-header-no-colon;duplicate-header;header-no-value;header-some-no-value;host;next-header-no-colon;some-other-header;x-amz-content-sha256;x-amz-date;x-amz-meta-blah;x-amz-meta-test;x-amz-meta-test2, Signature=b1e2ac88fd1307f0b9031140c3c99cc20d6263f3fe64b132dc433c95fe2c6316
+X-Amz-Date: 19700101T000000Z
+x-amz-content-sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+x-amz-meta-test: test2
+some-other-header: value
+x-amz-meta-test: test1
+duplicate-header: duplicate
+x-amz-meta-test: test3
+X-amz-meta-test2: test2
+x-amz-meta-blah: blah
+x-Amz-meta-test2: test1
+x-amz-Meta-test2: test3
+curr-header-no-colon: value
+next-header-no-colon: value
+duplicate-header: duplicate
+header-no-value:
+header-no-value:
+header-some-no-value:
+header-some-no-value: value
+
+</protocol>
+</verify>
+</testcase>
