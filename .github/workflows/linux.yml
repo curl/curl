@@ -102,7 +102,7 @@ jobs:
           - name: wolfssl-opensslextra valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: wolfssl-opensslextra
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-debug
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev valgrind
@@ -412,7 +412,7 @@ jobs:
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-opensslextra \
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
           make install
 
