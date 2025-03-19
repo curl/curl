@@ -538,12 +538,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build: [autotools, cmake]
-        compiler: [gcc]
+        include:
+          - { build: 'autotools', compiler: 'gcc' }
+          - { build: 'cmake'    , compiler: 'gcc' }
+          - { build: 'cmake'    , compiler: 'clang-tidy' }
     steps:
       - name: 'install packages'
         timeout-minutes: 5
-        run: sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
+        run: |
+          sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 \
+            ${{ matrix.build == 'cmake' && 'ninja-build' || '' }} \
+            ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -556,14 +561,22 @@ jobs:
       - name: 'configure'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
+            if [ '${{ matrix.compiler }}' = 'clang-tidy' ]; then
+              options+=' -DCURL_CLANG_TIDY=ON'
+              options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
+              options+=' -DCMAKE_C_COMPILER=clang'
+              options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang -dumpversion | cut -d '.' -f 1)"
+            else
+              options+=" -DCMAKE_C_COMPILER=${TRIPLET}-gcc"
+            fi
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=Windows \
               -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
-              -DCMAKE_C_COMPILER="${TRIPLET}-gcc" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
-              -DCURL_USE_LIBPSL=OFF
+              -DCURL_USE_LIBPSL=OFF \
+              ${options}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --host="${TRIPLET}" \
@@ -593,7 +606,7 @@ jobs:
         run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools
+        if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
@@ -602,6 +615,7 @@ jobs:
           fi
 
       - name: 'build examples'
+        if: ${{ matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for clang-tidy
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples

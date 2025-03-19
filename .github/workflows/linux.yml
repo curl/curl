@@ -215,9 +215,9 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: clang-tidy
-            install_packages: clang-tidy libssl-dev libssh2-1-dev
-            install_steps: skipall
-            configure: --with-openssl --with-libssh2
+            install_packages: clang-tidy zlib1g-dev libssl-dev libkrb5-dev
+            install_steps: skipall wolfssl-opensslextra wolfssh
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --with-wolfssh=$HOME/wolfssh --with-openssl --enable-ech --with-gssapi --enable-ssls-export
             make-custom-target: tidy
 
           - name: scanbuild
