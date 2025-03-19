@@ -62,18 +62,12 @@ include Makefile.inc
 EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(FIRSTFILES)
 
 if USE_TEST_BUNDLES
-server_EXCLUDE =
-if ENABLE_SERVER_DEBUG
-if CURLDEBUG
-server_EXCLUDE += $(MEMDEBUG)
-endif
-endif
-server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(MEMDEBUG) $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(FIRSTFILES)
-	@PERL@ $(top_srcdir)/tests/server/mk-bundle.pl $(MEMDEBUG) $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(SERVERPROGS) --exclude $(server_EXCLUDE) > server_bundle.c
+server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(FIRSTFILES)
+	@PERL@ $(top_srcdir)/tests/server/mk-bundle.pl $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(SERVERPROGS) > server_bundle.c
 
 noinst_PROGRAMS = servers
 nodist_servers_SOURCES = server_bundle.c
-servers_SOURCES = $(server_EXCLUDE)
+servers_SOURCES =
 servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 servers_CFLAGS = $(AM_CFLAGS)
 CLEANFILES = server_bundle.c
