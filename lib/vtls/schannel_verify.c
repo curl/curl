@@ -399,6 +399,9 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   (void)Win8_compat;
 #endif
 
+  if(!alt_name_info)
+    return 0;
+
   compute_content = host_names != NULL && length != 0;
 
   /* Initialize default return values. */
