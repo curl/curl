@@ -529,7 +529,7 @@ jobs:
           cmake --build bld --target curl-examples
 
   linux-cross-mingw-w64:
-    name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }}"
+    name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -539,16 +539,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { build: 'autotools', compiler: 'gcc'  , name: 'gcc' }
-          - { build: 'cmake'    , compiler: 'gcc'  , name: 'gcc' }
-          - { build: 'cmake'    , compiler: 'clang', clang-tidy: true, name: 'clang-tidy' }
+          - { build: 'autotools', compiler: 'gcc' }
+          - { build: 'cmake'    , compiler: 'gcc' }
+          - { build: 'cmake'    , compiler: 'clang-tidy' }
     steps:
       - name: 'install packages'
         timeout-minutes: 5
         run: |
           sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 \
             ${{ matrix.build == 'cmake' && 'ninja-build' || '' }} \
-            ${{ matrix.compiler == 'clang' && 'clang' || '' }}
+            ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -561,8 +561,9 @@ jobs:
       - name: 'configure'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            [ -n '${{ matrix.clang-tidy }}' ] && options+=' -DCURL_CLANG_TIDY=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
-            if [ '${{ matrix.compiler }}' = 'clang' ]; then
+            if [ '${{ matrix.compiler }}' = 'clang-tidy' ]; then
+              options+=' -DCURL_CLANG_TIDY=ON'
+              options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
               options+=' -DCMAKE_C_COMPILER=clang'
               options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang -dumpversion | cut -d '.' -f 1)"
             else
@@ -605,7 +606,7 @@ jobs:
         run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' && !matrix.clang-tidy }}  # Save time by skipping this for autotools and clang-tidy
+        if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
@@ -614,7 +615,7 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: ${{ !matrix.clang-tidy }}  # Save time by skipping this for clang-tidy
+        if: ${{ matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for clang-tidy
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
