@@ -177,7 +177,6 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 
     if(clip) {
       *clip = '\0';
-      len = clip - target;
     }
   }
 
