@@ -4900,12 +4900,12 @@ if test "x$want_ech" != "xno"; then
   dnl check for OpenSSL equivalent
   if test "x$OPENSSL_ENABLED" = "x1"; then
     AC_CHECK_FUNCS(SSL_set1_ech_config_list,
-      ECH_SUPPORT="${ECH_SUPPORT} OpenSSL"
+      ECH_SUPPORT="$ECH_SUPPORT OpenSSL"
       ECH_ENABLED_OPENSSL=1)
   fi
   if test "x$WOLFSSL_ENABLED" = "x1"; then
     AC_CHECK_FUNCS(wolfSSL_CTX_GenerateEchConfig,
-      ECH_SUPPORT="${ECH_SUPPORT} wolfSSL"
+      ECH_SUPPORT="$ECH_SUPPORT wolfSSL"
       ECH_ENABLED_WOLFSSL=1)
   fi
 
