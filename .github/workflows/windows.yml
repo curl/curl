@@ -563,8 +563,8 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             [ -n '${{ matrix.clang-tidy }}' ] && options+=' -DCURL_CLANG_TIDY=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
             if [ '${{ matrix.compiler }}' = 'clang' ]; then
-              CCSUFFIX="-$(clang -dumpversion | cut -d '.' -f 1)"
-              options+=" -DCMAKE_C_COMPILER=clang -DCMAKE_RC_COMPILER=llvm-windres${CCSUFFIX}"
+              options+=' -DCMAKE_C_COMPILER=clang'
+              options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang -dumpversion | cut -d '.' -f 1)"
             else
               options+=" -DCMAKE_C_COMPILER=${TRIPLET}-gcc"
             fi
