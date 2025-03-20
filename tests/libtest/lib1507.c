@@ -51,7 +51,7 @@ CURLcode test(char *URL)
    CURL *curl = NULL;
    CURLM *mcurl = NULL;
    int still_running = 1;
-   curltime mp_start;
+   struct curltime mp_start;
    struct curl_slist *rcpt_list = NULL;
 
    curl_global_init(CURL_GLOBAL_DEFAULT);

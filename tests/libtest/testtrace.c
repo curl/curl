@@ -89,7 +89,6 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
 {
   struct libtest_trace_cfg *trace_cfg = userp;
   const char *text;
-  curltime tv;
   char timebuf[20];
   char *timestr;
   time_t secs;
@@ -100,6 +99,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   timestr = &timebuf[0];
 
   if(trace_cfg->tracetime) {
+    struct curltime tv;
     struct tm *now;
     tv = curlx_now();
     if(!known_offset) {

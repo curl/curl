@@ -77,7 +77,7 @@ char *libtest_arg4 = NULL;
 int test_argc;
 char **test_argv;
 
-curltime tv_test_start; /* for test timing */
+struct curltime tv_test_start; /* for test timing */
 
 int unitfail; /* for unittests */
 

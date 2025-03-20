@@ -29,7 +29,7 @@
 #define NUM_THREADS 100
 
 #ifdef _WIN32
-#include "version_win32.h"
+#include "system_win32.h"
 
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
 static DWORD WINAPI run_thread(LPVOID ptr)

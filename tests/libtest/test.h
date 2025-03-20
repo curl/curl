@@ -72,7 +72,7 @@ extern char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
 extern int test_argc;
 extern char **test_argv;
 
-extern curltime tv_test_start; /* for test timing */
+extern struct curltime tv_test_start; /* for test timing */
 
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
@@ -457,7 +457,8 @@ extern int unitfail;
   timediff_t timediff = curlx_timediff(curlx_now(), tv_test_start);       \
   if(timediff > (TEST_HANG_TIMEOUT)) {                                    \
     fprintf(stderr, "%s:%d ABORTING TEST, since it seems "                \
-            "that it would have run forever (%ld ms > %ld ms)\n",         \
+            "that it would have run forever (%" FMT_TIMEDIFF_T " ms"      \
+            " > %ld ms)\n",                                               \
             (Y), (Z), timediff, (long) (TEST_HANG_TIMEOUT));              \
     res = TEST_ERR_RUNS_FOREVER;                                          \
   }                                                                       \

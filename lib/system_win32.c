@@ -33,9 +33,12 @@
 #include "warnless.h"
 
 /* The last #include files should be: */
+#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
+#endif
 #include "memdebug.h"
 
+#ifdef BUILDING_LIBCURL
 LARGE_INTEGER Curl_freq;
 bool Curl_isVistaOrGreater;
 
@@ -142,6 +145,7 @@ void Curl_win32_cleanup(long init_flags)
 #endif
   }
 }
+#endif /* BUILDING_LIBCURL */
 
 #if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008

@@ -123,7 +123,7 @@ static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
  */
 static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
-  curltime *timeout = userp;
+  struct curltime *timeout = userp;
 
   (void)multi; /* unused */
   if(timeout_ms != -1) {
@@ -167,7 +167,7 @@ static int checkForCompletion(CURLM *curl, int *success)
 
 static int getMicroSecondTimeout(struct timeval *timeout)
 {
-  curltime now;
+  struct curltime now;
   ssize_t result;
   now = curlx_now();
   result = (ssize_t)((timeout->tv_sec - now.tv_sec) * 1000000 +

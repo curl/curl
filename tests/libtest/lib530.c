@@ -150,7 +150,7 @@ static int timer_calls = 0;
  */
 static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
-  curltime *timeout = userp;
+  struct curltime *timeout = userp;
 
   (void)multi; /* unused */
   fprintf(stderr, "CURLMOPT_TIMERFUNCTION called: %u\n", timer_calls++);
@@ -199,7 +199,7 @@ static int checkForCompletion(CURLM *curl, int *success)
 
 static int getMicroSecondTimeout(struct timeval *timeout)
 {
-  curltime now;
+  struct curltime now;
   ssize_t result;
   now = curlx_now();
   result = (ssize_t)((timeout->tv_sec - now.tv_sec) * 1000000 +

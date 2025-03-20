@@ -64,8 +64,8 @@ CURLcode test(char *URL)
     fd_set fdwrite;
     fd_set fdexcep;
     int maxfd = -99;
-    curltime before;
-    curltime after;
+    struct curltime before;
+    struct curltime after;
     timediff_t e;
 
     timeout.tv_sec = 0;
@@ -92,7 +92,7 @@ CURLcode test(char *URL)
 
     after = curlx_now();
     e = curlx_timediff(after, before);
-    fprintf(stderr, "pong = %ld\n", e);
+    fprintf(stderr, "pong = %" FMT_TIMEDIFF_T "\n", e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
       res = (CURLcode) 100;
