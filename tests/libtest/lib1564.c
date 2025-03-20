@@ -35,7 +35,7 @@ CURLcode test(char *URL)
   int numfds;
   int i;
   CURLcode res = CURLE_OK;
-  struct timeval time_before_wait, time_after_wait;
+  curltime time_before_wait, time_after_wait;
 
   (void)URL;
 

@@ -64,8 +64,8 @@ CURLcode test(char *URL)
     fd_set fdwrite;
     fd_set fdexcep;
     int maxfd = -99;
-    struct timeval before;
-    struct timeval after;
+    curltime before;
+    curltime after;
     timediff_t e;
 
     timeout.tv_sec = 0;
