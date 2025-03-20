@@ -584,6 +584,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     digest->http_context = calloc(1, sizeof(CtxtHandle));
     if(!digest->http_context) {
       curlx_unicodefree(spn);
+      Curl_sspi_free_identity(p_identity);
+      free(output_token);
       return CURLE_OUT_OF_MEMORY;
     }
 
