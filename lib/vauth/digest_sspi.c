@@ -582,8 +582,10 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
     /* Allocate our new context handle */
     digest->http_context = calloc(1, sizeof(CtxtHandle));
-    if(!digest->http_context)
+    if(!digest->http_context) {
+      curlx_unicodefree(spn);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     /* Generate our response message */
     status = Curl_pSecFn->InitializeSecurityContext(&credentials, NULL,
