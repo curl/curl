@@ -454,7 +454,7 @@ extern int unitfail;
 } while(0)
 
 #define exe_test_timedout(Y,Z) do {                                       \
-  timediff_h timediff = curlx_timediff(curlx_now(), tv_test_start);       \
+  timediff_t timediff = curlx_timediff(curlx_now(), tv_test_start);       \
   if(timediff > (TEST_HANG_TIMEOUT)) {                                    \
     fprintf(stderr, "%s:%d ABORTING TEST, since it seems "                \
             "that it would have run forever (%ld ms > %ld ms)\n",         \
