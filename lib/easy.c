@@ -955,6 +955,7 @@ CURL *curl_easy_duphandle(CURL *d)
   outcurl->state.lastconnect_id = -1;
   outcurl->state.recent_conn_id = -1;
   outcurl->id = -1;
+  outcurl->mid = UINT_MAX;
 
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
