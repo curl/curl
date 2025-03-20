@@ -975,7 +975,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(!backend->cred) {
     char *snihost;
     result = schannel_acquire_credential_handle(cf, data);
-    if(result)
+    if(result || !backend->cred)
       return result;
     /* schannel_acquire_credential_handle() sets backend->cred accordingly or
        it returns error otherwise. */
