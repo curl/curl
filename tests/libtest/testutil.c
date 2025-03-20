@@ -153,8 +153,10 @@ HMODULE win32_load_system_library(const TCHAR *filename)
 
   /* if written >= systemdirlen then nothing was written */
   written = GetSystemDirectory(path, (unsigned int)systemdirlen);
-  if(!written || written >= systemdirlen)
+  if(!written || written >= systemdirlen) {
+    free(path);
     return NULL;
+  }
 
   if(path[written - 1] != _T('\\'))
     path[written++] = _T('\\');
