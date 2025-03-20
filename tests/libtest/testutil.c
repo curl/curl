@@ -141,6 +141,7 @@ HMODULE win32_load_system_library(const TCHAR *filename)
   size_t systemdirlen = GetSystemDirectory(NULL, 0);
   size_t written;
   TCHAR *path;
+  HMODULE module;
 
   if(!filenamelen || filenamelen > 32768 ||
      !systemdirlen || systemdirlen > 32768)
@@ -163,7 +164,11 @@ HMODULE win32_load_system_library(const TCHAR *filename)
 
   _tcscpy(path + written, filename);
 
-  return LoadLibrary(path);
+  module = LoadLibrary(path);
+
+  free(path);
+
+  return module;
 #endif
 }
 #endif
