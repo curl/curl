@@ -13,7 +13,6 @@ none
 <features>
 unittest
 HSTS
-Debug
 </features>
 
 <file name="%LOGDIR/hsts%TESTNUMBER">
