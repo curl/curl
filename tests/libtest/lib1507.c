@@ -77,7 +77,7 @@ CURLcode test(char *URL)
    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
    multi_add_handle(mcurl, curl);
 
-   mp_start = tutil_tvnow();
+   mp_start = curlx_now();
 
   /* we start some action by calling perform right away */
   curl_multi_perform(mcurl, &still_running);
@@ -121,7 +121,7 @@ CURLcode test(char *URL)
 
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    if(curlx_timediff(tutil_tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
+    if(curlx_timediff(curlx_now(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
       fprintf(stderr, "ABORTING TEST, since it seems "
               "that it would have run forever.\n");
       break;

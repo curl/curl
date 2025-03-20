@@ -84,13 +84,13 @@ CURLcode test(char *URL)
     abort_on_test_timeout();
 
     fprintf(stderr, "ping\n");
-    before = tutil_tvnow();
+    before = curlx_now();
 
     multi_perform(mhandle, &still_running);
 
     abort_on_test_timeout();
 
-    after = tutil_tvnow();
+    after = curlx_now();
     e = curlx_timediff(after, before);
     fprintf(stderr, "pong = %ld\n", e);
 
