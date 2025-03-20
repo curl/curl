@@ -24,9 +24,4 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
-
-#ifdef _WIN32
-HMODULE win32_load_system_library(const TCHAR *filename);
-#endif
-
 #endif  /* HEADER_CURL_LIBTEST_TESTUTIL_H */
