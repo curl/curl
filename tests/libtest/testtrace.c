@@ -101,7 +101,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
 
   if(trace_cfg->tracetime) {
     struct tm *now;
-    tv = tutil_tvnow();
+    tv = curlx_now();
     if(!known_offset) {
       epoch_offset = time(NULL) - tv.tv_sec;
       known_offset = 1;

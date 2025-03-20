@@ -150,7 +150,7 @@ static int timer_calls = 0;
  */
 static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
-  struct timeval *timeout = userp;
+  curltime *timeout = userp;
 
   (void)multi; /* unused */
   fprintf(stderr, "CURLMOPT_TIMERFUNCTION called: %u\n", timer_calls++);
@@ -159,7 +159,7 @@ static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
     return -1;
   }
   if(timeout_ms != -1) {
-    *timeout = tutil_tvnow();
+    *timeout = curlx_now();
     timeout->tv_usec += (int)timeout_ms * 1000;
   }
   else {
@@ -199,9 +199,9 @@ static int checkForCompletion(CURLM *curl, int *success)
 
 static int getMicroSecondTimeout(struct timeval *timeout)
 {
-  struct timeval now;
+  curltime now;
   ssize_t result;
-  now = tutil_tvnow();
+  now = curlx_now();
   result = (ssize_t)((timeout->tv_sec - now.tv_sec) * 1000000 +
     timeout->tv_usec - now.tv_usec);
   if(result < 0)

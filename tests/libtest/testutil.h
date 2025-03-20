@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-struct timeval tutil_tvnow(void);
-
 #ifdef _WIN32
 HMODULE win32_load_system_library(const TCHAR *filename);
 #endif
