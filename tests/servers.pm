@@ -54,7 +54,6 @@ BEGIN {
         # functions
         qw(
             checkcmd
-            clearlocks
             serverfortest
             stopserver
             stopservers
@@ -261,54 +260,6 @@ sub init_serverpidfile_hash {
   }
 }
 
-
-#######################################################################
-# Kill the processes that still have lock files in a directory
-#
-sub clearlocks {
-    my $dir = $_[0];
-    my $done = 0;
-
-    if(os_is_win()) {
-        $dir = sys_native_abs_path($dir);
-        # Must use backslashes for handle64 to find a match
-        if ($^O eq 'MSWin32') {
-            $dir =~ s/\//\\/g;
-        }
-        else {
-            $dir =~ s/\//\\\\/g;
-        }
-        my $handle = "handle";
-        if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
-            $handle = "handle64";
-        }
-        if(checkcmd($handle)) {
-            # https://learn.microsoft.com/sysinternals/downloads/handle#usage
-            my $cmd = "$handle $dir -accepteula -nobanner";
-            logmsg "clearlocks: Executing query: '$cmd'\n";
-            my @handles = `$cmd`;
-            for my $tryhandle (@handles) {
-                # Skip the "No matching handles found." warning when returned
-                if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
-                    logmsg "clearlocks: Found $3 lock of '$5' ($4) by $1 ($2)\n";
-                    # Ignore stunnel since we cannot do anything about its locks
-                    if("$3" eq "File" && "$1" ne "tstunnel.exe") {
-                        logmsg "clearlocks: Killing IMAGENAME eq $1 and PID eq $2\n";
-                        # https://ss64.com/nt/taskkill.html
-                        my $cmd = "taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1";
-                        logmsg "clearlocks: Executing kill: '$cmd'\n";
-                        system($cmd);
-                        $done = 1;
-                    }
-                }
-            }
-        }
-        else {
-            logmsg "Warning: 'handle' tool not found.\n";
-        }
-    }
-    return $done;
-}
 
 #######################################################################
 # Check if a given child process has just died. Reaps it if so.

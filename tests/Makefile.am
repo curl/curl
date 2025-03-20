@@ -123,9 +123,6 @@ if CROSSCOMPILING
 TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
 PYTEST = $(TEST)
 else # if not cross-compiling:
-if USE_TEST_BUNDLES
-TEST_COMMON += -bundle
-endif
 
 if BUILD_DOCS
 else
@@ -144,7 +141,7 @@ TEST_E = -a -e
 TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special CI target derived from nonflaky with CI-specific flags
-TEST_CI = $(TEST_NF) -r -rm -j20
+TEST_CI = $(TEST_NF) -r -j20
 
 PYTEST = pytest
 endif

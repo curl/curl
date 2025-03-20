@@ -40,9 +40,6 @@ add_subdirectory(unit)
 add_subdirectory(certs EXCLUDE_FROM_ALL)
 
 function(curl_add_runtests _targetname _test_flags)
-  if(CURL_TEST_BUNDLES)
-    string(APPEND _test_flags " -bundle")
-  endif()
   if(NOT BUILD_LIBCURL_DOCS)
     string(APPEND _test_flags " !documentation")
   endif()
@@ -107,7 +104,7 @@ curl_add_runtests(test-am        "-a -am")
 curl_add_runtests(test-full      "-a -p -r")
 # ~flaky means that it ignores results of tests using the flaky keyword
 curl_add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
-curl_add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j20")
+curl_add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -j20")
 curl_add_runtests(test-torture   "-a -t -j20")
 curl_add_runtests(test-event     "-a -e")
 
