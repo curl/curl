@@ -1942,7 +1942,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                                     backend->encdata_offset),
                               size, err);
     if(*err) {
-      nread = -1;
       if(*err == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
       else if(*err == CURLE_RECV_ERROR)
