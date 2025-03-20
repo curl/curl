@@ -22,7 +22,7 @@
 #
 ###########################################################################
 # files used only in some libcurl test programs
-TESTUTIL = ../../lib/timeval.c ../../lib/timeval.h ../../lib/version_win32.c ../../lib/version_win32.h
+TESTUTIL = testutil.c testutil.h ../../lib/timeval.c ../../lib/timeval.h ../../lib/version_win32.c ../../lib/version_win32.h
 TSTTRACE = testtrace.c testtrace.h
 WARNLESS = ../../lib/warnless.c ../../lib/warnless.h
 MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
