@@ -438,7 +438,7 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
   }
 }
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) || defined(UNITTESTS)
 /* to play well with debug builds, we can *set* a fixed time this will
    return */
 static time_t altsvc_debugtime(void *unused)
