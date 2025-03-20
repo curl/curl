@@ -60,6 +60,7 @@ void Curl_dyn_init(struct dynbuf *s, size_t toobig)
 void Curl_dyn_free(struct dynbuf *s)
 {
   DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
   Curl_safefree(s->bufr);
   s->leng = s->allc = 0;
 }

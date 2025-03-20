@@ -1605,7 +1605,6 @@ static CURLcode sftp_readdir(struct Curl_easy *data,
         if((sshp->readdir_attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) &&
            ((sshp->readdir_attrs.permissions & LIBSSH2_SFTP_S_IFMT) ==
             LIBSSH2_SFTP_S_IFLNK)) {
-          Curl_dyn_init(&sshp->readdir_link, CURL_PATH_MAX);
           result = Curl_dyn_addf(&sshp->readdir_link, "%s%s", sshp->path,
                                  sshp->readdir_filename);
           state(data, SSH_SFTP_READDIR_LINK);
@@ -2430,7 +2429,6 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
         sshc->actualcode = result ? result : CURLE_SSH;
         break;
       }
-      Curl_dyn_init(&sshp->readdir, CURL_PATH_MAX * 2);
       state(data, SSH_SFTP_READDIR);
       break;
 
@@ -3024,12 +3022,22 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
 static CURLcode ssh_setup_connection(struct Curl_easy *data,
                                      struct connectdata *conn)
 {
+  struct ssh_conn *sshc = &conn->proto.sshc;
   struct SSHPROTO *ssh;
   (void)conn;
+
+  if(!sshc->initialised) {
+    /* other ssh implementations do something here, let's keep
+     * the initialised flag correct even if this implementation does not. */
+    sshc->initialised = TRUE;
+  }
 
   data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
+
+  Curl_dyn_init(&ssh->readdir, CURL_PATH_MAX * 2);
+  Curl_dyn_init(&ssh->readdir_link, CURL_PATH_MAX);
 
   return CURLE_OK;
 }
@@ -3331,60 +3339,62 @@ static int sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
 {
   int rc;
 
-  if(sshc->kh) {
-    libssh2_knownhost_free(sshc->kh);
-    sshc->kh = NULL;
+  if(sshc->initialised) {
+    if(sshc->kh) {
+      libssh2_knownhost_free(sshc->kh);
+      sshc->kh = NULL;
+    }
+
+    if(sshc->ssh_agent) {
+      rc = libssh2_agent_disconnect(sshc->ssh_agent);
+      if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
+        return rc;
+      }
+      if(rc < 0) {
+        char *err_msg = NULL;
+        (void)libssh2_session_last_error(sshc->ssh_session,
+                                         &err_msg, NULL, 0);
+        infof(data, "Failed to disconnect from libssh2 agent: %d %s",
+              rc, err_msg);
+      }
+      libssh2_agent_free(sshc->ssh_agent);
+      sshc->ssh_agent = NULL;
+
+      /* NB: there is no need to free identities, they are part of internal
+         agent stuff */
+      sshc->sshagent_identity = NULL;
+      sshc->sshagent_prev_identity = NULL;
+    }
+
+    if(sshc->ssh_session) {
+      rc = libssh2_session_free(sshc->ssh_session);
+      if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
+        return rc;
+      }
+      if(rc < 0) {
+        char *err_msg = NULL;
+        (void)libssh2_session_last_error(sshc->ssh_session,
+                                         &err_msg, NULL, 0);
+        infof(data, "Failed to free libssh2 session: %d %s", rc, err_msg);
+      }
+      sshc->ssh_session = NULL;
+    }
+
+    /* worst-case scenario cleanup */
+    DEBUGASSERT(sshc->ssh_session == NULL);
+    DEBUGASSERT(sshc->ssh_channel == NULL);
+    DEBUGASSERT(sshc->sftp_session == NULL);
+    DEBUGASSERT(sshc->sftp_handle == NULL);
+    DEBUGASSERT(sshc->kh == NULL);
+    DEBUGASSERT(sshc->ssh_agent == NULL);
+
+    Curl_safefree(sshc->rsa_pub);
+    Curl_safefree(sshc->rsa);
+    Curl_safefree(sshc->quote_path1);
+    Curl_safefree(sshc->quote_path2);
+    Curl_safefree(sshc->homedir);
+    sshc->initialised = FALSE;
   }
-
-  if(sshc->ssh_agent) {
-    rc = libssh2_agent_disconnect(sshc->ssh_agent);
-    if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
-      return rc;
-    }
-    if(rc < 0) {
-      char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
-      infof(data, "Failed to disconnect from libssh2 agent: %d %s",
-            rc, err_msg);
-    }
-    libssh2_agent_free(sshc->ssh_agent);
-    sshc->ssh_agent = NULL;
-
-    /* NB: there is no need to free identities, they are part of internal
-       agent stuff */
-    sshc->sshagent_identity = NULL;
-    sshc->sshagent_prev_identity = NULL;
-  }
-
-  if(sshc->ssh_session) {
-    rc = libssh2_session_free(sshc->ssh_session);
-    if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
-      return rc;
-    }
-    if(rc < 0) {
-      char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
-      infof(data, "Failed to free libssh2 session: %d %s", rc, err_msg);
-    }
-    sshc->ssh_session = NULL;
-  }
-
-  /* worst-case scenario cleanup */
-  DEBUGASSERT(sshc->ssh_session == NULL);
-  DEBUGASSERT(sshc->ssh_channel == NULL);
-  DEBUGASSERT(sshc->sftp_session == NULL);
-  DEBUGASSERT(sshc->sftp_handle == NULL);
-  DEBUGASSERT(sshc->kh == NULL);
-  DEBUGASSERT(sshc->ssh_agent == NULL);
-
-  Curl_safefree(sshc->rsa_pub);
-  Curl_safefree(sshc->rsa);
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
-  Curl_safefree(sshc->homedir);
-
   return 0;
 }
 
@@ -3426,6 +3436,7 @@ static CURLcode ssh_done(struct Curl_easy *data, CURLcode status)
 
   Curl_safefree(sshp->path);
   Curl_dyn_free(&sshp->readdir);
+  Curl_dyn_free(&sshp->readdir_link);
 
   if(Curl_pgrsDone(data))
     return CURLE_ABORTED_BY_CALLBACK;
