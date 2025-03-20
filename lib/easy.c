@@ -950,10 +950,6 @@ CURL *curl_easy_duphandle(CURL *d)
    */
   outcurl->set.buffer_size = data->set.buffer_size;
 
-  /* copy all userdefined values */
-  if(dupset(outcurl, data))
-    goto fail;
-
   Curl_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_netrc_init(&outcurl->state.netrc);
 
@@ -961,6 +957,16 @@ CURL *curl_easy_duphandle(CURL *d)
   outcurl->state.lastconnect_id = -1;
   outcurl->state.recent_conn_id = -1;
   outcurl->id = -1;
+  outcurl->mid = -1;
+
+#ifndef CURL_DISABLE_HTTP
+  Curl_llist_init(&outcurl->state.httphdrs, NULL);
+#endif
+  Curl_initinfo(outcurl);
+
+  /* copy all userdefined values */
+  if(dupset(outcurl, data))
+    goto fail;
 
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
@@ -1054,10 +1060,6 @@ CURL *curl_easy_duphandle(CURL *d)
       goto fail;
   }
 #endif /* USE_ARES */
-#ifndef CURL_DISABLE_HTTP
-  Curl_llist_init(&outcurl->state.httphdrs, NULL);
-#endif
-  Curl_initinfo(outcurl);
 
   outcurl->magic = CURLEASY_MAGIC_NUMBER;
 

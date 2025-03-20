@@ -156,10 +156,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   /* Set channel binding data if available */
-  if(nego->channel_binding_data.leng > 0) {
+  if(Curl_dyn_len(&nego->channel_binding_data)) {
     memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
-    chan.application_data.length = nego->channel_binding_data.leng;
-    chan.application_data.value = nego->channel_binding_data.bufr;
+    chan.application_data.length = Curl_dyn_len(&nego->channel_binding_data);
+    chan.application_data.value = Curl_dyn_ptr(&nego->channel_binding_data);
     chan_bindings = &chan;
   }
 

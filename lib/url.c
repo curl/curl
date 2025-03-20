@@ -507,39 +507,38 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
+  Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_req_init(&data->req);
+  Curl_initinfo(data);
+#ifndef CURL_DISABLE_HTTP
+  Curl_llist_init(&data->state.httphdrs, NULL);
+#endif
+  Curl_netrc_init(&data->state.netrc);
 
   result = Curl_resolver_init(data, &data->state.async.resolver);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-    Curl_req_free(&data->req, data);
-    free(data);
-    return result;
+    goto out;
   }
 
   result = Curl_init_userdefined(data);
-  if(!result) {
-    Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
-    Curl_initinfo(data);
+  if(result)
+    goto out;
 
-    /* most recent connection is not yet defined */
-    data->state.lastconnect_id = -1;
-    data->state.recent_conn_id = -1;
-    /* and not assigned an id yet */
-    data->id = -1;
-    data->mid = -1;
+  /* most recent connection is not yet defined */
+  data->state.lastconnect_id = -1;
+  data->state.recent_conn_id = -1;
+  /* and not assigned an id yet */
+  data->id = -1;
+  data->mid = -1;
 #ifndef CURL_DISABLE_DOH
-    data->set.dohfor_mid = -1;
+  data->set.dohfor_mid = -1;
 #endif
 
-    data->progress.flags |= PGRS_HIDE;
-    data->state.current_speed = -1; /* init to negative == impossible */
-#ifndef CURL_DISABLE_HTTP
-    Curl_llist_init(&data->state.httphdrs, NULL);
-#endif
-    Curl_netrc_init(&data->state.netrc);
-  }
+  data->progress.flags |= PGRS_HIDE;
+  data->state.current_speed = -1; /* init to negative == impossible */
 
+out:
   if(result) {
     Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);

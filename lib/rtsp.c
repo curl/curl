@@ -130,14 +130,19 @@ const struct Curl_handler Curl_handler_rtsp = {
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
+  struct rtsp_conn *rtspc = &conn->proto.rtspc;
   struct RTSP *rtsp;
   (void)conn;
+
+  if(!rtspc->initialised) {
+    Curl_dyn_init(&rtspc->buf, MAX_RTP_BUFFERSIZE);
+    rtspc->initialised = TRUE;
+  }
 
   data->req.p.rtsp = rtsp = calloc(1, sizeof(struct RTSP));
   if(!rtsp)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_dyn_init(&conn->proto.rtspc.buf, MAX_RTP_BUFFERSIZE);
   return CURLE_OK;
 }
 
@@ -182,9 +187,13 @@ static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
 static CURLcode rtsp_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead)
 {
+  struct rtsp_conn *rtspc = &conn->proto.rtspc;
   (void) dead;
   (void) data;
-  Curl_dyn_free(&conn->proto.rtspc.buf);
+  if(rtspc->initialised) {
+    Curl_dyn_free(&conn->proto.rtspc.buf);
+    rtspc->initialised = FALSE;
+  }
   return CURLE_OK;
 }
 
