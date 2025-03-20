@@ -52,7 +52,7 @@
 #define MAX_HSTS_DATELEN 256
 #define UNLIMITED "unlimited"
 
-#if defined(DEBUGBUILD) || defined(UNITTESTS)
+#ifdef DEBUGBUILD
 /* to play well with debug builds, we can *set* a fixed time this will
    return */
 time_t deltatime; /* allow for "adjustments" for unit test purposes */
