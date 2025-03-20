@@ -605,7 +605,7 @@ jobs:
         run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools
+        if: ${{ matrix.build == 'cmake' && !matrix.clang-tidy }}  # Save time by skipping this for autotools and clang-tidy
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
