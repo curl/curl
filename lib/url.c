@@ -90,6 +90,7 @@
 #include "hsts.h"
 #include "noproxy.h"
 #include "cfilters.h"
+#include "curl_krb5.h"
 #include "idn.h"
 
 /* And now for the protocols */
@@ -578,6 +579,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
 #endif
+  Curl_sec_conn_destroy(conn);
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
   Curl_safefree(conn->sasl_authzid);
@@ -3399,6 +3401,10 @@ static CURLcode create_conn(struct Curl_easy *data,
      parent can cleanup any possible allocs we may have done before
      any failure */
   *in_connect = conn;
+
+  /* Do the unfailable inits first, before checks that may early return */
+  /* GSSAPI related inits */
+  Curl_sec_conn_init(conn);
 
   result = parseurlandfillconn(data, conn);
   if(result)
