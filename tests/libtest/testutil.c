@@ -105,18 +105,6 @@ struct timeval tutil_tvnow(void)
 
 #endif
 
-/*
- * Make sure that the first argument is the more recent time, as otherwise
- * we'll get a weird negative time-diff back...
- *
- * Returns: the time difference in number of milliseconds.
- */
-long tutil_tvdiff(struct timeval newer, struct timeval older)
-{
-  return (long)(newer.tv_sec-older.tv_sec)*1000+
-    (long)(newer.tv_usec-older.tv_usec)/1000;
-}
-
 #ifdef _WIN32
 HMODULE win32_load_system_library(const TCHAR *filename)
 {

@@ -25,7 +25,6 @@
 
 #include <fcntl.h>
 
-#include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"
 
@@ -67,7 +66,7 @@ CURLcode test(char *URL)
     int maxfd = -99;
     struct timeval before;
     struct timeval after;
-    long e;
+    timediff_t e;
 
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000L; /* 100 ms */
@@ -92,7 +91,7 @@ CURLcode test(char *URL)
     abort_on_test_timeout();
 
     after = tutil_tvnow();
-    e = tutil_tvdiff(after, before);
+    e = curlx_timediff(after, before);
     fprintf(stderr, "pong = %ld\n", e);
 
     if(e > MAX_BLOCKED_TIME_MS) {

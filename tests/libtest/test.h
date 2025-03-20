@@ -42,6 +42,7 @@
 #include <unistd.h>
 #endif
 
+#include "timeval.h"
 #include "curl_printf.h"
 
 /* GCC <4.6 does not support '#pragma GCC diagnostic push' and
@@ -453,7 +454,7 @@ extern int unitfail;
 } while(0)
 
 #define exe_test_timedout(Y,Z) do {                                       \
-  long timediff = tutil_tvdiff(tutil_tvnow(), tv_test_start);             \
+  timediff_h timediff = curlx_timediff(tutil_tvnow(), tv_test_start);     \
   if(timediff > (TEST_HANG_TIMEOUT)) {                                    \
     fprintf(stderr, "%s:%d ABORTING TEST, since it seems "                \
             "that it would have run forever (%ld ms > %ld ms)\n",         \

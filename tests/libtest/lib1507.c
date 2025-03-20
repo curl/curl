@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "testutil.h"
-#include "timediff.h"
 #include "warnless.h"
 #include "memdebug.h"
 
@@ -123,7 +121,7 @@ CURLcode test(char *URL)
 
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    if(tutil_tvdiff(tutil_tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
+    if(curlx_timediff(tutil_tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
       fprintf(stderr, "ABORTING TEST, since it seems "
               "that it would have run forever.\n");
       break;

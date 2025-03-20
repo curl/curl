@@ -33,8 +33,6 @@
 #  include "memdebug.h"
 #endif
 
-#include "timediff.h"
-
 #include "tool_binmode.h"
 
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
@@ -135,6 +133,10 @@ int main(int argc, char **argv)
   CURLcode result;
   int basearg;
   test_func_t test_func;
+
+#ifdef _WIN32
+  curlx_now_init();
+#endif
 
   CURL_SET_BINMODE(stdout);
 
