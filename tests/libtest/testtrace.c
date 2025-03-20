@@ -89,7 +89,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
 {
   struct libtest_trace_cfg *trace_cfg = userp;
   const char *text;
-  struct timeval tv;
+  curltime tv;
   char timebuf[20];
   char *timestr;
   time_t secs;
