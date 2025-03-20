@@ -3026,7 +3026,7 @@ static CURLcode ssh_setup_connection(struct Curl_easy *data,
 
   if(!sshc->initialised) {
     /* other ssh implementations do something here, let's keep
-     * the intialised flag correct even if this implementation does not. */
+     * the initialised flag correct even if this implementation does not. */
     sshc->initialised = TRUE;
   }
 

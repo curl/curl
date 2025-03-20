@@ -127,7 +127,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
                                            host, header, neg_ctx);
 
-#if HAVE_GSSAPI
+#ifdef HAVE_GSSAPI
   Curl_dyn_free(&neg_ctx->channel_binding_data);
 #endif
 
