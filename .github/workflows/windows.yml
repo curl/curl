@@ -614,6 +614,7 @@ jobs:
           fi
 
       - name: 'build examples'
+        if: ${{ !matrix.clang-tidy }}  # Save time by skipping this for clang-tidy
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
