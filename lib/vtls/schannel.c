@@ -1631,6 +1631,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       args.data = data;
       args.idx = 0;
       args.certs_count = certs_count;
+      args.result = CURLE_OK;
       traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
       result = args.result;
     }
