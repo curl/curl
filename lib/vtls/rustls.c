@@ -275,7 +275,6 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
   rustls_io_result io_error;
   size_t tlswritten = 0;
   size_t tlswritten_total = 0;
-  CURLcode result = CURLE_OK;
 
   io_ctx.cf = cf;
   io_ctx.data = data;
@@ -301,7 +300,7 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
     CURL_TRC_CF(data, cf, "cf_send: wrote %zu TLS bytes", tlswritten);
     tlswritten_total += tlswritten;
   }
-  return result;
+  return CURLE_OK;
 }
 
 /*
