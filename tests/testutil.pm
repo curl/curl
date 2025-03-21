@@ -213,7 +213,7 @@ sub runclientoutput {
 # Return custom tool (e.g. wine or qemu) to run curl binaries.
 #
 sub exerunner {
-    if ($ENV{'CURL_TEST_EXE_RUNNER'}) {
+    if($ENV{'CURL_TEST_EXE_RUNNER'}) {
         return $ENV{'CURL_TEST_EXE_RUNNER'} . ' ';
     }
     return '';

@@ -273,7 +273,7 @@ sub server_exe_args {
     else {
         @cmd = ($SRVDIR . $name . exe_ext($ext));
     }
-    if ($ENV{'CURL_TEST_EXE_RUNNER'}) {
+    if($ENV{'CURL_TEST_EXE_RUNNER'}) {
         unshift @cmd, $ENV{'CURL_TEST_EXE_RUNNER'};
     }
     return @cmd;
