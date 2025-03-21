@@ -8,6 +8,7 @@
  * Copyright (C) Jacob Hoffman-Andrews,
  * <github@hoffman-andrews.com>
  * Copyright (C) kpcyrd, <kpcyrd@archlinux.org>
+ * Copyright (C) Daniel McCarney, <daniel@binaryparadox.net>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
