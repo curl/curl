@@ -172,6 +172,12 @@ static bool mev_sh_entry_xfer_remove(struct mev_sh_entry *e,
   return Curl_hash_offt_remove(&e->xfers, data->mid);
 }
 
+static bool mev_sh_entry_conn_remove(struct mev_sh_entry *e,
+                                     struct connectdata *conn)
+{
+  return Curl_hash_offt_remove(&e->conns, conn->connection_id);
+}
+
 /* Purge any information about socket `s`.
  * Let the socket callback know as well when necessary */
 static CURLMcode mev_forget_socket(struct Curl_multi *multi,
@@ -311,7 +317,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
       CURL_TRC_M(data, "ev new entry fd=%" FMT_SOCKET_T, s);
     }
     else if(conn) {
-      first_time = !mev_sh_entry_conn_known(entry, data->conn);
+      first_time = !mev_sh_entry_conn_known(entry, conn);
     }
     else {
       first_time = !mev_sh_entry_xfer_known(entry, data);
@@ -325,7 +331,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
     last_action = 0;
     if(first_time) {
       if(conn) {
-        if(!mev_sh_entry_conn_add(entry, data->conn))
+        if(!mev_sh_entry_conn_add(entry, conn))
           return CURLM_OUT_OF_MEMORY;
       }
       else {
@@ -376,7 +382,17 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
     if(!entry)
       continue;
 
-    if(!mev_sh_entry_xfer_remove(entry, data)) {
+    if(conn && !mev_sh_entry_conn_remove(entry, conn)) {
+      /* `conn` says in `prev_ps` that it had been using a socket,
+       * but `conn` has not been registered for it.
+       * This should not happen if our book-keeping is correct? */
+      CURL_TRC_M(data, "ev entry fd=%" FMT_SOCKET_T ", conn lost "
+                 "interest but is not registered", s);
+      DEBUGASSERT(NULL);
+      continue;
+    }
+
+    if(!conn && !mev_sh_entry_xfer_remove(entry, data)) {
       /* `data` says in `prev_ps` that it had been using a socket,
        * but `data` has not been registered for it.
        * This should not happen if our book-keeping is correct? */
@@ -463,7 +479,7 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
     if(!last_ps && ps.num) {
       if(conn)
         last_ps = mev_add_new_pollset(&multi->ev.conn_pollsets,
-                                      data->conn->connection_id);
+                                      conn->connection_id);
       else
         last_ps = mev_add_new_pollset(&multi->ev.xfer_pollsets, data->mid);
       if(!last_ps)
