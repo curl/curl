@@ -572,6 +572,8 @@ case $host_os in
     ;;
 esac
 
+AM_CONDITIONAL(BUILD_UNITTESTS, test x$supports_unittests = xyes)
+
 # In order to detect support of sendmmsg(), we need to escape the POSIX
 # jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
 case $host_os in
@@ -579,15 +581,6 @@ case $host_os in
     CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
     ;;
 esac
-
-dnl Build unit tests when option --enable-debug is given.
-if test "x$want_debug" = "xyes" &&
-   test "x$supports_unittests" = "xyes"; then
-  want_unittests=yes
-else
-  want_unittests=no
-fi
-AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_unittests = xyes)
 
 dnl Apply curl debug options to test servers
 OPT_SERVER_DEBUG="default"
