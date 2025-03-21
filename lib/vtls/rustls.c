@@ -518,14 +518,136 @@ add_ciphers:
 }
 
 static CURLcode
+init_config_builder(struct Curl_easy *data,
+                    const struct ssl_primary_config *conn_config,
+                    struct rustls_client_config_builder **config_builder)
+{
+  const struct rustls_supported_ciphersuite **cipher_suites = NULL;
+  struct rustls_crypto_provider_builder *custom_provider_builder = NULL;
+  const struct rustls_crypto_provider *custom_provider = NULL;
+
+  uint16_t tls_versions[2] = {
+      RUSTLS_TLS_VERSION_TLSV1_2,
+      RUSTLS_TLS_VERSION_TLSV1_3,
+  };
+  size_t tls_versions_len = 2;
+  size_t cipher_suites_len =
+    rustls_default_crypto_provider_ciphersuites_len();
+
+  CURLcode result = CURLE_OK;
+  rustls_result rr;
+
+  switch(conn_config->version) {
+  case CURL_SSLVERSION_DEFAULT:
+  case CURL_SSLVERSION_TLSv1:
+  case CURL_SSLVERSION_TLSv1_0:
+  case CURL_SSLVERSION_TLSv1_1:
+  case CURL_SSLVERSION_TLSv1_2:
+    break;
+  case CURL_SSLVERSION_TLSv1_3:
+    tls_versions[0] = RUSTLS_TLS_VERSION_TLSV1_3;
+    tls_versions_len = 1;
+    break;
+  default:
+    failf(data, "rustls: unsupported minimum TLS version value");
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto cleanup;
+  }
+
+  switch(conn_config->version_max) {
+  case CURL_SSLVERSION_MAX_DEFAULT:
+  case CURL_SSLVERSION_MAX_NONE:
+  case CURL_SSLVERSION_MAX_TLSv1_3:
+    break;
+  case CURL_SSLVERSION_MAX_TLSv1_2:
+    if(tls_versions[0] == RUSTLS_TLS_VERSION_TLSV1_2) {
+      tls_versions_len = 1;
+      break;
+    }
+    FALLTHROUGH();
+  case CURL_SSLVERSION_MAX_TLSv1_1:
+  case CURL_SSLVERSION_MAX_TLSv1_0:
+  default:
+    failf(data, "rustls: unsupported maximum TLS version value");
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto cleanup;
+  }
+
+  cipher_suites = malloc(sizeof(cipher_suites) * (cipher_suites_len));
+  if(!cipher_suites) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
+  cr_get_selected_ciphers(data,
+                          conn_config->cipher_list,
+                          conn_config->cipher_list13,
+                          cipher_suites, &cipher_suites_len);
+  if(cipher_suites_len == 0) {
+    failf(data, "rustls: no supported cipher in list");
+    result = CURLE_SSL_CIPHER;
+    goto cleanup;
+  }
+
+  rr = rustls_crypto_provider_builder_new_from_default(
+    &custom_provider_builder);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr,
+      "failed to create crypto provider builder from default");
+    result = CURLE_SSL_CIPHER;
+    goto cleanup;
+  }
+
+  rr =
+    rustls_crypto_provider_builder_set_cipher_suites(
+      custom_provider_builder,
+      cipher_suites,
+      cipher_suites_len);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr,
+      "failed to set ciphersuites for crypto provider builder");
+    result = CURLE_SSL_CIPHER;
+    goto cleanup;
+  }
+
+  rr = rustls_crypto_provider_builder_build(
+    custom_provider_builder, &custom_provider);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "failed to build custom crypto provider");
+    result = CURLE_SSL_CIPHER;
+    goto cleanup;
+  }
+
+  rr = rustls_client_config_builder_new_custom(custom_provider,
+                                                     tls_versions,
+                                                     tls_versions_len,
+                                                     config_builder);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "failed to create client config builder");
+    result = CURLE_SSL_CIPHER;
+    goto cleanup;
+  }
+
+cleanup:
+  if(cipher_suites) {
+    free(cipher_suites);
+  }
+  if(custom_provider_builder) {
+    rustls_crypto_provider_builder_free(custom_provider_builder);
+  }
+  if(custom_provider) {
+    rustls_crypto_provider_free(custom_provider);
+  }
+  return result;
+}
+
+static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
   const struct ssl_primary_config *conn_config =
     Curl_ssl_cf_get_primary_config(cf);
-  struct rustls_crypto_provider_builder *custom_provider_builder = NULL;
-  const struct rustls_crypto_provider *custom_provider = NULL;
   struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
   const struct rustls_root_cert_store *roots = NULL;
@@ -538,109 +660,15 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     (ca_info_blob ? NULL : conn_config->CAfile);
   const bool verifypeer = conn_config->verifypeer;
   rustls_result result;
+  CURLcode curl_result;
 
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  {
-    uint16_t tls_versions[2] = {
-        RUSTLS_TLS_VERSION_TLSV1_2,
-        RUSTLS_TLS_VERSION_TLSV1_3,
-    };
-    size_t tls_versions_len = 2;
-    const struct rustls_supported_ciphersuite **cipher_suites;
-    size_t cipher_suites_len =
-      rustls_default_crypto_provider_ciphersuites_len();
-
-    switch(conn_config->version) {
-    case CURL_SSLVERSION_DEFAULT:
-    case CURL_SSLVERSION_TLSv1:
-    case CURL_SSLVERSION_TLSv1_0:
-    case CURL_SSLVERSION_TLSv1_1:
-    case CURL_SSLVERSION_TLSv1_2:
-      break;
-    case CURL_SSLVERSION_TLSv1_3:
-      tls_versions[0] = RUSTLS_TLS_VERSION_TLSV1_3;
-      tls_versions_len = 1;
-      break;
-    default:
-      failf(data, "rustls: unsupported minimum TLS version value");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-
-    switch(conn_config->version_max) {
-    case CURL_SSLVERSION_MAX_DEFAULT:
-    case CURL_SSLVERSION_MAX_NONE:
-    case CURL_SSLVERSION_MAX_TLSv1_3:
-      break;
-    case CURL_SSLVERSION_MAX_TLSv1_2:
-      if(tls_versions[0] == RUSTLS_TLS_VERSION_TLSV1_2) {
-        tls_versions_len = 1;
-        break;
-      }
-      FALLTHROUGH();
-    case CURL_SSLVERSION_MAX_TLSv1_1:
-    case CURL_SSLVERSION_MAX_TLSv1_0:
-    default:
-      failf(data, "rustls: unsupported maximum TLS version value");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-
-    cipher_suites = malloc(sizeof(cipher_suites) * (cipher_suites_len));
-    if(!cipher_suites)
-      return CURLE_OUT_OF_MEMORY;
-
-    cr_get_selected_ciphers(data,
-                            conn_config->cipher_list,
-                            conn_config->cipher_list13,
-                            cipher_suites, &cipher_suites_len);
-    if(cipher_suites_len == 0) {
-      failf(data, "rustls: no supported cipher in list");
-      free(cipher_suites);
-      return CURLE_SSL_CIPHER;
-    }
-
-    result = rustls_crypto_provider_builder_new_from_default(
-      &custom_provider_builder);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data,
-            "rustls: failed to create crypto provider builder from default");
-      return CURLE_SSL_CIPHER;
-    }
-
-    result =
-      rustls_crypto_provider_builder_set_cipher_suites(
-        custom_provider_builder,
-        cipher_suites,
-        cipher_suites_len);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data,
-            "rustls: failed to set ciphersuites for crypto provider builder");
-      rustls_crypto_provider_builder_free(custom_provider_builder);
-      return CURLE_SSL_CIPHER;
-    }
-
-    result = rustls_crypto_provider_builder_build(
-      custom_provider_builder, &custom_provider);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to build custom crypto provider");
-      rustls_crypto_provider_builder_free(custom_provider_builder);
-      return CURLE_SSL_CIPHER;
-    }
-
-    result = rustls_client_config_builder_new_custom(custom_provider,
-                                                     tls_versions,
-                                                     tls_versions_len,
-                                                     &config_builder);
-    free(cipher_suites);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to create client config");
-      return CURLE_SSL_CIPHER;
-    }
+  curl_result = init_config_builder(data, conn_config, &config_builder);
+  if(curl_result != CURLE_OK) {
+    return curl_result;
   }
-
-  rustls_crypto_provider_builder_free(custom_provider_builder);
-  rustls_crypto_provider_free(custom_provider);
 
   if(connssl->alpn) {
     struct alpn_proto_buf proto;
