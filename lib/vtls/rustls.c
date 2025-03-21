@@ -641,6 +641,24 @@ cleanup:
   return result;
 }
 
+static void
+init_config_builder_alpn(struct Curl_easy *data,
+                         const struct ssl_connect_data *connssl,
+                         struct rustls_client_config_builder *config_builder) {
+  struct alpn_proto_buf proto;
+  rustls_slice_bytes alpn[ALPN_ENTRIES_MAX];
+  size_t i;
+
+  for(i = 0; i < connssl->alpn->count; ++i) {
+    alpn[i].data = (const uint8_t *)connssl->alpn->entries[i];
+    alpn[i].len = strlen(connssl->alpn->entries[i]);
+  }
+  rustls_client_config_builder_set_alpn_protocols(config_builder, alpn,
+                                                  connssl->alpn->count);
+  Curl_alpn_to_proto_str(&proto, connssl->alpn);
+  infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
+}
+
 static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
@@ -671,19 +689,9 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(connssl->alpn) {
-    struct alpn_proto_buf proto;
-    rustls_slice_bytes alpn[ALPN_ENTRIES_MAX];
-    size_t i;
-
-    for(i = 0; i < connssl->alpn->count; ++i) {
-      alpn[i].data = (const uint8_t *)connssl->alpn->entries[i];
-      alpn[i].len = strlen(connssl->alpn->entries[i]);
-    }
-    rustls_client_config_builder_set_alpn_protocols(config_builder, alpn,
-                                                    connssl->alpn->count);
-    Curl_alpn_to_proto_str(&proto, connssl->alpn);
-    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
+    init_config_builder_alpn(data, connssl, config_builder);
   }
+
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
