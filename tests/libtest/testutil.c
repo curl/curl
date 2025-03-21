@@ -139,29 +139,33 @@ HMODULE win32_load_system_library(const TCHAR *filename)
 #else
   size_t filenamelen = _tcslen(filename);
   size_t systemdirlen = GetSystemDirectory(NULL, 0);
-  size_t written;
   TCHAR *path;
+  HMODULE module;
 
   if(!filenamelen || filenamelen > 32768 ||
      !systemdirlen || systemdirlen > 32768)
     return NULL;
 
+  module = NULL;
+
   /* systemdirlen includes null character */
   path = malloc(sizeof(TCHAR) * (systemdirlen + 1 + filenamelen));
-  if(!path)
-    return NULL;
+  if(path) {
+    size_t written;
+    /* if written >= systemdirlen then nothing was written */
+    written = GetSystemDirectory(path, (UINT)systemdirlen);
+    if(written && written < systemdirlen) {
+      if(path[written - 1] != _T('\\'))
+        path[written++] = _T('\\');
 
-  /* if written >= systemdirlen then nothing was written */
-  written = GetSystemDirectory(path, (unsigned int)systemdirlen);
-  if(!written || written >= systemdirlen)
-    return NULL;
+      _tcscpy(path + written, filename);
 
-  if(path[written - 1] != _T('\\'))
-    path[written++] = _T('\\');
+      module = LoadLibrary(path);
+    }
+    free(path);
+  }
 
-  _tcscpy(path + written, filename);
-
-  return LoadLibrary(path);
+  return module;
 #endif
 }
 #endif

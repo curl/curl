@@ -726,6 +726,9 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       ret = mbedtls_pk_parse_keyfile(&backend->pk, ssl_config->key,
                                      ssl_config->key_passwd);
 #endif
+      if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
+                       mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
+        ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -754,6 +757,9 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0);
 #endif
+      if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
+                       mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
+        ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -762,10 +768,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
         return CURLE_SSL_CERTPROBLEM;
       }
     }
-
-    if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
-                     mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
-      ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
   }
 
   /* Load the CRL */
