@@ -235,7 +235,7 @@ CURLcode test(char *URL)
   CURLM *m = NULL;
   struct ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
-  struct timeval timeout = {0};
+  struct curltime timeout = {0};
   timeout.tv_sec = (time_t)-1;
 
   assert(test_argc >= 5);
