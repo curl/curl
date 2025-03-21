@@ -66,6 +66,15 @@ static CURLcode map_error(const rustls_result r)
   }
 }
 
+static void
+rustls_failf(struct Curl_easy *data, const rustls_result rr, const char *msg)
+{
+  char errorbuf[STRERROR_LEN];
+  size_t errorlen;
+  rustls_error(rr, errorbuf, sizeof(errorbuf), &errorlen);
+  failf(data, "%s: %.*s", msg, (int)errorlen, errorbuf);
+}
+
 static bool
 cr_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
 {
@@ -159,11 +168,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
 
   rresult = rustls_connection_process_new_packets(backend->conn);
   if(rresult != RUSTLS_RESULT_OK) {
-    char errorbuf[255];
-    size_t errorlen;
-    rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
-    failf(data, "rustls_connection_process_new_packets: %.*s",
-      (int)errorlen, errorbuf);
+    rustls_failf(data, rresult, "rustls_connection_process_new_packets");
     *err = map_error(rresult);
     return -1;
   }
@@ -229,10 +234,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     else if(rresult != RUSTLS_RESULT_OK) {
       /* n always equals 0 in this case, do not need to check it */
-      char errorbuf[255];
-      size_t errorlen;
-      rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
-      failf(data, "rustls_connection_read: %.*s", (int)errorlen, errorbuf);
+      rustls_failf(data, rresult, "rustls_connection_read");
       *err = CURLE_RECV_ERROR;
       nread = -1;
       goto out;
@@ -357,10 +359,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     CURL_TRC_CF(data, cf, "cf_send: adding %zu plain bytes to Rustls", blen);
     rresult = rustls_connection_write(rconn, buf, blen, &plainwritten);
     if(rresult != RUSTLS_RESULT_OK) {
-      char errorbuf[256];
-      size_t errorlen;
-      rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
-      failf(data, "rustls_connection_write: %.*s", (int)errorlen, errorbuf);
+      rustls_failf(data, rresult, "rustls_connection_write");
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
@@ -750,10 +749,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = rustls_client_connection_new(backend->config,
                                         connssl->peer.hostname, &rconn);
   if(result != RUSTLS_RESULT_OK) {
-    char errorbuf[256];
-    size_t errorlen;
-    rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
-    failf(data, "rustls_client_connection_new: %.*s", (int)errorlen, errorbuf);
+    rustls_failf(data, result, "rustls_client_connection_new");
     return CURLE_COULDNT_CONNECT;
   }
   DEBUGASSERT(rconn);
