@@ -3732,7 +3732,30 @@ void Curl_ssh_cleanup(void)
 
 void Curl_ssh_version(char *buffer, size_t buflen)
 {
-  (void)msnprintf(buffer, buflen, "libssh2/%s", libssh2_version(0));
+  const char *crypto_str = "";
+#if LIBSSH2_VERSION_NUM >= 0x010b00
+  switch(libssh2_crypto_engine()) {
+    case libssh2_gcrypt:
+      crypto_str = "libgcrypt";
+      break;
+    case libssh2_mbedtls:
+      crypto_str = "mbedTLS";
+      break;
+    case libssh2_openssl:
+      crypto_str = "OpenSSL";
+      break;
+    case libssh2_os400qc3:
+      crypto_str = "os400qc3";
+      break;
+    case libssh2_wincng:
+      crypto_str = "WinCNG";
+      break;
+    default:
+      break;
+  }
+#endif
+  (void)msnprintf(buffer, buflen, "libssh2/%s%s%s", libssh2_version(0),
+    crypto_str ? "/" : "", crypto_str);
 }
 
 /* The SSH session is associated with the *CONNECTION* but the callback user
