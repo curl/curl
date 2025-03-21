@@ -609,7 +609,7 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 }
 
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
-if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
+if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 590)) {
     push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
 }
 push @cfgarr, "HostKey $hstprvkeyf_config";
