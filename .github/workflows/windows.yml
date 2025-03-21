@@ -343,6 +343,7 @@ jobs:
         timeout-minutes: 10
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }}'
+          export CURL_TEST_SSH_KEY_FORMAT=PEM  # for libssh2-wincng
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
             TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
@@ -931,6 +932,9 @@ jobs:
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
           export TFLAGS='-j8 ${{ matrix.tflags }}'
+          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
+            export CURL_TEST_SSH_KEY_FORMAT=PEM  # for libssh2-wincng
+          fi
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
           if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
