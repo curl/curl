@@ -35,6 +35,15 @@
 
 #include "tool_binmode.h"
 
+#ifdef _WIN32
+/* socket-safe strerror (works on Winsock errors, too) */
+const char *sstrerror(int err)
+{
+  static char buf[512];
+  return curlx_winapi_strerror(err, buf, sizeof(buf));
+}
+#endif /* _WIN32 */
+
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {

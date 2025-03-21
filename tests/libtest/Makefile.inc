@@ -33,7 +33,7 @@ SYSWIN32 = ../../lib/system_win32.c ../../lib/system_win32.h
 # these files are used in every single test program below
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
 FIRSTFILES = first.c first.h
-SUPPORTFILES = $(TIMEDIFF) $(FIRSTFILES) test.h
+SUPPORTFILES = $(TIMEDIFF) $(FIRSTFILES) test.h ../../lib/strerror.c ../../lib/strerror.h
 
 # These are all libcurl test programs
 LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \

@@ -54,6 +54,10 @@
 
 #ifdef _WIN32
 #define sleep(sec) Sleep((sec)*1000)
+
+const char *sstrerror(int err);
+#else
+#define sstrerror(e) strerror(e)
 #endif
 
 #define test_setopt(A,B,C)                                      \
@@ -430,7 +434,7 @@ extern int unitfail;
       ec = SOCKERRNO;                                           \
       fprintf(stderr, "%s:%d select() failed, with "            \
               "errno %d (%s)\n",                                \
-              (Y), (Z), ec, strerror(ec));                      \
+              (Y), (Z), ec, sstrerror(ec));                     \
       res = TEST_ERR_SELECT;                                    \
     }                                                           \
   } while(0)
