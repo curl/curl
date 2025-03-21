@@ -37,12 +37,8 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
-#include "select.h"
 #include "strerror.h"
-#include "multiif.h"
-#include "connect.h" /* for the connect timeout */
 #include "cipher_suite.h"
-#include "rand.h"
 #include "x509asn1.h"
 
 struct rustls_ssl_backend_data
