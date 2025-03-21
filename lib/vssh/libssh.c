@@ -2086,10 +2086,14 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
   struct SSHPROTO *ssh;
   struct ssh_conn *sshc = &conn->proto.sshc;
 
+  if(!sshc->initialised) {
+    Curl_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
+    sshc->initialised = TRUE;
+  }
+
   data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
-  Curl_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
 
   return CURLE_OK;
 }
@@ -2295,47 +2299,50 @@ static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
 static void sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data)
 {
   (void)data;
-  if(sshc->ssh_session) {
-    ssh_free(sshc->ssh_session);
-    sshc->ssh_session = NULL;
-  }
+  if(sshc->initialised) {
+    if(sshc->ssh_session) {
+      ssh_free(sshc->ssh_session);
+      sshc->ssh_session = NULL;
+    }
 
-  /* worst-case scenario cleanup */
-  DEBUGASSERT(sshc->ssh_session == NULL);
-  DEBUGASSERT(sshc->scp_session == NULL);
+    /* worst-case scenario cleanup */
+    DEBUGASSERT(sshc->ssh_session == NULL);
+    DEBUGASSERT(sshc->scp_session == NULL);
 
-  if(sshc->readdir_tmp) {
-    ssh_string_free_char(sshc->readdir_tmp);
-    sshc->readdir_tmp = NULL;
-  }
-  if(sshc->quote_attrs) {
-    sftp_attributes_free(sshc->quote_attrs);
-    sshc->quote_attrs = NULL;
-  }
-  if(sshc->readdir_attrs) {
-    sftp_attributes_free(sshc->readdir_attrs);
-    sshc->readdir_attrs = NULL;
-  }
-  if(sshc->readdir_link_attrs) {
-    sftp_attributes_free(sshc->readdir_link_attrs);
-    sshc->readdir_link_attrs = NULL;
-  }
-  if(sshc->privkey) {
-    ssh_key_free(sshc->privkey);
-    sshc->privkey = NULL;
-  }
-  if(sshc->pubkey) {
-    ssh_key_free(sshc->pubkey);
-    sshc->pubkey = NULL;
-  }
+    if(sshc->readdir_tmp) {
+      ssh_string_free_char(sshc->readdir_tmp);
+      sshc->readdir_tmp = NULL;
+    }
+    if(sshc->quote_attrs) {
+      sftp_attributes_free(sshc->quote_attrs);
+      sshc->quote_attrs = NULL;
+    }
+    if(sshc->readdir_attrs) {
+      sftp_attributes_free(sshc->readdir_attrs);
+      sshc->readdir_attrs = NULL;
+    }
+    if(sshc->readdir_link_attrs) {
+      sftp_attributes_free(sshc->readdir_link_attrs);
+      sshc->readdir_link_attrs = NULL;
+    }
+    if(sshc->privkey) {
+      ssh_key_free(sshc->privkey);
+      sshc->privkey = NULL;
+    }
+    if(sshc->pubkey) {
+      ssh_key_free(sshc->pubkey);
+      sshc->pubkey = NULL;
+    }
 
-  Curl_safefree(sshc->rsa_pub);
-  Curl_safefree(sshc->rsa);
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
-  Curl_dyn_free(&sshc->readdir_buf);
-  Curl_safefree(sshc->readdir_linkPath);
-  SSH_STRING_FREE_CHAR(sshc->homedir);
+    Curl_safefree(sshc->rsa_pub);
+    Curl_safefree(sshc->rsa);
+    Curl_safefree(sshc->quote_path1);
+    Curl_safefree(sshc->quote_path2);
+    Curl_dyn_free(&sshc->readdir_buf);
+    Curl_safefree(sshc->readdir_linkPath);
+    SSH_STRING_FREE_CHAR(sshc->homedir);
+    sshc->initialised = FALSE;
+  }
 }
 
 /* BLOCKING, but the function is using the state machine so the only reason

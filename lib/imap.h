@@ -85,6 +85,7 @@ struct imap_conn {
   BIT(tls_supported);         /* StartTLS capability supported by server */
   BIT(login_disabled);        /* LOGIN command disabled by server */
   BIT(ir_supported);          /* Initial response supported by server */
+  BIT(initialised);           /* members have been initialised */
 };
 
 extern const struct Curl_handler Curl_handler_imap;

@@ -90,6 +90,7 @@
 #include "hsts.h"
 #include "noproxy.h"
 #include "cfilters.h"
+#include "curl_krb5.h"
 #include "idn.h"
 
 /* And now for the protocols */
@@ -506,39 +507,38 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
+  Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_req_init(&data->req);
+  Curl_initinfo(data);
+#ifndef CURL_DISABLE_HTTP
+  Curl_llist_init(&data->state.httphdrs, NULL);
+#endif
+  Curl_netrc_init(&data->state.netrc);
 
   result = Curl_resolver_init(data, &data->state.async.resolver);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-    Curl_req_free(&data->req, data);
-    free(data);
-    return result;
+    goto out;
   }
 
   result = Curl_init_userdefined(data);
-  if(!result) {
-    Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
-    Curl_initinfo(data);
+  if(result)
+    goto out;
 
-    /* most recent connection is not yet defined */
-    data->state.lastconnect_id = -1;
-    data->state.recent_conn_id = -1;
-    /* and not assigned an id yet */
-    data->id = -1;
-    data->mid = -1;
+  /* most recent connection is not yet defined */
+  data->state.lastconnect_id = -1;
+  data->state.recent_conn_id = -1;
+  /* and not assigned an id yet */
+  data->id = -1;
+  data->mid = -1;
 #ifndef CURL_DISABLE_DOH
-    data->set.dohfor_mid = -1;
+  data->set.dohfor_mid = -1;
 #endif
 
-    data->progress.flags |= PGRS_HIDE;
-    data->state.current_speed = -1; /* init to negative == impossible */
-#ifndef CURL_DISABLE_HTTP
-    Curl_llist_init(&data->state.httphdrs, NULL);
-#endif
-    Curl_netrc_init(&data->state.netrc);
-  }
+  data->progress.flags |= PGRS_HIDE;
+  data->state.current_speed = -1; /* init to negative == impossible */
 
+out:
   if(result) {
     Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
@@ -578,6 +578,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
 #endif
+  Curl_sec_conn_destroy(conn);
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
   Curl_safefree(conn->sasl_authzid);
@@ -3399,6 +3400,10 @@ static CURLcode create_conn(struct Curl_easy *data,
      parent can cleanup any possible allocs we may have done before
      any failure */
   *in_connect = conn;
+
+  /* Do the unfailable inits first, before checks that may early return */
+  /* GSSAPI related inits */
+  Curl_sec_conn_init(conn);
 
   result = parseurlandfillconn(data, conn);
   if(result)

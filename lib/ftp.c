@@ -4108,7 +4108,6 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   Curl_safefree(ftpc->prevpath);
   Curl_safefree(ftpc->server_os);
   Curl_pp_disconnect(pp);
-  Curl_sec_end(conn);
   return CURLE_OK;
 }
 
