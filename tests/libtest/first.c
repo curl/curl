@@ -33,9 +33,18 @@
 #  include "memdebug.h"
 #endif
 
-#include "timediff.h"
-
 #include "tool_binmode.h"
+
+#ifdef _WIN32
+#include "strerror.h"
+
+/* socket-safe strerror (works on Winsock errors, too) */
+const char *sstrerror(int err)
+{
+  static char buf[512];
+  return curlx_winapi_strerror(err, buf, sizeof(buf));
+}
+#endif /* _WIN32 */
 
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
@@ -79,7 +88,7 @@ char *libtest_arg4 = NULL;
 int test_argc;
 char **test_argv;
 
-struct timeval tv_test_start; /* for test timing */
+struct curltime tv_test_start; /* for test timing */
 
 int unitfail; /* for unittests */
 

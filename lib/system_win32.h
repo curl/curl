@@ -28,6 +28,12 @@
 
 #ifdef _WIN32
 
+#ifndef BUILDING_LIBCURL
+/* this renames the functions so that the tool code can use the same code
+   without getting symbol collisions */
+#define Curl_load_library(a) curlx_load_library(a)
+#endif
+
 #include <curl/curl.h>
 
 extern LARGE_INTEGER Curl_freq;

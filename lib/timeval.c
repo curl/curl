@@ -34,6 +34,7 @@
 
 static LARGE_INTEGER s_freq;
 static bool s_isVistaOrGreater;
+static bool s_timeval_init;
 
 /* For tool or tests, we must initialize before calling Curl_now() */
 void curlx_now_init(void)
@@ -45,6 +46,8 @@ void curlx_now_init(void)
     s_isVistaOrGreater = false;
 
   QueryPerformanceFrequency(&s_freq);
+
+  s_timeval_init = TRUE;
 }
 #endif
 
@@ -56,6 +59,8 @@ struct curltime Curl_now(void)
 #ifdef BUILDING_LIBCURL
   isVistaOrGreater = Curl_isVistaOrGreater;
 #else
+  if(!s_timeval_init)
+    curlx_now_init();
   isVistaOrGreater = s_isVistaOrGreater;
 #endif
   if(isVistaOrGreater) { /* QPC timer might have issues pre-Vista */

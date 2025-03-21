@@ -24,26 +24,4 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
-
-struct timeval tutil_tvnow(void);
-
-/*
- * Make sure that the first argument (t1) is the more recent time and t2 is
- * the older time, as otherwise you get a weird negative time-diff back...
- *
- * Returns: the time difference in number of milliseconds.
- */
-long tutil_tvdiff(struct timeval t1, struct timeval t2);
-
-/*
- * Same as tutil_tvdiff but with full usec resolution.
- *
- * Returns: the time difference in seconds with subsecond resolution.
- */
-double tutil_tvdiff_secs(struct timeval t1, struct timeval t2);
-
-#ifdef _WIN32
-HMODULE win32_load_system_library(const TCHAR *filename);
-#endif
-
 #endif  /* HEADER_CURL_LIBTEST_TESTUTIL_H */

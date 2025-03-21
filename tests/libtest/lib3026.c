@@ -29,6 +29,8 @@
 #define NUM_THREADS 100
 
 #ifdef _WIN32
+#include "system_win32.h"
+
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
 static DWORD WINAPI run_thread(LPVOID ptr)
 #else
@@ -72,8 +74,8 @@ CURLcode test(char *URL)
      libcurl calls LoadLibrary/FreeLibrary it only increases/decreases the
      library's refcount rather than actually loading/unloading the library,
      which would affect the test runtime. */
-  (void)win32_load_system_library(TEXT("secur32.dll"));
-  (void)win32_load_system_library(TEXT("iphlpapi.dll"));
+  (void)curlx_load_library(TEXT("secur32.dll"));
+  (void)curlx_load_library(TEXT("iphlpapi.dll"));
 
   for(i = 0; i < tid_count; i++) {
     curl_win_thread_handle_t th;

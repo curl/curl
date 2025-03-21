@@ -42,6 +42,7 @@
 #include <unistd.h>
 #endif
 
+#include "timeval.h"
 #include "curl_printf.h"
 
 /* GCC <4.6 does not support '#pragma GCC diagnostic push' and
@@ -53,6 +54,10 @@
 
 #ifdef _WIN32
 #define sleep(sec) Sleep((sec)*1000)
+
+const char *sstrerror(int err);
+#else
+#define sstrerror(e) strerror(e)
 #endif
 
 #define test_setopt(A,B,C)                                      \
@@ -71,7 +76,7 @@ extern char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
 extern int test_argc;
 extern char **test_argv;
 
-extern struct timeval tv_test_start; /* for test timing */
+extern struct curltime tv_test_start; /* for test timing */
 
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
@@ -429,7 +434,7 @@ extern int unitfail;
       ec = SOCKERRNO;                                           \
       fprintf(stderr, "%s:%d select() failed, with "            \
               "errno %d (%s)\n",                                \
-              (Y), (Z), ec, strerror(ec));                      \
+              (Y), (Z), ec, sstrerror(ec));                     \
       res = TEST_ERR_SELECT;                                    \
     }                                                           \
   } while(0)
@@ -449,14 +454,15 @@ extern int unitfail;
 /* ---------------------------------------------------------------- */
 
 #define start_test_timing() do { \
-  tv_test_start = tutil_tvnow(); \
+  tv_test_start = curlx_now(); \
 } while(0)
 
 #define exe_test_timedout(Y,Z) do {                                       \
-  long timediff = tutil_tvdiff(tutil_tvnow(), tv_test_start);             \
+  timediff_t timediff = curlx_timediff(curlx_now(), tv_test_start);       \
   if(timediff > (TEST_HANG_TIMEOUT)) {                                    \
     fprintf(stderr, "%s:%d ABORTING TEST, since it seems "                \
-            "that it would have run forever (%ld ms > %ld ms)\n",         \
+            "that it would have run forever (%" FMT_TIMEDIFF_T " ms"      \
+            " > %ld ms)\n",                                               \
             (Y), (Z), timediff, (long) (TEST_HANG_TIMEOUT));              \
     res = TEST_ERR_RUNS_FOREVER;                                          \
   }                                                                       \

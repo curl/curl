@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"
 
@@ -36,7 +35,7 @@ CURLcode test(char *URL)
   int numfds;
   int i;
   CURLcode res = CURLE_OK;
-  struct timeval time_before_wait, time_after_wait;
+  struct curltime time_before_wait, time_after_wait;
 
   (void)URL;
 
@@ -48,11 +47,11 @@ CURLcode test(char *URL)
 
   /* no wakeup */
 
-  time_before_wait = tutil_tvnow();
+  time_before_wait = curlx_now();
   multi_poll(multi, NULL, 0, 1000, &numfds);
-  time_after_wait = tutil_tvnow();
+  time_after_wait = curlx_now();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timediff(time_after_wait, time_before_wait) < 500) {
     fprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -65,11 +64,11 @@ CURLcode test(char *URL)
 
   res_multi_wakeup(multi);
 
-  time_before_wait = tutil_tvnow();
+  time_before_wait = curlx_now();
   multi_poll(multi, NULL, 0, 1000, &numfds);
-  time_after_wait = tutil_tvnow();
+  time_after_wait = curlx_now();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) > 500) {
+  if(curlx_timediff(time_after_wait, time_before_wait) > 500) {
     fprintf(stderr, "%s:%d curl_multi_poll returned too late\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -80,11 +79,11 @@ CURLcode test(char *URL)
 
   /* previous wakeup should not wake up this */
 
-  time_before_wait = tutil_tvnow();
+  time_before_wait = curlx_now();
   multi_poll(multi, NULL, 0, 1000, &numfds);
-  time_after_wait = tutil_tvnow();
+  time_after_wait = curlx_now();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timediff(time_after_wait, time_before_wait) < 500) {
     fprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -98,11 +97,11 @@ CURLcode test(char *URL)
   for(i = 0; i < WAKEUP_NUM; ++i)
     res_multi_wakeup(multi);
 
-  time_before_wait = tutil_tvnow();
+  time_before_wait = curlx_now();
   multi_poll(multi, NULL, 0, 1000, &numfds);
-  time_after_wait = tutil_tvnow();
+  time_after_wait = curlx_now();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) > 500) {
+  if(curlx_timediff(time_after_wait, time_before_wait) > 500) {
     fprintf(stderr, "%s:%d curl_multi_poll returned too late\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -113,11 +112,11 @@ CURLcode test(char *URL)
 
   /* Even lots of previous wakeups should not wake up this. */
 
-  time_before_wait = tutil_tvnow();
+  time_before_wait = curlx_now();
   multi_poll(multi, NULL, 0, 1000, &numfds);
-  time_after_wait = tutil_tvnow();
+  time_after_wait = curlx_now();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timediff(time_after_wait, time_before_wait) < 500) {
     fprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
             __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
