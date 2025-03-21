@@ -332,7 +332,7 @@ jobs:
 
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-bearssl
         env:
           cache-name: cache-bearssl
@@ -354,7 +354,7 @@ jobs:
 
       - name: 'cache libressl'
         if: contains(matrix.build.install_steps, 'libressl')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -374,7 +374,7 @@ jobs:
 
       - name: 'cache wolfssl (all)'
         if: contains(matrix.build.install_steps, 'wolfssl-all')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-wolfssl-all
         env:
           cache-name: cache-wolfssl-all
@@ -396,7 +396,7 @@ jobs:
 
       - name: 'cache wolfssl (opensslextra)'
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-wolfssl-opensslextra
         env:
           cache-name: cache-wolfssl-opensslextra
@@ -418,7 +418,7 @@ jobs:
 
       - name: 'cache wolfssh'
         if: contains(matrix.build.install_steps, 'wolfssl')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-wolfssh
         env:
           cache-name: cache-wolfssh
@@ -440,7 +440,7 @@ jobs:
 
       - name: 'cache mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-mbedtls
         env:
           cache-name: cache-mbedtls-threadsafe
@@ -464,7 +464,7 @@ jobs:
 
       - name: 'cache openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-openssl-tsan
         env:
           cache-name: cache-openssl-tsan
@@ -483,7 +483,7 @@ jobs:
 
       - name: 'cache quictls'
         if: contains(matrix.build.install_steps, 'quictls')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-quictls
         env:
           cache-name: cache-quictls
@@ -502,7 +502,7 @@ jobs:
 
       - name: 'cache msh3'
         if: contains(matrix.build.install_steps, 'msh3')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-msh3
         env:
           cache-name: cache-msh3
@@ -521,7 +521,7 @@ jobs:
 
       - name: 'cache awslc'
         if: contains(matrix.build.install_steps, 'awslc')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -543,7 +543,7 @@ jobs:
 
       - name: 'cache rustls'
         if: contains(matrix.build.install_steps, 'rustls')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         id: cache-rustls
         env:
           cache-name: cache-rustls
