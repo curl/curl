@@ -660,6 +660,103 @@ init_config_builder_alpn(struct Curl_easy *data,
 }
 
 static CURLcode
+init_config_builder_verifier(struct Curl_easy *data,
+                             struct rustls_client_config_builder *builder,
+                             const struct ssl_primary_config *conn_config,
+                             const struct curl_blob *ca_info_blob,
+                             const char * const ssl_cafile) {
+  const struct rustls_root_cert_store *roots = NULL;
+  struct rustls_root_cert_store_builder *roots_builder = NULL;
+  struct rustls_web_pki_server_cert_verifier_builder *verifier_builder = NULL;
+  struct rustls_server_cert_verifier *server_cert_verifier = NULL;
+  rustls_result rr = RUSTLS_RESULT_OK;
+  CURLcode result = CURLE_OK;
+
+  roots_builder = rustls_root_cert_store_builder_new();
+  if(ca_info_blob) {
+    rr = rustls_root_cert_store_builder_add_pem(roots_builder,
+                                                ca_info_blob->data,
+                                                ca_info_blob->len,
+                                                1);
+    if(rr != RUSTLS_RESULT_OK) {
+      rustls_failf(data, rr, "failed to parse trusted certificates from blob");
+
+      result = CURLE_SSL_CACERT_BADFILE;
+      goto cleanup;
+    }
+  }
+  else if(ssl_cafile) {
+    rr = rustls_root_cert_store_builder_load_roots_from_file(roots_builder,
+                                                             ssl_cafile,
+                                                             1);
+    if(rr != RUSTLS_RESULT_OK) {
+      rustls_failf(data, rr, "failed to load trusted certificates");
+
+      result = CURLE_SSL_CACERT_BADFILE;
+      goto cleanup;
+    }
+  }
+
+  rr = rustls_root_cert_store_builder_build(roots_builder, &roots);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "failed to build trusted root certificate store");
+    result = CURLE_SSL_CACERT_BADFILE;
+  }
+
+  verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
+
+  if(conn_config->CRLfile) {
+    struct dynbuf crl_contents;
+    Curl_dyn_init(&crl_contents, DYN_CRLFILE_SIZE);
+    if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
+      failf(data, "rustls: failed to read revocation list file");
+      Curl_dyn_free(&crl_contents);
+      result = CURLE_SSL_CRL_BADFILE;
+      goto cleanup;
+    }
+
+    rr = rustls_web_pki_server_cert_verifier_builder_add_crl(
+      verifier_builder,
+      Curl_dyn_uptr(&crl_contents),
+      Curl_dyn_len(&crl_contents));
+    if(rr != RUSTLS_RESULT_OK) {
+      rustls_failf(data, rr, "failed to parse revocation list");
+      Curl_dyn_free(&crl_contents);
+      result = CURLE_SSL_CRL_BADFILE;
+      goto cleanup;
+    }
+
+    Curl_dyn_free(&crl_contents);
+  }
+
+  rr = rustls_web_pki_server_cert_verifier_builder_build(
+    verifier_builder, &server_cert_verifier);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "failed to build certificate verifier");
+    result = CURLE_SSL_CACERT_BADFILE;
+    goto cleanup;
+  }
+
+  rustls_client_config_builder_set_server_verifier(builder,
+                                                   server_cert_verifier);
+cleanup:
+  if(roots_builder) {
+    rustls_root_cert_store_builder_free(roots_builder);
+  }
+  if(roots) {
+    rustls_root_cert_store_free(roots);
+  }
+  if(verifier_builder) {
+    rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
+  }
+  if(server_cert_verifier) {
+    rustls_server_cert_verifier_free(server_cert_verifier);
+  }
+
+  return result;
+}
+
+static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
 {
@@ -668,10 +765,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     Curl_ssl_cf_get_primary_config(cf);
   struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
-  const struct rustls_root_cert_store *roots = NULL;
-  struct rustls_root_cert_store_builder *roots_builder = NULL;
-  struct rustls_web_pki_server_cert_verifier_builder *verifier_builder = NULL;
-  struct rustls_server_cert_verifier *server_cert_verifier = NULL;
+
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
@@ -697,79 +791,15 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       config_builder, cr_verify_none);
   }
   else if(ca_info_blob || ssl_cafile) {
-    roots_builder = rustls_root_cert_store_builder_new();
-
-    if(ca_info_blob) {
-      /* Enable strict parsing only if verification is not disabled. */
-      result = rustls_root_cert_store_builder_add_pem(roots_builder,
-                                                      ca_info_blob->data,
-                                                      ca_info_blob->len,
-                                                      verifypeer);
-      if(result != RUSTLS_RESULT_OK) {
-        failf(data, "rustls: failed to parse trusted certificates from blob");
-        rustls_root_cert_store_builder_free(roots_builder);
-        rustls_client_config_builder_free(config_builder);
-        return CURLE_SSL_CACERT_BADFILE;
-      }
-    }
-    else if(ssl_cafile) {
-      /* Enable strict parsing only if verification is not disabled. */
-      result = rustls_root_cert_store_builder_load_roots_from_file(
-        roots_builder, ssl_cafile, verifypeer);
-      if(result != RUSTLS_RESULT_OK) {
-        failf(data, "rustls: failed to load trusted certificates");
-        rustls_root_cert_store_builder_free(roots_builder);
-        rustls_client_config_builder_free(config_builder);
-        return CURLE_SSL_CACERT_BADFILE;
-      }
-    }
-
-    result = rustls_root_cert_store_builder_build(roots_builder, &roots);
-    rustls_root_cert_store_builder_free(roots_builder);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to build trusted root certificate store");
+    curl_result = init_config_builder_verifier(data,
+                                               config_builder,
+                                               conn_config,
+                                               ca_info_blob,
+                                               ssl_cafile);
+    if(curl_result != CURLE_OK) {
       rustls_client_config_builder_free(config_builder);
-      return CURLE_SSL_CACERT_BADFILE;
+      return curl_result;
     }
-
-    verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
-    rustls_root_cert_store_free(roots);
-
-    if(conn_config->CRLfile) {
-      struct dynbuf crl_contents;
-      Curl_dyn_init(&crl_contents, DYN_CRLFILE_SIZE);
-      if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
-        failf(data, "rustls: failed to read revocation list file");
-        Curl_dyn_free(&crl_contents);
-        rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
-        return CURLE_SSL_CRL_BADFILE;
-      }
-
-      result = rustls_web_pki_server_cert_verifier_builder_add_crl(
-        verifier_builder,
-        Curl_dyn_uptr(&crl_contents),
-        Curl_dyn_len(&crl_contents));
-      Curl_dyn_free(&crl_contents);
-      if(result != RUSTLS_RESULT_OK) {
-        failf(data, "rustls: failed to parse revocation list");
-        rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
-        return CURLE_SSL_CRL_BADFILE;
-      }
-    }
-
-    result = rustls_web_pki_server_cert_verifier_builder_build(
-      verifier_builder, &server_cert_verifier);
-    rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to build certificate verifier");
-      rustls_server_cert_verifier_free(server_cert_verifier);
-      rustls_client_config_builder_free(config_builder);
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-
-    rustls_client_config_builder_set_server_verifier(config_builder,
-                                                     server_cert_verifier);
-    rustls_server_cert_verifier_free(server_cert_verifier);
   }
 
   result = rustls_client_config_builder_build(
