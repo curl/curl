@@ -51,7 +51,7 @@ struct rustls_ssl_backend_data
 };
 
 /* For a given rustls_result error code, return the best-matching CURLcode. */
-static CURLcode map_error(rustls_result r)
+static CURLcode map_error(const rustls_result r)
 {
   if(rustls_result_is_cert_error(r)) {
     return CURLE_PEER_FAILED_VERIFICATION;
@@ -69,7 +69,7 @@ static CURLcode map_error(rustls_result r)
 static bool
 cr_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
 {
-  struct ssl_connect_data *ctx = cf->ctx;
+  const struct ssl_connect_data *ctx = cf->ctx;
   struct rustls_ssl_backend_data *backend;
 
   (void)data;
@@ -86,7 +86,7 @@ struct io_ctx {
 static int
 read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
 {
-  struct io_ctx *io_ctx = userdata;
+  const struct io_ctx *io_ctx = userdata;
   struct ssl_connect_data *const connssl = io_ctx->cf->ctx;
   CURLcode result;
   int ret = 0;
@@ -111,7 +111,7 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
 static int
 write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
 {
-  struct io_ctx *io_ctx = userdata;
+  const struct io_ctx *io_ctx = userdata;
   CURLcode result;
   int ret = 0;
   ssize_t nwritten = Curl_conn_cf_send(io_ctx->cf->next, io_ctx->data,
@@ -133,7 +133,7 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
 static ssize_t tls_recv_more(struct Curl_cfilter *cf,
                              struct Curl_easy *data, CURLcode *err)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
+  const struct ssl_connect_data *const connssl = cf->ctx;
   struct rustls_ssl_backend_data *const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct io_ctx io_ctx;
@@ -189,7 +189,7 @@ static ssize_t
 cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
             char *plainbuf, size_t plainlen, CURLcode *err)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
+  const struct ssl_connect_data *const connssl = cf->ctx;
   struct rustls_ssl_backend_data *const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
@@ -318,7 +318,7 @@ static ssize_t
 cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         const void *plainbuf, size_t plainlen, CURLcode *err)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
+  const struct ssl_connect_data *const connssl = cf->ctx;
   struct rustls_ssl_backend_data *const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
@@ -415,7 +415,7 @@ read_file_into(const char *filename,
 
   while(!feof(f)) {
     uint8_t buf[256];
-    size_t rr = fread(buf, 1, sizeof(buf), f);
+    const size_t rr = fread(buf, 1, sizeof(buf), f);
     if(rr == 0 ||
        CURLE_OK != Curl_dyn_addn(out, buf, rr)) {
       fclose(f);
@@ -433,8 +433,8 @@ cr_get_selected_ciphers(struct Curl_easy *data,
                         const struct rustls_supported_ciphersuite **selected,
                         size_t *selected_size)
 {
-  size_t supported_len = *selected_size;
-  size_t default_len = rustls_default_crypto_provider_ciphersuites_len();
+  const size_t supported_len = *selected_size;
+  const size_t default_len = rustls_default_crypto_provider_ciphersuites_len();
   const struct rustls_supported_ciphersuite *entry;
   const char *ciphers = ciphers12;
   size_t count = 0, default13_count = 0, i, j;
@@ -523,8 +523,9 @@ static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  const struct ssl_connect_data *connssl = cf->ctx;
+  const struct ssl_primary_config *conn_config =
+    Curl_ssl_cf_get_primary_config(cf);
   struct rustls_crypto_provider_builder *custom_provider_builder = NULL;
   const struct rustls_crypto_provider *custom_provider = NULL;
   struct rustls_connection *rconn = NULL;
@@ -784,9 +785,9 @@ cr_connect(struct Curl_cfilter *cf,
            struct Curl_easy *data, bool *done)
 {
   struct ssl_connect_data *const connssl = cf->ctx;
-  struct rustls_ssl_backend_data *const backend =
+  const struct rustls_ssl_backend_data *const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
-  struct rustls_connection *rconn = NULL;
+  const struct rustls_connection *rconn = NULL;
   CURLcode tmperr = CURLE_OK;
   int result;
   bool wants_read;
@@ -831,8 +832,10 @@ cr_connect(struct Curl_cfilter *cf,
       }
       /* REALLY Done with the handshake. */
       {
-        uint16_t proto = rustls_connection_get_protocol_version(rconn);
-        uint16_t cipher = rustls_connection_get_negotiated_ciphersuite(rconn);
+        const uint16_t proto =
+          rustls_connection_get_protocol_version(rconn);
+        const uint16_t cipher =
+          rustls_connection_get_negotiated_ciphersuite(rconn);
         char buf[64] = "";
         const char *ver = "TLS version unknown";
         if(proto == RUSTLS_TLS_VERSION_TLSV1_3)
@@ -940,7 +943,7 @@ cr_get_internals(struct ssl_connect_data *connssl,
 static CURLcode
 cr_shutdown(struct Curl_cfilter *cf,
             struct Curl_easy *data,
-            bool send_shutdown, bool *done)
+            const bool send_shutdown, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct rustls_ssl_backend_data *backend =
@@ -1009,7 +1012,7 @@ out:
 static void
 cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
+  const struct ssl_connect_data *connssl = cf->ctx;
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
 
@@ -1027,7 +1030,7 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static size_t cr_version(char *buffer, size_t size)
 {
-  struct rustls_str ver = rustls_version();
+  const struct rustls_str ver = rustls_version();
   return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
 }
 
