@@ -65,6 +65,9 @@ use globalconfig;
 use pathhelp qw(
     exe_ext
     );
+use testutil qw(
+    exerunner
+    );
 
 our $logfile;  # server log file name, for logmsg
 
@@ -251,7 +254,7 @@ sub server_exe {
     else {
         $cmd = $SRVDIR . $name . exe_ext($ext);
     }
-    return "$cmd";
+    return exerunner() . "$cmd";
 }
 
 
@@ -269,6 +272,9 @@ sub server_exe_args {
     }
     else {
         @cmd = ($SRVDIR . $name . exe_ext($ext));
+    }
+    if($ENV{'CURL_TEST_EXE_RUNNER'}) {
+        unshift @cmd, $ENV{'CURL_TEST_EXE_RUNNER'};
     }
     return @cmd;
 }
