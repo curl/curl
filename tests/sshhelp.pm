@@ -50,6 +50,7 @@ BEGIN {
         $hstpubsha256f
         $cliprvkeyf
         $clipubkeyf
+        display_file_top
         display_sshdconfig
         display_sshconfig
         display_sftpconfig
@@ -184,6 +185,21 @@ sub display_file {
         while(my $line = <$displayfh>) {
             print "$line";
         }
+        close $displayfh;
+    }
+    print "=== End of file $filename\n";
+}
+
+
+#***************************************************************************
+# Display first line of the given file
+#
+sub display_file_top {
+    my $filename = $_[0];
+    print "=== Top of file $filename\n";
+    if(open(my $displayfh, "<", "$filename")) {
+        my $line = <$displayfh>;
+        print "$line";
         close $displayfh;
     }
     print "=== End of file $filename\n";
