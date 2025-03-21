@@ -322,9 +322,6 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
   size_t plainwritten = 0;
-  rustls_result rresult;
-  char errorbuf[256];
-  size_t errorlen;
   const unsigned char *buf = plainbuf;
   size_t blen = plainlen;
   ssize_t nwritten = 0;
@@ -356,9 +353,12 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(blen > 0) {
+    rustls_result rresult;
     CURL_TRC_CF(data, cf, "cf_send: adding %zu plain bytes to Rustls", blen);
     rresult = rustls_connection_write(rconn, buf, blen, &plainwritten);
     if(rresult != RUSTLS_RESULT_OK) {
+      char errorbuf[256];
+      size_t errorlen;
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
       failf(data, "rustls_connection_write: %.*s", (int)errorlen, errorbuf);
       *err = CURLE_WRITE_ERROR;
@@ -538,8 +538,6 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
   const bool verifypeer = conn_config->verifypeer;
-  char errorbuf[256];
-  size_t errorlen;
   rustls_result result;
 
   DEBUGASSERT(backend);
@@ -752,6 +750,8 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = rustls_client_connection_new(backend->config,
                                         connssl->peer.hostname, &rconn);
   if(result != RUSTLS_RESULT_OK) {
+    char errorbuf[256];
+    size_t errorlen;
     rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
     failf(data, "rustls_client_connection_new: %.*s", (int)errorlen, errorbuf);
     return CURLE_COULDNT_CONNECT;
@@ -949,7 +949,6 @@ cr_shutdown(struct Curl_cfilter *cf,
     (struct rustls_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
   ssize_t nwritten, nread;
-  char buf[1024];
   size_t i;
 
   DEBUGASSERT(backend);
@@ -982,6 +981,7 @@ cr_shutdown(struct Curl_cfilter *cf,
   }
 
   for(i = 0; i < 10; ++i) {
+    char buf[1024];
     nread = cr_recv(cf, data, buf, (int)sizeof(buf), &result);
     if(nread <= 0)
       break;
