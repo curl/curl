@@ -787,58 +787,60 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
-  const bool verifypeer = conn_config->verifypeer;
-  rustls_result result;
-  CURLcode curl_result;
+  CURLcode result = CURLE_OK;
+  rustls_result rr;
 
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  curl_result = init_config_builder(data, conn_config, &config_builder);
-  if(curl_result != CURLE_OK) {
-    return curl_result;
+  result = init_config_builder(data, conn_config, &config_builder);
+  if(result != CURLE_OK) {
+    return result;
   }
 
   if(connssl->alpn) {
     init_config_builder_alpn(data, connssl, config_builder);
   }
 
-  if(!verifypeer) {
+  if(!conn_config->verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
   }
   else if(ca_info_blob || ssl_cafile) {
-    curl_result = init_config_builder_verifier(data,
-                                               config_builder,
-                                               conn_config,
-                                               ca_info_blob,
-                                               ssl_cafile);
-    if(curl_result != CURLE_OK) {
+    result = init_config_builder_verifier(data,
+                                          config_builder,
+                                          conn_config,
+                                          ca_info_blob,
+                                          ssl_cafile);
+    if(result != CURLE_OK) {
       rustls_client_config_builder_free(config_builder);
-      return curl_result;
+      return result;
     }
   }
 
-  result = rustls_client_config_builder_build(
+  rr = rustls_client_config_builder_build(
     config_builder,
     &backend->config);
-  if(result != RUSTLS_RESULT_OK) {
-    failf(data, "rustls: failed to build client config");
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "failed to build client config");
+    rustls_client_config_builder_free(config_builder);
     rustls_client_config_free(backend->config);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
   DEBUGASSERT(rconn == NULL);
-  result = rustls_client_connection_new(backend->config,
-                                        connssl->peer.hostname, &rconn);
-  if(result != RUSTLS_RESULT_OK) {
+  rr = rustls_client_connection_new(backend->config,
+                                    connssl->peer.hostname,
+                                    &rconn);
+  if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, result, "rustls_client_connection_new");
     return CURLE_COULDNT_CONNECT;
   }
   DEBUGASSERT(rconn);
   rustls_connection_set_userdata(rconn, backend);
   backend->conn = rconn;
-  return CURLE_OK;
+
+  return result;
 }
 
 static void
