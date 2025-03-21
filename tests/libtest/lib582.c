@@ -165,7 +165,7 @@ static int checkForCompletion(CURLM *curl, int *success)
   return result;
 }
 
-static int getMicroSecondTimeout(struct timeval *timeout)
+static int getMicroSecondTimeout(struct curltime *timeout)
 {
   struct curltime now;
   ssize_t result;
