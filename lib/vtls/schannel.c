@@ -975,7 +975,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(!backend->cred) {
     char *snihost;
     result = schannel_acquire_credential_handle(cf, data);
-    if(result)
+    if(result || !backend->cred)
       return result;
     /* schannel_acquire_credential_handle() sets backend->cred accordingly or
        it returns error otherwise. */
@@ -1631,6 +1631,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       args.data = data;
       args.idx = 0;
       args.certs_count = certs_count;
+      args.result = CURLE_OK;
       traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
       result = args.result;
     }
@@ -1941,7 +1942,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                                     backend->encdata_offset),
                               size, err);
     if(*err) {
-      nread = -1;
       if(*err == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
       else if(*err == CURLE_RECV_ERROR)
