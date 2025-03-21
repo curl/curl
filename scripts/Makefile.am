@@ -47,7 +47,7 @@ if CROSSCOMPILING
 	@echo "NOTICE: we can't generate zsh completion when cross-compiling!"
 else # if not cross-compiling:
 	if test -z "$(PERL)"; then echo "No perl: can't install completion script"; else \
-	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell zsh > $@ ; fi
+	$(PERL) $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell zsh > $@ ; fi
 endif
 endif
 
@@ -57,7 +57,7 @@ if CROSSCOMPILING
 	@echo "NOTICE: we can't generate fish completion when cross-compiling!"
 else # if not cross-compiling:
 	if test -z "$(PERL)"; then echo "No perl: can't install completion script"; else \
-	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell fish > $@ ; fi
+	$(PERL) $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell fish > $@ ; fi
 endif
 endif
 

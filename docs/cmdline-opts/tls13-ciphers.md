@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: tls13-ciphers
 Arg: <list>
-help: TLS 1.3 cipher suites to use
+Help: TLS 1.3 cipher suites to use
 Protocols: TLS
 Category: tls
 Added: 7.61.0
