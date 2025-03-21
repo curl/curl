@@ -409,12 +409,12 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f),
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
     logmsg "generating host keys...\n" if($verbose);
-    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($hstprvkeyf) . " -C 'curl test server' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -b 2048 -f " . pp($hstprvkeyf) . " -C 'curl test server' -N ''") {
         logmsg "Could not generate host key\n";
         exit 1;
     }
     logmsg "generating client keys...\n" if($verbose);
-    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -b 2048 -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''") {
         logmsg "Could not generate client key\n";
         exit 1;
     }
