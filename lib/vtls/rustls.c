@@ -660,6 +660,38 @@ init_config_builder_alpn(struct Curl_easy *data,
 }
 
 static CURLcode
+init_config_builder_verifier_crl(
+  struct Curl_easy *data,
+  const struct ssl_primary_config *conn_config,
+  struct rustls_web_pki_server_cert_verifier_builder *builder)
+{
+  CURLcode result = CURLE_OK;
+  struct dynbuf crl_contents;
+  rustls_result rr;
+
+  Curl_dyn_init(&crl_contents, DYN_CRLFILE_SIZE);
+  if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
+    failf(data, "rustls: failed to read revocation list file");
+    result = CURLE_SSL_CRL_BADFILE;
+    goto cleanup;
+  }
+
+  rr = rustls_web_pki_server_cert_verifier_builder_add_crl(
+    builder,
+    Curl_dyn_uptr(&crl_contents),
+    Curl_dyn_len(&crl_contents));
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "failed to parse revocation list");
+    result = CURLE_SSL_CRL_BADFILE;
+    goto cleanup;
+  }
+
+cleanup:
+  Curl_dyn_free(&crl_contents);
+  return result;
+}
+
+static CURLcode
 init_config_builder_verifier(struct Curl_easy *data,
                              struct rustls_client_config_builder *builder,
                              const struct ssl_primary_config *conn_config,
@@ -706,27 +738,12 @@ init_config_builder_verifier(struct Curl_easy *data,
   verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
 
   if(conn_config->CRLfile) {
-    struct dynbuf crl_contents;
-    Curl_dyn_init(&crl_contents, DYN_CRLFILE_SIZE);
-    if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
-      failf(data, "rustls: failed to read revocation list file");
-      Curl_dyn_free(&crl_contents);
-      result = CURLE_SSL_CRL_BADFILE;
+    result = init_config_builder_verifier_crl(data,
+                                             conn_config,
+                                             verifier_builder);
+    if(result != CURLE_OK) {
       goto cleanup;
     }
-
-    rr = rustls_web_pki_server_cert_verifier_builder_add_crl(
-      verifier_builder,
-      Curl_dyn_uptr(&crl_contents),
-      Curl_dyn_len(&crl_contents));
-    if(rr != RUSTLS_RESULT_OK) {
-      rustls_failf(data, rr, "failed to parse revocation list");
-      Curl_dyn_free(&crl_contents);
-      result = CURLE_SSL_CRL_BADFILE;
-      goto cleanup;
-    }
-
-    Curl_dyn_free(&crl_contents);
   }
 
   rr = rustls_web_pki_server_cert_verifier_builder_build(
