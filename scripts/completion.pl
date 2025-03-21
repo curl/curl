@@ -87,7 +87,7 @@ sub parse_main_opts {
     # We want regular files that end with .md and don't start with an underscore
     # Edge case: MANPAGE.md doesn't start with an underscore but also isn't documentation for an option
     @files = grep { $_ =~ /\.md$/i && !/^_/ && -f "$opts_dir/$_" && $_ ne "MANPAGE.md" } @files;
-    
+
     for my $file (@files) {
         open(my $doc_handle, '<', "$opts_dir/$file") || die "Unable to open file: $file due to error: $!";
         $file_content = join('', <$doc_handle>);
@@ -110,7 +110,6 @@ sub parse_main_opts {
         $desc =~ s/\]/\\\]/g if defined $desc;
         $desc =~ s/\:/\\\:/g if defined $desc;
 
-        
         my $option = '';
 
         if ($shell eq 'fish') {
