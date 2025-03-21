@@ -419,6 +419,9 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         if($ENV{'CURL_TEST_SSH_KEY_FORMAT'}) {
             $sshkeygenopt .= ' -m ' . $ENV{'CURL_TEST_SSH_KEY_FORMAT'};
         }
+        else {
+            $sshkeygenopt .= ' -m PEM';  # Use the most compatible RSA format for tests.
+        }
     }
     logmsg "generating host keys...\n" if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -b 2048 -f " . pp($hstprvkeyf) . " -C 'curl test server' -N ''" . $sshkeygenopt) {
