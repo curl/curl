@@ -36,6 +36,8 @@
 #include "tool_binmode.h"
 
 #ifdef _WIN32
+#include "strerror.h"
+
 /* socket-safe strerror (works on Winsock errors, too) */
 const char *sstrerror(int err)
 {
