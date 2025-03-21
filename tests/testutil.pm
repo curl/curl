@@ -37,6 +37,7 @@ BEGIN {
         runclient
         runclientoutput
         setlogfunc
+        exerunner
         shell_quote
         subbase64
         subnewlines
@@ -208,6 +209,15 @@ sub runclientoutput {
 #    return @out;
 }
 
+#######################################################################
+# Return custom tool (e.g. wine or qemu) to run curl binaries.
+#
+sub exerunner {
+    if($ENV{'CURL_TEST_EXE_RUNNER'}) {
+        return $ENV{'CURL_TEST_EXE_RUNNER'} . ' ';
+    }
+    return '';
+}
 
 #######################################################################
 # Quote an argument for passing safely to a Bourne shell

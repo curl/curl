@@ -99,6 +99,7 @@ use testutil qw(
     clearlogs
     logmsg
     runclient
+    exerunner
     shell_quote
     subbase64
     subsha256base64file
@@ -935,6 +936,8 @@ sub singletest_run {
             return (-1, 0, 0, "", "", 0);
         }
 
+        $CMDLINE=exerunner() . $CMDLINE;
+
         if($bundle) {
             $CMDLINE.=" $tool_name";
         }
@@ -971,7 +974,7 @@ sub singletest_run {
     }
 
     if(!$tool) {
-        $CMDLINE=shell_quote($CURL);
+        $CMDLINE=exerunner() . shell_quote($CURL);
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-q/)) {
             $CMDLINE .= " -q";
         }
