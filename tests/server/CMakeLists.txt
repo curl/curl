@@ -22,13 +22,9 @@
 #
 ###########################################################################
 
-# Get 'SERVERPROGS', '<target>_SOURCES' variables, 'MEMDEBUG', 'CURLX_SRCS', 'USEFUL', 'INET_PTON', 'UTIL', 'FIRSTFILES'
+# Get 'SERVERPROGS', '<target>_SOURCES' variables, 'CURLX_SRCS', 'USEFUL', 'INET_PTON', 'UTIL', 'FIRSTFILES'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-
-if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
-  set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
-endif()
 
 if(CURL_TEST_BUNDLES)
   add_custom_command(
@@ -40,7 +36,7 @@ if(CURL_TEST_BUNDLES)
     VERBATIM)
 
   set(SERVERPROGS "servers")
-  set(servers_SOURCES ${MEMDEBUG} ${CURLX_SRCS} ${USEFUL} ${INET_PTON} ${UTIL} "server_bundle.c")
+  set(servers_SOURCES ${CURLX_SRCS} ${USEFUL} ${INET_PTON} ${UTIL} "server_bundle.c")
 endif()
 
 foreach(_target IN LISTS SERVERPROGS)

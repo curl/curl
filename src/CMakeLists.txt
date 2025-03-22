@@ -77,12 +77,6 @@ if(BUILD_STATIC_CURL)
   set(CURLX_CFILES ${CURLTOOL_LIBCURL_CFILES})
 endif()
 
-if(ENABLE_CURLDEBUG)
-  # We must compile this source separately to avoid memdebug.h redefinitions
-  # applying to them.
-  set_source_files_properties("../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
-endif()
-
 add_executable(
   ${EXE_NAME}
   ${CURL_CFILES} ${_curl_cfiles_gen} ${CURLX_CFILES} ${CURL_HFILES} ${_curl_hfiles_gen}
@@ -100,7 +94,7 @@ add_library(
   EXCLUDE_FROM_ALL
   ${CURL_CFILES} ${CURLTOOL_LIBCURL_CFILES} ${CURL_HFILES}
 )
-target_compile_definitions(curltool PUBLIC "UNITTESTS" "CURL_STATICLIB")
+target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
 
 if(CURL_HAS_LTO)

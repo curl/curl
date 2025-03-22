@@ -86,11 +86,6 @@ if USE_UNITY
 # Keep these separate to avoid duplicate definitions when linking libtests
 # in static mode.
 curl_EXCLUDE = curl_threads.c timediff.c warnless.c
-if CURLDEBUG
-# We must compile these sources separately to avoid memdebug.h redefinitions
-# applying to them.
-curl_EXCLUDE += memdebug.c curl_multibyte.c
-endif
 # For Cygwin always compile dllmain.c as a separate unit since it
 # includes windows.h, which should not be included in other units.
 if DOING_CYGWIN
