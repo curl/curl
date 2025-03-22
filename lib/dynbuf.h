@@ -86,14 +86,14 @@ char *Curl_dyn_take(struct dynbuf *s, size_t *plen);
 #define DYN_DOH_RESPONSE    3000
 #define DYN_DOH_CNAME       256
 #define DYN_PAUSE_BUFFER    (64 * 1024 * 1024)
-#define DYN_HAXPROXY        2048
+#define DYN_HAXPROXY        (2*1024)
 #define DYN_HTTP_REQUEST    (1024*1024)
 #define DYN_APRINTF         8000000
 #define DYN_RTSP_REQ_HEADER (64*1024)
 #define DYN_TRAILERS        (64*1024)
-#define DYN_PROXY_CONNECT_HEADERS 16384
+#define DYN_PROXY_CONNECT_HEADERS (16*1024)
 #define DYN_QLOG_NAME       1024
-#define DYN_H1_TRAILER      4096
+#define DYN_H1_TRAILER      (4*1024)
 #define DYN_PINGPPONG_CMD   (64*1024)
 #define DYN_IMAP_CMD        (64*1024)
 #define DYN_MQTT_RECV       (64*1024)
