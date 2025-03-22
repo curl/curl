@@ -1288,7 +1288,7 @@ ConnectionExists(struct Curl_easy *data,
 
   /* Find a connection in the pool that matches what "data + needle"
    * requires. If a suitable candidate is found, it is attached to "data". */
-  result = Curl_cpool_find(data, needle->destination, needle->destination_len,
+  result = Curl_cpool_find(data, needle->destination,
                            url_match_conn, url_match_result, &match);
 
   /* wait_pipe is TRUE if we encounter a bundle that is undecided. There
@@ -2064,9 +2064,8 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   if(!conn->destination)
     return CURLE_OUT_OF_MEMORY;
 
-  conn->destination_len = strlen(conn->destination) + 1;
   Curl_strntolower(conn->destination, conn->destination,
-                   conn->destination_len - 1);
+                   strlen(conn->destination));
 
   return CURLE_OK;
 }
