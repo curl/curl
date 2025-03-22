@@ -31,19 +31,14 @@ sftp
 SFTP pre-quote chmod
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/upload.txt -Q "chmod 444 %SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/upload.txt" --list-only sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/plainfile.txt -Q "-chmod 444 %SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/upload.txt" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/upload.txt --insecure
 </command>
-<file name="%LOGDIR/file%TESTNUMBER.txt">
-Dummy test file for chmod test
-</file>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-#%PERL %SRCDIR/libtest/test610.pl rm %PWD/%LOGDIR/file%TESTNUMBER.txt
-%PERL %SRCDIR/libtest/test610.pl rm %PWD/%LOGDIR/test%TESTNUMBER.dir/upload.txt
 %PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
 </postcheck>
 </verify>
