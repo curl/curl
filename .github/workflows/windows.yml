@@ -348,7 +348,6 @@ jobs:
             if [[ '${{ matrix.install }}' = *'libssh2-wincng'* ]]; then
               TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
             fi
-            TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
           fi
           TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
@@ -938,7 +937,6 @@ jobs:
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
           fi
-          TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
           if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
             TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
           else  # OpenSSH-Windows
