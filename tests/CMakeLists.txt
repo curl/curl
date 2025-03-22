@@ -79,7 +79,7 @@ function(curl_add_pytests _targetname _test_flags)
 endfunction()
 
 # Create configurehelp.pm, used by tests needing to run the C preprocessor.
-if(MSVC OR CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+if(MSVC OR CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   set(CURL_CPP "\"${CMAKE_C_COMPILER}\" -E")
   if(APPLE AND CMAKE_OSX_SYSROOT)
     string(APPEND CURL_CPP " -isysroot ${CMAKE_OSX_SYSROOT}")
