@@ -187,7 +187,6 @@ my $datasockf_conn = 'no';       # ['no','yes']
 # global vars used for signal handling
 #
 my $got_exit_signal = 0; # set if program should finish execution ASAP
-my $exit_signal;         # first signal handled in exit_signal_handler
 
 #**********************************************************************
 # Mail related definitions
