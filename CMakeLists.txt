@@ -91,7 +91,7 @@ if(WINDOWS_STORE AND MINGW)  # mingw UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
-elseif(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # mingw32ce build
+elseif(WIN32 AND WINCE AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # mingw32ce build
   if(NOT MINGW32CE_LIBRARY_DIR)
     message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
   endif()
@@ -118,7 +118,7 @@ elseif(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # mingw32ce build
   set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
-elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
+elseif(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # DJGPP
   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
@@ -161,7 +161,7 @@ endif()
 if(AMIGA)
   string(APPEND _target_flags " AMIGA")
 endif()
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   string(APPEND _target_flags " GCC")
 endif()
 if(MINGW)

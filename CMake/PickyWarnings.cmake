@@ -26,7 +26,7 @@ include(CheckCCompilerFlag)
 set(_picky "")
 
 if(CURL_WERROR AND
-   ((CMAKE_COMPILER_IS_GNUCC AND
+   ((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
      NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
      NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
      NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
@@ -40,7 +40,7 @@ if(APPLE AND
   list(APPEND _picky "-Werror=partial-availability")  # clang 3.6  appleclang 6.3
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   list(APPEND _picky "-Werror-implicit-function-declaration")  # clang 1.0  gcc 2.95
 endif()
 
@@ -54,7 +54,7 @@ elseif(BORLAND)
 endif()
 
 if(PICKY_COMPILER)
-  if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 
     # https://clang.llvm.org/docs/DiagnosticsReference.html
     # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
@@ -254,7 +254,7 @@ if(PICKY_COMPILER)
       endif()
     endforeach()
 
-    if(CMAKE_COMPILER_IS_GNUCC)
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
       if(CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
         # Avoid false positives
         list(APPEND _picky "-Wno-shadow")
