@@ -51,7 +51,7 @@ if(CURL_BUILD_TESTING)
     EXCLUDE_FROM_ALL
     ${HHEADERS} ${CSOURCES}
   )
-  target_compile_definitions(curlu PUBLIC "UNITTESTS" "CURL_STATICLIB")
+  target_compile_definitions(curlu PUBLIC "CURL_STATICLIB" "UNITTESTS")
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
   # There is plenty of parallelism when building the testdeps target.
   # Override the curlu batch size with the maximum to optimize performance.
@@ -59,9 +59,9 @@ if(CURL_BUILD_TESTING)
 endif()
 
 if(ENABLE_CURLDEBUG)
-  # We must compile these sources separately to avoid memdebug.h redefinitions
-  # applying to them.
-  set_source_files_properties("memdebug.c" "curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+  # We must compile this source separately to avoid memdebug.h redefinitions
+  # applying to it.
+  set_source_files_properties("memdebug.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
 
 ## Library definition
