@@ -212,7 +212,6 @@ sub ftp_createcontent {
   my $eol  = $$list{'eol'};
   my $list_ref = $$list{'files'};
 
-  my @diroutput;
   my @contentlist;
   if($type eq "unix") {
     for(@$list_ref) {
