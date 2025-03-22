@@ -46,7 +46,6 @@ my $pidfile;
 my $portfile;
 my $logfile;
 my $srcdir;
-my $fork;
 
 my $flags  = "";
 my $path   = '.';
