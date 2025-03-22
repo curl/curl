@@ -121,14 +121,13 @@ typedef bool Curl_cpool_done_match_cb(bool result, void *userdata);
  * All callbacks are invoked while the pool's lock is held.
  * @param data        current transfer
  * @param destination match agaonst `conn->destination` in pool
- * @param dest_len    destination length, including terminating NUL
  * @param conn_cb     must be present, called for each connection in the
  *                    bundle until it returns TRUE
  * @return combined result of last conn_db and result_cb or FALSE if no
                       connections were present.
  */
 bool Curl_cpool_find(struct Curl_easy *data,
-                     const char *destination, size_t dest_len,
+                     const char *destination,
                      Curl_cpool_conn_match_cb *conn_cb,
                      Curl_cpool_done_match_cb *done_cb,
                      void *userdata);

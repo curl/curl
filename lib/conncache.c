@@ -88,16 +88,17 @@ static void cpool_discard_conn(struct cpool *cpool,
                                struct connectdata *conn,
                                bool aborted);
 
-static struct cpool_bundle *cpool_bundle_create(const char *dest,
-                                                size_t dest_len)
+static struct cpool_bundle *cpool_bundle_create(const char *dest)
 {
   struct cpool_bundle *bundle;
+  size_t dest_len = strlen(dest);
+
   bundle = calloc(1, sizeof(*bundle) + dest_len);
   if(!bundle)
     return NULL;
   Curl_llist_init(&bundle->conns, NULL);
-  bundle->dest_len = dest_len;
-  memcpy(bundle->dest, dest, dest_len);
+  bundle->dest_len = dest_len + 1;
+  memcpy(bundle->dest, dest, bundle->dest_len);
   return bundle;
 }
 
@@ -176,7 +177,7 @@ static struct cpool_bundle *cpool_find_bundle(struct cpool *cpool,
                                               struct connectdata *conn)
 {
   return Curl_hash_pick(&cpool->dest2bundle,
-                        conn->destination, conn->destination_len);
+                        conn->destination, strlen(conn->destination) + 1);
 }
 
 
@@ -276,7 +277,7 @@ cpool_add_bundle(struct cpool *cpool, struct connectdata *conn)
 {
   struct cpool_bundle *bundle;
 
-  bundle = cpool_bundle_create(conn->destination, conn->destination_len);
+  bundle = cpool_bundle_create(conn->destination);
   if(!bundle)
     return NULL;
 
@@ -551,7 +552,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
 }
 
 bool Curl_cpool_find(struct Curl_easy *data,
-                     const char *destination, size_t dest_len,
+                     const char *destination,
                      Curl_cpool_conn_match_cb *conn_cb,
                      Curl_cpool_done_match_cb *done_cb,
                      void *userdata)
@@ -567,7 +568,8 @@ bool Curl_cpool_find(struct Curl_easy *data,
 
   CPOOL_LOCK(cpool, data);
   bundle = Curl_hash_pick(&cpool->dest2bundle,
-                          CURL_UNCONST(destination), dest_len);
+                          CURL_UNCONST(destination),
+                          strlen(destination) + 1);
   if(bundle) {
     struct Curl_llist_node *curr = Curl_llist_head(&bundle->conns);
     while(curr) {
