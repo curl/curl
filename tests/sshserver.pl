@@ -60,6 +60,7 @@ use sshhelp qw(
     $hstpubsha256f
     $cliprvkeyf
     $clipubkeyf
+    display_file_top
     display_sshdconfig
     display_sshconfig
     display_sftpconfig
@@ -408,16 +409,32 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f),
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
+
+    my $sshkeygenopt = '';
+    if(($sshid =~ /OpenSSH/) && ($sshvernum >= 560)) {
+        # Override the default key format. Necessary to force legacy PEM format
+        # for libssh2 crypto backends that do not understand the OpenSSH (RFC4716)
+        # format, e.g. WinCNG.
+        # Accepted values: RFC4716, PKCS8, PEM (see also 'man ssh-keygen')
+        if($ENV{'CURL_TEST_SSH_KEY_FORMAT'}) {
+            $sshkeygenopt .= ' -m ' . $ENV{'CURL_TEST_SSH_KEY_FORMAT'};
+        }
+        else {
+            $sshkeygenopt .= ' -m PEM';  # Use the most compatible RSA format for tests.
+        }
+    }
     logmsg "generating host keys...\n" if($verbose);
-    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($hstprvkeyf) . " -C 'curl test server' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($hstprvkeyf) . " -C 'curl test server' -N ''" . $sshkeygenopt) {
         logmsg "Could not generate host key\n";
         exit 1;
     }
+    display_file_top(pp($hstprvkeyf));
     logmsg "generating client keys...\n" if($verbose);
-    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''" . $sshkeygenopt) {
         logmsg "Could not generate client key\n";
         exit 1;
     }
+    display_file_top(pp($cliprvkeyf));
     # Make sure that permissions are restricted so openssh doesn't complain
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);

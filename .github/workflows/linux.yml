@@ -664,7 +664,7 @@ jobs:
           export TFLAGS='${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
             if [[ '${{ matrix.build.install_steps }}' = *'wolfssh'* ]]; then
-              TFLAGS+=' ~SFTP'
+              TFLAGS+=' ~SFTP'  # curl: (79) wolfssh SFTP connect error -1051 / WS_MATCH_KEY_ALGO_E / cannot match key algo with peer
             fi
             if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
