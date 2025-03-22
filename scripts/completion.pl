@@ -99,10 +99,10 @@ sub parse_main_opts {
         $file_content = $1;
         my ($short, $long, $arg, $desc);
 
-        if ($file_content =~ /^Short:\s+(.*)\s*$/m) {$short = "-$1";}
-        if ($file_content =~ /^Long:\s+(.*)\s*$/m) {$long = "--$1";}
-        if ($file_content =~ /^Arg:\s+(.*)\s*$/m) {$arg = $1;}
-        if ($file_content =~ /^Help:\s+(.*)\s*$/m) {$desc = $1;}
+        if ($file_content =~ /^Short:\s+(.*)\s*$/im) {$short = "-$1";}
+        if ($file_content =~ /^Long:\s+(.*)\s*$/im) {$long = "--$1";}
+        if ($file_content =~ /^Arg:\s+(.*)\s*$/im) {$arg = $1;}
+        if ($file_content =~ /^Help:\s+(.*)\s*$/im) {$desc = $1;}
 
         $arg =~ s/\:/\\\:/g if defined $arg;
         $desc =~ s/'/'\\''/g if defined $desc;
