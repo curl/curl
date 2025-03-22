@@ -803,7 +803,6 @@ struct connectdata {
   char *options; /* options string, allocated */
   char *sasl_authzid;     /* authorization identity string, allocated */
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
-  struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection poolas idle */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data

@@ -3781,9 +3781,6 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
     return result;
   }
 
-  /* set start time here for timeout purposes in the connect procedure, it
-     is later set again for the progress meter purpose */
-  conn->now = Curl_now();
   if(!conn->bits.reuse)
     result = Curl_conn_setup(data, conn, FIRSTSOCKET, conn->dns_entry,
                              CURL_CF_SSL_DEFAULT);
