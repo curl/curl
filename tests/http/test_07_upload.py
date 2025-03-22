@@ -549,7 +549,8 @@ class TestUpload:
         if r.exit_code == 18: # PARTIAL_FILE is always ok
             pass
         elif proto == 'h2':
-            r.check_exit_code(16)  # CURLE_HTTP2 also ok
+            # CURLE_HTTP2, CURLE_HTTP2_STREAM
+            assert r.exit_code in [16, 92], f'unexpected exit code\n{r.dump_logs()}'
         elif proto == 'h3':
             r.check_exit_code(95)  # CURLE_HTTP3 also ok
         else:
