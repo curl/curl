@@ -347,7 +347,6 @@ jobs:
             TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
             TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
           fi
-          TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -936,9 +935,7 @@ jobs:
             TFLAGS+=' !SCP !SFTP'  # Fail with all tested openssh servers: curl: (67) Authentication failure
           fi
           TFLAGS+=' ~612'  # 'SFTP post-quote remove file' SFTP, post-quote
-          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
-            TFLAGS+=' ~613'  # 'SFTP directory retrieval' SFTP, directory
-          else  # OpenSSH-Windows
+          if [ -n '${{ matrix.openssh }}' ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
             if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
