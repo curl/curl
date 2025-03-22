@@ -3742,8 +3742,7 @@ void Curl_ssh_version(char *buffer, size_t buflen)
       crypto_str = "mbedTLS";
       break;
     case libssh2_openssl:
-      /* May mean any OpenSSL fork or wolfSSL. Also mostly the default. */
-      crypto_str = "";
+      crypto_str = "openssl";  /* In lowercase to cover forks and wolfSSL. */
       break;
     case libssh2_os400qc3:
       crypto_str = "os400qc3";
