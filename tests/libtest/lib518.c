@@ -454,7 +454,7 @@ CURLcode test(char *URL)
     /* used by the test script to ask if we can run this test or not */
     if(test_rlimit(FALSE)) {
       fprintf(stdout, "test_rlimit problem: %s\n", msgbuff);
-      return (CURLcode)1;
+      return TEST_ERR_FAILURE;
     }
     return CURLE_OK; /* sure, run this! */
   }

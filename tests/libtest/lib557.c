@@ -1254,21 +1254,21 @@ static int test_weird_arguments(void)
   int rc;
 
   /* verify %% */
-  rc = curl_msnprintf(buf, sizeof(buf), "%-20d%% right? %%", 500);
+  (void)curl_msnprintf(buf, sizeof(buf), "%-20d%% right? %%", 500);
   errors += string_check(buf, "500                 % right? %");
 
   /* 100 x % */
-  rc = curl_msnprintf(buf, sizeof(buf), "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-                      "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-                      "%%%%%%%%%%%%%%%%%%%%%%");
+  (void)curl_msnprintf(buf, sizeof(buf), "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+                       "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+                       "%%%%%%%%%%%%%%%%%%%%%%");
   /* 50 x % */
   errors += string_check(buf, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
                          "%%%%%%%%%%%%%%%");
 
-  rc = curl_msnprintf(buf, sizeof(buf), "%2 AA %d %K", 500, 501, 502);
+  (void)curl_msnprintf(buf, sizeof(buf), "%2 AA %d %K", 500, 501, 502);
   errors += string_check(buf, "%2 AA 500 %K");
 
-  rc = curl_msnprintf(buf, sizeof(buf), "%2 %d %K", 500, 501, 502);
+  (void)curl_msnprintf(buf, sizeof(buf), "%2 %d %K", 500, 501, 502);
   errors += string_check(buf, "%2 500 %K");
 
   /* MAX_PARAMETERS is 128, try exact 128! */

@@ -176,7 +176,7 @@ for my $e (sort @syms) {
     # last entry in many enum series.
     #
 
-    if($e =~ /(OBSOLETE|^CURL_EXTERN|^CURLINC_|_LAST\z|_LASTENTRY\z|^CURL_TEMP_)/) {
+    if($e =~ /(OBSOLETE|CURLE_RESERVED|^CURL_EXTERN|^CURLINC_|_LAST\z|_LASTENTRY\z|^CURL_TEMP_)/) {
         $ignored++;
         next;
     }

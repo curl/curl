@@ -28,7 +28,7 @@
     if(!(expr)) {                                          \
       fprintf(stderr, "%s:%d Assertion '%s' failed: %s\n", \
               __FILE__, __LINE__, #expr, msg);             \
-      return (CURLcode)1;                                  \
+      return TEST_ERR_FAILURE;                             \
     }                                                      \
   } while(0)
 

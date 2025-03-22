@@ -206,7 +206,7 @@ CURLcode test(char *URL)
   start_test_timing();
 
   if(test_argc < 4)
-    return (CURLcode)99;
+    return TEST_ERR_MAJOR_BAD;
 
   msnprintf(buffer, sizeof(buffer), "Host: %s", HOST);
 

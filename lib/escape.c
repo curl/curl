@@ -223,8 +223,6 @@ void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
   DEBUGASSERT(src && len && (olen >= 3));
   if(src && len && (olen >= 3)) {
     while(len-- && (olen >= 3)) {
-      /* clang-tidy warns on this line without this comment: */
-      /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
       *out++ = (unsigned char)hex[(*src & 0xF0) >> 4];
       *out++ = (unsigned char)hex[*src & 0x0F];
       ++src;

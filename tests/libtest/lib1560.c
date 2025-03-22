@@ -1128,6 +1128,7 @@ static CURLUPart part2id(char *part)
     return CURLUPART_FRAGMENT;
   if(!strcmp("zoneid", part))
     return CURLUPART_ZONEID;
+  /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
   return (CURLUPart)9999; /* bad input => bad output */
 }
 

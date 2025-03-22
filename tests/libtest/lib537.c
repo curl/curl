@@ -465,7 +465,7 @@ CURLcode test(char *URL)
     /* used by the test script to ask if we can run this test or not */
     if(test_rlimit(FALSE)) {
       fprintf(stdout, "test_rlimit problem: %s\n", msgbuff);
-      return (CURLcode)1;
+      return TEST_ERR_FAILURE;
     }
     return CURLE_OK; /* sure, run this! */
   }
@@ -512,7 +512,7 @@ CURLcode test(char *URL)
 {
   (void)URL;
   printf("system lacks necessary system function(s)");
-  return (CURLcode)1; /* skip test */
+  return TEST_ERR_MAJOR_BAD; /* skip test */
 }
 
 #endif /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */

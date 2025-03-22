@@ -772,14 +772,14 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
 
   writeleft = totalsize;
   do {
-    written = fwrite(&reqbuf[totalsize-writeleft],
-                     1, writeleft, dump);
+    written = fwrite(&reqbuf[totalsize-writeleft], 1, writeleft, dump);
     if(got_exit_signal)
       goto storerequest_cleanup;
     if(written > 0)
       writeleft -= written;
+    error = errno;
     /* !checksrc! disable ERRNOVAR 1 */
-  } while((writeleft > 0) && ((error = errno) == EINTR));
+  } while((writeleft > 0) && (error == EINTR));
 
   if(writeleft == 0)
     logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
