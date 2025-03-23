@@ -66,6 +66,10 @@ if ($ARGV[0] eq "prepare")
     # represented exactly on a FAT filesystem.
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
+    if($^O eq 'cygwin') {
+      system "/bin/setfacl --remove-all rofile.txt";
+      chmod 0444, "rofile.txt";
+    }
 
     exit 0;
 }
