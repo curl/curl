@@ -919,7 +919,7 @@ jobs:
             [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-Pre' ] && chocopkg+=' --prerelease'
             chocopkg+=' openssh'
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force ${chocopkg} stunnel || true
+          /c/ProgramData/chocolatey/choco.exe install --yes --verbose --no-progress --limit-output --timeout 180 --force ${chocopkg} stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'downgrade msys2-runtime'
