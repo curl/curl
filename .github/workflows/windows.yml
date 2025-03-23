@@ -738,6 +738,7 @@ jobs:
       run:
         shell: msys2 {0}
     env:
+      openssh_windows-version: 'v9.8.1.0p1-Preview'
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
@@ -927,10 +928,13 @@ jobs:
           if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           else  # OpenSSH-Windows
-            [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-Pre' ] && chocopkg+=' --prerelease'
-            chocopkg+=' openssh'
+            cd /d || exit 1
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
+              --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.openssh_windows-version }}/OpenSSH-Win64.zip' --output bin.zip
+            unzip bin.zip
+            rm -f bin.zip
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force ${chocopkg} stunnel || true
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'downgrade msys2-runtime'
@@ -957,7 +961,7 @@ jobs:
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
             fi
-            PATH="$PATH:/c/Program Files/OpenSSH-Win64"
+            PATH="/d/OpenSSH-Win64:$PATH"
           fi
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
