@@ -42,7 +42,7 @@ jobs:
     timeout-minutes: 25
     defaults:
       run:
-        shell: C:\cygwin\bin\bash.exe '{0}'
+        shell: D:\cygwin\bin\bash.exe '{0}'
     env:
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
@@ -60,6 +60,7 @@ jobs:
         with:
           platform: ${{ matrix.platform }}
           site: https://mirrors.kernel.org/sourceware/cygwin/
+          install-dir: D:\cygwin
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
             autoconf libtool gcc-core gcc-g++ binutils
