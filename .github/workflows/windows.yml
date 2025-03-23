@@ -946,6 +946,9 @@ jobs:
             PATH="$PATH:/c/Program Files/OpenSSH-Win64"
           fi
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
+          ls -1 '/c/Program Files' || true
+          ls -1 '/c/Program Files/OpenSSH-Win64' || true
+          echo "|$PATH|"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
