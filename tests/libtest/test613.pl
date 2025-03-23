@@ -66,6 +66,9 @@ if ($ARGV[0] eq "prepare")
     # represented exactly on a FAT filesystem.
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
+    if($^O eq 'cygwin') {
+      system "chattr +r rofile.txt";
+    }
 
     exit 0;
 }
@@ -75,6 +78,9 @@ elsif ($ARGV[0] eq "postprocess")
     my $logfile = $ARGV[2];
 
     # Clean up the test directory
+    if($^O eq 'cygwin') {
+      system "chattr -r $dirname/rofile.txt";
+    }
     chmod 0666, "$dirname/rofile.txt";
     unlink "$dirname/rofile.txt";
     unlink "$dirname/plainfile.txt";
