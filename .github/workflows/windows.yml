@@ -984,7 +984,7 @@ jobs:
         timeout-minutes: 10
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          export TFLAGS='-j8 -v -d ${{ matrix.tflags }}'
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
