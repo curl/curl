@@ -950,8 +950,6 @@ jobs:
             PATH="/d/OpenSSH-Win64:$PATH"
           fi
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
-          ssh.exe -V || true
-          sshd.exe -V || true
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'build examples'
