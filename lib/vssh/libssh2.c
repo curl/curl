@@ -598,9 +598,9 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
   const char *pubkey_sha256 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256];
 
   infof(data, "SSH MD5 public key: %s",
-    pubkey_md5 != NULL ? pubkey_md5 : "NULL");
+        pubkey_md5 != NULL ? pubkey_md5 : "NULL");
   infof(data, "SSH SHA256 public key: %s",
-      pubkey_sha256 != NULL ? pubkey_sha256 : "NULL");
+        pubkey_sha256 != NULL ? pubkey_sha256 : "NULL");
 
   if(pubkey_sha256) {
     const char *fingerprint = NULL;
@@ -684,7 +684,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
 
   if(pubkey_md5) {
     char md5buffer[33];
-    const char *fingerprint = NULL;
+    const char *fingerprint;
 
     fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
                                        LIBSSH2_HOSTKEY_HASH_MD5);
