@@ -80,7 +80,9 @@ jobs:
       - name: 'autoreconf'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 2
-        run: autoreconf -fi
+        run: |
+          PATH=/usr/bin
+          autoreconf -fi
 
       - name: 'configure'
         timeout-minutes: 5
@@ -101,16 +103,20 @@ jobs:
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+        run: |
+          PATH=/usr/bin
+          cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
+          PATH=/usr/bin
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'build'
         timeout-minutes: 10
         run: |
+          PATH=/usr/bin
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld
           else
@@ -120,6 +126,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
+          PATH=/usr/bin
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
@@ -130,6 +137,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 15
         run: |
+          PATH=/usr/bin
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
@@ -140,6 +148,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
         run: |
+          PATH=/usr/bin
           export TFLAGS='-j8 ${{ matrix.tflags }} ~615'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -155,6 +164,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
         run: |
+          PATH=/usr/bin
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
