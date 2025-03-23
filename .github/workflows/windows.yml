@@ -917,7 +917,7 @@ jobs:
             cd "${HOME}" || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
               --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.openssh_windows-version }}/OpenSSH-Win64.zip' --output bin.zip
-            unzip -q bin.zip
+            unzip bin.zip
             rm -f bin.zip
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --verbose --no-progress --limit-output --timeout 180 --force stunnel || true
