@@ -796,7 +796,9 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
   int port = 0;
   bool found = FALSE;
 
-  if(sshc->kh && !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) {
+  if(sshc->kh &&
+     !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] &&
+     !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256]) {
     /* lets try to find our host in the known hosts file */
     while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
       /* For non-standard ports, the name will be enclosed in */
