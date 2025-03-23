@@ -5,6 +5,15 @@ SCP
 server sha256 key check
 </keywords>
 </info>
+
+#
+# Server-side
+<reply>
+<data>
+test
+</data>
+</reply>
+
 #
 # Client-side
 <client>
