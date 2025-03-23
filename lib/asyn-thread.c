@@ -640,8 +640,8 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 #endif
 
 #ifdef USE_HTTPSRR_ARES
-  if(data->state.async.thdata.channel) {
-    ret_val = Curl_ares_getsock(data, data->state.async.thdata.channel, socks);
+  if(td->init && td->channel) {
+    ret_val = Curl_ares_getsock(data, td->channel, socks);
     for(socketi = 0; socketi < (MAX_SOCKSPEREASYHANDLE - 1); socketi++)
       if(!ARES_GETSOCK_READABLE(ret_val, socketi) &&
          !ARES_GETSOCK_WRITABLE(ret_val, socketi))
@@ -649,10 +649,13 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
   }
 #endif
 #ifndef CURL_DISABLE_SOCKETPAIR
-  /* return read fd to client for polling the DNS resolution status */
-  socks[socketi] = td->tsd.sock_pair[0];
-  ret_val |= GETSOCK_READSOCK(socketi);
-#else
+  if(td->init) {
+    /* return read fd to client for polling the DNS resolution status */
+    socks[socketi] = td->tsd.sock_pair[0];
+    ret_val |= GETSOCK_READSOCK(socketi);
+  }
+  else
+#endif
   {
     timediff_t milli;
     timediff_t ms = Curl_timediff(Curl_now(), td->start);
@@ -666,7 +669,6 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
       milli = 200;
     Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
   }
-#endif
 
   return ret_val;
 }
