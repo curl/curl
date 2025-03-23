@@ -20,7 +20,7 @@ scp
 SCP correct sha256 host key
 </name>
 <command>
---hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file3022.txt
+--hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file3022.txt
 
 </command>
 <setenv>
