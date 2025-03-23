@@ -910,6 +910,9 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          '/c/Program Files/OpenSSH-Win64/ssh.exe' -V || true
+          ls -1 '/c/Program Files' || true
+          ls -1 '/c/Program Files/OpenSSH-Win64' || true
           if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           else  # OpenSSH-Windows
@@ -946,6 +949,7 @@ jobs:
             PATH="/c/Program Files/OpenSSH-Win64:$PATH"
           fi
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
+          '/c/Program Files/OpenSSH-Win64/ssh.exe' -V || true
           ls -1 '/c/Program Files' || true
           ls -1 '/c/Program Files/OpenSSH-Win64' || true
           echo "|$PATH|"
