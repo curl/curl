@@ -42,7 +42,7 @@ jobs:
     timeout-minutes: 25
     defaults:
       run:
-        shell: C:\cygwin\bin\bash.exe '{0}'
+        shell: D:\cygwin\bin\bash.exe '{0}'
     env:
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
@@ -60,6 +60,7 @@ jobs:
         with:
           platform: ${{ matrix.platform }}
           site: https://mirrors.kernel.org/sourceware/cygwin/
+          install-dir: D:\cygwin
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
             autoconf libtool gcc-core gcc-g++ binutils
@@ -424,14 +425,14 @@ jobs:
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
-          path: ~\my-cache
+          path: D:\my-cache
           key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
       - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
         run: |
-          cd "${USERPROFILE}" || exit 1
+          cd /d || exit 1
           mkdir my-cache
           cd my-cache || exit 1
           curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https '${{ matrix.url }}'
@@ -449,7 +450,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
@@ -478,7 +479,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld
 
       - name: 'curl version'
@@ -492,7 +493,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
           cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
