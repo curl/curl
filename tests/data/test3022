@@ -6,6 +6,15 @@ server key check
 SHA256
 </keywords>
 </info>
+
+#
+# Server-side
+<reply>
+<data>
+test
+</data>
+</reply>
+
 #
 # Client-side
 <client>
