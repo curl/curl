@@ -849,6 +849,22 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
               -DCURL_USE_GSASL=ON
 
+          - name: 'mbedtls libssh SSHW'
+            install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            openssh: 'OpenSSH-Windows-Pre'
+            # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
+            #          read its configuration from, making it vulnerable to attacks on
+            #          Windows. Do not use this component till there is a fix for these.
+            # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
+              -DCURL_USE_GSASL=ON
+
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
