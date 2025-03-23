@@ -173,6 +173,7 @@ Available substitute variables include:
 - `%SOCKSPORT` - Port number of the SOCKS4/5 server
 - `%SOCKSUNIXPATH` - Path to the Unix socket of the SOCKS server
 - `%SRCDIR` - Full path to the source dir
+- `%SCP_PWD` - Current directory friendly for the SSH server for the scp:// protocol
 - `%SSH_PWD` - Current directory friendly for the SSH server
 - `%SSHPORT` - Port number of the SCP/SFTP server
 - `%SSHSRVMD5` - MD5 of SSH server's public key
