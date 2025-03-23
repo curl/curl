@@ -6,15 +6,6 @@ server key check
 SHA256
 </keywords>
 </info>
-
-#
-# Server-side
-<reply>
-<data>
-test
-</data>
-</reply>
-
 #
 # Client-side
 <client>
@@ -29,7 +20,7 @@ scp
 SCP correct sha256 host key
 </name>
 <command>
---hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt
+--hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt scp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/upload.txt
 </command>
 <setenv>
 # Needed for MSYS2 to not treat the argument as a POSIX path list
