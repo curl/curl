@@ -425,7 +425,7 @@ jobs:
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
-          path: /d/my-cache
+          path: D:\my-cache
           key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
       - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
