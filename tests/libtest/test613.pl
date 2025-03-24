@@ -79,7 +79,7 @@ elsif ($ARGV[0] eq "postprocess")
 
     # Clean up the test directory
     if($^O eq 'cygwin') {
-      system "chattr -r rofile.txt";
+      system "chattr -r $dirname/rofile.txt";
     }
     chmod 0666, "$dirname/rofile.txt";
     unlink "$dirname/rofile.txt";
