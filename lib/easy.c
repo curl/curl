@@ -542,12 +542,34 @@ static void events_setup(struct Curl_multi *multi, struct events *ev)
   curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, ev);
 }
 
+/* populate_fds()
+ *
+ * populate the fds[] array
+ */
+static int populate_fds(struct pollfd *fds, struct events *ev)
+{
+  int numfds = 0;
+  struct pollfd *f;
+  struct socketmonitor *m;
+
+  f = &fds[0];
+  for(m = ev->list; m; m = m->next) {
+    f->fd = m->socket.fd;
+    f->events = m->socket.events;
+    f->revents = 0;
+#if DEBUG_EV_POLL
+    fprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
+#endif
+    f++;
+    numfds++;
+  }
+  return numfds;
+}
 
 /* wait_or_timeout()
  *
  * waits for activity on any of the given sockets, or the timeout to trigger.
  */
-
 static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 {
   bool done = FALSE;
@@ -556,26 +578,13 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
   while(!done) {
     CURLMsg *msg;
-    struct socketmonitor *m;
-    struct pollfd *f;
     struct pollfd fds[4];
     int numfds = 0;
     int pollrc;
     int i;
     struct curltime before;
 
-    /* populate the fds[] array */
-    f = &fds[0];
-    for(m = ev->list; m; m = m->next) {
-      f->fd = m->socket.fd;
-      f->events = m->socket.events;
-      f->revents = 0;
-#if DEBUG_EV_POLL
-      fprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
-#endif
-      f++;
-      numfds++;
-    }
+    numfds = populate_fds(fds, ev);
 
     /* get the time stamp to use to figure out how long poll takes */
     before = Curl_now();
