@@ -70,12 +70,14 @@ echo "PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
 set -x
 
-"$OPENSSL" genrsa -out "$PREFIX-ca.key" -passout fd:0 "$KEYSIZE" <<EOF
+exec 3<<EOF
 pass:secret
 EOF
-"$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin fd:0 <<EOF
+"$OPENSSL" genrsa -out "$PREFIX-ca.key" -passout fd:3 "$KEYSIZE"
+exec 3<<EOF
 pass:secret
 EOF
+"$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin fd:3
 "$OPENSSL" x509 -extfile "$SRCDIR/$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-ca.raw-cacert" "$DIGESTALGO"
 "$OPENSSL" x509 -text -in "$PREFIX-ca.raw-cacert" -nameopt multiline > "$PREFIX-ca.cacert"
 "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -outform der -out "$PREFIX-ca.der"
