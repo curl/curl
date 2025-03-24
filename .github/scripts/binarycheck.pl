@@ -96,11 +96,6 @@ if(scalar(@files) < 3000) {
 
 knownbins();
 
-if(scalar(keys %known) < 4) {
-    print STDERR "too few known binaries in $sumsfile\n";
-    exit 2;
-}
-
 for my $f (@files) {
     chomp $f;
     checkfile("$root/$f");

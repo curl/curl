@@ -2,3 +2,9 @@
 #
 # SPDX-License-Identifier: curl
 gen
+test-*.cacert
+test-*.crl
+test-*.crt
+test-*.der
+test-*.key
+test-*.pem

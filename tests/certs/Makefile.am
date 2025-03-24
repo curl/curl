@@ -27,7 +27,9 @@ SUBDIRS = scripts
 
 include Makefile.inc
 
-EXTRA_DIST = $(CERTCONFIGS) $(GENERATEDCERTS) $(SRPFILES) CMakeLists.txt
+EXTRA_DIST = $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt
+
+DISTCLEANFILES = $(GENERATEDCERTS)
 
 # Rebuild the certificates
 
