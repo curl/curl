@@ -67,13 +67,8 @@ if ($ARGV[0] eq "prepare")
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
     if($^O eq 'cygwin') {
-      system "/bin/getfacl rofile.txt | tr '\n' ' '";
       system "/bin/setfacl --remove-all rofile.txt";
-      system "/bin/getfacl rofile.txt | tr '\n' ' '";
       chmod 0444, "rofile.txt";
-      system "/bin/getfacl rofile.txt | tr '\n' ' '";
-      system "/bin/setfacl ---default --modify u:r,g:r,o:r rofile.txt";
-      system "/bin/getfacl rofile.txt | tr '\n' ' '";
     }
 
     exit 0;
