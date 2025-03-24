@@ -69,6 +69,9 @@ if ($ARGV[0] eq "prepare")
     if($^O eq 'cygwin') {
       system "/bin/setfacl --remove-all rofile.txt";
       chmod 0444, "rofile.txt";
+      print "TRACE-0\n";
+      system "/bin/getfacl rofile.txt";
+      print "TRACE-1\n";
     }
 
     exit 0;
