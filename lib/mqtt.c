@@ -257,7 +257,6 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   int remain_pos = 0;
   char remain[4] = {0};
   size_t packetlen = 0;
-  size_t payloadlen = 0;
   size_t start_user = 0;
   size_t start_pwd = 0;
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
@@ -272,14 +271,11 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   const char *passwd = data->state.aptr.passwd ?
     data->state.aptr.passwd : "";
   const size_t plen = strlen(passwd);
-
-  payloadlen = ulen + plen + MQTT_CLIENTID_LEN + 2;
-  /* The plus 2 are for the MSB and LSB describing the length of the string to
-   * be added on the payload. Refer to spec 1.5.2 and 1.5.4 */
-  if(ulen)
-    payloadlen += 2;
-  if(plen)
-    payloadlen += 2;
+  const size_t payloadlen = ulen + plen + MQTT_CLIENTID_LEN + 2 +
+  /* The plus 2s below are for the MSB and LSB describing the length of the
+     string to be added on the payload. Refer to spec 1.5.2 and 1.5.4 */
+    (ulen ? 2 : 0) +
+    (plen ? 2 : 0);
 
   /* getting how much occupy the remain length */
   remain_pos = mqtt_encode_len(remain, payloadlen + 10);
