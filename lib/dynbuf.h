@@ -97,5 +97,6 @@ char *Curl_dyn_take(struct dynbuf *s, size_t *plen);
 #define DYN_PINGPPONG_CMD   (64*1024)
 #define DYN_IMAP_CMD        (64*1024)
 #define DYN_MQTT_RECV       (64*1024)
+#define DYN_MQTT_SEND       0xFFFFFFF
 #define DYN_CRLFILE_SIZE    (400*1024*1024) /* 400mb */
 #endif
