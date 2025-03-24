@@ -48,18 +48,6 @@ void Curl_conn_terminate(struct Curl_easy *data,
                          struct connectdata *conn,
                          bool aborted);
 
-/**
- * Callback invoked when disconnecting connections.
- * @param data    transfer last handling the connection, not attached
- * @param conn    the connection to discard
- * @param aborted if the connection is being aborted
- * @return if the connection is being aborted, e.g. should NOT perform
- *         a shutdown and just close.
- **/
-typedef bool Curl_cpool_disconnect_cb(struct Curl_easy *data,
-                                      struct connectdata *conn,
-                                      bool aborted);
-
 struct cpool {
    /* the pooled connections, bundled per destination */
   struct Curl_hash dest2bundle;
@@ -68,8 +56,7 @@ struct cpool {
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
   struct Curl_easy *idata; /* internal handle for maintenance */
-  struct Curl_share *share; /* != NULL iff pool belongs to share */
-  Curl_cpool_disconnect_cb *disconnect_cb;
+  struct Curl_share *share; /* != NULL if pool belongs to share */
   BIT(locked);
   BIT(initialised);
 };
@@ -78,7 +65,6 @@ struct cpool {
  * returns 1 on error, 0 is fine.
  */
 int Curl_cpool_init(struct cpool *cpool,
-                    Curl_cpool_disconnect_cb *disconnect_cb,
                     struct Curl_easy *idata,
                     struct Curl_share *share,
                     size_t size);

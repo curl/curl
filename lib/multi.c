@@ -242,8 +242,7 @@ struct Curl_multi *Curl_multi_handle(size_t ev_hashsize,  /* event hash */
   if(Curl_cshutdn_init(&multi->cshutdn, multi))
     goto error;
 
-  if(Curl_cpool_init(&multi->cpool, Curl_on_disconnect,
-                     multi->admin, NULL, chashsize))
+  if(Curl_cpool_init(&multi->cpool, multi->admin, NULL, chashsize))
     goto error;
 
   if(Curl_ssl_scache_create(sesssize, 2, &multi->ssl_scache))

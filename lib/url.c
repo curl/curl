@@ -600,52 +600,6 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 }
 
 /*
- * Disconnects the given connection. Note the connection may not be the
- * primary connection, like when freeing room in the connection pool or
- * killing of a dead old connection.
- *
- * A connection needs an easy handle when closing down. We support this passed
- * in separately since the connection to get closed here is often already
- * disassociated from an easy handle.
- *
- * This function MUST NOT reset state in the Curl_easy struct if that
- * is not strictly bound to the life-time of *this* particular connection.
- */
-bool Curl_on_disconnect(struct Curl_easy *data,
-                        struct connectdata *conn, bool aborted)
-{
-  /* there must be a connection to close */
-  DEBUGASSERT(conn);
-
-  /* it must be removed from the connection pool */
-  DEBUGASSERT(!conn->bits.in_cpool);
-
-  /* there must be an associated transfer */
-  DEBUGASSERT(data);
-
-  /* the transfer must be detached from the connection */
-  DEBUGASSERT(!data->conn);
-
-  DEBUGF(infof(data, "Curl_disconnect(conn #%" FMT_OFF_T ", aborted=%d)",
-         conn->connection_id, aborted));
-
-  if(conn->dns_entry)
-    Curl_resolv_unlink(data, &conn->dns_entry);
-
-  /* Cleanup NTLM connection-related data */
-  Curl_http_auth_cleanup_ntlm(conn);
-
-  /* Cleanup NEGOTIATE connection-related data */
-  Curl_http_auth_cleanup_negotiate(conn);
-
-  if(conn->connect_only)
-    /* treat the connection as aborted in CONNECT_ONLY situations */
-    aborted = TRUE;
-
-  return aborted;
-}
-
-/*
  * xfer_may_multiplex()
  *
  * Return a TRUE, iff the transfer can be done over an (appropriate)
