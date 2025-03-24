@@ -196,7 +196,7 @@ if(!$logfile) {
 $conffile = "$piddir/${proto}_stunnel.conf";
 
 $capath = abs_path($path);
-$certfile = "$srcdir/". ($stuncert?"certs/$stuncert":"certs/test-localhost.pem");
+$certfile = $stuncert ? "certs/$stuncert" : "certs/test-localhost.pem";
 $certfile = abs_path($certfile);
 
 my $ssltext = uc($proto) ." SSL/TLS:";

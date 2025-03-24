@@ -157,28 +157,33 @@ SUFFIXES = .1 .md
 perlcheck:
 	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
 
-test: perlcheck all
+build-certs:
+	(cd certs && $(MAKE) build-certs)
+
+runtests-pre: perlcheck build-certs
+
+test: runtests-pre all
 	$(TEST) $(TFLAGS)
 
-quiet-test: perlcheck all
+quiet-test: runtests-pre all
 	$(TEST) $(TEST_Q) $(TFLAGS)
 
-am-test: perlcheck all
+am-test: runtests-pre all
 	$(TEST) $(TEST_AM) $(TFLAGS)
 
-ci-test: perlcheck all
+ci-test: runtests-pre all
 	$(TEST) $(TEST_CI) $(TFLAGS)
 
-full-test: perlcheck all
+full-test: runtests-pre all
 	$(TEST) $(TEST_F) $(TFLAGS)
 
-nonflaky-test: perlcheck all
+nonflaky-test: runtests-pre all
 	$(TEST) $(TEST_NF) $(TFLAGS)
 
-torture-test: perlcheck all
+torture-test: runtests-pre all
 	$(TEST) $(TEST_T) $(TFLAGS)
 
-event-test: perlcheck all
+event-test: runtests-pre all
 	$(TEST) $(TEST_E) $(TFLAGS)
 
 default-pytest: ci-pytest

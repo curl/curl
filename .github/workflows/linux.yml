@@ -327,7 +327,7 @@ jobs:
             libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev \
             heimdal-dev libpsl-dev c-ares-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
-            perl-time-hires openssh stunnel sudo git
+            perl-time-hires openssh stunnel sudo git openssl
 
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')

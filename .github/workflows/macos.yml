@@ -277,17 +277,6 @@ jobs:
       - name: 'test configs'
         run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
-      - name: 'build-cert'
-        if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON') || contains(matrix.build.configure, '--with-secure-transport')
-        run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target clean-certs
-            cmake --build bld --target build-certs --parallel 1
-          else
-            make -C bld/tests/certs clean-certs
-            make -C bld/tests/certs build-certs -j1
-          fi
-
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then

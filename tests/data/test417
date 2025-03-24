@@ -50,7 +50,7 @@ s/^(.*):(.*)[\r\n]*//
 </stripfile>
 <stdout>
 nomnom
-%strippemfile[%SRCDIR/certs/test-localhost.crt]strippemfile%
+%strippemfile[%CERTDIR/certs/test-localhost.crt]strippemfile%
 </stdout>
 
 </verify>
