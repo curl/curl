@@ -366,9 +366,9 @@ static void destroy_async_data(struct Curl_easy *data)
 #endif
 
 #ifdef USE_HTTPSRR_ARES
-    if(data->state.async.thdata.channel) {
-      ares_destroy(data->state.async.thdata.channel);
-      data->state.async.thdata.channel = NULL;
+    if(td->channel) {
+      ares_destroy(td->channel);
+      td->channel = NULL;
     }
 #endif
     /*
@@ -567,13 +567,8 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
   DEBUGASSERT(entry);
   *entry = NULL;
 
-  if(!td) {
-    DEBUGASSERT(td);
-    return CURLE_COULDNT_RESOLVE_HOST;
-  }
 #ifdef USE_HTTPSRR_ARES
-  if(Curl_ares_perform(data->state.async.thdata.channel, 0) < 0)
-    return CURLE_UNRECOVERABLE_POLL;
+  (void)Curl_ares_perform(td->channel, 0); /* ignore errors */
 #endif
 
   Curl_mutex_acquire(&td->tsd.mutx);
