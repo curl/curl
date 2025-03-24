@@ -82,7 +82,6 @@ elsif ($ARGV[0] eq "postprocess")
       system "chattr -r rofile.txt";
     }
     chmod 0666, "$dirname/rofile.txt";
-    system "cat $dirname/rofile.txt | tr '\n' ' '";
     unlink "$dirname/rofile.txt";
     unlink "$dirname/plainfile.txt";
     rmdir "$dirname/asubdir";
