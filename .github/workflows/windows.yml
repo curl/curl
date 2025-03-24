@@ -914,7 +914,7 @@ jobs:
           if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           else  # OpenSSH-Windows
-            cd "${HOME}" || exit 1
+            cd /d || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
               --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.openssh_windows-version }}/OpenSSH-Win64.zip' --output bin.zip
             unzip bin.zip
@@ -947,7 +947,7 @@ jobs:
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
             fi
-            PATH="$HOME/OpenSSH-Win64:$PATH"
+            PATH="/d/OpenSSH-Win64:$PATH"
           fi
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
           ssh.exe -V || true
