@@ -284,12 +284,11 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   packetlen = payloadlen + 10 + remain_pos + 1;
 
   /* allocating packet */
-  if(packetlen > 268435455)
+  if(packetlen > 0xFFFFFFF)
     return CURLE_WEIRD_SERVER_REPLY;
-  packet = malloc(packetlen);
+  packet = calloc(1, packetlen);
   if(!packet)
     return CURLE_OUT_OF_MEMORY;
-  memset(packet, 0, packetlen);
 
   /* set initial values for the CONNECT packet */
   pos = init_connpack(packet, remain, remain_pos);
