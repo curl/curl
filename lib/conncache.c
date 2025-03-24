@@ -133,7 +133,6 @@ static void cpool_bundle_free_entry(void *freethis)
 }
 
 int Curl_cpool_init(struct cpool *cpool,
-                    Curl_cpool_disconnect_cb *disconnect_cb,
                     struct Curl_easy *idata,
                     struct Curl_share *share,
                     size_t size)
@@ -142,12 +141,8 @@ int Curl_cpool_init(struct cpool *cpool,
                  Curl_str_key_compare, cpool_bundle_free_entry);
 
   DEBUGASSERT(idata);
-  DEBUGASSERT(disconnect_cb);
-  if(!disconnect_cb)
-    return 1;
 
   cpool->idata = idata;
-  cpool->disconnect_cb = disconnect_cb;
   cpool->share = share;
   cpool->initialised = TRUE;
   return 0; /* good */
@@ -457,9 +452,9 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
   cpool_bundle_add(bundle, conn);
   conn->connection_id = cpool->next_connection_id++;
   cpool->num_conn++;
-  DEBUGF(infof(data, "Added connection %" FMT_OFF_T ". "
-               "The cache now contains %zu members",
-               conn->connection_id, cpool->num_conn));
+  CURL_TRC_M(data, "[CPOOL] added connection %" FMT_OFF_T ". "
+             "The cache now contains %zu members",
+             conn->connection_id, cpool->num_conn);
 out:
   CPOOL_UNLOCK(cpool, data);
 
@@ -669,8 +664,10 @@ void Curl_conn_terminate(struct Curl_easy *data,
     DEBUGASSERT(!conn->bits.in_cpool);
   }
 
-  /* Run the callback to let it clean up anything it wants to. */
-  aborted = cpool->disconnect_cb(data, conn, aborted);
+  /* treat the connection as aborted in CONNECT_ONLY situations,
+   * so no graceful shutdown is attempted. */
+  if(conn->connect_only)
+    aborted = TRUE;
 
   if(data->multi) {
     /* Add it to the multi's cpool for shutdown handling */

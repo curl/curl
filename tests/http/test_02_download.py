@@ -633,7 +633,9 @@ class TestDownload:
         docname = 'data-10k'
         port = env.port_for(proto)
         url = f'https://{env.domain1}:{port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'multi'
+        client = LocalClient(name='hx-download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -667,7 +669,9 @@ class TestDownload:
         docname = 'data-10k'
         port = env.port_for(proto)
         url = f'https://{env.domain1}:{port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'multi'
+        client = LocalClient(name='hx-download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
