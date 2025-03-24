@@ -112,6 +112,7 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
   if(!mq)
     return CURLE_OUT_OF_MEMORY;
   Curl_dyn_init(&mq->recvbuf, DYN_MQTT_RECV);
+  Curl_dyn_init(&mq->sendbuf, DYN_MQTT_SEND);
   data->req.p.mqtt = mq;
   return CURLE_OK;
 }
@@ -119,25 +120,24 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
 static CURLcode mqtt_send(struct Curl_easy *data,
                           const char *buf, size_t len)
 {
-  CURLcode result = CURLE_OK;
   struct MQTT *mq = data->req.p.mqtt;
   size_t n;
-  result = Curl_xfer_send(data, buf, len, FALSE, &n);
+  CURLcode result = Curl_xfer_send(data, buf, len, FALSE, &n);
   if(result)
     return result;
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)n);
   if(len != n) {
     size_t nsend = len - n;
-    char *sendleftovers = Curl_memdup(&buf[n], nsend);
-    if(!sendleftovers)
-      return CURLE_OUT_OF_MEMORY;
-    mq->sendleftovers = sendleftovers;
-    mq->nsend = nsend;
+    if(Curl_dyn_len(&mq->sendbuf)) {
+      DEBUGASSERT(Curl_dyn_len(&mq->sendbuf) >= nsend);
+      result = Curl_dyn_tail(&mq->sendbuf, nsend); /* keep this much */
+    }
+    else {
+      result = Curl_dyn_addn(&mq->sendbuf, &buf[n], nsend);
+    }
   }
-  else {
-    mq->sendleftovers = NULL;
-    mq->nsend = 0;
-  }
+  else
+    Curl_dyn_reset(&mq->sendbuf);
   return result;
 }
 
@@ -352,7 +352,7 @@ static CURLcode mqtt_disconnect(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   struct MQTT *mq = data->req.p.mqtt;
   result = mqtt_send(data, "\xe0\x00", 2);
-  Curl_safefree(mq->sendleftovers);
+  Curl_dyn_free(&mq->sendbuf);
   Curl_dyn_free(&mq->recvbuf);
   return result;
 }
@@ -732,7 +732,7 @@ static CURLcode mqtt_done(struct Curl_easy *data,
   struct MQTT *mq = data->req.p.mqtt;
   (void)status;
   (void)premature;
-  Curl_safefree(mq->sendleftovers);
+  Curl_dyn_free(&mq->sendbuf);
   Curl_dyn_free(&mq->recvbuf);
   return CURLE_OK;
 }
@@ -740,19 +740,17 @@ static CURLcode mqtt_done(struct Curl_easy *data,
 static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
-  struct mqtt_conn *mqtt = &conn->proto.mqtt;
+  struct mqtt_conn *mqtt = &data->conn->proto.mqtt;
   struct MQTT *mq = data->req.p.mqtt;
   ssize_t nread;
   unsigned char recvbyte;
 
   *done = FALSE;
 
-  if(mq->nsend) {
+  if(Curl_dyn_len(&mq->sendbuf)) {
     /* send the remainder of an outgoing packet */
-    char *ptr = mq->sendleftovers;
-    result = mqtt_send(data, mq->sendleftovers, mq->nsend);
-    free(ptr);
+    result = mqtt_send(data, Curl_dyn_ptr(&mq->sendbuf),
+                       Curl_dyn_len(&mq->sendbuf));
     if(result)
       return result;
   }
