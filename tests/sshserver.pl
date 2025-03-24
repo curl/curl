@@ -440,7 +440,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     system "chmod 600 " . pp($cliprvkeyf);
     if(($^O eq 'cygwin' || $^O eq 'msys') && -e "/bin/setfacl") {
         # https://cygwin.com/cygwin-ug-net/setfacl.html
-        #system "/bin/setfacl --remove-all " . pp($hstprvkeyf);
+        system "/bin/setfacl --remove-all " . pp($hstprvkeyf);
     }
     elsif(pathhelp::os_is_win()) {
         # https://ss64.com/nt/icacls.html
