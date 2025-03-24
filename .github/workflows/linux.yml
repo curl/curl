@@ -390,7 +390,7 @@ jobs:
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-all \
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-wolfssh --enable-all \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-all
           make install
 
