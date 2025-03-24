@@ -69,6 +69,7 @@ if ($ARGV[0] eq "prepare")
     if($^O eq 'cygwin') {
       system "/bin/setfacl --remove-all rofile.txt";
       chmod 0444, "rofile.txt";
+      system "chattr +r rofile.txt";
     }
 
     exit 0;
@@ -79,6 +80,9 @@ elsif ($ARGV[0] eq "postprocess")
     my $logfile = $ARGV[2];
 
     # Clean up the test directory
+    if($^O eq 'cygwin') {
+      system "chattr -r rofile.txt";
+    }
     chmod 0666, "$dirname/rofile.txt";
     system "cat $dirname/rofile.txt | tr '\n' ' '";
     unlink "$dirname/rofile.txt";
