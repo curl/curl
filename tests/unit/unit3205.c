@@ -722,7 +722,7 @@ UNITTEST_START
 
     Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), true);
 
-    if(strcmp(buf, expect) != 0) {
+    if(expect && strcmp(buf, expect) != 0) {
       fprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
                       "result = \"%s\", expected = \"%s\"\n",
                       test->id, buf, expect);
