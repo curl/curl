@@ -89,14 +89,10 @@ echo "PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 set -x
 
 if [ "$REQ" = YES ]; then
-  "$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -newkey "rsa:$KEYSIZE" -keyout "$PREFIX.key" -out "$PREFIX.csr" -passout fd:0 <<EOF
-pass:secret
-EOF
+  "$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -newkey "rsa:$KEYSIZE" -keyout "$PREFIX.key" -out "$PREFIX.csr" -passout 'pass:secret'
 fi
 
-"$OPENSSL" rsa -in "$PREFIX.key" -out "$PREFIX.key" -passin fd:0 <<EOF
-pass:secret
-EOF
+"$OPENSSL" rsa -in "$PREFIX.key" -out "$PREFIX.key" -passin 'pass:secret'
 
 echo 'pseudo secrets generated'
 
