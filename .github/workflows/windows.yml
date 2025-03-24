@@ -149,7 +149,7 @@ jobs:
         timeout-minutes: 15
         run: |
           PATH=/usr/bin
-          export TFLAGS='-j8 ${{ matrix.tflags }} ~615'
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
