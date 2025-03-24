@@ -797,6 +797,32 @@ cleanup:
 }
 
 static CURLcode
+init_config_builder_platform_verifier(
+  struct Curl_easy *data,
+  struct rustls_client_config_builder *builder)
+{
+  struct rustls_server_cert_verifier *server_cert_verifier = NULL;
+  CURLcode result = CURLE_OK;
+  rustls_result rr;
+
+  rr = rustls_platform_server_cert_verifier(&server_cert_verifier);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "failed to create platform certificate verifier");
+    result = CURLE_SSL_CACERT_BADFILE;
+    goto cleanup;
+  }
+
+  rustls_client_config_builder_set_server_verifier(builder,
+                                                   server_cert_verifier);
+
+cleanup:
+  if(server_cert_verifier) {
+    rustls_server_cert_verifier_free(server_cert_verifier);
+  }
+  return result;
+}
+
+static CURLcode
 init_config_builder_keylog(struct Curl_easy *data,
                            struct rustls_client_config_builder *builder)
 {
@@ -1024,6 +1050,13 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!conn_config->verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
+  }
+  else if(ssl_config->native_ca_store) {
+    result = init_config_builder_platform_verifier(data, config_builder);
+    if(result != CURLE_OK) {
+      rustls_client_config_builder_free(config_builder);
+      return result;
+    }
   }
   else if(ca_info_blob || ssl_cafile) {
     result = init_config_builder_verifier(data,
