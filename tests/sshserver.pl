@@ -441,7 +441,6 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     if(($^O eq 'cygwin' || $^O eq 'msys') && -e "/bin/setfacl") {
         # https://cygwin.com/cygwin-ug-net/setfacl.html
         system "/bin/setfacl --remove-all " . pp($hstprvkeyf);
-        logmsg "TRACE: running setfacl\n";
     }
     elsif(pathhelp::os_is_win()) {
         # https://ss64.com/nt/icacls.html
