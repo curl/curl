@@ -657,6 +657,17 @@ jobs:
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
+      - name: 'build certs'
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build bld --target clean-certs
+            cmake --build bld --target build-certs --parallel 1
+          else
+            make -C bld/tests/certs clean-certs
+            make -C bld/tests/certs build-certs -j1
+          fi
+
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
