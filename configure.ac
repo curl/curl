@@ -4888,6 +4888,7 @@ if test "x$want_ech" != "xno"; then
   ECH_ENABLED=0
   ECH_ENABLED_OPENSSL=0
   ECH_ENABLED_WOLFSSL=0
+  ECH_ENABLED_RUSTLS=0
   ECH_SUPPORT=''
 
   dnl check for OpenSSL equivalent
@@ -4901,10 +4902,15 @@ if test "x$want_ech" != "xno"; then
       ECH_SUPPORT="$ECH_SUPPORT wolfSSL"
       ECH_ENABLED_WOLFSSL=1)
   fi
+  if test "x$RUSTLS_ENABLED" = "x1"; then
+      ECH_SUPPORT="$ECH_SUPPORT rustls-ffi"
+      ECH_ENABLED_RUSTLS=1
+  fi
 
   dnl now deal with whatever we found
   if test "x$ECH_ENABLED_OPENSSL" = "x1" -o \
-          "x$ECH_ENABLED_WOLFSSL" = "x1"; then
+          "x$ECH_ENABLED_WOLFSSL" = "x1" -o \
+          "x$ECH_ENABLED_RUSTLS" = "x1"; then
     AC_DEFINE(USE_ECH, 1, [if ECH support is available])
     AC_MSG_RESULT(ECH support available via:$ECH_SUPPORT)
     experimental="$experimental ECH"

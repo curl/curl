@@ -588,6 +588,14 @@ init_config_builder(struct Curl_easy *data,
     goto cleanup;
   }
 
+#if defined(USE_ECH)
+  if(ECH_ENABLED(data)) {
+    tls_versions[0] = RUSTLS_TLS_VERSION_TLSV1_3;
+    tls_versions_len = 1;
+    infof(data, "rustls: ECH enabled, forcing TLSv1.3");
+  }
+#endif /* USE_ECH */
+
   cipher_suites = malloc(sizeof(cipher_suites) * (cipher_suites_len));
   if(!cipher_suites) {
     result = CURLE_OUT_OF_MEMORY;
@@ -889,6 +897,38 @@ cleanup:
   return result;
 }
 
+#if defined(USE_ECH)
+static CURLcode
+init_config_builder_ech(struct Curl_easy *data,
+                        struct rustls_client_config_builder *builder)
+{
+  const rustls_hpke *hpke = rustls_supported_hpke();
+
+  if(!hpke) {
+    failf(data,
+          "rustls: ECH unavailable, rustls-ffi built without "
+          "HPKE compatible crypto provider");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if(data->set.str[STRING_ECH_PUBLIC]) {
+    failf(data, "rustls: ECH outername not supported");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if(data->set.tls_ech == CURLECH_GREASE) {
+    rustls_result rr;
+    rr = rustls_client_config_builder_enable_ech_grease(builder, hpke);
+    if(rr != RUSTLS_RESULT_OK) {
+      rustls_failf(data, rr, "rustls: failed to configure ECH GREASE");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+
+  return CURLE_OK;
+}
+#endif /* USE_ECH */
+
 static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
@@ -945,6 +985,16 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       return result;
     }
   }
+
+#if defined(USE_ECH)
+  if(ECH_ENABLED(data)) {
+    result = init_config_builder_ech(data, config_builder);
+    if(result != CURLE_OK && data->set.tls_ech & CURLECH_HARD) {
+      rustls_client_config_builder_free(config_builder);
+      return result;
+    }
+  }
+#endif /* USE_ECH */
 
   result = init_config_builder_keylog(data, config_builder);
   if(result != CURLE_OK) {
@@ -1269,7 +1319,8 @@ const struct Curl_ssl Curl_ssl_rustls = {
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CIPHER_LIST |
   SSLSUPP_TLS13_CIPHERSUITES |
-  SSLSUPP_CERTINFO,
+  SSLSUPP_CERTINFO |
+  SSLSUPP_ECH,
   sizeof(struct rustls_ssl_backend_data),
 
   NULL,                            /* init */
