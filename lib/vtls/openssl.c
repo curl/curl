@@ -931,14 +931,14 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 }
 
 static int passwd_callback(char *buf, int num, int encrypting,
-                           void *global_passwd)
+                           void *password)
 {
   DEBUGASSERT(0 == encrypting);
 
-  if(!encrypting && num >= 0) {
-    int klen = curlx_uztosi(strlen((char *)global_passwd));
+  if(!encrypting && num >= 0 && password) {
+    int klen = curlx_uztosi(strlen((char *)password));
     if(num > klen) {
-      memcpy(buf, global_passwd, klen + 1);
+      memcpy(buf, password, klen + 1);
       return klen;
     }
   }
