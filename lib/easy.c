@@ -546,9 +546,9 @@ static void events_setup(struct Curl_multi *multi, struct events *ev)
  *
  * populate the fds[] array
  */
-static int populate_fds(struct pollfd *fds, struct events *ev)
+static unsigned int populate_fds(struct pollfd *fds, struct events *ev)
 {
-  int numfds = 0;
+  unsigned int numfds = 0;
   struct pollfd *f;
   struct socketmonitor *m;
 
@@ -579,12 +579,9 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
   while(!done) {
     CURLMsg *msg;
     struct pollfd fds[4];
-    int numfds = 0;
     int pollrc;
-    int i;
     struct curltime before;
-
-    numfds = populate_fds(fds, ev);
+    const unsigned int numfds = populate_fds(fds, ev);
 
     /* get the time stamp to use to figure out how long poll takes */
     before = Curl_now();
@@ -592,11 +589,11 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     if(numfds) {
       /* wait for activity or timeout */
 #if DEBUG_EV_POLL
-      fprintf(stderr, "poll(numfds=%d, timeout=%ldms)\n", numfds, ev->ms);
+      fprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n", numfds, ev->ms);
 #endif
-      pollrc = Curl_poll(fds, (unsigned int)numfds, ev->ms);
+      pollrc = Curl_poll(fds, numfds, ev->ms);
 #if DEBUG_EV_POLL
-      fprintf(stderr, "poll(numfds=%d, timeout=%ldms) -> %d\n",
+      fprintf(stderr, "poll(numfds=%u, timeout=%ldms) -> %d\n",
               numfds, ev->ms, pollrc);
 #endif
       if(pollrc < 0)
@@ -624,6 +621,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       /* here pollrc is > 0 */
       struct Curl_llist_node *e = Curl_llist_head(&multi->process);
       struct Curl_easy *data;
+      unsigned int i;
       DEBUGASSERT(e);
       data = Curl_node_elem(e);
       DEBUGASSERT(data);
