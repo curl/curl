@@ -150,9 +150,10 @@ jobs:
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
             https://www.stunnel.org/downloads/stunnel-5.74-win64-installer.exe --output installer.exe
-          ./installer /S /D D:/stunnel
-          ls -l /d/ || true
-          ls -l /d/stunnel || true
+          chmod +x installer.exe
+          ./installer.exe /S /D D:/stunnel
+          ls -l /cygdrive/d/ || true
+          ls -l /cygdrive/d/stunnel || true
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
