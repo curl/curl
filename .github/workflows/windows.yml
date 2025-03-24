@@ -943,7 +943,7 @@ jobs:
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
             fi
-            PATH="$PATH:/c/Program Files/OpenSSH-Win64"
+            PATH="/c/Program Files/OpenSSH-Win64:$PATH"
           fi
           PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
           ls -1 '/c/Program Files' || true
