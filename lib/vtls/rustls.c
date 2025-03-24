@@ -903,6 +903,8 @@ init_config_builder_ech(struct Curl_easy *data,
                         struct rustls_client_config_builder *builder)
 {
   const rustls_hpke *hpke = rustls_supported_hpke();
+  unsigned char *ech_config = NULL;
+  size_t ech_config_len = 0;
 
   if(!hpke) {
     failf(data,
@@ -921,6 +923,30 @@ init_config_builder_ech(struct Curl_easy *data,
     rr = rustls_client_config_builder_enable_ech_grease(builder, hpke);
     if(rr != RUSTLS_RESULT_OK) {
       rustls_failf(data, rr, "rustls: failed to configure ECH GREASE");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+  else if(data->set.tls_ech & CURLECH_CLA_CFG
+       && data->set.str[STRING_ECH_CONFIG]) {
+    const char *b64 = data->set.str[STRING_ECH_CONFIG];
+    size_t decode_result;
+    rustls_result rr;
+    if(!b64) {
+      infof(data, "rustls: ECHConfig from command line empty");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    /* rustls-ffi expects the raw TLS encoded ECHConfigList bytes */
+    decode_result = Curl_base64_decode(b64, &ech_config, &ech_config_len);
+    if(decode_result || !ech_config) {
+      infof(data, "rustls: cannot base64 decode ECHConfig from command line");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    rr = rustls_client_config_builder_enable_ech(builder,
+                                                 ech_config,
+                                                 ech_config_len,
+                                                 hpke);
+    if(rr != RUSTLS_RESULT_OK) {
+      rustls_failf(data, rr, "rustls: failed to configure ECH");
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
