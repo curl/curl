@@ -257,7 +257,6 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   int remain_pos = 0;
   char remain[4] = {0};
   size_t packetlen = 0;
-  size_t payloadlen = 0;
   size_t start_user = 0;
   size_t start_pwd = 0;
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
@@ -272,14 +271,11 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   const char *passwd = data->state.aptr.passwd ?
     data->state.aptr.passwd : "";
   const size_t plen = strlen(passwd);
-
-  payloadlen = ulen + plen + MQTT_CLIENTID_LEN + 2;
-  /* The plus 2 are for the MSB and LSB describing the length of the string to
-   * be added on the payload. Refer to spec 1.5.2 and 1.5.4 */
-  if(ulen)
-    payloadlen += 2;
-  if(plen)
-    payloadlen += 2;
+  const size_t payloadlen = ulen + plen + MQTT_CLIENTID_LEN + 2 +
+  /* The plus 2s below are for the MSB and LSB describing the length of the
+     string to be added on the payload. Refer to spec 1.5.2 and 1.5.4 */
+    (ulen ? 2 : 0) +
+    (plen ? 2 : 0);
 
   /* getting how much occupy the remain length */
   remain_pos = mqtt_encode_len(remain, payloadlen + 10);
@@ -288,12 +284,11 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   packetlen = payloadlen + 10 + remain_pos + 1;
 
   /* allocating packet */
-  if(packetlen > 268435455)
+  if(packetlen > 0xFFFFFFF)
     return CURLE_WEIRD_SERVER_REPLY;
-  packet = malloc(packetlen);
+  packet = calloc(1, packetlen);
   if(!packet)
     return CURLE_OUT_OF_MEMORY;
-  memset(packet, 0, packetlen);
 
   /* set initial values for the CONNECT packet */
   pos = init_connpack(packet, remain, remain_pos);
@@ -309,9 +304,9 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   }
   infof(data, "Using client id '%s'", client_id);
 
-  /* position where starts the user payload */
+  /* position where the user payload starts */
   start_user = pos + 3 + MQTT_CLIENTID_LEN;
-  /* position where starts the password payload */
+  /* position where the password payload starts */
   start_pwd = start_user + ulen;
   /* if username was provided, add it to the packet */
   if(ulen) {
@@ -320,7 +315,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
     rc = add_user(username, ulen,
                   (unsigned char *)packet, start_user, remain_pos);
     if(rc) {
-      failf(data, "Username is too large: [%zu]", ulen);
+      failf(data, "Username too long: [%zu]", ulen);
       result = CURLE_WEIRD_SERVER_REPLY;
       goto end;
     }
@@ -330,7 +325,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   if(plen) {
     rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
     if(rc) {
-      failf(data, "Password is too large: [%zu]", plen);
+      failf(data, "Password too long: [%zu]", plen);
       result = CURLE_WEIRD_SERVER_REPLY;
       goto end;
     }
