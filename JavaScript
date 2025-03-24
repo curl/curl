@@ -1,0 +1,195 @@
+
+Thông báo trong bảng điều khiển JavaScript
+18 thông báo
+
+Nhật ký
+00:06.000
+Detect client is mobile or not start!
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/preload.bundle.js:1
+
+Nhật ký
+00:06.000
+Detect client is mobile or not end!
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/preload.bundle.js:1
+
+Nhật ký
+00:07.000
+Error
+https://www.nohu52.com/js/ssodeestsebo.js?async&seed=AIAzz8eVAQAA1AZ3uHUfkZ4iIQirBQqbkn-aNhwFaRYxONoMCuIVw6l7FHz_&XPOby5X0PL--z=q:1
+
+Nhật ký
+00:07.000
+Error
+https://www.nohu52.com/js/ssodeestsebo.js?async&seed=AIAzz8eVAQAA1AZ3uHUfkZ4iIQirBQqbkn-aNhwFaRYxONoMCuIVw6l7FHz_&XPOby5X0PL--z=q:1
+
+Cảnh báo
+00:08.000
+TypeError: e.getTime is not a function at e.value (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523538) at r (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523198) at fn (eval at compile (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:106055), <anonymous>:4:249) at u.$digest (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:101099) at u.$apply (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:103082) at https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:66469 at _ (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:69373) at C.onload (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531- ...
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393
+
+Cảnh báo
+00:08.000
+TypeError: e.getTime is not a function at e.value (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523538) at r (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523198) at fn (eval at compile (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:106055), <anonymous>:4:249) at u.$digest (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:101099) at u.$apply (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:103082) at https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:66469 at _ (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:69373) at C.onload (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531- ...
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393
+
+Cảnh báo
+00:08.000
+TypeError: e.getTime is not a function at e.value (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523538) at r (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523198) at fn (eval at compile (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:106055), <anonymous>:4:249) at u.$digest (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:101099) at u.$apply (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:103082) at https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:66469 at _ (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:69373) at C.onload (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531- ...
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393
+
+Cảnh báo
+00:08.000
+TypeError: e.getTime is not a function at e.value (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523538) at r (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523198) at fn (eval at compile (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:106055), <anonymous>:4:249) at u.$digest (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:101099) at u.$apply (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:103082) at https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:66469 at _ (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:69373) at C.onload (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531- ...
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393
+
+Cảnh báo
+00:08.000
+TypeError: e.getTime is not a function at e.value (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523538) at r (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:17:4523198) at fn (eval at compile (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:106055), <anonymous>:4:249) at u.$digest (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:101099) at u.$apply (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:103082) at https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:66469 at _ (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393:69373) at C.onload (https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531- ...
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393
+
+Cảnh báo
+00:10.000
+pascalprecht.translate.$translateSanitization: No sanitization strategy has been configured. This can have serious security implications. See http://angular-translate.github.io/docs/#/guide/19_security for details.
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393
+
+Nhật ký
+00:18.000
+Object {data: null, status: -1, headers: f, config: Object, statusText: ...}
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:1
+
+Nhật ký
+00:18.000
+null
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/main.bundle.js:1
+
+Cảnh báo
+00:18.000
+Possibly unhandled rejection: en-us undefined
+https://gwfd.qatgwawm.net/system-requirement/Web.PortalNew/UA531-01/9c14731086/vendor.bundle.js:393
+
+Nhật ký
+00:31.000
+Error
+https://www.nohu52.com/js/ssodeestsebo.js?async&seed=AIAzz8eVAQAA1AZ3uHUfkZ4iIQirBQqbkn-aNhwFaRYxONoMCuIVw6l7FHz_&XPOby5X0PL--z=q:1
+
+Cảnh báo
+00:31.000
+[GroupMarkerNotSet(crbug.com/242999)!:A0443500CC1A0000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security guarantees for trusted content.
+https://www.nohu52.com/?%3Cconfiguration%3E%20%20%20%3Csystem.web%3E%20%20%20%20%20%3CcustomErrors%20mode=%22Off%22%2F%3E%20%20%20%3C%2Fsystem.web%3E%20%3C%2Fconfiguration%3E:0
+
+Nhật ký
+00:31.000
+Error
+https://www.nohu52.com/js/ssodeestsebo.js?async&seed=AIAzz8eVAQAA1AZ3uHUfkZ4iIQirBQqbkn-aNhwFaRYxONoMCuIVw6l7FHz_&XPOby5X0PL--z=q:1
+
+Cảnh báo
+00:32.000
+[GroupMarkerNotSet(crbug.com/242999)!:A0443500CC1A0000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security guarantees for trusted content.
+https://www.nohu52.com/?%3Cconfiguration%3E%20%20%20%3Csystem.web%3E%20%20%20%20%20%3CcustomErrors%20mode=%22Off%22%2F%3E%20%20%20%3C%2Fsystem.web%3E%20%3C%2Fconfiguration%3E:0
+
+Cảnh báo
+00:32.000
+[.WebGL-0x2d9c057caa00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+https://www.nohu52.com/?%3Cconfiguration%3E%20%20%20%3Csystem.web%3E%20%20%20%20%20%3CcustomErrors%20mode=%22Off%22%2F%3E%20%20%20%3C%2Fsystem.web%3E%20%3C%2Fconfiguration%3E:0
+
+Xin chào csnet.tacgia@gmail.com ,
+
+Chúng tôi viết thư này để thông báo cho bạn biết rằng nhóm bạn đã cố gắng liên hệ (googlecloud) có thể không tồn tại hoặc bạn có thể không được phép đăng tin nhắn lên nhóm. Một số thông tin chi tiết hơn về lý do tại sao bạn không thể đăng:
+
+* Có thể bạn đã viết sai chính tả hoặc định dạng tên nhóm.
+* Chủ sở hữu nhóm có thể đã xóa nhóm này.
+* Bạn có thể cần tham gia nhóm trước khi được phép đăng bài.
+* Nhóm này có thể không cho phép đăng bài.
+
+Nếu bạn có thắc mắc liên quan đến Nhóm Google này hoặc bất kỳ Nhóm Google nào khác, hãy truy cập Trung tâm trợ giúp tại https://support.google.com/a/google.com/bin/topic.py?topic=25838 .
+
+Cảm ơn,
+
+quản trị viên google.com
+
+----- Tin nhắn gốc -----
+
+X-Forwarded-Encrypted: i=2; AJvYcCXf6xjZGgixoy7vmIFLDoqHzGb1uOjT0GxW7yKqe6YVjafyF8MpnSqqB+eMYgKSD1QViF4A6E5XLDKFLA==@ google.com
+X-Received: vào năm 2002:a2e:be92:0:b0:30b:c6fe:4529 với ID SMTP 38308e7fff4ca-30d7e2067acmr53931291fa.8.1742833439381;
+Thứ hai, 24/03/2025 09:23:59 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1742833439; cv=không có;
+d= google.com ; s=arc-20240605;
+b=Q+u5P+E3P85q5miGSxb2Jmw5xFeOVcEeX88HiHpBJHxh2gU8D8etXPqlcsnhkI/9E/
+b5TcEInFeLSSABmaUBlavWUlAJPUcrlrsFvVxX9DW7n6WYOy3Nu20BfuakId++VEDqfa
+MFU7MwXC67hlkzCF6q7401rmcQzNpaBtafImf8rdEdw8l6HXXvylWARm8aYLXzCMFcxa
+WdCDCYRN5EN9b/MYnOo8dKlwKljICCkSvcp/7e0Jd6OecYPSh3rt+kE2PDZLA3RFvMDF
+UI91/yy44VQiN111qNNkuL4mrXczL3kYZrR8lfnxvsTfshwmgvrve9yXWANoJxy64z6o
+Câu hỏi 7Ig==
+Chữ ký tin nhắn ARC: i=1; a=rsa-sha256; c=thư giãn/thư giãn; d= google.com ; s=arc-20240605;
+h=đến:chủ đề:id-tin-nhắn:ngày:từ:phiên-bản-mime:chữ-ký-dkim;
+bh=SY+HQsMk+ahD/oILAd/FIXk/nxcUSDfvpajMK2bMpN0=;
+fh=1DfDuOvlIsgdR9Xcm4Udk0kykWL7PXxLWSIh/LnAC7Q=;
+b=SDBp22eAgRTyH5w6ql1VXCGlYX6qT7QZyBRxJSV0cavVf1xPMU2aRjdUOsOfh3hF8B
+JnHQm4YmW1A2xYRsLPj0GTf5r9U7xpZ98/PSOQIUThJeg4WC0lmhlxjtc4NQ+qzhZEAv
+xg4rHtCj+e7EACOxff5QUdUTLsRzfFNkA+8STQ105wENfYoY0B1UPoCNiZNKrkshst9X
+LlhSGHRXJsMDe5CJ2MeKHu/rsAfVMMS+BLblyoXtdWAd9XB+Dhb1WyCYcSS8afLDWJzR
++z++sEcvxIzrpzTaUjH3eKQBQFsRUPSmYy2mgPOb71V3EKqYuqhuxdW7EpVAKHOxX0Ou
+2KXQ==;
+dara= google.com
+Kết quả xác thực ARC: i=1; mx.google.com ;
+dkim=pass header.i=@ gmail.com header.s=20230601 header.b=Q2z24JSp;
+spf=pass ( google.com : tên miền của csnet.tacgia@gmail.com chỉ định 209.85.220.41 là người gửi được phép) smtp.mailfrom= csnet.tacgia@gmail.com ;
+dmarc=pass (p=KHÔNG CÓ sp=QUARANTINE dis=KHÔNG CÓ) header.from= gmail.com ;
+dara=pass header.i=@ google.com
+Đường dẫn trả về: < csnet.tacgia@gmail.com >
+Đã nhận: từ mail-sor-f41.google.com ( mail-sor-f41.google.com . [209.85.220.41])
+bởi mx.google.com với SMTPS id 38308e7fff4ca-30d7d7e7b0csor16508801fa.1.2025.03.24.09.23.59
+cho < googlecloud@google.com >
+(An ninh giao thông của Google);
+Thứ hai, 24/03/2025 09:23:59 -0700 (PDT)
+Đã nhận-SPF: vượt qua ( google.com : tên miền của csnet.tacgia@gmail.com chỉ định 209.85.220.41 là người gửi được phép) client-ip=209.85.220.41;
+Kết quả xác thực: mx.google.com ;
+dkim=pass header.i=@ gmail.com header.s=20230601 header.b=Q2z24JSp;
+spf=pass ( google.com : tên miền của csnet.tacgia@gmail.com chỉ định 209.85.220.41 là người gửi được phép) smtp.mailfrom= csnet.tacgia@gmail.com ;
+dmarc=pass (p=KHÔNG CÓ sp=QUARANTINE dis=KHÔNG CÓ) header.from= gmail.com ;
+dara=pass header.i=@ google.com
+Chữ ký DKIM: v=1; a=rsa-sha256; c=thư giãn/thư giãn;
+d= gmail.com ; s=20230601; t=1742833438; x=1743438238; dara= google.com ;
+h=đến:chủ đề:id-tin-nhắn:ngày:từ:phiên-bản-mime:từ:đến:cc:chủ-đề
+:ngày:id-tin-nhắn:trả-lời;
+bh=SY+HQsMk+ahD/oILAd/FIXk/nxcUSDfvpajMK2bMpN0=;
+b=Q2z24JSpbk3SGvSROsx2OmpHNkEvWvqLpK8F+6pBFd314jbr0C/QMaXcIjsqfIJ5xT
+2dBvVQ6GYTreUjKAhiVujOESW+iSTZmzRA9676wQl8w95E4gP86amsgJDWFQmPP4hbzv
+FNoF07VbGcxOwrf2UBYt69qCwN3xVY8gwXQPa8s93H0s/Vl7L8fNYfghSBIGbXALz4dU
+0a30YEuunQqc+qG0jvNIDMJTSD/+nM0B5G9Bht1zAKnbMCiiDFJxmAv/1LMXtz1Qrp+b
+nMCRje40ZGG9ho+VKYL4p7pvYT3KT9KasnovQchcn0FLNwXO8lhOsLFI6Y/eG0j7YKT3
+cR/A==
+X-Google-DKIM-Chữ ký: v=1; a=rsa-sha256; c=thư giãn/thư giãn;
+d= 1e100.net ; s=20230601; t=1742833438; x=1743438238;
+h=đến:chủ đề:id-tin-nhắn:ngày:từ:phiên-bản-mime:trạng-thái-tin-nhắn-x-gm
+:từ:đến:cc:chủ đề:ngày:id tin nhắn:trả lời;
+bh=SY+HQsMk+ahD/oILAd/FIXk/nxcUSDfvpajMK2bMpN0=;
+b=sfqQLAETTpdCMd5Ffe/pdmf7zC1Cam8Ms08E3nyBlX89rTg/yMcFYQndyDEbJqUhQw
+EI3bAxpCiuGbBKuQdRLEs7N/ikOPwtWjG82q2KMK22Tw9+DQjNqAM6FQ8q512Y6B+vW9
+xi9MizGppnQo6rHroWykMn31rwXTnFNn8PBreWzgl3+iLjRlJRG876zvGi5VgKAxa01H
+JKpVkNqJ9doI/ECUGFgvle0CetZBP3EkLmFWeJQHP2LnLcZ0ymwGniVQG+IH6mdcDgKX
+QxaorNr863eKlF5iJi6Y6B/ZBdytZpnndbYYlmUssPfD+SmimbK+b2lUfzxZ/eoKILUi
+920A==
+X-Chuyển tiếp-Mã hóa: i=1; AJvYcCWu+1dA+7B909a350E2FtyMKnqpiCrHYZGXn2+JJEmcc/VQsQIC9EpFb6nXphSN+vblzNX7gL04vO/e6A==@ google.com
+Trạng thái tin nhắn X-Gm: AOJu0YyZq0+iQH4RduSc05osnaEabjj3T2Y2kQw70yN/NqHpt074GTbG
+lS3TO4DxpnHXZWZAvLIK1H6MhW1YYFilgo+E10zapEGgViIrAV4brLE7FeW/JgABpNozOzaW0Rh
+OoNFpUFIlMJdxvN9rkRdpHLC2rmU=
+X-Gm-Gg: ASbGncsQ5vDN+bQFitp6PE7nm/pl6z0lhfW87M04jnQl1DF9HFQ/fYWgzGreAUrKAew
+4BCHfcTiiGzj0mB0Tk9A2YdWQqcG7bq4lk4bQxQnhSKSUyR2ikzgPy61LOoR5Ebhu9viUoRK028
+KoLH3UvmMP/chwpC8zgwTpp/HIUw==
+X-Google-Smtp-Nguồn: AGHT+IG8wdXsoXaRr2qC9I+58yfhZ8fA1W0C06VwJPXmVAartvSCdUqUjS9rsJoWb2rWY2aQ7FA9CXGS+Twuh7K38WM=
+X-Received: trước 2002:a05:651c:1193:b0:30c:719:1145 với ID SMTP
+38308e7fff4ca-30d7e239639mr39689071fa.17.1742833438165; Thứ hai, 24 tháng 3 năm 2025
+09:23:58 -0700 (Giờ Thái Bình Dương)
+Phiên bản MIME: 1.0
+Từ: =?UTF-8?B?Tmjhuq10IFRoacOqbiBNw6M=?= < csnet.tacgia@gmail.com >
+Ngày: Thứ Hai, 24/03/2025 23:23:45 +0700
+X-Gm-Đặc điểm: AQ5f1JrURa9GgoRvNikX_16-iJTJ6Pd78OFK9ax1DzC-d7L73DaM1ssLeHWOGFo
+ID tin nhắn: <CAD1= kLA0Pog0LcmaYjTncvO_P2eYE9M0t1c3eobFYe9Hp83TWA@mail.gmail.com >
+Tiêu đề: =?UTF-8?B?VGjDtG5nIGLDoW8gdHJvbmcgYuG6o25nIMSRaeG7gXUga2hp4buDbiBKYXZhU2NyaXB0IA==?=
+=?UTF-8?B?MTggdGjDtG5nIGLDoW8=?=
+Đến: notifications@github.com , csnet.tacgia@gmail.com ,
+"WordPress.com" < help@wordpress.com >, "WordPress.com" < domains-help@wordpress.com >, googlecloud@google.com
+Loại nội dung: multipart/alternative; ranh giới="000000000000fc10e506311907b2"
+Sử dụng Control + Shift + mđể chuyển đổi tabtiêu điểm di chuyển phím. Ngoài ra, sử dụng escthen tabđể di chuyển đến phần tử tương tác tiếp theo trên trang.
+
