@@ -4,7 +4,7 @@ curl and libcurl 8.13.0
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3371
+ Contributors:                 3372
 
 This release includes the following changes:
 
@@ -64,17 +64,22 @@ This release includes the following bugfixes:
  o cmake: fix `HAVE_ATOMIC`/`HAVE_STDATOMIC` pre-fill for clang-cl [28]
  o cmake: fix detection pre-fills for iOS [153]
  o cmake: fix ECH detection in custom-patched OpenSSL [32]
+ o cmake: fix typo in ECH config error msg [246]
  o cmake: hide empty `MINGW64_VERSION` output for mingw32ce [114]
  o cmake: improve httpd detection for pytest [127]
  o cmake: mention 'insecure' in the debug build warning [15]
  o cmake: misc tidy-ups [38]
  o cmake: pre-fill known type sizes for Windows OSes [100]
+ o cmake: replace CMAKE_COMPILER_IS_GNUCC with CMAKE_C_COMPILER_ID [232]
+ o cmake: replace exec_program() with execute_process() [239]
  o cmake: restrict static CRT builds to static curl exe, test in CI [113]
  o cmake: sync cutoff version with autotools for picky option `-ftree-vrp` [99]
  o cmake: sync OpenSSL(-fork) feature checks with `./configure` [49]
  o cmake: unity mode optimization for non-`CURLDEBUG` `testdeps` targets [231]
  o CODE_STYLE: readability and banned functions [35]
+ o config-win32: set `HAVE_STDINT_H` where available [264]
  o configure: call the blocking resolver "blocking", not "default" [220]
+ o configure: fix ECH detection with MultiSSL [259]
  o configure: silence compiler warnings in feature checks, drop duplicates [86]
  o configure: use `curl_cv_apple` variable [40]
  o conn: fix connection reuse when SSL is optional [54]
@@ -142,6 +147,7 @@ This release includes the following bugfixes:
  o INSTALL-CMAKE.md: mention `ZLIB_USE_STATIC_LIBS` [112]
  o lib1156: pass longs to `curl_easy_setopt()` [159]
  o lib2302: fix crash due to stack overflow on MSVC and clang Windows [228]
+ o lib696: fix building on Windows in non-bundle mode [267]
  o lib: better optimized casecompare() and ncasecompare() [3]
  o lib: clear up CURLRES_ASYNCH vs USE_CURL_ASYNC use [215]
  o lib: fix two curlx_strtoofft invokes [128]
@@ -179,12 +185,16 @@ This release includes the following bugfixes:
  o request: clear sendbuf_hds_len when resetting request bufq [166]
  o resolve: fix building without Unix sockets and `CURLDEBUG` [213]
  o runtests: accept `CURL_DIRSUFFIX` without ending slash [133]
+ o runtests: add feature-based filtering [268]
  o runtests: check and report if `diff` tool is missing [162]
+ o runtests: drop logic calling the `handle` tool (Windows) [263]
  o runtests: drop recognizing 'winssl' as Schannel [102]
  o runtests: drop ref to unused external function
  o runtests: fix SSH server not starting in cases, re-ignore failing vcpkg CI jobs [225]
+ o runtests: fix test key format for libssh2 WinCNG (and others) [229]
  o runtests: recognize AWS-LC as OpenSSL [103]
  o runtests: support multi-target cmake, drop workarounds from CI [116]
+ o runtests: support running tests under wine or qemu [210]
  o rustls: cap maximum allowed CRL file size to 8MB [196]
  o schannel: deduplicate Windows Vista detection [98]
  o schannel: enable ALPN support under WINE 6.0+ [92]
@@ -205,6 +215,8 @@ This release includes the following bugfixes:
  o src: remove final uses of Curl_ symbol prefixes in tool code [242]
  o src: replace strto[u][ld] with curlx_str_ parsers [222]
  o ssh: consider sftp quote commands case sensitive [33]
+ o sshserver.pl: adjust `AuthorizedKeysFile2` cutoff version [204]
+ o sshserver: fix excluding obsolete client config lines [212]
  o ssl session cache: add exportable flag [56]
  o strparse: make Curl_str_number() return error for no digits [14]
  o strparse: switch the API to work on 'const char *' [2]
@@ -227,6 +239,7 @@ This release includes the following bugfixes:
  o tests: make sure 'commands.log' is generated in the correct logdir [172]
  o tests: mark tests 1631, 1632 flaky [157]
  o tests: reformat error messages to avoid tripping MSBuild [201]
+ o tests: Remove unused variables [245]
  o tftpd: prefix TFTP protocol error `E*` constants with `TFTP_` [189]
  o tidy-up: align MSYS2/Cygwin codepaths, follow Cygwin `MAX_PID` bump [97]
  o tidy-up: delete, comment or scope C macros reported unused [16]
@@ -283,20 +296,20 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthony Hu, Calvin Ruocco, Carlos Henrique Lima Melara, Catena cyber,
-  Christian Schmitz, Dan Fandrich, Daniel McCarney, Daniel Stenberg,
-  dependabot[bot], Derek Huang, Dexter Gerig, Ethan Wilkes, Harry Sintonen,
-  Jan Macku, Jeremy Drake, John Bampton, Joseph Chen, Justin Steventon,
-  Kai Pastor, kayrus on github, kriztalz, Lars Karlitski, Laurențiu Nicola,
-  lf- on github, Marcel Raad, Marius Albrecht, Mark Phillips, Martxel,
-  Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh, Peng-Yu Chen,
-  Philippe Antoine, qhill on github, Ray Satiro, renovate[bot], Rinku Das,
-  rmg-x on github, Ronald Crane, RubisetCie on github, saimen,
+  Anthony Hu, Aquila Macedo, Calvin Ruocco, Carlos Henrique Lima Melara,
+  Catena cyber, Christian Schmitz, Dan Fandrich, Daniel McCarney,
+  Daniel Stenberg, dependabot[bot], Derek Huang, Dexter Gerig, Ethan Wilkes,
+  Harry Sintonen, Jan Macku, Jeremy Drake, John Bampton, Joseph Chen,
+  Justin Steventon, Kai Pastor, kayrus on github, kriztalz, Lars Karlitski,
+  Laurențiu Nicola, lf- on github, Marcel Raad, Marius Albrecht, Mark Phillips,
+  Martxel, Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh, Peng-Yu Chen,
+  Peter Kokot, Philippe Antoine, qhill on github, Ray Satiro, renovate[bot],
+  Rinku Das, rmg-x on github, Ronald Crane, RubisetCie on github, saimen,
   Samuel Dionne-Riel, Samuel Henrique, Scott Talbert, Sergey, Stefan Eissing,
   stevenpackardblp on github, Tatsuhiro Tsujikawa, Tianyi Song, Timo Tijhof,
   tiymat, Viktor Szakats, Vulpes Vulpes, Yedaya Katsman, Zenju on github,
   Zhang Wen, Zhaoming Luo
-  (57 contributors)
+  (59 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -503,12 +516,15 @@ References to bug reports and discussions on issues:
  [201] = https://curl.se/bug/?i=16583
  [202] = https://curl.se/bug/?i=16577
  [203] = https://curl.se/bug/?i=16709
+ [204] = https://curl.se/bug/?i=16787
  [205] = https://curl.se/bug/?i=16657
  [206] = https://curl.se/bug/?i=16659
  [207] = https://curl.se/bug/?i=16656
  [208] = https://curl.se/bug/?i=16142
  [209] = https://curl.se/bug/?i=16660
+ [210] = https://curl.se/bug/?i=16785
  [211] = https://curl.se/bug/?i=16641
+ [212] = https://curl.se/bug/?i=16784
  [213] = https://curl.se/bug/?i=16700
  [214] = https://curl.se/bug/?i=16649
  [215] = https://curl.se/bug/?i=16645
@@ -524,19 +540,24 @@ References to bug reports and discussions on issues:
  [226] = https://curl.se/bug/?i=16627
  [227] = https://curl.se/bug/?i=16632
  [228] = https://curl.se/bug/?i=16630
+ [229] = https://curl.se/bug/?i=16781
  [230] = https://curl.se/bug/?i=16696
  [231] = https://curl.se/bug/?i=16695
+ [232] = https://curl.se/bug/?i=16797
  [233] = https://curl.se/bug/?i=16553
  [234] = https://curl.se/bug/?i=16691
  [235] = https://curl.se/bug/?i=16690
  [236] = https://curl.se/bug/?i=16689
  [237] = https://curl.se/bug/?i=16733
  [238] = https://curl.se/bug/?i=16681
+ [239] = https://curl.se/bug/?i=16779
  [240] = https://curl.se/bug/?i=16726
  [241] = https://curl.se/bug/?i=16729
  [242] = https://curl.se/bug/?i=16678
  [243] = https://curl.se/bug/?i=16685
  [244] = https://issues.oss-fuzz.com/issues/402476456
+ [245] = https://curl.se/bug/?i=16798
+ [246] = https://curl.se/bug/?i=16786
  [247] = https://curl.se/bug/?i=16653
  [248] = https://curl.se/bug/?i=16674
  [249] = https://curl.se/bug/?i=16673
@@ -548,3 +569,8 @@ References to bug reports and discussions on issues:
  [256] = https://curl.se/bug/?i=16687
  [257] = https://curl.se/bug/?i=16712
  [258] = https://curl.se/bug/?i=16713
+ [259] = https://curl.se/bug/?i=16774
+ [263] = https://curl.se/bug/?i=16484
+ [264] = https://curl.se/bug/?i=16759
+ [267] = https://curl.se/bug/?i=16753
+ [268] = https://curl.se/bug/?i=16533
