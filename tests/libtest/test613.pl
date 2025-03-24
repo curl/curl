@@ -72,6 +72,9 @@ if ($ARGV[0] eq "prepare")
       print "TRACE-0\n";
       system "/bin/getfacl rofile.txt";
       print "TRACE-1\n";
+      system "/bin/setfacl ---default --modify u:r,g:r,o:r rofile.txt";
+      print "TRACE-2\n";
+      system "/bin/getfacl rofile.txt";
     }
 
     exit 0;
