@@ -144,6 +144,18 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
+      - name: 'build certs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        run: |
+          PATH=/usr/bin
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target clean-certs
+            cmake --build bld --target build-certs --parallel 1
+          else
+            make -C bld/tests/certs clean-certs
+            make -C bld/tests/certs build-certs -j1
+          fi
+
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
@@ -349,6 +361,17 @@ jobs:
         # causing runtests.pl to run at 2-3x reduced speed.
         run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
+      - name: 'build certs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target clean-certs
+            cmake --build bld --target build-certs --parallel 1
+          else
+            make -C bld/tests/certs clean-certs
+            make -C bld/tests/certs build-certs -j1
+          fi
+
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
@@ -519,6 +542,12 @@ jobs:
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
         run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+
+      - name: 'build certs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        run: |
+          cmake --build bld --target clean-certs
+          cmake --build bld --target build-certs --parallel 1
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -954,6 +983,12 @@ jobs:
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
         run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+
+      - name: 'build certs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --target clean-certs
+          cmake --build bld --config '${{ matrix.type }}' --target build-certs --parallel 1
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
