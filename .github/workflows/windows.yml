@@ -77,6 +77,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 2
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
+            https://www.stunnel.org/downloads/stunnel-5.74-win64-installer.exe --output installer.exe
+          chmod +x installer.exe
+          ./installer.exe /S /D D:/stunnel
+          ls -l /cygdrive/d/ || true
+          ls -l /cygdrive/d/stunnel || true
+
       - name: 'autoreconf'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 2
@@ -143,17 +154,6 @@ jobs:
           else
             make -C bld V=1 -C tests
           fi
-
-      - name: 'install test prereqs'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 2
-        run: |
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
-            https://www.stunnel.org/downloads/stunnel-5.74-win64-installer.exe --output installer.exe
-          chmod +x installer.exe
-          ./installer.exe /S /D D:/stunnel
-          ls -l /cygdrive/d/ || true
-          ls -l /cygdrive/d/stunnel || true
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
