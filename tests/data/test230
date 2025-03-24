@@ -9,36 +9,19 @@ compressed
 #
 # Server-side
 <reply>
-<data base64="yes">
-SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDI5IE5vdiAyMDA0IDIxOjU2OjUzIEdNVA0KU2Vy
-dmVyOiBBcGFjaGUvMS4zLjMxIChEZWJpYW4gR05VL0xpbnV4KSBtb2RfZ3ppcC8xLjMuMjYuMWEg
-UEhQLzQuMy45LTEgbW9kX3NzbC8yLjguMjAgT3BlblNTTC8wLjkuN2QgbW9kX3BlcmwvMS4yOQ0K
-VmFyeTogQWNjZXB0LUVuY29kaW5nDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD1J
-U08tODg1OS0xDQpDb250ZW50LUVuY29kaW5nOiBkZWZsYXRlLCBpZGVudGl0eSwgZ3ppcA0KQ29u
-dGVudC1MZW5ndGg6IDEzMjgNCg0KH4sIAPpl+lkAAwEZBeb6eJzcWNtu4zYQfTeQf2D91AK2brYT
-OXC0KHLZBM02wdoFuk8GLdE2G0kUSMq5PPTbO5QoibEcr3eDvgRIYnLmnMPhDEmTmXx6SmK0IVxQ
-lp51XcvpIpKGLKLp6qx7M73r+/5o3He7n4LO5JeLu/PZt/tLlHH2DwllP6ZCAhBNv01nl19Qdy1l
-dmrbS07EOiFYWimR9gKHDySN7GXS1zzRd6yhFcmoC6JbWkEHocqm2k1vTqPAPXa9iW0YSkSEJZnj
-KCKAGI/9vuP3PRc5w1PHPfXGE9vwG4Q8Ux9R4DnOsO86fddHjnfqwc9AUyrEqzhSnJC5WDMugzDn
-cR2OYW/jl3kcF3CE0wjFdNGmFhAdHhGhljpnSVJSUoIkY7UAx/wZLRlHYUxJKvuCRgT99fUWSY5T
-sYSKWjCLRshQ3hkMogLhcgSlWqlwVd8ljYk46uRCddQY4jmV+MlCNxKJPMtAX6Dr2ey+V/yd9tAV
-tI86V0X74uZ81kOzy9s/L+Hz9uJ3gF3d3F72iuE/391fX36FNgzwSGKIqZTqZ0zInm7m0AoZe6BE
-FNooz2KGIxgCllqekKiZdQ9lWIhHxiPVhMjSPFkU9un09qgTEi7pkoZQVzD9QTj4mChDgWo8wQjF
-tCAbGXsknERHncVzlaQekmvyZsarslhHndkaqAjD74KmajMJSG2dapVgBpsOec5RJ8bpKscrIooY
-SLqhnKUJDCBAR5fQWBsbKnFM5fNchIyTYHTiD63RycTesm+BM8JDkAwGlntsYCvzFhrm8wB7bWwg
-C5Ne1yzLY8ybsY5HY4hhCMt529MiVAO6A8t3XxFeh2I4ymCc0Su0EQ7HxbnhWyNnYuuO6ZmHLAdd
-z6282vAKUw7iD2qMMYDIFyLkNJNwRIpgoE6H16YSBqVPw/Vc7eXggixxHsuJbRpLGNR/Xh1gGZQ9
-2HloVielrdaLPbFbrEZszRLythAsYMpLFXV42iZD69YCjaZcvRwuB2CtpGiNyOLFO1wEwFpE0RqR
-F5odLgJgLaJojUi4hj1GYrY6XKqmaMFGopHlWXK4IIC1lKI1IhFZHC4CYC2iaI0IE0+HiwBYiyia
-US8RqfPyB2pWEqq6abqxzHMOaRMk0Ou36hqF2YgfKMlGVMXYCENE3RwOV1FoLVMQG52Ecs744Uol
-XmtpslnXhAVVraBZemIKhxyk4MvNzP4bncPpASmjeYJuS8fErhAar76n5JyTmNSZa5nn+v4WnFiu
-Z8EF6Q33G2x1rzo5dvxRi1hdsNocdS/afXHaBSznYu+azATOUQITXjM5l2v4qoactUwlEucSbjKi
-DqnsV93aoE9gnFISo6kkKXzDrya26WxRoEq76/7vAq8ioopsIFt0zmIS3D2mhNe4wlRFapuhVr1q
-CasveE4TmmJpzk5yuCEUtYGC1p2W1/OO97kHe7n7nK7v7+W6e8eFpbE/6r1u93i4zz3eS/bHe73O
-Xrc7+k7c3wlsf2SD1tjl/W67/LAmMngywUMMrqO1Tm18RvI5I2ddTkJ4HSibeknVi7LBmRvZUUPt
-cuwk6nsLuE+Gqhg7XTuZxuOsRd1+uL3FlVSqDQV2uLOjX/Vt6redWiW23mkN4u28seLehuP/L2nO
-T2dsOHhnxtT76uMnyvUGI/cdmXqBp9jHz9LAc4Yn78jSNaFJhOOPn6jhcDTw3pGosA9PffEzeTIs
-+qyv/ysUdP4DAAD//4IzEaNjAAAAAP//AwDdOI7RbCh2MRkFAAA=
+<data>
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
+Vary: Accept-Encoding
+Content-Type: text/html; charset=ISO-8859-1
+Content-Encoding: deflate, identity, gzip
+Content-Length: 1328
+
+%hex[%1f%8b%08%00%fa%65%fa%59%00%03%01%19%05%e6%fa%78%9c%dc%58%db%6e%e3%36%10%7d%37%90%7f%60%fd%d4%02%b6%6e%b6%13%39%70%b4%28%72%d9%04%cd%36%c1%da%05%ba%4f%06%2d%d1%36%1b%49%14%48%ca%b9%3c%f4%db%3b%94%28%89%b1%1c%af%77%83%be%04%48%62%72%e6%9c%c3%e1%0c%49%93%99%7c%7a%4a%62%b4%21%5c%50%96%9e%75%5d%cb%e9%22%92%86%2c%a2%e9%ea%ac%7b%33%bd%eb%fb%fe%68%dc%77%bb%9f%82%ce%e4%97%8b%bb%f3%d9%b7%fb%4b%94%71%f6%0f%09%65%3f%a6%42%02%10%4d%bf%4d%67%97%5f%50%77%2d%65%76%6a%db%4b%4e%c4%3a%21%58%5a%29%91%f6%02%87%0f%24%8d%ec%65%d2%d7%3c%d1%77%ac%a1%15%c9%a8%0b%a2%5b%5a%41%07%a1%ca%a6%da%4d%6f%4e%a3%c0%3d%76%bd%89%6d%18%4a%44%84%25%99%e3%28%22%80%18%8f%fd%be%e3%f7%3d%17%39%c3%53%c7%3d%f5%c6%13%db%f0%1b%84%3c%53%1f%51%e0%39%ce%b0%ef%3a%7d%d7%47%8e%77%ea%c1%cf%40%53%2a%c4%ab%38%52%9c%90%b9%58%33%2e%83%30%e7%71%1d%8e%61%6f%e3%97%79%1c%17%70%84%d3%08%c5%74%d1%a6%16%10%1d%1e%11%a1%96%3a%67%49%52%52%52%82%24%63%b5%00%c7%fc%19%2d%19%47%61%4c%49%2a%fb%82%46%04%fd%f5%f5%16%49%8e%53%b1%84%8a%5a%30%8b%46%c8%50%de%19%0c%a2%02%e1%72%04%a5%5a%a9%70%55%df%25%8d%89%38%ea%e4%42%75%d4%18%e2%39%95%f8%c9%42%37%12%89%3c%cb%40%5f%a0%eb%d9%ec%be%57%fc%9d%f6%d0%15%b4%8f%3a%57%45%fb%e2%e6%7c%d6%43%b3%cb%db%3f%2f%e1%f3%f6%e2%77%80%5d%dd%dc%5e%f6%8a%e1%3f%df%dd%5f%5f%7e%85%36%0c%f0%48%62%88%a9%94%ea%67%4c%c8%9e%6e%e6%d0]hex%
+%hex[%19%7b%a0%44%14%da%28%cf%62%86%23%18%02%96%5a%9e%90%a8%99%75%0f%65%58%88%47%c6%23%d5%84%c8%d2%3c%59%14%f6%e9%f4%f6%a8%13%12%2e%e9%92%86%50%57%30%fd%41%38%f8%98%28%43%81%6a%3c%c1%08%c5%b4%20%1b%19%7b%24%9c%44%47%9d%c5%73%95%a4%1e%92%6b%f2%66%c6%ab%b2%58%47%9d%d9%1a%a8%08%c3%ef%82%a6%6a%33%09%48%6d%9d%6a%95%60%06%9b%0e%79%ce%51%27%c6%e9%2a%c7%2b%22%8a%18%48%ba%a1%9c%a5%09%0c%20%40%47%97%d0%58%1b%1b%2a%71%4c%e5%f3%5c%84%8c%93%60%74%e2%0f%ad%d1%c9%c4%de%b2%6f%81%33%c2%43%90%0c%06%96%7b%6c%60%2b%f3%16%1a%e6%f3%00%7b%6d%6c%20%0b%93%5e%d7%2c%cb%63%cc%9b%b1%8e%47%63%88%61%08%cb%79%db%d3%22%54%03%ba%03%cb%77%5f%11%5e%87%62%38%ca%60%9c%d1%2b%b4%11%0e%c7%c5%b9%e1%5b%23%67%62%eb%8e%e9%99%87%2c%07%5d%cf%ad%bc%da%f0]hex%
+%hex[%53%0e%e2%0f%6a%8c%31%80%c8%17%22%e4%34%93%70%44%8a%60%a0%4e%87%d7%a6%12%06%a5%4f%c3%f5%5c%ed%e5%e0%82%2c%71%1e%cb%89%6d%1a%4b%18%d4%7f%5e%1d%60%19%94%3d%d8%79%68%56%27%a5%ad%d6%8b%3d%b1%5b%ac%46%6c%cd%12%f2%b6%10%2c%60%ca%4b%15%75%78%da%26%43%eb%d6%02%8d%a6%5c%bd%1c%2e%07%60%ad%a4%68%8d%c8%e2%c5%3b%5c%04%c0%5a%44%d1%1a%91%17%9a%1d%2e%02%60%2d%a2%68%8d%48%b8%86%3d%46%62%b6%3a%5c%aa%a6%68%c1%46%a2%91%e5%59%72%b8%20%80%b5%94%a2%35%22%11%59%1c%2e%02%60%2d%a2%68%8d%08%13%4f%87%8b%00%58%8b%28%9a%51%2f%11%a9%f3%f2%07%6a%56%12%aa%ba%69%ba%b1%cc%73%0e%69%13%24%d0%eb%b7%ea%1a%85%d9%88%1f%28%c9%46%54%c5%d8%08%43%44%dd%1c%0e%57%51%68%2d%53%10%1b%9d%84%72%ce%f8%e1%4a%25%5e%6b%69%b2%59%d7%84%05%55%ad%a0%59%7a%62]hex%
+%hex[%87%1c%a4%e0%cb%cd%cc%fe%1b%9d%c3%e9%01%29%a3%79%82%6e%4b%c7%c4%ae%10%1a%af%be%a7%e4%9c%93%98%d4%99%6b%99%e7%fa%fe%16%9c%58%ae%67%c1%05%e9%0d%f7%1b%6c%75%af%3a%39%76%fc%51%8b%58%5d%b0%da%1c%75%2f%da%7d%71%da%05%2c%e7%62%ef%9a%cc%04%ce%51%02%13%5e%33%39%97%6b%f8%aa%86%9c%b5%4c%25%12%e7%12%6e%32%a2%0e%a9%ec%57%dd%da%a0%4f%60%9c%52%12%a3%a9%24%29%7c%c3%af%26%b6%e9%6c%51%a0%4a%bb%eb%fe%ef%02%af%22%a2%8a%6c%20%5b%74%ce%62%12%dc%3d%a6%84%d7%b8%c2%54%45%6a%9b%a1%56%bd%6a%09%ab%2f%78%4e%13%9a%62%69%ce%4e%72%b8%21%14%b5%81%82%d6%9d%96%d7%f3%8e%f7%b9%07%7b%b9%fb%9c%ae%ef%ef%e5%ba%7b%c7%85%a5%b1%3f%ea%bd%6e%f7%78%b8%cf%3d%de%4b%f6%c7%7b%bd%ce%5e%b7%3b%fa%4e%dc%df%09%6c%7f%64%83%d6%d8%e5%fd%6e%bb%fc%b0%26%32%78%32%c1%43%0c%ae%a3%b5%4e%6d%7c%46%f2%39%23%67%5d%4e%42%78%1d%28%9b%7a%49%d5%8b%b2%c1%99%1b%d9%51%43%ed%72%ec%24%ea%7b%0b%b8%4f%86%aa%18%3b%5d%3b%99%c6%e3%ac%45%dd%7e%b8%bd%c5%95%54%aa%0d%05%76%b8%b3%a3%5f%f5%6d%ea%b7%9d%5a%25%b6%de%69%0d%e2%ed%bc%b1%e2%de%86%e3%ff%2f%69%ce%4f%67%6c%38%78%67%c6%d4%fb%ea%e3%27%ca%f5%06%23%f7%1d%99%7a%81%a7%d8%c7%cf%d2%c0%73%86%27%ef%c8%d2%35%a1%49%84%e3%8f%9f%a8%e1%70%34%f0%de%91%a8%b0%0f%4f%7d%f1%33%79%32%2c%fa%ac%af%ff%2b%14%74%fe%03%00%00%ff%ff%82%33%11%a3%63%00%00%00%00%ff%ff%03%00%dd%38%8e%d1%6c%28%76%31%19%05%00%00]hex%
 </data>
 
 <datacheck>
