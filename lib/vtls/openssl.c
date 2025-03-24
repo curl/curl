@@ -935,7 +935,7 @@ static int passwd_callback(char *buf, int num, int encrypting,
 {
   DEBUGASSERT(0 == encrypting);
 
-  if(!encrypting && num >= 0) {
+  if(!encrypting && num >= 0 && global_passwd) {
     int klen = curlx_uztosi(strlen((char *)global_passwd));
     if(num > klen) {
       memcpy(buf, global_passwd, klen + 1);
