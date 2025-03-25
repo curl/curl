@@ -43,5 +43,7 @@ clean-certs:
 
 all: build-certs
 
-build-certs: $(CERTCONFIG_CA) $(CERTCONFIGS)
+build-certs: $(GENERATEDCERTS)
+
+$(GENERATEDCERTS): $(CERTCONFIG_CA) $(CERTCONFIGS)
 	$(srcdir)/genserv.sh test $(CERTCONFIGS)
