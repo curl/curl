@@ -25,7 +25,8 @@ AUTOMAKE_OPTIONS = foreign
 
 include Makefile.inc
 
-EXTRA_DIST = $(CERTCONFIG_CA) $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt genserv.sh
+EXTRA_DIST = $(CERTCONFIG_CA) $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt \
+  genserv.sh
 
 DISTCLEANFILES = $(GENERATEDCERTS)
 
