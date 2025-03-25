@@ -67,7 +67,7 @@ fi
 
 echo "PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
-set -x
+#set -x
 
 "$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve -out "$PREFIX-ca.key" -pass 'pass:secret'
 "$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin 'pass:secret'
