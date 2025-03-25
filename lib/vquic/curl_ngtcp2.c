@@ -138,7 +138,7 @@ struct cf_ngtcp2_ctx {
   struct curltime handshake_at;      /* time connect handshake finished */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct dynbuf scratch;             /* temp buffer for header construction */
-  struct Curl_hash_offt streams;     /* hash `data->mid` to `h3_stream_ctx` */
+  struct uint_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
   uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
@@ -161,7 +161,7 @@ struct cf_ngtcp2_ctx {
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_ngtcp2_ctx *)(cf)->ctx)->call_data
 
-static void h3_stream_hash_free(curl_off_t id, void *stream);
+static void h3_stream_hash_free(unsigned int id, void *stream);
 
 static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
 {
@@ -173,7 +173,7 @@ static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_uint_hash_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->initialized = TRUE;
 }
 
@@ -184,7 +184,7 @@ static void cf_ngtcp2_ctx_free(struct cf_ngtcp2_ctx *ctx)
     vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
     Curl_dyn_free(&ctx->scratch);
-    Curl_hash_offt_destroy(&ctx->streams);
+    Curl_uint_hash_destroy(&ctx->streams);
     Curl_ssl_peer_cleanup(&ctx->peer);
   }
   free(ctx);
@@ -218,9 +218,7 @@ struct h3_stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct h3_stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
-#define H3_STREAM_CTX_ID(ctx,id)  ((struct h3_stream_ctx *)(\
-            Curl_hash_offt_get(&(ctx)->streams, (id))))
+            data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
@@ -229,7 +227,7 @@ static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(curl_off_t id, void *stream)
+static void h3_stream_hash_free(unsigned int id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
@@ -259,7 +257,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->sendbuf_len_in_flight = 0;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -298,7 +296,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] easy handle is done",
                 stream->id);
     cf_ngtcp2_stream_close(cf, data, stream);
-    Curl_hash_offt_remove(&ctx->streams, data->mid);
+    Curl_uint_hash_remove(&ctx->streams, data->mid);
   }
 }
 
@@ -551,7 +549,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read_stream(len=%zu) -> %zd",
                 stream_id, buflen, nconsumed);
   if(nconsumed < 0) {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX_ID(ctx, stream_id);
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(data && stream) {
       CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] error on known stream, "
                   "reset=%d, closed=%d",
@@ -2617,7 +2615,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     }
     else if(ctx->max_bidi_streams) {
       uint64_t avail_bidi_streams = 0;
-      uint64_t max_streams = CONN_INUSE(cf->conn);
+      uint64_t max_streams = CONN_ATTACHED(cf->conn);
       if(ctx->max_bidi_streams > ctx->used_bidi_streams)
         avail_bidi_streams = ctx->max_bidi_streams - ctx->used_bidi_streams;
       max_streams += avail_bidi_streams;
@@ -2626,8 +2624,8 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     else  /* transport params not arrived yet? take our default. */
       *pres1 = (int)Curl_multi_max_concurrent_streams(data->multi);
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
-                "MAX_CONCURRENT -> %d (%zu in use)",
-                cf->conn->connection_id, *pres1, CONN_INUSE(cf->conn));
+                "MAX_CONCURRENT -> %d (%u in use)",
+                cf->conn->connection_id, *pres1, CONN_ATTACHED(cf->conn));
     CF_DATA_RESTORE(cf, save);
     return CURLE_OK;
   }

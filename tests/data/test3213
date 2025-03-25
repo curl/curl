@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+uint_spbset
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+<name>
+uint_spbset unit tests
+</name>
+</client>
+</testcase>

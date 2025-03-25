@@ -516,6 +516,15 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
 
   data->magic = CURLEASY_MAGIC_NUMBER;
+  /* most recent connection is not yet defined */
+  data->state.lastconnect_id = -1;
+  data->state.recent_conn_id = -1;
+  /* and not assigned an id yet */
+  data->id = -1;
+  data->mid = UINT_MAX;
+  data->master_mid = UINT_MAX;
+  data->progress.flags |= PGRS_HIDE;
+  data->state.current_speed = -1; /* init to negative == impossible */
 
   Curl_hash_init(&data->meta_hash, 23,
                  Curl_hash_str, Curl_str_key_compare, easy_meta_freeentry);
@@ -528,26 +537,13 @@ CURLcode Curl_open(struct Curl_easy **curl)
   Curl_netrc_init(&data->state.netrc);
 
   result = Curl_init_userdefined(data);
-  if(result)
-    goto out;
 
-  /* most recent connection is not yet defined */
-  data->state.lastconnect_id = -1;
-  data->state.recent_conn_id = -1;
-  /* and not assigned an id yet */
-  data->id = -1;
-  data->mid = -1;
-  data->master_mid = -1;
-
-  data->progress.flags |= PGRS_HIDE;
-  data->state.current_speed = -1; /* init to negative == impossible */
-
-out:
   if(result) {
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     Curl_req_free(&data->req, data);
     Curl_hash_destroy(&data->meta_hash);
+    data->magic = 0;
     free(data);
     data = NULL;
   }
@@ -599,6 +595,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->unix_domain_socket);
 #endif
   Curl_safefree(conn->destination);
+  Curl_uint_spbset_destroy(&conn->xfers_attached);
 
   free(conn); /* free all the connection oriented data */
 }
@@ -891,10 +888,19 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
       return FALSE;
     else {
       /* transfer and conn multiplex. Are they on the same multi? */
-      struct Curl_llist_node *e = Curl_llist_head(&conn->easyq);
-      struct Curl_easy *entry = Curl_node_elem(e);
-      if(entry->multi != data->multi)
+      unsigned int mid;
+      if(Curl_uint_spbset_first(&conn->xfers_attached, &mid)) {
+        struct Curl_easy *entry = Curl_multi_get_easy(data->multi, mid);
+        DEBUGASSERT(entry);
+        if(!entry || (entry->multi != data->multi))
+          return FALSE;
+      }
+      else {
+        /* Since CONN_INUSE() checks the bitset, we SHOULD find a first
+         * mid in there. */
+        DEBUGASSERT(0);
         return FALSE;
+      }
     }
   }
   /* `conn` is connected and we could add the transfer to it, if
@@ -1156,16 +1162,16 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     DEBUGASSERT(match->may_multiplex);
     DEBUGASSERT(conn->bits.multiplex);
     /* If multiplexed, make sure we do not go over concurrency limit */
-    if(CONN_INUSE(conn) >=
+    if(CONN_ATTACHED(conn) >=
             Curl_multi_max_concurrent_streams(data->multi)) {
       infof(data, "client side MAX_CONCURRENT_STREAMS reached"
-            ", skip (%zu)", CONN_INUSE(conn));
+            ", skip (%u)", CONN_ATTACHED(conn));
       return FALSE;
     }
-    if(CONN_INUSE(conn) >=
+    if(CONN_ATTACHED(conn) >=
             Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
-      infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%zu)",
-            CONN_INUSE(conn));
+      infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%u)",
+            CONN_ATTACHED(conn));
       return FALSE;
     }
     /* When not multiplexed, we have a match here! */
@@ -1350,8 +1356,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connect_only = data->set.connect_only;
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
 
-  /* Initialize the easy handle list */
-  Curl_llist_init(&conn->easyq, NULL);
+  /* Initialize the attached xfers bitset */
+  Curl_uint_spbset_init(&conn->xfers_attached);
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CLEAR;
@@ -3621,7 +3627,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         connections_available = FALSE;
         break;
       case CPOOL_LIMIT_TOTAL:
-        if(data->master_mid >= 0)
+        if(data->master_mid != UINT_MAX)
           CURL_TRC_M(data, "Allowing sub-requests (like DoH) to override "
                      "max connection limit");
         else {
@@ -3772,7 +3778,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
   result = create_conn(data, &conn, asyncp);
 
   if(!result) {
-    if(CONN_INUSE(conn) > 1)
+    if(CONN_ATTACHED(conn) > 1)
       /* multiplexed */
       *protocol_done = TRUE;
     else if(!*asyncp) {

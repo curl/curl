@@ -44,6 +44,7 @@
 #include "select.h"
 #include "strcase.h"
 #include "strparse.h"
+#include "uint-table.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -533,7 +534,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   unsigned int maxconnects = !data->multi->maxconnects ?
-    data->multi->num_easy * 4 : data->multi->maxconnects;
+    (Curl_multi_xfers_running(data->multi) * 4) : data->multi->maxconnects;
   struct connectdata *oldest_idle = NULL;
   struct cpool *cpool = cpool_get_instance(data);
   bool kept = TRUE;
@@ -619,8 +620,8 @@ static void cpool_discard_conn(struct cpool *cpool,
    */
   if(CONN_INUSE(conn) && !aborted) {
     CURL_TRC_M(data, "[CPOOL] not discarding #%" FMT_OFF_T
-               " still in use by %zu transfers", conn->connection_id,
-               CONN_INUSE(conn));
+               " still in use by %u transfers", conn->connection_id,
+               CONN_ATTACHED(conn));
     return;
   }
 
@@ -664,7 +665,7 @@ void Curl_conn_terminate(struct Curl_easy *data,
    * are other users of it */
   if(CONN_INUSE(conn) && !aborted) {
     DEBUGASSERT(0); /* does this ever happen? */
-    DEBUGF(infof(data, "Curl_disconnect when inuse: %zu", CONN_INUSE(conn)));
+    DEBUGF(infof(data, "Curl_disconnect when inuse: %u", CONN_ATTACHED(conn)));
     return;
   }
 

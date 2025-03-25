@@ -26,6 +26,9 @@
 
 #include "curl_setup.h"
 
+struct Curl_easy;
+struct Curl_dns_entry;
+
 #ifdef CURLRES_ASYNCH
 
 #include "curl_addrinfo.h"
@@ -33,9 +36,7 @@
 
 struct addrinfo;
 struct hostent;
-struct Curl_easy;
 struct connectdata;
-struct Curl_dns_entry;
 
 #if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
 #error cannot have both CURLRES_ARES and CURLRES_THREADED defined

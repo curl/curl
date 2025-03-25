@@ -32,6 +32,9 @@
 #include "multi_ev.h"
 #include "psl.h"
 #include "socketpair.h"
+#include "uint-bset.h"
+#include "uint-spbset.h"
+#include "uint-table.h"
 
 struct connectdata;
 struct Curl_easy;
@@ -90,19 +93,18 @@ struct Curl_multi {
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
   unsigned int magic;
 
-  unsigned int num_easy; /* amount of entries in the linked list above. */
-  unsigned int num_alive; /* amount of easy handles that are added but have
-                             not yet reached COMPLETE state */
+  unsigned int xfers_alive; /* amount of added transfers that have
+                               not yet reached COMPLETE state */
+  struct uint_tbl xfers; /* transfers added to this multi */
+  /* Each transfer's mid may be present in at most one of these */
+  struct uint_bset process; /* transfer being processed */
+  struct uint_bset pending; /* transfers in waiting (conn limit etc.) */
+  struct uint_bset msgsent; /* transfers done with message for application */
 
   struct Curl_llist msglist; /* a list of messages from completed transfers */
 
-  /* Each added easy handle is added to ONE of these three lists */
-  struct Curl_llist process; /* not in PENDING or MSGSENT */
-  struct Curl_llist pending; /* in PENDING */
-  struct Curl_llist msgsent; /* in MSGSENT */
-  curl_off_t next_easy_mid; /* next multi-id for easy handle added */
-
-  struct Curl_easy *admin; /* internal easy handle for admin operations */
+  struct Curl_easy *admin; /* internal easy handle for admin operations.
+                              gets assigned `mid` 0 on multi init */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;

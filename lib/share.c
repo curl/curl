@@ -52,6 +52,8 @@ curl_share_init(void)
       free(share);
       return NULL;
     }
+    /* admin handles have mid 0 */
+    share->admin->mid = 0;
     share->admin->state.internal = TRUE;
 #ifdef DEBUGBUILD
     if(getenv("CURL_DEBUG"))
