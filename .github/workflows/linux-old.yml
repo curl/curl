@@ -117,9 +117,6 @@ jobs:
       - name: 'cmake build tests'
         run: make -C bld-cares testdeps
 
-      - name: 'build certs'
-        run: make -C bld-cares/tests/certs build-certs -j1
-
       - name: 'cmake run tests'
         run: make -C bld-cares test-ci
 

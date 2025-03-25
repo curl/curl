@@ -303,15 +303,6 @@ jobs:
           source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
-      - name: 'build certs'
-        if: ${{ !matrix.build.clang-tidy }}
-        run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target build-certs --parallel 1
-          else
-            make -C bld/tests/certs build-certs -j1
-          fi
-
       - name: 'run tests'
         if: ${{ !matrix.build.clang-tidy }}
         timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}

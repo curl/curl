@@ -481,14 +481,6 @@ jobs:
           source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
-      - name: 'build certs'
-        run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target build-certs --parallel 1
-          else
-            make -C bld/tests/certs build-certs -j1
-          fi
-
       - name: 'run tests'
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
