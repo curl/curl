@@ -53,6 +53,7 @@ elif [ ! -f "$CAPREFIX-ca.cacert" ] || \
   command -v "$OPENSSL"
   "$OPENSSL" version
 
+  # Generating CA root
   PREFIX=$CAPREFIX
   DURATION=6000
 
