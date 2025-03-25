@@ -48,7 +48,7 @@ application.
 
 Disable the automatic reply to PING messages. This means users must
 send a PONG message with curl_ws_send(3). This feature is added with
-version 8.13.0.
+version 8.14.0.
 
 # DEFAULT
 
