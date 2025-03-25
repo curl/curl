@@ -44,30 +44,9 @@ clean-certs:
 
 all: build-certs
 
-.NOTPARALLEL: build-certs
+build-certs: test-ca.cacert
 
-build-certs: \
-  test-ca.cacert \
-  test-localhost.pem \
-  test-localhost.nn.pem \
-  test-localhost0h.pem \
-  test-localhost-san-first.pem \
-  test-localhost-san-last.pem
-
+# Generate all certs in a single shot, but declare just a single target file
+# to support GNU Make <4.3 without "grouped explicit targets" support.
 test-ca.cacert: $(CERTCONFIG_CA) $(CERTCONFIGS) genserv.sh
-	$(srcdir)/genserv.sh test
-
-test-localhost.pem: test-ca.cacert
-	$(srcdir)/genserv.sh test test-localhost
-
-test-localhost.nn.pem: test-ca.cacert
-	$(srcdir)/genserv.sh test test-localhost.nn
-
-test-localhost0h.pem: test-ca.cacert
-	$(srcdir)/genserv.sh test test-localhost0h
-
-test-localhost-san-first.pem: test-ca.cacert
-	$(srcdir)/genserv.sh test test-localhost-san-first
-
-test-localhost-san-last.pem: test-ca.cacert
-	$(srcdir)/genserv.sh test test-localhost-san-last
+	$(srcdir)/genserv.sh test $(CERTCONFIGS)
