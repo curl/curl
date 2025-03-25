@@ -80,7 +80,7 @@ fi
 
 echo "PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
-"$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve -out "$PREFIX.keyenc" -pass 'pass:secret'
+"$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:"$KEYSIZE" -pkeyopt ec_param_enc:named_curve -out "$PREFIX.keyenc" -pass 'pass:secret'
 "$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -new -key "$PREFIX.keyenc" -out "$PREFIX.csr" -passin 'pass:secret'
 "$OPENSSL" pkey -in "$PREFIX.keyenc" -out "$PREFIX.key" -passin 'pass:secret'
 

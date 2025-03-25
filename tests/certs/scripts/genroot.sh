@@ -66,7 +66,7 @@ fi
 
 echo "PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
-"$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve -out "$PREFIX-ca.key" -pass 'pass:secret'
+"$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:"$KEYSIZE" -pkeyopt ec_param_enc:named_curve -out "$PREFIX-ca.key" -pass 'pass:secret'
 "$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin 'pass:secret'
 "$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-ca.raw-cacert"
 "$OPENSSL" x509 -text -in "$PREFIX-ca.raw-cacert" -nameopt multiline > "$PREFIX-ca.cacert"
