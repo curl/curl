@@ -41,8 +41,8 @@ all: build-certs
 build-certs: $(CERTCONFIGS)
 	(cd $(srcdir) && \
 	  scripts/genroot.sh test; \
-	  scripts/genserv.sh test-localhost test; \
-	  scripts/genserv.sh test-localhost.nn test; \
-	  scripts/genserv.sh test-localhost0h test; \
-	  scripts/genserv.sh test-localhost-san-first test; \
-	  scripts/genserv.sh test-localhost-san-last test)
+	  scripts/genserv.sh test test-localhost; \
+	  scripts/genserv.sh test test-localhost.nn; \
+	  scripts/genserv.sh test test-localhost0h; \
+	  scripts/genserv.sh test test-localhost-san-first; \
+	  scripts/genserv.sh test test-localhost-san-last)

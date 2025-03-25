@@ -31,7 +31,7 @@ if [ -f /usr/local/ssl/bin/openssl ]; then
   OPENSSL=/usr/local/ssl/bin/openssl
 fi
 
-USAGE='echo Usage is genserv.sh <prefix> <caprefix>'
+USAGE='echo Usage is genserv.sh <caprefix> <prefix>'
 
 SRCDIR=$(pwd)
 
@@ -44,18 +44,7 @@ DURATION=300
 
 NOTOK=
 
-PREFIX="${1:-}"
-if [ -z "$PREFIX" ]; then
-  echo 'No configuration prefix'
-  NOTOK=1
-else
-  if [ ! -f "$SRCDIR/$PREFIX.prm" ]; then
-    echo "No configuration file $SRCDIR/$PREFIX.prm"
-    NOTOK=1
-  fi
-fi
-
-CAPREFIX="${2:-}"
+CAPREFIX="${1:-}"
 if [ -z "$CAPREFIX" ]; then
   echo 'No CA prefix'
   NOTOK=1
@@ -66,6 +55,17 @@ else
   fi
   if [ ! -f "$CAPREFIX-ca.key" ]; then
     echo "No $CAPREFIX key"
+    NOTOK=1
+  fi
+fi
+
+PREFIX="${2:-}"
+if [ -z "$PREFIX" ]; then
+  echo 'No configuration prefix'
+  NOTOK=1
+else
+  if [ ! -f "$SRCDIR/$PREFIX.prm" ]; then
+    echo "No configuration file $SRCDIR/$PREFIX.prm"
     NOTOK=1
   fi
 fi

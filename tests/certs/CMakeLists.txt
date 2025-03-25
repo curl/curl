@@ -31,11 +31,11 @@ if(SH_EXECUTABLE)
   add_custom_target(build-certs
     DEPENDS ${CERTCONFIGS}
     COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genroot.sh test"
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test-localhost test"
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test-localhost.nn test"
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test-localhost0h test"
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test-localhost-san-first test"
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test-localhost-san-last test"
+    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test test-localhost"
+    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test test-localhost.nn"
+    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test test-localhost0h"
+    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test test-localhost-san-first"
+    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test test-localhost-san-last"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM USES_TERMINAL
   )
