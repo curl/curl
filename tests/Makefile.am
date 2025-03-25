@@ -153,40 +153,37 @@ SUFFIXES = .1 .md
 .md.1:
 	$(CD2)$(CD2NROFF)
 
-certs:
-	(cd certs && $(MAKE) build-certs)
-
 # make sure that PERL is pointing to an executable
 perlcheck:
 	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
 
-test: perlcheck certs all
+test: perlcheck all
 	$(TEST) $(TFLAGS)
 
-quiet-test: perlcheck certs all
+quiet-test: perlcheck all
 	$(TEST) $(TEST_Q) $(TFLAGS)
 
-am-test: perlcheck certs all
+am-test: perlcheck all
 	$(TEST) $(TEST_AM) $(TFLAGS)
 
-ci-test: perlcheck certs all
+ci-test: perlcheck all
 	$(TEST) $(TEST_CI) $(TFLAGS)
 
-full-test: perlcheck certs all
+full-test: perlcheck all
 	$(TEST) $(TEST_F) $(TFLAGS)
 
-nonflaky-test: perlcheck certs all
+nonflaky-test: perlcheck all
 	$(TEST) $(TEST_NF) $(TFLAGS)
 
-torture-test: perlcheck certs all
+torture-test: perlcheck all
 	$(TEST) $(TEST_T) $(TFLAGS)
 
-event-test: perlcheck certs all
+event-test: perlcheck all
 	$(TEST) $(TEST_E) $(TFLAGS)
 
 default-pytest: ci-pytest
 
-ci-pytest: certs all
+ci-pytest: all
 	srcdir=$(srcdir) $(PYTEST) -v $(srcdir)/http
 
 checksrc:
