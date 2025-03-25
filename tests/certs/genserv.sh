@@ -33,11 +33,7 @@ fi
 
 USAGE='echo Usage is genserv.sh <caprefix> [<prefix> ...]'
 
-if [ -n "${srcdir:-}" ]; then
-  SRCDIR="${srcdir}"
-else
-  SRCDIR="$(dirname "${0}")"
-fi
+SRCDIR="$(dirname "${0}")"
 
 KEYSIZE=prime256v1
 
