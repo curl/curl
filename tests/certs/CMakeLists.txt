@@ -28,9 +28,10 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 find_program(SH_EXECUTABLE "sh")
 mark_as_advanced(SH_EXECUTABLE)
 if(SH_EXECUTABLE)
+  string(REPLACE ";" " " _certconfigs "${CERTCONFIGS}")
   add_custom_target(build-certs
     DEPENDS ${CERTCONFIG_CA} ${CERTCONFIGS}
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh test ${CERTCONFIGS}"
+    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh test ${_certconfigs}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM USES_TERMINAL
   )
