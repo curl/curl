@@ -23,11 +23,9 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = scripts
-
 include Makefile.inc
 
-EXTRA_DIST = $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt
+EXTRA_DIST = $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt genserv.sh
 
 DISTCLEANFILES = $(GENERATEDCERTS)
 
@@ -40,9 +38,9 @@ all: build-certs
 
 build-certs: $(CERTCONFIGS)
 	(cd $(srcdir) && \
-	  scripts/genserv.sh test; \
-	  scripts/genserv.sh test test-localhost; \
-	  scripts/genserv.sh test test-localhost.nn; \
-	  scripts/genserv.sh test test-localhost0h; \
-	  scripts/genserv.sh test test-localhost-san-first; \
-	  scripts/genserv.sh test test-localhost-san-last)
+	  genserv.sh test; \
+	  genserv.sh test test-localhost; \
+	  genserv.sh test test-localhost.nn; \
+	  genserv.sh test test-localhost0h; \
+	  genserv.sh test test-localhost-san-first; \
+	  genserv.sh test test-localhost-san-last)
