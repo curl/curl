@@ -38,7 +38,6 @@ all: build-certs
 
 build-certs: $(CERTCONFIGS)
 	(cd $(srcdir) && \
-	  genserv.sh test; \
 	  genserv.sh test test-localhost; \
 	  genserv.sh test test-localhost.nn; \
 	  genserv.sh test test-localhost0h; \
