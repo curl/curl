@@ -89,8 +89,7 @@ while [ -n "${1:-}" ]; do
   "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform DER -out "$PREFIX.pub.der"
   "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform PEM -out "$PREFIX.pub.pem"
   "$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX.prm" -days "$DURATION" \
-    -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req \
-    -text -nameopt multiline > "$PREFIX.crt"
+    -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req > "$PREFIX.crt"
 
   # revoke server cert
   touch "$CAPREFIX-ca.db"
