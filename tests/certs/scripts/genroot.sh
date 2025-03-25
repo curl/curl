@@ -44,7 +44,7 @@ cd "$GENDIR"
 
 KEYSIZE=prime256v1
 DURATION=6000
-DIGESTALGO=-sha256  # The -sha256 option was introduced in OpenSSL 1.0.1
+DIGESTALGO=-sha256
 
 NOTOK=
 
