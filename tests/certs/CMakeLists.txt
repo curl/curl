@@ -42,5 +42,6 @@ if(SH_EXECUTABLE)
     COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test-localhost-san-first test"
     COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test-localhost-san-last test"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    VERBATIM USES_TERMINAL
   )
 endif()

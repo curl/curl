@@ -35,7 +35,7 @@ add_subdirectory(http/clients)
 add_subdirectory(server)
 add_subdirectory(libtest)
 add_subdirectory(unit)
-add_subdirectory(certs EXCLUDE_FROM_ALL)
+add_subdirectory(certs)
 
 function(curl_add_runtests _targetname _test_flags)
   if(NOT BUILD_LIBCURL_DOCS)
