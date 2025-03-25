@@ -44,7 +44,30 @@ clean-certs:
 
 all: build-certs
 
-build-certs: $(GENERATEDCERTS)
+.NOTPARALLEL: build-certs
 
-$(GENERATEDCERTS): $(CERTCONFIG_CA) $(CERTCONFIGS)
-	$(srcdir)/genserv.sh test $(CERTCONFIGS)
+build-certs: \
+  test-ca.cacert \
+  test-localhost.pem \
+  test-localhost.nn.pem \
+  test-localhost0h.pem \
+  test-localhost-san-first.pem \
+  test-localhost-san-last.pem
+
+test-ca.cacert: $(CERTCONFIG_CA) $(CERTCONFIGS) genserv.sh
+	$(srcdir)/genserv.sh test
+
+test-localhost.pem: test-ca.cacert
+	$(srcdir)/genserv.sh test test-localhost
+
+test-localhost.nn.pem: test-ca.cacert
+	$(srcdir)/genserv.sh test test-localhost.nn
+
+test-localhost0h.pem: test-ca.cacert
+	$(srcdir)/genserv.sh test test-localhost0h
+
+test-localhost-san-first.pem: test-ca.cacert
+	$(srcdir)/genserv.sh test test-localhost-san-first
+
+test-localhost-san-last.pem: test-ca.cacert
+	$(srcdir)/genserv.sh test test-localhost-san-last
