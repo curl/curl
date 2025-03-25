@@ -31,7 +31,7 @@ if(SH_EXECUTABLE)
   string(REPLACE ";" " " _certconfigs "${CERTCONFIGS}")
   add_custom_command(OUTPUT ${GENERATEDCERTS}
     COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh test ${_certconfigs}"
-    DEPENDS ${CERTCONFIG_CA} ${CERTCONFIGS}
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh" ${CERTCONFIG_CA} ${CERTCONFIGS}
     VERBATIM
   )
   add_custom_target(build-certs
