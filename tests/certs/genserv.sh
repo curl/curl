@@ -90,10 +90,10 @@ while [ -n "${1:-}" ]; do
   # revoke server cert
   touch "$CAPREFIX-ca.db"
   echo 01 > "$CAPREFIX-ca.cnt"
-  "$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -revoke "$PREFIX.crt"
+  "$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -revoke "$PREFIX.crt" 2>/dev/null
 
   # issue CRL
-  "$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -gencrl -out "$PREFIX.crl"
+  "$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -gencrl -out "$PREFIX.crl" 2>/dev/null
 
   "$OPENSSL" x509 -in "$PREFIX.crt" -outform der -out "$PREFIX.der"
 
