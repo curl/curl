@@ -32,9 +32,16 @@ DISTCLEANFILES = $(GENERATEDCERTS)
 # Rebuild the certificates
 
 clean-certs:
-	cd $(srcdir); rm -f $(GENERATEDCERTS)
+	rm -f $(GENERATEDCERTS) \
+	  test-*.csr \
+	  test-*.der \
+	  test-*.keyenc \
+	  test-ca.cnt* \
+	  test-ca.db* \
+	  test-ca.raw* \
+	  test-ca.srl
 
 all: build-certs
 
 build-certs: $(CERTCONFIG_CA) $(CERTCONFIGS)
-	(cd $(srcdir) && ./genserv.sh test $(CERTCONFIGS))
+	$(srcdir)/genserv.sh test $(CERTCONFIGS)

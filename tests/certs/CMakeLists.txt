@@ -30,17 +30,21 @@ mark_as_advanced(SH_EXECUTABLE)
 if(SH_EXECUTABLE)
   string(REPLACE ";" " " _certconfigs "${CERTCONFIGS}")
   add_custom_command(OUTPUT ${GENERATEDCERTS}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh test ${_certconfigs}"
     DEPENDS ${CERTCONFIG_CA} ${CERTCONFIGS}
     VERBATIM
   )
   add_custom_target(build-certs
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${GENERATEDCERTS})
 endif()
 
 add_custom_target(clean-certs
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} -E remove ${GENERATEDCERTS}
+    "test-*.csr"
+    "test-*.der"
+    "test-*.keyenc"
+    "test-ca.cnt*"
+    "test-ca.db*"
+    "test-ca.raw*"
+    "test-ca.srl"
 )

@@ -102,11 +102,8 @@ while(@ARGV) {
     shift @ARGV;
 }
 
-my $srcdir = dirname(__FILE__);
-$certfile = "$srcdir/certs/$cert.pem";
-$keyfile = "$srcdir/certs/$cert.key";
-$certfile = abs_path($certfile);
-$keyfile = abs_path($keyfile);
+$certfile = abs_path("certs/$cert.pem");
+$keyfile = abs_path("certs/$cert.key");
 
 my $cmdline="$nghttpx --http2-proxy --backend=$connect ".
     "--backend-keep-alive-timeout=500ms ".

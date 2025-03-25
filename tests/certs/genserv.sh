@@ -33,11 +33,11 @@ fi
 
 USAGE='echo Usage is genserv.sh <caprefix> [<prefix> ...]'
 
-SRCDIR=$(pwd)
-
-GENDIR=${GENDIR:-$SRCDIR/gen}
-test -d "$GENDIR" || mkdir "$GENDIR"
-cd "$GENDIR"
+if [ -n "${srcdir:-}" ]; then
+  SRCDIR="${srcdir}"
+else
+  SRCDIR="$(dirname "${0}")"
+fi
 
 KEYSIZE=prime256v1
 
@@ -65,10 +65,6 @@ elif [ ! -f "$CAPREFIX-ca.cacert" ] || \
   "$OPENSSL" x509 -in "$PREFIX-ca.raw-cacert" -text -nameopt multiline > "$PREFIX-ca.cacert"
   "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -outform der -out "$PREFIX-ca.der"
   "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -text -nameopt multiline > "$PREFIX-ca.crt"
-
-  for ext in key cacert crt; do
-    cp "$PREFIX-ca.$ext" "$SRCDIR"/
-  done
 
   echo "CA root generated: PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 fi
@@ -104,10 +100,6 @@ while [ -n "${1:-}" ]; do
   # all together now
   cat "$SRCDIR/$PREFIX.prm" "$PREFIX.key" "$PREFIX.crt" > "$PREFIX.pem"
   chmod o-r "$SRCDIR/$PREFIX.prm"
-
-  for ext in crl crt key pem pub.der pub.pem; do
-    cp "$PREFIX.$ext" "$SRCDIR"/
-  done
 
   echo "Certificate generated: CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE PREFIX=$PREFIX"
 done
