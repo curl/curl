@@ -44,11 +44,7 @@ cd "$GENDIR"
 
 KEYSIZE=2048
 DURATION=300
-# The -sha256 option was introduced in OpenSSL 1.0.1
-DIGESTALGO=-sha256
-
-REQ=YES
-P12=NO
+DIGESTALGO=-sha256  # The -sha256 option was introduced in OpenSSL 1.0.1
 
 NOTOK=
 
@@ -88,10 +84,7 @@ echo "PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
 set -x
 
-if [ "$REQ" = YES ]; then
-  "$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -newkey "rsa:$KEYSIZE" -keyout "$PREFIX.key" -out "$PREFIX.csr" -passout 'pass:secret'
-fi
-
+"$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -newkey "rsa:$KEYSIZE" -keyout "$PREFIX.key" -out "$PREFIX.csr" -passout 'pass:secret'
 "$OPENSSL" rsa -in "$PREFIX.key" -out "$PREFIX.key" -passin 'pass:secret'
 
 echo 'pseudo secrets generated'
@@ -99,11 +92,6 @@ echo 'pseudo secrets generated'
 "$OPENSSL" rsa -in "$PREFIX.key" -pubout -outform DER -out "$PREFIX.pub.der"
 "$OPENSSL" rsa -in "$PREFIX.key" -pubout -outform PEM -out "$PREFIX.pub.pem"
 "$OPENSSL" x509 -extfile "$SRCDIR/$PREFIX.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX.crt"
-
-if [ "$P12" = YES ]; then
-  "$OPENSSL" pkcs12 -export -des3 -out "$PREFIX.p12" -caname "$CAPREFIX" -name "$PREFIX" -inkey "$PREFIX.key" -in "$PREFIX.crt" -certfile "$CAPREFIX-ca.crt"
-fi
-
 "$OPENSSL" x509 -noout -text -hash -in "$PREFIX.crt" -nameopt multiline
 
 # revoke server cert
@@ -120,7 +108,6 @@ echo 01 > "$CAPREFIX-ca.cnt"
 cat "$SRCDIR/$PREFIX.prm" "$PREFIX.key" "$PREFIX.crt" > "$PREFIX.pem"
 chmod o-r "$SRCDIR/$PREFIX.prm"
 
-#for ext in crl crt csr der key pem pub.der pub.pem; do
 for ext in crl crt key pem pub.der pub.pem; do
   cp "$PREFIX.$ext" "$SRCDIR"/
 done

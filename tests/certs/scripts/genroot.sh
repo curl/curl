@@ -44,8 +44,7 @@ cd "$GENDIR"
 
 KEYSIZE=2048
 DURATION=6000
-# The -sha256 option was introduced in OpenSSL 1.0.1
-DIGESTALGO=-sha256
+DIGESTALGO=-sha256  # The -sha256 option was introduced in OpenSSL 1.0.1
 
 NOTOK=
 
@@ -80,4 +79,4 @@ set -x
 for ext in key cacert crt; do
   cp "$PREFIX-ca.$ext" "$SRCDIR"/
 done
-echo "ca root $PREFIX generated."
+echo "CA root $PREFIX generated."
