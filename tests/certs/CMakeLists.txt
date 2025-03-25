@@ -29,12 +29,13 @@ find_program(SH_EXECUTABLE "sh")
 mark_as_advanced(SH_EXECUTABLE)
 if(SH_EXECUTABLE)
   string(REPLACE ";" " " _certconfigs "${CERTCONFIGS}")
-  add_custom_target(build-certs
-    DEPENDS ${CERTCONFIG_CA} ${CERTCONFIGS}
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh test ${_certconfigs}"
+  add_custom_command(OUTPUT ${GENERATEDCERTS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    VERBATIM USES_TERMINAL
+    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh test ${_certconfigs}"
+    DEPENDS ${CERTCONFIG_CA} ${CERTCONFIGS}
+    VERBATIM
   )
+  add_custom_target(build-certs DEPENDS ${GENERATEDCERTS})
 endif()
 
 add_custom_target(clean-certs
