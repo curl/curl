@@ -32,7 +32,6 @@ if [ -f /usr/local/ssl/bin/openssl ]; then
 fi
 
 command -v "$OPENSSL"
-"$OPENSSL" version
 
 USAGE='echo Usage is genserv.sh <prefix> <caprefix>'
 
@@ -82,8 +81,6 @@ fi
 
 echo "PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
-#set -x
-
 "$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve -out "$PREFIX.keyenc" -pass 'pass:secret'
 "$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -new -key "$PREFIX.keyenc" -out "$PREFIX.csr" -passin 'pass:secret'
 "$OPENSSL" pkey -in "$PREFIX.keyenc" -out "$PREFIX.key" -passin 'pass:secret'
@@ -93,7 +90,6 @@ echo 'pseudo secrets generated'
 "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform DER -out "$PREFIX.pub.der"
 "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform PEM -out "$PREFIX.pub.pem"
 "$OPENSSL" x509 -extfile "$SRCDIR/$PREFIX.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX.crt"
-#"$OPENSSL" x509 -noout -text -hash -in "$PREFIX.crt" -nameopt multiline
 
 # revoke server cert
 touch "$CAPREFIX-ca.db"
