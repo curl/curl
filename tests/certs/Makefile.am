@@ -25,7 +25,7 @@ AUTOMAKE_OPTIONS = foreign
 
 include Makefile.inc
 
-EXTRA_DIST = $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt genserv.sh
+EXTRA_DIST = $(CERTCONFIG_CA) $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt genserv.sh
 
 DISTCLEANFILES = $(GENERATEDCERTS)
 
@@ -36,7 +36,7 @@ clean-certs:
 
 all: build-certs
 
-build-certs: $(CERTCONFIGS)
+build-certs: $(CERTCONFIG_CA) $(CERTCONFIGS)
 	(cd $(srcdir) && \
 	  genserv.sh test test-localhost; \
 	  genserv.sh test test-localhost.nn; \
