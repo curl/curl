@@ -31,8 +31,6 @@ if [ -f /usr/local/ssl/bin/openssl ]; then
   OPENSSL=/usr/local/ssl/bin/openssl
 fi
 
-command -v "$OPENSSL"
-
 USAGE='echo Usage is genserv.sh <prefix> <caprefix>'
 
 SRCDIR=$(pwd)
