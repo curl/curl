@@ -22,8 +22,8 @@
 #
 ###########################################################################
 CERTCONFIGS = \
-  test-ca.prm \
   test-ca.cnf \
+  test-ca.prm \
   test-localhost.prm \
   test-localhost.nn.prm \
   test-localhost0h.prm \
