@@ -43,7 +43,6 @@ cd "$GENDIR"
 
 KEYSIZE=prime256v1
 DURATION=300
-DIGESTALGO=-sha256
 
 NOTOK=
 
@@ -89,7 +88,7 @@ echo 'pseudo secrets generated'
 
 "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform DER -out "$PREFIX.pub.der"
 "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform PEM -out "$PREFIX.pub.pem"
-"$OPENSSL" x509 -extfile "$SRCDIR/$PREFIX.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX.crt"
+"$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req -text -nameopt multiline > "$PREFIX.crt"
 
 # revoke server cert
 touch "$CAPREFIX-ca.db"

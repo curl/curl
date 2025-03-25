@@ -44,7 +44,6 @@ cd "$GENDIR"
 
 KEYSIZE=prime256v1
 DURATION=6000
-DIGESTALGO=-sha256
 
 NOTOK=
 
@@ -69,7 +68,7 @@ echo "PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
 "$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve -out "$PREFIX-ca.key" -pass 'pass:secret'
 "$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin 'pass:secret'
-"$OPENSSL" x509 -extfile "$SRCDIR/$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-ca.raw-cacert" "$DIGESTALGO"
+"$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-ca.raw-cacert"
 "$OPENSSL" x509 -text -in "$PREFIX-ca.raw-cacert" -nameopt multiline > "$PREFIX-ca.cacert"
 "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -outform der -out "$PREFIX-ca.der"
 "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -text -nameopt multiline > "$PREFIX-ca.crt"
