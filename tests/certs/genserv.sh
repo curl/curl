@@ -75,7 +75,7 @@ DURATION=300
 
 while [ -n "${1:-}" ]; do
 
-  PREFIX="$1"
+  PREFIX="${1%.prm}"
   shift
 
   # pseudo-secrets
