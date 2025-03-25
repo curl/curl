@@ -62,7 +62,7 @@ elif [ ! -f "$CAPREFIX-ca.cacert" ] || \
   "$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin 'pass:secret' 2>/dev/null
   "$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX-ca.prm" -days "$DURATION" \
     -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-ca.raw-cacert"
-  "$OPENSSL" x509 -text -in "$PREFIX-ca.raw-cacert" -nameopt multiline > "$PREFIX-ca.cacert"
+  "$OPENSSL" x509 -in "$PREFIX-ca.raw-cacert" -text -nameopt multiline > "$PREFIX-ca.cacert"
   "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -outform der -out "$PREFIX-ca.der"
   "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -text -nameopt multiline > "$PREFIX-ca.crt"
 
@@ -89,7 +89,7 @@ while [ -n "${1:-}" ]; do
   "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform DER -out "$PREFIX.pub.der"
   "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform PEM -out "$PREFIX.pub.pem"
   "$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX.prm" -days "$DURATION" \
-    -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req > "$PREFIX.crt"
+    -req -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" > "$PREFIX.crt"
 
   # revoke server cert
   touch "$CAPREFIX-ca.db"
