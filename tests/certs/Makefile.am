@@ -38,24 +38,11 @@ clean-certs:
 
 all: build-certs
 
-build-certs: $(srcdir)/test-ca.cacert $(srcdir)/test-localhost.pem \
-  $(srcdir)/test-localhost.nn.pem $(srcdir)/test-localhost0h.pem \
-  $(srcdir)/test-localhost-san-first.pem $(srcdir)/test-localhost-san-last.pem
-
-$(srcdir)/test-ca.cacert:
-	cd $(srcdir); scripts/genroot.sh test
-
-$(srcdir)/test-localhost.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost test
-
-$(srcdir)/test-localhost.nn.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost.nn test
-
-$(srcdir)/test-localhost0h.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost0h test
-
-$(srcdir)/test-localhost-san-first.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost-san-first test
-
-$(srcdir)/test-localhost-san-last.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost-san-last test
+build-certs: $(CERTCONFIGS)
+	(cd $(srcdir) && \
+	  scripts/genroot.sh test; \
+	  scripts/genserv.sh test-localhost test; \
+	  scripts/genserv.sh test-localhost.nn test; \
+	  scripts/genserv.sh test-localhost0h test; \
+	  scripts/genserv.sh test-localhost-san-first test; \
+	  scripts/genserv.sh test-localhost-san-last test)
