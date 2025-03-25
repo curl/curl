@@ -109,5 +109,5 @@ while [ -n "${1:-}" ]; do
     cp "$PREFIX.$ext" "$SRCDIR"/
   done
 
-  echo "Certificates generated: PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
+  echo "Certificate generated: PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 done
