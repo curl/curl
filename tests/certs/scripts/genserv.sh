@@ -78,13 +78,10 @@ if [ -n "$NOTOK" ]; then
   exit
 fi
 
-echo "PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
-
+# pseudo-secrets
 "$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:"$KEYSIZE" -pkeyopt ec_param_enc:named_curve -out "$PREFIX.keyenc" -pass 'pass:secret'
-"$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -new -key "$PREFIX.keyenc" -out "$PREFIX.csr" -passin 'pass:secret'
+"$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -new -key "$PREFIX.keyenc" -out "$PREFIX.csr" -passin 'pass:secret' 2>/dev/null
 "$OPENSSL" pkey -in "$PREFIX.keyenc" -out "$PREFIX.key" -passin 'pass:secret'
-
-echo 'pseudo secrets generated'
 
 "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform DER -out "$PREFIX.pub.der"
 "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform PEM -out "$PREFIX.pub.pem"
@@ -107,4 +104,5 @@ chmod o-r "$SRCDIR/$PREFIX.prm"
 for ext in crl crt key pem pub.der pub.pem; do
   cp "$PREFIX.$ext" "$SRCDIR"/
 done
-echo "certificates for $PREFIX generated."
+
+echo "Certificates generated: PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
