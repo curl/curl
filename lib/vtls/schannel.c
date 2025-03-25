@@ -687,7 +687,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         return CURLE_SSL_CERTPROBLEM;
       }
 
-
       /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server
          2012, (NT v6.2). For earlier versions we use CURL_FIND_ANY. */
       if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
