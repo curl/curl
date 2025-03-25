@@ -97,7 +97,7 @@ struct cf_quiche_ctx {
   struct curltime started_at;        /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
-  struct Curl_hash_offt streams;     /* hash `data->mid` to `stream_ctx` */
+  struct uint_hash streams;          /* hash `data->mid` to `stream_ctx` */
   curl_off_t data_recvd;
   BIT(initialized);
   BIT(goaway);                       /* got GOAWAY from server */
@@ -115,7 +115,7 @@ static void quiche_debug_log(const char *line, void *argp)
 }
 #endif
 
-static void h3_stream_hash_free(curl_off_t id, void *stream);
+static void h3_stream_hash_free(unsigned int id, void *stream);
 
 static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
 {
@@ -128,7 +128,7 @@ static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
 #endif
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_uint_hash_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->data_recvd = 0;
   ctx->initialized = TRUE;
 }
@@ -142,7 +142,7 @@ static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
     Curl_ssl_peer_cleanup(&ctx->peer);
     vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_hash_offt_destroy(&ctx->streams);
+    Curl_uint_hash_destroy(&ctx->streams);
   }
   free(ctx);
 }
@@ -180,7 +180,7 @@ struct stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
+            data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct stream_ctx *stream)
 {
@@ -189,7 +189,7 @@ static void h3_stream_ctx_free(struct stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(curl_off_t id, void *stream)
+static void h3_stream_hash_free(unsigned int id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
@@ -208,11 +208,11 @@ struct cf_quiche_visit_ctx {
   void *user_data;
 };
 
-static bool cf_quiche_stream_do(curl_off_t mid, void *val, void *user_data)
+static bool cf_quiche_stream_do(unsigned int mid, void *val, void *user_data)
 {
   struct cf_quiche_visit_ctx *vctx = user_data;
   struct stream_ctx *stream = val;
-  struct Curl_easy *sdata = Curl_multi_get_handle(vctx->multi, mid);
+  struct Curl_easy *sdata = Curl_multi_get_easy(vctx->multi, mid);
   if(sdata)
     return vctx->cb(vctx->cf, sdata, stream, vctx->user_data);
   return TRUE;
@@ -229,7 +229,7 @@ static void cf_quiche_for_all_streams(struct Curl_cfilter *cf,
   vctx.multi = multi;
   vctx.cb = do_cb;
   vctx.user_data = user_data;
-  Curl_hash_offt_visit(&ctx->streams, cf_quiche_stream_do, &vctx);
+  Curl_uint_hash_visit(&ctx->streams, cf_quiche_stream_do, &vctx);
 }
 
 static bool cf_quiche_do_resume(struct Curl_cfilter *cf,
@@ -276,7 +276,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -306,7 +306,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(result)
         CURL_TRC_CF(data, cf, "data_done, flush egress -> %d", result);
     }
-    Curl_hash_offt_remove(&ctx->streams, data->mid);
+    Curl_uint_hash_remove(&ctx->streams, data->mid);
   }
 }
 
@@ -581,13 +581,13 @@ struct cf_quich_disp_ctx {
   CURLcode result;
 };
 
-static bool cf_quiche_disp_event(curl_off_t mid, void *val, void *user_data)
+static bool cf_quiche_disp_event(unsigned int mid, void *val, void *user_data)
 {
   struct cf_quich_disp_ctx *dctx = user_data;
   struct stream_ctx *stream = val;
 
   if(stream->id == dctx->stream_id) {
-    struct Curl_easy *sdata = Curl_multi_get_handle(dctx->multi, mid);
+    struct Curl_easy *sdata = Curl_multi_get_easy(dctx->multi, mid);
     if(sdata)
       dctx->result = cf_quiche_ev_process(dctx->cf, sdata, stream, dctx->ev);
     return FALSE; /* stop iterating */
@@ -630,7 +630,7 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
       else {
         /* another transfer, do not return errors, as they are not for
          * the calling transfer */
-        Curl_hash_offt_visit(&ctx->streams, cf_quiche_disp_event, &dctx);
+        Curl_uint_hash_visit(&ctx->streams, cf_quiche_disp_event, &dctx);
         quiche_h3_event_free(ev);
       }
     }
@@ -1572,14 +1572,14 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT: {
-    curl_uint64_t max_streams = CONN_INUSE(cf->conn);
+    curl_uint64_t max_streams = CONN_ATTACHED(cf->conn);
     if(!ctx->goaway) {
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
     *pres1 = (max_streams > INT_MAX) ? INT_MAX : (int)max_streams;
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
-                "MAX_CONCURRENT -> %d (%zu in use)",
-                cf->conn->connection_id, *pres1, CONN_INUSE(cf->conn));
+                "MAX_CONCURRENT -> %d (%u in use)",
+                cf->conn->connection_id, *pres1, CONN_ATTACHED(cf->conn));
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:

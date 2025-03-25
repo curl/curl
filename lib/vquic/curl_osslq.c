@@ -285,7 +285,7 @@ struct cf_osslq_ctx {
   struct curltime handshake_at;      /* time connect handshake finished */
   struct curltime first_byte_at;     /* when first byte was recvd */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
-  struct Curl_hash_offt streams;     /* hash `data->mid` to `h3_stream_ctx` */
+  struct uint_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
   uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   SSL_POLL_ITEM *poll_items;         /* Array for polling on writable state */
@@ -299,14 +299,14 @@ struct cf_osslq_ctx {
   BIT(need_send);                    /* QUIC connection needs to send */
 };
 
-static void h3_stream_hash_free(curl_off_t id, void *stream);
+static void h3_stream_hash_free(unsigned int id, void *stream);
 
 static void cf_osslq_ctx_init(struct cf_osslq_ctx *ctx)
 {
   DEBUGASSERT(!ctx->initialized);
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_uint_hash_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->poll_items = NULL;
   ctx->curl_items = NULL;
   ctx->items_max = 0;
@@ -317,7 +317,7 @@ static void cf_osslq_ctx_free(struct cf_osslq_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
     Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_hash_offt_destroy(&ctx->streams);
+    Curl_uint_hash_destroy(&ctx->streams);
     Curl_ssl_peer_cleanup(&ctx->peer);
     free(ctx->poll_items);
     free(ctx->curl_items);
@@ -591,7 +591,7 @@ struct h3_stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct h3_stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
+            data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
@@ -602,7 +602,7 @@ static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(curl_off_t id, void *stream)
+static void h3_stream_hash_free(unsigned int id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
@@ -637,7 +637,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->recv_buf_nonflow = 0;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -662,7 +662,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       stream->closed = TRUE;
     }
 
-    Curl_hash_offt_remove(&ctx->streams, data->mid);
+    Curl_uint_hash_remove(&ctx->streams, data->mid);
   }
 }
 
@@ -671,7 +671,7 @@ struct cf_ossq_find_ctx {
   struct h3_stream_ctx *stream;
 };
 
-static bool cf_osslq_find_stream(curl_off_t mid, void *val, void *user_data)
+static bool cf_osslq_find_stream(unsigned int mid, void *val, void *user_data)
 {
   struct h3_stream_ctx *stream = val;
   struct cf_ossq_find_ctx *fctx = user_data;
@@ -707,7 +707,7 @@ static struct cf_osslq_stream *cf_osslq_get_qstream(struct Curl_cfilter *cf,
     struct cf_ossq_find_ctx fctx;
     fctx.stream_id = stream_id;
     fctx.stream = NULL;
-    Curl_hash_offt_visit(&ctx->streams, cf_osslq_find_stream, &fctx);
+    Curl_uint_hash_visit(&ctx->streams, cf_osslq_find_stream, &fctx);
     if(fctx.stream)
       return &fctx.stream->s;
   }
@@ -1420,14 +1420,14 @@ struct cf_ossq_recv_ctx {
   CURLcode result;
 };
 
-static bool cf_osslq_iter_recv(curl_off_t mid, void *val, void *user_data)
+static bool cf_osslq_iter_recv(unsigned int mid, void *val, void *user_data)
 {
   struct h3_stream_ctx *stream = val;
   struct cf_ossq_recv_ctx *rctx = user_data;
 
   (void)mid;
   if(stream && !stream->closed && !Curl_bufq_is_full(&stream->recvbuf)) {
-    struct Curl_easy *sdata = Curl_multi_get_handle(rctx->multi, mid);
+    struct Curl_easy *sdata = Curl_multi_get_easy(rctx->multi, mid);
     if(sdata) {
       rctx->result = cf_osslq_stream_recv(&stream->s, rctx->cf, sdata);
       if(rctx->result)
@@ -1479,7 +1479,7 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
     rctx.cf = cf;
     rctx.multi = data->multi;
     rctx.result = CURLE_OK;
-    Curl_hash_offt_visit(&ctx->streams, cf_osslq_iter_recv, &rctx);
+    Curl_uint_hash_visit(&ctx->streams, cf_osslq_iter_recv, &rctx);
     result = rctx.result;
   }
 
@@ -1494,7 +1494,7 @@ struct cf_ossq_fill_ctx {
   size_t n;
 };
 
-static bool cf_osslq_collect_block_send(curl_off_t mid, void *val,
+static bool cf_osslq_collect_block_send(unsigned int mid, void *val,
                                         void *user_data)
 {
   struct h3_stream_ctx *stream = val;
@@ -1505,7 +1505,7 @@ static bool cf_osslq_collect_block_send(curl_off_t mid, void *val,
     return FALSE;
 
   if(stream && stream->s.ssl && stream->s.send_blocked) {
-    struct Curl_easy *sdata = Curl_multi_get_handle(fctx->multi, mid);
+    struct Curl_easy *sdata = Curl_multi_get_easy(fctx->multi, mid);
     fprintf(stderr, "[OSSLQ] stream %" FMT_PRId64 " sdata=%p\n",
             stream->s.id, (void *)sdata);
     if(sdata) {
@@ -1534,8 +1534,8 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
   if(ctx->h3.conn) {
     struct cf_ossq_fill_ctx fill_ctx;
 
-    if(ctx->items_max < Curl_hash_offt_count(&ctx->streams)) {
-      size_t nmax = Curl_hash_offt_count(&ctx->streams);
+    if(ctx->items_max < Curl_uint_hash_count(&ctx->streams)) {
+      size_t nmax = Curl_uint_hash_count(&ctx->streams);
       ctx->items_max = 0;
       tmpptr = realloc(ctx->poll_items, nmax * sizeof(SSL_POLL_ITEM));
       if(!tmpptr) {
@@ -1560,7 +1560,7 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
     fill_ctx.ctx = ctx;
     fill_ctx.multi = data->multi;
     fill_ctx.n = 0;
-    Curl_hash_offt_visit(&ctx->streams, cf_osslq_collect_block_send,
+    Curl_uint_hash_visit(&ctx->streams, cf_osslq_collect_block_send,
                          &fill_ctx);
     poll_count = fill_ctx.n;
     if(poll_count) {
@@ -2378,7 +2378,7 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
       return CURLE_HTTP3;
     }
     /* we report avail + in_use */
-    v += CONN_INUSE(cf->conn);
+    v += CONN_ATTACHED(cf->conn);
     *pres1 = (v > INT_MAX) ? INT_MAX : (int)v;
 #else
     *pres1 = 100;

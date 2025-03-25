@@ -236,6 +236,9 @@ LIB_CFILES =         \
   timediff.c         \
   timeval.c          \
   transfer.c         \
+  uint-bset.c        \
+  uint-spbset.c      \
+  uint-table.c       \
   url.c              \
   urlapi.c           \
   version.c          \
@@ -376,6 +379,9 @@ LIB_HFILES =         \
   timediff.h         \
   timeval.h          \
   transfer.h         \
+  uint-bset.h        \
+  uint-spbset.h      \
+  uint-table.h       \
   url.h              \
   urlapi-int.h       \
   urldata.h          \

@@ -59,6 +59,15 @@ typedef enum {
   DNS_TYPE_HTTPS = 65
 } DNStype;
 
+/* one of these for each DoH request */
+struct doh_probe {
+  unsigned int easy_mid; /* multi id of easy handle doing the lookup */
+  DNStype dnstype;
+  unsigned char req_body[512];
+  size_t req_body_len;
+  struct dynbuf resp_body;
+};
+
 enum doh_slot_num {
   /* Explicit values for first two symbols so as to match hard-coded
    * constants in existing code
@@ -93,7 +102,7 @@ struct doh_request {
 };
 
 struct doh_response {
-  curl_off_t probe_mid;
+  unsigned int probe_mid;
   struct dynbuf body;
   DNStype dnstype;
   CURLcode result;

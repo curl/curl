@@ -336,6 +336,8 @@
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#    define CURL_POPCOUNT64(x)         __builtin_popcountll(x)
+#    define CURL_CTZ64(x)              __builtin_ctzll(x)
 #  elif defined(__LP64__) || \
         defined(__x86_64__) || defined(__ppc64__) || defined(__sparc64__) || \
         defined(__e2k__) || \
@@ -346,6 +348,8 @@
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
 #    define CURL_SUFFIX_CURL_OFF_T     L
 #    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define CURL_POPCOUNT64(x)         __builtin_popcountl(x)
+#    define CURL_CTZ64(x)              __builtin_ctzl(x)
 #  endif
 #  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
 #  define CURL_PULL_SYS_TYPES_H      1

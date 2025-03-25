@@ -120,7 +120,7 @@ struct cf_msh3_ctx {
   struct cf_call_data call_data;
   struct curltime connect_started;   /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct Curl_hash_offt streams;     /* hash `data->mid` to `stream_ctx` */
+  struct uint_hash streams;          /* hash `data->mid` to `stream_ctx` */
   /* Flags written by msh3/msquic thread */
   bool handshake_complete;
   bool handshake_succeeded;
@@ -131,7 +131,7 @@ struct cf_msh3_ctx {
   BIT(active);
 };
 
-static void h3_stream_hash_free(curl_off_t id, void *stream);
+static void h3_stream_hash_free(unsigned int id, void *stream);
 
 static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
                                  const struct Curl_addrinfo *ai)
@@ -139,7 +139,7 @@ static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
   CURLcode result;
 
   DEBUGASSERT(!ctx->initialized);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_uint_hash_init(&ctx->streams, 63, h3_stream_hash_free);
 
   result = Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
   if(result)
@@ -155,7 +155,7 @@ static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
 static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
-    Curl_hash_offt_destroy(&ctx->streams);
+    Curl_uint_hash_destroy(&ctx->streams);
   }
   free(ctx);
 }
@@ -189,7 +189,7 @@ struct stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct stream_ctx *)((data && ctx)? \
-                Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
+                Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct stream_ctx *stream)
 {
@@ -197,7 +197,7 @@ static void h3_stream_ctx_free(struct stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(curl_off_t id, void *stream)
+static void h3_stream_hash_free(unsigned int id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
@@ -223,7 +223,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   CURL_TRC_CF(data, cf, "data setup");
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -239,7 +239,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "easy handle is done");
-    Curl_hash_offt_remove(&ctx->streams, data->mid);
+    Curl_uint_hash_remove(&ctx->streams, data->mid);
   }
 }
 
