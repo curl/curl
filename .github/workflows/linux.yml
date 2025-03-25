@@ -661,10 +661,8 @@ jobs:
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target clean-certs
             cmake --build bld --target build-certs --parallel 1
           else
-            make -C bld/tests/certs clean-certs
             make -C bld/tests/certs build-certs -j1
           fi
 

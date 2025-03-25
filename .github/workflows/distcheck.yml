@@ -59,7 +59,6 @@ jobs:
           pushd curl-99.98.97
           ./configure --prefix=$HOME/temp --without-ssl --without-libpsl
           make
-          make -C tests/certs clean-certs
           make -C tests/certs build-certs -j1
           make test-ci
           make install
@@ -86,7 +85,6 @@ jobs:
           pushd build
           ../curl-99.98.97/configure --without-ssl --without-libpsl
           make
-          make -C tests/certs clean-certs
           make -C tests/certs build-certs -j1
           make test-ci
           popd
@@ -111,7 +109,6 @@ jobs:
           pushd build
           ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg" --without-libpsl
           make
-          make -C tests/certs clean-certs
           make -C tests/certs build-certs -j1
           make test-ci
           make install

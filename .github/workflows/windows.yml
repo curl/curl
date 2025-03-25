@@ -149,10 +149,8 @@ jobs:
         run: |
           PATH=/usr/bin
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target clean-certs
             cmake --build bld --target build-certs --parallel 1
           else
-            make -C bld/tests/certs clean-certs
             make -C bld/tests/certs build-certs -j1
           fi
 
@@ -365,10 +363,8 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target clean-certs
             cmake --build bld --target build-certs --parallel 1
           else
-            make -C bld/tests/certs clean-certs
             make -C bld/tests/certs build-certs -j1
           fi
 
@@ -545,9 +541,7 @@ jobs:
 
       - name: 'build certs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        run: |
-          cmake --build bld --target clean-certs
-          cmake --build bld --target build-certs --parallel 1
+        run: cmake --build bld --target build-certs --parallel 1
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -986,9 +980,7 @@ jobs:
 
       - name: 'build certs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        run: |
-          cmake --build bld --config '${{ matrix.type }}' --target clean-certs
-          cmake --build bld --config '${{ matrix.type }}' --target build-certs --parallel 1
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 1 --target build-certs
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}

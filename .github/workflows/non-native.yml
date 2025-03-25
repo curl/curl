@@ -69,7 +69,6 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
-              time cmake --build bld --target clean-certs
               time cmake --build bld --target build-certs --parallel 1
               export TFLAGS='-j4'
               time cmake --build bld --target test-ci
@@ -111,7 +110,6 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
-              time cmake --build bld --target clean-certs
               time cmake --build bld --target build-certs --parallel 1
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
               time cmake --build bld --target test-ci
@@ -169,7 +167,6 @@ jobs:
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time make -C tests
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
-                time make -C tests/certs clean-certs
                 time make -C tests/certs build-certs -j1
                 time make test-ci V=1 TFLAGS='-j4'
               fi
@@ -208,7 +205,6 @@ jobs:
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
-                time cmake --build bld --target clean-certs
                 time cmake --build bld --target build-certs --parallel 1
                 time cmake --build bld --target test-ci
               fi
@@ -248,7 +244,6 @@ jobs:
             time gmake install
             src/curl --disable --version
             time gmake -C tests
-            time gmake -C tests/certs clean-certs
             time gmake -C tests/certs build-certs -j1
             time gmake test-ci V=1
             echo '::group::build examples'

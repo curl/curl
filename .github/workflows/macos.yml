@@ -307,10 +307,8 @@ jobs:
         if: ${{ !matrix.build.clang-tidy }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target clean-certs
             cmake --build bld --target build-certs --parallel 1
           else
-            make -C bld/tests/certs clean-certs
             make -C bld/tests/certs build-certs -j1
           fi
 
