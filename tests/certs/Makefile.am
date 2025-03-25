@@ -42,8 +42,6 @@ clean-certs:
 	  test-ca.raw* \
 	  test-ca.srl
 
-all: build-certs
-
 build-certs: test-ca.cacert
 
 # Generate all certs in a single shot, but declare just a single target file
