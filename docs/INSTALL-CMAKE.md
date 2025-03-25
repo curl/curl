@@ -387,10 +387,14 @@ Details via CMake
 - `ZLIB_LIBRARY`:                           Path to `zlib` library.
 - `ZLIB_USE_STATIC_LIBS`:                   Look for static ZLIB library (requires CMake v3.24).
 
-## Dependency options
+## Dependency options (tools)
 
 - `CLANG_TIDY`:                             `clang-tidy` tool used with `CURL_CLANG_TIDY=ON`. Default: `clang-tidy`
-- `PERL_EXECUTABLE`                         Perl binary used throughout the build and tests.
+- `PERL_EXECUTABLE`:                        Perl binary used throughout the build and tests.
+- `SH_EXECUTABLE`:                          POSIX shell binary used throughout the build (for generating test certificates).
+
+## Dependency options (libraries)
+
 - `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
 - `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
 - `AMISSL_AUTO_LIBRARY`:                    Path to `amisslauto` library.
