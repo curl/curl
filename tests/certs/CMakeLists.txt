@@ -43,5 +43,4 @@ endif()
 add_custom_target(clean-certs
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND ${CMAKE_COMMAND} -E remove ${GENERATEDCERTS}
-  COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_SOURCE_DIR}/gen/*
 )
