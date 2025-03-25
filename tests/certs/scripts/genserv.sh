@@ -31,41 +31,27 @@ if [ -f /usr/local/ssl/bin/openssl ]; then
   OPENSSL=/usr/local/ssl/bin/openssl
 fi
 
-USAGE='echo Usage is genserv.sh <caprefix> <prefix> ...'
+USAGE='echo Usage is genserv.sh <caprefix> [<prefix> ...]'
 
 SRCDIR=$(pwd)
-
 GENDIR=${GENDIR:-$SRCDIR/gen}
-test -d "$GENDIR" || mkdir "$GENDIR"
-cd "$GENDIR"
-
 KEYSIZE=prime256v1
 DURATION=300
 
-NOTOK=
-
 CAPREFIX="${1:-}"
+shift
 if [ -z "$CAPREFIX" ]; then
   echo 'No CA prefix'
-  NOTOK=1
-else
-  if [ ! -f "$CAPREFIX-ca.cacert" ]; then
-    echo "No CA certificate file $CAPREFIX-ca.cacert"
-    NOTOK=1
-  fi
-  if [ ! -f "$CAPREFIX-ca.key" ]; then
-    echo "No $CAPREFIX key"
-    NOTOK=1
-  fi
-fi
-
-if [ -n "$NOTOK" ]; then
-  echo 'Sorry, I cannot do that for you.'
   $USAGE
   exit
+elif [ ! -f "$GENDIR/$CAPREFIX-ca.cacert" ] || \
+     [ ! -f "$GENDIR/$CAPREFIX-ca.key" ]; then
+  "$(dirname "${0}")"/genroot.sh "$CAPREFIX"
 fi
 
-shift
+test -d "$GENDIR" || mkdir "$GENDIR"
+cd "$GENDIR"
+
 while [ -n "${1:-}" ]; do
 
   PREFIX="$1"
