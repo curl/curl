@@ -23,8 +23,6 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign
 
-SCRIPTFILES = \
-  genroot.sh \
-  genserv.sh
+SCRIPTFILES = genserv.sh
 
 EXTRA_DIST = $(SCRIPTFILES)

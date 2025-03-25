@@ -40,7 +40,7 @@ all: build-certs
 
 build-certs: $(CERTCONFIGS)
 	(cd $(srcdir) && \
-	  scripts/genroot.sh test; \
+	  scripts/genserv.sh test; \
 	  scripts/genserv.sh test test-localhost; \
 	  scripts/genserv.sh test test-localhost.nn; \
 	  scripts/genserv.sh test test-localhost0h; \

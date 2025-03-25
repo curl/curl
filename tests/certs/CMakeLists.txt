@@ -30,7 +30,7 @@ mark_as_advanced(SH_EXECUTABLE)
 if(SH_EXECUTABLE)
   add_custom_target(build-certs
     DEPENDS ${CERTCONFIGS}
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genroot.sh test"
+    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test"
     COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test test-localhost"
     COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test test-localhost.nn"
     COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/scripts/genserv.sh test test-localhost0h"

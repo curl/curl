@@ -34,9 +34,12 @@ fi
 USAGE='echo Usage is genserv.sh <caprefix> [<prefix> ...]'
 
 SRCDIR=$(pwd)
+
 GENDIR=${GENDIR:-$SRCDIR/gen}
+test -d "$GENDIR" || mkdir "$GENDIR"
+cd "$GENDIR"
+
 KEYSIZE=prime256v1
-DURATION=300
 
 CAPREFIX="${1:-}"
 shift
@@ -44,13 +47,30 @@ if [ -z "$CAPREFIX" ]; then
   echo 'No CA prefix'
   $USAGE
   exit
-elif [ ! -f "$GENDIR/$CAPREFIX-ca.cacert" ] || \
-     [ ! -f "$GENDIR/$CAPREFIX-ca.key" ]; then
-  "$(dirname "${0}")"/genroot.sh "$CAPREFIX"
+elif [ ! -f "$CAPREFIX-ca.cacert" ] || \
+     [ ! -f "$CAPREFIX-ca.key" ]; then
+
+  command -v "$OPENSSL"
+  "$OPENSSL" version
+
+  PREFIX=$CAPREFIX
+  DURATION=6000
+
+  "$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:"$KEYSIZE" -pkeyopt ec_param_enc:named_curve -out "$PREFIX-ca.key" -pass 'pass:secret'
+  "$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin 'pass:secret' 2>/dev/null
+  "$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-ca.raw-cacert"
+  "$OPENSSL" x509 -text -in "$PREFIX-ca.raw-cacert" -nameopt multiline > "$PREFIX-ca.cacert"
+  "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -outform der -out "$PREFIX-ca.der"
+  "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -text -nameopt multiline > "$PREFIX-ca.crt"
+
+  for ext in key cacert crt; do
+    cp "$PREFIX-ca.$ext" "$SRCDIR"/
+  done
+
+  echo "CA root generated: PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 fi
 
-test -d "$GENDIR" || mkdir "$GENDIR"
-cd "$GENDIR"
+DURATION=300
 
 while [ -n "${1:-}" ]; do
 
