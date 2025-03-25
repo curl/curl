@@ -37,9 +37,4 @@ clean-certs:
 all: build-certs
 
 build-certs: $(CERTCONFIG_CA) $(CERTCONFIGS)
-	(cd $(srcdir) && \
-	  genserv.sh test test-localhost; \
-	  genserv.sh test test-localhost.nn; \
-	  genserv.sh test test-localhost0h; \
-	  genserv.sh test test-localhost-san-first; \
-	  genserv.sh test test-localhost-san-last)
+	(cd $(srcdir) && genserv.sh test $(CERTCONFIG_CA))
