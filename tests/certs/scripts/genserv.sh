@@ -42,7 +42,7 @@ GENDIR=${GENDIR:-$SRCDIR/gen}
 test -d "$GENDIR" || mkdir "$GENDIR"
 cd "$GENDIR"
 
-KEYSIZE=2048
+KEYSIZE=prime256v1
 DURATION=300
 DIGESTALGO=-sha256  # The -sha256 option was introduced in OpenSSL 1.0.1
 
@@ -84,7 +84,8 @@ echo "PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
 set -x
 
-"$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -newkey "rsa:$KEYSIZE" -keyout "$PREFIX.keyenc" -out "$PREFIX.csr" -passout 'pass:secret'
+"$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve -out "$PREFIX.key" -pass 'pass:secret'
+"$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -new -key "$PREFIX.key" -out "$PREFIX.csr" -passin 'pass:secret'
 "$OPENSSL" pkey -in "$PREFIX.keyenc" -out "$PREFIX.key" -passin 'pass:secret'
 
 echo 'pseudo secrets generated'

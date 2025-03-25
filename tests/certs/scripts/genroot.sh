@@ -42,7 +42,7 @@ GENDIR=${GENDIR:-$SRCDIR/gen}
 test -d "$GENDIR" || mkdir "$GENDIR"
 cd "$GENDIR"
 
-KEYSIZE=2048
+KEYSIZE=prime256v1
 DURATION=6000
 DIGESTALGO=-sha256  # The -sha256 option was introduced in OpenSSL 1.0.1
 
@@ -69,7 +69,7 @@ echo "PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
 set -x
 
-"$OPENSSL" genrsa -out "$PREFIX-ca.key" -passout 'pass:secret' "$KEYSIZE"
+"$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve -out "$PREFIX-ca.key" -pass 'pass:secret'
 "$OPENSSL" req -config "$SRCDIR/$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin 'pass:secret'
 "$OPENSSL" x509 -extfile "$SRCDIR/$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-ca.raw-cacert" "$DIGESTALGO"
 "$OPENSSL" x509 -text -in "$PREFIX-ca.raw-cacert" -nameopt multiline > "$PREFIX-ca.cacert"
