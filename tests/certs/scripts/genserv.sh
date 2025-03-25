@@ -31,7 +31,7 @@ if [ -f /usr/local/ssl/bin/openssl ]; then
   OPENSSL=/usr/local/ssl/bin/openssl
 fi
 
-USAGE='echo Usage is genserv.sh <caprefix> <prefix>'
+USAGE='echo Usage is genserv.sh <caprefix> <prefix> ...'
 
 SRCDIR=$(pwd)
 
@@ -59,48 +59,44 @@ else
   fi
 fi
 
-PREFIX="${2:-}"
-if [ -z "$PREFIX" ]; then
-  echo 'No configuration prefix'
-  NOTOK=1
-else
-  if [ ! -f "$SRCDIR/$PREFIX.prm" ]; then
-    echo "No configuration file $SRCDIR/$PREFIX.prm"
-    NOTOK=1
-  fi
-fi
-
 if [ -n "$NOTOK" ]; then
   echo 'Sorry, I cannot do that for you.'
   $USAGE
   exit
 fi
 
-# pseudo-secrets
-"$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:"$KEYSIZE" -pkeyopt ec_param_enc:named_curve -out "$PREFIX.keyenc" -pass 'pass:secret'
-"$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -new -key "$PREFIX.keyenc" -out "$PREFIX.csr" -passin 'pass:secret' 2>/dev/null
-"$OPENSSL" pkey -in "$PREFIX.keyenc" -out "$PREFIX.key" -passin 'pass:secret'
+shift
+while [ -n "${1:-}" ]; do
 
-"$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform DER -out "$PREFIX.pub.der"
-"$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform PEM -out "$PREFIX.pub.pem"
-"$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req -text -nameopt multiline > "$PREFIX.crt"
+  PREFIX="$1"
+  shift
 
-# revoke server cert
-touch "$CAPREFIX-ca.db"
-echo 01 > "$CAPREFIX-ca.cnt"
-"$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -revoke "$PREFIX.crt"
+  # pseudo-secrets
+  "$OPENSSL" genpkey -algorithm EC -pkeyopt ec_paramgen_curve:"$KEYSIZE" -pkeyopt ec_param_enc:named_curve -out "$PREFIX.keyenc" -pass 'pass:secret'
+  "$OPENSSL" req -config "$SRCDIR/$PREFIX.prm" -new -key "$PREFIX.keyenc" -out "$PREFIX.csr" -passin 'pass:secret' 2>/dev/null
+  "$OPENSSL" pkey -in "$PREFIX.keyenc" -out "$PREFIX.key" -passin 'pass:secret'
 
-# issue CRL
-"$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -gencrl -out "$PREFIX.crl"
+  "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform DER -out "$PREFIX.pub.der"
+  "$OPENSSL" pkey -in "$PREFIX.key" -pubout -outform PEM -out "$PREFIX.pub.pem"
+  "$OPENSSL" x509 -sha256 -extfile "$SRCDIR/$PREFIX.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX.csr" -req -text -nameopt multiline > "$PREFIX.crt"
 
-"$OPENSSL" x509 -in "$PREFIX.crt" -outform der -out "$PREFIX.der"
+  # revoke server cert
+  touch "$CAPREFIX-ca.db"
+  echo 01 > "$CAPREFIX-ca.cnt"
+  "$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -revoke "$PREFIX.crt"
 
-# all together now
-cat "$SRCDIR/$PREFIX.prm" "$PREFIX.key" "$PREFIX.crt" > "$PREFIX.pem"
-chmod o-r "$SRCDIR/$PREFIX.prm"
+  # issue CRL
+  "$OPENSSL" ca -config "$SRCDIR/$CAPREFIX-ca.cnf" -gencrl -out "$PREFIX.crl"
 
-for ext in crl crt key pem pub.der pub.pem; do
-  cp "$PREFIX.$ext" "$SRCDIR"/
+  "$OPENSSL" x509 -in "$PREFIX.crt" -outform der -out "$PREFIX.der"
+
+  # all together now
+  cat "$SRCDIR/$PREFIX.prm" "$PREFIX.key" "$PREFIX.crt" > "$PREFIX.pem"
+  chmod o-r "$SRCDIR/$PREFIX.prm"
+
+  for ext in crl crt key pem pub.der pub.pem; do
+    cp "$PREFIX.$ext" "$SRCDIR"/
+  done
+
+  echo "Certificates generated: PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 done
-
-echo "Certificates generated: PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
