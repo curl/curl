@@ -36,6 +36,8 @@ DISTCLEANFILES = $(GENERATEDCERTS)
 clean-certs:
 	cd $(srcdir); rm -f $(GENERATEDCERTS)
 
+all: build-certs
+
 build-certs: $(srcdir)/test-ca.cacert $(srcdir)/test-localhost.pem \
 	$(srcdir)/test-localhost.nn.pem $(srcdir)/test-localhost0h.pem \
 	$(srcdir)/test-localhost-san-first.pem $(srcdir)/test-localhost-san-last.pem
