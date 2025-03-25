@@ -22,15 +22,15 @@
 #
 ###########################################################################
 CERTCONFIG_CA = \
-  test-ca.cnf \
-  test-ca.prm
+  test-ca \
+  test-ca.cnf
 
 CERTCONFIGS = \
-  test-localhost.prm \
-  test-localhost.nn.prm \
-  test-localhost0h.prm \
-  test-localhost-san-first.prm \
-  test-localhost-san-last.prm
+  test-localhost \
+  test-localhost.nn \
+  test-localhost0h \
+  test-localhost-san-first \
+  test-localhost-san-last
 
 GENERATEDCERTS = \
   test-ca.cacert \
