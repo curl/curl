@@ -615,7 +615,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       WCHAR* pszPassword;
       size_t pwd_len = 0;
       int str_w_len = 0;
-      int cert_find_flags = CERT_FIND_ANY;
+      int cert_find_flags;
       const char *cert_showfilename_error = blob ?
         "(memory blob)" : data->set.ssl.primary.clientcert;
       curlx_unicodefree(cert_path);
@@ -689,7 +689,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
 
       /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server
-         2012, (NT v6.2). For earlier versions we will use CURL_FIND_ANY. */
+         2012, (NT v6.2). For earlier versions we use CURL_FIND_ANY. */
       if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL))
         cert_find_flags = CERT_FIND_HAS_PRIVATE_KEY;
