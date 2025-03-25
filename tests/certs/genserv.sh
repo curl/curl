@@ -62,7 +62,7 @@ elif [ ! -f "$CAPREFIX-ca.cacert" ] || \
   "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -outform der -out "$PREFIX-ca.der"
   "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -text -nameopt multiline > "$PREFIX-ca.crt"
 
-  echo "CA root generated: PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
+  echo "CA root generated: $PREFIX ${DURATION}days $KEYSIZE"
 fi
 
 DURATION=300
@@ -97,5 +97,5 @@ while [ -n "${1:-}" ]; do
   cat "$SRCDIR/$PREFIX.prm" "$PREFIX.key" "$PREFIX.crt" > "$PREFIX.pem"
   chmod o-r "$SRCDIR/$PREFIX.prm"
 
-  echo "Certificate generated: CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE PREFIX=$PREFIX"
+  echo "Certificate generated: CA=$CAPREFIX ${DURATION}days $KEYSIZE $PREFIX"
 done
