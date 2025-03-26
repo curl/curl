@@ -61,7 +61,7 @@ endif
 
 install-data-local:
 if CROSSCOMPILING
-	@echo "NOTICE: we can't install completion scripts when cross-compiling!"
+	@echo "NOTICE: we cannot install completion scripts when cross-compiling"
 else # if not cross-compiling:
 if USE_ZSH_COMPLETION
 	if test -n "$(PERL)"; then \
