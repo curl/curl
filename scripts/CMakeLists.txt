@@ -54,7 +54,6 @@ if(CURL_COMPLETION_FISH OR
       if(NOT CMAKE_CROSSCOMPILING)
         if(NOT CURL_COMPLETION_FISH_DIR)
           find_package(PkgConfig QUIET)
-          pkg_check_modules(_fish "fish")
           pkg_get_variable(CURL_COMPLETION_FISH_DIR "fish" "completionsdir")
           if(NOT _pkg_fish_completionsdir)
             include(GNUInstallDirs)
