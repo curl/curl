@@ -117,9 +117,6 @@ struct SingleRequest {
     struct SSHPROTO *ssh;
     struct TELNET *telnet;
   } p;
-#ifndef CURL_DISABLE_DOH
-  struct doh_probes *doh; /* DoH specific data for this request */
-#endif
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
