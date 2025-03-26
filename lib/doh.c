@@ -466,14 +466,14 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                                int *waitp)
 {
   CURLcode result = CURLE_OK;
-  struct doh_probes *dohp = Curl_meta_get(data, CURL_EZM_DOH_MASTER);
+  struct doh_probes *dohp = NULL;
   struct connectdata *conn = data->conn;
   size_t i;
   *waitp = FALSE;
   (void)hostname;
   (void)port;
 
-  DEBUGASSERT(!dohp);
+  DEBUGASSERT(!Curl_meta_get(data, CURL_EZM_DOH_MASTER));
   DEBUGASSERT(conn);
 
   /* start clean, consider allocating this struct on demand */
