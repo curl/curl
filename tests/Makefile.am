@@ -188,7 +188,7 @@ event-test: runtests-pre all
 
 default-pytest: ci-pytest
 
-ci-pytest: build-certs all
+ci-pytest: all
 	srcdir=$(srcdir) $(PYTEST) -v $(srcdir)/http
 
 checksrc:

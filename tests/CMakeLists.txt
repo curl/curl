@@ -64,7 +64,7 @@ function(curl_add_runtests _targetname _test_flags)
 endfunction()
 
 function(curl_add_pytests _targetname _test_flags)
-  set(_depends "build-certs")
+  set(_depends "")
   if(NOT _targetname STREQUAL "pytest-ci")
     set(_depends "test-http-clients")
   endif()
