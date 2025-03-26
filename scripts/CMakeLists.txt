@@ -69,10 +69,12 @@ if(CURL_COMPLETION_FISH OR
         endif()
       endif()
       if(CURL_COMPLETION_FISH_DIR)
-        install(FILES "${_completion_fish}" DESTINATION "${CURL_COMPLETION_FISH_DIR}")
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_completion_fish}"
+                DESTINATION "${CURL_COMPLETION_FISH_DIR}")
       endif()
       if(CURL_COMPLETION_ZSH_DIR)
-        install(FILES "${_completion_zsh}" DESTINATION "${CURL_COMPLETION_ZSH_DIR}")
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_completion_zsh}"
+                DESTINATION "${CURL_COMPLETION_ZSH_DIR}")
       endif()
     else()
       message(STATUS "We cannot install completion scripts when cross-compiling")
