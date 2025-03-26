@@ -130,6 +130,10 @@ while (my $filename = <$git_ls_files>) {
         push @err, "content: has multiple EOL at EOF";
     }
 
+    if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
+        push @err, "content: has binary contents";
+    }
+
     if (@err) {
         $issues++;
         foreach my $err (@err) {
