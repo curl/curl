@@ -42,7 +42,7 @@ function(curl_add_manual_pages _listname)
       add_custom_command(OUTPUT ${_rofffiles}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" -k -d "${CMAKE_CURRENT_BINARY_DIR}" ${_mdfiles}
-        DEPENDS ${_mdfiles}
+        DEPENDS "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" ${_mdfiles}
         VERBATIM
       )
       set(_file_count 0)
@@ -69,8 +69,8 @@ add_custom_command(OUTPUT "libcurl-symbols.md"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl" <
     "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions" > "libcurl-symbols.md"
   DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions"
   VERBATIM
 )
 
