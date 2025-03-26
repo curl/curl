@@ -142,12 +142,31 @@ CURLU_GUESS_SCHEME is used.
 
 (Added in curl 8.9.0)
 
+## CURLU_NORMALIZE
+
+When this flag is used in curl_url_get() when retrieving the URL, the URL is
+"normalized" in several ways. Normalized here means using consistent percent
+encoding and decoding for the result.
+
+The host name is lowercased. All percent encodings are done using uppercase.
+Every octet with a byte value of 32 or below, or 127 or higher, are percent
+encoded.
+
+In the path component, `%2F` sequences are left percent encoded and `/` is
+left unencoded.
+
+In the query component, `%3D`, `%2B` and `%26` are left encoded is already
+present and `=`, `+` and `&` left left as-is when provided. The query
+component also puts `/`, `?` and `:` unencoded in the URL.
+
+(Added in curl 8.14.0)
+
 # PARTS
 
 ## CURLUPART_URL
 
-When asked to return the full URL, curl_url_get(3) returns a normalized and
-possibly cleaned up version using all available URL parts.
+When asked to return the full URL, curl_url_get(3) returns the complete URL;
+using all available previously set URL parts.
 
 We advise using the *CURLU_PUNYCODE* option to get the URL as "normalized" as
 possible since IDN allows hostnames to be written in many different ways that

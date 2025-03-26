@@ -35,8 +35,9 @@ lib%TESTNUMBER
 </client>
 
 <verify>
-<stdout>
-success
-</stdout>
+<stderr mode="text">
+URL: -
+Test ended with result 0
+</stderr>
 </verify>
 </testcase>
