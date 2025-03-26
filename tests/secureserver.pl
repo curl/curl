@@ -292,8 +292,8 @@ if($stunnel_version >= 400) {
     $SIG{TERM} = \&exit_signal_handler;
     # stunnel configuration file
     if(open(my $stunconf, ">", "$conffile")) {
-        print $stunconf "CApath = $capath\n";
-        print $stunconf "cert = $certfile\n";
+        print $stunconf "CApath = " . pathhelp::sys_native_abs_path($capath) . "\n";
+        print $stunconf "cert = " . pathhelp::sys_native_abs_path($certfile) . "\n";
         print $stunconf "debug = $loglevel\n";
         print $stunconf "socket = $socketopt\n";
         if($fips_support) {
