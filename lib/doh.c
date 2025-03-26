@@ -499,10 +499,8 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     Curl_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
   }
 
-  if(Curl_meta_set(data, CURL_EZM_DOH_MASTER, dohp, doh_master_dtor)) {
-    result = CURLE_OUT_OF_MEMORY;
+  if(Curl_meta_set(data, CURL_EZM_DOH_MASTER, dohp, doh_master_dtor))
     goto error;
-  }
 
   conn->bits.doh = TRUE;
   dohp->host = hostname;
