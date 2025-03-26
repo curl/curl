@@ -44,7 +44,7 @@ all-local: $(ZSH_COMPLETION_FUNCTION_FILENAME) $(FISH_COMPLETION_FUNCTION_FILENA
 if USE_ZSH_COMPLETION
 $(ZSH_COMPLETION_FUNCTION_FILENAME): completion.pl
 	if test -z "$(PERL)"; then \
-	  echo "No perl: cannot generate completion script";
+	  echo 'No perl: cannot generate completion script';
 	else \
 	  $(PERL) $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell zsh > $@;
 	fi
@@ -53,7 +53,7 @@ endif
 if USE_FISH_COMPLETION
 $(FISH_COMPLETION_FUNCTION_FILENAME): completion.pl
 	if test -z "$(PERL)"; then
-	  echo "No perl: cannot generate completion script";
+	  echo 'No perl: cannot generate completion script';
 	else \
 	  $(PERL) $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell fish > $@;
 	fi
@@ -61,7 +61,7 @@ endif
 
 install-data-local:
 if CROSSCOMPILING
-	@echo "NOTICE: we cannot install completion scripts when cross-compiling"
+	@echo 'NOTICE: we cannot install completion scripts when cross-compiling'
 else # if not cross-compiling:
 if USE_ZSH_COMPLETION
 	if test -n "$(PERL)"; then \
