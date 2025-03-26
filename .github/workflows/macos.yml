@@ -134,8 +134,8 @@ jobs:
             install: gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
-            install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump
-            generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
+            install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump fish
+            generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
             clang-tidy: true
             chkprefill: _chkprefill
           - name: 'quictls +static libssh +examples'

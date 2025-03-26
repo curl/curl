@@ -127,7 +127,7 @@ jobs:
           - name: mbedtls-pkg !pc
             install_packages: libnghttp2-dev libmbedtls-dev
             install_steps: skipall
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: msh3
             install_packages: zlib1g-dev
