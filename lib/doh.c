@@ -222,26 +222,40 @@ static void doh_probe_done(struct Curl_easy *data,
   DEBUGASSERT(dohp);
   if(dohp) {
     struct doh_request *doh_req = Curl_meta_get(doh, CURL_EZM_DOH_PROBE);
-    DEBUGASSERT(doh_req);
+    int i;
+
+    for(i = 0; i < DOH_SLOT_COUNT; ++i) {
+      if(dohp->probe_resp[i].probe_mid == doh->mid)
+        break;
+    }
+    if(i >= DOH_SLOT_COUNT) {
+      failf(data, "unknown sub request done");
+      return;
+    }
+
+    dohp->pending--;
+    infof(doh, "a DoH request is completed, %u to go", dohp->pending);
+    dohp->probe_resp[i].result = result;
+    /* We expect either the meta data still to exist or the sub request
+     * to have already failed. */
+    DEBUGASSERT(doh_req || result);
     if(doh_req) {
-      dohp->pending--;
-      infof(doh, "a DoH request is completed, %u to go", dohp->pending);
       if(!result) {
-        dohp->probe_resp[doh_req->slot].dnstype = doh_req->dnstype;
-        result = Curl_dyn_addn(&dohp->probe_resp[doh_req->slot].body,
+        dohp->probe_resp[i].dnstype = doh_req->dnstype;
+        result = Curl_dyn_addn(&dohp->probe_resp[i].body,
                                Curl_dyn_ptr(&doh_req->resp_body),
                                Curl_dyn_len(&doh_req->resp_body));
         Curl_dyn_free(&doh_req->resp_body);
       }
       Curl_meta_clear(doh, CURL_EZM_DOH_PROBE);
+    }
 
-      if(result)
-        infof(doh, "DoH request %s", curl_easy_strerror(result));
+    if(result)
+      infof(doh, "DoH request %s", curl_easy_strerror(result));
 
-      if(!dohp->pending) {
-        /* DoH completed, run the transfer picking up the results */
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
-      }
+    if(!dohp->pending) {
+      /* DoH completed, run the transfer picking up the results */
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
     }
   }
 }
@@ -268,7 +282,7 @@ static void doh_probe_dtor(void *key, size_t klen, void *e)
   } while(0)
 
 static CURLcode doh_probe_run(struct Curl_easy *data,
-                              enum doh_slot_num slot, DNStype dnstype,
+                              DNStype dnstype,
                               const char *host,
                               const char *url, CURLM *multi,
                               curl_off_t *pmid)
@@ -284,7 +298,6 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   doh_req = calloc(1, sizeof(*doh_req));
   if(!doh_req)
     return CURLE_OUT_OF_MEMORY;
-  doh_req->slot = slot;
   doh_req->dnstype = dnstype;
   Curl_dyn_init(&doh_req->resp_body, DYN_DOH_RESPONSE);
 
@@ -478,12 +491,17 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 
   /* start clean, consider allocating this struct on demand */
   dohp = calloc(1, sizeof(struct doh_probes));
-  if(!dohp || Curl_meta_set(data, CURL_EZM_DOH_MASTER, dohp, doh_master_dtor))
+  if(!dohp)
     return NULL;
 
   for(i = 0; i < DOH_SLOT_COUNT; ++i) {
     dohp->probe_resp[i].probe_mid = -1;
     Curl_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
+  }
+
+  if(Curl_meta_set(data, CURL_EZM_DOH_MASTER, dohp, doh_master_dtor)) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto error;
   }
 
   conn->bits.doh = TRUE;
@@ -494,7 +512,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   data->sub_xfer_done = doh_probe_done;
 
   /* create IPv4 DoH request */
-  result = doh_probe_run(data, DOH_SLOT_IPV4, DNS_TYPE_A,
+  result = doh_probe_run(data, DNS_TYPE_A,
                          hostname, data->set.str[STRING_DOH],
                          data->multi,
                          &dohp->probe_resp[DOH_SLOT_IPV4].probe_mid);
@@ -505,7 +523,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 #ifdef USE_IPV6
   if((conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* create IPv6 DoH request */
-    result = doh_probe_run(data, DOH_SLOT_IPV6, DNS_TYPE_AAAA,
+    result = doh_probe_run(data, DNS_TYPE_AAAA,
                            hostname, data->set.str[STRING_DOH],
                            data->multi,
                            &dohp->probe_resp[DOH_SLOT_IPV6].probe_mid);
@@ -524,7 +542,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
       if(!qname)
         goto error;
     }
-    result = doh_probe_run(data, DOH_SLOT_HTTPS_RR, DNS_TYPE_HTTPS,
+    result = doh_probe_run(data, DNS_TYPE_HTTPS,
                            qname ? qname : hostname, data->set.str[STRING_DOH],
                            data->multi,
                            &dohp->probe_resp[DOH_SLOT_HTTPS_RR].probe_mid);

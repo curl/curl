@@ -87,7 +87,6 @@ enum doh_slot_num {
  * as easy meta for CURL_EZM_DOH_PROBE */
 struct doh_request {
   DNStype dnstype;
-  enum doh_slot_num slot;
   unsigned char req_body[512];
   size_t req_body_len;
   struct curl_slist *req_hds;
@@ -98,6 +97,7 @@ struct doh_response {
   curl_off_t probe_mid;
   struct dynbuf body;
   DNStype dnstype;
+  CURLcode result;
 };
 
 /* each transfer firing off DoH requests has this
