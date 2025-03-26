@@ -344,7 +344,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     dns = Curl_fetch_addr(data, sx->hostname, conn->primary.remote_port);
 
     if(dns) {
-#ifdef CURLRES_ASYNCH
+#ifdef USE_CURL_ASYNC
       data->state.async.dns = dns;
       data->state.async.done = TRUE;
 #endif
@@ -590,7 +590,6 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   bool allow_gssapi = FALSE;
   struct Curl_dns_entry *dns = NULL;
 
-  DEBUGASSERT(auth & (CURLAUTH_BASIC | CURLAUTH_GSSAPI));
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
     if(conn->bits.httpproxy)
@@ -815,7 +814,7 @@ CONNECT_REQ_INIT:
     dns = Curl_fetch_addr(data, sx->hostname, sx->remote_port);
 
     if(dns) {
-#ifdef CURLRES_ASYNCH
+#ifdef USE_CURL_ASYNC
       data->state.async.dns = dns;
       data->state.async.done = TRUE;
 #endif
@@ -912,7 +911,7 @@ CONNECT_RESOLVE_REMOTE:
 #ifdef USE_IPV6
       if(conn->bits.ipv6_ip) {
         char ip6[16];
-        if(1 != Curl_inet_pton(AF_INET6, sx->hostname, ip6))
+        if(1 != curlx_inet_pton(AF_INET6, sx->hostname, ip6))
           return CURLPX_BAD_ADDRESS_TYPE;
         socksreq[len++] = 4;
         memcpy(&socksreq[len], ip6, sizeof(ip6));
@@ -920,7 +919,7 @@ CONNECT_RESOLVE_REMOTE:
       }
       else
 #endif
-      if(1 == Curl_inet_pton(AF_INET, sx->hostname, ip4)) {
+      if(1 == curlx_inet_pton(AF_INET, sx->hostname, ip4)) {
         socksreq[len++] = 1;
         memcpy(&socksreq[len], ip4, sizeof(ip4));
         len += sizeof(ip4);

@@ -60,7 +60,7 @@ UNITTEST_START
   struct Curl_llist_node *element_next;
   struct Curl_llist_node *element_prev;
   struct Curl_llist_node *to_remove;
-  size_t llist_size = Curl_llist_count(&llist);
+  size_t llist_size;
 
   /**
    * testing llist_init

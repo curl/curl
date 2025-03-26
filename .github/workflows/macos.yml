@@ -47,8 +47,8 @@ permissions: {}
 # newer than the 10.8 required by `CFURLCreateDataAndPropertiesFromResource`.
 
 env:
-  LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
   MAKEFLAGS: -j 4
+  LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
 
 jobs:
   macos:
@@ -84,8 +84,8 @@ jobs:
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl) --enable-ares
           - name: 'OpenSSL libssh'
             compiler: llvm@15
-            install: libssh
-            configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl)
+            install: libssh libnghttp3
+            configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl) --with-openssl-quic
           - name: '!ssl c-ares'
             compiler: clang
             configure: --enable-debug --enable-ares --without-ssl
@@ -94,10 +94,11 @@ jobs:
             configure: >-
               --enable-debug
               --disable-alt-svc --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap
-              --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp
+              --disable-ldap --disable-pop3 --without-librtmp --disable-rtsp
               --disable-shared --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets
-              --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2
-              --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib --without-zstd
+              --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp
+              --without-libssh2 --without-libssh --without-wolfssh
+              --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
 
             macos-version-min: '10.15'  # Catalina (2019)
           - name: 'SecureTransport libssh2'
@@ -123,22 +124,23 @@ jobs:
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
             tflags: --test-event
-          - name: 'OpenSSL libssh2 !ldap 10.15'
+          - name: 'quictls libssh2 !ldap 10.15'
             compiler: clang
-            configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)
+            install: quictls
+            configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix quictls) LDFLAGS="${LDFLAGS} -L$(brew --prefix quictls)/lib"
             macos-version-min: '10.15'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN'
             install: gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
-          - name: 'OpenSSL AppleIDN clang-tidy +examples'
-            install: llvm
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_APPLE_IDN=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
+          - name: 'MultiSSL AppleIDN clang-tidy +examples'
+            install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump
+            generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
             clang-tidy: true
             chkprefill: _chkprefill
-          - name: 'OpenSSL +static libssh +examples'
-            install: libssh
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
+          - name: 'quictls +static libssh +examples'
+            install: quictls libssh
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
           - name: 'SecureTransport debug'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
@@ -185,10 +187,12 @@ jobs:
           echo ${{ matrix.build.generate && 'ninja' || 'automake libtool' }} \
             pkgconf libpsl libssh2 \
             ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }} \
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }} \
             ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
+        if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
         run: |
           if test -d $(brew --prefix)/include/openssl; then
             brew unlink openssl
@@ -232,6 +236,7 @@ jobs:
             for _chkprefill in '' ${{ matrix.build.chkprefill }}; do
               options=''
               [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
+              [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
@@ -253,6 +258,7 @@ jobs:
               CFLAGS+=" --sysroot=${sysroot}"
             fi
             [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
+            [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' --with-test-nghttpx= ac_cv_path_HTTPD_NGHTTPX='
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
@@ -267,6 +273,9 @@ jobs:
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'test configs'
+        run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
       - name: 'build-cert'
         if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON') || contains(matrix.build.configure, '--with-secure-transport')
@@ -293,7 +302,7 @@ jobs:
       - name: 'build tests'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target testdeps
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -312,39 +321,39 @@ jobs:
           export TFLAGS='-j20 ${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
             TFLAGS+=' ~2037 ~2041'  # flaky
-            if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-              TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
-              TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
-              if [[ -n '${{ matrix.build.configure }}' || \
-                    '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-                TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
-              fi
-              if [[ '${{ matrix.build.configure }}' = *'--with-secure-transport'* || \
-                    '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-                TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
-              else
-                TFLAGS+=' ~2402 ~2404'  # non-Secure Transport + nghttp2
-              fi
-            fi
-            if [[ '${{ matrix.build.configure }}' = *'--with-secure-transport'* || \
-                  '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-              TFLAGS+=' ~313'  # Secure Transport does not support crl file
-              TFLAGS+=' ~1631 ~1632'  # Secure Transport is not able to shutdown ftp over https gracefully yet
-            fi
           fi
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
             make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+          fi
+
+      - name: 'install pytest prereqs'
+        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        run: |
+          source $HOME/venv/bin/activate
+          python3 -m pip install -r tests/http/requirements.txt
+
+      - name: 'run pytest'
+        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        env:
+          CURL_CI: github
+          PYTEST_ADDOPTS: '--color=yes'
+        run: |
+          source $HOME/venv/bin/activate
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build bld --verbose --target curl-pytest-ci
+          else
+            make -C bld V=1 pytest-ci
           fi
 
       - name: 'build examples'
         if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target curl-examples --verbose
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld examples V=1
           fi
@@ -373,7 +382,7 @@ jobs:
         # https://en.wikipedia.org/wiki/MacOS_version_history
         image: [macos-13, macos-14, macos-15]
         # Can skip these to reduce jobs:
-        #   15.1 has the same default macOS SDK as 15.2 and identical test result.
+        #   15.1 has the same default macOS SDK as 15.2 and identical test results.
         #   14.1, 15.4 not revealing new fallouts.
         #xcode: ['14.1', '14.2', '14.3.1', '15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0', '16.1']  # all Xcode
         #xcode: ['14.1', '14.2', '14.3.1', '15.0.1'        , '15.2', '15.3', '15.4', '16.0', '16.1']  # all SDK
@@ -382,7 +391,7 @@ jobs:
         macos-version-min: ['']
         build: [autotools, cmake]
         exclude:
-          # Combinations uncovered by runner images:
+          # Combinations not covered by runner images:
           - { image: macos-13, xcode: '15.3'   }
           - { image: macos-13, xcode: '15.4'   }
           - { image: macos-13, xcode: '16.0'   }
@@ -412,7 +421,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: |
           echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'toolchain versions'
         run: |

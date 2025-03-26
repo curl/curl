@@ -41,7 +41,7 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {
   if(nfds < 0) {
-    SET_SOCKERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
 #ifdef USE_WINSOCK
@@ -75,6 +75,7 @@ void wait_ms(int ms)
 
 char *libtest_arg2 = NULL;
 char *libtest_arg3 = NULL;
+char *libtest_arg4 = NULL;
 int test_argc;
 char **test_argv;
 
@@ -200,6 +201,9 @@ int main(int argc, char **argv)
 
   if(argc > (basearg + 2))
     libtest_arg3 = argv[basearg + 2];
+
+  if(argc > (basearg + 2))
+    libtest_arg4 = argv[basearg + 3];
 
   URL = argv[basearg]; /* provide this to the rest */
 

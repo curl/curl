@@ -32,6 +32,7 @@
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -86,8 +87,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 
   /* Obtain the input token, if any */
   header += strlen("Negotiate");
-  while(ISBLANK(*header))
-    header++;
+  Curl_str_passblanks(&header);
 
   len = strlen(header);
   neg_ctx->havenegdata = len != 0;
@@ -109,9 +109,10 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   neg_ctx->sslContext = conn->sslContext;
 #endif
   /* Check if the connection is using SSL and get the channel binding data */
-#if defined(USE_SSL) && defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
+  Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
+#ifdef USE_SSL
   if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-    Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
     result = Curl_ssl_get_channel_binding(
       data, FIRSTSOCKET, &neg_ctx->channel_binding_data);
     if(result) {
@@ -119,13 +120,14 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
       return result;
     }
   }
-#endif
+#endif /* USE_SSL */
+#endif /* HAVE_GSSAPI */
 
   /* Initialize the security context and decode our challenge */
   result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
                                            host, header, neg_ctx);
 
-#if defined(USE_SSL) && defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   Curl_dyn_free(&neg_ctx->channel_binding_data);
 #endif
 
@@ -203,12 +205,12 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-      Curl_safefree(data->state.aptr.proxyuserpwd);
+      free(data->state.aptr.proxyuserpwd);
       data->state.aptr.proxyuserpwd = userp;
 #endif
     }
     else {
-      Curl_safefree(data->state.aptr.userpwd);
+      free(data->state.aptr.userpwd);
       data->state.aptr.userpwd = userp;
     }
 

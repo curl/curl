@@ -27,7 +27,9 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-set_source_files_properties("../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+if(ENABLE_CURLDEBUG)
+  set_source_files_properties("../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+endif()
 
 add_custom_command(
   OUTPUT "lib1521.c"
@@ -78,6 +80,7 @@ foreach(_target IN LISTS LIBTESTPROGS)
     "${PROJECT_SOURCE_DIR}/src"            # for "tool_binmode.h"
     "${PROJECT_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
+  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
   if(NOT CURL_TEST_BUNDLES)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS ${_upper_target})
   endif()

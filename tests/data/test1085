@@ -34,7 +34,7 @@ HTTP-IPv6 GET with invalid --interface
 # Ensure the IPv6 stack is operational before running this test (other tests
 # use the startup of the IPv6 test server as a substitute check for this).
 <precheck>
-./server/resolve --ipv6 ::1
+%RESOLVE --ipv6 ::1
 </precheck>
 </client>
 

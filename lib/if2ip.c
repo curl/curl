@@ -67,7 +67,8 @@
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 {
   if(sa->sa_family == AF_INET6) {
-    const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *)(void *) sa;
+    const struct sockaddr_in6 * sa6 =
+      (const struct sockaddr_in6 *)(const void *) sa;
     const unsigned char *b = sa6->sin6_addr.s6_addr;
     unsigned short w = (unsigned short) ((b[0] << 8) | b[1]);
 
@@ -161,7 +162,7 @@ if2ip_result_t Curl_if2ip(int af,
               addr =
                 &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
             res = IF2IP_FOUND;
-            ip = Curl_inet_ntop(af, addr, ipstr, sizeof(ipstr));
+            ip = curlx_inet_ntop(af, addr, ipstr, sizeof(ipstr));
             msnprintf(buf, buf_size, "%s%s", ip, scope);
             break;
           }
@@ -234,7 +235,7 @@ if2ip_result_t Curl_if2ip(int af,
 
   s = (struct sockaddr_in *)(void *)&req.ifr_addr;
   memcpy(&in, &s->sin_addr, sizeof(in));
-  r = Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
+  r = curlx_inet_ntop(s->sin_family, &in, buf, buf_size);
 
   sclose(dummy);
   if(!r)

@@ -64,7 +64,8 @@ CURLcode test(char *URL)
 #if (defined(_WIN32) || defined(__CYGWIN__))
     printf("Windows TCP does not deliver response data but reports "
            "CONNABORTED\n");
-    return (CURLcode)1; /* skip since it fails on Windows without workaround */
+    return TEST_ERR_FAILURE; /* skip since it fails on Windows without
+                                workaround */
 #else
     return CURLE_OK; /* sure, run this! */
 #endif

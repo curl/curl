@@ -63,6 +63,10 @@
 %if bearssl
 313
 %endif
+# Secure Transport does not support CRL file
+%if sectransp
+313
+%endif
 %if WinIDN
 165
 %endif

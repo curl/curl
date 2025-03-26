@@ -180,12 +180,6 @@ static int progress_callback(void *clientp,
   return 0;
 }
 
-#define ERR()                                                             \
-  do {                                                                    \
-    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
-    exit(2);                                                              \
-  } while(0)
-
 static void usage(const char *msg)
 {
   if(msg)
@@ -196,6 +190,13 @@ static void usage(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
+
+#define ERR()                                                             \
+  do {                                                                    \
+    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
+    return 2;                                                             \
+  } while(0)
+
 #endif /* !_MSC_VER */
 
 int main(int argc, char *argv[])
@@ -245,19 +246,19 @@ int main(int argc, char *argv[])
   cu = curl_url();
   if(!cu) {
     fprintf(stderr, "out of memory\n");
-    exit(1);
+    return 1;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     fprintf(stderr, "not a URL: '%s'\n", url);
-    exit(1);
+    return 1;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     fprintf(stderr, "could not get host of '%s'\n", url);
-    exit(1);
+    return 1;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     fprintf(stderr, "could not get port of '%s'\n", url);
-    exit(1);
+    return 1;
   }
   memset(&resolve, 0, sizeof(resolve));
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
@@ -267,7 +268,7 @@ int main(int argc, char *argv[])
   curl = curl_easy_init();
   if(!curl) {
     fprintf(stderr, "out of memory\n");
-    exit(1);
+    return 1;
   }
   /* We want to use our own read function. */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);

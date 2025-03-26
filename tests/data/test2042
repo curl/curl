@@ -21,13 +21,13 @@ SSLpinning
 local-http
 </features>
 <server>
-https Server-localhost-sv.pem
+https test-localhost.pem
 </server>
 <name>
 HTTPS wrong base64-sha256 pinnedpubkey but right CN
 </name>
 <command>
--4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey sha256//bSIggTf+ikMG0CtmDlpMVBd7yi7H1md4URogRPqerso= https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/test-ca.crt --pinnedpubkey sha256//bSIggTf+ikMG0CtmDlpMVBd7yi7H1md4URogRPqerso= https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

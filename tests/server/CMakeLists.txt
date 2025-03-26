@@ -22,22 +22,41 @@
 #
 ###########################################################################
 
-# Get 'noinst_PROGRAMS', '<target>_SOURCES' variables
+# Get 'SERVERPROGS', '<target>_SOURCES' variables, 'MEMDEBUG', 'CURLX_SRCS', 'USEFUL', 'INET_PTON', 'UTIL', 'FIRSTFILES'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
+  set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+endif()
 
-foreach(_target IN LISTS noinst_PROGRAMS)
+if(CURL_TEST_BUNDLES)
+  add_custom_command(
+    OUTPUT "server_bundle.c"
+    COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${SERVERPROGS} > "server_bundle.c"
+    DEPENDS
+      "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${FIRSTFILES}
+      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    VERBATIM)
+
+  set(SERVERPROGS "servers")
+  set(servers_SOURCES ${MEMDEBUG} ${CURLX_SRCS} ${USEFUL} ${INET_PTON} ${UTIL} "server_bundle.c")
+endif()
+
+foreach(_target IN LISTS SERVERPROGS)
   set(_target_name "${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
   add_dependencies(testdeps ${_target_name})
   target_include_directories(${_target_name} PRIVATE
-    "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
-    "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
-    "${PROJECT_SOURCE_DIR}/src"  # for "tool_binmod.h", "tool_xattr.h"
+    "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
+    "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
+    "${PROJECT_SOURCE_DIR}/src"           # for "tool_binmode.h", "tool_xattr.h"
+    "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
   )
   target_link_libraries(${_target_name} ${CURL_LIBS})
+  if(ENABLE_SERVER_DEBUG)
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+  endif()
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convenience and to ease portability of these servers,
   # some source code files from the libcurl subdirectory are also used

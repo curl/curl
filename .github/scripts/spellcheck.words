@@ -185,6 +185,7 @@ devcpp
 DevOps
 devtools
 DHCP
+DHE
 dir
 distro
 distro's
@@ -251,6 +252,7 @@ Feltzing
 ffi
 filesize
 filesystem
+FindCURL
 FLOSS
 fnmatch
 footguns
@@ -867,6 +869,7 @@ typedef
 typedefed
 Ubuntu
 ucLinux
+UCRT
 UDP
 UI
 UID
@@ -950,7 +953,6 @@ winbuild
 WinIDN
 WinLDAP
 winsock
-winssl
 Wireshark
 wolfSSH
 wolfSSL

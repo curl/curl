@@ -200,7 +200,7 @@ struct OperationConfig {
   long expect100timeout_ms;
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */
-  curl_TimeCond timecond;
+  unsigned long timecond;
   HttpReq httpreq;
   int proxyver;             /* set to CURLPROXY_HTTP* define */
   int ftp_ssl_ccc_mode;
@@ -216,6 +216,7 @@ struct OperationConfig {
     CLOBBER_NEVER, /* If the file exists, always fail */
     CLOBBER_ALWAYS /* If the file exists, always overwrite it */
   } file_clobber_mode;
+  unsigned char upload_flags; /* Bitmask for --upload-flags */
   unsigned short porttouse;
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */
@@ -324,11 +325,13 @@ struct GlobalConfig {
   char *libcurl;                  /* Output libcurl code to this filename */
   char *ssl_sessions;             /* file to load/save SSL session tickets */
   char *help_category;            /* The help category, if set */
+  char *knownhosts;               /* known host path, if set. curl_free()
+                                     this */
   struct tool_var *variables;
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
-  long ms_per_transfer;           /* start next transfer after (at least) this
+  timediff_t ms_per_transfer;     /* start next transfer after (at least) this
                                      many milliseconds */
   trace tracetype;
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */

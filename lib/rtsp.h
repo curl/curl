@@ -53,6 +53,7 @@ struct rtsp_conn {
   size_t rtp_len;
   rtp_parse_st state;
   BIT(in_header);
+  BIT(initialised);
 };
 
 /****************************************************************************

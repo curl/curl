@@ -36,7 +36,7 @@ Consider the following table while looking at pull request failures:
  | FreeBSD FreeBSD: ...                | stable | all errors and failures    |
  | LGTM analysis: Python               | stable | new findings               |
  | LGTM analysis:  C/C++               | stable | new findings               |
- | buildbot/curl_winssl_ ...           | stable | all errors and failures    |
+ | buildbot/curl_Schannel_ ...         | stable | all errors and failures    |
  | AppVeyor                            | flaky  | all errors and failures    |
  | curl.curl (linux ...)               | stable | all errors and failures    |
  | curl.curl (windows ...)             | flaky  | repetitive errors/failures |

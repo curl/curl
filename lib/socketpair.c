@@ -223,15 +223,15 @@ int Curl_socketpair(int domain, int type, int protocol,
         if(Curl_timediff(Curl_now(), start) > (60 * 1000))
           goto error;
         if(
-#ifdef WSAEWOULDBLOCK
+#ifdef USE_WINSOCK
           /* This is how Windows does it */
-          (WSAEWOULDBLOCK == sockerr)
+          (SOCKEWOULDBLOCK == sockerr)
 #else
           /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
              returned due to its inability to send off data without
              blocking. We therefore treat both error codes the same here */
-          (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
-          (EINTR == sockerr) || (EINPROGRESS == sockerr)
+          (SOCKEWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
+          (SOCKEINTR == sockerr) || (SOCKEINPROGRESS == sockerr)
 #endif
           ) {
           continue;

@@ -42,7 +42,7 @@ if(CURL_HIDDEN_SYMBOLS)
     set(CURL_HIDES_PRIVATE_SYMBOLS TRUE)
     set(CURL_EXTERN_SYMBOL "__attribute__((__visibility__(\"default\")))")
     set(CURL_CFLAG_SYMBOLS_HIDE "-fvisibility=hidden")
-  elseif(CMAKE_COMPILER_IS_GNUCC)
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.4)
       # Note: This is considered buggy prior to 4.0 but the autotools do not care, so let us ignore that fact
       set(CURL_HIDES_PRIVATE_SYMBOLS TRUE)

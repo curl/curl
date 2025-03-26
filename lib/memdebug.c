@@ -117,20 +117,19 @@ static bool countcheck(const char *func, int line, const char *source)
       fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
               source, line, func);
       fflush(curl_dbg_logfile); /* because it might crash now */
+      /* !checksrc! disable ERRNOVAR 1 */
       CURL_SETERRNO(ENOMEM);
       return TRUE; /* RETURN ERROR! */
     }
     else
       memsize--; /* countdown */
-
-
   }
 
   return FALSE; /* allow this */
 }
 
-ALLOC_FUNC void *curl_dbg_malloc(size_t wantedsize,
-                                 int line, const char *source)
+ALLOC_FUNC
+void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
 {
   struct memdebug *mem;
   size_t size;
@@ -156,8 +155,9 @@ ALLOC_FUNC void *curl_dbg_malloc(size_t wantedsize,
   return mem ? mem->mem : NULL;
 }
 
-ALLOC_FUNC void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
-                                 int line, const char *source)
+ALLOC_FUNC
+void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
+                      int line, const char *source)
 {
   struct memdebug *mem;
   size_t size, user_size;
@@ -184,8 +184,8 @@ ALLOC_FUNC void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   return mem ? mem->mem : NULL;
 }
 
-ALLOC_FUNC char *curl_dbg_strdup(const char *str,
-                                 int line, const char *source)
+ALLOC_FUNC
+char *curl_dbg_strdup(const char *str, int line, const char *source)
 {
   char *mem;
   size_t len;
@@ -209,8 +209,8 @@ ALLOC_FUNC char *curl_dbg_strdup(const char *str,
 }
 
 #if defined(_WIN32) && defined(UNICODE)
-ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
-                                    int line, const char *source)
+ALLOC_FUNC
+wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source)
 {
   wchar_t *mem;
   size_t wsiz, bsiz;
@@ -229,7 +229,7 @@ ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 
   if(source)
     curl_dbg_log("MEM %s:%d wcsdup(%p) (%zu) = %p\n",
-                source, line, (void *)str, bsiz, (void *)mem);
+                source, line, (const void *)str, bsiz, (void *)mem);
 
   return mem;
 }
@@ -238,7 +238,7 @@ ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 /* We provide a realloc() that accepts a NULL as pointer, which then
    performs a malloc(). In order to work with ares. */
 void *curl_dbg_realloc(void *ptr, size_t wantedsize,
-                      int line, const char *source)
+                       int line, const char *source)
 {
   struct memdebug *mem = NULL;
 
@@ -394,8 +394,9 @@ int curl_dbg_sclose(curl_socket_t sockfd, int line, const char *source)
   return res;
 }
 
-ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
-                                int line, const char *source)
+ALLOC_FUNC
+FILE *curl_dbg_fopen(const char *file, const char *mode,
+                     int line, const char *source)
 {
   FILE *res = fopen(file, mode);
 
@@ -406,8 +407,9 @@ ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
   return res;
 }
 
-ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
-                                 int line, const char *source)
+ALLOC_FUNC
+FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                      int line, const char *source)
 {
   FILE *res = fdopen(filedes, mode);
   if(source)
@@ -431,33 +433,25 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
   return res;
 }
 
-#define LOGLINE_BUFSIZE  1024
-
 /* this does the writing to the memory tracking log file */
 void curl_dbg_log(const char *format, ...)
 {
-  char *buf;
+  char buf[1024];
   int nchars;
   va_list ap;
 
   if(!curl_dbg_logfile)
     return;
 
-  buf = (Curl_cmalloc)(LOGLINE_BUFSIZE);
-  if(!buf)
-    return;
-
   va_start(ap, format);
-  nchars = mvsnprintf(buf, LOGLINE_BUFSIZE, format, ap);
+  nchars = mvsnprintf(buf, sizeof(buf), format, ap);
   va_end(ap);
 
-  if(nchars > LOGLINE_BUFSIZE - 1)
-    nchars = LOGLINE_BUFSIZE - 1;
+  if(nchars > (int)sizeof(buf) - 1)
+    nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0)
     fwrite(buf, 1, (size_t)nchars, curl_dbg_logfile);
-
-  (Curl_cfree)(buf);
 }
 
 #endif /* CURLDEBUG */

@@ -31,6 +31,12 @@ void Curl_str_init(struct Curl_str *out)
   out->len = 0;
 }
 
+void Curl_str_assign(struct Curl_str *out, const char *str, size_t len)
+{
+  out->str = str;
+  out->len = len;
+}
+
 /* Get a word until the first DELIM or end of string. At least one byte long.
    return non-zero on error */
 int Curl_str_until(const char **linep, struct Curl_str *out,
@@ -61,6 +67,29 @@ int Curl_str_word(const char **linep, struct Curl_str *out,
                   const size_t max)
 {
   return Curl_str_until(linep, out, max, ' ');
+}
+
+/* Get a word until a newline byte or end of string. At least one byte long.
+   return non-zero on error */
+int Curl_str_untilnl(const char **linep, struct Curl_str *out,
+                     const size_t max)
+{
+  const char *s = *linep;
+  size_t len = 0;
+  DEBUGASSERT(linep && *linep && out && max);
+
+  Curl_str_init(out);
+  while(*s && !ISNEWLINE(*s)) {
+    s++;
+    if(++len > max)
+      return STRE_BIG;
+  }
+  if(!len)
+    return STRE_SHORT;
+  out->str = *linep;
+  out->len = len;
+  *linep = s; /* point to the first byte after the word */
+  return STRE_OK;
 }
 
 
@@ -183,6 +212,16 @@ int Curl_str_octal(const char **linep, curl_off_t *nump, curl_off_t max)
   return str_num_base(linep, nump, max, 8);
 }
 
+/*
+ * Parse a positive number up to 63-bit number written in ASCII. Skip leading
+ * blanks. No support for prefixes.
+ */
+int Curl_str_numblanks(const char **str, curl_off_t *num)
+{
+  Curl_str_passblanks(str);
+  return Curl_str_number(str, num, CURL_OFF_T_MAX);
+}
+
 /* CR or LF
    return non-zero on error */
 int Curl_str_newline(const char **linep)
@@ -201,6 +240,16 @@ int Curl_str_casecompare(struct Curl_str *str, const char *check)
 {
   size_t clen = check ? strlen(check) : 0;
   return ((str->len == clen) && strncasecompare(str->str, check, clen));
+}
+
+/* case sensitive string compare. Returns non-zero on match. */
+int Curl_str_cmp(struct Curl_str *str, const char *check)
+{
+  if(check) {
+    size_t clen = strlen(check);
+    return ((str->len == clen) && !strncmp(str->str, check, clen));
+  }
+  return !!(str->len);
 }
 
 /* Trim off 'num' number of bytes from the beginning (left side) of the
@@ -243,4 +292,11 @@ void Curl_str_trimblanks(struct Curl_str *out)
   /* trim trailing spaces and tabs */
   while(out->len && ISBLANK(out->str[out->len - 1]))
     out->len--;
+}
+
+/* increase the pointer until it has moved over all blanks */
+void Curl_str_passblanks(const char **linep)
+{
+  while(ISBLANK(**linep))
+    (*linep)++; /* move over it */
 }

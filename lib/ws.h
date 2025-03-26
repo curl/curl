@@ -43,6 +43,7 @@ struct ws_decoder {
   unsigned char head[10];
   int head_len, head_total;
   enum ws_dec_state state;
+  int cont_flags;
 };
 
 /* a client-side WS frame encoder, generating frame headers and

@@ -72,7 +72,6 @@
 #include "headers.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
-#include "strtoofft.h"
 #include "multiif.h"
 #include "strcase.h"
 #include "content_encoding.h"
@@ -273,46 +272,28 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 #endif
 
 /*
- * Strip off leading and trailing whitespace from the value in the
- * given HTTP header line and return a strdupped copy. Returns NULL in
- * case of allocation failure. Returns an empty string if the header value
- * consists entirely of whitespace.
+ * Strip off leading and trailing whitespace from the value in the given HTTP
+ * header line and return a strdup()ed copy. Returns NULL in case of
+ * allocation failure or bad input. Returns an empty string if the header
+ * value consists entirely of whitespace.
+ *
+ * If the header is provided as "name;", ending with a semicolon, it must
+ * return a blank string.
  */
 char *Curl_copy_header_value(const char *header)
 {
-  const char *start;
-  const char *end;
-  size_t len;
+  struct Curl_str out;
 
-  /* Find the end of the header name */
-  while(*header && (*header != ':'))
-    ++header;
+  /* find the end of the header name */
+  if(!Curl_str_cspn(&header, &out, ";:") &&
+     (!Curl_str_single(&header, ':') || !Curl_str_single(&header, ';'))) {
+    Curl_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
+    Curl_str_trimblanks(&out);
 
-  if(*header)
-    /* Skip over colon */
-    ++header;
-
-  /* Find the first non-space letter */
-  start = header;
-  while(ISSPACE(*start))
-    start++;
-
-  end = strchr(start, '\r');
-  if(!end)
-    end = strchr(start, '\n');
-  if(!end)
-    end = strchr(start, '\0');
-  if(!end)
-    return NULL;
-
-  /* skip all trailing space letters */
-  while((end > start) && ISSPACE(*end))
-    end--;
-
-  /* get length of the type */
-  len = end - start + 1;
-
-  return Curl_memdup0(start, len);
+    return Curl_memdup0(Curl_str(&out), Curl_strlen(&out));
+  }
+  /* bad input */
+  return NULL;
 }
 
 #ifndef CURL_DISABLE_HTTP_AUTH
@@ -601,7 +582,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     /* In case this is GSS auth, the newurl field is already allocated so
        we must make sure to free it before allocating a new one. As figured
        out in bug #2284386 */
-    Curl_safefree(data->req.newurl);
+    free(data->req.newurl);
     data->req.newurl = strdup(data->state.url); /* clone URL */
     if(!data->req.newurl)
       return CURLE_OUT_OF_MEMORY;
@@ -652,9 +633,10 @@ output_auth_headers(struct Curl_easy *data,
   (void)path;
 #endif
 #ifndef CURL_DISABLE_AWS
-  if(authstatus->picked == CURLAUTH_AWS_SIGV4) {
+  if((authstatus->picked == CURLAUTH_AWS_SIGV4) && !proxy) {
+    /* this method is never for proxy */
     auth = "AWS_SIGV4";
-    result = Curl_output_aws_sigv4(data, proxy);
+    result = Curl_output_aws_sigv4(data);
     if(result)
       return result;
   }
@@ -1014,6 +996,8 @@ static CURLcode auth_bearer(struct Curl_easy *data,
  * Curl_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
  * headers. They are dealt with both in the transfer.c main loop and in the
  * proxy CONNECT loop.
+ *
+ * The 'auth' line ends with a null byte without CR or LF present.
  */
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth) /* the first non-space */
@@ -1089,8 +1073,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       auth++;
     else
       break;
-    while(ISBLANK(*auth))
-      auth++;
+    Curl_str_passblanks(&auth);
   }
 #else
   (void) proxy;
@@ -1169,6 +1152,21 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode)
 #endif
 
   return data->state.authproblem;
+}
+
+static void http_switch_to_get(struct Curl_easy *data, int code)
+{
+  const char *req = data->set.str[STRING_CUSTOMREQUEST];
+  if((req || data->state.httpreq != HTTPREQ_GET) &&
+     (data->set.http_follow_mode == CURLFOLLOW_OBEYCODE)) {
+    infof(data, "Switch to GET because of %d response", code);
+    data->state.http_ignorecustom = TRUE;
+  }
+  else if(req && (data->set.http_follow_mode != CURLFOLLOW_FIRSTONLY))
+    infof(data, "Stick to %s instead of GET", req);
+
+  data->state.httpreq = HTTPREQ_GET;
+  Curl_creader_set_rewind(data, FALSE);
 }
 
 CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
@@ -1337,6 +1335,12 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
   data->state.url_alloc = TRUE;
   Curl_req_soft_reset(&data->req, data);
   infof(data, "Issue another request to this URL: '%s'", data->state.url);
+  if((data->set.http_follow_mode == CURLFOLLOW_FIRSTONLY) &&
+     data->set.str[STRING_CUSTOMREQUEST] &&
+     !data->state.http_ignorecustom) {
+    data->state.http_ignorecustom = TRUE;
+    infof(data, "Drop custom request method for next request");
+  }
 
   /*
    * We get here when the HTTP code is 300-399 (and 401). We need to perform
@@ -1378,11 +1382,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
-       && !(data->set.keep_post & CURL_REDIR_POST_301)) {
-      infof(data, "Switch from POST to GET");
-      data->state.httpreq = HTTPREQ_GET;
-      Curl_creader_set_rewind(data, FALSE);
-    }
+       && !(data->set.keep_post & CURL_REDIR_POST_301))
+      http_switch_to_get(data, 301);
     break;
   case 302: /* Found */
     /* (quote from RFC7231, section 6.4.3)
@@ -1404,11 +1405,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
-       && !(data->set.keep_post & CURL_REDIR_POST_302)) {
-      infof(data, "Switch from POST to GET");
-      data->state.httpreq = HTTPREQ_GET;
-      Curl_creader_set_rewind(data, FALSE);
-    }
+       && !(data->set.keep_post & CURL_REDIR_POST_302))
+      http_switch_to_get(data, 302);
     break;
 
   case 303: /* See Other */
@@ -1421,11 +1419,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
        ((data->state.httpreq != HTTPREQ_POST &&
          data->state.httpreq != HTTPREQ_POST_FORM &&
          data->state.httpreq != HTTPREQ_POST_MIME) ||
-        !(data->set.keep_post & CURL_REDIR_POST_303))) {
-      data->state.httpreq = HTTPREQ_GET;
-      infof(data, "Switch to %s",
-            data->req.no_body ? "HEAD" : "GET");
-    }
+        !(data->set.keep_post & CURL_REDIR_POST_303)))
+      http_switch_to_get(data, 303);
     break;
   case 304: /* Not Modified */
     /* 304 means we did a conditional request and it was "Not modified".
@@ -1466,9 +1461,8 @@ Curl_compareheader(const char *headerline, /* line to check */
    * The field value MAY be preceded by any amount of LWS, though a single SP
    * is preferred." */
 
-  size_t len;
-  const char *start;
-  const char *end;
+  const char *p;
+  struct Curl_str val;
   DEBUGASSERT(hlen);
   DEBUGASSERT(clen);
   DEBUGASSERT(header);
@@ -1478,31 +1472,21 @@ Curl_compareheader(const char *headerline, /* line to check */
     return FALSE; /* does not start with header */
 
   /* pass the header */
-  start = &headerline[hlen];
+  p = &headerline[hlen];
 
-  /* pass all whitespace */
-  while(ISSPACE(*start))
-    start++;
-
-  /* find the end of the header line */
-  end = strchr(start, '\r'); /* lines end with CRLF */
-  if(!end) {
-    /* in case there is a non-standard compliant line here */
-    end = strchr(start, '\n');
-
-    if(!end)
-      /* hm, there is no line ending here, use the zero byte! */
-      end = strchr(start, '\0');
-  }
-
-  len = end-start; /* length of the content part of the input line */
+  if(Curl_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE))
+    return FALSE;
+  Curl_str_trimblanks(&val);
 
   /* find the content string in the rest of the line */
-  for(; len >= clen; len--, start++) {
-    if(strncasecompare(start, content, clen))
-      return TRUE; /* match! */
+  if(Curl_strlen(&val) >= clen) {
+    size_t len;
+    p = Curl_str(&val);
+    for(len = Curl_strlen(&val); len >= Curl_strlen(&val); len--, p++) {
+      if(strncasecompare(p, content, clen))
+        return TRUE; /* match! */
+    }
   }
-
   return FALSE; /* no match */
 }
 
@@ -1621,7 +1605,6 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  bool is_connect, int httpversion,
                                  struct dynbuf *req)
 {
-  char *ptr;
   struct curl_slist *h[2];
   struct curl_slist *headers;
   int numlists = 1; /* by default */
@@ -1661,98 +1644,81 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
 
   /* loop through one or two lists */
   for(i = 0; i < numlists; i++) {
-    headers = h[i];
+    for(headers = h[i]; headers; headers = headers->next) {
+      CURLcode result = CURLE_OK;
+      bool blankheader = FALSE;
+      struct Curl_str name;
+      const char *p = headers->data;
+      const char *origp = p;
 
-    while(headers) {
-      char *semicolonp = NULL;
-      ptr = strchr(headers->data, ':');
-      if(!ptr) {
-        char *optr;
-        /* no colon, semicolon? */
-        ptr = strchr(headers->data, ';');
-        if(ptr) {
-          optr = ptr;
-          ptr++; /* pass the semicolon */
-          while(ISSPACE(*ptr))
-            ptr++;
-
-          if(*ptr) {
-            /* this may be used for something else in the future */
-            optr = NULL;
-          }
-          else {
-            if(*(--ptr) == ';') {
-              /* copy the source */
-              semicolonp = strdup(headers->data);
-              if(!semicolonp) {
-                Curl_dyn_free(req);
-                return CURLE_OUT_OF_MEMORY;
-              }
-              /* put a colon where the semicolon is */
-              semicolonp[ptr - headers->data] = ':';
-              /* point at the colon */
-              optr = &semicolonp [ptr - headers->data];
-            }
-          }
-          ptr = optr;
+      /* explicitly asked to send header without content is done by a header
+         that ends with a semicolon, but there must be no colon present in the
+         name */
+      if(!Curl_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ';') &&
+         !Curl_str_single(&p, ';') &&
+         !Curl_str_single(&p, '\0') &&
+         !memchr(Curl_str(&name), ':', Curl_strlen(&name)))
+        blankheader = TRUE;
+      else {
+        p = origp;
+        if(!Curl_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ':') &&
+           !Curl_str_single(&p, ':')) {
+          struct Curl_str val;
+          Curl_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE);
+          Curl_str_trimblanks(&val);
+          if(!Curl_strlen(&val))
+            /* no content, don't send this */
+            continue;
         }
+        else
+          /* no colon */
+          continue;
       }
-      if(ptr && (ptr != headers->data)) {
-        /* we require a colon for this to be a true header */
 
-        ptr++; /* pass the colon */
-        while(ISSPACE(*ptr))
-          ptr++;
+      /* only send this if the contents was non-blank or done special */
 
-        if(*ptr || semicolonp) {
-          /* only send this if the contents was non-blank or done special */
-          CURLcode result = CURLE_OK;
-          char *compare = semicolonp ? semicolonp : headers->data;
+      if(data->state.aptr.host &&
+         /* a Host: header was sent already, do not pass on any custom
+            Host: header as that will produce *two* in the same
+            request! */
+         Curl_str_casecompare(&name, "Host"))
+        ;
+      else if(data->state.httpreq == HTTPREQ_POST_FORM &&
+              /* this header (extended by formdata.c) is sent later */
+              Curl_str_casecompare(&name, "Content-Type"))
+        ;
+      else if(data->state.httpreq == HTTPREQ_POST_MIME &&
+              /* this header is sent later */
+              Curl_str_casecompare(&name, "Content-Type"))
+        ;
+      else if(data->req.authneg &&
+              /* while doing auth neg, do not allow the custom length since
+                 we will force length zero then */
+              Curl_str_casecompare(&name, "Content-Length"))
+        ;
+      else if(data->state.aptr.te &&
+              /* when asking for Transfer-Encoding, do not pass on a custom
+                 Connection: */
+              Curl_str_casecompare(&name, "Connection"))
+        ;
+      else if((httpversion >= 20) &&
+              Curl_str_casecompare(&name, "Transfer-Encoding"))
+        /* HTTP/2 does not support chunked requests */
+        ;
+      else if((Curl_str_casecompare(&name, "Authorization") ||
+               Curl_str_casecompare(&name, "Cookie")) &&
+              /* be careful of sending this potentially sensitive header to
+                 other hosts */
+              !Curl_auth_allowed_to_host(data))
+        ;
+      else if(blankheader)
+        result = Curl_dyn_addf(req, "%.*s:\r\n", (int)Curl_strlen(&name),
+                               Curl_str(&name));
+      else
+        result = Curl_dyn_addf(req, "%s\r\n", origp);
 
-          if(data->state.aptr.host &&
-             /* a Host: header was sent already, do not pass on any custom
-                Host: header as that will produce *two* in the same
-                request! */
-             checkprefix("Host:", compare))
-            ;
-          else if(data->state.httpreq == HTTPREQ_POST_FORM &&
-                  /* this header (extended by formdata.c) is sent later */
-                  checkprefix("Content-Type:", compare))
-            ;
-          else if(data->state.httpreq == HTTPREQ_POST_MIME &&
-                  /* this header is sent later */
-                  checkprefix("Content-Type:", compare))
-            ;
-          else if(data->req.authneg &&
-                  /* while doing auth neg, do not allow the custom length since
-                     we will force length zero then */
-                  checkprefix("Content-Length:", compare))
-            ;
-          else if(data->state.aptr.te &&
-                  /* when asking for Transfer-Encoding, do not pass on a custom
-                     Connection: */
-                  checkprefix("Connection:", compare))
-            ;
-          else if((httpversion >= 20) &&
-                  checkprefix("Transfer-Encoding:", compare))
-            /* HTTP/2 does not support chunked requests */
-            ;
-          else if((checkprefix("Authorization:", compare) ||
-                   checkprefix("Cookie:", compare)) &&
-                  /* be careful of sending this potentially sensitive header to
-                     other hosts */
-                  !Curl_auth_allowed_to_host(data))
-            ;
-          else {
-            result = Curl_dyn_addf(req, "%s\r\n", compare);
-          }
-          if(semicolonp)
-            free(semicolonp);
-          if(result)
-            return result;
-        }
-      }
-      headers = headers->next;
+      if(result)
+        return result;
     }
   }
 
@@ -1848,8 +1814,10 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
     httpreq = HTTPREQ_PUT;
 
   /* Now set the 'request' pointer to the proper request string */
-  if(data->set.str[STRING_CUSTOMREQUEST])
+  if(data->set.str[STRING_CUSTOMREQUEST] &&
+     !data->state.http_ignorecustom) {
     request = data->set.str[STRING_CUSTOMREQUEST];
+  }
   else {
     if(data->req.no_body)
       request = "HEAD";
@@ -1942,7 +1910,7 @@ static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn)
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      Curl_safefree(aptr->cookiehost);
+      free(aptr->cookiehost);
       aptr->cookiehost = cookiehost;
     }
 #endif
@@ -2767,7 +2735,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
      data->set.str[STRING_ENCODING]) {
-    Curl_safefree(data->state.aptr.accept_encoding);
+    free(data->state.aptr.accept_encoding);
     data->state.aptr.accept_encoding =
       aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
     if(!data->state.aptr.accept_encoding)
@@ -3058,13 +3026,13 @@ static CURLcode http_header(struct Curl_easy *data,
       HD_VAL(hd, hdlen, "Content-Length:") : NULL;
     if(v) {
       curl_off_t contentlength;
-      CURLofft offt = curlx_strtoofft(v, NULL, 10, &contentlength);
+      int offt = Curl_str_numblanks(&v, &contentlength);
 
-      if(offt == CURL_OFFT_OK) {
+      if(offt == STRE_OK) {
         k->size = contentlength;
         k->maxdownload = k->size;
       }
-      else if(offt == CURL_OFFT_FLOW) {
+      else if(offt == STRE_OVERFLOW) {
         /* out of range */
         if(data->set.max_filesize) {
           failf(data, "Maximum file size exceeded");
@@ -3102,7 +3070,7 @@ static CURLcode http_header(struct Curl_easy *data,
         /* ignore empty data */
         free(contenttype);
       else {
-        Curl_safefree(data->info.contenttype);
+        free(data->info.contenttype);
         data->info.contenttype = contenttype;
       }
       return CURLE_OK;
@@ -3183,7 +3151,7 @@ static CURLcode http_header(struct Curl_easy *data,
       else {
         data->req.location = location;
 
-        if(data->set.http_follow_location) {
+        if(data->set.http_follow_mode) {
           DEBUGASSERT(!data->req.newurl);
           data->req.newurl = strdup(data->req.location); /* clone */
           if(!data->req.newurl)
@@ -3260,18 +3228,22 @@ static CURLcode http_header(struct Curl_easy *data,
     if(v) {
       /* Retry-After = HTTP-date / delay-seconds */
       curl_off_t retry_after = 0; /* zero for unknown or "now" */
-      /* Try it as a decimal number, if it works it is not a date */
-      (void)curlx_strtoofft(v, NULL, 10, &retry_after);
-      if(!retry_after) {
-        time_t date = Curl_getdate_capped(v);
+      time_t date;
+      Curl_str_passblanks(&v);
+
+      /* try it as a date first, because a date can otherwise start with and
+         get treated as a number */
+      date = Curl_getdate_capped(v);
+
+      if((time_t)-1 != date) {
         time_t current = time(NULL);
-        if((time_t)-1 != date && date > current) {
+        if(date >= current)
           /* convert date to number of seconds into the future */
           retry_after = date - current;
-        }
       }
-      if(retry_after < 0)
-        retry_after = 0;
+      else
+        /* Try it as a decimal number */
+        Curl_str_number(&v, &retry_after, CURL_OFF_T_MAX);
       /* limit to 6 hours max. this is not documented so that it can be changed
          in the future if necessary. */
       if(retry_after > 21600)
@@ -3569,7 +3541,7 @@ static CURLcode http_write_header(struct Curl_easy *data,
 
   /* now, only output this if the header AND body are requested:
    */
-  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
 
   writetype = CLIENTWRITE_HEADER |
     ((data->req.httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
@@ -3925,8 +3897,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
        */
       const char *p = hd;
 
-      while(ISBLANK(*p))
-        p++;
+      Curl_str_passblanks(&p);
       if(!strncmp(p, "HTTP/", 5)) {
         p += 5;
         switch(*p) {
@@ -3939,9 +3910,9 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
               if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
                   (p[2] - '0');
-                p += 3;
-                if(ISSPACE(*p))
-                  fine_statusline = TRUE;
+                /* RFC 9112 requires a single space following the status code,
+                   but the browsers don't so let's not insist */
+                fine_statusline = TRUE;
               }
             }
           }
@@ -3960,7 +3931,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
             k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
               (p[2] - '0');
             p += 3;
-            if(!ISSPACE(*p))
+            if(!ISBLANK(*p))
               break;
             fine_statusline = TRUE;
           }
@@ -3985,30 +3956,22 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     }
     else if(data->conn->handler->protocol & CURLPROTO_RTSP) {
       const char *p = hd;
-      while(ISBLANK(*p))
-        p++;
-      if(!strncmp(p, "RTSP/", 5)) {
-        p += 5;
-        if(ISDIGIT(*p)) {
-          p++;
-          if((p[0] == '.') && ISDIGIT(p[1])) {
-            if(ISBLANK(p[2])) {
-              p += 3;
-              if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                  (p[2] - '0');
-                p += 3;
-                if(ISSPACE(*p)) {
-                  fine_statusline = TRUE;
-                  k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
-                }
-              }
-            }
-          }
+      struct Curl_str ver;
+      curl_off_t status;
+      /* we set the max string a little excessive to forgive some leading
+         spaces */
+      if(!Curl_str_until(&p, &ver, 32, ' ') &&
+         !Curl_str_single(&p, ' ') &&
+         !Curl_str_number(&p, &status, 999)) {
+        Curl_str_trimblanks(&ver);
+        if(Curl_str_cmp(&ver, "RTSP/1.0")) {
+          k->httpcode = (int)status;
+          fine_statusline = TRUE;
+          k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
         }
-        if(!fine_statusline)
-          return CURLE_WEIRD_SERVER_REPLY;
       }
+      if(!fine_statusline)
+        return CURLE_WEIRD_SERVER_REPLY;
     }
 
     if(fine_statusline) {
@@ -4034,7 +3997,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
   /*
    * Taken in one (more) header. Write it to the client.
    */
-  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
 
   if(k->httpcode/100 == 1)
     writetype |= CLIENTWRITE_1XX;
@@ -4235,7 +4198,7 @@ CURLcode Curl_http_write_resp(struct Curl_easy *data,
     flags = CLIENTWRITE_BODY;
     if(is_eos)
       flags |= CLIENTWRITE_EOS;
-    result = Curl_client_write(data, flags, (char *)buf, blen);
+    result = Curl_client_write(data, flags, buf, blen);
   }
 out:
   return result;
@@ -4275,11 +4238,9 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
   struct httpreq *req;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(method);
-  if(m_len + 1 > sizeof(req->method))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  DEBUGASSERT(method && m_len);
 
-  req = calloc(1, sizeof(*req));
+  req = calloc(1, sizeof(*req) + m_len);
   if(!req)
     goto out;
   memcpy(req->method, method, m_len);
@@ -4431,11 +4392,9 @@ CURLcode Curl_http_req_make2(struct httpreq **preq,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   CURLUcode uc;
 
-  DEBUGASSERT(method);
-  if(m_len + 1 > sizeof(req->method))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  DEBUGASSERT(method && m_len);
 
-  req = calloc(1, sizeof(*req));
+  req = calloc(1, sizeof(*req) + m_len);
   if(!req)
     goto out;
   memcpy(req->method, method, m_len);
@@ -4526,8 +4485,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     scheme = Curl_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
     if(scheme) {
       scheme += sizeof(HTTP_PSEUDO_SCHEME);
-      while(ISBLANK(*scheme))
-        scheme++;
+      Curl_str_passblanks(&scheme);
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }
     else {

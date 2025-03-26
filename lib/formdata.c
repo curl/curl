@@ -31,10 +31,6 @@ struct Curl_easy;
 #include "formdata.h"
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
 
-#if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
-#include <libgen.h>
-#endif
-
 #include "urldata.h" /* for struct Curl_easy */
 #include "mime.h"
 #include "vtls/vtls.h"
@@ -241,7 +237,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     if(array_state && forms) {
       /* get the upcoming option from the given array */
       option = forms->option;
-      array_value = (char *)forms->value;
+      array_value = (char *)CURL_UNCONST(forms->value);
 
       forms++; /* advance this to next entry */
       if(CURLFORM_END == option) {

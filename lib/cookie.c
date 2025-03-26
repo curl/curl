@@ -434,8 +434,9 @@ static bool bad_domain(const char *domain, size_t len)
   fine. The prime reason for filtering out control bytes is that some HTTP
   servers return 400 for requests that contain such.
 */
-static bool invalid_octets(const char *p)
+static bool invalid_octets(const char *ptr)
 {
+  const unsigned char *p = (const unsigned char *)ptr;
   /* Reject all bytes \x01 - \x1f (*except* \x09, TAB) + \x7f */
   while(*p) {
     if(((*p != 9) && (*p < 0x20)) || (*p == 0x7f))
@@ -536,9 +537,9 @@ parse_cookie_header(struct Curl_easy *data,
        * "the rest". Prefixes must start with '__' and end with a '-', so
        * only test for names where that can possibly be true.
        */
-      if(strncasecompare("__Secure-", Curl_str(&name), 9))
+      if(!strncmp("__Secure-", Curl_str(&name), 9))
         co->prefix_secure = TRUE;
-      else if(strncasecompare("__Host-", Curl_str(&name), 7))
+      else if(!strncmp("__Host-", Curl_str(&name), 7))
         co->prefix_host = TRUE;
 
       /*
@@ -1210,14 +1211,13 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       struct dynbuf buf;
       Curl_dyn_init(&buf, MAX_COOKIE_LINE);
       while(Curl_get_line(&buf, fp)) {
-        char *lineptr = Curl_dyn_ptr(&buf);
+        const char *lineptr = Curl_dyn_ptr(&buf);
         bool headerline = FALSE;
         if(checkprefix("Set-Cookie:", lineptr)) {
           /* This is a cookie line, get it! */
           lineptr += 11;
           headerline = TRUE;
-          while(ISBLANK(*lineptr))
-            lineptr++;
+          Curl_str_passblanks(&lineptr);
         }
 
         Curl_cookie_add(data, ci, headerline, TRUE, lineptr, NULL, NULL, TRUE);
@@ -1250,8 +1250,8 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
  */
 static int cookie_sort(const void *p1, const void *p2)
 {
-  struct Cookie *c1 = *(struct Cookie **)p1;
-  struct Cookie *c2 = *(struct Cookie **)p2;
+  const struct Cookie *c1 = *(const struct Cookie * const *)p1;
+  const struct Cookie *c2 = *(const struct Cookie * const *)p2;
   size_t l1, l2;
 
   /* 1 - compare cookie path lengths */
@@ -1286,8 +1286,8 @@ static int cookie_sort(const void *p1, const void *p2)
  */
 static int cookie_sort_ct(const void *p1, const void *p2)
 {
-  struct Cookie *c1 = *(struct Cookie **)p1;
-  struct Cookie *c2 = *(struct Cookie **)p2;
+  const struct Cookie *c1 = *(const struct Cookie * const *)p1;
+  const struct Cookie *c2 = *(const struct Cookie * const *)p2;
 
   return (c2->creationtime > c1->creationtime) ? 1 : -1;
 }

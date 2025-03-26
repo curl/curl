@@ -392,21 +392,21 @@ int init_fifo(void)
     if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
-      exit(1);
+      return CURL_SOCKET_BAD;
     }
   }
 
   unlink(fifo);
-  if(mkfifo (fifo, 0600) == -1) {
+  if(mkfifo(fifo, 0600) == -1) {
     perror("mkfifo");
-    exit(1);
+    return CURL_SOCKET_BAD;
   }
 
   socket = open(fifo, O_RDWR | O_NONBLOCK, 0);
 
-  if(socket == -1) {
+  if(socket == CURL_SOCKET_BAD) {
     perror("open");
-    exit(1);
+    return socket;
   }
   MSG_OUT("Now, pipe some URL's into > %s\n", fifo);
 
@@ -421,6 +421,8 @@ int main(void)
   GIOChannel* ch;
 
   fd = init_fifo();
+  if(fd == CURL_SOCKET_BAD)
+    return 1;
   ch = g_io_channel_unix_new(fd);
   g_io_add_watch(ch, G_IO_IN, fifo_cb, g);
   gmain = g_main_loop_new(NULL, FALSE);

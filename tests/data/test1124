@@ -11,12 +11,20 @@ chunked Transfer-Encoding
 #
 # Server-side
 <reply>
-<data base64="yes">
-SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDI5IE5vdiAyMDI0IDIxOjU2OjUzIEdNVA0KU2Vy
-dmVyOiBTb21ldGhpbmctVEUtZnJpZW5kbHkvMC4xDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkNv
-bnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PUlTTy04ODU5LTENClRyYW5zZmVyLUVuY29k
-aW5nOiBnemlwLCBjaHVua2VkDQoNCjE0DQofiwgIeZ6rQQADbGFsYWxhAMvJzA0KMTgNCktVMORS
-yAHRRlwKEIYxFwAKAnFgGAAAAA0KMA0KDQo=
+<data>
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2024 21:56:53 GMT
+Server: Something-TE-friendly/0.1
+Vary: Accept-Encoding
+Content-Type: text/html; charset=ISO-8859-1
+Transfer-Encoding: gzip, chunked
+
+2c
+%hex[%1f%8b%08%08%79%9e%ab%41%00%03%6c%61%6c%61%6c%61%00%cb%c9%cc%4b%55%30%e4%52%c8%01%d1%46%5c]hex%
+%hex[%10%86%31%17%00]hex%
+%hex[%02%71%60%18%00%00%00]hex%
+0
+
 </data>
 
 <datacheck>

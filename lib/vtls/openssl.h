@@ -49,7 +49,16 @@
 #define HAVE_KEYLOG_CALLBACK
 #endif
 
+/* Check for OpenSSL 1.1.1 which has early data support. */
+#undef HAVE_OPENSSL_EARLYDATA
+#if OPENSSL_VERSION_NUMBER >= 0x10100010L && defined(TLS1_3_VERSION) && \
+    !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
+#define HAVE_OPENSSL_EARLYDATA
+#endif
+
+struct alpn_spec;
 struct ssl_peer;
+struct Curl_ssl_session;
 
 /* Struct to hold a curl OpenSSL instance */
 struct ossl_ctx {
@@ -75,16 +84,22 @@ typedef CURLcode Curl_ossl_ctx_setup_cb(struct Curl_cfilter *cf,
                                         void *user_data);
 
 typedef int Curl_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid);
+typedef CURLcode Curl_ossl_init_session_reuse_cb(struct Curl_cfilter *cf,
+                                                 struct Curl_easy *data,
+                                                 struct alpn_spec *alpns,
+                                                 struct Curl_ssl_session *scs,
+                                                 bool *do_early_data);
 
 CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const unsigned char *alpn, size_t alpn_len,
+                            const struct alpn_spec *alpns,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             Curl_ossl_new_session_cb *cb_new_session,
-                            void *ssl_user_data);
+                            void *ssl_user_data,
+                            Curl_ossl_init_session_reuse_cb *sess_reuse_cb);
 
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L)
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
@@ -113,7 +128,9 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                const char *ssl_peer_key,
                                SSL_SESSION *ssl_sessionid,
                                int ietf_tls_id,
-                               const char *alpn);
+                               const char *alpn,
+                               unsigned char *quic_tp,
+                               size_t quic_tp_len);
 
 /*
  * Get the server cert, verify it and show it, etc., only call failf() if

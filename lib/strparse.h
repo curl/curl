@@ -43,6 +43,7 @@ struct Curl_str {
 };
 
 void Curl_str_init(struct Curl_str *out);
+void Curl_str_assign(struct Curl_str *out, const char *str, size_t len);
 
 #define Curl_str(x) ((x)->str)
 #define Curl_strlen(x) ((x)->len)
@@ -55,6 +56,11 @@ int Curl_str_word(const char **linep, struct Curl_str *out, const size_t max);
    return non-zero on error */
 int Curl_str_until(const char **linep, struct Curl_str *out, const size_t max,
                    char delim);
+
+/* Get a word until a newline byte or end of string. At least one byte long.
+   return non-zero on error */
+int Curl_str_untilnl(const char **linep, struct Curl_str *out,
+                     const size_t max);
 
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
@@ -72,6 +78,9 @@ int Curl_str_singlespace(const char **linep);
 /* Get an unsigned decimal number. Return non-zero on error */
 int Curl_str_number(const char **linep, curl_off_t *nump, curl_off_t max);
 
+/* As above with CURL_OFF_T_MAX but also pass leading blanks */
+int Curl_str_numblanks(const char **str, curl_off_t *num);
+
 /* Get an unsigned hexadecimal number. Return non-zero on error */
 int Curl_str_hex(const char **linep, curl_off_t *nump, curl_off_t max);
 
@@ -85,10 +94,18 @@ int Curl_str_newline(const char **linep);
 /* case insensitive compare that the parsed string matches the
    given string. */
 int Curl_str_casecompare(struct Curl_str *str, const char *check);
+int Curl_str_cmp(struct Curl_str *str, const char *check);
 
 int Curl_str_nudge(struct Curl_str *str, size_t num);
 
 int Curl_str_cspn(const char **linep, struct Curl_str *out, const char *cspn);
 void Curl_str_trimblanks(struct Curl_str *out);
+void Curl_str_passblanks(const char **linep);
+
+#define curlx_str_number(x,y,z) Curl_str_number(x,y,z)
+#define curlx_str_octal(x,y,z) Curl_str_octal(x,y,z)
+#define curlx_str_single(x,y) Curl_str_single(x,y)
+#define curlx_str_passblanks(x) Curl_str_passblanks(x)
+#define curlx_str_numblanks(x,y) Curl_str_numblanks(x,y)
 
 #endif /* HEADER_CURL_STRPARSE_H */

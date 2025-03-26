@@ -121,7 +121,7 @@ hash_elem_create(const void *key, size_t key_len, const void *p,
     /* copy the key */
     memcpy(he->key, key, key_len);
     he->key_len = key_len;
-    he->ptr = (void *) p;
+    he->ptr = CURL_UNCONST(p);
     he->dtor = dtor;
   }
   return he;
@@ -399,26 +399,4 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter)
   }
 
   return iter->current;
-}
-
-void Curl_hash_offt_init(struct Curl_hash *h,
-                         size_t slots,
-                         Curl_hash_dtor dtor)
-{
-  Curl_hash_init(h, slots, Curl_hash_str, Curl_str_key_compare, dtor);
-}
-
-void *Curl_hash_offt_set(struct Curl_hash *h, curl_off_t id, void *elem)
-{
-  return Curl_hash_add(h, &id, sizeof(id), elem);
-}
-
-int Curl_hash_offt_remove(struct Curl_hash *h, curl_off_t id)
-{
-  return Curl_hash_delete(h, &id, sizeof(id));
-}
-
-void *Curl_hash_offt_get(struct Curl_hash *h, curl_off_t id)
-{
-  return Curl_hash_pick(h, &id, sizeof(id));
 }

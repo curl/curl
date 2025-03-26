@@ -91,7 +91,7 @@ if(WINDOWS_STORE AND MINGW)  # mingw UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
-elseif(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # mingw32ce build
+elseif(WIN32 AND WINCE AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # mingw32ce build
   if(NOT MINGW32CE_LIBRARY_DIR)
     message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
   endif()
@@ -118,7 +118,7 @@ elseif(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # mingw32ce build
   set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
-elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
+elseif(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # DJGPP
   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
@@ -161,7 +161,7 @@ endif()
 if(AMIGA)
   string(APPEND _target_flags " AMIGA")
 endif()
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   string(APPEND _target_flags " GCC")
 endif()
 if(MINGW)
@@ -217,13 +217,6 @@ option(ENABLE_ARES "Enable c-ares support" OFF)
 option(CURL_DISABLE_INSTALL "Disable installation targets" OFF)
 
 if(WIN32)
-  option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
-  if(CURL_STATIC_CRT AND MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    string(APPEND CMAKE_C_FLAGS_RELEASE " -MT")
-    string(APPEND CMAKE_C_FLAGS_DEBUG " -MTd")
-  endif()
-
   option(ENABLE_UNICODE "Use the Unicode version of the Windows API functions" OFF)
   if(WINDOWS_STORE OR WINCE)
     set(ENABLE_UNICODE ON)
@@ -264,7 +257,9 @@ if(WIN32)
     if(MINGW64_VERSION)
       string(REGEX MATCH "MINGW64_VERSION=[0-9]+\.[0-9]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
       string(REGEX REPLACE "MINGW64_VERSION=" "" MINGW64_VERSION "${CURL_TEST_OUTPUT}")
-      message(STATUS "Found MINGW64_VERSION=${MINGW64_VERSION}")
+      if(MINGW64_VERSION)
+        message(STATUS "Found MINGW64_VERSION=${MINGW64_VERSION}")
+      endif()
     endif()
     unset(MINGW64_VERSION CACHE)  # Avoid storing in CMake cache
   endif()
@@ -295,18 +290,24 @@ if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
 option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
+option(ENABLE_SERVER_DEBUG "Apply curl debug options to test servers" OFF)
 
+set(CURL_DEBUG_MACROS "")
 if(ENABLE_DEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DEBUGBUILD")
+  list(APPEND CURL_DEBUG_MACROS "DEBUGBUILD")
+endif()
+if(ENABLE_CURLDEBUG)
+  list(APPEND CURL_DEBUG_MACROS "CURLDEBUG")
 endif()
 
-if(ENABLE_CURLDEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURLDEBUG")
-endif()
+option(CURL_TEST_BUNDLES "Build tests into single-binary bundles" OFF)
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
+  # clang-tidy is not looking into #included sources, thus not compatible with
+  # unity builds and test bundles.
   set(CMAKE_UNITY_BUILD OFF)
+  set(CURL_TEST_BUNDLES OFF)
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
   list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
@@ -352,6 +353,19 @@ if(BUILD_SHARED_LIBS)
   set(LIB_SELECTED ${LIB_SHARED})
 else()
   set(LIB_SELECTED ${LIB_STATIC})
+endif()
+
+if(WIN32)
+  option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
+  if(CURL_STATIC_CRT AND MSVC)
+    if(MSVC_VERSION GREATER_EQUAL 1900 OR BUILD_STATIC_CURL OR NOT BUILD_CURL_EXE)
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+      string(APPEND CMAKE_C_FLAGS_RELEASE " -MT")
+      string(APPEND CMAKE_C_FLAGS_DEBUG " -MTd")
+    else()
+      message(WARNING "Static CRT requires UCRT, static libcurl or no curl executable.")
+    endif()
+  endif()
 endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
@@ -819,9 +833,6 @@ if(CURL_USE_OPENSSL)
     set(_openssl "AmiSSL")
   else()
     set(_openssl "OpenSSL")
-    if(OPENSSL_VERSION VERSION_LESS 1.1.1)
-      message(WARNING "OpenSSL ${OPENSSL_VERSION} does not support TLS 1.3.")
-    endif()
   endif()
 endif()
 
@@ -1075,7 +1086,7 @@ if(USE_ECH)
       message(STATUS "HTTPSRR enabled")
     endif()
   else()
-    message(FATAL_ERROR "ECH requires ECH-enablded OpenSSL, BoringSSL, AWS-LC or wolfSSL")
+    message(FATAL_ERROR "ECH requires ECH-enabled OpenSSL, BoringSSL, AWS-LC or wolfSSL")
   endif()
 endif()
 
@@ -1612,24 +1623,9 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
-  if(HAVE_WIN32_WINNT)
-    if(HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
-      # Windows XP is required for freeaddrinfo, getaddrinfo
-      message(FATAL_ERROR "Building for Windows XP or newer is required.")
-    endif()
-
-    # Pre-fill detection results based on target OS version
-    if(MINGW OR MSVC OR WINCE)
-      if(HAVE_WIN32_WINNT LESS 0x0600)
-        set(HAVE_INET_NTOP 0)
-        set(HAVE_INET_PTON 0)
-      else()  # Windows Vista or newer
-        set(HAVE_INET_NTOP 1)
-        set(HAVE_INET_PTON 1)
-      endif()
-      unset(HAVE_INET_NTOP CACHE)
-      unset(HAVE_INET_PTON CACHE)
-    endif()
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
+    # Windows XP is required for freeaddrinfo, getaddrinfo
+    message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
 endif()
 
@@ -1671,6 +1667,7 @@ check_include_file("poll.h"           HAVE_POLL_H)
 check_include_file("pwd.h"            HAVE_PWD_H)
 check_include_file("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file("stdbool.h"        HAVE_STDBOOL_H)
+check_include_file("stdint.h"         HAVE_STDINT_H)
 check_include_file("strings.h"        HAVE_STRINGS_H)
 check_include_file("stropts.h"        HAVE_STROPTS_H)
 check_include_file("termio.h"         HAVE_TERMIO_H)
@@ -1813,8 +1810,10 @@ endif()
 if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 endif()
-check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h netinet/in.h sys/socket.h
-check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h netinet/in.h sys/socket.h
+if(NOT WIN32)
+  check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h netinet/in.h sys/socket.h
+  check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h netinet/in.h sys/socket.h
+endif()
 
 check_symbol_exists("fsetxattr" "sys/xattr.h" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
@@ -1948,22 +1947,6 @@ endif()
 
 # Some other minor tests
 
-if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
-  include(CheckCCompilerFlag)
-  check_c_compiler_flag("-Wno-long-double" HAVE_C_FLAG_Wno_long_double)
-  if(HAVE_C_FLAG_Wno_long_double)
-    # The Mac version of GCC warns about use of long double. Disable it.
-    get_source_file_property(_mprintf_compile_flags "mprintf.c" COMPILE_FLAGS)
-    if(_mprintf_compile_flags)
-      string(APPEND _mprintf_compile_flags " -Wno-long-double")
-    else()
-      set(_mprintf_compile_flags "-Wno-long-double")
-    endif()
-    set_source_files_properties("mprintf.c" PROPERTIES
-      COMPILE_FLAGS ${_mprintf_compile_flags})
-  endif()
-endif()
-
 if(_cmake_try_compile_target_type_save)
   set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save})
   unset(_cmake_try_compile_target_type_save)
@@ -1983,9 +1966,6 @@ if(WIN32)
     set(USE_WIN32_LARGE_FILES ON)
   endif()
 
-  # Use the manifest embedded in the Windows Resource
-  string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")
-
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
     set(USE_WIN32_CRYPTO ON)
@@ -2000,10 +1980,7 @@ if(WIN32)
   endif()
 endif()
 
-if(MSVC)
-  # Disable default manifest added by CMake
-  string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
-
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
 endif()
 
@@ -2072,6 +2049,8 @@ if(HAVE_MANUAL_TOOLS)
   set(CURL_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
   add_subdirectory(docs)
 endif()
+
+list(REMOVE_DUPLICATES CURL_LIBDIRS)
 
 add_subdirectory(lib)
 
@@ -2183,7 +2162,7 @@ curl_add_if("TLS-SRP"       USE_TLS_SRP)
 curl_add_if("HTTP2"         USE_NGHTTP2)
 curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
 curl_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-curl_add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
+curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                             OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                             USE_MBEDTLS OR USE_SECTRANSP OR
                             (USE_WOLFSSL AND HAVE_WOLFSSL_BIO)))

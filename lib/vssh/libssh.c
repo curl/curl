@@ -65,7 +65,6 @@
 #include "inet_ntop.h"
 #include "parsedate.h"          /* for the week day and month names */
 #include "sockaddr.h"           /* required for Curl_sockaddr_storage */
-#include "strtoofft.h"
 #include "strparse.h"
 #include "multiif.h"
 #include "select.h"
@@ -139,6 +138,7 @@ static void myssh_block2waitfor(struct connectdata *conn, bool block);
 
 static CURLcode myssh_setup_connection(struct Curl_easy *data,
                                        struct connectdata *conn);
+static void sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data);
 
 /*
  * SCP protocol handler.
@@ -944,7 +944,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         MOVE_TO_ERROR_STATE(CURLE_COULDNT_CONNECT);
         break;
       }
-      data->state.most_recent_ftp_entrypath = sshc->homedir;
+      free(data->state.most_recent_ftp_entrypath);
+      data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
+      if(!data->state.most_recent_ftp_entrypath)
+        return CURLE_OUT_OF_MEMORY;
 
       /* This is the last step in the SFTP connect phase. Do note that while
          we get the homedir here, we get the "workingpath" in the DO action
@@ -1603,29 +1606,29 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         }
         if(data->state.use_range) {
           curl_off_t from, to;
-          char *ptr;
-          char *ptr2;
-          CURLofft to_t;
-          CURLofft from_t;
+          const char *p = data->state.range;
+          int from_t, to_t;
 
-          from_t = curlx_strtoofft(data->state.range, &ptr, 10, &from);
-          if(from_t == CURL_OFFT_FLOW) {
+          from_t = Curl_str_number(&p, &from, CURL_OFF_T_MAX);
+          if(from_t == STRE_OVERFLOW)
             return CURLE_RANGE_ERROR;
-          }
-          while(*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
-            ptr++;
-          to_t = curlx_strtoofft(ptr, &ptr2, 10, &to);
-          if(to_t == CURL_OFFT_FLOW) {
+          Curl_str_passblanks(&p);
+          (void)Curl_str_single(&p, '-');
+
+          to_t = Curl_str_numblanks(&p, &to);
+          if(to_t == STRE_OVERFLOW)
             return CURLE_RANGE_ERROR;
-          }
-          if((to_t == CURL_OFFT_INVAL) /* no "to" value given */
-             || (to >= size)) {
+
+          if((to_t == STRE_NO_NUM) || (to >= size)) {
             to = size - 1;
+            to_t = STRE_OK;
           }
-          if(from_t) {
+
+          if(from_t == STRE_NO_NUM) {
             /* from is relative to end of file */
             from = size - to;
             to = size - 1;
+            from_t = STRE_OK;
           }
           if(from > size) {
             failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
@@ -1763,7 +1766,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
-      data->state.most_recent_ftp_entrypath = NULL;
 
       state(data, SSH_SESSION_DISCONNECT);
       break;
@@ -1815,9 +1817,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
 
-      rc = ssh_scp_push_file(sshc->scp_session, protop->path,
-                             (size_t)data->state.infilesize,
-                             (int)data->set.new_file_perms);
+      rc = ssh_scp_push_file64(sshc->scp_session, protop->path,
+                               (uint64_t)data->state.infilesize,
+                               (int)data->set.new_file_perms);
+
       if(rc != SSH_OK) {
         err_msg = ssh_get_error(sshc->ssh_session);
         failf(data, "%s", err_msg);
@@ -1938,53 +1941,14 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
-      data->state.most_recent_ftp_entrypath = NULL;
 
       state(data, SSH_SESSION_FREE);
       FALLTHROUGH();
     case SSH_SESSION_FREE:
-      if(sshc->ssh_session) {
-        ssh_free(sshc->ssh_session);
-        sshc->ssh_session = NULL;
-      }
-
-      /* worst-case scenario cleanup */
-
-      DEBUGASSERT(sshc->ssh_session == NULL);
-      DEBUGASSERT(sshc->scp_session == NULL);
-
-      if(sshc->readdir_tmp) {
-        ssh_string_free_char(sshc->readdir_tmp);
-        sshc->readdir_tmp = NULL;
-      }
-
-      if(sshc->quote_attrs)
-        sftp_attributes_free(sshc->quote_attrs);
-
-      if(sshc->readdir_attrs)
-        sftp_attributes_free(sshc->readdir_attrs);
-
-      if(sshc->readdir_link_attrs)
-        sftp_attributes_free(sshc->readdir_link_attrs);
-
-      if(sshc->privkey)
-        ssh_key_free(sshc->privkey);
-      if(sshc->pubkey)
-        ssh_key_free(sshc->pubkey);
-
-      Curl_safefree(sshc->rsa_pub);
-      Curl_safefree(sshc->rsa);
-      Curl_safefree(sshc->quote_path1);
-      Curl_safefree(sshc->quote_path2);
-      Curl_dyn_free(&sshc->readdir_buf);
-      Curl_safefree(sshc->readdir_linkPath);
-      SSH_STRING_FREE_CHAR(sshc->homedir);
-
+      sshc_cleanup(sshc, data);
       /* the code we are about to return */
       result = sshc->actualcode;
-
       memset(sshc, 0, sizeof(struct ssh_conn));
-
       connclose(conn, "SSH session free");
       sshc->state = SSH_SESSION_FREE;   /* current */
       sshc->nextstate = SSH_NO_STATE;
@@ -2122,10 +2086,14 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
   struct SSHPROTO *ssh;
   struct ssh_conn *sshc = &conn->proto.sshc;
 
+  if(!sshc->initialised) {
+    Curl_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
+    sshc->initialised = TRUE;
+  }
+
   data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
-  Curl_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
 
   return CURLE_OK;
 }
@@ -2328,6 +2296,55 @@ static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
   return result;
 }
 
+static void sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data)
+{
+  (void)data;
+  if(sshc->initialised) {
+    if(sshc->ssh_session) {
+      ssh_free(sshc->ssh_session);
+      sshc->ssh_session = NULL;
+    }
+
+    /* worst-case scenario cleanup */
+    DEBUGASSERT(sshc->ssh_session == NULL);
+    DEBUGASSERT(sshc->scp_session == NULL);
+
+    if(sshc->readdir_tmp) {
+      ssh_string_free_char(sshc->readdir_tmp);
+      sshc->readdir_tmp = NULL;
+    }
+    if(sshc->quote_attrs) {
+      sftp_attributes_free(sshc->quote_attrs);
+      sshc->quote_attrs = NULL;
+    }
+    if(sshc->readdir_attrs) {
+      sftp_attributes_free(sshc->readdir_attrs);
+      sshc->readdir_attrs = NULL;
+    }
+    if(sshc->readdir_link_attrs) {
+      sftp_attributes_free(sshc->readdir_link_attrs);
+      sshc->readdir_link_attrs = NULL;
+    }
+    if(sshc->privkey) {
+      ssh_key_free(sshc->privkey);
+      sshc->privkey = NULL;
+    }
+    if(sshc->pubkey) {
+      ssh_key_free(sshc->pubkey);
+      sshc->pubkey = NULL;
+    }
+
+    Curl_safefree(sshc->rsa_pub);
+    Curl_safefree(sshc->rsa);
+    Curl_safefree(sshc->quote_path1);
+    Curl_safefree(sshc->quote_path2);
+    Curl_dyn_free(&sshc->readdir_buf);
+    Curl_safefree(sshc->readdir_linkPath);
+    SSH_STRING_FREE_CHAR(sshc->homedir);
+    sshc->initialised = FALSE;
+  }
+}
+
 /* BLOCKING, but the function is using the state machine so the only reason
    this is still blocking is that the multi interface code has no support for
    disconnecting operations that takes a while */
@@ -2336,10 +2353,10 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
                                bool dead_connection)
 {
   CURLcode result = CURLE_OK;
-  struct ssh_conn *ssh = &conn->proto.sshc;
+  struct ssh_conn *sshc = &conn->proto.sshc;
   (void) dead_connection;
 
-  if(ssh->ssh_session) {
+  if(sshc->ssh_session) {
     /* only if there is a session still around to use! */
 
     state(data, SSH_SESSION_DISCONNECT);
@@ -2347,6 +2364,7 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
     result = myssh_block_statemach(data, TRUE);
   }
 
+  sshc_cleanup(sshc, data);
   return result;
 }
 
@@ -2500,6 +2518,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 bool dead_connection)
 {
+  struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
   (void) dead_connection;
 
@@ -2512,9 +2531,9 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
   }
 
   DEBUGF(infof(data, "SSH DISCONNECT is done"));
+  sshc_cleanup(sshc, data);
 
   return result;
-
 }
 
 static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
@@ -2687,7 +2706,7 @@ static void sftp_quote(struct Curl_easy *data)
       sshc->nextstate = SSH_NO_STATE;
       return;
     }
-    Curl_debug(data, CURLINFO_HEADER_OUT, (char *) "PWD\n", 4);
+    Curl_debug(data, CURLINFO_HEADER_OUT, "PWD\n", 4);
     Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
 
     /* this sends an FTP-like "header" to the header callback so that the

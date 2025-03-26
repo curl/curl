@@ -36,7 +36,7 @@ HTTP-IPv6 GET (using ip6-localhost)
 -g "http://ip6-localhost:%HTTP6PORT/%TESTNUMBER"
 </command>
 <precheck>
-./server/resolve --ipv6 ip6-localhost
+%RESOLVE --ipv6 ip6-localhost
 </precheck>
 </client>
 

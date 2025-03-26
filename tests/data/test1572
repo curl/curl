@@ -1,0 +1,97 @@
+<testcase>
+<info>
+<keywords>
+CURLFOLLOW_OBEYCODE
+CURLOPT_FOLLOWLOCATION
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 308 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Location: %TESTNUMBER0001
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+<data1 crlf="yes">
+HTTP/1.1 200 OK
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-bar-
+</data>
+<datacheck crlf="yes">
+HTTP/1.1 308 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Location: %TESTNUMBER0001
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+HTTP/1.1 200 OK
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-bar-
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<tool>
+lib1571
+</tool>
+
+ <name>
+CURLFOLLOW_OBEYCODE with custom POST method, 308 => custom
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER 1571
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol nonewline="yes" crlf="yes">
+IGLOO /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 3
+Content-Type: application/x-www-form-urlencoded
+
+mooIGLOO /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 3
+Content-Type: application/x-www-form-urlencoded
+
+moo
+</protocol>
+</verify>
+</testcase>

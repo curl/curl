@@ -542,12 +542,34 @@ static void events_setup(struct Curl_multi *multi, struct events *ev)
   curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, ev);
 }
 
+/* populate_fds()
+ *
+ * populate the fds[] array
+ */
+static unsigned int populate_fds(struct pollfd *fds, struct events *ev)
+{
+  unsigned int numfds = 0;
+  struct pollfd *f;
+  struct socketmonitor *m;
+
+  f = &fds[0];
+  for(m = ev->list; m; m = m->next) {
+    f->fd = m->socket.fd;
+    f->events = m->socket.events;
+    f->revents = 0;
+#if DEBUG_EV_POLL
+    fprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
+#endif
+    f++;
+    numfds++;
+  }
+  return numfds;
+}
 
 /* wait_or_timeout()
  *
  * waits for activity on any of the given sockets, or the timeout to trigger.
  */
-
 static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 {
   bool done = FALSE;
@@ -556,25 +578,10 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
   while(!done) {
     CURLMsg *msg;
-    struct socketmonitor *m;
-    struct pollfd *f;
     struct pollfd fds[4];
-    int numfds = 0;
     int pollrc;
-    int i;
     struct curltime before;
-
-    /* populate the fds[] array */
-    for(m = ev->list, f = &fds[0]; m; m = m->next) {
-      f->fd = m->socket.fd;
-      f->events = m->socket.events;
-      f->revents = 0;
-#if DEBUG_EV_POLL
-      fprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
-#endif
-      f++;
-      numfds++;
-    }
+    const unsigned int numfds = populate_fds(fds, ev);
 
     /* get the time stamp to use to figure out how long poll takes */
     before = Curl_now();
@@ -582,11 +589,11 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     if(numfds) {
       /* wait for activity or timeout */
 #if DEBUG_EV_POLL
-      fprintf(stderr, "poll(numfds=%d, timeout=%ldms)\n", numfds, ev->ms);
+      fprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n", numfds, ev->ms);
 #endif
-      pollrc = Curl_poll(fds, (unsigned int)numfds, ev->ms);
+      pollrc = Curl_poll(fds, numfds, ev->ms);
 #if DEBUG_EV_POLL
-      fprintf(stderr, "poll(numfds=%d, timeout=%ldms) -> %d\n",
+      fprintf(stderr, "poll(numfds=%u, timeout=%ldms) -> %d\n",
               numfds, ev->ms, pollrc);
 #endif
       if(pollrc < 0)
@@ -614,6 +621,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       /* here pollrc is > 0 */
       struct Curl_llist_node *e = Curl_llist_head(&multi->process);
       struct Curl_easy *data;
+      unsigned int i;
       DEBUGASSERT(e);
       data = Curl_node_elem(e);
       DEBUGASSERT(data);
@@ -770,7 +778,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     Curl_detach_connection(data);
     s = Curl_getconnectinfo(data, &c);
     if((s != CURL_SOCKET_BAD) && c) {
-      Curl_cpool_disconnect(data, c, TRUE);
+      Curl_conn_terminate(data, c, TRUE);
     }
     DEBUGASSERT(!data->conn);
   }
@@ -949,10 +957,6 @@ CURL *curl_easy_duphandle(CURL *d)
    */
   outcurl->set.buffer_size = data->set.buffer_size;
 
-  /* copy all userdefined values */
-  if(dupset(outcurl, data))
-    goto fail;
-
   Curl_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_netrc_init(&outcurl->state.netrc);
 
@@ -960,6 +964,16 @@ CURL *curl_easy_duphandle(CURL *d)
   outcurl->state.lastconnect_id = -1;
   outcurl->state.recent_conn_id = -1;
   outcurl->id = -1;
+  outcurl->mid = -1;
+
+#ifndef CURL_DISABLE_HTTP
+  Curl_llist_init(&outcurl->state.httphdrs, NULL);
+#endif
+  Curl_initinfo(outcurl);
+
+  /* copy all userdefined values */
+  if(dupset(outcurl, data))
+    goto fail;
 
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
@@ -1053,10 +1067,6 @@ CURL *curl_easy_duphandle(CURL *d)
       goto fail;
   }
 #endif /* USE_ARES */
-#ifndef CURL_DISABLE_HTTP
-  Curl_llist_init(&outcurl->state.httphdrs, NULL);
-#endif
-  Curl_initinfo(outcurl);
 
   outcurl->magic = CURLEASY_MAGIC_NUMBER;
 
@@ -1195,10 +1205,10 @@ CURLcode curl_easy_pause(CURL *d, int action)
   }
 
 out:
-  if(!result && !data->state.done && keep_changed)
-    /* This transfer may have been moved in or out of the bundle, update the
-       corresponding socket callback, if used */
-    result = Curl_updatesocket(data);
+  if(!result && !data->state.done && keep_changed && data->multi)
+    /* pause/unpausing may result in multi event changes */
+    if(Curl_multi_ev_assess_xfer(data->multi, data))
+      result = CURLE_ABORTED_BY_CALLBACK;
 
   if(recursive)
     /* this might have called a callback recursively which might have set this

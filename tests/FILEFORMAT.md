@@ -163,6 +163,7 @@ Available substitute variables include:
 - `%POSIX_PWD` - Current directory somewhat MinGW friendly
 - `%PROXYPORT` - Port number of the HTTP proxy
 - `%PWD` - Current directory
+- `%RESOLVE` - server/resolve command
 - `%RTSP6PORT` - IPv6 port number of the RTSP server
 - `%RTSPPORT` - Port number of the RTSP server
 - `%SMBPORT` - Port number of the SMB server
@@ -227,7 +228,7 @@ often run on overloaded machines with unpredictable timing.
 
 ## `<reply>`
 
-### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes"]>`
+### `<data [nocheck="yes"] [sendzero="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes"]>`
 
 data to be sent to the client on its request and later verified that it
 arrived safely. Set `nocheck="yes"` to prevent the test script from verifying
@@ -248,11 +249,6 @@ auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server "sends" the data even if the size
 is zero bytes. Used to verify curl's behavior on zero bytes transfers.
-
-`base64=yes` means that the data provided in the test-file is a chunk of data
-encoded with base64. It is the only way a test case can contain binary
-data. (This attribute can in fact be used on any section, but it does not make
-much sense for other sections than "data").
 
 `hex=yes` means that the data is a sequence of hex pairs. It gets decoded and
 used as "raw" data.
@@ -434,6 +430,7 @@ feature is NOT required. If the feature is present then the test is SKIPPED.
 
 Features testable here are:
 
+- `--libcurl`
 - `alt-svc`
 - `AppleIDN`
 - `asyn-rr` - c-ares is used for additional records only

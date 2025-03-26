@@ -33,12 +33,21 @@
 #include <curl/curl.h>
 #include "functypes.h"
 
-#if defined(__GNUC__) && __GNUC__ >= 3
-#  define ALLOC_FUNC __attribute__((__malloc__))
-#  define ALLOC_SIZE(s) __attribute__((__alloc_size__(s)))
-#  define ALLOC_SIZE2(n, s) __attribute__((__alloc_size__(n, s)))
+#ifdef __clang__
+#  define ALLOC_FUNC         __attribute__((__malloc__))
+#  if __clang_major__ >= 4
+#  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
+#  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
+#  else
+#  define ALLOC_SIZE(s)
+#  define ALLOC_SIZE2(n, s)
+#  endif
+#elif defined(__GNUC__) && __GNUC__ >= 3
+#  define ALLOC_FUNC         __attribute__((__malloc__))
+#  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
+#  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
 #elif defined(_MSC_VER)
-#  define ALLOC_FUNC __declspec(restrict)
+#  define ALLOC_FUNC         __declspec(restrict)
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
 #else
@@ -49,25 +58,25 @@
 
 #define CURL_MT_LOGFNAME_BUFSIZE 512
 
+/* Avoid redundant redeclaration warnings with modern compilers, when including
+   this header multiple times. */
+#ifndef HEADER_CURL_MEMDEBUG_H_EXTERNS
+#define HEADER_CURL_MEMDEBUG_H_EXTERNS
 extern FILE *curl_dbg_logfile;
 
 /* memory functions */
-CURL_EXTERN ALLOC_FUNC ALLOC_SIZE(1) void *curl_dbg_malloc(size_t size,
-                                                           int line,
-                                                           const char *source);
-CURL_EXTERN ALLOC_FUNC ALLOC_SIZE2(1, 2) void *curl_dbg_calloc(size_t elements,
-                                   size_t size, int line, const char *source);
-CURL_EXTERN ALLOC_SIZE(2) void *curl_dbg_realloc(void *ptr,
-                                                 size_t size,
-                                                 int line,
-                                                 const char *source);
 CURL_EXTERN void curl_dbg_free(void *ptr, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC char *curl_dbg_strdup(const char *str, int line,
-                                             const char *src);
+CURL_EXTERN ALLOC_FUNC ALLOC_SIZE(1)
+  void *curl_dbg_malloc(size_t size, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC ALLOC_SIZE2(1, 2)
+  void *curl_dbg_calloc(size_t n, size_t size, int line, const char *source);
+CURL_EXTERN ALLOC_SIZE(2)
+  void *curl_dbg_realloc(void *ptr, size_t size, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
+  char *curl_dbg_strdup(const char *str, int line, const char *src);
 #if defined(_WIN32) && defined(UNICODE)
-CURL_EXTERN ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
-                                                int line,
-                                                const char *source);
+CURL_EXTERN ALLOC_FUNC
+  wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source);
 #endif
 
 CURL_EXTERN void curl_dbg_memdebug(const char *logname);
@@ -102,12 +111,15 @@ CURL_EXTERN RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd,
                                          const char *source);
 
 /* FILE functions */
-CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
-                                  int line, const char *source);
-CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
-                                             int line, const char *source);
-
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
+  FILE *curl_dbg_fopen(const char *file, const char *mode,
+                       int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
+  FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                        int line, const char *source);
+
+#endif /* HEADER_CURL_MEMDEBUG_H_EXTERNS */
 
 #ifndef MEMDEBUG_NODEFINES
 

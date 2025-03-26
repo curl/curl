@@ -49,9 +49,9 @@
 #endif
 
 #ifdef HAVE_GETADDRINFO
-#  define RESOLVER_ENOMEM  EAI_MEMORY
+#  define RESOLVER_ENOMEM  EAI_MEMORY  /* = WSA_NOT_ENOUGH_MEMORY on Windows */
 #else
-#  define RESOLVER_ENOMEM  ENOMEM
+#  define RESOLVER_ENOMEM  SOCKENOMEM
 #endif
 
 #include "urldata.h"
@@ -69,7 +69,7 @@
 #ifdef USE_ARES
 #include <ares.h>
 #ifdef USE_HTTPSRR
-#define USE_HTTPSRR_ARES 1 /* the combo */
+#define USE_HTTPSRR_ARES  /* the combo */
 #endif
 #endif
 
@@ -366,9 +366,9 @@ static void destroy_async_data(struct Curl_easy *data)
 #endif
 
 #ifdef USE_HTTPSRR_ARES
-    if(data->state.async.thdata.channel) {
-      ares_destroy(data->state.async.thdata.channel);
-      data->state.async.thdata.channel = NULL;
+    if(td->channel) {
+      ares_destroy(td->channel);
+      td->channel = NULL;
     }
 #endif
     /*
@@ -394,13 +394,13 @@ static void destroy_async_data(struct Curl_easy *data)
      * ensure CURLMOPT_SOCKETFUNCTION fires CURL_POLL_REMOVE
      * before the FD is invalidated to avoid EBADF on EPOLL_CTL_DEL
      */
-    Curl_multi_closed(data, sock_rd);
+    Curl_multi_will_close(data, sock_rd);
     wakeup_close(sock_rd);
 #endif
 
     td->init = FALSE;
   }
-  Curl_safefree(async->hostname);
+
 }
 
 #ifdef USE_HTTPSRR_ARES
@@ -414,7 +414,7 @@ static CURLcode resolve_httpsrr(struct Curl_easy *data,
   memset(&async->thdata.hinfo, 0, sizeof(struct Curl_https_rrinfo));
   async->thdata.hinfo.port = -1;
   ares_query_dnsrec(async->thdata.channel,
-                    async->hostname, ARES_CLASS_IN,
+                    data->conn->host.name, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,
                     Curl_dnsrec_done_cb, data, NULL);
 
@@ -433,6 +433,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
                                 const struct addrinfo *hints)
 {
   struct thread_data *td = &data->state.async.thdata;
+  /* !checksrc! disable ERRNOVAR 1 */
   int err = ENOMEM;
   struct Curl_async *async = &data->state.async;
 
@@ -443,14 +444,8 @@ static bool init_resolve_thread(struct Curl_easy *data,
   td->start = Curl_now();
 
   if(!init_thread_sync_data(td, hostname, port, hints)) {
-    free(td);
     goto errno_exit;
   }
-
-  free(async->hostname);
-  async->hostname = strdup(hostname);
-  if(!async->hostname)
-    goto err_exit;
 
   /* The thread will set this TRUE when complete. */
   td->tsd.done = FALSE;
@@ -572,13 +567,8 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
   DEBUGASSERT(entry);
   *entry = NULL;
 
-  if(!td) {
-    DEBUGASSERT(td);
-    return CURLE_COULDNT_RESOLVE_HOST;
-  }
 #ifdef USE_HTTPSRR_ARES
-  if(Curl_ares_perform(data->state.async.thdata.channel, 0) < 0)
-    return CURLE_UNRECOVERABLE_POLL;
+  (void)Curl_ares_perform(td->channel, 0); /* ignore errors */
 #endif
 
   Curl_mutex_acquire(&td->tsd.mutx);
@@ -645,8 +635,8 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 #endif
 
 #ifdef USE_HTTPSRR_ARES
-  if(data->state.async.thdata.channel) {
-    ret_val = Curl_ares_getsock(data, data->state.async.thdata.channel, socks);
+  if(td->init && td->channel) {
+    ret_val = Curl_ares_getsock(data, td->channel, socks);
     for(socketi = 0; socketi < (MAX_SOCKSPEREASYHANDLE - 1); socketi++)
       if(!ARES_GETSOCK_READABLE(ret_val, socketi) &&
          !ARES_GETSOCK_WRITABLE(ret_val, socketi))
@@ -654,10 +644,13 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
   }
 #endif
 #ifndef CURL_DISABLE_SOCKETPAIR
-  /* return read fd to client for polling the DNS resolution status */
-  socks[socketi] = td->tsd.sock_pair[0];
-  ret_val |= GETSOCK_READSOCK(socketi);
-#else
+  if(td->init) {
+    /* return read fd to client for polling the DNS resolution status */
+    socks[socketi] = td->tsd.sock_pair[0];
+    ret_val |= GETSOCK_READSOCK(socketi);
+  }
+  else
+#endif
   {
     timediff_t milli;
     timediff_t ms = Curl_timediff(Curl_now(), td->start);
@@ -671,7 +664,6 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
       milli = 200;
     Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
   }
-#endif
 
   return ret_val;
 }

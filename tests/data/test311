@@ -20,13 +20,13 @@ SSL
 local-http
 </features>
 <server>
-https Server-localhost0h-sv.pem
+https test-localhost0h.pem
 </server>
 <name>
 HTTPS wrong subjectAltName but right CN
 </name>
 <command>
--4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/test-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

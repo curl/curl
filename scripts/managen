@@ -320,7 +320,23 @@ sub render {
             $quote = 1;
             $d = "$word\n";
         }
-        elsif($quote) {
+        elsif($d =~ /^(```|~~~)/) {
+            if(!$quote) {
+                if($manpage) {
+                    push @desc, "\n" if($blankline);
+                    push @desc, ".nf\n";
+                    $blankline = 0;
+                }
+                $quote = 2;
+            }
+            else {
+                # end of quote
+                push @desc, ".fi\n" if($manpage);
+                $quote = 0;
+            }
+            next;
+        }
+        elsif($quote == 1) {
             # end of quote
             push @desc, ".fi\n" if($manpage);
             $quote = 0;

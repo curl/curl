@@ -549,7 +549,7 @@ class TestUpload:
         if r.exit_code == 18: # PARTIAL_FILE is always ok
             pass
         elif proto == 'h2':
-            r.check_exit_code(92)  # CURLE_HTTP2_STREAM also ok
+            r.check_exit_code(16)  # CURLE_HTTP2 also ok
         elif proto == 'h3':
             r.check_exit_code(95)  # CURLE_HTTP3 also ok
         else:
@@ -703,9 +703,10 @@ class TestUpload:
                                        # of 128K.
     ])
     def test_07_70_put_earlydata(self, env: Env, httpd, nghttpx, proto, upload_size, exp_early):
-        if not env.curl_uses_lib('gnutls'):
-            pytest.skip('TLS earlydata only implemented in GnuTLS')
-        if proto == 'h3' and not env.have_h3():
+        if not env.curl_can_early_data():
+            pytest.skip('TLS earlydata not implemented')
+        if proto == 'h3' and \
+           (not env.have_h3() or not env.curl_can_h3_early_data()):
             pytest.skip("h3 not supported")
         count = 2
         # we want this test to always connect to nghttpx, since it is

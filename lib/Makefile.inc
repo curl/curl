@@ -39,7 +39,6 @@ LIB_VAUTH_CFILES =      \
 
 LIB_VAUTH_HFILES =      \
   vauth/digest.h        \
-  vauth/ntlm.h          \
   vauth/vauth.h
 
 LIB_VTLS_CFILES =           \
@@ -123,6 +122,7 @@ LIB_CFILES =         \
   cf-socket.c        \
   cfilters.c         \
   conncache.c        \
+  cshutdn.c          \
   connect.c          \
   content_encoding.c \
   cookie.c           \
@@ -146,7 +146,6 @@ LIB_CFILES =         \
   cw-out.c           \
   cw-pause.c         \
   dict.c             \
-  dllmain.c          \
   doh.c              \
   dynbuf.c           \
   dynhds.c           \
@@ -164,6 +163,7 @@ LIB_CFILES =         \
   getinfo.c          \
   gopher.c           \
   hash.c             \
+  hash_offt.c        \
   headers.c          \
   hmac.c             \
   hostasyn.c         \
@@ -198,6 +198,7 @@ LIB_CFILES =         \
   mprintf.c          \
   mqtt.c             \
   multi.c            \
+  multi_ev.c         \
   netrc.c            \
   nonblock.c         \
   noproxy.c          \
@@ -230,7 +231,6 @@ LIB_CFILES =         \
   strequal.c         \
   strerror.c         \
   strparse.c         \
-  strtoofft.c        \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
@@ -258,6 +258,7 @@ LIB_HFILES =         \
   cf-socket.h        \
   cfilters.h         \
   conncache.h        \
+  cshutdn.h          \
   connect.h          \
   content_encoding.h \
   cookie.h           \
@@ -311,6 +312,7 @@ LIB_HFILES =         \
   getinfo.h          \
   gopher.h           \
   hash.h             \
+  hash_offt.h        \
   headers.h          \
   hostip.h           \
   hsts.h             \
@@ -335,6 +337,7 @@ LIB_HFILES =         \
   mime.h             \
   mqtt.h             \
   multihandle.h      \
+  multi_ev.h         \
   multiif.h          \
   netrc.h            \
   nonblock.h         \
@@ -368,7 +371,6 @@ LIB_HFILES =         \
   strdup.h           \
   strerror.h         \
   strparse.h         \
-  strtoofft.h        \
   system_win32.h     \
   telnet.h           \
   tftp.h             \

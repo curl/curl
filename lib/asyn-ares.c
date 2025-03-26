@@ -245,7 +245,7 @@ static void sock_state_cb(void *data, ares_socket_t socket_fd,
   struct Curl_easy *easy = data;
   if(!readable && !writable) {
     DEBUGASSERT(easy);
-    Curl_multi_closed(easy, socket_fd);
+    Curl_multi_will_close(easy, socket_fd);
   }
 }
 
@@ -774,7 +774,6 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   if(!res->hostname)
     return NULL;
 
-  data->state.async.hostname = res->hostname;
   data->state.async.port = port;
   data->state.async.done = FALSE;   /* not done */
   data->state.async.dns = NULL;     /* clear */
@@ -933,7 +932,7 @@ CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
     a4.s_addr = 0; /* disabled: do not bind to a specific address */
   }
   else {
-    if(Curl_inet_pton(AF_INET, local_ip4, &a4) != 1) {
+    if(curlx_inet_pton(AF_INET, local_ip4, &a4) != 1) {
       DEBUGF(infof(data, "bad DNS IPv4 address"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
@@ -961,7 +960,7 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
     memset(a6, 0, sizeof(a6));
   }
   else {
-    if(Curl_inet_pton(AF_INET6, local_ip6, a6) != 1) {
+    if(curlx_inet_pton(AF_INET6, local_ip6, a6) != 1) {
       DEBUGF(infof(data, "bad DNS IPv6 address"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }

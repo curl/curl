@@ -127,7 +127,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 #endif
 
   *psent = 0;
-  msg_iov.iov_base = (uint8_t *)pkt;
+  msg_iov.iov_base = (uint8_t *)CURL_UNCONST(pkt);
   msg_iov.iov_len = pktlen;
   msg.msg_iov = &msg_iov;
   msg.msg_iovlen = 1;
@@ -148,17 +148,18 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 #endif
 
 
-  while((sent = sendmsg(qctx->sockfd, &msg, 0)) == -1 && SOCKERRNO == EINTR)
+  while((sent = sendmsg(qctx->sockfd, &msg, 0)) == -1 &&
+        SOCKERRNO == SOCKEINTR)
     ;
 
   if(sent == -1) {
     switch(SOCKERRNO) {
     case EAGAIN:
-#if EAGAIN != EWOULDBLOCK
-    case EWOULDBLOCK:
+#if EAGAIN != SOCKEWOULDBLOCK
+    case SOCKEWOULDBLOCK:
 #endif
       return CURLE_AGAIN;
-    case EMSGSIZE:
+    case SOCKEMSGSIZE:
       /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
       break;
     case EIO:
@@ -186,16 +187,16 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 
   while((sent = send(qctx->sockfd,
                      (const char *)pkt, (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
-        SOCKERRNO == EINTR)
+        SOCKERRNO == SOCKEINTR)
     ;
 
   if(sent == -1) {
-    if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
+    if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
       return CURLE_AGAIN;
     }
     else {
       failf(data, "send() returned %zd (errno %d)", sent, SOCKERRNO);
-      if(SOCKERRNO != EMSGSIZE) {
+      if(SOCKERRNO != SOCKEMSGSIZE) {
         return CURLE_SEND_ERROR;
       }
       /* UDP datagram is too large; caused by PMTUD. Just let it be
@@ -392,14 +393,14 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
     }
 
     while((mcount = recvmmsg(qctx->sockfd, mmsg, n, 0, NULL)) == -1 &&
-          SOCKERRNO == EINTR)
+          SOCKERRNO == SOCKEINTR)
       ;
     if(mcount == -1) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
+      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
         CURL_TRC_CF(data, cf, "ingress, recvmmsg -> EAGAIN");
         goto out;
       }
-      if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
+      if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
         struct ip_quadruple ip;
         Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",
@@ -484,13 +485,13 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     msg.msg_namelen = sizeof(remote_addr);
     msg.msg_controllen = sizeof(msg_ctrl);
     while((nread = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
-          SOCKERRNO == EINTR)
+          SOCKERRNO == SOCKEINTR)
       ;
     if(nread == -1) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
+      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
         goto out;
       }
-      if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
+      if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
         struct ip_quadruple ip;
         Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",
@@ -558,14 +559,14 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
     while((nread = recvfrom(qctx->sockfd, (char *)buf, bufsize, 0,
                             (struct sockaddr *)&remote_addr,
                             &remote_addrlen)) == -1 &&
-          SOCKERRNO == EINTR)
+          SOCKERRNO == SOCKEINTR)
       ;
     if(nread == -1) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
+      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
         CURL_TRC_CF(data, cf, "ingress, recvfrom -> EAGAIN");
         goto out;
       }
-      if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
+      if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
         struct ip_quadruple ip;
         Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",

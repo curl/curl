@@ -51,7 +51,7 @@ package pathhelp;
 
 use strict;
 use warnings;
-use Cwd 'abs_path';
+use File::Spec;
 
 BEGIN {
     use base qw(Exporter);
@@ -59,6 +59,7 @@ BEGIN {
     our @EXPORT_OK = qw(
         os_is_win
         exe_ext
+        dirsepadd
         sys_native_abs_path
         sys_native_current_path
         build_sys_abs_path
@@ -117,20 +118,20 @@ sub sys_native_abs_path {
     my ($path) = @_;
 
     # Return untouched on non-Windows platforms.
-    return Cwd::abs_path($path) if !os_is_win();
+    return File::Spec->rel2abs($path) if !os_is_win();
 
     # Do not process empty path.
     return $path if ($path eq '');
 
     my $res;
     if($^O eq 'msys' || $^O eq 'cygwin') {
-        $res = Cygwin::posix_to_win_path(Cwd::abs_path($path));
+        $res = Cygwin::posix_to_win_path(File::Spec->rel2abs($path));
     }
     elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
         $res = uc($2) . ":/" . $3;
     }
     else {
-        $res = Cwd::abs_path($path);
+        $res = File::Spec->rel2abs($path);
     }
 
     $res =~ s{[/\\]+}{/}g;
@@ -146,14 +147,14 @@ sub build_sys_abs_path {
     my ($path) = @_;
 
     # Return untouched on non-Windows platforms.
-    return Cwd::abs_path($path) if !os_is_win();
+    return File::Spec->rel2abs($path) if !os_is_win();
 
     my $res;
     if($^O eq 'msys' || $^O eq 'cygwin') {
         $res = Cygwin::win_to_posix_path($path, 1);
     }
     else {
-        $res = Cwd::abs_path($path);
+        $res = File::Spec->rel2abs($path);
 
         if($res =~ m{^([A-Za-z]):(.*)}) {
             $res = "/" . lc($1) . $2;
@@ -180,6 +181,15 @@ sub exe_ext {
         return '.exe';
     }
     return '';
+}
+
+#***************************************************************************
+# Add ending slash if missing
+#
+sub dirsepadd {
+    my ($dir) = @_;
+    $dir =~ s/\/$//;
+    return $dir . '/';
 }
 
 1;    # End of module

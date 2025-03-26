@@ -36,11 +36,6 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_POLL_H
-#include <poll.h>
-#elif defined(HAVE_SYS_POLL_H)
-#include <sys/poll.h>
-#endif
 
 #ifdef MSDOS
 #include <dos.h>  /* delay() */
@@ -51,18 +46,23 @@
 #endif
 
 #include "curlx.h" /* from the private lib dir */
-#include "getpart.h"
 #include "util.h"
-#include "timeval.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  EINVAL
-#define EINVAL  22 /* errno.h value */
+/* need init from main() */
+const char *pidname = NULL;
+const char *portname = NULL; /* none by default */
+const char *serverlogfile = NULL;
+int serverlogslocked;
+const char *configfile = NULL;
+const char *logdir = "log";
+char loglockfile[256];
+#ifdef USE_IPV6
+bool use_ipv6 = FALSE;
 #endif
-
-static struct timeval tvnow(void);
+const char *ipv_inuse = "IPv4";
+unsigned short server_port = 0;
+const char *socket_type = "IPv4";
+int socket_domain = AF_INET;
 
 /* This function returns a pointer to STATIC memory. It converts the given
  * binary lump to a hex formatted string usable for output in logs or
@@ -96,7 +96,7 @@ void logmsg(const char *msg, ...)
   va_list ap;
   char buffer[2048 + 1];
   FILE *logfp;
-  struct timeval tv;
+  struct curltime tv;
   time_t sec;
   struct tm *now;
   char timebuf[20];
@@ -104,11 +104,11 @@ void logmsg(const char *msg, ...)
   static int    known_offset;
 
   if(!serverlogfile) {
-    fprintf(stderr, "Error: serverlogfile not set\n");
+    fprintf(stderr, "Serverlogfile not set error\n");
     return;
   }
 
-  tv = tvnow();
+  tv = curlx_now();
   if(!known_offset) {
     epoch_offset = time(NULL) - tv.tv_sec;
     known_offset = 1;
@@ -127,6 +127,7 @@ void logmsg(const char *msg, ...)
 
   do {
     logfp = fopen(serverlogfile, "ab");
+    /* !checksrc! disable ERRNOVAR 1 */
   } while(!logfp && (errno == EINTR));
   if(logfp) {
     fprintf(logfp, "%s %s\n", timebuf, buffer);
@@ -134,52 +135,51 @@ void logmsg(const char *msg, ...)
   }
   else {
     int error = errno;
-    fprintf(stderr, "fopen() failed with error: %d %s\n",
+    fprintf(stderr, "fopen() failed with error (%d) %s\n",
             error, strerror(error));
-    fprintf(stderr, "Error opening file: %s\n", serverlogfile);
+    fprintf(stderr, "Error opening file '%s'\n", serverlogfile);
     fprintf(stderr, "Msg not logged: %s %s\n", timebuf, buffer);
   }
 }
 
+void loghex(unsigned char *buffer, ssize_t len)
+{
+  char data[12000];
+  ssize_t i;
+  unsigned char *ptr = buffer;
+  char *optr = data;
+  ssize_t width = 0;
+  int left = sizeof(data);
+
+  for(i = 0; i < len && (left >= 0); i++) {
+    msnprintf(optr, left, "%02x", ptr[i]);
+    width += 2;
+    optr += 2;
+    left -= 2;
+  }
+  if(width)
+    logmsg("'%s'", data);
+}
+
+unsigned char byteval(char *value)
+{
+  unsigned long num = strtoul(value, NULL, 10);
+  return num & 0xff;
+}
+
 #ifdef _WIN32
 /* use instead of perror() on generic Windows */
-void win32_perror(const char *msg)
+static void win32_perror(const char *msg)
 {
   char buf[512];
   int err = SOCKERRNO;
-  Curl_winapi_strerror(err, buf, sizeof(buf));
+  curlx_winapi_strerror(err, buf, sizeof(buf));
   if(msg)
     fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
 }
 
-void win32_init(void)
-{
-#ifdef USE_WINSOCK
-  WORD wVersionRequested;
-  WSADATA wsaData;
-  int err;
-
-  wVersionRequested = MAKEWORD(2, 2);
-  err = WSAStartup(wVersionRequested, &wsaData);
-
-  if(err) {
-    perror("Winsock init failed");
-    logmsg("Error initialising Winsock -- aborting");
-    exit(1);
-  }
-
-  if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-     HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-    WSACleanup();
-    perror("Winsock init failed");
-    logmsg("No suitable winsock.dll found -- aborting");
-    exit(1);
-  }
-#endif  /* USE_WINSOCK */
-}
-
-void win32_cleanup(void)
+static void win32_cleanup(void)
 {
 #ifdef USE_WINSOCK
   WSACleanup();
@@ -189,29 +189,60 @@ void win32_cleanup(void)
   _flushall();
 }
 
+int win32_init(void)
+{
+  curlx_now_init();
+#ifdef USE_WINSOCK
+  {
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    int err;
+
+    wVersionRequested = MAKEWORD(2, 2);
+    err = WSAStartup(wVersionRequested, &wsaData);
+
+    if(err) {
+      win32_perror("Winsock init failed");
+      logmsg("Error initialising Winsock -- aborting");
+      return 1;
+    }
+
+    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
+       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
+      WSACleanup();
+      win32_perror("Winsock init failed");
+      logmsg("No suitable winsock.dll found -- aborting");
+      return 1;
+    }
+  }
+#endif  /* USE_WINSOCK */
+  atexit(win32_cleanup);
+  return 0;
+}
+
 /* socket-safe strerror (works on Winsock errors, too) */
 const char *sstrerror(int err)
 {
   static char buf[512];
-  return Curl_winapi_strerror(err, buf, sizeof(buf));
+  return curlx_winapi_strerror(err, buf, sizeof(buf));
 }
 #endif  /* _WIN32 */
 
 /* set by the main code to point to where the test dir is */
-const char *path = ".";
+const char *srcpath = ".";
 
-FILE *test2fopen(long testno, const char *logdir)
+FILE *test2fopen(long testno, const char *logdir2)
 {
   FILE *stream;
   char filename[256];
   /* first try the alternative, preprocessed, file */
-  msnprintf(filename, sizeof(filename), ALTTEST_DATA_PATH, logdir, testno);
+  msnprintf(filename, sizeof(filename), "%s/test%ld", logdir2, testno);
   stream = fopen(filename, "rb");
   if(stream)
     return stream;
 
   /* then try the source version */
-  msnprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
+  msnprintf(filename, sizeof(filename), "%s/data/test%ld", srcpath, testno);
   stream = fopen(filename, "rb");
 
   return stream;
@@ -226,51 +257,41 @@ FILE *test2fopen(long testno, const char *logdir)
  *   -1 = system call error, or invalid timeout value
  *    0 = specified timeout has elapsed
  */
-int wait_ms(int timeout_ms)
+int wait_ms(timediff_t timeout_ms)
 {
-#if !defined(MSDOS) && !defined(USE_WINSOCK)
-#ifndef HAVE_POLL
-  struct timeval pending_tv;
-#endif
-  struct timeval initial_tv;
-  int pending_ms;
-#endif
   int r = 0;
 
   if(!timeout_ms)
     return 0;
   if(timeout_ms < 0) {
-    CURL_SETERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
 #if defined(MSDOS)
-  delay(timeout_ms);
-#elif defined(USE_WINSOCK)
+  delay((unsigned int)timeout_ms);
+#elif defined(_WIN32)
+  /* prevent overflow, timeout_ms is typecast to ULONG/DWORD. */
+#if TIMEDIFF_T_MAX >= ULONG_MAX
+  if(timeout_ms >= ULONG_MAX)
+    timeout_ms = ULONG_MAX-1;
+    /* do not use ULONG_MAX, because that is equal to INFINITE */
+#endif
   Sleep((DWORD)timeout_ms);
 #else
-  pending_ms = timeout_ms;
-  initial_tv = tvnow();
-  do {
-    int error;
-#ifdef HAVE_POLL
-    r = poll(NULL, 0, pending_ms);
-#else
-    pending_tv.tv_sec = pending_ms / 1000;
-    pending_tv.tv_usec = (pending_ms % 1000) * 1000;
-    r = select(0, NULL, NULL, NULL, &pending_tv);
-#endif /* HAVE_POLL */
-    if(r != -1)
-      break;
-    error = errno;
-    if(error && (error != EINTR))
-      break;
-    pending_ms = timeout_ms - (int)timediff(tvnow(), initial_tv);
-    if(pending_ms <= 0)
-      break;
-  } while(r == -1);
-#endif /* USE_WINSOCK */
-  if(r)
-    r = -1;
+  /* avoid using poll() for this since it behaves incorrectly with no sockets
+     on Apple operating systems */
+  {
+    struct timeval pending_tv;
+    r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
+  }
+#endif /* _WIN32 */
+  if(r) {
+    if((r == -1) && (SOCKERRNO == SOCKEINTR))
+      /* make EINTR from select or poll not a "lethal" error */
+      r = 0;
+    else
+      r = -1;
+  }
   return r;
 }
 
@@ -278,8 +299,8 @@ curl_off_t our_getpid(void)
 {
   curl_off_t pid;
 
-  pid = (curl_off_t)Curl_getpid();
-#if defined(_WIN32)
+  pid = (curl_off_t)curlx_getpid();
+#ifdef _WIN32
   /* store pid + MAX_PID to avoid conflict with Cygwin/msys PIDs, see also:
    * - 2019-01-31: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
    *               h=b5e1003722cb14235c4f166be72c09acdffc62ea
@@ -332,16 +353,17 @@ void set_advisor_read_lock(const char *filename)
 
   do {
     lockfile = fopen(filename, "wb");
+    /* !checksrc! disable ERRNOVAR 1 */
   } while(!lockfile && ((error = errno) == EINTR));
   if(!lockfile) {
-    logmsg("Error creating lock file %s error: %d %s",
+    logmsg("Error creating lock file %s error (%d) %s",
            filename, error, strerror(error));
     return;
   }
 
   res = fclose(lockfile);
   if(res)
-    logmsg("Error closing lock file %s error: %d %s",
+    logmsg("Error closing lock file %s error (%d) %s",
            filename, errno, strerror(errno));
 }
 
@@ -358,110 +380,11 @@ void clear_advisor_read_lock(const char *filename)
 
   do {
     res = unlink(filename);
+    /* !checksrc! disable ERRNOVAR 1 */
   } while(res && ((error = errno) == EINTR));
   if(res)
-    logmsg("Error removing lock file %s error: %d %s",
+    logmsg("Error removing lock file %s error (%d) %s",
            filename, error, strerror(error));
-}
-
-
-#if defined(_WIN32)
-
-static struct timeval tvnow(void)
-{
-  /*
-  ** GetTickCount() is available on _all_ Windows versions from W95 up
-  ** to nowadays. Returns milliseconds elapsed since last system boot,
-  ** increases monotonically and wraps once 49.7 days have elapsed.
-  **
-  ** GetTickCount64() is available on Windows version from Windows Vista
-  ** and Windows Server 2008 up to nowadays. The resolution of the
-  ** function is limited to the resolution of the system timer, which
-  ** is typically in the range of 10 milliseconds to 16 milliseconds.
-  */
-  struct timeval now;
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
-  ULONGLONG milliseconds = GetTickCount64();
-#else
-  DWORD milliseconds = GetTickCount();
-#endif
-  now.tv_sec = (long)(milliseconds / 1000);
-  now.tv_usec = (long)((milliseconds % 1000) * 1000);
-  return now;
-}
-
-#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
-
-static struct timeval tvnow(void)
-{
-  /*
-  ** clock_gettime() is granted to be increased monotonically when the
-  ** monotonic clock is queried. Time starting point is unspecified, it
-  ** could be the system start-up time, the Epoch, or something else,
-  ** in any case the time starting point does not change once that the
-  ** system has started up.
-  */
-  struct timeval now;
-  struct timespec tsnow;
-  if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
-    now.tv_sec = tsnow.tv_sec;
-    now.tv_usec = (int)(tsnow.tv_nsec / 1000);
-  }
-  /*
-  ** Even when the configure process has truly detected monotonic clock
-  ** availability, it might happen that it is not actually available at
-  ** run-time. When this occurs simply fallback to other time source.
-  */
-#ifdef HAVE_GETTIMEOFDAY
-  else
-    (void)gettimeofday(&now, NULL);
-#else
-  else {
-    now.tv_sec = time(NULL);
-    now.tv_usec = 0;
-  }
-#endif
-  return now;
-}
-
-#elif defined(HAVE_GETTIMEOFDAY)
-
-static struct timeval tvnow(void)
-{
-  /*
-  ** gettimeofday() is not granted to be increased monotonically, due to
-  ** clock drifting and external source time synchronization it can jump
-  ** forward or backward in time.
-  */
-  struct timeval now;
-  (void)gettimeofday(&now, NULL);
-  return now;
-}
-
-#else
-
-static struct timeval tvnow(void)
-{
-  /*
-  ** time() returns the value of time in seconds since the Epoch.
-  */
-  struct timeval now;
-  now.tv_sec = time(NULL);
-  now.tv_usec = 0;
-  return now;
-}
-
-#endif
-
-long timediff(struct timeval newer, struct timeval older)
-{
-  timediff_t diff = newer.tv_sec-older.tv_sec;
-  if(diff >= (LONG_MAX/1000))
-    return LONG_MAX;
-  else if(diff <= (LONG_MIN/1000))
-    return LONG_MIN;
-  return (long)(newer.tv_sec-older.tv_sec)*1000+
-    (long)(newer.tv_usec-older.tv_usec)/1000;
 }
 
 /* vars used to keep around previous signal handlers */
@@ -525,7 +448,7 @@ HANDLE exit_event = NULL;
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
-  logmsg("exit_signal_handler: %d", signum);
+  logmsg("exit_signal_handler (%d)", signum);
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
@@ -631,7 +554,7 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
   wc.hInstance = (HINSTANCE)lpParameter;
   wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
-    perror("RegisterClass failed");
+    win32_perror("RegisterClass failed");
     return (DWORD)-1;
   }
 
@@ -643,14 +566,14 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
                                       (HWND)NULL, (HMENU)NULL,
                                       wc.hInstance, (LPVOID)NULL);
   if(!hidden_main_window) {
-    perror("CreateWindowEx failed");
+    win32_perror("CreateWindowEx failed");
     return (DWORD)-1;
   }
 
   do {
     ret = GetMessage(&msg, NULL, 0, 0);
     if(ret == -1) {
-      perror("GetMessage failed");
+      win32_perror("GetMessage failed");
       return (DWORD)-1;
     }
     else if(ret) {
@@ -839,12 +762,12 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   }
   strcpy(sau->sun_path, unix_socket);
   rc = bind(sock, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
-  if(0 != rc && SOCKERRNO == EADDRINUSE) {
+  if(0 != rc && SOCKERRNO == SOCKEADDRINUSE) {
     struct_stat statbuf;
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(CURL_SOCKET_BAD == unixfd) {
-      logmsg("Failed to create socket at %s: (%d) %s",
+      logmsg("Failed to create socket at %s (%d) %s",
              unix_socket, SOCKERRNO, sstrerror(SOCKERRNO));
       return -1;
     }
@@ -852,8 +775,8 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = connect(unixfd, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
     error = SOCKERRNO;
     sclose(unixfd);
-    if(0 != rc && ECONNREFUSED != error) {
-      logmsg("Failed to connect to %s: (%d) %s",
+    if(0 != rc && SOCKECONNREFUSED != error) {
+      logmsg("Failed to connect to %s (%d) %s",
              unix_socket, error, sstrerror(error));
       return rc;
     }
@@ -865,7 +788,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = lstat(unix_socket, &statbuf);
 #endif
     if(0 != rc) {
-      logmsg("Error binding socket, failed to stat %s: (%d) %s",
+      logmsg("Error binding socket, failed to stat %s (%d) %s",
              unix_socket, errno, strerror(errno));
       return rc;
     }
@@ -878,7 +801,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* dead socket, cleanup and retry bind */
     rc = unlink(unix_socket);
     if(0 != rc) {
-      logmsg("Error binding socket, failed to unlink %s: (%d) %s",
+      logmsg("Error binding socket, failed to unlink %s (%d) %s",
              unix_socket, errno, strerror(errno));
       return rc;
     }

@@ -206,7 +206,7 @@ static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
   if(result != CURLM_OK) {
-    fprintf(stderr, "Curl error on %s: %i (%s)\n",
+    fprintf(stderr, "Curl error on %s (%i) %s\n",
             info, result, curl_multi_strerror(result));
   }
 }
@@ -249,9 +249,9 @@ CURLcode test(char *URL)
 
   hd_src = fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    fprintf(stderr, "fopen() failed with error: %d (%s)\n",
+    fprintf(stderr, "fopen() failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
+    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
 
@@ -263,9 +263,9 @@ CURLcode test(char *URL)
 #endif
   if(hd == -1) {
     /* can't open file, bail out */
-    fprintf(stderr, "fstat() failed with error: %d (%s)\n",
+    fprintf(stderr, "fstat() failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "ERROR: cannot open file (%s)\n", libtest_arg2);
+    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_FSTAT;
   }

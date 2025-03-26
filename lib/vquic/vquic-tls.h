@@ -27,6 +27,7 @@
 #include "curl_setup.h"
 #include "bufq.h"
 #include "vtls/vtls.h"
+#include "vtls/vtls_int.h"
 #include "vtls/openssl.h"
 
 #if defined(USE_HTTP3) && \
@@ -43,7 +44,7 @@ struct curl_tls_ctx {
 #elif defined(USE_GNUTLS)
   struct gtls_ctx gtls;
 #elif defined(USE_WOLFSSL)
-  struct wolfssl_ctx wssl;
+  struct wssl_ctx wssl;
 #endif
 };
 
@@ -60,6 +61,7 @@ typedef CURLcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,
 
 typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
                                              struct Curl_easy *data,
+                                             struct alpn_spec *alpns,
                                              struct Curl_ssl_session *scs,
                                              bool *do_early_data);
 
@@ -70,9 +72,7 @@ typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
  * @param cf          the connection filter involved
  * @param data        the transfer involved
  * @param peer        the peer that will be connected to
- * @param alpn        the ALPN string in protocol format ((len+bytes+)+),
- *                    may be NULL
- * @param alpn_len    the overall number of bytes in `alpn`
+ * @param alpns       the ALPN specifications to negotiate, may be NULL
  * @param cb_setup    optional callback for early TLS config
  * @param cb_user_data user_data param for callback
  * @param ssl_user_data  optional pointer to set in TLS application context
@@ -82,7 +82,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ssl_peer *peer,
-                             const char *alpn, size_t alpn_len,
+                             const struct alpn_spec *alpns,
                              Curl_vquic_tls_ctx_setup *cb_setup,
                              void *cb_user_data,
                              void *ssl_user_data,

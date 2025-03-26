@@ -24,8 +24,7 @@
 ###########################################################################
 
 #
-# This script shows all mentioned contributors from <hash> until HEAD and
-# puts them at the end of the THANKS document on stdout
+# This script updates the docs/THANKS document.
 #
 
 set -eu
@@ -36,6 +35,13 @@ if test "$start" = "-h"; then
   echo "Usage: $0 <since this tag/hash>"
   exit
 fi
+if test "$start" = "stdout"; then
+    # output the names on stdout
+    use_stdout="yes"
+    start=""
+else
+    use_stdout="no";
+fi
 if test -z "$start"; then
   start=$(git tag --sort=taggerdate | grep "^curl-" | tail -1)
 fi
@@ -43,8 +49,12 @@ fi
 # We also include curl-www if possible. Override by setting CURLWWW
 CURLWWW="${CURLWWW:-../curl-www}"
 
-cat ./docs/THANKS
+rand="./docs/THANKS.$$"
 
+# output the existing list of names with lowercase github
+tail -n +7 ./docs/THANKS | sed 's/ github/ github/i'  > $rand
+
+# get new names using git
 {
   {
     git log --use-mailmap "$start..HEAD"
@@ -57,9 +67,10 @@ cat ./docs/THANKS
   cut '-d(' -f1 | \
   cut '-d<' -f1 | \
   tr , '\012' | \
-  sed 's/ at github/ on github/' | \
+  sed 's/ at github/ on github/i' | \
   sed 's/ and /\n/' | \
-  sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
+  sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/i' | \
+  sed 's/ github/ github/i'
 
   # grep out the list of names from RELEASE-NOTES
   # split on ", "
@@ -70,4 +81,25 @@ cat ./docs/THANKS
 } | \
 sed -f ./docs/THANKS-filter | \
 sort -fu | \
-grep -aixvFf ./docs/THANKS
+grep -aixvFf ./docs/THANKS >> $rand
+
+if test "$use_stdout" = "no"; then
+
+  # output header
+  cat <<EOF >./docs/THANKS
+ This project has been alive for many years. Countless people have provided
+ feedback that have improved curl. Here follows a list of people that have
+ contributed (a-z order).
+
+ If you have contributed but are missing here, please let us know!
+
+EOF
+  # append all the names, sorted case insensitively
+  grep -v "^ " $rand | sort -f $rand >> ./docs/THANKS
+else
+  # send all names on stdout
+  grep -v "^ " $rand | sort -f $rand
+fi
+
+# get rid of the temp file
+rm $rand

@@ -67,8 +67,6 @@ my $summary=0;
 my $misses=0;
 
 my @syms;
-my %doc;
-my %rem;
 
 sub scanenums {
     my ($file)=@_;
@@ -124,7 +122,7 @@ sub scanheader {
     open H, "<$f";
     while(<H>) {
         my ($line, $linenum) = ($_, $.);
-        if (/^#define +([^ \n]*)/) {
+        if (/^ *# *define +([^ \n]*)/) {
             if($verbose) {
                 print "Source: $f\n";
                 print "Symbol: $1\n";

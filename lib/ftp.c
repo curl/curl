@@ -587,8 +587,9 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
   }
 #endif
 
-  /* store the latest code for later retrieval */
-  data->info.httpcode = code;
+  /* store the latest code for later retrieval, except during shutdown */
+  if(!data->conn->proto.ftpc.shutdown)
+    data->info.httpcode = code;
 
   if(ftpcode)
     *ftpcode = code;
@@ -912,7 +913,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
           /* either ipv6 or (ipv4|domain|interface):port(-range) */
           addrlen = ip_end - string_ftpport;
 #ifdef USE_IPV6
-          if(Curl_inet_pton(AF_INET6, string_ftpport, &sa6->sin6_addr) == 1) {
+          if(curlx_inet_pton(AF_INET6, string_ftpport, &sa6->sin6_addr) == 1) {
             /* ipv6 */
             port_min = port_max = 0;
             ip_end = NULL; /* this got no port ! */
@@ -998,11 +999,11 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     switch(sa->sa_family) {
 #ifdef USE_IPV6
     case AF_INET6:
-      r = Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
+      r = curlx_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
       break;
 #endif
     default:
-      r = Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
+      r = curlx_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
       break;
     }
     if(!r) {
@@ -1062,7 +1063,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     if(bind(portsock, sa, sslen) ) {
       /* It failed. */
       error = SOCKERRNO;
-      if(possibly_non_local && (error == EADDRNOTAVAIL)) {
+      if(possibly_non_local && (error == SOCKEADDRNOTAVAIL)) {
         /* The requested bind address is not local. Use the address used for
          * the control connection instead and restart the port loop
          */
@@ -1079,7 +1080,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
         possibly_non_local = FALSE; /* do not try this again */
         continue;
       }
-      if(error != EADDRINUSE && error != EACCES) {
+      if(error != SOCKEADDRINUSE && error != SOCKEACCES) {
         failf(data, "bind(port=%hu) failed: %s", port,
               Curl_strerror(error, buffer, sizeof(buffer)));
         goto out;
@@ -1906,7 +1907,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
-      Curl_safefree(ftpc->newhost);
+      free(ftpc->newhost);
       ftpc->newhost = strdup(control_address(conn));
       if(!ftpc->newhost)
         return CURLE_OUT_OF_MEMORY;
@@ -1951,7 +1952,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
   Curl_resolv_unlink(data, &addr); /* we are done using this address */
 
-  Curl_safefree(conn->secondaryhostname);
+  free(conn->secondaryhostname);
   conn->secondary_port = ftpc->newport;
   conn->secondaryhostname = strdup(ftpc->newhost);
   if(!conn->secondaryhostname)
@@ -2901,20 +2902,26 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
               free(dir);
               return result;
             }
-            Curl_safefree(ftpc->entrypath);
+            free(ftpc->entrypath);
             ftpc->entrypath = dir; /* remember this */
             infof(data, "Entry path is '%s'", ftpc->entrypath);
             /* also save it where getinfo can access it: */
-            data->state.most_recent_ftp_entrypath = ftpc->entrypath;
+            free(data->state.most_recent_ftp_entrypath);
+            data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
+            if(!data->state.most_recent_ftp_entrypath)
+              return CURLE_OUT_OF_MEMORY;
             ftp_state(data, FTP_SYST);
             break;
           }
 
-          Curl_safefree(ftpc->entrypath);
+          free(ftpc->entrypath);
           ftpc->entrypath = dir; /* remember this */
           infof(data, "Entry path is '%s'", ftpc->entrypath);
           /* also save it where getinfo can access it: */
-          data->state.most_recent_ftp_entrypath = ftpc->entrypath;
+          free(data->state.most_recent_ftp_entrypath);
+          data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
+          if(!data->state.most_recent_ftp_entrypath)
+            return CURLE_OUT_OF_MEMORY;
         }
         else {
           /* could not get the path */
@@ -2953,14 +2960,14 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
             return result;
           }
           /* remember target server OS */
-          Curl_safefree(ftpc->server_os);
+          free(ftpc->server_os);
           ftpc->server_os = os;
           ftp_state(data, FTP_NAMEFMT);
           break;
         }
         /* Nothing special for the target server. */
         /* remember target server OS */
-        Curl_safefree(ftpc->server_os);
+        free(ftpc->server_os);
         ftpc->server_os = os;
       }
       else {
@@ -3131,6 +3138,8 @@ static CURLcode ftp_block_statemach(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   while(ftpc->state != FTP_STOP) {
+    if(ftpc->shutdown)
+      CURL_TRC_FTP(data, "in shutdown, waiting for server response");
     result = Curl_pp_statemach(data, pp, TRUE, TRUE /* disconnecting */);
     if(result)
       break;
@@ -3368,10 +3377,13 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
        use checking further */
     ;
   else if(data->state.upload) {
-    if((-1 != data->state.infilesize) &&
-       (data->state.infilesize != data->req.writebytecount) &&
-       !data->set.crlf &&
-       (ftp->transfer == PPTRANSFER_BODY)) {
+    if((ftp->transfer == PPTRANSFER_BODY) &&
+       (data->state.infilesize != -1) && /* upload with known size */
+       ((!data->set.crlf && !data->state.prefer_ascii && /* no conversion */
+         (data->state.infilesize != data->req.writebytecount)) ||
+        ((data->set.crlf || data->state.prefer_ascii) && /* maybe crlf conv */
+         (data->state.infilesize > data->req.writebytecount))
+       )) {
       failf(data, "Uploaded unaligned file size (%" FMT_OFF_T
             " out of %" FMT_OFF_T " bytes)",
             data->req.writebytecount, data->state.infilesize);
@@ -4042,6 +4054,7 @@ static CURLcode ftp_quit(struct Curl_easy *data, struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   if(conn->proto.ftpc.ctl_valid) {
+    CURL_TRC_FTP(data, "sending QUIT to close session");
     result = Curl_pp_sendf(data, &conn->proto.ftpc.pp, "%s", "QUIT");
     if(result) {
       failf(data, "Failure sending QUIT command: %s",
@@ -4081,26 +4094,20 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
      ftp_quit() will check the state of ftp->ctl_valid. If it is ok it
      will try to send the QUIT command, otherwise it will just return.
   */
+  ftpc->shutdown = TRUE;
   if(dead_connection)
     ftpc->ctl_valid = FALSE;
 
   /* The FTP session may or may not have been allocated/setup at this point! */
   (void)ftp_quit(data, conn); /* ignore errors on the QUIT */
 
-  if(ftpc->entrypath) {
-    if(data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
-      data->state.most_recent_ftp_entrypath = NULL;
-    }
-    Curl_safefree(ftpc->entrypath);
-  }
-
   freedirs(ftpc);
   Curl_safefree(ftpc->account);
   Curl_safefree(ftpc->alternative_to_user);
+  Curl_safefree(ftpc->entrypath);
   Curl_safefree(ftpc->prevpath);
   Curl_safefree(ftpc->server_os);
   Curl_pp_disconnect(pp);
-  Curl_sec_end(conn);
   return CURLE_OK;
 }
 

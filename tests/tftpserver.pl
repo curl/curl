@@ -34,10 +34,7 @@ BEGIN {
 use serverhelp qw(
     server_pidfilename
     server_logfilename
-    );
-
-use pathhelp qw(
-    exe_ext
+    server_exe
     );
 
 my $verbose = 0;     # set to 1 for debugging
@@ -49,7 +46,6 @@ my $pidfile;
 my $portfile;
 my $logfile;
 my $srcdir;
-my $fork;
 
 my $flags  = "";
 my $path   = '.';
@@ -130,4 +126,4 @@ $flags .= "--pidfile \"$pidfile\" ".
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;
-exec("exec server/tftpd".exe_ext('SRV')." $flags");
+exec("exec ".server_exe('tftpd')." $flags");

@@ -6,6 +6,39 @@ SPDX-License-Identifier: curl
 
 ## curl cipher options
 
+A TLS handshake involves many parameters which take part in the negotiation
+between client and server in order to agree on the TLS version and set of
+algorithms to use for a connection.
+
+What has become known as a "cipher" or better "cipher suite" in TLS
+are names for specific combinations of
+[key exchange](https://en.wikipedia.org/wiki/Key_exchange),
+[bulk encryption](https://en.wikipedia.org/wiki/Link_encryption),
+[message authentication code](https://en.wikipedia.org/wiki/Message_authentication_code)
+and with TLSv1.3 the
+[authenticated encryption](https://en.wikipedia.org/wiki/Authenticated_encryption).
+In addition, there are other parameters that influence the TLS handshake, like
+[DHE](https://en.wikipedia.org/wiki/Diffie–Hellman_key_exchange) "groups" and
+[ECDHE](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie–Hellman) with its
+"curves".
+
+### History
+
+curl's way of letting users configure these settings closely followed OpenSSL
+in its API. TLS learned new parameters, OpenSSL added new API functions and
+curl added command line options.
+
+Several other TLS backends followed the OpenSSL approach, more or less closely,
+and curl maps the command line options to these TLS backends. Some TLS
+backends do not support all of it and command line options are either
+ignored or lead to an error.
+
+Many examples below show the OpenSSL-like use of these options. GnuTLS
+however chose a different approach. These are described in a separate
+section further below.
+
+## ciphers, the OpenSSL way
+
 With curl's option
 [`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
 or
@@ -38,7 +71,7 @@ cipher suites supported by the server and the cipher suites sent by curl. If
 the server is configured to honor the client's cipher preference, the first
 common cipher suite in the list sent by curl is chosen.
 
-## TLS 1.3 cipher suites
+### TLS 1.3 cipher suites
 
 Setting TLS 1.3 cipher suites is supported by curl with
 OpenSSL (1.1.1+, curl 7.61.0+), LibreSSL (3.4.1+, curl 8.3.0+),
@@ -53,14 +86,14 @@ TLS_AES_128_CCM_SHA256
 TLS_AES_128_CCM_8_SHA256
 ```
 
-### wolfSSL notes
+#### wolfSSL notes
 
 In addition to above list the following cipher suites can be used:
 `TLS_SM4_GCM_SM3` `TLS_SM4_CCM_SM3` `TLS_SHA256_SHA256` `TLS_SHA384_SHA384`.
 Usage of these cipher suites is not recommended. (The last two cipher suites
 are NULL ciphers, offering no encryption whatsoever.)
 
-## TLS 1.2 (1.1, 1.0) cipher suites
+### TLS 1.2 (1.1, 1.0) cipher suites
 
 Setting TLS 1.2 cipher suites is supported by curl with OpenSSL, LibreSSL,
 BoringSSL, mbedTLS (curl 8.8.0+), wolfSSL (curl 7.53.0+),
@@ -118,7 +151,7 @@ DES-CBC3-SHA
 See this [list](https://github.com/curl/curl/blob/master/docs/CIPHERS-TLS12.md)
 for a complete list of TLS 1.2 cipher suites.
 
-### OpenSSL notes
+#### OpenSSL notes
 
 In addition to specifying a list of cipher suites, OpenSSL also accepts a
 format with specific cipher strings (like `TLSv1.2`, `AESGCM`, `CHACHA20`) and
@@ -126,7 +159,7 @@ format with specific cipher strings (like `TLSv1.2`, `AESGCM`, `CHACHA20`) and
 [OpenSSL cipher documentation](https://docs.openssl.org/master/man1/openssl-ciphers/#cipher-list-format)
 for further information on that format.
 
-### Schannel notes
+#### Schannel notes
 
 Schannel does not support setting individual TLS 1.2 cipher suites directly.
 It only allows the enabling and disabling of encryption algorithms. These are
@@ -139,7 +172,7 @@ use](https://learn.microsoft.com/en-us/windows/win32/secauthn/cipher-suites-in-s
 to see how that affects the cipher suite selection. When not specifying the
 `--ciphers` and `--tls13-ciphers` options curl passes this flag by default.
 
-## Examples
+### Examples
 
 ```sh
 curl \
@@ -170,6 +203,64 @@ Restrict TLS 1.2 ciphers to `aes128-gcm` and `chacha20`, use default TLS 1.3
 ciphers (if TLS 1.3 is available). Works with OpenSSL, LibreSSL, BoringSSL,
 mbedTLS, wolfSSL, Secure Transport and BearSSL.
 
+## ciphers, the GnuTLS way
+
+With GnuTLS, curl allows configuration of all TLS parameters via option
+[`--ciphers`](https://curl.se/docs/manpage.html#--ciphers)
+or
+[`CURLOPT_SSL_CIPHER_LIST`](https://curl.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+only. The option
+[`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
+or
+[`CURLOPT_TLS13_CIPHERS`](https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
+is being ignored.
+
+`--ciphers` is used to set the GnuTLS **priority string** in
+the following way:
+
+* When the set string starts with '+', '-' or '!' it is *appended* to the
+  priority string libcurl itself generates (separated by ':'). This initial
+  priority depends other settings such as CURLOPT_SSLVERSION(3),
+  CURLOPT_TLSAUTH_USERNAME(3) (for SRP) or if HTTP/3 (QUIC)
+  is being negotiated.
+* Otherwise, the set string fully *replaces* the libcurl generated one. While
+  giving full control to the application, the set priority needs to
+  provide for everything the transfer may need to negotiate. Example: if
+  the set priority only allows TLSv1.2, all HTTP/3 attempts fail.
+
+Users may specify via `--ciphers` anything that GnuTLS supports: ciphers,
+key exchange, MAC, compression, TLS versions, signature algorithms, groups,
+elliptic curves, certificate types. In addition, GnuTLS has a variety of
+other keywords that tweak its operations. Applications or a system
+may define new alias names for priority strings that can then be used here.
+
+Since the order of items in priority strings is significant, it makes no
+sense for curl to puzzle other ssl options somehow together. `--ciphers`
+is the single way to change priority.
+
+### Examples
+
+```sh
+curl \
+  --ciphers '-CIPHER_ALL:+AES-128-GCM:+CHACHA20-POLY1305' \
+  https://example.com/
+```
+Restrict ciphers to `aes128-gcm` and `chacha20` in GnuTLS.
+
+```sh
+curl \
+  --ciphers 'NORMAL:-VERS-ALL:+TLS1.3:-AES-256-GCM' \
+  https://example.com/
+```
+Restrict to only TLS 1.3 without the `aes256-gcm` cipher.
+
+```sh
+curl \
+  --ciphers 'NORMAL:-VERS-ALL:+TLS1.2:-CIPHER_ALL:+CAMELLIA-128-GCM' \
+  https://example.com/
+```
+Restrict to only TLS 1.2 with the `CAMELLIA-128-GCM` cipher.
+
 ## Further reading
 - [OpenSSL cipher suite names documentation](https://docs.openssl.org/master/man1/openssl-ciphers/#cipher-suite-names)
 - [wolfSSL cipher support documentation](https://www.wolfssl.com/documentation/manuals/wolfssl/chapter04.html#cipher-support)
@@ -179,3 +270,4 @@ mbedTLS, wolfSSL, Secure Transport and BearSSL.
 - [Secure Transport cipher suite values](https://developer.apple.com/documentation/security/1550981-ssl_cipher_suite_values)
 - [IANA cipher suites list](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4)
 - [Wikipedia cipher suite article](https://en.wikipedia.org/wiki/Cipher_suite)
+- [GnuTLS Priority Strings](https://gnutls.org/manual/html_node/Priority-Strings.html)

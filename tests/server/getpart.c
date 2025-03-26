@@ -25,13 +25,20 @@
 
 #include "getpart.h"
 
+#ifdef TEST
+#include "curl/curl.h"
+#include "warnless.h"
+#else
 #include "curlx.h" /* from the private lib dir */
+#endif
 
 #include "curl_base64.h"
 #include "curl_memory.h"
 
+#ifndef TEST
 /* include memdebug.h last */
 #include "memdebug.h"
+#endif
 
 #define EAT_SPACE(p) while(*(p) && ISSPACE(*(p))) (p)++
 
@@ -43,6 +50,14 @@
 #define show(x) Curl_nop_stmt
 #endif
 
+#if defined(UNDER_CE)
+#define system_strdup _strdup
+#elif !defined(HAVE_STRDUP)
+#define system_strdup Curl_strdup
+#else
+#define system_strdup strdup
+#endif
+
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(push)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
@@ -51,10 +66,10 @@
 curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
 curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)strdup;
+curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 #if defined(_WIN32) && defined(UNICODE)
-curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
+curl_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -123,8 +138,10 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
   for(;;) {
     int bytestoread = curlx_uztosi(*bufsize - offset);
 
-    if(!fgets(*buffer + offset, bytestoread, stream))
+    if(!fgets(*buffer + offset, bytestoread, stream)) {
+      *length = 0;
       return (offset != 0) ? GPE_OK : GPE_END_OF_FILE;
+    }
 
     *length = offset + line_length(*buffer + offset, bytestoread);
     if(*(*buffer + *length - 1) == '\n')
@@ -222,14 +239,14 @@ static int decodedata(char  **buf,   /* dest buffer */
     return GPE_OK;
 
   /* base64 decode the given buffer */
-  error = Curl_base64_decode(*buf, &buf64, &src_len);
+  error = curlx_base64_decode(*buf, &buf64, &src_len);
   if(error)
     return GPE_OUT_OF_MEMORY;
 
   if(!src_len) {
     /*
     ** currently there is no way to tell apart an OOM condition in
-    ** Curl_base64_decode() from zero length decoded data. For now,
+    ** curlx_base64_decode() from zero length decoded data. For now,
     ** let's just assume it is an OOM condition, currently we have
     ** no input for this function that decodes to zero length data.
     */
@@ -477,3 +494,29 @@ int getpart(char **outbuf, size_t *outlen,
 
   return error;
 }
+
+#ifdef TEST
+#include "../../lib/base64.c"
+#include "../../lib/warnless.c"
+/* Build with:
+ * $ gcc getpart.c -DTEST -I../../include -I../../lib -DHAVE_CONFIG_H
+ */
+int main(int argc, char **argv)
+{
+  if(argc < 3) {
+    printf("./getpart main sub\n");
+  }
+  else {
+    char  *part;
+    size_t partlen;
+    int rc = getpart(&part, &partlen, argv[1], argv[2], stdin);
+    size_t i;
+    if(rc)
+      return rc;
+    for(i = 0; i < partlen; i++)
+      printf("%c", part[i]);
+    free(part);
+  }
+  return 0;
+}
+#endif

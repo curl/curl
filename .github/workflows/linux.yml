@@ -47,11 +47,11 @@ env:
   # renovate: datasource=github-tags depName=wolfSSL/wolfssh versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   wolfssh-version: 1.4.19
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
-  mbedtls-version: 3.6.2
+  mbedtls-version: 3.6.3
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
   msh3-version: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.45.0
+  awslc-version: 1.47.0
   # handled in renovate.json
   openssl-version: 3.4.1
   # handled in renovate.json
@@ -102,7 +102,7 @@ jobs:
           - name: wolfssl-opensslextra valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: wolfssl-opensslextra
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-debug
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev valgrind
@@ -177,16 +177,17 @@ jobs:
             install_steps: skipall
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
 
-          - name: openssl !ipv6
-            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity
+          - name: openssl !ipv6 !--libcurl
+            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option
 
           - name: openssl https-only
             configure: >-
               --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
               --disable-imap --disable-pop3 --disable-smtp
-              --disable-rtmp --disable-rtsp
-              --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
+              --without-librtmp --disable-rtsp
+              --without-libssh2 --without-libssh --without-wolfssh
+              --disable-tftp --disable-ftp --disable-file --disable-smb
 
           - name: openssl torture !FTP
             install_packages: zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
@@ -214,9 +215,9 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: clang-tidy
-            install_packages: clang-tidy libssl-dev libssh2-1-dev
-            install_steps: skipall
-            configure: --with-openssl --with-libssh2
+            install_packages: clang-tidy zlib1g-dev libssl-dev libkrb5-dev
+            install_steps: skipall wolfssl-opensslextra wolfssh
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --with-wolfssh=$HOME/wolfssh --with-openssl --enable-ech --with-gssapi --enable-ssls-export
             make-custom-target: tidy
 
           - name: scanbuild
@@ -302,9 +303,10 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf ninja-build \
-            ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' && 'stunnel4' || '' }} \
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }} \
             libpsl-dev libbrotli-dev libzstd-dev \
-            ${{ matrix.build.install_packages }}
+            ${{ matrix.build.install_packages }} \
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd' || '' }}
           python3 -m venv $HOME/venv
 
       - name: 'install prereqs'
@@ -319,11 +321,6 @@ jobs:
             ${{ matrix.build.install_packages }}
           python3 -m venv $HOME/venv
 
-      - name: 'install prereqs for pytest'
-        if: contains(matrix.build.install_steps, 'pytest')
-        run: |
-          sudo apt-get -o Dpkg::Use-Pty=0 install apache2 apache2-dev libnghttp2-dev vsftpd
-
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')
         run: |
@@ -335,7 +332,7 @@ jobs:
 
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-bearssl
         env:
           cache-name: cache-bearssl
@@ -357,7 +354,7 @@ jobs:
 
       - name: 'cache libressl'
         if: contains(matrix.build.install_steps, 'libressl')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -377,7 +374,7 @@ jobs:
 
       - name: 'cache wolfssl (all)'
         if: contains(matrix.build.install_steps, 'wolfssl-all')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-wolfssl-all
         env:
           cache-name: cache-wolfssl-all
@@ -399,7 +396,7 @@ jobs:
 
       - name: 'cache wolfssl (opensslextra)'
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-wolfssl-opensslextra
         env:
           cache-name: cache-wolfssl-opensslextra
@@ -415,13 +412,13 @@ jobs:
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-opensslextra \
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
           make install
 
       - name: 'cache wolfssh'
         if: contains(matrix.build.install_steps, 'wolfssl')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-wolfssh
         env:
           cache-name: cache-wolfssh
@@ -443,7 +440,7 @@ jobs:
 
       - name: 'cache mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-mbedtls
         env:
           cache-name: cache-mbedtls-threadsafe
@@ -467,7 +464,7 @@ jobs:
 
       - name: 'cache openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-openssl-tsan
         env:
           cache-name: cache-openssl-tsan
@@ -486,7 +483,7 @@ jobs:
 
       - name: 'cache quictls'
         if: contains(matrix.build.install_steps, 'quictls')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-quictls
         env:
           cache-name: cache-quictls
@@ -505,7 +502,7 @@ jobs:
 
       - name: 'cache msh3'
         if: contains(matrix.build.install_steps, 'msh3')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-msh3
         env:
           cache-name: cache-msh3
@@ -524,7 +521,7 @@ jobs:
 
       - name: 'cache awslc'
         if: contains(matrix.build.install_steps, 'awslc')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -546,7 +543,7 @@ jobs:
 
       - name: 'cache rustls'
         if: contains(matrix.build.install_steps, 'rustls')
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-rustls
         env:
           cache-name: cache-rustls
@@ -560,7 +557,7 @@ jobs:
           cd $HOME
           curl -sSf --compressed https://sh.rustup.rs/ | sh -s -- -y
           source $HOME/.cargo/env
-          rustup toolchain install nightly
+          rustup toolchain install stable --profile minimal
 
       - name: 'build rustls'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
@@ -593,37 +590,37 @@ jobs:
             export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
           fi
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake -B . -G Ninja \
+            cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               ${{ matrix.build.generate }}
           else
+            mkdir bld && cd bld && \
             ${{ matrix.build.configure-prefix }} \
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --disable-dependency-tracking \
               ${{ matrix.build.configure }}
           fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' lib/curl_config.h | sort || true
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'test configs'
-        run: |
-          cat tests/config || true
-          cat tests/http/config.ini || true
+        run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build . --verbose
+            ${{ matrix.build.make-prefix }} cmake --build bld --verbose
           else
-            ${{ matrix.build.make-prefix }} make V=1 ${{ matrix.build.make-custom-target }}
+            ${{ matrix.build.make-prefix }} make -C bld V=1 ${{ matrix.build.make-custom-target }}
           fi
 
       - name: 'single-use function check'
@@ -631,43 +628,43 @@ jobs:
         run: |
           git config --global --add safe.directory "*"
           if [ -n '${{ matrix.build.generate }}' ]; then
-            libcurla=lib/libcurl.a
+            libcurla=bld/lib/libcurl.a
           else
-            libcurla=lib/.libs/libcurl.a
+            libcurla=bld/lib/.libs/libcurl.a
           fi
           ./scripts/singleuse.pl --unit ${libcurla}
 
       - name: 'check curl -V output'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: ./src/curl -V
+        run: bld/src/curl -V
 
       - name: 'cmake install'
         if: ${{ matrix.build.generate }}
-        run: cmake --install . --strip
+        run: cmake --install bld --strip
 
       - name: 'build tests'
-        if: ${{ matrix.build.install_steps != 'skipall' }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target testdeps
+            cmake --build bld --verbose --target testdeps
           else
-            make V=1 -C tests
+            make -C bld V=1 -C tests
           fi
 
       - name: 'install test prereqs'
-        if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.container == null }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && matrix.build.container == null }}
         run: |
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
-        if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
             if [[ '${{ matrix.build.install_steps }}' = *'wolfssh'* ]]; then
-              TFLAGS+=' ~SFTP'
+              TFLAGS+=' ~SFTP'  # curl: (79) wolfssh SFTP connect error -1051 / WS_MATCH_KEY_ALGO_E / cannot match key algo with peer
             fi
             if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
@@ -678,9 +675,9 @@ jobs:
           fi
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
-            make V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           fi
 
       - name: 'install pytest prereqs'
@@ -692,22 +689,21 @@ jobs:
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')
         env:
-          TFLAGS: '${{ matrix.build.tflags }}'
           CURL_CI: github
           PYTEST_ADDOPTS: '--color=yes'
         run: |
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target curl-pytest-ci
+            cmake --build bld --verbose --target curl-pytest-ci
           else
-            make V=1 pytest-ci
+            make -C bld V=1 pytest-ci
           fi
 
       - name: 'build examples'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples
+            ${{ matrix.build.make-prefix }} cmake --build bld --verbose --target curl-examples
           else
-            ${{ matrix.build.make-prefix }} make V=1 examples
+            ${{ matrix.build.make-prefix }} make -C bld V=1 examples
           fi

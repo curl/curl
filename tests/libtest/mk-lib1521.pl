@@ -335,7 +335,7 @@ CURLcode test(char *URL)
   void *conv_to_network_cb = NULL;
   void *conv_from_utf8_cb = NULL;
   void *interleavecb = NULL;
-  char *stringpointerextra = (char *)"moooo";
+  char *stringpointerextra = (char *)CURL_UNCONST("moooo");
   struct curl_slist *slist = NULL;
   struct curl_httppost *httppost = NULL;
   curl_mime *mimepost = NULL;
@@ -348,7 +348,7 @@ CURLcode test(char *URL)
   curl_socket_t sockfd;
   struct curl_certinfo *certinfo;
   struct curl_tlssessioninfo *tlssession;
-  struct curl_blob blob = { (void *)"silly", 5, 0};
+  struct curl_blob blob = { CURL_UNCONST("silly"), 5, 0};
   CURLcode res = CURLE_OK;
   (void)URL; /* not used */
   global_init(CURL_GLOBAL_ALL);
@@ -594,6 +594,7 @@ MOO
 
 print $fh <<FOOTER
   )
+  /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
   curl_easy_setopt(curl, (CURLoption)1, 0);
   res = CURLE_OK;
 test_cleanup:

@@ -83,7 +83,7 @@ struct hsts *Curl_hsts_init(void)
 
 static void hsts_free(struct stsentry *e)
 {
-  free((char *)e->host);
+  free(CURL_UNCONST(e->host));
   free(e);
 }
 
@@ -154,8 +154,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     return CURLE_OK;
 
   do {
-    while(ISBLANK(*p))
-      p++;
+    Curl_str_passblanks(&p);
     if(strncasecompare("max-age", p, 7)) {
       bool quoted = FALSE;
       int rc;
@@ -164,17 +163,14 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         return CURLE_BAD_FUNCTION_ARGUMENT;
 
       p += 7;
-      while(ISBLANK(*p))
-        p++;
-      if(*p++ != '=')
+      Curl_str_passblanks(&p);
+      if(Curl_str_single(&p, '='))
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      while(ISBLANK(*p))
-        p++;
+      Curl_str_passblanks(&p);
 
-      if(*p == '\"') {
-        p++;
+      if(!Curl_str_single(&p, '\"'))
         quoted = TRUE;
-      }
+
       rc = Curl_str_number(&p, &expires, TIME_T_MAX);
       if(rc == STRE_OVERFLOW)
         expires = CURL_OFF_T_MAX;
@@ -202,8 +198,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         p++;
     }
 
-    while(ISBLANK(*p))
-      p++;
+    Curl_str_passblanks(&p);
     if(*p == ';')
       p++;
   } while(*p);
@@ -305,7 +300,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
   struct tm stamp;
   CURLcode result;
 
-  e.name = (char *)sts->host;
+  e.name = (char *)CURL_UNCONST(sts->host);
   e.namelen = strlen(sts->host);
   e.includeSubDomains = sts->includeSubDomains;
 
@@ -533,9 +528,9 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
     struct dynbuf buf;
     Curl_dyn_init(&buf, MAX_HSTS_LINE);
     while(Curl_get_line(&buf, fp)) {
-      char *lineptr = Curl_dyn_ptr(&buf);
-      while(ISBLANK(*lineptr))
-        lineptr++;
+      const char *lineptr = Curl_dyn_ptr(&buf);
+      Curl_str_passblanks(&lineptr);
+
       /*
        * Skip empty or commented lines, since we know the line will have a
        * trailing newline from Curl_get_line we can treat length 1 as empty.

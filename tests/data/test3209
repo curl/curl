@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+APPEND
+UPLOAD
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+<name>
+Upload message via IMAP with upload flags
+</name>
+<command>
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret --upload-flags answered,deleted,draft,flagged,seen
+</command>
+<file name="%LOGDIR/upload%TESTNUMBER">
+Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
+From: Fred Foobar <foobar@example.COM>
+Subject: afternoon meeting
+To: joe@example.com
+Message-Id: <B27397-0100000@example.COM>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
+
+Hello Joe, do you think we can meet at 3:30 tomorrow?
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 APPEND %TESTNUMBER (\Answered \Deleted \Draft \Flagged \Seen) {286}
+A004 LOGOUT
+</protocol>
+<upload>
+Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
+From: Fred Foobar <foobar@example.COM>
+Subject: afternoon meeting
+To: joe@example.com
+Message-Id: <B27397-0100000@example.COM>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
+
+Hello Joe, do you think we can meet at 3:30 tomorrow?
+</upload>
+</verify>
+</testcase>

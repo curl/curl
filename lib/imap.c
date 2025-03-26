@@ -36,6 +36,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#include "dynbuf.h"
 
 #ifndef CURL_DISABLE_IMAP
 
@@ -192,6 +193,10 @@ static const struct SASLproto saslimap = {
   SASL_FLAG_BASE64            /* Configuration flags */
 };
 
+struct ulbits {
+  int bit;
+  const char *flag;
+};
 
 /***********************************************************************
  *
@@ -760,6 +765,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   struct IMAP *imap = data->req.p.imap;
   char *mailbox;
+  struct dynbuf flags;
 
   /* Check we have a mailbox */
   if(!imap->mailbox) {
@@ -808,10 +814,43 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
   if(!mailbox)
     return CURLE_OUT_OF_MEMORY;
 
-  /* Send the APPEND command */
-  result = imap_sendf(data, "APPEND %s (\\Seen) {%" FMT_OFF_T "}",
-                      mailbox, data->state.infilesize);
+  /* Generate flags string and send the APPEND command */
+  Curl_dyn_init(&flags, 100);
+  if(data->set.upload_flags) {
+    int i;
+    struct ulbits ulflag[] = {
+      {CURLULFLAG_ANSWERED, "Answered"},
+      {CURLULFLAG_DELETED, "Deleted"},
+      {CURLULFLAG_DRAFT, "Draft"},
+      {CURLULFLAG_FLAGGED, "Flagged"},
+      {CURLULFLAG_SEEN, "Seen"},
+      {0, NULL}
+    };
 
+    result = CURLE_OUT_OF_MEMORY;
+    if(Curl_dyn_add(&flags, " (")) {
+      goto cleanup;
+    }
+
+    for(i = 0; ulflag[i].bit; i++) {
+      if(data->set.upload_flags & ulflag[i].bit) {
+        if((Curl_dyn_len(&flags) > 2 && Curl_dyn_add(&flags, " ")) ||
+           Curl_dyn_add(&flags, "\\") || Curl_dyn_add(&flags, ulflag[i].flag))
+            goto cleanup;
+      }
+    }
+
+    if(Curl_dyn_add(&flags, ")"))
+      goto cleanup;
+  }
+  else if(Curl_dyn_add(&flags, ""))
+    goto cleanup;
+
+  result = imap_sendf(data, "APPEND %s%s {%" FMT_OFF_T "}",
+                      mailbox, Curl_dyn_ptr(&flags), data->state.infilesize);
+
+cleanup:
+  Curl_dyn_free(&flags);
   free(mailbox);
 
   if(!result)
@@ -1095,7 +1134,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data, int imapcode,
         Curl_dyn_init(&uid, 20);
         if(Curl_dyn_addn(&uid, p, len))
           return CURLE_OUT_OF_MEMORY;
-        Curl_safefree(imapc->mailbox_uidvalidity);
+        free(imapc->mailbox_uidvalidity);
         imapc->mailbox_uidvalidity = Curl_dyn_ptr(&uid);
       }
     }
@@ -1456,14 +1495,17 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done)
   /* We always support persistent connections in IMAP */
   connkeep(conn, "IMAP default");
 
-  PINGPONG_SETUP(pp, imap_statemachine, imap_endofresp);
+  if(!imapc->initialised) {
+    PINGPONG_SETUP(pp, imap_statemachine, imap_endofresp);
 
-  /* Set the default preferred authentication type and mechanism */
-  imapc->preftype = IMAP_TYPE_ANY;
-  Curl_sasl_init(&imapc->sasl, data, &saslimap);
+    /* Set the default preferred authentication type and mechanism */
+    imapc->preftype = IMAP_TYPE_ANY;
+    Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
-  Curl_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
-  Curl_pp_init(pp);
+    Curl_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
+    Curl_pp_init(pp);
+    imapc->initialised = TRUE;
+  }
 
   /* Parse the URL options */
   result = imap_parse_url_options(conn);
@@ -1653,27 +1695,30 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
   struct imap_conn *imapc = &conn->proto.imapc;
   (void)data;
 
-  /* We cannot send quit unconditionally. If this connection is stale or
-     bad in any way, sending quit and waiting around here will make the
-     disconnect wait in vain and cause more problems than we need to. */
+  if(imapc->initialised) {
+    /* We cannot send quit unconditionally. If this connection is stale or
+       bad in any way, sending quit and waiting around here will make the
+       disconnect wait in vain and cause more problems than we need to. */
 
-  /* The IMAP session may or may not have been allocated/setup at this
-     point! */
-  if(!dead_connection && conn->bits.protoconnstart) {
-    if(!imap_perform_logout(data))
-      (void)imap_block_statemach(data, conn, TRUE); /* ignore errors */
+    /* The IMAP session may or may not have been allocated/setup at this
+       point! */
+    if(!dead_connection && conn->bits.protoconnstart) {
+      if(!imap_perform_logout(data))
+        (void)imap_block_statemach(data, conn, TRUE); /* ignore errors */
+    }
+
+    /* Disconnect from the server */
+    Curl_pp_disconnect(&imapc->pp);
+    Curl_dyn_free(&imapc->dyn);
+
+    /* Cleanup the SASL module */
+    Curl_sasl_cleanup(conn, imapc->sasl.authused);
+
+    /* Cleanup our connection based variables */
+    Curl_safefree(imapc->mailbox);
+    Curl_safefree(imapc->mailbox_uidvalidity);
+    memset(imapc, 0, sizeof(*imapc));
   }
-
-  /* Disconnect from the server */
-  Curl_pp_disconnect(&imapc->pp);
-  Curl_dyn_free(&imapc->dyn);
-
-  /* Cleanup the SASL module */
-  Curl_sasl_cleanup(conn, imapc->sasl.authused);
-
-  /* Cleanup our connection based variables */
-  Curl_safefree(imapc->mailbox);
-  Curl_safefree(imapc->mailbox_uidvalidity);
 
   return CURLE_OK;
 }

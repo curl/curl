@@ -81,6 +81,8 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
 char *Curl_dyn_take(struct dynbuf *s, size_t *plen);
 
 /* Dynamic buffer max sizes */
+#define MAX_DYNBUF_SIZE (SIZE_T_MAX/2)
+
 #define DYN_DOH_RESPONSE    3000
 #define DYN_DOH_CNAME       256
 #define DYN_PAUSE_BUFFER    (64 * 1024 * 1024)
@@ -95,4 +97,6 @@ char *Curl_dyn_take(struct dynbuf *s, size_t *plen);
 #define DYN_PINGPPONG_CMD   (64*1024)
 #define DYN_IMAP_CMD        (64*1024)
 #define DYN_MQTT_RECV       (64*1024)
+#define DYN_MQTT_SEND       0xFFFFFFF
+#define DYN_CRLFILE_SIZE    (400*1024*1024) /* 400mb */
 #endif

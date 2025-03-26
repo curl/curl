@@ -46,7 +46,6 @@
 #include "urldata.h"
 #include "fileinfo.h"
 #include "llist.h"
-#include "strtoofft.h"
 #include "ftp.h"
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
@@ -443,11 +442,10 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           else if(c == '\n') {
             mem[parser->item_length - 1] = 0;
             if(!strncmp("total ", mem, 6)) {
-              char *endptr = mem + 6;
+              const char *endptr = mem + 6;
               /* here we can deal with directory size, pass the leading
                  whitespace and then the digits */
-              while(ISBLANK(*endptr))
-                endptr++;
+              Curl_str_passblanks(&endptr);
               while(ISDIGIT(*endptr))
                 endptr++;
               if(*endptr) {
@@ -628,13 +626,11 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         case PL_UNIX_SIZE_NUMBER:
           parser->item_length++;
           if(c == ' ') {
-            char *p;
+            const char *p = mem + parser->item_offset;
             curl_off_t fsize;
             mem[parser->item_offset + parser->item_length - 1] = 0;
-            if(!curlx_strtoofft(mem + parser->item_offset,
-                                &p, 10, &fsize)) {
-              if(p[0] == '\0' && fsize != CURL_OFF_T_MAX &&
-                 fsize != CURL_OFF_T_MIN) {
+            if(!Curl_str_numblanks(&p, &fsize)) {
+              if(p[0] == '\0' && fsize != CURL_OFF_T_MAX) {
                 parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_SIZE;
                 parser->file_data->info.size = fsize;
               }
@@ -955,10 +951,8 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
               finfo->size = 0;
             }
             else {
-              char *endptr;
-              if(curlx_strtoofft(mem +
-                                 parser->item_offset,
-                                 &endptr, 10, &finfo->size)) {
+              const char *p = mem + parser->item_offset;
+              if(Curl_str_numblanks(&p, &finfo->size)) {
                 parser->error = CURLE_FTP_BAD_FILE_LIST;
                 goto fail;
               }

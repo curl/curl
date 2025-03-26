@@ -1018,19 +1018,15 @@ static CURLcode doh_decode_rdata_name(unsigned char **buf, size_t *remaining,
                                       char **dnsname)
 {
   unsigned char *cp = NULL;
-  int rem = 0;
+  size_t rem = 0;
   unsigned char clen = 0; /* chunk len */
   struct dynbuf thename;
 
   DEBUGASSERT(buf && remaining && dnsname);
-  if(!buf || !remaining || !dnsname)
+  if(!buf || !remaining || !dnsname || !*remaining)
     return CURLE_OUT_OF_MEMORY;
-  rem = (int)*remaining;
-  if(rem <= 0) {
-    Curl_dyn_free(&thename);
-    return CURLE_OUT_OF_MEMORY;
-  }
   Curl_dyn_init(&thename, CURL_MAXLEN_host_name);
+  rem = *remaining;
   cp = *buf;
   clen = *cp++;
   if(clen == 0) {
@@ -1088,6 +1084,7 @@ static CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
                                         struct Curl_https_rrinfo **hrr)
 {
   uint16_t pcode = 0, plen = 0;
+  uint32_t expected_min_pcode = 0;
   struct Curl_https_rrinfo *lhrr = NULL;
   char *dnsname = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
@@ -1114,13 +1111,16 @@ static CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
     plen = doh_get16bit(cp, 2);
     cp += 4;
     len -= 4;
+    if(pcode < expected_min_pcode || plen > len) {
+      result = CURLE_WEIRD_SERVER_REPLY;
+      goto err;
+    }
     result = Curl_httpsrr_set(data, lhrr, pcode, cp, plen);
     if(result)
       goto err;
-    if(plen > 0 && plen <= len) {
-      cp += plen;
-      len -= plen;
-    }
+    cp += plen;
+    len -= plen;
+    expected_min_pcode = pcode + 1;
   }
   DEBUGASSERT(!len);
   *hrr = lhrr;
@@ -1181,7 +1181,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
   if(dohp->probe[DOH_SLOT_IPV4].easy_mid < 0 &&
      dohp->probe[DOH_SLOT_IPV6].easy_mid < 0) {
-    failf(data, "Could not DoH-resolve: %s", data->state.async.hostname);
+    failf(data, "Could not DoH-resolve: %s", dohp->host);
     return CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
       CURLE_COULDNT_RESOLVE_HOST;
   }

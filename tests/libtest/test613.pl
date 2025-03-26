@@ -66,6 +66,9 @@ if ($ARGV[0] eq "prepare")
     # represented exactly on a FAT filesystem.
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
+    if($^O eq 'cygwin') {
+      system "chattr +r rofile.txt";
+    }
 
     exit 0;
 }
@@ -75,6 +78,10 @@ elsif ($ARGV[0] eq "postprocess")
     my $logfile = $ARGV[2];
 
     # Clean up the test directory
+    if($^O eq 'cygwin') {
+      system "chattr -r $dirname/rofile.txt";
+    }
+    chmod 0666, "$dirname/rofile.txt";
     unlink "$dirname/rofile.txt";
     unlink "$dirname/plainfile.txt";
     rmdir "$dirname/asubdir";
@@ -110,18 +117,11 @@ elsif ($ARGV[0] eq "postprocess")
                 # consistent for across all test systems and filesystems
                 push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
             } elsif ($1 eq "-") {
-                # Replace missing group and other permissions with user
-                # permissions (eg. on Windows) due to them being shown as *
-                my ($u, $g, $o) = ($2, $3, $4);
-                if($g eq "**") {
-                    $g = $u;
-                }
-                if($o eq "**") {
-                    $o = $u;
-                }
+                # Ignore group and other permissions, because these may vary on
+                # some systems (e.g. on Windows)
                 # Erase user and group names, as they are not consistent across
                 # all test systems
-                my $line = sprintf("%s%s?%s?%s?%5d U         U %15d %s %s\n", $1,$u,$g,$o,$5,$6,$7,$8);
+                my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1,$2,$5,$6,$7,$8);
                 push @canondir, $line;
             } else {
                 # Unexpected format; just pass it through and let the test fail

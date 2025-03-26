@@ -33,7 +33,7 @@
 #  define CURL_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
 #endif
 #else
-#  define CURL_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
+#  define CURL_SET_BINMODE(stream)  (void)stream; tool_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_TOOL_BINMODE_H */

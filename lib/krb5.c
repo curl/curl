@@ -173,7 +173,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
   /* NOTE that the cast is safe, neither of the krb5, gnu gss and heimdal
    * libraries modify the input buffer in gss_wrap()
    */
-  dec.value = (void *)from;
+  dec.value = CURL_UNCONST(from);
   dec.length = (size_t)length;
   maj = gss_wrap(&min, *context,
                  level == PROT_PRIVATE,
@@ -215,7 +215,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   struct gss_channel_bindings_struct chan;
   size_t base64_sz = 0;
   struct sockaddr_in *remote_addr =
-    (struct sockaddr_in *)(void *)&conn->remote_addr->curl_sa_addr;
+    (struct sockaddr_in *)CURL_UNCONST(&conn->remote_addr->curl_sa_addr);
   char *stringp;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
@@ -855,7 +855,6 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
             mech->name);
       return CURLE_FAILED_INIT;
     }
-    Curl_dyn_init(&conn->in_buffer.buf, CURL_MAX_INPUT_LENGTH);
   }
 
   infof(data, "Trying mechanism %s...", mech->name);
@@ -914,9 +913,16 @@ Curl_sec_login(struct Curl_easy *data, struct connectdata *conn)
   return choose_mech(data, conn);
 }
 
+void
+Curl_sec_conn_init(struct connectdata *conn)
+{
+  Curl_dyn_init(&conn->in_buffer.buf, CURL_MAX_INPUT_LENGTH);
+  conn->in_buffer.index = 0;
+  conn->in_buffer.eof_flag = 0;
+}
 
 void
-Curl_sec_end(struct connectdata *conn)
+Curl_sec_conn_destroy(struct connectdata *conn)
 {
   if(conn->mech && conn->mech->end)
     conn->mech->end(conn->app_data);

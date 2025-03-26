@@ -170,7 +170,12 @@ static int MD4_Init(MD4_CTX *ctx)
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  CryptHashData(ctx->hHash, (BYTE *)data, (unsigned int) size, 0);
+#ifdef __MINGW32CE__
+  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(data),
+                (unsigned int) size, 0);
+#else
+  CryptHashData(ctx->hHash, (const BYTE *)data, (unsigned int) size, 0);
+#endif
 }
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
@@ -308,16 +313,16 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD4_SET(n) \
-        (*(MD4_u32plus *)(void *)&ptr[(n) * 4])
+        (*(const MD4_u32plus *)(const void *)&ptr[(n) * 4])
 #define MD4_GET(n) \
         MD4_SET(n)
 #else
 #define MD4_SET(n) \
         (ctx->block[(n)] = \
-        (MD4_u32plus)ptr[(n) * 4] | \
-        ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
-        ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
-        ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
+          (MD4_u32plus)ptr[(n) * 4] | \
+          ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
+          ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
+          ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
 #define MD4_GET(n) \
         (ctx->block[(n)])
 #endif

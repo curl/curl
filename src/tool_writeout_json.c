@@ -38,7 +38,7 @@
 int jsonquoted(const char *in, size_t len,
                struct curlx_dynbuf *out, bool lowercase)
 {
-  const unsigned char *i = (unsigned char *)in;
+  const unsigned char *i = (const unsigned char *)in;
   const unsigned char *in_end = &i[len];
   CURLcode result = CURLE_OK;
 

@@ -39,24 +39,18 @@
 # - `BROTLI_CFLAGS`:         Required compiler flags.
 # - `BROTLI_VERSION`:        Version of brotli.
 
-set(BROTLI_PC_REQUIRES "libbrotlidec")
+set(BROTLI_PC_REQUIRES "libbrotlidec" "libbrotlicommon")  # order is significant: brotlidec then brotlicommon
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED BROTLI_INCLUDE_DIR AND
    NOT DEFINED BROTLICOMMON_LIBRARY AND
    NOT DEFINED BROTLIDEC_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(BROTLI "libbrotlicommon")
-  pkg_check_modules(BROTLIDEC ${BROTLI_PC_REQUIRES})
+  pkg_check_modules(BROTLI ${BROTLI_PC_REQUIRES})
 endif()
 
-if(BROTLI_FOUND AND BROTLIDEC_FOUND)
+if(BROTLI_FOUND)
   set(Brotli_FOUND TRUE)
-  list(APPEND BROTLIDEC_LIBRARIES ${BROTLI_LIBRARIES})  # order is significant: brotlidec then brotlicommon
-  list(REVERSE BROTLIDEC_LIBRARIES)
-  list(REMOVE_DUPLICATES BROTLIDEC_LIBRARIES)
-  list(REVERSE BROTLIDEC_LIBRARIES)
-  set(BROTLI_LIBRARIES ${BROTLIDEC_LIBRARIES})
   string(REPLACE ";" " " BROTLI_CFLAGS "${BROTLI_CFLAGS}")
   message(STATUS "Found Brotli (via pkg-config): ${BROTLI_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
 else()

@@ -465,6 +465,22 @@ January: switched to "curldown" for all documentation
 
 April 24: the curl container has been pulled more than six billion times
 
-May: experimental support for ECH
+May: experimental support for ECH, dropped NTLM_WB
 
 August 9: we adopted the wcurl tool into the curl organization
+
+September 11: --help [option]
+
+November 6: TLS 1.3 early data, WebSocket is official
+
+December 21: dropped hyper
+
+2025
+----
+
+February 5: first 0RTT for QUIC, ssl session import/export
+
+February: experimental HTTPS RR support
+
+February 22: The website served 62.95 TB/month; 12.43 billion requests
+ The docker image has been pulled 6373501745 times.

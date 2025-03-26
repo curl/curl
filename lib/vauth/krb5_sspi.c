@@ -55,9 +55,9 @@ bool Curl_auth_is_gssapi_supported(void)
   SECURITY_STATUS status;
 
   /* Query the security package for Kerberos */
-  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
-                                              TEXT(SP_NAME_KERBEROS),
-                                              &SecurityPackage);
+  status = Curl_pSecFn->QuerySecurityPackageInfo(
+                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
+                                 &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
   if(status == SEC_E_OK) {
@@ -118,9 +118,9 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
   if(!krb5->output_token) {
     /* Query the security package for Kerberos */
-    status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
-                                                TEXT(SP_NAME_KERBEROS),
-                                                &SecurityPackage);
+    status = Curl_pSecFn->QuerySecurityPackageInfo(
+                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
+                                 &SecurityPackage);
     if(status != SEC_E_OK) {
       failf(data, "SSPI: could not get auth info");
       return CURLE_AUTH_ERROR;
@@ -159,11 +159,10 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
     /* Acquire our credentials handle */
     status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                                (TCHAR *)
-                                                TEXT(SP_NAME_KERBEROS),
-                                                SECPKG_CRED_OUTBOUND, NULL,
-                                                krb5->p_identity, NULL, NULL,
-                                                krb5->credentials, &expiry);
+                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
+                                 SECPKG_CRED_OUTBOUND, NULL,
+                                 krb5->p_identity, NULL, NULL,
+                                 krb5->credentials, &expiry);
     if(status != SEC_E_OK)
       return CURLE_LOGIN_DENIED;
 
@@ -184,7 +183,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     chlg_desc.cBuffers  = 1;
     chlg_desc.pBuffers  = &chlg_buf;
     chlg_buf.BufferType = SECBUFFER_TOKEN;
-    chlg_buf.pvBuffer   = (void *) Curl_bufref_ptr(chlg);
+    chlg_buf.pvBuffer   = CURL_UNCONST(Curl_bufref_ptr(chlg));
     chlg_buf.cbBuffer   = curlx_uztoul(Curl_bufref_len(chlg));
   }
 
@@ -297,7 +296,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   input_desc.cBuffers = 2;
   input_desc.pBuffers = input_buf;
   input_buf[0].BufferType = SECBUFFER_STREAM;
-  input_buf[0].pvBuffer = (void *) Curl_bufref_ptr(chlg);
+  input_buf[0].pvBuffer = CURL_UNCONST(Curl_bufref_ptr(chlg));
   input_buf[0].cbBuffer = curlx_uztoul(Curl_bufref_len(chlg));
   input_buf[1].BufferType = SECBUFFER_DATA;
   input_buf[1].pvBuffer = NULL;

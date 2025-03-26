@@ -49,17 +49,15 @@ struct mqtt_conn {
 
 /* protocol-specific transfer-related data */
 struct MQTT {
-  char *sendleftovers;
-  size_t nsend; /* size of sendleftovers */
-
+  struct dynbuf sendbuf;
   /* when receiving */
-  size_t npacket; /* byte counter */
-  unsigned char firstbyte;
-  size_t remaining_length;
   struct dynbuf recvbuf;
+  size_t npacket; /* byte counter */
+  size_t remaining_length;
   unsigned char pkt_hd[4]; /* for decoding the arriving packet length */
   struct curltime lastTime; /* last time we sent or received data */
   bool pingsent; /* 1 while we wait for ping response */
+  unsigned char firstbyte;
 };
 
 #endif /* HEADER_CURL_MQTT_H */

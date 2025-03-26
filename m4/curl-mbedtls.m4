@@ -104,7 +104,7 @@ if test "x$OPT_MBEDTLS" != xno; then
       fi
       dnl FIXME: Enable when mbedTLS was detected via pkg-config
       if false; then
-        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls"
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls mbedx509 mbedcrypto"
       fi
     fi
 

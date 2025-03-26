@@ -25,7 +25,6 @@ SSL
 !wolfssl
 !bearssl
 !mbedtls
-!rustls
 </features>
 <server>
 http
@@ -51,7 +50,7 @@ s/^(.*):(.*)[\r\n]*//
 </stripfile>
 <stdout>
 nomnom
-%strippemfile[%SRCDIR/certs/stunnel-sv.crt]strippemfile%
+%strippemfile[%SRCDIR/certs/test-localhost.crt]strippemfile%
 </stdout>
 
 </verify>

@@ -133,15 +133,15 @@ static void memory_tracking_init(void)
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = curl_getenv("CURL_MEMLIMIT");
   if(env) {
-    char *endptr;
-    long num = strtol(env, &endptr, 10);
-    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
-      curl_dbg_memlimit(num);
+    curl_off_t num;
+    const char *p = env;
+    if(!curlx_str_number(&p, &num, LONG_MAX))
+      curl_dbg_memlimit((long)num);
     curl_free(env);
   }
 }
 #else
-#  define memory_tracking_init() Curl_nop_stmt
+#  define memory_tracking_init() tool_nop_stmt
 #endif
 
 /*
@@ -197,13 +197,13 @@ static CURLcode main_init(struct GlobalConfig *config)
 
 static void free_globalconfig(struct GlobalConfig *config)
 {
-  Curl_safefree(config->trace_dump);
+  curlx_safefree(config->trace_dump);
 
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
   config->trace_stream = NULL;
 
-  Curl_safefree(config->libcurl);
+  curlx_safefree(config->libcurl);
 }
 
 /*

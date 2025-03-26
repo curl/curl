@@ -125,7 +125,8 @@ struct ftp_conn {
   char *entrypath; /* the PWD reply when we logged on */
   char *file;    /* url-decoded filename (or path) */
   char **dirs;   /* realloc()ed array for path components */
-  char *newhost;
+  char *newhost; /* the (allocated) IP addr or hostname to connect the data
+                    connection to */
   char *prevpath;   /* url-decoded conn->path from the previous transfer */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
@@ -139,9 +140,8 @@ struct ftp_conn {
   int count1; /* general purpose counter for the state machine */
   int count2; /* general purpose counter for the state machine */
   int count3; /* general purpose counter for the state machine */
-  /* newhost is the (allocated) IP addr or hostname to connect the data
-     connection to */
-  unsigned short newport;
+  unsigned short newport;  /* the port of 'newhost' to connect the data
+                              connection to */
   ftpstate state; /* always use ftp.c:state() to change state! */
   ftpstate state_saved; /* transfer type saved to be reloaded after data
                            connection is established */
@@ -160,6 +160,7 @@ struct ftp_conn {
   BIT(cwdfail);     /* set TRUE if a CWD command fails, as then we must prevent
                        caching the current directory */
   BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
+  BIT(shutdown);    /* connection is being shutdown, e.g. QUIT */
 };
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */

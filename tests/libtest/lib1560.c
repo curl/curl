@@ -529,6 +529,39 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"018.0.0.0", "http://018.0.0.0/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"08", "http://08/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0", "http://0.0.0.0/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"01", "http://0.0.0.1/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"02", "http://0.0.0.2/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"03", "http://0.0.0.3/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"04", "http://0.0.0.4/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"05", "http://0.0.0.5/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"06", "http://0.0.0.6/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"07", "http://0.0.0.7/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"07.1", "http://7.0.0.1/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"7.1", "http://7.0.0.1/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x7.1", "http://7.0.0.1/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x", "http://0x/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x1", "http://0.0.0.1/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x2", "http://0.0.0.2/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x3", "http://0.0.0.3/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x4", "http://0.0.0.4/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x5", "http://0.0.0.5/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x6", "http://0.0.0.6/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x7", "http://0.0.0.7/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x8", "http://0.0.0.8/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0x9", "http://0.0.0.9/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0xa", "http://0.0.0.10/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0xb", "http://0.0.0.11/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0xc", "http://0.0.0.12/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0xd", "http://0.0.0.13/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0xe", "http://0.0.0.14/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0xf", "http://0.0.0.15/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"0xg", "http://0xg/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+  {"https://0/", "https://0.0.0.0/", 0, 0, CURLUE_OK},
+  {"https://0.0x0/", "https://0.0.0.0/", 0, 0, CURLUE_OK},
+  {"https://0.000/", "https://0.0.0.0/", 0, 0, CURLUE_OK},
   {"example.com",
    "example.com/",
    CURLU_GUESS_SCHEME, CURLU_NO_GUESS_SCHEME, CURLUE_OK},
@@ -1095,6 +1128,7 @@ static CURLUPart part2id(char *part)
     return CURLUPART_FRAGMENT;
   if(!strcmp("zoneid", part))
     return CURLUPART_ZONEID;
+  /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
   return (CURLUPart)9999; /* bad input => bad output */
 }
 
@@ -1143,6 +1177,25 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static const struct redircase set_url_list[] = {
+  {"http://firstplace.example.com/want/1314",
+   "//somewhere.example.com/reply/1314",
+   "http://somewhere.example.com/reply/1314",
+   0, 0, CURLUE_OK },
+  {"http://127.0.0.1:46383/want?uri=http://anything/276?secondq/276",
+   "data/2760002.txt?coolsite=http://anotherurl/?a_second/2760002",
+   "http://127.0.0.1:46383/"
+   "data/2760002.txt?coolsite=http://anotherurl/?a_second/2760002",
+   0, 0, CURLUE_OK },
+  {"file:///basic#", "#yay",
+   "file:///basic#yay", 0, 0, CURLUE_OK},
+  {"file:///basic", "?yay",
+   "file:///basic?yay", 0, 0, CURLUE_OK},
+  {"file:///basic?", "?yay",
+   "file:///basic?yay", 0, 0, CURLUE_OK},
+  {"file:///basic?hello", "#frag",
+   "file:///basic?hello#frag", 0, 0, CURLUE_OK},
+  {"file:///basic?hello", "?q",
+   "file:///basic?q", 0, 0, CURLUE_OK},
   {"http://example.org#withs/ash", "/moo#frag",
    "http://example.org/moo#frag",
    0, 0, CURLUE_OK},

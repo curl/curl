@@ -42,21 +42,24 @@ header list establishes the document-level MIME headers to prepend to the
 uploaded document described by CURLOPT_MIMEPOST(3). This does not affect raw
 mail uploads.
 
-The linked list should be a fully valid list of **struct curl_slist** structs
-properly filled in. Use curl_slist_append(3) to create the list and
-curl_slist_free_all(3) to clean up an entire list. If you add a header that is
-otherwise generated and used by libcurl internally, your added header is used
-instead. If you add a header with no content as in 'Accept:' (no data on the
-right side of the colon), the internally used header is disabled/removed. With
-this option you can add new headers, replace internal headers and remove
-internal headers. To add a header with no content (nothing to the right side
-of the colon), use the form 'name;' (note the ending semicolon).
+When used with HTTP, this option can add new headers, replace internal headers
+and remove internal headers.
 
-The headers included in the linked list **must not** be CRLF-terminated,
-because libcurl adds CRLF after each header item itself. Failure to comply
-with this might result in strange behavior. libcurl passes on the verbatim
-strings you give it, without any filter or other safe guards. That includes
-white space and control characters.
+The linked list should be a valid list of **struct curl_slist** entries
+properly filled in. Use curl_slist_append(3) to create the list and
+curl_slist_free_all(3) to free it again after use.
+
+If you provide a header that is otherwise generated and used by libcurl
+internally, your header alternative is used instead. If you provide a header
+without content (no data on the right side of the colon) as in `Accept:`, the
+internally used header is removed. To forcibly add a header without content
+(nothing after the colon), use the form `name;` (using a trailing semicolon).
+
+The headers included in the linked list **must not** be CRLF-terminated, since
+libcurl adds CRLF after each header item itself. Failure to comply with this
+might result in strange behavior. libcurl passes on the verbatim strings you
+give it, without any filter or other safe guards. That includes white space
+and control characters.
 
 The first line in an HTTP request (containing the method, usually a GET or
 POST) is not a header and cannot be replaced using this option. Only the lines
@@ -164,8 +167,14 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
+    /* add this header */
     list = curl_slist_append(list, "Shoesize: 10");
+
+    /* remove this header */
     list = curl_slist_append(list, "Accept:");
+
+    /* change this header */
+    list = curl_slist_append(list, "Host: example.net");
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 

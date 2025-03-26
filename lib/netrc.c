@@ -39,6 +39,7 @@
 #include "netrc.h"
 #include "strcase.h"
 #include "curl_get_line.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -85,8 +86,7 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
       CURLcode result;
       const char *line = Curl_dyn_ptr(&linebuf);
       /* skip comments on load */
-      while(ISBLANK(*line))
-        line++;
+      Curl_str_passblanks(&line);
       if(*line == '#')
         continue;
       result = Curl_dyn_add(filebuf, line);
@@ -138,13 +138,12 @@ static NETRCcode parsenetrc(struct store_netrc *store,
   netrcbuffer = Curl_dyn_ptr(filebuf);
 
   while(!done) {
-    char *tok = netrcbuffer;
+    const char *tok = netrcbuffer;
     while(tok && !done) {
-      char *tok_end;
+      const char *tok_end;
       bool quoted;
       Curl_dyn_reset(&token);
-      while(ISBLANK(*tok))
-        tok++;
+      Curl_str_passblanks(&tok);
       /* tok is first non-space letter */
       if(state == MACDEF) {
         if((*tok == '\n') || (*tok == '\r'))
@@ -162,7 +161,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
       if(!quoted) {
         size_t len = 0;
         CURLcode result;
-        while(!ISSPACE(*tok_end)) {
+        while(*tok_end > ' ') {
           tok_end++;
           len++;
         }

@@ -37,11 +37,6 @@
 #include "strcase.h"
 /* "strcase.h" provides the strcasecompare protos */
 
-#include "strtoofft.h"
-/* "strtoofft.h" provides this function: curlx_strtoofft(), returns a
-   curl_off_t number from a given string.
-*/
-
 #include "nonblock.h"
 /* "nonblock.h" provides curlx_nonblock() */
 
@@ -65,5 +60,10 @@
 
 #include "version_win32.h"
 /* "version_win32.h" provides curlx_verify_windows_version() */
+
+#include "strparse.h"
+/* The curlx_str_* parsing functions */
+
+#define curlx_safefree(x) Curl_safefree(x)
 
 #endif /* HEADER_CURL_CURLX_H */

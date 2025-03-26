@@ -254,10 +254,11 @@ CURLcode Curl_ssl_session_pack(struct Curl_easy *data,
 }
 
 CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
-                                 const unsigned char *buf, size_t buflen,
+                                 const void *bufv, size_t buflen,
                                  struct Curl_ssl_session **ps)
 {
   struct Curl_ssl_session *s = NULL;
+  const unsigned char *buf = (const unsigned char *)bufv;
   const unsigned char *end = buf + buflen;
   uint8_t val8, *pval8;
   uint16_t val16;

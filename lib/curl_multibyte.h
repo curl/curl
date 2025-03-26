@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
  /*
   * MultiByte conversions using Windows kernel32 library.
@@ -84,7 +84,7 @@ typedef union {
 #define curlx_unicodefree(ptr)                          \
   do {                                                  \
     if(ptr) {                                           \
-      (free)(ptr);                                      \
+      (free)(CURL_UNCONST(ptr));                        \
       (ptr) = NULL;                                     \
     }                                                   \
   } while(0)

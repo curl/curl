@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 
   if(argc < 1) {
     puts("report_openssl_version filename");
-    exit(1);
+    return 1;
   }
 
   libptr = dlopen(argv[1], 0);
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
   if(!ssl_version) {
     puts("Unable to lookup version of OpenSSL");
-    exit(1);
+    return 1;
   }
 
   version = ssl_version(SSLEAY_VERSION);
@@ -91,9 +91,9 @@ int main(int argc, char **argv)
 
     status = LIB$SET_SYMBOL(&symbol_dsc, &value_dsc, &table_type);
     if(!$VMS_STATUS_SUCCESS(status)) {
-      exit(status);
+      return status;
     }
   }
 
-  exit(0);
+  return 0;
 }
