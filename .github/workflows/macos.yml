@@ -239,6 +239,7 @@ jobs:
               [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
+                -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
@@ -260,6 +261,7 @@ jobs:
             [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
             [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' --with-test-nghttpx= ac_cv_path_HTTPD_NGHTTPX='
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --prefix="$HOME/curl" \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
               ${{ matrix.build.configure }} ${options}
@@ -298,6 +300,14 @@ jobs:
 
       - name: 'curl version'
         run: bld/src/curl --disable --version
+
+      - name: 'install'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --install bld --strip
+          else
+            make -C bld install
+          fi
 
       - name: 'build tests'
         run: |
