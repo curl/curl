@@ -1483,7 +1483,7 @@ sub ipcrecv {
     # print "ipcrecv $funcname\n";
     # Synchronously call the desired function
     my @res;
-    print "iprecv: trace-5\n";
+    print "iprecv: trace-5: $funcname\n";
     if($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
         # Special case: no response will be forthcoming
