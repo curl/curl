@@ -84,11 +84,20 @@
 #undef socketpair
 #endif
 
-/* sclose is probably already defined, redefine it! */
-#undef sclose
-#undef fopen
 #undef fdopen
 #undef fclose
+
+/* restore system symbol override */
+#undef fopen
+#ifdef CURL_FOPEN
+#define fopen(fname, mode)  CURL_FOPEN(fname, mode)
+#endif
+
+/* compatibility/convenience macros */
+#undef sclose
+#define sclose(x)  CURL_SCLOSE(x)
+#undef fake_sclose
+#define fake_sclose(x)  Curl_nop_stmt
 
 #endif /* MEMDEBUG_NODEFINES */
 #endif /* CURLDEBUG */
@@ -99,8 +108,6 @@
 /*
 ** Following section applies even when CURLDEBUG is not defined.
 */
-
-#undef fake_sclose
 
 #ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
 /*
