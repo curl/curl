@@ -285,7 +285,7 @@ if($stunnel_version >= 400) {
         # but does not work together with SO_REUSEADDR being on.
         $socketopt .= "\nsocket = a:SO_EXCLUSIVEADDRUSE=0";
     }
-    $cmd  = "\"$stunnel\" $conffile ";
+    $cmd  = "\"$stunnel\" " . pathhelp::sys_native_abs_path($conffile) . " ";
     $cmd .= ">$logfile 2>&1";
     # setup signal handler
     $SIG{INT} = \&exit_signal_handler;
