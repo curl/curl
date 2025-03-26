@@ -43,20 +43,14 @@ all-local: $(ZSH_COMPLETION_FUNCTION_FILENAME) $(FISH_COMPLETION_FUNCTION_FILENA
 
 if USE_ZSH_COMPLETION
 $(ZSH_COMPLETION_FUNCTION_FILENAME): completion.pl
-	if test -z "$(PERL)"; then \
-	  echo 'No perl: cannot generate completion script'; \
-	else \
-	  $(PERL) $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell zsh > $@; \
-	fi
+	if test -z "$(PERL)"; then echo 'No perl: cannot generate completion script'; else \
+	$(PERL) $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell zsh > $@; fi
 endif
 
 if USE_FISH_COMPLETION
 $(FISH_COMPLETION_FUNCTION_FILENAME): completion.pl
-	if test -z "$(PERL)"; then \
-	  echo 'No perl: cannot generate completion script'; \
-	else \
-	  $(PERL) $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell fish > $@; \
-	fi
+	if test -z "$(PERL)"; then echo 'No perl: cannot generate completion script'; else \
+	$(PERL) $(srcdir)/completion.pl --opts-dir $(top_srcdir)/docs/cmdline-opts --shell fish > $@; fi
 endif
 
 install-data-local:
