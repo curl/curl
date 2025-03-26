@@ -536,7 +536,6 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       RETRY_FTP,
       RETRY_LAST /* not used */
     } retry = RETRY_NO;
-    long response = 0;
     if((CURLE_OPERATION_TIMEDOUT == result) ||
        (CURLE_COULDNT_RESOLVE_HOST == result) ||
        (CURLE_COULDNT_RESOLVE_PROXY == result) ||
@@ -561,6 +560,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       scheme = proto_token(scheme);
       if(scheme == proto_http || scheme == proto_https) {
         /* This was HTTP(S) */
+        long response = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
         switch(response) {
@@ -587,6 +587,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     } /* if CURLE_OK */
     else if(result) {
       const char *scheme;
+      long response = 0;
 
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
       curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
@@ -615,6 +616,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         ": HTTP error",
         ": FTP error"
       };
+      bool truncate = TRUE; /* truncate output file */
 
       sleeptime = per->retry_sleep;
       if(RETRY_HTTP == retry) {
@@ -657,7 +659,53 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         if(per->retry_sleep > RETRY_SLEEP_MAX)
           per->retry_sleep = RETRY_SLEEP_MAX;
       }
-      if(outs->bytes && outs->filename && outs->stream) {
+
+      /* Skip truncation of outfile if auto-resume is enabled for download and
+         the partially received data is good. Currently this is only for HTTP
+         GET requests in limited circumstances. */
+      if(config->use_resume && config->resume_from_current &&
+         config->resume_from >= 0 && outs->init == config->resume_from &&
+         (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
+          config->httpreq == TOOL_HTTPREQ_GET) &&
+         (!config->customrequest || !strcmp(config->customrequest, "GET")) &&
+         !config->use_ascii && !per->uploadfile &&
+         result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR &&
+         outs->bytes > 0 && outs->filename && outs->stream) {
+        long response = 0;
+        const char *method = NULL, *scheme = NULL;
+
+        curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &method);
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+        curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
+        scheme = proto_token(scheme);
+
+        if((scheme == proto_http || scheme == proto_https) &&
+           method && !strcmp(method, "GET") &&
+           response == (config->resume_from ? 206 : 200)) {
+          notef(config->global,
+                "Keeping %" CURL_FORMAT_CURL_OFF_T " bytes",
+                outs->bytes);
+          if(fflush(outs->stream)) {
+            errorf(config->global, "Failed to flush output file stream");
+            return CURLE_WRITE_ERROR;
+          }
+          if(outs->bytes >= CURL_OFF_T_MAX - outs->init) {
+            errorf(config->global, "Exceeded maximum supported file size ("
+                                   "%" CURL_FORMAT_CURL_OFF_T " + "
+                                   "%" CURL_FORMAT_CURL_OFF_T ")",
+                                   outs->init, outs->bytes);
+            return CURLE_WRITE_ERROR;
+          }
+          truncate = FALSE;
+          outs->init += outs->bytes;
+          outs->bytes = 0;
+          config->resume_from = outs->init;
+          curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE,
+                           config->resume_from);
+        }
+      }
+
+      if(truncate && outs->bytes && outs->filename && outs->stream) {
         /* We have written data to an output file, we truncate file
          */
         notef(config->global,
