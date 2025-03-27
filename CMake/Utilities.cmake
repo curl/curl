@@ -34,7 +34,8 @@ function(curl_count_true _output_count_var)
   set(${_output_count_var} ${_list_len} PARENT_SCOPE)
 endfunction()
 
-function(curl_dumptargetprops _target)  # Dump all target properties
+# Dump all target properties
+function(curl_dumptargetprops _target)
   if(TARGET "${_target}")
     execute_process(COMMAND "${CMAKE_COMMAND}" "--help-property-list" OUTPUT_VARIABLE _cmake_property_list)
     string(REPLACE "\n" ";" _cmake_property_list "${_cmake_property_list}")
