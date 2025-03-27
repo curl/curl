@@ -23,7 +23,6 @@ nomnom
 <features>
 SSL
 !wolfssl
-!bearssl
 !mbedtls
 </features>
 <server>

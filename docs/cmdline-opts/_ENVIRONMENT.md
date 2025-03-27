@@ -72,8 +72,8 @@ the case insensitive name of the particular backend to use when curl is
 invoked. Setting a name that is not a built-in alternative makes curl stay
 with the default.
 
-SSL backend names (case-insensitive): **bearssl**, **gnutls**, **mbedtls**,
-**openssl**, **rustls**, **schannel**, **secure-transport**, **wolfssl**
+SSL backend names (case-insensitive): **gnutls**, **mbedtls**, **openssl**,
+**rustls**, **schannel**, **wolfssl**
 
 ## `HOME` <dir>
 If set, this is used to find the home directory when that is needed. Like when

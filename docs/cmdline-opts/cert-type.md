@@ -21,6 +21,6 @@ Example:
 Set type of the provided client certificate. PEM, DER, ENG, PROV and P12 are
 recognized types.
 
-The default type depends on the TLS backend and is usually PEM, however for
-Secure Transport and Schannel it is P12. If --cert is a pkcs11: URI then ENG
-or PROV is the default type (depending on OpenSSL version).
+The default type depends on the TLS backend and is usually PEM. For Schannel
+it is P12. If --cert is a pkcs11: URI then ENG or PROV is the default type
+(depending on OpenSSL version).

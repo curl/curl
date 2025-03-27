@@ -14,7 +14,6 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - Schannel
-  - Secure Transport
 Added-in: 7.71.0
 ---
 
@@ -35,9 +34,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLCERT_BLOB,
 
 Pass a pointer to a curl_blob structure, which contains information (pointer
 and size) about a memory block with binary data of the certificate used to
-connect to the HTTPS proxy. The format must be "P12" on Secure Transport or
-Schannel. The format must be "P12" or "PEM" on OpenSSL. The string "P12" or
-"PEM" must be specified with CURLOPT_PROXY_SSLCERTTYPE(3).
+connect to the HTTPS proxy. The format must be "P12" on Schannel. The format
+must be "P12" or "PEM" on OpenSSL. The string "P12" or "PEM" must be specified
+with CURLOPT_PROXY_SSLCERTTYPE(3).
 
 If the blob is initialized with the flags member of struct curl_blob set to
 CURL_BLOB_COPY, the application does not have to keep the buffer around after

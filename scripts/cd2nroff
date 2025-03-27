@@ -186,13 +186,11 @@ my %knownprotos = (
     );
 
 my %knowntls = (
-    'BearSSL' => 1,
     'GnuTLS' => 1,
     'mbedTLS' => 1,
     'OpenSSL' => 1,
     'rustls' => 1,
     'Schannel' => 1,
-    'Secure Transport' => 1,
     'wolfSSL' => 1,
     'All' => 1,
     'none' => 1,
