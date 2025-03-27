@@ -86,7 +86,7 @@ jobs:
 
           - name: libressl heimdal valgrind
             install_packages: zlib1g-dev heimdal-dev valgrind
-            install_steps: libressl pytest
+            install_steps: libressl
             generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: libressl clang
@@ -106,12 +106,12 @@ jobs:
 
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev valgrind
-            install_steps: mbedtls pytest
+            install_steps: mbedtls
             configure: LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
           - name: mbedtls clang
             install_packages: libnghttp2-dev clang
-            install_steps: mbedtls
+            install_steps: mbedtls pytest
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
           - name: mbedtls
@@ -267,11 +267,11 @@ jobs:
 
           - name: rustls valgrind
             install_packages: valgrind
-            install_steps: rust rustls pytest
+            install_steps: rust rustls
             configure: --with-rustls --enable-ech --enable-debug
 
           - name: rustls
-            install_steps: rust rustls skipall
+            install_steps: rust rustls skipall pytest
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: IntelC openssl
