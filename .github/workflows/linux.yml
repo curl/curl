@@ -155,7 +155,7 @@ jobs:
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: openssl libssh2 sync-resolver valgrind
-            install_packages: zlib1g-dev libssh2-1-dev valgrind
+            install_packages: zlib1g-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
           - name: openssl
