@@ -379,7 +379,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 
   total_nread = 0;
   while(pkts < max_pkts) {
-    n = (int)CURLMIN(MMSG_NUM, max_pkts);
+    n = (int)CURLMIN(CURLMIN(MMSG_NUM, IOV_MAX), max_pkts);
     memset(&mmsg, 0, sizeof(mmsg));
     for(i = 0; i < n; ++i) {
       msg_iov[i].iov_base = bufs[i];
