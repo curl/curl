@@ -755,7 +755,7 @@ if(CURL_USE_OPENSSL)
   # Depend on OpenSSL via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  set_target_properties(OpenSSL::SSL PROPERTIES LIBCURL_PC_MODULES "openssl")
+  set_target_properties(OpenSSL::SSL PROPERTIES CURL_PC_MODULES "openssl")
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
@@ -916,7 +916,7 @@ if(ZLIB_FOUND)
   # Depend on ZLIB via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS ZLIB::ZLIB)
-  set_target_properties(ZLIB::ZLIB PROPERTIES LIBCURL_PC_MODULES "zlib")
+  set_target_properties(ZLIB::ZLIB PROPERTIES CURL_PC_MODULES "zlib")
 endif()
 
 set(HAVE_BROTLI OFF)
@@ -2136,7 +2136,7 @@ if(NOT CURL_DISABLE_INSTALL)
       if(NOT _libname AND NOT _libs AND NOT _libdirs)
         message(WARNING "Bad lib in library list: ${_lib}")
       endif()
-      get_target_property(_modules "${_lib}" LIBCURL_PC_MODULES)
+      get_target_property(_modules "${_lib}" CURL_PC_MODULES)
       if(_modules)
         list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "${_modules}")
       endif()
