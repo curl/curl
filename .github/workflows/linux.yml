@@ -156,7 +156,6 @@ jobs:
 
           - name: openssl libssh2 sync-resolver valgrind
             install_packages: zlib1g-dev libssh2-1-dev valgrind
-            install_steps: pytest
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
           - name: openssl
