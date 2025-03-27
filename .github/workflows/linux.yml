@@ -80,13 +80,13 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
 
           - name: libressl heimdal
-            install_packages: zlib1g-dev heimdal-dev
+            install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev
             install_steps: libressl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --with-gssapi --enable-debug
 
           - name: libressl heimdal valgrind
-            install_packages: zlib1g-dev heimdal-dev valgrind
-            install_steps: libressl pytest
+            install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev valgrind
+            install_steps: libressl
             generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: libressl clang
@@ -105,13 +105,13 @@ jobs:
             configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: mbedtls valgrind
-            install_packages: libnghttp2-dev valgrind
-            install_steps: mbedtls pytest
+            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_steps: mbedtls
             configure: LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
           - name: mbedtls clang
-            install_packages: libnghttp2-dev clang
-            install_steps: mbedtls
+            install_packages: libnghttp2-dev libldap-dev clang
+            install_steps: mbedtls pytest
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
           - name: mbedtls
@@ -155,8 +155,7 @@ jobs:
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: openssl libssh2 sync-resolver valgrind
-            install_packages: zlib1g-dev libssh2-1-dev valgrind
-            install_steps: pytest
+            install_packages: zlib1g-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
           - name: openssl
@@ -266,12 +265,13 @@ jobs:
             tflags: -n --test-duphandle '!TLS-SRP'
 
           - name: rustls valgrind
-            install_packages: valgrind
-            install_steps: rust rustls pytest
+            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_steps: rust rustls
             configure: --with-rustls --enable-ech --enable-debug
 
           - name: rustls
-            install_steps: rust rustls skipall
+            install_packages: libnghttp2-dev libldap-dev
+            install_steps: rust rustls skipall pytest
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: IntelC openssl
