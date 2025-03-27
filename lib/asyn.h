@@ -51,7 +51,7 @@ struct thread_sync_data {
 #endif
   int port;
   int sock_error;
-  bool done;
+  int ref_count;
 };
 
 struct thread_data {
@@ -59,7 +59,7 @@ struct thread_data {
   unsigned int poll_interval;
   timediff_t interval_end;
   struct curltime start;
-  struct thread_sync_data tsd;
+  struct thread_sync_data *tsd;
   CURLcode result; /* CURLE_OK or error handling response */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct Curl_https_rrinfo hinfo;
@@ -227,6 +227,13 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                                                 int port,
                                                 int *waitp);
 
+/*
+ * Set `dnsentry` as result of resolve operation, replacing any
+ * ongoing resolve attempts.
+ */
+void Curl_resolver_set_result(struct Curl_easy *data,
+                              struct Curl_dns_entry *dnsentry);
+
 #ifndef CURLRES_ASYNCH
 /* convert these functions if an asynch resolver is not used */
 #define Curl_resolver_cancel(x) Curl_nop_stmt
@@ -237,6 +244,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 #define Curl_resolver_init(x,y) CURLE_OK
 #define Curl_resolver_global_init() CURLE_OK
 #define Curl_resolver_global_cleanup() Curl_nop_stmt
+#define Curl_resolver_set_result(x,y) Curl_nop_stmt
 #define Curl_resolver_cleanup(x) Curl_nop_stmt
 #endif
 
