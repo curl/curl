@@ -268,11 +268,11 @@ jobs:
           - name: rustls valgrind
             install_packages: valgrind
             install_steps: rust rustls pytest
-            configure: --with-rustls --enable-debug
+            configure: --with-rustls --enable-ech --enable-debug
 
           - name: rustls
             install_steps: rust rustls skipall
-            generate: -DCURL_USE_RUSTLS=ON -DENABLE_DEBUG=ON
+            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: IntelC openssl
             install_packages: zlib1g-dev libssl-dev
