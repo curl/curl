@@ -944,7 +944,7 @@ if(ZLIB_FOUND)
   # Depend on ZLIB via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS ZLIB::ZLIB)
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "zlib")
+  set_target_properties(ZLIB::ZLIB PROPERTIES LIBCURL_PC_MODULES "zlib")
 endif()
 
 set(HAVE_BROTLI OFF)
