@@ -197,7 +197,7 @@ checksrc:
 	(cd server && $(MAKE) checksrc)
 	(cd http && $(MAKE) checksrc)
 
-all-local: $(MANFILES)
+all-local: $(MANFILES) build-certs
 
 distclean:
 	rm -f $(MANFILES)
