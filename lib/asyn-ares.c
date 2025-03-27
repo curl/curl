@@ -975,6 +975,15 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 #endif
 }
+
+void Curl_resolver_set_result(struct Curl_easy *data,
+                              struct Curl_dns_entry *dnsentry)
+{
+  destroy_async_data(data);
+  data->state.async.dns = dnsentry;
+  data->state.async.done = TRUE;
+}
+
 #endif /* CURLRES_ARES */
 
 #endif /* USE_ARES */
